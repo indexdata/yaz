@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.24 2006-08-04 14:35:40 adam Exp $
+ * $Id: siconv.c,v 1.25 2006-08-24 10:01:03 adam Exp $
  */
 /**
  * \file siconv.c
@@ -492,9 +492,16 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
     }
 }
 
-static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft,
-                              int last)
+static size_t yaz_write_UTF8(yaz_iconv_t cd, unsigned long x,
+                             char **outbuf, size_t *outbytesleft,
+                             int last)
+{
+    return yaz_write_UTF8_char(x, outbuf, outbytesleft, &cd->my_errno);
+}
+
+size_t yaz_write_UTF8_char(unsigned long x,
+                           char **outbuf, size_t *outbytesleft,
+                           int *error)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
@@ -545,7 +552,7 @@ static size_t yaz_write_UTF8 (yaz_iconv_t cd, unsigned long x,
     }
     else 
     {
-        cd->my_errno = YAZ_ICONV_E2BIG;  /* not room for output */
+        *error = YAZ_ICONV_E2BIG;  /* not room for output */
         return (size_t)(-1);
     }
     *outbuf = (char *) outp;

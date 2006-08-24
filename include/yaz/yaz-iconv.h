@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: yaz-iconv.h,v 1.10 2006-08-04 14:35:39 adam Exp $
+ * $Id: yaz-iconv.h,v 1.11 2006-08-24 10:01:03 adam Exp $
  */
 /**
  * \file yaz-iconv.h
@@ -69,10 +69,30 @@ YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
 
 YAZ_EXPORT int yaz_strcmp_del(const char *a, const char *b, const char *b_del);
 
+/** \brief decodes UTF-8 sequence
+    \param inp input buffer with UTF-8 bytes
+    \param inbytesleft length of input buffer
+    \param no_read holds number of bytes read if conversion is successful
+    \param error pointer to error code if error occurs
+    \retval 0 if error
+    \retval >0 if conversion is successful
+*/
 YAZ_EXPORT unsigned long yaz_read_UTF8_char(unsigned char *inp,
                                             size_t inbytesleft,
                                             size_t *no_read,
                                             int *error);
+
+/** \brief encodes UTF-8 sequence 
+    \param x the UNICODE value
+    \param outbuf output buffer pointer, updated if conversion is successful
+    \param outbytesleft length of buffer, updated if conversino is successful
+    \param error pointer to error code if error occurs
+    \retval 0 if successful
+    \retval -1 for error
+*/
+YAZ_EXPORT size_t yaz_write_UTF8_char(unsigned long x,
+                                      char **outbuf, size_t *outbytesleft,
+                                      int *error);
 
 YAZ_END_CDECL
 
