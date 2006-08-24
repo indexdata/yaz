@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.85 2006-08-16 22:47:11 adam Exp $
+ * $Id: zoom-c.c,v 1.86 2006-08-24 12:51:49 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -371,6 +371,8 @@ ZOOM_API(void)
     yaz_log(log_api, "%p ZOOM_connection_connect host=%s portnum=%d",
             c, host, portnum);
 
+    set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
+
     if (c->cs)
     {
         yaz_log(log_details, "%p ZOOM_connection_connect reconnect ok", c);
@@ -472,8 +474,6 @@ ZOOM_API(void)
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
     yaz_log(log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
  
-    set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
-
     task = ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
 
     if (!c->async)
@@ -1200,7 +1200,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.85 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.86 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
