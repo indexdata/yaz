@@ -1,4 +1,4 @@
-/* $Id: zoomtst9.c,v 1.2 2006-04-21 10:28:08 adam Exp $  */
+/* $Id: zoomtst9.c,v 1.3 2006-08-24 13:19:44 adam Exp $  */
 
 /** \file zoomtst9.c
     \brief Extended Service Update
@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <yaz/wrbuf.h>
 
 #include <yaz/nmem.h>
 #include <yaz/xmalloc.h>
@@ -73,8 +74,21 @@ int main(int argc, char **argv)
             ZOOM_package_option_set(pkg, "recordIdOpaque",
                                     argv[i][0] ? argv[i] : 0);
             i++;
-            ZOOM_package_option_set(pkg, "record",
-                                    argv[i][0] ? argv[i] : 0);
+            if (!strcmp(argv[i], "-"))
+            {
+                /* For -, read record buffer from stdin */
+                WRBUF w = wrbuf_alloc();
+                int ch;
+                while ((ch = getchar()) != EOF)
+                    wrbuf_putc(w, ch);
+                wrbuf_putc(w, '\0');
+                ZOOM_package_option_set(pkg, "record", wrbuf_buf(w));
+            }
+            else
+            {
+                ZOOM_package_option_set(pkg, "record",
+                                        argv[i][0] ? argv[i] : 0);
+            }
             i++;
             ZOOM_package_send(pkg, "update"); /* Update EXT service */
 
