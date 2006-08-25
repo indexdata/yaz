@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.86 2006-08-24 12:51:49 adam Exp $
+ * $Id: zoom-c.c,v 1.87 2006-08-25 14:57:04 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -372,6 +372,7 @@ ZOOM_API(void)
             c, host, portnum);
 
     set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
+    ZOOM_connection_remove_tasks(c);
 
     if (c->cs)
     {
@@ -1200,7 +1201,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.86 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.87 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3422,6 +3423,7 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
         if (c->reconnect_ok)
         {
             do_close(c);
+            c->reconnect_ok = 0;
             c->tasks->running = 0;
             ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
         }
@@ -3607,9 +3609,9 @@ static int do_read(ZOOM_connection c)
     {
         if (c->reconnect_ok)
         {
+            yaz_log(log_details, "%p do_read reconnect read", c);
             do_close(c);
             c->reconnect_ok = 0;
-            yaz_log(log_details, "%p do_read reconnect read", c);
             c->tasks->running = 0;
             ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
         }
@@ -3672,7 +3674,6 @@ static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out)
         {
             do_close(c);
             c->reconnect_ok = 0;
-            yaz_log(log_details, "%p do_write_ex reconnect write", c);
             c->tasks->running = 0;
             ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
             return zoom_pending;
@@ -3853,13 +3854,22 @@ ZOOM_API(int)
     return ZOOM_connection_error_x(c, cp, addinfo, 0);
 }
 
-static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
+static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
 {
     ZOOM_Event event = 0;
     int r = cs_look(c->cs);
     yaz_log(log_details, "%p ZOOM_connection_do_io mask=%d cs_look=%d",
             c, mask, r);
     
+    if (mask & ZOOM_SELECT_EXCEPT)
+    {
+        if (r == CS_CONNECT)
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
+        else
+            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
+        do_close(c);
+        return;
+    }
     if (r == CS_NONE)
     {
         event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
@@ -3869,10 +3879,7 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
     }
     else if (r == CS_CONNECT)
     {
-        int ret;
-        event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
-
-        ret = cs_rcvconnect(c->cs);
+        int ret = ret = cs_rcvconnect(c->cs);
         yaz_log(log_details, "%p ZOOM_connection_do_io "
                 "cs_rcvconnect returned %d", c, ret);
         if (ret == 1)
@@ -3882,10 +3889,10 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
                 c->mask += ZOOM_SELECT_WRITE;
             if (c->cs->io_pending & CS_WANT_READ)
                 c->mask += ZOOM_SELECT_READ;
-            ZOOM_connection_put_event(c, event);
         }
         else if (ret == 0)
         {
+            event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
             ZOOM_connection_put_event(c, event);
             get_cert(c);
             if (c->proto == PROTO_Z3950)
@@ -3904,7 +3911,6 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         {
             set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
             do_close(c);
-            ZOOM_connection_put_event(c, event);
         }
     }
     else
@@ -3914,7 +3920,6 @@ static int ZOOM_connection_do_io(ZOOM_connection c, int mask)
         if (c->cs && (mask & ZOOM_SELECT_WRITE))
             do_write(c);
     }
-    return 1;
 }
 
 ZOOM_API(int)
