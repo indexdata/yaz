@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.25 2006-08-24 10:01:03 adam Exp $
+ * $Id: siconv.c,v 1.26 2006-08-27 19:04:03 adam Exp $
  */
 /**
  * \file siconv.c
@@ -12,12 +12,16 @@
  * is used by YAZ to interface with iconv (if present).
  * For systems where iconv is not present, this layer
  * provides a few important conversions: UTF-8, MARC-8, Latin-1.
+ *
+ * MARC-8 reference:
+ *  http://www.loc.gov/marc/specifications/speccharmarc8.html
  */
 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
@@ -28,6 +32,7 @@
 #if HAVE_ICONV_H
 #include <iconv.h>
 #endif
+
 
 #include <yaz/yaz-util.h>
 
@@ -818,21 +823,42 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
     else
     {
         size_t r = flush_combos(cd, outbuf, outbytesleft);
+        const char *old_page_chr = cd->write_marc8_page_chr;
         if (r)
             return r;
-        if (strcmp(page_chr, cd->write_marc8_page_chr))
+        if (strcmp(page_chr, old_page_chr))
         {
-            size_t plen = strlen(page_chr);
+            size_t plen = 0;
+            const char *page_out = page_chr;
 
-            if (*outbytesleft < plen)
+            if (*outbytesleft < 8)
             {
                 cd->my_errno = YAZ_ICONV_E2BIG;
+                
                 return (size_t) (-1);
             }
-            memcpy(*outbuf, page_chr, plen);
+            cd->write_marc8_page_chr = page_chr;
+
+            if (!strcmp(old_page_chr, "\033p") 
+                || !strcmp(old_page_chr, "\033g")
+                || !strcmp(old_page_chr, "\033b"))
+            {
+                /* Technique 1 leave */
+                page_out = "\033s";
+                if (strcmp(page_chr, "\033(B")) /* Not going ASCII page? */
+                {
+                    /* Must leave script + enter new page */
+                    plen = strlen(page_out);
+                    memcpy(*outbuf, page_out, plen);
+                    (*outbuf) += plen;
+                    (*outbytesleft) -= plen;
+                    page_out = page_chr;
+                }
+            }
+            plen = strlen(page_out);
+            memcpy(*outbuf, page_out, plen);
             (*outbuf) += plen;
             (*outbytesleft) -= plen;
-            cd->write_marc8_page_chr = page_chr;            
         }
         cd->write_marc8_last = y;
     }
