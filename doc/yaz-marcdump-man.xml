@@ -1,9 +1,19 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
+     %common;
 ]>
-<!-- $Id: yaz-marcdump-man.xml,v 1.11 2006-08-28 18:35:07 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.12 2006-08-28 19:18:02 adam Exp $ -->
 <refentry id="yaz-marcdump">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+ </refentryinfo>
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
   <manvolnum>1</manvolnum>

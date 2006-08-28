@@ -1,14 +1,24 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
+     %common;
      <!ENTITY gfs-options SYSTEM "gfs-options.xml">
      <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
      <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.10 2006-05-24 12:49:45 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.11 2006-08-28 19:18:02 adam Exp $ -->
 <refentry id="yaz-ztest">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+ </refentryinfo>
  
  <refmeta>
   <refentrytitle>yaz-ztest</refentrytitle>

@@ -1,8 +1,18 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
+     %common;
 ]>
 <refentry id="yaz-asncomp">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+ </refentryinfo>
  
  <refmeta>
   <refentrytitle>yaz-asncomp</refentrytitle>

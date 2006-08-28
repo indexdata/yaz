@@ -1,8 +1,20 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
-[ ]>
-<!-- $Id: yaz-config-man.xml,v 1.6 2006-05-24 12:49:45 adam Exp $ -->
+[ 
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
+     %common;
+]>
+<!-- $Id: yaz-config-man.xml,v 1.7 2006-08-28 19:18:02 adam Exp $ -->
 <refentry id="yaz-config">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+ </refentryinfo>
+ 
  <refmeta>
   <refentrytitle>yaz-config</refentrytitle>
   <manvolnum>8</manvolnum>

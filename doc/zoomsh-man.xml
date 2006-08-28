@@ -1,10 +1,19 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN"
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
-     <!ENTITY zoomsh-commands SYSTEM "zoomsh-commands.xml">
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % common SYSTEM "common/common.ent">
+     %common;
 ]>
-<!-- $Id: zoomsh-man.xml,v 1.4 2006-05-24 12:33:21 adam Exp $ -->
+<!-- $Id: zoomsh-man.xml,v 1.5 2006-08-28 19:18:02 adam Exp $ -->
 <refentry id="zoomsh">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+ </refentryinfo>
  
  <refmeta>
   <refentrytitle>zoomsh</refentrytitle>
