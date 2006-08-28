@@ -2,7 +2,7 @@
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
 ]>
-<!-- $Id: yaz-marcdump-man.xml,v 1.10 2006-08-28 14:18:18 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.11 2006-08-28 18:35:07 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -23,6 +23,7 @@
    <arg choice="opt"><option>-I</option></arg>
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>to</replaceable></option></arg>
+   <arg choice="opt"><option>-l <replaceable>spec</replaceable></option></arg>
    <arg choice="opt"><option>-v</option></arg>
    <arg choice="opt"><option>-c <replaceable>cfile</replaceable></option></arg>
    <arg choice="opt" rep="repeat">file</arg>
