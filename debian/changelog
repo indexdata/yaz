@@ -1,3 +1,9 @@
+yaz (2.1.27-2) unstable; urgency=low
+
+  * Testing of MARC-8 encoding bugs.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 28 Aug 2006 18:54:11 +0200
+
 yaz (2.1.27-1) unstable; urgency=low
 
   * Upstream.
