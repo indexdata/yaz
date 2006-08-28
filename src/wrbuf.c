@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.11 2006-07-07 10:31:26 marc Exp $
+ * $Id: wrbuf.c,v 1.12 2006-08-28 12:34:41 adam Exp $
  */
 
 /**
@@ -213,6 +213,13 @@ int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
 int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
     return wrbuf_iconv_write(b, cd, strz, strlen(strz));
+}
+
+int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch)
+{
+    char buf[1];
+    buf[0] = ch;
+    return wrbuf_iconv_write(b, cd, buf, 1);
 }
 
 int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, int size)

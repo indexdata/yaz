@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.26 2006-08-27 19:04:03 adam Exp $
+ * $Id: siconv.c,v 1.27 2006-08-28 12:34:41 adam Exp $
  */
 /**
  * \file siconv.c
@@ -181,6 +181,21 @@ static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd, unsigned char *inp,
     unsigned long x = inp[0];
     *no_read = 1;
     return x;
+}
+
+static size_t yaz_init_marc8(yaz_iconv_t cd, unsigned char *inp,
+                             size_t inbytesleft, size_t *no_read)
+{
+    cd->marc8_esc_mode = 'B';
+
+    cd->comb_offset = cd->comb_size = 0;
+    cd->compose_char = 0;
+
+    cd->write_marc8_comb_no = 0;
+    cd->write_marc8_last = 0;
+    cd->write_marc8_page_chr = "\033(B";
+
+    return 0;
 }
 
 static size_t yaz_init_UTF8 (yaz_iconv_t cd, unsigned char *inp,
@@ -949,13 +964,6 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->read_handle = 0;
     cd->init_handle = 0;
     cd->my_errno = YAZ_ICONV_UNKNOWN;
-    cd->marc8_esc_mode = 'B';
-    cd->comb_offset = cd->comb_size = 0;
-    cd->compose_char = 0;
-
-    cd->write_marc8_comb_no = 0;
-    cd->write_marc8_last = 0;
-    cd->write_marc8_page_chr = "\033(B";
 
     /* a useful hack: if fromcode has leading @,
        the library not use YAZ's own conversions .. */
@@ -975,9 +983,15 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
         else if (!yaz_matchstr(fromcode, "UCS4LE"))
             cd->read_handle = yaz_read_UCS4LE;
         else if (!yaz_matchstr(fromcode, "MARC8"))
+        {
             cd->read_handle = yaz_read_marc8;
+            cd->init_handle = yaz_init_marc8;
+        }
         else if (!yaz_matchstr(fromcode, "MARC8s"))
+        {
             cd->read_handle = yaz_read_marc8s;
+            cd->init_handle = yaz_init_marc8;
+        }
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(fromcode, "WCHAR_T"))
             cd->read_handle = yaz_read_wchar_t;
@@ -992,9 +1006,15 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
         else if (!yaz_matchstr(tocode, "UCS4LE"))
             cd->write_handle = yaz_write_UCS4LE;
         else if (!yaz_matchstr(tocode, "MARC8"))
+        {
             cd->write_handle = yaz_write_marc8;
+            cd->init_handle = yaz_init_marc8;
+        }
         else if (!yaz_matchstr(tocode, "MARC8s"))
+        {
             cd->write_handle = yaz_write_marc8;
+            cd->init_handle = yaz_init_marc8;
+        }
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(tocode, "WCHAR_T"))
             cd->write_handle = yaz_write_wchar_t;
@@ -1065,7 +1085,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     {
         if (cd->init_handle)
         {
-            size_t no_read;
+            size_t no_read = 0;
             size_t r = (cd->init_handle)(cd, (unsigned char *) *inbuf,
                                          *inbytesleft, &no_read);
             if (r)

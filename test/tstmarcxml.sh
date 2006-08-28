@@ -1,6 +1,8 @@
 #!/bin/sh
-# $Id: tstmarcxml.sh,v 1.2 2006-04-20 19:47:02 adam Exp $
+# $Id: tstmarcxml.sh,v 1.3 2006-08-28 12:34:42 adam Exp $
 # Tests reading of MARCXML and checks that we get identical ISO2709 output.
+#
+# Reads marc?.xml files , Generates marc?.xml.marc files
 srcdir=${srcdir:-.}
 ecode=0
 # Skip this test if Libxml2 support is not enabled
@@ -31,3 +33,8 @@ for f in ${srcdir}/marc?.xml; do
 done
 exit $ecode
 
+# Local Variables:
+# mode:shell-script
+# sh-indentation: 2
+# sh-basic-offset: 4
+# End:

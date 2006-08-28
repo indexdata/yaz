@@ -1,24 +1,26 @@
 ## Copyright (C) 1994-2006, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.25 2006-08-01 12:03:58 adam Exp $
+## $Id: Makefile.am,v 1.26 2006-08-28 12:34:42 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  nfatest1 nfaxmltest1 \
  tst_filepath tst_record_conv tst_retrieval tst_tpath
-check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh
+check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh tstmarccol.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
 EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
  cql2pqf-order.txt \
  $(check_SCRIPTS) \
- marc1 marc1.xml marc1.chr marc1.xml.marc \
- marc2 marc2.xml marc2.chr marc2.xml.marc \
- marc3 marc3.xml marc3.chr marc3.xml.marc \
- marc4 marc4.xml marc4.chr marc4.xml.marc \
- marc5 marc5.xml marc5.chr marc5.xml.marc \
- marc6 marc6.xml marc6.chr marc6.xml.marc \
+ marc1.marc marc1.xml marc1.chr marc1.xml.marc \
+ marc2.marc marc2.xml marc2.chr marc2.xml.marc \
+ marc3.marc marc3.xml marc3.chr marc3.xml.marc \
+ marc4.marc marc4.xml marc4.chr marc4.xml.marc \
+ marc5.marc marc5.xml marc5.chr marc5.xml.marc \
+ marc6.marc marc6.xml marc6.chr marc6.xml.marc \
+ marc7.marc marc7.xml marc7.chr marc7.xml.marc \
+ marccol1.u8.marc marccol1.u8.1.lst marccol1.u8.2.lst \
  tst_record_conv.xsl 
 
 YAZCOMP = ../util/yaz-asncomp

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.32 2006-08-01 09:28:04 adam Exp $
+ * $Id: marcdisp.c,v 1.33 2006-08-28 12:34:40 adam Exp $
  */
 
 /**
@@ -422,15 +422,20 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
                 wrbuf_puts (wr, mt->subfield_str); 
                 wrbuf_iconv_write(wr, mt->iconv_cd, s->code_data, 
                                   using_code_len);
-                wrbuf_printf(wr, " ");
+                wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
                 wrbuf_iconv_puts(wr, mt->iconv_cd, 
                                  s->code_data + using_code_len);
+                wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
+                wr->pos--;
             }
             wrbuf_puts (wr, mt->endline_str);
             break;
         case YAZ_MARC_CONTROLFIELD:
-            wrbuf_printf(wr, "%s ", n->u.controlfield.tag);
+            wrbuf_printf(wr, "%s", n->u.controlfield.tag);
+            wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
+            wr->pos--;
             wrbuf_puts (wr, mt->endline_str);
             break;
         case YAZ_MARC_COMMENT:
@@ -499,6 +504,7 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
     for (n = mt->nodes; n; n = n->next)
     {
         struct yaz_marc_subfield *s;
+
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
@@ -514,7 +520,7 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
                     wrbuf_printf(wr, " ind%d=\"", i+1);
                     wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                           n->u.datafield.indicator+i, 1);
-                    wrbuf_printf(wr, "\"");
+                    wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
                 }
             }
             wrbuf_printf(wr, ">\n");
@@ -528,14 +534,15 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
                     :
                     cdata_one_character(mt, s->code_data);
                 
-                wrbuf_puts(wr, "    <subfield code=\"");
+                wrbuf_iconv_puts(wr, mt->iconv_cd, "    <subfield code=\"");
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data, using_code_len);
-                wrbuf_puts(wr, "\">");
+                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data + using_code_len,
                                         strlen(s->code_data + using_code_len));
-                wrbuf_puts(wr, "</subfield>\n");
+                wrbuf_iconv_puts(wr, mt->iconv_cd, "</subfield>");
+                wrbuf_puts(wr, "\n");
             }
             wrbuf_printf(wr, "  </datafield>\n");
             break;
@@ -543,9 +550,10 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, "  <controlfield tag=\"");
             wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
                                     strlen(n->u.controlfield.tag));
-            wrbuf_printf(wr, "\">");
+            wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
-            wrbuf_printf(wr, "</controlfield>\n");
+            wrbuf_iconv_puts(wr, mt->iconv_cd, "</controlfield>");
+            wrbuf_puts(wr, "\n");
             break;
         case YAZ_MARC_COMMENT:
             wrbuf_printf(wr, "<!-- ");
@@ -616,18 +624,22 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     {
         int data_length = 0;
         struct yaz_marc_subfield *s;
+
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
             wrbuf_printf(wr_dir, "%.3s", n->u.datafield.tag);
             data_length += indicator_length;
+            wrbuf_rewind(wr_data_tmp);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                wrbuf_rewind(wr_data_tmp);
+                /* write dummy IDFS + content */
+                wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');
                 wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd, s->code_data);
-                data_length += 1+wrbuf_len(wr_data_tmp);
             }
-            data_length++;
+            /* write dummy FS (makes MARC-8 to become ASCII) */
+            wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');
+            data_length += wrbuf_len(wr_data_tmp);
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_printf(wr_dir, "%.3s", n->u.controlfield.tag);
@@ -635,8 +647,8 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             wrbuf_rewind(wr_data_tmp);
             wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd, 
                              n->u.controlfield.data);
+            wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');/* field sep */
             data_length += wrbuf_len(wr_data_tmp);
-            data_length++;
             break;
         case YAZ_MARC_COMMENT:
             break;
@@ -676,6 +688,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     for (n = mt->nodes; n; n = n->next)
     {
         struct yaz_marc_subfield *s;
+
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
@@ -683,14 +696,20 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                          n->u.datafield.indicator);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                wrbuf_printf(wr, "%c", ISO2709_IDFS);
+                wrbuf_putc(wr, ISO2709_IDFS);
                 wrbuf_iconv_puts(wr, mt->iconv_cd, s->code_data);
+                /* write dummy blank - makes MARC-8 to become ASCII */
+                wrbuf_iconv_putchar(wr, mt->iconv_cd, ' ');
+                wr->pos--;
             }
-            wrbuf_printf(wr, "%c", ISO2709_FS);
+            wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
-            wrbuf_printf(wr, "%c", ISO2709_FS);
+            /* write dummy blank - makes MARC-8 to become ASCII */
+            wrbuf_iconv_putchar(wr, mt->iconv_cd, ' ');
+            wr->pos--;
+            wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_COMMENT:
             break;

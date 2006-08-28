@@ -1,13 +1,17 @@
 #!/bin/sh
-# $Id: tstmarciso.sh,v 1.2 2006-04-20 19:47:02 adam Exp $
+# $Id: tstmarciso.sh,v 1.3 2006-08-28 12:34:42 adam Exp $
 # Tests reading of ISO2709 and checks that we get identical MARCXML
+# 
+# Reads marc?.marc files , Generates marc?.xml files
 srcdir=${srcdir:-.}
 ecode=0
-for f in ${srcdir}/marc?; do
-    NEW=`basename ${f}`.new.xml
-    OLD=${f}.xml
+for f in ${srcdir}/marc?.marc; do
+    fb=`basename ${f} .marc`
+    CHR=${srcdir}/${fb}.chr
+    NEW=${fb}.new.xml
+    OLD=${srcdir}/${fb}.xml
     DIFF=`basename ${f}`.diff
-    ../util/yaz-marcdump -f `cat ${f}.chr` -t utf-8 -X $f > $NEW
+    ../util/yaz-marcdump -f `cat $CHR` -t utf-8 -X $f > $NEW
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
 	ecode=1
@@ -37,3 +41,8 @@ for f in ${srcdir}/marc?; do
 done
 exit $ecode
 
+# Local Variables:
+# mode:shell-script
+# sh-indentation: 2
+# sh-basic-offset: 4
+# End:
