@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.40 2006-07-06 10:17:55 adam Exp $
+ * $Id: marcdump.c,v 1.41 2006-08-28 12:31:18 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -204,9 +204,11 @@ static void dump(const char *fname, const char *from, const char *to,
                         fclose(sf);
                     }
                 }
-                { int rlentmp = (int) rlen;
-                  r = yaz_marc_decode_buf (mt, buf, -1, &result, &rlentmp);
-                  rlen = (size_t) rlentmp; }
+                {
+                    int rlentmp = (int) rlen;
+                    r = yaz_marc_decode_buf(mt, buf, -1, &result, &rlentmp);
+                    rlen = (size_t) rlentmp;
+                }
                 if (r > 0 && result)
                 {
                     fwrite (result, rlen, 1, stdout);
