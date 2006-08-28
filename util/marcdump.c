@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.41 2006-08-28 12:31:18 adam Exp $
+ * $Id: marcdump.c,v 1.42 2006-08-28 14:18:23 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -50,7 +50,8 @@ static char *prog;
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-X] [-e] [-I] [-v] [-s splitfname] file...\n",
+    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-X] [-e] "
+             "[-I] [-l pos=value] [-v] [-s splitfname] file...\n",
              prog);
 } 
 
@@ -84,11 +85,17 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 static void dump(const char *fname, const char *from, const char *to,
                  int read_xml, int xml,
                  int print_offset, const char *split_fname, int verbose,
-                 FILE *cfile)
+                 FILE *cfile, const char *leader_spec)
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
-    
+
+    if (yaz_marc_leader_spec(mt, leader_spec))
+    {
+        fprintf(stderr, "bad leader spec: %s\n", leader_spec);
+        yaz_marc_destroy(mt);
+        exit(2);
+    }
     if (from && to)
     {
         cd = yaz_iconv_open(to, from);
@@ -96,6 +103,7 @@ static void dump(const char *fname, const char *from, const char *to,
         {
             fprintf(stderr, "conversion from %s to %s "
                     "unsupported\n", from, to);
+            yaz_marc_destroy(mt);
             exit(2);
         }
         yaz_marc_iconv(mt, cd);
@@ -259,6 +267,7 @@ int main (int argc, char **argv)
     char *from = 0, *to = 0;
     int read_xml = 0;
     const char *split_fname = 0;
+    const char *leader_spec = 0;
     
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -270,11 +279,14 @@ int main (int argc, char **argv)
 #endif
 
     prog = *argv;
-    while ((r = options("pvc:xOeXIf:t:s:", argv, argc, &arg)) != -2)
+    while ((r = options("pvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
         {
+        case 'l':
+            leader_spec = arg;
+            break;
         case 'f':
             from = arg;
             break;
@@ -317,7 +329,7 @@ int main (int argc, char **argv)
             break;
         case 0:
             dump(arg, from, to, read_xml, xml,
-                 print_offset, split_fname, verbose, cfile);
+                 print_offset, split_fname, verbose, cfile, leader_spec);
             break;
         case 'v':
             verbose++;

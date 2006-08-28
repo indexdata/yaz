@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: marcdisp.h,v 1.17 2006-04-20 20:35:02 adam Exp $
+ * $Id: marcdisp.h,v 1.18 2006-08-28 14:18:20 adam Exp $
  */
 
 /**
@@ -196,6 +196,18 @@ YAZ_EXPORT int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wrbuf);
 */  
 YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
 
+/** \brief sets leader spec (for modifying bytes in 24 byte leader)
+    \param mt handle
+    \param leader_spec
+    \retval 0 OK
+    \retval -1 ERROR
+    
+    Spec takes form pos=val,pos=val,...
+    where value is either a number (decimal char value) or a
+    string in 'a', e.g. 9='a'
+    
+*/  
+YAZ_EXPORT int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec);
 YAZ_END_CDECL
 
 #endif

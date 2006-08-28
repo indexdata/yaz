@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.33 2006-08-28 12:34:40 adam Exp $
+ * $Id: marcdisp.c,v 1.34 2006-08-28 14:18:22 adam Exp $
  */
 
 /**
@@ -87,6 +87,7 @@ struct yaz_marc_t_ {
     yaz_iconv_t iconv_cd;
     char subfield_str[8];
     char endline_str[8];
+    char *leader_spec;
     struct yaz_marc_node *nodes;
     struct yaz_marc_node **nodes_pp;
     struct yaz_marc_subfield **subfield_pp;
@@ -99,6 +100,7 @@ yaz_marc_t yaz_marc_create(void)
     mt->debug = 0;
     mt->m_wr = wrbuf_alloc();
     mt->iconv_cd = 0;
+    mt->leader_spec = 0;
     strcpy(mt->subfield_str, " $");
     strcpy(mt->endline_str, "\n");
 
@@ -112,9 +114,14 @@ void yaz_marc_destroy(yaz_marc_t mt)
     if (!mt)
         return ;
     nmem_destroy(mt->nmem);
-    wrbuf_free (mt->m_wr, 1);
-    xfree (mt);
+    wrbuf_free(mt->m_wr, 1);
+    xfree(mt->leader_spec);
+    xfree(mt);
 }
+
+static int marc_exec_leader(const char *leader_spec, char *leader,
+                            size_t size);
+
 
 struct yaz_marc_node *yaz_marc_add_node(yaz_marc_t mt)
 {
@@ -158,6 +165,7 @@ void yaz_marc_add_leader(yaz_marc_t mt, const char *leader, size_t leader_len)
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_LEADER;
     n->u.leader = nmem_strdupn(mt->nmem, leader, leader_len);
+    marc_exec_leader(mt->leader_spec, n->u.leader, leader_len);
 }
 
 void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
@@ -574,7 +582,8 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
 
 int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
 {
-    yaz_marc_modify_leader(mt, 9, "a");
+    if (!mt->leader_spec)
+        yaz_marc_modify_leader(mt, 9, "a");
     return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim",
                                      0, 0);
 }
@@ -1210,6 +1219,64 @@ int marc_display (const char *buf, FILE *outf)
 {
     return marc_display_ex (buf, outf, 0);
 }
+
+int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec)
+{
+    xfree(mt->leader_spec);
+    mt->leader_spec = 0;
+    if (leader_spec)
+    {
+        char dummy_leader[24];
+        if (marc_exec_leader(leader_spec, dummy_leader, 24))
+            return -1;
+        mt->leader_spec = xstrdup(leader_spec);
+    }
+    return 0;
+}
+
+static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
+{
+    const char *cp = leader_spec;
+    while (cp)
+    {
+        char val[21];
+        int pos;
+        int no_read = 0, no = 0;
+
+        no = sscanf(cp, "%d=%20[^,]%n", &pos, val, &no_read);
+        if (no < 2 || no_read < 3)
+            return -1;
+        if (pos < 0 || pos >= size)
+            return -1;
+
+        if (*val == '\'')
+        {
+            const char *vp = strchr(val+1, '\'');
+            size_t len;
+            
+            if (!vp)
+                return -1;
+            len = vp-val-1;
+            if (len + pos > size)
+                return -1;
+            memcpy(leader + pos, val+1, len);
+        }
+        else if (*val >= '0' && *val <= '9')
+        {
+            int ch = atoi(val);
+            leader[pos] = ch;
+        }
+        else
+            return -1;
+        cp += no_read;
+        if (*cp != ',')
+            break;
+
+        cp++;
+    }
+    return 0;
+}
+
 
 /*
  * Local variables:

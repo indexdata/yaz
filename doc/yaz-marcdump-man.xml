@@ -2,7 +2,7 @@
  "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
 [
 ]>
-<!-- $Id: yaz-marcdump-man.xml,v 1.9 2006-05-24 12:33:21 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.10 2006-08-28 14:18:18 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refmeta>
   <refentrytitle>yaz-marcdump</refentrytitle>
@@ -98,7 +98,7 @@
    </varlistentry>
 
    <varlistentry>
-    <term>-f<replaceable>from</replaceable>]</term>
+    <term>-f <replaceable>from</replaceable></term>
     <listitem><para>
       Specify the character set <replaceable>from</replaceable>
       of the input MARC record.
@@ -107,11 +107,23 @@
    </varlistentry>
 
    <varlistentry>
-    <term>-t<replaceable>to</replaceable>]</term>
+    <term>-t <replaceable>to</replaceable></term>
     <listitem><para>
       Specify the character set <replaceable>of</replaceable>
       of the output.
       Should be used in conjunction with option <literal>-f</literal>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-l <replaceable>leaderspec</replaceable></term>
+    <listitem><para>
+      Specify a simple modification string for MARC leader. The
+      <replaceable>leaderspec</replaceable> is a list of pos=value
+      pairs, where pos is an integer offset (0 - 23) for leader. Value
+      is either a quoted string or an integer (character value in decimal).
+      Pairs are comma separated. For example, to set leader at offset 9
+      to a, use <literal>9=a</literal>.
      </para></listitem>
    </varlistentry>
 
@@ -129,9 +141,10 @@
  <refsect1><title>EXAMPLES</title>
   <para>
    The following command converts MARC21/USMARC in MARC-8 encoding to
-   MARC21/USMARC in UTF-8 encoding. (Both input and output is in ISO2709).
+   MARC21/USMARC in UTF-8 encoding. Leader offset 9 is set to 'a'.
+   Both input and output records are ISO2709 encoded.
    <screen>
-    yaz-marcdump -f MARC-8 -t UTF-8 -I marc21.raw >marc21.utf8.raw
+    yaz-marcdump -f MARC-8 -t UTF-8 -I -l 9=97 marc21.raw >marc21.utf8.raw
    </screen>
   </para>
   <para>

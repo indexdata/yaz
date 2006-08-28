@@ -1,3 +1,8 @@
+New option for yaz-marcdump -lpos=value which allows setting a portion
+of MARC header to a certain value.
+
+Fixes for MARC generation when encoded as MARC-8 (bug 642, 643).
+
 ZOOM-C reads option extraArgs. If set the value of extraArgs is appended to
 SRU URI (POST/GET). Value is _raw_ URI part, such as x-id-a=v1&x-id-b=v2 .
 
