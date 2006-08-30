@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.19 2006-08-24 13:25:45 adam Exp $
+ * $Id: tcpip.c,v 1.20 2006-08-30 12:04:43 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -241,9 +241,14 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
                        int default_port)
 {
     struct hostent *hp;
+#if HAVE_GETHOSTBYNAME_R
+    struct hostent h;
+    char hbuf[1024];
+    int h_error;
+#endif
     char *p, buf[512];
     short int port = default_port;
-    unsigned tmpadd;
+    in_addr_t tmpadd;
 
     if (!tcpip_init ())
         return 0;
@@ -260,12 +265,26 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
     }
     add->sin_port = htons(port);
     if (!strcmp("@", buf))
+    {
         add->sin_addr.s_addr = INADDR_ANY;
-    else if ((hp = gethostbyname(buf)))
+    }
+    else if ((tmpadd = inet_addr(buf)) != INADDR_NONE)
+    {
+        memcpy(&add->sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
+    }
+#if HAVE_GETHOSTBYNAME_R
+    else if (gethostbyname_r(buf, &h, hbuf, sizeof(hbuf), &hp, &h_error) == 0)
+    {
         memcpy(&add->sin_addr.s_addr, *hp->h_addr_list,
                sizeof(struct in_addr));
-    else if ((tmpadd = (unsigned) inet_addr(buf)) != 0)
-        memcpy(&add->sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
+    }
+#else
+    else if ((hp = gethostbyname(buf)))
+    {
+        memcpy(&add->sin_addr.s_addr, *hp->h_addr_list,
+               sizeof(struct in_addr));
+    }
+#endif
     else
         return 0;
     return 1;

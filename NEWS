@@ -1,3 +1,5 @@
+Fixed bug #644: Using Non Reentrant gethostbyname causes SIGSEGV.
+
 New option for yaz-marcdump -lpos=value which allows setting a portion
 of MARC header to a certain value.
 
