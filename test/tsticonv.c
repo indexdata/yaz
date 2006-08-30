@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.21 2006-08-27 19:04:03 adam Exp $
+ * $Id: tsticonv.c,v 1.22 2006-08-30 20:14:56 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -455,7 +455,7 @@ static void tst_utf8_to_marc8()
     /** Ideographic question mark (Unicode FF1F) */
     YAZ_CHECK(tst_convert(cd,
                           "\xEF\xBC\x9F" "o",        /* UTF-8 */
-                          "\033(1" "\x21\x2B\x3B" "\033(B" "o" ));
+                          "\033$1" "\x21\x2B\x3B" "\033(B" "o" ));
 
 
     /** Superscript 0 . bug #642 */
