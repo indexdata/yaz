@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.33 2006-08-30 12:04:42 adam Exp $
+dnl $Id: configure.ac,v 1.34 2006-08-30 18:58:58 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.27],[adam@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -164,7 +164,7 @@ if test "$with_iconv" != "no"; then
     ])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS(gethostbyname_r vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64)
+AC_CHECK_FUNCS(getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64)
 case $host in
     *-*-darwin*)
 	trypoll="no";

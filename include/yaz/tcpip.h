@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: tcpip.h,v 1.7 2005-06-25 15:46:03 adam Exp $
+ * $Id: tcpip.h,v 1.8 2006-08-30 18:58:58 adam Exp $
  */
 /**
  * \file tcpip.h
@@ -39,7 +39,6 @@
 YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
-YAZ_EXPORT struct sockaddr_in *tcpip_strtoaddr(const char *str);
 YAZ_EXPORT COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp);
 YAZ_EXPORT COMSTACK ssl_type(int s, int blocking, int protocol, void *vp);
 
