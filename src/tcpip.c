@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.21 2006-08-30 12:47:23 adam Exp $
+ * $Id: tcpip.c,v 1.22 2006-08-30 12:55:12 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -249,9 +249,13 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
     char *p, buf[512];
     short int port = default_port;
 #ifdef WIN32
-	unsigned long tmpadd;
+    unsigned long tmpadd;
 #else
     in_addr_t tmpadd;
+#endif
+
+#ifndef INADDR_NONE
+#define INADDR_NONE -1
 #endif
 
     if (!tcpip_init ())
