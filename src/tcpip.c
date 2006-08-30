@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.23 2006-08-30 18:58:59 adam Exp $
+ * $Id: tcpip.c,v 1.24 2006-08-30 19:26:43 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -26,7 +26,9 @@
 #endif
 
 #ifdef WIN32
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#define HAVE_GETADDRINFO 1
 #else
 #include <netinet/in.h>
 #include <netdb.h>
