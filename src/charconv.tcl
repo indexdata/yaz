@@ -2,7 +2,7 @@
 # the next line restarts using tclsh \
 if [ -f /usr/local/bin/tclsh8.4 ]; then exec tclsh8.4 "$0" "$@"; else exec tclsh "$0" "$@"; fi
 #
-# $Id: charconv.tcl,v 1.16 2006-05-23 09:43:37 mike Exp $
+# $Id: charconv.tcl,v 1.17 2006-08-30 20:40:18 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -165,9 +165,11 @@ proc ins_trie_r {from to combining codename this} {
             }
             ins_trie_r $rest $to $combining $codename $trie($this,ptr,$ch)
         } else {
-            set trie($this,to,$ch) $to
-            set trie($this,combining,$ch) $combining
-            set trie($this,codename,$ch) $codename
+	    if {![info exist trie($this,to,$ch)]} {
+                set trie($this,to,$ch) $to
+                set trie($this,combining,$ch) $combining
+                set trie($this,codename,$ch) $codename
+	    }
         }
     }
 }
