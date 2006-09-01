@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.24 2006-08-30 19:26:43 adam Exp $
+ * $Id: tcpip.c,v 1.25 2006-09-01 10:39:09 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -97,7 +97,7 @@ typedef struct tcpip_state
     int towrite;  /* to verify against user input */
     int (*complete)(const unsigned char *buf, int len); /* length/comple. */
 #if HAVE_GETADDRINFO
-    struct addrinfo *res;
+    struct addrinfo *ai;
 #else
     struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
@@ -141,40 +141,16 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 {
     COMSTACK p;
     tcpip_state *sp;
-    int new_socket;
-#ifdef WIN32
-    unsigned long tru = 1;
-#endif
 
     if (!tcpip_init ())
         return 0;
-    if (s < 0)
-    {
-        if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-            return 0;
-        new_socket = 1;
-    }
-    else
-        new_socket = 0;
     if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
         return 0;
     if (!(sp = (struct tcpip_state *)(p->cprivate =
                                          xmalloc(sizeof(tcpip_state)))))
         return 0;
 
-    if (!((p->blocking = blocking)&1))
-    {
-#ifdef WIN32
-        if (ioctlsocket(s, FIONBIO, &tru) < 0)
-            return 0;
-#else
-        if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
-            return 0;
-#ifndef MSG_NOSIGNAL
-        signal (SIGPIPE, SIG_IGN);
-#endif
-#endif
-    }
+    p->blocking = blocking;
 
     p->io_pending = 0;
     p->iofile = s;
@@ -195,7 +171,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
     p->f_set_blocking = tcpip_set_blocking;
     p->max_recv_bytes = 5000000;
 
-    p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
+    p->state = s < 0 ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
     p->stackerr = 0;
@@ -208,7 +184,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 #endif
 
 #if HAVE_GETADDRINFO
-    sp->res = 0;
+    sp->ai = 0;
 #endif
     sp->altbuf = 0;
     sp->altsize = sp->altlen = 0;
@@ -341,10 +317,22 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     if (!tcpip_init ())
         return 0;
 
-    if (sp->res)
-        freeaddrinfo(sp->res);
-    sp->res = tcpip_getaddrinfo(str, port);
-    return sp->res;
+    if (sp->ai)
+        freeaddrinfo(sp->ai);
+    sp->ai = tcpip_getaddrinfo(str, port);
+    if (sp->ai && h->state == CS_ST_UNBND)
+    {
+        int s;
+        struct addrinfo *ai = sp->ai;
+        s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (s < 0)
+            return 0;
+        h->iofile = s;
+        
+        if (!tcpip_set_blocking(h, h->blocking))
+            return 0;
+    }
+    return sp->ai;
 }
 #else
 void *tcpip_straddr(COMSTACK h, const char *str)
@@ -358,6 +346,17 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         return 0;
     if (!tcpip_strtoaddr_ex (str, &sp->addr, port))
         return 0;
+    if (h->state == CS_ST_UNBND)
+    {
+        int s;
+        s = socket(AF_INET, SOCK_STREAM, 0);
+        if (s < 0)
+            return 0;
+        h->iofile = s;
+
+        if (!tcpip_set_blocking(h, h->blocking))
+            return 0;
+    }
     return &sp->addr;
 }
 #endif
@@ -378,7 +377,7 @@ int tcpip_more(COMSTACK h)
 int tcpip_connect(COMSTACK h, void *address)
 {
 #if HAVE_GETADDRINFO
-    struct addrinfo *ai = (struct addrinfo *) address; 
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
 #else
     struct sockaddr_in *add = (struct sockaddr_in *) address;
 #endif
@@ -394,6 +393,13 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
+#if HAVE_GETADDRINFO
+    if (sp->ai != (struct addrinfo *) address)
+    {
+        h->cerrno = CSOUTSTATE;
+        return -1;
+    }
+#endif
 #ifdef __sun__
     /* On Suns, you must set a bigger Receive Buffer BEFORE a call to connect
      * This gives the connect a chance to negotiate with the other side
@@ -422,7 +428,9 @@ int tcpip_connect(COMSTACK h, void *address)
 #endif
 
 #if HAVE_GETADDRINFO
-    r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
+    r = connect(h->iofile, sp->ai->ai_addr, sp->ai->ai_addrlen);
+    freeaddrinfo(sp->ai);
+    sp->ai = 0;
 #else
     r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
 #endif
@@ -544,8 +552,8 @@ static void tcpip_setsockopt (int fd)
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
 #if HAVE_GETADDRINFO
-    struct addrinfo *ai = (struct addrinfo *)address;
 #else
     struct sockaddr *addr = (struct sockaddr *)address;
 #endif
@@ -555,8 +563,15 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     unsigned long one = 1;
 #endif
 
+#if HAVE_GETADDRINFO
+    if (sp->ai != (struct addrinfo *) address)
+    {
+        h->cerrno = CSOUTSTATE;
+        return -1;
+    }
+#endif
+
 #if HAVE_OPENSSL_SSL_H
-    tcpip_state *sp = (tcpip_state *)h->cprivate;
     if (h->type == ssl_type && !sp->ctx)
     {
         SSL_load_error_strings();
@@ -613,7 +628,9 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 #endif
     tcpip_setsockopt(h->iofile);
 #if HAVE_GETADDRINFO
-    r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
+    r = bind(h->iofile, sp->ai->ai_addr, sp->ai->ai_addrlen);
+    freeaddrinfo(sp->ai);
+    sp->ai = 0;
 #else
     r = bind(h->iofile, addr, sizeof(struct sockaddr_in));
 #endif
@@ -727,13 +744,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             }
             return 0;
         }
-        if (!(cnew->blocking&1) && 
-#ifdef WIN32
-            (ioctlsocket(cnew->iofile, FIONBIO, &tru) < 0)
-#else
-            (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
-#endif
-            )
+        if (!tcpip_set_blocking(cnew, cnew->blocking))
         {
             h->cerrno = CSYSERR;
             if (h->newfd != -1)
@@ -754,6 +765,9 @@ COMSTACK tcpip_accept(COMSTACK h)
         state->altsize = state->altlen = 0;
         state->towrite = state->written = -1;
         state->complete = st->complete;
+#if HAVE_GETADDRINFO
+        state->ai = 0;
+#endif
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
         
@@ -1167,8 +1181,8 @@ int tcpip_close(COMSTACK h)
         SSL_CTX_free (sp->ctx_alloc);
 #endif
 #if HAVE_GETADDRINFO
-    if (sp->res)
-        freeaddrinfo(sp->res);
+    if (sp->ai)
+        freeaddrinfo(sp->ai);
 #endif
     xfree(sp);
     xfree(h);
@@ -1216,18 +1230,19 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
 {
     unsigned long flag;
     
-    if (p->blocking == blocking)
-        return 1;
 #ifdef WIN32
     flag = 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
         return 0;
 #else
     flag = fcntl(p->iofile, F_GETFL, 0);
-    if(!(blocking&1))
-        flag = flag & ~O_NONBLOCK;
+    if (blocking & 1)
+        flag = flag & ~O_NONBLOCK;  /* blocking */
     else
-        flag = flag | O_NONBLOCK;
+    {
+        flag = flag | O_NONBLOCK;   /* non-blocking */
+        signal(SIGPIPE, SIG_IGN);
+    }
     if (fcntl(p->iofile, F_SETFL, flag) < 0)
         return 0;
 #endif
