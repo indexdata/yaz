@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.96 2006-08-24 13:25:45 adam Exp $
+ * $Id: seshigh.c,v 1.97 2006-09-01 12:40:44 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -339,22 +339,23 @@ void ir_session(IOCHAN h, int event)
                 return;
             }
             assoc->cs_get_mask = EVENT_INPUT;
-            if ((res = cs_get(conn, &assoc->input_buffer,
-                &assoc->input_buffer_len)) == 0)
+            res = cs_get(conn, &assoc->input_buffer,
+                &assoc->input_buffer_len);
+            if (res < 0 && cs_errno(conn) == CSBUFSIZE)
+            {
+                yaz_log(log_session, "Connection error: %s res=%d",
+                        cs_errmsg(cs_errno(conn)), res);
+                req = request_get(&assoc->incoming); /* get a new request */
+                do_close_req(assoc, Z_Close_protocolError, 
+                             "Incoming package too large", req);
+                return;
+            }
+            else if (res <= 0)
             {
                 yaz_log(log_sessiondetail, "Connection closed by client");
                 cs_close(conn);
                 destroy_association(assoc);
                 iochan_destroy(h);
-                return;
-            }
-            else if (res < 0)
-            {
-                yaz_log(log_session, "Connection error: %s",
-                        cs_errmsg(cs_errno(conn)));
-                req = request_get(&assoc->incoming); /* get a new request */
-                do_close_req(assoc, Z_Close_protocolError, 
-                             "Incoming package too large", req);
                 return;
             }
             else if (res == 1) /* incomplete read - wait for more  */
@@ -2326,7 +2327,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.96 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.97 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
