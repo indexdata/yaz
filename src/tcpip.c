@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.26 2006-09-01 11:27:20 adam Exp $
+ * $Id: tcpip.c,v 1.27 2006-09-01 12:42:31 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -874,7 +874,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
         if (res < 0)
         {
-          TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(), 
+            TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(), 
                       strerror(yaz_errno())));
 #ifdef WIN32
             if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -883,7 +883,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 break;
             }
             else
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
 #else
             if (yaz_errno() == EWOULDBLOCK 
 #ifdef EAGAIN   
@@ -903,7 +906,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             else if (yaz_errno() == 0)
                 continue;
             else
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
 #endif
         }
         else if (!res)
@@ -927,10 +933,16 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         if (!sp->altbuf)
         {
             if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
         } else if (sp->altsize < req)
             if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
         TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
             (unsigned) sp->altbuf));
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
@@ -1231,7 +1243,7 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
     unsigned long flag;
     
 #ifdef WIN32
-    flag = 1;
+	flag = blocking ? 0 : 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
         return 0;
 #else
