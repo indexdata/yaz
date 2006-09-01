@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.25 2006-09-01 10:39:09 adam Exp $
+ * $Id: tcpip.c,v 1.26 2006-09-01 11:27:20 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -243,7 +243,7 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port)
     host[sizeof(host)-1] = 0;
     if ((p = strchr(host, '/')))
         *p = 0;
-    if ((p = strchr(host, ':')))
+    if ((p = strrchr(host, ':')))
     {
         *p = '\0';
         port = p+1;
@@ -282,7 +282,7 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
     buf[sizeof(buf)-1] = 0;
     if ((p = strchr(buf, '/')))
         *p = 0;
-    if ((p = strchr(buf, ':')))
+    if ((p = strrchr(buf, ':')))
     {
         *p = 0;
         port = atoi(p + 1);
