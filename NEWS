@@ -1,3 +1,6 @@
+TCP/IP comstack uses getaddrinfo now to resolve names. It should be IPV6
+friendly now.
+
 Fixed bug #644: Using Non Reentrant gethostbyname causes SIGSEGV.
 
 New option for yaz-marcdump -lpos=value which allows setting a portion
