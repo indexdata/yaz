@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.71 2006-06-28 21:41:54 adam Exp $
+## $Id: Makefile.am,v 1.72 2006-09-04 12:43:45 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -10,23 +10,7 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
  future.xml client.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
 
-HTMLFILES = \
- asn.external.html asn.html asn.oid.html asn.pdu.html asn.preparing.html \
- client.commands.html client.html client.invoking.html client.searching.html \
- comstack.addresses.html comstack.client.html comstack.common.html \
- comstack.diagnostics.html comstack.html comstack.introduction.html \
- comstack.server.html comstack.ssl.html comstack.summary.html \
- credits.html future.html \
- indexdata.html installation.html installation.unix.html \
- installation.win32.html introduction.api.html introduction.html \
- license.html license.other.html odr.debugging.html odr.html \
- odr.programming.html odr.use.html server.backendfunctions.html \
- server.backend.html server.frontend.html server.html server.invocation.html \
- server.main.html server.vhosts.html \
- soap.html soap.http.html soap.xml.html soap.srw.html \
- tools.html tools.marc.html tools.nmem.html tools.log.html tools.oid.html \
- index.html zoom.events.html zoom.ext.html zoom.html zoom.options.html \
- zoom.query.html zoom.records.html zoom.resultsets.html zoom.scan.html
+HTMLFILES = index.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
 	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
@@ -71,9 +55,11 @@ yaz-log.7: yaz-log-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-log-man.xml
 
 $(HTMLFILES): $(XMLFILES)
+	rm -f *.html
 	$(HTML_COMPILE) $(srcdir)/yaz.xml
 
 index.tkl: $(XMLFILES)
+	rm -f *.tkl
 	$(TKL_COMPILE) $(srcdir)/yaz.xml
 
 yaz.pdf: $(XMLFILES)
@@ -89,18 +75,13 @@ apilayer.png:
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 
 dist-hook:
-	if test -f index.html; then for f in *.html; do \
-		found=0; \
-		b=`basename $$f`; \
-		for h in $(HTMLFILES); do \
-			if test "$$h" = "$$b"; then \
-				found=1; \
-			fi \
-		done; \
-		if test "$$found" = "0"; then \
-			echo "$$b not found in HTMLFILES"; \
-			exit 1; \
-		fi \
-	done; fi
+	if test -d index.html; then d=.; else d="$(srcdir)"; fi; \
+	for p in $$d/*.html; do \
+		cp $$p $(distdir); \
+	done
 
-
+install-data-hook:
+	if test -d index.html; then d=.; else d="$(srcdir)"; fi; \
+	for p in $$d/*.html; do \
+		$(docDATA_INSTALL) $$p $(DESTDIR)/$(docdir); \
+	done
