@@ -1,3 +1,5 @@
+--- 2.1.28 2006/09/04
+
 TCP/IP comstack uses getaddrinfo now to resolve names. It should be IPV6
 friendly now.
 
@@ -9,7 +11,7 @@ of MARC header to a certain value.
 Fixes for MARC generation when encoded as MARC-8 (bug 642, 643).
 
 ZOOM-C reads option extraArgs. If set the value of extraArgs is appended to
-SRU URI (POST/GET). Value is _raw_ URI part, such as x-id-a=v1&x-id-b=v2 .
+SRU URI (POST/GET). Value must be URL encoded, such as x-id-a=v1&x-id-b=v2 .
 
 --- 2.1.26 2006/08/15
 

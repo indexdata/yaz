@@ -1,3 +1,9 @@
+yaz (2.1.28-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon,  4 Sep 2006 12:11:24 +0200
+
 yaz (2.1.27-3) unstable; urgency=low
 
   * More testing of MARC-8 encoding. Using getaddrinfo.
