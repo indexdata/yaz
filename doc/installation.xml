@@ -1,7 +1,7 @@
-<!-- $Id: installation.xml,v 1.32 2006-06-27 12:23:12 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.33 2006-09-06 09:27:16 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
-  <sect1><title>Introduction</title>
+  <sect1 id="installation-introduction"><title>Introduction</title>
    <para>
     The latest version of the software will generally be found at:
    </para>
@@ -353,7 +353,8 @@
     </para>
    </sect2>
 
-   <sect2><title>How to make apps using YAZ on UNIX</title>
+   <sect2 id="installation-linking-yaz-unix">
+    <title>How to make apps using YAZ on UNIX</title>
     <para>
      This section describes how to compile - and link your own
      applications using the &yaz; toolkit.
@@ -630,7 +631,8 @@
     </para>
    </sect2>
 
-   <sect2><title>How to make apps using YAZ on WIN32</title>
+   <sect2 id="installation-linking-yaz-win32">
+    <title>How to make apps using YAZ on WIN32</title>
     <para>
      This section will go though the process of linking your WIN32
      applications with &yaz;.

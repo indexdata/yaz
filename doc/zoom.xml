@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.50 2006-06-13 16:01:51 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.51 2006-09-06 09:26:36 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -75,7 +75,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    protocol behavior, that describes how the API maps to the Z39.50
    protocol.
   </para>
-  <sect1 id="zoom.connections"><title>Connections</title>
+  <sect1 id="zoom-connections"><title>Connections</title>
    
    <para>The Connection object is a session with a target.
    </para>
@@ -154,7 +154,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <function>ZOOM_connection_option_getl</function> returns
     the value for an option given by <parameter>key</parameter>.
    </para>
-   <table frame="top"><title>ZOOM Connection Options</title>
+   <table id="zoom-connection-options" frame="top">
+    <title>ZOOM Connection Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -278,7 +279,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     of <function>ZOOM_connection_error</function> that is capable of
     returning name of diagnostic set in <parameter>dset</parameter>.
    </para>
-   <sect2><title>Z39.50 Protocol behavior</title>
+   <sect2 id="zoom-connection-z39.50">
+    <title>Z39.50 Protocol behavior</title>
     <para>
      The calls <function>ZOOM_connection_new</function> and
      <function>ZOOM_connection_connect</function> establishes a TCP/IP
