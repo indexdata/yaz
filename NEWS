@@ -1,3 +1,9 @@
+Changed the way PQF queries are encoded in SRU GET/POST. PQF search
+before: x-pquery=pqf .  PQF search now: query=pqf&x-querytype=pqf . This
+makes the SRU request more conformant because the required query parameter
+is always present. PQF scan before: x-pScanClause=pqf . PQF scan now:
+scanClause=pqf&x-querytype=pqf .
+
 For the generic frontend server, the maximum record size is used as maximum
 size of incoming packages (SRU + Z39.50). The value until was previously 
 only used in Z39.50 Init negotiation and, later, in a session controlled
