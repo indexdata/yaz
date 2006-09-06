@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.49 2006-09-06 13:37:51 adam Exp $
+ * $Id: srwutil.c,v 1.50 2006-09-06 15:21:26 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -80,7 +80,7 @@ static void yaz_array_to_uri_ex(char **path, ODR o, char **name, char **value,
 
 void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
 {
-    return yaz_array_to_uri_ex(path, o, name, value, 0);
+    yaz_array_to_uri_ex(path, o, name, value, 0);
 }
 
 int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
