@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.40 2006-07-07 13:02:21 marc Exp $
+ * $Id: statserv.c,v 1.41 2006-09-06 09:35:42 adam Exp $
  */
 
 /**
@@ -301,23 +301,30 @@ int control_association(association *assoc, const char *host, int force_open)
                 assoc->server = gfs;
                 assoc->last_control = &gfs->cb;
                 statserv_setcontrol(&gfs->cb);
+                
                 gfs_server_chdir(gfs);
-                yaz_log(YLOG_DEBUG, "server select: %s", gfs->cb.configname);
-                return 1;
+                break;
             }
         }
-        statserv_setcontrol(0);
-        assoc->last_control = 0;
-        yaz_log(YLOG_DEBUG, "server select: no match");
-        return 0;
+        if (!gfs)
+        {
+            statserv_setcontrol(0);
+            assoc->last_control = 0;
+            return 0;
+        }
     }
     else
     {
         statserv_setcontrol(&control_block);
         assoc->last_control = &control_block;
-        yaz_log(YLOG_DEBUG, "server select: config=%s", control_block.configname);
-        return 1;
     }
+    yaz_log(YLOG_DEBUG, "server select: config=%s", 
+            assoc->last_control->configname);
+
+    assoc->maximumRecordSize = assoc->last_control->maxrecordsize;
+    assoc->preferredMessageSize = assoc->last_control->maxrecordsize;
+    cs_set_max_recv_bytes(assoc->client_link, assoc->maximumRecordSize);
+    return 1;
 }
 
 static void xml_config_read()
@@ -360,6 +367,7 @@ static void xml_config_read()
             xmlNodePtr ptr;
             const char *listenref = 0;
             const char *id = 0;
+            struct gfs_server *gfs;
 
             for ( ; attr; attr = attr->next)
                 if (!xmlStrcmp(attr->name, BAD_CAST "listenref") 
@@ -372,8 +380,8 @@ static void xml_config_read()
                 else
                     yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
                             attr->name);
-            *gfsp = gfs_server_new();
-            (*gfsp)->server_node_ptr = ptr_server;
+            gfs = *gfsp = gfs_server_new();
+            gfs->server_node_ptr = ptr_server;
             if (listenref)
             {
                 int id_no;
@@ -381,7 +389,7 @@ static void xml_config_read()
                 for (id_no = 1; gl; gl = gl->next, id_no++)
                     if (gl->id && !strcmp(gl->id, listenref))
                     {
-                        (*gfsp)->listen_ref = id_no;
+                        gfs->listen_ref = id_no;
                         break;
                     }
                 if (!gl)
@@ -394,36 +402,41 @@ static void xml_config_read()
                     continue;
                 if (!strcmp((const char *) ptr->name, "host"))
                 {
-                    (*gfsp)->host = nmem_dup_xml_content(gfs_nmem,
+                    gfs->host = nmem_dup_xml_content(gfs_nmem,
                                                          ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "config"))
                 {
-                    strcpy((*gfsp)->cb.configname,
+                    strcpy(gfs->cb.configname,
                            nmem_dup_xml_content(gfs_nmem, ptr->children));
                 }
                 else if (!strcmp((const char *) ptr->name, "cql2rpn"))
                 {
-                    (*gfsp)->cql_transform = cql_transform_open_fname(
+                    gfs->cql_transform = cql_transform_open_fname(
                         nmem_dup_xml_content(gfs_nmem, ptr->children)
                         );
                 }
                 else if (!strcmp((const char *) ptr->name, "directory"))
                 {
-                    (*gfsp)->directory = 
+                    gfs->directory = 
                         nmem_dup_xml_content(gfs_nmem, ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "docpath"))
                 {
-                    (*gfsp)->docpath = 
+                    gfs->docpath = 
                         nmem_dup_xml_content(gfs_nmem, ptr->children);
+                }
+                else if (!strcmp((const char *) ptr->name, "maximumrecordsize"))
+                {
+                    gfs->cb.maxrecordsize = atoi(
+                        nmem_dup_xml_content(gfs_nmem, ptr->children));
                 }
                 else if (!strcmp((const char *) ptr->name, "stylesheet"))
                 {
                     char *s = nmem_dup_xml_content(gfs_nmem, ptr->children);
-                    (*gfsp)->stylesheet = 
+                    gfs->stylesheet = 
                         nmem_malloc(gfs_nmem, strlen(s) + 2);
-                    sprintf((*gfsp)->stylesheet, "/%s", s);
+                    sprintf(gfs->stylesheet, "/%s", s);
                 }
                 else if (!strcmp((const char *) ptr->name, "explain"))
                 {
@@ -431,10 +444,10 @@ static void xml_config_read()
                 }
                 else if (!strcmp((const char *) ptr->name, "retrievalinfo"))
                 {
-                    if (yaz_retrieval_configure((*gfsp)->retrieval, ptr))
+                    if (yaz_retrieval_configure(gfs->retrieval, ptr))
                     {       
                         yaz_log(YLOG_FATAL, "%s in config %s",
-                                yaz_retrieval_get_error((*gfsp)->retrieval),
+                                yaz_retrieval_get_error(gfs->retrieval),
                                 control_block.xml_config);
                         exit(1);
                     }

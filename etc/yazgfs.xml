@@ -1,4 +1,4 @@
-<!-- $Id: yazgfs.xml,v 1.5 2006-05-09 13:39:46 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.6 2006-09-06 09:35:40 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
@@ -9,6 +9,7 @@
      <cql2rpn>pqf.properties</cql2rpn>
      <docpath>xsl</docpath>
      <stylesheet>xsl/default.xsl</stylesheet>
+     <maximumrecordsize>2000000</maximumrecordsize>
      <retrievalinfo>
        <retrieval syntax="grs-1"/>
        <retrieval syntax="usmarc" name="F"/>

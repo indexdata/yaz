@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.6 2006-04-25 11:25:08 marc Exp $
+   $Id: gfs-virtual.xml,v 1.7 2006-09-06 09:35:39 adam Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -169,6 +169,18 @@
     </para>
    </listitem>
   </varlistentry>
+
+  <varlistentry><term>element <literal>maximumrecordsize</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies maximum record size/message size, in bytes. This
+     value also servers as maximum size of <emphasis>incoming</emphasis>
+     packages (for Record Updates etc). It's the same value as that
+     given by the <literal>-k</literal> option.
+    </para>
+   </listitem>
+  </varlistentry>
+   
  </variablelist>
 </para>
  

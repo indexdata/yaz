@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.97 2006-09-01 12:40:44 adam Exp $
+ * $Id: seshigh.c,v 1.98 2006-09-06 09:35:41 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -519,9 +519,6 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
         yaz_log(log_requestdetail, "srw_bend_init config=%s", cb->configname);
         assoc_init_reset(assoc);
         
-        assoc->maximumRecordSize = 3000000;
-        assoc->preferredMessageSize = 3000000;
-
         if (sr->username)
         {
             Z_IdAuthentication *auth = odr_malloc(assoc->decode, sizeof(*auth));
@@ -2308,13 +2305,12 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     }
 
     yaz_log(log_requestdetail, "Negotiated to v%d: %s", assoc->version, options);
-    assoc->maximumRecordSize = *req->maximumRecordSize;
 
-    if (cb && assoc->maximumRecordSize > cb->maxrecordsize)
-        assoc->maximumRecordSize = cb->maxrecordsize;
-    assoc->preferredMessageSize = *req->preferredMessageSize;
-    if (assoc->preferredMessageSize > assoc->maximumRecordSize)
-        assoc->preferredMessageSize = assoc->maximumRecordSize;
+    if (*req->maximumRecordSize < assoc->maximumRecordSize)
+        assoc->maximumRecordSize = *req->maximumRecordSize;
+
+    if (*req->preferredMessageSize < assoc->preferredMessageSize)
+        assoc->preferredMessageSize = *req->preferredMessageSize;
 
     resp->preferredMessageSize = &assoc->preferredMessageSize;
     resp->maximumRecordSize = &assoc->maximumRecordSize;
@@ -2327,7 +2323,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.97 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.98 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

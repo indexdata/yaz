@@ -1,3 +1,9 @@
+For the generic frontend server, the maximum record size is used as maximum
+size of incoming packages (SRU + Z39.50). The value until was previously 
+only used in Z39.50 Init negotiation and, later, in a session controlled
+sizes of records returned. This is controlled using -k option. It can be
+specified, per server, with element maximumrecordsize in YAZ' GFS XML config.
+
 --- 2.1.28 2006/09/04
 
 TCP/IP comstack uses getaddrinfo now to resolve names. It should be IPV6
