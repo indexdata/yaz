@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.28 2006-09-06 15:01:53 adam Exp $
+ * $Id: tcpip.c,v 1.29 2006-09-06 16:03:52 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -354,7 +354,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             return 0;
         h->iofile = s;
 
-        if (!tcpip_set_blocking(h, h->blocking))
+        if (!tcpip_set_blocking(h, h->flags))
             return 0;
     }
     return &sp->addr;
