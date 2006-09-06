@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: comstack.h,v 1.22 2006-08-24 13:25:44 adam Exp $
+ * $Id: comstack.h,v 1.23 2006-09-06 15:01:53 adam Exp $
  */
 
 /** 
@@ -44,7 +44,7 @@ YAZ_BEGIN_CDECL
 
 struct comstack;
 typedef struct comstack *COMSTACK;
-typedef COMSTACK (*CS_TYPE)(int s, int blocking, int protocol, void *vp);
+typedef COMSTACK (*CS_TYPE)(int s, int flags, int protocol, void *vp);
 
 struct comstack
 {
@@ -64,7 +64,7 @@ struct comstack
 #define CS_ST_ACCEPT     5
 #define CS_ST_CONNECTING 6
     int newfd;     /* storing new descriptor between listen and accept */
-    int blocking;  /* is this link (supposed to be) blocking? */
+    int flags;     /* flags, blocking etc.. CS_FLAGS_..  */
     unsigned io_pending; /* flag to signal read / write op is incomplete */
     int event;     /* current event */
 #define CS_NONE       0
@@ -150,6 +150,9 @@ YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
 /* backwards compatibility */
 #define CS_SR     PROTO_SR
 #define CS_Z3950  PROTO_Z3950
+
+#define CS_FLAGS_BLOCKING 1
+#define CS_FLAGS_NUMERICHOST 2
 
 YAZ_END_CDECL
 

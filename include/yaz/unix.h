@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  *
  * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation, in whole or in part, for any purpose, is hereby granted,
@@ -23,7 +23,7 @@
  * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  *
- * $Id: unix.h,v 1.5 2005-06-25 15:46:03 adam Exp $
+ * $Id: unix.h,v 1.6 2006-09-06 15:01:53 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -43,7 +43,7 @@ YAZ_BEGIN_CDECL
 
 YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
 YAZ_EXPORT struct sockaddr_un *unix_strtoaddr(const char *str);
-YAZ_EXPORT COMSTACK unix_type(int s, int blocking, int protocol, void *vp);
+YAZ_EXPORT COMSTACK unix_type(int s, int flags, int protocol, void *vp);
 
 YAZ_END_CDECL
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.27 2006-09-01 12:42:31 adam Exp $
+ * $Id: tcpip.c,v 1.28 2006-09-06 15:01:53 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -137,7 +137,7 @@ static int tcpip_init (void)
  * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
  */
-COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
+COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
 {
     COMSTACK p;
     tcpip_state *sp;
@@ -150,7 +150,7 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
                                          xmalloc(sizeof(tcpip_state)))))
         return 0;
 
-    p->blocking = blocking;
+    p->flags = flags;
 
     p->io_pending = 0;
     p->iofile = s;
@@ -202,12 +202,12 @@ COMSTACK tcpip_type(int s, int blocking, int protocol, void *vp)
 
 #if HAVE_OPENSSL_SSL_H
 
-COMSTACK ssl_type(int s, int blocking, int protocol, void *vp)
+COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 {
     tcpip_state *sp;
     COMSTACK p;
 
-    p = tcpip_type (s, blocking, protocol, 0);
+    p = tcpip_type (s, flags, protocol, 0);
     if (!p)
         return 0;
     p->f_get = ssl_get;
@@ -329,7 +329,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             return 0;
         h->iofile = s;
         
-        if (!tcpip_set_blocking(h, h->blocking))
+        if (!tcpip_set_blocking(h, h->flags))
             return 0;
     }
     return sp->ai;
@@ -744,7 +744,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             }
             return 0;
         }
-        if (!tcpip_set_blocking(cnew, cnew->blocking))
+        if (!tcpip_set_blocking(cnew, cnew->flags))
         {
             h->cerrno = CSYSERR;
             if (h->newfd != -1)
@@ -1203,25 +1203,50 @@ int tcpip_close(COMSTACK h)
 
 char *tcpip_addrstr(COMSTACK h)
 {
-    struct sockaddr_in addr;
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r = 0, *buf = sp->buf;
-    YAZ_SOCKLEN_T len;
+
+#if HAVE_GETADDRINFO
+    char host[120];
+    struct sockaddr_storage addr;
+    YAZ_SOCKLEN_T len = sizeof(addr);
+    
+    if (getpeername(h->iofile, (struct sockaddr *)&addr, &len) < 0)
+    {
+        h->cerrno = CSYSERR;
+        return 0;
+    }
+    if (getnameinfo((struct sockaddr *) &addr, len, host, sizeof(host)-1, 
+                    0, 0, 
+                    (h->flags & CS_FLAGS_NUMERICHOST) ? NI_NUMERICHOST : 0))
+    {
+        r = "unknown";
+    }
+    else
+        r = host;
+    
+#else
+
+    struct sockaddr_in addr;
+    YAZ_SOCKLEN_T len = sizeof(addr);
     struct hostent *host;
     
-    len = sizeof(addr);
     if (getpeername(h->iofile, (struct sockaddr*) &addr, &len) < 0)
     {
         h->cerrno = CSYSERR;
         return 0;
     }
-    if (!(h->blocking&2)) {
-        if ((host = gethostbyaddr((char*)&addr.sin_addr, sizeof(addr.sin_addr),
-                              AF_INET)))
+    if (!(h->flags & CS_FLAGS_NUMERICHOST))
+    {
+        if ((host = gethostbyaddr((char*)&addr.sin_addr,
+                                  sizeof(addr.sin_addr),
+                                  AF_INET)))
             r = (char*) host->h_name;
     }
     if (!r)
-        r = inet_ntoa(addr.sin_addr);
+        r = inet_ntoa(addr.sin_addr);        
+#endif
+
     if (h->protocol == PROTO_HTTP)
         sprintf(buf, "http:%s", r);
     else
@@ -1238,17 +1263,17 @@ char *tcpip_addrstr(COMSTACK h)
     return buf;
 }
 
-int static tcpip_set_blocking(COMSTACK p, int blocking)
+int static tcpip_set_blocking(COMSTACK p, int flags)
 {
     unsigned long flag;
     
 #ifdef WIN32
-	flag = blocking ? 0 : 1;
+    flag = (flags & CS_FLAGS_BLOCKING) ? 0 : 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
         return 0;
 #else
     flag = fcntl(p->iofile, F_GETFL, 0);
-    if (blocking & 1)
+    if (flags & CS_FLAGS_BLOCKING)
         flag = flag & ~O_NONBLOCK;  /* blocking */
     else
     {
@@ -1258,7 +1283,7 @@ int static tcpip_set_blocking(COMSTACK p, int blocking)
     if (fcntl(p->iofile, F_SETFL, flag) < 0)
         return 0;
 #endif
-    p->blocking = blocking;
+    p->flags = flags;
     return 1;
 }
 

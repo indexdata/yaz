@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.16 2005-10-22 13:32:04 adam Exp $
+ * $Id: unix.c,v 1.17 2006-09-06 15:01:53 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -107,7 +107,7 @@ static int unix_init (void)
  * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
  */
-COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
+COMSTACK unix_type(int s, int flags, int protocol, void *vp)
 {
     COMSTACK p;
     unix_state *state;
@@ -129,7 +129,8 @@ COMSTACK unix_type(int s, int blocking, int protocol, void *vp)
                                         xmalloc(sizeof(unix_state)))))
         return 0;
 
-    if (!((p->blocking = blocking)&1))
+    p->flags = flags;
+    if (!(p->flags&CS_FLAGS_BLOCKING))
     {
         if (fcntl(s, F_SETFL, O_NONBLOCK) < 0)
             return 0;
@@ -504,7 +505,7 @@ static COMSTACK unix_accept(COMSTACK h)
             }
             return 0;
         }
-        if (!(cnew->blocking&1) && 
+        if (!(cnew->flags&CS_FLAGS_BLOCKING) && 
             (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
             )
         {
@@ -718,20 +719,20 @@ static char *unix_addrstr(COMSTACK h)
     return buf;
 }
 
-static int unix_set_blocking(COMSTACK p, int blocking)
+static int unix_set_blocking(COMSTACK p, int flags)
 {
     unsigned long flag;
 
-    if (p->blocking == blocking)
+    if (p->flags == flags)
         return 1;
     flag = fcntl(p->iofile, F_GETFL, 0);
-    if(!blocking)
+    if (flags & CS_FLAGS_BLOCKING)
         flag = flag & ~O_NONBLOCK;
     else
         flag = flag | O_NONBLOCK;
     if (fcntl(p->iofile, F_SETFL, flag) < 0)
         return 0;
-    p->blocking = blocking;
+    p->flags = flags;
     return 1;
 }
 #endif /* WIN32 */
