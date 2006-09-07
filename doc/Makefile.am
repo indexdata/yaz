@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.72 2006-09-04 12:43:45 adam Exp $
+## $Id: Makefile.am,v 1.73 2006-09-07 10:01:50 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -75,13 +75,13 @@ apilayer.png:
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 
 dist-hook:
-	if test -d index.html; then d=.; else d="$(srcdir)"; fi; \
+	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
 	for p in $$d/*.html; do \
 		cp $$p $(distdir); \
 	done
 
 install-data-hook:
-	if test -d index.html; then d=.; else d="$(srcdir)"; fi; \
+	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
 	for p in $$d/*.html; do \
 		$(docDATA_INSTALL) $$p $(DESTDIR)/$(docdir); \
 	done
