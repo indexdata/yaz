@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.313 2006-09-07 08:14:04 ja7 Exp $
+ * $Id: client.c,v 1.314 2006-09-07 11:31:39 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2300,10 +2300,10 @@ static int cmd_xmles(const char *arg)
         Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
         Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
         
-        req->referenceId = set_refid (out);
 
         Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
         
+        req->referenceId = set_refid (out);
         req->taskSpecificParameters = ext;
         ext->indirect_reference = 0;
         ext->descriptor = 0;
