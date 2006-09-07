@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.312 2006-08-15 13:30:00 adam Exp $
+ * $Id: client.c,v 1.313 2006-09-07 08:14:04 ja7 Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2087,6 +2087,9 @@ static int send_itemorder(const char *type, int itemno)
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     oident ItemOrderRequest;
 
+
+    req->referenceId = set_refid (out);
+
     ItemOrderRequest.proto = PROTO_Z3950;
     ItemOrderRequest.oclass = CLASS_EXTSERV;
     ItemOrderRequest.value = VAL_ITEMORDER;
@@ -2297,6 +2300,8 @@ static int cmd_xmles(const char *arg)
         Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
         Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
         
+        req->referenceId = set_refid (out);
+
         Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
         
         req->taskSpecificParameters = ext;
@@ -4307,7 +4312,7 @@ static struct {
     {"attributeset", cmd_attributeset, "<attrset>",complete_attributeset,0,NULL},
     {"querytype", cmd_querytype, "<type>",complete_querytype,0,NULL},
     {"refid", cmd_refid, "<id>",NULL,0,NULL},
-    {"itemorder", cmd_itemorder, "ill|item <itemno>",NULL,0,NULL},
+    {"itemorder", cmd_itemorder, "ill|item|xml <itemno>",NULL,0,NULL},
     {"update", cmd_update, "<action> <recid> [<doc>]",NULL,0,NULL},
     {"update0", cmd_update0, "<action> <recid> [<doc>]",NULL,0,NULL},
     {"xmles", cmd_xmles, "<OID> <doc>",NULL,0,NULL},
