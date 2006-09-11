@@ -44,7 +44,7 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Id: cclsh.c,v 1.2 2005-06-25 15:46:07 adam Exp $
+ * $Id: cclsh.c,v 1.3 2006-09-11 12:12:42 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -86,6 +86,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <yaz/ccl.h>
 
