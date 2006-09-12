@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.12 2006-08-08 20:58:52 adam Exp $
+ * $Id: zoom-p.h,v 1.13 2006-09-12 19:09:43 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -28,7 +28,7 @@ typedef enum {
     zoom_sru_error,
     zoom_sru_soap,
     zoom_sru_get,
-    zoom_sru_post,
+    zoom_sru_post
 } zoom_sru_mode;
     
 
