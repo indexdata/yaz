@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.41 2006-09-06 09:35:42 adam Exp $
+ * $Id: statserv.c,v 1.42 2006-09-14 13:50:24 adam Exp $
  */
 
 /**
@@ -770,27 +770,21 @@ static void listener(IOCHAN h, int event)
 
     if (event == EVENT_INPUT)
     {
+        COMSTACK new_line;
+        IOCHAN new_chan;
+
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-            yaz_log(YLOG_FATAL, "cs_listen failed");
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "cs_listen failed");
             return;
         }
         else if (res == 1)
-            return;
+            return; /* incomplete */
         yaz_log(YLOG_DEBUG, "listen ok");
-        iochan_setevent(h, EVENT_OUTPUT);
-        iochan_setflags(h, EVENT_OUTPUT | EVENT_EXCEPT); /* set up for acpt */
-    }
-    else if (event == EVENT_OUTPUT)
-    {
-        COMSTACK new_line = cs_accept(line);
-        IOCHAN new_chan;
-        char *a = NULL;
-
-        if (!new_line)
+        new_line = cs_accept(line);
+	if (!new_line)
         {
             yaz_log(YLOG_FATAL, "Accept failed.");
-            iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT);
             return;
         }
         yaz_log(YLOG_DEBUG, "Accept ok");
