@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.h,v 1.7 2006-06-02 13:08:27 adam Exp $
+ * $Id: zgdu.h,v 1.8 2006-09-14 07:39:49 marc Exp $
  */
 
 /**
@@ -60,7 +60,7 @@ YAZ_EXPORT void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
                                                const char *content_type,
                                                const char *charset);
 
-YAZ_EXPORT const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n);
+YAZ_EXPORT const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n);
 
 YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 

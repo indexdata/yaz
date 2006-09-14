@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.15 2006-06-02 13:08:27 adam Exp $
+ * $Id: zgdu.c,v 1.16 2006-09-14 07:40:00 marc Exp $
  */
 
 /**
@@ -179,7 +179,7 @@ void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
     (*hp)->next = 0;
 }
 
-const char *z_HTTP_header_lookup(Z_HTTP_Header *hp, const char *n)
+const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n)
 {
     for (; hp; hp = hp->next)
         if (!yaz_matchstr(hp->name, n))
