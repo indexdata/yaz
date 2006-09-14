@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.87 2006-08-25 14:57:04 adam Exp $
+ * $Id: zoom-c.c,v 1.88 2006-09-14 13:47:57 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -40,6 +40,9 @@
 #include <sys/select.h>
 #endif
 #ifdef WIN32
+#if FD_SETSIZE < 512
+#define FD_SETSIZE 512
+#endif
 #include <winsock.h>
 #endif
 
@@ -1201,7 +1204,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.87 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.88 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
