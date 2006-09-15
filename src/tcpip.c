@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.29 2006-09-06 16:03:52 adam Exp $
+ * $Id: tcpip.c,v 1.30 2006-09-15 09:06:28 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -322,10 +322,15 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     sp->ai = tcpip_getaddrinfo(str, port);
     if (sp->ai && h->state == CS_ST_UNBND)
     {
-        int s;
+        int s = -1;
         struct addrinfo *ai = sp->ai;
-        s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-        if (s < 0)
+        for (; ai; ai = ai->ai_next)
+        {
+            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+            if (s != -1)
+                break;
+        }
+        if (s == -1)
             return 0;
         h->iofile = s;
         
