@@ -1,3 +1,11 @@
+--- 2.1.30 2006/09/17
+
+Fixes for getaddrinfo use, Bugs #655 + #660. These bugs were introduced
+in YAZ 2.1.28.
+
+Fixed bug in Generic Frontend Server that could cause a server to stop
+accepting new connections. Bug only seen on dual CPU Windows 2003 server.
+
 For the generic frontend server, the maximum record size is used as maximum
 size of incoming packages (SRU + Z39.50). The value until was previously 
 only used in Z39.50 Init negotiation and, later, in a session controlled
