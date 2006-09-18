@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.13 2005-10-22 13:28:03 adam Exp $
+ * $Id: zoom-benchmark.c,v 1.14 2006-09-18 09:40:05 marc Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -75,7 +75,12 @@ void  update_events(int *elc, struct event_line_t *els,
     els[iels].time_usec = usec;
     els[iels].progress = prog;
     els[iels].event = event;
-    strcpy(els[iels].zoom_event, eventmsg);
+
+    if (eventmsg)
+        strcpy(els[iels].zoom_event, eventmsg);
+    else
+        strcpy(els[iels].zoom_event, "---");
+
     els[iels].error = error;
     strcpy(els[iels].errmsg, errmsg);
     /* print_event_line(&els[iels]); */
@@ -121,18 +126,20 @@ void init_statics()
     zoom_events[ZOOM_EVENT_RECV_APDU] = "ZOOM_EVENT_RECV_APDU";
     zoom_events[ZOOM_EVENT_RECV_RECORD] = "ZOOM_EVENT_RECV_RECORD";
     zoom_events[ZOOM_EVENT_RECV_SEARCH] = "ZOOM_EVENT_RECV_SEARCH";
+    zoom_events[ZOOM_EVENT_END] = "ZOOM_EVENT_END";
 
     /* re-sorting event numbers to progress numbers */
     zoom_progress[ZOOM_EVENT_NONE] = 0;
     zoom_progress[ZOOM_EVENT_CONNECT] = 1;
     zoom_progress[ZOOM_EVENT_SEND_DATA] = 3;
     zoom_progress[ZOOM_EVENT_RECV_DATA] = 4;
-    zoom_progress[ZOOM_EVENT_TIMEOUT] = 8;
-    zoom_progress[ZOOM_EVENT_UNKNOWN] = 9;
+    zoom_progress[ZOOM_EVENT_TIMEOUT] = 9;
+    zoom_progress[ZOOM_EVENT_UNKNOWN] = 10;
     zoom_progress[ZOOM_EVENT_SEND_APDU] = 2;
     zoom_progress[ZOOM_EVENT_RECV_APDU] = 5;
     zoom_progress[ZOOM_EVENT_RECV_RECORD] = 7;
     zoom_progress[ZOOM_EVENT_RECV_SEARCH] = 6;
+    zoom_progress[ZOOM_EVENT_END] = 8;
 
     /* parameters */
     parameters.concurrent = 1;
