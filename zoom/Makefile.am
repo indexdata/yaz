@@ -1,10 +1,10 @@
-## $Id: Makefile.am,v 1.20 2006-08-11 12:57:31 adam Exp $
+## $Id: Makefile.am,v 1.21 2006-09-19 19:41:32 adam Exp $
 ## Copyright (C) 2001, Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include $(XML2_CFLAGS)
 
 bin_PROGRAMS = zoomsh
-noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9 zoomtst10 zoom-benchmark
+noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9 zoomtst10 zoom-benchmark zoom-ka
 
 LDADD = ../src/libyaz.la $(READLINE_LIBS)
 
@@ -20,5 +20,6 @@ zoomtst9_SOURCES = zoomtst9.c
 zoomtst10_SOURCES = zoomtst10.c
 zoomsh_SOURCES = zoomsh.c
 zoom_benchmark_SOURCES = zoom-benchmark.c
+zoom_ka_SOURCES = zoom-ka.c
 
 
