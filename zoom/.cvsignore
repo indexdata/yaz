@@ -16,4 +16,5 @@ zoomtst9
 zoomtst10
 zoom-benchmark
 zoom-ka
+zoom-bug-641
 *.lo
