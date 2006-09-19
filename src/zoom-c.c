@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.88 2006-09-14 13:47:57 adam Exp $
+ * $Id: zoom-c.c,v 1.89 2006-09-19 21:09:44 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -316,6 +316,7 @@ ZOOM_API(ZOOM_connection)
     c->m_queue_back = 0;
     return c;
 }
+
 
 /* set database names. Take local databases (if set); otherwise
    take databases given in ZURL (if set); otherwise use Default */
@@ -910,6 +911,17 @@ static void do_close(ZOOM_connection c)
     c->state = STATE_IDLE;
 }
 
+static int ZOOM_test_reconnect(ZOOM_connection c)
+{
+    if (!c->reconnect_ok)
+        return 0;
+    do_close(c);
+    c->reconnect_ok = 0;
+    c->tasks->running = 0;
+    ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
+    return 1;
+}
+
 static void ZOOM_resultset_retrieve(ZOOM_resultset r,
                                     int force_sync, int start, int count)
 {
@@ -1204,7 +1216,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.88 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.89 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3423,14 +3435,7 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
         break;
     case Z_APDU_close:
         yaz_log(log_api, "%p recv_apdu Close PDU", c);
-        if (c->reconnect_ok)
-        {
-            do_close(c);
-            c->reconnect_ok = 0;
-            c->tasks->running = 0;
-            ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
-        }
-        else
+        if (!ZOOM_test_reconnect(c))
         {
             set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
             do_close(c);
@@ -3610,13 +3615,9 @@ static int do_read(ZOOM_connection c)
         return 0;
     if (r <= 0)
     {
-        if (c->reconnect_ok)
+        if (ZOOM_test_reconnect(c))
         {
             yaz_log(log_details, "%p do_read reconnect read", c);
-            do_close(c);
-            c->reconnect_ok = 0;
-            c->tasks->running = 0;
-            ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
         }
         else
         {
@@ -3673,12 +3674,8 @@ static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out)
     if ((r = cs_put(c->cs, buf_out, len_out)) < 0)
     {
         yaz_log(log_details, "%p do_write_ex write failed", c);
-        if (c->reconnect_ok)
+        if (ZOOM_test_reconnect(c))
         {
-            do_close(c);
-            c->reconnect_ok = 0;
-            c->tasks->running = 0;
-            ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
             return zoom_pending;
         }
         if (c->state == STATE_CONNECTING)
@@ -3864,15 +3861,6 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
     yaz_log(log_details, "%p ZOOM_connection_do_io mask=%d cs_look=%d",
             c, mask, r);
     
-    if (mask & ZOOM_SELECT_EXCEPT)
-    {
-        if (r == CS_CONNECT)
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
-        else
-            set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
-        do_close(c);
-        return;
-    }
     if (r == CS_NONE)
     {
         event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
@@ -3918,6 +3906,20 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
     }
     else
     {
+        if (mask & ZOOM_SELECT_EXCEPT)
+        {
+            if (ZOOM_test_reconnect(c))
+            {
+                event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
+                ZOOM_connection_put_event(c, event);
+            }
+            else
+            {
+                set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
+                do_close(c);
+            }
+            return;
+        }
         if (mask & ZOOM_SELECT_READ)
             do_read(c);
         if (c->cs && (mask & ZOOM_SELECT_WRITE))
