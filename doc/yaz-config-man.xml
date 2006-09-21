@@ -8,7 +8,7 @@
      <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-config-man.xml,v 1.7 2006-08-28 19:18:02 adam Exp $ -->
+<!-- $Id: yaz-config-man.xml,v 1.8 2006-09-21 06:56:51 adam Exp $ -->
 <refentry id="yaz-config">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -110,13 +110,13 @@
  
  <refsect1><title>FILES</title>
   <para>
-   <filename><replaceable>prefix</replaceable>/bin/yaz-config</filename>
+   <filename>&prefix;/bin/yaz-config</filename>
   </para>
   <para>
-   <filename><replaceable>prefix</replaceable>/lib/libyaz*.a</filename>
+   <filename>&prefix;/lib/libyaz*.a</filename>
   </para>
   <para>
-   <filename><replaceable>prefix</replaceable>/include/yaz/*.h</filename>
+   <filename>&prefix;/include/yaz/*.h</filename>
   </para>
   </refsect1>
  <refsect1><title>SEE ALSO</title>
