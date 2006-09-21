@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.30 2006-09-15 09:06:28 adam Exp $
+ * $Id: tcpip.c,v 1.31 2006-09-21 15:55:25 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -565,7 +565,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 #ifdef WIN32
     BOOL one = 1;
 #else
-    unsigned long one = 1;
+    int one = 1;
 #endif
 
 #if HAVE_GETADDRINFO
