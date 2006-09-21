@@ -1,3 +1,7 @@
+--- 2.1.32 2006/09/21
+
+Fix problem introduced in YAZ 2.1.28 WRT unix sockets in the ZOOM code.
+
 --- 2.1.30 2006/09/17
 
 Fixes for getaddrinfo use, Bugs #655 + #660. These bugs were introduced
