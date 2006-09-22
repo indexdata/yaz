@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.314 2006-09-07 11:31:39 adam Exp $
+ * $Id: client.c,v 1.315 2006-09-22 14:09:25 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -1410,7 +1410,7 @@ static int send_SRW_searchRequest(const char *arg)
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
     if (recordsyntax_size == 1 && recordsyntax_list[0] == VAL_TEXT_XML)
-        sr->u.explain_request->recordPacking = "xml";
+        sr->u.request->recordPacking = "xml";
     return send_srw(sr);
 }
 #endif
