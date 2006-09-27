@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.38 2006-07-31 10:05:04 adam Exp $
+ * $Id: log.c,v 1.39 2006-09-27 11:39:02 adam Exp $
  */
 
 /**
@@ -55,7 +55,8 @@ char *strerror(int n)
 #endif
 
 
-static int default_log_level() {
+static int default_log_level(void)
+{
     char *env = getenv("YAZ_LOG");
     if (env != 0)
         return yaz_log_mask_str_x(env, YLOG_DEFAULT_LEVEL);
@@ -120,7 +121,7 @@ static struct {
 
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
-static void init_mutex()
+static void init_mutex(void)
 {
     if (mutex_init_flag)
         return;
@@ -140,7 +141,7 @@ FILE *yaz_log_file(void)
     return f;
 }
 
-void yaz_log_close()
+void yaz_log_close(void)
 {
     if (yaz_file_type == use_file && yaz_global_log_file)
     {

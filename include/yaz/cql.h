@@ -1,4 +1,4 @@
-/* $Id: cql.h,v 1.13 2005-06-27 22:03:59 adam Exp $
+/* $Id: cql.h,v 1.14 2006-09-27 11:39:00 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -279,7 +279,7 @@ const char *cql_strerror(int code);
  * Returns the standard CQL context set URI.
  */
 YAZ_EXPORT
-const char *cql_uri();
+const char *cql_uri(void);
 
 /**
  * Compares two CQL strings (for relations, operators, etc)

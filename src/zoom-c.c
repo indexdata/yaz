@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.89 2006-09-19 21:09:44 adam Exp $
+ * $Id: zoom-c.c,v 1.90 2006-09-27 11:39:02 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -58,7 +58,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c);
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
 
-static void initlog()
+static void initlog(void)
 {
     static int log_level_initialized = 0;
     if (!log_level_initialized)
@@ -678,7 +678,7 @@ void ZOOM_resultset_addref(ZOOM_resultset r)
     }
 }
 
-ZOOM_resultset ZOOM_resultset_create()
+ZOOM_resultset ZOOM_resultset_create(void)
 {
     int i;
     ZOOM_resultset r = (ZOOM_resultset) xmalloc(sizeof(*r));
@@ -1216,7 +1216,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.89 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.90 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 

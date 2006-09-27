@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.9 2005-06-27 22:03:59 adam Exp $
+/* $Id: cqlutil.c,v 1.10 2006-09-27 11:39:01 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -84,7 +84,7 @@ struct cql_node *cql_node_mk_boolean(NMEM nmem, const char *op)
     return p;
 }
 
-const char *cql_uri()
+const char *cql_uri(void)
 {
     return "info:srw/cql-context-set/1/cql-v1.1";
 }

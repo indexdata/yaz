@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.42 2006-08-24 14:29:58 heikki Exp $
+# $Id: buildconf.sh,v 1.43 2006-09-27 11:38:59 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -42,7 +42,7 @@ conf_flags=""
 case $1 in
     -d)
 	#sh_flags="-g -Wall -Wdeclaration-after-statement -Werror"
-	sh_flags="-g -Wall -Wdeclaration-after-statement "
+	sh_flags="-g -Wall -Wdeclaration-after-statement -Wstrict-prototypes"
 	enable_configure=true
 	enable_help=false
 	shift

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.315 2006-09-22 14:09:25 adam Exp $
+ * $Id: client.c,v 1.316 2006-09-27 11:38:59 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -180,7 +180,7 @@ int cmd_register_tab(const char* arg);
 
 static void close_session (void);
 
-ODR getODROutputStream()
+ODR getODROutputStream(void)
 {
     return out;
 }
@@ -766,7 +766,7 @@ int cmd_open(const char *arg)
     return session_connect(cur_host);
 }
 
-void try_reconnect() 
+void try_reconnect(void)
 {
     char* open_command;
         
@@ -1891,7 +1891,7 @@ const char *get_ill_element (void *clientData, const char *element)
     return 0;
 }
 
-static Z_External *create_external_itemRequest()
+static Z_External *create_external_itemRequest(void)
 {
     struct ill_get_ctl ctl;
     ILL_ItemRequest *req;
@@ -2102,7 +2102,7 @@ static int send_itemorder(const char *type, int itemno)
     return 0;
 }
 
-static int only_z3950()
+static int only_z3950(void)
 {
     if (!conn)
     {
@@ -3638,7 +3638,7 @@ int cmd_push_command(const char* arg)
     return 1;
 }
 
-void source_rcfile() 
+void source_rcfile(void)
 {
     /*  Look for a $HOME/.yazclientrc and source it if it exists */
     struct stat statbuf;

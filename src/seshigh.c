@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.98 2006-09-06 09:35:41 adam Exp $
+ * $Id: seshigh.c,v 1.99 2006-09-27 11:39:02 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -108,7 +108,7 @@ static int log_request = 0; /* one-line logs for requests */
 static int log_requestdetail = 0;  /* more detailed stuff */
 
 /** get_logbits sets global loglevel bits */
-static void get_logbits()
+static void get_logbits(void)
 { /* needs to be called after parsing cmd-line args that can set loglevels!*/
     if (!logbits_set)
     {
@@ -2323,7 +2323,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.98 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.99 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

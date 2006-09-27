@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: mime.h,v 1.2 2006-04-20 20:50:51 adam Exp $
+ * $Id: mime.h,v 1.3 2006-09-27 11:39:02 adam Exp $
  */
 
 /** \file mime.h
@@ -14,7 +14,7 @@
 
 typedef struct yaz_mime_info *yaz_mime_types;
 
-yaz_mime_types yaz_mime_types_create();
+yaz_mime_types yaz_mime_types_create(void);
 void yaz_mime_types_add(yaz_mime_types t, const char *suffix,
                         const char *mime_type);
 const char *yaz_mime_lookup_suffix(yaz_mime_types t, const char *suffix);

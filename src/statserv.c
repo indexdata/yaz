@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.42 2006-09-14 13:50:24 adam Exp $
+ * $Id: statserv.c,v 1.43 2006-09-27 11:39:02 adam Exp $
  */
 
 /**
@@ -151,7 +151,7 @@ static xmlDocPtr xml_config_doc = 0;
 #endif
 
 #if YAZ_HAVE_XML2
-static xmlNodePtr xml_config_get_root()
+static xmlNodePtr xml_config_get_root(void)
 {
     xmlNodePtr ptr = 0;
     if (xml_config_doc)
@@ -212,7 +212,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
 }
 #endif
 
-static struct gfs_server * gfs_server_new()
+static struct gfs_server * gfs_server_new(void)
 {
     struct gfs_server *n = nmem_malloc(gfs_nmem, sizeof(*n));
     memcpy(&n->cb, &control_block, sizeof(control_block));
@@ -327,7 +327,7 @@ int control_association(association *assoc, const char *host, int force_open)
     return 1;
 }
 
-static void xml_config_read()
+static void xml_config_read(void)
 {
     struct gfs_server **gfsp = &gfs_server_list;
     struct gfs_listen **gfslp = &gfs_listen_list;
@@ -466,7 +466,7 @@ static void xml_config_read()
     *gfsp = 0;
 }
 
-static void xml_config_open()
+static void xml_config_open(void)
 {
     if (!getcwd(gfs_root_dir, FILENAME_MAX))
     {
@@ -509,7 +509,7 @@ static void xml_config_open()
 #endif
 }
 
-static void xml_config_close()
+static void xml_config_close(void)
 {
 #if YAZ_HAVE_XML2
     if (xml_config_doc)
@@ -529,7 +529,7 @@ static void xml_config_close()
 #endif
 }
 
-static void xml_config_add_listeners()
+static void xml_config_add_listeners(void)
 {
     struct gfs_listen *gfs = gfs_listen_list;
     int id_no;
@@ -541,7 +541,7 @@ static void xml_config_add_listeners()
     }
 }
 
-static void xml_config_bend_start()
+static void xml_config_bend_start(void)
 {
     if (control_block.xml_config[0])
     {
@@ -567,7 +567,7 @@ static void xml_config_bend_start()
     }
 }
 
-static void xml_config_bend_stop()
+static void xml_config_bend_stop(void)
 {
     if (control_block.xml_config[0])
     {

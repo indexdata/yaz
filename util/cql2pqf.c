@@ -1,4 +1,4 @@
-/* $Id: cql2pqf.c,v 1.7 2005-06-25 15:46:07 adam Exp $
+/* $Id: cql2pqf.c,v 1.8 2006-09-27 11:39:04 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -13,7 +13,7 @@ See the file LICENSE.
 #include <yaz/cql.h>
 #include <yaz/options.h>
 
-static void usage()
+static void usage(void)
 {
     fprintf (stderr, "usage\n cql2pqf [-n <n>] <properties> [<query>]\n");
     exit (1);
