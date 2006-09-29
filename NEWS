@@ -1,3 +1,6 @@
+Added support for specifying the max log file size for the Generic
+Frontend Server. The size is given with option -r.
+
 --- 2.1.32 2006/09/21
 
 Fix problem introduced in YAZ 2.1.28 WRT unix sockets in the ZOOM code.

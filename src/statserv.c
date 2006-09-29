@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.43 2006-09-27 11:39:02 adam Exp $
+ * $Id: statserv.c,v 1.44 2006-09-29 13:20:23 adam Exp $
  */
 
 /**
@@ -1349,7 +1349,7 @@ int check_options(int argc, char **argv)
     }
 
     get_logbits(1); 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1458,6 +1458,14 @@ int check_options(int argc, char **argv)
             break;
         case 'D':
             control_block.background = 1;
+            break;
+        case 'r':
+            if (!arg || !(r = atoi(arg)))
+            {
+                fprintf(stderr, "%s: Specify positive size for -r.\n", me);
+                return(1);
+            }
+            yaz_log_init_max_size(r * 1024);
             break;
         default:
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"

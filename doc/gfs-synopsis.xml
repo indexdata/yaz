@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-synopsis.xml,v 1.3 2006-04-25 11:25:08 marc Exp $
+   $Id: gfs-synopsis.xml,v 1.4 2006-09-29 13:20:22 adam Exp $
    cmd description of YAZ GFS application.
    Included in both manual and man page for yaz-ztest
 -->
@@ -21,6 +21,7 @@
  <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
  <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
  <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
+ <arg choice="opt"><option>-r <replaceable>kilobytes</replaceable></option></arg>
  <arg choice="opt"><option>-ziDST1</option></arg>
  <arg choice="opt" rep="repeat">listener-spec</arg>
 </cmdsynopsis>
