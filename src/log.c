@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.39 2006-09-27 11:39:02 adam Exp $
+ * $Id: log.c,v 1.40 2006-09-29 15:29:36 adam Exp $
  */
 
 /**
@@ -26,6 +26,7 @@
 #include <pth.h>
 #endif
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -174,18 +175,36 @@ void yaz_log_init_file(const char *fname)
 
 static void rotate_log(const char *cur_fname)
 {
-    char newname[512];
-    strncpy(newname, cur_fname, 509);
-    newname[509] = '\0'; /* make sure it is terminated */
-    strcat(newname, ".1");
+    int i;
 #ifdef WIN32
     /* windows can't rename a file if it is open */
     fclose(yaz_global_log_file);
     yaz_global_log_file = 0;
-    MoveFileEx(cur_fname, newname, MOVEFILE_REPLACE_EXISTING);
-#else
-    rename(cur_fname, newname);
 #endif
+    for (i = 0; i<100; i++)
+    {
+        char fname_str[FILENAME_MAX];
+        struct stat stat_buf;
+
+        sprintf(fname_str, "%s.%d", cur_fname, i);
+        if (stat(fname_str, &stat_buf) != 0)
+            break;
+    }
+    for (; i >= 0; --i)
+    {
+        char fname_str[2][FILENAME_MAX];
+
+        if (i > 0)
+            sprintf(fname_str[0], "%s.%d", cur_fname, i-1);
+        else
+            sprintf(fname_str[0], "%s", cur_fname);
+        sprintf(fname_str[1], "%s.%d", cur_fname, i);
+#ifdef WIN32
+        MoveFileEx(fname_str[0], fname_str[1], MOVEFILE_REPLACE_EXISTING);
+#else
+        rename(fname_str[0], fname_str[1]);
+#endif
+    }
 }
 
 
