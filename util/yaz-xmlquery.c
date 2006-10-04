@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-xmlquery.c,v 1.3 2006-07-06 10:17:55 adam Exp $
+ * $Id: yaz-xmlquery.c,v 1.4 2006-10-04 16:59:34 mike Exp $
  */
 
 #include <stdlib.h>
@@ -153,7 +153,7 @@ void xmlfiletopqf(const char *xmlfile)
 }
 #endif
 
-void usage()
+void usage(void)
 {
     fprintf(stderr, "%s [-p pqf] [-x xmlfile]\n", prog);
     fprintf(stderr, " -p pqf      reads pqf. write xml to stdout\n");

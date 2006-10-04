@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodrstack.c,v 1.4 2006-01-29 21:59:13 adam Exp $
+ * $Id: tstodrstack.c,v 1.5 2006-10-04 16:59:34 mike Exp $
  *
  */
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 #include <yaz/test.h>
 
 /** \brief build a 100 level query */
-void test1()
+void test1(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     YAZ_PQF_Parser parser = yaz_pqf_create();
@@ -39,7 +39,7 @@ void test1()
 }
 
 /** \brief build a circular referenced query */
-void test2()
+void test2(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     YAZ_PQF_Parser parser = yaz_pqf_create();

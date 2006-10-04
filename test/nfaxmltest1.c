@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.7 2006-07-14 13:06:38 heikki Exp $
+ *  $Id: nfaxmltest1.c,v 1.8 2006-10-04 16:59:34 mike Exp $
  *
  */
 
@@ -18,7 +18,7 @@
 
 
 /** \brief  Test parsing of a minimal, valid xml string */
-void test1() {
+void test1(void) {
     char *xmlstr = "<ruleset> "
                    "<rule> "
                    "  <fromstring>foo</fromstring> "
@@ -32,7 +32,7 @@ void test1() {
 
 
 /** \brief  Test parsing of a minimal, invalid xml string */
-void test2() {
+void test2(void) {
     yaz_nfa *nfa;
     char *xmlstr = "<ruleset> "
                    "<rule> "
@@ -48,7 +48,7 @@ void test2() {
 }
 
 /** \brief  Test parsing a few minimal xml files */
-void test3() {
+void test3(void) {
     char *goodfilenames[] = {
              "nfaxml-simple.xml",
              "nfaxml-main.xml", /* x-includes nfaxml-include */
@@ -74,7 +74,7 @@ void test3() {
 }
 
 /** \brief  Test parsing of a few minimal xml strings, with logical errors */
-void test4() {
+void test4(void) {
     yaz_nfa *nfa;
     char *xmls[] = { 
       /*a*/"<missingruleset>   <foo/>   </missingruleset>",
@@ -130,7 +130,7 @@ void test4() {
     }
 } /* test4 */
 
-static void test5() {
+static void test5(void) {
     struct conv_test {
         unsigned char *name;
         int expresult;

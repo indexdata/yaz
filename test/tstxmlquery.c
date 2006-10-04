@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.12 2006-07-07 12:09:05 marc Exp $
+ * $Id: tstxmlquery.c,v 1.13 2006-10-04 16:59:34 mike Exp $
  */
 
 #include <stdlib.h>
@@ -104,7 +104,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
     return status;
 }
 
-static void tst()
+static void tst(void)
 {
     YAZ_CHECK_EQ(pqf2xml_text("@attr 1=4 bad query", "", 0), PQF_FAILED);
 #if YAZ_HAVE_XML2

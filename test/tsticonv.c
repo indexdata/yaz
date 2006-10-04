@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.22 2006-08-30 20:14:56 adam Exp $
+ * $Id: tsticonv.c,v 1.23 2006-10-04 16:59:34 mike Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -124,7 +124,7 @@ static const char *iso_8859_1_a[] = {
     "\xe5" "\xe5",
     0 };
 
-static void tst_marc8_to_ucs4b()
+static void tst_marc8_to_ucs4b(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UCS4", "MARC8");
     YAZ_CHECK(cd);
@@ -222,7 +222,7 @@ static void tst_marc8_to_ucs4b()
     yaz_iconv_close(cd);
 }
 
-static void tst_ucs4b_to_utf8()
+static void tst_ucs4b_to_utf8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UTF8", "UCS4");
     YAZ_CHECK(cd);
@@ -337,7 +337,7 @@ int utf8_check(unsigned c)
     return 1;
 }
         
-static void tst_marc8_to_utf8()
+static void tst_marc8_to_utf8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC8");
 
@@ -353,7 +353,7 @@ static void tst_marc8_to_utf8()
     yaz_iconv_close(cd);
 }
 
-static void tst_marc8s_to_utf8()
+static void tst_marc8s_to_utf8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC8s");
 
@@ -371,7 +371,7 @@ static void tst_marc8s_to_utf8()
 }
 
 
-static void tst_marc8_to_latin1()
+static void tst_marc8_to_latin1(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("ISO-8859-1", "MARC8");
 
@@ -413,7 +413,7 @@ static void tst_marc8_to_latin1()
     yaz_iconv_close(cd);
 }
 
-static void tst_utf8_to_marc8()
+static void tst_utf8_to_marc8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("MARC8", "UTF-8");
 
@@ -468,7 +468,7 @@ static void tst_utf8_to_marc8()
 }
 
 
-static void tst_latin1_to_marc8()
+static void tst_latin1_to_marc8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("MARC8", "ISO-8859-1");
 
@@ -505,7 +505,7 @@ static void tst_latin1_to_marc8()
     yaz_iconv_close(cd);
 }
 
-static void tst_utf8_codes()
+static void tst_utf8_codes(void)
 {
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));

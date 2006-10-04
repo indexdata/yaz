@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.6 2006-07-06 10:17:55 adam Exp $
+ * $Id: tst_retrieval.c,v 1.7 2006-10-04 16:59:34 mike Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -104,7 +104,7 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
     return ret;
 }
 
-static void tst_configure()
+static void tst_configure(void)
 {
     YAZ_CHECK(conv_configure_test("<bad", 
                                   "xmlParseMemory", 0));

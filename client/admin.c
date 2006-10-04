@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.21 2005-06-25 15:46:01 adam Exp $
+ * $Id: admin.c,v 1.22 2006-10-04 16:59:33 mike Exp $
  */
 
 #include <stdio.h>
@@ -33,7 +33,7 @@
 #include "admin.h"
 
 /* Helper functions to get to various statics in the client */
-ODR getODROutputStream();
+ODR getODROutputStream(void);
 
 extern char *databaseNames[];
 extern int num_databaseNames;

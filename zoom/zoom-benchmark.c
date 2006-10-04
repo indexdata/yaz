@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.14 2006-09-18 09:40:05 marc Exp $
+ * $Id: zoom-benchmark.c,v 1.15 2006-10-04 16:59:35 mike Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -110,7 +110,7 @@ void  print_events(int *elc,  struct event_line_t *els,
 
 
 
-void init_statics()
+void init_statics(void)
 {
     int i;
     char nullstring[1] = "";
@@ -193,7 +193,7 @@ long time_usec(struct time_type *ptime)
     return ptime->usec;
 }
 
-void print_option_error()
+void print_option_error(void)
 {
     fprintf(stderr, "zoom-benchmark:  Call error\n");
     fprintf(stderr, "zoom-benchmark -h host:port -q pqf-query "
@@ -276,7 +276,7 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
         print_option_error();
 }
 
-void print_table_header()
+void print_table_header(void)
 {
     if (parameters.gnuplot)
         printf("#");

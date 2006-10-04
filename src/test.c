@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.c,v 1.10 2006-07-07 13:39:04 heikki Exp $
+ * $Id: test.c,v 1.11 2006-10-04 16:59:33 mike Exp $
  */
 
 /** \file test.c
@@ -31,7 +31,7 @@ static int test_verbose = 1;
 static const char *test_prog = 0;
 static int log_tests = 0; 
 
-static FILE *get_file()
+static FILE *get_file(void)
 {
     if (test_fout)
         return test_fout;

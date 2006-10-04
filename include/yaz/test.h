@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: test.h,v 1.9 2006-07-07 13:39:02 heikki Exp $
+ * $Id: test.h,v 1.10 2006-10-04 16:59:33 mike Exp $
  */
 
 /** \file test.h
@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 /** \brief Get the verbosity level */
-int yaz_test_get_verbosity();
+int yaz_test_get_verbosity(void);
 
 /** \brief Test OK */
 #define YAZ_TEST_TYPE_OK 1

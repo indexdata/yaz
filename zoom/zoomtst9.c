@@ -1,4 +1,4 @@
-/* $Id: zoomtst9.c,v 1.3 2006-08-24 13:19:44 adam Exp $  */
+/* $Id: zoomtst9.c,v 1.4 2006-10-04 16:59:35 mike Exp $  */
 
 /** \file zoomtst9.c
     \brief Extended Service Update
@@ -12,7 +12,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/zoom.h>
 
-static void usage()
+static void usage(void)
 {
     fprintf(stderr, "usage:\n"
             "zoomtst9 target [insert|delete|replace|update] id1 rec1 "

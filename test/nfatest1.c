@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfatest1.c,v 1.6 2006-05-10 13:58:47 heikki Exp $
+ *  $Id: nfatest1.c,v 1.7 2006-10-04 16:59:34 mike Exp $
  *
  */
 
@@ -56,7 +56,7 @@ void test_match(yaz_nfa *n,
     }
 }
 
-void construction_test() {
+void construction_test(void) {
     yaz_nfa* n= yaz_nfa_init();
     yaz_nfa_char *cp, *cp1, *cp2;
     yaz_nfa_state *s, *s0, *s1, *s2, *s3, *s4, *s5;
@@ -191,7 +191,7 @@ void construction_test() {
     yaz_nfa_destroy(n);
 }
 
-void converter_test() {
+void converter_test(void) {
     yaz_nfa* n= yaz_nfa_init();
     yaz_nfa_converter *c1, *c2, *c3;
     yaz_nfa_char str1[]={'a','b','c'};
@@ -346,7 +346,7 @@ void chkbuff( yaz_nfa_char *start, yaz_nfa_char *end, char *exp) {
 
 }
 
-void high_level_test() {
+void high_level_test(void) {
     NMEM nmem=nmem_create();
     yaz_nfa_char from1[] = {'f','o','o','b','a','r'};
     yaz_nfa_char to1[] = {'f','u','b','a','r'};

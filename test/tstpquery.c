@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstpquery.c,v 1.2 2006-04-01 11:47:41 adam Exp $
+ * $Id: tstpquery.c,v 1.3 2006-10-04 16:59:34 mike Exp $
  */
 
 #include <stdlib.h>
@@ -55,7 +55,7 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
     return res;
 }
 
-static void tst()
+static void tst(void)
 {
     YAZ_CHECK(expect_pqf("a", "@attrset Bib-1 a", YAZ_PQF_ERROR_NONE));
     YAZ_CHECK(expect_pqf("@attr 1=4 a", "@attrset Bib-1 @attr 1=4 a", YAZ_PQF_ERROR_NONE));

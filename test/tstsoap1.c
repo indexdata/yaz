@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstsoap1.c,v 1.7 2006-07-06 10:17:55 adam Exp $
+ * $Id: tstsoap1.c,v 1.8 2006-10-04 16:59:34 mike Exp $
  */
 
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 #endif
 #include <yaz/test.h>
 
-void tst()
+void tst(void)
 {
 #if YAZ_HAVE_XML2
     xmlChar *buf_out;

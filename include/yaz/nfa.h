@@ -1,6 +1,6 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
- *  $Id: nfa.h,v 1.10 2006-08-11 12:43:52 adam Exp $
+ *  $Id: nfa.h,v 1.11 2006-10-04 16:59:33 mike Exp $
  */
 
 /**
@@ -89,7 +89,7 @@ typedef struct yaz_nfa_converter yaz_nfa_converter;
  * \return a pointer to the newly created NFA
  *
  * */
-yaz_nfa *yaz_nfa_init();
+yaz_nfa *yaz_nfa_init(void);
 
 /** \brief Destroy the whole thing */
 void yaz_nfa_destroy(

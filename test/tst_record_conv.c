@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.10 2006-08-01 09:28:04 adam Exp $
+ * $Id: tst_record_conv.c,v 1.11 2006-10-04 16:59:34 mike Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -105,7 +105,7 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
     return ret;
 }
 
-static void tst_configure()
+static void tst_configure(void)
 {
     YAZ_CHECK(conv_configure_test("<bad", "xmlParseMemory", 0));
     YAZ_CHECK(conv_configure_test("<bad/>", "Missing 'convert' element", 0));
@@ -206,7 +206,7 @@ static int conv_convert_test(yaz_record_conv_t p,
     return ret;
 }
 
-static void tst_convert1()
+static void tst_convert1(void)
 {
     yaz_record_conv_t p = 0;
     const char *marcxml_rec =
@@ -289,7 +289,7 @@ static void tst_convert1()
     yaz_record_conv_destroy(p);
 }
 
-static void tst_convert2()
+static void tst_convert2(void)
 {
     yaz_record_conv_t p = 0;
     const char *marcxml_rec =
