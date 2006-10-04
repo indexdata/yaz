@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.10 2006-03-21 12:54:02 adam Exp $
+ * $Id: tstlog.c,v 1.11 2006-10-04 07:32:36 adam Exp $
  *
  */
 #include <stdio.h>
@@ -27,11 +27,11 @@ int main(int argc, char **argv)
     int number = 1;
     unsigned int wait_between_log = 0;
 
-    while ((ret = options("f:v:l:m:n:s:w:Hh", argv, argc, &arg)) != -2)
+    while ((ret = options("f:v:l:m:n:r:w:Hh", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
-        case 's':
+        case 'r':
             yaz_log_init_max_size(atoi(arg));
             break;
         case 'f':
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         default:
             fprintf(stderr, "tstlog. Bad option\n");
             fprintf(stderr, "tstlog [-f logformat] [-v level] [-l file] "
-                    "[-m module] [-w sec] [-s max] [-n num] [-H] msg ..\n");
+                    "[-m module] [-w sec] [-r max] [-n num] [-H] msg ..\n");
             exit(1);
         }
     }
