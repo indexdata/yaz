@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.40 2006-09-29 15:29:36 adam Exp $
+ * $Id: log.c,v 1.41 2006-10-04 07:42:13 adam Exp $
  */
 
 /**
@@ -92,8 +92,10 @@ static char l_new_default_format[] = "%Y%m%d-%H%M%S";
 static char l_custom_format[TIMEFORMAT_LEN] = "";
 static char *l_actual_format = l_old_default_format;
 
-/** l_max_size tells when to rotate the log. Default to 1 GB */
-static const int l_def_max_size = 1024*1024*1024;
+/** l_max_size tells when to rotate the log. Default is 1 GB 
+    This is almost the same as never, but it saves applications in the
+    case of 2 or 4 GB file size limits..
+ */
 static int l_max_size = 1024*1024*1024;
 
 #define MAX_MASK_NAMES 35   /* 32 bits plus a few combo names */
@@ -181,7 +183,7 @@ static void rotate_log(const char *cur_fname)
     fclose(yaz_global_log_file);
     yaz_global_log_file = 0;
 #endif
-    for (i = 0; i<100; i++)
+    for (i = 0; i<9; i++)
     {
         char fname_str[FILENAME_MAX];
         struct stat stat_buf;
@@ -273,10 +275,10 @@ void yaz_log_init(int level, const char *prefix, const char *fname)
 
 void yaz_log_init_max_size(int mx)
 {
-    if (mx <0)
-        l_max_size = l_def_max_size;
-    else
+    if (mx > 0)
         l_max_size = mx;
+    else
+        l_max_size = 0;
 }
 
 void yaz_log_set_handler(void (*func)(int, const char *, void *), void *info)
