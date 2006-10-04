@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.316 2006-09-27 11:38:59 adam Exp $
+ * $Id: client.c,v 1.317 2006-10-04 07:26:00 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2294,6 +2294,7 @@ static int cmd_xmles(const char *arg)
         return 1;
     else
     {
+        char *asn_buf = 0;
         int noread = 0;
         char oid_str[51];
         int oid_value_xmles = VAL_XMLES;
@@ -2322,10 +2323,13 @@ static int cmd_xmles(const char *arg)
             printf("Bad OID: %s\n", oid_str);
             return 0;
         }
-        
-        if (parse_cmd_doc(&arg, out, (char **) &ext->u.single_ASN1_type->buf,
+
+        if (parse_cmd_doc(&arg, out, &asn_buf,
                           &ext->u.single_ASN1_type->len, 0) == 0)
             return 0;
+
+        ext->u.single_ASN1_type->buf = (unsigned char *) asn_buf;
+
         req->packageType = yaz_oidval_to_z3950oid(out, CLASS_EXTSERV,
                                                   oid_value_xmles);
         
