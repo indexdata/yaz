@@ -10,7 +10,7 @@
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.12 2006-09-06 09:27:04 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.13 2006-10-04 13:21:33 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -73,7 +73,12 @@
   <para>
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>
-    <manvolnum>7</manvolnum></citerefentry>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
+   <citerefentry>
+    <refentrytitle>yaz-log</refentrytitle>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
   </para>
   <para>
    Section "Generic server" in the YAZ manual.

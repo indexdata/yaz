@@ -8,7 +8,7 @@
      <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-log-man.xml,v 1.6 2006-08-28 19:18:02 adam Exp $ -->
+<!-- $Id: yaz-log-man.xml,v 1.7 2006-10-04 13:21:33 adam Exp $ -->
 <refentry id="yaz-log">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -48,14 +48,25 @@
   <variablelist>
    <varlistentry>
     <term>-l<replaceable> logfile</replaceable></term>
-    <listitem><para>
+    <listitem>
+     <para>
       Specify the file where the log is to be written. If none is specified,
       <filename>stderr</filename> is used. The log is appended to this file.
       If the file grows overly large, it is silently rotated: It is renamed to
-      <replaceable>logfile</replaceable>.1 (old such file is deleted), and a
+      <replaceable>logfile</replaceable>.1,
+      <replaceable>logfile</replaceable>.2, .., 9 
+      (old such file is deleted), and a
       new file is opened. The limit defaults to 1GB, but can be set by the
       program.
-    </para></listitem>
+      The rotating limit can be specified with option <literal>-r</literal>
+      for the YAZ frontend server (yaz-ztest).
+     </para>
+     <para>
+      Rotation can also be implicitly enabled by using a filename
+      which gets changed for a given date, due to substitutions as
+      given by the strftime(3) function.
+     </para>
+    </listitem>
    </varlistentry>
 
    <varlistentry>
@@ -167,9 +178,9 @@
    in addition to these. As they depend on the server in question, they can
    not be described here. See above how to find out about them.
   </para>
- </refsect1> 
+ </refsect1>
 
- <refsect1><title>EXAMPLES</title>
+ <refsect1><title>LOGGING EXAMPLES</title>
   <para>
    See what log levels yaz-ztest is using:
    <screen>
@@ -223,6 +234,19 @@
   </para>
  </refsect1> 
 
+ <refsect1><title>LOG FILENAME EXAMPLES</title>
+  <para>
+   A file with format my_YYYYMMDD.log is where Y, M, D is year, month, and day
+   digits is given as follows
+   <literal>-l my_%Y%m%d.log</literal> . And since the filename
+   is depending on day, rotaion will occur on midnight.
+  </para>
+  <para>
+   A weekly log could be specified as 
+   <literal>-l my_%Y%U.log</literal>.
+  </para>
+ </refsect1>
+  
  <refsect1><title>FILES</title>
   <para>
    <filename><replaceable>prefix</replaceable>/include/yaz/log.h</filename>
@@ -231,8 +255,25 @@
  </refsect1>
  <refsect1><title>SEE ALSO</title>
   <para>
-   yaz(7)
-   yaz-ztest(8) yaz-client(1) 
+   <citerefentry>
+    <refentrytitle>yaz</refentrytitle>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
+
+   <citerefentry>
+    <refentrytitle>yaz-ztest</refentrytitle>
+    <manvolnum>8</manvolnum>
+   </citerefentry>
+
+   <citerefentry>
+    <refentrytitle>yaz-client</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>
+
+   <citerefentry>
+    <refentrytitle>strftime</refentrytitle>
+    <manvolnum>3</manvolnum>
+   </citerefentry>
   </para>
  </refsect1>
 </refentry>
