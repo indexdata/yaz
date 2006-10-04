@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom.h,v 1.36 2006-06-15 10:34:16 adam Exp $
+ * $Id: zoom.h,v 1.37 2006-10-04 16:24:05 adam Exp $
  */
 /**
  * \file zoom.h
@@ -320,6 +320,9 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value);
    connection for which the event occurred. */
 ZOOM_API(int)
 ZOOM_event (int no, ZOOM_connection *cs);
+
+ZOOM_API(int)
+ZOOM_connection_is_idle(ZOOM_connection cs);
 
 ZOOM_END_CDECL
 /*
