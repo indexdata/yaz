@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.99 2006-09-27 11:39:02 adam Exp $
+ * $Id: seshigh.c,v 1.100 2006-10-05 15:24:02 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1013,114 +1013,112 @@ static void srw_bend_search(association *assoc, request *req,
                     srw_res->resultSetIdleTime =
                         odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
 		}
-                if (number > 0)
+                
+                if (start > rr.hits || start < 1)
+                {
+                    yaz_add_srw_diagnostic(
+                        assoc->encode, 
+                        &srw_res->diagnostics, &srw_res->num_diagnostics,
+                        YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
+                }
+                else if (number > 0)
                 {
                     int i;
+                    int ok = 1;
+                    if (start + number > rr.hits)
+                        number = rr.hits - start + 1;
                     
-                    if (start > rr.hits)
+                    /* Call bend_present if defined */
+                    if (assoc->init->bend_present)
                     {
-                        yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                               &srw_res->num_diagnostics,
-                                               YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
-                    }
-                    else
-                    {
-                        int ok = 1;
-                        if (start + number > rr.hits)
-                            number = rr.hits - start + 1;
-
-                        /* Call bend_present if defined */
-                        if (assoc->init->bend_present)
+                        bend_present_rr *bprr = (bend_present_rr*)
+                            odr_malloc (assoc->decode, sizeof(*bprr));
+                        bprr->setname = "default";
+                        bprr->start = start;
+                        bprr->number = number;
+                        bprr->format = VAL_TEXT_XML;
+                        if (srw_req->recordSchema)
                         {
-                            bend_present_rr *bprr = (bend_present_rr*)
-                                odr_malloc (assoc->decode, sizeof(*bprr));
-                            bprr->setname = "default";
-                            bprr->start = start;
-                            bprr->number = number;
-                            bprr->format = VAL_TEXT_XML;
-                            if (srw_req->recordSchema)
-                            {
-                                bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
-                                        sizeof(*bprr->comp));
-                                bprr->comp->which = Z_RecordComp_simple;
-                                bprr->comp->u.simple = (Z_ElementSetNames *)
-                                    odr_malloc(assoc->decode, sizeof(Z_ElementSetNames));
-                                bprr->comp->u.simple->which = Z_ElementSetNames_generic;
-                                bprr->comp->u.simple->u.generic = srw_req->recordSchema;
-                            }
-                            else
-                            {
-                                bprr->comp = 0;
-                            }
-                            bprr->stream = assoc->encode;
-                            bprr->referenceId = 0;
-                            bprr->print = assoc->print;
-                            bprr->request = req;
-                            bprr->association = assoc;
-                            bprr->errcode = 0;
-                            bprr->errstring = NULL;
-                            (*assoc->init->bend_present)(assoc->backend, bprr);
+                            bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
+                                                                            sizeof(*bprr->comp));
+                            bprr->comp->which = Z_RecordComp_simple;
+                            bprr->comp->u.simple = (Z_ElementSetNames *)
+                                odr_malloc(assoc->decode, sizeof(Z_ElementSetNames));
+                            bprr->comp->u.simple->which = Z_ElementSetNames_generic;
+                            bprr->comp->u.simple->u.generic = srw_req->recordSchema;
+                        }
+                        else
+                        {
+                            bprr->comp = 0;
+                        }
+                        bprr->stream = assoc->encode;
+                        bprr->referenceId = 0;
+                        bprr->print = assoc->print;
+                        bprr->request = req;
+                        bprr->association = assoc;
+                        bprr->errcode = 0;
+                        bprr->errstring = NULL;
+                        (*assoc->init->bend_present)(assoc->backend, bprr);
+                        
+                        if (!bprr->request)
+                            return;
+                        if (bprr->errcode)
+                        {
+                            srw_error = yaz_diag_bib1_to_srw (bprr->errcode);
+                            yaz_add_srw_diagnostic(assoc->encode,
+                                                   &srw_res->diagnostics,
+                                                   &srw_res->num_diagnostics,
+                                                   srw_error, bprr->errstring);
+                            ok = 0;
+                        }
+                    }
+                    
+                    if (ok)
+                    {
+                        int j = 0;
+                        int packing = Z_SRW_recordPacking_string;
+                        if (srw_req->recordPacking){
+                            if (!strcmp(srw_req->recordPacking, "xml"))
+                                packing = Z_SRW_recordPacking_XML;
+                            if (!strcmp(srw_req->recordPacking, "url"))
+                                packing = Z_SRW_recordPacking_URL;
+                        }
+                        srw_res->records = (Z_SRW_record *)
+                            odr_malloc(assoc->encode,
+                                       number * sizeof(*srw_res->records));
+                        
+                        srw_res->extra_records = (Z_SRW_extra_record **)
+                            odr_malloc(assoc->encode,
+                                       number*sizeof(*srw_res->extra_records));
+                        
+                        for (i = 0; i<number; i++)
+                        {
+                            int errcode;
+                            const char *addinfo = 0;
                             
-                            if (!bprr->request)
-                                return;
-                            if (bprr->errcode)
+                            srw_res->records[j].recordPacking = packing;
+                            srw_res->records[j].recordData_buf = 0;
+                            srw_res->extra_records[j] = 0;
+                            yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
+                            errcode = srw_bend_fetch(assoc, i+start, srw_req,
+                                                     srw_res->records + j,
+                                                     &addinfo);
+                            if (errcode)
                             {
-                                srw_error = yaz_diag_bib1_to_srw (bprr->errcode);
                                 yaz_add_srw_diagnostic(assoc->encode,
                                                        &srw_res->diagnostics,
                                                        &srw_res->num_diagnostics,
-                                                       srw_error, bprr->errstring);
-                                ok = 0;
-                            }
-                        }
-
-                        if (ok)
-                        {
-                            int j = 0;
-                            int packing = Z_SRW_recordPacking_string;
-                            if (srw_req->recordPacking){
-                                if (!strcmp(srw_req->recordPacking, "xml"))
-                                    packing = Z_SRW_recordPacking_XML;
-                                if (!strcmp(srw_req->recordPacking, "url"))
-                                    packing = Z_SRW_recordPacking_URL;
-                            }
-                            srw_res->records = (Z_SRW_record *)
-                                odr_malloc(assoc->encode,
-                                           number * sizeof(*srw_res->records));
-                            
-                            srw_res->extra_records = (Z_SRW_extra_record **)
-                                odr_malloc(assoc->encode,
-                                           number*sizeof(*srw_res->extra_records));
-
-                            for (i = 0; i<number; i++)
-                            {
-                                int errcode;
-                                const char *addinfo = 0;
+                                                       yaz_diag_bib1_to_srw (errcode),
+                                                       addinfo);
                                 
-                                srw_res->records[j].recordPacking = packing;
-                                srw_res->records[j].recordData_buf = 0;
-                                srw_res->extra_records[j] = 0;
-                                yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
-                                errcode = srw_bend_fetch(assoc, i+start, srw_req,
-                                                         srw_res->records + j,
-                                                         &addinfo);
-                                if (errcode)
-                                {
-                                    yaz_add_srw_diagnostic(assoc->encode,
-                                                           &srw_res->diagnostics,
-                                                           &srw_res->num_diagnostics,
-                                                           yaz_diag_bib1_to_srw (errcode),
-                                                           addinfo);
-                                    
-                                    break;
-                                }
-                                if (srw_res->records[j].recordData_buf)
-                                    j++;
+                                break;
                             }
-                            srw_res->num_records = j;
-                            if (!j)
-                                srw_res->records = 0;
+                            if (srw_res->records[j].recordData_buf)
+                                j++;
                         }
+                        srw_res->num_records = j;
+                        if (!j)
+                            srw_res->records = 0;
                     }
                 }
             }
@@ -2323,7 +2321,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.99 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.100 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
