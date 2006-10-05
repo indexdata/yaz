@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.50 2006-09-06 15:21:26 adam Exp $
+ * $Id: srwutil.c,v 1.51 2006-10-05 15:19:33 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -411,10 +411,10 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     return 2;
 }
 
-static int yaz_sru_integer_decode(ODR odr, const char *pname, 
+static int yaz_sru_decode_integer(ODR odr, const char *pname, 
                                   const char *valstr, int **valp,
-                                  Z_SRW_diagnostic **diag, int *num_diag)
-
+                                  Z_SRW_diagnostic **diag, int *num_diag,
+                                  int min_value)
 {
     int ival;
     if (!valstr)
@@ -425,9 +425,16 @@ static int yaz_sru_integer_decode(ODR odr, const char *pname,
                                YAZ_SRW_UNSUPP_PARAMETER_VALUE, pname);
         return 0;
     }
+    if (min_value >= 0 && ival < min_value)
+    {
+        yaz_add_srw_diagnostic(odr, diag, num_diag,
+                               YAZ_SRW_UNSUPP_PARAMETER_VALUE, pname);
+        return 0;
+    }
     *valp = odr_intdup(odr, ival);
     return 1;
 }
+
 /**
   http://www.loc.gov/z3950/agency/zing/srw/service.html
 */ 
@@ -599,13 +606,13 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->recordPacking = recordPacking;
             sr->u.request->stylesheet = stylesheet;
 
-            yaz_sru_integer_decode(decode, "maximumRecords", maximumRecords, 
+            yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords, 
                                    &sr->u.request->maximumRecords, 
-                                   diag, num_diag);
-
-            yaz_sru_integer_decode(decode, "startRecord", startRecord, 
+                                   diag, num_diag, 0);
+            
+            yaz_sru_decode_integer(decode, "startRecord", startRecord, 
                                    &sr->u.request->startRecord,
-                                   diag, num_diag);
+                                   diag, num_diag, 1);
 
             sr->u.request->database = db;
 
@@ -677,15 +684,15 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "scanClause");
             sr->u.scan_request->database = db;
             
-            yaz_sru_integer_decode(decode, "maximumTerms",
+            yaz_sru_decode_integer(decode, "maximumTerms",
                                    maximumTerms, 
                                    &sr->u.scan_request->maximumTerms,
-                                   diag, num_diag);
-
-            yaz_sru_integer_decode(decode, "responsePosition",
+                                   diag, num_diag, 0);
+            
+            yaz_sru_decode_integer(decode, "responsePosition",
                                    responsePosition, 
                                    &sr->u.scan_request->responsePosition,
-                                   diag, num_diag);
+                                   diag, num_diag, 0);
 
             sr->u.scan_request->stylesheet = stylesheet;
 
