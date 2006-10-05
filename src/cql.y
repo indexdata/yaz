@@ -1,6 +1,6 @@
-/* $Id: cql.y,v 1.10 2006-10-05 16:13:34 adam Exp $
-   Copyright (C) 2002-2004
-   Index Data Aps
+/* $Id: cql.y,v 1.11 2006-10-05 16:19:16 adam Exp $
+   Copyright (C) 2002-2006
+   Index Data ApS
 
 This file is part of the YAZ toolkit.
 
