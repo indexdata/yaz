@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.23 2006-07-05 14:50:16 adam Exp $
+/* $Id: cqltransform.c,v 1.24 2006-10-05 16:12:23 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -444,10 +444,21 @@ void emit_term(cql_transform_t ct,
     (*pr)("\"", client_data);
     for (i = 0; i<length; i++)
     {
-        char buf[2];
-        buf[0] = term[i];
-        buf[1] = 0;
-        (*pr)(buf, client_data);
+        /* pr(int) each character */
+        char buf[3];
+        const char *cp;
+
+        buf[1] = term[i];
+        buf[2] = 0;
+        /* do we have to escape this char? */
+        if (buf[1] == '"')
+        {
+            buf[0] = '\\';
+            cp = buf;
+        }
+        else
+            cp = buf+1;
+        (*pr)(cp, client_data);
     }
     (*pr)("\" ", client_data);
 }
