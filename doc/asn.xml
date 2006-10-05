@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.17 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: asn.xml,v 1.18 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
@@ -347,7 +347,8 @@ typedef struct Z_ext_typeent
     PDU, as well as their default settings.
    </para>
    
-   <table frame="top"><title>Default settings for PDU Initialize Request</title>
+   <table frame="top" id="asn.default.initialize.request">
+    <title>Default settings for PDU Initialize Request</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -397,7 +398,8 @@ typedef struct Z_ext_typeent
    </tgroup>
   </table>
 
-  <table frame="top"><title>Default settings for PDU Initialize
+  <table frame="top" id="asn.default.initialize.response">
+    <title>Default settings for PDU Initialize
     Response</title>
    <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
@@ -448,7 +450,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for PDU Search Request</title>
+   <table frame="top" id="asn.default.search.request">
+    <title>Default settings for PDU Search Request</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -510,7 +513,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for PDU Search Response</title>
+   <table frame="top" id="asn.default.search.response">
+    <title>Default settings for PDU Search Response</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -559,7 +563,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for PDU Present Request</title>
+   <table frame="top" id="asn.default.present.request">
+    <title>Default settings for PDU Present Request</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -612,7 +617,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
    
-   <table frame="top"><title>Default settings for PDU Present Response</title>
+   <table frame="top" id="asn.default.present.response">
+    <title>Default settings for PDU Present Response</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -647,7 +653,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
    
-   <table frame="top"><title>Default settings for Delete Result Set Request
+   <table frame="top" id="asn.default.delete.result.set.request">
+    <title>Default settings for Delete Result Set Request
     </title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
@@ -680,7 +687,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Delete Result Set Response
+   <table frame="top" id="asn.default.delete.result.set.response">
+    <title>Default settings for Delete Result Set Response
     </title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
@@ -725,7 +733,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Scan Request
+   <table frame="top" id="asn.default.scan.request">
+    <title>Default settings for Scan Request
     </title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
@@ -770,7 +779,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Scan Response
+   <table frame="top" id="asn.default.scan.response">
+    <title>Default settings for Scan Response
     </title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
@@ -813,8 +823,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Trigger Resource
-     Control Request </title>
+   <table frame="top" id="asn.default.trigger.resource.control.request">
+    <title>Default settings for Trigger Resource Control Request </title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -849,8 +859,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Resource
-     Control Request</title>
+   <table frame="top" id="asn.default.resource.control.request">
+    <title>Default settings for Resource Control Request</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -889,8 +899,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Resource
-     Control Response</title>
+   <table frame="top" id="asn.default.resource.control.response">
+    <title>Default settings for Resource Control Response</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -920,8 +930,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
    
-   <table frame="top"><title>Default settings for Access
-     Control Request</title>
+   <table frame="top" id="asn.default.access.control.request">
+    <title>Default settings for Access Control Request</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -951,8 +961,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Access
-     Control Response</title>
+   <table frame="top" id="asn.default.access.control.response">
+    <title>Default settings for Access Control Response</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -985,7 +995,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Segment</title>
+   <table frame="top" id="asn.default.segment">
+    <title>Default settings for Segment</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>
@@ -1017,7 +1028,8 @@ typedef struct Z_ext_typeent
     </tgroup>
    </table>
 
-   <table frame="top"><title>Default settings for Close</title>
+   <table frame="top" id="asn.default.close">
+    <title>Default settings for Close</title>
     <tgroup cols="3">
      <colspec colwidth="7*" colname="field"></colspec>
      <colspec colwidth="5*" colname="type"></colspec>

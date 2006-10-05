@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.51 2006-09-06 09:26:36 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.52 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -318,7 +318,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      API cannot tell the outcome (yet).
     </para>
     </sect2>
-   <sect2><title>SRU Protocol behavior</title>
+   <sect2 id="zoom.sru.init.behavior">
+    <title>SRU Protocol behavior</title>
     <para>
      The SRU protocol doesn't feature an Inititialize Request, so
      the connection phase merely establishes a TCP/IP connection
@@ -365,7 +366,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
-   <sect2><title>Protocol behavior</title>
+   <sect2 id="zoom.sort.behavior"><title>Protocol behavior</title>
     <para>
      The query object is just an interface for the member Query
      in the SearchRequest. The sortby-function is an interface to the
@@ -416,7 +417,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     The number of hits also called result-count is returned by
     function <function>ZOOM_resultset_size</function>.
    </para>
-   <table frame="top"><title>ZOOM Result set Options</title>
+   <table id="zoom.resultset.options" 
+    frame="top"><title>ZOOM Result set Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -480,7 +482,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     Read <literal>searchresult.size</literal> to determine the
     number of items.
    </para>
-   <table frame="top"><title>Search Info Report options</title>
+   <table id="zoom.search.info.report.options" 
+    frame="top"><title>Search Info Report Options</title>
     <tgroup cols="2">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -525,7 +528,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </tbody>
     </tgroup>
    </table>
-   <sect2>
+   <sect2 id="zoom.z3950.resultset.behavior">
     <title>Z39.50 Protocol behavior</title>
     <para>
      The creation of a result set involves at least a SearchRequest
@@ -577,7 +580,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      to specify one elementSetName option rather than three.
      </para>
    </sect2>
-   <sect2>
+   <sect2 id="zoom.sru.resultset.behavior">
     <title>SRU Protocol behavior</title>
     <para>
      Current version of &yaz; does not take advantage of a result set id
@@ -760,7 +763,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      render; charset=marc8,iso-8859-1
     </screen>
    </para>
-   <sect2><title>Z39.50 Protocol behavior</title>
+   <sect2 id="zoom.z3950.record.behavior">
+    <title>Z39.50 Protocol behavior</title>
     <para>
      The functions <function>ZOOM_resultset_record</function> and
      <function>ZOOM_resultset_records</function> inspects the client-side
@@ -779,7 +783,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      <emphasis>now</emphasis>.
     </para>
    </sect2>
-   <sect2><title>SRU Protocol behavior</title>
+   <sect2 id="zoom.sru.record.behavior">
+    <title>SRU Protocol behavior</title>
     <para>
      The ZOOM driver for SRU treats records returned by a SRU server
      as if they where Z39.50 records with transfer syntax XML and
@@ -860,7 +865,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </literallayout>
    </para>
    
-   <table frame="top"><title>ZOOM Scan Set Options</title>
+   <table frame="top" id="zoom.scanset.options">
+    <title>ZOOM Scan Set Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -893,7 +899,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </table>
   </sect1>
 
-  <sect1 id="zoom.ext"><title>Extended Services</title>
+  <sect1 id="zoom.extendedservices"><title>Extended Services</title>
    <para>
     ZOOM offers an interface to a subset of the Z39.50 extended services
     as well as a few privately defined ones:
@@ -902,35 +908,35 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <listitem>
      <para>
       Z39.50 Item Order (ILL).
-      See <xref linkend="zoom.ext.itemorder"/>.
+      See <xref linkend="zoom.item.order"/>.
      </para>
     </listitem>
     <listitem>
      <para>
       Record Update. This allows a client to insert, modify or delete
       records.
-      See <xref linkend="zoom.ext.update"/>.
+      See <xref linkend="zoom.record.update"/>.
      </para>
     </listitem>
     <listitem>
      <para>
       Database Create. This a non-standard feature. Allows a client
       to create a database.
-      See <xref linkend="zoom.ext.dbcreate"/>.
+      See <xref linkend="zoom.database.create"/>.
      </para>
     </listitem>
     <listitem>
      <para>
       Database Drop. This a non-standard feature. Allows a client
       to delete/drop a database.
-      See <xref linkend="zoom.ext.dbdrop"/>.
+      See <xref linkend="zoom.database.drop"/>.
      </para>
      </listitem>
     <listitem>
      <para>
       Commit operation. This a non-standard feature. Allows a client
       to commit operations.
-      See <xref linkend="zoom.ext.commit"/>.
+      See <xref linkend="zoom.commit"/>.
      </para>
     </listitem>
     <!-- all the ILL PDU options should go here too -->
@@ -971,7 +977,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     package type to be sent.
    </para>
 
-   <table frame="top"><title>Extended Service Common Options</title>
+   <table frame="top" id="zoom.extendedservices.options">
+    <title>Extended Service Common Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>
@@ -1016,13 +1023,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </tgroup>
    </table>
 
-   <sect2 id="zoom.ext.itemorder"><title>Item Order</title>
+   <sect2 id="zoom.item.order"><title>Item Order</title>
     <para>
      For Item Order, type must be set to <literal>itemorder</literal> in
      <function>ZOOM_package_send</function>.
     </para>
 
-    <table frame="top"><title>Item Order Options</title>
+    <table frame="top" id="zoom.item.order.options">
+     <title>Item Order Options</title>
      <tgroup cols="3">
       <colspec colwidth="4*" colname="name"></colspec>
       <colspec colwidth="7*" colname="description"></colspec>
@@ -1061,13 +1069,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 
    </sect2>
 
-   <sect2 id="zoom.ext.update"><title>Record Update</title>
+   <sect2 id="zoom.record.update"><title>Record Update</title>
     <para>
      For Record Update, type must be set to <literal>update</literal> in
      <function>ZOOM_package_send</function>.
     </para>
 
-    <table frame="top"><title>Record Update Options</title>
+    <table frame="top" id="zoom.record.update.options">
+     <title>Record Update Options</title>
      <tgroup cols="3">
       <colspec colwidth="4*" colname="name"></colspec>
       <colspec colwidth="7*" colname="description"></colspec>
@@ -1125,13 +1134,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     
    </sect2>
 
-   <sect2 id="zoom.ext.dbcreate"><title>Database Create</title>
+   <sect2 id="zoom.database.create"><title>Database Create</title>
     <para>
      For Database Create, type must be set to <literal>create</literal> in
      <function>ZOOM_package_send</function>.
     </para>
     
-    <table frame="top"><title>Database Create Options</title>
+    <table frame="top" id="zoom.database.create.options">
+     <title>Database Create Options</title>
      <tgroup cols="3">
       <colspec colwidth="4*" colname="name"></colspec>
       <colspec colwidth="7*" colname="description"></colspec>
@@ -1154,13 +1164,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </table>
    </sect2>
    
-   <sect2 id="zoom.ext.dbdrop"><title>Database Drop</title>
+   <sect2 id="zoom.database.drop"><title>Database Drop</title>
     <para>
      For Database Drop, type must be set to <literal>drop</literal> in
      <function>ZOOM_package_send</function>.
     </para>
     
-    <table frame="top"><title>Database Create Options</title>
+    <table frame="top" id="zoom.database.drop.options">
+     <title>Database Drop Options</title>
      <tgroup cols="3">
       <colspec colwidth="4*" colname="name"></colspec>
       <colspec colwidth="7*" colname="description"></colspec>
@@ -1183,14 +1194,15 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </table>
    </sect2>
    
-   <sect2 id="zoom.ext.commit"><title>Commit Operation</title>
+   <sect2 id="zoom.commit"><title>Commit Operation</title>
     <para>
      For Commit, type must be set to <literal>commit</literal> in
      <function>ZOOM_package_send</function>.
     </para>
    </sect2>
 
-   <sect2><title>Protocol behavior</title>
+   <sect2 id="zoom.extended.services.behavior">
+    <title>Protocol behavior</title>
     <para>
      All the extended services are Z39.50-only.
     </para>
@@ -1269,7 +1281,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     (integer) for the last event.
    </para>
 
-   <table frame="top"><title>ZOOM Event IDs</title>
+   <table frame="top" id="zoom.event.ids">
+    <title>ZOOM Event IDs</title>
     <tgroup cols="2">
      <colspec colwidth="4*" colname="name"></colspec>
      <colspec colwidth="7*" colname="description"></colspec>

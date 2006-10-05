@@ -10,7 +10,7 @@
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.13 2006-10-04 13:21:33 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.14 2006-10-05 08:26:58 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -69,7 +69,7 @@
    <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
   </para>
  </refsect1>
- <refsect1 id="tools.cql.map"><title>SEE ALSO</title>
+ <refsect1 id="cql.to.rpn"><title>SEE ALSO</title>
   <para>
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>

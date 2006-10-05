@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.18 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: odr.xml,v 1.19 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -39,7 +39,7 @@
   </sect1>
   <sect1 id="odr.use"><title>Using ODR</title>
 
-   <sect2><title>ODR Streams</title>
+   <sect2 id="odr.streams"><title>ODR Streams</title>
 
     <para>
      Conceptually, the ODR stream is the source of encoded data in the
@@ -74,7 +74,7 @@
     </para>
    </sect2>
 
-   <sect2><title id="memory">Memory Management</title>
+   <sect2 id="odr.memory.management"><title id="memory">Memory Management</title>
 
     <para>
      Two forms of memory management take place in the &odr; system. The first
@@ -169,7 +169,7 @@
     </para>
 
    </sect2>
-   <sect2><title>Encoding and Decoding Data</title>
+   <sect2 id="odr.encoding.and.decoding"><title>Encoding and Decoding Data</title>
 
     <para>
      When encoding data, the ODR stream will write the encoded octet string
@@ -260,7 +260,8 @@
      <function>z_APDU()</function>).
     </para>
     
-    <example><title>Encoding and decoding functions</title>
+    <example id="example.odr.encoding.and.decoding.functions">
+     <title>Encoding and decoding functions</title>
      <synopsis>
       int odr_integer(ODR o, int **p, int optional, const char *name);
       
@@ -298,7 +299,8 @@
      last call to <function>odr_reset()</function> will be released.
     </para>
 
-    <example><title>Encoding and decoding of an integer</title>
+    <example id="example.odr.encoding.of.integer">
+     <title>Encoding and decoding of an integer</title>
      <para>
       The use of the double indirection can be a little confusing at first
       (its purpose will become clear later on, hopefully),
@@ -355,7 +357,7 @@ void do_nothing_useful(int value)
     
    </sect2>
 
-   <sect2><title>Printing</title>
+   <sect2 id="odr.printing"><title>Printing</title>
     <para>
      When an ODR stream is created of type <literal>ODR_PRINT</literal>
      the ODR module will print the contents of a PDU in a readable format.
@@ -396,7 +398,7 @@ void do_nothing_useful(int value)
      <literal>ar[n]</literal> is the last. The last element has the
      property that <literal>ar[n+1] == NULL</literal>.
     </para>
-    <example>
+    <example id="example.odr.element.path.record">
      <title>Element Path for record</title>
      <para>
       For a database record part of a PresentResponse the
@@ -406,7 +408,7 @@ void do_nothing_useful(int value)
      </para>
      </example>
    </sect2>
-   <sect2><title>Diagnostics</title>
+   <sect2 id="odr.diagnostics"><title>Diagnostics</title>
 
     <para>
      The encoding/decoding functions all return 0 when an error occurs.
@@ -440,7 +442,8 @@ void do_nothing_useful(int value)
      one of these constants:
     </para>
 
-    <table frame="top"><title>ODR Error codes</title>
+    <table frame="top" id="odr.error.codes">
+     <title>ODR Error codes</title>
      <tgroup cols="2">
       <thead>
        <row>
@@ -498,7 +501,8 @@ void do_nothing_useful(int value)
     </para>
 
    </sect2>
-   <sect2><title>Summary and Synopsis</title>
+   <sect2 id="odr.summary.and.synopsis">
+    <title>Summary and Synopsis</title>
 
     <synopsis>
      #include &lt;odr.h>
@@ -568,14 +572,15 @@ void do_nothing_useful(int value)
     SEQUENCE members which don't exist in XDR.
    </para>
 
-   <sect2><title>The Primitive ASN.1 Types</title>
+   <sect2 id="odr.primitive.asn1.types">
+    <title>The Primitive ASN.1 Types</title>
 
     <para>
      ASN.1 defines a number of primitive types (many of which correspond
      roughly to primitive types in structured programming languages, such as C).
     </para>
 
-    <sect3><title>INTEGER</title>
+    <sect3 id="odr.integer"><title>INTEGER</title>
 
      <para>
       The &odr; function for encoding or decoding (or printing) the ASN.1
@@ -633,21 +638,21 @@ void do_nothing_useful(int value)
       similar manners:
      </para>
     </sect3>
-    <sect3><title>BOOLEAN</title>
+    <sect3 id="odr.boolean"><title>BOOLEAN</title>
 
      <synopsis>
 int odr_bool(ODR o, bool_t **p, int optional, const char *name);
      </synopsis>
 
     </sect3>
-    <sect3><title>REAL</title>
+    <sect3 id="odr.real"><title>REAL</title>
 
      <para>
       Not defined.
      </para>
 
     </sect3>
-    <sect3><title>NULL</title>
+    <sect3 id="odr.null"><title>NULL</title>
 
      <synopsis>
 int odr_null(ODR o, bool_t **p, int optional, const char *name);
@@ -660,7 +665,7 @@ int odr_null(ODR o, bool_t **p, int optional, const char *name);
      </para>
 
     </sect3>
-    <sect3><title>OCTET STRING</title>
+    <sect3 id="odr.octet.string"><title>OCTET STRING</title>
 
      <synopsis>
 typedef struct odr_oct
@@ -707,7 +712,7 @@ int odr_visiblestring(ODR o, char **p, int optional,
      </synopsis>
 
     </sect3>
-    <sect3><title>BIT STRING</title>
+    <sect3 id="odr.bit.string"><title>BIT STRING</title>
 
      <synopsis>
 int odr_bitstring(ODR o, Odr_bitmask **p, int optional,
@@ -745,7 +750,7 @@ int ODR_MASK_GET(Odr_bitmask *b, int bitno);
      </para>
     </sect3>
 
-    <sect3><title>OBJECT IDENTIFIER</title>
+    <sect3 id="odr.object.identifier"><title>OBJECT IDENTIFIER</title>
 
      <synopsis>
 int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
@@ -762,7 +767,7 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
 
     </sect3>
    </sect2>
-   <sect2 id="tag.prim"><title>Tagging Primitive Types</title>
+   <sect2 id="odr.tagging.primitive.types"><title>Tagging Primitive Types</title> <!-- tag.prim -->
 
     <para>
      The simplest way of tagging a type is to use the
@@ -813,7 +818,7 @@ int myInt(ODR o, int **p, int optional, const char *name)
     </para>
 
    </sect2>
-   <sect2><title>Constructed Types</title>
+   <sect2 id="odr.constructed.types"><title>Constructed Types</title>
 
     <para>
      Constructed types are created by combining primitive types. The
@@ -900,16 +905,18 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
     </para>
 
    </sect2>
-   <sect2><title>Tagging Constructed Types</title>
+   <sect2 id="odr.tagging.constructed.types">
+    <title>Tagging Constructed Types</title>
 
     <note>
      <para>
-      See <xref linkend="tag.prim"/> for information on how to tag
+      See <xref linkend="odr.tagging.primitive.types"/> for information on how to tag
       the primitive types, as well as types that are already defined.
      </para>
     </note>
 
-    <sect3><title>Implicit Tagging</title>
+    <sect3 id="odr.implicit.tagging">
+     <title>Implicit Tagging</title>
 
      <para>
       Assume the type above had been defined as
@@ -957,7 +964,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
      </para>
     </sect3>
 
-    <sect3><title>Explicit Tagging</title>
+    <sect3 id="odr.explicit.tagging"><title>Explicit Tagging</title>
 
      <para>
       Explicit tagging of constructed types is a little more complicated,
@@ -1032,7 +1039,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
 
     </sect3>
    </sect2>
-   <sect2><title>SEQUENCE OF</title>
+   <sect2 id="odr.sequence.of"><title>SEQUENCE OF</title>
 
     <para>
      To handle sequences (arrays) of a specific type, the function
@@ -1088,7 +1095,7 @@ int myArray(ODR o, MyArray **p, int optional, const char *name)
     </screen>
 
    </sect2>
-   <sect2><title>CHOICE Types</title>
+   <sect2 id="odr.choice.types"><title>CHOICE Types</title>
 
     <para>
      The choice type is used fairly often in some ASN.1 definitions, so

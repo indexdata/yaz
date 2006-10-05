@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.50 2006-06-13 16:01:51 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.51 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -301,7 +301,8 @@
 
     <sect3 id="pqf-examples"><title>PQF queries</title>
 
-     <example><title>PQF queries using simple terms</title>
+     <example id="example.pqf.simple.terms">
+      <title>PQF queries using simple terms</title>
       <para>
        <screen>
 	dylan
@@ -310,7 +311,8 @@
        </screen>
       </para>
      </example>
-     <example><title>PQF boolean operators</title>
+     <example id="pqf.example.pqf.boolean.operators">
+      <title>PQF boolean operators</title>
       <para>
        <screen>
 	@or "dylan" "zimmerman"
@@ -321,7 +323,8 @@
        </screen>
       </para>
      </example>
-     <example><title>PQF references to result sets</title>
+     <example id="example.pqf.result.sets">
+      <title>PQF references to result sets</title>
       <para>
        <screen>
 	@set Result-1
@@ -330,7 +333,8 @@
        </screen>
       </para>
      </example>
-     <example><title>Attributes for terms</title>
+     <example id="example.pqf.attributes">
+      <title>Attributes for terms</title>
       <para>
        <screen>
 	@attr 1=4 computer
@@ -345,7 +349,8 @@
        </screen>
       </para>
      </example>
-     <example><title>PQF Proximity queries</title>
+     <example id="example.pqf.proximity">
+      <title>PQF Proximity queries</title>
       <para>
        <screen>
 	@prox 0 3 1 2 k 2 dylan zimmerman
@@ -384,14 +389,16 @@
 	</para></note>
       </para>
      </example>
-     <example><title>PQF specification of search term</title>
+     <example id="example.pqf.search.term.type">
+      <title>PQF specification of search term type</title>
       <para>
        <screen>
 	@term string "a UTF-8 string, maybe?"
        </screen>
       </para>
      </example>
-     <example><title>PQF mixed queries</title>
+     <example id="example.pqf.mixed.queries">
+      <title>PQF mixed queries</title>
       <para>
        <screen>
 	@or @and bob dylan @set Result-1
@@ -439,7 +446,8 @@
      license, it is included as a supplement to &yaz;.
     </para>
 
-    <sect3><title>CCL Syntax</title>
+    <sect3 id="ccl.syntax">
+     <title>CCL Syntax</title>
 
      <para>
       The CCL parser obeys the following grammar for the FIND argument.
@@ -488,7 +496,8 @@
 
      </screen>
      
-     <example><title>CCL queries</title>
+     <example id="example.ccl.queries">
+      <title>CCL queries</title>
       <para>
        The following queries are all valid:
       </para>
@@ -522,7 +531,8 @@
      </example>
      
     </sect3>
-    <sect3><title>CCL Qualifiers</title>
+    <sect3 id="ccl.qualifiers">
+     <title>CCL Qualifiers</title>
      
      <para>
       Qualifiers are used to direct the search to a particular searchable
@@ -544,7 +554,8 @@
       lines in a CCL profile: qualifier specification,
       qualifier alias, comments and directives.
      </para>
-     <sect4><title id="qualifier-specification">Qualifier specification</title>
+     <sect4 id="ccl.qualifier.specification">
+      <title>Qualifier specification</title>
       <para>
        A qualifier specification is of the form:
       </para>
@@ -569,7 +580,8 @@
        or <literal>c</literal> for completeness.
        The attributes for the special qualifier name <literal>term</literal>
        are used when no CCL qualifier is given in a query.
-       <table><title>Common Bib-1 attributes</title>
+       <table id="ccl.common.bib1.attributes">
+	<title>Common Bib-1 attributes</title>
 	<tgroup cols="2">
 	 <colspec colwidth="2*" colname="type"></colspec>
 	 <colspec colwidth="9*" colname="description"></colspec>
@@ -648,7 +660,8 @@
        which are used in combination with certain types.
        The special combinations are:
        
-       <table><title>Special attribute combos</title>
+       <table id="ccl.special.attribute.combos">
+	<title>Special attribute combos</title>
 	<tgroup cols="2">
 	 <colspec colwidth="2*" colname="name"></colspec>
 	 <colspec colwidth="9*" colname="description"></colspec>
@@ -734,7 +747,7 @@
 	</tgroup>
        </table>
       </para>
-      <example><title>CCL profile</title>
+      <example id="example.ccl.profile"><title>CCL profile</title>
        <para>
 	Consider the following definition:
        </para>
@@ -779,7 +792,8 @@
        </para>
       </example>
      </sect4>
-     <sect4><title>Qualifier alias</title>
+     <sect4 id="ccl.qualifier.alias">
+      <title>Qualifier alias</title>
       <para>
        A qualifier alias is of the form:
       </para>
@@ -796,20 +810,23 @@
       </para>
      </sect4>
 
-     <sect4><title>Comments</title>
+     <sect4 id="ccl.comments">
+      <title>Comments</title>
       <para>
        Lines with white space or lines that begin with
        character <literal>#</literal> are treated as comments.
       </para>
      </sect4>
 
-     <sect4><title>Directives</title>
+     <sect4 id="ccl.directives">
+      <title>Directives</title>
       <para>
        Directive specifications takes the form
       </para>
       <para><literal>@</literal><replaceable>directive</replaceable> <replaceable>value</replaceable>
       </para>
-      <table><title>CCL directives</title>
+      <table id="ccl.directives">
+       <title>CCL directives</title>
        <tgroup cols="3">
 	<colspec colwidth="2*" colname="name"></colspec>
 	<colspec colwidth="8*" colname="description"></colspec>
@@ -873,7 +890,8 @@
       </table>
      </sect4>
     </sect3>
-    <sect3><title>CCL API</title>
+    <sect3 id="ccl.apid">
+     <title>CCL API</title>
      <para>
       All public definitions can be found in the header file
       <filename>ccl.h</filename>. A profile identifier is of type
@@ -936,7 +954,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
      </para>
     </sect3>
    </sect2>
-   <sect2 id="tools.cql"><title>CQL</title>
+   <sect2 id="cql"><title>CQL</title>
     <para>
      <ulink url="&url.cql;">CQL</ulink>
       - Common Query Language - was defined for the
@@ -986,7 +1004,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
       </listitem>
      </itemizedlist>
     </para>
-    <sect3 id="tools.cql.parsing"><title>CQL parsing</title>
+    <sect3 id="cql.parsing"><title>CQL parsing</title>
      <para>
       A CQL parser is represented by the <literal>CQL_parser</literal>
       handle. Its contents should be considered &yaz; internal (private).
@@ -1032,7 +1050,7 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
      </para>
     </sect3>
     
-    <sect3 id="tools.cql.tree"><title>CQL tree</title>
+    <sect3 id="cql.tree"><title>CQL tree</title>
      <para>
       The the query string is valid, the CQL parser
       generates a tree representing the structure of the
@@ -1136,7 +1154,7 @@ struct cql_node {
      </para>
 
     </sect3>
-    <sect3 id="tools.cql.pqf"><title>CQL to PQF conversion</title>
+    <sect3 id="cql.to.pqf"><title>CQL to PQF conversion</title>
      <para>
       Conversion to PQF (and Z39.50 RPN) is tricky by the fact
       that the resulting RPN depends on the Z39.50 target
@@ -1218,7 +1236,7 @@ int cql_transform_FILE(cql_transform_t ct,
       open <literal>FILE</literal>.
      </para>
     </sect3>
-    <sect3 id="tools.cql.map">
+    <sect3 id="cql.to.rpn">
      <title>Specification of CQL to RPN mappings</title>
      <para>
       The file supplied to functions 
@@ -1369,7 +1387,7 @@ int cql_transform_FILE(cql_transform_t ct,
        </varlistentry>
       </variablelist>
      </para>
-     <example><title>CQL to RPN mapping file</title>
+     <example id="example.cql.to.rpn.mapping"><title>CQL to RPN mapping file</title>
       <para>
        This simple file defines two context sets, three indexes and three
        relations, a position pattern and a default structure.
@@ -1424,7 +1442,7 @@ int cql_transform_FILE(cql_transform_t ct,
       </para>
      </example>
     </sect3>
-    <sect3 id="tools.cql.xcql"><title>CQL to XCQL conversion</title>
+    <sect3 id="cql.xcql"><title>CQL to XCQL conversion</title>
      <para>
       Conversion from CQL to XCQL is trivial and does not
       require a mapping to be defined.
@@ -1950,7 +1968,7 @@ typedef struct oident
 
   </sect1>
   
-  <sect1 id="tools.marc"><title>MARC</title>
+  <sect1 id="marc"><title>MARC</title>
    
    <para>
     YAZ provides a fast utility that decodes MARC records and
@@ -2038,7 +2056,7 @@ typedef struct oident
     stores the resulting record in a WRBUF handle (WRBUF is a simple string
     type).
    </para>
-   <example>
+   <example id="example.marc.display">
     <title>Display of MARC record</title>
     <para>
      The followint program snippet illustrates how the MARC API may

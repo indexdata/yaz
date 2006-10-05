@@ -1,4 +1,4 @@
-<!-- $Id: comstack.xml,v 1.13 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: comstack.xml,v 1.14 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
   
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
@@ -101,7 +101,7 @@ if (buf)
   </sect1>
   <sect1 id="comstack.common"><title>Common Functions</title>
 
-   <sect2><title>Managing Endpoints</title>
+   <sect2 id="comstack.managing.endpoints"><title>Managing Endpoints</title>
 
     <synopsis>
      COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
@@ -162,7 +162,7 @@ if (buf)
     </note>
    </sect2>
 
-   <sect2><title>Data Exchange</title>
+   <sect2 id="comstack.data.exchange"><title>Data Exchange</title>
 
     <synopsis>
      int cs_put(COMSTACK handle, char *buf, int len);

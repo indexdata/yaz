@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.24 2006-06-13 16:01:51 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.25 2006-10-05 08:26:58 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -125,7 +125,7 @@
       <xref linkend="tools"/> contains sections for the various
       tools offered by &yaz;. Scan through the material quickly
       and see what's relevant to you! SRU implementors
-      might find the <link linkend="tools.cql">CQL</link> section
+      might find the <link linkend="cql">CQL</link> section
       particularly useful.
      </para>
     </listitem>
