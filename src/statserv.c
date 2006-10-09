@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.44 2006-09-29 13:20:23 adam Exp $
+ * $Id: statserv.c,v 1.45 2006-10-09 11:21:37 adam Exp $
  */
 
 /**
@@ -85,8 +85,7 @@ static statserv_options_block *current_control_block = 0;
 /*
  * default behavior.
  */
-#define STAT_DEFAULT_LOG_LEVEL "none,fatal,warn,log,server,session,request"
-/* the 'none' clears yaz' own default settings, including [log] */
+#define STAT_DEFAULT_LOG_LEVEL "server,session,request"
 
 int check_options(int argc, char **argv);
 statserv_options_block control_block = {
@@ -1337,18 +1336,9 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    if (getenv("YAZ_LOG") == 0) {
-        /*
-         * Set default log level.  We want to avoid doing this if the
-         * user has already explicitly specified a preferred default
-         * log-level, hence the inelegant peek at the YAZ_LOG
-         * environment variable that will subsequently be interpreted
-         * by the YAZ logging module itself.
-         */
-        yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL));
-    }
-
+    yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL)); 
     get_logbits(1); 
+
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",
                           argv, argc, &arg)) != -2)
     {
@@ -1395,12 +1385,10 @@ int check_options(int argc, char **argv)
             }
             yaz_log_time_format(arg);
             break;
-        case 'v': {
-            int default_level = yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL);
-            yaz_log_init_level(yaz_log_mask_str_x(arg, default_level));
+        case 'v':
+            yaz_log_init_level(yaz_log_mask_str(arg));
             get_logbits(1); 
             break;
-        }
         case 'a':
             option_copy(control_block.apdufile, arg);
             break;

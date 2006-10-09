@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.41 2006-10-04 07:42:13 adam Exp $
+ * $Id: log.c,v 1.42 2006-10-09 11:21:37 adam Exp $
  */
 
 /**
@@ -39,7 +39,6 @@
 #include <yaz/xmalloc.h>
 
 static NMEM_MUTEX log_mutex = 0;
-static int mutex_init_flag = 0; /* not yet initialized */
 
 #define HAS_STRERROR 1
 
@@ -56,17 +55,7 @@ char *strerror(int n)
 #endif
 
 
-static int default_log_level(void)
-{
-    char *env = getenv("YAZ_LOG");
-    if (env != 0)
-        return yaz_log_mask_str_x(env, YLOG_DEFAULT_LEVEL);
-    else
-        return YLOG_DEFAULT_LEVEL;
-}
-
-
-static int l_level = -1;        /* will be set from default_log_level() */
+static int l_level = YLOG_DEFAULT_LEVEL;
 
 enum l_file_type {  use_stderr, use_none, use_file };
 static enum l_file_type yaz_file_type = use_stderr;
@@ -124,13 +113,22 @@ static struct {
 
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
-static void init_mutex(void)
+static void internal_log_init(void)
 {
+    static int mutex_init_flag = 0; /* not yet initialized */
+    char *env;
+
     if (mutex_init_flag)
         return;
+    mutex_init_flag = 1; /* here, 'cause nmem_mutex_create may call yaz_log */
+
     nmem_mutex_create(&log_mutex);
-    mutex_init_flag = 1;
+
+    env = getenv("YAZ_LOG");
+    if (env)
+        l_level = yaz_log_mask_str_x(env, l_level);
 }
+
 
 FILE *yaz_log_file(void)
 {
@@ -155,7 +153,7 @@ void yaz_log_close(void)
 
 void yaz_log_init_file(const char *fname)
 {
-    init_mutex();
+    internal_log_init();
 
     yaz_log_close();
     if (fname)
@@ -212,9 +210,7 @@ static void rotate_log(const char *cur_fname)
 
 void yaz_log_init_level(int level)
 {
-    init_mutex();
-    if (l_level < 0) 
-        l_level = default_log_level();
+    internal_log_init();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
@@ -222,6 +218,7 @@ void yaz_log_init_level(int level)
     } 
     else
         l_level = level;
+
     if (l_level  & YLOG_LOGLVL)
     {  /* dump the log level bits */
         const char *bittype = "Static ";
@@ -266,7 +263,7 @@ void yaz_log_init_prefix2(const char *prefix)
 
 void yaz_log_init(int level, const char *prefix, const char *fname)
 {
-    init_mutex();
+    internal_log_init();
     yaz_log_init_level(level);
     yaz_log_init_prefix(prefix);
     if (fname && *fname)
@@ -327,7 +324,6 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
     {
         yaz_log_close();
         yaz_global_log_file = fopen(cur_filename, filemode);
-        if (l_level < 0) l_level = default_log_level();
         if (l_level & YLOG_FLUSH)
             setvbuf(yaz_global_log_file, 0, _IONBF, 0);
     }
@@ -402,7 +398,7 @@ static void yaz_log_to_file(int level, const char *log_message)
     struct tm *tm;
 #endif
 
-    init_mutex();
+    internal_log_init();
 
     nmem_mutex_enter(log_mutex);
     
@@ -441,7 +437,7 @@ static void yaz_log_to_file(int level, const char *log_message)
         
         fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2,
                 log_message);
-        if (l_level & (YLOG_FLUSH|YLOG_DEBUG) )
+        if (l_level & YLOG_FLUSH)
             fflush(file);
     }
     nmem_mutex_leave(log_mutex);
@@ -454,8 +450,7 @@ void yaz_log(int level, const char *fmt, ...)
     FILE *file;
     int o_level = level;
 
-    if (l_level < 0)
-        l_level = default_log_level();
+    internal_log_init();
     if (!(level & l_level))
         return;
     va_start(ap, fmt);
@@ -525,7 +520,7 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
 static int define_module_bit(const char *name)
 {
     int i;
-    init_mutex();
+
     nmem_mutex_enter(log_mutex);
     for (i = 0; mask_names[i].name; i++)
         if (0 == strcmp(mask_names[i].name, name))
@@ -554,7 +549,7 @@ int yaz_log_module_level(const char *name)
     int i;
     char clean[255];
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
-    init_mutex();
+    internal_log_init();
     
     nmem_mutex_enter(log_mutex);
     for (i = 0; mask_names[i].name; i++)
@@ -568,19 +563,21 @@ int yaz_log_module_level(const char *name)
         }
     nmem_mutex_leave(log_mutex);
     yaz_log(YLOG_LOGLVL, "returning NO log bit for '%s' %s", n, 
-                    strcmp(n, name) ? name : "" );
+            strcmp(n, name) ? name : "" );
     return 0;
 }
 
 int yaz_log_mask_str(const char *str)
 {
-    return yaz_log_mask_str_x(str, default_log_level());
+    internal_log_init(); /* since l_level may be affected */
+    return yaz_log_mask_str_x(str, l_level);
 }
 
 int yaz_log_mask_str_x(const char *str, int level)
 {
     const char *p;
 
+    internal_log_init();
     while (*str)
     {
         int negated = 0;
