@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.51 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.52 2006-10-09 21:02:40 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -825,7 +825,7 @@
       </para>
       <para><literal>@</literal><replaceable>directive</replaceable> <replaceable>value</replaceable>
       </para>
-      <table id="ccl.directives">
+      <table id="ccl.directives.table">
        <title>CCL directives</title>
        <tgroup cols="3">
 	<colspec colwidth="2*" colname="name"></colspec>
