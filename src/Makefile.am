@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.40 2006-07-04 12:59:56 heikki Exp $
+## $Id: Makefile.am,v 1.41 2006-10-09 21:12:44 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -136,15 +136,21 @@ $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/esadmin.asn
 
 # Charset negotiation
-z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
+z-charneg.c \
+$(top_srcdir)/include/yaz/z-charneg.h: \
+$(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/charneg-3.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
+z-mterm2.c \
+$(top_srcdir)/include/yaz/z-mterm2.h: \
+$(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/mterm2.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
+z-oclcui.c \
+$(top_srcdir)/include/yaz/z-oclcui.h: \
+$(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/oclcui.asn
 
 # ILL protocol
