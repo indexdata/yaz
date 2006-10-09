@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.42 2006-08-28 14:18:23 adam Exp $
+ * $Id: marcdump.c,v 1.43 2006-10-09 14:22:44 heikki Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -182,8 +182,8 @@ static void dump(const char *fname, const char *from, const char *to,
                 if (len < 25 || len > 100000)
                 {
                     long off = ftell(inf) - 5;
-                    printf("Bad Length %d read at offset %ld (%lx)\n",
-                           len, (long) off, (long) off);
+                    printf("Bad Length %ld read at offset %ld (%lx)\n",
+                           (long)len, (long) off, (long) off);
                     break;
                 }
                 rlen = len - 5;

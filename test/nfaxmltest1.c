@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfaxmltest1.c,v 1.8 2006-10-04 16:59:34 mike Exp $
+ *  $Id: nfaxmltest1.c,v 1.9 2006-10-09 14:22:44 heikki Exp $
  *
  */
 
@@ -132,11 +132,11 @@ void test4(void) {
 
 static void test5(void) {
     struct conv_test {
-        unsigned char *name;
+        char *name;
         int expresult;
-        unsigned char *xml;
-        unsigned char *from;
-        unsigned char *to;
+        char *xml;
+        char *from;
+        char *to;
     };
     struct conv_test tests[]= {
         { "test5-1",  YAZ_NFA_SUCCESS,
@@ -232,9 +232,9 @@ static void test5(void) {
     yaz_nfa *nfa;
     yaz_nfa_char frombuf[MAXBUF];
     yaz_nfa_char tobuf[MAXBUF];
-    unsigned char charbuf[MAXBUF];
+    char charbuf[MAXBUF];
     struct conv_test *thistest=tests;
-    unsigned char *cp;
+    char *cp;
     yaz_nfa_char *ycp;
     size_t incharsleft;
     size_t outcharsleft;
@@ -254,7 +254,7 @@ static void test5(void) {
             }
             ycp=frombuf;
             cp=thistest->from;
-            while ( (*ycp++ = *cp++) )
+            while ( (*ycp++ = (unsigned char)*cp++) )
                 ; /* strcpy, but expand to yaz_nfa_chars */
             incharsleft = strlen(thistest->from);
             prev_incharsleft = 0;

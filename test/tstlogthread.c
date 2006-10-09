@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2005, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstlogthread.c,v 1.3 2005-10-22 13:27:29 adam Exp $
+ * $Id: tstlogthread.c,v 1.4 2006-10-09 14:22:44 heikki Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -33,7 +33,7 @@ static void *t_loop2(void *vp)
     return 0;
 }
 
-static void t_test()
+static void t_test(void)
 {
     pthread_t tids[4];
     

@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  * 
- *  $Id: nfaxml.c,v 1.10 2006-08-04 14:35:40 adam Exp $ 
+ *  $Id: nfaxml.c,v 1.11 2006-10-09 14:22:43 heikki Exp $ 
  */
 
 /**
@@ -45,8 +45,8 @@ static int utf16_content(xmlNodePtr node, yaz_nfa_char *buf, int maxlen,
         if (res == 0) {
             /* should be caught earlier */
             yaz_log(YLOG_FATAL,"Illegal utf-8 sequence "
-                    "%d bytes into '%s' in %s, rule %d ",
-                    cp-content, content, filename, rulenumber);
+                    "%ld bytes into '%s' in %s, rule %d ",
+                    (long)(cp-content), content, filename, rulenumber);
             xmlFree(content);
             return -1;
         }

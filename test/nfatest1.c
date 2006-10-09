@@ -1,7 +1,7 @@
 /*  Copyright (C) 2006, Index Data ApS
  *  See the file LICENSE for details.
  *
- *  $Id: nfatest1.c,v 1.7 2006-10-04 16:59:34 mike Exp $
+ *  $Id: nfatest1.c,v 1.8 2006-10-09 14:22:44 heikki Exp $
  *
  */
 
@@ -35,8 +35,8 @@ void test_match(yaz_nfa *n,
     size_t buflen2 = buflen;
     i = yaz_nfa_match(n,&c, &buflen2,&resptr);
     if (yaz_test_get_verbosity()>3)
-        printf("\n'%s' returned %d. Moved c by %d, and resulted in '%s'\n",
-            expstr, i, (c-buf),(char*)resptr);
+        printf("\n'%s' returned %d. Moved c by %ld, and resulted in '%s'\n",
+            expstr, i, (long)(c-buf),(char*)resptr);
     YAZ_CHECK_EQ(buflen-buflen2, c-buf);
     YAZ_CHECK_EQ(i, expcode);
     if (i==0)
@@ -46,8 +46,8 @@ void test_match(yaz_nfa *n,
     while((bi!=2) && (yaz_test_get_verbosity()>3)){
         bi = yaz_nfa_get_backref(n, i,&cp1,&cp2);
         if (bi==0 && ( cp1 || cp2 ) ) {
-            printf("  got backref %d of %d chars (%p to %p): '",
-                    i, cp2-cp1+1, cp1, cp2);
+            printf("  got backref %d of %ld chars (%p to %p): '",
+                    i, (long)(cp2-cp1+1), cp1, cp2);
             while (cp2-cp1 >= 0 )
                 printf("%c", *cp1++);
             printf("'\n");
@@ -185,8 +185,8 @@ void construction_test(void) {
     YAZ_CHECK_EQ(*cp1, 'z' );
     YAZ_CHECK_EQ(*cp2, 'k' );
     if (yaz_test_get_verbosity()>3)
-        printf("backref from %p '%c' to %p '%c' is %d long. sz is now %d\n",
-            cp1, *cp1,  cp2, *cp2,  cp2-cp1+1, sz );
+        printf("backref from %p '%c' to %p '%c' is %ld long. sz is now %ld\n",
+            cp1, *cp1,  cp2, *cp2,  (long)(cp2-cp1+1), (long)sz );
 
     yaz_nfa_destroy(n);
 }
@@ -277,10 +277,11 @@ void converter_test(void) {
     YAZ_CHECK_EQ(i,YAZ_NFA_SUCCESS); 
     i=yaz_nfa_get_backref(n, 2, &cp1, &cp2 );
     if (yaz_test_get_verbosity()>3)
-        printf("backref from %p '%c' to %p '%c' is %d long. sz is now %d\n",
-            cp1, *cp1,  cp2, *cp2,  cp2-cp1+1, sz );
+        printf("backref from %p '%c' to %p '%c' is %ld long. sz is now %ld\n",
+            cp1, *cp1,  cp2, *cp2,  (long)(cp2-cp1+1), (long)sz );
     YAZ_CHECK_EQ(i,0);
-    YAZ_CHECK_EQ((int)c1,(int)c2);  /* got our pointer back from nfa */
+    /*YAZ_CHECK_EQ((int)c1,(int)c2);*/  /* got our pointer back from nfa */
+    YAZ_CHECK(c1==c2);  /* got our pointer back from nfa */
     for(i=0;i<1024;i++)
         outbuf[i]=10000+i;
     outp=outbuf;
