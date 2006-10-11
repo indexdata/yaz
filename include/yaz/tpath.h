@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: tpath.h,v 1.12 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: tpath.h,v 1.13 2006-10-11 08:43:21 adam Exp $ */
 
 /**
  * \file tpath.h
@@ -41,10 +41,24 @@ YAZ_BEGIN_CDECL
 
 /** \brief checks whether path is absolute
     \param path path to checked
-
-    Returns 1 if path is absolute, 0 if relative
+    \retval 1 path is absolute
+    \retval 0 path is relative
 */
 YAZ_EXPORT int yaz_is_abspath (const char *path);
+
+/** \brief get next path component in filepath
+    \param path_p pointer to path (updated to "next" entry if any)
+    \param comp upon pointer to component (if component is found)
+    \retval 0 no component found (and no more componennts)
+    \retval >0 length of component (length of *comp)
+    
+    A filepath has components separted by colon. For example
+    /usr/lib/modules:c:/my:/:lib
+    which has these components
+    "/usr/lib/modules", "c:/my", "/", "lib"
+*/
+YAZ_EXPORT size_t yaz_filepath_comp(const char **path_p, const char **comp);
+
 
 /** \brief resolve file on path 
     \param fname "short" filename (without path)
@@ -86,7 +100,8 @@ YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *fname,
 /** \brief closes file
     \param f FILE handle
 
-    Returns -1 on failure; 0 on success
+    \retval -1 on failure
+    \retval 0 on success
 */
 YAZ_EXPORT int yaz_fclose(FILE *f);
 

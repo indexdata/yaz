@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tpath.c,v 1.11 2006-06-08 20:55:38 adam Exp $
+ * $Id: tpath.c,v 1.12 2006-10-11 08:43:22 adam Exp $
  */
 /**
  * \file tpath.c
@@ -36,43 +36,62 @@ int yaz_fclose (FILE *f)
 }
 
 
+size_t yaz_filepath_comp(const char **path_p, const char **comp)
+{
+    const char *path = *path_p;
+    size_t len;
+    const char *path_sep;
+
+    /* somewhat dirty since we have to consider Windows
+     * drive letters..
+     */
+    if (path[0] && strchr ("/\\.", path[0]))
+        path_sep = strchr (path+1, ':');
+    else if (path[0] && path[1])
+        path_sep = strchr (path+2, ':');
+    else
+        path_sep = 0;
+    
+    if (path_sep)
+    {
+        len = path_sep - path;
+        *path_p = path + len + 1;
+    }
+    else
+    {
+        len = strlen(path);
+        *path_p = path + len;
+    }
+    *comp = path;
+    return len;
+}
+
 char *yaz_filepath_resolve(const char *fname, const char *path,
                            const char *base, char *fullpath)
 {
     for(;;)
     {
         struct stat stat_buf;
-        const char *path_sep = 0;
-        size_t len = 0;
         size_t slen = 0;
        
         *fullpath = '\0';
         if (path)
         {
-            /* somewhat dirty since we have to consider Windows
-             * drive letters..
-             */
-            if (path[0] && strchr ("/\\.", *path))
-                path_sep = strchr (path+1, ':');
-            else if (path[0] && path[1])
-                path_sep = strchr (path+2, ':');
-            else
-                path_sep = 0;
+            const char *comp;
+            size_t len = 0;
 
-            if (path_sep)
-                len = path_sep - path;
-            else
-                len = strlen(path);
-            /* is path is relative and base is to be used */
-            if (!strchr ("/\\", *path) && base)
+            len = yaz_filepath_comp(&path, &comp);
+            if (!len)
+                break;
+
+            if (!strchr ("/\\", *comp) && base)
             {
                 /* yes: make base the first part */
                 strcpy (fullpath, base);
                 slen = strlen(fullpath);
                 fullpath[slen++] = '/';
             }
-            if (len)
-                memcpy (fullpath+slen, path, len);
+            memcpy (fullpath+slen, comp, len);
             slen += len;
             if (slen > 0 && !strchr("/\\", fullpath[slen-1]))
                 fullpath[slen++] = '/';
@@ -80,10 +99,8 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
         strcpy (fullpath+slen, fname);
         if (stat(fullpath, &stat_buf) == 0)
             return fullpath;
-        
-        if (!path_sep)
+        if (!path)
             break;
-        path = path_sep+1;
     }
     return 0;
 }
