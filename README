@@ -1,11 +1,11 @@
-YAZ toolkit - $Id: README,v 1.48 2006-02-01 20:07:20 adam Exp $
+YAZ toolkit - $Id: README,v 1.49 2006-10-13 11:25:24 adam Exp $
 
 Copyright (C) 1995-2006, Index Data ApS.
 See the file LICENSE for details.
 
 The primary output of the source here is the YAZ library, which
 contains support functions for implementing the server or client
-role of Z39.50 and SRW.
+role of Z39.50 and SRU.
 
 On Unix, GNU configure is used to configure YAZ and generate Makefiles.
 Type "./configure", then "make" to build YAZ. Read
@@ -17,7 +17,7 @@ On Windows, a MS Visual Studio makefile is provided (nmake). The commands
 should do. Refer to doc/installation.win32.html for details.
 
 Note: If you are using the CVS snapshot of YAZ you must have autoconf,
-automake and libtool installed. Before running configure, create
+automake, libtool and xsltproc installed. Before running configure, create
 support files by running buildconf.sh in the top-level directory of YAZ.  
 
 In any case refer to the documentation in sub directory doc or read
