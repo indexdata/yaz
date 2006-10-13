@@ -24,16 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: cql.h,v 1.15 2006-10-09 21:02:41 adam Exp $ */
-
-/* $Id: cql.h,v 1.15 2006-10-09 21:02:41 adam Exp $
-   Copyright (C) 1995-2005, Index Data ApS
-   Index Data Aps
-
-This file is part of the YAZ toolkit.
-
-See the file LICENSE.
-*/
+/* $Id: cql.h,v 1.16 2006-10-13 11:30:37 adam Exp $ */
 
 /** \file cql.h
     \brief Header with public definitions about CQL.

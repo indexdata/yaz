@@ -24,14 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: test.h,v 1.11 2006-10-09 21:02:41 adam Exp $ */
-
-/*
- * Copyright (C) 1995-2006, Index Data ApS
- * See the file LICENSE for details.
- *
- * $Id: test.h,v 1.11 2006-10-09 21:02:41 adam Exp $
- */
+/* $Id: test.h,v 1.12 2006-10-13 11:30:37 adam Exp $ */
 
 /** \file test.h
     \brief Unit Test for YAZ
