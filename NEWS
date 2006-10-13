@@ -1,3 +1,5 @@
+--- 2.1.36 2006/10/13
+
 Implemented yaz_filepath_comp which splits a path into file path
 components (required by Zebra 2.0.3+).
 
