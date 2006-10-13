@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.31 2006-09-21 15:55:25 adam Exp $
+ * $Id: tcpip.c,v 1.32 2006-10-13 11:22:26 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -26,9 +26,16 @@
 #endif
 
 #ifdef WIN32
+
+/* VS 2003 or later has getaddrinfo; older versions do not */
 #include <winsock2.h>
+#if _MSC_VER >= 1300
 #include <ws2tcpip.h>
 #define HAVE_GETADDRINFO 1
+#else
+#define HAVE_GETADDRINFO 0
+#endif
+
 #else
 #include <netinet/in.h>
 #include <netdb.h>
