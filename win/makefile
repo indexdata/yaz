@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.117 2006-08-03 09:27:23 adam Exp $
+# $Id: makefile,v 1.118 2006-10-24 08:26:49 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -108,6 +108,7 @@ ZOOMTST6=$(BINDIR)\zoomtst6.exe
 ZOOMTST7=$(BINDIR)\zoomtst7.exe
 ZOOMTST8=$(BINDIR)\zoomtst8.exe
 ZOOMTST9=$(BINDIR)\zoomtst9.exe
+ZOOMTST10=$(BINDIR)\zoomtst10.exe
 
 CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
@@ -121,7 +122,8 @@ client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
- $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9)
+ $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
+ $(ZOOMTST10)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
 
@@ -306,6 +308,8 @@ YAZ_ZOOMTST8_OBJS = \
    $(OBJDIR)\zoomtst8.obj
 YAZ_ZOOMTST9_OBJS = \
    $(OBJDIR)\zoomtst9.obj
+YAZ_ZOOMTST10_OBJS = \
+   $(OBJDIR)\zoomtst10.obj
 
 YAZ_CQL2PQF_OBJS = \
    $(OBJDIR)\cql2pqf.obj
@@ -709,106 +713,92 @@ $(DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		$(DLL_OBJS) \
 		$(YAZ_RES) \
 		/out:$(DLL) \
-		/implib:"$(YAZ_IMPLIB)" \
-		/map:"$(LIBDIR)\yaz.map" 
+		/implib:"$(YAZ_IMPLIB)" 
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_CLIENT_OBJS) \
-		/map:"$(LIBDIR)\yaz-client.map" \
 		/out:$(CLIENT)
 
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMSH_OBJS) \
-		/map:"$(LIBDIR)\zoomsh.map" \
 		/out:$(ZOOMSH)
 
 $(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST1_OBJS) \
-		/map:"$(LIBDIR)\zoomtst1.map" \
 		/out:$(ZOOMTST1)
 
 $(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST2_OBJS) \
-		/map:"$(LIBDIR)\zoomtst2.map" \
 		/out:$(ZOOMTST2)
 
 $(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST3_OBJS) \
-		/map:"$(LIBDIR)\zoomtst3.map" \
 		/out:$(ZOOMTST3)
 
 $(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST4_OBJS) \
-		/map:"$(LIBDIR)\zoomtst4.map" \
 		/out:$(ZOOMTST4)
 
 $(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST5_OBJS) \
-		/map:"$(LIBDIR)\zoomtst5.map" \
 		/out:$(ZOOMTST5)
 
 $(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST6_OBJS) \
-		/map:"$(LIBDIR)\zoomtst6.map" \
 		/out:$(ZOOMTST6)
 
 $(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST7_OBJS) \
-		/map:"$(LIBDIR)\zoomtst7.map" \
 		/out:$(ZOOMTST7)
 
 $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST8_OBJS) \
-		/map:"$(LIBDIR)\zoomtst8.map" \
 		/out:$(ZOOMTST8)
-
 
 $(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_ZOOMTST9_OBJS) \
-		/map:"$(LIBDIR)\zoomtst9.map" \
 		/out:$(ZOOMTST9)
+
+$(ZOOMTST10) : "$(BINDIR)" $(YAZ_ZOOMTST10_OBJS) $(DLL)
+	$(LINK_PROGRAM) \
+		$(YAZ_ZOOMTST10_OBJS) \
+		/out:$(ZOOMTST10)
 
 $(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_CQL2PQF_OBJS) \
-		/map:"$(LIBDIR)\cql2pqf.map" \
 		/out:$(CQL2PQF)
 
 $(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_CQL2XCQL_OBJS) \
-		/map:"$(LIBDIR)\cql2xcql.map" \
 		/out:$(CQL2XCQL)
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(ZTEST_OBJS) \
 		/implib:"$(LIBDIR)\yaz-ztest.lib" \
-		/map:"$(LIBDIR)\yaz-ztest.map" \
 		/out:$(ZTEST) 
 
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(YAZ_MARCDUMP_OBJS) \
-		/map:"$(LIBDIR)\yaz-marcdump.map" \
 		/out:$(YAZ_MARCDUMP) 
-
 
 $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(DLL)
 	$(LINK_PROGRAM) \
 		$(TSTLOG_OBJS) \
-		/map:"$(LIBDIR)\tstlog.map" \
 		/out:$(TSTLOG)
 
 # Other rules
@@ -823,7 +813,6 @@ clean:
 	-del $(BINDIR)\*.dll
 	-del $(BINDIR)\*.pdb
 	-del $(TMPDIR)\*.
-	-del $(LIBDIR)\*.MAP
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
 
