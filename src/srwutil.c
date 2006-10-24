@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.51 2006-10-05 15:19:33 adam Exp $
+ * $Id: srwutil.c,v 1.52 2006-10-24 09:18:34 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -328,6 +328,26 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
 
+
+static void grab_charset(ODR o, const char *content_type, char **charset)
+{
+    if (charset)
+    { 
+        const char *charset_p = 0;
+        if (content_type && (charset_p = strstr(content_type, "; charset=")))
+        {
+            int i = 0;
+            charset_p += 10;
+            while (i < 20 && charset_p[i] &&
+                   !strchr("; \n\r", charset_p[i]))
+                i++;
+            *charset = (char*) odr_malloc(o, i+1);
+            memcpy(*charset, charset_p, i);
+            (*charset)[i] = '\0';
+        }
+    }
+}
+
 int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                    Z_SOAP **soap_package, ODR decode, char **charset)
 {
@@ -343,7 +363,6 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             char *db = "Default";
             const char *p0 = hreq->path, *p1;
             int ret = -1;
-            const char *charset_p = 0;
             
             static Z_SOAP_Handler soap_handlers[4] = {
 #if YAZ_HAVE_XML2
@@ -369,17 +388,8 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 db[p1 - p0] = '\0';
             }
 
-            if (charset && (charset_p = strstr(content_type, "; charset=")))
-            {
-                int i = 0;
-                charset_p += 10;
-                while (i < 20 && charset_p[i] &&
-                       !strchr("; \n\r", charset_p[i]))
-                    i++;
-                *charset = (char*) odr_malloc(decode, i+1);
-                memcpy(*charset, charset_p, i);
-                (*charset)[i] = '\0';
-            }
+            grab_charset(decode, content_type, charset);
+
             ret = z_soap_codec(decode, soap_package, 
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
@@ -450,20 +460,18 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     };
 #endif
     const char *content_type = z_HTTP_header_lookup(hreq->headers,
-                                                    "Content-Type");
+                                            "Content-Type");
+
     /*
-      SRU GET: allow any content type.
+      SRU GET: ignore content type.
       SRU POST: we support "application/x-www-form-urlencoded";
       not  "multipart/form-data" .
     */
-    if (!strcmp(hreq->method, "GET") 
-        ||
-        (!strcmp(hreq->method, "POST") 
-         && content_type &&
-         !yaz_strcmp_del("application/x-www-form-urlencoded",
-                         content_type, "; ")
-            )
-        )
+    if (!strcmp(hreq->method, "GET")
+        || 
+             (!strcmp(hreq->method, "POST") && content_type &&
+              !yaz_strcmp_del("application/x-www-form-urlencoded",
+                              content_type, "; ")))
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
@@ -490,8 +498,10 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char **uri_name;
         char **uri_val;
 
-        if (charset)
-            *charset = 0;
+        grab_charset(decode, content_type, charset);
+        if (charset && *charset == 0 && !strcmp(hreq->method, "GET"))
+            *charset = "UTF-8";
+
         if (*p0 == '/')
             p0++;
         p1 = strchr(p0, '?');

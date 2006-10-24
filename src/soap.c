@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.15 2006-10-24 08:05:45 adam Exp $
+ * $Id: soap.c,v 1.16 2006-10-24 09:18:34 adam Exp $
  */
 /**
  * \file soap.c
@@ -261,8 +261,6 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             xmlDocSetRootElement(doc, body_ptr->children);
             body_ptr->children = 0;
             xmlFreeNode(envelope_ptr);
-            if (!encoding)
-                encoding = "utf-8";
         }
         if (stylesheet)
         {
