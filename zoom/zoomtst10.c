@@ -1,4 +1,4 @@
-/* $Id: zoomtst10.c,v 1.2 2006-10-24 08:26:25 adam Exp $  */
+/* $Id: zoomtst10.c,v 1.3 2006-10-24 09:53:42 adam Exp $  */
 
 /** \file zoomtst10.c
     \brief Synchronous single-target search using CCL conversion
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     if (argc != 3)
     {
         fprintf (stderr, "usage:\n%s target cclquery\n", *argv);
-        fprintf (stderr, " eg.  bagel.indexdata.dk/gils "ti=utah"\n");
+        fprintf (stderr, " eg.  bagel.indexdata.dk/gils \"ti=utah\"\n");
         exit (1);
     }
 
