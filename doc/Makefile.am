@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.74 2006-10-11 09:39:43 adam Exp $
+## $Id: Makefile.am,v 1.75 2006-10-24 10:12:36 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -79,6 +79,9 @@ dist-hook:
 	for p in $$d/*.html; do \
 		cp $$p $(distdir); \
 	done
+
+doc-clean:
+	rm -f *.html *.[0-9] *.pdf *.tkl
 
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
