@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.52 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.53 2006-10-24 11:48:42 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -34,7 +34,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     A recent addition to &yaz; is SRU support. You can now make
     SRU ZOOM connections by specifying scheme <literal>http://</literal>
-    for the hostname for a connection.
+    for the hostname for a connection.  The dialect of SRU used is
+    specified by the value of the connection's <literal>sru</literal>
+    option, which may be SRU over HTTP GET (<literal>get</literal>),
+    SRU over HTTP POST (<literal>post</literal>) or SRW (SRU over
+    SOAP) (<literal>soap</literal>).
    </para>
   </note>
 
