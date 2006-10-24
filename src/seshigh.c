@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.100 2006-10-05 15:24:02 adam Exp $
+ * $Id: seshigh.c,v 1.101 2006-10-24 08:07:02 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -906,6 +906,7 @@ static void srw_bend_search(association *assoc, request *req,
         
         if (srw_req->query_type == Z_SRW_query_type_cql)
         {
+            yaz_log(YLOG_LOG, "CQL string=%s", srw_req->query.cql);
             if (assoc->server && assoc->server->cql_transform)
             {
                 int srw_errcode = cql2pqf(assoc->encode, srw_req->query.cql,
@@ -2321,7 +2322,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.100 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.101 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

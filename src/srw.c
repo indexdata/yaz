@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.48 2006-08-18 06:30:05 adam Exp $
+ * $Id: srw.c,v 1.49 2006-10-24 08:07:02 adam Exp $
  */
 /**
  * \file srw.c
@@ -603,6 +603,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "database", o,
                                            &req->database))
                     ;
+            }
+            if (!req->query.cql && !req->query.pqf && !req->query.xcql)
+            {
+                /* should put proper diagnostic here */
+                return -1;
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveResponse"))

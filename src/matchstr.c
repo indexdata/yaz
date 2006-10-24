@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: matchstr.c,v 1.5 2005-06-25 15:46:04 adam Exp $
+ * $Id: matchstr.c,v 1.6 2006-10-24 08:07:02 adam Exp $
  */
 
 /**
@@ -19,12 +19,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <yaz/yaz-util.h>
-
-/*
- * Match strings, independently of case and occurences of '-'.
- * fairly inefficient - will be replaced with an indexing scheme for
- * the various subsystems if we get a bottleneck here.
- */
 
 int yaz_matchstr(const char *s1, const char *s2)
 {
