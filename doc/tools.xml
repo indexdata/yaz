@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.52 2006-10-09 21:02:40 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.53 2006-10-25 07:28:27 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -890,7 +890,7 @@
       </table>
      </sect4>
     </sect3>
-    <sect3 id="ccl.apid">
+    <sect3 id="ccl.api">
      <title>CCL API</title>
      <para>
       All public definitions can be found in the header file
@@ -1439,6 +1439,16 @@ int cql_transform_FILE(cql_transform_t ct,
        <screen>
         @attr 1=4 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 "x"
        </screen>
+      </para>
+     </example>
+     <example id="example.cql.to.rpn.bathprofile">
+      <title>CQL to RPN using Bath Profile</title>
+      <para>
+       The file <filename>etc/pqf.properties</filename> has mappings from
+       the Bath Profile and Dublin Core to RPN.
+       If YAZ is installed as a package it's usually located
+       in <filename>/usr/share/yaz/etc</filename> and part of the
+       development package, such as <literal>libyaz-dev</literal>.
       </para>
      </example>
     </sect3>
