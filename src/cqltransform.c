@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.24 2006-10-05 16:12:23 adam Exp $
+/* $Id: cqltransform.c,v 1.25 2006-10-25 09:58:19 adam Exp $
    Copyright (C) 1995-2005, Index Data ApS
    Index Data Aps
 
@@ -53,36 +53,48 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
     {
         const char *cp_value_start;
         const char *cp_value_end;
+        const char *cp_pattern_start;
         const char *cp_pattern_end;
         const char *cp = line;
-        while (*cp && !strchr(" \t=\r\n#", *cp))
+
+        while (*cp && strchr(" \t", *cp))
+            cp++;
+        cp_pattern_start = cp;
+        
+        while (*cp && !strchr(" \t\r\n=#", *cp))
             cp++;
         cp_pattern_end = cp;
-        if (cp == line)
+        if (cp == cp_pattern_start)
             continue;
-        while (*cp && strchr(" \t\r\n", *cp))
+        while (*cp && strchr(" \t", *cp))
             cp++;
         if (*cp != '=')
-            continue;
+        {
+            *pp = 0;
+            cql_transform_close(ct);
+            return 0;
+        }
         cp++;
         while (*cp && strchr(" \t\r\n", *cp))
             cp++;
         cp_value_start = cp;
-        if (!(cp_value_end = strchr(cp, '#')))
+        cp_value_end = strchr(cp, '#');
+        if (!cp_value_end)
             cp_value_end = strlen(line) + line;
 
         if (cp_value_end != cp_value_start &&
             strchr(" \t\r\n", cp_value_end[-1]))
             cp_value_end--;
         *pp = (struct cql_prop_entry *) xmalloc (sizeof(**pp));
-        (*pp)->pattern = (char *) xmalloc (cp_pattern_end - line + 1);
-        memcpy ((*pp)->pattern, line, cp_pattern_end - line);
-        (*pp)->pattern[cp_pattern_end-line] = 0;
+        (*pp)->pattern = (char *) xmalloc(cp_pattern_end-cp_pattern_start + 1);
+        memcpy ((*pp)->pattern, cp_pattern_start,
+                cp_pattern_end-cp_pattern_start);
+        (*pp)->pattern[cp_pattern_end-cp_pattern_start] = '\0';
 
-        (*pp)->value = (char *) xmalloc (cp_value_end - cp_value_start + 1);
+        (*pp)->value = (char *) xmalloc (cp_value_end-cp_value_start + 1);
         if (cp_value_start != cp_value_end)
             memcpy ((*pp)->value, cp_value_start, cp_value_end-cp_value_start);
-        (*pp)->value[cp_value_end - cp_value_start] = 0;
+        (*pp)->value[cp_value_end - cp_value_start] = '\0';
         pp = &(*pp)->next;
     }
     *pp = 0;
