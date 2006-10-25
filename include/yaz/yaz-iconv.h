@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: yaz-iconv.h,v 1.12 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: yaz-iconv.h,v 1.13 2006-10-25 09:54:35 adam Exp $ */
 
 /**
  * \file yaz-iconv.h
@@ -66,6 +66,12 @@ YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
 /** \brief tests whether conversion is handled by YAZ' iconv or system iconv */
 YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
+/** \brief match strings - independent of case and '-'
+    \param s1 first string
+    \param s2 second string
+    \retval 0 strings are similar
+    \retval !=0 strings are different
+*/
 YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
 
 YAZ_EXPORT int yaz_strcmp_del(const char *a, const char *b, const char *b_del);
