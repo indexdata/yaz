@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.92 2006-10-05 14:58:58 adam Exp $
+ * $Id: zoom-c.c,v 1.93 2006-10-26 15:34:46 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -235,9 +235,13 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
         {
         case ZOOM_TASK_SEARCH:
             ZOOM_resultset_destroy(task->u.search.resultset);
+            xfree(task->u.search.syntax);
+            xfree(task->u.search.elementSetName);
             break;
         case ZOOM_TASK_RETRIEVE:
             ZOOM_resultset_destroy(task->u.retrieve.resultset);
+            xfree(task->u.retrieve.syntax);
+            xfree(task->u.retrieve.elementSetName);
             break;
         case ZOOM_TASK_CONNECT:
             break;
@@ -272,7 +276,9 @@ void ZOOM_connection_remove_tasks(ZOOM_connection c)
         ZOOM_connection_remove_task(c);
 }
 
-static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos);
+static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos,
+                                       const char *syntax,
+                                       const char *elementSetName);
 
 ZOOM_API(ZOOM_connection)
     ZOOM_connection_create(ZOOM_options options)
@@ -727,6 +733,7 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_task task;
     const char *cp;
     int start, count;
+    const char *syntax, *elementSetName;
 
     yaz_log(log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = q->sort_spec;
@@ -773,7 +780,14 @@ ZOOM_API(ZOOM_resultset)
     task->u.search.resultset = r;
     task->u.search.start = start;
     task->u.search.count = count;
-    ZOOM_resultset_addref(r);  
+
+    syntax = ZOOM_options_get(r->options, "preferredRecordSyntax"); 
+    task->u.search.syntax = syntax ? xstrdup(syntax) : 0;
+    elementSetName = ZOOM_options_get(r->options, "elementSetName");
+    task->u.search.elementSetName = elementSetName 
+        ? xstrdup(elementSetName) : 0;
+   
+    ZOOM_resultset_addref(r);
 
     (q->refcount)++;
 
@@ -933,6 +947,7 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
     ZOOM_task task;
     ZOOM_connection c;
     const char *cp;
+    const char *syntax, *elementSetName;
 
     if (!r)
         return;
@@ -960,6 +975,12 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
     task->u.retrieve.resultset = r;
     task->u.retrieve.start = start;
     task->u.retrieve.count = count;
+
+    syntax = ZOOM_options_get(r->options, "preferredRecordSyntax"); 
+    task->u.retrieve.syntax = syntax ? xstrdup(syntax) : 0;
+    elementSetName = ZOOM_options_get(r->options, "elementSetName");
+    task->u.retrieve.elementSetName = elementSetName 
+        ? xstrdup(elementSetName) : 0;
 
     cp = ZOOM_options_get(r->options, "schema");
     if (cp)
@@ -1221,7 +1242,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.92 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.93 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1344,16 +1365,16 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
     assert(c->tasks);
-    if (c->tasks->which == ZOOM_TASK_SEARCH)
+    switch(c->tasks->which)
     {
+    case ZOOM_TASK_SEARCH:
         resultset = c->tasks->u.search.resultset;
         resultset->setname = xstrdup("default");
         ZOOM_options_set(resultset->options, "setname", resultset->setname);
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
-    }
-    else if (c->tasks->which == ZOOM_TASK_RETRIEVE)
-    {
+        break;
+    case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
 
         start = &c->tasks->u.retrieve.start;
@@ -1367,7 +1388,9 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         for (i = 0; i < *count; i++)
         {
             ZOOM_record rec =
-                record_cache_lookup(resultset, i + *start);
+                record_cache_lookup(resultset, i + *start,
+                                    c->tasks->u.retrieve.syntax,
+                                    c->tasks->u.retrieve.elementSetName);
             if (!rec)
                 break;
             else
@@ -1381,6 +1404,9 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 
         if (*count == 0)
             return zoom_complete;
+        break;
+    default:
+        return zoom_complete;
     }
     assert(resultset->query);
         
@@ -1470,7 +1496,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
         set_DatabaseNames(c, r->options, &search_req->num_databaseNames);
 
     /* get syntax (no need to provide unless piggyback is in effect) */
-    syntax = ZOOM_options_get(r->options, "preferredRecordSyntax");
+    syntax = c->tasks->u.search.syntax;
 
     lslb = ZOOM_options_get_int(r->options, "largeSetLowerBound", -1);
     ssub = ZOOM_options_get_int(r->options, "smallSetUpperBound", -1);
@@ -1611,7 +1637,12 @@ ZOOM_API(ZOOM_record)
 ZOOM_API(ZOOM_record)
     ZOOM_resultset_record_immediate(ZOOM_resultset s,size_t pos)
 {
-    return record_cache_lookup(s, pos);
+    const char *syntax =
+        ZOOM_options_get(s->options, "preferredRecordSyntax"); 
+    const char *elementSetName =
+        ZOOM_options_get(s->options, "elementSetName");
+
+    return record_cache_lookup(s, pos, syntax, elementSetName);
 }
 
 ZOOM_API(ZOOM_record)
@@ -2026,13 +2057,10 @@ static size_t record_hash(int pos)
 }
 
 static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
-                             int pos)
+                             int pos,
+                             const char *syntax, const char *elementSetName)
 {
     ZOOM_record_cache rc;
-    const char *elementSetName =
-        ZOOM_resultset_option_get(r, "elementSetName");
-    const char *syntax = 
-        ZOOM_resultset_option_get(r, "preferredRecordSyntax");
     
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
@@ -2079,13 +2107,11 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     r->record_hash[record_hash(pos)] = rc;
 }
 
-static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos)
+static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos,
+                                       const char *syntax,
+                                       const char *elementSetName)
 {
     ZOOM_record_cache rc;
-    const char *elementSetName =
-        ZOOM_resultset_option_get(r, "elementSetName");
-    const char *syntax = 
-        ZOOM_resultset_option_get(r, "preferredRecordSyntax");
     
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
@@ -2108,6 +2134,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
 {
     ZOOM_resultset resultset;
     int *start, *count;
+    const char *syntax = 0, *elementSetName = 0;
 
     if (!c->tasks)
         return ;
@@ -2117,11 +2144,15 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
         resultset = c->tasks->u.search.resultset;
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
+        syntax = c->tasks->u.search.syntax;
+        elementSetName = c->tasks->u.search.elementSetName;
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;        
         start = &c->tasks->u.retrieve.start;
         count = &c->tasks->u.retrieve.count;
+        syntax = c->tasks->u.retrieve.syntax;
+        elementSetName = c->tasks->u.retrieve.elementSetName;
         break;
     default:
         return;
@@ -2149,7 +2180,8 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
                 sr->u.databaseOrSurDiagnostics;
             for (i = 0; i<p->num_records; i++)
             {
-                record_cache_add(resultset, p->records[i], i + *start);
+                record_cache_add(resultset, p->records[i], i + *start,
+                                 syntax, elementSetName);
             }
             *count -= i;
             *start += i;
@@ -2165,7 +2197,8 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
                 /* present response and we didn't get any records! */
                 Z_NamePlusRecord *myrec = 
                     zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
-                record_cache_add(resultset, myrec, *start);
+                record_cache_add(resultset, myrec, *start,
+                                 syntax, elementSetName);
             }
         }
         else if (present_phase)
@@ -2173,7 +2206,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             /* present response and we didn't get any records! */
             Z_NamePlusRecord *myrec = 
                 zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
-            record_cache_add(resultset, myrec, *start);
+            record_cache_add(resultset, myrec, *start, syntax, elementSetName);
         }
     }
 }
@@ -2385,11 +2418,15 @@ static zoom_ret send_present(ZOOM_connection c)
         resultset = c->tasks->u.search.resultset;
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
+        syntax = c->tasks->u.search.syntax;
+        elementSetName = c->tasks->u.search.elementSetName;
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
         start = &c->tasks->u.retrieve.start;
         count = &c->tasks->u.retrieve.count;
+        syntax = c->tasks->u.retrieve.syntax;
+        elementSetName = c->tasks->u.retrieve.elementSetName;
 
         if (*start >= resultset->size)
         {
@@ -2406,9 +2443,6 @@ static zoom_ret send_present(ZOOM_connection c)
     yaz_log(log_details, "%p send_present start=%d count=%d",
             c, *start, *count);
 
-    syntax = ZOOM_resultset_option_get(resultset, "preferredRecordSyntax");
-    elementSetName = ZOOM_resultset_option_get(resultset, "elementSetName");
-
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
     if (*start < 0)
@@ -2419,7 +2453,7 @@ static zoom_ret send_present(ZOOM_connection c)
     for (i = 0; i < *count; i++)
     {
         ZOOM_record rec =
-            record_cache_lookup(resultset, i + *start);
+            record_cache_lookup(resultset, i + *start, syntax, elementSetName);
         if (!rec)
             break;
         else
@@ -3462,23 +3496,28 @@ static void handle_srw_response(ZOOM_connection c,
     NMEM nmem;
     ZOOM_Event event;
     int *start;
+    const char *syntax, *elementSetName;
 
     if (!c->tasks)
         return;
 
-    if (c->tasks->which == ZOOM_TASK_SEARCH)
+    switch(c->tasks->which)
     {
+    case ZOOM_TASK_SEARCH:
         resultset = c->tasks->u.search.resultset;
         start = &c->tasks->u.search.start;
-    }
-    else if (c->tasks->which == ZOOM_TASK_RETRIEVE)
-    {
+        syntax = c->tasks->u.search.syntax;
+        elementSetName = c->tasks->u.search.elementSetName;        
+        break;
+    case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
         start = &c->tasks->u.retrieve.start;
+        syntax = c->tasks->u.retrieve.syntax;
+        elementSetName = c->tasks->u.retrieve.elementSetName;
+        break;
+    default:
+        return;
     }
-    else
-        return ;
-
     event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
     ZOOM_connection_put_event(c, event);
 
@@ -3518,7 +3557,7 @@ static void handle_srw_response(ZOOM_connection c,
         npr->u.databaseRecord->u.octet_aligned->len = 
             npr->u.databaseRecord->u.octet_aligned->size = 
             res->records[i].recordData_len;
-        record_cache_add(resultset, npr, pos);
+        record_cache_add(resultset, npr, pos, syntax, elementSetName);
     }
     if (res->num_diagnostics > 0)
     {
