@@ -5,6 +5,8 @@ Updates for SRU Update by Ko van der Sloot:
 versions in the code, marked as 'backward compatible'.
 3. Added diagnostics for SRU Update.
 
+Fixd bug #709: Records are fetched in wrong format when tasks are queued.
+
 --- 2.1.36 2006/10/13
 
 Implemented yaz_filepath_comp which splits a path into file path
