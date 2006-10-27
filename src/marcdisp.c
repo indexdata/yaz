@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.34 2006-08-28 14:18:22 adam Exp $
+ * $Id: marcdisp.c,v 1.35 2006-10-27 12:19:15 adam Exp $
  */
 
 /**
@@ -25,6 +25,7 @@
 #include <yaz/marcdisp.h>
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
+#include <yaz/nmem_xml.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>

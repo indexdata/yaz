@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: nmem.h,v 1.22 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: nmem.h,v 1.23 2006-10-27 12:19:15 adam Exp $ */
 
 /**
  * \file nmem.h
@@ -38,10 +38,6 @@
 
 #include <stddef.h>
 #include <yaz/yconfig.h>
-
-#if YAZ_HAVE_XML2
-#include <libxml/parser.h>
-#endif
 
 #define NMEM_DEBUG 0
 
@@ -96,11 +92,6 @@ YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
 */
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
                                     char ***darray, int *num);
-
-#if YAZ_HAVE_XML2
-/** \brief copies TEXT Libxml2 node data to NMEM */
-YAZ_EXPORT char *nmem_text_node_cdata(const xmlNode *ptr, NMEM nmem);
-#endif
 
 /** \brief creates and allocates integer for NMEM */
 YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
