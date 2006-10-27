@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-xmlquery.c,v 1.4 2006-10-04 16:59:34 mike Exp $
+ * $Id: yaz-xmlquery.c,v 1.5 2006-10-27 11:02:50 adam Exp $
  */
 
 #include <stdlib.h>
@@ -62,10 +62,10 @@ void pqftoxmlquery(const char *pqf)
 	}
         else
         {
-            char *buf_out = 0;
+            xmlChar *buf_out = 0;
             int len_out = 0;
 
-            xmlDocDumpMemory(doc, (xmlChar **) &buf_out, &len_out);
+            xmlDocDumpMemory(doc, &buf_out, &len_out);
 
             if (!len_out || !buf_out)
 	    {
