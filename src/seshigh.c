@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.102 2006-10-24 08:12:12 adam Exp $
+ * $Id: seshigh.c,v 1.103 2006-10-27 11:22:09 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1477,24 +1477,60 @@ static void srw_bend_update(association *assoc, request *req,
         rr.uri = 0;
         rr.message = 0;
         rr.details = 0;
-
+        
+        if ( rr.operation == 0 ){
+            yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                          &srw_res->num_diagnostics,
+                                          9, "action" );
+            return;
+        }
         yaz_log(YLOG_DEBUG, "basename = %s", rr.basenames[0] );
         yaz_log(YLOG_DEBUG, "Operation = %s", rr.operation );
 	if ( !strcmp( rr.operation, "delete" ) ){
             if ( !srw_req->recordId ){
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordId" );
+                if ( srw_req->record.recordData_len ){
+                    if ( srw_req->record.recordSchema == 0 ){
+                        yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                                      &srw_res->num_diagnostics,
+                                                      9, "recordSchema" );
+                    }
+                    else {
+                        rr.record_schema = odr_strdup(assoc->encode,
+                                                      srw_req->record.recordSchema );
+                    }
+                    switch (srw_req->record.recordPacking)
+                        {
+                        case Z_SRW_recordPacking_string: 
+                            rr.record_packing = "string";
+                            break;
+                        case Z_SRW_recordPacking_XML: 
+                            rr.record_packing = "xml";
+                            break;
+                        case Z_SRW_recordPacking_URL: 
+                            rr.record_packing = "url";
+                            break;
+                        }
+                    rr.record_data = odr_strdupn(assoc->encode, 
+                                                 srw_req->record.recordData_buf,
+                                                 srw_req->record.recordData_len );
+                    rr.request_extra_record = srw_req->extra_record;
+                }
+                else {
+                    yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                                  &srw_res->num_diagnostics,
+                                                  9, "recordIdentifier OR recordData" );
+                }
             }
             else {
                 rr.record_id = srw_req->recordId;
+                if ( srw_req->record.recordData_len ){
+                    yaz_add_sru_update_diagnostic(assoc->encode, 
+                                                  &srw_res->diagnostics,
+                                                  &srw_res->num_diagnostics,
+                                                  9, "recordData" );
+                }
             }
-            if (  !srw_req->recordVersion ){
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordVersion" );
-            }
-            else {
+            if (  srw_req->recordVersion ){
                 rr.record_version = odr_strdup( assoc->encode,
                                                 srw_req->recordVersion );
                 
@@ -1510,17 +1546,17 @@ static void srw_bend_update(association *assoc, request *req,
 	}
 	else if ( !strcmp( rr.operation, "replace" ) ){
             if ( !srw_req->recordId ){
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordId" );
+                yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                              &srw_res->num_diagnostics,
+                                              9, "recordIdentifier" );
             }
             else {
                 rr.record_id = srw_req->recordId;
             }
             if ( srw_req->record.recordSchema == 0 ){
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordSchema" );
+                yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                              &srw_res->num_diagnostics,
+                                              9, "recordSchema" );
             }
             else {
                 rr.record_schema = odr_strdup(assoc->encode,
@@ -1545,21 +1581,20 @@ static void srw_bend_update(association *assoc, request *req,
                 rr.request_extra_record = srw_req->extra_record;
             }
             else {
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordData" );
+                yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                              &srw_res->num_diagnostics,
+                                              9, "recordData" );
             }
             if (srw_req->extraRequestData)
                 rr.extra_request_data = odr_strdup(assoc->encode,
                                                    srw_req->extraRequestData );
 	}
-	else if ( !strcmp( rr.operation, "insert" ) )
-        {
+	else if (!strcmp( rr.operation, "insert" ) ) {
             rr.record_id = srw_req->recordId; 
             if ( srw_req->record.recordSchema == 0 ){
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordSchema" );
+                yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                              &srw_res->num_diagnostics,
+                                              9, "recordSchema" );
             }
             else {
                 rr.record_schema = odr_strdup(assoc->encode,
@@ -1586,13 +1621,18 @@ static void srw_bend_update(association *assoc, request *req,
                 rr.request_extra_record = srw_req->extra_record;
             }
             else
-                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
-                                       &srw_res->num_diagnostics,
-                                       7, "recordData" );
+                yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                             &srw_res->num_diagnostics,
+                                             9, "recordData" );
             if ( srw_req->extraRequestData )
                 rr.extra_request_data = odr_strdup(assoc->encode,
                                                    srw_req->extraRequestData );
 	}
+	else { 
+            yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                          &srw_res->num_diagnostics,
+                                          100, rr.operation );
+        }
         if (srw_res->num_diagnostics == 0)
         {
             if ( assoc->init->bend_srw_update)
@@ -2321,7 +2361,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.102 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.103 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

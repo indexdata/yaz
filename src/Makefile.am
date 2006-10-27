@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.41 2006-10-09 21:12:44 adam Exp $
+## $Id: Makefile.am,v 1.42 2006-10-27 11:22:09 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -19,7 +19,8 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
- csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv
+ csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv \
+ csvtosru_update.tcl sru_update.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
@@ -45,6 +46,9 @@ diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: csvtobib1.tcl bib1.csv
 diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: csvtosrw.tcl srw.csv
 	$(TCLSH) $(srcdir)/csvtosrw.tcl $(srcdir)
 
+diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl sru_update.csv
+	$(TCLSH) $(srcdir)/csvtosru_update.tcl $(srcdir)
+
 libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c marc8.c marc8r.c \
@@ -62,7 +66,8 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   z-charneg.c \
   prt-ext.c \
   ill-core.c item-req.c ill-get.c \
-  zget.c yaz-ccl.c diag-entry.c diag-entry.h diagbib1.c diagsrw.c logrpn.c \
+  zget.c yaz-ccl.c diag-entry.c diag-entry.h diagbib1.c diagsrw.c \
+  diagsru_update.c logrpn.c \
   otherinfo.c pquery.c sortspec.c z3950oid.c charneg.c initopt.c \
   zoom-c.c zoom-opt.c zoom-p.h grs1disp.c zgdu.c soap.c srw.c srwutil.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \

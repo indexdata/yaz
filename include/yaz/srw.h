@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.30 2006-10-13 11:30:37 adam Exp $ */
+/* $Id: srw.h,v 1.31 2006-10-27 11:22:08 adam Exp $ */
 
 /**
  * \file srw.h
@@ -37,6 +37,7 @@
 #include <yaz/soap.h>
 #include <yaz/zgdu.h>
 #include <yaz/diagsrw.h>
+#include <yaz/diagsru_update.h>
 
 YAZ_BEGIN_CDECL
 
@@ -233,6 +234,9 @@ YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                        int *num, int code,
                                        const char *addinfo);
     
+YAZ_EXPORT void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
+                                              int *num, int code,
+                                              const char *addinfo);
 
 YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
                                       int code, const char *details);

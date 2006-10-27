@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.49 2006-10-24 08:07:02 adam Exp $
+ * $Id: srw.c,v 1.50 2006-10-27 11:22:09 adam Exp $
  */
 /**
  * \file srw.c
@@ -188,6 +188,9 @@ static int yaz_srw_extra_record(ODR o, xmlNodePtr pptr,
 	{
 	    if (match_xsd_string(ptr, "recordId", o, 
 				 &rec->recordId ))
+		; /* backward compatible */
+	    else if (match_xsd_string(ptr, "recordIdentifier", o, 
+				 &rec->recordId ))
 		;
 	    else if (match_xsd_string(ptr, "recordReviewCode", o, 
 				      &rec->recordReviewCode ))
@@ -210,7 +213,7 @@ static int yaz_srw_extra_record(ODR o, xmlNodePtr pptr,
     {
         xmlNodePtr ptr = pptr;
         if ( rec->recordId )
-            add_xsd_string(ptr, "recordId", rec->recordId);
+            add_xsd_string(ptr, "recordIdentfier", rec->recordId);
         if ( rec->recordReviewCode )
             add_xsd_string(ptr, "recordReviewCode", rec->recordReviewCode);
         if (  rec->recordReviewNote )
@@ -431,18 +434,28 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
         for (i = 0; i < *num; i++)
         {
             const char *std_diag = "info:srw/diagnostic/1/";
+            const char *ucp_diag = "info:srw/diagnostic/12/";
             xmlNodePtr rptr = xmlNewChild(pptr, ns_diag,
                                           BAD_CAST "diagnostic", 0);
             add_xsd_string(rptr, "uri", (*recs)[i].uri);
             if ((*recs)[i].message)
                 add_xsd_string(rptr, "message", (*recs)[i].message);
-            else if ((*recs)[i].uri && 
-                     !strncmp((*recs)[i].uri, std_diag, strlen(std_diag)))
+            else if ((*recs)[i].uri )
             {
-                int no = atoi((*recs)[i].uri + strlen(std_diag));
-                const char *message = yaz_diag_srw_str(no);
-                if (message)
-                    add_xsd_string(rptr, "message", message);
+                if (!strncmp((*recs)[i].uri, std_diag, strlen(std_diag)))
+                {
+                    int no = atoi((*recs)[i].uri + strlen(std_diag));
+                    const char *message = yaz_diag_srw_str(no);
+                    if (message)
+                        add_xsd_string(rptr, "message", message);
+                }
+                else if (!strncmp((*recs)[i].uri, ucp_diag, strlen(ucp_diag)))
+                {
+                    int no = atoi((*recs)[i].uri + strlen(ucp_diag));
+                    const char *message = yaz_diag_sru_update_str(no);
+                    if (message)
+                        add_xsd_string(rptr, "message", message);
+                }
             }
             add_xsd_string(rptr, "details", (*recs)[i].details);
         }
@@ -1001,6 +1014,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                     ;
                 else if (match_xsd_string(ptr, "operation", o, 
                                           &oper)){
+                    /* backward compatible */
                     if ( oper ){
                         if ( !strcmp(oper, "delete"))
                             req->operation = "delete";
@@ -1010,7 +1024,21 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                             req->operation = "insert";
                     }
                 }
+                else if (match_xsd_string(ptr, "action", o, 
+                                          &oper)){
+                    if ( oper ){
+                        if ( !strcmp(oper, "info:srw/action/1/delete"))
+                            req->operation = "delete";
+                        else if (!strcmp(oper,"info:srw/action/1/replace" ))
+                            req->operation = "replace";
+                        else if ( !strcmp( oper, "info:srw/action/1/create"))
+                            req->operation = "insert";
+                    }
+                }
                 else if (match_xsd_string(ptr, "recordId", o,
+                                          &req->recordId))
+                    ; /* backward compatible */
+                else if (match_xsd_string(ptr, "recordIdentifier", o,
                                           &req->recordId))
                     ;
                 else if (match_xsd_string(ptr, "recordVersion", o,
@@ -1058,6 +1086,9 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                       &res->operationStatus ))
                     ;
                 else if (match_xsd_string(ptr, "recordId", o, 
+                                          &res->recordId))
+                    ; /* backward compatible */
+                else if (match_xsd_string(ptr, "recordIdentifier", o, 
                                           &res->recordId))
                     ;
                 else if (match_xsd_string(ptr, "recordVersion", o, 
@@ -1110,7 +1141,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             
 	    add_xsd_string(ptr, "version", (*p)->srw_version);
             add_xsd_string(ptr, "operationStatus", res->operationStatus );
-            add_xsd_string(ptr, "recordId", res->recordId );
+            add_xsd_string(ptr, "recordIdentifier", res->recordId );
 	    if (res->recordVersion)
                 add_xsd_string(ptr, "recordVersion", res->recordVersion );
 	    if (res->recordChecksum)

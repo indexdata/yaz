@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.52 2006-10-24 09:18:34 adam Exp $
+ * $Id: srwutil.c,v 1.53 2006-10-27 11:22:09 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -325,6 +325,16 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
     char uri[40];
     
     sprintf(uri, "info:srw/diagnostic/1/%d", code);
+    yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
+}
+
+
+void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
+                                   int *num, int code, const char *addinfo)
+{
+    char uri[40];
+    
+    sprintf(uri, "info:srw/diagnostic/12/%d", code);
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
 

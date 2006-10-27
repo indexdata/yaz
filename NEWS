@@ -1,3 +1,10 @@
+
+Updates for SRU Update by Ko van der Sloot:
+1. Changed name from "operation" to "action"
+2. Fixed that that "recordIdentifier" was called "recordId". Kept the old
+versions in the code, marked as 'backward compatible'.
+3. Added diagnostics for SRU Update.
+
 --- 2.1.36 2006/10/13
 
 Implemented yaz_filepath_comp which splits a path into file path
