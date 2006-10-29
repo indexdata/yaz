@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.118 2006-10-24 08:26:49 adam Exp $
+# $Id: makefile,v 1.119 2006-10-29 18:33:54 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -387,6 +387,7 @@ MISC_OBJS= \
    $(OBJDIR)\libxml2_error.obj \
    $(OBJDIR)\test.obj \
    $(OBJDIR)\diagbib1.obj \
+   $(OBJDIR)\diagsru_update.obj \
    $(OBJDIR)\diagsrw.obj \
    $(OBJDIR)\diag-entry.obj \
    $(OBJDIR)\zget.obj \
@@ -576,7 +577,8 @@ generated_files: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
 	$(SRCDIR)\diagsrw.c \
-	$(SRCDIR)\diagbib1.c 
+	$(SRCDIR)\diagbib1.c \
+	$(SRCDIR)\diagsru_update.c 
 
 # Compiling 
 
@@ -677,6 +679,10 @@ $(SRCDIR)\diagbib1.c: $(SRCDIR)\bib1.csv
 $(SRCDIR)\diagsrw.c: $(SRCDIR)\srw.csv
 	@cd $(SRCDIR)
 	$(TCL) csvtosrw.tcl $(SRCDIR)
+
+$(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
+	@cd $(SRCDIR)
+	$(TCL) csvtosru_update.tcl $(SRCDIR)
 
 !endif
 
