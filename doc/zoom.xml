@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.53 2006-10-24 11:48:42 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.54 2006-10-31 14:08:01 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -632,13 +632,16 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     created from result sets.
    </para>
    <synopsis>
-     void ZOOM_resultset_records (ZOOM_resultset r,
-                                  ZOOM_record *recs,
-                                  size_t start, size_t count);
-     ZOOM_record ZOOM_resultset_record (ZOOM_resultset s, size_t pos);
+     void ZOOM_resultset_records(ZOOM_resultset r,
+                                 ZOOM_record *recs,
+                                 size_t start, size_t count);
+     ZOOM_record ZOOM_resultset_record(ZOOM_resultset s, size_t pos);
 
-     const char *ZOOM_record_get (ZOOM_record rec, const char *type,
-                                  size_t *len);
+     const char *ZOOM_record_get(ZOOM_record rec, const char *type,
+                                 size_t *len);
+
+     int ZOOM_record_error(ZOOM_record rec, const char **msg,
+                           const char **addinfo, const char **diagset);
 
      ZOOM_record ZOOM_record_clone (ZOOM_record rec);
 
@@ -660,6 +663,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <function>ZOOM_resultset_record</function> that takes a 
     position as argument. First record has position zero.
     If no record could be obtained <literal>NULL</literal> is returned.
+   </para>
+   <para>
+    Error information for a record can be checked with
+    <function>ZOOM_record_error</function> which returns non-zero
+    (error code) if record is in error, called <emphasis>Surrogate
+     Diagnostics</emphasis> in Z39.50.
    </para>
    <para>
     Function <function>ZOOM_resultset_records</function> retrieves

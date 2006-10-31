@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.39 2006-10-13 11:30:37 adam Exp $ */
+/* $Id: zoom.h,v 1.40 2006-10-31 14:08:02 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -209,6 +209,11 @@ ZOOM_record_destroy (ZOOM_record rec);
 ZOOM_API(ZOOM_record)
 ZOOM_record_clone (ZOOM_record srec);
 
+/* return error info (surrogate diagnostic) for record */
+ZOOM_API(int)
+    ZOOM_record_error(ZOOM_record rec, const char **msg,
+                      const char **addinfo, const char **diagset);
+    
 /* ----------------------------------------------------------- */
 /* queries */
 

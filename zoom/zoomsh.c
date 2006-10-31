@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.41 2006-04-24 10:30:44 adam Exp $
+ * $Id: zoomsh.c,v 1.42 2006-10-31 14:08:03 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -184,22 +184,36 @@ static void display_records (ZOOM_connection c,
         int pos = i + start;
         ZOOM_record rec = ZOOM_resultset_record (r, pos);
         const char *db = ZOOM_record_get (rec, "database", 0);
-        int len, opac_len;
-        const char *render = ZOOM_record_get (rec, "render", &len);
-        const char *opac_render = ZOOM_record_get (rec, "opac", &opac_len);
-        const char *syntax = ZOOM_record_get (rec, "syntax", 0);
-        /* if rec is non-null, we got a record for display */
-        if (rec)
+        
+        if (ZOOM_record_error(rec, 0, 0, 0))
         {
-            char oidbuf[100];
-            (void) oid_name_to_dotstring(CLASS_RECSYN, syntax, oidbuf);
-            printf ("%d %s %s (%s)\n",
-                    pos+1, (db ? db : "unknown"), syntax, oidbuf);
-            if (render)
-                fwrite (render, 1, len, stdout);
-            printf ("\n");
-            if (opac_render)
-                fwrite (opac_render, 1, opac_len, stdout);
+            const char *msg;
+            const char *addinfo;
+            const char *diagset;
+            int error = ZOOM_record_error(rec, &msg, &addinfo, &diagset);
+            
+            printf("%d %s: %s (%s:%d) %s\n", pos, (db ? db : "unknown"),
+                   msg, diagset, error, addinfo);
+        }
+        else
+        {
+            int len, opac_len;
+            const char *render = ZOOM_record_get (rec, "render", &len);
+            const char *opac_render = ZOOM_record_get (rec, "opac", &opac_len);
+            const char *syntax = ZOOM_record_get (rec, "syntax", 0);
+            /* if rec is non-null, we got a record for display */
+            if (rec)
+            {
+                char oidbuf[100];
+                (void) oid_name_to_dotstring(CLASS_RECSYN, syntax, oidbuf);
+                printf ("%d %s %s (%s)\n",
+                        pos, (db ? db : "unknown"), syntax, oidbuf);
+                if (render)
+                    fwrite (render, 1, len, stdout);
+                printf ("\n");
+                if (opac_render)
+                    fwrite (opac_render, 1, opac_len, stdout);
+            }
         }
             
     }

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.93 2006-10-26 15:34:46 adam Exp $
+ * $Id: zoom-c.c,v 1.94 2006-10-31 14:08:03 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1242,7 +1242,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.93 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.94 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1800,6 +1800,53 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
     if (len)
         *len = sz;
     return buf;
+}
+
+ZOOM_API(int)
+    ZOOM_record_error(ZOOM_record rec, const char **cp,
+                      const char **addinfo, const char **diagset)
+{
+    Z_NamePlusRecord *npr;
+    
+    if (!rec)
+        return 0;
+    npr = rec->npr;
+    if (npr && npr->which == Z_NamePlusRecord_surrogateDiagnostic)
+    {
+        Z_DiagRec *diag_rec = npr->u.surrogateDiagnostic;
+        int error = YAZ_BIB1_UNSPECIFIED_ERROR;
+        const char *add = 0;
+
+        if (diag_rec->which == Z_DiagRec_defaultFormat)
+        {
+            Z_DefaultDiagFormat *ddf = diag_rec->u.defaultFormat;
+            int oclass;
+    
+            error = *ddf->condition;
+            switch (ddf->which)
+            {
+            case Z_DefaultDiagFormat_v2Addinfo:
+                add = ddf->u.v2Addinfo;
+                break;
+            case Z_DefaultDiagFormat_v3Addinfo:
+                add = ddf->u.v3Addinfo;
+                break;
+            }
+            if (diagset)
+                *diagset = yaz_z3950oid_to_str(ddf->diagnosticSetId, &oclass);
+        }
+        else
+        {
+            if (diagset)
+                *diagset = "Bib-1";
+        }
+        if (addinfo)
+            *addinfo = add ? add : "";
+        if (cp)
+            *cp = diagbib1_str(error);
+        return error;
+    }
+    return 0;
 }
 
 ZOOM_API(const char *)
