@@ -14,3 +14,4 @@ marc8r.c
 cql.c
 diagbib1.c
 diagsrw.c
+diagsru_update.c
