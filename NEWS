@@ -1,3 +1,4 @@
+--- 2.1.38 2006/10/31
 
 Updates for SRU Update by Ko van der Sloot:
 1. Changed name from "operation" to "action"
@@ -5,7 +6,16 @@ Updates for SRU Update by Ko van der Sloot:
 versions in the code, marked as 'backward compatible'.
 3. Added diagnostics for SRU Update.
 
-Fixd bug #709: Records are fetched in wrong format when tasks are queued.
+Fixed bug #709: Records are fetched in wrong format when tasks are queued.
+
+Fixed bug #707: CQL->RPN ignores lines with leading spaces.
+
+Fixed bug #706: XML hex encoding UTF-8 chars out of range 0-255.
+
+For GFS, fixed problem with SRU diagnostic 'First record position out of
+range' being issued for 0 hits.
+
+zoomtst10 part of Windows Build.
 
 --- 2.1.36 2006/10/13
 
