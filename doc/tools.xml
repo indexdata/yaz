@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.53 2006-10-25 07:28:27 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.54 2006-10-31 09:15:00 mike Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -2040,7 +2040,7 @@ typedef struct oident
      </varlistentry>
 
      <varlistentry>
-      <term>YAZ_MARC_MARXML</term>
+      <term>YAZ_MARC_MARCXML</term>
       <listitem>
        <para>
 	The resulting record is converted to MARCXML.
