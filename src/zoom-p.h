@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.14 2006-10-26 15:34:46 adam Exp $
+ * $Id: zoom-p.h,v 1.15 2006-11-01 15:39:05 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -111,6 +111,8 @@ struct ZOOM_resultset_p {
     ZOOM_options options;
     ZOOM_connection connection;
     ZOOM_resultset next;
+    char **databaseNames;
+    int num_databaseNames;
 };
 
 struct ZOOM_record_p {
@@ -138,6 +140,8 @@ struct ZOOM_scanset_p {
     Z_AttributesPlusTerm *termListAndStartPoint;
     Z_AttributeSetId *attributeSet;
     Z_ScanResponse *scan_response;
+    char **databaseNames;
+    int num_databaseNames;
 };
 
 struct ZOOM_package_p {

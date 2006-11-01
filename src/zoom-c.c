@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.94 2006-10-31 14:08:03 adam Exp $
+ * $Id: zoom-c.c,v 1.95 2006-11-01 15:39:05 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -193,6 +193,33 @@ static void clear_error(ZOOM_connection c)
     }
 }
 
+void ZOOM_connection_show_task(ZOOM_task task)
+{
+    switch(task->which)
+    {
+    case ZOOM_TASK_SEARCH:
+        yaz_log(YLOG_LOG, "search p=%p", task);
+        break;
+    case ZOOM_TASK_RETRIEVE:
+        yaz_log(YLOG_LOG, "retrieve p=%p", task);
+        break;
+    case ZOOM_TASK_CONNECT:
+        yaz_log(YLOG_LOG, "connect p=%p", task);
+        break;
+    case ZOOM_TASK_SCAN:
+        yaz_log(YLOG_LOG, "scant p=%p", task);
+        break;
+    }
+}
+
+void ZOOM_connection_show_tasks(ZOOM_connection c)
+{
+    ZOOM_task task;
+    yaz_log(YLOG_LOG, "connection p=%p tasks", c);
+    for (task = c->tasks; task; task = task->next)
+        ZOOM_connection_show_task(task);
+}
+
 ZOOM_task ZOOM_connection_add_task(ZOOM_connection c, int which)
 {
     ZOOM_task *taskp = &c->tasks;
@@ -332,7 +359,7 @@ ZOOM_API(ZOOM_connection)
 /* set database names. Take local databases (if set); otherwise
    take databases given in ZURL (if set); otherwise use Default */
 static char **set_DatabaseNames(ZOOM_connection con, ZOOM_options options,
-                                int *num)
+                                int *num, ODR odr)
 {
     char **databaseNames;
     const char *cp = ZOOM_options_get(options, "databaseName");
@@ -348,7 +375,7 @@ static char **set_DatabaseNames(ZOOM_connection con, ZOOM_options options,
     }
     if (!cp)
         cp = "Default";
-    nmem_strsplit(con->odr_out->mem, "+", cp,  &databaseNames, num);
+    nmem_strsplit(odr->mem, "+", cp,  &databaseNames, num);
     return databaseNames;
 }
 
@@ -710,6 +737,8 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->query = 0;
     r->connection = 0;
     r->next = 0;
+    r->databaseNames = 0;
+    r->num_databaseNames = 0;
     return r;
 }
 
@@ -756,6 +785,9 @@ ZOOM_API(ZOOM_resultset)
     cp = ZOOM_options_get(r->options, "schema");
     if (cp)
         r->schema = xstrdup(cp);
+
+    r->databaseNames = set_DatabaseNames(c, c->options, &r->num_databaseNames,
+                                         r->odr);
     
     r->connection = c;
 
@@ -1242,7 +1274,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.94 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.95 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1492,8 +1524,8 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
         return zoom_complete;
     }
 
-    search_req->databaseNames =
-        set_DatabaseNames(c, r->options, &search_req->num_databaseNames);
+    search_req->databaseNames = r->databaseNames;
+    search_req->num_databaseNames = r->num_databaseNames;
 
     /* get syntax (no need to provide unless piggyback is in effect) */
     syntax = c->tasks->u.search.syntax;
@@ -2645,7 +2677,7 @@ ZOOM_API(ZOOM_scanset)
                 c, q, q->query_string);
         abort();
     }
-
+    
     scan = (ZOOM_scanset) xmalloc(sizeof(*scan));
     scan->connection = c;
     scan->odr = odr_createmem(ODR_DECODE);
@@ -2655,6 +2687,10 @@ ZOOM_API(ZOOM_scanset)
     scan->termListAndStartPoint =
         p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet, start);
     xfree(freeme);
+
+    scan->databaseNames = set_DatabaseNames(c, c->options,
+                                            &scan->num_databaseNames,
+                                            scan->odr);
     if (scan->termListAndStartPoint != 0)
     {
         ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SCAN);
@@ -2729,8 +2765,8 @@ static zoom_ret send_scan(ZOOM_connection c)
         odr_intdup(c->odr_out,
                    ZOOM_options_get_int(scan->options, "stepSize", 0));
     
-    req->databaseNames = set_DatabaseNames(c, scan->options, 
-                                           &req->num_databaseNames);
+    req->databaseNames = scan->databaseNames;
+    req->num_databaseNames = scan->num_databaseNames;
 
     return send_APDU(c, apdu);
 }
@@ -2967,7 +3003,8 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
         Z_External *r = (Z_External *) odr_malloc(p->odr_out, sizeof(*r));
         const char *first_db = "Default";
         int num_db;
-        char **db = set_DatabaseNames(p->connection, p->options, &num_db);
+        char **db = set_DatabaseNames(p->connection, p->options, &num_db,
+                                      p->odr_out);
         if (num_db > 0)
             first_db = db[0];
             
@@ -3033,7 +3070,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     Z_APDU *apdu = 0;
     const char *first_db = "Default";
     int num_db;
-    char **db = set_DatabaseNames(p->connection, p->options, &num_db);
+    char **db = set_DatabaseNames(p->connection, p->options, &num_db, p->odr_out);
     const char *action = ZOOM_options_get(p->options, "action");
     const char *recordIdOpaque = ZOOM_options_get(p->options, "recordIdOpaque");
     const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
@@ -3273,6 +3310,8 @@ static int ZOOM_connection_exec_task(ZOOM_connection c)
             c, task->which, task->running);
     if (c->error != ZOOM_ERROR_NONE)
     {
+        yaz_log(YLOG_LOG, "%p ZOOM_connection_exec_task "
+                "removing tasks because of error = %d", c, c->error);
         yaz_log(log_details, "%p ZOOM_connection_exec_task "
                 "removing tasks because of error = %d", c, c->error);
         ZOOM_connection_remove_tasks(c);
@@ -4042,10 +4081,17 @@ ZOOM_API(int)
     int max_fd = 0;
 
     yaz_log(log_details, "ZOOM_event(no=%d,cs=%p)", no, cs);
+    
     for (i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
         ZOOM_Event event;
+
+#if 0
+        if (c)
+            ZOOM_connection_show_tasks(c);
+#endif
+
         if (c && (event = ZOOM_connection_get_event(c)))
         {
             ZOOM_Event_destroy(event);
