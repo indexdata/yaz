@@ -1,10 +1,10 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.42 2006-10-27 11:22:09 adam Exp $
+## $Id: Makefile.am,v 1.43 2006-11-02 08:06:03 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
-lib_LTLIBRARIES = libyaz.la libyazthread.la
+lib_LTLIBRARIES = libyaz.la
 # noinst_PROGRAMS = cqlparse
 
 dist-hook:
@@ -82,12 +82,6 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   record_conv.c retrieval.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
-
-# This library is only built and installed for backwards
-# compatibility (older libs depend on it). The libyaz.la is now threaded
-# by itself..
-libyazthread_la_SOURCES=version.c
-libyazthread_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
 z-accdes1.c \

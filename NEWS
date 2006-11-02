@@ -1,3 +1,6 @@
+Removed the build of libyazthread.la. The libyaz.so is the threaded version
+of YAZ and has been so since YAZ 2.1.10.
+
 Implemented ZOOM_record_error which returns error information for
 record (surrogate diagnostic).
 
