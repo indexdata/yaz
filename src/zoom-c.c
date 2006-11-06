@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.96 2006-11-06 14:49:32 marc Exp $
+ * $Id: zoom-c.c,v 1.97 2006-11-06 23:21:30 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.96 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.97 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2508,15 +2508,6 @@ static zoom_ret send_present(ZOOM_connection c)
         count = &c->tasks->u.retrieve.count;
         syntax = c->tasks->u.retrieve.syntax;
         elementSetName = c->tasks->u.retrieve.elementSetName;
-
-        if (*start >= resultset->size)
-        {
-            yaz_log(log_details, "%p send_present start=%d >= size=%d",
-                    c, *start, resultset->size);
-            return zoom_complete;
-        }
-        if (*start + *count > resultset->size)
-            *count = resultset->size - *start;
         break;
     default:
         return zoom_complete;
@@ -2524,9 +2515,12 @@ static zoom_ret send_present(ZOOM_connection c)
     yaz_log(log_details, "%p send_present start=%d count=%d",
             c, *start, *count);
 
+    if (*start < 0 || *count < 0 || *start + *count > resultset->size)
+    {
+        set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
+                       "", 0);
+    }
     if (c->error)                  /* don't continue on error */
-        return zoom_complete;
-    if (*start < 0)
         return zoom_complete;
     yaz_log(log_details, "send_present resultset=%p start=%d count=%d",
             resultset, *start, *count);
@@ -4188,7 +4182,14 @@ ZOOM_API(int)
         return 0;
 
 #if HAVE_SYS_POLL_H
-    r = poll(pollfds, nfds, (timeout == -1 ? -1 : timeout * 1000));
+    while ((r = poll(pollfds, nfds,
+         (timeout == -1 ? -1 : timeout * 1000))) < 0
+          && errno == EINTR)
+    {
+        ;
+    }
+    if (r < 0)
+        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: poll failed");
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
