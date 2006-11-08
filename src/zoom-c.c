@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.97 2006-11-06 23:21:30 adam Exp $
+ * $Id: zoom-c.c,v 1.98 2006-11-08 08:57:34 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.97 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.98 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -4189,7 +4189,7 @@ ZOOM_API(int)
         ;
     }
     if (r < 0)
-        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: poll failed");
+        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: poll");
     for (i = 0; i<nfds; i++)
     {
         ZOOM_connection c = poll_cs[i];
@@ -4217,6 +4217,15 @@ ZOOM_API(int)
 #else
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
+
+    while ((r = select(max_fd+1, &input, &output, &except,
+                       (timeout == -1 ? 0 : &tv))) < 0 && errno == EINTR)
+    {
+        ;
+    }
+    if (r < 0)
+        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: select");
+
     r = select(max_fd+1, &input, &output, &except, (timeout == -1 ? 0 : &tv));
     for (i = 0; i<no; i++)
     {
