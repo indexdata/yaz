@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.317 2006-10-04 07:26:00 adam Exp $
+ * $Id: client.c,v 1.318 2006-11-08 08:55:50 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -686,7 +686,7 @@ int session_connect(const char *arg)
         conn = cs_create_host(arg, 1, &add);
     if (!conn)
     {
-        printf ("Couldn't create comstack\n");
+        printf ("Could not resolve address %s\n", arg);
         return 0;
     }
 #if YAZ_HAVE_XML2
@@ -711,12 +711,6 @@ int session_connect(const char *arg)
     if (cs_connect(conn, add) < 0)
     {
         printf ("error = %s\n", cs_strerror(conn));
-        if (conn->cerrno == CSYSERR)
-        {
-            char msg[256];
-            yaz_strerror(msg, sizeof(msg));
-            printf ("%s\n", msg);
-        }
         cs_close(conn);
         conn = 0;
         return 0;
