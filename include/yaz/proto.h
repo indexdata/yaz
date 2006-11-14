@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: proto.h,v 1.24 2006-10-13 11:30:37 adam Exp $ */
+/* $Id: proto.h,v 1.25 2006-11-14 08:37:38 adam Exp $ */
 
 /**
  * \file proto.h
@@ -181,6 +181,22 @@ Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo);
 /** \brief Creates Diagnostic record - Z_DiagRecs type */
 YAZ_EXPORT
 Z_DiagRec *zget_DiagRec(ODR o, int error, const char *addinfo);
+
+/** \brief get element set name from RecordComposition
+    \param comp record composition
+    \returns element set name or NULL if no element set name was given
+*/
+YAZ_EXPORT
+const char *yaz_get_esn(Z_RecordComposition *comp);
+
+/** \brief set element set name in RecordComposition struct
+    \param comp_p record composition ptr
+    \param esn element set name string
+    \param nmem memory for result composition
+*/
+YAZ_EXPORT
+void yaz_set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem);
+
 
 YAZ_END_CDECL
 

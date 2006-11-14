@@ -1,3 +1,6 @@
+Added utilities yaz_{set,get}_esn to set/get element set name from
+record composition.
+
 Removed the build of libyazthread.la. The libyaz.so is the threaded version
 of YAZ and has been so since YAZ 2.1.10.
 

@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.43 2006-11-02 08:06:03 adam Exp $
+## $Id: Makefile.am,v 1.44 2006-11-14 08:37:38 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -79,7 +79,7 @@ libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
   xmlquery.c \
   mime.c mime.h \
   nfa.c nfaxml.c \
-  record_conv.c retrieval.c
+  record_conv.c retrieval.c elementset.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 

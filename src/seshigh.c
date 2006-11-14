@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.103 2006-10-27 11:22:09 adam Exp $
+ * $Id: seshigh.c,v 1.104 2006-11-14 08:37:38 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -565,33 +565,6 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
     return 1;
 }
 
-static const char *get_esn(Z_RecordComposition *comp)
-{
-    if (comp && comp->which == Z_RecordComp_complex)
-    {
-        if (comp->u.complex->generic 
-            && comp->u.complex->generic->elementSpec
-            && (comp->u.complex->generic->elementSpec->which == 
-                Z_ElementSpec_elementSetName))
-            return comp->u.complex->generic->elementSpec->u.elementSetName;
-    }
-    else if (comp && comp->which == Z_RecordComp_simple &&
-             comp->u.simple->which == Z_ElementSetNames_generic)
-        return comp->u.simple->u.generic;
-    return 0;
-}
-
-static void set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
-{
-    Z_RecordComposition *comp = nmem_malloc(nmem, sizeof(*comp));
-    
-    comp->which = Z_RecordComp_simple;
-    comp->u.simple = nmem_malloc(nmem, sizeof(*comp->u.simple));
-    comp->u.simple->which = Z_ElementSetNames_generic;
-    comp->u.simple->u.generic = nmem_strdup(nmem, esn);
-    *comp_p = comp;
-}
-
 static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 {
 #if YAZ_HAVE_XML2
@@ -602,7 +575,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
     if (assoc->server)
     {
         int r;
-        const char *input_schema = get_esn(rr->comp);
+        const char *input_schema = yaz_get_esn(rr->comp);
         Odr_oid *input_syntax_raw = rr->request_format_raw;
         
         const char *backend_schema = 0;
@@ -647,7 +620,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         }
         if (backend_schema)
         {
-            set_esn(&rr->comp, backend_schema, rr->stream->mem);
+            yaz_set_esn(&rr->comp, backend_schema, rr->stream->mem);
         }
         if (backend_syntax)
         {
@@ -2361,7 +2334,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.103 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.104 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
