@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.318 2006-11-08 08:55:50 adam Exp $
+ * $Id: client.c,v 1.319 2006-11-14 08:37:16 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2220,7 +2220,7 @@ static int cmd_update_common(const char *arg, int version)
         notToKeep->elements[0] = (Z_IU0SuppliedRecords_elem *)
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-        if (*recid)
+        if (*recid && strcmp(recid, "none"))
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc (out, sizeof(Odr_oct));
