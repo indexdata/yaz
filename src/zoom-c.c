@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.98 2006-11-08 08:57:34 adam Exp $
+ * $Id: zoom-c.c,v 1.99 2006-11-20 08:13:05 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.98 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.99 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3306,8 +3306,6 @@ static int ZOOM_connection_exec_task(ZOOM_connection c)
             c, task->which, task->running);
     if (c->error != ZOOM_ERROR_NONE)
     {
-        yaz_log(YLOG_LOG, "%p ZOOM_connection_exec_task "
-                "removing tasks because of error = %d", c, c->error);
         yaz_log(log_details, "%p ZOOM_connection_exec_task "
                 "removing tasks because of error = %d", c, c->error);
         ZOOM_connection_remove_tasks(c);
