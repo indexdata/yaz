@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.42 2006-10-09 11:21:37 adam Exp $
+ * $Id: log.c,v 1.43 2006-11-27 14:09:32 adam Exp $
  */
 
 /**
@@ -528,7 +528,7 @@ static int define_module_bit(const char *name)
             nmem_mutex_leave(log_mutex);
             return mask_names[i].mask;
         }
-    if ( (i>=MAX_MASK_NAMES) || (next_log_bit >= 1<<31 ))
+    if ( (i>=MAX_MASK_NAMES) || (next_log_bit & (1<<31) ))
     {
         nmem_mutex_leave(log_mutex);
         yaz_log(YLOG_WARN, "No more log bits left, not logging '%s'", name);
