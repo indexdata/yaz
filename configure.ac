@@ -1,8 +1,8 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.47 2006-11-27 14:15:53 adam Exp $
+dnl $Id: configure.ac,v 1.48 2006-11-29 22:35:17 adam Exp $
 AC_PREREQ(2.59)
-AC_INIT([yaz],[2.1.40],[yaz-help@indexdata.dk])
+AC_INIT([yaz],[2.1.41],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.8])
@@ -23,7 +23,7 @@ YAZ_DOC
 dnl 
 dnl
 dnl ------ Headers
-AC_CHECK_HEADERS(dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/un.h sys/wait.h unistd.h)
+AC_CHECK_HEADERS(dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/un.h sys/wait.h unistd.h netinet/if_ether.h netinet/in_systm.h)
 AC_HEADER_STDC
 if test "$ac_cv_header_stdc" = "no"; then
     AC_MSG_WARN([Your system doesn not seem to support ANSI C])
@@ -163,6 +163,37 @@ if test "$with_iconv" != "no"; then
 	    ])
     ])
 fi
+dnl ------ libpcap
+
+AC_SUBST(PCAP_LIBS)
+AC_SUBST(PCAP_CFLAGS)
+AC_ARG_WITH(pcap-dir, [  --with-pcap-dir         libpcap root dir located in (dir)], PCAP_DIR="$withval", PCAP_DIR=no)
+
+AC_MSG_CHECKING([for libpcap (required for ziffy)])
+if test "${PCAP_DIR}" != "no" &&
+    test -r $PCAP_DIR/libpcap.a &&
+    test -r $PCAP_DIR/pcap.h; then
+    PCAP_DIR="$PCAP_DIR"
+    PCAP_LIBS="${LIBS} -L$PCAP_DIR -lpcap"
+    PCAP_CFLAGS="${INCS} -I$PCAP_DIR"
+    AC_MSG_RESULT([found in $PCAP_DIR])
+elif test -d /usr/local &&
+    test -r /usr/local/lib/libpcap.a &&
+    test -r /usr/local/include/pcap.h; then
+    PCAP_DIR="/usr/local"
+    PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
+    PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
+    AC_MSG_RESULT([found in $PCAP_DIR])
+elif test -d /usr &&
+    test -r /usr/lib/libpcap.a &&
+    test -r /usr/include/pcap.h; then
+    PCAP_DIR="/usr"
+    PCAP_LIBS="${LIBS} -lpcap"
+    AC_MSG_RESULT([found in $PCAP_DIR])
+else
+    AC_MSG_RESULT([not found. ziffy disabled])
+fi
+
 dnl ------ various functions
 AC_CHECK_FUNCS(getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64)
 case $host in
@@ -378,6 +409,7 @@ include/yaz/Makefile
 client/Makefile
 ztest/Makefile
 zoom/Makefile
+ziffy/Makefile
 doc/Makefile
 doc/local.ent
 doc/common/Makefile
