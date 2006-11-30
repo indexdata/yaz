@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.49 2006-11-30 08:46:52 adam Exp $
+dnl $Id: configure.ac,v 1.50 2006-11-30 09:11:35 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.41],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -166,7 +166,6 @@ fi
 dnl ------ libpcap / ziffy
 
 AC_SUBST(ZIFFY_PROG)
-AC_SUBST(ZIFFY_MAN)
 AC_SUBST(PCAP_LIBS)
 AC_SUBST(PCAP_CFLAGS)
 ZIFFY_PROG=
@@ -205,7 +204,6 @@ if test -z "$ZIFFY_PROG"; then
     fi
 else
     AC_MSG_RESULT([found in $PCAP_DIR])
-    ZIFFY_MAN=ziffy.1
 fi
 
 dnl ------ various functions

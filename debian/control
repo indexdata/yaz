@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev
+Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libpcap0.8-dev
 
 Package: libyaz
 Section: libs
@@ -48,4 +48,13 @@ Description: The YAZ Z39.50 toolkit (development files)
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  This packages includes development libraries and C/C++ header files.
+
+Package: yaz-ziffy
+Section: utils
+Architecture: all
+Description: ziffy: the promiscuous Z39.50 APDU sniffer 
+ ziffy is a promiscuous Z39.50 APDU sniffer, like the popular tcpdump.
+ ziffy can capture and show all Z39.50 traffic on your LAN segment.
+ This packages is a special port of ziffy ported to YAZ. Note that ziffy
+ is licensed under the GPL and was is by Rocco Carbone <rocco@ntop.org>.
 

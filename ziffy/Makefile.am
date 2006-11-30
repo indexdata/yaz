@@ -11,8 +11,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include $(PCAP_CFLAGS) -DHAVE_YAZ=1
 bin_PROGRAMS = $(ZIFFY_PROG)
 EXTRA_PROGRAMS = ziffy
 
-man_MANS = $(ZIFFY_MAN)
-EXTRA_MANS = ziffy.1
+man_MANS = ziffy.1
 
 EXTRA_DIST = ANNOUNCEMENT-1 AUTHORS COPYING ChangeLog \
               FAQ FILES HACKING NEWS README TODO $(man_MANS)
