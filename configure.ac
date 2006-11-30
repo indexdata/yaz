@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1994-2006
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.48 2006-11-29 22:35:17 adam Exp $
+dnl $Id: configure.ac,v 1.49 2006-11-30 08:46:52 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.41],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -163,35 +163,49 @@ if test "$with_iconv" != "no"; then
 	    ])
     ])
 fi
-dnl ------ libpcap
+dnl ------ libpcap / ziffy
 
+AC_SUBST(ZIFFY_PROG)
+AC_SUBST(ZIFFY_MAN)
 AC_SUBST(PCAP_LIBS)
 AC_SUBST(PCAP_CFLAGS)
-AC_ARG_WITH(pcap-dir, [  --with-pcap-dir         libpcap root dir located in (dir)], PCAP_DIR="$withval", PCAP_DIR=no)
+ZIFFY_PROG=
+AC_ARG_WITH(pcap, [  --with-pcap[=DIR]         libpcap root dir located in (dir)], [PCAP_DIR="$withval"],[PCAP_DIR=default])
 
 AC_MSG_CHECKING([for libpcap (required for ziffy)])
-if test "${PCAP_DIR}" != "no" &&
-    test -r $PCAP_DIR/libpcap.a &&
-    test -r $PCAP_DIR/pcap.h; then
-    PCAP_DIR="$PCAP_DIR"
-    PCAP_LIBS="${LIBS} -L$PCAP_DIR -lpcap"
-    PCAP_CFLAGS="${INCS} -I$PCAP_DIR"
-    AC_MSG_RESULT([found in $PCAP_DIR])
-elif test -d /usr/local &&
-    test -r /usr/local/lib/libpcap.a &&
-    test -r /usr/local/include/pcap.h; then
-    PCAP_DIR="/usr/local"
-    PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
-    PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
-    AC_MSG_RESULT([found in $PCAP_DIR])
-elif test -d /usr &&
-    test -r /usr/lib/libpcap.a &&
-    test -r /usr/include/pcap.h; then
-    PCAP_DIR="/usr"
-    PCAP_LIBS="${LIBS} -lpcap"
-    AC_MSG_RESULT([found in $PCAP_DIR])
-else
+if test "${PCAP_DIR}" != "no"; then
+    if test "${PCAP_DIR}" != "yes" && test "${PCAP_DIR}" != "default"; then
+	if test -r $PCAP_DIR/libpcap.a && test -r $PCAP_DIR/pcap.h; then
+	    PCAP_DIR="$PCAP_DIR"
+	    PCAP_LIBS="${LIBS} -L$PCAP_DIR -lpcap"
+	    PCAP_CFLAGS="${INCS} -I$PCAP_DIR"
+	    ZIFFY_PROG=ziffy
+	fi
+    else
+	if test -d /usr/local &&
+	    test -r /usr/local/lib/libpcap.a &&
+	    test -r /usr/local/include/pcap.h; then
+	    PCAP_DIR="/usr/local"
+	    PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
+	    PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
+	    ZIFFY_PROG=ziffy
+	elif test -d /usr &&
+	    test -r /usr/lib/libpcap.a &&
+	    test -r /usr/include/pcap.h; then
+	    PCAP_DIR="/usr"
+	    PCAP_LIBS="${LIBS} -lpcap"
+	    ZIFFY_PROG=ziffy
+	fi
+    fi
+fi
+if test -z "$ZIFFY_PROG"; then
     AC_MSG_RESULT([not found. ziffy disabled])
+    if test "${PCAP_DIR}" != "default" && test "${PCAP_DIR}" != "no"; then
+        AC_MSG_ERROR([libpcap missing])
+    fi
+else
+    AC_MSG_RESULT([found in $PCAP_DIR])
+    ZIFFY_MAN=ziffy.1
 fi
 
 dnl ------ various functions
