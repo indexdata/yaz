@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.99 2006-11-20 08:13:05 adam Exp $
+ * $Id: zoom-c.c,v 1.100 2006-11-30 17:07:50 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -453,9 +453,6 @@ ZOOM_API(void)
     else
         c->lang = 0;
 
-    val = ZOOM_options_get(c->options, "sru");
-    c->sru_mode = get_sru_mode_from_string(val);
-
     xfree(c->host_port);
     if (portnum)
     {
@@ -496,6 +493,9 @@ ZOOM_API(void)
             /*printf("# reset hp='%s'\n", remainder);*/
         }
     }
+
+    val = ZOOM_options_get(c->options, "sru");
+    c->sru_mode = get_sru_mode_from_string(val);
 
     ZOOM_options_set(c->options, "host", c->host_port);
 
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.99 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.100 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
