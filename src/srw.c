@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.50 2006-10-27 11:22:09 adam Exp $
+ * $Id: srw.c,v 1.51 2006-11-30 22:58:06 adam Exp $
  */
 /**
  * \file srw.c
@@ -13,6 +13,7 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <assert.h>
 
 static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len)
 {
@@ -112,6 +113,46 @@ static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
     return match_xsd_string_n(ptr, elem, o, val, 0);
 }
 
+
+/** \brief fixes NS for root node of record data (bug #740) */
+static void fixup_xmlns(xmlNodePtr ptr, ODR o)
+{
+    /* should go towards root and collect NS not defined in the record here! */
+    xmlNodePtr p = ptr;
+
+    while (p)
+    {
+        assert(p->type == XML_ELEMENT_NODE);
+
+        p = p->parent;
+        while (p && p->type != XML_ELEMENT_NODE)
+            p = p->prev;
+        if (p)
+        {
+            xmlNsPtr ns = p->ns;
+            for (; ns; ns = ns->next)
+            {
+                xmlNsPtr n;
+                for (n = ptr->nsDef; n; n = n->next)
+                    if ((n->prefix == 0 && ns->prefix == 0)
+                        || (n->prefix && ns->prefix 
+                            && !strcmp((const char *) n->prefix,
+                                       (const char *) ns->prefix)))
+                    {
+                        break;
+                    }
+                if (!n)
+                {
+                    xmlNsPtr new_ns = xmlCopyNamespace(ns);
+                    
+                    new_ns->next = ptr->nsDef;
+                    ptr->nsDef = new_ns;
+                }
+            }
+        }
+    }
+}
+
 static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
                            char **val, int *len)
 {
@@ -119,13 +160,17 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 
     if (!match_element(ptr, elem))
         return 0;
+
     ptr = ptr->children;
     while (ptr && (ptr->type == XML_TEXT_NODE || ptr->type == XML_COMMENT_NODE))
         ptr = ptr->next;
     if (!ptr)
         return 0;
+
+    fixup_xmlns(ptr, o);
+
     buf = xmlBufferCreate();
-    
+
     xmlNodeDump(buf, ptr->doc, ptr, 0, 0);
     
     *val = odr_malloc(o, buf->use+1);
