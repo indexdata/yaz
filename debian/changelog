@@ -1,3 +1,9 @@
+yaz (2.1.41-3) unstable; urgency=low
+
+  * yaz-ziffy is architecture all (not any).
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Fri,  1 Dec 2006 09:09:39 +0100
+
 yaz (2.1.41-2) unstable; urgency=low
 
   * With bug fix #740.
