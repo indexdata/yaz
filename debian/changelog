@@ -1,3 +1,9 @@
+yaz (2.1.41-2) unstable; urgency=low
+
+  * With bug fix #740.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Fri,  1 Dec 2006 08:57:26 +0100
+
 yaz (2.1.41-1) unstable; urgency=low
 
   * With ziffy.
