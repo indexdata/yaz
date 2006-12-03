@@ -4,11 +4,11 @@ Version: @VERSION@
 Release: 1
 Requires: libxslt openssl readline libyaz = %{version}
 License: BSD
-Group: Other
+Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libxml2-devel libxslt-devel tcp_wrappers openssl-devel readline-devel
+BuildRequires: libxml2-devel libxslt-devel tcp_wrappers openssl-devel readline-devel libpcap
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.dk/yaz/
 
@@ -32,6 +32,17 @@ Requires: libyaz = %{version} libxml2-devel libxslt-devel
 
 %description -n lib%{name}-devel
 Development libraries and includes for the libyaz package.
+
+%package -n yaz-ziffy
+Summary:  ziffy: the promiscuous Z39.50 APDU sniffer
+Group: Applications/Communication
+Requires: libxslt openssl libpcap libyaz = %{version}
+
+%description -n yaz-ziffy
+ziffy is a promiscuous Z39.50 APDU sniffer, like the popular tcpdump.
+ziffy can capture and show all Z39.50 traffic on your LAN segment.
+This packages is a special port of ziffy ported to YAZ. Note that ziffy
+is licensed under the GPL and was is by Rocco Carbone <rocco@ntop.org>.
 
 %prep
 %setup
@@ -81,3 +92,6 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/share/doc/yaz
 /usr/share/yaz
 
+%files -n yaz-ziffy
+/usr/bin/ziffy
+/usr/share/man/man1/ziffy.*
