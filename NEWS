@@ -1,3 +1,5 @@
+Fixed bug #740: Handle SRU records referring to xmlns's outside recordData.
+
 --- 2.1.40 2006/11/27
 
 Added utilities yaz_{set,get}_esn to set/get element set name from
