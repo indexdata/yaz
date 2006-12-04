@@ -1,3 +1,8 @@
+Added GFS utility function bend_assoc_is_alive which returns 1 if
+association is still alive (client is connected); 0 otherwise (client
+closed connection). This allows busy servers to stop working for
+impatient clients.
+
 Fixed bug #740: Handle SRU records referring to xmlns's outside recordData.
 
 --- 2.1.40 2006/11/27

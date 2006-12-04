@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.104 2006-11-14 08:37:38 adam Exp $
+ * $Id: seshigh.c,v 1.105 2006-12-04 14:56:55 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -264,6 +264,98 @@ static void do_close(association *a, int reason, char *message)
     do_close_req (a, reason, message, req);
 }
 
+
+int ir_read(IOCHAN h, int event)
+{
+    association *assoc = (association *)iochan_getdata(h);
+    COMSTACK conn = assoc->client_link;
+    request *req;
+    
+    if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
+    {
+        yaz_log(YLOG_DEBUG, "ir_session (input)");
+        /* We aren't speaking to this fellow */
+        if (assoc->state == ASSOC_DEAD)
+        {
+            yaz_log(log_sessiondetail, "Connection closed - end of session");
+            cs_close(conn);
+            destroy_association(assoc);
+            iochan_destroy(h);
+            return 0;
+        }
+        assoc->cs_get_mask = EVENT_INPUT;
+
+        do
+        {
+            int res = cs_get(conn, &assoc->input_buffer,
+                             &assoc->input_buffer_len);
+            if (res < 0 && cs_errno(conn) == CSBUFSIZE)
+            {
+                yaz_log(log_session, "Connection error: %s res=%d",
+                        cs_errmsg(cs_errno(conn)), res);
+                req = request_get(&assoc->incoming); /* get a new request */
+                do_close_req(assoc, Z_Close_protocolError, 
+                             "Incoming package too large", req);
+                return 0;
+            }
+            else if (res <= 0)
+            {
+                yaz_log(log_session, "Connection closed by client");
+                assoc->state = ASSOC_DEAD;
+                return 0;
+            }
+            else if (res == 1) /* incomplete read - wait for more  */
+            {
+                if (conn->io_pending & CS_WANT_WRITE)
+                    assoc->cs_get_mask |= EVENT_OUTPUT;
+                iochan_setflag(h, assoc->cs_get_mask);
+                return 1;
+            }
+            /* we got a complete PDU. Let's decode it */
+            yaz_log(YLOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
+                    assoc->input_buffer[0] & 0xff,
+                    assoc->input_buffer[1] & 0xff,
+                    assoc->input_buffer[2] & 0xff);
+            req = request_get(&assoc->incoming); /* get a new request */
+            odr_reset(assoc->decode);
+            odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
+            if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
+            {
+                yaz_log(YLOG_WARN, "ODR error on incoming PDU: %s [element %s] "
+                        "[near byte %ld] ",
+                        odr_errmsg(odr_geterror(assoc->decode)),
+                        odr_getelement(assoc->decode),
+                        (long) odr_offset(assoc->decode));
+                if (assoc->decode->error != OHTTP)
+                {
+                    yaz_log(YLOG_WARN, "PDU dump:");
+                    odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
+                    request_release(req);
+                    do_close(assoc, Z_Close_protocolError, "Malformed package");
+                }
+                else
+                {
+                    Z_GDU *p = z_get_HTTP_Response(assoc->encode, 400);
+                    assoc->state = ASSOC_DEAD;
+                    process_gdu_response(assoc, req, p);
+                }
+                return 0;
+            }
+            req->request_mem = odr_extract_mem(assoc->decode);
+            if (assoc->print) 
+            {
+                if (!z_GDU(assoc->print, &req->gdu_request, 0, 0))
+                    yaz_log(YLOG_WARN, "ODR print error: %s", 
+                            odr_errmsg(odr_geterror(assoc->print)));
+                odr_reset(assoc->print);
+            }
+            request_enq(&assoc->incoming, req);
+        }
+        while (cs_more(conn));
+    }
+    return 1;
+}
+
 /*
  * This is where PDUs from the client are read and the further
  * processing is initiated. Flow of control moves down through the
@@ -324,92 +416,10 @@ void ir_session(IOCHAN h, int event)
         }
         return;
     }
-    if ((event & assoc->cs_get_mask) || (event & EVENT_WORK)) /* input */
+    if (event & assoc->cs_get_mask) /* input */
     {
-        if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
-        {
-            yaz_log(YLOG_DEBUG, "ir_session (input)");
-            /* We aren't speaking to this fellow */
-            if (assoc->state == ASSOC_DEAD)
-            {
-                yaz_log(log_sessiondetail, "Connection closed - end of session");
-                cs_close(conn);
-                destroy_association(assoc);
-                iochan_destroy(h);
-                return;
-            }
-            assoc->cs_get_mask = EVENT_INPUT;
-            res = cs_get(conn, &assoc->input_buffer,
-                &assoc->input_buffer_len);
-            if (res < 0 && cs_errno(conn) == CSBUFSIZE)
-            {
-                yaz_log(log_session, "Connection error: %s res=%d",
-                        cs_errmsg(cs_errno(conn)), res);
-                req = request_get(&assoc->incoming); /* get a new request */
-                do_close_req(assoc, Z_Close_protocolError, 
-                             "Incoming package too large", req);
-                return;
-            }
-            else if (res <= 0)
-            {
-                yaz_log(log_sessiondetail, "Connection closed by client");
-                cs_close(conn);
-                destroy_association(assoc);
-                iochan_destroy(h);
-                return;
-            }
-            else if (res == 1) /* incomplete read - wait for more  */
-            {
-                if (conn->io_pending & CS_WANT_WRITE)
-                    assoc->cs_get_mask |= EVENT_OUTPUT;
-                iochan_setflag(h, assoc->cs_get_mask);
-                return;
-            }
-            if (cs_more(conn)) /* more stuff - call us again later, please */
-                iochan_setevent(h, EVENT_INPUT);
-                
-            /* we got a complete PDU. Let's decode it */
-            yaz_log(YLOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
-                            assoc->input_buffer[0] & 0xff,
-                            assoc->input_buffer[1] & 0xff,
-                            assoc->input_buffer[2] & 0xff);
-            req = request_get(&assoc->incoming); /* get a new request */
-            odr_reset(assoc->decode);
-            odr_setbuf(assoc->decode, assoc->input_buffer, res, 0);
-            if (!z_GDU(assoc->decode, &req->gdu_request, 0, 0))
-            {
-                yaz_log(YLOG_WARN, "ODR error on incoming PDU: %s [element %s] "
-                        "[near byte %ld] ",
-                        odr_errmsg(odr_geterror(assoc->decode)),
-                        odr_getelement(assoc->decode),
-                        (long) odr_offset(assoc->decode));
-                if (assoc->decode->error != OHTTP)
-                {
-                    yaz_log(YLOG_WARN, "PDU dump:");
-                    odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
-                    request_release(req);
-                    do_close(assoc, Z_Close_protocolError, "Malformed package");
-                }
-                else
-                {
-                    Z_GDU *p = z_get_HTTP_Response(assoc->encode, 400);
-                    assoc->state = ASSOC_DEAD;
-                    process_gdu_response(assoc, req, p);
-                }
-                return;
-            }
-            req->request_mem = odr_extract_mem(assoc->decode);
-            if (assoc->print) 
-            {
-                if (!z_GDU(assoc->print, &req->gdu_request, 0, 0))
-                    yaz_log(YLOG_WARN, "ODR print error: %s", 
-                       odr_errmsg(odr_geterror(assoc->print)));
-                odr_reset(assoc->print);
-            }
-            request_enq(&assoc->incoming, req);
-        }
-
-        /* can we do something yet? */
+        if (!ir_read(h, event))
+            return;
         req = request_head(&assoc->incoming);
         if (req->state == REQUEST_IDLE)
         {
@@ -2116,13 +2126,18 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
     iochan_setflag(assoc->client_chan, EVENT_OUTPUT);
     assoc->cs_put_mask = EVENT_OUTPUT;
     /* Is there more work to be done? give that to the input handler too */
-#if 1
-    if (request_head(&assoc->incoming))
+    for (;;)
     {
-        yaz_log (YLOG_DEBUG, "more work to be done");
-        iochan_setevent(assoc->client_chan, EVENT_WORK);
+        req = request_head(&assoc->incoming);
+        if (req && req->state == REQUEST_IDLE)
+        {
+            yaz_log(YLOG_LOG, "process next request 3");
+            request_deq(&assoc->incoming);
+            process_gdu_request(assoc, req);
+        }
+        else
+            break;
     }
-#endif
     return 0;
 }
 
@@ -2334,7 +2349,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.104 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.105 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3509,6 +3524,15 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     yaz_log(YLOG_DEBUG,"Send the result apdu");
     return apdu;
 }
+
+int bend_assoc_is_alive(bend_association assoc)
+{
+    if (assoc->state == ASSOC_DEAD)
+        return 0; /* already marked as dead. Don't check I/O chan anymore */
+
+    return iochan_is_alive(assoc->client_chan);
+}
+
 
 /*
  * Local variables:

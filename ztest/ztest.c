@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.81 2006-05-06 00:52:15 quinn Exp $
+ * $Id: ztest.c,v 1.82 2006-12-04 14:56:55 adam Exp $
  */
 
 /*
@@ -54,7 +54,17 @@ int ztest_search(void *handle, bend_search_rr *rr)
     else if(!yaz_matchstr (rr->basenames[0], "Slow"))
     {
 #if HAVE_UNISTD_H
-        sleep(3);
+        /* wait up to 3 seconds and check if connection is still alive */
+        int i;
+        for (i = 0; i<3; i++)
+        {
+            if (!bend_assoc_is_alive(rr->association))
+            {
+                yaz_log(YLOG_LOG, "search aborted");
+                break;
+            }
+            sleep(1);
+        }
 #endif
         ;
     }

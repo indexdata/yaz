@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.h,v 1.6 2005-06-25 15:46:04 adam Exp $
+ * $Id: eventl.h,v 1.7 2006-12-04 14:56:55 adam Exp $
  */
 
 /**
@@ -30,7 +30,6 @@ typedef struct iochan
 #define EVENT_OUTPUT    0x02
 #define EVENT_EXCEPT    0x04
 #define EVENT_TIMEOUT   0x08
-#define EVENT_WORK      0x10
 int force_event;
     IOC_CALLBACK fun;
     void *data;
@@ -59,6 +58,7 @@ int force_event;
 #define iochan_settimeout(i, t) ((i)->max_idle = (t), (i)->last_event = time(0))
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port);
+int iochan_is_alive(IOCHAN chan);
 int event_loop(IOCHAN *iochans);
 void statserv_remove (IOCHAN pIOChannel);
 #endif

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.38 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: backend.h,v 1.39 2006-12-04 14:56:54 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -329,6 +329,7 @@ YAZ_EXPORT statserv_options_block *statserv_getcontrol(void);
 YAZ_EXPORT void statserv_setcontrol(statserv_options_block *block);
 YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);
 
+YAZ_EXPORT int bend_assoc_is_alive(bend_association assoc);
 
 YAZ_END_CDECL
 

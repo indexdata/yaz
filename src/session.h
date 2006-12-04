@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.11 2006-05-07 14:48:25 adam Exp $
+ * $Id: session.h,v 1.12 2006-12-04 14:56:55 adam Exp $
  */
 /**
  * \file session.h
@@ -132,6 +132,8 @@ void request_release(request *r);
 int statserv_must_terminate(void);
 
 int control_association(association *assoc, const char *host, int force);
+
+int ir_read(IOCHAN h, int event);
 
 #endif
 /*
