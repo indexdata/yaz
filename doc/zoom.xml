@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.54 2006-10-31 14:08:01 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.55 2006-12-06 11:12:14 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -256,6 +256,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       <row><entry>
         mediumSetElementSetName</entry><entry>
         The element set name to be for medium-sized result sets.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        init_opt_search, init_opt_present, init_opt_delSet, etc.</entry><entry>
+        After a successful Init, these options may be interrogated to
+	discover whether the server claims to support the specified
+	operations.
        </entry><entry>none</entry></row>
      </tbody>
     </tgroup>

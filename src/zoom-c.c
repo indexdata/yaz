@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.100 2006-11-30 17:07:50 mike Exp $
+ * $Id: zoom-c.c,v 1.101 2006-12-06 11:12:14 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.100 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.101 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3436,6 +3436,16 @@ static void interpret_otherinformation_field(ZOOM_connection c,
     }
 }
 
+
+static void set_init_option(const char *name, void *clientData) {
+    ZOOM_connection c = clientData;
+    char buf[80];
+
+    sprintf(buf, "init_opt_%.70s", name);
+    ZOOM_connection_option_set(c, buf, "1");
+}
+
+
 static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
@@ -3466,6 +3476,10 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
         ZOOM_connection_option_set(c, "targetImplementationVersion",
                                    initrs->implementationVersion ?
                                    initrs->implementationVersion : "");
+
+        /* Make initrs->options available as ZOOM-level options */
+        yaz_init_opt_decode(initrs->options, set_init_option, (void*) c);
+
         if (!*initrs->result)
         {
             Z_External *uif = initrs->userInformationField;
