@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.39 2006-12-04 14:56:54 adam Exp $ */
+/* $Id: backend.h,v 1.40 2006-12-06 21:35:58 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -154,14 +154,12 @@ typedef struct bend_update_rr {
     char *operation;
     char *operation_status;
     char *record_id;
-    char *record_version;
-    char *record_checksum;
-    char *record_old_version;
+    Z_SRW_recordVersion *record_versions;
+    int num_versions;
     char *record_packing;
     char *record_schema;
     char *record_data;
-    Z_SRW_extra_record *request_extra_record;
-    Z_SRW_extra_record *response_extra_record;
+    char *extra_record_data;
     char *extra_request_data;
     char *extra_response_data;
     char *uri;

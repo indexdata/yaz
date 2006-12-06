@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.319 2006-11-14 08:37:16 adam Exp $
+ * $Id: client.c,v 1.320 2006-12-06 21:35:57 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2123,20 +2123,20 @@ static int cmd_update0(const char *arg)
     return cmd_update_common(arg, 0);
 }
 
+static int cmd_update_Z3950(int version, int action_no, const char *recid,
+                            char *rec_buf, int rec_len);
+
+static int cmd_update_SRW(int action_no, const char *recid,
+                          char *rec_buf, int rec_len);
+
 static int cmd_update_common(const char *arg, int version)
 {
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
-    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-    Z_External *r;
     char action[20], recid[20];
     char *rec_buf;
     int rec_len;
     int action_no;
     int noread = 0;
-    Z_External *record_this = 0;
 
-    if (only_z3950())
-        return 1;
     *action = 0;
     *recid = 0;
     sscanf (arg, "%19s %19s%n", action, recid, &noread);
@@ -2166,6 +2166,57 @@ static int cmd_update_common(const char *arg, int version)
     arg += noread;
     if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len, 1) == 0)
         return 0;
+
+    if (protocol == PROTO_HTTP)
+        return cmd_update_SRW(action_no, recid, rec_buf, rec_len);
+    else
+        return cmd_update_Z3950(version, action_no, recid, rec_buf, rec_len);
+}
+
+static int cmd_update_SRW(int action_no, const char *recid,
+                          char *rec_buf, int rec_len)
+{
+    if (!conn)
+        cmd_open(0);
+    if (!conn)
+        return 0;
+    else
+    {
+        Z_SRW_PDU *srw = yaz_srw_get(out, Z_SRW_update_request);
+        Z_SRW_updateRequest *sr = srw->u.update_request;
+
+        switch(action_no)
+        {
+        case Z_IUOriginPartToKeep_recordInsert:
+            sr->operation = "info:srw/action/1/create";
+            break;
+        case Z_IUOriginPartToKeep_recordReplace:
+            sr->operation = "info:srw/action/1/replace";
+            break;
+        case Z_IUOriginPartToKeep_recordDelete:
+            sr->operation = "info:srw/action/1/delete";
+            break;
+        }
+        if (rec_buf)
+        {
+            sr->record = yaz_srw_get_record(out);
+            sr->record->recordData_buf = rec_buf;
+            sr->record->recordData_len = rec_len;
+            sr->record->recordSchema = record_schema;
+        }
+        if (recid)
+            sr->recordId = odr_strdup(out, recid);
+        return send_srw(srw);
+    }
+}
+                          
+static int cmd_update_Z3950(int version, int action_no, const char *recid,
+                            char *rec_buf, int rec_len)
+{
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+    Z_External *r;
+    Z_External *record_this = 0;
 
     if (rec_buf)
         record_this = z_ext_record (out, VAL_TEXT_XML, rec_buf, rec_len);
@@ -3807,16 +3858,15 @@ static void http_response(Z_HTTP_Response *hres)
     {
         Z_SOAP *soap_package = 0;
         ODR o = odr_createmem(ODR_DECODE);
-        Z_SOAP_Handler soap_handlers[2] = {
-            {"http://www.loc.gov/zing/srw/", 0,
-             (Z_SOAP_fun) yaz_srw_codec},
+        Z_SOAP_Handler soap_handlers[3] = {
+            {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+            {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
             {0, 0, 0}
         };
         ret = z_soap_codec(o, &soap_package,
                            &hres->content_buf, &hres->content_len,
                            soap_handlers);
-        if (!ret && soap_package->which == Z_SOAP_generic &&
-            soap_package->u.generic->no == 0)
+        if (!ret && soap_package->which == Z_SOAP_generic)
         {
             Z_SRW_PDU *sr = soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
@@ -3825,11 +3875,14 @@ static void http_response(Z_HTTP_Response *hres)
                 handle_srw_explain_response(sr->u.explain_response);
             else if (sr->which == Z_SRW_scan_response)
                 handle_srw_scan_response(sr->u.scan_response);
+            else if (sr->which == Z_SRW_update_response)
+                printf("Got update response. Status: %s\n",
+                       sr->u.update_response->operationStatus);
             else
                 ret = -1;
         }
         else if (soap_package && (soap_package->which == Z_SOAP_fault
-                          || soap_package->which == Z_SOAP_error))
+                                  || soap_package->which == Z_SOAP_error))
         {
             printf ("HTTP Error Status=%d\n", hres->code);
             printf ("SOAP Fault code %s\n",
@@ -3841,7 +3894,10 @@ static void http_response(Z_HTTP_Response *hres)
                         soap_package->u.fault->details);
         }
         else
+        {
+            printf("z_soap_codec failed. (no SOAP error)\n");
             ret = -1;
+        }
         odr_destroy(o);
     }
     if (ret)

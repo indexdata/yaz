@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.31 2006-10-27 11:22:08 adam Exp $ */
+/* $Id: srw.h,v 1.32 2006-12-06 21:35:58 adam Exp $ */
 
 /**
  * \file srw.h
@@ -42,13 +42,9 @@
 YAZ_BEGIN_CDECL
 
 typedef struct {
-    int type;
-    char *recordReviewCode;
-    char *recordReviewNote;
-    char *recordId;
-    char *nonDupRecordId;
-    char *recordLockStatus;
-    char *recordOldVersion;
+    char *extraRecordData_buf;
+    int extraRecordData_len;
+    char *recordIdentifier;
 } Z_SRW_extra_record;
 
 typedef struct {
@@ -156,25 +152,32 @@ typedef struct {
 
 
 typedef struct {
+    char *versionType;
+    char *versionValue;
+} Z_SRW_recordVersion;
+
+typedef struct {
     char *database;
     char *operation;
     char *recordId;
-    char *recordVersion;
-    char *recordOldVersion;
-    Z_SRW_record record;
+    Z_SRW_recordVersion *recordVersions;
+    int num_recordVersions;
+    Z_SRW_record *record;
     Z_SRW_extra_record *extra_record;
-    char *extraRequestData;
+    char *extraRequestData_buf;
+    int extraRequestData_len;
     char *stylesheet;
 } Z_SRW_updateRequest;
 
 typedef struct {
     char *operationStatus;
     char *recordId;
-    char *recordVersion;
-    char *recordChecksum;
-    char *extraResponseData;
-    Z_SRW_record record;
+    Z_SRW_recordVersion *recordVersions;
+    int num_recordVersions;
+    Z_SRW_record *record;
     Z_SRW_extra_record *extra_record;
+    char *extraResponseData_buf;
+    int extraResponseData_len;
     Z_SRW_diagnostic *diagnostics;
     int num_diagnostics;
 } Z_SRW_updateResponse;
@@ -214,11 +217,17 @@ YAZ_EXPORT int yaz_ucp_codec(ODR o, void * pptr,
                              void *client_data, const char *ns);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
+YAZ_EXPORT Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR o, int num);
 YAZ_EXPORT Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o);
+YAZ_EXPORT Z_SRW_record *yaz_srw_get_record(ODR o);
+YAZ_EXPORT Z_SRW_record *yaz_srw_get_records(ODR o, int num);
 
 YAZ_EXPORT int yaz_diag_bib1_to_srw (int bib1_code);
 
 YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
+
+YAZ_EXPORT const char *yaz_srw_pack_to_str(int pack);
+YAZ_EXPORT int yaz_srw_str_to_pack(const char *str);
 
 YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
 YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
@@ -256,6 +265,11 @@ YAZ_EXPORT int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR encode, const char *charset);
 YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
+
+#define YAZ_XMLNS_SRU_v1_0 "http://www.loc.gov/zing/srw/v1.0/"
+#define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"
+#define YAZ_XMLNS_DIAG_v1_1 "http://www.loc.gov/zing/srw/diagnostic/"
+#define YAZ_XMLNS_UPDATE_v0_9 "http://www.loc.gov/zing/srw/update/"
 
 YAZ_END_CDECL
 

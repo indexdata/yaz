@@ -1,3 +1,9 @@
+Changed the SRU update structures and codecs to reflect the SRU pre 1.0
+spec, at http://www.loc.gov/standards/sru/record-update/
+This has changed the binary layout of the following structs:
+Z_SRW_extra_record, Z_SRW_updateRequest, Z_SRW_updateResponse and
+bend_update_rr . Patch by Ko van der Sloot.
+
 Added GFS utility function bend_assoc_is_alive which returns 1 if
 association is still alive (client is connected); 0 otherwise (client
 closed connection). This allows busy servers to stop working for

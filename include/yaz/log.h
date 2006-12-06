@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: log.h,v 1.39 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: log.h,v 1.40 2006-12-06 21:35:58 adam Exp $ */
 
 /**
  * \file log.h
@@ -196,9 +196,7 @@ YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg,
 YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
                                            void *info), void *info);
 
-#if YAZ_USE_NEW_LOG
-
-#else
+#if YAZ_USE_OLD_LOG
 
 #include <yaz/xmalloc.h>
 
@@ -239,7 +237,7 @@ YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
 /** \brief logf is deprecated, as it conflicts with a math function */
 #define logf yaz_log
 
-#endif /* if YAZ_USE_NEW_LOG */
+#endif /* if YAZ_USE_OLD_LOG */
 
 YAZ_END_CDECL
 

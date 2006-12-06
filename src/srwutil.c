@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.53 2006-10-27 11:22:09 adam Exp $
+ * $Id: srwutil.c,v 1.54 2006-12-06 21:35:58 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -376,12 +376,9 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             
             static Z_SOAP_Handler soap_handlers[4] = {
 #if YAZ_HAVE_XML2
-                {"http://www.loc.gov/zing/srw/", 0,
-                 (Z_SOAP_fun) yaz_srw_codec},
-                {"http://www.loc.gov/zing/srw/v1.0/", 0,
-                 (Z_SOAP_fun) yaz_srw_codec},
-                {"http://www.loc.gov/zing/srw/update/", 0,
-                 (Z_SOAP_fun) yaz_ucp_codec},
+                { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+                { YAZ_XMLNS_SRU_v1_0, 0, (Z_SOAP_fun) yaz_srw_codec },
+                { YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec },
 #endif
                 {0, 0, 0}
             };
@@ -464,8 +461,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 {
 #if YAZ_HAVE_XML2
     static Z_SOAP_Handler soap_handlers[2] = {
-        {"http://www.loc.gov/zing/srw/", 0,
-         (Z_SOAP_fun) yaz_srw_codec},
+        {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
         {0, 0, 0}
     };
 #endif
@@ -770,14 +766,33 @@ Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o)
 {
     Z_SRW_extra_record *res = (Z_SRW_extra_record *)
         odr_malloc(o, sizeof(*res));
-    res->type = 1;
-    res->recordReviewCode = 0;
-    res->recordReviewNote = 0;
-    res->recordId = 0;
-    res->nonDupRecordId = 0;
-    res->recordLockStatus = 0;
-    res->recordOldVersion = 0;
+
+    res->extraRecordData_buf = 0;
+    res->extraRecordData_len = 0;
+    res->recordIdentifier = 0;
     return res;
+}
+
+
+Z_SRW_record *yaz_srw_get_records(ODR o, int n)
+{
+    Z_SRW_record *res = (Z_SRW_record *) odr_malloc(o, n * sizeof(*res));
+    int i;
+
+    for (i = 0; i<n; i++)
+    {
+        res[i].recordSchema = 0;
+        res[i].recordPacking = Z_SRW_recordPacking_string;
+        res[i].recordData_buf = 0;
+        res[i].recordData_len = 0;
+        res[i].recordPosition = 0;
+    }
+    return res;
+}
+
+Z_SRW_record *yaz_srw_get_record(ODR o)
+{
+    return yaz_srw_get_records(o, 1);
 }
 
 Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
@@ -868,15 +883,13 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
             odr_malloc(o, sizeof(*sr->u.update_request));
 	sr->u.update_request->database = 0;
 	sr->u.update_request->stylesheet = 0;
-        sr->u.update_request->record.recordSchema = 0;
-        sr->u.update_request->record.recordPacking = Z_SRW_recordPacking_XML;
+        sr->u.update_request->record = 0;
 	sr->u.update_request->recordId = 0;
-	sr->u.update_request->recordVersion = 0;
-	sr->u.update_request->recordOldVersion = 0;
-        sr->u.update_request->record.recordData_buf = 0;
-        sr->u.update_request->record.recordData_len = 0;
+	sr->u.update_request->recordVersions = 0;
+	sr->u.update_request->num_recordVersions = 0;
         sr->u.update_request->extra_record = 0;
-        sr->u.update_request->extraRequestData = 0;
+        sr->u.update_request->extraRequestData_buf = 0;
+        sr->u.update_request->extraRequestData_len = 0;
 	sr->u.request->database = 0;
         break;
     case Z_SRW_update_response:
@@ -884,15 +897,12 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
             odr_malloc(o, sizeof(*sr->u.update_response));
 	sr->u.update_response->operationStatus = 0;
 	sr->u.update_response->recordId = 0;
-	sr->u.update_response->recordVersion = 0;
-	sr->u.update_response->recordChecksum = 0;
-	sr->u.update_response->record.recordData_buf = 0;
-	sr->u.update_response->record.recordData_len = 0;
-	sr->u.update_response->record.recordSchema = 0;
-	sr->u.update_response->record.recordPacking =
-	    Z_SRW_recordPacking_XML;
+	sr->u.update_response->recordVersions = 0;
+	sr->u.update_response->num_recordVersions = 0;
+	sr->u.update_response->record = 0;
         sr->u.update_response->extra_record = 0;
-        sr->u.update_response->extraResponseData = 0;
+        sr->u.update_response->extraResponseData_buf = 0;
+        sr->u.update_response->extraResponseData_len = 0;
 	sr->u.update_response->diagnostics = 0;
 	sr->u.update_response->num_diagnostics = 0;
     }
@@ -1254,13 +1264,15 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                         ODR odr, const char *charset)
 {
-    Z_SOAP_Handler handlers[2] = {
+    Z_SOAP_Handler handlers[3] = {
 #if YAZ_HAVE_XML2
-        {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+        {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
 #endif
         {0, 0, 0}
     };
     Z_SOAP *p = (Z_SOAP*) odr_malloc(odr, sizeof(*p));
+
     z_HTTP_header_add_content_type(odr,
                                    &hreq->headers,
                                    "text/xml", charset);
@@ -1273,11 +1285,53 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     p->u.generic->ns = 0;
     p->u.generic->p = srw_pdu;
     p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
-    
+
+#if YAZ_HAVE_XML2
+    if (srw_pdu->which == Z_SRW_update_request ||
+        srw_pdu->which == Z_SRW_update_response)
+        p->u.generic->no = 1; /* second handler */
+#endif
     return z_soap_codec_enc(odr, &p,
                             &hreq->content_buf,
                             &hreq->content_len, handlers,
                             charset);
+}
+
+Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR odr, int num )
+{
+    Z_SRW_recordVersion *ver 
+        = (Z_SRW_recordVersion *) odr_malloc( odr, num * sizeof(*ver) );
+    int i;
+    for ( i=0; i < num; ++i ){
+        ver[i].versionType = 0;
+        ver[i].versionValue = 0;
+    }
+    return ver;
+}
+
+const char *yaz_srw_pack_to_str(int pack)
+{
+    switch(pack)
+    {
+    case Z_SRW_recordPacking_string:
+        return "string";
+    case Z_SRW_recordPacking_XML:
+        return "xml";
+    case Z_SRW_recordPacking_URL:
+        return "url";
+    }
+    return 0;
+}
+
+int yaz_srw_str_to_pack(const char *str)
+{
+    if (!strcmp(str, "string"))
+        return Z_SRW_recordPacking_string;
+    if (!strcmp(str, "xml"))
+        return Z_SRW_recordPacking_XML;
+    if (!strcmp(str, "url"))
+        return Z_SRW_recordPacking_URL;
+    return -1;
 }
 
 /*

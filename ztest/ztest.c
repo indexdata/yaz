@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.82 2006-12-04 14:56:55 adam Exp $
+ * $Id: ztest.c,v 1.83 2006-12-06 21:35:59 adam Exp $
  */
 
 /*
@@ -673,6 +673,12 @@ int ztest_explain(void *handle, bend_explain_rr *rr)
     return 0;
 }
 
+int ztest_update(void *handle, bend_update_rr *rr)
+{
+    rr->operation_status = "success";
+    return 0;
+}
+
 bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *)
@@ -700,6 +706,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_explain = ztest_explain;
 #endif
     q->bend_srw_scan = ztest_scan;
+    q->bend_srw_update = ztest_update;
 
     return r;
 }
