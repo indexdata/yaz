@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.19 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: marcdisp.h,v 1.20 2006-12-07 11:08:04 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -64,6 +64,8 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_ISO2709   4
 /** \brief Output format: MarcXchange */
 #define YAZ_MARC_XCHANGE   5
+/** \brief Output format: check only (no marc output) */
+#define YAZ_MARC_CHECK  6
 
 /** \brief supply iconv handle for character set conversion .. */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);

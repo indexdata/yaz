@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.35 2006-10-27 12:19:15 adam Exp $
+ * $Id: marcdisp.c,v 1.36 2006-12-07 11:08:05 adam Exp $
  */
 
 /**
@@ -392,6 +392,41 @@ static void yaz_marc_reset(yaz_marc_t mt)
     mt->subfield_pp = 0;
 }
 
+int yaz_marc_write_check(yaz_marc_t mt, WRBUF wr)
+{
+    struct yaz_marc_node *n;
+    int identifier_length;
+    const char *leader = 0;
+
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            break;
+        }
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+
+    for (n = mt->nodes; n; n = n->next)
+    {
+        switch(n->which)
+        {
+        case YAZ_MARC_COMMENT:
+            wrbuf_iconv_write(wr, mt->iconv_cd, 
+                              n->u.comment, strlen(n->u.comment));
+            wrbuf_puts(wr, ")\n");
+            break;
+        default:
+            break;
+        }
+    }
+    return 0;
+}
+
+
 int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
 {
     struct yaz_marc_node *n;
@@ -472,6 +507,8 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
         return yaz_marc_write_marcxchange(mt, wr, 0, 0); /* no format, type */
     case YAZ_MARC_ISO2709:
         return yaz_marc_write_iso2709(mt, wr);
+    case YAZ_MARC_CHECK:
+        return yaz_marc_write_check(mt, wr);
     }
     return -1;
 }

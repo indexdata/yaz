@@ -1,3 +1,9 @@
+Added 'check only' option for MARC utilities. Option -n for yaz-marcdump
+does not print anything except warnings for records.
+
+For yaz-marcdump, added support for MARC split into files (-s) with a given
+chunk size (-C).
+
 Changed the SRU update structures and codecs to reflect the SRU pre 1.0
 spec, at http://www.loc.gov/standards/sru/record-update/
 This has changed the binary layout of the following structs:

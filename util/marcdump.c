@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.43 2006-10-09 14:22:44 heikki Exp $
+ * $Id: marcdump.c,v 1.44 2006-12-07 11:08:05 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -51,7 +51,7 @@ static char *prog;
 static void usage(const char *prog)
 {
     fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-X] [-e] "
-             "[-I] [-l pos=value] [-v] [-s splitfname] file...\n",
+             "[-I] [-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] file...\n",
              prog);
 } 
 
@@ -71,11 +71,12 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
         r = yaz_marc_read_xml(mt, ptr);
         if (r)
             fprintf(stderr, "yaz_marc_read_xml failed\n");
-        
-        yaz_marc_write_mode(mt, wrbuf);
-
-        fputs(wrbuf_buf(wrbuf), stdout);
-
+        else
+        {
+            yaz_marc_write_mode(mt, wrbuf);
+            
+            fputs(wrbuf_buf(wrbuf), stdout);
+        }
         wrbuf_free(wrbuf, 1);
     }
     xmlFreeDoc(doc);
@@ -84,8 +85,8 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 
 static void dump(const char *fname, const char *from, const char *to,
                  int read_xml, int xml,
-                 int print_offset, const char *split_fname, int verbose,
-                 FILE *cfile, const char *leader_spec)
+                 int print_offset, const char *split_fname, int split_chunk,
+                 int verbose, FILE *cfile, const char *leader_spec)
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
@@ -122,8 +123,9 @@ static void dump(const char *fname, const char *from, const char *to,
     else
     {
         FILE *inf = fopen(fname, "rb");
-        int count = 0;
         int num = 1;
+        int marc_no = 0;
+        int split_file_no = -1;
         if (!inf)
         {
             fprintf (stderr, "%s: cannot open %s:%s\n",
@@ -132,119 +134,120 @@ static void dump(const char *fname, const char *from, const char *to,
         }
         if (cfile)
             fprintf (cfile, "char *marc_records[] = {\n");
-        if (1)
+        for(;; marc_no++)
         {
-            int marc_no = 0;
-            for(;; marc_no++)
+            char *result = 0;
+            size_t len;
+            size_t rlen;
+            int len_result;
+            size_t r;
+            char buf[100001];
+            
+            r = fread (buf, 1, 5, inf);
+            if (r < 5)
             {
-                size_t len;
-                char *result = 0;
-                size_t rlen;
-                size_t r;
-                char buf[100001];
-                
-                r = fread (buf, 1, 5, inf);
-                if (r < 5)
-                {
-                    if (r && print_offset && verbose)
-                        printf ("<!-- Extra %ld bytes at end of file -->\n",
-                                (long) r);
-                    break;
-                }
-                while (*buf < '0' || *buf > '9')
-                {
-                    int i;
-                    long off = ftell(inf) - 5;
-                    if (verbose || print_offset)
-                        printf("<!-- Skipping bad byte %d (0x%02X) at offset "
-                               "%ld (0x%lx) -->\n", 
-                               *buf & 0xff, *buf & 0xff,
-                               off, off);
-                    for (i = 0; i<4; i++)
-                        buf[i] = buf[i+1];
-                    r = fread(buf+4, 1, 1, inf);
-                    if (r < 1)
-                        break;
-                }
+                if (r && print_offset && verbose)
+                    printf ("<!-- Extra %ld bytes at end of file -->\n",
+                            (long) r);
+                break;
+            }
+            while (*buf < '0' || *buf > '9')
+            {
+                int i;
+                long off = ftell(inf) - 5;
+                if (verbose || print_offset)
+                    printf("<!-- Skipping bad byte %d (0x%02X) at offset "
+                           "%ld (0x%lx) -->\n", 
+                           *buf & 0xff, *buf & 0xff,
+                           off, off);
+                for (i = 0; i<4; i++)
+                    buf[i] = buf[i+1];
+                r = fread(buf+4, 1, 1, inf);
                 if (r < 1)
-                {
-                    if (verbose || print_offset)
-                        printf ("<!-- End of file with data -->\n");
                     break;
-                }
-                if (print_offset)
+            }
+            if (r < 1)
+            {
+                if (verbose || print_offset)
+                    printf ("<!-- End of file with data -->\n");
+                break;
+            }
+            if (print_offset)
+            {
+                long off = ftell(inf) - 5;
+                printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
+                        num, off, off);
+            }
+            len = atoi_n(buf, 5);
+            if (len < 25 || len > 100000)
+            {
+                long off = ftell(inf) - 5;
+                printf("Bad Length %ld read at offset %ld (%lx)\n",
+                       (long)len, (long) off, (long) off);
+                break;
+            }
+            rlen = len - 5;
+            r = fread (buf + 5, 1, rlen, inf);
+            if (r < rlen)
+                break;
+            if (split_fname)
+            {
+                char fname[256];
+                const char *mode = 0;
+                FILE *sf;
+                if ((marc_no % split_chunk) == 0)
                 {
-                    long off = ftell(inf) - 5;
-                    printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
-                            num, off, off);
+                    mode = "wb";
+                    split_file_no++;
                 }
-                len = atoi_n(buf, 5);
-                if (len < 25 || len > 100000)
+                else
+                    mode = "ab";
+                sprintf(fname, "%.200s%07d", split_fname, split_file_no);
+                sf = fopen(fname, mode);
+                if (!sf)
                 {
-                    long off = ftell(inf) - 5;
-                    printf("Bad Length %ld read at offset %ld (%lx)\n",
-                           (long)len, (long) off, (long) off);
-                    break;
+                    fprintf(stderr, "Could not open %s\n", fname);
+                    split_fname = 0;
                 }
-                rlen = len - 5;
-                r = fread (buf + 5, 1, rlen, inf);
-                if (r < rlen)
-                    break;
-                if (split_fname)
+                else
                 {
-                    char fname[256];
-                    FILE *sf;
-                    sprintf(fname, "%.200s%07d", split_fname, marc_no);
-                    sf = fopen(fname, "wb");
-                    if (!sf)
+                    if (fwrite(buf, 1, len, sf) != len)
                     {
-                        fprintf(stderr, "Could not open %s\n", fname);
+                        fprintf(stderr, "Could write content to %s\n",
+                                fname);
                         split_fname = 0;
                     }
-                    else
-                    {
-                        if (fwrite(buf, 1, len, sf) != len)
-                        {
-                            fprintf(stderr, "Could write content to %s\n",
-                                    fname);
-                            split_fname = 0;
-                        }
-                        fclose(sf);
-                    }
+                    fclose(sf);
                 }
-                {
-                    int rlentmp = (int) rlen;
-                    r = yaz_marc_decode_buf(mt, buf, -1, &result, &rlentmp);
-                    rlen = (size_t) rlentmp;
-                }
-                if (r > 0 && result)
-                {
-                    fwrite (result, rlen, 1, stdout);
-                }
-                if (r > 0 && cfile)
-                {
-                    char *p = buf;
-                    size_t i;
-                    if (count)
-                        fprintf (cfile, ",");
-                    fprintf (cfile, "\n");
-                    for (i = 0; i < r; i++)
-                    {
-                        if ((i & 15) == 0)
-                            fprintf (cfile, "  \"");
-                        fprintf (cfile, "\\x%02X", p[i] & 255);
-                        
-                        if (i < r - 1 && (i & 15) == 15)
-                            fprintf (cfile, "\"\n");
-                        
-                    }
-                    fprintf (cfile, "\"\n");
-                }
-                num++;
-                if (verbose)
-                    printf("\n");
             }
-            count++;
+            len_result = (int) rlen;
+            r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
+            if (r > 0 && result)
+            {
+                fwrite (result, len_result, 1, stdout);
+            }
+            if (r > 0 && cfile)
+            {
+                char *p = buf;
+                size_t i;
+                if (marc_no)
+                    fprintf (cfile, ",");
+                fprintf (cfile, "\n");
+                for (i = 0; i < r; i++)
+                {
+                    if ((i & 15) == 0)
+                        fprintf (cfile, "  \"");
+                    fprintf (cfile, "\\x%02X", p[i] & 255);
+                    
+                    if (i < r - 1 && (i & 15) == 15)
+                        fprintf (cfile, "\"\n");
+                    
+                }
+                fprintf (cfile, "\"\n");
+            }
+            num++;
+            if (verbose)
+                printf("\n");
         }
         if (cfile)
             fprintf (cfile, "};\n");
@@ -266,6 +269,7 @@ int main (int argc, char **argv)
     FILE *cfile = 0;
     char *from = 0, *to = 0;
     int read_xml = 0;
+    int split_chunk = 1;
     const char *split_fname = 0;
     const char *leader_spec = 0;
     
@@ -279,7 +283,7 @@ int main (int argc, char **argv)
 #endif
 
     prog = *argv;
-    while ((r = options("pvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
+    while ((r = options("C:npvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
@@ -321,15 +325,22 @@ int main (int argc, char **argv)
         case 'I':
             xml = YAZ_MARC_ISO2709;
             break;
+        case 'n':
+            xml = YAZ_MARC_CHECK;
+            break;
         case 'p':
             print_offset = 1;
             break;
         case 's':
             split_fname = arg;
             break;
+        case 'C':
+            split_chunk = atoi(arg);
+            break;
         case 0:
             dump(arg, from, to, read_xml, xml,
-                 print_offset, split_fname, verbose, cfile, leader_spec);
+                 print_offset, split_fname, split_chunk,
+                 verbose, cfile, leader_spec);
             break;
         case 'v':
             verbose++;
