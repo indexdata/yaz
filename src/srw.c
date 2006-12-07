@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.52 2006-12-06 21:35:58 adam Exp $
+ * $Id: srw.c,v 1.53 2006-12-07 19:06:11 adam Exp $
  */
 /**
  * \file srw.c
@@ -126,50 +126,11 @@ static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
     return match_xsd_string_n(ptr, elem, o, val, 0);
 }
 
-
-/** \brief fixes NS for root node of record data (bug #740) */
-static void fixup_xmlns(xmlNodePtr ptr, ODR o)
-{
-    /* should go towards root and collect NS not defined in the record here! */
-    xmlNodePtr p = ptr;
-
-    while (p)
-    {
-        assert(p->type == XML_ELEMENT_NODE);
-
-        p = p->parent;
-        while (p && p->type != XML_ELEMENT_NODE)
-            p = p->prev;
-        if (p)
-        {
-            xmlNsPtr ns = p->ns;
-            for (; ns; ns = ns->next)
-            {
-                xmlNsPtr n;
-                for (n = ptr->nsDef; n; n = n->next)
-                    if ((n->prefix == 0 && ns->prefix == 0)
-                        || (n->prefix && ns->prefix 
-                            && !strcmp((const char *) n->prefix,
-                                       (const char *) ns->prefix)))
-                    {
-                        break;
-                    }
-                if (!n)
-                {
-                    xmlNsPtr new_ns = xmlCopyNamespace(ns);
-                    
-                    new_ns->next = ptr->nsDef;
-                    ptr->nsDef = new_ns;
-                }
-            }
-        }
-    }
-}
-
 static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
                            char **val, int *len)
 {
     xmlBufferPtr buf;
+    xmlNode *tmp;
 
     if (!match_element(ptr, elem))
         return 0;
@@ -179,12 +140,15 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
         ptr = ptr->next;
     if (!ptr)
         return 0;
-
-    fixup_xmlns(ptr, o);
-
+    
+    /* copy node to get NS right (bug #740). */
+    tmp = xmlCopyNode(ptr, 1);
+    
     buf = xmlBufferCreate();
-
-    xmlNodeDump(buf, ptr->doc, ptr, 0, 0);
+    
+    xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
+    
+    xmlFreeNode(tmp);
     
     *val = odr_malloc(o, buf->use+1);
     memcpy (*val, buf->content, buf->use);
