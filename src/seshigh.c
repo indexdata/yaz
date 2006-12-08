@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.106 2006-12-06 21:35:58 adam Exp $
+ * $Id: seshigh.c,v 1.107 2006-12-08 13:53:26 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -309,7 +309,7 @@ int ir_read(IOCHAN h, int event)
                 if (conn->io_pending & CS_WANT_WRITE)
                     assoc->cs_get_mask |= EVENT_OUTPUT;
                 iochan_setflag(h, assoc->cs_get_mask);
-                return 1;
+                return 0;
             }
             /* we got a complete PDU. Let's decode it */
             yaz_log(YLOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
@@ -2351,7 +2351,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.106 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.107 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
