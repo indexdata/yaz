@@ -43,6 +43,9 @@
 59, "Suspect duplicate: warning only"
 60, "Incoming record matches with database record, records merged"
 61, "Unspecified database error"
+62, "Cannot process or store record, insufficent space"
 63, " 'record' is ignored, while Both 'recordIdentifier' and 'record' were included on a 'delete' action."
 64, "'recordIdentifier' is ignored, while Both 'recordIdentifier' and 'record' were included on a 'delete' action."
-100, "invalid action"
+65, "Not processed (replace or delete). Record identifier retrieved ore than one record"
+100, "Invalid action"
+
