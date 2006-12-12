@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.11 2006-07-06 10:17:53 adam Exp $
+ * $Id: record_conv.c,v 1.12 2006-12-12 10:41:38 marc Exp $
  */
 /**
  * \file record_conv.c
@@ -81,6 +81,7 @@ struct yaz_record_conv_rule {
 /** \brief reset rules+configuration */
 static void yaz_record_conv_reset(yaz_record_conv_t p)
 {
+
     struct yaz_record_conv_rule *r;
     for (r = p->rules; r; r = r->next)
     {
@@ -164,7 +165,8 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
     }
     if (!stylesheet)
     {
-        wrbuf_printf(p->wr_error, "Missing attribute 'stylesheet'");
+        wrbuf_printf(p->wr_error, "Element <xslt>: "
+                     "attribute 'stylesheet' expected");
         return -1;
     }
     else
@@ -173,14 +175,22 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
         xsltStylesheetPtr xsp;
         if (!yaz_filepath_resolve(stylesheet, p->path, 0, fullpath))
         {
-            wrbuf_printf(p->wr_error, "could not locate '%s'. Path=%s",
-                         stylesheet, p->path);
+            wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
+                         " could not locate stylesheet '%s' with path '%s'",
+                         stylesheet, fullpath, p->path);
             return -1;
         }
         xsp = xsltParseStylesheetFile((xmlChar*) fullpath);
         if (!xsp)
         {
-            wrbuf_printf(p->wr_error, "xsltParseStylesheetFile failed'");
+            wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
+                         " parsing stylesheet '%s' with path '%s' failed,"
+#if YAZ_HAVE_EXSLT
+                         " EXSLT enabled",
+#else
+                         " EXSLT not supported",
+#endif
+                         stylesheet, fullpath, p->path);
             return -1;
         }
         else
@@ -227,13 +237,17 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
             output_format = (const char *) attr->children->content;
         else
         {
-            wrbuf_printf(p->wr_error, "Bad attribute '%s'", attr->name);
+            wrbuf_printf(p->wr_error, "Element <marc>: expected attributes"
+                         "'inputformat', 'inputcharset', 'outputformat' or"
+                         " 'outputcharset', got attribute '%s'", 
+                         attr->name);
             return -1;
         }
     }
     if (!input_format)
     {
-        wrbuf_printf(p->wr_error, "Attribute 'inputformat' required");
+        wrbuf_printf(p->wr_error, "Element <marc>: "
+                     "attribute 'inputformat' required");
         return -1;
     }
     else if (!strcmp(input_format, "marc"))
@@ -251,13 +265,17 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
     }
     else
     {
-        wrbuf_printf(p->wr_error, "Bad inputformat: '%s'", input_format);
+        wrbuf_printf(p->wr_error, "Element <marc inputformat='%s'>: "
+                     " Unsupported input format"
+                     " defined by attribute value", 
+                     input_format);
         return -1;
     }
     
     if (!output_format)
     {
-        wrbuf_printf(p->wr_error, "Attribute 'outputformat' required");
+        wrbuf_printf(p->wr_error, 
+                     "Element <marc>: attribute 'outputformat' required");
         return -1;
     }
     else if (!strcmp(output_format, "line"))
@@ -282,7 +300,10 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
     }
     else
     {
-        wrbuf_printf(p->wr_error, "Bad outputformat: '%s'", input_format);
+        wrbuf_printf(p->wr_error, "Element <marc outputformat='%s'>: "
+                     " Unsupported output format"
+                     " defined by attribute value", 
+                     output_format);
         return -1;
     }
     if (input_charset && output_charset)
@@ -290,20 +311,24 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
         cd = yaz_iconv_open(output_charset, input_charset);
         if (!cd)
         {
-            wrbuf_printf(p->wr_error, "Unsupported character set mamping"
-                         " inputcharset=%s outputcharset=%s",
+            wrbuf_printf(p->wr_error, 
+                         "Element <marc inputcharset='%s' outputcharset='%s'>:"
+                         " Unsupported character set mapping"
+                         " defined by attribute values",
                          input_charset, output_charset);
             return -1;
         }
     }
     else if (input_charset)
     {
-        wrbuf_printf(p->wr_error, "Attribute 'outputcharset' missing");
+        wrbuf_printf(p->wr_error, "Element <marc>: "
+                     "attribute 'outputcharset' missing");
         return -1;
     }
     else if (output_charset)
     {
-        wrbuf_printf(p->wr_error, "Attribute 'inputcharset' missing");
+        wrbuf_printf(p->wr_error, "Element <marc>: "
+                     "attribute 'inputcharset' missing");
         return -1;
     }
     r = add_rule(p, YAZ_RECORD_CONV_RULE_MARC);
@@ -320,47 +345,29 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const void *ptr_v)
 
     yaz_record_conv_reset(p);
 
-    if (ptr && ptr->type == XML_ELEMENT_NODE &&
-        !strcmp((const char *) ptr->name, "convert"))
-    {
-        for (ptr = ptr->children; ptr; ptr = ptr->next)
+    /* parsing element children */
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
         {
             if (ptr->type != XML_ELEMENT_NODE)
                 continue;
             if (!strcmp((const char *) ptr->name, "xslt"))
-            {
-                if (conv_xslt(p, ptr))
-                    return -1;
-            }
-            else if (!strcmp((const char *) ptr->name, "exslt"))
-            {
-#if YAZ_HAVE_EXSLT
-                if (conv_xslt(p, ptr))
-                    return -1;
-#else
-                wrbuf_printf(p->wr_error, "exslt unsupported."
-                             " YAZ compiled without EXSLT support");
-                return -1;
-#endif
-            }
+                {
+                    if (conv_xslt(p, ptr))
+                        return -1;
+                }
             else if (!strcmp((const char *) ptr->name, "marc"))
-            {
-                if (conv_marc(p, ptr))
-                    return -1;
-            }
+                {
+                    if (conv_marc(p, ptr))
+                        return -1;
+                }
             else
-            {
-                wrbuf_printf(p->wr_error, "Bad element '%s'."
-                              "Expected marc, xslt, ..", ptr->name);
-                return -1;
-            }
+                {
+                    wrbuf_printf(p->wr_error, "Element <backend>: expected "
+                                 "<marc> or <xslt> element, got <%s>"
+                                 , ptr->name);
+                    return -1;
+                }
         }
-    }
-    else
-    {
-        wrbuf_printf(p->wr_error, "Missing 'convert' element");
-        return -1;
-    }
     return 0;
 }
 

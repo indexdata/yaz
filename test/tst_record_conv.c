@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.11 2006-10-04 16:59:34 mike Exp $
+ * $Id: tst_record_conv.c,v 1.12 2006-12-12 10:41:39 marc Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -52,6 +52,8 @@ yaz_record_conv_t conv_configure(const char *xmlstring, WRBUF w)
         }
         else
         {
+
+
             int r = yaz_record_conv_configure(p, ptr);
             
             if (r)
@@ -87,19 +89,16 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
     else
     {
         if (expect_error)
-        {
             ret = 0;
-            yaz_record_conv_destroy(p);
-        }
         else
-        {
             ret = 1;
-        }
     }
+
     if (pt)
         *pt = p;
     else
-        yaz_record_conv_destroy(p);
+        if (p)
+            yaz_record_conv_destroy(p);
 
     wrbuf_free(w, 1);
     return ret;
@@ -107,42 +106,49 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
 
 static void tst_configure(void)
 {
+
+
+
     YAZ_CHECK(conv_configure_test("<bad", "xmlParseMemory", 0));
-    YAZ_CHECK(conv_configure_test("<bad/>", "Missing 'convert' element", 0));
-    YAZ_CHECK(conv_configure_test("<convert/>", 0, 0));
-    YAZ_CHECK(conv_configure_test("<convert><bad/></convert>",
-                                  "Bad element 'bad'."
-                                  "Expected marc, xslt, ..", 0));
+
+
+    YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
+                                  "<bad/></backend>",
+                                  "Element <backend>: expected <marc> or "
+                                  "<xslt> element, got <bad>", 0));
+
 #if YAZ_HAVE_XSLT
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
                                   " inputcharset=\"marc-8\""
                                   " outputcharset=\"marc-8\""
                                   "/>"
-                                  "</convert>",
-                                  "Attribute 'inputformat' required", 0));
-    YAZ_CHECK(conv_configure_test("<convert>"
+                                  "</backend>",
+                                  "Element <marc>: attribute 'inputformat' "
+                                  "required", 0));
+    YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
                                   "<xslt/>"
-                                  "</convert>",
-                                  "Missing attribute 'stylesheet'", 0));
-    YAZ_CHECK(conv_configure_test("<convert>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "</backend>",
+                                  "Element <xslt>: attribute 'stylesheet' "
+                                  "expected", 0));
+    YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
                                   " outputcharset=\"marc-8\""
                                   " inputformat=\"xml\""
                                   " outputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "</backend>",
                                   0, 0));
 #else
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "</convert>",
+                                  "</backend>",
                                   "xslt unsupported."
                                   " YAZ compiled without XSLT support", 0));
-#endif
+#endif 
 }
 
 static int conv_convert_test(yaz_record_conv_t p,
@@ -224,32 +230,32 @@ static void tst_convert1(void)
         "\x1E\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x20\x20"
         "\x1F\x61\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x1D";
 
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
                                   " outputcharset=\"marc-8\""
                                   " inputformat=\"xml\""
                                   " outputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
     yaz_record_conv_destroy(p);
 
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend>"
                                   "<marc"
                                   " outputcharset=\"utf-8\""
                                   " inputcharset=\"marc-8\""
                                   " outputformat=\"marcxml\""
                                   " inputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, iso2709_rec, marcxml_rec));
     yaz_record_conv_destroy(p);
 
 
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -264,13 +270,13 @@ static void tst_convert1(void)
                                   " outputformat=\"marcxml\""
                                   " inputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
     yaz_record_conv_destroy(p);
 
 
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
                                   "<marc"
@@ -283,7 +289,7 @@ static void tst_convert1(void)
                                   " outputformat=\"marcxml\""
                                   " inputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
     yaz_record_conv_destroy(p);
@@ -307,14 +313,14 @@ static void tst_convert2(void)
         "\x1E\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x20\x20"
         "\x1F\x61\x6b\xb2\x62\x65\x6e\x68\x61\x76\x6e\x1E\x1D";
 
-    YAZ_CHECK(conv_configure_test("<convert>"
+    YAZ_CHECK(conv_configure_test("<backend>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
                                   " outputcharset=\"marc-8\""
                                   " inputformat=\"xml\""
                                   " outputformat=\"marc\""
                                   "/>"
-                                  "</convert>",
+                                  "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
     yaz_record_conv_destroy(p);
@@ -329,7 +335,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     tst_configure();
 #endif
-#if YAZ_HAVE_XSLT
+#if  YAZ_HAVE_XSLT 
     tst_convert1();
     tst_convert2();
 #endif

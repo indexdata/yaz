@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.7 2006-10-04 16:59:34 mike Exp $
+ * $Id: tst_retrieval.c,v 1.8 2006-12-12 10:41:39 marc Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -110,57 +110,50 @@ static void tst_configure(void)
                                   "xmlParseMemory", 0));
 
     YAZ_CHECK(conv_configure_test("<bad/>", 
-                                  "Missing 'retrievalinfo' element", 0));
+                                  "Expected element <retrievalinfo>", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo/>", 0, 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo><bad/></retrievalinfo>",
-                                  "Bad element 'bad'."
-                                  " Expected 'retrieval'", 0));
+                                  "Element <retrievalinfo>:"
+                                  " expected element <retrieval>, got <bad>",
+                                  0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo><retrieval/>"
-                                  "</retrievalinfo>", 
+                                  "</retrievalinfo>",
                                   "Missing 'syntax' attribute", 0));
 
+
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval syntax=\"usmarc\">\n"
-                                  "  "
-                                  "<convert>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<marc"
-                                  " inputcharset=\"utf-8\""
-                                  " outputcharset=\"marc-8\""
-                                  " inputformat=\"xml\""
-                                  " outputformat=\"marc\""
-                                  "/>"
-                                  "</convert>"
+                                  "<retrieval" 
+                                  " unknown=\"unknown\""
+                                  ">"
                                   "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Element <retrieval>:  expected attributes "
+                                  "'syntax', identifier' or 'name', got "
+                                  "'unknown'", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"unknown_synt\""
+                                  ">"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Element <retrieval>:  unknown attribute "
+                                  "value syntax='unknown_synt'", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  "/>"
                                   "</retrievalinfo>",
                                   0, 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval syntax=\"usmarc\">"
-                                  "<convert>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<marc"
-                                  " inputcharset=\"utf-8\""
-                                  " outputcharset=\"marc-8\""
-                                  " inputformat=\"xml\""
-                                  " outputformat=\"marc\""
-                                  "/>"
-                                  "</convert>"
-                                  "</retrieval>"
-                                  "<retrieval syntax=\"usmarc\">"
-                                  "<convert>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<marc"
-                                  " inputcharset=\"utf-8\""
-                                  " outputcharset=\"marc-8\""
-                                  " inputformat=\"xml\""
-                                  " outputformat=\"marc\""
-                                  "/>"
-                                  "</convert>"
-                                  "</retrieval>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " name=\"marcxml\"/>"
                                   "</retrievalinfo>",
                                   0, 0));
 
@@ -170,8 +163,44 @@ static void tst_configure(void)
                                   " syntax=\"usmarc\""
                                   " name=\"marcxml\"" 
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
-                                  ">"
+                                  "/>"
+                                  "</retrievalinfo>",
+                                  0, 0));
+
+
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  " name=\"marcxml\">"
                                   "<convert/>"
+                                  "</retrieval>" 
+                                  "</retrievalinfo>",
+                                  "Element <retrieval>: expected zero or one element "
+                                  "<backend>, got <convert>", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  " name=\"marcxml\">"
+                                  " <backend syntax=\"usmarc\""
+                                  " schema=\"marcxml\""
+                                  "/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Element <backend>: expected attributes 'syntax' or 'name,"
+                                  " got 'schema'", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval" 
+                                  " syntax=\"usmarc\""
+                                  " identifier=\"info:srw/schema/1/marcxml-v1.1\""
+                                  " name=\"marcxml\">"
+                                  " <backend syntax=\"usmarc\""
+                                  " name=\"marcxml\""
+                                  "/>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
                                   0, 0));
@@ -179,49 +208,108 @@ static void tst_configure(void)
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval" 
                                   " syntax=\"usmarc\""
-                                  " name=\"marcxml\""
-                                  " backendsyntax=\"usmarc\""
-                                  " backendname=\"marcxml\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
-                                  ">"
-                                  "<convert/>"
+                                  " name=\"marcxml\">"
+                                  " <backend syntax=\"unknown\""
+                                  "/>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
-                                  0, 0));
+                                  "Element <backend syntax='unknown'>: "
+                                  "attribute 'syntax' has invalid value "
+                                  "'unknown'", 0));
+
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval" 
                                   " syntax=\"usmarc\""
-                                  " name=\"marcxml\""
-                                  " backendsyntax=\"usmarc\""
-                                  " backendschema=\"marcxml\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
-                                  ">"
-                                  "<convert/>"
+                                    " name=\"marcxml\">"
+                                  " <backend syntax=\"usmarc\""
+                                  " unknown=\"silly\""
+                                  "/>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
-                                  "Bad attribute 'backendschema'."
-                                  " Use 'backendname' instead", 
-                                  0));
+                                  "Element <backend>: expected attributes "
+                                  "'syntax' or 'name, got 'unknown'", 0));
 
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
-                                  " syntax=\"unknown_synt\""
-                                  ">"
-                                  "<convert/>"
+                                  "<retrieval syntax=\"usmarc\">"
+                                  "<backend syntax=\"xml\" name=\"dc\">"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"non-existent\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</backend>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
-                                  "Bad syntax 'unknown_synt'", 0));
+                                  "Element <marc inputcharset='utf-8'"
+                                  " outputcharset='non-existent'>: Unsupported character"
+                                  " set mapping defined by attribute values", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
-                                  " backendsyntax=\"unknown_synt\""
-                                  ">"
-                                  "<convert/>"
+                                  "<retrieval syntax=\"usmarc\">"
+                                  "<backend syntax=\"xml\" name=\"dc\">"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"not-existent\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</backend>"
                                   "</retrieval>"
                                   "</retrievalinfo>",
-                                  "Bad backendsyntax 'unknown_synt'", 0));
+                                  "Element <marc inputformat='not-existent'>:  Unsupported"
+                                  " input format defined by attribute value", 0));
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval syntax=\"usmarc\">"
+                                  "<backend syntax=\"xml\" name=\"dc\">"
+                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</backend>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  0, 0));
+
+    YAZ_CHECK(conv_configure_test(
+                                  "<retrievalinfo "
+                                  " xmlns=\"http://indexdata.com/yaz\" version=\"1.0\">"
+                                  "<retrieval syntax=\"grs-1\"/>"
+                                  "<retrieval syntax=\"usmarc\" name=\"F\"/>"
+                                  "<retrieval syntax=\"usmarc\" name=\"B\"/>"
+                                  "<retrieval syntax=\"xml\" name=\"marcxml\" "
+                                  "           identifier=\"info:srw/schema/1/marcxml-v1.1\">"
+                                  "  <backend syntax=\"usmarc\" name=\"F\">"
+                                  "    <marc inputformat=\"marc\" outputformat=\"marcxml\" "
+                                  "            inputcharset=\"marc-8\"/>"
+                                  "  </backend>"
+                                  "</retrieval>"
+                                  "<retrieval syntax=\"xml\" name=\"danmarc\">"
+                                  "  <backend syntax=\"usmarc\" name=\"F\">"
+                                  "    <marc inputformat=\"marc\" outputformat=\"marcxchange\" "
+                                  "          inputcharset=\"marc-8\"/>"
+                                  "  </backend>"
+                                  "</retrieval>"
+                                  "<retrieval syntax=\"xml\" name=\"dc\" "
+                                  "           identifier=\"info:srw/schema/1/dc-v1.1\">"
+                                  "  <backend syntax=\"usmarc\" name=\"F\">"
+                                  "    <marc inputformat=\"marc\" outputformat=\"marcxml\" "
+                                  "          inputcharset=\"marc-8\"/>"
+                                  "    <xslt stylesheet=\"tst_record_conv.xsl\"/> "
+                                  "  </backend>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  0, 0));
 
 }
 

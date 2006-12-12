@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: record_conv.h,v 1.5 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: record_conv.h,v 1.6 2006-12-12 10:41:38 marc Exp $ */
 
 /**
  * \file record_conv.h
@@ -62,18 +62,18 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
     On failure, use yaz_record_conv_get_error to get error string.
     
     \verbatim
-    <convert>
+    <backend syntax='xml'>
       <xslt stylesheet="dc2marcxml.xsl"/>
       <marc inputformat="xml" outputformat="marcxml" outputcharset="marc-8"/>
-    </convert>
+    </backend>
     \endverbatim
 
     \verbatim
-    <convert>
+    <backend syntax='usmarc' name='F'>
       <marc inputformat="marc" outputformat="marcxml" inputcharset="marc-8"/>
       <xslt stylesheet="marcxml2mods.xsl"/>
       <xslt stylesheet="mods2dc.xsl"/>
-    </convert>
+    </backend>
     \endverbatim
 
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.12 2006-10-10 09:13:52 adam Exp $
+ * $Id: retrieval.c,v 1.13 2006-12-12 10:41:38 marc Exp $
  */
 /**
  * \file retrieval.c
@@ -51,10 +51,11 @@ struct yaz_retrieval_struct {
 struct yaz_retrieval_elem {
     /** \brief schema identifier */
     const char *identifier;
-    /** \brief schema name , short-hand such sa "dc" */
+    /** \brief schema name , short-hand such as "dc" */
     const char *name;
     /** \brief record syntax */
     int *syntax;
+
     /** \brief backend name */
     const char *backend_name;
     /** \brief backend syntax */
@@ -131,7 +132,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 (const char *) attr->children->content);
             if (!el->syntax)
             {
-                wrbuf_printf(p->wr_error, "Bad syntax '%s'",
+                wrbuf_printf(p->wr_error, "Element <retrieval>: "
+                             " unknown attribute value syntax='%s'",
                              (const char *) attr->children->content);
                 return -1;
             }
@@ -140,61 +142,82 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                  attr->children && attr->children->type == XML_TEXT_NODE)
             el->identifier =
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
-        else if (!xmlStrcmp(attr->name, BAD_CAST "schema") &&
-                 attr->children && attr->children->type == XML_TEXT_NODE)
-        {
-            wrbuf_printf(p->wr_error, "Bad attribute 'schema'. "
-                         "Use 'name' instead");
-            return -1;
-        }
         else if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
             el->name = 
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
-        else if (!xmlStrcmp(attr->name, BAD_CAST "backendschema") &&
-                 attr->children && attr->children->type == XML_TEXT_NODE)
-        {
-            wrbuf_printf(p->wr_error, "Bad attribute 'backendschema'. "
-                         "Use 'backendname' instead");
-            return -1;
-        }
-        else if (!xmlStrcmp(attr->name, BAD_CAST "backendname") &&
-                 attr->children && attr->children->type == XML_TEXT_NODE)
-            el->backend_name = 
-                nmem_strdup(p->nmem, (const char *) attr->children->content);
-        else if (!xmlStrcmp(attr->name, BAD_CAST "backendsyntax") &&
-                 attr->children && attr->children->type == XML_TEXT_NODE)
-        {
-            el->backend_syntax = yaz_str_to_z3950oid(
-                p->odr, CLASS_RECSYN,
-                (const char *) attr->children->content);
-            if (!el->backend_syntax)
-            {
-                wrbuf_printf(p->wr_error, "Bad backendsyntax '%s'",
-                             (const char *) attr->children->content);
-                return -1;
-            }
-        }
         else
         {
-            wrbuf_printf(p->wr_error, "Bad attribute '%s'.", attr->name);
+            wrbuf_printf(p->wr_error, "Element <retrieval>: "
+                         " expected attributes 'syntax', identifier' or "
+                         "'name', got '%s'", attr->name);
             return -1;
         }
     }
+
     if (!el->syntax)
     {
         wrbuf_printf(p->wr_error, "Missing 'syntax' attribute");
         return -1;
     }
 
-    el->record_conv = 0; /* OK to have no 'convert' sub content */
+    /* parsing backend element */
+
+    el->record_conv = 0; /* OK to have no 'backend' sub content */
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
-        if (ptr->type == XML_ELEMENT_NODE)
-        {
+        if (ptr->type == XML_ELEMENT_NODE
+            && 0 != strcmp((const char *) ptr->name, "backend")){
+            wrbuf_printf(p->wr_error, "Element <retrieval>: expected"
+                         " zero or one element <backend>, got <%s>",
+                         (const char *) ptr->name);
+            return -1;
+        }
+
+        else {
+
+            /* parsing attributees */
+            struct _xmlAttr *attr;
+            for (attr = ptr->properties; attr; attr = attr->next){
+            
+                if (!xmlStrcmp(attr->name, BAD_CAST "name") 
+                         && attr->children 
+                         && attr->children->type == XML_TEXT_NODE)
+                    el->backend_name 
+                        = nmem_strdup(p->nmem, 
+                                      (const char *) attr->children->content);
+
+                else if (!xmlStrcmp(attr->name, BAD_CAST "syntax") 
+                         && attr->children 
+                         && attr->children->type == XML_TEXT_NODE){
+                    el->backend_syntax 
+                    = yaz_str_to_z3950oid(p->odr, CLASS_RECSYN,
+                       (const char *) attr->children->content);
+                    
+                    if (!el->backend_syntax){
+                        wrbuf_printf(p->wr_error, 
+                                     "Element <backend syntax='%s'>: "
+                                     "attribute 'syntax' has invalid "
+                                     "value '%s'", 
+                                     attr->children->content,
+                                     attr->children->content);
+                        return -1;
+                    } 
+                }
+                else {
+                    wrbuf_printf(p->wr_error, "Element <backend>: expected "
+                                 "attributes 'syntax' or 'name, got '%s'", 
+                                 attr->name);
+                    return -1;
+                }
+            }
+          
+ 
+            /* parsing internal of record conv */
             el->record_conv = yaz_record_conv_create();
             
             yaz_record_conv_set_path(el->record_conv, p->path);
+
         
             if (yaz_record_conv_configure(el->record_conv, ptr))
             {
@@ -231,15 +254,16 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const void *ptr_v)
             }
             else
             {
-                wrbuf_printf(p->wr_error, "Bad element '%s'."
-                             " Expected 'retrieval'", ptr->name);
+                wrbuf_printf(p->wr_error, "Element <retrievalinfo>: "
+                             "expected element <retrieval>, got <%s>", 
+                             ptr->name);
                 return -1;
             }
         }
     }
     else
     {
-        wrbuf_printf(p->wr_error, "Missing 'retrievalinfo' element");
+        wrbuf_printf(p->wr_error, "Expected element <retrievalinfo>");
         return -1;
     }
     return 0;
