@@ -85,7 +85,7 @@ void please_yaz_help_me (z3950apdu * hook)
    */
   memcpy (berbuffer, z3950, z3950_size);
 
-  odr_setbuf (decode, berbuffer, z3950_size, 0);
+  odr_setbuf (decode, (char *) berbuffer, z3950_size, 0);
 
   /*
    * Perform BER decoding
@@ -127,7 +127,7 @@ void please_yaz_help_me (z3950apdu * hook)
       /*
        * Yup! We have the APDU now. Try to print it
        */
-      odr_setbuf (printing, berbuffer, z3950_size, 0);
+      odr_setbuf (printing, (char *) berbuffer, z3950_size, 0);
       fflush (stdout);
 
       z_APDU (printing, & apdu, 0, 0);
