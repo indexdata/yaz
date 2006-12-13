@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.36 2006-12-07 11:08:05 adam Exp $
+ * $Id: marcdisp.c,v 1.37 2006-12-13 11:25:17 adam Exp $
  */
 
 /**
@@ -956,10 +956,11 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
         }
     return 0;
 }
+#endif
 
-int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode)
+int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
 {
-    const xmlNode *ptr = xmlnode;
+#if YAZ_HAVE_XML2
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
         {
@@ -983,13 +984,10 @@ int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode)
     if (yaz_marc_read_xml_leader(mt, &ptr))
         return -1;
     return yaz_marc_read_xml_fields(mt, ptr->next);
-}
 #else
-int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode)
-{
     return -1;
-}
 #endif
+}
 
 int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
 {

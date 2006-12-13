@@ -2,11 +2,11 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: elementset.c,v 1.1 2006-11-14 08:48:26 adam Exp $
+ * $Id: elementset.c,v 1.2 2006-12-13 11:25:17 adam Exp $
  */
 /**
- * \file tpath.c
- * \brief File Path utilities
+ * \file elementset.c
+ * \brief Z39.50 element set utilities
  */
 
 #if HAVE_CONFIG_H

@@ -24,31 +24,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: xmlquery.h,v 1.8 2006-12-13 11:25:17 adam Exp $ */
+/* $Id: xmltypes.h,v 1.1 2006-12-13 11:25:17 adam Exp $ */
 
-/** \file xmlquery.h
-    \brief Query / XML conversions
-*/
+/**
+ * \file xmltypes.h
+ * \brief Define fundamental Libxml2 types for functions YAZ provide.
+ * \details If Libxml2 is not installed, we define dummy types instead.
+ */
+#ifndef YAZ_XMLTYPES_H
+#define YAZ_XMLTYPES_H
 
-#ifndef YAZ_XMLQUERY_H
-#define YAZ_XMLQUERY_H
-
-#include <yaz/yconfig.h>
-#include <yaz/proto.h>
-#include <yaz/xmltypes.h>
+#if YAZ_HAVE_XML2
+#include <libxml/tree.h>
+#endif
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp);
-YAZ_EXPORT void yaz_rpnquery2xml(const Z_RPNQuery *rpn, xmlDocPtr *docp);
-
-YAZ_EXPORT void yaz_xml2query(const void *xmlnodep, Z_Query **query, ODR odr,
-                              int *error_code, const char **addinfo);
+#if YAZ_HAVE_XML2
+#else
+typedef void xmlNode;
+typedef void *xmlDocPtr;
+#endif
 
 YAZ_END_CDECL
 
 #endif
-
 /*
  * Local variables:
  * c-basic-offset: 4

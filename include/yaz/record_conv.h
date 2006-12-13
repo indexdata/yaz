@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: record_conv.h,v 1.6 2006-12-12 10:41:38 marc Exp $ */
+/* $Id: record_conv.h,v 1.7 2006-12-13 11:25:17 adam Exp $ */
 
 /**
  * \file record_conv.h
@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
+#include <yaz/xmltypes.h>
 
 YAZ_BEGIN_CDECL
 
@@ -75,11 +76,9 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
       <xslt stylesheet="mods2dc.xsl"/>
     </backend>
     \endverbatim
-
-
 */
 YAZ_EXPORT
-int yaz_record_conv_configure(yaz_record_conv_t p, const void *node);
+int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *node);
 
 /** performs record conversion
     \param p record conversion handle

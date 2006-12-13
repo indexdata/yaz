@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: retrieval.h,v 1.6 2006-10-09 21:02:41 adam Exp $ */
+/* $Id: retrieval.h,v 1.7 2006-12-13 11:25:17 adam Exp $ */
 
 /**
  * \file retrieval.h
@@ -82,7 +82,7 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     \endverbatim
 */
 YAZ_EXPORT
-int yaz_retrieval_configure(yaz_retrieval_t p, const void *node);
+int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *node);
 
 
 /** performs retrieval request based on schema and format

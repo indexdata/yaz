@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.13 2006-12-12 10:41:38 marc Exp $
+ * $Id: retrieval.c,v 1.14 2006-12-13 11:25:17 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -234,10 +234,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     return 0;
 }
 
-int yaz_retrieval_configure(yaz_retrieval_t p, const void *ptr_v)
+int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
 {
-    const xmlNode *ptr = ptr_v; 
-
     yaz_retrieval_reset(p);
 
     if (ptr && ptr->type == XML_ELEMENT_NODE &&

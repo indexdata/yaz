@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: nmem_xml.h,v 1.1 2006-10-27 12:19:15 adam Exp $ */
+/* $Id: nmem_xml.h,v 1.2 2006-12-13 11:25:17 adam Exp $ */
 
 /**
  * \file nmem_xml.h
@@ -35,8 +35,7 @@
 
 #include <yaz/nmem.h>
 
-#if YAZ_HAVE_XML2
-#include <libxml/parser.h>
+#include <yaz/xmltypes.h>
 
 YAZ_BEGIN_CDECL
 
@@ -45,7 +44,6 @@ YAZ_EXPORT char *nmem_text_node_cdata(const xmlNode *ptr, NMEM nmem);
 
 YAZ_END_CDECL
 
-#endif
 #endif
 /*
  * Local variables:

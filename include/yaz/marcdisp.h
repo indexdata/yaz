@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.20 2006-12-07 11:08:04 adam Exp $ */
+/* $Id: marcdisp.h,v 1.21 2006-12-13 11:25:17 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -37,6 +37,8 @@
 #include <yaz/yconfig.h>
 #include <stdio.h>
 #include <yaz/wrbuf.h>
+
+#include <yaz/xmltypes.h>
 
 YAZ_BEGIN_CDECL
 
@@ -147,11 +149,11 @@ YAZ_EXPORT int yaz_marc_read_iso2709(yaz_marc_t mt,
 
 /** \brief parses MARCXML/MarcXchange record from xmlNode pointer 
     \param mt handle
-    \param xmlnode is a pointer to root xmlNode pointer 
+    \param ptr is a pointer to root xml node 
 
     Returns 0=OK, -1=ERROR
 */
-YAZ_EXPORT int yaz_marc_read_xml(yaz_marc_t mt, const void *xmlnode);
+YAZ_EXPORT int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr);
 
 /** \brief writes record in line format
     \param mt handle
@@ -167,7 +169,6 @@ YAZ_EXPORT int yaz_marc_write_line(yaz_marc_t mt, WRBUF wrbuf);
 
     Sets leader[9]='a' . Returns 0=OK, -1=ERROR . 
 */
-
 YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
 
 /** \brief writes record in MarcXchange XML
