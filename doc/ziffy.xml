@@ -1,4 +1,4 @@
-<!-- $Id: ziffy.xml,v 1.1 2006-12-13 09:40:32 adam Exp $ -->
+<!-- $Id: ziffy.xml,v 1.2 2006-12-13 14:18:03 adam Exp $ -->
  <chapter id="ziffy"><title>ziffy</title>
   <sect1 id="ziffy.introduction"><title>Introduction</title>
    <para>
@@ -20,23 +20,24 @@
    </para>
   </sect1>
   <sect1 id="ziffy.using"><title>Using Ziffy</title>
-  <para>
-   ziffy must be executed with root priviledge.
-  </para>
-  <example>
    <para>
-   In the command below ziffy is started and dumps all Z39.50 traffic
-   on ethernet device <literal>eth0</literal>
+    ziffy must be executed with root priviledge.
    </para>
-   <screen>
-   # ziffy -i eth0
-   </screen>
+   <example id="starting-ziffy">
+    <title>Starting ziffy from the command line</title>
+    <para>
+     In the command below ziffy is started and dumps all Z39.50 traffic
+     on ethernet device <literal>eth0</literal>
+    </para>
+    <screen>
+     # ziffy -i eth0
+    </screen>
    </example>
    <para>
     For more information about ziffy refer to the man page ziffy(1) and
     the material in sub directory <filename>ziffy</filename>.
    </para>
- </sect1>
+  </sect1>
  </chapter>
  
  <!-- Keep this comment at the end of the file
