@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmalloc.c,v 1.7 2006-04-21 10:28:07 adam Exp $
+ * $Id: xmalloc.c,v 1.8 2006-12-13 15:28:28 adam Exp $
  */
 /**
  * \file xmalloc.c
@@ -246,6 +246,11 @@ void xmalloc_trav_f(const char *s, const char *file, int line)
     xmalloc_trav_d(file, line);
 }
 
+void xmalloc_fatal(void)
+{
+    exit(1);
+}
+
 void *xrealloc_f (void *o, size_t size, const char *file, int line)
 {
     void *p = xrealloc_d (o, size, file, line);
@@ -263,7 +268,7 @@ void *xrealloc_f (void *o, size_t size, const char *file, int line)
     {
         yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%ld bytes)",
                  (long) size);
-        exit(1);
+        xmalloc_fatal();
     }
     return p;
 }
@@ -286,7 +291,7 @@ void *xmalloc_f (size_t size, const char *file, int line)
     {
         yaz_log (YLOG_FATAL, "Out of memory - malloc (%ld bytes)",
                  (long) size);
-        exit (1);
+        xmalloc_fatal();
     }
     return p;
 }
@@ -308,7 +313,7 @@ void *xcalloc_f (size_t nmemb, size_t size, const char *file, int line)
     {
         yaz_log (YLOG_FATAL, "Out of memory - calloc (%ld, %ld)",
                  (long) nmemb, (long) size);
-        exit (1);
+        xmalloc_fatal();
     }
     return p;
 }
