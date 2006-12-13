@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.26 2006-12-13 15:28:28 adam Exp $
+ * $Id: nmem.c,v 1.27 2006-12-13 15:29:01 adam Exp $
  */
 
 /**
@@ -182,7 +182,7 @@ static int nmem_active_no = 0;
 static int nmem_init_flag = 0;
 
 /** \brief whether nmem blocks should be reassigned to heap */
-static int nmem_release_in_heap = 1;
+static int nmem_release_in_heap = 0;
 
 #if NMEM_DEBUG
 struct nmem_debug_info {
