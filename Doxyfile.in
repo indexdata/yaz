@@ -950,7 +950,7 @@ INCLUDE_FILE_PATTERNS  =
 # or name=definition (no spaces). If the definition and the = are 
 # omitted =1 is assumed.
 
-PREDEFINED             = "YAZ_BEGIN_CDECL= " "YAZ_END_CDECL=" "YAZ_EXPORT="  "HAVE_XML2=1" "HAVE_XSLT=1"
+PREDEFINED             = "YAZ_BEGIN_CDECL= " "YAZ_END_CDECL=" "YAZ_EXPORT="  "YAZ_HAVE_XML2=1" "YAZ_HAVE_XSLT=1"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
