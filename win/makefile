@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.120 2006-11-14 08:37:39 adam Exp $
+# $Id: makefile,v 1.121 2006-12-13 10:36:00 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -323,8 +323,6 @@ TSTLOG_OBJS = \
 
 MISC_OBJS= \
    $(OBJDIR)\version.obj \
-   $(OBJDIR)\nfa.obj \
-   $(OBJDIR)\nfaxml.obj \
    $(OBJDIR)\eventl.obj \
    $(OBJDIR)\requestq.obj \
    $(OBJDIR)\service.obj \
