@@ -6,7 +6,8 @@
 
 ziffy_LDADD = ../src/libyaz.la $(PCAP_LIBS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/include $(PCAP_CFLAGS) -DHAVE_YAZ=1
+AM_CPPFLAGS = -I$(top_srcdir)/include $(PCAP_CFLAGS) \
+	$(XML2_CFLAGS) $(SSL_CFLAGS) -DHAVE_YAZ=1
 
 bin_PROGRAMS = $(ZIFFY_PROG)
 EXTRA_PROGRAMS = ziffy
