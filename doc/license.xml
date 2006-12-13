@@ -1,4 +1,4 @@
-<!-- $Id: license.xml,v 1.13 2006-10-09 21:02:40 adam Exp $ -->
+<!-- $Id: license.xml,v 1.14 2006-12-13 09:40:32 adam Exp $ -->
  <appendix id="license"><title>License</title>
 
   <sect1 id="license.indexdata"><title>Index Data Copyright</title>
@@ -54,6 +54,15 @@
   </sect1>
   <sect1 id="license.other"><title>Additional Copyright Statements</title>
 
+   <sect2 id="license.ziffy"><title>ziffy</title>
+    <para>
+     The software in directory <filename>ziffy</filename> and the
+     <application>ziffy</application> application is copyright
+     Rocco Carbone and covered by the GNU General public license, version 2.
+    </para>
+   </sect2>
+   
+   <sect2 id="license.ccl"><title>CCL</title>
    <para>
     The optional CCL query language interpreter is covered by the following
     license:
@@ -114,6 +123,7 @@
     ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
     USE OR PERFORMANCE OF THIS SOFTWARE.
    </para>
+   </sect2>
   </sect1>
  </appendix>
 

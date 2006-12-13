@@ -15,6 +15,10 @@ association is still alive (client is connected); 0 otherwise (client
 closed connection). This allows busy servers to stop working for
 impatient clients.
 
+Added ziffy: the promiscuous Z39.50 APDU sniffer. until now, ziffy has
+been a separate piece of software. This version of ziffy has been modified
+to fit with YAZ. ziffy is copyright Rocco Carbone and covered by GPL v2.
+
 Fixed bug #740: Handle SRU records referring to xmlns's outside recordData.
 
 Fixed bug #722: Allow Z39.50 Init Options to be specified / retrieved.

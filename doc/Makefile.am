@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.75 2006-10-24 10:12:36 adam Exp $
+## $Id: Makefile.am,v 1.76 2006-12-13 09:40:32 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -7,7 +7,7 @@ SUBDIRS = common
 XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
- future.xml client.xml zoom.xml credits.xml gfs-options.xml \
+ future.xml client.xml ziffy.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
 
 HTMLFILES = index.html
