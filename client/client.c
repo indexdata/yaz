@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.320 2006-12-06 21:35:57 adam Exp $
+ * $Id: client.c,v 1.321 2006-12-13 11:23:48 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2167,12 +2167,14 @@ static int cmd_update_common(const char *arg, int version)
     if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len, 1) == 0)
         return 0;
 
+#if YAZ_HAVE_XML2
     if (protocol == PROTO_HTTP)
         return cmd_update_SRW(action_no, recid, rec_buf, rec_len);
-    else
-        return cmd_update_Z3950(version, action_no, recid, rec_buf, rec_len);
+#endif
+    return cmd_update_Z3950(version, action_no, recid, rec_buf, rec_len);
 }
 
+#if YAZ_HAVE_XML2
 static int cmd_update_SRW(int action_no, const char *recid,
                           char *rec_buf, int rec_len)
 {
@@ -2209,6 +2211,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
         return send_srw(srw);
     }
 }
+#endif
                           
 static int cmd_update_Z3950(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len)
