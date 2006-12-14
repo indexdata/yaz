@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.12 2006-12-14 08:55:52 adam Exp $
+/* $Id: cql.y,v 1.13 2006-12-14 09:05:18 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -135,11 +135,7 @@ searchClause:
 /* unary NOT search TERM here .. */
 
 boolean: 
-  AND { $$.buf = "and"; } 
-| OR { $$.buf = "or"; } 
-| NOT { $$.buf = "not"; } 
-| PROX { $$.buf = "prox"; } 
-  ;
+  AND | OR | NOT | PROX ;
 
 modifiers: modifiers '/' searchTerm
 { 
@@ -302,13 +298,25 @@ int yylex(YYSTYPE *lval, void *vp)
         if (c != 0)
             cp->ungetbyte(c, cp->client_data);
         if (!cql_strcmp(lval->buf, "and"))
+	{
+	    lval->buf = "and";
             return AND;
+	}
         if (!cql_strcmp(lval->buf, "or"))
+	{
+	    lval->buf = "or";
             return OR;
+	}
         if (!cql_strcmp(lval->buf, "not"))
+	{
+	    lval->buf = "not";
             return NOT;
+	}
         if (!cql_strcmp(lval->buf, "prox"))
+	{
+	    lval->buf = "prox";
             return PROX;
+	}
     }
     return TERM;
 }
