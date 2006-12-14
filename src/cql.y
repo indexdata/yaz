@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.11 2006-10-05 16:19:16 adam Exp $
+/* $Id: cql.y,v 1.12 2006-12-14 08:55:52 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -135,7 +135,10 @@ searchClause:
 /* unary NOT search TERM here .. */
 
 boolean: 
-  AND | OR | NOT | PROX 
+  AND { $$.buf = "and"; } 
+| OR { $$.buf = "or"; } 
+| NOT { $$.buf = "not"; } 
+| PROX { $$.buf = "prox"; } 
   ;
 
 modifiers: modifiers '/' searchTerm
