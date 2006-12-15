@@ -1,6 +1,6 @@
 # Copyright (C) 1994-2006, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.121 2006-12-13 10:36:00 adam Exp $
+# $Id: makefile,v 1.122 2006-12-15 12:37:18 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -368,6 +368,9 @@ MISC_OBJS= \
    $(OBJDIR)\atoin.obj \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\marcdisp.obj \
+   $(OBJDIR)\marc_read_xml.obj \
+   $(OBJDIR)\marc_read_iso2709.obj \
+   $(OBJDIR)\marc_read_line.obj \
    $(OBJDIR)\nmem.obj \
    $(OBJDIR)\nmemsdup.obj \
    $(OBJDIR)\oid.obj \

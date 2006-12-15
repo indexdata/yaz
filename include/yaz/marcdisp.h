@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.21 2006-12-13 11:25:17 adam Exp $ */
+/* $Id: marcdisp.h,v 1.22 2006-12-15 12:37:17 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <yaz/wrbuf.h>
 
+#include <yaz/nmem.h>
 #include <yaz/xmltypes.h>
 
 YAZ_BEGIN_CDECL
@@ -147,6 +148,21 @@ YAZ_EXPORT int atoi_n(const char *buf, int len);
 YAZ_EXPORT int yaz_marc_read_iso2709(yaz_marc_t mt,
                                      const char *buf, int bsize);
 
+/** \brief read MARC lineformat from stream
+    \param mt handle
+    \param getbyte get one byte handler
+    \param ungetbyte unget one byte handler
+    \param client_data opaque data for handers
+
+    Parses MARC line record from stream
+    Returns > 0 for OK (same as length), -1=ERROR
+*/
+YAZ_EXPORT 
+int yaz_marc_read_line(yaz_marc_t mt,
+                       int (*getbyte)(void *client_data),
+                       void (*ungetbyte)(int b, void *client_data),
+                       void *client_data);
+
 /** \brief parses MARCXML/MarcXchange record from xmlNode pointer 
     \param mt handle
     \param ptr is a pointer to root xml node 
@@ -211,6 +227,113 @@ YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
     
 */  
 YAZ_EXPORT int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec);
+
+
+/** \brief sets leader, validates it, and returns important values
+    \param mt handle
+    \param leader of the 24 byte leader to be set
+    \param indicator_length indicator length (returned value)
+    \param identifier_length identifier length (returned value)
+    \param base_address base address (returned value)
+    \param length_data_entry length of data entry (returned value)
+    \param length_starting length of starting 
+    \param length_implementation length of implementation defined data
+*/
+YAZ_EXPORT
+void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
+                         int *indicator_length,
+                         int *identifier_length,
+                         int *base_address,
+                         int *length_data_entry,
+                         int *length_starting,
+                         int *length_implementation);
+
+
+/** \brief adds MARC comment string
+    \param mt handle
+    \param comment comment to be added)
+*/  
+YAZ_EXPORT
+void yaz_marc_add_comment(yaz_marc_t mt, char *comment);
+
+/** \brief adds MARC annotation - printf interface
+    \param mt handle
+    \param fmt printf format string
+*/  
+YAZ_EXPORT
+void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...);
+
+/** \brief adds subfield to MARC structure
+    \param mt handle
+    \param code_data code data buffer
+    \param code_data_len length of code data
+*/  
+YAZ_EXPORT
+void yaz_marc_add_subfield(yaz_marc_t mt,
+                           const char *code_data, size_t code_data_len);
+
+
+/** \brief adds controlfield to MARC structure
+    \param mt handle
+    \param tag (e.g. "001"
+    \param data value for this tag
+    \param data_len length of data
+*/  
+YAZ_EXPORT
+void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
+                               const char *data, size_t data_len);
+
+
+/** \brief adds controlfield to MARC structure using xml Nodes
+    \param mt handle
+    \param ptr_tag value of tag (TEXT xmlNode)
+    \param ptr_data value of data (TEXT xmlNode)
+*/  
+YAZ_EXPORT
+void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
+                                   const xmlNode *ptr_data);
+
+
+/** \brief adds datafield to MARC structure using strings
+    \param mt handle
+    \param tag value of tag as string
+    \param indicator indicator string
+    \param indicator_len length of indicator string
+*/  
+YAZ_EXPORT
+void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
+                            const char *indicator, size_t indicator_len);
+
+/** \brief adds datafield to MARC structure using xml Nodes
+    \param mt handle
+    \param ptr_tag value of tag (TEXT xmlNode)
+    \param indicator indicator string
+    \param indicator_len length of indicator string
+*/  
+YAZ_EXPORT
+void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
+                                const char *indicator, size_t indicator_len);
+
+
+/** \brief returns memory for MARC handle
+    \param mt handle
+    \retval NMEM handle for MARC system
+*/  
+YAZ_EXPORT
+NMEM yaz_marc_get_nmem(yaz_marc_t mt);
+
+/** \brief clears memory and MARC record
+    \param mt handle
+*/  
+YAZ_EXPORT
+void yaz_marc_reset(yaz_marc_t mt);
+
+/** \brief gets debug level for MARC system
+    \param mt handle
+*/  
+YAZ_EXPORT
+int yaz_marc_get_debug(yaz_marc_t mt);
+
 YAZ_END_CDECL
 
 #endif

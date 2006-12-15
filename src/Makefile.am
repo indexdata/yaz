@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.45 2006-11-29 12:34:51 heikki Exp $
+## $Id: Makefile.am,v 1.46 2006-12-15 12:37:18 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -49,7 +49,9 @@ diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: csvtosrw.tcl srw.csv
 diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl sru_update.csv
 	$(TCLSH) $(srcdir)/csvtosru_update.tcl $(srcdir)
 
-libyaz_la_SOURCES=version.c options.c log.c marcdisp.c oid.c wrbuf.c \
+libyaz_la_SOURCES=version.c options.c log.c \
+  marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
+  oid.c wrbuf.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c marc8.c marc8r.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
