@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: tstmarccol.sh,v 1.1 2006-08-28 12:34:42 adam Exp $
+# $Id: tstmarccol.sh,v 1.2 2006-12-15 19:28:47 adam Exp $
 # Tests reading of a bunch of non-roman UTF-8 ISO2709 and see if
 # we can encode it in MARC-8
 #
@@ -32,7 +32,7 @@ for f in ${srcdir}/marccol?.u8.marc; do
     fi
 
     filem=`echo $fb | sed 's/u8/m8/'`.marc
-    ../util/yaz-marcdump -I -f utf8 -t marc8 $f >$filem
+    ../util/yaz-marcdump -o marc -f utf8 -t marc8 $f >$filem
 
     DIFF=${fb}.2.lst.diff
     NEW=${fb}.2.lst.new

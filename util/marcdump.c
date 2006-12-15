@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.44 2006-12-07 11:08:05 adam Exp $
+ * $Id: marcdump.c,v 1.45 2006-12-15 19:28:48 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -50,10 +50,51 @@ static char *prog;
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] [-x] [-X] [-e] "
-             "[-I] [-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] file...\n",
+    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] "
+             "[-i format] [-o format] "
+             "[-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] file...\n",
              prog);
 } 
+
+static int getbyte_stream(void *client_data)
+{
+    FILE *f = (FILE*) client_data;
+
+    int c = fgetc(f);
+    if (c == EOF)
+        return 0;
+    return c;
+}
+
+static void ungetbyte_stream(int c, void *client_data)
+{
+    FILE *f = (FILE*) client_data;
+
+    if (c == 0)
+        c = EOF;
+    ungetc(c, f);
+}
+
+static void marcdump_read_line(yaz_marc_t mt, const char *fname)
+{
+    FILE *inf = fopen(fname, "rb");
+    if (!inf)
+    {
+        fprintf (stderr, "%s: cannot open %s:%s\n",
+                 prog, fname, strerror (errno));
+        exit(1);
+    }
+    
+    while (yaz_marc_read_line(mt, getbyte_stream,
+                              ungetbyte_stream, inf) == 0)
+    {
+        WRBUF wrbuf = wrbuf_alloc();
+        yaz_marc_write_mode(mt, wrbuf);
+        fputs(wrbuf_buf(wrbuf), stdout);
+        wrbuf_free(wrbuf, 1);
+    }
+    fclose(inf);
+}
 
 #if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
@@ -84,7 +125,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 #endif
 
 static void dump(const char *fname, const char *from, const char *to,
-                 int read_xml, int xml,
+                 int input_format, int output_format,
                  int print_offset, const char *split_fname, int split_chunk,
                  int verbose, FILE *cfile, const char *leader_spec)
 {
@@ -109,18 +150,20 @@ static void dump(const char *fname, const char *from, const char *to,
         }
         yaz_marc_iconv(mt, cd);
     }
-    yaz_marc_xml(mt, xml);
+    yaz_marc_xml(mt, output_format);
     yaz_marc_debug(mt, verbose);
 
-    if (read_xml)
+    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
         marcdump_read_xml(mt, fname);
-#else
-        return;
 #endif
     }
-    else
+    else if (input_format == YAZ_MARC_LINE)
+    {
+        marcdump_read_line(mt, fname);
+    }
+    else if (input_format == YAZ_MARC_ISO2709)
     {
         FILE *inf = fopen(fname, "rb");
         int num = 1;
@@ -265,10 +308,10 @@ int main (int argc, char **argv)
     char *arg;
     int verbose = 0;
     int no = 0;
-    int xml = 0;
+    int output_format = YAZ_MARC_LINE;
     FILE *cfile = 0;
     char *from = 0, *to = 0;
-    int read_xml = 0;
+    int input_format = YAZ_MARC_ISO2709;
     int split_chunk = 1;
     const char *split_fname = 0;
     const char *leader_spec = 0;
@@ -283,11 +326,27 @@ int main (int argc, char **argv)
 #endif
 
     prog = *argv;
-    while ((r = options("C:npvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
+    while ((r = options("i:o:C:npvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
         {
+        case 'i':
+            input_format = yaz_marc_decode_formatstr(arg);
+            if (input_format == -1)
+            {
+                fprintf(stderr, "%s: bad input format: %s\n", prog, arg);
+                exit(1);
+            }
+            break;
+        case 'o':
+            output_format = yaz_marc_decode_formatstr(arg);
+            if (output_format == -1)
+            {
+                fprintf(stderr, "%s: bad output format: %s\n", prog, arg);
+                exit(1);
+            }
+            break;
         case 'l':
             leader_spec = arg;
             break;
@@ -303,13 +362,9 @@ int main (int argc, char **argv)
             cfile = fopen(arg, "w");
             break;
         case 'x':
-#if YAZ_HAVE_XML2
-            read_xml = 1;
-#else
-            fprintf(stderr, "%s: -x not supported."
-                    " YAZ not compiled with Libxml2 support\n", prog);
-            exit(3);
-#endif
+            fprintf(stderr, "%s: -x no longer supported. "
+                    "Use -i marcxml instead\n", prog);
+            exit(1);
             break;
         case 'O':
             fprintf(stderr, "%s: OAI MARC no longer supported."
@@ -317,16 +372,22 @@ int main (int argc, char **argv)
             exit(1);
             break;
         case 'e':
-            xml = YAZ_MARC_XCHANGE;
+            fprintf(stderr, "%s: -e no longer supported. "
+                    "Use -o marcxchange instead\n", prog);
+            exit(1);
             break;
         case 'X':
-            xml = YAZ_MARC_MARCXML;
+            fprintf(stderr, "%s: -X no longer supported. "
+                    "Use -o marcxml instead\n", prog);
+            exit(1);
             break;
         case 'I':
-            xml = YAZ_MARC_ISO2709;
+            fprintf(stderr, "%s: -I no longer supported. "
+                    "Use -o marc instead\n", prog);
+            exit(1);
             break;
         case 'n':
-            xml = YAZ_MARC_CHECK;
+            output_format = YAZ_MARC_CHECK;
             break;
         case 'p':
             print_offset = 1;
@@ -338,7 +399,7 @@ int main (int argc, char **argv)
             split_chunk = atoi(arg);
             break;
         case 0:
-            dump(arg, from, to, read_xml, xml,
+            dump(arg, from, to, input_format, output_format,
                  print_offset, split_fname, split_chunk,
                  verbose, cfile, leader_spec);
             break;
@@ -347,7 +408,7 @@ int main (int argc, char **argv)
             break;
         default:
             usage(prog);
-            exit (1);
+            exit(1);
         }
     }
     if (cfile)

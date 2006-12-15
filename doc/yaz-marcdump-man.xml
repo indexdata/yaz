@@ -8,7 +8,7 @@
      <!ENTITY % common SYSTEM "common/common.ent">
      %common;
 ]>
-<!-- $Id: yaz-marcdump-man.xml,v 1.12 2006-08-28 19:18:02 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.13 2006-12-15 19:28:46 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -27,10 +27,8 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-marcdump</command>
-   <arg choice="opt"><option>-x</option></arg>
-   <arg choice="opt"><option>-X</option></arg>
-   <arg choice="opt"><option>-e</option></arg>
-   <arg choice="opt"><option>-I</option></arg>
+   <arg choice="opt"><option>-i <replaceable>format</replaceable></option></arg>
+   <arg choice="opt"><option>-o <replaceable>format</replaceable></option></arg>
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>to</replaceable></option></arg>
    <arg choice="opt"><option>-l <replaceable>spec</replaceable></option></arg>
@@ -60,8 +58,7 @@
   <para>
    By default, each record is written to standard output in a line
    format with newline for each field, $x for each subfield x.
-   The output format may be changed with options <literal>-X</literal>,
-   <literal>-e</literal>, <literal>-I</literal>.
+   The output format may be changed with option <literal>-o</literal>,
   </para>
   <para>
    <command>yaz-marcdump</command> can also be requested to perform
@@ -73,38 +70,20 @@
   
   <variablelist>
    <varlistentry>
-    <term>-x</term>
+    <term>-i <replaceable>format</replaceable></term>
     <listitem><para>
-      Reads MARC records in MARCXML/MarcXchange format. Without
-      this option, <command>yaz-marcdump</command> reads records
-      in ISO2709 format.
+      Specifies input format. Must be one of
+      <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
+      <literal>line</literal> (line mode MARC).
      </para></listitem>
    </varlistentry>
 
    <varlistentry>
-    <term>-X</term>
+    <term>-o <replaceable>format</replaceable></term>
     <listitem><para>
-      Writes MARC records in MARCXML.
-      This format is equivalent to YAZ_MARC_MARCXML in
-      <filename>yaz/marcdisp.h</filename>.
-     </para></listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>-e</term>
-    <listitem><para>
-      Writes MARC records in MarcXchange format.
-      This format is equivalent to YAZ_MARC_XCHANGE in
-      <filename>yaz/marcdisp.h</filename>.
-     </para></listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>-I</term>
-    <listitem><para>
-      Writes MARC records in ISO2709 format.
-      This format is equivalent to YAZ_MARC_ISO2709 in
-      <filename>yaz/marcdisp.h</filename>.
+      Specifies output format. Must be one of
+      <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
+      <literal>line</literal> (line mode MARC).
      </para></listitem>
    </varlistentry>
 
@@ -155,13 +134,13 @@
    MARC21/USMARC in UTF-8 encoding. Leader offset 9 is set to 'a'.
    Both input and output records are ISO2709 encoded.
    <screen>
-    yaz-marcdump -f MARC-8 -t UTF-8 -I -l 9=97 marc21.raw >marc21.utf8.raw
+    yaz-marcdump -f MARC-8 -t UTF-8 -o marc -l 9=97 marc21.raw >marc21.utf8.raw
    </screen>
   </para>
   <para>
    The same records may be converted to MARCXML instead in UTF-8:
    <screen>
-    yaz-marcdump -f MARC-8 -t UTF-8 -X marc21.raw >marcxml.xml
+    yaz-marcdump -f MARC-8 -t UTF-8 -o marcxml marc21.raw >marcxml.xml
    </screen>
   </para>
  </refsect1> 

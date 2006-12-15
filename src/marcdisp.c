@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.38 2006-12-15 12:37:18 adam Exp $
+ * $Id: marcdisp.c,v 1.39 2006-12-15 19:28:47 adam Exp $
  */
 
 /**
@@ -267,10 +267,12 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
     }
 }
 
-static int atoi_n_check(const char *buf, int size, int *val)
+int atoi_n_check(const char *buf, int size, int *val)
 {
-    if (!isdigit(*(const unsigned char *) buf))
-        return 0;
+    int i;
+    for (i = 0; i < size; i++)
+        if (!isdigit(i[(const unsigned char *) buf]))
+            return 0;
     *val = atoi_n(buf, size);
     return 1;
 }
@@ -491,6 +493,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             wrbuf_printf(wr, "%s\n", n->u.leader);
         }
     }
+    wrbuf_puts(wr, "\n");
     return 0;
 }
 
@@ -925,6 +928,20 @@ static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
         cp++;
     }
     return 0;
+}
+
+int yaz_marc_decode_formatstr(const char *arg)
+{
+    int mode = -1; 
+    if (!strcmp(arg, "marc"))
+        mode = YAZ_MARC_ISO2709;
+    if (!strcmp(arg, "marcxml"))
+        mode = YAZ_MARC_MARCXML;
+    if (!strcmp(arg, "marcxchange"))
+        mode = YAZ_MARC_XCHANGE;
+    if (!strcmp(arg, "line"))
+        mode = YAZ_MARC_LINE;
+    return mode;
 }
 
 /*

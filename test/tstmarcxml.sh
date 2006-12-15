@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: tstmarcxml.sh,v 1.3 2006-08-28 12:34:42 adam Exp $
+# $Id: tstmarcxml.sh,v 1.4 2006-12-15 19:28:47 adam Exp $
 # Tests reading of MARCXML and checks that we get identical ISO2709 output.
 #
 # Reads marc?.xml files , Generates marc?.xml.marc files
@@ -14,7 +14,7 @@ for f in ${srcdir}/marc?.xml; do
     NEW=`basename ${f}`.new.marc
     OLD=${f}.marc
     DIFF=`basename ${f}`.diff
-    ../util/yaz-marcdump -f utf-8 -t utf-8 -x -I $f > $NEW
+    ../util/yaz-marcdump -f utf-8 -t utf-8 -i marcxml -o marc $f > $NEW
     if test $? != "0"; then
 	echo "Failed decode of $f"
 	ecode=1

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.22 2006-12-15 12:37:17 adam Exp $ */
+/* $Id: marcdisp.h,v 1.23 2006-12-15 19:28:46 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -129,6 +129,16 @@ YAZ_EXPORT void yaz_marc_modify_leader(yaz_marc_t mt, size_t off,
 
 /** \brief like atoi(3) except that it reads exactly len characters */
 YAZ_EXPORT int atoi_n(const char *buf, int len);
+
+/** \brief like atoi_n but checks for proper formatting
+    \param buf buffer to read values from
+    \param size size of buffer
+    \param val value of decimal number (if successful)
+    \retval 0 no value found (non-digits found)
+    \retval 1 value found and *val holds value
+*/
+YAZ_EXPORT
+int atoi_n_check(const char *buf, int size, int *val);
 
 /** \brief MARC control char: record separator (29 Dec, 1D Hex) */
 #define ISO2709_RS 035
@@ -333,6 +343,13 @@ void yaz_marc_reset(yaz_marc_t mt);
 */  
 YAZ_EXPORT
 int yaz_marc_get_debug(yaz_marc_t mt);
+
+/** \brief convert MARC format type to format type(YAZ_MARC_..)
+    \param arg string
+    \returns -1 if arg is not a known format; YAZ_MARC_.. otherwise (OK)
+*/  
+YAZ_EXPORT
+int yaz_marc_decode_formatstr(const char *arg);
 
 YAZ_END_CDECL
 

@@ -1,3 +1,12 @@
+Implemented function yaz_marc_read_line which parses MARC line format
+records. There is a wealth of formats out there. So far, this function
+reads line records produced by yaz_marc_write_line.
+
+yaz-marcdump's options -x, -X, -I, -e have been replaced with the
+more generic and easier to remember(!) options: -i format and -o format
+which specifies input format and output format respectively - where
+format is one of "marc", "marcxml", "line", "marcxchange".
+
 Added 'check only' option for MARC utilities. Option -n for yaz-marcdump
 does not print anything except warnings for records.
 
