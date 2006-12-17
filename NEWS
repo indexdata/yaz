@@ -1,3 +1,6 @@
+Fixed bug #775: char conversion does not handle Alternative UTF-8
+sequences.
+
 Implemented function yaz_marc_read_line which parses MARC line format
 records. There is a wealth of formats out there. So far, this function
 reads line records produced by yaz_marc_write_line.

@@ -2,7 +2,7 @@
 # the next line restarts using tclsh \
 if [ -f /usr/local/bin/tclsh8.4 ]; then exec tclsh8.4 "$0" "$@"; else exec tclsh "$0" "$@"; fi
 #
-# $Id: charconv.tcl,v 1.17 2006-08-30 20:40:18 adam Exp $
+# $Id: charconv.tcl,v 1.18 2006-12-17 15:34:11 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -268,12 +268,14 @@ proc readfile {fname ofilehandle prefix omits reverse} {
     set marc_lines 0
     set ucs_lines 0
     set utf_lines 0
+    set altutf_lines 0
     set codename_lines 0
     set lineno 0
     set f [open $fname r]
     set tablenumber x
     set combining 0
     set codename {}
+    set altutf {}
     while {1} {
         incr lineno
         set cnt [gets $f line]
@@ -305,6 +307,7 @@ proc readfile {fname ofilehandle prefix omits reverse} {
 		    # puts "ins_trie $hex $marc
 		    ins_trie $hex $marc $combining $codename
 		    unset hex
+
 		} else {
 		    for {set i 0} {$i < [string length $marc]} {incr i 2} {
 			lappend hex [string range $marc $i [expr $i+1]]
@@ -314,10 +317,20 @@ proc readfile {fname ofilehandle prefix omits reverse} {
 		    unset hex
 		}
 	    }
+	    if {$reverse && [string length $marc]} {
+		for {set i 0} {$i < [string length $altutf]} {incr i 2} {
+		    lappend hex [string range $altutf $i [expr $i+1]]
+		}
+		if {[info exists hex]} {
+		    ins_trie $hex $marc $combining $codename
+		    unset hex
+		}
+	    }
 	    set marc {}
 	    set uni {}
 	    set codename {}
 	    set combining 0
+	    set altutf {}
 	} elseif {[regexp {<marc>([0-9A-Fa-f]*)</marc>} $line s marc]} {
 	    incr marc_lines
 	} elseif {[regexp {<name>(.*)</name>} $line s codename]} {
@@ -338,6 +351,8 @@ proc readfile {fname ofilehandle prefix omits reverse} {
 	    incr ucs_lines
 	} elseif {[regexp {<utf-8>([0-9A-Fa-f]*)</utf-8>} $line s utf]} {
 	    incr utf_lines
+	} elseif {[regexp {<altutf-8>([0-9A-Fa-f]*)</altutf-8>} $line s altutf]} {
+	    incr altutf_lines
 	}
     }
     close $f
