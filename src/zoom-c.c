@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.102 2006-12-06 21:35:58 adam Exp $
+ * $Id: zoom-c.c,v 1.103 2006-12-17 16:03:01 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1276,7 +1276,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.102 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.103 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2265,6 +2265,8 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
                                  syntax, elementSetName);
             }
             *count -= i;
+            if (*count < 0)
+                *count = 0;
             *start += i;
             yaz_log(log_details, 
                     "handle_records resultset=%p start=%d count=%d",
