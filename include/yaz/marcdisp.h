@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.23 2006-12-15 19:28:46 adam Exp $ */
+/* $Id: marcdisp.h,v 1.24 2006-12-18 10:32:47 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -225,6 +225,21 @@ YAZ_EXPORT int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wrbuf);
 */  
 YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
 
+/** \brief writes MARC record as libxml2 tree
+    \param mt handle
+    \param root_ptr pointer to record node
+    \param ns namespace of record (such as "http://www.loc.gov/MARC21/slim")
+    \param format MarcXchange format (NULL for none)
+    \param type MarcXchange format (NULL for none)
+    \retval 0 Creation successful and *root_ptr is "record" node
+    \retval -1 ERROR
+*/  
+YAZ_EXPORT
+int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
+                       const char *ns, 
+                       const char *format,
+                       const char *type);
+
 /** \brief sets leader spec (for modifying bytes in 24 byte leader)
     \param mt handle
     \param leader_spec
@@ -350,6 +365,13 @@ int yaz_marc_get_debug(yaz_marc_t mt);
 */  
 YAZ_EXPORT
 int yaz_marc_decode_formatstr(const char *arg);
+
+/** \brief enable writing of MARC XML records using Libxml2 
+    \param mt handle
+    \param enable 0=disable, 1=enable
+*/  
+YAZ_EXPORT
+void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
 
 YAZ_END_CDECL
 

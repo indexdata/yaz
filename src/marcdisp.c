@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.39 2006-12-15 19:28:47 adam Exp $
+ * $Id: marcdisp.c,v 1.40 2006-12-18 10:33:22 adam Exp $
  */
 
 /**
@@ -83,6 +83,7 @@ struct yaz_marc_t_ {
     NMEM nmem;
     int xml;
     int debug;
+    int write_using_libxml2;
     yaz_iconv_t iconv_cd;
     char subfield_str[8];
     char endline_str[8];
@@ -97,6 +98,7 @@ yaz_marc_t yaz_marc_create(void)
     yaz_marc_t mt = (yaz_marc_t) xmalloc(sizeof(*mt));
     mt->xml = YAZ_MARC_LINE;
     mt->debug = 0;
+    mt->write_using_libxml2 = 0;
     mt->m_wr = wrbuf_alloc();
     mt->iconv_cd = 0;
     mt->leader_spec = 0;
@@ -522,10 +524,10 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
     \param format record format (e.g. "MARC21")
     \param type record type (e.g. "Bibliographic")
 */
-static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
-                                     const char *ns, 
-                                     const char *format,
-                                     const char *type)
+static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
+                                      const char *ns, 
+                                      const char *format,
+                                      const char *type)
 {
     struct yaz_marc_node *n;
     int identifier_length;
@@ -620,6 +622,37 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
     return 0;
 }
 
+static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
+                                     const char *ns, 
+                                     const char *format,
+                                     const char *type)
+{
+    if (mt->write_using_libxml2)
+    {
+        int ret;
+        xmlNode *root_ptr;
+
+        ret = yaz_marc_write_xml(mt, &root_ptr, ns, format, type);
+        if (ret == 0)
+        {
+            xmlChar *buf_out;
+            xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
+            int len_out;
+
+            xmlDocSetRootElement(doc, root_ptr);
+            xmlDocDumpMemory(doc, &buf_out, &len_out);
+
+            wrbuf_write(wr, (const char *) buf_out, len_out);
+            wrbuf_puts(wr, "");
+            xmlFree(buf_out);
+            xmlFreeDoc(doc);
+        }
+        return ret;
+    }
+    else
+        return yaz_marc_write_marcxml_ns1(mt, wr, ns, format, type);
+}
+
 int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
 {
     if (!mt->leader_spec)
@@ -635,6 +668,114 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
     return yaz_marc_write_marcxml_ns(mt, wr,
                                      "http://www.bs.dk/standards/MarcXchange",
                                      0, 0);
+}
+
+
+int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
+                       const char *ns, 
+                       const char *format,
+                       const char *type)
+{
+#if YAZ_HAVE_XML2
+    struct yaz_marc_node *n;
+    int identifier_length;
+    const char *leader = 0;
+    xmlNode *record_ptr;
+    xmlNsPtr ns_record;
+
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            break;
+        }
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+
+    record_ptr = xmlNewNode(0, BAD_CAST "record");
+    *root_ptr = record_ptr;
+
+    ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
+
+    if (format)
+        xmlNewProp(record_ptr, BAD_CAST "format", BAD_CAST format);
+    if (type)
+        xmlNewProp(record_ptr, BAD_CAST "type", BAD_CAST type);
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+        xmlNode *ptr;
+
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST "datafield", 0);
+            xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.datafield.tag);
+            if (n->u.datafield.indicator)
+            {
+                int i;
+                for (i = 0; n->u.datafield.indicator[i]; i++)
+                {
+                    char ind_str[6];
+                    char ind_val[2];
+
+                    sprintf(ind_str, "ind%d", i+1);
+                    ind_val[0] = n->u.datafield.indicator[i];
+                    ind_val[1] = '\0';
+                    xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+                }
+            }
+            for (s = n->u.datafield.subfields; s; s = s->next)
+            {
+                char code_val[8];
+
+                xmlNode *ptr_subfield;
+                /* if identifier length is 2 (most MARCs),
+                   the code is a single character .. However we've
+                   seen multibyte codes, so see how big it really is */
+                size_t using_code_len = 
+                    (identifier_length != 2) ? identifier_length - 1
+                    :
+                    cdata_one_character(mt, s->code_data);
+
+                if (using_code_len >= sizeof(code_val)-1)
+                    continue;
+
+                ptr_subfield = xmlNewTextChild(
+                    ptr, ns_record, 
+                    BAD_CAST "subfield", 
+                    BAD_CAST (s->code_data + using_code_len));
+                
+                memcpy(code_val, s->code_data, using_code_len);
+                code_val[using_code_len] = '\0';
+
+                xmlNewProp(ptr_subfield, BAD_CAST "code", BAD_CAST code_val);
+            }
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+            ptr = xmlNewTextChild(record_ptr, ns_record,
+                                  BAD_CAST "controlfield",
+                                  BAD_CAST n->u.controlfield.data);
+            
+            xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
+            break;
+        case YAZ_MARC_COMMENT:
+            ptr = xmlNewComment(BAD_CAST n->u.comment);
+            xmlAddChild(record_ptr, ptr);
+            break;
+        case YAZ_MARC_LEADER:
+            xmlNewTextChild(record_ptr, ns_record, BAD_CAST "leader",
+                            BAD_CAST n->u.leader);
+            break;
+        }
+    }
+    return 0;
+#else
+    return -1;
+#endif
 }
 
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
@@ -942,6 +1083,11 @@ int yaz_marc_decode_formatstr(const char *arg)
     if (!strcmp(arg, "line"))
         mode = YAZ_MARC_LINE;
     return mode;
+}
+
+void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable)
+{
+    mt->write_using_libxml2 = enable;
 }
 
 /*

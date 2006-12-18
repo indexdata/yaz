@@ -1,3 +1,6 @@
+Added yaz_marc_write_xml which creates MARCXML/MarcXchange record as
+Libxml2 tree.
+
 --- 2.1.42 2006/12/17
 
 Fixed bug #775: char conversion does not handle Alternative UTF-8
