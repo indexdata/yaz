@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.29 2006-08-31 18:19:53 adam Exp $
+ * $Id: siconv.c,v 1.30 2006-12-19 22:41:28 adam Exp $
  */
 /**
  * \file siconv.c
@@ -432,7 +432,7 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
         size_t inbytesleft0 = inbytesleft;
         inp++;
         inbytesleft--;
-        while(inbytesleft > 0 && strchr("(,$!", *inp))
+        while(inbytesleft > 0 && strchr("(,$!)-", *inp))
         {
             inbytesleft--;
             inp++;
