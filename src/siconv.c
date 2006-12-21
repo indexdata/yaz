@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.30 2006-12-19 22:41:28 adam Exp $
+ * $Id: siconv.c,v 1.31 2006-12-21 20:50:56 adam Exp $
  */
 /**
  * \file siconv.c
@@ -100,6 +100,7 @@ struct yaz_iconv_struct {
 
     unsigned long write_marc8_comb_ch[8];
     size_t write_marc8_comb_no;
+    unsigned write_marc8_second_half_char;
     unsigned long write_marc8_last;
     const char *write_marc8_page_chr;
 };
@@ -756,7 +757,7 @@ static size_t flush_combos(yaz_iconv_t cd,
                            char **outbuf, size_t *outbytesleft)
 {
     unsigned long y = cd->write_marc8_last;
-    unsigned char byte, second_half = 0;
+    unsigned char byte;
     char out_buf[10];
     size_t i, out_no = 0;
 
@@ -783,25 +784,21 @@ static size_t flush_combos(yaz_iconv_t cd,
     {
         /* all MARC-8 combined characters are simple bytes */
         byte = (unsigned char )(cd->write_marc8_comb_ch[i]);
-        if (byte == 0xEB)
-            second_half = 0xEC;
-        else if (byte == 0xFA)
-            second_half = 0xFB;
-
         *(*outbuf)++ = byte;
         (*outbytesleft)--;
     }
     memcpy(*outbuf, out_buf, out_no);
     *outbuf += out_no;
     (*outbytesleft) -= out_no;
-    if (second_half)
+    if (cd->write_marc8_second_half_char)
     {
-        *(*outbuf)++ = second_half;
+        *(*outbuf)++ = cd->write_marc8_second_half_char;
         (*outbytesleft)--;
     }        
 
     cd->write_marc8_last = 0;
     cd->write_marc8_comb_no = 0;
+    cd->write_marc8_second_half_char = 0;
     return 0;
 }
 
@@ -818,6 +815,11 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
 
     if (comb)
     {
+        if (x == 0x0361)
+            cd->write_marc8_second_half_char = 0xEC;
+        else if (x == 0x0360)
+            cd->write_marc8_second_half_char = 0xFB;
+
         if (cd->write_marc8_comb_no < 6)
             cd->write_marc8_comb_ch[cd->write_marc8_comb_no++] = y;
     }
@@ -1078,6 +1080,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         cd->compose_char = 0;
         
         cd->write_marc8_comb_no = 0;
+        cd->write_marc8_second_half_char = 0;
         cd->write_marc8_last = 0;
         cd->write_marc8_page_chr = "\033(B";
         
