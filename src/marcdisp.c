@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.40 2006-12-18 10:33:22 adam Exp $
+ * $Id: marcdisp.c,v 1.41 2007-01-02 07:01:56 quinn Exp $
  */
 
 /**
@@ -699,6 +699,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
     *root_ptr = record_ptr;
 
     ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
+    xmlSetNs(record_ptr, ns_record);
 
     if (format)
         xmlNewProp(record_ptr, BAD_CAST "format", BAD_CAST format);
