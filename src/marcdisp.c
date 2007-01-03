@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.41 2007-01-02 07:01:56 quinn Exp $
+ * $Id: marcdisp.c,v 1.42 2007-01-03 08:42:15 adam Exp $
  */
 
 /**

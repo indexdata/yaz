@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2005, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.12 2006-08-28 12:34:41 adam Exp $
+ * $Id: wrbuf.c,v 1.13 2007-01-03 08:42:15 adam Exp $
  */
 
 /**

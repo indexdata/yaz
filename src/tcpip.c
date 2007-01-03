@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.32 2006-10-13 11:22:26 adam Exp $
+ * $Id: tcpip.c,v 1.33 2007-01-03 08:42:15 adam Exp $
  */
 /**
  * \file tcpip.c

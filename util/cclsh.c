@@ -44,7 +44,7 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Id: cclsh.c,v 1.3 2006-09-11 12:12:42 adam Exp $
+ * $Id: cclsh.c,v 1.4 2007-01-03 08:42:16 adam Exp $
  *
  * Old Europagate Log:
  *

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.15 2006-11-01 15:39:05 adam Exp $
+ * $Id: zoom-p.h,v 1.16 2007-01-03 08:42:15 adam Exp $
  */
 /**
  * \file zoom-p.h

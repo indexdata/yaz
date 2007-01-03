@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.46 2006-12-18 10:33:52 adam Exp $
+ * $Id: marcdump.c,v 1.47 2007-01-03 08:42:16 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64

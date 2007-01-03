@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.15 2006-10-04 16:59:35 mike Exp $
+ * $Id: zoom-benchmark.c,v 1.16 2007-01-03 08:42:17 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */

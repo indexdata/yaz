@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1994-2006, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.46 2006-12-15 12:37:18 adam Exp $
+## Copyright (C) 1995-2007, Index Data, All rights reserved.
+## $Id: Makefile.am,v 1.47 2007-01-03 08:42:15 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 

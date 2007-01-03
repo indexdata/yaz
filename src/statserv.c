@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.45 2006-10-09 11:21:37 adam Exp $
+ * $Id: statserv.c,v 1.46 2007-01-03 08:42:15 adam Exp $
  */
 
 /**

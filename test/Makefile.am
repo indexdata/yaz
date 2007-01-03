@@ -1,6 +1,6 @@
-## Copyright (C) 1994-2006, Index Data ApS
+## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.28 2006-12-17 15:34:11 adam Exp $
+## $Id: Makefile.am,v 1.29 2007-01-03 08:42:16 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \

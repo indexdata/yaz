@@ -1,6 +1,6 @@
-## Copyright (C) 1995-2004, Index Data
+## Copyright (C) 1995-2007, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.27 2006-08-11 12:57:30 adam Exp $
+## $Id: Makefile.am,v 1.28 2007-01-03 08:42:13 adam Exp $
 
 
 bin_PROGRAMS=yaz-client 

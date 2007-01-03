@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.16 2006-08-24 13:25:45 adam Exp $
+ * $Id: comstack.c,v 1.17 2007-01-03 08:42:15 adam Exp $
  */
 
 /** 

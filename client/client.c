@@ -1,8 +1,8 @@
 /* 
- * Copyright (C) 1995-2006, Index Data ApS
+ * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.321 2006-12-13 11:23:48 adam Exp $
+ * $Id: client.c,v 1.322 2007-01-03 08:42:13 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
