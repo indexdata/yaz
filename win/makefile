@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.123 2007-01-03 08:42:17 adam Exp $
+# $Id: makefile,v 1.124 2007-01-03 13:46:18 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -418,7 +418,8 @@ MISC_OBJS= \
    $(OBJDIR)\cqlutil.obj \
    $(OBJDIR)\cqlstrer.obj \
    $(OBJDIR)\xcqlutil.obj \
-   $(OBJDIR)\elementset.obj
+   $(OBJDIR)\elementset.obj \
+   $(OBJDIR)\timing.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\

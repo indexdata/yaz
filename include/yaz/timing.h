@@ -24,36 +24,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: yaz-version.h,v 1.109 2007-01-03 13:46:17 adam Exp $ */
+/* $Id: timing.h,v 1.1 2007-01-03 13:46:17 adam Exp $ */
+
 /**
- * \file yaz-version.h
- * \brief Defines YAZ version.
+ * \file timing.h
+ * \brief Timing Utilities
  */
-#ifndef YAZ_VERSION
+
+#ifndef YAZ_TIMING_H
+#define YAZ_TIMING_H
 
 #include <yaz/yconfig.h>
 
-#define YAZ_VERSION "2.1.45"
-#define YAZ_VERSIONL 0x02012D
-
-#define YAZ_DATE 1
-
-#ifdef WIN32
-#ifdef NDEBUG
-#define YAZ_OS "WIN32 Release"
-#else
-#define YAZ_OS "WIN32 Debug"
-#endif
-#endif
-
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sys_str);
+typedef struct yaz_timing *yaz_timing_t;
+
+YAZ_EXPORT
+yaz_timing_t yaz_timing_create(void);
+YAZ_EXPORT
+void yaz_timing_start(yaz_timing_t t);
+YAZ_EXPORT
+void yaz_timing_stop(yaz_timing_t t);
+YAZ_EXPORT
+double yaz_timing_get_real(yaz_timing_t t);
+YAZ_EXPORT
+double yaz_timing_get_user(yaz_timing_t t);
+YAZ_EXPORT
+double yaz_timing_get_sys(yaz_timing_t t);
+YAZ_EXPORT
+void yaz_timing_destroy(yaz_timing_t *tp);
 
 YAZ_END_CDECL
 
 #endif
-
 /*
  * Local variables:
  * c-basic-offset: 4

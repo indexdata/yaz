@@ -1,3 +1,5 @@
+Added timings utility (yaz/timing.h)
+
 --- 2.1.44 2007/01/03
 
 Added yaz_marc_write_xml which creates MARCXML/MarcXchange record as
