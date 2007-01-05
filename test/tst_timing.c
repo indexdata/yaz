@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_timing.c,v 1.2 2007-01-05 12:40:05 adam Exp $
+ * $Id: tst_timing.c,v 1.3 2007-01-05 14:05:55 adam Exp $
  */
 
 #include <stdlib.h>
@@ -20,19 +20,21 @@ static void tst(void)
     yaz_timing_t t = yaz_timing_create();
     double real, user, sys;
     int i = 0;
+    double x = 0;
 
     YAZ_CHECK(t);
     if (!t)
         return;
 
 #ifdef WIN32
-    Sleep(100);
+    Sleep(10);
 #endif
-    for (i = 0; i<100000; i++)
-        ;
+    for (i = 0; i<5000000; i++)
+        x += i;
 
-    YAZ_CHECK_EQ(i, 100000);
+    YAZ_CHECK_EQ(i, 5000000);
 
+    yaz_log(YLOG_LOG, "i=%d x=%f", i, x);
     yaz_timing_stop(t);
 
     real = yaz_timing_get_real(t);
