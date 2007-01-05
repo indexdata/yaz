@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: timing.c,v 1.2 2007-01-05 11:44:49 adam Exp $
+ * $Id: timing.c,v 1.3 2007-01-05 12:40:05 adam Exp $
  */
 
 /**
@@ -14,6 +14,9 @@
 #include <config.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include <stdlib.h>
 
 #if HAVE_SYS_TIMES_H
@@ -34,6 +37,9 @@ struct yaz_timing {
 #if HAVE_SYS_TIME_H
     struct timeval start_time, end_time;
 #endif
+#ifdef WIN32
+    ULONGLONG start_time, end_time;
+#endif
     double real_sec, user_sec, sys_sec;
 };
 
@@ -43,6 +49,19 @@ yaz_timing_t yaz_timing_create(void)
     yaz_timing_start(t);
     return t;
 }
+
+#ifdef WIN32
+static void get_date_as_largeinteger(ULONGLONG *lp)
+{
+    FILETIME f;
+    ULARGE_INTEGER li;
+    GetSystemTimeAsFileTime(&f);
+    li.LowPart = f.dwLowDateTime;
+    li.HighPart = f.dwHighDateTime;
+
+    *lp = li.QuadPart;
+}
+#endif
 
 void yaz_timing_start(yaz_timing_t t)
 {
@@ -54,11 +73,14 @@ void yaz_timing_start(yaz_timing_t t)
     t->user_sec = -1.0;
     t->sys_sec = -1.0;
 #endif
+    t->real_sec = -1.0;
 #if HAVE_SYS_TIME_H
     gettimeofday(&t->start_time, 0);
     t->real_sec = 0.0;
-#else
-    t->real_sec = -1.0;
+#endif
+#ifdef WIN32
+    get_date_as_largeinteger(&t->start_time);
+    t->real_sec = 0.0;
 #endif
 }
 
@@ -75,6 +97,10 @@ void yaz_timing_stop(yaz_timing_t t)
     t->real_sec = ((t->end_time.tv_sec - t->start_time.tv_sec) * 1000000.0 +
                    t->end_time.tv_usec - t->start_time.tv_usec) / 1000000;
     
+#endif
+#ifdef WIN32
+    get_date_as_largeinteger(&t->end_time);
+    t->real_sec = (double) (t->end_time - t->start_time) / 10000000.0;
 #endif
 }
 

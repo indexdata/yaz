@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_timing.c,v 1.1 2007-01-05 11:45:11 adam Exp $
+ * $Id: tst_timing.c,v 1.2 2007-01-05 12:40:05 adam Exp $
  */
 
 #include <stdlib.h>
@@ -11,6 +11,9 @@
 #include <yaz/timing.h>
 #include <yaz/test.h>
 #include <yaz/log.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 static void tst(void)
 {
@@ -22,6 +25,9 @@ static void tst(void)
     if (!t)
         return;
 
+#ifdef WIN32
+    Sleep(100);
+#endif
     for (i = 0; i<100000; i++)
         ;
 
