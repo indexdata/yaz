@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: timing.c,v 1.1 2007-01-03 13:46:18 adam Exp $
+ * $Id: timing.c,v 1.2 2007-01-05 11:44:49 adam Exp $
  */
 
 /**
@@ -48,20 +48,22 @@ void yaz_timing_start(yaz_timing_t t)
 {
 #if HAVE_SYS_TIMES_H
     times(&t->tms1);
+    t->user_sec = 0.0;
+    t->sys_sec = 0.0;
+#else
+    t->user_sec = -1.0;
+    t->sys_sec = -1.0;
 #endif
 #if HAVE_SYS_TIME_H
     gettimeofday(&t->start_time, 0);
-#endif
+    t->real_sec = 0.0;
+#else
     t->real_sec = -1.0;
-    t->user_sec = -1.0;
-    t->sys_sec = -1.0;
+#endif
 }
 
 void yaz_timing_stop(yaz_timing_t t)
 {
-    t->real_sec = 0.0;
-    t->user_sec = 0.0;
-    t->sys_sec = 0.0;
 #if HAVE_SYS_TIMES_H
     times(&t->tms2);
     
