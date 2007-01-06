@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.22 2007-01-06 15:32:46 adam Exp $ */
+/* $Id: wrbuf.h,v 1.23 2007-01-06 16:05:24 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -75,6 +75,8 @@ YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)
+
+YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
 
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
