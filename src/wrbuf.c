@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.13 2007-01-03 08:42:15 adam Exp $
+ * $Id: wrbuf.c,v 1.14 2007-01-06 15:32:46 adam Exp $
  */
 
 /**
@@ -39,6 +39,11 @@ void wrbuf_free(WRBUF b, int free_buf)
     if (free_buf && b->buf)
         xfree(b->buf);
     xfree(b);
+}
+
+void wrbuf_destroy(WRBUF b)
+{
+    wrbuf_free(b, 1);
 }
 
 void wrbuf_rewind(WRBUF b)

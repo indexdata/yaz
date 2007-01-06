@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.21 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: wrbuf.h,v 1.22 2007-01-06 15:32:46 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -48,6 +48,7 @@ typedef struct wrbuf
 
 YAZ_EXPORT WRBUF wrbuf_alloc(void);
 YAZ_EXPORT void wrbuf_free(WRBUF b, int free_buf);
+YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
 YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
