@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.42 2007-01-03 08:42:15 adam Exp $
+ * $Id: marcdisp.c,v 1.43 2007-01-06 16:08:04 adam Exp $
  */
 
 /**
@@ -682,6 +682,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
     const char *leader = 0;
     xmlNode *record_ptr;
     xmlNsPtr ns_record;
+    WRBUF wr_cdata = 0;
 
     for (n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
@@ -694,6 +695,8 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
         return -1;
+
+    wr_cdata = wrbuf_alloc();
 
     record_ptr = xmlNewNode(0, BAD_CAST "record");
     *root_ptr = record_ptr;
@@ -731,8 +734,6 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             }
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                char code_val[8];
-
                 xmlNode *ptr_subfield;
                 /* if identifier length is 2 (most MARCs),
                    the code is a single character .. However we've
@@ -742,24 +743,28 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                     :
                     cdata_one_character(mt, s->code_data);
 
-                if (using_code_len >= sizeof(code_val)-1)
-                    continue;
+                wrbuf_rewind(wr_cdata);
+                wrbuf_iconv_puts(wr_cdata, mt->iconv_cd,
+                                 s->code_data + using_code_len);
 
                 ptr_subfield = xmlNewTextChild(
                     ptr, ns_record, 
-                    BAD_CAST "subfield", 
-                    BAD_CAST (s->code_data + using_code_len));
-                
-                memcpy(code_val, s->code_data, using_code_len);
-                code_val[using_code_len] = '\0';
+                    BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
 
-                xmlNewProp(ptr_subfield, BAD_CAST "code", BAD_CAST code_val);
+                wrbuf_rewind(wr_cdata);
+                wrbuf_iconv_write(wr_cdata, mt->iconv_cd,
+                                  s->code_data, using_code_len);
+                xmlNewProp(ptr_subfield, BAD_CAST "code",
+                           BAD_CAST wrbuf_cstr(wr_cdata));
             }
             break;
         case YAZ_MARC_CONTROLFIELD:
+            wrbuf_rewind(wr_cdata);
+            wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
+
             ptr = xmlNewTextChild(record_ptr, ns_record,
                                   BAD_CAST "controlfield",
-                                  BAD_CAST n->u.controlfield.data);
+                                  BAD_CAST wrbuf_cstr(wr_cdata));
             
             xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
             break;
@@ -773,6 +778,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             break;
         }
     }
+    wrbuf_destroy(wr_cdata);
     return 0;
 #else
     return -1;
