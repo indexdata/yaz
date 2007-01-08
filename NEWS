@@ -1,3 +1,6 @@
+Implemented function ccl_xml_config which parses XML version of CCL
+configuration (bug #798).
+
 Fixed bug #797: yaz_marc_write_xml does not honor character conversion.
 
 Added timings utility (yaz/timing.h)

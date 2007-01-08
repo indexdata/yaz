@@ -5,6 +5,7 @@ tstodrcodec.c
 tstodrcodec.h
 .libs
 tstccl
+tstccl.log
 tsticonv
 tstmatchstr
 tstnmem
@@ -21,4 +22,5 @@ tst_filepath
 tst_record_conv
 tst_retrieval
 tst_tpath
+tst_timing
 tst_timing.log
