@@ -12,3 +12,6 @@ Doxyfile
 dox
 autom4te.cache
 ChangeLog
+build-stamp
+config.guess
+config.sub
