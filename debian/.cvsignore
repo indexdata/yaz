@@ -1,0 +1,13 @@
+copyright
+files
+libyaz
+libyaz-dev
+libyaz.postinst.debhelper
+libyaz.postrm.debhelper
+libyaz.substvars
+tmp
+yaz
+yaz-doc
+yaz-ziffy
+yaz-ziffy.substvars
+yaz.substvars
