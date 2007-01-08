@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.25 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: marcdisp.h,v 1.26 2007-01-08 10:45:19 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -265,7 +265,7 @@ YAZ_EXPORT int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec);
     \param length_implementation length of implementation defined data
 */
 YAZ_EXPORT
-void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
+void yaz_marc_set_leader(yaz_marc_t mt, const char *leader,
                          int *indicator_length,
                          int *identifier_length,
                          int *base_address,
