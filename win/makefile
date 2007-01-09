@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.125 2007-01-05 12:00:11 adam Exp $
+# $Id: makefile,v 1.126 2007-01-09 13:56:49 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -412,6 +412,7 @@ MISC_OBJS= \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-opt.obj \
+   $(OBJDIR)\zoom-socket.obj \
    $(OBJDIR)\initopt.obj \
    $(OBJDIR)\xmlquery.obj \
    $(OBJDIR)\mime.obj \

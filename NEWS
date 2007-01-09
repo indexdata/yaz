@@ -1,3 +1,11 @@
+Implemented Generic select hook for ZOOM (bug #803). This is achieved with 
+the following new functions:
+ ZOOM_process_event, 
+ ZOOM_connection_get_{socket,mask,timeout}, 
+ ZOOM_connection_fire_event_{timeout,socket}.
+The existing blocking event handler, ZOOM_event, is a wrapper for the
++ blocking ZOOM_event_sys_{poll,select}.
+
 Implemented function ccl_xml_config which parses XML version of CCL
 configuration (bug #798).
 

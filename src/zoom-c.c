@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.104 2007-01-03 08:42:15 adam Exp $
+ * $Id: zoom-c.c,v 1.105 2007-01-09 13:56:48 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -26,25 +26,6 @@
 #include <yaz/srw.h>
 #include <yaz/cql.h>
 #include <yaz/ccl.h>
-
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#if HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#endif
-#if HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#ifdef WIN32
-#if FD_SETSIZE < 512
-#define FD_SETSIZE 512
-#endif
-#include <winsock.h>
-#endif
 
 static int log_api = 0;
 static int log_details = 0;
@@ -318,7 +299,7 @@ ZOOM_API(ZOOM_connection)
 
     c->proto = PROTO_Z3950;
     c->cs = 0;
-    c->mask = 0;
+    ZOOM_connection_set_mask(c, 0);
     c->reconnect_ok = 0;
     c->state = STATE_IDLE;
     c->addinfo = 0;
@@ -960,7 +941,7 @@ static void do_close(ZOOM_connection c)
     if (c->cs)
         cs_close(c->cs);
     c->cs = 0;
-    c->mask = 0;
+    ZOOM_connection_set_mask(c, 0);
     c->state = STATE_IDLE;
 }
 
@@ -1115,7 +1096,7 @@ static zoom_ret do_connect(ZOOM_connection c)
                 /* no init request for SRW .. */
                 assert(c->tasks->which == ZOOM_TASK_CONNECT);
                 ZOOM_connection_remove_task(c);
-                c->mask = 0;
+                ZOOM_connection_set_mask(c, 0);
                 ZOOM_connection_exec_task(c);
             }
             c->state = STATE_ESTABLISHED;
@@ -1123,32 +1104,19 @@ static zoom_ret do_connect(ZOOM_connection c)
         }
         else if (ret > 0)
         {
-            c->state = STATE_CONNECTING; 
-            c->mask = ZOOM_SELECT_EXCEPT;
+            int mask = ZOOM_SELECT_EXCEPT;
             if (c->cs->io_pending & CS_WANT_WRITE)
-                c->mask += ZOOM_SELECT_WRITE;
+                mask += ZOOM_SELECT_WRITE;
             if (c->cs->io_pending & CS_WANT_READ)
-                c->mask += ZOOM_SELECT_READ;
+                mask += ZOOM_SELECT_READ;
+            ZOOM_connection_set_mask(c, mask);
+            c->state = STATE_CONNECTING; 
             return zoom_pending;
         }
     }
     c->state = STATE_IDLE;
     set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
     return zoom_complete;
-}
-
-int z3950_connection_socket(ZOOM_connection c)
-{
-    if (c->cs)
-        return cs_fileno(c->cs);
-    return -1;
-}
-
-int z3950_connection_mask(ZOOM_connection c)
-{
-    if (c->cs)
-        return c->mask;
-    return 0;
 }
 
 static void otherInfo_attach(ZOOM_connection c, Z_APDU *a, ODR out)
@@ -1276,7 +1244,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.104 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.105 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3452,7 +3420,7 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
     
-    c->mask = 0;
+    ZOOM_connection_set_mask(c, 0);
     yaz_log(log_details, "%p recv_apdu apdu->which=%d", c, apdu->which);
     switch(apdu->which)
     {
@@ -3682,7 +3650,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
                                                     "Content-Type");
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
-    c->mask = 0;
+    ZOOM_connection_set_mask(c, 0);
     yaz_log(log_details, "%p handle_http", c);
 
     if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
@@ -3826,17 +3794,18 @@ static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out)
     }
     else if (r == 1)
     {    
-        c->mask = ZOOM_SELECT_EXCEPT;
+        int mask = ZOOM_SELECT_EXCEPT;
         if (c->cs->io_pending & CS_WANT_WRITE)
-            c->mask += ZOOM_SELECT_WRITE;
+            mask += ZOOM_SELECT_WRITE;
         if (c->cs->io_pending & CS_WANT_READ)
-            c->mask += ZOOM_SELECT_READ;
+            mask += ZOOM_SELECT_READ;
+        ZOOM_connection_set_mask(c, mask);
         yaz_log(log_details, "%p do_write_ex write incomplete mask=%d",
                 c, c->mask);
     }
     else
     {
-        c->mask = ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT;
+        ZOOM_connection_set_mask(c, ZOOM_SELECT_READ|ZOOM_SELECT_EXCEPT);
         yaz_log(log_details, "%p do_write_ex write complete mask=%d",
                 c, c->mask);
     }
@@ -4014,11 +3983,12 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
                 "cs_rcvconnect returned %d", c, ret);
         if (ret == 1)
         {
-            c->mask = ZOOM_SELECT_EXCEPT;
+            int mask = ZOOM_SELECT_EXCEPT;
             if (c->cs->io_pending & CS_WANT_WRITE)
-                c->mask += ZOOM_SELECT_WRITE;
+                mask += ZOOM_SELECT_WRITE;
             if (c->cs->io_pending & CS_WANT_READ)
-                c->mask += ZOOM_SELECT_READ;
+                mask += ZOOM_SELECT_READ;
+            ZOOM_connection_set_mask(c, mask);
         }
         else if (ret == 0)
         {
@@ -4032,7 +4002,7 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
                 /* no init request for SRW .. */
                 assert(c->tasks->which == ZOOM_TASK_CONNECT);
                 ZOOM_connection_remove_task(c);
-                c->mask = 0;
+                ZOOM_connection_set_mask(c, 0);
                 ZOOM_connection_exec_task(c);
             }
             c->state = STATE_ESTABLISHED;
@@ -4072,216 +4042,6 @@ ZOOM_API(int)
     if (!cs)
         return ZOOM_EVENT_NONE;
     return cs->last_event;
-}
-
-ZOOM_API(int)
-    ZOOM_event(int no, ZOOM_connection *cs)
-{
-    int timeout = 30;      /* default timeout in seconds */
-    int timeout_set = 0;   /* whether it was overriden at all */
-#if HAVE_SYS_POLL_H
-    struct pollfd pollfds[1024];
-    ZOOM_connection poll_cs[1024];
-#else
-    struct timeval tv;
-    fd_set input, output, except;
-#endif
-    int i, r, nfds;
-    int max_fd = 0;
-
-    yaz_log(log_details, "ZOOM_event(no=%d,cs=%p)", no, cs);
-    
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        ZOOM_Event event;
-
-#if 0
-        if (c)
-            ZOOM_connection_show_tasks(c);
-#endif
-
-        if (c && (event = ZOOM_connection_get_event(c)))
-        {
-            ZOOM_Event_destroy(event);
-            return i+1;
-        }
-    }
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        if (c)
-        {
-            ZOOM_Event event;
-            ZOOM_connection_exec_task(c);
-            if ((event = ZOOM_connection_get_event(c)))
-            {
-                ZOOM_Event_destroy(event);
-                return i+1;
-            }
-        }
-    }
-#if HAVE_SYS_POLL_H
-
-#else
-    FD_ZERO(&input);
-    FD_ZERO(&output);
-    FD_ZERO(&except);
-#endif
-    nfds = 0;
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        int fd, mask;
-        int this_timeout;
-        
-        if (!c)
-            continue;
-        fd = z3950_connection_socket(c);
-        mask = z3950_connection_mask(c);
-
-        if (fd == -1)
-            continue;
-        if (max_fd < fd)
-            max_fd = fd;
-        
-        /* -1 is used for indefinite timeout (no timeout), so -2 here. */
-        this_timeout = ZOOM_options_get_int(c->options, "timeout", -2);
-        if (this_timeout != -2)
-        {
-            /* ensure the minimum timeout is used */
-            if (!timeout_set)
-                timeout = this_timeout;
-            else if (this_timeout != -1 && this_timeout < timeout)
-                timeout = this_timeout;
-            timeout_set = 1;
-        }               
-#if HAVE_SYS_POLL_H
-        if (mask)
-        {
-            short poll_events = 0;
-
-            if (mask & ZOOM_SELECT_READ)
-                poll_events += POLLIN;
-            if (mask & ZOOM_SELECT_WRITE)
-                poll_events += POLLOUT;
-            if (mask & ZOOM_SELECT_EXCEPT)
-                poll_events += POLLERR;
-            pollfds[nfds].fd = fd;
-            pollfds[nfds].events = poll_events;
-            pollfds[nfds].revents = 0;
-            poll_cs[nfds] = c;
-            nfds++;
-        }
-#else
-        if (mask & ZOOM_SELECT_READ)
-        {
-            FD_SET(fd, &input);
-            nfds++;
-        }
-        if (mask & ZOOM_SELECT_WRITE)
-        {
-            FD_SET(fd, &output);
-            nfds++;
-        }
-        if (mask & ZOOM_SELECT_EXCEPT)
-        {
-            FD_SET(fd, &except);
-            nfds++;
-        }
-#endif
-    }
-    if (!nfds)
-        return 0;
-
-#if HAVE_SYS_POLL_H
-    while ((r = poll(pollfds, nfds,
-         (timeout == -1 ? -1 : timeout * 1000))) < 0
-          && errno == EINTR)
-    {
-        ;
-    }
-    if (r < 0)
-        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: poll");
-    for (i = 0; i<nfds; i++)
-    {
-        ZOOM_connection c = poll_cs[i];
-        if (r && c->mask)
-        {
-            int mask = 0;
-            if (pollfds[i].revents & POLLIN)
-                mask += ZOOM_SELECT_READ;
-            if (pollfds[i].revents & POLLOUT)
-                mask += ZOOM_SELECT_WRITE;
-            if (pollfds[i].revents & POLLERR)
-                mask += ZOOM_SELECT_EXCEPT;
-            if (mask)
-                ZOOM_connection_do_io(c, mask);
-        }
-        else if (r == 0 && c->mask)
-        {
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
-            /* timeout and this connection was waiting */
-            set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT, 0);
-            do_close(c);
-            ZOOM_connection_put_event(c, event);
-        }
-    }
-#else
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
-
-    while ((r = select(max_fd+1, &input, &output, &except,
-                       (timeout == -1 ? 0 : &tv))) < 0 && errno == EINTR)
-    {
-        ;
-    }
-    if (r < 0)
-        yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event: select");
-
-    r = select(max_fd+1, &input, &output, &except, (timeout == -1 ? 0 : &tv));
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        int fd, mask;
-
-        if (!c)
-            continue;
-        fd = z3950_connection_socket(c);
-        mask = 0;
-        if (r && c->mask)
-        {
-            /* no timeout and real socket */
-            if (FD_ISSET(fd, &input))
-                mask += ZOOM_SELECT_READ;
-            if (FD_ISSET(fd, &output))
-                mask += ZOOM_SELECT_WRITE;
-            if (FD_ISSET(fd, &except))
-                mask += ZOOM_SELECT_EXCEPT;
-            if (mask)
-                ZOOM_connection_do_io(c, mask);
-        }
-        if (r == 0 && c->mask)
-        {
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
-            /* timeout and this connection was waiting */
-            set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT, 0);
-            do_close(c);
-            ZOOM_connection_put_event(c, event);
-        }
-    }
-#endif
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        ZOOM_Event event;
-        if (c && (event = ZOOM_connection_get_event(c)))
-        {
-            ZOOM_Event_destroy(event);
-            return i+1;
-        }
-    }
-    return 0;
 }
 
 
@@ -4343,6 +4103,93 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
 
     cql_transform_close(trans);
     return xstrdup(pqfbuf);
+}
+
+ZOOM_API(int) ZOOM_connection_fire_event_timeout(ZOOM_connection c)
+{
+    if (c->mask)
+    {
+        ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_TIMEOUT);
+        /* timeout and this connection was waiting */
+        set_ZOOM_error(c, ZOOM_ERROR_TIMEOUT, 0);
+        do_close(c);
+        ZOOM_connection_put_event(c, event);
+    }
+    return 0;
+}
+
+ZOOM_API(int)
+    ZOOM_process_event(int no, ZOOM_connection *cs)
+{
+    int i;
+
+    yaz_log(log_details, "ZOOM_event_poll(no=%d,cs=%p)", no, cs);
+    
+    for (i = 0; i<no; i++)
+    {
+        ZOOM_connection c = cs[i];
+        ZOOM_Event event;
+
+#if 0
+        if (c)
+            ZOOM_connection_show_tasks(c);
+#endif
+
+        if (c && (event = ZOOM_connection_get_event(c)))
+        {
+            ZOOM_Event_destroy(event);
+            return i+1;
+        }
+    }
+    for (i = 0; i<no; i++)
+    {
+        ZOOM_connection c = cs[i];
+        if (c)
+        {
+            ZOOM_Event event;
+            ZOOM_connection_exec_task(c);
+            if ((event = ZOOM_connection_get_event(c)))
+            {
+                ZOOM_Event_destroy(event);
+                return i+1;
+            }
+        }
+    }
+    return 0;
+}
+
+ZOOM_API(int) ZOOM_connection_fire_event_socket(ZOOM_connection c, int mask)
+{
+    if (c->mask && mask)
+        ZOOM_connection_do_io(c, mask);
+    return 0;
+}
+
+ZOOM_API(int) ZOOM_connection_get_socket(ZOOM_connection c)
+{
+    if (c->cs)
+        return cs_fileno(c->cs);
+    return -1;
+}
+
+ZOOM_API(int) ZOOM_connection_set_mask(ZOOM_connection c, int mask)
+{
+    c->mask = mask;
+    if (!c->cs)
+        return -1; 
+    return 0;
+}
+
+ZOOM_API(int) ZOOM_connection_get_mask(ZOOM_connection c)
+{
+    if (c->cs)
+        return c->mask;
+    return 0;
+}
+
+ZOOM_API(int) ZOOM_connection_get_timeout(ZOOM_connection c)
+{
+    return ZOOM_options_get_int(c->options, "timeout", 30);
 }
 
 /*
