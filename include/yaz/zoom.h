@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.42 2007-01-09 13:56:48 adam Exp $ */
+/* $Id: zoom.h,v 1.43 2007-01-10 13:25:46 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -448,6 +448,17 @@ ZOOM_API(int)
     ZOOM_connection_fire_event_socket(ZOOM_connection c, int mask);
 
 
+
+/** \brief peek at next event
+    \param c connection
+    \returns ZOOM_EVENT_NONE (for no events in queue), ZOOM_EVENT_CONNECT, ..
+
+    Does not actually remove the event from the event queue. ZOOM_event and
+    ZOOM_process_event removes one event.
+*/
+
+ZOOM_API(int)
+    ZOOM_connection_peek_event(ZOOM_connection c);
 
 ZOOM_END_CDECL
 /*
