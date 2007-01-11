@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zgdu.c,v 1.17 2007-01-03 08:42:15 adam Exp $
+ * $Id: zgdu.c,v 1.18 2007-01-11 10:30:41 adam Exp $
  */
 
 /**
@@ -28,17 +28,16 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     int chunked = 0;
 
     *headers = 0;
-    while (i < o->size-1 && o->buf[i] == '\r')
+    while (i < o->size-1 && o->buf[i] == '\n')
     {
         int po;
         i++;
-        if (o->buf[i] != '\n')
+        if (o->buf[i] == '\r' && i < o->size-1 && o->buf[i+1] == '\n')
         {
-            o->error = OHTTP;
-            return 0;
+            i++;
+            break;
         }
-        i++;
-        if (o->buf[i] == '\r')
+        if (o->buf[i] == '\n')
             break;
         for (po = i; ; i++)
         {
@@ -57,7 +56,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         i++;
         while (i < o->size-1 && o->buf[i] == ' ')
             i++;
-        for (po = i; i < o->size-1 && o->buf[i] != '\r' ; i++)
+        for (po = i; i < o->size-1 && !strchr("\r\n", o->buf[i]); i++)
             ;
         
         (*headers)->value = (char*) odr_malloc(o, i - po + 1);
@@ -69,9 +68,10 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             !strcasecmp((*headers)->value, "chunked"))
             chunked = 1;
         headers = &(*headers)->next;
+        if (i < o->size-1 && o->buf[i] == '\r')
+            i++;
     }
     *headers = 0;
-    i++;
     if (o->buf[i] != '\n')
     {
         o->error = OHTTP;
@@ -312,7 +312,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             hr->content_len = 0;
 
             po = i = 5;
-            while (i < o->size-2 && o->buf[i] != ' ' && o->buf[i] != '\r')
+            while (i < o->size-2 && !strchr(" \r\n", o->buf[i]))
                 i++;
             hr->version = (char *) odr_malloc(o, i - po + 1);
             if (i - po)
@@ -330,7 +330,7 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
                 hr->code = hr->code*10 + (o->buf[i] - '0');
                 i++;
             }
-            while (i < o->size-1 && o->buf[i] != '\r')
+            while (i < o->size-1 && o->buf[i] != '\n')
                 i++;
             return decode_headers_content(o, i, &hr->headers,
                                           &hr->content_buf, &hr->content_len);            
@@ -378,19 +378,19 @@ int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
             }
             i+= 5;
             po = i;
-            while (o->buf[i] != '\r')
-            {
-                if (i >= o->size-1)
-                {
-                    o->error = OHTTP;
-                    return 0;
-                }
+            while (i < o->size && !strchr("\r\n", o->buf[i]))
                 i++;
-            }
             hr->version = (char *) odr_malloc(o, i - po + 1);
             memcpy(hr->version, o->buf + po, i - po);
             hr->version[i - po] = '\0';
             /* headers */
+            if (i < o->size-1 && o->buf[i] == '\r')
+                i++;
+            if (o->buf[i] != '\n')
+            {
+                o->error = OHTTP;
+                return 0;
+            }
             return decode_headers_content(o, i, &hr->headers,
                                           &hr->content_buf, &hr->content_len);
 

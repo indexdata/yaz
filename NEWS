@@ -1,3 +1,7 @@
+Implemented bug #806: Deal with HTTP clients sending LF in HTTP headers.
+
+Added ZOOM_connection_peek_event.
+
 Implemented Generic select hook for ZOOM (bug #803). This is achieved with 
 the following new functions:
  ZOOM_process_event, 
