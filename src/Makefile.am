@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.50 2007-01-09 13:56:48 adam Exp $
+## $Id: Makefile.am,v 1.51 2007-01-11 10:55:57 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -79,7 +79,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   cqlstrer.c querytowrbuf.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h test.c timing.c \
-  xmlquery.c \
+  xmlquery.c http.c \
   mime.c mime.h \
   record_conv.c retrieval.c elementset.c
 
