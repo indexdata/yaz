@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.43 2007-01-10 13:25:46 adam Exp $ */
+/* $Id: zoom.h,v 1.44 2007-01-12 21:03:30 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -370,21 +370,38 @@ ZOOM_API(int)
 ZOOM_connection_is_idle(ZOOM_connection c);
 
 
-/** \brief processes one event for one of connections given
+/** \brief process one event for one of connections given
     \param no number of connections (size of cs)
     \param cs connection array
     \retval 0 no event was processed
     \retval >0 event was processed for connection at (retval-1)
 
-    This function attemps to deal with outstandings events in 
-    a non-blocking fashion. If no events was processed (return value of 0),
-    then the system should attempt to deal with sockets in blocking mode
-    using socket select/poll which means calling the following functions:
+    This function attemps to deal with outstandings events in a non-blocking
+    mode. If no events was processed (return value of 0),  then the system
+    should attempt to deal with sockets in blocking mode using socket
+    select/poll which means calling the following functions:
     ZOOM_connection_get_socket, ZOOM_connection_get_mask,
     ZOOM_connection_get_timeout.
 */
 ZOOM_API(int)
-    ZOOM_process_event(int no, ZOOM_connection *cs);
+    ZOOM_event_nonblock(int no, ZOOM_connection *cs);
+
+
+/** \brief process one event for connection
+    \param c connection
+    \retval 0 no event was processed
+    \retval 1 event was processed for connection
+
+    This function attemps to deal with outstandings events in 
+    a non-blocking fashion. If no event was processed (return value of 0),
+    then the system should attempt to deal with sockets in blocking mode
+    using socket select/poll which means calling the following functions:
+    ZOOM_connection_get_socket, ZOOM_connection_get_mask,
+    ZOOM_connection_get_timeout. If an event was processed call this
+    function again.
+*/
+ZOOM_API(int)
+    ZOOM_connection_process(ZOOM_connection c);
 
 
 /** \brief get socket fd for ZOOM connection

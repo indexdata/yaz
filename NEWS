@@ -4,7 +4,7 @@ Added ZOOM_connection_peek_event.
 
 Implemented Generic select hook for ZOOM (bug #803). This is achieved with 
 the following new functions:
- ZOOM_process_event, 
+ ZOOM_event_nonblock, ZOOM_connection_process,
  ZOOM_connection_get_{socket,mask,timeout}, 
  ZOOM_connection_fire_event_{timeout,socket}.
 The existing blocking event handler, ZOOM_event, is a wrapper for the

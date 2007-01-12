@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.107 2007-01-11 11:05:01 adam Exp $
+ * $Id: zoom-c.c,v 1.108 2007-01-12 21:03:31 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1250,7 +1250,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.107 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.108 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -4125,41 +4125,41 @@ ZOOM_API(int) ZOOM_connection_fire_event_timeout(ZOOM_connection c)
 }
 
 ZOOM_API(int)
-    ZOOM_process_event(int no, ZOOM_connection *cs)
+    ZOOM_connection_process(ZOOM_connection c)
+{
+    ZOOM_Event event;
+    if (!c)
+        return 0;
+
+    event = ZOOM_connection_get_event(c);
+    if (event)
+    {
+        ZOOM_Event_destroy(event);
+        return 1;
+    }
+    ZOOM_connection_exec_task(c);
+    event = ZOOM_connection_get_event(c);
+    if (event)
+    {
+        ZOOM_Event_destroy(event);
+        return 1;
+    }
+    return 0;
+}
+
+ZOOM_API(int)
+    ZOOM_event_nonblock(int no, ZOOM_connection *cs)
 {
     int i;
 
-    yaz_log(log_details, "ZOOM_event_poll(no=%d,cs=%p)", no, cs);
+    yaz_log(log_details, "ZOOM_process_event(no=%d,cs=%p)", no, cs);
     
     for (i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
-        ZOOM_Event event;
 
-#if 0
-        if (c)
-            ZOOM_connection_show_tasks(c);
-#endif
-
-        if (c && (event = ZOOM_connection_get_event(c)))
-        {
-            ZOOM_Event_destroy(event);
+        if (c && ZOOM_connection_process(c))
             return i+1;
-        }
-    }
-    for (i = 0; i<no; i++)
-    {
-        ZOOM_connection c = cs[i];
-        if (c)
-        {
-            ZOOM_Event event;
-            ZOOM_connection_exec_task(c);
-            if ((event = ZOOM_connection_get_event(c)))
-            {
-                ZOOM_Event_destroy(event);
-                return i+1;
-            }
-        }
     }
     return 0;
 }
