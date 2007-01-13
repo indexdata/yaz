@@ -1,3 +1,5 @@
+--- 2.1.46 2007/01/13
+
 Implemented bug #806: Deal with HTTP clients sending LF in HTTP headers.
 
 Added ZOOM_connection_peek_event.
