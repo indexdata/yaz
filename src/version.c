@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: version.c,v 1.5 2007-01-03 08:42:15 adam Exp $
+ * $Id: version.c,v 1.6 2007-01-13 08:57:47 adam Exp $
  */
 
 /**
@@ -10,10 +10,6 @@
  * \brief Implements YAZ version utilities.
  */
 
-/**
- * \mainpage The YAZ Toolkit.
- */
- 
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
