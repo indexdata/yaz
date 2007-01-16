@@ -1,3 +1,12 @@
+Extended the GFS search facility. New member of bend_search_rr 
+'estimated_hit_count' signals that hits is known to be an estmate
+(higher or lower than real hit count). New member 'partial_resultset'
+signals that the search was partial (hit count is lower or equal than
+real hit count). For Z39.50, the information is stored in resultSetStatus
+member of SearchResponse APDU. For SRU, the information is signalled
+via SRU diagnostic 59: "Result set created with valid partial results
+available".
+
 --- 2.1.46 2007/01/13
 
 Implemented bug #806: Deal with HTTP clients sending LF in HTTP headers.

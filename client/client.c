@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.322 2007-01-03 08:42:13 adam Exp $
+ * $Id: client.c,v 1.323 2007-01-16 14:12:37 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -1633,7 +1633,25 @@ static int process_searchResponse(Z_SearchResponse *res)
     last_hit_count = *res->resultCount;
     if (setnumber >= 0)
         printf (", setno %d", setnumber);
-    printf ("\n");
+    putchar('\n');
+    if (res->resultSetStatus)
+    {
+        printf("Result Set Status: ");
+        switch(*res->resultSetStatus)
+        {
+        case Z_SearchResponse_subset:
+            printf("subset"); break;
+        case Z_SearchResponse_interim:
+            printf("interim"); break;
+        case Z_SearchResponse_none:
+            printf("none"); break;
+        case Z_SearchResponse_estimate:
+            printf("estimate"); break;
+        default:
+            printf("%d", *res->resultSetStatus);
+        }            
+        putchar('\n');
+    }
     display_searchResult (res->additionalSearchInfo);
     printf("records returned: %d\n",
            *res->numberOfRecordsReturned);
