@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.43 2007-01-06 16:08:04 adam Exp $
+ * $Id: marcdisp.c,v 1.44 2007-01-18 14:45:05 adam Exp $
  */
 
 /**
@@ -123,6 +123,27 @@ void yaz_marc_destroy(yaz_marc_t mt)
 NMEM yaz_marc_get_nmem(yaz_marc_t mt)
 {
     return mt->nmem;
+}
+
+static void marc_iconv_reset(yaz_marc_t mt, WRBUF wr)
+{
+    if (mt->iconv_cd)
+    {
+#if 1
+        char outbuf[12];
+        size_t outbytesleft = sizeof(outbuf);
+        char *outp = outbuf;
+        size_t r = yaz_iconv(mt->iconv_cd, 0, 0, &outp, &outbytesleft);
+        if (r != (size_t) (-1))
+            wrbuf_write(wr, outbuf, outp - outbuf);
+#else
+        int pos = wr->pos;
+        wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
+        if (pos != wr->pos)
+            wr->pos--;
+        yaz_iconv(mt->iconv_cd, 0, 0, 0, 0);
+#endif
+    }
 }
 
 static int marc_exec_leader(const char *leader_spec, char *leader,
@@ -472,8 +493,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
                 wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
                 wrbuf_iconv_puts(wr, mt->iconv_cd, 
                                  s->code_data + using_code_len);
-                wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
-                wr->pos--;
+                marc_iconv_reset(mt, wr);
             }
             wrbuf_puts (wr, mt->endline_str);
             break;
@@ -481,8 +501,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             wrbuf_printf(wr, "%s", n->u.controlfield.tag);
             wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
-            wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
-            wr->pos--;
+            marc_iconv_reset(mt, wr);
             wrbuf_puts (wr, mt->endline_str);
             break;
         case YAZ_MARC_COMMENT:
@@ -591,6 +610,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data + using_code_len,
                                         strlen(s->code_data + using_code_len));
+                marc_iconv_reset(mt, wr);
                 wrbuf_iconv_puts(wr, mt->iconv_cd, "</subfield>");
                 wrbuf_puts(wr, "\n");
             }
@@ -602,6 +622,8 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                     strlen(n->u.controlfield.tag));
             wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
+
+            marc_iconv_reset(mt, wr);
             wrbuf_iconv_puts(wr, mt->iconv_cd, "</controlfield>");
             wrbuf_puts(wr, "\n");
             break;
@@ -746,7 +768,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                 wrbuf_rewind(wr_cdata);
                 wrbuf_iconv_puts(wr_cdata, mt->iconv_cd,
                                  s->code_data + using_code_len);
-
+                marc_iconv_reset(mt, wr_cdata);
                 ptr_subfield = xmlNewTextChild(
                     ptr, ns_record, 
                     BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
@@ -761,7 +783,8 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_rewind(wr_cdata);
             wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
-
+            marc_iconv_reset(mt, wr_cdata);
+            
             ptr = xmlNewTextChild(record_ptr, ns_record,
                                   BAD_CAST "controlfield",
                                   BAD_CAST wrbuf_cstr(wr_cdata));
@@ -833,6 +856,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                 /* write dummy IDFS + content */
                 wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');
                 wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd, s->code_data);
+                marc_iconv_reset(mt, wr_data_tmp);
             }
             /* write dummy FS (makes MARC-8 to become ASCII) */
             wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');
@@ -844,6 +868,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             wrbuf_rewind(wr_data_tmp);
             wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd, 
                              n->u.controlfield.data);
+            marc_iconv_reset(mt, wr_data_tmp);
             wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');/* field sep */
             data_length += wrbuf_len(wr_data_tmp);
             break;
@@ -895,17 +920,13 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             {
                 wrbuf_putc(wr, ISO2709_IDFS);
                 wrbuf_iconv_puts(wr, mt->iconv_cd, s->code_data);
-                /* write dummy blank - makes MARC-8 to become ASCII */
-                wrbuf_iconv_putchar(wr, mt->iconv_cd, ' ');
-                wr->pos--;
+                marc_iconv_reset(mt, wr);
             }
             wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
-            /* write dummy blank - makes MARC-8 to become ASCII */
-            wrbuf_iconv_putchar(wr, mt->iconv_cd, ' ');
-            wr->pos--;
+            marc_iconv_reset(mt, wr);
             wrbuf_putc(wr, ISO2709_FS);
             break;
         case YAZ_MARC_COMMENT:

@@ -24,6 +24,5 @@ tst_retrieval
 tst_tpath
 tst_timing
 tst_timing.log
-nfatest1
-nfaxmltest1
-nfaxmltest1.log
+tst_comstack
+tst_comstack.log
