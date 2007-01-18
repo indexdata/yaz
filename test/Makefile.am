@@ -1,6 +1,6 @@
 ## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.31 2007-01-11 10:30:41 adam Exp $
+## $Id: Makefile.am,v 1.32 2007-01-18 14:46:58 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
@@ -20,6 +20,7 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
  marc5.marc marc5.xml marc5.chr marc5.xml.marc \
  marc6.marc marc6.xml marc6.chr marc6.xml.marc \
  marc7.marc marc7.xml marc7.chr marc7.xml.marc \
+ marc8.marc marc8.xml marc8.chr marc8.xml.marc \
  marccol1.u8.marc marccol1.u8.1.lst marccol1.u8.2.lst \
  marccol2.u8.marc marccol2.u8.1.lst marccol2.u8.2.lst \
  tst_record_conv.xsl 
