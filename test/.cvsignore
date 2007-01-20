@@ -26,3 +26,6 @@ tst_timing
 tst_timing.log
 tst_comstack
 tst_comstack.log
+nfatest1
+nfaxmltest1
+nfaxmltest1.log
