@@ -1,3 +1,7 @@
+Implemented alternative Item Order package for ZOOM. If option "doc" is set,
+that is treated as an ItemOrder with itemRequest being an XML document
+external. The value of "doc" is the content.
+
 Extended the GFS search facility. New member of bend_search_rr 
 'estimated_hit_count' signals that hits is known to be an estmate
 (higher or lower than real hit count). New member 'partial_resultset'
