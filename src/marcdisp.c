@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.44 2007-01-18 14:45:05 adam Exp $
+ * $Id: marcdisp.c,v 1.45 2007-01-22 09:21:16 adam Exp $
  */
 
 /**
@@ -129,20 +129,12 @@ static void marc_iconv_reset(yaz_marc_t mt, WRBUF wr)
 {
     if (mt->iconv_cd)
     {
-#if 1
         char outbuf[12];
         size_t outbytesleft = sizeof(outbuf);
         char *outp = outbuf;
         size_t r = yaz_iconv(mt->iconv_cd, 0, 0, &outp, &outbytesleft);
         if (r != (size_t) (-1))
             wrbuf_write(wr, outbuf, outp - outbuf);
-#else
-        int pos = wr->pos;
-        wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
-        if (pos != wr->pos)
-            wr->pos--;
-        yaz_iconv(mt->iconv_cd, 0, 0, 0, 0);
-#endif
     }
 }
 
