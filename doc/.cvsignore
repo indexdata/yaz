@@ -6,6 +6,7 @@ yaz.aux
 yaz.log
 yaz.out
 yaz.pdf
+yazj.*
 *.php
 *.tkl
 manpage.links
