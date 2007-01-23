@@ -1,7 +1,12 @@
+
 Extended ZOOM result set options with two options that may be read by
 a client: resultSetStatus and presentStatus with values as specified for
 the ASN.1. See:
 http://www.loc.gov/z3950/agency/markup/04.html#Search-status
+
+Fixed bug #827: Using SSL fails on Debian etch.
+
+Fixed bug #826: Weird looking chars for set of MARC records.
 
 Implemented alternative Item Order package for ZOOM. If option "doc" is set,
 that is treated as an ItemOrder with itemRequest being an XML document
@@ -15,6 +20,8 @@ real hit count). For Z39.50, the information is stored in resultSetStatus
 member of SearchResponse APDU. For SRU, the information is signalled
 via SRU diagnostic 59: "Result set created with valid partial results
 available".
+
+Switched from jade/pdfjdaetex to dblatex for Docbook documentation in PDF.
 
 --- 2.1.46 2007/01/13
 
