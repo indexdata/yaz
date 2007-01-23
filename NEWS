@@ -1,3 +1,4 @@
+--- 2.1.48 2007/01/23
 
 Extended ZOOM result set options with two options that may be read by
 a client: resultSetStatus and presentStatus with values as specified for
