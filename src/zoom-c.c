@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.109 2007-01-22 10:35:07 adam Exp $
+ * $Id: zoom-c.c,v 1.110 2007-01-23 19:25:21 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1250,7 +1250,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.109 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.110 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2392,6 +2392,16 @@ static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
 
     resultset = c->tasks->u.search.resultset;
 
+    if (sr->resultSetStatus)
+    {
+        ZOOM_options_set_int(resultset->options, "resultSetStatus",
+                             *sr->resultSetStatus);
+    }
+    if (sr->presentStatus)
+    {
+        ZOOM_options_set_int(resultset->options, "presentStatus",
+                             *sr->presentStatus);
+    }
     handle_searchResult(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;

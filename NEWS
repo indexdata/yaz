@@ -1,3 +1,8 @@
+Extended ZOOM result set options with two options that may be read by
+a client: resultSetStatus and presentStatus with values as specified for
+the ASN.1. See:
+http://www.loc.gov/z3950/agency/markup/04.html#Search-status
+
 Implemented alternative Item Order package for ZOOM. If option "doc" is set,
 that is treated as an ItemOrder with itemRequest being an XML document
 external. The value of "doc" is the content.
