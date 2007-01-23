@@ -1,8 +1,8 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.57 2007-01-23 19:31:10 adam Exp $
+dnl $Id: configure.ac,v 1.58 2007-01-23 20:02:09 adam Exp $
 AC_PREREQ(2.59)
-AC_INIT([yaz],[2.1.48],[yaz-help@indexdata.dk])
+AC_INIT([yaz],[2.1.49],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.8])
