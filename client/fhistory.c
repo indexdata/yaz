@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: fhistory.c,v 1.1 2007-01-24 11:50:18 adam Exp $
+ * $Id: fhistory.c,v 1.2 2007-01-24 23:09:48 adam Exp $
  */
 /** \file fhistory.c
  *  \brief file history implementation
@@ -75,7 +75,10 @@ int file_history_save(file_history_t fh)
     char* homedir = getenv("HOME");
     char fname[1024];
     int ret = 0;
+    int sz = wrbuf_len(fh->wr);
 
+    if (!sz)
+        return 0;
     sprintf(fname, "%.500s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
@@ -86,8 +89,8 @@ int file_history_save(file_history_t fh)
     }
     else
     {
-        size_t w = fwrite(wrbuf_buf(fh->wr), 1, wrbuf_len(fh->wr), f);
-        if (w != wrbuf_len(fh->wr))
+        size_t w = fwrite(wrbuf_buf(fh->wr), 1, sz, f);
+        if (w != sz)
             ret = -1;
         if (fclose(f))
             ret = -1;
