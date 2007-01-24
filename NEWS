@@ -1,3 +1,5 @@
+Fixed bug #830: pkg-config support.
+
 --- 2.1.48 2007/01/23
 
 Extended ZOOM result set options with two options that may be read by

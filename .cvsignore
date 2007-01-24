@@ -8,6 +8,7 @@ configure
 libtool
 yaz-config
 yaz.spec
+yaz.pc
 Doxyfile
 dox
 autom4te.cache
