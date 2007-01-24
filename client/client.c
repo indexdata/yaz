@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.326 2007-01-24 15:14:57 adam Exp $
+ * $Id: client.c,v 1.327 2007-01-24 23:10:01 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -13,6 +13,9 @@
 #include <assert.h>
 #include <time.h>
 #include <ctype.h>
+#ifndef WIN32
+#include <signal.h>
+#endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4679,11 +4682,22 @@ char **readline_completer(char *text, int start, int end)
 }
 #endif
 
+#ifndef WIN32
+void ctrl_c_handler(int x)
+{
+    exit_client(0);
+}
+#endif
+
 static void client(void)
 {
     char line[10240];
 
     line[10239] = '\0';
+
+#ifndef WIN32
+    signal(SIGINT, ctrl_c_handler);
+#endif
 
 #if HAVE_GETTIMEOFDAY
     gettimeofday (&tv_start, 0);
