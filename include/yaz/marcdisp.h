@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.26 2007-01-08 10:45:19 adam Exp $ */
+/* $Id: marcdisp.h,v 1.27 2007-01-24 15:13:20 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -83,8 +83,8 @@ YAZ_EXPORT void yaz_marc_debug(yaz_marc_t mt, int level);
     \param mt marc handle
     \param buf input buffer
     \param bsize size of buffer or (-1 if "any size")
-    \param result result to be stored here (allocate before use!)
-    \param rsize size of result (set before calling)
+    \param result result to be stored here
+    \param rsize size of result (memory "owned" by yaz_marc_mt handle)
 
     Decodes MARC in buf of size bsize.
     On success, result in *result with size *rsize. 
