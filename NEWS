@@ -1,3 +1,5 @@
+Fixed bug #668: save command line history for yaz-client.
+
 Fixed bug #830: pkg-config support.
 
 --- 2.1.48 2007/01/23

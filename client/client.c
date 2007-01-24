@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.324 2007-01-24 09:54:04 adam Exp $
+ * $Id: client.c,v 1.325 2007-01-24 11:50:18 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -78,8 +78,11 @@
 
 #include "admin.h"
 #include "tabcomplete.h"
+#include "fhistory.h"
 
 #define C_PROMPT "Z> "
+
+static file_history_t file_history = 0;
 
 static char *sru_method = "soap";
 static char *codeset = 0;               /* character set for output */
@@ -2824,11 +2827,18 @@ static int cmd_show(const char *arg)
     return 2;
 }
 
+void exit_client(int code)
+{
+    file_history_save(file_history);
+    file_history_destroy(&file_history);
+    exit(code);
+}
+
 int cmd_quit(const char *arg)
 {
     printf("See you later, alligator.\n");
     xmalloc_trav ("");
-    exit(0);
+    exit_client(0);
     return 0;
 }
 
@@ -3712,24 +3722,24 @@ void source_rcfile(void)
 {
     /*  Look for a $HOME/.yazclientrc and source it if it exists */
     struct stat statbuf;
-    char buffer[1000];
-    char* homedir=getenv("HOME");
+    char fname[1000];
+    char* homedir = getenv("HOME");
 
-    if( homedir ) {
-        
-        sprintf(buffer,"%s/.yazclientrc",homedir);
+    sprintf(fname, "%.500s%s%s", homedir ? homedir : "",
+            homedir ? "/" : "",
+            ".yazclientrc");
 
-        if(stat(buffer,&statbuf)==0) {
-            cmd_source(buffer, 0 );
-        }
-        
-    };
-    
-    if(stat(".yazclientrc",&statbuf)==0) {
-        cmd_source(".yazclientrc", 0 );
-    }
+    if (stat(fname,&statbuf)==0)
+        cmd_source(fname, 0 );
 }
 
+void add_to_readline_history(void *client_data, const char *line)
+{
+#if HAVE_READLINE_HISTORY_H
+    if (strlen(line))
+        add_history(line);
+#endif
+}
 
 static void initialize(void)
 {
@@ -3768,6 +3778,10 @@ static void initialize(void)
     }
     
     source_rcfile();
+
+    file_history = file_history_new();
+    file_history_load(file_history);
+    file_history_trav(file_history, 0, add_to_readline_history);
 }
 
 
@@ -4709,7 +4723,7 @@ static void client(void)
             if (*line_in)
                 add_history(line_in);
 #endif
-            strncpy(line, line_in, 10239);
+            strncpy(line, line_in, sizeof(line)-1);
             free(line_in);
         }
 #endif 
@@ -4718,11 +4732,13 @@ static void client(void)
             char *end_p;
             printf (C_PROMPT);
             fflush(stdout);
-            if (!fgets(line, 10239, stdin))
+            if (!fgets(line, sizeof(line)-1, stdin))
                 break;
             if ((end_p = strchr (line, '\n')))
                 *end_p = '\0';
         }
+        if (isatty(0))
+            file_history_add_line(file_history, line);
         process_cmd_line(line);
     }
 }
@@ -4881,8 +4897,9 @@ int main(int argc, char **argv)
 #endif
         xfree(open_command);
     }
-    client ();
-    exit (0);
+    client();
+    exit_client(0);
+    return 0;
 }
 /*
  * Local variables:

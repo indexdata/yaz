@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.127 2007-01-11 10:55:57 adam Exp $
+# $Id: makefile,v 1.128 2007-01-24 11:50:19 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -281,7 +281,8 @@ LINK_DLL = $(LINK) $(LNKOPT) \
 YAZ_CLIENT_OBJS= \
    $(OBJDIR)\client.obj \
    $(OBJDIR)\tabcomplete.obj \
-   $(OBJDIR)\admin.obj
+   $(OBJDIR)\admin.obj \
+   $(OBJDIR)\fhistory.obj
 
 ZTEST_OBJS= \
     $(OBJDIR)\read-marc.obj \
