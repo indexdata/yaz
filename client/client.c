@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.323 2007-01-16 14:12:37 adam Exp $
+ * $Id: client.c,v 1.324 2007-01-24 09:54:04 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -4398,6 +4398,7 @@ static struct {
     {"displaycharset", cmd_displaycharset, "<output_charset>",NULL,0,NULL},
     {"marccharset", cmd_marccharset, "<charset_name>",NULL,0,NULL},
     {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
+    {"source", cmd_source_echo, "<filename>",NULL,1,NULL},
     {".", cmd_source_echo, "<filename>",NULL,1,NULL},
     {"!", cmd_subshell, "Subshell command",NULL,1,NULL},
     {"set_apdufile", cmd_set_apdufile, "<filename>",NULL,1,NULL},
