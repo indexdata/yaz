@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.325 2007-01-24 11:50:18 adam Exp $
+ * $Id: client.c,v 1.326 2007-01-24 15:14:57 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -939,61 +939,40 @@ static void display_record(Z_External *r)
                 int rlen;
                 yaz_iconv_t cd = 0;
                 yaz_marc_t mt = yaz_marc_create();
+                const char *from = 0;
+
+                if (marcCharset && !strcmp(marcCharset, "auto"))
+                {
+                    if (ent->value == VAL_USMARC)
+                    {
+                        if (octet_buf[9] == 'a')
+                            from = "UTF-8";
+                        else
+                            from = "MARC-8";
+                    }
+                    else
+                        from = "ISO-8859-1";
+                }
+                else if (marcCharset)
+                    from = marcCharset;
+                if (outputCharset && from)
+                {   
+                    cd = yaz_iconv_open(outputCharset, from);
+                    printf ("convert from %s to %s", from, 
+                            outputCharset);
+                    if (!cd)
+                        printf (" unsupported\n");
+                    else
+                    {
+                        yaz_marc_iconv(mt, cd);
+                        printf ("\n");
+                    }
+                }
                     
                 if (yaz_marc_decode_buf(mt, octet_buf,r->u.octet_aligned->len,
                                         &result, &rlen)> 0)
                 {
-                    char *from = 0;
-                    if (marcCharset && !strcmp(marcCharset, "auto"))
-                    {
-                        if (ent->value == VAL_USMARC)
-                        {
-                            if (octet_buf[9] == 'a')
-                                from = "UTF-8";
-                            else
-                                from = "MARC-8";
-                        }
-                        else
-                            from = "ISO-8859-1";
-                    }
-                    else if (marcCharset)
-                        from = marcCharset;
-                    if (outputCharset && from)
-                    {   
-                        cd = yaz_iconv_open(outputCharset, from);
-                        printf ("convert from %s to %s", from, 
-                                outputCharset);
-                        if (!cd)
-                            printf (" unsupported\n");
-                        else
-                            printf ("\n");
-                    }
-                    if (!cd)
-                        fwrite (result, 1, rlen, stdout);
-                    else
-                    {
-                        char outbuf[6];
-                        size_t inbytesleft = rlen;
-                        const char *inp = result;
-                        
-                        while (inbytesleft)
-                        {
-                            size_t outbytesleft = sizeof(outbuf);
-                            char *outp = outbuf;
-                            size_t r;
-
-                            r = yaz_iconv (cd, (char**) &inp,
-                                           &inbytesleft, 
-                                           &outp, &outbytesleft);
-                            if (r == (size_t) (-1))
-                            {
-                                int e = yaz_iconv_error(cd);
-                                if (e != YAZ_ICONV_E2BIG)
-                                    break;
-                            }
-                            fwrite (outbuf, outp - outbuf, 1, stdout);
-                        }
-                    }
+                    fwrite (result, rlen, 1, stdout);
                 }
                 else
                 {

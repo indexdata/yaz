@@ -1,3 +1,5 @@
+Fixed bug #832: Problem with MARC/charset in yaz-client.
+
 Fixed bug #668: save command line history for yaz-client.
 
 Fixed bug #830: pkg-config support.
