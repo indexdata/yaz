@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.16 2006-04-25 11:25:08 marc Exp $ -->
+<!-- $Id: credits.xml,v 1.17 2007-02-01 09:56:14 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
   <para>
    This appendix lists individuals that have contributed in the development
@@ -12,7 +12,7 @@
      Dimitrios Andreadis
     </para></listitem>
    <listitem><para>
-     Morten B&oslash;geskov
+     Morten B&#xf8;geskov
     </para></listitem>
    <listitem><para>
      Rocco Carbone
@@ -93,7 +93,7 @@
      Charles Woodfield
     </para></listitem>
    <listitem><para>
-     Tom Andr&eacute; &Oslash;verland
+     Tom Andr&#xe9; &#xd8;verland
     </para></listitem>
   </itemizedlist>
  </appendix>

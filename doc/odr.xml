@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.19 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.20 2007-02-01 09:56:14 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -492,7 +492,7 @@ void do_nothing_useful(int value)
     </para>
 
     <synopsis>
-     char *odr_errlist&lsqb;&rsqb;
+     char *odr_errlist[]
     </synopsis>
 
     <para>
@@ -789,7 +789,7 @@ int odr_explicit_tag(ODR o, Odr_fun fun, int class, int tag,
     </para>
 
     <screen>
-     MyInt ::= &lsqb;210&rsqb; IMPLICIT INTEGER
+     MyInt ::= [210] IMPLICIT INTEGER
     </screen>
 
     <para>
@@ -923,7 +923,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
      </para>
 
      <screen>
-MySequence ::= &lsqb;10&rsqb; IMPLICIT SEQUENCE {
+MySequence ::= [10] IMPLICIT SEQUENCE {
       intval INTEGER,
       boolval BOOLEAN OPTIONAL
 }
@@ -976,7 +976,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
      </para>
 
      <screen>
-MySequence ::= &lsqb;10&rsqb; IMPLICIT SEQUENCE {
+MySequence ::= [10] IMPLICIT SEQUENCE {
    intval INTEGER,
    boolval BOOLEAN OPTIONAL
 }
@@ -1107,7 +1107,7 @@ int myArray(ODR o, MyArray **p, int optional, const char *name)
     </para>
 
     <synopsis>
-int odr_choice(ODR o, Odr_arm arm&lsqb;&rsqb;, void *p, void *whichp,
+int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
                const char *name);
     </synopsis>
 
@@ -1152,7 +1152,7 @@ typedef struct odr_arm
 
      <varlistentry><term>which</term>
       <listitem><para>The value of the discriminator that corresponds to
-	this CHOICE element. Typically, it will be a &num;defined constant, or
+	this CHOICE element. Typically, it will be a #defined constant, or
 	an enum member.</para></listitem>
      </varlistentry>
 
@@ -1177,7 +1177,7 @@ typedef struct odr_arm
     <screen>
 MyChoice ::= CHOICE {
     untagged INTEGER,
-    tagged   &lsqb;99&rsqb; IMPLICIT INTEGER,
+    tagged   [99] IMPLICIT INTEGER,
     other    BOOLEAN
 }
     </screen>
@@ -1211,7 +1211,7 @@ typedef struct MyChoice
     <screen>
 int myChoice(ODR o, MyChoice **p, int optional, const char *name)
 {
-    static Odr_arm arm&lsqb;&rsqb; =
+    static Odr_arm arm[] =
     {
       {-1, -1, -1, MyChoice_untagged, odr_integer, "untagged"},
       {ODR_IMPLICIT, ODR_CONTEXT, 99, MyChoice_tagged, odr_integer,

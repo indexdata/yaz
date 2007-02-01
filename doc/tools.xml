@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.54 2006-10-31 09:15:00 mike Exp $ -->
+<!-- $Id: tools.xml,v 1.55 2007-02-01 09:56:14 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -129,11 +129,11 @@
     <literallayout>
      query ::= top-set query-struct.
 
-     top-set ::= &lsqb; '@attrset' string &rsqb;
+     top-set ::= [ '@attrset' string ]
 
      query-struct ::= attr-spec | simple | complex | '@term' term-type query
 
-     attr-spec ::= '@attr' &lsqb; string &rsqb; string query-struct
+     attr-spec ::= '@attr' [ string ] string query-struct
 
      complex ::= operator query-struct query-struct.
 
@@ -452,7 +452,7 @@
      <para>
       The CCL parser obeys the following grammar for the FIND argument.
       The syntax is annotated by in the lines prefixed by
-      <literal>&dash;&dash;</literal>.
+      <literal>--</literal>.
      </para>
 
      <screen>

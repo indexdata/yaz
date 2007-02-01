@@ -1,10 +1,10 @@
-<!-- $Id: license.xml,v 1.14 2006-12-13 09:40:32 adam Exp $ -->
+<!-- $Id: license.xml,v 1.15 2007-02-01 09:56:14 adam Exp $ -->
  <appendix id="license"><title>License</title>
 
   <sect1 id="license.indexdata"><title>Index Data Copyright</title>
 
    <para>
-    Copyright &copy; &copyright-year; Index Data.
+    Copyright &#xa9; &copyright-year; Index Data.
    </para>
    <para>
     All rights reserved.
@@ -69,7 +69,7 @@
    </para>
 
    <para>
-    Copyright &copy; 1995, the EUROPAGATE consortium (see below).
+    Copyright &#xa9; 1995, the EUROPAGATE consortium (see below).
    </para>
 
    <literallayout>
