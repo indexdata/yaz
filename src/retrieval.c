@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.15 2007-01-03 08:42:15 adam Exp $
+ * $Id: retrieval.c,v 1.16 2007-02-04 02:24:56 quinn Exp $
  */
 /**
  * \file retrieval.c
@@ -166,8 +166,9 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     el->record_conv = 0; /* OK to have no 'backend' sub content */
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
-        if (ptr->type == XML_ELEMENT_NODE
-            && 0 != strcmp((const char *) ptr->name, "backend")){
+        if (ptr->type != XML_ELEMENT_NODE)
+            continue;
+        if (strcmp((const char *) ptr->name, "backend")){
             wrbuf_printf(p->wr_error, "Element <retrieval>: expected"
                          " zero or one element <backend>, got <%s>",
                          (const char *) ptr->name);
