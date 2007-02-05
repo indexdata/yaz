@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.45 2007-01-03 08:42:15 adam Exp $
+ * $Id: log.c,v 1.46 2007-02-05 17:51:48 adam Exp $
  */
 
 /**
@@ -444,14 +444,16 @@ static void yaz_log_to_file(int level, const char *log_message)
                     level &= ~mask_names[i].mask;
                 }
             }
-        
-        if (l_level & YLOG_NOTIME)
-            tbuf[0] = '\0';
-        else
-            yaz_strftime(tbuf, TIMEFORMAT_LEN-1, l_actual_format, tm);
-        tbuf[TIMEFORMAT_LEN-1] = '\0';
-        
-        fprintf(file, "%s %s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2,
+       
+        tbuf[0] = '\0';
+        if (!(l_level & YLOG_NOTIME))
+        {
+            yaz_strftime(tbuf, TIMEFORMAT_LEN-2, l_actual_format, tm);
+            tbuf[TIMEFORMAT_LEN-2] = '\0';
+        }
+        if (tbuf[0])
+            strcat(tbuf, " ");
+        fprintf(file, "%s%s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2,
                 log_message);
         if (l_level & YLOG_FLUSH)
             fflush(file);
