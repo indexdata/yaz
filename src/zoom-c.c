@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.110 2007-01-23 19:25:21 adam Exp $
+ * $Id: zoom-c.c,v 1.111 2007-02-07 17:52:44 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -38,6 +38,21 @@ typedef enum {
 static zoom_ret ZOOM_connection_send_init(ZOOM_connection c);
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
+
+
+/*
+ * This wrapper is just for logging failed lookups.  It would be nicer
+ * if it could cause failure when a lookup fails, but that's hard.
+ */
+static Odr_oid *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
+                                         int oid_class, const char *str) {
+    Odr_oid *res = yaz_str_to_z3950oid(c->odr_out, oid_class, str);
+    if (res == 0)
+        yaz_log(YLOG_WARN, "%p OID lookup (%d, '%s') failed",
+                c, (int) oid_class, str);
+    return res;
+}
+
 
 static void initlog(void)
 {
@@ -1250,7 +1265,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.110 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.111 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1552,7 +1567,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
     }
     if (syntax)
         search_req->preferredRecordSyntax =
-            yaz_str_to_z3950oid(c->odr_out, CLASS_RECSYN, syntax);
+            zoom_yaz_str_to_z3950oid(c, CLASS_RECSYN, syntax);
     
     if (!r->setname)
     {
@@ -2547,7 +2562,7 @@ static zoom_ret send_present(ZOOM_connection c)
 
     if (syntax && *syntax)
         req->preferredRecordSyntax =
-            yaz_str_to_z3950oid(c->odr_out, CLASS_RECSYN, syntax);
+            zoom_yaz_str_to_z3950oid(c, CLASS_RECSYN, syntax);
 
     if (resultset->schema && *resultset->schema)
     {
@@ -2567,14 +2582,14 @@ static zoom_ret send_present(ZOOM_connection c)
 
         compo->u.complex->generic->which = Z_Schema_oid;
         compo->u.complex->generic->schema.oid = (Odr_oid *)
-            yaz_str_to_z3950oid (c->odr_out, CLASS_SCHEMA, resultset->schema);
+            zoom_yaz_str_to_z3950oid (c, CLASS_SCHEMA, resultset->schema);
 
         if (!compo->u.complex->generic->schema.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
 
             compo->u.complex->generic->schema.oid = (Odr_oid *)
-                yaz_str_to_z3950oid (c->odr_out, CLASS_RECSYN, resultset->schema);
+                zoom_yaz_str_to_z3950oid (c, CLASS_RECSYN, resultset->schema);
         }
         if (elementSetName && *elementSetName)
         {
