@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.26 2007-01-03 08:42:15 adam Exp $
+/* $Id: cqltransform.c,v 1.27 2007-02-07 13:36:58 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -195,6 +195,7 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
         const char *cp0 = res, *cp1;
         while ((cp1 = strchr(cp0, '=')))
         {
+            int i;
             while (*cp1 && *cp1 != ' ')
                 cp1++;
             if (cp1 - cp0 >= sizeof(buf))
@@ -202,7 +203,19 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
             memcpy (buf, cp0, cp1 - cp0);
             buf[cp1-cp0] = 0;
             (*pr)("@attr ", client_data);
-            (*pr)(buf, client_data);
+
+            for (i = 0; buf[i]; i++)
+            {
+                if (buf[i] == '*')
+                    (*pr)(eval, client_data);
+                else
+                {
+                    char tmp[2];
+                    tmp[0] = buf[i];
+                    tmp[1] = '\0';
+                    (*pr)(tmp, client_data);
+                }
+            }
             (*pr)(" ", client_data);
             cp0 = cp1;
             while (*cp0 == ' ')

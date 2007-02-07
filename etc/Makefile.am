@@ -1,8 +1,9 @@
-# $Id: Makefile.am,v 1.4 2005-12-16 15:01:25 adam Exp $
+# $Id: Makefile.am,v 1.5 2007-02-07 13:36:58 adam Exp $
 
 etcdatadir = $(pkgdatadir)/etc
 etcdata_DATA =  \
  pqf.properties \
+ cqlpass.properties \
  yazgfs.xml \
  maps.xml \
  MARC21slim2DC.xsl \

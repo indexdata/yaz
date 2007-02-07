@@ -1,3 +1,5 @@
+Implemented pass-through CQL-to-PQF conversions. Bug #861.
+
 Fixed bug #832: Problem with MARC/charset in yaz-client.
 
 Fixed bug #668: save command line history for yaz-client.
