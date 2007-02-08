@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.56 2007-02-08 09:03:31 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.57 2007-02-08 11:36:59 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -2147,6 +2147,267 @@ typedef struct oident
    </example>
   </sect1>
 
+  <sect1 id="tools.retrieval">
+   <title>Retrieval Facility</title>
+   <para>
+    YAZ version 2.1.20 or later includes a Retrieval facility tool
+    which allows a SRU/Z39.50 to describe itself and perform record
+    conversions. The idea is the following:
+    
+    <itemizedlist>
+     <listitem>
+      <para>
+       An SRU/Z39.50 client sends a retrieval request which includes
+       a combination of the following parameters: syntax (format),
+       schema (or element set name).
+      </para>
+     </listitem>
+
+     <listitem>
+      <para>
+       The retrieval facility is invoked with parameters in a
+       server/proxy. The retrieval facility matches the parameters a set of
+       "supported" retrieval types.
+       If there is no match, the retrieval signals an error
+       (syntax and / or schema not supported).
+      </para>
+     </listitem>
+
+     <listitem>
+      <para>
+       For a successful match, the backend is invoked with the same
+       or altered retrieval parameters (syntax, schema). If
+       a record is received from the backend, it is converted to the
+       frontend name / syntax.
+      </para>
+     </listitem>
+
+     <listitem>
+      <para>
+       The resulting record is sent back the client and tagged with
+       the frontend syntax / schema.
+      </para>
+     </listitem>
+
+    </itemizedlist>
+   </para>
+   <para>
+    The Retrieval facility is driven by an XML configuration. The
+    configuration is neither Z39.50 ZeeRex or SRU ZeeRex. But it
+    should be easy to generate both of them from the XML configuration.
+    (unfortunately the two versions
+    of ZeeRex differ substantially in this regard).
+   </para>
+   <sect2 id="tools.retrieval.format">
+    <title>Retrieval XML format</title>
+    <para>
+     All elements should be covered by namespace 
+     <literal>http://indexdata.com/yaz</literal> .
+     The root element node must be <literal>retrievalinfo</literal>.
+    </para>
+    <para>
+     The <literal>retrievalinfo</literal> must include one or
+     more <literal>retrieval</literal> elements. Each 
+    <literal>retrieval</literal> defines specific combination of
+     syntax, name and identifier supported by this retrieval service.
+    </para>
+    <para>
+     The <literal>retrieval</literal> element may include any of the
+     following attributes:
+     <variablelist>
+      <varlistentry><term><literal>syntax</literal> (REQUIRED)</term>
+       <listitem>
+        <para>
+         Defines the record syntax. Possible values is any
+         of the names defined in YAZ' OID database or a raw
+         OID in (n.n ... n).
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry><term><literal>name</literal> (OPTIONAL)</term>
+       <listitem>
+        <para>
+         Defines the name of the retrieval format. This can be
+         any string. For SRU, the value, is equivalent to schema (short-hand);
+         for Z39.50 it's equivalent to simple element set name. 
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry><term><literal>identifier</literal> (OPTIONAL)</term>
+       <listitem>
+        <para>
+         Defines the URI schema name of the retrieval format. This can be
+         any string. For SRU, the value, is equivalent to URI schema.
+         For Z39.50, there is no equivalent.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </para>
+    <para>
+     The <literal>retrieval</literal> may include one 
+     <literal>backend</literal> element. If a <literal>backend</literal>
+     element is given, it specifies how the records are retrieved by
+     some backend and how the records are converted from the backend to
+     the "frontend".
+    </para>
+    <para>
+     The attributes, <literal>name</literal> and <literal>syntax</literal>
+     may be specified for the <literal>backend</literal> element. These
+     semantics of these attributes is equivalent to those for the
+     <literal>retrieval</literal>. However, these values are passed to
+     the "backend".
+    </para>
+    <para>
+     The <literal>backend</literal> element may includes one or more
+     conversion instructions (as children elements). The supported
+     conversions are:
+     <variablelist>
+      <varlistentry><term><literal>marc</literal></term>
+       <listitem>
+        <para>
+         The <literal>marc</literal> element specifies a conversion 
+         to - and from ISO2709 encoded MARC and 
+         <ulink url="&url.marcxml;">&marcxml;</ulink>/MarcXchange.
+         The following attributes may be specified:
+
+         <variablelist>
+          <varlistentry><term><literal>inputformat</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+             Format of input. Supported values are 
+            <literal>marc</literal> (for ISO2709); and <literal>xml</literal>
+             for MARCXML/MarcXchange.
+            </para>
+           </listitem>
+          </varlistentry>
+
+          <varlistentry><term><literal>outputformat</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+             Format of output. Supported values are 
+            <literal>line</literal> (MARC line format); 
+            <literal>marcxml</literal> (for MARCXML),
+            <literal>marc</literal> (ISO2709),
+            <literal>marcxhcange</literal> (for MarcXchange).
+            </para>
+           </listitem>
+          </varlistentry>
+
+          <varlistentry><term><literal>inputcharset</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             Encoding of input. For XML input formats, this need not
+             be given, but for ISO2709 based inputformats, this should
+             be set to the encoding used. For MARC21 records, a common
+             inputcharset value  would be <literal>marc-8</literal>.
+            </para>
+           </listitem>
+          </varlistentry>
+
+          <varlistentry><term><literal>outputcharset</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             Encoding of output. If outputformat is XML based, it is
+             strongly recommened to use <literal>utf-8</literal>.
+            </para>
+           </listitem>
+          </varlistentry>
+
+         </variablelist>
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry><term><literal>xslt</literal></term>
+       <listitem>
+        <para>
+         The <literal>xslt</literal> element specifies a conversion
+         via &xslt;. The following attributes may be specified:
+
+         <variablelist>
+          <varlistentry><term><literal>stylesheet</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+             Stylesheet file.
+            </para>
+           </listitem>
+          </varlistentry>
+         </variablelist>
+
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </para>
+   </sect2>
+   <sect2 id="tools.retrieval.examples">
+    <title>Retrieval Facility Examples</title>
+    <example>
+     <title id="tools.retrieval.marc21">MARC21 backend</title>
+     <para>
+      A typical way to use the retrieval facility is to enable XML
+      for servers that only supports ISO2709 encoded MARC21 records.
+     </para>
+     <programlisting><![CDATA[
+     <retrievalinfo>
+       <retrieval syntax="usmarc" name="F"/>
+       <retrieval syntax="usmarc" name="B"/>
+       <retrieval syntax="xml" name="marcxml"
+		  identifier="info:srw/schema/1/marcxml-v1.1">
+         <backend syntax="usmarc" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+	 </backend>
+       </retrieval>
+       <retrieval syntax="xml" name="dc">
+         <backend syntax="usmarc" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+           <xslt stylesheet="MARC21slim2DC.xsl"/>
+	 </backend>
+       </retrieval>
+     </retrievalinfo>
+]]>
+     </programlisting>
+     <para>
+      This means that our frontend supports:
+      <itemizedlist>
+       <listitem>
+        <para>
+         MARC21 F(ull) records.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         MARC21 B(rief) records.
+        </para>
+       </listitem>
+
+       <listitem>
+        <para>
+         MARCXML records.
+        </para>
+       </listitem>
+
+       <listitem>
+        <para>
+         Dublin core records.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </para>
+    </example>
+   </sect2>
+   <sect2>
+    <title>API</title>
+    <para>
+     It should be easy to use the retrieval systems from applications. Refer
+     to the headers
+     <filename>yaz/retrieval.h</filename> and 
+     <filename>yaz/record_conv.h</filename>.
+    </para>
+   </sect2>
+  </sect1>
  </chapter>
  
  <!-- Keep this comment at the end of the file

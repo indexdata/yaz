@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.7 2006-09-06 09:35:39 adam Exp $
+   $Id: gfs-virtual.xml,v 1.8 2007-02-08 11:36:59 adam Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -177,6 +177,17 @@
      value also servers as maximum size of <emphasis>incoming</emphasis>
      packages (for Record Updates etc). It's the same value as that
      given by the <literal>-k</literal> option.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>retrievalinfo</literal> (optional)</term>
+   <listitem>
+    <para>
+     Enables the retrieval facility supporting conversions and
+     specifications of record formats/types.
+     See <xref linkend="tools.retrieval"/> for
+     more information.
     </para>
    </listitem>
   </varlistentry>

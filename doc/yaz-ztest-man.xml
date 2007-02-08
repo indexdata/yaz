@@ -10,7 +10,7 @@
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.14 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.15 2007-02-08 11:36:59 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -69,7 +69,17 @@
    <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
   </para>
  </refsect1>
- <refsect1 id="cql.to.rpn"><title>SEE ALSO</title>
+ <refsect1 id="tools.retrieval"><title>Retrieval Facility</title>
+  <para>
+   Refer to the "Retrieval Facility" in the YAZ manual
+ </para>
+ </refsect1>
+ <refsect1 id="cql.to.rpn"><title>CQL to RPN conversions</title>
+  <para>
+   Refer to the "Specification of CQL to RPN mappings" in YAZ manual.
+  </para>
+ </refsect1>
+ <refsect1><title>SEE ALSO</title>
   <para>
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>
@@ -79,9 +89,6 @@
     <refentrytitle>yaz-log</refentrytitle>
     <manvolnum>7</manvolnum>
    </citerefentry>
-  </para>
-  <para>
-   Section "Generic server" in the YAZ manual.
   </para>
  </refsect1>
 </refentry>

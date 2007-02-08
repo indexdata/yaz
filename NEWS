@@ -1,3 +1,5 @@
+Fixed bug #615: Document retrievalInfo facilities for Frontend Server.
+
 Implemented pass-through CQL-to-PQF conversions. Bug #861.
 
 Fixed bug #832: Problem with MARC/charset in yaz-client.
