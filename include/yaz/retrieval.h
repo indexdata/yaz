@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: retrieval.h,v 1.8 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: retrieval.h,v 1.9 2007-02-08 10:51:23 adam Exp $ */
 
 /**
  * \file retrieval.h
@@ -65,20 +65,24 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     
     For retrieval:
     \verbatim
-    <retrievalinfo>
-       <retrieval syntax="usmarc" name="marcxml"
-            identifier="info:srw/schema/1/marcxml-v1.1"
-            backendsyntax="xml" backendname="dc"
-       >
-         <title>MARCXML</title>
-         <convert>
-            <marc inputformat="marc" outputformat="marcxml"
-                         inputcharset="marc-8"/>
-            <xslt stylesheet="marcxml2mods.xsl"/>
-            <xslt stylesheet="mods2dc.xsl"/>
-         </convert>
+     <retrievalinfo>
+       <retrieval syntax="usmarc" name="F"/>
+       <retrieval syntax="usmarc" name="B"/>
+       <retrieval syntax="xml" name="marcxml"
+		  identifier="info:srw/schema/1/marcxml-v1.1">
+         <backend syntax="usmarc" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+	 </backend>
        </retrieval>
-    </retrievalinfo>
+       <retrieval syntax="xml" name="dc">
+         <backend syntax="usmarc" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8"/>
+           <xslt stylesheet="MARC21slim2DC.xsl"/>
+	 </backend>
+       </retrieval>
+     </retrievalinfo>
     \endverbatim
 */
 YAZ_EXPORT
