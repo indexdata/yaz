@@ -1,4 +1,4 @@
-<!-- $Id: yazgfs.xml,v 1.6 2006-09-06 09:35:40 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.7 2007-02-08 10:52:06 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
@@ -11,32 +11,21 @@
      <stylesheet>xsl/default.xsl</stylesheet>
      <maximumrecordsize>2000000</maximumrecordsize>
      <retrievalinfo>
-       <retrieval syntax="grs-1"/>
        <retrieval syntax="usmarc" name="F"/>
        <retrieval syntax="usmarc" name="B"/>
        <retrieval syntax="xml" name="marcxml"
-		  identifier="info:srw/schema/1/marcxml-v1.1"
-		  backendsyntax="usmarc" backendname="F">
-	 <convert>
+		  identifier="info:srw/schema/1/marcxml-v1.1">
+         <backend syntax="usmarc" name="F">
 	   <marc inputformat="marc" outputformat="marcxml"
 		 inputcharset="marc-8"/>
-	 </convert>
+	 </backend>
        </retrieval>
-       <retrieval syntax="xml" name="danmarc"
-		  backendsyntax="usmarc" backendname="F">
-	 <convert>
-	   <marc inputformat="marc" outputformat="marcxchange"
-		 inputcharset="marc-8"/>
-	 </convert>
-       </retrieval>
-       <retrieval syntax="xml" name="dc"
-		  identifier="info:srw/schema/1/dc-v1.1"
-		  backendsyntax="usmarc" backendname="F">
-	 <convert>
+       <retrieval syntax="xml" name="dc">
+         <backend syntax="usmarc" name="F">
 	   <marc inputformat="marc" outputformat="marcxml"
 		 inputcharset="marc-8"/>
-	   <xslt stylesheet="../etc/MARC21slim2DC.xsl"/>
-	 </convert>
+           <xslt stylesheet="MARC21slim2DC.xsl"/>
+	 </backend>
        </retrieval>
      </retrievalinfo>
      <explain xmlns="http://explain.z3950.org/dtd/2.0/">
