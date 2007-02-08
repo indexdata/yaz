@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.55 2007-02-01 09:56:14 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.56 2007-02-08 09:03:31 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1263,6 +1263,13 @@ int cql_transform_FILE(cql_transform_t ct,
       <replaceable>value</replaceable> the attribute value.
      </para>
      <para>
+      The character <literal>*</literal> (asterisk) has special meaning
+      when used in the RPN pattern.
+      Each occurrence of <literal>*</literal> is substituted with the
+      CQL matching name (index, relation, qualifier etc).
+      This facility can be used to copy a CQL name verbatim to the RPN result.
+     </para>
+     <para>
       The following CQL patterns are recognized:
       <variablelist>
        <varlistentry><term>
@@ -1283,6 +1290,11 @@ int cql_transform_FILE(cql_transform_t ct,
           <literal>http://www.loc.gov/zing/cql/cql-indexes/v1.0/</literal>.
           If this pattern is not defined, the mapping will fail.
          </para>
+         <para>
+          The pattern, 
+          <literal>index.</literal><replaceable>set</replaceable><literal>.*</literal>
+          is used when no other index pattern is matched.
+        </para>
         </listitem>
        </varlistentry>
        <varlistentry><term>
@@ -1385,28 +1397,41 @@ int cql_transform_FILE(cql_transform_t ct,
          </para>
         </listitem>
        </varlistentry>
+
+       <varlistentry><term>
+         <literal>set</literal>
+        </term>
+        <listitem>
+         <para>
+          This specification defines a default CQL context set for index names.
+          The value on the right hand side is the URI for the set.
+         </para>
+        </listitem>
+       </varlistentry>
+
       </variablelist>
      </para>
-     <example id="example.cql.to.rpn.mapping"><title>CQL to RPN mapping file</title>
+     <example id="example.cql.to.rpn.mapping">
+      <title>CQL to RPN mapping file</title>
       <para>
        This simple file defines two context sets, three indexes and three
        relations, a position pattern and a default structure.
       </para>
       <programlisting><![CDATA[
-       set.cql    = http://www.loc.gov/zing/cql/context-sets/cql/v1.1/
-       set.dc     = http://www.loc.gov/zing/cql/dc-indexes/v1.0/
+       set.cql  = http://www.loc.gov/zing/cql/context-sets/cql/v1.1/
+       set.dc   = http://www.loc.gov/zing/cql/dc-indexes/v1.0/
 
        index.cql.serverChoice = 1=1016
        index.dc.title         = 1=4
        index.dc.subject       = 1=21
   
-       relation.<                 = 2=1
-       relation.eq                = 2=3
-       relation.scr               = 2=3
+       relation.<             = 2=1
+       relation.eq            = 2=3
+       relation.scr           = 2=3
 
-       position.any               = 3=3 6=1
+       position.any           = 3=3 6=1
 
-       structure.*                = 4=1
+       structure.*            = 4=1
 ]]>
       </programlisting>
       <para>
@@ -1438,6 +1463,39 @@ int cql_transform_FILE(cql_transform_t ct,
        is converted to
        <screen>
         @attr 1=4 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 "x"
+       </screen>
+      </para>
+     </example>
+     <example id="example.cql.to.rpn.string">
+      <title>CQL to RPN string attributes</title>
+      <para>
+       In this example we allow any index to be passed to RPN as
+       a use attribute.
+      </para>
+      <programlisting><![CDATA[
+       # Identifiers for prefixes used in this file. (index.*)
+       set.cql  = info:srw/cql-context-set/1/cql-v1.1
+       set.rpn  = http://bogus/rpn
+       set      = http://bogus/rpn
+
+       # The default index when none is specified by the query
+       index.cql.serverChoice     = 1=any
+
+       index.rpn.*                = 1=*
+       relation.eq                = 2=3
+       structure.*                = 4=1
+       position.any               = 3=3
+]]>
+      </programlisting>
+      <para>
+       The <literal>http://bogus/rpn</literal> context set is also the default
+       so we can make queries such as
+       <screen>
+        title = a
+       </screen>
+       which is converted to
+       <screen>
+        @attr 2=3 @attr 4=1 @attr 3=3 @attr 1=title "a"
        </screen>
       </para>
      </example>
