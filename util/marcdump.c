@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.47 2007-01-03 08:42:16 adam Exp $
+ * $Id: marcdump.c,v 1.48 2007-02-17 10:53:06 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -341,6 +341,15 @@ int main (int argc, char **argv)
                 fprintf(stderr, "%s: bad input format: %s\n", prog, arg);
                 exit(1);
             }
+#if YAZ_HAVE_XML2
+#else
+            if (input_format == YAZ_MARC_MARCXML 
+                || input_format == YAZ_MARC_XCHANGE)
+            {
+                fprintf(stderr, "%s: Libxml2 support not enabled\n", prog);
+                exit(3);
+            }
+#endif
             break;
         case 'o':
             /* dirty hack so we can make Libxml2 do the writing ..

@@ -1,12 +1,12 @@
 #!/bin/sh
-# $Id: tstmarcxml.sh,v 1.4 2006-12-15 19:28:47 adam Exp $
+# $Id: tstmarcxml.sh,v 1.5 2007-02-17 10:53:05 adam Exp $
 # Tests reading of MARCXML and checks that we get identical ISO2709 output.
 #
 # Reads marc?.xml files , Generates marc?.xml.marc files
 srcdir=${srcdir:-.}
 ecode=0
 # Skip this test if Libxml2 support is not enabled
-../util/yaz-marcdump -x >/dev/null 2>&1
+../util/yaz-marcdump -i marcxml >/dev/null 2>&1
 if test $? = "3"; then
     exit 0
 fi

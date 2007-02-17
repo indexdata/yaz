@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.45 2007-01-22 09:21:16 adam Exp $
+ * $Id: marcdisp.c,v 1.46 2007-02-17 10:53:05 adam Exp $
  */
 
 /**
@@ -643,6 +643,7 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
 {
     if (mt->write_using_libxml2)
     {
+#if YAZ_HAVE_XML2
         int ret;
         xmlNode *root_ptr;
 
@@ -662,6 +663,9 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
             xmlFreeDoc(doc);
         }
         return ret;
+#else
+        return -1;
+#endif
     }
     else
         return yaz_marc_write_marcxml_ns1(mt, wr, ns, format, type);
