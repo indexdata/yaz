@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.59 2007-01-24 10:09:31 adam Exp $
+dnl $Id: configure.ac,v 1.60 2007-02-20 09:53:30 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.49],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -23,7 +23,18 @@ YAZ_DOC
 dnl 
 dnl
 dnl ------ Headers
-AC_CHECK_HEADERS(dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h unistd.h netinet/if_ether.h netinet/in_systm.h)
+AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h netinet/in.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h])
+AC_CHECK_HEADERS([netinet/if_ether.h],[],[],[
+ #if HAVE_SYS_TYPES_H
+ #include <sys/types.h>
+ #endif
+ #if HAVE_SYS_SOCKET_H
+ #include <sys/socket.h>
+ #endif
+ #if HAVE_NETINET_IN_H
+ #include <netinet/in.h>
+ #endif
+])
 AC_HEADER_STDC
 if test "$ac_cv_header_stdc" = "no"; then
     AC_MSG_WARN([Your system doesn not seem to support ANSI C])
