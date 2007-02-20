@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.45 2007-01-03 13:55:49 mike Exp $
+# $Id: buildconf.sh,v 1.46 2007-02-20 09:53:01 adam Exp $
 
 automake=automake
 aclocal=aclocal
@@ -8,7 +8,7 @@ libtoolize=libtoolize
 
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
-    echo "Using special configuation for FreeBSD ..."
+    echo "Using special configuration for FreeBSD ..."
     automake=automake19
     aclocal="aclocal19 -I /usr/local/share/aclocal"
     autoconf=autoconf259
