@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.111 2007-02-07 17:52:44 mike Exp $
+ * $Id: zoom-c.c,v 1.112 2007-02-21 09:17:51 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -26,6 +26,8 @@
 #include <yaz/srw.h>
 #include <yaz/cql.h>
 #include <yaz/ccl.h>
+
+#define TASK_FIX 1
 
 static int log_api = 0;
 static int log_details = 0;
@@ -150,11 +152,16 @@ static void set_dset_error(ZOOM_connection c, int error,
     }
     else if (addinfo)
         c->addinfo = xstrdup(addinfo);
-    if (error)
+    if (error != ZOOM_ERROR_NONE)
+    {
         yaz_log(log_api, "%p set_dset_error %s %s:%d %s %s",
                 c, c->host_port ? c->host_port : "<>", dset, error,
                 addinfo ? addinfo : "",
                 addinfo2 ? addinfo2 : "");
+#if TASK_FIX
+        ZOOM_connection_remove_tasks(c);
+#endif
+    }
 }
 
 #if YAZ_HAVE_XML2
@@ -164,6 +171,8 @@ static void set_HTTP_error(ZOOM_connection c, int error,
     set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
 #endif
+
+void ZOOM_connection_remove_tasks(ZOOM_connection c);
 
 static void set_ZOOM_error(ZOOM_connection c, int error,
                            const char *addinfo)
@@ -1265,7 +1274,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.111 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.112 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
