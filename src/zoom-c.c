@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.113 2007-02-21 09:19:26 adam Exp $
+ * $Id: zoom-c.c,v 1.114 2007-02-21 12:53:01 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -120,6 +120,13 @@ static ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c)
     return event;
 }
 
+static void ZOOM_connection_remove_events(ZOOM_connection c)
+{
+    ZOOM_Event event;
+    while ((event = ZOOM_connection_get_event(c)))
+        ZOOM_Event_destroy(event);
+}
+
 ZOOM_API(int) ZOOM_connection_peek_event(ZOOM_connection c)
 {
     ZOOM_Event event = c->m_queue_front;
@@ -190,6 +197,8 @@ static void clear_error(ZOOM_connection c)
      * or Init Refused are not cleared, because they are not
      * recoverable: doing another search doesn't help.
      */
+
+    ZOOM_connection_remove_events(c);
     switch (c->error)
     {
     case ZOOM_ERROR_CONNECT:
@@ -707,6 +716,7 @@ ZOOM_API(void)
     odr_destroy(c->odr_out);
     ZOOM_options_destroy(c->options);
     ZOOM_connection_remove_tasks(c);
+    ZOOM_connection_remove_events(c);
     xfree(c->host_port);
     xfree(c->path);
     xfree(c->proxy);
@@ -1275,7 +1285,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.113 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.114 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
