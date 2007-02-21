@@ -1,3 +1,9 @@
+yaz (2.1.49-1) unstable; urgency=low
+
+  * Test new event/task handling for ZOOM C.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 21 Feb 2007 13:57:39 +0100
+
 yaz (2.1.48-1) unstable; urgency=low
 
   * Upstream.
