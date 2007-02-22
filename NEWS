@@ -1,3 +1,7 @@
+Fixed bug in ZOOM-C's event and task handling. If a ZOOM task was
+created before all previous tasks were completed and removed from the
+task queue, the new task could be removed by a mistake. 
+
 Fixed bug #615: Document retrievalInfo facilities for Frontend Server.
 
 Implemented pass-through CQL-to-PQF conversions. Bug #861.
