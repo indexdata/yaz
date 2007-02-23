@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.46 2007-02-17 10:53:05 adam Exp $
+ * $Id: marcdisp.c,v 1.47 2007-02-23 10:15:01 adam Exp $
  */
 
 /**
@@ -26,6 +26,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 #include <yaz/nmem_xml.h>
+#include <yaz/snprintf.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -174,19 +175,9 @@ void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...)
 {
     va_list ap;
     char buf[200];
-    va_start(ap, fmt);
 
-#ifdef WIN32
-    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
-#else
-/* !WIN32 */
-#if HAVE_VSNPRINTF
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-#else
-    vsprintf(buf, fmt, ap);
-#endif
-#endif
-/* WIN32 */
+    va_start(ap, fmt);
+    yaz_vsnprintf(buf, sizeof(buf)-1, fmt, ap);
     yaz_marc_add_comment(mt, buf);
     va_end (ap);
 }

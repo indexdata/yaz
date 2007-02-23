@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.15 2007-01-06 16:05:24 adam Exp $
+ * $Id: wrbuf.c,v 1.16 2007-02-23 10:15:01 adam Exp $
  */
 
 /**
@@ -20,6 +20,7 @@
 #include <stdarg.h>
 
 #include <yaz/wrbuf.h>
+#include <yaz/snprintf.h>
 #include <yaz/yaz-iconv.h>
 
 WRBUF wrbuf_alloc(void)
@@ -159,16 +160,7 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     char buf[4096];
 
     va_start(ap, fmt);
-#ifdef WIN32
-    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
-#else
-/* !WIN32 */
-#if HAVE_VSNPRINTF
-    vsnprintf(buf, sizeof(buf)-1, fmt, ap);
-#else
-    vsprintf(buf, fmt, ap);
-#endif
-#endif
+    yaz_vsnprintf(buf, sizeof(buf)-1, fmt, ap);
     wrbuf_puts (b, buf);
 
     va_end(ap);

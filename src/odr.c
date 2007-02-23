@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.14 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr.c,v 1.15 2007-02-23 10:15:01 adam Exp $
  *
  */
 
@@ -22,6 +22,7 @@
 
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 #include "odr-priv.h"
 
 static int log_level=0;
@@ -295,15 +296,7 @@ void odr_printf(ODR o, const char *fmt, ...)
     char buf[4096];
 
     va_start(ap, fmt);
-#ifdef WIN32
-    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
-#else
-#if HAVE_VSNPRINTF
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-#else
-    vsprintf(buf, fmt, ap);
-#endif
-#endif
+    yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
     o->op->stream_write(o, o->print, ODR_VISIBLESTRING, buf, strlen(buf));
     va_end(ap);
 }

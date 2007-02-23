@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.128 2007-01-24 11:50:19 adam Exp $
+# $Id: makefile,v 1.129 2007-02-23 10:15:02 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -386,6 +386,7 @@ MISC_OBJS= \
    $(OBJDIR)\xmalloc.obj \
    $(OBJDIR)\matchstr.obj \
    $(OBJDIR)\siconv.obj \
+   $(OBJDIR)\snprintf.obj \
    $(OBJDIR)\marc8.obj \
    $(OBJDIR)\marc8r.obj \
    $(OBJDIR)\record_conv.obj \

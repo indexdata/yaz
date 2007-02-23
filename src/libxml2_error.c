@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: libxml2_error.c,v 1.3 2007-01-03 08:42:15 adam Exp $
+ * $Id: libxml2_error.c,v 1.4 2007-02-23 10:15:01 adam Exp $
  */
 /**
  * \file libxml2_error.c
@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 #include <yaz/libxml2_error.h>
 
 #if YAZ_HAVE_XML2
@@ -31,11 +32,7 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
 
-#ifdef WIN32
-    vsprintf(buf, fmt, ap);
-#else
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-#endif
+    yaz_vsnprintf(buf, sizeof(buf)-1, fmt, ap);
     yaz_log(libxml2_error_level, "%s: %s", (char*) ctx, buf);
 
     va_end (ap);

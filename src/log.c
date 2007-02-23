@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.47 2007-02-20 09:39:17 adam Exp $
+ * $Id: log.c,v 1.48 2007-02-23 10:15:01 adam Exp $
  */
 
 /**
@@ -36,6 +36,7 @@
 #include <time.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
 
 static NMEM_MUTEX log_mutex = 0;
@@ -472,17 +473,8 @@ void yaz_log(int level, const char *fmt, ...)
     if (!(level & l_level))
         return;
     va_start(ap, fmt);
-#ifdef WIN32
-    _vsnprintf(buf, sizeof(buf)-1, fmt, ap);
-#else
-/* !WIN32 */
-#if HAVE_VSNPRINTF
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-#else
-    vsprintf(buf, fmt, ap);
-#endif
-#endif
-/* WIN32 */
+
+    yaz_vsnprintf(buf, sizeof(buf)-1, fmt, ap);
     if (o_level & YLOG_ERRNO)
     {
         strcat(buf, " [");

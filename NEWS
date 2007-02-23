@@ -1,3 +1,6 @@
+Added snprintf/vsnprintf wrappers for systems that don't have 
+limits (heavens forbid).
+
 Fixed bug in ZOOM-C's event and task handling. If a ZOOM task was
 created before all previous tasks were completed and removed from the
 task queue, the new task could be removed by a mistake. 
