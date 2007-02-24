@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.62 2007-02-23 14:04:37 adam Exp $
+dnl $Id: configure.ac,v 1.63 2007-02-24 13:35:23 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.51],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -336,41 +336,11 @@ dnl
 dnl ------ POSIX Threads
 AC_ARG_ENABLE(threads, [  --disable-threads       disable POSIX threads],[enable_threads=$enableval],[enable_threads=yes])
 if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
-    OLIBS=$LIBS
-    OCC=$CC
-    AC_CHECK_LIB(pthread,main)
-    AC_MSG_CHECKING(for working POSIX Threads)
-    AC_TRY_LINK([#include <pthread.h>
-	    void *func(void *p) { return 0; }
-	    ],[
-	    pthread_t pthread_id;
-	    pthread_create (&pthread_id, 0, func, 0);],
-	thread_ok=yes,thread_ok=no)
-    if test "$thread_ok" = "yes"; then
-	AC_MSG_RESULT(yes)
-	LIBTHREAD="-lpthread"
-	THREAD_CFLAGS="-DYAZ_POSIX_THREADS=1 -D_REENTRANT"
-	HAVETHREADS=1
-    else
-	CC="$CC -pthread"
-	AC_TRY_LINK([#include <pthread.h>
-		void *func(void *p) { return 0; }
-		],[
-		pthread_t pthread_id;
-		pthread_create (&pthread_id, 0, func, 0);],
-	    thread_ok=yes,thread_ok=no)
-	if test "$thread_ok" = "yes"; then
-	    AC_MSG_RESULT([yes,BSD])
-	    THREAD_CFLAGS="-pthread -DYAZ_POSIX_THREADS=1 -D_REENTRANT"
-	    LIBTHREAD="-pthread"
+    ACX_PTHREAD([
+	    THREAD_CFLAGS="$PTHREAD_CFLAGS -DYAZ_POSIX_THREADS=1"
+	    LIBS="$PTHREAD_LIBS $LIBS"
 	    HAVETHREADS=1
-	fi
-    fi
-    if test "$thread_ok" = "no"; then
-	AC_MSG_RESULT(no)
-    fi
-    CC=$OCC
-    LIBS="$OLIBS $LIBTHREAD"
+	    ])
 fi
 
 dnl ----- libXSLT/libEXLT/libXML2

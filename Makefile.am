@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.40 2007-01-24 10:09:31 adam Exp $
+## $Id: Makefile.am,v 1.41 2007-02-24 13:35:23 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -10,7 +10,7 @@ SUBDIRS = src include util test client ztest zoom ziffy doc etc
 
 aclocaldir=$(datadir)/aclocal
 
-aclocal_DATA = m4/yaz.m4
+aclocal_DATA = m4/yaz.m4 m4/acx_pthread.m4
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = yaz.pc
