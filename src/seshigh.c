@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.109 2007-01-16 14:12:38 adam Exp $
+ * $Id: seshigh.c,v 1.110 2007-02-24 18:44:54 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -612,7 +612,8 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         else if (r == 1 || r == 3)
         {
             const char *details = input_schema;
-            rr->errcode =  YAZ_BIB1_ELEMENT_SET_NAMES_UNSUPP;
+            rr->errcode =
+                YAZ_BIB1_SPECIFIED_ELEMENT_SET_NAME_NOT_VALID_FOR_SPECIFIED_;
             if (details)
                 rr->errstring = odr_strdup(rr->stream, details);
             return -1;
@@ -2362,7 +2363,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.109 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.110 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
