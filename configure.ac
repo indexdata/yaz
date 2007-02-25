@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.64 2007-02-25 14:46:50 adam Exp $
+dnl $Id: configure.ac,v 1.65 2007-02-25 21:04:04 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.51],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -339,6 +339,20 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
     ACX_PTHREAD([
 	    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 	    AC_DEFINE(YAZ_POSIX_THREADS)
+	    dnl unfortunately empty thread lib spec is problematic because 
+            dnl 'yaz-config --cflags' is not always passed to linker in 
+            dnl applications using YAZ (such as Zebra).
+	    if test "x$PTHREAD_LIBS" = "x"; then
+		OLIBS=$LIBS
+	        for lib in -lpthread -lpthreads -lc_r; do
+		    LIBS="$lib $OLIBS"
+		    AC_TRY_LINK([ #include <pthread.h> ],
+			    [ pthread_t id; pthread_join(id, 0); ],
+			    [ PTHREAD_LIBS=$lib; break ]
+			)
+		done
+		LIBS=$OLIBS
+	    fi
 	    LIBS="$PTHREAD_LIBS $LIBS"
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS $PTHREAD_CFLAGS -DYAZ_POSIX_THREADS=1"
 	    ])
