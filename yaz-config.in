@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.25 2006-07-06 10:17:51 adam Exp $
+# $Id: yaz-config.in,v 1.26 2007-02-25 14:46:50 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -96,10 +96,6 @@ else
     if test "$yazprefix" != "/usr"; then
 	YAZINC="$YAZINC -I$yazprefix/include"
     fi
-fi
-
-if test "$lib_thread" = "yes"; then
-    YAZINC="$YAZINC @THREAD_CFLAGS@"
 fi
 
 if test "$yaz_echo_help" = "yes"; then

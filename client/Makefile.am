@@ -1,6 +1,6 @@
 ## Copyright (C) 1995-2007, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.29 2007-01-24 11:50:18 adam Exp $
+## $Id: Makefile.am,v 1.30 2007-02-25 14:46:50 adam Exp $
 
 
 bin_PROGRAMS=yaz-client 
@@ -10,8 +10,6 @@ EXTRA_DIST = default.bib
 
 COMMON=admin.c admin.h tabcomplete.c tabcomplete.h fhistory.c fhistory.h
 yaz_client_SOURCES=client.c $(COMMON)
-
-AM_CFLAGS=$(THREAD_CFLAGS)
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
 

@@ -1,6 +1,6 @@
 ## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.32 2007-01-18 14:46:58 adam Exp $
+## $Id: Makefile.am,v 1.33 2007-02-25 14:46:51 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
@@ -27,8 +27,6 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
-
-AM_CFLAGS=$(THREAD_CFLAGS)
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
 

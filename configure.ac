@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.63 2007-02-24 13:35:23 adam Exp $
+dnl $Id: configure.ac,v 1.64 2007-02-25 14:46:50 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.51],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -311,42 +311,41 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
     fi
 fi
 dnl
-AC_SUBST(THREAD_CFLAGS)
+AC_SUBST(YAZ_CONFIG_CFLAGS)
+dnl
 HAVETHREADS=0
-THREAD_CFLAGS=""
-LIBTHREAD=""
 dnl
 dnl ------ GNU threads
 AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
 AC_SUBST(LIBPTH)
 if test "$enable_pth" = "yes"; then
+    PTH_LIBS=""
     OLIBS=$LIBS
     AC_CHECK_LIB(pth,main)
     if test "$ac_cv_lib_pth_main" = "yes"; then
 	AC_CHECK_HEADERS(pth.h)
 	if test "$ac_cv_header_pth_h" = "yes"; then
-	    LIBTHREAD="-lpth"
-	    THREAD_CFLAGS="-DYAZ_GNU_THREADS=1"
+	    PTH_LIBS="-lpth"
+	    CFLAGS="$CFLAGS -DYAZ_GNU_THREADS=1"
 	    HAVETHREADS=1
 	fi
     fi	
-    LIBS="$OLIBS $LIBTHREAD"
+    LIBS="$OLIBS $PTH_LIBS"
 fi
 dnl
 dnl ------ POSIX Threads
 AC_ARG_ENABLE(threads, [  --disable-threads       disable POSIX threads],[enable_threads=$enableval],[enable_threads=yes])
 if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
     ACX_PTHREAD([
-	    THREAD_CFLAGS="$PTHREAD_CFLAGS -DYAZ_POSIX_THREADS=1"
+	    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+	    AC_DEFINE(YAZ_POSIX_THREADS)
 	    LIBS="$PTHREAD_LIBS $LIBS"
-	    HAVETHREADS=1
+	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS $PTHREAD_CFLAGS -DYAZ_POSIX_THREADS=1"
 	    ])
 fi
 
 dnl ----- libXSLT/libEXLT/libXML2
 AC_SUBST(XML2_CFLAGS)
-AC_SUBST(YAZ_CONFIG_CFLAGS)
-YAZ_CONFIG_CFLAGS=""
 
 YAZ_LIBXML2(
     [

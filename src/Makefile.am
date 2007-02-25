@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.52 2007-02-23 10:15:01 adam Exp $
+## $Id: Makefile.am,v 1.53 2007-02-25 14:46:50 adam Exp $
 
 YAZ_VERSION_INFO=2:1:0
 
@@ -26,7 +26,6 @@ YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
 YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
-AM_CFLAGS=$(THREAD_CFLAGS)
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 
 AM_YFLAGS=-p cql_
