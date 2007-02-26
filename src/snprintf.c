@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: snprintf.c,v 1.1 2007-02-23 10:15:01 adam Exp $
+ * $Id: snprintf.c,v 1.2 2007-02-26 14:24:00 adam Exp $
  */
 /**
  * \file snprintf.c
@@ -15,7 +15,7 @@
 
 void yaz_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
-#if HAVE_VSNPRINF
+#if HAVE_VSNPRINTF
     vsnprintf(buf, size, fmt, ap);
 #else
 #ifdef WIN32
