@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-socket.c,v 1.2 2007-01-12 21:03:31 adam Exp $
+ * $Id: zoom-socket.c,v 1.3 2007-02-28 11:14:56 mike Exp $
  */
 /**
  * \file zoom-socket.c
@@ -15,6 +15,7 @@
 #include <yaz/zoom.h>
 
 #include <yaz/log.h>
+#include <yaz/xmalloc.h>
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -36,6 +37,18 @@
 #endif
 
 
+/*
+ * Note that ZOOM_event_sys_select() is limited as to how many file
+ * descriptors it can multiplex due to its use of select() which in
+ * turn uses the statically defined fd_set type to be a bitmap of the
+ * file descriptors to check.  On Ubuntu 6.06 (and almost certainly on
+ * Debian, and probably on all Linuxes, and maybe all Unixes) this is
+ * by default set to 1024 (though it may be possible to override this
+ * using a #define before including <sys/select.h> -- I've not tried
+ * this).  1024 file descriptors is a lot, but not enough in all
+ * cases, e.g. when running IRSpy on a large target database.  So you
+ * should ensure that YAZ uses ZOOM_event_sys_poll() when possible.
+ */
 ZOOM_API(int)
     ZOOM_event_sys_select(int no, ZOOM_connection *cs)
 {
@@ -123,8 +136,8 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_event_sys_poll(int no, ZOOM_connection *cs)
 {
-    struct pollfd pollfds[1024];
-    ZOOM_connection poll_cs[1024];
+    struct pollfd *pollfds = xmalloc(no * sizeof *pollfds);
+    ZOOM_connection *poll_cs = xmalloc(no * sizeof *poll_cs);
     int i, r;
     int nfds = 0;
     int timeout = 30;
@@ -159,8 +172,11 @@ ZOOM_API(int)
             nfds++;
         }
     }
-    if (nfds == 0)
+    if (nfds == 0) {
+        xfree(pollfds);
+        xfree(poll_cs);
         return 0;
+    }
     while ((r = poll(pollfds, nfds,
          (timeout == -1 ? -1 : timeout * 1000))) < 0
           && errno == EINTR)
@@ -170,6 +186,8 @@ ZOOM_API(int)
     if (r < 0)
     {
         yaz_log(YLOG_WARN|YLOG_ERRNO, "ZOOM_event_sys_poll");
+        xfree(pollfds);
+        xfree(poll_cs);
         return r;
     }
     for (i = 0; i<nfds; i++)
@@ -189,6 +207,8 @@ ZOOM_API(int)
         else
             ZOOM_connection_fire_event_timeout(c);
     }
+    xfree(pollfds);
+    xfree(poll_cs);
     return r;
 }
 #endif
