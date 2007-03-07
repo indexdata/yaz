@@ -1,4 +1,4 @@
-/* $Id: zoomtst11.c,v 1.1 2007-02-21 09:10:19 adam Exp $  */
+/* $Id: zoomtst11.c,v 1.2 2007-03-07 13:12:42 adam Exp $  */
 
 /** \file zoomtst11.c
     \brief Asynchronous single-target which tests event/error handling
@@ -73,30 +73,31 @@ int main(int argc, char **argv)
     while (ZOOM_event (1, &z))
     {
         int ev = ZOOM_connection_last_event(z);
+        int idle = ZOOM_connection_is_idle(z);
+
+        /* see if any error occurred */
+        if ((error = ZOOM_connection_error_x(z, &errmsg, &addinfo, &diagset)))
+        {
+            fprintf (stderr, "Error: %s: %s (%d) %s\n", diagset, errmsg, error,
+                     addinfo);
+
+        }
         if (ev == ZOOM_EVENT_RECV_SEARCH)
         {
-            int idle = ZOOM_connection_is_idle(z);
-            /* see if any error occurred */
-            if ((error = ZOOM_connection_error_x(z, &errmsg, &addinfo, &diagset)))
-            {
-                fprintf (stderr, "Error: %s: %s (%d) %s\n", diagset, errmsg, error,
-                         addinfo);
-
-            }
-            else /* OK print hit count */
+            if (error == 0)
                 printf ("Search OK\n");
             printf("idle=%d\n", idle);
-            if (idle)
+        }
+        if (idle)
+        {
+            ZOOM_connection_connect(z, 0, 0); /* allow reconnect */
+            
+            if (++use <= 10)
             {
-                ZOOM_connection_connect(z, 0, 0); /* allow reconnect */
-
-                if (++use <= 10)
-                {
-                    probe_search(z, use, use&1);
-                }
-                printf("Press enter\n");
-                getchar();
+                probe_search(z, use, use&1);
             }
+            printf("Press enter\n");
+            getchar();
         }
     }
     ZOOM_connection_destroy (z);
