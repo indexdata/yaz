@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.114 2007-02-21 12:53:01 adam Exp $
+ * $Id: zoom-c.c,v 1.115 2007-03-07 14:26:44 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -432,7 +432,7 @@ ZOOM_API(void)
     initlog();
 
     yaz_log(log_api, "%p ZOOM_connection_connect host=%s portnum=%d",
-            c, host, portnum);
+            c, host ? host : "null", portnum);
 
     set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
     ZOOM_connection_remove_tasks(c);
@@ -474,15 +474,18 @@ ZOOM_API(void)
     else
         c->lang = 0;
 
-    xfree(c->host_port);
-    if (portnum)
+    if (host)
     {
-        char hostn[128];
-        sprintf(hostn, "%.80s:%d", host, portnum);
-        c->host_port = xstrdup(hostn);
-    }
-    else
-        c->host_port = xstrdup(host);
+        xfree(c->host_port);
+        if (portnum)
+        {
+            char hostn[128];
+            sprintf(hostn, "%.80s:%d", host, portnum);
+            c->host_port = xstrdup(hostn);
+        }
+        else
+            c->host_port = xstrdup(host);
+    }        
 
     {
         /*
@@ -988,12 +991,18 @@ static void do_close(ZOOM_connection c)
 
 static int ZOOM_test_reconnect(ZOOM_connection c)
 {
+    ZOOM_Event event;
+
     if (!c->reconnect_ok)
         return 0;
     do_close(c);
     c->reconnect_ok = 0;
     c->tasks->running = 0;
     ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
+
+    event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
+    ZOOM_connection_put_event(c, event);
+
     return 1;
 }
 
@@ -1285,7 +1294,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.114 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.115 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3779,11 +3788,7 @@ static int do_read(ZOOM_connection c)
         return 0;
     if (r <= 0)
     {
-        if (ZOOM_test_reconnect(c))
-        {
-            yaz_log(log_details, "%p do_read reconnect read", c);
-        }
-        else
+        if (!ZOOM_test_reconnect(c))
         {
             set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
             do_close(c);
@@ -4074,12 +4079,7 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
     {
         if (mask & ZOOM_SELECT_EXCEPT)
         {
-            if (ZOOM_test_reconnect(c))
-            {
-                event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
-                ZOOM_connection_put_event(c, event);
-            }
-            else
+            if (!ZOOM_test_reconnect(c))
             {
                 set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
                 do_close(c);
