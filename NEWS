@@ -1,3 +1,13 @@
+--- 2.1.52 2007/03/07
+
+ZOOM-C: Removed hardcoded limit of 1024 sockets in ZOOM_event_sys_poll().
+Note that ZOOM_event_sys_select() still has the limit due to the fixed-size
+fd_set structure used as a bitmask for the FDs to be selected on.
+
+Using ACX_PTHREAD macro to check for POSIX threads.
+
+Fixed have-vsnprintf check.
+
 --- 2.1.50 2007/02/23
  
 Fixes for configure on BSD. Bug #900.
