@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.24 2007-01-03 08:42:16 adam Exp $
+ * $Id: tsticonv.c,v 1.25 2007-03-09 08:39:38 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -90,19 +90,20 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
     char outbuf[12];
     size_t inbytesleft = strlen(buf);
     const char *inp = buf;
-    while (inbytesleft)
+    int rounds = 0;
+    for (rounds = 0; inbytesleft && rounds < sizeof(outbuf); rounds++)
     {
         size_t outbytesleft = sizeof(outbuf);
         char *outp = outbuf;
         size_t r = yaz_iconv(cd, (char**) &inp,  &inbytesleft,
                              &outp, &outbytesleft);
+        wrbuf_write(b, outbuf, outp - outbuf);
         if (r == (size_t) (-1))
         {
             int e = yaz_iconv_error(cd);
             if (e != YAZ_ICONV_E2BIG)
                 break;
         }
-        wrbuf_write(b, outbuf, outp - outbuf);
     }
     if (wrbuf_len(b) == strlen(cmpbuf) 
         && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
@@ -350,6 +351,11 @@ static void tst_marc8_to_utf8(void)
     /* COMBINING ACUTE ACCENT */
     YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
                           "Cours de mathe\xcc\x81"));
+
+
+    YAZ_CHECK(tst_convert(cd, "a\xea\x1e", "a\x1e\xcc\x8a"));
+
+    YAZ_CHECK(tst_convert(cd, "a\xea", "a"));
     yaz_iconv_close(cd);
 }
 

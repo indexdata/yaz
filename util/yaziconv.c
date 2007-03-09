@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaziconv.c,v 1.6 2007-01-03 08:42:16 adam Exp $
+ * $Id: yaziconv.c,v 1.7 2007-03-09 08:39:38 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -81,7 +81,7 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
                 }
                 if (r == 0)
                 {
-                    fprintf (stderr, "invalid sequence\n");
+                    fprintf (stderr, "invalid sequence due to missing input\n");
                     return ;
                 }
                 inbytesleft += r;

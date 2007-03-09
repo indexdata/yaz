@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.33 2007-01-18 14:45:05 adam Exp $
+ * $Id: siconv.c,v 1.34 2007-03-09 08:39:38 adam Exp $
  */
 /**
  * \file siconv.c
@@ -394,6 +394,13 @@ static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
     for (cd->comb_size = 0; cd->comb_size < 8; cd->comb_size++)
     {
         int comb = 0;
+        if (inbytesleft == 0 && cd->comb_size)
+        {
+            cd->my_errno = YAZ_ICONV_EINVAL;
+            x = 0;
+            *no_read = 0;
+            break;
+        }
         x = yaz_read_marc8_comb(cd, inp, inbytesleft, no_read, &comb);
         if (!comb || !x)
             break;
