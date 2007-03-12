@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: grs1disp.c,v 1.5 2007-01-03 08:42:15 adam Exp $
+ * $Id: grs1disp.c,v 1.6 2007-03-12 16:16:49 adam Exp $
  */
 
 /**
@@ -66,9 +66,14 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
             }
         }
         else if (t->content->which == Z_ElementData_string)
-            wrbuf_printf(w, "%s\n", t->content->u.string);
+        {
+            wrbuf_puts(w, t->content->u.string);
+            wrbuf_puts(w, "\n");
+        }
         else if (t->content->which == Z_ElementData_numeric)
+        {
             wrbuf_printf(w, "%d\n", *t->content->u.numeric);
+        }
         else if (t->content->which == Z_ElementData_oid)
         {
             int *ip = t->content->u.oid;
