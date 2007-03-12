@@ -1,4 +1,4 @@
-Added character conversion support for "greekadvance"; based on patch from
+Added character conversion support for "advancegreek"; based on patch from
 Giannis Kosmas.
 
 --- 2.1.52 2007/03/07
