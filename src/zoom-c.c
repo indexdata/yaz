@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.115 2007-03-07 14:26:44 adam Exp $
+ * $Id: zoom-c.c,v 1.116 2007-03-12 08:27:44 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -37,6 +37,7 @@ typedef enum {
     zoom_complete
 } zoom_ret;
 
+static void resultset_destroy(ZOOM_resultset r);
 static zoom_ret ZOOM_connection_send_init(ZOOM_connection c);
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
@@ -282,12 +283,12 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
         switch (task->which)
         {
         case ZOOM_TASK_SEARCH:
-            ZOOM_resultset_destroy(task->u.search.resultset);
+            resultset_destroy(task->u.search.resultset);
             xfree(task->u.search.syntax);
             xfree(task->u.search.elementSetName);
             break;
         case ZOOM_TASK_RETRIEVE:
-            ZOOM_resultset_destroy(task->u.retrieve.resultset);
+            resultset_destroy(task->u.retrieve.resultset);
             xfree(task->u.retrieve.syntax);
             xfree(task->u.retrieve.elementSetName);
             break;
@@ -300,7 +301,7 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
             ZOOM_package_destroy(task->u.package);
             break;
         case ZOOM_TASK_SORT:
-            ZOOM_resultset_destroy(task->u.sort.resultset);
+            resultset_destroy(task->u.sort.resultset);
             ZOOM_query_destroy(task->u.sort.q);
             break;
         default:
@@ -939,6 +940,11 @@ ZOOM_API(void)
 ZOOM_API(void)
     ZOOM_resultset_destroy(ZOOM_resultset r)
 {
+    resultset_destroy(r);
+}
+
+static void resultset_destroy(ZOOM_resultset r)
+{
     if (!r)
         return;
     (r->refcount)--;
@@ -1294,7 +1300,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.115 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.116 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
