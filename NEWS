@@ -1,3 +1,6 @@
+Added character conversion support for "greekadvance"; based on patch from
+Giannis Kosmas.
+
 --- 2.1.52 2007/03/07
 
 ZOOM-C: Removed hardcoded limit of 1024 sockets in ZOOM_event_sys_poll().

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.25 2007-03-09 08:39:38 adam Exp $
+ * $Id: tsticonv.c,v 1.26 2007-03-12 10:59:59 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -473,6 +473,29 @@ static void tst_utf8_to_marc8(void)
     yaz_iconv_close(cd);
 }
 
+static void tst_advance_to_utf8(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("utf-8", "advancegreek");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours ", "Cours "));
+    yaz_iconv_close(cd);
+}
+
+static void tst_utf8_to_advance(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("advancegreek", "utf-8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "Cours ", "Cours "));
+    yaz_iconv_close(cd);
+}
 
 static void tst_latin1_to_marc8(void)
 {
@@ -538,6 +561,9 @@ int main (int argc, char **argv)
     tst_marc8s_to_utf8();
 
     tst_marc8_to_latin1();
+
+    tst_advance_to_utf8();
+    tst_utf8_to_advance();
 
     tst_utf8_to_marc8();
 
