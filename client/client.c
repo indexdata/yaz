@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.327 2007-01-24 23:10:01 adam Exp $
+ * $Id: client.c,v 1.328 2007-03-14 11:46:37 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2134,20 +2134,22 @@ static int cmd_update_SRW(int action_no, const char *recid,
 
 static int cmd_update_common(const char *arg, int version)
 {
-    char action[20], recid[20];
+    char action[20], recid_buf[20];
+    const char *recid = 0;
     char *rec_buf;
     int rec_len;
     int action_no;
     int noread = 0;
 
     *action = 0;
-    *recid = 0;
-    sscanf (arg, "%19s %19s%n", action, recid, &noread);
+    *recid_buf = 0;
+    sscanf (arg, "%19s %19s%n", action, recid_buf, &noread);
     if (noread == 0)
     {
-        printf("Update must be followed by action and recid\n");
+        printf("Use: update action recid [fname]\n");
         printf(" where action is one of insert,replace,delete.update\n");
-        printf(" recid is some record ID (any string)\n");
+        printf(" recid is some record ID. Use none for no ID\n");
+        printf(" fname is file of record to be updated\n");
         return 0;
     }
 
@@ -2165,6 +2167,9 @@ static int cmd_update_common(const char *arg, int version)
         printf ("Possible values: insert, replace, delete, update\n");
         return 0;
     }
+
+    if (strcmp(recid_buf, "none")) /* none means no record ID */
+        recid = recid_buf;
 
     arg += noread;
     if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len, 1) == 0)
@@ -2277,7 +2282,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         notToKeep->elements[0] = (Z_IU0SuppliedRecords_elem *)
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-        if (*recid && strcmp(recid, "none"))
+        if (recid)
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc (out, sizeof(Odr_oct));
@@ -2319,7 +2324,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-        if (*recid)
+        if (recid)
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc (out, sizeof(Odr_oct));
