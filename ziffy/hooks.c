@@ -36,10 +36,15 @@
 #include <sys/socket.h>
 
 #include <netdb.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_NETINET_IF_ETHER_H
 #include <netinet/if_ether.h>
@@ -210,9 +215,9 @@ z3950apdu * pduhook (const struct pcap_pkthdr * h, const u_char * p)
       printf ("ETHER:  Total size  = %d : header = %d : data = %d\n",
 	      eth_size, eth_hlen, eth_size - eth_hlen),
       printf ("ETHER:  Source      = %s\n",
-	      etheraddr_string (dlt == DLT_NULL ? NULL : (char *) & e -> ether_shost)),
+	      etheraddr_string (dlt == DLT_NULL ? NULL : (u_char *) & e -> ether_shost)),
       printf ("ETHER:  Destination = %s\n",
-	      etheraddr_string (dlt == DLT_NULL ? NULL : (char *) & e -> ether_dhost)),
+	      etheraddr_string (dlt == DLT_NULL ? NULL : (u_char *) & e -> ether_dhost)),
       fflush (stdout),
       fmemdmp (stdout, (char *) e, eth_size, "Ethernet Packet");
 

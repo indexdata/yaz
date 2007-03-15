@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.67 2007-03-07 08:54:13 adam Exp $
+dnl $Id: configure.ac,v 1.68 2007-03-15 14:07:41 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.53],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -23,13 +23,16 @@ YAZ_DOC
 dnl 
 dnl
 dnl ------ Headers
-AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h netinet/in.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h])
-AC_CHECK_HEADERS([netinet/if_ether.h],[],[],[
+AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h])
+AC_CHECK_HEADERS([net/if.h netinet/in.h netinet/if_ether.h],[],[],[
  #if HAVE_SYS_TYPES_H
  #include <sys/types.h>
  #endif
  #if HAVE_SYS_SOCKET_H
  #include <sys/socket.h>
+ #endif
+ #if HAVE_NET_IF_H
+ #include <net/if.h>
  #endif
  #if HAVE_NETINET_IN_H
  #include <netinet/in.h>
@@ -176,6 +179,7 @@ if test "$with_iconv" != "no"; then
 fi
 dnl ------ libpcap / ziffy
 
+echo "ether_h = ${ac_cv_header_netinet_if_ether_h}"
 AC_SUBST(ZIFFY_PROG)
 AC_SUBST(PCAP_LIBS)
 AC_SUBST(PCAP_CFLAGS)
@@ -184,28 +188,28 @@ AC_ARG_WITH(pcap, [  --with-pcap[=DIR]         libpcap root dir located in (dir)
 
 AC_MSG_CHECKING([for libpcap (required for ziffy)])
 if test "${PCAP_DIR}" != "no"; then
-    if test "${PCAP_DIR}" != "yes" && test "${PCAP_DIR}" != "default"; then
+    if test "${ac_cv_header_netinet_if_ether_h}" = "no"; then
+	:
+    elif test "${PCAP_DIR}" != "yes" && test "${PCAP_DIR}" != "default"; then
 	if test -r $PCAP_DIR/libpcap.a && test -r $PCAP_DIR/pcap.h; then
 	    PCAP_DIR="$PCAP_DIR"
 	    PCAP_LIBS="${LIBS} -L$PCAP_DIR -lpcap"
 	    PCAP_CFLAGS="${INCS} -I$PCAP_DIR"
 	    ZIFFY_PROG=ziffy
 	fi
-    else
-	if test -d /usr/local &&
-	    test -r /usr/local/lib/libpcap.a &&
-	    test -r /usr/local/include/pcap.h; then
-	    PCAP_DIR="/usr/local"
-	    PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
-	    PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
-	    ZIFFY_PROG=ziffy
-	elif test -d /usr &&
-	    test -r /usr/lib/libpcap.a &&
-	    test -r /usr/include/pcap.h; then
-	    PCAP_DIR="/usr"
-	    PCAP_LIBS="${LIBS} -lpcap"
-	    ZIFFY_PROG=ziffy
-	fi
+    elif test -d /usr/local &&
+	test -r /usr/local/lib/libpcap.a &&
+	test -r /usr/local/include/pcap.h; then
+	PCAP_DIR="/usr/local"
+	PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
+	PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
+	ZIFFY_PROG=ziffy
+    elif test -d /usr &&
+	test -r /usr/lib/libpcap.a &&
+	test -r /usr/include/pcap.h; then
+	PCAP_DIR="/usr"
+	PCAP_LIBS="${LIBS} -lpcap"
+	ZIFFY_PROG=ziffy
     fi
 fi
 if test -z "$ZIFFY_PROG"; then
