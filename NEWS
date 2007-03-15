@@ -1,3 +1,6 @@
+Fix to ZOOM-C so that transparent reconnection is properly handled on
+connections that are in asynchronous mode.
+
 Added character conversion support for "advancegreek"; based on patch from
 Giannis Kosmas.
 
