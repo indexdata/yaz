@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.69 2007-03-16 08:08:10 adam Exp $
+dnl $Id: configure.ac,v 1.70 2007-03-16 08:11:13 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[2.1.54],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -179,7 +179,6 @@ if test "$with_iconv" != "no"; then
 fi
 dnl ------ libpcap / ziffy
 
-echo "ether_h = ${ac_cv_header_netinet_if_ether_h}"
 AC_SUBST(ZIFFY_PROG)
 AC_SUBST(PCAP_LIBS)
 AC_SUBST(PCAP_CFLAGS)
