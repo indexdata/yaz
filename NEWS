@@ -1,4 +1,4 @@
---- 2.1.52 2007/03/16
+--- 2.1.54 2007/03/16
 
 Fix to ZOOM-C so that transparent reconnection is properly handled on
 connections that are in asynchronous mode.
