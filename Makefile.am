@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.42 2007-03-07 09:09:22 adam Exp $
+## $Id: Makefile.am,v 1.43 2007-03-16 08:06:26 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -16,7 +16,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = yaz.pc
 
 SPEC_FILE=$(PACKAGE).spec
-EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO \
+EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO ChangeLog \
 	yaz-config.in yaz.pc.in m4/yaz.m4 m4/yaz_libxml2.m4 buildconf.sh \
 	Doxyfile.in m4/acx_pthread.m4
 
