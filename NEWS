@@ -1,8 +1,18 @@
 Fix to ZOOM-C so that transparent reconnection is properly handled on
 connections that are in asynchronous mode.
 
+Fixed compilation on OpenBSD 4.0.
+
+Large strings in GRS-1 records are now properly displayed in yaz-client.
+
 Added character conversion support for "advancegreek"; based on patch from
 Giannis Kosmas.
+
+Fixed yaz_iconv to return YAZ_ICONV_EINVAL if an incomplete MARC-8 combo
+sequence is met. Before the error was not set so it would be unknown.
+
+Adjust yaz-marcdump MARC reader so that it skips until record separator
+is read
 
 --- 2.1.52 2007/03/07
 
