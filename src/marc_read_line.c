@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marc_read_line.c,v 1.3 2007-01-03 08:42:15 adam Exp $
+ * $Id: marc_read_line.c,v 1.4 2007-03-17 08:44:24 adam Exp $
  */
 
 /**
@@ -198,7 +198,6 @@ int yaz_marc_read_line(yaz_marc_t mt,
                         }
                     }
                     assert(len >= 0);
-                    assert(len < 399);
                     yaz_marc_add_subfield(mt, cp, len);
                     if (!next)
                         break;
