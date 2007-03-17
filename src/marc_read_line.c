@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marc_read_line.c,v 1.4 2007-03-17 08:44:24 adam Exp $
+ * $Id: marc_read_line.c,v 1.5 2007-03-17 09:13:29 adam Exp $
  */
 
 /**
@@ -30,14 +30,16 @@
 int yaz_gets(int (*getbyte)(void *client_data),
              void (*ungetbyte)(int b, void *client_data),
              void *client_data,
-             char *buf, size_t len)
+             WRBUF w)
 {
     size_t sz = 0;
     int ch = getbyte(client_data);
+
+    wrbuf_rewind(w);
     while (ch != '\0' && ch != '\r' && ch != '\n')
     {
-        if (sz < len-1)
-            buf[sz++] = ch;
+        wrbuf_putc(w, ch);
+        sz++;
         ch = getbyte(client_data);
     }
     if (ch == '\r')
@@ -52,9 +54,10 @@ int yaz_gets(int (*getbyte)(void *client_data),
         if (ch != '\r' && ch != '\0')
             ungetbyte(ch, client_data);
     }
-    buf[sz] = '\0';
     if (sz)
+    {
         return 1;
+    }
     return 0;
 }
     
@@ -72,17 +75,15 @@ int yaz_marc_read_line(yaz_marc_t mt,
     int marker_ch = 0;
     int marker_skip = 0;
     int header_created = 0;
-    char line[4096];
+    WRBUF wrbuf_line = wrbuf_alloc();
 
     yaz_marc_reset(mt);
 
-    while (yaz_gets(getbyte, ungetbyte, client_data, line, sizeof(line)))
+    while (yaz_gets(getbyte, ungetbyte, client_data, wrbuf_line))
     {
+        const char *line = wrbuf_cstr(wrbuf_line);
         int val;
         size_t line_len = strlen(line);
-        /* see if have leader lines of the form:
-           00366nam  22001698a 4500
-        */
         if (line_len == 0)       /* empty line indicates end of record */
         {
             if (header_created)
@@ -97,6 +98,9 @@ int yaz_marc_read_line(yaz_marc_t mt,
             ;
         else if (line_len == 24 && atoi_n_check(line, 5, &val) && val >= 24)
         {
+            /* deal with header lines:  00366nam  22001698a 4500
+            */
+
             if (header_created)
                 break;
             yaz_marc_set_leader(mt, line,
@@ -114,8 +118,9 @@ int yaz_marc_read_line(yaz_marc_t mt,
         }
         else if (line_len > 5 && line[3] == ' ')
         {
+            /* deal with data/control lines: 245 12 ........ */
             char tag[4];
-            char *datafield_start = line+6;
+            const char *datafield_start = line+6;
             marker_ch = 0;
             marker_skip = 0;
 
@@ -155,12 +160,12 @@ int yaz_marc_read_line(yaz_marc_t mt,
             {   /* data field */
                 const char *indicator = line+4;
                 int indicator_len = 2;
-                char *cp = datafield_start;
+                const char *cp = datafield_start;
 
                 yaz_marc_add_datafield(mt, tag, indicator, indicator_len);
                 for (;;)
                 {
-                    char *next;
+                    const char *next;
                     size_t len;
                     
                     assert(cp[0] == marker_ch);
@@ -206,6 +211,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
             }
         }
     }
+    wrbuf_destroy(wrbuf_line);
     if (!header_created)
         return -1;
     return 0;
