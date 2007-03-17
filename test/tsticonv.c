@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.26 2007-03-12 10:59:59 adam Exp $
+ * $Id: tsticonv.c,v 1.27 2007-03-17 00:10:41 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -470,6 +470,41 @@ static void tst_utf8_to_marc8(void)
                           "(\033p0\x1bs)"));
     
  
+    {
+        char *inbuf0 = "\xe2\x81\xb0";
+        char *inbuf = inbuf0;
+        size_t inbytesleft = strlen(inbuf);
+        char outbuf0[64];
+        char *outbuf = outbuf0;
+        size_t outbytesleft = sizeof(outbuf0)-1;
+        size_t r;
+#if 0
+        int i;
+#endif
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        YAZ_CHECK(r != (size_t) (-1));
+
+#if 0
+        *outbuf = '\0';  /* so we know when to stop printing */
+        for (i = 0; outbuf0[i]; i++)
+        {
+            int ch = outbuf0[i] & 0xff;
+            yaz_log(YLOG_LOG, "ch%d %02X %c", i, ch, ch >= ' ' ? ch : '?');
+        }
+#endif
+
+        r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
+        YAZ_CHECK(r != (size_t) (-1));
+        *outbuf = '\0';  /* for strcmp test below and printing */
+#if 0
+        for (i = 0; outbuf0[i]; i++)
+        {
+            int ch = outbuf0[i] & 0xff;
+            yaz_log(YLOG_LOG, "ch%d %02X %c", i, ch, ch >= ' ' ? ch : '?');
+        }
+#endif
+        YAZ_CHECK(strcmp("\033p0\x1bs", outbuf0) == 0);
+    }
     yaz_iconv_close(cd);
 }
 
