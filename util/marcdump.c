@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.49 2007-03-08 12:45:02 adam Exp $
+ * $Id: marcdump.c,v 1.50 2007-03-17 09:14:00 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -327,7 +327,8 @@ int main (int argc, char **argv)
     const char *split_fname = 0;
     const char *leader_spec = 0;
     int write_using_libxml2 = 0;
-    
+
+    nmem_init();
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
 #endif
@@ -442,6 +443,7 @@ int main (int argc, char **argv)
     }
     if (cfile)
         fclose (cfile);
+    nmem_exit();
     if (!no)
     {
         usage(prog);
