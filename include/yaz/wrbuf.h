@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.23 2007-01-06 16:05:24 adam Exp $ */
+/* $Id: wrbuf.h,v 1.24 2007-03-18 12:59:56 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -39,6 +39,7 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief string buffer */
 typedef struct wrbuf
 {
     char *buf;
@@ -46,10 +47,19 @@ typedef struct wrbuf
     int size;
 } wrbuf, *WRBUF;
 
+/** \brief allocate / construct WRBUF */
 YAZ_EXPORT WRBUF wrbuf_alloc(void);
+
+/** \brief free WRBUF and possibly its buffer */
 YAZ_EXPORT void wrbuf_free(WRBUF b, int free_buf);
+
+/** \brief destroy WRBUF and its buffer */
 YAZ_EXPORT void wrbuf_destroy(WRBUF b);
+
+/** \brief empty WRBUF content */
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
+
+/** \brief grow WRBUF larger */
 YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
 YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
 YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
@@ -72,6 +82,9 @@ YAZ_EXPORT int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
 YAZ_EXPORT int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
 
 YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
+
+/** \brief cut size of WRBUF */
+YAZ_EXPORT void wrbuf_cut_right(WRBUF b, size_t no_to_remove);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.16 2007-02-23 10:15:01 adam Exp $
+ * $Id: wrbuf.c,v 1.17 2007-03-18 12:59:56 adam Exp $
  */
 
 /**
@@ -229,6 +229,13 @@ const char *wrbuf_cstr(WRBUF b)
     wrbuf_write(b, "", 1);  /* '\0'-terminate as well */
     (b->pos)--;             /* don't include '\0' in count */
     return b->buf;
+}
+
+void wrbuf_cut_right(WRBUF b, size_t no_to_remove)
+{
+    if (no_to_remove > b->pos)
+        no_to_remove = b->pos;
+    b->pos = b->pos - no_to_remove;
 }
 
 /*
