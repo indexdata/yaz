@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marc_read_line.c,v 1.5 2007-03-17 09:13:29 adam Exp $
+ * $Id: marc_read_line.c,v 1.6 2007-03-18 13:00:37 adam Exp $
  */
 
 /**
@@ -35,7 +35,6 @@ int yaz_gets(int (*getbyte)(void *client_data),
     size_t sz = 0;
     int ch = getbyte(client_data);
 
-    wrbuf_rewind(w);
     while (ch != '\0' && ch != '\r' && ch != '\n')
     {
         wrbuf_putc(w, ch);
@@ -60,6 +59,41 @@ int yaz_gets(int (*getbyte)(void *client_data),
     }
     return 0;
 }
+
+static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
+                              void (*ungetbyte)(int b, void *client_data),
+                              void *client_data,
+                              WRBUF w)
+{
+    int more;
+
+    wrbuf_rewind(w);
+    more = yaz_gets(getbyte, ungetbyte, client_data, w);
+    if (!more)
+        return 0;
+
+    while (more)
+    {
+        int i;
+        for (i = 0; i<4; i++)
+        {
+            int ch = getbyte(client_data);
+            if (ch != ' ')
+            {
+                if (ch)
+                    ungetbyte(ch, client_data);
+                return 1;
+            }
+        }
+        if (wrbuf_len(w) > 60 && wrbuf_buf(w)[wrbuf_len(w)-1] == '=')
+            wrbuf_cut_right(w, 1);
+        else
+            wrbuf_puts(w, " ");
+        more = yaz_gets(getbyte, ungetbyte, client_data, w);
+    }
+    return 1;
+}
+
     
 int yaz_marc_read_line(yaz_marc_t mt,
                        int (*getbyte)(void *client_data),
@@ -79,7 +113,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
 
     yaz_marc_reset(mt);
 
-    while (yaz_gets(getbyte, ungetbyte, client_data, wrbuf_line))
+    while (yaz_marc_line_gets(getbyte, ungetbyte, client_data, wrbuf_line))
     {
         const char *line = wrbuf_cstr(wrbuf_line);
         int val;
@@ -112,11 +146,8 @@ int yaz_marc_read_line(yaz_marc_t mt,
                                 &length_implementation);
             header_created = 1;
         }
-        else if (line_len > 5 && memcmp(line, "    ", 4) == 0)
-        {  /* continuation line */
-            ;
-        }
-        else if (line_len > 5 && line[3] == ' ')
+        else if (line_len > 5 && line[0] != ' ' && line[1] != ' ' 
+                 && line[2] != ' ' && line[3] == ' ' )
         {
             /* deal with data/control lines: 245 12 ........ */
             char tag[4];
@@ -209,6 +240,10 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     cp = next;
                 }
             }
+        }
+        else
+        {
+            yaz_marc_cprintf(mt, "Ignoring line: %s", line);
         }
     }
     wrbuf_destroy(wrbuf_line);
