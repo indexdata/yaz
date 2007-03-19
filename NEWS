@@ -1,3 +1,10 @@
+API changes to ZOOM. Functions for setting options returns int, rather
+than void, so we have a way to flag unknown options. ZOOM_resultset_sort1
+has become "the" ZOOM_resultset_sort. (and old ZOOM_resultset_sort is removed).
+ZOOM_connection_scan1 removed. The generic scan is ZOOM_connection_scan
+and the ZOOM_connection_scan_pqf is a handy short-hand taking a PQF string
+as argument.
+
 API changes to WRBUF. wrbuf_free removed; replaced by wrbuf_destroy. And
 wrbuf_puts no longer appends '\0'. Use wrbuf_cstr to get C-string out.
 
