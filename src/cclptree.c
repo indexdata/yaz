@@ -53,7 +53,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.7 2007-03-19 14:40:07 adam Exp $
+ * $Id: cclptree.c,v 1.8 2007-03-19 22:17:41 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -271,7 +271,6 @@ void ccl_pquery (WRBUF w, struct ccl_rpn_node *p)
         wrbuf_puts (w, " ");
         break;
     }
-    wrbuf_cstr(w);
 }
 /*
  * Local variables:

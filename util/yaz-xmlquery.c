@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-xmlquery.c,v 1.7 2007-03-19 14:40:08 adam Exp $
+ * $Id: yaz-xmlquery.c,v 1.8 2007-03-19 22:17:41 adam Exp $
  */
 
 #include <stdlib.h>
@@ -117,7 +117,7 @@ void xmlquerytopqf(const char *xmlstr)
 	{
 	    WRBUF w = wrbuf_alloc();
 	    yaz_query_to_wrbuf(w, query);
-	    printf("%s\n", wrbuf_buf(w));
+	    printf("%s\n", wrbuf_cstr(w));
 	    wrbuf_destroy(w);
 	}
 	odr_destroy(odr);

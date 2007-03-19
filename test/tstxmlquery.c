@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.15 2007-03-19 14:40:07 adam Exp $
+ * $Id: tstxmlquery.c,v 1.16 2007-03-19 22:17:41 adam Exp $
  */
 
 #include <stdlib.h>
@@ -83,7 +83,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
                     else
                     {
                         status = XML_NO_MATCH;
-                        printf("Result: %s\n", wrbuf_buf(w));
+                        printf("Result: %s\n", wrbuf_cstr(w));
                     }
                     wrbuf_destroy(w);
                 }

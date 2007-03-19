@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: fhistory.c,v 1.2 2007-01-24 23:09:48 adam Exp $
+ * $Id: fhistory.c,v 1.3 2007-03-19 22:17:41 adam Exp $
  */
 /** \file fhistory.c
  *  \brief file history implementation
@@ -111,7 +111,7 @@ int file_history_trav(file_history_t fh, void *client_data,
             if (wrbuf_buf(fh->wr)[i] == '\n')
             {
                 wrbuf_buf(fh->wr)[i] = '\0';
-                callback(client_data, wrbuf_buf(fh->wr) + off);
+                callback(client_data, wrbuf_cstr(fh->wr) + off);
                 wrbuf_buf(fh->wr)[i] = '\n';
                 i++;
                 break;
