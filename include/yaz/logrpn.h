@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: logrpn.h,v 1.13 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: logrpn.h,v 1.14 2007-03-19 21:07:35 adam Exp $ */
 
 /**
  * \file logrpn.h
@@ -36,7 +36,6 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/proto.h>
-#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
@@ -49,9 +48,6 @@ YAZ_EXPORT void log_scan_term_level(int loglevel,
 
 YAZ_EXPORT void yaz_log_zquery(Z_Query *q);
 YAZ_EXPORT void yaz_log_zquery_level(int loglevel, Z_Query *q);
-
-YAZ_EXPORT void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags);
-YAZ_EXPORT void wrbuf_put_zquery(WRBUF b, const Z_Query *q);
 
 YAZ_END_CDECL
 

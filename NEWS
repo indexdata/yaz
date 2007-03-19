@@ -1,3 +1,6 @@
+Definition of wrbuf_diags moved to querytowrbuf.h. Function wrbuf_put_zquery
+removed, because function yaz_query_to_wrbuf does the same.
+
 API changes to ZOOM. Functions for setting options returns int, rather
 than void, so we have a way to flag unknown options. ZOOM_resultset_sort1
 has become "the" ZOOM_resultset_sort. (and old ZOOM_resultset_sort is removed).

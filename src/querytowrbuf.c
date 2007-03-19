@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.7 2007-03-19 14:40:07 adam Exp $
+ * $Id: querytowrbuf.c,v 1.8 2007-03-19 21:07:35 adam Exp $
  */
 
 /** \file querytowrbuf.c
@@ -227,21 +227,6 @@ void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
     wrbuf_printf(b, "RPN ");
     yaz_apt_to_wrbuf(b, zapt);
 }
-
-/* obsolete */
-void wrbuf_scan_term(WRBUF b, const Z_AttributesPlusTerm *zapt, oid_value ast)
-{
-    yaz_apt_to_wrbuf(b, zapt);
-    wrbuf_cstr(b);
-}
-
-/* obsolete */
-void wrbuf_put_zquery(WRBUF b, const Z_Query *q)
-{
-    yaz_query_to_wrbuf(b, q);
-    wrbuf_cstr(b);
-}
-
 
 /*
  * Local variables:
