@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.116 2007-03-12 08:27:44 adam Exp $
+ * $Id: zoom-c.c,v 1.117 2007-03-19 14:40:07 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -678,8 +678,8 @@ ZOOM_API(int)
         WRBUF wr = wrbuf_alloc();
         ccl_pquery(wr, rpn);
         ccl_rpn_delete(rpn);
-        ret = ZOOM_query_prefix(s, wrbuf_buf(wr));
-        wrbuf_free(wr, 1);
+        ret = ZOOM_query_prefix(s, wrbuf_cstr(wr));
+        wrbuf_destroy(wr);
     }
     ccl_qual_rm(&bibset);
     return ret;
@@ -927,11 +927,11 @@ ZOOM_API(void)
         for (rc = r->record_hash[i]; rc; rc = rc->next)
         {
             if (rc->rec.wrbuf_marc)
-                wrbuf_free(rc->rec.wrbuf_marc, 1);
+                wrbuf_destroy(rc->rec.wrbuf_marc);
             if (rc->rec.wrbuf_iconv)
-                wrbuf_free(rc->rec.wrbuf_iconv, 1);
+                wrbuf_destroy(rc->rec.wrbuf_iconv);
             if (rc->rec.wrbuf_opac)
-                wrbuf_free(rc->rec.wrbuf_opac, 1);
+                wrbuf_destroy(rc->rec.wrbuf_opac);
         }
         r->record_hash[i] = 0;
     }
@@ -1300,7 +1300,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.116 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.117 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1730,11 +1730,11 @@ ZOOM_API(void)
     if (!rec)
         return;
     if (rec->wrbuf_marc)
-        wrbuf_free(rec->wrbuf_marc, 1);
+        wrbuf_destroy(rec->wrbuf_marc);
     if (rec->wrbuf_iconv)
-        wrbuf_free(rec->wrbuf_iconv, 1);
+        wrbuf_destroy(rec->wrbuf_iconv);
     if (rec->wrbuf_opac)
-        wrbuf_free(rec->wrbuf_opac, 1);
+        wrbuf_destroy(rec->wrbuf_opac);
     odr_destroy(rec->odr);
     xfree(rec);
 }
@@ -1787,7 +1787,7 @@ static const char *marc_iconv_return(ZOOM_record rec, int marc_type,
             yaz_iconv_close(cd);
         if (len)
             *len = wrbuf_len(rec->wrbuf_marc);
-        return wrbuf_buf(rec->wrbuf_marc);
+        return wrbuf_cstr(rec->wrbuf_marc);
     }
     yaz_marc_destroy(mt);
     if (cd)
@@ -1850,8 +1850,7 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
             }
             wrbuf_write(rec->wrbuf_iconv, outbuf, outp - outbuf);
         }
-        wrbuf_puts(rec->wrbuf_iconv, "");
-        buf = wrbuf_buf(rec->wrbuf_iconv);
+        buf = wrbuf_cstr(rec->wrbuf_iconv);
         sz = wrbuf_len(rec->wrbuf_iconv);
         yaz_iconv_close(cd);
     }

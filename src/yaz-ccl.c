@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-ccl.c,v 1.5 2007-01-03 08:42:15 adam Exp $
+ * $Id: yaz-ccl.c,v 1.6 2007-03-19 14:40:07 adam Exp $
  */
 /**
  * \file yaz-ccl.c
@@ -25,9 +25,9 @@ Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 
     ccl_pquery(wr, p);
 
-    q = yaz_pqf_parse(parser, o, wrbuf_buf(wr));
+    q = yaz_pqf_parse(parser, o, wrbuf_cstr(wr));
 
-    wrbuf_free(wr, 1);
+    wrbuf_destroy(wr);
     yaz_pqf_destroy(parser);
     return q;
 }
@@ -41,9 +41,9 @@ Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
 
     ccl_pquery(wr, p);
 
-    q = yaz_pqf_scan(parser, o, &setp, wrbuf_buf(wr));
+    q = yaz_pqf_scan(parser, o, &setp, wrbuf_cstr(wr));
 
-    wrbuf_free(wr, 1);
+    wrbuf_destroy(wr);
     yaz_pqf_destroy(parser);
     return q;
 }

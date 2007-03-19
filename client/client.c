@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.328 2007-03-14 11:46:37 adam Exp $
+ * $Id: client.c,v 1.329 2007-03-19 14:40:06 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -938,8 +938,8 @@ static void display_record(Z_External *r)
 #endif
                 )
             {
-                char *result;
-                int rlen;
+                const char *result;
+                size_t rlen;
                 yaz_iconv_t cd = 0;
                 yaz_marc_t mt = yaz_marc_create();
                 const char *from = 0;
@@ -972,7 +972,7 @@ static void display_record(Z_External *r)
                     }
                 }
                     
-                if (yaz_marc_decode_buf(mt, octet_buf,r->u.octet_aligned->len,
+                if (yaz_marc_decode_buf(mt, octet_buf, r->u.octet_aligned->len,
                                         &result, &rlen)> 0)
                 {
                     fwrite (result, rlen, 1, stdout);
@@ -1018,7 +1018,7 @@ static void display_record(Z_External *r)
         w = wrbuf_alloc();
         yaz_display_grs1(w, r->u.grs1, 0);
         puts (wrbuf_buf(w));
-        wrbuf_free(w, 1);
+        wrbuf_destroy(w);
     }
     else if (ent && ent->value == VAL_OPAC)
     {
@@ -1302,7 +1302,7 @@ static char *encode_SRW_term(ODR o, const char *q)
     cd = yaz_iconv_open("UTF-8", in_charset);
     if (!cd)
     {
-        wrbuf_free(w, 1);
+        wrbuf_destroy(w);
         return odr_strdup(o, q);
     }
     wrbuf_iconv_write(w, cd, q, strlen(q));
@@ -1314,7 +1314,7 @@ static char *encode_SRW_term(ODR o, const char *q)
     else
         res = odr_strdup(o, q);    
     yaz_iconv_close(cd);
-    wrbuf_free(w, 1);
+    wrbuf_destroy(w);
     return res;
 }
 

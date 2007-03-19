@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: read-marc.c,v 1.8 2007-01-03 08:42:18 adam Exp $
+ * $Id: read-marc.c,v 1.9 2007-03-19 14:40:08 adam Exp $
  */
 
 /*
@@ -1602,8 +1602,8 @@ char *dummy_marc_record (int num, ODR odr)
 char *dummy_xml_record (int num, ODR odr)
 {
     yaz_marc_t mt = yaz_marc_create();
-    char *result;
-    int rlen;
+    const char *result;
+    size_t rlen;
     char *rec = dummy_marc_record (num, odr);
     int len;
 
@@ -1613,7 +1613,11 @@ char *dummy_xml_record (int num, ODR odr)
     yaz_marc_xml(mt, YAZ_MARC_MARCXML);
     len = yaz_marc_decode_buf (mt, rec, -1, &result, &rlen);
     if (len > 1)
-        rec = (char *) odr_strdup(odr, result);
+    {
+        rec = odr_malloc(odr, rlen+1);
+        memcpy(rec, result, rlen);
+        rec[rlen] = '\0';
+    }
     yaz_marc_destroy(mt);
     return rec;
 }

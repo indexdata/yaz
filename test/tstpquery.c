@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstpquery.c,v 1.4 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstpquery.c,v 1.5 2007-03-19 14:40:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -45,9 +45,9 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
         {
             yaz_rpnquery_to_wrbuf(wrbuf, rpn);
             
-            if (!strcmp(wrbuf_buf(wrbuf), expect_pqf))
+            if (!strcmp(wrbuf_cstr(wrbuf), expect_pqf))
                 res = 1;
-            wrbuf_free(wrbuf, 1);
+            wrbuf_destroy(wrbuf);
         }
     }
     yaz_pqf_destroy(parser);

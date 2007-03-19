@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_retrieval.c,v 1.9 2007-01-03 08:42:16 adam Exp $
+ * $Id: tst_retrieval.c,v 1.10 2007-03-19 14:40:07 adam Exp $
  *
  */
 #include <yaz/retrieval.h>
@@ -76,12 +76,12 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
 
     if (!p)
     {
-        if (expect_error && !strcmp(wrbuf_buf(w), expect_error))
+        if (expect_error && !strcmp(wrbuf_cstr(w), expect_error))
             ret = 1;
         else
         {
             ret = 0;
-            printf("%.*s\n", wrbuf_len(w), wrbuf_buf(w));
+            printf("%s\n", wrbuf_cstr(w));
         }
     }
     else
@@ -100,7 +100,7 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
             ret = 1;
         }
     }
-    wrbuf_free(w, 1);
+    wrbuf_destroy(w);
     return ret;
 }
 

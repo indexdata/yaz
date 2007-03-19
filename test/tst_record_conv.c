@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_record_conv.c,v 1.13 2007-01-03 08:42:16 adam Exp $
+ * $Id: tst_record_conv.c,v 1.14 2007-03-19 14:40:07 adam Exp $
  *
  */
 #include <yaz/record_conv.h>
@@ -78,12 +78,12 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
 
     if (!p)
     {
-        if (expect_error && !strcmp(wrbuf_buf(w), expect_error))
+        if (expect_error && !strcmp(wrbuf_cstr(w), expect_error))
             ret = 1;
         else
         {
             ret = 0;
-            printf("%.*s\n", wrbuf_len(w), wrbuf_buf(w));
+            printf("%s\n", wrbuf_cstr(w));
         }
     }
     else
@@ -100,7 +100,7 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
         if (p)
             yaz_record_conv_destroy(p);
 
-    wrbuf_free(w, 1);
+    wrbuf_destroy(w);
     return ret;
 }
 
@@ -188,26 +188,22 @@ static int conv_convert_test(yaz_record_conv_t p,
                 ret = 0;
                 printf("output_record expect-len=%d got-len=%d\n", expect_len,
                        wrbuf_len(output_record));
-                printf("got-output_record = %.*s\n",
-                       wrbuf_len(output_record), wrbuf_buf(output_record));
-                printf("output_expect_record = %s\n",
-                       output_expect_record);
+                printf("got-output_record = %s\n", wrbuf_cstr(output_record));
+                printf("output_expect_record = %s\n", output_expect_record);
             }
             else if (memcmp(output_expect_record, wrbuf_buf(output_record),
                             strlen(output_expect_record)))
             {
                 ret = 0;
-                printf("got-output_record = %.*s\n",
-                       wrbuf_len(output_record), wrbuf_buf(output_record));
-                printf("output_expect_record = %s\n",
-                       output_expect_record);
+                printf("got-output_record = %s\n", wrbuf_cstr(output_record));
+                printf("output_expect_record = %s\n", output_expect_record);
             }
             else
             {
                 ret = 1;
             }
         }
-        wrbuf_free(output_record, 1);
+        wrbuf_destroy(output_record);
     }
     return ret;
 }

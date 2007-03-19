@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.27 2007-01-24 15:13:20 adam Exp $ */
+/* $Id: marcdisp.h,v 1.28 2007-03-19 14:40:06 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -91,7 +91,7 @@ YAZ_EXPORT void yaz_marc_debug(yaz_marc_t mt, int level);
     Returns -1 on error, or size of input record (>0) if OK
 */
 YAZ_EXPORT int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
-                                   char **result, int *rsize);
+                                   const char **result, size_t *rsize);
 
 /** \brief decodes ISO2709/MARC buffer and stores result in WRBUF
     \param mt handle
@@ -105,20 +105,6 @@ YAZ_EXPORT int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
 */
 YAZ_EXPORT int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf,
                                      int bsize, WRBUF wrbuf);
-
-/** \brief depricated */
-YAZ_EXPORT int marc_display(const char *buf, FILE *outf);
-/** \brief depricated */
-YAZ_EXPORT int marc_display_ex(const char *buf, FILE *outf, int debug);
-/** \brief depricated */
-YAZ_EXPORT int marc_display_exl(const char *buf, FILE *outf, int debug,
-                                int length);
-/** \brief depricated */
-YAZ_EXPORT int marc_display_wrbuf(const char *buf, WRBUF wr, int debug,
-                                  int bsize);
-/** \brief depricated */
-YAZ_EXPORT int yaz_marc_decode(const char *buf, WRBUF wr,
-                               int debug, int bsize, int xml);
 
 YAZ_EXPORT void yaz_marc_subfield_str(yaz_marc_t mt, const char *s);
 YAZ_EXPORT void yaz_marc_endline_str(yaz_marc_t mt, const char *s);

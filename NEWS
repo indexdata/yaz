@@ -1,3 +1,11 @@
+API changes to WRBUF. wrbuf_free removed; replaced by wrbuf_destroy. And
+wrbuf_puts no longer appends '\0'. Use wrbuf_cstr to get C-string out.
+
+Deprecated functions for yaz_marc-removed. 
+
+Changed prototype of yaz_marc_decode_buf: const char for result and size_t
+for rsize.
+
 Branch split: YAZ_2_1_55_branch
 
 --- 2.1.54 2007/03/16

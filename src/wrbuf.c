@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.17 2007-03-18 12:59:56 adam Exp $
+ * $Id: wrbuf.c,v 1.18 2007-03-19 14:40:07 adam Exp $
  */
 
 /**
@@ -35,16 +35,10 @@ WRBUF wrbuf_alloc(void)
     return n;
 }
 
-void wrbuf_free(WRBUF b, int free_buf)
-{
-    if (free_buf && b->buf)
-        xfree(b->buf);
-    xfree(b);
-}
-
 void wrbuf_destroy(WRBUF b)
 {
-    wrbuf_free(b, 1);
+    xfree(b->buf);
+    xfree(b);
 }
 
 void wrbuf_rewind(WRBUF b)
@@ -82,23 +76,21 @@ int wrbuf_write(WRBUF b, const char *buf, int size)
 
 int wrbuf_puts(WRBUF b, const char *buf)
 {
-    wrbuf_write(b, buf, strlen(buf)+1);  /* '\0'-terminate as well */
-    (b->pos)--;                          /* don't include '\0' in count */
+    wrbuf_write(b, buf, strlen(buf));
     return 0;
 }
 
 int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                             const char from, const char to)
 {
-    while(*buf){
+    while(*buf)
+    {
         if (*buf == from)
             wrbuf_putc(b, to);
         else
             wrbuf_putc(b, *buf);
         buf++;
     }
-    wrbuf_putc(b, 0);
-    (b->pos)--;                          /* don't include '\0' in count */
     return 0;
 }
 
@@ -107,7 +99,6 @@ void wrbuf_chop_right(WRBUF b)
     while (b->pos && b->buf[b->pos-1] == ' ')
     {
         (b->pos)--;
-        b->buf[b->pos] = '\0';
     }
 }
 
@@ -149,8 +140,6 @@ int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
         }
         cp++;
     }
-    wrbuf_putc(b, 0);
-    (b->pos)--;
     return 0;
 }
 
@@ -226,8 +215,8 @@ int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
 
 const char *wrbuf_cstr(WRBUF b)
 {
-    wrbuf_write(b, "", 1);  /* '\0'-terminate as well */
-    (b->pos)--;             /* don't include '\0' in count */
+    wrbuf_putc(b, '\0');   /* add '\0' */
+    (b->pos)--;           /* don't include '\0' in count */
     return b->buf;
 }
 

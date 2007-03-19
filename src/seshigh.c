@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.111 2007-03-13 09:12:09 adam Exp $
+ * $Id: seshigh.c,v 1.112 2007-03-19 14:40:07 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -663,7 +663,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
             rr->record = odr_malloc(rr->stream, rr->len);
             memcpy(rr->record, wrbuf_buf(output_record), rr->len);
         }
-        wrbuf_free(output_record, 1);
+        wrbuf_destroy(output_record);
     }
     if (match_syntax)
     {
@@ -1156,8 +1156,8 @@ static void srw_bend_search(association *assoc, request *req,
                       srw_res->resultSetId : "-"),
                      (srw_req->startRecord ? *srw_req->startRecord : 1), 
                      srw_res->num_records);
-        yaz_log(log_request, "%s %s: %s", wrbuf_buf(wr), querytype, querystr);
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s %s: %s", wrbuf_cstr(wr), querytype, querystr);
+        wrbuf_destroy(wr);
     }
 }
 
@@ -1434,8 +1434,8 @@ static void srw_bend_scan(association *assoc, request *req,
                       *srw_req->maximumTerms : 1));
         /* there is no step size in SRU/W ??? */
         wrbuf_printf(wr, "%s: %s ", querytype, querystr);
-        yaz_log(log_request, "%s ", wrbuf_buf(wr) );
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s ", wrbuf_cstr(wr) );
+        wrbuf_destroy(wr);
     }
 
 }
@@ -2364,7 +2364,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.111 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.112 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2427,8 +2427,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                      (req->implementationVersion ?
                       req->implementationVersion : "-")
             );
-        yaz_log(log_request, "%s", wrbuf_buf(wr));
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s", wrbuf_cstr(wr));
+        wrbuf_destroy(wr);
     }
     return apdu;
 }
@@ -2864,8 +2864,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                      req->resultSetName, returnedrecs);
         yaz_query_to_wrbuf(wr, req->query);
         
-        yaz_log(log_request, "Search %s", wrbuf_buf(wr));
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "Search %s", wrbuf_cstr(wr));
+        wrbuf_destroy(wr);
     }
     return apdu;
 }
@@ -2969,8 +2969,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         wrbuf_printf(wr, " %s %d+%d ",
                 req->resultSetId, *req->resultSetStartPoint,
                 *req->numberOfRecordsRequested);
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        wrbuf_destroy(wr);
     }
     if (!resp->records)
         return 0;
@@ -3187,8 +3187,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
 
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
                           bsrr->attributeset);
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        wrbuf_destroy(wr);
     }
     return apdu;
 }
@@ -3264,8 +3264,8 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
         }
         wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
 
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        wrbuf_destroy(wr);
     }
     return apdu;
 }
@@ -3348,8 +3348,8 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
             wrbuf_printf(wr, "OK -");
         for (i = 0; i<req->num_resultSetList; i++)
             wrbuf_printf(wr, " %s ", req->resultSetList[i]);
-        yaz_log(log_request, "%s", wrbuf_buf(wr) );
-        wrbuf_free(wr, 1);
+        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        wrbuf_destroy(wr);
     }
     return apdu;
 }
@@ -3535,8 +3535,8 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
         {
             WRBUF wr = wrbuf_alloc();
             wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
-            yaz_log(log_request, "EsRequest %s", wrbuf_buf(wr) );
-            wrbuf_free(wr, 1);
+            yaz_log(log_request, "EsRequest %s", wrbuf_cstr(wr) );
+            wrbuf_destroy(wr);
         }
 
     }

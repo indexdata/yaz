@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.14 2007-01-03 08:42:15 adam Exp $
+ * $Id: record_conv.c,v 1.15 2007-03-19 14:40:07 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -126,7 +126,7 @@ void yaz_record_conv_destroy(yaz_record_conv_t p)
     {
         yaz_record_conv_reset(p);
         nmem_destroy(p->nmem);
-        wrbuf_free(p->wr_error, 1);
+        wrbuf_destroy(p->wr_error);
         xfree(p->path);
         xfree(p);
     }
@@ -484,7 +484,7 @@ int yaz_record_conv_record(yaz_record_conv_t p,
 
 const char *yaz_record_conv_get_error(yaz_record_conv_t p)
 {
-    return wrbuf_buf(p->wr_error);
+    return wrbuf_cstr(p->wr_error);
 }
 
 void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path)

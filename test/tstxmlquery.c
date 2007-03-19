@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstxmlquery.c,v 1.14 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstxmlquery.c,v 1.15 2007-03-19 14:40:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -78,14 +78,14 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
                 {
                     WRBUF w = wrbuf_alloc();
                     yaz_query_to_wrbuf(w, query2);
-                    if (!expect_pqf || strcmp(expect_pqf, wrbuf_buf(w)) == 0)
+                    if (!expect_pqf || strcmp(expect_pqf, wrbuf_cstr(w)) == 0)
                         status = XML_MATCH;
                     else
                     {
                         status = XML_NO_MATCH;
                         printf("Result: %s\n", wrbuf_buf(w));
                     }
-                    wrbuf_free(w, 1);
+                    wrbuf_destroy(w);
                 }
                 odr_destroy(odr2);
             }

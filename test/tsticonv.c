@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.27 2007-03-17 00:10:41 adam Exp $
+ * $Id: tsticonv.c,v 1.28 2007-03-19 14:40:07 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -110,7 +110,7 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
         ret = 1;
     else
         yaz_log(YLOG_LOG, "GOT (%.*s)", wrbuf_len(b), wrbuf_buf(b));
-    wrbuf_free(b, 1);
+    wrbuf_destroy(b);
     return ret;
 }
 

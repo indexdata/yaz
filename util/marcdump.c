@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.50 2007-03-17 09:14:00 adam Exp $
+ * $Id: marcdump.c,v 1.51 2007-03-19 14:40:08 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -90,8 +90,8 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
     {
         WRBUF wrbuf = wrbuf_alloc();
         yaz_marc_write_mode(mt, wrbuf);
-        fputs(wrbuf_buf(wrbuf), stdout);
-        wrbuf_free(wrbuf, 1);
+        fputs(wrbuf_cstr(wrbuf), stdout);
+        wrbuf_destroy(wrbuf);
     }
     fclose(inf);
 }
@@ -116,9 +116,9 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
         {
             yaz_marc_write_mode(mt, wrbuf);
             
-            fputs(wrbuf_buf(wrbuf), stdout);
+            fputs(wrbuf_cstr(wrbuf), stdout);
         }
-        wrbuf_free(wrbuf, 1);
+        wrbuf_destroy(wrbuf);
     }
     xmlFreeDoc(doc);
 }
@@ -181,10 +181,10 @@ static void dump(const char *fname, const char *from, const char *to,
             fprintf (cfile, "char *marc_records[] = {\n");
         for(;; marc_no++)
         {
-            char *result = 0;
+            const char *result = 0;
             size_t len;
             size_t rlen;
-            int len_result;
+            size_t len_result;
             size_t r;
             char buf[100001];
             
@@ -274,7 +274,7 @@ static void dump(const char *fname, const char *from, const char *to,
                     fclose(sf);
                 }
             }
-            len_result = (int) rlen;
+            len_result = rlen;
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
             if (r > 0 && result)
             {

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.16 2007-02-04 02:24:56 quinn Exp $
+ * $Id: retrieval.c,v 1.17 2007-03-19 14:40:07 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -88,7 +88,7 @@ void yaz_retrieval_destroy(yaz_retrieval_t p)
     {
         yaz_retrieval_reset(p);
         odr_destroy(p->odr);
-        wrbuf_free(p->wr_error, 1);
+        wrbuf_destroy(p->wr_error);
         xfree(p->path);
         xfree(p);
     }
@@ -351,7 +351,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
 
 const char *yaz_retrieval_get_error(yaz_retrieval_t p)
 {
-    return wrbuf_buf(p->wr_error);
+    return wrbuf_cstr(p->wr_error);
 }
 
 void yaz_retrieval_set_path(yaz_retrieval_t p, const char *path)

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstwrbuf.c,v 1.6 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstwrbuf.c,v 1.7 2007-03-19 14:40:07 adam Exp $
  */
 
 #include <stdlib.h>
@@ -18,7 +18,7 @@ static void tstwrbuf(void)
 
     YAZ_CHECK(wr);
 
-    wrbuf_free(wr, 1);
+    wrbuf_destroy(wr);
 
     wr = wrbuf_alloc();
 
@@ -50,7 +50,7 @@ static void tstwrbuf(void)
             }
         wrbuf_rewind(wr);
     }
-    wrbuf_free(wr, 1);
+    wrbuf_destroy(wr);
 }
 
 int main (int argc, char **argv)

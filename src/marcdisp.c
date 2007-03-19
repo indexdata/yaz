@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.47 2007-02-23 10:15:01 adam Exp $
+ * $Id: marcdisp.c,v 1.48 2007-03-19 14:40:07 adam Exp $
  */
 
 /**
@@ -116,7 +116,7 @@ void yaz_marc_destroy(yaz_marc_t mt)
     if (!mt)
         return ;
     nmem_destroy(mt->nmem);
-    wrbuf_free(mt->m_wr, 1);
+    wrbuf_destroy(mt->m_wr);
     xfree(mt->leader_spec);
     xfree(mt);
 }
@@ -890,9 +890,9 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     
     wrbuf_write(wr, wrbuf_buf(wr_head), 24);
     wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
-    wrbuf_free(wr_head, 1);
-    wrbuf_free(wr_dir, 1);
-    wrbuf_free(wr_data_tmp, 1);
+    wrbuf_destroy(wr_head);
+    wrbuf_destroy(wr_dir);
+    wrbuf_destroy(wr_data_tmp);
 
     for (n = mt->nodes; n; n = n->next)
     {
@@ -939,14 +939,14 @@ int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 }
 
 int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
-                         char **result, int *rsize)
+                         const char **result, size_t *rsize)
 {
     int r;
 
     wrbuf_rewind(mt->m_wr);
     r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
     if (result)
-        *result = wrbuf_buf(mt->m_wr);
+        *result = wrbuf_cstr(mt->m_wr);
     if (rsize)
         *rsize = wrbuf_len(mt->m_wr);
     return r;
@@ -980,53 +980,6 @@ void yaz_marc_modify_leader(yaz_marc_t mt, size_t off, const char *str)
             memcpy(leader+off, str, strlen(str));
             break;
         }
-}
-
-/* deprecated */
-int yaz_marc_decode(const char *buf, WRBUF wr, int debug, int bsize, int xml)
-{
-    yaz_marc_t mt = yaz_marc_create();
-    int r;
-
-    mt->debug = debug;
-    mt->xml = xml;
-    r = yaz_marc_decode_wrbuf(mt, buf, bsize, wr);
-    yaz_marc_destroy(mt);
-    return r;
-}
-
-/* deprecated */
-int marc_display_wrbuf (const char *buf, WRBUF wr, int debug, int bsize)
-{
-    return yaz_marc_decode(buf, wr, debug, bsize, 0);
-}
-
-/* deprecated */
-int marc_display_exl (const char *buf, FILE *outf, int debug, int bsize)
-{
-    yaz_marc_t mt = yaz_marc_create();
-    int r;
-
-    mt->debug = debug;
-    r = yaz_marc_decode_wrbuf (mt, buf, bsize, mt->m_wr);
-    if (!outf)
-        outf = stdout;
-    if (r > 0)
-        fwrite (wrbuf_buf(mt->m_wr), 1, wrbuf_len(mt->m_wr), outf);
-    yaz_marc_destroy(mt);
-    return r;
-}
-
-/* deprecated */
-int marc_display_ex (const char *buf, FILE *outf, int debug)
-{
-    return marc_display_exl (buf, outf, debug, -1);
-}
-
-/* deprecated */
-int marc_display (const char *buf, FILE *outf)
-{
-    return marc_display_ex (buf, outf, 0);
 }
 
 int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec)

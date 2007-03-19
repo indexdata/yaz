@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.13 2007-01-08 10:48:07 adam Exp $
+ * $Id: tstccl.c,v 1.14 2007-03-19 14:40:07 adam Exp $
  */
 
 /* CCL test */
@@ -41,7 +41,7 @@ static int tst_ccl_query(CCL_bibset bibset,
             else
                 ret = 0;
             ccl_rpn_delete(rpn);
-            wrbuf_free(wrbuf, 1);
+            wrbuf_destroy(wrbuf);
         }
         else 
         {
