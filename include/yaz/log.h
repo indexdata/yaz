@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: log.h,v 1.42 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: log.h,v 1.43 2007-03-19 12:54:58 adam Exp $ */
 
 /**
  * \file log.h
@@ -196,9 +196,8 @@ YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg,
 YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
                                            void *info), void *info);
 
-/* if syslog.h is already included, do not define the old LOG_'s */
-#ifdef LOG_DEBUG
-#undef YAZ_USE_NEW_LOG
+/* by default, do not enable the old LOG_-defines */
+#ifndef YAZ_USE_NEW_LOG
 #define YAZ_USE_NEW_LOG 1
 #endif
 
