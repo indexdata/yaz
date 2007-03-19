@@ -1,4 +1,4 @@
-/* $Id: zoomtst7.c,v 1.16 2007-01-03 08:42:17 adam Exp $  */
+/* $Id: zoomtst7.c,v 1.17 2007-03-19 20:58:34 adam Exp $  */
 
 /** \file zoomtst7.c
     \brief Mix of operations
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
             z = ZOOM_connection_create (o);
             ZOOM_connection_connect (z, host, 0);
 
-            scan = ZOOM_connection_scan (z, "@attr 1=4 a");
+            scan = ZOOM_connection_scan_pqf(z, "@attr 1=4 a");
             if (block > 0)
                 while (ZOOM_event (1, &z))
                     ;

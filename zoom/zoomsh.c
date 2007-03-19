@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.43 2007-01-03 08:42:17 adam Exp $
+ * $Id: zoomsh.c,v 1.44 2007-03-19 20:58:34 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -393,7 +393,7 @@ static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
     for (i = 0; i<MAX_CON; i++)
     {
         if (c[i])
-            s[i] = ZOOM_connection_scan(c[i], start_term);
+            s[i] = ZOOM_connection_scan_pqf(c[i], start_term);
         else
             s[i] = 0;
     }
