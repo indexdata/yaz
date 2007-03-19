@@ -5,7 +5,7 @@ Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
 Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libpcap0.8-dev
 
-Package: libyaz
+Package: libyaz3
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -36,10 +36,10 @@ Description: The YAZ Z39.50 toolkit (documentation)
  .
  This packages includes HTML documentation for YAZ.
 
-Package: libyaz-dev
-Depends: libyaz (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev
+Package: libyaz3-dev
+Depends: libyaz3 (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev
 Replaces: yaz-devel
-Conflicts: yaz-devel
+Conflicts: yaz-devel,libyaz-dev
 Section: devel
 Architecture: any
 Recommends: yaz-doc
