@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.9 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_util.c,v 1.10 2007-03-19 21:08:13 adam Exp $
  */
 /**
  * \file odr_util.c
@@ -21,9 +21,9 @@
 void odr_prname(ODR o, const char *name)
 {
     if (name)
-        odr_printf(o, "%*s%s ", o->indent*4, "", name);
+        odr_printf(o, "%*s%s ", o->op->indent*4, "", name);
     else
-        odr_printf(o, "%*s", o->indent*4, "");
+        odr_printf(o, "%*s", o->op->indent*4, "");
 }
 
 int odp_more_chunks(ODR o, const unsigned char *base, int len)

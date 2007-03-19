@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_cons.c,v 1.8 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_cons.c,v 1.9 2007-03-19 21:08:13 adam Exp $
  *
  */
 
@@ -21,7 +21,7 @@
 
 void odr_setlenlen(ODR o, int len)
 {
-    o->lenlen = len;
+    o->op->lenlen = len;
 }
 
 int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
@@ -29,17 +29,18 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
 {
     int res;
     int cons = 1;
-    int lenlen = o->lenlen;
+    int lenlen = o->op->lenlen;
 
     if (o->error)
         return 0;
-    o->lenlen = 1; /* reset lenlen */
-    if (o->t_class < 0)
+    o->op->lenlen = 1; /* reset lenlen */
+    if (o->op->t_class < 0)
     {
-        o->t_class = zclass;
-        o->t_tag = tag;
+        o->op->t_class = zclass;
+        o->op->t_tag = tag;
     }
-    if ((res = ber_tag(o, xxp, o->t_class, o->t_tag, &cons, 1, name)) < 0)
+    res = ber_tag(o, xxp, o->op->t_class, o->op->t_tag, &cons, 1, name);
+    if (res < 0)
         return 0;
     if (!res || !cons)
         return 0;
@@ -122,7 +123,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
     {
         odr_prname(o, name);
         odr_printf(o, "{\n");
-        o->indent++;
+        o->op->indent++;
     }
     else
     {
@@ -202,7 +203,7 @@ int odr_constructed_end(ODR o)
         return 1;
     case ODR_PRINT:
         ODR_STACK_POP(o);
-        o->indent--;
+        o->op->indent--;
         odr_prname(o, 0);
         odr_printf(o, "}\n");
         return 1;

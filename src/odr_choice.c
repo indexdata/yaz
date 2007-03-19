@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_choice.c,v 1.7 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_choice.c,v 1.8 2007-03-19 21:08:13 adam Exp $
  */
 
 /**
@@ -19,7 +19,7 @@
 int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
                const char *name)
 {
-    int i, cl = -1, tg, cn, *which = (int *)whichp, bias = o->choice_bias;
+    int i, cl = -1, tg, cn, *which = (int *)whichp, bias = o->op->choice_bias;
 
     if (o->error)
         return 0;
@@ -31,7 +31,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
         *which = -1;
         *(char**)p = 0;
     }
-    o->choice_bias = -1;
+    o->op->choice_bias = -1;
 
     if (o->direction == ODR_PRINT)
     {
@@ -91,13 +91,13 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
 
 void odr_choice_bias(ODR o, int what)
 {
-    if (o->enable_bias)
-        o->choice_bias = what;
+    if (o->op->enable_bias)
+        o->op->choice_bias = what;
 }
 
 void odr_choice_enable_bias (ODR o, int mode)
 {
-    o->enable_bias = mode;
+    o->op->enable_bias = mode;
 }
 /*
  * Local variables:

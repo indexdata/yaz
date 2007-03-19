@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.10 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_oct.c,v 1.11 2007-03-19 21:08:13 adam Exp $
  */
 /**
  * \file odr_oct.c
@@ -24,12 +24,13 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
 
     if (o->error)
         return 0;
-    if (o->t_class < 0)
+    if (o->op->t_class < 0)
     {
-        o->t_class = ODR_UNIVERSAL;
-        o->t_tag = ODR_OCTETSTRING;
+        o->op->t_class = ODR_UNIVERSAL;
+        o->op->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
+    res = ber_tag(o, p, o->op->t_class, o->op->t_tag, &cons, opt, name);
+    if (res < 0)
         return 0;
     if (!res)
         return odr_missing(o, opt, name);
@@ -38,7 +39,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
         odr_prname(o, name);
         odr_printf(o, "OCTETSTRING(len=%d) ", (*p)->len);
 
-        o->op->stream_write(o, o->print, ODR_OCTETSTRING,
+        o->op->stream_write(o, o->op->print, ODR_OCTETSTRING,
                             (char*) (*p)->buf, (*p)->len);
         odr_printf(o, "\n");
         return 1;
@@ -66,12 +67,13 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
 
     if (o->error)
         return 0;
-    if (o->t_class < 0)
+    if (o->op->t_class < 0)
     {
-        o->t_class = ODR_UNIVERSAL;
-        o->t_tag = ODR_OCTETSTRING;
+        o->op->t_class = ODR_UNIVERSAL;
+        o->op->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
+    res = ber_tag(o, p, o->op->t_class, o->op->t_tag, &cons, opt, name);
+    if (res < 0)
         return 0;
     if (!res)
         return odr_missing(o, opt, name);
@@ -113,12 +115,13 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
 
     if (o->error)
         return 0;
-    if (o->t_class < 0)
+    if (o->op->t_class < 0)
     {
-        o->t_class = ODR_UNIVERSAL;
-        o->t_tag = ODR_OCTETSTRING;
+        o->op->t_class = ODR_UNIVERSAL;
+        o->op->t_tag = ODR_OCTETSTRING;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
+    res = ber_tag(o, p, o->op->t_class, o->op->t_tag, &cons, opt, name);
+    if (res < 0)
         return 0;
     if (!res)
         return odr_missing(o, opt, name);

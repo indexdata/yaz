@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr.c,v 1.15 2007-02-23 10:15:01 adam Exp $
+ * $Id: odr.c,v 1.16 2007-03-19 21:08:13 adam Exp $
  *
  */
 
@@ -184,7 +184,7 @@ void odr_set_stream(ODR o, void *handle,
                                          const char *buf, int len),
                     void (*stream_close)(void *handle))
 {
-    o->print = (FILE*) handle;
+    o->op->print = (FILE*) handle;
     o->op->stream_write = stream_write;
     o->op->stream_close = stream_close;
 }
@@ -215,13 +215,13 @@ ODR odr_createmem(int direction)
 
     if (!(o = (ODR)xmalloc(sizeof(*o))))
         return 0;
+    o->op = (struct Odr_private *) xmalloc (sizeof(*o->op));
     o->direction = direction;
     o->buf = 0;
     o->size = o->pos = o->top = 0;
-    o->can_grow = 1;
+    o->op->can_grow = 1;
     o->mem = nmem_create();
-    o->enable_bias = 1;
-    o->op = (struct Odr_private *) xmalloc (sizeof(*o->op));
+    o->op->enable_bias = 1;
     o->op->odr_ber_tag.lclass = -1;
     o->op->iconv_handle = 0;
     odr_setprint(o, stderr);
@@ -242,16 +242,16 @@ void odr_reset(ODR o)
     o->bp = o->buf;
     odr_seek(o, ODR_S_SET, 0);
     o->top = 0;
-    o->t_class = -1;
-    o->t_tag = -1;
-    o->indent = 0;
+    o->op->t_class = -1;
+    o->op->t_tag = -1;
+    o->op->indent = 0;
     o->op->stack_first = 0;
     o->op->stack_top = 0;
     o->op->tmp_names_sz = 0;
     o->op->tmp_names_buf = 0;
     nmem_reset(o->mem);
-    o->choice_bias = -1;
-    o->lenlen = 1;
+    o->op->choice_bias = -1;
+    o->op->lenlen = 1;
     if (o->op->iconv_handle != 0)
         yaz_iconv(o->op->iconv_handle, 0, 0, 0, 0);
     yaz_log (log_level, "odr_reset o=%p", o);
@@ -260,10 +260,10 @@ void odr_reset(ODR o)
 void odr_destroy(ODR o)
 {
     nmem_destroy(o->mem);
-    if (o->buf && o->can_grow)
+    if (o->buf && o->op->can_grow)
        xfree(o->buf);
     if (o->op->stream_close)
-        o->op->stream_close(o->print);
+        o->op->stream_close(o->op->print);
     if (o->op->iconv_handle != 0)
         yaz_iconv_close (o->op->iconv_handle);
     xfree(o->op);
@@ -277,7 +277,7 @@ void odr_setbuf(ODR o, char *buf, int len, int can_grow)
     o->bp = (unsigned char *) buf;
 
     o->buf = (unsigned char *) buf;
-    o->can_grow = can_grow;
+    o->op->can_grow = can_grow;
     o->top = o->pos = 0;
     o->size = len;
 }
@@ -297,7 +297,7 @@ void odr_printf(ODR o, const char *fmt, ...)
 
     va_start(ap, fmt);
     yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
-    o->op->stream_write(o, o->print, ODR_VISIBLESTRING, buf, strlen(buf));
+    o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, strlen(buf));
     va_end(ap);
 }
 /*

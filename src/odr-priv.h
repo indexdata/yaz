@@ -60,7 +60,6 @@ struct Odr_private {
     struct odr_constack *stack_first; /** first member of allocated stack */
     struct odr_constack *stack_top;   /** top of stack */
 
-
     const char **tmp_names_buf;   /** array returned by odr_get_element_path */
     int tmp_names_sz;                 /** size of tmp_names_buf */
 
@@ -72,6 +71,16 @@ struct Odr_private {
     void (*stream_write)(ODR o, void *handle, int type,
                          const char *buf, int len);
     void (*stream_close)(void *handle);
+
+    int can_grow;        /* are we allowed to reallocate */
+    int t_class;         /* implicit tagging (-1==default tag) */
+    int t_tag;
+
+    int enable_bias;     /* force choice enable flag */
+    int choice_bias;     /* force choice */
+    int lenlen;          /* force length-of-lenght (odr_setlen()) */
+    FILE *print;         /* output file handler for direction print */
+    int indent;          /* current indent level for printing */
 };
 
 #define ODR_STACK_POP(x) (x)->op->stack_top = (x)->op->stack_top->prev

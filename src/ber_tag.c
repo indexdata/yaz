@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ber_tag.c,v 1.7 2007-01-03 08:42:15 adam Exp $
+ * $Id: ber_tag.c,v 1.8 2007-03-19 21:08:13 adam Exp $
  */
 
 /** 
@@ -42,7 +42,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
 
     if (o->direction == ODR_DECODE)
         *pp = 0;
-    o->t_class = -1;
+    o->op->t_class = -1;
     if (ODR_STACK_EMPTY(o))
     {
         odr_seek(o, ODR_S_SET, 0);

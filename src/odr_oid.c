@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_oid.c,v 1.8 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_oid.c,v 1.9 2007-03-19 21:08:13 adam Exp $
  */
 /**
  * \file odr_oid.c
@@ -25,12 +25,13 @@ int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
 
     if (o->error)
         return 0;
-    if (o->t_class < 0)
+    if (o->op->t_class < 0)
     {
-        o->t_class = ODR_UNIVERSAL;
-        o->t_tag = ODR_OID;
+        o->op->t_class = ODR_UNIVERSAL;
+        o->op->t_tag = ODR_OID;
     }
-    if ((res = ber_tag(o, p, o->t_class, o->t_tag, &cons, opt, name)) < 0)
+    res = ber_tag(o, p, o->op->t_class, o->op->t_tag, &cons, opt, name);
+    if (res < 0)
         return 0;
     if (!res)
         return odr_missing(o, opt, name);

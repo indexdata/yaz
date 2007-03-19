@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.8 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_mem.c,v 1.9 2007-03-19 21:08:13 adam Exp $
  */
 /**
  * \file odr_mem.c
@@ -77,7 +77,7 @@ int odr_grow_block(ODR b, int min_bytes)
 {
     int togrow;
 
-    if (!b->can_grow)
+    if (!b->op->can_grow)
         return -1;
     if (!b->size)
         togrow = 1024;

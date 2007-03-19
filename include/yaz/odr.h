@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: odr.h,v 1.25 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: odr.h,v 1.26 2007-03-19 21:08:13 adam Exp $ */
 
 /**
  * \file odr.h
@@ -115,35 +115,27 @@ typedef int Odr_oid;   /* terminate by -1 */
 #define ODR_S_CUR     1
 #define ODR_S_END     2
 
-typedef struct odr
+typedef struct odr *ODR;
+
+/** ODR handle and the public structs */
+struct odr
 {
     int direction;       /* the direction of this stream */
 
-    int error;           /* current error state (0==OK) */
+    int error;            /* current error state (0==OK) */
 
-    int can_grow;         /* are we allowed to reallocate */
     unsigned char *buf;            /* memory handle */
+    int top;              /* top of buffer (max pos when encoding) */
     int size;             /* current buffer size (encoding+decoding) */
 
     int pos;              /* current position (encoding) */
-    int top;              /* top of buffer (max pos when encoding) */
 
     const unsigned char *bp; /* position in buffer (decoding) */
-
-    int t_class;         /* implicit tagging (-1==default tag) */
-    int t_tag;
-
-    int enable_bias;     /* force choice enable flag */
-    int choice_bias;     /* force choice */
-    int lenlen;          /* force length-of-lenght (odr_setlen()) */
-
-    FILE *print;         /* output file handler for direction print */
-    int indent;          /* current indent level for printing */
 
     NMEM mem;            /* memory handle for decoding (primarily) */
 
     struct Odr_private *op;
-} *ODR;
+};
 
 typedef int (*Odr_fun)(ODR, char **, int, const char *);
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_tag.c,v 1.6 2007-01-03 08:42:15 adam Exp $
+ * $Id: odr_tag.c,v 1.7 2007-03-19 21:08:13 adam Exp $
  */
 /**
  * \file odr_tag.c
@@ -35,10 +35,10 @@ int odr_implicit_settag(ODR o, int zclass, int tag)
 {
     if (o->error)
         return 0;
-    if (o->t_class < 0)
+    if (o->op->t_class < 0)
     {
-        o->t_class = zclass;
-        o->t_tag = tag;
+        o->op->t_class = zclass;
+        o->op->t_tag = tag;
     }
     return 1;
 }
@@ -53,7 +53,7 @@ int odr_initmember(ODR o, void *p, int size)
         *pp = (char *)odr_malloc(o, size);
     else if (!*pp)
     {
-        o->t_class = -1;
+        o->op->t_class = -1;
         return 0;
     }
     return 1;
