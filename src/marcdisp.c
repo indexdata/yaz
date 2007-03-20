@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.48 2007-03-19 14:40:07 adam Exp $
+ * $Id: marcdisp.c,v 1.49 2007-03-20 21:37:32 adam Exp $
  */
 
 /**
@@ -128,15 +128,7 @@ NMEM yaz_marc_get_nmem(yaz_marc_t mt)
 
 static void marc_iconv_reset(yaz_marc_t mt, WRBUF wr)
 {
-    if (mt->iconv_cd)
-    {
-        char outbuf[12];
-        size_t outbytesleft = sizeof(outbuf);
-        char *outp = outbuf;
-        size_t r = yaz_iconv(mt->iconv_cd, 0, 0, &outp, &outbytesleft);
-        if (r != (size_t) (-1))
-            wrbuf_write(wr, outbuf, outp - outbuf);
-    }
+    wrbuf_iconv_reset(wr, mt->iconv_cd);
 }
 
 static int marc_exec_leader(const char *leader_spec, char *leader,
@@ -491,6 +483,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             wrbuf_puts(wr, "(");
             wrbuf_iconv_write(wr, mt->iconv_cd, 
                               n->u.comment, strlen(n->u.comment));
+            marc_iconv_reset(mt, wr);
             wrbuf_puts(wr, ")\n");
             break;
         case YAZ_MARC_LEADER:
@@ -847,6 +840,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             }
             /* write dummy FS (makes MARC-8 to become ASCII) */
             wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');
+            marc_iconv_reset(mt, wr_data_tmp);
             data_length += wrbuf_len(wr_data_tmp);
             break;
         case YAZ_MARC_CONTROLFIELD:
@@ -857,6 +851,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                              n->u.controlfield.data);
             marc_iconv_reset(mt, wr_data_tmp);
             wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');/* field sep */
+            marc_iconv_reset(mt, wr_data_tmp);
             data_length += wrbuf_len(wr_data_tmp);
             break;
         case YAZ_MARC_COMMENT:

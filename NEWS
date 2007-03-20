@@ -1,3 +1,8 @@
+Attempted fix of bug #976: Segfault in yaz_iconv. The yaz_iconv function
+write handlers no longer carries a 'last' parameter. This will make
+yaz_iconv flush "less" characters. A flush is performed by call to
+yaz_iconv(cd, 0, 0, &outbut, &outbytesleft) .
+
 Definition of wrbuf_diags moved to querytowrbuf.h. Function wrbuf_put_zquery
 removed, because function yaz_query_to_wrbuf does the same.
 

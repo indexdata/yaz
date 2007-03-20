@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.25 2007-03-19 14:40:06 adam Exp $ */
+/* $Id: wrbuf.h,v 1.26 2007-03-20 21:37:31 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -77,6 +77,8 @@ YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
 YAZ_EXPORT int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
 
 YAZ_EXPORT int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
+
+YAZ_EXPORT void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd);
 
 YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
 

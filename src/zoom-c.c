@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.118 2007-03-19 20:58:34 adam Exp $
+ * $Id: zoom-c.c,v 1.119 2007-03-20 21:37:32 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1284,7 +1284,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.118 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.119 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1789,6 +1789,7 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 
     *from = '\0';
     strcpy(to, "UTF-8");
+
     if (record_charset && *record_charset)
     {
         /* Use "from,to" or just "from" */
@@ -1810,30 +1811,14 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 
     if (*from && *to && (cd = yaz_iconv_open(to, from)))
     {
-        char outbuf[12];
-        size_t inbytesleft = sz;
-        const char *inp = buf;
-        
         if (!rec->wrbuf_iconv)
             rec->wrbuf_iconv = wrbuf_alloc();
 
         wrbuf_rewind(rec->wrbuf_iconv);
 
-        while (inbytesleft)
-        {
-            size_t outbytesleft = sizeof(outbuf);
-            char *outp = outbuf;
-            size_t r = yaz_iconv(cd, (char**) &inp,
-                                 &inbytesleft, 
-                                 &outp, &outbytesleft);
-            if (r == (size_t) (-1))
-            {
-                int e = yaz_iconv_error(cd);
-                if (e != YAZ_ICONV_E2BIG)
-                    break;
-            }
-            wrbuf_write(rec->wrbuf_iconv, outbuf, outp - outbuf);
-        }
+        wrbuf_iconv_write(rec->wrbuf_iconv, cd, buf, sz);
+        wrbuf_iconv_reset(rec->wrbuf_iconv, cd);
+
         buf = wrbuf_cstr(rec->wrbuf_iconv);
         sz = wrbuf_len(rec->wrbuf_iconv);
         yaz_iconv_close(cd);

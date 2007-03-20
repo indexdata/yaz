@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.36 2007-03-17 00:10:40 adam Exp $
+ * $Id: siconv.c,v 1.37 2007-03-20 21:37:32 adam Exp $
  */
 /**
  * \file siconv.c
@@ -83,8 +83,7 @@ struct yaz_iconv_struct {
     unsigned long (*read_handle)(yaz_iconv_t cd, unsigned char *inbuf,
                                  size_t inbytesleft, size_t *no_read);
     size_t (*write_handle)(yaz_iconv_t cd, unsigned long x,
-                           char **outbuf, size_t *outbytesleft,
-                           int last);
+                           char **outbuf, size_t *outbytesleft);
     size_t (*flush_handle)(yaz_iconv_t cd,
                            char **outbuf, size_t *outbytesleft);
     int marc8_esc_mode;
@@ -616,8 +615,7 @@ static unsigned long yaz_read_advancegreek(yaz_iconv_t cd, unsigned char *inp,
 }
 
 static size_t yaz_write_advancegreek(yaz_iconv_t cd, unsigned long x,
-                                     char **outbuf, size_t *outbytesleft,
-                                     int last)
+                                     char **outbuf, size_t *outbytesleft)
 {
     size_t k = 0;
     unsigned char *out = (unsigned char*) *outbuf;
@@ -865,8 +863,7 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
 }
 
 static size_t yaz_write_UTF8(yaz_iconv_t cd, unsigned long x,
-                             char **outbuf, size_t *outbytesleft,
-                             int last)
+                             char **outbuf, size_t *outbytesleft)
 {
     return yaz_write_UTF8_char(x, outbuf, outbytesleft, &cd->my_errno);
 }
@@ -931,10 +928,8 @@ size_t yaz_write_UTF8_char(unsigned long x,
     return 0;
 }
 
-
 static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
-                                   char **outbuf, size_t *outbytesleft,
-                                   int last)
+                                   char **outbuf, size_t *outbytesleft)
 {
     /* list of two char unicode sequence that, when combined, are
        equivalent to single unicode chars that can be represented in
@@ -969,7 +964,7 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
         cd->compose_char = 0;
     }
 
-    if (!last && x > 32 && x < 127 && cd->compose_char == 0)
+    if (x > 32 && x < 127 && cd->compose_char == 0)
     {
         cd->compose_char = x;
         return 0;
@@ -990,10 +985,27 @@ static size_t yaz_write_ISO8859_1 (yaz_iconv_t cd, unsigned long x,
     return 0;
 }
 
+static size_t yaz_flush_ISO8859_1(yaz_iconv_t cd,
+                                  char **outbuf, size_t *outbytesleft)
+{
+    if (cd->compose_char)
+    {
+        unsigned char *outp = (unsigned char *) *outbuf;
+        if (*outbytesleft < 1)
+        {
+            cd->my_errno = YAZ_ICONV_E2BIG;
+            return (size_t)(-1);
+        }
+        *outp++ = (unsigned char) cd->compose_char;
+        (*outbytesleft)--;
+        *outbuf = (char *) outp;
+        cd->compose_char = 0;
+    }
+    return 0;
+}
 
 static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft,
-                              int last)
+                              char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
@@ -1014,8 +1026,7 @@ static size_t yaz_write_UCS4 (yaz_iconv_t cd, unsigned long x,
 }
 
 static size_t yaz_write_UCS4LE (yaz_iconv_t cd, unsigned long x,
-                                char **outbuf, size_t *outbytesleft,
-                                int last)
+                                char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
@@ -1043,7 +1054,7 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
     char *utf8_outbuf = utf8_buf;
     size_t utf8_outbytesleft = sizeof(utf8_buf)-1, r;
 
-    r = yaz_write_UTF8(cd, x, &utf8_outbuf, &utf8_outbytesleft, 0);
+    r = yaz_write_UTF8(cd, x, &utf8_outbuf, &utf8_outbytesleft);
     if (r == (size_t)(-1))
     {
         cd->my_errno = YAZ_ICONV_EILSEQ;
@@ -1211,8 +1222,7 @@ static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
 
 
 static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
-                                char **outbuf, size_t *outbytesleft,
-                                int last)
+                                char **outbuf, size_t *outbytesleft)
 {
     int comb = 0;
     const char *page_chr = 0;
@@ -1242,18 +1252,6 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
             return r;
         cd->write_marc8_last = y;
     }
-    if (last)
-    {
-        size_t r = flush_combos(cd, outbuf, outbytesleft);
-        if (r)
-        {
-            if (comb)
-                cd->write_marc8_comb_no--;
-            else
-                cd->write_marc8_last = 0;
-            return r;
-        }
-    }
     return 0;
 }
 
@@ -1267,8 +1265,7 @@ static size_t yaz_flush_marc8(yaz_iconv_t cd,
 }
 
 static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft,
-                              int last)
+                              char **outbuf, size_t *outbytesleft)
 {
     int i;
     for (i = 0; latin1_comb[i].x1; i++)
@@ -1282,11 +1279,11 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
             int last_ch = cd->write_marc8_last;
 
             r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
-                                  outbuf, outbytesleft, 0);
+                                  outbuf, outbytesleft);
             if (r)
                 return r;
             r = yaz_write_marc8_2(cd, latin1_comb[i].x2,
-                                  outbuf, outbytesleft, last);
+                                  outbuf, outbytesleft);
             if (r && cd->my_errno == YAZ_ICONV_E2BIG)
             {
                 /* not enough room. reset output to original values */
@@ -1297,14 +1294,13 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
             return r;
         }
     }
-    return yaz_write_marc8_2(cd, x, outbuf, outbytesleft, last);
+    return yaz_write_marc8_2(cd, x, outbuf, outbytesleft);
 }
 
 
 #if HAVE_WCHAR_H
-static size_t yaz_write_wchar_t (yaz_iconv_t cd, unsigned long x,
-                                 char **outbuf, size_t *outbytesleft,
-                                 int last)
+static size_t yaz_write_wchar_t(yaz_iconv_t cd, unsigned long x,
+                                char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
@@ -1371,7 +1367,10 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
         if (!yaz_matchstr(tocode, "UTF8"))
             cd->write_handle = yaz_write_UTF8;
         else if (!yaz_matchstr(tocode, "ISO88591"))
+        {
             cd->write_handle = yaz_write_ISO8859_1;
+            cd->flush_handle = yaz_flush_ISO8859_1;
+        }
         else if (!yaz_matchstr (tocode, "UCS4"))
             cd->write_handle = yaz_write_UCS4;
         else if (!yaz_matchstr(tocode, "UCS4LE"))
@@ -1489,6 +1488,20 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     }
     cd->init_flag = 0;
 
+    if (!inbuf || !*inbuf)
+    {
+        if (outbuf && *outbuf)
+        {
+            if (cd->unget_x)
+                r = (*cd->write_handle)(cd, cd->unget_x, outbuf, outbytesleft);
+            if (cd->flush_handle)
+                r = (*cd->flush_handle)(cd, outbuf, outbytesleft);
+        }
+        if (r == 0)
+            cd->init_flag = 1;
+        cd->unget_x = 0;
+        return r;
+    }
     while (1)
     {
         unsigned long x;
@@ -1499,34 +1512,24 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             x = cd->unget_x;
             no_read = cd->no_read_x;
         }
-        else if (inbuf && *inbuf)
+        else
         {
             if (*inbytesleft == 0)
             {
                 r = *inbuf - inbuf0;
                 break;
             }
-            x = (cd->read_handle)(cd, (unsigned char *) *inbuf, *inbytesleft,
-                                  &no_read);
+            x = (*cd->read_handle)(cd, (unsigned char *) *inbuf, *inbytesleft,
+                                   &no_read);
             if (no_read == 0)
             {
                 r = (size_t)(-1);
                 break;
             }
         }
-        else
-        {
-            r = 0;
-            if (cd->flush_handle && outbuf && *outbuf)
-                r = (*cd->flush_handle)(cd, outbuf, outbytesleft);
-            if (r == 0)
-                cd->init_flag = 1;
-            break;
-        }
         if (x)
         {
-            r = (cd->write_handle)(cd, x, outbuf, outbytesleft,
-                                   (*inbytesleft - no_read) == 0 ? 1 : 0);
+            r = (*cd->write_handle)(cd, x, outbuf, outbytesleft);
             if (r)
             {
                 /* unable to write it. save it because read_handle cannot

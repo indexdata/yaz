@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.28 2007-03-19 14:40:07 adam Exp $
+ * $Id: tsticonv.c,v 1.29 2007-03-20 21:37:32 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -76,8 +76,12 @@ static int tst_convert_l(yaz_iconv_t cd, size_t in_len, const char *in_buf,
                 return 0;
         }
         else
+        {
+            yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
             break;
+        }
     }
+
     return compare_buffers("tsticonv 22", 0,
                            expect_len, expect_buf,
                            outbuf - outbuf0, outbuf0);
@@ -103,6 +107,14 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
             int e = yaz_iconv_error(cd);
             if (e != YAZ_ICONV_E2BIG)
                 break;
+        }
+        else
+        {
+            size_t outbytesleft = sizeof(outbuf);
+            char *outp = outbuf;
+            r = yaz_iconv(cd, 0, 0, &outp, &outbytesleft);
+            wrbuf_write(b, outbuf, outp - outbuf);
+            break;
         }
     }
     if (wrbuf_len(b) == strlen(cmpbuf) 
@@ -266,6 +278,9 @@ static void dconvert(int mandatory, const char *tmpcode)
             return;
         r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         YAZ_CHECK(r != (size_t) (-1));
+
+        r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
+        YAZ_CHECK(r != (size_t) (-1));
         yaz_iconv_close(cd);
         if (r == (size_t) (-1))
             return;
@@ -281,11 +296,19 @@ static void dconvert(int mandatory, const char *tmpcode)
         outbytesleft = sizeof(outbuf1);
         r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         YAZ_CHECK(r != (size_t) (-1));
+
+        r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
+        if (r == (size_t)(-1))
+        {
+            fprintf(stderr, "failed\n");
+        }
+        YAZ_CHECK(r != (size_t) (-1));
+
         if (r != (size_t)(-1)) 
         {
             ret = compare_buffers("dconvert", i,
                                   strlen(iso_8859_1_a[i]), iso_8859_1_a[i],
-                              sizeof(outbuf1) - outbytesleft, outbuf1);
+                                  sizeof(outbuf1) - outbytesleft, outbuf1);
             YAZ_CHECK(ret);
         }
         yaz_iconv_close(cd);
