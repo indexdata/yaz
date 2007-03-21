@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.129 2007-02-23 10:15:02 adam Exp $
+# $Id: makefile,v 1.130 2007-03-21 19:47:28 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -427,6 +427,7 @@ MISC_OBJS= \
    $(OBJDIR)\xcqlutil.obj \
    $(OBJDIR)\elementset.obj \
    $(OBJDIR)\timing.obj \
+   $(OBJDIR)\query-charset.obj \
    $(OBJDIR)\http.obj
 
 Z3950_OBJS= \
