@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: cql.h,v 1.17 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: cql.h,v 1.18 2007-03-21 10:12:09 adam Exp $ */
 
 /** \file cql.h
     \brief Header with public definitions about CQL.
@@ -260,10 +260,10 @@ void cql_transform_close(cql_transform_t ct);
  * transformation handle. The result is written to a user-defined stream.
  */
 YAZ_EXPORT
-void cql_transform_pr(cql_transform_t ct,
-                      struct cql_node *cn,
-                      void (*pr)(const char *buf, void *client_data),
-                      void *client_data);
+int cql_transform(cql_transform_t ct,
+                  struct cql_node *cn,
+                  void (*pr)(const char *buf, void *client_data),
+                  void *client_data);
 
 /**
  * Performs a CQL transform to PQF given a CQL node tree and a CQL
