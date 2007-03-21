@@ -1,4 +1,4 @@
-/* $Id: zoomtst8.c,v 1.7 2007-03-19 20:58:34 adam Exp $  */
+/* $Id: zoomtst8.c,v 1.8 2007-03-21 11:27:47 adam Exp $  */
 
 /** \file zoomtst8.c
     \brief Asynchronous multi-target client doing scan
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         /* set number of scan terms to be returned. */
         ZOOM_connection_option_set (z[i], "number", "7");
         /* and perform scan */
-        s[i] = ZOOM_connection_scan_pqf(z[i], argv[argc-1]);
+        s[i] = ZOOM_connection_scan(z[i], argv[argc-1]);
     }
 
     /* network I/O. pass number of connections and array of connections */

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.121 2007-03-21 10:22:31 adam Exp $
+ * $Id: zoom-c.c,v 1.122 2007-03-21 11:27:46 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -853,9 +853,16 @@ ZOOM_API(ZOOM_resultset)
     return r;
 }
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_resultset_sort(ZOOM_resultset r,
-                        const char *sort_type, const char *sort_spec)
+                         const char *sort_type, const char *sort_spec)
+{
+    (void) ZOOM_resultset_sort(r, sort_type, sort_spec);
+}
+
+ZOOM_API(int)
+    ZOOM_resultset_sort1(ZOOM_resultset r,
+                         const char *sort_type, const char *sort_spec)
 {
     ZOOM_connection c = r->connection;
     ZOOM_task task;
@@ -1284,7 +1291,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.121 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.122 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2628,21 +2635,21 @@ static zoom_ret send_present(ZOOM_connection c)
 }
 
 ZOOM_API(ZOOM_scanset)
-    ZOOM_connection_scan_pqf(ZOOM_connection c, const char *start)
+    ZOOM_connection_scan(ZOOM_connection c, const char *start)
 {
     ZOOM_scanset s;
     ZOOM_query q = ZOOM_query_create();
 
     ZOOM_query_prefix(q, start);
 
-    s = ZOOM_connection_scan(c, q);
+    s = ZOOM_connection_scan1(c, q);
     ZOOM_query_destroy(q);
     return s;
 
 }
 
 ZOOM_API(ZOOM_scanset)
-    ZOOM_connection_scan(ZOOM_connection c, ZOOM_query q)
+    ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query q)
 {
     char *start;
     char *freeme = 0;
@@ -2842,12 +2849,11 @@ ZOOM_API(const char *)
     return ZOOM_options_get(scan->options, key);
 }
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_scanset_option_set(ZOOM_scanset scan, const char *key,
                             const char *val)
 {
     ZOOM_options_set(scan->options, key, val);
-    return 0;
 }
 
 static Z_APDU *create_es_package(ZOOM_package p, int type)
@@ -3299,12 +3305,11 @@ ZOOM_API(const char *)
 }
 
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_package_option_set(ZOOM_package p, const char *key,
                             const char *val)
 {
     ZOOM_options_set(p->options, key, val);
-    return 0;
 }
 
 static int ZOOM_connection_exec_task(ZOOM_connection c)
@@ -3868,20 +3873,18 @@ ZOOM_API(const char *)
     return ZOOM_options_getl(c->options, key, lenp);
 }
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_connection_option_set(ZOOM_connection c, const char *key,
                                const char *val)
 {
     ZOOM_options_set(c->options, key, val);
-    return 0;
 }
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_connection_option_setl(ZOOM_connection c, const char *key,
                                 const char *val, int len)
 {
     ZOOM_options_setl(c->options, key, val, len);
-    return 0;
 }
 
 ZOOM_API(const char *)
@@ -3890,12 +3893,11 @@ ZOOM_API(const char *)
     return ZOOM_options_get(r->options, key);
 }
 
-ZOOM_API(int)
+ZOOM_API(void)
     ZOOM_resultset_option_set(ZOOM_resultset r, const char *key,
                               const char *val)
 {
     ZOOM_options_set(r->options, key, val);
-    return 0;
 }
 
 
