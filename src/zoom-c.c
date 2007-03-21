@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.120 2007-03-21 09:23:11 adam Exp $
+ * $Id: zoom-c.c,v 1.121 2007-03-21 10:22:31 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1284,7 +1284,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.120 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.121 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -4081,6 +4081,12 @@ ZOOM_API(int)
 }
 
 
+static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
+{
+    WRBUF wrbuf = client_data;
+    wrbuf_puts(wrbuf, buf);
+}
+
 /*
  * Returns an xmalloc()d string containing RPN that corresponds to the
  * CQL passed in.  On error, sets the Connection object's error state
@@ -4091,10 +4097,9 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
 {
     CQL_parser parser;
     int error;
-    struct cql_node *node;
     const char *cqlfile;
-    static cql_transform_t trans;
-    char pqfbuf[512];
+    cql_transform_t trans;
+    char *result = 0;
 
     parser = cql_parser_create();
     if ((error = cql_parser_string(parser, cql)) != 0) {
@@ -4103,42 +4108,40 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
         return 0;
     }
 
-    node = cql_parser_result(parser);
-    /* ### Do not call cql_parser_destroy() yet: it destroys `node'! */
-
     cqlfile = ZOOM_connection_option_get(c, "cqlfile");
-    if (cqlfile == 0) {
-        cql_parser_destroy(parser);
-        cql_node_destroy(node);
+    if (cqlfile == 0) 
+    {
         set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
-        return 0;
     }
-
-    if ((trans = cql_transform_open_fname(cqlfile)) == 0) {
+    else if ((trans = cql_transform_open_fname(cqlfile)) == 0) 
+    {
         char buf[512];        
-        cql_parser_destroy(parser);
-        cql_node_destroy(node);
         sprintf(buf, "can't open CQL transform file '%.200s': %.200s",
                 cqlfile, strerror(errno));
         set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
-        return 0;
     }
-
-    error = cql_transform_buf(trans, node, pqfbuf, sizeof pqfbuf);
-    cql_parser_destroy(parser);
-    cql_node_destroy(node);
-    if (error != 0) {
-        char buf[512];
-        const char *addinfo;
-        error = cql_transform_error(trans, &addinfo);
-        sprintf(buf, "%.200s (addinfo=%.200s)", cql_strerror(error), addinfo);
-        set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+    else 
+    {
+        WRBUF wrbuf_result = wrbuf_alloc();
+        error = cql_transform(trans, cql_parser_result(parser),
+                              cql2pqf_wrbuf_puts, wrbuf_result);
+        if (error != 0) {
+            char buf[512];
+            const char *addinfo;
+            error = cql_transform_error(trans, &addinfo);
+            sprintf(buf, "%.200s (addinfo=%.200s)", 
+                    cql_strerror(error), addinfo);
+            set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+        }
+        else
+        {
+            result = xstrdup(wrbuf_cstr(wrbuf_result));
+        }
         cql_transform_close(trans);
-        return 0;
+        wrbuf_destroy(wrbuf_result);
     }
-
-    cql_transform_close(trans);
-    return xstrdup(pqfbuf);
+    cql_parser_destroy(parser);
+    return result;
 }
 
 ZOOM_API(int) ZOOM_connection_fire_event_timeout(ZOOM_connection c)
