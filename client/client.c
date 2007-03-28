@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.330 2007-03-19 22:17:41 adam Exp $
+ * $Id: client.c,v 1.331 2007-03-28 16:35:47 mike Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -158,7 +158,7 @@ typedef enum {
 static QueryType queryType = QueryType_Prefix;
 
 static CCL_bibset bibset;               /* CCL bibset handle */
-static cql_transform_t cqltrans;        /* CQL context-set handle */
+static cql_transform_t cqltrans = 0; /* CQL context-set handle */
 
 #if HAVE_READLINE_COMPLETION_OVER
 
