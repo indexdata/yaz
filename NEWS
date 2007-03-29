@@ -1,3 +1,8 @@
+Change to emit_term() in CQL-to-PQF query translation: when a term has
+the /regexp relation modifier, do not process it for leading and
+trailing "^" and "*", which have quite different meanings in regular
+expressions.
+
 Attempted fix of bug #976: Segfault in yaz_iconv. The yaz_iconv function
 write handlers no longer carries a 'last' parameter. This will make
 yaz_iconv flush "less" characters. A flush is performed by call to
