@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.27 2007-02-07 13:36:58 adam Exp $
+/* $Id: cqltransform.c,v 1.28 2007-03-29 11:14:11 mike Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -353,6 +353,18 @@ static const char *wcchar(const char *term, int length)
 }
 
 
+/* ### checks for CQL relation-name rather than Type-1 attribute */
+static int has_modifier(struct cql_node *cn, const char *name) {
+    struct cql_node *mod;
+    for (mod = cn->u.st.modifiers; mod != 0; mod = mod->u.st.modifiers) {
+        if (!strcmp(mod->u.st.index, name))
+            return 1;
+    }
+
+    return 0;
+}
+
+
 void emit_term(cql_transform_t ct,
                struct cql_node *cn,
                const char *term, int length,
@@ -361,10 +373,11 @@ void emit_term(cql_transform_t ct,
 {
     int i;
     const char *ns = cn->u.st.index_uri;
+    int process_term = !has_modifier(cn, "regexp");
 
     assert(cn->which == CQL_NODE_ST);
 
-    if (length > 0)
+    if (process_term && length > 0)
     {
         if (length > 1 && term[0] == '^' && term[length-1] == '^')
         {
@@ -393,7 +406,7 @@ void emit_term(cql_transform_t ct,
         }
     }
 
-    if (length > 0)
+    if (process_term && length > 0)
     {
         /* Check for well-known globbing patterns that represent
          * simple truncation attributes as expected by, for example,
