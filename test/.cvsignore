@@ -26,6 +26,7 @@ tst_timing
 tst_timing.log
 tst_comstack
 tst_comstack.log
+tst_query_charset
 nfatest1
 nfaxmltest1
 nfaxmltest1.log

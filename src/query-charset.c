@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: query-charset.c,v 1.1 2007-03-21 19:47:28 adam Exp $
+ * $Id: query-charset.c,v 1.2 2007-04-10 14:42:31 adam Exp $
  */
 
 /** \file query-charset.c
@@ -12,10 +12,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include <yaz/proto.h>
+#include <yaz/query-charset.h>
 #include <yaz/wrbuf.h>
-#include <yaz/odr.h>
-#include <yaz/yaz-iconv.h>
 
 void yaz_query_charset_convert_buf(char *buf_in, int len_in,
                                    char **buf_out, int *len_out,
