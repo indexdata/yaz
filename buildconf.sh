@@ -1,10 +1,12 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.46 2007-02-20 09:53:01 adam Exp $
+# $Id: buildconf.sh,v 1.46.2.1 2007-04-11 13:35:37 adam Exp $
 
 automake=automake
 aclocal=aclocal
 autoconf=autoconf
 libtoolize=libtoolize
+
+test -d config || mkdir config
 
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
