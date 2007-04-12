@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.18 2007-04-12 13:52:57 adam Exp $
+ * $Id: retrieval.c,v 1.19 2007-04-12 20:47:28 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -344,7 +344,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
     if (!syntax_matches && syntax)
     {
         char buf[OID_STR_MAX];
-        wrbuf_printf(p->wr_error, "%s", oid_to_dotstring(syntax, buf));
+        wrbuf_printf(p->wr_error, "%s", oid_oid_to_dotstring(syntax, buf));
         return 2;
     }
     if (schema)

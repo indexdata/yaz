@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.332 2007-04-12 13:52:57 adam Exp $
+ * $Id: client.c,v 1.333 2007-04-12 20:47:27 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -3607,7 +3607,6 @@ int cmd_set_marcdump(const char* arg)
     return 1;
 }
 
-#if 0
 /* 
    this command takes 3 arge {name class oid} 
 */
@@ -3634,12 +3633,10 @@ int cmd_register_oid(const char* args) {
         {0,(enum oid_class) 0}
     };
     char oname_str[101], oclass_str[101], oid_str[101];  
-    char* name;
     int i;
-    oid_class oidclass = CLASS_GENERAL;
-    int val = 0, oid[OID_SIZE];
-    struct oident * new_oident=NULL;
-    
+    int oidclass = CLASS_GENERAL;
+    int oid[OID_SIZE];
+
     if (sscanf (args, "%100[^ ] %100[^ ] %100s",
                 oname_str,oclass_str, oid_str) < 1) {
         printf("Error in register command \n");
@@ -3659,35 +3656,15 @@ int cmd_register_oid(const char* args) {
         return 0;
     }
     
-    i = 0;
-    name = oid_str;
-    val = 0;
-    
-    while (isdigit (*(unsigned char *) name))
+    oid_dotstring_to_oid(oid_str, oid);
+
+    if (yaz_oid_add(yaz_oid_std(), oidclass, oname_str, oid))
     {
-        val = val*10 + (*name - '0');
-        name++;
-        if (*name == '.')
-        {
-            if (i < OID_SIZE-1)
-                oid[i++] = val;
-            val = 0;
-            name++;
-        }
-    }
-    oid[i] = val;
-    oid[i+1] = -1;
-    
-    new_oident = oid_addent (oid, PROTO_GENERAL, oidclass, oname_str,
-                             VAL_DYNAMIC);  
-    if(strcmp(new_oident->desc,oname_str))
-    {
-        fprintf(stderr,"oid is already named as %s, registration failed\n",
-                new_oident->desc);
+        printf("oid %s already exists, registration failed\n",
+               oname_str);
     }
     return 1;  
 }
-#endif
 
 int cmd_push_command(const char* arg) 
 {
@@ -4421,9 +4398,7 @@ static struct {
     {"set_auto_wait", cmd_set_auto_wait," on|off",complete_auto_reconnect,1,NULL},
     {"set_otherinfo", cmd_set_otherinfo,"<otherinfoinddex> <oid> <string>",NULL,0,NULL},
     {"sleep", cmd_sleep,"<seconds>",NULL,0,NULL},
-#if 0
     {"register_oid", cmd_register_oid,"<name> <class> <oid>",NULL,0,NULL},
-#endif
     {"push_command", cmd_push_command,"<command>",command_generator,0,NULL},
     {"register_tab", cmd_register_tab,"<commandname> <tab>",command_generator,0,NULL},
     {"cclparse", cmd_cclparse,"<ccl find command>",NULL,0,NULL},

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.113 2007-04-12 13:52:57 adam Exp $
+ * $Id: seshigh.c,v 1.114 2007-04-12 20:47:28 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -625,7 +625,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
             if (input_syntax_raw)
             {
                 char oidbuf[OID_STR_MAX];
-                oid_to_dotstring(input_syntax_raw, oidbuf);
+                oid_oid_to_dotstring(input_syntax_raw, oidbuf);
                 rr->errstring = odr_strdup(rr->stream, oidbuf);
             }
             return -1;
@@ -2344,7 +2344,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.113 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.114 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

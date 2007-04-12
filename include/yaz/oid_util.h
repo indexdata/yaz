@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_util.h,v 1.1 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: oid_util.h,v 1.2 2007-04-12 20:47:27 adam Exp $ */
 
 /**
  * \file oid_util.h
@@ -79,7 +79,9 @@ YAZ_EXPORT void oid_oidcpy(int *t, const int *s);
 YAZ_EXPORT void oid_oidcat(int *t, const int *s);
 YAZ_EXPORT int oid_oidcmp(const int *o1, const int *o2);
 YAZ_EXPORT int oid_oidlen(const int *o);
-YAZ_EXPORT char *oid_to_dotstring(const int *oid, char *oidbuf);
+YAZ_EXPORT char *oid_oid_to_dotstring(const int *oid, char *oidbuf);
+YAZ_EXPORT int oid_dotstring_to_oid(const char *name, int *oid);
+
 YAZ_END_CDECL
 
 #endif

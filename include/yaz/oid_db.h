@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.1 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: oid_db.h,v 1.2 2007-04-12 20:47:27 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -40,7 +40,7 @@
 YAZ_BEGIN_CDECL
 
 /** \brief OID database */
-typedef struct yaz_oid_entry *yaz_oid_db_t;
+typedef struct yaz_oid_db *yaz_oid_db_t;
 
 /** \brief returns standard OID database 
     \retval OID database handle
@@ -123,6 +123,18 @@ YAZ_EXPORT void yaz_oid_trav(yaz_oid_db_t oid_db,
 */
 YAZ_EXPORT
 int yaz_oid_is_iso2709(const int *oid);
+
+/** \brief adds new OID entry to database
+    \param oid_db database
+    \param oclass OID class
+    \param name name of OID
+    \param new_oid OID value (raw OID)
+    \retval 0 OID added
+    \retval -1 OID name+oclass already exists
+*/
+YAZ_EXPORT
+int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
+                const int *new_oid);
 
 #define OID_STR_BIB1 "Bib-1"
 #define OID_STR_DIAG1 "Diag-1"

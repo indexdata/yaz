@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_util.c,v 1.1 2007-04-12 13:52:57 adam Exp $
+ * $Id: oid_util.c,v 1.2 2007-04-12 20:47:28 adam Exp $
  */
 
 /**
@@ -58,7 +58,7 @@ int oid_oidlen(const int *o)
 }
 
 
-char *oid_to_dotstring(const int *oid, char *oidbuf)
+char *oid_oid_to_dotstring(const int *oid, char *oidbuf)
 {
     char tmpbuf[20];
     int i;
@@ -72,6 +72,27 @@ char *oid_to_dotstring(const int *oid, char *oidbuf)
         strcat(oidbuf, tmpbuf);
     }
     return oidbuf;
+}
+
+int oid_dotstring_to_oid(const char *name, int *oid)
+{
+    int i = 0;
+    int val = 0;
+    while (isdigit (*(unsigned char *) name))
+    {
+        val = val*10 + (*name - '0');
+        name++;
+        if (*name == '.')
+        {
+            if (i < OID_SIZE-1)
+                oid[i++] = val;
+            val = 0;
+            name++;
+        }
+    }
+    oid[i] = val;
+    oid[i+1] = -1;
+    return 0;
 }
 
 /*
