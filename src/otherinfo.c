@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: otherinfo.c,v 1.6 2007-01-03 08:42:15 adam Exp $
+ * $Id: otherinfo.c,v 1.7 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file otherinfo.c
@@ -73,7 +73,7 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 
 Z_OtherInformationUnit *yaz_oi_update (
     Z_OtherInformation **otherInformationP, ODR odr,
-    int *oid, int categoryValue, int delete_flag)
+    const int *oid, int categoryValue, int delete_flag)
 {
     int i;
     Z_OtherInformation *otherInformation;
@@ -157,7 +157,7 @@ Z_OtherInformationUnit *yaz_oi_update (
 
 void yaz_oi_set_string_oid (
     Z_OtherInformation **otherInformation, ODR odr,
-    int *oid, int categoryValue,
+    const int *oid, int categoryValue,
     const char *str)
 {
     Z_OtherInformationUnit *oi =
@@ -168,25 +168,9 @@ void yaz_oi_set_string_oid (
     oi->information.characterInfo = odr_strdup (odr, str);
 }
 
-void yaz_oi_set_string_oidval (
-    Z_OtherInformation **otherInformation, ODR odr,
-    int oidval, int categoryValue,
-    const char *str)
-{
-    int oid[OID_SIZE];
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_USERINFO;
-    ent.value = (oid_value) oidval;
-    if (!oid_ent_to_oid (&ent, oid))
-        return ;
-    yaz_oi_set_string_oid(otherInformation,
-                          odr, oid, categoryValue, str);
-}
-
 char *yaz_oi_get_string_oid (
     Z_OtherInformation **otherInformation,
-    int *oid, int categoryValue, int delete_flag)
+    const int *oid, int categoryValue, int delete_flag)
 {
     Z_OtherInformationUnit *oi;
     
@@ -195,21 +179,6 @@ char *yaz_oi_get_string_oid (
         oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
     return 0;
-}
-
-char *yaz_oi_get_string_oidval(Z_OtherInformation **otherInformation,
-                               int oidval, int categoryValue, int delete_flag)
-{
-    int oid[OID_SIZE];
-    struct oident ent;
-    ent.proto = PROTO_Z3950;
-    ent.oclass = CLASS_USERINFO;
-    ent.value = (oid_value) oidval;
-
-    if (!oid_ent_to_oid (&ent, oid))
-        return 0;
-    return yaz_oi_get_string_oid (otherInformation, oid, categoryValue,
-                                  delete_flag);
 }
 
 /*

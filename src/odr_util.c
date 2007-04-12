@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.10 2007-03-19 21:08:13 adam Exp $
+ * $Id: odr_util.c,v 1.11 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file odr_util.c
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "odr-priv.h"
-#include <yaz/oid.h>
+#include <yaz/oid_util.h>
 
 void odr_prname(ODR o, const char *name)
 {
@@ -44,7 +44,7 @@ int odp_more_chunks(ODR o, const unsigned char *base, int len)
         return o->bp - base < len;
 }
 
-Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o)
+Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o)
 {
     Odr_oid *r;
 
@@ -56,11 +56,9 @@ Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o)
     return r;
 }
 
-Odr_oid *odr_oiddup(ODR odr, Odr_oid *o)
+Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o)
 {
-    if (!odr->mem)
-        odr->mem = nmem_create();
-    return odr_oiddup_nmem (odr->mem, o);
+    return odr_oiddup_nmem(odr_getmem(odr), o);
 }
 
 Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
@@ -84,9 +82,7 @@ Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
 
 Odr_oid *odr_getoidbystr(ODR o, const char *str)
 {
-    if (!o->mem)
-        o->mem = nmem_create();
-    return odr_getoidbystr_nmem (o->mem, str);
+    return odr_getoidbystr_nmem(odr_getmem(o), str);
 }
 
 int odr_missing(ODR o, int opt, const char *name)

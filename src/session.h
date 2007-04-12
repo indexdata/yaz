@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.13 2007-01-03 08:42:15 adam Exp $
+ * $Id: session.h,v 1.14 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file session.h
@@ -14,7 +14,6 @@
 #include <yaz/comstack.h>
 #include <yaz/cql.h>
 #include <yaz/odr.h>
-#include <yaz/oid.h>
 #include <yaz/proto.h>
 #include <yaz/backend.h>
 #include <yaz/retrieval.h>

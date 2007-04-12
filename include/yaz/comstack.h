@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: comstack.h,v 1.26 2007-01-11 10:30:40 adam Exp $ */
+/* $Id: comstack.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
 
 /** 
  * \file comstack.h
@@ -35,7 +35,7 @@
 #define COMSTACK_H
 
 #include <yaz/yconfig.h>
-#include <yaz/oid.h>
+#include <yaz/oid_util.h>
 #include <yaz/xmalloc.h>
 
 YAZ_BEGIN_CDECL

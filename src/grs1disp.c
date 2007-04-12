@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: grs1disp.c,v 1.6 2007-03-12 16:16:49 adam Exp $
+ * $Id: grs1disp.c,v 1.7 2007-04-12 13:52:57 adam Exp $
  */
 
 /**
@@ -16,6 +16,7 @@
 #include <ctype.h>
 
 #include <yaz/proto.h>
+#include <yaz/oid_db.h>
 
 static void display_variant(WRBUF w, Z_Variant *v, int level)
 {
@@ -77,16 +78,16 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         else if (t->content->which == Z_ElementData_oid)
         {
             int *ip = t->content->u.oid;
-            oident *oent;
-            
-            if ((oent = oid_getentbyoid(t->content->u.oid)))
-                wrbuf_printf(w, "OID: %s\n", oent->desc);
-            else
+
+            if (ip)
             {
-                wrbuf_printf(w, "{");
-                while (ip && *ip >= 0)
-                    wrbuf_printf(w, " %d", *(ip++));
-                wrbuf_printf(w, " }\n");
+                char oid_name_str[OID_STR_MAX];
+                int oclass;
+                const char *oid_name 
+                    = yaz_oid_to_string_buf(ip, &oclass, oid_name_str);
+            
+                if (oid_name)
+                    wrbuf_printf(w, "OID: %s\n", oid_name);
             }
         }
         else if (t->content->which == Z_ElementData_noDataRequested)

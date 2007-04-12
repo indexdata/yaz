@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.12 2007-01-03 08:42:15 adam Exp $
+ * $Id: xmlquery.c,v 1.13 2007-04-12 13:52:57 adam Exp $
  */
 
 /** \file xmlquery.c
@@ -26,12 +26,12 @@ void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
 {
     char formstr[30];
     const char *setname = 0;
+    char oid_name_str[OID_STR_MAX];
     
     if (element->attributeSet)
     {
-        oident *attrset;
-        attrset = oid_getentbyoid (element->attributeSet);
-        setname = attrset->desc;
+        setname = yaz_oid_to_string_buf(element->attributeSet,
+                                        0, oid_name_str);
     }
 
     if (element->which == Z_AttributeValue_numeric)
@@ -228,9 +228,14 @@ xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
 
 xmlNodePtr yaz_query2xml_rpn(const Z_RPNQuery *rpn, xmlNodePtr parent)
 {
-    oident *attrset = oid_getentbyoid (rpn->attributeSetId);
-    if (attrset && attrset->value)
-        xmlNewProp(parent, BAD_CAST "set", BAD_CAST attrset->desc);
+    if (rpn->attributeSetId)
+    {
+        char oid_name_str[OID_STR_MAX];
+        const char *setname = yaz_oid_to_string_buf(rpn->attributeSetId,
+                                                    0, oid_name_str);
+        if (setname)
+            xmlNewProp(parent, BAD_CAST "set", BAD_CAST setname);
+    }
     return yaz_query2xml_rpnstructure(rpn->RPNStructure, parent);
 }
 
@@ -452,8 +457,10 @@ void yaz_xml2query_attribute_element(const xmlNode *ptr,
         
     *elem = (Z_AttributeElement *) odr_malloc(odr, sizeof(**elem));
     if (set)
-        (*elem)->attributeSet = yaz_str_to_z3950oid(odr, CLASS_ATTSET,
-                                                    (const char *)set);
+        (*elem)->attributeSet = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                      CLASS_ATTSET,
+                                                      (const char *) set,
+                                                      odr);
     else
         (*elem)->attributeSet = 0;
     (*elem)->attributeType = intVal(odr, (const char *) type);
@@ -500,7 +507,7 @@ void yaz_xml2query_attribute_element(const xmlNode *ptr,
 
 char *strVal(const xmlNode *ptr_cdata, ODR odr)
 {
-    return nmem_text_node_cdata(ptr_cdata, odr->mem);
+    return nmem_text_node_cdata(ptr_cdata, odr_getmem(odr));
 }
 
 void yaz_xml2query_term(const xmlNode *ptr,
@@ -711,7 +718,8 @@ void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
 
     *query = (Z_RPNQuery*) odr_malloc(odr, sizeof(Z_RPNQuery));
     if (set)
-        (*query)->attributeSetId = yaz_str_to_z3950oid(odr, CLASS_ATTSET, set);
+        (*query)->attributeSetId = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                         CLASS_ATTSET, set, odr);
     else
         (*query)->attributeSetId = 0;
     yaz_xml2query_rpnstructure(ptr->children, &(*query)->RPNStructure,

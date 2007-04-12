@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: unix.h,v 1.8 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: unix.h,v 1.9 2007-04-12 13:52:57 adam Exp $ */
 
 /**
  * \file unix.h
@@ -37,7 +37,6 @@
 #ifndef WIN32
 
 #include <yaz/comstack.h>
-#include <yaz/oid.h>
 
 YAZ_BEGIN_CDECL
 

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.42 2007-01-16 14:12:37 adam Exp $ */
+/* $Id: backend.h,v 1.43 2007-04-12 13:52:57 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -40,6 +40,7 @@
 #include <yaz/yconfig.h>
 #include <yaz/proto.h>
 #include <yaz/srw.h>
+#include <yaz/oid_db.h>
 
 YAZ_BEGIN_CDECL
     
@@ -77,7 +78,7 @@ typedef struct {
     char *setname;             /* set name */
     int start;
     int number;                /* record number */
-    oid_value format;          /* One of the CLASS_RECSYN members */
+    int *format;               /* format, transfer syntax (OID) */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
@@ -94,8 +95,7 @@ typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
-    oid_value request_format;  /* One of the CLASS_RECSYN members */
-    int *request_format_raw;   /* same as above (raw OID) */
+    int *request_format;        /* format, transfer syntax (OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
@@ -104,8 +104,7 @@ typedef struct bend_fetch_rr {
     int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
-    oid_value output_format;   /* format */
-    int *output_format_raw;    /* used instead of above if not-null */
+    int *output_format;        /* response format/syntax (OID) */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
@@ -128,7 +127,7 @@ typedef enum {
 typedef struct bend_scan_rr {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
-    oid_value attributeset;
+    int *attributeset;
     Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
     ODR stream;         /* encoding stream - memory source if required */

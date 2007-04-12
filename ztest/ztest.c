@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.85 2007-01-16 14:12:38 adam Exp $
+ * $Id: ztest.c,v 1.86 2007-04-12 13:52:58 adam Exp $
  */
 
 /*
@@ -16,7 +16,7 @@
 #include <unistd.h>
 #endif
 
-#include <yaz/yaz-util.h>
+#include <yaz/log.h>
 #include <yaz/backend.h>
 #include <yaz/ill.h>
 
@@ -137,17 +137,21 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 ILL_APDU *ill_apdu = 0;
                 if (r->direct_reference)
                 {
-                    oident *ent = oid_getentbyoid(r->direct_reference);
-                    if (ent)
-                        yaz_log(log_level, "OID %s", ent->desc);
-                    if (ent && ent->value == VAL_TEXT_XML)
+                    char oid_name_str[OID_STR_MAX];
+                    int oclass;
+                    const char *oid_name = 
+                        yaz_oid_to_string_buf(r->direct_reference,
+                                          &oclass, oid_name_str);
+                    if (oid_name)
+                        yaz_log(log_level, "OID %s", oid_name);
+                    if (oid_name && !strcmp(oid_name, OID_STR_XML))
                     {
                         yaz_log (log_level, "ILL XML request");
                         if (r->which == Z_External_octet)
                             yaz_log (log_level, "%.*s", r->u.octet_aligned->len,
                                      r->u.octet_aligned->buf); 
                     }
-                    if (ent && ent->value == VAL_ISO_ILL_1)
+                    if (oid_name && !strcmp(oid_name, OID_STR_ILL_1))
                     {
                         yaz_log (log_level, "Decode ItemRequest begin");
                         if (r->which == ODR_EXTERNAL_single)
@@ -369,7 +373,13 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 targetPart->taskPackageRecords[0]->which =
                     Z_IUTaskPackageRecordStructure_record;
                 targetPart->taskPackageRecords[0]->u.record = 
-                    z_ext_record (rr->stream, VAL_SUTRS, "test", 4);
+                    z_ext_record_oid(rr->stream,
+                                     yaz_string_to_oid_odr(
+                                         yaz_oid_std(),
+                                         CLASS_RECSYN,
+                                         OID_STR_SUTRS,
+                                         rr->stream),
+                                     "test", 4);
                 targetPart->taskPackageRecords[0]->correlationInfo = 0; 
                 targetPart->taskPackageRecords[0]->recordStatus =
                     odr_intdup (rr->stream,
@@ -388,11 +398,14 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 
                     if (rec->direct_reference)
                     {
-                        struct oident *oident;
-                        oident = oid_getentbyoid(rec->direct_reference);
-                        if (oident)
+                        char oid_name_str[OID_STR_MAX];
+                        const char *oid_name 
+                            = oid_name = yaz_oid_to_string_buf(
+                                rec->direct_reference, 0,
+                                oid_name_str);
+                        if (oid_name)
                             yaz_log (log_level, "record %d type %s", i,
-                                     oident->desc);
+                                     oid_name);
                     }
                     switch (rec->which)
                     {
@@ -452,11 +465,18 @@ int ztest_present (void *handle, bend_present_rr *rr)
 int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
     char *cp;
+    int oclass;
+    char oid_str_buf[OID_STR_MAX];
+    const char *oid_str = 0;
 
     r->last_in_set = 0;
     r->basename = "Default";
-    r->output_format = r->request_format;  
-    if (r->request_format == VAL_SUTRS)
+    r->output_format = r->request_format;
+
+    oid_str = yaz_oid_to_string_buf(r->request_format, &oclass,
+                                    oid_str_buf);
+
+    if (oid_str && !strcmp(oid_str, OID_STR_SUTRS))
     {
         /* this section returns a small record */
         char buf[100];
@@ -467,7 +487,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         r->record = (char *) odr_malloc (r->stream, r->len+1);
         strcpy(r->record, buf);
     }
-    else if (r->request_format == VAL_GRS1)
+    else if (oid_str && !strcmp(oid_str, OID_STR_GRS1))
     {
         r->len = -1;
         r->record = (char*) dummy_grs_record(r->number, r->stream);
@@ -477,7 +497,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             return 0;
         }
     }
-    else if (r->request_format == VAL_POSTSCRIPT)
+    else if (oid_str && !strcmp(oid_str, OID_STR_POSTSCRIPT))
     {
         char fname[20];
         FILE *f;
@@ -500,17 +520,15 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         fseek (f, 0L, SEEK_SET);
         r->record = (char*) odr_malloc (r->stream, size);
         r->len = size;
-        r->output_format = VAL_POSTSCRIPT;
         fread (r->record, size, 1, f);
         fclose (f);
     }
-    else if (r->request_format == VAL_TEXT_XML)
+    else if (oid_str && !strcmp(oid_str, OID_STR_XML))
     {
         if ((cp = dummy_xml_record (r->number, r->stream)))
         {
             r->len = strlen(cp);
             r->record = cp;
-            r->output_format = VAL_TEXT_XML;
         }
         else 
         {
@@ -523,7 +541,8 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     {
         r->len = strlen(cp);
         r->record = cp;
-        r->output_format = VAL_USMARC;
+        r->output_format = yaz_string_to_oid_odr(
+            yaz_oid_std(), CLASS_RECSYN, OID_STR_USMARC, r->stream);
     }
     else
     {

@@ -2,14 +2,14 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.17 2007-01-09 13:56:48 adam Exp $
+ * $Id: zoom-p.h,v 1.18 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file zoom-p.h
  * \brief Internal header for ZOOM implementation
  */
-
 #include <yaz/proto.h>
+#include <yaz/oid_db.h>
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>

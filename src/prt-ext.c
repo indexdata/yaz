@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.7 2007-01-03 08:42:15 adam Exp $
+ * $Id: prt-ext.c,v 1.8 2007-04-12 13:52:57 adam Exp $
  */
 
 /**
@@ -12,6 +12,7 @@
 
 #include <yaz/proto.h>
 
+#include <yaz/oid_db.h>
 #define PRT_EXT_DEBUG 0
 
 #if PRT_EXT_DEBUG
@@ -25,43 +26,43 @@
  */
 static Z_ext_typeent type_table[] =
 {
-    {VAL_SUTRS, Z_External_sutrs, (Odr_fun) z_SUTRS},
-    {VAL_EXPLAIN, Z_External_explainRecord, (Odr_fun)z_ExplainRecord},
-    {VAL_RESOURCE1, Z_External_resourceReport1, (Odr_fun)z_ResourceReport1},
-    {VAL_RESOURCE2, Z_External_resourceReport2, (Odr_fun)z_ResourceReport2},
-    {VAL_PROMPT1, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
-    {VAL_GRS1, Z_External_grs1, (Odr_fun)z_GenericRecord},
-    {VAL_EXTENDED, Z_External_extendedService, (Odr_fun)z_TaskPackage},
-    {VAL_ITEMORDER, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
-    {VAL_DIAG1, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
-    {VAL_ESPEC1, Z_External_espec1, (Odr_fun)z_Espec1},
-    {VAL_SUMMARY, Z_External_summary, (Odr_fun)z_BriefBib},
-    {VAL_OPAC, Z_External_OPAC, (Odr_fun)z_OPACRecord},
-    {VAL_SEARCHRES1, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
-    {VAL_DBUPDATE, Z_External_update, (Odr_fun)z_IUUpdate},
-    {VAL_DBUPDATE0, Z_External_update0, (Odr_fun)z_IU0Update},
-    {VAL_DBUPDATE1, Z_External_update0, (Odr_fun)z_IU0Update},
-    {VAL_DATETIME, Z_External_dateTime, (Odr_fun)z_DateTime},
-    {VAL_UNIVERSE_REPORT, Z_External_universeReport,(Odr_fun)z_UniverseReport},
-    {VAL_ADMINSERVICE, Z_External_ESAdmin, (Odr_fun)z_Admin},
-    {VAL_USERINFO1, Z_External_userInfo1, (Odr_fun) z_OtherInformation},
-    {VAL_CHARNEG3, Z_External_charSetandLanguageNegotiation, (Odr_fun)
+    {{1, 2, 830, 10003, 5, 101,-1}, Z_External_sutrs, (Odr_fun) z_SUTRS},
+    {{1, 2, 830, 10003, 5, 100,-1}, Z_External_explainRecord, (Odr_fun)z_ExplainRecord},
+    {{1, 2, 840, 10003, 7, 1,-1}, Z_External_resourceReport1, (Odr_fun)z_ResourceReport1},
+    {{1, 2, 840, 10003, 7, 2,-1}, Z_External_resourceReport2, (Odr_fun)z_ResourceReport2},
+    {{1, 2, 840, 10003, 8, 1,-1}, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
+    {{1, 2, 840, 10003, 5, 105,-1}, Z_External_grs1, (Odr_fun)z_GenericRecord},
+    {{1, 2, 840, 10003, 5, 106,-1}, Z_External_extendedService, (Odr_fun)z_TaskPackage},
+    {{1, 2, 840, 10003, 9, 4,-1}, Z_External_itemOrder, (Odr_fun)z_IOItemOrder},
+    {{1, 2, 840, 10003, 4, 2,-1}, Z_External_diag1, (Odr_fun)z_DiagnosticFormat},
+    {{1, 2, 840, 10003, 11, 1,-1}, Z_External_espec1, (Odr_fun)z_Espec1},
+    {{1, 2, 840, 10003, 5, 103,-1}, Z_External_summary, (Odr_fun)z_BriefBib},
+    {{1, 2, 840, 10003, 5, 102,-1}, Z_External_OPAC, (Odr_fun)z_OPACRecord},
+    {{1, 2, 840, 10003, 10, 1,-1}, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
+    {{1, 2, 840, 10003, 9, 5,-1}, Z_External_update, (Odr_fun)z_IUUpdate},
+    {{1, 2, 840, 10003, 9, 5,1,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
+    {{1, 2, 840, 10003, 9, 5, 1, 1,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
+    {{1, 2, 840, 10003, 10, 6,-1}, Z_External_dateTime, (Odr_fun)z_DateTime},
+    {{1, 2, 840, 10003, 7, 1000, 81, 1,-1}, Z_External_universeReport,(Odr_fun)z_UniverseReport},
+    {{1, 2, 840, 10003, 9, 1000, 81, 1,-1}, Z_External_ESAdmin, (Odr_fun)z_Admin},
+    {{1, 2, 840, 10003, 10, 3,-1}, Z_External_userInfo1, (Odr_fun) z_OtherInformation},
+    {{1, 2, 840, 10003, 15, 3,-1}, Z_External_charSetandLanguageNegotiation, (Odr_fun)
                   z_CharSetandLanguageNegotiation},
-    {VAL_PROMPT1, Z_External_acfPrompt1, (Odr_fun) z_PromptObject1},
-    {VAL_DES1, Z_External_acfDes1, (Odr_fun) z_DES_RN_Object},
-    {VAL_KRB1, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
-    {VAL_MULTISRCH2, Z_External_multisrch2, (Odr_fun) z_MultipleSearchTerms_2},
-    {VAL_CQL, Z_External_CQL, (Odr_fun) z_InternationalString},
-    {VAL_NONE, 0, 0}
+    {{1, 2, 840, 10003, 8, 1,-1}, Z_External_acfPrompt1, (Odr_fun) z_PromptObject1},
+    {{1, 2, 840, 10003, 8, 2,-1}, Z_External_acfDes1, (Odr_fun) z_DES_RN_Object},
+    {{1, 2, 840, 10003, 8, 3,-1}, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
+    {{1, 2, 840, 10003, 10, 5,-1}, Z_External_multisrch2, (Odr_fun) z_MultipleSearchTerms_2},
+    {{1, 2, 840, 10003, 16,  2, -1}, Z_External_CQL, (Odr_fun) z_InternationalString},
+    {{-1}, 0, 0}
 };
 
-Z_ext_typeent *z_ext_getentbyref(oid_value val)
+Z_ext_typeent *z_ext_getentbyref(const int *oid)
 {
-    Z_ext_typeent *i;
+    Z_ext_typeent *p;
 
-    for (i = type_table; i->dref != VAL_NONE; i++)
-        if (i->dref == val)
-            return i;
+    for (p = type_table; p->oid[0] != -1; p++)
+        if (!oid_oidcmp(oid, p->oid))
+            return p;
     return 0;
 }
 
@@ -86,7 +87,6 @@ Z_ext_typeent *z_ext_getentbyref(oid_value val)
 */
 int z_External(ODR o, Z_External **p, int opt, const char *name)
 {
-    oident *oid;
     Z_ext_typeent *type;
 
     static Odr_arm arm[] =
@@ -183,8 +183,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 #endif
     /* Do we know this beast? */
     if (o->direction == ODR_DECODE && (*p)->direct_reference &&
-        (oid = oid_getentbyoid((*p)->direct_reference)) &&
-        (type = z_ext_getentbyref(oid->value)))
+        (type = z_ext_getentbyref((*p)->direct_reference)))
     {
         int zclass, tag, cons;
         /* OID is present and we know it */
@@ -240,18 +239,22 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         odr_sequence_end(o);
 }
 
-Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
+Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
 {
     Z_External *thisext;
+    char oid_str_buf[OID_STR_MAX];
+    const char *oid_str;
+    int oclass;
 
+    if (!oid)
+        return 0;
     thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
     thisext->descriptor = 0;
     thisext->indirect_reference = 0;
 
-    thisext->direct_reference = 
-        yaz_oidval_to_z3950oid (o, CLASS_RECSYN, format);    
-    if (!thisext->direct_reference)
-        return 0;
+    oid_str = yaz_oid_to_string_buf(oid, &oclass, oid_str_buf);
+
+    thisext->direct_reference = odr_oiddup(o, oid);
 
     if (len < 0) /* Structured data */
     {
@@ -263,31 +266,36 @@ Z_External *z_ext_record(ODR o, int format, const char *buf, int len)
          */
         thisext->u.grs1 = (Z_GenericRecord*) buf;
 
-        switch (format)
+        if (!strcmp(oid_str, OID_STR_SUTRS))
         {
-        case VAL_SUTRS:
             thisext->which = Z_External_sutrs;
-            break;
-        case VAL_GRS1:
+        }
+        else if (!strcmp(oid_str, OID_STR_GRS1))
+        {
             thisext->which = Z_External_grs1;
-            break;
-        case VAL_EXPLAIN:
+        }
+        else if (!strcmp(oid_str, OID_STR_EXPLAIN))
+        {
             thisext->which = Z_External_explainRecord;
-            break;
-        case VAL_SUMMARY:
+        }
+        else if (!strcmp(oid_str, OID_STR_SUMMARY))
+        {
             thisext->which = Z_External_summary;
-            break;
-        case VAL_OPAC:
+        }
+        else if (!strcmp(oid_str, OID_STR_OPAC))
+        {
             thisext->which = Z_External_OPAC;
-            break;
-        case VAL_EXTENDED:
+        }
+        else if (!strcmp(oid_str, OID_STR_EXTENDED))
+        {
             thisext->which = Z_External_extendedService;
-            break;
-        default:
+        }
+        else
+        {
             return 0;
         }
     }
-    else if (format == VAL_SUTRS) /* SUTRS is a single-ASN.1-type */
+    else if (!strcmp(oid_str, OID_STR_SUTRS)) /* SUTRS is a single-ASN.1-type */
     {
         Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
         

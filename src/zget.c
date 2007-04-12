@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.12 2007-01-03 08:42:15 adam Exp $
+ * $Id: zget.c,v 1.13 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file zget.c
@@ -10,6 +10,7 @@
  */
 
 #include <yaz/proto.h>
+#include <yaz/oid_db.h>
 
 Z_InitRequest *zget_InitRequest(ODR o)
 {
@@ -505,7 +506,8 @@ Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
         odr_malloc (o, sizeof(*dr));
     
-    dr->diagnosticSetId = yaz_oidval_to_z3950oid (o, CLASS_DIAGSET, VAL_BIB1);
+    dr->diagnosticSetId = yaz_string_to_oid_odr(
+        yaz_oid_std(), CLASS_DIAGSET, OID_STR_BIB1, o);
     dr->condition = odr_intdup(o, error);
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (o, addinfo ? addinfo : "");
@@ -550,7 +552,6 @@ Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
 Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
 {
     Z_External *x, *x2;
-    oident oid;
     Z_OtherInformation *u;
     Z_OtherInformationUnit *l;
     Z_DiagnosticFormat *d;
@@ -559,10 +560,10 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
     x->indirect_reference = 0;  
-    oid.proto = PROTO_Z3950;
-    oid.oclass = CLASS_USERINFO;
-    oid.value = VAL_USERINFO1;
-    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                CLASS_USERINFO,
+                                                OID_STR_USERINFO_1,
+                                                odr);
     x->which = Z_External_userInfo1;
 
     u = odr_malloc(odr, sizeof *u);
@@ -578,9 +579,10 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     l->information.externallyDefinedInfo = x2;
     x2->descriptor = 0;
     x2->indirect_reference = 0;
-    oid.oclass = CLASS_DIAGSET;
-    oid.value = VAL_DIAG1;
-    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x2->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                 CLASS_DIAGSET,
+                                                 OID_STR_DIAG1,
+                                                 odr);
     x2->which = Z_External_diag1;
 
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
@@ -600,7 +602,6 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
                                         const char *addinfo)
 {
     Z_External *x, *x2;
-    oident oid;
     Z_OtherInformation *u;
     Z_OtherInformationUnit *l;
     Z_DiagnosticFormat *d;
@@ -621,10 +622,11 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     l->information.externallyDefinedInfo = x2;
     x2->descriptor = 0;
     x2->indirect_reference = 0;
-    oid.oclass = CLASS_DIAGSET;
-    oid.proto = PROTO_Z3950;
-    oid.value = VAL_DIAG1;
-    x2->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+
+    x2->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                 CLASS_DIAGSET,
+                                                 OID_STR_DIAG1,
+                                                 odr);
     x2->which = Z_External_diag1;
 
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
@@ -647,10 +649,10 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
     x->indirect_reference = 0;  
-    oid.proto = PROTO_Z3950;
-    oid.oclass = CLASS_USERINFO;
-    oid.value = VAL_USERINFO1;
-    x->direct_reference = odr_oiddup(odr, oid_getoidbyent(&oid));
+    x->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                CLASS_USERINFO,
+                                                OID_STR_USERINFO_1,
+                                                odr);
 
     x->which = Z_External_octet;
     x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));

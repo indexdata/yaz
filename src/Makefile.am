@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.55 2007-03-21 19:47:28 adam Exp $
+## $Id: Makefile.am,v 1.56 2007-04-12 13:52:57 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -50,7 +50,7 @@ diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl
 
 libyaz_la_SOURCES=version.c options.c log.c \
   marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
-  oid.c wrbuf.c \
+  wrbuf.c oid_db.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c marc8.c marc8r.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
@@ -69,7 +69,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   ill-core.c item-req.c ill-get.c \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h diagbib1.c diagsrw.c \
   diagsru_update.c logrpn.c \
-  otherinfo.c pquery.c sortspec.c z3950oid.c charneg.c initopt.c \
+  otherinfo.c pquery.c sortspec.c charneg.c initopt.c \
   zoom-c.c zoom-socket.c zoom-opt.c zoom-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c \
@@ -79,7 +79,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h test.c timing.c \
   xmlquery.c http.c \
-  mime.c mime.h \
+  mime.c mime.h oid_util.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)

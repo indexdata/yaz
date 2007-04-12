@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: logrpn.h,v 1.14 2007-03-19 21:07:35 adam Exp $ */
+/* $Id: logrpn.h,v 1.15 2007-04-12 13:52:57 adam Exp $ */
 
 /**
  * \file logrpn.h
@@ -42,10 +42,10 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT void log_rpn_query(Z_RPNQuery *rpn);
 YAZ_EXPORT void log_rpn_query_level(int loglevel, Z_RPNQuery *rpn);
 
-YAZ_EXPORT void log_scan_term(Z_AttributesPlusTerm *zapt, oid_value ast);
+YAZ_EXPORT void log_scan_term(Z_AttributesPlusTerm *zapt, const int *ast);
 YAZ_EXPORT void log_scan_term_level(int loglevel, 
-                                    Z_AttributesPlusTerm *zapt, oid_value ast);
-
+                                    Z_AttributesPlusTerm *zapt,
+                                    const int *ast);
 YAZ_EXPORT void yaz_log_zquery(Z_Query *q);
 YAZ_EXPORT void yaz_log_zquery_level(int loglevel, Z_Query *q);
 

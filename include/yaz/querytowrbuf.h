@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: querytowrbuf.h,v 1.5 2007-03-19 21:07:35 adam Exp $ */
+/* $Id: querytowrbuf.h,v 1.6 2007-04-12 13:52:57 adam Exp $ */
 /**
  * \file querytowrbuf.h
  * \brief Query to WRBUF (to strings)
@@ -41,7 +41,7 @@ YAZ_BEGIN_CDECL
 
 YAZ_EXPORT void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q);
 YAZ_EXPORT void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
-                                  oid_value ast);
+                                  const int *attribute_set);
 YAZ_EXPORT void yaz_rpnquery_to_wrbuf(WRBUF b, const Z_RPNQuery *rpn);
 YAZ_EXPORT void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags);
 

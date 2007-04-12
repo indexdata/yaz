@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.23 2007-01-03 08:42:13 adam Exp $
+ * $Id: admin.c,v 1.24 2007-04-12 13:52:57 adam Exp $
  */
 
 #include <stdio.h>
@@ -27,7 +27,7 @@
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
-
+#include <yaz/oid_db.h>
 #include <yaz/pquery.h>
 
 #include "admin.h"
@@ -47,20 +47,19 @@ int sendAdminES(int type, char* param1)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
-    int oid[OID_SIZE];
+    int *oid;
     Z_ESAdminOriginPartToKeep  *toKeep;
     Z_ESAdminOriginPartNotToKeep  *notToKeep;
-    oident update_oid;
     printf ("Admin request\n");
     fflush(stdout);
 
-    /* Set up the OID for the external */
-    update_oid.proto = PROTO_Z3950;
-    update_oid.oclass = CLASS_EXTSERV;
-    update_oid.value = VAL_ADMINSERVICE;
+    oid = yaz_string_to_oid_odr(yaz_oid_std(),
+                                CLASS_EXTSERV,
+                                OID_STR_ADMIN,
+                                out);
 
-    oid_ent_to_oid (&update_oid, oid);
-    req->packageType = odr_oiddup(out,oid);
+
+    req->packageType = oid;
     req->packageName = "1.Extendedserveq";
 
     /* Allocate the external */

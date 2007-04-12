@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.17 2007-03-19 14:40:07 adam Exp $
+ * $Id: retrieval.c,v 1.18 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -20,6 +20,7 @@
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
 #include <yaz/proto.h>
+#include <yaz/oid_db.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -74,7 +75,7 @@ yaz_retrieval_t yaz_retrieval_create()
 {
     yaz_retrieval_t p = xmalloc(sizeof(*p));
     p->odr = odr_createmem(ODR_ENCODE);
-    p->nmem = p->odr->mem;
+    p->nmem = odr_getmem(p->odr);
     p->wr_error = wrbuf_alloc();
     p->list = 0;
     p->path = 0;
@@ -127,9 +128,11 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
         if (!xmlStrcmp(attr->name, BAD_CAST "syntax") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
         {
-            el->syntax = yaz_str_to_z3950oid(
-                p->odr, CLASS_RECSYN,
-                (const char *) attr->children->content);
+            el->syntax = yaz_string_to_oid_odr(
+                yaz_oid_std(),
+                CLASS_RECSYN,
+                (const char *) attr->children->content,
+                p->odr);
             if (!el->syntax)
             {
                 wrbuf_printf(p->wr_error, "Element <retrieval>: "
@@ -192,9 +195,11 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                          && attr->children 
                          && attr->children->type == XML_TEXT_NODE){
                     el->backend_syntax 
-                    = yaz_str_to_z3950oid(p->odr, CLASS_RECSYN,
-                       (const char *) attr->children->content);
-                    
+                        = yaz_string_to_oid_odr(
+                            yaz_oid_std(),
+                            CLASS_RECSYN,
+                            (const char *) attr->children->content,
+                            p->odr);
                     if (!el->backend_syntax){
                         wrbuf_printf(p->wr_error, 
                                      "Element <backend syntax='%s'>: "

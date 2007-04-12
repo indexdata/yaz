@@ -1,3 +1,11 @@
+New OID database - with public definitions in oid_db.h. Removed old OID
+database including the head oid.h and definitions such as enum oid_value
+and struct oident. The new OID database uses the same string names as
+before but the 'protocol' is gone. There are now only two representations
+raw OID (int *) and string. Functions with prefix yaz_string_to_oid
+converts from string to OID; functions with prefix yaz_oid_to_string
+converts the other way.
+
 Change to emit_term() in CQL-to-PQF query translation: when a term has
 the /regexp relation modifier, do not process it for leading and
 trailing "^" and "*", which have quite different meanings in regular

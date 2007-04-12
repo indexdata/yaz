@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.8 2007-03-19 21:07:35 adam Exp $
+ * $Id: querytowrbuf.c,v 1.9 2007-04-12 13:52:57 adam Exp $
  */
 
 /** \file querytowrbuf.c
@@ -14,6 +14,7 @@
 
 #include <yaz/logrpn.h>
 #include <yaz/querytowrbuf.h>
+#include <yaz/oid_db.h>
 
 static void yaz_term_to_wrbuf(WRBUF b, const char *term, int len)
 {
@@ -40,14 +41,18 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
                                            const Z_AttributeElement *element)
 {
     int i;
-    char *setname="";
-    char *sep = ""; /* optional space after attrset name */
+    char oid_name_str[OID_STR_MAX];
+    const char *setname = 0;
+    char *sep = " "; /* optional space after attrset name */
     if (element->attributeSet)
     {
-        oident *attrset;
-        attrset = oid_getentbyoid (element->attributeSet);
-        setname = attrset->desc;
-        sep = " ";
+        setname = yaz_oid_to_string_buf(element->attributeSet, 
+                                        0, oid_name_str);
+    }
+    if (!setname)
+    {
+        setname = "";
+        sep = "";
     }
     switch (element->which) 
     {
@@ -181,14 +186,13 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
 
 void yaz_rpnquery_to_wrbuf(WRBUF b, const Z_RPNQuery *rpn)
 {
-    oident *attrset;
-    enum oid_value ast;
-    
-    attrset = oid_getentbyoid (rpn->attributeSetId);
-    if (attrset)
+    if (rpn->attributeSetId)
     {
-        ast = attrset->value;
-        wrbuf_printf(b, "@attrset %s ", attrset->desc);
+        char oid_name_str[OID_STR_MAX];
+        const char *oid_name = yaz_oid_to_string_buf(rpn->attributeSetId,
+                                                     0, oid_name_str);
+        if (oid_name)
+            wrbuf_printf(b, "@attrset %s ", oid_name);
     } 
     yaz_rpnstructure_to_wrbuf(b, rpn->RPNStructure);
     wrbuf_chop_right(b);
@@ -221,7 +225,7 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
 }
 
 void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
-                       oid_value ast)
+                       const int *attrbute_set)
 {
     /* should print attr set here */
     wrbuf_printf(b, "RPN ");

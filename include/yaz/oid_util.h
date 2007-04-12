@@ -24,24 +24,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: tcpip.h,v 1.12 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: oid_util.h,v 1.1 2007-04-12 13:52:57 adam Exp $ */
 
 /**
- * \file tcpip.h
- * \brief Header for TCP/IP + SSL COMSTACK.
+ * \file oid_util.h
+ * \brief Header for OID database
+ *
+ * More or less protocol-transparent OID database.
+ * We could (and should?) extend this so that the user app can add new
+ * entries to the list at initialization.
  */
+#ifndef OID_UTIL_H
+#define OID_UTIL_H
 
-#ifndef TCPIP_H
-#define TCPIP_H
-
-#include <yaz/comstack.h>
+#include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
-YAZ_EXPORT COMSTACK tcpip_type(int s, int flags, int protocol, void *vp);
-YAZ_EXPORT COMSTACK ssl_type(int s, int flags, int protocol, void *vp);
+#define OID_SIZE 20
+#define OID_STR_MAX 256
 
+typedef enum oid_proto
+{
+    PROTO_NOP=0,
+    PROTO_Z3950,
+    PROTO_SR,
+    PROTO_GENERAL,
+    PROTO_WAIS,
+    PROTO_HTTP
+} oid_proto;
+
+typedef enum oid_class
+{
+    CLASS_NOP=0,
+    CLASS_APPCTX,
+    CLASS_ABSYN,
+    CLASS_ATTSET,
+    CLASS_TRANSYN,
+    CLASS_DIAGSET,
+    CLASS_RECSYN,
+    CLASS_RESFORM,
+    CLASS_ACCFORM,
+    CLASS_EXTSERV,
+    CLASS_USERINFO,
+    CLASS_ELEMSPEC,
+    CLASS_VARSET,
+    CLASS_SCHEMA,
+    CLASS_TAGSET,
+    CLASS_GENERAL,
+    CLASS_NEGOT
+} oid_class;
+    
+YAZ_EXPORT void oid_oidcpy(int *t, const int *s);
+YAZ_EXPORT void oid_oidcat(int *t, const int *s);
+YAZ_EXPORT int oid_oidcmp(const int *o1, const int *o2);
+YAZ_EXPORT int oid_oidlen(const int *o);
+YAZ_EXPORT char *oid_to_dotstring(const int *oid, char *oidbuf);
 YAZ_END_CDECL
 
 #endif

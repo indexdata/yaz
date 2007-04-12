@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_oid.c,v 1.9 2007-03-19 21:08:13 adam Exp $
+ * $Id: odr_oid.c,v 1.10 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file odr_oid.c
@@ -12,8 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/oid_util.h>
 #include "odr-priv.h"
-#include <yaz/oid.h>
 
 /*
  * Top level oid en/decoder.

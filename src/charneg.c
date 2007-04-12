@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: charneg.c,v 1.7 2007-01-03 08:42:15 adam Exp $
+ * $Id: charneg.c,v 1.8 2007-04-12 13:52:57 adam Exp $
  */
 
 /** 
@@ -16,12 +16,11 @@
 #include <yaz/z-charneg.h>
 #include <yaz/charneg.h>
 #include <yaz/yaz-util.h>
+#include <yaz/oid_db.h>
 
-static Z_External* z_ext_record2(ODR o, int oid_class, int oid_value,
-                                 const char *buf)
+static Z_External* z_ext_record2(ODR o, const char *buf)
 {
     Z_External *p;
-    oident oid;
     int len = strlen(buf);
     
     if (!(p = (Z_External *)odr_malloc(o, sizeof(*p)))) return 0;
@@ -29,10 +28,10 @@ static Z_External* z_ext_record2(ODR o, int oid_class, int oid_value,
     p->descriptor = 0;
     p->indirect_reference = 0;
     
-    oid.proto = PROTO_Z3950;
-    oid.oclass = (enum oid_class) oid_class;
-    oid.value = (enum oid_value) oid_value;
-    p->direct_reference = odr_oiddup(o, oid_getoidbyent(&oid));
+    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                CLASS_NEGOT,
+                                                OID_STR_ID_CHARSET,
+                                                o);
     
     p->which = Z_External_octet;
     if (!(p->u.octet_aligned = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)))) {
@@ -110,8 +109,7 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
         p0->u.zprivate = pc;
         
         pc->which = Z_PrivateCharacterSet_externallySpecified;
-        pc->u.externallySpecified =
-            z_ext_record2(o, CLASS_NEGOT, VAL_ID_CHARSET, charset);
+        pc->u.externallySpecified = z_ext_record2(o, charset);
     }
     return p0;
 }
@@ -173,15 +171,14 @@ Z_External *yaz_set_proposal_charneg(ODR o,
                                      int selected)
 {
     Z_External *p = (Z_External *)odr_malloc(o, sizeof(*p));
-    oident oid;
         
     p->descriptor = 0;
     p->indirect_reference = 0;  
 
-    oid.proto = PROTO_Z3950;
-    oid.oclass = CLASS_NEGOT;
-    oid.value = VAL_CHARNEG3;
-    p->direct_reference = odr_oiddup(o, oid_getoidbyent(&oid));
+    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                CLASS_NEGOT,
+                                                OID_STR_CHARNEG_3,
+                                                o);
 
     p->which = Z_External_charSetandLanguageNegotiation;
     p->u.charNeg3 = z_get_CharSetandLanguageNegotiation(o);
@@ -205,10 +202,10 @@ Z_External *yaz_set_proposal_charneg_list(ODR o,
     int langs_count = 0;
     
     if (charset_list)
-        nmem_strsplit(o->mem, delim, charset_list,
+        nmem_strsplit(odr_getmem(o), delim, charset_list,
                       &charsets_addresses, &charsets_count);
     if (lang_list)
-        nmem_strsplit(o->mem, delim, lang_list,
+        nmem_strsplit(odr_getmem(o), delim, lang_list,
                       &langs_addresses, &langs_count);    
     return yaz_set_proposal_charneg(o,
                                     (const char **) charsets_addresses,
@@ -251,7 +248,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
         
         pc->which = Z_PrivateCharacterSet_externallySpecified;
         pc->u.externallySpecified =
-            z_ext_record2(o, CLASS_NEGOT, VAL_ID_CHARSET, charset);
+            z_ext_record2(o, charset);
     }
     p->recordsInSelectedCharSets = (bool_t *)odr_malloc(o, sizeof(bool_t));
     *p->recordsInSelectedCharSets = (selected) ? 1:0;
@@ -265,15 +262,14 @@ Z_External *yaz_set_response_charneg(ODR o, const char *charset,
                                      const char *lang, int selected)
 {
     Z_External *p = (Z_External *)odr_malloc(o, sizeof(*p));
-    oident oid;
         
     p->descriptor = 0;
     p->indirect_reference = 0;  
 
-    oid.proto = PROTO_Z3950;
-    oid.oclass = CLASS_NEGOT;
-    oid.value = VAL_CHARNEG3;
-    p->direct_reference = odr_oiddup(o, oid_getoidbyent(&oid));
+    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                CLASS_NEGOT,
+                                                OID_STR_CHARNEG_3,
+                                                o);
 
     p->which = Z_External_charSetandLanguageNegotiation;
     p->u.charNeg3 = z_get_CharSetandLanguageNegotiation(o);
@@ -295,12 +291,15 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
         Z_External *pext;
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = p->list[i]->information.externallyDefinedInfo)) {
-            
-            oident *ent = oid_getentbyoid(pext->direct_reference);
-            
-            if (ent && ent->value == VAL_CHARNEG3 
-                && ent->oclass == CLASS_NEGOT
-                &&  pext->which == Z_External_charSetandLanguageNegotiation)
+
+            int oclass;
+            const char *name = yaz_oid_to_string(yaz_oid_std(),
+                                                 pext->direct_reference,
+                                                 &oclass);
+
+            if (oclass == CLASS_NEGOT 
+                && name && !strcmp(name, OID_STR_CHARNEG_3) 
+                && pext->which == Z_External_charSetandLanguageNegotiation)
             {
                 return pext->u.charNeg3;
             }
@@ -320,19 +319,22 @@ int yaz_del_charneg_record(Z_OtherInformation **p)
     for (i = 0; i < (*p)->num_elements; i++) {
         Z_External *pext;
         if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
-            (pext = (*p)->list[i]->information.externallyDefinedInfo)) {
-            
-            oident *ent = oid_getentbyoid(pext->direct_reference);
-            
-            if (ent && ent->value == VAL_CHARNEG3 
-                && ent->oclass == CLASS_NEGOT
+            (pext = (*p)->list[i]->information.externallyDefinedInfo))
+        {
+            int oclass;
+            const char *name = yaz_oid_to_string(yaz_oid_std(),
+                                                 pext->direct_reference,
+                                                 &oclass);
+
+            if (oclass == CLASS_NEGOT 
+                && name && !strcmp(name, OID_STR_CHARNEG_3) 
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
-                --((*p)->num_elements);
-                if ((*p)->num_elements == 0)
+                if ((*p)->num_elements <= 1)
                     *p = 0;
                 else
                 {
+                    --((*p)->num_elements);
                     for(; i < (*p)->num_elements; i++)
                         (*p)->list[i] = (*p)->list[i+1];
                 }

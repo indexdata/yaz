@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.112 2007-03-19 14:40:07 adam Exp $
+ * $Id: seshigh.c,v 1.113 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -62,7 +62,7 @@
 #include "session.h"
 #include "mime.h"
 #include <yaz/proto.h>
-#include <yaz/oid.h>
+#include <yaz/oid_db.h>
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
 #include <yaz/querytowrbuf.h>
@@ -72,6 +72,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/yaz-util.h>
 #include <yaz/pquery.h>
+#include <yaz/oid_db.h>
 
 #include <yaz/srw.h>
 #include <yaz/backend.h>
@@ -586,7 +587,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
     {
         int r;
         const char *input_schema = yaz_get_esn(rr->comp);
-        Odr_oid *input_syntax_raw = rr->request_format_raw;
+        Odr_oid *input_syntax_raw = rr->request_format;
         
         const char *backend_schema = 0;
         Odr_oid *backend_syntax = 0;
@@ -631,19 +632,10 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         }
         if (backend_schema)
         {
-            yaz_set_esn(&rr->comp, backend_schema, rr->stream->mem);
+            yaz_set_esn(&rr->comp, backend_schema, odr_getmem(rr->stream));
         }
         if (backend_syntax)
-        {
-            oident *oident_syntax = oid_getentbyoid(backend_syntax);
-
-            rr->request_format_raw = backend_syntax;
-            
-            if (oident_syntax)
-                rr->request_format = oident_syntax->value;
-            else
-                rr->request_format = VAL_NONE;
-        }
+            rr->request_format = backend_syntax;
     }
     (*assoc->init->bend_fetch)(assoc->backend, rr);
     if (rc && rr->record && rr->errcode == 0 && rr->len > 0)
@@ -666,11 +658,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         wrbuf_destroy(output_record);
     }
     if (match_syntax)
-    {
-        struct oident *oi = oid_getentbyoid(match_syntax);
-        rr->output_format = oi ? oi->value : VAL_NONE;
-        rr->output_format_raw = match_syntax;
-    }
+        rr->output_format = match_syntax;
     if (match_schema)
         rr->schema = odr_strdup(rr->stream, match_schema);
     return 0;
@@ -691,10 +679,10 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.setname = "default";
     rr.number = pos;
     rr.referenceId = 0;
-    rr.request_format = VAL_TEXT_XML;
-    rr.request_format_raw = yaz_oidval_to_z3950oid(assoc->decode,
-                                                   CLASS_RECSYN,
-                                                   VAL_TEXT_XML);
+    rr.request_format = yaz_string_to_oid_odr(yaz_oid_std(),
+                                              CLASS_RECSYN,
+                                              OID_STR_XML,
+                                              assoc->decode);
     rr.comp = (Z_RecordComposition *)
             odr_malloc(assoc->decode, sizeof(*rr.comp));
     rr.comp->which = Z_RecordComp_complex;
@@ -1023,7 +1011,6 @@ static void srw_bend_search(association *assoc, request *req,
                         bprr->setname = "default";
                         bprr->start = start;
                         bprr->number = number;
-                        bprr->format = VAL_TEXT_XML;
                         if (srw_req->recordSchema)
                         {
                             bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
@@ -1296,20 +1283,11 @@ static void srw_bend_scan(association *assoc, request *req,
         if (srw_req->query_type == Z_SRW_query_type_pqf &&
             assoc->init->bend_scan)
         {
-            Odr_oid *scan_attributeSet = 0;
-            oident *attset;
             YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
             
             bsrr->term = yaz_pqf_scan(pqf_parser, assoc->decode,
-                                      &scan_attributeSet, 
+                                      &bsrr->attributeset, 
                                       srw_req->scanClause.pqf); 
-            if (scan_attributeSet &&
-                (attset = oid_getentbyoid(scan_attributeSet)) &&
-                (attset->oclass == CLASS_ATTSET ||
-                 attset->oclass == CLASS_GENERAL))
-                bsrr->attributeset = attset->value;
-            else
-                bsrr->attributeset = VAL_NONE;
             yaz_pqf_destroy(pqf_parser);
             bsrr->scanClause = 0;
             ((int (*)(void *, bend_scan_rr *))
@@ -1321,7 +1299,7 @@ static void srw_bend_scan(association *assoc, request *req,
         {
             int srw_error;
             bsrr->scanClause = 0;
-            bsrr->attributeset = VAL_NONE;
+            bsrr->attributeset = 0;
             bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
             srw_error = cql2pqf_scan(assoc->encode,
                                      srw_req->scanClause.cql,
@@ -1341,7 +1319,7 @@ static void srw_bend_scan(association *assoc, request *req,
                  && assoc->init->bend_srw_scan)
         {
             bsrr->term = 0;
-            bsrr->attributeset = VAL_NONE;
+            bsrr->attributeset = 0;
             bsrr->scanClause = srw_req->scanClause.cql;
             ((int (*)(void *, bend_scan_rr *))
              (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
@@ -2170,7 +2148,9 @@ static int process_z_response(association *assoc, request *req, Z_APDU *res)
 
 static char *get_vhost(Z_OtherInformation *otherInfo)
 {
-    return yaz_oi_get_string_oidval(&otherInfo, VAL_PROXY, 1, 0);
+    const int *oid = yaz_string_to_oid(yaz_oid_std(),
+                                       CLASS_USERINFO, OID_STR_PROXY);
+    return yaz_oi_get_string_oid(&otherInfo, oid, 1, 0);
 }
 
 /*
@@ -2364,7 +2344,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.112 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.113 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2476,7 +2456,7 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc,
 
 static Z_Records *pack_records(association *a, char *setname, int start,
                                int *num, Z_RecordComposition *comp,
-                               int *next, int *pres, oid_value format,
+                               int *next, int *pres,
                                Z_ReferenceId *referenceId,
                                int *oid, int *errcode)
 {
@@ -2520,10 +2500,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
         freq.surrogate_flag = 0;
         freq.number = recno;
         freq.comp = comp;
-        freq.request_format = format;
-        freq.request_format_raw = oid;
-        freq.output_format = format;
-        freq.output_format_raw = 0;
+        freq.request_format = oid;
+        freq.output_format = 0;
         freq.stream = a->encode;
         freq.print = a->print;
         freq.referenceId = referenceId;
@@ -2615,13 +2593,10 @@ static Z_Records *pack_records(association *a, char *setname, int start,
             thisrec->databaseName = 0;
         thisrec->which = Z_NamePlusRecord_databaseRecord;
 
-        if (freq.output_format_raw)
-        {
-            struct oident *ident = oid_getentbyoid(freq.output_format_raw);
-            freq.output_format = ident->value;
-        }
-        thisrec->u.databaseRecord = z_ext_record(a->encode, freq.output_format,
-                                                 freq.record, freq.len);
+        if (!freq.output_format)
+            freq.output_format = freq.request_format;
+        thisrec->u.databaseRecord = z_ext_record_oid(
+            a->encode, freq.output_format, freq.record, freq.len);
         if (!thisrec->u.databaseRecord)
             return 0;
         reclist->records[reclist->num_records] = thisrec;
@@ -2668,7 +2643,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
         bsrr->basenames = req->databaseNames;
         bsrr->query = req->query;
         bsrr->stream = assoc->encode;
-        nmem_transfer(bsrr->stream->mem, reqb->request_mem);
+        nmem_transfer(odr_getmem(bsrr->stream), reqb->request_mem);
         bsrr->decode = assoc->decode;
         bsrr->print = assoc->print;
         bsrr->hits = 0;
@@ -2774,15 +2749,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
         if (*toget && !resp->records)
         {
-            oident *prefformat;
-            oid_value form;
             int *presst = odr_intdup(assoc->encode, 0);
-
-            if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
-                form = VAL_NONE;
-            else
-                form = prefformat->value;
-
             /* Call bend_present if defined */
             if (assoc->init->bend_present)
             {
@@ -2791,7 +2758,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                 bprr->setname = req->resultSetName;
                 bprr->start = 1;
                 bprr->number = *toget;
-                bprr->format = form;
+                bprr->format = req->preferredRecordSyntax;
                 bprr->comp = compp;
                 bprr->referenceId = req->referenceId;
                 bprr->stream = assoc->encode;
@@ -2812,9 +2779,10 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
             }
 
             if (!resp->records)
-                resp->records = pack_records(assoc, req->resultSetName, 1,
-                                             toget, compp, next, presst, form, req->referenceId,
-                                             req->preferredRecordSyntax, NULL);
+                resp->records = pack_records(
+                    assoc, req->resultSetName, 1,
+                    toget, compp, next, presst, req->referenceId,
+                    req->preferredRecordSyntax, NULL);
             if (!resp->records)
                 return 0;
             resp->numberOfRecordsReturned = toget;
@@ -2889,8 +2857,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
                                       int *fd)
 {
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
-    oident *prefformat;
-    oid_value form;
     Z_APDU *apdu;
     Z_PresentResponse *resp;
     int *next;
@@ -2900,10 +2866,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 
     yaz_log(log_requestdetail, "Got PresentRequest.");
 
-    if (!(prefformat = oid_getentbyoid(req->preferredRecordSyntax)))
-        form = VAL_NONE;
-    else
-        form = prefformat->value;
     resp = (Z_PresentResponse *)odr_malloc (assoc->encode, sizeof(*resp));
     resp->records = 0;
     resp->presentStatus = odr_intdup(assoc->encode, 0);
@@ -2914,7 +2876,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         bprr->setname = req->resultSetId;
         bprr->start = *req->resultSetStartPoint;
         bprr->number = *req->numberOfRecordsRequested;
-        bprr->format = form;
+        bprr->format = req->preferredRecordSyntax;
         bprr->comp = req->recordComposition;
         bprr->referenceId = req->referenceId;
         bprr->stream = assoc->encode;
@@ -2951,7 +2913,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
             pack_records(assoc, req->resultSetId, *req->resultSetStartPoint,
                          num, req->recordComposition, next,
                          resp->presentStatus,
-                         form, req->referenceId, req->preferredRecordSyntax, 
+                         req->referenceId, req->preferredRecordSyntax, 
                          &errcode);
     }
     if (log_request)
@@ -2995,7 +2957,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_ListEntries *ents = (Z_ListEntries *)
         odr_malloc (assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
-    oident *attset;
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc (assoc->encode, sizeof(*bsrr));
     struct scan_entry *save_entries;
@@ -3063,12 +3024,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     }
     save_entries = bsrr->entries;  /* save it so we can compare later */
 
-    if (req->attributeSet &&
-        (attset = oid_getentbyoid(req->attributeSet)) &&
-        (attset->oclass == CLASS_ATTSET || attset->oclass == CLASS_GENERAL))
-        bsrr->attributeset = attset->value;
-    else
-        bsrr->attributeset = VAL_NONE;
+    bsrr->attributeset = req->attributeSet;
     log_scan_term_level (log_requestdetail, req->termListAndStartPoint, 
             bsrr->attributeset);
     bsrr->term_position = req->preferredPositionInResponse ?
@@ -3542,9 +3498,13 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     }
     /* Do something with the members of bend_extendedservice */
     if (esrequest.taskPackage)
-        resp->taskPackage = z_ext_record (assoc->encode, VAL_EXTENDED,
-                                         (const char *)  esrequest.taskPackage,
-                                          -1);
+    {
+        const int *oid = yaz_string_to_oid(yaz_oid_std(),
+                                           CLASS_EXTSERV, OID_STR_EXTENDED);
+        resp->taskPackage = z_ext_record_oid(assoc->encode, oid,
+                                             (const char *)  esrequest.taskPackage,
+                                             -1);
+    }
     yaz_log(YLOG_DEBUG,"Send the result apdu");
     return apdu;
 }

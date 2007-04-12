@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmem.c,v 1.28 2007-01-03 08:42:15 adam Exp $
+ * $Id: nmem.c,v 1.29 2007-04-12 13:52:57 adam Exp $
  */
 
 /**
@@ -27,7 +27,6 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
-#include <yaz/oid.h>
 
 #ifdef WIN32
 #include <windows.h>
@@ -499,7 +498,6 @@ void nmem_exit (void)
 {
     if (--nmem_init_flag == 0)
     {
-        oid_exit();
         while (freelist)
         {
             struct nmem_block *fl = freelist;

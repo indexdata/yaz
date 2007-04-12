@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.9 2007-03-19 21:08:13 adam Exp $
+ * $Id: odr_mem.c,v 1.10 2007-04-12 13:52:57 adam Exp $
  */
 /**
  * \file odr_mem.c
@@ -25,21 +25,17 @@ NMEM odr_extract_mem(ODR o)
 {
     NMEM r = o->mem;
 
-    o->mem = 0;
+    o->mem = nmem_create();
     return r;
 }
 
 void *odr_malloc(ODR o, int size)
 {
-    if (o && !o->mem)
-        o->mem = nmem_create();
-    return nmem_malloc(o ? o->mem : 0, size);
+    return nmem_malloc(o->mem, size);
 }
 
 char *odr_strdup(ODR o, const char *str)
 {
-    if (o && !o->mem)
-        o->mem = nmem_create();
     return nmem_strdup(o->mem, str);
 }
 
@@ -50,14 +46,12 @@ char *odr_strdupn(ODR o, const char *str, size_t n)
 
 int *odr_intdup(ODR o, int v)
 {
-    if (o && !o->mem)
-        o->mem = nmem_create();
     return nmem_intdup(o->mem, v);
 }
 
 int odr_total(ODR o)
 {
-    return o->mem ? nmem_total(o->mem) : 0;
+    return nmem_total(o->mem);
 }
 
 Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf, int sz)

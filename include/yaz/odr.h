@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: odr.h,v 1.26 2007-03-19 21:08:13 adam Exp $ */
+/* $Id: odr.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
 
 /**
  * \file odr.h
@@ -218,7 +218,6 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_offset(o) ((o)->bp - (o)->buf)
 #define odr_ok(o) (!(o)->error)
 #define odr_getmem(o) ((o)->mem)
-#define odr_setmem(o, v) ((o)->mem = (v))
 
 #define ODR_MAXNAME 256
 
@@ -276,8 +275,8 @@ YAZ_EXPORT int completeBER(const unsigned char *buf, int len);
 
 YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);
-YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
-YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, Odr_oid *o);
+YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
+YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o);
 YAZ_EXPORT int odr_grow_block(ODR b, int min_bytes);
 YAZ_EXPORT int odr_write(ODR o, unsigned char *buf, int bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);

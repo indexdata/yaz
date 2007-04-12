@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.45 2007-03-21 11:27:47 adam Exp $
+ * $Id: zoomsh.c,v 1.46 2007-04-12 13:52:58 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -28,7 +28,6 @@
 #include <yaz/log.h>
 #include <yaz/nmem.h>
 #include <yaz/zoom.h>
-#include <yaz/oid.h>
 
 #define MAX_CON 100
 
@@ -204,10 +203,8 @@ static void display_records (ZOOM_connection c,
             /* if rec is non-null, we got a record for display */
             if (rec)
             {
-                char oidbuf[100];
-                (void) oid_name_to_dotstring(CLASS_RECSYN, syntax, oidbuf);
-                printf ("%d %s %s (%s)\n",
-                        pos, (db ? db : "unknown"), syntax, oidbuf);
+                printf ("%d %s %s\n",
+                        pos, (db ? db : "unknown"), syntax);
                 if (render)
                     fwrite (render, 1, len, stdout);
                 printf ("\n");

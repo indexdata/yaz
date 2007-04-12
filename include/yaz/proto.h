@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: proto.h,v 1.26 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: proto.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
 
 /**
  * \file proto.h
@@ -65,7 +65,6 @@
 #include <yaz/zes-update0.h>
 #include <yaz/z-charneg.h>
 #include <yaz/z-mterm2.h>
-#include <yaz/oid.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zgdu.h>
 #include <yaz/z-oclcui.h>
@@ -130,13 +129,6 @@ typedef struct Z_IOItemOrder Z_ItemOrder;
 
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
 YAZ_EXPORT Z_Close *zget_Close (ODR o);
-YAZ_EXPORT Odr_oid *yaz_oidval_to_z3950oid (ODR o, int oid_class,
-                                            int oid_value);
-YAZ_EXPORT Odr_oid *yaz_str_to_z3950oid (ODR o, int oid_class,
-                                         const char *str);
-YAZ_EXPORT const char *yaz_z3950oid_to_str (Odr_oid *oid, int *oid_class);
-
-YAZ_EXPORT const char* yaz_z3950_oid_value_to_str(oid_value ov, oid_class oc);
 
 /** \brief Performs "pretty" display of GRS-1 record to WRBUF */
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);

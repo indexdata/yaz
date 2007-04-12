@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: pquery.h,v 1.10 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: pquery.h,v 1.11 2007-04-12 13:52:57 adam Exp $ */
 
 /**
  * \file pquery.h
@@ -41,21 +41,19 @@ YAZ_BEGIN_CDECL
 
 typedef struct yaz_pqf_parser *YAZ_PQF_Parser;
 
-YAZ_EXPORT Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
+YAZ_EXPORT Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf);
 
-YAZ_EXPORT Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
-           Odr_oid **attributeSetP, const char *qbuf);
-YAZ_EXPORT int p_query_attset (const char *arg);
+YAZ_EXPORT Z_AttributesPlusTerm *p_query_scan(ODR o, oid_proto proto,
+                                              Odr_oid **attributeSetP, const char *qbuf);
+YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create(void);
+YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o,
+                                     const char *qbuf);
+YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
+                                              Odr_oid **attributeSetId,
+                                              const char *qbuf);
+YAZ_EXPORT void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
-YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create (void);
-YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse (YAZ_PQF_Parser p, ODR o,
-                                      const char *qbuf);
-YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan (YAZ_PQF_Parser p, ODR o,
-                                               Odr_oid **attributeSetId,
-                                               const char *qbuf);
-YAZ_EXPORT void yaz_pqf_destroy (YAZ_PQF_Parser p);
-
-YAZ_EXPORT int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off);
+YAZ_EXPORT int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
 
 
 /* no error */
