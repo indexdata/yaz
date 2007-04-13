@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.13 2007-04-12 13:52:57 adam Exp $
+ * $Id: xmlquery.c,v 1.14 2007-04-13 09:55:21 adam Exp $
  */
 
 /** \file xmlquery.c
@@ -20,6 +20,7 @@
 #include <yaz/logrpn.h>
 #include <yaz/xmlquery.h>
 #include <yaz/nmem_xml.h>
+#include <yaz/oid_db.h>
 
 void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
                                      xmlNodePtr parent)
