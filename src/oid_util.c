@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_util.c,v 1.2 2007-04-12 20:47:28 adam Exp $
+ * $Id: oid_util.c,v 1.3 2007-04-13 07:04:42 adam Exp $
  */
 
 /**
@@ -90,6 +90,8 @@ int oid_dotstring_to_oid(const char *name, int *oid)
             name++;
         }
     }
+    if (i == 0)
+        return -1;
     oid[i] = val;
     oid[i+1] = -1;
     return 0;
