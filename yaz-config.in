@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.26 2007-02-25 14:46:50 adam Exp $
+# $Id: yaz-config.in,v 1.27 2007-04-13 10:24:32 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -81,7 +81,7 @@ if test "$yaz_echo_source" = "yes"; then
     YAZBIN=${yaz_build_root}/bin
     YAZLIB="-L${yaz_build_root}/src/.libs $lyaz $yazextralibs"
     YAZLALIB="${yaz_build_root}/src/libyaz.la $yazextralibs"
-    YAZINC="$YAZINC -I${yaz_src_root}/include"
+    YAZINC="-I${yaz_src_root}/include $YAZINC"
     YAZCOMP=${yaz_src_root}/util/yaz-asncomp
 else
     YAZBIN=${yazprefix}/bin
@@ -94,7 +94,7 @@ else
     fi
     YAZLALIB=$YAZLIB
     if test "$yazprefix" != "/usr"; then
-	YAZINC="$YAZINC -I$yazprefix/include"
+	YAZINC="-I$yazprefix/include $YAZINC"
     fi
 fi
 
