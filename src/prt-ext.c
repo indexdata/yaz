@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.8 2007-04-12 13:52:57 adam Exp $
+ * $Id: prt-ext.c,v 1.9 2007-04-13 09:55:41 adam Exp $
  */
 
 /**
@@ -318,6 +318,27 @@ Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
         thisext->u.octet_aligned->len = thisext->u.octet_aligned->size = len;
     }
     return thisext;
+}
+
+Z_External *z_ext_record_xml(ODR o, const char *buf, int len)
+{
+    const int *oid = yaz_string_to_oid(yaz_oid_std(),
+                                       CLASS_RECSYN, OID_STR_XML);
+    return z_ext_record_oid(o, oid, buf, len);
+}
+
+Z_External *z_ext_record_sutrs(ODR o, const char *buf, int len)
+{
+    const int *oid = yaz_string_to_oid(yaz_oid_std(),
+                                       CLASS_RECSYN, OID_STR_SUTRS);
+    return z_ext_record_oid(o, oid, buf, len);
+}
+
+Z_External *z_ext_record_usmarc(ODR o, const char *buf, int len)
+{
+    const int *oid = yaz_string_to_oid(yaz_oid_std(),
+                                       CLASS_RECSYN, OID_STR_USMARC);
+    return z_ext_record_oid(o, oid, buf, len);
 }
 
 /*

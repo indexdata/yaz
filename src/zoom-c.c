@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.123 2007-04-12 13:52:57 adam Exp $
+ * $Id: zoom-c.c,v 1.124 2007-04-13 09:55:41 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1298,7 +1298,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.123 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.124 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2988,10 +2988,8 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
     str = ZOOM_options_get(p->options, "doc");
     if (str)
     {
-        const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                           CLASS_RECSYN, OID_STR_XML);
         req->u.esRequest->notToKeep->itemRequest =
-            z_ext_record_oid(p->odr_out, oid, str, strlen(str));
+            z_ext_record_xml(p->odr_out, str, strlen(str));
     }
     else
         req->u.esRequest->notToKeep->itemRequest = encode_ill_request(p);

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.86 2007-04-12 13:52:58 adam Exp $
+ * $Id: ztest.c,v 1.87 2007-04-13 09:55:41 adam Exp $
  */
 
 /*
@@ -373,13 +373,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 targetPart->taskPackageRecords[0]->which =
                     Z_IUTaskPackageRecordStructure_record;
                 targetPart->taskPackageRecords[0]->u.record = 
-                    z_ext_record_oid(rr->stream,
-                                     yaz_string_to_oid_odr(
-                                         yaz_oid_std(),
-                                         CLASS_RECSYN,
-                                         OID_STR_SUTRS,
-                                         rr->stream),
-                                     "test", 4);
+                    z_ext_record_sutrs(rr->stream, "test", 4);
                 targetPart->taskPackageRecords[0]->correlationInfo = 0; 
                 targetPart->taskPackageRecords[0]->recordStatus =
                     odr_intdup (rr->stream,
