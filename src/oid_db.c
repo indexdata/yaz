@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.2 2007-04-12 20:47:28 adam Exp $
+ * $Id: oid_db.c,v 1.3 2007-04-13 13:58:00 adam Exp $
  */
 
 /**
@@ -142,8 +142,8 @@ static struct yaz_oid_entry standard_list[] =
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 1000, 81, 1,-1}, OID_STR_PROXY},
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 1000, 81, 2,-1}, OID_STR_COOKIE},
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 1000, 81, 3,-1},  OID_STR_CLIENT_IP },
-    {CLASS_ELEMSPEC, {1, 2, 840, 1003, 11, 1,-1}, "Espec-1"},
-    {CLASS_VARSET, {Z3950_PREFIX, 12, 1,-1}, "Variant-1"},
+    {CLASS_ELEMSPEC, {Z3950_PREFIX, 11, 1,-1}, "Espec-1"},
+    {CLASS_VARSET, {Z3950_PREFIX, 12, 1,-1}, OID_STR_VARIANT_1},
     {CLASS_SCHEMA, {Z3950_PREFIX, 13, 1,-1}, "WAIS-schema"},
     {CLASS_SCHEMA, {Z3950_PREFIX, 13, 2,-1}, "GILS-schema"},
     {CLASS_SCHEMA, {Z3950_PREFIX, 13, 3,-1}, "Collections-schema"},

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.2 2007-04-12 20:47:27 adam Exp $ */
+/* $Id: oid_db.h,v 1.3 2007-04-13 13:58:00 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -162,6 +162,7 @@ int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
 #define OID_STR_ID_CHARSET "ID-Charset"
 #define OID_STR_CHARNEG_3 "CharSetandLanguageNegotiation-3"
 #define OID_STR_CHARNEG_4 "CharSetandLanguageNegotiation-4"
+#define OID_STR_VARIANT_1 "Variant-1"
 
 YAZ_END_CDECL
 
