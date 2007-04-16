@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.56 2007-04-12 13:52:57 adam Exp $
+## $Id: Makefile.am,v 1.57 2007-04-16 11:15:51 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -20,7 +20,8 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv \
- csvtosru_update.tcl sru_update.csv
+ csvtosru_update.tcl sru_update.csv \
+ oid.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
