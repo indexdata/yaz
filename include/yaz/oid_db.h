@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.4 2007-04-16 08:43:08 adam Exp $ */
+/* $Id: oid_db.h,v 1.5 2007-04-16 21:53:08 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -136,53 +136,16 @@ YAZ_EXPORT
 int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
                 const int *new_oid);
 
-#define OID_STR_BIB1 "Bib-1"
-#define OID_STR_DIAG1 "Diag-1"
-#define OID_STR_USMARC "USmarc"
-#define OID_STR_XML "XML"
-#define OID_STR_SOIF "SOIF"
-#define OID_STR_APPLICATION_XML "application-XML"
-#define OID_STR_HTML "html"
-#define OID_STR_GRS1 "GRS-1"
-#define OID_STR_POSTSCRIPT "postscript"
-#define OID_STR_SUTRS "SUTRS"
-#define OID_STR_OPAC "OPAC"
-#define OID_STR_EXPLAIN "Explain"
-#define OID_STR_SUMMARY "Summary"
-#define OID_STR_EXTENDED "Extended"
-#define OID_STR_COOKIE "Cookie" 
-#define OID_STR_PROXY "Proxy" 
-#define OID_STR_CLIENT_IP "Client-IP"
-#define OID_STR_ILL_1 "ISOILL-1"
-#define OID_STR_ADMIN "Admin"
-#define OID_STR_XMLES "XML-ES"
-#define OID_STR_EXT_UPDATE "DB. Update"
-#define OID_STR_ITEMORDER "Item order"
-#define OID_STR_USERINFO_1 "UserInfo-1"
-#define OID_STR_ID_CHARSET "ID-Charset"
-#define OID_STR_CHARNEG_3 "CharSetandLanguageNegotiation-3"
-#define OID_STR_CHARNEG_4 "CharSetandLanguageNegotiation-4"
-#define OID_STR_VARIANT_1 "Variant-1"
-#define OID_STR_SEARCH_RESULT_1 "searchResult-1"
+struct yaz_oid_entry {
+    int oclass;
+    const int *oid;
+    char *name;
+};
 
-YAZ_EXPORT const int *yaz_oid_xml(void);
-YAZ_EXPORT const int *yaz_oid_application_xml(void);
-YAZ_EXPORT const int *yaz_oid_html(void);
-YAZ_EXPORT const int *yaz_oid_sutrs(void);
-YAZ_EXPORT const int *yaz_oid_opac(void);
-YAZ_EXPORT const int *yaz_oid_grs1(void);
-YAZ_EXPORT const int *yaz_oid_postscript(void);
-YAZ_EXPORT const int *yaz_oid_explain(void);
-YAZ_EXPORT const int *yaz_oid_extended(void);
-YAZ_EXPORT const int *yaz_oid_summary(void);
-YAZ_EXPORT const int *yaz_oid_get_usmarc(void);
-YAZ_EXPORT const int *yaz_oid_soif(void);
-YAZ_EXPORT const int *yaz_oid_attset_bib1(void);
-YAZ_EXPORT const int *yaz_oid_diag1(void);
-YAZ_EXPORT const int *yaz_oid_proxy(void);
-YAZ_EXPORT const int *yaz_oid_cookie(void);
-YAZ_EXPORT const int *yaz_oid_search_result_1(void);
-YAZ_EXPORT const int *yaz_oid_variant1(void);
+#define Z3950_PREFIX 1, 2, 840, 10003
+
+#include <yaz/oid_std.h>
+
 YAZ_END_CDECL
 
 #endif

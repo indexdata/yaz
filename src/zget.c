@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.13 2007-04-12 13:52:57 adam Exp $
+ * $Id: zget.c,v 1.14 2007-04-16 21:53:09 adam Exp $
  */
 /**
  * \file zget.c
@@ -506,8 +506,7 @@ Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
         odr_malloc (o, sizeof(*dr));
     
-    dr->diagnosticSetId = yaz_string_to_oid_odr(
-        yaz_oid_std(), CLASS_DIAGSET, OID_STR_BIB1, o);
+    dr->diagnosticSetId = odr_oiddup(o, yaz_oid_diagset_bib_1);
     dr->condition = odr_intdup(o, error);
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
     dr->u.v2Addinfo = odr_strdup (o, addinfo ? addinfo : "");
@@ -560,10 +559,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
     x->indirect_reference = 0;  
-    x->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                CLASS_USERINFO,
-                                                OID_STR_USERINFO_1,
-                                                odr);
+    x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_userInfo1;
 
     u = odr_malloc(odr, sizeof *u);
@@ -579,10 +575,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     l->information.externallyDefinedInfo = x2;
     x2->descriptor = 0;
     x2->indirect_reference = 0;
-    x2->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                 CLASS_DIAGSET,
-                                                 OID_STR_DIAG1,
-                                                 odr);
+    x2->direct_reference = odr_oiddup(odr, yaz_oid_diagset_diag_1);
     x2->which = Z_External_diag1;
 
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
@@ -623,10 +616,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     x2->descriptor = 0;
     x2->indirect_reference = 0;
 
-    x2->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                 CLASS_DIAGSET,
-                                                 OID_STR_DIAG1,
-                                                 odr);
+    x2->direct_reference = odr_oiddup(odr, yaz_oid_diagset_diag_1);
     x2->which = Z_External_diag1;
 
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
@@ -649,11 +639,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
     x->indirect_reference = 0;  
-    x->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                CLASS_USERINFO,
-                                                OID_STR_USERINFO_1,
-                                                odr);
-
+    x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_octet;
     x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));
     x->u.octet_aligned->buf = odr_malloc(odr, octet_len);

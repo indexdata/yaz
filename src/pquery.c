@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.10 2007-04-12 13:52:57 adam Exp $
+ * $Id: pquery.c,v 1.11 2007-04-16 21:53:09 adam Exp $
  */
 /**
  * \file pquery.c
@@ -645,8 +645,7 @@ Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li, const char *qbuf)
     }
     if (!top_set)
     {
-        top_set = yaz_string_to_oid_odr(yaz_oid_std(),
-                                        CLASS_ATTSET, OID_STR_BIB1, o);
+        top_set = odr_oiddup(o, yaz_oid_attset_bib_1);
     }
 
     zq->attributeSetId = top_set;
@@ -710,8 +709,7 @@ Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     }
     if (!top_set)
     {
-        top_set = yaz_string_to_oid_odr(yaz_oid_std(),
-                                        CLASS_ATTSET, OID_STR_BIB1, o);
+        top_set = odr_oiddup(o, yaz_oid_attset_bib_1);
     }
     *attributeSetP = top_set;
 

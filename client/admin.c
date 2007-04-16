@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.24 2007-04-12 13:52:57 adam Exp $
+ * $Id: admin.c,v 1.25 2007-04-16 21:53:08 adam Exp $
  */
 
 #include <stdio.h>
@@ -53,11 +53,7 @@ int sendAdminES(int type, char* param1)
     printf ("Admin request\n");
     fflush(stdout);
 
-    oid = yaz_string_to_oid_odr(yaz_oid_std(),
-                                CLASS_EXTSERV,
-                                OID_STR_ADMIN,
-                                out);
-
+    oid = odr_oiddup(out, yaz_oid_extserv_admin);
 
     req->packageType = oid;
     req->packageName = "1.Extendedserveq";

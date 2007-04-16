@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.87 2007-04-13 09:55:41 adam Exp $
+ * $Id: ztest.c,v 1.88 2007-04-16 21:53:09 adam Exp $
  */
 
 /*
@@ -144,14 +144,15 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                           &oclass, oid_name_str);
                     if (oid_name)
                         yaz_log(log_level, "OID %s", oid_name);
-                    if (oid_name && !strcmp(oid_name, OID_STR_XML))
+                    if (!oid_oidcmp(r->direct_reference, yaz_oid_recsyn_xml))
                     {
                         yaz_log (log_level, "ILL XML request");
                         if (r->which == Z_External_octet)
                             yaz_log (log_level, "%.*s", r->u.octet_aligned->len,
                                      r->u.octet_aligned->buf); 
                     }
-                    if (oid_name && !strcmp(oid_name, OID_STR_ILL_1))
+                    if (!oid_oidcmp(r->direct_reference, 
+                                    yaz_oid_general_isoill_1))
                     {
                         yaz_log (log_level, "Decode ItemRequest begin");
                         if (r->which == ODR_EXTERNAL_single)
@@ -462,15 +463,15 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     int oclass;
     char oid_str_buf[OID_STR_MAX];
     const char *oid_str = 0;
+    const int *oid = r->request_format;
 
     r->last_in_set = 0;
     r->basename = "Default";
     r->output_format = r->request_format;
 
-    oid_str = yaz_oid_to_string_buf(r->request_format, &oclass,
-                                    oid_str_buf);
-
-    if (oid_str && !strcmp(oid_str, OID_STR_SUTRS))
+    oid_str = yaz_oid_to_string_buf(oid, &oclass, oid_str_buf);
+    
+    if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {
         /* this section returns a small record */
         char buf[100];
@@ -481,7 +482,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         r->record = (char *) odr_malloc (r->stream, r->len+1);
         strcpy(r->record, buf);
     }
-    else if (oid_str && !strcmp(oid_str, OID_STR_GRS1))
+    else if (oid &&  !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
         r->len = -1;
         r->record = (char*) dummy_grs_record(r->number, r->stream);
@@ -491,7 +492,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             return 0;
         }
     }
-    else if (oid_str && !strcmp(oid_str, OID_STR_POSTSCRIPT))
+    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_postscript))
     {
         char fname[20];
         FILE *f;
@@ -517,7 +518,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         fread (r->record, size, 1, f);
         fclose (f);
     }
-    else if (oid_str && !strcmp(oid_str, OID_STR_XML))
+    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_xml))
     {
         if ((cp = dummy_xml_record (r->number, r->stream)))
         {
@@ -535,8 +536,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     {
         r->len = strlen(cp);
         r->record = cp;
-        r->output_format = yaz_string_to_oid_odr(
-            yaz_oid_std(), CLASS_RECSYN, OID_STR_USMARC, r->stream);
+        r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_usmarc);
     }
     else
     {

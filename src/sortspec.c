@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: sortspec.c,v 1.9 2007-04-12 13:52:57 adam Exp $
+ * $Id: sortspec.c,v 1.10 2007-04-16 21:53:09 adam Exp $
  */
 /**
  * \file sortspec.c
@@ -49,9 +49,7 @@ Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
             sk->which = Z_SortKey_sortAttributes;
             sk->u.sortAttributes = (Z_SortAttributes *)
                 odr_malloc (out, sizeof(*sk->u.sortAttributes));
-            sk->u.sortAttributes->id = 
-                yaz_string_to_oid_odr(yaz_oid_std(),
-                                      CLASS_ATTSET, OID_STR_BIB1, out);
+            sk->u.sortAttributes->id = odr_oiddup(out, yaz_oid_attset_bib_1);
             sk->u.sortAttributes->list = (Z_AttributeList *)
                 odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
             sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)

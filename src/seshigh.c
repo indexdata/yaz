@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.114 2007-04-12 20:47:28 adam Exp $
+ * $Id: seshigh.c,v 1.115 2007-04-16 21:53:09 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -679,10 +679,8 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.setname = "default";
     rr.number = pos;
     rr.referenceId = 0;
-    rr.request_format = yaz_string_to_oid_odr(yaz_oid_std(),
-                                              CLASS_RECSYN,
-                                              OID_STR_XML,
-                                              assoc->decode);
+    rr.request_format = odr_oiddup(assoc->decode, yaz_oid_recsyn_xml);
+
     rr.comp = (Z_RecordComposition *)
             odr_malloc(assoc->decode, sizeof(*rr.comp));
     rr.comp->which = Z_RecordComp_complex;
@@ -2148,9 +2146,7 @@ static int process_z_response(association *assoc, request *req, Z_APDU *res)
 
 static char *get_vhost(Z_OtherInformation *otherInfo)
 {
-    const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                       CLASS_USERINFO, OID_STR_PROXY);
-    return yaz_oi_get_string_oid(&otherInfo, oid, 1, 0);
+    return yaz_oi_get_string_oid(&otherInfo, yaz_oid_userinfo_proxy, 1, 0);
 }
 
 /*
@@ -2344,7 +2340,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.114 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.115 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3499,11 +3495,10 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     /* Do something with the members of bend_extendedservice */
     if (esrequest.taskPackage)
     {
-        const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                           CLASS_EXTSERV, OID_STR_EXTENDED);
-        resp->taskPackage = z_ext_record_oid(assoc->encode, oid,
-                                             (const char *)  esrequest.taskPackage,
-                                             -1);
+        resp->taskPackage = z_ext_record_oid(
+            assoc->encode, yaz_oid_recsyn_extended,
+            (const char *)  esrequest.taskPackage, -1
+            );
     }
     yaz_log(YLOG_DEBUG,"Send the result apdu");
     return apdu;

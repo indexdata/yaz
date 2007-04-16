@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: charneg.c,v 1.8 2007-04-12 13:52:57 adam Exp $
+ * $Id: charneg.c,v 1.9 2007-04-16 21:53:09 adam Exp $
  */
 
 /** 
@@ -28,10 +28,7 @@ static Z_External* z_ext_record2(ODR o, const char *buf)
     p->descriptor = 0;
     p->indirect_reference = 0;
     
-    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                CLASS_NEGOT,
-                                                OID_STR_ID_CHARSET,
-                                                o);
+    p->direct_reference = odr_oiddup(o, yaz_oid_negot_charset_id);
     
     p->which = Z_External_octet;
     if (!(p->u.octet_aligned = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)))) {
@@ -175,10 +172,7 @@ Z_External *yaz_set_proposal_charneg(ODR o,
     p->descriptor = 0;
     p->indirect_reference = 0;  
 
-    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                CLASS_NEGOT,
-                                                OID_STR_CHARNEG_3,
-                                                o);
+    p->direct_reference = odr_oiddup(o, yaz_oid_negot_charset_3);
 
     p->which = Z_External_charSetandLanguageNegotiation;
     p->u.charNeg3 = z_get_CharSetandLanguageNegotiation(o);
@@ -266,10 +260,7 @@ Z_External *yaz_set_response_charneg(ODR o, const char *charset,
     p->descriptor = 0;
     p->indirect_reference = 0;  
 
-    p->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                CLASS_NEGOT,
-                                                OID_STR_CHARNEG_3,
-                                                o);
+    p->direct_reference = odr_oiddup(o, yaz_oid_negot_charset_3);
 
     p->which = Z_External_charSetandLanguageNegotiation;
     p->u.charNeg3 = z_get_CharSetandLanguageNegotiation(o);
@@ -291,14 +282,8 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
         Z_External *pext;
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = p->list[i]->information.externallyDefinedInfo)) {
-
-            int oclass;
-            const char *name = yaz_oid_to_string(yaz_oid_std(),
-                                                 pext->direct_reference,
-                                                 &oclass);
-
-            if (oclass == CLASS_NEGOT 
-                && name && !strcmp(name, OID_STR_CHARNEG_3) 
+            
+            if (!oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
                 return pext->u.charNeg3;
@@ -321,13 +306,7 @@ int yaz_del_charneg_record(Z_OtherInformation **p)
         if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = (*p)->list[i]->information.externallyDefinedInfo))
         {
-            int oclass;
-            const char *name = yaz_oid_to_string(yaz_oid_std(),
-                                                 pext->direct_reference,
-                                                 &oclass);
-
-            if (oclass == CLASS_NEGOT 
-                && name && !strcmp(name, OID_STR_CHARNEG_3) 
+            if (!oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
                 if ((*p)->num_elements <= 1)

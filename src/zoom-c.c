@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.124 2007-04-13 09:55:41 adam Exp $
+ * $Id: zoom-c.c,v 1.125 2007-04-16 21:53:09 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1207,19 +1207,17 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
     assert(a);
     if (c->cookie_out)
     {
-        const int *oid = yaz_string_to_oid(
-            yaz_oid_std(), CLASS_USERINFO, OID_STR_COOKIE);
         Z_OtherInformation **oi;
         yaz_oi_APDU(a, &oi);
-        yaz_oi_set_string_oid(oi, out, oid, 1, c->cookie_out);
+        yaz_oi_set_string_oid(oi, out, yaz_oid_userinfo_cookie, 
+                              1, c->cookie_out);
     }
     if (c->client_IP)
     {
-        const int *oid = yaz_string_to_oid(
-            yaz_oid_std(), CLASS_USERINFO, OID_STR_CLIENT_IP);
         Z_OtherInformation **oi;
         yaz_oi_APDU(a, &oi);
-        yaz_oi_set_string_oid(oi, out, oid, 1, c->client_IP);
+        yaz_oi_set_string_oid(oi, out, yaz_oid_userinfo_client_ip, 
+                              1, c->client_IP);
     }
     otherInfo_attach(c, a, out);
     if (!z_APDU(out, &a, 0, 0))
@@ -1298,7 +1296,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.124 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.125 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1357,10 +1355,8 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     }
     if (c->proxy)
     {
-        const int *oid = yaz_string_to_oid(
-            yaz_oid_std(), CLASS_USERINFO, OID_STR_CLIENT_IP);
         yaz_oi_set_string_oid(&ireq->otherInfo, c->odr_out,
-                              oid, 1, c->host_port);
+                              yaz_oid_userinfo_proxy, 1, c->host_port);
     }
     if (c->charset || c->lang)
     {
@@ -2849,7 +2845,7 @@ ZOOM_API(void)
     ZOOM_options_set(scan->options, key, val);
 }
 
-static Z_APDU *create_es_package(ZOOM_package p, const char *type)
+static Z_APDU *create_es_package(ZOOM_package p, const int *oid)
 {
     const char *str;
     Z_APDU *apdu = zget_APDU(p->odr_out, Z_APDU_extendedServicesRequest);
@@ -2865,8 +2861,7 @@ static Z_APDU *create_es_package(ZOOM_package p, const char *type)
     if (str)
         req->userId = odr_strdup(p->odr_out, str);
     
-    req->packageType = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_EXTSERV,
-                                             type, p->odr_out);
+    req->packageType = odr_oiddup(p->odr_out, oid);
 
     str = ZOOM_options_get(p->options, "function");
     if (str)
@@ -2914,10 +2909,7 @@ static Z_External *encode_ill_request(ZOOM_package p)
         char *illRequest_buf = odr_getbuf(out, &illRequest_size, 0);
                 
         r = (Z_External *) odr_malloc(out, sizeof(*r));
-        r->direct_reference = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                    CLASS_GENERAL,
-                                                    OID_STR_ILL_1,
-                                                    out);
+        r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
@@ -3001,7 +2993,7 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
                              Z_ESAdminOriginPartToKeep **toKeepP,
                              Z_ESAdminOriginPartNotToKeep **notToKeepP)
 {
-    Z_APDU *apdu = create_es_package(p, OID_STR_ADMIN);
+    Z_APDU *apdu = create_es_package(p, yaz_oid_extserv_admin);
     if (apdu)
     {
         Z_ESAdminOriginPartToKeep  *toKeep;
@@ -3014,9 +3006,7 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
         if (num_db > 0)
             first_db = db[0];
             
-        r->direct_reference =
-            yaz_string_to_oid_odr(yaz_oid_std(),
-                                  CLASS_EXTSERV, OID_STR_ADMIN, p->odr_out);
+        r->direct_reference = odr_oiddup(p->odr_out, yaz_oid_extserv_admin);
         r->descriptor = 0;
         r->indirect_reference = 0;
         r->which = Z_External_ESAdmin;
@@ -3051,7 +3041,7 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
 
 static Z_APDU *create_xmlupdate_package(ZOOM_package p)
 {
-    Z_APDU *apdu = create_es_package(p, OID_STR_XMLES);
+    Z_APDU *apdu = create_es_package(p, yaz_oid_extserv_xml_es);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *ext = (Z_External *) odr_malloc(p->odr_out, sizeof(*ext));
     const char *doc = ZOOM_options_get(p->options, "doc");
@@ -3121,7 +3111,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     else
         return 0;
 
-    apdu = create_es_package(p, OID_STR_EXT_UPDATE);
+    apdu = create_es_package(p, yaz_oid_extserv_database_update);
     if (apdu)
     {
         Z_IUOriginPartToKeep *toKeep;
@@ -3132,9 +3122,8 @@ static Z_APDU *create_update_package(ZOOM_package p)
         apdu->u.extendedServicesRequest->taskSpecificParameters = r;
 
         
-        r->direct_reference =
-            yaz_string_to_oid_odr(yaz_oid_std(), CLASS_EXTSERV,
-                                  OID_STR_EXT_UPDATE, p->odr_out);
+        r->direct_reference = odr_oiddup(p->odr_out, 
+                                         yaz_oid_extserv_database_update);
         r->descriptor = 0;
         r->which = Z_External_update;
         r->indirect_reference = 0;
@@ -3208,14 +3197,13 @@ ZOOM_API(void)
     p->buf_out = 0;
     if (!strcmp(type, "itemorder"))
     {
-        apdu = create_es_package(p, OID_STR_ITEMORDER);
+        apdu = create_es_package(p, yaz_oid_extserv_item_order);
         if (apdu)
         {
             Z_External *r = (Z_External *) odr_malloc(p->odr_out, sizeof(*r));
             
-            r->direct_reference =
-                yaz_string_to_oid_odr(yaz_oid_std(), CLASS_EXTSERV,
-                                      OID_STR_ITEMORDER, p->odr_out);
+            r->direct_reference = 
+                odr_oiddup(p->odr_out, yaz_oid_extserv_item_order);
             r->descriptor = 0;
             r->which = Z_External_itemOrder;
             r->indirect_reference = 0;
@@ -3509,12 +3497,9 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
         }
         else
         {
-            const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                               CLASS_USERINFO,
-                                               OID_STR_COOKIE);
             char *cookie =
                 yaz_oi_get_string_oid(&apdu->u.initResponse->otherInfo,
-                                      oid, 1, 0);
+                                      yaz_oid_userinfo_cookie, 1, 0);
             xfree(c->cookie_in);
             c->cookie_in = 0;
             if (cookie)
@@ -3662,8 +3647,7 @@ static void handle_srw_response(ZOOM_connection c,
             odr_malloc(c->odr_in, sizeof(Z_External));
         npr->u.databaseRecord->descriptor = 0;
         npr->u.databaseRecord->direct_reference =
-            yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, OID_STR_XML,
-                                  c->odr_in);
+            odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
         npr->u.databaseRecord->which = Z_External_octet;
 
         npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)

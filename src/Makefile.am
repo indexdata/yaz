@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.57 2007-04-16 11:15:51 adam Exp $
+## $Id: Makefile.am,v 1.58 2007-04-16 21:53:09 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -21,7 +21,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv \
  csvtosru_update.tcl sru_update.csv \
- oid.csv
+ oidtoc.tcl oid.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
@@ -38,6 +38,10 @@ marc8.c: charconv.tcl codetables.xml
 # UTF-8->MARC8 conversion is generated from codetables.xml
 marc8r.c: charconv.tcl codetables.xml
 	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o marc8r.c
+
+# Generate OID database from CSV
+oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
+	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir)/oid.csv $(srcdir)/oid_std.c $(top_srcdir)/include/yaz/oid_std.h
 
 # Generate diagnostics from CSVs
 diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: csvtobib1.tcl bib1.csv
@@ -80,7 +84,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h test.c timing.c \
   xmlquery.c http.c \
-  mime.c mime.h oid_util.c \
+  mime.c mime.h oid_util.c oid_std.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)

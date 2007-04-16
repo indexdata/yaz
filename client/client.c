@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.333 2007-04-12 20:47:27 adam Exp $
+ * $Id: client.c,v 1.334 2007-04-16 21:53:08 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -339,9 +339,7 @@ static void send_initRequest(const char* type_and_host)
 
     if (yazProxy && type_and_host)
     {
-        const int *oid_proxy = yaz_string_to_oid(yaz_oid_std(),
-                                                 CLASS_USERINFO, OID_STR_PROXY);
-        yaz_oi_set_string_oid(&req->otherInfo, out, oid_proxy,
+        yaz_oi_set_string_oid(&req->otherInfo, out, yaz_oid_userinfo_proxy,
                               1, type_and_host);
     }
     
@@ -859,10 +857,7 @@ static void print_record(const unsigned char *buf, size_t len)
 
 static void display_record(Z_External *r)
 {
-    char oid_name_buf[OID_STR_MAX];
-    int oclass;
     const int *oid = r->direct_reference;
-    const char *oid_name = 0;
     
     record_last = r;
     /*
@@ -870,7 +865,10 @@ static void display_record(Z_External *r)
      */
     if (oid)
     {
-        oid_name = yaz_oid_to_string_buf(oid, &oclass, oid_name_buf);
+        int oclass;
+        char oid_name_buf[OID_STR_MAX];
+        const char *oid_name
+            =  yaz_oid_to_string_buf(oid, &oclass, oid_name_buf);
         printf("Record type: ");
         if (oid_name)
             printf("%s\n", oid_name);
@@ -908,7 +906,7 @@ static void display_record(Z_External *r)
             }
         }
     }
-    if (oid_name && !yaz_matchstr(oid_name, OID_STR_SOIF))
+    if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_soif))
     {
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
@@ -918,14 +916,14 @@ static void display_record(Z_External *r)
     else if (oid && r->which == Z_External_octet)
     {
         const char *octet_buf = (char*)r->u.octet_aligned->buf;
-        if (oid_name && (!yaz_matchstr(oid_name, OID_STR_XML)
-                         || !yaz_matchstr(oid_name, OID_STR_APPLICATION_XML)
-                         || !yaz_matchstr(oid_name, OID_STR_HTML)))
+        if (oid && (!oid_oidcmp(oid, yaz_oid_recsyn_xml)
+                    || !oid_oidcmp(oid, yaz_oid_recsyn_xml)
+                    || !oid_oidcmp(oid, yaz_oid_recsyn_html)))
         {
             print_record((const unsigned char *) octet_buf,
                          r->u.octet_aligned->len);
         }
-        else if (oid_name && !yaz_matchstr(oid_name, OID_STR_POSTSCRIPT))
+        else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_postscript))
         {
             int size = r->u.octet_aligned->len;
             if (size > 100)
@@ -953,7 +951,7 @@ static void display_record(Z_External *r)
 
                 if (marcCharset && !strcmp(marcCharset, "auto"))
                 {
-                    if (!yaz_matchstr(oid_name, OID_STR_USMARC))
+                    if (!oid_oidcmp(oid, yaz_oid_recsyn_usmarc))
                     {
                         if (octet_buf[9] == 'a')
                             from = "UTF-8";
@@ -1003,7 +1001,7 @@ static void display_record(Z_External *r)
         if (marc_file)
             fwrite (octet_buf, 1, r->u.octet_aligned->len, marc_file);
     }
-    else if (oid_name && !yaz_matchstr(oid_name, OID_STR_SUTRS))
+    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {
         if (r->which != Z_External_sutrs)
         {
@@ -1014,7 +1012,7 @@ static void display_record(Z_External *r)
         if (marc_file)
             fwrite (r->u.sutrs->buf, 1, r->u.sutrs->len, marc_file);
     }
-    else if (oid_name && !yaz_matchstr(oid_name, OID_STR_GRS1))
+    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
         WRBUF w;
         if (r->which != Z_External_grs1)
@@ -1027,7 +1025,7 @@ static void display_record(Z_External *r)
         puts (wrbuf_cstr(w));
         wrbuf_destroy(w);
     }
-    else if (oid_name && !yaz_matchstr(oid_name, OID_STR_OPAC))
+    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_opac))
     {
         int i;
         if (r->u.opac->bibliographicRecord)
@@ -1166,7 +1164,7 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
             const char *diag_name = 0;
             diag_name = yaz_oid_to_string_buf
                 (r->diagnosticSetId, &oclass, diag_name_buf);
-            if (yaz_matchstr(diag_name, OID_STR_BIB1))
+            if (oid_oidcmp(r->diagnosticSetId, yaz_oid_diagset_bib_1))
                 printf("Unknown diagset: %s\n", diag_name);
         }
         printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));

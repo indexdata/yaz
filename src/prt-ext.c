@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.9 2007-04-13 09:55:41 adam Exp $
+ * $Id: prt-ext.c,v 1.10 2007-04-16 21:53:09 adam Exp $
  */
 
 /**
@@ -266,27 +266,27 @@ Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
          */
         thisext->u.grs1 = (Z_GenericRecord*) buf;
 
-        if (!strcmp(oid_str, OID_STR_SUTRS))
+        if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
         {
             thisext->which = Z_External_sutrs;
         }
-        else if (!strcmp(oid_str, OID_STR_GRS1))
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
         {
             thisext->which = Z_External_grs1;
         }
-        else if (!strcmp(oid_str, OID_STR_EXPLAIN))
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_explain))
         {
             thisext->which = Z_External_explainRecord;
         }
-        else if (!strcmp(oid_str, OID_STR_SUMMARY))
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_summary))
         {
             thisext->which = Z_External_summary;
         }
-        else if (!strcmp(oid_str, OID_STR_OPAC))
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_opac))
         {
             thisext->which = Z_External_OPAC;
         }
-        else if (!strcmp(oid_str, OID_STR_EXTENDED))
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_extended))
         {
             thisext->which = Z_External_extendedService;
         }
@@ -295,7 +295,7 @@ Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
             return 0;
         }
     }
-    else if (!strcmp(oid_str, OID_STR_SUTRS)) /* SUTRS is a single-ASN.1-type */
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs)) /* SUTRS is a single-ASN.1-type */
     {
         Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
         
@@ -322,23 +322,17 @@ Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
 
 Z_External *z_ext_record_xml(ODR o, const char *buf, int len)
 {
-    const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                       CLASS_RECSYN, OID_STR_XML);
-    return z_ext_record_oid(o, oid, buf, len);
+    return z_ext_record_oid(o, yaz_oid_recsyn_xml, buf, len);
 }
 
 Z_External *z_ext_record_sutrs(ODR o, const char *buf, int len)
 {
-    const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                       CLASS_RECSYN, OID_STR_SUTRS);
-    return z_ext_record_oid(o, oid, buf, len);
+    return z_ext_record_oid(o, yaz_oid_recsyn_sutrs, buf, len);
 }
 
 Z_External *z_ext_record_usmarc(ODR o, const char *buf, int len)
 {
-    const int *oid = yaz_string_to_oid(yaz_oid_std(),
-                                       CLASS_RECSYN, OID_STR_USMARC);
-    return z_ext_record_oid(o, oid, buf, len);
+    return z_ext_record_oid(o, yaz_oid_recsyn_usmarc, buf, len);
 }
 
 /*
