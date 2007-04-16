@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.3 2007-04-13 13:58:00 adam Exp $
+ * $Id: oid_db.c,v 1.4 2007-04-16 08:43:08 adam Exp $
  */
 
 /**
@@ -133,7 +133,7 @@ static struct yaz_oid_entry standard_list[] =
     {CLASS_EXTSERV, {Z3950_PREFIX, 9, 6,-1}, "exp. spec."},
     {CLASS_EXTSERV, {Z3950_PREFIX, 9, 7,-1}, "exp. inv."},
     {CLASS_EXTSERV, {Z3950_PREFIX, 9, 1000, 81, 1,-1}, OID_STR_ADMIN},
-    {CLASS_USERINFO, {Z3950_PREFIX, 10, 1,-1}, "searchResult-1"},
+    {CLASS_USERINFO, {Z3950_PREFIX, 10, 1,-1}, OID_STR_SEARCH_RESULT_1},
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 2,-1}, "CharSetandLanguageNegotiation"},
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 3,-1},  OID_STR_USERINFO_1},
     {CLASS_USERINFO, {Z3950_PREFIX, 10, 4,-1}, "MultipleSearchTerms-1"},
@@ -198,13 +198,20 @@ const int *yaz_string_to_oid(yaz_oid_db_t oid_db,
 {
     for (; oid_db; oid_db = oid_db->next)
     {
-	struct yaz_oid_entry *e = oid_db->entries;
-	for (; e->name; e++)
-	{
-	    if (!yaz_matchstr(e->name, name)
-		&& (oclass == CLASS_GENERAL || oclass == e->oclass))
-		return e->oid;
-	}
+        struct yaz_oid_entry *e;
+        if (oclass != CLASS_GENERAL)
+        {
+            for (e = oid_db->entries; e->name; e++)
+            {
+                if (!yaz_matchstr(e->name, name) && oclass == e->oclass)
+                    return e->oid;
+            }
+        }
+        for (e = oid_db->entries; e->name; e++)
+        {
+            if (!yaz_matchstr(e->name, name))
+                return e->oid;
+        }
     }
     return 0;
 }
@@ -332,4 +339,103 @@ void yaz_oid_trav(yaz_oid_db_t oid_db,
 	    func(e->oid, e->oclass, e->name, client_data);
     }
 }
+
+const int *yaz_oid_xml(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_XML);
+}
+
+const int *yaz_oid_application_xml(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN,
+			     OID_STR_APPLICATION_XML);
+}
+const int *yaz_oid_html(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_HTML);
+}
+
+const int *yaz_oid_sutrs(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_SUTRS);
+}
+
+const int *yaz_oid_opac(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_OPAC);
+}
+
+const int *yaz_oid_grs1(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_GRS1);
+}
+
+const int *yaz_oid_postscript(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_POSTSCRIPT);
+}
+
+const int *yaz_oid_explain(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_EXPLAIN);
+}
+
+const int *yaz_oid_extended(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_EXTENDED);
+}
+
+const int *yaz_oid_summary(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_SUMMARY);
+}
+
+const int *yaz_oid_get_usmarc(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_USMARC);
+}
+
+const int *yaz_oid_soif(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_RECSYN, OID_STR_SOIF);
+}
+
+const int *yaz_oid_attset_bib1(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_ATTSET, OID_STR_BIB1);
+}
+
+const int *yaz_oid_diag1(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_DIAGSET, OID_STR_DIAG1);
+}
+
+const int *yaz_oid_proxy(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_USERINFO, OID_STR_PROXY);
+}
+
+const int *yaz_oid_cookie(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_USERINFO, OID_STR_COOKIE);
+}
+
+const int *yaz_oid_search_result_1(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_USERINFO,
+                             OID_STR_SEARCH_RESULT_1);
+}
+
+const int *yaz_oid_variant1(void)
+{
+    return yaz_string_to_oid(yaz_oid_std(), CLASS_VARSET, OID_STR_VARIANT_1);
+}
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 

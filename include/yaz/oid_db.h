@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.3 2007-04-13 13:58:00 adam Exp $ */
+/* $Id: oid_db.h,v 1.4 2007-04-16 08:43:08 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -163,7 +163,26 @@ int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
 #define OID_STR_CHARNEG_3 "CharSetandLanguageNegotiation-3"
 #define OID_STR_CHARNEG_4 "CharSetandLanguageNegotiation-4"
 #define OID_STR_VARIANT_1 "Variant-1"
+#define OID_STR_SEARCH_RESULT_1 "searchResult-1"
 
+YAZ_EXPORT const int *yaz_oid_xml(void);
+YAZ_EXPORT const int *yaz_oid_application_xml(void);
+YAZ_EXPORT const int *yaz_oid_html(void);
+YAZ_EXPORT const int *yaz_oid_sutrs(void);
+YAZ_EXPORT const int *yaz_oid_opac(void);
+YAZ_EXPORT const int *yaz_oid_grs1(void);
+YAZ_EXPORT const int *yaz_oid_postscript(void);
+YAZ_EXPORT const int *yaz_oid_explain(void);
+YAZ_EXPORT const int *yaz_oid_extended(void);
+YAZ_EXPORT const int *yaz_oid_summary(void);
+YAZ_EXPORT const int *yaz_oid_get_usmarc(void);
+YAZ_EXPORT const int *yaz_oid_soif(void);
+YAZ_EXPORT const int *yaz_oid_attset_bib1(void);
+YAZ_EXPORT const int *yaz_oid_diag1(void);
+YAZ_EXPORT const int *yaz_oid_proxy(void);
+YAZ_EXPORT const int *yaz_oid_cookie(void);
+YAZ_EXPORT const int *yaz_oid_search_result_1(void);
+YAZ_EXPORT const int *yaz_oid_variant1(void);
 YAZ_END_CDECL
 
 #endif
