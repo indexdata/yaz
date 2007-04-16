@@ -15,3 +15,4 @@ cql.c
 diagbib1.c
 diagsrw.c
 diagsru_update.c
+oid_std.c
