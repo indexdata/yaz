@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.59 2007-04-17 07:37:58 adam Exp $
+## $Id: Makefile.am,v 1.60 2007-04-17 08:15:15 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -53,27 +53,34 @@ diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: csvtosrw.tcl srw.csv
 diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl sru_update.csv
 	$(TCLSH) $(srcdir)/csvtosru_update.tcl $(srcdir)
 
-libyaz_la_SOURCES=version.c options.c log.c \
-  marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
-  wrbuf.c oid_std.c oid_db.c \
-  nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
-  siconv.c marc8.c marc8r.c \
-  odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
-  odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
-  odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
-  ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
-  dumpber.c odr_enum.c odr-priv.h libxml2_error.c \
-  comstack.c tcpip.c waislen.c unix.c \
+# Auto-generated C-files
+GEN_FILES = oid_std.c \
+  marc8.c marc8r.c \
+  diagbib1.c diagsrw.c diagsru_update.c \
   z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
   z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
   z-uifr1.c z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c z-oclcui.c\
   zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
   zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c \
   z-charneg.c \
+  ill-core.c item-req.c 
+
+libyaz_la_SOURCES=version.c options.c log.c \
+ $(GEN_FILES) \
+  marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
+  wrbuf.c oid_db.c \
+  nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
+  siconv.c \
+  odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
+  odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
+  odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
+  ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
+  dumpber.c odr_enum.c odr-priv.h libxml2_error.c \
+  comstack.c tcpip.c waislen.c unix.c \
   prt-ext.c \
-  ill-core.c item-req.c ill-get.c \
-  zget.c yaz-ccl.c diag-entry.c diag-entry.h diagbib1.c diagsrw.c \
-  diagsru_update.c logrpn.c \
+  ill-get.c \
+  zget.c yaz-ccl.c diag-entry.c diag-entry.h \
+  logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c \
   zoom-c.c zoom-socket.c zoom-opt.c zoom-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c \
