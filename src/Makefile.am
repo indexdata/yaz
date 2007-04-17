@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.58 2007-04-16 21:53:09 adam Exp $
+## $Id: Makefile.am,v 1.59 2007-04-17 07:37:58 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -55,7 +55,7 @@ diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl
 
 libyaz_la_SOURCES=version.c options.c log.c \
   marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
-  wrbuf.c oid_db.c \
+  wrbuf.c oid_std.c oid_db.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c marc8.c marc8r.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
@@ -84,7 +84,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
   eventl.h service.c service.h session.h test.c timing.c \
   xmlquery.c http.c \
-  mime.c mime.h oid_util.c oid_std.c \
+  mime.c mime.h oid_util.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
