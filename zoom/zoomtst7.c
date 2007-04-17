@@ -1,4 +1,4 @@
-/* $Id: zoomtst7.c,v 1.18 2007-03-21 11:27:47 adam Exp $  */
+/* $Id: zoomtst7.c,v 1.19 2007-04-17 20:26:19 adam Exp $  */
 
 /** \file zoomtst7.c
     \brief Mix of operations
@@ -21,7 +21,6 @@ int main(int argc, char **argv)
     ZOOM_resultset r[10];  /* and result sets .. */
     ZOOM_options o;
 
-    nmem_init ();
     o = ZOOM_options_create ();
 
     z = ZOOM_connection_new ("localhost", 9999);

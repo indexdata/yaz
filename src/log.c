@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.49 2007-03-22 09:13:13 adam Exp $
+ * $Id: log.c,v 1.50 2007-04-17 20:26:18 adam Exp $
  */
 
 /**
@@ -18,14 +18,6 @@
 #include <windows.h>
 #endif
 
-#if YAZ_POSIX_THREADS
-#include <pthread.h>
-#endif
-
-#if YAZ_GNU_THREADS
-#include <pth.h>
-#endif
-
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +30,6 @@
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
-
-static NMEM_MUTEX log_mutex = 0;
 
 #define HAS_STRERROR 1
 
@@ -122,8 +112,6 @@ static void internal_log_init(void)
     if (mutex_init_flag)
         return;
     mutex_init_flag = 1; /* here, 'cause nmem_mutex_create may call yaz_log */
-
-    nmem_mutex_create(&log_mutex);
 
     env = getenv("YAZ_LOG");
     if (env)
@@ -228,10 +216,8 @@ void yaz_log_init_level(int level)
         yaz_log(YLOG_LOGLVL, "Setting log level to %d = 0x%08x",
                 l_level, l_level);
         /* determine size of mask_names (locked) */
-        nmem_mutex_enter(log_mutex);
         for (sz = 0; mask_names[sz].name; sz++)
             ;
-        nmem_mutex_leave(log_mutex);
         /* second pass without lock */
         for (i = 0; i < sz; i++)
             if (mask_names[i].mask && *mask_names[i].name)
@@ -355,14 +341,12 @@ static void yaz_log_do_reopen(const char *filemode)
     struct tm *tm;
 #endif
 
-    nmem_mutex_enter(log_mutex);
 #if HAVE_LOCALTIME_R
     localtime_r(&cur_time, tm);
 #else
     tm = localtime(&cur_time);
 #endif
     yaz_log_open_check(tm, 1, filemode);
-    nmem_mutex_leave(log_mutex);
 }
 
 
@@ -376,34 +360,10 @@ void yaz_log_trunc()
     yaz_log_do_reopen("w");
 }
 
-
-
 static void yaz_strftime(char *dst, size_t sz,
                          const char *fmt, const struct tm *tm)
 {
-    const char *cp = strstr(fmt, "%!");
-    if (cp && strlen(fmt) < 60)
-    {
-        char fmt2[80];
-        char tpidstr[20];
-#ifdef WIN32
-        DWORD tid = GetCurrentThreadId();
-#else
-#if YAZ_POSIX_THREADS
-        pthread_t tid = pthread_self();
-#else
-        long tid = 0;
-#endif
-#endif
-        memcpy(fmt2, fmt, cp-fmt);
-        fmt2[cp-fmt] = '\0';
-        sprintf(tpidstr, "%08lx", (long) tid);
-        strcat(fmt2, tpidstr);
-        strcat(fmt2, cp+2);
-        strftime(dst, sz, fmt2, tm);     
-    }
-    else
-        strftime(dst, sz, fmt, tm);
+    strftime(dst, sz, fmt, tm);
 }
                             
 static void yaz_log_to_file(int level, const char *log_message)
@@ -418,8 +378,6 @@ static void yaz_log_to_file(int level, const char *log_message)
 
     internal_log_init();
 
-    nmem_mutex_enter(log_mutex);
-    
 #if HAVE_LOCALTIME_R
     localtime_r(&ti, tm);
 #else
@@ -460,7 +418,6 @@ static void yaz_log_to_file(int level, const char *log_message)
         if (l_level & YLOG_FLUSH)
             fflush(file);
     }
-    nmem_mutex_leave(log_mutex);
 }
 
 void yaz_log(int level, const char *fmt, ...)
@@ -475,7 +432,11 @@ void yaz_log(int level, const char *fmt, ...)
         return;
     va_start(ap, fmt);
 
-    yaz_vsnprintf(buf, sizeof(buf)-1, fmt, ap);
+    /* 30 is enough for our 'rest of output' message */
+    yaz_vsnprintf(buf, sizeof(buf)-30, fmt, ap);
+    if (strlen(buf) >= sizeof(buf)-31)
+        strcat(buf, " [rest of output omitted]");
+
     if (o_level & YLOG_ERRNO)
     {
         strcat(buf, " [");
@@ -532,16 +493,13 @@ static int define_module_bit(const char *name)
 {
     int i;
 
-    nmem_mutex_enter(log_mutex);
     for (i = 0; mask_names[i].name; i++)
         if (0 == strcmp(mask_names[i].name, name))
         {
-            nmem_mutex_leave(log_mutex);
             return mask_names[i].mask;
         }
     if ( (i>=MAX_MASK_NAMES) || (next_log_bit & (1<<31) ))
     {
-        nmem_mutex_leave(log_mutex);
         yaz_log(YLOG_WARN, "No more log bits left, not logging '%s'", name);
         return 0;
     }
@@ -551,7 +509,6 @@ static int define_module_bit(const char *name)
     strcpy(mask_names[i].name, name);
     mask_names[i+1].name = NULL;
     mask_names[i+1].mask = 0;
-    nmem_mutex_leave(log_mutex);
     return mask_names[i].mask;
 }
 
@@ -562,17 +519,14 @@ int yaz_log_module_level(const char *name)
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
     internal_log_init();
     
-    nmem_mutex_enter(log_mutex);
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n, mask_names[i].name))
         {
-            nmem_mutex_leave(log_mutex);
             yaz_log(YLOG_LOGLVL, "returning log bit 0x%x for '%s' %s",
                     mask_names[i].mask, n, 
                     strcmp(n,name) ? name : "");
             return mask_names[i].mask;
         }
-    nmem_mutex_leave(log_mutex);
     yaz_log(YLOG_LOGLVL, "returning NO log bit for '%s' %s", n, 
             strcmp(n, name) ? name : "" );
     return 0;

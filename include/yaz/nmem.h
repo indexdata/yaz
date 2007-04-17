@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: nmem.h,v 1.24 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: nmem.h,v 1.25 2007-04-17 20:26:18 adam Exp $ */
 
 /**
  * \file nmem.h
@@ -39,24 +39,7 @@
 #include <stddef.h>
 #include <yaz/yconfig.h>
 
-#define NMEM_DEBUG 0
-
-#ifndef NMEM_DEBUG
-#define NMEM_DEBUG 0
-#endif
-
 YAZ_BEGIN_CDECL
-
-/** \brief NMEM/YAZ MUTEX opaque pointer */
-typedef struct nmem_mutex *NMEM_MUTEX;
-/** \brief create Mutex */
-YAZ_EXPORT void nmem_mutex_create(NMEM_MUTEX *);
-/** \brief enter critical section / AKA lock */
-YAZ_EXPORT void nmem_mutex_enter(NMEM_MUTEX);
-/** \brief leave critical section / AKA unlock */
-YAZ_EXPORT void nmem_mutex_leave(NMEM_MUTEX);
-/** \brief destroy MUTEX */
-YAZ_EXPORT void nmem_mutex_destroy(NMEM_MUTEX *);
 
 /** \brief NMEM handle (an opaque pointer to memory) */
 typedef struct nmem_control *NMEM;
@@ -99,25 +82,6 @@ YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
 /** \brief transfers memory from one NMEM handle to another  */
 YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
 
-/** \brief internal (do not use) */
-YAZ_EXPORT void nmem_critical_enter (void);
-/** \brief internal (do not use) */
-YAZ_EXPORT void nmem_critical_leave (void);
-
-#if NMEM_DEBUG
-
-YAZ_EXPORT NMEM nmem_create_f(const char *file, int line);
-YAZ_EXPORT void nmem_destroy_f(const char *file, int line, NMEM n);
-YAZ_EXPORT void *nmem_malloc_f(const char *file, int line, NMEM n, int size);
-#define nmem_create() nmem_create_f(__FILE__, __LINE__)
-#define nmem_destroy(x) nmem_destroy_f(__FILE__, __LINE__, (x))
-#define nmem_malloc(x, y) nmem_malloc_f(__FILE__, __LINE__, (x), (y))
-
-YAZ_EXPORT void nmem_print_list (void);
-YAZ_EXPORT void nmem_print_list_l (int level);
-
-#else
-
 /** \brief returns new NMEM handle */
 YAZ_EXPORT NMEM nmem_create(void);
 
@@ -127,31 +91,9 @@ YAZ_EXPORT void nmem_destroy(NMEM n);
 /** \brief allocate memory block on NMEM handle */
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
-#define nmem_print_list()
-
-#endif
-
-/** \brief initializes NMEM system
-    This function increments a usage counter for NMEM.. Only
-    on first usage the system is initialized.. The \fn nmem_exit
-    decrements the counter. So these must be called in pairs
-*/
-YAZ_EXPORT void nmem_init (void);
-
-/** \brief destroys NMEM system */
-YAZ_EXPORT void nmem_exit (void);
-
 YAZ_EXPORT int yaz_errno (void);
 YAZ_EXPORT void yaz_set_errno (int v);
 YAZ_EXPORT void yaz_strerror(char *buf, int max);
-
-/** \brief returns memory in use (by application) 
-    \param p pointer to size (in bytes)
- */
-YAZ_EXPORT void nmem_get_memory_in_use(size_t *p);
-/** \brief returns memory in free (for later reuse) 
- */
-YAZ_EXPORT void nmem_get_memory_free(size_t *p);
 
 YAZ_END_CDECL
 

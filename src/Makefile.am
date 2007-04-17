@@ -1,10 +1,10 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.60 2007-04-17 08:15:15 adam Exp $
+## $Id: Makefile.am,v 1.61 2007-04-17 20:26:18 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
-lib_LTLIBRARIES = libyaz.la
+lib_LTLIBRARIES = libyaz.la libyaz_server.la
 # noinst_PROGRAMS = cqlparse
 
 dist-hook:
@@ -28,6 +28,8 @@ YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
 YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
+libyaz_server_la_CFLAGS = $(PTHREAD_CFLAGS)
+
 
 AM_YFLAGS=-p cql_
 
@@ -88,13 +90,18 @@ libyaz_la_SOURCES=version.c options.c log.c \
   cclqfile.c cclstr.c cclxmlconfig.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
   cqlstrer.c querytowrbuf.c \
-  eventl.c seshigh.c statserv.c requestq.c tcpdchk.c \
-  eventl.h service.c service.h session.h test.c timing.c \
+  tcpdchk.c \
+  test.c timing.c \
   xmlquery.c http.c \
   mime.c mime.h oid_util.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
+
+libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
+  requestq.c eventl.h session.h service.c service.h mutex.c
+
+libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
 z-accdes1.c \

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.46 2007-04-12 13:52:58 adam Exp $
+ * $Id: zoomsh.c,v 1.47 2007-04-17 20:26:19 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -644,9 +644,7 @@ int main(int argc, char **argv)
         int mask = yaz_log_mask_str(maskstr);
         yaz_log_init_level(mask);
     }
-    nmem_init();
     zoomsh(argc, argv);
-    nmem_exit();
     exit (0);
 }
 /*

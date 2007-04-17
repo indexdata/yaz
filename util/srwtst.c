@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.6 2007-01-03 08:42:16 adam Exp $
+ * $Id: srwtst.c,v 1.7 2007-04-17 20:26:18 adam Exp $
  */
 
 #include <stdlib.h>
@@ -25,7 +25,6 @@ int main(int argc, char **argv)
     ODR decode, encode;
     int debug = 0;
 
-    nmem_init();
     if (argc == 2 && !strcmp(argv[1], "debug"))
         debug = 1;
     no = fread(buf, 1, sizeof(buf), stdin);
@@ -96,7 +95,6 @@ int main(int argc, char **argv)
     }
     odr_destroy(decode);
     odr_destroy(encode);
-    nmem_exit();
     exit(0);
 }
 #else

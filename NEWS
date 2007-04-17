@@ -1,3 +1,18 @@
+Split YAZ library into two libs : libyaz.la and libyaz_server.la.
+libyaz.la is the core of YAZ except the generic frontend server and
+does not depend on POSIX threads anymore. libyaz_server.la is the
+generic frontend server facilities and uses POSIX thread functionality
+if available. The libyaz.la no longer depends on POSIX threads because
+the number of global structures is limited. NMEM no longer re-uses blocks
+between threads ; it simply free's memory immediately but allocates in
+"large" chunks as usual. We don't expect any performance penalties
+because of this. The yaz_log system is still using a global log_level so
+caution must be taken when modifying it with yaz_log_init_.. +
+yaz_log_mask_str. This, however, should not cause any trouble because
+these functions are called during initialization of application code
+anyway. `yaz-config --libs  server` returns libs for server applications;
+`yaz-config --libs` returns libs for non-server applications.
+
 New OID database - with public definitions in oid_db.h. Removed old OID
 database including the head oid.h and definitions such as enum oid_value
 and struct oident. The new OID database uses the same string names as

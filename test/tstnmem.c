@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstnmem.c,v 1.7 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstnmem.c,v 1.8 2007-04-17 20:26:18 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -23,7 +23,6 @@ void tst(void)
     int j;
     char *cp;
 
-    nmem_init();
     n = nmem_create();
     YAZ_CHECK(n);
 
@@ -47,7 +46,6 @@ void tst(void)
         YAZ_CHECK(cp);
     }
     nmem_destroy(n);
-    nmem_exit();
 }
 
 int main (int argc, char **argv)
