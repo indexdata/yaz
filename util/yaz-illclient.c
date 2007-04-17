@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.1 2007-04-16 15:33:51 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.2 2007-04-17 13:23:02 heikki Exp $
  */
 
 /* NOTE - This is work in progress - not at all ready */
@@ -60,6 +60,8 @@
 /* A structure for storing all the arguments */
 struct prog_args {
     char *host;
+    char *auth_userid;
+    char *auth_passwd;
 } ;
 
 
@@ -86,9 +88,18 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.1 2007-04-16 15:33:51 heikki Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.2 2007-04-17 13:23:02 heikki Exp $"; /* from cvs */
 
-    args->host=0; /* not known (yet) */
+    /* default values */
+    args->host = 0; /* not known (yet) */
+#if 0    
+    args->auth_userid = "100-228-301" ; /* FIXME - get from cmd line */
+    args->auth_passwd = "dxg5magxc" ;   /* FIXME - get from cmd line */
+#else
+    args->auth_userid = "100070049" ; /* FIXME - get from cmd line */
+    args->auth_passwd = "cowgirl" ;   /* FIXME - get from cmd line */
+#endif
+
 
     while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
     {
@@ -161,46 +172,126 @@ COMSTACK connect_to( char *hostaddr ){
     return stack;
 }
 
+
 /* * * * * * * * * * * * * * * */
-ILL_APDU *createrequest( struct prog_args *args, ODR out_odr) {
+/* Makes a Z39.50-like prompt package with username and password */
+Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
+    Z_PromptObject1 *p = odr_malloc(odr, sizeof(*p) );
+    p->which=Z_PromptObject1_response;
+    p->u.response = odr_malloc(odr, sizeof(*(p->u.response)) );
+    p->u.response->num=2;
+    p->u.response->elements=odr_malloc(odr, 
+             p->u.response->num*sizeof(*(p->u.response->elements)) );
+    /* user id, aka "oclc authorization number" */
+    Z_ResponseUnit1 *ru = odr_malloc(odr, sizeof(*ru) );
+    p->u.response->elements[0] = ru;
+    ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
+    ru->promptId->which = Z_PromptId_enumeratedPrompt;
+    ru->promptId->u.enumeratedPrompt =  
+        odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
+    ru->promptId->u.enumeratedPrompt->type = 
+         odr_intdup(odr,Z_PromptIdEnumeratedPrompt_userId);
+    ru->promptId->u.enumeratedPrompt->suggestedString = 0 ;
+    ru->which = Z_ResponseUnit1_string ;
+    ru->u.string = odr_strdup(odr, args->auth_userid);
+    /* password */
+    ru = odr_malloc(odr, sizeof(*ru) );
+    p->u.response->elements[1] = ru;
+    ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
+    ru->promptId->which = Z_PromptId_enumeratedPrompt;
+    ru->promptId->u.enumeratedPrompt =  
+        odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
+    ru->promptId->u.enumeratedPrompt->type = 
+         odr_intdup(odr,Z_PromptIdEnumeratedPrompt_password);
+    ru->promptId->u.enumeratedPrompt->suggestedString = 0 ;
+    ru->which = Z_ResponseUnit1_string ;
+    ru->u.string = odr_strdup(odr, args->auth_passwd);
+    return p;
+} /* makeprompt */
+
+ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
+    ODR odr_ext = odr_createmem(ODR_ENCODE);
+    ODR odr_prt = odr_createmem(ODR_PRINT);
+    ILL_Extension *e = odr_malloc(odr, sizeof(*e));
+    Z_PromptObject1 *p = makeprompt(args,odr_ext);
+    char * buf;
+    int siz;
+    Z_External *ext = odr_malloc(odr, sizeof(*ext));
+    ext->direct_reference = odr_getoidbystr(odr,"1.2.840.10003.8.1");
+    ext->indirect_reference=0;
+    ext->descriptor=0;
+    ext->which=Z_External_single;
+    if ( ! z_PromptObject1(odr_ext, &p, 0,0 ) ) {
+        yaz_log(YLOG_FATAL,"Encoding of z_PromptObject1 failed ");
+        exit (6);
+    }
+    
+    z_PromptObject1(odr_prt, &p, 0,0 ); /*!*/
+
+    buf= odr_getbuf(odr_ext,&siz,0);
+    ext->u.single_ASN1_type=odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
+    ext->u.single_ASN1_type->buf= odr_malloc(odr, siz);
+    memcpy(ext->u.single_ASN1_type->buf,buf, siz );
+    ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
+    odr_reset(odr_ext);
+
+    e->identifier = odr_intdup(odr,1);
+    e->critical = odr_intdup(odr,0);
+    e->item=odr_malloc(odr,sizeof(*e->item));
+    if ( ! z_External(odr_ext, &ext,0,0) ) {
+        yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
+        exit (6);
+    }
+    buf= odr_getbuf(odr_ext,&siz,0); 
+    e->item->buf= odr_malloc(odr, siz);
+    memcpy(e->item->buf,buf, siz );
+    e->item->len = e->item->size = siz;
+
+    return e;
+} /* makepromptextension */
+
+ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     struct ill_get_ctl ctl;
     ILL_APDU *apdu;
     ILL_Request *req;
 
-    ctl.odr = out_odr;
+    ctl.odr = odr;
     ctl.clientData = & args;
     ctl.f = get_ill_element;
-    apdu = odr_malloc( out_odr, sizeof(*apdu) );
+    apdu = odr_malloc( odr, sizeof(*apdu) );
     apdu->which=ILL_APDU_ILL_Request;
     req = ill_get_ILLRequest(&ctl, "ill", 0);
     apdu->u.illRequest=req;
+    req->num_iLL_request_extensions=1;
+    req->iLL_request_extensions=
+        odr_malloc(odr, req->num_iLL_request_extensions*sizeof(*req->iLL_request_extensions));
+    req->iLL_request_extensions[0]=makepromptextension(args,odr);
     if (!req) {
         yaz_log(YLOG_FATAL,"Could not create ill request");
         exit(2);
     }
-
     return apdu;
 } /* createrequest */
 
 
 /* * * * * * * * * * * * * * * */
 /** \brief Send the request */
-void sendrequest(ILL_APDU *apdu, ODR out_odr, COMSTACK stack ) {
+void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
     char *buf_out;
     int len_out;
     int res;
-    if (!ill_APDU  (out_odr, &apdu, 0, 0)) { 
+    if (!ill_APDU  (odr, &apdu, 0, 0)) { 
         yaz_log(YLOG_FATAL,"ill_Apdu failed");
         exit(2);
     }
-    buf_out = odr_getbuf(out_odr, &len_out, 0);
+    buf_out = odr_getbuf(odr, &len_out, 0);
     if (0) {
         yaz_log(YLOG_DEBUG,"Request PDU Dump");
         odr_dumpBER(yaz_log_file(), buf_out, len_out);
     }
     if (!buf_out) {
         yaz_log(YLOG_FATAL,"Encoding failed. Len=%d", len_out);
-        odr_perror(out_odr, "encoding failed");
+        odr_perror(odr, "encoding failed");
         exit(2);
     }
     yaz_log(YLOG_DEBUG,"About to send the request. Len=%d", len_out);
@@ -372,6 +463,8 @@ int main (int argc, char * argv[]) {
     validateargs(&args);
     stack = connect_to(args.host);
     apdu = createrequest(&args, out_odr);
+    if (1) 
+        dumpapdu(apdu);
     sendrequest(apdu, out_odr, stack ); 
     resp = getresponse(stack, in_odr );
     if (1) 
