@@ -2,7 +2,7 @@
  * Copyright (c) 1998-2007, Index Data.
  * See the file LICENSE for details.
  * 
- * $Id: tstlogthread.c,v 1.5 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstlogthread.c,v 1.6 2007-04-18 11:50:47 mike Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -49,7 +49,7 @@ static void t_test(void)
     exit(0);
 }
 #else
-static void t_test()
+static void t_test(void)
 {
 }
 
