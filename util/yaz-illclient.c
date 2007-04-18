@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.2 2007-04-17 13:23:02 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.3 2007-04-18 07:17:19 adam Exp $
  */
 
 /* NOTE - This is work in progress - not at all ready */
@@ -88,7 +88,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.2 2007-04-17 13:23:02 heikki Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.3 2007-04-18 07:17:19 adam Exp $"; /* from cvs */
 
     /* default values */
     args->host = 0; /* not known (yet) */
@@ -177,13 +177,15 @@ COMSTACK connect_to( char *hostaddr ){
 /* Makes a Z39.50-like prompt package with username and password */
 Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     Z_PromptObject1 *p = odr_malloc(odr, sizeof(*p) );
+    Z_ResponseUnit1 *ru;
+    
     p->which=Z_PromptObject1_response;
     p->u.response = odr_malloc(odr, sizeof(*(p->u.response)) );
     p->u.response->num=2;
     p->u.response->elements=odr_malloc(odr, 
              p->u.response->num*sizeof(*(p->u.response->elements)) );
     /* user id, aka "oclc authorization number" */
-    Z_ResponseUnit1 *ru = odr_malloc(odr, sizeof(*ru) );
+    ru = odr_malloc(odr, sizeof(*ru) );
     p->u.response->elements[0] = ru;
     ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
@@ -311,7 +313,7 @@ ILL_APDU *getresponse( COMSTACK stack, ODR in_odr ){
     int len_in=0;
     yaz_log(YLOG_DEBUG,"About to wait for a response");
     res = cs_get(stack, &buf_in, &len_in);
-    yaz_log(YLOG_DEBUG,"Got a response of %d bytes at %x. res=%d", len_in,buf_in, res);
+    yaz_log(YLOG_DEBUG,"Got a response of %d bytes at %p. res=%d", len_in,buf_in, res);
     if (res<0) {
         yaz_log(YLOG_FATAL,"Could not receive packet. code %d",res );
         yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...", 
@@ -382,7 +384,7 @@ char *getillstring( ILL_String *s) {
 /* Then the problem is to find the right message. We dig around */
 /* until we find the first message, print that, and exit the program */
 void checkerr( ILL_Status_Or_Error_Report *staterr ) {
-    yaz_log(YLOG_DEBUG, "err= %x ",staterr->error_report );
+    yaz_log(YLOG_DEBUG, "err= %p ",staterr->error_report );
     if (staterr->error_report) {
         ILL_Error_Report *err= staterr->error_report;
         if ( err->user_error_report) {
@@ -392,7 +394,7 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                     printf("Already forwarded: \n");
                     break;
                 case ILL_User_Error_Report_intermediary_problem:
-                    printf("Intermediary problem: %d\n", 
+                    printf("Intermediary problem: %p\n", 
                         uerr->u.intermediary_problem);
                     break;
                 case ILL_User_Error_Report_security_problem:
@@ -400,7 +402,7 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                         getillstring(uerr->u.security_problem));
                     break;
                 case ILL_User_Error_Report_unable_to_perform:
-                    printf("Unable to perform: %d\n", 
+                    printf("Unable to perform: %p\n", 
                           uerr->u.unable_to_perform);
                     break;
                 default:
@@ -412,11 +414,11 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
             ILL_Provider_Error_Report *perr= err->provider_error_report;
             switch( perr->which ) {
                 case ILL_Provider_Error_Report_general_problem:
-                    printf("General Problem: %d\n", 
+                    printf("General Problem: %p\n", 
                           perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_transaction_id_problem:
-                    printf("Transaction Id Problem: %d\n", 
+                    printf("Transaction Id Problem: %p\n", 
                           perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_state_transition_prohibited:
