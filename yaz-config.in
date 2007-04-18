@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.29 2007-04-18 13:40:19 adam Exp $
+# $Id: yaz-config.in,v 1.30 2007-04-18 18:46:37 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -123,10 +123,8 @@ fi
 
 if test "$lib_thread" = "yes"; then
     YAZINC="$PTHREAD_CFLAGS $YAZINC"
-fi
-
-if test "$lib_thread" = "yes"; then
     YAZLIB="$YAZLIB $PTHREAD_LIBS"
+    YAZLALIB="$YAZLALIB $PTHREAD_LIBS"
 fi
 
 if test "$yaz_echo_help" = "yes"; then
