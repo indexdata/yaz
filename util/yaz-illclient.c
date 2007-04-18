@@ -2,10 +2,10 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.3 2007-04-18 07:17:19 adam Exp $
+ * $Id: yaz-illclient.c,v 1.4 2007-04-18 13:21:46 heikki Exp $
  */
 
-/* NOTE - This is work in progress - not at all ready */
+/* WARNING - This is work in progress - not at all ready */
 
 /** \file yaz-illclient.c
  *  \brief client for ILL requests (ISO 10161-1)
@@ -56,6 +56,8 @@
 #include <yaz/odr.h>
 #include <yaz/log.h>
 #include <yaz/ill.h>
+#include <yaz/oclc-ill-req-ext.h>
+
 
 /* A structure for storing all the arguments */
 struct prog_args {
@@ -74,8 +76,10 @@ const char *get_ill_element(void *clientData, const char *element) {
         ret=args->host;
     } else if (!strcmp(element,"ill,protocol-version-num")) {
         ret="2";
+ /*
     } else if (!strcmp(element,"ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution")) {
         ret="IndexData";
+ */
     } 
     yaz_log(YLOG_DEBUG,"get_ill_element: '%s' -> '%s' ", element, ret );
     return ret;
@@ -88,7 +92,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.3 2007-04-18 07:17:19 adam Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.4 2007-04-18 13:21:46 heikki Exp $"; /* from cvs */
 
     /* default values */
     args->host = 0; /* not known (yet) */
@@ -177,7 +181,7 @@ COMSTACK connect_to( char *hostaddr ){
 /* Makes a Z39.50-like prompt package with username and password */
 Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     Z_PromptObject1 *p = odr_malloc(odr, sizeof(*p) );
-    Z_ResponseUnit1 *ru;
+    Z_ResponseUnit1 *ru = odr_malloc(odr, sizeof(*ru) );
     
     p->which=Z_PromptObject1_response;
     p->u.response = odr_malloc(odr, sizeof(*(p->u.response)) );
@@ -185,7 +189,6 @@ Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     p->u.response->elements=odr_malloc(odr, 
              p->u.response->num*sizeof(*(p->u.response->elements)) );
     /* user id, aka "oclc authorization number" */
-    ru = odr_malloc(odr, sizeof(*ru) );
     p->u.response->elements[0] = ru;
     ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
@@ -228,6 +231,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
         exit (6);
     }
     
+    printf ("Prompt: \n"); /*!*/
     z_PromptObject1(odr_prt, &p, 0,0 ); /*!*/
 
     buf= odr_getbuf(odr_ext,&siz,0);
@@ -236,6 +240,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
     ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
     odr_reset(odr_ext);
+    odr_reset(odr_prt); /*!*/
 
     e->identifier = odr_intdup(odr,1);
     e->critical = odr_intdup(odr,0);
@@ -244,13 +249,75 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
         yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
         exit (6);
     }
+    printf("External: \n");
+    z_External(odr_prt, &ext,0,0);  /*!*/
     buf= odr_getbuf(odr_ext,&siz,0); 
     e->item->buf= odr_malloc(odr, siz);
     memcpy(e->item->buf,buf, siz );
     e->item->len = e->item->size = siz;
 
+    odr_destroy(odr_prt);
+    odr_destroy(odr_ext);
     return e;
 } /* makepromptextension */
+
+ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
+    /* The oclc extension is required, but only contains optional */
+    /* fields. Here we just null them all out */
+    ODR odr_ext = odr_createmem(ODR_ENCODE);
+    ODR odr_prt = odr_createmem(ODR_PRINT);
+    ILL_Extension *e = odr_malloc(odr, sizeof(*e));
+    ILL_OCLCILLRequestExtension *oc = odr_malloc(odr_ext, sizeof(*oc));
+    char * buf;
+    int siz;
+    Z_External *ext = odr_malloc(odr, sizeof(*ext));
+    oc->clientDepartment = 0;
+    oc->paymentMethod = 0;
+    oc->uniformTitle = 0;
+    oc->dissertation = 0;
+    oc->issueNumber = 0;
+    oc->volume = 0;
+    oc->affiliations = 0;
+    oc->source = 0;
+    ext->direct_reference = odr_getoidbystr(odr,"1.0.10161.13.2");
+    ext->indirect_reference=0;
+    ext->descriptor=0;
+    ext->which=Z_External_single;
+    if ( ! ill_OCLCILLRequestExtension(odr_ext, &oc, 0,0 ) ) {
+        yaz_log(YLOG_FATAL,"Encoding of ill_OCLCILLRequestExtension failed ");
+        exit (6);
+    }
+    
+    printf ("OCLC: \n"); /*!*/
+    ill_OCLCILLRequestExtension(odr_prt, &oc, 0,0 ); /*!*/
+
+    buf= odr_getbuf(odr_ext,&siz,0);
+    ext->u.single_ASN1_type=odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
+    ext->u.single_ASN1_type->buf= odr_malloc(odr, siz);
+    memcpy(ext->u.single_ASN1_type->buf,buf, siz );
+    ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
+    odr_reset(odr_ext);
+    odr_reset(odr_prt); /*!*/
+
+    e->identifier = odr_intdup(odr,1);
+    e->critical = odr_intdup(odr,0);
+    e->item=odr_malloc(odr,sizeof(*e->item));
+    if ( ! z_External(odr_ext, &ext,0,0) ) {
+        yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
+        exit (6);
+    }
+    printf("External: \n");
+    z_External(odr_prt, &ext,0,0);  /*!*/
+    buf= odr_getbuf(odr_ext,&siz,0); 
+    e->item->buf= odr_malloc(odr, siz);
+    memcpy(e->item->buf,buf, siz );
+    e->item->len = e->item->size = siz;
+
+    odr_destroy(odr_prt);
+    odr_destroy(odr_ext);
+    return e;
+
+} /* makeoclcextension */
 
 ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     struct ill_get_ctl ctl;
@@ -264,10 +331,11 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     apdu->which=ILL_APDU_ILL_Request;
     req = ill_get_ILLRequest(&ctl, "ill", 0);
     apdu->u.illRequest=req;
-    req->num_iLL_request_extensions=1;
+    req->num_iLL_request_extensions=2;
     req->iLL_request_extensions=
         odr_malloc(odr, req->num_iLL_request_extensions*sizeof(*req->iLL_request_extensions));
     req->iLL_request_extensions[0]=makepromptextension(args,odr);
+    req->iLL_request_extensions[1]=makeoclcextension(args,odr);
     if (!req) {
         yaz_log(YLOG_FATAL,"Could not create ill request");
         exit(2);
@@ -302,6 +370,12 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
         yaz_log(YLOG_FATAL,"Could not send packet. code %d",res );
         exit (4);
     }
+    if (1) {
+        FILE *F = fopen("req.apdu","w");
+        fwrite ( buf_out, 1, len_out, F);
+        fclose(F);
+    }
+    
 } /* sendrequest */
 
 /* * * * * * * * * * * * * * * */
@@ -394,16 +468,16 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                     printf("Already forwarded: \n");
                     break;
                 case ILL_User_Error_Report_intermediary_problem:
-                    printf("Intermediary problem: %p\n", 
-                        uerr->u.intermediary_problem);
+                    printf("Intermediary problem: %d\n", 
+                        *uerr->u.intermediary_problem);
                     break;
                 case ILL_User_Error_Report_security_problem:
                     printf("Security problem: %s\n", 
                         getillstring(uerr->u.security_problem));
                     break;
                 case ILL_User_Error_Report_unable_to_perform:
-                    printf("Unable to perform: %p\n", 
-                          uerr->u.unable_to_perform);
+                    printf("Unable to perform: %d\n", 
+                          *uerr->u.unable_to_perform);
                     break;
                 default:
                     printf("Unknown problem");
@@ -414,12 +488,12 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
             ILL_Provider_Error_Report *perr= err->provider_error_report;
             switch( perr->which ) {
                 case ILL_Provider_Error_Report_general_problem:
-                    printf("General Problem: %p\n", 
-                          perr->u.general_problem);
+                    printf("General Problem: %d\n", 
+                          *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_transaction_id_problem:
-                    printf("Transaction Id Problem: %p\n", 
-                          perr->u.general_problem);
+                    printf("Transaction Id Problem: %d\n", 
+                          *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_state_transition_prohibited:
                     printf("State Transition prohibited \n");
