@@ -2,7 +2,7 @@
 # Copyright (c) Index Data 2006-2007
 # See the file LICENSE for details.
 #
-# $Id: oidtoc.tcl,v 1.1 2007-04-16 21:53:09 adam Exp $
+# $Id: oidtoc.tcl,v 1.2 2007-04-18 08:08:02 adam Exp $
 #
 # Converts a CSV file with Object identifiers to C
 
@@ -34,11 +34,18 @@ proc readoids {input} {
     return $oids
 }
 
-proc oid_to_c {input cfile hfile} {
-    set oids [readoids $input]
+proc oid_to_c {srcdir input cname hname} {
+    set oids [readoids "${srcdir}/${input}"]
 
-    set cfile [open $cfile w]
-    set hfile [open $hfile w]
+    set cfile [open "${srcdir}/${cname}" w]
+    set hfile [open "${srcdir}/../include/yaz/${hname}" w]
+
+    puts $cfile "/** \\file $cname"
+    puts $hfile "/** \\file $hname"
+    set preamble "    \\brief Standard Object Identifiers: Generated from $input */"
+    puts $cfile $preamble
+    puts $hfile $preamble
+
 
     puts $cfile "\#include <yaz/oid_db.h>"
     puts $cfile ""
@@ -75,8 +82,8 @@ proc oid_to_c {input cfile hfile} {
     close $hfile
 }
 
-if {[llength $argv] != 3} {
-    puts "oidtoc.tcl csv cfile hfile"
+if {[llength $argv] != 4} {
+    puts "oidtoc.tcl srcdir csv cfile hfile"
     exit 1
 }
-oid_to_c [lindex $argv 0] [lindex $argv 1] [lindex $argv 2]
+oid_to_c [lindex $argv 0] [lindex $argv 1] [lindex $argv 2] [lindex $argv 3]

@@ -2,10 +2,11 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.5 2007-04-16 21:53:09 adam Exp $
+ * $Id: oid_db.c,v 1.6 2007-04-18 08:08:02 adam Exp $
  */
 
 /**
+ * \file oid_db.c
  * \brief OID Database
  */
 #if HAVE_CONFIG_H
