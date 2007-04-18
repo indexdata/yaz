@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.43 2007-04-17 20:26:18 adam Exp $
+## $Id: Makefile.am,v 1.44 2007-04-18 07:34:35 adam Exp $
 
 pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h comstack.h \
  diagbib1.h diagsrw.h diagsru_update.h sortspec.h log.h logrpn.h marcdisp.h \
@@ -10,7 +10,7 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h comstack.h \
  xmlquery.h libxml2_error.h xmltypes.h snprintf.h query-charset.h \
  mutex.h oid_db.h oid_util.h oid_std.h \
  \
- ill.h ill-core.h item-req.h z-accdes1.h z-accform1.h \
+ ill.h ill-core.h item-req.h oclc-ill-req-ext.h z-accdes1.h z-accform1.h \
  z-acckrb1.h z-core.h z-date.h z-diag1.h z-espec1.h z-estask.h z-exp.h \
  z-grs.h z-mterm2.h z-opac.h z-rrf1.h z-rrf2.h z-sum.h z-sutrs.h z-uifr1.h \
  z-univ.h z-oclcui.h zes-expi.h zes-exps.h zes-order.h zes-pquery.h \

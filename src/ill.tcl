@@ -1,5 +1,5 @@
 # Config File for ILL
-# $Id: ill.tcl,v 1.1 2003-10-27 12:21:30 adam Exp $
+# $Id: ill.tcl,v 1.2 2007-04-18 07:34:35 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -47,6 +47,11 @@ set map($m,Service_Date_Time_1) Service_Date_original
 set map($m,Overdue_0) Overdue_ExtensionS
 set membermap($m,APDU,ILL-Request) {APDU_ILL_Request illRequest}
 set membermap($m,APDU,ILL-Answer) {APDU_ILL_Answer illAnswer}
+
+# ----------------------------------------------------------
+set m CLCILLRequestExtension
+# Filename
+set filename($m) oclc-ill-req-ext
 
 # ----------------------------------------------------------
 set m Z39.50-extendedService-ItemOrder-ItemRequest-1

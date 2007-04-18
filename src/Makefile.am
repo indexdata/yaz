@@ -1,11 +1,10 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.61 2007-04-17 20:26:18 adam Exp $
+## $Id: Makefile.am,v 1.62 2007-04-18 07:34:35 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
 lib_LTLIBRARIES = libyaz.la libyaz_server.la
-# noinst_PROGRAMS = cqlparse
 
 dist-hook:
 	test -f $(srcdir)/cql.c || exit 1
@@ -15,7 +14,7 @@ tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
  esadmin.asn charneg-3.asn mterm2.asn oclcui.asn
 
 illdatadir=$(pkgdatadir)/ill
-illdata_DATA=ill9702.asn item-req.asn ill.tcl
+illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml \
@@ -65,7 +64,7 @@ GEN_FILES = oid_std.c \
   zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
   zes-pset.c zes-update0.c z-date.c z-univ.c zes-update.c zes-admin.c \
   z-charneg.c \
-  ill-core.c item-req.c 
+  ill-core.c item-req.c oclc-ill-req-ext.c
 
 libyaz_la_SOURCES=version.c options.c log.c \
  $(GEN_FILES) \
@@ -178,11 +177,15 @@ $(top_srcdir)/include/yaz/ill-core.h: \
 $(srcdir)/ill.tcl $(srcdir)/ill9702.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/ill9702.asn
 
+# OCLC ILL Request Extension
+oclc-ill-req-ext.c \
+$(top_srcdir)/include/yaz/oclc-ill-req-ext.h: \
+$(srcdir)/ill.tcl $(srcdir)/oclc-ill-req-ext.asn $(YAZCOMP)
+	$(TCLSH) $(YAZCOMP_I) $(srcdir)/oclc-ill-req-ext.asn
+
 # Item Request
 item-req.c \
 $(top_srcdir)/include/yaz/item-req.h: \
 $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/item-req.asn
-
-# cqlparse_SOURCES = cqlstd.y
 
