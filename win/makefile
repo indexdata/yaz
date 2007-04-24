@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.130 2007-03-21 19:47:28 adam Exp $
+# $Id: makefile,v 1.131 2007-04-24 12:55:15 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -328,6 +328,7 @@ TST_TIMING_OBJS = \
 
 MISC_OBJS= \
    $(OBJDIR)\version.obj \
+   $(OBJDIR)\oid_std.obj \
    $(OBJDIR)\eventl.obj \
    $(OBJDIR)\requestq.obj \
    $(OBJDIR)\service.obj \
@@ -378,7 +379,8 @@ MISC_OBJS= \
    $(OBJDIR)\marc_read_line.obj \
    $(OBJDIR)\nmem.obj \
    $(OBJDIR)\nmemsdup.obj \
-   $(OBJDIR)\oid.obj \
+   $(OBJDIR)\oid_db.obj \
+   $(OBJDIR)\oid_util.obj \
    $(OBJDIR)\options.obj \
    $(OBJDIR)\readconf.obj \
    $(OBJDIR)\tpath.obj \
@@ -404,7 +406,6 @@ MISC_OBJS= \
    $(OBJDIR)\yaz-ccl.obj \
    $(OBJDIR)\otherinfo.obj \
    $(OBJDIR)\sortspec.obj \
-   $(OBJDIR)\z3950oid.obj \
    $(OBJDIR)\charneg.obj \
    $(OBJDIR)\grs1disp.obj \
    $(OBJDIR)\opacdisp.obj \
@@ -611,7 +612,7 @@ generated_files: \
 
 # Various YAZ source directories
 {$(SRCDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) /D"YAZ_DLL" $< 
 
 {$(ZOOMDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
@@ -683,6 +684,10 @@ $(SRCDIR)\marc8.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 $(SRCDIR)\marc8r.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
+
+$(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv $(SRCDIR)\charconv.tcl
+	@cd $(SRCDIR)
+	$(TCL) oidtoc.tcl $(SRCDIR) oid.csv oid_std.c oid_std.h
 
 $(SRCDIR)\diagbib1.c: $(SRCDIR)\bib1.csv
 	@cd $(SRCDIR)
