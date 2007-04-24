@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: yconfig.h,v 1.11 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: yconfig.h,v 1.12 2007-04-24 12:54:42 adam Exp $ */
 
 /**
  * \file yconfig.h
@@ -37,8 +37,10 @@
 #ifndef YAZ_EXPORT
 # ifdef WIN32
 #  define YAZ_EXPORT __declspec(dllexport)
+#  define YAZ_IMPORT __declspec(dllimport)
 # else
 #  define YAZ_EXPORT
+#  define YAZ_IMPORT 
 # endif
 #endif
 
