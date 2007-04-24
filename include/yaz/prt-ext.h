@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: prt-ext.h,v 1.17 2007-04-13 09:55:41 adam Exp $ */
+/* $Id: prt-ext.h,v 1.18 2007-04-24 12:53:56 adam Exp $ */
 
 /**
  * \file prt-ext.h
@@ -148,13 +148,13 @@ YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(const int *oid);
 YAZ_EXPORT Z_External *z_ext_record_oid(ODR o, const int *oid,
                                         const char *buf, int len);
 /** \brief encodes EXTERNAL XML record */
-Z_External *z_ext_record_xml(ODR o, const char *buf, int len);
+YAZ_EXPORT Z_External *z_ext_record_xml(ODR o, const char *buf, int len);
 
 /** \brief encodes EXTERNAL SUTRS record */
-Z_External *z_ext_record_sutrs(ODR o, const char *buf, int len);
+YAZ_EXPORT Z_External *z_ext_record_sutrs(ODR o, const char *buf, int len);
 
 /** \brief encodes EXTERNAL USMARC/MARC21 record */
-Z_External *z_ext_record_usmarc(ODR o, const char *buf, int len);
+YAZ_EXPORT Z_External *z_ext_record_usmarc(ODR o, const char *buf, int len);
 
 YAZ_END_CDECL
 
