@@ -1,0 +1,21 @@
+# Example ill parameter file
+# 
+# (any line starting with # is a comment)
+#
+# Lines are in form 
+#   key=value
+# key is a comma-separated list of fieldnames.
+# value is anything that follows the equal sign.
+#
+
+ill,protocol-version-num=2
+
+#ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution=100-310-658
+ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution=IKM
+#ill,requester-id,person-or-institution-symbol,institution=100-310-658
+#ill,responder-id,person-or-institution-symbol,institution=100-310-658
+ill,requester-id,person-or-institution-symbol,institution=IKM
+ill,responder-id,person-or-institution-symbol,institution=IKM
+
+# service type 1 = loan
+ill,ill-service-type=1

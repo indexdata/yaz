@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.4 2007-04-18 13:21:46 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.5 2007-04-25 16:51:47 heikki Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */
@@ -59,53 +59,168 @@
 #include <yaz/oclc-ill-req-ext.h>
 
 
+/* A structure for holding name-value pairs in a linked list */
+struct nameval {
+    char *name;
+    char *val;
+    struct nameval *next;
+};
+
 /* A structure for storing all the arguments */
 struct prog_args {
     char *host;
     char *auth_userid;
     char *auth_passwd;
+    struct nameval* namevals; /* circular list, points to last */
 } ;
+
 
 
 /* Call-back to be called for every field in the ill-request */
 /* It can set values to any field, perhaps from the prog_args */
 const char *get_ill_element(void *clientData, const char *element) {
     struct prog_args *args = clientData;
+    struct nameval *nv=args->namevals;
     char *ret=0;
+    if (!nv)
+        return "";
+    do  {
+        nv=nv->next;
+        /* printf("comparing '%s' with '%s' \n",element, nv->name ); */
+        if ( strcmp(element, nv->name) == 0 )
+            ret = nv->val;
+    } while ( ( !ret) && ( nv != args->namevals) );
+#if 0
     if (!strcmp(element,"foo")) {
         ret=args->host;
     } else if (!strcmp(element,"ill,protocol-version-num")) {
         ret="2";
+    } else if (!strcmp(element,"ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution")) {
+        ret=args->auth_userid; 
+    } else if (!strcmp(element,"ill,requester-id,person-or-institution-symbol,institution")) {
+        ret=args->auth_userid;
+    } else if (!strcmp(element,"ill,responder-id,person-or-institution-symbol,institution")) {
+        ret=args->auth_userid;
+    } else if (!strcmp(element,"ill,ill-service-type")) {
+        ret="1"; /* Loan */
+    } 
+#endif
  /*
     } else if (!strcmp(element,"ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution")) {
         ret="IndexData";
  */
-    } 
-    yaz_log(YLOG_DEBUG,"get_ill_element: '%s' -> '%s' ", element, ret );
+    yaz_log(YLOG_DEBUG,"get_ill_element:'%s'->'%s'", element, ret );
     return ret;
 }
 
 
 /* * * * * * * * * * * * * * * * * */
+
+/** \brief parse a parameter string */
+/* string is like 'name=value' */
+struct nameval *parse_nameval( char *arg ) {
+    struct nameval *nv = xmalloc(sizeof(*nv));
+    char *p=arg;
+    int len;
+    if (!p || !*p) 
+        return 0; /* yeah, leaks a bit of memory. so what */
+    while ( *p && ( *p != '=' ) ) 
+        p++;
+    len = p - arg;
+    if (!len)
+        return 0;
+    nv->name = xmalloc(len+1);
+    strncpy(nv->name, arg, len);
+    nv->name[len]='\0';
+    if (*p == '=' )
+        p++; /* skip the '=' */
+    else
+        return 0; /* oops, no '=' */
+    if (!*p)
+        return 0; /* no value */
+    nv->val=xstrdup(p);
+    nv->next=0;
+    yaz_log(YLOG_DEBUG,"parse_nameval: n='%s' v='%s'", nv->name, nv->val );
+    return nv;
+}
+
+/** \brief append nv to the list of namevals */
+void append_nameval (struct prog_args *args, struct nameval *nv) {
+    if (!nv)
+        return;
+    if (args->namevals) {
+        nv->next=args->namevals->next; /* first */
+        args->namevals->next=nv; 
+        args->namevals=nv;
+    } else {
+        nv->next=nv;
+        args->namevals=nv;
+    }
+} /* append_nameval */
+
+/** \brief parse a parameter file */
+void parse_paramfile(char *arg, struct prog_args *args) {
+    FILE *f=fopen(arg,"r");
+#define BUFSIZE 4096    
+    char buf[BUFSIZE];
+    int len;
+    struct nameval *nv;
+    if (!f) {
+        yaz_log(YLOG_FATAL,"Could not open param file '%s' ", arg);
+        printf("Could not open file '%s' \n",arg);
+        exit(1);
+    }
+    yaz_log(YLOG_DEBUG,"Opened input file '%s' ",arg );
+    while (fgets(buf,BUFSIZE,f)) {
+        if (buf[0] != '#' ) {
+            len=strlen(buf)-1;
+            if (buf[len] == '\n')
+                buf[len] = '\0' ;
+            nv=parse_nameval(buf);
+            append_nameval(args, nv);
+        } /* not a comment */
+    }
+    (void) fclose(f);
+
+    if (0) {
+        nv=args->namevals;
+        printf("nv chain: ================ \n");
+        printf("(last:) %p: '%s' = '%s' (%p) \n",nv, nv->name, nv->val, nv->next );
+        do {
+            nv=nv->next;
+            printf("%p: '%s' = '%s' (%p)\n",nv, nv->name, nv->val, nv->next );
+        } while (nv != args->namevals );
+        exit(1);
+    }
+
+} /* parse_paramfile */
+
+
 /** \brief  Parse program arguments */
 void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.4 2007-04-18 13:21:46 heikki Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.5 2007-04-25 16:51:47 heikki Exp $"; /* from cvs */
+    struct nameval *nv;
 
     /* default values */
     args->host = 0; /* not known (yet) */
+    args->namevals=0; /* none set up */
 #if 0    
+    /* Example 1, from TSLAC */
     args->auth_userid = "100-228-301" ; /* FIXME - get from cmd line */
     args->auth_passwd = "dxg5magxc" ;   /* FIXME - get from cmd line */
-#else
+    /* Example 2, from TSLAC */
     args->auth_userid = "100070049" ; /* FIXME - get from cmd line */
     args->auth_passwd = "cowgirl" ;   /* FIXME - get from cmd line */
+#else
+    /* Example 3 - directly from OCLC, supposed to work on their test server*/
+    args->auth_userid = "100-310-658" ; /* FIXME - get from cmd line */
+    args->auth_passwd = "apii2test" ;   /* FIXME - get from cmd line */
 #endif
 
-
-    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
+    while ((ret = options("v:D:f:V", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -116,7 +231,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
             }
             else
             {
-                fprintf(stderr, "%s: Specify most one server address\n",
+                fprintf(stderr, "%s: Specify at most one server address\n",
                         prog);
                 exit(1);
             }
@@ -127,9 +242,17 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
         case 'V':
             printf("%s %s",prog, version );
             break;
+        case 'D':
+            nv=parse_nameval(arg);
+            append_nameval(args,nv);
+            break;
+        case 'f':
+            parse_paramfile(arg,args);
+            break;
         default:
             fprintf (stderr, "Usage: %s "
                      " [-v loglevel...]"
+                     " [-D name=value ]"
                      " [-V]"
                      " <server-addr>\n",
                      prog);
@@ -325,7 +448,7 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     ILL_Request *req;
 
     ctl.odr = odr;
-    ctl.clientData = & args;
+    ctl.clientData = args;
     ctl.f = get_ill_element;
     apdu = odr_malloc( odr, sizeof(*apdu) );
     apdu->which=ILL_APDU_ILL_Request;
