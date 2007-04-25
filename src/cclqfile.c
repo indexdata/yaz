@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.7 2005-06-25 15:46:03 adam Exp $
+ * $Id: cclqfile.c,v 1.8 2007-04-25 20:52:19 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -71,16 +71,18 @@
 
 #include <yaz/ccl.h>
 
+#define MAX_QUAL 128
+
 void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
 {
     char qual_spec[128];
-    int type_ar[128];
-    int value_ar[128];
-    char *svalue_ar[128];
-    char *attsets[128];
+    int type_ar[MAX_QUAL];
+    int value_ar[MAX_QUAL];
+    char *svalue_ar[MAX_QUAL];
+    char *attsets[MAX_QUAL];
     int pair_no = 0;
 
-    while (pair_no < 128)
+    while (pair_no < MAX_QUAL)
     {
         char *qual_value, *qual_type;
         char *split, *setp;
@@ -116,7 +118,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             /* type=value ... */
             qual_type = qual_spec;
         }
-        while (pair_no < 128)
+        while (pair_no < MAX_QUAL)
         {
             int type, value;
 
@@ -198,8 +200,7 @@ void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
             }
             if (setp)
             {
-                attsets[pair_no] = (char*) xmalloc (strlen(qual_spec)+1);
-                strcpy (attsets[pair_no], qual_spec);
+                attsets[pair_no] = xstrdup (qual_spec);
             }
             else
                 attsets[pair_no] = 0;

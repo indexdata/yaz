@@ -56,7 +56,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.8 2005-06-25 15:46:03 adam Exp $
+ * $Id: cclfind.c,v 1.9 2007-04-25 20:52:19 adam Exp $
  *
  * Old Europagate log:
  *
@@ -113,7 +113,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <yaz/ccl.h>
+#include "cclp.h"
 
 /* returns type of current lookahead */
 #define KIND (cclp->look_token->kind)
@@ -1121,7 +1121,17 @@ static struct ccl_rpn_node *find_spec (CCL_parser cclp,
     return p1;
 }
 
-struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
+struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str)
+{
+    struct ccl_rpn_node *p;
+    struct ccl_token *list = ccl_parser_tokenize(cclp, str);
+    p = ccl_parser_find_token(cclp, list);
+    ccl_token_del(list);
+    return p;
+}
+
+struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp, 
+                                           struct ccl_token *list)
 {
     struct ccl_rpn_node *p;
 
@@ -1145,32 +1155,6 @@ struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list)
 }
 
 /**
- * ccl_find: Parse CCL find - token representation
- * bibset:  Bibset to be used for the parsing
- * list:    List of tokens
- * error:   Pointer to integer. Holds error no. on completion.
- * pos:     Pointer to char position. Holds approximate error position.
- * return:  RPN tree on successful completion; NULL otherwise.
- */
-struct ccl_rpn_node *ccl_find (CCL_bibset bibset, struct ccl_token *list,
-                               int *error, const char **pos)
-{
-    struct ccl_rpn_node *p;
-    CCL_parser cclp = ccl_parser_create ();
-
-    cclp->bibset = bibset;
-
-    p = ccl_parser_find (cclp, list);
-
-    *error = cclp->error_code;
-    *pos = cclp->error_pos;
-
-    ccl_parser_destroy (cclp);
-
-    return p;
-}
-
-/**
  * ccl_find_str: Parse CCL find - string representation
  * bibset:  Bibset to be used for the parsing
  * str:     String to be parsed
@@ -1178,17 +1162,15 @@ struct ccl_rpn_node *ccl_find (CCL_bibset bibset, struct ccl_token *list,
  * pos:     Pointer to char position. Holds approximate error position.
  * return:  RPN tree on successful completion; NULL otherwise.
  */
-struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
-                                   int *error, int *pos)
+struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
+                                  int *error, int *pos)
 {
-    CCL_parser cclp = ccl_parser_create ();
+    CCL_parser cclp = ccl_parser_create (bibset);
     struct ccl_token *list;
     struct ccl_rpn_node *p;
 
-    cclp->bibset = bibset;
-
     list = ccl_parser_tokenize (cclp, str);
-    p = ccl_parser_find (cclp, list);
+    p = ccl_parser_find_token(cclp, list);
 
     *error = cclp->error_code;
     if (*error)

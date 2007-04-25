@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.9 2005-08-22 20:34:21 adam Exp $
+ * $Id: ccltoken.c,v 1.10 2007-04-25 20:52:19 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -91,7 +91,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <yaz/ccl.h>
+#include "cclp.h"
 
 /*
  * token_cmp: Compare token with keyword(s)
@@ -146,6 +146,7 @@ struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command)
     const unsigned char *cp = (const unsigned char *) command;
     struct ccl_token *first = NULL;
     struct ccl_token *last = NULL;
+    cclp->start_pos = command;
 
     while (1)
     {
@@ -277,17 +278,6 @@ struct ccl_token *ccl_token_add (struct ccl_token *at)
     return n;
 }
     
-struct ccl_token *ccl_tokenize (const char *command)
-{
-    CCL_parser cclp = ccl_parser_create ();
-    struct ccl_token *list;
-
-    list = ccl_parser_tokenize (cclp, command);
-
-    ccl_parser_destroy (cclp);
-    return list;
-}
-
 /*
  * ccl_token_del: delete CCL tokens
  */
@@ -311,7 +301,7 @@ char *ccl_strdup (const char *str)
     return p;
 }
 
-CCL_parser ccl_parser_create (void)
+CCL_parser ccl_parser_create (CCL_bibset bibset)
 {
     CCL_parser p = (CCL_parser)xmalloc (sizeof(*p));
     if (!p)
@@ -319,7 +309,7 @@ CCL_parser ccl_parser_create (void)
     p->look_token = NULL;
     p->error_code = 0;
     p->error_pos = NULL;
-    p->bibset = NULL;
+    p->bibset = bibset;
 
     p->ccl_token_and = ccl_strdup("and");
     p->ccl_token_or = ccl_strdup("or");
@@ -384,6 +374,14 @@ void ccl_parser_set_case (CCL_parser p, int case_sensitivity_flag)
     if (p)
         p->ccl_case_sensitive = case_sensitivity_flag;
 }
+
+int ccl_parser_get_error(CCL_parser cclp, int *pos)
+{
+    if (pos && cclp->error_code)
+        *pos = cclp->error_pos - cclp->start_pos;
+    return cclp->error_code;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

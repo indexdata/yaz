@@ -44,7 +44,7 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Id: cclsh.c,v 1.5 2007-01-08 10:48:08 adam Exp $
+ * $Id: cclsh.c,v 1.6 2007-04-25 20:52:20 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -172,17 +172,13 @@ int main (int argc, char **argv)
     }
     if (q_wrbuf)
     {
-        CCL_parser cclp = ccl_parser_create ();
-        struct ccl_token *list;
+        CCL_parser cclp = ccl_parser_create(bibset);
         int error;
         struct ccl_rpn_node *rpn;
         
-        cclp->bibset = bibset;
+        rpn = ccl_parser_find_str (cclp, wrbuf_cstr(q_wrbuf));
         
-        list = ccl_parser_tokenize (cclp, wrbuf_cstr(q_wrbuf));
-        rpn = ccl_parser_find (cclp, list);
-        
-        error = cclp->error_code;
+        error = ccl_parser_get_error(cclp, 0);
         
         if (error)
         {
@@ -196,13 +192,6 @@ int main (int argc, char **argv)
                 printf ("\n");
             }
         }
-        if (debug)
-        {
-            struct ccl_token *lp;
-            for (lp = list; lp; lp = lp->next)
-                printf ("%d %.*s\n", lp->kind, (int) (lp->len), lp->name);
-        }
-        ccl_token_del (list);
         ccl_parser_destroy (cclp);
         if (rpn)
             ccl_rpn_delete(rpn);
@@ -212,7 +201,7 @@ int main (int argc, char **argv)
     while (1)
     {
         char buf[1000];
-        int i, error, pos;
+        int i, error;
         struct ccl_rpn_node *rpn;
 
 #if HAVE_READLINE_READLINE_H
@@ -238,17 +227,12 @@ int main (int argc, char **argv)
 
         for (i = 0; i<1; i++)
         {
-            CCL_parser cclp = ccl_parser_create ();
-            struct ccl_token *list;
+            CCL_parser cclp = ccl_parser_create(bibset);
+            int pos;
             
-            cclp->bibset = bibset;
+            rpn = ccl_parser_find_str(cclp, buf);
             
-            list = ccl_parser_tokenize (cclp, buf);
-            rpn = ccl_parser_find (cclp, list);
-            
-            error = cclp->error_code;
-            if (error)
-                pos = cclp->error_pos - buf;
+            error = ccl_parser_get_error(cclp, &pos);
 
             if (error)
             {
@@ -263,13 +247,6 @@ int main (int argc, char **argv)
                     printf ("\n");
                 }
             }
-            if (debug)
-            {
-                struct ccl_token *lp;
-                for (lp = list; lp; lp = lp->next)
-                    printf ("%d %.*s\n", lp->kind, (int) (lp->len), lp->name);
-            }
-            ccl_token_del (list);
             ccl_parser_destroy (cclp);
             if (rpn)
                 ccl_rpn_delete(rpn);

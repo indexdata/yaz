@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.23 2005-06-25 15:46:01 adam Exp $
+ * $Id: ccl.h,v 1.24 2007-04-25 20:52:18 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -203,94 +203,8 @@ typedef struct ccl_qualifiers *CCL_bibset;
 #define CCL_BIB1_TRU_CAN_BOTH  (-3)
 #define CCL_BIB1_TRU_CAN_NONE  (-4)
 
-#define CCL_TOK_EOL   0
-#define CCL_TOK_TERM  1
-#define CCL_TOK_REL   2
-#define CCL_TOK_EQ    3
-#define CCL_TOK_PROX  4
-#define CCL_TOK_LP    5
-#define CCL_TOK_RP    6
-#define CCL_TOK_COMMA 7
-#define CCL_TOK_AND   8
-#define CCL_TOK_OR    9
-#define CCL_TOK_NOT   10
-#define CCL_TOK_SET   11
-
-/** CCL token */
-struct ccl_token {
-    char kind;
-    size_t len;                 /* length of name below */
-    const char *name;           /* string / name of token */
-    struct ccl_token *next;
-    struct ccl_token *prev;
-    const char *ws_prefix_buf;  /* leading white space buf */
-    size_t ws_prefix_len;       /* leading white space len */
-};
-
-/** CCL Qualifier */
-struct ccl_qualifier {
-    char *name;
-    int no_sub;
-    struct ccl_qualifier **sub;
-    struct ccl_rpn_attr *attr_list;
-    struct ccl_qualifier *next;
-};
-
-/** CCL parser structure */
-struct ccl_parser {
-    /** current lookahead token */
-    struct ccl_token *look_token;
-    
-    /** holds error code if error occur */
-    int error_code;
-    /** if error occurs, this holds position (starting from 0). */
-    const char *error_pos;
-    
-    /** current bibset */
-    CCL_bibset bibset;
-
-    /** names of and operator */
-    char *ccl_token_and;
-    /** names of or operator */
-    char *ccl_token_or;
-    /** names of not operator */
-    char *ccl_token_not;
-    /** names of set operator */
-    char *ccl_token_set;
-    /** 1=CCL parser is case sensitive, 0=case insensitive */
-    int ccl_case_sensitive;
-};
-    
 typedef struct ccl_parser *CCL_parser;
     
-/**
- * Splits CCL command string into individual tokens using
- * a CCL parser.
- */
-YAZ_EXPORT
-struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command);
-
-/**
- * Splits CCL command string into tokens using temporary parser.
- *
- * Use ccl_parser_tokenize instead and provide a parser - it is
- * more flexible and efficient.
- */
-YAZ_EXPORT
-struct ccl_token *ccl_tokenize (const char *command);
-    
-/** 
- * Deletes token list
- */
-YAZ_EXPORT
-void ccl_token_del (struct ccl_token *list);
-
-/**
- * Add single token after a given onde.
- */
-YAZ_EXPORT
-struct ccl_token *ccl_token_add (struct ccl_token *at);
-
 /**
  * Parses a CCL Find command in a simple C string. Returns CCL parse
  * tree node describing RPN if parsing is successful. If parsing is
@@ -300,20 +214,8 @@ YAZ_EXPORT
 struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset,
                                    const char *str, int *error, int *pos);
 
-/**
- * Parses CCL Find command from a list of CCL tokens. Otherwise similar to
- * ccl_find_str.
- */
 YAZ_EXPORT
-struct ccl_rpn_node *ccl_find (CCL_bibset abibset, struct ccl_token *list,
-                               int *error, const char **pos);
-
-/**
- * Parses a CCL Find command from a list of CCL tokens and given a CCL
- * parser. Otherwise similar to ccl_find_str.
- */
-YAZ_EXPORT
-struct ccl_rpn_node *ccl_parser_find (CCL_parser cclp, struct ccl_token *list);
+struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str);
 
 /** Set names for AND operator in parser */
 YAZ_EXPORT
@@ -411,7 +313,7 @@ struct ccl_rpn_attr *ccl_qual_search (CCL_parser cclp, const char *name,
 
 /** Create CCL parser */
 YAZ_EXPORT
-CCL_parser ccl_parser_create (void);
+CCL_parser ccl_parser_create (CCL_bibset bibset);
 
 /** Destroy CCL parser */
 YAZ_EXPORT
@@ -423,11 +325,16 @@ char *ccl_strdup (const char *str);
 
 /** Search for special qualifier */
 YAZ_EXPORT
-const char *ccl_qual_search_special (CCL_bibset b,
-                                                const char *name);
+const char *ccl_qual_search_special (CCL_bibset b, const char *name);
 /** Pretty-print CCL RPN node tree to WRBUF */
 YAZ_EXPORT
 void ccl_pquery (WRBUF w, struct ccl_rpn_node *p);
+
+YAZ_EXPORT
+CCL_bibset ccl_parser_get_bibset(CCL_parser cclp);
+
+YAZ_EXPORT
+int ccl_parser_get_error(CCL_parser cclp, int *pos);
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

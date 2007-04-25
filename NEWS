@@ -1,3 +1,8 @@
+Clean-up the CCL API. Moved some internal structures from ccl.h to 
+private header cclp.h. Changed ccl_parser_create so that a Bibset must
+be supplied. Removed tokenize API from ccl.h - including ccl_parser_find.
+This is replaced by ccl_parser_find_str which takes a string instead.
+
 Split YAZ library into two libs : libyaz.la and libyaz_server.la.
 libyaz.la is the core of YAZ except the generic frontend server and
 does not depend on POSIX threads anymore. libyaz_server.la is the

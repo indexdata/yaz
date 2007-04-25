@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.3 2005-06-25 15:46:03 adam Exp $
+ * $Id: cclqual.c,v 1.4 2007-04-25 20:52:19 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -86,7 +86,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <yaz/ccl.h>
+#include "cclp.h"
+
+/** CCL Qualifier */
+struct ccl_qualifier {
+    char *name;
+    int no_sub;
+    struct ccl_qualifier **sub;
+    struct ccl_rpn_attr *attr_list;
+    struct ccl_qualifier *next;
+};
+
 
 /** Definition of CCL_bibset pointer */
 struct ccl_qualifiers {

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.15 2007-03-19 22:17:41 adam Exp $
+ * $Id: tstccl.c,v 1.16 2007-04-25 20:52:19 adam Exp $
  */
 
 /* CCL test */
@@ -16,19 +16,14 @@ static int tst_ccl_query(CCL_bibset bibset,
                          const char *query,
                          const char *result)
 {
-    CCL_parser parser = ccl_parser_create();
+    CCL_parser parser = ccl_parser_create(bibset);
     int ret = 0;
 
     if (parser && bibset)
     {
-        struct ccl_token *token_list;
         struct ccl_rpn_node *rpn;
         
-        parser->bibset = bibset;
-        
-        token_list = ccl_parser_tokenize(parser, query);
-        rpn = ccl_parser_find(parser, token_list);
-        ccl_token_del(token_list);
+        rpn = ccl_parser_find_str(parser, query);
         if (rpn)
         {
             /* parse ok. check that result is there and match */
