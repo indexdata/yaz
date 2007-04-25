@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.10 2007-04-16 21:53:09 adam Exp $
+ * $Id: prt-ext.c,v 1.11 2007-04-25 13:49:52 adam Exp $
  */
 
 /**
@@ -39,9 +39,9 @@ static Z_ext_typeent type_table[] =
     {{1, 2, 840, 10003, 5, 103,-1}, Z_External_summary, (Odr_fun)z_BriefBib},
     {{1, 2, 840, 10003, 5, 102,-1}, Z_External_OPAC, (Odr_fun)z_OPACRecord},
     {{1, 2, 840, 10003, 10, 1,-1}, Z_External_searchResult1, (Odr_fun)z_SearchInfoReport},
-    {{1, 2, 840, 10003, 9, 5,-1}, Z_External_update, (Odr_fun)z_IUUpdate},
-    {{1, 2, 840, 10003, 9, 5,1,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
-    {{1, 2, 840, 10003, 9, 5, 1, 1,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
+    {{1, 2, 840, 10003, 9, 5,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
+    {{1, 2, 840, 10003, 9, 5, 1,-1}, Z_External_update0, (Odr_fun)z_IU0Update},
+    {{1, 2, 840, 10003, 9, 5, 1, 1,-1}, Z_External_update, (Odr_fun)z_IUUpdate},
     {{1, 2, 840, 10003, 10, 6,-1}, Z_External_dateTime, (Odr_fun)z_DateTime},
     {{1, 2, 840, 10003, 7, 1000, 81, 1,-1}, Z_External_universeReport,(Odr_fun)z_UniverseReport},
     {{1, 2, 840, 10003, 9, 1000, 81, 1,-1}, Z_External_ESAdmin, (Odr_fun)z_Admin},
