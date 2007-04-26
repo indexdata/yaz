@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.5 2007-04-26 09:11:56 adam Exp $
+ * $Id: cclqual.c,v 1.6 2007-04-26 21:41:57 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -236,8 +236,6 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
     }
     else
     {
-        if (q->sub)  /* suspect.. */
-            xfree (q->sub);
         attrp = &q->attr_list;
         while (*attrp)
             attrp = &(*attrp)->next;
