@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.4 2007-04-25 20:52:19 adam Exp $
+ * $Id: cclqual.c,v 1.5 2007-04-26 09:11:56 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -136,7 +136,7 @@ void ccl_qual_add_special (CCL_bibset bibset, const char *n, const char *v)
     else
     {
         p = (struct ccl_qualifier_special *) xmalloc (sizeof(*p));
-        p->name = ccl_strdup (n);
+        p->name = xstrdup(n);
         p->value = 0;
         p->next = bibset->special;
         bibset->special = p;
@@ -180,7 +180,7 @@ void ccl_qual_add_combi (CCL_bibset b, const char *n, const char *names)
     if (q)
         return ;
     q = (struct ccl_qualifier *) xmalloc (sizeof(*q));
-    q->name = ccl_strdup (n);
+    q->name = xstrdup(n);
     q->attr_list = 0;
     q->next = b->list;
     b->list = q;
@@ -228,7 +228,7 @@ void ccl_qual_add_set (CCL_bibset b, const char *name, int no,
         new_qual->next = b->list;
         b->list = new_qual;
         
-        new_qual->name = ccl_strdup (name);
+        new_qual->name = xstrdup(name);
         attrp = &new_qual->attr_list;
 
         new_qual->no_sub = 0;

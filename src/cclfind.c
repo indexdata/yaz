@@ -56,7 +56,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.9 2007-04-25 20:52:19 adam Exp $
+ * $Id: cclfind.c,v 1.10 2007-04-26 09:11:56 adam Exp $
  *
  * Old Europagate log:
  *
@@ -257,10 +257,7 @@ static struct ccl_rpn_attr *add_attr_node (struct ccl_rpn_node *p,
     n = (struct ccl_rpn_attr *)xmalloc (sizeof(*n));
     ccl_assert (n);
     if (set)
-    {
-        n->set = (char*) xmalloc (strlen(set)+1);
-        strcpy (n->set, set);
-    }
+        n->set = xstrdup(set);
     else
         n->set = 0;
     n->type = type;
