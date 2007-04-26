@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.8 2007-04-25 20:52:19 adam Exp $
+ * $Id: cclqfile.c,v 1.9 2007-04-26 21:45:17 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -69,148 +69,201 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <yaz/tokenizer.h>
 #include <yaz/ccl.h>
+#include <yaz/log.h>
 
 #define MAX_QUAL 128
 
-void ccl_qual_field (CCL_bibset bibset, const char *cp, const char *qual_name)
+int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
+                    const char **addinfo)
 {
-    char qual_spec[128];
+    yaz_tokenizer_t yt = yaz_tokenizer_create();
+
     int type_ar[MAX_QUAL];
     int value_ar[MAX_QUAL];
     char *svalue_ar[MAX_QUAL];
     char *attsets[MAX_QUAL];
     int pair_no = 0;
+    char *type_str = 0;
+    int t;
 
-    while (pair_no < MAX_QUAL)
+    yaz_tokenizer_single_tokens(yt, ",=");
+    yaz_tokenizer_read_buf(yt, cp);
+    *addinfo = 0;
+    
+    t = yaz_tokenizer_move(yt);
+    while (t == YAZ_TOKENIZER_STRING)
     {
-        char *qual_value, *qual_type;
-        char *split, *setp;
-        int no_scan = 0;
-        
-        if (sscanf (cp, "%100s%n", qual_spec, &no_scan) < 1)
-            break;
+        /* we don't know what lead is yet */
+        char *lead_str = xstrdup(yaz_tokenizer_string(yt));
+        const char *value_str = 0;
+        int type = 0, value = 0; /* indicates attribute value UNSET  */
 
-        if (!(split = strchr (qual_spec, '=')))
+        t = yaz_tokenizer_move(yt);
+        if (t == ',')
         {
-            /* alias specification .. */
-            if (pair_no == 0)
+            /* full attribute spec: set, type = value */
+            /* lead is attribute set */
+            attsets[pair_no] = lead_str;
+            t = yaz_tokenizer_move(yt);
+            if (t != YAZ_TOKENIZER_STRING)
             {
-                ccl_qual_add_combi (bibset, qual_name, cp);
-                return;
+                *addinfo = "token expected";
+                goto out;
             }
-            break;
+            xfree(type_str);
+            type_str = xstrdup(yaz_tokenizer_string(yt));
+            if (yaz_tokenizer_move(yt) != '=')
+            {
+                *addinfo = "= expected";
+                goto out;
+            }
         }
-        /* [set,]type=value ... */
-        cp += no_scan;
-        
-        *split++ = '\0';
-
-        setp = strchr (qual_spec, ',');
-        if (setp)
+        else if (t == '=')
         {
-            /* set,type=value ... */
-            *setp++ = '\0';
-            qual_type = setp;
+            /* lead is attribute type */
+            /* attribute set omitted: type = value */
+            attsets[pair_no] = 0;
+            xfree(type_str);
+            type_str = lead_str;
         }
         else
         {
-            /* type=value ... */
-            qual_type = qual_spec;
+            /* lead is first of a list of qualifier aliaeses */
+            /* qualifier alias: q1 q2 ... */
+            xfree(lead_str);
+            yaz_tokenizer_destroy(yt);
+            ccl_qual_add_combi (bibset, qual_name, cp);
+            return 0;
         }
-        while (pair_no < MAX_QUAL)
+        while (1) /* comma separated attribute value list */
         {
-            int type, value;
-
-            qual_value = split;
-            if ((split = strchr (qual_value, ',')))
-                *split++ = '\0';
-
-            value = 0;
-            switch (qual_type[0])
+            t = yaz_tokenizer_move(yt);
+            /* must have a value now */
+            if (t != YAZ_TOKENIZER_STRING)
             {
-            case 'u':
-            case 'U':
-                type = CCL_BIB1_USE;
-                break;
-            case 'r':
-            case 'R':
-                type = CCL_BIB1_REL;
-                if (!ccl_stricmp (qual_value, "o"))
-                    value = CCL_BIB1_REL_ORDER;
-                else if (!ccl_stricmp (qual_value, "r"))
-                    value = CCL_BIB1_REL_PORDER;
-                break;                
-            case 'p':
-            case 'P':
-                type = CCL_BIB1_POS;
-                break;
-            case 's':
-            case 'S':
-                type = CCL_BIB1_STR;
-                if (!ccl_stricmp (qual_value, "pw"))
-                    value = CCL_BIB1_STR_WP;
-                if (!ccl_stricmp (qual_value, "al"))
-                    value = CCL_BIB1_STR_AND_LIST;
-                if (!ccl_stricmp (qual_value, "ol"))
-                    value = CCL_BIB1_STR_OR_LIST;
-                break;                
-            case 't':
-            case 'T':
-                type = CCL_BIB1_TRU;
-                if (!ccl_stricmp (qual_value, "l"))
-                    value = CCL_BIB1_TRU_CAN_LEFT;
-                else if (!ccl_stricmp (qual_value, "r"))
-                    value = CCL_BIB1_TRU_CAN_RIGHT;
-                else if (!ccl_stricmp (qual_value, "b"))
-                    value = CCL_BIB1_TRU_CAN_BOTH;
-                else if (!ccl_stricmp (qual_value, "n"))
-                    value = CCL_BIB1_TRU_CAN_NONE;
-                break;                
-            case 'c':
-            case 'C':
-                type = CCL_BIB1_COM;
-                break;
-            default:
-                type = atoi (qual_type);
+                *addinfo = "value token expected";
+                goto out;
             }
-
+            value_str = yaz_tokenizer_string(yt);
+            
+            if (sscanf(type_str, "%d", &type) == 1)
+                ;
+            else if (strlen(type_str) != 1)
+            {
+                *addinfo = "bad attribute type";
+                goto out;
+            }
+            else
+            {
+                switch (*type_str)
+                {
+                case 'u':
+                case 'U':
+                    type = CCL_BIB1_USE;
+                    break;
+                case 'r':
+                case 'R':
+                    type = CCL_BIB1_REL;
+                    if (!ccl_stricmp (value_str, "o"))
+                        value = CCL_BIB1_REL_ORDER;
+                    else if (!ccl_stricmp (value_str, "r"))
+                        value = CCL_BIB1_REL_PORDER;
+                    break;                
+                case 'p':
+                case 'P':
+                    type = CCL_BIB1_POS;
+                    break;
+                case 's':
+                case 'S':
+                    type = CCL_BIB1_STR;
+                    if (!ccl_stricmp (value_str, "pw"))
+                        value = CCL_BIB1_STR_WP;
+                    if (!ccl_stricmp (value_str, "al"))
+                        value = CCL_BIB1_STR_AND_LIST;
+                    if (!ccl_stricmp (value_str, "ol"))
+                        value = CCL_BIB1_STR_OR_LIST;
+                    break;                
+                case 't':
+                case 'T':
+                    type = CCL_BIB1_TRU;
+                    if (!ccl_stricmp (value_str, "l"))
+                        value = CCL_BIB1_TRU_CAN_LEFT;
+                    else if (!ccl_stricmp (value_str, "r"))
+                        value = CCL_BIB1_TRU_CAN_RIGHT;
+                    else if (!ccl_stricmp (value_str, "b"))
+                        value = CCL_BIB1_TRU_CAN_BOTH;
+                    else if (!ccl_stricmp (value_str, "n"))
+                        value = CCL_BIB1_TRU_CAN_NONE;
+                    break;                
+                case 'c':
+                case 'C':
+                    type = CCL_BIB1_COM;
+                    break;
+                }
+            }
+            if (type == 0)
+            {
+                /* type was not set in switch above */
+                *addinfo = "bad attribute type";
+                goto out;
+            }
             type_ar[pair_no] = type;
-
             if (value)
             {
                 value_ar[pair_no] = value;
                 svalue_ar[pair_no] = 0;
             }
-            else if (*qual_value >= '0' && *qual_value <= '9')
+            else if (*value_str >= '0' && *value_str <= '9')
             {
-                value_ar[pair_no] = atoi (qual_value);
+                value_ar[pair_no] = atoi (value_str);
                 svalue_ar[pair_no] = 0;
             }
             else
             {
-                size_t len;
-                if (split)
-                    len = split - qual_value;
-                else
-                    len = strlen(qual_value);
-                svalue_ar[pair_no] = (char *) xmalloc(len+1);
-                memcpy(svalue_ar[pair_no], qual_value, len);
-                svalue_ar[pair_no][len] = '\0';
+                value_ar[pair_no] = 0;
+                svalue_ar[pair_no] = xstrdup(value_str);
             }
-            if (setp)
-            {
-                attsets[pair_no] = xstrdup (qual_spec);
-            }
-            else
-                attsets[pair_no] = 0;
             pair_no++;
-            if (!split)
+            if (pair_no == MAX_QUAL)
+            {
+                *addinfo = "too many attribute values";
+                goto out;
+            }
+            t = yaz_tokenizer_move(yt);
+            if (t != ',')
                 break;
+            attsets[pair_no] = attsets[pair_no-1];
         }
     }
-    ccl_qual_add_set (bibset, qual_name, pair_no, type_ar, value_ar, svalue_ar,
-                      attsets);
+ out:
+    xfree(type_str);
+    type_str = 0;
+
+    yaz_tokenizer_destroy(yt);
+
+    if (*addinfo)
+    {
+        int i;
+        for (i = 0; i<pair_no; i++)
+        {
+            xfree(attsets[i]);
+            xfree(svalue_ar[i]);
+        }
+        return -1;
+    }
+    ccl_qual_add_set(bibset, qual_name, pair_no, type_ar, value_ar, svalue_ar,
+                     attsets);
+    return 0;
+}
+
+void ccl_qual_field(CCL_bibset bibset, const char *cp, const char *qual_name)
+{
+    const char *addinfo;
+    ccl_qual_field2(bibset, cp, qual_name, &addinfo);
+    if (addinfo)
+        yaz_log(YLOG_WARN, "ccl_qual_field2 fail: %s", addinfo);
 }
 
 void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)

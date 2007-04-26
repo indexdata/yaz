@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.25 2007-04-26 09:11:56 adam Exp $
+ * $Id: ccl.h,v 1.26 2007-04-26 21:45:16 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -296,6 +296,18 @@ void ccl_pquery(WRBUF w, struct ccl_rpn_node *p);
 
 YAZ_EXPORT
 int ccl_parser_get_error(CCL_parser cclp, int *pos);
+
+YAZ_EXPORT
+struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind);
+
+YAZ_EXPORT
+void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
+                          int type, int value);
+
+YAZ_EXPORT
+void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
+                         int type, char *value);
+
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;
