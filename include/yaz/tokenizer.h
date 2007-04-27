@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: tokenizer.h,v 1.1 2007-04-26 21:45:16 adam Exp $ */
+/* $Id: tokenizer.h,v 1.2 2007-04-27 10:09:44 adam Exp $ */
 
 /** \file tokenizer.h
     \brief Header with public definitions about YAZ' tokenizer
@@ -36,35 +36,45 @@
 
 YAZ_BEGIN_CDECL
 
-#define YAZ_TOKENIZER_EOF 0
-#define YAZ_TOKENIZER_ERROR (-1)
-#define YAZ_TOKENIZER_STRING (-2)
-#define YAZ_TOKENIZER_QSTRING (-3)
+#define YAZ_TOK_EOF 0
+#define YAZ_TOK_ERROR (-1)
+#define YAZ_TOK_STRING (-2)
+#define YAZ_TOK_QSTRING (-3)
 
-typedef struct yaz_tokenizer *yaz_tokenizer_t;
+typedef struct yaz_tok_cfg *yaz_tok_cfg_t;
+typedef struct yaz_tok_parse *yaz_tok_parse_t;
 
-YAZ_EXPORT
-yaz_tokenizer_t yaz_tokenizer_create(void);
-
-YAZ_EXPORT
-void yaz_tokenizer_destroy(yaz_tokenizer_t t);
+typedef int (*yaz_tok_get_byte_t)(void **vp);
 
 YAZ_EXPORT
-void yaz_tokenizer_read_buf(yaz_tokenizer_t t, const char *buf);
+yaz_tok_cfg_t yaz_tok_cfg_create(void);
 
 YAZ_EXPORT
-int yaz_tokenizer_move(yaz_tokenizer_t t);
+void yaz_tok_cfg_destroy(yaz_tok_cfg_t t);
 
 YAZ_EXPORT
-const char *yaz_tokenizer_string(yaz_tokenizer_t t);
+void yaz_tok_cfg_single_tokens(yaz_tok_cfg_t t, const char *simple);
 
 YAZ_EXPORT
-void yaz_tokenizer_single_tokens(yaz_tokenizer_t t, const char *simple);
+yaz_tok_parse_t yaz_tok_parse_buf(yaz_tok_cfg_t t, const char *buf);
+
+YAZ_EXPORT
+yaz_tok_parse_t yaz_tok_parse_create(yaz_tok_cfg_t t, yaz_tok_get_byte_t h,
+                                     void *vp);
+
+YAZ_EXPORT
+void yaz_tok_parse_destroy(yaz_tok_parse_t tp);
+
+YAZ_EXPORT
+int yaz_tok_move(yaz_tok_parse_t tp);
+
+YAZ_EXPORT
+const char *yaz_tok_parse_string(yaz_tok_parse_t tp);
 
 YAZ_END_CDECL
 
 #endif
-/* CQL_H_INCLUDED */
+
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tokenizer.c,v 1.1 2007-04-26 21:45:17 adam Exp $
+ * $Id: tokenizer.c,v 1.2 2007-04-27 10:09:45 adam Exp $
  */
 
 /**
@@ -18,51 +18,55 @@
 #include <yaz/wrbuf.h>
 #include <yaz/tokenizer.h>
 
-struct yaz_tokenizer {
-    int (*get_byte_func)(const void **vp);
-    const void *get_byte_data;
-
+struct yaz_tok_parse {
     int unget_byte;
+    WRBUF wr_string;
+    int look;
+    
+    yaz_tok_cfg_t cfg;
+    yaz_tok_get_byte_t get_byte_func;
+    void *get_byte_data;
+};
+
+struct yaz_tok_cfg {
+    int ref_count;
     char *white_space;
     char *single_tokens;
     char *quote_tokens_begin;
     char *quote_tokens_end;
-    WRBUF wr_string;
-    int look;
 };
 
-void yaz_tokenizer_single_tokens(yaz_tokenizer_t t, const char *simple)
+void yaz_tok_cfg_single_tokens(yaz_tok_cfg_t t, const char *simple)
 {
     xfree(t->single_tokens);
     t->single_tokens = xstrdup(simple);
 }
 
-yaz_tokenizer_t yaz_tokenizer_create(void)
+yaz_tok_cfg_t yaz_tok_cfg_create(void)
 {
-    yaz_tokenizer_t t = xmalloc(sizeof(*t));
+    yaz_tok_cfg_t t = xmalloc(sizeof(*t));
     t->white_space = xstrdup(" \t\r\n");
     t->single_tokens = xstrdup("");
     t->quote_tokens_begin = xstrdup("\"");
     t->quote_tokens_end = xstrdup("\"");
-    t->get_byte_func = 0;
-    t->get_byte_data = 0;
-    t->wr_string = wrbuf_alloc();
-    t->look = YAZ_TOKENIZER_ERROR;
-    t->unget_byte = 0;
+    t->ref_count = 1;
     return t;
 }
 
-void yaz_tokenizer_destroy(yaz_tokenizer_t t)
+void yaz_tok_cfg_destroy(yaz_tok_cfg_t t)
 {
-    xfree(t->white_space);
-    xfree(t->single_tokens);
-    xfree(t->quote_tokens_begin);
-    xfree(t->quote_tokens_end);
-    wrbuf_destroy(t->wr_string);
-    xfree(t);
+    t->ref_count--;
+    if (t->ref_count == 0)
+    {
+        xfree(t->white_space);
+        xfree(t->single_tokens);
+        xfree(t->quote_tokens_begin);
+        xfree(t->quote_tokens_end);
+        xfree(t);
+    }
 }
 
-static int read_buf(const void **vp)
+static int read_buf(void **vp)
 {
     const char *cp = *(const char **) vp;
     int ch = *cp;
@@ -74,77 +78,99 @@ static int read_buf(const void **vp)
     return ch;
 }
 
-static int get_byte(yaz_tokenizer_t t)
+yaz_tok_parse_t yaz_tok_parse_buf(yaz_tok_cfg_t t, const char *buf)
 {
-    int ch = t->unget_byte;
-    assert(t->get_byte_func);
+    return yaz_tok_parse_create(t, read_buf, (void *) buf);
+}
+
+static int get_byte(yaz_tok_parse_t tp)
+{
+    int ch = tp->unget_byte;
+    assert(tp->get_byte_func);
     if (ch)
-        t->unget_byte = 0;
+        tp->unget_byte = 0;
     else
-        ch = t->get_byte_func(&t->get_byte_data);
+        ch = tp->get_byte_func(&tp->get_byte_data);
     return ch;
 }
 
-static void unget_byte(yaz_tokenizer_t t, int ch)
+static void unget_byte(yaz_tok_parse_t tp, int ch)
 {
-    t->unget_byte = ch;
+    tp->unget_byte = ch;
 }
 
-void yaz_tokenizer_read_buf(yaz_tokenizer_t t, const char *buf)
+yaz_tok_parse_t yaz_tok_parse_create(yaz_tok_cfg_t t,
+                                     yaz_tok_get_byte_t h,
+                                     void *vp)
 {
-    assert(t);
-    t->get_byte_func = read_buf;
-    t->get_byte_data = buf;
+    yaz_tok_parse_t tp = xmalloc(sizeof(*tp));
+
+    tp->cfg = t;
+    tp->cfg->ref_count++;
+    tp->get_byte_func = h;
+    tp->get_byte_data = vp;
+
+    tp->look = YAZ_TOK_ERROR;
+    tp->unget_byte = 0;
+
+    tp->wr_string = wrbuf_alloc();
+    return tp;
+}
+                                           
+
+void yaz_tok_parse_destroy(yaz_tok_parse_t tp)
+{
+    yaz_tok_cfg_destroy(tp->cfg);
+    wrbuf_destroy(tp->wr_string);
+    xfree(tp);
 }
 
-int yaz_tokenizer_move(yaz_tokenizer_t t)
+int yaz_tok_move(yaz_tok_parse_t tp)
 {
+    yaz_tok_cfg_t t = tp->cfg;
     const char *cp;
-    int ch = get_byte(t);
+    int ch = get_byte(tp);
 
     /* skip white space */
     while (ch && strchr(t->white_space, ch))
-        ch = get_byte(t);
+        ch = get_byte(tp);
     if (!ch) 
     {
-        ch = YAZ_TOKENIZER_EOF;
+        ch = YAZ_TOK_EOF;
     }
     else if ((cp = strchr(t->single_tokens, ch)))
         ch = *cp;  /* single token match */
     else if ((cp = strchr(t->quote_tokens_begin, ch)))
     {   /* quoted string */
         int end_ch = t->quote_tokens_end[cp - t->quote_tokens_begin];
-        ch = get_byte(t);
-        wrbuf_rewind(t->wr_string);
+        ch = get_byte(tp);
+        wrbuf_rewind(tp->wr_string);
         while (ch && ch != end_ch)
-            wrbuf_putc(t->wr_string, ch);
+            wrbuf_putc(tp->wr_string, ch);
         if (!ch)
-            ch = YAZ_TOKENIZER_ERROR;
+            ch = YAZ_TOK_ERROR;
         else
-            ch = YAZ_TOKENIZER_QSTRING;
+            ch = YAZ_TOK_QSTRING;
     }
     else
     {  /* unquoted string */
-        wrbuf_rewind(t->wr_string);
+        wrbuf_rewind(tp->wr_string);
         while (ch && !strchr(t->white_space, ch)
                && !strchr(t->single_tokens, ch))
         {
-            wrbuf_putc(t->wr_string, ch);
-            ch = get_byte(t);
+            wrbuf_putc(tp->wr_string, ch);
+            ch = get_byte(tp);
         }
-        unget_byte(t, ch);
-        ch = YAZ_TOKENIZER_STRING;
+        unget_byte(tp, ch);
+        ch = YAZ_TOK_STRING;
     }
-    t->look = ch;
-    yaz_log(YLOG_LOG, "tokenizer returns %d (%s)", ch, 
-            wrbuf_cstr(t->wr_string));
-    
+    tp->look = ch;
     return ch;
 }
 
-const char *yaz_tokenizer_string(yaz_tokenizer_t t)
+const char *yaz_tok_parse_string(yaz_tok_parse_t tp)
 {
-    return wrbuf_cstr(t->wr_string);
+    return wrbuf_cstr(tp->wr_string);
 }
 
 /*

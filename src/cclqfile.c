@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.9 2007-04-26 21:45:17 adam Exp $
+ * $Id: cclqfile.c,v 1.10 2007-04-27 10:09:45 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -78,7 +78,7 @@
 int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                     const char **addinfo)
 {
-    yaz_tokenizer_t yt = yaz_tokenizer_create();
+    yaz_tok_cfg_t yt = yaz_tok_cfg_create();
 
     int type_ar[MAX_QUAL];
     int value_ar[MAX_QUAL];
@@ -87,34 +87,38 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
     int pair_no = 0;
     char *type_str = 0;
     int t;
+    yaz_tok_parse_t tp;
 
-    yaz_tokenizer_single_tokens(yt, ",=");
-    yaz_tokenizer_read_buf(yt, cp);
+    yaz_tok_cfg_single_tokens(yt, ",=");
+
+    tp = yaz_tok_parse_buf(yt, cp);
+
+    yaz_tok_cfg_destroy(yt);
     *addinfo = 0;
     
-    t = yaz_tokenizer_move(yt);
-    while (t == YAZ_TOKENIZER_STRING)
+    t = yaz_tok_move(tp);
+    while (t == YAZ_TOK_STRING)
     {
         /* we don't know what lead is yet */
-        char *lead_str = xstrdup(yaz_tokenizer_string(yt));
+        char *lead_str = xstrdup(yaz_tok_parse_string(tp));
         const char *value_str = 0;
         int type = 0, value = 0; /* indicates attribute value UNSET  */
 
-        t = yaz_tokenizer_move(yt);
+        t = yaz_tok_move(tp);
         if (t == ',')
         {
             /* full attribute spec: set, type = value */
             /* lead is attribute set */
             attsets[pair_no] = lead_str;
-            t = yaz_tokenizer_move(yt);
-            if (t != YAZ_TOKENIZER_STRING)
+            t = yaz_tok_move(tp);
+            if (t != YAZ_TOK_STRING)
             {
                 *addinfo = "token expected";
                 goto out;
             }
             xfree(type_str);
-            type_str = xstrdup(yaz_tokenizer_string(yt));
-            if (yaz_tokenizer_move(yt) != '=')
+            type_str = xstrdup(yaz_tok_parse_string(tp));
+            if (yaz_tok_move(tp) != '=')
             {
                 *addinfo = "= expected";
                 goto out;
@@ -133,20 +137,20 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
             /* lead is first of a list of qualifier aliaeses */
             /* qualifier alias: q1 q2 ... */
             xfree(lead_str);
-            yaz_tokenizer_destroy(yt);
+            yaz_tok_parse_destroy(tp);
             ccl_qual_add_combi (bibset, qual_name, cp);
             return 0;
         }
         while (1) /* comma separated attribute value list */
         {
-            t = yaz_tokenizer_move(yt);
+            t = yaz_tok_move(tp);
             /* must have a value now */
-            if (t != YAZ_TOKENIZER_STRING)
+            if (t != YAZ_TOK_STRING)
             {
                 *addinfo = "value token expected";
                 goto out;
             }
-            value_str = yaz_tokenizer_string(yt);
+            value_str = yaz_tok_parse_string(tp);
             
             if (sscanf(type_str, "%d", &type) == 1)
                 ;
@@ -231,7 +235,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                 *addinfo = "too many attribute values";
                 goto out;
             }
-            t = yaz_tokenizer_move(yt);
+            t = yaz_tok_move(tp);
             if (t != ',')
                 break;
             attsets[pair_no] = attsets[pair_no-1];
@@ -241,7 +245,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
     xfree(type_str);
     type_str = 0;
 
-    yaz_tokenizer_destroy(yt);
+    yaz_tok_parse_destroy(tp);
 
     if (*addinfo)
     {
