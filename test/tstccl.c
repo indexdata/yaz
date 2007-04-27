@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstccl.c,v 1.16 2007-04-25 20:52:19 adam Exp $
+ * $Id: tstccl.c,v 1.17 2007-04-27 09:48:28 adam Exp $
  */
 
 /* CCL test */
@@ -127,6 +127,8 @@ void tst1(int pass)
 
             r = ccl_xml_config(bibset, xmlDocGetRootElement(doc), &addinfo);
             YAZ_CHECK_EQ(r, 0);
+
+            xmlFreeDoc(doc);
         }
         break;
 #else
