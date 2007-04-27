@@ -2,9 +2,13 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: cclp.h,v 1.1 2007-04-25 20:52:19 adam Exp $
+ * $Id: cclp.h,v 1.2 2007-04-27 09:50:35 adam Exp $
  */
 
+/** 
+ * \file cclp.h 
+ * \brief CCL header with private definitions 
+ */
 #include <yaz/ccl.h>
 
 #define CCL_TOK_EOL   0
