@@ -44,7 +44,7 @@
 /* CCL shell.
  * Europagate 1995
  *
- * $Id: cclsh.c,v 1.6 2007-04-25 20:52:20 adam Exp $
+ * $Id: cclsh.c,v 1.7 2007-04-30 19:50:22 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -253,6 +253,7 @@ int main (int argc, char **argv)
         }
     }
     printf ("\n");
+    ccl_qual_rm(&bibset);
     return 0;
 }
 /*
