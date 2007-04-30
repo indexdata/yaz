@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.27 2007-04-30 11:33:49 adam Exp $
+ * $Id: ccl.h,v 1.28 2007-04-30 19:55:39 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -185,22 +185,6 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str);
 
-/** Set names for AND operator in parser */
-YAZ_EXPORT
-void ccl_parser_set_op_and(CCL_parser p, const char *op);
-
-/** Set names for OR operator in parser */
-YAZ_EXPORT
-void ccl_parser_set_op_or(CCL_parser p, const char *op);
-
-/** Set names for ANDNOT operator in parser */
-YAZ_EXPORT
-void ccl_parser_set_op_not(CCL_parser p, const char *op);
-
-/** Set names for ResultSet in parser */
-YAZ_EXPORT
-void ccl_parser_set_op_set(CCL_parser p, const char *op);
-
 /** Set case sensitivity for parser */
 YAZ_EXPORT
 void ccl_parser_set_case(CCL_parser p, int case_sensitivity_flag);
@@ -228,11 +212,11 @@ void ccl_qual_add_set(CCL_bibset b, const char *name, int no,
 
 /** Add special qualifier */
 YAZ_EXPORT
-void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *v);
+void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp);
 
 /** Add combo qualifier */
 YAZ_EXPORT
-void ccl_qual_add_combi(CCL_bibset b, const char *n, const char *names);
+void ccl_qual_add_combi(CCL_bibset b, const char *n, const char **names);
 
 /** Read CCL qualifier list spec from file inf */
 YAZ_EXPORT
@@ -284,7 +268,7 @@ void ccl_parser_destroy(CCL_parser p);
 
 /** Search for special qualifier */
 YAZ_EXPORT
-const char *ccl_qual_search_special(CCL_bibset b, const char *name);
+const char **ccl_qual_search_special(CCL_bibset b, const char *name);
 /** Pretty-print CCL RPN node tree to WRBUF */
 YAZ_EXPORT
 void ccl_pquery(WRBUF w, struct ccl_rpn_node *p);

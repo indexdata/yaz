@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqfile.c,v 1.10 2007-04-27 10:09:45 adam Exp $
+ * $Id: cclqfile.c,v 1.11 2007-04-30 19:55:40 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -136,9 +136,21 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
         {
             /* lead is first of a list of qualifier aliaeses */
             /* qualifier alias: q1 q2 ... */
-            xfree(lead_str);
+            char *qlist[10];
+            int i = 0;
+
+            qlist[i++] = lead_str;
+
+            while ((t=yaz_tok_move(tp)) == YAZ_TOK_STRING)
+            {
+                if (i < sizeof(qlist)/sizeof(*qlist)-1)
+                    qlist[i++] = xstrdup(yaz_tok_parse_string(tp));
+            }
+            qlist[i] = 0;
             yaz_tok_parse_destroy(tp);
-            ccl_qual_add_combi (bibset, qual_name, cp);
+            ccl_qual_add_combi (bibset, qual_name, (const char **) qlist);
+            for (i = 0; qlist[i]; i++)
+                xfree(qlist[i]);
             return 0;
         }
         while (1) /* comma separated attribute value list */

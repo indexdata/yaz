@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.11 2007-04-26 09:11:56 adam Exp $
+ * $Id: ccltoken.c,v 1.12 2007-04-30 19:55:40 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -100,40 +100,33 @@
  * return: 1 if token string matches one of the keywords in list;
  *         0 otherwise.
  */
-static int token_cmp(CCL_parser cclp, const char *kw, struct ccl_token *token)
+static int token_cmp(CCL_parser cclp, const char **kw, struct ccl_token *token)
 {
-    const char *cp1 = kw;
-    const char *cp2;
-    const char *aliases;
+    const char **aliases;
     int case_sensitive = cclp->ccl_case_sensitive;
+    int i;
 
     aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
-        case_sensitive = atoi(aliases);
-    if (!kw)
-        return 0;
-    while ((cp2 = strchr(cp1, ' ')))
+        case_sensitive = atoi(aliases[0]);
+
+    for (i = 0; kw[i]; i++)
     {
-        if (token->len == (size_t) (cp2-cp1))
+        if (token->len == strlen(kw[i]))
         {
             if (case_sensitive)
             {
-                if (!memcmp(cp1, token->name, token->len))
+                if (!memcmp(kw[i], token->name, token->len))
                     return 1;
             }
             else
             {
-                if (!ccl_memicmp(cp1, token->name, token->len))
+                if (!ccl_memicmp(kw[i], token->name, token->len))
                     return 1;
             }
         }
-        cp1 = cp2+1;
     }
-    if (case_sensitive)
-        return token->len == strlen(cp1) 
-            && !memcmp(cp1, token->name, token->len);
-    return token->len == strlen(cp1) &&
-        !ccl_memicmp(cp1, token->name, token->len);
+    return 0;
 }
 
 /*
@@ -142,7 +135,7 @@ static int token_cmp(CCL_parser cclp, const char *kw, struct ccl_token *token)
  */
 struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
 {
-    const char *aliases;
+    const char **aliases;
     const unsigned char *cp = (const unsigned char *) command;
     struct ccl_token *first = NULL;
     struct ccl_token *last = NULL;
@@ -293,6 +286,31 @@ void ccl_token_del(struct ccl_token *list)
     }
 }
 
+static const char **create_ar(const char *v1, const char *v2)
+{
+    const char **a = xmalloc(3 * sizeof(*a));
+    a[0] = xstrdup(v1);
+    if (v2)
+    {
+        a[1] = xstrdup(v2);
+        a[2] = 0;
+    }
+    else
+        a[1] = 0;
+    return a;
+}
+
+static void destroy_ar(const char **a)
+{
+    if (a)
+    {
+        int i;
+        for (i = 0; a[i]; i++)
+            xfree((char *) a[i]);
+        xfree(a);
+    }
+}
+
 CCL_parser ccl_parser_create(CCL_bibset bibset)
 {
     CCL_parser p = (CCL_parser)xmalloc(sizeof(*p));
@@ -303,10 +321,10 @@ CCL_parser ccl_parser_create(CCL_bibset bibset)
     p->error_pos = NULL;
     p->bibset = bibset;
 
-    p->ccl_token_and = xstrdup("and");
-    p->ccl_token_or = xstrdup("or");
-    p->ccl_token_not = xstrdup("not andnot");
-    p->ccl_token_set = xstrdup("set");
+    p->ccl_token_and = create_ar("and", 0);
+    p->ccl_token_or = create_ar("or", 0);
+    p->ccl_token_not = create_ar("not", "andnot");
+    p->ccl_token_set = create_ar("set", 0);
     p->ccl_case_sensitive = 1;
 
     return p;
@@ -316,45 +334,11 @@ void ccl_parser_destroy(CCL_parser p)
 {
     if (!p)
         return;
-    xfree(p->ccl_token_and);
-    xfree(p->ccl_token_or);
-    xfree(p->ccl_token_not);
-    xfree(p->ccl_token_set);
+    destroy_ar(p->ccl_token_and);
+    destroy_ar(p->ccl_token_or);
+    destroy_ar(p->ccl_token_not);
+    destroy_ar(p->ccl_token_set);
     xfree(p);
-}
-
-void ccl_parser_set_op_and(CCL_parser p, const char *op)
-{
-    if (p && op)
-    {
-        xfree(p->ccl_token_and);
-        p->ccl_token_and = xstrdup(op);
-    }
-}
-
-void ccl_parser_set_op_or(CCL_parser p, const char *op)
-{
-    if (p && op)
-    {
-        xfree(p->ccl_token_or);
-        p->ccl_token_or = xstrdup(op);
-    }
-}
-void ccl_parser_set_op_not(CCL_parser p, const char *op)
-{
-    if (p && op)
-    {
-        xfree(p->ccl_token_not);
-        p->ccl_token_not = xstrdup(op);
-    }
-}
-void ccl_parser_set_op_set(CCL_parser p, const char *op)
-{
-    if (p && op)
-    {
-        xfree(p->ccl_token_set);
-        p->ccl_token_set = xstrdup(op);
-    }
 }
 
 void ccl_parser_set_case(CCL_parser p, int case_sensitivity_flag)

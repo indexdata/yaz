@@ -56,7 +56,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.12 2007-04-30 11:33:49 adam Exp $
+ * $Id: cclfind.c,v 1.13 2007-04-30 19:55:40 adam Exp $
  *
  * Old Europagate log:
  *
@@ -322,12 +322,17 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
     int and_list = 0;
     int or_list = 0;
     char *attset;
-    const char *truncation_aliases;
+    const char **truncation_aliases;
+    const char *t_default[2];
 
     truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
     if (!truncation_aliases)
-        truncation_aliases = "?";
+    {
+        truncation_aliases = t_default;
+        t_default[0] = "?";
+        t_default[1] = 0;
+    }
 
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_AND_LIST, 0))
         and_list = 1;
@@ -366,7 +371,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             for (i = 0; i<lookahead->len; i++)
                 if (lookahead->name[i] == ' ')
                     no_spaces++;
-                else if (strchr(truncation_aliases, lookahead->name[i]))
+                else if (strchr(truncation_aliases[0], lookahead->name[i]))
                 {
                     if (no == 0 && i == 0 && lookahead->len >= 1)
                         left_trunc = 1;
@@ -382,32 +387,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
         if (len == 0)
             break;      /* no more terms . stop . */
-
-
-        if (p_top)
-        {
-            if (or_list)
-                p = ccl_rpn_node_create(CCL_RPN_OR);
-            else if (and_list)
-                p = ccl_rpn_node_create(CCL_RPN_AND);
-            else
-                p = ccl_rpn_node_create(CCL_RPN_AND);
-            p->u.p[0] = p_top;
-            p_top = p;
-        }
                 
         /* create the term node, but wait a moment before adding the term */
         p = ccl_rpn_node_create(CCL_RPN_TERM);
         p->u.t.attr_list = NULL;
         p->u.t.term = NULL;
 
-        /* make the top node point to us.. */
-        if (p_top)
-            p_top->u.p[1] = p;
-        else
-            p_top = p;
-
-        
         /* go through all attributes and add them to the attribute list */
         for (i=0; qa && qa[i]; i++)
         {
@@ -477,7 +462,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         for (i = 0; i<no; i++)
         {
             const char *src_str = cclp->look_token->name;
-            int src_len = cclp->look_token->len;
+            size_t src_len = cclp->look_token->len;
             
             if (i == 0 && left_trunc)
             {
@@ -486,20 +471,50 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             if (i == no-1 && right_trunc)
                 src_len--;
-#if 0
-            fprintf(stderr, "[%s %.*s]",
-                    ccl_qual_get_name(qa[0]), src_len, src_str);
-#endif
-            if (i && cclp->look_token->ws_prefix_len)
+            if (!ccl_qual_match_stop(cclp->bibset, qa, src_str, src_len))
             {
-                size_t len = strlen(p->u.t.term);
-                memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
-                                cclp->look_token->ws_prefix_len);
-                p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
+#if 0
+                fprintf(stderr, "[%s %.*s]",
+                        ccl_qual_get_name(qa[0]), src_len, src_str);
+#endif
+                if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
+                {
+                    size_t len = strlen(p->u.t.term);
+                    memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
+                           cclp->look_token->ws_prefix_len);
+                    p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
+                }
+                strxcat(p->u.t.term, src_str, src_len);
             }
-            strxcat(p->u.t.term, src_str, src_len);
             ADVANCE;
         }
+
+        if (p->u.t.term[0] == 0)
+        {
+            ccl_rpn_delete(p);
+            continue;
+        }
+
+        /* make the top node point to us.. */
+        if (p_top)
+        {
+            struct ccl_rpn_node *tmp;
+
+            if (or_list)
+                tmp = ccl_rpn_node_create(CCL_RPN_OR);
+            else if (and_list)
+                tmp = ccl_rpn_node_create(CCL_RPN_AND);
+            else
+                tmp = ccl_rpn_node_create(CCL_RPN_AND);
+            tmp->u.p[0] = p_top;
+            tmp->u.p[1] = p;
+
+            p_top = tmp;
+        }
+        else
+            p_top = p;
+
+
         if (left_trunc && right_trunc)
         {
             if (!qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH,
@@ -764,14 +779,15 @@ struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *qualifier_list(CCL_parser cclp, struct ccl_token *la,
-                                        ccl_qualifier_t *qa)
+static struct ccl_rpn_node *qualifier_list(CCL_parser cclp, 
+                                           struct ccl_token *la,
+                                           ccl_qualifier_t *qa)
 {
     struct ccl_token *lookahead = cclp->look_token;
     struct ccl_token *look_start = cclp->look_token;
     ccl_qualifier_t *ap;
     struct ccl_rpn_node *node = 0;
-    const char *field_str;
+    const char **field_str;
     int no = 0;
     int seq = 0;
     int i;
@@ -795,9 +811,9 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp, struct ccl_token *la
     field_str = ccl_qual_search_special(cclp->bibset, "field");
     if (field_str)
     {
-        if (!strcmp(field_str, "or"))
+        if (!strcmp(field_str[0], "or"))
             mode_merge = 0;
-        else if (!strcmp(field_str, "merge"))
+        else if (!strcmp(field_str[0], "merge"))
             mode_merge = 1;
     }
     if (!mode_merge)

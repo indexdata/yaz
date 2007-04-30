@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: cclp.h,v 1.3 2007-04-30 11:33:49 adam Exp $
+ * $Id: cclp.h,v 1.4 2007-04-30 19:55:40 adam Exp $
  */
 
 /** 
@@ -53,13 +53,13 @@ struct ccl_parser {
     CCL_bibset bibset;
 
     /** names of and operator */
-    char *ccl_token_and;
+    const char **ccl_token_and;
     /** names of or operator */
-    char *ccl_token_or;
+    const char **ccl_token_or;
     /** names of not operator */
-    char *ccl_token_not;
+    const char **ccl_token_not;
     /** names of set operator */
-    char *ccl_token_set;
+    const char **ccl_token_set;
     /** 1=CCL parser is case sensitive, 0=case insensitive */
     int ccl_case_sensitive;
 };
@@ -98,6 +98,10 @@ struct ccl_rpn_attr *ccl_qual_get_attr(ccl_qualifier_t q);
 
 YAZ_EXPORT
 const char *ccl_qual_get_name(ccl_qualifier_t q);
+
+YAZ_EXPORT
+int ccl_qual_match_stop(CCL_bibset bibset, ccl_qualifier_t *qa, 
+                        const char *src_str,  size_t src_len);
 
 /*
  * Local variables:

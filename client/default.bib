@@ -1,5 +1,5 @@
 # CCL field mappings
-# $Id: default.bib,v 1.10 2007-04-24 12:57:52 adam Exp $
+# $Id: default.bib,v 1.11 2007-04-30 19:55:39 adam Exp $
 # 
 # The rule below is used when no fields are specified
 term t=l,r  s=al
@@ -8,6 +8,7 @@ term t=l,r  s=al
 clean t=l,r
 #
 # Rules for some BIB-1 fields
+
 au   u=1    s=pw 
 ti   u=4    s=pw
 isbn u=7
@@ -46,3 +47,19 @@ DateAdded            exp1,1=9
 DateChanged          exp1,1=10
 DateExpires          exp1,1=11
 ElementSetName       exp1,1=12
+
+# Define or operator
+@or or
+# Define and operator
+@and and
+# Define and not operator
+@not not andnot
+
+# Whether CCL is case sensitive or not.
+@case 1
+
+# default stop words
+# @stop.* the of a
+
+# stop words for ti
+# @stop.ti art
