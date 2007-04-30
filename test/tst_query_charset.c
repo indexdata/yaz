@@ -2,13 +2,14 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_query_charset.c,v 1.1 2007-04-10 14:42:31 adam Exp $
+ * $Id: tst_query_charset.c,v 1.2 2007-04-30 08:29:08 adam Exp $
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <yaz/query-charset.h>
+#include <yaz/copy_types.h>
 #include <yaz/pquery.h>
 #include <yaz/querytowrbuf.h>
 #include <yaz/test.h>
@@ -42,7 +43,10 @@ enum query_charset_status t(yaz_iconv_t cd,
     else
     {
         WRBUF w = wrbuf_alloc();
+        Z_RPNQuery *r2 = yaz_copy_z_RPNQuery(rpn, odr);
 
+        YAZ_CHECK(r2);
+        YAZ_CHECK(r2 != rpn);
         yaz_query_charset_convert_rpnquery(rpn, odr, cd);
         yaz_rpnquery_to_wrbuf(w, rpn);
         if (!expect_pqf || strcmp(expect_pqf, wrbuf_cstr(w)) == 0)

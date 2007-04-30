@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.126 2007-04-24 09:29:34 adam Exp $
+ * $Id: zoom-c.c,v 1.127 2007-04-30 08:29:07 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -26,6 +26,8 @@
 #include <yaz/srw.h>
 #include <yaz/cql.h>
 #include <yaz/ccl.h>
+#include <yaz/query-charset.h>
+#include <yaz/copy_types.h>
 
 static int log_api = 0;
 static int log_details = 0;
@@ -762,6 +764,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->next = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
+    r->rpn_iconv = 0;
     return r;
 }
 
@@ -792,6 +795,13 @@ ZOOM_API(ZOOM_resultset)
     r->query = q;
 
     r->options = ZOOM_options_create_with_parent(c->options);
+    
+    {
+        const char *cp = ZOOM_options_get(r->options, "rpnCharset");
+        if (cp)
+            r->rpn_iconv = yaz_iconv_open(cp, "UTF-8");
+    }
+
 
     start = ZOOM_options_get_int(r->options, "start", 0);
     count = ZOOM_options_get_int(r->options, "count", 0);
@@ -816,6 +826,8 @@ ZOOM_API(ZOOM_resultset)
 
     r->next = c->resultsets;
     c->resultsets = r;
+
+    
 
     if (c->host_port && c->proto == PROTO_HTTP)
     {
@@ -963,6 +975,8 @@ static void resultset_destroy(ZOOM_resultset r)
         }
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
+        if (r->rpn_iconv)
+            yaz_iconv_close(r->rpn_iconv);
         odr_destroy(r->odr);
         xfree(r->setname);
         xfree(r->schema);
@@ -1296,7 +1310,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.126 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.127 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1547,7 +1561,13 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
         set_ZOOM_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
         return zoom_complete;
     }
-
+    if (r->query->z_query->which == Z_Query_type_1 && r->rpn_iconv)
+    {
+        search_req->query = yaz_copy_Z_Query(r->query->z_query, c->odr_out);
+        
+        yaz_query_charset_convert_rpnquery(search_req->query->u.type_1,
+                                           c->odr_out, r->rpn_iconv);
+    }
     search_req->databaseNames = r->databaseNames;
     search_req->num_databaseNames = r->num_databaseNames;
 
@@ -2683,6 +2703,20 @@ ZOOM_API(ZOOM_scanset)
     scan->termListAndStartPoint =
         p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet, start);
     xfree(freeme);
+
+    {
+        const char *cp = ZOOM_options_get(scan->options, "rpnCharset");
+        if (cp)
+        {
+            yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
+            if (cd)
+            {
+                yaz_query_charset_convert_apt(scan->termListAndStartPoint,
+                                              scan->odr, cd);
+            }
+        }
+    }
+        
 
     scan->databaseNames = set_DatabaseNames(c, c->options,
                                             &scan->num_databaseNames,

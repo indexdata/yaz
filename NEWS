@@ -1,3 +1,6 @@
+New ZOOM C option, "rpnCharset", which allows client-side conversion of
+terms in RPN queries.
+
 Clean-up the CCL API. Moved some internal structures from ccl.h to 
 private header cclp.h. Changed ccl_parser_create so that a Bibset must
 be supplied. Removed tokenize API from ccl.h - including ccl_parser_find.

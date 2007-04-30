@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.55 2006-12-06 11:12:14 mike Exp $ -->
+<!-- $Id: zoom.xml,v 1.56 2007-04-30 08:29:07 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -474,6 +474,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         If this option isn't set, the ZOOM module will automatically
         allocate a result set name.
        </entry><entry>default</entry></row>
+      <row><entry>
+        rpnCharset</entry><entry>Character set for RPN terms.
+        If this is set, ZOOM C will assume that the ZOOM application is
+        running UTF-8. Terms in RPN queries are then converted to the
+        rpnCharset. If this is unset, ZOOM C will not assume any encoding
+        of RPN terms and no conversion is performed.
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
@@ -913,6 +920,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         scanStatus</entry><entry>An integer indicating the Scan Status
         of last scan.
        </entry><entry>0</entry></row>
+      <row><entry>
+        rpnCharset</entry><entry>Character set for RPN terms.
+        If this is set, ZOOM C will assume that the ZOOM application is
+        running UTF-8. Terms in RPN queries are then converted to the
+        rpnCharset. If this is unset, ZOOM C will not assume any encoding
+        of RPN terms and no conversion is performed.
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>

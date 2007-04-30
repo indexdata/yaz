@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.18 2007-04-12 13:52:57 adam Exp $
+ * $Id: zoom-p.h,v 1.19 2007-04-30 08:29:07 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -109,6 +109,7 @@ struct ZOOM_resultset_p {
     ZOOM_resultset next;
     char **databaseNames;
     int num_databaseNames;
+    yaz_iconv_t rpn_iconv;
 };
 
 struct ZOOM_record_p {
