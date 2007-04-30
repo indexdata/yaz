@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: cclp.h,v 1.2 2007-04-27 09:50:35 adam Exp $
+ * $Id: cclp.h,v 1.3 2007-04-30 11:33:49 adam Exp $
  */
 
 /** 
@@ -24,6 +24,7 @@
 #define CCL_TOK_NOT   10
 #define CCL_TOK_SET   11
 
+typedef struct ccl_qualifier *ccl_qualifier_t;
 
 /** CCL token */
 struct ccl_token {
@@ -88,6 +89,15 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
                                            struct ccl_token *list);
 
 
+YAZ_EXPORT
+ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name, 
+                                size_t name_len, int seq);
+
+YAZ_EXPORT
+struct ccl_rpn_attr *ccl_qual_get_attr(ccl_qualifier_t q);
+
+YAZ_EXPORT
+const char *ccl_qual_get_name(ccl_qualifier_t q);
 
 /*
  * Local variables:

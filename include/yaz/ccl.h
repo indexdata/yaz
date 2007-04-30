@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.26 2007-04-26 21:45:16 adam Exp $
+ * $Id: ccl.h,v 1.27 2007-04-30 11:33:49 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -273,11 +273,6 @@ int ccl_stricmp(const char *s1, const char *s2);
 /** CCL version of ccl_memicmp */
 YAZ_EXPORT
 int ccl_memicmp(const char *s1, const char *s2, size_t n);
-
-/** Search for qualifier 'name' in set 'b'. */
-YAZ_EXPORT
-struct ccl_rpn_attr *ccl_qual_search(CCL_parser cclp, const char *name,
-                                      size_t len, int seq);
 
 /** Create CCL parser */
 YAZ_EXPORT

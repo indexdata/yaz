@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.7 2007-04-26 22:11:32 adam Exp $
+ * $Id: cclqual.c,v 1.8 2007-04-30 11:33:49 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -327,52 +327,58 @@ void ccl_qual_rm(CCL_bibset *b)
     *b = NULL;
 }
 
-/** \brief searches for qualifier attributes
-    \param cclp CCL parser
-    \param name qualifier name to for search (length given by len)
-    \param len length of name
-    \param seq attribute index (0=first, 1=second, ..)
-    \returns attribute or NULL if none is found
-*/
-struct ccl_rpn_attr *ccl_qual_search(CCL_parser cclp, const char *name, 
-                                     size_t len, int seq)
+ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name, 
+                                size_t name_len, int seq)
 {
-    struct ccl_qualifier *q;
+    struct ccl_qualifier *q = 0;
     const char *aliases;
     int case_sensitive = cclp->ccl_case_sensitive;
 
     ccl_assert(cclp);
     if (!cclp->bibset)
-        return NULL;
+        return 0;
 
     aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
         case_sensitive = atoi(aliases);
 
     for (q = cclp->bibset->list; q; q = q->next)
-        if (strlen(q->name) == len)
+        if (strlen(q->name) == name_len)
         {
             if (case_sensitive)
             {
-                if (!memcmp(name, q->name, len))
+                if (!memcmp(name, q->name, name_len))
                     break;
             }
             else
             {
-                if (!ccl_memicmp(name, q->name, len))
+                if (!ccl_memicmp(name, q->name, name_len))
                     break;
             }
         }
     if (q)
     {
-        if (q->attr_list && seq == 0)
-            return q->attr_list;
-        if (seq < q->no_sub && q->sub[seq])
+        if (q->no_sub)
         {
-            return q->sub[seq]->attr_list;
+            if (seq < q->no_sub)
+                q = q->sub[seq];
+            else
+                q = 0;
         }
+        else if (seq)
+            q = 0;
     }
-    return 0;
+    return q;
+}
+
+struct ccl_rpn_attr *ccl_qual_get_attr(ccl_qualifier_t q)
+{
+    return q->attr_list;
+}
+
+const char *ccl_qual_get_name(ccl_qualifier_t q)
+{
+    return q->name;
 }
 
 const char *ccl_qual_search_special(CCL_bibset b, const char *name)
