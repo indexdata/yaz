@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.9 2007-04-30 19:55:40 adam Exp $
+ * $Id: cclqual.c,v 1.10 2007-05-01 12:22:11 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -397,30 +397,29 @@ const char **ccl_qual_search_special(CCL_bibset b, const char *name)
     return 0;
 }
 
-int ccl_qual_match_stop(CCL_bibset bibset, ccl_qualifier_t *qa, 
-                        const char *src_str, size_t src_len)
+int ccl_search_stop(CCL_bibset bibset, const char *qname,
+                    const char *src_str, size_t src_len)
 {
-    if (qa[0])
+    const char **slist = 0;
+    if (qname)
     {
-        char qname[80];
-        const char **slist;
-        yaz_snprintf(qname, sizeof(qname)-1, "stop.%s",
-                     ccl_qual_get_name(qa[0]));
-        slist = ccl_qual_search_special(bibset, qname);
-        if (!slist)
-            slist = ccl_qual_search_special(bibset, "stop.*");
-        if (slist)
-        {
-            int i;
-            for (i = 0; slist[i]; i++)
-                if (src_len == strlen(slist[i]) 
-                    && ccl_memicmp(slist[i], src_str, src_len) == 0)
-                    return 1;
-        }
+        char qname_buf[80];
+        yaz_snprintf(qname_buf, sizeof(qname_buf)-1, "stop.%s",
+                     qname);
+        slist = ccl_qual_search_special(bibset, qname_buf);
+    }
+    if (!slist)
+        slist = ccl_qual_search_special(bibset, "stop.*");
+    if (slist)
+    {
+        int i;
+        for (i = 0; slist[i]; i++)
+            if (src_len == strlen(slist[i]) 
+                && ccl_memicmp(slist[i], src_str, src_len) == 0)
+                return 1;
     }
     return 0;
 }
-
 
 /*
  * Local variables:

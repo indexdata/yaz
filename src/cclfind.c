@@ -56,7 +56,7 @@
 /* CCL find (to rpn conversion)
  * Europagate, 1995
  *
- * $Id: cclfind.c,v 1.13 2007-04-30 19:55:40 adam Exp $
+ * $Id: cclfind.c,v 1.14 2007-05-01 12:22:11 adam Exp $
  *
  * Old Europagate log:
  *
@@ -199,6 +199,7 @@ struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
     case CCL_RPN_TERM:
         p->u.t.attr_list = 0;
         p->u.t.term = 0;
+        p->u.t.qual = 0;
         break;
     default:
         break;
@@ -225,6 +226,7 @@ void ccl_rpn_delete(struct ccl_rpn_node *rpn)
         break;
     case CCL_RPN_TERM:
         xfree(rpn->u.t.term);
+        xfree(rpn->u.t.qual);
         for (attr = rpn->u.t.attr_list; attr; attr = attr1)
         {
             attr1 = attr->next;
@@ -392,6 +394,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         p = ccl_rpn_node_create(CCL_RPN_TERM);
         p->u.t.attr_list = NULL;
         p->u.t.term = NULL;
+        if (qa && qa[0])
+        {
+            const char *n = ccl_qual_get_name(qa[0]);
+            if (n)
+                p->u.t.qual = xstrdup(n);
+        }
 
         /* go through all attributes and add them to the attribute list */
         for (i=0; qa && qa[i]; i++)
@@ -471,28 +479,15 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             if (i == no-1 && right_trunc)
                 src_len--;
-            if (!ccl_qual_match_stop(cclp->bibset, qa, src_str, src_len))
+            if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
-#if 0
-                fprintf(stderr, "[%s %.*s]",
-                        ccl_qual_get_name(qa[0]), src_len, src_str);
-#endif
-                if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
-                {
-                    size_t len = strlen(p->u.t.term);
-                    memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
-                           cclp->look_token->ws_prefix_len);
-                    p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
-                }
-                strxcat(p->u.t.term, src_str, src_len);
+                size_t len = strlen(p->u.t.term);
+                memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
+                       cclp->look_token->ws_prefix_len);
+                p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
             }
+            strxcat(p->u.t.term, src_str, src_len);
             ADVANCE;
-        }
-
-        if (p->u.t.term[0] == 0)
-        {
-            ccl_rpn_delete(p);
-            continue;
         }
 
         /* make the top node point to us.. */
@@ -1204,6 +1199,7 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
     ccl_token_del(list);
     return p;
 }
+
 /*
  * Local variables:
  * c-basic-offset: 4

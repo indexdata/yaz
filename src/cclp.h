@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: cclp.h,v 1.4 2007-04-30 19:55:40 adam Exp $
+ * $Id: cclp.h,v 1.5 2007-05-01 12:22:11 adam Exp $
  */
 
 /** 
@@ -98,10 +98,6 @@ struct ccl_rpn_attr *ccl_qual_get_attr(ccl_qualifier_t q);
 
 YAZ_EXPORT
 const char *ccl_qual_get_name(ccl_qualifier_t q);
-
-YAZ_EXPORT
-int ccl_qual_match_stop(CCL_bibset bibset, ccl_qualifier_t *qa, 
-                        const char *src_str,  size_t src_len);
 
 /*
  * Local variables:

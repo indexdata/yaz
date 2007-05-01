@@ -49,7 +49,7 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.28 2007-04-30 19:55:39 adam Exp $
+ * $Id: ccl.h,v 1.29 2007-05-01 12:22:10 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -150,6 +150,7 @@ struct ccl_rpn_node {
         /** \brief Attributes + Term */
         struct {
             char *term;
+            char *qual;
             struct ccl_rpn_attr *attr_list;
         } t;
         /** Result set */
@@ -287,6 +288,31 @@ YAZ_EXPORT
 void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
                          int type, char *value);
 
+YAZ_EXPORT
+int ccl_search_stop(CCL_bibset bibset, const char *qname,
+                    const char *src_str, size_t src_len);
+
+
+/** \brief stop words handle (pimpl) */
+typedef struct ccl_stop_words *ccl_stop_words_t;
+
+/** \brief creates stop words handle */
+YAZ_EXPORT
+ccl_stop_words_t ccl_stop_words_create(void);
+
+/** \brief destroys stop words handle */
+YAZ_EXPORT
+void ccl_stop_words_destroy(ccl_stop_words_t csw);
+
+/** \brief removes stop words from RPN tree */
+YAZ_EXPORT
+int ccl_stop_words_tree(ccl_stop_words_t csw,
+                        CCL_bibset bibset, struct ccl_rpn_node **t);
+
+/** \brief returns information about removed "stop" words */
+YAZ_EXPORT
+int ccl_stop_words_info(ccl_stop_words_t csw, int idx,
+                        const char **qualname, const char **term);
 
 #ifndef ccl_assert
 #define ccl_assert(x) ;

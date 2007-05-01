@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.66 2007-04-30 08:29:07 adam Exp $
+## $Id: Makefile.am,v 1.67 2007-05-01 12:22:11 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -86,7 +86,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   zoom-c.c zoom-socket.c zoom-opt.c zoom-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
-  cclqfile.c cclstr.c cclxmlconfig.c \
+  cclqfile.c cclstr.c cclxmlconfig.c ccl_stop_words.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
   cqlstrer.c querytowrbuf.c \
   tcpdchk.c \
