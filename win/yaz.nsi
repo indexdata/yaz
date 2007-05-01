@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.106 2007-03-16 08:08:11 adam Exp $
+; $Id: yaz.nsi,v 1.107 2007-05-01 12:35:17 adam Exp $
 
-!define VERSION "2.1.54"
+!define VERSION "3.0.0"
 
 ; Microsoft runtime CRT
 ; VS 2003
@@ -97,7 +97,7 @@ Noservice:
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
-	File ..\bin\yaz.dll
+	File ..\bin\yaz3.dll
 ;	File ..\bin\*.manifest
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
