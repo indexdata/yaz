@@ -53,7 +53,7 @@
 /* CCL print rpn tree - infix notation
  * Europagate, 1995
  *
- * $Id: cclptree.c,v 1.9 2007-04-25 20:50:56 adam Exp $
+ * $Id: cclptree.c,v 1.10 2007-05-01 12:12:34 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -135,12 +135,17 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
 
 static void ccl_prterm(WRBUF w, const char *term)
 {
-    const char *cp = term;
-    for (; *cp; cp++)
+    if (!*term)
+        wrbuf_puts(w, "\"\"");
+    else
     {
-        if (*cp == ' ' || *cp == '\\')
-            wrbuf_putc(w, '\\');
-        wrbuf_putc(w, *cp);
+        const char *cp = term;
+        for (; *cp; cp++)
+        {
+            if (*cp == ' ' || *cp == '\\')
+                wrbuf_putc(w, '\\');
+            wrbuf_putc(w, *cp);
+        }
     }
     wrbuf_puts(w, " ");
 }
@@ -149,6 +154,8 @@ static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)
 {
     struct ccl_rpn_attr *att;
 
+    if (!p)
+        return;
     if (indent != -1)
     {
         int i;
