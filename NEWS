@@ -1,3 +1,8 @@
+--- 3.0.0 2007/05/01
+
+Added CCL utility to remove terms (stop words) from resulting RPN
+tree. This is handled by functions with prefix ccl_stop_words_ .
+
 New ZOOM C option, "rpnCharset", which allows client-side conversion of
 terms in RPN queries.
 
