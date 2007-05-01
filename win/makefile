@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.131 2007-04-24 12:55:15 adam Exp $
+# $Id: makefile,v 1.132 2007-05-01 12:48:07 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -88,10 +88,10 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yazd.dll
+DLL=$(BINDIR)\yaz3d.dll
 YAZ_IMPLIB=$(LIBDIR)\yazd.lib
 !else
-DLL=$(BINDIR)\yaz.dll
+DLL=$(BINDIR)\yaz3.dll
 YAZ_IMPLIB=$(LIBDIR)\yaz.lib
 !endif
 
@@ -342,6 +342,7 @@ MISC_OBJS= \
    $(OBJDIR)\cclqual.obj \
    $(OBJDIR)\cclstr.obj \
    $(OBJDIR)\ccltoken.obj \
+   $(OBJDIR)\ccl_stop_words.obj \
    $(OBJDIR)\comstack.obj \
    $(OBJDIR)\tcpip.obj \
    $(OBJDIR)\waislen.obj \
@@ -429,6 +430,8 @@ MISC_OBJS= \
    $(OBJDIR)\elementset.obj \
    $(OBJDIR)\timing.obj \
    $(OBJDIR)\query-charset.obj \
+   $(OBJDIR)\tokenizer.obj \
+   $(OBJDIR)\copy_types.obj \
    $(OBJDIR)\http.obj
 
 Z3950_OBJS= \
