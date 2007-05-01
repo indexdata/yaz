@@ -2,7 +2,7 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 1
-Requires: libxslt openssl readline libyaz = %{version}
+Requires: libxslt openssl readline libyaz3 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -16,27 +16,28 @@ URL: http://www.indexdata.dk/yaz/
 This package contains both a test-server and clients (normal & ssl)
 for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 
-%package -n lib%{name}
+%package -n libyaz3
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt openssl
 
-%description -n lib%{name}
+%description -n libyaz3
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
 Retrieval.
 
-%package -n lib%{name}-devel
+%package -n libyaz3-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz = %{version} libxml2-devel libxslt-devel
+Requires: libyaz3 = %{version} libxml2-devel libxslt-devel
+Conflicts: libyaz-devel
 
-%description -n lib%{name}-devel
+%description -n libyaz3-devel
 Development libraries and includes for the libyaz package.
 
 %package -n yaz-ziffy
 Summary:  ziffy: the promiscuous Z39.50 APDU sniffer
 Group: Applications/Communication
-Requires: libxslt openssl libpcap libyaz = %{version}
+Requires: libxslt openssl libpcap libyaz3 = %{version}
 
 %description -n yaz-ziffy
 ziffy is a promiscuous Z39.50 APDU sniffer, like the popular tcpdump.
@@ -75,10 +76,10 @@ rm -fr ${RPM_BUILD_ROOT}
 /usr/share/man/man1/yaz-iconv.*
 /usr/share/man/man7/yaz-log.*
 
-%files -n lib%{name}
+%files -n libyaz3
 /usr/lib/*.so.*
 
-%files -n lib%{name}-devel
+%files -n libyaz3-devel
 /usr/bin/yaz-config
 /usr/bin/yaz-asncomp
 /usr/include/yaz
