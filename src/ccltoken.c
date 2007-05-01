@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.12 2007-04-30 19:55:40 adam Exp $
+ * $Id: ccltoken.c,v 1.13 2007-05-01 12:54:44 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -307,7 +307,7 @@ static void destroy_ar(const char **a)
         int i;
         for (i = 0; a[i]; i++)
             xfree((char *) a[i]);
-        xfree(a);
+        xfree((char **)a);
     }
 }
 
