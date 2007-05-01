@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.56 2007-04-30 08:29:07 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.57 2007-05-01 22:23:30 mike Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -38,7 +38,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     specified by the value of the connection's <literal>sru</literal>
     option, which may be SRU over HTTP GET (<literal>get</literal>),
     SRU over HTTP POST (<literal>post</literal>) or SRW (SRU over
-    SOAP) (<literal>soap</literal>).
+    SOAP) (<literal>soap</literal>).  Using the facility for embedding
+    options in target strings, a connection can be forced to use SRU
+    rather the SRW (the default) by prefixing the target string with
+    <literal>sru=get,</literal>, like this:
+    <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
    </para>
   </note>
 
