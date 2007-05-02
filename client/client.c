@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.334 2007-04-16 21:53:08 adam Exp $
+ * $Id: client.c,v 1.335 2007-05-02 11:51:54 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -349,7 +349,8 @@ static void send_initRequest(const char* type_and_host)
         
         yaz_oi_APDU(apdu, &p);
         
-        if ((p0=yaz_oi_update(p, out, NULL, 0, 0))) {
+        if ((p0=yaz_oi_update(p, out, NULL, 0, 0)))
+        {
             ODR_MASK_SET(req->options, Z_Options_negotiationModel);
             
             p0->which = Z_OtherInfo_externallyDefinedInfo;
@@ -360,7 +361,6 @@ static void send_initRequest(const char* type_and_host)
                                               negotiationCharsetRecords);
         }
     }
-    
     if (send_apdu(apdu))
         printf("Sent initrequest.\n");
 }
@@ -453,7 +453,7 @@ static int process_initResponse(Z_InitResponse *res)
     
         Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(res->otherInfo);
-        
+
         if (p) {
             
             char *charset=NULL, *lang=NULL;
@@ -462,18 +462,20 @@ static int process_initResponse(Z_InitResponse *res)
             yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
 
-            if (outputCharset && negotiationCharset) {
-                    odr_set_charset (out, charset, outputCharset);
-                    odr_set_charset (in, outputCharset, charset);
-            }
-            else {
-                    odr_set_charset (out, 0, 0);
-                    odr_set_charset (in, 0, 0);
-            }
-            
             printf("Accepted character set : %s\n", charset);
             printf("Accepted code language : %s\n", lang ? lang : "none");
             printf("Accepted records in ...: %d\n", selected );
+
+            if (outputCharset && negotiationCharset) {
+                printf("Converting between %s and %s\n",
+                       outputCharset, negotiationCharset);
+                odr_set_charset (out, charset, outputCharset);
+                odr_set_charset (in, outputCharset, charset);
+            }
+            else {
+                odr_set_charset (out, 0, 0);
+                odr_set_charset (in, 0, 0);
+            }
         }
     }
     fflush (stdout);
@@ -4765,6 +4767,7 @@ int main(int argc, char **argv)
     ODR_MASK_SET(&z3950_options, Z_Options_sort);
     ODR_MASK_SET(&z3950_options, Z_Options_extendedServices);
     ODR_MASK_SET(&z3950_options, Z_Options_delSet);
+    ODR_MASK_SET(&z3950_options, Z_Options_negotiationModel);
 
     while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
     {
