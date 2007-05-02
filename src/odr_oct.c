@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_oct.c,v 1.11 2007-03-19 21:08:13 adam Exp $
+ * $Id: odr_oct.c,v 1.12 2007-05-02 11:31:59 adam Exp $
  */
 /**
  * \file odr_oct.c
@@ -146,8 +146,16 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             
             t->buf = (unsigned char *) outbuf;
             
-            ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
-                             &outbuf, &outleft);
+            ret = yaz_iconv(o->op->iconv_handle, &inbuf, &inleft,
+                            &outbuf, &outleft);
+            if (ret == (size_t)(-1))
+            {
+                odr_seterror(o, ODATA, 44);
+                return 0;
+            }
+            ret = yaz_iconv(o->op->iconv_handle, 0, 0,
+                            &outbuf, &outleft);
+
             if (ret == (size_t)(-1))
             {
                 odr_seterror(o, ODATA, 44);
