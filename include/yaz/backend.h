@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.45 2007-05-02 12:36:34 adam Exp $ */
+/* $Id: backend.h,v 1.46 2007-05-02 12:37:15 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -255,7 +255,7 @@ typedef struct bend_initrequest
     /** \brief decoding stream (use stream for results) */
     ODR decode; 
     /** \brief reference ID */
-    Z_ReferenceId *referenceId;/
+    Z_ReferenceId *referenceId;
     /** \brief peer address of client */
     char *peer_name;           
     
