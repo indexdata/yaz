@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.43 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: backend.h,v 1.44 2007-05-02 11:53:25 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -233,31 +233,38 @@ typedef struct {
 
 typedef struct bend_initrequest
 {
+    /* arguments to be read by a backend */
     Z_IdAuthentication *auth;
     ODR stream;                /* encoding stream */
     ODR print;                 /* printing stream */
     Z_ReferenceId *referenceId;/* reference ID */
     char *peer_name;           /* dns host of peer (client) */
-    
+    ODR decode;                 /* decoding stream */
+    /* character set and language negotiation - see include/yaz/z-charneg.h */
+    Z_CharSetandLanguageNegotiation *charneg_request;
+
+
+    /* stuff to be modified/set by backend */
+
+    /* character negotiation response */
+    Z_External *charneg_response;
+    char *query_charset;
+    int records_in_same_charset; /* as query_charset */
     char *implementation_id;
     char *implementation_name;
     char *implementation_version;
-    int (*bend_sort) (void *handle, bend_sort_rr *rr);
-    int (*bend_search) (void *handle, bend_search_rr *rr);
-    int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
-    int (*bend_present) (void *handle, bend_present_rr *rr);
+    int (*bend_sort)(void *handle, bend_sort_rr *rr);
+    int (*bend_search)(void *handle, bend_search_rr *rr);
+    int (*bend_fetch)(void *handle, bend_fetch_rr *rr);
+    int (*bend_present)(void *handle, bend_present_rr *rr);
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
     int (*bend_scan)(void *handle, bend_scan_rr *rr);
     int (*bend_segment)(void *handle, bend_segment_rr *rr);
-
-    ODR decode;                 /* decoding stream */
-    /* character set and language negotiation - see include/yaz/z-charneg.h */
-    Z_CharSetandLanguageNegotiation *charneg_request;
-    Z_External *charneg_response;
     int (*bend_explain)(void *handle, bend_explain_rr *rr);
     int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
     int (*bend_srw_update)(void *handle, bend_update_rr *rr);
+
 } bend_initrequest;
 
 typedef struct bend_initresult
@@ -284,11 +291,10 @@ typedef struct statserv_options_block
     int dynamic;                  /* fork on incoming requests */
     int threads;                  /* use threads */
     int one_shot;                 /* one session then exit(1) */
-    int __UNUSED__loglevel;       /* desired logging-level */
     char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
     char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
     char default_listen[1024];    /* 0 == no default listen */
-    enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */
+    enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */ 
     int idle_timeout;             /* how many minutes to wait before closing */
     int maxrecordsize;            /* maximum value for negotiation */
     char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */

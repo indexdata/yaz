@@ -1,4 +1,11 @@
---- 3.0.0 2007/05/01
+--- 3.0.0 2007/05/02
+
+Added new member 'query_charset' for bend_initrequest structure. A
+backend init handler should set this member to its native character set
+for query terms. When defined, the frontend server logic will announce
+this character set to a client if the negotiationModel bit is set by the
+client. ALL server implementors are encouraged to specify this. If they
+don't, a warning is issued.
 
 Added CCL utility to remove terms (stop words) from resulting RPN
 tree. This is handled by functions with prefix ccl_stop_words_ .
