@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.44 2007-05-02 11:53:25 adam Exp $ */
+/* $Id: backend.h,v 1.45 2007-05-02 12:36:34 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -47,7 +47,7 @@ YAZ_BEGIN_CDECL
 typedef struct request *bend_request;
 typedef struct association *bend_association;
 
-/* extended search handler (rr = request response) */
+/** \brief Information for Z39.50/SRU search handler */
 typedef struct {
     char *setname;             /* name to give to this set */
     int replace_set;           /* replace set, if it already exists */
@@ -73,7 +73,7 @@ typedef struct {
     int partial_resultset;     /* if result set is partial */
 } bend_search_rr;
 
-/* extended present handler. Does not replace bend_fetch. */
+/** \brief Information for present handler. Does not replace bend_fetch. */
 typedef struct {
     char *setname;             /* set name */
     int start;
@@ -91,6 +91,7 @@ typedef struct {
     char *errstring;           /* system error string or NULL */
 } bend_present_rr;
 
+/** \brief Information for fetch record handler */
 typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
@@ -111,6 +112,7 @@ typedef struct bend_fetch_rr {
     char *schema;              /* string record schema input/output */
 } bend_fetch_rr;
 
+/** \brief Information for scan entry */
 struct scan_entry {
     char *term;         /* the returned scan term */
     int occurrences;    /* no of occurrences or -1 if error (see below) */
@@ -124,6 +126,7 @@ typedef enum {
     BEND_SCAN_PARTIAL   /* not all entries could be found */
 } bend_scan_status;
 
+/** \brief Information for SRU / Z39.50 scan handler */
 typedef struct bend_scan_rr {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
@@ -146,6 +149,7 @@ typedef struct bend_scan_rr {
     char *scanClause;   /* CQL scan clause */
 } bend_scan_rr;
 
+/** \brief Information for SRU record update handler */
 typedef struct bend_update_rr {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
@@ -168,7 +172,7 @@ typedef struct bend_update_rr {
     char *details;
 } bend_update_rr;
 
-/* delete handler */
+/** \brief Information for Z39.50 delete result set handler */
 typedef struct bend_delete_rr {
     int function;
     int num_setnames;
@@ -180,7 +184,7 @@ typedef struct bend_delete_rr {
     ODR print; 
 } bend_delete_rr;
 
-/* sort handler */
+/** \brief Information for Z39.50 sort handler */
 typedef struct bend_sort_rr
 {
     int num_input_setnames;
@@ -196,6 +200,7 @@ typedef struct bend_sort_rr
     char *errstring;
 } bend_sort_rr;
 
+/** \brief Information for Z39.50 extended services handler */
 typedef struct bend_esrequest_rr
 {
     int ItemNo;
@@ -212,6 +217,7 @@ typedef struct bend_esrequest_rr
     Z_TaskPackage *taskPackage;
 } bend_esrequest_rr;
 
+/** \brief Information for Z39.50 segment handler */
 typedef struct bend_segment_rr {
     Z_Segment *segment;
     ODR stream;
@@ -221,6 +227,7 @@ typedef struct bend_segment_rr {
     bend_association association;
 } bend_segment_rr;
 
+/** \brief Information for SRU Explain handler */
 typedef struct {
     ODR stream;
     ODR decode;
@@ -231,42 +238,79 @@ typedef struct {
     void *server_node_ptr;
 } bend_explain_rr;
 
+/** \brief Information for the Init handler
+
+This includes both request
+information (to be read) and response information which should be
+set by the bend_init handler 
+*/
 typedef struct bend_initrequest
 {
-    /* arguments to be read by a backend */
-    Z_IdAuthentication *auth;
-    ODR stream;                /* encoding stream */
-    ODR print;                 /* printing stream */
-    Z_ReferenceId *referenceId;/* reference ID */
-    char *peer_name;           /* dns host of peer (client) */
-    ODR decode;                 /* decoding stream */
-    /* character set and language negotiation - see include/yaz/z-charneg.h */
+    /** \brief user/name/password to be read */
+    Z_IdAuthentication *auth; 
+    /** \brief encoding stream (for results) */
+    ODR stream;
+    /** \brief printing stream */
+    ODR print;
+    /** \brief decoding stream (use stream for results) */
+    ODR decode; 
+    /** \brief reference ID */
+    Z_ReferenceId *referenceId;/
+    /** \brief peer address of client */
+    char *peer_name;           
+    
+    /** \brief character set and language negotiation 
+
+    see include/yaz/z-charneg.h 
+    */
     Z_CharSetandLanguageNegotiation *charneg_request;
 
-
-    /* stuff to be modified/set by backend */
-
-    /* character negotiation response */
+    /** \brief character negotiation response */
     Z_External *charneg_response;
-    char *query_charset;
-    int records_in_same_charset; /* as query_charset */
+
+    /** \brief character set (encoding) for query terms 
+        
+    This is NULL by default. It should be set to the native character
+    set that the backend assumes for query terms */
+    char *query_charset;      
+
+    /** \brief whehter query_charset also applies to recors 
+    
+    Is 0 (No) by default. Set to 1 (yes) if records is in the same
+    character set as queries. If in doubt, use 0 (No).
+    */
+    int records_in_same_charset;
+
     char *implementation_id;
     char *implementation_name;
     char *implementation_version;
+
+    /** \brief Z39.50 sort handler */
     int (*bend_sort)(void *handle, bend_sort_rr *rr);
+    /** \brief SRU/Z39.50 search handler */
     int (*bend_search)(void *handle, bend_search_rr *rr);
+    /** \brief SRU/Z39.50 fetch handler */
     int (*bend_fetch)(void *handle, bend_fetch_rr *rr);
+    /** \brief SRU/Z39.50 present handler */
     int (*bend_present)(void *handle, bend_present_rr *rr);
+    /** \brief Z39.50 extended services handler */
     int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
+    /** \brief Z39.50 delete result set handler */
     int (*bend_delete)(void *handle, bend_delete_rr *rr);
+    /** \brief Z39.50 scan handler */
     int (*bend_scan)(void *handle, bend_scan_rr *rr);
+    /** \brief Z39.50 segment facility handler */
     int (*bend_segment)(void *handle, bend_segment_rr *rr);
+    /** \brief SRU explain handler */
     int (*bend_explain)(void *handle, bend_explain_rr *rr);
+    /** \brief SRU scan handler */
     int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
+    /** \brief SRU record update handler */
     int (*bend_srw_update)(void *handle, bend_update_rr *rr);
 
 } bend_initrequest;
 
+/** \brief result for init handler (must be filled by handler) */
 typedef struct bend_initresult
 {
     int errcode;               /* 0==OK */
@@ -286,6 +330,7 @@ YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
 YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
 YAZ_EXPORT void *bend_request_getdata(bend_request r);
 
+/** \brief control block for server */
 typedef struct statserv_options_block
 {
     int dynamic;                  /* fork on incoming requests */

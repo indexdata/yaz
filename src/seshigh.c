@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.116 2007-05-02 11:53:25 adam Exp $
+ * $Id: seshigh.c,v 1.117 2007-05-02 12:36:34 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -497,6 +497,7 @@ static void assoc_init_reset(association *assoc)
     assoc->init->implementation_id = 0;
     assoc->init->implementation_name = 0;
     assoc->init->query_charset = 0;
+    assoc->init->records_in_same_charset = 0;
     assoc->init->bend_sort = NULL;
     assoc->init->bend_search = NULL;
     assoc->init->bend_present = NULL;
@@ -2289,7 +2290,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         if (assoc->init->query_charset)
         {
             assoc->init->charneg_response = yaz_set_response_charneg(
-                assoc->encode, assoc->init->query_charset, 0, 0);
+                assoc->encode, assoc->init->query_charset, 0, 
+                assoc->init->records_in_same_charset);
         }
         else
         {
@@ -2352,7 +2354,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.116 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.117 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

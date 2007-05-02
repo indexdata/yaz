@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.89 2007-05-02 11:53:25 adam Exp $
+ * $Id: ztest.c,v 1.90 2007-05-02 12:36:35 adam Exp $
  */
 
 /*
@@ -722,6 +722,7 @@ bend_initresult *bend_init(bend_initrequest *q)
     q->bend_srw_update = ztest_update;
 
     q->query_charset = "ISO-8859-1";
+    q->records_in_same_charset = 0;
 
     return r;
 }
