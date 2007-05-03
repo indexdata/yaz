@@ -1,5 +1,5 @@
 # Config File for ILL
-# $Id: ill.tcl,v 1.2 2007-04-18 07:34:35 adam Exp $
+# $Id: ill.tcl,v 1.3 2007-05-03 08:34:52 heikki Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  
@@ -49,7 +49,7 @@ set membermap($m,APDU,ILL-Request) {APDU_ILL_Request illRequest}
 set membermap($m,APDU,ILL-Answer) {APDU_ILL_Answer illAnswer}
 
 # ----------------------------------------------------------
-set m CLCILLRequestExtension
+set m OCLCILLRequestExtension
 # Filename
 set filename($m) oclc-ill-req-ext
 
