@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.335 2007-05-02 11:51:54 adam Exp $
+ * $Id: client.c,v 1.336 2007-05-03 08:04:10 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2248,11 +2248,10 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         record_this = record_last;
     }
 
-    req->packageType =
-        yaz_string_to_oid_odr(yaz_oid_std(),
-                              CLASS_EXTSERV, 
-                              version == 0 ? "DB. Update (first version)" :
-                              "DB. Update", out);
+    req->packageType = odr_oiddup(out, (version == 0 ? 
+       yaz_oid_extserv_database_update_first_version :
+       yaz_oid_extserv_database_update));
+
     req->packageName = esPackageName;
     
     req->referenceId = set_refid (out);
