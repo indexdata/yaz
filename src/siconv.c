@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.38 2007-05-03 13:14:41 adam Exp $
+ * $Id: siconv.c,v 1.39 2007-05-03 22:18:13 adam Exp $
  */
 /**
  * \file siconv.c
@@ -399,7 +399,7 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
                 x = 0x0391;
             break;
 
-    case 0xe3: // Beta small
+    case 0xe2: // Beta small
             x = 0x03b2;
             break;
     case 0xc2: // Beta capital
@@ -621,7 +621,7 @@ static size_t yaz_write_iso5428_1984(yaz_iconv_t cd, unsigned long x,
     case 0x03b1 : out[k++]=0xe1; break;
     case 0x0386 : out[k++]=0xa2; out[k++]=0xc1; break;
     case 0x0391 : out[k++]=0xc1; break;
-    case 0x03b2 : out[k++]=0xe3; break;
+    case 0x03b2 : out[k++]=0xe2; break;
     case 0x0392 : out[k++]=0xc2; break;
     case 0x03b3 : out[k++]=0xe4; break;
     case 0x0393 : out[k++]=0xc4; break;
