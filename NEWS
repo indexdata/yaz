@@ -1,3 +1,6 @@
+Added partial support for ISO5428-1984, which is the "Greek alphabet coded
+character set for bibliographic information interchange". By Giannis Kosmas.
+
 --- 3.0.0 2007/05/02
 
 Changes to generic frontend server interface: added new member
