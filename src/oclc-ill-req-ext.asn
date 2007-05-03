@@ -1,0 +1,45 @@
+-- Couple of OCLC-specific extensions to their ILL-Request
+
+OCLCILLRequestExtension DEFINITIONS ::=
+--The object identifier is 1.0.10161.13.2
+BEGIN
+IMPORTS ILL-String FROM ISO-10161-ILL-1;
+
+OCLCILLRequestExtension ::=SEQUENCE {
+    clientDepartment [0] ILL-String OPTIONAL,
+    paymentMethod [1] ILL-String OPTIONAL,
+    uniformTitle [2] ILL-String OPTIONAL,
+    dissertation [3] ILL-String OPTIONAL,
+    issueNumber [4] ILL-String OPTIONAL,
+    volume [5] ILL-String OPTIONAL,
+    affiliations [6] ILL-String OPTIONAL,
+    source [7] ILL-String OPTIONAL
+}
+
+-- If present, systemNo should contain an OCLC number. To encode the OCLC
+-- number, use the external object for system number defined by the Library and
+-- Archives Canada.
+-- The object identifier is 1.2.124.10161.2
+
+SystemNo ::= SEQUENCE SIZE (1..10) OF SEQUENCE 
+ system System,
+ recordNo RecordNo 
+} 
+ 
+System ::= ENUMERATED { 
+ dobis (1), 
+ candoc (2),
+ oclc (3),
+ rlin (4), 
+ utlas (5),
+ other (6)
+}
+--Do not include the acronym for the system as part of the record number unless
+--"other (6)" is chosen. 
+ 
+ RecordNo ::= ILL-String (SIZE (1..50))
+
+
+
+END
+
