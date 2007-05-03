@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: query-charset.c,v 1.2 2007-04-10 14:42:31 adam Exp $
+ * $Id: query-charset.c,v 1.3 2007-05-03 22:20:45 adam Exp $
  */
 
 /** \file query-charset.c
@@ -25,7 +25,7 @@ void yaz_query_charset_convert_buf(char *buf_in, int len_in,
 
     *len_out = wrbuf_len(wrbuf);
     if (*len_out == 0)
-    {   // we assume conversion failed
+    {   /* we assume conversion failed */
         *buf_out = buf_in;
         *len_out = len_in;
     }

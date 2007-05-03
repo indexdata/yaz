@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.39 2007-05-03 22:18:13 adam Exp $
+ * $Id: siconv.c,v 1.40 2007-05-03 22:20:45 adam Exp $
  */
 /**
  * \file siconv.c
@@ -386,76 +386,76 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
         return 0;
     }
     switch (*inp) {
-    case 0xe1: // alpha small
+    case 0xe1: /*  alpha small */
             if (tonos) 
                 x = 0x03ac;
             else 
                 x = 0x03b1;
             break;
-    case 0xc1: // alpha capital
+    case 0xc1: /*  alpha capital */
             if (tonos) 
                 x = 0x0386;
             else 
                 x = 0x0391;
             break;
 
-    case 0xe2: // Beta small
+    case 0xe2: /*  Beta small */
             x = 0x03b2;
             break;
-    case 0xc2: // Beta capital
+    case 0xc2: /*  Beta capital */
             x = 0x0392;
             break;
 
-    case 0xe4: // Gamma small
+    case 0xe4: /*  Gamma small */
             x = 0x03b3;
             break;
-    case 0xc4: // Gamma capital
+    case 0xc4: /*  Gamma capital */
             x = 0x0393;
             break;
 
-    case 0xe5: // Delta small
+    case 0xe5: /*  Delta small */
             x = 0x03b4;
             break;
-    case 0xc5: // Delta capital
+    case 0xc5: /*  Delta capital */
             x = 0x0394;
             break;
-    case 0xe6: // epsilon small
+    case 0xe6: /*  epsilon small */
             if (tonos) 
                 x = 0x03ad;
             else 
                 x = 0x03b5;
             break;
-    case 0xc6: // epsilon capital
+    case 0xc6: /*  epsilon capital */
             if (tonos) 
                 x = 0x0388;
             else 
                 x = 0x0395;
             break;
-    case 0xe9: // Zeta small
+    case 0xe9: /*  Zeta small */
             x = 0x03b6;
             break;
-    case 0xc9: // Zeta capital
+    case 0xc9: /*  Zeta capital */
             x = 0x0396;
             break;
-    case 0xea: // Eta small
+    case 0xea: /*  Eta small */
             if (tonos) 
                 x = 0x03ae;
             else 
                 x = 0x03b7;
             break;
-    case 0xca: // Eta capital
+    case 0xca: /*  Eta capital */
             if (tonos) 
                 x = 0x0389;
             else 
                 x = 0x0397;
             break;
-    case 0xeb: // Theta small
+    case 0xeb: /*  Theta small */
             x = 0x03b8;
             break;
-    case 0xcb: // Theta capital
+    case 0xcb: /*  Theta capital */
             x = 0x0398;
             break;
-    case 0xec: // Iota small
+    case 0xec: /*  Iota small */
             if (tonos) 
                 if (dialitika) 
                     x = 0x0390;
@@ -467,7 +467,7 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
                 else 
                     x = 0x03b9;
             break;
-    case 0xcc: // Iota capital
+    case 0xcc: /*  Iota capital */
             if (tonos) 
                 x = 0x038a;
             else 
@@ -476,76 +476,76 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
                 else 
                     x = 0x0399;
             break;
-    case 0xed: // Kappa small
+    case 0xed: /*  Kappa small */
             x = 0x03ba;
             break;
-    case 0xcd: // Kappa capital
+    case 0xcd: /*  Kappa capital */
             x = 0x039a;
             break;
-    case 0xee: // Lambda small
+    case 0xee: /*  Lambda small */
             x = 0x03bb;
             break;
-    case 0xce: // Lambda capital
+    case 0xce: /*  Lambda capital */
             x = 0x039b;
             break;
-    case 0xef: // Mu small
+    case 0xef: /*  Mu small */
             x = 0x03bc;
             break;
-    case 0xcf: // Mu capital
+    case 0xcf: /*  Mu capital */
             x = 0x039c;
             break;
-    case 0xf0: // Nu small
+    case 0xf0: /*  Nu small */
             x = 0x03bd;
             break;
-    case 0xd0: // Nu capital
+    case 0xd0: /*  Nu capital */
             x = 0x039d;
             break;
-    case 0xf1: // Xi small
+    case 0xf1: /*  Xi small */
             x = 0x03be;
             break;
-    case 0xd1: // Xi capital
+    case 0xd1: /*  Xi capital */
             x = 0x039e;
             break;
-    case 0xf2: // Omicron small
+    case 0xf2: /*  Omicron small */
             if (tonos) 
                 x = 0x03cc;
             else 
                 x = 0x03bf;
             break;
-    case 0xd2: // Omicron capital
+    case 0xd2: /*  Omicron capital */
             if (tonos) 
                 x = 0x038c;
             else 
                 x = 0x039f;
             break;
-    case 0xf3: // Pi small
+    case 0xf3: /*  Pi small */
             x = 0x03c0;
             break;
-    case 0xd3: // Pi capital
+    case 0xd3: /*  Pi capital */
             x = 0x03a0;
             break;
-    case 0xf5: // Rho small
+    case 0xf5: /*  Rho small */
             x = 0x03c1;
             break;
-    case 0xd5: // Rho capital
+    case 0xd5: /*  Rho capital */
             x = 0x03a1;
             break;
-    case 0xf7: // Sigma small (end of words)
+    case 0xf7: /*  Sigma small (end of words) */
             x = 0x03c2;
             break;
-    case 0xf6: // Sigma small
+    case 0xf6: /*  Sigma small */
             x = 0x03c3;
             break;
-    case 0xd6: // Sigma capital
+    case 0xd6: /*  Sigma capital */
             x = 0x03a3;
             break;
-    case 0xf8: // Tau small
+    case 0xf8: /*  Tau small */
             x = 0x03c4;
             break;
-    case 0xd8: // Tau capital
+    case 0xd8: /*  Tau capital */
             x = 0x03a4;
             break;
-    case 0xf9: // Upsilon small
+    case 0xf9: /*  Upsilon small */
             if (tonos) 
                 if (dialitika) 
                     x = 0x03b0;
@@ -557,7 +557,7 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
                 else 
                     x = 0x03c5;
             break;
-    case 0xd9: // Upsilon capital
+    case 0xd9: /*  Upsilon capital */
             if (tonos) 
                 x = 0x038e;
             else 
@@ -566,31 +566,31 @@ static unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
                 else 
                     x = 0x03a5;
             break;
-    case 0xfa: // Phi small
+    case 0xfa: /*  Phi small */
             x = 0x03c6;
             break;
-    case 0xda: // Phi capital
+    case 0xda: /*  Phi capital */
             x = 0x03a6;
             break;
-    case 0xfb: // Chi small
+    case 0xfb: /*  Chi small */
             x = 0x03c7;
             break;
-    case 0xdb: // Chi capital
+    case 0xdb: /*  Chi capital */
             x = 0x03a7;
             break;
-    case 0xfc: // Psi small
+    case 0xfc: /*  Psi small */
             x = 0x03c8;
             break;
-    case 0xdc: // Psi capital
+    case 0xdc: /*  Psi capital */
             x = 0x03a8;
             break;
-    case 0xfd: // Omega small
+    case 0xfd: /*  Omega small */
             if (tonos) 
                 x = 0x03ce;
             else 
                 x = 0x03c9;
             break;
-    case 0xdd: // Omega capital
+    case 0xdd: /*  Omega capital */
             if (tonos) 
                 x = 0x038f;
             else 
