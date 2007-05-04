@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: prt-ext.h,v 1.18 2007-04-24 12:53:56 adam Exp $ */
+/* $Id: prt-ext.h,v 1.19 2007-05-04 12:23:54 adam Exp $ */
 
 /**
  * \file prt-ext.h
@@ -50,11 +50,7 @@ YAZ_BEGIN_CDECL
  */
 typedef struct Z_ext_typeent
 {
-#if 0
-    oid_value dref;    /* the direct-reference OID value. */
-#else
     int oid[OID_SIZE]; /* the direct-reference OID */
-#endif
     int what;          /* discriminator value for the external CHOICE */
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;
