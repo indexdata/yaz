@@ -1,4 +1,4 @@
-<!-- $Id: asn.xml,v 1.18 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: asn.xml,v 1.19 2007-05-04 12:24:15 adam Exp $ -->
  <chapter id="asn"><title>The Z39.50 ASN.1 Module</title>
   <sect1 id="asn.introduction"><title>Introduction</title>
    <para>
@@ -132,7 +132,16 @@
     
    </para>
   </sect1>
-  <sect1 id="asn.oid"><title>Object Identifiers</title>
+  <sect1 id="asn.oid"><title>Object Identifiers (YAZ 2)</title>
+
+  <note>
+   <para>
+    This material only applies to version 2 series of YAZ. You need not
+    read this material if you are working with YAZ 3. 
+    See <xref linkend="tools.oid"/> for more information on OIDs.
+   </para>
+  </note>
+
   <para>
     When you refer to object identifiers in your application, you need to
     be aware that SR and Z39.50 use two different set of OIDs to refer to
@@ -271,7 +280,7 @@ typedef struct Z_External
    </para>
    
    <screen>
-   Z_ext_typeent *z_ext_gettypebyref(oid_value ref);
+   Z_ext_typeent *z_ext_gettypebyref(const oid *oid);
    </screen>
 
    <para>
@@ -285,7 +294,7 @@ typedef struct Z_External
    <screen>
 typedef struct Z_ext_typeent
 {
-    oid_value dref;    /* the direct-reference OID value. */
+    int oid[OID_SIZE]; /* the direct-reference OID. */
     int what;          /* discriminator value for the external CHOICE */
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;

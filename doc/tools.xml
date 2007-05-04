@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.58 2007-05-04 08:06:24 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.59 2007-05-04 12:24:15 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1541,30 +1541,176 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 
    <para>
     The basic YAZ representation of an OID is an array of integers,
-    terminated with the value -1. The &odr; module provides two
-    utility-functions to create and copy this type of data elements:
+    terminated with the value -1. There is a <literal>typedef</literal>
+    of this integer to <literal>Odr_oid</literal> but this is not consistenly
+    used everywhere.
    </para>
-
-   <screen>
-    Odr_oid *odr_getoidbystr(ODR o, char *str);
-   </screen>
-
    <para>
-    Creates an OID based on a string-based representation using dots (.)
-    to separate elements in the OID.
+    An OID can either be declared as a automatic variable or we can
+    allocated using the ODR/NMEM memory utilities. It's
+    guaranteed that an OID can fit in <literal>OID_SIZE</literal> integers.
    </para>
-
-   <screen>
-    Odr_oid *odr_oiddup(ODR odr, Odr_oid *o);
-   </screen>
-
+   <example id="tools.oid.bib1.1"><title>Create OID on stack</title>
+    <para>
+     We can create an OID for the Bib-1 attribute set with:
+     <screen>
+      int bib1[OID_SIZE];
+      myoid[0] = 1;
+      myoid[1] = 2;
+      myoid[2] = 840;
+      myoid[3] = 10003;
+      myoid[4] = 3;
+      myoid[5] = 1;
+      myoid[6] = -1;
+     </screen>
+    </para>
+   </example>
    <para>
-    Creates a copy of the OID referenced by the <emphasis>o</emphasis>
-    parameter.
-    Both functions take an &odr; stream as parameter. This stream is used to
+    And OID may also be filled from a string-based representation using
+    dots (.). This is achieved by function
+    <screen>
+     int oid_dotstring_to_oid(const char *name, int *oid);
+    </screen>
+   </para>
+   <example id="tools.oid.bib1.2"><title>Using oid_oiddotstring_to_oid</title>
+    <para>
+     We can create the Bib-1 attribute set OID easier with:
+     <screen>
+      int bib1[OID_SIZE];
+      oid_oiddotstring_to_oid("1.2.840.10003.3.1", bib1);
+     </screen>
+   </para>
+   </example>
+   <para>
+    We can also allocate an OID dynamically on a ODR stream with:
+   <screen>
+    Odr_oid *odr_getoidbystr(ODR o, const char *str);
+   </screen>
+    This creates an OID from string-based representation using dots.
+    This function take an &odr; stream as parameter. This stream is used to
     allocate memory for the data elements, which is released on a
     subsequent call to <function>odr_reset()</function> on that stream.
    </para>
+
+   <example id="tools.oid.bib1.3"><title>Using odr_getoidbystr</title>
+    <para>
+     We can create a OID for the Bib-1 attribute set with:
+     <screen>
+      Odr_oid *bib1 = odr_getoidbystr(odr, "1.2.840.10003.3.1");
+     </screen>
+    </para>
+   </example>
+
+   <para>
+    The function
+    <screen>
+     char *oid_oid_to_dotstring(const int *oid, char *oidbuf)
+    </screen>
+    does the reverse of <function>oid_oiddotstring_to_oid</function>. It
+    converts an OID to the string-based representation using dots.
+    The supplied char buffer <literal>oidbuf</literal> holds the resulting
+    string and must be at least <literal>OID_STR_MAX</literal> in size.
+   </para>
+
+   <para>
+    OIDs can be copied with <function>oid_oidcpy</function> which takes
+    two OID lists as arguments. Alternativly, an OID copy can be allocated
+    on a ODR stream with:
+    <screen>
+     Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
+    </screen>
+   </para>
+   
+   <para>
+    OIDs can be compared with <function>oid_oidcmp</function> which returns
+    zero if the two OIDs provided are identical; non-zero otherwise.
+   </para>
+ 
+   <sect2 id="tools.oid.database"><title>OID database</title>
+    <para>
+     From YAZ version 3 and later, the oident system has been replaced
+     by an OID database. OID database is a misnomer .. the old odient
+     was a database system too.
+    </para>
+    <para>
+     The OID database is really just a map between named Object Identifiers
+     (string) and their OID raw equivalents. Most operations either
+     convert from string to OID or other way around.
+    </para>
+    <para>
+     Unfortunately, whenever we supply a string we must also specify the 
+     <emphasis>OID class</emphasis>. The class is necessary because some
+     strings correspond to multiple OIDs. An example of such a string is
+     <literal>Bib-1</literal> which may either be an attribute-set 
+     or a diagnostic-set.
+    </para>
+    <para>
+     Applications using the YAZ database should include 
+     <filename>yaz/yaz_db.h</filename>.
+    </para>
+    <para>
+     A YAZ database handle is of type <literal>yaz_oid_db_t</literal>.
+     Actually that's a pointer. You need not think deal with that.
+     YAZ has a built-in database which can be considered "constant" for
+     most purposes. 
+     We can get hold that by using function <function>yaz_oid_std</function>.
+    </para>
+    <para>
+     All functions with prefix <function>yaz_string_to_oid</function>
+     converts from class + string to OID. We have variants of this
+     operation due to different memory allocation strategies.
+    </para>
+    <para>
+     All functions with prefix
+     <function>yaz_oid_to_string</function> converts from OID to string
+     + class.
+    </para>
+
+    <example id="tools.oid.bib1.4"><title>Create OID with YAZ DB</title>
+     <para>
+      We can create an OID for the Bib-1 attribute set on the ODR stream
+      odr with:
+     <screen>
+        Odr_oid *bib1 = 
+         yaz_string_to_oid_odr(yaz_oid_std(), CLASS_ATTSET, "Bib-1", odr);
+      </screen>
+      This is more complex than using <function>odr_getoidbystr</function>.
+      You would only use <function>yaz_string_to_oid_odr</function> when the
+      string (here Bib-1) is supplied by a user or configuration.
+     </para>
+    </example>
+     
+    <para>
+     All the object identifers in the standard OID database as returned
+     by <function>yaz_oid_std</function> can referenced directly in a
+     program. Each constant OID is prefixed with <literal>yaz_oid_</literal> -
+     followed by OID class (lowercase) - then by OID name (normalized and
+     lowercase).
+    </para>
+    <para>
+     These are declared in <filename>yaz/oid_std.h</filename> but are
+     included by <filename>yaz/oid_db.h</filename> as well.
+    </para>
+
+    <example id="tools.oid.bib1.5"><title>Use a built-in OID</title>
+     <para>
+      We can allocate our own OID filled with the constant OID for
+      Bib-1 with:
+      <screen>
+        Odr_oid *bib1 = odr_oiddup(o, yaz_oid_attset_bib1);
+      </screen>
+     </para>
+    </example>
+   </sect2>
+
+   <sect2 id="tools.oid.oident"><title>OID oident</title>
+
+   <note>
+    <para>
+     The oident utility has been removed from YAZ version 3. This
+     sub section only applies to YAZ version 2.
+    </para>
+   </note>
 
    <para>
     The OID module provides a higher-level representation of the
@@ -1798,18 +1944,6 @@ typedef struct oident
     <literal>oidbuf</literal> and returning its address.
    </para>
 
-   <para>
-    Finally, the module provides the following utility functions, whose
-    meaning should be obvious:
-   </para>
-
-   <screen>
-    void oid_oidcpy(int *t, int *s);
-    void oid_oidcat(int *t, int *s);
-    int oid_oidcmp(int *o1, int *o2);
-    int oid_oidlen(int *o);
-   </screen>
-
    <note>
     <para>
      The OID module has been criticized - and perhaps rightly so
@@ -1826,8 +1960,8 @@ typedef struct oident
     </para>
    </note>
 
+   </sect2>
   </sect1>
-
   <sect1 id="tools.nmem"><title>Nibble Memory</title>
 
    <para>
