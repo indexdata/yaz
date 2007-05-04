@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.57 2007-02-08 11:36:59 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.58 2007-05-04 08:06:24 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -2342,8 +2342,8 @@ typedef struct oident
    </sect2>
    <sect2 id="tools.retrieval.examples">
     <title>Retrieval Facility Examples</title>
-    <example>
-     <title id="tools.retrieval.marc21">MARC21 backend</title>
+    <example id="tools.retrieval.marc21">
+     <title>MARC21 backend</title>
      <para>
       A typical way to use the retrieval facility is to enable XML
       for servers that only supports ISO2709 encoded MARC21 records.
@@ -2398,7 +2398,7 @@ typedef struct oident
      </para>
     </example>
    </sect2>
-   <sect2>
+   <sect2 id="tools.retrieval.api">
     <title>API</title>
     <para>
      It should be easy to use the retrieval systems from applications. Refer
