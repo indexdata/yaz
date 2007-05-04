@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.59 2007-05-04 12:24:15 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.60 2007-05-04 12:36:56 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1646,7 +1646,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     </para>
     <para>
      Applications using the YAZ database should include 
-     <filename>yaz/yaz_db.h</filename>.
+     <filename>yaz/oid_db.h</filename>.
     </para>
     <para>
      A YAZ database handle is of type <literal>yaz_oid_db_t</literal>.
