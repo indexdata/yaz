@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.35 2007-01-31 15:27:17 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.36 2007-05-04 08:03:40 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1 id="installation-introduction"><title>Introduction</title>
@@ -272,11 +272,11 @@
         </para></listitem>
       </varlistentry>
       
-      <varlistentry><term><filename>src/libyazthread.la</filename></term>
+      <varlistentry><term><filename>src/libyaz_server.la</filename></term>
        <listitem><para>
-         When threading is supported/enabled by configure this Libtool
-         library is created. It includes functions that allows &yaz;
-         to use threads.
+         Generic Frontend server. This is an add-on for libyaz.la.
+         Code in this library uses POSIX threads functions - if they
+         available on the platform.
         </para></listitem>
       </varlistentry>
       
@@ -604,24 +604,24 @@
      The following files are generated upon successful compilation:
      
      <variablelist>
-      <varlistentry><term><filename>bin/yaz.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz3.dll</filename></term>
        <listitem><para>
          &yaz; release mode multi-threaded Dynamic Link Library.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>lib/yaz.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz.dll</filename>.
+         Import library for <filename>yaz3.dll</filename>.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>bin/yazd.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz3d.dll</filename></term>
        <listitem><para>
          &yaz; debug mode multi-threaded Dynamic Link Library.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>lib/yazd.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yazd.dll</filename>.
+         Import library for <filename>yaz3d.dll</filename>.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>bin/yaz-client.exe</filename></term>
@@ -680,9 +680,9 @@
          You must link with this library. It's located in the 
          sub directory <filename>lib</filename> of &yaz;.
 	 If you want to link with the debug version of &yaz;, you must
-	 link with <filename>yazd.dll</filename> instead.
+	 link against <filename>yazd.lib</filename> instead.
         </para></listitem></varlistentry>
-      <varlistentry><term>dynamic link library <filename>yaz.dll</filename>
+      <varlistentry><term>dynamic link library <filename>yaz3.dll</filename>
        </term><listitem><para>
          This DLL must be in your execution path when you invoke
          your application. Specifically, you should distribute this
