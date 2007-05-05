@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.127 2007-04-30 08:29:07 adam Exp $
+ * $Id: zoom-c.c,v 1.128 2007-05-05 11:55:22 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -364,6 +364,13 @@ ZOOM_API(ZOOM_connection)
     c->client_IP = 0;
     c->tasks = 0;
 
+    c->user = 0;
+    c->group = 0;
+    c->password = 0;
+
+    c->maximum_record_size = 0;
+    c->preferred_message_size = 0;
+
     c->odr_in = odr_createmem(ODR_DECODE);
     c->odr_out = odr_createmem(ODR_ENCODE);
 
@@ -445,24 +452,22 @@ ZOOM_API(void)
     }
     yaz_log(log_details, "%p ZOOM_connection_connect connect", c);
     xfree(c->proxy);
+    c->proxy = 0;
     val = ZOOM_options_get(c->options, "proxy");
     if (val && *val)
     {
         yaz_log(log_details, "%p ZOOM_connection_connect proxy=%s", c, val);
         c->proxy = xstrdup(val);
     }
-    else
-        c->proxy = 0;
 
     xfree(c->charset);
+    c->charset = 0;
     val = ZOOM_options_get(c->options, "charset");
     if (val && *val)
     {
         yaz_log(log_details, "%p ZOOM_connection_connect charset=%s", c, val);
         c->charset = xstrdup(val);
     }
-    else
-        c->charset = 0;
 
     xfree(c->lang);
     val = ZOOM_options_get(c->options, "lang");
@@ -523,6 +528,8 @@ ZOOM_API(void)
 
     ZOOM_options_set(c->options, "host", c->host_port);
 
+    xfree(c->cookie_out);
+    c->cookie_out = 0;
     val = ZOOM_options_get(c->options, "cookie");
     if (val && *val)
     { 
@@ -530,6 +537,8 @@ ZOOM_API(void)
         c->cookie_out = xstrdup(val);
     }
 
+    xfree(c->client_IP);
+    c->client_IP = 0;
     val = ZOOM_options_get(c->options, "clientIP");
     if (val && *val)
     {
@@ -537,6 +546,32 @@ ZOOM_API(void)
                 c, val);
         c->client_IP = xstrdup(val);
     }
+
+    xfree(c->group);
+    c->group = 0;
+    val = ZOOM_options_get(c->options, "group");
+    if (val && *val)
+        c->group = xstrdup(val);
+
+    xfree(c->user);
+    c->user = 0;
+    val = ZOOM_options_get(c->options, "user");
+    if (val && *val)
+        c->user = xstrdup(val);
+
+    xfree(c->password);
+    c->password = 0;
+    val = ZOOM_options_get(c->options, "password");
+    if (!val)
+        val = ZOOM_options_get(c->options, "pass");
+
+    if (val && *val)
+        c->password = xstrdup(val);
+    
+    c->maximum_record_size =
+        ZOOM_options_get_int(c->options, "maximumRecordSize", 1024*1024);
+    c->preferred_message_size =
+        ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
     yaz_log(log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
@@ -728,6 +763,9 @@ ZOOM_API(void)
     xfree(c->cookie_out);
     xfree(c->cookie_in);
     xfree(c->client_IP);
+    xfree(c->user);
+    xfree(c->group);
+    xfree(c->password);
     xfree(c);
 }
 
@@ -1278,15 +1316,8 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     Z_InitRequest *ireq = apdu->u.initRequest;
     Z_IdAuthentication *auth = (Z_IdAuthentication *)
         odr_malloc(c->odr_out, sizeof(*auth));
-    const char *auth_groupId = ZOOM_options_get(c->options, "group");
-    const char *auth_userId = ZOOM_options_get(c->options, "user");
-    const char *auth_password = ZOOM_options_get(c->options, "password");
     char *version;
 
-    /* support the pass for backwards compatibility */
-    if (!auth_password)
-        auth_password = ZOOM_options_get(c->options, "pass");
-        
     ODR_MASK_SET(ireq->options, Z_Options_search);
     ODR_MASK_SET(ireq->options, Z_Options_present);
     ODR_MASK_SET(ireq->options, Z_Options_scan);
@@ -1310,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.127 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.128 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1319,52 +1350,29 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, &version[11],
                                 ireq->implementationVersion));
     
-    *ireq->maximumRecordSize =
-        ZOOM_options_get_int(c->options, "maximumRecordSize", 1024*1024);
-    *ireq->preferredMessageSize =
-        ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
+    *ireq->maximumRecordSize = c->maximum_record_size;
+    *ireq->preferredMessageSize = c->preferred_message_size;
     
-    if (auth_groupId || auth_password)
+    if (c->group || c->password)
     {
         Z_IdPass *pass = (Z_IdPass *) odr_malloc(c->odr_out, sizeof(*pass));
-        int i = 0;
         pass->groupId = 0;
-        if (auth_groupId && *auth_groupId)
-        {
-            pass->groupId = (char *)
-                odr_malloc(c->odr_out, strlen(auth_groupId)+1);
-            strcpy(pass->groupId, auth_groupId);
-            i++;
-        }
+        if (c->group)
+            pass->groupId = odr_strdup(c->odr_out, c->group);
         pass->userId = 0;
-        if (auth_userId && *auth_userId)
-        {
-            pass->userId = (char *)
-                odr_malloc(c->odr_out, strlen(auth_userId)+1);
-            strcpy(pass->userId, auth_userId);
-            i++;
-        }
+        if (c->user)
+            pass->userId = odr_strdup(c->odr_out, c->user);
         pass->password = 0;
-        if (auth_password && *auth_password)
-        {
-            pass->password = (char *)
-                odr_malloc(c->odr_out, strlen(auth_password)+1);
-            strcpy(pass->password, auth_password);
-            i++;
-        }
-        if (i)
-        {
-            auth->which = Z_IdAuthentication_idPass;
-            auth->u.idPass = pass;
-            ireq->idAuthentication = auth;
-        }
+        if (c->password)
+            pass->password = odr_strdup(c->odr_out, c->password);
+        auth->which = Z_IdAuthentication_idPass;
+        auth->u.idPass = pass;
+        ireq->idAuthentication = auth;
     }
-    else if (auth_userId)
+    else if (c->user)
     {
         auth->which = Z_IdAuthentication_open;
-        auth->u.open = (char *)
-            odr_malloc(c->odr_out, strlen(auth_userId)+1);
-        strcpy(auth->u.open, auth_userId);
+        auth->u.open = odr_strdup(c->odr_out, c->user);
         ireq->idAuthentication = auth;
     }
     if (c->proxy)

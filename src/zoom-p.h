@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.19 2007-04-30 08:29:07 adam Exp $
+ * $Id: zoom-p.h,v 1.20 2007-05-05 11:55:22 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -61,9 +61,18 @@ struct ZOOM_connection_p {
     char *cookie_out;
     char *cookie_in;
     char *client_IP;
+
+    char *user;
+    char *group;
+    char *password;
+
     int async;
     int support_named_resultsets;
     int last_event;
+
+    int maximum_record_size;
+    int preferred_message_size;
+
     ZOOM_task tasks;
     ZOOM_options options;
     ZOOM_resultset resultsets;
