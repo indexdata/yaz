@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.46 2007-03-21 11:27:46 adam Exp $ */
+/* $Id: zoom.h,v 1.47 2007-05-05 11:53:27 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -313,6 +313,9 @@ ZOOM_options_create_with_parent (ZOOM_options parent);
 ZOOM_API(ZOOM_options)
     ZOOM_options_create_with_parent2 (ZOOM_options parent1,
                                       ZOOM_options parent2);
+
+ZOOM_API(ZOOM_options)
+    ZOOM_options_dup(ZOOM_options src);
 
 ZOOM_API(const char *)
 ZOOM_options_get (ZOOM_options opt, const char *name);

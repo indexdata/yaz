@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-opt.c,v 1.7 2007-05-04 17:16:21 adam Exp $
+ * $Id: zoom-opt.c,v 1.8 2007-05-05 11:53:26 adam Exp $
  */
 /**
  * \file zoom-opt.c
@@ -12,6 +12,52 @@
 #include "zoom-p.h"
 
 #include <yaz/xmalloc.h>
+
+static void set_value(struct ZOOM_options_entry **e,
+                      const char *value, int len)
+{
+    (*e)->value = 0;
+    (*e)->len = 0;
+    if (value)
+    {
+        (*e)->value = (char *) xmalloc(len+1);
+        memcpy((*e)->value, value, len);
+        (*e)->value[len] = '\0';
+        (*e)->len = len;
+    }
+}
+
+static void append_entry(struct ZOOM_options_entry **e,
+                         const char *name, const char *value, int len)
+{
+    *e = (struct ZOOM_options_entry *) xmalloc(sizeof(**e));
+    (*e)->name = xstrdup(name);
+    set_value(e, value, len);
+    (*e)->next = 0;
+}
+
+ZOOM_API(ZOOM_options)
+    ZOOM_options_dup(ZOOM_options src)
+{
+    if (!src)
+        return 0;
+    else
+    {
+        ZOOM_options dst = ZOOM_options_create();
+        struct ZOOM_options_entry *src_e = src->entries;
+        struct ZOOM_options_entry **dst_e = &dst->entries;
+        
+        while(src_e)
+        {
+            append_entry(dst_e, src_e->name, src_e->value, src_e->len);
+            dst_e = &(*dst_e)->next;
+            src_e = src_e->next;
+        }
+        dst->parent1 = ZOOM_options_dup(src->parent1);
+        dst->parent2 = ZOOM_options_dup(src->parent2);
+        return dst;
+    }
+}
 
 ZOOM_API(ZOOM_options)
     ZOOM_options_create_with_parent(ZOOM_options parent)
@@ -91,20 +137,6 @@ ZOOM_API(void)
     }
 }
 
-/* PRIVATE to ZOOM_options_setl() */
-static void
-_set_value(struct ZOOM_options_entry **e, const char *value, int len)
-{
-    (*e)->value = 0;
-    (*e)->len = 0;
-    if (value)
-    {
-        (*e)->value = (char *) xmalloc(len+1);
-        memcpy((*e)->value, value, len);
-        (*e)->value[len] = '\0';
-        (*e)->len = len;
-    }
-}
 
 ZOOM_API(void)
     ZOOM_options_setl(ZOOM_options opt, const char *name, const char *value,
@@ -118,15 +150,12 @@ ZOOM_API(void)
         if (!strcmp((*e)->name, name))
         {
             xfree((*e)->value);
-            _set_value(e, value, len);
+            set_value(e, value, len);
             return;
         }
         e = &(*e)->next;
     }
-    *e = (struct ZOOM_options_entry *) xmalloc(sizeof(**e));
-    (*e)->name = xstrdup(name);
-    _set_value(e, value, len);
-    (*e)->next = 0;
+    append_entry(e, name, value, len);
 }
 
 ZOOM_API(void)
