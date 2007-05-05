@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.11 2007-04-25 13:49:52 adam Exp $
+ * $Id: prt-ext.c,v 1.12 2007-05-05 10:26:31 adam Exp $
  */
 
 /**
@@ -26,8 +26,8 @@
  */
 static Z_ext_typeent type_table[] =
 {
-    {{1, 2, 830, 10003, 5, 101,-1}, Z_External_sutrs, (Odr_fun) z_SUTRS},
-    {{1, 2, 830, 10003, 5, 100,-1}, Z_External_explainRecord, (Odr_fun)z_ExplainRecord},
+    {{1, 2, 840, 10003, 5, 101,-1}, Z_External_sutrs, (Odr_fun) z_SUTRS},
+    {{1, 2, 840, 10003, 5, 100,-1}, Z_External_explainRecord, (Odr_fun)z_ExplainRecord},
     {{1, 2, 840, 10003, 7, 1,-1}, Z_External_resourceReport1, (Odr_fun)z_ResourceReport1},
     {{1, 2, 840, 10003, 7, 2,-1}, Z_External_resourceReport2, (Odr_fun)z_ResourceReport2},
     {{1, 2, 840, 10003, 8, 1,-1}, Z_External_promptObject1, (Odr_fun)z_PromptObject1 },
