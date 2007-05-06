@@ -1,5 +1,10 @@
+Fixed external handling for SUTRS and Explain records (bug appered in 3.0
+series).
+
 Added partial support for ISO5428-1984, which is the "Greek alphabet coded
 character set for bibliographic information interchange". By Giannis Kosmas.
+
+Added documentation on new OID API.
 
 --- 3.0.0 2007/05/02
 
