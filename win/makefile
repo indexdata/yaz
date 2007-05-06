@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.132 2007-05-01 12:48:07 adam Exp $
+# $Id: makefile,v 1.133 2007-05-06 20:27:14 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -89,10 +89,10 @@ TMP=$(TMPDIR)
 
 !if $(DEBUG)
 DLL=$(BINDIR)\yaz3d.dll
-YAZ_IMPLIB=$(LIBDIR)\yazd.lib
+YAZ_IMPLIB=$(LIBDIR)\yaz3d.lib
 !else
 DLL=$(BINDIR)\yaz3.dll
-YAZ_IMPLIB=$(LIBDIR)\yaz.lib
+YAZ_IMPLIB=$(LIBDIR)\yaz3.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
