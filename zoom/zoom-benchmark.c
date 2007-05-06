@@ -1,5 +1,5 @@
 /*
- * $Id: zoom-benchmark.c,v 1.19 2007-05-06 20:12:21 adam Exp $
+ * $Id: zoom-benchmark.c,v 1.20 2007-05-06 20:35:43 adam Exp $
  *
  * Asynchronous multi-target client doing search and piggyback retrieval
  */
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
     z = (ZOOM_connection *) xmalloc(sizeof(*z) * parameters.concurrent);
     r = (ZOOM_resultset *) xmalloc(sizeof(*r) * parameters.concurrent);
     elc = (int *) xmalloc(sizeof(*elc) * parameters.concurrent * parameters.repeat);
-    els = (event_line_t *) xmalloc(
+    els = (struct event_line_t *) xmalloc(
         sizeof(*els) * parameters.concurrent * parameters.repeat * 10);
     o = ZOOM_options_create();
 
