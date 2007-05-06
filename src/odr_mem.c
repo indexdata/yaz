@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.10 2007-04-12 13:52:57 adam Exp $
+ * $Id: odr_mem.c,v 1.11 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file odr_mem.c
@@ -57,7 +57,7 @@ int odr_total(ODR o)
 Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf, int sz)
 {
     Odr_oct *p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
-    p->buf = odr_malloc(o, sz);
+    p->buf = (unsigned char *) odr_malloc(o, sz);
     memcpy(p->buf, buf, sz);
     p->size = sz;
     p->len = sz;

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.5 2007-04-25 16:51:47 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.6 2007-05-06 20:12:20 adam Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */
@@ -79,7 +79,7 @@ struct prog_args {
 /* Call-back to be called for every field in the ill-request */
 /* It can set values to any field, perhaps from the prog_args */
 const char *get_ill_element(void *clientData, const char *element) {
-    struct prog_args *args = clientData;
+    struct prog_args *args = (struct prog_args *) clientData;
     struct nameval *nv=args->namevals;
     char *ret=0;
     if (!nv)
@@ -119,7 +119,7 @@ const char *get_ill_element(void *clientData, const char *element) {
 /** \brief parse a parameter string */
 /* string is like 'name=value' */
 struct nameval *parse_nameval( char *arg ) {
-    struct nameval *nv = xmalloc(sizeof(*nv));
+    struct nameval *nv = (struct nameval *) xmalloc(sizeof(*nv));
     char *p=arg;
     int len;
     if (!p || !*p) 
@@ -129,7 +129,7 @@ struct nameval *parse_nameval( char *arg ) {
     len = p - arg;
     if (!len)
         return 0;
-    nv->name = xmalloc(len+1);
+    nv->name = (char *) xmalloc(len+1);
     strncpy(nv->name, arg, len);
     nv->name[len]='\0';
     if (*p == '=' )
@@ -201,7 +201,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.5 2007-04-25 16:51:47 heikki Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.6 2007-05-06 20:12:20 adam Exp $"; /* from cvs */
     struct nameval *nv;
 
     /* default values */
@@ -303,19 +303,19 @@ COMSTACK connect_to( char *hostaddr ){
 /* * * * * * * * * * * * * * * */
 /* Makes a Z39.50-like prompt package with username and password */
 Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
-    Z_PromptObject1 *p = odr_malloc(odr, sizeof(*p) );
-    Z_ResponseUnit1 *ru = odr_malloc(odr, sizeof(*ru) );
+    Z_PromptObject1 *p = (Z_PromptObject1 *) odr_malloc(odr, sizeof(*p) );
+    Z_ResponseUnit1 *ru = (Z_ResponseUnit1 *) odr_malloc(odr, sizeof(*ru) );
     
     p->which=Z_PromptObject1_response;
-    p->u.response = odr_malloc(odr, sizeof(*(p->u.response)) );
+    p->u.response = (Z_Response1*) odr_malloc(odr, sizeof(*(p->u.response)) );
     p->u.response->num=2;
-    p->u.response->elements=odr_malloc(odr, 
+    p->u.response->elements= (Z_ResponseUnit1 **) odr_malloc(odr, 
              p->u.response->num*sizeof(*(p->u.response->elements)) );
     /* user id, aka "oclc authorization number" */
     p->u.response->elements[0] = ru;
-    ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
+    ru->promptId = (Z_PromptId *) odr_malloc(odr, sizeof(*(ru->promptId) ));
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
-    ru->promptId->u.enumeratedPrompt =  
+    ru->promptId->u.enumeratedPrompt = (Z_PromptIdEnumeratedPrompt *)
         odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
     ru->promptId->u.enumeratedPrompt->type = 
          odr_intdup(odr,Z_PromptIdEnumeratedPrompt_userId);
@@ -323,11 +323,11 @@ Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     ru->which = Z_ResponseUnit1_string ;
     ru->u.string = odr_strdup(odr, args->auth_userid);
     /* password */
-    ru = odr_malloc(odr, sizeof(*ru) );
+    ru = (Z_ResponseUnit1 *) odr_malloc(odr, sizeof(*ru) );
     p->u.response->elements[1] = ru;
-    ru->promptId = odr_malloc(odr, sizeof(*(ru->promptId) ));
+    ru->promptId = (Z_PromptId *) odr_malloc(odr, sizeof(*(ru->promptId) ));
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
-    ru->promptId->u.enumeratedPrompt =  
+    ru->promptId->u.enumeratedPrompt =  (Z_PromptIdEnumeratedPrompt *)
         odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
     ru->promptId->u.enumeratedPrompt->type = 
          odr_intdup(odr,Z_PromptIdEnumeratedPrompt_password);
@@ -340,11 +340,11 @@ Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
 ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     ODR odr_ext = odr_createmem(ODR_ENCODE);
     ODR odr_prt = odr_createmem(ODR_PRINT);
-    ILL_Extension *e = odr_malloc(odr, sizeof(*e));
+    ILL_Extension *e = (ILL_Extension *) odr_malloc(odr, sizeof(*e));
     Z_PromptObject1 *p = makeprompt(args,odr_ext);
     char * buf;
     int siz;
-    Z_External *ext = odr_malloc(odr, sizeof(*ext));
+    Z_External *ext = (Z_External *) odr_malloc(odr, sizeof(*ext));
     ext->direct_reference = odr_getoidbystr(odr,"1.2.840.10003.8.1");
     ext->indirect_reference=0;
     ext->descriptor=0;
@@ -358,8 +358,9 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     z_PromptObject1(odr_prt, &p, 0,0 ); /*!*/
 
     buf= odr_getbuf(odr_ext,&siz,0);
-    ext->u.single_ASN1_type=odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
-    ext->u.single_ASN1_type->buf= odr_malloc(odr, siz);
+    ext->u.single_ASN1_type=(Odr_any *) 
+        odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
+    ext->u.single_ASN1_type->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
     ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
     odr_reset(odr_ext);
@@ -367,7 +368,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
 
     e->identifier = odr_intdup(odr,1);
     e->critical = odr_intdup(odr,0);
-    e->item=odr_malloc(odr,sizeof(*e->item));
+    e->item = (Odr_any *) odr_malloc(odr,sizeof(*e->item));
     if ( ! z_External(odr_ext, &ext,0,0) ) {
         yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
         exit (6);
@@ -375,7 +376,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
     buf= odr_getbuf(odr_ext,&siz,0); 
-    e->item->buf= odr_malloc(odr, siz);
+    e->item->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(e->item->buf,buf, siz );
     e->item->len = e->item->size = siz;
 
@@ -389,11 +390,12 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     /* fields. Here we just null them all out */
     ODR odr_ext = odr_createmem(ODR_ENCODE);
     ODR odr_prt = odr_createmem(ODR_PRINT);
-    ILL_Extension *e = odr_malloc(odr, sizeof(*e));
-    ILL_OCLCILLRequestExtension *oc = odr_malloc(odr_ext, sizeof(*oc));
+    ILL_Extension *e = (ILL_Extension *) odr_malloc(odr, sizeof(*e));
+    ILL_OCLCILLRequestExtension *oc = (ILL_OCLCILLRequestExtension *)
+        odr_malloc(odr_ext, sizeof(*oc));
     char * buf;
     int siz;
-    Z_External *ext = odr_malloc(odr, sizeof(*ext));
+    Z_External *ext = (Z_External *) odr_malloc(odr, sizeof(*ext));
     oc->clientDepartment = 0;
     oc->paymentMethod = 0;
     oc->uniformTitle = 0;
@@ -415,8 +417,9 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     ill_OCLCILLRequestExtension(odr_prt, &oc, 0,0 ); /*!*/
 
     buf= odr_getbuf(odr_ext,&siz,0);
-    ext->u.single_ASN1_type=odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
-    ext->u.single_ASN1_type->buf= odr_malloc(odr, siz);
+    ext->u.single_ASN1_type = (Odr_any*)
+        odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
+    ext->u.single_ASN1_type->buf = (unsigned char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
     ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
     odr_reset(odr_ext);
@@ -424,7 +427,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
 
     e->identifier = odr_intdup(odr,1);
     e->critical = odr_intdup(odr,0);
-    e->item=odr_malloc(odr,sizeof(*e->item));
+    e->item = (Odr_any *) odr_malloc(odr,sizeof(*e->item));
     if ( ! z_External(odr_ext, &ext,0,0) ) {
         yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
         exit (6);
@@ -432,8 +435,8 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
     buf= odr_getbuf(odr_ext,&siz,0); 
-    e->item->buf= odr_malloc(odr, siz);
-    memcpy(e->item->buf,buf, siz );
+    e->item->buf= (unsigned char *) odr_malloc(odr, siz);
+    memcpy(e->item->buf, buf, siz);
     e->item->len = e->item->size = siz;
 
     odr_destroy(odr_prt);
@@ -450,12 +453,12 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     ctl.odr = odr;
     ctl.clientData = args;
     ctl.f = get_ill_element;
-    apdu = odr_malloc( odr, sizeof(*apdu) );
+    apdu = (ILL_APDU *) odr_malloc( odr, sizeof(*apdu) );
     apdu->which=ILL_APDU_ILL_Request;
     req = ill_get_ILLRequest(&ctl, "ill", 0);
     apdu->u.illRequest=req;
     req->num_iLL_request_extensions=2;
-    req->iLL_request_extensions=
+    req->iLL_request_extensions = (ILL_Extension **)
         odr_malloc(odr, req->num_iLL_request_extensions*sizeof(*req->iLL_request_extensions));
     req->iLL_request_extensions[0]=makepromptextension(args,odr);
     req->iLL_request_extensions[1]=makeoclcextension(args,odr);

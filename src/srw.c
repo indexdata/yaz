@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.54 2007-01-03 08:42:15 adam Exp $
+ * $Id: srw.c,v 1.55 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file srw.c
@@ -150,7 +150,7 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
     
     xmlFreeNode(tmp);
     
-    *val = odr_malloc(o, buf->use+1);
+    *val = (char *) odr_malloc(o, buf->use+1);
     memcpy (*val, buf->content, buf->use);
     (*val)[buf->use] = '\0';
 

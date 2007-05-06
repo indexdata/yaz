@@ -1,4 +1,4 @@
-/* $Id: zoom-bug-641.c,v 1.2 2007-01-03 08:42:17 adam Exp $  */
+/* $Id: zoom-bug-641.c,v 1.3 2007-05-06 20:12:21 adam Exp $  */
 
 /** \file zoom-bug641.c
     \brief Program to illustrate bug 641
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         }
         size = statbuf.st_size;
         printf("size=%lu\n", (unsigned long) size);
-        buf = xmalloc(size+1);
+        buf = (char *) xmalloc(size+1);
         while ((n = read(fd, &buf[offset], size)) < size) {
             if (n < 0) {
                 perror("read");

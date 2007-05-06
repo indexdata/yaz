@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.49 2007-03-20 21:37:32 adam Exp $
+ * $Id: marcdisp.c,v 1.50 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -137,7 +137,8 @@ static int marc_exec_leader(const char *leader_spec, char *leader,
 
 static struct yaz_marc_node *yaz_marc_add_node(yaz_marc_t mt)
 {
-    struct yaz_marc_node *n = nmem_malloc(mt->nmem, sizeof(*n));
+    struct yaz_marc_node *n = (struct yaz_marc_node *)
+        nmem_malloc(mt->nmem, sizeof(*n));
     n->next = 0;
     *mt->nodes_pp = n;
     mt->nodes_pp = &n->next;
@@ -256,7 +257,8 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
 
     if (mt->subfield_pp)
     {
-        struct yaz_marc_subfield *n = nmem_malloc(mt->nmem, sizeof(*n));
+        struct yaz_marc_subfield *n = (struct yaz_marc_subfield *)
+            nmem_malloc(mt->nmem, sizeof(*n));
         n->code_data = nmem_strdupn(mt->nmem, code_data, code_data_len);
         n->next = 0;
         /* mark subfield_pp to point to this one, so we append here next */

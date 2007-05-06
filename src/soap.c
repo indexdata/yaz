@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: soap.c,v 1.17 2007-01-03 08:42:15 adam Exp $
+ * $Id: soap.c,v 1.18 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file soap.c
@@ -264,7 +264,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         }
         if (stylesheet)
         {
-            char *content = odr_malloc(o, strlen(stylesheet) + 40);
+            char *content = (char *) odr_malloc(o, strlen(stylesheet) + 40);
             
             xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
             sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);

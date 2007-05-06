@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: mime.c,v 1.3 2007-01-03 08:42:15 adam Exp $
+ * $Id: mime.c,v 1.4 2007-05-06 20:12:20 adam Exp $
  */
 
 /** \file mime.c
@@ -32,7 +32,7 @@ struct yaz_mime_info {
 
 yaz_mime_types yaz_mime_types_create()
 {
-    yaz_mime_types p = xmalloc(sizeof(*p));
+    yaz_mime_types p = (yaz_mime_types) xmalloc(sizeof(*p));
     p->table = 0;
     return p;
 }
@@ -40,7 +40,7 @@ yaz_mime_types yaz_mime_types_create()
 void yaz_mime_types_add(yaz_mime_types t, const char *suffix,
                         const char *mime_type)
 {
-    struct yaz_mime_entry *e = xmalloc(sizeof(*e));
+    struct yaz_mime_entry *e = (struct yaz_mime_entry *) xmalloc(sizeof(*e));
     e->mime_type  = xstrdup(mime_type);
     e->suffix = xstrdup(suffix);
     e->next = t->table;

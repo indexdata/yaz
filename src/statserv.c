@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.48 2007-05-02 11:53:25 adam Exp $
+ * $Id: statserv.c,v 1.49 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -183,7 +183,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
             len += xmlStrlen(p->content);
     }
     /* now allocate for the string */
-    str = nmem_malloc(n, len);
+    str = (unsigned char *) nmem_malloc(n, len);
     *str = '\0'; /* so we can use strcat */
     for (p = ptr; p; p = p->next)
     {
@@ -212,7 +212,8 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
 
 static struct gfs_server * gfs_server_new(void)
 {
-    struct gfs_server *n = nmem_malloc(gfs_nmem, sizeof(*n));
+    struct gfs_server *n = (struct gfs_server *)
+        nmem_malloc(gfs_nmem, sizeof(*n));
     memcpy(&n->cb, &control_block, sizeof(control_block));
     n->next = 0;
     n->host = 0;
@@ -231,7 +232,8 @@ static struct gfs_server * gfs_server_new(void)
 static struct gfs_listen * gfs_listen_new(const char *id, 
                                           const char *address)
 {
-    struct gfs_listen *n = nmem_malloc(gfs_nmem, sizeof(*n));
+    struct gfs_listen *n = (struct gfs_listen *)
+        nmem_malloc(gfs_nmem, sizeof(*n));
     if (id)
         n->id = nmem_strdup(gfs_nmem, id);
     else
@@ -432,7 +434,7 @@ static void xml_config_read(void)
                 else if (!strcmp((const char *) ptr->name, "stylesheet"))
                 {
                     char *s = nmem_dup_xml_content(gfs_nmem, ptr->children);
-                    gfs->stylesheet = 
+                    gfs->stylesheet = (char *)
                         nmem_malloc(gfs_nmem, strlen(s) + 2);
                     sprintf(gfs->stylesheet, "/%s", s);
                 }
@@ -981,7 +983,7 @@ static void *new_session (void *vp)
     association *newas;
     IOCHAN new_chan;
     COMSTACK new_line = (COMSTACK) vp;
-    IOCHAN parent_chan = new_line->user;
+    IOCHAN parent_chan = (IOCHAN) new_line->user;
 
     unsigned cs_get_mask, cs_accept_mask, mask =  
         ((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
@@ -1153,7 +1155,8 @@ statserv_options_block *statserv_getcontrol(void)
         return &control_block;
 #elif YAZ_POSIX_THREADS
     if (init_control_tls)
-        return pthread_getspecific(current_control_tls);
+        return (statserv_options_block *)
+            pthread_getspecific(current_control_tls);
     else
         return &control_block;
 #else

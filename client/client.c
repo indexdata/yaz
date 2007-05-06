@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.336 2007-05-03 08:04:10 adam Exp $
+ * $Id: client.c,v 1.337 2007-05-06 20:12:19 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -173,7 +173,7 @@ int rl_attempted_completion_over = 0;
 #define AVOID_MARC_DECODE 1
 
 #define maxOtherInfosSupported 10
-struct {
+struct eoi {
     int oid[OID_SIZE];
     char* value;
 } extraOtherInfos[maxOtherInfosSupported];
@@ -624,7 +624,7 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf,
             return 0;
         }
         *len = fsize;
-        *buf = odr_malloc(out, fsize);
+        *buf = (char *) odr_malloc(out, fsize);
         if (fread(*buf, 1, fsize, inf) != fsize)
         {
             printf("Unable to read %s\n", fname);
@@ -1260,7 +1260,7 @@ static int send_srw(Z_SRW_PDU *sr)
     Z_GDU *gdu;
     char *path = 0;
 
-    path = odr_malloc(out, 2+strlen(databaseNames[0]));
+    path = (char *) odr_malloc(out, 2+strlen(databaseNames[0]));
     *path = '/';
     strcpy(path+1, databaseNames[0]);
 
@@ -3728,7 +3728,8 @@ static void initialize(void)
     /* If this fails, no problem: we detect cqltrans == 0 later */
 
 #if HAVE_READLINE_READLINE_H
-    rl_attempted_completion_function = (CPPFunction*)readline_completer;
+    rl_attempted_completion_function = 
+        (char **(*)(const char *, int, int)) readline_completer;
 #endif
     for(i = 0; i < maxOtherInfosSupported; ++i) {
         extraOtherInfos[i].oid[0] = -1;
@@ -3863,7 +3864,7 @@ static void http_response(Z_HTTP_Response *hres)
                            soap_handlers);
         if (!ret && soap_package->which == Z_SOAP_generic)
         {
-            Z_SRW_PDU *sr = soap_package->u.generic->p;
+            Z_SRW_PDU *sr = (Z_SRW_PDU *) soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(sr->u.response);
             else if (sr->which == Z_SRW_explain_response)

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marc_read_xml.c,v 1.2 2007-01-03 08:42:15 adam Exp $
+ * $Id: marc_read_xml.c,v 1.3 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -74,7 +74,7 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)
                         ctrl_data_len += strlen((const char *)p->content);
-                ctrl_data_buf = nmem_malloc(nmem, ctrl_data_len+1);
+                ctrl_data_buf = (char *) nmem_malloc(nmem, ctrl_data_len+1);
                 strcpy(ctrl_data_buf, (const char *)ptr_code->content);
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)

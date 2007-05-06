@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.5 2007-04-16 21:53:08 adam Exp $ */
+/* $Id: oid_db.h,v 1.6 2007-05-06 20:12:20 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -142,11 +142,11 @@ struct yaz_oid_entry {
     char *name;
 };
 
+YAZ_END_CDECL
+
 #define Z3950_PREFIX 1, 2, 840, 10003
 
 #include <yaz/oid_std.h>
-
-YAZ_END_CDECL
 
 #endif
 /*

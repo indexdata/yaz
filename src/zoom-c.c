@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.128 2007-05-05 11:55:22 adam Exp $
+ * $Id: zoom-c.c,v 1.129 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.128 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.129 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3486,7 +3486,7 @@ static void interpret_otherinformation_field(ZOOM_connection c,
 
 
 static void set_init_option(const char *name, void *clientData) {
-    ZOOM_connection c = clientData;
+    ZOOM_connection c = (ZOOM_connection) clientData;
     char buf[80];
 
     sprintf(buf, "init_opt_%.70s", name);
@@ -4116,7 +4116,7 @@ ZOOM_API(int)
 
 static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
 {
-    WRBUF wrbuf = client_data;
+    WRBUF wrbuf = (WRBUF) client_data;
     wrbuf_puts(wrbuf, buf);
 }
 

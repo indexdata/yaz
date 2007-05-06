@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: xmlquery.c,v 1.14 2007-04-13 09:55:21 adam Exp $
+ * $Id: xmlquery.c,v 1.15 2007-05-06 20:12:20 adam Exp $
  */
 
 /** \file xmlquery.c
@@ -669,7 +669,7 @@ void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
     *zs = (Z_RPNStructure *) odr_malloc(odr, sizeof(Z_RPNStructure));
     if (!xmlStrcmp(ptr->name, BAD_CAST "operator"))
     {
-        Z_Complex *zc = odr_malloc(odr, sizeof(Z_Complex));
+        Z_Complex *zc = (Z_Complex *) odr_malloc(odr, sizeof(Z_Complex));
         
         (*zs)->which = Z_RPNStructure_complex;
         (*zs)->u.complex = zc;
@@ -780,7 +780,7 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
     }
 }
 
-void yaz_xml2query(const void *xmlnodep, Z_Query **query, ODR odr,
+void yaz_xml2query(const xmlNode *xmlnodep, Z_Query **query, ODR odr,
                    int *error_code, const char **addinfo)
 {
     yaz_xml2query_(xmlnodep, query, odr, error_code, addinfo);

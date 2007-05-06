@@ -48,7 +48,7 @@
 /* CCL - lexical analysis
  * Europagate, 1995
  *
- * $Id: ccltoken.c,v 1.13 2007-05-01 12:54:44 adam Exp $
+ * $Id: ccltoken.c,v 1.14 2007-05-06 20:12:20 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -288,7 +288,7 @@ void ccl_token_del(struct ccl_token *list)
 
 static const char **create_ar(const char *v1, const char *v2)
 {
-    const char **a = xmalloc(3 * sizeof(*a));
+    const char **a = (const char **) xmalloc(3 * sizeof(*a));
     a[0] = xstrdup(v1);
     if (v2)
     {

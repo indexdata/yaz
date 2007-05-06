@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.55 2007-01-03 08:42:15 adam Exp $
+ * $Id: srwutil.c,v 1.56 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -47,7 +47,7 @@ static void yaz_array_to_uri_ex(char **path, ODR o, char **name, char **value,
     size_t i, szp = 0, sz = extra_args ? 1+strlen(extra_args) : 1;
     for(i = 0; name[i]; i++)
         sz += strlen(name[i]) + 3 + strlen(value[i]) * 3;
-    *path = odr_malloc(o, sz);
+    *path = (char *) odr_malloc(o, sz);
     
     for(i = 0; name[i]; i++)
     {
@@ -98,8 +98,8 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
         cp++;
         no++;
     }
-    *name = odr_malloc(o, no * sizeof(char*));
-    *val = odr_malloc(o, no * sizeof(char*));
+    *name = (char **) odr_malloc(o, no * sizeof(char*));
+    *val = (char **) odr_malloc(o, no * sizeof(char*));
 
     for (no = 0; *path; no++)
     {
@@ -109,7 +109,7 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
         if (!p1)
             break;
 
-        (*name)[no] = odr_malloc(o, (p1-path)+1);
+        (*name)[no] = (char *) odr_malloc(o, (p1-path)+1);
         memcpy((*name)[no], path, p1-path);
         (*name)[no][p1-path] = '\0';
 
@@ -117,7 +117,7 @@ int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
         p1 = strchr(path, '&');
         if (!p1)
             p1 = strlen(path) + path;
-        (*val)[no] = ret = odr_malloc(o, p1 - path + 1);
+        (*val)[no] = ret = (char *) odr_malloc(o, p1 - path + 1);
         while (*path && *path != '&')
         {
             if (*path == '+')
@@ -632,10 +632,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->u.request->database = db;
 
-            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package) = (Z_SOAP *)
+                odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
             
-            (*soap_package)->u.generic =
+            (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
             
             (*soap_package)->u.generic->p = sr;
@@ -660,10 +661,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->u.explain_request->stylesheet = stylesheet;
 
-            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package) = (Z_SOAP *)
+                odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
             
-            (*soap_package)->u.generic =
+            (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
             
             (*soap_package)->u.generic->p = sr;
@@ -712,10 +714,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->u.scan_request->stylesheet = stylesheet;
 
-            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package) = (Z_SOAP *)
+                odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
             
-            (*soap_package)->u.generic =
+            (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
             
             (*soap_package)->u.generic->p = sr;
@@ -740,10 +743,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
             sr->u.explain_request->stylesheet = stylesheet;
 
-            (*soap_package) = odr_malloc(decode, sizeof(**soap_package));
+            (*soap_package) = (Z_SOAP *)
+                odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
             
-            (*soap_package)->u.generic =
+            (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
             
             (*soap_package)->u.generic->p = sr;
@@ -1109,7 +1113,7 @@ static void add_val_int(ODR o, char **name, char **value,  int *i,
     if (val)
     {
         name[*i] = a_name;
-        value[*i] = odr_malloc(o, 30);
+        value[*i] = (char *) odr_malloc(o, 30);
         sprintf(value[*i], "%d", *val);
         (*i)++;
     }
@@ -1228,9 +1232,10 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     hreq->method = "GET";
     
-    path = odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4
-                      +(srw_pdu->extra_args ? strlen(srw_pdu->extra_args) : 0)
-        );
+    path = (char *)
+        odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4
+                   +(srw_pdu->extra_args ? strlen(srw_pdu->extra_args) : 0));
+
     sprintf(path, "%s?%s", hreq->path, uri_args);
     hreq->path = path;
 

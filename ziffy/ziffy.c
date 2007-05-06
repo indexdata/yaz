@@ -404,12 +404,12 @@ int main (int argc, char * argv [])
         if (filter)
           {
             strcat (filter, " ");
-            filter = realloc (filter, roomsize);
+            filter = (char *) realloc (filter, roomsize);
             strcat (filter, argv [optind ++]);
           }
         else
           {
-            filter = malloc (roomsize);
+            filter = (char *) malloc (roomsize);
             strcpy (filter, argv [optind ++]);
           }
       }

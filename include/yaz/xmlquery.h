@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: xmlquery.h,v 1.9 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: xmlquery.h,v 1.10 2007-05-06 20:12:20 adam Exp $ */
 
 /** \file xmlquery.h
     \brief Query / XML conversions
@@ -42,8 +42,8 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp);
 YAZ_EXPORT void yaz_rpnquery2xml(const Z_RPNQuery *rpn, xmlDocPtr *docp);
 
-YAZ_EXPORT void yaz_xml2query(const void *xmlnodep, Z_Query **query, ODR odr,
-                              int *error_code, const char **addinfo);
+YAZ_EXPORT void yaz_xml2query(const xmlNode *xmlnodep, Z_Query **query,
+                              ODR odr, int *error_code, const char **addinfo);
 
 YAZ_END_CDECL
 

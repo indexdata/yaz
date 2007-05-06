@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: nmemsdup.c,v 1.10 2007-01-03 08:42:15 adam Exp $
+ * $Id: nmemsdup.c,v 1.11 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -15,10 +15,7 @@
 #endif
 
 #include <string.h>
-#include <yaz/nmem.h>
-#if YAZ_HAVE_XML2
-#include <libxml/tree.h>
-#endif
+#include <yaz/nmem_xml.h>
 
 char *nmem_strdup (NMEM mem, const char *src)
 {
@@ -73,7 +70,7 @@ void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
     else
     {
         size_t i = 0;
-        *darray = nmem_malloc(nmem, *num * sizeof(**darray));
+        *darray = (char **) nmem_malloc(nmem, *num * sizeof(**darray));
         for (cp = dstr; *cp; )
         {
             const char *cp0;

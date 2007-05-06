@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-socket.c,v 1.3 2007-02-28 11:14:56 mike Exp $
+ * $Id: zoom-socket.c,v 1.4 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file zoom-socket.c
@@ -136,8 +136,9 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_event_sys_poll(int no, ZOOM_connection *cs)
 {
-    struct pollfd *pollfds = xmalloc(no * sizeof *pollfds);
-    ZOOM_connection *poll_cs = xmalloc(no * sizeof *poll_cs);
+    struct pollfd *pollfds = (struct pollfd *) xmalloc(no * sizeof *pollfds);
+    ZOOM_connection *poll_cs = (ZOOM_connection *)
+        xmalloc(no * sizeof *poll_cs);
     int i, r;
     int nfds = 0;
     int timeout = 30;

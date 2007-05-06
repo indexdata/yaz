@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: timing.c,v 1.4 2007-01-05 14:05:24 adam Exp $
+ * $Id: timing.c,v 1.5 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -47,7 +47,7 @@ struct yaz_timing {
 
 yaz_timing_t yaz_timing_create(void)
 {
-    yaz_timing_t t = xmalloc(sizeof(*t));
+    yaz_timing_t t = (yaz_timing_t) xmalloc(sizeof(*t));
     yaz_timing_start(t);
     return t;
 }

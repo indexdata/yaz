@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zget.c,v 1.14 2007-04-16 21:53:09 adam Exp $
+ * $Id: zget.c,v 1.15 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file zget.c
@@ -562,7 +562,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_userInfo1;
 
-    u = odr_malloc(odr, sizeof *u);
+    u = (Z_OtherInformation *) odr_malloc(odr, sizeof *u);
     x->u.userInfo1 = u;
     u->num_elements = 1;
     u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
@@ -603,7 +603,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     int octet_len;
     ODR encode;
 
-    u = odr_malloc(odr, sizeof *u);
+    u = (Z_OtherInformation *) odr_malloc(odr, sizeof *u);
     u->num_elements = 1;
     u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
     u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
@@ -642,7 +642,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_octet;
     x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));
-    x->u.octet_aligned->buf = odr_malloc(odr, octet_len);
+    x->u.octet_aligned->buf = (unsigned char *) odr_malloc(odr, octet_len);
     memcpy(x->u.octet_aligned->buf, octet_buf, octet_len);
     x->u.octet_aligned->len = octet_len;
 

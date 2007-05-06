@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.6 2007-04-18 08:08:02 adam Exp $
+ * $Id: oid_db.c,v 1.7 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -127,14 +127,15 @@ int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
 
 	while (oid_db->next)
 	    oid_db = oid_db->next;
-	oid_db->next = xmalloc(sizeof(*oid_db->next));
+	oid_db->next = (struct yaz_oid_db *) xmalloc(sizeof(*oid_db->next));
 	oid_db = oid_db->next;
 
 	oid_db->next = 0;
 	oid_db->xmalloced = 1;
-	oid_db->entries = ent = xmalloc(2 * sizeof(*ent));
+	oid_db->entries = ent = (struct yaz_oid_entry *) xmalloc(2 * sizeof(*ent));
 
-        alloc_oid = xmalloc(sizeof(*alloc_oid) * (oid_oidlen(new_oid)+1));
+        alloc_oid = (int *)
+            xmalloc(sizeof(*alloc_oid) * (oid_oidlen(new_oid)+1));
 	oid_oidcpy(alloc_oid, new_oid);
         ent[0].oid = alloc_oid;
 	ent[0].name = xstrdup(name);
@@ -150,7 +151,7 @@ int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
 
 yaz_oid_db_t yaz_oid_db_new(void)
 {
-    yaz_oid_db_t p = xmalloc(sizeof(*p));
+    yaz_oid_db_t p = (yaz_oid_db_t) xmalloc(sizeof(*p));
     p->entries = 0;
     p->next = 0;
     p->xmalloced = 1;

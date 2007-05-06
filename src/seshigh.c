@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.117 2007-05-02 12:36:34 adam Exp $
+ * $Id: seshigh.c,v 1.118 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -534,14 +534,15 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
         
         if (sr->username)
         {
-            Z_IdAuthentication *auth = odr_malloc(assoc->decode, sizeof(*auth));
+            Z_IdAuthentication *auth = (Z_IdAuthentication *)
+                odr_malloc(assoc->decode, sizeof(*auth));
             int len;
 
             len = strlen(sr->username) + 1;
             if (sr->password) 
                 len += strlen(sr->password) + 2;
             auth->which = Z_IdAuthentication_open;
-            auth->u.open = odr_malloc(assoc->decode, len);
+            auth->u.open = (char *) odr_malloc(assoc->decode, len);
             strcpy(auth->u.open, sr->username);
             if (sr->password && *sr->password)
             {
@@ -654,7 +655,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         else
         {
             rr->len = wrbuf_len(output_record);
-            rr->record = odr_malloc(rr->stream, rr->len);
+            rr->record = (char *) odr_malloc(rr->stream, rr->len);
             memcpy(rr->record, wrbuf_buf(output_record), rr->len);
         }
         wrbuf_destroy(output_record);
@@ -742,7 +743,7 @@ static int srw_bend_fetch(association *assoc, int pos,
         if (rr.errstring)
             len += strlen(rr.errstring);
 
-        record->recordData_buf = odr_malloc(o, len);
+        record->recordData_buf = (char *) odr_malloc(o, len);
         
         sprintf(record->recordData_buf, "<diagnostic "
                 "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
@@ -1151,7 +1152,7 @@ static void srw_bend_search(association *assoc, request *req,
 static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
 {
 #if YAZ_HAVE_XML2
-    xmlNodePtr ptr = rr->server_node_ptr;
+    xmlNodePtr ptr = (xmlNode *) rr->server_node_ptr;
     if (!ptr)
         return 0;
     for (ptr = ptr->children; ptr; ptr = ptr->next)
@@ -1267,8 +1268,9 @@ static void srw_bend_scan(association *assoc, request *req,
         if (bsrr->num_entries > 0) 
         {
             int i;
-            bsrr->entries = odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
-                                       bsrr->num_entries);
+            bsrr->entries = (struct scan_entry *) 
+                odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
+                           bsrr->num_entries);
             for (i = 0; i<bsrr->num_entries; i++)
             {
                 bsrr->entries[i].term = 0;
@@ -1300,7 +1302,8 @@ static void srw_bend_scan(association *assoc, request *req,
             int srw_error;
             bsrr->scanClause = 0;
             bsrr->attributeset = 0;
-            bsrr->term = odr_malloc(assoc->decode, sizeof(*bsrr->term));
+            bsrr->term = (Z_AttributesPlusTerm *)
+                odr_malloc(assoc->decode, sizeof(*bsrr->term));
             srw_error = cql2pqf_scan(assoc->encode,
                                      srw_req->scanClause.cql,
                                      assoc->server->cql_transform,
@@ -1671,7 +1674,7 @@ static char *read_file(const char *fname, ODR o, int *sz)
     fseek(inf, 0L, SEEK_END);
     *sz = ftell(inf);
     rewind(inf);
-    buf = odr_malloc(o, *sz);
+    buf = (char *) odr_malloc(o, *sz);
     fread(buf, 1, *sz, inf);
     fclose(inf);
     return buf;     
@@ -2219,7 +2222,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     else
     {
         /* no backend. return error */
-        binitres = odr_malloc(assoc->encode, sizeof(*binitres));
+        binitres = (bend_initresult *)
+            odr_malloc(assoc->encode, sizeof(*binitres));
         binitres->errstring = 0;
         binitres->errcode = YAZ_BIB1_PERMANENT_SYSTEM_ERROR;
         iochan_settimeout(assoc->client_chan, 10);
@@ -2354,7 +2358,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.117 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.118 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3021,8 +3025,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     if (bsrr->num_entries > 0) 
     {
         int i;
-        bsrr->entries = odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
-                                   bsrr->num_entries);
+        bsrr->entries = (struct scan_entry *)
+            odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
+                       bsrr->num_entries);
         for (i = 0; i<bsrr->num_entries; i++)
         {
             bsrr->entries[i].term = 0;

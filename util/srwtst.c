@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwtst.c,v 1.7 2007-04-17 20:26:18 adam Exp $
+ * $Id: srwtst.c,v 1.8 2007-05-06 20:12:20 adam Exp $
  */
 
 #include <stdlib.h>
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         if (soap_package->which == Z_SOAP_generic &&
             soap_package->u.generic->no == 0)
         {
-            Z_SRW_PDU *sr = soap_package->u.generic->p;
+            Z_SRW_PDU *sr = (Z_SRW_PDU *) soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_request)
             { 
                 Z_SRW_searchRetrieveRequest *req = sr->u.request;

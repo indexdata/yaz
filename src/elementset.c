@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: elementset.c,v 1.3 2007-01-03 08:42:15 adam Exp $
+ * $Id: elementset.c,v 1.4 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file elementset.c
@@ -33,10 +33,12 @@ const char *yaz_get_esn(Z_RecordComposition *comp)
 
 void yaz_set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
 {
-    Z_RecordComposition *comp = nmem_malloc(nmem, sizeof(*comp));
+    Z_RecordComposition *comp = (Z_RecordComposition *)
+        nmem_malloc(nmem, sizeof(*comp));
     
     comp->which = Z_RecordComp_simple;
-    comp->u.simple = nmem_malloc(nmem, sizeof(*comp->u.simple));
+    comp->u.simple = (Z_ElementSetNames *)
+        nmem_malloc(nmem, sizeof(*comp->u.simple));
     comp->u.simple->which = Z_ElementSetNames_generic;
     comp->u.simple->u.generic = nmem_strdup(nmem, esn);
     *comp_p = comp;

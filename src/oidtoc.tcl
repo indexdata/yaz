@@ -2,7 +2,7 @@
 # Copyright (c) Index Data 2006-2007
 # See the file LICENSE for details.
 #
-# $Id: oidtoc.tcl,v 1.3 2007-04-24 12:55:15 adam Exp $
+# $Id: oidtoc.tcl,v 1.4 2007-05-06 20:12:20 adam Exp $
 #
 # Converts a CSV file with Object identifiers to C
 
@@ -65,7 +65,7 @@ proc oid_to_c {srcdir input cname hname} {
 	set lname [string map {- _ . _ { } _ ( {} ) {}} $lname]
 	set prefix [string tolower [lindex $oid 0]]
 	
-	puts -nonewline $cfile "YAZ_EXPORT const int yaz_oid_${prefix}_${lname}\[\] = \{"
+	puts -nonewline $cfile "YAZ_EXPORT extern const int yaz_oid_${prefix}_${lname}\[\] = \{"
 	puts -nonewline $cfile [string map {. ,} [lindex $oid 1]]
 	puts $cfile ",-1\};"
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.19 2007-04-12 20:47:28 adam Exp $
+ * $Id: retrieval.c,v 1.20 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -73,7 +73,7 @@ static void yaz_retrieval_reset(yaz_retrieval_t p);
 
 yaz_retrieval_t yaz_retrieval_create()
 {
-    yaz_retrieval_t p = xmalloc(sizeof(*p));
+    yaz_retrieval_t p = (yaz_retrieval_t) xmalloc(sizeof(*p));
     p->odr = odr_createmem(ODR_ENCODE);
     p->nmem = odr_getmem(p->odr);
     p->wr_error = wrbuf_alloc();
@@ -113,7 +113,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
 {
 
     struct _xmlAttr *attr;
-    struct yaz_retrieval_elem *el = nmem_malloc(p->nmem, sizeof(*el));
+    struct yaz_retrieval_elem *el = (struct yaz_retrieval_elem *)
+        nmem_malloc(p->nmem, sizeof(*el));
 
     el->syntax = 0;
     el->identifier = 0;

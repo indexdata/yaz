@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tokenizer.c,v 1.2 2007-04-27 10:09:45 adam Exp $
+ * $Id: tokenizer.c,v 1.3 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -44,7 +44,7 @@ void yaz_tok_cfg_single_tokens(yaz_tok_cfg_t t, const char *simple)
 
 yaz_tok_cfg_t yaz_tok_cfg_create(void)
 {
-    yaz_tok_cfg_t t = xmalloc(sizeof(*t));
+    yaz_tok_cfg_t t = (yaz_tok_cfg_t) xmalloc(sizeof(*t));
     t->white_space = xstrdup(" \t\r\n");
     t->single_tokens = xstrdup("");
     t->quote_tokens_begin = xstrdup("\"");
@@ -103,7 +103,7 @@ yaz_tok_parse_t yaz_tok_parse_create(yaz_tok_cfg_t t,
                                      yaz_tok_get_byte_t h,
                                      void *vp)
 {
-    yaz_tok_parse_t tp = xmalloc(sizeof(*tp));
+    yaz_tok_parse_t tp = (yaz_tok_parse_t) xmalloc(sizeof(*tp));
 
     tp->cfg = t;
     tp->cfg->ref_count++;

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.9 2007-04-12 13:52:57 adam Exp $
+ * $Id: querytowrbuf.c,v 1.10 2007-05-06 20:12:20 adam Exp $
  */
 
 /** \file querytowrbuf.c
@@ -230,6 +230,26 @@ void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
     /* should print attr set here */
     wrbuf_printf(b, "RPN ");
     yaz_apt_to_wrbuf(b, zapt);
+}
+
+void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags)
+{
+    /* we only dump the first diag - that keeps the log cleaner. */
+    wrbuf_printf(b," ERROR ");
+    if (diags[0]->which != Z_DiagRec_defaultFormat)
+        wrbuf_printf(b,"(diag not in default format?)");
+    else
+    {
+        Z_DefaultDiagFormat *e=diags[0]->u.defaultFormat;
+        if (e->condition)
+            wrbuf_printf(b, "%d ",*e->condition);
+        else
+            wrbuf_printf(b, "?? ");
+        if ((e->which==Z_DefaultDiagFormat_v2Addinfo) && (e->u.v2Addinfo))
+            wrbuf_printf(b,"%s ",e->u.v2Addinfo);
+        else if ((e->which==Z_DefaultDiagFormat_v3Addinfo) && (e->u.v3Addinfo))
+            wrbuf_printf(b,"%s ",e->u.v3Addinfo);
+    }
 }
 
 /*

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.15 2007-03-19 14:40:07 adam Exp $
+ * $Id: record_conv.c,v 1.16 2007-05-06 20:12:20 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -107,7 +107,7 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
 
 yaz_record_conv_t yaz_record_conv_create()
 {
-    yaz_record_conv_t p = xmalloc(sizeof(*p));
+    yaz_record_conv_t p = (yaz_record_conv_t) xmalloc(sizeof(*p));
     p->nmem = nmem_create();
     p->wr_error = wrbuf_alloc();
     p->rules = 0;
@@ -136,7 +136,8 @@ void yaz_record_conv_destroy(yaz_record_conv_t p)
 static struct yaz_record_conv_rule *add_rule(yaz_record_conv_t p,
                                              enum YAZ_RECORD_CONV_RULE type)
 {
-    struct yaz_record_conv_rule *r = nmem_malloc(p->nmem, sizeof(*r));
+    struct yaz_record_conv_rule *r = (struct yaz_record_conv_rule *)
+        nmem_malloc(p->nmem, sizeof(*r));
     r->which = type;
     r->next = 0;
     *p->rules_p = r;

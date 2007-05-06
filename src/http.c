@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: http.c,v 1.1 2007-01-11 10:55:57 adam Exp $
+ * $Id: http.c,v 1.2 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -159,7 +159,8 @@ void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
     const char *l = "Content-Type";
     if (charset)
     {
-        char *ctype = odr_malloc(o, strlen(content_type)+strlen(charset) + 15);
+        char *ctype = (char *)
+            odr_malloc(o, strlen(content_type)+strlen(charset) + 15);
         sprintf(ctype, "%s; charset=%s", content_type, charset);
         z_HTTP_header_add(o, hp, l, ctype);
     }

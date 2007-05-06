@@ -48,7 +48,7 @@
 /* CCL qualifiers
  * Europagate, 1995
  *
- * $Id: cclqual.c,v 1.11 2007-05-01 12:54:44 adam Exp $
+ * $Id: cclqual.c,v 1.12 2007-05-06 20:12:20 adam Exp $
  *
  * Old Europagate Log:
  *
@@ -153,7 +153,7 @@ void ccl_qual_add_special_ar(CCL_bibset bibset, const char *n,
 void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp)
 {
     size_t no = 2;
-    char **vlist = xmalloc(no * sizeof(*vlist));
+    char **vlist = (char **) xmalloc(no * sizeof(*vlist));
     yaz_tok_cfg_t yt = yaz_tok_cfg_create();
     int t;
     size_t i = 0;
@@ -166,7 +166,7 @@ void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp)
     while (t == YAZ_TOK_STRING)
     {
         if (i >= no-1)
-            vlist = xrealloc(vlist, (no = no * 2) * sizeof(*vlist));
+            vlist = (char **) xrealloc(vlist, (no = no * 2) * sizeof(*vlist));
         vlist[i++] = xstrdup(yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp); 
     }

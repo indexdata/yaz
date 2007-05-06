@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: fhistory.c,v 1.3 2007-03-19 22:17:41 adam Exp $
+ * $Id: fhistory.c,v 1.4 2007-05-06 20:12:19 adam Exp $
  */
 /** \file fhistory.c
  *  \brief file history implementation
@@ -26,7 +26,7 @@ struct file_history {
 
 file_history_t file_history_new()
 {
-    file_history_t fh = xmalloc(sizeof(*fh));
+    file_history_t fh = (file_history_t) xmalloc(sizeof(*fh));
     fh->wr = wrbuf_alloc();
     return fh;
 }

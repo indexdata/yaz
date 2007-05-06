@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.50 2007-04-17 20:26:18 adam Exp $
+ * $Id: log.c,v 1.51 2007-05-06 20:12:20 adam Exp $
  */
 
 /**
@@ -505,7 +505,7 @@ static int define_module_bit(const char *name)
     }
     mask_names[i].mask = next_log_bit;
     next_log_bit = next_log_bit<<1;
-    mask_names[i].name = malloc(strlen(name)+1);
+    mask_names[i].name = (char *) malloc(strlen(name)+1);
     strcpy(mask_names[i].name, name);
     mask_names[i+1].name = NULL;
     mask_names[i+1].mask = 0;

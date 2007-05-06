@@ -69,14 +69,15 @@ static void append_removed_item(ccl_stop_words_t csw,
                                 const char *qname,
                                 const char *t, size_t len)
 {
-    struct ccl_stop_info *csi = nmem_malloc(csw->nmem, sizeof(*csi));
+    struct ccl_stop_info *csi = (struct ccl_stop_info *)
+        nmem_malloc(csw->nmem, sizeof(*csi));
     struct ccl_stop_info **csip = &csw->removed_items;
     if (qname)
         csi->qualname = nmem_strdup(csw->nmem, qname);
     else
         csi->qualname = 0;
 
-    csi->term = nmem_malloc(csw->nmem, len+1);
+    csi->term = (char *) nmem_malloc(csw->nmem, len+1);
     memcpy(csi->term, t, len);
     csi->term[len] = '\0';
     csi->next = 0;
@@ -90,7 +91,7 @@ static void append_removed_item(ccl_stop_words_t csw,
 ccl_stop_words_t ccl_stop_words_create(void)
 {
     NMEM nmem = nmem_create();
-    ccl_stop_words_t csw = xmalloc(sizeof(*csw));
+    ccl_stop_words_t csw = (ccl_stop_words_t) xmalloc(sizeof(*csw));
     csw->nmem = nmem;
     csw->removed_items = 0;
     csw->blank_chars = xstrdup(" \r\n\t");
