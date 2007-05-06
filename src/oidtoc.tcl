@@ -2,7 +2,7 @@
 # Copyright (c) Index Data 2006-2007
 # See the file LICENSE for details.
 #
-# $Id: oidtoc.tcl,v 1.4 2007-05-06 20:12:20 adam Exp $
+# $Id: oidtoc.tcl,v 1.5 2007-05-06 20:18:29 adam Exp $
 #
 # Converts a CSV file with Object identifiers to C
 
@@ -48,8 +48,6 @@ proc oid_to_c {srcdir input cname hname} {
     puts $hfile "\#ifndef OID_STD_H"
     puts $hfile "\#define OID_STD_H"
 
-    # Define this. So that we don't get duplicate declartions with MSVC
-    puts $cfile "\#define OID_STD_H"
     puts $cfile "\#include <yaz/oid_db.h>"
     puts $cfile ""
     # To avoid LNK4049
