@@ -1,4 +1,4 @@
-Fixed external handling for SUTRS and Explain records (bug appered in 3.0
+Fixed external handling for SUTRS and Explain records (bug appeared in 3.0
 series).
 
 Added partial support for ISO5428-1984, which is the "Greek alphabet coded
