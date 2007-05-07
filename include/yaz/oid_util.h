@@ -24,15 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_util.h,v 1.2 2007-04-12 20:47:27 adam Exp $ */
+/* $Id: oid_util.h,v 1.3 2007-05-07 12:04:06 adam Exp $ */
 
 /**
  * \file oid_util.h
- * \brief Header for OID database
- *
- * More or less protocol-transparent OID database.
- * We could (and should?) extend this so that the user app can add new
- * entries to the list at initialization.
+ * \brief Header for OID basic functions
  */
 #ifndef OID_UTIL_H
 #define OID_UTIL_H
