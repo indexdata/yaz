@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.6 2007-05-06 20:12:20 adam Exp $ */
+/* $Id: oid_db.h,v 1.7 2007-05-07 12:06:09 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -135,6 +135,19 @@ int yaz_oid_is_iso2709(const int *oid);
 YAZ_EXPORT
 int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
                 const int *new_oid);
+
+
+/** \brief creates empty OID database
+    \returns database
+*/
+YAZ_EXPORT
+yaz_oid_db_t yaz_oid_db_new(void);
+
+/** \brief destroys OID database
+    \param oid_db database
+*/
+YAZ_EXPORT
+void yaz_oid_db_destroy(yaz_oid_db_t oid_db);
 
 struct yaz_oid_entry {
     int oclass;
