@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.78 2007-01-22 12:14:09 adam Exp $
+## $Id: Makefile.am,v 1.79 2007-05-07 13:18:32 adam Exp $
 
 docdir=$(datadir)/doc/@PACKAGE@
 
@@ -8,7 +8,8 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
  future.xml client.xml ziffy.xml zoom.xml credits.xml gfs-options.xml \
- yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml
+ yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
+ std-oid-table.xml
 
 HTMLFILES = index.html
 
@@ -26,6 +27,9 @@ man_MANS = $(MANFILES)
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA)
+
+std-oid-table.xml: $(srcdir)/../src/oid.csv
+	$(TCLSH) $(srcdir)/../src/oidtoc.tcl $(srcdir) $(srcdir)/../src/oid.csv std-oid-table.xml
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-client-man.xml

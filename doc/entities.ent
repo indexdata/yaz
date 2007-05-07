@@ -1,4 +1,4 @@
-<!-- $Id: entities.ent,v 1.5 2007-01-03 08:42:14 adam Exp $ -->
+<!-- $Id: entities.ent,v 1.6 2007-05-07 13:18:32 adam Exp $ -->
 <!ENTITY yaz "YAZ">
 <!ENTITY bookinfo SYSTEM "bookinfo.xml">
 <!ENTITY chap-introduction SYSTEM "introduction.xml">
@@ -13,6 +13,7 @@
 <!ENTITY chap-comstack SYSTEM "comstack.xml">
 <!ENTITY chap-frontend SYSTEM "frontend.xml">
 <!ENTITY chap-future SYSTEM "future.xml">
+<!ENTITY std-oid-table SYSTEM "std-oid-table.xml">
 <!ENTITY app-license SYSTEM "license.xml">
 <!ENTITY app-indexdata SYSTEM "indexdata.xml">
 <!ENTITY app-credits SYSTEM "credits.xml">

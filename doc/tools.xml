@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.60 2007-05-04 12:36:56 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.61 2007-05-07 13:18:32 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1679,15 +1679,21 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       string (here Bib-1) is supplied by a user or configuration.
      </para>
     </example>
+
+   </sect2>
+   <sect2 id="tools.oid.std"><title>Standard OIDs</title>
      
     <para>
      All the object identifers in the standard OID database as returned
      by <function>yaz_oid_std</function> can referenced directly in a
-     program. Each constant OID is prefixed with <literal>yaz_oid_</literal> -
+     program as a constant OID.
+     Each constant OID is prefixed with <literal>yaz_oid_</literal> -
      followed by OID class (lowercase) - then by OID name (normalized and
      lowercase).
     </para>
     <para>
+     See <xref linkend="list-oids"/> for list of all object identifiers
+     built into YAZ.
      These are declared in <filename>yaz/oid_std.h</filename> but are
      included by <filename>yaz/oid_db.h</filename> as well.
     </para>

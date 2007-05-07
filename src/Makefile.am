@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.67 2007-05-01 12:22:11 adam Exp $
+## $Id: Makefile.am,v 1.68 2007-05-07 13:18:32 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -42,7 +42,7 @@ marc8r.c: charconv.tcl codetables.xml
 
 # Generate OID database from CSV
 oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
-	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir) oid.csv oid_std.c oid_std.h
+	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir) $(srcdir)/oid.csv oid_std.c oid_std.h
 
 # Generate diagnostics from CSVs
 diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: csvtobib1.tcl bib1.csv
