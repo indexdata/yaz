@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.108 2007-05-08 08:27:14 adam Exp $
+; $Id: yaz.nsi,v 1.109 2007-05-08 08:39:00 adam Exp $
 
 !define VERSION "3.0.2"
 
@@ -117,7 +117,7 @@ Section "YAZ Development" YAZ_Development
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
-	File ..\lib\yaz.lib
+	File ..\lib\yaz3.lib
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation
