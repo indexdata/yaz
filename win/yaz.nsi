@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.107 2007-05-01 12:35:17 adam Exp $
+; $Id: yaz.nsi,v 1.108 2007-05-08 08:27:14 adam Exp $
 
-!define VERSION "3.0.0"
+!define VERSION "3.0.2"
 
 ; Microsoft runtime CRT
 ; VS 2003

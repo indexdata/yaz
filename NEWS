@@ -1,3 +1,5 @@
+--- 3.0.2 2007/05/08
+
 For OIDs use Odr_oid type everywhere, i.e. do not assume Odr_oid=int.
 
 For OID class, use oid_class consistently.
