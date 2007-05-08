@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.129 2007-05-06 20:12:20 adam Exp $
+ * $Id: zoom-c.c,v 1.130 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -47,9 +47,9 @@ static char *cql2pqf(ZOOM_connection c, const char *cql);
  * This wrapper is just for logging failed lookups.  It would be nicer
  * if it could cause failure when a lookup fails, but that's hard.
  */
-static int *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
+static Odr_oid *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
                                      int oid_class, const char *str) {
-    int *res = yaz_string_to_oid_odr(yaz_oid_std(), oid_class, str,
+    Odr_oid *res = yaz_string_to_oid_odr(yaz_oid_std(), oid_class, str,
                                      c->odr_out);
     if (res == 0)
         yaz_log(YLOG_WARN, "%p OID lookup (%d, '%s') failed",
@@ -1225,7 +1225,7 @@ static void otherInfo_attach(ZOOM_connection c, Z_APDU *a, ODR out)
     for (i = 0; i<200; i++)
     {
         size_t len;
-        int *oid;
+        Odr_oid *oid;
         Z_OtherInformation **oi;
         char buf[80];
         const char *val;
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.129 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.130 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1666,7 +1666,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
 
 static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
 {
-    int oclass;
+    oid_class oclass;
     char *addinfo = 0;
 
     switch (r->which)
@@ -1889,7 +1889,7 @@ ZOOM_API(int)
         if (diag_rec->which == Z_DiagRec_defaultFormat)
         {
             Z_DefaultDiagFormat *ddf = diag_rec->u.defaultFormat;
-            int oclass;
+            oid_class oclass;
     
             error = *ddf->condition;
             switch (ddf->which)
@@ -2003,7 +2003,7 @@ ZOOM_API(const char *)
     if (!strcmp(type, "render"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
-        const int *oid = r->direct_reference;
+        const Odr_oid *oid = r->direct_reference;
 
         /* render bibliographic record .. */
         if (r->which == Z_External_OPAC)
@@ -2051,7 +2051,7 @@ ZOOM_API(const char *)
     else if (!strcmp(type, "xml"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
-        const int *oid = r->direct_reference;
+        const Odr_oid *oid = r->direct_reference;
 
         /* render bibliographic record .. */
         if (r->which == Z_External_OPAC)
@@ -2887,7 +2887,7 @@ ZOOM_API(void)
     ZOOM_options_set(scan->options, key, val);
 }
 
-static Z_APDU *create_es_package(ZOOM_package p, const int *oid)
+static Z_APDU *create_es_package(ZOOM_package p, const Odr_oid *oid)
 {
     const char *str;
     Z_APDU *apdu = zget_APDU(p->odr_out, Z_APDU_extendedServicesRequest);
@@ -3115,7 +3115,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     const char *record_buf = ZOOM_options_get(p->options, "record");
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
     int action_no = -1;
-    int *syntax_oid = 0;
+    Odr_oid *syntax_oid = 0;
 
     if (!syntax_str)
         syntax_str = "xml";

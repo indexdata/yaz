@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_util.c,v 1.3 2007-04-13 07:04:42 adam Exp $
+ * $Id: oid_util.c,v 1.4 2007-05-08 08:22:36 adam Exp $
  */
 
 /**
@@ -21,19 +21,19 @@
 #include <yaz/snprintf.h>
 #include <yaz/oid_util.h>
 
-void oid_oidcpy(int *t, const int *s)
+void oid_oidcpy(Odr_oid *t, const Odr_oid *s)
 {
     while ((*(t++) = *(s++)) > -1);
 }
 
-void oid_oidcat(int *t, const int *s)
+void oid_oidcat(Odr_oid *t, const Odr_oid *s)
 {
     while (*t > -1)
         t++;
     while ((*(t++) = *(s++)) > -1);
 }
 
-int oid_oidcmp(const int *o1, const int *o2)
+int oid_oidcmp(const Odr_oid *o1, const Odr_oid *o2)
 {
     while (*o1 == *o2 && *o1 > -1)
     {
@@ -48,7 +48,7 @@ int oid_oidcmp(const int *o1, const int *o2)
         return -1;
 }
 
-int oid_oidlen(const int *o)
+int oid_oidlen(const Odr_oid *o)
 {
     int len = 0;
 
@@ -58,7 +58,7 @@ int oid_oidlen(const int *o)
 }
 
 
-char *oid_oid_to_dotstring(const int *oid, char *oidbuf)
+char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf)
 {
     char tmpbuf[20];
     int i;
@@ -74,7 +74,7 @@ char *oid_oid_to_dotstring(const int *oid, char *oidbuf)
     return oidbuf;
 }
 
-int oid_dotstring_to_oid(const char *name, int *oid)
+int oid_dotstring_to_oid(const char *name, Odr_oid *oid)
 {
     int i = 0;
     int val = 0;

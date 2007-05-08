@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: otherinfo.h,v 1.10 2007-04-12 17:50:26 adam Exp $ */
+/* $Id: otherinfo.h,v 1.11 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file otherinfo.h
@@ -43,18 +43,18 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip);
 YAZ_EXPORT
 Z_OtherInformationUnit *yaz_oi_update (
     Z_OtherInformation **otherInformationP, ODR odr,
-    const int *oid, int categoryValue, int delete_flag);
+    const Odr_oid *oid, int categoryValue, int delete_flag);
 
 YAZ_EXPORT
 void yaz_oi_set_string_oid (
     Z_OtherInformation **otherInformation, ODR odr,
-    const int *oid, int categoryValue,
+    const Odr_oid *oid, int categoryValue,
     const char *str);
 
 YAZ_EXPORT
 char *yaz_oi_get_string_oid (
     Z_OtherInformation **otherInformation,
-    const int *oid, int categoryValue, int delete_flag);
+    const Odr_oid *oid, int categoryValue, int delete_flag);
 
 YAZ_END_CDECL
 

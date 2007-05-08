@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.46 2007-05-02 12:37:15 adam Exp $ */
+/* $Id: backend.h,v 1.47 2007-05-08 08:22:35 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -78,7 +78,7 @@ typedef struct {
     char *setname;             /* set name */
     int start;
     int number;                /* record number */
-    int *format;               /* format, transfer syntax (OID) */
+    Odr_oid *format;           /* format, transfer syntax (OID) */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if required */
@@ -96,7 +96,7 @@ typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
-    int *request_format;        /* format, transfer syntax (OID) */
+    Odr_oid *request_format;        /* format, transfer syntax (OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
@@ -105,7 +105,7 @@ typedef struct bend_fetch_rr {
     int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
-    int *output_format;        /* response format/syntax (OID) */
+    Odr_oid *output_format;        /* response format/syntax (OID) */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
@@ -130,7 +130,7 @@ typedef enum {
 typedef struct bend_scan_rr {
     int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
-    int *attributeset;
+    Odr_oid *attributeset;
     Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
     ODR stream;         /* encoding stream - memory source if required */

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: prt-ext.c,v 1.12 2007-05-05 10:26:31 adam Exp $
+ * $Id: prt-ext.c,v 1.13 2007-05-08 08:22:36 adam Exp $
  */
 
 /**
@@ -56,7 +56,7 @@ static Z_ext_typeent type_table[] =
     {{-1}, 0, 0}
 };
 
-Z_ext_typeent *z_ext_getentbyref(const int *oid)
+Z_ext_typeent *z_ext_getentbyref(const Odr_oid *oid)
 {
     Z_ext_typeent *p;
 
@@ -239,12 +239,12 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         odr_sequence_end(o);
 }
 
-Z_External *z_ext_record_oid(ODR o, const int *oid, const char *buf, int len)
+Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len)
 {
     Z_External *thisext;
     char oid_str_buf[OID_STR_MAX];
     const char *oid_str;
-    int oclass;
+    oid_class oclass;
 
     if (!oid)
         return 0;

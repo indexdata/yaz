@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_oid.c,v 1.10 2007-04-12 13:52:57 adam Exp $
+ * $Id: odr_oid.c,v 1.11 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file odr_oid.c
@@ -52,7 +52,7 @@ int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
         return 1;
     }
     if (o->direction == ODR_DECODE)
-        *p = (int *)odr_malloc(o, OID_SIZE * sizeof(**p));
+        *p = (Odr_oid *)odr_malloc(o, OID_SIZE * sizeof(**p));
     return ber_oidc(o, *p, OID_SIZE);
 }
 /*

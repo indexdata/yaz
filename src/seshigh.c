@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.118 2007-05-06 20:12:20 adam Exp $
+ * $Id: seshigh.c,v 1.119 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -584,7 +584,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 #if YAZ_HAVE_XML2
     yaz_record_conv_t rc = 0;
     const char *match_schema = 0;
-    int *match_syntax = 0;
+    Odr_oid *match_syntax = 0;
 
     if (assoc->server)
     {
@@ -2358,7 +2358,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.118 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.119 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2472,7 +2472,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
                                int *num, Z_RecordComposition *comp,
                                int *next, int *pres,
                                Z_ReferenceId *referenceId,
-                               int *oid, int *errcode)
+                               Odr_oid *oid, int *errcode)
 {
     int recno, total_length = 0, toget = *num, dumped_records = 0;
     Z_Records *records =

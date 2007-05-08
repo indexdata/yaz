@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: logrpn.c,v 1.17 2007-05-06 20:12:20 adam Exp $
+ * $Id: logrpn.c,v 1.18 2007-05-08 08:22:36 adam Exp $
  */
 
 /**
@@ -181,7 +181,7 @@ static void attrStr (int type, int value, char *str)
  * zlog_attributes: print attributes of term
  */
 static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
-                            const int *ast, int loglevel)
+                            const Odr_oid *ast, int loglevel)
 {
     int of, i;
     char str[80];
@@ -268,7 +268,7 @@ static char *prox_unit_name(Z_ProximityOperator *op)
 }
 
 static void zlog_structure(Z_RPNStructure *zs, int depth, 
-                           const int *ast, int loglevel)
+                           const Odr_oid *ast, int loglevel)
 {
     if (zs->which == Z_RPNStructure_complex)
     {
@@ -349,7 +349,7 @@ void log_rpn_query(Z_RPNQuery *rpn)
 }
 
 void log_scan_term_level(int loglevel, 
-                         Z_AttributesPlusTerm *zapt, const int *ast)
+                         Z_AttributesPlusTerm *zapt, const Odr_oid *ast)
 {
     int depth = 0;
     if (!loglevel)
@@ -364,7 +364,7 @@ void log_scan_term_level(int loglevel,
     zlog_attributes(zapt, depth+2, ast, loglevel);
 }
 
-void log_scan_term(Z_AttributesPlusTerm *zapt, const int *ast)
+void log_scan_term(Z_AttributesPlusTerm *zapt, const Odr_oid *ast)
 {
     log_scan_term_level (YLOG_LOG, zapt, ast);
 }

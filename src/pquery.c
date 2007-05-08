@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: pquery.c,v 1.11 2007-04-16 21:53:09 adam Exp $
+ * $Id: pquery.c,v 1.12 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file pquery.c
@@ -34,13 +34,13 @@ struct yaz_pqf_parser {
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                      int num_attr, int max_attr, 
                                      int *attr_list, char **attr_clist,
-                                     int **attr_set);
+                                     Odr_oid **attr_set);
 
-static int *query_oid_getvalbyname(struct yaz_pqf_parser *li, ODR o)
+static Odr_oid *query_oid_getvalbyname(struct yaz_pqf_parser *li, ODR o)
 {
     char buf[32];
 
-    if (li->lex_len > 31)
+    if (li->lex_len >= sizeof(buf)-1)
         return 0;
     memcpy (buf, li->lex_buf, li->lex_len);
     buf[li->lex_len] = '\0';
@@ -186,7 +186,7 @@ static int escape_string(char *out_buf, const char *in, int len)
 
 static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               int num_attr, int *attr_list,
-                              char **attr_clist, int **attr_set)
+                              char **attr_clist, Odr_oid **attr_set)
 {
     const char *cp;
 
@@ -242,7 +242,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
 
 static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
                                       int num_attr, int *attr_list,
-                                      char **attr_clist, int **attr_set)
+                                      char **attr_clist, Odr_oid **attr_set)
 {
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
@@ -352,7 +352,7 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
 
 static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
                              int num_attr, int *attr_list, char **attr_clist,
-                             int **attr_set)
+                             Odr_oid **attr_set)
 {
     Z_Operand *zo;
 
@@ -362,7 +362,7 @@ static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
     case 't':
         zo->which = Z_Operand_APT;
         if (!(zo->u.attributesPlusTerm =
-              rpn_term (li, o, num_attr, attr_list, attr_clist, attr_set)))
+              rpn_term(li, o, num_attr, attr_list, attr_clist, attr_set)))
             return 0;
         lex (li);
         break;
@@ -487,7 +487,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
 static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
                               int num_attr, int max_attr, 
                               int *attr_list, char **attr_clist,
-                              int **attr_set)
+                              Odr_oid **attr_set)
 {
     Z_Complex *zc;
     Z_Operator *zo;
@@ -564,7 +564,7 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                      int num_attr, int max_attr, 
                                      int *attr_list,
                                      char **attr_clist,
-                                     int **attr_set)
+                                     Odr_oid **attr_set)
 {
     Z_RPNStructure *sz;
 
@@ -627,8 +627,8 @@ Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li, const char *qbuf)
     Z_RPNQuery *zq;
     int attr_array[1024];
     char *attr_clist[512];
-    int *attr_set[512];
-    int *top_set = 0;
+    Odr_oid *attr_set[512];
+    Odr_oid *top_set = 0;
 
     zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
     lex (li);
@@ -689,10 +689,10 @@ Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
 {
     int attr_list[1024];
     char *attr_clist[512];
-    int *attr_set[512];
+    Odr_oid *attr_set[512];
     int num_attr = 0;
     int max_attr = 512;
-    int *top_set = 0;
+    Odr_oid *top_set = 0;
     Z_AttributesPlusTerm *apt;
 
     lex (li);

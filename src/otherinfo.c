@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: otherinfo.c,v 1.7 2007-04-12 13:52:57 adam Exp $
+ * $Id: otherinfo.c,v 1.8 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file otherinfo.c
@@ -73,7 +73,7 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
 
 Z_OtherInformationUnit *yaz_oi_update (
     Z_OtherInformation **otherInformationP, ODR odr,
-    const int *oid, int categoryValue, int delete_flag)
+    const Odr_oid *oid, int categoryValue, int delete_flag)
 {
     int i;
     Z_OtherInformation *otherInformation;
@@ -138,12 +138,10 @@ Z_OtherInformationUnit *yaz_oi_update (
         {
             otherInformation->list[i]->category = (Z_InfoCategory*)
                 odr_malloc (odr, sizeof(Z_InfoCategory));
-            otherInformation->list[i]->category->categoryTypeId = (int*)
+            otherInformation->list[i]->category->categoryTypeId = (Odr_oid*)
                 odr_oiddup (odr, oid);
-            otherInformation->list[i]->category->categoryValue = (int*)
-                odr_malloc (odr, sizeof(int));
-            *otherInformation->list[i]->category->categoryValue =
-                categoryValue;
+            otherInformation->list[i]->category->categoryValue = 
+                odr_intdup(odr, categoryValue);
         }
         else
             otherInformation->list[i]->category = 0;
@@ -157,7 +155,7 @@ Z_OtherInformationUnit *yaz_oi_update (
 
 void yaz_oi_set_string_oid (
     Z_OtherInformation **otherInformation, ODR odr,
-    const int *oid, int categoryValue,
+    const Odr_oid *oid, int categoryValue,
     const char *str)
 {
     Z_OtherInformationUnit *oi =
@@ -170,7 +168,7 @@ void yaz_oi_set_string_oid (
 
 char *yaz_oi_get_string_oid (
     Z_OtherInformation **otherInformation,
-    const int *oid, int categoryValue, int delete_flag)
+    const Odr_oid *oid, int categoryValue, int delete_flag)
 {
     Z_OtherInformationUnit *oi;
     

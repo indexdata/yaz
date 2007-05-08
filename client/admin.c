@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: admin.c,v 1.25 2007-04-16 21:53:08 adam Exp $
+ * $Id: admin.c,v 1.26 2007-05-08 08:22:35 adam Exp $
  */
 
 #include <stdio.h>
@@ -47,7 +47,7 @@ int sendAdminES(int type, char* param1)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
-    int *oid;
+    Odr_oid *oid;
     Z_ESAdminOriginPartToKeep  *toKeep;
     Z_ESAdminOriginPartNotToKeep  *notToKeep;
     printf ("Admin request\n");

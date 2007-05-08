@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_util.h,v 1.3 2007-05-07 12:04:06 adam Exp $ */
+/* $Id: oid_util.h,v 1.4 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file oid_util.h
@@ -40,6 +40,8 @@ YAZ_BEGIN_CDECL
 #define OID_SIZE 20
 #define OID_STR_MAX 256
 
+typedef short Odr_oid;   /* terminate by -1 */
+
 typedef enum oid_proto
 {
     PROTO_NOP=0,
@@ -50,33 +52,12 @@ typedef enum oid_proto
     PROTO_HTTP
 } oid_proto;
 
-typedef enum oid_class
-{
-    CLASS_NOP=0,
-    CLASS_APPCTX,
-    CLASS_ABSYN,
-    CLASS_ATTSET,
-    CLASS_TRANSYN,
-    CLASS_DIAGSET,
-    CLASS_RECSYN,
-    CLASS_RESFORM,
-    CLASS_ACCFORM,
-    CLASS_EXTSERV,
-    CLASS_USERINFO,
-    CLASS_ELEMSPEC,
-    CLASS_VARSET,
-    CLASS_SCHEMA,
-    CLASS_TAGSET,
-    CLASS_GENERAL,
-    CLASS_NEGOT
-} oid_class;
-    
-YAZ_EXPORT void oid_oidcpy(int *t, const int *s);
-YAZ_EXPORT void oid_oidcat(int *t, const int *s);
-YAZ_EXPORT int oid_oidcmp(const int *o1, const int *o2);
-YAZ_EXPORT int oid_oidlen(const int *o);
-YAZ_EXPORT char *oid_oid_to_dotstring(const int *oid, char *oidbuf);
-YAZ_EXPORT int oid_dotstring_to_oid(const char *name, int *oid);
+YAZ_EXPORT void oid_oidcpy(Odr_oid *t, const Odr_oid *s);
+YAZ_EXPORT void oid_oidcat(Odr_oid *t, const Odr_oid *s);
+YAZ_EXPORT int oid_oidcmp(const Odr_oid *o1, const Odr_oid *o2);
+YAZ_EXPORT int oid_oidlen(const Odr_oid *o);
+YAZ_EXPORT char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf);
+YAZ_EXPORT int oid_dotstring_to_oid(const char *name, Odr_oid *oid);
 
 YAZ_END_CDECL
 

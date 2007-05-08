@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.337 2007-05-06 20:12:19 adam Exp $
+ * $Id: client.c,v 1.338 2007-05-08 08:22:35 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -174,7 +174,7 @@ int rl_attempted_completion_over = 0;
 
 #define maxOtherInfosSupported 10
 struct eoi {
-    int oid[OID_SIZE];
+    Odr_oid oid[OID_SIZE];
     char* value;
 } extraOtherInfos[maxOtherInfosSupported];
 
@@ -415,11 +415,9 @@ static int process_initResponse(Z_InitResponse *res)
             }
             else if (uif->which == Z_External_single) 
             {
-                const int *oclc_oid = yaz_string_to_oid(yaz_oid_std(),
-                                                        CLASS_GENERAL,
-                                                        "OCLC-userInfo");
                 Odr_any *sat = uif->u.single_ASN1_type;
-                if (!oid_oidcmp(uif->direct_reference, oclc_oid))
+                if (!oid_oidcmp(uif->direct_reference,
+                                yaz_oid_userinfo_oclc_userinfo))
                 {
                     Z_OCLC_UserInformation *oclc_ui;
                     ODR decode = odr_createmem(ODR_DECODE);
@@ -859,7 +857,7 @@ static void print_record(const unsigned char *buf, size_t len)
 
 static void display_record(Z_External *r)
 {
-    const int *oid = r->direct_reference;
+    const Odr_oid *oid = r->direct_reference;
     
     record_last = r;
     /*
@@ -867,7 +865,7 @@ static void display_record(Z_External *r)
      */
     if (oid)
     {
-        int oclass;
+        oid_class oclass;
         char oid_name_buf[OID_STR_MAX];
         const char *oid_name
             =  yaz_oid_to_string_buf(oid, &oclass, oid_name_buf);
@@ -934,16 +932,7 @@ static void display_record(Z_External *r)
         }
         else
         {
-            const int *oidsuffix = oid_oidlen(oid) > 1 
-                ? oid + oid_oidlen(oid)-2 : 0;
-            if ( 
-#if AVOID_MARC_DECODE
-                /* primitive check for a marc OID 5.1-29 except 16 */
-                oidsuffix[0] == 5 && oidsuffix[1] < 30 && oidsuffix[1] != 16
-#else
-                1
-#endif
-                )
+            if (oid && yaz_oid_is_iso2709(oid))
             {
                 const char *result;
                 size_t rlen;
@@ -1161,7 +1150,7 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
             printf("Missing diagset\n");
         else
         {
-            int oclass;
+            oid_class oclass;
             char diag_name_buf[OID_STR_MAX];
             const char *diag_name = 0;
             diag_name = yaz_oid_to_string_buf
@@ -1690,7 +1679,7 @@ static void print_oid(int iLevel, const char *pTag, Odr_oid *pOid)
 {
     if (pOid != NULL)
     {
-        int *pInt = pOid;
+        Odr_oid *pInt = pOid;
 
         print_level(iLevel);
         printf("%s:", pTag);
@@ -1934,10 +1923,8 @@ static Z_External *create_external_itemRequest(void)
     }
     else
     {
-        const int *ill_oid = yaz_string_to_oid(yaz_oid_std(),
-                                               CLASS_GENERAL, "ISOILL-1");
         r = (Z_External *) odr_malloc (out, sizeof(*r));
-        r->direct_reference = odr_oiddup(out, ill_oid);
+        r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
@@ -1987,13 +1974,10 @@ static Z_External *create_external_ILL_APDU(int which)
     }
     else
     {
-        const int *ill_oid = yaz_string_to_oid(yaz_oid_std(),
-                                               CLASS_GENERAL, "ISOILL-1");
-
         ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
         
         r = (Z_External *) odr_malloc (out, sizeof(*r));
-        r->direct_reference = odr_oiddup(out, ill_oid);
+        r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
@@ -2017,10 +2001,7 @@ static Z_External *create_external_ILL_APDU(int which)
 static Z_External *create_ItemOrderExternal(const char *type, int itemno)
 {
     Z_External *r = (Z_External *) odr_malloc(out, sizeof(Z_External));
-    const int *itemorder_oid = yaz_string_to_oid(yaz_oid_std(),
-                                                 CLASS_EXTSERV,
-                                                 "Item order");
-    r->direct_reference = odr_oiddup(out, itemorder_oid);
+    r->direct_reference = odr_oiddup(out, yaz_oid_extserv_item_order);
     r->indirect_reference = 0;
     r->descriptor = 0;
 
@@ -2068,8 +2049,6 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
     }
     else if (!strcmp(type, "xml") || !strcmp(type, "3"))
     {
-        const int *oid_xml = yaz_string_to_oid(yaz_oid_std(),
-                                               CLASS_RECSYN, "xml");
         const char *xml_buf =
             "<itemorder>\n"
             "  <type>request</type>\n"
@@ -2077,7 +2056,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno)
             "  <borrowerTicketNo> 1212 </borrowerTicketNo>\n"
             "</itemorder>";
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
-            z_ext_record_oid(out, oid_xml, xml_buf, strlen(xml_buf));
+            z_ext_record_oid(out, yaz_oid_recsyn_xml, xml_buf, strlen(xml_buf));
     }
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
@@ -2090,12 +2069,9 @@ static int send_itemorder(const char *type, int itemno)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
 
-    const int *itemorder_oid = yaz_string_to_oid(yaz_oid_std(),
-                                                 CLASS_EXTSERV,
-                                                 "Item order");
     req->referenceId = set_refid (out);
 
-    req->packageType = odr_oiddup(out, itemorder_oid);
+    req->packageType = odr_oiddup(out, yaz_oid_extserv_item_order);
     req->packageName = esPackageName;
 
     req->taskSpecificParameters = create_ItemOrderExternal(type, itemno);
@@ -2233,11 +2209,9 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
     Z_External *record_this = 0;
-    const int *oid_xml = yaz_string_to_oid(yaz_oid_std(),
-                                           CLASS_RECSYN, "xml");
-
     if (rec_buf)
-        record_this = z_ext_record_oid(out, oid_xml, rec_buf, rec_len);
+        record_this = z_ext_record_oid(out, yaz_oid_recsyn_xml,
+                                       rec_buf, rec_len);
     else
     {
         if (!record_last)
@@ -2359,7 +2333,7 @@ static int cmd_xmles(const char *arg)
     {
         char *asn_buf = 0;
         int noread = 0;
-        int *oid;
+        Odr_oid *oid;
         char oid_str[51];
         Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
         Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -3633,8 +3607,8 @@ int cmd_register_oid(const char* args) {
     };
     char oname_str[101], oclass_str[101], oid_str[101];  
     int i;
-    int oidclass = CLASS_GENERAL;
-    int oid[OID_SIZE];
+    oid_class oidclass = CLASS_GENERAL;
+    Odr_oid oid[OID_SIZE];
 
     if (sscanf (args, "%100[^ ] %100[^ ] %100s",
                 oname_str,oclass_str, oid_str) < 1) {
@@ -4144,7 +4118,7 @@ int cmd_set_otherinfo(const char* args)
     else
     {
         NMEM oid_tmp = nmem_create();
-        const int *oid =
+        const Odr_oid *oid =
             yaz_string_to_oid_nmem(yaz_oid_std(),
                                    CLASS_GENERAL, oidstr, oid_tmp);
         oid_oidcpy(extraOtherInfos[otherinfoNo].oid, oid);
@@ -4187,7 +4161,7 @@ int cmd_list_otherinfo(const char* args)
         if (extraOtherInfos[i].value)
         {
             char name_oid[OID_STR_MAX];
-            int oclass;
+            oid_class oclass;
             const char *name =
                 yaz_oid_to_string_buf(extraOtherInfos[i].oid, &oclass,
                                       name_oid);
@@ -4204,7 +4178,7 @@ int cmd_list_otherinfo(const char* args)
             if (extraOtherInfos[i].value)
             {
                 char name_oid[OID_STR_MAX];
-                int oclass;
+                oid_class oclass;
                 const char *name =
                     yaz_oid_to_string_buf(extraOtherInfos[i].oid, &oclass,
                                           name_oid);
@@ -4212,7 +4186,6 @@ int cmd_list_otherinfo(const char* args)
                        i, name ? name : "null",
                        extraOtherInfos[i].value);
             }
-            
         }
     }
     return 0;

@@ -1,3 +1,7 @@
+For OIDs use Odr_oid type everywhere, i.e. do not assume Odr_oid=int.
+
+For OID class, use oid_class consistently.
+
 Fixed external handling for SUTRS and Explain records (bug appeared in 3.0
 series).
 

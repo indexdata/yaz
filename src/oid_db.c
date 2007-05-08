@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.7 2007-05-06 20:12:20 adam Exp $
+ * $Id: oid_db.c,v 1.8 2007-05-08 08:22:36 adam Exp $
  */
 
 /**
@@ -38,8 +38,8 @@ yaz_oid_db_t yaz_oid_std(void)
     return standard_db;
 }
 
-const int *yaz_string_to_oid(yaz_oid_db_t oid_db,
-			     int oclass, const char *name)
+const Odr_oid *yaz_string_to_oid(yaz_oid_db_t oid_db,
+                                 oid_class oclass, const char *name)
 {
     for (; oid_db; oid_db = oid_db->next)
     {
@@ -61,23 +61,23 @@ const int *yaz_string_to_oid(yaz_oid_db_t oid_db,
     return 0;
 }
 
-int *yaz_string_to_oid_nmem(yaz_oid_db_t oid_list,
-			    int oclass, const char *name, NMEM nmem)
+Odr_oid *yaz_string_to_oid_nmem(yaz_oid_db_t oid_list,
+                                oid_class oclass, const char *name, NMEM nmem)
 {
-    const int *oid = yaz_string_to_oid(oid_list, oclass, name);
+    const Odr_oid *oid = yaz_string_to_oid(oid_list, oclass, name);
     if (oid)
 	return odr_oiddup_nmem(nmem, oid);
     return odr_getoidbystr_nmem(nmem, name);
 }
 
-int *yaz_string_to_oid_odr(yaz_oid_db_t oid_list,
-			   int oclass, const char *name, ODR o)
+Odr_oid *yaz_string_to_oid_odr(yaz_oid_db_t oid_list,
+                               oid_class oclass, const char *name, ODR o)
 {
     return yaz_string_to_oid_nmem(oid_list, oclass, name, odr_getmem(o));
 }
 
 const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
-			      const int *oid, int *oclass)
+			      const Odr_oid *oid, oid_class *oclass)
 {
     if (!oid)
 	return 0;
@@ -97,7 +97,7 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
     return 0;
 }
 
-const char *yaz_oid_to_string_buf(const int *oid, int *oclass, char *buf)
+const char *yaz_oid_to_string_buf(const Odr_oid *oid, oid_class *oclass, char *buf)
 {
     const char *p = yaz_oid_to_string(standard_db, oid, oclass);
     if (p)
@@ -107,7 +107,7 @@ const char *yaz_oid_to_string_buf(const int *oid, int *oclass, char *buf)
     return oid_oid_to_dotstring(oid, buf);
 }
 
-int yaz_oid_is_iso2709(const int *oid)
+int yaz_oid_is_iso2709(const Odr_oid *oid)
 {
     if (oid_oidlen(oid) == 6 && oid[0] == 1 && oid[1] == 2
 	&& oid[2] == 840 && oid[3] == 10003 && oid[4] == 5 
@@ -117,13 +117,13 @@ int yaz_oid_is_iso2709(const int *oid)
 }
 
 int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
-		const int *new_oid)
+		const Odr_oid *new_oid)
 {
-    const int *oid = yaz_string_to_oid(oid_db, oclass, name);
+    const Odr_oid *oid = yaz_string_to_oid(oid_db, oclass, name);
     if (!oid)
     {
 	struct yaz_oid_entry *ent;
-        int *alloc_oid;
+        Odr_oid *alloc_oid;
 
 	while (oid_db->next)
 	    oid_db = oid_db->next;
@@ -134,7 +134,7 @@ int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
 	oid_db->xmalloced = 1;
 	oid_db->entries = ent = (struct yaz_oid_entry *) xmalloc(2 * sizeof(*ent));
 
-        alloc_oid = (int *)
+        alloc_oid = (Odr_oid *)
             xmalloc(sizeof(*alloc_oid) * (oid_oidlen(new_oid)+1));
 	oid_oidcpy(alloc_oid, new_oid);
         ent[0].oid = alloc_oid;
@@ -177,8 +177,8 @@ void yaz_oid_db_destroy(yaz_oid_db_t oid_db)
 }
 
 void yaz_oid_trav(yaz_oid_db_t oid_db,
-		  void (*func)(const int *oid,
-			       int oclass, const char *name,
+		  void (*func)(const Odr_oid *oid,
+			       oid_class oclass, const char *name,
 			       void *client_data),
 		  void *client_data)
 {

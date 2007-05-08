@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_util.c,v 1.12 2007-04-12 20:47:28 adam Exp $
+ * $Id: odr_util.c,v 1.13 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file odr_util.c
@@ -50,7 +50,8 @@ Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o)
 
     if (!o)
         return 0;
-    if (!(r = (int *)nmem_malloc(nmem, (oid_oidlen(o) + 1) * sizeof(int))))
+    if (!(r = (Odr_oid *)
+          nmem_malloc(nmem, (oid_oidlen(o) + 1) * sizeof(Odr_oid))))
         return 0;
     oid_oidcpy(r, o);
     return r;
@@ -63,12 +64,12 @@ Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o)
 
 Odr_oid *odr_getoidbystr_nmem(NMEM nmem, const char *str)
 {
-    int oid[OID_SIZE];
-    int *ret;
+    Odr_oid oid[OID_SIZE];
+    Odr_oid *ret;
 
     if (oid_dotstring_to_oid(str, oid))
         return 0;
-    ret = (int *)nmem_malloc(nmem, sizeof(*ret)*(oid_oidlen(oid) + 1));
+    ret = (Odr_oid *)nmem_malloc(nmem, sizeof(*ret)*(oid_oidlen(oid) + 1));
     oid_oidcpy(ret, oid);
     return ret;
 }

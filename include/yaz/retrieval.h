@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: retrieval.h,v 1.9 2007-02-08 10:51:23 adam Exp $ */
+/* $Id: retrieval.h,v 1.10 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file retrieval.h
@@ -37,7 +37,7 @@
 #include <stddef.h>
 #include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
-
+#include <yaz/oid_util.h>
 #include <yaz/record_conv.h>
 
 YAZ_BEGIN_CDECL
@@ -106,11 +106,11 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *node);
 */
 YAZ_EXPORT
 int yaz_retrieval_request(yaz_retrieval_t p,
-                          const char *schema, int *syntax,
-                          const char **match_schema, int **match_syntax,
+                          const char *schema, Odr_oid *syntax,
+                          const char **match_schema, Odr_oid **match_syntax,
                           yaz_record_conv_t *rc,
                           const char **backend_schema,
-                          int **backend_syntax);
+                          Odr_oid **backend_syntax);
 
 /** returns error string (for last error)
     \param p record conversion handle

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.90 2007-05-02 12:36:35 adam Exp $
+ * $Id: ztest.c,v 1.91 2007-05-08 08:22:37 adam Exp $
  */
 
 /*
@@ -138,7 +138,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 if (r->direct_reference)
                 {
                     char oid_name_str[OID_STR_MAX];
-                    int oclass;
+                    oid_class oclass;
                     const char *oid_name = 
                         yaz_oid_to_string_buf(r->direct_reference,
                                           &oclass, oid_name_str);
@@ -460,10 +460,10 @@ int ztest_present (void *handle, bend_present_rr *rr)
 int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
     char *cp;
-    int oclass;
+    oid_class oclass;
     char oid_str_buf[OID_STR_MAX];
     const char *oid_str = 0;
-    const int *oid = r->request_format;
+    const Odr_oid *oid = r->request_format;
 
     r->last_in_set = 0;
     r->basename = "Default";

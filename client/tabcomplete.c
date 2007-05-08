@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tabcomplete.c,v 1.18 2007-04-12 13:52:57 adam Exp $
+ * $Id: tabcomplete.c,v 1.19 2007-05-08 08:22:35 adam Exp $
  */
 
 #include <string.h>
@@ -64,8 +64,8 @@ typedef struct {
   of pointers into the oid owned data 
 */
 
-void oid_loader(const int *oid,
-                int oclass, const char *name, void* data_)
+void oid_loader(const Odr_oid *oid,
+                oid_class oclass, const char *name, void* data_)
 {
     oid_callback_t* data=(oid_callback_t*) data_;
     

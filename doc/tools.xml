@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.61 2007-05-07 13:18:32 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.62 2007-05-08 08:22:35 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -1541,27 +1541,30 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 
    <para>
     The basic YAZ representation of an OID is an array of integers,
-    terminated with the value -1. There is a <literal>typedef</literal>
-    of this integer to <literal>Odr_oid</literal> but this is not consistenly
-    used everywhere.
+    terminated with the value -1. This integer is of type 
+    <literal>Odr_oid</literal>.
    </para>
    <para>
-    An OID can either be declared as a automatic variable or we can
-    allocated using the ODR/NMEM memory utilities. It's
+    Fundamental OID operations and the type <literal>Odr_oid</literal>
+    are defined in <filename>yaz/oid_util.h</filename>.
+   </para>
+   <para>
+    An OID can either be declared as a automatic variable or it can
+    allocated using the memory utilities or ODR/NMEM. It's
     guaranteed that an OID can fit in <literal>OID_SIZE</literal> integers.
    </para>
    <example id="tools.oid.bib1.1"><title>Create OID on stack</title>
     <para>
      We can create an OID for the Bib-1 attribute set with:
      <screen>
-      int bib1[OID_SIZE];
-      myoid[0] = 1;
-      myoid[1] = 2;
-      myoid[2] = 840;
-      myoid[3] = 10003;
-      myoid[4] = 3;
-      myoid[5] = 1;
-      myoid[6] = -1;
+      Odr_oid bib1[OID_SIZE];
+      bib1[0] = 1;
+      bib1[1] = 2;
+      bib1[2] = 840;
+      bib1[3] = 10003;
+      bib1[4] = 3;
+      bib1[5] = 1;
+      bib1[6] = -1;
      </screen>
     </para>
    </example>
@@ -1569,14 +1572,15 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     And OID may also be filled from a string-based representation using
     dots (.). This is achieved by function
     <screen>
-     int oid_dotstring_to_oid(const char *name, int *oid);
+     int oid_dotstring_to_oid(const char *name, Odr_oid *oid);
     </screen>
+    This functions returns 0 if name could be converted; -1 otherwise.
    </para>
    <example id="tools.oid.bib1.2"><title>Using oid_oiddotstring_to_oid</title>
     <para>
-     We can create the Bib-1 attribute set OID easier with:
+     We can fill the Bib-1 attribute set OID easier with:
      <screen>
-      int bib1[OID_SIZE];
+      Odr_oid bib1[OID_SIZE];
       oid_oiddotstring_to_oid("1.2.840.10003.3.1", bib1);
      </screen>
    </para>
@@ -1604,7 +1608,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
    <para>
     The function
     <screen>
-     char *oid_oid_to_dotstring(const int *oid, char *oidbuf)
+     char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf)
     </screen>
     does the reverse of <function>oid_oiddotstring_to_oid</function>. It
     converts an OID to the string-based representation using dots.
@@ -1630,7 +1634,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     <para>
      From YAZ version 3 and later, the oident system has been replaced
      by an OID database. OID database is a misnomer .. the old odient
-     was a database system too.
+     system was also a database.
     </para>
     <para>
      The OID database is really just a map between named Object Identifiers

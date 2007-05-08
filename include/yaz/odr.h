@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: odr.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: odr.h,v 1.28 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file odr.h
@@ -39,6 +39,9 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/nmem.h>
+
+/* for definition of Odr_oid */
+#include <yaz/oid_util.h>
 
 YAZ_BEGIN_CDECL
 
@@ -108,8 +111,6 @@ typedef struct odr_bitmask
     unsigned char bits[ODR_BITMASK_SIZE];
     int top;
 } Odr_bitmask;
-
-typedef int Odr_oid;   /* terminate by -1 */
 
 #define ODR_S_SET     0
 #define ODR_S_CUR     1

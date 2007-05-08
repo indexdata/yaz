@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: prt-ext.h,v 1.19 2007-05-04 12:23:54 adam Exp $ */
+/* $Id: prt-ext.h,v 1.20 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file prt-ext.h
@@ -50,7 +50,7 @@ YAZ_BEGIN_CDECL
  */
 typedef struct Z_ext_typeent
 {
-    int oid[OID_SIZE]; /* the direct-reference OID */
+    Odr_oid oid[OID_SIZE]; /* the direct-reference OID */
     int what;          /* discriminator value for the external CHOICE */
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;
@@ -139,9 +139,9 @@ struct Z_External
 /** \brief codec for BER EXTERNAL */
 YAZ_EXPORT int z_External(ODR o, Z_External **p, int opt, const char *name);
 /** \brief returns type information for OID (NULL if not known) */
-YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(const int *oid);
+YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(const Odr_oid *oid);
 /** \brief encodes EXTERNAL record based on OID (NULL if not known) */
-YAZ_EXPORT Z_External *z_ext_record_oid(ODR o, const int *oid,
+YAZ_EXPORT Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid,
                                         const char *buf, int len);
 /** \brief encodes EXTERNAL XML record */
 YAZ_EXPORT Z_External *z_ext_record_xml(ODR o, const char *buf, int len);

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: grs1disp.c,v 1.7 2007-04-12 13:52:57 adam Exp $
+ * $Id: grs1disp.c,v 1.8 2007-05-08 08:22:36 adam Exp $
  */
 
 /**
@@ -77,12 +77,12 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         }
         else if (t->content->which == Z_ElementData_oid)
         {
-            int *ip = t->content->u.oid;
+            Odr_oid *ip = t->content->u.oid;
 
             if (ip)
             {
                 char oid_name_str[OID_STR_MAX];
-                int oclass;
+                oid_class oclass;
                 const char *oid_name 
                     = yaz_oid_to_string_buf(ip, &oclass, oid_name_str);
             

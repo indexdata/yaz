@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * All rights reserved.
  *
- * $Id: querytowrbuf.c,v 1.10 2007-05-06 20:12:20 adam Exp $
+ * $Id: querytowrbuf.c,v 1.11 2007-05-08 08:22:36 adam Exp $
  */
 
 /** \file querytowrbuf.c
@@ -225,7 +225,7 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
 }
 
 void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
-                       const int *attrbute_set)
+                       const Odr_oid *attrbute_set)
 {
     /* should print attr set here */
     wrbuf_printf(b, "RPN ");

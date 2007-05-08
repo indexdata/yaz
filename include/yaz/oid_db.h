@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.7 2007-05-07 12:06:09 adam Exp $ */
+/* $Id: oid_db.h,v 1.8 2007-05-08 08:22:35 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -41,6 +41,29 @@ YAZ_BEGIN_CDECL
 
 /** \brief OID database */
 typedef struct yaz_oid_db *yaz_oid_db_t;
+
+
+typedef enum oid_class
+{
+    CLASS_NOP=0,
+    CLASS_APPCTX,
+    CLASS_ABSYN,
+    CLASS_ATTSET,
+    CLASS_TRANSYN,
+    CLASS_DIAGSET,
+    CLASS_RECSYN,
+    CLASS_RESFORM,
+    CLASS_ACCFORM,
+    CLASS_EXTSERV,
+    CLASS_USERINFO,
+    CLASS_ELEMSPEC,
+    CLASS_VARSET,
+    CLASS_SCHEMA,
+    CLASS_TAGSET,
+    CLASS_GENERAL,
+    CLASS_NEGOT
+} oid_class;
+    
 
 /** \brief returns standard OID database 
     \retval OID database handle
@@ -59,8 +82,8 @@ yaz_oid_db_t yaz_oid_std(void);
     any named OID in dot-notation (1.2.8).
 */
 YAZ_EXPORT
-const int *yaz_string_to_oid(yaz_oid_db_t oid_db,
-                             int oclass, const char *name);
+const Odr_oid *yaz_string_to_oid(yaz_oid_db_t oid_db,
+                                 oid_class oclass, const char *name);
 
 
 /** \brief creates NMEM malloc'ed OID from string
@@ -71,8 +94,8 @@ const int *yaz_string_to_oid(yaz_oid_db_t oid_db,
     \returns raw OID or NULL if name is unknown (bad)
 */
 YAZ_EXPORT
-int *yaz_string_to_oid_nmem(yaz_oid_db_t oid_db,
-                            int oclass, const char *name, NMEM nmem);
+Odr_oid *yaz_string_to_oid_nmem(yaz_oid_db_t oid_db,
+                                oid_class oclass, const char *name, NMEM nmem);
 
 /** \brief creates ODR malloc'ed OID from string
     \param oid_db OID database
@@ -82,8 +105,8 @@ int *yaz_string_to_oid_nmem(yaz_oid_db_t oid_db,
     \returns raw OID or NULL if name is unknown (bad)
 */
 YAZ_EXPORT
-int *yaz_string_to_oid_odr(yaz_oid_db_t oid_db,
-                           int oclass, const char *name, ODR odr);
+Odr_oid *yaz_string_to_oid_odr(yaz_oid_db_t oid_db,
+                               oid_class oclass, const char *name, ODR odr);
 
 /** \brief maps raw OID to string
     \param oid_db OID database
@@ -93,7 +116,7 @@ int *yaz_string_to_oid_odr(yaz_oid_db_t oid_db,
 */
 YAZ_EXPORT
 const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
-                              const int *oid, int *oclass);
+                              const Odr_oid *oid, oid_class *oclass);
 
 
 /** \brief maps any OID to string (named or dot-notation)
@@ -103,7 +126,8 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
     \returns OID string (named or dot notatition) 
 */
 YAZ_EXPORT
-const char *yaz_oid_to_string_buf(const int *oid, int *oclass, char *buf);
+const char *yaz_oid_to_string_buf(const Odr_oid *oid,
+                                  oid_class *oclass, char *buf);
 
 /** \brief traverses OIDs in a database
     \param oid_db OID database
@@ -111,8 +135,8 @@ const char *yaz_oid_to_string_buf(const int *oid, int *oclass, char *buf);
     \param client_data data to be passed to func (custom defined)
 */
 YAZ_EXPORT void yaz_oid_trav(yaz_oid_db_t oid_db,
-                             void (*func)(const int *oid,
-                                          int oclass, const char *name,
+                             void (*func)(const Odr_oid *oid,
+                                          oid_class oclass, const char *name,
                                           void *client_data),
                              void *client_data);
 
@@ -122,7 +146,7 @@ YAZ_EXPORT void yaz_oid_trav(yaz_oid_db_t oid_db,
     \retval 0 OID is not a MARC type
 */
 YAZ_EXPORT
-int yaz_oid_is_iso2709(const int *oid);
+int yaz_oid_is_iso2709(const Odr_oid *oid);
 
 /** \brief adds new OID entry to database
     \param oid_db database
@@ -134,7 +158,7 @@ int yaz_oid_is_iso2709(const int *oid);
 */
 YAZ_EXPORT
 int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
-                const int *new_oid);
+                const Odr_oid *new_oid);
 
 
 /** \brief creates empty OID database
@@ -151,7 +175,7 @@ void yaz_oid_db_destroy(yaz_oid_db_t oid_db);
 
 struct yaz_oid_entry {
     int oclass;
-    const int *oid;
+    const Odr_oid *oid;
     char *name;
 };
 

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.20 2007-05-06 20:12:20 adam Exp $
+ * $Id: retrieval.c,v 1.21 2007-05-08 08:22:36 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -55,12 +55,12 @@ struct yaz_retrieval_elem {
     /** \brief schema name , short-hand such as "dc" */
     const char *name;
     /** \brief record syntax */
-    int *syntax;
+    Odr_oid *syntax;
 
     /** \brief backend name */
     const char *backend_name;
     /** \brief backend syntax */
-    int *backend_syntax;
+    Odr_oid *backend_syntax;
 
     /** \brief record conversion */
     yaz_record_conv_t record_conv;
@@ -275,11 +275,11 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
 }
 
 int yaz_retrieval_request(yaz_retrieval_t p,
-                          const char *schema, int *syntax,
-                          const char **match_schema, int **match_syntax,
+                          const char *schema, Odr_oid *syntax,
+                          const char **match_schema, Odr_oid **match_syntax,
                           yaz_record_conv_t *rc,
                           const char **backend_schema,
-                          int **backend_syntax)
+                          Odr_oid **backend_syntax)
 {
     struct yaz_retrieval_elem *el = p->list;
     int syntax_matches = 0;
