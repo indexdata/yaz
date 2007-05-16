@@ -2,12 +2,12 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tokenizer.c,v 1.3 2007-05-06 20:12:20 adam Exp $
+ * $Id: tokenizer.c,v 1.4 2007-05-16 10:47:49 adam Exp $
  */
 
 /**
  * \file tokenizer.c
- * \brief Implements attribute match of CCL RPN nodes
+ * \brief Simple tokenizer system.
  */
 
 #include <assert.h>
@@ -30,6 +30,7 @@ struct yaz_tok_parse {
 
 struct yaz_tok_cfg {
     int ref_count;
+    char *comment;
     char *white_space;
     char *single_tokens;
     char *quote_tokens_begin;
@@ -49,6 +50,7 @@ yaz_tok_cfg_t yaz_tok_cfg_create(void)
     t->single_tokens = xstrdup("");
     t->quote_tokens_begin = xstrdup("\"");
     t->quote_tokens_end = xstrdup("\"");
+    t->comment = xstrdup("#");
     t->ref_count = 1;
     return t;
 }
@@ -62,6 +64,7 @@ void yaz_tok_cfg_destroy(yaz_tok_cfg_t t)
         xfree(t->single_tokens);
         xfree(t->quote_tokens_begin);
         xfree(t->quote_tokens_end);
+        xfree(t->comment);
         xfree(t);
     }
 }
@@ -135,9 +138,9 @@ int yaz_tok_move(yaz_tok_parse_t tp)
     while (ch && strchr(t->white_space, ch))
         ch = get_byte(tp);
     if (!ch) 
-    {
         ch = YAZ_TOK_EOF;
-    }
+    else if (strchr(t->comment, ch))
+        ch = YAZ_TOK_EOF;
     else if ((cp = strchr(t->single_tokens, ch)))
         ch = *cp;  /* single token match */
     else if ((cp = strchr(t->quote_tokens_begin, ch)))
@@ -156,7 +159,8 @@ int yaz_tok_move(yaz_tok_parse_t tp)
     {  /* unquoted string */
         wrbuf_rewind(tp->wr_string);
         while (ch && !strchr(t->white_space, ch)
-               && !strchr(t->single_tokens, ch))
+               && !strchr(t->single_tokens, ch)
+               && !strchr(t->comment, ch))
         {
             wrbuf_putc(tp->wr_string, ch);
             ch = get_byte(tp);
