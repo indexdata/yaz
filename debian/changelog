@@ -1,3 +1,9 @@
+yaz (3.0.4-1) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 21 May 2007 14:16:11 +0200
+
 yaz (3.0.2-2) unstable; urgency=low
 
   * libyaz3-dev should conflict with libyaz2-dev.
