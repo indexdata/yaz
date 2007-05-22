@@ -5,12 +5,12 @@
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
      %entities;
-     <!ENTITY % common SYSTEM "common/common.ent">
-     %common;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.15 2007-02-08 11:36:59 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.16 2007-05-22 11:10:08 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>

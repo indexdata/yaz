@@ -5,8 +5,8 @@
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
      %entities;
-     <!ENTITY % common SYSTEM "common/common.ent">
-     %common;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
 ]>
 <refentry id="yaz-asncomp">
  <refentryinfo>

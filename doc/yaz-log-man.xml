@@ -5,10 +5,10 @@
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
      %entities;
-     <!ENTITY % common SYSTEM "common/common.ent">
-     %common;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
 ]>
-<!-- $Id: yaz-log-man.xml,v 1.7 2006-10-04 13:21:33 adam Exp $ -->
+<!-- $Id: yaz-log-man.xml,v 1.8 2007-05-22 11:10:08 adam Exp $ -->
 <refentry id="yaz-log">
  <refentryinfo>
   <productname>YAZ</productname>

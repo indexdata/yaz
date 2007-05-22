@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<!-- $Id: yaz.xml,v 1.23 2007-05-07 13:18:32 adam Exp $ -->
+<!-- $Id: yaz.xml,v 1.24 2007-05-22 11:10:08 adam Exp $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1//EN"
     "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd" 
 [
@@ -7,8 +7,8 @@
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
      %entities;
-     <!ENTITY % common SYSTEM "common/common.ent">
-     %common;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
 ]>
 <book id="yaz">
  &bookinfo; 
