@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: yaz-iconv.h,v 1.14 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: yaz-iconv.h,v 1.15 2007-05-23 12:58:59 adam Exp $ */
 
 /**
  * \file yaz-iconv.h
@@ -68,7 +68,7 @@ YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
 /** \brief match strings - independent of case and '-'
     \param s1 first string
-    \param s2 second string
+    \param s2 second string (May include wildcard ? and .)
     \retval 0 strings are similar
     \retval !=0 strings are different
 */
