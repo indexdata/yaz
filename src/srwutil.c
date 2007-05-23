@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.57 2007-05-23 11:54:47 adam Exp $
+ * $Id: srwutil.c,v 1.58 2007-05-23 13:11:11 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -1344,11 +1344,11 @@ const char *yaz_srw_pack_to_str(int pack)
 
 int yaz_srw_str_to_pack(const char *str)
 {
-    if (!strcmp(str, "string"))
+    if (!yaz_matchstr(str, "string"))
         return Z_SRW_recordPacking_string;
-    if (!strcmp(str, "xml"))
+    if (!yaz_matchstr(str, "xml"))
         return Z_SRW_recordPacking_XML;
-    if (!strcmp(str, "url"))
+    if (!yaz_matchstr(str, "url"))
         return Z_SRW_recordPacking_URL;
     return -1;
 }

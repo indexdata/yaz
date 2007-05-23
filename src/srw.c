@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.55 2007-05-06 20:12:20 adam Exp $
+ * $Id: srw.c,v 1.56 2007-05-23 13:11:11 adam Exp $
  */
 /**
  * \file srw.c
@@ -130,25 +130,29 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
                            char **val, int *len)
 {
     xmlBufferPtr buf;
-    xmlNode *tmp;
 
     if (!match_element(ptr, elem))
         return 0;
 
-    ptr = ptr->children;
-    while (ptr && (ptr->type == XML_TEXT_NODE || ptr->type == XML_COMMENT_NODE))
-        ptr = ptr->next;
-    if (!ptr)
-        return 0;
-    
-    /* copy node to get NS right (bug #740). */
-    tmp = xmlCopyNode(ptr, 1);
-    
     buf = xmlBufferCreate();
-    
-    xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
-    
-    xmlFreeNode(tmp);
+
+    /* Copy each element nodes at top.
+       In most cases there is only one root node.. At least one server
+       http://www.theeuropeanlibrary.org/sru/sru.pl
+       has multiple root nodes in recordData.
+    */
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            /* copy node to get NS right (bug #740). */
+            xmlNode *tmp = xmlCopyNode(ptr, 1);
+            
+            xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
+            
+            xmlFreeNode(tmp);
+        }
+    }
     
     *val = (char *) odr_malloc(o, buf->use+1);
     memcpy (*val, buf->content, buf->use);
@@ -222,12 +226,8 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                 ;
             else if (match_xsd_string(ptr, "recordPacking", o, &spack))
             {
-                if (spack && !strcmp(spack, "xml"))
-                    pack = Z_SRW_recordPacking_XML;
-                if (spack && !strcmp(spack, "url"))
-                    pack = Z_SRW_recordPacking_URL;
-                if (spack && !strcmp(spack, "string"))
-                    pack = Z_SRW_recordPacking_string;
+                if (spack)
+                    pack = yaz_srw_str_to_pack(spack);
             }
             else if (match_xsd_integer(ptr, "recordPosition", o, 
                                        &rec->recordPosition))
@@ -281,22 +281,22 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
     {
         xmlNodePtr ptr = pptr;
         int pack = rec->recordPacking;
-        add_xsd_string(ptr, "recordSchema", rec->recordSchema);
+        const char *spack = yaz_srw_pack_to_str(pack);
 
+        add_xsd_string(ptr, "recordSchema", rec->recordSchema);
+        if (spack)
+            add_xsd_string(ptr, "recordPacking", spack);
         switch(pack)
         {
         case Z_SRW_recordPacking_string:
-            add_xsd_string(ptr, "recordPacking", "string");
             add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
                              rec->recordData_len);
             break;
         case Z_SRW_recordPacking_XML:
-            add_xsd_string(ptr, "recordPacking", "xml");
             add_XML_n(ptr, "recordData", rec->recordData_buf,
                       rec->recordData_len, 0);
             break;
         case Z_SRW_recordPacking_URL:
-            add_xsd_string(ptr, "recordPacking", "url");
             add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
                              rec->recordData_len);
             break;

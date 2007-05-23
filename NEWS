@@ -1,3 +1,8 @@
+Changed decoding of SRU XML packed records to deal with servers that
+have recordData with XML data with multiple root nodes. Also make
+comparison for recordPacking case insensitive. Again, one server
+returns "XML" where others return "xml".
+
 For SRU responses allow Content-Type application/xml as well as text/xml.
 
 --- 3.0.4 2007/05/21
