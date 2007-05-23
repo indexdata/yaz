@@ -1,4 +1,4 @@
-<!-- $Id: credits.xml,v 1.17 2007-02-01 09:56:14 adam Exp $ -->
+<!-- $Id: credits.xml,v 1.18 2007-05-23 08:53:20 adam Exp $ -->
  <appendix id="credits"><title>Credits</title>
   <para>
    This appendix lists individuals that have contributed in the development
@@ -8,6 +8,9 @@
   </para>
   
   <itemizedlist>
+   <listitem><para>
+     Gary Anderson
+    </para></listitem>
    <listitem><para>
      Dimitrios Andreadis
     </para></listitem>
