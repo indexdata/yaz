@@ -1,3 +1,5 @@
+For SRU responses allow Content-Type application/xml as well as text/xml.
+
 --- 3.0.4 2007/05/21
 
 Fixed bug in character set conversion of BER strings. Bug introduced

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.33 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: srw.h,v 1.34 2007-05-23 11:54:47 adam Exp $ */
 
 /**
  * \file srw.h
@@ -270,6 +270,9 @@ YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 #define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"
 #define YAZ_XMLNS_DIAG_v1_1 "http://www.loc.gov/zing/srw/diagnostic/"
 #define YAZ_XMLNS_UPDATE_v0_9 "http://www.loc.gov/zing/srw/update/"
+
+YAZ_EXPORT
+int yaz_srw_check_content_type(Z_HTTP_Response *hres);
 
 YAZ_END_CDECL
 

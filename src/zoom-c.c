@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.130 2007-05-08 08:22:36 adam Exp $
+ * $Id: zoom-c.c,v 1.131 2007-05-23 11:54:47 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.130 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.131 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3724,14 +3724,15 @@ static void handle_srw_response(ZOOM_connection c,
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     int ret = -1;
-    const char *content_type = z_HTTP_header_lookup(hres->headers,
-                                                    "Content-Type");
+    const char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
     ZOOM_connection_set_mask(c, 0);
     yaz_log(log_details, "%p handle_http", c);
-
-    if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+    
+    if (!yaz_srw_check_content_type(hres))
+        addinfo = "content-type";
+    else
     {
         Z_SOAP *soap_package = 0;
         ODR o = c->odr_in;
@@ -3766,7 +3767,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         if (hres->code != 200)
             set_HTTP_error(c, hres->code, 0, 0);
         else
-            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+            set_ZOOM_error(c, ZOOM_ERROR_DECODE, addinfo);
         do_close(c);
     }
     ZOOM_connection_remove_task(c);

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.338 2007-05-08 08:22:35 adam Exp $
+ * $Id: client.c,v 1.339 2007-05-23 11:54:46 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -3820,11 +3820,11 @@ static void handle_srw_scan_response(Z_SRW_scanResponse *res)
 static void http_response(Z_HTTP_Response *hres)
 {
     int ret = -1;
-    const char *content_type = z_HTTP_header_lookup(hres->headers,
-                                                    "Content-Type");
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
-    if (content_type && !yaz_strcmp_del("text/xml", content_type, "; "))
+    if (!yaz_srw_check_content_type(hres))
+        printf("Content type does not appear to be XML");
+    else
     {
         Z_SOAP *soap_package = 0;
         ODR o = odr_createmem(ODR_DECODE);
