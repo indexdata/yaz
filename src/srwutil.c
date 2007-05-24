@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.58 2007-05-23 13:11:11 adam Exp $
+ * $Id: srwutil.c,v 1.59 2007-05-24 10:18:36 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -28,8 +28,9 @@ void encode_uri_char(char *dst, char ch)
 {
     if (ch == ' ')
         strcpy(dst, "+");
+    /*  mark        = "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")" */
     else if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-        (ch >= '0' && ch <= '9'))
+             (ch >= '0' && ch <= '9') || strchr("-_.!~*'(|)", ch))
     {
         dst[0] = ch;
         dst[1] = '\0';
