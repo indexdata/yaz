@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaziconv.c,v 1.8 2007-03-21 08:37:57 adam Exp $
+ * $Id: yaziconv.c,v 1.9 2007-05-25 16:19:46 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -153,7 +153,7 @@ int main (int argc, char **argv)
             break;
         default:
             fprintf (stderr, "yaziconv: Usage\n"
-                     "siconv -f encoding -t encoding [-v] [file]\n");
+                     "yaziconv -f encoding -t encoding [-v] [file]\n");
             exit(1);
         }
     }
