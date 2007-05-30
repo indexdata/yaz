@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.339 2007-05-23 11:54:46 adam Exp $
+ * $Id: client.c,v 1.340 2007-05-30 08:12:16 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2853,7 +2853,8 @@ int cmd_cancel_find(const char *arg) {
     return fres;
 }
 
-int send_scanrequest(const char *query, int pp, int num, const char *term)
+int send_scanrequest(const char *set,  const char *query,
+                     int pp, int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
@@ -2918,6 +2919,11 @@ int send_scanrequest(const char *query, int pp, int num, const char *term)
     req->numberOfTermsRequested = &num;
     req->preferredPositionInResponse = &pp;
     req->stepSize = odr_intdup(out, scan_stepSize);
+
+    if (set)
+        yaz_oi_set_string_oid(&req->otherInfo, out,
+                              yaz_oid_userinfo_scan_set, 1, set);
+
     send_apdu(apdu);
     return 2;
 }
@@ -3098,7 +3104,7 @@ int cmd_scansize(const char *arg)
     return 0;
 }
 
-int cmd_scan(const char *arg)
+static int cmd_scan_common(const char *set, const char *arg)
 {
     if (protocol == PROTO_HTTP)
     {
@@ -3142,16 +3148,35 @@ int cmd_scan(const char *arg)
         if (*arg)
         {
             strcpy (last_scan_query, arg);
-            if (send_scanrequest(arg, scan_position, scan_size, 0) < 0)
+            if (send_scanrequest(set, arg, 
+                                 scan_position, scan_size, 0) < 0)
                 return 0;
         }
         else
         {
-            if (send_scanrequest(last_scan_query, 1, scan_size, last_scan_line) < 0)
+            if (send_scanrequest(set, last_scan_query, 
+                                 1, scan_size, last_scan_line) < 0)
                 return 0;
         }
         return 2;
     }
+}
+
+int cmd_scan(const char *arg)
+{
+    return cmd_scan_common(0, arg);
+}
+
+int cmd_setscan(const char *arg)
+{
+    char setstring[100];
+    int nor;
+    if (sscanf(arg, "%99s%n", setstring, &nor) < 1)
+    {
+        printf("missing set for setscan\n");
+        return 0;
+    }
+    return cmd_scan_common(setstring, arg + nor);
 }
 
 int cmd_schema(const char *arg)
@@ -4328,6 +4353,7 @@ static struct {
     {"delete", cmd_delete, "<setname>",NULL,0,NULL},
     {"base", cmd_base, "<base-name>",NULL,0,NULL},
     {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0,NULL},
+    {"setscan", cmd_setscan, "<term>",NULL,0,NULL},
     {"scan", cmd_scan, "<term>",NULL,0,NULL},
     {"scanstep", cmd_scanstep, "<size>",NULL,0,NULL},
     {"scanpos", cmd_scanpos, "<size>",NULL,0,NULL},

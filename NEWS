@@ -1,3 +1,15 @@
+Implemented a way to perform scan in a result set using Z39.50. This
+is achieved by attaching the result set name in the characterInfo
+(type InternationalString) of OtherInformation in the Scan Request PDU.
+The result set is identified in the otherinformation by the new OID:
+ USERINFO, Z3950_PREFIX.10.1000.81.4, "Scan-Set
+This allows for scan in result set and faceted search . Zebra did some
+of this in the APT term using attribute type 8 and value being result
+set. Using the OtherInformation approach for this is cleaner and easier
+to work with in proxies and the like. This facility can be used in
+yaz-client using new command setscan which takes a result set as first
+argument, start position (APT) as second.
+
 Changed decoding of SRU XML packed records to deal with servers that
 have recordData with XML data with multiple root nodes. Also make
 comparison for recordPacking case insensitive. Again, one server

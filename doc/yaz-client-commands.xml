@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.17 2007-01-24 09:54:04 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.18 2007-05-30 08:12:17 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -90,6 +90,15 @@
    <screen>
     scan @attr 1=4 water
    </screen>
+  </listitem>
+ </varlistentry>
+ <varlistentry><term>
+   <literal>setscan</literal> <replaceable>set</replaceable> <replaceable>term</replaceable>
+  </term>
+  <listitem>
+   <simpara>Scans database index for a term within a result set. This
+    is similar to the scan command but has a result set as its first argument.
+   </simpara>
   </listitem>
  </varlistentry>
  <varlistentry><term>

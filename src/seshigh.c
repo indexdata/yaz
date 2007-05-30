@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.119 2007-05-08 08:22:36 adam Exp $
+ * $Id: seshigh.c,v 1.120 2007-05-30 08:12:17 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1264,6 +1264,7 @@ static void srw_bend_scan(association *assoc, request *req,
         bsrr->print = assoc->print;
         bsrr->step_size = odr_intdup(assoc->decode, 0);
         bsrr->entries = 0;
+        bsrr->setname = 0;
 
         if (bsrr->num_entries > 0) 
         {
@@ -2358,7 +2359,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.119 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.120 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3014,6 +3015,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     bsrr->stream = assoc->encode;
     bsrr->print = assoc->print;
     bsrr->step_size = res->stepSize;
+    bsrr->setname = yaz_oi_get_string_oid(&req->otherInfo, 
+                                          yaz_oid_userinfo_scan_set, 1, 0);
     bsrr->entries = 0;
     /* For YAZ 2.0 and earlier it was the backend handler that
        initialized entries (member display_term did not exist)
@@ -3127,35 +3130,32 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         int i;
         WRBUF wr = wrbuf_alloc();
         wrbuf_printf(wr, "Scan ");
-        for (i = 0 ; i < req->num_databaseNames; i++){
+        for (i = 0 ; i < req->num_databaseNames; i++)
+        {
             if (i)
                 wrbuf_printf(wr, "+");
             wrbuf_printf(wr, req->databaseNames[i]);
         }
+
         wrbuf_printf(wr, " ");
         
-        if (bsrr->errcode){
+        if (bsrr->errcode)
             wr_diag(wr, bsrr->errcode, bsrr->errstring);
-            wrbuf_printf(wr, " ");
-        }
         else
-            wrbuf_printf(wr, "OK "); 
-        /* else if (*res->scanStatus == Z_Scan_success) */
-        /*    wrbuf_printf(wr, "OK "); */
-        /* else */
-        /* wrbuf_printf(wr, "Partial "); */
+            wrbuf_printf(wr, "OK"); 
 
-        if (*res->numberOfEntriesReturned)
-            wrbuf_printf(wr, "%d - ", *res->numberOfEntriesReturned);
-        else
-            wrbuf_printf(wr, "0 - ");
-
-        wrbuf_printf(wr, "%d+%d+%d ",
+        wrbuf_printf(wr, " %d - %d+%d+%d",
+                     res->numberOfEntriesReturned ?
+                     *res->numberOfEntriesReturned : 0,
                      (req->preferredPositionInResponse ?
                       *req->preferredPositionInResponse : 1),
                      *req->numberOfTermsRequested,
                      (res->stepSize ? *res->stepSize : 1));
+        
+        if (bsrr->setname)
+            wrbuf_printf(wr, "+%s", bsrr->setname);
 
+        wrbuf_printf(wr, " ");
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint, 
                           bsrr->attributeset);
         yaz_log(log_request, "%s", wrbuf_cstr(wr) );

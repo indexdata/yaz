@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: backend.h,v 1.47 2007-05-08 08:22:35 adam Exp $ */
+/* $Id: backend.h,v 1.48 2007-05-30 08:12:17 adam Exp $ */
 
 /** 
  * \file backend.h
@@ -147,6 +147,7 @@ typedef struct bend_scan_rr {
     int errcode;
     char *errstring;
     char *scanClause;   /* CQL scan clause */
+    char *setname;      /* Scan in result set (NULL if omitted) */
 } bend_scan_rr;
 
 /** \brief Information for SRU record update handler */
