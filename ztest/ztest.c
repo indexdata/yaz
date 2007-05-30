@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.91 2007-05-08 08:22:37 adam Exp $
+ * $Id: ztest.c,v 1.92 2007-05-30 08:04:28 adam Exp $
  */
 
 /*
@@ -40,14 +40,6 @@ int ztest_search(void *handle, bend_search_rr *rr)
         rr->errcode = 23;
         return 0;
     }
-#if NMEM_DEBUG
-    /* if database is stop, stop this process.. For debugging only. */
-    if (!yaz_matchstr (rr->basenames[0], "stop"))
-    {
-        nmem_print_list_l(YLOG_LOG);
-        exit(0);
-    }
-#endif
     /* Throw Database unavailable if other than Default or Slow */
     if (!yaz_matchstr (rr->basenames[0], "Default"))
         ;  /* Default is OK in our test */
