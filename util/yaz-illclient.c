@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.6 2007-05-06 20:12:20 adam Exp $
+ * $Id: yaz-illclient.c,v 1.7 2007-05-30 13:59:04 heikki Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */
@@ -71,6 +71,8 @@ struct prog_args {
     char *host;
     char *auth_userid;
     char *auth_passwd;
+    char *oclc_recno; /* record number in oclc-mode */
+    int oclc_auth;  /* 1=use oclc-type auth */
     struct nameval* namevals; /* circular list, points to last */
 } ;
 
@@ -90,25 +92,6 @@ const char *get_ill_element(void *clientData, const char *element) {
         if ( strcmp(element, nv->name) == 0 )
             ret = nv->val;
     } while ( ( !ret) && ( nv != args->namevals) );
-#if 0
-    if (!strcmp(element,"foo")) {
-        ret=args->host;
-    } else if (!strcmp(element,"ill,protocol-version-num")) {
-        ret="2";
-    } else if (!strcmp(element,"ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution")) {
-        ret=args->auth_userid; 
-    } else if (!strcmp(element,"ill,requester-id,person-or-institution-symbol,institution")) {
-        ret=args->auth_userid;
-    } else if (!strcmp(element,"ill,responder-id,person-or-institution-symbol,institution")) {
-        ret=args->auth_userid;
-    } else if (!strcmp(element,"ill,ill-service-type")) {
-        ret="1"; /* Loan */
-    } 
-#endif
- /*
-    } else if (!strcmp(element,"ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution")) {
-        ret="IndexData";
- */
     yaz_log(YLOG_DEBUG,"get_ill_element:'%s'->'%s'", element, ret );
     return ret;
 }
@@ -201,27 +184,25 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.6 2007-05-06 20:12:20 adam Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.7 2007-05-30 13:59:04 heikki Exp $"; /* from cvs */
     struct nameval *nv;
 
     /* default values */
     args->host = 0; /* not known (yet) */
     args->namevals=0; /* none set up */
+    args->oclc_auth=0;
+    args->oclc_recno=0;
+    args->auth_userid = 0;
+    args->auth_passwd = 0;
 #if 0    
-    /* Example 1, from TSLAC */
-    args->auth_userid = "100-228-301" ; /* FIXME - get from cmd line */
-    args->auth_passwd = "dxg5magxc" ;   /* FIXME - get from cmd line */
-    /* Example 2, from TSLAC */
-    args->auth_userid = "100070049" ; /* FIXME - get from cmd line */
-    args->auth_passwd = "cowgirl" ;   /* FIXME - get from cmd line */
-#else
     /* Example 3 - directly from OCLC, supposed to work on their test server*/
     args->auth_userid = "100-310-658" ; /* FIXME - get from cmd line */
     args->auth_passwd = "apii2test" ;   /* FIXME - get from cmd line */
 #endif
 
-    while ((ret = options("v:D:f:V", argv, argc, &arg)) != -2)
+    while ((ret = options("Vov:p:u:D:f:r:l:", argv, argc, &arg)) != -2)
     {
+        yaz_log(YLOG_DEBUG,"parsing option '%c' '%s'",ret, arg);
         switch (ret)
         {
         case 0:
@@ -239,6 +220,8 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
         case 'v':
             yaz_log_init(yaz_log_mask_str(arg), "", 0);
             break;
+        case 'l':
+            yaz_log_init_file(arg);
         case 'V':
             printf("%s %s",prog, version );
             break;
@@ -249,10 +232,24 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
         case 'f':
             parse_paramfile(arg,args);
             break;
+        case 'o':
+            args->oclc_auth=1;
+            break;
+        case 'u':
+            args->auth_userid=xstrdup(arg);
+            break;
+        case 'p':
+            args->auth_passwd=xstrdup(arg);
+            break;
+        case 'r':
+            args->oclc_recno=xstrdup(arg);
+            break;
         default:
             fprintf (stderr, "Usage: %s "
+                     " [-f filename]"
                      " [-v loglevel...]"
                      " [-D name=value ]"
+                     " [-o -u user -p passwd]"
                      " [-V]"
                      " <server-addr>\n",
                      prog);
@@ -267,6 +264,10 @@ void validateargs( struct prog_args *args) {
     if (!args->host) {
         fprintf(stderr, "Specify a connection address, "
                         "as in 'bagel.indexdata.dk:210' \n");
+        exit(1);
+    }
+    if (args->oclc_auth && ((!args->auth_userid) || (!args->auth_passwd))){
+        fprintf(stderr, "-o option requires -u <user> and -p <pwd>\n");
         exit(1);
     }
 } /* validateargs */
@@ -457,11 +458,14 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     apdu->which=ILL_APDU_ILL_Request;
     req = ill_get_ILLRequest(&ctl, "ill", 0);
     apdu->u.illRequest=req;
-    req->num_iLL_request_extensions=2;
-    req->iLL_request_extensions = (ILL_Extension **)
-        odr_malloc(odr, req->num_iLL_request_extensions*sizeof(*req->iLL_request_extensions));
-    req->iLL_request_extensions[0]=makepromptextension(args,odr);
-    req->iLL_request_extensions[1]=makeoclcextension(args,odr);
+    if (args->oclc_auth) {
+        req->num_iLL_request_extensions=2;
+        req->iLL_request_extensions=
+            odr_malloc(odr, req->num_iLL_request_extensions*
+                            sizeof(*req->iLL_request_extensions));
+        req->iLL_request_extensions[0]=makepromptextension(args,odr);
+        req->iLL_request_extensions[1]=makeoclcextension(args,odr);
+    }
     if (!req) {
         yaz_log(YLOG_FATAL,"Could not create ill request");
         exit(2);
@@ -614,24 +618,25 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
             ILL_Provider_Error_Report *perr= err->provider_error_report;
             switch( perr->which ) {
                 case ILL_Provider_Error_Report_general_problem:
-                    printf("General Problem: %d\n", 
+                    printf("General Problem: %d:", 
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_transaction_id_problem:
-                    printf("Transaction Id Problem: %d\n", 
+                    printf("Transaction Id Problem: %d:", 
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_state_transition_prohibited:
-                    printf("State Transition prohibited \n");
+                    printf("State Transition prohibited:");
                     break;
             }
-            exit(7);
+            /*exit(7);*/
         } 
         /* fallbacks */
         if ( staterr->note ) 
             printf("%s", getillstring(staterr->note));
         else 
             printf("Unknown error type");
+        printf("\n");
         exit(7);
     }
 } /* checkerr */

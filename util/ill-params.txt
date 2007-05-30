@@ -15,7 +15,16 @@ ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution
 #ill,requester-id,person-or-institution-symbol,institution=100-310-658
 #ill,responder-id,person-or-institution-symbol,institution=100-310-658
 ill,requester-id,person-or-institution-symbol,institution=IKM
-ill,responder-id,person-or-institution-symbol,institution=IKM
+#ill,responder-id,person-or-institution-symbol,institution=IKM
+ill,responder-id,person-or-institution-symbol,institution=OZZ
 
 # service type 1 = loan
 ill,ill-service-type=1
+
+# The item to request
+ill,item-id,title=Unknown Title
+ill,item-id,verification-reference-source=myself
+
+# Where to deliver it
+ill,delivery-address,postal-address,name-of-person-or-institution,name-of-person=TEST DATA
+delivery-address,postal-address,name-of-person-or-institution,name-of-institution=INDEX DATA
