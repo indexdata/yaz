@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.120 2007-05-30 08:12:17 adam Exp $
+ * $Id: seshigh.c,v 1.121 2007-05-30 21:56:59 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -2290,36 +2290,32 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         strcat(options, " sort");
     }
     
-    if (!assoc->init->charneg_response && !assoc->init->charneg_request)
+    if (ODR_MASK_GET(req->options, Z_Options_negotiationModel))
     {
-        if (assoc->init->query_charset)
-        {
-            assoc->init->charneg_response = yaz_set_response_charneg(
-                assoc->encode, assoc->init->query_charset, 0, 
-                assoc->init->records_in_same_charset);
-        }
-        else
-        {
-            yaz_log(YLOG_WARN, "default query_charset not defined by backend");
-        }
-    }
-    if (assoc->init->charneg_response 
-        && ODR_MASK_GET(req->options, Z_Options_negotiationModel))
-    {
-        Z_OtherInformation **p;
         Z_OtherInformationUnit *p0;
-        
-        yaz_oi_APDU(apdu, &p);
-        
-        if ((p0=yaz_oi_update(p, assoc->encode, NULL, 0, 0))) {
-            ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
-            
+
+        if (!assoc->init->charneg_response)
+        {
+            if (assoc->init->query_charset)
+            {
+                assoc->init->charneg_response = yaz_set_response_charneg(
+                    assoc->encode, assoc->init->query_charset, 0, 
+                    assoc->init->records_in_same_charset);
+            }
+            else
+            {
+                yaz_log(YLOG_WARN, "default query_charset not defined by backend");
+            }
+        }
+        if (assoc->init->charneg_response
+            && (p0=yaz_oi_update(&resp->otherInfo, assoc->encode, NULL, 0, 0)))
+        {
             p0->which = Z_OtherInfo_externallyDefinedInfo;
             p0->information.externallyDefinedInfo =
                 assoc->init->charneg_response;
+            ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
+            strcat(options, " negotiation");
         }
-        ODR_MASK_SET(resp->options, Z_Options_negotiationModel);
-        strcat(options, " negotiation");
     }
     if (ODR_MASK_GET(req->options, Z_Options_triggerResourceCtrl))
         ODR_MASK_SET(resp->options, Z_Options_triggerResourceCtrl);
@@ -2359,7 +2355,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.120 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.121 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

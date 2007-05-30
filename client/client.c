@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.341 2007-05-30 08:40:26 adam Exp $
+ * $Id: client.c,v 1.342 2007-05-30 21:56:59 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -186,6 +186,7 @@ char **readline_completer(char *text, int start, int end);
 #endif
 static char *command_generator(const char *text, int state);
 int cmd_register_tab(const char* arg);
+int cmd_querycharset(const char *arg);
 
 static void close_session (void);
 
@@ -363,6 +364,21 @@ static void send_initRequest(const char* type_and_host)
                                               negotiationCharsetRecords);
         }
     }
+    else if (ODR_MASK_GET(req->options, Z_Options_negotiationModel))
+    {
+        Z_OtherInformation **p;
+        Z_OtherInformationUnit *p0;
+        
+        yaz_oi_APDU(apdu, &p);
+        
+        if ((p0=yaz_oi_update(p, out, NULL, 0, 0)))
+        {
+            p0->which = Z_OtherInfo_externallyDefinedInfo;
+            p0->information.externallyDefinedInfo =
+                yaz_set_proposal_charneg(out, 0, 0, 0, 0, 0);
+        }
+
+    }
     if (send_apdu(apdu))
         printf("Sent initrequest.\n");
 }
@@ -454,27 +470,30 @@ static int process_initResponse(Z_InitResponse *res)
         Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(res->otherInfo);
 
-        if (p) {
-            
+        if (p) 
+        {
             char *charset=NULL, *lang=NULL;
             int selected;
             
             yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
 
-            printf("Accepted character set : %s\n", charset);
-            printf("Accepted code language : %s\n", lang ? lang : "none");
+            printf("Accepted character set : %s\n", charset ? charset:"none");
+            printf("Accepted code language : %s\n", lang ? lang:"none");
             printf("Accepted records in ...: %d\n", selected );
 
-            if (outputCharset && negotiationCharset) {
+            if (outputCharset && charset)
+            {
                 printf("Converting between %s and %s\n",
-                       outputCharset, negotiationCharset);
-                odr_set_charset (out, charset, outputCharset);
-                odr_set_charset (in, outputCharset, charset);
+                       outputCharset, charset);
+                odr_set_charset(out, charset, outputCharset);
+                odr_set_charset(in, outputCharset, charset);
+                cmd_querycharset(charset);
             }
-            else {
-                odr_set_charset (out, 0, 0);
-                odr_set_charset (in, 0, 0);
+            else
+            {
+                odr_set_charset(out, 0, 0);
+                odr_set_charset(in, 0, 0);
             }
         }
     }
@@ -3348,7 +3367,7 @@ int cmd_marccharset(const char *arg)
     }
     xfree (marcCharset);
     marcCharset = 0;
-    if (strcmp(l1, "-"))
+    if (strcmp(l1, "-") && strcmp(l1, "none"))
         marcCharset = xstrdup(l1);
     return 1;
 }
@@ -3366,7 +3385,7 @@ int cmd_querycharset(const char *arg)
     }
     xfree (queryCharset);
     queryCharset = 0;
-    if (strcmp(l1, "-"))
+    if (strcmp(l1, "-") && strcmp(l1, "none"))
         queryCharset = xstrdup(l1);
     return 1;
 }
@@ -3409,11 +3428,14 @@ int cmd_negcharset(const char *arg)
     if (sscanf(arg, "%29s %d %d", l1, &negotiationCharsetRecords,
                &negotiationCharsetVersion) < 1)
     {
-        printf("Current negotiation character set is `%s'\n", 
+        printf("Negotiation character set `%s'\n", 
                negotiationCharset ? negotiationCharset: "none");  
-        printf("Records in charset %s\n", negotiationCharsetRecords ? 
-               "yes" : "no");
-        printf("Charneg version %d\n", negotiationCharsetVersion);
+        if (negotiationCharset)
+        {
+            printf("Records in charset %s\n", negotiationCharsetRecords ? 
+                   "yes" : "no");
+            printf("Charneg version %d\n", negotiationCharsetVersion);
+        }
     }
     else
     {
@@ -3430,14 +3452,15 @@ int cmd_negcharset(const char *arg)
 
 int cmd_charset(const char* arg)
 {
-    char l1[30], l2[30], l3[30];
+    char l1[30], l2[30], l3[30], l4[30];
 
-    *l1 = *l2 = *l3 = 0;
-    if (sscanf(arg, "%29s %29s %29s", l1, l2, l3) < 1)
+    *l1 = *l2 = *l3 = *l4 = '\0';
+    if (sscanf(arg, "%29s %29s %29s %29s", l1, l2, l3, l4) < 1)
     {
         cmd_negcharset("");
         cmd_displaycharset("");
         cmd_marccharset("");
+        cmd_querycharset("");
     }
     else
     {
@@ -3446,6 +3469,8 @@ int cmd_charset(const char* arg)
             cmd_displaycharset(l2);
         if (*l3)
             cmd_marccharset(l3);
+        if (*l4)
+            cmd_querycharset(l4);
     }
     return 1;
 }
@@ -3453,7 +3478,7 @@ int cmd_charset(const char* arg)
 int cmd_lang(const char* arg)
 {
     if (*arg == '\0') {
-        printf("Current language is `%s'\n", (yazLang)?yazLang:NULL);
+        printf("Current language is `%s'\n", yazLang ? yazLang : "none");
         return 1;
     }
     xfree (yazLang);
