@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.340 2007-05-30 08:12:16 adam Exp $
+ * $Id: client.c,v 1.341 2007-05-30 08:40:26 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -63,6 +63,7 @@
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
 #include <yaz/charneg.h>
+#include <yaz/query-charset.h>
 
 #include <yaz/pquery.h>
 #include <yaz/sortspec.h>
@@ -133,6 +134,7 @@ static int  negotiationCharsetRecords = 1;
 static int  negotiationCharsetVersion = 3;
 static char *outputCharset = 0;
 static char *marcCharset = 0;
+static char *queryCharset = 0;
 static char* yazLang = 0;
 
 static char last_cmd[32] = "?";
@@ -1396,6 +1398,22 @@ static int send_SRW_searchRequest(const char *arg)
 }
 #endif
 
+static void query_charset_convert(Z_RPNQuery *q)
+{
+    if (queryCharset && outputCharset)
+    {
+        yaz_iconv_t cd = yaz_iconv_open(queryCharset, outputCharset);
+        if (!cd)
+        {
+            printf("Conversion from %s to %s unsupported\n",
+                   outputCharset, queryCharset);
+            return;
+        }
+        yaz_query_charset_convert_rpnquery(q, out, cd);
+        yaz_iconv_close(cd);
+    }
+}
+
 static int send_searchRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
@@ -1501,6 +1519,7 @@ static int send_searchRequest(const char *arg)
             return 0;
         }
         yaz_pqf_destroy (pqf_parser);
+        query_charset_convert(RPNquery);
         query.u.type_1 = RPNquery;
         break;
     case QueryType_CCL:
@@ -1517,6 +1536,7 @@ static int send_searchRequest(const char *arg)
             printf ("Couldn't convert from CCL to RPN\n");
             return 0;
         }
+        query_charset_convert(RPNquery);
         query.u.type_1 = RPNquery;
         ccl_rpn_delete (rpn);
         break;
@@ -2900,6 +2920,18 @@ int send_scanrequest(const char *set,  const char *query,
         }
         yaz_pqf_destroy (pqf_parser);
     }
+    if (queryCharset && outputCharset)
+    {
+        yaz_iconv_t cd = yaz_iconv_open(queryCharset, outputCharset);
+        if (!cd)
+        {
+            printf("Conversion from %s to %s unsupported\n",
+                   outputCharset, queryCharset);
+            return -1;
+        }
+        yaz_query_charset_convert_apt(req->termListAndStartPoint, out, cd);
+        yaz_iconv_close(cd);
+    }
     if (term && *term)
     {
         if (req->termListAndStartPoint->term &&
@@ -3318,6 +3350,24 @@ int cmd_marccharset(const char *arg)
     marcCharset = 0;
     if (strcmp(l1, "-"))
         marcCharset = xstrdup(l1);
+    return 1;
+}
+
+int cmd_querycharset(const char *arg)
+{
+    char l1[30];
+
+    *l1 = 0;
+    if (sscanf(arg, "%29s", l1) < 1)
+    {
+        printf("Query character set is `%s'\n", 
+               queryCharset ? queryCharset: "none");
+        return 1;
+    }
+    xfree (queryCharset);
+    queryCharset = 0;
+    if (strcmp(l1, "-"))
+        queryCharset = xstrdup(l1);
     return 1;
 }
 
@@ -4384,6 +4434,7 @@ static struct {
     {"negcharset", cmd_negcharset, "<nego_charset>",NULL,0,NULL},
     {"displaycharset", cmd_displaycharset, "<output_charset>",NULL,0,NULL},
     {"marccharset", cmd_marccharset, "<charset_name>",NULL,0,NULL},
+    {"querycharset", cmd_querycharset, "<charset_name>",NULL,0,NULL},
     {"lang", cmd_lang, "<language_code>",NULL,0,NULL},
     {"source", cmd_source_echo, "<filename>",NULL,1,NULL},
     {".", cmd_source_echo, "<filename>",NULL,1,NULL},

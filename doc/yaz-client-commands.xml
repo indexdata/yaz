@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.18 2007-05-30 08:12:17 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.19 2007-05-30 08:40:26 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -578,6 +578,19 @@
   </listitem>
  </varlistentry>
 
+ <varlistentry><term>
+   <literal>querycharset</literal>
+   <replaceable>charset</replaceable>
+  </term>
+  <listitem>
+   <para>Specifies character set for query terms for Z39.50 RPN
+    queries and Z39.50 Scan Requests (termListAndStartPoint).
+    This is a pure client-side conversion which converts from
+    displayCharset to queryCharset.
+   </para>
+  </listitem>
+ </varlistentry>
+ 
  <varlistentry><term>
    <literal>set_cclfile</literal>
    <replaceable>filename</replaceable>
