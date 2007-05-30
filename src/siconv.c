@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.41 2007-05-23 08:50:11 adam Exp $
+ * $Id: siconv.c,v 1.42 2007-05-30 08:22:03 adam Exp $
  */
 /**
  * \file siconv.c
@@ -1718,6 +1718,8 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->read_handle = yaz_read_advancegreek;
         else if (!yaz_matchstr(fromcode, "iso54281984"))
             cd->read_handle = yaz_read_iso5428_1984;
+        else if (!yaz_matchstr(fromcode, "iso5428:1984"))
+            cd->read_handle = yaz_read_iso5428_1984;
 #if HAVE_WCHAR_H
         else if (!yaz_matchstr(fromcode, "WCHAR_T"))
             cd->read_handle = yaz_read_wchar_t;
@@ -1749,6 +1751,10 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->write_handle = yaz_write_advancegreek;
         }
         else if (!yaz_matchstr(tocode, "iso54281984"))
+        {
+            cd->write_handle = yaz_write_iso5428_1984;
+        }
+        else if (!yaz_matchstr(tocode, "iso5428:1984"))
         {
             cd->write_handle = yaz_write_iso5428_1984;
         }

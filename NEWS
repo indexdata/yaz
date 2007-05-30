@@ -1,3 +1,5 @@
+Charset ISO5428:1984 is an alias for ISO5428-1984.
+
 Implemented a way to perform scan in a result set using Z39.50. This
 is achieved by attaching the result set name in the characterInfo
 (type InternationalString) of OtherInformation in the Scan Request PDU.
