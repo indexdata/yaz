@@ -1,3 +1,6 @@
+Added support for correlationInfo Note and ID for Record Update via
+ZOOM C.
+
 Added yaz-client command querycharset which specifies character set for
 query terms for Z39.50 RPN queries and Z39.50 Scan Requests
 (termListAndStartPoint).

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.131 2007-05-23 11:54:47 adam Exp $
+ * $Id: zoom-c.c,v 1.132 2007-05-31 07:38:14 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.131 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.132 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3114,6 +3114,11 @@ static Z_APDU *create_update_package(ZOOM_package p)
     const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
     const char *record_buf = ZOOM_options_get(p->options, "record");
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
+
+    const char *correlationInfo_note =
+        ZOOM_options_get(p->options, "correlationInfo.note");
+    const char *correlationInfo_id =
+        ZOOM_options_get(p->options, "correlationInfo.id");
     int action_no = -1;
     Odr_oid *syntax_oid = 0;
 
@@ -3211,7 +3216,18 @@ static Z_APDU *create_update_package(ZOOM_package p)
         else
             notToKeep->elements[0]->u.opaque = 0;
         notToKeep->elements[0]->supplementalId = 0;
-        notToKeep->elements[0]->correlationInfo = 0;
+        if (correlationInfo_note || correlationInfo_id)
+        {
+            Z_IUCorrelationInfo *ci;
+            ci = notToKeep->elements[0]->correlationInfo =
+                odr_malloc(p->odr_out, sizeof(*ci));
+            ci->note = correlationInfo_note ?
+                odr_strdup(p->odr_out, correlationInfo_note) : 0;
+            ci->id = correlationInfo_id ?
+                odr_intdup(p->odr_out, atoi(correlationInfo_id)) : 0;
+        }
+        else
+            notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record =
             z_ext_record_oid(p->odr_out, syntax_oid,
                              record_buf, strlen(record_buf));
