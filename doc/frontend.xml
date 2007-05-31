@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.33 2007-02-01 09:56:14 adam Exp $ -->
+<!-- $Id: frontend.xml,v 1.34 2007-05-31 09:45:14 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1 id="server.introduction"><title>Introduction</title>
    
@@ -348,37 +348,75 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     <synopsis>
 typedef struct bend_initrequest
 {
-    Z_IdAuthentication *auth;
-    ODR stream;                /* encoding stream */
-    ODR print;                 /* printing stream */
-    Z_ReferenceId *referenceId;/* reference ID */
-    char *peer_name;           /* dns host of peer (client) */
+    /** \brief user/name/password to be read */
+    Z_IdAuthentication *auth; 
+    /** \brief encoding stream (for results) */
+    ODR stream;
+    /** \brief printing stream */
+    ODR print;
+    /** \brief decoding stream (use stream for results) */
+    ODR decode; 
+    /** \brief reference ID */
+    Z_ReferenceId *referenceId;
+    /** \brief peer address of client */
+    char *peer_name;           
+    
+    /** \brief character set and language negotiation 
+
+    see include/yaz/z-charneg.h 
+    */
+    Z_CharSetandLanguageNegotiation *charneg_request;
+
+    /** \brief character negotiation response */
+    Z_External *charneg_response;
+
+    /** \brief character set (encoding) for query terms 
+        
+    This is NULL by default. It should be set to the native character
+    set that the backend assumes for query terms */
+    char *query_charset;      
+
+    /** \brief whehter query_charset also applies to recors 
+    
+    Is 0 (No) by default. Set to 1 (yes) if records is in the same
+    character set as queries. If in doubt, use 0 (No).
+    */
+    int records_in_same_charset;
 
     char *implementation_id;
     char *implementation_name;
     char *implementation_version;
-    int (*bend_sort) (void *handle, bend_sort_rr *rr);
-    int (*bend_search) (void *handle, bend_search_rr *rr);
-    int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
-    int (*bend_present) (void *handle, bend_present_rr *rr);
-    int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
-    int (*bend_delete)(void *handle, bend_delete_rr *rr);
-    int (*bend_scan)(void *handle, bend_scan_rr *rr);
-    int (*bend_segment)(void *handle, bend_segment_rr *rr);
 
-    ODR decode;                 /* decoding stream */
-    /* character set and language negotiation - see include/yaz/z-charneg.h */
-    Z_CharSetandLanguageNegotiation *charneg_request;
-    Z_External *charneg_response;
-    int (*bend_srw_explain)(void *handle, bend_explain_rr *rr);
+    /** \brief Z39.50 sort handler */
+    int (*bend_sort)(void *handle, bend_sort_rr *rr);
+    /** \brief SRU/Z39.50 search handler */
+    int (*bend_search)(void *handle, bend_search_rr *rr);
+    /** \brief SRU/Z39.50 fetch handler */
+    int (*bend_fetch)(void *handle, bend_fetch_rr *rr);
+    /** \brief SRU/Z39.50 present handler */
+    int (*bend_present)(void *handle, bend_present_rr *rr);
+    /** \brief Z39.50 extended services handler */
+    int (*bend_esrequest) (void *handle, bend_esrequest_rr *rr);
+    /** \brief Z39.50 delete result set handler */
+    int (*bend_delete)(void *handle, bend_delete_rr *rr);
+    /** \brief Z39.50 scan handler */
+    int (*bend_scan)(void *handle, bend_scan_rr *rr);
+    /** \brief Z39.50 segment facility handler */
+    int (*bend_segment)(void *handle, bend_segment_rr *rr);
+    /** \brief SRU explain handler */
+    int (*bend_explain)(void *handle, bend_explain_rr *rr);
+    /** \brief SRU scan handler */
     int (*bend_srw_scan)(void *handle, bend_scan_rr *rr);
+    /** \brief SRU record update handler */
+    int (*bend_srw_update)(void *handle, bend_update_rr *rr);
+
 } bend_initrequest;
 
 typedef struct bend_initresult
 {
-    int errcode;       /* 0==OK */
-    char *errstring;   /* system error string or NULL */
-    void *handle;      /* private handle to the backend module */
+    int errcode;               /* 0==OK */
+    char *errstring;           /* system error string or NULL */
+    void *handle;              /* private handle to the backend module */
 } bend_initresult;
     </synopsis>
 
@@ -458,7 +496,12 @@ typedef struct {
     int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
-    Z_OtherInformation *search_info;
+    Z_OtherInformation *search_info; /* additional search info */
+    char *srw_sortKeys;        /* holds SRU/SRW sortKeys info */
+    char *srw_setname;         /* holds SRU/SRW generated resultsetID */
+    int *srw_setnameIdleTime;  /* holds SRU/SRW life-time */
+    int estimated_hit_count;   /* if hit count is estimated */
+    int partial_resultset;     /* if result set is partial */
 } bend_search_rr;
     </synopsis>
 
@@ -520,8 +563,7 @@ typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
-    oid_value request_format;  /* One of the CLASS_RECSYN members */
-    int *request_format_raw;   /* same as above (raw OID) */
+    Odr_oid *request_format;        /* format, transfer syntax (OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
@@ -530,8 +572,7 @@ typedef struct bend_fetch_rr {
     int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
-    oid_value output_format;   /* format */
-    int *output_format_raw;    /* used instead of above if not-null */
+    Odr_oid *output_format;        /* response format/syntax (OID) */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
@@ -549,10 +590,10 @@ typedef struct bend_fetch_rr {
      being the first record in the set). The <literal>format</literal> field
      is the record format requested by the client (See
      <xref linkend="asn.oid"/>).
-     The value <literal>VAL_NONE</literal> indicates that the client did
-     not request a specific format. The <literal>stream</literal> argument
-     is an &odr; stream which should be used for
-     allocating space for structured data records.
+     A value of NULL for <literal>format</literal> indicates that the
+     client did not request a specific format.
+     The <literal>stream</literal> argument is an &odr; stream which
+     should be used for allocating space for structured data records.
      The stream will be reset when all records have been assembled, and
      the response package has been transmitted.
      For unstructured data, the backend is responsible for maintaining a
@@ -562,8 +603,7 @@ typedef struct bend_fetch_rr {
     <para>
      If a SRU SearchRetrieveRequest is received by the frontend server,
      the <literal>referenceId</literal> is NULL and the
-     <literal>request_format</literal> (transfer syntax) is XML (OID name 
-     <literal>VAL_TEXT_XML</literal>).
+     <literal>format</literal> (transfer syntax) is the OID for XML.
      The schema for SRU is stored in both the
      <literal>Z_RecordComposition</literal>
      structure and <literal>schema</literal> (simple string).
@@ -618,10 +658,10 @@ typedef struct {
     char *setname;             /* set name */
     int start;
     int number;                /* record number */
-    oid_value format;          /* One of the CLASS_RECSYN members */
+    Odr_oid *format;           /* format, transfer syntax (OID) */
     Z_ReferenceId *referenceId;/* reference ID */
     Z_RecordComposition *comp; /* Formatting instructions */
-    ODR stream;                /* encoding stream */
+    ODR stream;                /* encoding stream - memory source if required */
     ODR print;                 /* printing stream */
     bend_request request;
     bend_association association;
@@ -692,7 +732,7 @@ typedef struct bend_delete_rr {
     </para>
 
     <synopsis>
-int (*bend_delete)(void *handle, bend_delete_rr *rr);
+int (*bend_scan)(void *handle, bend_scan_rr *rr);
 
 typedef enum {
     BEND_SCAN_SUCCESS,  /* ok */
@@ -700,9 +740,9 @@ typedef enum {
 } bend_scan_status;
 
 typedef struct bend_scan_rr {
-    int num_bases;      /* number of elements in database list */
+    int num_bases;      /* number of elements in databaselist */
     char **basenames;   /* databases to search */
-    oid_value attributeset;
+    Odr_oid *attributeset;
     Z_ReferenceId *referenceId; /* reference ID */
     Z_AttributesPlusTerm *term;
     ODR stream;         /* encoding stream - memory source if required */
@@ -712,11 +752,14 @@ typedef struct bend_scan_rr {
     int term_position;  /* desired index of term in result list/returned */
     int num_entries;    /* number of entries requested/returned */
 
+    /* scan term entries. The called handler does not have
+       to allocate this. Size of entries is num_entries (see above) */
     struct scan_entry *entries;
     bend_scan_status status;
     int errcode;
     char *errstring;
     char *scanClause;   /* CQL scan clause */
+    char *setname;      /* Scan in result set (NULL if omitted) */
 } bend_scan_rr;
     </synopsis>
    <para>
