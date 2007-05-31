@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.81 2007-05-23 13:16:32 adam Exp $
+dnl $Id: configure.ac,v 1.82 2007-05-31 08:01:30 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.5],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -295,7 +295,7 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
 	CPPFLAGS="$CPPFLAGS -I$enable_tcpd/include"
     fi
     AC_MSG_CHECKING(for working tcpd.h)
-    LIBS="$LIBS -lwrap -lnsl"
+    LIBS="$LIBS -lwrap"
     AC_TRY_LINK([#include <syslog.h>
 #include <tcpd.h>
 	    int allow_severity = LOG_INFO;
