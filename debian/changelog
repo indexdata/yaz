@@ -1,3 +1,9 @@
+yaz (3.0.5-3) unstable; urgency=low
+
+  * New ZOOM C features, correlationInfo for record update.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 31 May 2007 09:39:11 +0200
+
 yaz (3.0.5-2) unstable; urgency=low
 
   * Added command querycharset for yaz-client.
