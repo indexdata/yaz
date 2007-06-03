@@ -45,6 +45,14 @@ ziffy can capture and show all Z39.50 traffic on your LAN segment.
 This packages is a special port of ziffy ported to YAZ. Note that ziffy
 is licensed under the GPL and was is by Rocco Carbone <rocco@ntop.org>.
 
+%package -n yaz-illclient
+Summary:  ILL client
+Group: Applications/Communication
+Requires: readline libyaz3 = %{version}
+
+%description -n yaz-illclient
+yaz-illclient: an ISO ILL client.
+
 %prep
 %setup
 
@@ -97,3 +105,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %files -n yaz-ziffy
 /usr/bin/ziffy
 /usr/share/man/man1/ziffy.*
+
+%files -n yaz-illclient
+/usr/bin/yaz-illclient
+/usr/share/man/man1/yaz-illclient.*

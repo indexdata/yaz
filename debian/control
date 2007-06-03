@@ -59,3 +59,11 @@ Description: ziffy: the promiscuous Z39.50 APDU sniffer
  This packages is a special port of ziffy ported to YAZ. Note that ziffy
  is licensed under the GPL by Rocco Carbone <rocco@ntop.org>.
 
+Package: yaz-illclient
+Section: utils
+Depends: ${shlibs:Depends}
+Architecture: any
+Description: yaz-illclient: an ISO ILL client.
+ yaz-illclient is a command-line based client which sends ILL requests
+ to a server and decodes the response.
+
