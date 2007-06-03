@@ -8,7 +8,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.15 2007-06-03 08:06:32 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.16 2007-06-03 14:59:34 adam Exp $ -->
 <refentry id="yaz-client">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -32,6 +32,7 @@
    <arg choice="opt"><option>-b <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-c <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-d <replaceable>dump</replaceable></option></arg>
+   <arg choice="opt"><option>-f <replaceable>cmdfile</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
    <arg choice="opt"><option>-m <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-p <replaceable>addr</replaceable></option></arg>
@@ -43,25 +44,33 @@
 
  </refsynopsisdiv>
   
-  <refsect1><title>DESCRIPTION</title>
-   <para>
-    <command>yaz-client</command> is a Z39.50/SRU client (origin) with a
-    simple command line interface that allows you to test behavior and
-    performance of Z39.50 targets and SRU servers.
-   </para>
-   <para>
-    If the <replaceable>addr</replaceable> is specified, the client creates
-    a connection to the Z39.50/SRU target at the address given.
-   </para>
+ <refsect1><title>DESCRIPTION</title>
   <para>
-   When <command>yaz-client</command> is invoked it attemps to read
-   <filename>.yazclientrc</filename> from current working directory.
-   If <filename>.yazclientrc</filename> does not exist in current directory
-   YAZ client reads <filename>.yazclientrc</filename> from the
-   home directory, where the home directory is given by environment
-   variable <literal>HOME</literal>. 
-   For those files that are readable, the YAZ client executes commands
-   in those files. See COMMANDS section for description of commands.
+   <command>yaz-client</command> is a Z39.50/SRU client (origin) with a
+   simple command line interface that allows you to test behavior and
+   performance of Z39.50 targets and SRU servers.
+  </para>
+  <para>
+   If the <replaceable>addr</replaceable> is specified, the client creates
+   a connection to the Z39.50/SRU target at the address given.
+  </para>
+  <para>
+   When <command>yaz-client</command> is started it tries to read
+   commands from one of the following files:
+   <itemizedlist>
+    <listitem><para>
+      Command file if it is given by option -f. 
+     </para></listitem>
+    <listitem><para>
+      <filename>.yazclientrc</filename> in current working directory.
+     </para></listitem>
+    <listitem><para>
+      <filename>.yazclientrc</filename> in the user's home directory.
+      The value of the <literal>HOME</literal> is used to determine
+      the home directory. Normally, <literal>HOME</literal> is only set
+      on POSIX systems such as Linux, FreeBSD, Solaris.
+     </para></listitem>
+   </itemizedlist>
   </para>
  </refsect1>
   <refsect1>
@@ -101,6 +110,16 @@
        where DDD is 001, 002, 003, ..
       </para></listitem>
     </varlistentry>
+
+    <varlistentry>
+     <term>-f <replaceable>cmdfile</replaceable></term>
+     <listitem><para>
+      Reads commands from <replaceable>cmdfile</replaceable>. When
+      this option is used, YAZ client does not read .yazclientrc
+      from current directory or home directory.
+      </para></listitem>
+    </varlistentry>
+
     <varlistentry>
      <term>-k <replaceable>size</replaceable></term>
      <listitem><para>

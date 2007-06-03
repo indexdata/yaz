@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.343 2007-06-03 08:06:31 adam Exp $
+ * $Id: client.c,v 1.344 2007-06-03 14:59:34 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -3750,26 +3750,40 @@ int cmd_push_command(const char* arg)
     return 1;
 }
 
-void source_rcfile(void)
+void source_rc_file(const char *rc_file)
 {
-    /*  Look for .yazclientrc and read it if it exists. 
+    /*  If rc_file != NULL, source that. Else
+        Look for .yazclientrc and read it if it exists. 
         If it does not exist, read  $HOME/.yazclientrc instead */
     struct stat statbuf;
-    char fname[1000];
 
-    strcpy(fname, ".yazclientrc");
-    if (stat(fname, &statbuf)==0)
+    if (rc_file)
     {
-        cmd_source(fname, 0);
+        if (stat(rc_file, &statbuf) == 0)
+            cmd_source(rc_file, 0);
+        else
+        {
+            fprintf(stderr, "yaz_client: cannot source '%s'\n", rc_file);
+            exit(1);
+        }
     }
     else
     {
-        const char* homedir = getenv("HOME");
-        if (homedir)
+        char fname[1000];
+        strcpy(fname, ".yazclientrc");
+        if (stat(fname, &statbuf)==0)
         {
-            sprintf(fname, "%.800s/%s", homedir, ".yazclientrc");
-            if (stat(fname, &statbuf)==0)
-                cmd_source(fname, 0);
+            cmd_source(fname, 0);
+        }
+        else
+        {
+            const char* homedir = getenv("HOME");
+            if (homedir)
+            {
+                sprintf(fname, "%.800s/%s", homedir, ".yazclientrc");
+                if (stat(fname, &statbuf)==0)
+                    cmd_source(fname, 0);
+            }
         }
     }
 }
@@ -3782,7 +3796,7 @@ void add_to_readline_history(void *client_data, const char *line)
 #endif
 }
 
-static void initialize(void)
+static void initialize(const char *rc_file)
 {
     FILE *inf;
     int i;
@@ -3821,7 +3835,7 @@ static void initialize(void)
 
     cmd_format("usmarc");
     
-    source_rcfile();
+    source_rc_file(rc_file);
 
     file_history = file_history_new();
     file_history_load(file_history);
@@ -3932,7 +3946,7 @@ static void http_response(Z_HTTP_Response *hres)
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
     if (!yaz_srw_check_content_type(hres))
-        printf("Content type does not appear to be XML");
+        printf("Content type does not appear to be XML\n");
     else
     {
         Z_SOAP *soap_package = 0;
@@ -4829,6 +4843,7 @@ int main(int argc, char **argv)
     char *open_command = 0;
     char *auth_command = 0;
     char *arg;
+    const char *rc_file = 0;
     int ret;
     
 #if HAVE_LOCALE_H
@@ -4853,7 +4868,7 @@ int main(int argc, char **argv)
     ODR_MASK_SET(&z3950_options, Z_Options_delSet);
     ODR_MASK_SET(&z3950_options, Z_Options_negotiationModel);
 
-    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -4924,6 +4939,9 @@ int main(int argc, char **argv)
         case 'v':
             yaz_log_init(yaz_log_mask_str(arg), "", 0);
             break;
+        case 'f':
+            rc_file = arg;
+            break;
         case 'V':
             show_version();
             break;
@@ -4944,7 +4962,7 @@ int main(int argc, char **argv)
             exit (1);
         }      
     }
-    initialize();
+    initialize(rc_file);
     if (auth_command)
     {
 #ifdef HAVE_GETTIMEOFDAY

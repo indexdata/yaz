@@ -1,3 +1,8 @@
+Fixed bug #1157: yaz-client does not read .yazclientrc from current
+directory. yaz-client now reads commands from file given by option -f
+if specified; then tries to read .yazclientrc in current directory.
+Failing that, it reads .yazclientrc from user's home directory.
+
 Added support for correlationInfo Note and ID for Record Update via
 ZOOM C.
 
