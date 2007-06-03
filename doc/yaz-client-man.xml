@@ -8,7 +8,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.14 2007-05-22 11:10:08 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.15 2007-06-03 08:06:32 adam Exp $ -->
 <refentry id="yaz-client">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -54,10 +54,12 @@
     a connection to the Z39.50/SRU target at the address given.
    </para>
   <para>
-   When <command>yaz-client</command> is invoked it attemps to read the
-   following files:
-   <literal>$HOME/.yazclientrc</literal> (home directory, Unix only) and
-   <literal>.yazclientrc</literal> (current directory - any platform)
+   When <command>yaz-client</command> is invoked it attemps to read
+   <filename>.yazclientrc</filename> from current working directory.
+   If <filename>.yazclientrc</filename> does not exist in current directory
+   YAZ client reads <filename>.yazclientrc</filename> from the
+   home directory, where the home directory is given by environment
+   variable <literal>HOME</literal>. 
    For those files that are readable, the YAZ client executes commands
    in those files. See COMMANDS section for description of commands.
   </para>

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.342 2007-05-30 21:56:59 adam Exp $
+ * $Id: client.c,v 1.343 2007-06-03 08:06:31 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -3752,17 +3752,26 @@ int cmd_push_command(const char* arg)
 
 void source_rcfile(void)
 {
-    /*  Look for a $HOME/.yazclientrc and source it if it exists */
+    /*  Look for .yazclientrc and read it if it exists. 
+        If it does not exist, read  $HOME/.yazclientrc instead */
     struct stat statbuf;
     char fname[1000];
-    char* homedir = getenv("HOME");
 
-    sprintf(fname, "%.500s%s%s", homedir ? homedir : "",
-            homedir ? "/" : "",
-            ".yazclientrc");
-
-    if (stat(fname,&statbuf)==0)
-        cmd_source(fname, 0 );
+    strcpy(fname, ".yazclientrc");
+    if (stat(fname, &statbuf)==0)
+    {
+        cmd_source(fname, 0);
+    }
+    else
+    {
+        const char* homedir = getenv("HOME");
+        if (homedir)
+        {
+            sprintf(fname, "%.800s/%s", homedir, ".yazclientrc");
+            if (stat(fname, &statbuf)==0)
+                cmd_source(fname, 0);
+        }
+    }
 }
 
 void add_to_readline_history(void *client_data, const char *line)
