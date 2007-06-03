@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.344 2007-06-03 14:59:34 adam Exp $
+ * $Id: client.c,v 1.345 2007-06-03 15:55:50 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -4886,8 +4886,27 @@ int main(int argc, char **argv)
                 exit(1);
             }
             break;
+        case 'a':
+            if (!strcmp(arg, "-"))
+                apdu_file=stderr;
+            else
+                apdu_file=fopen(arg, "a");
+            break;
+        case 'b':
+            if (!strcmp(arg, "-"))
+                ber_file=stderr;
+            else
+                ber_file=fopen(arg, "a");
+            break;
+        case 'c':
+            strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+            ccl_fields[sizeof(ccl_fields)-1] = '\0';
+            break;
         case 'd':
             dump_file_prefix = arg;
+            break;
+        case 'f':
+            rc_file = arg;
             break;
         case 'k':
             kilobytes = atoi(arg);
@@ -4899,34 +4918,15 @@ int main(int argc, char **argv)
                 exit (1);
             }
             break;
-        case 't':
-            outputCharset = xstrdup(arg);
-            break;
-        case 'c':
-            strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
-            ccl_fields[sizeof(ccl_fields)-1] = '\0';
+        case 'p':
+            yazProxy = xstrdup(arg);
             break;
         case 'q':
             strncpy (cql_fields, arg, sizeof(cql_fields)-1);
             cql_fields[sizeof(cql_fields)-1] = '\0';
             break;
-        case 'b':
-            if (!strcmp(arg, "-"))
-                ber_file=stderr;
-            else
-                ber_file=fopen(arg, "a");
-            break;
-        case 'a':
-            if (!strcmp(arg, "-"))
-                apdu_file=stderr;
-            else
-                apdu_file=fopen(arg, "a");
-            break;
-        case 'x':
-            hex_dump = 1;
-            break;
-        case 'p':
-            yazProxy = xstrdup(arg);
+        case 't':
+            outputCharset = xstrdup(arg);
             break;
         case 'u':
             if (!auth_command)
@@ -4939,25 +4939,29 @@ int main(int argc, char **argv)
         case 'v':
             yaz_log_init(yaz_log_mask_str(arg), "", 0);
             break;
-        case 'f':
-            rc_file = arg;
-            break;
         case 'V':
             show_version();
             break;
+        case 'x':
+            hex_dump = 1;
+            break;
         default:
             fprintf (stderr, "Usage: %s "
-                     " [-a <apdulog>]"
+                     " [-a apdulog]"
                      " [-b berdump]"
-                     " [-d dump]\n"
-                     " [-c cclfields]"
+                     " [-c cclfile]"
+                     " [-d dump]"
+                     " [-f cmdfile]"
                      " [-k size]"
-                     " [-m <marclog>]\n" 
-                     " [-p <proxy-addr>]"
-                     " [-q cqlfields]"
-                     " [-u <auth>]"
+                     " [-m marclog]" 
+                     " [-p proxy-addr]"
+                     " [-q cqlfile]"
+                     " [-t dispcharset]"
+                     " [-u auth]"
+                     " [-v loglevel]"
                      " [-V]"
-                     " [<server-addr>]\n",
+                     " [-x]"
+                     " [server-addr]\n",
                      prog);
             exit (1);
         }      
