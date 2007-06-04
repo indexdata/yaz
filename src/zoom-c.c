@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.132 2007-05-31 07:38:14 adam Exp $
+ * $Id: zoom-c.c,v 1.133 2007-06-04 09:18:09 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.132 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.133 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1666,9 +1666,11 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
 
 static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
 {
-    oid_class oclass;
+    char oid_name_buf[OID_STR_MAX];
+    const char *oid_name;
     char *addinfo = 0;
 
+    oid_name = yaz_oid_to_string_buf(r->diagnosticSetId, 0, oid_name_buf);
     switch (r->which)
     {
     case Z_DefaultDiagFormat_v2Addinfo:
@@ -1680,10 +1682,7 @@ static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
     }
     xfree(c->addinfo);
     c->addinfo = 0;
-    set_dset_error(c, *r->condition,
-                   yaz_oid_to_string(yaz_oid_std(), 
-                                     r->diagnosticSetId, &oclass),
-                   addinfo, 0);
+    set_dset_error(c, *r->condition, oid_name, addinfo, 0);
 }
 
 static void response_diag(ZOOM_connection c, Z_DiagRec *p)
