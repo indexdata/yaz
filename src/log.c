@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.53 2007-06-05 06:23:07 adam Exp $
+ * $Id: log.c,v 1.54 2007-06-05 06:42:26 adam Exp $
  */
 
 /**
@@ -175,7 +175,7 @@ static void rotate_log(const char *cur_fname)
         char fname_str[FILENAME_MAX];
         struct stat stat_buf;
 
-        sprintf(fname_str, "%s.%d", cur_fname, i);
+        yaz_snprintf(fname_str, sizeof(fname_str), "%s.%d", cur_fname, i);
         if (stat(fname_str, &stat_buf) != 0)
             break;
     }
@@ -184,10 +184,13 @@ static void rotate_log(const char *cur_fname)
         char fname_str[2][FILENAME_MAX];
 
         if (i > 0)
-            sprintf(fname_str[0], "%s.%d", cur_fname, i-1);
+            yaz_snprintf(fname_str[0], sizeof(fname_str[0]),
+                         "%s.%d", cur_fname, i-1);
         else
-            sprintf(fname_str[0], "%s", cur_fname);
-        sprintf(fname_str[1], "%s.%d", cur_fname, i);
+            yaz_snprintf(fname_str[0], sizeof(fname_str[0]),
+                         "%s", cur_fname);
+        yaz_snprintf(fname_str[1], sizeof(fname_str[1]),
+                     "%s.%d", cur_fname, i);
 #ifdef WIN32
         MoveFileEx(fname_str[0], fname_str[1], MOVEFILE_REPLACE_EXISTING);
 #else
@@ -400,7 +403,13 @@ static void yaz_log_to_file(int level, const char *log_message)
                 if (*mask_names[i].name && mask_names[i].mask && 
                     mask_names[i].mask != YLOG_ALL)
                 {
-                    sprintf(flags + strlen(flags), "[%s]", mask_names[i].name);
+                    if (strlen(flags) + strlen(mask_names[i].name) 
+                                             <   sizeof(flags) - 4)
+                    {
+                        strcat(flags, "[");
+                        strcat(flags, mask_names[i].name);
+                        strcat(flags, "]");
+                    }
                     level &= ~mask_names[i].mask;
                 }
             }
