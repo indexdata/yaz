@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.51 2007-05-06 20:12:20 adam Exp $
+ * $Id: log.c,v 1.52 2007-06-05 05:58:16 adam Exp $
  */
 
 /**
@@ -439,9 +439,13 @@ void yaz_log(int level, const char *fmt, ...)
 
     if (o_level & YLOG_ERRNO)
     {
-        strcat(buf, " [");
-        yaz_strerror(buf+strlen(buf), 2048);
-        strcat(buf, "]");
+        int remain = sizeof(buf) - strlen(buf);
+        if (remain > 100) /* reasonable minimum space for error */
+        {
+            strcat(buf, " [");
+            yaz_strerror(buf+strlen(buf), remain-5); /* 5 due to extra [] */
+            strcat(buf, "]");
+        }
     }
     va_end (ap);
     if (start_hook_func)
