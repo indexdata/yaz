@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.13 2007-06-05 06:22:19 adam Exp $
+ * $Id: tstlog.c,v 1.14 2007-06-05 06:40:28 adam Exp $
  *
  */
 #include <stdio.h>
@@ -73,9 +73,8 @@ int main(int argc, char **argv)
             break;
         case 'h':
         default:
-            fprintf(stderr, "tstlog. Bad option\n");
             fprintf(stderr, "tstlog [-f logformat] [-v level] [-l file] "
-                    "[-m module] [-w sec] [-r max] [-n num] [-H] msg ..\n");
+                    "[-p prefix] [-m module] [-w sec] [-r max] [-n num] [-H] msg ..\n");
             exit(1);
         }
     }
