@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.52 2007-06-05 05:58:16 adam Exp $
+ * $Id: log.c,v 1.53 2007-06-05 06:23:07 adam Exp $
  */
 
 /**
@@ -235,7 +235,7 @@ void yaz_log_init_level(int level)
 void yaz_log_init_prefix(const char *prefix)
 {
     if (prefix && *prefix)
-        sprintf(l_prefix, "%.511s ", prefix);
+        yaz_snprintf(l_prefix, sizeof(l_prefix), "%s ", prefix);
     else
         *l_prefix = 0;
 }
@@ -243,7 +243,7 @@ void yaz_log_init_prefix(const char *prefix)
 void yaz_log_init_prefix2(const char *prefix)
 {
     if (prefix && *prefix)
-        sprintf(l_prefix2, "%.511s ", prefix);
+        yaz_snprintf(l_prefix2, sizeof(l_prefix2), "%s ", prefix);
     else
         *l_prefix2 = 0;
 }
