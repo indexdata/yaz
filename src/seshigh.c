@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.121 2007-05-30 21:56:59 adam Exp $
+ * $Id: seshigh.c,v 1.122 2007-06-05 06:52:23 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1856,7 +1856,7 @@ static void process_http_request(association *assoc, request *req)
 #endif
                 {0, 0, 0}
             };
-            char ctype[60];
+            char ctype[80];
             int ret;
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
@@ -1874,7 +1874,7 @@ static void process_http_request(association *assoc, request *req)
             hres->code = http_code;
 
             strcpy(ctype, "text/xml");
-            if (charset)
+            if (charset && strlen(charset) < sizeof(ctype)-30)
             {
                 strcat(ctype, "; charset=");
                 strcat(ctype, charset);
@@ -2355,7 +2355,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.121 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.122 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
