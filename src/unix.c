@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.18 2007-01-03 08:42:15 adam Exp $
+ * $Id: unix.c,v 1.19 2007-06-05 05:42:07 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -185,7 +185,8 @@ static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
         return 0;
     TRC(fprintf(stderr, "unix_strtoaddress: %s\n", str ? str : "NULL"));
     add->sun_family = AF_UNIX;
-    strncpy(add->sun_path, str, sizeof(add->sun_path));
+    strncpy(add->sun_path, str, sizeof(add->sun_path)-1);
+    add->sun_path[sizeof(add->sun_path)-1] = 0;
     cp = strchr (add->sun_path, ':');
     if (cp)
         *cp = '\0';
@@ -405,7 +406,8 @@ static int unix_bind(COMSTACK h, void *address, int mode)
             return -1;
         }
         socket_unix.sun_family = AF_UNIX;
-        strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path));
+        strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path)-1);
+        socket_unix.sun_path[sizeof(socket_unix.sun_path)-1] = 0;
         if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
             if(yaz_errno() == ECONNREFUSED) {
                 TRC (fprintf (stderr, "Socket exists but nobody is listening\n"));
