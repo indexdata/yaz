@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstlog.c,v 1.12 2007-01-03 08:42:16 adam Exp $
+ * $Id: tstlog.c,v 1.13 2007-06-05 06:22:19 adam Exp $
  *
  */
 #include <stdio.h>
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     int number = 1;
     unsigned int wait_between_log = 0;
 
-    while ((ret = options("f:v:l:m:n:r:w:Hh", argv, argc, &arg)) != -2)
+    while ((ret = options("f:p:v:l:m:n:r:w:Hh", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -36,6 +36,9 @@ int main(int argc, char **argv)
             break;
         case 'f':
             yaz_log_time_format(arg);
+            break;
+        case 'p':
+            yaz_log_init_prefix(arg);
             break;
         case 'v':
             yaz_log_init_level(yaz_log_mask_str(arg));
