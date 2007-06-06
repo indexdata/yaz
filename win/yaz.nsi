@@ -1,14 +1,21 @@
-; $Id: yaz.nsi,v 1.111 2007-06-02 20:57:12 adam Exp $
+; $Id: yaz.nsi,v 1.112 2007-06-06 16:34:23 adam Exp $
 
 !define VERSION "3.0.5"
 
-; Microsoft runtime CRT
-; VS 2003
-!define VS_RUNTIME_DLL "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin\msvcr71.dll"
+; Microsoft runtime CRT 
+; Uncomment exactly ONE section of the three below
+; 1: MSVC 6
+!define VS_RUNTIME_DLL ""
+!define VS_RUNTIME_MANIFEST ""
 
-; VS 2005
+; 2: VS 2003
+; !define VS_RUNTIME_DLL "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin\msvcr71.dll"
+;!define VS_RUNTIME_MANIFEST ""
+
+; 3: VS 2005
 ;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\msvcr80.dll"
 ;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\Microsoft.VC80.CRT.manifest"
+
 
 !include "MUI.nsh"
 
@@ -92,13 +99,12 @@ Section "YAZ Runtime" YAZ_Runtime
 Noservice:
 	SetOutPath $INSTDIR\bin
 	File "${VS_RUNTIME_DLL}"
-;	File "${VS_RUNTIME_MANIFEST}"
+	File "${VS_RUNTIME_MANIFEST}"
 	File ..\bin\iconv.dll
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
 	File ..\bin\yaz3.dll
-;	File ..\bin\*.manifest
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
