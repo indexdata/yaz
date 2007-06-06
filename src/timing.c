@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: timing.c,v 1.5 2007-05-06 20:12:20 adam Exp $
+ * $Id: timing.c,v 1.6 2007-06-06 16:32:34 adam Exp $
  */
 
 /**
@@ -38,9 +38,9 @@ struct yaz_timing {
     struct timeval start_time, end_time;
 #endif
 #ifdef WIN32
-    ULONGLONG start_time, end_time;
-    ULONGLONG start_time_sys, start_time_user;
-    ULONGLONG end_time_sys, end_time_user;
+    LONGLONG start_time, end_time;
+    LONGLONG start_time_sys, start_time_user;
+    LONGLONG end_time_sys, end_time_user;
 #endif
     double real_sec, user_sec, sys_sec;
 };
@@ -67,7 +67,7 @@ static void get_process_time(ULONGLONG *lp_user, ULONGLONG *lp_sys)
     li.HighPart = sys_t.dwHighDateTime;
     *lp_sys = li.QuadPart;
 }
-static void get_date_as_largeinteger(ULONGLONG *lp)
+static void get_date_as_largeinteger(LONGLONG *lp)
 {
     FILETIME f;
     ULARGE_INTEGER li;
