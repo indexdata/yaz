@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.134 2007-06-03 09:34:43 adam Exp $
+# $Id: makefile,v 1.135 2007-06-06 16:33:19 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -242,9 +242,8 @@ MT=mt.exe /nologo
 MT=echo
 !endif
 
-LINK_LIBS= kernel32.lib user32.lib   gdi32.lib   \
-           advapi32.lib uuid.lib wsock32.lib  advapi32.lib \
-           $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
+LINK_LIBS= kernel32.lib wsock32.lib advapi32.lib \
+	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
