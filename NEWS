@@ -1,3 +1,5 @@
+--- 3.0.6 2007/06/06
+
 Fixed bug #1157: yaz-client does not read .yazclientrc from current
 directory. yaz-client now reads commands from file given by option -f
 if specified; then tries to read .yazclientrc in current directory.

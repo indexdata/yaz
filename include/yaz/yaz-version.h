@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: yaz-version.h,v 1.126 2007-05-23 13:16:33 adam Exp $ */
+/* $Id: yaz-version.h,v 1.127 2007-06-06 16:42:35 adam Exp $ */
 /**
  * \file yaz-version.h
  * \brief Defines YAZ version.
@@ -33,8 +33,8 @@
 
 #include <yaz/yconfig.h>
 
-#define YAZ_VERSION "3.0.5"
-#define YAZ_VERSIONL 0x030005
+#define YAZ_VERSION "3.0.6"
+#define YAZ_VERSIONL 0x030006
 
 #define YAZ_DATE 1
 
