@@ -4,19 +4,21 @@
 #
 # Lines are in form 
 #   key=value
-# key is a comma-separated list of fieldnames.
+# key is a comma-separated list of fieldnames (no spaces!)
 # value is anything that follows the equal sign.
 #
 
 ill,protocol-version-num=2
 
-#ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution=100-310-658
-ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution=IKM
-#ill,requester-id,person-or-institution-symbol,institution=100-310-658
-#ill,responder-id,person-or-institution-symbol,institution=100-310-658
+#ill,transaction-id,initial-requester-id,person-or-institution-symbol,institution=IKM
+# (seems not to be necessary)
+
 ill,requester-id,person-or-institution-symbol,institution=IKM
-#ill,responder-id,person-or-institution-symbol,institution=IKM
+ill,requester-idname-of-person-or-institution,name-of-institution=UNT Libraries
+
 ill,responder-id,person-or-institution-symbol,institution=OZZ
+ill,responder-idname-of-person-or-institution,name-of-institution=University of North Texas Health Science Center
+
 
 # service type 1 = loan
 ill,ill-service-type=1
@@ -28,3 +30,4 @@ ill,item-id,verification-reference-source=myself
 # Where to deliver it
 ill,delivery-address,postal-address,name-of-person-or-institution,name-of-person=TEST DATA
 delivery-address,postal-address,name-of-person-or-institution,name-of-institution=INDEX DATA
+

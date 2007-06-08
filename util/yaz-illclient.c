@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.7 2007-05-30 13:59:04 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.8 2007-06-08 10:01:07 heikki Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */
@@ -184,7 +184,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.7 2007-05-30 13:59:04 heikki Exp $"; /* from cvs */
+    char *version="$Id: yaz-illclient.c,v 1.8 2007-06-08 10:01:07 heikki Exp $"; /* from cvs */
     struct nameval *nv;
 
     /* default values */
@@ -222,6 +222,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
             break;
         case 'l':
             yaz_log_init_file(arg);
+            break;
         case 'V':
             printf("%s %s",prog, version );
             break;
