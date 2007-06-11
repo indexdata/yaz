@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.92 2007-05-30 08:04:28 adam Exp $
+ * $Id: ztest.c,v 1.93 2007-06-11 08:50:57 adam Exp $
  */
 
 /*
@@ -32,6 +32,57 @@ int ztest_sort(void *handle, bend_sort_rr *rr);
 int ztest_present(void *handle, bend_present_rr *rr);
 int ztest_esrequest(void *handle, bend_esrequest_rr *rr);
 int ztest_delete(void *handle, bend_delete_rr *rr);
+
+/** \fn get_term_hit
+    \brief use term value as hit count 
+   
+    Traverse RPN tree 'in order' and use term value as hit count.
+    Only terms  that looks a numeric is used.. Returns -1 if
+    no sub tree has a hit count term
+*/
+static int get_term_hit(Z_RPNStructure *s)
+{
+    int h = -1;
+    switch(s->which)
+    {
+    case Z_RPNStructure_simple:
+        if (s->u.simple->which == Z_Operand_APT)
+        {
+            Z_AttributesPlusTerm *apt = s->u.simple->u.attributesPlusTerm;
+            if (apt->term->which == Z_Term_general)
+            {
+                Odr_oct *oct = apt->term->u.general;
+                if (oct->len > 0 && oct->buf[0] >= '0' && oct->buf[0] <= '9')
+                    h = atoi_n((const char *) oct->buf, oct->len);
+            }
+        }
+        break;
+    case Z_RPNStructure_complex:
+        h = get_term_hit(s->u.complex->s1);
+        if (h == -1)
+            h = get_term_hit(s->u.complex->s2);
+        break;
+    }
+    return h;
+}
+
+/** \fn get_hit_count
+    \brief gets hit count for numeric terms in RPN queries
+    
+    This is just for testing.. A real database of course uses
+    the content of a database to establish a value.. In our case, we
+    have a way to trigger a certain hit count. Good for testing of
+    client applications etc
+*/
+static int get_hit_count(Z_Query *q)
+{
+    int h = -1;
+    if (q->which == Z_Query_type_1 || q->which == Z_Query_type_101)
+        h = get_term_hit(q->u.type_1->RPNStructure);
+    if (h == -1)
+        h = rand() % 24;
+    return h;
+}
 
 int ztest_search(void *handle, bend_search_rr *rr)
 {
@@ -66,7 +117,8 @@ int ztest_search(void *handle, bend_search_rr *rr)
         rr->errstring = rr->basenames[0];
         return 0;
     }
-    rr->hits = rand() % 24;
+
+    rr->hits = get_hit_count(rr->query);
     return 0;
 }
 
