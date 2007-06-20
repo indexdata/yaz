@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.58 2007-05-31 07:38:14 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.59 2007-06-20 12:55:29 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -124,7 +124,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <literal><parameter>key</parameter>=<parameter>value</parameter></literal>
     sequences, each of which represents an option to be set into the
     connection structure <emphasis>before</emphasis> the
-    protocol-level connection is forged and the initialisation
+    protocol-level connection is forged and the initialization
     handshake takes place.  This facility can be used to provide
     authentication credentials, as in host-strings such as:
     <literal>user=admin,password=halfAm4n,tcp:localhost:8017/db</literal>
@@ -1049,10 +1049,19 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        <entry><literal>create</literal></entry>
       </row>
       <row>
+       <entry>waitAction</entry>
+       <entry>
+	Wait action for package. Possible values:
+	<literal>wait</literal>, <literal>waitIfPossible</literal>,
+	<literal>dontWait</literal> or <literal>dontReturnPackage</literal>.
+       </entry>
+       <entry><literal>waitIfPossible</literal></entry>
+      </row>
+      <row>
        <entry>targetReference</entry>
        <entry>
 	Target Reference. This is part of the response as returned
-	by the server. Read it after a succesful operation.
+	by the server. Read it after a successful operation.
        </entry>
        <entry><literal>none</literal></entry>
       </row>

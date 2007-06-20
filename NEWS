@@ -1,3 +1,5 @@
+Allow waitAction to be specified for ZOOM C based for Extended Services.
+
 --- 3.0.6 2007/06/06
 
 Fixed bug #1157: yaz-client does not read .yazclientrc from current

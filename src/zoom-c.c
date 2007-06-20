@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.133 2007-06-04 09:18:09 adam Exp $
+ * $Id: zoom-c.c,v 1.134 2007-06-20 12:55:29 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.133 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.134 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2892,8 +2892,6 @@ static Z_APDU *create_es_package(ZOOM_package p, const Odr_oid *oid)
     Z_APDU *apdu = zget_APDU(p->odr_out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     
-    *req->function = Z_ExtendedServicesRequest_create;
-    
     str = ZOOM_options_get(p->options, "package-name");
     if (str && *str)
         req->packageName = odr_strdup(p->odr_out, str);
@@ -2908,11 +2906,24 @@ static Z_APDU *create_es_package(ZOOM_package p, const Odr_oid *oid)
     if (str)
     {
         if (!strcmp (str, "create"))
-            *req->function = 1;
+            *req->function = Z_ExtendedServicesRequest_create;
         if (!strcmp (str, "delete"))
-            *req->function = 2;
+            *req->function = Z_ExtendedServicesRequest_delete;
         if (!strcmp (str, "modify"))
-            *req->function = 3;
+            *req->function = Z_ExtendedServicesRequest_modify;
+    }
+
+    str = ZOOM_options_get(p->options, "waitAction");
+    if (str)
+    {
+        if (!strcmp (str, "wait"))
+            *req->waitAction = Z_ExtendedServicesRequest_wait;
+        if (!strcmp (str, "waitIfPossible"))
+            *req->waitAction = Z_ExtendedServicesRequest_waitIfPossible;
+        if (!strcmp (str, "dontWait"))
+            *req->waitAction = Z_ExtendedServicesRequest_dontWait;
+        if (!strcmp (str, "dontReturnPackage"))
+            *req->waitAction = Z_ExtendedServicesRequest_dontReturnPackage;
     }
     return apdu;
 }
