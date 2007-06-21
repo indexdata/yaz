@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.134 2007-06-20 12:55:29 adam Exp $
+ * $Id: zoom-c.c,v 1.135 2007-06-21 09:00:53 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.134 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.135 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3175,6 +3175,8 @@ static Z_APDU *create_update_package(ZOOM_package p)
         Z_IUSuppliedRecords *notToKeep;
         Z_External *r = (Z_External *)
             odr_malloc(p->odr_out, sizeof(*r));
+        const char *elementSetName =
+            ZOOM_options_get(p->options, "elementSetName");
         
         apdu->u.extendedServicesRequest->taskSpecificParameters = r;
 
@@ -3196,7 +3198,11 @@ static Z_APDU *create_update_package(ZOOM_package p)
         
         toKeep->databaseName = odr_strdup(p->odr_out, first_db);
         toKeep->schema = 0;
+        
         toKeep->elementSetName = 0;
+        if (elementSetName)
+            toKeep->elementSetName = odr_strdup(p->odr_out, elementSetName);
+            
         toKeep->actionQualifier = 0;
         toKeep->action = odr_intdup(p->odr_out, action_no);
         

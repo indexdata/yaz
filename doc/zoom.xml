@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.59 2007-06-20 12:55:29 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.60 2007-06-21 09:00:53 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -1177,12 +1177,17 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        <row>
 	<entry>correlationInfo.note</entry>
 	<entry>Correlation Info Note (string)</entry>
-	<entry>none (omitted)</entry>
+	<entry>none</entry>
        </row>
        <row>
 	<entry>correlationInfo.id</entry>
 	<entry>Correlation Info ID (integer)</entry>
-	<entry>none (omitted)</entry>
+	<entry>none</entry>
+       </row>
+       <row>
+	<entry>elementSetName</entry>
+	<entry>Element Set for Record</entry>
+	<entry>none</entry>
        </row>
       </tbody>
      </tgroup>

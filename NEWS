@@ -1,3 +1,5 @@
+Allow elementSetName to be specified for ZOOM C record update.
+
 Allow waitAction to be specified for ZOOM C based for Extended Services.
 
 --- 3.0.6 2007/06/06
