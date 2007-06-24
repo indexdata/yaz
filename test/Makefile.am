@@ -1,11 +1,11 @@
 ## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.34 2007-04-10 14:42:31 adam Exp $
+## $Id: Makefile.am,v 1.35 2007-06-24 19:27:12 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
- tst_timing tst_query_charset
+ tst_timing tst_query_charset tst_oid
 check_SCRIPTS = tstcql.sh tstmarciso.sh tstmarcxml.sh tstmarccol.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -58,6 +58,7 @@ tstxmlquery_SOURCES = tstxmlquery.c
 tstpquery_SOURCES = tstpquery.c
 tst_comstack_SOURCES = tst_comstack.c
 tst_filepath_SOURCES = tst_filepath.c
+tst_oid_SOURCES = tst_oid.c
 tst_record_conv_SOURCES = tst_record_conv.c
 tst_retrieval_SOURCES = tst_retrieval.c
 tst_tpath_SOURCES = tst_tpath.c

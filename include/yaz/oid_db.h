@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.8 2007-05-08 08:22:35 adam Exp $ */
+/* $Id: oid_db.h,v 1.9 2007-06-24 19:27:11 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -128,6 +128,17 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
 YAZ_EXPORT
 const char *yaz_oid_to_string_buf(const Odr_oid *oid,
                                   oid_class *oclass, char *buf);
+
+
+/** \brief maps named from standard database to dot notation
+    \param oclass class of string (enum oid_class)
+    \param name named OID
+    \param oid_buf buffer for result (must be of size OID_STR_MAX)
+    \returns OID string or NULL if name is not registered in database
+*/
+YAZ_EXPORT
+char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oid_buf);
+
 
 /** \brief traverses OIDs in a database
     \param oid_db OID database
