@@ -1,6 +1,19 @@
+--- 3.0.8 2007/06/25
+
+Fixed bug #1208: SSL appears to be broken in ZOOM.
+
+Fixed bug #1206: Libxml2 include path weirdness. 
+
+Added oid_name_to_dotstring.
+
 Allow elementSetName to be specified for ZOOM C record update.
 
 Allow waitAction to be specified for ZOOM C based for Extended Services.
+
+Fixed NULL ptr reference bug in yaz-ztest - caused by omitted record
+syntax OID. Bug introduced in YAZ 3 series.
+
+Updated WIN32 build to include Libxml2 2.6.28 / Libxslt 1.1.19.
 
 --- 3.0.6 2007/06/06
 
