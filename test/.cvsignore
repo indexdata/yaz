@@ -30,3 +30,5 @@ tst_query_charset
 nfatest1
 nfaxmltest1
 nfaxmltest1.log
+tst_oid
+tst_oid.log
