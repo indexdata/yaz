@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.136 2007-06-25 18:34:09 adam Exp $
+ * $Id: zoom-c.c,v 1.137 2007-06-25 18:34:27 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.136 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.137 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3535,7 +3535,7 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
     switch(apdu->which)
     {
     case Z_APDU_initResponse:
-        yaz_log(log_api, "%p recv_apd: Received Init response", c);
+        yaz_log(log_api, "%p recv_apdu: Received Init response", c);
         initrs = apdu->u.initResponse;
         ZOOM_connection_option_set(c, "serverImplementationId",
                                    initrs->implementationId ?
