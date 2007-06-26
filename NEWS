@@ -1,25 +1,6 @@
-Change to emit_term() in CQL-to-PQF query translation: when a term has
-the /regexp relation modifier, do not process it for leading and
-trailing "^" and "*", which have quite different meanings in regular
-expressions.
+--- 2.1.56 2007/06/26
 
-Attempted fix of bug #976: Segfault in yaz_iconv. The yaz_iconv function
-write handlers no longer carries a 'last' parameter. This will make
-yaz_iconv flush "less" characters. A flush is performed by call to
-yaz_iconv(cd, 0, 0, &outbut, &outbytesleft) .
-
-Definition of wrbuf_diags moved to querytowrbuf.h. Function wrbuf_put_zquery
-removed, because function yaz_query_to_wrbuf does the same.
-
-API changes to WRBUF. wrbuf_free removed; replaced by wrbuf_destroy. And
-wrbuf_puts no longer appends '\0'. Use wrbuf_cstr to get C-string out.
-
-Deprecated MARC utility functions removed.
-
-Changed prototype of yaz_marc_decode_buf: const char for result and size_t
-for rsize.
-
-Branch split: YAZ_2_1_55_branch
+Fixed bug #1208: SSL appears to be broken in ZOOM.
 
 --- 2.1.54 2007/03/16
 
