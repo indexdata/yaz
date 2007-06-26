@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.44 2007-03-16 08:58:39 adam Exp $
+## $Id: Makefile.am,v 1.44.2.1 2007-06-26 09:29:42 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -21,7 +21,7 @@ EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO \
 	Doxyfile.in m4/acx_pthread.m4
 
 dist-hook:
-	if test -x /usr/bin/cvs2cl -a -d CVS; then cvs2cl ; cp ChangeLog $(distdir); fi
+	if test -x /usr/bin/cvs2cl -a -d CVS; then cvs2cl -F YAZ_2_1_55_branch; cp ChangeLog $(distdir); fi
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 	mkdir $(distdir)/debian
