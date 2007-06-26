@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.122 2007-03-21 11:27:46 adam Exp $
+ * $Id: zoom-c.c,v 1.116.2.1 2007-06-26 09:23:30 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -26,6 +26,8 @@
 #include <yaz/srw.h>
 #include <yaz/cql.h>
 #include <yaz/ccl.h>
+
+#define TASK_FIX 1
 
 static int log_api = 0;
 static int log_details = 0;
@@ -166,7 +168,9 @@ static void set_dset_error(ZOOM_connection c, int error,
                 c, c->host_port ? c->host_port : "<>", dset, error,
                 addinfo ? addinfo : "",
                 addinfo2 ? addinfo2 : "");
+#if TASK_FIX
         ZOOM_connection_remove_tasks(c);
+#endif
     }
 }
 
@@ -674,8 +678,8 @@ ZOOM_API(int)
         WRBUF wr = wrbuf_alloc();
         ccl_pquery(wr, rpn);
         ccl_rpn_delete(rpn);
-        ret = ZOOM_query_prefix(s, wrbuf_cstr(wr));
-        wrbuf_destroy(wr);
+        ret = ZOOM_query_prefix(s, wrbuf_buf(wr));
+        wrbuf_free(wr, 1);
     }
     ccl_qual_rm(&bibset);
     return ret;
@@ -853,11 +857,16 @@ ZOOM_API(ZOOM_resultset)
     return r;
 }
 
+/*
+ * This is the old result-set sorting API, which is maintained only
+ * for the sake of binary compatibility.  There is no reason ever to
+ * use this rather than ZOOM_resultset_sort1().
+ */
 ZOOM_API(void)
     ZOOM_resultset_sort(ZOOM_resultset r,
-                         const char *sort_type, const char *sort_spec)
+                        const char *sort_type, const char *sort_spec)
 {
-    (void) ZOOM_resultset_sort(r, sort_type, sort_spec);
+    (void) ZOOM_resultset_sort1(r, sort_type, sort_spec);
 }
 
 ZOOM_API(int)
@@ -918,11 +927,11 @@ ZOOM_API(void)
         for (rc = r->record_hash[i]; rc; rc = rc->next)
         {
             if (rc->rec.wrbuf_marc)
-                wrbuf_destroy(rc->rec.wrbuf_marc);
+                wrbuf_free(rc->rec.wrbuf_marc, 1);
             if (rc->rec.wrbuf_iconv)
-                wrbuf_destroy(rc->rec.wrbuf_iconv);
+                wrbuf_free(rc->rec.wrbuf_iconv, 1);
             if (rc->rec.wrbuf_opac)
-                wrbuf_destroy(rc->rec.wrbuf_opac);
+                wrbuf_free(rc->rec.wrbuf_opac, 1);
         }
         r->record_hash[i] = 0;
     }
@@ -1291,7 +1300,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.122 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.116.2.1 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1721,11 +1730,11 @@ ZOOM_API(void)
     if (!rec)
         return;
     if (rec->wrbuf_marc)
-        wrbuf_destroy(rec->wrbuf_marc);
+        wrbuf_free(rec->wrbuf_marc, 1);
     if (rec->wrbuf_iconv)
-        wrbuf_destroy(rec->wrbuf_iconv);
+        wrbuf_free(rec->wrbuf_iconv, 1);
     if (rec->wrbuf_opac)
-        wrbuf_destroy(rec->wrbuf_opac);
+        wrbuf_free(rec->wrbuf_opac, 1);
     odr_destroy(rec->odr);
     xfree(rec);
 }
@@ -1778,7 +1787,7 @@ static const char *marc_iconv_return(ZOOM_record rec, int marc_type,
             yaz_iconv_close(cd);
         if (len)
             *len = wrbuf_len(rec->wrbuf_marc);
-        return wrbuf_cstr(rec->wrbuf_marc);
+        return wrbuf_buf(rec->wrbuf_marc);
     }
     yaz_marc_destroy(mt);
     if (cd)
@@ -1796,7 +1805,6 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 
     *from = '\0';
     strcpy(to, "UTF-8");
-
     if (record_charset && *record_charset)
     {
         /* Use "from,to" or just "from" */
@@ -1818,15 +1826,32 @@ static const char *record_iconv_return(ZOOM_record rec, int *len,
 
     if (*from && *to && (cd = yaz_iconv_open(to, from)))
     {
+        char outbuf[12];
+        size_t inbytesleft = sz;
+        const char *inp = buf;
+        
         if (!rec->wrbuf_iconv)
             rec->wrbuf_iconv = wrbuf_alloc();
 
         wrbuf_rewind(rec->wrbuf_iconv);
 
-        wrbuf_iconv_write(rec->wrbuf_iconv, cd, buf, sz);
-        wrbuf_iconv_reset(rec->wrbuf_iconv, cd);
-
-        buf = wrbuf_cstr(rec->wrbuf_iconv);
+        while (inbytesleft)
+        {
+            size_t outbytesleft = sizeof(outbuf);
+            char *outp = outbuf;
+            size_t r = yaz_iconv(cd, (char**) &inp,
+                                 &inbytesleft, 
+                                 &outp, &outbytesleft);
+            if (r == (size_t) (-1))
+            {
+                int e = yaz_iconv_error(cd);
+                if (e != YAZ_ICONV_E2BIG)
+                    break;
+            }
+            wrbuf_write(rec->wrbuf_iconv, outbuf, outp - outbuf);
+        }
+        wrbuf_puts(rec->wrbuf_iconv, "");
+        buf = wrbuf_buf(rec->wrbuf_iconv);
         sz = wrbuf_len(rec->wrbuf_iconv);
         yaz_iconv_close(cd);
     }
@@ -4032,6 +4057,8 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
             if (c->cs->io_pending & CS_WANT_READ)
                 mask += ZOOM_SELECT_READ;
             ZOOM_connection_set_mask(c, mask);
+            event = ZOOM_Event_create(ZOOM_EVENT_NONE);
+            ZOOM_connection_put_event(c, event);
         }
         else if (ret == 0)
         {
@@ -4083,12 +4110,6 @@ ZOOM_API(int)
 }
 
 
-static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
-{
-    WRBUF wrbuf = client_data;
-    wrbuf_puts(wrbuf, buf);
-}
-
 /*
  * Returns an xmalloc()d string containing RPN that corresponds to the
  * CQL passed in.  On error, sets the Connection object's error state
@@ -4099,9 +4120,10 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
 {
     CQL_parser parser;
     int error;
+    struct cql_node *node;
     const char *cqlfile;
-    cql_transform_t trans;
-    char *result = 0;
+    static cql_transform_t trans;
+    char pqfbuf[512];
 
     parser = cql_parser_create();
     if ((error = cql_parser_string(parser, cql)) != 0) {
@@ -4110,40 +4132,42 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
         return 0;
     }
 
+    node = cql_parser_result(parser);
+    /* ### Do not call cql_parser_destroy() yet: it destroys `node'! */
+
     cqlfile = ZOOM_connection_option_get(c, "cqlfile");
-    if (cqlfile == 0) 
-    {
+    if (cqlfile == 0) {
+        cql_parser_destroy(parser);
+        cql_node_destroy(node);
         set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
+        return 0;
     }
-    else if ((trans = cql_transform_open_fname(cqlfile)) == 0) 
-    {
+
+    if ((trans = cql_transform_open_fname(cqlfile)) == 0) {
         char buf[512];        
+        cql_parser_destroy(parser);
+        cql_node_destroy(node);
         sprintf(buf, "can't open CQL transform file '%.200s': %.200s",
                 cqlfile, strerror(errno));
         set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+        return 0;
     }
-    else 
-    {
-        WRBUF wrbuf_result = wrbuf_alloc();
-        error = cql_transform(trans, cql_parser_result(parser),
-                              cql2pqf_wrbuf_puts, wrbuf_result);
-        if (error != 0) {
-            char buf[512];
-            const char *addinfo;
-            error = cql_transform_error(trans, &addinfo);
-            sprintf(buf, "%.200s (addinfo=%.200s)", 
-                    cql_strerror(error), addinfo);
-            set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
-        }
-        else
-        {
-            result = xstrdup(wrbuf_cstr(wrbuf_result));
-        }
-        cql_transform_close(trans);
-        wrbuf_destroy(wrbuf_result);
-    }
+
+    error = cql_transform_buf(trans, node, pqfbuf, sizeof pqfbuf);
     cql_parser_destroy(parser);
-    return result;
+    cql_node_destroy(node);
+    if (error != 0) {
+        char buf[512];
+        const char *addinfo;
+        error = cql_transform_error(trans, &addinfo);
+        cql_transform_close(trans);
+        sprintf(buf, "%.200s (addinfo=%.200s)", cql_strerror(error), addinfo);
+        set_ZOOM_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
+        return 0;
+    }
+
+    cql_transform_close(trans);
+    return xstrdup(pqfbuf);
 }
 
 ZOOM_API(int) ZOOM_connection_fire_event_timeout(ZOOM_connection c)
