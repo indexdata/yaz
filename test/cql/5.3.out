@@ -4,7 +4,7 @@
     <modifiers>
       <modifier>
         <type>distance</type>
-        <relation>&lt;</relation>
+        <comparison>&lt;</comparison>
         <value>3</value>
       </modifier>
     </modifiers>

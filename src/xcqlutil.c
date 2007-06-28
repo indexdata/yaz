@@ -1,4 +1,4 @@
-/* $Id: xcqlutil.c,v 1.7 2007-01-03 08:42:15 adam Exp $
+/* $Id: xcqlutil.c,v 1.8 2007-06-28 07:58:07 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -104,9 +104,9 @@ static void cql_to_xml_mod(struct cql_node *m,
             pr_n("</type>\n", pr, client_data, 0);
             if (m->u.st.relation)
             {
-                pr_n("<relation>", pr, client_data, level+4);
+                pr_n("<comparison>", pr, client_data, level+4);
                 pr_cdata(m->u.st.relation, pr, client_data);
-                pr_n("</relation>\n", pr, client_data, 0);
+                pr_n("</comparison>\n", pr, client_data, 0);
             }
             if (m->u.st.term)
             {

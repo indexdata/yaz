@@ -4,12 +4,12 @@
     <modifiers>
       <modifier>
         <type>unit</type>
-        <relation>=</relation>
+        <comparison>=</comparison>
         <value>element</value>
       </modifier>
       <modifier>
         <type>distance</type>
-        <relation>&gt;</relation>
+        <comparison>&gt;</comparison>
         <value>5</value>
       </modifier>
     </modifiers>

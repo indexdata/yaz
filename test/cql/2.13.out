@@ -5,7 +5,7 @@
     <modifiers>
       <modifier>
         <type>rel.algorithm</type>
-        <relation>=</relation>
+        <comparison>=</comparison>
         <value>CORI</value>
       </modifier>
     </modifiers>

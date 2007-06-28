@@ -5,12 +5,11 @@
     <modifiers>
       <modifier>
         <type>b.bar</type>
-        <relation>&gt;</relation>
+        <comparison>&gt;</comparison>
         <value>1</value>
       </modifier>
       <modifier>
         <type>f.foo</type>
-        <relation>=</relation>
       </modifier>
     </modifiers>
   </relation>

@@ -4,7 +4,7 @@
     <modifiers>
       <modifier>
         <type>unit</type>
-        <relation>=</relation>
+        <comparison>=</comparison>
         <value>sentence</value>
       </modifier>
     </modifiers>

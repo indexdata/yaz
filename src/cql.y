@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.13 2006-12-14 09:05:18 adam Exp $
+/* $Id: cql.y,v 1.14 2007-06-28 07:58:07 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -140,7 +140,7 @@ boolean:
 modifiers: modifiers '/' searchTerm
 { 
     struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
-					  $3.buf, "=", 0);
+					  $3.buf, 0, 0);
 
     mod->u.st.modifiers = $1.cql;
     $$.cql = mod;
