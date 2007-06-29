@@ -1,3 +1,8 @@
+Added support for the use of the older versions or Extended Service
+Update in ZOOM. To faciliate this, an option "updateVersion" may be
+set to the version , 1=first, 2=second, 3=third. The third version is
+what ZOOM C has used so far. And that, obviously, is the default.
+
 --- 3.0.8 2007/06/25
 
 Fixed bug #1208: SSL appears to be broken in ZOOM.

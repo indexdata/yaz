@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.60 2007-06-21 09:00:53 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.61 2007-06-29 08:05:07 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -1145,7 +1145,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	 <literal>recordDelete</literal>,
 	 <literal>elementUpdate</literal>.
 	</entry>
-	<entry><literal>specialUpdate</literal></entry>
+	<entry><literal>specialUpdate (recordInsert for updateVersion=1 which does not support specialUpdate)</literal></entry>
        </row>
        <row>
 	<entry>recordIdOpaque</entry>
@@ -1188,6 +1188,20 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	<entry>elementSetName</entry>
 	<entry>Element Set for Record</entry>
 	<entry>none</entry>
+       </row>
+       <row>
+	<entry>updateVersion</entry>
+	<entry>Record Update version which holds one of the values
+	 1, 2 or 3. Each version has a distinct OID:
+	 1.2.840.10003.9.5
+	 (<ulink url="&url.z39.50.extupdate1;">first version</ulink>) ,
+	 1.2.840.10003.9.5.1 
+	 (second version) and 
+	 1.2.840.10003.9.5.1.1 
+	 (<ulink url="&url.z39.50.extupdate3;">third and
+	  newest version</ulink>).
+	</entry>
+	<entry>3</entry>
        </row>
       </tbody>
      </tgroup>

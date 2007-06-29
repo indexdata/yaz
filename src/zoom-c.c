@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.137 2007-06-25 18:34:27 adam Exp $
+ * $Id: zoom-c.c,v 1.138 2007-06-29 08:05:07 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1341,7 +1341,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.137 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.138 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3124,6 +3124,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
     const char *record_buf = ZOOM_options_get(p->options, "record");
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
+    const char *version = ZOOM_options_get(p->options, "updateVersion");
 
     const char *correlationInfo_note =
         ZOOM_options_get(p->options, "correlationInfo.note");
@@ -3131,7 +3132,10 @@ static Z_APDU *create_update_package(ZOOM_package p)
         ZOOM_options_get(p->options, "correlationInfo.id");
     int action_no = -1;
     Odr_oid *syntax_oid = 0;
+    const Odr_oid *package_oid = yaz_oid_extserv_database_update;
 
+    if (!version)
+        version = "3";
     if (!syntax_str)
         syntax_str = "xml";
     if (!record_buf)
@@ -3152,8 +3156,27 @@ static Z_APDU *create_update_package(ZOOM_package p)
     if (num_db > 0)
         first_db = db[0];
     
-    if (!action)
-        action = "specialUpdate";
+    switch(*version)
+    {
+    case '1':
+        package_oid = yaz_oid_extserv_database_update_first_version;
+        /* old update does not support specialUpdate */
+        if (!action)
+            action = "recordInsert";
+        break;
+    case '2':
+        if (!action)
+            action = "specialUpdate";
+        package_oid = yaz_oid_extserv_database_update_second_version;
+        break;
+    case '3':
+        if (!action)
+            action = "specialUpdate";
+        package_oid = yaz_oid_extserv_database_update;
+        break;
+    default:
+        return 0;
+    }
     
     if (!strcmp(action, "recordInsert"))
         action_no = Z_IUOriginPartToKeep_recordInsert;
@@ -3168,7 +3191,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     else
         return 0;
 
-    apdu = create_es_package(p, yaz_oid_extserv_database_update);
+    apdu = create_es_package(p, package_oid);
     if (apdu)
     {
         Z_IUOriginPartToKeep *toKeep;
@@ -3179,10 +3202,8 @@ static Z_APDU *create_update_package(ZOOM_package p)
             ZOOM_options_get(p->options, "elementSetName");
         
         apdu->u.extendedServicesRequest->taskSpecificParameters = r;
-
         
-        r->direct_reference = odr_oiddup(p->odr_out, 
-                                         yaz_oid_extserv_database_update);
+        r->direct_reference = odr_oiddup(p->odr_out, package_oid);
         r->descriptor = 0;
         r->which = Z_External_update;
         r->indirect_reference = 0;
