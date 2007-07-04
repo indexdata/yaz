@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.346 2007-07-04 09:20:06 adam Exp $
+ * $Id: client.c,v 1.347 2007-07-04 09:21:00 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -56,7 +56,6 @@
 
 #include <yaz/comstack.h>
 
-#include <yaz/tcpip.h>
 #include <yaz/oid_db.h>
 #define NO_OID 1
 #include <yaz/proto.h>
@@ -718,20 +717,10 @@ int session_connect(const char *arg)
         conn = cs_create_host(yazProxy, 1, &add);
     else
         conn = cs_create_host(arg, 1, &add);
-
     if (!conn)
     {
         printf ("Could not resolve address %s\n", arg);
         return 0;
-    }
-    if (1)
-    {
-        COMSTACK tmp_cs = cs_create (tcpip_type, 0, PROTO_Z3950);
-
-        void *addr = cs_straddr(tmp_cs, arg);
-        printf ("cs_straddr of %s %s\n", arg, addr ? "OK" : "Failed");
-
-        cs_close(tmp_cs);
     }
 #if YAZ_HAVE_XML2
     if (conn->protocol == PROTO_HTTP)
