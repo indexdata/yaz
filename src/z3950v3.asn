@@ -652,7 +652,7 @@ ExtendedServicesResponse ::= SEQUENCE{
   otherInfo          OtherInformation OPTIONAL}
 
  Permissions ::= SEQUENCE OF SEQUENCE{
-  userId      [1] IMPLICIT InternationalString,
+  userId      [1] IMPLICIT InternationalString OPTIONAL,
   allowableFunctions  [2] IMPLICIT SEQUENCE OF INTEGER{
               delete      (1),
               modifyContents  (2),
@@ -2420,7 +2420,7 @@ TargetPart ::= SEQUENCE{
   globalDiagnostics  [2] IMPLICIT SEQUENCE OF DiagRec OPTIONAL,
                 -- These are non-surrogate diagnostics relating to the task, 
                 -- not to individual records.
-  taskPackageRecords  [3] IMPLICIT SEQUENCE OF TaskPackageRecordStructure
+  taskPackageRecords  [3] IMPLICIT SEQUENCE OF TaskPackageRecordStructure OPTIONAL
                 -- There should be a TaskPackageRecordStructure for every record
                 -- supplied. The target should create such a structure for every
                       -- record immediately upon creating the task package to include
