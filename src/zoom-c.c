@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.138 2007-06-29 08:05:07 adam Exp $
+ * $Id: zoom-c.c,v 1.139 2007-07-04 11:42:14 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -28,6 +28,7 @@
 #include <yaz/ccl.h>
 #include <yaz/query-charset.h>
 #include <yaz/copy_types.h>
+#include <yaz/snprintf.h>
 
 static int log_api = 0;
 static int log_details = 0;
@@ -1341,7 +1342,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.138 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.139 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3874,11 +3875,19 @@ static int do_read(ZOOM_connection c)
         {
             int x;
             int err = odr_geterrorx(c->odr_in, &x);
-            char msg[60];
+            char msg[100];
             const char *element = odr_getelement(c->odr_in);
-            sprintf(msg, "ODR code %d:%d element=%-20s",
-                    err, x, element ? element : "<unknown>");
+            yaz_snprintf(msg, sizeof(msg),
+                    "ODR code %d:%d element=%s offset=%d",
+                    err, x, element ? element : "<unknown>",
+                    odr_offset(c->odr_in));
             set_ZOOM_error(c, ZOOM_ERROR_DECODE, msg);
+            if (log_api)
+            {
+                FILE *ber_file = yaz_log_file();
+                if (ber_file)
+                    odr_dumpBER(ber_file, c->buf_in, r);
+            }
             do_close(c);
         }
         else if (gdu->which == Z_GDU_Z3950)
