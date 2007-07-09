@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.86 2007-06-29 08:03:02 adam Exp $
+dnl $Id: configure.ac,v 1.87 2007-07-09 17:39:01 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.9],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -404,6 +404,9 @@ AC_SUBST(YAZ_SRC_ROOT)
 AC_SUBST(YAZ_BUILD_ROOT)
 YAZ_SRC_ROOT=`cd ${srcdir}; pwd`
 YAZ_BUILD_ROOT=`pwd`
+
+dnl ------ windows version files
+WIN_FILEVERSION=`echo $PACKAGE_VERSION|tr . ,`.1
 dnl
 dnl ------ Makefiles
 dnl
@@ -427,7 +430,10 @@ etc/Makefile
 yaz-config
 yaz.pc
 Doxyfile
-],[sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config])
+],[
+	sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
+    ]
+)
 
 
 echo \
