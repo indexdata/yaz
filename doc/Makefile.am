@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.82 2007-07-10 09:40:44 adam Exp $
+## $Id: Makefile.am,v 1.83 2007-07-10 09:42:46 adam Exp $
 
 SUBDIRS = common
 
@@ -100,4 +100,4 @@ install-data-hook:
 	done
 
 uninstall-hook:
-	rm -r $(DESTDIR)/$(docdir)
+	rm -r $(DESTDIR)$(docdir)
