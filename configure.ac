@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.88 2007-07-10 14:28:37 adam Exp $
+dnl $Id: configure.ac,v 1.89 2007-07-10 14:41:36 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.9],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -209,7 +209,7 @@ fi
 AC_MSG_CHECKING([for libpcap (required for ziffy)])
 if test -z "${PCAP_LIBS}"; then
     AC_MSG_RESULT([not found. ziffy disabled])
-    if test "${PCAP_LIBS}"; then
+    if test "${PCAP_DIR}" = "yes"; then
         AC_MSG_ERROR([libpcap missing])
     fi
 else
