@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.87 2007-07-09 17:39:01 adam Exp $
+dnl $Id: configure.ac,v 1.88 2007-07-10 14:28:37 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.9],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -185,39 +185,36 @@ AC_SUBST(PCAP_CFLAGS)
 ZIFFY_PROG=
 AC_ARG_WITH(pcap, [  --with-pcap[=DIR]         libpcap root dir located in (dir)], [PCAP_DIR="$withval"],[PCAP_DIR=default])
 
-AC_MSG_CHECKING([for libpcap (required for ziffy)])
 if test "${PCAP_DIR}" != "no"; then
     if test "${ac_cv_header_netinet_if_ether_h}" = "no"; then
 	:
     elif test "${PCAP_DIR}" != "yes" && test "${PCAP_DIR}" != "default"; then
-	if test -r $PCAP_DIR/libpcap.a && test -r $PCAP_DIR/pcap.h; then
-	    PCAP_DIR="$PCAP_DIR"
-	    PCAP_LIBS="${LIBS} -L$PCAP_DIR -lpcap"
-	    PCAP_CFLAGS="${INCS} -I$PCAP_DIR"
-	    ZIFFY_PROG=ziffy
+	PCAP_LIBS="-lpcap"
+	if test "$PCAP_DIR" != "/usr"; then
+	    PCAP_LIBS="-L$PCAP_DIR $PCAP_LIBS"
+	    PCAP_CFLAGS="-I$PCAP_DIR"
 	fi
-    elif test -d /usr/local &&
-	test -r /usr/local/lib/libpcap.a &&
-	test -r /usr/local/include/pcap.h; then
-	PCAP_DIR="/usr/local"
-	PCAP_LIBS="${LIBS} -L$PCAP_DIR/lib -lpcap"
-	PCAP_CFLAGS="${INCS} -I$PCAP_DIR/include"
-	ZIFFY_PROG=ziffy
-    elif test -d /usr &&
-	test -r /usr/lib/libpcap.a &&
-	test -r /usr/include/pcap.h; then
-	PCAP_DIR="/usr"
-	PCAP_LIBS="${LIBS} -lpcap"
-	ZIFFY_PROG=ziffy
+    else
+	oldLibs=$LIBS
+	AC_CHECK_LIB([pcap], [main])
+	if test "$ac_cv_lib_pcap_main" = "yes"; then
+	    AC_CHECK_HEADER([pcap.h])
+	    if test "$ac_cv_header_pcap_h" = "yes"; then
+		PCAP_LIBS="-lpcap"
+	    fi
+	fi
+	LIBS=$oldLibs
     fi
 fi
-if test -z "$ZIFFY_PROG"; then
+AC_MSG_CHECKING([for libpcap (required for ziffy)])
+if test -z "${PCAP_LIBS}"; then
     AC_MSG_RESULT([not found. ziffy disabled])
-    if test "${PCAP_DIR}" != "default" && test "${PCAP_DIR}" != "no"; then
+    if test "${PCAP_LIBS}"; then
         AC_MSG_ERROR([libpcap missing])
     fi
 else
     AC_MSG_RESULT([found in $PCAP_DIR])
+    ZIFFY_PROG=ziffy
 fi
 
 dnl ------ various functions
