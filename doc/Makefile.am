@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.81 2007-06-17 07:05:42 adam Exp $
+## $Id: Makefile.am,v 1.82 2007-07-10 09:40:44 adam Exp $
 
 SUBDIRS = common
 
@@ -96,7 +96,7 @@ doc-clean:
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
 	for p in $$d/*.html; do \
-		$(docDATA_INSTALL) $$p $(DESTDIR)/$(docdir); \
+		$(docDATA_INSTALL) $$p $(DESTDIR)$(docdir); \
 	done
 
 uninstall-hook:
