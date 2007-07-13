@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.347 2007-07-04 09:21:00 adam Exp $
+ * $Id: client.c,v 1.348 2007-07-13 09:28:43 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -170,9 +170,6 @@ static cql_transform_t cqltrans = 0; /* CQL context-set handle */
 /* readline doesn't have this var. Define it ourselves. */
 int rl_attempted_completion_over = 0;
 #endif
-
-/* set this one to 1, to avoid decode of unknown MARCs  */
-#define AVOID_MARC_DECODE 1
 
 #define maxOtherInfosSupported 10
 struct eoi {
