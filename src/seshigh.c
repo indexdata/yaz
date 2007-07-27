@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.122 2007-06-05 06:52:23 adam Exp $
+ * $Id: seshigh.c,v 1.123 2007-07-27 08:05:52 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -990,12 +990,14 @@ static void srw_bend_search(association *assoc, request *req,
                         odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
 		}
                 
-                if ((rr.hits > 0 && start > rr.hits) || start < 1)
+                if (start > rr.hits || start < 1)
                 {
-                    yaz_add_srw_diagnostic(
-                        assoc->encode, 
-                        &srw_res->diagnostics, &srw_res->num_diagnostics,
-                        YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
+                    /* if hits<=0 and start=1 we don't return a diagnostic */
+                    if (start != 1)
+                        yaz_add_srw_diagnostic(
+                            assoc->encode, 
+                            &srw_res->diagnostics, &srw_res->num_diagnostics,
+                            YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
                 }
                 else if (number > 0)
                 {
@@ -2355,7 +2357,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.122 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.123 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
