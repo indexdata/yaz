@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: session.h,v 1.14 2007-04-12 13:52:57 adam Exp $
+ * $Id: session.h,v 1.15 2007-08-13 16:46:19 mike Exp $
  */
 /**
  * \file session.h
@@ -13,6 +13,7 @@
 
 #include <yaz/comstack.h>
 #include <yaz/cql.h>
+#include <yaz/ccl.h>
 #include <yaz/odr.h>
 #include <yaz/proto.h>
 #include <yaz/backend.h>
@@ -24,6 +25,7 @@ struct gfs_server {
     char *host;
     int listen_ref;
     cql_transform_t cql_transform;
+    CCL_bibset ccl_transform;
     void *server_node_ptr;
     char *directory;
     char *docpath;
