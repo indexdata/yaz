@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tstodr.c,v 1.11 2007-04-13 06:51:57 adam Exp $
+ * $Id: tstodr.c,v 1.12 2007-08-13 16:23:30 mike Exp $
  *
  */
 #include <stdlib.h>
@@ -66,7 +66,7 @@ void tst_MySequence1(ODR encode, ODR decode)
     YAZ_CHECK(t->myoid);
     if (t->myoid)
     {
-        int *myoid = odr_getoidbystr(decode, MYOID);
+        Odr_oid *myoid = odr_getoidbystr(decode, MYOID);
 
         YAZ_CHECK(oid_oidcmp(myoid, t->myoid) == 0);
     }
