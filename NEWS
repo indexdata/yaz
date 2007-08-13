@@ -3,6 +3,12 @@ Update in ZOOM. To faciliate this, an option "updateVersion" may be
 set to the version , 1=first, 2=second, 3=third. The third version is
 what ZOOM C has used so far. And that, obviously, is the default.
 
+Added support for CCL queries in Z39.50 queries sent to the GFS (and
+therefore in Zebra and in SimpleServer-based applications).  The new
+<ccl2rpn> element in a GFS configuration file, if present, names a CCL
+qualifier file used to transform incoming CCL queries into Type-1 RPN,
+which is passed into the back-end search callback function.
+
 --- 3.0.8 2007/06/25
 
 Fixed bug #1208: SSL appears to be broken in ZOOM.
