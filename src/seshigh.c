@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.123 2007-07-27 08:05:52 adam Exp $
+ * $Id: seshigh.c,v 1.124 2007-08-13 16:43:59 mike Exp $
  */
 /**
  * \file seshigh.c
@@ -76,6 +76,7 @@
 
 #include <yaz/srw.h>
 #include <yaz/backend.h>
+#include <yaz/yaz-ccl.h>
 
 static void process_gdu_request(association *assoc, request *req);
 static int process_z_request(association *assoc, request *req, char **msg);
@@ -852,6 +853,25 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
     return 0;
 }
                    
+
+static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
+                   bend_search_rr *bsrr) {
+    char *ccl0;
+    struct ccl_rpn_node *node;
+    int errcode, pos;
+
+    ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
+    if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0) {
+        bsrr->errstring = (char*) ccl_err_msg(errcode);
+        return 10;              /* Query syntax error */
+    }
+
+    bsrr->query->which = Z_Query_type_1;
+    bsrr->query->u.type_1 = ccl_rpn_query(odr, node);
+    return 0;
+}
+
+
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_PDU *sr,
                             Z_SRW_searchRetrieveResponse *srw_res,
@@ -2357,7 +2377,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.123 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.124 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2675,6 +2695,18 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
             if (srw_errcode)
                 bsrr->errcode = yaz_diag_srw_to_bib1(srw_errcode);
         }
+
+        if (assoc->server && assoc->server->ccl_transform 
+            && req->query->which == Z_Query_type_2) /*CCL*/
+        {
+            /* have a CCL query and a CCL to PQF transform .. */
+            int srw_errcode = 
+                ccl2pqf(bsrr->stream, req->query->u.type_2,
+                        assoc->server->ccl_transform, bsrr);
+            if (srw_errcode)
+                bsrr->errcode = yaz_diag_srw_to_bib1(srw_errcode);
+        }
+
         if (!bsrr->errcode)
             (assoc->init->bend_search)(assoc->backend, bsrr);
         if (!bsrr->request)  /* backend not ready with the search response */
