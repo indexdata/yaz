@@ -1,5 +1,5 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.8 2007-02-08 11:36:59 adam Exp $
+   $Id: gfs-virtual.xml,v 1.9 2007-08-13 16:58:46 mike Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -130,6 +130,16 @@
     <para>
      Specifies a filename that includes CQL to RPN conversion for this
      backend server. See &reference-tools-cql-map;
+     If given, the backend server will only "see" a Type-1/RPN query. 
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry><term>element <literal>ccl2rpn</literal> (optional)</term>
+   <listitem>
+    <para>
+     Specifies a filename that includes CCL to RPN conversion for this
+     backend server. See &reference-tools-ccl-qualifiers;
      If given, the backend server will only "see" a Type-1/RPN query. 
     </para>
    </listitem>
