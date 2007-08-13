@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.49 2007-05-06 20:12:20 adam Exp $
+ * $Id: statserv.c,v 1.50 2007-08-13 16:46:47 mike Exp $
  */
 
 /**
@@ -219,6 +219,7 @@ static struct gfs_server * gfs_server_new(void)
     n->host = 0;
     n->listen_ref = 0;
     n->cql_transform = 0;
+    n->ccl_transform = 0;
     n->server_node_ptr = 0;
     n->directory = 0;
     n->docpath = 0;
@@ -415,6 +416,20 @@ static void xml_config_read(void)
                     gfs->cql_transform = cql_transform_open_fname(
                         nmem_dup_xml_content(gfs_nmem, ptr->children)
                         );
+                }
+                else if (!strcmp((const char *) ptr->name, "ccl2rpn"))
+                {
+                    char *name;
+                    FILE *f;
+
+                    name = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    if ((f = fopen(name, "r")) == 0) {
+                        yaz_log(YLOG_FATAL, "can't open CCL file '%s'", name);
+                        exit(1);
+                    }
+                    gfs->ccl_transform = ccl_qual_mk();
+                    ccl_qual_file (gfs->ccl_transform, f);
+                    fclose(f);
                 }
                 else if (!strcmp((const char *) ptr->name, "directory"))
                 {
