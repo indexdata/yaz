@@ -9,8 +9,9 @@
      %idcommon;
      <!ENTITY gfs-synopsis-app "yaz-ztest">
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
+     <!ENTITY reference-tools-cql-map 'section "CCL Qualifiers"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.16 2007-05-22 11:10:08 adam Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.17 2007-08-13 16:58:27 mike Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -58,7 +59,7 @@
   <title>OPTIONS</title>
   &gfs-options;
  </refsect1>
- <refsect1><title>VIRTUAL HOSTS</title>
+ <refsect1><title>GFS CONFIGURATION AND VIRTUAL HOSTS</title>
   &gfs-virtual;
  </refsect1>
  <refsect1><title>FILES</title>
