@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: ztest.c,v 1.94 2007-06-14 10:44:18 adam Exp $
+ * $Id: ztest.c,v 1.95 2007-08-14 12:22:51 adam Exp $
  */
 
 /*
@@ -153,6 +153,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
             Z_IORequest *ir = it->u.esRequest;
             Z_IOOriginPartToKeep *k = ir->toKeep;
             Z_IOOriginPartNotToKeep *n = ir->notToKeep;
+            const char *xml_in_response = 0;
             
             if (k && k->contact)
             {
@@ -192,8 +193,10 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                     {
                         yaz_log (log_level, "ILL XML request");
                         if (r->which == Z_External_octet)
-                            yaz_log (log_level, "%.*s", r->u.octet_aligned->len,
+                            yaz_log (log_level, "%.*s",
+                                     r->u.octet_aligned->len,
                                      r->u.octet_aligned->buf); 
+                        xml_in_response = "<dummy>x</dummy>";
                     }
                     if (!oid_oidcmp(r->direct_reference, 
                                     yaz_oid_general_isoill_1))
@@ -300,7 +303,13 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 ext->u.itemOrder->u.taskPackage->originPart = k;
                 ext->u.itemOrder->u.taskPackage->targetPart = targetPart;
 
-                targetPart->itemRequest = 0;
+                if (xml_in_response)
+                    targetPart->itemRequest =
+                        z_ext_record_xml(rr->stream, xml_in_response,
+                                         strlen(xml_in_response));
+                else
+                    targetPart->itemRequest = 0;
+                    
                 targetPart->statusOrErrorReport = 0;
                 targetPart->auxiliaryStatus = 0;
             }
