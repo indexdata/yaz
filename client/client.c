@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.348 2007-07-13 09:28:43 adam Exp $
+ * $Id: client.c,v 1.349 2007-08-14 12:21:14 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -1912,6 +1912,20 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
                     {
                         printf ("other type\n");
                     }
+                }
+            }
+        }
+        if (ext->which == Z_External_itemOrder)
+        {
+            Z_IOTaskPackage *otp = ext->u.itemOrder->u.taskPackage;
+            if (otp && otp->targetPart && otp->targetPart->itemRequest)
+            {
+                Z_External *ext = otp->targetPart->itemRequest;
+                if (ext->which == Z_External_octet)
+                {
+                    Odr_oct *doc = ext->u.octet_aligned;
+                    printf("Got itemRequest doc %.*s\n",
+                           doc->len, doc->buf);
                 }
             }
         }
