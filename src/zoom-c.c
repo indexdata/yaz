@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.139 2007-07-04 11:42:14 adam Exp $
+ * $Id: zoom-c.c,v 1.140 2007-08-15 17:53:11 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1342,7 +1342,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.139 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.140 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2691,6 +2691,19 @@ ZOOM_API(ZOOM_scanset)
     {
         yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
                 c, q, q->query_string);
+        /*
+         * ### This is wrong: if ZOOM_query_cql2rpn() was used, then
+         * the query already been translated to PQF, so we'd be in the
+         * previous branch.  We only get here if the client submitted
+         * CQL to be interepreted by the server using
+         * ZOOM_query_cql(), in which case we should send it as-is.
+         * We can't do that in Z39.50 as the ScanRequest APDU has no
+         * slot in which to place the CQL, but we could and should do
+         * it for SRU connections.  At present, we can't do that
+         * because there is no slot in the ZOOM_scanset structure to
+         * save the CQL so that it can be sent when the ZOOM_TASK_SCAN
+         * fires.
+         */
         start = freeme = cql2pqf(c, q->query_string);
         if (start == 0)
             return 0;
