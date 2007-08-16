@@ -1,3 +1,5 @@
+Added support for SRU scan.
+
 Added support for the use of the older versions or Extended Service
 Update in ZOOM. To faciliate this, an option "updateVersion" may be
 set to the version , 1=first, 2=second, 3=third. The third version is

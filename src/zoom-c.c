@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.140 2007-08-15 17:53:11 mike Exp $
+ * $Id: zoom-c.c,v 1.141 2007-08-16 10:09:36 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -180,6 +180,20 @@ static void set_HTTP_error(ZOOM_connection c, int error,
 {
     set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
+
+static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
+{
+    const char *uri = d->uri;
+    if (uri)
+    {
+        int code = 0;       
+        const char *cp;
+        if ((cp = strrchr(uri, '/')))
+            code = atoi(cp+1);
+        set_dset_error(c, code, uri, d->details, 0);
+    }
+}
+
 #endif
 
 
@@ -641,7 +655,7 @@ ZOOM_API(int)
     s->query_string = odr_strdup(s->odr, str);
 
     ext = (Z_External *) odr_malloc(s->odr, sizeof(*ext));
-    ext->direct_reference = odr_getoidbystr(s->odr, "1.2.840.10003.16.2");
+    ext->direct_reference = odr_oiddup(s->odr, yaz_oid_userinfo_cql);
     ext->indirect_reference = 0;
     ext->descriptor = 0;
     ext->which = Z_External_CQL;
@@ -803,7 +817,6 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->next = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
-    r->rpn_iconv = 0;
     return r;
 }
 
@@ -835,13 +848,6 @@ ZOOM_API(ZOOM_resultset)
 
     r->options = ZOOM_options_create_with_parent(c->options);
     
-    {
-        const char *cp = ZOOM_options_get(r->options, "rpnCharset");
-        if (cp)
-            r->rpn_iconv = yaz_iconv_open(cp, "UTF-8");
-    }
-
-
     start = ZOOM_options_get_int(r->options, "start", 0);
     count = ZOOM_options_get_int(r->options, "count", 0);
     {
@@ -1014,8 +1020,6 @@ static void resultset_destroy(ZOOM_resultset r)
         }
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
-        if (r->rpn_iconv)
-            yaz_iconv_close(r->rpn_iconv);
         odr_destroy(r->odr);
         xfree(r->setname);
         xfree(r->schema);
@@ -1342,7 +1346,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.140 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.141 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1570,12 +1574,23 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
         set_ZOOM_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
         return zoom_complete;
     }
-    if (r->query->z_query->which == Z_Query_type_1 && r->rpn_iconv)
+    if (r->query->z_query->which == Z_Query_type_1 || 
+        r->query->z_query->which == Z_Query_type_101)
     {
-        search_req->query = yaz_copy_Z_Query(r->query->z_query, c->odr_out);
-        
-        yaz_query_charset_convert_rpnquery(search_req->query->u.type_1,
-                                           c->odr_out, r->rpn_iconv);
+        const char *cp = ZOOM_options_get(r->options, "rpnCharset");
+        if (cp)
+        {
+            yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
+            if (cd)
+            {
+                search_req->query = yaz_copy_Z_Query(search_req->query,
+                                                     c->odr_out);
+                
+                yaz_query_charset_convert_rpnquery(search_req->query->u.type_1,
+                                                   c->odr_out, cd);
+                yaz_iconv_close(cd);
+            }
+        }
     }
     search_req->databaseNames = r->databaseNames;
     search_req->num_databaseNames = r->num_databaseNames;
@@ -2468,6 +2483,7 @@ static int scan_response(ZOOM_connection c, Z_ScanResponse *res)
     if (res->entries && res->entries->nonsurrogateDiagnostics)
         response_diag(c, res->entries->nonsurrogateDiagnostics[0]);
     scan->scan_response = res;
+    scan->srw_scan_response = 0;
     nmem_transfer(odr_getmem(scan->odr), nmem);
     if (res->stepSize)
         ZOOM_options_set_int(scan->options, "stepSize", *res->stepSize);
@@ -2668,81 +2684,25 @@ ZOOM_API(ZOOM_scanset)
 ZOOM_API(ZOOM_scanset)
     ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query q)
 {
-    char *start;
-    char *freeme = 0;
     ZOOM_scanset scan = 0;
 
-    /*
-     * We need to check the query-type, so we can recognise CQL and
-     * CCL and compile them into a form that we can use here.  The
-     * ZOOM_query structure has no explicit `type' member, but
-     * inspection of the ZOOM_query_prefix() and ZOOM_query_cql()
-     * functions shows how the structure is set up in each case.
-     */
     if (!q->z_query)
         return 0;
-    else if (q->z_query->which == Z_Query_type_1) 
-    {
-        yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p PQF '%s'",
-                c, q, q->query_string);
-        start = q->query_string;
-    } 
-    else if (q->z_query->which == Z_Query_type_104)
-    {
-        yaz_log(log_api, "%p ZOOM_connection_scan1 q=%p CQL '%s'",
-                c, q, q->query_string);
-        /*
-         * ### This is wrong: if ZOOM_query_cql2rpn() was used, then
-         * the query already been translated to PQF, so we'd be in the
-         * previous branch.  We only get here if the client submitted
-         * CQL to be interepreted by the server using
-         * ZOOM_query_cql(), in which case we should send it as-is.
-         * We can't do that in Z39.50 as the ScanRequest APDU has no
-         * slot in which to place the CQL, but we could and should do
-         * it for SRU connections.  At present, we can't do that
-         * because there is no slot in the ZOOM_scanset structure to
-         * save the CQL so that it can be sent when the ZOOM_TASK_SCAN
-         * fires.
-         */
-        start = freeme = cql2pqf(c, q->query_string);
-        if (start == 0)
-            return 0;
-    } 
-    else
-    {
-        yaz_log(YLOG_FATAL, "%p ZOOM_connection_scan1 q=%p unknown type '%s'",
-                c, q, q->query_string);
-        abort();
-    }
-    
     scan = (ZOOM_scanset) xmalloc(sizeof(*scan));
     scan->connection = c;
     scan->odr = odr_createmem(ODR_DECODE);
     scan->options = ZOOM_options_create_with_parent(c->options);
     scan->refcount = 1;
     scan->scan_response = 0;
-    scan->termListAndStartPoint =
-        p_query_scan(scan->odr, PROTO_Z3950, &scan->attributeSet, start);
-    xfree(freeme);
+    scan->srw_scan_response = 0;
 
-    {
-        const char *cp = ZOOM_options_get(scan->options, "rpnCharset");
-        if (cp)
-        {
-            yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
-            if (cd)
-            {
-                yaz_query_charset_convert_apt(scan->termListAndStartPoint,
-                                              scan->odr, cd);
-            }
-        }
-    }
-        
-
+    scan->query = q;
+    (q->refcount)++;
     scan->databaseNames = set_DatabaseNames(c, c->options,
                                             &scan->num_databaseNames,
                                             scan->odr);
-    if (scan->termListAndStartPoint != 0)
+
+    if (1)
     {
         ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SCAN);
         task->u.scan.scan = scan;
@@ -2765,6 +2725,8 @@ ZOOM_API(void)
     (scan->refcount)--;
     if (scan->refcount == 0)
     {
+        ZOOM_query_destroy(scan->query);
+
         odr_destroy(scan->odr);
         
         ZOOM_options_destroy(scan->options);
@@ -2790,7 +2752,7 @@ static zoom_ret send_package(ZOOM_connection c)
     return do_write(c);
 }
 
-static zoom_ret send_scan(ZOOM_connection c)
+static zoom_ret ZOOM_connection_send_scan(ZOOM_connection c)
 {
     ZOOM_scanset scan;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
@@ -2802,8 +2764,44 @@ static zoom_ret send_scan(ZOOM_connection c)
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     scan = c->tasks->u.scan.scan;
 
-    req->termListAndStartPoint = scan->termListAndStartPoint;
-    req->attributeSet = scan->attributeSet;
+    /* Z39.50 scan can only carry RPN */
+    if (scan->query->z_query->which == Z_Query_type_1 ||
+        scan->query->z_query->which == Z_Query_type_101)
+    {
+        Z_RPNQuery *rpn = scan->query->z_query->u.type_1;
+        const char *cp = ZOOM_options_get(scan->options, "rpnCharset");
+        if (cp)
+        {
+            yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
+            if (cd)
+            {
+                rpn = yaz_copy_z_RPNQuery(rpn, c->odr_out);
+
+                yaz_query_charset_convert_rpnquery(
+                    rpn, c->odr_out, cd);
+                yaz_iconv_close(cd);
+            }
+        }
+        req->attributeSet = rpn->attributeSetId;
+        if (!req->attributeSet)
+            req->attributeSet = odr_oiddup(c->odr_out, yaz_oid_attset_bib_1);
+        if (rpn->RPNStructure->which == Z_RPNStructure_simple &&
+            rpn->RPNStructure->u.simple->which == Z_Operand_APT)
+        {
+            req->termListAndStartPoint =
+                rpn->RPNStructure->u.simple->u.attributesPlusTerm;
+        }
+        else
+        {
+            set_ZOOM_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+            return zoom_complete;
+        }
+    }
+    else
+    {
+        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
+        return zoom_complete;
+    }
 
     *req->numberOfTermsRequested =
         ZOOM_options_get_int(scan->options, "number", 10);
@@ -2822,69 +2820,157 @@ static zoom_ret send_scan(ZOOM_connection c)
     return send_APDU(c, apdu);
 }
 
+#if YAZ_HAVE_XML2
+static zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
+{
+    ZOOM_scanset scan;
+    Z_SRW_PDU *sr = 0;
+    const char *option_val = 0;
+
+    if (!c->tasks)
+        return zoom_complete;
+    assert (c->tasks->which == ZOOM_TASK_SCAN);
+    scan = c->tasks->u.scan.scan;
+        
+    sr = yaz_srw_get(c->odr_out, Z_SRW_scan_request);
+
+    /* SRU scan can only carry CQL and PQF */
+    if (scan->query->z_query->which == Z_Query_type_104)
+    {
+        sr->u.scan_request->query_type = Z_SRW_query_type_cql;
+        sr->u.scan_request->scanClause.cql = scan->query->query_string;
+    }
+    else if (scan->query->z_query->which == Z_Query_type_1
+             || scan->query->z_query->which == Z_Query_type_101)
+    {
+        sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
+        sr->u.scan_request->scanClause.pqf = scan->query->query_string;
+    }
+    else
+    {
+        set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
+        return zoom_complete;
+    }
+
+    sr->u.scan_request->maximumTerms = odr_intdup(
+        c->odr_out, ZOOM_options_get_int(scan->options, "number", 10));
+    
+    sr->u.scan_request->responsePosition = odr_intdup(
+        c->odr_out, ZOOM_options_get_int(scan->options, "position", 1));
+    
+    option_val = ZOOM_options_get(scan->options, "extraArgs");
+    if (option_val)
+        sr->extra_args = odr_strdup(c->odr_out, option_val);
+    return send_srw(c, sr);
+}
+#else
+static zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
+{
+    return zoom_complete;
+}
+#endif
+
+
 ZOOM_API(size_t)
     ZOOM_scanset_size(ZOOM_scanset scan)
 {
-    if (!scan || !scan->scan_response || !scan->scan_response->entries)
+    if (!scan)
         return 0;
-    return scan->scan_response->entries->num_entries;
+
+    if (scan->scan_response && scan->scan_response->entries)
+        return scan->scan_response->entries->num_entries;
+    else if (scan->srw_scan_response)
+        return scan->srw_scan_response->num_terms;
+    return 0;
+}
+
+static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
+                                int *occ,
+                                const char **value_term, size_t *value_len,
+                                const char **disp_term, size_t *disp_len)
+{
+    size_t noent = ZOOM_scanset_size(scan);
+    
+    *value_term = 0;
+    *value_len = 0;
+
+    *disp_term = 0;
+    *disp_len = 0;
+
+    *occ = 0;
+    if (pos >= noent || pos < 0)
+        return;
+    if (scan->scan_response)
+    {
+        Z_ScanResponse *res = scan->scan_response;
+        if (res->entries->entries[pos]->which == Z_Entry_termInfo)
+        {
+            Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
+            
+            *value_term = (const char *) t->term->u.general->buf;
+            *value_len = t->term->u.general->len;
+            if (t->displayTerm)
+            {
+                *disp_term = t->displayTerm;
+                *disp_len = strlen(*disp_term);
+            }
+            else if (t->term->which == Z_Term_general)
+            {
+                *disp_term = (const char *) t->term->u.general->buf;
+                *disp_len = t->term->u.general->len;
+            }
+            *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
+        }
+    }
+    if (scan->srw_scan_response)
+    {
+        Z_SRW_scanResponse *res = scan->srw_scan_response;
+        Z_SRW_scanTerm *t = res->terms + pos;
+        if (t)
+        {
+            *value_term = t->value;
+            *value_len = strlen(*value_term);
+
+            if (t->displayTerm)
+                *disp_term = t->displayTerm;
+            else
+                *disp_term = t->value;
+            *disp_len = strlen(*disp_term);
+            *occ = t->numberOfRecords ? *t->numberOfRecords : 0;
+        }
+    }
 }
 
 ZOOM_API(const char *)
     ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
                       int *occ, int *len)
 {
-    const char *term = 0;
-    size_t noent = ZOOM_scanset_size(scan);
-    Z_ScanResponse *res = scan->scan_response;
+    const char *value_term = 0;
+    size_t value_len = 0;
+    const char *disp_term = 0;
+    size_t disp_len = 0;
+
+    ZOOM_scanset_term_x(scan, pos, occ, &value_term, &value_len,
+                        &disp_term, &disp_len);
     
-    *len = 0;
-    *occ = 0;
-    if (pos >= noent)
-        return 0;
-    if (res->entries->entries[pos]->which == Z_Entry_termInfo)
-    {
-        Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
-        
-        if (t->term->which == Z_Term_general)
-        {
-            term = (const char *) t->term->u.general->buf;
-            *len = t->term->u.general->len;
-        }
-        *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
-    }
-    return term;
+    *len = value_len;
+    return value_term;
 }
 
 ZOOM_API(const char *)
     ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
                               int *occ, int *len)
 {
-    const char *term = 0;
-    size_t noent = ZOOM_scanset_size(scan);
-    Z_ScanResponse *res = scan->scan_response;
-    
-    *len = 0;
-    *occ = 0;
-    if (pos >= noent)
-        return 0;
-    if (res->entries->entries[pos]->which == Z_Entry_termInfo)
-    {
-        Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
+    const char *value_term = 0;
+    size_t value_len = 0;
+    const char *disp_term = 0;
+    size_t disp_len = 0;
 
-        if (t->displayTerm)
-        {
-            term = t->displayTerm;
-            *len = strlen(term);
-        }
-        else if (t->term->which == Z_Term_general)
-        {
-            term = (const char *) t->term->u.general->buf;
-            *len = t->term->u.general->len;
-        }
-        *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
-    }
-    return term;
+    ZOOM_scanset_term_x(scan, pos, occ, &value_term, &value_len,
+                        &disp_term, &disp_len);
+    
+    *len = disp_len;
+    return disp_term;
 }
 
 ZOOM_API(const char *)
@@ -3454,7 +3540,10 @@ static int ZOOM_connection_exec_task(ZOOM_connection c)
             ret = do_connect(c);
             break;
         case ZOOM_TASK_SCAN:
-            ret = send_scan(c);
+            if (c->proto == PROTO_HTTP)
+                ret = ZOOM_connection_srw_send_scan(c);
+            else
+                ret = ZOOM_connection_send_scan(c);
             break;
         case ZOOM_TASK_PACKAGE:
             ret = send_package(c);
@@ -3769,20 +3858,32 @@ static void handle_srw_response(ZOOM_connection c,
         record_cache_add(resultset, npr, pos, syntax, elementSetName);
     }
     if (res->num_diagnostics > 0)
-    {
-        const char *uri = res->diagnostics[0].uri;
-        if (uri)
-        {
-            int code = 0;       
-            const char *cp;
-            if ((cp = strrchr(uri, '/')))
-                code = atoi(cp+1);
-            set_dset_error(c, code, uri,
-                           res->diagnostics[0].details, 0);
-        }
-    }
+        set_SRU_error(c, &res->diagnostics[0]);
     nmem = odr_extract_mem(c->odr_in);
     nmem_transfer(odr_getmem(resultset->odr), nmem);
+    nmem_destroy(nmem);
+}
+#endif
+
+#if YAZ_HAVE_XML2
+static void handle_srw_scan_response(ZOOM_connection c,
+                                     Z_SRW_scanResponse *res)
+{
+    NMEM nmem = odr_extract_mem(c->odr_in);
+    ZOOM_scanset scan;
+
+    if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
+        return;
+    scan = c->tasks->u.scan.scan;
+
+    if (res->num_diagnostics > 0)
+        set_SRU_error(c, &res->diagnostics[0]);
+
+    scan->scan_response = 0;
+    scan->srw_scan_response = res;
+    nmem_transfer(odr_getmem(scan->odr), nmem);
+
+    ZOOM_options_set_int(scan->options, "number", res->num_terms);
     nmem_destroy(nmem);
 }
 #endif
@@ -3816,6 +3917,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(c, sr->u.response);
+            else if (sr->which == Z_SRW_scan_response)
+                handle_srw_scan_response(c, sr->u.scan_response);
             else
                 ret = -1;
         }

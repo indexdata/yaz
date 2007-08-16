@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.47 2007-04-17 20:26:19 adam Exp $
+ * $Id: zoomsh.c,v 1.48 2007-08-16 10:09:37 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -31,7 +31,7 @@
 
 #define MAX_CON 100
 
-static int next_token (const char **cpp, const char **t_start)
+static int next_token(const char **cpp, const char **t_start)
 {
     int len = 0;
     const char *cp = *cpp;
@@ -64,10 +64,10 @@ static int next_token (const char **cpp, const char **t_start)
     return len;  /* return -1 if no token was read .. */
 }
 
-static int next_token_copy (const char **cpp, char *buf_out, int buf_max)
+static int next_token_copy(const char **cpp, char *buf_out, int buf_max)
 {
     const char *start;
-    int len = next_token (cpp, &start);
+    int len = next_token(cpp, &start);
     if (len < 0)
     {
         *buf_out = 0;
@@ -75,51 +75,51 @@ static int next_token_copy (const char **cpp, char *buf_out, int buf_max)
     }
     if (len >= buf_max)
         len = buf_max-1;
-    memcpy (buf_out, start, len);
+    memcpy(buf_out, start, len);
     buf_out[len] = '\0';
     return len;
 }
 
-static int is_command (const char *cmd_str, const char *this_str, int this_len)
+static int is_command(const char *cmd_str, const char *this_str, int this_len)
 {
     int cmd_len = strlen(cmd_str);
     if (cmd_len != this_len)
         return 0;
-    if (memcmp (cmd_str, this_str, cmd_len))
+    if (memcmp(cmd_str, this_str, cmd_len))
         return 0;
     return 1;
 }
 
-static void cmd_set (ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **args)
+static void cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
+                    ZOOM_options options,
+                    const char **args)
 {
     char key[40], val[80];
 
-    if (next_token_copy (args, key, sizeof(key)) < 0)
+    if (next_token_copy(args, key, sizeof(key)) < 0)
     {
-        printf ("missing argument for set\n");
+        printf("missing argument for set\n");
         return ;
     }
-    if (next_token_copy (args, val, sizeof(val)) < 0)
+    if (next_token_copy(args, val, sizeof(val)) < 0)
         ZOOM_options_set(options, key, 0);
     else
         ZOOM_options_set(options, key, val);
 }
 
-static void cmd_get (ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **args)
+static void cmd_get(ZOOM_connection *c, ZOOM_resultset *r,
+                    ZOOM_options options,
+                    const char **args)
 {
     char key[40];
-    if (next_token_copy (args, key, sizeof(key)) < 0)
+    if (next_token_copy(args, key, sizeof(key)) < 0)
     {
-        printf ("missing argument for get\n");
+        printf("missing argument for get\n");
     }
     else
     {
         const char *val = ZOOM_options_get(options, key);
-        printf ("%s = %s\n", key, val ? val : "<null>");
+        printf("%s = %s\n", key, val ? val : "<null>");
     }
 }
 
@@ -128,9 +128,9 @@ static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
                      const char **args)
 {
     char key[40];
-    if (next_token_copy (args, key, sizeof(key)) < 0)
+    if (next_token_copy(args, key, sizeof(key)) < 0)
     {
-        printf ("missing argument for get\n");
+        printf("missing argument for get\n");
     }
     else
     {
@@ -142,47 +142,47 @@ static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
                 continue;
             
             val = ZOOM_resultset_option_get(r[i], key);
-            printf ("%s = %s\n", key, val ? val : "<null>");
+            printf("%s = %s\n", key, val ? val : "<null>");
         }
     }
 }
 
-static void cmd_close (ZOOM_connection *c, ZOOM_resultset *r,
-                       ZOOM_options options,
-                       const char **args)
+static void cmd_close(ZOOM_connection *c, ZOOM_resultset *r,
+                      ZOOM_options options,
+                      const char **args)
 {
     char host[60];
     int i;
-    next_token_copy (args, host, sizeof(host));
+    next_token_copy(args, host, sizeof(host));
     for (i = 0; i<MAX_CON; i++)
     {
         const char *h;
         if (!c[i])
             continue;
         if ((h = ZOOM_connection_option_get(c[i], "host"))
-            && !strcmp (h, host))
+            && !strcmp(h, host))
         {
-            ZOOM_connection_destroy (c[i]);
+            ZOOM_connection_destroy(c[i]);
             c[i] = 0;
         }
         else if (*host == '\0')
         {
-            ZOOM_connection_destroy (c[i]);
+            ZOOM_connection_destroy(c[i]);
             c[i] = 0;
         }
     }
 }
 
-static void display_records (ZOOM_connection c,
-                             ZOOM_resultset r,
-                             int start, int count)
+static void display_records(ZOOM_connection c,
+                            ZOOM_resultset r,
+                            int start, int count)
 {
     int i;
     for (i = 0; i<count; i++)
     {
         int pos = i + start;
-        ZOOM_record rec = ZOOM_resultset_record (r, pos);
-        const char *db = ZOOM_record_get (rec, "database", 0);
+        ZOOM_record rec = ZOOM_resultset_record(r, pos);
+        const char *db = ZOOM_record_get(rec, "database", 0);
         
         if (ZOOM_record_error(rec, 0, 0, 0))
         {
@@ -197,41 +197,41 @@ static void display_records (ZOOM_connection c,
         else
         {
             int len, opac_len;
-            const char *render = ZOOM_record_get (rec, "render", &len);
-            const char *opac_render = ZOOM_record_get (rec, "opac", &opac_len);
-            const char *syntax = ZOOM_record_get (rec, "syntax", 0);
+            const char *render = ZOOM_record_get(rec, "render", &len);
+            const char *opac_render = ZOOM_record_get(rec, "opac", &opac_len);
+            const char *syntax = ZOOM_record_get(rec, "syntax", 0);
             /* if rec is non-null, we got a record for display */
             if (rec)
             {
-                printf ("%d %s %s\n",
-                        pos, (db ? db : "unknown"), syntax);
+                printf("%d %s %s\n",
+                       pos, (db ? db : "unknown"), syntax);
                 if (render)
-                    fwrite (render, 1, len, stdout);
-                printf ("\n");
+                    fwrite(render, 1, len, stdout);
+                printf("\n");
                 if (opac_render)
-                    fwrite (opac_render, 1, opac_len, stdout);
+                    fwrite(opac_render, 1, opac_len, stdout);
             }
         }
             
     }
 }
 
-static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
 {
     int i;
     char start_str[10], count_str[10];
 
-    if (next_token_copy (args, start_str, sizeof(start_str)) >= 0)
-        ZOOM_options_set (options, "start", start_str);
+    if (next_token_copy(args, start_str, sizeof(start_str)) >= 0)
+        ZOOM_options_set(options, "start", start_str);
 
-    if (next_token_copy (args, count_str, sizeof(count_str)) >= 0)
-        ZOOM_options_set (options, "count", count_str);
+    if (next_token_copy(args, count_str, sizeof(count_str)) >= 0)
+        ZOOM_options_set(options, "count", count_str);
 
     for (i = 0; i<MAX_CON; i++)
-        ZOOM_resultset_records (r[i], 0, atoi(start_str), atoi(count_str));
-    while (ZOOM_event (MAX_CON, c))
+        ZOOM_resultset_records(r[i], 0, atoi(start_str), atoi(count_str));
+    while (ZOOM_event(MAX_CON, c))
         ;
 
     for (i = 0; i<MAX_CON; i++)
@@ -242,45 +242,45 @@ static void cmd_show (ZOOM_connection *c, ZOOM_resultset *r,
         if (!c[i])
             continue;
         if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-            printf ("%s error: %s (%s:%d) %s\n",
-                     ZOOM_connection_option_get(c[i], "host"), errmsg,
-                     dset, error, addinfo);
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
         else if (r[i])
         {
             /* OK, no major errors. Display records... */
-            int start = ZOOM_options_get_int (options, "start", 0);
-            int count = ZOOM_options_get_int (options, "count", 0);
-            display_records (c[i], r[i], start, count);
+            int start = ZOOM_options_get_int(options, "start", 0);
+            int count = ZOOM_options_get_int(options, "count", 0);
+            display_records(c[i], r[i], start, count);
         }
     }
-    ZOOM_options_set (options, "count", "0");
-    ZOOM_options_set (options, "start", "0");
+    ZOOM_options_set(options, "count", "0");
+    ZOOM_options_set(options, "start", "0");
 }
 
-static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **args)
+static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
+                    ZOOM_options options,
+                    const char **args)
 {
     ZOOM_package p[MAX_CON];
     char ext_type_str[10];
     
     int i;
 
-    if (next_token_copy (args, ext_type_str, sizeof(ext_type_str)) < 0)
+    if (next_token_copy(args, ext_type_str, sizeof(ext_type_str)) < 0)
         return;
     
     for (i = 0; i<MAX_CON; i++)
     {
         if (c[i])
         {
-            p[i] = ZOOM_connection_package (c[i], 0);
+            p[i] = ZOOM_connection_package(c[i], 0);
             ZOOM_package_send(p[i], ext_type_str);
         }
         else
             p[i] = 0;
     }
 
-    while (ZOOM_event (MAX_CON, c))
+    while (ZOOM_event(MAX_CON, c))
         ;
 
     for (i = 0; i<MAX_CON; i++)
@@ -291,63 +291,65 @@ static void cmd_ext (ZOOM_connection *c, ZOOM_resultset *r,
         if (!p[i])
             continue;
         if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-            printf ("%s error: %s (%s:%d) %s\n",
-                     ZOOM_connection_option_get(c[i], "host"), errmsg,
-                     dset, error, addinfo);
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
         else if (p[i])
         {
             const char *v;
-            printf ("ok\n");
-            v = ZOOM_package_option_get (p[i], "targetReference");
+            printf("ok\n");
+            v = ZOOM_package_option_get(p[i], "targetReference");
             if (v)
                 printf("targetReference: %s\n", v);
-            v = ZOOM_package_option_get (p[i], "xmlUpdateDoc");
+            v = ZOOM_package_option_get(p[i], "xmlUpdateDoc");
             if (v)
                 printf("xmlUpdateDoc: %s\n", v);
         }
-        ZOOM_package_destroy (p[i]);
+        ZOOM_package_destroy(p[i]);
     }
 }
 
-static void cmd_debug (ZOOM_connection *c, ZOOM_resultset *r,
-                       ZOOM_options options,
-                       const char **args)
+static void cmd_debug(ZOOM_connection *c, ZOOM_resultset *r,
+                      ZOOM_options options,
+                      const char **args)
 {
     yaz_log_init_level(YLOG_ALL);
 }
 
-static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
-                        ZOOM_options options,
-                        const char **args)
+static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
+                       ZOOM_options options,
+                       const char **args)
 {
     ZOOM_query s;
     const char *query_str = *args;
     int i;
     
-    s = ZOOM_query_create ();
+    s = ZOOM_query_create();
     while (*query_str == ' ')
         query_str++;
     if (memcmp(query_str, "cql:", 4) == 0)
     {
-        ZOOM_query_cql (s, query_str + 4);
+        ZOOM_query_cql(s, query_str + 4);
     }
-    else if (ZOOM_query_prefix (s, query_str))
+    else if (ZOOM_query_prefix(s, query_str))
     {
-        printf ("Bad PQF: %s\n", query_str);
+        printf("Bad PQF: %s\n", query_str);
         return;
     }
     for (i = 0; i<MAX_CON; i++)
     {
+
         if (c[i])
         {
-            ZOOM_resultset_destroy (r[i]);
+            ZOOM_resultset_destroy(r[i]);
             r[i] = 0;
         }
         if (c[i])
-            r[i] = ZOOM_connection_search (c[i], s);
+            r[i] = ZOOM_connection_search(c[i], s);
     }
+    ZOOM_query_destroy(s);
 
-    while (ZOOM_event (MAX_CON, c))
+    while (ZOOM_event(MAX_CON, c))
         ;
 
     for (i = 0; i<MAX_CON; i++)
@@ -358,46 +360,68 @@ static void cmd_search (ZOOM_connection *c, ZOOM_resultset *r,
         if (!c[i])
             continue;
         if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-            printf ("%s error: %s (%s:%d) %s\n",
-                    ZOOM_connection_option_get(c[i], "host"), errmsg,
-                    dset, error, addinfo);
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
         else if (r[i])
         {
             /* OK, no major errors. Look at the result count */
-            int start = ZOOM_options_get_int (options, "start", 0);
-            int count = ZOOM_options_get_int (options, "count", 0);
+            int start = ZOOM_options_get_int(options, "start", 0);
+            int count = ZOOM_options_get_int(options, "count", 0);
 
-            printf ("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
-                    (long) ZOOM_resultset_size(r[i]));
+            printf("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
+                   (long) ZOOM_resultset_size(r[i]));
             /* and display */
-            display_records (c[i], r[i], start, count);
+            display_records(c[i], r[i], start, count);
         }
     }
-    ZOOM_query_destroy (s);
 }
 
-static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static void cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
 {
-    const char *start_term = *args;
+    const char *query_str = *args;
+    ZOOM_query query = ZOOM_query_create();
     int i;
     ZOOM_scanset s[MAX_CON];
     
-    while (*start_term == ' ')
-        start_term++;
+    while (*query_str == ' ')
+        query_str++;
+
+    if (memcmp(query_str, "cql:", 4) == 0)
+    {
+        ZOOM_query_cql(query, query_str + 4);
+    }
+    else if (ZOOM_query_prefix(query, query_str))
+    {
+        printf("Bad PQF: %s\n", query_str);
+        return;
+    }
 
     for (i = 0; i<MAX_CON; i++)
     {
         if (c[i])
-            s[i] = ZOOM_connection_scan(c[i], start_term);
+            s[i] = ZOOM_connection_scan1(c[i], query);
         else
             s[i] = 0;
     }
+    ZOOM_query_destroy(query);
+
     while (ZOOM_event(MAX_CON, c))
         ;
     for (i = 0; i<MAX_CON; i++)
     {
+        int error;
+        const char *errmsg, *addinfo, *dset;
+        /* display errors if any */
+        if (!c[i])
+            continue;
+        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
+
         if (s[i]) {
             size_t p, sz = ZOOM_scanset_size(s[i]);
             for (p = 0; p < sz; p++)
@@ -405,18 +429,18 @@ static void cmd_scan (ZOOM_connection *c, ZOOM_resultset *r,
                 int occ = 0;
                 int len = 0;
                 const char *term = ZOOM_scanset_display_term(s[i], p,
-                                &occ, &len);
+                                                             &occ, &len);
                 fwrite(term, 1, len, stdout);
-                printf (" %d\n", occ);
+                printf(" %d\n", occ);
             }            
             ZOOM_scanset_destroy(s[i]);
         }
     }
 }
 
-static void cmd_sort (ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static void cmd_sort(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
 {
     const char *sort_spec = *args;
     int i;
@@ -433,59 +457,59 @@ static void cmd_sort (ZOOM_connection *c, ZOOM_resultset *r,
         ;
 }
 
-static void cmd_help (ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
 {
-    printf ("connect <zurl>\n");
-    printf ("search <pqf>\n");
-    printf ("show [<start> [<count>]\n");
-    printf ("scan <term>\n");
-    printf ("quit\n");
-    printf ("close <zurl>\n");
-    printf ("ext <type>\n");
-    printf ("set <option> [<value>]\n");
-    printf ("get <option>\n");
-    printf ("\n");
-    printf ("options:\n");
-    printf (" start\n");
-    printf (" count\n");
-    printf (" databaseName\n");
-    printf (" preferredRecordSyntax\n");
-    printf (" proxy\n");
-    printf (" elementSetName\n");
-    printf (" maximumRecordSize\n");
-    printf (" preferredRecordSize\n");
-    printf (" async\n");
-    printf (" piggyback\n");
-    printf (" group\n");
-    printf (" user\n");
-    printf (" password\n");
-    printf (" implementationName\n");
-    printf (" charset\n");
-    printf (" lang\n");
+    printf("connect <zurl>\n");
+    printf("search <pqf>\n");
+    printf("show [<start> [<count>]\n");
+    printf("scan <term>\n");
+    printf("quit\n");
+    printf("close <zurl>\n");
+    printf("ext <type>\n");
+    printf("set <option> [<value>]\n");
+    printf("get <option>\n");
+    printf("\n");
+    printf("options:\n");
+    printf(" start\n");
+    printf(" count\n");
+    printf(" databaseName\n");
+    printf(" preferredRecordSyntax\n");
+    printf(" proxy\n");
+    printf(" elementSetName\n");
+    printf(" maximumRecordSize\n");
+    printf(" preferredRecordSize\n");
+    printf(" async\n");
+    printf(" piggyback\n");
+    printf(" group\n");
+    printf(" user\n");
+    printf(" password\n");
+    printf(" implementationName\n");
+    printf(" charset\n");
+    printf(" lang\n");
 }
 
-static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
-                         ZOOM_options options,
-                         const char **args)
+static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
+                        ZOOM_options options,
+                        const char **args)
 {
     int error;
     const char *errmsg, *addinfo, *dset;
     char host[60];
     int j, i;
-    if (next_token_copy (args, host, sizeof(host)) < 0)
+    if (next_token_copy(args, host, sizeof(host)) < 0)
     {
-        printf ("missing host after connect\n");
+        printf("missing host after connect\n");
         return ;
     }
     for (j = -1, i = 0; i<MAX_CON; i++)
     {
         const char *h;
         if (c[i] && (h = ZOOM_connection_option_get(c[i], "host")) &&
-            !strcmp (h, host))
+            !strcmp(h, host))
         {
-            ZOOM_connection_destroy (c[i]);
+            ZOOM_connection_destroy(c[i]);
             break;
         }
         else if (c[i] == 0 && j == -1)
@@ -495,62 +519,62 @@ static void cmd_connect (ZOOM_connection *c, ZOOM_resultset *r,
     {
         if (j == -1)
         {
-            printf ("no more connection available\n");
+            printf("no more connection available\n");
             return;
         }
         i = j;   /* OK, use this one is available */
     }
-    c[i] = ZOOM_connection_create (options);
-    ZOOM_connection_connect (c[i], host, 0);
+    c[i] = ZOOM_connection_create(options);
+    ZOOM_connection_connect(c[i], host, 0);
         
     if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
-       printf ("%s error: %s (%s:%d) %s\n",
-            ZOOM_connection_option_get(c[i], "host"), errmsg,
-            dset, error, addinfo);
+        printf("%s error: %s (%s:%d) %s\n",
+               ZOOM_connection_option_get(c[i], "host"), errmsg,
+               dset, error, addinfo);
 }
 
-static int cmd_parse (ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options, 
-                      const char **buf)
+static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options, 
+                     const char **buf)
 {
     int cmd_len;
     const char *cmd_str;
 
-    cmd_len = next_token (buf, &cmd_str);
+    cmd_len = next_token(buf, &cmd_str);
     if (cmd_len < 0)
         return 1;
-    if (is_command ("quit", cmd_str, cmd_len))
+    if (is_command("quit", cmd_str, cmd_len))
         return 0;
-    else if (is_command ("set", cmd_str, cmd_len))
-        cmd_set (c, r, options, buf);
-    else if (is_command ("get", cmd_str, cmd_len))
-        cmd_get (c, r, options, buf);
-    else if (is_command ("rget", cmd_str, cmd_len))
-        cmd_rget (c, r, options, buf);
-    else if (is_command ("connect", cmd_str, cmd_len))
-        cmd_connect (c, r, options, buf);
-    else if (is_command ("open", cmd_str, cmd_len))
-        cmd_connect (c, r, options, buf);
-    else if (is_command ("search", cmd_str, cmd_len))
-        cmd_search (c, r, options, buf);
-    else if (is_command ("find", cmd_str, cmd_len))
-        cmd_search (c, r, options, buf);
-    else if (is_command ("show", cmd_str, cmd_len))
-        cmd_show (c, r, options, buf);
-    else if (is_command ("close", cmd_str, cmd_len))
-        cmd_close (c, r, options, buf);
-    else if (is_command ("help", cmd_str, cmd_len))
+    else if (is_command("set", cmd_str, cmd_len))
+        cmd_set(c, r, options, buf);
+    else if (is_command("get", cmd_str, cmd_len))
+        cmd_get(c, r, options, buf);
+    else if (is_command("rget", cmd_str, cmd_len))
+        cmd_rget(c, r, options, buf);
+    else if (is_command("connect", cmd_str, cmd_len))
+        cmd_connect(c, r, options, buf);
+    else if (is_command("open", cmd_str, cmd_len))
+        cmd_connect(c, r, options, buf);
+    else if (is_command("search", cmd_str, cmd_len))
+        cmd_search(c, r, options, buf);
+    else if (is_command("find", cmd_str, cmd_len))
+        cmd_search(c, r, options, buf);
+    else if (is_command("show", cmd_str, cmd_len))
+        cmd_show(c, r, options, buf);
+    else if (is_command("close", cmd_str, cmd_len))
+        cmd_close(c, r, options, buf);
+    else if (is_command("help", cmd_str, cmd_len))
         cmd_help(c, r, options, buf);
-    else if (is_command ("ext", cmd_str, cmd_len))
+    else if (is_command("ext", cmd_str, cmd_len))
         cmd_ext(c, r, options, buf);
-    else if (is_command ("debug", cmd_str, cmd_len))
+    else if (is_command("debug", cmd_str, cmd_len))
         cmd_debug(c, r, options, buf);
-    else if (is_command ("scan", cmd_str, cmd_len))
+    else if (is_command("scan", cmd_str, cmd_len))
         cmd_scan(c, r, options, buf);
-    else if (is_command ("sort", cmd_str, cmd_len))
+    else if (is_command("sort", cmd_str, cmd_len))
         cmd_sort(c, r, options, buf);
     else
-        printf ("unknown command %.*s\n", cmd_len, cmd_str);
+        printf("unknown command %.*s\n", cmd_len, cmd_str);
     return 2;
 }
 
@@ -576,15 +600,15 @@ void shell(ZOOM_connection *c, ZOOM_resultset *r,
             break;
         };
         strcpy(buf,line_in);
-        free (line_in);
+        free(line_in);
 #else    
-        printf ("ZOOM>"); fflush (stdout);
-        if (!fgets (buf, 999, stdin))
+        printf("ZOOM>"); fflush(stdout);
+        if (!fgets(buf, 999, stdin))
             break;
 #endif 
         if ((cp = strchr(buf, '\n')))
             *cp = '\0';
-        if (!cmd_parse (c, r, options, &bp))
+        if (!cmd_parse(c, r, options, &bp))
             break;
     }
 }
@@ -645,7 +669,7 @@ int main(int argc, char **argv)
         yaz_log_init_level(mask);
     }
     zoomsh(argc, argv);
-    exit (0);
+    exit(0);
 }
 /*
  * Local variables:

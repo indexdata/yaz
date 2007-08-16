@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.20 2007-05-05 11:55:22 adam Exp $
+ * $Id: zoom-p.h,v 1.21 2007-08-16 10:09:36 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -14,6 +14,8 @@
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
 #include <yaz/sortspec.h>
+#include <yaz/srw.h>
+
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
 struct ZOOM_query_p {
@@ -118,7 +120,6 @@ struct ZOOM_resultset_p {
     ZOOM_resultset next;
     char **databaseNames;
     int num_databaseNames;
-    yaz_iconv_t rpn_iconv;
 };
 
 struct ZOOM_record_p {
@@ -143,9 +144,10 @@ struct ZOOM_scanset_p {
     ODR odr;
     ZOOM_options options;
     ZOOM_connection connection;
-    Z_AttributesPlusTerm *termListAndStartPoint;
-    Z_AttributeSetId *attributeSet;
+    ZOOM_query query;
     Z_ScanResponse *scan_response;
+    Z_SRW_scanResponse *srw_scan_response;
+
     char **databaseNames;
     int num_databaseNames;
 };
