@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.124 2007-08-13 16:43:59 mike Exp $
+ * $Id: seshigh.c,v 1.125 2007-08-21 13:20:51 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -2377,7 +2377,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.124 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.125 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -3051,9 +3051,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     /* For YAZ 2.0 and earlier it was the backend handler that
        initialized entries (member display_term did not exist)
        YAZ 2.0 and later sets 'entries'  and initialize all members
-       including 'display_term'. If YAZ 2.0 or later sees that
-       entries was modified - we assume that it is an old handler and
-       that 'display_term' is _not_ set.
+       including 'display_term'.
     */
     if (bsrr->num_entries > 0) 
     {
@@ -3112,13 +3110,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                     odr_malloc(assoc->encode, sizeof(*t));
                 t->suggestedAttributes = 0;
                 t->displayTerm = 0;
-                if (save_entries == bsrr->entries && 
-                    bsrr->entries[i].display_term)
+                if (bsrr->entries[i].display_term)
                 {
-                    /* the entries was _not_ set by the handler. So it's
-                       safe to test for new member display_term. It is
-                       NULL'ed by us.
-                    */
                     t->displayTerm = odr_strdup(assoc->encode,
                                                 bsrr->entries[i].display_term);
                 }
