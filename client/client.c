@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.349 2007-08-14 12:21:14 adam Exp $
+ * $Id: client.c,v 1.350 2007-08-21 13:19:44 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -3032,13 +3032,13 @@ void display_term(Z_TermInfo *t)
     if (t->displayTerm)
         printf("%s", t->displayTerm);
     else if (t->term->which == Z_Term_general)
-    {
         printf("%.*s", t->term->u.general->len, t->term->u.general->buf);
-        sprintf(last_scan_line, "%.*s", t->term->u.general->len,
-            t->term->u.general->buf);
-    }
     else
         printf("Term (not general)");
+    if (t->term->which == Z_Term_general)
+        sprintf(last_scan_line, "%.*s", t->term->u.general->len,
+            t->term->u.general->buf);
+
     if (t->globalOccurrences)
         printf (" (%d)\n", *t->globalOccurrences);
     else
