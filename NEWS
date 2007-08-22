@@ -1,4 +1,6 @@
-Added support for SRU scan.
+--- 3.0.10 2007/08/22
+
+Added support for SRU scan for ZOOM.
 
 Added support for the use of the older versions or Extended Service
 Update in ZOOM. To faciliate this, an option "updateVersion" may be
