@@ -59,12 +59,14 @@ yaz-illclient: an ISO ILL client.
 %build
 
 CFLAGS="$RPM_OPT_FLAGS" \
- ./configure --prefix=/usr --enable-shared --enable-tcpd --with-xslt --with-openssl --with-pcap
+ ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
+	--enable-shared --enable-tcpd --with-xslt --with-openssl --with-pcap
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
 rm -fr ${RPM_BUILD_ROOT}
-make prefix=${RPM_BUILD_ROOT}/usr mandir=${RPM_BUILD_ROOT}/usr/share/man install
+make prefix=${RPM_BUILD_ROOT}/%{_prefix} mandir=${RPM_BUILD_ROOT}/%{_mandir} \
+	libdir=${RPM_BUILD_ROOT}/%{_libdir} install
 
 %clean
 rm -fr ${RPM_BUILD_ROOT}
@@ -72,40 +74,44 @@ rm -fr ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root)
 %doc README LICENSE NEWS TODO
-/usr/bin/yaz-client
-/usr/bin/yaz-ztest
-/usr/bin/zoomsh*
-/usr/bin/yaz-marcdump
-/usr/bin/yaz-iconv
-/usr/share/man/man1/yaz-client.*
-/usr/share/man/man8/yaz-ztest.*
-/usr/share/man/man1/zoomsh.*
-/usr/share/man/man1/yaz-marcdump.*
-/usr/share/man/man1/yaz-iconv.*
-/usr/share/man/man7/yaz-log.*
+%{_bindir}/yaz-client
+%{_bindir}/yaz-ztest
+%{_bindir}/zoomsh*
+%{_bindir}/yaz-marcdump
+%{_bindir}/yaz-iconv
+%{_mandir}/man1/yaz-client.*
+%{_mandir}/man8/yaz-ztest.*
+%{_mandir}/man1/zoomsh.*
+%{_mandir}/man1/yaz-marcdump.*
+%{_mandir}/man1/yaz-iconv.*
+%{_mandir}/man7/yaz-log.*
 
 %files -n libyaz3
-/usr/lib/*.so.*
+%defattr(-,root,root)
+%{_libdir}/*.so.*
 
 %files -n libyaz3-devel
-/usr/bin/yaz-config
-/usr/bin/yaz-asncomp
-/usr/include/yaz
-/usr/lib/pkgconfig/yaz.pc
-/usr/lib/*.so
-/usr/lib/*.a
-/usr/lib/*.la
-/usr/share/aclocal/yaz.m4
-/usr/share/man/man1/yaz-asncomp.*
-/usr/share/man/man7/yaz.*
-/usr/share/man/man8/yaz-config.*
-/usr/share/doc/yaz
-/usr/share/yaz
+%defattr(-,root,root)
+%{_bindir}/yaz-config
+%{_bindir}/yaz-asncomp
+%{_includedir}/yaz
+%{_libdir}/pkgconfig/yaz.pc
+%{_libdir}/*.so
+%{_libdir}/*.a
+%{_libdir}/*.la
+%{_datadir}/aclocal/yaz.m4
+%{_mandir}/man1/yaz-asncomp.*
+%{_mandir}/man7/yaz.*
+%{_mandir}/man8/yaz-config.*
+%{_datadir}/doc/yaz
+%{_datadir}/yaz
 
 %files -n yaz-ziffy
-/usr/bin/ziffy
-/usr/share/man/man1/ziffy.*
+%defattr(-,root,root)
+%{_bindir}/ziffy
+%{_mandir}/man1/ziffy.*
 
 %files -n yaz-illclient
-/usr/bin/yaz-illclient
-/usr/share/man/man1/yaz-illclient.*
+%defattr(-,root,root)
+%{_bindir}/yaz-illclient
+%{_mandir}/man1/yaz-illclient.*
