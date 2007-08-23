@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.126 2007-08-22 08:11:28 adam Exp $
+ * $Id: seshigh.c,v 1.127 2007-08-23 14:23:23 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -1801,8 +1801,8 @@ static void process_http_request(association *assoc, request *req)
         if (sr->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_PDU *res =
-                yaz_srw_get(assoc->encode, Z_SRW_searchRetrieve_response);
-
+                yaz_srw_get_pdu(assoc->encode, Z_SRW_searchRetrieve_response,
+                                sr->srw_version);
             stylesheet = sr->u.request->stylesheet;
             if (num_diagnostic)
             {
@@ -1819,7 +1819,8 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_explain_request)
         {
-            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_explain_response);
+            Z_SRW_PDU *res = yaz_srw_get_pdu(o, Z_SRW_explain_response,
+                                             sr->srw_version);
             stylesheet = sr->u.explain_request->stylesheet;
             if (num_diagnostic)
             {   
@@ -1833,7 +1834,8 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_scan_request)
         {
-            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_scan_response);
+            Z_SRW_PDU *res = yaz_srw_get_pdu(o, Z_SRW_scan_response,
+                                             sr->srw_version);
             stylesheet = sr->u.scan_request->stylesheet;
             if (num_diagnostic)
             {   
@@ -1847,7 +1849,8 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_update_request)
         {
-            Z_SRW_PDU *res = yaz_srw_get(o, Z_SRW_update_response);
+            Z_SRW_PDU *res = yaz_srw_get_pdu(o, Z_SRW_update_response,
+                                             sr->srw_version);
             yaz_log(YLOG_DEBUG, "handling SRW UpdateRequest");
             if (num_diagnostic)
             {   
@@ -2377,7 +2380,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.126 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.127 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,

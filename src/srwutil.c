@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.59 2007-05-24 10:18:36 adam Exp $
+ * $Id: srwutil.c,v 1.60 2007-08-23 14:23:23 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -594,9 +594,16 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "version");
             version = "1.1";
         }
-        if (strcmp(version, "1.1"))
+
+        version = yaz_negotiate_sru_version(version);
+
+        if (!version)
+        {   /* negotiation failed. */
             yaz_add_srw_diagnostic(decode, diag, num_diag,
-                                   YAZ_SRW_UNSUPP_VERSION, "1.1");
+                                   YAZ_SRW_UNSUPP_VERSION, "1.2");
+            version = "1.2";
+        }
+        
         if (!operation)
         {
             if (uri_name)
@@ -814,19 +821,30 @@ Z_SRW_record *yaz_srw_get_record(ODR o)
     return yaz_srw_get_records(o, 1);
 }
 
-Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
+static Z_SRW_PDU *yaz_srw_get_core_ver(ODR o, const char *version)
 {
     Z_SRW_PDU *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(*p));
-    p->srw_version = odr_strdup(o, "1.1");
+    p->srw_version = odr_strdup(o, version);
     p->username = 0;
     p->password = 0;
     p->extra_args = 0;
     return p;
 }
 
+Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
+{
+    return yaz_srw_et_core_ver(o, "1.1");
+}
+
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
-    Z_SRW_PDU *sr = yaz_srw_get_core_v_1_1(o);
+    return yaz_srw_get_pdu(o, which, "1.2");
+}
+
+Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
+{
+    Z_SRW_PDU *sr = yaz_srw_get_core_ver(o, version);
+
     sr->which = which;
     switch(which)
     {

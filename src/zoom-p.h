@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.21 2007-08-16 10:09:36 adam Exp $
+ * $Id: zoom-p.h,v 1.22 2007-08-23 14:23:23 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -63,6 +63,7 @@ struct ZOOM_connection_p {
     char *cookie_out;
     char *cookie_in;
     char *client_IP;
+    char *sru_version;
 
     char *user;
     char *group;

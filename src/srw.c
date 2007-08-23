@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.56 2007-05-23 13:11:11 adam Exp $
+ * $Id: srw.c,v 1.57 2007-08-23 14:23:23 adam Exp $
  */
 /**
  * \file srw.c
@@ -194,6 +194,16 @@ static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, int **val)
         return 0;
     *val = odr_intdup(o, atoi((const char *) ptr->content));
     return 1;
+}
+
+char *yaz_negotiate_sru_version(char *input_ver)
+{
+    if (!input_ver)
+        input_ver = "1.1";
+
+    if (!strcmp(input_ver, "1.1"))
+        return "1.1";
+    return  "1.2"; /* our latest supported version */
 }
 
 static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
@@ -594,6 +604,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
     {
         Z_SRW_PDU **p = handler_data;
         xmlNodePtr method = pptr->children;
+        char *neg_version;
 
         while (method && method->type == XML_TEXT_NODE)
             method = method->next;
@@ -851,6 +862,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             *p = 0;
             return -1;
         }
+        neg_version = yaz_negotiate_sru_version((*p)->srw_version);
+        if (neg_version)
+            (*p)->srw_version = neg_version;
     }
     else if (o->direction == ODR_ENCODE)
     {

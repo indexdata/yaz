@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.34 2007-05-23 11:54:47 adam Exp $ */
+/* $Id: srw.h,v 1.35 2007-08-23 14:23:23 adam Exp $ */
 
 /**
  * \file srw.h
@@ -216,6 +216,7 @@ YAZ_EXPORT int yaz_ucp_codec(ODR o, void * pptr,
                              Z_SRW_PDU **handler_data,
                              void *client_data, const char *ns);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o);
+YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
 YAZ_EXPORT Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR o, int num);
 YAZ_EXPORT Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o);
@@ -265,6 +266,8 @@ YAZ_EXPORT int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR encode, const char *charset);
 YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
+
+YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
 
 #define YAZ_XMLNS_SRU_v1_0 "http://www.loc.gov/zing/srw/v1.0/"
 #define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"

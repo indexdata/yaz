@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.142 2007-08-23 12:24:38 adam Exp $
+ * $Id: zoom-c.c,v 1.143 2007-08-23 14:23:23 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -395,6 +395,8 @@ ZOOM_API(ZOOM_connection)
 
     c->m_queue_front = 0;
     c->m_queue_back = 0;
+
+    c->sru_version = xstrdup("1.1");
     return c;
 }
 
@@ -540,6 +542,10 @@ ZOOM_API(void)
 
     val = ZOOM_options_get(c->options, "sru");
     c->sru_mode = get_sru_mode_from_string(val);
+
+    xfree(c->sru_version);
+    val = ZOOM_options_get(c->options, "sru_version");
+    c->sru_version = xstrdup(val ? val : "1.1");
 
     ZOOM_options_set(c->options, "host", c->host_port);
 
@@ -781,6 +787,7 @@ ZOOM_API(void)
     xfree(c->user);
     xfree(c->group);
     xfree(c->password);
+    xfree(c->sru_version);
     xfree(c);
 }
 
@@ -1346,7 +1353,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.142 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.143 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1493,7 +1500,8 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     assert(resultset->query);
         
-    sr = yaz_srw_get(c->odr_out, Z_SRW_searchRetrieve_request);
+    sr = yaz_srw_get_pdu(c->odr_out, Z_SRW_searchRetrieve_request,
+                         c->sru_version);
 
     if (resultset->query->z_query->which == Z_Query_type_104
         && resultset->query->z_query->u.type_104->which == Z_External_CQL)
@@ -2832,7 +2840,7 @@ static zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     scan = c->tasks->u.scan.scan;
         
-    sr = yaz_srw_get(c->odr_out, Z_SRW_scan_request);
+    sr = yaz_srw_get_pdu(c->odr_out, Z_SRW_scan_request, c->sru_version);
 
     /* SRU scan can only carry CQL and PQF */
     if (scan->query->z_query->which == Z_Query_type_104)
