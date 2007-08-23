@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.141 2007-08-16 10:09:36 adam Exp $
+ * $Id: zoom-c.c,v 1.142 2007-08-23 12:24:38 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1346,7 +1346,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.141 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.142 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3820,6 +3820,9 @@ static void handle_srw_response(ZOOM_connection c,
     ZOOM_connection_put_event(c, event);
 
     resultset->size = 0;
+
+    if (res->resultSetId)
+        ZOOM_resultset_option_set(resultset, "resultSetId", res->resultSetId);
 
     yaz_log(log_details, "%p handle_srw_response got SRW response OK", c);
     
