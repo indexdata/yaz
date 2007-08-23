@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.60 2007-08-23 14:23:23 adam Exp $
+ * $Id: srwutil.c,v 1.61 2007-08-23 14:28:07 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -833,7 +833,7 @@ static Z_SRW_PDU *yaz_srw_get_core_ver(ODR o, const char *version)
 
 Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
 {
-    return yaz_srw_et_core_ver(o, "1.1");
+    return yaz_srw_get_core_ver(o, "1.1");
 }
 
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
