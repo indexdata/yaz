@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.350 2007-08-21 13:19:44 adam Exp $
+ * $Id: client.c,v 1.351 2007-08-24 13:25:14 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -90,7 +90,8 @@
 
 static file_history_t file_history = 0;
 
-static char *sru_method = "soap";
+static char sru_method[10] = "soap";
+static char sru_version[10] = "1.2";
 static char *codeset = 0;               /* character set for output */
 static int hex_dump = 0;
 static char *dump_file_prefix = 0;
@@ -1273,15 +1274,15 @@ static int send_srw(Z_SRW_PDU *sr)
 
     gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
-    if (!strcmp(sru_method, "get"))
+    if (!yaz_matchstr(sru_method, "get"))
     {
         yaz_sru_get_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
-    else if (!strcmp(sru_method, "post"))
+    else if (!yaz_matchstr(sru_method, "post"))
     {
         yaz_sru_post_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
-    else if (!strcmp(sru_method, "soap"))
+    else if (!yaz_matchstr(sru_method, "soap"))
     {
         yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
@@ -1344,7 +1345,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
     Z_SRW_PDU *sr = 0;
     
     /* regular requestse .. */
-    sr = yaz_srw_get(out, Z_SRW_scan_request);
+    sr = yaz_srw_get_pdu(out, Z_SRW_scan_request, sru_version);
 
     switch(queryType)
     {
@@ -1379,10 +1380,11 @@ static int send_SRW_searchRequest(const char *arg)
     setno = 1;
 
     /* save this for later .. when fetching individual records */
-    srw_sr =  yaz_srw_get(srw_sr_odr_out, Z_SRW_searchRetrieve_request);
+    srw_sr =  yaz_srw_get_pdu(srw_sr_odr_out, Z_SRW_searchRetrieve_request,
+                              sru_version);
     
     /* regular request .. */
-    sr = yaz_srw_get(out, Z_SRW_searchRetrieve_request);
+    sr = yaz_srw_get_pdu(out, Z_SRW_searchRetrieve_request, sru_version);
 
     switch(queryType)
     {
@@ -2519,19 +2521,26 @@ static int cmd_sru(const char *arg)
     if (!*arg)
     {
         printf("SRU method is: %s\n", sru_method);
+        printf("SRU version is: %s\n", sru_version);
     }
     else
     {
-        if (!yaz_matchstr(arg, "post"))
-            sru_method = "post";
-        else if (!yaz_matchstr(arg, "get"))
-            sru_method = "get";
-        else if (!yaz_matchstr(arg, "soap"))
-            sru_method = "soap";
-        else
+        int r;
+        r = sscanf(arg, "%9s %9s", sru_method, sru_version);
+        if (r >= 1)
         {
-            printf("Unknown SRU method: %s\n", arg);
-            printf("Specify one of POST, GET, SOAP\n");
+            if (!yaz_matchstr(sru_method, "post"))
+                ;
+            else if (!yaz_matchstr(sru_method, "get"))
+                ;
+            else if (!yaz_matchstr(sru_method, "soap"))
+                ;
+            else
+            {
+                strcpy(sru_method, "soap");
+                printf("Unknown SRU method: %s\n", arg);
+                printf("Specify one of POST, GET, SOAP\n");
+            }
         }
     }
     return 0;
@@ -4530,7 +4539,7 @@ static struct {
     {"zversion", cmd_zversion, "", NULL, 0, NULL},
     {"help", cmd_help, "", NULL,0,NULL},
     {"init", cmd_init, "", NULL,0,NULL},
-    {"sru", cmd_sru, "", NULL,0,NULL},
+    {"sru", cmd_sru, "<method> <version>", NULL,0,NULL},
     {"exit", cmd_quit, "",NULL,0,NULL},
     {0,0,0,0,0,0}
 };
