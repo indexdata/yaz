@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.62 2007-08-16 10:09:36 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.63 2007-08-31 21:23:45 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -267,6 +267,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	discover whether the server claims to support the specified
 	operations.
        </entry><entry>none</entry></row>
+      <row><entry>
+        sru_version</entry><entry>
+	SRU/SRW version. Should be <literal>1.1</literal>, or
+	<literal>1.2</literal>. This is , prior to connect, the version
+	to offer (highest version). And following connect (in fact
+	first operation), holds the negotiated version with the server
+	(same or lower version).
+       </entry><entry>1.1</entry></row>
      </tbody>
     </tgroup>
    </table>

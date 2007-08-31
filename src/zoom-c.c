@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.143 2007-08-23 14:23:23 adam Exp $
+ * $Id: zoom-c.c,v 1.144 2007-08-31 21:23:45 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1353,7 +1353,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.143 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.144 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3926,6 +3926,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             soap_package->u.generic->no == 0)
         {
             Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
+
+            ZOOM_options_set(c->options, "sru_version", sr->srw_version);
             if (sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(c, sr->u.response);
             else if (sr->which == Z_SRW_scan_response)
