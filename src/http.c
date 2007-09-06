@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: http.c,v 1.2 2007-05-06 20:12:20 adam Exp $
+ * $Id: http.c,v 1.3 2007-09-06 17:11:59 mike Exp $
  */
 
 /**
@@ -21,6 +21,57 @@
 #define strcasecmp _stricmp
 #endif
  
+
+/*
+ * This function's counterpart, yaz_base64decode(), is in srwutil.c.
+ * I feel bad that they're not together, but each function is only
+ * needed in one place, and those places are not together.  Maybe one
+ * day we'll move them into a new httputil.c, and declare them in a
+ * corresponding httputil.h
+ */
+static void yaz_base64encode(const char *in, char *out)
+{
+    static char encoding[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    unsigned char buf[3];
+    long n;
+
+    while (*in != 0) {
+	char *pad = 0;
+        buf[0] = in[0];
+	buf[1] = in[1];
+	if (in[1] == 0) {
+	    buf[2] = 0;
+	    pad = "==";
+	} else {
+	    buf[2] = in[2];
+	    if (in[2] == 0)
+		pad = "=";
+	}
+
+	/* Treat three eight-bit numbers as on 24-bit number */
+	n = (buf[0] << 16) + (buf[1] << 8) + buf[2];
+
+	/* Write the six-bit chunks out as four encoded characters */
+	*out++ = encoding[(n >> 18) & 63];
+	*out++ = encoding[(n >> 12) & 63];
+	if (in[1] != 0)
+	    *out++ = encoding[(n >> 6) & 63];
+	if (in[1] != 0 && in[2] != 0)
+	    *out++ = encoding[n & 63];
+
+	if (pad != 0) {
+	    while (*pad != 0)
+		*out++ = *pad++;
+	    break;
+	}
+	in += 3;
+    }
+
+    *out++ = 0;
+}
+
+
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
@@ -168,6 +219,29 @@ void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
         z_HTTP_header_add(o, hp, l, content_type);
 
 }
+
+/*
+ * HTTP Basic authentication is described at:
+ * http://tools.ietf.org/html/rfc1945#section-11.1
+ */
+void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
+                                  const char *username, const char *password)
+{
+    char *tmp, *buf;
+    int len;
+
+    if (username == 0)
+        return;
+
+    len = strlen(username) + strlen(password);
+    tmp = odr_malloc(o, len+2);
+    sprintf(tmp, "%s:%s", username, password);
+    buf = odr_malloc(o, (len+1) * 8/6 + 12);
+    strcpy(buf, "Basic ");
+    yaz_base64encode(tmp, &buf[strlen(buf)]);
+    z_HTTP_header_add(o, hp, "Authorization", buf);
+}
+
 
 void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
                        const char *v)
