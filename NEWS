@@ -13,6 +13,12 @@ therefore in Zebra and in SimpleServer-based applications).  The new
 qualifier file used to transform incoming CCL queries into Type-1 RPN,
 which is passed into the back-end search callback function.
 
+Added support for HTTP Basic authentication in clients: the SRU/W
+codec encodes the username/password elements of the PDU structure
+appropriately, and these may be set using the "user" and "password"
+options in ZOOM-C applications (the same options that are used for
+Z39.50 authentication).
+
 --- 3.0.8 2007/06/25
 
 Fixed bug #1208: SSL appears to be broken in ZOOM.
