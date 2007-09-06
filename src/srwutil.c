@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.62 2007-08-24 13:26:03 adam Exp $
+ * $Id: srwutil.c,v 1.63 2007-09-06 17:10:35 mike Exp $
  */
 /**
  * \file srwutil.c
@@ -1259,6 +1259,8 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *uri_args;
     char *path;
 
+    z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
+                                 srw_pdu->username, srw_pdu->password);
     if (yaz_get_sru_parms(srw_pdu, encode, name, value))
         return -1;
     yaz_array_to_uri_ex(&uri_args, encode, name, value, srw_pdu->extra_args);
@@ -1283,6 +1285,8 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *name[30], *value[30]; /* definite upper limit for SRU params */
     char *uri_args;
 
+    z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
+                                 srw_pdu->username, srw_pdu->password);
     if (yaz_get_sru_parms(srw_pdu, encode, name, value))
         return -1;
 
@@ -1311,6 +1315,8 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     };
     Z_SOAP *p = (Z_SOAP*) odr_malloc(odr, sizeof(*p));
 
+    z_HTTP_header_add_basic_auth(odr, &hreq->headers, 
+                                 srw_pdu->username, srw_pdu->password);
     z_HTTP_header_add_content_type(odr,
                                    &hreq->headers,
                                    "text/xml", charset);
