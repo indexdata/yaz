@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.144 2007-08-31 21:23:45 adam Exp $
+ * $Id: zoom-c.c,v 1.145 2007-09-06 12:40:53 mike Exp $
  */
 /**
  * \file zoom-c.c
@@ -1353,7 +1353,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.144 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.145 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1443,6 +1443,15 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 }
 #endif
 
+
+static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type) {
+    Z_SRW_PDU *sr = yaz_srw_get_pdu(c->odr_out, type, c->sru_version);
+    sr->username = c->user;
+    sr->password = c->password;
+    return sr;
+}
+
+
 #if YAZ_HAVE_XML2
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
@@ -1500,9 +1509,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     assert(resultset->query);
         
-    sr = yaz_srw_get_pdu(c->odr_out, Z_SRW_searchRetrieve_request,
-                         c->sru_version);
-
+    sr = ZOOM_srw_get_pdu(c, Z_SRW_searchRetrieve_request);
     if (resultset->query->z_query->which == Z_Query_type_104
         && resultset->query->z_query->u.type_104->which == Z_External_CQL)
     {
@@ -2840,7 +2847,7 @@ static zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     scan = c->tasks->u.scan.scan;
         
-    sr = yaz_srw_get_pdu(c->odr_out, Z_SRW_scan_request, c->sru_version);
+    sr = ZOOM_srw_get_pdu(c, Z_SRW_scan_request);
 
     /* SRU scan can only carry CQL and PQF */
     if (scan->query->z_query->which == Z_Query_type_104)
