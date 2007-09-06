@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zgdu.h,v 1.12 2007-01-11 10:55:56 adam Exp $ */
+/* $Id: zgdu.h,v 1.13 2007-09-06 17:09:56 mike Exp $ */
 
 /**
  * \file zgdu.h
@@ -80,6 +80,9 @@ YAZ_EXPORT void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
 YAZ_EXPORT void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
                                                const char *content_type,
                                                const char *charset);
+YAZ_EXPORT void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
+                                             const char *username,
+                                             const char *password);
 
 YAZ_EXPORT const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n);
 
