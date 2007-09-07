@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.63 2007-09-06 17:10:35 mike Exp $
+ * $Id: srwutil.c,v 1.64 2007-09-07 17:41:47 mike Exp $
  */
 /**
  * \file srwutil.c
@@ -947,7 +947,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
 }
 
 /* bib1:srw */
-static int srw_bib1_map[] = {
+static int bib1_srw_map[] = {
     1, 1,
     2, 2,
     3, 11,
@@ -1116,9 +1116,21 @@ static int srw_bib1_map[] = {
     0
 };
 
+/*
+ * This array contains overrides for when the first occurrence of a
+ * particular SRW error in the array above does not correspond with
+ * the best back-translation of that SRW error.
+ */
+static int srw_bib1_map[] = {
+    66, 238,
+    /* No doubt there are many more */
+    0
+};
+
+
 int yaz_diag_bib1_to_srw (int code)
 {
-    const int *p = srw_bib1_map;
+    const int *p = bib1_srw_map;
     while (*p)
     {
         if (code == p[0])
@@ -1130,7 +1142,17 @@ int yaz_diag_bib1_to_srw (int code)
 
 int yaz_diag_srw_to_bib1(int code)
 {
+    /* Check explicit reverse-map first */
     const int *p = srw_bib1_map;
+    while (*p)
+    {
+        if (code == p[0])
+            return p[1];
+        p += 2;
+    }
+
+    /* Fall back on reverse lookup in main map */
+    p = bib1_srw_map;
     while (*p)
     {
         if (code == p[1])
