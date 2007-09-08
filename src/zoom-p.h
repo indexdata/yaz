@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-p.h,v 1.22 2007-08-23 14:23:23 adam Exp $
+ * $Id: zoom-p.h,v 1.23 2007-09-08 06:17:45 adam Exp $
  */
 /**
  * \file zoom-p.h
@@ -129,6 +129,7 @@ struct ZOOM_record_p {
     WRBUF wrbuf_iconv;
     WRBUF wrbuf_opac;
     Z_NamePlusRecord *npr;
+    const char *schema;
 };
 
 struct ZOOM_record_cache_p {

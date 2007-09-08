@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.145 2007-09-06 12:40:53 mike Exp $
+ * $Id: zoom-c.c,v 1.146 2007-09-08 06:17:45 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1353,7 +1353,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.145 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.146 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -2012,6 +2012,12 @@ ZOOM_API(const char *)
             *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
         return npr->databaseName;
     }
+    else if (!strcmp(type, "schema"))
+    {
+        if (len)
+            *len = rec->schema ? strlen(rec->schema) : 0;
+        return rec->schema;
+    }
     else if (!strcmp(type, "syntax"))
     {
         const char *desc = 0;   
@@ -2185,7 +2191,8 @@ static size_t record_hash(int pos)
 
 static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
                              int pos,
-                             const char *syntax, const char *elementSetName)
+                             const char *syntax, const char *elementSetName,
+                             const char *schema)
 {
     ZOOM_record_cache rc;
     
@@ -2209,7 +2216,8 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         }
     }
     rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
-    rc->rec.npr = npr; 
+    rc->rec.npr = npr;
+    rc->rec.schema = schema ? odr_strdup(r->odr, schema) : 0;
     rc->rec.odr = 0;
     rc->rec.wrbuf_marc = 0;
     rc->rec.wrbuf_iconv = 0;
@@ -2308,7 +2316,8 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             for (i = 0; i<p->num_records; i++)
             {
                 record_cache_add(resultset, p->records[i], i + *start,
-                                 syntax, elementSetName);
+                                 syntax, elementSetName,
+                                 elementSetName);
             }
             *count -= i;
             if (*count < 0)
@@ -2327,7 +2336,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
                 Z_NamePlusRecord *myrec = 
                     zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
                 record_cache_add(resultset, myrec, *start,
-                                 syntax, elementSetName);
+                                 syntax, elementSetName, 0);
             }
         }
         else if (present_phase)
@@ -2335,7 +2344,8 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             /* present response and we didn't get any records! */
             Z_NamePlusRecord *myrec = 
                 zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
-            record_cache_add(resultset, myrec, *start, syntax, elementSetName);
+            record_cache_add(resultset, myrec, *start, syntax, elementSetName,
+                             0);
         }
     }
 }
@@ -3873,7 +3883,8 @@ static void handle_srw_response(ZOOM_connection c,
         npr->u.databaseRecord->u.octet_aligned->len = 
             npr->u.databaseRecord->u.octet_aligned->size = 
             res->records[i].recordData_len;
-        record_cache_add(resultset, npr, pos, syntax, elementSetName);
+        record_cache_add(resultset, npr, pos, syntax, elementSetName,
+                         res->records[i].recordSchema);
     }
     if (res->num_diagnostics > 0)
         set_SRU_error(c, &res->diagnostics[0]);

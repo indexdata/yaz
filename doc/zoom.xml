@@ -20,7 +20,7 @@ ZOOM_options_set_int(opt, name, value)
 ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
-<!-- $Id: zoom.xml,v 1.63 2007-08-31 21:23:45 adam Exp $ -->
+<!-- $Id: zoom.xml,v 1.64 2007-09-08 06:17:45 adam Exp $ -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
     &zoom; is an acronym for 'Z39.50 Object-Orientation Model' and is
@@ -749,6 +749,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         as a C null-terminated string containing the symbolic name of
 	the record syntax, e.g. <literal>Usmarc</literal>. Return type
 	is
+        <literal>const char *</literal>. 
+       </para></listitem>
+     </varlistentry>
+     <varlistentry><term><literal>schema</literal></term>
+      <listitem><para>The schema of the record is returned
+        as a C null-terminated string. Return type is
         <literal>const char *</literal>. 
        </para></listitem>
      </varlistentry>

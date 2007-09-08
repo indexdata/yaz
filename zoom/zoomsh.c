@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoomsh.c,v 1.48 2007-08-16 10:09:37 adam Exp $
+ * $Id: zoomsh.c,v 1.49 2007-09-08 06:17:45 adam Exp $
  */
 
 /** \file zoomsh.c
@@ -200,11 +200,13 @@ static void display_records(ZOOM_connection c,
             const char *render = ZOOM_record_get(rec, "render", &len);
             const char *opac_render = ZOOM_record_get(rec, "opac", &opac_len);
             const char *syntax = ZOOM_record_get(rec, "syntax", 0);
+            const char *schema = ZOOM_record_get(rec, "schema", 0);
             /* if rec is non-null, we got a record for display */
             if (rec)
             {
-                printf("%d %s %s\n",
-                       pos, (db ? db : "unknown"), syntax);
+                printf("%d database=%s syntax=%s schema=%s\n",
+                       pos, (db ? db : "unknown"), syntax,
+                       schema ? schema : "unknown");
                 if (render)
                     fwrite(render, 1, len, stdout);
                 printf("\n");
@@ -212,7 +214,6 @@ static void display_records(ZOOM_connection c,
                     fwrite(opac_render, 1, opac_len, stdout);
             }
         }
-            
     }
 }
 
