@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.35 2007-08-23 14:23:23 adam Exp $ */
+/* $Id: srw.h,v 1.36 2007-09-09 05:54:45 adam Exp $ */
 
 /**
  * \file srw.h
@@ -276,6 +276,13 @@ YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
 
 YAZ_EXPORT
 int yaz_srw_check_content_type(Z_HTTP_Response *hres);
+
+YAZ_EXPORT
+int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
+                                     Z_SRW_diagnostic **diag,
+                                     int *num, ODR odr);
+
+    
 
 YAZ_END_CDECL
 

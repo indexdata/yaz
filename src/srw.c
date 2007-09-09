@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srw.c,v 1.57 2007-08-23 14:23:23 adam Exp $
+ * $Id: srw.c,v 1.58 2007-09-09 05:54:45 adam Exp $
  */
 /**
  * \file srw.c
@@ -439,53 +439,85 @@ static int yaz_srw_versions(ODR o, xmlNodePtr pptr,
     return 0;
 }
 
-static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
-                               int *num, void *client_data, const char *ns)
+
+static int yaz_srw_decode_diagnostics(ODR o, xmlNodePtr pptr,
+                                      Z_SRW_diagnostic **recs, int *num,
+                                      void *client_data, const char *ns)
+    
 {
-    if (o->direction == ODR_DECODE)
+    int i;
+    xmlNodePtr ptr;
+    *num = 0;
+    for (ptr = pptr; ptr; ptr = ptr->next)
     {
-        int i;
-        xmlNodePtr ptr;
-        *num = 0;
-        for (ptr = pptr->children; ptr; ptr = ptr->next)
-        {
             if (ptr->type == XML_ELEMENT_NODE &&
                 !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
                 (*num)++;
-        }
-        if (!*num)
-            return 1;
-        *recs = (Z_SRW_diagnostic *) odr_malloc(o, *num * sizeof(**recs));
-        for (i = 0; i < *num; i++)
+    }
+    if (!*num)
+        return 1;
+    *recs = (Z_SRW_diagnostic *) odr_malloc(o, *num * sizeof(**recs));
+    for (i = 0; i < *num; i++)
         {
             (*recs)[i].uri = 0;
             (*recs)[i].details = 0;
             (*recs)[i].message = 0;
         } 
-        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
+    for (i = 0, ptr = pptr; ptr; ptr = ptr->next)
+    {
+        if (ptr->type == XML_ELEMENT_NODE &&
+            !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
         {
-            if (ptr->type == XML_ELEMENT_NODE &&
-                !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
+            xmlNodePtr rptr;
+            (*recs)[i].uri = 0;
+            (*recs)[i].details = 0;
+            (*recs)[i].message = 0;
+            for (rptr = ptr->children; rptr; rptr = rptr->next)
             {
-                xmlNodePtr rptr;
-                (*recs)[i].uri = 0;
-                (*recs)[i].details = 0;
-                (*recs)[i].message = 0;
-                for (rptr = ptr->children; rptr; rptr = rptr->next)
-                {
-                    if (match_xsd_string(rptr, "uri", o, 
-                                         &(*recs)[i].uri))
-                        ;
-                    else if (match_xsd_string(rptr, "details", o, 
-                                              &(*recs)[i].details))
-                        ;
-                    else if (match_xsd_string(rptr, "message", o, 
-                                              &(*recs)[i].message))
-                        ;
-                }
-                i++;
+                if (match_xsd_string(rptr, "uri", o, 
+                                     &(*recs)[i].uri))
+                    ;
+                else if (match_xsd_string(rptr, "details", o, 
+                                          &(*recs)[i].details))
+                    ;
+                else if (match_xsd_string(rptr, "message", o, 
+                                          &(*recs)[i].message))
+                    ;
             }
+            i++;
         }
+    }
+    return 0;
+}
+
+int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
+                                     Z_SRW_diagnostic **diag,
+                                     int *num, ODR odr)
+{
+    int ret = 0;
+    xmlDocPtr doc = xmlParseMemory(buf, len);
+    if (doc)
+    {
+        xmlNodePtr ptr = xmlDocGetRootElement(doc);
+        while (ptr && ptr->type != XML_ELEMENT_NODE)
+            ptr = ptr->next;
+        if (ptr && ptr->ns 
+            && !xmlStrcmp(ptr->ns->href,
+                          BAD_CAST "http://www.loc.gov/zing/srw/diagnostic/"))
+        {
+            ret = yaz_srw_decode_diagnostics(odr, ptr, diag, num, 0, 0);
+        }
+        xmlFreeDoc(doc);
+    }
+    return ret;
+}
+
+static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
+                               int *num, void *client_data, const char *ns)
+{
+    if (o->direction == ODR_DECODE)
+    {
+        return yaz_srw_decode_diagnostics(o, pptr->children, recs, num, client_data, ns);
     }
     else if (o->direction == ODR_ENCODE)
     {
