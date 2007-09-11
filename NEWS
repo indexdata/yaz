@@ -10,6 +10,13 @@ Added new ZOOM C connection option 'sru_option' which specifies SRU version.
 
 Better SRW-to-Bib-1 diagnostic mapping.
 
+ZOOM C and yaz-client announces SRU version 1.2 by default.
+
+yaz-client 'sru' command may specifiy both SRU version and transport (SOAP,
+GET or POST).
+
+Fixed in yaz_sru_decode to allow SRU version 1.2.
+
 --- 3.0.10 2007/08/22
 
 Added support for SRU scan for ZOOM.
