@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.147 2007-09-09 05:54:45 adam Exp $
+ * $Id: zoom-c.c,v 1.148 2007-09-11 08:40:28 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1356,7 +1356,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.147 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.148 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1371,15 +1371,9 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     if (c->group || c->password)
     {
         Z_IdPass *pass = (Z_IdPass *) odr_malloc(c->odr_out, sizeof(*pass));
-        pass->groupId = 0;
-        if (c->group)
-            pass->groupId = odr_strdup(c->odr_out, c->group);
-        pass->userId = 0;
-        if (c->user)
-            pass->userId = odr_strdup(c->odr_out, c->user);
-        pass->password = 0;
-        if (c->password)
-            pass->password = odr_strdup(c->odr_out, c->password);
+        pass->groupId = odr_strdup_null(c->odr_out, c->group);
+        pass->userId = odr_strdup_null(c->odr_out, c->user);
+        pass->password = odr_strdup_null(c->odr_out, c->password);
         auth->which = Z_IdAuthentication_idPass;
         auth->u.idPass = pass;
         ireq->idAuthentication = auth;
@@ -1748,6 +1742,11 @@ ZOOM_API(ZOOM_record)
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
     
+    nrec->schema = odr_strdup_null(nrec->odr, srec->schema);
+    nrec->diag_uri = odr_strdup_null(nrec->odr, srec->diag_uri);
+    nrec->diag_message = odr_strdup_null(nrec->odr, srec->diag_message);
+    nrec->diag_details = odr_strdup_null(nrec->odr, srec->diag_details);
+    nrec->diag_set = odr_strdup_null(nrec->odr, srec->diag_set);
     odr_destroy(odr_enc);
     return nrec;
 }
@@ -1915,15 +1914,15 @@ ZOOM_API(int)
         return 0;
 
     npr = rec->npr;
-    if (rec->diag)
+    if (rec->diag_uri)
     {
         if (cp)
-            *cp = rec->diag[0].message;
+            *cp = rec->diag_message;
         if (addinfo)
-            *addinfo = rec->diag[0].details;
+            *addinfo = rec->diag_details;
         if (diagset)
-            *diagset = rec->diagset;
-        return uri_to_code(rec->diag[0].uri);
+            *diagset = rec->diag_set;
+        return uri_to_code(rec->diag_uri);
     }
     if (npr && npr->which == Z_NamePlusRecord_surrogateDiagnostic)
     {
@@ -2208,65 +2207,56 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                              int pos,
                              const char *syntax, const char *elementSetName,
                              const char *schema,
-                             Z_SRW_diagnostic *diag, int num_diag)
+                             Z_SRW_diagnostic *diag)
 {
-    ZOOM_record_cache rc;
+    ZOOM_record_cache rc = 0;
     
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
 
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
-        if (pos == rc->pos)
-        {
-            if (strcmp_null(r->schema, rc->schema))
-                continue;
-            if (strcmp_null(elementSetName,rc->elementSetName))
-                continue;
-            if (strcmp_null(syntax, rc->syntax))
-                continue;
-            /* not destroying rc->npr (it's handled by nmem )*/
-            rc->rec.npr = npr;
-            /* keeping wrbuf_marc too */
-            return;
-        }
+        if (pos == rc->pos 
+            && strcmp_null(r->schema, rc->schema) == 0
+            && strcmp_null(elementSetName,rc->elementSetName) == 0
+            && strcmp_null(syntax, rc->syntax) == 0)
+            break;
     }
-    rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
-    rc->rec.npr = npr;
-    rc->rec.schema = schema ? odr_strdup(r->odr, schema) : 0;
-    rc->rec.odr = 0;
-    rc->rec.wrbuf_marc = 0;
-    rc->rec.wrbuf_iconv = 0;
-    rc->rec.wrbuf_opac = 0;
-    rc->rec.diag = diag;
-    rc->rec.diagset = 0;
-    if (diag && diag[0].uri)
+    if (!rc)
     {
-        char *cp;
-        rc->rec.diagset = odr_strdup(r->odr, diag[0].uri);
-        if ((cp = strrchr(rc->rec.diagset, '/')))
-            *cp = '\0';
+        rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
+        rc->rec.odr = 0;
+        rc->rec.wrbuf_marc = 0;
+        rc->rec.wrbuf_iconv = 0;
+        rc->rec.wrbuf_opac = 0;
+        rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
+        
+        rc->syntax = odr_strdup_null(r->odr, syntax);
+        
+        rc->schema = odr_strdup_null(r->odr, r->schema);
+
+        rc->pos = pos;
+        rc->next = r->record_hash[record_hash(pos)];
+        r->record_hash[record_hash(pos)] = rc;
     }
-
-    if (elementSetName)
-        rc->elementSetName = odr_strdup(r->odr, elementSetName);
-    else
-        rc->elementSetName = 0;
-
-    if (syntax)
-        rc->syntax = odr_strdup(r->odr, syntax);
-    else
-        rc->syntax = 0;
-
-    if (r->schema)
-        rc->schema = odr_strdup(r->odr, r->schema);
-    else
-        rc->schema = 0;
-
-
-    rc->pos = pos;
-    rc->next = r->record_hash[record_hash(pos)];
-    r->record_hash[record_hash(pos)] = rc;
+    rc->rec.npr = npr;
+    rc->rec.schema = odr_strdup_null(r->odr, schema);
+    rc->rec.diag_set = 0;
+    rc->rec.diag_uri = 0;
+    rc->rec.diag_details = 0;
+    if (diag)
+    {
+        if (diag->uri)
+        {
+            char *cp;
+            rc->rec.diag_set = odr_strdup(r->odr, diag->uri);
+            if ((cp = strrchr(rc->rec.diag_set, '/')))
+                *cp = '\0';
+            rc->rec.diag_uri = odr_strdup(r->odr, diag->uri);
+        }
+        rc->rec.diag_message = odr_strdup_null(r->odr, diag->message);            
+        rc->rec.diag_details = odr_strdup_null(r->odr, diag->details);
+    }
 }
 
 static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos,
@@ -2344,7 +2334,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             {
                 record_cache_add(resultset, p->records[i], i + *start,
                                  syntax, elementSetName,
-                                 elementSetName, 0, 0);
+                                 elementSetName, 0);
             }
             *count -= i;
             if (*count < 0)
@@ -2363,7 +2353,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
                 Z_NamePlusRecord *myrec = 
                     zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
                 record_cache_add(resultset, myrec, *start,
-                                 syntax, elementSetName, 0, 0, 0);
+                                 syntax, elementSetName, 0, 0);
             }
         }
         else if (present_phase)
@@ -2372,7 +2362,7 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             Z_NamePlusRecord *myrec = 
                 zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
             record_cache_add(resultset, myrec, *start, syntax, elementSetName,
-                             0, 0, 0);
+                             0, 0);
         }
     }
 }
@@ -3050,7 +3040,7 @@ static Z_APDU *create_es_package(ZOOM_package p, const Odr_oid *oid)
     
     str = ZOOM_options_get(p->options, "user-id");
     if (str)
-        req->userId = odr_strdup(p->odr_out, str);
+        req->userId = odr_strdup_null(p->odr_out, str);
     
     req->packageType = odr_oiddup(p->odr_out, oid);
 
@@ -3143,16 +3133,16 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
         odr_malloc(p->odr_out, sizeof(*req->u.esRequest->toKeep->contact));
         
     str = ZOOM_options_get(p->options, "contact-name");
-    req->u.esRequest->toKeep->contact->name = str ?
-        odr_strdup(p->odr_out, str) : 0;
+    req->u.esRequest->toKeep->contact->name =
+        odr_strdup_null(p->odr_out, str);
         
     str = ZOOM_options_get(p->options, "contact-phone");
-    req->u.esRequest->toKeep->contact->phone = str ?
-        odr_strdup(p->odr_out, str) : 0;
+    req->u.esRequest->toKeep->contact->phone =
+        odr_strdup_null(p->odr_out, str);
         
     str = ZOOM_options_get(p->options, "contact-email");
-    req->u.esRequest->toKeep->contact->email = str ?
-        odr_strdup(p->odr_out, str) : 0;
+    req->u.esRequest->toKeep->contact->email =
+        odr_strdup_null(p->odr_out, str);
         
     req->u.esRequest->toKeep->addlBilling = 0;
         
@@ -3372,9 +3362,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         toKeep->databaseName = odr_strdup(p->odr_out, first_db);
         toKeep->schema = 0;
         
-        toKeep->elementSetName = 0;
-        if (elementSetName)
-            toKeep->elementSetName = odr_strdup(p->odr_out, elementSetName);
+        toKeep->elementSetName = odr_strdup_null(p->odr_out, elementSetName);
             
         toKeep->actionQualifier = 0;
         toKeep->action = odr_intdup(p->odr_out, action_no);
@@ -3410,8 +3398,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
             Z_IUCorrelationInfo *ci;
             ci = notToKeep->elements[0]->correlationInfo =
                 odr_malloc(p->odr_out, sizeof(*ci));
-            ci->note = correlationInfo_note ?
-                odr_strdup(p->odr_out, correlationInfo_note) : 0;
+            ci->note = odr_strdup_null(p->odr_out, correlationInfo_note);
             ci->id = correlationInfo_id ?
                 odr_intdup(p->odr_out, atoi(correlationInfo_id)) : 0;
         }
@@ -3926,7 +3913,7 @@ static void handle_srw_response(ZOOM_connection c,
                                              resultset->odr);
         }
         record_cache_add(resultset, npr, pos, syntax, elementSetName,
-                         sru_rec->recordSchema, diag, num_diag);
+                         sru_rec->recordSchema, diag);
     }
     if (res->num_diagnostics > 0)
         set_SRU_error(c, &res->diagnostics[0]);
