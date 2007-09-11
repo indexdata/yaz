@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: seshigh.c,v 1.127 2007-08-23 14:23:23 adam Exp $
+ * $Id: seshigh.c,v 1.128 2007-09-11 08:37:53 adam Exp $
  */
 /**
  * \file seshigh.c
@@ -767,10 +767,7 @@ static int srw_bend_fetch(association *assoc, int pos,
         record->recordData_buf = rr.record;
         record->recordData_len = rr.len;
         record->recordPosition = odr_intdup(o, pos);
-        if (rr.schema)
-            record->recordSchema = odr_strdup(o, rr.schema);
-        else
-            record->recordSchema = 0;
+        record->recordSchema = odr_strdup_null(o, rr.schema);
     }
     if (rr.errcode)
     {
@@ -2380,7 +2377,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
 
-    version = odr_strdup(assoc->encode, "$Revision: 1.127 $");
+    version = odr_strdup(assoc->encode, "$Revision: 1.128 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     resp->implementationVersion = odr_prepend(assoc->encode,
@@ -2623,10 +2620,7 @@ static Z_Records *pack_records(association *a, char *setname, int start,
         if (!(thisrec = (Z_NamePlusRecord *)
               odr_malloc(a->encode, sizeof(*thisrec))))
             return 0;
-        if (freq.basename)
-            thisrec->databaseName = odr_strdup(a->encode, freq.basename);
-        else
-            thisrec->databaseName = 0;
+        thisrec->databaseName = odr_strdup_null(a->encode, freq.basename);
         thisrec->which = Z_NamePlusRecord_databaseRecord;
 
         if (!freq.output_format)
