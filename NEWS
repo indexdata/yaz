@@ -1,3 +1,13 @@
+
+ZOOM C now handles SRU surrogate diagnostics (i.e. errors returned
+from ZOOM_record_error).
+
+ZOOM C function ZOOM_record_get returns record schema for type="schema".
+
+Implemented HTTP Basic authentication to SRU/GET, SRU/POST and SRW requests.
+
+Added new ZOOM C connection option 'sru_option' which specifies SRU version.
+
 Better SRW-to-Bib-1 diagnostic mapping.
 
 --- 3.0.10 2007/08/22
