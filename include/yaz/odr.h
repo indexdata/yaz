@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: odr.h,v 1.28 2007-05-08 08:22:35 adam Exp $ */
+/* $Id: odr.h,v 1.29 2007-09-11 08:35:42 adam Exp $ */
 
 /**
  * \file odr.h
@@ -184,6 +184,7 @@ YAZ_EXPORT char *odr_getbuf(ODR o, int *len, int *size);
 YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
 YAZ_EXPORT char *odr_strdupn(ODR o, const char *str, size_t n);
+YAZ_EXPORT char *odr_strdup_null(ODR o, const char *str);
 YAZ_EXPORT int *odr_intdup(ODR o, int v);
 YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf,
                                        int sz);

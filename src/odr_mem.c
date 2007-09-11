@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: odr_mem.c,v 1.11 2007-05-06 20:12:20 adam Exp $
+ * $Id: odr_mem.c,v 1.12 2007-09-11 08:35:42 adam Exp $
  */
 /**
  * \file odr_mem.c
@@ -37,6 +37,11 @@ void *odr_malloc(ODR o, int size)
 char *odr_strdup(ODR o, const char *str)
 {
     return nmem_strdup(o->mem, str);
+}
+
+char *odr_strdup_null(ODR o, const char *str)
+{
+    return nmem_strdup_null(o->mem, str);
 }
 
 char *odr_strdupn(ODR o, const char *str, size_t n)
