@@ -1,3 +1,4 @@
+--- 3.0.10 2007/09/12
 
 ZOOM C now handles SRU surrogate diagnostics (i.e. errors returned
 from ZOOM_record_error).
@@ -15,7 +16,7 @@ ZOOM C and yaz-client announces SRU version 1.2 by default.
 yaz-client 'sru' command may specifiy both SRU version and transport (SOAP,
 GET or POST).
 
-Fixed in yaz_sru_decode to allow SRU version 1.2.
+Fixed in yaz_sru_decode to allow other version than 1.1.
 
 --- 3.0.10 2007/08/22
 
