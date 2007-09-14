@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: codetables.xml,v 1.4 2006-12-15 20:36:45 adam Exp $ -->
+<!-- $Id: codetables.xml,v 1.5 2007-09-14 21:39:36 adam Exp $ -->
 <!-- Switched <marc>212320</marc> and <marc>212320</marc> -->
 <codeTables>
 	<codeTable name="Basic and Extended Latin" date="January 2000" number="1">
@@ -2462,269 +2462,269 @@ YERI</name>
 		</characterSet>
 		<characterSet name="Extended Cyrillic" ISOcode="51">
 			<code>
-				<marc>C0</marc>
+				<marc>40</marc>
 				<ucs>0491</ucs>
 				<utf-8>D291</utf-8>
 				<name>LOWERCASE GE WITH UPTURN / CYRILLIC SMALL LETTER
 GHE WITH UPTURN</name>
 			</code>
 			<code>
-				<marc>C1</marc>
+				<marc>41</marc>
 				<ucs>0452</ucs>
 				<utf-8>D192</utf-8>
 				<name>LOWERCASE DJE / CYRILLIC SMALL LETTER DJE
 (Serbian)</name>
 			</code>
 			<code>
-				<marc>C2</marc>
+				<marc>42</marc>
 				<ucs>0453</ucs>
 				<utf-8>D193</utf-8>
 				<name>CYRILLIC SMALL LETTER GJE</name>
 			</code>
 			<code>
-				<marc>C3</marc>
+				<marc>43</marc>
 				<ucs>0454</ucs>
 				<utf-8>D194</utf-8>
 				<name>LOWERCASE E / CYRILLIC SMALL LETTER UKRAINIAN
 IE</name>
 			</code>
 			<code>
-				<marc>C4</marc>
+				<marc>44</marc>
 				<ucs>0451</ucs>
 				<utf-8>D191</utf-8>
 				<name>CYRILLIC SMALL LETTER IO</name>
 			</code>
 			<code>
-				<marc>C5</marc>
+				<marc>45</marc>
 				<ucs>0455</ucs>
 				<utf-8>D195</utf-8>
 				<name>CYRILLIC SMALL LETTER DZE</name>
 			</code>
 			<code>
-				<marc>C6</marc>
+				<marc>46</marc>
 				<ucs>0456</ucs>
 				<utf-8>D196</utf-8>
 				<name>LOWERCASE I / CYRILLIC SMALL LETTER
 BYELORUSSIAN-UKRANIAN I</name>
 			</code>
 			<code>
-				<marc>C7</marc>
+				<marc>47</marc>
 				<ucs>0457</ucs>
 				<utf-8>D197</utf-8>
 				<name>LOWERCASE YI / CYRILLIC SMALL LETTER YI
 (Ukrainian)</name>
 			</code>
 			<code>
-				<marc>C8</marc>
+				<marc>48</marc>
 				<ucs>0458</ucs>
 				<utf-8>D198</utf-8>
 				<name>CYRILLIC SMALL LETTER JE</name>
 			</code>
 			<code>
-				<marc>C9</marc>
+				<marc>49</marc>
 				<ucs>0459</ucs>
 				<utf-8>D199</utf-8>
 				<name>CYRILLIC SMALL LETTER LJE</name>
 			</code>
 			<code>
-				<marc>CA</marc>
+				<marc>4A</marc>
 				<ucs>045A</ucs>
 				<utf-8>D19A</utf-8>
 				<name>CYRILLIC SMALL LETTER NJE</name>
 			</code>
 			<code>
-				<marc>CB</marc>
+				<marc>4B</marc>
 				<ucs>045B</ucs>
 				<utf-8>D19B</utf-8>
 				<name>LOWERCASE TSHE / CYRILLIC SMALL LETTER TSHE
 (Serbian)</name>
 			</code>
 			<code>
-				<marc>CC</marc>
+				<marc>4C</marc>
 				<ucs>045C</ucs>
 				<utf-8>D19C</utf-8>
 				<name>CYRILLIC SMALL LETTER KJE</name>
 			</code>
 			<code>
-				<marc>CD</marc>
+				<marc>4D</marc>
 				<ucs>045E</ucs>
 				<utf-8>D19E</utf-8>
 				<name>LOWERCASE SHORT U / CYRILLIC SMALL LETTER SHORT
 U (Byelorussian)</name>
 			</code>
 			<code>
-				<marc>CE</marc>
+				<marc>4E</marc>
 				<ucs>045F</ucs>
 				<utf-8>D19F</utf-8>
 				<name>CYRILLIC SMALL LETTER DZHE</name>
 			</code>
 			<code>
-				<marc>D0</marc>
+				<marc>50</marc>
 				<ucs>0463</ucs>
 				<utf-8>D1A3</utf-8>
 				<name>CYRILLIC SMALL LETTER YAT</name>
 			</code>
 			<code>
-				<marc>D1</marc>
+				<marc>51</marc>
 				<ucs>0473</ucs>
 				<utf-8>D1B3</utf-8>
 				<name>CYRILLIC SMALL LETTER FITA</name>
 			</code>
 			<code>
-				<marc>D2</marc>
+				<marc>52</marc>
 				<ucs>0475</ucs>
 				<utf-8>D1B5</utf-8>
 				<name>CYRILLIC SMALL LETTER IZHITSA</name>
 			</code>
 			<code>
-				<marc>D3</marc>
+				<marc>53</marc>
 				<ucs>046B</ucs>
 				<utf-8>D1AB</utf-8>
 				<name>CYRILLIC SMALL LETTER BIG YUS</name>
 			</code>
 			<code>
-				<marc>DB</marc>
+				<marc>5B</marc>
 				<ucs>005B</ucs>
 				<utf-8>5B</utf-8>
 				<name>OPENING SQUARE BRACKET / LEFT SQUARE
 BRACKET</name>
 			</code>
 			<code>
-				<marc>DD</marc>
+				<marc>5D</marc>
 				<ucs>005D</ucs>
 				<utf-8>5D</utf-8>
 				<name>CLOSING SQUARE BRACKET / RIGHT SQUARE
 BRACKET</name>
 			</code>
 			<code>
-				<marc>DF</marc>
+				<marc>5F</marc>
 				<ucs>005F</ucs>
 				<utf-8>5F</utf-8>
 				<name>SPACING UNDERSCORE / LOW LINE</name>
 			</code>
 			<code>
-				<marc>E0</marc>
+				<marc>60</marc>
 				<ucs>0490</ucs>
 				<utf-8>D290</utf-8>
 				<name>UPPERCASE GE WITH UPTURN / CYRILLIC CAPITAL
 LETTER GHE WITH UPTURN</name>
 			</code>
 			<code>
-				<marc>E1</marc>
+				<marc>61</marc>
 				<ucs>0402</ucs>
 				<utf-8>D082</utf-8>
 				<name>UPPERCASE DJE / CYRILLIC CAPITAL LETTER DJE
 (Serbian)</name>
 			</code>
 			<code>
-				<marc>E2</marc>
+				<marc>62</marc>
 				<ucs>0403</ucs>
 				<utf-8>D083</utf-8>
 				<name>CYRILLIC CAPITAL LETTER GJE</name>
 			</code>
 			<code>
-				<marc>E3</marc>
+				<marc>63</marc>
 				<ucs>0404</ucs>
 				<utf-8>D084</utf-8>
 				<name>UPPERCASE E / CYRILLIC CAPITAL LETTER UKRAINIAN
 IE</name>
 			</code>
 			<code>
-				<marc>E4</marc>
+				<marc>64</marc>
 				<ucs>0401</ucs>
 				<utf-8>D081</utf-8>
 				<name>CYRILLIC CAPITAL LETTER IO</name>
 			</code>
 			<code>
-				<marc>E5</marc>
+				<marc>65</marc>
 				<ucs>0405</ucs>
 				<utf-8>D085</utf-8>
 				<name>CYRILLIC CAPITAL LETTER DZE</name>
 			</code>
 			<code>
-				<marc>E6</marc>
+				<marc>66</marc>
 				<ucs>0406</ucs>
 				<utf-8>D086</utf-8>
 				<name>UPPERCASE I / CYRILLIC CAPITAL LETTER
 BYELORUSSIAN-UKRANIAN I</name>
 			</code>
 			<code>
-				<marc>E7</marc>
+				<marc>67</marc>
 				<ucs>0407</ucs>
 				<utf-8>D087</utf-8>
 				<name>UPPERCASE YI / CYRILLIC CAPITAL LETTER YI
 (Ukrainian)</name>
 			</code>
 			<code>
-				<marc>E8</marc>
+				<marc>68</marc>
 				<ucs>0408</ucs>
 				<utf-8>D088</utf-8>
 				<name>CYRILLIC CAPITAL LETTER JE</name>
 			</code>
 			<code>
-				<marc>E9</marc>
+				<marc>69</marc>
 				<ucs>0409</ucs>
 				<utf-8>D089</utf-8>
 				<name>CYRILLIC CAPITAL LETTER LJE</name>
 			</code>
 			<code>
-				<marc>EA</marc>
+				<marc>6A</marc>
 				<ucs>040A</ucs>
 				<utf-8>D08A</utf-8>
 				<name>CYRILLIC CAPITAL LETTER NJE</name>
 			</code>
 			<code>
-				<marc>EB</marc>
+				<marc>6B</marc>
 				<ucs>040B</ucs>
 				<utf-8>D08B</utf-8>
 				<name>UPPERCASE TSHE / CYRILLIC CAPITAL LETTER TSHE
 (Serbian)</name>
 			</code>
 			<code>
-				<marc>EC</marc>
+				<marc>6C</marc>
 				<ucs>040C</ucs>
 				<utf-8>D08C</utf-8>
 				<name>CYRILLIC CAPITAL LETTER KJE</name>
 			</code>
 			<code>
-				<marc>ED</marc>
+				<marc>6D</marc>
 				<ucs>040E</ucs>
 				<utf-8>D08E</utf-8>
 				<name>UPPERCASE SHORT U / CYRILLIC CAPITAL LETTER SHORT
 U (Byelorussian)</name>
 			</code>
 			<code>
-				<marc>EE</marc>
+				<marc>6E</marc>
 				<ucs>040F</ucs>
 				<utf-8>D08F</utf-8>
 				<name>CYRILLIC CAPITAL LETTER DZHE</name>
 			</code>
 			<code>
-				<marc>EF</marc>
+				<marc>6F</marc>
 				<ucs>042A</ucs>
 				<utf-8>D0AA</utf-8>
 				<name>CYRILLIC CAPITAL LETTER HARD SIGN</name>
 			</code>
 			<code>
-				<marc>F0</marc>
+				<marc>70</marc>
 				<ucs>0462</ucs>
 				<utf-8>D1A2</utf-8>
 				<name>CYRILLIC CAPITAL LETTER YAT</name>
 			</code>
 			<code>
-				<marc>F1</marc>
+				<marc>71</marc>
 				<ucs>0472</ucs>
 				<utf-8>D1B2</utf-8>
 				<name>CYRILLIC CAPITAL LETTER FITA</name>
 			</code>
 			<code>
-				<marc>F2</marc>
+				<marc>72</marc>
 				<ucs>0474</ucs>
 				<utf-8>D1B4</utf-8>
 				<name>CYRILLIC CAPITAL LETTER IZHITSA</name>
 			</code>
 			<code>
-				<marc>F3</marc>
+				<marc>73</marc>
 				<ucs>046A</ucs>
 				<utf-8>D1AA</utf-8>
 				<name>CYRILLIC CAPITAL LETTER BIG YUS</name>
@@ -3253,540 +3253,540 @@ BRACKET</name>
 		</characterSet>
 		<characterSet name="Extended Arabic" ISOcode="34">
 			<code>
-				<marc>A1</marc>
+				<marc>21</marc>
 				<ucs>06FD</ucs>
 				<utf-8>DBBD</utf-8>
 				<name>DOUBLE ALEF WITH HAMZA ABOVE / ARABIC SIGN SINDHI
 AMPERSAND</name>
 			</code>
 			<code>
-				<marc>A2</marc>
+				<marc>22</marc>
 				<ucs>0672</ucs>
 				<utf-8>D9B2</utf-8>
 				<name>ARABIC LETTER ALEF WITH WAVY HAMZA
 ABOVE</name>
 			</code>
 			<code>
-				<marc>A3</marc>
+				<marc>23</marc>
 				<ucs>0673</ucs>
 				<utf-8>D9B3</utf-8>
 				<name>ARABIC LETTER ALEF WITH WAVY HAMZA
 BELOW</name>
 			</code>
 			<code>
-				<marc>A4</marc>
+				<marc>24</marc>
 				<ucs>0679</ucs>
 				<utf-8>D9B9</utf-8>
 				<name>ARABIC LETTER TTEH</name>
 			</code>
 			<code>
-				<marc>A5</marc>
+				<marc>25</marc>
 				<ucs>067A</ucs>
 				<utf-8>D9BA</utf-8>
 				<name>ARABIC LETTER TTEHEH</name>
 			</code>
 			<code>
-				<marc>A6</marc>
+				<marc>26</marc>
 				<ucs>067B</ucs>
 				<utf-8>D9BB</utf-8>
 				<name>ARABIC LETTER BBEH</name>
 			</code>
 			<code>
-				<marc>A7</marc>
+				<marc>27</marc>
 				<ucs>067C</ucs>
 				<utf-8>D9BC</utf-8>
 				<name>ARABIC LETTER TEH WITH RING</name>
 			</code>
 			<code>
-				<marc>A8</marc>
+				<marc>28</marc>
 				<ucs>067D</ucs>
 				<utf-8>D9BD</utf-8>
 				<name>ARABIC LETTER TEH WITH THREE DOTS ABOVE
 DOWNWARDS</name>
 			</code>
 			<code>
-				<marc>A9</marc>
+				<marc>29</marc>
 				<ucs>067E</ucs>
 				<utf-8>D9BE</utf-8>
 				<name>ARABIC LETTER PEH</name>
 			</code>
 			<code>
-				<marc>AA</marc>
+				<marc>2A</marc>
 				<ucs>067F</ucs>
 				<utf-8>D9BF</utf-8>
 				<name>ARABIC LETTER TEHEH</name>
 			</code>
 			<code>
-				<marc>AB</marc>
+				<marc>2B</marc>
 				<ucs>0680</ucs>
 				<utf-8>DA80</utf-8>
 				<name>ARABIC LETTER BEHEH</name>
 			</code>
 			<code>
-				<marc>AC</marc>
+				<marc>2C</marc>
 				<ucs>0681</ucs>
 				<utf-8>DA81</utf-8>
 				<name>ARABIC LETTER HAH WITH HAMZA ABOVE</name>
 			</code>
 			<code>
-				<marc>AD</marc>
+				<marc>2D</marc>
 				<ucs>0682</ucs>
 				<utf-8>DA82</utf-8>
 				<name>ARABIC LETTER HAH WITH TWO ABOVE DOTS VERTICAL
 ABOVE</name>
 			</code>
 			<code>
-				<marc>AE</marc>
+				<marc>2E</marc>
 				<ucs>0683</ucs>
 				<utf-8>DA83</utf-8>
 				<name>ARABIC LETTER NYEH</name>
 			</code>
 			<code>
-				<marc>AF</marc>
+				<marc>2F</marc>
 				<ucs>0684</ucs>
 				<utf-8>DA84</utf-8>
 				<name>ARABIC LETTER DYEH</name>
 			</code>
 			<code>
-				<marc>B0</marc>
+				<marc>30</marc>
 				<ucs>0685</ucs>
 				<utf-8>DA85</utf-8>
 				<name>ARABIC LETTER HAH WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>B1</marc>
+				<marc>31</marc>
 				<ucs>0686</ucs>
 				<utf-8>DA86</utf-8>
 				<name>ARABIC LETTER TCHEH</name>
 			</code>
 			<code>
-				<marc>B2</marc>
+				<marc>32</marc>
 				<ucs>06BF</ucs>
 				<utf-8>DABF</utf-8>
 				<name>ARABIC LETTER TCHEH WITH DOT ABOVE</name>
 			</code>
 			<code>
-				<marc>B3</marc>
+				<marc>33</marc>
 				<ucs>0687</ucs>
 				<utf-8>DA87</utf-8>
 				<name>ARABIC LETTER TCHEHEH</name>
 			</code>
 			<code>
-				<marc>B4</marc>
+				<marc>34</marc>
 				<ucs>0688</ucs>
 				<utf-8>DA88</utf-8>
 				<name>ARABIC LETTER DDAL</name>
 			</code>
 			<code>
-				<marc>B5</marc>
+				<marc>35</marc>
 				<ucs>0689</ucs>
 				<utf-8>DA89</utf-8>
 				<name>ARABIC LETTER DAL WITH RING</name>
 			</code>
 			<code>
-				<marc>B6</marc>
+				<marc>36</marc>
 				<ucs>068A</ucs>
 				<utf-8>DA8A</utf-8>
 				<name>ARABIC LETTER DAL WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>B7</marc>
+				<marc>37</marc>
 				<ucs>068B</ucs>
 				<utf-8>DA8B</utf-8>
 				<name>ARABIC LETTER DAL WITH DOT BELOW AND SMALL
 TAH</name>
 			</code>
 			<code>
-				<marc>B8</marc>
+				<marc>38</marc>
 				<ucs>068C</ucs>
 				<utf-8>DA8C</utf-8>
 				<name>ARABIC LETTER DAHAL</name>
 			</code>
 			<code>
-				<marc>B9</marc>
+				<marc>39</marc>
 				<ucs>068D</ucs>
 				<utf-8>DA8D</utf-8>
 				<name>ARABIC LETTER DDAHAL</name>
 			</code>
 			<code>
-				<marc>BA</marc>
+				<marc>3A</marc>
 				<ucs>068E</ucs>
 				<utf-8>DA8E</utf-8>
 				<name>ARABIC LETTER DUL</name>
 			</code>
 			<code>
-				<marc>BB</marc>
+				<marc>3B</marc>
 				<ucs>068F</ucs>
 				<utf-8>DA8F</utf-8>
 				<name>ARABIC LETTER DAL WITH THREE DOTS ABOVE
 DOWNWARDS</name>
 			</code>
 			<code>
-				<marc>BC</marc>
+				<marc>3C</marc>
 				<ucs>0690</ucs>
 				<utf-8>DA90</utf-8>
 				<name>ARABIC LETTER DAL WITH FOUR DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>BD</marc>
+				<marc>3D</marc>
 				<ucs>0691</ucs>
 				<utf-8>DA91</utf-8>
 				<name>ARABIC LETTER RREH</name>
 			</code>
 			<code>
-				<marc>BE</marc>
+				<marc>3E</marc>
 				<ucs>0692</ucs>
 				<utf-8>DA92</utf-8>
 				<name>ARABIC LETTER REH WITH SMALL V</name>
 			</code>
 			<code>
-				<marc>BF</marc>
+				<marc>3F</marc>
 				<ucs>0693</ucs>
 				<utf-8>DA93</utf-8>
 				<name>ARABIC LETTER REH WITH RING</name>
 			</code>
 			<code>
-				<marc>C0</marc>
+				<marc>40</marc>
 				<ucs>0694</ucs>
 				<utf-8>DA94</utf-8>
 				<name>ARABIC LETTER REH WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>C1</marc>
+				<marc>41</marc>
 				<ucs>0695</ucs>
 				<utf-8>DA95</utf-8>
 				<name>ARABIC LETTER REH WITH SMALL V BELOW</name>
 			</code>
 			<code>
-				<marc>C2</marc>
+				<marc>42</marc>
 				<ucs>0696</ucs>
 				<utf-8>DA96</utf-8>
 				<name>ARABIC LETTER REH WITH DOT BELOW AND DOT
 ABOVE</name>
 			</code>
 			<code>
-				<marc>C3</marc>
+				<marc>43</marc>
 				<ucs>0697</ucs>
 				<utf-8>DA97</utf-8>
 				<name>ARABIC LETTER REH WITH TWO DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>C4</marc>
+				<marc>44</marc>
 				<ucs>0698</ucs>
 				<utf-8>DA98</utf-8>
 				<name>ARABIC LETTER JEH</name>
 			</code>
 			<code>
-				<marc>C5</marc>
+				<marc>45</marc>
 				<ucs>0699</ucs>
 				<utf-8>DA99</utf-8>
 				<name>ARABIC LETTER REH WITH FOUR DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>C6</marc>
+				<marc>46</marc>
 				<ucs>069A</ucs>
 				<utf-8>DA9A</utf-8>
 				<name>ARABIC LETTER SEEN WITH DOT BELOW AND DOT
 ABOVE</name>
 			</code>
 			<code>
-				<marc>C7</marc>
+				<marc>47</marc>
 				<ucs>069B</ucs>
 				<utf-8>DA9B</utf-8>
 				<name>ARABIC LETTER SEEN WITH THREE DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>C8</marc>
+				<marc>48</marc>
 				<ucs>069C</ucs>
 				<utf-8>DA9C</utf-8>
 				<name>ARABIC LETTER SEEN WITH THREE DOTS BELOW AND
 THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>C9</marc>
+				<marc>49</marc>
 				<ucs>06FA</ucs>
 				<utf-8>DBBA</utf-8>
 				<name>ARABIC LETTER SHEEN WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>CA</marc>
+				<marc>4A</marc>
 				<ucs>069D</ucs>
 				<utf-8>DA9D</utf-8>
 				<name>ARABIC LETTER SAD WITH TWO DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>CB</marc>
+				<marc>4B</marc>
 				<ucs>069E</ucs>
 				<utf-8>DA9E</utf-8>
 				<name>ARABIC LETTER SAD WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>CC</marc>
+				<marc>4C</marc>
 				<ucs>06FB</ucs>
 				<utf-8>DBBB</utf-8>
 				<name>ARABIC LETTER DAD WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>CD</marc>
+				<marc>4D</marc>
 				<ucs>069F</ucs>
 				<utf-8>DA9F</utf-8>
 				<name>ARABIC LETTER TAH WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>CE</marc>
+				<marc>4E</marc>
 				<ucs>06A0</ucs>
 				<utf-8>DAA0</utf-8>
 				<name>ARABIC LETTER AIN WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>CF</marc>
+				<marc>4F</marc>
 				<ucs>06FC</ucs>
 				<utf-8>DBBC</utf-8>
 				<name>ARABIC LETTER GHAIN WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>D0</marc>
+				<marc>50</marc>
 				<ucs>06A1</ucs>
 				<utf-8>DAA1</utf-8>
 				<name>ARABIC LETTER DOTLESS FEH</name>
 			</code>
 			<code>
-				<marc>D1</marc>
+				<marc>51</marc>
 				<ucs>06A2</ucs>
 				<utf-8>DAA2</utf-8>
 				<name>ARABIC LETTER FEH WITH DOT MOVED BELOW</name>
 			</code>
 			<code>
-				<marc>D2</marc>
+				<marc>52</marc>
 				<ucs>06A3</ucs>
 				<utf-8>DAA3</utf-8>
 				<name>ARABIC LETTER FEH WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>D3</marc>
+				<marc>53</marc>
 				<ucs>06A4</ucs>
 				<utf-8>DAA4</utf-8>
 				<name>ARABIC LETTER VEH</name>
 			</code>
 			<code>
-				<marc>D4</marc>
+				<marc>54</marc>
 				<ucs>06A5</ucs>
 				<utf-8>DAA5</utf-8>
 				<name>ARABIC LETTER FEH WITH THREE DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>D5</marc>
+				<marc>55</marc>
 				<ucs>06A6</ucs>
 				<utf-8>DAA6</utf-8>
 				<name>ARABIC LETTER PEHEH</name>
 			</code>
 			<code>
-				<marc>D6</marc>
+				<marc>56</marc>
 				<ucs>06A7</ucs>
 				<utf-8>DAA7</utf-8>
 				<name>ARABIC LETTER QAF WITH DOT ABOVE</name>
 			</code>
 			<code>
-				<marc>D7</marc>
+				<marc>57</marc>
 				<ucs>06A8</ucs>
 				<utf-8>DAA8</utf-8>
 				<name>ARABIC LETTER QAF WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>D8</marc>
+				<marc>58</marc>
 				<ucs>06A9</ucs>
 				<utf-8>DAA9</utf-8>
 				<name>ARABIC LETTER KEHEH</name>
 			</code>
 			<code>
-				<marc>D9</marc>
+				<marc>59</marc>
 				<ucs>06AA</ucs>
 				<utf-8>DAAA</utf-8>
 				<name>ARABIC LETTER SWASH KAF</name>
 			</code>
 			<code>
-				<marc>DA</marc>
+				<marc>5A</marc>
 				<ucs>06AB</ucs>
 				<utf-8>DAAB</utf-8>
 				<name>ARABIC LETTER KAF WITH RING</name>
 			</code>
 			<code>
-				<marc>DB</marc>
+				<marc>5B</marc>
 				<ucs>06AC</ucs>
 				<utf-8>DAAC</utf-8>
 				<name>ARABIC LETTER KAF WITH DOT ABOVE</name>
 			</code>
 			<code>
-				<marc>DC</marc>
+				<marc>5C</marc>
 				<ucs>06AD</ucs>
 				<utf-8>DAAD</utf-8>
 				<name>ARABIC LETTER NG</name>
 			</code>
 			<code>
-				<marc>DD</marc>
+				<marc>5D</marc>
 				<ucs>06AE</ucs>
 				<utf-8>DAAE</utf-8>
 				<name>ARABIC LETTER KAF WITH THREE DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>DE</marc>
+				<marc>5E</marc>
 				<ucs>06AF</ucs>
 				<utf-8>DAAF</utf-8>
 				<name>ARABIC LETTER GAF</name>
 			</code>
 			<code>
-				<marc>DF</marc>
+				<marc>5F</marc>
 				<ucs>06B0</ucs>
 				<utf-8>DAB0</utf-8>
 				<name>ARABIC LETTER GAF WITH RING</name>
 			</code>
 			<code>
-				<marc>E0</marc>
+				<marc>60</marc>
 				<ucs>06B1</ucs>
 				<utf-8>DAB1</utf-8>
 				<name>ARABIC LETTER NGOEH</name>
 			</code>
 			<code>
-				<marc>E1</marc>
+				<marc>61</marc>
 				<ucs>06B2</ucs>
 				<utf-8>DAB2</utf-8>
 				<name>ARABIC LETTER GAF WITH TWO DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>E2</marc>
+				<marc>62</marc>
 				<ucs>06B3</ucs>
 				<utf-8>DAB3</utf-8>
 				<name>ARABIC LETTER GUEH</name>
 			</code>
 			<code>
-				<marc>E3</marc>
+				<marc>63</marc>
 				<ucs>06B4</ucs>
 				<utf-8>DAB4</utf-8>
 				<name>ARABIC LETTER GAF WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>E4</marc>
+				<marc>64</marc>
 				<ucs>06B5</ucs>
 				<utf-8>DAB5</utf-8>
 				<name>ARABIC LETTER LAM WITH SMALL V</name>
 			</code>
 			<code>
-				<marc>E5</marc>
+				<marc>65</marc>
 				<ucs>06B6</ucs>
 				<utf-8>DAB6</utf-8>
 				<name>ARABIC LETTER LAM WITH DOT ABOVE</name>
 			</code>
 			<code>
-				<marc>E6</marc>
+				<marc>66</marc>
 				<ucs>06B7</ucs>
 				<utf-8>DAB7</utf-8>
 				<name>ARABIC LETTER LAM WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>E7</marc>
+				<marc>67</marc>
 				<ucs>06B8</ucs>
 				<utf-8>DAB8</utf-8>
 				<name>ARABIC LETTER LAM WITH THREE DOTS BELOW</name>
 			</code>
 			<code>
-				<marc>E8</marc>
+				<marc>68</marc>
 				<ucs>06BA</ucs>
 				<utf-8>DABA</utf-8>
 				<name>ARABIC LETTER NOON GHUNNA</name>
 			</code>
 			<code>
-				<marc>E9</marc>
+				<marc>69</marc>
 				<ucs>06BB</ucs>
 				<utf-8>DABB</utf-8>
 				<name>ARABIC LETTER RNOON</name>
 			</code>
 			<code>
-				<marc>EA</marc>
+				<marc>6A</marc>
 				<ucs>06BC</ucs>
 				<utf-8>DABC</utf-8>
 				<name>ARABIC LETTER NOON WITH RING</name>
 			</code>
 			<code>
-				<marc>EB</marc>
+				<marc>6B</marc>
 				<ucs>06BD</ucs>
 				<utf-8>DABD</utf-8>
 				<name>ARABIC LETTER NOON WITH THREE DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>EC</marc>
+				<marc>6C</marc>
 				<ucs>06B9</ucs>
 				<utf-8>DAB9</utf-8>
 				<name>ARABIC LETTER NOON WITH DOT BELOW</name>
 			</code>
 			<code>
-				<marc>ED</marc>
+				<marc>6D</marc>
 				<ucs>06BE</ucs>
 				<utf-8>DABE</utf-8>
 				<name>ARABIC LETTER HEH DOACHASHMEE</name>
 			</code>
 			<code>
-				<marc>EE</marc>
+				<marc>6E</marc>
 				<ucs>06C0</ucs>
 				<utf-8>DB80</utf-8>
 				<name>HEH WITH HAMZA ABOVE / ARABIC LETTER HEH WITH
 YEH ABOVE</name>
 			</code>
 			<code>
-				<marc>EF</marc>
+				<marc>6F</marc>
 				<ucs>06C4</ucs>
 				<utf-8>DB84</utf-8>
 				<name>ARABIC LETTER WAW WITH RING</name>
 			</code>
 			<code>
-				<marc>F0</marc>
+				<marc>70</marc>
 				<ucs>06C5</ucs>
 				<utf-8>DB85</utf-8>
 				<name>KYRGHYZ OE / ARABIC LETTER KIRGHIZ OE</name>
 			</code>
 			<code>
-				<marc>F1</marc>
+				<marc>71</marc>
 				<ucs>06C6</ucs>
 				<utf-8>DB86</utf-8>
 				<name>ARABIC LETTER OE</name>
 			</code>
 			<code>
-				<marc>F2</marc>
+				<marc>72</marc>
 				<ucs>06CA</ucs>
 				<utf-8>DB8A</utf-8>
 				<name>ARABIC LETTER WAW WITH TWO DOTS ABOVE</name>
 			</code>
 			<code>
-				<marc>F3</marc>
+				<marc>73</marc>
 				<ucs>06CB</ucs>
 				<utf-8>DB8B</utf-8>
 				<name>ARABIC LETTER VE</name>
 			</code>
 			<code>
-				<marc>F4</marc>
+				<marc>74</marc>
 				<ucs>06CD</ucs>
 				<utf-8>DB8D</utf-8>
 				<name>ARABIC LETTER YEH WITH TAIL</name>
 			</code>
 			<code>
-				<marc>F5</marc>
+				<marc>75</marc>
 				<ucs>06CE</ucs>
 				<utf-8>DB8E</utf-8>
 				<name>ARABIC LETTER YEH WITH SMALL V</name>
 			</code>
 			<code>
-				<marc>F6</marc>
+				<marc>76</marc>
 				<ucs>06D0</ucs>
 				<utf-8>DB90</utf-8>
 				<name>ARABIC LETTER E</name>
 			</code>
 			<code>
-				<marc>F7</marc>
+				<marc>77</marc>
 				<ucs>06D2</ucs>
 				<utf-8>DB92</utf-8>
 				<name>ARABIC LETTER YEH BARREE</name>
 			</code>
 			<code>
-				<marc>F8</marc>
+				<marc>78</marc>
 				<ucs>06D3</ucs>
 				<utf-8>DB93</utf-8>
 				<name>ARABIC LETTER YEH BARREE WITH HAMZA
@@ -3794,14 +3794,14 @@ ABOVE</name>
 			</code>
 			<code>
 				<isCombining>true</isCombining>
-				<marc>FD</marc>
+				<marc>7D</marc>
 				<ucs>0306</ucs>
 				<utf-8>CC86</utf-8>
 				<name>SHORT E / COMBINING BREVE</name>
 			</code>
 			<code>
 				<isCombining>true</isCombining>
-				<marc>FE</marc>
+				<marc>7E</marc>
 				<ucs>030C</ucs>
 				<utf-8>CC8C</utf-8>
 				<name>SHORT U / COMBINING CARON</name>
