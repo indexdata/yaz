@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.29 2007-03-20 21:37:32 adam Exp $
+ * $Id: tsticonv.c,v 1.30 2007-09-17 19:15:22 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -121,7 +121,24 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
         && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
         ret = 1;
     else
-        yaz_log(YLOG_LOG, "GOT (%.*s)", wrbuf_len(b), wrbuf_buf(b));
+    {
+        WRBUF w = wrbuf_alloc();
+
+        wrbuf_rewind(w);
+        wrbuf_verbose_str(w, buf, strlen(buf));
+        yaz_log(YLOG_LOG, "input %s", wrbuf_cstr(w));
+
+        wrbuf_rewind(w);
+        wrbuf_verbose_str(w, wrbuf_buf(b), wrbuf_len(b));
+        yaz_log(YLOG_LOG, "got %s", wrbuf_cstr(w));
+        
+        wrbuf_rewind(w);
+        wrbuf_verbose_str(w, cmpbuf, strlen(cmpbuf));
+        yaz_log(YLOG_LOG, "expected %s", wrbuf_cstr(w));
+
+        wrbuf_destroy(w);
+    }
+
     wrbuf_destroy(b);
     return ret;
 }
@@ -458,7 +475,7 @@ static void tst_utf8_to_marc8(void)
     /** Pure ASCII. 12 characters (sizeof(outbuf)) */
     YAZ_CHECK(tst_convert(cd, "Cours de math", "Cours de math"));
 
-    /** Pure ASCII. 13 characters (sizeof(outbuf)) */
+    /** Pure ASCII. 13 characters (sizeof(outbuf)+1) */
     YAZ_CHECK(tst_convert(cd, "Cours de math.", "Cours de math."));
 
     /** UPPERCASE SCANDINAVIAN O */
