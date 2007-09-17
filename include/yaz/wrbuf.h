@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.26 2007-03-20 21:37:31 adam Exp $ */
+/* $Id: wrbuf.h,v 1.27 2007-09-17 19:14:26 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -93,6 +93,9 @@ YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
+
+/** \brief put readable string in WRBUF from raw input */
+YAZ_EXPORT void wrbuf_verbose_str(WRBUF b, const char *str, size_t len);
 
 YAZ_END_CDECL
 
