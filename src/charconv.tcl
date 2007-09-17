@@ -2,7 +2,7 @@
 # the next line restarts using tclsh \
 if [ -f /usr/local/bin/tclsh8.4 ]; then exec tclsh8.4 "$0" "$@"; else exec tclsh "$0" "$@"; fi
 #
-# $Id: charconv.tcl,v 1.18 2006-12-17 15:34:11 adam Exp $
+# $Id: charconv.tcl,v 1.19 2007-09-17 19:18:27 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -282,22 +282,12 @@ proc readfile {fname ofilehandle prefix omits reverse} {
         if {$cnt < 0} {
             break
         }
-	if {[regexp {<entitymap>} $line s]} {
-	    reset_trie
-	    set trie(prefix) "${prefix}"
-	} elseif {[regexp {</entitymap>} $line s]} {
+	if {[regexp {</characterSet>} $line s]} {
 	    dump_trie $ofilehandle
-	} elseif {[regexp {<character hex="([^\"]*)".*<unientity>([0-9A-Fa-f]*)</unientity>} $line s hex ucs]} {
-	    ins_trie $hex $ucs $combining {}
-	    unset hex
-	} elseif {[regexp {<codeTable .*number="([0-9]+)"} $line s tablenumber]} {
+	} elseif {[regexp {<characterSet .*ISOcode="([0-9A-Fa-f]+)"} $line s tablenumber]} {
 	    reset_trie
 	    set trie(prefix) "${prefix}_$tablenumber"
 	    set combining 0
-	} elseif {[regexp {</codeTable>} $line s]} {
-	    if {[lsearch $omits $tablenumber] == -1} {
-		dump_trie $ofilehandle
-	    }
 	} elseif {[regexp {</code>} $line s]} {
 	    if {[string length $ucs]} {
 		if {$reverse} {
