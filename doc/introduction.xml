@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.25 2006-10-05 08:26:58 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.26 2007-09-18 19:19:16 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -160,7 +160,7 @@
     toolkit offers several different levels of access to the
     <ulink url="&url.z39.50;">ISO23950/Z39.50</ulink>,
     <ulink url="&url.ill;">ILL</ulink> and
-    <ulink url="&url.sru;">SRU</ulink>/<ulink url="&url.srw;">SRW</ulink>
+    <ulink url="&url.sru;">SRU</ulink>
     protocols.
     The level that you need to use depends on your requirements, and
     the role (server or client) that you want to implement.
