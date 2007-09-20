@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.50 2007-05-06 20:12:20 adam Exp $
+ * $Id: marcdisp.c,v 1.51 2007-09-20 17:22:45 adam Exp $
  */
 
 /**
@@ -599,7 +599,9 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
             wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
                                     strlen(n->u.controlfield.tag));
             wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
-            wrbuf_iconv_puts(wr, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                    n->u.controlfield.data,
+                                    strlen(n->u.controlfield.data));
 
             marc_iconv_reset(mt, wr);
             wrbuf_iconv_puts(wr, mt->iconv_cd, "</controlfield>");
