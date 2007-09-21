@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.150 2007-09-21 07:10:08 adam Exp $
+ * $Id: zoom-c.c,v 1.151 2007-09-21 16:04:48 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -174,13 +174,6 @@ static void set_dset_error(ZOOM_connection c, int error,
     }
 }
 
-#if YAZ_HAVE_XML2
-static void set_HTTP_error(ZOOM_connection c, int error,
-                           const char *addinfo, const char *addinfo2)
-{
-    set_dset_error(c, error, "HTTP", addinfo, addinfo2);
-}
-
 static int uri_to_code(const char *uri)
 {
     int code = 0;       
@@ -188,6 +181,13 @@ static int uri_to_code(const char *uri)
     if ((cp = strrchr(uri, '/')))
         code = atoi(cp+1);
     return code;
+}
+
+#if YAZ_HAVE_XML2
+static void set_HTTP_error(ZOOM_connection c, int error,
+                           const char *addinfo, const char *addinfo2)
+{
+    set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
 
 static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
@@ -1356,7 +1356,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.150 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.151 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
