@@ -1,4 +1,17 @@
---- 3.0.10 2007/09/12
+--- 3.0.14 2007/09/21
+
+Fixed bad memory reference in ZOOM_record - cuased by member not being
+initialized. This was a problem only in YAZ 3.0.12.
+
+Fixed bug in conversion from MARC to XML: Non-XML characters in control
+fields were not removed.
+
+Changed the way C code is generated from codetables.xml.  Made a MARC-8
+conversion trie for each characterSet section rather than codeTable.
+This is ensure the code can deal with G0/G1 sequences. Use of a newer version
+of codetables.xml from Larry Dixson, LOC. Bug #1464.
+
+--- 3.0.12 2007/09/12
 
 ZOOM C now handles SRU surrogate diagnostics (i.e. errors returned
 from ZOOM_record_error).
