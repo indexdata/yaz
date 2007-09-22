@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.30 2007-09-17 19:15:22 adam Exp $
+ * $Id: tsticonv.c,v 1.31 2007-09-22 18:56:22 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -504,11 +504,18 @@ static void tst_utf8_to_marc8(void)
                           "\033$1" "\x21\x2B\x3B" "\033(B" "o" ));
 
 
+    /** Ideographic space per ANSI Z39.64 */
+    YAZ_CHECK(tst_convert(cd,
+                          "\xe3\x80\x80" "o",        /* UTF-8 */
+                          "\033$1" "\x21\x23\x21" "\033(B" "o" ));
+
     /** Superscript 0 . bug #642 */
     YAZ_CHECK(tst_convert(cd,
                           "(\xe2\x81\xb0)",        /* UTF-8 */
                           "(\033p0\x1bs)"));
     
+    
+ 
  
     {
         char *inbuf0 = "\xe2\x81\xb0";
