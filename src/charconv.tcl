@@ -2,7 +2,7 @@
 # the next line restarts using tclsh \
 if [ -f /usr/local/bin/tclsh8.4 ]; then exec tclsh8.4 "$0" "$@"; else exec tclsh "$0" "$@"; fi
 #
-# $Id: charconv.tcl,v 1.19 2007-09-17 19:18:27 adam Exp $
+# $Id: charconv.tcl,v 1.20 2007-09-22 18:55:02 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }
@@ -147,7 +147,18 @@ proc ins_trie_r {from to combining codename this} {
         set trie($this,type) f
     }
     if {$trie($this,type) == "f"} {
-        lappend trie($this,content) [list $from $to $combining $codename]
+	set dup 0
+	if {[info exists trie($this,content)]} {
+	    foreach e $trie($this,content) {
+		set efrom [lindex $e 0]
+		if { $efrom == $from } {
+		    set dup 1
+		}
+	    }
+	}
+	if { $dup == 0 } {
+	    lappend trie($this,content) [list $from $to $combining $codename]
+	}
         
         # split ?
         if {[llength $trie($this,content)] > $trie(split)} {
