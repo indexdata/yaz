@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.43 2007-09-17 19:18:27 adam Exp $
+ * $Id: siconv.c,v 1.44 2007-09-22 18:49:55 adam Exp $
  */
 /**
  * \file siconv.c
@@ -1182,6 +1182,11 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
     }
     if (inbytesleft <= 0)
         return 0;
+    else if (*inp == ' ')
+    {
+        *no_read += 1;
+        return ' ';
+    }
     else
     {
         unsigned long x;
@@ -1447,6 +1452,9 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         *utf8_outbuf = '\0';        
         inp = (unsigned char *) utf8_buf;
         inbytesleft = strlen(utf8_buf);
+
+        if (x == ' ')
+            return x;
         
         x = yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
@@ -1643,9 +1651,12 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
         if (r)
             return r;
 
-        r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, page_chr);
-        if (r)
-            return r;
+        if (page_chr)
+        {
+            r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, page_chr);
+            if (r)
+                return r;
+        }
         cd->write_marc8_last = y;
     }
     return 0;
