@@ -1,0 +1,29 @@
+01373cam a2200349ua 4500
+001 82129893
+003 DLC
+005 20070808062021.0
+008 841102s1980    cc a          000 0 chi  
+035    $a (DLC)5011703
+010    $a    82129893 
+035    $a (CStRLIN)DCLP84-B3561
+040    $a DLC-R $c DLC-R $d CStRLIN $d DLC
+050 00 $a TL546.7 $b .S48 1980
+066    $c $1
+082 00 $a 629.4 $2 19
+100 1  $6 880-01 $a Shen, Guoliang.
+245 10 $6 880-02 $a Yu zhou hang xing he shu li hua / $c Shen Guoliang wen ; Chen Genxiang tu.
+250    $6 880-03 $a Di 1 ban.
+260    $6 880-04 $a [Canton] : $b Guangdong ren min chu ban she : $b Guangdong sheng xin hua shu dian fa xing, $c 1980.
+300    $a 199 p. : $b ill. ; $c 19 cm.
+440  0 $6 880-05 $a Ke xue zhi shi pu ji cong shu
+650  0 $a Astronautics $x Popular works.
+700 1  $6 880-06 $a Chen, Genxiang.
+880 1  $6 100-01/1 $a 沈　国良.
+880 10 $6 245-02/1 $a 宇宙　航行　和　数理化 / $c 沈　国良　文 ; 陈　根祥　图.
+880    $6 250-03/1 $a 第1版.
+880    $6 260-04/1 $a [Canton] : $b 广东　人民　出版社 : $b 广东省　新華　書店　发行, $c 1980.
+880  0 $6 440-05/1 $a 科学　知识　普及　丛书
+880 1  $6 700-06/1 $a 陈　根祥.
+906    $a 0 $b cbc $c orignew $d u $e ncip $f 19 $g y-rlinjack
+985    $a spacingreload
+

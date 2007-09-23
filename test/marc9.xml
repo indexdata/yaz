@@ -1,0 +1,155 @@
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02075cas a22005055a 4500</leader>
+  <controlfield tag="001">  2005336282</controlfield>
+  <controlfield tag="003">DLC</controlfield>
+  <controlfield tag="005">20070911033614.0</controlfield>
+  <controlfield tag="008">070910c20059999mr uu p      f0    0ara  </controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">  2005336282</subfield>
+  </datafield>
+  <datafield tag="012" ind1=" " ind2=" ">
+    <subfield code="a">-3-7-0709110002-p-----    </subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)170490164</subfield>
+  </datafield>
+  <datafield tag="906" ind1=" " ind2=" ">
+    <subfield code="a">7</subfield>
+    <subfield code="b">und</subfield>
+    <subfield code="c">serials</subfield>
+    <subfield code="d">u</subfield>
+    <subfield code="e">ncip</subfield>
+    <subfield code="f">19</subfield>
+    <subfield code="g">n-oclcserc</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+    <subfield code="c">DLC</subfield>
+    <subfield code="d">DLC</subfield>
+  </datafield>
+  <datafield tag="041" ind1="0" ind2=" ">
+    <subfield code="a">ara</subfield>
+    <subfield code="a">fre</subfield>
+  </datafield>
+  <datafield tag="042" ind1=" " ind2=" ">
+    <subfield code="a">lc</subfield>
+  </datafield>
+  <datafield tag="043" ind1=" " ind2=" ">
+    <subfield code="a">f-mr---</subfield>
+  </datafield>
+  <datafield tag="050" ind1="0" ind2="0">
+    <subfield code="a">IN PROCESS</subfield>
+  </datafield>
+  <datafield tag="066" ind1=" " ind2=" ">
+    <subfield code="c">(3</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="6">880-01</subfield>
+    <subfield code="a">Qaḍāʼ al-usrah :</subfield>
+    <subfield code="b">majallah mutakhaṣṣiṣah /</subfield>
+    <subfield code="c">Wizārat al-ʻAdl.</subfield>
+  </datafield>
+  <datafield tag="246" ind1="1" ind2="3">
+    <subfield code="a">Justice de la famille</subfield>
+  </datafield>
+  <datafield tag="246" ind1="1" ind2="3">
+    <subfield code="6">880-02</subfield>
+    <subfield code="a">Majallat Qaḍāʼ al-usrah</subfield>
+    <subfield code="f">&lt;2006&gt;</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="6">880-03</subfield>
+    <subfield code="a">al-Rabāṭ :</subfield>
+    <subfield code="b">Jamʻīyat Nashr al-Maʻlūmah al-Qānūnīyah wa-al-Qaḍāʼīyah,</subfield>
+    <subfield code="c">2005-</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">v. :</subfield>
+    <subfield code="b">ill. ;</subfield>
+    <subfield code="c">24 cm.</subfield>
+  </datafield>
+  <datafield tag="310" ind1=" " ind2=" ">
+    <subfield code="a">Irregular (semiannual)</subfield>
+  </datafield>
+  <datafield tag="362" ind1="0" ind2=" ">
+    <subfield code="6">880-04</subfield>
+    <subfield code="a">al-ʻAdad 1. (Yūlyūz 2005)-</subfield>
+  </datafield>
+  <datafield tag="490" ind1="0" ind2=" ">
+    <subfield code="6">880-05</subfield>
+    <subfield code="a">Manshūrāt Jamʻīyat Nashr al-Maʻlūmah al-Qānūnīyah wa-al-Qaḍāʼīyah</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Some issues have also a distinctive title.</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">Latest issue consulted: al-ʻAdad 3. (Dujanbir 2006).</subfield>
+  </datafield>
+  <datafield tag="546" ind1=" " ind2=" ">
+    <subfield code="a">Chiefly in Arabic; some French.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Domestic relations (Islamic law)</subfield>
+    <subfield code="z">Morocco.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Divorce (Islamic law)</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Marriage law</subfield>
+    <subfield code="z">Morocco.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Law reports, digests, etc.</subfield>
+    <subfield code="z">Morocco.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="6">880-06</subfield>
+    <subfield code="a">Jamʻīyat Nashr al-Maʻlūmah al-Qānūnīyah wa-al-Qaḍāʼīyah.</subfield>
+  </datafield>
+  <datafield tag="710" ind1="1" ind2=" ">
+    <subfield code="6">880-07</subfield>
+    <subfield code="a">Morocco.</subfield>
+    <subfield code="b">Wizārat al-ʻAdl.</subfield>
+  </datafield>
+  <datafield tag="850" ind1=" " ind2=" ">
+    <subfield code="a">DLC</subfield>
+  </datafield>
+  <datafield tag="880" ind1="0" ind2="0">
+    <subfield code="6">245-01/(3/r</subfield>
+    <subfield code="a">قضاء الأسرة :</subfield>
+    <subfield code="b">مجلة متخصصة /</subfield>
+    <subfield code="c">وزارة العدل.</subfield>
+  </datafield>
+  <datafield tag="880" ind1="1" ind2="3">
+    <subfield code="6">246-02/(3/r</subfield>
+    <subfield code="a">مجلة قضاء الأسرة</subfield>
+    <subfield code="f">&lt;2006&gt;</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2=" ">
+    <subfield code="6">260-03/(3/r</subfield>
+    <subfield code="a">الرباط :</subfield>
+    <subfield code="b">جمعية نشر المعلومة القانونية والقضائية،</subfield>
+    <subfield code="c">2005-</subfield>
+  </datafield>
+  <datafield tag="880" ind1="0" ind2=" ">
+    <subfield code="6">362-04/(3/r</subfield>
+    <subfield code="a">العدد 1. (يوليوز 2005)-</subfield>
+  </datafield>
+  <datafield tag="880" ind1="0" ind2=" ">
+    <subfield code="6">490-05/(3/r</subfield>
+    <subfield code="a">منشورات جمعية نشر المعلومة القانونية والقضائية</subfield>
+  </datafield>
+  <datafield tag="880" ind1="2" ind2=" ">
+    <subfield code="6">710-06/(3/r</subfield>
+    <subfield code="a">جمعية نشر المعلومة القانونية والقضائية.</subfield>
+  </datafield>
+  <datafield tag="880" ind1="1" ind2=" ">
+    <subfield code="6">710-07/(3/r</subfield>
+    <subfield code="a">Morocco.</subfield>
+    <subfield code="b">وزارة العدل.</subfield>
+  </datafield>
+  <datafield tag="936" ind1=" " ind2=" ">
+    <subfield code="a">LC Cairo Office [we 45]</subfield>
+  </datafield>
+</record>
