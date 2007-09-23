@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.52 2007-04-17 20:26:18 adam Exp $
+ * $Id: marcdump.c,v 1.53 2007-09-23 07:40:13 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -52,7 +52,7 @@ static void usage(const char *prog)
 {
     fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] "
              "[-i format] [-o format] "
-             "[-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] file...\n",
+             "[-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] [-p] file...\n",
              prog);
 } 
 

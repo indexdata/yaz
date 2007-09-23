@@ -8,7 +8,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-marcdump-man.xml,v 1.14 2007-05-22 11:10:08 adam Exp $ -->
+<!-- $Id: yaz-marcdump-man.xml,v 1.15 2007-09-23 07:40:13 adam Exp $ -->
 <refentry id="yaz-marcdump">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -34,6 +34,9 @@
    <arg choice="opt"><option>-l <replaceable>spec</replaceable></option></arg>
    <arg choice="opt"><option>-v</option></arg>
    <arg choice="opt"><option>-c <replaceable>cfile</replaceable></option></arg>
+   <arg choice="opt"><option>-s <replaceable>prefix</replaceable></option></arg>
+   <arg choice="opt"><option>-C <replaceable>size</replaceable></option></arg>
+   <arg choice="opt"><option>-p</option></arg>
    <arg choice="opt" rep="repeat">file</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -74,6 +77,7 @@
     <listitem><para>
       Specifies input format. Must be one of
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
+      <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC).
      </para></listitem>
    </varlistentry>
@@ -83,6 +87,7 @@
     <listitem><para>
       Specifies output format. Must be one of
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
+      <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC).
      </para></listitem>
    </varlistentry>
@@ -122,6 +127,32 @@
     <listitem><para>
       Writes more information about the parsing process.
       Useful if you have ill-formatted ISO2709 records as input.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-s <replaceable>prefix</replaceable></term>
+    <listitem><para>
+      Writes a chunk of records to a separate file with prefix given,
+      i.e. splits a record batch into files with only at most
+      "chunk" ISO2709 record per file. By default chunk is 1 (one record
+      per file). See option <literal>-C</literal>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-C <replaceable>chunksize</replaceable></term>
+    <listitem><para>
+      Specifies chunk size; to be used conjunction with option 
+      <literal>-s</literal>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-p</term>
+    <listitem><para>
+      Makes yaz-marcdump prints record number and input file offset
+      of each record read.
      </para></listitem>
    </varlistentry>
 
