@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.18 2007-01-11 10:30:41 adam Exp $
+ * $Id: comstack.c,v 1.19 2007-10-05 16:46:55 adam Exp $
  */
 
 /** 
@@ -74,62 +74,74 @@ void cs_get_host_args(const char *type_and_host, const char **args)
     }
 }
 
-COMSTACK cs_create_host(const char *type_and_host, int blocking, void **vp)
+int cs_parse_host(const char *uri, const char **host,
+                  CS_TYPE *t, enum oid_proto *proto)
 {
-    enum oid_proto proto = PROTO_Z3950;
-    const char *host = 0;
-    COMSTACK cs;
-    CS_TYPE t;
-
-    if (strncmp (type_and_host, "tcp:", 4) == 0)
+    if (strncmp (uri, "tcp:", 4) == 0)
     {
-        t = tcpip_type;
-        host = type_and_host + 4;
+        *t = tcpip_type;
+        *host = uri + 4;
+        *proto = PROTO_Z3950;
     }
-    else if (strncmp (type_and_host, "ssl:", 4) == 0)
+    else if (strncmp (uri, "ssl:", 4) == 0)
     {
 #if HAVE_OPENSSL_SSL_H
-        t = ssl_type;
-        host = type_and_host + 4;
+        *t = ssl_type;
+        *host = uri + 4;
+        *proto = PROTO_Z3950;
 #else
         return 0;
 #endif
     }
-    else if (strncmp (type_and_host, "unix:", 5) == 0)
+    else if (strncmp (uri, "unix:", 5) == 0)
     {
 #ifndef WIN32
-        t = unix_type;
-        host = type_and_host + 5;
+        *t = unix_type;
+        *host = uri + 5;
+        *proto = PROTO_Z3950;
 #else
         return 0;
 #endif
     }
-    else if (strncmp(type_and_host, "http:", 5) == 0)
+    else if (strncmp(uri, "http:", 5) == 0)
     {
-        t = tcpip_type;
-        host = type_and_host + 5;
-        while (host[0] == '/')
-            host++;
-        proto = PROTO_HTTP;
+        *t = tcpip_type;
+        *host = uri + 5;
+        while (**host == '/')
+            (*host)++;
+        *proto = PROTO_HTTP;
     }
-    else if (strncmp(type_and_host, "https:", 6) == 0)
+    else if (strncmp(uri, "https:", 6) == 0)
     {
 #if HAVE_OPENSSL_SSL_H
-        t = ssl_type;
-        host = type_and_host + 6;
-        while (host[0] == '/')
-            host++;
-        proto = PROTO_HTTP;
+        *t = ssl_type;
+        *host = uri + 6;
+        while (**host == '/')
+            (*host)++;
+        *proto = PROTO_HTTP;
 #else
         return 0;
 #endif
     }
     else
     {
-        t = tcpip_type;
-        host = type_and_host;
+        *proto = PROTO_Z3950;
+        *t = tcpip_type;
+        *host = uri;
     }
-    cs = cs_create (t, blocking, proto);
+    return 1;
+}
+
+COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
+{
+    enum oid_proto proto = PROTO_Z3950;
+    const char *host = 0;
+    COMSTACK cs;
+    CS_TYPE t;
+
+    cs_parse_host(vhost, &host, &t, &proto);
+
+    cs = cs_create(t, blocking, proto);
     if (!cs)
         return 0;
 

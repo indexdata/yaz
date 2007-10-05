@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: comstack.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: comstack.h,v 1.28 2007-10-05 16:46:55 adam Exp $ */
 
 /** 
  * \file comstack.h
@@ -133,6 +133,8 @@ YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
 YAZ_EXPORT int cs_complete_http(const char *buf, int len);
+YAZ_EXPORT int cs_parse_host(const char *uri, const char **host,
+                             CS_TYPE *t, enum oid_proto *proto);
                                           
 /*
  * error management.
