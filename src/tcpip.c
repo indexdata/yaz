@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.34 2007-01-19 10:28:42 adam Exp $
+ * $Id: tcpip.c,v 1.35 2007-10-07 08:53:26 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -65,6 +65,8 @@
 static int tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
 static int tcpip_get(COMSTACK h, char **buf, int *bufsize);
+static int tcpip_put_connect(COMSTACK h, char *buf, int size);
+static int tcpip_get_connect(COMSTACK h, char **buf, int *bufsize);
 static int tcpip_connect(COMSTACK h, void *address);
 static int tcpip_more(COMSTACK h);
 static int tcpip_rcvconnect(COMSTACK h);
@@ -115,6 +117,10 @@ typedef struct tcpip_state
     SSL *ssl;
     char cert_fname[256];
 #endif
+    char *connect_request_buf;
+    int connect_request_len;
+    char *connect_response_buf;
+    int connect_response_len;
 } tcpip_state;
 
 #ifdef WIN32
@@ -201,11 +207,37 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     else
         sp->complete = cs_complete_auto;
 
+    sp->connect_request_buf = 0;
+    sp->connect_request_len = 0;
+    sp->connect_response_buf = 0;
+    sp->connect_response_len = 0;
+
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new TCPIP comstack\n"));
 
     return p;
 }
+
+COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
+                          const char *connect_host)
+{
+    COMSTACK p = tcpip_type(s, flags, protocol, 0);
+    if (!p)
+        return 0;
+    if (connect_host)
+    {
+        tcpip_state *sp = (tcpip_state *) p->cprivate;
+        sp->connect_request_buf = xmalloc(strlen(connect_host) + 30);
+        sprintf(sp->connect_request_buf, "CONNECT %s HTTP/1.0\r\n\r\n",
+                connect_host);
+        sp->connect_request_len = strlen(sp->connect_request_buf);
+        p->f_put = tcpip_put_connect;
+        p->f_get = tcpip_get_connect;
+        sp->complete = cs_complete_auto_head; /* only want HTTP header */
+    }
+    return p;
+}
+
 
 #if HAVE_OPENSSL_SSL_H
 
@@ -792,6 +824,8 @@ COMSTACK tcpip_accept(COMSTACK h)
             state->ssl = SSL_new (state->ctx);
             SSL_set_fd (state->ssl, cnew->iofile);
         }
+        state->connect_request_buf = 0;
+        state->connect_response_buf = 0;
 #endif
         h = cnew;
     }
@@ -1208,6 +1242,8 @@ int tcpip_close(COMSTACK h)
     if (sp->ai)
         freeaddrinfo(sp->ai);
 #endif
+    xfree(sp->connect_request_buf);
+    xfree(sp->connect_response_buf);
     xfree(sp);
     xfree(h);
     return 0;
@@ -1374,6 +1410,38 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
     return 0;
 }
 #endif
+
+
+static int tcpip_put_connect(COMSTACK h, char *buf, int size)
+{
+    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
+
+    int r = tcpip_put(h, state->connect_request_buf,
+                      state->connect_request_len);
+    if (r == 0)
+    {
+        /* it's sent */
+        h->f_put = tcpip_put; /* switch to normal tcpip put */
+        r = tcpip_put(h, buf, size);
+    }
+    return r;
+}
+
+static int tcpip_get_connect(COMSTACK h, char **buf, int *bufsize)
+{
+    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
+    int r;
+
+    r = tcpip_get(h, &state->connect_response_buf, 
+                  &state->connect_response_len);
+    if (r < 1)
+        return r;
+    /* got the connect response completely */
+    state->complete = cs_complete_auto; /* switch to normal tcpip get */
+    h->f_get = tcpip_get;
+    return tcpip_get(h, buf, bufsize);
+}
+
 
 /*
  * Local variables:

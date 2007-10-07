@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: comstack.h,v 1.28 2007-10-05 16:46:55 adam Exp $ */
+/* $Id: comstack.h,v 1.29 2007-10-07 08:53:26 adam Exp $ */
 
 /** 
  * \file comstack.h
@@ -126,16 +126,14 @@ YAZ_EXPORT const char *cs_errmsg(int n);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host, 
                                    int blocking, void **vp);
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
+YAZ_EXPORT int cs_complete_auto_head(const unsigned char *buf, int len);
 YAZ_EXPORT int cs_complete_auto(const unsigned char *buf, int len);
 YAZ_EXPORT void *cs_get_ssl(COMSTACK cs);
 YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
-YAZ_EXPORT int cs_complete_http(const char *buf, int len);
-YAZ_EXPORT int cs_parse_host(const char *uri, const char **host,
-                             CS_TYPE *t, enum oid_proto *proto);
-                                          
+
 /*
  * error management.
  */

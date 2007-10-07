@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: tcpip.h,v 1.12 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: tcpip.h,v 1.13 2007-10-07 08:53:26 adam Exp $ */
 
 /**
  * \file tcpip.h
@@ -41,6 +41,8 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
 YAZ_EXPORT COMSTACK tcpip_type(int s, int flags, int protocol, void *vp);
 YAZ_EXPORT COMSTACK ssl_type(int s, int flags, int protocol, void *vp);
+YAZ_EXPORT COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
+                                     const char *connect_host);
 
 YAZ_END_CDECL
 

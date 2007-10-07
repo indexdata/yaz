@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.19 2007-10-05 16:46:55 adam Exp $
+ * $Id: comstack.c,v 1.20 2007-10-07 08:53:26 adam Exp $
  */
 
 /** 
@@ -74,9 +74,24 @@ void cs_get_host_args(const char *type_and_host, const char **args)
     }
 }
 
-int cs_parse_host(const char *uri, const char **host,
-                  CS_TYPE *t, enum oid_proto *proto)
+static int cs_parse_host(const char *uri, const char **host,
+                         CS_TYPE *t, enum oid_proto *proto,
+                         char **connect_host)
 {
+    *connect_host = 0;
+    if (strncmp(uri, "connect:", 8) == 0)
+    {
+        const char *cp = strchr(uri, ',');
+        if (cp)
+        {
+            size_t len = cp - (uri + 8);
+            *connect_host = xmalloc(len+1);
+            memcpy(*connect_host, uri + 8, len);
+            (*connect_host)[len] = '\0';
+            uri = cp+1;
+        }
+    }
+
     if (strncmp (uri, "tcp:", 4) == 0)
     {
         *t = tcpip_type;
@@ -138,18 +153,27 @@ COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
     const char *host = 0;
     COMSTACK cs;
     CS_TYPE t;
+    char *connect_host = 0;
 
-    cs_parse_host(vhost, &host, &t, &proto);
+    cs_parse_host(vhost, &host, &t, &proto, &connect_host);
 
-    cs = cs_create(t, blocking, proto);
-    if (!cs)
-        return 0;
-
-    if (!(*vp = cs_straddr(cs, host)))
+    if (t == tcpip_type)
     {
-        cs_close (cs);
-        return 0;
-    }    
+        cs = yaz_tcpip_create(-1, blocking, proto, connect_host ? host : 0);
+    }
+    else
+    {
+        cs = cs_create(t, blocking, proto);
+    }
+    if (cs)
+    {
+        if (!(*vp = cs_straddr(cs, connect_host ? connect_host : host)))
+        {
+            cs_close (cs);
+            cs = 0;
+        }    
+    }
+    xfree(connect_host);
     return cs;
 }
 
@@ -178,7 +202,7 @@ static int skip_crlf(const char *buf, int len, int *i)
 
 #define CHUNK_DEBUG 0
 
-int cs_complete_http(const char *buf, int len)
+static int cs_complete_http(const char *buf, int len, int head_only)
 {
     /* deal with HTTP request/response */
     int i = 2, content_len = 0, chunked = 0;
@@ -188,7 +212,7 @@ int cs_complete_http(const char *buf, int len)
 
     /* if dealing with HTTP responses - then default
        content length is unlimited (socket close) */
-    if (!memcmp(buf, "HTTP/", 5))
+    if (!head_only && !memcmp(buf, "HTTP/", 5))
         content_len = -1; 
 
 #if 0
@@ -324,16 +348,27 @@ int cs_complete_http(const char *buf, int len)
     return 0;
 }
 
-int cs_complete_auto(const unsigned char *buf, int len)
+static int cs_complete_auto_x(const unsigned char *buf, int len, int head_only)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
                 && buf[1] >= 0x20 && buf[1] < 0x7f
                 && buf[2] >= 0x20 && buf[2] < 0x7f)
     {
-        int r = cs_complete_http((const char *) buf, len);
+        int r = cs_complete_http((const char *) buf, len, head_only);
         return r;
     }
     return completeBER(buf, len);
+}
+
+
+int cs_complete_auto(const unsigned char *buf, int len)
+{
+    return cs_complete_auto_x(buf, len, 0);
+}
+
+int cs_complete_auto_head(const unsigned char *buf, int len)
+{
+    return cs_complete_auto_x(buf, len, 1);
 }
 
 void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes)
