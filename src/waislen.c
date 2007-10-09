@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: waislen.c,v 1.5 2007-01-03 08:42:15 adam Exp $
+ * $Id: waislen.c,v 1.6 2007-10-09 06:00:56 adam Exp $
  */
 /**
  * \file waislen.c
@@ -11,11 +11,10 @@
 
 #include <stdio.h>
 #include <yaz/comstack.h>
-#include <yaz/tcpip.h>
 /*
  * Return length of WAIS package or 0
  */
-int completeWAIS(const unsigned char *buf, int len)
+int completeWAIS(const char *buf, int len)
 {
     int i, lval = 0;
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.20 2007-10-07 08:53:26 adam Exp $
+ * $Id: comstack.c,v 1.21 2007-10-09 06:00:56 adam Exp $
  */
 
 /** 
@@ -348,25 +348,25 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     return 0;
 }
 
-static int cs_complete_auto_x(const unsigned char *buf, int len, int head_only)
+static int cs_complete_auto_x(const char *buf, int len, int head_only)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
                 && buf[1] >= 0x20 && buf[1] < 0x7f
                 && buf[2] >= 0x20 && buf[2] < 0x7f)
     {
-        int r = cs_complete_http((const char *) buf, len, head_only);
+        int r = cs_complete_http(buf, len, head_only);
         return r;
     }
-    return completeBER(buf, len);
+    return completeBER((const unsigned char *) buf, len);
 }
 
 
-int cs_complete_auto(const unsigned char *buf, int len)
+int cs_complete_auto(const char *buf, int len)
 {
     return cs_complete_auto_x(buf, len, 0);
 }
 
-int cs_complete_auto_head(const unsigned char *buf, int len)
+int cs_complete_auto_head(const char *buf, int len)
 {
     return cs_complete_auto_x(buf, len, 1);
 }

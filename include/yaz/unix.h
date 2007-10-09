@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: unix.h,v 1.9 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: unix.h,v 1.10 2007-10-09 06:00:55 adam Exp $ */
 
 /**
  * \file unix.h
@@ -40,7 +40,6 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT int completeWAIS(const unsigned char *buf, int len);
 YAZ_EXPORT struct sockaddr_un *unix_strtoaddr(const char *str);
 YAZ_EXPORT COMSTACK unix_type(int s, int flags, int protocol, void *vp);
 

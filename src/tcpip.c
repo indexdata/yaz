@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.35 2007-10-07 08:53:26 adam Exp $
+ * $Id: tcpip.c,v 1.36 2007-10-09 06:00:56 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -104,7 +104,7 @@ typedef struct tcpip_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
-    int (*complete)(const unsigned char *buf, int len); /* length/comple. */
+    int (*complete)(const char *buf, int len); /* length/complete. */
 #if HAVE_GETADDRINFO
     struct addrinfo *ai;
 #else
@@ -409,8 +409,7 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     
-    return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
-        sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
 }
 
 /*
@@ -895,7 +894,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
+    while (!(berlen = (*sp->complete)(*buf, hasread)))
     {
         if (!*bufsize)
         {
@@ -1026,7 +1025,7 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
+    while (!(berlen = (*sp->complete)(*buf, hasread)))
     {
         if (!*bufsize)
         {

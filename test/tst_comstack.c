@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_comstack.c,v 1.1 2007-01-11 10:30:41 adam Exp $
+ * $Id: tst_comstack.c,v 1.2 2007-10-09 06:00:56 adam Exp $
  */
 
 #include <stdlib.h>
@@ -21,12 +21,12 @@ static void tst_http_request(void)
             "\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 16), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 17), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 18), 18);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 19), 18);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 16), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 17), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 18), 18);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 19), 18);
     }
     {
         /* one header, no content */
@@ -37,11 +37,11 @@ static void tst_http_request(void)
             "\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 34), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 35), 35);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 36), 35);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 34), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 35), 35);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 36), 35);
     }        
     {
         /* one content-length header, length 0 */
@@ -52,11 +52,11 @@ static void tst_http_request(void)
             "\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 35), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 37), 37);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 38), 37);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 35), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 37), 37);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 38), 37);
     }        
     {
         /* one content-length header, length 5 */
@@ -68,11 +68,11 @@ static void tst_http_request(void)
             "ABCDE"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 41), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 42), 42);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 43), 42);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 41), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), 42);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 43), 42);
     }        
     {
         /* LF only in GET, one content-length header, length 5 */
@@ -84,11 +84,11 @@ static void tst_http_request(void)
             "ABCDE"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 40), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 41), 41);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 42), 41);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 40), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 41), 41);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), 41);
     }        
     {
         /* LF only in all places, one content-length header, length 5 */
@@ -100,11 +100,11 @@ static void tst_http_request(void)
             "ABCDE"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 38), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 39), 39);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 40), 39);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 38), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 39), 39);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 40), 39);
     }        
 
     {
@@ -116,8 +116,8 @@ static void tst_http_request(void)
             "\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 45), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 46), 46);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 45), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 46), 46);
     }        
 
     {
@@ -132,8 +132,8 @@ static void tst_http_request(void)
             "0\r\n\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 58), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 59), 59);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 58), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 59), 59);
     }        
 
     {
@@ -150,8 +150,8 @@ static void tst_http_request(void)
             "0\r\n\r\n"
             "GET / HTTP/1.0\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 64), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 65), 65);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 64), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 65), 65);
     }        
 }
 
@@ -165,9 +165,9 @@ static void tst_http_response(void)
             "\r\n"
             "HTTP/1.1 200 OK\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 24), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 24), 0);
     }
     {
         /* response, content  */
@@ -179,11 +179,11 @@ static void tst_http_response(void)
             "12"
             "HTTP/1.1 200 OK\r\n";
         
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 1), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 39), 0);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 40), 40);
-        YAZ_CHECK_EQ(cs_complete_http(http_buf, 41), 40);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 39), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 40), 40);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 41), 40);
     }
 }
 

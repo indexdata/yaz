@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: unix.c,v 1.19 2007-06-05 05:42:07 adam Exp $
+ * $Id: unix.c,v 1.20 2007-10-09 06:00:56 adam Exp $
  * UNIX socket COMSTACK. By Morten Bøgeskov.
  */
 /**
@@ -90,7 +90,7 @@ typedef struct unix_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
-    int (*complete)(const unsigned char *buf, int len); /* length/comple. */
+    int (*complete)(const char *buf, int len); /* length/complete. */
     struct sockaddr_un addr;  /* returned by cs_straddr */
     int uid;
     int gid;
@@ -309,8 +309,7 @@ static int unix_more(COMSTACK h)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)((unsigned char *) sp->altbuf,
-                                         sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
 }
 
 /*
@@ -575,7 +574,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)((unsigned char *)*buf, hasread)))
+    while (!(berlen = (*sp->complete)(*buf, hasread)))
     {
         if (!*bufsize)
         {
