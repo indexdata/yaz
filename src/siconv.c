@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.46 2007-10-05 15:11:36 adam Exp $
+ * $Id: siconv.c,v 1.47 2007-10-12 14:22:19 adam Exp $
  */
 /**
  * \file siconv.c
@@ -87,6 +87,8 @@ unsigned long yaz_marc8r_53_conv(unsigned char *inp, size_t inbytesleft,
 unsigned long yaz_marc8r_31_conv(unsigned char *inp, size_t inbytesleft,
                                  size_t *no_read, int *combining);
 
+#define ESC "\033"
+
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
@@ -115,7 +117,8 @@ struct yaz_iconv_struct {
     size_t write_marc8_comb_no;
     unsigned write_marc8_second_half_char;
     unsigned long write_marc8_last;
-    const char *write_marc8_page_chr;
+    const char *write_marc8_g0;
+    const char *write_marc8_g1;
 };
 
 static struct {
@@ -1456,73 +1459,78 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         x = yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(B";
+            *page_chr = ESC "(B";
             return x;
         }
         x = yaz_marc8r_45_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(B";
+#if 1
+            *page_chr = ESC "(B";
+#else
+            /* this possibly solves bug #1778 */
+            *page_chr = ESC ")!E";
+#endif
             return x;
         }
         x = yaz_marc8r_67_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033g";
+            *page_chr = ESC "g";
             return x;
         }
         x = yaz_marc8r_62_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033b";
+            *page_chr = ESC "b";
             return x;
         }
         x = yaz_marc8r_70_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033p";
+            *page_chr = ESC "p";
             return x;
         }
         x = yaz_marc8r_32_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(2";
+            *page_chr = ESC "(2";
             return x;
         }
         x = yaz_marc8r_4E_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(N";
+            *page_chr = ESC "(N";
             return x;
         }
         x = yaz_marc8r_51_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(Q";
+            *page_chr = ESC "(Q";
             return x;
         }
         x = yaz_marc8r_33_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(3";
+            *page_chr = ESC "(3";
             return x;
         }
         x = yaz_marc8r_34_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(4";
+            *page_chr = ESC "(4";
             return x;
         }
         x = yaz_marc8r_53_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033(S";
+            *page_chr = ESC "(S";
             return x;
         }
         x = yaz_marc8r_31_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-            *page_chr = "\033$1";
+            *page_chr = ESC "$1";
             return x;
         }
         cd->my_errno = YAZ_ICONV_EILSEQ;
@@ -1583,8 +1591,13 @@ static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
                                        char **outbuf, size_t *outbytesleft,
                                        const char *page_chr)
 {
-    const char *old_page_chr = cd->write_marc8_page_chr;
-    if (strcmp(page_chr, old_page_chr))
+    const char **old_page_chr = &cd->write_marc8_g0;
+
+    /* are we going to a G1-set (such as such as ESC ")!E") */
+    if (page_chr && page_chr[1] == ')')
+        old_page_chr = &cd->write_marc8_g1;
+
+    if (!*old_page_chr || strcmp(page_chr, *old_page_chr))
     {
         size_t plen = 0;
         const char *page_out = page_chr;
@@ -1595,24 +1608,27 @@ static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
             
             return (size_t) (-1);
         }
-        cd->write_marc8_page_chr = page_chr;
-        
-        if (!strcmp(old_page_chr, "\033p") 
-            || !strcmp(old_page_chr, "\033g")
-            || !strcmp(old_page_chr, "\033b"))
+
+        if (*old_page_chr)
         {
-            /* Technique 1 leave */
-            page_out = "\033s";
-            if (strcmp(page_chr, "\033(B")) /* Not going ASCII page? */
+            if (!strcmp(*old_page_chr, ESC "p") 
+                || !strcmp(*old_page_chr, ESC "g")
+                || !strcmp(*old_page_chr, ESC "b"))
             {
-                /* Must leave script + enter new page */
-                plen = strlen(page_out);
-                memcpy(*outbuf, page_out, plen);
-                (*outbuf) += plen;
-                (*outbytesleft) -= plen;
-                page_out = page_chr;
+                page_out = ESC "s";
+                /* Technique 1 leave */
+                if (strcmp(page_chr, ESC "(B")) /* Not going ASCII page? */
+                {
+                    /* Must leave script + enter new page */
+                    plen = strlen(page_out);
+                    memcpy(*outbuf, page_out, plen);
+                    (*outbuf) += plen;
+                    (*outbytesleft) -= plen;
+                    page_out = ESC "(B";
+                }
             }
         }
+        *old_page_chr = page_chr;
         plen = strlen(page_out);
         memcpy(*outbuf, page_out, plen);
         (*outbuf) += plen;
@@ -1634,6 +1650,12 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
 
     if (comb)
     {
+        if (page_chr)
+        {
+            size_t r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, page_chr);
+            if (r)
+                return r;
+        }
         if (x == 0x0361)
             cd->write_marc8_second_half_char = 0xEC;
         else if (x == 0x0360)
@@ -1665,7 +1687,8 @@ static size_t yaz_flush_marc8(yaz_iconv_t cd,
     size_t r = flush_combos(cd, outbuf, outbytesleft);
     if (r)
         return r;
-    return yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, "\033(B");
+    cd->write_marc8_g1 = 0;
+    return yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, ESC "(B");
 }
 
 static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
@@ -1878,7 +1901,8 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         cd->write_marc8_comb_no = 0;
         cd->write_marc8_second_half_char = 0;
         cd->write_marc8_last = 0;
-        cd->write_marc8_page_chr = "\033(B";
+        cd->write_marc8_g0 = ESC "(B";
+        cd->write_marc8_g1 = 0;
         
         cd->unget_x = 0;
         cd->no_read_x = 0;
