@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.31 2007-09-22 18:56:22 adam Exp $
+ * $Id: tsticonv.c,v 1.32 2007-10-15 20:45:05 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -134,7 +134,7 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
         
         wrbuf_rewind(w);
         wrbuf_verbose_str(w, cmpbuf, strlen(cmpbuf));
-        yaz_log(YLOG_LOG, "expected %s", wrbuf_cstr(w));
+        yaz_log(YLOG_LOG, "exp %s", wrbuf_cstr(w));
 
         wrbuf_destroy(w);
     }
@@ -515,7 +515,15 @@ static void tst_utf8_to_marc8(void)
                           "(\033p0\x1bs)"));
     
     
- 
+    /** bug #1778 */
+    YAZ_CHECK(tst_convert(cd,
+                          /* offset 0x530 in UTF-8 rec marccol4.u8.marc */
+                          "\xE3\x83\xB3" "\xE3\x82\xBF" 
+                          "\xCC\x84" "\xCC\x84" "\xE3\x83\xBC" /* UTF-8 */,
+                          "\x1B\x24\x31" "\x69\x25\x73"
+                          "\x1B\x28\x42" "\xE5\xE5" "\x1B\x24\x31" 
+                          "\x69\x25\x3F"
+                          "\x69\x21\x3C" "\x1B\x28\x42"));
  
     {
         char *inbuf0 = "\xe2\x81\xb0";

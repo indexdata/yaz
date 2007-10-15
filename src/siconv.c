@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.47 2007-10-12 14:22:19 adam Exp $
+ * $Id: siconv.c,v 1.48 2007-10-15 20:45:05 adam Exp $
  */
 /**
  * \file siconv.c
@@ -113,10 +113,9 @@ struct yaz_iconv_struct {
 #endif
     unsigned long compose_char;
 
-    unsigned long write_marc8_comb_ch[8];
-    size_t write_marc8_comb_no;
     unsigned write_marc8_second_half_char;
     unsigned long write_marc8_last;
+    const char *write_marc8_lpage;
     const char *write_marc8_g0;
     const char *write_marc8_g1;
 };
@@ -191,6 +190,10 @@ static struct {
     
     { 0, 0, 0}
 };
+
+static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd, 
+                                       char **outbuf, size_t *outbytesleft,
+                                       const char *page_chr);
 
 static unsigned long yaz_read_ISO8859_1 (yaz_iconv_t cd, unsigned char *inp,
                                          size_t inbytesleft, size_t *no_read)
@@ -1465,12 +1468,7 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         x = yaz_marc8r_45_conv(inp, inbytesleft, &no_read_sub, comb);
         if (x)
         {
-#if 1
             *page_chr = ESC "(B";
-#else
-            /* this possibly solves bug #1778 */
-            *page_chr = ESC ")!E";
-#endif
             return x;
         }
         x = yaz_marc8r_67_conv(inp, inbytesleft, &no_read_sub, comb);
@@ -1543,11 +1541,20 @@ static size_t flush_combos(yaz_iconv_t cd,
 {
     unsigned long y = cd->write_marc8_last;
     unsigned char byte;
-    char out_buf[10];
-    size_t i, out_no = 0;
+    char out_buf[4];
+    size_t out_no = 0;
 
     if (!y)
         return 0;
+
+    assert(cd->write_marc8_lpage);
+    if (cd->write_marc8_lpage)
+    {
+        size_t r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft,
+                                            cd->write_marc8_lpage);
+        if (r)
+            return r;
+    }
 
     byte = (unsigned char )((y>>16) & 0xff);
     if (byte)
@@ -1559,19 +1566,12 @@ static size_t flush_combos(yaz_iconv_t cd,
     if (byte)
         out_buf[out_no++] = byte;
 
-    if (out_no + cd->write_marc8_comb_no + 1 > *outbytesleft)
+    if (out_no + 2 >= *outbytesleft)
     {
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t) (-1);
     }
 
-    for (i = 0; i < cd->write_marc8_comb_no; i++)
-    {
-        /* all MARC-8 combined characters are simple bytes */
-        byte = (unsigned char )(cd->write_marc8_comb_ch[i]);
-        *(*outbuf)++ = byte;
-        (*outbytesleft)--;
-    }
     memcpy(*outbuf, out_buf, out_no);
     *outbuf += out_no;
     (*outbytesleft) -= out_no;
@@ -1582,7 +1582,7 @@ static size_t flush_combos(yaz_iconv_t cd,
     }        
 
     cd->write_marc8_last = 0;
-    cd->write_marc8_comb_no = 0;
+    cd->write_marc8_lpage = 0;
     cd->write_marc8_second_half_char = 0;
     return 0;
 }
@@ -1652,7 +1652,8 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
     {
         if (page_chr)
         {
-            size_t r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, page_chr);
+            size_t r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft,
+                                                page_chr);
             if (r)
                 return r;
         }
@@ -1661,8 +1662,13 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
         else if (x == 0x0360)
             cd->write_marc8_second_half_char = 0xFB;
 
-        if (cd->write_marc8_comb_no < 6)
-            cd->write_marc8_comb_ch[cd->write_marc8_comb_no++] = y;
+        if (*outbytesleft <= 1)
+        {
+            cd->my_errno = YAZ_ICONV_E2BIG;
+            return (size_t) (-1);
+        }
+        *(*outbuf)++ = y;
+        (*outbytesleft)--;
     }
     else
     {
@@ -1670,13 +1676,8 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
         if (r)
             return r;
 
-        if (page_chr)
-        {
-            r = yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, page_chr);
-            if (r)
-                return r;
-        }
         cd->write_marc8_last = y;
+        cd->write_marc8_lpage = page_chr;
     }
     return 0;
 }
@@ -1704,6 +1705,7 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
             char *outbuf0 = *outbuf;
             size_t outbytesleft0 = *outbytesleft;
             int last_ch = cd->write_marc8_last;
+            const char *lpage = cd->write_marc8_lpage;
 
             r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
                                   outbuf, outbytesleft);
@@ -1717,6 +1719,7 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
                 *outbuf = outbuf0;
                 *outbytesleft = outbytesleft0;
                 cd->write_marc8_last = last_ch;
+                cd->write_marc8_lpage = lpage;
             }
             return r;
         }
@@ -1898,9 +1901,9 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         cd->comb_offset = cd->comb_size = 0;
         cd->compose_char = 0;
         
-        cd->write_marc8_comb_no = 0;
         cd->write_marc8_second_half_char = 0;
         cd->write_marc8_last = 0;
+        cd->write_marc8_lpage = 0;
         cd->write_marc8_g0 = ESC "(B";
         cd->write_marc8_g1 = 0;
         
