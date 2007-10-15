@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.20 2007-09-17 19:14:26 adam Exp $
+ * $Id: wrbuf.c,v 1.21 2007-10-15 12:00:31 adam Exp $
  */
 
 /**
@@ -160,7 +160,7 @@ static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
 {
     if (cd)
     {
-        char outbuf[12];
+        char outbuf[16];
         size_t inbytesleft = size;
         const char *inp = buf;
         while (inbytesleft)
@@ -217,7 +217,7 @@ void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
 {
     if (cd)
     {
-        char outbuf[12];
+        char outbuf[16];
         size_t outbytesleft = sizeof(outbuf);
         char *outp = outbuf;
         size_t r = yaz_iconv(cd, 0, 0, &outp, &outbytesleft);
