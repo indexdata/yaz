@@ -1,0 +1,26 @@
+01357nas a2200313 a 4500
+001   2007210635
+003 DLC
+005 20071005153240.0
+008 071005c200u9999ja  |         |   d0jpn  
+010    $a   2007210635
+035    $a (OCoLC)173684089
+040    $a DLC $c DLC $d DLC
+042    $a lc
+043    $a a-ja---
+050 00 $a T27.J32 $b S83a
+066    $c $1
+110 2  $6 880-01 $a Sangyō Gijutsu Sōgō Kenkyūjo. $b Shikoku Sangakukan Renkei Sentā.
+245 10 $6 880-02 $a Shikoku Sangakukan Renkei Sentā̄ katsudo hokoku.
+246 11 $a Activity report
+260    $6 880-03 $a Kagawa-ken Takamatsu-shi : $b Sangyō Gijutsu Sōgō Kenkyūjo Shikoku Sangakukan Renkei Sentā
+500    $a Description based on: 2005; title from cover.
+610 20 $a Sangyō Gijutsu Sōgō Kenkyūjo. $b Shikoku Sangakukan Renkei Sentā $v Periodicals.
+650  0 $a Technology $z Japan $v Periodicals.
+650  0 $a Technological innovations $z Japan $v Periodicals.
+850    $a DLC
+880 2  $6 110-01/$1 $a 産業技術総合研究所. $b 四国産学官連携センター.
+880 10 $6 245-02/$1 $a 四国産学官連携センタ̄̄ー活動報告.
+880    $6 260-03/$1 $a 香川県高松市 : $b 産業技術総合研究所研究所四国産学官連携センター.
+880 24 $6 610-00/$1 $a 産業技術総合研究所. $b 四国産学官連携センタ̄̄ー $v Periodicals.
+
