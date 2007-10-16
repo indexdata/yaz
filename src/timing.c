@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: timing.c,v 1.4 2007-01-05 14:05:24 adam Exp $
+ * $Id: timing.c,v 1.4.2.1 2007-10-16 11:57:51 adam Exp $
  */
 
 /**
@@ -38,9 +38,9 @@ struct yaz_timing {
     struct timeval start_time, end_time;
 #endif
 #ifdef WIN32
-    ULONGLONG start_time, end_time;
-    ULONGLONG start_time_sys, start_time_user;
-    ULONGLONG end_time_sys, end_time_user;
+    LONGLONG start_time, end_time;
+    LONGLONG start_time_sys, start_time_user;
+    LONGLONG end_time_sys, end_time_user;
 #endif
     double real_sec, user_sec, sys_sec;
 };
