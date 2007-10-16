@@ -1,4 +1,4 @@
-<!-- $Id: odr.xml,v 1.20 2007-02-01 09:56:14 adam Exp $ -->
+<!-- $Id: odr.xml,v 1.21 2007-10-16 10:45:53 adam Exp $ -->
  <chapter id="odr"><title>The ODR Module</title>
   
   <sect1 id="odr.introduction"><title>Introduction</title>
@@ -759,9 +759,9 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
      <para>
       The C OID representation is simply an array of integers, terminated by
       the value -1 (the <literal>Odr_oid</literal> type is synonymous with
-      the <literal>int</literal> type).
+      the <literal>short</literal> type).
       We suggest that you use the OID database module (see
-      <xref linkend="asn.oid"/>) to handle object identifiers
+      <xref linkend="tools.oid.database"/>) to handle object identifiers
       in your application.
      </para>
 
