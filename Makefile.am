@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.44 2007-03-16 08:58:39 adam Exp $
+## $Id: Makefile.am,v 1.45 2007-10-22 17:52:09 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -18,7 +18,7 @@ pkgconfig_DATA = yaz.pc
 SPEC_FILE=$(PACKAGE).spec
 EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO \
 	yaz-config.in yaz.pc.in m4/yaz.m4 m4/yaz_libxml2.m4 buildconf.sh \
-	Doxyfile.in m4/acx_pthread.m4
+	Doxyfile.in m4/acx_pthread.m4 m4/ac_check_icu.m4
 
 dist-hook:
 	if test -x /usr/bin/cvs2cl -a -d CVS; then cvs2cl ; cp ChangeLog $(distdir); fi
