@@ -1,26 +1,12 @@
-/* $Id: yaz-icu.c,v 1.1 2007-10-22 12:21:40 adam Exp $
-   Copyright (c) 2006-2007, Index Data.
-
-This file is part of Pazpar2.
-
-Pazpar2 is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2, or (at your option) any later
-version.
-
-Pazpar2 is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
-
-You should have received a copy of the GNU General Public License
-along with Pazpar2; see the file LICENSE.  If not, write to the
-Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.
+/*
+ * Copyright (C) 1995-2007, Index Data ApS
+ * See the file LICENSE for details.
+ *
+ * $Id: yaz-icu.c,v 1.2 2007-10-22 17:32:08 adam Exp $
  */
 
 #if HAVE_CONFIG_H
-#include "cconfig.h"
+#include "config.h"
 #endif
 
 #include <string.h>
@@ -28,11 +14,10 @@ Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include <stdio.h>
 #include <stdlib.h>
 
-//#include <yaz/xmalloc.h>
 #include <yaz/options.h>
 
 
-#ifdef HAVE_ICU
+#if HAVE_ICU
 
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
@@ -118,7 +103,7 @@ void read_params(int argc, char **argv, struct config_t *p_config)
         || !config.outfile)
         
         print_option_error(p_config);
-};
+}
 
 
 /*     UConverter *conv; */
@@ -170,13 +155,10 @@ static void print_icu_converters(const struct config_t *p_config)
 
 static void print_icu_transliterators(const struct config_t *p_config)
 {
-    int32_t count;
-    int32_t i;
-    
-    count = utrans_countAvailableIDs();
-    
     int32_t buf_cap = 128;
     char buf[buf_cap];
+    int32_t i;
+    int32_t count = utrans_countAvailableIDs();
     
     if (p_config->xmloutput)
         fprintf(config.outfile, "<transliterators count=\"%d\">\n",  count);
@@ -435,7 +417,7 @@ static void print_info(const struct config_t *p_config)
         fprintf(config.outfile, "</icu>\n");
 
     exit(0);
-};
+}
 
 
 
@@ -476,7 +458,7 @@ static void process_text_file(const struct config_t *p_config)
                 "<icu>\n"
                 "<tokens>\n");
     
-    // read input lines for processing
+    /* read input lines for processing */
     while ((line=fgets(linebuf, sizeof(linebuf)-1, config.infile)))
     {
         success = icu_chain_assign_cstr(config.chain, line, &status);
@@ -515,15 +497,15 @@ static void process_text_file(const struct config_t *p_config)
     xmlFreeDoc(doc);
     if (line)
         free(line);
-};
+}
 
-#endif // HAVE_ICU
+#endif /* HAVE_ICU */
 
 
 int main(int argc, char **argv) 
 {
 
-#ifdef HAVE_ICU
+#if HAVE_ICU
 
     read_params(argc, argv, &config);
 
@@ -533,17 +515,17 @@ int main(int argc, char **argv)
     if (config.print && strlen(config.print))
         print_info(&config);
 
-#else // HAVE_ICU
+#else /* HAVE_ICU */
 
     printf("ICU not available on your system.\n"
            "Please install libicu36-dev and icu-doc or similar, "
            "re-configure and re-compile\n");
 
 
-#endif // HAVE_ICU
+#endif /* HAVE_ICU */
 
     return(0);
-};
+}
 
 
 /*
