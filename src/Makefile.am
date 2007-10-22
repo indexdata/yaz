@@ -1,10 +1,10 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.68 2007-05-07 13:18:32 adam Exp $
+## $Id: Makefile.am,v 1.69 2007-10-22 12:21:39 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
-lib_LTLIBRARIES = libyaz.la libyaz_server.la
+lib_LTLIBRARIES = libyaz.la libyaz_server.la libyaz_icu.la
 
 dist-hook:
 	test -f $(srcdir)/cql.c || exit 1
@@ -28,7 +28,7 @@ YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 libyaz_server_la_CFLAGS = $(PTHREAD_CFLAGS)
-
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS)
 
 AM_YFLAGS=-p cql_
 
@@ -102,6 +102,9 @@ libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
   requestq.c eventl.h session.h service.c service.h mutex.c
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
+
+libyaz_icu_la_SOURCES = icu_I18N.c
+libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
 z-accdes1.c \

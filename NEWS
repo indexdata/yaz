@@ -1,3 +1,5 @@
+Added ICU chain component - which used to be part of Pazpar2.
+
 Added HTTP tunnel facility for COMSTACK, bug #1752.
 This is a facility that allows a Web proxy, such as squid, to tunnel
 Z39.50 traffic. This facility is "transparent" to must applications

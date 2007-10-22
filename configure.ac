@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.94 2007-09-26 19:14:04 adam Exp $
+dnl $Id: configure.ac,v 1.95 2007-10-22 12:21:38 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.15],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -313,9 +313,13 @@ fi
 dnl
 AC_SUBST(YAZ_CONFIG_CFLAGS)
 dnl
-HAVETHREADS=0
+dnl 
+AC_CHECK_ICU(3.6, [],
+    AC_MSG_WARN([For ICU internationalizing support please install libicu36-dev 
+    or similar]))
 dnl
 dnl ------ GNU threads
+HAVETHREADS=0
 AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
 AC_SUBST(LIBPTH)
 if test "$enable_pth" = "yes"; then

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.30 2007-04-18 18:46:37 adam Exp $
+# $Id: yaz-config.in,v 1.31 2007-10-22 12:21:38 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -11,6 +11,8 @@ yaz_src_root=@YAZ_SRC_ROOT@
 yaz_build_root=@YAZ_BUILD_ROOT@
 PTHREAD_LIBS="@PTHREAD_LIBS@"
 PTHREAD_CFLAGS="@PTHREAD_CFLAGS@"
+ICU_LIBS="@ICU_LIBS@"
+ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 
 yazextralibs="@LIBS@"
 YAZVERSION=@VERSION@
@@ -65,6 +67,9 @@ while test $# -gt 0; do
 	threads)
 	    lib_thread=yes
 	    ;;
+	icu)
+	    lib_icu=yes
+	    ;;
 	server)
 	    lib_thread=yes
 	    lib_server=yes
@@ -82,6 +87,10 @@ done
 lyaz="-lyaz"
 if test "$lib_server" = "yes"; then
     lyaz="-lyaz_server $lyaz"
+fi
+
+if test "$lib_icu" = "yes"; then
+    lyaz="-lyaz_icu $lyaz"
 fi
 
 YAZINC="@YAZ_CONFIG_CFLAGS@"
@@ -125,6 +134,12 @@ if test "$lib_thread" = "yes"; then
     YAZINC="$PTHREAD_CFLAGS $YAZINC"
     YAZLIB="$YAZLIB $PTHREAD_LIBS"
     YAZLALIB="$YAZLALIB $PTHREAD_LIBS"
+fi
+
+if test "$lib_icu" = "yes"; then
+    YAZINC="$YAZINC $ICU_CPPFLAGS"
+    YAZLIB="$YAZLIB $ICU_LIBS"
+    YAZLALIB="$YAZLALIB $ICU_LIBS"
 fi
 
 if test "$yaz_echo_help" = "yes"; then

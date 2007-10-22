@@ -1,16 +1,17 @@
 ## Copyright (C) 1995-2007, Index Data
 ## All rights reserved.
-## $Id: Makefile.am,v 1.32 2007-06-03 09:57:25 adam Exp $
+## $Id: Makefile.am,v 1.33 2007-10-22 12:21:40 adam Exp $
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
-EXTRA_DIST = yaz-asncomp 
+EXTRA_DIST = yaz-asncomp yaz-icu-example.xml
 
 DISTCLEANFILES = yaz-config
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
+yaz_icu_CPPFLAGS=$(AM_CPPFLAGS) $(ICU_CPPFLAGS)
 
-bin_PROGRAMS = yaz-marcdump yaz-iconv yaz-illclient
+bin_PROGRAMS = yaz-marcdump yaz-iconv yaz-illclient yaz-icu
 noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark yaz-xmlquery
 
 # MARC dumper utility
@@ -41,3 +42,6 @@ yaz_xmlquery_LDADD = ../src/libyaz.la
 
 yaz_illclient_SOURCES = yaz-illclient.c
 yaz_illclient_LDADD = ../src/libyaz.la $(READLINE_LIBS)
+
+yaz_icu_SOURCES = yaz-icu.c
+yaz_icu_LDADD =../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)

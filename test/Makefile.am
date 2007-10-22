@@ -1,11 +1,11 @@
 ## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.38 2007-10-15 20:45:46 adam Exp $
+## $Id: Makefile.am,v 1.39 2007-10-22 12:21:39 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
- tst_timing tst_query_charset tst_oid
+ tst_timing tst_query_charset tst_oid tst_icu_I18N
 check_SCRIPTS = tstcql.sh tstmarc.sh tstmarccol.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -32,6 +32,7 @@ YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
+tst_icu_I18N_CPPFLAGS=$(AM_CPPFLAGS) $(ICU_CPPFLAGS)
 
 dist-hook:
 	mkdir -p $(distdir)/cql
@@ -43,6 +44,7 @@ tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
+tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(LDADD) $(ICU_LIBS)
 
 CONFIG_CLEAN_FILES=*.log
 
@@ -67,3 +69,4 @@ tst_retrieval_SOURCES = tst_retrieval.c
 tst_tpath_SOURCES = tst_tpath.c
 tst_timing_SOURCES = tst_timing.c
 tst_query_charset_SOURCES = tst_query_charset.c
+tst_icu_I18N_SOURCES = tst_icu_I18N.c
