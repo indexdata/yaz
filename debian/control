@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libpcap0.8-dev
+Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libpcap0.8-dev, libicu36-dev
 
 Package: libyaz3
 Section: libs
@@ -66,4 +66,11 @@ Architecture: any
 Description: yaz-illclient: an ISO ILL client.
  yaz-illclient is a command-line based client which sends ILL requests
  to a server and decodes the response.
+
+Package: yaz-icu
+Section: utils
+Depends: ${shlibs:Depends}
+Architecture: any
+Description: yaz-icu: command line utility for YAZ' ICU utilities.
+ yaz-icu is a command-line based client which tests YAZ' ICU utilities.
 

@@ -3,8 +3,8 @@ Added ICU chain component - which used to be part of Pazpar2.
 Added HTTP tunnel facility for COMSTACK, bug #1752.
 This is a facility that allows a Web proxy, such as squid, to tunnel
 Z39.50 traffic. This facility is "transparent" to must applications
-using YAZ. It's enabled by using pseudo transport connect: followed bý
-the we proxy address, followed by command, then follwed by he regular
+using YAZ. It's enabled by using pseudo transport connect: followed by
+the proxy address, followed by command, then follwed by he regular
 "virtual" addresss. For example,
 connect:webproxy.com:3128,tcp:z3950.loc.gov:7090/voyager . 
 
