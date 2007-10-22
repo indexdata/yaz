@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.31 2007-10-22 12:21:38 adam Exp $
+# $Id: yaz-config.in,v 1.32 2007-10-22 12:50:52 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -111,6 +111,9 @@ if test "$yaz_echo_source" = "yes"; then
     YAZLALIB="${yaz_build_root}/src/libyaz.la"
     if test "$lib_server" = "yes"; then
 	YAZLALIB="${yaz_build_root}/src/libyaz_server.la $YAZLALIB"
+    fi
+    if test "$lib_icu" = "yes"; then
+	YAZLALIB="${yaz_build_root}/src/libyaz_icu.la $YAZLALIB"
     fi
     YAZLALIB="$YAZLALIB $yazextralibs"
 
