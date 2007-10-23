@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.2 2007-10-22 17:32:07 adam Exp $
+/* $Id: tst_icu_I18N.c,v 1.3 2007-10-23 07:51:57 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -508,7 +508,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    printf("ICU chain:\ninput: '%s'\n", en_str);
+    // printf("ICU chain:\ninput: '%s'\n", en_str);
 
 
     chain = icu_chain_xml_config(xml_node, &status);
@@ -552,10 +552,11 @@ void test_icu_I18N_chain(int argc, char **argv)
     YAZ_CHECK(icu_chain_assign_cstr(chain, en_str, &status));
 
     while (icu_chain_next_token(chain, &status)){
-        printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+        ;
+        // printf("%d '%s' '%s'\n",
+        //       icu_chain_get_token_count(chain),
+        //       icu_chain_get_norm(chain),
+        //       icu_chain_get_display(chain));
     }
 
     YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 7);
@@ -564,10 +565,11 @@ void test_icu_I18N_chain(int argc, char **argv)
     YAZ_CHECK(icu_chain_assign_cstr(chain, "what is this?", &status));
 
     while (icu_chain_next_token(chain, &status)){
-        printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+        ;
+        //printf("%d '%s' '%s'\n",
+        //       icu_chain_get_token_count(chain),
+        //       icu_chain_get_norm(chain),
+        //       icu_chain_get_display(chain));
     }
 
 
@@ -618,10 +620,11 @@ void test_bug_1140(void)
     YAZ_CHECK(icu_chain_assign_cstr(chain, "what is this?", &status));
 
     while (icu_chain_next_token(chain, &status)){
-        printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+       ;
+       //printf("%d '%s' '%s'\n",
+       //        icu_chain_get_token_count(chain),
+       //        icu_chain_get_norm(chain),
+       //        icu_chain_get_display(chain));
     }
 
     /* we expect 'what' 'is' 'this', i.e. 3 tokens */
