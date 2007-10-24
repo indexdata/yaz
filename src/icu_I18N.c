@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.3 2007-10-24 07:41:48 marc Exp $
+ * $Id: icu_I18N.c,v 1.4 2007-10-24 13:23:34 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -337,12 +337,13 @@ struct icu_casemap * icu_casemap_create(const char *locale, char action,
 
     switch(casemap->action) {    
     case 'l':   
-        break;
+    case 'L':   
     case 'u':   
-        break;
+    case 'U':   
     case 't':  
-        break;
+    case 'T':  
     case 'f':  
+    case 'F':  
         break;
     default:
         icu_casemap_destroy(casemap);
@@ -1043,6 +1044,104 @@ int icu_chain_step_next_token(struct icu_chain * chain,
                               UErrorCode *status)
 {
     struct icu_buf_utf16 * src16 = 0;
+    int got_new_token = 0;
+
+    if (!chain || !chain->src16 || !step || !step->more_tokens)
+        return 0;
+
+    /* assign utf16 src buffers as neeed, advance in previous steps
+       tokens until non-zero token met, and setting stop condition */
+
+    if (step->previous){
+        src16 = step->previous->buf16;
+        /* tokens might be killed in previous steps, therefore looping */
+        while (step->need_new_token 
+               && step->previous->more_tokens
+               && !got_new_token)
+            got_new_token
+                = icu_chain_step_next_token(chain, step->previous, status);
+    }
+    else { /* first step can only work once on chain->src16 input buffer */
+        src16 = chain->src16;
+        step->more_tokens = 0;
+        got_new_token = 1;
+    }
+
+    if (!src16)
+        return 0;
+
+    /* stop if nothing to process */
+    if (step->need_new_token && !got_new_token){
+        step->more_tokens = 0;
+        return 0;
+    }
+
+    /* either an old token not finished yet, or a new token, thus
+       perform the work, eventually put this steps output in 
+       step->buf16 or the chains UTF8 output buffers  */
+
+    switch(step->type) {
+    case ICU_chain_step_type_display:
+        icu_utf16_to_utf8(chain->display8, src16, status);
+        break;
+    case ICU_chain_step_type_index:
+        icu_utf16_to_utf8(chain->norm8, src16, status);
+        break;
+    case ICU_chain_step_type_sortkey:
+        icu_utf16_to_utf8(chain->sort8, src16, status);
+        break;
+    case ICU_chain_step_type_casemap:
+        icu_casemap_casemap(step->u.casemap,
+                            step->buf16, src16, status);
+        break;
+    case ICU_chain_step_type_normalize:
+        icu_normalizer_normalize(step->u.normalizer,
+                                 step->buf16, src16, status);
+        break;
+    case ICU_chain_step_type_tokenize:
+        /* attach to new src16 token only first time during splitting */
+        if (step->need_new_token){
+            icu_tokenizer_attach(step->u.tokenizer, src16, status);
+            step->need_new_token = 0;
+        }
+
+
+        /* splitting one src16 token into multiple buf16 tokens */
+        step->more_tokens
+            = icu_tokenizer_next_token(step->u.tokenizer,
+                                       step->buf16, status);
+
+        /* make sure to get new previous token if this one had been used up
+           by recursive call to _same_ step */
+
+        if (!step->more_tokens)
+            step->more_tokens = icu_chain_step_next_token(chain, step, status);
+
+        //if (0 == step->more_tokens)
+        //return 0;
+        break;
+    default:
+        return 0;
+        break;
+    }
+
+    if (U_FAILURE(*status))
+        return 0;
+
+    /* if token disappered into thin air, tell caller */
+    if (!step->buf16->utf16_len)
+        return 0;
+
+    return 1;
+}
+
+
+#if 0 /* backup */
+int icu_chain_step_next_token_BAK(struct icu_chain * chain,
+                              struct icu_chain_step * step,
+                              UErrorCode *status)
+{
+    struct icu_buf_utf16 * src16 = 0;
     
     if (!chain || !chain->src16 || !step || !step->more_tokens)
         return 0;
@@ -1133,7 +1232,7 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     return 1;
 }
 
-
+#endif /* backup */
 
 int icu_chain_assign_cstr(struct icu_chain * chain,
                           const char * src8cstr, 

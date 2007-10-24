@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.4 2007-10-24 07:41:48 marc Exp $
+/* $Id: tst_icu_I18N.c,v 1.5 2007-10-24 13:23:34 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -614,10 +614,10 @@ void test_bug_1140(void)
 
     while (icu_chain_next_token(chain, &status)){    
         ;
-       printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+        //printf("%d '%s' '%s'\n",
+        //       icu_chain_get_token_count(chain),
+        //       icu_chain_get_norm(chain),
+        //       icu_chain_get_display(chain));
 
     }
     
@@ -628,10 +628,10 @@ void test_bug_1140(void)
 
     while (icu_chain_next_token(chain, &status)){
        ;
-       printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+       //printf("%d '%s' '%s'\n",
+       //        icu_chain_get_token_count(chain),
+       //        icu_chain_get_norm(chain),
+       //        icu_chain_get_display(chain));
     }
 
     /* we expect 'what' 'is' 'this', i.e. 3 tokens */
@@ -647,9 +647,9 @@ void test_chain_empty_token(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
 
-    const char * xml_str = "<icu_chain id=\"en:word\" locale=\"el\">"
-        "<normalize rule=\"Remove\"/>"
-        "<normalize rule=\"Lower\"/>"
+    const char * xml_str = "<icu_chain id=\"en:word\" locale=\"en\">"
+        "<tokenize rule=\"w\"/>"
+        "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<index/>"
         "</icu_chain>";
     
@@ -663,20 +663,18 @@ void test_chain_empty_token(void)
     YAZ_CHECK(chain);
     
     YAZ_CHECK(icu_chain_assign_cstr(
-                  chain,  " ",
+                  chain,  "a string with 15 wordbreaks and 8 tokens",
                   &status));
 
     while (icu_chain_next_token(chain, &status)){
         ;
-        printf("%d '%s' '%s'\n",
-               icu_chain_get_token_count(chain),
-               icu_chain_get_norm(chain),
-               icu_chain_get_display(chain));
+        //printf("%d '%s' '%s'\n",
+        //       icu_chain_get_token_count(chain),
+        //       icu_chain_get_norm(chain),
+        //       icu_chain_get_display(chain));
     }
 
-    // this should result in one toke, namely the empty token '',
-    // but it has none.
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 0);
+    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 8);
 
     icu_chain_destroy(chain);
 }
@@ -698,7 +696,7 @@ int main(int argc, char **argv)
     test_icu_I18N_normalizer(argc, argv); 
     test_icu_I18N_tokenizer(argc, argv);
     test_icu_I18N_chain(argc, argv);
-    //test_chain_empty_token();
+    test_chain_empty_token();
     test_bug_1140();
 
 #else /* HAVE_ICU */
