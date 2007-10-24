@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.136 2007-06-13 08:22:31 adam Exp $
+# $Id: makefile,v 1.137 2007-10-24 13:50:04 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -438,7 +438,8 @@ MISC_OBJS= \
    $(OBJDIR)\query-charset.obj \
    $(OBJDIR)\tokenizer.obj \
    $(OBJDIR)\copy_types.obj \
-   $(OBJDIR)\http.obj
+   $(OBJDIR)\http.obj \
+   $(OBJDIR)\match_glob.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
