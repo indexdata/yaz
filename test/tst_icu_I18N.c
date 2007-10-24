@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.5 2007-10-24 13:23:34 marc Exp $
+/* $Id: tst_icu_I18N.c,v 1.6 2007-10-24 14:48:17 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -493,7 +493,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     struct icu_chain * chain = 0;
     
 
-    const char * xml_str = "<icu_chain id=\"en:word\" locale=\"en\">"
+    const char * xml_str = "<icu_chain>"
         "<normalize rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
@@ -511,7 +511,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     // printf("ICU chain:\ninput: '%s'\n", en_str);
 
 
-    chain = icu_chain_xml_config(xml_node, &status);
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
 
 #if 0
     chain  = icu_chain_create((uint8_t *) "en:word", (uint8_t *) "en");
@@ -584,7 +584,7 @@ void test_bug_1140(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
     
-    const char * xml_str = "<icu_chain id=\"en:word\" locale=\"en\">"
+    const char * xml_str = "<icu_chain>"
 
         /* if the first rule is normalize instead. Then it works */
 #if 0
@@ -603,7 +603,7 @@ void test_bug_1140(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, &status);
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -647,7 +647,7 @@ void test_chain_empty_token(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
 
-    const char * xml_str = "<icu_chain id=\"en:word\" locale=\"en\">"
+    const char * xml_str = "<icu_chain>"
         "<tokenize rule=\"w\"/>"
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<index/>"
@@ -657,7 +657,7 @@ void test_chain_empty_token(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, &status);
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);

@@ -243,12 +243,13 @@ struct icu_chain
     struct icu_chain_step * steps;
 };
 
-struct icu_chain * icu_chain_create(const uint8_t * identifier, 
+struct icu_chain * icu_chain_create( // const uint8_t * identifier, 
                                     const uint8_t * locale);
 
 void icu_chain_destroy(struct icu_chain * chain);
 
-struct icu_chain * icu_chain_xml_config(xmlNode *xml_node, 
+struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
+                                        const uint8_t * locale, 
                                         UErrorCode * status);
 
 

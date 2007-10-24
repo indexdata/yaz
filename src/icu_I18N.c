@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.4 2007-10-24 13:23:34 marc Exp $
+ * $Id: icu_I18N.c,v 1.5 2007-10-24 14:48:17 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -858,15 +858,15 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
 
 
 
-struct icu_chain * icu_chain_create(const uint8_t * identifier,
+struct icu_chain * icu_chain_create( //const uint8_t * identifier,
                                     const uint8_t * locale)
 {
 
     struct icu_chain * chain 
         = (struct icu_chain *) malloc(sizeof(struct icu_chain));
 
-    strncpy((char *) chain->identifier, (const char *) identifier, 128);
-    chain->identifier[128 - 1] = '\0';
+    //strncpy((char *) chain->identifier, (const char *) identifier, 128);
+    //chain->identifier[128 - 1] = '\0';
     strncpy((char *) chain->locale, (const char *) locale, 16);    
     chain->locale[16 - 1] = '\0';
 
@@ -901,6 +901,7 @@ void icu_chain_destroy(struct icu_chain * chain)
 
 
 struct icu_chain * icu_chain_xml_config(xmlNode *xml_node, 
+                                        const uint8_t * locale, 
                                         UErrorCode * status){
 
     xmlNode *node = 0;
@@ -908,26 +909,17 @@ struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
    
     if (!xml_node 
         ||xml_node->type != XML_ELEMENT_NODE 
-        || strcmp((const char *) xml_node->name, "icu_chain"))
+        // || strcmp((const char *) xml_node->name, "icu_chain")
+        )
 
         return 0;
 
-    {    
-        xmlChar *xml_id = xmlGetProp(xml_node, (xmlChar *) "id");
-        xmlChar *xml_locale = xmlGetProp(xml_node, (xmlChar *) "locale");
-        
-        if (!xml_id || !strlen((const char *) xml_id) 
-            || !xml_locale || !strlen((const char *) xml_locale))
-            return 0;
-        
-        chain = icu_chain_create((const uint8_t *) xml_id, 
-                                 (const uint8_t *) xml_locale);
-        
-        xmlFree(xml_id);
-        xmlFree(xml_locale);
-    }
+        chain = icu_chain_create( // (const uint8_t *) xml_id, 
+                                 locale);
+
     if (!chain)
         return 0;
+
         
     for (node = xml_node->children; node; node = node->next)
     {
