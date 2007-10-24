@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.2 2007-10-22 17:32:07 adam Exp $
+ * $Id: icu_I18N.c,v 1.3 2007-10-24 07:41:48 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -61,27 +61,38 @@ struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
     return buf16;
 }
 
+struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16)
+{
+    if (buf16){
+        if (buf16->utf16)
+            buf16->utf16[0] = (UChar) 0;
+        buf16->utf16_len = 0;
+    }
+    return buf16;
+}
+
 struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
                                             size_t capacity)
 {
-    if (buf16){
-        if (capacity >  0){
-            if (0 == buf16->utf16)
-                buf16->utf16 = (UChar *) malloc(sizeof(UChar) * capacity);
-            else
-                buf16->utf16 
-                    = (UChar *) realloc(buf16->utf16, sizeof(UChar) * capacity);
-            buf16->utf16[0] = (UChar) 0;
-            buf16->utf16_len = 0;
-            buf16->utf16_cap = capacity;
-        } 
-        else { 
-            if (buf16->utf16)
-                free(buf16->utf16);
-            buf16->utf16 = 0;
-            buf16->utf16_len = 0;
-            buf16->utf16_cap = 0;
-        }
+    if (!buf16)
+        return 0;
+    
+    if (capacity >  0){
+        if (0 == buf16->utf16)
+            buf16->utf16 = (UChar *) malloc(sizeof(UChar) * capacity);
+        else
+            buf16->utf16 
+                = (UChar *) realloc(buf16->utf16, sizeof(UChar) * capacity);
+
+        icu_buf_utf16_clear(buf16);
+        buf16->utf16_cap = capacity;
+    } 
+    else { 
+        if (buf16->utf16)
+            free(buf16->utf16);
+        buf16->utf16 = 0;
+        buf16->utf16_len = 0;
+        buf16->utf16_cap = 0;
     }
 
     return buf16;
@@ -137,29 +148,41 @@ struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity)
 }
 
 
+struct icu_buf_utf8 * icu_buf_utf8_clear(struct icu_buf_utf8 * buf8)
+{
+    if (buf8){
+        if (buf8->utf8)
+            buf8->utf8[0] = (uint8_t) 0;
+        buf8->utf8_len = 0;
+    }
+    return buf8;
+}
+
 
 struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
                                           size_t capacity)
 {
-    if (buf8){
-        if (capacity >  0){
-            if (0 == buf8->utf8)
-                buf8->utf8 = (uint8_t *) malloc(sizeof(uint8_t) * capacity);
-            else
-                buf8->utf8 
-                    = (uint8_t *) realloc(buf8->utf8, 
-                                          sizeof(uint8_t) * capacity);
-            buf8->utf8_cap = capacity;
-        } 
-        else { 
-            if (buf8->utf8)
-                free(buf8->utf8);
-            buf8->utf8 = 0;
-            buf8->utf8_len = 0;
-            buf8->utf8_cap = 0;
-        }
-    }
+    if (!buf8)
+        return 0;
 
+    if (capacity >  0){
+        if (0 == buf8->utf8)
+            buf8->utf8 = (uint8_t *) malloc(sizeof(uint8_t) * capacity);
+        else
+            buf8->utf8 
+                = (uint8_t *) realloc(buf8->utf8, sizeof(uint8_t) * capacity);
+
+        icu_buf_utf8_clear(buf8);
+        buf8->utf8_cap = capacity;
+    } 
+    else { 
+        if (buf8->utf8)
+            free(buf8->utf8);
+        buf8->utf8 = 0;
+        buf8->utf8_len = 0;
+        buf8->utf8_cap = 0;
+    }
+    
     return buf8;
 }
 
@@ -185,9 +208,12 @@ const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
 {
     if (!src8 || src8->utf8_len == 0)
         return "";
+
     if (src8->utf8_len == src8->utf8_cap)
         src8 = icu_buf_utf8_resize(src8, src8->utf8_len * 2 + 1);
+
     src8->utf8[src8->utf8_len] = '\0';
+
     return (const char *) src8->utf8;
 }
 
@@ -226,10 +252,8 @@ UErrorCode icu_utf16_from_utf8(struct icu_buf_utf16 * dest16,
     if (U_SUCCESS(*status)  
         && utf16_len <= dest16->utf16_cap)
         dest16->utf16_len = utf16_len;
-    else {
-        dest16->utf16[0] = (UChar) 0;
-        dest16->utf16_len = 0;
-    }
+    else 
+        icu_buf_utf16_clear(dest16);
   
     return *status;
 }
@@ -262,10 +286,8 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
     if (U_SUCCESS(*status)  
         && utf16_len <= dest16->utf16_cap)
         dest16->utf16_len = utf16_len;
-    else {
-        dest16->utf16[0] = (UChar) 0;
-        dest16->utf16_len = 0;
-    }
+    else 
+        icu_buf_utf16_clear(dest16);
   
     return *status;
 }
@@ -297,10 +319,8 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
     if (U_SUCCESS(*status)  
         && utf8_len <= dest8->utf8_cap)
         dest8->utf8_len = utf8_len;
-    else {
-        dest8->utf8[0] = (uint8_t) 0;
-        dest8->utf8_len = 0;
-    }
+    else 
+        icu_buf_utf8_clear(dest8);
   
     return *status;
 }
@@ -358,24 +378,37 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
                       UErrorCode *status)
 {
     int32_t dest16_len = 0;
+
+
+    if (!src16->utf16_len){           //guarding for empty source string
+        if (dest16->utf16)
+            dest16->utf16[0] = (UChar) 0;
+        dest16->utf16_len = 0;
+        return U_ZERO_ERROR;
+    }
+
     
     switch(action) {    
     case 'l':    
+    case 'L':    
         dest16_len = u_strToLower(dest16->utf16, dest16->utf16_cap,
                                   src16->utf16, src16->utf16_len, 
                                   locale, status);
         break;
     case 'u':    
+    case 'U':    
         dest16_len = u_strToUpper(dest16->utf16, dest16->utf16_cap,
                                   src16->utf16, src16->utf16_len, 
                                   locale, status);
         break;
     case 't':    
+    case 'T':    
         dest16_len = u_strToTitle(dest16->utf16, dest16->utf16_cap,
                                   src16->utf16, src16->utf16_len,
                                   0, locale, status);
         break;
     case 'f':    
+    case 'F':    
         dest16_len = u_strFoldCase(dest16->utf16, dest16->utf16_cap,
                                    src16->utf16, src16->utf16_len,
                                    U_FOLD_CASE_DEFAULT, status);
@@ -396,21 +429,25 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
     
         switch(action) {    
         case 'l':    
+        case 'L':    
             dest16_len = u_strToLower(dest16->utf16, dest16->utf16_cap,
                                       src16->utf16, src16->utf16_len, 
                                       locale, status);
             break;
         case 'u':    
+        case 'U':    
             dest16_len = u_strToUpper(dest16->utf16, dest16->utf16_cap,
                                       src16->utf16, src16->utf16_len, 
                                       locale, status);
             break;
         case 't':    
+        case 'T':    
             dest16_len = u_strToTitle(dest16->utf16, dest16->utf16_cap,
                                       src16->utf16, src16->utf16_len,
                                       0, locale, status);
             break;
         case 'f':    
+        case 'F':    
             dest16_len = u_strFoldCase(dest16->utf16, dest16->utf16_cap,
                                        src16->utf16, src16->utf16_len,
                                        U_FOLD_CASE_DEFAULT, status);
@@ -426,7 +463,8 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
         && dest16_len <= dest16->utf16_cap)
         dest16->utf16_len = dest16_len;
     else {
-        dest16->utf16[0] = (UChar) 0;
+        if (dest16->utf16)
+            dest16->utf16[0] = (UChar) 0;
         dest16->utf16_len = 0;
     }
   
@@ -456,11 +494,9 @@ UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
     if (U_SUCCESS(*status)
         && sortkey_len > 0)
         dest8->utf8_len = sortkey_len;
-    else {
-        dest8->utf8[0] = (UChar) 0;
-        dest8->utf8_len = 0;
-    }
-
+    else 
+        icu_buf_utf8_clear(dest8);
+    
     return sortkey_len;
 }
 
@@ -484,26 +520,31 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
 
     switch(tokenizer->action) {    
     case 'l':
+    case 'L':
         tokenizer->bi
             = ubrk_open(UBRK_LINE, tokenizer->locale,
                         0, 0, status);
         break;
     case 's':
+    case 'S':
         tokenizer->bi
             = ubrk_open(UBRK_SENTENCE, tokenizer->locale,
                         0, 0, status);
         break;
     case 'w':
+    case 'W':
         tokenizer->bi 
             = ubrk_open(UBRK_WORD, tokenizer->locale,
                         0, 0, status);
         break;
     case 'c':
+    case 'C':
         tokenizer->bi 
             = ubrk_open(UBRK_CHARACTER, tokenizer->locale,
                         0, 0, status);
         break;
     case 't':
+    case 'T':
         tokenizer->bi 
             = ubrk_open(UBRK_TITLE, tokenizer->locale,
                         0, 0, status);
@@ -661,6 +702,7 @@ struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
      
     switch(normalizer->action) {    
     case 'f':
+    case 'F':
         normalizer->trans
             = utrans_openU(normalizer->rules16->utf16, 
                            normalizer->rules16->utf16_len,
@@ -669,6 +711,7 @@ struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
                            normalizer->parse_error, status);
         break;
     case 'r':
+    case 'R':
         normalizer->trans
             = utrans_openU(normalizer->rules16->utf16,
                            normalizer->rules16->utf16_len,
@@ -696,9 +739,7 @@ void icu_normalizer_destroy(struct icu_normalizer * normalizer){
         if (normalizer->rules16) 
             icu_buf_utf16_destroy(normalizer->rules16);
         if (normalizer->trans)
-        {
             utrans_close(normalizer->trans);
-        }
         free(normalizer);
     }
 }
@@ -710,21 +751,27 @@ int icu_normalizer_normalize(struct icu_normalizer * normalizer,
                              struct icu_buf_utf16 * src16,
                              UErrorCode *status)
 {
-    if (!normalizer || !normalizer->trans || !src16 || !dest16)
+    if (!normalizer || !normalizer->trans 
+        || !src16
+        || !dest16)
         return 0;
+
+    if (!src16->utf16_len){           //guarding for empty source string
+        icu_buf_utf16_clear(dest16);
+        return 0;
+    }
 
     if (!icu_buf_utf16_copy(dest16, src16))
         return 0;
 
+   
     utrans_transUChars (normalizer->trans, 
                         dest16->utf16, &(dest16->utf16_len),
                         dest16->utf16_cap,
                         0, &(src16->utf16_len), status);
 
-    if (U_FAILURE(*status)){
-        dest16->utf16[0] = (UChar) 0;
-        dest16->utf16_len = 0;
-    }
+    if (U_FAILURE(*status))
+        icu_buf_utf16_clear(dest16);
     
     return dest16->utf16_len;
 }
@@ -1016,7 +1063,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
 
     /* stop if nothing to process 
        i.e new token source was not properly assigned
-    */
+       or I did not get any tokens from previous step
+   */
     if (!step->more_tokens || !src16)
         return 0;
 
@@ -1068,16 +1116,19 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         break;
     }
 
-
-
     /* stop further token processing if last step and 
-       new tokens are needed from previous (non-existing) step 
+       new tokens can ot be obtained from last non-existing step 
     */
-    if (!step->previous && step->need_new_token)
+    if (!step->previous)
         step->more_tokens = 0;
 
     if (U_FAILURE(*status))
         return 0;
+
+    // result buf empty, got no token TODO: make while loop around all token
+    // fetching operations
+    //if (!step->buf16->utf16_len)
+    //    return 0;
 
     return 1;
 }
@@ -1119,14 +1170,14 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
 int icu_chain_next_token(struct icu_chain * chain,
                          UErrorCode *status)
 {
-    int success = 0;
+    int got_token = 0;
     
     if (!chain || !chain->steps)
         return 0;
 
-    success = icu_chain_step_next_token(chain, chain->steps, status);
+    got_token = icu_chain_step_next_token(chain, chain->steps, status);
     
-    if (success){
+    if (got_token){
         chain->token_count++;
         return chain->token_count;
     }

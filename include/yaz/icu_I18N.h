@@ -54,10 +54,15 @@ struct icu_buf_utf16
 };
 
 struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity);
+
+struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16);
+
 struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
                                             size_t capacity);
+
 struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
                                           struct icu_buf_utf16 * src16);
+
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16);
 
 
@@ -70,8 +75,12 @@ struct icu_buf_utf8
 };
 
 struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity);
+
+struct icu_buf_utf8 * icu_buf_utf8_clear(struct icu_buf_utf8 * buf8);
+
 struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
                                           size_t capacity);
+
 void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8);
 
 
