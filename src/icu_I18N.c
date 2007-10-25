@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.6 2007-10-25 08:32:50 marc Exp $
+ * $Id: icu_I18N.c,v 1.7 2007-10-25 08:40:06 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -801,12 +801,6 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     switch(step->type) {
     case ICU_chain_step_type_display:
         break;
-#ifdef ICU_CHAIN_SORTKEY
-    case ICU_chain_step_type_index:
-        break;
-    case ICU_chain_step_type_sortkey:
-        break;
-#endif
     case ICU_chain_step_type_casemap:
         step->u.casemap = icu_casemap_create((char *) chain->locale, 
                                              (char) rule[0], status);
@@ -836,12 +830,6 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
     switch(step->type) {
     case ICU_chain_step_type_display:
         break;
-#ifdef ICU_CHAIN_SORTKEY
-    case ICU_chain_step_type_index:
-        break;
-    case ICU_chain_step_type_sortkey:
-        break;
-#endif
     case ICU_chain_step_type_casemap:
         icu_casemap_destroy(step->u.casemap);
         icu_buf_utf16_destroy(step->buf16);
@@ -967,18 +955,6 @@ struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
         }
-#ifdef ICU_CHAIN_SORTKEY
-        else if (!strcmp((const char *) node->name,
-                         (const char *) "index")){
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_index, 
-                                         (const uint8_t *) "", status);
-        }
-        else if (!strcmp((const char *) node->name,
-                         (const char *) "sortkey")){
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_sortkey, 
-                                         (const uint8_t *) "", status);
-        }
-#endif
         xmlFree(xml_rule);
         if (!step || U_FAILURE(*status)){
             icu_chain_destroy(chain);
@@ -1019,14 +995,6 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
     case ICU_chain_step_type_display:
         buf16 = src16;
         break;
-#ifdef ICU_CHAIN_SORTKEY
-    case ICU_chain_step_type_index:
-        buf16 = src16;
-        break;
-    case ICU_chain_step_type_sortkey:
-        buf16 = src16;
-        break;
-#endif
     case ICU_chain_step_type_casemap:
         buf16 = icu_buf_utf16_create(0);
         break;
@@ -1095,19 +1063,6 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     case ICU_chain_step_type_display:
         icu_utf16_to_utf8(chain->display8, src16, status);
         break;
-#ifdef ICU_CHAIN_SORTKEY
-        // TODO
-    case ICU_chain_step_type_index:
-        icu_utf16_to_utf8(chain->norm8, src16, status);
-        break;
-    case ICU_chain_step_type_sortkey:
-        icu_utf16_to_utf8(chain->sort8, src16, status);
-        //UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
-        //                           struct icu_buf_utf8 * dest8, 
-        //                           struct icu_buf_utf16 * src16,
-        //                           UErrorCode * status);
-        break;
-#endif
     case ICU_chain_step_type_casemap:
         icu_casemap_casemap(step->u.casemap,
                             step->buf16, src16, status);
@@ -1135,8 +1090,6 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         if (!step->more_tokens)
             step->more_tokens = icu_chain_step_next_token(chain, step, status);
 
-        //if (0 == step->more_tokens)
-        //return 0;
         break;
     default:
         return 0;
@@ -1156,104 +1109,6 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     return 1;
 }
 
-
-#if 0 /* backup */
-int icu_chain_step_next_token_BAK(struct icu_chain * chain,
-                              struct icu_chain_step * step,
-                              UErrorCode *status)
-{
-    struct icu_buf_utf16 * src16 = 0;
-    
-    if (!chain || !chain->src16 || !step || !step->more_tokens)
-        return 0;
-
-    /* assign utf16 src buffers as neeed, advance in previous steps
-       tokens until non-zero token met, and setting stop condition
-    */
-    if (step->previous){
-        src16 = step->previous->buf16;
-        if (step->need_new_token)
-            step->more_tokens 
-                = icu_chain_step_next_token(chain, step->previous, status);
-    }
-    else { /* first step can only work once on chain->src16 input buffer */
-        src16 = chain->src16;
-        step->more_tokens = 1;
-    }
-
-    /* stop if nothing to process 
-       i.e new token source was not properly assigned
-       or I did not get any tokens from previous step
-   */
-    if (!step->more_tokens || !src16)
-        return 0;
-
-    /* perform the work, eventually put this steps output in 
-       step->buf16 or the chains UTF8 output buffers  */
-    switch(step->type) {
-    case ICU_chain_step_type_display:
-        icu_utf16_to_utf8(chain->display8, src16, status);
-        break;
-    case ICU_chain_step_type_index:
-        icu_utf16_to_utf8(chain->norm8, src16, status);
-        break;
-    case ICU_chain_step_type_sortkey:
-        icu_utf16_to_utf8(chain->sort8, src16, status);
-        break;
-    case ICU_chain_step_type_casemap:
-        icu_casemap_casemap(step->u.casemap,
-                            step->buf16, src16, status);
-        break;
-    case ICU_chain_step_type_normalize:
-        icu_normalizer_normalize(step->u.normalizer,
-                                 step->buf16, src16, status);
-        break;
-    case ICU_chain_step_type_tokenize:
-        /* attach to new src16 token only first time during splitting */
-        if (step->need_new_token){
-            icu_tokenizer_attach(step->u.tokenizer, src16, status);
-            step->need_new_token = 0;
-        }
-        /* splitting one src16 token into multiple buf16 tokens */
-        step->more_tokens
-            = icu_tokenizer_next_token(step->u.tokenizer,
-                                       step->buf16, status);
-        /* make sure to get new previous token if this one had been used up */
-        if (step->previous && !step->more_tokens){
-            if (icu_chain_step_next_token(chain, step->previous, status)){
-                icu_tokenizer_attach(step->u.tokenizer, src16, status);
-                step->need_new_token = 0;   
-                step->more_tokens
-                    = icu_tokenizer_next_token(step->u.tokenizer,
-                                               step->buf16, status);
-            }
-        }
-        if (0 == step->more_tokens)
-            return 0;
-        break;
-    default:
-        return 0;
-        break;
-    }
-
-    /* stop further token processing if last step and 
-       new tokens can ot be obtained from last non-existing step 
-    */
-    if (!step->previous)
-        step->more_tokens = 0;
-
-    if (U_FAILURE(*status))
-        return 0;
-
-    // result buf empty, got no token TODO: make while loop around all token
-    // fetching operations
-    //if (!step->buf16->utf16_len)
-    //    return 0;
-
-    return 1;
-}
-
-#endif /* backup */
 
 int icu_chain_assign_cstr(struct icu_chain * chain,
                           const char * src8cstr, 

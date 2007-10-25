@@ -41,9 +41,6 @@
 #include <unicode/utrans.h>
 
 
-// #define ICU_CHAIN_SORTKEY
-#undef ICU_CHAIN_SORTKEY
-
 /* declared structs and functions */
 
 int icu_check_status (UErrorCode status);
@@ -187,10 +184,6 @@ int icu_normalizer_normalize(struct icu_normalizer * normalizer,
 enum icu_chain_step_type {
     ICU_chain_step_type_none,
     ICU_chain_step_type_display,   /* convert to utf8 display format */
-#ifdef ICU_CHAIN_SORTKEY
-    ICU_chain_step_type_index,     /* convert to utf8 index format  */
-    ICU_chain_step_type_sortkey,   /* convert to utf8 sortkey format */
-#endif
     ICU_chain_step_type_casemap,   /* apply utf16 charmap */
     ICU_chain_step_type_normalize, /* apply utf16 normalization */
     ICU_chain_step_type_tokenize   /* apply utf16 tokenization */

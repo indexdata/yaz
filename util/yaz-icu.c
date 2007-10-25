@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.4 2007-10-25 08:32:51 marc Exp $
+ * $Id: yaz-icu.c,v 1.5 2007-10-25 08:40:06 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -57,8 +57,6 @@ void print_option_error(const struct config_t *p_config)
             "  <normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>\n"
             "  <display/>\n"
             "  <casemap rule=\"l\"/>\n"
-            "  <index/>\n"
-            "  <sortkey/>\n"
             "</icu_chain>\n"
           );
     exit(1);
