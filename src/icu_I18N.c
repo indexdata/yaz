@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.5 2007-10-24 14:48:17 marc Exp $
+ * $Id: icu_I18N.c,v 1.6 2007-10-25 08:32:50 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -801,10 +801,12 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     switch(step->type) {
     case ICU_chain_step_type_display:
         break;
+#ifdef ICU_CHAIN_SORTKEY
     case ICU_chain_step_type_index:
         break;
     case ICU_chain_step_type_sortkey:
         break;
+#endif
     case ICU_chain_step_type_casemap:
         step->u.casemap = icu_casemap_create((char *) chain->locale, 
                                              (char) rule[0], status);
@@ -834,10 +836,12 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
     switch(step->type) {
     case ICU_chain_step_type_display:
         break;
+#ifdef ICU_CHAIN_SORTKEY
     case ICU_chain_step_type_index:
         break;
     case ICU_chain_step_type_sortkey:
         break;
+#endif
     case ICU_chain_step_type_casemap:
         icu_casemap_destroy(step->u.casemap);
         icu_buf_utf16_destroy(step->buf16);
@@ -858,17 +862,24 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
 
 
 
-struct icu_chain * icu_chain_create( //const uint8_t * identifier,
-                                    const uint8_t * locale)
+struct icu_chain * icu_chain_create(const uint8_t * locale, 
+                                    int sort,
+                                    UErrorCode * status)
 {
 
     struct icu_chain * chain 
         = (struct icu_chain *) malloc(sizeof(struct icu_chain));
 
-    //strncpy((char *) chain->identifier, (const char *) identifier, 128);
-    //chain->identifier[128 - 1] = '\0';
     strncpy((char *) chain->locale, (const char *) locale, 16);    
     chain->locale[16 - 1] = '\0';
+
+    chain->sort = sort;
+
+    chain->coll = ucol_open((const char *) chain->locale, status);
+
+    if (U_FAILURE(*status))
+        return 0;
+
 
     chain->token_count = 0;
 
@@ -880,6 +891,7 @@ struct icu_chain * icu_chain_create( //const uint8_t * identifier,
 
     chain->steps = 0;
 
+
     return chain;
 }
 
@@ -887,6 +899,10 @@ struct icu_chain * icu_chain_create( //const uint8_t * identifier,
 void icu_chain_destroy(struct icu_chain * chain)
 {
     if (chain){
+
+        if (chain->coll)
+            ucol_close(chain->coll);
+
         icu_buf_utf8_destroy(chain->display8);
         icu_buf_utf8_destroy(chain->norm8);
         icu_buf_utf8_destroy(chain->sort8);
@@ -902,6 +918,7 @@ void icu_chain_destroy(struct icu_chain * chain)
 
 struct icu_chain * icu_chain_xml_config(xmlNode *xml_node, 
                                         const uint8_t * locale, 
+                                        int sort,
                                         UErrorCode * status){
 
     xmlNode *node = 0;
@@ -914,8 +931,7 @@ struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
 
         return 0;
 
-        chain = icu_chain_create( // (const uint8_t *) xml_id, 
-                                 locale);
+        chain = icu_chain_create(locale, sort, status);
 
     if (!chain)
         return 0;
@@ -951,6 +967,7 @@ struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
         }
+#ifdef ICU_CHAIN_SORTKEY
         else if (!strcmp((const char *) node->name,
                          (const char *) "index")){
             step = icu_chain_insert_step(chain, ICU_chain_step_type_index, 
@@ -961,7 +978,7 @@ struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
             step = icu_chain_insert_step(chain, ICU_chain_step_type_sortkey, 
                                          (const uint8_t *) "", status);
         }
-
+#endif
         xmlFree(xml_rule);
         if (!step || U_FAILURE(*status)){
             icu_chain_destroy(chain);
@@ -1002,12 +1019,14 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
     case ICU_chain_step_type_display:
         buf16 = src16;
         break;
+#ifdef ICU_CHAIN_SORTKEY
     case ICU_chain_step_type_index:
         buf16 = src16;
         break;
     case ICU_chain_step_type_sortkey:
         buf16 = src16;
         break;
+#endif
     case ICU_chain_step_type_casemap:
         buf16 = icu_buf_utf16_create(0);
         break;
@@ -1076,12 +1095,19 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     case ICU_chain_step_type_display:
         icu_utf16_to_utf8(chain->display8, src16, status);
         break;
+#ifdef ICU_CHAIN_SORTKEY
+        // TODO
     case ICU_chain_step_type_index:
         icu_utf16_to_utf8(chain->norm8, src16, status);
         break;
     case ICU_chain_step_type_sortkey:
         icu_utf16_to_utf8(chain->sort8, src16, status);
+        //UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
+        //                           struct icu_buf_utf8 * dest8, 
+        //                           struct icu_buf_utf16 * src16,
+        //                           UErrorCode * status);
         break;
+#endif
     case ICU_chain_step_type_casemap:
         icu_casemap_casemap(step->u.casemap,
                             step->buf16, src16, status);
@@ -1122,6 +1148,9 @@ int icu_chain_step_next_token(struct icu_chain * chain,
 
     /* if token disappered into thin air, tell caller */
     if (!step->buf16->utf16_len)
+        return 0;
+    
+    if (U_FAILURE(*status))
         return 0;
 
     return 1;
@@ -1266,10 +1295,17 @@ int icu_chain_next_token(struct icu_chain * chain,
     if (!chain || !chain->steps)
         return 0;
 
-    got_token = icu_chain_step_next_token(chain, chain->steps, status);
+    while(!got_token && chain->steps->more_tokens)
+        got_token = icu_chain_step_next_token(chain, chain->steps, status);
     
     if (got_token){
         chain->token_count++;
+
+        icu_utf16_to_utf8(chain->norm8, chain->steps->buf16, status);
+
+        icu_sortkey8_from_utf16(chain->coll,
+                                chain->sort8, chain->steps->buf16, status);
+
         return chain->token_count;
     }
 
@@ -1309,6 +1345,13 @@ const char * icu_chain_get_sort(struct icu_chain * chain)
     
     return 0;
 }
+
+const UCollator * icu_chain_get_coll(struct icu_chain * chain)
+{
+    return chain->coll;
+}
+
+
 
 
 #endif /* HAVE_ICU */

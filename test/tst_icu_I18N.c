@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.6 2007-10-24 14:48:17 marc Exp $
+/* $Id: tst_icu_I18N.c,v 1.7 2007-10-25 08:32:51 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -499,8 +499,6 @@ void test_icu_I18N_chain(int argc, char **argv)
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<display/>"
         "<casemap rule=\"l\"/>"
-        "<index/>"
-        "<sortkey/>"
         "</icu_chain>";
 
     
@@ -511,40 +509,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     // printf("ICU chain:\ninput: '%s'\n", en_str);
 
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
-
-#if 0
-    chain  = icu_chain_create((uint8_t *) "en:word", (uint8_t *) "en");
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize,
-                                 (const uint8_t *) "[:Control:] Any-Remove",
-                                 &status);
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize,
-                                 (const uint8_t *) "s",
-                                 &status);
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize,
-                                 (const uint8_t *) "l",
-                                 &status);
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize,
-                                 (const uint8_t *)
-                                 "[[:WhiteSpace:][:Punctuation:]] Any-Remove",
-                                 &status);
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_display,
-                                 (const uint8_t *)"",
-                                 &status);
-/*     step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize, */
-/*                                  (const uint8_t *) "Lower", */
-/*                                  &status); */
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap,
-                                 (const uint8_t *) "l",
-                                 &status);
-    step = icu_chain_insert_step(chain, ICU_chain_step_type_index,
-                                 (const uint8_t *)"",
-                                 &status);
-/*     step = icu_chain_insert_step(chain, ICU_chain_step_type_sortkey, */
-/*                                  (const uint8_t *)"", */
-/*                                  &status); */
-    
-#endif
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -594,8 +559,6 @@ void test_bug_1140(void)
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<display/>"
         "<casemap rule=\"l\"/>"
-        "<index/>"
-        "<sortkey/>"
         "</icu_chain>";
 
     
@@ -603,7 +566,7 @@ void test_bug_1140(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -650,14 +613,13 @@ void test_chain_empty_token(void)
     const char * xml_str = "<icu_chain>"
         "<tokenize rule=\"w\"/>"
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
-        "<index/>"
         "</icu_chain>";
     
     xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", &status);
+    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);

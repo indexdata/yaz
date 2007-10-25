@@ -41,6 +41,8 @@
 #include <unicode/utrans.h>
 
 
+// #define ICU_CHAIN_SORTKEY
+#undef ICU_CHAIN_SORTKEY
 
 /* declared structs and functions */
 
@@ -185,8 +187,10 @@ int icu_normalizer_normalize(struct icu_normalizer * normalizer,
 enum icu_chain_step_type {
     ICU_chain_step_type_none,
     ICU_chain_step_type_display,   /* convert to utf8 display format */
+#ifdef ICU_CHAIN_SORTKEY
     ICU_chain_step_type_index,     /* convert to utf8 index format  */
     ICU_chain_step_type_sortkey,   /* convert to utf8 sortkey format */
+#endif
     ICU_chain_step_type_casemap,   /* apply utf16 charmap */
     ICU_chain_step_type_normalize, /* apply utf16 normalization */
     ICU_chain_step_type_tokenize   /* apply utf16 tokenization */
@@ -225,8 +229,10 @@ void icu_chain_step_destroy(struct icu_chain_step * step);
 
 struct icu_chain
 {
-    uint8_t identifier[128];
     uint8_t locale[16];
+    int sort;
+
+    UCollator * coll;
     
     /* number of tokens returned so far */
     int32_t token_count;
@@ -243,21 +249,21 @@ struct icu_chain
     struct icu_chain_step * steps;
 };
 
-struct icu_chain * icu_chain_create( // const uint8_t * identifier, 
-                                    const uint8_t * locale);
+struct icu_chain * icu_chain_create(const uint8_t * locale,
+                                    int sort,
+                                    UErrorCode * status);
 
 void icu_chain_destroy(struct icu_chain * chain);
 
 struct icu_chain * icu_chain_xml_config(xmlNode *xml_node,
-                                        const uint8_t * locale, 
+                                        const uint8_t * locale,
+                                        int sort,
                                         UErrorCode * status);
-
 
 struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
                                               enum icu_chain_step_type type,
                                               const uint8_t * rule,
                                               UErrorCode *status);
-
 
 int icu_chain_step_next_token(struct icu_chain * chain,
                               struct icu_chain_step * step,
@@ -277,6 +283,8 @@ const char * icu_chain_get_display(struct icu_chain * chain);
 const char * icu_chain_get_norm(struct icu_chain * chain);
 
 const char * icu_chain_get_sort(struct icu_chain * chain);
+
+const UCollator * icu_chain_get_coll(struct icu_chain * chain);
 
 #endif /* ICU_I18NL_H */
 
