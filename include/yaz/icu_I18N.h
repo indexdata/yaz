@@ -225,6 +225,8 @@ struct icu_chain
     uint8_t locale[16];
     int sort;
 
+    const char * src8cstr;
+
     UCollator * coll;
     
     /* number of tokens returned so far */

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.7 2007-10-25 08:40:06 marc Exp $
+ * $Id: icu_I18N.c,v 1.8 2007-10-25 10:04:32 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -871,6 +871,8 @@ struct icu_chain * icu_chain_create(const uint8_t * locale,
 
     chain->token_count = 0;
 
+    chain->src8cstr = 0;
+
     chain->display8 = icu_buf_utf8_create(0);
     chain->norm8 = icu_buf_utf8_create(0);
     chain->sort8 = icu_buf_utf8_create(0);
@@ -878,7 +880,6 @@ struct icu_chain * icu_chain_create(const uint8_t * locale,
     chain->src16 = icu_buf_utf16_create(0);
 
     chain->steps = 0;
-
 
     return chain;
 }
@@ -1119,6 +1120,8 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
     if (!chain || !src8cstr)
         return 0;
 
+    chain->src8cstr = src8cstr;
+
     stp = chain->steps;
     
     /* clear token count */
@@ -1131,8 +1134,9 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
         stp = stp->previous;
     }
     
-    /* finally convert UTF8 to UTF16 string */
-    icu_utf16_from_utf8_cstr(chain->src16, src8cstr, status);
+    /* finally convert UTF8 to UTF16 string if needed */
+    if (chain->steps || chain->sort)
+        icu_utf16_from_utf8_cstr(chain->src16, chain->src8cstr, status);
             
     if (U_FAILURE(*status))
         return 0;
@@ -1147,23 +1151,43 @@ int icu_chain_next_token(struct icu_chain * chain,
 {
     int got_token = 0;
     
-    if (!chain || !chain->steps)
+    if (!chain)
         return 0;
 
-    while(!got_token && chain->steps->more_tokens)
-        got_token = icu_chain_step_next_token(chain, chain->steps, status);
-    
-    if (got_token){
-        chain->token_count++;
-
-        icu_utf16_to_utf8(chain->norm8, chain->steps->buf16, status);
-
-        icu_sortkey8_from_utf16(chain->coll,
-                                chain->sort8, chain->steps->buf16, status);
-
-        return chain->token_count;
+    /* special case with no steps - same as index type binary */
+    if (!chain->steps){
+        if (chain->token_count)
+            return 0;
+        else {
+            chain->token_count++;
+            
+            if (chain->sort)
+                icu_sortkey8_from_utf16(chain->coll,
+                                        chain->sort8, chain->steps->buf16,
+                                        status);
+            return chain->token_count;
+        }
     }
+    /* usual case, one or more icu chain steps existing */
+    else {
 
+        while(!got_token && chain->steps && chain->steps->more_tokens)
+            got_token = icu_chain_step_next_token(chain, chain->steps, status);
+    
+        if (got_token){
+            chain->token_count++;
+
+            icu_utf16_to_utf8(chain->norm8, chain->steps->buf16, status);
+            
+            if (chain->sort)
+                icu_sortkey8_from_utf16(chain->coll,
+                                        chain->sort8, chain->steps->buf16,
+                                        status);
+            
+            return chain->token_count;
+        }
+    }
+        
     return 0;
 }
 
@@ -1176,7 +1200,6 @@ int icu_chain_get_token_count(struct icu_chain * chain)
 }
 
 
-
 const char * icu_chain_get_display(struct icu_chain * chain)
 {
     if (chain->display8)
@@ -1187,6 +1210,9 @@ const char * icu_chain_get_display(struct icu_chain * chain)
 
 const char * icu_chain_get_norm(struct icu_chain * chain)
 {
+    if (!chain->steps)
+        return chain->src8cstr;
+
     if (chain->norm8)
         return icu_buf_utf8_to_cstr(chain->norm8);
     
