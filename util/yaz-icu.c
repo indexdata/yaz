@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.5 2007-10-25 08:40:06 marc Exp $
+ * $Id: yaz-icu.c,v 1.6 2007-10-29 10:22:23 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -482,14 +482,14 @@ static void process_text_file(const struct config_t *p_config)
                             " norm=\"%s\" display=\"%s\"/>\n",
                             token_count,
                             line_count,
-                            icu_chain_get_norm(config.chain),
-                            icu_chain_get_display(config.chain));
+                            icu_chain_token_norm(config.chain),
+                            icu_chain_token_display(config.chain));
                 else
                     fprintf(config.outfile, "%lu %lu '%s' '%s'\n",
                             token_count,
                             line_count,
-                            icu_chain_get_norm(config.chain),
-                            icu_chain_get_display(config.chain));
+                            icu_chain_token_norm(config.chain),
+                            icu_chain_token_display(config.chain));
             }
         }
         

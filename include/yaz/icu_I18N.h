@@ -271,13 +271,17 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
 int icu_chain_next_token(struct icu_chain * chain,
                          UErrorCode *status);
 
-int icu_chain_get_token_count(struct icu_chain * chain);
+int icu_chain_token_number(struct icu_chain * chain);
 
-const char * icu_chain_get_display(struct icu_chain * chain);
+/*int icu_chain_token_start(struct icu_chain * chain); */
 
-const char * icu_chain_get_norm(struct icu_chain * chain);
+/*int icu_chain_token_end(struct icu_chain * chain); */
 
-const char * icu_chain_get_sort(struct icu_chain * chain);
+const char * icu_chain_token_display(struct icu_chain * chain);
+
+const char * icu_chain_token_norm(struct icu_chain * chain);
+
+const char * icu_chain_token_sortkey(struct icu_chain * chain);
 
 const UCollator * icu_chain_get_coll(struct icu_chain * chain);
 

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.8 2007-10-25 10:04:32 marc Exp $
+ * $Id: icu_I18N.c,v 1.9 2007-10-29 10:22:23 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -1191,7 +1191,7 @@ int icu_chain_next_token(struct icu_chain * chain,
     return 0;
 }
 
-int icu_chain_get_token_count(struct icu_chain * chain)
+int icu_chain_token_number(struct icu_chain * chain)
 {
     if (!chain)
         return 0;
@@ -1200,7 +1200,7 @@ int icu_chain_get_token_count(struct icu_chain * chain)
 }
 
 
-const char * icu_chain_get_display(struct icu_chain * chain)
+const char * icu_chain_token_display(struct icu_chain * chain)
 {
     if (chain->display8)
         return icu_buf_utf8_to_cstr(chain->display8);
@@ -1208,7 +1208,7 @@ const char * icu_chain_get_display(struct icu_chain * chain)
     return 0;
 }
 
-const char * icu_chain_get_norm(struct icu_chain * chain)
+const char * icu_chain_token_norm(struct icu_chain * chain)
 {
     if (!chain->steps)
         return chain->src8cstr;
@@ -1219,7 +1219,7 @@ const char * icu_chain_get_norm(struct icu_chain * chain)
     return 0;
 }
 
-const char * icu_chain_get_sort(struct icu_chain * chain)
+const char * icu_chain_token_sortkey(struct icu_chain * chain)
 {
     if (chain->sort8)
         return icu_buf_utf8_to_cstr(chain->sort8);

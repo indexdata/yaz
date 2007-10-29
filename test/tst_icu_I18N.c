@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.9 2007-10-25 10:04:33 marc Exp $
+/* $Id: tst_icu_I18N.c,v 1.10 2007-10-29 10:22:23 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -519,12 +519,12 @@ void test_icu_I18N_chain(int argc, char **argv)
     while (icu_chain_next_token(chain, &status)){
         ;
         // printf("%d '%s' '%s'\n",
-        //       icu_chain_get_token_count(chain),
-        //       icu_chain_get_norm(chain),
-        //       icu_chain_get_display(chain));
+        //       icu_chain_token_number(chain),
+        //       icu_chain_token_norm(chain),
+        //       icu_chain_token_display(chain));
     }
 
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 7);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 7);
 
 
     YAZ_CHECK(icu_chain_assign_cstr(chain, "what is this?", &status));
@@ -532,13 +532,13 @@ void test_icu_I18N_chain(int argc, char **argv)
     while (icu_chain_next_token(chain, &status)){
         ;
         //printf("%d '%s' '%s'\n",
-        //       icu_chain_get_token_count(chain),
-        //       icu_chain_get_norm(chain),
-        //       icu_chain_get_display(chain));
+        //       icu_chain_token_number(chain),
+        //       icu_chain_token_norm(chain),
+        //       icu_chain_token_display(chain));
     }
 
 
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 3);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 3);
 
     icu_chain_destroy(chain);
 }
@@ -578,27 +578,27 @@ void test_bug_1140(void)
     while (icu_chain_next_token(chain, &status)){    
         ;
         //printf("%d '%s' '%s'\n",
-        //       icu_chain_get_token_count(chain),
-        //       icu_chain_get_norm(chain),
-        //       icu_chain_get_display(chain));
+        //       icu_chain_token_number(chain),
+        //       icu_chain_token_norm(chain),
+        //       icu_chain_token_display(chain));
 
     }
     
 
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 7);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 7);
 
     YAZ_CHECK(icu_chain_assign_cstr(chain, "what is this?", &status));
 
     while (icu_chain_next_token(chain, &status)){
        ;
        //printf("%d '%s' '%s'\n",
-       //        icu_chain_get_token_count(chain),
-       //        icu_chain_get_norm(chain),
-       //        icu_chain_get_display(chain));
+       //        icu_chain_token_number(chain),
+       //        icu_chain_token_norm(chain),
+       //        icu_chain_token_display(chain));
     }
 
     /* we expect 'what' 'is' 'this', i.e. 3 tokens */
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 3);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 3);
 
     icu_chain_destroy(chain);
 }
@@ -631,12 +631,12 @@ void test_chain_empty_token(void)
     while (icu_chain_next_token(chain, &status)){
         ;
         //printf("%d '%s' '%s'\n",
-        //       icu_chain_get_token_count(chain),
-        //       icu_chain_get_norm(chain),
-        //       icu_chain_get_display(chain));
+        //       icu_chain_token_number(chain),
+        //       icu_chain_token_norm(chain),
+        //       icu_chain_token_display(chain));
     }
 
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 8);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 8);
 
     icu_chain_destroy(chain);
 }
@@ -668,14 +668,14 @@ void test_chain_empty_chain(void)
     while (icu_chain_next_token(chain, &status)){
         ;
         //printf("%d '%s' '%s'\n",
-        //       icu_chain_get_token_count(chain),
-        //       icu_chain_get_norm(chain),
-        //       icu_chain_get_display(chain));
+        //       icu_chain_token_number(chain),
+        //       icu_chain_token_norm(chain),
+        //       icu_chain_token_display(chain));
     }
 
-    YAZ_CHECK_EQ(icu_chain_get_token_count(chain), 1);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 1);
 
-    dest8 = icu_chain_get_norm(chain);
+    dest8 = icu_chain_token_norm(chain);
     YAZ_CHECK_EQ(strcmp(src8, dest8), 0);
     
 
