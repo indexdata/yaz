@@ -1,4 +1,4 @@
-/* $Id: tst_icu_I18N.c,v 1.10 2007-10-29 10:22:23 marc Exp $
+/* $Id: tst_icu_I18N.c,v 1.11 2007-10-29 13:50:57 marc Exp $
    Copyright (c) 2006-2007, Index Data.
 
    This file is part of Pazpar2.
@@ -506,8 +506,6 @@ void test_icu_I18N_chain(int argc, char **argv)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    // printf("ICU chain:\ninput: '%s'\n", en_str);
-
 
     chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
 
@@ -516,12 +514,13 @@ void test_icu_I18N_chain(int argc, char **argv)
 
     YAZ_CHECK(icu_chain_assign_cstr(chain, en_str, &status));
 
+    //printf("ICU chain:\ninput: '%s'\n", en_str);
     while (icu_chain_next_token(chain, &status)){
         ;
-        // printf("%d '%s' '%s'\n",
-        //       icu_chain_token_number(chain),
-        //       icu_chain_token_norm(chain),
-        //       icu_chain_token_display(chain));
+        /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
     }
 
     YAZ_CHECK_EQ(icu_chain_token_number(chain), 7);
@@ -531,10 +530,10 @@ void test_icu_I18N_chain(int argc, char **argv)
 
     while (icu_chain_next_token(chain, &status)){
         ;
-        //printf("%d '%s' '%s'\n",
-        //       icu_chain_token_number(chain),
-        //       icu_chain_token_norm(chain),
-        //       icu_chain_token_display(chain));
+        /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
     }
 
 
@@ -577,10 +576,10 @@ void test_bug_1140(void)
 
     while (icu_chain_next_token(chain, &status)){    
         ;
-        //printf("%d '%s' '%s'\n",
-        //       icu_chain_token_number(chain),
-        //       icu_chain_token_norm(chain),
-        //       icu_chain_token_display(chain));
+        /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
 
     }
     
@@ -591,10 +590,10 @@ void test_bug_1140(void)
 
     while (icu_chain_next_token(chain, &status)){
        ;
-       //printf("%d '%s' '%s'\n",
-       //        icu_chain_token_number(chain),
-       //        icu_chain_token_norm(chain),
-       //        icu_chain_token_display(chain));
+       /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
     }
 
     /* we expect 'what' 'is' 'this', i.e. 3 tokens */
@@ -625,18 +624,18 @@ void test_chain_empty_token(void)
     YAZ_CHECK(chain);
     
     YAZ_CHECK(icu_chain_assign_cstr(
-                  chain,  "a string with 15 wordbreaks and 8 tokens",
+                  chain,  "a string with 15 tokenss and 8 displays",
                   &status));
 
     while (icu_chain_next_token(chain, &status)){
         ;
-        //printf("%d '%s' '%s'\n",
-        //       icu_chain_token_number(chain),
-        //       icu_chain_token_norm(chain),
-        //       icu_chain_token_display(chain));
+        /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
     }
 
-    YAZ_CHECK_EQ(icu_chain_token_number(chain), 8);
+    YAZ_CHECK_EQ(icu_chain_token_number(chain), 15);
 
     icu_chain_destroy(chain);
 }
@@ -667,15 +666,15 @@ void test_chain_empty_chain(void)
 
     while (icu_chain_next_token(chain, &status)){
         ;
-        //printf("%d '%s' '%s'\n",
-        //       icu_chain_token_number(chain),
-        //       icu_chain_token_norm(chain),
-        //       icu_chain_token_display(chain));
+        /* printf("%d '%s' '%s'\n",
+               icu_chain_token_number(chain),
+               icu_chain_token_norm(chain),
+               icu_chain_token_display(chain)); */
     }
 
     YAZ_CHECK_EQ(icu_chain_token_number(chain), 1);
 
-    dest8 = icu_chain_token_norm(chain);
+    dest8 = (char *) icu_chain_token_norm(chain);
     YAZ_CHECK_EQ(strcmp(src8, dest8), 0);
     
 

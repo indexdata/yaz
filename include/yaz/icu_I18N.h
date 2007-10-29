@@ -273,10 +273,6 @@ int icu_chain_next_token(struct icu_chain * chain,
 
 int icu_chain_token_number(struct icu_chain * chain);
 
-/*int icu_chain_token_start(struct icu_chain * chain); */
-
-/*int icu_chain_token_end(struct icu_chain * chain); */
-
 const char * icu_chain_token_display(struct icu_chain * chain);
 
 const char * icu_chain_token_norm(struct icu_chain * chain);

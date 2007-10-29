@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.9 2007-10-29 10:22:23 marc Exp $
+ * $Id: icu_I18N.c,v 1.10 2007-10-29 13:50:57 marc Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -1035,6 +1035,7 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     if (step->previous){
         src16 = step->previous->buf16;
         /* tokens might be killed in previous steps, therefore looping */
+
         while (step->need_new_token 
                && step->previous->more_tokens
                && !got_new_token)
@@ -1088,8 +1089,10 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         /* make sure to get new previous token if this one had been used up
            by recursive call to _same_ step */
 
-        if (!step->more_tokens)
+        if (!step->more_tokens){
             step->more_tokens = icu_chain_step_next_token(chain, step, status);
+            return step->more_tokens;  // avoid one token count too much!
+        }
 
         break;
     default:
@@ -1101,11 +1104,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         return 0;
 
     /* if token disappered into thin air, tell caller */
-    if (!step->buf16->utf16_len)
-        return 0;
-    
-    if (U_FAILURE(*status))
-        return 0;
+    /* if (!step->buf16->utf16_len && !step->more_tokens) */ 
+    /*    return 0; */ 
 
     return 1;
 }
@@ -1173,7 +1173,7 @@ int icu_chain_next_token(struct icu_chain * chain,
 
         while(!got_token && chain->steps && chain->steps->more_tokens)
             got_token = icu_chain_step_next_token(chain, chain->steps, status);
-    
+
         if (got_token){
             chain->token_count++;
 
