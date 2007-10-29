@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.351 2007-08-24 13:25:14 adam Exp $
+ * $Id: client.c,v 1.352 2007-10-29 09:16:32 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -844,8 +844,8 @@ int cmd_authentication(const char *arg)
         au.which = Z_IdAuthentication_idPass;
         au.u.idPass = &idPass;
         idPass.groupId = NULL;
-        idPass.userId = user;
-        idPass.password = group;
+        idPass.userId = !strcmp(user, "-") ? 0 : user;
+        idPass.password = !strcmp(group, "-") ? 0 : group;
         printf("Authentication set to User (%s), Pass (%s)\n", user, group);
     }
     if (r == 3)
