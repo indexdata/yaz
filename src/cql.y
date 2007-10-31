@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.14 2007-06-28 07:58:07 adam Exp $
+/* $Id: cql.y,v 1.15 2007-10-31 21:58:07 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -278,8 +278,13 @@ int yylex(YYSTYPE *lval, void *vp)
         while ((c = cp->getbyte(cp->client_data)) != 0 && c != '"')
         {
             if (c == '\\')
+	    {
+		putb(lval, cp, c);
                 c = cp->getbyte(cp->client_data);
-            putb(lval, cp, c);
+		if (!c)
+		    break;
+	    }
+	    putb(lval, cp, c);
         }
         putb(lval, cp, 0);
     }
@@ -288,10 +293,16 @@ int yylex(YYSTYPE *lval, void *vp)
         while (c != 0 && !strchr(" \n()=<>/", c))
         {
             if (c == '\\')
+	    {
+		putb(lval, cp, c);
                 c = cp->getbyte(cp->client_data);
+		if (!c)
+		    break;
+	    }
             putb(lval, cp, c);
 	    c = cp->getbyte(cp->client_data);
         }
+	putb(lval, cp, 0);
 #if YYDEBUG
         printf ("got %s\n", lval->buf);
 #endif

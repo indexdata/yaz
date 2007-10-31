@@ -3,5 +3,5 @@
   <relation>
     <value>scr</value>
   </relation>
-  <term>^cat*fishdog"horse?</term>
+  <term>^cat*fishdog\"horse?</term>
 </searchClause>

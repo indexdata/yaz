@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.28 2007-03-29 11:14:11 mike Exp $
+/* $Id: cqltransform.c,v 1.29 2007-10-31 21:58:07 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -337,19 +337,18 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
  * characters starting at `term', or a null pointer of there are
  * none -- like memchr().
  */
-static const char *wcchar(const char *term, int length)
+static const char *wcchar(int start, const char *term, int length)
 {
-    const char *best = 0;
-    const char *current;
-    char *whichp;
-
-    for (whichp = "*?"; *whichp != '\0'; whichp++) {
-        current = (const char *) memchr(term, *whichp, length);
-        if (current != 0 && (best == 0 || current < best))
-            best = current;
+    while (length > 0)
+    {
+        if (start || term[-1] != '\\')
+            if (strchr("*?", *term))
+                return term;
+        term++;
+        length--;
+        start = 0;
     }
-
-    return best;
+    return 0;
 }
 
 
@@ -374,6 +373,7 @@ void emit_term(cql_transform_t ct,
     int i;
     const char *ns = cn->u.st.index_uri;
     int process_term = !has_modifier(cn, "regexp");
+    char *z3958_mem = 0;
 
     assert(cn->which == CQL_NODE_ST);
 
@@ -408,33 +408,38 @@ void emit_term(cql_transform_t ct,
 
     if (process_term && length > 0)
     {
+        const char *first_wc = wcchar(1, term, length);
+        const char *second_wc = first_wc ?
+            wcchar(0, first_wc+1, length-(first_wc-term)-1) : 0;
+
         /* Check for well-known globbing patterns that represent
          * simple truncation attributes as expected by, for example,
          * Bath-compliant server.  If we find such a pattern but
          * there's no mapping for it, that's fine: we just use a
          * general pattern-matching attribute.
          */
-        if (length > 1 && term[0] == '*' && term[length-1] == '*' &&
-            wcchar(term+1, length-2) == 0 &&
-            cql_pr_attr(ct, "truncation", "both", 0,
-                        pr, client_data, 0)) {
+        if (first_wc == term && second_wc == term + length-1 
+            && *first_wc == '*' && *second_wc == '*' 
+            && cql_pr_attr(ct, "truncation", "both", 0, pr, client_data, 0)) 
+        {
             term++;
             length -= 2;
         }
-        else if (term[0] == '*' &&
-                 wcchar(term+1, length-1) == 0 &&
-                 cql_pr_attr(ct, "truncation", "left", 0,
-                             pr, client_data, 0)) {
+        else if (first_wc == term && second_wc == 0 && *first_wc == '*'
+                 && cql_pr_attr(ct, "truncation", "left", 0,
+                                pr, client_data, 0))
+        {
             term++;
             length--;
         }
-        else if (term[length-1] == '*' &&
-                 wcchar(term, length-1) == 0 &&
-                 cql_pr_attr(ct, "truncation", "right", 0,
-                             pr, client_data, 0)) {
+        else if (first_wc == term + length-1 && second_wc == 0
+                 && *first_wc == '*'
+                 && cql_pr_attr(ct, "truncation", "right", 0, 
+                                pr, client_data, 0))
+        {
             length--;
         }
-        else if (wcchar(term, length))
+        else if (first_wc)
         {
             /* We have one or more wildcard characters, but not in a
              * way that can be dealt with using only the standard
@@ -446,17 +451,22 @@ void emit_term(cql_transform_t ct,
              * supported".
              */
             int i;
-            char *mem;
             cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, 28);
-            mem = (char *) xmalloc(length+1);
-            for (i = 0; i < length; i++) {
-                if (term[i] == '*')      mem[i] = '?';
-                else if (term[i] == '?') mem[i] = '#';
-                else                     mem[i] = term[i];
+            z3958_mem = (char *) xmalloc(length+1);
+            for (i = 0; i < length; i++)
+            {
+                if (i > 0 && term[i-1] == '\\')
+                    z3958_mem[i] = term[i];
+                else if (term[i] == '*')
+                    z3958_mem[i] = '?';
+                else if (term[i] == '?')
+                    z3958_mem[i] = '#';
+                else
+                    z3958_mem[i] = term[i];
             }
-            mem[length] = '\0';
-            term = mem;
+            z3958_mem[length] = '\0';
+            term = z3958_mem;
         }
         else {
             /* No masking characters.  Use "truncation.none" if given. */
@@ -499,6 +509,7 @@ void emit_term(cql_transform_t ct,
         (*pr)(cp, client_data);
     }
     (*pr)("\" ", client_data);
+    xfree(z3958_mem);
 }
 
 void emit_wordlist(cql_transform_t ct,
