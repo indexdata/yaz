@@ -1,4 +1,4 @@
-<!-- $Id: frontend.xml,v 1.35 2007-08-13 16:58:02 mike Exp $ -->
+<!-- $Id: frontend.xml,v 1.36 2007-11-01 10:29:28 adam Exp $ -->
  <chapter id="server"><title>Generic server</title>
   <sect1 id="server.introduction"><title>Introduction</title>
    
@@ -589,7 +589,7 @@ typedef struct bend_fetch_rr {
      The <literal>number</literal> is the offset into the set (with 1
      being the first record in the set). The <literal>format</literal> field
      is the record format requested by the client (See
-     <xref linkend="asn.oid"/>).
+     <xref linkend="tools.oid"/>).
      A value of NULL for <literal>format</literal> indicates that the
      client did not request a specific format.
      The <literal>stream</literal> argument is an &odr; stream which
