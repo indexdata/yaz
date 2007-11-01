@@ -65,8 +65,8 @@ void fmemdmp (FILE * fd, char * ptr, int size, char * text)
     return;
 
   if (text && * text)
-    fprintf (fd, "\"%s\" at address 0x%08x for %d bytes\n",
-	     text, (unsigned int) ptr, size);
+    fprintf (fd, "\"%s\" at address %p for %d bytes\n",
+	     text, ptr, size);
 
   for (total = 0; total < size; total += bytes_in_a_line)
     {
