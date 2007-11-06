@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.10 2007-10-29 13:50:57 marc Exp $
+ * $Id: icu_I18N.c,v 1.11 2007-11-06 10:27:30 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -850,7 +850,7 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
 
 
 
-struct icu_chain * icu_chain_create(const uint8_t * locale, 
+struct icu_chain * icu_chain_create(const char *locale, 
                                     int sort,
                                     UErrorCode * status)
 {
@@ -905,8 +905,8 @@ void icu_chain_destroy(struct icu_chain * chain)
 
 
 
-struct icu_chain * icu_chain_xml_config(xmlNode *xml_node, 
-                                        const uint8_t * locale, 
+struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node, 
+                                        const char *locale, 
                                         int sort,
                                         UErrorCode * status){
 
