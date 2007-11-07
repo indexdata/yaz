@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.11 2007-11-06 10:27:30 adam Exp $
+ * $Id: icu_I18N.c,v 1.12 2007-11-07 10:19:12 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -267,6 +267,7 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
     size_t src8cstr_len = 0;
     int32_t utf16_len = 0;
 
+    *status = U_ZERO_ERROR;
     src8cstr_len = strlen(src8cstr);
   
     u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
@@ -858,6 +859,8 @@ struct icu_chain * icu_chain_create(const char *locale,
     struct icu_chain * chain 
         = (struct icu_chain *) malloc(sizeof(struct icu_chain));
 
+    *status = U_ZERO_ERROR;
+
     strncpy((char *) chain->locale, (const char *) locale, 16);    
     chain->locale[16 - 1] = '\0';
 
@@ -913,6 +916,8 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
     xmlNode *node = 0;
     struct icu_chain * chain = 0;
    
+    *status = U_ZERO_ERROR;
+
     if (!xml_node 
         ||xml_node->type != XML_ELEMENT_NODE 
         // || strcmp((const char *) xml_node->name, "icu_chain")
@@ -1151,6 +1156,8 @@ int icu_chain_next_token(struct icu_chain * chain,
 {
     int got_token = 0;
     
+    *status = U_ZERO_ERROR;
+
     if (!chain)
         return 0;
 
