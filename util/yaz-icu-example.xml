@@ -4,6 +4,4 @@
   <normalize rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
   <display/>
   <casemap rule="l"/>
-  <index/>
-  <sortkey/>
 </icu_chain>
