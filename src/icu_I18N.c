@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.13 2007-11-08 08:17:17 adam Exp $
+ * $Id: icu_I18N.c,v 1.14 2007-11-08 13:35:13 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -333,7 +333,6 @@ struct icu_casemap * icu_casemap_create(const char *locale, char action,
 {    
     struct icu_casemap * casemap
         = (struct icu_casemap *) malloc(sizeof(struct icu_casemap));
-    strcpy(casemap->locale, locale);
     casemap->action = action;
 
     switch(casemap->action) {    
@@ -356,7 +355,7 @@ struct icu_casemap * icu_casemap_create(const char *locale, char action,
 
 void icu_casemap_destroy(struct icu_casemap * casemap)
 {
-    if (casemap) 
+    if (casemap)
         free(casemap);
 }
 
@@ -364,13 +363,14 @@ void icu_casemap_destroy(struct icu_casemap * casemap)
 int icu_casemap_casemap(struct icu_casemap * casemap,
                         struct icu_buf_utf16 * dest16,
                         struct icu_buf_utf16 * src16,
-                        UErrorCode *status)
+                        UErrorCode *status,
+                        const char *locale)
 {
     if(!casemap)
         return 0;
     
-    return icu_utf16_casemap(dest16, src16,
-                             casemap->locale, casemap->action, status);
+    return icu_utf16_casemap(dest16, src16, locale,
+                             casemap->action, status);
 }
 
 
@@ -909,28 +909,31 @@ void icu_chain_destroy(struct icu_chain * chain)
 
 
 struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node, 
-                                        const char *locale, 
                                         int sort,
-                                        UErrorCode * status){
-
+                                        UErrorCode * status)
+{
     xmlNode *node = 0;
     struct icu_chain * chain = 0;
    
     *status = U_ZERO_ERROR;
 
-    if (!xml_node 
-        ||xml_node->type != XML_ELEMENT_NODE 
-        // || strcmp((const char *) xml_node->name, "icu_chain")
-        )
-
+    if (!xml_node ||xml_node->type != XML_ELEMENT_NODE)
         return 0;
-
-        chain = icu_chain_create(locale, sort, status);
-
+    
+    {
+        xmlChar * xml_locale = xmlGetProp((xmlNode *) xml_node, 
+                                          (xmlChar *) "locale");
+        
+        if (xml_locale)
+        {
+            chain = icu_chain_create((const char *) xml_locale, sort, status);
+            xmlFree(xml_locale);
+        }
+        
+    }
     if (!chain)
         return 0;
 
-        
     for (node = xml_node->children; node; node = node->next)
     {
         xmlChar *xml_rule;
@@ -1072,7 +1075,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         break;
     case ICU_chain_step_type_casemap:
         icu_casemap_casemap(step->u.casemap,
-                            step->buf16, src16, status);
+                            step->buf16, src16, status,
+                            chain->locale);
         break;
     case ICU_chain_step_type_normalize:
         icu_normalizer_normalize(step->u.normalizer,

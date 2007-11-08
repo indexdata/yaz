@@ -102,7 +102,6 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
 
 struct icu_casemap
 {
-    char locale[16];
     char action;
 };
 
@@ -114,7 +113,8 @@ void icu_casemap_destroy(struct icu_casemap * casemap);
 int icu_casemap_casemap(struct icu_casemap * casemap,
                         struct icu_buf_utf16 * dest16,
                         struct icu_buf_utf16 * src16,
-                        UErrorCode *status);
+                        UErrorCode *status,
+                        const char *locale);
 
 int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
                       struct icu_buf_utf16 * src16,
@@ -226,7 +226,7 @@ void icu_chain_step_destroy(struct icu_chain_step * step);
 
 struct icu_chain
 {
-    uint8_t locale[16];
+    char locale[16];
     int sort;
 
     const char * src8cstr;

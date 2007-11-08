@@ -50,7 +50,6 @@ yaz_icu_chain_t icu_chain_create(const char * locale,
 void icu_chain_destroy(yaz_icu_chain_t chain);
 
 yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
-                                     const char *locale,
                                      int sort,
                                      UErrorCode * status);
 

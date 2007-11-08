@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_icu_I18N.c,v 1.13 2007-11-08 09:03:11 adam Exp $
+ * $Id: tst_icu_I18N.c,v 1.14 2007-11-08 13:35:14 adam Exp $
  *
  */
 
@@ -480,7 +480,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     struct icu_chain * chain = 0;
     
 
-    const char * xml_str = "<icu>"
+    const char * xml_str = "<icu locale=\"en\">"
         "<normalize rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
@@ -493,8 +493,7 @@ void test_icu_I18N_chain(int argc, char **argv)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
+    chain = icu_chain_xml_config(xml_node, 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -534,7 +533,7 @@ void test_bug_1140(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
     
-    const char * xml_str = "<icu>"
+    const char * xml_str = "<icu locale=\"en\">"
 
         /* if the first rule is normalize instead. Then it works */
 #if 0
@@ -551,7 +550,7 @@ void test_bug_1140(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
+    chain = icu_chain_xml_config(xml_node, 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -595,7 +594,7 @@ void test_chain_empty_token(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
 
-    const char * xml_str = "<icu>"
+    const char * xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
         "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
@@ -604,7 +603,7 @@ void test_chain_empty_token(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
+    chain = icu_chain_xml_config(xml_node, 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -631,7 +630,7 @@ void test_chain_empty_chain(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
 
-    const char * xml_str = "<icu>"
+    const char * xml_str = "<icu locale=\"en\">"
         "</icu>";
     
     const char * src8 = "some 5487 weired !¤%&(/& sTuFf";
@@ -641,7 +640,7 @@ void test_chain_empty_chain(void)
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
-    chain = icu_chain_xml_config(xml_node, (uint8_t *) "en", 0, &status);
+    chain = icu_chain_xml_config(xml_node, 0, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);

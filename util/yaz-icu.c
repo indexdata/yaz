@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.10 2007-11-08 09:29:39 adam Exp $
+ * $Id: yaz-icu.c,v 1.11 2007-11-08 13:35:14 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -428,7 +428,6 @@ static void process_text_file(const struct config_t *p_config)
  
     xmlDoc *doc = xmlParseFile(config.conffile);  
     xmlNode *xml_node = xmlDocGetRootElement(doc);
-    xmlChar *xml_locale = xmlGetProp(xml_node, (xmlChar *) "locale");
 
     long unsigned int token_count = 0;    
     long unsigned int line_count = 0;    
@@ -442,14 +441,7 @@ static void process_text_file(const struct config_t *p_config)
         exit (1);
     }
 
-    if (!xml_locale || !strlen((const char *) xml_locale))
-        return;        
-    
-    config.chain = icu_chain_xml_config(xml_node, (const char *) xml_locale, 0,
-                                        &status);
-
-    xmlFree(xml_locale);
-
+    config.chain = icu_chain_xml_config(xml_node, 0, &status);
 
     if (config.chain && U_SUCCESS(status))
         success = 1;
