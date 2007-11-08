@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.16 2007-11-08 17:15:13 adam Exp $
+ * $Id: icu_I18N.c,v 1.17 2007-11-08 17:20:32 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -14,6 +14,7 @@
 #include <yaz/timing.h>
 #endif
 
+#include <yaz/xmalloc.h>
 
 #if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
@@ -47,14 +48,14 @@ int icu_check_status (UErrorCode status)
 struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
 {
     struct icu_buf_utf16 * buf16 
-        = (struct icu_buf_utf16 *) malloc(sizeof(struct icu_buf_utf16));
+        = (struct icu_buf_utf16 *) xmalloc(sizeof(struct icu_buf_utf16));
 
     buf16->utf16 = 0;
     buf16->utf16_len = 0;
     buf16->utf16_cap = 0;
 
     if (capacity > 0){
-        buf16->utf16 = (UChar *) malloc(sizeof(UChar) * capacity);
+        buf16->utf16 = (UChar *) xmalloc(sizeof(UChar) * capacity);
         buf16->utf16[0] = (UChar) 0;
         buf16->utf16_cap = capacity;
     }
@@ -79,17 +80,16 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
     
     if (capacity >  0){
         if (0 == buf16->utf16)
-            buf16->utf16 = (UChar *) malloc(sizeof(UChar) * capacity);
+            buf16->utf16 = (UChar *) xmalloc(sizeof(UChar) * capacity);
         else
             buf16->utf16 
-                = (UChar *) realloc(buf16->utf16, sizeof(UChar) * capacity);
+                = (UChar *) xrealloc(buf16->utf16, sizeof(UChar) * capacity);
 
         icu_buf_utf16_clear(buf16);
         buf16->utf16_cap = capacity;
     } 
     else { 
-        if (buf16->utf16)
-            free(buf16->utf16);
+        xfree(buf16->utf16);
         buf16->utf16 = 0;
         buf16->utf16_len = 0;
         buf16->utf16_cap = 0;
@@ -118,29 +118,24 @@ struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
 
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16)
 {
-    if (buf16){
-        if (buf16->utf16)
-            free(buf16->utf16);
-        free(buf16);
-    }
+    if (buf16)
+        xfree(buf16->utf16);
+    xfree(buf16);
 }
-
-
-
 
 
 
 struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity)
 {
     struct icu_buf_utf8 * buf8 
-        = (struct icu_buf_utf8 *) malloc(sizeof(struct icu_buf_utf8));
+        = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
 
     buf8->utf8 = 0;
     buf8->utf8_len = 0;
     buf8->utf8_cap = 0;
 
     if (capacity > 0){
-        buf8->utf8 = (uint8_t *) malloc(sizeof(uint8_t) * capacity);
+        buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         buf8->utf8[0] = (uint8_t) 0;
         buf8->utf8_cap = capacity;
     }
@@ -167,17 +162,16 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
 
     if (capacity >  0){
         if (0 == buf8->utf8)
-            buf8->utf8 = (uint8_t *) malloc(sizeof(uint8_t) * capacity);
+            buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         else
             buf8->utf8 
-                = (uint8_t *) realloc(buf8->utf8, sizeof(uint8_t) * capacity);
+                = (uint8_t *) xrealloc(buf8->utf8, sizeof(uint8_t) * capacity);
 
         icu_buf_utf8_clear(buf8);
         buf8->utf8_cap = capacity;
     } 
     else { 
-        if (buf8->utf8)
-            free(buf8->utf8);
+        xfree(buf8->utf8);
         buf8->utf8 = 0;
         buf8->utf8_len = 0;
         buf8->utf8_cap = 0;
@@ -220,11 +214,9 @@ const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
 
 void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8)
 {
-    if (buf8){
-        if (buf8->utf8)
-            free(buf8->utf8);
-        free(buf8);
-    }
+    if (buf8)
+        xfree(buf8->utf8);
+    xfree(buf8);
 }
 
 
@@ -331,7 +323,7 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
 struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
 {    
     struct icu_casemap * casemap
-        = (struct icu_casemap *) malloc(sizeof(struct icu_casemap));
+        = (struct icu_casemap *) xmalloc(sizeof(struct icu_casemap));
     casemap->action = action;
 
     switch(casemap->action) {    
@@ -354,8 +346,7 @@ struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
 
 void icu_casemap_destroy(struct icu_casemap * casemap)
 {
-    if (casemap)
-        free(casemap);
+    xfree(casemap);
 }
 
 
@@ -507,7 +498,7 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
                                             UErrorCode *status)
 {
     struct icu_tokenizer * tokenizer
-        = (struct icu_tokenizer *) malloc(sizeof(struct icu_tokenizer));
+        = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
 
     tokenizer->action = action;
     tokenizer->bi = 0;
@@ -559,7 +550,7 @@ void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer)
     if (tokenizer) {
         if (tokenizer->bi)
             ubrk_close(tokenizer->bi);
-        free(tokenizer);
+        xfree(tokenizer);
     }
 }
 
@@ -683,7 +674,7 @@ struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
 {
 
     struct icu_normalizer * normalizer
-        = (struct icu_normalizer *) malloc(sizeof(struct icu_normalizer));
+        = (struct icu_normalizer *) xmalloc(sizeof(struct icu_normalizer));
 
     normalizer->action = action;
     normalizer->trans = 0;
@@ -730,7 +721,7 @@ void icu_normalizer_destroy(struct icu_normalizer * normalizer){
             icu_buf_utf16_destroy(normalizer->rules16);
         if (normalizer->trans)
             utrans_close(normalizer->trans);
-        free(normalizer);
+        xfree(normalizer);
     }
 }
 
@@ -780,7 +771,7 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     if(!chain || !type || !rule)
         return 0;
 
-    step = (struct icu_chain_step *) malloc(sizeof(struct icu_chain_step));
+    step = (struct icu_chain_step *) xmalloc(sizeof(struct icu_chain_step));
 
     step->type = type;
 
@@ -833,7 +824,7 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
     default:
         break;
     }
-    free(step);
+    xfree(step);
 }
 
 
@@ -844,7 +835,7 @@ struct icu_chain * icu_chain_create(const char *locale,
 {
 
     struct icu_chain * chain 
-        = (struct icu_chain *) malloc(sizeof(struct icu_chain));
+        = (struct icu_chain *) xmalloc(sizeof(struct icu_chain));
 
     *status = U_ZERO_ERROR;
 
@@ -889,7 +880,7 @@ void icu_chain_destroy(struct icu_chain * chain)
         icu_buf_utf16_destroy(chain->src16);
     
         icu_chain_step_destroy(chain->steps);
-        free(chain);
+        xfree(chain);
     }
 }
 
