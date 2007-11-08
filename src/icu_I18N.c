@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.18 2007-11-08 17:22:49 adam Exp $
+ * $Id: icu_I18N.c,v 1.19 2007-11-08 18:02:04 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -14,9 +14,9 @@
 #include <yaz/timing.h>
 #endif
 
+#if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
 
 #include <yaz/log.h>
@@ -34,9 +34,9 @@
 
 int icu_check_status (UErrorCode status)
 {
-    if(U_FAILURE(status)){
-        yaz_log(YLOG_WARN, 
-                "ICU: %d %s\n", status, u_errorName(status));
+    if (U_FAILURE(status))
+    {
+        yaz_log(YLOG_WARN, "ICU: %d %s\n", status, u_errorName(status));
         return 0;   
     }
     return 1;
@@ -372,7 +372,7 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
     int32_t dest16_len = 0;
 
 
-    if (!src16->utf16_len){           //guarding for empty source string
+    if (!src16->utf16_len){           /* guarding for empty source string */
         if (dest16->utf16)
             dest16->utf16[0] = (UChar) 0;
         dest16->utf16_len = 0;
@@ -737,7 +737,7 @@ int icu_normalizer_normalize(struct icu_normalizer * normalizer,
         || !dest16)
         return 0;
 
-    if (!src16->utf16_len){           //guarding for empty source string
+    if (!src16->utf16_len){           /* guarding for empty source string */
         icu_buf_utf16_clear(dest16);
         return 0;
     }
@@ -829,11 +829,9 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
 
 
 
-struct icu_chain * icu_chain_create(const char *locale, 
-                                    int sort,
+struct icu_chain * icu_chain_create(const char *locale,  int sort,
                                     UErrorCode * status)
 {
-
     struct icu_chain * chain 
         = (struct icu_chain *) xmalloc(sizeof(struct icu_chain));
 
@@ -847,7 +845,6 @@ struct icu_chain * icu_chain_create(const char *locale,
 
     if (U_FAILURE(*status))
         return 0;
-
 
     chain->token_count = 0;
 
@@ -867,8 +864,8 @@ struct icu_chain * icu_chain_create(const char *locale,
 
 void icu_chain_destroy(struct icu_chain * chain)
 {
-    if (chain){
-
+    if (chain)
+    {
         if (chain->coll)
             ucol_close(chain->coll);
 
@@ -922,35 +919,27 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
 
         xml_rule = xmlGetProp(node, (xmlChar *) "rule");
 
-        if (!strcmp((const char *) node->name, 
-                    (const char *) "casemap")){
+        if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
                                          (const uint8_t *) xml_rule, status);
-        }
-        else if (!strcmp((const char *) node->name,
-                         (const char *) "normalize")){
+        else if (!strcmp((const char *) node->name, "normalize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize, 
                                          (const uint8_t *) xml_rule, status);
-        }
-        else if (!strcmp((const char *) node->name,
-                         (const char *) "tokenize")){
+        else if (!strcmp((const char *) node->name, "tokenize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize, 
                                          (const uint8_t *) xml_rule, status);
-        }
-        else if (!strcmp((const char *) node->name,
-                         (const char *) "display")){
+        else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
-        }
         xmlFree(xml_rule);
-        if (!step || U_FAILURE(*status)){
+        if (!step || U_FAILURE(*status))
+        {
             icu_chain_destroy(chain);
             return 0;
         }
         
 
     }
-
     return chain;
 }
 
@@ -978,7 +967,8 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
 
     
     /* create utf16 destination buffers as needed, or */
-    switch(type) {
+    switch(type)
+    {
     case ICU_chain_step_type_display:
         buf16 = src16;
         break;
@@ -1018,7 +1008,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     /* assign utf16 src buffers as neeed, advance in previous steps
        tokens until non-zero token met, and setting stop condition */
 
-    if (step->previous){
+    if (step->previous)
+    {
         src16 = step->previous->buf16;
         /* tokens might be killed in previous steps, therefore looping */
 
@@ -1028,7 +1019,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
             got_new_token
                 = icu_chain_step_next_token(chain, step->previous, status);
     }
-    else { /* first step can only work once on chain->src16 input buffer */
+    else 
+    { /* first step can only work once on chain->src16 input buffer */
         src16 = chain->src16;
         step->more_tokens = 0;
         got_new_token = 1;
@@ -1038,7 +1030,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         return 0;
 
     /* stop if nothing to process */
-    if (step->need_new_token && !got_new_token){
+    if (step->need_new_token && !got_new_token)
+    {
         step->more_tokens = 0;
         return 0;
     }
@@ -1047,7 +1040,8 @@ int icu_chain_step_next_token(struct icu_chain * chain,
        perform the work, eventually put this steps output in 
        step->buf16 or the chains UTF8 output buffers  */
 
-    switch(step->type) {
+    switch(step->type)
+    {
     case ICU_chain_step_type_display:
         icu_utf16_to_utf8(chain->display8, src16, status);
         break;
@@ -1062,11 +1056,11 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         break;
     case ICU_chain_step_type_tokenize:
         /* attach to new src16 token only first time during splitting */
-        if (step->need_new_token){
+        if (step->need_new_token)
+        {
             icu_tokenizer_attach(step->u.tokenizer, src16, status);
             step->need_new_token = 0;
         }
-
 
         /* splitting one src16 token into multiple buf16 tokens */
         step->more_tokens
@@ -1076,11 +1070,11 @@ int icu_chain_step_next_token(struct icu_chain * chain,
         /* make sure to get new previous token if this one had been used up
            by recursive call to _same_ step */
 
-        if (!step->more_tokens){
+        if (!step->more_tokens)
+        {
             step->more_tokens = icu_chain_step_next_token(chain, step, status);
-            return step->more_tokens;  // avoid one token count too much!
+            return step->more_tokens;  /* avoid one token count too much! */
         }
-
         break;
     default:
         return 0;
@@ -1115,7 +1109,8 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
     chain->token_count = 0;
 
     /* clear all steps stop states */
-    while (stp){
+    while (stp)
+    {
         stp->more_tokens = 1;
         stp->need_new_token = 1;
         stp = stp->previous;
@@ -1144,10 +1139,12 @@ int icu_chain_next_token(struct icu_chain * chain,
         return 0;
 
     /* special case with no steps - same as index type binary */
-    if (!chain->steps){
+    if (!chain->steps)
+    {
         if (chain->token_count)
             return 0;
-        else {
+        else
+        {
             chain->token_count++;
             
             if (chain->sort)
@@ -1158,12 +1155,13 @@ int icu_chain_next_token(struct icu_chain * chain,
         }
     }
     /* usual case, one or more icu chain steps existing */
-    else {
-
+    else 
+    {
         while(!got_token && chain->steps && chain->steps->more_tokens)
             got_token = icu_chain_step_next_token(chain, chain->steps, status);
 
-        if (got_token){
+        if (got_token)
+        {
             chain->token_count++;
 
             icu_utf16_to_utf8(chain->norm8, chain->steps->buf16, status);
@@ -1172,7 +1170,7 @@ int icu_chain_next_token(struct icu_chain * chain,
                 icu_sortkey8_from_utf16(chain->coll,
                                         chain->sort8, chain->steps->buf16,
                                         status);
-            
+
             return chain->token_count;
         }
     }
@@ -1221,11 +1219,7 @@ const UCollator * icu_chain_get_coll(struct icu_chain * chain)
     return chain->coll;
 }
 
-
 #endif /* YAZ_HAVE_ICU */
-
-
-
 
 /*
  * Local variables:

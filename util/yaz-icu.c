@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.11 2007-11-08 13:35:14 adam Exp $
+ * $Id: yaz-icu.c,v 1.12 2007-11-08 18:02:04 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -15,7 +15,6 @@
 #include <stdlib.h>
 
 #include <yaz/options.h>
-
 
 #if YAZ_HAVE_ICU
 
@@ -139,7 +138,8 @@ static void print_icu_converters(const struct config_t *p_config)
                 ucnv_getDefaultName());
     }
     
-    for(i=0;i<count;i++){
+    for(i=0;i<count;i++)
+    {
         if (p_config->xmloutput)
             fprintf(config.outfile, "<converter id=\"%s\"/>\n", 
                     ucnv_getAvailableName(i));
@@ -174,7 +174,8 @@ static void print_icu_transliterators(const struct config_t *p_config)
             fprintf(config.outfile, " %s", buf);
     }
     
-    if (p_config->xmloutput){
+    if (p_config->xmloutput)
+    {
         fprintf(config.outfile, "</transliterators>\n");
     }
     else
@@ -271,8 +272,8 @@ static void print_icu_xml_locales(const struct config_t *p_config)
 
     count = uloc_countAvailable() ;
 
-    if (p_config->xmloutput){
-    
+    if (p_config->xmloutput)
+    {
         fprintf(config.outfile, "<locales count=\"%d\" default=\"%s\" collations=\"%d\">\n", 
                 count, uloc_getDefault(), ucol_countAvailable());
     }
@@ -346,7 +347,8 @@ static void print_icu_xml_locales(const struct config_t *p_config)
                     &status);
 
 
-        if (p_config->xmloutput){
+        if (p_config->xmloutput)
+        {
             fprintf(config.outfile, "<locale id=\"%s\"", uloc_getAvailable(i)); 
             /* fprintf(config.outfile, " locale=\"%s\"", uloc_getAvailable(i)); */
             /* if (strlen(keyword_str)) */
@@ -370,7 +372,8 @@ static void print_icu_xml_locales(const struct config_t *p_config)
                 fprintf(config.outfile, "%s", localname_str);
             fprintf(config.outfile, "</locale>\n"); 
         }
-        else if (1 == p_config->xmloutput){
+        else if (1 == p_config->xmloutput)
+        {
             fprintf(config.outfile, "%s", uloc_getAvailable(i)); 
             fprintf(config.outfile, " | ");
             if (strlen(name_str))
@@ -388,7 +391,8 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     else
         fprintf(config.outfile, "\n");
 
-    if(U_FAILURE(status)) {
+    if(U_FAILURE(status))
+    {
         fprintf(stderr, "ICU Error: %d %s\n", status, u_errorName(status));
         exit(status);
     }
@@ -435,7 +439,8 @@ static void process_text_file(const struct config_t *p_config)
     UErrorCode status = U_ZERO_ERROR;
     int success = 0;
     
-    if (! xml_node) {   
+    if (! xml_node)
+    {   
         printf("Could not parse XML config file '%s' \n",
                 config.conffile);
         exit (1);
@@ -450,8 +455,6 @@ static void process_text_file(const struct config_t *p_config)
                 config.conffile);
         exit (1);
     }
-    
-
 
     if (p_config->xmloutput)
         fprintf(config.outfile,
@@ -465,7 +468,8 @@ static void process_text_file(const struct config_t *p_config)
         success = icu_chain_assign_cstr(config.chain, line, &status);
         line_count++;
 
-        while (success && icu_chain_next_token(config.chain, &status)){
+        while (success && icu_chain_next_token(config.chain, &status))
+        {
             if (U_FAILURE(status))
                 success = 0;
             else {
