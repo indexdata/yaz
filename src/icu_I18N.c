@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.17 2007-11-08 17:20:32 adam Exp $
+ * $Id: icu_I18N.c,v 1.18 2007-11-08 17:22:49 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -839,8 +839,7 @@ struct icu_chain * icu_chain_create(const char *locale,
 
     *status = U_ZERO_ERROR;
 
-    strncpy((char *) chain->locale, (const char *) locale, 16);    
-    chain->locale[16 - 1] = '\0';
+    chain->locale = xstrdup(locale);
 
     chain->sort = sort;
 
@@ -880,6 +879,7 @@ void icu_chain_destroy(struct icu_chain * chain)
         icu_buf_utf16_destroy(chain->src16);
     
         icu_chain_step_destroy(chain->steps);
+        xfree(chain->locale);
         xfree(chain);
     }
 }

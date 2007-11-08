@@ -224,7 +224,7 @@ void icu_chain_step_destroy(struct icu_chain_step * step);
 
 struct icu_chain
 {
-    char locale[16];
+    char *locale;
     int sort;
 
     const char * src8cstr;
