@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.14 2007-11-08 13:35:13 adam Exp $
+ * $Id: icu_I18N.c,v 1.15 2007-11-08 17:08:11 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -328,8 +328,7 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
 
 
 
-struct icu_casemap * icu_casemap_create(const char *locale, char action,
-                                        UErrorCode *status)
+struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
 {    
     struct icu_casemap * casemap
         = (struct icu_casemap *) malloc(sizeof(struct icu_casemap));
@@ -803,8 +802,7 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     case ICU_chain_step_type_display:
         break;
     case ICU_chain_step_type_casemap:
-        step->u.casemap = icu_casemap_create((char *) chain->locale, 
-                                             (char) rule[0], status);
+        step->u.casemap = icu_casemap_create(rule[0], status);
         break;
     case ICU_chain_step_type_normalize:
         step->u.normalizer = icu_normalizer_create((char *) rule, 'f', status);

@@ -105,8 +105,7 @@ struct icu_casemap
     char action;
 };
 
-struct icu_casemap * icu_casemap_create(const char *locale, char action,
-                                        UErrorCode *status);
+struct icu_casemap * icu_casemap_create(char action, UErrorCode *status);
 
 void icu_casemap_destroy(struct icu_casemap * casemap);
 
