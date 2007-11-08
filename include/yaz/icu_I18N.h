@@ -25,12 +25,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/** \file
+    \brief Internal header for ICU utilities
+*/
+
 #ifndef ICU_I18NL_H
 #define ICU_I18NL_H
 
-#include <yaz/nmem.h>
+#include <yaz/yconfig.h>
 
-#include <libxml/parser.h>
 #include <libxml/tree.h>
 
 #include <unicode/utypes.h>   /* Basic ICU data types */
@@ -40,6 +43,7 @@
 #include <unicode/ubrk.h>
 #include <unicode/utrans.h>
 
+#include <yaz/icu.h>
 
 /* declared structs and functions */
 
@@ -210,7 +214,7 @@ struct icu_chain_step
 
 struct icu_chain;
 
-struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
+struct icu_chain_step * icu_chain_step_create(yaz_icu_chain_t chain,
                                               enum icu_chain_step_type type,
                                               const uint8_t * rule,
                                               struct icu_buf_utf16 * buf16,
@@ -244,42 +248,18 @@ struct icu_chain
     struct icu_chain_step * steps;
 };
 
-struct icu_chain * icu_chain_create(const char * locale,
-                                    int sort,
-                                    UErrorCode * status);
-
-void icu_chain_destroy(struct icu_chain * chain);
-
-struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
-                                        const char *locale,
-                                        int sort,
-                                        UErrorCode * status);
-
-struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
+struct icu_chain_step * icu_chain_insert_step(yaz_icu_chain_t chain,
                                               enum icu_chain_step_type type,
                                               const uint8_t * rule,
                                               UErrorCode *status);
 
-int icu_chain_step_next_token(struct icu_chain * chain,
+int icu_chain_step_next_token(yaz_icu_chain_t chain,
                               struct icu_chain_step * step,
                               UErrorCode *status);
 
-int icu_chain_assign_cstr(struct icu_chain * chain,
-                          const char * src8cstr, 
-                          UErrorCode *status);
+int icu_chain_token_number(yaz_icu_chain_t chain);
 
-int icu_chain_next_token(struct icu_chain * chain,
-                         UErrorCode *status);
-
-int icu_chain_token_number(struct icu_chain * chain);
-
-const char * icu_chain_token_display(struct icu_chain * chain);
-
-const char * icu_chain_token_norm(struct icu_chain * chain);
-
-const char * icu_chain_token_sortkey(struct icu_chain * chain);
-
-const UCollator * icu_chain_get_coll(struct icu_chain * chain);
+const UCollator * icu_chain_get_coll(yaz_icu_chain_t chain);
 
 #endif /* ICU_I18NL_H */
 

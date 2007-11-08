@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.9 2007-11-08 08:17:18 adam Exp $
+ * $Id: yaz-icu.c,v 1.10 2007-11-08 09:29:39 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -21,15 +21,18 @@
 
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+#include <unicode/ucol.h> 
+#include <unicode/ubrk.h>
+#include <unicode/utrans.h>
 
-#include <yaz/icu_I18N.h>
+#include <yaz/icu.h>
 
 /* commando line and config parameters */
 static struct config_t { 
     char conffile[1024];
     char print[1024];
     int xmloutput;
-    struct icu_chain * chain;
+    yaz_icu_chain_t chain;
     FILE * infile;
     FILE * outfile;
 } config;
