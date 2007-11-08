@@ -47,9 +47,9 @@ int icu_check_status (UErrorCode status);
 
 struct icu_buf_utf16
 {
-  UChar * utf16;
-  int32_t utf16_len;
-  int32_t utf16_cap;
+    UChar * utf16;
+    int32_t utf16_len;
+    int32_t utf16_cap;
 };
 
 struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity);
@@ -103,7 +103,7 @@ struct icu_casemap
 };
 
 struct icu_casemap * icu_casemap_create(const char *locale, char action,
-                                            UErrorCode *status);
+                                        UErrorCode *status);
 
 void icu_casemap_destroy(struct icu_casemap * casemap);
 
