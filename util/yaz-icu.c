@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.8 2007-11-07 09:50:24 adam Exp $
+ * $Id: yaz-icu.c,v 1.9 2007-11-08 08:17:18 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -17,7 +17,7 @@
 #include <yaz/options.h>
 
 
-#if HAVE_ICU
+#if YAZ_HAVE_ICU
 
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
@@ -505,13 +505,13 @@ static void process_text_file(const struct config_t *p_config)
         free(line);
 }
 
-#endif /* HAVE_ICU */
+#endif /* YAZ_HAVE_ICU */
 
 
 int main(int argc, char **argv) 
 {
 
-#if HAVE_ICU
+#if YAZ_HAVE_ICU
 
     read_params(argc, argv, &config);
 
@@ -521,14 +521,14 @@ int main(int argc, char **argv)
     if (config.print && strlen(config.print))
         print_info(&config);
 
-#else /* HAVE_ICU */
+#else /* YAZ_HAVE_ICU */
 
     printf("ICU not available on your system.\n"
            "Please install libicu36-dev and icu-doc or similar, "
            "re-configure and re-compile\n");
 
 
-#endif /* HAVE_ICU */
+#endif /* YAZ_HAVE_ICU */
 
     return(0);
 }

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.12 2007-11-07 10:19:12 adam Exp $
+ * $Id: icu_I18N.c,v 1.13 2007-11-08 08:17:17 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -15,7 +15,7 @@
 #endif
 
 
-#if HAVE_ICU
+#if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
 
 #include <yaz/log.h>
@@ -1240,9 +1240,7 @@ const UCollator * icu_chain_get_coll(struct icu_chain * chain)
 }
 
 
-
-
-#endif /* HAVE_ICU */
+#endif /* YAZ_HAVE_ICU */
 
 
 
