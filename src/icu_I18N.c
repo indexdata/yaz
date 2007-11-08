@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.15 2007-11-08 17:08:11 adam Exp $
+ * $Id: icu_I18N.c,v 1.16 2007-11-08 17:15:13 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -509,7 +509,6 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
     struct icu_tokenizer * tokenizer
         = (struct icu_tokenizer *) malloc(sizeof(struct icu_tokenizer));
 
-    strcpy(tokenizer->locale, locale);
     tokenizer->action = action;
     tokenizer->bi = 0;
     tokenizer->buf16 = 0;
@@ -522,33 +521,23 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
     switch(tokenizer->action) {    
     case 'l':
     case 'L':
-        tokenizer->bi
-            = ubrk_open(UBRK_LINE, tokenizer->locale,
-                        0, 0, status);
+        tokenizer->bi = ubrk_open(UBRK_LINE, locale, 0, 0, status);
         break;
     case 's':
     case 'S':
-        tokenizer->bi
-            = ubrk_open(UBRK_SENTENCE, tokenizer->locale,
-                        0, 0, status);
+        tokenizer->bi = ubrk_open(UBRK_SENTENCE, locale, 0, 0, status);
         break;
     case 'w':
     case 'W':
-        tokenizer->bi 
-            = ubrk_open(UBRK_WORD, tokenizer->locale,
-                        0, 0, status);
+        tokenizer->bi = ubrk_open(UBRK_WORD, locale, 0, 0, status);
         break;
     case 'c':
     case 'C':
-        tokenizer->bi 
-            = ubrk_open(UBRK_CHARACTER, tokenizer->locale,
-                        0, 0, status);
+        tokenizer->bi = ubrk_open(UBRK_CHARACTER, locale, 0, 0, status);
         break;
     case 't':
     case 'T':
-        tokenizer->bi 
-            = ubrk_open(UBRK_TITLE, tokenizer->locale,
-                        0, 0, status);
+        tokenizer->bi = ubrk_open(UBRK_TITLE, locale, 0, 0, status);
         break;
     default:
         *status = U_UNSUPPORTED_ERROR;

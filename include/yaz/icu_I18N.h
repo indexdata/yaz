@@ -127,7 +127,6 @@ UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
 
 struct icu_tokenizer
 {
-    char locale[16];
     char action;
     UBreakIterator* bi;
     struct icu_buf_utf16 * buf16;
