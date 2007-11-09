@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.49 2007-11-08 09:29:38 adam Exp $
+## $Id: Makefile.am,v 1.50 2007-11-09 16:46:43 adam Exp $
 
 noinst_HEADERS = icu_I18N.h
 
@@ -11,7 +11,7 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h comstack.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
  xmlquery.h libxml2_error.h xmltypes.h snprintf.h query-charset.h \
  mutex.h oid_db.h oid_util.h oid_std.h tokenizer.h copy_types.h \
- icu.h match_glob.h \
+ icu.h match_glob.h poll.h \
  \
  ill.h ill-core.h item-req.h oclc-ill-req-ext.h z-accdes1.h z-accform1.h \
  z-acckrb1.h z-core.h z-date.h z-diag1.h z-espec1.h z-estask.h z-exp.h \
