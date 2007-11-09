@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.11 2007-01-03 08:42:15 adam Exp $
+ * $Id: eventl.c,v 1.12 2007-11-09 18:47:50 adam Exp $
  */
 
 /**
@@ -25,6 +25,13 @@
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
+#define NPOLL 1
+
+#if NPOLL
+#include <yaz/poll.h>
+#else
+
 #ifdef WIN32
 #include <winsock.h>
 #endif
@@ -34,8 +41,8 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#endif
 
-#include <yaz/yconfig.h>
 #include <yaz/log.h>
 #include <yaz/comstack.h>
 #include <yaz/xmalloc.h>
@@ -78,6 +85,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int chan_id)
     return new_iochan;
 }
 
+
 int iochan_is_alive(IOCHAN chan)
 {
     static struct timeval to;
@@ -108,9 +116,17 @@ int event_loop(IOCHAN *iochans)
     do /* loop as long as there are active associations to process */
     {
         IOCHAN p, nextp;
+#if NPOLL
+        int i;
+        int tv_sec = 3600;
+        int no_fds = 0;
+        struct yaz_poll_fd *fds = 0;
+#else
         fd_set in, out, except;
-        int res, max;
         static struct timeval to;
+        int max;
+#endif
+        int res;
         time_t now = time(0);
 
         if (statserv_must_terminate())
@@ -118,6 +134,39 @@ int event_loop(IOCHAN *iochans)
             for (p = *iochans; p; p = p->next)
                 p->force_event = EVENT_TIMEOUT;
         }
+#if NPOLL
+        for (p = *iochans; p; p = p->next)
+            no_fds++;
+        fds = xmalloc(no_fds * sizeof(*fds));
+        for (i = 0, p = *iochans; p; p = p->next, i++)
+        {
+            time_t w, ftime;
+            enum yaz_poll_mask input_mask = 0;
+            yaz_log(log_level, "fd=%d flags=%d force_event=%d",
+                    p->fd, p->flags, p->force_event);
+            if (p->force_event)
+                tv_sec = 0;          /* polling select */
+            if (p->flags & EVENT_INPUT)
+                input_mask += yaz_poll_read;
+            if (p->flags & EVENT_OUTPUT)
+                input_mask += yaz_poll_write;
+            if (p->flags & EVENT_EXCEPT)
+                input_mask += yaz_poll_except;
+            if (p->max_idle && p->last_event)
+            {
+                ftime = p->last_event + p->max_idle;
+                if (ftime < now)
+                    w = p->max_idle;
+                else
+                    w = ftime - now;
+                if (w < tv_sec)
+                    tv_sec = w;
+            }
+            fds[i].fd = p->fd;
+            fds[i].input_mask = input_mask;
+        }
+        res = yaz_poll(fds, no_fds, tv_sec);
+#else
         FD_ZERO(&in);
         FD_ZERO(&out);
         FD_ZERO(&except);
@@ -153,6 +202,7 @@ int event_loop(IOCHAN *iochans)
         yaz_log(log_level, "select start %ld", (long) to.tv_sec);
         res = YAZ_EV_SELECT(max + 1, &in, &out, &except, &to);
         yaz_log(log_level, "select end");
+#endif
         if (res < 0)
         {
             if (yaz_errno() == EINTR)
@@ -162,6 +212,7 @@ int event_loop(IOCHAN *iochans)
                     for (p = *iochans; p; p = p->next)
                         p->force_event = EVENT_TIMEOUT;
                 }
+                xfree(fds);
                 continue;
             }
             else
@@ -178,6 +229,40 @@ int event_loop(IOCHAN *iochans)
             }
         }
         now = time(0);
+#if NPOLL
+        for (i = 0, p = *iochans; p; p = p->next, i++)
+        {
+            int force_event = p->force_event;
+            enum yaz_poll_mask output_mask = fds[i].output_mask;
+
+            p->force_event = 0;
+            if (!p->destroyed && ((output_mask & yaz_poll_read) ||
+                                  force_event == EVENT_INPUT))
+            {
+                p->last_event = now;
+                (*p->fun)(p, EVENT_INPUT);
+            }
+            if (!p->destroyed && ((output_mask & yaz_poll_write) ||
+                                  force_event == EVENT_OUTPUT))
+            {
+                p->last_event = now;
+                (*p->fun)(p, EVENT_OUTPUT);
+            }
+            if (!p->destroyed && ((output_mask & yaz_poll_except) ||
+                force_event == EVENT_EXCEPT))
+            {
+                p->last_event = now;
+                (*p->fun)(p, EVENT_EXCEPT);
+            }
+            if (!p->destroyed && ((p->max_idle && now - p->last_event >=
+                p->max_idle) || force_event == EVENT_TIMEOUT))
+            {
+                p->last_event = now;
+                (*p->fun)(p, EVENT_TIMEOUT);
+            }
+        }
+        xfree(fds);
+#else
         for (p = *iochans; p; p = p->next)
         {
             int force_event = p->force_event;
@@ -208,6 +293,7 @@ int event_loop(IOCHAN *iochans)
                 (*p->fun)(p, EVENT_TIMEOUT);
             }
         }
+#endif
         for (p = *iochans; p; p = nextp)
         {
             nextp = p->next;
