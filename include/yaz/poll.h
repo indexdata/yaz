@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: poll.h,v 1.1 2007-11-09 16:46:43 adam Exp $ */
+/* $Id: poll.h,v 1.2 2007-11-09 19:00:08 adam Exp $ */
 
 /**
  * \file
@@ -59,14 +59,33 @@ struct yaz_poll_fd {
 };
 
 /** \brief socket poll wrapper using select
- */
+    \param fds array of sockets to be polled
+    \param num_fds size of fds array (number of sockets)
+    \param timeout number of seconds to wait (-1 for no timeout)
+    \retval -1 error
+    \retval 0 timeout
+    \retval >0 event occur on one or more sockets
+*/
 int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int timeout);
 
-/** \brief socket poll using poll */
+/** \brief socket poll using poll
+    \param fds array of sockets to be polled
+    \param num_fds size of fds array (number of sockets)
+    \param timeout number of seconds to wait (-1 for no timeout)
+    \retval -1 error
+    \retval 0 timeout
+    \retval >0 event occur on one or more sockets
+*/
 int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int timeout);
 
 /** \brief poll wrapper for poll or select 
-    
+    \param fds array of sockets to be polled
+    \param num_fds size of fds array (number of sockets)
+    \param timeout number of seconds to wait (-1 for no timeout)
+    \retval -1 error
+    \retval 0 timeout
+    \retval >0 event occur on one or more sockets
+
     This functions calls yaz_poll_poll on systems where poll is
     available and yaz_poll_select where it it unavailable.
 */
