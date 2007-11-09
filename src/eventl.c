@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.14 2007-11-09 19:00:42 adam Exp $
+ * $Id: eventl.c,v 1.15 2007-11-09 22:08:14 adam Exp $
  */
 
 /**
@@ -69,7 +69,7 @@ int iochan_is_alive(IOCHAN chan)
 
     fds.fd = chan->fd;
     fds.input_mask = yaz_poll_read;
-    res = yaz_poll(&fds, 1, 0);
+    res = yaz_poll(&fds, 1, 0, 0);
     if (res == 0)
         return 1;
     if (!ir_read(chan, EVENT_INPUT))
@@ -124,7 +124,7 @@ int event_loop(IOCHAN *iochans)
             fds[i].fd = p->fd;
             fds[i].input_mask = input_mask;
         }
-        res = yaz_poll(fds, no_fds, tv_sec);
+        res = yaz_poll(fds, no_fds, tv_sec, 0);
         if (res < 0)
         {
             if (yaz_errno() == EINTR)

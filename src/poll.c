@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: poll.c,v 1.1 2007-11-09 16:46:43 adam Exp $
+ * $Id: poll.c,v 1.2 2007-11-09 22:08:14 adam Exp $
  */
 /**
  * \file 
@@ -48,7 +48,8 @@
   cases, e.g. when running IRSpy on a large target database.  So you
   should ensure that YAZ uses ZOOM_yaz_poll_poll() when possible.
 */
-int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int timeout)
+static int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds,
+                           int sec, int nsec)
 {
     struct timeval tv;
     fd_set input, output, except;
@@ -74,11 +75,11 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int timeout)
         if (max_fd < fd)
             max_fd = fd;
     }
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+    tv.tv_sec = sec;
+    tv.tv_usec = nsec / 1000;
 
     while ((r = select(max_fd+1, &input, &output, &except,
-                       (timeout == -1 ? 0 : &tv))) < 0 && errno == EINTR)
+                       (sec == -1 ? 0 : &tv))) < 0 && errno == EINTR)
     {
         ;
     }
@@ -103,7 +104,8 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int timeout)
 }
 
 #if HAVE_SYS_POLL_H
-int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int timeout)
+static int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds,
+                         int sec, int nsec)
 {
     int r;
     struct pollfd *pollfds = (struct pollfd *) 
@@ -128,7 +130,7 @@ int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int timeout)
         pollfds[i].revents = 0;
     }
     while ((r = poll(pollfds, num_fds,
-                     (timeout == -1 ? -1 : timeout * 1000))) < 0
+                     (sec == -1 ? -1 : sec*1000 + nsec/1000000))) < 0
            && errno == EINTR)
     {
         ;
@@ -157,12 +159,12 @@ int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int timeout)
 }
 #endif
 
-int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int timeout)
+int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 {
 #if YAZ_HAVE_SYS_POLL_H
-    return yaz_poll_poll(fds, num_fds, timeout);
+    return yaz_poll_poll(fds, num_fds, sec, nsec);
 #else
-    return yaz_poll_select(fds, num_fds, timeout);
+    return yaz_poll_select(fds, num_fds, sec, nsec);
 #endif
 }
 

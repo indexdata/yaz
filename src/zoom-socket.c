@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-socket.c,v 1.5 2007-11-09 16:46:43 adam Exp $
+ * $Id: zoom-socket.c,v 1.6 2007-11-09 22:08:14 adam Exp $
  */
 /**
  * \file zoom-socket.c
@@ -68,7 +68,7 @@ ZOOM_API(int)
         xfree(yp);
         return 0;
     }
-    r = yaz_poll(yp, nfds, timeout);
+    r = yaz_poll(yp, nfds, timeout, 0);
     if (r >= 0)
     {
         for (i = 0; i < nfds; i++)
