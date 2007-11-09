@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.36 2007-10-09 06:00:56 adam Exp $
+ * $Id: tcpip.c,v 1.37 2007-11-09 21:52:38 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -45,9 +45,6 @@
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-#if HAVE_SYS_SELECT_H
-#include <sys/select.h>
 #endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
