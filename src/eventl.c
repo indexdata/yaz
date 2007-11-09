@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.13 2007-11-09 18:49:19 adam Exp $
+ * $Id: eventl.c,v 1.14 2007-11-09 19:00:42 adam Exp $
  */
 
 /**
@@ -64,22 +64,12 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int chan_id)
 
 int iochan_is_alive(IOCHAN chan)
 {
-    static struct timeval to;
-    fd_set in, out, except;
-    int res, max;
+    struct yaz_poll_fd fds;
+    int res;
 
-    to.tv_sec = 0;
-    to.tv_usec = 0;
-
-    FD_ZERO(&in);
-    FD_ZERO(&out);
-    FD_ZERO(&except);
-
-    FD_SET(chan->fd, &in);
-
-    max = chan->fd + 1;
-
-    res = YAZ_EV_SELECT(max + 1, &in, 0, 0, &to);
+    fds.fd = chan->fd;
+    fds.input_mask = yaz_poll_read;
+    res = yaz_poll(&fds, 1, 0);
     if (res == 0)
         return 1;
     if (!ir_read(chan, EVENT_INPUT))
