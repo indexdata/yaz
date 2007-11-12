@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2005, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.h,v 1.8 2007-01-03 08:42:15 adam Exp $
+ * $Id: eventl.h,v 1.9 2007-11-12 08:41:56 adam Exp $
  */
 
 /**
@@ -59,7 +59,7 @@ int force_event;
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port);
 int iochan_is_alive(IOCHAN chan);
-int event_loop(IOCHAN *iochans);
+int iochan_event_loop(IOCHAN *iochans);
 void statserv_remove (IOCHAN pIOChannel);
 #endif
 /*

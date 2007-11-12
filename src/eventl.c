@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.15 2007-11-09 22:08:14 adam Exp $
+ * $Id: eventl.c,v 1.16 2007-11-12 08:41:56 adam Exp $
  */
 
 /**
@@ -10,7 +10,7 @@
  * \brief Implements event loop handling for GFS.
  *
  * This source implements the main event loop for the Generic Frontend
- * Server. It uses select(2).
+ * Server.
  */
 
 #include <assert.h>
@@ -77,7 +77,7 @@ int iochan_is_alive(IOCHAN chan)
     return 1;
 }
 
-int event_loop(IOCHAN *iochans)
+int iochan_event_loop(IOCHAN *iochans)
 {
     do /* loop as long as there are active associations to process */
     {

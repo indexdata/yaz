@@ -5,7 +5,7 @@
  * NT threaded server code by
  *   Chas Woodfield, Fretwell Downing Informatics.
  *
- * $Id: statserv.c,v 1.50 2007-08-13 16:46:47 mike Exp $
+ * $Id: statserv.c,v 1.51 2007-11-12 08:41:56 adam Exp $
  */
 
 /**
@@ -1043,7 +1043,7 @@ static void *new_session (void *vp)
         control_block.one_shot = 1;
     if (control_block.threads)
     {
-        event_loop(&new_chan);
+        iochan_event_loop(&new_chan);
     }
     else
     {
@@ -1343,7 +1343,7 @@ int statserv_start(int argc, char **argv)
     if (pListener == NULL)
         return 1;
     yaz_log(YLOG_DEBUG, "Entering event loop.");
-    return event_loop(&pListener);
+    return iochan_event_loop(&pListener);
 }
 
 static void option_copy(char *dst, const char *src)
