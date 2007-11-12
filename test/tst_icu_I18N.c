@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tst_icu_I18N.c,v 1.14 2007-11-08 13:35:14 adam Exp $
+ * $Id: tst_icu_I18N.c,v 1.15 2007-11-12 11:11:16 adam Exp $
  *
  */
 
@@ -481,9 +481,9 @@ void test_icu_I18N_chain(int argc, char **argv)
     
 
     const char * xml_str = "<icu locale=\"en\">"
-        "<normalize rule=\"[:Control:] Any-Remove\"/>"
+        "<transform rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
-        "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<display/>"
         "<casemap rule=\"l\"/>"
         "</icu>";
@@ -537,10 +537,10 @@ void test_bug_1140(void)
 
         /* if the first rule is normalize instead. Then it works */
 #if 0
-        "<normalize rule=\"[:Control:] Any-Remove\"/>"
+        "<transform rule=\"[:Control:] Any-Remove\"/>"
 #endif
         "<tokenize rule=\"l\"/>"
-        "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "<display/>"
         "<casemap rule=\"l\"/>"
         "</icu>";
@@ -596,7 +596,7 @@ void test_chain_empty_token(void)
 
     const char * xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
-        "<normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
     
     xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));

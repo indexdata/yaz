@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.19 2007-11-08 18:02:04 adam Exp $
+ * $Id: icu_I18N.c,v 1.20 2007-11-12 11:11:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -922,7 +922,7 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
                                          (const uint8_t *) xml_rule, status);
-        else if (!strcmp((const char *) node->name, "normalize"))
+        else if (!strcmp((const char *) node->name, "transform"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize, 
                                          (const uint8_t *) xml_rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))

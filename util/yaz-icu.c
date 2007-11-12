@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.12 2007-11-08 18:02:04 adam Exp $
+ * $Id: yaz-icu.c,v 1.13 2007-11-12 11:11:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -53,10 +53,10 @@ void print_option_error(const struct config_t *p_config)
             "./yaz-icu -p t -x\n"
             "\n"
             "Example ICU chain XML configuration file:\n"
-            "<icu_chain id=\"en:word\" locale=\"en\">\n"
-            "  <normalize rule=\"[:Control:] Any-Remove\"/>\n"
+            "<icu_chain locale=\"en\">\n"
+            "  <transform rule=\"[:Control:] Any-Remove\"/>\n"
             "  <tokenize rule=\"l\"/>\n"
-            "  <normalize rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>\n"
+            "  <transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>\n"
             "  <casemap rule=\"l\"/>\n"
             "</icu_chain>\n"
           );
