@@ -4,7 +4,11 @@ Added yaz_poll which is a wrapper for select/poll. When poll is available
 and non-buggy, it is used, by yaz_poll . This allows more than 1024
 sockets to be in use.
 
-Added ICU chain component - which used to be part of Pazpar2.
+Added ICU wrapper library which exposes ICU http://www.icu-project.org/
+functionality through an XML based configuration (ICU chain). This system
+is useful for search facilities such as Pazpar2 and Zebra that needs to
+perform tokenization of indexed material. The ICU code in a separate
+library libyaz3_icu.a.
 
 Added HTTP tunnel facility for COMSTACK, bug #1752.
 This is a facility that allows a Web proxy, such as squid, to tunnel
