@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.83 2007-07-10 09:42:46 adam Exp $
+## $Id: Makefile.am,v 1.84 2007-11-12 11:13:05 adam Exp $
 
 SUBDIRS = common
 
@@ -13,11 +13,12 @@ HTMLFILES = index.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
 	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
-	yaz-marcdump.1 yaz-iconv.1 yaz-log.7 yaz-illclient.1
+	yaz-marcdump.1 yaz-iconv.1 yaz-log.7 \
+	yaz-illclient.1 yaz-icu.1
 REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml \
-	yaz-illclient-man.xml
+	yaz-illclient-man.xml yaz-icu-man.xml
 
 SUPPORTFILES=entities.ent apilayer.obj local.ent.in
 
@@ -59,6 +60,9 @@ yaz-illclient.1: yaz-illclient-man.xml
 
 yaz-log.7: yaz-log-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-log-man.xml
+
+yaz-icu.1: yaz-icu-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-icu-man.xml
 
 $(HTMLFILES): $(XMLFILES)
 	rm -f *.html
