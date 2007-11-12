@@ -63,14 +63,15 @@ Package: yaz-illclient
 Section: utils
 Depends: ${shlibs:Depends}
 Architecture: any
-Description: yaz-illclient: an ISO ILL client.
- yaz-illclient is a command-line based client which sends ILL requests
- to a server and decodes the response.
+Description: utility for ISO ILL of YAZ
+ The yaz-illclient program is a command-line based client which sends ILL
+ requests to a server and decodes the response.
 
 Package: yaz-icu
 Section: utils
 Depends: ${shlibs:Depends}
 Architecture: any
-Description: yaz-icu: command line utility for YAZ' ICU utilities.
- yaz-icu is a command-line based client which tests YAZ' ICU utilities.
+Description: command line utility for ICU utilities of YAZ
+ The yaz-icu program is a command-line based client which exposes the ICU
+ chain facility of YAZ.
 
