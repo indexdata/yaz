@@ -1,7 +1,7 @@
-<icu_chain id="en:word" locale="en">
-  <normalize rule="[:Control:] Any-Remove"/>
+<icu_chain locale="en">
+  <transform rule="[:Control:] Any-Remove"/>
   <tokenize rule="l"/>
-  <normalize rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
+  <transform rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
   <display/>
   <casemap rule="l"/>
 </icu_chain>
