@@ -8,7 +8,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-icu-man.xml,v 1.1 2007-11-12 11:13:05 adam Exp $ -->
+<!-- $Id: yaz-icu-man.xml,v 1.2 2007-11-12 11:43:47 adam Exp $ -->
 <refentry id="zoomsh">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -59,7 +59,7 @@
       If <replaceable>type</replaceable> is <literal>c</literal>
       then ICU converters are printed. 
       If <replaceable>type</replaceable> is <literal>l</literal>
-      available locates are printed.
+      available locales are printed.
       If <replaceable>type</replaceable> is <literal>t</literal>
       available transliterators are printed.
      </para></listitem>
