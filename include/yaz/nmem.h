@@ -24,14 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: nmem.h,v 1.25 2007-04-17 20:26:18 adam Exp $ */
+/* $Id: nmem.h,v 1.26 2007-11-14 21:03:59 adam Exp $ */
 
 /**
- * \file nmem.h
+ * \file
  * \brief Header for Nibble Memory functions
  *
  * This is a simple and fairly wasteful little module for nibble memory
- * allocation. Evemtually we'll put in something better.
+ * allocation. Eventually we'll put in something better.
  */
 #ifndef NMEM_H
 #define NMEM_H
@@ -44,17 +44,36 @@ YAZ_BEGIN_CDECL
 /** \brief NMEM handle (an opaque pointer to memory) */
 typedef struct nmem_control *NMEM;
 
-/** \brief release all memory associaged with an NMEM handle */
+/** \brief releases memory associaged with an NMEM handle 
+    \param n NMEM handle
+*/
 YAZ_EXPORT void nmem_reset(NMEM n);
-/** \brief returns size in bytes of memory for NMEM handle */
+
+/** \brief returns size in bytes of memory for NMEM handle
+    \returns number of bytes
+ */
 YAZ_EXPORT int nmem_total(NMEM n);
 
-/** \brief allocates string on NMEM handle (similar strdup) */
-YAZ_EXPORT char *nmem_strdup (NMEM mem, const char *src);
-/** \brief allocates string on NMEM handle - allows NULL ptr buffer */
-YAZ_EXPORT char *nmem_strdup_null (NMEM mem, const char *src);
-/** \brief allocates string of certain size on NMEM handle */
-YAZ_EXPORT char *nmem_strdupn (NMEM mem, const char *src, size_t n);
+/** \brief allocates string on NMEM handle (similar strdup) 
+    \param mem HNEM handle
+    \param src string
+    \returns duplicated string
+ */
+YAZ_EXPORT char *nmem_strdup(NMEM mem, const char *src);
+/** \brief allocates string on NMEM handle - allows NULL ptr buffer
+    \param mem HNEM handle
+    \param src string
+    \returns duplicated string or NULL if src was NULL
+ */
+YAZ_EXPORT char *nmem_strdup_null(NMEM mem, const char *src);
+
+/** \brief allocates string of certain size on NMEM handle
+    \param mem NMEM handle
+    \param src string
+    \param n size of string
+    \returns duplicated string (0 terminated)
+ */
+YAZ_EXPORT char *nmem_strdupn(NMEM mem, const char *src, size_t n);
 
 /** \brief allocates sub strings out of string using certain delimitors
     \param nmem NMEM handle
@@ -76,22 +95,37 @@ YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
                                     char ***darray, int *num);
 
-/** \brief creates and allocates integer for NMEM */
-YAZ_EXPORT int *nmem_intdup (NMEM mem, int v);
+/** \brief allocates integer for NMEM
+    \param nmem NMEM handle
+    \param v integer value
+    \returns pointer to created integer
+*/
+YAZ_EXPORT int *nmem_intdup(NMEM nmem, int v);
 
-/** \brief transfers memory from one NMEM handle to another  */
-YAZ_EXPORT void nmem_transfer (NMEM dst, NMEM src);
+/** \brief transfers memory from one NMEM handle to another
+    \param src source NMEM handle
+    \param dst destination NMEM handle
+ */
+YAZ_EXPORT void nmem_transfer(NMEM dst, NMEM src);
 
-/** \brief returns new NMEM handle */
+/** \brief returns new NMEM handle 
+    \returns NMEM handle
+ */
 YAZ_EXPORT NMEM nmem_create(void);
 
-/** \brief destroys NMEM handle and memory associated with it */
+/** \brief destroys NMEM handle and memory associated with it
+    \param n NMEM handle
+ */
 YAZ_EXPORT void nmem_destroy(NMEM n);
 
-/** \brief allocate memory block on NMEM handle */
+/** \brief allocates memory block on NMEM handle
+    \param n NMEM handle
+    \param size number of bytes to be allocated
+    \returns pointer to allocated memory
+ */
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
-YAZ_EXPORT int yaz_errno (void);
+YAZ_EXPORT int yaz_errno(void);
 YAZ_EXPORT void yaz_set_errno (int v);
 YAZ_EXPORT void yaz_strerror(char *buf, int max);
 
