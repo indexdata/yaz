@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.13 2007-11-12 11:11:16 adam Exp $
+ * $Id: yaz-icu.c,v 1.14 2007-11-15 08:28:08 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -25,6 +25,7 @@
 #include <unicode/utrans.h>
 
 #include <yaz/icu.h>
+#include <yaz/wrbuf.h>
 
 /* commando line and config parameters */
 static struct config_t { 
@@ -446,7 +447,7 @@ static void process_text_file(const struct config_t *p_config)
         exit (1);
     }
 
-    config.chain = icu_chain_xml_config(xml_node, 0, &status);
+    config.chain = icu_chain_xml_config(xml_node, 1, &status);
 
     if (config.chain && U_SUCCESS(status))
         success = 1;
@@ -470,25 +471,32 @@ static void process_text_file(const struct config_t *p_config)
 
         while (success && icu_chain_next_token(config.chain, &status))
         {
+            WRBUF sw = wrbuf_alloc();
             if (U_FAILURE(status))
                 success = 0;
             else {
+                const char *sortkey = icu_chain_token_sortkey(config.chain);
+                wrbuf_rewind(sw);
+                wrbuf_verbose_str(sw, sortkey, strlen(sortkey));
                 token_count++;
                 if (p_config->xmloutput)                    
                     fprintf(config.outfile, 
                             "<token id=\%lu\" line=\"%lu\""
-                            " norm=\"%s\" display=\"%s\"/>\n",
+                            " norm=\"%s\" display=\"%s\" sortkey=\"%s\"/>\n",
                             token_count,
                             line_count,
                             icu_chain_token_norm(config.chain),
-                            icu_chain_token_display(config.chain));
+                            icu_chain_token_display(config.chain),
+                            wrbuf_cstr(sw));
                 else
-                    fprintf(config.outfile, "%lu %lu '%s' '%s'\n",
+                    fprintf(config.outfile, "%lu %lu '%s' '%s' '%s'\n",
                             token_count,
                             line_count,
                             icu_chain_token_norm(config.chain),
-                            icu_chain_token_display(config.chain));
+                            icu_chain_token_display(config.chain),
+                            wrbuf_cstr(sw));
             }
+            wrbuf_destroy(sw);
         }
         
     }
