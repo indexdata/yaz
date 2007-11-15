@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.14 2007-11-15 08:28:08 adam Exp $
+ * $Id: yaz-icu.c,v 1.15 2007-11-15 08:45:52 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -477,9 +477,11 @@ static void process_text_file(const struct config_t *p_config)
             else {
                 const char *sortkey = icu_chain_token_sortkey(config.chain);
                 wrbuf_rewind(sw);
-                wrbuf_verbose_str(sw, sortkey, strlen(sortkey));
+                wrbuf_puts_escaped(sw, sortkey);
                 token_count++;
                 if (p_config->xmloutput)                    
+                {
+                    /* should XML encode this. Bug #1902 */
                     fprintf(config.outfile, 
                             "<token id=\%lu\" line=\"%lu\""
                             " norm=\"%s\" display=\"%s\" sortkey=\"%s\"/>\n",
@@ -488,6 +490,7 @@ static void process_text_file(const struct config_t *p_config)
                             icu_chain_token_norm(config.chain),
                             icu_chain_token_display(config.chain),
                             wrbuf_cstr(sw));
+                }
                 else
                     fprintf(config.outfile, "%lu %lu '%s' '%s' '%s'\n",
                             token_count,

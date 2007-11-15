@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: wrbuf.c,v 1.21 2007-10-15 12:00:31 adam Exp $
+ * $Id: wrbuf.c,v 1.22 2007-11-15 08:45:52 adam Exp $
  */
 
 /**
@@ -240,7 +240,12 @@ void wrbuf_cut_right(WRBUF b, size_t no_to_remove)
     b->pos = b->pos - no_to_remove;
 }
 
-void wrbuf_verbose_str(WRBUF b, const char *str, size_t len)
+void wrbuf_puts_escaped(WRBUF b, const char *str)
+{
+    return wrbuf_write_escaped(b, str, strlen(str));
+}
+
+void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
 {
     size_t i;
     for (i = 0; i < len; i++)

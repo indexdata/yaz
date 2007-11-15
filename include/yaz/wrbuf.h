@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.27 2007-09-17 19:14:26 adam Exp $ */
+/* $Id: wrbuf.h,v 1.28 2007-11-15 08:45:52 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -56,14 +56,26 @@ YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 /** \brief empty WRBUF content */
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 
-/** \brief grow WRBUF larger */
-YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
+/** \brief writes (append) buffer to WRBUF */
 YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
-YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
+/** \brief appends C-string to WRBUF */
 YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
+
+/** \brief writes buffer to WRBUF and XML encode (as CDATA) */
+YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
+/** \brief writes C-String to WRBUF and XML encode (as CDATA) */
+YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
+
 YAZ_EXPORT int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                                        const char from, const char to);
-YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
+
+/** \brief writes buffer to WRBUF and escape non-ASCII characters */
+YAZ_EXPORT void wrbuf_puts_escaped(WRBUF b, const char *str);
+
+/** \brief writes C-string to WRBUF and escape non-ASCII characters */
+YAZ_EXPORT void wrbuf_write_escaped(WRBUF b, const char *buf, size_t len);
+
+/** \brief writes printf result to WRBUF */
 YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
 #ifdef __GNUC__
         __attribute__ ((format (printf, 2, 3)))
@@ -85,6 +97,12 @@ YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
 /** \brief cut size of WRBUF */
 YAZ_EXPORT void wrbuf_cut_right(WRBUF b, size_t no_to_remove);
 
+
+/** \brief grow WRBUF larger 
+    This function is normally not used by applications
+*/
+YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
+
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)
 
@@ -93,9 +111,6 @@ YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
 #define wrbuf_putc(b, c) \
     (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
-
-/** \brief put readable string in WRBUF from raw input */
-YAZ_EXPORT void wrbuf_verbose_str(WRBUF b, const char *str, size_t len);
 
 YAZ_END_CDECL
 
