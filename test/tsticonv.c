@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.32 2007-10-15 20:45:05 adam Exp $
+ * $Id: tsticonv.c,v 1.33 2007-11-16 08:01:47 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -125,15 +125,15 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
         WRBUF w = wrbuf_alloc();
 
         wrbuf_rewind(w);
-        wrbuf_verbose_str(w, buf, strlen(buf));
+        wrbuf_puts_escaped(w, buf);
         yaz_log(YLOG_LOG, "input %s", wrbuf_cstr(w));
 
         wrbuf_rewind(w);
-        wrbuf_verbose_str(w, wrbuf_buf(b), wrbuf_len(b));
+        wrbuf_write_escaped(w, wrbuf_buf(b), wrbuf_len(b));
         yaz_log(YLOG_LOG, "got %s", wrbuf_cstr(w));
         
         wrbuf_rewind(w);
-        wrbuf_verbose_str(w, cmpbuf, strlen(cmpbuf));
+        wrbuf_puts_escaped(w, cmpbuf);
         yaz_log(YLOG_LOG, "exp %s", wrbuf_cstr(w));
 
         wrbuf_destroy(w);
