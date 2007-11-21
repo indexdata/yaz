@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.352 2007-10-29 09:16:32 adam Exp $
+ * $Id: client.c,v 1.353 2007-11-21 13:53:20 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -2302,6 +2302,12 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
+        if (record_schema)
+        {
+            toKeep->schema = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                   CLASS_SCHEMA,
+                                                   record_schema, out);
+        }
         toKeep->elementSetName = 0;
 
         toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
@@ -2344,6 +2350,12 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
+        if (record_schema)
+        {
+            toKeep->schema = yaz_string_to_oid_odr(yaz_oid_std(),
+                                                   CLASS_SCHEMA,
+                                                   record_schema, out);
+        }
         toKeep->elementSetName = 0;
         toKeep->actionQualifier = 0;
         toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
