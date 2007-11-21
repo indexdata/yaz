@@ -11,7 +11,7 @@
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
      <!ENTITY reference-tools-cql-map 'section "CCL Qualifiers"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.17 2007-08-13 16:58:27 mike Exp $ -->
+<!-- $Id: yaz-ztest-man.xml,v 1.18 2007-11-21 09:04:47 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -68,16 +68,6 @@
   </para>
   <para>
    <filename>yaz-&lt;version&gt;/include/yaz/backend.h</filename>
-  </para>
- </refsect1>
- <refsect1 id="tools.retrieval"><title>Retrieval Facility</title>
-  <para>
-   Refer to the "Retrieval Facility" in the YAZ manual
- </para>
- </refsect1>
- <refsect1 id="cql.to.rpn"><title>CQL to RPN conversions</title>
-  <para>
-   Refer to the "Specification of CQL to RPN mappings" in YAZ manual.
   </para>
  </refsect1>
  <refsect1><title>SEE ALSO</title>

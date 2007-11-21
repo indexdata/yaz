@@ -8,7 +8,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-client-man.xml,v 1.16 2007-06-03 14:59:34 adam Exp $ -->
+<!-- $Id: yaz-client-man.xml,v 1.17 2007-11-21 09:04:46 adam Exp $ -->
 <refentry id="yaz-client">
  <refentryinfo>
   <productname>YAZ</productname>
@@ -38,6 +38,7 @@
    <arg choice="opt"><option>-p <replaceable>addr</replaceable></option></arg>
    <arg choice="opt"><option>-q <replaceable>filename</replaceable></option></arg>
    <arg choice="opt"><option>-u <replaceable>auth</replaceable></option></arg>
+   <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
    <arg choice="opt"><option>-xV</option></arg>
    <arg choice="opt">addr</arg>
   </cmdsynopsis>
@@ -137,7 +138,10 @@
      <term>-p <replaceable>addr</replaceable></term>
      <listitem><para>
        If specified, the client will use the proxy at the address
-       given.
+       given. YAZ client will
+       connect to a proxy on the address and port given. 
+       The actual target will be specified as part of the InitRequest
+       to inform the proxy about actual target.
       </para></listitem>
     </varlistentry>
     <varlistentry>
@@ -153,6 +157,21 @@
        If specified, the <replaceable>auth</replaceable> string
        will be used for authentication.
       </para></listitem>
+    </varlistentry>
+    <varlistentry><term>
+      <literal>-v</literal> <replaceable>level</replaceable>
+     </term><listitem>
+      <simpara>Sets the LOG level to <replaceable>level</replaceable>.
+       Level is a sequence of tokens separated by comma. Each token
+       is a integer or a named LOG item - one of 
+       <literal>fatal</literal>,
+       <literal>debug</literal>,
+       <literal>warn</literal>,
+       <literal>log</literal>,
+       <literal>malloc</literal>,
+       <literal>all</literal>,
+       <literal>none</literal>.
+      </simpara></listitem>
     </varlistentry>
     <varlistentry>
      <term>-V</term>
@@ -176,6 +195,38 @@
    </para>
    &yaz-client-commands;
    </refsect1>
+ <refsect1><title>EXAMPLE</title>
+  <para>
+   The simplest example of a Prefix Query would be something like
+   <screen>
+    f knuth
+   </screen>
+   or
+   <screen>
+    f "donald knuth"
+   </screen>
+   In those queries no attributes was specified.
+   This leaves it up to the server what fields to search but
+   most servers will search in all fields. Some servers does not
+   support this feature though, and require that some attributes
+   are defined. To add one attribute you could do:
+   <screen>
+    f @attr 1=4 computer
+   </screen>
+   where we search in the title field, since the use(1) is title(4).
+   If we want to search in the author field <emphasis>and</emphasis>
+   in the title field, and in the title field using right truncation
+   it could look something like this:
+   <screen>
+    f @and @attr 1=1003 knuth @attr 1=4 @attr 5=1 computer
+   </screen>
+   Finally using a mix of Bib-1 and GILS attributes could look
+   something like this:
+   <screen>
+    f @attrset Bib-1 @and @attr GILS 1=2008 Washington @attr 1=21 weather
+   </screen>
+  </para>
+ </refsect1>
   <refsect1><title>FILES</title>
    <para>
     <filename>yaz-&lt;version&gt;/client/client.c</filename>
@@ -193,18 +244,6 @@
      <refentrytitle>yaz</refentrytitle>
      <manvolnum>7</manvolnum>
     </citerefentry>
-   </para>
-   <para>
-    Section "The YAZ Client" in the YAZ manual.
-   </para>
-   <para id="PQF">
-    Section "Prefix Query Format" in the YAZ manual.
-   </para>
-   <para id="CCL">
-    Section "Common Command Language" in the YAZ manual.
-   </para>
-   <para id="CQL">
-    Section "Common Query Language" in the YAZ manual.
    </para>
   </refsect1>
 </refentry>

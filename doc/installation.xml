@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.37 2007-05-06 20:27:14 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.38 2007-11-21 09:04:46 adam Exp $ -->
  <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1 id="installation-introduction"><title>Introduction</title>
@@ -287,7 +287,7 @@
       
       <varlistentry><term><filename>client/yaz-client</filename></term>
        <listitem><para>Z39.50 client for testing the protocol.
-         See chapter <link linkend="client">
+         See chapter <link linkend="yaz-client">
           YAZ client</link> for more information.
         </para></listitem>
       </varlistentry>
@@ -627,7 +627,7 @@
       <varlistentry><term><filename>bin/yaz-client.exe</filename></term>
        <listitem><para>
          &yaz; Z39.50 client application. It's a WIN32 console application.
-         See chapter <link linkend="client">YAZ client</link> for more
+         See chapter <link linkend="yaz-client">YAZ client</link> for more
          information.
         </para></listitem></varlistentry>
       

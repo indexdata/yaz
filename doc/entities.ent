@@ -1,10 +1,9 @@
-<!-- $Id: entities.ent,v 1.7 2007-08-13 16:57:40 mike Exp $ -->
+<!-- $Id: entities.ent,v 1.8 2007-11-21 09:04:46 adam Exp $ -->
 <!ENTITY yaz "YAZ">
 <!ENTITY bookinfo SYSTEM "bookinfo.xml">
 <!ENTITY chap-introduction SYSTEM "introduction.xml">
 <!ENTITY chap-installation SYSTEM "installation.xml">
 <!ENTITY chap-zoom SYSTEM "zoom.xml">
-<!ENTITY chap-client SYSTEM "client.xml">
 <!ENTITY chap-ziffy SYSTEM "ziffy.xml">
 <!ENTITY chap-asn SYSTEM "asn.xml">
 <!ENTITY chap-soap SYSTEM "soap.xml">
@@ -21,6 +20,7 @@
 <!ENTITY gfs-synopsis SYSTEM "gfs-synopsis.xml">
 <!ENTITY gfs-virtual SYSTEM "gfs-virtual.xml">
 <!ENTITY yaz-client-commands SYSTEM "yaz-client-commands.xml">
+<!ENTITY manref SYSTEM "manref.xml">
 <!ENTITY asn "Z39.50 ASN.1">
 <!ENTITY odr "<acronym>ODR</acronym>">
 <!ENTITY comstack "<acronym>COMSTACK</acronym>">

@@ -1,5 +1,5 @@
 <!-- 
-   $Id: yaz-client-commands.xml,v 1.20 2007-08-24 13:25:13 adam Exp $
+   $Id: yaz-client-commands.xml,v 1.21 2007-11-21 09:04:46 adam Exp $
    Commands for YAZ client.
    Included in both manual and man page for yaz-client.
 -->
@@ -33,7 +33,7 @@
   <listitem>
    <para>Sends a Search Request using the <replaceable>query</replaceable>
     given. By default the query is assumed to be PQF. See command
-    <link linkend="command-querytype"><literal>querytype</literal></link>.
+    <link linkend="command-querytype">querytype</link> for more information.
    </para>
   </listitem>
  </varlistentry>

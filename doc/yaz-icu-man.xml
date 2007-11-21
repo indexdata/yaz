@@ -8,8 +8,8 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-icu-man.xml,v 1.2 2007-11-12 11:43:47 adam Exp $ -->
-<refentry id="zoomsh">
+<!-- $Id: yaz-icu-man.xml,v 1.3 2007-11-21 09:04:47 adam Exp $ -->
+<refentry id="yaz-icu">
  <refentryinfo>
   <productname>YAZ</productname>
   <productnumber>&version;</productnumber>

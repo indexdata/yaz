@@ -1,4 +1,4 @@
-<!-- $Id: introduction.xml,v 1.26 2007-09-18 19:19:16 adam Exp $ -->
+<!-- $Id: introduction.xml,v 1.27 2007-11-21 09:04:46 adam Exp $ -->
  <chapter id="introduction"><title>Introduction</title>
 
   <para>
@@ -97,7 +97,7 @@
 
     <listitem>
      <para>
-      <xref linkend="client"/> describes how to use the &yaz; Z39.50
+      <xref linkend="yaz-client"/> describes how to use the &yaz; Z39.50
       client. If you're developer and wish to test your server
       or a server from another party, you might find this chapter
       useful.
