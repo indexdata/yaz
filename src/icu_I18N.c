@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.20 2007-11-12 11:11:16 adam Exp $
+ * $Id: icu_I18N.c,v 1.21 2007-11-30 11:43:47 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -465,10 +465,10 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
 
 
 
-UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
-                                   struct icu_buf_utf8 * dest8, 
-                                   struct icu_buf_utf16 * src16,
-                                   UErrorCode * status)
+void icu_sortkey8_from_utf16(UCollator *coll,
+                             struct icu_buf_utf8 * dest8, 
+                             struct icu_buf_utf16 * src16,
+                             UErrorCode * status)
 { 
   
     int32_t sortkey_len = 0;
@@ -488,8 +488,6 @@ UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
         dest8->utf8_len = sortkey_len;
     else 
         icu_buf_utf8_clear(dest8);
-    
-    return sortkey_len;
 }
 
 

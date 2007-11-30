@@ -120,10 +120,10 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
                       const char *locale, char action,
                       UErrorCode *status);
 
-UErrorCode icu_sortkey8_from_utf16(UCollator *coll,
-                                   struct icu_buf_utf8 * dest8, 
-                                   struct icu_buf_utf16 * src16,
-                                   UErrorCode * status);
+void icu_sortkey8_from_utf16(UCollator *coll,
+                             struct icu_buf_utf8 * dest8, 
+                             struct icu_buf_utf16 * src16,
+                             UErrorCode * status);
 
 struct icu_tokenizer
 {
