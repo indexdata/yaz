@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2006, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-illclient.c,v 1.8 2007-06-08 10:01:07 heikki Exp $
+ * $Id: yaz-illclient.c,v 1.9 2007-11-30 11:44:47 adam Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */
@@ -184,7 +184,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    char *version="$Id: yaz-illclient.c,v 1.8 2007-06-08 10:01:07 heikki Exp $"; /* from cvs */
+    const char *version="$Id: yaz-illclient.c,v 1.9 2007-11-30 11:44:47 adam Exp $"; /* from cvs */
     struct nameval *nv;
 
     /* default values */
@@ -462,8 +462,9 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     if (args->oclc_auth) {
         req->num_iLL_request_extensions=2;
         req->iLL_request_extensions=
+            (ILL_Extension **)
             odr_malloc(odr, req->num_iLL_request_extensions*
-                            sizeof(*req->iLL_request_extensions));
+                       sizeof(*req->iLL_request_extensions));
         req->iLL_request_extensions[0]=makepromptextension(args,odr);
         req->iLL_request_extensions[1]=makeoclcextension(args,odr);
     }

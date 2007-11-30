@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: poll.h,v 1.3 2007-11-09 22:08:14 adam Exp $ */
+/* $Id: poll.h,v 1.4 2007-11-30 11:44:46 adam Exp $ */
 
 /**
  * \file
@@ -40,6 +40,7 @@ YAZ_BEGIN_CDECL
 
 /** \brief select/poll masks .. timeout is "output" only */
 enum yaz_poll_mask {
+    yaz_poll_none = 0,
     yaz_poll_read = 1,
     yaz_poll_write = 2,
     yaz_poll_except = 4,
@@ -72,6 +73,7 @@ struct yaz_poll_fd {
 */
 int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec);
 
+#define yaz_poll_add(var,value) var = (enum yaz_poll_mask ) ((int) var | value)
 YAZ_END_CDECL
 
 #endif

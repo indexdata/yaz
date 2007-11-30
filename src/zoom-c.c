@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.151 2007-09-21 16:04:48 adam Exp $
+ * $Id: zoom-c.c,v 1.152 2007-11-30 11:44:47 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -49,7 +49,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql);
  * if it could cause failure when a lookup fails, but that's hard.
  */
 static Odr_oid *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
-                                     int oid_class, const char *str) {
+                                     oid_class oid_class, const char *str) {
     Odr_oid *res = yaz_string_to_oid_odr(yaz_oid_std(), oid_class, str,
                                      c->odr_out);
     if (res == 0)
@@ -1356,7 +1356,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.151 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.152 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3398,7 +3398,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         {
             Z_IUCorrelationInfo *ci;
             ci = notToKeep->elements[0]->correlationInfo =
-                odr_malloc(p->odr_out, sizeof(*ci));
+                (Z_IUCorrelationInfo *) odr_malloc(p->odr_out, sizeof(*ci));
             ci->note = odr_strdup_null(p->odr_out, correlationInfo_note);
             ci->id = correlationInfo_id ?
                 odr_intdup(p->odr_out, atoi(correlationInfo_id)) : 0;

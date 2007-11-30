@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: poll.c,v 1.3 2007-11-10 08:59:31 adam Exp $
+ * $Id: poll.c,v 1.4 2007-11-30 11:44:47 adam Exp $
  */
 /**
  * \file 
@@ -82,18 +82,18 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
     {
         for (i = 0; i < num_fds; i++)
         {
-            enum yaz_poll_mask mask = 0;
+            enum yaz_poll_mask mask = yaz_poll_none;
             int fd = fds[i].fd;
             if (!r)
-                mask += yaz_poll_timeout;
+                yaz_poll_add(mask, yaz_poll_timeout);
             else
             {
                 if (FD_ISSET(fd, &input))
-                    mask += yaz_poll_read;
+                    yaz_poll_add(mask, yaz_poll_read);
                 if (FD_ISSET(fd, &output))
-                    mask += yaz_poll_write;
+                    yaz_poll_add(mask, yaz_poll_write);
                 if (FD_ISSET(fd, &except))
-                    mask += yaz_poll_except;
+                    yaz_poll_add(mask, yaz_poll_except);
             }
             fds[i].output_mask = mask;
         }
@@ -131,17 +131,17 @@ int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
     {
         for (i = 0; i < num_fds; i++)
         {
-            enum yaz_poll_mask mask = 0;
+            enum yaz_poll_mask mask = yaz_poll_none;
             if (!r)
-                mask += yaz_poll_timeout;
+                yaz_poll_add(mask, yaz_poll_timeout);
             else
             {
                 if (pollfds[i].revents & POLLIN)
-                    mask += yaz_poll_read;
+                    yaz_poll_add(mask, yaz_poll_read);
                 if (pollfds[i].revents & POLLOUT)
-                    mask += yaz_poll_write;
+                    yaz_poll_add(mask, yaz_poll_write);
                 if (pollfds[i].revents & POLLERR)
-                    mask += yaz_poll_except;
+                    yaz_poll_add(mask, yaz_poll_except);
             }
             fds[i].output_mask = mask;
         }

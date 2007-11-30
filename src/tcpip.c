@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.37 2007-11-09 21:52:38 adam Exp $
+ * $Id: tcpip.c,v 1.38 2007-11-30 11:44:47 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -224,7 +224,7 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
     if (connect_host)
     {
         tcpip_state *sp = (tcpip_state *) p->cprivate;
-        sp->connect_request_buf = xmalloc(strlen(connect_host) + 30);
+        sp->connect_request_buf = (char *) xmalloc(strlen(connect_host) + 30);
         sprintf(sp->connect_request_buf, "CONNECT %s HTTP/1.0\r\n\r\n",
                 connect_host);
         sp->connect_request_len = strlen(sp->connect_request_buf);

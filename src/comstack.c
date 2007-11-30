@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: comstack.c,v 1.21 2007-10-09 06:00:56 adam Exp $
+ * $Id: comstack.c,v 1.22 2007-11-30 11:44:47 adam Exp $
  */
 
 /** 
@@ -85,7 +85,7 @@ static int cs_parse_host(const char *uri, const char **host,
         if (cp)
         {
             size_t len = cp - (uri + 8);
-            *connect_host = xmalloc(len+1);
+            *connect_host = (char *) xmalloc(len+1);
             memcpy(*connect_host, uri + 8, len);
             (*connect_host)[len] = '\0';
             uri = cp+1;

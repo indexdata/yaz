@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: http.c,v 1.3 2007-09-06 17:11:59 mike Exp $
+ * $Id: http.c,v 1.4 2007-11-30 11:44:47 adam Exp $
  */
 
 /**
@@ -234,9 +234,9 @@ void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
         return;
 
     len = strlen(username) + strlen(password);
-    tmp = odr_malloc(o, len+2);
+    tmp = (char *) odr_malloc(o, len+2);
     sprintf(tmp, "%s:%s", username, password);
-    buf = odr_malloc(o, (len+1) * 8/6 + 12);
+    buf = (char *) odr_malloc(o, (len+1) * 8/6 + 12);
     strcpy(buf, "Basic ");
     yaz_base64encode(tmp, &buf[strlen(buf)]);
     z_HTTP_header_add(o, hp, "Authorization", buf);

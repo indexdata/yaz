@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: eventl.c,v 1.16 2007-11-12 08:41:56 adam Exp $
+ * $Id: eventl.c,v 1.17 2007-11-30 11:44:47 adam Exp $
  */
 
 /**
@@ -96,21 +96,21 @@ int iochan_event_loop(IOCHAN *iochans)
         }
         for (p = *iochans; p; p = p->next)
             no_fds++;
-        fds = xmalloc(no_fds * sizeof(*fds));
+        fds = (struct yaz_poll_fd *) xmalloc(no_fds * sizeof(*fds));
         for (i = 0, p = *iochans; p; p = p->next, i++)
         {
             time_t w, ftime;
-            enum yaz_poll_mask input_mask = 0;
+            enum yaz_poll_mask input_mask = yaz_poll_none;
             yaz_log(log_level, "fd=%d flags=%d force_event=%d",
                     p->fd, p->flags, p->force_event);
             if (p->force_event)
                 tv_sec = 0;          /* polling select */
             if (p->flags & EVENT_INPUT)
-                input_mask += yaz_poll_read;
+                yaz_poll_add(input_mask, yaz_poll_read);
             if (p->flags & EVENT_OUTPUT)
-                input_mask += yaz_poll_write;
+                yaz_poll_add(input_mask, yaz_poll_write);
             if (p->flags & EVENT_EXCEPT)
-                input_mask += yaz_poll_except;
+                yaz_poll_add(input_mask, yaz_poll_except);
             if (p->max_idle && p->last_event)
             {
                 ftime = p->last_event + p->max_idle;

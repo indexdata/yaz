@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-socket.c,v 1.7 2007-11-10 08:59:31 adam Exp $
+ * $Id: zoom-socket.c,v 1.8 2007-11-30 11:44:47 adam Exp $
  */
 /**
  * \file zoom-socket.c
@@ -29,7 +29,7 @@
 ZOOM_API(int)
     ZOOM_event_sys_yaz_poll(int no, ZOOM_connection *cs)
 {
-    struct yaz_poll_fd *yp = xmalloc(sizeof(*yp) * no);
+    struct yaz_poll_fd *yp = (struct yaz_poll_fd *) xmalloc(sizeof(*yp) * no);
     int i, r;
     int nfds = 0;
     int timeout = 30;
@@ -49,14 +49,14 @@ ZOOM_API(int)
             continue;
         if (mask)
         {
-            enum yaz_poll_mask input_mask = 0;
+            enum yaz_poll_mask input_mask = yaz_poll_none;
 
             if (mask & ZOOM_SELECT_READ)
-                input_mask += yaz_poll_read;
+                yaz_poll_add(input_mask, yaz_poll_read);
             if (mask & ZOOM_SELECT_WRITE)
-                input_mask += yaz_poll_write;
+                yaz_poll_add(input_mask, yaz_poll_write);
             if (mask & ZOOM_SELECT_EXCEPT)
-                input_mask += yaz_poll_except;
+                yaz_poll_add(input_mask, yaz_poll_except);
             yp[nfds].fd = fd;
             yp[nfds].input_mask = input_mask;
             yp[nfds].client_data = c;
@@ -73,7 +73,7 @@ ZOOM_API(int)
     {
         for (i = 0; i < nfds; i++)
         {
-            ZOOM_connection c = yp[i].client_data;
+            ZOOM_connection c = (ZOOM_connection) yp[i].client_data;
             enum yaz_poll_mask output_mask = yp[i].output_mask;
             if (output_mask & yaz_poll_timeout)
                 ZOOM_connection_fire_event_timeout(c);
