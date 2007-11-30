@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: oid_db.h,v 1.9 2007-06-24 19:27:11 adam Exp $ */
+/* $Id: oid_db.h,v 1.10 2007-11-30 11:42:04 adam Exp $ */
 
 /**
  * \file oid_db.h
@@ -168,7 +168,7 @@ int yaz_oid_is_iso2709(const Odr_oid *oid);
     \retval -1 OID name+oclass already exists
 */
 YAZ_EXPORT
-int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
+int yaz_oid_add(yaz_oid_db_t oid_db, oid_class oclass, const char *name,
                 const Odr_oid *new_oid);
 
 
@@ -185,7 +185,7 @@ YAZ_EXPORT
 void yaz_oid_db_destroy(yaz_oid_db_t oid_db);
 
 struct yaz_oid_entry {
-    int oclass;
+    enum oid_class oclass;
     const Odr_oid *oid;
     char *name;
 };

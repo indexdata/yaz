@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: oid_db.c,v 1.9 2007-06-24 19:27:12 adam Exp $
+ * $Id: oid_db.c,v 1.10 2007-11-30 11:42:04 adam Exp $
  */
 
 /**
@@ -126,7 +126,7 @@ int yaz_oid_is_iso2709(const Odr_oid *oid)
     return 0;
 }
 
-int yaz_oid_add(yaz_oid_db_t oid_db, int oclass, const char *name,
+int yaz_oid_add(yaz_oid_db_t oid_db, oid_class oclass, const char *name,
 		const Odr_oid *new_oid)
 {
     const Odr_oid *oid = yaz_string_to_oid(oid_db, oclass, name);
