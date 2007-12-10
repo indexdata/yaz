@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.138 2007-11-09 16:46:43 adam Exp $
+# $Id: makefile,v 1.139 2007-12-10 20:33:47 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -259,15 +259,11 @@ COMMON_TCL_OPTIONS= ..\util\yaz-asncomp -I$(INCLDIR) -i yaz
 # Final opt variables
 !if $(DEBUG)
 COPT=   $(COMMON_C_OPTIONS)   $(DEBUG_C_OPTIONS)     $(COMMON_C_INCLUDES)
-MTLOPT= $(COMMON_MTL_OPTIONS) $(DEBUG_MTL_OPTIONS)
-RCOPT=  $(COMMON_RC_OPTIONS)  $(DEBUG_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 
 !else
 COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
-MTLOPT= $(COMMON_MTL_OPTIONS) $(RELEASE_MTL_OPTIONS)
-RCOPT=  $(COMMON_RC_OPTIONS)  $(RELEASE_RC_OPTIONS)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
@@ -738,7 +734,7 @@ RSOPT=/d_NDEBUG
 !endif
 
 $(YAZ_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /fo"$(YAZ_RES)" $(YAZ_RC) 
+	$(RSC) $(RSOPT) /I"../include" /fo"$(YAZ_RES)" $(YAZ_RC) 
 
 # Linking
 
