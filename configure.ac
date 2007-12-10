@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.98 2007-11-15 08:33:15 adam Exp $
+dnl $Id: configure.ac,v 1.99 2007-12-10 22:10:09 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.17],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -314,10 +314,7 @@ dnl
 AC_SUBST(YAZ_CONFIG_CFLAGS)
 dnl
 dnl 
-AC_CHECK_ICU([3.6],[
-	ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"],[
-	AC_MSG_WARN([For ICU support please install libicu36-dev or similar])
-])
+AC_CHECK_ICU([3.6],[ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"])
 dnl ------ GNU threads
 HAVETHREADS=0
 AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
