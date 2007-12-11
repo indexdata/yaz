@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.47 2007-05-05 11:53:27 adam Exp $ */
+/* $Id: zoom.h,v 1.48 2007-12-11 13:35:45 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -284,9 +284,16 @@ ZOOM_API(void)
 ZOOM_API(const char *)
     ZOOM_package_option_get (ZOOM_package p, const char *key);
 
+ZOOM_API(const char *)
+    ZOOM_package_option_getl (ZOOM_package p, const char *key, int *lenp);
+
 ZOOM_API(void)
     ZOOM_package_option_set (ZOOM_package p, const char *key,
                              const char *val);
+
+ZOOM_API(void)
+    ZOOM_package_option_setl (ZOOM_package p, const char *key,
+                              const char *val, int len);
 
 /* ----------------------------------------------------------- */
 /* Sort.  First function is deprecated, use second instead */

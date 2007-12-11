@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.152 2007-11-30 11:44:47 adam Exp $
+ * $Id: zoom-c.c,v 1.153 2007-12-11 13:35:45 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1356,7 +1356,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.152 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.153 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -3121,6 +3121,7 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
 {
     Z_ItemOrder *req = (Z_ItemOrder *) odr_malloc(p->odr_out, sizeof(*req));
     const char *str;
+    int len;
     
     req->which = Z_IOItemOrder_esRequest;
     req->u.esRequest = (Z_IORequest *) 
@@ -3172,11 +3173,11 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
             (str ? atoi(str) : 1);
     }
 
-    str = ZOOM_options_get(p->options, "doc");
+    str = ZOOM_options_getl(p->options, "doc", &len);
     if (str)
     {
         req->u.esRequest->notToKeep->itemRequest =
-            z_ext_record_xml(p->odr_out, str, strlen(str));
+            z_ext_record_xml(p->odr_out, str, len);
     }
     else
         req->u.esRequest->notToKeep->itemRequest = encode_ill_request(p);
@@ -3239,10 +3240,14 @@ static Z_APDU *create_xmlupdate_package(ZOOM_package p)
     Z_APDU *apdu = create_es_package(p, yaz_oid_extserv_xml_es);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *ext = (Z_External *) odr_malloc(p->odr_out, sizeof(*ext));
-    const char *doc = ZOOM_options_get(p->options, "doc");
+    int len;
+    const char *doc = ZOOM_options_getl(p->options, "doc", &len);
 
     if (!doc)
+    {
         doc = "";
+        len = 0;
+    }
 
     req->taskSpecificParameters = ext;
     ext->direct_reference = req->packageType;
@@ -3251,8 +3256,7 @@ static Z_APDU *create_xmlupdate_package(ZOOM_package p)
     
     ext->which = Z_External_octet;
     ext->u.single_ASN1_type =
-        odr_create_Odr_oct(p->odr_out, (const unsigned char *) doc,
-                           strlen(doc));
+        odr_create_Odr_oct(p->odr_out, (const unsigned char *) doc, len);
     return apdu;
 }
 
@@ -3263,9 +3267,13 @@ static Z_APDU *create_update_package(ZOOM_package p)
     int num_db;
     char **db = set_DatabaseNames(p->connection, p->options, &num_db, p->odr_out);
     const char *action = ZOOM_options_get(p->options, "action");
-    const char *recordIdOpaque = ZOOM_options_get(p->options, "recordIdOpaque");
+    int recordIdOpaque_len;
+    const char *recordIdOpaque = ZOOM_options_getl(p->options, "recordIdOpaque",
+        &recordIdOpaque_len);
     const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
-    const char *record_buf = ZOOM_options_get(p->options, "record");
+    int record_len;
+    const char *record_buf = ZOOM_options_getl(p->options, "record",
+        &record_len);
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
     const char *version = ZOOM_options_get(p->options, "updateVersion");
 
@@ -3284,6 +3292,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     if (!record_buf)
     {
         record_buf = "void";
+        record_len = 4;
         syntax_str = "SUTRS";
     }
 
@@ -3382,7 +3391,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
             notToKeep->elements[0]->u.opaque = 
                 odr_create_Odr_oct(p->odr_out,
                                    (const unsigned char *) recordIdOpaque,
-                                   strlen(recordIdOpaque));
+                                   recordIdOpaque_len);
         }
         else if (recordIdNumber)
         {
@@ -3407,7 +3416,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
             notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record =
             z_ext_record_oid(p->odr_out, syntax_oid,
-                             record_buf, strlen(record_buf));
+                             record_buf, record_len);
     }
     if (0 && apdu)
     {
@@ -3528,12 +3537,24 @@ ZOOM_API(const char *)
     return ZOOM_options_get(p->options, key);
 }
 
+ZOOM_API(const char *)
+    ZOOM_package_option_getl(ZOOM_package p, const char *key, int *lenp)
+{
+    return ZOOM_options_getl(p->options, key, lenp);
+}
 
 ZOOM_API(void)
     ZOOM_package_option_set(ZOOM_package p, const char *key,
                             const char *val)
 {
     ZOOM_options_set(p->options, key, val);
+}
+
+ZOOM_API(void)
+    ZOOM_package_option_setl(ZOOM_package p, const char *key,
+                             const char *val, int len)
+{
+    ZOOM_options_setl(p->options, key, val, len);
 }
 
 static int ZOOM_connection_exec_task(ZOOM_connection c)
