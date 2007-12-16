@@ -1,3 +1,5 @@
+Handle OPAC for record conversion module.
+
 --- 3.0.16 2007/11/12
 
 Added yaz_poll which is a wrapper for select/poll. When poll is available
