@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: proto.h,v 1.27 2007-04-12 13:52:57 adam Exp $ */
+/* $Id: proto.h,v 1.28 2007-12-16 11:08:50 adam Exp $ */
 
 /**
  * \file proto.h
@@ -132,12 +132,6 @@ YAZ_EXPORT Z_Close *zget_Close (ODR o);
 
 /** \brief Performs "pretty" display of GRS-1 record to WRBUF */
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
-
-/** \brief Performs "pretty" display of OPAC record to WRBUF */
-YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
-
-/** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t */
-YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
 
 /** \brief Encodes Z39.50 Init OPtions based on string mnemonics */
 YAZ_EXPORT int yaz_init_opt_encode(Z_Options *opt, const char *opt_str,

@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: record_conv.c,v 1.16 2007-05-06 20:12:20 adam Exp $
+ * $Id: record_conv.c,v 1.17 2007-12-16 11:08:51 adam Exp $
  */
 /**
  * \file record_conv.c
@@ -21,6 +21,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
+#include <yaz/z-opac.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -370,14 +371,56 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
     return 0;
 }
 
+static int yaz_record_conv_record_rule(yaz_record_conv_t p,
+                                       struct yaz_record_conv_rule *r,
+                                       const char *input_record_buf,
+                                       size_t input_record_len,
+                                       WRBUF output_record);
+
+int yaz_record_conv_opac_record(yaz_record_conv_t p,
+                                Z_OPACRecord *input_record,
+                                WRBUF output_record)
+{
+    int ret = 0;
+    struct yaz_record_conv_rule *r = p->rules;
+    WRBUF res = wrbuf_alloc();
+    yaz_marc_t mt = yaz_marc_create();
+    
+    wrbuf_rewind(p->wr_error);
+    yaz_marc_xml(mt, r->u.marc.output_format);
+    if (r->u.marc.iconv_t)
+        yaz_marc_iconv(mt, r->u.marc.iconv_t);
+    yaz_opac_decode_wrbuf(mt, input_record, res);
+    if (ret != -1)
+    {
+        ret = yaz_record_conv_record_rule(p, 
+                                          r->next,
+                                          wrbuf_buf(res), wrbuf_len(res),
+                                          output_record);
+    }
+    yaz_marc_destroy(mt);
+    wrbuf_destroy(res);
+    return ret;
+}
+
 int yaz_record_conv_record(yaz_record_conv_t p,
                            const char *input_record_buf,
                            size_t input_record_len,
                            WRBUF output_record)
 {
+    return yaz_record_conv_record_rule(p, p->rules,
+                                       input_record_buf,
+                                       input_record_len, output_record);
+}
+
+static int yaz_record_conv_record_rule(yaz_record_conv_t p,
+                                       struct yaz_record_conv_rule *r,
+                                       const char *input_record_buf,
+                                       size_t input_record_len,
+                                       WRBUF output_record)
+{
     int ret = 0;
     WRBUF record = output_record; /* pointer transfer */
-    struct yaz_record_conv_rule *r = p->rules;
     wrbuf_rewind(p->wr_error);
     
     wrbuf_write(record, input_record_buf, input_record_len);

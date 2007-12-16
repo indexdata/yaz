@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.28 2007-03-19 14:40:06 adam Exp $ */
+/* $Id: marcdisp.h,v 1.29 2007-12-16 11:08:50 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -40,6 +40,7 @@
 
 #include <yaz/nmem.h>
 #include <yaz/xmltypes.h>
+#include <yaz/z-opac.h>
 
 YAZ_BEGIN_CDECL
 
@@ -358,6 +359,13 @@ int yaz_marc_decode_formatstr(const char *arg);
 */  
 YAZ_EXPORT
 void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
+
+/** \brief Performs "pretty" display of OPAC record to WRBUF */
+YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
+
+/** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t */
+YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
+
 
 YAZ_END_CDECL
 

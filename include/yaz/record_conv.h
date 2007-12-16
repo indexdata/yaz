@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: record_conv.h,v 1.8 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: record_conv.h,v 1.9 2007-12-16 11:08:50 adam Exp $ */
 
 /**
  * \file record_conv.h
@@ -38,6 +38,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
 #include <yaz/xmltypes.h>
+#include <yaz/z-opac.h>
 
 YAZ_BEGIN_CDECL
 
@@ -80,7 +81,7 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 YAZ_EXPORT
 int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *node);
 
-/** performs record conversion
+/** performs record conversion on record buffer (OCTET aligned)
     \param p record conversion handle
     \param input_record_buf input record buffer
     \param input_record_len length of input record buffer
@@ -94,6 +95,21 @@ YAZ_EXPORT
 int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record_buf,
                            size_t input_record_len,
                            WRBUF output_record);
+
+
+/** performs record conversion on OPAC record
+    \param p record conversion handle
+    \param input_record Z39.50 OPAC record
+    \param output_record resultint record (WRBUF string)
+    \retval 0 success
+    \retval -1 failure
+
+    On failure, use yaz_record_conv_get_error to get error string.
+*/
+YAZ_EXPORT
+int yaz_record_conv_opac_record(yaz_record_conv_t p,
+                                Z_OPACRecord *input_record,
+                                WRBUF output_record);
 
 /** returns error string (for last error)
     \param p record conversion handle
