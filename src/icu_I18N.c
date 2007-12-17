@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: icu_I18N.c,v 1.21 2007-11-30 11:43:47 adam Exp $
+ * $Id: icu_I18N.c,v 1.22 2007-12-17 11:23:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -166,8 +166,7 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
         else
             buf8->utf8 
                 = (uint8_t *) xrealloc(buf8->utf8, sizeof(uint8_t) * capacity);
-
-        icu_buf_utf8_clear(buf8);
+        
         buf8->utf8_cap = capacity;
     } 
     else { 
@@ -178,23 +177,6 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
     }
     
     return buf8;
-}
-
-
-struct icu_buf_utf8 * icu_buf_utf8_copy(struct icu_buf_utf8 * dest8,
-                                          struct icu_buf_utf8 * src8)
-{
-    if(!dest8 || !src8
-       || dest8 == src8)
-        return 0;
-    
-
-    if (dest8->utf8_cap < src8->utf8_len)
-        icu_buf_utf8_resize(dest8, src8->utf8_len * 2);
-
-    strncpy((char*) dest8->utf8, (char*) src8->utf8, src8->utf8_len);
-
-    return dest8;
 }
 
 
