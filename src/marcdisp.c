@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.51 2007-09-20 17:22:45 adam Exp $
+ * $Id: marcdisp.c,v 1.52 2007-12-17 20:59:30 adam Exp $
  */
 
 /**
@@ -33,6 +33,12 @@
 #include <libxml/tree.h>
 #endif
 
+enum yaz_collection_state {
+    no_collection,
+    collection_first,
+    collection_second
+};
+   
 /** \brief node types for yaz_marc_node */
 enum YAZ_MARC_NODE_TYPE
 { 
@@ -85,6 +91,7 @@ struct yaz_marc_t_ {
     int xml;
     int debug;
     int write_using_libxml2;
+    enum yaz_collection_state enable_collection;
     yaz_iconv_t iconv_cd;
     char subfield_str[8];
     char endline_str[8];
@@ -100,6 +107,7 @@ yaz_marc_t yaz_marc_create(void)
     mt->xml = YAZ_MARC_LINE;
     mt->debug = 0;
     mt->write_using_libxml2 = 0;
+    mt->enable_collection = no_collection;
     mt->m_wr = wrbuf_alloc();
     mt->iconv_cd = 0;
     mt->leader_spec = 0;
@@ -496,6 +504,28 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
     return 0;
 }
 
+int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr)
+{
+    if (mt->enable_collection == collection_second)
+    {
+        switch(mt->xml)
+        {
+        case YAZ_MARC_MARCXML:
+            wrbuf_printf(wr, "</collection>\n");
+            break;
+        case YAZ_MARC_XCHANGE:
+            wrbuf_printf(wr, "</collection>\n");
+            break;
+        }
+    }
+    return 0;
+}
+
+void yaz_marc_enable_collection(yaz_marc_t mt)
+{
+    mt->enable_collection = collection_first;
+}
+
 int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
 {
     switch(mt->xml)
@@ -541,8 +571,18 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
         return -1;
-
-    wrbuf_printf(wr, "<record xmlns=\"%s\"", ns);
+    
+    if (mt->enable_collection != no_collection)
+    {
+        if (mt->enable_collection == collection_first)
+            wrbuf_printf(wr, "<collection xmlns=\"%s\">\n", ns);
+        mt->enable_collection = collection_second;
+        wrbuf_printf(wr, "<record");
+    }
+    else
+    {
+        wrbuf_printf(wr, "<record xmlns=\"%s\"", ns);
+    }
     if (format)
         wrbuf_printf(wr, " format=\"%.80s\"", format);
     if (type)

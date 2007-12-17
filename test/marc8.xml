@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
   <leader>02647nam^a2200469^^^4500</leader>
   <controlfield tag="001">UCD-002592301</controlfield>
   <controlfield tag="005">20061209034435.0</controlfield>
@@ -137,3 +138,4 @@
     <subfield code="b">002592301</subfield>
   </datafield>
 </record>
+</collection>

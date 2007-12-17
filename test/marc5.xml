@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
   <leader>00492nam a22001455a 4500</leader>
   <controlfield tag="001">000277485</controlfield>
   <controlfield tag="005">20051026111436.0</controlfield>
@@ -29,3 +30,4 @@
     <subfield code="a">Cryptography.</subfield>
   </datafield>
 </record>
+</collection>

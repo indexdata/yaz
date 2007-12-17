@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
 <!-- Indicator length at offset 10 should hold a digit. Assuming 2 -->
 <!-- Identifier length at offset 11 should hold a digit. Assuming 2 -->
 <!-- Base address at offsets 12..16 should hold a number. Assuming 0 -->
@@ -7,3 +8,4 @@
 <!-- Directory offset 24: Bad value for data length and/or length starting -->
 <!-- Base address not at end of directory, base 0, end 25 -->
 </record>
+</collection>

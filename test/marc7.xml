@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
   <leader>03114cam a2200349 i 4500</leader>
   <controlfield tag="001">   77123332 </controlfield>
   <controlfield tag="003">DLC</controlfield>
@@ -84,3 +85,4 @@
     <subfield code="a">Standard PC Keyboard:   1234567890-=   !@#$%^&amp;*()_+   qwertyuiop[]\   QWERTYUIOP{}|   asdfghjkl;&apos;  ASDFGHJKL:&quot;   zxcvbnm,./   ZXCVBNM&lt;&gt;?</subfield>
   </datafield>
 </record>
+</collection>

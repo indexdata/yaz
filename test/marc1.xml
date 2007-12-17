@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
 <!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
   <leader>00988nam0a32003011  450 </leader>
   <datafield tag="001" ind1="0" ind2="0" ind3="0">
@@ -91,3 +92,4 @@
     <subfield code="i">1970-1979</subfield>
   </datafield>
 </record>
+</collection>

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdump.c,v 1.53 2007-09-23 07:40:13 adam Exp $
+ * $Id: marcdump.c,v 1.54 2007-12-17 20:59:32 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64
@@ -14,7 +14,7 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-
+#include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
@@ -93,34 +93,54 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
         fputs(wrbuf_cstr(wrbuf), stdout);
         wrbuf_destroy(wrbuf);
     }
+    {
+        WRBUF wrbuf = wrbuf_alloc();
+        yaz_marc_write_trailer(mt, wrbuf);
+        fputs(wrbuf_cstr(wrbuf), stdout);
+        wrbuf_destroy(wrbuf);
+    }
     fclose(inf);
 }
 
 #if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 {
-    xmlNodePtr ptr;
-    xmlDocPtr doc = xmlParseFile(fname);
-    if (!doc)
-        return;
+    xmlTextReaderPtr reader = xmlReaderForFile(fname, 0 /* encoding */,
+                                               0 /* options */);
 
-    ptr = xmlDocGetRootElement(doc);
-    if (ptr)
+    if (reader)
     {
-        int r;
+        int ret;
         WRBUF wrbuf = wrbuf_alloc();
-        r = yaz_marc_read_xml(mt, ptr);
-        if (r)
-            fprintf(stderr, "yaz_marc_read_xml failed\n");
-        else
+        while ((ret = xmlTextReaderRead(reader)) == 1)
         {
-            yaz_marc_write_mode(mt, wrbuf);
-            
-            fputs(wrbuf_cstr(wrbuf), stdout);
+            int type = xmlTextReaderNodeType(reader);
+            if (type == XML_READER_TYPE_ELEMENT)
+            {
+                const char *name = (const char *) 
+                    xmlTextReaderConstName(reader);
+                if (!strcmp(name, "record"))
+                {
+                    xmlNodePtr ptr = xmlTextReaderExpand(reader);
+        
+                    int r = yaz_marc_read_xml(mt, ptr);
+                    if (r)
+                        fprintf(stderr, "yaz_marc_read_xml failed\n");
+                    else
+                    {
+                        yaz_marc_write_mode(mt, wrbuf);
+                        
+                        fputs(wrbuf_cstr(wrbuf), stdout);
+                        wrbuf_rewind(wrbuf);
+                    }
+                }
+            }
         }
+        yaz_marc_write_trailer(mt, wrbuf);
+        fputs(wrbuf_cstr(wrbuf), stdout);
         wrbuf_destroy(wrbuf);
+        xmlFreeTextReader(reader);
     }
-    xmlFreeDoc(doc);
 }
 #endif
 
@@ -152,6 +172,7 @@ static void dump(const char *fname, const char *from, const char *to,
         yaz_marc_iconv(mt, cd);
     }
     yaz_marc_xml(mt, output_format);
+    yaz_marc_enable_collection(mt);
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 
@@ -306,6 +327,12 @@ static void dump(const char *fname, const char *from, const char *to,
         if (cfile)
             fprintf (cfile, "};\n");
         fclose(inf);
+    }
+    {
+        WRBUF wrbuf = wrbuf_alloc();
+        yaz_marc_write_trailer(mt, wrbuf);
+        fputs(wrbuf_cstr(wrbuf), stdout);
+        wrbuf_destroy(wrbuf);
     }
     if (cd)
         yaz_iconv_close(cd);

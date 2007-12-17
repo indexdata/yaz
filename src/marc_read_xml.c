@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marc_read_xml.c,v 1.3 2007-05-06 20:12:20 adam Exp $
+ * $Id: marc_read_xml.c,v 1.4 2007-12-17 20:59:30 adam Exp $
  */
 
 /**
@@ -224,6 +224,8 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
 {
 #if YAZ_HAVE_XML2
+    yaz_marc_reset(mt);
+
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
         {

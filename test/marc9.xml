@@ -1,4 +1,5 @@
-<record xmlns="http://www.loc.gov/MARC21/slim">
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
   <leader>02075cas a22005055a 4500</leader>
   <controlfield tag="001">  2005336282</controlfield>
   <controlfield tag="003">DLC</controlfield>
@@ -153,3 +154,4 @@
     <subfield code="a">LC Cairo Office [we 45]</subfield>
   </datafield>
 </record>
+</collection>

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.29 2007-12-16 11:08:50 adam Exp $ */
+/* $Id: marcdisp.h,v 1.30 2007-12-17 20:59:30 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -366,6 +366,19 @@ YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
 /** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t */
 YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
 
+
+/** \brief flushes records
+    \param mt handle
+    \param wrbuf WRBUF for output
+    \retval 0 OK
+    \retval -1 ERROR
+*/  
+YAZ_EXPORT int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr);
+
+/** \brief enables record collection output
+    \param mt handle
+*/  
+YAZ_EXPORT void yaz_marc_enable_collection(yaz_marc_t mt);
 
 YAZ_END_CDECL
 
