@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.52 2007-12-17 20:59:30 adam Exp $
+ * $Id: marcdisp.c,v 1.53 2007-12-18 12:46:02 adam Exp $
  */
 
 /**
@@ -701,6 +701,8 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
 
 int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
 {
+    /* set leader 09 to 'a' for UNICODE */
+    /* http://www.loc.gov/marc/bibliographic/ecbdldrd.html#mrcblea */
     if (!mt->leader_spec)
         yaz_marc_modify_leader(mt, 9, "a");
     return yaz_marc_write_marcxml_ns(mt, wr, "http://www.loc.gov/MARC21/slim",
