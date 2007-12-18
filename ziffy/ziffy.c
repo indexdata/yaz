@@ -36,9 +36,7 @@
 #endif
 #include <sys/utsname.h>
 
-#if 1
-#include "getopt.h"
-#endif
+#include <yaz/options.h>
 
 #include "pcap.h"               /* Packet Capture Library */
 
@@ -116,21 +114,6 @@ static char __author__      [] = "R. Carbone <rocco@ntop.org>";
 static char __version__     [] = "Version 0.0.3";
 static char __released__    [] = "June 2001";
 
-
-#if (0)
-struct option options [] =
-{
-  /* Default args */
-  { "help",		no_argument,            NULL,   'h' },
-  { "version",	 	no_argument,            NULL,   'v' },
-
-  /* Session Management stuff */
-  { "restart-session",	required_argument,      NULL,   'S' },
-  { "discard-session",	required_argument,      NULL,   'D' },
-
-  { NULL, 0, NULL, 0 }
-};
-#endif
 
 char ebuf [PCAP_ERRBUF_SIZE] = {0};
 struct pcap_stat pcapstats = {0};
@@ -272,7 +255,8 @@ void parse_pdu (u_char * user_data,
 int main (int argc, char * argv [])
 {
   int option;
-  char * optstr = "hvac:ef:i:lnprs:twxz";
+  const char * optstr = "hvac:ef:i:lnprs:twxz";
+  char *optarg;
 
   char * progname;
 
@@ -294,20 +278,10 @@ int main (int argc, char * argv [])
   else
     progname ++;
 
-#if (0)
-  /*
-   * initialize getopt
-   */
-  optarg = NULL;
-  optind = 0;
-  optopt = 0;
-  opterr = 0;  /* this prevents getopt() to send error messages to stderr */
-#endif
-
   /*
    * Parse command-line options
    */
-  while ((option = getopt (argc, argv, optstr)) != EOF)
+  while ((option = options(optstr, argv, argc, &optarg)) != -2)
     {
       switch (option)
 	{
