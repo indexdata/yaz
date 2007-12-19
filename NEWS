@@ -1,4 +1,15 @@
+--- 3.0.18 2007/12/19
+
+ziffy uses YAZ' options rather than getopt; getopt is unavailable on
+some systems.
+
+yaz-marcdump reads and writes collection wrapped records.
+
 Handle OPAC for record conversion module.
+
+Fixes for ICU wrapper.
+
+Allow ICU libs to be controlled with --with-icu .
 
 --- 3.0.16 2007/11/12
 
