@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.29 2007-10-31 21:58:07 adam Exp $
+/* $Id: cqltransform.c,v 1.30 2007-12-20 22:45:37 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -493,20 +493,13 @@ void emit_term(cql_transform_t ct,
     for (i = 0; i<length; i++)
     {
         /* pr(int) each character */
-        char buf[3];
-        const char *cp;
+        /* we do not need to deal with \-sequences because the
+           CQL and PQF terms have same \-format, bug #1988 */
+        char buf[2];
 
-        buf[1] = term[i];
-        buf[2] = 0;
-        /* do we have to escape this char? */
-        if (buf[1] == '"')
-        {
-            buf[0] = '\\';
-            cp = buf;
-        }
-        else
-            cp = buf+1;
-        (*pr)(cp, client_data);
+        buf[0] = term[i];
+        buf[1] = '\0';
+        (*pr)(buf, client_data);
     }
     (*pr)("\" ", client_data);
     xfree(z3958_mem);
