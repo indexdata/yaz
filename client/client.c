@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.353 2007-11-21 13:53:20 adam Exp $
+ * $Id: client.c,v 1.354 2007-12-21 08:31:42 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -616,11 +616,14 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf,
     {
         long fsize;
         FILE *inf;
-        const char *fname = *arg;
+        const char *fname;
+        const char *arg_start = *arg;
         
         while (**arg != '\0' && **arg != ' ')
             (*arg)++;
             
+        fname = odr_strdupn(out, arg_start, *arg - arg_start);
+
         inf = fopen(fname, "rb");
         if (!inf)
         {
