@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.354 2007-12-21 08:31:42 adam Exp $
+ * $Id: client.c,v 1.355 2007-12-21 19:01:33 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -598,27 +598,22 @@ static int set_base(const char *arg)
     return 1;
 }
 
-static int parse_cmd_doc(const char **arg, ODR out, char **buf,
-                         int *len, int opt)
+static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
 {
     const char *sep;
     while (**arg && strchr(" \t\n\r\f", **arg))
         (*arg)++;
-    if ((*arg)[0] == '\"' && (sep=strchr(*arg+1, '"')))
+    if (**arg == '\0')
     {
-        (*arg)++;
-        *len = sep - *arg;
-        *buf = odr_strdupn(out, *arg, *len);
-        (*arg) = sep+1;
-        return 1;
+        return 0;
     }
-    else if ((*arg)[0] && (*arg)[0] != '\"')
+    else if ((*arg)[0] == '<')
     {
         long fsize;
         FILE *inf;
         const char *fname;
-        const char *arg_start = *arg;
-        
+        const char *arg_start = ++(*arg);
+    
         while (**arg != '\0' && **arg != ' ')
             (*arg)++;
             
@@ -644,7 +639,8 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf,
             return 0;
         }
         *len = fsize;
-        *buf = (char *) odr_malloc(out, fsize);
+        *buf = (char *) odr_malloc(out, fsize+1);
+        (*buf)[fsize] = '\0';
         if (fread(*buf, 1, fsize, inf) != fsize)
         {
             printf("Unable to read %s\n", fname);
@@ -652,21 +648,25 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf,
             return 0;
         }
         fclose(inf);
-        return 1;
     }
-    else if (**arg == '\0')
+    else if ((*arg)[0] == '\"' && (sep=strchr(*arg+1, '"')))
     {
-        if (opt)
-        {
-            *len = 0;
-            *buf = 0;
-            return 1;
-        }
-        printf("Missing doc argument\n");
+        (*arg)++;
+        *len = sep - *arg;
+        *buf = odr_strdupn(out, *arg, *len);
+        (*arg) = sep+1;
     }
     else
-        printf("Bad doc argument %s\n", *arg);
-    return 0;
+    {
+        const char *arg_start = *arg;
+
+        while (**arg != '\0' && **arg != ' ')
+            (*arg)++;
+
+        *len = *arg - arg_start;
+        *buf = odr_strdupn(out, arg_start, *len);
+    }
+    return 1;
 }
 
 static int cmd_base(const char *arg)
@@ -2170,17 +2170,17 @@ static int cmd_update_SRW(int action_no, const char *recid,
 
 static int cmd_update_common(const char *arg, int version)
 {
-    char action[20], recid_buf[20];
+    char *action_buf;
+    int action_len;
+    char *recid_buf;
+    int recid_len;
     const char *recid = 0;
     char *rec_buf;
     int rec_len;
     int action_no;
     int noread = 0;
 
-    *action = 0;
-    *recid_buf = 0;
-    sscanf (arg, "%19s %19s%n", action, recid_buf, &noread);
-    if (noread == 0)
+    if (parse_cmd_doc(&arg, out, &action_buf, &action_len) == 0)
     {
         printf("Use: update action recid [fname]\n");
         printf(" where action is one of insert,replace,delete.update\n");
@@ -2189,17 +2189,23 @@ static int cmd_update_common(const char *arg, int version)
         return 0;
     }
 
-    if (!strcmp (action, "insert"))
+    if (parse_cmd_doc(&arg, out, &recid_buf, &recid_len) == 0)
+    {
+        printf("Missing recid\n");
+        return 0;
+    }
+
+    if (!strcmp(action_buf, "insert"))
         action_no = Z_IUOriginPartToKeep_recordInsert;
-    else if (!strcmp (action, "replace"))
+    else if (!strcmp(action_buf, "replace"))
         action_no = Z_IUOriginPartToKeep_recordReplace;
-    else if (!strcmp (action, "delete"))
+    else if (!strcmp(action_buf, "delete"))
         action_no = Z_IUOriginPartToKeep_recordDelete;
-    else if (!strcmp (action, "update"))
+    else if (!strcmp(action_buf, "update"))
         action_no = Z_IUOriginPartToKeep_specialUpdate;
     else 
     {
-        printf ("Bad action: %s\n", action);
+        printf ("Bad action: %s\n", action_buf);
         printf ("Possible values: insert, replace, delete, update\n");
         return 0;
     }
@@ -2208,14 +2214,14 @@ static int cmd_update_common(const char *arg, int version)
         recid = recid_buf;
 
     arg += noread;
-    if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len, 1) == 0)
+    if (parse_cmd_doc(&arg, out, &rec_buf, &rec_len) == 0)
         return 0;
 
 #if YAZ_HAVE_XML2
     if (protocol == PROTO_HTTP)
-        return cmd_update_SRW(action_no, recid, rec_buf, rec_len);
+        return cmd_update_SRW(action_no, recid_buf, rec_buf, rec_len);
 #endif
-    return cmd_update_Z3950(version, action_no, recid, rec_buf, rec_len);
+    return cmd_update_Z3950(version, action_no, recid_buf, rec_buf, rec_len);
 }
 
 #if YAZ_HAVE_XML2
@@ -2422,7 +2428,7 @@ static int cmd_xmles(const char *arg)
         }
         arg += noread;
         if (parse_cmd_doc(&arg, out, &asn_buf,
-                          &ext->u.single_ASN1_type->len, 0) == 0)
+                          &ext->u.single_ASN1_type->len) == 0)
             return 0;
 
         ext->u.single_ASN1_type->buf = (unsigned char *) asn_buf;
