@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: client.c,v 1.355 2007-12-21 19:01:33 adam Exp $
+ * $Id: client.c,v 1.356 2007-12-27 13:27:40 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program
@@ -724,8 +724,6 @@ int session_connect(const char *arg)
         return 0;
     }
 #if YAZ_HAVE_XML2
-    if (conn->protocol == PROTO_HTTP)
-        queryType = QueryType_CQL;
 #else
     if (conn->protocol == PROTO_HTTP)
     {
@@ -786,12 +784,16 @@ int session_connect(const char *arg)
 
 int cmd_open(const char *arg)
 {
+    int r;
     if (arg)
     {
         strncpy (cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
-    return session_connect(cur_host);
+    r = session_connect(cur_host);
+    if (conn && conn->protocol == PROTO_HTTP)
+        queryType = QueryType_CQL;
+    return r;
 }
 
 void try_reconnect(void)
@@ -2229,7 +2231,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
                           char *rec_buf, int rec_len)
 {
     if (!conn)
-        cmd_open(0);
+        session_connect(cur_host);
     if (!conn)
         return 0;
     else
@@ -2505,7 +2507,7 @@ static int cmd_explain(const char *arg)
         return 0;
 #if YAZ_HAVE_XML2
     if (!conn)
-        cmd_open(0);
+        session_connect(cur_host);
     if (conn)
     {
         Z_SRW_PDU *sr = 0;
@@ -2578,7 +2580,7 @@ static int cmd_find(const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            cmd_open(0);
+            session_connect(cur_host);
         if (!conn)
             return 0;
         if (!send_SRW_searchRequest(arg))
@@ -2855,7 +2857,7 @@ static int cmd_show(const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            cmd_open(0);
+            session_connect(cur_host);
         if (!conn)
             return 0;
         if (!send_SRW_presentRequest(arg))
@@ -3202,7 +3204,7 @@ static int cmd_scan_common(const char *set, const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            cmd_open(0);
+            session_connect(cur_host);
         if (!conn)
             return 0;
         if (*arg)
@@ -4083,7 +4085,7 @@ void wait_and_handle_response(int one_response_only)
         {
             cs_close(conn);
             conn = 0;
-            cmd_open(0);
+            session_connect(cur_host);
             reconnect_ok = 0;
             if (conn)
             {
