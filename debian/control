@@ -37,10 +37,10 @@ Description: The YAZ Z39.50 toolkit (documentation)
  This packages includes HTML documentation for YAZ.
 
 Package: libyaz3-dev
-Depends: libyaz3 (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev
+Depends: libyaz3 (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libssl-dev, tcl8.3|tclsh
 Replaces: yaz-devel
 Conflicts: yaz-devel, libyaz-dev, libyaz2-dev
-Section: devel
+Section: libdevel
 Architecture: any
 Suggests: yaz-doc
 Description: The YAZ Z39.50 toolkit (development files)
