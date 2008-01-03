@@ -20,17 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
+#define _BSD_SOURCE
 
-#if defined(__GLIBC__)
-# if !defined(_BSD_SOURCE)
-#  define _BSD_SOURCE
-# endif
-#endif
 
 /*
  * Operating System include files
  */
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
