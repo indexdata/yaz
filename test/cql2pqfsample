@@ -1,0 +1,26 @@
+# $Id: cql2pqfsample,v 1.1 2008-01-06 21:48:23 adam Exp $
+# CQL queries for testing.
+# from http://www.loc.gov/z3950/agency/zing/cql/sample-queries.html
+# Simple Term
+
+a
+a b
+"a b"
+
+# Index Relation Term
+
+title = fish
+dc.title = fish
+
+# Simple Boolean
+
+cat or dog
+cat and fish
+cat not frog
+(cat not frog)
+"cat" not "fish food"
+xml and "prox///"
+fred and any
+((fred or all))
+a or b and c not d 
+

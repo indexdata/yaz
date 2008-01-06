@@ -1,17 +1,17 @@
 ## Copyright (C) 1995-2007, Index Data ApS
 ## All rights reserved.
-## $Id: Makefile.am,v 1.41 2007-10-24 22:10:24 adam Exp $
+## $Id: Makefile.am,v 1.42 2008-01-06 21:48:23 adam Exp $
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob
-check_SCRIPTS = tstcql.sh tstmarc.sh tstmarccol.sh
+check_SCRIPTS = tstcql.sh tstmarc.sh tstmarccol.sh tstcql2pqf.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
 EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cqlsample \
- cql2pqf-order.txt \
+ cql2pqf-order.txt cql2pqfsample \
  $(check_SCRIPTS) \
  marc1.marc marc1.xml marc1.chr marc1.xml.marc \
  marc2.marc marc2.xml marc2.chr marc2.xml.marc \
@@ -35,8 +35,9 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 
 dist-hook:
 	mkdir -p $(distdir)/cql
-	cp $(srcdir)/cql/*.err $(distdir)/cql
-	cp $(srcdir)/cql/*.out $(distdir)/cql
+	cp $(srcdir)/cql/*.err $(srcdir)/cql/*.out $(distdir)/cql
+	mkdir -p $(distdir)/cql2pqf
+	cp $(srcdir)/cql2pqf/*.err $(srcdir)/cql2pqf/*.out $(distdir)/cql2pqf
 
 # Rule for generating codecs for our small ASN.1 spec
 tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
