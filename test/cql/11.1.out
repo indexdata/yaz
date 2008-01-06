@@ -1,0 +1,8 @@
+<searchClause>
+  <index>cql.serverChoice</index>
+  <relation>
+    <value>=</value>
+  </relation>
+  <term>a</term>
+  <term>b</term>
+</searchClause>
