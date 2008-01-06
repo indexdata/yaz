@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: cql.h,v 1.19 2007-11-14 21:03:59 adam Exp $ */
+/* $Id: cql.h,v 1.20 2008-01-06 16:22:02 adam Exp $ */
 
 /** \file cql.h
     \brief Header with public definitions about CQL.
@@ -121,6 +121,8 @@ struct cql_node {
             char *relation_uri;
             /** relation modifiers */
             struct cql_node *modifiers;
+            /** term list */
+            struct cql_node *extra_terms;
         } st;
         /** which == CQL_NODE_BOOL */
         struct {

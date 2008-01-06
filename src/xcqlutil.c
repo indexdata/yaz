@@ -1,4 +1,4 @@
-/* $Id: xcqlutil.c,v 1.8 2007-06-28 07:58:07 adam Exp $
+/* $Id: xcqlutil.c,v 1.9 2008-01-06 16:22:02 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -162,6 +162,16 @@ static void cql_to_xml_r(struct cql_node *cn,
             pr_n("<term>", pr, client_data, level+2);
             pr_cdata(cn->u.st.term, pr, client_data);
             pr_n("</term>\n", pr, client_data, 0);
+        }
+        if (cn->u.st.extra_terms)
+        {
+            struct cql_node *n = cn->u.st.extra_terms;
+            for (; n; n = n->u.st.extra_terms)
+            {
+                pr_n("<term>", pr, client_data, level+2);
+                pr_cdata(n->u.st.term, pr, client_data);
+                pr_n("</term>\n", pr, client_data, 0);
+            }
         }
         pr_n("</searchClause>\n", pr, client_data, level);
         break;

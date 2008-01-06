@@ -1,4 +1,4 @@
-/* $Id: cqlutil.c,v 1.12 2008-01-06 13:08:09 adam Exp $
+/* $Id: cqlutil.c,v 1.13 2008-01-06 16:22:02 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -68,6 +68,7 @@ struct cql_node *cql_node_mk_sc(NMEM nmem,
         p->u.st.relation = nmem_strdup(nmem, relation);
     p->u.st.relation_uri = 0;
     p->u.st.modifiers = 0;
+    p->u.st.extra_terms = 0;
     return p;
 }
 

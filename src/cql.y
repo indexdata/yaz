@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.16 2008-01-06 13:08:09 adam Exp $
+/* $Id: cql.y,v 1.17 2008-01-06 16:22:02 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -121,8 +121,9 @@ searchClause:
       $$.cql = $3.cql;
   }
 |
-  searchTerm {
-      struct cql_node *st = cql_node_dup (((CQL_parser) parm)->nmem, $0.rel);
+searchTerm extraTerms {
+      struct cql_node *st = cql_node_dup(((CQL_parser) parm)->nmem, $0.rel);
+      st->u.st.extra_terms = $2.cql;
       st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
   }
@@ -135,6 +136,18 @@ searchClause:
       cql_node_destroy($4.rel);
   }
 ;
+
+extraTerms:
+extraTerms TERM {
+    struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem, 
+					 /* index */ 0, /* rel */ 0, $2.buf);
+    st->u.st.extra_terms = $1.cql;
+    $$.cql = st;
+}
+| 
+{ $$.cql = 0; }
+;
+
 
 /* unary NOT search TERM here .. */
 
@@ -163,11 +176,6 @@ modifiers '/' searchTerm mrelation searchTerm
     $$.cql = 0;
 }
 ;
-
-/*
-extraTerms:
-   extraTerms TERM | ;
-*/
 
 mrelation:
   '=' 
