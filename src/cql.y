@@ -1,4 +1,4 @@
-/* $Id: cql.y,v 1.15 2007-10-31 21:58:07 adam Exp $
+/* $Id: cql.y,v 1.16 2008-01-06 13:08:09 adam Exp $
    Copyright (C) 2002-2006
    Index Data ApS
 
@@ -58,14 +58,13 @@ See the file LICENSE.
 %}
 
 %pure_parser
-%token TERM AND OR NOT PROX GE LE NE
-%expect 9
+%token DOTTERM TERM AND OR NOT PROX GE LE NE EXACT
 
 %%
 
 top: { 
     $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem,
-			    "cql.serverChoice", "scr", 0);
+			    "cql.serverChoice", "=", 0);
     ((CQL_parser) parm)->top = 0;
 } cqlQuery1 {
     cql_node_destroy($$.rel);
@@ -80,10 +79,27 @@ cqlQuery1: cqlQuery
 }
 ;
 
-cqlQuery: 
+cqlQuery:
+  scopedClause
+ |
+  '>' searchTerm '=' searchTerm {
+    $$.rel = $0.rel;
+  } cqlQuery {
+    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
+			      $6.cql, $2.buf, $4.buf);
+  }
+| '>' searchTerm {
+      $$.rel = $0.rel;
+  } cqlQuery {
+    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem, 
+			      $4.cql, 0, $2.buf);
+   }
+;
+
+scopedClause: 
   searchClause
 |
-  cqlQuery boolean modifiers { 
+  scopedClause boolean modifiers { 
       $$.rel = $0.rel;
   } searchClause {
       struct cql_node *cn = cql_node_mk_boolean(((CQL_parser) parm)->nmem,
@@ -118,18 +134,6 @@ searchClause:
       $$.cql = $5.cql;
       cql_node_destroy($4.rel);
   }
-| '>' searchTerm '=' searchTerm {
-      $$.rel = $0.rel;
-  } cqlQuery {
-    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
-			      $6.cql, $2.buf, $4.buf);
-  }
-| '>' searchTerm {
-      $$.rel = $0.rel;
-  } cqlQuery {
-    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem, 
-			      $4.cql, 0, $2.buf);
-   }
 ;
 
 /* unary NOT search TERM here .. */
@@ -160,6 +164,11 @@ modifiers '/' searchTerm mrelation searchTerm
 }
 ;
 
+/*
+extraTerms:
+   extraTerms TERM | ;
+*/
+
 mrelation:
   '=' 
 | '>' 
@@ -167,6 +176,7 @@ mrelation:
 | GE
 | LE
 | NE
+| EXACT
 ;
 
 relation: 
@@ -176,7 +186,8 @@ relation:
 | GE
 | LE
 | NE
-| TERM
+| EXACT
+| DOTTERM
 ;
 
 index: 
@@ -184,6 +195,7 @@ index:
 
 searchTerm:
   TERM
+| DOTTERM
 | AND
 | OR
 | NOT
@@ -244,7 +256,18 @@ int yylex(YYSTYPE *lval, void *vp)
     {
         int c1;
         putb(lval, cp, c);
-        if (c == '>')
+	if (c == '=')
+	{
+            c1 = cp->getbyte(cp->client_data);
+            if (c1 == '=')
+            {
+                putb(lval, cp, c1);
+                return EXACT;
+            }
+            else
+                cp->ungetbyte(c1, cp->client_data);
+	}
+        else if (c == '>')
         {
             c1 = cp->getbyte(cp->client_data);
             if (c1 == '=')
@@ -287,47 +310,57 @@ int yylex(YYSTYPE *lval, void *vp)
 	    putb(lval, cp, c);
         }
         putb(lval, cp, 0);
+	return TERM;
     }
     else
     {
-        while (c != 0 && !strchr(" \n()=<>/", c))
-        {
-            if (c == '\\')
+	int relation_like = 0;
+	while (c != 0 && !strchr(" \n()=<>/", c))
+	{
+	    if (c == '.')
+		relation_like = 1;
+	    if (c == '\\')
 	    {
 		putb(lval, cp, c);
-                c = cp->getbyte(cp->client_data);
+		c = cp->getbyte(cp->client_data);
 		if (!c)
 		    break;
 	    }
-            putb(lval, cp, c);
+	    putb(lval, cp, c);
 	    c = cp->getbyte(cp->client_data);
-        }
+	}
 	putb(lval, cp, 0);
 #if YYDEBUG
-        printf ("got %s\n", lval->buf);
+	printf ("got %s\n", lval->buf);
 #endif
-        if (c != 0)
-            cp->ungetbyte(c, cp->client_data);
-        if (!cql_strcmp(lval->buf, "and"))
+	if (c != 0)
+	    cp->ungetbyte(c, cp->client_data);
+	if (!cql_strcmp(lval->buf, "and"))
 	{
 	    lval->buf = "and";
-            return AND;
+	    return AND;
 	}
-        if (!cql_strcmp(lval->buf, "or"))
+	if (!cql_strcmp(lval->buf, "or"))
 	{
 	    lval->buf = "or";
-            return OR;
+	    return OR;
 	}
-        if (!cql_strcmp(lval->buf, "not"))
+	if (!cql_strcmp(lval->buf, "not"))
 	{
 	    lval->buf = "not";
-            return NOT;
+	    return NOT;
 	}
-        if (!cql_strcmp(lval->buf, "prox"))
+	if (!cql_strcmp(lval->buf, "prox"))
 	{
 	    lval->buf = "prox";
-            return PROX;
+	    return PROX;
 	}
+	if (!cql_strcmp(lval->buf, "all"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "any"))
+	    relation_like = 1;
+	if (relation_like)
+	    return DOTTERM;
     }
     return TERM;
 }

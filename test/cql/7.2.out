@@ -11,7 +11,7 @@
         <searchClause>
           <index>cql.serverChoice</index>
           <relation>
-            <value>scr</value>
+            <value>=</value>
           </relation>
           <term>cat</term>
         </searchClause>
@@ -20,7 +20,7 @@
         <searchClause>
           <index>cql.serverChoice</index>
           <relation>
-            <value>scr</value>
+            <value>=</value>
           </relation>
           <term>dog</term>
         </searchClause>
@@ -36,7 +36,7 @@
         <searchClause>
           <index>cql.serverChoice</index>
           <relation>
-            <value>scr</value>
+            <value>=</value>
           </relation>
           <term>horse</term>
         </searchClause>
@@ -45,7 +45,7 @@
         <searchClause>
           <index>cql.serverChoice</index>
           <relation>
-            <value>scr</value>
+            <value>=</value>
           </relation>
           <term>frog</term>
         </searchClause>

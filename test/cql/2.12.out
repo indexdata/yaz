@@ -1,7 +1,7 @@
 <searchClause>
   <index>dc.title</index>
   <relation>
-    <value>scr</value>
+    <value>=</value>
   </relation>
   <term>fish frog chicken</term>
 </searchClause>

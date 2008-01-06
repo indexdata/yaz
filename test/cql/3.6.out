@@ -6,7 +6,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>xml</term>
     </searchClause>
@@ -15,7 +15,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>prox///</term>
     </searchClause>

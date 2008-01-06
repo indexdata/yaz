@@ -13,7 +13,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>fish food</term>
     </searchClause>
@@ -22,7 +22,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>and</term>
     </searchClause>

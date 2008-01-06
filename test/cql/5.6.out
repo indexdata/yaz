@@ -18,7 +18,7 @@
     <searchClause>
       <index>dc.author</index>
       <relation>
-        <value>exact</value>
+        <value>==</value>
       </relation>
       <term>jones</term>
     </searchClause>

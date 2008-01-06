@@ -1,7 +1,7 @@
 <searchClause>
   <index>cql.serverChoice</index>
   <relation>
-    <value>scr</value>
+    <value>=</value>
   </relation>
   <term>cat*fish</term>
 </searchClause>

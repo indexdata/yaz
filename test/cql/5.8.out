@@ -13,7 +13,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>a</term>
     </searchClause>
@@ -22,7 +22,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>b</term>
     </searchClause>

@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.30 2007-12-20 22:45:37 adam Exp $
+/* $Id: cqltransform.c,v 1.31 2008-01-06 13:08:09 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -185,6 +185,18 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     {
         if (!res)
             res = cql_lookup_property(ct, category, prefix, eval);
+        /* we have some aliases for some relations unfortunately.. */
+        if (!res && !prefix && !strcmp(category, "relation"))
+        {
+            if (!strcmp(val, "=="))
+                res = cql_lookup_property(ct, category, prefix, "exact");
+            if (!strcmp(val, "="))
+                res = cql_lookup_property(ct, category, prefix, "eq");
+            if (!strcmp(val, "<="))
+                res = cql_lookup_property(ct, category, prefix, "le");
+            if (!strcmp(val, ">="))
+                res = cql_lookup_property(ct, category, prefix, "ge");
+        }
         if (!res)
             res = cql_lookup_property(ct, category, prefix, "*");
     }
@@ -572,18 +584,7 @@ void cql_transform_r(cql_transform_t ct,
             }
         }
         cql_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
-        if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "="))
-            cql_pr_attr(ct, "relation", "eq", "scr",
-                        pr, client_data, 19);
-        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "<="))
-            cql_pr_attr(ct, "relation", "le", "scr",
-                        pr, client_data, 19);
-        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, ">="))
-            cql_pr_attr(ct, "relation", "ge", "scr",
-                        pr, client_data, 19);
-        else
-            cql_pr_attr(ct, "relation", cn->u.st.relation, "eq",
-                        pr, client_data, 19);
+        cql_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data, 19);
         cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, 24);
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))

@@ -1,7 +1,7 @@
 <searchClause>
   <index>title</index>
   <relation>
-    <value>exact</value>
+    <value>==</value>
   </relation>
   <term>fish</term>
 </searchClause>

@@ -20,7 +20,7 @@
     <searchClause>
       <index>cql.serverChoice</index>
       <relation>
-        <value>scr</value>
+        <value>=</value>
       </relation>
       <term>and</term>
     </searchClause>
