@@ -1,17 +1,15 @@
-#!/bin/sh
-# the next line restats using tclsh \
-exec tclsh "$0" "$@"
+#!/usr/bin/tclsh
 #
 # This file is part of the YAZ toolkit
 # Copyright (c) Index Data 1996-2007
 # See the file LICENSE for details.
 #
-# $Id: csvtosru_update.tcl,v 1.2 2007-01-03 08:42:15 adam Exp $
+# $Id: csvtosru_update.tcl,v 1.3 2008-01-06 13:02:48 adam Exp $
 #
 # Converts a CSV file with SRU update diagnostics to C+H file for easy
 # maintenance
 #
-# $Id: csvtosru_update.tcl,v 1.2 2007-01-03 08:42:15 adam Exp $
+# $Id: csvtosru_update.tcl,v 1.3 2008-01-06 13:02:48 adam Exp $
 
 source [lindex $argv 0]/csvtodiag.tcl
 
