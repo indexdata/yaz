@@ -1,4 +1,4 @@
-/* $Id: cqltransform.c,v 1.31 2008-01-06 13:08:09 adam Exp $
+/* $Id: cqltransform.c,v 1.32 2008-01-06 19:34:34 adam Exp $
    Copyright (C) 1995-2007, Index Data ApS
    Index Data Aps
 
@@ -517,6 +517,34 @@ void emit_term(cql_transform_t ct,
     xfree(z3958_mem);
 }
 
+void emit_terms(cql_transform_t ct,
+                struct cql_node *cn,
+                void (*pr)(const char *buf, void *client_data),
+                void *client_data,
+                const char *op)
+{
+    struct cql_node *ne = cn->u.st.extra_terms;
+    if (ne)
+    {
+        (*pr)("@", client_data);
+        (*pr)(op, client_data);
+        (*pr)(" ", client_data);
+    }
+    emit_term(ct, cn, cn->u.st.term, strlen(cn->u.st.term),
+              pr, client_data);
+    for (; ne; ne = ne->u.st.extra_terms)
+    {
+        if (ne->u.st.extra_terms)
+        {
+            (*pr)("@", client_data);
+            (*pr)(op, client_data);
+            (*pr)(" ", client_data);
+        }            
+        emit_term(ct, cn, ne->u.st.term, strlen(ne->u.st.term),
+                  pr, client_data);
+    }
+}
+
 void emit_wordlist(cql_transform_t ct,
                    struct cql_node *cn,
                    void (*pr)(const char *buf, void *client_data),
@@ -597,8 +625,7 @@ void cql_transform_r(cql_transform_t ct,
         }
         else
         {
-            emit_term(ct, cn, cn->u.st.term, strlen(cn->u.st.term),
-                      pr, client_data);
+            emit_terms(ct, cn, pr, client_data, "and");
         }
         break;
     case CQL_NODE_BOOL:
