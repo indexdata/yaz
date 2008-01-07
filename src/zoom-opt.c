@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-opt.c,v 1.8 2007-05-05 11:53:26 adam Exp $
+ * $Id: zoom-opt.c,v 1.9 2008-01-07 17:32:49 adam Exp $
  */
 /**
  * \file zoom-opt.c
@@ -171,7 +171,11 @@ ZOOM_API(const char *)
     if (!opt)
         return 0;
     if (opt->callback_func)
+    {
         v = (*opt->callback_func)(opt->callback_handle, name);
+        if (v)
+            *lenp = strlen(v);
+    }
     if (!v)
     {
         struct ZOOM_options_entry *e;
