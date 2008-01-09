@@ -43,30 +43,30 @@ YAZ_BEGIN_CDECL
 
 typedef struct icu_chain *yaz_icu_chain_t;
 
-yaz_icu_chain_t icu_chain_create(const char * locale,
+YAZ_EXPORT yaz_icu_chain_t icu_chain_create(const char * locale,
                                  int sort,
                                  UErrorCode * status);
 
-void icu_chain_destroy(yaz_icu_chain_t chain);
+YAZ_EXPORT void icu_chain_destroy(yaz_icu_chain_t chain);
 
-yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
+YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
                                      int sort,
                                      UErrorCode * status);
 
-int icu_chain_assign_cstr(yaz_icu_chain_t chain,
+YAZ_EXPORT int icu_chain_assign_cstr(yaz_icu_chain_t chain,
                           const char * src8cstr, 
                           UErrorCode *status);
 
-int icu_chain_next_token(yaz_icu_chain_t chain,
+YAZ_EXPORT int icu_chain_next_token(yaz_icu_chain_t chain,
                          UErrorCode *status);
 
-int icu_chain_token_number(yaz_icu_chain_t chain);
+YAZ_EXPORT int icu_chain_token_number(yaz_icu_chain_t chain);
 
-const char * icu_chain_token_display(yaz_icu_chain_t chain);
+YAZ_EXPORT const char * icu_chain_token_display(yaz_icu_chain_t chain);
 
-const char * icu_chain_token_norm(yaz_icu_chain_t chain);
+YAZ_EXPORT const char * icu_chain_token_norm(yaz_icu_chain_t chain);
 
-const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
+YAZ_EXPORT const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
 
 YAZ_END_CDECL
 
