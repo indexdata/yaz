@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.140 2008-01-09 15:00:47 adam Exp $
+# $Id: makefile,v 1.141 2008-01-09 15:34:30 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -21,7 +21,7 @@ ICONV_DIR = c:\iconv-1.9.2.win32
 
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
-HAVE_ICU=0
+HAVE_ICU=1
 ICU_DIR = c:\icu
 
 # libxslt
@@ -44,7 +44,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest zoomsh utilprog testprog iconv icu libxml2 libxslt
+all: dirs generate dll client ztest yazicu zoomsh utilprog testprog iconv icu libxml2 libxslt
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -102,6 +102,7 @@ YAZ_IMPLIB=$(LIBDIR)\yaz3.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
+YAZ_ICU=$(BINDIR)\yaz-icu.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
 
@@ -168,6 +169,7 @@ ICU_DEF= \
 ICU_LIB= \
   $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
 icu: $(BINDIR)\icudt38.dll $(BINDIR)\icuin38.dll $(BINDIR)\icuuc38.dll
+yazicu: dirs generate $(YAZ_ICU)
 
 $(BINDIR)\icudt38.dll:
   copy "$(ICU_DIR)\bin\icudt38.dll" $(BINDIR)
@@ -180,6 +182,7 @@ ICU_DEF= \
   /D YAZ_HAVE_ICU=0
 ICU_LIB=
 icu:
+yazicu:
 !endif
 
 ### 
@@ -317,6 +320,8 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\tabcomplete.obj \
    $(OBJDIR)\admin.obj \
    $(OBJDIR)\fhistory.obj
+
+YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj 
 
 ZTEST_OBJS= \
     $(OBJDIR)\read-marc.obj \
@@ -470,7 +475,7 @@ MISC_OBJS= \
    $(OBJDIR)\http.obj \
    $(OBJDIR)\match_glob.obj \
    $(OBJDIR)\poll.obj \
-    $(OBJDIR)\icu_I18N.obj
+   $(OBJDIR)\icu_I18N.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -783,6 +788,11 @@ $(DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(DLL)
 	$(LINK_PROGRAM) $(YAZ_CLIENT_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
+
+$(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(DLL)
+	$(LINK_PROGRAM) $(YAZ_ICU_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
+
 
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@
