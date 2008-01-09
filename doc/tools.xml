@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.64 2007-10-16 10:45:53 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.65 2008-01-09 21:32:27 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -433,17 +433,6 @@
      availability of graphical interfaces. It is still useful in
      applications where you for some reason or other need to provide a
      symbolic language for expressing boolean query structures.
-    </para>
-
-    <para>
-     The EUROPAGATE research project working under the Libraries programme
-     of the European Commission's DG XIII has, amongst other useful tools,
-     implemented a general-purpose CCL parser which produces an output
-     structure that can be trivially converted to the internal RPN
-     representation of &yaz; (The <literal>Z_RPNQuery</literal> structure).
-     Since the CCL utility - along with the rest of the software
-     produced by EUROPAGATE - is made freely available on a liberal
-     license, it is included as a supplement to &yaz;.
     </para>
 
     <sect3 id="ccl.syntax">
