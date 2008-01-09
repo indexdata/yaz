@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.139 2007-12-10 20:33:47 adam Exp $
+# $Id: makefile,v 1.140 2008-01-09 15:00:47 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -18,6 +18,11 @@ HAVE_TCL=1
 # iconv charcter conversion utility
 HAVE_ICONV=1
 ICONV_DIR = c:\iconv-1.9.2.win32
+
+# icu charcter conversion utility
+# get icu libraries from http://www.icu-project.org
+HAVE_ICU=0
+ICU_DIR = c:\icu
 
 # libxslt
 HAVE_LIBXSLT=1
@@ -39,7 +44,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest zoomsh utilprog testprog iconv libxml2 libxslt
+all: dirs generate dll client ztest zoomsh utilprog testprog iconv icu libxml2 libxslt
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -127,8 +132,7 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
  $(ZOOMTST10)
 
-utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
-
+utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) 
 testprog: $(TSTLOG) $(TST_TIMING)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
@@ -152,6 +156,33 @@ ICONV_LIB=
 iconv:
 
 !endif
+
+###TRYING ICU FLAGS HERE WORKS  ####
+## ADAM ARE THESE FLAGS OK and the DLL sufficient ##
+##IT COMPILES AND SEEMS TO WORK
+
+!if $(HAVE_ICU)
+ICU_DEF= \
+  /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 \
+  /I"$(ICU_DIR)\include"
+ICU_LIB= \
+  $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
+icu: $(BINDIR)\icudt38.dll $(BINDIR)\icuin38.dll $(BINDIR)\icuuc38.dll
+
+$(BINDIR)\icudt38.dll:
+  copy "$(ICU_DIR)\bin\icudt38.dll" $(BINDIR)
+$(BINDIR)\icuin38.dll:
+  copy "$(ICU_DIR)\bin\icuin38.dll" $(BINDIR)
+$(BINDIR)\icuuc38.dll:
+  copy "$(ICU_DIR)\bin\icuuc38.dll" $(BINDIR)
+!else
+ICU_DEF= \
+  /D YAZ_HAVE_ICU=0
+ICU_LIB=
+icu:
+!endif
+
+### 
 
 !if $(HAVE_LIBXML2)
 LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
@@ -196,6 +227,7 @@ libxslt:
 COMMON_C_OPTIONS=          \
   /nologo /W3 /EHsc /FD /c   \
   $(ICONV_DEF)             \
+   $(ICU_DEF)             \
   $(LIBXML2_DEF)           \
   $(LIBXSLT_DEF)           \
   /D "_CRT_SECURE_NO_DEPRECATE" \
@@ -243,7 +275,7 @@ MT=echo
 !endif
 
 LINK_LIBS= kernel32.lib wsock32.lib advapi32.lib \
-	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
+	   $(ICONV_LIB) $(ICU_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
@@ -321,6 +353,7 @@ YAZ_CQL2XCQL_OBJS = \
    $(OBJDIR)\cql2xcql.obj
 YAZ_MARCDUMP_OBJS = \
    $(OBJDIR)\marcdump.obj
+
 
 TSTLOG_OBJS = \
    $(OBJDIR)\tstlog.obj
@@ -436,7 +469,8 @@ MISC_OBJS= \
    $(OBJDIR)\copy_types.obj \
    $(OBJDIR)\http.obj \
    $(OBJDIR)\match_glob.obj \
-   $(OBJDIR)\poll.obj
+   $(OBJDIR)\poll.obj \
+    $(OBJDIR)\icu_I18N.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -809,6 +843,7 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
 	$(LINK_PROGRAM) $(YAZ_MARCDUMP_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
+
 
 $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(DLL)
 	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@
