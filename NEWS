@@ -1,3 +1,7 @@
+Tcl scripts uses /usr/bin/tclsh as preferred shell.
+
+yaz-ziffy defines _BSD_SOURCE.
+
 Changed license of CCL module to 'Revised BSD'. After consultation with
 remaining members of the original EUROPAGATE consortium, we are re-issuing
 the CCL module without a separate license. The software was developed by
