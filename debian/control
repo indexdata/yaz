@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libpcap0.8-dev, libicu36-dev
+Build-Depends: debhelper (>= 4), pkg-config, libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev, libicu36-dev
 
 Package: libyaz3
 Section: libs
