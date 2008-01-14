@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2007, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.141 2008-01-09 15:34:30 adam Exp $
+# $Id: makefile,v 1.142 2008-01-14 22:58:46 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -94,11 +94,15 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-DLL=$(BINDIR)\yaz3d.dll
+YAZ_DLL=$(BINDIR)\yaz3d.dll
 YAZ_IMPLIB=$(LIBDIR)\yaz3d.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu3d.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu3d.lib
 !else
-DLL=$(BINDIR)\yaz3.dll
+YAZ_DLL=$(BINDIR)\yaz3.dll
 YAZ_IMPLIB=$(LIBDIR)\yaz3.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu3.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu3.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
@@ -125,7 +129,7 @@ TSTLOG=$(BINDIR)\tstlog.exe
 TST_TIMING=$(BINDIR)\tst_timing.exe
 
 # shortcut names defined here
-dll: dirs generate $(DLL) 
+dll: dirs generate $(YAZ_DLL) 
 client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
 
@@ -169,7 +173,7 @@ ICU_DEF= \
 ICU_LIB= \
   $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
 icu: $(BINDIR)\icudt38.dll $(BINDIR)\icuin38.dll $(BINDIR)\icuuc38.dll
-yazicu: dirs generate $(YAZ_ICU)
+yazicu: dirs generate $(YAZ_ICU) 
 
 $(BINDIR)\icudt38.dll:
   copy "$(ICU_DIR)\bin\icudt38.dll" $(BINDIR)
@@ -278,7 +282,7 @@ MT=echo
 !endif
 
 LINK_LIBS= kernel32.lib wsock32.lib advapi32.lib \
-	   $(ICONV_LIB) $(ICU_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
+	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
 
@@ -475,7 +479,6 @@ MISC_OBJS= \
    $(OBJDIR)\http.obj \
    $(OBJDIR)\match_glob.obj \
    $(OBJDIR)\poll.obj \
-   $(OBJDIR)\icu_I18N.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -518,6 +521,9 @@ DLL_OBJS =\
    $(MISC_OBJS) \
    $(Z3950_OBJS) \
    $(ILL_OBJS) \
+   
+ICU_DLL_OBJS =\
+   $(OBJDIR)\icu_I18N.obj
 
 # Generated C and H files
 
@@ -777,7 +783,7 @@ $(YAZ_RES): $(YAZ_RC)
 
 # Linking
 
-$(DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
+$(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 	$(LINK_DLL) \
 		$(DLL_OBJS) \
 		$(YAZ_RES) \
@@ -785,81 +791,88 @@ $(DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		/implib:"$(YAZ_IMPLIB)" 
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
-$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(DLL)
+$(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_RES)
+	$(LINK_DLL) $(ICU_LIB) $(YAZ_IMPLIB)\
+		$(ICU_DLL_OBJS) \
+		/out:$@ \
+		/implib:"$(YAZ_ICU_IMPLIB)" 
+	$(MT) -manifest $@.manifest -outputresource:$@;2
+
+$(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CLIENT_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(DLL)
-	$(LINK_PROGRAM) $(YAZ_ICU_OBJS) /out:$@
+$(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
+	$(LINK_PROGRAM) $(ICU_LIB) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 
-$(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(DLL)
+$(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) $(DLL)
+$(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST1_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) $(DLL)
+$(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST2_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) $(DLL)
+$(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST3_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) $(DLL)
+$(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST4_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) $(DLL)
+$(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST5_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) $(DLL)
+$(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST6_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) $(DLL)
+$(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST7_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) $(DLL)
+$(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST8_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) $(DLL)
+$(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST9_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZOOMTST10) : "$(BINDIR)" $(YAZ_ZOOMTST10_OBJS) $(DLL)
+$(ZOOMTST10) : "$(BINDIR)" $(YAZ_ZOOMTST10_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST10_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) $(DLL)
+$(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CQL2PQF_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) $(DLL)
+$(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CQL2XCQL_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(DLL)
+$(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM)	$(ZTEST_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(DLL)
+$(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_MARCDUMP_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 
-$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(DLL)
+$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(DLL)
+$(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TST_TIMING_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 

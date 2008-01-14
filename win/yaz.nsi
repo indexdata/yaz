@@ -1,4 +1,4 @@
-; $Id: yaz.nsi,v 1.124 2007-12-19 11:02:22 adam Exp $
+; $Id: yaz.nsi,v 1.125 2008-01-14 22:58:46 adam Exp $
 
 !define VERSION "3.0.18"
 
@@ -105,6 +105,10 @@ Noservice:
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
 	File ..\bin\yaz3.dll
+	File ..\bin\icudt38.dll
+	File ..\bin\icuin38.dll
+	File ..\bin\icuuc38.dll
+	File ..\bin\yaz_icu3.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
