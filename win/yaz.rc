@@ -23,7 +23,7 @@ VS_VERSION_INFO VERSIONINFO
             VALUE "FileDescription", "YAZ Library\0"
             VALUE "FileVersion", YAZ_VERSION "\0"
             VALUE "InternalName", "YAZ\0"
-            VALUE "LegalCopyright", "Copyright © 1995-2007 Index Data ApS\0"
+            VALUE "LegalCopyright", "Copyright © 1995-2008 Index Data ApS\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "yaz.rc\0"
             VALUE "PrivateBuild", "\0"
