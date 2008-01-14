@@ -1,10 +1,9 @@
-<!-- $Id: entities.ent,v 1.8 2007-11-21 09:04:46 adam Exp $ -->
+<!-- $Id: entities.ent,v 1.9 2008-01-14 20:34:14 adam Exp $ -->
 <!ENTITY yaz "YAZ">
 <!ENTITY bookinfo SYSTEM "bookinfo.xml">
 <!ENTITY chap-introduction SYSTEM "introduction.xml">
 <!ENTITY chap-installation SYSTEM "installation.xml">
 <!ENTITY chap-zoom SYSTEM "zoom.xml">
-<!ENTITY chap-ziffy SYSTEM "ziffy.xml">
 <!ENTITY chap-asn SYSTEM "asn.xml">
 <!ENTITY chap-soap SYSTEM "soap.xml">
 <!ENTITY chap-tools SYSTEM "tools.xml">

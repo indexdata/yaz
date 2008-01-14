@@ -1,4 +1,4 @@
-<!-- $Id: license.xml,v 1.16 2008-01-09 21:32:27 adam Exp $ -->
+<!-- $Id: license.xml,v 1.17 2008-01-14 20:34:15 adam Exp $ -->
  <appendix id="license"><title>License</title>
 
   <sect1 id="license.indexdata"><title>Index Data Copyright</title>
@@ -51,17 +51,6 @@
     OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
     SUCH DAMAGE.
    </para>
-  </sect1>
-  <sect1 id="license.other"><title>Additional Copyright Statements</title>
-
-   <sect2 id="license.ziffy"><title>ziffy</title>
-    <para>
-     The software in directory <filename>ziffy</filename> and the
-     <application>ziffy</application> application is copyright
-     Rocco Carbone and covered by the GNU General public license, version 2.
-    </para>
-   </sect2>
-   
   </sect1>
  </appendix>
 

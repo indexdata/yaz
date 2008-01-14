@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.101 2007-12-30 22:04:12 adam Exp $
+dnl $Id: configure.ac,v 1.102 2008-01-14 20:34:14 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.18],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -177,46 +177,6 @@ if test "$with_iconv" != "no"; then
 	    ])
     ])
 fi
-dnl ------ libpcap / ziffy
-
-AC_SUBST(ZIFFY_PROG)
-AC_SUBST(PCAP_LIBS)
-AC_SUBST(PCAP_CFLAGS)
-ZIFFY_PROG=
-AC_ARG_WITH(pcap, [  --with-pcap[=DIR]         libpcap root dir located in (dir)], [PCAP_DIR="$withval"],[PCAP_DIR=default])
-
-if test "${PCAP_DIR}" != "no"; then
-    if test "${ac_cv_header_netinet_if_ether_h}" = "no"; then
-	:
-    elif test "${PCAP_DIR}" != "yes" && test "${PCAP_DIR}" != "default"; then
-	PCAP_LIBS="-lpcap"
-	if test "$PCAP_DIR" != "/usr"; then
-	    PCAP_LIBS="-L$PCAP_DIR $PCAP_LIBS"
-	    PCAP_CFLAGS="-I$PCAP_DIR"
-	fi
-    else
-	oldLibs=$LIBS
-	AC_CHECK_LIB([pcap], [main])
-	if test "$ac_cv_lib_pcap_main" = "yes"; then
-	    AC_CHECK_HEADER([pcap.h])
-	    if test "$ac_cv_header_pcap_h" = "yes"; then
-		PCAP_LIBS="-lpcap"
-	    fi
-	fi
-	LIBS=$oldLibs
-    fi
-fi
-AC_MSG_CHECKING([for libpcap (required for ziffy)])
-if test -z "${PCAP_LIBS}"; then
-    AC_MSG_RESULT([not found. ziffy disabled])
-    if test "${PCAP_DIR}" = "yes"; then
-        AC_MSG_ERROR([libpcap missing])
-    fi
-else
-    AC_MSG_RESULT([found in $PCAP_DIR])
-    ZIFFY_PROG=ziffy
-fi
-
 dnl ------ various functions
 AC_CHECK_FUNCS(getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64)
 case $host in
@@ -419,7 +379,6 @@ include/yaz/Makefile
 client/Makefile
 ztest/Makefile
 zoom/Makefile
-ziffy/Makefile
 doc/Makefile
 doc/local.ent
 doc/common/Makefile

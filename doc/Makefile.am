@@ -1,11 +1,11 @@
-## $Id: Makefile.am,v 1.85 2007-11-21 09:04:46 adam Exp $
+## $Id: Makefile.am,v 1.86 2008-01-14 20:34:14 adam Exp $
 
 SUBDIRS = common
 
 XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
- future.xml ziffy.xml zoom.xml credits.xml gfs-options.xml \
+ future.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
  std-oid-table.xml manref.xml
 

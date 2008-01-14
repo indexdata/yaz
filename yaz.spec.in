@@ -34,17 +34,6 @@ Conflicts: libyaz-devel
 %description -n libyaz3-devel
 Development libraries and includes for the libyaz package.
 
-%package -n yaz-ziffy
-Summary:  ziffy: the promiscuous Z39.50 APDU sniffer
-Group: Applications/Communication
-Requires: libxslt openssl libpcap libyaz3 = %{version}
-
-%description -n yaz-ziffy
-ziffy is a promiscuous Z39.50 APDU sniffer, like the popular tcpdump.
-ziffy can capture and show all Z39.50 traffic on your LAN segment.
-This packages is a special port of ziffy ported to YAZ. Note that ziffy
-is licensed under the GPL and was is by Rocco Carbone <rocco@ntop.org>.
-
 %package -n yaz-illclient
 Summary:  ILL client
 Group: Applications/Communication
@@ -107,11 +96,6 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_mandir}/man8/yaz-config.*
 %{_datadir}/doc/yaz
 %{_datadir}/yaz
-
-%files -n yaz-ziffy
-%defattr(-,root,root)
-%{_bindir}/ziffy
-%{_mandir}/man1/ziffy.*
 
 %files -n yaz-illclient
 %defattr(-,root,root)

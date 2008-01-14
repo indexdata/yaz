@@ -1,12 +1,12 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.45 2007-10-22 17:52:09 adam Exp $
+## $Id: Makefile.am,v 1.46 2008-01-14 20:34:14 adam Exp $
 
 AUTOMAKE_OPTIONS = foreign 
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src include util test client ztest zoom ziffy doc etc
+SUBDIRS = src include util test client ztest zoom doc etc
 
 aclocaldir=$(datadir)/aclocal
 

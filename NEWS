@@ -1,6 +1,5 @@
-Tcl scripts uses /usr/bin/tclsh as preferred shell.
-
-yaz-ziffy defines _BSD_SOURCE.
+yaz-ziffy is no longer part of YAZ. It is distributed separately by
+Index Data because ziffy's license is GPL2 rather then 'Revised BSD'.
 
 Changed license of CCL module to 'Revised BSD'. After consultation with
 remaining members of the original EUROPAGATE consortium, we are re-issuing
@@ -14,6 +13,8 @@ years, to the point where very practically no original code remains. To
 simplify re-use of the software, we have contacted those members of the
 consortium who could be reached, and agreed to re-issue the module as a
 proper part of the YAZ package.
+
+Tcl scripts uses /usr/bin/tclsh as preferred shell.
 
 --- 3.0.18 2007/12/19
 
