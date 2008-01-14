@@ -1,4 +1,7 @@
---- 3.0.20 2008/1/14
+--- 3.0.20 2008/1/15
+
+YAZ now makes ICU utilities for Windows. A separate DLL, yaz_icu3.dll,
+is built. Only this DLL depends on the ICU runtime.
 
 yaz-ziffy is no longer part of YAZ. It is distributed separately by
 Index Data because ziffy's license is GPL2 rather then 'Revised BSD'.

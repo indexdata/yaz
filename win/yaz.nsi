@@ -1,6 +1,6 @@
-; $Id: yaz.nsi,v 1.125 2008-01-14 22:58:46 adam Exp $
+; $Id: yaz.nsi,v 1.126 2008-01-14 23:11:53 adam Exp $
 
-!define VERSION "3.0.18"
+!define VERSION "3.0.20"
 
 ; Microsoft runtime CRT 
 ; Uncomment exactly ONE section of the three below
