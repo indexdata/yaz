@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: yaz-icu.c,v 1.15 2007-11-15 08:45:52 adam Exp $
+ * $Id: yaz-icu.c,v 1.16 2008-01-14 22:58:06 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -157,7 +157,7 @@ static void print_icu_converters(const struct config_t *p_config)
 static void print_icu_transliterators(const struct config_t *p_config)
 {
     int32_t buf_cap = 128;
-    char buf[buf_cap];
+    char buf[128];
     int32_t i;
     int32_t count = utrans_countAvailableIDs();
     
@@ -483,7 +483,7 @@ static void process_text_file(const struct config_t *p_config)
                 {
                     /* should XML encode this. Bug #1902 */
                     fprintf(config.outfile, 
-                            "<token id=\%lu\" line=\"%lu\""
+                            "<token id=\"%lu\" line=\"%lu\""
                             " norm=\"%s\" display=\"%s\" sortkey=\"%s\"/>\n",
                             token_count,
                             line_count,
