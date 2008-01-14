@@ -1,3 +1,5 @@
+--- 3.0.20 2008/1/14
+
 yaz-ziffy is no longer part of YAZ. It is distributed separately by
 Index Data because ziffy's license is GPL2 rather then 'Revised BSD'.
 
@@ -15,6 +17,14 @@ consortium who could be reached, and agreed to re-issue the module as a
 proper part of the YAZ package.
 
 Tcl scripts uses /usr/bin/tclsh as preferred shell.
+
+CQL closer to being version 1.2 compliant. CQL also allows free-form
+terms, such as 'title=a b', and thus, make the CQL parser more CCL-like
+and user-frendly.
+
+Fixed bug in ZOOM_options_getl WRT setting of parameter lenp. This
+bug could make Extended services handling crash in the ZOOM layer. This
+bug was only present in YAZ 3.0.18.
 
 --- 3.0.18 2007/12/19
 
