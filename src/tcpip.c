@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.38 2007-11-30 11:44:47 adam Exp $
+ * $Id: tcpip.c,v 1.39 2008-01-16 13:01:45 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -820,9 +820,9 @@ COMSTACK tcpip_accept(COMSTACK h)
             state->ssl = SSL_new (state->ctx);
             SSL_set_fd (state->ssl, cnew->iofile);
         }
+#endif
         state->connect_request_buf = 0;
         state->connect_response_buf = 0;
-#endif
         h = cnew;
     }
     if (h->state == CS_ST_ACCEPT)
