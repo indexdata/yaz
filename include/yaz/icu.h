@@ -35,7 +35,7 @@
 
 #include <yaz/yconfig.h>
 
-#include <libxml/tree.h>
+#include <yaz/xmltypes.h>
 
 #include <unicode/utypes.h>
 

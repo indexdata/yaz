@@ -34,8 +34,6 @@
 
 #include <yaz/yconfig.h>
 
-#include <libxml/tree.h>
-
 #include <unicode/utypes.h>   /* Basic ICU data types */
 #include <unicode/uchar.h>    /* char names           */
 
