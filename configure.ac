@@ -1,6 +1,6 @@
 dnl YAZ Toolkit, Index Data 1995-2007
 dnl See the file LICENSE for details.
-dnl $Id: configure.ac,v 1.104 2008-01-16 11:31:48 adam Exp $
+dnl $Id: configure.ac,v 1.105 2008-01-16 12:17:26 adam Exp $
 AC_PREREQ(2.59)
 AC_INIT([yaz],[3.0.21],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR(configure.ac)
@@ -274,7 +274,14 @@ dnl
 AC_SUBST(YAZ_CONFIG_CFLAGS)
 dnl
 dnl 
-AC_CHECK_ICU([3.6],[ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"])
+AC_CHECK_ICU([3.6],[
+	if test "$xml_enabled" = "true"; then
+	    ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"
+	else
+	    ICU_CPPFLAGS=""
+	    AC_MSG_WARN([ICU support disabled because XML support is unavailable])
+	fi
+])
 dnl ------ GNU threads
 HAVETHREADS=0
 AC_ARG_ENABLE(pth, [  --enable-pth            enable GNU threads],[enable_pth=$enableval],[enable_pth=no])
@@ -322,10 +329,12 @@ fi
 dnl ----- libXSLT/libEXLT/libXML2
 AC_SUBST(XML2_CFLAGS)
 
+xml_enabled=false
 YAZ_LIBXML2(
     [
 	AC_DEFINE(YAZ_HAVE_XML2) 
 	YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_XML2=1"
+	xml_enabled=true
     ]
 )
 
