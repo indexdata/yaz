@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.33 2008-01-16 11:30:51 adam Exp $
+# $Id: yaz-config.in,v 1.34 2008-01-16 12:18:51 adam Exp $
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no
@@ -68,7 +68,7 @@ while test $# -gt 0; do
 	    lib_thread=yes
 	    ;;
 	icu)
-	    if test "$ICU_LIBS"; then
+	    if test "$ICU_CPPFLAGS"; then
 		lib_icu=yes
 	    fi
 	    ;;
