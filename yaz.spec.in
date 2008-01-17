@@ -19,7 +19,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz3
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt openssl
+Requires: libxslt openssl libicu
 
 %description -n libyaz3
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
@@ -35,12 +35,21 @@ Conflicts: libyaz-devel
 Development libraries and includes for the libyaz package.
 
 %package -n yaz-illclient
-Summary:  ILL client
+Summary: ILL client
 Group: Applications/Communication
 Requires: readline libyaz3 = %{version}
 
 %description -n yaz-illclient
 yaz-illclient: an ISO ILL client.
+
+%package -n yaz-icu
+Summary: Command line utility for ICU utilities of YAZ
+Group: Applications/Communication
+Requires: libyaz3 = %{version}
+
+%description -n yaz-icu
+The yaz-icu program is a command-line based client which exposes the ICU
+chain facility of YAZ.
 
 %prep
 %setup
@@ -68,13 +77,11 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_bindir}/zoomsh
 %{_bindir}/yaz-marcdump
 %{_bindir}/yaz-iconv
-%{_bindir}/yaz-icu
 %{_mandir}/man1/yaz-client.*
 %{_mandir}/man8/yaz-ztest.*
 %{_mandir}/man1/zoomsh.*
 %{_mandir}/man1/yaz-marcdump.*
 %{_mandir}/man1/yaz-iconv.*
-%{_mandir}/man1/yaz-icu.*
 %{_mandir}/man7/yaz-log.*
 
 %files -n libyaz3
@@ -101,3 +108,8 @@ rm -fr ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_bindir}/yaz-illclient
 %{_mandir}/man1/yaz-illclient.*
+
+%files -n yaz-icu
+%defattr(-,root,root)
+%{_bindir}/yaz-icu
+%{_mandir}/man1/yaz-icu.*
