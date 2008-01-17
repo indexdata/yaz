@@ -1,6 +1,6 @@
-# Copyright (C) 1995-2007, Index Data ApS
+# Copyright (C) 1995-2008, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.142 2008-01-14 22:58:46 adam Exp $
+# $Id: makefile,v 1.143 2008-01-17 22:27:40 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss

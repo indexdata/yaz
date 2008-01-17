@@ -2,6 +2,9 @@
 
 Fixed bug #2027: Crash when closing connection.
 
+Changed configure so that ICU support is only enabled if only ICU
+and Libxml2 is available (because the ICU chain is XML based).
+
 --- 3.0.20 2008/01/15
 
 YAZ now makes ICU utilities for Windows. A separate DLL, yaz_icu3.dll,
