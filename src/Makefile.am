@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.71 2007-11-09 16:46:43 adam Exp $
+## $Id: Makefile.am,v 1.72 2008-01-17 14:44:57 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -29,6 +29,7 @@ YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 libyaz_server_la_CFLAGS = $(PTHREAD_CFLAGS)
 libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS)
+libyaz_icu_la_LIBADD = $(ICU_LIBS)
 
 AM_YFLAGS=-p cql_
 
