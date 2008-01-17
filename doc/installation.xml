@@ -1,5 +1,5 @@
-<!-- $Id: installation.xml,v 1.39 2008-01-14 20:34:14 adam Exp $ -->
- <chapter id="installation"><title>Compilation and Installation</title>
+<!-- $Id: installation.xml,v 1.40 2008-01-17 21:45:05 adam Exp $ -->
+<chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1 id="installation-introduction"><title>Introduction</title>
    <para>
@@ -18,7 +18,7 @@
     The software is regularly tested on
     <ulink url="&url.debian;">Debian GNU/Linux</ulink>,
     <ulink url="&url.redhat;">Redhat Linux</ulink>,
-    <ulink url="&url.gentoo;">Gentoo Linux</ulink>,
+    <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
     <ulink url="&url.solaris;">SunOS 5.8 (sparc)</ulink>,
@@ -84,6 +84,14 @@
      the iconv library is installed. Some Unixes today already have it
      - if not, we suggest 
      <ulink url="&url.libiconv;">GNU libiconv</ulink>.
+    </para>
+
+    <para>
+     YAZ 3.0.16 and later includes a wrapper for the 
+     <ulink url="%url.icu;">ICU</ulink> 
+     (International Components for Unicode).
+     In order to use this, the developer version of the ICU library
+     must be available.
     </para>
 
     <para>
@@ -232,6 +240,16 @@
         </para></listitem>
       </varlistentry>
 
+      <varlistentry><term>
+        <literal>--with-icu</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>&yaz; will be linked the 
+	<ulink url="&url.icu;">ICU</ulink> library in the prefix if given.
+	If prefix is not given, the libraries exposed by the script
+	<application>icu-config</application> will be used if found.
+        </para></listitem>
+      </varlistentry>
+
      </variablelist>
      
     </para>
@@ -298,6 +316,13 @@
       <varlistentry><term><filename>util/yaz-marcdump</filename></term>
        <listitem><para>This program parses ISO2709 encoded MARC records
 	 and prints them in line-format or XML.
+        </para></listitem>
+      </varlistentry>
+      
+      <varlistentry><term><filename>util/yaz-icu</filename></term>
+       <listitem><para>This program exposes the ICU wrapper library if that
+	 is enabled for YAZ. Only if ICU is available this program is
+         useful.
         </para></listitem>
       </varlistentry>
       
@@ -406,7 +431,7 @@
      For Libtool users, the <filename>yaz-config</filename> script provides
      a different variant of option <literal>--libs</literal>, called
      <literal>--lalibs</literal> that returns the name of the
-     Libtool acrhive(s) for &yaz; rather than the ordinary ones.
+     Libtool archive(s) for &yaz; rather than the ordinary ones.
     </para>
     <para>
      For applications using the threaded version of &yaz;,
@@ -546,6 +571,20 @@
 	 </para>
 	</note>
        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+       <term><literal>HAVE_ICU</literal>,
+        <literal>ICU_DIR</literal></term>
+       <listitem>
+        <para>
+         If <literal>HAVE_ICU</literal> is set to 1, YAZ is compiled
+         with <ulink url="&url.icu;">ICU</ulink> support.
+	 In this configuration, set 
+         <literal>ICU_DIR</literal> to the 
+         <ulink url="&url.icu;">ICU</ulink> source directory.
+        </para>
+       </listitem>
 
       </varlistentry>
 
@@ -579,24 +618,37 @@
      The following files are generated upon successful compilation:
      
      <variablelist>
-      <varlistentry><term><filename>bin/yaz3.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz3.dll</filename> / 
+	  <filename>bin/yaz3d.dll</filename></term>
        <listitem><para>
-         &yaz; release mode multi-threaded Dynamic Link Library.
+         &yaz; Release/Debug DLL.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>lib/yaz3.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz3.lib</filename> / 
+	  <filename>lib/yaz3d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz3.dll</filename>.
+         Import library for <filename>yaz3.dll</filename> /
+	 <filename>yaz3d.dll</filename>.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>bin/yaz3d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz_icu3.dll</filename> /
+          <filename>bin/yaz_icu3d.dll</filename></term>
        <listitem><para>
-         &yaz; debug mode multi-threaded Dynamic Link Library.
+         Release/Debug DLL for the ICU wrapper utility.
+	 Only build if HAVE_ICU is 1.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>lib/yaz3d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz_icu3.lib</filename> /
+	  <filename>lib/yaz_icu3d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz3d.dll</filename>.
+         Import library for <filename>yaz_icu3.dll</filename> /
+	 <filename>yaz_icu3d.dll</filename>.
+        </para></listitem></varlistentry>
+      
+      <varlistentry><term><filename>bin/yaz-ztest.exe</filename></term>
+       <listitem><para>
+         Z39.50 multi-threaded test/example server. It's a WIN32
+         console application.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>bin/yaz-client.exe</filename></term>
@@ -606,12 +658,12 @@
          information.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>bin/yaz-ztest.exe</filename></term>
-       <listitem><para>
-         Z39.50 multi-threaded test/example server. It's a WIN32
-         console application.
+      <varlistentry><term><filename>bin/yaz-icu.exe</filename></term>
+       <listitem><para>This program exposes the ICU wrapper library if that
+	 is enabled for YAZ. Only if ICU is available this program is
+         build.
         </para></listitem></varlistentry>
-      
+
       <varlistentry><term><filename>bin/zoomsh.exe</filename></term>
        <listitem><para>
          Simple console application implemented on top of the
