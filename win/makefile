@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2008, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.143 2008-01-17 22:27:40 adam Exp $
+# $Id: makefile,v 1.144 2008-01-18 11:47:56 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -765,12 +765,10 @@ $(SRCDIR)\cql.c: $(SRCDIR)\cql.y
 # Resources
 # The RC compiler (resource files)
 RSC=rc.exe
-COMMON_RC_OPTIONS= /l 0x406 /i"$(ROOTDIR)" 
-DEBUG_RC_OPTIONS=/d "_DEBUG"
-RELEASE_RC_OPTIONS=/d "NDEBUG"
 
-YAZ_RES=$(OBJDIR)\yaz.res
 YAZ_RC=$(WINDIR)\yaz.rc
+YAZ_RES=$(OBJDIR)\yaz.res
+YAZ_ICU_RES=$(OBJDIR)\yaz_icu.res
 
 !if $(DEBUG)
 RSOPT=/d_DEBUG
@@ -780,6 +778,9 @@ RSOPT=/d_NDEBUG
 
 $(YAZ_RES): $(YAZ_RC)
 	$(RSC) $(RSOPT) /I"../include" /fo"$(YAZ_RES)" $(YAZ_RC) 
+
+$(YAZ_ICU_RES): $(YAZ_RC)
+	$(RSC) $(RSOPT) /DICU=1 /I"../include" /fo"$(YAZ_ICU_RES)" $(YAZ_RC) 
 
 # Linking
 
@@ -791,9 +792,10 @@ $(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		/implib:"$(YAZ_IMPLIB)" 
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
-$(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_RES)
+$(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
 	$(LINK_DLL) $(ICU_LIB) $(YAZ_IMPLIB)\
 		$(ICU_DLL_OBJS) \
+		$(YAZ_ICU_RES) \
 		/out:$@ \
 		/implib:"$(YAZ_ICU_IMPLIB)" 
 	$(MT) -manifest $@.manifest -outputresource:$@;2

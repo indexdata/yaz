@@ -18,16 +18,20 @@ VS_VERSION_INFO VERSIONINFO
  {
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "Z39.50/SRU Library\0"
-            VALUE "CompanyName", "Index Data ApS\0"
-            VALUE "FileDescription", "YAZ Library\0"
+            VALUE "Comments", "http://www.indexdata.com/yaz/\0"
+            VALUE "CompanyName", "Index Data\0"
+#ifdef ICU
+            VALUE "FileDescription", "YAZ ICU DLL\0"
+#else
+            VALUE "FileDescription", "YAZ DLL\0"
+#endif
             VALUE "FileVersion", YAZ_VERSION "\0"
             VALUE "InternalName", "YAZ\0"
             VALUE "LegalCopyright", "Copyright © 1995-2008 Index Data ApS\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "yaz.rc\0"
+            VALUE "OriginalFilename", "yaz.res\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "YAZ Toolkit\0"
+            VALUE "ProductName", "YAZ\0"
             VALUE "ProductVersion", YAZ_VERSION "\0"
             VALUE "SpecialBuild", "\0"
         END
