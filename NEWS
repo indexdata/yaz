@@ -1,3 +1,7 @@
+--- 3.0.22 2008/01/20
+
+Fixed version in yaz/yaz-version.h.
+
 --- 3.0.22 2008/01/17
 
 Fixed bug #2027: Crash when closing connection.
