@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tcpip.c,v 1.40 2008-01-21 13:07:43 adam Exp $
+ * $Id: tcpip.c,v 1.41 2008-01-21 13:34:34 adam Exp $
  */
 /**
  * \file tcpip.c
@@ -721,7 +721,11 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
             h->cerrno = CSNODATA;
         else
         {
+#ifdef WIN32
+            shutdown(h->iofile, SD_RECEIVE);
+#else
             shutdown(h->iofile, SHUT_RD);
+#endif
             listen(h->iofile, SOMAXCONN);
             h->cerrno = CSYSERR;
         }
