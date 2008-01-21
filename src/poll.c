@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: poll.c,v 1.4 2007-11-30 11:44:47 adam Exp $
+ * $Id: poll.c,v 1.5 2008-01-21 13:09:07 adam Exp $
  */
 /**
  * \file 
@@ -140,8 +140,10 @@ int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
                     yaz_poll_add(mask, yaz_poll_read);
                 if (pollfds[i].revents & POLLOUT)
                     yaz_poll_add(mask, yaz_poll_write);
-                if (pollfds[i].revents & POLLERR)
+                if (pollfds[i].revents & ~(POLLIN | POLLOUT))
+                {
                     yaz_poll_add(mask, yaz_poll_except);
+                }
             }
             fds[i].output_mask = mask;
         }
