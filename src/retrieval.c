@@ -2,7 +2,7 @@
  * Copyright (C) 2005-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: retrieval.c,v 1.21 2007-05-08 08:22:36 adam Exp $
+ * $Id: retrieval.c,v 1.22 2008-01-25 16:28:26 adam Exp $
  */
 /**
  * \file retrieval.c
@@ -19,6 +19,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
+#include <yaz/match_glob.h>
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>
 
@@ -297,7 +298,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             schema_ok = 1;
         else
         {
-            if (el->name && !strcmp(schema, el->name))
+            if (el->name && yaz_match_glob(el->name, schema))
                 schema_ok = 1;
             if (el->identifier && !strcmp(schema, el->identifier))
                 schema_ok = 1;
