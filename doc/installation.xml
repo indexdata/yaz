@@ -1,4 +1,4 @@
-<!-- $Id: installation.xml,v 1.40 2008-01-17 21:45:05 adam Exp $ -->
+<!-- $Id: installation.xml,v 1.41 2008-01-25 16:28:42 adam Exp $ -->
 <chapter id="installation"><title>Compilation and Installation</title>
   
   <sect1 id="installation-introduction"><title>Introduction</title>
@@ -222,13 +222,34 @@
        <listitem><para>Compile &yaz; with 
          <ulink url="&url.libxslt;">libxslt</ulink> in directory
          <replaceable>prefix</replaceable>. 
-         Use this option if you want SRU support.
+         Use this option if you want XSLT and XML support.
          By default, configure will
          search for libxslt on the system. Use this option if it
          libxslt is not found automatically. Alternatively, 
          <literal>--without-xslt</literal>, can be used to force &yaz;
 	 not to use libxslt.
-        </para></listitem>
+        </para>
+       </listitem>
+      </varlistentry>
+
+      <varlistentry><term>
+        <literal>--with-xml2</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>Compile &yaz; with 
+         <ulink url="&url.libxml2;">libxml2</ulink> in directory
+         <replaceable>prefix</replaceable>. 
+         Use this option if you want &yaz; to use XML and support SRU.
+         By default, configure will
+         search for libxml2 on the system. Use this option if it
+         libxml2 is not found automatically. Alternatively, 
+         <literal>--without-xml2</literal>, can be used to force &yaz;
+	 not to use libxml2.
+	 </para>
+	 <para>
+	   Note that option <literal>--with-xslt</literal>
+	   also enables libxml2.
+         </para>
+       </listitem>
       </varlistentry>
 
       <varlistentry><term>
