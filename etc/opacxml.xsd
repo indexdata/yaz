@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OPAC XML. This is the output of yaz_display_OPAC -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="opacRecord">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="bibliographicRecord">
+	  
+	</xs:element>
+	<xs:element name="holdings">
+	  <xs:complexType>
+	    <xs:sequence>
+	      <xs:element maxOccurs="unbounded" minOccurs="0" ref="holding"/>
+	    </xs:sequence>
+	  </xs:complexType>
+	</xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="holding">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="typeOfRecord" minOccurs="0" type="xs:string"/>
+	<xs:element name="encodingLevel" minOccurs="0" type="xs:string"/>
+	<xs:element name="format" minOccurs="0" type="xs:string"/>
+	<xs:element name="receiptAcqStatus" minOccurs="0" type="xs:string"/>
+	<xs:element name="generalRetention" minOccurs="0" type="xs:string"/>
+	
+	<xs:element name="completeness" minOccurs="0" type="xs:string"/>
+	<xs:element name="dateOfReport" minOccurs="0" type="xs:string"/>
+	<xs:element name="nucCode" minOccurs="0" type="xs:string"/>
+	<xs:element name="localLocation" minOccurs="0" type="xs:string"/>
+	<xs:element name="shelvingLocation" minOccurs="0" type="xs:string"/>
+	<xs:element name="callNumber" minOccurs="0" type="xs:string"/>
+	<xs:element name="shelvingData" minOccurs="0" type="xs:string"/>
+	<xs:element name="copyNumber" minOccurs="0" type="xs:string"/>
+	<xs:element name="publicNote" minOccurs="0" type="xs:string"/>
+	<xs:element name="reproductionNote" minOccurs="0" type="xs:string"/>
+	<xs:element name="termsUseRepro" minOccurs="0" type="xs:string"/>
+	<xs:element name="enumAndChron" minOccurs="0" type="xs:string"/>
+	<xs:element name="volumes" minOccurs="0">
+	  <xs:complexType>
+	    <xs:sequence>
+	      <xs:element maxOccurs="unbounded" minOccurs="0" ref="volume"/>
+	    </xs:sequence>
+	  </xs:complexType>
+	</xs:element>
+	<xs:element name="circulations" minOccurs="0">
+	  <xs:complexType>
+	    <xs:sequence>
+	      <xs:element maxOccurs="unbounded" minOccurs="0" ref="circulation"/>
+	    </xs:sequence>
+	  </xs:complexType>
+	</xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="volume">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="enumeration" minOccurs="0" type="xs:string"/>
+	<xs:element name="chronology" minOccurs="0" type="xs:string"/>
+	<xs:element name="enumAndChron" minOccurs="0" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="circulation">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="availableNow">
+	  <xs:complexType>
+	  <xs:attribute name="value" use="required" type="xs:string"/>
+	  </xs:complexType>
+	</xs:element>
+	<xs:element name="availabilityDate" minOccurs="0" type="xs:string"/>
+	<xs:element name="availableThru" minOccurs="0" type="xs:string"/>
+	<xs:element name="restrictions" minOccurs="0" type="xs:string"/>
+	<xs:element name="itemId" minOccurs="0" type="xs:string"/>
+	<xs:element name="renewable">
+	  <xs:complexType>
+	    <xs:attribute name="value" use="required" type="xs:string"/>
+	</xs:complexType>
+	</xs:element>
+	<xs:element name="onHold">
+	  <xs:complexType>
+	    <xs:attribute name="value" use="required" type="xs:string"/>
+	  </xs:complexType>
+	</xs:element>
+	<xs:element name="enumAndChron" minOccurs="0"/>
+	<xs:element name="midspine" minOccurs="0"/>
+	<xs:element name="temporaryLocation" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
