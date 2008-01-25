@@ -1,4 +1,4 @@
-<!-- $Id: yazgfs.xml,v 1.7 2007-02-08 10:52:06 adam Exp $ -->
+<!-- $Id: yazgfs.xml,v 1.8 2008-01-25 16:29:35 adam Exp $ -->
 <!-- sample YAZ GFS config file .. see 
   http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
 <yazgfs>
@@ -11,6 +11,8 @@
      <stylesheet>xsl/default.xsl</stylesheet>
      <maximumrecordsize>2000000</maximumrecordsize>
      <retrievalinfo>
+       <retrieval syntax="xml" name="zebra::*"/>
+       <retrieval syntax="sutrs" name="zebra::*"/>
        <retrieval syntax="usmarc" name="F"/>
        <retrieval syntax="usmarc" name="B"/>
        <retrieval syntax="xml" name="marcxml"
