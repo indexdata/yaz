@@ -1,8 +1,20 @@
+--- 3.0.24 2008/01/28
+
+Document --with-xml2 option.
+
+Added OPAC XML XSD (etc/opacxml.xsd).
+
+Allow glob mask for name attribute in retrieval element for the 
+generic frontend server's retrieval facility.
+
+Changed yaz_poll_poll to return yaz_poll_except for all returned events
+except POLLIN/POLLOUT.
+
+Fixed error handling in cs_listen. Bug #2037.
+
 --- 3.0.22 2008/01/20
 
 Fixed version in yaz/yaz-version.h.
-
---- 3.0.22 2008/01/17
 
 Fixed bug #2027: Crash when closing connection.
 
