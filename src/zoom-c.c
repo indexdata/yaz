@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: zoom-c.c,v 1.153 2007-12-11 13:35:45 adam Exp $
+ * $Id: zoom-c.c,v 1.154 2008-01-28 09:51:02 adam Exp $
  */
 /**
  * \file zoom-c.c
@@ -1356,7 +1356,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.153 $");
+    version = odr_strdup(c->odr_out, "$Revision: 1.154 $");
     if (strlen(version) > 10)   /* check for unexpanded CVS strings */
         version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
@@ -1448,7 +1448,6 @@ static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type) {
     return sr;
 }
 
-
 #if YAZ_HAVE_XML2
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
@@ -1534,8 +1533,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         sr->u.request->recordPacking = odr_strdup(c->odr_out, option_val);
 
     option_val = ZOOM_resultset_option_get(resultset, "extraArgs");
-    if (option_val)
-        sr->extra_args = odr_strdup(c->odr_out, option_val);
+    yaz_encode_sru_extra(sr, c->odr_out, option_val);
     return send_srw(c, sr);
 }
 #else
@@ -2902,8 +2900,7 @@ static zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
         c->odr_out, ZOOM_options_get_int(scan->options, "position", 1));
     
     option_val = ZOOM_options_get(scan->options, "extraArgs");
-    if (option_val)
-        sr->extra_args = odr_strdup(c->odr_out, option_val);
+    yaz_encode_sru_extra(sr, c->odr_out, option_val);
     return send_srw(c, sr);
 }
 #else

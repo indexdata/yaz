@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: srwutil.c,v 1.64 2007-09-07 17:41:47 mike Exp $
+ * $Id: srwutil.c,v 1.65 2008-01-28 09:51:02 adam Exp $
  */
 /**
  * \file srwutil.c
@@ -42,10 +42,9 @@ void encode_uri_char(char *dst, char ch)
     }
 }
 
-static void yaz_array_to_uri_ex(char **path, ODR o, char **name, char **value,
-                                const char *extra_args)
+static void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
 {
-    size_t i, szp = 0, sz = extra_args ? 1+strlen(extra_args) : 1;
+    size_t i, szp = 0, sz = 1;
     for(i = 0; name[i]; i++)
         sz += strlen(name[i]) + 3 + strlen(value[i]) * 3;
     *path = (char *) odr_malloc(o, sz);
@@ -69,22 +68,10 @@ static void yaz_array_to_uri_ex(char **path, ODR o, char **name, char **value,
             szp += vlen;
         }
     }
-    if (extra_args)
-    {
-        if (i)
-            (*path)[szp++] = '&';
-        memcpy(*path + szp, extra_args, strlen(extra_args));
-        szp += strlen(extra_args);
-    }
     (*path)[szp] = '\0';
 }
 
-void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
-{
-    yaz_array_to_uri_ex(path, o, name, value, 0);
-}
-
-int yaz_uri_array(const char *path, ODR o, char ***name, char ***val)
+int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
 {
     int no = 2;
     const char *cp;
@@ -515,6 +502,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *maximumTerms = 0;
         char *responsePosition = 0;
         char *extraRequestData = 0;
+        Z_SRW_extra_arg *extra_args = 0;
 #endif
         char **uri_name;
         char **uri_val;
@@ -536,7 +524,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         }
         if (!strcmp(hreq->method, "POST"))
             p1 = hreq->content_buf;
-        yaz_uri_array(p1, decode, &uri_name, &uri_val);
+        yaz_uri_to_array(p1, decode, &uri_name, &uri_val);
 #if YAZ_HAVE_XML2
         if (uri_name)
         {
@@ -581,6 +569,16 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     responsePosition = v;
                 else if (!strcmp(n, "extraRequestData"))
                     extraRequestData = v;
+                else if (n[0] == 'x' && n[1] == '-')
+                {
+                    Z_SRW_extra_arg **l = &extra_args;
+                    while (*l)
+                        l = &(*l)->next;
+                    *l = odr_malloc(decode, sizeof(**l));
+                    (*l)->name = odr_strdup(decode, n);
+                    (*l)->value = odr_strdup(decode, v);
+                    (*l)->next = 0;
+                }
                 else
                     yaz_add_srw_diagnostic(decode, diag, num_diag,
                                            YAZ_SRW_UNSUPP_PARAMETER, n);
@@ -617,6 +615,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_searchRetrieve_request);
 
             sr->srw_version = version;
+            sr->extra_args = extra_args;
             *srw_pdu = sr;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
             if (query)
@@ -676,6 +675,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
             sr->srw_version = version;
+            sr->extra_args = extra_args;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
             *srw_pdu = sr;
             sr->u.explain_request->recordPacking = recordPacking;
@@ -705,6 +705,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_scan_request);
 
             sr->srw_version = version;
+            sr->extra_args = extra_args;
             *srw_pdu = sr;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
 
@@ -1186,7 +1187,7 @@ static void add_val_str(ODR o, char **name, char **value,  int *i,
 }
 
 static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
-                              char **name, char **value)
+                             char **name, char **value, int max_names)
 {
     int i = 0;
     add_val_str(encode, name, value, &i, "version", srw_pdu->srw_version);
@@ -1270,7 +1271,18 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
     default:
         return -1;
     }
+    if (srw_pdu->extra_args)
+    {
+        Z_SRW_extra_arg *ea = srw_pdu->extra_args;
+        for (; ea && i < max_names-1; ea = ea->next)
+        {
+            name[i] = ea->name;
+            value[i] = ea->value;
+            i++;
+        }
+    }
     name[i++] = 0;
+
     return 0;
 }
 
@@ -1283,15 +1295,14 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
                                  srw_pdu->username, srw_pdu->password);
-    if (yaz_get_sru_parms(srw_pdu, encode, name, value))
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value, 30))
         return -1;
-    yaz_array_to_uri_ex(&uri_args, encode, name, value, srw_pdu->extra_args);
+    yaz_array_to_uri(&uri_args, encode, name, value);
 
     hreq->method = "GET";
     
     path = (char *)
-        odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4
-                   +(srw_pdu->extra_args ? strlen(srw_pdu->extra_args) : 0));
+        odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
     sprintf(path, "%s?%s", hreq->path, uri_args);
     hreq->path = path;
@@ -1309,10 +1320,10 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
                                  srw_pdu->username, srw_pdu->password);
-    if (yaz_get_sru_parms(srw_pdu, encode, name, value))
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value, 30))
         return -1;
 
-    yaz_array_to_uri_ex(&uri_args, encode, name, value, srw_pdu->extra_args);
+    yaz_array_to_uri(&uri_args, encode, name, value);
 
     hreq->method = "POST";
     
@@ -1399,6 +1410,30 @@ int yaz_srw_str_to_pack(const char *str)
         return Z_SRW_recordPacking_URL;
     return -1;
 }
+
+void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args)
+{
+    if (extra_args)
+    {
+        char **name;
+        char **val;
+        Z_SRW_extra_arg **ea = &sr->extra_args;
+        yaz_uri_to_array(extra_args, odr, &name, &val);
+
+        while (*name)
+        {
+            *ea = odr_malloc(odr, sizeof(**ea));
+            (*ea)->name = *name;
+            (*ea)->value = *val;
+            ea = &(*ea)->next;
+            val++;
+            name++;
+        }
+        *ea = 0;
+    }
+}
+
+
 
 /*
  * Local variables:

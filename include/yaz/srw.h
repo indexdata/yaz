@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: srw.h,v 1.36 2007-09-09 05:54:45 adam Exp $ */
+/* $Id: srw.h,v 1.37 2008-01-28 09:51:02 adam Exp $ */
 
 /**
  * \file srw.h
@@ -169,6 +169,13 @@ typedef struct {
     char *stylesheet;
 } Z_SRW_updateRequest;
 
+typedef struct Z_SRW_extra_arg Z_SRW_extra_arg;
+struct Z_SRW_extra_arg {
+    char *name;
+    char *value;
+    Z_SRW_extra_arg *next;
+};
+
 typedef struct {
     char *operationStatus;
     char *recordId;
@@ -206,7 +213,7 @@ typedef struct {
     char *srw_version;
     char *username; /* From HTTP header or request */
     char *password; /* From HTTP header or request  */
-    char *extra_args; /* For SRU GET/POST only */
+    Z_SRW_extra_arg *extra_args; /* only used for SRU GET/POST */
 } Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
@@ -268,6 +275,10 @@ YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
 
 YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
+
+YAZ_EXPORT
+void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args);
+
 
 #define YAZ_XMLNS_SRU_v1_0 "http://www.loc.gov/zing/srw/v1.0/"
 #define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"
