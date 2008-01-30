@@ -1,3 +1,5 @@
+Fixed bug #395: ZOOM_record / OPAC record encoding problems.
+
 --- 3.0.24 2008/01/28
 
 Document --with-xml2 option.
