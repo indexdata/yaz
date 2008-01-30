@@ -9,4 +9,4 @@ Description: YAZ library.
 Requires: libexslt
 Libs: -L${libdir} -lyaz
 Libs.private: @LIBS@
-Cflags: @YAZ_CONFIG_CFLAGS@
+Cflags: -I${includedir} @YAZ_CONFIG_CFLAGS@
