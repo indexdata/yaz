@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2007, Index Data
+ * Copyright (c) 1995-2008, Index Data
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: wrbuf.h,v 1.28 2007-11-15 08:45:52 adam Exp $ */
+/* $Id: wrbuf.h,v 1.29 2008-01-30 19:58:24 adam Exp $ */
 
 /**
  * \file wrbuf.h
@@ -86,6 +86,9 @@ YAZ_EXPORT int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
                                  int size);
 YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
                                        const char *buf, int size);
+YAZ_EXPORT int wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd,
+                                      const char *strz);
+
 YAZ_EXPORT int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
 
 YAZ_EXPORT int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
