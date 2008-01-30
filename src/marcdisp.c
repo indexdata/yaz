@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: marcdisp.c,v 1.53 2007-12-18 12:46:02 adam Exp $
+ * $Id: marcdisp.c,v 1.54 2008-01-30 19:59:02 adam Exp $
  */
 
 /**
@@ -1008,6 +1008,11 @@ void yaz_marc_debug(yaz_marc_t mt, int level)
 void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd)
 {
     mt->iconv_cd = cd;
+}
+
+yaz_iconv_t yaz_marc_get_iconv(yaz_marc_t mt)
+{
+    return mt->iconv_cd;
 }
 
 void yaz_marc_modify_leader(yaz_marc_t mt, size_t off, const char *str)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2007, Index Data
+ * Copyright (c) 1995-2008, Index Data
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.30 2007-12-17 20:59:30 adam Exp $ */
+/* $Id: marcdisp.h,v 1.31 2008-01-30 19:59:02 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -71,8 +71,11 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 /** \brief Output format: check only (no marc output) */
 #define YAZ_MARC_CHECK  6
 
-/** \brief supply iconv handle for character set conversion .. */
+/** \brief set iconv handle for character set conversion .. */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
+
+/** \brief supply iconv handle for character set conversion .. */
+YAZ_EXPORT yaz_iconv_t yaz_marc_get_iconv(yaz_marc_t mt);
 
 /** \brief set debug level 
     \param mt handle
