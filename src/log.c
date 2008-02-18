@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: log.c,v 1.54 2007-06-05 06:42:26 adam Exp $
+ * $Id: log.c,v 1.55 2008-02-18 16:44:48 adam Exp $
  */
 
 /**
@@ -294,7 +294,7 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
     if (yaz_file_type != use_file)
         return;
 
-    if (l_fname && *l_fname)
+    if (*l_fname)
     {
         strftime(new_filename, sizeof(new_filename)-1, l_fname, tm);
         if (strcmp(new_filename, cur_filename))
