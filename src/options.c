@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: options.c,v 1.5 2007-01-03 08:42:15 adam Exp $
+ * $Id: options.c,v 1.6 2008-02-19 19:58:40 adam Exp $
  */
 /**
  * \file options.c
@@ -13,7 +13,7 @@
 #endif
 
 #include <stdlib.h>
-
+#include <string.h>
 #include <yaz/options.h>
 
 static int arg_no = 1;
@@ -21,7 +21,9 @@ static int arg_off = 0;
 
 int options (const char *desc, char **argv, int argc, char **arg)
 {
-    int ch, i = 0;
+    const char *opt_buf = 0;
+    int i = 0;
+    int ch = 0;
     
     if (arg_no >= argc)
         return -2;
@@ -38,26 +40,45 @@ int options (const char *desc, char **argv, int argc, char **arg)
             *arg = argv[arg_no++];
             return 0;
         }
-        arg_off++;
+        arg_off++; /* skip - */
     }
-    ch = argv[arg_no][arg_off++];
+    if (argv[arg_no][1] == '-')
+    {   /* long opt */
+        opt_buf = argv[arg_no]+2;
+        arg_off = strlen(argv[arg_no]);
+    }
+    else
+    {   /* single char opt */
+        ch = argv[arg_no][arg_off++];
+    }
     while (desc[i])
     {
         int desc_char = desc[i++];
         int type = 0;
+        while (desc[i] == '{')
+        {
+            int i0 = ++i;
+            while (desc[i] && desc[i] != '}')
+                i++;
+            if (opt_buf && (i - i0) == strlen(opt_buf) &&
+                memcmp(opt_buf, desc+i0, i - i0) == 0)
+                ch = desc_char;
+            if (desc[i])
+                i++;
+        }
         if (desc[i] == ':')
         {       /* string argument */
-            type = desc[i++];
+                type = desc[i++];
         }
         if (desc_char == ch)
-        { /* option with argument */
-            if (type)
+        { 
+            if (type) /* option with argument */
             {
                 if (argv[arg_no][arg_off])
                 {
                     *arg = argv[arg_no]+arg_off;
                     arg_no++;
-                    arg_off =  0;
+                    arg_off = 0;
                 }
                 else
                 {
