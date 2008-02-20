@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1995-2007, Index Data
+ * Copyright (c) 1995-2008, Index Data
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,19 +24,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: options.h,v 1.8 2007-01-03 08:42:14 adam Exp $ */
+/* $Id: options.h,v 1.9 2008-02-20 10:03:42 adam Exp $ */
 
 /**
  * \file options.h
  * \brief Header for command line options parsing utilities
  */
 
-#ifndef OPTIONS_H
-#define OPTIONS_H
+#ifndef YAZ_OPTIONS_H
+#define TAZ_OPTIONS_H
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
 
+/** \brief parser command-line options
+    \arg desc command argument description (allowed options)
+    \arg argv main argv
+    \arg argc main argc
+    \arg arg returned argument (for options that take an argument).
+    \retval 0 non-option arg (e.g. filename).
+    \retval -1 unknown option (error). arg is name of unknown option
+    \retval -2 no more options (end of options)
+    \retval c option char
+    
+    This function is called repeatedly for each option. Both single
+    char options (-x) as well as GNU long options are supported (--long).
+    The description is a sequence specs where each spec is if the form: 
+    [a-zA-Z0-9]({[a-zA-Z0-9]*})+:? . For example: h{help}f{filename}{fname}:
+
+    The first char is what is returned when met (single char option char).
+    The second is zero ore more long option values (synonum for single char)
+    If colon is appended, it means the option takes an argument.
+*/
 YAZ_EXPORT int options (const char *desc, char **argv, int argc, char **arg);
 
 YAZ_END_CDECL

@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: options.c,v 1.6 2008-02-19 19:58:40 adam Exp $
+ * $Id: options.c,v 1.7 2008-02-20 10:03:42 adam Exp $
  */
 /**
  * \file options.c
@@ -67,7 +67,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
                 i++;
         }
         if (desc[i] == ':')
-        {       /* string argument */
+        {       /* option with string argument */
                 type = desc[i++];
         }
         if (desc_char == ch)
