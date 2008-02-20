@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: marcdisp.h,v 1.31 2008-01-30 19:59:02 adam Exp $ */
+/* $Id: marcdisp.h,v 1.32 2008-02-20 10:03:25 adam Exp $ */
 
 /**
  * \file marcdisp.h
@@ -372,7 +372,7 @@ YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbu
 
 /** \brief flushes records
     \param mt handle
-    \param wrbuf WRBUF for output
+    \param wr WRBUF for output
     \retval 0 OK
     \retval -1 ERROR
 */  
