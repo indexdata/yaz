@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: daemon.h,v 1.1 2008-02-18 17:07:05 adam Exp $ */
+/* $Id: daemon.h,v 1.2 2008-02-21 10:15:12 adam Exp $ */
 
 /**
  * \file daemon.h
@@ -43,6 +43,7 @@ YAZ_BEGIN_CDECL
 #define YAZ_DAEMON_DEBUG 2
 #define YAZ_DAEMON_KEEPALIVE 4
 
+YAZ_EXPORT
 int yaz_daemon(const char *progname,
                unsigned int flags,
                void (*work)(void *data), void *data,
