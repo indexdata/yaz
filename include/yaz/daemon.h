@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: daemon.h,v 1.2 2008-02-21 10:15:12 adam Exp $ */
+/* $Id: daemon.h,v 1.3 2008-02-21 10:44:43 adam Exp $ */
 
 /**
  * \file daemon.h
@@ -43,6 +43,26 @@ YAZ_BEGIN_CDECL
 #define YAZ_DAEMON_DEBUG 2
 #define YAZ_DAEMON_KEEPALIVE 4
 
+/** \brief daemon utility.
+    \param progname program name for logging purposes.
+    \param flags flags which is a bit-wise combination of YAZ_DAEMON_..
+    \param work working handler (which may be running in different process)
+    \param data opaque data to be passed to work handler
+    \param pidfile filename with Process-ID (NULL for no file)
+    \param uid effective user ID for handler (NULL for no same as caller)
+    \returns 0 for success, non-zero for failure.
+
+    This function puts calls work handler which is supposed to carry
+    out a daemon service with a possible changed User ID and in a
+    child process.
+
+    Flag YAZ_DAEMON_FORK: Puts the service in the background on Unix.
+
+    Flag YAZ_DAEMON_DEBUG: Puts the service in debug mode (no fork at all).
+
+    Flag YAZ_DAEMON_KEEPALIVE: Repeatedly calls work handler if it makes a 
+    "fatal" error.
+*/
 YAZ_EXPORT
 int yaz_daemon(const char *progname,
                unsigned int flags,
