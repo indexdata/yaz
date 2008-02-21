@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: daemon.c,v 1.1 2008-02-18 17:07:06 adam Exp $
+ * $Id: daemon.c,v 1.2 2008-02-21 10:15:30 adam Exp $
  */
 
 /**
@@ -17,20 +17,32 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#include <assert.h>
+#endif
 #include <stdlib.h>
 #include <signal.h>
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
+
 #include <sys/types.h>
+
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+
 #include <fcntl.h>
+
+#if HAVE_PWD_H
 #include <pwd.h>
+#endif
 
 #include <yaz/daemon.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
 
+#if HAVE_PWD_H
 static void write_pidfile(int pid_fd)
 {
     if (pid_fd != -1)
@@ -148,12 +160,14 @@ static void keepalive(void (*work)(void *data), void *data)
         run++;
     }
 }
+#endif
 
 int yaz_daemon(const char *progname,
                unsigned int flags,
                void (*work)(void *data), void *data,
                const char *pidfile, const char *uid)
 {
+#if HAVE_PWD_H
     int pid_fd = -1;
 
     /* open pidfile .. defer write until in child and after setuid */
@@ -249,6 +263,10 @@ int yaz_daemon(const char *progname,
         work(data);
     }
     return 0;
+#else
+    work(data);
+    return 0;
+#endif
 }
 
 /*

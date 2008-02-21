@@ -1,6 +1,6 @@
 # Copyright (C) 1995-2008, Index Data ApS
 # All rights reserved.
-# $Id: makefile,v 1.144 2008-01-18 11:47:56 adam Exp $
+# $Id: makefile,v 1.145 2008-02-21 10:15:31 adam Exp $
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss
@@ -479,6 +479,7 @@ MISC_OBJS= \
    $(OBJDIR)\http.obj \
    $(OBJDIR)\match_glob.obj \
    $(OBJDIR)\poll.obj \
+   $(OBJDIR)\daemon.obj 
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
