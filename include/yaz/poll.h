@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: poll.h,v 1.4 2007-11-30 11:44:46 adam Exp $ */
+/* $Id: poll.h,v 1.5 2008-02-21 10:15:03 adam Exp $ */
 
 /**
  * \file
@@ -71,6 +71,7 @@ struct yaz_poll_fd {
     This functions calls yaz_poll_poll on systems where poll is
     available and yaz_poll_select where it it unavailable.
 */
+YAZ_EXPORT
 int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec);
 
 #define yaz_poll_add(var,value) var = (enum yaz_poll_mask ) ((int) var | value)
