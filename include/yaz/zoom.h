@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: zoom.h,v 1.48 2007-12-11 13:35:45 adam Exp $ */
+/* $Id: zoom.h,v 1.49 2008-02-21 12:42:13 adam Exp $ */
 
 /**
  * \file zoom.h
@@ -173,7 +173,7 @@ ZOOM_resultset_option_get (ZOOM_resultset r, const char *key);
 ZOOM_API(void)
 ZOOM_resultset_option_set (ZOOM_resultset r, const char *key, const char *val);
 
-/* return size of result set (alias hit count AKA result count) */
+/* return size of result set (alias hit count AKA result count) */
 ZOOM_API(size_t)
 ZOOM_resultset_size (ZOOM_resultset r);
 
