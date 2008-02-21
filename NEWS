@@ -1,3 +1,9 @@
+--- 3.0.26 2008/02/21
+
+Added yaz_daemon (daemon.h).
+
+Fixed bug #2068: pkg-config trouble
+
 Fixed bug #395: ZOOM_record / OPAC record encoding problems.
 
 --- 3.0.24 2008/01/28
