@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: daemon.c,v 1.2 2008-02-21 10:15:30 adam Exp $
+ * $Id: daemon.c,v 1.3 2008-02-21 10:18:15 adam Exp $
  */
 
 /**
@@ -146,17 +146,17 @@ static void keepalive(void (*work)(void *data), void *data)
                 yaz_log(YLOG_WARN, "Received SIG %d from child %ld",
                         WTERMSIG(status), (long) p);
                 cont = 0;
-                }
             }
-            else if (status == 0)
-                cont = 0; /* child exited normally */
-            else
-            {   /* child exited with error */
-                yaz_log(YLOG_LOG, "Exit %d from child %ld", status, (long) p);
-                cont = 0;
-            }
+        }
+        else if (status == 0)
+            cont = 0; /* child exited normally */
+        else
+        {   /* child exited with error */
+            yaz_log(YLOG_LOG, "Exit %d from child %ld", status, (long) p);
+            cont = 0;
+        }
         if (cont) /* respawn slower as we get more errors */
-                sleep(1 + run/5);
+            sleep(1 + run/5);
         run++;
     }
 }
