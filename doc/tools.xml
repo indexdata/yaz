@@ -1,4 +1,4 @@
-<!-- $Id: tools.xml,v 1.65 2008-01-09 21:32:27 adam Exp $ -->
+<!-- $Id: tools.xml,v 1.66 2008-02-28 09:40:42 adam Exp $ -->
  <chapter id="tools"><title>Supporting Tools</title>
   
   <para>
@@ -2103,7 +2103,10 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
         <para>
          Defines the name of the retrieval format. This can be
          any string. For SRU, the value, is equivalent to schema (short-hand);
-         for Z39.50 it's equivalent to simple element set name. 
+         for Z39.50 it's equivalent to simple element set name.
+         For YAZ 3.0.24 and later this name may be specified as a glob
+         expression with operators
+         <literal>*</literal> and <literal>?</literal>.
         </para>
        </listitem>
       </varlistentry>
