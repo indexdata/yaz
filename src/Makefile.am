@@ -1,6 +1,6 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.73 2008-02-18 17:07:06 adam Exp $
+## $Id: Makefile.am,v 1.74 2008-03-05 10:41:45 adam Exp $
 
 YAZ_VERSION_INFO=3:0:0
 
@@ -111,7 +111,6 @@ libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 z-accdes1.c \
 z-accform1.c \
 z-acckrb1.c \
-z-core.c \
 z-diag1.c \
 z-espec1.c \
 z-estask.c \
@@ -131,8 +130,9 @@ zes-psched.c \
 zes-pset.c \
 zes-update0.c \
 $(top_srcdir)/include/yaz/z-accdes1.h \
-$(top_srcdir)/include/yaz/z-core.h: \
-$(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
+$(top_srcdir)/include/yaz/z-core.h: z-core.c
+
+z-core.c: $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/z3950v3.asn
 
 # Date extension
