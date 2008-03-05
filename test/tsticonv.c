@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.33 2007-11-16 08:01:47 adam Exp $
+ * $Id: tsticonv.c,v 1.34 2008-03-05 21:21:22 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -16,6 +16,8 @@
 
 #include <yaz/yaz-util.h>
 #include <yaz/test.h>
+
+#define ESC "\x1b"
 
 static int compare_buffers(char *msg, int no,
                            int expect_len, const char *expect_buf,
@@ -386,16 +388,20 @@ static void tst_marc8_to_utf8(void)
     if (!cd)
         return;
 
+    /* bug #2115 */
+    YAZ_CHECK(tst_convert(cd, ESC "(N" ESC ")Qp" ESC "(B", "\xd0\x9f"));
+
+
     YAZ_CHECK(tst_convert(cd, "Cours de math", 
                           "Cours de math"));
     /* COMBINING ACUTE ACCENT */
     YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
                           "Cours de mathe\xcc\x81"));
 
-
     YAZ_CHECK(tst_convert(cd, "a\xea\x1e", "a\x1e\xcc\x8a"));
 
     YAZ_CHECK(tst_convert(cd, "a\xea", "a"));
+
     yaz_iconv_close(cd);
 }
 

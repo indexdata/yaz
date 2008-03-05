@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.48 2007-10-15 20:45:05 adam Exp $
+ * $Id: siconv.c,v 1.49 2008-03-05 21:21:22 adam Exp $
  */
 /**
  * \file siconv.c
@@ -100,7 +100,8 @@ struct yaz_iconv_struct {
                            char **outbuf, size_t *outbytesleft);
     size_t (*flush_handle)(yaz_iconv_t cd,
                            char **outbuf, size_t *outbytesleft);
-    int marc8_esc_mode;
+    int g0_mode;
+    int g1_mode;
 
     int comb_offset;
     int comb_size;
@@ -1168,22 +1169,36 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
     *no_read = 0;
     while(inbytesleft >= 1 && inp[0] == 27)
     {
+        int ch;
         size_t inbytesleft0 = inbytesleft;
         inp++;
         inbytesleft--;
-        while(inbytesleft > 0 && strchr("(,$!)-", *inp))
+        if (inbytesleft > 0 && *inp == '$')
         {
             inbytesleft--;
             inp++;
         }
-        if (inbytesleft <= 0)
+        if (inbytesleft <= 1)
         {
             *no_read = 0;
             cd->my_errno = YAZ_ICONV_EINVAL;
             return 0;
         }
-        cd->marc8_esc_mode = *inp++;
         inbytesleft--;
+        ch = *inp++;
+        if (inbytesleft > 0 && (ch == '(' || ch == ','))
+        {
+            inbytesleft--;
+            cd->g0_mode = *inp++;
+        }
+        else if (inbytesleft > 0 && (ch == ')' || ch == '-'))
+        {
+            inbytesleft--;
+            cd->g1_mode = *inp++;
+        }
+        else
+            cd->g0_mode = ch;
+
         (*no_read) += inbytesleft0 - inbytesleft;
     }
     if (inbytesleft <= 0)
@@ -1197,9 +1212,10 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
     {
         unsigned long x;
         size_t no_read_sub = 0;
+        int mode = *inp < 128 ? cd->g0_mode : cd->g1_mode;
         *comb = 0;
 
-        switch(cd->marc8_esc_mode)
+        switch(mode)
         {
         case 'B':  /* Basic ASCII */
         case 's':  /* ASCII */
@@ -1896,7 +1912,8 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     if (cd->init_flag)
     {
         cd->my_errno = YAZ_ICONV_UNKNOWN;
-        cd->marc8_esc_mode = 'B';
+        cd->g0_mode = 'B';
+        cd->g1_mode = 'B';
         
         cd->comb_offset = cd->comb_size = 0;
         cd->compose_char = 0;
