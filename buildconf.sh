@@ -6,6 +6,8 @@ aclocal=aclocal
 autoconf=autoconf
 libtoolize=libtoolize
 
+test -d config || mkdir config
+
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
     echo "Using special configuration for FreeBSD ..."
