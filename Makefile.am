@@ -21,7 +21,7 @@ EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS TODO \
 	Doxyfile.in m4/acx_pthread.m4 m4/ac_check_icu.m4
 
 dist-hook:
-	if test -x /usr/bin/cvs2cl -a -d CVS; then cvs2cl ; cp ChangeLog $(distdir); fi
+	if test -x /usr/bin/git -a -d .git; then git log >ChangeLog ; cp ChangeLog $(distdir); fi
 	mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 	mkdir $(distdir)/debian
