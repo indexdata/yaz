@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: tsticonv.c,v 1.34 2008-03-05 21:21:22 adam Exp $
+ * $Id: tsticonv.c,v 1.35 2008-03-12 08:53:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H
@@ -530,6 +530,18 @@ static void tst_utf8_to_marc8(void)
                           "\x1B\x28\x42" "\xE5\xE5" "\x1B\x24\x31" 
                           "\x69\x25\x3F"
                           "\x69\x21\x3C" "\x1B\x28\x42"));
+
+    
+    /** bug #2120 */
+    YAZ_CHECK(tst_convert(cd, 
+                          "\xCE\x94\xCE\xB5\xCF\x84"
+                          "\xCE\xBF\xCF\x81\xCE\xB1"
+                          "\xCE\xBA\xCE\xB7\xCF\x82\x2C",
+
+                          "\x1B\x28\x53\x45\x66\x78\x72\x75"
+                          "\x61\x6D\x6A\x77"
+                          "\x1B\x28\x42\x2C"
+                  ));
  
     {
         char *inbuf0 = "\xe2\x81\xb0";

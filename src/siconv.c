@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2007, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.49 2008-03-05 21:21:22 adam Exp $
+ * $Id: siconv.c,v 1.50 2008-03-12 08:53:28 adam Exp $
  */
 /**
  * \file siconv.c
@@ -1485,12 +1485,6 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         if (x)
         {
             *page_chr = ESC "(B";
-            return x;
-        }
-        x = yaz_marc8r_67_conv(inp, inbytesleft, &no_read_sub, comb);
-        if (x)
-        {
-            *page_chr = ESC "g";
             return x;
         }
         x = yaz_marc8r_62_conv(inp, inbytesleft, &no_read_sub, comb);
