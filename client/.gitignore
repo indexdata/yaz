@@ -1,6 +1,7 @@
 .deps
 .libs
 *.raw
+*.o
 Makefile
 Makefile.in
 yaz-client

@@ -10,3 +10,4 @@ zoom-benchmark
 zoom-ka
 zoom-bug-641
 *.lo
+*.o

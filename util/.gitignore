@@ -6,6 +6,7 @@ libutil.la
 marcdump
 yaziconv
 *.lo
+*.o
 marc8.c
 cclsh
 cql2pqf
