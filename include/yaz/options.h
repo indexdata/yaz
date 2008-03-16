@@ -37,6 +37,7 @@
 
 YAZ_BEGIN_CDECL
 
+
 /** \brief parser command-line options
     \arg desc command argument description (allowed options)
     \arg argv main argv
@@ -57,6 +58,9 @@ YAZ_BEGIN_CDECL
     If colon is appended, it means the option takes an argument.
 */
 YAZ_EXPORT int options (const char *desc, char **argv, int argc, char **arg);
+
+#define YAZ_OPTIONS_ERROR (-1)
+#define YAZ_OPTIONS_EOF (-2)
 
 YAZ_END_CDECL
 
