@@ -38,7 +38,7 @@
 YAZ_BEGIN_CDECL
 
 
-/** \brief parser command-line options
+/** \brief command-line options parsing for main
     \arg desc command argument description (allowed options)
     \arg argv main argv
     \arg argc main argc
