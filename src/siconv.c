@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1995-2007, Index Data ApS
+ * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
  * $Id: siconv.c,v 1.50 2008-03-12 08:53:28 adam Exp $
@@ -1167,41 +1167,48 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
                                          int *comb)
 {
     *no_read = 0;
-    while(inbytesleft >= 1 && inp[0] == 27)
+    while (inbytesleft > 0 && *inp == 27)
     {
-        int ch;
+        int *modep = &cd->g0_mode;
         size_t inbytesleft0 = inbytesleft;
-        inp++;
+
         inbytesleft--;
-        if (inbytesleft > 0 && *inp == '$')
+        inp++;
+        if (inbytesleft == 0)
+            goto incomplete;
+        if (*inp == '$') /* set with multiple bytes */
         {
             inbytesleft--;
             inp++;
         }
-        if (inbytesleft <= 1)
+        if (inbytesleft == 0)
+            goto incomplete;
+        if (*inp == '(' || *inp == ',')  /* G0 */
         {
-            *no_read = 0;
-            cd->my_errno = YAZ_ICONV_EINVAL;
-            return 0;
+            inbytesleft--;
+            inp++;
         }
+        else if (*inp == ')' || *inp == '-') /* G1 */
+        {
+            inbytesleft--;
+            inp++;
+            modep = &cd->g1_mode;
+        }
+        if (inbytesleft == 0)
+            goto incomplete;
+        if (*inp == '!') /* ANSEL is a special case */
+        {
+            inbytesleft--;
+            inp++;
+        }
+        if (inbytesleft == 0)
+            goto incomplete;
+        *modep = *inp++; /* Final character */
         inbytesleft--;
-        ch = *inp++;
-        if (inbytesleft > 0 && (ch == '(' || ch == ','))
-        {
-            inbytesleft--;
-            cd->g0_mode = *inp++;
-        }
-        else if (inbytesleft > 0 && (ch == ')' || ch == '-'))
-        {
-            inbytesleft--;
-            cd->g1_mode = *inp++;
-        }
-        else
-            cd->g0_mode = ch;
 
         (*no_read) += inbytesleft0 - inbytesleft;
     }
-    if (inbytesleft <= 0)
+    if (inbytesleft == 0)
         return 0;
     else if (*inp == ' ')
     {
@@ -1265,6 +1272,10 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
         *no_read += no_read_sub;
         return x;
     }
+incomplete:
+    *no_read = 0;
+    cd->my_errno = YAZ_ICONV_EINVAL;
+    return 0;
 }
 
 static size_t yaz_write_UTF8(yaz_iconv_t cd, unsigned long x,

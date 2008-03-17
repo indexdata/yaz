@@ -89,9 +89,10 @@ static int tst_convert_l(yaz_iconv_t cd, size_t in_len, const char *in_buf,
                            outbuf - outbuf0, outbuf0);
 }
 
-static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
+static int tst_convert_x(yaz_iconv_t cd, const char *buf, const char *cmpbuf,
+                         int expect_error)
 {
-    int ret = 0;
+    int ret = 1;
     WRBUF b = wrbuf_alloc();
     char outbuf[12];
     size_t inbytesleft = strlen(buf);
@@ -108,7 +109,12 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
         {
             int e = yaz_iconv_error(cd);
             if (e != YAZ_ICONV_E2BIG)
+            {
+                if (expect_error != -1)
+                    if (e != expect_error)
+                        ret = 0;
                 break;
+            }
         }
         else
         {
@@ -116,16 +122,20 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
             char *outp = outbuf;
             r = yaz_iconv(cd, 0, 0, &outp, &outbytesleft);
             wrbuf_write(b, outbuf, outp - outbuf);
+            if (expect_error != -1)
+                if (expect_error)
+                    ret = 0;
             break;
         }
     }
     if (wrbuf_len(b) == strlen(cmpbuf) 
         && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
-        ret = 1;
+        ;
     else
     {
         WRBUF w = wrbuf_alloc();
 
+        ret = 0;
         wrbuf_rewind(w);
         wrbuf_puts_escaped(w, buf);
         yaz_log(YLOG_LOG, "input %s", wrbuf_cstr(w));
@@ -145,6 +155,10 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
     return ret;
 }
 
+static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
+{
+    return tst_convert_x(cd, buf, cmpbuf, 0);
+}
 
 /* some test strings in ISO-8859-1 format */
 static const char *iso_8859_1_a[] = {
@@ -388,19 +402,26 @@ static void tst_marc8_to_utf8(void)
     if (!cd)
         return;
 
-    /* bug #2115 */
-    YAZ_CHECK(tst_convert(cd, ESC "(N" ESC ")Qp" ESC "(B", "\xd0\x9f"));
-
-
     YAZ_CHECK(tst_convert(cd, "Cours de math", 
                           "Cours de math"));
     /* COMBINING ACUTE ACCENT */
     YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
                           "Cours de mathe\xcc\x81"));
 
-    YAZ_CHECK(tst_convert(cd, "a\xea\x1e", "a\x1e\xcc\x8a"));
+    YAZ_CHECK(tst_convert(cd, "\xea" "a", "a\xcc\x8a"));
+    YAZ_CHECK(tst_convert(cd, "a" "\xea" "\x1e", "a" "\x1e\xcc\x8a"));
+    YAZ_CHECK(tst_convert(cd, "a" "\xea" "p", "a" "p\xcc\x8a"));
 
-    YAZ_CHECK(tst_convert(cd, "a\xea", "a"));
+    YAZ_CHECK(tst_convert_x(cd, "a\xea", "a", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "p", "\xcc\x8a")); /* note: missing p */
+    yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
+
+    /* bug #2115 */
+    YAZ_CHECK(tst_convert(cd, ESC "(N" ESC ")Qp" ESC "(B", "\xd0\x9f"));
+
+    YAZ_CHECK(tst_convert_x(cd, ESC , "", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert_x(cd, ESC "(", "", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert_x(cd, ESC "(B", "", 0));
 
     yaz_iconv_close(cd);
 }
