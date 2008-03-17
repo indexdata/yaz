@@ -433,6 +433,10 @@ MISC_OBJS= \
    $(OBJDIR)\xmalloc.obj \
    $(OBJDIR)\matchstr.obj \
    $(OBJDIR)\siconv.obj \
+   $(OBJDIR)\iso5428.obj \
+   $(OBJDIR)\utf8.obj \
+   $(OBJDIR)\ucs4.obj \
+   $(OBJDIR)\advancegreek.obj \
    $(OBJDIR)\snprintf.obj \
    $(OBJDIR)\marc8.obj \
    $(OBJDIR)\marc8r.obj \
