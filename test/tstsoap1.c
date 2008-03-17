@@ -19,7 +19,7 @@ void tst(void)
     xmlDocPtr doc;
     xmlNodePtr top;
 #if 0
-    const char *val = "jordbær"; /* makes xmlDocDumpMemory hang .. */
+    const char *val = "jordb" "\xe6" "r"; /* makes xmlDocDumpMemory hang .. */
 #else
     const char *val = "jordbaer"; /* OK */
 #endif

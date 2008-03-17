@@ -31,7 +31,7 @@ static void tst_srw(void)
     YAZ_CHECK(sr);
     YAZ_CHECK(p);
 #if 0
-    sr->u.request->query.cql = "jordbær"; 
+    sr->u.request->query.cql = "jordb" "\xe6" "r"; 
 #else
     sr->u.request->query.cql = "jordbaer"; 
 #endif
