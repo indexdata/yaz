@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  *
  * $Id: unix.c,v 1.20 2007-10-09 06:00:56 adam Exp $
- * UNIX socket COMSTACK. By Morten Bøgeskov.
+ * UNIX socket COMSTACK. By Morten Bogeskov.
  */
 /**
  * \file unix.c

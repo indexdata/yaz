@@ -72,7 +72,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
   wrbuf.c oid_db.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
-  siconv.c \
+  siconv.c utf8.c ucs4.c iso5428.c advancegreek.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
