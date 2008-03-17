@@ -1925,16 +1925,30 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         if (ext->which == Z_External_itemOrder)
         {
             Z_IOTaskPackage *otp = ext->u.itemOrder->u.taskPackage;
-            if (otp && otp->targetPart && otp->targetPart->itemRequest)
+
+            if (otp && otp->targetPart ) 
             {
-                Z_External *ext = otp->targetPart->itemRequest;
-                if (ext->which == Z_External_octet)
+                if (otp->targetPart->itemRequest) 
                 {
-                    Odr_oct *doc = ext->u.octet_aligned;
-                    printf("Got itemRequest doc %.*s\n",
-                           doc->len, doc->buf);
+                    Z_External *ext = otp->targetPart->itemRequest;                    
+                    if (ext->which == Z_External_octet)
+                    {
+                        Odr_oct *doc = ext->u.octet_aligned;
+                        printf("Got itemRequest doc %.*s\n",
+                               doc->len, doc->buf);
+                    }
                 }
-            }
+                else if (otp->targetPart->statusOrErrorReport) 
+                {
+                    Z_External *ext = otp->targetPart->statusOrErrorReport;
+                    if (ext->which == Z_External_octet)
+                    {
+                        Odr_oct *doc = ext->u.octet_aligned;
+                        printf("Got Status or Error Report doc %.*s\n",
+                               doc->len, doc->buf);
+                    }
+                }
+            } 
         }
     }
     if (res->taskPackage && res->taskPackage->which == Z_External_octet)
