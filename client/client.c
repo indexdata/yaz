@@ -2055,7 +2055,9 @@ static Z_External *create_external_ILL_APDU(int which)
 }
 
 
-static Z_External *create_ItemOrderExternal(const char *type, int itemno, const char* document_name)
+static Z_External *create_ItemOrderExternal(const char *type, int itemno,
+                                            const char *xml_buf,
+                                            int xml_len)
 {
     Z_External *r = (Z_External *) odr_malloc(out, sizeof(Z_External));
     r->direct_reference = odr_oiddup(out, yaz_oid_extserv_item_order);
@@ -2106,29 +2108,18 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno, const 
     }
     else if (!strcmp(type, "xml") || !strcmp(type, "3"))
     {
-        printf("xml found \n");
-                    
-        if( !document_name ) 
+        printf("using XML ILL-request\n");
+
+        if (!xml_buf)
         {
-            printf("no ducoument added \n");
+            printf("no docoument added\n");
             r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
-            return r;
-        };
-
-        char *xml_buf = NULL;
-        int xml_len = 0;
-
-        printf("reading from -%s-\n", document_name );
-        if (parse_cmd_doc(&document_name, out, &xml_buf, &xml_len) == 0 )
+        }
+        else
         {
-            printf("Unable to read document\n");
-            r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
-            return r;
-        };
-
-        r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
-            z_ext_record_oid(out, yaz_oid_recsyn_xml, xml_buf, xml_len);
-            
+            r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
+                z_ext_record_oid(out, yaz_oid_recsyn_xml, xml_buf, xml_len);
+        }
     }
     else
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 0;
@@ -2136,7 +2127,8 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno, const 
     return r;
 }
 
-static int send_itemorder(const char *type, int itemno, const char* document_name)
+static int send_itemorder(const char *type, int itemno,
+                          const char *xml_buf, int xml_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2146,8 +2138,8 @@ static int send_itemorder(const char *type, int itemno, const char* document_nam
     req->packageType = odr_oiddup(out, yaz_oid_extserv_item_order);
     req->packageName = esPackageName;
 
-    req->taskSpecificParameters = create_ItemOrderExternal(type, itemno, document_name);
-
+    req->taskSpecificParameters = create_ItemOrderExternal(type, itemno,
+                                                           xml_buf, xml_len);
     send_apdu(apdu);
     return 0;
 }
@@ -2472,20 +2464,19 @@ static int cmd_itemorder(const char *arg)
 {
     char type[12];
     int itemno;
-    const char* filename = arg;
+    char *xml_buf = 0;
+    int xml_len = 0;
+    int no_read = 0;
    
     if (only_z3950())
         return 1;
-    if (sscanf (arg, "%10s %d", type, &itemno) != 2)
+    if (sscanf(arg, "%10s %d%n", type, &itemno, &no_read) < 2)
         return 0;
+    arg += no_read;
+    parse_cmd_doc(&arg, out, &xml_buf, &xml_len);
 
-
-    filename+=strlen(type) + 1; 
-    while( *filename && *filename !=' ' ) filename++;
-
-    printf("Item order request\n");
     fflush(stdout);
-    send_itemorder(type, itemno, filename);
+    send_itemorder(type, itemno, xml_buf, xml_len);
     return 2;
 }
 
