@@ -111,7 +111,7 @@ static int setnumber = -1;              /* current result set number */
 static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
-static Z_ElementSetNames *elementSetNames = 0; 
+static Z_ElementSetNames *elementSetNames = 0;
 static int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 #define RECORDSYNTAX_MAX 20
@@ -186,35 +186,35 @@ static char *command_generator(const char *text, int state);
 int cmd_register_tab(const char* arg);
 int cmd_querycharset(const char *arg);
 
-static void close_session (void);
+static void close_session(void);
 
 ODR getODROutputStream(void)
 {
     return out;
 }
 
-const char* query_type_as_string(QueryType q) 
+const char* query_type_as_string(QueryType q)
 {
-    switch (q) { 
+    switch (q) {
     case QueryType_Prefix: return "prefix (RPN sent to server)";
     case QueryType_CCL: return "CCL (CCL sent to server) ";
     case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
     case QueryType_CQL: return "CQL (CQL sent to server)";
     case QueryType_CQL2RPN: return "CQL -> RPN (RPN sent to server)";
-    default: 
+    default:
         return "unknown Query type internal yaz-client error";
     }
 }
 
-static void do_hex_dump(const char* buf, int len) 
+static void do_hex_dump(const char* buf, int len)
 {
     if (hex_dump)
     {
         int i,x;
-        for( i=0; i<len ; i=i+16 ) 
-        {                       
+        for (i = 0; i < len ; i = i+16 )
+        {
             printf(" %4.4d ",i);
-            for(x=0 ; i+x<len && x<16; ++x) 
+            for(x=0 ; i+x<len && x<16; ++x)
             {
                 printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
             }
@@ -228,37 +228,37 @@ static void do_hex_dump(const char* buf, int len)
         {
             char fname[1024];
             FILE *of;
-            sprintf (fname, "%s.%03d.raw", dump_file_prefix, no);
+            sprintf(fname, "%s.%03d.raw", dump_file_prefix, no);
             of = fopen(fname, "wb");
-            
-            fwrite (buf, 1, len, of);
-            
+
+            fwrite(buf, 1, len, of);
+
             fclose(of);
         }
     }
 }
 
-void add_otherInfos(Z_APDU *a) 
+void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
     int i;
-                
+
     yaz_oi_APDU(a, &oi);
-    for(i=0; i<maxOtherInfosSupported; ++i) 
+    for(i=0; i<maxOtherInfosSupported; ++i)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
                                      1, extraOtherInfos[i].value);
-    }   
+    }
 }
 
 int send_apdu(Z_APDU *a)
 {
     char *buf;
     int len;
-    
+
     add_otherInfos(a);
-    
+
     if (apdu_file)
     {
         z_APDU(print, &a, 0, 0);
@@ -289,33 +289,33 @@ static void print_stringn(const unsigned char *buf, size_t len)
 {
     size_t i;
     for (i = 0; i<len; i++)
-        if ((buf[i] <= 126 && buf[i] >= 32) || strchr ("\n\r\t\f", buf[i]))
-            printf ("%c", buf[i]);
+        if ((buf[i] <= 126 && buf[i] >= 32) || strchr("\n\r\t\f", buf[i]))
+            printf("%c", buf[i]);
         else
-            printf ("\\X%02X", buf[i]);
+            printf("\\X%02X", buf[i]);
 }
 
-static void print_refid (Z_ReferenceId *id)
+static void print_refid(Z_ReferenceId *id)
 {
     if (id)
     {
-        printf ("Reference Id: ");
-        print_stringn (id->buf, id->len);
-        printf ("\n");
+        printf("Reference Id: ");
+        print_stringn(id->buf, id->len);
+        printf("\n");
     }
 }
 
-static Z_ReferenceId *set_refid (ODR out)
+static Z_ReferenceId *set_refid(ODR out)
 {
     Z_ReferenceId *id;
     if (!refid)
         return 0;
-    id = (Z_ReferenceId *) odr_malloc (out, sizeof(*id));
+    id = (Z_ReferenceId *) odr_malloc(out, sizeof(*id));
     id->size = id->len = strlen(refid);
-    id->buf = (unsigned char *) odr_malloc (out, id->len);
-    memcpy (id->buf, refid, id->len);
+    id->buf = (unsigned char *) odr_malloc(out, id->len);
+    memcpy(id->buf, refid, id->len);
     return id;
-}   
+}
 
 /* INIT SERVICE ------------------------------- */
 
@@ -336,28 +336,28 @@ static void send_initRequest(const char* type_and_host)
 
     req->idAuthentication = auth;
 
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
 
     if (yazProxy && type_and_host)
     {
         yaz_oi_set_string_oid(&req->otherInfo, out, yaz_oid_userinfo_proxy,
                               1, type_and_host);
     }
-    
+
     if (negotiationCharset || yazLang) {
         Z_OtherInformation **p;
         Z_OtherInformationUnit *p0;
-        
+
         yaz_oi_APDU(apdu, &p);
-        
+
         if ((p0=yaz_oi_update(p, out, NULL, 0, 0)))
         {
             ODR_MASK_SET(req->options, Z_Options_negotiationModel);
-            
+
             p0->which = Z_OtherInfo_externallyDefinedInfo;
             p0->information.externallyDefinedInfo =
-                yaz_set_proposal_charneg_list(out, ",", 
-                                              negotiationCharset, 
+                yaz_set_proposal_charneg_list(out, ",",
+                                              negotiationCharset,
                                               yazLang,
                                               negotiationCharsetRecords);
         }
@@ -366,9 +366,9 @@ static void send_initRequest(const char* type_and_host)
     {
         Z_OtherInformation **p;
         Z_OtherInformationUnit *p0;
-        
+
         yaz_oi_APDU(apdu, &p);
-        
+
         if ((p0=yaz_oi_update(p, out, NULL, 0, 0)))
         {
             p0->which = Z_OtherInfo_externallyDefinedInfo;
@@ -388,7 +388,7 @@ static void render_diag(Z_DiagnosticFormat *diag);
 
 static void pr_opt(const char *opt, void *clientData)
 {
-    printf (" %s", opt);
+    printf(" %s", opt);
 }
 
 static int process_initResponse(Z_InitResponse *res)
@@ -429,7 +429,7 @@ static int process_initResponse(Z_InitResponse *res)
                 printf("'%.*s'\n", uif->u.octet_aligned->len,
                        uif->u.octet_aligned->buf);
             }
-            else if (uif->which == Z_External_single) 
+            else if (uif->which == Z_External_single)
             {
                 Odr_any *sat = uif->u.single_ASN1_type;
                 if (!oid_oidcmp(uif->direct_reference,
@@ -439,11 +439,11 @@ static int process_initResponse(Z_InitResponse *res)
                     ODR decode = odr_createmem(ODR_DECODE);
                     odr_setbuf(decode, (char *) sat->buf, sat->len, 0);
                     if (!z_OCLC_UserInformation(decode, &oclc_ui, 0, 0))
-                        printf ("Bad OCLC UserInformation:\n");
+                        printf("Bad OCLC UserInformation:\n");
                     else
-                        printf ("OCLC UserInformation:\n");
+                        printf("OCLC UserInformation:\n");
                     if (!z_OCLC_UserInformation(print, &oclc_ui, 0, 0))
-                        printf ("Bad OCLC UserInformation spec\n");
+                        printf("Bad OCLC UserInformation spec\n");
                     odr_destroy(decode);
                 }
                 else
@@ -453,26 +453,26 @@ static int process_initResponse(Z_InitResponse *res)
                            sat->len, sat->buf);
                 }
             }
-            odr_reset (print);
+            odr_reset(print);
         }
     }
-    printf ("Options:");
+    printf("Options:");
     yaz_init_opt_decode(res->options, pr_opt, 0);
-    printf ("\n");
+    printf("\n");
 
     if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
         setnumber = 0;
-    
+
     if (ODR_MASK_GET(res->options, Z_Options_negotiationModel)) {
-    
+
         Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(res->otherInfo);
 
-        if (p) 
+        if (p)
         {
             char *charset=NULL, *lang=NULL;
             int selected;
-            
+
             yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
 
@@ -495,7 +495,7 @@ static int process_initResponse(Z_InitResponse *res)
             }
         }
     }
-    fflush (stdout);
+    fflush(stdout);
     return 0;
 }
 
@@ -513,15 +513,15 @@ static void render_initUserInfo(Z_OtherInformation *ui1) {
             unit->information.externallyDefinedInfo->which ==
             Z_External_diag1) {
             render_diag(unit->information.externallyDefinedInfo->u.diag1);
-        } 
+        }
         else if (unit->which != Z_OtherInfo_externallyDefinedInfo)
         {
             printf("unsupported otherInfo unit->which = %d\n", unit->which);
         }
-        else 
+        else
         {
             printf("unsupported otherInfo unit external %d\n",
-                   unit->information.externallyDefinedInfo ? 
+                   unit->information.externallyDefinedInfo ?
                    unit->information.externallyDefinedInfo->which : -2);
         }
     }
@@ -568,7 +568,7 @@ static int set_base(const char *arg)
     const char *cp;
 
     for (i = 0; i<num_databaseNames; i++)
-        xfree (databaseNames[i]);
+        xfree(databaseNames[i]);
     num_databaseNames = 0;
     while (1)
     {
@@ -577,8 +577,8 @@ static int set_base(const char *arg)
             cp = arg + strlen(arg);
         if (cp - arg < 1)
             break;
-        databaseNames[num_databaseNames] = (char *)xmalloc (1 + cp - arg);
-        memcpy (databaseNames[num_databaseNames], arg, cp - arg);
+        databaseNames[num_databaseNames] = (char *)xmalloc(1 + cp - arg);
+        memcpy(databaseNames[num_databaseNames], arg, cp - arg);
         databaseNames[num_databaseNames][cp - arg] = '\0';
 
         for (cp1 = databaseNames[num_databaseNames]; *cp1 ; cp1++)
@@ -613,10 +613,10 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
         FILE *inf;
         const char *fname;
         const char *arg_start = ++(*arg);
-    
+
         while (**arg != '\0' && **arg != ' ')
             (*arg)++;
-            
+
         fname = odr_strdupn(out, arg_start, *arg - arg_start);
 
         inf = fopen(fname, "rb");
@@ -681,7 +681,7 @@ static int cmd_base(const char *arg)
 
 void cmd_open_remember_last_open_command(const char* arg, char* new_open_command)
 {
-    if(last_open_command != arg) 
+    if(last_open_command != arg)
     {
         if(last_open_command) xfree(last_open_command);
         last_open_command = xstrdup(new_open_command);
@@ -698,12 +698,12 @@ int session_connect(const char *arg)
 #endif
     if (conn)
     {
-        cs_close (conn);
+        cs_close(conn);
         conn = 0;
-    }   
+    }
     if (session_mem)
     {
-        nmem_destroy (session_mem);
+        nmem_destroy(session_mem);
         session_mem = NULL;
         session_initResponse = 0;
     }
@@ -720,14 +720,14 @@ int session_connect(const char *arg)
         conn = cs_create_host(arg, 1, &add);
     if (!conn)
     {
-        printf ("Could not resolve address %s\n", arg);
+        printf("Could not resolve address %s\n", arg);
         return 0;
     }
 #if YAZ_HAVE_XML2
 #else
     if (conn->protocol == PROTO_HTTP)
     {
-        printf ("SRW/HTTP not enabled in this YAZ\n");
+        printf("SRW/HTTP not enabled in this YAZ\n");
         cs_close(conn);
         conn = 0;
         return 0;
@@ -742,7 +742,7 @@ int session_connect(const char *arg)
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-        printf ("error = %s\n", cs_strerror(conn));
+        printf("error = %s\n", cs_strerror(conn));
         cs_close(conn);
         conn = 0;
         return 0;
@@ -763,7 +763,7 @@ int session_connect(const char *arg)
             PEM_write_bio_X509(bio, server_cert);
             pem_len = BIO_get_mem_data(bio, &pem_buf);
             fwrite(pem_buf, pem_len, 1, stdout);
-        
+
             /* print all info on screen .. */
             X509_print_fp(stdout, server_cert);
             BIO_free(bio);
@@ -787,7 +787,7 @@ int cmd_open(const char *arg)
     int r;
     if (arg)
     {
-        strncpy (cur_host, arg, sizeof(cur_host)-1);
+        strncpy(cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
     r = session_connect(cur_host);
@@ -799,17 +799,17 @@ int cmd_open(const char *arg)
 void try_reconnect(void)
 {
     char* open_command;
-        
+
     if(!( auto_reconnect && last_open_command) ) return ;
 
-    open_command = (char *) xmalloc (strlen(last_open_command)+6);
-    strcpy (open_command, "open ");
-        
-    strcat (open_command, last_open_command);
+    open_command = (char *) xmalloc(strlen(last_open_command)+6);
+    strcpy(open_command, "open ");
+
+    strcat(open_command, last_open_command);
 
     process_cmd_line(open_command);
-        
-    xfree(open_command);                                
+
+    xfree(open_command);
 }
 
 int cmd_authentication(const char *arg)
@@ -825,7 +825,7 @@ int cmd_authentication(const char *arg)
         auth = 0;
         return 1;
     }
-    r = sscanf (arg, "%39s %39s %39s", user, group, pass);
+    r = sscanf(arg, "%39s %39s %39s", user, group, pass);
     if (r == 0)
     {
         printf("Authentication set to null\n");
@@ -873,16 +873,16 @@ static void display_record(Z_External *r);
 static void print_record(const unsigned char *buf, size_t len)
 {
     size_t i = len;
-    print_stringn (buf, len);
+    print_stringn(buf, len);
     /* add newline if not already added ... */
     if (i <= 0 || buf[i-1] != '\n')
-        printf ("\n");
+        printf("\n");
 }
 
 static void display_record(Z_External *r)
 {
     const Odr_oid *oid = r->direct_reference;
-    
+
     record_last = r;
     /*
      * Tell the user what we got.
@@ -918,7 +918,7 @@ static void display_record(Z_External *r)
                 odr_dumpBER(stdout, (char*)r->u.octet_aligned->buf,
                             r->u.octet_aligned->len);
                 fprintf(stdout, "---------\n");
-                
+
                 /* note just ignores the error ant print the bytes form the octet_aligned later */
             } else {
                 /*
@@ -935,7 +935,7 @@ static void display_record(Z_External *r)
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
         if (marc_file)
-            fwrite (r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, marc_file);
+            fwrite(r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, marc_file);
     }
     else if (oid && r->which == Z_External_octet)
     {
@@ -979,30 +979,30 @@ static void display_record(Z_External *r)
                 else if (marcCharset)
                     from = marcCharset;
                 if (outputCharset && from)
-                {   
+                {
                     cd = yaz_iconv_open(outputCharset, from);
-                    printf ("convert from %s to %s", from, 
+                    printf("convert from %s to %s", from,
                             outputCharset);
                     if (!cd)
-                        printf (" unsupported\n");
+                        printf(" unsupported\n");
                     else
                     {
                         yaz_marc_iconv(mt, cd);
-                        printf ("\n");
+                        printf("\n");
                     }
                 }
-                    
+
                 if (yaz_marc_decode_buf(mt, octet_buf, r->u.octet_aligned->len,
                                         &result, &rlen)> 0)
                 {
-                    fwrite (result, rlen, 1, stdout);
+                    fwrite(result, rlen, 1, stdout);
                 }
                 else
                 {
-                    printf ("bad MARC. Dumping as it is:\n");
+                    printf("bad MARC. Dumping as it is:\n");
                     print_record((const unsigned char*) octet_buf,
                                   r->u.octet_aligned->len);
-                }       
+                }
                 yaz_marc_destroy(mt);
                 if (cd)
                     yaz_iconv_close(cd);
@@ -1014,7 +1014,7 @@ static void display_record(Z_External *r)
             }
         }
         if (marc_file)
-            fwrite (octet_buf, 1, r->u.octet_aligned->len, marc_file);
+            fwrite(octet_buf, 1, r->u.octet_aligned->len, marc_file);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {
@@ -1025,7 +1025,7 @@ static void display_record(Z_External *r)
         }
         print_record(r->u.sutrs->buf, r->u.sutrs->len);
         if (marc_file)
-            fwrite (r->u.sutrs->buf, 1, r->u.sutrs->len, marc_file);
+            fwrite(r->u.sutrs->buf, 1, r->u.sutrs->len, marc_file);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
@@ -1037,7 +1037,7 @@ static void display_record(Z_External *r)
         }
         w = wrbuf_alloc();
         yaz_display_grs1(w, r->u.grs1, 0);
-        puts (wrbuf_cstr(w));
+        puts(wrbuf_cstr(w));
         wrbuf_destroy(w);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_opac))
@@ -1050,7 +1050,7 @@ static void display_record(Z_External *r)
             Z_HoldingsRecord *h = r->u.opac->holdingsData[i];
             if (h->which == Z_HoldingsRecord_marcHoldingsRecord)
             {
-                printf ("MARC holdings %d\n", i);
+                printf("MARC holdings %d\n", i);
                 display_record(h->u.marcHoldingsRecord);
             }
             else if (h->which == Z_HoldingsRecord_holdingsAndCirc)
@@ -1059,90 +1059,90 @@ static void display_record(Z_External *r)
 
                 Z_HoldingsAndCircData *data = h->u.holdingsAndCirc;
 
-                printf ("Data holdings %d\n", i);
+                printf("Data holdings %d\n", i);
                 if (data->typeOfRecord)
-                    printf ("typeOfRecord: %s\n", data->typeOfRecord);
+                    printf("typeOfRecord: %s\n", data->typeOfRecord);
                 if (data->encodingLevel)
-                    printf ("encodingLevel: %s\n", data->encodingLevel);
+                    printf("encodingLevel: %s\n", data->encodingLevel);
                 if (data->receiptAcqStatus)
-                    printf ("receiptAcqStatus: %s\n", data->receiptAcqStatus);
+                    printf("receiptAcqStatus: %s\n", data->receiptAcqStatus);
                 if (data->generalRetention)
-                    printf ("generalRetention: %s\n", data->generalRetention);
+                    printf("generalRetention: %s\n", data->generalRetention);
                 if (data->completeness)
-                    printf ("completeness: %s\n", data->completeness);
+                    printf("completeness: %s\n", data->completeness);
                 if (data->dateOfReport)
-                    printf ("dateOfReport: %s\n", data->dateOfReport);
+                    printf("dateOfReport: %s\n", data->dateOfReport);
                 if (data->nucCode)
-                    printf ("nucCode: %s\n", data->nucCode);
+                    printf("nucCode: %s\n", data->nucCode);
                 if (data->localLocation)
-                    printf ("localLocation: %s\n", data->localLocation);
+                    printf("localLocation: %s\n", data->localLocation);
                 if (data->shelvingLocation)
-                    printf ("shelvingLocation: %s\n", data->shelvingLocation);
+                    printf("shelvingLocation: %s\n", data->shelvingLocation);
                 if (data->callNumber)
-                    printf ("callNumber: %s\n", data->callNumber);
+                    printf("callNumber: %s\n", data->callNumber);
                 if (data->shelvingData)
-                    printf ("shelvingData: %s\n", data->shelvingData);
+                    printf("shelvingData: %s\n", data->shelvingData);
                 if (data->copyNumber)
-                    printf ("copyNumber: %s\n", data->copyNumber);
+                    printf("copyNumber: %s\n", data->copyNumber);
                 if (data->publicNote)
-                    printf ("publicNote: %s\n", data->publicNote);
+                    printf("publicNote: %s\n", data->publicNote);
                 if (data->reproductionNote)
-                    printf ("reproductionNote: %s\n", data->reproductionNote);
+                    printf("reproductionNote: %s\n", data->reproductionNote);
                 if (data->termsUseRepro)
-                    printf ("termsUseRepro: %s\n", data->termsUseRepro);
+                    printf("termsUseRepro: %s\n", data->termsUseRepro);
                 if (data->enumAndChron)
-                    printf ("enumAndChron: %s\n", data->enumAndChron);
+                    printf("enumAndChron: %s\n", data->enumAndChron);
                 for (j = 0; j<data->num_volumes; j++)
                 {
-                    printf ("volume %d\n", j);
+                    printf("volume %d\n", j);
                     if (data->volumes[j]->enumeration)
-                        printf (" enumeration: %s\n",
+                        printf(" enumeration: %s\n",
                                 data->volumes[j]->enumeration);
                     if (data->volumes[j]->chronology)
-                        printf (" chronology: %s\n",
+                        printf(" chronology: %s\n",
                                 data->volumes[j]->chronology);
                     if (data->volumes[j]->enumAndChron)
-                        printf (" enumAndChron: %s\n",
+                        printf(" enumAndChron: %s\n",
                                 data->volumes[j]->enumAndChron);
                 }
                 for (j = 0; j<data->num_circulationData; j++)
                 {
-                    printf ("circulation %d\n", j);
+                    printf("circulation %d\n", j);
                     if (data->circulationData[j]->availableNow)
-                        printf (" availableNow: %d\n",
+                        printf(" availableNow: %d\n",
                                 *data->circulationData[j]->availableNow);
                     if (data->circulationData[j]->availablityDate)
-                        printf (" availabiltyDate: %s\n",
+                        printf(" availabiltyDate: %s\n",
                                 data->circulationData[j]->availablityDate);
                     if (data->circulationData[j]->availableThru)
-                        printf (" availableThru: %s\n",
+                        printf(" availableThru: %s\n",
                                 data->circulationData[j]->availableThru);
                     if (data->circulationData[j]->restrictions)
-                        printf (" restrictions: %s\n",
+                        printf(" restrictions: %s\n",
                                 data->circulationData[j]->restrictions);
                     if (data->circulationData[j]->itemId)
-                        printf (" itemId: %s\n",
+                        printf(" itemId: %s\n",
                                 data->circulationData[j]->itemId);
                     if (data->circulationData[j]->renewable)
-                        printf (" renewable: %d\n",
+                        printf(" renewable: %d\n",
                                 *data->circulationData[j]->renewable);
                     if (data->circulationData[j]->onHold)
-                        printf (" onHold: %d\n",
+                        printf(" onHold: %d\n",
                                 *data->circulationData[j]->onHold);
                     if (data->circulationData[j]->enumAndChron)
-                        printf (" enumAndChron: %s\n",
+                        printf(" enumAndChron: %s\n",
                                 data->circulationData[j]->enumAndChron);
                     if (data->circulationData[j]->midspine)
-                        printf (" midspine: %s\n",
+                        printf(" midspine: %s\n",
                                 data->circulationData[j]->midspine);
                     if (data->circulationData[j]->temporaryLocation)
-                        printf (" temporaryLocation: %s\n",
+                        printf(" temporaryLocation: %s\n",
                                 data->circulationData[j]->temporaryLocation);
                 }
             }
         }
     }
-    else 
+    else
     {
         printf("Unknown record representation.\n");
         if (!z_External(print, &r, 0, 0))
@@ -1186,10 +1186,10 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
-            printf (" -- v2 addinfo '%s'\n", r->u.v2Addinfo);
+            printf(" -- v2 addinfo '%s'\n", r->u.v2Addinfo);
             break;
         case Z_DefaultDiagFormat_v3Addinfo:
-            printf (" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
+            printf(" -- v3 addinfo '%s'\n", r->u.v3Addinfo);
             break;
         }
     }
@@ -1215,12 +1215,12 @@ static void display_records(Z_Records *p)
         Z_DiagRec dr, *dr_p = &dr;
         dr.which = Z_DiagRec_defaultFormat;
         dr.u.defaultFormat = p->u.nonSurrogateDiagnostic;
-        display_diagrecs (&dr_p, 1);
+        display_diagrecs(&dr_p, 1);
     }
     else if (p->which == Z_Records_multipleNSD)
-        display_diagrecs (p->u.multipleNonSurDiagnostics->diagRecs,
+        display_diagrecs(p->u.multipleNonSurDiagnostics->diagRecs,
                           p->u.multipleNonSurDiagnostics->num_diagRecs);
-    else 
+    else
     {
         printf("Records: %d\n", p->u.databaseOrSurDiagnostics->num_records);
         for (i = 0; i < p->u.databaseOrSurDiagnostics->num_records; i++)
@@ -1236,20 +1236,20 @@ static int send_deleteResultSetRequest(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_deleteResultSetRequest);
     Z_DeleteResultSetRequest *req = apdu->u.deleteResultSetRequest;
 
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
 
     req->num_resultSetList =
-        sscanf (arg, "%30s %30s %30s %30s %30s %30s %30s %30s",
-                names[0], names[1], names[2], names[3],
-                names[4], names[5], names[6], names[7]);
+        sscanf(arg, "%30s %30s %30s %30s %30s %30s %30s %30s",
+               names[0], names[1], names[2], names[3],
+               names[4], names[5], names[6], names[7]);
 
     req->deleteFunction = (int *)
-        odr_malloc (out, sizeof(*req->deleteFunction));
+        odr_malloc(out, sizeof(*req->deleteFunction));
     if (req->num_resultSetList > 0)
     {
         *req->deleteFunction = Z_DeleteResultSetRequest_list;
         req->resultSetList = (char **)
-            odr_malloc (out, sizeof(*req->resultSetList)*
+            odr_malloc(out, sizeof(*req->resultSetList)*
                         req->num_resultSetList);
         for (i = 0; i<req->num_resultSetList; i++)
             req->resultSetList[i] = names[i];
@@ -1259,7 +1259,7 @@ static int send_deleteResultSetRequest(const char *arg)
         *req->deleteFunction = Z_DeleteResultSetRequest_all;
         req->resultSetList = 0;
     }
-    
+
     send_apdu(apdu);
     printf("Sent deleteResultSetRequest.\n");
     return 2;
@@ -1301,11 +1301,11 @@ static int send_srw(Z_SRW_PDU *sr)
         if (apdu_file)
         {
             if (!z_GDU(print, &gdu, 0, 0))
-                printf ("Failed to print outgoing SRU package\n");
+                printf("Failed to print outgoing SRU package\n");
             odr_reset(print);
         }
         buf_out = odr_getbuf(out, &len_out, 0);
-        
+
         /* we don't odr_reset(out), since we may need the buffer again */
 
         do_hex_dump(buf_out, len_out);
@@ -1338,7 +1338,7 @@ static char *encode_SRW_term(ODR o, const char *q)
     if (wrbuf_len(w))
         res = odr_strdup(o, wrbuf_cstr(w));
     else
-        res = odr_strdup(o, q);    
+        res = odr_strdup(o, q);
     yaz_iconv_close(cd);
     wrbuf_destroy(w);
     return res;
@@ -1348,7 +1348,7 @@ static char *encode_SRW_term(ODR o, const char *q)
 static int send_SRW_scanRequest(const char *arg, int pos, int num)
 {
     Z_SRW_PDU *sr = 0;
-    
+
     /* regular requestse .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_scan_request, sru_version);
 
@@ -1363,7 +1363,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
         sr->u.scan_request->scanClause.pqf = encode_SRW_term(out, arg);
         break;
     default:
-        printf ("Only CQL and PQF supported in SRW\n");
+        printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
     sr->u.scan_request->responsePosition = odr_intdup(out, pos);
@@ -1374,7 +1374,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
 static int send_SRW_searchRequest(const char *arg)
 {
     Z_SRW_PDU *sr = 0;
-    
+
     if (!srw_sr)
     {
         assert(srw_sr_odr_out == 0);
@@ -1387,7 +1387,7 @@ static int send_SRW_searchRequest(const char *arg)
     /* save this for later .. when fetching individual records */
     srw_sr =  yaz_srw_get_pdu(srw_sr_odr_out, Z_SRW_searchRetrieve_request,
                               sru_version);
-    
+
     /* regular request .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_searchRetrieve_request, sru_version);
 
@@ -1408,7 +1408,7 @@ static int send_SRW_searchRequest(const char *arg)
         sr->u.request->query.pqf = encode_SRW_term(srw_sr_odr_out, arg);
         break;
     default:
-        printf ("Only CQL and PQF supported in SRW\n");
+        printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
     sr->u.request->maximumRecords = odr_intdup(out, 0);
@@ -1478,7 +1478,7 @@ static int send_searchRequest(const char *arg)
         if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
                                        sizeof pqfbuf)) != 0) {
             error = cql_transform_error(cqltrans, &addinfo);
-            printf ("Can't convert CQL to PQF: %s (addinfo=%s)\n",
+            printf("Can't convert CQL to PQF: %s (addinfo=%s)\n",
                     cql_strerror(error), addinfo);
             return 0;
         }
@@ -1486,7 +1486,7 @@ static int send_searchRequest(const char *arg)
         myQueryType = QueryType_Prefix;
     }
 
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
         static unsigned char big[2100];
@@ -1498,7 +1498,7 @@ static int send_searchRequest(const char *arg)
         bigo.buf = big;
         req->referenceId = &bigo;
     }
-    
+
     if (setnumber >= 0)
     {
         sprintf(setstring, "%d", ++setnumber);
@@ -1512,7 +1512,7 @@ static int send_searchRequest(const char *arg)
     {
         if (recordsyntax_size)
             req->preferredRecordSyntax =
-                yaz_string_to_oid_odr(yaz_oid_std(), 
+                yaz_string_to_oid_odr(yaz_oid_std(),
                                       CLASS_RECSYN, recordsyntax_list[0], out);
 
         req->smallSetElementSetNames =
@@ -1527,21 +1527,21 @@ static int send_searchRequest(const char *arg)
     {
     case QueryType_Prefix:
         query.which = Z_Query_type_1;
-        pqf_parser = yaz_pqf_create ();
-        RPNquery = yaz_pqf_parse (pqf_parser, out, arg);
+        pqf_parser = yaz_pqf_create();
+        RPNquery = yaz_pqf_parse(pqf_parser, out, arg);
         if (!RPNquery)
         {
             const char *pqf_msg;
             size_t off;
-            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+            int code = yaz_pqf_error(pqf_parser, &pqf_msg, &off);
             int ioff = off;
             printf("%*s^\n", ioff+4, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
-            
-            yaz_pqf_destroy (pqf_parser);
+
+            yaz_pqf_destroy(pqf_parser);
             return 0;
         }
-        yaz_pqf_destroy (pqf_parser);
+        yaz_pqf_destroy(pqf_parser);
         query_charset_convert(RPNquery);
         query.u.type_1 = RPNquery;
         break;
@@ -1556,12 +1556,12 @@ static int send_searchRequest(const char *arg)
         RPNquery = ccl_rpn_query(out, rpn);
         if (!RPNquery)
         {
-            printf ("Couldn't convert from CCL to RPN\n");
+            printf("Couldn't convert from CCL to RPN\n");
             return 0;
         }
         query_charset_convert(RPNquery);
         query.u.type_1 = RPNquery;
-        ccl_rpn_delete (rpn);
+        ccl_rpn_delete(rpn);
         break;
     case QueryType_CQL:
         query.which = Z_Query_type_104;
@@ -1574,7 +1574,7 @@ static int send_searchRequest(const char *arg)
         query.u.type_104 =  ext;
         break;
     default:
-        printf ("Unsupported query type\n");
+        printf("Unsupported query type\n");
         return 0;
     }
     if (send_apdu(apdu))
@@ -1584,7 +1584,7 @@ static int send_searchRequest(const char *arg)
 }
 
 /* display Query Expression as part of searchResult-1 */
-static void display_queryExpression (const char *lead, Z_QueryExpression *qe)
+static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
 {
     if (!qe)
         return;
@@ -1597,16 +1597,16 @@ static void display_queryExpression (const char *lead, Z_QueryExpression *qe)
             switch (term->which)
             {
             case Z_Term_general:
-                printf ("%.*s", term->u.general->len, term->u.general->buf);
+                printf("%.*s", term->u.general->len, term->u.general->buf);
                 break;
             case Z_Term_characterString:
-                printf ("%s", term->u.characterString);
+                printf("%s", term->u.characterString);
                 break;
             case Z_Term_numeric:
-                printf ("%d", *term->u.numeric);
+                printf("%d", *term->u.numeric);
                 break;
             case Z_Term_null:
-                printf ("null");
+                printf("null");
                 break;
             }
         }
@@ -1614,7 +1614,7 @@ static void display_queryExpression (const char *lead, Z_QueryExpression *qe)
 }
 
 /* see if we can find USR:SearchResult-1 */
-static void display_searchResult (Z_OtherInformation *o)
+static void display_searchResult(Z_OtherInformation *o)
 {
     int i;
     if (!o)
@@ -1624,12 +1624,12 @@ static void display_searchResult (Z_OtherInformation *o)
         if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
         {
             Z_External *ext = o->list[i]->information.externallyDefinedInfo;
-            
+
             if (ext->which == Z_External_searchResult1)
             {
                 int j;
                 Z_SearchInfoReport *sr = ext->u.searchResult1;
-                printf ("SearchResult-1:");
+                printf("SearchResult-1:");
                 for (j = 0; j < sr->num; j++)
                 {
                     if (j)
@@ -1647,7 +1647,7 @@ static void display_searchResult (Z_OtherInformation *o)
                     if (sr->elements[j]->subqueryId)
                         printf(" id=%s ", sr->elements[j]->subqueryId);
                 }
-                printf ("\n");
+                printf("\n");
             }
         }
     }
@@ -1655,8 +1655,8 @@ static void display_searchResult (Z_OtherInformation *o)
 
 static int process_searchResponse(Z_SearchResponse *res)
 {
-    printf ("Received SearchResponse.\n");
-    print_refid (res->referenceId);
+    printf("Received SearchResponse.\n");
+    print_refid(res->referenceId);
     if (*res->searchStatus)
         printf("Search was a success.\n");
     else
@@ -1664,7 +1664,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     printf("Number of hits: %d", *res->resultCount);
     last_hit_count = *res->resultCount;
     if (setnumber >= 0)
-        printf (", setno %d", setnumber);
+        printf(", setno %d", setnumber);
     putchar('\n');
     if (res->resultSetStatus)
     {
@@ -1681,10 +1681,10 @@ static int process_searchResponse(Z_SearchResponse *res)
             printf("estimate"); break;
         default:
             printf("%d", *res->resultSetStatus);
-        }            
+        }
         putchar('\n');
     }
-    display_searchResult (res->additionalSearchInfo);
+    display_searchResult(res->additionalSearchInfo);
     printf("records returned: %d\n",
            *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
@@ -1755,11 +1755,11 @@ static void print_string_or_numeric(int iLevel, const char *pTag, Z_StringOrNume
         case Z_StringOrNumeric_string:
             print_string(iLevel, pTag, pStringNumeric->u.string);
             break;
-            
+
         case Z_StringOrNumeric_numeric:
             print_int(iLevel, pTag, pStringNumeric->u.numeric);
             break;
-            
+
         default:
             print_level(iLevel);
             printf("%s: valid type for Z_StringOrNumeric\n", pTag);
@@ -1811,12 +1811,12 @@ static void print_universe_report(int iLevel, Z_UniverseReport *pUniverseReport)
             print_universe_report_hits(iLevel,
                                        pUniverseReport->u.databaseHits);
             break;
-            
+
         case Z_UniverseReport_duplicate:
             print_universe_report_duplicate(iLevel,
                                             pUniverseReport->u.duplicate);
             break;
-            
+
         default:
             print_level(iLevel);
             printf("Type: %d\n", pUniverseReport->which);
@@ -1840,7 +1840,7 @@ static void print_external(int iLevel, Z_External *pExternal)
         case Z_External_universeReport:
             print_universe_report(iLevel, pExternal->u.universeReport);
             break;
-            
+
         default:
             print_level(iLevel);
             printf("Type: %d\n", pExternal->which);
@@ -1849,9 +1849,9 @@ static void print_external(int iLevel, Z_External *pExternal)
     }
 }
 
-static int process_resourceControlRequest (Z_ResourceControlRequest *req)
+static int process_resourceControlRequest(Z_ResourceControlRequest *req)
 {
-    printf ("Received ResourceControlRequest.\n");
+    printf("Received ResourceControlRequest.\n");
     print_referenceId(1, req->referenceId);
     print_int(1, "Suspended Flag", req->suspendedFlag);
     print_int(1, "Partial Results Available", req->partialResultsAvailable);
@@ -1867,35 +1867,35 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     switch (*res->operationStatus)
     {
     case Z_ExtendedServicesResponse_done:
-        printf ("done\n");
+        printf("done\n");
         break;
     case Z_ExtendedServicesResponse_accepted:
-        printf ("accepted\n");
+        printf("accepted\n");
         break;
     case Z_ExtendedServicesResponse_failure:
-        printf ("failure\n");
+        printf("failure\n");
         display_diagrecs(res->diagnostics, res->num_diagnostics);
         break;
     default:
-        printf ("unknown\n");
+        printf("unknown\n");
     }
     if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
         (res->num_diagnostics != 0) ) {
         display_diagrecs(res->diagnostics, res->num_diagnostics);
     }
     print_refid (res->referenceId);
-    if (res->taskPackage && 
+    if (res->taskPackage &&
         res->taskPackage->which == Z_External_extendedService)
     {
         Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
         Odr_oct *id = taskPackage->targetReference;
         Z_External *ext = taskPackage->taskSpecificParameters;
-        
+
         if (id)
         {
-            printf ("Target Reference: ");
+            printf("Target Reference: ");
             print_stringn (id->buf, id->len);
-            printf ("\n");
+            printf("\n");
         }
         if (ext->which == Z_External_update)
         {
@@ -1910,14 +1910,14 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
 
                     Z_IUTaskPackageRecordStructure *tpr =
                         targetPart->taskPackageRecords[i];
-                    printf ("task package record %d\n", i+1);
+                    printf("task package record %d\n", i+1);
                     if (tpr->which == Z_IUTaskPackageRecordStructure_record)
                     {
                         display_record (tpr->u.record);
                     }
                     else
                     {
-                        printf ("other type\n");
+                        printf("other type\n");
                     }
                 }
             }
@@ -1926,11 +1926,11 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         {
             Z_IOTaskPackage *otp = ext->u.itemOrder->u.taskPackage;
 
-            if (otp && otp->targetPart ) 
+            if (otp && otp->targetPart)
             {
-                if (otp->targetPart->itemRequest) 
+                if (otp->targetPart->itemRequest)
                 {
-                    Z_External *ext = otp->targetPart->itemRequest;                    
+                    Z_External *ext = otp->targetPart->itemRequest;
                     if (ext->which == Z_External_octet)
                     {
                         Odr_oct *doc = ext->u.octet_aligned;
@@ -1938,7 +1938,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
                                doc->len, doc->buf);
                     }
                 }
-                else if (otp->targetPart->statusOrErrorReport) 
+                else if (otp->targetPart->statusOrErrorReport)
                 {
                     Z_External *ext = otp->targetPart->statusOrErrorReport;
                     if (ext->which == Z_External_octet)
@@ -1948,7 +1948,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
                                doc->len, doc->buf);
                     }
                 }
-            } 
+            }
         }
     }
     if (res->taskPackage && res->taskPackage->which == Z_External_octet)
@@ -1958,7 +1958,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
-const char *get_ill_element (void *clientData, const char *element)
+const char *get_ill_element(void *clientData, const char *element)
 {
     return 0;
 }
@@ -1974,12 +1974,12 @@ static Z_External *create_external_itemRequest(void)
     ctl.odr = out;
     ctl.clientData = 0;
     ctl.f = get_ill_element;
-    
+
     req = ill_get_ItemRequest(&ctl, "ill", 0);
     if (!req)
-        printf ("ill_get_ItemRequest failed\n");
-        
-    if (!ill_ItemRequest (out, &req, 0, 0))
+        printf("ill_get_ItemRequest failed\n");
+
+    if (!ill_ItemRequest(out, &req, 0, 0))
     {
         if (apdu_file)
         {
@@ -1989,26 +1989,26 @@ static Z_External *create_external_itemRequest(void)
         item_request_buf = odr_getbuf (out, &item_request_size, 0);
         if (item_request_buf)
             odr_setbuf (out, item_request_buf, item_request_size, 1);
-        printf ("Couldn't encode ItemRequest, size %d\n", item_request_size);
+        printf("Couldn't encode ItemRequest, size %d\n", item_request_size);
         return 0;
     }
     else
     {
-        r = (Z_External *) odr_malloc (out, sizeof(*r));
+        r = (Z_External *) odr_malloc(out, sizeof(*r));
         r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
-        
+
         r->u.single_ASN1_type = (Odr_oct *)
-            odr_malloc (out, sizeof(*r->u.single_ASN1_type));
+            odr_malloc(out, sizeof(*r->u.single_ASN1_type));
         r->u.single_ASN1_type->buf = (unsigned char *)
-        odr_malloc (out, item_request_size);
+        odr_malloc(out, item_request_size);
         r->u.single_ASN1_type->len = item_request_size;
         r->u.single_ASN1_type->size = item_request_size;
-        memcpy (r->u.single_ASN1_type->buf, item_request_buf,
+        memcpy(r->u.single_ASN1_type->buf, item_request_buf,
                 item_request_size);
-        
+
         do_hex_dump(item_request_buf,item_request_size);
     }
     return r;
@@ -2021,7 +2021,7 @@ static Z_External *create_external_ILL_APDU(int which)
     Z_External *r = 0;
     int ill_request_size = 0;
     char *ill_request_buf = 0;
-        
+
     ctl.odr = out;
     ctl.clientData = 0;
     ctl.f = get_ill_element;
@@ -2032,35 +2032,35 @@ static Z_External *create_external_ILL_APDU(int which)
     {
         if (apdu_file)
         {
-            printf ("-------------------\n");
+            printf("-------------------\n");
             ill_APDU(print, &ill_apdu, 0, 0);
             odr_reset(print);
-            printf ("-------------------\n");
+            printf("-------------------\n");
         }
         ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
         if (ill_request_buf)
             odr_setbuf (out, ill_request_buf, ill_request_size, 1);
-        printf ("Couldn't encode ILL-Request, size %d\n", ill_request_size);
+        printf("Couldn't encode ILL-Request, size %d\n", ill_request_size);
         return 0;
     }
     else
     {
         ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
-        
-        r = (Z_External *) odr_malloc (out, sizeof(*r));
+
+        r = (Z_External *) odr_malloc(out, sizeof(*r));
         r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
-        
+
         r->u.single_ASN1_type = (Odr_oct *)
-            odr_malloc (out, sizeof(*r->u.single_ASN1_type));
+            odr_malloc(out, sizeof(*r->u.single_ASN1_type));
         r->u.single_ASN1_type->buf = (unsigned char *)
-        odr_malloc (out, ill_request_size);
+        odr_malloc(out, ill_request_size);
         r->u.single_ASN1_type->len = ill_request_size;
         r->u.single_ASN1_type->size = ill_request_size;
-        memcpy (r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
-/*         printf ("len = %d\n", ill_request_size); */
+        memcpy(r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
+/*         printf("len = %d\n", ill_request_size); */
 /*              do_hex_dump(ill_request_buf,ill_request_size); */
 /*              printf("--- end of extenal\n"); */
 
@@ -2084,7 +2084,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
     memset(r->u.itemOrder, 0, sizeof(Z_ItemOrder));
     r->u.itemOrder->which=Z_IOItemOrder_esRequest;
 
-    r->u.itemOrder->u.esRequest = (Z_IORequest *) 
+    r->u.itemOrder->u.esRequest = (Z_IORequest *)
         odr_malloc(out,sizeof(Z_IORequest));
     memset(r->u.itemOrder->u.esRequest, 0, sizeof(Z_IORequest));
 
@@ -2110,14 +2110,14 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
 
     if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
-        printf ("using item-request\n");
-        r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
+        printf("using item-request\n");
+        r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
             create_external_itemRequest();
     }
     else if (!strcmp(type, "ill") || !strcmp(type, "1"))
     {
-        printf ("using ILL-request\n");
-        r->u.itemOrder->u.esRequest->notToKeep->itemRequest = 
+        printf("using ILL-request\n");
+        r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
             create_external_ILL_APDU(ILL_APDU_ILL_Request);
     }
     else if (!strcmp(type, "xml") || !strcmp(type, "3"))
@@ -2162,12 +2162,12 @@ static int only_z3950(void)
 {
     if (!conn)
     {
-        printf ("Not connected yet\n");
+        printf("Not connected yet\n");
         return 1;
     }
     if (protocol == PROTO_HTTP)
     {
-        printf ("Not supported by SRW\n");
+        printf("Not supported by SRW\n");
         return 1;
     }
     return 0;
@@ -2226,10 +2226,10 @@ static int cmd_update_common(const char *arg, int version)
         action_no = Z_IUOriginPartToKeep_recordDelete;
     else if (!strcmp(action_buf, "update"))
         action_no = Z_IUOriginPartToKeep_specialUpdate;
-    else 
+    else
     {
-        printf ("Bad action: %s\n", action_buf);
-        printf ("Possible values: insert, replace, delete, update\n");
+        printf("Bad action: %s\n", action_buf);
+        printf("Possible values: insert, replace, delete, update\n");
         return 0;
     }
 
@@ -2285,7 +2285,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
     }
 }
 #endif
-                          
+
 static int cmd_update_Z3950(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len)
 {
@@ -2300,22 +2300,22 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
     {
         if (!record_last)
         {
-            printf ("No last record (update ignored)\n");
+            printf("No last record (update ignored)\n");
             return 0;
         }
         record_this = record_last;
     }
 
-    req->packageType = odr_oiddup(out, (version == 0 ? 
+    req->packageType = odr_oiddup(out, (version == 0 ?
        yaz_oid_extserv_database_update_first_version :
        yaz_oid_extserv_database_update));
 
     req->packageName = esPackageName;
-    
+
     req->referenceId = set_refid (out);
 
     r = req->taskSpecificParameters = (Z_External *)
-        odr_malloc (out, sizeof(*r));
+        odr_malloc(out, sizeof(*r));
     r->direct_reference = req->packageType;
     r->indirect_reference = 0;
     r->descriptor = 0;
@@ -2331,7 +2331,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
             odr_malloc(out, sizeof(*r->u.update0->u.esRequest));
         toKeep = r->u.update0->u.esRequest->toKeep = (Z_IU0OriginPartToKeep *)
             odr_malloc(out, sizeof(*r->u.update0->u.esRequest->toKeep));
-        
+
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
         if (record_schema)
@@ -2344,7 +2344,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
 
         toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
         *toKeep->action = action_no;
-        
+
         notToKeep = r->u.update0->u.esRequest->notToKeep = (Z_IU0SuppliedRecords *)
             odr_malloc(out, sizeof(*r->u.update0->u.esRequest->notToKeep));
         notToKeep->num = 1;
@@ -2356,7 +2356,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         if (recid)
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
-                odr_malloc (out, sizeof(Odr_oct));
+                odr_malloc(out, sizeof(Odr_oct));
             notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
             notToKeep->elements[0]->u.opaque->len = strlen(recid);
@@ -2379,7 +2379,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
             odr_malloc(out, sizeof(*r->u.update->u.esRequest));
         toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
             odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
-        
+
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
         if (record_schema)
@@ -2404,7 +2404,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         if (recid)
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
-                odr_malloc (out, sizeof(Odr_oct));
+                odr_malloc(out, sizeof(Odr_oct));
             notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
             notToKeep->elements[0]->u.opaque->len = strlen(recid);
@@ -2415,7 +2415,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record = record_this;
     }
-    
+
     send_apdu(apdu);
 
     return 2;
@@ -2433,16 +2433,16 @@ static int cmd_xmles(const char *arg)
         char oid_str[51];
         Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
         Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
-        
+
 
         Z_External *ext = (Z_External *) odr_malloc(out, sizeof(*ext));
-        
+
         req->referenceId = set_refid (out);
         req->taskSpecificParameters = ext;
         ext->indirect_reference = 0;
         ext->descriptor = 0;
         ext->which = Z_External_octet;
-        ext->u.single_ASN1_type = (Odr_oct *) odr_malloc (out, sizeof(Odr_oct));        
+        ext->u.single_ASN1_type = (Odr_oct *) odr_malloc(out, sizeof(Odr_oct));
         sscanf(arg, "%50s%n", oid_str, &noread);
         if (noread == 0)
         {
@@ -2465,11 +2465,11 @@ static int cmd_xmles(const char *arg)
         }
 
         req->packageType = oid;
-        
+
         ext->direct_reference = oid;
 
         send_apdu(apdu);
-        
+
         return 2;
     }
 }
@@ -2481,7 +2481,7 @@ static int cmd_itemorder(const char *arg)
     char *xml_buf = 0;
     int xml_len = 0;
     int no_read = 0;
-   
+
     if (only_z3950())
         return 1;
     if (sscanf(arg, "%10s %d%n", type, &itemno, &no_read) < 2)
@@ -2496,7 +2496,7 @@ static int cmd_itemorder(const char *arg)
 
 static void show_opt(const char *arg, void *clientData)
 {
-    printf ("%s ", arg);
+    printf("%s ", arg);
 }
 
 static int cmd_zversion(const char *arg)
@@ -2504,7 +2504,7 @@ static int cmd_zversion(const char *arg)
     if (*arg && arg)
         z3950_version = atoi(arg);
     else
-        printf ("version is %d\n", z3950_version);
+        printf("version is %d\n", z3950_version);
     return 0;
 }
 
@@ -2521,7 +2521,7 @@ static int cmd_options(const char *arg)
     else
     {
         yaz_init_opt_decode(&z3950_options, show_opt, 0);
-        printf ("\n");
+        printf("\n");
     }
     return 0;
 }
@@ -2536,12 +2536,12 @@ static int cmd_explain(const char *arg)
     if (conn)
     {
         Z_SRW_PDU *sr = 0;
-        
+
         setno = 1;
-        
+
         /* save this for later .. when fetching individual records */
         sr = yaz_srw_get(out, Z_SRW_explain_request);
-        if (recordsyntax_size == 1 
+        if (recordsyntax_size == 1
             && !yaz_matchstr(recordsyntax_list[0], "xml"))
             sr->u.explain_request->recordPacking = "xml";
         send_srw(sr);
@@ -2555,7 +2555,7 @@ static int cmd_init(const char *arg)
 {
     if (*arg)
     {
-        strncpy (cur_host, arg, sizeof(cur_host)-1);
+        strncpy(cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
     if (only_z3950())
@@ -2618,9 +2618,9 @@ static int cmd_find(const char *arg)
     {
         if (!conn)
         {
-            try_reconnect(); 
-            
-            if (!conn) {                                        
+            try_reconnect();
+
+            if (!conn) {
                 printf("Not connected yet\n");
                 return 0;
             }
@@ -2679,7 +2679,7 @@ static int cmd_setnames(const char *arg)
         setnumber = 0;
     else
         setnumber = -1;
-   
+
     if (setnumber >= 0)
         printf("Set numbering enabled.\n");
     else
@@ -2714,7 +2714,7 @@ static void parse_show_args(const char *arg_c, char *setstring,
             *start = atoi(arg);
     }
     if (p && (p=strchr(p+1, '+')))
-        strcpy (setstring, p+1);
+        strcpy(setstring, p+1);
     else if (setnumber >= 0)
         sprintf(setstring, "%d", setnumber);
     else
@@ -2729,7 +2729,7 @@ static int send_presentRequest(const char *arg)
     int nos = 1;
     char setstring[100];
 
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
 
     parse_show_args(arg, setstring, &setno, &nos);
     if (*setstring)
@@ -2749,22 +2749,22 @@ static int send_presentRequest(const char *arg)
         compo.which = Z_RecordComp_complex;
         compo.u.complex = (Z_CompSpec *)
             odr_malloc(out, sizeof(*compo.u.complex));
-        compo.u.complex->selectAlternativeSyntax = (bool_t *) 
+        compo.u.complex->selectAlternativeSyntax = (bool_t *)
             odr_malloc(out, sizeof(bool_t));
         *compo.u.complex->selectAlternativeSyntax = 0;
 
         compo.u.complex->generic = (Z_Specification *)
             odr_malloc(out, sizeof(*compo.u.complex->generic));
-        
+
         compo.u.complex->generic->which = Z_Schema_oid;
         if (!record_schema)
             compo.u.complex->generic->schema.oid = 0;
-        else 
+        else
         {
             compo.u.complex->generic->schema.oid =
                 yaz_string_to_oid_odr(yaz_oid_std(),
                                       CLASS_SCHEMA, record_schema, out);
-            
+
             if (!compo.u.complex->generic->schema.oid)
             {
                 /* OID wasn't a schema! Try record syntax instead. */
@@ -2796,8 +2796,8 @@ static int send_presentRequest(const char *arg)
             compo.u.complex->recordSyntax = (Odr_oid **)
                 odr_malloc(out, recordsyntax_size * sizeof(Odr_oid*));
             for (i = 0; i < recordsyntax_size; i++)
-            compo.u.complex->recordSyntax[i] =                 
-                yaz_string_to_oid_odr(yaz_oid_std(), 
+            compo.u.complex->recordSyntax[i] =
+                yaz_string_to_oid_odr(yaz_oid_std(),
                                       CLASS_RECSYN, recordsyntax_list[i], out);
         }
     }
@@ -2832,10 +2832,10 @@ static int send_SRW_presentRequest(const char *arg)
 }
 #endif
 
-static void close_session (void)
+static void close_session(void)
 {
     if (conn)
-        cs_close (conn);
+        cs_close(conn);
     conn = 0;
     sent_close = 0;
     odr_reset(out);
@@ -2866,7 +2866,7 @@ void process_close(Z_Close *req)
     printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
         req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
-        close_session ();
+        close_session();
     else
     {
         *res->closeReason = Z_Close_finished;
@@ -2914,7 +2914,7 @@ void exit_client(int code)
 int cmd_quit(const char *arg)
 {
     printf("See you later, alligator.\n");
-    xmalloc_trav ("");
+    xmalloc_trav("");
     exit_client(0);
     return 0;
 }
@@ -2926,7 +2926,7 @@ int cmd_cancel(const char *arg)
         apdu->u.triggerResourceControlRequest;
     bool_t rfalse = 0;
     char command[16];
-  
+
     *command = '\0';
     sscanf(arg, "%15s", command);
 
@@ -2941,7 +2941,7 @@ int cmd_cancel(const char *arg)
     }
     *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
     req->resultSetWanted = &rfalse;
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
 
     send_apdu(apdu);
     printf("Sent cancel request\n");
@@ -2965,7 +2965,7 @@ int send_scanrequest(const char *set,  const char *query,
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-    
+
     if (only_z3950())
         return 0;
     if (queryType == QueryType_CCL2RPN)
@@ -2973,7 +2973,7 @@ int send_scanrequest(const char *set,  const char *query,
         int error, pos;
         struct ccl_rpn_node *rpn;
 
-        rpn = ccl_find_str (bibset,  query, &error, &pos);
+        rpn = ccl_find_str(bibset,  query, &error, &pos);
         if (error)
         {
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
@@ -2982,30 +2982,30 @@ int send_scanrequest(const char *set,  const char *query,
         req->attributeSet =
             yaz_string_to_oid_odr(yaz_oid_std(),
                                   CLASS_ATTSET, "Bib-1", out);
-        if (!(req->termListAndStartPoint = ccl_scan_query (out, rpn)))
+        if (!(req->termListAndStartPoint = ccl_scan_query(out, rpn)))
         {
             printf("Couldn't convert CCL to Scan term\n");
             return -1;
         }
-        ccl_rpn_delete (rpn);
+        ccl_rpn_delete(rpn);
     }
     else
     {
-        YAZ_PQF_Parser pqf_parser = yaz_pqf_create ();
+        YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
 
         if (!(req->termListAndStartPoint =
               yaz_pqf_scan(pqf_parser, out, &req->attributeSet, query)))
         {
             const char *pqf_msg;
             size_t off;
-            int code = yaz_pqf_error (pqf_parser, &pqf_msg, &off);
+            int code = yaz_pqf_error(pqf_parser, &pqf_msg, &off);
             int ioff = off;
             printf("%*s^\n", ioff+7, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
-            yaz_pqf_destroy (pqf_parser);
+            yaz_pqf_destroy(pqf_parser);
             return -1;
         }
-        yaz_pqf_destroy (pqf_parser);
+        yaz_pqf_destroy(pqf_parser);
     }
     if (queryCharset && outputCharset)
     {
@@ -3032,7 +3032,7 @@ int send_scanrequest(const char *set,  const char *query,
                 strlen(term);
         }
     }
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
     req->num_databaseNames = num_databaseNames;
     req->databaseNames = databaseNames;
     req->numberOfTermsRequested = &num;
@@ -3052,32 +3052,32 @@ int send_sortrequest(const char *arg, int newset)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
-        odr_malloc (out, sizeof(*sksl));
+        odr_malloc(out, sizeof(*sksl));
     char setstring[32];
 
     if (only_z3950())
         return 0;
     if (setnumber >= 0)
-        sprintf (setstring, "%d", setnumber);
+        sprintf(setstring, "%d", setnumber);
     else
-        sprintf (setstring, "default");
+        sprintf(setstring, "default");
 
-    req->referenceId = set_refid (out);
+    req->referenceId = set_refid(out);
 
     req->num_inputResultSetNames = 1;
     req->inputResultSetNames = (Z_InternationalString **)
-        odr_malloc (out, sizeof(*req->inputResultSetNames));
-    req->inputResultSetNames[0] = odr_strdup (out, setstring);
+        odr_malloc(out, sizeof(*req->inputResultSetNames));
+    req->inputResultSetNames[0] = odr_strdup(out, setstring);
 
     if (newset && setnumber >= 0)
-        sprintf (setstring, "%d", ++setnumber);
+        sprintf(setstring, "%d", ++setnumber);
 
-    req->sortedResultSetName = odr_strdup (out, setstring);
+    req->sortedResultSetName = odr_strdup(out, setstring);
 
-    req->sortSequence = yaz_sort_spec (out, arg);
+    req->sortSequence = yaz_sort_spec(out, arg);
     if (!req->sortSequence)
     {
-        printf ("Missing sort specifications\n");
+        printf("Missing sort specifications\n");
         return -1;
     }
     send_apdu(apdu);
@@ -3097,9 +3097,9 @@ void display_term(Z_TermInfo *t)
             t->term->u.general->buf);
 
     if (t->globalOccurrences)
-        printf (" (%d)\n", *t->globalOccurrences);
+        printf(" (%d)\n", *t->globalOccurrences);
     else
-        printf ("\n");
+        printf("\n");
 }
 
 void process_scanResponse(Z_ScanResponse *res)
@@ -3107,13 +3107,13 @@ void process_scanResponse(Z_ScanResponse *res)
     int i;
     Z_Entry **entries = NULL;
     int num_entries = 0;
-   
-    printf("Received ScanResponse\n"); 
-    print_refid (res->referenceId);
+
+    printf("Received ScanResponse\n");
+    print_refid(res->referenceId);
     printf("%d entries", *res->numberOfEntriesReturned);
     if (res->positionOfTerm)
-        printf (", position=%d", *res->positionOfTerm); 
-    printf ("\n");
+        printf(", position=%d", *res->positionOfTerm);
+    printf("\n");
     if (*res->scanStatus != Z_Scan_success)
         printf("Scan returned code %d\n", *res->scanStatus);
     if (!res->entries)
@@ -3132,7 +3132,7 @@ void process_scanResponse(Z_ScanResponse *res)
             display_diagrecs(&entries[i]->u.surrogateDiagnostic, 1);
     }
     if (res->entries->nonsurrogateDiagnostics)
-        display_diagrecs (res->entries->nonsurrogateDiagnostics,
+        display_diagrecs(res->entries->nonsurrogateDiagnostics,
                           res->entries->num_nonsurrogateDiagnostics);
 }
 
@@ -3142,22 +3142,22 @@ void process_sortResponse(Z_SortResponse *res)
     switch (*res->sortStatus)
     {
     case Z_SortResponse_success:
-        printf ("success"); break;
+        printf("success"); break;
     case Z_SortResponse_partial_1:
-        printf ("partial"); break;
+        printf("partial"); break;
     case Z_SortResponse_failure:
-        printf ("failure"); break;
+        printf("failure"); break;
     default:
-        printf ("unknown (%d)", *res->sortStatus);
+        printf("unknown (%d)", *res->sortStatus);
     }
-    printf ("\n");
+    printf("\n");
     print_refid (res->referenceId);
     if (res->diagnostics)
         display_diagrecs(res->diagnostics,
                          res->num_diagnostics);
 }
 
-void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
+void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
 {
     printf("Got deleteResultSetResponse status=%d\n",
            *res->deleteOperationStatus);
@@ -3166,7 +3166,7 @@ void process_deleteResultSetResponse (Z_DeleteResultSetResponse *res)
         int i;
         for (i = 0; i < res->deleteListStatuses->num; i++)
         {
-            printf ("%s status=%d\n", res->deleteListStatuses->elements[i]->id,
+            printf("%s status=%d\n", res->deleteListStatuses->elements[i]->id,
                     *res->deleteListStatuses->elements[i]->status);
         }
     }
@@ -3176,7 +3176,7 @@ int cmd_sort_generic(const char *arg, int newset)
 {
     if (only_z3950())
         return 0;
-    if (session_initResponse && 
+    if (session_initResponse &&
         !ODR_MASK_GET(session_initResponse->options, Z_Options_sort))
     {
         printf("Target doesn't support sort\n");
@@ -3193,12 +3193,12 @@ int cmd_sort_generic(const char *arg, int newset)
 
 int cmd_sort(const char *arg)
 {
-    return cmd_sort_generic (arg, 0);
+    return cmd_sort_generic(arg, 0);
 }
 
-int cmd_sort_newset (const char *arg)
+int cmd_sort_newset(const char *arg)
 {
-    return cmd_sort_generic (arg, 1);
+    return cmd_sort_generic(arg, 1);
 }
 
 int cmd_scanstep(const char *arg)
@@ -3252,13 +3252,13 @@ static int cmd_scan_common(const char *set, const char *arg)
         if (!conn)
         {
             try_reconnect();
-            
-            if (!conn) {                                                                
+
+            if (!conn) {
                 printf("Session not initialized yet\n");
                 return 0;
             }
         }
-        if (session_initResponse && 
+        if (session_initResponse &&
             !ODR_MASK_GET(session_initResponse->options, Z_Options_scan))
         {
             printf("Target doesn't support scan\n");
@@ -3266,14 +3266,14 @@ static int cmd_scan_common(const char *set, const char *arg)
         }
         if (*arg)
         {
-            strcpy (last_scan_query, arg);
-            if (send_scanrequest(set, arg, 
+            strcpy(last_scan_query, arg);
+            if (send_scanrequest(set, arg,
                                  scan_position, scan_size, 0) < 0)
                 return 0;
         }
         else
         {
-            if (send_scanrequest(set, last_scan_query, 
+            if (send_scanrequest(set, last_scan_query,
                                  1, scan_size, last_scan_line) < 0)
                 return 0;
         }
@@ -3325,7 +3325,7 @@ int cmd_format(const char *arg)
         recordsyntax_list[i] = 0;
     }
 
-    while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0 
+    while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0
            && idx < RECORDSYNTAX_MAX)
     {
         if (!strcmp(form_str, "none"))
@@ -3355,37 +3355,37 @@ int cmd_elements(const char *arg)
     return 1;
 }
 
-int cmd_querytype (const char *arg)
+int cmd_querytype(const char *arg)
 {
-    if (!strcmp (arg, "ccl"))
+    if (!strcmp(arg, "ccl"))
         queryType = QueryType_CCL;
-    else if (!strcmp (arg, "prefix") || !strcmp(arg, "rpn"))
+    else if (!strcmp(arg, "prefix") || !strcmp(arg, "rpn"))
         queryType = QueryType_Prefix;
-    else if (!strcmp (arg, "ccl2rpn") || !strcmp (arg, "cclrpn"))
+    else if (!strcmp(arg, "ccl2rpn") || !strcmp(arg, "cclrpn"))
         queryType = QueryType_CCL2RPN;
     else if (!strcmp(arg, "cql"))
-        queryType = QueryType_CQL;        
-    else if (!strcmp (arg, "cql2rpn") || !strcmp (arg, "cqlrpn"))
+        queryType = QueryType_CQL;
+    else if (!strcmp(arg, "cql2rpn") || !strcmp(arg, "cqlrpn"))
         queryType = QueryType_CQL2RPN;
     else
     {
-        printf ("Querytype must be one of:\n");
-        printf (" prefix         - Prefix query\n");
-        printf (" ccl            - CCL query\n");
-        printf (" ccl2rpn        - CCL query converted to RPN\n");
-        printf (" cql            - CQL\n");
-        printf (" cql2rpn        - CQL query converted to RPN\n");
+        printf("Querytype must be one of:\n");
+        printf(" prefix         - Prefix query\n");
+        printf(" ccl            - CCL query\n");
+        printf(" ccl2rpn        - CCL query converted to RPN\n");
+        printf(" cql            - CQL\n");
+        printf(" cql2rpn        - CQL query converted to RPN\n");
         return 0;
     }
     return 1;
 }
 
-int cmd_refid (const char *arg)
+int cmd_refid(const char *arg)
 {
-    xfree (refid);
+    xfree(refid);
     refid = NULL;
     if (*arg)
-        refid = xstrdup (arg);
+        refid = xstrdup(arg);
     return 1;
 }
 
@@ -3406,7 +3406,7 @@ int cmd_close(const char *arg)
 
 int cmd_packagename(const char* arg)
 {
-    xfree (esPackageName);
+    xfree(esPackageName);
     esPackageName = NULL;
     if (*arg)
         esPackageName = xstrdup(arg);
@@ -3418,7 +3418,7 @@ int cmd_proxy(const char* arg)
     xfree(yazProxy);
     yazProxy = 0;
     if (*arg)
-        yazProxy = xstrdup (arg);
+        yazProxy = xstrdup(arg);
     return 1;
 }
 
@@ -3429,11 +3429,11 @@ int cmd_marccharset(const char *arg)
     *l1 = 0;
     if (sscanf(arg, "%29s", l1) < 1)
     {
-        printf("MARC character set is `%s'\n", 
+        printf("MARC character set is `%s'\n",
                marcCharset ? marcCharset: "none");
         return 1;
     }
-    xfree (marcCharset);
+    xfree(marcCharset);
     marcCharset = 0;
     if (strcmp(l1, "-") && strcmp(l1, "none"))
         marcCharset = xstrdup(l1);
@@ -3447,11 +3447,11 @@ int cmd_querycharset(const char *arg)
     *l1 = 0;
     if (sscanf(arg, "%29s", l1) < 1)
     {
-        printf("Query character set is `%s'\n", 
+        printf("Query character set is `%s'\n",
                queryCharset ? queryCharset: "none");
         return 1;
     }
-    xfree (queryCharset);
+    xfree(queryCharset);
     queryCharset = 0;
     if (strcmp(l1, "-") && strcmp(l1, "none"))
         queryCharset = xstrdup(l1);
@@ -3465,26 +3465,26 @@ int cmd_displaycharset(const char *arg)
     *l1 = 0;
     if (sscanf(arg, "%29s", l1) < 1)
     {
-        printf("Display character set is `%s'\n", 
+        printf("Display character set is `%s'\n",
                outputCharset ? outputCharset: "none");
     }
     else
     {
-        xfree (outputCharset);
+        xfree(outputCharset);
         outputCharset = 0;
         if (!strcmp(l1, "auto") && codeset)
         {
             if (codeset)
             {
-                printf ("Display character set: %s\n", codeset);
+                printf("Display character set: %s\n", codeset);
                 outputCharset = xstrdup(codeset);
             }
             else
-                printf ("No codeset found on this system\n");
+                printf("No codeset found on this system\n");
         }
         else if (strcmp(l1, "-") && strcmp(l1, "none"))
             outputCharset = xstrdup(l1);
-    } 
+    }
     return 1;
 }
 
@@ -3496,23 +3496,23 @@ int cmd_negcharset(const char *arg)
     if (sscanf(arg, "%29s %d %d", l1, &negotiationCharsetRecords,
                &negotiationCharsetVersion) < 1)
     {
-        printf("Negotiation character set `%s'\n", 
-               negotiationCharset ? negotiationCharset: "none");  
+        printf("Negotiation character set `%s'\n",
+               negotiationCharset ? negotiationCharset: "none");
         if (negotiationCharset)
         {
-            printf("Records in charset %s\n", negotiationCharsetRecords ? 
+            printf("Records in charset %s\n", negotiationCharsetRecords ?
                    "yes" : "no");
             printf("Charneg version %d\n", negotiationCharsetVersion);
         }
     }
     else
     {
-        xfree (negotiationCharset);
+        xfree(negotiationCharset);
         negotiationCharset = NULL;
         if (*l1 && strcmp(l1, "-") && strcmp(l1, "none"))
         {
             negotiationCharset = xstrdup(l1);
-            printf ("Character set negotiation : %s\n", negotiationCharset);
+            printf("Character set negotiation : %s\n", negotiationCharset);
         }
     }
     return 1;
@@ -3549,14 +3549,14 @@ int cmd_lang(const char* arg)
         printf("Current language is `%s'\n", yazLang ? yazLang : "none");
         return 1;
     }
-    xfree (yazLang);
+    xfree(yazLang);
     yazLang = NULL;
     if (*arg)
         yazLang = xstrdup(arg);
     return 1;
 }
 
-int cmd_source(const char* arg, int echo ) 
+int cmd_source(const char* arg, int echo )
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
@@ -3566,30 +3566,30 @@ int cmd_source(const char* arg, int echo )
         fprintf(stderr,"Error in source command use a filename\n");
         return -1;
     }
-    
-    includeFile = fopen (arg, "r");
-    
+
+    includeFile = fopen(arg, "r");
+
     if(!includeFile) {
         fprintf(stderr,"Unable to open file %s for reading\n",arg);
         return -1;
     }
-    
+
     while(!feof(includeFile)) {
         memset(line,0,sizeof(line));
         fgets(line,sizeof(line),includeFile);
-        
+
         if(strlen(line) < 2) continue;
         if(line[0] == '#') continue;
-        
-        if ((cp = strrchr (line, '\n')))
+
+        if ((cp = strrchr(line, '\n')))
             *cp = '\0';
-        
+
         if( echo ) {
             printf( "processing line: %s\n",line );
         };
         process_cmd_line(line);
     }
-    
+
     if(fclose(includeFile)<0) {
         perror("unable to close include file");
         exit(1);
@@ -3598,7 +3598,7 @@ int cmd_source(const char* arg, int echo )
 }
 
 int cmd_source_echo(const char* arg)
-{ 
+{
     cmd_source(arg, 1);
     return 1;
 }
@@ -3612,11 +3612,11 @@ int cmd_source_noecho(const char* arg)
 
 int cmd_subshell(const char* args)
 {
-    if(strlen(args)) 
+    if(strlen(args))
         system(args);
-    else 
+    else
         system(getenv("SHELL"));
-    
+
     printf("\n");
     return 1;
 }
@@ -3654,17 +3654,17 @@ int cmd_set_apdufile(const char *arg)
 }
 
 int cmd_set_cclfile(const char* arg)
-{  
+{
     FILE *inf;
 
-    bibset = ccl_qual_mk (); 
-    inf = fopen (arg, "r");
+    bibset = ccl_qual_mk();
+    inf = fopen(arg, "r");
     if (!inf)
         perror("unable to open CCL file");
     else
     {
-        ccl_qual_file (bibset, inf);
-        fclose (inf);
+        ccl_qual_file(bibset, inf);
+        fclose(inf);
     }
     strcpy(ccl_fields,arg);
     return 0;
@@ -3687,45 +3687,45 @@ int cmd_set_cqlfile(const char* arg)
 }
 
 int cmd_set_auto_reconnect(const char* arg)
-{  
+{
     if(strlen(arg)==0) {
         auto_reconnect = ! auto_reconnect;
     } else if(strcmp(arg,"on")==0) {
         auto_reconnect = 1;
     } else if(strcmp(arg,"off")==0) {
-        auto_reconnect = 0;             
+        auto_reconnect = 0;
     } else {
         printf("Error use on or off\n");
         return 1;
     }
-    
+
     if (auto_reconnect)
         printf("Set auto reconnect enabled.\n");
     else
         printf("Set auto reconnect disabled.\n");
-    
+
     return 0;
 }
 
 
 int cmd_set_auto_wait(const char* arg)
-{  
+{
     if(strlen(arg)==0) {
         auto_wait = ! auto_wait;
     } else if(strcmp(arg,"on")==0) {
         auto_wait = 1;
     } else if(strcmp(arg,"off")==0) {
-        auto_wait = 0;          
+        auto_wait = 0;
     } else {
         printf("Error use on or off\n");
         return 1;
     }
-    
+
     if (auto_wait)
         printf("Set auto wait enabled.\n");
     else
         printf("Set auto wait disabled.\n");
-    
+
     return 0;
 }
 
@@ -3748,8 +3748,8 @@ int cmd_set_marcdump(const char* arg)
     return 1;
 }
 
-/* 
-   this command takes 3 arge {name class oid} 
+/*
+   this command takes 3 arge {name class oid}
 */
 int cmd_register_oid(const char* args) {
     static struct {
@@ -3773,17 +3773,17 @@ int cmd_register_oid(const char* args) {
         {"general",CLASS_GENERAL},
         {0,(enum oid_class) 0}
     };
-    char oname_str[101], oclass_str[101], oid_str[101];  
+    char oname_str[101], oclass_str[101], oid_str[101];
     int i;
     oid_class oidclass = CLASS_GENERAL;
     Odr_oid oid[OID_SIZE];
 
-    if (sscanf (args, "%100[^ ] %100[^ ] %100s",
+    if (sscanf(args, "%100[^ ] %100[^ ] %100s",
                 oname_str,oclass_str, oid_str) < 1) {
         printf("Error in register command \n");
         return 0;
     }
-    
+
     for (i = 0; oid_classes[i].className; i++) {
         if (!strcmp(oid_classes[i].className, oclass_str))
         {
@@ -3791,12 +3791,12 @@ int cmd_register_oid(const char* args) {
             break;
         }
     }
-    
+
     if(!(oid_classes[i].className)) {
         printf("Unknown oid class %s\n",oclass_str);
         return 0;
     }
-    
+
     oid_dotstring_to_oid(oid_str, oid);
 
     if (yaz_oid_add(yaz_oid_std(), oidclass, oname_str, oid))
@@ -3804,15 +3804,15 @@ int cmd_register_oid(const char* args) {
         printf("oid %s already exists, registration failed\n",
                oname_str);
     }
-    return 1;  
+    return 1;
 }
 
-int cmd_push_command(const char* arg) 
+int cmd_push_command(const char* arg)
 {
 #if HAVE_READLINE_HISTORY_H
-    if(strlen(arg)>1) 
+    if(strlen(arg)>1)
         add_history(arg);
-#else 
+#else
     fprintf(stderr,"Not compiled with the readline/history module\n");
 #endif
     return 1;
@@ -3821,7 +3821,7 @@ int cmd_push_command(const char* arg)
 void source_rc_file(const char *rc_file)
 {
     /*  If rc_file != NULL, source that. Else
-        Look for .yazclientrc and read it if it exists. 
+        Look for .yazclientrc and read it if it exists.
         If it does not exist, read  $HOME/.yazclientrc instead */
     struct stat statbuf;
 
@@ -3868,7 +3868,7 @@ static void initialize(const char *rc_file)
 {
     FILE *inf;
     int i;
-    
+
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))
@@ -3876,24 +3876,24 @@ static void initialize(const char *rc_file)
         fprintf(stderr, "failed to allocate ODR streams\n");
         exit(1);
     }
-    
+
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
 
-    bibset = ccl_qual_mk (); 
-    inf = fopen (ccl_fields, "r");
+    bibset = ccl_qual_mk();
+    inf = fopen(ccl_fields, "r");
     if (inf)
     {
-        ccl_qual_file (bibset, inf);
-        fclose (inf);
+        ccl_qual_file(bibset, inf);
+        fclose(inf);
     }
 
     cqltrans = cql_transform_open_fname(cql_fields);
     /* If this fails, no problem: we detect cqltrans == 0 later */
 
 #if HAVE_READLINE_READLINE_H
-    rl_attempted_completion_function = 
+    rl_attempted_completion_function =
         (char **(*)(const char *, int, int)) readline_completer;
 #endif
     for(i = 0; i < maxOtherInfosSupported; ++i) {
@@ -3902,7 +3902,7 @@ static void initialize(const char *rc_file)
     }
 
     cmd_format("usmarc");
-    
+
     source_rc_file(rc_file);
 
     file_history = file_history_new();
@@ -3920,20 +3920,20 @@ static void handle_srw_record(Z_SRW_record *rec)
 {
     if (rec->recordPosition)
     {
-        printf ("pos=%d", *rec->recordPosition);
+        printf("pos=%d", *rec->recordPosition);
         setno = *rec->recordPosition + 1;
     }
     if (rec->recordSchema)
-        printf (" schema=%s", rec->recordSchema);
-    printf ("\n");
+        printf(" schema=%s", rec->recordSchema);
+    printf("\n");
     if (rec->recordData_buf && rec->recordData_len)
     {
         fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
         if (marc_file)
-            fwrite (rec->recordData_buf, 1, rec->recordData_len, marc_file);
+            fwrite(rec->recordData_buf, 1, rec->recordData_len, marc_file);
     }
     else
-        printf ("No data!");
+        printf("No data!");
     printf("\n");
 }
 
@@ -3946,22 +3946,22 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
 {
     int i;
 
-    printf ("Received SRW SearchRetrieve Response\n");
-    
+    printf("Received SRW SearchRetrieve Response\n");
+
     for (i = 0; i<res->num_diagnostics; i++)
     {
         if (res->diagnostics[i].uri)
-            printf ("SRW diagnostic %s\n",
+            printf("SRW diagnostic %s\n",
                     res->diagnostics[i].uri);
         else
-            printf ("SRW diagnostic missing or could not be decoded\n");
+            printf("SRW diagnostic missing or could not be decoded\n");
         if (res->diagnostics[i].message)
-            printf ("Message: %s\n", res->diagnostics[i].message);
+            printf("Message: %s\n", res->diagnostics[i].message);
         if (res->diagnostics[i].details)
-            printf ("Details: %s\n", res->diagnostics[i].details);
+            printf("Details: %s\n", res->diagnostics[i].details);
     }
     if (res->numberOfRecords)
-        printf ("Number of hits: %d\n", *res->numberOfRecords);
+        printf("Number of hits: %d\n", *res->numberOfRecords);
     for (i = 0; i<res->num_records; i++)
         handle_srw_record(res->records + i);
 }
@@ -3989,19 +3989,19 @@ static void handle_srw_scan_response(Z_SRW_scanResponse *res)
 {
     int i;
 
-    printf ("Received SRW Scan Response\n");
-    
+    printf("Received SRW Scan Response\n");
+
     for (i = 0; i<res->num_diagnostics; i++)
     {
         if (res->diagnostics[i].uri)
-            printf ("SRW diagnostic %s\n",
+            printf("SRW diagnostic %s\n",
                     res->diagnostics[i].uri);
         else
-            printf ("SRW diagnostic missing or could not be decoded\n");
+            printf("SRW diagnostic missing or could not be decoded\n");
         if (res->diagnostics[i].message)
-            printf ("Message: %s\n", res->diagnostics[i].message);
+            printf("Message: %s\n", res->diagnostics[i].message);
         if (res->diagnostics[i].details)
-            printf ("Details: %s\n", res->diagnostics[i].details);
+            printf("Details: %s\n", res->diagnostics[i].details);
     }
     if (res->terms)
         for (i = 0; i<res->num_terms; i++)
@@ -4045,13 +4045,13 @@ static void http_response(Z_HTTP_Response *hres)
         else if (soap_package && (soap_package->which == Z_SOAP_fault
                                   || soap_package->which == Z_SOAP_error))
         {
-            printf ("HTTP Error Status=%d\n", hres->code);
-            printf ("SOAP Fault code %s\n",
+            printf("HTTP Error Status=%d\n", hres->code);
+            printf("SOAP Fault code %s\n",
                     soap_package->u.fault->fault_code);
-            printf ("SOAP Fault string %s\n", 
+            printf("SOAP Fault string %s\n",
                     soap_package->u.fault->fault_string);
             if (soap_package->u.fault->details)
-                printf ("SOAP Details %s\n", 
+                printf("SOAP Details %s\n",
                         soap_package->u.fault->details);
         }
         else
@@ -4065,11 +4065,11 @@ static void http_response(Z_HTTP_Response *hres)
     {
         if (hres->code != 200)
         {
-            printf ("HTTP Error Status=%d\n", hres->code);
+            printf("HTTP Error Status=%d\n", hres->code);
         }
         else
         {
-            printf ("Decoding of SRW package failed\n");
+            printf("Decoding of SRW package failed\n");
         }
         close_session();
     }
@@ -4081,7 +4081,7 @@ static void http_response(Z_HTTP_Response *hres)
             if (!connection_head || strcmp(connection_head, "Keep-Alive"))
                 close_session();
         }
-        else 
+        else
         {
             /* HTTP 1.1: only if no close we stay alive .. */
             if (connection_head && !strcmp(connection_head, "close"))
@@ -4091,7 +4091,7 @@ static void http_response(Z_HTTP_Response *hres)
 }
 #endif
 
-void wait_and_handle_response(int one_response_only) 
+void wait_and_handle_response(int one_response_only)
 {
     int reconnect_ok = 1;
     int res;
@@ -4102,7 +4102,7 @@ void wait_and_handle_response(int one_response_only)
     struct timeval tv_end;
 #endif
     Z_GDU *gdu;
-    
+
     while(conn)
     {
         res = cs_get(conn, &netbuffer, &netbufferlen);
@@ -4116,13 +4116,13 @@ void wait_and_handle_response(int one_response_only)
             {
                 char *buf_out;
                 int len_out;
-                
+
                 buf_out = odr_getbuf(out, &len_out, 0);
-                
+
                 do_hex_dump(buf_out, len_out);
 
                 cs_put(conn, buf_out, len_out);
-                
+
                 odr_reset(out);
                 continue;
             }
@@ -4135,7 +4135,7 @@ void wait_and_handle_response(int one_response_only)
         }
 #if HAVE_GETTIMEOFDAY
         if (got_tv_end == 0)
-            gettimeofday (&tv_end, 0); /* count first one only */
+            gettimeofday(&tv_end, 0); /* count first one only */
         got_tv_end++;
 #endif
         odr_reset(out);
@@ -4143,7 +4143,7 @@ void wait_and_handle_response(int one_response_only)
         record_last = 0;
         do_hex_dump(netbuffer, res);
         odr_setbuf(in, netbuffer, res, 0);
-        
+
         if (!z_GDU(in, &gdu, 0, 0))
         {
             FILE *f = ber_file ? ber_file : stdout;
@@ -4184,14 +4184,14 @@ void wait_and_handle_response(int one_response_only)
                 process_scanResponse(apdu->u.scanResponse);
                 break;
             case Z_APDU_presentResponse:
-                print_refid (apdu->u.presentResponse->referenceId);
+                print_refid(apdu->u.presentResponse->referenceId);
                 setno +=
                     *apdu->u.presentResponse->numberOfRecordsReturned;
                 if (apdu->u.presentResponse->records)
                     display_records(apdu->u.presentResponse->records);
                 else
                     printf("No records.\n");
-                printf ("nextResultSetPosition = %d\n",
+                printf("nextResultSetPosition = %d\n",
                         *apdu->u.presentResponse->nextResultSetPosition);
                 break;
             case Z_APDU_sortResponse:
@@ -4214,9 +4214,9 @@ void wait_and_handle_response(int one_response_only)
                                                 deleteResultSetResponse);
                 break;
             default:
-                printf("Received unknown APDU type (%d).\n", 
+                printf("Received unknown APDU type (%d).\n",
                        apdu->which);
-                close_session ();
+                close_session();
             }
         }
 #if YAZ_HAVE_XML2
@@ -4234,46 +4234,46 @@ void wait_and_handle_response(int one_response_only)
     if (got_tv_end)
     {
 #if 0
-        printf ("S/U S/U=%ld/%ld %ld/%ld",
+        printf("S/U S/U=%ld/%ld %ld/%ld",
                 (long) tv_start.tv_sec,
                 (long) tv_start.tv_usec,
                 (long) tv_end.tv_sec,
                 (long) tv_end.tv_usec);
 #endif
-        printf ("Elapsed: %.6f\n",
+        printf("Elapsed: %.6f\n",
                 (double) tv_end.tv_usec / 1e6 + tv_end.tv_sec -
                 ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
     }
 #endif
-    xfree (netbuffer);
+    xfree(netbuffer);
 }
 
 
-int cmd_cclparse(const char* arg) 
+int cmd_cclparse(const char* arg)
 {
     int error, pos;
     struct ccl_rpn_node *rpn=NULL;
-    
-    
-    rpn = ccl_find_str (bibset, arg, &error, &pos);
-    
+
+
+    rpn = ccl_find_str(bibset, arg, &error, &pos);
+
     if (error) {
         int ioff = 3+strlen(last_cmd)+1+pos;
-        printf ("%*s^ - ", ioff, " ");
-        printf ("%s\n", ccl_err_msg (error));
+        printf("%*s^ - ", ioff, " ");
+        printf("%s\n", ccl_err_msg(error));
     }
     else
     {
         if (rpn)
-        {       
-            ccl_pr_tree(rpn, stdout); 
+        {
+            ccl_pr_tree(rpn, stdout);
         }
     }
     if (rpn)
         ccl_rpn_delete(rpn);
-    
-    printf ("\n");
-    
+
+    printf("\n");
+
     return 0;
 }
 
@@ -4283,8 +4283,8 @@ int cmd_set_otherinfo(const char* args)
     char oidstr[101], otherinfoString[101];
     int otherinfoNo;
     int sscan_res;
-    
-    sscan_res = sscanf (args, "%d %100[^ ] %100s", 
+
+    sscan_res = sscanf(args, "%d %100[^ ] %100s",
                         &otherinfoNo, oidstr, otherinfoString);
 
     if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported) {
@@ -4292,13 +4292,13 @@ int cmd_set_otherinfo(const char* args)
                otherinfoNo,maxOtherInfosSupported);
         return 0;
     }
-    
 
-    if (sscan_res==1) 
+
+    if (sscan_res==1)
     {
         /* reset this otherinfo */
         extraOtherInfos[otherinfoNo].oid[0] = -1;
-        xfree(extraOtherInfos[otherinfoNo].value);                   
+        xfree(extraOtherInfos[otherinfoNo].value);
         extraOtherInfos[otherinfoNo].value = 0;
         return 0;
     }
@@ -4313,17 +4313,17 @@ int cmd_set_otherinfo(const char* args)
             yaz_string_to_oid_nmem(yaz_oid_std(),
                                    CLASS_GENERAL, oidstr, oid_tmp);
         oid_oidcpy(extraOtherInfos[otherinfoNo].oid, oid);
-            
+
         xfree(extraOtherInfos[otherinfoNo].value);
         extraOtherInfos[otherinfoNo].value = xstrdup(otherinfoString);
 
         nmem_destroy(oid_tmp);
     }
-    
+
     return 0;
 }
 
-int cmd_sleep(const char* args ) 
+int cmd_sleep(const char* args )
 {
     int sec=atoi(args);
     if( sec > 0 ) {
@@ -4332,15 +4332,15 @@ int cmd_sleep(const char* args )
 #else
         sleep(sec);
 #endif
-        printf("Done sleeping %d seconds\n", sec);      
+        printf("Done sleeping %d seconds\n", sec);
     }
-    return 1;    
+    return 1;
 }
 
 int cmd_list_otherinfo(const char* args)
 {
-    int i;         
-    
+    int i;
+
     if (strlen(args)>0)
     {
         i = atoi(args);
@@ -4360,10 +4360,10 @@ int cmd_list_otherinfo(const char* args)
                    i, name ? name : "null",
                    extraOtherInfos[i].value);
         }
-        
-    } 
-    else 
-    {            
+
+    }
+    else
+    {
         for(i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
@@ -4385,35 +4385,35 @@ int cmd_list_otherinfo(const char* args)
 
 int cmd_list_all(const char* args) {
     int i;
-    
+
     /* connection options */
     if(conn) {
         printf("Connected to         : %s\n",last_open_command);
     } else {
-        if(last_open_command) 
+        if(last_open_command)
             printf("Not connected to     : %s\n",last_open_command);
-        else 
+        else
             printf("Not connected        : \n");
-        
+
     }
-    if(yazProxy) printf("using proxy          : %s\n",yazProxy);                
-    
+    if(yazProxy) printf("using proxy          : %s\n",yazProxy);
+
     printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
     printf("auto_wait            : %s\n",auto_wait?"on":"off");
-    
+
     if (!auth) {
         printf("Authentication       : none\n");
     } else {
         switch(auth->which) {
         case Z_IdAuthentication_idPass:
-            printf("Authentication       : IdPass\n"); 
+            printf("Authentication       : IdPass\n");
             printf("    Login User       : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
             printf("    Login Group      : %s\n",auth->u.idPass->groupId?auth->u.idPass->groupId:"");
             printf("    Password         : %s\n",auth->u.idPass->password?auth->u.idPass->password:"");
             break;
         case Z_IdAuthentication_open:
-            printf("Authentication       : psOpen\n");                  
-            printf("    Open string      : %s\n",auth->u.open); 
+            printf("Authentication       : psOpen\n");
+            printf("    Open string      : %s\n",auth->u.open);
             break;
         default:
             printf("Authentication       : Unknown\n");
@@ -4421,22 +4421,22 @@ int cmd_list_all(const char* args) {
     }
     if (negotiationCharset)
         printf("Neg. Character set   : `%s'\n", negotiationCharset);
-    
+
     /* bases */
     printf("Bases                : ");
     for (i = 0; i<num_databaseNames; i++) printf("%s ",databaseNames[i]);
     printf("\n");
-    
+
     /* Query options */
     printf("CCL file             : %s\n",ccl_fields);
     printf("CQL file             : %s\n",cql_fields);
     printf("Query type           : %s\n",query_type_as_string(queryType));
-    
+
     printf("Named Result Sets    : %s\n",setnumber==-1?"off":"on");
-    
+
     /* piggy back options */
     printf("ssub/lslb/mspn       : %d/%d/%d\n",smallSetUpperBound,largeSetLowerBound,mediumSetPresentNumber);
-    
+
     /* print present related options */
     if (recordsyntax_size > 0)
     {
@@ -4444,19 +4444,19 @@ int cmd_list_all(const char* args) {
     }
     printf("Schema               : %s\n",record_schema ? record_schema : "not set");
     printf("Elements             : %s\n",elementSetNames?elementSetNames->u.generic:"");
-    
+
     /* loging options */
     printf("APDU log             : %s\n",apdu_file?"on":"off");
     printf("Record log           : %s\n",marc_file?"on":"off");
-    
+
     /* other infos */
     printf("Other Info: \n");
     cmd_list_otherinfo("");
-    
+
     return 0;
 }
 
-int cmd_clear_otherinfo(const char* args) 
+int cmd_clear_otherinfo(const char* args)
 {
     if(strlen(args)>0) {
         int otherinfoNo = atoi(args);
@@ -4466,7 +4466,7 @@ int cmd_clear_otherinfo(const char* args)
             return 0;
         }
         if (extraOtherInfos[otherinfoNo].value)
-        {                 
+        {
             /* only clear if set. */
             extraOtherInfos[otherinfoNo].oid[0] = -1;
             xfree(extraOtherInfos[otherinfoNo].value);
@@ -4474,10 +4474,10 @@ int cmd_clear_otherinfo(const char* args)
         }
     } else {
         int i;
-        for(i = 0; i < maxOtherInfosSupported; ++i) 
+        for(i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
-            {                               
+            {
                 extraOtherInfos[i].oid[0] = -1;
                 xfree(extraOtherInfos[i].value);
                 extraOtherInfos[i].value = 0;
@@ -4494,14 +4494,14 @@ int cmd_wait_response(const char *arg)
     if( wait_for < 1 ) {
         wait_for = 1;
     };
-    
+
     for( i=0 ; i < wait_for ; ++i ) {
         wait_and_handle_response(1);
     };
     return 0;
 }
 
-static int cmd_help (const char *line);
+static int cmd_help(const char *line);
 
 typedef char *(*completerFunctionType)(const char *text, int state);
 
@@ -4592,18 +4592,18 @@ static struct {
     {0,0,0,0,0,0}
 };
 
-static int cmd_help (const char *line)
+static int cmd_help(const char *line)
 {
     int i;
     char topic[21];
-    
+
     *topic = 0;
-    sscanf (line, "%20s", topic);
+    sscanf(line, "%20s", topic);
 
     if (*topic == 0)
         printf("Commands:\n");
     for (i = 0; cmd_array[i].cmd; i++)
-        if (*topic == 0 || strcmp (topic, cmd_array[i].cmd) == 0)
+        if (*topic == 0 || strcmp(topic, cmd_array[i].cmd) == 0)
             printf("   %s %s\n", cmd_array[i].cmd, cmd_array[i].ad);
     if (!strcmp(topic, "find"))
     {
@@ -4651,41 +4651,41 @@ static int cmd_help (const char *line)
     return 1;
 }
 
-int cmd_register_tab(const char* arg) 
+int cmd_register_tab(const char* arg)
 {
 #if HAVE_READLINE_READLINE_H
     char command[101], tabargument[101];
     int i;
     int num_of_tabs;
     const char** tabslist;
-    
-    if (sscanf (arg, "%100s %100s", command, tabargument) < 1) {
+
+    if (sscanf(arg, "%100s %100s", command, tabargument) < 1) {
         return 0;
     }
-    
+
     /* locate the amdn in the list */
     for (i = 0; cmd_array[i].cmd; i++) {
         if (!strncmp(cmd_array[i].cmd, command, strlen(command))) {
             break;
         }
     }
-    
-    if (!cmd_array[i].cmd) { 
+
+    if (!cmd_array[i].cmd) {
         fprintf(stderr,"Unknown command %s\n",command);
         return 1;
     }
-    
-        
+
+
     if (!cmd_array[i].local_tabcompletes)
         cmd_array[i].local_tabcompletes = (const char **) calloc(1,sizeof(char**));
-    
-    num_of_tabs=0;              
-    
+
+    num_of_tabs=0;
+
     tabslist = cmd_array[i].local_tabcompletes;
     for(; tabslist && *tabslist; tabslist++) {
         num_of_tabs++;
     }
-    
+
     cmd_array[i].local_tabcompletes = (const char **)
         realloc(cmd_array[i].local_tabcompletes,
                 (num_of_tabs+2)*sizeof(char**));
@@ -4698,14 +4698,14 @@ int cmd_register_tab(const char* arg)
 
 
 void process_cmd_line(char* line)
-{  
+{
     int i, res;
     char word[32], arg[10240];
-    
+
 #if HAVE_GETTIMEOFDAY
-    gettimeofday (&tv_start, 0);
+    gettimeofday(&tv_start, 0);
 #endif
-    
+
     if ((res = sscanf(line, "%31s %10239[^;]", word, arg)) <= 0)
     {
         strcpy(word, last_cmd);
@@ -4714,50 +4714,50 @@ void process_cmd_line(char* line)
     else if (res == 1)
         *arg = 0;
     strcpy(last_cmd, word);
-    
+
     /* removed tailing spaces from the arg command */
-    { 
+    {
         char* p = arg;
         char* lastnonspace=NULL;
-        
+
         for(;*p; ++p) {
             if(!isspace(*(unsigned char *) p)) {
                 lastnonspace = p;
             }
         }
-        if(lastnonspace) 
+        if(lastnonspace)
             *(++lastnonspace) = 0;
     }
-    
+
     for (i = 0; cmd_array[i].cmd; i++)
         if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
         {
             res = (*cmd_array[i].fun)(arg);
             break;
         }
-    
+
     if (!cmd_array[i].cmd) /* dump our help-screen */
     {
         printf("Unknown command: %s.\n", word);
         printf("Type 'help' for list of commands\n");
         res = 1;
     }
-    
+
     if(apdu_file) fflush(apdu_file);
-    
+
     if (res >= 2 && auto_wait)
         wait_and_handle_response(0);
-    
+
     if(apdu_file)
         fflush(apdu_file);
     if(marc_file)
         fflush(marc_file);
 }
 
-static char *command_generator(const char *text, int state) 
+static char *command_generator(const char *text, int state)
 {
 #if HAVE_READLINE_READLINE_H
-    static int idx; 
+    static int idx;
     if (state==0) {
         idx = 0;
     }
@@ -4782,41 +4782,41 @@ static char* default_completer(const char* text, int state)
 
 #if HAVE_READLINE_READLINE_H
 
-/* 
+/*
    This function only known how to complete on the first word
 */
 char **readline_completer(char *text, int start, int end)
 {
     completerFunctionType completerToUse;
-    
+
     if(start == 0) {
 #if HAVE_READLINE_RL_COMPLETION_MATCHES
-        char** res = rl_completion_matches(text, command_generator); 
+        char** res = rl_completion_matches(text, command_generator);
 #else
         char** res = completion_matches(text,
-                                        (CPFunction*)command_generator); 
+                                        (CPFunction*)command_generator);
 #endif
         rl_attempted_completion_over = 1;
         return res;
     } else {
         char arg[10240],word[32];
         int i=0 ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0) {     
+        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0) {
             rl_attempted_completion_over = 1;
             return NULL;
         }
-        
+
         for (i = 0; cmd_array[i].cmd; i++)
             if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
                 break;
-        
+
         if(!cmd_array[i].cmd)
             return NULL;
-        
+
         default_completer_list = cmd_array[i].local_tabcompletes;
-        
+
         completerToUse = cmd_array[i].rl_completerfunction;
-        if (!completerToUse) 
+        if (!completerToUse)
         { /* if command completer is not defined use the default completer */
             completerToUse = default_completer;
         }
@@ -4828,11 +4828,11 @@ char **readline_completer(char *text, int start, int end)
             char** res=
                 completion_matches(text, (CPFunction*)completerToUse);
 #endif
-            if (!cmd_array[i].complete_filenames) 
+            if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return res;
         } else {
-            if (!cmd_array[i].complete_filenames) 
+            if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return 0;
         }
@@ -4858,7 +4858,7 @@ static void client(void)
 #endif
 
 #if HAVE_GETTIMEOFDAY
-    gettimeofday (&tv_start, 0);
+    gettimeofday(&tv_start, 0);
 #endif
 
     while (1)
@@ -4877,15 +4877,15 @@ static void client(void)
             strncpy(line, line_in, sizeof(line)-1);
             free(line_in);
         }
-#endif 
+#endif
         if (!line_in)
         {
             char *end_p;
-            printf (C_PROMPT);
+            printf(C_PROMPT);
             fflush(stdout);
             if (!fgets(line, sizeof(line)-1, stdin))
                 break;
-            if ((end_p = strchr (line, '\n')))
+            if ((end_p = strchr(line, '\n')))
                 *end_p = '\0';
         }
         if (isatty(0))
@@ -4899,9 +4899,9 @@ static void show_version(void)
     char vstr[20];
 
     yaz_version(vstr, 0);
-    printf ("YAZ version: %s\n", YAZ_VERSION);
+    printf("YAZ version: %s\n", YAZ_VERSION);
     if (strcmp(vstr, YAZ_VERSION))
-        printf ("YAZ DLL/SO: %s\n", vstr);
+        printf("YAZ DLL/SO: %s\n", vstr);
     exit(0);
 }
 
@@ -4913,10 +4913,10 @@ int main(int argc, char **argv)
     char *arg;
     const char *rc_file = 0;
     int ret;
-    
+
 #if HAVE_LOCALE_H
     if (!setlocale(LC_CTYPE, ""))
-        fprintf (stderr, "setlocale failed\n");
+        fprintf(stderr, "setlocale failed\n");
 #endif
 #if HAVE_LANGINFO_H
 #ifdef CODESET
@@ -4925,7 +4925,7 @@ int main(int argc, char **argv)
 #endif
     if (codeset)
         outputCharset = xstrdup(codeset);
-    
+
     ODR_MASK_SET(&z3950_options, Z_Options_search);
     ODR_MASK_SET(&z3950_options, Z_Options_present);
     ODR_MASK_SET(&z3950_options, Z_Options_namedResultSets);
@@ -4943,9 +4943,9 @@ int main(int argc, char **argv)
         case 0:
             if (!open_command)
             {
-                open_command = (char *) xmalloc (strlen(arg)+6);
-                strcpy (open_command, "open ");
-                strcat (open_command, arg);
+                open_command = (char *) xmalloc(strlen(arg)+6);
+                strcpy(open_command, "open ");
+                strcat(open_command, arg);
             }
             else
             {
@@ -4967,7 +4967,7 @@ int main(int argc, char **argv)
                 ber_file=fopen(arg, "a");
             break;
         case 'c':
-            strncpy (ccl_fields, arg, sizeof(ccl_fields)-1);
+            strncpy(ccl_fields, arg, sizeof(ccl_fields)-1);
             ccl_fields[sizeof(ccl_fields)-1] = '\0';
             break;
         case 'd':
@@ -4980,17 +4980,17 @@ int main(int argc, char **argv)
             kilobytes = atoi(arg);
             break;
         case 'm':
-            if (!(marc_file = fopen (arg, "a")))
+            if (!(marc_file = fopen(arg, "a")))
             {
-                perror (arg);
-                exit (1);
+                perror(arg);
+                exit(1);
             }
             break;
         case 'p':
             yazProxy = xstrdup(arg);
             break;
         case 'q':
-            strncpy (cql_fields, arg, sizeof(cql_fields)-1);
+            strncpy(cql_fields, arg, sizeof(cql_fields)-1);
             cql_fields[sizeof(cql_fields)-1] = '\0';
             break;
         case 't':
@@ -4999,9 +4999,9 @@ int main(int argc, char **argv)
         case 'u':
             if (!auth_command)
             {
-                auth_command = (char *) xmalloc (strlen(arg)+6);
-                strcpy (auth_command, "auth ");
-                strcat (auth_command, arg);
+                auth_command = (char *) xmalloc(strlen(arg)+6);
+                strcpy(auth_command, "auth ");
+                strcat(auth_command, arg);
             }
             break;
         case 'v':
@@ -5014,14 +5014,14 @@ int main(int argc, char **argv)
             hex_dump = 1;
             break;
         default:
-            fprintf (stderr, "Usage: %s "
+            fprintf(stderr, "Usage: %s "
                      " [-a apdulog]"
                      " [-b berdump]"
                      " [-c cclfile]"
                      " [-d dump]"
                      " [-f cmdfile]"
                      " [-k size]"
-                     " [-m marclog]" 
+                     " [-m marclog]"
                      " [-p proxy-addr]"
                      " [-q cqlfile]"
                      " [-t dispcharset]"
@@ -5031,16 +5031,16 @@ int main(int argc, char **argv)
                      " [-x]"
                      " [server-addr]\n",
                      prog);
-            exit (1);
-        }      
+            exit(1);
+        }
     }
     initialize(rc_file);
     if (auth_command)
     {
 #ifdef HAVE_GETTIMEOFDAY
-        gettimeofday (&tv_start, 0);
+        gettimeofday(&tv_start, 0);
 #endif
-        process_cmd_line (auth_command);
+        process_cmd_line(auth_command);
 #if HAVE_READLINE_HISTORY_H
         add_history(auth_command);
 #endif
@@ -5049,9 +5049,9 @@ int main(int argc, char **argv)
     if (open_command)
     {
 #ifdef HAVE_GETTIMEOFDAY
-        gettimeofday (&tv_start, 0);
+        gettimeofday(&tv_start, 0);
 #endif
-        process_cmd_line (open_command);
+        process_cmd_line(open_command);
 #if HAVE_READLINE_HISTORY_H
         add_history(open_command);
 #endif
