@@ -103,12 +103,6 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
         fputs(wrbuf_cstr(wrbuf), stdout);
         wrbuf_destroy(wrbuf);
     }
-    {
-        WRBUF wrbuf = wrbuf_alloc();
-        yaz_marc_write_trailer(mt, wrbuf);
-        fputs(wrbuf_cstr(wrbuf), stdout);
-        wrbuf_destroy(wrbuf);
-    }
     fclose(inf);
 }
 
@@ -147,8 +141,6 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                 }
             }
         }
-        yaz_marc_write_trailer(mt, wrbuf);
-        fputs(wrbuf_cstr(wrbuf), stdout);
     }
 #else
     xmlDocPtr doc = xmlParseFile(fname);
@@ -182,7 +174,6 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
         xmlFreeDoc(doc);
     }
 #endif
-    yaz_marc_write_trailer(mt, wrbuf);
     fputs(wrbuf_cstr(wrbuf), stdout);
     wrbuf_destroy(wrbuf);
 }
