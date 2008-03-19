@@ -129,7 +129,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
             if (type == XML_READER_TYPE_ELEMENT)
             {
                 const char *name = (const char *) 
-                    xmlTextReaderConstName(reader);
+                    xmlTextReaderLocalName(reader);
                 if (!strcmp(name, "record"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
