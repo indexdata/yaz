@@ -118,7 +118,6 @@ static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p)
             {
                 yaz_marc_cprintf(
                     mt, "Expected element 'leader', got '%.80s'", ptr->name);
-                return -1;
             }
         }
     if (!leader)
@@ -194,7 +193,6 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                         yaz_marc_cprintf(
                             mt, "Bad attribute '%.80s' for 'datafield'",
                             attr->name);
-                        return -1;
                     }
                 if (!ptr_tag)
                 {
