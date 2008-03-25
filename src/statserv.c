@@ -1358,6 +1358,8 @@ int check_options(int argc, char **argv)
     char *arg;
 
     yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL)); 
+
+    yaz_log_xml_errors(0, YLOG_WARN);
     get_logbits(1); 
 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",

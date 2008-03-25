@@ -467,6 +467,7 @@ MISC_OBJS= \
    $(OBJDIR)\zoom-socket.obj \
    $(OBJDIR)\initopt.obj \
    $(OBJDIR)\xmlquery.obj \
+   $(OBJDIR)\xmlerror.obj \
    $(OBJDIR)\mime.obj \
    $(OBJDIR)\cql.obj \
    $(OBJDIR)\cqlstdio.obj \

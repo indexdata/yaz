@@ -92,7 +92,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   cqlstrer.c querytowrbuf.c \
   tcpdchk.c \
   test.c timing.c \
-  xmlquery.c http.c \
+  xmlquery.c xmlerror.c http.c \
   mime.c mime.h oid_util.c tokenizer.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c \
   copy_types.c match_glob.c poll.c daemon.c

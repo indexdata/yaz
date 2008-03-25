@@ -196,6 +196,13 @@ YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg,
 YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
                                            void *info), void *info);
 
+
+/** \brief Makes Libxml2/Libxslt log errors via yaz_log
+    \param prefix prefix to use for log messages (may be 0)
+    \param log_level log level to use for messages
+*/
+YAZ_EXPORT void yaz_log_xml_errors(const char *prefix, int log_level);
+
 /* by default, do not enable the old LOG_-defines */
 #ifndef YAZ_USE_NEW_LOG
 #define YAZ_USE_NEW_LOG 1
