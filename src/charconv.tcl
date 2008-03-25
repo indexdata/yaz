@@ -36,16 +36,16 @@ proc preamble_trie {ofilehandle ifiles ofile} {
     "
     puts $f {
         static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read, int *combining)
+                                    size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, int boffset)
         {
             struct yaz_iconv_trie *t = (ptr > 0) ? ptrs[ptr-1] : 0;
             if (!t || inbytesleft < 1)
                 return 0;
             if (t->dir)
             {
-                size_t ch = inp[0] & 0xff;
+                size_t ch = (inp[0] & mask) + boffset;
                 unsigned long code =
-                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read, combining);
+                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read, combining, mask, boffset);
                 if (code)
                 {
                     (*no_read)++;
@@ -67,7 +67,13 @@ proc preamble_trie {ofilehandle ifiles ofile} {
                     size_t len = strlen(flat->from);
                     if (len <= inbytesleft)
                     {
-                        if (memcmp(flat->from, inp, len) == 0)
+                        size_t i;
+			for (i = 0; i < len; i++)
+			{
+			    if (((unsigned char *) flat->from)[i] != (inp[i] & mask) + boffset)
+			        break;
+		        }
+                        if (i == len)
                         {
                             *no_read = len;
 			    *combining = flat->combining;
@@ -256,11 +262,11 @@ proc dump_trie {ofilehandle} {
     puts $f ""
 
     puts $f "unsigned long yaz_$trie(prefix)_conv
-            (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining)
+            (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, int boffset)
         {
             unsigned long code;
             
-            code = lookup($trie(prefix)ptrs, 1, inp, inbytesleft, no_read, combining);
+            code = lookup($trie(prefix)ptrs, 1, inp, inbytesleft, no_read, combining, mask, boffset);
             if (!code)
             {
                 *no_read = 1;

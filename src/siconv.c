@@ -37,57 +37,36 @@
 #include <yaz/nmem.h>
 #include "iconv-p.h"
 
-
-unsigned long yaz_marc8_42_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_45_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_67_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_62_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_70_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_32_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_4E_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_51_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_33_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_34_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_53_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
-unsigned long yaz_marc8_31_conv(unsigned char *inp, size_t inbytesleft,
-                               size_t *no_read, int *combining);
+typedef unsigned long yaz_conv_func_t(unsigned char *inp, size_t inbytesleft,
+                                      size_t *no_read, int *combining,
+                                      unsigned mask, int boffset);
 
 
-unsigned long yaz_marc8r_42_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_45_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_67_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_62_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_70_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_32_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_4E_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_51_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_33_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_34_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_53_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
-unsigned long yaz_marc8r_31_conv(unsigned char *inp, size_t inbytesleft,
-                                 size_t *no_read, int *combining);
+yaz_conv_func_t yaz_marc8_42_conv;
+yaz_conv_func_t yaz_marc8_45_conv;
+yaz_conv_func_t yaz_marc8_67_conv;
+yaz_conv_func_t yaz_marc8_62_conv;
+yaz_conv_func_t yaz_marc8_70_conv;
+yaz_conv_func_t yaz_marc8_32_conv;
+yaz_conv_func_t yaz_marc8_4E_conv;
+yaz_conv_func_t yaz_marc8_51_conv;
+yaz_conv_func_t yaz_marc8_33_conv;
+yaz_conv_func_t yaz_marc8_34_conv;
+yaz_conv_func_t yaz_marc8_53_conv;
+yaz_conv_func_t yaz_marc8_31_conv;
+
+yaz_conv_func_t yaz_marc8r_42_conv;
+yaz_conv_func_t yaz_marc8r_45_conv;
+yaz_conv_func_t yaz_marc8r_67_conv;
+yaz_conv_func_t yaz_marc8r_62_conv;
+yaz_conv_func_t yaz_marc8r_70_conv;
+yaz_conv_func_t yaz_marc8r_32_conv;
+yaz_conv_func_t yaz_marc8r_4E_conv;
+yaz_conv_func_t yaz_marc8r_51_conv;
+yaz_conv_func_t yaz_marc8r_33_conv;
+yaz_conv_func_t yaz_marc8r_34_conv;
+yaz_conv_func_t yaz_marc8r_53_conv;
+yaz_conv_func_t yaz_marc8r_31_conv;
 
 struct yaz_iconv_struct {
     int my_errno;
@@ -372,43 +351,40 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
         {
         case 'B':  /* Basic ASCII */
         case 's':  /* ASCII */
+            x = yaz_marc8_42_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
+            break;
         case 'E':  /* ANSEL */
-            x = yaz_marc8_42_conv(inp, inbytesleft, &no_read_sub, comb);
-            if (!x)
-            {
-                no_read_sub = 0;
-                x = yaz_marc8_45_conv(inp, inbytesleft, &no_read_sub, comb);
-            }
+            x = yaz_marc8_45_conv(inp, inbytesleft, &no_read_sub, comb, 127, 128);
             break;
         case 'g':  /* Greek */
-            x = yaz_marc8_67_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_67_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case 'b':  /* Subscripts */
-            x = yaz_marc8_62_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_62_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case 'p':  /* Superscripts */
-            x = yaz_marc8_70_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_70_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case '2':  /* Basic Hebrew */
-            x = yaz_marc8_32_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_32_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case 'N':  /* Basic Cyrillic */
-            x = yaz_marc8_4E_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_4E_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case 'Q':  /* Extended Cyrillic */
-            x = yaz_marc8_51_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_51_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case '3':  /* Basic Arabic */
-            x = yaz_marc8_33_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_33_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case '4':  /* Extended Arabic */
-            x = yaz_marc8_34_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_34_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case 'S':  /* Greek */
-            x = yaz_marc8_53_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_53_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         case '1':  /* Chinese, Japanese, Korean (EACC) */
-            x = yaz_marc8_31_conv(inp, inbytesleft, &no_read_sub, comb);
+            x = yaz_marc8_31_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
             break;
         default:
             *no_read = 0;
@@ -524,67 +500,67 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         inp = (unsigned char *) utf8_buf;
         inbytesleft = strlen(utf8_buf);
 
-        x = yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(B";
             return x;
         }
-        x = yaz_marc8r_45_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_45_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(B";
             return x;
         }
-        x = yaz_marc8r_62_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_62_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "b";
             return x;
         }
-        x = yaz_marc8r_70_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_70_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "p";
             return x;
         }
-        x = yaz_marc8r_32_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_32_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(2";
             return x;
         }
-        x = yaz_marc8r_4E_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_4E_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(N";
             return x;
         }
-        x = yaz_marc8r_51_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_51_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(Q";
             return x;
         }
-        x = yaz_marc8r_33_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_33_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(3";
             return x;
         }
-        x = yaz_marc8r_34_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_34_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(4";
             return x;
         }
-        x = yaz_marc8r_53_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_53_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(S";
             return x;
         }
-        x = yaz_marc8r_31_conv(inp, inbytesleft, &no_read_sub, comb);
+        x = yaz_marc8r_31_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "$1";
@@ -956,7 +932,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     {
         cd->my_errno = YAZ_ICONV_UNKNOWN;
         cd->g0_mode = 'B';
-        cd->g1_mode = 'B';
+        cd->g1_mode = 'E';
         
         cd->comb_offset = cd->comb_size = 0;
         cd->compose_char = 0;

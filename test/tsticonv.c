@@ -423,6 +423,9 @@ static void tst_marc8_to_utf8(void)
     YAZ_CHECK(tst_convert_x(cd, ESC "(", "", YAZ_ICONV_EINVAL));
     YAZ_CHECK(tst_convert_x(cd, ESC "(B", "", 0));
 
+    YAZ_CHECK(tst_convert(cd, ESC "(B" "\x31", "1"));  /* ASCII in G0 */
+    YAZ_CHECK(tst_convert(cd, ESC ")B" "\xB1", "1"));  /* ASCII in G1 */
+
     yaz_iconv_close(cd);
 }
 
