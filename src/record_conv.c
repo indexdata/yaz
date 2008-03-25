@@ -178,21 +178,28 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
         if (!yaz_filepath_resolve(stylesheet, p->path, 0, fullpath))
         {
             wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
-                         " could not locate stylesheet '%s' with path '%s'",
-                         stylesheet, fullpath, p->path);
+                         " could not locate stylesheet '%s'",
+                         stylesheet, fullpath);
+            if (p->path)
+                wrbuf_printf(p->wr_error, " with path '%s'", p->path);
+                
             return -1;
         }
         xsp = xsltParseStylesheetFile((xmlChar*) fullpath);
         if (!xsp)
         {
-            wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
-                         " parsing stylesheet '%s' with path '%s' failed,"
+            wrbuf_printf(p->wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
+                         " xslt parse failed: %s", stylesheet, fullpath);
+            if (p->path)
+                wrbuf_printf(p->wr_error, " with path '%s'", p->path);
+            wrbuf_printf(p->wr_error, " ("
 #if YAZ_HAVE_EXSLT
-                         " EXSLT enabled",
+                         
+                         "EXSLT enabled"
 #else
-                         " EXSLT not supported",
+                         "EXSLT not supported"
 #endif
-                         stylesheet, fullpath, p->path);
+                         ")");
             return -1;
         }
         else
