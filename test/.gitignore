@@ -31,3 +31,4 @@ nfaxmltest1
 tst_oid
 *.log
 *.o
+*~

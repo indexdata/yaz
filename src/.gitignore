@@ -5,6 +5,7 @@ Makefile
 *.o
 *.lo
 *.la
+*~
 zes-*.c
 z-*.c
 item-req.c

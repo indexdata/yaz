@@ -4,6 +4,7 @@ ill-core.h
 item-req.h
 z-*.h
 zes-*.h
+*~
 diagbib1.h
 diagsrw.h
 diagsru_update.h
