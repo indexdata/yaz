@@ -1,0 +1,354 @@
+01385cam a2200301Ka 4500
+001 ocm57665435 
+003 OCoLC
+005 20080328102918.0
+008 050215s2004    ii       d    000 0 eng d
+040    $a ACN $c ACN $d OCLCQ $d IXA $d OCL
+020    $a 8176500623
+020    $a 9788176500623
+035    $a (OCoLC)57665435
+041 0  $a beneng
+092    $a 491.44321
+090    $a PK1687 $b .E65 2004
+049    $a LNNA
+245 00 $6 880-01 $a English-Bengali Bengali-English combined dictionary = $b Iṃrājī - Bāṃlā Bāṃlā - Iṃrājī samshukuta diksánarī / $c compiled by Debasis Adhikary.
+260    $a New Delhi : $b World of Learning : $b Distributed by Star Publications, $c 2004.
+300    $a 1518 p. ; $c 23 cm.
+500    $a "More than 90,000 total words from English to Bengali and Bengali to English."
+546    $a Bengali and English.
+650  0 $a English language $v Dictionaries $x Bengali.
+650  0 $a Bengali language $v Dictionaries $x English.
+700 1  $a Adhikary, Debasis.
+880 00 $6 245-01 $a English-Bengali Bengali-English combined dictionary = $b ইংরাজী - বাংলা বাংলা - ইংরাজী সংযুক্ত ডিক্শনরী / $c compiled by Debasis Adhikary.
+880 31 $6 246-00 $a ইংরাজী - বাংলা বাংলা - ইংরাজী সংযুক্ত ডিক্শনরী
+994    $a C0 $b LNN
+
+02873nam a22005053i 4500
+001 ocm86174229 
+003 OCoLC
+005 20080328102918.0
+008 070326s1977    ii       b    000 0 san d
+040    $a STF $c STF
+035    $a (OCoLC)86174229
+041 0  $a san $a hin
+050 04 $a PK511 $b 1977
+049    $a LNNA
+100 0  $6 880-01 $a Pāṇini.
+240 10 $a Aṣṭādhyāyī
+245 10 $6 880-02 $a Aṣṭādhyāyīsūtrapāṭhaḥ : $b Pāṇinīyaśikṣā-liṅgānuśāsanasahitaśca / $c Maharṣipāṇinipraṇītaḥ ; upoddhātalekhakaḥ Śrīnārāyaṇa Miśraḥ.
+246 15 $a Aṣṭādhyāyīsūtrapāṭha : $b with Pāṇinīyaśikṣā and Liṅgānuśāsana
+250    $6 880-03 $a 1. saṃskaraṇa.
+260    $6 880-04 $a Vārāṇasī ; $a Dillī : $b Caukhambhā Oriyanṭāliyā ; $a Vārāṇasī : $b anya prāptisthāna, Caukhambhā Viśvabhāratī, $c 1977.
+300    $a 100 p.
+440  0 $6 880-05 $a Gokuladāsa Saṃskr̥ta granthamālā ; $v 29
+546    $a In Sanskrit; introd. in Hindi.
+500    $a "Sampādakaḥ Śrīnārāyaṇa Miśraḥ"--Cover.
+500    $a Added title page in English.
+504    $a Includes bibliographical references.
+650  0 $a Sanskrit language $x Grammar.
+650  0 $a Sanskrit language $x Accents and accentuation.
+700 02 $6 880-06 $a Pāṇini. $t Pāṇinīyaśikṣā.
+700 02 $6 880-07 $a Pāṇini. $t Liṅgānuśāsana.
+700 1  $6 880-08 $a Miśra, Śrīnārāyaṇa.
+740 02 $6 880-09 $a Pāṇinīyaśikṣā.
+740 02 $6 880-10 $a Liṅgānuśāsana.
+880 0  $6 100-01 $a पाणिनी.
+880 10 $6 240-00 $a अष्टाध्यायी
+880 10 $6 245-02 $a अष्टाध्यायीसूत्रपाठः : $b पाणिणीयशिक्षा-लिङ्गानुशासनसहितश्र्च / $c महर्षिपाणिनिप्रणीतः ; उपोद्घातलेखकः श्रीनारायण मिश्रः.
+880    $6 250-03 $a 1. संस्करण.
+880    $6 260-04 $a वाराणसी ; $a दिल्ली : $b चौखम्भा ओरियन्टालिया ; $a वाराणसी : $b अन्य प्राप्तिस्थान, चौखम्भा विश्वभारती, $c 1977.
+880  0 $6 440-05 $a गोकुलदास संस्कृत ग्रन्थमाला ; $v 29
+880 02 $6 700-06 $a पाणिनी. $t पाणिणीयशिक्षा
+880 02 $6 700-07 $a पाणिनी. $t लिङ्गानुशासन.
+880 1  $6 700-08 $a मिश्र, श्रीनारायण.
+880 02 $6 740-09 $a पाणिणीयशिक्षा.
+880 02 $6 740-10 $a लिङ्गानुशासन.
+994    $a C0 $b LNN
+
+02242cam a2200433Ia 4500
+001 ocm44944167 
+003 OCoLC
+005 20080328102918.0
+008 000906s2000    ilua          000 0 tam d
+040    $a OCO $c OCO $d OCL $d OCLCQ $d TEF
+020    $a 0967621208 : $c $24.95
+020    $a 9780967621203
+035    $a (OCoLC)44944167
+041 1  $a tameng $h tam
+050  4 $a PL4758.9.T5 $b T5
+082 04 $a 894.811 $b T597t
+049    $a LNNA
+100 0  $a Tiruvaḷḷuvar.
+240 10 $6 880-01 $a Thirukku ral. $l Tamil & English
+245 10 $6 880-02 $a Thirukkural : $b Thamizh Marai = Tirukkural : the Holy Scripture / $c [by Tiruvalluvar ; English translation by P.S. Sundaram.].
+250    $a 1st ed.
+260    $a Woodridge, Ill. : $b International Tamil Language Foundation, $c c2000.
+300    $a 1813 p. : $b ill. (some col.) ; $c 20 cm.
+500    $a Tamil text, with English translation.
+500    $a "An edition of this translation was published by Penguin Books in 1991."
+500    $a Section 2 and section 3, English translation from Tamil by R. Natarajan.
+546    $a Text in Tamil and English.
+500    $a Non-Latin script record.
+600 00 $a Tiruvaḷḷuvar.
+650  0 $a Tamil literature $v Translations into English.
+650  0 $a Tamil language materials $x Bilingual.
+740 02 $a Handbook of Tamil culture and heritage.
+740 02 $a Tamils guide to future.
+880 10 $6 240-01 $a திரூக்கு றள். $l Tamil & English
+880 10 $6 245-02 $a திரூக்குறள் : $b தமிழ் மறை = Tirukkural : the Holy Scripture / $c [by Tiruvalluvar ; English translation by P.S. Sundaram.]
+880 0  $6 505-00 $a Section 1: திரூக்குறள் : Tirukkural -- Section 2: தறிழ்ப் பண்பாட்டூக் கையேடூ : The handbook of Tamil culture and heritage -- Section 3: தமிழின எதிர்கால வழிகாட்டி : Tamils guide to future.
+880 02 $6 740-00 $a தமிழ்ப் பண்பாட்டூக் கையேடூ : The handbook of Tamil culture and heritage.
+880 02 $6 740-00 $a தமிழின எதிர்கால வழிகாட்டி : Tamils guide to future.
+994    $a C0 $b LNN
+
+01025cam a2200301Ia 4500
+001 ocm62425106 
+003 OCoLC
+005 20080328102918.0
+008 051203s2002    th            000 f thaod
+040    $a TEF $c TEF $d LNQ $d OCL
+020    $a 9749204808
+020    $a 9789749204801
+035    $a (OCoLC)62425106
+090    $a PL4209.D837 $b P57 2002
+049    $a LNNA
+100 0  $6 880-01 $a Dūangtawan.
+245 10 $6 880-02 $a Phračhan sǣnkon / $c Dūangtawan.
+250    $6 880-03 $a Phim khrang thī 3.
+260    $6 880-04 $a Krung Thēp : $b Phimkham Samnakphim, $c 2545 [2002]
+300    $a 154 p. ; $c 21 cm.
+500    $a Novel.
+546    $a In Thai.
+655  7 $a Humorous fiction. $2 gsafd
+880 0  $6 100-01 $a ดวงตะวัน.
+880 10 $6 245-02 $a พระจันทร์แสนกล / $c ดวงตะวัน.
+880    $6 250-03 $a พิมพ์ครั้งที่ 3.
+880    $6 260-04 $a กรุงเทพฯ : $b พิมพ์คำ สานักพิมพ์, $c 2545.
+994    $a C0 $b LNN
+
+02684cam a2200409 a 4500
+001 14876782
+005 20071121181842.0
+008 990326s1997    ai a     b    001 0 armo 
+035    $a (Uk)006855813
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a    99189840 
+040    $a DLC $b eng $c DLC $d DLC-R $d Uk
+043    $a a-ai--- $a a-tu---
+050 00 $a BX121 $b .S63 1997
+100 1  $6 880-01 $a Smbatyantsʿ, Artak, $c Episkopos, $d 1876-1937
+245 10 $6 880-02 $a Artak Episkopos Smbatyantsʿ (Taushetsʿi) : hogevor, grakan, patma-banasirakan gortsuneutʿyuně ev gndakaharutʿyuně, 1876-1937 tʿtʿ. / $c kazmetsʿ Sandro Behbudyan.
+260    $6 880-03 $a Erevan : $b "Anahit", $c 1997.
+300    $a 691 p. : $b ill. ; $c 27 cm.
+440  0 $6 880-04 $a Vaveragrer Hay Ekeghetsʿu patmutʿyan ; $v girkʿ 3
+500    $6 880-05 $a At head of title: Hayastani Hanrapetutʿyan Kaṛavarutʿyann aṛěntʿer. Arkhivayin Gortsi Varchʿutʿyun. Arvesti, Grakanutʿyan ev Mamuli Pʿastatʿghtʿeri Petakan Kentronakan Arkhiv.
+504    $a Includes bibliographical references and indexes.
+600 10 $6 880-06 $a Smbatyantsʿ, Artak, $c Episkopos, $d 1876-1937
+610 20 $6 880-07 $a Armenian Church $x History $v Sources.
+650  0 $a Armenians $z Turkey.
+651  0 $a Armenia $x History $y 1801-1900 $v Sources.
+651  0 $a Armenia $x History $y 1901- $v Sources.
+700 1  $6 880-08 $a Behbudyan, Sandro $q (Sandro Artashesi), $d 1934-
+852 41 $a British Library $b OC $j HEC.1994.a.294/3
+880 1  $6 100-01 / $a Սմբատյանց, Արտակ, $c Եբիսկոպոս, $d 1876-1937.
+880 10 $6 245-02 / $a Արտակ Եբիսկոպոս Սմբատյանց (Տաուշեցի) : հոգեվոր, գրական պատմա-բանասիրական գործունեությունը եվ գնդակահարությունը, 1876-1937 թթ. / $c կազմեց Սանդրո Բեհբության.
+880    $6 260-03 / $a Երեվան : $b «Անահիտ», $c 1997.
+880  0 $6 440-04 / $a Վավերագրեր Հայ Եկեղեցու պատմության ; $v գիրք 3
+880    $6 500-05 / $a Տիտղոսի գլուխ: Հայաստանի Հանրապետության Կառավարության առընթեր. Արխիվային Գործի Վարչություն. Արվեստի, Գրականության եվ Մամուլի Բաստաթղթերի Պետական Կենտրոնական Արխիվ.
+880 10 $6 600-06 / $a Սմբատյանց, Արտակ, $c Եբիսկոպոս, $d 1876-1937.
+880 20 $6 610-07 / $a Հայաստանեայց Ս. Եկեղեցի $x Պատմութիւն $v Աղբիւրներ.
+880 1  $6 700-08 / $a Բեհբության, Սանդրո, $q (Սանդրո Արտաշեսի), $d 1934-
+985    $a armenian LC
+
+01466 am a2200349 a 4500
+001 14876783
+005 20071121181846.0
+008 040502m19461951sy ac         000 0 arm  
+035    $a (Uk)006881105
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2003207810
+035    $a (OCoLC)ocm51506679
+040    $a DLC $b eng $c DLC $d OCoLC $d Uk
+043    $a a-sy---
+050 00 $a BV4539.A75 $b M36
+245 00 $6 880-01 $a Mananay : $b taregrkʿoyk.
+260    $6 880-02 $a Halēp : $b Hratarakutʿiwn Hogewor Eghbarutʿean Eritasardatsʿ, $c 1946-1951
+300    $a 2 v. : $b ill., ports. ; $c 23 cm.
+505 0  $a [1]. 1946, 5-6. 1950-1951.
+610 20 $6 880-03 $a Hogewor Eghbayrutʿiwn Eritasardatsʿ.
+650  0 $a Armenians $x Religious life $z Syria.
+650  0 $a Almanacs, Armenian $z Syria.
+650  0 $a Youth $x Religious life $z Syria.
+650  0 $a Armenians $z Syria $x Social life and customs.
+650  0 $a Armenians $z Lebanon $x Social life and customs.
+710 2  $6 880-04 $a Hogewor Eghbayrutʿiwn Eritasardatsʿ.
+852 41 $a British Library $b OC $j HEC.2002.a.492
+880 00 $6 245-01 / $a Մանանայ : $b տարեգրքոյկ.
+880    $6 260-02 / $a Հալէպ : $b Հրատարակութիւն Հոգեւոր Եղբայրութեան Երիտասրդաց, $c 1946-1951.
+880 20 $6 610-03 / $a Հոգեւոր Եղբայրութիւն Երիտասրդաց.
+880 2  $6 710-04 / $a Հոգեւոր Եղբայրութիւն Երիտասրդաց.
+985    $a armenian LC
+
+01818cab a2200385 a 4500
+001 14877410
+005 20071121185010.0
+008 040502m18971900enkmr|p       0   z0arm  
+035    $a (Uk)002848266
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970004
+019 x  $a 2532250240
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Mart : $b [amsatʿertʿ, ōrgan Hnchʿakean Kusaktsʿutʿean].
+246 3  $a Mard
+260    $6 880-02 $a London : $b [Sotsʿial Demokrat Hnchʿakean Kusaktsʿutʿiwn], $c 1897-1900.
+300    $a v. ; $c 44 cm.
+500    $a "Battle": an Armenian political newspaper.
+500    $a "Mart" published after 1897, as "Hnchʿak" could not be due to legal proceedings.
+505 0  $a I year, no. 1 (15 Apr., 1897)-10 (10 Apr., 1898); II year, no. 11 (7 May, 1898)-16 (Mar., 1899); III year, no. 17 (Aug., 1899)-27 (Oct., 1900)
+610 20 $6 880-03 $a Sotsʿial Demokrat Hnchʿakean Kusaktsʿutʿiwn
+650  0 $a Armenian periodicals.
+650  0 $a Armenians $x Politics and government.
+651  0 $a Armenia $x Politics and government.
+651  0 $a Armenia $x History $y 1801-1900.
+655  4 $a Periodical publications.- London
+710 2  $6 880-04 $a Sotsʿial Demokrat Hnchʿakean Kusaktsʿutʿiwn
+740 0  $6 880-05 $a Hnchʿak.
+852 41 $a British Library $b HMNTS $j OP.411
+880 00 $6 245-01 / $a Մարտ : $b [ամսաթերթ, օրգան Հնչակեան Կուսակցութեան].
+880    $6 260-02 / $a Լոնդոն : $b [Սոցիալ Դեմոկրատ Հնչակեան Կուսակցութիւն], $c 1897-1900.
+880 20 $6 610-03 / $a Սոցիալ Դեմոկրատ Հնչակեան Կուսակցութիւն.
+880 2  $6 710-04 / $a Սոցիալ Դեմոկրատ Հնչակեան Կուսակցութիւն.
+880 0  $6 740-05 / $a Հնչակ.
+985    $a armenian
+
+03105cab a2200601 a 4500
+001 14877413
+005 20071121185021.0
+008 000316d18551865fr er p       0   z0armod
+035    $a (Uk)002863571
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970007
+019 x  $a 2541830122
+035    $a (OCoLC)43646516
+040    $a Uk $b eng $c Uk
+041 1  $a arm $a fre $a rus $h arm
+043    $a a-ai--- $a e------
+245 00 $6 880-01 $a Maseatsʿ aghawni : $b awetaber Hayastaneaytsʿ / $c [khmb. Gabriēl Ayvazeantsʿ].
+246 15 $a Colombe du Massis
+246 15 $a Messager de l'Arménie
+246 13 $6 880-02 $a Maseatsʿ aghawni awetaber Hayastaneaytsʿ
+246 14 $6 880-03 $a Maseatsʿ aghawni ew Tsiatsan Hayastaneaytsʿ $f <Sept. 1861->
+246 30 $6 880-04 $a Tsiatsan Hayastaneaytsʿ $f <Sept. 1861->
+246 30 $6 880-05 $a Awetaber Hayastaneaytsʿ
+260    $6 880-06 $a Pʿariz : $b [Khmbagir ew hratarakichʿ Gabriēl Ayvazeantsʿ], $c 1855- $e (Paris : $f Imp. W. Remquet)
+300    $a v. : $b ill., ports. ; $c 32 cm.
+310    $a Biweekly, $b <1 Sept. 1861->
+321    $a Monthly, $b Jan. 1855->
+362 0  $6 880-07 $a 1. tari, tʿiw 1 (Hunuar 1855)-
+362 1  $a Ceased in 1865.
+500    $6 880-08 $a Imprint varies: Paris : i Granotsʿi Chaniki Aramean, Jan. 1856-> ; Theodosia : Khalipean Usumnaran, <Sept. 1861->
+500    $6 880-09 $a Latest issue consulted: 6. tari, tʿiw 17 (15 Sept. 1861)
+505 0  $a Vol. I (1855); vol. II (1856); vol. III (1857); vol. VI, 1-8 (1861)
+515    $a Not published in 1859.
+546    $a In Armenian and French.
+650  0 $a Armenians $v Periodicals.
+650  0 $a Armenians $z Foreign countries $v Periodicals.
+650  0 $a Armenians $v Biography $v Periodicals.
+651  0 $a Armenia $v Periodicals.
+651  0 $a Europe $v 19th century $v Periodicals.
+655  4 $a Periodical publications.- Paris
+700 1  $6 880-10 $a Ayvazovskʿi, Gabriēl, $d 1812-1880.
+852 41 $a British Library $b OC $j 17070.g.5.
+880 00 $6 245-01 / $a Մասեաց աղաւնի : $b աւետաբեր Հայաստանեայց / $c [խմբ. Գաբրիէլ Այվազեանց].
+880 13 $6 246-02 / $a Մասեաց աղաւնի աւետաբեր Հայաստանեայց
+880 14 $6 246-03 / $a Մասեաց աղաւնի եւ Ծիածան Հայաստանեայց $f <Սեպտ. 1861->
+880 30 $6 246-04 / $a Ծիածան Հայաստանեայց $f <Սեպտ. 1861->
+880 30 $6 246-05 / $a Աւետաբեր Հայաստանեայց
+880    $6 260-06 / $a Փարիզ : $b [Խմբագիր և հրատարակիչ Գաբրիէլ Այվազեանց], $c 1855- $e (Paris : $f Imp. W. Remquet)
+880 0  $6 362-07 / $a 1. տարի, թիւ 1 (Յունուար 1855)-
+880    $6 500-08 / $a Տարբեր հրատ.: Փարիզ : ի Գրանոցի Ճանիկի Արամեան, Յունուար 1856-> ; Թեոդոսիա : Խալիպեան Ուսումնարան, <Սեպտ. 1861->
+880    $6 500-09 / $a Քննուած վերջին թիւ: 6. տարի, թիւ 17 (15 Սեպտ. 1861)
+880 1  $6 700-10 / $a Այվազեանց, Գաբրիէլ $d 1812-1880.
+985    $a armenian
+
+01794 ab a2200349 a 4500
+001 14877417
+005 20071121185036.0
+008 040502m18121816it wu|p       0   a0arm  
+035    $a (Uk)002870975
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970012
+019 x  $a 2543960295
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Ditak Biwzandean : $b shabatʿatʿertʿ apa erkshapatʿatʿertʿ, patmutʿiwn kʿaghakʿagan u paterazmakan, banasirakan, ekeghetsakan / $c khmb. Grigor Gaparachean, M. Pʿiwskiwlean, M. Jakhjakhean.
+246 3  $a Tidag Piwzantean
+260    $6 880-02 $a i Venetik : $b i Vans Srboyn Ghazaru, $c 1812-1816.
+300    $a v. ; $c 23 cm.
+500    $a Began 1808; ceased 1816.
+650  0 $a Armenians $v Periodicals.
+651  0 $a Europe $x History $y 1789-1815 $v Periodicals.
+651  0 $a Europe $x Politics and government $y 1789-1915 $v Periodicals.
+651  0 $a France $x History $y Consulate and First Empire, 1799-1815 $v Periodicals.
+700 1  $6 880-03 $a Karapetean, Grigor Khapaṛachi
+700 1  $6 880-04 $a Pʿiwskiwlean, M.
+700 1  $6 880-05 $a Jakhjakhean, Manuēl.
+852 41 $a British Library $b OC $j 17070.d.3.
+880 00 $6 245-01 / $a Դիտակ Բիւզանդեան : $b շաբաթաթերթ ապա երկշաբաթաթերթ, պատմութիւն քաղաքական ու պատերազմական, բանասիրական, եկեղեցական / $c խմբ. Գրիգոր Գապարաճեան, Մ. Փիւսկիւլեան, Մ. Ջախջախեան.
+880    $6 260-02 / $a ի Վենետիկ : $b ի Վանս Սրբոյն Ղազարու, $c 1812-1816.
+880 1  $6 700-03 / $a Կարապետեան, Գրիգոր Խապառաճի.
+880 1  $6 700-04 / $a Փիւսկիւլեան, Մ.
+880 1  $6 700-05 / $a Ջախջախեան, Մանուէլ.
+985    $a armenian
+
+01672cam a2200325 a 4500
+001 14877418
+005 20071121185039.0
+008 040502m19481961ai acf   b    000 0darm  
+035    $a (Uk)006842308
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970013
+040    $a Uk $b eng $c Uk
+100 1  $6 880-01 $a Abovyan, Khachʿatur, $d 1805-1848
+240 10 $a Works. $f 1948
+245 10 $6 880-02 $a Erkeri liakatar zhoghovatsu utʿ hatorov / $c Kh. Abovyan ; [khmb. kolegia, Av. Isahakyan ... [et al.]].
+246 15 $6 880-03 $a Polnoe sobranie sochineniǐ v vosʹmi tomakh
+260    $6 880-04 $a Erevan : $b HSSṚ Gitutʿyunneri Akademiai Hratarakchʿutʿyun, $c 1948-1961.
+300    $a 8 v. in 10 books : $b ill., port. ; $c 26 cm.
+500    $a Illustrated end-papers.
+650  0 $a Armenian literature.
+700 1  $6 880-05 $a Isahakyan, Avetikʿ, $d 1875-1957
+710 2  $6 880-06 $a M. Abeghyani Anvan Grakanutʻyan Institut.
+852 41 $a British Library $b OC $j 17046.h.1
+880 1  $6 100-01 / $a Աբովյան, Խաչատուր, $d 1805-1848.
+880 10 $6 245-02 / $a Երկերի լիակատար ժողովածու ութ հատորով / $c Խ. Աբովյան ; [խմբ. կոլեգիա Ավ. Իսահակյան ... [և ուրշն.]].
+880 15 $6 246-03 / $a Полное собрание сочинений в восьми томах
+880    $6 260-04 / $a Երեվան : $b ՀՍՍՌ Գիտությունների Ակադեմիաի Հրատարակչություն, $c 1948-1961.
+880 1  $6 700-05 / $a Իսահակյան, Ավետիք, $d 1875-1957.
+880 2  $6 710-06 / $a Մ. Աբեղյանի Անվան Գրականության Ինստիտուտ.
+985    $a armenian
+
+01187cab a2200301 a 4500
+001 14879015
+005 20071203081856.0
+008 040502m18641877tu mr|p       0   z0arm  
+035    $a (Uk)002824493
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970001
+019 x  $a 2520240032
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Hoys : $b [drōshak hayreneats, amsagir banasirakan].
+246 3  $a Huys
+246 3  $a Yuys
+260    $6 880-02 $a Armash : $b [Armashi Vankʿ], $c 1864-1877.
+300    $a v. ; $c 23 cm.
+500    $a Hoys. “Hope,” a monthly magazine of literature in modern Armenian, Western dialect, printed at the Convent of the Mother of God at Armash.
+505 0  $a Vol. I, 1-12 (1864-1865), II, 13-24 (1865-1866)
+650  0 $a Armenian literature $v Periodicals.
+650  0 $a Armenian language $v Periodicals.
+650  0 $a Armenians $x Religious life.
+655  4 $a Periodical publications.- Armash
+852 41 $a British Library $b OC $j 17070.g.3.
+880 00 $6 245-01 / $a Յոյս : $b դրօշակ հայրենեաց, ամսագիր բանասիրական].
+880    $6 260-02 / $a Արմաշ : $b [Արմաշի Վանք], $c 1864-1877.
+985    $a armenian2
+

@@ -94,7 +94,7 @@ static int tst_convert_x(yaz_iconv_t cd, const char *buf, const char *cmpbuf,
 {
     int ret = 1;
     WRBUF b = wrbuf_alloc();
-    char outbuf[12];
+    char outbuf[16];
     size_t inbytesleft = strlen(buf);
     const char *inp = buf;
     int rounds = 0;
@@ -489,9 +489,9 @@ static void tst_marc8_to_latin1(void)
     yaz_iconv_close(cd);
 }
 
-static void tst_utf8_to_marc8(void)
+static void tst_utf8_to_marc8(const char *marc8_type)
 {
-    yaz_iconv_t cd = yaz_iconv_open("MARC8", "UTF-8");
+    yaz_iconv_t cd = yaz_iconv_open(marc8_type, "UTF-8");
 
     YAZ_CHECK(cd);
     if (!cd)
@@ -697,7 +697,9 @@ int main (int argc, char **argv)
     tst_advance_to_utf8();
     tst_utf8_to_advance();
 
-    tst_utf8_to_marc8();
+    tst_utf8_to_marc8("marc8");
+    tst_utf8_to_marc8("marc8lossy");
+    tst_utf8_to_marc8("marc8lossless");
 
     tst_latin1_to_marc8();
 

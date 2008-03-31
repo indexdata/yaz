@@ -35,6 +35,7 @@
 
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
+#include <yaz/snprintf.h>
 #include "iconv-p.h"
 
 typedef unsigned long yaz_conv_func_t(unsigned char *inp, size_t inbytesleft,
@@ -95,6 +96,7 @@ struct yaz_iconv_struct {
 
     unsigned write_marc8_second_half_char;
     unsigned long write_marc8_last;
+    int write_marc8_ncr;
     const char *write_marc8_lpage;
     const char *write_marc8_g0;
     const char *write_marc8_g1;
@@ -575,9 +577,6 @@ static size_t flush_combos(yaz_iconv_t cd,
                            char **outbuf, size_t *outbytesleft)
 {
     unsigned long y = cd->write_marc8_last;
-    unsigned char byte;
-    char out_buf[4];
-    size_t out_no = 0;
 
     if (!y)
         return 0;
@@ -591,25 +590,38 @@ static size_t flush_combos(yaz_iconv_t cd,
             return r;
     }
 
-    byte = (unsigned char )((y>>16) & 0xff);
-    if (byte)
-        out_buf[out_no++] = byte;
-    byte = (unsigned char)((y>>8) & 0xff);
-    if (byte)
-        out_buf[out_no++] = byte;
-    byte = (unsigned char )(y & 0xff);
-    if (byte)
-        out_buf[out_no++] = byte;
-
-    if (out_no + 2 >= *outbytesleft)
+    if (9 >= *outbytesleft)
     {
         cd->my_errno = YAZ_ICONV_E2BIG;
         return (size_t) (-1);
     }
+    if (cd->write_marc8_ncr)
+    {
+        yaz_snprintf(*outbuf, 9, "&#x%04x;", y);
+        (*outbytesleft) -= 8;
+        (*outbuf) += 8;
+    }
+    else
+    {
+        char out_buf[4];
+        size_t out_no = 0;
+        unsigned char byte;
 
-    memcpy(*outbuf, out_buf, out_no);
-    *outbuf += out_no;
-    (*outbytesleft) -= out_no;
+
+        byte = (unsigned char )((y>>16) & 0xff);
+        if (byte)
+            out_buf[out_no++] = byte;
+        byte = (unsigned char)((y>>8) & 0xff);
+        if (byte)
+            out_buf[out_no++] = byte;
+        byte = (unsigned char )(y & 0xff);
+        if (byte)
+            out_buf[out_no++] = byte;
+        memcpy(*outbuf, out_buf, out_no);
+        *outbuf += out_no;
+        (*outbytesleft) -= out_no;
+    }
+
     if (cd->write_marc8_second_half_char)
     {
         *(*outbuf)++ = cd->write_marc8_second_half_char;
@@ -617,6 +629,7 @@ static size_t flush_combos(yaz_iconv_t cd,
     }        
 
     cd->write_marc8_last = 0;
+    cd->write_marc8_ncr = 0;
     cd->write_marc8_lpage = 0;
     cd->write_marc8_second_half_char = 0;
     return 0;
@@ -674,14 +687,27 @@ static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
 
 
 static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
-                                char **outbuf, size_t *outbytesleft)
+                                char **outbuf, size_t *outbytesleft,
+                                int loss_mode)
 {
     int comb = 0;
+    int enable_ncr = 0;
     const char *page_chr = 0;
     unsigned long y = lookup_marc8(cd, x, &comb, &page_chr);
 
     if (!y)
-        return (size_t) (-1);
+    {
+        if (loss_mode == 0 || cd->my_errno != YAZ_ICONV_EILSEQ)
+            return (size_t) (-1);
+        page_chr = ESC "(B";
+        if (loss_mode == 1)
+            y = '|';
+        else
+        {
+            y = x; 
+            enable_ncr = 1;
+        }
+    }
 
     if (comb)
     {
@@ -713,6 +739,7 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, unsigned long x,
 
         cd->write_marc8_last = y;
         cd->write_marc8_lpage = page_chr;
+        cd->write_marc8_ncr = enable_ncr;
     }
     return 0;
 }
@@ -727,8 +754,31 @@ static size_t yaz_flush_marc8(yaz_iconv_t cd,
     return yaz_write_marc8_page_chr(cd, outbuf, outbytesleft, ESC "(B");
 }
 
-static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft)
+static size_t yaz_write_marc8_generic(yaz_iconv_t cd, unsigned long x,
+                                      char **outbuf, size_t *outbytesleft,
+                                      int loss_mode);
+
+static size_t yaz_write_marc8_normal(yaz_iconv_t cd, unsigned long x,
+                                     char **outbuf, size_t *outbytesleft)
+{
+    return yaz_write_marc8_generic(cd, x, outbuf, outbytesleft, 0);
+}
+
+static size_t yaz_write_marc8_lossy(yaz_iconv_t cd, unsigned long x,
+                                    char **outbuf, size_t *outbytesleft)
+{
+    return yaz_write_marc8_generic(cd, x, outbuf, outbytesleft, 1);
+}
+
+static size_t yaz_write_marc8_lossless(yaz_iconv_t cd, unsigned long x,
+                                    char **outbuf, size_t *outbytesleft)
+{
+    return yaz_write_marc8_generic(cd, x, outbuf, outbytesleft, 2);
+}
+
+static size_t yaz_write_marc8_generic(yaz_iconv_t cd, unsigned long x,
+                                      char **outbuf, size_t *outbytesleft,
+                                      int loss_mode)
 {
     int i;
     for (i = 0; latin1_comb[i].x1; i++)
@@ -743,11 +793,11 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
             const char *lpage = cd->write_marc8_lpage;
 
             r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
-                                  outbuf, outbytesleft);
+                                  outbuf, outbytesleft, loss_mode);
             if (r)
                 return r;
             r = yaz_write_marc8_2(cd, latin1_comb[i].x2,
-                                  outbuf, outbytesleft);
+                                  outbuf, outbytesleft, loss_mode);
             if (r && cd->my_errno == YAZ_ICONV_E2BIG)
             {
                 /* not enough room. reset output to original values */
@@ -759,7 +809,7 @@ static size_t yaz_write_marc8(yaz_iconv_t cd, unsigned long x,
             return r;
         }
     }
-    return yaz_write_marc8_2(cd, x, outbuf, outbytesleft);
+    return yaz_write_marc8_2(cd, x, outbuf, outbytesleft, loss_mode);
 }
 
 
@@ -846,12 +896,22 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->write_handle = yaz_write_UCS4LE;
         else if (!yaz_matchstr(tocode, "MARC8"))
         {
-            cd->write_handle = yaz_write_marc8;
+            cd->write_handle = yaz_write_marc8_normal;
             cd->flush_handle = yaz_flush_marc8;
         }
         else if (!yaz_matchstr(tocode, "MARC8s"))
         {
-            cd->write_handle = yaz_write_marc8;
+            cd->write_handle = yaz_write_marc8_normal;
+            cd->flush_handle = yaz_flush_marc8;
+        }
+        else if (!yaz_matchstr(tocode, "MARC8lossy"))
+        {
+            cd->write_handle = yaz_write_marc8_lossy;
+            cd->flush_handle = yaz_flush_marc8;
+        }
+        else if (!yaz_matchstr(tocode, "MARC8lossless"))
+        {
+            cd->write_handle = yaz_write_marc8_lossless;
             cd->flush_handle = yaz_flush_marc8;
         }
         else if (!yaz_matchstr(tocode, "advancegreek"))
@@ -939,6 +999,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
         
         cd->write_marc8_second_half_char = 0;
         cd->write_marc8_last = 0;
+        cd->write_marc8_ncr = 0;
         cd->write_marc8_lpage = 0;
         cd->write_marc8_g0 = ESC "(B";
         cd->write_marc8_g1 = 0;

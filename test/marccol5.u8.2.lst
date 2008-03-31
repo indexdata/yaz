@@ -1,0 +1,354 @@
+01741cam a2200301Ka 4500
+001 ocm57665435 
+003 OCoLC
+005 20080328102918.0
+008 050215s2004    ii       d    000 0 eng d
+040    $a ACN $c ACN $d OCLCQ $d IXA $d OCL
+020    $a 8176500623
+020    $a 9788176500623
+035    $a (OCoLC)57665435
+041 0  $a beneng
+092    $a 491.44321
+090    $a PK1687 $b .E65 2004
+049    $a LNNA
+245 00 $6 880-01 $a English-Bengali Bengali-English combined dictionary = $b Iṃrājī - Bāṃlā Bāṃlā - Iṃrājī samshukuta diksánarī / $c compiled by Debasis Adhikary.
+260    $a New Delhi : $b World of Learning : $b Distributed by Star Publications, $c 2004.
+300    $a 1518 p. ; $c 23 cm.
+500    $a "More than 90,000 total words from English to Bengali and Bengali to English."
+546    $a Bengali and English.
+650  0 $a English language $v Dictionaries $x Bengali.
+650  0 $a Bengali language $v Dictionaries $x English.
+700 1  $a Adhikary, Debasis.
+880 00 $6 245-01 $a English-Bengali Bengali-English combined dictionary = $b &#x0987;&#x0982;&#x09b0;&#x09be;&#x099c;&#x09c0; - &#x09ac;&#x09be;&#x0982;&#x09b2;&#x09be; &#x09ac;&#x09be;&#x0982;&#x09b2;&#x09be; - &#x0987;&#x0982;&#x09b0;&#x09be;&#x099c;&#x09c0; &#x09b8;&#x0982;&#x09af;&#x09c1;&#x0995;&#x09cd;&#x09a4; &#x09a1;&#x09bf;&#x0995;&#x09cd;&#x09b6;&#x09a8;&#x09b0;&#x09c0; / $c compiled by Debasis Adhikary.
+880 31 $6 246-00 $a &#x0987;&#x0982;&#x09b0;&#x09be;&#x099c;&#x09c0; - &#x09ac;&#x09be;&#x0982;&#x09b2;&#x09be; &#x09ac;&#x09be;&#x0982;&#x09b2;&#x09be; - &#x0987;&#x0982;&#x09b0;&#x09be;&#x099c;&#x09c0; &#x09b8;&#x0982;&#x09af;&#x09c1;&#x0995;&#x09cd;&#x09a4; &#x09a1;&#x09bf;&#x0995;&#x09cd;&#x09b6;&#x09a8;&#x09b0;&#x09c0;
+994    $a C0 $b LNN
+
+04253nam a22005053i 4500
+001 ocm86174229 
+003 OCoLC
+005 20080328102918.0
+008 070326s1977    ii       b    000 0 san d
+040    $a STF $c STF
+035    $a (OCoLC)86174229
+041 0  $a san $a hin
+050 04 $a PK511 $b 1977
+049    $a LNNA
+100 0  $6 880-01 $a Pāṇini.
+240 10 $a Aṣṭādhyāyī
+245 10 $6 880-02 $a Aṣṭādhyāyīsūtrapāṭhaḥ : $b Pāṇinīyaśikṣā-liṅgānuśāsanasahitaśca / $c Maharṣipāṇinipraṇītaḥ ; upoddhātalekhakaḥ Śrīnārāyaṇa Miśraḥ.
+246 15 $a Aṣṭādhyāyīsūtrapāṭha : $b with Pāṇinīyaśikṣā and Liṅgānuśāsana
+250    $6 880-03 $a 1. saṃskaraṇa.
+260    $6 880-04 $a Vārāṇasī ; $a Dillī : $b Caukhambhā Oriyanṭāliyā ; $a Vārāṇasī : $b anya prāptisthāna, Caukhambhā Viśvabhāratī, $c 1977.
+300    $a 100 p.
+440  0 $6 880-05 $a Gokuladāsa Saṃskr̥ta granthamālā ; $v 29
+546    $a In Sanskrit; introd. in Hindi.
+500    $a "Sampādakaḥ Śrīnārāyaṇa Miśraḥ"--Cover.
+500    $a Added title page in English.
+504    $a Includes bibliographical references.
+650  0 $a Sanskrit language $x Grammar.
+650  0 $a Sanskrit language $x Accents and accentuation.
+700 02 $6 880-06 $a Pāṇini. $t Pāṇinīyaśikṣā.
+700 02 $6 880-07 $a Pāṇini. $t Liṅgānuśāsana.
+700 1  $6 880-08 $a Miśra, Śrīnārāyaṇa.
+740 02 $6 880-09 $a Pāṇinīyaśikṣā.
+740 02 $6 880-10 $a Liṅgānuśāsana.
+880 0  $6 100-01 $a &#x092a;&#x093e;&#x0923;&#x093f;&#x0928;&#x0940;.
+880 10 $6 240-00 $a &#x0905;&#x0937;&#x094d;&#x091f;&#x093e;&#x0927;&#x094d;&#x092f;&#x093e;&#x092f;&#x0940;
+880 10 $6 245-02 $a &#x0905;&#x0937;&#x094d;&#x091f;&#x093e;&#x0927;&#x094d;&#x092f;&#x093e;&#x092f;&#x0940;&#x0938;&#x0942;&#x0924;&#x094d;&#x0930;&#x092a;&#x093e;&#x0920;&#x0903; : $b &#x092a;&#x093e;&#x0923;&#x093f;&#x0923;&#x0940;&#x092f;&#x0936;&#x093f;&#x0915;&#x094d;&#x0937;&#x093e;-&#x0932;&#x093f;&#x0919;&#x094d;&#x0917;&#x093e;&#x0928;&#x0941;&#x0936;&#x093e;&#x0938;&#x0928;&#x0938;&#x0939;&#x093f;&#x0924;&#x0936;&#x094d;&#x0930;&#x094d;&#x091a; / $c &#x092e;&#x0939;&#x0930;&#x094d;&#x0937;&#x093f;&#x092a;&#x093e;&#x0923;&#x093f;&#x0928;&#x093f;&#x092a;&#x094d;&#x0930;&#x0923;&#x0940;&#x0924;&#x0903; ; &#x0909;&#x092a;&#x094b;&#x0926;&#x094d;&#x0918;&#x093e;&#x0924;&#x0932;&#x0947;&#x0916;&#x0915;&#x0903; &#x0936;&#x094d;&#x0930;&#x0940;&#x0928;&#x093e;&#x0930;&#x093e;&#x092f;&#x0923; &#x092e;&#x093f;&#x0936;&#x094d;&#x0930;&#x0903;.
+880    $6 250-03 $a 1. &#x0938;&#x0902;&#x0938;&#x094d;&#x0915;&#x0930;&#x0923;.
+880    $6 260-04 $a &#x0935;&#x093e;&#x0930;&#x093e;&#x0923;&#x0938;&#x0940; ; $a &#x0926;&#x093f;&#x0932;&#x094d;&#x0932;&#x0940; : $b &#x091a;&#x094c;&#x0916;&#x092e;&#x094d;&#x092d;&#x093e; &#x0913;&#x0930;&#x093f;&#x092f;&#x0928;&#x094d;&#x091f;&#x093e;&#x0932;&#x093f;&#x092f;&#x093e; ; $a &#x0935;&#x093e;&#x0930;&#x093e;&#x0923;&#x0938;&#x0940; : $b &#x0905;&#x0928;&#x094d;&#x092f; &#x092a;&#x094d;&#x0930;&#x093e;&#x092a;&#x094d;&#x0924;&#x093f;&#x0938;&#x094d;&#x0925;&#x093e;&#x0928;, &#x091a;&#x094c;&#x0916;&#x092e;&#x094d;&#x092d;&#x093e; &#x0935;&#x093f;&#x0936;&#x094d;&#x0935;&#x092d;&#x093e;&#x0930;&#x0924;&#x0940;, $c 1977.
+880  0 $6 440-05 $a &#x0917;&#x094b;&#x0915;&#x0941;&#x0932;&#x0926;&#x093e;&#x0938; &#x0938;&#x0902;&#x0938;&#x094d;&#x0915;&#x0943;&#x0924; &#x0917;&#x094d;&#x0930;&#x0928;&#x094d;&#x0925;&#x092e;&#x093e;&#x0932;&#x093e; ; $v 29
+880 02 $6 700-06 $a &#x092a;&#x093e;&#x0923;&#x093f;&#x0928;&#x0940;. $t &#x092a;&#x093e;&#x0923;&#x093f;&#x0923;&#x0940;&#x092f;&#x0936;&#x093f;&#x0915;&#x094d;&#x0937;&#x093e;
+880 02 $6 700-07 $a &#x092a;&#x093e;&#x0923;&#x093f;&#x0928;&#x0940;. $t &#x0932;&#x093f;&#x0919;&#x094d;&#x0917;&#x093e;&#x0928;&#x0941;&#x0936;&#x093e;&#x0938;&#x0928;.
+880 1  $6 700-08 $a &#x092e;&#x093f;&#x0936;&#x094d;&#x0930;, &#x0936;&#x094d;&#x0930;&#x0940;&#x0928;&#x093e;&#x0930;&#x093e;&#x092f;&#x0923;.
+880 02 $6 740-09 $a &#x092a;&#x093e;&#x0923;&#x093f;&#x0923;&#x0940;&#x092f;&#x0936;&#x093f;&#x0915;&#x094d;&#x0937;&#x093e;.
+880 02 $6 740-10 $a &#x0932;&#x093f;&#x0919;&#x094d;&#x0917;&#x093e;&#x0928;&#x0941;&#x0936;&#x093e;&#x0938;&#x0928;.
+994    $a C0 $b LNN
+
+02913cam a2200433Ia 4500
+001 ocm44944167 
+003 OCoLC
+005 20080328102918.0
+008 000906s2000    ilua          000 0 tam d
+040    $a OCO $c OCO $d OCL $d OCLCQ $d TEF
+020    $a 0967621208 : $c $24.95
+020    $a 9780967621203
+035    $a (OCoLC)44944167
+041 1  $a tameng $h tam
+050  4 $a PL4758.9.T5 $b T5
+082 04 $a 894.811 $b T597t
+049    $a LNNA
+100 0  $a Tiruvaḷḷuvar.
+240 10 $6 880-01 $a Thirukku ral. $l Tamil & English
+245 10 $6 880-02 $a Thirukkural : $b Thamizh Marai = Tirukkural : the Holy Scripture / $c [by Tiruvalluvar ; English translation by P.S. Sundaram.].
+250    $a 1st ed.
+260    $a Woodridge, Ill. : $b International Tamil Language Foundation, $c c2000.
+300    $a 1813 p. : $b ill. (some col.) ; $c 20 cm.
+500    $a Tamil text, with English translation.
+500    $a "An edition of this translation was published by Penguin Books in 1991."
+500    $a Section 2 and section 3, English translation from Tamil by R. Natarajan.
+546    $a Text in Tamil and English.
+500    $a Non-Latin script record.
+600 00 $a Tiruvaḷḷuvar.
+650  0 $a Tamil literature $v Translations into English.
+650  0 $a Tamil language materials $x Bilingual.
+740 02 $a Handbook of Tamil culture and heritage.
+740 02 $a Tamils guide to future.
+880 10 $6 240-01 $a &#x0ba4;&#x0bbf;&#x0bb0;&#x0bc2;&#x0b95;&#x0bcd;&#x0b95;&#x0bc1; &#x0bb1;&#x0bb3;&#x0bcd;. $l Tamil & English
+880 10 $6 245-02 $a &#x0ba4;&#x0bbf;&#x0bb0;&#x0bc2;&#x0b95;&#x0bcd;&#x0b95;&#x0bc1;&#x0bb1;&#x0bb3;&#x0bcd; : $b &#x0ba4;&#x0bae;&#x0bbf;&#x0bb4;&#x0bcd; &#x0bae;&#x0bb1;&#x0bc8; = Tirukkural : the Holy Scripture / $c [by Tiruvalluvar ; English translation by P.S. Sundaram.]
+880 0  $6 505-00 $a Section 1: &#x0ba4;&#x0bbf;&#x0bb0;&#x0bc2;&#x0b95;&#x0bcd;&#x0b95;&#x0bc1;&#x0bb1;&#x0bb3;&#x0bcd; : Tirukkural -- Section 2: &#x0ba4;&#x0bb1;&#x0bbf;&#x0bb4;&#x0bcd;&#x0baa;&#x0bcd; &#x0baa;&#x0ba3;&#x0bcd;&#x0baa;&#x0bbe;&#x0b9f;&#x0bcd;&#x0b9f;&#x0bc2;&#x0b95;&#x0bcd; &#x0b95;&#x0bc8;&#x0baf;&#x0bc7;&#x0b9f;&#x0bc2; : The handbook of Tamil culture and heritage -- Section 3: &#x0ba4;&#x0bae;&#x0bbf;&#x0bb4;&#x0bbf;&#x0ba9; &#x0b8e;&#x0ba4;&#x0bbf;&#x0bb0;&#x0bcd;&#x0b95;&#x0bbe;&#x0bb2; &#x0bb5;&#x0bb4;&#x0bbf;&#x0b95;&#x0bbe;&#x0b9f;&#x0bcd;&#x0b9f;&#x0bbf; : Tamils guide to future.
+880 02 $6 740-00 $a &#x0ba4;&#x0bae;&#x0bbf;&#x0bb4;&#x0bcd;&#x0baa;&#x0bcd; &#x0baa;&#x0ba3;&#x0bcd;&#x0baa;&#x0bbe;&#x0b9f;&#x0bcd;&#x0b9f;&#x0bc2;&#x0b95;&#x0bcd; &#x0b95;&#x0bc8;&#x0baf;&#x0bc7;&#x0b9f;&#x0bc2; : The handbook of Tamil culture and heritage.
+880 02 $6 740-00 $a &#x0ba4;&#x0bae;&#x0bbf;&#x0bb4;&#x0bbf;&#x0ba9; &#x0b8e;&#x0ba4;&#x0bbf;&#x0bb0;&#x0bcd;&#x0b95;&#x0bbe;&#x0bb2; &#x0bb5;&#x0bb4;&#x0bbf;&#x0b95;&#x0bbe;&#x0b9f;&#x0bcd;&#x0b9f;&#x0bbf; : Tamils guide to future.
+994    $a C0 $b LNN
+
+01358cam a2200301Ia 4500
+001 ocm62425106 
+003 OCoLC
+005 20080328102918.0
+008 051203s2002    th            000 f thaod
+040    $a TEF $c TEF $d LNQ $d OCL
+020    $a 9749204808
+020    $a 9789749204801
+035    $a (OCoLC)62425106
+090    $a PL4209.D837 $b P57 2002
+049    $a LNNA
+100 0  $6 880-01 $a Dūangtawan.
+245 10 $6 880-02 $a Phračhan sǣnkon / $c Dūangtawan.
+250    $6 880-03 $a Phim khrang thī 3.
+260    $6 880-04 $a Krung Thēp : $b Phimkham Samnakphim, $c 2545 [2002]
+300    $a 154 p. ; $c 21 cm.
+500    $a Novel.
+546    $a In Thai.
+655  7 $a Humorous fiction. $2 gsafd
+880 0  $6 100-01 $a &#x0e14;&#x0e27;&#x0e07;&#x0e15;&#x0e30;&#x0e27;&#x0e31;&#x0e19;.
+880 10 $6 245-02 $a &#x0e1e;&#x0e23;&#x0e30;&#x0e08;&#x0e31;&#x0e19;&#x0e17;&#x0e23;&#x0e4c;&#x0e41;&#x0e2a;&#x0e19;&#x0e01;&#x0e25; / $c &#x0e14;&#x0e27;&#x0e07;&#x0e15;&#x0e30;&#x0e27;&#x0e31;&#x0e19;.
+880    $6 250-03 $a &#x0e1e;&#x0e34;&#x0e21;&#x0e1e;&#x0e4c;&#x0e04;&#x0e23;&#x0e31;&#x0e49;&#x0e07;&#x0e17;&#x0e35;&#x0e48; 3.
+880    $6 260-04 $a &#x0e01;&#x0e23;&#x0e38;&#x0e07;&#x0e40;&#x0e17;&#x0e1e;&#x0e2f; : $b &#x0e1e;&#x0e34;&#x0e21;&#x0e1e;&#x0e4c;&#x0e04;&#x0e33; &#x0e2a;&#x0e32;&#x0e19;&#x0e31;&#x0e01;&#x0e1e;&#x0e34;&#x0e21;&#x0e1e;&#x0e4c;, $c 2545.
+994    $a C0 $b LNN
+
+05353cam a2200409 a 4500
+001 14876782
+005 20071121181842.0
+008 990326s1997    ai a     b    001 0 armo 
+035    $a (Uk)006855813
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a    99189840 
+040    $a DLC $b eng $c DLC $d DLC-R $d Uk
+043    $a a-ai--- $a a-tu---
+050 00 $a BX121 $b .S63 1997
+100 1  $6 880-01 $a Smbatyants&#x02bf;, Artak, $c Episkopos, $d 1876-1937
+245 10 $6 880-02 $a Artak Episkopos Smbatyants&#x02bf; (Taushets&#x02bf;i) : hogevor, grakan, patma-banasirakan gortsuneut&#x02bf;yuně ev gndakaharut&#x02bf;yuně, 1876-1937 t&#x02bf;t&#x02bf;. / $c kazmets&#x02bf; Sandro Behbudyan.
+260    $6 880-03 $a Erevan : $b "Anahit", $c 1997.
+300    $a 691 p. : $b ill. ; $c 27 cm.
+440  0 $6 880-04 $a Vaveragrer Hay Ekeghets&#x02bf;u patmut&#x02bf;yan ; $v girk&#x02bf; 3
+500    $6 880-05 $a At head of title: Hayastani Hanrapetut&#x02bf;yan Kaṛavarut&#x02bf;yann aṛěnt&#x02bf;er. Arkhivayin Gortsi Varch&#x02bf;ut&#x02bf;yun. Arvesti, Grakanut&#x02bf;yan ev Mamuli P&#x02bf;astat&#x02bf;ght&#x02bf;eri Petakan Kentronakan Arkhiv.
+504    $a Includes bibliographical references and indexes.
+600 10 $6 880-06 $a Smbatyants&#x02bf;, Artak, $c Episkopos, $d 1876-1937
+610 20 $6 880-07 $a Armenian Church $x History $v Sources.
+650  0 $a Armenians $z Turkey.
+651  0 $a Armenia $x History $y 1801-1900 $v Sources.
+651  0 $a Armenia $x History $y 1901- $v Sources.
+700 1  $6 880-08 $a Behbudyan, Sandro $q (Sandro Artashesi), $d 1934-
+852 41 $a British Library $b OC $j HEC.1994.a.294/3
+880 1  $6 100-01 / $a &#x054d;&#x0574;&#x0562;&#x0561;&#x057f;&#x0575;&#x0561;&#x0576;&#x0581;, &#x0531;&#x0580;&#x057f;&#x0561;&#x056f;, $c &#x0535;&#x0562;&#x056b;&#x057d;&#x056f;&#x0578;&#x057a;&#x0578;&#x057d;, $d 1876-1937.
+880 10 $6 245-02 / $a &#x0531;&#x0580;&#x057f;&#x0561;&#x056f; &#x0535;&#x0562;&#x056b;&#x057d;&#x056f;&#x0578;&#x057a;&#x0578;&#x057d; &#x054d;&#x0574;&#x0562;&#x0561;&#x057f;&#x0575;&#x0561;&#x0576;&#x0581; (&#x054f;&#x0561;&#x0578;&#x0582;&#x0577;&#x0565;&#x0581;&#x056b;) : &#x0570;&#x0578;&#x0563;&#x0565;&#x057e;&#x0578;&#x0580;, &#x0563;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576; &#x057a;&#x0561;&#x057f;&#x0574;&#x0561;-&#x0562;&#x0561;&#x0576;&#x0561;&#x057d;&#x056b;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576; &#x0563;&#x0578;&#x0580;&#x056e;&#x0578;&#x0582;&#x0576;&#x0565;&#x0578;&#x0582;&#x0569;&#x0575;&#x0578;&#x0582;&#x0576;&#x0568; &#x0565;&#x057e; &#x0563;&#x0576;&#x0564;&#x0561;&#x056f;&#x0561;&#x0570;&#x0561;&#x0580;&#x0578;&#x0582;&#x0569;&#x0575;&#x0578;&#x0582;&#x0576;&#x0568;, 1876-1937 &#x0569;&#x0569;. / $c &#x056f;&#x0561;&#x0566;&#x0574;&#x0565;&#x0581; &#x054d;&#x0561;&#x0576;&#x0564;&#x0580;&#x0578; &#x0532;&#x0565;&#x0570;&#x0562;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576;.
+880    $6 260-03 / $a &#x0535;&#x0580;&#x0565;&#x057e;&#x0561;&#x0576; : $b «&#x0531;&#x0576;&#x0561;&#x0570;&#x056b;&#x057f;», $c 1997.
+880  0 $6 440-04 / $a &#x054e;&#x0561;&#x057e;&#x0565;&#x0580;&#x0561;&#x0563;&#x0580;&#x0565;&#x0580; &#x0540;&#x0561;&#x0575; &#x0535;&#x056f;&#x0565;&#x0572;&#x0565;&#x0581;&#x0578;&#x0582; &#x057a;&#x0561;&#x057f;&#x0574;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576; ; $v &#x0563;&#x056b;&#x0580;&#x0584; 3
+880    $6 500-05 / $a &#x054f;&#x056b;&#x057f;&#x0572;&#x0578;&#x057d;&#x056b; &#x0563;&#x056c;&#x0578;&#x0582;&#x056d;: &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x056b; &#x0540;&#x0561;&#x0576;&#x0580;&#x0561;&#x057a;&#x0565;&#x057f;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576; &#x053f;&#x0561;&#x057c;&#x0561;&#x057e;&#x0561;&#x0580;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576; &#x0561;&#x057c;&#x0568;&#x0576;&#x0569;&#x0565;&#x0580;. &#x0531;&#x0580;&#x056d;&#x056b;&#x057e;&#x0561;&#x0575;&#x056b;&#x0576; &#x0533;&#x0578;&#x0580;&#x056e;&#x056b; &#x054e;&#x0561;&#x0580;&#x0579;&#x0578;&#x0582;&#x0569;&#x0575;&#x0578;&#x0582;&#x0576;. &#x0531;&#x0580;&#x057e;&#x0565;&#x057d;&#x057f;&#x056b;, &#x0533;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576; &#x0565;&#x057e; &#x0544;&#x0561;&#x0574;&#x0578;&#x0582;&#x056c;&#x056b; &#x0532;&#x0561;&#x057d;&#x057f;&#x0561;&#x0569;&#x0572;&#x0569;&#x0565;&#x0580;&#x056b; &#x054a;&#x0565;&#x057f;&#x0561;&#x056f;&#x0561;&#x0576; &#x053f;&#x0565;&#x0576;&#x057f;&#x0580;&#x0578;&#x0576;&#x0561;&#x056f;&#x0561;&#x0576; &#x0531;&#x0580;&#x056d;&#x056b;&#x057e;.
+880 10 $6 600-06 / $a &#x054d;&#x0574;&#x0562;&#x0561;&#x057f;&#x0575;&#x0561;&#x0576;&#x0581;, &#x0531;&#x0580;&#x057f;&#x0561;&#x056f;, $c &#x0535;&#x0562;&#x056b;&#x057d;&#x056f;&#x0578;&#x057a;&#x0578;&#x057d;, $d 1876-1937.
+880 20 $6 610-07 / $a &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581; &#x054d;. &#x0535;&#x056f;&#x0565;&#x0572;&#x0565;&#x0581;&#x056b; $x &#x054a;&#x0561;&#x057f;&#x0574;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576; $v &#x0531;&#x0572;&#x0562;&#x056b;&#x0582;&#x0580;&#x0576;&#x0565;&#x0580;.
+880 1  $6 700-08 / $a &#x0532;&#x0565;&#x0570;&#x0562;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576;, &#x054d;&#x0561;&#x0576;&#x0564;&#x0580;&#x0578;, $q (&#x054d;&#x0561;&#x0576;&#x0564;&#x0580;&#x0578; &#x0531;&#x0580;&#x057f;&#x0561;&#x0577;&#x0565;&#x057d;&#x056b;), $d 1934-
+985    $a armenian LC
+
+02251 am a2200349 a 4500
+001 14876783
+005 20071121181846.0
+008 040502m19461951sy ac         000 0 arm  
+035    $a (Uk)006881105
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2003207810
+035    $a (OCoLC)ocm51506679
+040    $a DLC $b eng $c DLC $d OCoLC $d Uk
+043    $a a-sy---
+050 00 $a BV4539.A75 $b M36
+245 00 $6 880-01 $a Mananay : $b taregrk&#x02bf;oyk.
+260    $6 880-02 $a Halēp : $b Hratarakut&#x02bf;iwn Hogewor Eghbarut&#x02bf;ean Eritasardats&#x02bf;, $c 1946-1951
+300    $a 2 v. : $b ill., ports. ; $c 23 cm.
+505 0  $a [1]. 1946, 5-6. 1950-1951.
+610 20 $6 880-03 $a Hogewor Eghbayrut&#x02bf;iwn Eritasardats&#x02bf;.
+650  0 $a Armenians $x Religious life $z Syria.
+650  0 $a Almanacs, Armenian $z Syria.
+650  0 $a Youth $x Religious life $z Syria.
+650  0 $a Armenians $z Syria $x Social life and customs.
+650  0 $a Armenians $z Lebanon $x Social life and customs.
+710 2  $6 880-04 $a Hogewor Eghbayrut&#x02bf;iwn Eritasardats&#x02bf;.
+852 41 $a British Library $b OC $j HEC.2002.a.492
+880 00 $6 245-01 / $a &#x0544;&#x0561;&#x0576;&#x0561;&#x0576;&#x0561;&#x0575; : $b &#x057f;&#x0561;&#x0580;&#x0565;&#x0563;&#x0580;&#x0584;&#x0578;&#x0575;&#x056f;.
+880    $6 260-02 / $a &#x0540;&#x0561;&#x056c;&#x0567;&#x057a; : $b &#x0540;&#x0580;&#x0561;&#x057f;&#x0561;&#x0580;&#x0561;&#x056f;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576; &#x0540;&#x0578;&#x0563;&#x0565;&#x0582;&#x0578;&#x0580; &#x0535;&#x0572;&#x0562;&#x0561;&#x0575;&#x0580;&#x0578;&#x0582;&#x0569;&#x0565;&#x0561;&#x0576; &#x0535;&#x0580;&#x056b;&#x057f;&#x0561;&#x057d;&#x0580;&#x0564;&#x0561;&#x0581;, $c 1946-1951.
+880 20 $6 610-03 / $a &#x0540;&#x0578;&#x0563;&#x0565;&#x0582;&#x0578;&#x0580; &#x0535;&#x0572;&#x0562;&#x0561;&#x0575;&#x0580;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576; &#x0535;&#x0580;&#x056b;&#x057f;&#x0561;&#x057d;&#x0580;&#x0564;&#x0561;&#x0581;.
+880 2  $6 710-04 / $a &#x0540;&#x0578;&#x0563;&#x0565;&#x0582;&#x0578;&#x0580; &#x0535;&#x0572;&#x0562;&#x0561;&#x0575;&#x0580;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576; &#x0535;&#x0580;&#x056b;&#x057f;&#x0561;&#x057d;&#x0580;&#x0564;&#x0561;&#x0581;.
+985    $a armenian LC
+
+02855cab a2200385 a 4500
+001 14877410
+005 20071121185010.0
+008 040502m18971900enkmr|p       0   z0arm  
+035    $a (Uk)002848266
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970004
+019 x  $a 2532250240
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Mart : $b [amsat&#x02bf;ert&#x02bf;, ōrgan Hnch&#x02bf;akean Kusakts&#x02bf;ut&#x02bf;ean].
+246 3  $a Mard
+260    $6 880-02 $a London : $b [Sots&#x02bf;ial Demokrat Hnch&#x02bf;akean Kusakts&#x02bf;ut&#x02bf;iwn], $c 1897-1900.
+300    $a v. ; $c 44 cm.
+500    $a "Battle": an Armenian political newspaper.
+500    $a "Mart" published after 1897, as "Hnch&#x02bf;ak" could not be due to legal proceedings.
+505 0  $a I year, no. 1 (15 Apr., 1897)-10 (10 Apr., 1898); II year, no. 11 (7 May, 1898)-16 (Mar., 1899); III year, no. 17 (Aug., 1899)-27 (Oct., 1900)
+610 20 $6 880-03 $a Sots&#x02bf;ial Demokrat Hnch&#x02bf;akean Kusakts&#x02bf;ut&#x02bf;iwn
+650  0 $a Armenian periodicals.
+650  0 $a Armenians $x Politics and government.
+651  0 $a Armenia $x Politics and government.
+651  0 $a Armenia $x History $y 1801-1900.
+655  4 $a Periodical publications.- London
+710 2  $6 880-04 $a Sots&#x02bf;ial Demokrat Hnch&#x02bf;akean Kusakts&#x02bf;ut&#x02bf;iwn
+740 0  $6 880-05 $a Hnch&#x02bf;ak.
+852 41 $a British Library $b HMNTS $j OP.411
+880 00 $6 245-01 / $a &#x0544;&#x0561;&#x0580;&#x057f; : $b [&#x0561;&#x0574;&#x057d;&#x0561;&#x0569;&#x0565;&#x0580;&#x0569;, &#x0585;&#x0580;&#x0563;&#x0561;&#x0576; &#x0540;&#x0576;&#x0579;&#x0561;&#x056f;&#x0565;&#x0561;&#x0576; &#x053f;&#x0578;&#x0582;&#x057d;&#x0561;&#x056f;&#x0581;&#x0578;&#x0582;&#x0569;&#x0565;&#x0561;&#x0576;].
+880    $6 260-02 / $a &#x053c;&#x0578;&#x0576;&#x0564;&#x0578;&#x0576; : $b [&#x054d;&#x0578;&#x0581;&#x056b;&#x0561;&#x056c; &#x0534;&#x0565;&#x0574;&#x0578;&#x056f;&#x0580;&#x0561;&#x057f; &#x0540;&#x0576;&#x0579;&#x0561;&#x056f;&#x0565;&#x0561;&#x0576; &#x053f;&#x0578;&#x0582;&#x057d;&#x0561;&#x056f;&#x0581;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576;], $c 1897-1900.
+880 20 $6 610-03 / $a &#x054d;&#x0578;&#x0581;&#x056b;&#x0561;&#x056c; &#x0534;&#x0565;&#x0574;&#x0578;&#x056f;&#x0580;&#x0561;&#x057f; &#x0540;&#x0576;&#x0579;&#x0561;&#x056f;&#x0565;&#x0561;&#x0576; &#x053f;&#x0578;&#x0582;&#x057d;&#x0561;&#x056f;&#x0581;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576;.
+880 2  $6 710-04 / $a &#x054d;&#x0578;&#x0581;&#x056b;&#x0561;&#x056c; &#x0534;&#x0565;&#x0574;&#x0578;&#x056f;&#x0580;&#x0561;&#x057f; &#x0540;&#x0576;&#x0579;&#x0561;&#x056f;&#x0565;&#x0561;&#x0576; &#x053f;&#x0578;&#x0582;&#x057d;&#x0561;&#x056f;&#x0581;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576;.
+880 0  $6 740-05 / $a &#x0540;&#x0576;&#x0579;&#x0561;&#x056f;.
+985    $a armenian
+
+05195cab a2200601 a 4500
+001 14877413
+005 20071121185021.0
+008 000316d18551865fr er p       0   z0armod
+035    $a (Uk)002863571
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970007
+019 x  $a 2541830122
+035    $a (OCoLC)43646516
+040    $a Uk $b eng $c Uk
+041 1  $a arm $a fre $a rus $h arm
+043    $a a-ai--- $a e------
+245 00 $6 880-01 $a Maseats&#x02bf; aghawni : $b awetaber Hayastaneayts&#x02bf; / $c [khmb. Gabriēl Ayvazeants&#x02bf;].
+246 15 $a Colombe du Massis
+246 15 $a Messager de l'Arménie
+246 13 $6 880-02 $a Maseats&#x02bf; aghawni awetaber Hayastaneayts&#x02bf;
+246 14 $6 880-03 $a Maseats&#x02bf; aghawni ew Tsiatsan Hayastaneayts&#x02bf; $f <Sept. 1861->
+246 30 $6 880-04 $a Tsiatsan Hayastaneayts&#x02bf; $f <Sept. 1861->
+246 30 $6 880-05 $a Awetaber Hayastaneayts&#x02bf;
+260    $6 880-06 $a P&#x02bf;ariz : $b [Khmbagir ew hratarakich&#x02bf; Gabriēl Ayvazeants&#x02bf;], $c 1855- $e (Paris : $f Imp. W. Remquet)
+300    $a v. : $b ill., ports. ; $c 32 cm.
+310    $a Biweekly, $b <1 Sept. 1861->
+321    $a Monthly, $b Jan. 1855->
+362 0  $6 880-07 $a 1. tari, t&#x02bf;iw 1 (Hunuar 1855)-
+362 1  $a Ceased in 1865.
+500    $6 880-08 $a Imprint varies: Paris : i Granots&#x02bf;i Chaniki Aramean, Jan. 1856-> ; Theodosia : Khalipean Usumnaran, <Sept. 1861->
+500    $6 880-09 $a Latest issue consulted: 6. tari, t&#x02bf;iw 17 (15 Sept. 1861)
+505 0  $a Vol. I (1855); vol. II (1856); vol. III (1857); vol. VI, 1-8 (1861)
+515    $a Not published in 1859.
+546    $a In Armenian and French.
+650  0 $a Armenians $v Periodicals.
+650  0 $a Armenians $z Foreign countries $v Periodicals.
+650  0 $a Armenians $v Biography $v Periodicals.
+651  0 $a Armenia $v Periodicals.
+651  0 $a Europe $v 19th century $v Periodicals.
+655  4 $a Periodical publications.- Paris
+700 1  $6 880-10 $a Ayvazovsk&#x02bf;i, Gabriēl, $d 1812-1880.
+852 41 $a British Library $b OC $j 17070.g.5.
+880 00 $6 245-01 / $a &#x0544;&#x0561;&#x057d;&#x0565;&#x0561;&#x0581; &#x0561;&#x0572;&#x0561;&#x0582;&#x0576;&#x056b; : $b &#x0561;&#x0582;&#x0565;&#x057f;&#x0561;&#x0562;&#x0565;&#x0580; &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581; / $c [&#x056d;&#x0574;&#x0562;. &#x0533;&#x0561;&#x0562;&#x0580;&#x056b;&#x0567;&#x056c; &#x0531;&#x0575;&#x057e;&#x0561;&#x0566;&#x0565;&#x0561;&#x0576;&#x0581;].
+880 13 $6 246-02 / $a &#x0544;&#x0561;&#x057d;&#x0565;&#x0561;&#x0581; &#x0561;&#x0572;&#x0561;&#x0582;&#x0576;&#x056b; &#x0561;&#x0582;&#x0565;&#x057f;&#x0561;&#x0562;&#x0565;&#x0580; &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581;
+880 14 $6 246-03 / $a &#x0544;&#x0561;&#x057d;&#x0565;&#x0561;&#x0581; &#x0561;&#x0572;&#x0561;&#x0582;&#x0576;&#x056b; &#x0565;&#x0582; &#x053e;&#x056b;&#x0561;&#x056e;&#x0561;&#x0576; &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581; $f <&#x054d;&#x0565;&#x057a;&#x057f;. 1861->
+880 30 $6 246-04 / $a &#x053e;&#x056b;&#x0561;&#x056e;&#x0561;&#x0576; &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581; $f <&#x054d;&#x0565;&#x057a;&#x057f;. 1861->
+880 30 $6 246-05 / $a &#x0531;&#x0582;&#x0565;&#x057f;&#x0561;&#x0562;&#x0565;&#x0580; &#x0540;&#x0561;&#x0575;&#x0561;&#x057d;&#x057f;&#x0561;&#x0576;&#x0565;&#x0561;&#x0575;&#x0581;
+880    $6 260-06 / $a &#x0553;&#x0561;&#x0580;&#x056b;&#x0566; : $b [&#x053d;&#x0574;&#x0562;&#x0561;&#x0563;&#x056b;&#x0580; &#x0587; &#x0570;&#x0580;&#x0561;&#x057f;&#x0561;&#x0580;&#x0561;&#x056f;&#x056b;&#x0579; &#x0533;&#x0561;&#x0562;&#x0580;&#x056b;&#x0567;&#x056c; &#x0531;&#x0575;&#x057e;&#x0561;&#x0566;&#x0565;&#x0561;&#x0576;&#x0581;], $c 1855- $e (Paris : $f Imp. W. Remquet)
+880 0  $6 362-07 / $a 1. &#x057f;&#x0561;&#x0580;&#x056b;, &#x0569;&#x056b;&#x0582; 1 (&#x0545;&#x0578;&#x0582;&#x0576;&#x0578;&#x0582;&#x0561;&#x0580; 1855)-
+880    $6 500-08 / $a &#x054f;&#x0561;&#x0580;&#x0562;&#x0565;&#x0580; &#x0570;&#x0580;&#x0561;&#x057f;.: &#x0553;&#x0561;&#x0580;&#x056b;&#x0566; : &#x056b; &#x0533;&#x0580;&#x0561;&#x0576;&#x0578;&#x0581;&#x056b; &#x0543;&#x0561;&#x0576;&#x056b;&#x056f;&#x056b; &#x0531;&#x0580;&#x0561;&#x0574;&#x0565;&#x0561;&#x0576;, &#x0545;&#x0578;&#x0582;&#x0576;&#x0578;&#x0582;&#x0561;&#x0580; 1856-> ; &#x0539;&#x0565;&#x0578;&#x0564;&#x0578;&#x057d;&#x056b;&#x0561; : &#x053d;&#x0561;&#x056c;&#x056b;&#x057a;&#x0565;&#x0561;&#x0576; &#x0548;&#x0582;&#x057d;&#x0578;&#x0582;&#x0574;&#x0576;&#x0561;&#x0580;&#x0561;&#x0576;, <&#x054d;&#x0565;&#x057a;&#x057f;. 1861->
+880    $6 500-09 / $a &#x0554;&#x0576;&#x0576;&#x0578;&#x0582;&#x0561;&#x056e; &#x057e;&#x0565;&#x0580;&#x057b;&#x056b;&#x0576; &#x0569;&#x056b;&#x0582;: 6. &#x057f;&#x0561;&#x0580;&#x056b;, &#x0569;&#x056b;&#x0582; 17 (15 &#x054d;&#x0565;&#x057a;&#x057f;. 1861)
+880 1  $6 700-10 / $a &#x0531;&#x0575;&#x057e;&#x0561;&#x0566;&#x0565;&#x0561;&#x0576;&#x0581;, &#x0533;&#x0561;&#x0562;&#x0580;&#x056b;&#x0567;&#x056c; $d 1812-1880.
+985    $a armenian
+
+03142 ab a2200349 a 4500
+001 14877417
+005 20071121185036.0
+008 040502m18121816it wu|p       0   a0arm  
+035    $a (Uk)002870975
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970012
+019 x  $a 2543960295
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Ditak Biwzandean : $b shabat&#x02bf;at&#x02bf;ert&#x02bf; apa erkshapat&#x02bf;at&#x02bf;ert&#x02bf;, patmut&#x02bf;iwn k&#x02bf;aghak&#x02bf;agan u paterazmakan, banasirakan, ekeghetsakan / $c khmb. Grigor Gaparachean, M. P&#x02bf;iwskiwlean, M. Jakhjakhean.
+246 3  $a Tidag Piwzantean
+260    $6 880-02 $a i Venetik : $b i Vans Srboyn Ghazaru, $c 1812-1816.
+300    $a v. ; $c 23 cm.
+500    $a Began 1808; ceased 1816.
+650  0 $a Armenians $v Periodicals.
+651  0 $a Europe $x History $y 1789-1815 $v Periodicals.
+651  0 $a Europe $x Politics and government $y 1789-1915 $v Periodicals.
+651  0 $a France $x History $y Consulate and First Empire, 1799-1815 $v Periodicals.
+700 1  $6 880-03 $a Karapetean, Grigor Khapaṛachi
+700 1  $6 880-04 $a P&#x02bf;iwskiwlean, M.
+700 1  $6 880-05 $a Jakhjakhean, Manuēl.
+852 41 $a British Library $b OC $j 17070.d.3.
+880 00 $6 245-01 / $a &#x0534;&#x056b;&#x057f;&#x0561;&#x056f; &#x0532;&#x056b;&#x0582;&#x0566;&#x0561;&#x0576;&#x0564;&#x0565;&#x0561;&#x0576; : $b &#x0577;&#x0561;&#x0562;&#x0561;&#x0569;&#x0561;&#x0569;&#x0565;&#x0580;&#x0569; &#x0561;&#x057a;&#x0561; &#x0565;&#x0580;&#x056f;&#x0577;&#x0561;&#x0562;&#x0561;&#x0569;&#x0561;&#x0569;&#x0565;&#x0580;&#x0569;, &#x057a;&#x0561;&#x057f;&#x0574;&#x0578;&#x0582;&#x0569;&#x056b;&#x0582;&#x0576; &#x0584;&#x0561;&#x0572;&#x0561;&#x0584;&#x0561;&#x056f;&#x0561;&#x0576; &#x0578;&#x0582; &#x057a;&#x0561;&#x057f;&#x0565;&#x0580;&#x0561;&#x0566;&#x0574;&#x0561;&#x056f;&#x0561;&#x0576;, &#x0562;&#x0561;&#x0576;&#x0561;&#x057d;&#x056b;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576;, &#x0565;&#x056f;&#x0565;&#x0572;&#x0565;&#x0581;&#x0561;&#x056f;&#x0561;&#x0576; / $c &#x056d;&#x0574;&#x0562;. &#x0533;&#x0580;&#x056b;&#x0563;&#x0578;&#x0580; &#x0533;&#x0561;&#x057a;&#x0561;&#x0580;&#x0561;&#x0573;&#x0565;&#x0561;&#x0576;, &#x0544;. &#x0553;&#x056b;&#x0582;&#x057d;&#x056f;&#x056b;&#x0582;&#x056c;&#x0565;&#x0561;&#x0576;, &#x0544;. &#x054b;&#x0561;&#x056d;&#x057b;&#x0561;&#x056d;&#x0565;&#x0561;&#x0576;.
+880    $6 260-02 / $a &#x056b; &#x054e;&#x0565;&#x0576;&#x0565;&#x057f;&#x056b;&#x056f; : $b &#x056b; &#x054e;&#x0561;&#x0576;&#x057d; &#x054d;&#x0580;&#x0562;&#x0578;&#x0575;&#x0576; &#x0542;&#x0561;&#x0566;&#x0561;&#x0580;&#x0578;&#x0582;, $c 1812-1816.
+880 1  $6 700-03 / $a &#x053f;&#x0561;&#x0580;&#x0561;&#x057a;&#x0565;&#x057f;&#x0565;&#x0561;&#x0576;, &#x0533;&#x0580;&#x056b;&#x0563;&#x0578;&#x0580; &#x053d;&#x0561;&#x057a;&#x0561;&#x057c;&#x0561;&#x0573;&#x056b;.
+880 1  $6 700-04 / $a &#x0553;&#x056b;&#x0582;&#x057d;&#x056f;&#x056b;&#x0582;&#x056c;&#x0565;&#x0561;&#x0576;, &#x0544;.
+880 1  $6 700-05 / $a &#x054b;&#x0561;&#x056d;&#x057b;&#x0561;&#x056d;&#x0565;&#x0561;&#x0576;, &#x0544;&#x0561;&#x0576;&#x0578;&#x0582;&#x0567;&#x056c;.
+985    $a armenian
+
+02797cam a2200325 a 4500
+001 14877418
+005 20071121185039.0
+008 040502m19481961ai acf   b    000 0darm  
+035    $a (Uk)006842308
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970013
+040    $a Uk $b eng $c Uk
+100 1  $6 880-01 $a Abovyan, Khach&#x02bf;atur, $d 1805-1848
+240 10 $a Works. $f 1948
+245 10 $6 880-02 $a Erkeri liakatar zhoghovatsu ut&#x02bf; hatorov / $c Kh. Abovyan ; [khmb. kolegia, Av. Isahakyan ... [et al.]].
+246 15 $6 880-03 $a Polnoe sobranie sochineniǐ v vosʹmi tomakh
+260    $6 880-04 $a Erevan : $b HSSṚ Gitut&#x02bf;yunneri Akademiai Hratarakch&#x02bf;ut&#x02bf;yun, $c 1948-1961.
+300    $a 8 v. in 10 books : $b ill., port. ; $c 26 cm.
+500    $a Illustrated end-papers.
+650  0 $a Armenian literature.
+700 1  $6 880-05 $a Isahakyan, Avetik&#x02bf;, $d 1875-1957
+710 2  $6 880-06 $a M. Abeghyani Anvan Grakanutʻyan Institut.
+852 41 $a British Library $b OC $j 17046.h.1
+880 1  $6 100-01 / $a &#x0531;&#x0562;&#x0578;&#x057e;&#x0575;&#x0561;&#x0576;, &#x053d;&#x0561;&#x0579;&#x0561;&#x057f;&#x0578;&#x0582;&#x0580;, $d 1805-1848.
+880 10 $6 245-02 / $a &#x0535;&#x0580;&#x056f;&#x0565;&#x0580;&#x056b; &#x056c;&#x056b;&#x0561;&#x056f;&#x0561;&#x057f;&#x0561;&#x0580; &#x056a;&#x0578;&#x0572;&#x0578;&#x057e;&#x0561;&#x056e;&#x0578;&#x0582; &#x0578;&#x0582;&#x0569; &#x0570;&#x0561;&#x057f;&#x0578;&#x0580;&#x0578;&#x057e; / $c &#x053d;. &#x0531;&#x0562;&#x0578;&#x057e;&#x0575;&#x0561;&#x0576; ; [&#x056d;&#x0574;&#x0562;. &#x056f;&#x0578;&#x056c;&#x0565;&#x0563;&#x056b;&#x0561; &#x0531;&#x057e;. &#x053b;&#x057d;&#x0561;&#x0570;&#x0561;&#x056f;&#x0575;&#x0561;&#x0576; ... [&#x0587; &#x0578;&#x0582;&#x0580;&#x0577;&#x0576;.]].
+880 15 $6 246-03 / $a Полное собрание сочинений в восьми томах
+880    $6 260-04 / $a &#x0535;&#x0580;&#x0565;&#x057e;&#x0561;&#x0576; : $b &#x0540;&#x054d;&#x054d;&#x054c; &#x0533;&#x056b;&#x057f;&#x0578;&#x0582;&#x0569;&#x0575;&#x0578;&#x0582;&#x0576;&#x0576;&#x0565;&#x0580;&#x056b; &#x0531;&#x056f;&#x0561;&#x0564;&#x0565;&#x0574;&#x056b;&#x0561;&#x056b; &#x0540;&#x0580;&#x0561;&#x057f;&#x0561;&#x0580;&#x0561;&#x056f;&#x0579;&#x0578;&#x0582;&#x0569;&#x0575;&#x0578;&#x0582;&#x0576;, $c 1948-1961.
+880 1  $6 700-05 / $a &#x053b;&#x057d;&#x0561;&#x0570;&#x0561;&#x056f;&#x0575;&#x0561;&#x0576;, &#x0531;&#x057e;&#x0565;&#x057f;&#x056b;&#x0584;, $d 1875-1957.
+880 2  $6 710-06 / $a &#x0544;. &#x0531;&#x0562;&#x0565;&#x0572;&#x0575;&#x0561;&#x0576;&#x056b; &#x0531;&#x0576;&#x057e;&#x0561;&#x0576; &#x0533;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576;&#x0578;&#x0582;&#x0569;&#x0575;&#x0561;&#x0576; &#x053b;&#x0576;&#x057d;&#x057f;&#x056b;&#x057f;&#x0578;&#x0582;&#x057f;.
+985    $a armenian
+
+01512cab a2200301 a 4500
+001 14879015
+005 20071203081856.0
+008 040502m18641877tu mr|p       0   z0arm  
+035    $a (Uk)002824493
+906    $a p $b cbc $c undeter $d u $e ncip $f 20 $g y-nonroman
+010    $a   2007970001
+019 x  $a 2520240032
+040    $a Uk $b eng $c Uk
+245 00 $6 880-01 $a Hoys : $b [drōshak hayreneats, amsagir banasirakan].
+246 3  $a Huys
+246 3  $a Yuys
+260    $6 880-02 $a Armash : $b [Armashi Vank&#x02bf;], $c 1864-1877.
+300    $a v. ; $c 23 cm.
+500    $a Hoys. “Hope,” a monthly magazine of literature in modern Armenian, Western dialect, printed at the Convent of the Mother of God at Armash.
+505 0  $a Vol. I, 1-12 (1864-1865), II, 13-24 (1865-1866)
+650  0 $a Armenian literature $v Periodicals.
+650  0 $a Armenian language $v Periodicals.
+650  0 $a Armenians $x Religious life.
+655  4 $a Periodical publications.- Armash
+852 41 $a British Library $b OC $j 17070.g.3.
+880 00 $6 245-01 / $a &#x0545;&#x0578;&#x0575;&#x057d; : $b &#x0564;&#x0580;&#x0585;&#x0577;&#x0561;&#x056f; &#x0570;&#x0561;&#x0575;&#x0580;&#x0565;&#x0576;&#x0565;&#x0561;&#x0581;, &#x0561;&#x0574;&#x057d;&#x0561;&#x0563;&#x056b;&#x0580; &#x0562;&#x0561;&#x0576;&#x0561;&#x057d;&#x056b;&#x0580;&#x0561;&#x056f;&#x0561;&#x0576;].
+880    $6 260-02 / $a &#x0531;&#x0580;&#x0574;&#x0561;&#x0577; : $b [&#x0531;&#x0580;&#x0574;&#x0561;&#x0577;&#x056b; &#x054e;&#x0561;&#x0576;&#x0584;], $c 1864-1877.
+985    $a armenian2
+

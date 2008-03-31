@@ -32,7 +32,7 @@ for f in ${srcdir}/marccol?.u8.marc; do
     fi
 
     filem=`echo $fb | sed 's/u8/m8/'`.marc
-    ../util/yaz-marcdump -o marc -f utf8 -t marc8 $f >$filem
+    ../util/yaz-marcdump -o marc -f utf8 -t marc8lossless $f >$filem
 
     DIFF=${fb}.2.lst.diff
     NEW=${fb}.2.lst.new
