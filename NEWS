@@ -1,3 +1,18 @@
+--- 3.0.28 2008/03/31
+
+yaz-client's itemorder command may now send a file.
+
+Fixed yaz-marcdump to allow the use of NS prefix for record element.
+
+Added new function yaz_log_xml_errors.
+
+Allow (but warn) unknown XML attributes in MARCXML parsing.
+
+Handle G1 sequneces in MARC-8 decoding. Bug #2115.
+
+The UTF-8 to MARC-8 conversion now uses a different set of characters
+for Greek symbols. Bug #2120.
+
 --- 3.0.26 2008/02/21
 
 Added yaz_daemon (daemon.h).
