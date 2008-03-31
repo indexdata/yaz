@@ -191,8 +191,8 @@ static unsigned long yaz_read_ISO8859_1(yaz_iconv_t cd, unsigned char *inp,
 
 
 #if HAVE_WCHAR_H
-static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
-                                       size_t inbytesleft, size_t *no_read)
+static unsigned long yaz_read_wchar_t(yaz_iconv_t cd, unsigned char *inp,
+                                      size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
     
@@ -204,7 +204,7 @@ static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
     else
     {
         wchar_t wch;
-        memcpy (&wch, inp, sizeof(wch));
+        memcpy(&wch, inp, sizeof(wch));
         x = wch;
         *no_read = sizeof(wch);
     }
@@ -213,12 +213,12 @@ static unsigned long yaz_read_wchar_t (yaz_iconv_t cd, unsigned char *inp,
 #endif
 
 
-static unsigned long yaz_read_marc8_comb (yaz_iconv_t cd, unsigned char *inp,
-                                          size_t inbytesleft, size_t *no_read,
-                                          int *comb);
+static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd, unsigned char *inp,
+                                         size_t inbytesleft, size_t *no_read,
+                                         int *comb);
 
-static unsigned long yaz_read_marc8 (yaz_iconv_t cd, unsigned char *inp,
-                                     size_t inbytesleft, size_t *no_read)
+static unsigned long yaz_read_marc8(yaz_iconv_t cd, unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
 {
     unsigned long x;
     if (cd->comb_offset < cd->comb_size)
@@ -603,21 +603,18 @@ static size_t flush_combos(yaz_iconv_t cd,
     }
     else
     {
-        char out_buf[4];
         size_t out_no = 0;
         unsigned char byte;
 
-
         byte = (unsigned char )((y>>16) & 0xff);
         if (byte)
-            out_buf[out_no++] = byte;
+            (*outbuf)[out_no++] = byte;
         byte = (unsigned char)((y>>8) & 0xff);
         if (byte)
-            out_buf[out_no++] = byte;
+            (*outbuf)[out_no++] = byte;
         byte = (unsigned char )(y & 0xff);
         if (byte)
-            out_buf[out_no++] = byte;
-        memcpy(*outbuf, out_buf, out_no);
+            (*outbuf)[out_no++] = byte;
         *outbuf += out_no;
         (*outbytesleft) -= out_no;
     }
@@ -780,33 +777,38 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, unsigned long x,
                                       char **outbuf, size_t *outbytesleft,
                                       int loss_mode)
 {
-    int i;
-    for (i = 0; latin1_comb[i].x1; i++)
+    if (x >= 0xc0 && x <= 0xff) /* optimization. min and max .y values */
     {
-        if (x == latin1_comb[i].y)
+        int i;
+        for (i = 0; latin1_comb[i].x1; i++)
         {
-            size_t r ;
-            /* save the output pointers .. */
-            char *outbuf0 = *outbuf;
-            size_t outbytesleft0 = *outbytesleft;
-            int last_ch = cd->write_marc8_last;
-            const char *lpage = cd->write_marc8_lpage;
-
-            r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
-                                  outbuf, outbytesleft, loss_mode);
-            if (r)
-                return r;
-            r = yaz_write_marc8_2(cd, latin1_comb[i].x2,
-                                  outbuf, outbytesleft, loss_mode);
-            if (r && cd->my_errno == YAZ_ICONV_E2BIG)
+            if (x == latin1_comb[i].y)
             {
-                /* not enough room. reset output to original values */
-                *outbuf = outbuf0;
-                *outbytesleft = outbytesleft0;
-                cd->write_marc8_last = last_ch;
-                cd->write_marc8_lpage = lpage;
+                size_t r ;
+                /* save the output pointers .. */
+                char *outbuf0 = *outbuf;
+                size_t outbytesleft0 = *outbytesleft;
+                int last_ch = cd->write_marc8_last;
+                int ncr = cd->write_marc8_ncr;
+                const char *lpage = cd->write_marc8_lpage;
+                
+                r = yaz_write_marc8_2(cd, latin1_comb[i].x1,
+                                      outbuf, outbytesleft, loss_mode);
+                if (r)
+                    return r;
+                r = yaz_write_marc8_2(cd, latin1_comb[i].x2,
+                                      outbuf, outbytesleft, loss_mode);
+                if (r && cd->my_errno == YAZ_ICONV_E2BIG)
+                {
+                    /* not enough room. reset output to original values */
+                    *outbuf = outbuf0;
+                    *outbytesleft = outbytesleft0;
+                    cd->write_marc8_last = last_ch;
+                    cd->write_marc8_ncr = ncr;
+                    cd->write_marc8_lpage = lpage;
+                }
+                return r;
             }
-            return r;
         }
     }
     return yaz_write_marc8_2(cd, x, outbuf, outbytesleft, loss_mode);
@@ -841,7 +843,7 @@ int yaz_iconv_isbuiltin(yaz_iconv_t cd)
     return cd->read_handle && cd->write_handle;
 }
 
-yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
+yaz_iconv_t yaz_iconv_open(const char *tocode, const char *fromcode)
 {
     yaz_iconv_t cd = (yaz_iconv_t) xmalloc (sizeof(*cd));
 
@@ -890,7 +892,7 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
             cd->write_handle = yaz_write_ISO8859_1;
             cd->flush_handle = yaz_flush_ISO8859_1;
         }
-        else if (!yaz_matchstr (tocode, "UCS4"))
+        else if (!yaz_matchstr(tocode, "UCS4"))
             cd->write_handle = yaz_write_UCS4;
         else if (!yaz_matchstr(tocode, "UCS4LE"))
             cd->write_handle = yaz_write_UCS4LE;
@@ -935,17 +937,17 @@ yaz_iconv_t yaz_iconv_open (const char *tocode, const char *fromcode)
     cd->iconv_cd = 0;
     if (!cd->read_handle || !cd->write_handle)
     {
-        cd->iconv_cd = iconv_open (tocode, fromcode);
+        cd->iconv_cd = iconv_open(tocode, fromcode);
         if (cd->iconv_cd == (iconv_t) (-1))
         {
-            xfree (cd);
+            xfree(cd);
             return 0;
         }
     }
 #else
     if (!cd->read_handle || !cd->write_handle)
     {
-        xfree (cd);
+        xfree(cd);
         return 0;
     }
 #endif
@@ -1089,18 +1091,18 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     return r;
 }
 
-int yaz_iconv_error (yaz_iconv_t cd)
+int yaz_iconv_error(yaz_iconv_t cd)
 {
     return cd->my_errno;
 }
 
-int yaz_iconv_close (yaz_iconv_t cd)
+int yaz_iconv_close(yaz_iconv_t cd)
 {
 #if HAVE_ICONV_H
     if (cd->iconv_cd)
-        iconv_close (cd->iconv_cd);
+        iconv_close(cd->iconv_cd);
 #endif
-    xfree (cd);
+    xfree(cd);
     return 0;
 }
 
