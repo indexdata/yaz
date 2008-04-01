@@ -2,11 +2,10 @@
  * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.50 2008-03-12 08:53:28 adam Exp $
  */
 /**
  * \file
- * \brief ISO-5428 character mapping (iconv)
+ * \brief UCS4 decoding and encoding
  */
 
 #if HAVE_CONFIG_H
@@ -56,8 +55,9 @@ unsigned long yaz_read_UCS4LE(yaz_iconv_t cd, unsigned char *inp,
     return x;
 }
 
-size_t yaz_write_UCS4(yaz_iconv_t cd, unsigned long x,
-                      char **outbuf, size_t *outbytesleft)
+static size_t write_UCS4(yaz_iconv_t cd, yaz_iconv_encoder_t en,
+                         unsigned long x,
+                         char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
@@ -77,8 +77,9 @@ size_t yaz_write_UCS4(yaz_iconv_t cd, unsigned long x,
     return 0;
 }
 
-size_t yaz_write_UCS4LE(yaz_iconv_t cd, unsigned long x,
-                        char **outbuf, size_t *outbytesleft)
+static size_t write_UCS4LE(yaz_iconv_t cd, yaz_iconv_encoder_t en,
+                           unsigned long x,
+                           char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
     if (*outbytesleft >= 4)
@@ -96,6 +97,20 @@ size_t yaz_write_UCS4LE(yaz_iconv_t cd, unsigned long x,
     }
     *outbuf = (char *) outp;
     return 0;
+}
+
+
+yaz_iconv_encoder_t yaz_ucs4_encoder(const char *tocode,
+                                     yaz_iconv_encoder_t e)
+    
+{
+    if (!yaz_matchstr(tocode, "UCS4"))
+        e->write_handle = write_UCS4;
+    else if (!yaz_matchstr(tocode, "UCS4LE"))
+        e->write_handle = write_UCS4LE;
+    else
+        return 0;
+    return e;
 }
 
 

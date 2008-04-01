@@ -2,11 +2,10 @@
  * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.50 2008-03-12 08:53:28 adam Exp $
  */
 /**
  * \file
- * \brief ISO-5428 character mapping (iconv)
+ * \brief UTF-8 encoding / decoding
  */
 
 #if HAVE_CONFIG_H
@@ -147,8 +146,9 @@ unsigned long yaz_read_UTF8(yaz_iconv_t cd, unsigned char *inp,
 }
 
 
-size_t yaz_write_UTF8(yaz_iconv_t cd, unsigned long x,
-                      char **outbuf, size_t *outbytesleft)
+static size_t write_UTF8(yaz_iconv_t cd, yaz_iconv_encoder_t en,
+                             unsigned long x,
+                             char **outbuf, size_t *outbytesleft)
 {
     int err = 0;
     int r = yaz_write_UTF8_char(x, outbuf, outbytesleft, &err);
@@ -213,6 +213,18 @@ size_t yaz_write_UTF8_char(unsigned long x,
         return (size_t)(-1);
     }
     *outbuf = (char *) outp;
+    return 0;
+}
+
+yaz_iconv_encoder_t yaz_utf8_encoder(const char *tocode,
+                                     yaz_iconv_encoder_t e)
+    
+{
+    if (!yaz_matchstr(tocode, "UTF8"))
+    {
+        e->write_handle = write_UTF8;
+        return e;
+    }
     return 0;
 }
 

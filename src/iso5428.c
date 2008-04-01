@@ -2,11 +2,10 @@
  * Copyright (C) 1995-2008, Index Data ApS
  * See the file LICENSE for details.
  *
- * $Id: siconv.c,v 1.50 2008-03-12 08:53:28 adam Exp $
  */
 /**
  * \file
- * \brief ISO-5428 character mapping (iconv)
+ * \brief ISO-5428:1984 encoding and decoding
  */
 
 #if HAVE_CONFIG_H
@@ -270,8 +269,9 @@ unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
     return x;
 }
 
-size_t yaz_write_iso5428_1984(yaz_iconv_t cd, unsigned long x,
-                              char **outbuf, size_t *outbytesleft)
+static size_t write_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_encoder_t en,
+                                 unsigned long x,
+                                 char **outbuf, size_t *outbytesleft)
 {
     size_t k = 0;
     unsigned char *out = (unsigned char*) *outbuf;
@@ -362,6 +362,18 @@ size_t yaz_write_iso5428_1984(yaz_iconv_t cd, unsigned long x,
     }
     *outbytesleft -= k;
     (*outbuf) += k;
+    return 0;
+}
+
+yaz_iconv_encoder_t yaz_iso_5428_encoder(const char *name,
+                                         yaz_iconv_encoder_t e)
+{
+    if (!yaz_matchstr(name, "iso54281984")
+        || !yaz_matchstr(name, "iso5428:1984"))
+    {
+        e->write_handle = write_iso_5428_1984;
+        return e;
+    }
     return 0;
 }
 

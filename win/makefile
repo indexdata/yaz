@@ -484,7 +484,10 @@ MISC_OBJS= \
    $(OBJDIR)\http.obj \
    $(OBJDIR)\match_glob.obj \
    $(OBJDIR)\poll.obj \
-   $(OBJDIR)\daemon.obj 
+   $(OBJDIR)\daemon.obj \
+   $(OBJDIR)\iconv_encode_iso_8859_1.obj \
+   $(OBJDIR)\iconv_encode_marc8.obj \
+   $(OBJDIR)\iconv_encode_wchar.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
