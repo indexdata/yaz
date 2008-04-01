@@ -1,9 +1,6 @@
-/*
- * Copyright (C) 2005-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tst_retrieval.c,v 1.10 2007-03-19 14:40:07 adam Exp $
- *
  */
 #include <yaz/retrieval.h>
 #include <yaz/test.h>

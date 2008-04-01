@@ -1,8 +1,7 @@
-/* $Id: zoomtst6.c,v 1.13 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst6.c
-    \brief Asynchronous multi-target client with two searches
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <yaz/nmem.h>

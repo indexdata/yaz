@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: read-marc.c,v 1.10 2007-05-06 20:12:22 adam Exp $
  */
 
 /*

@@ -1,14 +1,6 @@
-/* $Id: benchmark.c,v 1.10 2007-01-03 08:42:16 adam Exp $
- * Copyright (C) 1995-2007, Index Data ApS
- *
- * This file is part of the YAZ toolkit.
- *
- * See the file LICENSE.
- *
- * This is an elementary benchmarker for server performance.  It works
- * by repeatedly connecting to, seaching in and retrieving from the
- * specified server, and keeps statistics about the minimum, maximum
- * and average times for each operation.
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 #include <stdlib.h>

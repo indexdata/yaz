@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
- * All rights reserved.
- *
- * $Id: logrpn.c,v 1.18 2007-05-08 08:22:36 adam Exp $
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 /**

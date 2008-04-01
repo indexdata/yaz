@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 2005-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: retrieval.c,v 1.22 2008-01-25 16:28:26 adam Exp $
  */
 /**
  * \file retrieval.c

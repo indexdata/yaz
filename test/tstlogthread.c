@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 1998-2007, Index Data.
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- * 
- * $Id: tstlogthread.c,v 1.6 2007-04-18 11:50:47 mike Exp $
  */
 
 #if HAVE_CONFIG_H

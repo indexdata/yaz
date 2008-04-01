@@ -1,9 +1,6 @@
-/*
- * Copyright (C) 2005-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tst_record_conv.c,v 1.16 2007-03-20 21:37:32 adam Exp $
- *
  */
 #include <yaz/record_conv.h>
 #include <yaz/test.h>

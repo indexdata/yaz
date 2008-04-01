@@ -1,10 +1,7 @@
-/* $Id: zoomtst3.c,v 1.13 2007-01-10 13:25:46 adam Exp $  */
-
-/** \file zoomtst3.c
-    \brief Asynchronous multi-target client
-    
-    Performs search and piggyback retrieval of records
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

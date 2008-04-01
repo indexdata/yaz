@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2008, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: cclfind.c,v 1.15 2008-01-09 21:32:27 adam Exp $
  */
 /** 
  * \file cclfind.c

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: timing.c,v 1.6 2007-06-06 16:32:34 adam Exp $
  */
 
 /**

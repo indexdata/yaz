@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
- * All rights reserved.
- *
- * $Id: xmalloc.c,v 1.9 2007-01-03 08:42:15 adam Exp $
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 /**
  * \file xmalloc.c

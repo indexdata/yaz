@@ -1,9 +1,6 @@
-/*
- * Copyright (C) 2005-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tst_tpath.c,v 1.3 2007-01-03 08:42:16 adam Exp $
- *
  */
 #include <yaz/tpath.h>
 #include <yaz/test.h>

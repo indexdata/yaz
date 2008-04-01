@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: zoom-c.c,v 1.154 2008-01-28 09:51:02 adam Exp $
  */
 /**
  * \file zoom-c.c

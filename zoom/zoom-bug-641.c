@@ -1,8 +1,7 @@
-/* $Id: zoom-bug-641.c,v 1.3 2007-05-06 20:12:21 adam Exp $  */
-
-/** \file zoom-bug641.c
-    \brief Program to illustrate bug 641
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <sys/types.h>

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: snprintf.c,v 1.2 2007-02-26 14:24:00 adam Exp $
  */
 /**
  * \file snprintf.c

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2008, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: opacdisp.c,v 1.10 2008-01-30 20:00:55 adam Exp $
  */
 /**
  * \file opacdisp.c

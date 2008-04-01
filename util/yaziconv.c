@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: yaziconv.c,v 1.9 2007-05-25 16:19:46 marc Exp $
  */
 
 #if HAVE_CONFIG_H

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tst_timing.c,v 1.3 2007-01-05 14:05:55 adam Exp $
  */
 
 #include <stdlib.h>

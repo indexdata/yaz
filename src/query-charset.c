@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
- * All rights reserved.
- *
- * $Id: query-charset.c,v 1.3 2007-05-03 22:20:45 adam Exp $
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 /** \file query-charset.c

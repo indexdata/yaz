@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: seshigh.c,v 1.128 2007-09-11 08:37:53 adam Exp $
  */
 /**
  * \file seshigh.c

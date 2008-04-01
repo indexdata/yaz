@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tstwrbuf.c,v 1.7 2007-03-19 14:40:07 adam Exp $
  */
 
 #include <stdlib.h>

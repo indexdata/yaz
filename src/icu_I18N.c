@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: icu_I18N.c,v 1.22 2007-12-17 11:23:16 adam Exp $
  */
 
 #if HAVE_CONFIG_H

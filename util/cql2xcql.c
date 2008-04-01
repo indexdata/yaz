@@ -1,11 +1,7 @@
-/* $Id: cql2xcql.c,v 1.8 2007-01-03 08:42:16 adam Exp $
-   Copyright (C) 1995-2007, Index Data ApS
-   Index Data Aps
-
-This file is part of the YAZ toolkit.
-
-See the file LICENSE.
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

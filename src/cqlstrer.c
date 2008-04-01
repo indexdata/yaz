@@ -1,11 +1,7 @@
-/* $Id: cqlstrer.c,v 1.7 2007-01-03 08:42:15 adam Exp $
-   Copyright (C) 1995-2007, Index Data ApS
-   Index Data Aps
-
-This file is part of the YAZ toolkit.
-
-See the file LICENSE details.
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 /**
  * \file cqlstrer.c

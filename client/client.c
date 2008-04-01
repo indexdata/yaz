@@ -1,8 +1,6 @@
-/* 
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: client.c,v 1.356 2007-12-27 13:27:40 adam Exp $
  */
 /** \file client.c
  *  \brief yaz-client program

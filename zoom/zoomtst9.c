@@ -1,8 +1,7 @@
-/* $Id: zoomtst9.c,v 1.5 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst9.c
-    \brief Extended Service Update
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <string.h>

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2008, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: daemon.c,v 1.3 2008-02-21 10:18:15 adam Exp $
  */
 
 /**

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
- * All rights reserved.
- *
- * $Id: copy_types.c,v 1.1 2007-04-30 08:29:07 adam Exp $
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 /** \file copy_types.c

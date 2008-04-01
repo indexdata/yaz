@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: libxml2_error.c,v 1.4 2007-02-23 10:15:01 adam Exp $
  */
 /**
  * \file libxml2_error.c

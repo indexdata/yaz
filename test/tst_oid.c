@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tst_oid.c,v 1.1 2007-06-24 19:27:12 adam Exp $
  */
 
 #include <stdlib.h>

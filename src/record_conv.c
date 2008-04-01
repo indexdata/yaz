@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 2005-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: record_conv.c,v 1.17 2007-12-16 11:08:51 adam Exp $
  */
 /**
  * \file record_conv.c

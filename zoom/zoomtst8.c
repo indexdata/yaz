@@ -1,8 +1,7 @@
-/* $Id: zoomtst8.c,v 1.8 2007-03-21 11:27:47 adam Exp $  */
-
-/** \file zoomtst8.c
-    \brief Asynchronous multi-target client doing scan
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <string.h>

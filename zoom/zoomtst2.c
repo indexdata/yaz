@@ -1,8 +1,7 @@
-/* $Id: zoomtst2.c,v 1.9 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst2.c
-    \brief Asynchronous single-target client performing search (no retrieval)
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

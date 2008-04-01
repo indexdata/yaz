@@ -1,10 +1,7 @@
-/* $Id: zoomtst5.c,v 1.12 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst5.c
-    \brief Asynchronous multi-target client with sort
-    
-    Asynchronous multi-target client doing search, sort and present
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <string.h>

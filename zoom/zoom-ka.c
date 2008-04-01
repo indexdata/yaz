@@ -1,8 +1,7 @@
-/* $Id: zoom-ka.c,v 1.2 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoom-ka.c
-    \brief Test ZOOM Keepalive / reconnect
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdlib.h>
 #include <unistd.h>

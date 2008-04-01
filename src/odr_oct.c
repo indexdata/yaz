@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: odr_oct.c,v 1.13 2007-05-21 11:51:01 adam Exp $
  */
 /**
  * \file odr_oct.c

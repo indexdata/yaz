@@ -1,8 +1,7 @@
-/* $Id: zoomtst11.c,v 1.2 2007-03-07 13:12:42 adam Exp $  */
-
-/** \file zoomtst11.c
-    \brief Asynchronous single-target which tests event/error handling
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

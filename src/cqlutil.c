@@ -1,11 +1,7 @@
-/* $Id: cqlutil.c,v 1.13 2008-01-06 16:22:02 adam Exp $
-   Copyright (C) 1995-2007, Index Data ApS
-   Index Data Aps
-
-This file is part of the YAZ toolkit.
-
-See the file LICENSE for details.
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 /**
  * \file cqlutil.c

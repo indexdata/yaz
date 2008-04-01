@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: zoomsh.c,v 1.50 2007-09-11 15:16:20 adam Exp $
  */
 
 /** \file zoomsh.c

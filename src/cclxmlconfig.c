@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
- * All rights reserved.
- *
- * $Id: cclxmlconfig.c,v 1.1 2007-01-08 13:20:58 adam Exp $
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 /** \file cclxmlconfig.c

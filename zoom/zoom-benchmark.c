@@ -1,7 +1,6 @@
-/*
- * $Id: zoom-benchmark.c,v 1.20 2007-05-06 20:35:43 adam Exp $
- *
- * Asynchronous multi-target client doing search and piggyback retrieval
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
  */
 
 #include <stdio.h>

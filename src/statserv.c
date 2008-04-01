@@ -1,11 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * NT threaded server code by
- *   Chas Woodfield, Fretwell Downing Informatics.
- *
- * $Id: statserv.c,v 1.52 2007-11-12 08:57:45 adam Exp $
  */
 
 /**

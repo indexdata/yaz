@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2008, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: ccltoken.c,v 1.15 2008-01-09 21:32:28 adam Exp $
  */
 /** 
  * \file ccltoken.c

@@ -1,45 +1,28 @@
-/*
- * Copyright (c) 1995, the EUROPAGATE consortium (see below).
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data.
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * The EUROPAGATE consortium members are:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Index Data nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
- *    University College Dublin
- *    Danmarks Teknologiske Videnscenter
- *    An Chomhairle Leabharlanna
- *    Consejo Superior de Investigaciones Cientificas
- *
- * Permission to use, copy, modify, distribute, and sell this software and
- * its documentation, in whole or in part, for any purpose, is hereby granted,
- * provided that:
- *
- * 1. This copyright and permission notice appear in all copies of the
- * software and its documentation. Notices of copyright or attribution
- * which appear at the beginning of any file must remain unchanged.
- *
- * 2. The names of EUROPAGATE or the project partners may not be used to
- * endorse or promote products derived from this software without specific
- * prior written permission.
- *
- * 3. Users of this software (implementors and gateway operators) agree to
- * inform the EUROPAGATE consortium of their use of the software. This
- * information will be used to evaluate the EUROPAGATE project and the
- * software, and to plan further developments. The consortium may use
- * the information in later publications.
- * 
- * 4. Users of this software agree to make their best efforts, when
- * documenting their use of the software, to acknowledge the EUROPAGATE
- * consortium, and the role played by the software in their work.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED, OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
- * IN NO EVENT SHALL THE EUROPAGATE CONSORTIUM OR ITS MEMBERS BE LIABLE
- * FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF
- * ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA
- * OR PROFITS, WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND
- * ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
- * USE OR PERFORMANCE OF THIS SOFTWARE.
- *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /** \file ccl.h

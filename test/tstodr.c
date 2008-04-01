@@ -1,9 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tstodr.c,v 1.12 2007-08-13 16:23:30 mike Exp $
- *
  */
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2006, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: yaz-illclient.c,v 1.9 2007-11-30 11:44:47 adam Exp $
  */
 
 /* WARNING - This is work in progress - not at all ready */

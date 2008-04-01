@@ -1,11 +1,7 @@
-/* $Id: zoomtst4.c,v 1.10 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst4.c
-    \brief Asynchronous multi-target client with separate present
-    
-    Asynchronous multi-target going through proxy doing search and retrieve
-    using present.
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <string.h>

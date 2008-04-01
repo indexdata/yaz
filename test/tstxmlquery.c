@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tstxmlquery.c,v 1.16 2007-03-19 22:17:41 adam Exp $
  */
 
 #include <stdlib.h>

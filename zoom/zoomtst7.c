@@ -1,8 +1,7 @@
-/* $Id: zoomtst7.c,v 1.19 2007-04-17 20:26:19 adam Exp $  */
-
-/** \file zoomtst7.c
-    \brief Mix of operations
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

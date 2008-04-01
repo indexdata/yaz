@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: marcdump.c,v 1.55 2007-12-18 21:13:06 adam Exp $
  */
 
 #define _FILE_OFFSET_BITS 64

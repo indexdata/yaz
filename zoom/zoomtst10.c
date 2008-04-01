@@ -1,8 +1,7 @@
-/* $Id: zoomtst10.c,v 1.4 2007-01-03 08:42:17 adam Exp $  */
-
-/** \file zoomtst10.c
-    \brief Synchronous single-target search using CCL conversion
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

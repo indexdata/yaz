@@ -1,8 +1,6 @@
-/*
- * Copyright (C) 1995-2007, Index Data ApS
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
  * See the file LICENSE for details.
- *
- * $Id: tsticonv.c,v 1.35 2008-03-12 08:53:28 adam Exp $
  */
 
 #if HAVE_CONFIG_H
