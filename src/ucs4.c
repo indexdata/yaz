@@ -18,8 +18,9 @@
 
 #include "iconv-p.h"
 
-unsigned long yaz_read_UCS4(yaz_iconv_t cd, unsigned char *inp,
-                            size_t inbytesleft, size_t *no_read)
+static unsigned long read_UCS4(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                               unsigned char *inp,
+                               size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
     
@@ -36,8 +37,9 @@ unsigned long yaz_read_UCS4(yaz_iconv_t cd, unsigned char *inp,
     return x;
 }
 
-unsigned long yaz_read_UCS4LE(yaz_iconv_t cd, unsigned char *inp,
-                              size_t inbytesleft, size_t *no_read)
+static unsigned long read_UCS4LE(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                                 unsigned char *inp,
+                                 size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
     
@@ -110,6 +112,19 @@ yaz_iconv_encoder_t yaz_ucs4_encoder(const char *tocode,
     else
         return 0;
     return e;
+}
+
+yaz_iconv_decoder_t yaz_ucs4_decoder(const char *tocode,
+                                     yaz_iconv_decoder_t d)
+    
+{
+    if (!yaz_matchstr(tocode, "UCS4"))
+        d->read_handle = read_UCS4;
+    else if (!yaz_matchstr(tocode, "UCS4LE"))
+        d->read_handle = read_UCS4LE;
+    else
+        return 0;
+    return d;
 }
 
 

@@ -18,8 +18,9 @@
 
 #include "iconv-p.h"
 
-unsigned long yaz_read_advancegreek(yaz_iconv_t cd, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read)
+static unsigned long read_advancegreek(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                                       unsigned char *inp,
+                                       size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
     int shift = 0;
@@ -380,6 +381,17 @@ yaz_iconv_encoder_t yaz_advancegreek_encoder(const char *name,
     {
         e->write_handle = write_advancegreek;
         return e;
+    }
+    return 0;
+}
+
+yaz_iconv_decoder_t yaz_advancegreek_decoder(const char *name,
+                                             yaz_iconv_decoder_t d)
+{
+    if (!yaz_matchstr(name, "advancegreek"))
+    {
+        d->read_handle = read_advancegreek;
+        return d;
     }
     return 0;
 }

@@ -18,8 +18,9 @@
 
 #include "iconv-p.h"
 
-size_t yaz_init_UTF8(yaz_iconv_t cd, unsigned char *inp,
-                     size_t inbytesleft, size_t *no_read)
+static size_t init_utf8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                        unsigned char *inp,
+                        size_t inbytesleft, size_t *no_read)
 {
     if (inp[0] != 0xef)
     {
@@ -135,8 +136,9 @@ unsigned long yaz_read_UTF8_char(unsigned char *inp,
     return x;
 }
 
-unsigned long yaz_read_UTF8(yaz_iconv_t cd, unsigned char *inp,
-                            size_t inbytesleft, size_t *no_read)
+static unsigned long read_utf8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                               unsigned char *inp,
+                               size_t inbytesleft, size_t *no_read)
 {
     int err = 0;
     int r = yaz_read_UTF8_char(inp, inbytesleft, no_read, &err);
@@ -227,6 +229,18 @@ yaz_iconv_encoder_t yaz_utf8_encoder(const char *tocode,
     return 0;
 }
 
+yaz_iconv_decoder_t yaz_utf8_decoder(const char *fromcode,
+                                     yaz_iconv_decoder_t d)
+{
+    if (!yaz_matchstr(fromcode, "UTF8"))
+    {
+        d->init_handle = init_utf8;
+        d->read_handle = read_utf8;
+        return d;
+    }
+    return 0;
+}
+   
 
 /*
  * Local variables:

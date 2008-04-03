@@ -20,8 +20,6 @@
 #endif
 
 #include <yaz/xmalloc.h>
-#include <yaz/nmem.h>
-#include <yaz/snprintf.h>
 #include "iconv-p.h"
 
 struct encoder_data
@@ -62,6 +60,43 @@ yaz_iconv_encoder_t yaz_wchar_encoder(const char *tocode,
     {
         e->write_handle = write_wchar_t;
         return e;
+    }
+#endif
+    return 0;
+}
+
+#if HAVE_WCHAR_H
+static unsigned long read_wchar_t(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                                  unsigned char *inp,
+                                  size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x = 0;
+    
+    if (inbytesleft < sizeof(wchar_t))
+    {
+        yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
+        *no_read = 0;
+    }
+    else
+    {
+        wchar_t wch;
+        memcpy(&wch, inp, sizeof(wch));
+        x = wch;
+        *no_read = sizeof(wch);
+    }
+    return x;
+}
+#endif
+
+yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
+				      yaz_iconv_decoder_t d)
+    
+{
+#if HAVE_WCHAR_H
+    if (!yaz_matchstr(fromcode, "wchar_t"))
+    {
+        d->read_handle = read_wchar_t;
+        return d;
     }
 #endif
     return 0;

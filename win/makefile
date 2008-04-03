@@ -487,6 +487,7 @@ MISC_OBJS= \
    $(OBJDIR)\daemon.obj \
    $(OBJDIR)\iconv_encode_iso_8859_1.obj \
    $(OBJDIR)\iconv_encode_marc8.obj \
+   $(OBJDIR)\iconv_decode_marc8.obj \
    $(OBJDIR)\iconv_encode_wchar.obj
 
 Z3950_OBJS= \

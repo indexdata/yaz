@@ -17,12 +17,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#if HAVE_ICONV_H
-#include <iconv.h>
-#endif
-
 #include <yaz/xmalloc.h>
-#include <yaz/nmem.h>
 #include "iconv-p.h"
 
 struct encoder_data
@@ -240,6 +235,28 @@ yaz_iconv_encoder_t yaz_iso_8859_1_encoder(const char *tocode,
         e->init_handle = init_iso_8859_1;
         e->destroy_handle = destroy_iso_8859_1;
         return e;
+    }
+    return 0;
+}
+
+static unsigned long read_ISO8859_1(yaz_iconv_t cd, 
+                                    yaz_iconv_decoder_t d,
+                                    unsigned char *inp,
+                                    size_t inbytesleft, size_t *no_read)
+{
+    unsigned long x = inp[0];
+    *no_read = 1;
+    return x;
+}
+
+yaz_iconv_decoder_t yaz_iso_8859_1_decoder(const char *fromcode,
+                                           yaz_iconv_decoder_t d)
+    
+{
+    if (!yaz_matchstr(fromcode, "iso88591"))
+    {
+        d->read_handle = read_ISO8859_1;
+        return d;
     }
     return 0;
 }

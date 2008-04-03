@@ -18,8 +18,9 @@
 
 #include "iconv-p.h"
 
-unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read)
+static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                                        unsigned char *inp,
+                                        size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
     int tonos = 0;
@@ -375,6 +376,19 @@ yaz_iconv_encoder_t yaz_iso_5428_encoder(const char *name,
     }
     return 0;
 }
+
+yaz_iconv_decoder_t yaz_iso_5428_decoder(const char *name,
+                                         yaz_iconv_decoder_t d)
+{
+    if (!yaz_matchstr(name, "iso54281984")
+        || !yaz_matchstr(name, "iso5428:1984"))
+    {
+        d->read_handle = read_iso_5428_1984;
+        return d;
+    }
+    return 0;
+}
+
 
 
 /*

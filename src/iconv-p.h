@@ -26,7 +26,7 @@
  */
 /**
  * \file
- * \brief Internal header for conv
+ * \brief Internal header for iconv
  */
 
 #ifndef ICONV_P_H
@@ -37,22 +37,6 @@
 #include <yaz/yaz-iconv.h>
 
 void yaz_iconv_set_errno(yaz_iconv_t cd, int no);
-
-unsigned long yaz_read_iso5428_1984(yaz_iconv_t cd, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read);
-
-size_t yaz_init_UTF8(yaz_iconv_t cd, unsigned char *inp,
-                     size_t inbytesleft, size_t *no_read);
-unsigned long yaz_read_UTF8(yaz_iconv_t cd, unsigned char *inp,
-                            size_t inbytesleft, size_t *no_read);
-
-
-unsigned long yaz_read_UCS4(yaz_iconv_t cd, unsigned char *inp,
-                            size_t inbytesleft, size_t *no_read);
-unsigned long yaz_read_UCS4LE(yaz_iconv_t cd, unsigned char *inp,
-                              size_t inbytesleft, size_t *no_read);
-unsigned long yaz_read_advancegreek(yaz_iconv_t cd, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read);
 
 typedef struct yaz_iconv_encoder_s *yaz_iconv_encoder_t;
 struct yaz_iconv_encoder_s {
@@ -89,6 +73,33 @@ int yaz_iso_8859_1_lookup_y(unsigned long v,
 
 int yaz_iso_8859_1_lookup_x12(unsigned long x1, unsigned long x2,
                               unsigned long *y);
+
+typedef struct yaz_iconv_decoder_s *yaz_iconv_decoder_t;
+struct yaz_iconv_decoder_s {
+    void *data;
+    size_t (*init_handle)(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                          unsigned char *inbuf,
+                          size_t inbytesleft, size_t *no_read);
+    unsigned long (*read_handle)(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                                 unsigned char *inbuf,
+                                 size_t inbytesleft, size_t *no_read);
+    void (*destroy_handle)(yaz_iconv_decoder_t d);
+};
+
+yaz_iconv_decoder_t yaz_marc8_decoder(const char *fromcode,
+                                      yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_utf8_decoder(const char *fromcode,
+                                     yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_ucs4_decoder(const char *tocode,
+                                     yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_iso_8859_1_decoder(const char *fromcode,
+                                           yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_iso_5428_decoder(const char *name,
+                                         yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_advancegreek_decoder(const char *name,
+                                             yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
+				      yaz_iconv_decoder_t d);
 
 #endif
 /*

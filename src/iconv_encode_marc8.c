@@ -20,7 +20,6 @@
 #include <ctype.h>
 
 #include <yaz/xmalloc.h>
-#include <yaz/nmem.h>
 #include <yaz/snprintf.h>
 #include "iconv-p.h"
 
