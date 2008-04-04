@@ -1,5 +1,5 @@
-## $Id: Makefile.am,v 1.23 2007-02-21 09:10:19 adam Exp $
-## Copyright (C) 2001-2007, Index Data
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include $(XML2_CFLAGS)
 

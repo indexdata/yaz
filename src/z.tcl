@@ -1,5 +1,4 @@
 # YC Sample Config File for Z39.50
-# $Id: z.tcl,v 1.1 2003-10-27 12:21:36 adam Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  

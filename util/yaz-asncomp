@@ -4,8 +4,6 @@
 # (c) Index Data 1996-2007
 # See the file LICENSE for details.
 #
-# $Id: yaz-asncomp,v 1.9 2008-01-06 13:02:48 adam Exp $
-#
 
 set yc_version 0.4
 

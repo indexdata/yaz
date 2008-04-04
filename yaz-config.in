@@ -1,5 +1,7 @@
 #!/bin/sh
-# $Id: yaz-config.in,v 1.34 2008-01-16 12:18:51 adam Exp $
+# This file is part of the YAZ toolkit.
+# Copyright (C) 1995-2008 Index Data
+
 yazprefix=@prefix@
 yaz_echo_cflags=no
 yaz_echo_libs=no

@@ -1,13 +1,8 @@
-/* $Id: cql.y,v 1.17 2008-01-06 16:22:02 adam Exp $
-   Copyright (C) 2002-2006
-   Index Data ApS
-
-This file is part of the YAZ toolkit.
-
-See the file LICENSE.
-
- bison parser for CQL grammar.
-*/
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */ 
+/* bison parser for CQL grammar. */
 %{
 /** 
  * \file cql.c

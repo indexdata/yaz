@@ -1,5 +1,4 @@
 #! /bin/sh
-# $Id: debian.init.d,v 1.1 2004-01-18 21:11:11 adam Exp $
 # Debian sample start/stop script for YAZ Generic Frontend Server
 #
 set -e

@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: tstmarccol.sh,v 1.2 2006-12-15 19:28:47 adam Exp $
 # Tests reading of a bunch of non-roman UTF-8 ISO2709 and see if
 # we can encode it in MARC-8
 #

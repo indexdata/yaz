@@ -1,5 +1,4 @@
 <!-- 
-   $Id: gfs-options.xml,v 1.6 2006-09-29 13:20:22 adam Exp $
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->

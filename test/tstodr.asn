@@ -1,5 +1,4 @@
 -- Small ASN.1 spec for tstodr test
--- $Id: tstodr.asn,v 1.2 2005-05-26 21:47:16 adam Exp $
 tstodrcodec
 {tstodrcodec} DEFINITIONS ::=
 BEGIN

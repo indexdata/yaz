@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: tstmarc.sh,v 1.4 2007-09-25 07:34:03 adam Exp $
 # Tests reading of ISO2709 and checks that we get identical MARCXML
 # 
 # Reads marc?.marc files , Generates marc*.xml files

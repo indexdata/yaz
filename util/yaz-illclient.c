@@ -182,7 +182,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     int ret;
     char *arg;
     char *prog=*argv;
-    const char *version="$Id: yaz-illclient.c,v 1.9 2007-11-30 11:44:47 adam Exp $"; /* from cvs */
+    char version[60];
     struct nameval *nv;
 
     /* default values */
@@ -222,7 +222,8 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
             yaz_log_init_file(arg);
             break;
         case 'V':
-            printf("%s %s",prog, version );
+            yaz_version(version, 0);
+            printf("%s %s\n",prog, version);
             break;
         case 'D':
             nv=parse_nameval(arg);

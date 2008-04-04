@@ -1,4 +1,8 @@
-/* $Id: cqlstd.y,v 1.3 2006-03-02 09:38:41 adam Exp $ 
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2008 Index Data
+ * See the file LICENSE for details.
+ */
+/*
   YACC CQL grammar taken verbatim from the official spec. We don't
   use that in YAZ but I don't know of a better place to put it.
  */

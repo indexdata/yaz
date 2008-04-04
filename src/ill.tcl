@@ -1,5 +1,4 @@
 # Config File for ILL
-# $Id: ill.tcl,v 1.3 2007-05-03 08:34:52 heikki Exp $
 # ----------------------------------------------------------
 # Prefix Specifications
 #  

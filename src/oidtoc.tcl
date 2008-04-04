@@ -2,7 +2,6 @@
 # Copyright (c) Index Data 2006-2007
 # See the file LICENSE for details.
 #
-# $Id: oidtoc.tcl,v 1.8 2007-05-31 12:14:02 adam Exp $
 #
 # Converts a CSV file with Object identifiers to C
 

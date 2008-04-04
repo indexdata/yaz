@@ -24,7 +24,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: copy_types.h,v 1.1 2007-04-30 08:29:07 adam Exp $ */
 /**
  * \file copy_types.h
  * \brief Copies various Z39.50 types

@@ -1,4 +1,5 @@
-## $Id: Makefile.am,v 1.22 2007-04-17 20:26:19 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 bin_PROGRAMS=yaz-ztest
 

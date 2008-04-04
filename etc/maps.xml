@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <!-- 
-  $Id: maps.xml,v 1.1 2003-01-06 08:20:27 adam Exp $
   XSLT for each schema conversion.
 -->
 <schema-mappings xmlns="http://indexdata.dk/srw/schema-mappings/v1.0/">

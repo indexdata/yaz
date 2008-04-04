@@ -1,4 +1,5 @@
-# $Id: Makefile.am,v 1.6 2008-01-25 16:30:47 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 etcdatadir = $(pkgdatadir)/etc
 etcdata_DATA =  \

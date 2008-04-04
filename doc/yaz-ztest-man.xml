@@ -11,7 +11,6 @@
      <!ENTITY reference-tools-cql-map 'section "Specifiction of CQL to RPN mappings"'>
      <!ENTITY reference-tools-cql-map 'section "CCL Qualifiers"'>
 ]>
-<!-- $Id: yaz-ztest-man.xml,v 1.18 2007-11-21 09:04:47 adam Exp $ -->
 <refentry id="yaz-ztest">
  <refentryinfo>
   <productname>YAZ</productname>

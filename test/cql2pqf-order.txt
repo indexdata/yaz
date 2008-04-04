@@ -1,5 +1,3 @@
-# $Id: cql2pqf-order.txt,v 1.1 2006-07-05 14:45:57 adam Exp $
-#
 # cql2pqf spec which tests evaluation order of rules
 # Identifiers for prefixes used in this file. (index.*)
 set.cql		= info:srw/cql-context-set/1/cql-v1.1

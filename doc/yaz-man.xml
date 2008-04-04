@@ -8,7 +8,6 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<!-- $Id: yaz-man.xml,v 1.14 2007-05-22 11:10:08 adam Exp $ -->
 <refentry id="yaz">
  <refentryinfo>
   <productname>YAZ</productname>

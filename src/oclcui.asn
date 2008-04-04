@@ -2,7 +2,6 @@ UserInfoFormat-oclcUserInformation
 {Z39-50-userInfoFormat OCLCUserInformation (7)} DEFINITIONS ::=
 BEGIN
 
--- $Id: oclcui.asn,v 1.1 2003-10-27 12:21:33 adam Exp $
 --
 -- This format is returned from the server at
 --	fsz3950test.oclc.org:210

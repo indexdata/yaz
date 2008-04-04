@@ -1,5 +1,4 @@
 #!/usr/bin/tclsh
-# $Id: charconv.tcl,v 1.21 2008-01-06 13:02:48 adam Exp $
 
 proc usage {} {
     puts {charconv.tcl: [-p prefix] [-s split] [-o ofile] file ... }

@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: tstcql2pqf.sh,v 1.1 2008-01-06 21:48:23 adam Exp $
 srcdir=${srcdir:-.}
 oIFS="$IFS"
 IFS='

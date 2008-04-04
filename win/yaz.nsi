@@ -1,4 +1,5 @@
-; $Id: yaz.nsi,v 1.129 2008-02-21 10:48:45 adam Exp $
+; This file is part of the YAZ toolkit.
+; Copyright (C) 1995-2008 Index Data
 
 !define VERSION "3.0.28"
 

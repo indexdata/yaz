@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<!-- $Id: codetables.xml,v 1.5 2007-09-14 21:39:36 adam Exp $ -->
 <!-- Switched <marc>212320</marc> and <marc>212320</marc> -->
 <codeTables>
 	<codeTable name="Basic and Extended Latin" date="January 2000" number="1">

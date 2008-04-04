@@ -1,6 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2007, Index Data, All rights reserved.
-## $Id: Makefile.am,v 1.74 2008-03-05 10:41:45 adam Exp $
+## Copyright (C) 1995-2008 Index Data
 
 YAZ_VERSION_INFO=3:0:0
 

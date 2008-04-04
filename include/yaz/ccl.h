@@ -32,7 +32,6 @@
 /*
  * CCL - header file
  *
- * $Id: ccl.h,v 1.29 2007-05-01 12:22:10 adam Exp $
  *
  * Old Europagate Log:
  *

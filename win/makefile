@@ -1,6 +1,5 @@
-# Copyright (C) 1995-2008, Index Data ApS
-# All rights reserved.
-# $Id: makefile,v 1.145 2008-02-21 10:15:31 adam Exp $
+# This file is part of the YAZ toolkit.
+# Copyright (C) 1995-2008 Index Data
 #
 # Programmed by
 #  Heikki Levanto & Adam Dickmeiss

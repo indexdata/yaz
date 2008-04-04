@@ -1,4 +1,3 @@
-<!-- $Id: comstack.xml,v 1.15 2007-02-01 09:56:14 adam Exp $ -->
  <chapter id="comstack"><title>The COMSTACK Module</title>
   
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>

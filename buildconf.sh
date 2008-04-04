@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.46 2007-02-20 09:53:01 adam Exp $
 
 automake=automake
 aclocal=aclocal

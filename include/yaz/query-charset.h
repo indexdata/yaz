@@ -24,7 +24,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: query-charset.h,v 1.2 2007-04-12 13:52:57 adam Exp $ */
 /**
  * \file query-charset.h
  * \brief Query to WRBUF (to strings)

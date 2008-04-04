@@ -1,6 +1,5 @@
-## Copyright (C) 1995-2007, Index Data
-## All rights reserved.
-## $Id: Makefile.am,v 1.36 2007-11-12 11:14:49 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 

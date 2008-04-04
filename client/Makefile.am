@@ -1,7 +1,5 @@
-## Copyright (C) 1995-2007, Index Data
-## All rights reserved.
-## $Id: Makefile.am,v 1.30 2007-02-25 14:46:50 adam Exp $
-
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 bin_PROGRAMS=yaz-client 
 EXTRA_PROGRAMS=bertorture

@@ -24,7 +24,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: match_glob.h,v 1.1 2007-10-24 13:50:02 adam Exp $ */
 
 /** \file
     \brief Glob expression matcher

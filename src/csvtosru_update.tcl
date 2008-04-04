@@ -4,12 +4,10 @@
 # Copyright (c) Index Data 1996-2007
 # See the file LICENSE for details.
 #
-# $Id: csvtosru_update.tcl,v 1.3 2008-01-06 13:02:48 adam Exp $
 #
 # Converts a CSV file with SRU update diagnostics to C+H file for easy
 # maintenance
 #
-# $Id: csvtosru_update.tcl,v 1.3 2008-01-06 13:02:48 adam Exp $
 
 source [lindex $argv 0]/csvtodiag.tcl
 

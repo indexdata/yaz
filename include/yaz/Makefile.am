@@ -1,4 +1,5 @@
-## $Id: Makefile.am,v 1.51 2008-02-18 17:07:05 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 noinst_HEADERS = icu_I18N.h
 

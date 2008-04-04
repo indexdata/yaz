@@ -1,4 +1,5 @@
-## $Id: Makefile.am,v 1.86 2008-01-14 20:34:14 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 SUBDIRS = common
 

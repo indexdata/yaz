@@ -24,7 +24,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* $Id: querytowrbuf.h,v 1.7 2007-05-08 08:22:35 adam Exp $ */
 /**
  * \file querytowrbuf.h
  * \brief Query to WRBUF (to strings)

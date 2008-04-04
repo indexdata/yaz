@@ -1,6 +1,5 @@
-## Copyright (C) 1995-2007, Index Data ApS
-## All rights reserved.
-## $Id: Makefile.am,v 1.42 2008-01-06 21:48:23 adam Exp $
+## This file is part of the YAZ toolkit.
+## Copyright (C) 1995-2008 Index Data
 
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \

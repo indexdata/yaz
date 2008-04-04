@@ -1,4 +1,3 @@
-<!-- $Id: entities.ent,v 1.10 2008-01-14 23:13:55 adam Exp $ -->
 <!ENTITY yaz "YAZ">
 <!ENTITY bookinfo SYSTEM "bookinfo.xml">
 <!ENTITY chap-introduction SYSTEM "introduction.xml">

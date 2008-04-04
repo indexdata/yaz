@@ -1,5 +1,4 @@
 <!-- 
-   $Id: gfs-virtual.xml,v 1.9 2007-08-13 16:58:46 mike Exp $
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
