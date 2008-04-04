@@ -245,7 +245,7 @@ void wrbuf_cut_right(WRBUF b, size_t no_to_remove)
 
 void wrbuf_puts_escaped(WRBUF b, const char *str)
 {
-    return wrbuf_write_escaped(b, str, strlen(str));
+    wrbuf_write_escaped(b, str, strlen(str));
 }
 
 void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
