@@ -27,8 +27,9 @@ YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 libyaz_server_la_CFLAGS = $(PTHREAD_CFLAGS)
+libyaz_server_la_LIBADD = libyaz.la
 libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS)
-libyaz_icu_la_LIBADD = $(ICU_LIBS)
+libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
 
 AM_YFLAGS=-p cql_
 

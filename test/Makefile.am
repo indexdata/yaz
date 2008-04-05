@@ -44,7 +44,7 @@ tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
-tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(LDADD) $(ICU_LIBS)
+tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
 
 CONFIG_CLEAN_FILES=*.log
 

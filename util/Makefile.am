@@ -43,4 +43,4 @@ yaz_illclient_SOURCES = yaz-illclient.c
 yaz_illclient_LDADD = ../src/libyaz.la $(READLINE_LIBS)
 
 yaz_icu_SOURCES = yaz-icu.c
-yaz_icu_LDADD =../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
+yaz_icu_LDADD =../src/libyaz_icu.la $(ICU_LIBS)
