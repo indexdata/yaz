@@ -58,14 +58,13 @@ enum YAZ_RECORD_CONV_RULE
     YAZ_RECORD_CONV_RULE_MARC
 };
 
-
 /** \brief tranformation info (rule info) */
 struct yaz_record_conv_rule {
     enum YAZ_RECORD_CONV_RULE which;
     union {
 #if YAZ_HAVE_XSLT
         struct {
-            xsltStylesheetPtr xsp;
+            xmlDocPtr xsp_doc;
         } xslt;
 #endif
         struct {
@@ -92,7 +91,7 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
 #if YAZ_HAVE_XSLT
         else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
         {
-            xsltFreeStylesheet(r->u.xslt.xsp);
+            xmlFreeDoc(r->u.xslt.xsp_doc);
         }
 #endif
     }
@@ -173,6 +172,7 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
     {
         char fullpath[1024];
         xsltStylesheetPtr xsp;
+        xmlDocPtr xsp_doc;
         if (!yaz_filepath_resolve(stylesheet, p->path, 0, fullpath))
         {
             wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
@@ -183,7 +183,16 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
                 
             return -1;
         }
-        xsp = xsltParseStylesheetFile((xmlChar*) fullpath);
+        xsp_doc = xmlParseFile(fullpath);
+        if (!xsp_doc)
+        {
+            wrbuf_printf(p->wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
+                         " xml parse failed: %s", stylesheet, fullpath);
+            if (p->path)
+                wrbuf_printf(p->wr_error, " with path '%s'", p->path);
+            return -1;
+        }
+        xsp = xsltParseStylesheetDoc(xsp_doc);
         if (!xsp)
         {
             wrbuf_printf(p->wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
@@ -204,7 +213,8 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
         {
             struct yaz_record_conv_rule *r = 
                 add_rule(p, YAZ_RECORD_CONV_RULE_XSLT);
-            r->u.xslt.xsp = xsp;
+            r->u.xslt.xsp_doc = xmlCopyDoc(xsp_doc, 1);
+            xsltFreeStylesheet(xsp); /* will free xsp_doc */
         }
     }
     return 0;
@@ -507,15 +517,16 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
             }
             else
             {
-                xmlDocPtr res = xsltApplyStylesheet(r->u.xslt.xsp, doc, 0);
+                xmlDocPtr xsp_doc = xmlCopyDoc(r->u.xslt.xsp_doc, 1);
+                xsltStylesheetPtr xsp = xsltParseStylesheetDoc(xsp_doc);
+                xmlDocPtr res = xsltApplyStylesheet(xsp, doc, 0);
                 if (res)
                 {
                     xmlChar *out_buf = 0;
                     int out_len;
 
 #if YAZ_HAVE_XSLTSAVERESULTTOSTRING
-                    xsltSaveResultToString(&out_buf, &out_len, res,
-                                           r->u.xslt.xsp); 
+                    xsltSaveResultToString(&out_buf, &out_len, res, xsp);
 #else
                     xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
 #endif
@@ -540,6 +551,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                     ret = -1;
                 }
                 xmlFreeDoc(doc);
+                xsltFreeStylesheet(xsp); /* frees xsp_doc too */
             }
         }
 #endif
