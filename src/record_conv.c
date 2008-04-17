@@ -69,7 +69,8 @@ struct yaz_record_conv_rule {
         } xslt;
 #endif
         struct {
-            yaz_iconv_t iconv_t;
+            const char *input_charset;
+            const char *output_charset;
             int input_format;
             int output_format;
         } marc;
@@ -86,8 +87,7 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
     {
         if (r->which == YAZ_RECORD_CONV_RULE_MARC)
         {
-            if (r->u.marc.iconv_t)
-                yaz_iconv_close(r->u.marc.iconv_t);
+            ;
         }
 #if YAZ_HAVE_XSLT
         else if (r->which == YAZ_RECORD_CONV_RULE_XSLT)
@@ -226,7 +226,6 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
     int input_format_mode = 0;
     int output_format_mode = 0;
     struct yaz_record_conv_rule *r;
-    yaz_iconv_t cd = 0;
 
     for (attr = ptr->properties; attr; attr = attr->next)
     {
@@ -315,7 +314,7 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
     }
     if (input_charset && output_charset)
     {
-        cd = yaz_iconv_open(output_charset, input_charset);
+        yaz_iconv_t cd = yaz_iconv_open(output_charset, input_charset);
         if (!cd)
         {
             wrbuf_printf(p->wr_error, 
@@ -325,6 +324,7 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
                          input_charset, output_charset);
             return -1;
         }
+        yaz_iconv_close(cd);
     }
     else if (input_charset)
     {
@@ -339,8 +339,9 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
         return -1;
     }
     r = add_rule(p, YAZ_RECORD_CONV_RULE_MARC);
-    r->u.marc.iconv_t = cd;
 
+    r->u.marc.input_charset = nmem_strdup(p->nmem, input_charset);
+    r->u.marc.output_charset = nmem_strdup(p->nmem, output_charset);
     r->u.marc.input_format = input_format_mode;
     r->u.marc.output_format = output_format_mode;
     return 0;
@@ -388,23 +389,33 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
 {
     int ret = 0;
     struct yaz_record_conv_rule *r = p->rules;
-    WRBUF res = wrbuf_alloc();
-    yaz_marc_t mt = yaz_marc_create();
-    
-    wrbuf_rewind(p->wr_error);
-    yaz_marc_xml(mt, r->u.marc.output_format);
-    if (r->u.marc.iconv_t)
-        yaz_marc_iconv(mt, r->u.marc.iconv_t);
-    yaz_opac_decode_wrbuf(mt, input_record, res);
-    if (ret != -1)
+    if (!r || r->which != YAZ_RECORD_CONV_RULE_MARC)
+        ret = -1; /* no marc rule so we can't do OPAC */
+    else
     {
-        ret = yaz_record_conv_record_rule(p, 
-                                          r->next,
-                                          wrbuf_buf(res), wrbuf_len(res),
-                                          output_record);
+        WRBUF res = wrbuf_alloc();
+        yaz_marc_t mt = yaz_marc_create();
+        yaz_iconv_t cd = yaz_iconv_open(r->u.marc.output_charset,
+                                        r->u.marc.input_charset);
+        
+        wrbuf_rewind(p->wr_error);
+        yaz_marc_xml(mt, r->u.marc.output_format);
+        
+        yaz_marc_iconv(mt, cd);
+        
+        yaz_opac_decode_wrbuf(mt, input_record, res);
+        if (ret != -1)
+        {
+            ret = yaz_record_conv_record_rule(p, 
+                                              r->next,
+                                              wrbuf_buf(res), wrbuf_len(res),
+                                              output_record);
+        }
+        yaz_marc_destroy(mt);
+        if (cd)
+            yaz_iconv_close(cd);
+        wrbuf_destroy(res);
     }
-    yaz_marc_destroy(mt);
-    wrbuf_destroy(res);
     return ret;
 }
 
@@ -433,12 +444,15 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
     {
         if (r->which == YAZ_RECORD_CONV_RULE_MARC)
         {
+            yaz_iconv_t cd = 
+                yaz_iconv_open(r->u.marc.output_charset,
+                               r->u.marc.input_charset);
             yaz_marc_t mt = yaz_marc_create();
 
             yaz_marc_xml(mt, r->u.marc.output_format);
 
-            if (r->u.marc.iconv_t)
-                yaz_marc_iconv(mt, r->u.marc.iconv_t);
+            if (cd)
+                yaz_marc_iconv(mt, cd);
             if (r->u.marc.input_format == YAZ_MARC_ISO2709)
             {
                 int sz = yaz_marc_read_iso2709(mt, wrbuf_buf(record),
@@ -477,6 +491,8 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                 if (ret)
                     wrbuf_printf(p->wr_error, "yaz_marc_write_mode failed");
             }
+            if (cd)
+                yaz_iconv_close(cd);
             yaz_marc_destroy(mt);
         }
 #if YAZ_HAVE_XSLT
