@@ -197,6 +197,22 @@ static int conv_convert_test(yaz_record_conv_t p,
     return ret;
 }
 
+static int conv_convert_test_iter(yaz_record_conv_t p,
+                                  const char *input_record,
+                                  const char *output_expect_record,
+                                  int num_iter)
+{
+    int i;
+    int ret;
+    for (i = 0; i < num_iter; i++)
+    {
+        ret = conv_convert_test(p, input_record, output_expect_record);
+        if (!ret)
+            break;
+    }
+    return ret;
+}
+
 static void tst_convert1(void)
 {
     yaz_record_conv_t p = 0;
@@ -307,7 +323,7 @@ static void tst_convert2(void)
                                   "/>"
                                   "</backend>",
                                   0, &p));
-    YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
+    YAZ_CHECK(conv_convert_test_iter(p, marcxml_rec, iso2709_rec, 100));
     yaz_record_conv_destroy(p);
 }
 
