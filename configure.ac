@@ -272,6 +272,7 @@ dnl
 AC_SUBST([YAZ_CONFIG_CFLAGS])
 dnl
 dnl ------ POSIX Threads
+HAVETHREADS=0
 AC_ARG_ENABLE([threads],[  --disable-threads       disable POSIX threads],[enable_threads=$enableval],[enable_threads=yes])
 if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
     ACX_PTHREAD([
