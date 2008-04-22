@@ -24,48 +24,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
- * \file service.h
- * \brief Header for NT service handling.
+ * \file sc.h
+ * \brief Header for Windows Service Control stuff
  */
 
-#ifndef SERVICE_INCLUDED
-#define SERVICE_INCLUDED
 
-#ifdef WIN32
+#include <yaz/yconfig.h>
 
-#include <windows.h>
+YAZ_BEGIN_CDECL
 
-typedef struct _Service
-{
-    LPTSTR pAppName;
-    LPTSTR pServiceName;
-    LPTSTR pServiceDisplayName;
-    LPTSTR pDependancies;
-    TCHAR szErr[256];
-    SERVICE_STATUS_HANDLE hService;
-    SERVICE_STATUS ServiceStatus;
-    SERVICE_TABLE_ENTRY ServiceTable[2];
-    int argc;
-    char **argv;
-} AppService;
+typedef struct sc_s *yaz_sc_t;
 
-/* Called by the app to initialize the service */
-BOOL SetupService(int argc, char *argv[], void *pHandle, LPTSTR pAppName, LPTSTR pServiceName, LPTSTR pServiceDisplayName, LPTSTR pDependancies);
+YAZ_EXPORT yaz_sc_t yaz_sc_create(const char *service_name,
+                                  const char *display_name);
 
-#endif /* WIN32 */
+YAZ_EXPORT void yaz_sc_running(yaz_sc_t s);
 
-/* Functions that must be in the main application */
-/* Initializes the app */
-int StartAppService(void *pHandle, int argc, char **argv);
+YAZ_EXPORT int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
+	 		      int (*sc_main)(yaz_sc_t s, int argc, char **argv),
+			      void (*sc_stop)(yaz_sc_t s));
 
-/* Now we wait for any connections */
-void RunAppService(void *pHandle);
+YAZ_EXPORT void yaz_sc_destroy(yaz_sc_t *s);
 
-/* Time to tidyup and stop the service */
-void StopAppService(void *pHandle);
+YAZ_END_CDECL
 
-#endif
 /*
  * Local variables:
  * c-basic-offset: 4

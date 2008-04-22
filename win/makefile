@@ -43,7 +43,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll client ztest yazicu zoomsh utilprog testprog iconv icu libxml2 libxslt
+all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog testprog iconv icu libxml2 libxslt
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -108,6 +108,7 @@ CLIENT=$(BINDIR)\yaz-client.exe
 YAZ_ICU=$(BINDIR)\yaz-icu.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
+SC_TEST=$(BINDIR)\sc_test.exe
 
 ZOOMTST1=$(BINDIR)\zoomtst1.exe
 ZOOMTST2=$(BINDIR)\zoomtst2.exe
@@ -131,6 +132,8 @@ TST_TIMING=$(BINDIR)\tst_timing.exe
 dll: dirs generate $(YAZ_DLL) 
 client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
+
+sc_test: $(SC_TEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
@@ -331,6 +334,9 @@ ZTEST_OBJS= \
     $(OBJDIR)\read-grs.obj \
     $(OBJDIR)\ztest.obj 
 
+SC_TEST_OBJS = \
+   $(OBJDIR)\sc_test.obj
+
 YAZ_ZOOMSH_OBJS = \
    $(OBJDIR)\zoomsh.obj
 
@@ -374,7 +380,6 @@ MISC_OBJS= \
    $(OBJDIR)\oid_std.obj \
    $(OBJDIR)\eventl.obj \
    $(OBJDIR)\requestq.obj \
-   $(OBJDIR)\service.obj \
    $(OBJDIR)\seshigh.obj \
    $(OBJDIR)\statserv.obj \
    $(OBJDIR)\tcpdchk.obj \
@@ -487,7 +492,8 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_encode_iso_8859_1.obj \
    $(OBJDIR)\iconv_encode_marc8.obj \
    $(OBJDIR)\iconv_decode_marc8.obj \
-   $(OBJDIR)\iconv_encode_wchar.obj
+   $(OBJDIR)\iconv_encode_wchar.obj \
+   $(OBJDIR)\sc.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -817,6 +823,10 @@ $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
 	$(LINK_PROGRAM) $(ICU_LIB) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
+
+$(SC_TEST) : "$(BINDIR)" $(SC_TEST_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(SC_TEST_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@

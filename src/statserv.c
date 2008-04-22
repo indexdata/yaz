@@ -12,12 +12,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #ifdef WIN32
 #include <process.h>
 #include <winsock.h>
 #include <direct.h>
-#include "service.h"
 #endif
+
+#include <yaz/sc.h>
+
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -399,7 +402,7 @@ static void xml_config_read(void)
                 if (!strcmp((const char *) ptr->name, "host"))
                 {
                     gfs->host = nmem_dup_xml_content(gfs_nmem,
-                                                         ptr->children);
+                                                     ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "config"))
                 {
@@ -626,7 +629,7 @@ static void ThreadList_Initialize()
     /* Initialize the critical Sections */
     InitializeCriticalSection(&Thread_CritSect);
 
-     /* Set the first thraed */
+    /* Set the first thraed */
     pFirstThread = NULL;
 
     /* we have been initialized */
@@ -1131,7 +1134,7 @@ static int add_listener(char *where, int listen_id)
         return -1;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
-         EVENT_EXCEPT, listen_id)))
+                              EVENT_EXCEPT, listen_id)))
     {
         yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create IOCHAN-type");
         cs_close (l);
@@ -1477,86 +1480,43 @@ int check_options(int argc, char **argv)
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
-                        " -ziDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
+                    " -ziDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }
     }
     return 0;
 }
 
-#ifdef WIN32
-typedef struct _Args
+void statserv_sc_stop(yaz_sc_t s)
 {
-    char **argv;
-    int argc;
-} Args; 
-
-static Args ArgDetails;
-
-/* name of the executable */
-#define SZAPPNAME            "server"
-
-/* list of service dependencies - "dep1\0dep2\0\0" */
-#define SZDEPENDENCIES       ""
-
-int statserv_main(int argc, char **argv,
-                  bend_initresult *(*bend_init)(bend_initrequest *r),
-                  void (*bend_close)(void *handle))
-{
-    struct statserv_options_block *cb = &control_block;
-    cb->bend_init = bend_init;
-    cb->bend_close = bend_close;
-
-    /* Lets setup the Arg structure */
-    ArgDetails.argc = argc;
-    ArgDetails.argv = argv;
-    
-    /* Now setup the service with the service controller */
-    SetupService(argc, argv, &ArgDetails, SZAPPNAME,
-                 cb->service_name, /* internal service name */
-                 cb->service_display_name, /* displayed name */
-                 SZDEPENDENCIES);
-    return 0;
-}
-
-int StartAppService(void *pHandle, int argc, char **argv)
-{
-    /* Initializes the App */
-    return 1;
-}
-
-void RunAppService(void *pHandle)
-{
-    Args *pArgs = (Args *)pHandle;
-    
-    /* Starts the app running */
-    statserv_start(pArgs->argc, pArgs->argv);
-}
-
-void StopAppService(void *pHandle)
-{
-    /* Stops the app */
     statserv_closedown();
     statserv_reset();
 }
-/* WIN32 */
-#else
-/* UNIX */
+
+int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
+{
+    yaz_sc_running(s);
+    return statserv_start(argc, argv);
+}
+
 int statserv_main(int argc, char **argv,
                   bend_initresult *(*bend_init)(bend_initrequest *r),
                   void (*bend_close)(void *handle))
 {
     int ret;
+    struct statserv_options_block *cb = &control_block;
 
-    control_block.bend_init = bend_init;
-    control_block.bend_close = bend_close;
+    yaz_sc_t s = yaz_sc_create(cb->service_name,
+                               cb->service_display_name);
 
-    ret = statserv_start (argc, argv);
-    statserv_closedown ();
-    statserv_reset();
+    cb->bend_init = bend_init;
+    cb->bend_close = bend_close;
+
+    ret = yaz_sc_program(s, argc, argv, statserv_sc_main, statserv_sc_stop);
+    yaz_sc_destroy(&s);
     return ret;
 }
-#endif
+
 /*
  * Local variables:
  * c-basic-offset: 4
