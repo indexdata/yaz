@@ -697,7 +697,7 @@ void statserv_remove(IOCHAN pIOChannel)
 }
 
 /* WIN32 statserv_closedown */
-void statserv_closedown()
+static void statserv_closedown()
 {
     /* Shouldn't do anything if we are not initialized */
     if (bInitialized)
@@ -870,7 +870,7 @@ void statserv_remove(IOCHAN pIOChannel)
 {
 }
 
-void statserv_closedown()
+static void statserv_closedown(void)
 {
     IOCHAN p;
 
@@ -1197,7 +1197,7 @@ static void statserv_reset(void)
 {
 }
 
-int statserv_start(int argc, char **argv)
+static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     char sep;
 #ifdef WIN32
@@ -1340,6 +1340,8 @@ int statserv_start(int argc, char **argv)
 #endif
     if (pListener == NULL)
         return 1;
+    if (s)
+        yaz_sc_running(s);
     yaz_log(YLOG_DEBUG, "Entering event loop.");
     return iochan_event_loop(&pListener);
 }
@@ -1493,12 +1495,6 @@ void statserv_sc_stop(yaz_sc_t s)
     statserv_reset();
 }
 
-int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
-{
-    yaz_sc_running(s);
-    return statserv_start(argc, argv);
-}
-
 int statserv_main(int argc, char **argv,
                   bend_initresult *(*bend_init)(bend_initrequest *r),
                   void (*bend_close)(void *handle))
@@ -1506,8 +1502,14 @@ int statserv_main(int argc, char **argv,
     int ret;
     struct statserv_options_block *cb = &control_block;
 
-    yaz_sc_t s = yaz_sc_create(cb->service_name,
-                               cb->service_display_name);
+    /* control block does not have service_name member on Unix */
+    yaz_sc_t s = yaz_sc_create(
+#ifdef WIN32
+        cb->service_name, cb->service_display_name
+#else
+        0, 0
+#endif
+        );
 
     cb->bend_init = bend_init;
     cb->bend_close = bend_close;

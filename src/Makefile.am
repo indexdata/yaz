@@ -97,12 +97,12 @@ libyaz_la_SOURCES=version.c options.c log.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c \
   copy_types.c match_glob.c poll.c daemon.c \
   iconv_encode_marc8.c iconv_encode_iso_8859_1.c iconv_encode_wchar.c \
-  iconv_decode_marc8.c
+  iconv_decode_marc8.c sc.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
-  requestq.c eventl.h session.h service.c service.h mutex.c
+  requestq.c eventl.h session.h mutex.c
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 

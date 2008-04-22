@@ -373,8 +373,6 @@ YAZ_EXPORT int statserv_main(
     int argc, char **argv,
     bend_initresult *(*bend_init)(bend_initrequest *r),
     void (*bend_close)(void *handle));
-YAZ_EXPORT int statserv_start(int argc, char **argv);
-YAZ_EXPORT void statserv_closedown(void);
 YAZ_EXPORT statserv_options_block *statserv_getcontrol(void);
 YAZ_EXPORT void statserv_setcontrol(statserv_options_block *block);
 YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);

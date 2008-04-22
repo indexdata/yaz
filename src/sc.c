@@ -25,8 +25,10 @@ struct sc_s {
     char *display_name;
     int (*sc_main)(yaz_sc_t s, int argc, char **argv);
     void (*sc_stop)(yaz_sc_t s);
+#ifdef WIN32
     SERVICE_STATUS_HANDLE   gSvcStatusHandle;
     SERVICE_STATUS          gSvcStatus;
+#endif
 };
 
 
@@ -34,18 +36,21 @@ yaz_sc_t yaz_sc_create(const char *service_name, const char *display_name)
 {
     yaz_sc_t s = xmalloc(sizeof(*s));
 
-    s->service_name = xstrdup(service_name);
-    s->display_name = xstrdup(display_name);
+    s->service_name = service_name ? xstrdup(service_name) : 0;
+    s->display_name = display_name ? xstrdup(display_name) : 0;
     s->install_flag = 0;
     s->start_flag = 0;
     s->remove_flag = 0;
     s->run_flag = 0;
     s->sc_main = 0;
     s->sc_stop = 0;
+#ifdef WIN32
     s->gSvcStatusHandle = 0;
+#endif
     return s;
 }
 
+#ifdef WIN32
 static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
 {
     int skip_opt = 0;
@@ -82,8 +87,8 @@ static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
             const char *dir = (*argv_p)[i+1];
             s->run_flag = 1;
             chdir(dir);
-                skip_opt = 2;
-                break;
+            skip_opt = 2;
+            break;
         }
     }
     *argc_p -= skip_opt;
@@ -203,10 +208,13 @@ static void WINAPI sc_service_main(DWORD argc, char **argv)
     sc_ReportSvcStatus(s, SERVICE_STOPPED,
                        ret_code ? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR, ret_code);
 }
+#endif
 
 void yaz_sc_running(yaz_sc_t s)
 {
+#ifdef WIN32
     sc_ReportSvcStatus(s, SERVICE_RUNNING, NO_ERROR, 0);
+#endif
 }
 
 int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
@@ -216,6 +224,7 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
 {
     s->sc_main = sc_main;
     s->sc_stop = sc_stop;
+#ifdef WIN32
     parse_args(s, &argc, &argv);
 
     if (s->install_flag || s->remove_flag)
@@ -333,13 +342,11 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "Service %s could not be controlled",
                     s->service_name);
         }
+        return 0;
     }
-    else
-    {
-        /* run the program standalone (with no service) */
-        return s->sc_main(s, argc, argv);
-    }
-    return 0;
+#endif /* WIN32 */
+    /* run the program standalone (with no service) */
+    return s->sc_main(s, argc, argv);
 }
 
 void yaz_sc_destroy(yaz_sc_t *s)
