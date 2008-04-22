@@ -1,7 +1,7 @@
 ; This file is part of the YAZ toolkit.
 ; Copyright (C) 1995-2008 Index Data
 
-!define VERSION "3.0.28"
+!define VERSION "3.0.29"
 
 ; Microsoft runtime CRT 
 ; Uncomment exactly ONE section of the three below

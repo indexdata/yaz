@@ -32,10 +32,10 @@
 
 #include <yaz/yconfig.h>
 
-#define YAZ_VERSION "3.0.28"
-#define YAZ_VERSIONL 0x03001C
+#define YAZ_VERSION "3.0.29"
+#define YAZ_VERSIONL 0x03001D
 
-#define YAZ_FILEVERSION 3,0,28,1
+#define YAZ_FILEVERSION 3,0,29,1
 
 #define YAZ_DATE 1
 
