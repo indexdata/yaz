@@ -25,6 +25,8 @@ struct sc_s {
     char *display_name;
     int (*sc_main)(yaz_sc_t s, int argc, char **argv);
     void (*sc_stop)(yaz_sc_t s);
+    int argc;
+    char **argv;
 #ifdef WIN32
     SERVICE_STATUS_HANDLE   gSvcStatusHandle;
     SERVICE_STATUS          gSvcStatus;
@@ -91,11 +93,13 @@ static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
             break;
         }
     }
-    *argc_p -= skip_opt;
+    *argc_p = *argc_p - skip_opt;
     for (; i < *argc_p; i++)
         (*argv_p)[i] = (*argv_p)[i + skip_opt];
 
+    /* now look for the service arguments */
     /* we must have a YAZ log file to work with */
+    skip_opt = 0;
     for (i = 1; i < *argc_p; i++)
     {
         const char *opt = (*argv_p)[i];
@@ -127,8 +131,10 @@ static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
     }
     if (s->run_flag)
     {   /* remove  -l logfile for a running service */
+        *argc_p = *argc_p - skip_opt;
         for (; i < *argc_p; i++)
             (*argv_p)[i] = (*argv_p)[i + skip_opt];
+
     }
 }
 
@@ -203,7 +209,7 @@ static void WINAPI sc_service_main(DWORD argc, char **argv)
 
     sc_ReportSvcStatus(s, SERVICE_START_PENDING, NO_ERROR, 3000);
 
-    ret_code = s->sc_main(s, argc, argv);
+    ret_code = s->sc_main(s, s->argc, s->argv);
 	
     sc_ReportSvcStatus(s, SERVICE_STOPPED,
                        ret_code ? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR, ret_code);
@@ -337,6 +343,8 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
         dt[1].lpServiceName = 0;
         dt[1].lpServiceProc = 0;
 
+        s->argc = argc;
+        s->argv = argv;
         if (!StartServiceCtrlDispatcher(dt))
         {
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "Service %s could not be controlled",
