@@ -360,21 +360,6 @@ static void send_initRequest(const char* type_and_host)
                                               negotiationCharsetRecords);
         }
     }
-    else if (ODR_MASK_GET(req->options, Z_Options_negotiationModel))
-    {
-        Z_OtherInformation **p;
-        Z_OtherInformationUnit *p0;
-
-        yaz_oi_APDU(apdu, &p);
-
-        if ((p0=yaz_oi_update(p, out, NULL, 0, 0)))
-        {
-            p0->which = Z_OtherInfo_externallyDefinedInfo;
-            p0->information.externallyDefinedInfo =
-                yaz_set_proposal_charneg(out, 0, 0, 0, 0, 0);
-        }
-
-    }
     if (send_apdu(apdu))
         printf("Sent initrequest.\n");
 }
@@ -4932,7 +4917,6 @@ int main(int argc, char **argv)
     ODR_MASK_SET(&z3950_options, Z_Options_sort);
     ODR_MASK_SET(&z3950_options, Z_Options_extendedServices);
     ODR_MASK_SET(&z3950_options, Z_Options_delSet);
-    ODR_MASK_SET(&z3950_options, Z_Options_negotiationModel);
 
     while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
     {
