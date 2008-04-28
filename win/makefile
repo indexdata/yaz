@@ -479,6 +479,7 @@ MISC_OBJS= \
    $(OBJDIR)\cqltransform.obj \
    $(OBJDIR)\cqlutil.obj \
    $(OBJDIR)\cqlstrer.obj \
+   $(OBJDIR)\rpn2cql.obj \
    $(OBJDIR)\xcqlutil.obj \
    $(OBJDIR)\elementset.obj \
    $(OBJDIR)\timing.obj \

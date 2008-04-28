@@ -710,6 +710,14 @@ int cql_transform_error(cql_transform_t ct, const char **addinfo)
     *addinfo = ct->addinfo;
     return ct->error;
 }
+
+void cql_transform_set_error(cql_transform_t ct, int error, const char *addinfo)
+{
+    xfree(ct->addinfo);
+    ct->addinfo = addinfo ? xstrdup(addinfo) : 0;
+    ct->error = error;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

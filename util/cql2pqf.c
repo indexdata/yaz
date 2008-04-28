@@ -6,28 +6,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <yaz/cql.h>
+#include <yaz/rpn2cql.h>
+#include <yaz/pquery.h>
 #include <yaz/options.h>
 
 static void usage(void)
 {
-    fprintf (stderr, "usage\n cql2pqf [-n <n>] <properties> [<query>]\n");
-    exit (1);
+    fprintf(stderr, "usage\n cql2pqf [-n <n>] [-r] <properties> [<query>]\n");
+    exit(1);
 }
 
 int main(int argc, char **argv)
 {
     cql_transform_t ct;
-    int r = 0;
     int i, iterations = 1;
-    CQL_parser cp = cql_parser_create();
     char *query = 0;
     char *fname = 0;
+    int reverse = 0;
 
     int ret;
     char *arg;
 
-    while ((ret = options("n:", argv, argc, &arg)) != -2)
+    while ((ret = options("n:r", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -37,6 +37,8 @@ int main(int argc, char **argv)
             else
                 query = arg;
             break;
+        case 'r':
+            reverse = 1;
         case 'n':
             iterations = atoi(arg);
             break;
@@ -49,40 +51,76 @@ int main(int argc, char **argv)
     ct = cql_transform_open_fname(fname);
     if (!ct)
     {
-        fprintf (stderr, "failed to read properties %s\n", fname);
-        exit (1);
+        fprintf(stderr, "failed to read properties %s\n", fname);
+        exit(1);
     }
 
-    if (query)
+    if (reverse)
     {
-        for (i = 0; i<iterations; i++)
-            r = cql_parser_string(cp, query);
-    }
-    else
-        r = cql_parser_stdio(cp, stdin);
-
-    if (r)
-        fprintf (stderr, "Syntax error\n");
-    else
-    {
-        r = cql_transform_FILE(ct, cql_parser_result(cp), stdout);
-        printf("\n");
-        if (r)
-        {
-            const char *addinfo;
-            cql_transform_error(ct, &addinfo);
-            printf ("Transform error %d %s\n", r, addinfo ? addinfo : "");
-        }
+        if (!query)
+            usage();
         else
         {
-            FILE *null = fopen("/dev/null", "w");
-            for (i = 1; i<iterations; i++)
-                cql_transform_FILE(ct, cql_parser_result(cp), null);
-            fclose(null);
+            ODR odr = odr_createmem(ODR_ENCODE);
+            YAZ_PQF_Parser pp = yaz_pqf_create();
+            Z_RPNQuery *rpn = yaz_pqf_parse(pp, odr, query);
+            if (!rpn)
+            {
+                fprintf(stderr, "PQF syntax error\n");
+            }
+            else 
+            {
+                int ret = cql_transform_rpn2cql(ct, cql_fputs, stdout, rpn);
+                
+                if (ret)
+                {
+                    const char *addinfo;
+                    int r = cql_transform_error(ct, &addinfo);
+                    printf("Transform error %d %s\n", r, addinfo ? addinfo : "");
+                }
+                else
+                    printf("\n");
+            }
+            yaz_pqf_destroy(pp);
+            odr_destroy(odr);
         }
     }
+    else
+    {
+        CQL_parser cp = cql_parser_create();
+        int r = 0;
+        
+        if (query)
+        {
+            for (i = 0; i<iterations; i++)
+                r = cql_parser_string(cp, query);
+        }
+        else
+            r = cql_parser_stdio(cp, stdin);
+        
+        if (r)
+            fprintf(stderr, "Syntax error\n");
+        else
+        {
+            r = cql_transform_FILE(ct, cql_parser_result(cp), stdout);
+            printf("\n");
+            if (r)
+            {
+                const char *addinfo;
+                r = cql_transform_error(ct, &addinfo);
+                printf("Transform error %d %s\n", r, addinfo ? addinfo : "");
+            }
+            else
+            {
+                FILE *null = fopen("/dev/null", "w");
+                for (i = 1; i<iterations; i++)
+                    cql_transform_FILE(ct, cql_parser_result(cp), null);
+                fclose(null);
+            }
+        }
+        cql_parser_destroy(cp);
+    }
     cql_transform_close(ct);
-    cql_parser_destroy(cp);
     return 0;
 }
 /*

@@ -300,6 +300,14 @@ int cql_transform_buf(cql_transform_t ct,
 YAZ_EXPORT
 int cql_transform_error(cql_transform_t ct, const char **addinfo);
 
+/** \brief sets error and addinfo for transform
+    \param ct CQL transform handle
+    \param error error code
+    \param addinfo additional info
+ */
+YAZ_EXPORT
+void cql_transform_set_error(cql_transform_t ct, int error, const char *addinfo);
+
 /** \brief returns the CQL message corresponding to a given error code.
     \param code error code
     \returns text message

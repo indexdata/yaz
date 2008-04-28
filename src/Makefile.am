@@ -88,7 +88,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
   cclqfile.c cclstr.c cclxmlconfig.c ccl_stop_words.c \
-  cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
+  cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c rpn2cql.c \
   cqlstrer.c querytowrbuf.c \
   tcpdchk.c \
   test.c timing.c \

@@ -3,7 +3,7 @@
 
 noinst_HEADERS = icu_I18N.h
 
-pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h comstack.h \
+pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h comstack.h \
  diagbib1.h diagsrw.h diagsru_update.h sortspec.h log.h logrpn.h marcdisp.h \
  nmem.h nmem_xml.h odr.h \
  options.h otherinfo.h pquery.h prt-ext.h querytowrbuf.h \
