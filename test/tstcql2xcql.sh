@@ -7,9 +7,9 @@ secno=0
 testno=0
 comment=0
 ecode=0
-test -f ${srcdir}/cqlsample || exit 1
+test -f ${srcdir}/cql2xcqlsample || exit 1
 test -d cql || mkdir cql
-for f in `cat ${srcdir}/cqlsample`; do
+for f in `cat ${srcdir}/cql2xcqlsample`; do
 	if echo $f | grep '^#' >/dev/null; then
 		comment=1
 	else
