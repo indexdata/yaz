@@ -297,7 +297,7 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
             } else if (!strcmp(relation, "<>")) {
                 proxrel = 6;
             } else {
-                ct->error = 40; /* Unsupported proximity relation */
+                ct->error = YAZ_SRW_UNSUPP_PROX_RELATION;
                 ct->addinfo = xstrdup(relation);
                 return 0;
             }
@@ -315,12 +315,12 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
             } else if (!strcmp(term, "element")) {
                 unit = 8;
             } else {
-                ct->error = 42; /* Unsupported proximity unit */
+                ct->error = YAZ_SRW_UNSUPP_PROX_UNIT;
                 ct->addinfo = xstrdup(term);
                 return 0;
             }
         } else {
-            ct->error = 46;     /* Unsupported boolean modifier */
+            ct->error = YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
             ct->addinfo = xstrdup(name);
             return 0;
         }
@@ -390,27 +390,27 @@ void emit_term(cql_transform_t ct,
         if (length > 1 && term[0] == '^' && term[length-1] == '^')
         {
             cql_pr_attr(ct, "position", "firstAndLast", 0,
-                        pr, client_data, 32);
+                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length -= 2;
         }
         else if (term[0] == '^')
         {
             cql_pr_attr(ct, "position", "first", 0,
-                        pr, client_data, 32);
+                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length--;
         }
         else if (term[length-1] == '^')
         {
             cql_pr_attr(ct, "position", "last", 0,
-                        pr, client_data, 32);
+                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             length--;
         }
         else
         {
             cql_pr_attr(ct, "position", "any", 0,
-                        pr, client_data, 32);
+                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
         }
     }
 
@@ -460,7 +460,7 @@ void emit_term(cql_transform_t ct,
              */
             int i;
             cql_pr_attr(ct, "truncation", "z3958", 0,
-                        pr, client_data, 28);
+                        pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
             z3958_mem = (char *) xmalloc(length+1);
             for (i = 0; i < length; i++)
             {
@@ -485,7 +485,7 @@ void emit_term(cql_transform_t ct,
     if (ns) {
         cql_pr_attr_uri(ct, "index", ns,
                         cn->u.st.index, "serverChoice",
-                        pr, client_data, 16);
+                        pr, client_data, YAZ_SRW_UNSUPP_INDEX);
     }
     if (cn->u.st.modifiers)
     {
@@ -493,7 +493,7 @@ void emit_term(cql_transform_t ct,
         for (; mod; mod = mod->u.st.modifiers)
         {
             cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
-                        pr, client_data, 20);
+                        pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
         }
     }
 
@@ -603,14 +603,15 @@ void cql_transform_r(cql_transform_t ct,
         {
             if (!ct->error)
             {
-                ct->error = 15;
+                ct->error = YAZ_SRW_UNSUPP_CONTEXT_SET;
                 ct->addinfo = 0;
             }
         }
         cql_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
-        cql_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data, 19);
+        cql_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data,
+                    YAZ_SRW_UNSUPP_RELATION);
         cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
-                    pr, client_data, 24);
+                    pr, client_data, YAZ_SRW_UNSUPP_COMBI_OF_RELATION_AND_TERM);
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
         {
             emit_wordlist(ct, cn, pr, client_data, "and");
@@ -634,7 +635,7 @@ void cql_transform_r(cql_transform_t ct,
                 return;
         } else if (mods) {
             /* Boolean modifiers other than on proximity not supported */
-            ct->error = 46; /* SRW diag: "Unsupported boolean modifier" */
+            ct->error = YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
             ct->addinfo = xstrdup(mods->u.st.index);
             return;
         }
