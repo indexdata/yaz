@@ -339,6 +339,34 @@ void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
 }
 
 
+void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
+                          int code, const char *details)
+{
+    const char *message = yaz_diag_srw_str(code);
+    int len = 200;
+    if (message)
+        len += strlen(message);
+    if (details)
+        len += strlen(details);
+    
+    record->recordData_buf = (char *) odr_malloc(o, len);
+    
+    sprintf(record->recordData_buf, "<diagnostic "
+            "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
+            " <uri>info:srw/diagnostic/1/%d</uri>\n", code);
+    if (details)
+        sprintf(record->recordData_buf + strlen(record->recordData_buf),
+                " <details>%s</details>\n", details);
+    if (message)
+        sprintf(record->recordData_buf + strlen(record->recordData_buf),
+                " <message>%s</message>\n", message);
+    sprintf(record->recordData_buf + strlen(record->recordData_buf),
+            "</diagnostic>\n");
+    record->recordData_len = strlen(record->recordData_buf);
+    record->recordPosition = odr_intdup(o, pos);
+    record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
+}
+
 static void grab_charset(ODR o, const char *content_type, char **charset)
 {
     if (charset)

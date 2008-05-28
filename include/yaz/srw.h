@@ -292,6 +292,9 @@ int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
                                      Z_SRW_diagnostic **diag,
                                      int *num, ODR odr);
 
+YAZ_EXPORT
+void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
+                          int code, const char *details);
     
 
 YAZ_END_CDECL

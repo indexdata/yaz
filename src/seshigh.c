@@ -735,29 +735,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     if (rr.errcode && rr.surrogate_flag)
     {
         int code = yaz_diag_bib1_to_srw(rr.errcode);
-        const char *message = yaz_diag_srw_str(code);
-        int len = 200;
-        if (message)
-            len += strlen(message);
-        if (rr.errstring)
-            len += strlen(rr.errstring);
-
-        record->recordData_buf = (char *) odr_malloc(o, len);
-        
-        sprintf(record->recordData_buf, "<diagnostic "
-                "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
-                " <uri>info:srw/diagnostic/1/%d</uri>\n", code);
-        if (rr.errstring)
-            sprintf(record->recordData_buf + strlen(record->recordData_buf),
-                    " <details>%s</details>\n", rr.errstring);
-        if (message)
-            sprintf(record->recordData_buf + strlen(record->recordData_buf),
-                    " <message>%s</message>\n", message);
-        sprintf(record->recordData_buf + strlen(record->recordData_buf),
-                "</diagnostic>\n");
-        record->recordData_len = strlen(record->recordData_buf);
-        record->recordPosition = odr_intdup(o, pos);
-        record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
+        yaz_mk_sru_surrogate(o, record, pos, code, rr.errstring);
         return 0;
     }
     else if (rr.len >= 0)
@@ -765,7 +743,8 @@ static int srw_bend_fetch(association *assoc, int pos,
         record->recordData_buf = rr.record;
         record->recordData_len = rr.len;
         record->recordPosition = odr_intdup(o, pos);
-        record->recordSchema = odr_strdup_null(o, rr.schema);
+        record->recordSchema = odr_strdup_null(
+            o, rr.schema ? rr.schema : srw_req->recordSchema);
     }
     if (rr.errcode)
     {
