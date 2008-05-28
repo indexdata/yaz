@@ -24,6 +24,8 @@
 #include <yaz/cql.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
+#include <yaz/tokenizer.h>
+#include <yaz/wrbuf.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -33,8 +35,10 @@ struct cql_prop_entry {
 
 struct cql_transform_t_ {
     struct cql_prop_entry *entry;
+    yaz_tok_cfg_t tok_cfg;
     int error;
     char *addinfo;
+    WRBUF w;
 };
 
 cql_transform_t cql_transform_open_FILE(FILE *f)
@@ -42,56 +46,74 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
     char line[1024];
     cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
     struct cql_prop_entry **pp = &ct->entry;
+    ct->tok_cfg = yaz_tok_cfg_create();
+    ct->w = wrbuf_alloc();
 
+    yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
     ct->error = 0;
     ct->addinfo = 0;
+
     while (fgets(line, sizeof(line)-1, f))
     {
-        const char *cp_value_start;
-        const char *cp_value_end;
-        const char *cp_pattern_start;
-        const char *cp_pattern_end;
-        const char *cp = line;
-
-        while (*cp && strchr(" \t", *cp))
-            cp++;
-        cp_pattern_start = cp;
-        
-        while (*cp && !strchr(" \t\r\n=#", *cp))
-            cp++;
-        cp_pattern_end = cp;
-        if (cp == cp_pattern_start)
-            continue;
-        while (*cp && strchr(" \t", *cp))
-            cp++;
-        if (*cp != '=')
+        yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, line);
+        int t;
+        wrbuf_rewind(ct->w);
+        t = yaz_tok_move(tp);
+        if (t == YAZ_TOK_STRING)
         {
-            *pp = 0;
+            char * pattern = xstrdup(yaz_tok_parse_string(tp));
+            t = yaz_tok_move(tp);
+            if (t != '=')
+            {
+                yaz_tok_parse_destroy(tp);
+                cql_transform_close(ct);
+                return 0;
+            }
+            t = yaz_tok_move(tp);
+
+            while (t == YAZ_TOK_STRING)
+            {
+                /* attset type=value  OR  type=value */
+                wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+                t = yaz_tok_move(tp);
+                if (t == YAZ_TOK_EOF)
+                    break;
+                if (t == YAZ_TOK_STRING)  
+                {  
+                    wrbuf_puts(ct->w, " ");
+                    wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+                    t = yaz_tok_move(tp);
+                }
+                if (t != '=')
+                {
+                    yaz_tok_parse_destroy(tp);
+                    cql_transform_close(ct);
+                    return 0;
+                }
+                t = yaz_tok_move(tp);
+                if (t != YAZ_TOK_STRING) /* value */
+                {
+                    yaz_tok_parse_destroy(tp);
+                    cql_transform_close(ct);
+                    return 0;
+                }
+                wrbuf_puts(ct->w, "=");
+                wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+                t = yaz_tok_move(tp);
+                wrbuf_puts(ct->w, " ");
+            }
+            *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
+            (*pp)->pattern = pattern;
+            (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
+            pp = &(*pp)->next;
+        }
+        else if (t != YAZ_TOK_EOF)
+        {
+            yaz_tok_parse_destroy(tp);
             cql_transform_close(ct);
             return 0;
         }
-        cp++;
-        while (*cp && strchr(" \t\r\n", *cp))
-            cp++;
-        cp_value_start = cp;
-        cp_value_end = strchr(cp, '#');
-        if (!cp_value_end)
-            cp_value_end = strlen(line) + line;
-
-        if (cp_value_end != cp_value_start &&
-            strchr(" \t\r\n", cp_value_end[-1]))
-            cp_value_end--;
-        *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
-        (*pp)->pattern = (char *) xmalloc(cp_pattern_end-cp_pattern_start + 1);
-        memcpy((*pp)->pattern, cp_pattern_start,
-               cp_pattern_end-cp_pattern_start);
-        (*pp)->pattern[cp_pattern_end-cp_pattern_start] = '\0';
-
-        (*pp)->value = (char *) xmalloc(cp_value_end-cp_value_start + 1);
-        if (cp_value_start != cp_value_end)
-            memcpy((*pp)->value, cp_value_start, cp_value_end-cp_value_start);
-        (*pp)->value[cp_value_end - cp_value_start] = '\0';
-        pp = &(*pp)->next;
+        yaz_tok_parse_destroy(tp);
     }
     *pp = 0;
     return ct;
@@ -112,6 +134,8 @@ void cql_transform_close(cql_transform_t ct)
         pe = pe_next;
     }
     xfree(ct->addinfo);
+    yaz_tok_cfg_destroy(ct->tok_cfg);
+    wrbuf_destroy(ct->w);
     xfree(ct);
 }
 
