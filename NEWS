@@ -1,4 +1,10 @@
---- 3.0.28 2008/03/31
+Improved speed of MARC-8 encoding.
+
+Added support for lossy and loss-less MARC-8 encoding.
+
+Changed yaz_record_conv_record to be reentrant for XSLT conversions.
+
+Added new Windows Service wrapper (sc).
 
 yaz-client's itemorder command may now send a file.
 
