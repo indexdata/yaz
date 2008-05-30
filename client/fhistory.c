@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
@@ -67,6 +68,8 @@ int file_history_load(file_history_t fh)
     return ret;
 }
 
+#define FILE_SAVE_HISTORY_MAX 16384
+
 int file_history_save(file_history_t fh)
 {
     FILE *f;
@@ -87,7 +90,21 @@ int file_history_save(file_history_t fh)
     }
     else
     {
-        size_t w = fwrite(wrbuf_buf(fh->wr), 1, sz, f);
+        size_t w;
+        const char *start = wrbuf_buf(fh->wr);
+        if (sz > FILE_SAVE_HISTORY_MAX)
+        {
+            const char *nl = strchr(
+                wrbuf_buf(fh->wr) + sz - FILE_SAVE_HISTORY_MAX,
+                '\n');
+            if (nl)
+            {
+                nl++;
+                sz = sz - (nl - start);
+                start = nl;
+            }
+        }
+        w = fwrite(start, 1, sz, f);
         if (w != sz)
             ret = -1;
         if (fclose(f))
