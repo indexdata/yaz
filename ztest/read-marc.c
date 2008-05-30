@@ -1572,12 +1572,6 @@ char *dummy_marc_record (int num, ODR odr)
     FILE *inf;
     char *buf = 0;
 
-    if (num == 98) 
-    {   /* this will generate a very bad MARC record (testing only) */
-        buf = (char*) odr_malloc(odr, 2101);
-        memset(buf, '7', 2100);
-        buf[2100] = '\0';
-    }
     inf = fopen ("dummy-records", "r");
     if (!inf) 
     { /* file not there. Get them from fixed array */

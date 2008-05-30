@@ -17,6 +17,7 @@
 #include <yaz/log.h>
 #include <yaz/backend.h>
 #include <yaz/ill.h>
+#include <yaz/diagbib1.h>
 
 static int log_level=0;
 static int log_level_set=0;
@@ -517,7 +518,77 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     r->basename = "Default";
     r->output_format = r->request_format;
 
-    if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
+    if (!oid || yaz_oid_is_iso2709(oid))
+    {
+        cp = dummy_marc_record(r->number, r->stream);
+        if (!cp)
+        {
+            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+        }
+        else
+        {
+            r->len = strlen(cp);
+            r->record = cp;
+            r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_usmarc);
+        }
+    }
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_opac))
+    {
+        Z_OPACRecord *rec;
+        int i;
+        cp = dummy_marc_record(r->number, r->stream);
+        if (!cp)
+        {
+            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            return 0;
+        }
+        rec = odr_malloc(r->stream, sizeof(*rec));
+        rec->bibliographicRecord =
+            z_ext_record_usmarc(r->stream, cp, strlen(cp));
+        rec->num_holdingsData = 1;
+        rec->holdingsData = odr_malloc(r->stream, sizeof(*rec->holdingsData));
+        for (i = 0; i < rec->num_holdingsData; i++)
+        {
+            Z_HoldingsRecord *hr = odr_malloc(r->stream, sizeof(*hr));
+            Z_HoldingsAndCircData *hc = odr_malloc(r->stream, sizeof(*hc));
+
+            rec->holdingsData[i] = hr;
+            hr->which = Z_HoldingsRecord_holdingsAndCirc;
+            hr->u.holdingsAndCirc = hc;
+            
+            hc->typeOfRecord = odr_strdup(r->stream, "x");
+            hc->typeOfRecord[0] = cp[5]; /* LDR 6 */
+
+            hc->encodingLevel = odr_strdup(r->stream, "x");
+            hc->encodingLevel[0] = cp[16]; /* LDR 17 */
+
+            hc->format = 0; /* OPT */
+            hc->receiptAcqStatus = 0; /* OPT */
+            hc->generalRetention = 0; /* OPT */
+            hc->completeness = 0; /* OPT */
+            hc->dateOfReport = 0; /* OPT */
+            hc->nucCode = 0; /* OPT */
+            hc->localLocation = 0; /* OPT */
+            hc->shelvingLocation = 0; /* OPT */
+            hc->callNumber = 0; /* OPT */
+            hc->shelvingData = 0; /* OPT */
+            hc->copyNumber = 0; /* OPT */
+            hc->publicNote = 0; /* OPT */
+            hc->reproductionNote = 0; /* OPT */
+            hc->termsUseRepro = 0; /* OPT */
+            hc->enumAndChron = 0; /* OPT */
+
+            hc->num_volumes = 0;
+            hc->volumes = 0;
+
+            hc->num_circulationData = 0;
+            hc->circulationData = 0;
+        }
+
+        r->len = -1;
+        r->record = (char*) rec;
+    }
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {
         /* this section returns a small record */
         char buf[100];
@@ -528,17 +599,17 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         r->record = (char *) odr_malloc (r->stream, r->len+1);
         strcpy(r->record, buf);
     }
-    else if (oid &&  !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
         r->len = -1;
         r->record = (char*) dummy_grs_record(r->number, r->stream);
         if (!r->record)
         {
-            r->errcode = 13;
+            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
             return 0;
         }
     }
-    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_postscript))
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_postscript))
     {
         char fname[20];
         FILE *f;
@@ -548,14 +619,14 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         f = fopen(fname, "rb");
         if (!f)
         {
-            r->errcode = 13;
+            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
             return 0;
         }
         fseek (f, 0L, SEEK_END);
         size = ftell (f);
         if (size <= 0 || size >= 5000000)
         {
-            r->errcode = 14;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             return 0;
         }
         fseek (f, 0L, SEEK_SET);
@@ -564,7 +635,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         fread (r->record, size, 1, f);
         fclose (f);
     }
-    else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_xml))
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_xml))
     {
         if ((cp = dummy_xml_record (r->number, r->stream)))
         {
@@ -573,20 +644,16 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         }
         else 
         {
-            r->errcode = 14;
+            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
             r->surrogate_flag = 1;
             return 0;
         }
     }
-    else if ((cp = dummy_marc_record(r->number, r->stream)))
-    {
-        r->len = strlen(cp);
-        r->record = cp;
-        r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_usmarc);
-    }
     else
     {
-        r->errcode = 13;
+        char buf[OID_STR_MAX];
+        r->errcode = YAZ_BIB1_RECORD_SYNTAX_UNSUPP;
+        r->errstring = odr_strdup(r->stream, oid_oid_to_dotstring(oid, buf));
         return 0;
     }
     r->errcode = 0;
