@@ -20,12 +20,20 @@
 #include <yaz/log.h>
 #include <yaz/sc.h>
 
+/** \brief handle that is used to stop that service should be stopped */
 HANDLE    default_stop_event = NULL;
+
+/** \brief stop handler which just signals "stop" */
 static void default_sc_stop(yaz_sc_t s)
 {
     SetEvent(default_stop_event);
 }
 
+/** \brief service control main
+    This does not read argc and argv.
+    Real applications would typically do that. It is very important that
+    yaz_sc_running is called before the application starts to operate .
+*/
 static int default_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     default_stop_event = CreateEvent(
@@ -43,7 +51,7 @@ static int default_sc_main(yaz_sc_t s, int argc, char **argv)
     return 0;
 }
 
-
+/** \brief the system main function */
 int main(int argc, char **argv)
 {
     yaz_sc_t s = yaz_sc_create("yaz_sc_test", "YAZ Service Control Test");

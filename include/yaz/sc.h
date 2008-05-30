@@ -25,26 +25,55 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * \file sc.h
- * \brief Header for Windows Service Control utility
+/** \file sc.h
+    \brief Header for Windows Service Control utility
+   
+    This is a simple wrapper for the Windows Service Control system. It
+    also operates on Unix in which case the user supplied main function
+    (sc_main) is is called immediately. See sc_test.c for an example.
  */
 
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
 
+/** service control handle (opaque type) */
 typedef struct sc_s *yaz_sc_t;
 
+/** \brief creates service handle
+    \param service_name Service Name
+    \param display_name Display Name
+    \return service control handle
+
+    This function does not activate the service. Only creates handle.
+*/
 YAZ_EXPORT yaz_sc_t yaz_sc_create(const char *service_name,
                                   const char *display_name);
 
-YAZ_EXPORT void yaz_sc_running(yaz_sc_t s);
+/** \brief registers service controlled program
+    \param s service control handle
+    \param argc argc as given from main
+    \param argv argv as given from main
+    \param sc_main service main function
+    \param sc_stop service stop function
+    \return sc_main return value
 
+    sc_main is the main program of the application. It should initialize
+    the application.. Function yaz_sc_running MUST be called before
+    the application operates (after initialization)
+*/
 YAZ_EXPORT int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
 	 		      int (*sc_main)(yaz_sc_t s, int argc, char **argv),
 			      void (*sc_stop)(yaz_sc_t s));
 
+/** \brief signals that sc_main applicatio starts running
+    \param s service control handle
+*/
+YAZ_EXPORT void yaz_sc_running(yaz_sc_t s);
+
+/** \brief frees service control handle
+    \param s service control handle
+*/    
 YAZ_EXPORT void yaz_sc_destroy(yaz_sc_t *s);
 
 YAZ_END_CDECL
