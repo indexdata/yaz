@@ -522,6 +522,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         if (!cp)
         {
             r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            return 0;
         }
         else
         {
