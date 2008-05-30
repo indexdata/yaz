@@ -87,7 +87,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
 {
     if (rr->num_bases != 1)
     {
-        rr->errcode = 23;
+        rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
         return 0;
     }
     /* Throw Database unavailable if other than Default or Slow */
@@ -112,7 +112,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
     }
     else
     {
-        rr->errcode = 109;
+        rr->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
         rr->errstring = rr->basenames[0];
         return 0;
     }
@@ -353,7 +353,7 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 yaz_log (log_level, "database: %s", toKeep->databaseName);
                 if (!strcmp(toKeep->databaseName, "fault"))
                 {
-                    rr->errcode = 109;
+                    rr->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
                     rr->errstring = toKeep->databaseName;
                 }
                 if (!strcmp(toKeep->databaseName, "accept"))
@@ -686,7 +686,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     }
     else
     {
-        q->errcode = 109;
+        q->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
         q->errstring = q->basenames[0];
         return 0;
     }
@@ -702,7 +702,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     }
     if (q->num_entries > 200)
     {
-        q->errcode = 31;
+        q->errcode = YAZ_BIB1_RESOURCES_EXHAUSTED_NO_RESULTS_AVAILABLE;
         return 0;
     }
     if (q->term)
@@ -710,12 +710,12 @@ int ztest_scan(void *handle, bend_scan_rr *q)
         int len;
         if (q->term->term->which != Z_Term_general)
         {
-            q->errcode = 229; /* unsupported term type */
+            q->errcode = YAZ_BIB1_TERM_TYPE_UNSUPP;
             return 0;
         }
         if (*q->step_size != 0)
         {
-            q->errcode = 205; /*Only zero step size supported for Scan */
+            q->errcode = YAZ_BIB1_ONLY_ZERO_STEP_SIZE_SUPPORTED_FOR_SCAN;
             return 0;
         }
         len = q->term->term->u.general->len;
@@ -761,7 +761,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
                 {
                     list[q->num_entries].term = entries[pos];
                     list[q->num_entries].occurrences = -1;
-                    list[q->num_entries].errcode = 233;
+                    list[q->num_entries].errcode =
+                        YAZ_BIB1_SCAN_UNSUPP_VALUE_OF_POSITION_IN_RESPONSE;
                     list[q->num_entries].errstring = "SD for Scan Term";
                 }
                 else

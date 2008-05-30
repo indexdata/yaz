@@ -767,8 +767,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     r = cql_parser_string(cp, cql);
     if (r)
     {
-        /* CQL syntax error */
-        srw_errcode = 10; 
+        srw_errcode = YAZ_SRW_QUERY_SYNTAX_ERROR;
     }
     if (!r)
     {
@@ -777,7 +776,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
                               cql_parser_result(cp),
                               rpn_buf, sizeof(rpn_buf)-1);
         if (r)
-            srw_errcode  = cql_transform_error(ct, &add);
+            srw_errcode = cql_transform_error(ct, &add);
     }
     if (!r)
     {
@@ -792,7 +791,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
             int code = yaz_pqf_error(pp, &pqf_msg, &off);
             yaz_log(YLOG_WARN, "PQF Parser Error %s (code %d)",
                     pqf_msg, code);
-            srw_errcode = 10;
+            srw_errcode = YAZ_SRW_QUERY_SYNTAX_ERROR;
         }
         else
         {
@@ -814,14 +813,14 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
     if (srw_error)
         return srw_error;
     if (query.which != Z_Query_type_1 && query.which != Z_Query_type_101)
-        return 10; /* bad query type */
+        return YAZ_SRW_QUERY_SYNTAX_ERROR; /* bad query type */
     rpn = query.u.type_1;
     if (!rpn->RPNStructure) 
-        return 10; /* must be structure */
+        return YAZ_SRW_QUERY_SYNTAX_ERROR; /* must be structure */
     if (rpn->RPNStructure->which != Z_RPNStructure_simple)
-        return 10; /* must be simple */
+        return YAZ_SRW_QUERY_SYNTAX_ERROR; /* must be simple */
     if (rpn->RPNStructure->u.simple->which != Z_Operand_APT)
-        return 10; /* must be attributes plus term node .. */
+        return YAZ_SRW_QUERY_SYNTAX_ERROR; /* must be be attributes + term */
     memcpy(result, rpn->RPNStructure->u.simple->u.attributesPlusTerm,
            sizeof(*result));
     return 0;
@@ -837,7 +836,7 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
     ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
     if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0) {
         bsrr->errstring = (char*) ccl_err_msg(errcode);
-        return 10;              /* Query syntax error */
+        return YAZ_SRW_QUERY_SYNTAX_ERROR;    /* Query syntax error */
     }
 
     bsrr->query->which = Z_Query_type_1;
