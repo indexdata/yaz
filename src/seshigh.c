@@ -2520,11 +2520,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
 
         *next = freq.last_in_set ? 0 : recno + 1;
 
-        /* backend should be able to signal whether error is system-wide
-           or only pertaining to current record */
         if (freq.errcode)
         {
-            if (!freq.surrogate_flag)
+            if (!freq.surrogate_flag) /* non-surrogate diagnostic i.e. global */
             {
                 char s[20];
                 *pres = Z_PresentStatus_failure;
