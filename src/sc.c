@@ -3,6 +3,11 @@
  * See the file LICENSE for details.
  */
 
+/**
+ * \file sc.c
+ * \brief Windows Service Control
+ */
+
 #ifdef WIN32
 #include <windows.h>
 #include <tchar.h>

@@ -27,9 +27,8 @@
 
 /**
  * \file sc.h
- * \brief Header for Windows Service Control stuff
+ * \brief Header for Windows Service Control utility
  */
-
 
 #include <yaz/yconfig.h>
 

@@ -3,6 +3,11 @@
  * See the file LICENSE for details.
  */
 
+/**
+ * \file sc_test.c
+ * \brief Small test for the Windows Service Control utility
+ */
+
 #ifdef WIN32
 #include <windows.h>
 #include <tchar.h>

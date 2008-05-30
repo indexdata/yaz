@@ -3,6 +3,11 @@
  * See the file LICENSE for details.
  */
 
+/**
+ * \file icu_I18N.c
+ * \brief ICU utilities
+ */
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif

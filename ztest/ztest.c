@@ -3,8 +3,8 @@
  * See the file LICENSE for details.
  */
 
-/*
- * Demonstration of simple server
+/** \file
+ * \brief Demonstration of server
  */
 
 #include <stdio.h>
@@ -30,8 +30,9 @@ int ztest_present(void *handle, bend_present_rr *rr);
 int ztest_esrequest(void *handle, bend_esrequest_rr *rr);
 int ztest_delete(void *handle, bend_delete_rr *rr);
 
-/** \fn get_term_hit
-    \brief use term value as hit count 
+/** \brief use term value as hit count 
+    \param s RPN structure
+    \return >= 0: search term number or -1: not found
    
     Traverse RPN tree 'in order' and use term value as hit count.
     Only terms  that looks a numeric is used.. Returns -1 if
@@ -63,8 +64,9 @@ static int get_term_hit(Z_RPNStructure *s)
     return h;
 }
 
-/** \fn get_hit_count
-    \brief gets hit count for numeric terms in RPN queries
+/** \brief gets hit count for numeric terms in RPN queries
+    \param q RPN Query
+    \return number of hits (random or number for term)
     
     This is just for testing.. A real database of course uses
     the content of a database to establish a value.. In our case, we
