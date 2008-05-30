@@ -3,8 +3,8 @@
  * See the file LICENSE for details.
  */
 
-/*
- * Little toy-thing to read a GRS-1 records from a file.
+/** \file
+ * \brief Little toy-thing to read GRS-1 records from a file.
  */
 
 #include <stdio.h>
@@ -13,6 +13,8 @@
 
 #include <yaz/proto.h>
 #include <yaz/log.h>
+
+#include "ztest.h"
 
 #define GRS_MAX_FIELDS 50
 

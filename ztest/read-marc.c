@@ -3,13 +3,16 @@
  * See the file LICENSE for details.
  */
 
-/*
- * Little toy-thing to read a MARC records from a fixed array.
+/** \file
+ * \brief Little toy-thing to read MARC records from a file or fixed array.
  */
+
 #include <ctype.h>
 #include <yaz/wrbuf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/odr.h>
+
+#include "ztest.h"
 
 char *marc_records[] = {
 

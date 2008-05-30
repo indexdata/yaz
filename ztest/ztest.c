@@ -19,12 +19,10 @@
 #include <yaz/ill.h>
 #include <yaz/diagbib1.h>
 
+#include "ztest.h"
+
 static int log_level=0;
 static int log_level_set=0;
-
-Z_GenericRecord *dummy_grs_record (int num, ODR o);
-char *dummy_marc_record (int num, ODR odr);
-char *dummy_xml_record (int num, ODR odr);
 
 int ztest_search(void *handle, bend_search_rr *rr);
 int ztest_sort(void *handle, bend_sort_rr *rr);
