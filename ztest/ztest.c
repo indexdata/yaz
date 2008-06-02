@@ -535,59 +535,14 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_opac))
     {
-        Z_OPACRecord *rec;
-        int i;
         cp = dummy_marc_record(r->number, r->stream);
         if (!cp)
         {
             r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
             return 0;
         }
-        rec = odr_malloc(r->stream, sizeof(*rec));
-        rec->bibliographicRecord =
-            z_ext_record_usmarc(r->stream, cp, strlen(cp));
-        rec->num_holdingsData = 1;
-        rec->holdingsData = odr_malloc(r->stream, sizeof(*rec->holdingsData));
-        for (i = 0; i < rec->num_holdingsData; i++)
-        {
-            Z_HoldingsRecord *hr = odr_malloc(r->stream, sizeof(*hr));
-            Z_HoldingsAndCircData *hc = odr_malloc(r->stream, sizeof(*hc));
-
-            rec->holdingsData[i] = hr;
-            hr->which = Z_HoldingsRecord_holdingsAndCirc;
-            hr->u.holdingsAndCirc = hc;
-            
-            hc->typeOfRecord = odr_strdup(r->stream, "x");
-            hc->typeOfRecord[0] = cp[5]; /* LDR 6 */
-
-            hc->encodingLevel = odr_strdup(r->stream, "x");
-            hc->encodingLevel[0] = cp[16]; /* LDR 17 */
-
-            hc->format = 0; /* OPT */
-            hc->receiptAcqStatus = 0; /* OPT */
-            hc->generalRetention = 0; /* OPT */
-            hc->completeness = 0; /* OPT */
-            hc->dateOfReport = 0; /* OPT */
-            hc->nucCode = 0; /* OPT */
-            hc->localLocation = 0; /* OPT */
-            hc->shelvingLocation = 0; /* OPT */
-            hc->callNumber = 0; /* OPT */
-            hc->shelvingData = 0; /* OPT */
-            hc->copyNumber = 0; /* OPT */
-            hc->publicNote = 0; /* OPT */
-            hc->reproductionNote = 0; /* OPT */
-            hc->termsUseRepro = 0; /* OPT */
-            hc->enumAndChron = 0; /* OPT */
-
-            hc->num_volumes = 0;
-            hc->volumes = 0;
-
-            hc->num_circulationData = 0;
-            hc->circulationData = 0;
-        }
-
+        r->record = (char *) dummy_opac(r->number, r->stream, cp);
         r->len = -1;
-        r->record = (char*) rec;
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {

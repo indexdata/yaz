@@ -3,7 +3,7 @@
 
 bin_PROGRAMS=yaz-ztest
 
-yaz_ztest_SOURCES=ztest.c read-grs.c read-marc.c ztest.h
+yaz_ztest_SOURCES=ztest.c read-grs.c read-marc.c dummy-opac.c ztest.h
 
 EXTRA_DIST=dummy-records dummy-words dummy-grs ztest.pem config1.xml
 

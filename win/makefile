@@ -330,6 +330,7 @@ YAZ_CLIENT_OBJS= \
 YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj 
 
 ZTEST_OBJS= \
+    $(OBJDIR)\dummy-opac.obj \
     $(OBJDIR)\read-marc.obj \
     $(OBJDIR)\read-grs.obj \
     $(OBJDIR)\ztest.obj 
