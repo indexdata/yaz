@@ -672,7 +672,7 @@ struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
                            normalizer->rules16->utf16_len,
                            UTRANS_FORWARD,
                            0, 0, 
-                           normalizer->parse_error, status);
+                           &normalizer->parse_error, status);
         break;
     case 'r':
     case 'R':
@@ -681,7 +681,7 @@ struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
                            normalizer->rules16->utf16_len,
                            UTRANS_REVERSE ,
                            0, 0,
-                           normalizer->parse_error, status);
+                           &normalizer->parse_error, status);
         break;
     default:
         *status = U_UNSUPPORTED_ERROR;

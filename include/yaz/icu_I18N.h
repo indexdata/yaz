@@ -166,7 +166,7 @@ struct icu_normalizer
 {
     char action;
     struct icu_buf_utf16 * rules16;
-    UParseError parse_error[256];
+    UParseError parse_error;
     UTransliterator * trans;
 };
 
