@@ -1419,7 +1419,7 @@ and search result respectively.
 
 Redhat package is now several packages: libyaz (runtime libraries),
 libyaz-devel (development and documentation, and yaz (utility programs).
-Package spec file by Morten Bøgeskov.
+Package spec file by Morten Bogeskov.
 
 New member 'schema' in struct bend_fetch_rr which the name of requested
 schema (SRW/SRU) for record (or NULL if none was given). The fetch
@@ -1599,7 +1599,7 @@ Solaris recv sometimes returns errno == ENOENT. It is treated as
 EINPROGRESS. COMSTACK patch by Ko van der Sloot.
 
 New COMSTACK of type UNIX Socket. Use "unix:/path" as address for
-both client and server. Code by Morten Bøgeskov.
+both client and server. Code by Morten Bogeskov.
 
 --- 1.8.7 2002/05/22
 
@@ -1681,7 +1681,7 @@ SSL/COMSTACK updates. cs_rcvconnect completes SSL handshake. ZOOM
 works with SSL.
 
 Configure option --with-openssl=<dir> now works when a directory is
-specified. Patch provided by Morten Bøgeskov.
+specified. Patch provided by Morten Bogeskov.
 
 New option for YAZ client, -u <auth>, that sets authentication.
 
@@ -1830,7 +1830,7 @@ Added raw OID member for preferred record syntax (request_format_raw)
 and returned record syntax (output_format_raw) for backend fetch method.
 
 Config file yaz-config now accepts options so that it returns specific
-compile settings, etc. Thanks to Morten Bøgeskov <morten@bogeskov.dk>
+compile settings, etc. Thanks to Morten Bogeskov <morten@bogeskov.dk>
 
 Shared library support for UNIX using GNU libtool.
 
