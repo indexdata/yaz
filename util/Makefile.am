@@ -40,7 +40,7 @@ yaz_xmlquery_SOURCES = yaz-xmlquery.c
 yaz_xmlquery_LDADD = ../src/libyaz.la
 
 yaz_illclient_SOURCES = yaz-illclient.c
-yaz_illclient_LDADD = ../src/libyaz.la $(READLINE_LIBS)
+yaz_illclient_LDADD = ../src/libyaz.la
 
 yaz_icu_SOURCES = yaz-icu.c
 yaz_icu_LDADD =../src/libyaz_icu.la $(ICU_LIBS)

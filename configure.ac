@@ -58,6 +58,7 @@ AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl
 dnl ------ OpenSSL
 AC_SUBST([SSL_CFLAGS])
+AC_SUBST([SSL_LIBS])
 openssl=default
 AC_ARG_WITH([openssl], [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
 SSL_CFLAGS=""
@@ -68,7 +69,7 @@ if test "$openssl" != "no"; then
 	if test -x $openssl/bin/pkg-config; then
 	    if $openssl/bin/pkg-config --exists openssl; then
 		SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
-		LIBS="$LIBS `$openssl/bin/pkg-config --libs openssl`"
+		SSL_LIBS="`$openssl/bin/pkg-config --libs openssl`"
 		sslver=`$openssl/bin/pkg-config --modversion openssl`
 	    fi
 	fi
@@ -80,7 +81,7 @@ if test "$openssl" != "no"; then
 	if test "$pkgconfigpath" != "NONE"; then
 	    if $pkgconfigpath --exists openssl; then
 		SSL_CFLAGS=`$pkgconfigpath --cflags openssl`
-		LIBS="$LIBS `$pkgconfigpath --libs openssl`"
+		SSL_LIBS="`$pkgconfigpath --libs openssl`"
 		sslver=`$pkgconfigpath --modversion openssl`
 	    fi
 	fi
@@ -91,16 +92,21 @@ if test "$openssl" != "no"; then
     if test "$sslver" = "no"; then
 	xLIBS="$LIBS";
 	xCPPFLAGS="$CPPFLAGS";
-	CPPFLAGS="$CPPFLAGS $SSL_CFLAGS $SSL_LIBPATH"
+	CPPFLAGS="$CPPFLAGS ${SSL_CFLAGS} ${SSL_LIBPATH}"
+	SSL_LIBS="${SSL_LIBPATH}"
 	AC_CHECK_LIB([crypto],[main])
+	if test "$ac_cv_lib_crypto_main" = "yes"; then
+	    SSL_LIBS="${SSL_LIBS} -lcrypto"
+	fi
 	AC_CHECK_LIB([ssl],[SSL_new])
 	if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
 	    AC_CHECK_HEADER([openssl/ssl.h],[sslver=yes])
-	    LIBS="$SSL_LIBPATH $LIBS"
+	    SSL_LIBS="${SSL_LIBS} -lssl"
 	fi
 	if test "$sslver" != "yes"; then
-	    LIBS="$xLIBS"
+	    SSL_LIBS=""
 	fi
+        LIBS="$xLIBS"
 	CPPFLAGS="$xCPPFLAGS"
     fi
     AC_MSG_CHECKING([for SSL])
