@@ -1,3 +1,5 @@
+yaz-ztest returns OPAC records if a client asks for OPAC.
+
 Improved speed of MARC-8 encoding.
 
 Added support for lossy and loss-less MARC-8 encoding.
