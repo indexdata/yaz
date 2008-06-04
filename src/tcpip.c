@@ -545,7 +545,8 @@ int tcpip_rcvconnect(COMSTACK h)
             sp->ssl = SSL_new (sp->ctx);
             SSL_set_fd (sp->ssl, h->iofile);
         }
-        res = SSL_connect (sp->ssl);
+        res = SSL_connect(sp->ssl);
+#if HAVE_OPENSSL_SSL_H
         if (res <= 0)
         {
             int err = SSL_get_error(sp->ssl, res);
@@ -562,6 +563,20 @@ int tcpip_rcvconnect(COMSTACK h)
             h->cerrno = CSERRORSSL;
             return -1;
         }
+#else
+        TRC(fprintf(stderr, "SSL_connect res=%d last_error=%d\n",
+                    res, sp->ssl->last_error));
+        if (res == 0 && sp->ssl->last_error == GNUTLS_E_AGAIN)
+        {
+            h->io_pending = CS_WANT_READ;
+            return 1;
+        }
+        else if (res <= 0)
+        {
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+#endif
     }
 #endif
     h->event = CS_DATA;
@@ -856,8 +871,10 @@ COMSTACK tcpip_accept(COMSTACK h)
         tcpip_state *state = (tcpip_state *)h->cprivate;
         if (state->ctx)
         {
-            int res = SSL_accept (state->ssl);
+            int res;
             TRC(fprintf(stderr, "SSL_accept\n"));
+            res = SSL_accept (state->ssl);
+#if HAVE_OPENSSL_SSL_H
             if (res <= 0)
             {
                 int err = SSL_get_error(state->ssl, res);
@@ -874,6 +891,20 @@ COMSTACK tcpip_accept(COMSTACK h)
                 cs_close (h);
                 return 0;
             }
+#else
+            TRC(fprintf(stderr, "SSL_accept res=%d last_error=%d\n",
+                        res, state->ssl->last_error));
+            if (res == 0 && state->ssl->last_error == GNUTLS_E_AGAIN)
+            {
+                h->io_pending = CS_WANT_READ;
+                return h;
+            }
+            else if (res <= 0) /* assume real error */
+            {
+                cs_close(h);
+                return 0;
+            }
+#endif
         }
 #endif
     }
@@ -1394,8 +1425,8 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     SSL *ssl = (SSL *) cs_get_ssl(cs);
     if (ssl)
     {
-        X509 *server_cert = SSL_get_peer_certificate (ssl);
 #if HAVE_OPENSSL_SSL_H
+        X509 *server_cert = SSL_get_peer_certificate (ssl);
         if (server_cert)
         {
             BIO *bio = BIO_new(BIO_s_mem());
