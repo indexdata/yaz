@@ -48,9 +48,15 @@
 #include <sys/wait.h>
 #endif
 
+#if HAVE_GNUTLS_H
+#include <gnutls/openssl.h>
+#define ENABLE_SSL 1
+#endif
+
 #if HAVE_OPENSSL_SSL_H
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#define ENABLE_SSL 1
 #endif
 
 #include <yaz/comstack.h>
@@ -71,7 +77,7 @@ static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  void *cd);
 static int tcpip_set_blocking(COMSTACK p, int blocking);
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
 static int ssl_get(COMSTACK h, char **buf, int *bufsize);
 static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
@@ -106,7 +112,7 @@ typedef struct tcpip_state
     struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
     char buf[128]; /* returned by cs_addrstr */
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     SSL_CTX *ctx;       /* current CTX. */
     SSL_CTX *ctx_alloc; /* If =ctx it is owned by CS. If 0 it is not owned */
     SSL *ssl;
@@ -185,7 +191,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->stackerr = 0;
     p->user = 0;
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     sp->ctx = sp->ctx_alloc = 0;
     sp->ssl = 0;
     strcpy(sp->cert_fname, "yaz.pem");
@@ -234,7 +240,7 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
 }
 
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
 
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 {
@@ -505,7 +511,7 @@ int tcpip_connect(COMSTACK h, void *address)
  */
 int tcpip_rcvconnect(COMSTACK h)
 {
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 #endif
     TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
@@ -517,13 +523,13 @@ int tcpip_rcvconnect(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     if (h->type == ssl_type && !sp->ctx)
     {
         SSL_library_init();
         SSL_load_error_strings();
 
-        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_method());
+        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_client_method());
         if (!sp->ctx)
         {
             h->cerrno = CSERRORSSL;
@@ -609,13 +615,13 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     }
 #endif
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     if (h->type == ssl_type && !sp->ctx)
     {
         SSL_library_init();
         SSL_load_error_strings();
 
-        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_method());
+        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_server_method());
         if (!sp->ctx)
         {
             h->cerrno = CSERRORSSL;
@@ -627,25 +633,38 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (sp->ctx_alloc)
         {
             int res;
-            res = SSL_CTX_use_certificate_chain_file(sp->ctx, sp->cert_fname);
+            res = SSL_CTX_use_certificate_file(sp->ctx, sp->cert_fname,
+                                               SSL_FILETYPE_PEM);
             if (res <= 0)
             {
+#if HAVE_OPENSSL_SSL_H
                 ERR_print_errors_fp(stderr);
+#else
+                fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
+                        sp->cert_fname);
+#endif
                 exit (2);
             }
             res = SSL_CTX_use_PrivateKey_file (sp->ctx, sp->cert_fname,
                                                SSL_FILETYPE_PEM);
             if (res <= 0)
             {
+#if HAVE_OPENSSL_SSL_H
                 ERR_print_errors_fp(stderr);
+#else
+                fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
+                        sp->cert_fname);
+#endif
                 exit (3);
             }
+#if HAVE_OPENSSL_SSL_H
             res = SSL_CTX_check_private_key (sp->ctx);
             if (res <= 0)
             {
                 ERR_print_errors_fp(stderr);
                 exit(5);
             }
+#endif
         }
         TRC (fprintf (stderr, "ssl_bind\n"));
     }
@@ -817,7 +836,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
         
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
         state->ctx = st->ctx;
         state->ctx_alloc = 0;
         state->ssl = st->ssl;
@@ -833,7 +852,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     if (h->state == CS_ST_ACCEPT)
     {
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
         tcpip_state *state = (tcpip_state *)h->cprivate;
         if (state->ctx)
         {
@@ -1001,7 +1020,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 }
 
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
 /*
  * Return: -1 error, >1 good, len of buffer, ==1 incomplete buffer,
  * 0=connection closed.
@@ -1155,7 +1174,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 }
 
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
 /*
  * Returns 1, 0 or -1
  * In nonblocking mode, you must call again with same buffer while
@@ -1216,7 +1235,7 @@ int tcpip_close(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_close\n"));
     if (h->iofile != -1)
     {
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
         if (sp->ssl)
         {
             SSL_shutdown (sp->ssl);
@@ -1230,7 +1249,7 @@ int tcpip_close(COMSTACK h)
     }
     if (sp->altbuf)
         xfree(sp->altbuf);
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     if (sp->ssl)
     {
         TRC (fprintf(stderr, "SSL_free\n"));
@@ -1301,7 +1320,7 @@ char *tcpip_addrstr(COMSTACK h)
         sprintf(buf, "http:%s", r);
     else
         sprintf(buf, "tcp:%s", r);
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
     if (sp->ctx)
     {
         if (h->protocol == PROTO_HTTP)
@@ -1337,7 +1356,7 @@ int static tcpip_set_blocking(COMSTACK p, int flags)
     return 1;
 }
 
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
 int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 {
     struct tcpip_state *sp;
@@ -1376,6 +1395,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     if (ssl)
     {
         X509 *server_cert = SSL_get_peer_certificate (ssl);
+#if HAVE_OPENSSL_SSL_H
         if (server_cert)
         {
             BIO *bio = BIO_new(BIO_s_mem());
@@ -1388,6 +1408,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
             BIO_free(bio);
             return 1;
         }
+#endif
     }
     return 0;
 }

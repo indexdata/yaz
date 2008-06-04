@@ -56,15 +56,16 @@ if test "$checkBoth" = "1"; then
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl
+
 dnl ------ OpenSSL
 AC_SUBST([SSL_CFLAGS])
 AC_SUBST([SSL_LIBS])
 openssl=default
+sslver=no
 AC_ARG_WITH([openssl], [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
 SSL_CFLAGS=""
 SSL_LIBPATH=""
 if test "$openssl" != "no"; then
-    sslver=no
     if test "$openssl" != "yes" -a "$openssl" != "default"; then
 	if test -x $openssl/bin/pkg-config; then
 	    if $openssl/bin/pkg-config --exists openssl; then
@@ -118,6 +119,40 @@ if test "$openssl" != "no"; then
 	AC_MSG_RESULT([None])
 	if test "$openssl" != "default"; then
 	    AC_MSG_ERROR([OpenSSL development libraries missing])
+	fi
+    fi
+fi
+dnl ------ GNU TLS
+gnutls=no
+AC_ARG_WITH([gnutls], [  --with-gnutls[=PREFIX]   GNU TLS library in PREFIX], [gnutls=$withval])
+if test "$gnutls" != "no" -a "$sslver" = "no"; then
+    gnutlsver=no
+    if test "$gnutls" != "yes" -a "$gnutls" != "default"; then
+	if test -x $gnutls/bin/pkg-config; then
+	    if $gnutls/bin/pkg-config --exists gnutls; then
+		SSL_CFLAGS=`$gnutls/bin/pkg-config --cflags gnutls`
+		SSL_LIBS="`$gnutls/bin/pkg-config --libs gnutls` -lgnutls-openssl"
+		gnutlsver=`$gnutls/bin/pkg-config --modversion gnutls`
+	    fi
+	fi
+    else
+	if test "$pkgconfigpath" != "NONE"; then
+	    if $pkgconfigpath --exists gnutls; then
+		SSL_CFLAGS=`$pkgconfigpath --cflags gnutls`
+		SSL_LIBS="`$pkgconfigpath --libs gnutls` -lgnutls-openssl"
+		gnutlsver=`$pkgconfigpath --modversion gnutls`
+	    fi
+	fi
+    fi
+    AC_MSG_CHECKING([for GNU TLS])
+    if test "$gnutlsver" != "no"; then
+	SSL_CFLAGS="-DHAVE_GNUTLS_H=1 $SSL_CFLAGS"
+	AC_MSG_RESULT([$gnutlsver])
+    else
+	SSL_CFLAGS=""
+	AC_MSG_RESULT([None])
+	if test "$gnutls" != "default"; then
+	    AC_MSG_ERROR([GNU TLS development libraries missing])
 	fi
     fi
 fi

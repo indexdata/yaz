@@ -22,6 +22,14 @@
 #define strncasecmp _strnicmp
 #endif
 
+#if HAVE_GNUTLS_H
+#define ENABLE_SSL 1
+#endif
+
+#if HAVE_OPENSSL_SSL_H
+#define ENABLE_SSL 1
+#endif
+
 static const char *cs_errlist[] =
 {
     "No error or unspecified error",
@@ -98,7 +106,7 @@ static int cs_parse_host(const char *uri, const char **host,
     }
     else if (strncmp (uri, "ssl:", 4) == 0)
     {
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
         *t = ssl_type;
         *host = uri + 4;
         *proto = PROTO_Z3950;
@@ -126,7 +134,7 @@ static int cs_parse_host(const char *uri, const char **host,
     }
     else if (strncmp(uri, "https:", 6) == 0)
     {
-#if HAVE_OPENSSL_SSL_H
+#if ENABLE_SSL
         *t = ssl_type;
         *host = uri + 6;
         while (**host == '/')
