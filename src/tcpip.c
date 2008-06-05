@@ -260,6 +260,41 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
 }
+
+int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
+{
+#if HAVE_OPENSSL_SSL_H
+    int err = SSL_get_error(sp->ssl, res);
+    TRC(fprintf(stderr, "got err=%d\n", err));
+    if (err == SSL_ERROR_WANT_READ)
+    {
+        TRC(fprintf(stderr, " -> SSL_ERROR_WANT_READ\n"));
+        h->io_pending = CS_WANT_READ;
+        return 1;
+    }
+    if (err == SSL_ERROR_WANT_WRITE)
+    {
+        TRC(fprintf(stderr, " -> SSL_ERROR_WANT_WRITE\n"));
+        h->io_pending = CS_WANT_WRITE;
+        return 1;
+    }
+#else
+    int tls_error = sp->ssl->last_error;
+    TRC(fprintf(stderr, "ssl_check_error error=%d fatal=%d msg=%s\n",
+                sp->ssl->last_error,
+                gnutls_error_is_fatal(tls_error),
+                gnutls_strerror(tls_error)));
+    if (tls_error == GNUTLS_E_AGAIN || tls_error == GNUTLS_E_INTERRUPTED)
+    {
+        int dir = gnutls_record_get_direction(sp->ssl->gnutls_state);
+        TRC(fprintf(stderr, " -> incomplete dir=%d\n", dir));
+        h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
+        return 1;
+    }
+#endif
+    h->cerrno = CSERRORSSL;
+    return 0;
+}
 #endif
 
 #if HAVE_GETADDRINFO
@@ -546,37 +581,12 @@ int tcpip_rcvconnect(COMSTACK h)
             SSL_set_fd (sp->ssl, h->iofile);
         }
         res = SSL_connect(sp->ssl);
-#if HAVE_OPENSSL_SSL_H
         if (res <= 0)
         {
-            int err = SSL_get_error(sp->ssl, res);
-            if (err == SSL_ERROR_WANT_READ)
-            {
-                h->io_pending = CS_WANT_READ;
+            if (ssl_check_error(h, sp, res))
                 return 1;
-            }
-            if (err == SSL_ERROR_WANT_WRITE)
-            {
-                h->io_pending = CS_WANT_WRITE;
-                return 1;
-            }
-            h->cerrno = CSERRORSSL;
             return -1;
         }
-#else
-        TRC(fprintf(stderr, "SSL_connect res=%d last_error=%d\n",
-                    res, sp->ssl->last_error));
-        if (res == 0 && sp->ssl->last_error == GNUTLS_E_AGAIN)
-        {
-            h->io_pending = CS_WANT_READ;
-            return 1;
-        }
-        else if (res <= 0)
-        {
-            h->cerrno = CSERRORSSL;
-            return -1;
-        }
-#endif
     }
 #endif
     h->event = CS_DATA;
@@ -867,44 +877,25 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     if (h->state == CS_ST_ACCEPT)
     {
+
 #if ENABLE_SSL
         tcpip_state *state = (tcpip_state *)h->cprivate;
         if (state->ctx)
         {
             int res;
-            TRC(fprintf(stderr, "SSL_accept\n"));
-            res = SSL_accept (state->ssl);
-#if HAVE_OPENSSL_SSL_H
+            errno = 0;
+            res = SSL_accept(state->ssl);
+            TRC(fprintf(stderr, "SSL_accept res=%d\n", res));
             if (res <= 0)
             {
-                int err = SSL_get_error(state->ssl, res);
-                if (err == SSL_ERROR_WANT_READ)
+                if (ssl_check_error(h, state, res))
                 {
-                    h->io_pending = CS_WANT_READ;
                     return h;
                 }
-                if (err == SSL_ERROR_WANT_WRITE)
-                {
-                    h->io_pending = CS_WANT_WRITE;
-                    return h;
-                }
-                cs_close (h);
-                return 0;
-            }
-#else
-            TRC(fprintf(stderr, "SSL_accept res=%d last_error=%d\n",
-                        res, state->ssl->last_error));
-            if (res == 0 && state->ssl->last_error == GNUTLS_E_AGAIN)
-            {
-                h->io_pending = CS_WANT_READ;
-                return h;
-            }
-            else if (res <= 0) /* assume real error */
-            {
                 cs_close(h);
                 return 0;
             }
-#endif
+            TRC(fprintf(stderr, "SSL_accept complete\n"));
         }
 #endif
     }
@@ -1092,20 +1083,8 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         TRC(fprintf(stderr, "  SSL_read res=%d, hasread=%d\n", res, hasread));
         if (res <= 0)
         {
-            int ssl_err = SSL_get_error(sp->ssl, res);
-            if (ssl_err == SSL_ERROR_WANT_READ)
-            {
-                h->io_pending = CS_WANT_READ;
+            if (ssl_check_error(h, sp, res))
                 break;
-            }
-            if (ssl_err == SSL_ERROR_WANT_WRITE)
-            {
-                h->io_pending = CS_WANT_WRITE;
-                break;
-            }
-            if (res == 0)
-                return 0;
-            h->cerrno = CSERRORSSL;
             return -1;
         }
         hasread += res;
@@ -1231,22 +1210,12 @@ int ssl_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-        res = SSL_write (state->ssl, buf + state->written,
-                         size - state->written);
+        res = SSL_write(state->ssl, buf + state->written, 
+                        size - state->written);
         if (res <= 0)
         {
-            int ssl_err = SSL_get_error(state->ssl, res);
-            if (ssl_err == SSL_ERROR_WANT_READ)
-            {
-                h->io_pending = CS_WANT_READ;
+            if (ssl_check_error(h, state, res))
                 return 1;
-            }
-            if (ssl_err == SSL_ERROR_WANT_WRITE)
-            {
-                h->io_pending = CS_WANT_WRITE;
-                return 1;
-            }
-            h->cerrno = CSERRORSSL;
             return -1;
         }
         state->written += res;
