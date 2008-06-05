@@ -33,15 +33,6 @@
 #include <sys/time.h>
 #endif
 
-#if HAVE_OPENSSL_SSL_H
-#include <openssl/bio.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#endif
-
 #ifdef WIN32
 #include <sys/stat.h>
 #include <io.h>
@@ -676,9 +667,6 @@ int session_connect(const char *arg)
     void *add;
     char type_and_host[101];
     const char *basep = 0;
-#if HAVE_OPENSSL_SSL_H
-    SSL *ssl;
-#endif
     if (conn)
     {
         cs_close(conn);
@@ -731,30 +719,7 @@ int session_connect(const char *arg)
         return 0;
     }
     printf("OK.\n");
-#if HAVE_OPENSSL_SSL_H
-    if ((ssl = (SSL *) cs_get_ssl(conn)))
-    {
-        X509 *server_cert = SSL_get_peer_certificate (ssl);
-
-        if (server_cert)
-        {
-            char *pem_buf;
-            int pem_len;
-            BIO *bio = BIO_new(BIO_s_mem());
-
-            /* get PEM buffer in memory */
-            PEM_write_bio_X509(bio, server_cert);
-            pem_len = BIO_get_mem_data(bio, &pem_buf);
-            fwrite(pem_buf, pem_len, 1, stdout);
-
-            /* print all info on screen .. */
-            X509_print_fp(stdout, server_cert);
-            BIO_free(bio);
-
-            X509_free (server_cert);
-        }
-    }
-#endif
+    cs_print_session_info(conn);
     if (basep && *basep)
         set_base (basep);
     if (protocol == PROTO_Z3950)

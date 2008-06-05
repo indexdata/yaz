@@ -50,6 +50,7 @@
 
 #if HAVE_GNUTLS_H
 #include <gnutls/openssl.h>
+#include <gnutls/x509.h>
 #define ENABLE_SSL 1
 #endif
 
@@ -1354,6 +1355,47 @@ int static tcpip_set_blocking(COMSTACK p, int flags)
 #endif
     p->flags = flags;
     return 1;
+}
+
+void cs_print_session_info(COMSTACK cs)
+{
+#if HAVE_GNUTLS_H
+    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+    SSL *ssl = (SSL *) sp->ssl;
+    if (ssl)
+    {
+        gnutls_session_t session = ssl->gnutls_state;
+        if (gnutls_certificate_type_get(session) != GNUTLS_CRT_X509)
+            return;
+        printf("X509 certificate\n");
+    }
+#endif
+#if HAVE_OPENSSL_SSL_H
+    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+    SSL *ssl = (SSL *) sp->ssl;
+    if (ssl)
+    {
+        X509 *server_cert = SSL_get_peer_certificate(ssl);
+        
+        if (server_cert)
+        {
+            char *pem_buf;
+            int pem_len;
+            BIO *bio = BIO_new(BIO_s_mem());
+
+            /* get PEM buffer in memory */
+            PEM_write_bio_X509(bio, server_cert);
+            pem_len = BIO_get_mem_data(bio, &pem_buf);
+            fwrite(pem_buf, pem_len, 1, stdout);
+
+            /* print all info on screen .. */
+            X509_print_fp(stdout, server_cert);
+            BIO_free(bio);
+
+            X509_free(server_cert);
+        }
+    }
+#endif
 }
 
 void *cs_get_ssl(COMSTACK cs)
