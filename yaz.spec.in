@@ -2,13 +2,13 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 1
-Requires: libxslt openssl readline libyaz3 = %{version}
+Requires: libxslt gnutls readline libyaz3 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libxml2-devel libxslt-devel tcp_wrappers openssl-devel readline-devel libicu-devel
+BuildRequires: libxml2-devel libxslt-devel tcp_wrappers gnutls-devel readline-devel libicu-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.dk/yaz/
 
@@ -19,7 +19,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz3
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt openssl libicu
+Requires: libxslt gnutls libicu
 
 %description -n libyaz3
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
@@ -58,7 +58,7 @@ chain facility of YAZ.
 
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
-	--enable-shared --enable-tcpd --with-xslt --with-openssl --with-icu
+	--enable-shared --enable-tcpd --with-xslt --with-gnutls --with-icu
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
