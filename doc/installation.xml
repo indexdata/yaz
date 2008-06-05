@@ -252,11 +252,21 @@
       </varlistentry>
 
       <varlistentry><term>
+        <literal>--with-gnutls</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>&yaz; will be linked with the GNU TLS libraries and
+         an SSL COMSTACK will be provided. By default configure enables
+         SSL support for YAZ if the GNU TLS development libraries are found
+         on the system.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry><term>
         <literal>--with-openssl</literal>[=<replaceable>prefix</replaceable>]
        </term>
        <listitem><para>&yaz; will be linked with the OpenSSL libraries and
-         an SSL COMSTACK will be provided. Note that SSL support is still
-         experimental.
+         an SSL COMSTACK will be provided. If OpenSSL is enabled, GNU TLS
+         is automatically disabled.
         </para></listitem>
       </varlistentry>
 

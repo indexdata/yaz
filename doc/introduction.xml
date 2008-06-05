@@ -31,6 +31,7 @@
      </para></listitem>
     <listitem><para>
       Secure Socket Layer support using
+      <ulink url="&url.gnutls;">GNU TLS</ulink> or
       <ulink url="&url.openssl;">OpenSSL</ulink>.
       If enabled, &yaz; uses HTTPS transport (for SOAP) or
       "Secure BER" (for Z39.50).
