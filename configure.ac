@@ -60,7 +60,7 @@ dnl
 dnl ------ OpenSSL
 AC_SUBST([SSL_CFLAGS])
 AC_SUBST([SSL_LIBS])
-openssl=default
+openssl=no
 sslver=no
 AC_ARG_WITH([openssl], [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
 SSL_CFLAGS=""
@@ -123,8 +123,8 @@ if test "$openssl" != "no"; then
     fi
 fi
 dnl ------ GNU TLS
-gnutls=no
-AC_ARG_WITH([gnutls], [  --with-gnutls[=PREFIX]   GNU TLS library in PREFIX], [gnutls=$withval])
+gnutls=default
+AC_ARG_WITH([gnutls], [  --with-gnutls[=PREFIX]    GNU TLS library in PREFIX], [gnutls=$withval])
 if test "$gnutls" != "no" -a "$sslver" = "no"; then
     gnutlsver=no
     if test "$gnutls" != "yes" -a "$gnutls" != "default"; then
