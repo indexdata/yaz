@@ -125,7 +125,7 @@ typedef struct tcpip_state
 } tcpip_state;
 
 #ifdef WIN32
-static int tcpip_init (void)
+static int tcpip_init(void)
 {
     static int initialized = 0;
     if (!initialized)
@@ -141,7 +141,7 @@ static int tcpip_init (void)
     return 1;
 }
 #else
-static int tcpip_init (void)
+static int tcpip_init(void)
 {
     return 1;
 }
@@ -156,7 +156,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     COMSTACK p;
     tcpip_state *sp;
 
-    if (!tcpip_init ())
+    if (!tcpip_init())
         return 0;
     if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
         return 0;
@@ -247,7 +247,7 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     tcpip_state *sp;
     COMSTACK p;
 
-    p = tcpip_type (s, flags, protocol, 0);
+    p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     p->f_get = ssl_get;
@@ -389,7 +389,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     const char *port = "210";
     if (h->protocol == PROTO_HTTP)
         port = "80";
-    if (!tcpip_init ())
+    if (!tcpip_init())
         return 0;
 
     if (sp->ai)
@@ -422,9 +422,9 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     if (h->protocol == PROTO_HTTP)
         port = 80;
 
-    if (!tcpip_init ())
+    if (!tcpip_init())
         return 0;
-    if (!tcpip_strtoaddr_ex (str, &sp->addr, port))
+    if (!tcpip_strtoaddr_ex(str, &sp->addr, port))
         return 0;
     if (h->state == CS_ST_UNBND)
     {
@@ -484,7 +484,7 @@ int tcpip_connect(COMSTACK h, void *address)
      * This gives the connect a chance to negotiate with the other side
      * (see 'man tcp') 
      */
-    if ( getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) < 0 )
+    if (getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) < 0 )
     {
         h->cerrno = CSYSERR;
         return -1;
@@ -492,18 +492,18 @@ int tcpip_connect(COMSTACK h, void *address)
     TRC(fprintf( stderr, "Current Size of TCP Receive Buffer= %d\n",
                  recbuflen ));
     recbuflen *= 10; /* lets be optimistic */
-    if ( setsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, rbufsize ) < 0 )
+    if (setsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, rbufsize ) < 0 )
     {
         h->cerrno = CSYSERR;
         return -1;
     }
-    if ( getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) )
+    if (getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) )
     {
         h->cerrno = CSYSERR;
         return -1;
     }
-    TRC(fprintf( stderr, "New Size of TCP Receive Buffer = %d\n",
-                 recbuflen ));
+    TRC(fprintf(stderr, "New Size of TCP Receive Buffer = %d\n",
+                recbuflen ));
 #endif
 
 #if HAVE_GETADDRINFO
@@ -538,7 +538,7 @@ int tcpip_connect(COMSTACK h, void *address)
     h->event = CS_CONNECT;
     h->state = CS_ST_CONNECTING;
 
-    return tcpip_rcvconnect (h);
+    return tcpip_rcvconnect(h);
 }
 
 /*
@@ -564,7 +564,7 @@ int tcpip_rcvconnect(COMSTACK h)
         SSL_library_init();
         SSL_load_error_strings();
 
-        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_client_method());
+        sp->ctx = sp->ctx_alloc = SSL_CTX_new(SSLv23_client_method());
         if (!sp->ctx)
         {
             h->cerrno = CSERRORSSL;
@@ -577,8 +577,8 @@ int tcpip_rcvconnect(COMSTACK h)
 
         if (!sp->ssl)
         {
-            sp->ssl = SSL_new (sp->ctx);
-            SSL_set_fd (sp->ssl, h->iofile);
+            sp->ssl = SSL_new(sp->ctx);
+            SSL_set_fd(sp->ssl, h->iofile);
         }
         res = SSL_connect(sp->ssl);
         if (res <= 0)
@@ -597,7 +597,7 @@ int tcpip_rcvconnect(COMSTACK h)
 #define CERTF "ztest.pem"
 #define KEYF "ztest.pem"
 
-static void tcpip_setsockopt (int fd)
+static void tcpip_setsockopt(int fd)
 {
 #if 0
     int len = 4096;
@@ -646,7 +646,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         SSL_library_init();
         SSL_load_error_strings();
 
-        sp->ctx = sp->ctx_alloc = SSL_CTX_new (SSLv23_server_method());
+        sp->ctx = sp->ctx_alloc = SSL_CTX_new(SSLv23_server_method());
         if (!sp->ctx)
         {
             h->cerrno = CSERRORSSL;
@@ -668,9 +668,9 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                 fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
                         sp->cert_fname);
 #endif
-                exit (2);
+                exit(2);
             }
-            res = SSL_CTX_use_PrivateKey_file (sp->ctx, sp->cert_fname,
+            res = SSL_CTX_use_PrivateKey_file(sp->ctx, sp->cert_fname,
                                                SSL_FILETYPE_PEM);
             if (res <= 0)
             {
@@ -680,10 +680,10 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                 fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
                         sp->cert_fname);
 #endif
-                exit (3);
+                exit(3);
             }
 #if HAVE_OPENSSL_SSL_H
-            res = SSL_CTX_check_private_key (sp->ctx);
+            res = SSL_CTX_check_private_key(sp->ctx);
             if (res <= 0)
             {
                 ERR_print_errors_fp(stderr);
@@ -691,14 +691,14 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
             }
 #endif
         }
-        TRC (fprintf (stderr, "ssl_bind\n"));
+        TRC(fprintf(stderr, "ssl_bind\n"));
     }
     else
     {
-        TRC (fprintf (stderr, "tcpip_bind\n"));
+        TRC(fprintf(stderr, "tcpip_bind\n"));
     }
 #else
-    TRC (fprintf (stderr, "tcpip_bind\n"));
+    TRC(fprintf(stderr, "tcpip_bind\n"));
 #endif
 #ifndef WIN32
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
@@ -790,7 +790,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         return -1;
     }
     h->state = CS_ST_INCON;
-    tcpip_setsockopt (h->newfd);
+    tcpip_setsockopt(h->newfd);
     return 0;
 }
 
@@ -846,8 +846,8 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
                 h->newfd = -1;
             }
-            xfree (cnew);
-            xfree (state);
+            xfree(cnew);
+            xfree(state);
             return 0;
         }
         h->newfd = -1;
@@ -867,8 +867,8 @@ COMSTACK tcpip_accept(COMSTACK h)
         state->ssl = st->ssl;
         if (state->ctx)
         {
-            state->ssl = SSL_new (state->ctx);
-            SSL_set_fd (state->ssl, cnew->iofile);
+            state->ssl = SSL_new(state->ctx);
+            SSL_set_fd(state->ssl, cnew->iofile);
         }
 #endif
         state->connect_request_buf = 0;
@@ -1010,8 +1010,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             return -1;
         }
     }
-    TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-                  hasread, berlen));
+    TRC(fprintf(stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
+                hasread, berlen));
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
@@ -1079,7 +1079,7 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
-        res = SSL_read (sp->ssl, *buf + hasread, CS_TCPIP_BUFCHUNK);
+        res = SSL_read(sp->ssl, *buf + hasread, CS_TCPIP_BUFCHUNK);
         TRC(fprintf(stderr, "  SSL_read res=%d, hasread=%d\n", res, hasread));
         if (res <= 0)
         {
@@ -1238,7 +1238,7 @@ int tcpip_close(COMSTACK h)
 #if ENABLE_SSL
         if (sp->ssl)
         {
-            SSL_shutdown (sp->ssl);
+            SSL_shutdown(sp->ssl);
         }
 #endif
 #ifdef WIN32
@@ -1252,12 +1252,12 @@ int tcpip_close(COMSTACK h)
 #if ENABLE_SSL
     if (sp->ssl)
     {
-        TRC (fprintf(stderr, "SSL_free\n"));
-        SSL_free (sp->ssl);
+        TRC(fprintf(stderr, "SSL_free\n"));
+        SSL_free(sp->ssl);
     }
     sp->ssl = 0;
     if (sp->ctx_alloc)
-        SSL_CTX_free (sp->ctx_alloc);
+        SSL_CTX_free(sp->ctx_alloc);
 #endif
 #if HAVE_GETADDRINFO
     if (sp->ai)
@@ -1395,7 +1395,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     if (ssl)
     {
 #if HAVE_OPENSSL_SSL_H
-        X509 *server_cert = SSL_get_peer_certificate (ssl);
+        X509 *server_cert = SSL_get_peer_certificate(ssl);
         if (server_cert)
         {
             BIO *bio = BIO_new(BIO_s_mem());

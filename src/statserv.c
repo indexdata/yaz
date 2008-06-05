@@ -767,9 +767,9 @@ static void statserv_closedown()
     xml_config_close();
 }
 
-void __cdecl event_loop_thread (IOCHAN iochan)
+void __cdecl event_loop_thread(IOCHAN iochan)
 {
-    iochan_event_loop (&iochan);
+    iochan_event_loop(&iochan);
 }
 
 /* WIN32 listener */
@@ -887,7 +887,7 @@ void sigterm(int sig)
     term_flag = 1;
 }
 
-static void *new_session (void *vp);
+static void *new_session(void *vp);
 static int no_sessions = 0;
 
 /* UNIX listener */
@@ -957,20 +957,20 @@ static void listener(IOCHAN h, int event)
         {
 #if YAZ_POSIX_THREADS
             pthread_t child_thread;
-            pthread_create (&child_thread, 0, new_session, new_line);
-            pthread_detach (child_thread);
+            pthread_create(&child_thread, 0, new_session, new_line);
+            pthread_detach(child_thread);
 #elif YAZ_GNU_THREADS
             pth_attr_t attr;
             pth_t child_thread;
 
-            attr = pth_attr_new ();
-            pth_attr_set (attr, PTH_ATTR_JOINABLE, FALSE);
-            pth_attr_set (attr, PTH_ATTR_STACK_SIZE, 32*1024);
-            pth_attr_set (attr, PTH_ATTR_NAME, "session");
-            yaz_log (YLOG_DEBUG, "pth_spawn begin");
-            child_thread = pth_spawn (attr, new_session, new_line);
-            yaz_log (YLOG_DEBUG, "pth_spawn finish");
-            pth_attr_destroy (attr);
+            attr = pth_attr_new();
+            pth_attr_set(attr, PTH_ATTR_JOINABLE, FALSE);
+            pth_attr_set(attr, PTH_ATTR_STACK_SIZE, 32*1024);
+            pth_attr_set(attr, PTH_ATTR_NAME, "session");
+            yaz_log(YLOG_DEBUG, "pth_spawn begin");
+            child_thread = pth_spawn(attr, new_session, new_line);
+            yaz_log(YLOG_DEBUG, "pth_spawn finish");
+            pth_attr_destroy(attr);
 #else
             new_session(new_line);
 #endif
@@ -990,7 +990,7 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-static void *new_session (void *vp)
+static void *new_session(void *vp)
 {
     char *a;
     association *newas;
@@ -1130,14 +1130,14 @@ static int add_listener(char *where, int listen_id)
         else
             yaz_log(YLOG_FATAL, "Failed to bind to %s: %s", where,
                     cs_strerror(l));
-        cs_close (l);
+        cs_close(l);
         return -1;
     }
     if (!(lst = iochan_create(cs_fileno(l), listener, EVENT_INPUT |
                               EVENT_EXCEPT, listen_id)))
     {
         yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create IOCHAN-type");
-        cs_close (l);
+        cs_close(l);
         return -1;
     }
     iochan_setdata(lst, l); /* user-defined data for listener is COMSTACK */
@@ -1212,7 +1212,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 #else
     sep = '/';
 #endif
-    if ((me = strrchr (argv[0], sep)))
+    if ((me = strrchr(argv[0], sep)))
         me++; /* get the basename */
     else
         me = argv[0];
@@ -1228,7 +1228,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 #ifdef WIN32
     xml_config_add_listeners();
 
-    yaz_log (log_server, "Starting server %s", me);
+    yaz_log(log_server, "Starting server %s", me);
     if (!pListener && *control_block.default_listen)
         add_listener(control_block.default_listen, 0);
 #else
@@ -1306,21 +1306,21 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
             close(hand[1]);
 
 
-        yaz_log (log_server, "Starting server %s pid=%ld", programname, 
-                 (long) getpid());
+        yaz_log(log_server, "Starting server %s pid=%ld", programname, 
+                (long) getpid());
 #if 0
         sigset_t sigs_to_block;
         
         sigemptyset(&sigs_to_block);
-        sigaddset (&sigs_to_block, SIGTERM);
-        pthread_sigmask (SIG_BLOCK, &sigs_to_block, 0);
+        sigaddset(&sigs_to_block, SIGTERM);
+        pthread_sigmask(SIG_BLOCK, &sigs_to_block, 0);
         /* missing... */
 #endif
         if (control_block.dynamic)
             signal(SIGCHLD, catchchld);
     }
-    signal (SIGPIPE, SIG_IGN);
-    signal (SIGTERM, sigterm);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGTERM, sigterm);
     if (*control_block.setuid)
     {
         struct passwd *pw;
@@ -1379,8 +1379,8 @@ int check_options(int argc, char **argv)
             control_block.default_proto = PROTO_Z3950;
             break;
         case 's':
-            fprintf (stderr, "%s: SR protocol no longer supported\n", me);
-            exit (1);
+            fprintf(stderr, "%s: SR protocol no longer supported\n", me);
+            exit(1);
             break;
         case 'S':
             control_block.dynamic = 0;
