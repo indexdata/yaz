@@ -31,7 +31,7 @@ Options:
 	[--cflags]
 	[--comp]
 Libraries:
-	threads
+	threads icu server
 EOF
 	exit $1
 }
