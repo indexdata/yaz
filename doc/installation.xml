@@ -20,7 +20,7 @@
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
-    <ulink url="&url.solaris;">SunOS 5.8 (sparc)</ulink>,
+    <ulink url="&url.solaris;">SunOS 5.10 (sparc)</ulink>,
     <ulink url="&url.windows2000;">Windows 2000</ulink>,
     <ulink url="&url.windows2003server;">Windows 2003 server</ulink>.
    </para>
@@ -305,8 +305,14 @@
       <varlistentry><term><filename>src/libyaz_server.la</filename></term>
        <listitem><para>
          Generic Frontend server. This is an add-on for libyaz.la.
-         Code in this library uses POSIX threads functions - if they
-         available on the platform.
+         Code in this library uses POSIX threads functions - if POSIX
+         threads are available on the platform.
+        </para></listitem>
+      </varlistentry>
+      
+      <varlistentry><term><filename>src/libyaz_icu.la</filename></term>
+       <listitem><para>
+         Functions that wrap the ICU library.
         </para></listitem>
       </varlistentry>
       
