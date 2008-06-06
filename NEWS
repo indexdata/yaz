@@ -1,4 +1,4 @@
---- 3.0.30 2008/06/26
+--- 3.0.30 2008/06/06
 
 Implemented SSL sockets using GNU TLS. OpenSSL is still supported, but
 GNU TLS is used by default (if found).
