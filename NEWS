@@ -1,3 +1,8 @@
+--- 3.0.30 2008/06/26
+
+Implemented SSL sockets using GNU TLS. OpenSSL is still supported, but
+GNU TLS is used by default (if found).
+
 yaz-ztest returns OPAC records if a client asks for OPAC.
 
 Improved speed of MARC-8 encoding.
