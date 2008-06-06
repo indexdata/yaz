@@ -15,7 +15,7 @@ PTHREAD_LIBS="@PTHREAD_LIBS@"
 PTHREAD_CFLAGS="@PTHREAD_CFLAGS@"
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
-
+SSL_LIBS="@SSL_LIBS@"
 yazextralibs="@LIBS@"
 YAZVERSION=@VERSION@
 
@@ -105,7 +105,7 @@ if test "$yaz_echo_source" = "yes"; then
     if test "$lib_static" = "yes"; then
         YAZLIB="${yaz_build_root}/src/.libs/libyaz.a"
         if test "$lib_server" = "yes"; then
-    	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB"
+    	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB ${SSL_LIBS}"
         fi
     else
         YAZLIB="-L${yaz_build_root}/src/.libs $lyaz"
