@@ -22,7 +22,7 @@ static size_t init_utf8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                         unsigned char *inp,
                         size_t inbytesleft, size_t *no_read)
 {
-    if (inp[0] != 0xef)
+    if (!inp || inp[0] != 0xef)
     {
         *no_read = 0;
         return 0;
