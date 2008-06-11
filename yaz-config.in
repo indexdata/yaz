@@ -16,7 +16,7 @@ PTHREAD_CFLAGS="@PTHREAD_CFLAGS@"
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
-yazextralibs="@LIBS@"
+LIBS="@LIBS@"
 YAZVERSION=@VERSION@
 
 usage()
@@ -110,7 +110,7 @@ if test "$yaz_echo_source" = "yes"; then
     else
         YAZLIB="-L${yaz_build_root}/src/.libs $lyaz"
     fi
-    YAZLIB="$YAZLIB ${SSL_LIBS} $yazextralibs"
+    YAZLIB="$YAZLIB ${SSL_LIBS} $LIBS"
 
     YAZLALIB="${yaz_build_root}/src/libyaz.la"
     if test "$lib_server" = "yes"; then
@@ -119,7 +119,7 @@ if test "$yaz_echo_source" = "yes"; then
     if test "$lib_icu" = "yes"; then
 	YAZLALIB="${yaz_build_root}/src/libyaz_icu.la $YAZLALIB"
     fi
-    YAZLALIB="$YAZLALIB $yazextralibs"
+    YAZLALIB="$YAZLALIB $LIBS"
 
     YAZINC="-I${yaz_src_root}/include $YAZINC"
     YAZCOMP=${yaz_src_root}/util/yaz-asncomp
@@ -130,7 +130,7 @@ else
     if test "$yazprefix" != "/usr"; then
 	YAZLIB="-L$yazprefix/lib"
     fi
-    YAZLIB="$YAZLIB $lyaz $yazextralibs"
+    YAZLIB="$YAZLIB $lyaz $LIBS"
     YAZLALIB=$YAZLIB
     if test "$yazprefix" != "/usr"; then
 	YAZINC="-I$yazprefix/include $YAZINC"
