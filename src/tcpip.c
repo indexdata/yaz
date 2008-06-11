@@ -264,7 +264,7 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 #endif
 }
 
-#if !ENABLE_SSL
+#if ENABLE_SSL
 static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 {
 #if HAVE_OPENSSL_SSL_H
