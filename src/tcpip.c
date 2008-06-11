@@ -241,10 +241,11 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
 }
 
 
-#if ENABLE_SSL
-
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 {
+#if !ENABLE_SSL
+    return 0;
+#else
     tcpip_state *sp;
     COMSTACK p;
 
@@ -260,9 +261,11 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
+#endif
 }
 
-int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
+#if !ENABLE_SSL
+static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 {
 #if HAVE_OPENSSL_SSL_H
     int err = SSL_get_error(sp->ssl, res);
