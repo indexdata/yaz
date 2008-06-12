@@ -600,6 +600,7 @@ static void tst_utf8_to_marc8(const char *marc8_type)
 #endif
         YAZ_CHECK(strcmp("\033p0\x1bs", outbuf0) == 0);
     }
+    yaz_iconv(cd, 0, 0, 0, 0);
     yaz_iconv_close(cd);
 }
 
