@@ -398,6 +398,7 @@ void ir_session(IOCHAN h, int event)
             yaz_log(YLOG_WARN, "accept failed");
             destroy_association(assoc);
             iochan_destroy(h);
+            return;
         }
         iochan_clearflag(h, EVENT_OUTPUT);
         if (conn->io_pending) 
