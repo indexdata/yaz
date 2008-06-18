@@ -1,3 +1,7 @@
+--- 3.0.34 2008/06/18
+
+YAZ uses GNU TLS without the OpenSSL compatibility wrapper.
+
 --- 3.0.32 2008/06/12
 
 Fixed memory violation that could occur when decoding UTF-8. This bug
