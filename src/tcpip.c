@@ -1497,7 +1497,7 @@ char *tcpip_addrstr(COMSTACK h)
     return buf;
 }
 
-int static tcpip_set_blocking(COMSTACK p, int flags)
+static int tcpip_set_blocking(COMSTACK p, int flags)
 {
     unsigned long flag;
     
@@ -1572,9 +1572,9 @@ void *cs_get_ssl(COMSTACK cs)
 #endif
 }
 
-#if ENABLE_SSL
 int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 {
+#if ENABLE_SSL
     struct tcpip_state *sp;
     if (!cs || cs->type != ssl_type)
         return 0;
@@ -1585,10 +1585,14 @@ int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
     sp->ctx = (SSL_CTX *) ctx;
 #endif
     return 1;
+#else
+    return 0;
+#endif
 }
 
 int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 {
+#if ENABLE_SSL
     struct tcpip_state *sp;
     if (!cs || cs->type != ssl_type)
         return 0;
@@ -1596,6 +1600,9 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
     strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
     sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
     return 1;
+#else
+    return 0;
+#endif
 }
 
 int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
@@ -1621,23 +1628,6 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 #endif
     return 0;
 }
-#else
-int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
-{
-    return 0;
-}
-
-int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
-{
-    return 0;
-}
-
-int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
-{
-    return 0;
-}
-#endif
-
 
 static int tcpip_put_connect(COMSTACK h, char *buf, int size)
 {
