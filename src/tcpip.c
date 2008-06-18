@@ -599,7 +599,7 @@ int tcpip_rcvconnect(COMSTACK h)
         tcpip_create_cred(h);
 
         gnutls_init(&sp->session, GNUTLS_CLIENT);
-        gnutls_priority_set_direct(sp->session,  "PERFORMANCE", NULL);
+        gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
         
@@ -938,8 +938,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 xfree(state);
                 return 0;
             }
-            res = gnutls_priority_set_direct(state->session,  
-                                             "PERFORMANCE", NULL);
+            res = gnutls_set_default_priority(state->session);
             if (res != GNUTLS_E_SUCCESS)
             {
                 xfree(cnew);
