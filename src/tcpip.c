@@ -52,12 +52,7 @@
 #if HAVE_GNUTLS_H
 #include <gnutls/x509.h>
 #include <gnutls/gnutls.h>
-#define ENABLE_SSL 2
-
-#if ENABLE_SSL == 1
-#include <gnutls/openssl.h>
-#endif
-
+#define ENABLE_SSL 1
 #endif
 
 #if HAVE_OPENSSL_SSL_H
@@ -103,7 +98,7 @@ static void *tcpip_straddr(COMSTACK h, const char *str);
 #define YAZ_SOCKLEN_T int
 #endif
 
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
 struct tcpip_cred_ptr {
     gnutls_certificate_credentials_t xcred;
     int ref;
@@ -126,11 +121,11 @@ typedef struct tcpip_state
     struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
     char buf[128]; /* returned by cs_addrstr */
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     struct tcpip_cred_ptr *cred_ptr;
     gnutls_session_t session;
     char cert_fname[256];
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     SSL_CTX *ctx;       /* current CTX. */
     SSL_CTX *ctx_alloc; /* If =ctx it is owned by CS. If 0 it is not owned */
     SSL *ssl;
@@ -209,11 +204,11 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->stackerr = 0;
     p->user = 0;
 
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     sp->cred_ptr = 0;
     sp->session = 0;
     strcpy(sp->cert_fname, "yaz.pem");
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     sp->ctx = sp->ctx_alloc = 0;
     sp->ssl = 0;
     strcpy(sp->cert_fname, "yaz.pem");
@@ -261,7 +256,7 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
     return p;
 }
 
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
 static void tcpip_create_cred(COMSTACK cs)
 {
     tcpip_state *sp = (tcpip_state *) cs->cprivate;
@@ -288,9 +283,9 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     p->type = ssl_type;
     sp = (tcpip_state *) p->cprivate;
 
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     sp->session = (gnutls_session_t) vp;
-#else
+#elif HAVE_OPENSSL_SSL_H
     sp->ctx = (SSL_CTX *) vp;  /* may be NULL */
 #endif
     /* note: we don't handle already opened socket in SSL mode - yet */
@@ -316,8 +311,7 @@ static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
         h->io_pending = CS_WANT_WRITE;
         return 1;
     }
-#else
-#if ENABLE_SSL == 2
+#elif HAVE_GNUTLS_H
     TRC(fprintf(stderr, "ssl_check_error error=%d fatal=%d msg=%s\n",
                 res,
                 gnutls_error_is_fatal(res),
@@ -329,20 +323,6 @@ static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
         h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
         return 1;
     }
-#else
-    int tls_error = sp->ssl->last_error;
-    TRC(fprintf(stderr, "ssl_check_error error=%d fatal=%d msg=%s\n",
-                sp->ssl->last_error,
-                gnutls_error_is_fatal(tls_error),
-                gnutls_strerror(tls_error)));
-    if (tls_error == GNUTLS_E_AGAIN || tls_error == GNUTLS_E_INTERRUPTED)
-    {
-        int dir = gnutls_record_get_direction(sp->ssl->gnutls_state);
-        TRC(fprintf(stderr, " -> incomplete dir=%d\n", dir));
-        h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
-        return 1;
-    }
-#endif
 #endif
     h->cerrno = CSERRORSSL;
     return 0;
@@ -610,7 +590,7 @@ int tcpip_rcvconnect(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
         int res;
@@ -633,7 +613,7 @@ int tcpip_rcvconnect(COMSTACK h)
             return -1;
         }
     }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     if (h->type == ssl_type && !sp->ctx)
     {
         SSL_library_init();
@@ -715,7 +695,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     }
 #endif
 
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
         int res;
@@ -733,7 +713,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
             return -1;
         }
     }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     if (h->type == ssl_type && !sp->ctx)
     {
         SSL_library_init();
@@ -755,34 +735,22 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                                                SSL_FILETYPE_PEM);
             if (res <= 0)
             {
-#if HAVE_OPENSSL_SSL_H
                 ERR_print_errors_fp(stderr);
-#else
-                fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
-                        sp->cert_fname);
-#endif
                 exit(2);
             }
             res = SSL_CTX_use_PrivateKey_file(sp->ctx, sp->cert_fname,
                                                SSL_FILETYPE_PEM);
             if (res <= 0)
             {
-#if HAVE_OPENSSL_SSL_H
                 ERR_print_errors_fp(stderr);
-#else
-                fprintf(stderr, " SSL_CTX_use_certificate_file %s failed\n",
-                        sp->cert_fname);
-#endif
                 exit(3);
             }
-#if HAVE_OPENSSL_SSL_H
             res = SSL_CTX_check_private_key(sp->ctx);
             if (res <= 0)
             {
                 ERR_print_errors_fp(stderr);
                 exit(5);
             }
-#endif
         }
         TRC(fprintf(stderr, "ssl_bind\n"));
     }
@@ -955,7 +923,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
         
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
         state->cred_ptr = st->cred_ptr;
         state->session = 0;
         if (st->cred_ptr)
@@ -990,7 +958,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             gnutls_transport_set_ptr(state->session, 
                                      (gnutls_transport_ptr_t) cnew->iofile);
         }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
         state->ctx = st->ctx;
         state->ctx_alloc = 0;
         state->ssl = st->ssl;
@@ -1006,7 +974,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     if (h->state == CS_ST_ACCEPT)
     {
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
         tcpip_state *state = (tcpip_state *)h->cprivate;
         if (state->session)
         {
@@ -1024,7 +992,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             }
             TRC(fprintf(stderr, "SSL_accept complete. gnutls\n"));
         }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
         tcpip_state *state = (tcpip_state *)h->cprivate;
         if (state->ctx)
         {
@@ -1225,7 +1193,7 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
         res = gnutls_record_recv(sp->session, *buf + hasread,
                                  CS_TCPIP_BUFCHUNK);
         if (res < 0)
@@ -1367,7 +1335,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
         res = gnutls_record_send(state->session, buf + state->written, 
                                  size - state->written);
         if (res <= 0)
@@ -1376,7 +1344,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
                 return 1;
             return -1;
         }
-#elif  ENABLE_SSL == 1
+#else
         res = SSL_write(state->ssl, buf + state->written, 
                         size - state->written);
         if (res <= 0)
@@ -1403,10 +1371,10 @@ int tcpip_close(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_close h=%p pid=%d\n", h, getpid()));
     if (h->iofile != -1)
     {
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
         if (sp->session)
             gnutls_bye(sp->session, GNUTLS_SHUT_RDWR);
-#elif ENABLE_SSL == 2
+#elif HAVE_OPENSSL_SSL_H
         if (sp->ssl)
         {
             SSL_shutdown(sp->ssl);
@@ -1420,7 +1388,7 @@ int tcpip_close(COMSTACK h)
     }
     if (sp->altbuf)
         xfree(sp->altbuf);
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     if (sp->session)
     {
         gnutls_deinit(sp->session);
@@ -1438,7 +1406,7 @@ int tcpip_close(COMSTACK h)
         }
         sp->cred_ptr = 0;
     }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     if (sp->ssl)
     {
         TRC(fprintf(stderr, "SSL_free\n"));
@@ -1509,7 +1477,7 @@ char *tcpip_addrstr(COMSTACK h)
         sprintf(buf, "http:%s", r);
     else
         sprintf(buf, "tcp:%s", r);
-#if ENABLE_SSL == 2
+#if HAVE_GNUTLS_H
     if (sp->session)
     {
         if (h->protocol == PROTO_HTTP)
@@ -1517,7 +1485,7 @@ char *tcpip_addrstr(COMSTACK h)
         else
             sprintf(buf, "ssl:%s", r);
     }
-#elif ENABLE_SSL == 1
+#elif HAVE_OPENSSL_SSL_H
     if (sp->ctx)
     {
         if (h->protocol == PROTO_HTTP)
@@ -1556,7 +1524,6 @@ int static tcpip_set_blocking(COMSTACK p, int flags)
 void cs_print_session_info(COMSTACK cs)
 {
 #if HAVE_GNUTLS_H
-#if ENABLE_SSL == 2
     struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
     if (sp->session)
     {
@@ -1564,19 +1531,7 @@ void cs_print_session_info(COMSTACK cs)
             return;
         printf("X509 certificate\n");
     }
-#else
-    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-    SSL *ssl = (SSL *) sp->ssl;
-    if (ssl)
-    {
-        gnutls_session_t session = ssl->gnutls_state;
-        if (gnutls_certificate_type_get(session) != GNUTLS_CRT_X509)
-            return;
-        printf("X509 certificate\n");
-    }
-#endif
-#endif
-#if HAVE_OPENSSL_SSL_H
+#elif HAVE_OPENSSL_SSL_H
     struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
     SSL *ssl = (SSL *) sp->ssl;
     if (ssl)
@@ -1624,7 +1579,7 @@ int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
     if (!cs || cs->type != ssl_type)
         return 0;
     sp = (struct tcpip_state *) cs->cprivate;
-#if ENABLE_SSL == 1
+#if HAVE_OPENSSL_SSL_H
     if (sp->ctx_alloc)
         return 0;
     sp->ctx = (SSL_CTX *) ctx;

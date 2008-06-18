@@ -131,7 +131,7 @@ if test "$gnutls" != "no" -a "$sslver" = "no"; then
 	if test -x $gnutls/bin/pkg-config; then
 	    if $gnutls/bin/pkg-config --exists gnutls; then
 		SSL_CFLAGS=`$gnutls/bin/pkg-config --cflags gnutls`
-		SSL_LIBS="`$gnutls/bin/pkg-config --libs gnutls` -lgnutls-openssl"
+		SSL_LIBS="`$gnutls/bin/pkg-config --libs gnutls`"
 		gnutlsver=`$gnutls/bin/pkg-config --modversion gnutls`
 	    fi
 	fi
@@ -139,7 +139,7 @@ if test "$gnutls" != "no" -a "$sslver" = "no"; then
 	if test "$pkgconfigpath" != "NONE"; then
 	    if $pkgconfigpath --exists gnutls; then
 		SSL_CFLAGS=`$pkgconfigpath --cflags gnutls`
-		SSL_LIBS="`$pkgconfigpath --libs gnutls` -lgnutls-openssl"
+		SSL_LIBS="`$pkgconfigpath --libs gnutls`"
 		gnutlsver=`$pkgconfigpath --modversion gnutls`
 	    fi
 	fi
