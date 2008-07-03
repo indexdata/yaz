@@ -78,6 +78,11 @@ int wrbuf_puts(WRBUF b, const char *buf)
     return 0;
 }
 
+void wrbug_put(WRBUF b, const char *buf)
+{
+    wrbuf_write(b, buf, strlen(buf));
+}
+
 int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                             const char from, const char to)
 {
