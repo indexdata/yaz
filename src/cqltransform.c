@@ -41,17 +41,25 @@ struct cql_transform_t_ {
     WRBUF w;
 };
 
-cql_transform_t cql_transform_open_FILE(FILE *f)
+
+cql_transform_t cql_transform_create(void)
 {
-    char line[1024];
     cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
-    struct cql_prop_entry **pp = &ct->entry;
     ct->tok_cfg = yaz_tok_cfg_create();
     ct->w = wrbuf_alloc();
-
-    yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
     ct->error = 0;
     ct->addinfo = 0;
+    ct->entry = 0;
+    return ct;
+}
+
+cql_transform_t cql_transform_open_FILE(FILE *f)
+{
+    cql_transform_t ct = cql_transform_create();
+    char line[1024];
+    struct cql_prop_entry **pp = &ct->entry;
+
+    yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
 
     while (fgets(line, sizeof(line)-1, f))
     {

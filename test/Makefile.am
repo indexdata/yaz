@@ -4,7 +4,7 @@
 check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
- tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob
+ tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob tst_rpn2cql
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
@@ -71,3 +71,4 @@ tst_timing_SOURCES = tst_timing.c
 tst_query_charset_SOURCES = tst_query_charset.c
 tst_icu_I18N_SOURCES = tst_icu_I18N.c
 tst_match_glob_SOURCES = tst_match_glob.c
+tst_rpn2cql_SOURCES = tst_rpn2cql.c

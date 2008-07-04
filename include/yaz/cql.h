@@ -227,6 +227,12 @@ void cql_fputs(const char *buf, void *client_data);
 */
 typedef struct cql_transform_t_ *cql_transform_t;
 
+/** \brief creates a CQL transform handle
+    \returns transform handle or NULL for failure
+*/
+YAZ_EXPORT
+cql_transform_t cql_transform_create(void);
+
 /** \brief creates a CQL transform handle from am opened file handle
     \param f file where transformation spec is read
     \returns transform handle or NULL for failure
