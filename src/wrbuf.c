@@ -78,9 +78,9 @@ int wrbuf_puts(WRBUF b, const char *buf)
     return 0;
 }
 
-void wrbug_put(WRBUF b, const char *buf)
+void wrbuf_vputs(const char *buf, void *client_data)
 {
-    wrbuf_write(b, buf, strlen(buf));
+    wrbuf_write((WRBUF) client_data, buf, strlen(buf));
 }
 
 int wrbuf_puts_replace_char(WRBUF b, const char *buf, 

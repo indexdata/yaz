@@ -60,7 +60,7 @@ YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
 /** \brief appends C-string to WRBUF (returns int) */
 YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
 /** \brief appends C-string to WRBUF (void) */
-YAZ_EXPORT int wrbuf_put(WRBUF b, const char *buf);
+YAZ_EXPORT void wrbuf_vputs(const char *buf, void *client_data);
 
 /** \brief writes buffer to WRBUF and XML encode (as CDATA) */
 YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
