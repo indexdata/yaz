@@ -16,7 +16,7 @@ On Windows, a MS Visual Studio makefile is provided (nmake). The commands
   nmake
 should do. Refer to doc/installation.win32.html for details.
 
-Note: If you are using the CVS snapshot of YAZ you must have autoconf,
+Note: If you are using the Git snapshot of YAZ you must have autoconf,
 automake, libtool and xsltproc installed. Before running configure, create
 support files by running buildconf.sh in the top-level directory of YAZ.  
 
