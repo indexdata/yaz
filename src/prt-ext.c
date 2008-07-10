@@ -318,6 +318,37 @@ Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len
     return thisext;
 }
 
+Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid, const char *buf, int len)
+{
+    Z_External *thisext;
+    char oid_str_buf[OID_STR_MAX];
+    const char *oid_str;
+    oid_class oclass;
+
+    if (!oid)
+        return 0;
+    thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
+    thisext->descriptor = 0;
+    thisext->indirect_reference = 0;
+
+    oid_str = yaz_oid_to_string_buf(oid, &oclass, oid_str_buf);
+
+    thisext->direct_reference = odr_oiddup(o, oid);
+
+    {
+        thisext->which = Z_External_single;
+        thisext->u.single_ASN1_type = (Odr_any *)odr_malloc(o, sizeof(Odr_any));
+        if ( ! thisext->u.single_ASN1_type )
+            return 0;
+        thisext->u.single_ASN1_type->buf = (unsigned char *)odr_malloc(o, len);
+        if ( ! thisext->u.single_ASN1_type->buf )
+            return 0;
+        memcpy(thisext->u.single_ASN1_type->buf, buf, len);
+        thisext->u.single_ASN1_type->len = thisext->u.single_ASN1_type->size = len;
+    }
+    return thisext;
+}
+
 Z_External *z_ext_record_xml(ODR o, const char *buf, int len)
 {
     return z_ext_record_oid(o, yaz_oid_recsyn_xml, buf, len);
