@@ -1184,6 +1184,19 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	<entry>none</entry>
        </row>
        <row>
+	<entry>recordOpaque</entry>
+	<entry>Specifies an opaque record which is
+	  encoded as an ASN.1 ANY type with the OID as tiven by option
+	  <literal>syntax</literal> (see below).
+	  Option <literal>recordOpaque</literal> is an alternative
+	  to record - and <literal>record</literal> option (above) is
+	  ignored if recordOpaque is set. This option is only available in 
+	  YAZ 3.0.35 and later and is meant to facilitate Updates with
+	  servers from OCLC.
+	</entry>
+	<entry>none</entry>
+       </row>
+       <row>
 	<entry>syntax</entry>
 	<entry>The record syntax (transfer syntax). Is a string that
 	 is a known record syntax.
