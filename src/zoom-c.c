@@ -3412,7 +3412,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         }
         else
             notToKeep->elements[0]->correlationInfo = 0;
-        if ( recordOpaque_buf )
+        if (recordOpaque_buf)
         {
             notToKeep->elements[0]->record =
                 z_ext_record_oid_any(p->odr_out, syntax_oid,
