@@ -3269,6 +3269,9 @@ static Z_APDU *create_update_package(ZOOM_package p)
     int record_len;
     const char *record_buf = ZOOM_options_getl(p->options, "record",
         &record_len);
+    int recordOpaque_len;
+    const char *recordOpaque_buf = ZOOM_options_getl(p->options, "recordOpaque",
+        &recordOpaque_len);
     const char *syntax_str = ZOOM_options_get(p->options, "syntax");
     const char *version = ZOOM_options_get(p->options, "updateVersion");
 
@@ -3284,7 +3287,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         version = "3";
     if (!syntax_str)
         syntax_str = "xml";
-    if (!record_buf)
+    if (!record_buf && !recordOpaque_buf)
     {
         record_buf = "void";
         record_len = 4;
@@ -3409,9 +3412,18 @@ static Z_APDU *create_update_package(ZOOM_package p)
         }
         else
             notToKeep->elements[0]->correlationInfo = 0;
-        notToKeep->elements[0]->record =
-            z_ext_record_oid(p->odr_out, syntax_oid,
-                             record_buf, record_len);
+        if ( recordOpaque_buf )
+        {
+            notToKeep->elements[0]->record =
+                z_ext_record_oid_any(p->odr_out, syntax_oid,
+                                 recordOpaque_buf, recordOpaque_len);
+        }
+        else
+        {
+            notToKeep->elements[0]->record =
+                z_ext_record_oid(p->odr_out, syntax_oid,
+                                 record_buf, record_len);
+        }
     }
     if (0 && apdu)
     {
@@ -3640,22 +3652,90 @@ static zoom_ret send_sort_present(ZOOM_connection c)
     return r;
 }
 
+static int es_response_taskpackage_update(ZOOM_connection c,
+		Z_IUUpdateTaskPackage *utp)
+{
+	if (utp && utp->targetPart)
+	{
+		Z_IUTargetPart *targetPart = utp->targetPart;
+		switch ( *targetPart->updateStatus ) {
+			case Z_IUTargetPart_success:
+				ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "success");
+				break;
+			case Z_IUTargetPart_partial:
+				ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "partial");
+				break;
+			case Z_IUTargetPart_failure:
+				ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "failure");
+				if (targetPart->globalDiagnostics && targetPart->num_globalDiagnostics > 0)
+					response_diag(c, targetPart->globalDiagnostics[0]);
+				break;
+		}
+		// NOTE: Individual record status, surrogate diagnostics, and supplemental diagnostics ARE NOT REPORTED.
+	}
+    return 1;
+}
+
+static int es_response_taskpackage(ZOOM_connection c,
+                                   Z_TaskPackage *taskPackage)
+{
+	// targetReference
+	Odr_oct *id = taskPackage->targetReference;
+	if (id)
+		ZOOM_options_setl(c->tasks->u.package->options,
+							"targetReference", (char*) id->buf, id->len);
+	
+	// taskStatus
+	switch ( *taskPackage->taskStatus ) {
+		case Z_TaskPackage_pending:
+			ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "pending");
+			break;
+		case Z_TaskPackage_active:
+			ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "active");
+			break;
+		case Z_TaskPackage_complete:
+			ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "complete");
+			break;
+		case Z_TaskPackage_aborted:
+			ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "aborted");
+			if ( taskPackage->num_packageDiagnostics && taskPackage->packageDiagnostics )
+				response_diag(c, taskPackage->packageDiagnostics[0]);
+			break;
+	}
+	
+	// taskSpecificParameters
+	// NOTE: Only Update implemented, no others.
+	if ( taskPackage->taskSpecificParameters->which == Z_External_update ) {
+			Z_IUUpdateTaskPackage *utp = taskPackage->taskSpecificParameters->u.update->u.taskPackage;
+			es_response_taskpackage_update(c, utp);
+	}
+	return 1;
+}
+
+
 static int es_response(ZOOM_connection c,
                        Z_ExtendedServicesResponse *res)
 {
     if (!c->tasks || c->tasks->which != ZOOM_TASK_PACKAGE)
         return 0;
-    if (res->diagnostics && res->num_diagnostics > 0)
-        response_diag(c, res->diagnostics[0]);
+    switch (*res->operationStatus) {
+        case Z_ExtendedServicesResponse_done:
+            ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "done");
+            break;
+        case Z_ExtendedServicesResponse_accepted:
+            ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "accepted");
+            break;
+        case Z_ExtendedServicesResponse_failure:
+            ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "failure");
+            if (res->diagnostics && res->num_diagnostics > 0)
+                response_diag(c, res->diagnostics[0]);
+            break;
+    }
     if (res->taskPackage &&
         res->taskPackage->which == Z_External_extendedService)
     {
         Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
-        Odr_oct *id = taskPackage->targetReference;
-        
-        if (id)
-            ZOOM_options_setl(c->tasks->u.package->options,
-                              "targetReference", (char*) id->buf, id->len);
+        es_response_taskpackage(c, taskPackage);
     }
     if (res->taskPackage && 
         res->taskPackage->which == Z_External_octet)
