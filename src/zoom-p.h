@@ -73,6 +73,7 @@ struct ZOOM_connection_p {
     int reconnect_ok;
     ODR odr_in;
     ODR odr_out;
+    ODR odr_print;
     char *buf_in;
     int len_in;
     char *buf_out;
