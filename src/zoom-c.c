@@ -596,6 +596,13 @@ ZOOM_API(void)
         ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
+    if (ZOOM_options_get_bool(c->options, "logapdu", 0))
+    {
+        c->odr_print = odr_createmem(ODR_PRINT);
+        odr_setprint(c->odr_print, yaz_log_file());
+    }
+    else
+        c->odr_print = 0;
     yaz_log(log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
  
     task = ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
@@ -774,6 +781,11 @@ ZOOM_API(void)
     xfree(c->diagset);
     odr_destroy(c->odr_in);
     odr_destroy(c->odr_out);
+    if (c->odr_print)
+    {
+        odr_setprint(c->odr_print, 0); /* prevent destroy from fclose'ing */
+        odr_destroy(c->odr_print);
+    }
     ZOOM_options_destroy(c->options);
     ZOOM_connection_remove_tasks(c);
     ZOOM_connection_remove_events(c);
@@ -1301,6 +1313,8 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
         odr_reset(out);
         return -1;
     }
+    if (c->odr_print)
+        z_APDU(c->odr_print, &a, 0, 0);
     yaz_log(log_details, "%p encoding_APDU encoding OK", c);
     return 0;
 }
@@ -1429,6 +1443,8 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     }
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;
+    if (c->odr_print)
+        z_GDU(c->odr_print, &gdu, 0, 0);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
         
     event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
@@ -2636,8 +2652,12 @@ static zoom_ret send_present(ZOOM_connection c)
         yaz_log(log_details, "%p send_present skip=%d", c, i);
 
     *req->resultSetStartPoint = *start + 1;
-    *req->numberOfRecordsRequested = resultset->step>0 ?
-        resultset->step : *count;
+
+    if (resultset->step > 0 && resultset->step < *count)
+        *req->numberOfRecordsRequested = resultset->step;
+    else
+        *req->numberOfRecordsRequested = *count;
+    
     if (*req->numberOfRecordsRequested + *start > resultset->size)
         *req->numberOfRecordsRequested = resultset->size - *start;
     assert(*req->numberOfRecordsRequested > 0);
@@ -4163,16 +4183,21 @@ static int do_read(ZOOM_connection c)
             }
             do_close(c);
         }
-        else if (gdu->which == Z_GDU_Z3950)
-            recv_apdu(c, gdu->u.z3950);
-        else if (gdu->which == Z_GDU_HTTP_Response)
+        else
         {
+            if (c->odr_print)
+                z_GDU(c->odr_print, &gdu, 0, 0);
+            if (gdu->which == Z_GDU_Z3950)
+                recv_apdu(c, gdu->u.z3950);
+            else if (gdu->which == Z_GDU_HTTP_Response)
+            {
 #if YAZ_HAVE_XML2
-            handle_http(c, gdu->u.HTTP_Response);
+                handle_http(c, gdu->u.HTTP_Response);
 #else
-            set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
-            do_close(c);
+                set_ZOOM_error(c, ZOOM_ERROR_DECODE, 0);
+                do_close(c);
 #endif
+            }
         }
         c->reconnect_ok = 0;
     }
