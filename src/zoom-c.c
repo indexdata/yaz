@@ -596,7 +596,7 @@ ZOOM_API(void)
         ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
-    if (ZOOM_options_get_bool(c->options, "logapdu", 0))
+    if (ZOOM_options_get_bool(c->options, "apdulog", 0))
     {
         c->odr_print = odr_createmem(ODR_PRINT);
         odr_setprint(c->odr_print, yaz_log_file());
