@@ -267,6 +267,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	operations.
        </entry><entry>none</entry></row>
       <row><entry>
+        sru</entry><entry>
+	SRU transport type. Must be either <literal>soap</literal>,
+	<literal>get</literal> or <literal>post</literal>.
+       </entry><entry>soap</entry></row>
+      <row><entry>
         sru_version</entry><entry>
 	SRU/SRW version. Should be <literal>1.1</literal>, or
 	<literal>1.2</literal>. This is , prior to connect, the version
