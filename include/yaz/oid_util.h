@@ -51,11 +51,50 @@ typedef enum oid_proto
     PROTO_HTTP
 } oid_proto;
 
+
+/** \brief copies OID
+    \param t destination OID
+    \param s source OID
+*/
 YAZ_EXPORT void oid_oidcpy(Odr_oid *t, const Odr_oid *s);
+
+/** \brief appends to OID
+    \param t destination OID
+    \param s source OID
+*/
 YAZ_EXPORT void oid_oidcat(Odr_oid *t, const Odr_oid *s);
+
+
+/** \brief compares OIDs
+    \param o1 first OID
+    \param o2 second OID
+    \retval 0 equal
+    \retval >0 o1 greater than o2
+    \retval <0 o1 less than o2
+*/
 YAZ_EXPORT int oid_oidcmp(const Odr_oid *o1, const Odr_oid *o2);
+
+
+/** \brief returns length of OIDs
+    \param o OID
+    \returns length as number of Odr_oids
+*/
 YAZ_EXPORT int oid_oidlen(const Odr_oid *o);
+
+/** \brief converts OID to string (dot notation)
+    \param oid OID
+    \param oidbuf resulting buffer which should be at least of size OID_STR_MAX
+    \returns result (same as oidbuf)
+*/
 YAZ_EXPORT char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf);
+
+
+/** \brief converts dot string to OID
+    \param name dot string OID, e.g. "1.2.840.10003.2.1"
+    \param oid resulting OID buffer which should be at least of size OID_SIZE
+    \retval 0 OK
+    \retval -1 failure
+*/
 YAZ_EXPORT int oid_dotstring_to_oid(const char *name, Odr_oid *oid);
 
 YAZ_END_CDECL
