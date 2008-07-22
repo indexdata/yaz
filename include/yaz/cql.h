@@ -250,6 +250,19 @@ cql_transform_t cql_transform_open_FILE (FILE *f);
 YAZ_EXPORT
 cql_transform_t cql_transform_open_fname(const char *fname);
 
+
+/** \brief defines CQL transform pattern
+    \param ct CQL transform handle
+    \param pattern pattern string
+    \param value pattern value
+    \returns 0 for succes; -1 for failure
+*/
+YAZ_EXPORT
+int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
+                                 const char *value);
+    
+
+
 /** \brief destroys a CQL transform handle
     \param ct CQL transform handle
  */

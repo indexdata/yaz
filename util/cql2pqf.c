@@ -70,7 +70,8 @@ int main(int argc, char **argv)
             }
             else 
             {
-                int ret = cql_transform_rpn2cql(ct, cql_fputs, stdout, rpn);
+                int ret = cql_transform_rpn2cql_stream(ct, cql_fputs,
+                                                       stdout, rpn);
                 
                 if (ret)
                 {

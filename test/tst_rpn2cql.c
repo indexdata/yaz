@@ -21,7 +21,7 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
     
     if (q)
     {
-        int r = cql_transform_rpn2cql(ct, wrbuf_vputs, w, q);
+        int r = cql_transform_rpn2cql_wrbuf(ct, w, q);
 
         if (r != 0)
         {

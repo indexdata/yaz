@@ -33,10 +33,11 @@
 #define RPN2CQL_H_INCLUDED
 #include <yaz/z-core.h>
 #include <yaz/cql.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
-/** \brief transforms PQF given a CQL tree (from FILE)
+/** \brief transforms PQF given a CQL tree
     \param ct CQL transform handle
     \param pr print function
     \param client_data opaque data to be passed to print handler
@@ -45,10 +46,23 @@ YAZ_BEGIN_CDECL
     \retval !=0 failure (error code)
  */
 YAZ_EXPORT
-int cql_transform_rpn2cql(cql_transform_t ct,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data,
-                          Z_RPNQuery *q);
+int cql_transform_rpn2cql_stream(cql_transform_t ct,
+                                 void (*pr)(const char *buf, void *client_data),
+                                 void *client_data,
+                                 Z_RPNQuery *q);
+
+
+/** \brief transforms PQF given a CQL tree
+    \param ct CQL transform handle
+    \param w WRBUF handle for result
+    \param q RPN Query
+    \retval 0 success
+    \retval !=0 failure (error code)
+ */
+YAZ_EXPORT
+int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
+                                WRBUF w,
+                                Z_RPNQuery *q);
 
 YAZ_END_CDECL
 

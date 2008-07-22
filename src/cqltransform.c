@@ -21,15 +21,25 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <yaz/cql.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
 #include <yaz/tokenizer.h>
 #include <yaz/wrbuf.h>
+#include <yaz/z-core.h>
+#include <yaz/oid_db.h>
+#include <yaz/log.h>
+
+struct cql_rpn_value_entry {
+    Z_AttributeElement *elem;
+    struct cql_rpn_value_entry *next;
+};
 
 struct cql_prop_entry {
     char *pattern;
     char *value;
+    struct cql_rpn_value_entry *attr_values;
     struct cql_prop_entry *next;
 };
 
@@ -39,6 +49,7 @@ struct cql_transform_t_ {
     int error;
     char *addinfo;
     WRBUF w;
+    NMEM nmem;
 };
 
 
@@ -50,14 +61,156 @@ cql_transform_t cql_transform_create(void)
     ct->error = 0;
     ct->addinfo = 0;
     ct->entry = 0;
+    ct->nmem = nmem_create();
     return ct;
 }
 
+static int cql_transform_parse_tok_line(cql_transform_t ct,
+                                        const char *pattern,
+                                        yaz_tok_parse_t tp)
+{
+    int ret = 0; /* 0=OK, != 0 FAIL */
+    int t;
+    t = yaz_tok_move(tp);
+    
+    while (t == YAZ_TOK_STRING)
+    {
+        WRBUF type_str = wrbuf_alloc();
+        WRBUF set_str = 0;
+        Z_AttributeElement *elem = 0;
+        const char *value_str = 0;
+        /* attset type=value  OR  type=value */
+        
+        elem = nmem_malloc(ct->nmem, sizeof(*elem));
+        elem->attributeSet = 0;
+#if 0
+        struct Z_ComplexAttribute {
+            int num_list;
+            Z_StringOrNumeric **list;
+            int num_semanticAction;
+            int **semanticAction; /* OPT */
+        };
+        
+        struct Z_AttributeElement {
+            Z_AttributeSetId *attributeSet; /* OPT */
+            int *attributeType;
+            int which;
+            union {
+                int *numeric;
+                Z_ComplexAttribute *complex;
+#define Z_AttributeValue_numeric 1
+#define Z_AttributeValue_complex 2
+            } value;
+        };
+#endif
+        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        wrbuf_puts(type_str, yaz_tok_parse_string(tp));
+        t = yaz_tok_move(tp);
+        if (t == YAZ_TOK_EOF)
+        {
+            wrbuf_destroy(type_str);
+            if (set_str)
+                wrbuf_destroy(set_str);                
+            break;
+        }
+        if (t == YAZ_TOK_STRING)  
+        {  
+            wrbuf_puts(ct->w, " ");
+            wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+            set_str = type_str;
+            
+            elem->attributeSet =
+                yaz_string_to_oid_nmem(yaz_oid_std(), CLASS_ATTSET,
+                                       wrbuf_cstr(set_str), ct->nmem);
+            
+            type_str = wrbuf_alloc();
+            wrbuf_puts(type_str, yaz_tok_parse_string(tp));
+            t = yaz_tok_move(tp);
+        }
+        elem->attributeType = nmem_intdup(ct->nmem, 0);
+        if (sscanf(wrbuf_cstr(type_str), "%d", elem->attributeType)
+            != 1)
+        {
+            wrbuf_destroy(type_str);
+            if (set_str)
+                wrbuf_destroy(set_str);                
+            yaz_log(YLOG_WARN, "Expected numeric attribute type");
+            ret = -1;
+            break;
+        }
+
+        wrbuf_destroy(type_str);
+        if (set_str)
+            wrbuf_destroy(set_str);                
+        
+        if (t != '=')
+        {
+            yaz_log(YLOG_WARN, "Expected = after after attribute type");
+            ret = -1;
+            break;
+        }
+        t = yaz_tok_move(tp);
+        if (t != YAZ_TOK_STRING) /* value */
+        {
+            yaz_log(YLOG_WARN, "Missing attribute value");
+            ret = -1;
+            break;
+        }
+        value_str = yaz_tok_parse_string(tp);
+        if (isdigit(*value_str))
+        {
+            elem->which = Z_AttributeValue_numeric;
+            elem->value.numeric =
+                nmem_intdup(ct->nmem, atoi(value_str));
+        }
+        else
+        {
+            Z_ComplexAttribute *ca = nmem_malloc(ct->nmem, sizeof(*ca));
+            elem->which = Z_AttributeValue_complex;
+            elem->value.complex = ca;
+            ca->num_list = 1;
+            ca->list = (Z_StringOrNumeric **)
+                nmem_malloc(ct->nmem, sizeof(Z_StringOrNumeric *));
+            ca->list[0] = (Z_StringOrNumeric *)
+                nmem_malloc(ct->nmem, sizeof(Z_StringOrNumeric));
+            ca->list[0]->which = Z_StringOrNumeric_string;
+            ca->list[0]->u.string = nmem_strdup(ct->nmem, value_str);
+            ca->num_semanticAction = 0;
+            ca->semanticAction = 0;
+        }
+        wrbuf_puts(ct->w, "=");
+        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        t = yaz_tok_move(tp);
+        wrbuf_puts(ct->w, " ");
+    }
+    if (ret == 0) /* OK? */
+    {
+        struct cql_prop_entry **pp = &ct->entry;
+        while (*pp)
+            pp = &(*pp)->next;
+        *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
+        (*pp)->pattern = xstrdup(pattern);
+        (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
+        (*pp)->next = 0;
+    }
+    return ret;
+}
+
+int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
+                                 const char *value)
+{
+    int r;
+    yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, value);
+    yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
+    r = cql_transform_parse_tok_line(ct, pattern, tp);
+    yaz_tok_parse_destroy(tp);
+    return r;
+}
+    
 cql_transform_t cql_transform_open_FILE(FILE *f)
 {
     cql_transform_t ct = cql_transform_create();
     char line[1024];
-    struct cql_prop_entry **pp = &ct->entry;
 
     yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
 
@@ -77,43 +230,13 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
                 cql_transform_close(ct);
                 return 0;
             }
-            t = yaz_tok_move(tp);
-
-            while (t == YAZ_TOK_STRING)
+            if (cql_transform_parse_tok_line(ct, pattern, tp))
             {
-                /* attset type=value  OR  type=value */
-                wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
-                t = yaz_tok_move(tp);
-                if (t == YAZ_TOK_EOF)
-                    break;
-                if (t == YAZ_TOK_STRING)  
-                {  
-                    wrbuf_puts(ct->w, " ");
-                    wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
-                    t = yaz_tok_move(tp);
-                }
-                if (t != '=')
-                {
-                    yaz_tok_parse_destroy(tp);
-                    cql_transform_close(ct);
-                    return 0;
-                }
-                t = yaz_tok_move(tp);
-                if (t != YAZ_TOK_STRING) /* value */
-                {
-                    yaz_tok_parse_destroy(tp);
-                    cql_transform_close(ct);
-                    return 0;
-                }
-                wrbuf_puts(ct->w, "=");
-                wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
-                t = yaz_tok_move(tp);
-                wrbuf_puts(ct->w, " ");
+                yaz_tok_parse_destroy(tp);
+                cql_transform_close(ct);
+                return 0;
             }
-            *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
-            (*pp)->pattern = pattern;
-            (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
-            pp = &(*pp)->next;
+            xfree(pattern);
         }
         else if (t != YAZ_TOK_EOF)
         {
@@ -123,7 +246,6 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
         }
         yaz_tok_parse_destroy(tp);
     }
-    *pp = 0;
     return ct;
 }
 
@@ -144,6 +266,7 @@ void cql_transform_close(cql_transform_t ct)
     xfree(ct->addinfo);
     yaz_tok_cfg_destroy(ct->tok_cfg);
     wrbuf_destroy(ct->w);
+    nmem_destroy(ct->nmem);
     xfree(ct);
 }
 
@@ -158,6 +281,31 @@ cql_transform_t cql_transform_open_fname(const char *fname)
     return ct;
 }
 
+static const char *cql_lookup_reverse(cql_transform_t ct, 
+                                      const char *category,
+                                      const char **attr_list,
+                                      int *matches)
+{
+    struct cql_prop_entry *e;
+    size_t cat_len = strlen(category);
+    NMEM nmem = nmem_create();
+    for (e = ct->entry; e; e = e->next)
+    {
+        const char *dot_str = strchr(e->pattern, '.');
+        int prefix_len = dot_str ? 
+            prefix_len = dot_str - e->pattern : strlen(e->pattern);
+        if (cat_len == prefix_len && !memcmp(category, e->pattern, cat_len))
+        {
+            char **attr_array;
+            int attr_num;
+            nmem_strsplit_blank(nmem, e->value, &attr_array, &attr_num);
+            nmem_reset(nmem);
+        }
+    }
+    nmem_destroy(nmem);
+    return 0;
+}
+                                      
 static const char *cql_lookup_property(cql_transform_t ct,
                                        const char *pat1, const char *pat2,
                                        const char *pat3)

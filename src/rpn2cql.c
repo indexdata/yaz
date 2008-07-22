@@ -27,10 +27,23 @@
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
 
+static int rpn2cql_attr(cql_transform_t ct,
+                        void (*pr)(const char *buf, void *client_data),
+                        void *client_data,
+                        Z_AttributeList *attributes, WRBUF w)
+{
+    int i;
+    for (i = 0; i < attributes->num_attributes; i++)
+    {
+        Z_AttributeElement *elem = attributes->attributes[i];
+    }
+    return 0;
+}
+
 static int rpn2cql_simple(cql_transform_t ct,
                           void (*pr)(const char *buf, void *client_data),
                           void *client_data,
-                          Z_Operand *q)
+                          Z_Operand *q, WRBUF w)
 {
     int ret = 0;
     if (q->which != Z_Operand_APT)
@@ -42,8 +55,9 @@ static int rpn2cql_simple(cql_transform_t ct,
     {
         Z_AttributesPlusTerm *apt = q->u.attributesPlusTerm;
         Z_Term *term = apt->term;
-        Z_AttributeList *attributes = apt->attributes;
-        WRBUF w = wrbuf_alloc();
+
+        wrbuf_rewind(w);
+        ret = rpn2cql_attr(ct, pr, client_data, apt->attributes, w);
 
         switch(term->which)
         {
@@ -62,7 +76,6 @@ static int rpn2cql_simple(cql_transform_t ct,
         }
         if (ret == 0)
             pr(wrbuf_cstr(w), client_data);
-        wrbuf_destroy(w);
     }
     return ret;
 }
@@ -70,10 +83,11 @@ static int rpn2cql_simple(cql_transform_t ct,
 static int rpn2cql_structure(cql_transform_t ct,
                              void (*pr)(const char *buf, void *client_data),
                              void *client_data,
-                             Z_RPNStructure *q, int nested)
+                             Z_RPNStructure *q, int nested,
+                             WRBUF w)
 {
     if (q->which == Z_RPNStructure_simple)
-        return rpn2cql_simple(ct, pr, client_data, q->u.simple);
+        return rpn2cql_simple(ct, pr, client_data, q->u.simple, w);
     else
     {
         Z_Operator *op = q->u.complex->roperator;
@@ -82,7 +96,7 @@ static int rpn2cql_structure(cql_transform_t ct,
         if (nested)
             pr("(", client_data);
 
-        r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1);
+        r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
         switch(op->which)
@@ -100,22 +114,33 @@ static int rpn2cql_structure(cql_transform_t ct,
             cql_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH, 0);
             return -1;
         }
-        r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s2, 1);
+        r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s2, 1, w);
         if (nested)
             pr(")", client_data);
         return r;
     }
 }
 
-int cql_transform_rpn2cql(cql_transform_t ct,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data,
-                          Z_RPNQuery *q)
+int cql_transform_rpn2cql_stream(cql_transform_t ct,
+                                 void (*pr)(const char *buf, void *client_data),
+                                 void *client_data,
+                                 Z_RPNQuery *q)
 {
+    int r;
+    WRBUF w = wrbuf_alloc();
     cql_transform_set_error(ct, 0, 0);
-    return rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0);
+    r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    wrbuf_destroy(w);
+    return r;
 }
 
+
+int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
+                                WRBUF w,
+                                Z_RPNQuery *q)
+{
+    return cql_transform_rpn2cql_stream(ct, wrbuf_vputs, w, q);
+}
 
 /*
  * Local variables:
