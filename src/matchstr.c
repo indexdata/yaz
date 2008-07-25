@@ -62,17 +62,15 @@ int yaz_strcmp_del(const char *a, const char *b, const char *b_del)
     return *a - *b;
 }
 
-#ifdef __GNUC__
-#ifdef __CHECKER__
-void __assert_fail (const char *assertion, const char *file, 
-                    unsigned int line, const char *function)
+int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b)
 {
-    fprintf (stderr, "%s in file %s line %d func %s\n",
-             assertion, file, line, function);
-    abort ();
+    size_t m_len = len_a < len_b ? len_a : len_b;
+    int r = memcmp(a, b, m_len);
+    if (r)
+        return r;
+    return len_a - len_b;
 }
-#endif
-#endif
+
 /*
  * Local variables:
  * c-basic-offset: 4

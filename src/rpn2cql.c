@@ -7,15 +7,6 @@
  * \file
  * \brief Implements RPN to CQL conversion
  *
- * Evaluation order of rules:
- *
- * always
- * relation
- * structure
- * position
- * truncation
- * index
- * relationModifier
  */
 
 #include <assert.h>
@@ -28,14 +19,41 @@
 #include <yaz/wrbuf.h>
 
 static int rpn2cql_attr(cql_transform_t ct,
-                        void (*pr)(const char *buf, void *client_data),
-                        void *client_data,
                         Z_AttributeList *attributes, WRBUF w)
 {
-    int i;
-    for (i = 0; i < attributes->num_attributes; i++)
+    const char *relation = cql_lookup_reverse(ct, "relation.", attributes);
+    const char *index = cql_lookup_reverse(ct, "index.", attributes);
+    const char *structure = cql_lookup_reverse(ct, "structure.", attributes);
+    if (index && strcmp(index, "index.cql.serverChoice"))
     {
-        Z_AttributeElement *elem = attributes->attributes[i];
+        wrbuf_puts(w, index+6);
+        if (relation)
+        {
+            relation += 9;
+
+            if (!strcmp(relation, "exact"))
+                relation = "==";
+            else if (!strcmp(relation, "eq"))
+                relation = "=";
+            else if (!strcmp(relation, "le"))
+                relation = "<=";
+            else if (!strcmp(relation, "ge"))
+                relation = ">=";
+            wrbuf_puts(w, relation);
+        }
+        else
+            wrbuf_puts(w, "=");
+
+        if (structure)
+        {
+            structure += 10;
+            if (strcmp(structure, "*"))
+            {
+                wrbuf_puts(w, "/");
+                wrbuf_puts(w, structure);
+                wrbuf_puts(w, " ");
+            }
+        }
     }
     return 0;
 }
@@ -55,24 +73,42 @@ static int rpn2cql_simple(cql_transform_t ct,
     {
         Z_AttributesPlusTerm *apt = q->u.attributesPlusTerm;
         Z_Term *term = apt->term;
+        const char *sterm = 0;
+        size_t lterm = 0;
 
         wrbuf_rewind(w);
-        ret = rpn2cql_attr(ct, pr, client_data, apt->attributes, w);
+        ret = rpn2cql_attr(ct, apt->attributes, w);
 
         switch(term->which)
         {
         case Z_Term_general:
-            wrbuf_write(w, (const char *) term->u.general->buf, term->u.general->len);
+            lterm = term->u.general->len;
+            sterm = (const char *) term->u.general->buf;
             break;
         case Z_Term_numeric:
             wrbuf_printf(w, "%d", *term->u.numeric);
             break;
         case Z_Term_characterString:
-            wrbuf_puts(w, term->u.characterString);
+            sterm = term->u.characterString;
+            lterm = strlen(sterm);
             break;
         default:
             ret = -1;
             cql_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
+        }
+
+        if (term)
+        {
+            int i;
+            int must_quote = 0;
+            for (i = 0 ; i < lterm; i++)
+                if (sterm[i] == ' ')
+                    must_quote = 1;
+            if (must_quote)
+                wrbuf_puts(w, "\"");
+            wrbuf_write(w, sterm, lterm);
+            if (must_quote)
+                wrbuf_puts(w, "\"");
         }
         if (ret == 0)
             pr(wrbuf_cstr(w), client_data);

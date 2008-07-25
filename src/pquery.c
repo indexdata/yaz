@@ -292,8 +292,7 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
                     Z_StringOrNumeric_string;
                 elements[k]->value.complex->list[0]->u.string =
                     attr_clist[i];
-                elements[k]->value.complex->semanticAction = (int **)
-                    odr_nullval();
+                elements[k]->value.complex->semanticAction = 0;
                 elements[k]->value.complex->num_semanticAction = 0;
             }
             else

@@ -64,6 +64,16 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
                                 WRBUF w,
                                 Z_RPNQuery *q);
 
+/** \brief find a pattern that has a subset of attributes
+    \param ct CQL transform handle
+    \param category pattern category
+    \param attributes RPN attributes
+    \returns pattern value or NULL if not found
+ */
+const char *cql_lookup_reverse(cql_transform_t ct, 
+                               const char *category,
+                               Z_AttributeList *attributes);
+
 YAZ_END_CDECL
 
 #endif

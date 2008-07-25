@@ -31,15 +31,10 @@
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
 
-struct cql_rpn_value_entry {
-    Z_AttributeElement *elem;
-    struct cql_rpn_value_entry *next;
-};
-
 struct cql_prop_entry {
     char *pattern;
     char *value;
-    struct cql_rpn_value_entry *attr_values;
+    Z_AttributeList attr_list;
     struct cql_prop_entry *next;
 };
 
@@ -69,11 +64,13 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
                                         const char *pattern,
                                         yaz_tok_parse_t tp)
 {
+    int ae_num = 0;
+    Z_AttributeElement *ae[20];
     int ret = 0; /* 0=OK, != 0 FAIL */
     int t;
     t = yaz_tok_move(tp);
     
-    while (t == YAZ_TOK_STRING)
+    while (t == YAZ_TOK_STRING && ae_num < 20)
     {
         WRBUF type_str = wrbuf_alloc();
         WRBUF set_str = 0;
@@ -83,26 +80,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         
         elem = nmem_malloc(ct->nmem, sizeof(*elem));
         elem->attributeSet = 0;
-#if 0
-        struct Z_ComplexAttribute {
-            int num_list;
-            Z_StringOrNumeric **list;
-            int num_semanticAction;
-            int **semanticAction; /* OPT */
-        };
-        
-        struct Z_AttributeElement {
-            Z_AttributeSetId *attributeSet; /* OPT */
-            int *attributeType;
-            int which;
-            union {
-                int *numeric;
-                Z_ComplexAttribute *complex;
-#define Z_AttributeValue_numeric 1
-#define Z_AttributeValue_complex 2
-            } value;
-        };
-#endif
+        ae[ae_num] = elem;
         wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
         wrbuf_puts(type_str, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
@@ -182,6 +160,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
         wrbuf_puts(ct->w, " ");
+        ae_num++;
     }
     if (ret == 0) /* OK? */
     {
@@ -191,7 +170,29 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
         (*pp)->pattern = xstrdup(pattern);
         (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
+
+        (*pp)->attr_list.num_attributes = ae_num;
+        if (ae_num == 0)
+            (*pp)->attr_list.attributes = 0;
+        else
+        {
+            (*pp)->attr_list.attributes =
+                nmem_malloc(ct->nmem,
+                            ae_num * sizeof(Z_AttributeElement *));
+            memcpy((*pp)->attr_list.attributes, ae, 
+                   ae_num * sizeof(Z_AttributeElement *));
+        }
         (*pp)->next = 0;
+
+        if (0)
+        {
+            ODR pr = odr_createmem(ODR_PRINT);
+            Z_AttributeList *alp = &(*pp)->attr_list;
+            odr_setprint(pr, yaz_log_file());
+            z_AttributeList(pr, &alp, 0, 0);
+            odr_setprint(pr, 0);
+            odr_destroy(pr);
+        }
     }
     return ret;
 }
@@ -281,28 +282,75 @@ cql_transform_t cql_transform_open_fname(const char *fname)
     return ct;
 }
 
-static const char *cql_lookup_reverse(cql_transform_t ct, 
-                                      const char *category,
-                                      const char **attr_list,
-                                      int *matches)
+#if 0
+struct Z_AttributeElement {
+	Z_AttributeSetId *attributeSet; /* OPT */
+	int *attributeType;
+	int which;
+	union {
+		int *numeric;
+		Z_ComplexAttribute *complex;
+#define Z_AttributeValue_numeric 1
+#define Z_AttributeValue_complex 2
+	} value;
+};
+#endif
+
+static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
+{
+    ODR odr_a = odr_createmem(ODR_ENCODE);
+    ODR odr_b = odr_createmem(ODR_ENCODE);
+    int len_a, len_b;
+    char *buf_a, *buf_b;
+    int ret;
+
+    z_AttributeElement(odr_a, &a, 0, 0);
+    z_AttributeElement(odr_b, &b, 0, 0);
+    
+    buf_a = odr_getbuf(odr_a, &len_a, 0);
+    buf_b = odr_getbuf(odr_b, &len_b, 0);
+
+    ret = yaz_memcmp(buf_a, buf_b, len_a, len_b);
+
+    odr_destroy(odr_a);
+    odr_destroy(odr_b);
+    return ret;
+}
+
+const char *cql_lookup_reverse(cql_transform_t ct, 
+                               const char *category,
+                               Z_AttributeList *attributes)
 {
     struct cql_prop_entry *e;
-    size_t cat_len = strlen(category);
-    NMEM nmem = nmem_create();
+    size_t clen = strlen(category);
     for (e = ct->entry; e; e = e->next)
     {
-        const char *dot_str = strchr(e->pattern, '.');
-        int prefix_len = dot_str ? 
-            prefix_len = dot_str - e->pattern : strlen(e->pattern);
-        if (cat_len == prefix_len && !memcmp(category, e->pattern, cat_len))
+        if (!strncmp(e->pattern, category, clen))
         {
-            char **attr_array;
-            int attr_num;
-            nmem_strsplit_blank(nmem, e->value, &attr_array, &attr_num);
-            nmem_reset(nmem);
+            /* category matches.. See if attributes in pattern value
+               are all listed in actual attributes */
+            int i;
+            for (i = 0; i < e->attr_list.num_attributes; i++)
+            {
+                /* entry attribute */
+                Z_AttributeElement *e_ae = e->attr_list.attributes[i];
+                int j;
+                for (j = 0; j < attributes->num_attributes; j++)
+                {
+                    /* actual attribute */
+                    Z_AttributeElement *a_ae = attributes->attributes[j];
+                    int r = compare_attr(e_ae, a_ae);
+                    if (r == 0)
+                        break;
+                }
+                if (j == attributes->num_attributes)
+                    break; /* i was not found at all.. try next pattern */
+                    
+            }
+            if (i == e->attr_list.num_attributes)
+                return e->pattern;
         }
     }
-    nmem_destroy(nmem);
     return 0;
 }
                                       
