@@ -998,6 +998,7 @@ static void *new_session(void *vp)
     COMSTACK new_line = (COMSTACK) vp;
     IOCHAN parent_chan = (IOCHAN) new_line->user;
 
+    yaz_log_xml_errors(0, YLOG_WARN);
     unsigned cs_get_mask, cs_accept_mask, mask =  
         ((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
         ((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
@@ -1359,7 +1360,6 @@ int check_options(int argc, char **argv)
 
     yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL)); 
 
-    yaz_log_xml_errors(0, YLOG_WARN);
     get_logbits(1); 
 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",
