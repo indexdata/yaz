@@ -74,7 +74,7 @@ index.tkl: $(XMLFILES)
 	$(TKL_COMPILE) $(srcdir)/yaz.xml
 
 yaz.pdf: $(XMLFILES)
-	dblatex $(srcdir)/yaz.xml
+	$(PDF_COMPILE) $(srcdir)/yaz.xml
 
 
 yazj.pdf:
