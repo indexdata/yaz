@@ -102,7 +102,7 @@ const char** build_list_for_oclass(oid_class oclass)
 
 char* complete_querytype(const char *text, int state)
 {
-    static const char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl","cql", 0};
+    static const char* querytypes[] = {"ccl2rpn","prefix","cclrpn","ccl","cql", "cql2rpn", 0};
     return complete_from_list(querytypes,text,state);  
 }
 
