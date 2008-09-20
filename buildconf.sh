@@ -6,13 +6,14 @@ autoconf=autoconf
 libtoolize=libtoolize
 
 test -d config || mkdir config
-if test -d m4/.git -a -d doc/common/.git; then
-    :
-else
-    git submodule init
+if test .git; then
+    if test -d m4/.git -a -d doc/common/.git; then
+	:
+    else
+	git submodule init
+    fi
     git submodule update
 fi
-
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
     echo "Using special configuration for FreeBSD ..."

@@ -1035,6 +1035,7 @@ static void *new_session(void *vp)
 #else
     a = 0;
 #endif
+    yaz_log_xml_errors(0, YLOG_WARN);
     yaz_log(log_session, "Session - OK %d %s %ld",
             no_sessions, a ? a : "[Unknown]", (long) getpid());
     if (max_sessions && no_sessions >= max_sessions)
@@ -1359,7 +1360,6 @@ int check_options(int argc, char **argv)
 
     yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL)); 
 
-    yaz_log_xml_errors(0, YLOG_WARN);
     get_logbits(1); 
 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",

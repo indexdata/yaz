@@ -104,7 +104,7 @@
     </para>
 
     <synopsis>
-     void odr_reset(ODR o, int size);
+     void odr_reset(ODR o);
     </synopsis>
 
     <para>

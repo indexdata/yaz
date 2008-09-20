@@ -10,31 +10,31 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
 Conflicts: idzebra (<= 1.3.4-2), php4-yaz (<= 4.1.2-5)
-Description: The YAZ Z39.50 toolkit (runtime files)
+Description: libraries for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes runtime files.
+ This package includes runtime files.
 
 Package: yaz
 Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}
 Conflicts: yaz-runtime, yaz-ssl
-Description: The YAZ Z39.50 toolkit (utilities)
+Description: utilities for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes utility programs.
+ This package includes utility programs.
 
 Package: yaz-doc
 Section: doc
 Architecture: all
-Description: The YAZ Z39.50 toolkit (documentation)
+Description: documentation for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes HTML documentation for YAZ.
+ This package includes HTML documentation for YAZ.
 
 Package: libyaz3-dev
 Depends: libyaz3 (= ${Source-Version}), libxslt1-dev, libwrap0-dev, libicu36-dev|libicu-dev, tcl8.3|tclsh
@@ -43,7 +43,7 @@ Conflicts: yaz-devel, libyaz-dev, libyaz2-dev
 Section: libdevel
 Architecture: any
 Suggests: yaz-doc
-Description: The YAZ Z39.50 toolkit (development files)
+Description: development files for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
@@ -53,15 +53,21 @@ Package: yaz-illclient
 Section: utils
 Depends: ${shlibs:Depends}
 Architecture: any
-Description: utility for ISO ILL of YAZ
- The yaz-illclient program is a command-line based client which sends ILL
- requests to a server and decodes the response.
+Description: ILL utility for the Z39.50 toolkit
+ YAZ is a toolkit that allows you to develop software using the
+ ANSI Z39.50/ISO23950 standard for information retrieval.
+ .
+ This packages includes the yaz-illclient program which sends ILL
+ (Inter-Library-Loan) requests to a server and decodes the response.
 
 Package: yaz-icu
 Section: utils
 Depends: ${shlibs:Depends}
 Architecture: any
-Description: command line utility for ICU utilities of YAZ
- The yaz-icu program is a command-line based client which exposes the ICU
- chain facility of YAZ.
+Description: ICU utility for the Z39.50 toolkit
+ YAZ is a toolkit that allows you to develop software using the
+ ANSI Z39.50/ISO23950 standard for information retrieval.
+ .
+ This packages includes the yaz-icu program which exposes the ICU chain
+ facility of Z39.50 toolkit.
 

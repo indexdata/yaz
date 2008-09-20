@@ -1,3 +1,6 @@
+Fixed crash in generic frontend server (and yaz-ztest) which occurred
+in Windows due to bad error handling for Libxml2.
+
 Added facility for sending arbitrary records (ASN.1 any) using
 ZOOM C's Extended service update. Patch by Sam Reynolds.
 
