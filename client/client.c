@@ -3278,6 +3278,12 @@ int cmd_format(const char *arg)
     {
         if (!strcmp(form_str, "none"))
             break;
+        if (!yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, form_str, out))
+        {
+            printf("Bad format: %s\n", form_str);
+            recordsyntax_size = 0;
+            return 0;
+        }
         recordsyntax_list[idx] = xstrdup(form_str);
         cp += nor;
         idx++;
