@@ -3267,23 +3267,29 @@ int cmd_format(const char *arg)
         printf("Usage: format <recordsyntax>\n");
         return 0;
     }
+    while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0
+           && idx < RECORDSYNTAX_MAX)
+    {
+        if (strcmp(form_str, "none") && 
+            !yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, form_str, out))
+        {
+            printf("Bad format: %s\n", form_str);
+            return 0;
+        }
+        cp += nor;
+    }
     for (i = 0; i < recordsyntax_size; i++)
     {
         xfree(recordsyntax_list[i]);
         recordsyntax_list[i] = 0;
     }
-
+    
+    cp = arg;
     while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0
            && idx < RECORDSYNTAX_MAX)
     {
         if (!strcmp(form_str, "none"))
             break;
-        if (!yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, form_str, out))
-        {
-            printf("Bad format: %s\n", form_str);
-            recordsyntax_size = 0;
-            return 0;
-        }
         recordsyntax_list[idx] = xstrdup(form_str);
         cp += nor;
         idx++;
