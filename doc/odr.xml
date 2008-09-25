@@ -321,23 +321,23 @@ void do_nothing_useful(int value)
     if (!(decode = odr_createmem(ODR_DECODE)))
         return;
 
-    valp = &amp;value;
-    if (odr_integer(encode, &amp;valp, 0, 0) == 0)
+    valp = &value;
+    if (odr_integer(encode, &valp, 0, 0) == 0)
     {
         printf("encoding went bad\n");
         return;
     }
-    bufferp = odr_getbuf(encode, &amp;len);
-    printf("length of encoded data is &percnt;d\n", len);
+    bufferp = odr_getbuf(encode, &len, 0);
+    printf("length of encoded data is %d\n", len);
 
     /* now let's decode the thing again */
-    odr_setbuf(decode, bufferp, len);
-    if (odr_integer(decode, &amp;resvalp, 0, 0) == 0)
+    odr_setbuf(decode, bufferp, len, 0);
+    if (odr_integer(decode, &resvalp, 0, 0) == 0)
     {
         printf("decoding went bad\n");
         return;
     }
-    printf("the value is &percnt;d\n", *resvalp);
+    printf("the value is %d\n", *resvalp);
 
     /* clean up */
     odr_destroy(encode);
@@ -504,7 +504,7 @@ void do_nothing_useful(int value)
     <title>Summary and Synopsis</title>
 
     <synopsis>
-     #include &lt;odr.h>
+     #include &lt;yaz/odr.h>
 
      ODR odr_createmem(int direction);
 
@@ -512,19 +512,17 @@ void do_nothing_useful(int value)
 
      void odr_reset(ODR o);
 
-     char *odr_getbuf(ODR o, int *len);
+     char *odr_getbuf(ODR o, int *len, int *size);
 
-     void odr_setbuf(ODR o, char *buf, int len);
+     void odr_setbuf(ODR o, char *buf, int len, int can_grow);
 
      void *odr_malloc(ODR o, int size);
 
-     ODR_MEM odr_extract_mem(ODR o);
-
-     void odr_release_mem(ODR_MEM r);
+     NMEM odr_extract_mem(ODR o);
 
      int odr_geterror(ODR o);
 
-     void odr_perror(char *message);
+     void odr_perror(ODR o, const char *message);
 
      extern char *odr_errlist[];
     </synopsis>
