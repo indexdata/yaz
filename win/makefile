@@ -25,11 +25,11 @@ ICU_DIR = c:\icu
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.19.win32
+LIBXSLT_DIR=c:\libxslt-1.1.23+.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.28.win32
+LIBXML2_DIR=c:\libxml2-2.6.32+.win32
 
 # zlib compression (used by libxml2)
 ZLIB_DIR = c:\zlib-1.2.3.win32
@@ -174,15 +174,15 @@ ICU_DEF= \
   /I"$(ICU_DIR)\include"
 ICU_LIB= \
   $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
-icu: $(BINDIR)\icudt38.dll $(BINDIR)\icuin38.dll $(BINDIR)\icuuc38.dll
+icu: $(BINDIR)\icudt40.dll $(BINDIR)\icuin40.dll $(BINDIR)\icuuc40.dll
 yazicu: dirs generate $(YAZ_ICU) 
 
-$(BINDIR)\icudt38.dll:
-  copy "$(ICU_DIR)\bin\icudt38.dll" $(BINDIR)
-$(BINDIR)\icuin38.dll:
-  copy "$(ICU_DIR)\bin\icuin38.dll" $(BINDIR)
-$(BINDIR)\icuuc38.dll:
-  copy "$(ICU_DIR)\bin\icuuc38.dll" $(BINDIR)
+$(BINDIR)\icudt40.dll:
+  copy "$(ICU_DIR)\bin\icudt40.dll" $(BINDIR)
+$(BINDIR)\icuin40.dll:
+  copy "$(ICU_DIR)\bin\icuin40.dll" $(BINDIR)
+$(BINDIR)\icuuc40.dll:
+  copy "$(ICU_DIR)\bin\icuuc40.dll" $(BINDIR)
 !else
 ICU_DEF= \
   /D YAZ_HAVE_ICU=0
@@ -283,7 +283,7 @@ MT=mt.exe /nologo
 MT=echo
 !endif
 
-LINK_LIBS= kernel32.lib wsock32.lib advapi32.lib \
+LINK_LIBS= kernel32.lib ws2_32.lib advapi32.lib \
 	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
@@ -495,6 +495,7 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_encode_marc8.obj \
    $(OBJDIR)\iconv_decode_marc8.obj \
    $(OBJDIR)\iconv_encode_wchar.obj \
+   $(OBJDIR)\mutex.obj \
    $(OBJDIR)\sc.obj
 
 Z3950_OBJS= \
