@@ -1488,7 +1488,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 
         start = &c->tasks->u.retrieve.start;
         count = &c->tasks->u.retrieve.count;
-        
+
         if (*start >= resultset->size)
             return zoom_complete;
         if (*start + *count > resultset->size)
@@ -1539,7 +1539,8 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     sr->u.request->startRecord = odr_intdup(c->odr_out, *start + 1);
     sr->u.request->maximumRecords = odr_intdup(
-        c->odr_out, resultset->step>0 ? resultset->step : *count);
+        c->odr_out, (resultset->step > 0 && resultset->step < *count) ? 
+        resultset->step : *count);
     sr->u.request->recordSchema = resultset->schema;
     
     option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
@@ -3942,35 +3943,37 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
 }
 
 #if YAZ_HAVE_XML2
-static void handle_srw_response(ZOOM_connection c,
-                                Z_SRW_searchRetrieveResponse *res)
+static zoom_ret handle_srw_response(ZOOM_connection c,
+                                    Z_SRW_searchRetrieveResponse *res)
 {
     ZOOM_resultset resultset = 0;
     int i;
     NMEM nmem;
     ZOOM_Event event;
-    int *start;
+    int *start, *count;
     const char *syntax, *elementSetName;
 
     if (!c->tasks)
-        return;
+        return zoom_complete;
 
     switch(c->tasks->which)
     {
     case ZOOM_TASK_SEARCH:
         resultset = c->tasks->u.search.resultset;
         start = &c->tasks->u.search.start;
+        count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;        
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
         start = &c->tasks->u.retrieve.start;
+        count = &c->tasks->u.retrieve.count;
         syntax = c->tasks->u.retrieve.syntax;
         elementSetName = c->tasks->u.retrieve.elementSetName;
         break;
     default:
-        return;
+        return zoom_complete;
     }
     event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
     ZOOM_connection_put_event(c, event);
@@ -4032,11 +4035,22 @@ static void handle_srw_response(ZOOM_connection c,
         record_cache_add(resultset, npr, pos, syntax, elementSetName,
                          sru_rec->recordSchema, diag);
     }
+    *count -= i;
+    *start += i;
+    if (*count + *start > resultset->size)
+        *count = resultset->size - *start;
+    if (*count < 0)
+        *count = 0;
+
     if (res->num_diagnostics > 0)
         set_SRU_error(c, &res->diagnostics[0]);
     nmem = odr_extract_mem(c->odr_in);
     nmem_transfer(odr_getmem(resultset->odr), nmem);
     nmem_destroy(nmem);
+    
+    if (*count > 0)
+        return ZOOM_connection_srw_send_search(c);
+    return zoom_complete;
 }
 #endif
 
@@ -4066,6 +4080,7 @@ static void handle_srw_scan_response(ZOOM_connection c,
 #if YAZ_HAVE_XML2
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
+    zoom_ret cret = zoom_complete;
     int ret = -1;
     const char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
@@ -4093,7 +4108,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
             ZOOM_options_set(c->options, "sru_version", sr->srw_version);
             if (sr->which == Z_SRW_searchRetrieve_response)
-                handle_srw_response(c, sr->u.response);
+                cret = handle_srw_response(c, sr->u.response);
             else if (sr->which == Z_SRW_scan_response)
                 handle_srw_scan_response(c, sr->u.scan_response);
             else
@@ -4117,7 +4132,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             set_ZOOM_error(c, ZOOM_ERROR_DECODE, addinfo);
         do_close(c);
     }
-    ZOOM_connection_remove_task(c);
+    if (cret == zoom_complete)
+        ZOOM_connection_remove_task(c);
     if (!strcmp(hres->version, "1.0"))
     {
         /* HTTP 1.0: only if Keep-Alive we stay alive.. */
