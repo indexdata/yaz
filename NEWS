@@ -1,8 +1,23 @@
+--- 3.0.36 2008/09/26
+
+Various ODR chapter fixes.
+
+Windows version uses libxml2 2.6.32+, libxslt 1.1.23+ and ICU 4.0.
+
+Added missing source for Windows compilation, mutex.c.
+
+Fixed compilation of YAZ for Visual Studio 2008. Bug #2256.
+
+For SRU connections in ZOOM all records up to "count" are now fetched.
+
 Fixed crash in generic frontend server (and yaz-ztest) which occurred
 in Windows due to bad error handling for Libxml2.
 
 Added facility for sending arbitrary records (ASN.1 any) using
 ZOOM C's Extended service update. Patch by Sam Reynolds.
+
+New options for ZOOM C's connection, logapdu which makes ZOOM log
+APDUs.
 
 --- 3.0.34 2008/06/18
 

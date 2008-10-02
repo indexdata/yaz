@@ -1,7 +1,7 @@
 ; This file is part of the YAZ toolkit.
 ; Copyright (C) 1995-2008 Index Data
 
-!define VERSION "3.0.34"
+!define VERSION "3.0.36"
 
 ; Microsoft runtime CRT 
 ; Uncomment exactly ONE section of the three below
@@ -106,9 +106,7 @@ Noservice:
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
 	File ..\bin\yaz3.dll
-	File ..\bin\icudt38.dll
-	File ..\bin\icuin38.dll
-	File ..\bin\icuuc38.dll
+	File ..\bin\icu*.dll
 	File ..\bin\yaz_icu3.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
