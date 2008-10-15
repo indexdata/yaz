@@ -46,10 +46,10 @@ void yaz_log_xml_errors(const char *prefix, int log_level)
 #if YAZ_HAVE_XML2
     xmlSetGenericErrorFunc((void *) (prefix ? prefix : "XML"),
                            xml_error_handler);
-#endif
 #if YAZ_HAVE_XSLT 
     xsltSetGenericErrorFunc((void *) (prefix ? prefix : "XSLT"),
                             xml_error_handler);
+#endif
 #endif
 }
 
