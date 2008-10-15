@@ -208,6 +208,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
 }
 #endif
 
+#if YAZ_HAVE_XML2
 static struct gfs_server * gfs_server_new(void)
 {
     struct gfs_server *n = (struct gfs_server *)
@@ -222,12 +223,12 @@ static struct gfs_server * gfs_server_new(void)
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
-#if YAZ_HAVE_XML2
     n->retrieval = yaz_retrieval_create();
-#endif
     return n;
 }
+#endif
 
+#if YAZ_HAVE_XML2
 static struct gfs_listen * gfs_listen_new(const char *id, 
                                           const char *address)
 {
@@ -241,6 +242,7 @@ static struct gfs_listen * gfs_listen_new(const char *id,
     n->address = nmem_strdup(gfs_nmem, address);
     return n;
 }
+#endif
 
 static void gfs_server_chdir(struct gfs_server *gfs)
 {
@@ -326,11 +328,11 @@ int control_association(association *assoc, const char *host, int force_open)
     return 1;
 }
 
+#if YAZ_HAVE_XML2
 static void xml_config_read(void)
 {
     struct gfs_server **gfsp = &gfs_server_list;
     struct gfs_listen **gfslp = &gfs_listen_list;
-#if YAZ_HAVE_XML2
     xmlNodePtr ptr = xml_config_get_root();
 
     if (!ptr)
@@ -475,9 +477,9 @@ static void xml_config_read(void)
             gfsp = &(*gfsp)->next;
         }
     }
-#endif
     *gfsp = 0;
 }
+#endif
 
 static void xml_config_open(void)
 {

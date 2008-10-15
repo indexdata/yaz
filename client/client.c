@@ -2136,8 +2136,10 @@ static int cmd_update0(const char *arg)
 static int cmd_update_Z3950(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len);
 
+#if YAZ_HAVE_XML2
 static int cmd_update_SRW(int action_no, const char *recid,
                           char *rec_buf, int rec_len);
+#endif
 
 static int cmd_update_common(const char *arg, int version)
 {

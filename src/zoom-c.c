@@ -1454,13 +1454,15 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 }
 #endif
 
-
-static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type) {
+#if YAZ_HAVE_XML2
+static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type)
+{
     Z_SRW_PDU *sr = yaz_srw_get_pdu(c->odr_out, type, c->sru_version);
     sr->username = c->user;
     sr->password = c->password;
     return sr;
 }
+#endif
 
 #if YAZ_HAVE_XML2
 static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)

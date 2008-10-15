@@ -175,6 +175,7 @@ char *yaz_uri_val(const char *path, const char *name, ODR o)
     return 0;
 }
 
+#if YAZ_HAVE_XML2
 static int yaz_base64decode(const char *in, char *out)
 {
     const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -220,6 +221,7 @@ static int yaz_base64decode(const char *in, char *out)
     *out = '\0';
     return olen;
 }
+#endif
 
 int yaz_srw_check_content_type(Z_HTTP_Response *hres)
 {
@@ -239,6 +241,7 @@ int yaz_srw_check_content_type(Z_HTTP_Response *hres)
  * Look for authentication tokens in HTTP Basic parameters or in x-username/x-password
  * parameters. Added by SH.
  */
+#if YAZ_HAVE_XML2
 static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
                                char *username, char *password, ODR decode)
 {
@@ -273,6 +276,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
             sr->password = odr_strdup(decode, pbuf);
     }
 }
+#endif
 
 void yaz_uri_val_int(const char *path, const char *name, ODR o, int **intp)
 {
@@ -456,6 +460,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     return 2;
 }
 
+#if YAZ_HAVE_XML2
 static int yaz_sru_decode_integer(ODR odr, const char *pname, 
                                   const char *valstr, int **valp,
                                   Z_SRW_diagnostic **diag, int *num_diag,
@@ -479,6 +484,7 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
     *valp = odr_intdup(odr, ival);
     return 1;
 }
+#endif
 
 /**
   http://www.loc.gov/z3950/agency/zing/srw/service.html
