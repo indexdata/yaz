@@ -10,7 +10,7 @@ DEBUG=0   # 0 for release, 1 for debug
 USE_MANIFEST = 0
 
 # TCL
-TCL="C:\Tcl\bin\tclsh84.exe"
+TCL="C:\Tcl\bin\tclsh85.exe"
 #TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
 HAVE_TCL=1
 
@@ -25,11 +25,11 @@ ICU_DIR = c:\icu
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.23+.win32
+LIBXSLT_DIR=c:\libxslt-1.1.24.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.6.32+.win32
+LIBXML2_DIR=c:\libxml2-2.7.1.win32
 
 # zlib compression (used by libxml2)
 ZLIB_DIR = c:\zlib-1.2.3.win32
