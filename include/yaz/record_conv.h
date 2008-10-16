@@ -54,6 +54,7 @@ YAZ_EXPORT yaz_record_conv_t yaz_record_conv_create(void);
 */
 YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 
+#if YAZ_HAVE_XML2
 /** configures record conversion
     \param p record conversion handle
     \param node xmlNode pointer (root element of XML config)
@@ -79,6 +80,7 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 */
 YAZ_EXPORT
 int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *node);
+#endif
 
 /** performs record conversion on record buffer (OCTET aligned)
     \param p record conversion handle

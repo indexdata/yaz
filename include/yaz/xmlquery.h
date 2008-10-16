@@ -38,12 +38,13 @@
 
 YAZ_BEGIN_CDECL
 
+#if YAZ_HAVE_XML2
 YAZ_EXPORT void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp);
 YAZ_EXPORT void yaz_rpnquery2xml(const Z_RPNQuery *rpn, xmlDocPtr *docp);
 
 YAZ_EXPORT void yaz_xml2query(const xmlNode *xmlnodep, Z_Query **query,
                               ODR odr, int *error_code, const char **addinfo);
-
+#endif
 YAZ_END_CDECL
 
 #endif

@@ -191,12 +191,6 @@ int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr, const char **addinfo)
     }
     return 0;
 }
-#else
-int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr, const char **addinfo)
-{
-    *addinfo = "CCL XML configuration not supported. Libxml2 is disabled";
-    return -1;
-}
 #endif
 
 /*

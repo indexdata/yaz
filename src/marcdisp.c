@@ -718,12 +718,12 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
 }
 
 
+#if YAZ_HAVE_XML2
 int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                        const char *ns, 
                        const char *format,
                        const char *type)
 {
-#if YAZ_HAVE_XML2
     struct yaz_marc_node *n;
     int identifier_length;
     const char *leader = 0;
@@ -828,10 +828,8 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
     }
     wrbuf_destroy(wr_cdata);
     return 0;
-#else
-    return -1;
-#endif
 }
+#endif
 
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
 {

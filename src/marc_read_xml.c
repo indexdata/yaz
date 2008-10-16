@@ -217,9 +217,9 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 }
 #endif
 
+#if YAZ_HAVE_XML2
 int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
 {
-#if YAZ_HAVE_XML2
     yaz_marc_reset(mt);
 
     for(; ptr; ptr = ptr->next)
@@ -245,10 +245,8 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     if (yaz_marc_read_xml_leader(mt, &ptr))
         return -1;
     return yaz_marc_read_xml_fields(mt, ptr->next);
-#else
-    return -1;
-#endif
 }
+#endif
 
 
 /*

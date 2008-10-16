@@ -27,8 +27,7 @@
 
 /**
  * \file xmltypes.h
- * \brief Define fundamental Libxml2 types for functions YAZ provide.
- * \details If Libxml2 is not installed, we define dummy types instead.
+ * \brief Define xmlNode and xmlDocPtr if Libxml2 is present
  */
 #ifndef YAZ_XMLTYPES_H
 #define YAZ_XMLTYPES_H
@@ -36,16 +35,6 @@
 #if YAZ_HAVE_XML2
 #include <libxml/tree.h>
 #endif
-
-YAZ_BEGIN_CDECL
-
-#if YAZ_HAVE_XML2
-#else
-typedef void xmlNode;
-typedef void *xmlDocPtr;
-#endif
-
-YAZ_END_CDECL
 
 #endif
 /*

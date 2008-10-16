@@ -37,6 +37,7 @@
 
 YAZ_BEGIN_CDECL
 
+#if YAZ_HAVE_XML2
 /** \brief configures CCL bibset using XML configuration
     \param bibset CCL bibliographic profile
     \param ptr xml node pointer pointing to "cclmap" element
@@ -64,7 +65,7 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT
 int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr,
                    const char **addinfo);
-
+#endif
 YAZ_END_CDECL
 
 #endif

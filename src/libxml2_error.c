@@ -23,6 +23,7 @@
 
 static int libxml2_error_level = 0;
 
+#if YAZ_HAVE_XML2
 static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
 {
     char buf[1024];
@@ -35,15 +36,16 @@ static void proxy_xml_error_handler(void *ctx, const char *fmt, ...)
 
     va_end (ap);
 }
+#endif
 
 int libxml2_error_to_yazlog(int level, const char *lead_msg)
 {
     libxml2_error_level = level;
+#if YAZ_HAVE_XML2
+    xmlSetGenericErrorFunc((void *) "XML", proxy_xml_error_handler);
 #if YAZ_HAVE_XSLT
     xsltSetGenericErrorFunc((void *) "XSLT", proxy_xml_error_handler);
 #endif
-#if YAZ_HAVE_XML2
-    xmlSetGenericErrorFunc((void *) "XML", proxy_xml_error_handler);
     return 0;
 #else
     return -1;

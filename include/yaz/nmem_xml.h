@@ -38,8 +38,10 @@
 
 YAZ_BEGIN_CDECL
 
+#if YAZ_HAVE_XML2
 /** \brief copies TEXT Libxml2 node data to NMEM */
 YAZ_EXPORT char *nmem_text_node_cdata(const xmlNode *ptr, NMEM nmem);
+#endif
 
 YAZ_END_CDECL
 

@@ -54,6 +54,7 @@ YAZ_EXPORT yaz_retrieval_t yaz_retrieval_create(void);
 */
 YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
 
+#if YAZ_HAVE_XML2
 /** configures retrieval
     \param p retrieval handle
     \param node xmlNode pointer (root element of XML config)
@@ -86,7 +87,7 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
 */
 YAZ_EXPORT
 int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *node);
-
+#endif
 
 /** performs retrieval request based on schema and format
     \param p retrieval handle

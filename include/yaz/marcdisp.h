@@ -162,6 +162,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                        void (*ungetbyte)(int b, void *client_data),
                        void *client_data);
 
+#if YAZ_HAVE_XML2
 /** \brief parses MARCXML/MarcXchange record from xmlNode pointer 
     \param mt handle
     \param ptr is a pointer to root xml node 
@@ -169,6 +170,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
     Returns 0=OK, -1=ERROR
 */
 YAZ_EXPORT int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr);
+#endif
 
 /** \brief writes record in line format
     \param mt handle
@@ -214,6 +216,7 @@ YAZ_EXPORT int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wrbuf);
 */  
 YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
 
+#if YAZ_HAVE_XML2
 /** \brief writes MARC record as libxml2 tree
     \param mt handle
     \param root_ptr pointer to record node
@@ -228,6 +231,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                        const char *ns, 
                        const char *format,
                        const char *type);
+#endif
 
 /** \brief sets leader spec (for modifying bytes in 24 byte leader)
     \param mt handle
@@ -298,6 +302,7 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
                                const char *data, size_t data_len);
 
 
+#if YAZ_HAVE_XML2
 /** \brief adds controlfield to MARC structure using xml Nodes
     \param mt handle
     \param ptr_tag value of tag (TEXT xmlNode)
@@ -306,7 +311,7 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
 YAZ_EXPORT
 void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                    const xmlNode *ptr_data);
-
+#endif
 
 /** \brief adds datafield to MARC structure using strings
     \param mt handle
@@ -318,6 +323,7 @@ YAZ_EXPORT
 void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
                             const char *indicator, size_t indicator_len);
 
+#if YAZ_HAVE_XML2
 /** \brief adds datafield to MARC structure using xml Nodes
     \param mt handle
     \param ptr_tag value of tag (TEXT xmlNode)
@@ -327,7 +333,7 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
 YAZ_EXPORT
 void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                 const char *indicator, size_t indicator_len);
-
+#endif
 
 /** \brief returns memory for MARC handle
     \param mt handle
