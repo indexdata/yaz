@@ -18,15 +18,18 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
 {
     Z_OPACRecord *rec;
     int i;
-    rec = odr_malloc(odr, sizeof(*rec));
+    rec = (Z_OPACRecord *) odr_malloc(odr, sizeof(*rec));
     rec->bibliographicRecord =
         z_ext_record_usmarc(odr, marc_input, strlen(marc_input));
     rec->num_holdingsData = 1;
-    rec->holdingsData = odr_malloc(odr, sizeof(*rec->holdingsData));
+    rec->holdingsData = (Z_HoldingsRecord **)
+        odr_malloc(odr, sizeof(*rec->holdingsData));
     for (i = 0; i < rec->num_holdingsData; i++)
     {
-        Z_HoldingsRecord *hr = odr_malloc(odr, sizeof(*hr));
-        Z_HoldingsAndCircData *hc = odr_malloc(odr, sizeof(*hc));
+        Z_HoldingsRecord *hr = (Z_HoldingsRecord *)
+            odr_malloc(odr, sizeof(*hr));
+        Z_HoldingsAndCircData *hc = (Z_HoldingsAndCircData *)
+            odr_malloc(odr, sizeof(*hc));
         
         rec->holdingsData[i] = hr;
         hr->which = Z_HoldingsRecord_holdingsAndCirc;
@@ -57,10 +60,10 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
         hc->volumes = 0;
 
         hc->num_circulationData = 1;
-        hc->circulationData = odr_malloc(odr, 
-                                         sizeof(*hc->circulationData));
-        hc->circulationData[0] = odr_malloc(odr, 
-                                            sizeof(**hc->circulationData));
+        hc->circulationData = (Z_CircRecord **)
+             odr_malloc(odr, sizeof(*hc->circulationData));
+        hc->circulationData[0] = (Z_CircRecord *)
+             odr_malloc(odr, sizeof(**hc->circulationData));
 
         hc->circulationData[0]->availableNow = odr_intdup(odr, 1);
         hc->circulationData[0]->availablityDate = 0;

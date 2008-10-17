@@ -260,7 +260,7 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
 static void tcpip_create_cred(COMSTACK cs)
 {
     tcpip_state *sp = (tcpip_state *) cs->cprivate;
-    sp->cred_ptr = xmalloc(sizeof(*sp->cred_ptr));
+    sp->cred_ptr = (struct tcpip_cred_ptr *) xmalloc(sizeof(*sp->cred_ptr));
     sp->cred_ptr->ref = 1;
     gnutls_certificate_allocate_credentials(&sp->cred_ptr->xcred);
 }

@@ -16,12 +16,12 @@ void tst_MySequence1(ODR encode, ODR decode)
     int ret;
     char *ber_buf;
     int ber_len;
-    Yc_MySequence *s = odr_malloc(encode, sizeof(*s));
+    Yc_MySequence *s = (Yc_MySequence *) odr_malloc(encode, sizeof(*s));
     Yc_MySequence *t;
 
     YAZ_CHECK(s);
     s->first = odr_intdup(encode, 12345);
-    s->second = odr_malloc(encode, sizeof(*s->second));
+    s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
     s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;
@@ -72,11 +72,11 @@ void tst_MySequence1(ODR encode, ODR decode)
 void tst_MySequence2(ODR encode, ODR decode)
 {
     int ret;
-    Yc_MySequence *s = odr_malloc(encode, sizeof(*s));
+    Yc_MySequence *s = (Yc_MySequence *) odr_malloc(encode, sizeof(*s));
 
     YAZ_CHECK(s);
     s->first = 0;  /* deliberately miss this .. */
-    s->second = odr_malloc(encode, sizeof(*s->second));
+    s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
     s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;

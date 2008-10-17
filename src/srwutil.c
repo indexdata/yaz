@@ -606,7 +606,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     Z_SRW_extra_arg **l = &extra_args;
                     while (*l)
                         l = &(*l)->next;
-                    *l = odr_malloc(decode, sizeof(**l));
+                    *l = (Z_SRW_extra_arg *) odr_malloc(decode, sizeof(**l));
                     (*l)->name = odr_strdup(decode, n);
                     (*l)->value = odr_strdup(decode, v);
                     (*l)->next = 0;
@@ -1454,7 +1454,7 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args)
 
         while (*name)
         {
-            *ea = odr_malloc(odr, sizeof(**ea));
+            *ea = (Z_SRW_extra_arg *) odr_malloc(odr, sizeof(**ea));
             (*ea)->name = *name;
             (*ea)->value = *val;
             ea = &(*ea)->next;

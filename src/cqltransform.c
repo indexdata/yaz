@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <yaz/cql.h>
+#include <yaz/rpn2cql.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
 #include <yaz/tokenizer.h>
@@ -78,7 +78,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         const char *value_str = 0;
         /* attset type=value  OR  type=value */
         
-        elem = nmem_malloc(ct->nmem, sizeof(*elem));
+        elem = (Z_AttributeElement *) nmem_malloc(ct->nmem, sizeof(*elem));
         elem->attributeSet = 0;
         ae[ae_num] = elem;
         wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
@@ -143,7 +143,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         }
         else
         {
-            Z_ComplexAttribute *ca = nmem_malloc(ct->nmem, sizeof(*ca));
+            Z_ComplexAttribute *ca = (Z_ComplexAttribute *)
+                nmem_malloc(ct->nmem, sizeof(*ca));
             elem->which = Z_AttributeValue_complex;
             elem->value.complex = ca;
             ca->num_list = 1;
@@ -176,7 +177,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             (*pp)->attr_list.attributes = 0;
         else
         {
-            (*pp)->attr_list.attributes =
+            (*pp)->attr_list.attributes = (Z_AttributeElement **)
                 nmem_malloc(ct->nmem,
                             ae_num * sizeof(Z_AttributeElement *));
             memcpy((*pp)->attr_list.attributes, ae, 

@@ -26,7 +26,7 @@ void tst(void)
 
     for (j = 1; j<500; j++)
     {
-        cp = nmem_malloc(n, j);
+        cp = (char *) nmem_malloc(n, j);
         YAZ_CHECK(cp);
         if (sizeof(long) >= j)
             *(long*) cp = 123L;
@@ -40,7 +40,7 @@ void tst(void)
     
     for (j = 2000; j<20000; j+= 2000)
     {
-        cp = nmem_malloc(n, j);
+        cp = (char *) nmem_malloc(n, j);
         YAZ_CHECK(cp);
     }
     nmem_destroy(n);

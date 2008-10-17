@@ -56,7 +56,7 @@ static unsigned long read_marc8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                unsigned char *inp,
                                size_t inbytesleft, size_t *no_read)
 {
-    struct decoder_data *data = d->data;
+    struct decoder_data *data = (struct decoder_data *) d->data;
     unsigned long x;
     if (data->comb_offset < data->comb_size)
     {
@@ -110,7 +110,7 @@ static unsigned long read_marc8s(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                  unsigned char *inp,
                                  size_t inbytesleft, size_t *no_read)
 {
-    struct decoder_data *data = d->data;
+    struct decoder_data *data = (struct decoder_data *) d->data;
     unsigned long x = read_marc8(cd, d, inp, inbytesleft, no_read);
     if (x && data->comb_size == 1)
     {
@@ -243,7 +243,7 @@ static size_t init_marc8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                          unsigned char *inp,
                          size_t inbytesleft, size_t *no_read)
 {
-    struct decoder_data *data = d->data;
+    struct decoder_data *data = (struct decoder_data *) d->data;
     data->g0_mode = 'B';
     data->g1_mode = 'E';
     data->comb_offset = data->comb_size = 0;
@@ -252,7 +252,7 @@ static size_t init_marc8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
 
 void destroy_marc8(yaz_iconv_decoder_t d)
 {
-    struct decoder_data *data = d->data;
+    struct decoder_data *data = (struct decoder_data *) d->data;
     xfree(data);
 }
 
@@ -266,7 +266,8 @@ yaz_iconv_decoder_t yaz_marc8_decoder(const char *fromcode,
     else
         return 0;
     {
-        struct decoder_data *data = xmalloc(sizeof(*data));
+        struct decoder_data *data = (struct decoder_data *)
+            xmalloc(sizeof(*data));
         d->data = data;
         d->init_handle = init_marc8;
         d->destroy_handle = destroy_marc8;

@@ -23,7 +23,7 @@ static void tst_srw(void)
         {0, 0, 0}
     };
     Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_searchRetrieve_request);
-    Z_SOAP *p = odr_malloc(o, sizeof(*p));
+    Z_SOAP *p = (Z_SOAP *) odr_malloc(o, sizeof(*p));
 
     YAZ_CHECK(o);
     YAZ_CHECK(sr);
@@ -35,7 +35,7 @@ static void tst_srw(void)
 #endif
 
     p->which = Z_SOAP_generic;
-    p->u.generic = odr_malloc(o, sizeof(*p->u.generic));
+    p->u.generic = (Z_SOAP_Generic *) odr_malloc(o, sizeof(*p->u.generic));
     p->u.generic->no = 0;
     p->u.generic->ns = 0;
     p->u.generic->p = sr;

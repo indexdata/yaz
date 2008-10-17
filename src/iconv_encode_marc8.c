@@ -50,7 +50,7 @@ struct encoder_data
 
 static void init_marc8(yaz_iconv_encoder_t w)
 {
-    struct encoder_data *data = w->data;
+    struct encoder_data *data = (struct encoder_data *) w->data;
     data->write_marc8_second_half_char = 0;
     data->write_marc8_last = 0;
     data->write_marc8_ncr = 0;
@@ -334,7 +334,7 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, struct encoder_data *w,
 static size_t flush_marc8(yaz_iconv_t cd, yaz_iconv_encoder_t en,
                            char **outbuf, size_t *outbytesleft)
 {
-    struct encoder_data *w = en->data;
+    struct encoder_data *w = (struct encoder_data *) en->data;
     size_t r = flush_combos(cd, w, outbuf, outbytesleft);
     if (r)
         return r;
@@ -382,21 +382,24 @@ static size_t write_marc8_normal(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                  unsigned long x,
                                  char **outbuf, size_t *outbytesleft)
 {
-    return yaz_write_marc8_generic(cd, e->data, x, outbuf, outbytesleft, 0);
+    return yaz_write_marc8_generic(cd, (struct encoder_data *) e->data,
+                                   x, outbuf, outbytesleft, 0);
 }
 
 static size_t write_marc8_lossy(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                 unsigned long x,
                                 char **outbuf, size_t *outbytesleft)
 {
-    return yaz_write_marc8_generic(cd, e->data, x, outbuf, outbytesleft, 1);
+    return yaz_write_marc8_generic(cd, (struct encoder_data *) e->data,
+                                   x, outbuf, outbytesleft, 1);
 }
 
 static size_t write_marc8_lossless(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                    unsigned long x,
                                    char **outbuf, size_t *outbytesleft)
 {
-    return yaz_write_marc8_generic(cd, e->data, x, outbuf, outbytesleft, 2);
+    return yaz_write_marc8_generic(cd, (struct encoder_data *) e->data,
+                                   x, outbuf, outbytesleft, 2);
 }
 
 static void destroy_marc8(yaz_iconv_encoder_t e)
@@ -420,7 +423,8 @@ yaz_iconv_encoder_t yaz_marc8_encoder(const char *tocode,
         return 0;
 
     {
-        struct encoder_data *data = xmalloc(sizeof(*data));
+        struct encoder_data *data = (struct encoder_data *)
+            xmalloc(sizeof(*data));
         e->data = data;
         e->destroy_handle = destroy_marc8;
         e->flush_handle = flush_marc8;

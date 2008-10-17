@@ -135,7 +135,7 @@ static size_t write_iso_8859_1(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                unsigned long x,
                                char **outbuf, size_t *outbytesleft)
 {
-    struct encoder_data *w = e->data;
+    struct encoder_data *w = (struct encoder_data *) e->data;
     /* list of two char unicode sequence that, when combined, are
        equivalent to single unicode chars that can be represented in
        ISO-8859-1/Latin-1.
@@ -193,7 +193,7 @@ static size_t write_iso_8859_1(yaz_iconv_t cd, yaz_iconv_encoder_t e,
 static size_t flush_iso_8859_1(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                char **outbuf, size_t *outbytesleft)
 {
-    struct encoder_data *w = e->data;
+    struct encoder_data *w = (struct encoder_data *) e->data;
     if (w->compose_char)
     {
         unsigned char *outp = (unsigned char *) *outbuf;
@@ -213,7 +213,7 @@ static size_t flush_iso_8859_1(yaz_iconv_t cd, yaz_iconv_encoder_t e,
 
 void init_iso_8859_1(yaz_iconv_encoder_t e)
 {
-    struct encoder_data *w = e->data;
+    struct encoder_data *w = (struct encoder_data *) e->data;
     w->compose_char = 0;
 }
 
@@ -228,7 +228,8 @@ yaz_iconv_encoder_t yaz_iso_8859_1_encoder(const char *tocode,
 {
     if (!yaz_matchstr(tocode, "iso88591"))
     {
-        struct encoder_data *data = xmalloc(sizeof(*data));
+        struct encoder_data *data = (struct encoder_data *)
+            xmalloc(sizeof(*data));
         e->data = data;
         e->write_handle = write_iso_8859_1;
         e->flush_handle = flush_iso_8859_1;

@@ -41,7 +41,7 @@ struct sc_s {
 
 yaz_sc_t yaz_sc_create(const char *service_name, const char *display_name)
 {
-    yaz_sc_t s = xmalloc(sizeof(*s));
+    yaz_sc_t s = (yaz_sc_t) xmalloc(sizeof(*s));
 
     s->service_name = service_name ? xstrdup(service_name) : 0;
     s->display_name = display_name ? xstrdup(display_name) : 0;
