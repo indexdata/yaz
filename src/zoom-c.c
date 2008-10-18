@@ -1480,7 +1480,8 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     {
     case ZOOM_TASK_SEARCH:
         resultset = c->tasks->u.search.resultset;
-        resultset->setname = xstrdup("default");
+        if (!resultset->setname)
+            resultset->setname = xstrdup("default");
         ZOOM_options_set(resultset->options, "setname", resultset->setname);
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
