@@ -4044,13 +4044,13 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     if (*count < 0)
         *count = 0;
 
-    if (res->num_diagnostics > 0)
-        set_SRU_error(c, &res->diagnostics[0]);
     nmem = odr_extract_mem(c->odr_in);
     nmem_transfer(odr_getmem(resultset->odr), nmem);
     nmem_destroy(nmem);
     
-    if (*count > 0)
+    if (res->num_diagnostics > 0)
+        set_SRU_error(c, &res->diagnostics[0]);
+    else if (*count > 0)
         return ZOOM_connection_srw_send_search(c);
     return zoom_complete;
 }
