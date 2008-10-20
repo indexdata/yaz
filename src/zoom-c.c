@@ -41,7 +41,7 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c);
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
 
-const char *ZOOM_get_event_str(int event)
+ZOOM_API(const char *) ZOOM_get_event_str(int event)
 {
     static const char *ar[] = {
         "NONE",
