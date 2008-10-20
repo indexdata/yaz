@@ -261,7 +261,7 @@ void ZOOM_connection_show_task(ZOOM_task task)
         yaz_log(YLOG_LOG, "connect p=%p", task);
         break;
     case ZOOM_TASK_SCAN:
-        yaz_log(YLOG_LOG, "scant p=%p", task);
+        yaz_log(YLOG_LOG, "scan p=%p", task);
         break;
     }
 }
@@ -4006,72 +4006,78 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         ZOOM_resultset_option_set(resultset, "resultSetId", res->resultSetId);
 
     yaz_log(log_details, "%p handle_srw_response got SRW response OK", c);
-    
-    if (res->numberOfRecords)
-        resultset->size = *res->numberOfRecords;
 
-    for (i = 0; i<res->num_records; i++)
-    {
-        int pos;
-        Z_SRW_record *sru_rec;
-        Z_SRW_diagnostic *diag = 0;
-        int num_diag;
- 
-        Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
-            odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
-
-        if (res->records[i].recordPosition && 
-            *res->records[i].recordPosition > 0)
-            pos = *res->records[i].recordPosition - 1;
-        else
-            pos = *start + i;
-        
-        sru_rec = &res->records[i];
-
-        npr->databaseName = 0;
-        npr->which = Z_NamePlusRecord_databaseRecord;
-        npr->u.databaseRecord = (Z_External *)
-            odr_malloc(c->odr_in, sizeof(Z_External));
-        npr->u.databaseRecord->descriptor = 0;
-        npr->u.databaseRecord->direct_reference =
-            odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
-        npr->u.databaseRecord->which = Z_External_octet;
-
-        npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
-            odr_malloc(c->odr_in, sizeof(Odr_oct));
-        npr->u.databaseRecord->u.octet_aligned->buf = (unsigned char*)
-            sru_rec->recordData_buf;
-        npr->u.databaseRecord->u.octet_aligned->len = 
-            npr->u.databaseRecord->u.octet_aligned->size = 
-            sru_rec->recordData_len;
-        
-        if (sru_rec->recordSchema 
-            && !strcmp(sru_rec->recordSchema,
-                       "info:srw/schema/1/diagnostics-v1.1"))
-        {
-            sru_decode_surrogate_diagnostics(sru_rec->recordData_buf,
-                                             sru_rec->recordData_len,
-                                             &diag, &num_diag,
-                                             resultset->odr);
-        }
-        record_cache_add(resultset, npr, pos, syntax, elementSetName,
-                         sru_rec->recordSchema, diag);
-    }
-    *count -= i;
-    *start += i;
-    if (*count + *start > resultset->size)
-        *count = resultset->size - *start;
-    if (*count < 0)
-        *count = 0;
-
-    nmem = odr_extract_mem(c->odr_in);
-    nmem_transfer(odr_getmem(resultset->odr), nmem);
-    nmem_destroy(nmem);
-    
     if (res->num_diagnostics > 0)
+    {
         set_SRU_error(c, &res->diagnostics[0]);
-    else if (*count > 0)
-        return ZOOM_connection_srw_send_search(c);
+    }
+    else
+    {
+        if (res->numberOfRecords)
+            resultset->size = *res->numberOfRecords;
+        
+        yaz_log(YLOG_LOG, "resultset->size=%d", resultset->size);
+        for (i = 0; i<res->num_records; i++)
+        {
+            int pos;
+            Z_SRW_record *sru_rec;
+            Z_SRW_diagnostic *diag = 0;
+            int num_diag;
+            
+            Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
+                odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
+            
+            if (res->records[i].recordPosition && 
+                *res->records[i].recordPosition > 0)
+                pos = *res->records[i].recordPosition - 1;
+            else
+                pos = *start + i;
+            
+            sru_rec = &res->records[i];
+            
+            npr->databaseName = 0;
+            npr->which = Z_NamePlusRecord_databaseRecord;
+            npr->u.databaseRecord = (Z_External *)
+                odr_malloc(c->odr_in, sizeof(Z_External));
+            npr->u.databaseRecord->descriptor = 0;
+            npr->u.databaseRecord->direct_reference =
+                odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
+            npr->u.databaseRecord->which = Z_External_octet;
+            
+            npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
+                odr_malloc(c->odr_in, sizeof(Odr_oct));
+            npr->u.databaseRecord->u.octet_aligned->buf = (unsigned char*)
+                sru_rec->recordData_buf;
+            npr->u.databaseRecord->u.octet_aligned->len = 
+                npr->u.databaseRecord->u.octet_aligned->size = 
+                sru_rec->recordData_len;
+            
+            if (sru_rec->recordSchema 
+                && !strcmp(sru_rec->recordSchema,
+                           "info:srw/schema/1/diagnostics-v1.1"))
+            {
+                sru_decode_surrogate_diagnostics(sru_rec->recordData_buf,
+                                                 sru_rec->recordData_len,
+                                                 &diag, &num_diag,
+                                                 resultset->odr);
+            }
+            record_cache_add(resultset, npr, pos, syntax, elementSetName,
+                             sru_rec->recordSchema, diag);
+        }
+        *count -= i;
+        *start += i;
+        if (*count + *start > resultset->size)
+            *count = resultset->size - *start;
+        if (*count < 0)
+            *count = 0;
+        
+        nmem = odr_extract_mem(c->odr_in);
+        nmem_transfer(odr_getmem(resultset->odr), nmem);
+        nmem_destroy(nmem);
+
+        if (*count > 0)
+            return ZOOM_connection_srw_send_search(c);
+    }
     return zoom_complete;
 }
 #endif
