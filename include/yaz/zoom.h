@@ -486,7 +486,9 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_connection_peek_event(ZOOM_connection c);
 
-ZOOM_END_CDECL
+ZOOM_API(const char *)
+    ZOOM_get_event_str(int event);
+
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -41,6 +41,23 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c);
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static char *cql2pqf(ZOOM_connection c, const char *cql);
 
+const char *ZOOM_get_event_str(int event)
+{
+    static const char *ar[] = {
+        "NONE",
+        "CONNECT",
+        "SEND_DATA",
+        "RECV_DATA",
+        "TIMEOUT",
+        "UNKNOWN",
+        "SEND_APDU",
+        "RECV_APDU",
+        "RECV_RECORD",
+        "RECV_SEARCH",
+        "END"
+    };
+    return ar[event];
+}
 
 /*
  * This wrapper is just for logging failed lookups.  It would be nicer
