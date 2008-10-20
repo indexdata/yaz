@@ -3984,6 +3984,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;        
+
+        event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+        ZOOM_connection_put_event(c, event);
+
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
@@ -3995,8 +3999,6 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     default:
         return zoom_complete;
     }
-    event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-    ZOOM_connection_put_event(c, event);
 
     resultset->size = 0;
 
