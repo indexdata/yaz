@@ -4015,8 +4015,6 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     {
         if (res->numberOfRecords)
             resultset->size = *res->numberOfRecords;
-        
-        yaz_log(YLOG_LOG, "resultset->size=%d", resultset->size);
         for (i = 0; i<res->num_records; i++)
         {
             int pos;
