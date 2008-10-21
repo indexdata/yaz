@@ -6,7 +6,7 @@
 
 # Parameters 
 
-DEBUG=0   # 0 for release, 1 for debug
+DEBUG=1   # 0 for release, 1 for debug
 USE_MANIFEST = 0
 
 # TCL
