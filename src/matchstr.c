@@ -5,7 +5,7 @@
 
 /**
  * \file matchstr.c
- * \brief Implements loose string matching 
+ * \brief a couple of string utilities
  */
 
 #if HAVE_CONFIG_H
@@ -16,7 +16,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
-#include <yaz/yaz-util.h>
+#include <yaz/match-str.h>
 
 int yaz_matchstr(const char *s1, const char *s2)
 {

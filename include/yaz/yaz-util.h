@@ -46,6 +46,7 @@
 #include <yaz/readconf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-iconv.h>
+#include <yaz/match-str.h>
 
 /** \mainpage YAZ
     \section intro_sec Introduction

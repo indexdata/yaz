@@ -65,44 +65,6 @@ YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
 /** \brief tests whether conversion is handled by YAZ' iconv or system iconv */
 YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
-/** \brief match strings - independent of case and '-'
-    \param s1 first string
-    \param s2 second string (May include wildcard ? and .)
-    \retval 0 strings are similar
-    \retval !=0 strings are different
-*/
-YAZ_EXPORT int yaz_matchstr(const char *s1, const char *s2);
-
-/** \brief match a and b with some delimitor for b
-    \param a first second
-    \param b second string
-    \param b_del delimitor for b
-    \retval 0 strings are similar
-    \retval !=0 strings are different
-*/
-YAZ_EXPORT int yaz_strcmp_del(const char *a, const char *b, const char *b_del);
-
-
-/** \brief compares two buffers of different size
-    \param a first buffer
-    \param b second buffer
-    \param len_a length of first buffer
-    \retval len_b length of second buffer
-    \retval 0 buffers are equal
-    \retval >0 a > b
-    \retval <0 a < b
-*/
-int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b);
-
-
-/** \brief decodes UTF-8 sequence
-    \param inp input buffer with UTF-8 bytes
-    \param inbytesleft length of input buffer
-    \param no_read holds number of bytes read if conversion is successful
-    \param error pointer to error code if error occurs
-    \retval 0 if error
-    \retval >0 if conversion is successful
-*/
 YAZ_EXPORT unsigned long yaz_read_UTF8_char(unsigned char *inp,
                                             size_t inbytesleft,
                                             size_t *no_read,

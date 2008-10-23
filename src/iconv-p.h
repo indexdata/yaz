@@ -34,6 +34,7 @@
 
 #include <yaz/yconfig.h>
 
+#include <yaz/match-str.h>
 #include <yaz/yaz-iconv.h>
 
 void yaz_iconv_set_errno(yaz_iconv_t cd, int no);

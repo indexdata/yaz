@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <yaz/srw.h>
+#include <yaz/match-str.h>
 #include <yaz/yaz-iconv.h>
 
 static int hex_digit (int ch)

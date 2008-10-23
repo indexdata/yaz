@@ -4,7 +4,7 @@
  */
 
 /** \file
- * \brief Demonstration of server
+ * \brief yaz-ztest Generic Frontend Server
  */
 
 #include <stdio.h>

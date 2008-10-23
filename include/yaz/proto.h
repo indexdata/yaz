@@ -65,6 +65,7 @@
 #include <yaz/z-charneg.h>
 #include <yaz/z-mterm2.h>
 #include <yaz/wrbuf.h>
+#include <yaz/match-str.h>
 #include <yaz/zgdu.h>
 #include <yaz/z-oclcui.h>
 
