@@ -479,6 +479,14 @@ ZOOM_API(void)
     set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
     ZOOM_connection_remove_tasks(c);
 
+    if (ZOOM_options_get_bool(c->options, "apdulog", 0))
+    {
+        c->odr_print = odr_createmem(ODR_PRINT);
+        odr_setprint(c->odr_print, yaz_log_file());
+    }
+    else
+        c->odr_print = 0;
+
     if (c->cs)
     {
         yaz_log(log_details, "%p ZOOM_connection_connect reconnect ok", c);
@@ -613,13 +621,6 @@ ZOOM_API(void)
         ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
-    if (ZOOM_options_get_bool(c->options, "apdulog", 0))
-    {
-        c->odr_print = odr_createmem(ODR_PRINT);
-        odr_setprint(c->odr_print, yaz_log_file());
-    }
-    else
-        c->odr_print = 0;
     yaz_log(log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
  
     task = ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
@@ -1443,8 +1444,17 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 {
     Z_GDU *gdu;
     ZOOM_Event event;
-
-    gdu = z_get_HTTP_Request_host_path(c->odr_out, c->host_port, c->path);
+    const char *database =  ZOOM_options_get(c->options, "databaseName");
+    char *fdatabase = 0;
+    
+    if (database)
+    {
+        fdatabase = (char *) odr_malloc(c->odr_out, strlen(database)+2);
+        strcpy(fdatabase, "/");
+        strcat(fdatabase, database);
+    }
+    gdu = z_get_HTTP_Request_host_path(c->odr_out, c->host_port,
+                                       fdatabase ? fdatabase : c->path);
 
     if (c->sru_mode == zoom_sru_get)
     {
