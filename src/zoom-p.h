@@ -200,6 +200,7 @@ struct ZOOM_task_p {
             ZOOM_resultset resultset;
             char *syntax;
             char *elementSetName;
+            int recv_search_fired;
         } search;
 #define ZOOM_TASK_RETRIEVE 2
         struct {

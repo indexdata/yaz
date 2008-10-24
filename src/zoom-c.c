@@ -930,6 +930,7 @@ ZOOM_API(ZOOM_resultset)
     task->u.search.resultset = r;
     task->u.search.start = start;
     task->u.search.count = count;
+    task->u.search.recv_search_fired = 0;
 
     syntax = ZOOM_options_get(r->options, "preferredRecordSyntax"); 
     task->u.search.syntax = syntax ? xstrdup(syntax) : 0;
@@ -3995,9 +3996,12 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;        
 
-        event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-        ZOOM_connection_put_event(c, event);
-
+        if (!c->tasks->u.search.recv_search_fired)
+        {
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+            ZOOM_connection_put_event(c, event);
+            c->tasks->u.search.recv_search_fired = 1;
+        }
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
