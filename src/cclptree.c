@@ -14,6 +14,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <yaz/querytowrbuf.h>
 #include <yaz/ccl.h>
 
 static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent);
@@ -68,19 +69,7 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
 
 static void ccl_prterm(WRBUF w, const char *term)
 {
-    if (!*term)
-        wrbuf_puts(w, "\"\"");
-    else
-    {
-        const char *cp = term;
-        for (; *cp; cp++)
-        {
-            if (*cp == ' ' || *cp == '\\')
-                wrbuf_putc(w, '\\');
-            wrbuf_putc(w, *cp);
-        }
-    }
-    wrbuf_puts(w, " ");
+    yaz_encode_pqf_term(w, term, strlen(term));
 }
 
 static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)

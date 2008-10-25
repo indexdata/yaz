@@ -194,9 +194,9 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "x=234-1990", "@attr 2=3 234-1990 "));
     YAZ_CHECK(tst_ccl_query(bibset, "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=a,b", "@attr 4=1 @attr 1=4 a,b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b", "@attr 4=1 @attr 1=4 a,\\ b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b", "@attr 4=1 @attr 1=4 \"a, b\" "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=a-b", "@attr 4=2 @attr 1=4 a-b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b", "@attr 4=1 @attr 1=4 a\\ -\\ b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b", "@attr 4=1 @attr 1=4 \"a - b\" "));
     ccl_qual_rm(&bibset);
 }
 

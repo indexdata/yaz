@@ -4,7 +4,7 @@
  */
 
 /** \file querytowrbuf.c
-    \brief Query to WRBUF (to strings)
+    \brief Convert Z39.50 Z_Query to PQF (as WRBUF string)
  */
 
 #include <stdio.h>
@@ -14,7 +14,7 @@
 #include <yaz/querytowrbuf.h>
 #include <yaz/oid_db.h>
 
-static void yaz_term_to_wrbuf(WRBUF b, const char *term, int len)
+void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
 {
     int i;
     for (i = 0; i < len; i++)
@@ -108,13 +108,13 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
     switch (zapt->term->which)
     {
     case Z_Term_general:
-        yaz_term_to_wrbuf(b, (const char *)zapt->term->u.general->buf,
-                          zapt->term->u.general->len);
+        yaz_encode_pqf_term(b, (const char *)zapt->term->u.general->buf,
+                            zapt->term->u.general->len);
         break;
     case Z_Term_characterString:
         wrbuf_printf(b, "@term string ");
-        yaz_term_to_wrbuf(b, zapt->term->u.characterString,
-                          strlen(zapt->term->u.characterString));
+        yaz_encode_pqf_term(b, zapt->term->u.characterString,
+                            strlen(zapt->term->u.characterString));
         break;
     case Z_Term_numeric:
         wrbuf_printf(b, "@term numeric %d ", *zapt->term->u.numeric);
@@ -172,8 +172,8 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
         else if (zs->u.simple->which == Z_Operand_resultSetId)
         {
             wrbuf_printf(b, "@set ");
-            yaz_term_to_wrbuf(b, zs->u.simple->u.resultSetId,
-                              strlen(zs->u.simple->u.resultSetId));
+            yaz_encode_pqf_term(b, zs->u.simple->u.resultSetId,
+                                strlen(zs->u.simple->u.resultSetId));
         }
         else
             wrbuf_printf (b, "(unknown simple structure)");
