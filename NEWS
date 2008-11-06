@@ -1,3 +1,18 @@
+ZOOM C now only fires one ZOOM_EVENT_SEARCH per search-task. Previously,
+ZOOM_EVENT_SEARCH was fired for each searchRetrieve Response received.
+
+ZOOM C now interprets databaseName option for ZOOM connection as path
+(SRU "database").
+
+Windows version bundled with Libxml2 2.7.1 / Libxslt 1.1.24 / ICU 4.0.
+
+Fixed CCL to RPN/PQF conversion which could result in invalid PQF.
+
+Dummy Libxml2 types no longer defined in headers of YAZ'.
+
+Fixed memory violation for ZOOM C - could occur when SRU diagnostics was
+received.
+
 --- 3.0.36 2008/09/26
 
 Various ODR chapter fixes.
