@@ -16,7 +16,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
-#include <yaz/match-str.h>
+#include <yaz/matchstr.h>
 
 int yaz_matchstr(const char *s1, const char *s2)
 {

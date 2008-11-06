@@ -12,7 +12,7 @@
 #include <yaz/odr.h>
 #include <yaz/yaz-version.h>
 #include <yaz/yaz-iconv.h>
-#include <yaz/match-str.h>
+#include <yaz/matchstr.h>
 #include <yaz/zgdu.h>
 
 #ifdef WIN32

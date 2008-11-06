@@ -14,7 +14,7 @@
 #include <yaz/log.h>
 #include <yaz/backend.h>
 #include <yaz/diagbib1.h>
-#include <yaz/match-str.h>
+#include <yaz/matchstr.h>
 #include <yaz/snprintf.h>
 
 static int my_search(void *handle, bend_search_rr *rr)

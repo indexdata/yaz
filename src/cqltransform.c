@@ -28,7 +28,7 @@
 #include <yaz/tokenizer.h>
 #include <yaz/wrbuf.h>
 #include <yaz/z-core.h>
-#include <yaz/match-str.h>
+#include <yaz/matchstr.h>
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
 

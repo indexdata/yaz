@@ -19,5 +19,5 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h comstack.h \
  z-grs.h z-mterm2.h z-opac.h z-rrf1.h z-rrf2.h z-sum.h z-sutrs.h z-uifr1.h \
  z-univ.h z-oclcui.h zes-expi.h zes-exps.h zes-order.h zes-pquery.h \
  zes-psched.h zes-admin.h zes-pset.h zes-update.h zes-update0.h \
- zoom.h z-charneg.h charneg.h soap.h srw.h zgdu.h match-str.h
+ zoom.h z-charneg.h charneg.h soap.h srw.h zgdu.h matchstr.h
 
