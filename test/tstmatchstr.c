@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <yaz/match-str.h>
+#include <yaz/matchstr.h>
 #include <yaz/test.h>
 
 int main (int argc, char **argv)
