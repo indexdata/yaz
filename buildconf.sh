@@ -19,6 +19,11 @@ if [ "`uname -s`" = FreeBSD ]; then
     libtoolize=libtoolize15
 fi
 
+if [ "`uname -s`" = Darwin ]; then
+    echo "Using special configuration for Darwin/MacOS ..."
+    libtoolize=glibtoolize
+fi
+
 if $automake --version|head -1 |grep '1\.[4-7]'; then
     echo "automake 1.4-1.7 is active. You should use automake 1.8 or later"
     if test -f /etc/debian_version; then
