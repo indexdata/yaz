@@ -50,14 +50,15 @@ sh_flags=""
 conf_flags=""
 case $1 in
     -d)
-	#sh_flags="-g -Wall -Wdeclaration-after-statement -Werror -Wstrict-prototypes"
-	sh_flags="-g -Wall -Wdeclaration-after-statement -Wstrict-prototypes"
+	sh_cflags="-g -Wall -Wdeclaration-after-statement -Wstrict-prototypes"
+	sh_cxxflags="-g -Wall"
 	enable_configure=true
 	enable_help=false
 	shift
 	;;
     -c)
-	sh_flags=""
+	sh_cflags=""
+	sh_cxxflags=""
 	enable_configure=true
 	enable_help=false
 	shift
@@ -66,7 +67,7 @@ esac
 
 if $enable_configure; then
     if test -n "$sh_flags"; then
-	CFLAGS="$sh_flags" ./configure --disable-shared --enable-static $*
+	CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure --disable-shared --enable-static $*
     else
 	./configure $*
     fi
