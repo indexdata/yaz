@@ -1,3 +1,5 @@
+--- 3.0.38 2008/11/10
+
 ZOOM C now only fires one ZOOM_EVENT_SEARCH per search-task. Previously,
 ZOOM_EVENT_SEARCH was fired for each searchRetrieve Response received.
 
