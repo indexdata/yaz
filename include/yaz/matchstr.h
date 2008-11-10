@@ -26,7 +26,7 @@
  */
 
 /**
- * \file match-str.h
+ * \file matchstr.h
  * \brief Header for YAZ iconv interface
  */
 
