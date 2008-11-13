@@ -21,3 +21,5 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h comstack.h \
  zes-psched.h zes-admin.h zes-pset.h zes-update.h zes-update0.h \
  zoom.h z-charneg.h charneg.h soap.h srw.h zgdu.h matchstr.h
 
+EXTRA_DIST = yaz-version.h.in
+

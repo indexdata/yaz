@@ -390,6 +390,7 @@ YAZ_BUILD_ROOT=`pwd`
 
 dnl ------ windows version files
 WIN_FILEVERSION=`echo $PACKAGE_VERSION|tr . ,`.1
+AC_SUBST([WIN_FILEVERSION])
 dnl
 dnl ------ Makefiles
 dnl
@@ -412,6 +413,7 @@ etc/Makefile
 yaz-config
 yaz.pc
 Doxyfile
+include/yaz/yaz-version.h
 ],[
 	sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
     ]
