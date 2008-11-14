@@ -17,6 +17,19 @@
 #define CHUNK_IN 64
 #define CHUNK_OUT 64
 
+void write_out(const char *b0, const char *b1)
+{
+    size_t sz = b1 - b0;
+    if (sz)
+    {
+        if (fwrite(b0, 1, sz, stdout) != sz)
+        {
+            fprintf(stderr, "yaz-iconv: write failed\n");
+            exit(8);
+        }
+    }
+}
+
 void convert(FILE *inf, yaz_iconv_t cd, int verbose)
 {
     char inbuf0[CHUNK_IN], *inbuf = inbuf0;
@@ -35,18 +48,16 @@ void convert(FILE *inf, yaz_iconv_t cd, int verbose)
             {
                 if (ferror(inf))
                 {
-                    fprintf(stderr, "yaziconv: error reading file\n");
+                    fprintf(stderr, "yaz-iconv: error reading file\n");
                     exit(6);
                 }
                 if (r == 0)
                 {
-                    if (outbuf != outbuf0)
-                        fwrite(outbuf0, 1, outbuf - outbuf0, stdout);
+                    write_out(outbuf0, outbuf);
                     outbuf = outbuf0;
                     outbytesleft = CHUNK_OUT;
                     r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
-                    if (outbuf != outbuf0)
-                        fwrite(outbuf0, 1, outbuf - outbuf0, stdout);
+                    write_out(outbuf0, outbuf);
                     break;
                 }
                 inbytesleft = r;
@@ -78,7 +89,7 @@ void convert(FILE *inf, yaz_iconv_t cd, int verbose)
                 {
                     if (ferror(inf))
                     {
-                        fprintf(stderr, "yaziconv: error reading file\n");
+                        fprintf(stderr, "yaz-iconv: error reading file\n");
                         exit(6);
                     }
                 }
@@ -93,14 +104,14 @@ void convert(FILE *inf, yaz_iconv_t cd, int verbose)
             }
             else if (e == YAZ_ICONV_E2BIG) /* no more output space */
             {
-                fwrite(outbuf0, 1, outbuf - outbuf0, stdout);
+                write_out(outbuf0, outbuf);
                 outbuf = outbuf0;
                 outbytesleft = CHUNK_OUT;
                 mustread = 0;
             }
             else
             {
-                fprintf(stderr, "yaziconv: unknown error\n");
+                fprintf(stderr, "yaz-iconv: unknown error\n");
                 exit(7);
             }
         }
@@ -109,7 +120,7 @@ void convert(FILE *inf, yaz_iconv_t cd, int verbose)
             inbuf = inbuf0;
             inbytesleft = CHUNK_IN;
 
-            fwrite(outbuf0, 1, outbuf - outbuf0, stdout);
+            write_out(outbuf0, outbuf);
             outbuf = outbuf0;
             outbytesleft = CHUNK_OUT;
 
@@ -136,7 +147,7 @@ int main(int argc, char **argv)
             inf = fopen(arg, "rb");
             if (!inf)
             {
-                fprintf(stderr, "yaziconv: cannot open %s", arg);
+                fprintf(stderr, "yaz-iconv: cannot open %s", arg);
                 exit(2);
             }
             break;
@@ -150,32 +161,32 @@ int main(int argc, char **argv)
             verbose++;
             break;
         default:
-            fprintf(stderr, "yaziconv: Usage\n"
+            fprintf(stderr, "yaz-iconv: Usage\n"
                     "yaziconv -f encoding -t encoding [-v] [file]\n");
             exit(1);
         }
     }
     if (!to)
     {
-        fprintf(stderr, "yaziconv: -t encoding missing\n");
+        fprintf(stderr, "yaz-iconv: -t encoding missing\n");
         exit(3);
     }
     if (!from)
     {
-        fprintf(stderr, "yaziconv: -f encoding missing\n");
+        fprintf(stderr, "yaz-iconv: -f encoding missing\n");
         exit(4);
     }
     cd = yaz_iconv_open(to, from);
     if (!cd)
     {
-        fprintf(stderr, "yaziconv: unsupported encoding\n");
+        fprintf(stderr, "yaz-iconv: unsupported encoding\n");
         exit(5);
     }
     else
     {
         if (verbose)
         {
-            fprintf(stderr, "yaziconv: using %s\n",
+            fprintf(stderr, "yaz-iconv: using %s\n",
                     yaz_iconv_isbuiltin(cd) ? "YAZ" : "iconv");
         }
     }

@@ -72,7 +72,13 @@ void pqftoxmlquery(const char *pqf)
 		exit(4);
 	    }
 	    else
-		fwrite(buf_out, len_out, 1, stdout);
+	    {
+		if (fwrite(buf_out, len_out, 1, stdout) != 1)
+		{
+		    fprintf(stderr, "%s: write failed\n", prog);
+		    exit(5);
+		}
+	    }
             xmlFreeDoc(doc);
 	}
     }    
@@ -143,8 +149,16 @@ void xmlfiletopqf(const char *xmlfile)
     rewind(f);
     xmlstr = (char *) xmalloc(sz+1);
     xmlstr[sz] = '\0';
-    fread(xmlstr, sz, 1, f);
-    fclose(f);
+    if (fread(xmlstr, sz, 1, f) != 1)
+    {
+	fprintf(stderr, "%s: read failed for file %s\n", prog, xmlfile);
+	exit(1);
+    }
+    if (fclose(f))
+    {
+	fprintf(stderr, "%s: close failed for file %s\n", prog, xmlfile);
+	exit(1);
+    }
     
     xmlquerytopqf(xmlstr);
     xfree(xmlstr);

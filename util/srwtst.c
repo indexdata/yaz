@@ -74,8 +74,11 @@ int main(int argc, char **argv)
                     {
                         fprintf (stderr, "%d\n", i);
                         if (res->records[i].recordData_buf)
-                            fwrite(res->records[i].recordData_buf, 1,
-                                   res->records[i].recordData_len, stderr);
+                        {
+                            fprintf(stderr, "%.*s",
+                                    res->records[i].recordData_len,
+                                    res->records[i].recordData_buf);
+                        }
                     }
                 }
             }
@@ -85,7 +88,9 @@ int main(int argc, char **argv)
     ret = z_soap_codec(encode, &soap_package,
                        &content_buf, &content_len, h);
     if (content_buf && content_len)
-        fwrite (content_buf, content_len, 1, stdout);
+    {
+        printf("%.*s", content_len, content_buf);
+    }
     else
     {
         fprintf(stderr, "No output!\n");

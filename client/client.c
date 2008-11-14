@@ -177,6 +177,8 @@ int cmd_querycharset(const char *arg);
 
 static void close_session(void);
 
+static void marc_file_write(const char *buf, size_t sz);
+
 ODR getODROutputStream(void)
 {
     return out;
@@ -220,9 +222,14 @@ static void do_hex_dump(const char* buf, int len)
             sprintf(fname, "%s.%03d.raw", dump_file_prefix, no);
             of = fopen(fname, "wb");
 
-            fwrite(buf, 1, len, of);
-
-            fclose(of);
+            if (fwrite(buf, 1, len, of) != len)
+            {
+                printf("write failed for %s", fname);
+            }
+            if (fclose(of))
+            {
+                printf("close failed for %s", fname);
+            }
         }
     }
 }
@@ -882,8 +889,7 @@ static void display_record(Z_External *r)
     {
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
-        if (marc_file)
-            fwrite(r->u.octet_aligned->buf, 1, r->u.octet_aligned->len, marc_file);
+        marc_file_write(r->u.octet_aligned->buf, r->u.octet_aligned->len);
     }
     else if (oid && r->which == Z_External_octet)
     {
@@ -943,7 +949,10 @@ static void display_record(Z_External *r)
                 if (yaz_marc_decode_buf(mt, octet_buf, r->u.octet_aligned->len,
                                         &result, &rlen)> 0)
                 {
-                    fwrite(result, rlen, 1, stdout);
+                    if (fwrite(result, rlen, 1, stdout) != 1)
+                    {
+                        printf("write to stdout failed\n");
+                    }
                 }
                 else
                 {
@@ -961,8 +970,7 @@ static void display_record(Z_External *r)
                              r->u.octet_aligned->len);
             }
         }
-        if (marc_file)
-            fwrite(octet_buf, 1, r->u.octet_aligned->len, marc_file);
+        marc_file_write(octet_buf, r->u.octet_aligned->len);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {
@@ -972,8 +980,7 @@ static void display_record(Z_External *r)
             return;
         }
         print_record(r->u.sutrs->buf, r->u.sutrs->len);
-        if (marc_file)
-            fwrite(r->u.sutrs->buf, 1, r->u.sutrs->len, marc_file);
+        marc_file_write(r->u.sutrs->buf, r->u.sutrs->len);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
@@ -3524,35 +3531,41 @@ int cmd_source(const char* arg, int echo )
     FILE* includeFile;
     char line[102400], *cp;
 
-    if(strlen(arg)<1) {
-        fprintf(stderr,"Error in source command use a filename\n");
+    if (strlen(arg) < 1)
+    {
+        fprintf(stderr, "Error in source command use a filename\n");
         return -1;
     }
 
     includeFile = fopen(arg, "r");
 
-    if(!includeFile) {
-        fprintf(stderr,"Unable to open file %s for reading\n",arg);
+    if (!includeFile)
+    {
+        fprintf(stderr, "Unable to open file %s for reading\n",arg);
         return -1;
     }
 
-    while(!feof(includeFile)) {
-        memset(line,0,sizeof(line));
-        fgets(line,sizeof(line),includeFile);
+    while (!feof(includeFile)) {
+        memset(line, 0, sizeof(line));
+        if (!fgets(line, sizeof(line), includeFile))
+        {
+            perror("fgets");
+            break;
+        }
 
-        if(strlen(line) < 2) continue;
-        if(line[0] == '#') continue;
+        if (strlen(line) < 2) continue;
+        if (line[0] == '#') continue;
 
         if ((cp = strrchr(line, '\n')))
             *cp = '\0';
 
-        if( echo ) {
-            printf( "processing line: %s\n",line );
-        };
+        if (echo)
+            printf("processing line: %s\n", line);
         process_cmd_line(line);
     }
 
-    if(fclose(includeFile)<0) {
+    if (fclose(includeFile))
+    {
         perror("unable to close include file");
         exit(1);
     }
@@ -3574,12 +3587,12 @@ int cmd_source_noecho(const char* arg)
 
 int cmd_subshell(const char* args)
 {
-    if(strlen(args))
-        system(args);
-    else
-        system(getenv("SHELL"));
-
+    int ret = system(strlen(args) ? args : getenv("SHELL"));
     printf("\n");
+    if (ret)
+    {
+        printf("Exit %d\n", ret);
+    }
     return 1;
 }
 
@@ -3710,6 +3723,16 @@ int cmd_set_marcdump(const char* arg)
     return 1;
 }
 
+static void marc_file_write(const char *buf, size_t sz)
+{
+    if (marc_file)
+    {
+        if (fwrite(buf, 1, sz, marc_file) != sz)
+        {
+            perror("marcfile write");
+        }
+    }
+}
 /*
    this command takes 3 arge {name class oid}
 */
@@ -3890,9 +3913,13 @@ static void handle_srw_record(Z_SRW_record *rec)
     printf("\n");
     if (rec->recordData_buf && rec->recordData_len)
     {
-        fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout);
-        if (marc_file)
-            fwrite(rec->recordData_buf, 1, rec->recordData_len, marc_file);
+        if (fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout) !=
+            rec->recordData_len)
+        {
+            printf("write to stdout failed\n");
+        }
+        printf("%.*s", rec->recordData_len, rec->recordData_buf);
+        marc_file_write(rec->recordData_buf, rec->recordData_len);
     }
     else
         printf("No data!");
