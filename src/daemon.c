@@ -246,7 +246,10 @@ int yaz_daemon(const char *progname,
         close(1);
         close(2);
         open("/dev/null", O_RDWR);
-        dup(0); dup(0);
+        if (dup(0) == -1)
+            return 1;
+        if (dup(0) == -1)
+            return 1;
         close(hand[1]);
     }
 

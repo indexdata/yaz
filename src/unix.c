@@ -425,8 +425,16 @@ static int unix_bind(COMSTACK h, void *address, int mode)
         h->cerrno = CSYSERR;
         return -1;
     }
-    chown(path, sp->uid, sp->gid);
-    chmod(path, sp->umask != -1 ? sp->umask : 0666);
+    if (chown(path, sp->uid, sp->gid))
+    {
+        h->cerrno = CSYSERR;
+        return -1;
+    }
+    if (chmod(path, sp->umask != -1 ? sp->umask : 0666))
+    {
+        h->cerrno = CSYSERR;
+        return -1;
+    }
     if (mode == CS_SERVER && listen(h->iofile, 100) < 0)
     {
         h->cerrno = CSYSERR;

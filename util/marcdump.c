@@ -332,7 +332,11 @@ static void dump(const char *fname, const char *from, const char *to,
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
             if (r > 0 && result)
             {
-                fwrite (result, len_result, 1, stdout);
+                if (fwrite(result, len_result, 1, stdout) != 1)
+                {
+                    fprintf(stderr, "Write to stdout failed\n");
+                    break;
+                }
             }
             if (r > 0 && cfile)
             {

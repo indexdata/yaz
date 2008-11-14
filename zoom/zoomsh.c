@@ -206,10 +206,18 @@ static void display_records(ZOOM_connection c,
                        pos, (db ? db : "unknown"), syntax,
                        schema ? schema : "unknown");
                 if (render)
-                    fwrite(render, 1, len, stdout);
+                {
+                    if (write(render, 1, len, stdout) != len)
+                    {
+                        printf("write to stdout failed\n");
+                    }
+                }
                 printf("\n");
                 if (opac_render)
-                    fwrite(opac_render, 1, opac_len, stdout);
+                {
+                    if (fwrite(opac_render, 1, opac_len, stdout) != opac_len)
+                        printf("write to stdout failed\n");
+                }
             }
         }
     }
@@ -429,8 +437,8 @@ static void cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
                 int len = 0;
                 const char *term = ZOOM_scanset_display_term(s[i], p,
                                                              &occ, &len);
-                fwrite(term, 1, len, stdout);
-                printf(" %d\n", occ);
+                
+                printf("%.*s %d\n", len, term, occ);
             }            
             ZOOM_scanset_destroy(s[i]);
         }

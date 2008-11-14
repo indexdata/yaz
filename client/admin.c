@@ -236,8 +236,14 @@ int cmd_adm_import(const char *arg)
                 
                 oct->len = oct->size = status.st_size;
                 oct->buf = (unsigned char *) odr_malloc (out, oct->size);
-                fread (oct->buf, 1, oct->size, inf);
-                fclose (inf);
+                if (fread(oct->buf, 1, oct->size, inf) != oct->size)
+                {
+                    printf("Incomplete read of file %s\n", fname);
+                }
+                if (fclose(inf))
+                {
+                    printf("Close failed for file %s\n", fname);
+                }
                 
                 segment->segmentRecords[segment->num_segmentRecords++] = rec;
 

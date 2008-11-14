@@ -17,7 +17,20 @@
 #define CHUNK_IN 64
 #define CHUNK_OUT 64
 
-void convert (FILE *inf, yaz_iconv_t cd, int verbose)
+void write_out(const char *b0, const char *b1)
+{
+    size_t sz = b1 - b0;
+    if (sz)
+    {
+        if (fwrite(b0, 1, sz, stdout) != sz)
+        {
+            fprintf(stderr, "yaz-iconv: write failed\n");
+            exit(8);
+        }
+    }
+}
+
+void convert(FILE *inf, yaz_iconv_t cd, int verbose)
 {
     char inbuf0[CHUNK_IN], *inbuf = inbuf0;
     char outbuf0[CHUNK_OUT], *outbuf = outbuf0;
@@ -30,23 +43,21 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
         size_t r;
         if (mustread)
         {
-            r = fread (inbuf, 1, inbytesleft, inf);
+            r = fread(inbuf, 1, inbytesleft, inf);
             if (inbytesleft != r)
             {
                 if (ferror(inf))
                 {
-                    fprintf (stderr, "yaziconv: error reading file\n");
-                    exit (6);
+                    fprintf(stderr, "yaz-iconv: error reading file\n");
+                    exit(6);
                 }
                 if (r == 0)
                 {
-                    if (outbuf != outbuf0)
-                        fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
+                    write_out(outbuf0, outbuf);
                     outbuf = outbuf0;
                     outbytesleft = CHUNK_OUT;
-                    r = yaz_iconv (cd, 0, 0, &outbuf, &outbytesleft);
-                    if (outbuf != outbuf0)
-                        fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
+                    r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
+                    write_out(outbuf0, outbuf);
                     break;
                 }
                 inbytesleft = r;
@@ -54,17 +65,17 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
         }
         if (verbose > 1)
         {
-            fprintf (stderr, "yaz_iconv: inbytesleft=%ld outbytesleft=%ld\n",
-                     (long) inbytesleft, (long) outbytesleft);
+            fprintf(stderr, "yaz_iconv: inbytesleft=%ld outbytesleft=%ld\n",
+                    (long) inbytesleft, (long) outbytesleft);
 
         }
-        r = yaz_iconv (cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         if (r == (size_t)(-1))
         {
             int e = yaz_iconv_error(cd);
             if (e == YAZ_ICONV_EILSEQ)
             {
-                fprintf (stderr, "invalid sequence\n");
+                fprintf(stderr, "invalid sequence\n");
                 return ;
             }
             else if (e == YAZ_ICONV_EINVAL) /* incomplete input */
@@ -78,13 +89,13 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
                 {
                     if (ferror(inf))
                     {
-                        fprintf (stderr, "yaziconv: error reading file\n");
+                        fprintf(stderr, "yaz-iconv: error reading file\n");
                         exit(6);
                     }
                 }
                 if (r == 0)
                 {
-                    fprintf (stderr, "invalid sequence due to missing input\n");
+                    fprintf(stderr, "invalid sequence due to missing input\n");
                     return ;
                 }
                 inbytesleft += r;
@@ -93,15 +104,15 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
             }
             else if (e == YAZ_ICONV_E2BIG) /* no more output space */
             {
-                fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
+                write_out(outbuf0, outbuf);
                 outbuf = outbuf0;
                 outbytesleft = CHUNK_OUT;
                 mustread = 0;
             }
             else
             {
-                fprintf (stderr, "yaziconv: unknown error\n");
-                exit (7);
+                fprintf(stderr, "yaz-iconv: unknown error\n");
+                exit(7);
             }
         }
         else
@@ -109,7 +120,7 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
             inbuf = inbuf0;
             inbytesleft = CHUNK_IN;
 
-            fwrite (outbuf0, 1, outbuf - outbuf0, stdout);
+            write_out(outbuf0, outbuf);
             outbuf = outbuf0;
             outbytesleft = CHUNK_OUT;
 
@@ -118,7 +129,7 @@ void convert (FILE *inf, yaz_iconv_t cd, int verbose)
     }
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     int ret;
     int verbose = 0;
@@ -128,16 +139,16 @@ int main (int argc, char **argv)
     yaz_iconv_t cd;
     FILE *inf = stdin;
 
-    while ((ret = options ("vf:t:", argv, argc, &arg)) != -2)
+    while ((ret = options("vf:t:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
         case 0:
-            inf = fopen (arg, "rb");
+            inf = fopen(arg, "rb");
             if (!inf)
             {
-                fprintf (stderr, "yaziconv: cannot open %s", arg);
-                exit (2);
+                fprintf(stderr, "yaz-iconv: cannot open %s", arg);
+                exit(2);
             }
             break;
         case 'f':
@@ -150,37 +161,37 @@ int main (int argc, char **argv)
             verbose++;
             break;
         default:
-            fprintf (stderr, "yaziconv: Usage\n"
-                     "yaziconv -f encoding -t encoding [-v] [file]\n");
+            fprintf(stderr, "yaz-iconv: Usage\n"
+                    "yaziconv -f encoding -t encoding [-v] [file]\n");
             exit(1);
         }
     }
     if (!to)
     {
-        fprintf (stderr, "yaziconv: -t encoding missing\n");
-        exit (3);
+        fprintf(stderr, "yaz-iconv: -t encoding missing\n");
+        exit(3);
     }
     if (!from)
     {
-        fprintf (stderr, "yaziconv: -f encoding missing\n");
-        exit (4);
+        fprintf(stderr, "yaz-iconv: -f encoding missing\n");
+        exit(4);
     }
-    cd = yaz_iconv_open (to, from);
+    cd = yaz_iconv_open(to, from);
     if (!cd)
     {
-        fprintf (stderr, "yaziconv: unsupported encoding\n");
-        exit (5);
+        fprintf(stderr, "yaz-iconv: unsupported encoding\n");
+        exit(5);
     }
     else
     {
         if (verbose)
         {
-            fprintf (stderr, "yaziconv: using %s\n",
-                     yaz_iconv_isbuiltin(cd) ? "YAZ" : "iconv");
+            fprintf(stderr, "yaz-iconv: using %s\n",
+                    yaz_iconv_isbuiltin(cd) ? "YAZ" : "iconv");
         }
     }
-    convert (inf, cd, verbose);
-    yaz_iconv_close (cd);
+    convert(inf, cd, verbose);
+    yaz_iconv_close(cd);
     return 0;
 }
 /*

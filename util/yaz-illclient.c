@@ -503,8 +503,17 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
     }
     if (1) {
         FILE *F = fopen("req.apdu","w");
-        fwrite ( buf_out, 1, len_out, F);
-        fclose(F);
+        if (!F)
+        {
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "open req.apdu failed");
+        }
+        else
+        {
+            if (fwrite ( buf_out, 1, len_out, F) != len_out)
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "write req.apdu failed");
+            if (fclose(F))
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "write req.apdu failed");
+        }
     }
     
 } /* sendrequest */

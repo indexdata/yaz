@@ -95,12 +95,7 @@ int main(int argc, char **argv)
                         ZOOM_resultset_record (r[i], pos), "render", &len);
                 /* if rec is non-null, we got a record for display */
                 if (rec)
-                {
-                    printf ("%d\n", pos+1);
-                    if (rec)
-                        fwrite (rec, 1, len, stdout);
-                    printf ("\n");
-                }
+                    printf ("%d\n%.*s\n", pos+1, len, rec);
             }
         }
     }

@@ -1122,9 +1122,7 @@ static void srw_bend_search(association *assoc, request *req,
             querystr = srw_req->query.pqf;
             break;
         }
-        wrbuf_printf(wr, "SRWSearch ");
-        wrbuf_printf(wr, srw_req->database);
-        wrbuf_printf(wr, " ");
+        wrbuf_printf(wr, "SRWSearch %s ", srw_req->database);
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s", srw_res->diagnostics[0].uri);
         else if (*http_code != 200)
@@ -1394,9 +1392,7 @@ static void srw_bend_scan(association *assoc, request *req,
             querystr = "";
         }
 
-        wrbuf_printf(wr, "SRWScan ");
-        wrbuf_printf(wr, srw_req->database);
-        wrbuf_printf(wr, " ");
+        wrbuf_printf(wr, "SRWScan %s ", srw_req->database);
 
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s - ", srw_res->diagnostics[0].uri);
@@ -1672,7 +1668,8 @@ static char *read_file(const char *fname, ODR o, int *sz)
     *sz = ftell(inf);
     rewind(inf);
     buf = (char *) odr_malloc(o, *sz);
-    fread(buf, 1, *sz, inf);
+    if (fread(buf, 1, *sz, inf) != *sz)
+        yaz_log(YLOG_WARN|YLOG_ERRNO, "short read %s", fname);
     fclose(inf);
     return buf;     
 }
@@ -2837,7 +2834,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         for (i = 0 ; i < req->num_databaseNames; i++){
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->databaseNames[i]);
+            wrbuf_puts(wr, req->databaseNames[i]);
         }
         wrbuf_printf(wr, " ");
         
@@ -3136,7 +3133,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         {
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->databaseNames[i]);
+            wrbuf_puts(wr, req->databaseNames[i]);
         }
 
         wrbuf_printf(wr, " ");
@@ -3233,7 +3230,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
         {
             if (i)
                 wrbuf_printf(wr, "+");
-            wrbuf_printf(wr, req->inputResultSetNames[i]);
+            wrbuf_puts(wr, req->inputResultSetNames[i]);
         }
         wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
 

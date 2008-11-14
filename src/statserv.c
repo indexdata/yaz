@@ -1184,7 +1184,11 @@ statserv_options_block *statserv_getcontrol(void)
 
 void statserv_setcontrol(statserv_options_block *block)
 {
-    chdir(gfs_root_dir);
+    if (gfs_root_dir[0])
+    {
+        if (chdir(gfs_root_dir))
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s", gfs_root_dir);
+    }
 #ifdef WIN32
     if (init_control_tls)
         TlsSetValue(current_control_tls, block);
@@ -1282,7 +1286,10 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
             close(1);
             close(2);
             open("/dev/null", O_RDWR);
-            dup(0); dup(0);
+            if (dup(0) == -1)
+                return 1;
+            if (dup(0) == -1)
+                return 1;
         }
         xml_config_add_listeners();
 

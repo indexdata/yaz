@@ -91,9 +91,9 @@ int ztest_search(void *handle, bend_search_rr *rr)
         return 0;
     }
     /* Throw Database unavailable if other than Default or Slow */
-    if (!yaz_matchstr (rr->basenames[0], "Default"))
+    if (!yaz_matchstr(rr->basenames[0], "Default"))
         ;  /* Default is OK in our test */
-    else if(!yaz_matchstr (rr->basenames[0], "Slow"))
+    else if(!yaz_matchstr(rr->basenames[0], "Slow"))
     {
 #if HAVE_UNISTD_H
         /* wait up to 3 seconds and check if connection is still alive */
@@ -123,7 +123,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
 
 
 /* this huge function handles extended services */
-int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
+int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
 {
     /* user-defined handle - created in bend_init */
     int *counter = (int*) handle;  
@@ -141,12 +141,12 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 
     if (!rr->esr->taskSpecificParameters)
     {
-        yaz_log (log_level, "No task specific parameters");
+        yaz_log(log_level, "No task specific parameters");
     }
     else if (rr->esr->taskSpecificParameters->which == Z_External_itemOrder)
     {
         Z_ItemOrder *it = rr->esr->taskSpecificParameters->u.itemOrder;
-        yaz_log (log_level, "Received ItemOrder");
+        yaz_log(log_level, "Received ItemOrder");
         if (it->which == Z_IOItemOrder_esRequest)
         {
             Z_IORequest *ir = it->u.esRequest;
@@ -185,102 +185,102 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                     oid_class oclass;
                     const char *oid_name = 
                         yaz_oid_to_string_buf(r->direct_reference,
-                                          &oclass, oid_name_str);
+                                              &oclass, oid_name_str);
                     if (oid_name)
                         yaz_log(log_level, "OID %s", oid_name);
                     if (!oid_oidcmp(r->direct_reference, yaz_oid_recsyn_xml))
                     {
-                        yaz_log (log_level, "ILL XML request");
+                        yaz_log(log_level, "ILL XML request");
                         if (r->which == Z_External_octet)
-                            yaz_log (log_level, "%.*s",
-                                     r->u.octet_aligned->len,
-                                     r->u.octet_aligned->buf); 
+                            yaz_log(log_level, "%.*s",
+                                    r->u.octet_aligned->len,
+                                    r->u.octet_aligned->buf); 
                         xml_in_response = "<dummy>x</dummy>";
                     }
                     if (!oid_oidcmp(r->direct_reference, 
                                     yaz_oid_general_isoill_1))
                     {
-                        yaz_log (log_level, "Decode ItemRequest begin");
+                        yaz_log(log_level, "Decode ItemRequest begin");
                         if (r->which == ODR_EXTERNAL_single)
                         {
                             odr_setbuf(rr->decode,
                                        (char *) r->u.single_ASN1_type->buf,
                                        r->u.single_ASN1_type->len, 0);
                             
-                            if (!ill_ItemRequest (rr->decode, &item_req, 0, 0))
+                            if (!ill_ItemRequest(rr->decode, &item_req, 0, 0))
                             {
-                                yaz_log (log_level,
-                                    "Couldn't decode ItemRequest %s near %ld",
-                                       odr_errmsg(odr_geterror(rr->decode)),
-                                       (long) odr_offset(rr->decode));
+                                yaz_log(log_level,
+                                        "Couldn't decode ItemRequest %s near %ld",
+                                        odr_errmsg(odr_geterror(rr->decode)),
+                                        (long) odr_offset(rr->decode));
                             }
                             else
                                 yaz_log(log_level, "Decode ItemRequest OK");
                             if (rr->print)
                             {
-                                ill_ItemRequest (rr->print, &item_req, 0,
-                                    "ItemRequest");
-                                odr_reset (rr->print);
+                                ill_ItemRequest(rr->print, &item_req, 0,
+                                                "ItemRequest");
+                                odr_reset(rr->print);
                             }
                         }
                         if (!item_req && r->which == ODR_EXTERNAL_single)
                         {
-                            yaz_log (log_level, "Decode ILL APDU begin");
+                            yaz_log(log_level, "Decode ILL APDU begin");
                             odr_setbuf(rr->decode,
                                        (char*) r->u.single_ASN1_type->buf,
                                        r->u.single_ASN1_type->len, 0);
                             
-                            if (!ill_APDU (rr->decode, &ill_apdu, 0, 0))
+                            if (!ill_APDU(rr->decode, &ill_apdu, 0, 0))
                             {
-                                yaz_log (log_level,
-                                    "Couldn't decode ILL APDU %s near %ld",
-                                       odr_errmsg(odr_geterror(rr->decode)),
-                                       (long) odr_offset(rr->decode));
+                                yaz_log(log_level,
+                                        "Couldn't decode ILL APDU %s near %ld",
+                                        odr_errmsg(odr_geterror(rr->decode)),
+                                        (long) odr_offset(rr->decode));
                                 yaz_log(log_level, "PDU dump:");
                                 odr_dumpBER(yaz_log_file(),
-                                     (char *) r->u.single_ASN1_type->buf,
-                                     r->u.single_ASN1_type->len);
+                                            (char *) r->u.single_ASN1_type->buf,
+                                            r->u.single_ASN1_type->len);
                             }
                             else
                                 yaz_log(log_level, "Decode ILL APDU OK");
                             if (rr->print)
                             {
-                                ill_APDU (rr->print, &ill_apdu, 0,
-                                    "ILL APDU");
-                                odr_reset (rr->print);
+                                ill_APDU(rr->print, &ill_apdu, 0,
+                                         "ILL APDU");
+                                odr_reset(rr->print);
                             }
                         }
                     }
                 }
                 if (item_req)
                 {
-                    yaz_log (log_level, "ILL protocol version = %d",
-                             *item_req->protocol_version_num);
+                    yaz_log(log_level, "ILL protocol version = %d",
+                            *item_req->protocol_version_num);
                 }
             }
             if (k)
             {
 
                 Z_External *ext = (Z_External *)
-                    odr_malloc (rr->stream, sizeof(*ext));
+                    odr_malloc(rr->stream, sizeof(*ext));
                 Z_IUOriginPartToKeep *keep = (Z_IUOriginPartToKeep *)
-                    odr_malloc (rr->stream, sizeof(*keep));
+                    odr_malloc(rr->stream, sizeof(*keep));
                 Z_IOTargetPart *targetPart = (Z_IOTargetPart *)
-                    odr_malloc (rr->stream, sizeof(*targetPart));
+                    odr_malloc(rr->stream, sizeof(*targetPart));
 
                 rr->taskPackage = (Z_TaskPackage *)
-                    odr_malloc (rr->stream, sizeof(*rr->taskPackage));
+                    odr_malloc(rr->stream, sizeof(*rr->taskPackage));
                 rr->taskPackage->packageType =
-                    odr_oiddup (rr->stream, rr->esr->packageType);
+                    odr_oiddup(rr->stream, rr->esr->packageType);
                 rr->taskPackage->packageName = 0;
                 rr->taskPackage->userId = 0;
                 rr->taskPackage->retentionTime = 0;
                 rr->taskPackage->permissions = 0;
                 rr->taskPackage->description = 0;
                 rr->taskPackage->targetReference = (Odr_oct *)
-                    odr_malloc (rr->stream, sizeof(Odr_oct));
+                    odr_malloc(rr->stream, sizeof(Odr_oct));
                 rr->taskPackage->targetReference->buf =
-                    (unsigned char *) odr_strdup (rr->stream, "911");
+                    (unsigned char *) odr_strdup(rr->stream, "911");
                 rr->taskPackage->targetReference->len =
                     rr->taskPackage->targetReference->size =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
@@ -290,15 +290,15 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->taskSpecificParameters = ext;
 
                 ext->direct_reference =
-                    odr_oiddup (rr->stream, rr->esr->packageType);
+                    odr_oiddup(rr->stream, rr->esr->packageType);
                 ext->indirect_reference = 0;
                 ext->descriptor = 0;
                 ext->which = Z_External_itemOrder;
                 ext->u.itemOrder = (Z_ItemOrder *)
-                    odr_malloc (rr->stream, sizeof(*ext->u.update));
+                    odr_malloc(rr->stream, sizeof(*ext->u.update));
                 ext->u.itemOrder->which = Z_IOItemOrder_taskPackage;
                 ext->u.itemOrder->u.taskPackage =  (Z_IOTaskPackage *)
-                    odr_malloc (rr->stream, sizeof(Z_IOTaskPackage));
+                    odr_malloc(rr->stream, sizeof(Z_IOTaskPackage));
                 ext->u.itemOrder->u.taskPackage->originPart = k;
                 ext->u.itemOrder->u.taskPackage->targetPart = targetPart;
 
@@ -317,40 +317,40 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
     else if (rr->esr->taskSpecificParameters->which == Z_External_update)
     {
         Z_IUUpdate *up = rr->esr->taskSpecificParameters->u.update;
-        yaz_log (log_level, "Received DB Update");
+        yaz_log(log_level, "Received DB Update");
         if (up->which == Z_IUUpdate_esRequest)
         {
             Z_IUUpdateEsRequest *esRequest = up->u.esRequest;
             Z_IUOriginPartToKeep *toKeep = esRequest->toKeep;
             Z_IUSuppliedRecords *notToKeep = esRequest->notToKeep;
             
-            yaz_log (log_level, "action");
+            yaz_log(log_level, "action");
             if (toKeep->action)
             {
                 switch (*toKeep->action)
                 {
                 case Z_IUOriginPartToKeep_recordInsert:
-                    yaz_log (log_level, " recordInsert");
+                    yaz_log(log_level, " recordInsert");
                     break;
                 case Z_IUOriginPartToKeep_recordReplace:
-                    yaz_log (log_level, " recordReplace");
+                    yaz_log(log_level, " recordReplace");
                     break;
                 case Z_IUOriginPartToKeep_recordDelete:
-                    yaz_log (log_level, " recordDelete");
+                    yaz_log(log_level, " recordDelete");
                     break;
                 case Z_IUOriginPartToKeep_elementUpdate:
-                    yaz_log (log_level, " elementUpdate");
+                    yaz_log(log_level, " elementUpdate");
                     break;
                 case Z_IUOriginPartToKeep_specialUpdate:
-                    yaz_log (log_level, " specialUpdate");
+                    yaz_log(log_level, " specialUpdate");
                     break;
                 default:
-                    yaz_log (log_level, " unknown (%d)", *toKeep->action);
+                    yaz_log(log_level, " unknown (%d)", *toKeep->action);
                 }
             }
             if (toKeep->databaseName)
             {
-                yaz_log (log_level, "database: %s", toKeep->databaseName);
+                yaz_log(log_level, "database: %s", toKeep->databaseName);
                 if (!strcmp(toKeep->databaseName, "fault"))
                 {
                     rr->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
@@ -362,25 +362,25 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
             if (toKeep)
             {
                 Z_External *ext = (Z_External *)
-                    odr_malloc (rr->stream, sizeof(*ext));
+                    odr_malloc(rr->stream, sizeof(*ext));
                 Z_IUOriginPartToKeep *keep = (Z_IUOriginPartToKeep *)
-                    odr_malloc (rr->stream, sizeof(*keep));
+                    odr_malloc(rr->stream, sizeof(*keep));
                 Z_IUTargetPart *targetPart = (Z_IUTargetPart *)
-                    odr_malloc (rr->stream, sizeof(*targetPart));
+                    odr_malloc(rr->stream, sizeof(*targetPart));
 
                 rr->taskPackage = (Z_TaskPackage *)
-                    odr_malloc (rr->stream, sizeof(*rr->taskPackage));
+                    odr_malloc(rr->stream, sizeof(*rr->taskPackage));
                 rr->taskPackage->packageType =
-                    odr_oiddup (rr->stream, rr->esr->packageType);
+                    odr_oiddup(rr->stream, rr->esr->packageType);
                 rr->taskPackage->packageName = 0;
                 rr->taskPackage->userId = 0;
                 rr->taskPackage->retentionTime = 0;
                 rr->taskPackage->permissions = 0;
                 rr->taskPackage->description = 0;
                 rr->taskPackage->targetReference = (Odr_oct *)
-                    odr_malloc (rr->stream, sizeof(Odr_oct));
+                    odr_malloc(rr->stream, sizeof(Odr_oct));
                 rr->taskPackage->targetReference->buf =
-                    (unsigned char *) odr_strdup (rr->stream, "123");
+                    (unsigned char *) odr_strdup(rr->stream, "123");
                 rr->taskPackage->targetReference->len =
                     rr->taskPackage->targetReference->size =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
@@ -390,38 +390,38 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->taskSpecificParameters = ext;
 
                 ext->direct_reference =
-                    odr_oiddup (rr->stream, rr->esr->packageType);
+                    odr_oiddup(rr->stream, rr->esr->packageType);
                 ext->indirect_reference = 0;
                 ext->descriptor = 0;
                 ext->which = Z_External_update;
                 ext->u.update = (Z_IUUpdate *)
-                    odr_malloc (rr->stream, sizeof(*ext->u.update));
+                    odr_malloc(rr->stream, sizeof(*ext->u.update));
                 ext->u.update->which = Z_IUUpdate_taskPackage;
                 ext->u.update->u.taskPackage =  (Z_IUUpdateTaskPackage *)
-                    odr_malloc (rr->stream, sizeof(Z_IUUpdateTaskPackage));
+                    odr_malloc(rr->stream, sizeof(Z_IUUpdateTaskPackage));
                 ext->u.update->u.taskPackage->originPart = keep;
                 ext->u.update->u.taskPackage->targetPart = targetPart;
 
-                keep->action = (int *) odr_malloc (rr->stream, sizeof(int));
+                keep->action = (int *) odr_malloc(rr->stream, sizeof(int));
                 *keep->action = *toKeep->action;
                 keep->databaseName =
-                    odr_strdup (rr->stream, toKeep->databaseName);
+                    odr_strdup(rr->stream, toKeep->databaseName);
                 keep->schema = 0;
                 keep->elementSetName = 0;
                 keep->actionQualifier = 0;
 
-                targetPart->updateStatus = odr_intdup (rr->stream, 1);
+                targetPart->updateStatus = odr_intdup(rr->stream, 1);
                 targetPart->num_globalDiagnostics = 0;
                 targetPart->globalDiagnostics = (Z_DiagRec **) odr_nullval();
                 targetPart->num_taskPackageRecords = 1;
                 targetPart->taskPackageRecords = 
                     (Z_IUTaskPackageRecordStructure **)
-                    odr_malloc (rr->stream,
-                                sizeof(Z_IUTaskPackageRecordStructure *));
+                    odr_malloc(rr->stream,
+                               sizeof(Z_IUTaskPackageRecordStructure *));
                 targetPart->taskPackageRecords[0] =
                     (Z_IUTaskPackageRecordStructure *)
-                    odr_malloc (rr->stream,
-                                sizeof(Z_IUTaskPackageRecordStructure));
+                    odr_malloc(rr->stream,
+                               sizeof(Z_IUTaskPackageRecordStructure));
                 
                 targetPart->taskPackageRecords[0]->which =
                     Z_IUTaskPackageRecordStructure_record;
@@ -429,8 +429,8 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                     z_ext_record_sutrs(rr->stream, "test", 4);
                 targetPart->taskPackageRecords[0]->correlationInfo = 0; 
                 targetPart->taskPackageRecords[0]->recordStatus =
-                    odr_intdup (rr->stream,
-                                Z_IUTaskPackageRecordStructure_success);  
+                    odr_intdup(rr->stream,
+                               Z_IUTaskPackageRecordStructure_success);  
                 targetPart->taskPackageRecords[0]->num_supplementalDiagnostics
                     = 0;
 
@@ -451,30 +451,30 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
                                 rec->direct_reference, 0,
                                 oid_name_str);
                         if (oid_name)
-                            yaz_log (log_level, "record %d type %s", i,
-                                     oid_name);
+                            yaz_log(log_level, "record %d type %s", i,
+                                    oid_name);
                     }
                     switch (rec->which)
                     {
                     case Z_External_sutrs:
                         if (rec->u.octet_aligned->len > 170)
-                            yaz_log (log_level, "%d bytes:\n%.168s ...",
-                                     rec->u.sutrs->len,
-                                     rec->u.sutrs->buf);
+                            yaz_log(log_level, "%d bytes:\n%.168s ...",
+                                    rec->u.sutrs->len,
+                                    rec->u.sutrs->buf);
                         else
-                            yaz_log (log_level, "%d bytes:\n%s",
-                                     rec->u.sutrs->len,
-                                     rec->u.sutrs->buf);
+                            yaz_log(log_level, "%d bytes:\n%s",
+                                    rec->u.sutrs->len,
+                                    rec->u.sutrs->buf);
                         break;
                     case Z_External_octet        :
                         if (rec->u.octet_aligned->len > 170)
-                            yaz_log (log_level, "%d bytes:\n%.168s ...",
-                                     rec->u.octet_aligned->len,
-                                     rec->u.octet_aligned->buf);
+                            yaz_log(log_level, "%d bytes:\n%.168s ...",
+                                    rec->u.octet_aligned->len,
+                                    rec->u.octet_aligned->buf);
                         else
-                            yaz_log (log_level, "%d bytes\n%s",
-                                     rec->u.octet_aligned->len,
-                                     rec->u.octet_aligned->buf);
+                            yaz_log(log_level, "%d bytes\n%s",
+                                    rec->u.octet_aligned->len,
+                                    rec->u.octet_aligned->buf);
                     }
                 }
             }
@@ -484,9 +484,9 @@ int ztest_esrequest (void *handle, bend_esrequest_rr *rr)
 }
 
 /* result set delete */
-int ztest_delete (void *handle, bend_delete_rr *rr)
+int ztest_delete(void *handle, bend_delete_rr *rr)
 {
-    if (rr->num_setnames == 1 && !strcmp (rr->setnames[0], "1"))
+    if (rr->num_setnames == 1 && !strcmp(rr->setnames[0], "1"))
         rr->delete_status = Z_DeleteStatus_success;
     else
         rr->delete_status = Z_DeleteStatus_resultSetDidNotExist;
@@ -494,7 +494,7 @@ int ztest_delete (void *handle, bend_delete_rr *rr)
 }
 
 /* Our sort handler really doesn't sort... */
-int ztest_sort (void *handle, bend_sort_rr *rr)
+int ztest_sort(void *handle, bend_sort_rr *rr)
 {
     rr->errcode = 0;
     rr->sort_status = Z_SortResponse_success;
@@ -503,7 +503,7 @@ int ztest_sort (void *handle, bend_sort_rr *rr)
 
 
 /* present request handler */
-int ztest_present (void *handle, bend_present_rr *rr)
+int ztest_present(void *handle, bend_present_rr *rr)
 {
     return 0;
 }
@@ -552,7 +552,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
 
         r->len = strlen(buf);
-        r->record = (char *) odr_malloc (r->stream, r->len+1);
+        r->record = (char *) odr_malloc(r->stream, r->len+1);
         strcpy(r->record, buf);
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
@@ -571,29 +571,31 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         FILE *f;
         long size;
 
-        sprintf (fname, "part.%d.ps", r->number);
+        sprintf(fname, "part.%d.ps", r->number);
         f = fopen(fname, "rb");
         if (!f)
         {
             r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
             return 0;
         }
-        fseek (f, 0L, SEEK_END);
-        size = ftell (f);
+        fseek(f, 0L, SEEK_END);
+        size = ftell(f);
         if (size <= 0 || size >= 5000000)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
-            return 0;
         }
-        fseek (f, 0L, SEEK_SET);
-        r->record = (char*) odr_malloc (r->stream, size);
+        fseek(f, 0L, SEEK_SET);
+        r->record = (char*) odr_malloc(r->stream, size);
         r->len = size;
-        fread (r->record, size, 1, f);
-        fclose (f);
+        if (fread(r->record, size, 1, f) != 1)
+        {
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+        }
+        fclose(f);
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_xml))
     {
-        if ((cp = dummy_xml_record (r->number, r->stream)))
+        if ((cp = dummy_xml_record(r->number, r->stream)))
         {
             r->len = strlen(cp);
             r->record = cp;
@@ -631,9 +633,9 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     int num_entries_req = q->num_entries;
 
     /* Throw Database unavailable if other than Default or Slow */
-    if (!yaz_matchstr (q->basenames[0], "Default"))
+    if (!yaz_matchstr(q->basenames[0], "Default"))
         ;  /* Default is OK in our test */
-    else if(!yaz_matchstr (q->basenames[0], "Slow"))
+    else if(!yaz_matchstr(q->basenames[0], "Slow"))
     {
 #if HAVE_UNISTD_H
         sleep(3);
@@ -696,7 +698,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     q->num_entries = 0;
 
     for (i = 0, pos = 0; fscanf(f, " %79[^:]:%d", entries[pos], &hits[pos]) == 2;
-        i++, pos < 199 ? pos++ : (pos = 0))
+         i++, pos < 199 ? pos++ : (pos = 0))
     {
         if (!q->num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
         {
@@ -713,7 +715,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
                 if (po < 0)
                     po += 200;
 
-                if (!strcmp (term, "SD") && q->num_entries == 2)
+                if (!strcmp(term, "SD") && q->num_entries == 2)
                 {
                     list[q->num_entries].term = entries[pos];
                     list[q->num_entries].occurrences = -1;
@@ -765,8 +767,8 @@ int ztest_update(void *handle, bend_update_rr *rr)
 bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *)
-        odr_malloc (q->stream, sizeof(*r));
-    int *counter = (int *) xmalloc (sizeof(int));
+        odr_malloc(q->stream, sizeof(*r));
+    int *counter = (int *) xmalloc(sizeof(int));
 
     if (!log_level_set)
     {
@@ -799,7 +801,7 @@ bend_initresult *bend_init(bend_initrequest *q)
 
 void bend_close(void *handle)
 {
-    xfree (handle);              /* release our user-defined handle */
+    xfree(handle);              /* release our user-defined handle */
     return;
 }
 
