@@ -387,9 +387,13 @@ AC_SUBST([YAZ_SRC_ROOT])
 AC_SUBST([YAZ_BUILD_ROOT])
 YAZ_SRC_ROOT=`cd ${srcdir}; pwd`
 YAZ_BUILD_ROOT=`pwd`
-
-dnl ------ windows version files
-WIN_FILEVERSION=`echo $PACKAGE_VERSION|tr . ,`.1
+dnl
+dnl ------ versioning
+dnl
+WIN_FILEVERSION=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { m = $4; printf "%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4;}'`
+AC_SUBST([WIN_FILEVERSION])
+YAZ_VERSION_HEX=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { printf "%x", ($1 * 256 + $2) * 256 + $3;}'`
+AC_SUBST([YAZ_VERSION_HEX])
 dnl
 dnl ------ Makefiles
 dnl
@@ -412,6 +416,8 @@ etc/Makefile
 yaz-config
 yaz.pc
 Doxyfile
+win/version.nsi
+include/yaz/yaz-version.h
 ],[
 	sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
     ]
