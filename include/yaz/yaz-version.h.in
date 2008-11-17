@@ -33,7 +33,7 @@
 #include <yaz/yconfig.h>
 
 #define YAZ_VERSION "@VERSION@"
-#define YAZ_VERSIONL 0x030026
+#define YAZ_VERSIONL 0x@YAZ_VERSION_HEX@
 
 #define YAZ_FILEVERSION @WIN_FILEVERSION@
 
