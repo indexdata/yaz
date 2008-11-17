@@ -78,6 +78,8 @@ static int prepare_decoders(yaz_iconv_t cd, const char *tocode)
 {
     if (yaz_marc8_decoder(tocode, &cd->decoder))
         return 1;
+    if (yaz_iso5426_decoder(tocode, &cd->decoder))
+        return 1;
     if (yaz_utf8_decoder(tocode, &cd->decoder))
         return 1;
     if (yaz_ucs4_decoder(tocode, &cd->decoder))

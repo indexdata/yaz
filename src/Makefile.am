@@ -42,6 +42,10 @@ marc8.c: charconv.tcl codetables.xml
 marc8r.c: charconv.tcl codetables.xml
 	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o marc8r.c
 
+# ISO5426->UTF8 conversion is generated from codetables.xml
+iso5426.c: charconv.tcl codetables-iso5426.xml
+	$(TCLSH) $(srcdir)/charconv.tcl -p iso5426 $(srcdir)/codetables-iso5426.xml -o iso5426.c
+
 # Generate OID database from CSV
 oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
 	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir) $(srcdir)/oid.csv oid_std.c oid_std.h
@@ -58,7 +62,7 @@ diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl
 
 # Auto-generated C-files
 GEN_FILES = oid_std.c \
-  marc8.c marc8r.c \
+  marc8.c marc8r.c iso5426.c \
   diagbib1.c diagsrw.c diagsru_update.c \
   z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
   z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
@@ -98,7 +102,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c \
   copy_types.c match_glob.c poll.c daemon.c \
   iconv_encode_marc8.c iconv_encode_iso_8859_1.c iconv_encode_wchar.c \
-  iconv_decode_marc8.c sc.c
+  iconv_decode_marc8.c iconv_decode_iso5426.c sc.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
