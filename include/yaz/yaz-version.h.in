@@ -32,11 +32,16 @@
 
 #include <yaz/yconfig.h>
 
+/** \brief YAZ version as string */
 #define YAZ_VERSION "@VERSION@"
+
+/** \brief YAZ version as integer (for comparison purposes) */
 #define YAZ_VERSIONL 0x@YAZ_VERSION_HEX@
 
+/** \brief YAZ file version for YAZ DLL (resource) */
 #define YAZ_FILEVERSION @WIN_FILEVERSION@
 
+/** \brief SHA1 ID for YAZ (Git) */
 #define YAZ_VERSION_SHA1 "@VERSION_SHA1@"
 
 YAZ_BEGIN_CDECL
