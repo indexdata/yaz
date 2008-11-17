@@ -4885,12 +4885,12 @@ static void client(void)
 
 static void show_version(void)
 {
-    char vstr[20];
+    char vstr[20], sha1_str[41];
 
-    yaz_version(vstr, 0);
-    printf("YAZ version: %s\n", YAZ_VERSION);
-    if (strcmp(vstr, YAZ_VERSION))
-        printf("YAZ DLL/SO: %s\n", vstr);
+    yaz_version(vstr, sha1_str);
+    printf("YAZ version: %s %s\n", YAZ_VERSION, YAZ_VERSION_SHA1);
+    if (strcmp(sha1_str, YAZ_VERSION_SHA1))
+        printf("YAZ DLL/SO: %s %s\n", vstr, sha1_str);
     exit(0);
 }
 
