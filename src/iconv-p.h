@@ -89,6 +89,8 @@ struct yaz_iconv_decoder_s {
 
 yaz_iconv_decoder_t yaz_marc8_decoder(const char *fromcode,
                                       yaz_iconv_decoder_t d);
+yaz_iconv_decoder_t yaz_iso5426_decode(const char *fromcode,
+                                      yaz_iconv_decoder_t d);
 yaz_iconv_decoder_t yaz_utf8_decoder(const char *fromcode,
                                      yaz_iconv_decoder_t d);
 yaz_iconv_decoder_t yaz_ucs4_decoder(const char *tocode,
