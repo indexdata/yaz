@@ -52,6 +52,18 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief returns YAZ version
+    \param version_str holds version upon completion (YAZ_VERSION)
+    \param sha1_str holds SHA1 (Git) upon completion (YAZ_VERSION_SHA1)
+    \returns long version value (YAZ_VERSIONL)
+
+    The version_str may be NULL in which case version is not returned.
+    When not-null, version_str, should point to a buffer of at least 20
+    charcters in size (including "\0").
+    The sha1_str may be NULL in which case the SHA1 is not returnd.
+    When not-null, sha1_str whould point to a buffer of at least 41 characters
+    in size (including "\0"). 
+  */
 YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sha1_str);
 
 YAZ_END_CDECL
