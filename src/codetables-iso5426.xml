@@ -13,7 +13,7 @@
      UCS name, only the UCS name is given.  For some tables alternate encodings 
 	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and 
 	 alternate UTF-8 columns follow the character name. </note>
-		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" ISOcode="">
+		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" ISOcode="42">
 			<code>
 				<marc>1B</marc>
 				<ucs>001B</ucs>
