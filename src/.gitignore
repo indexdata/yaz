@@ -12,6 +12,7 @@ item-req.c
 ill-core.c
 marc8.c
 marc8r.c
+iso5426.c
 cql.c
 diagbib1.c
 diagsrw.c
