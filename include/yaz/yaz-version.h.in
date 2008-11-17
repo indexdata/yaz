@@ -39,17 +39,6 @@
 
 #define YAZ_VERSION_SHA1 "@VERSION_SHA1@"
 
-#define YAZ_DATE 1
-
-
-#ifdef WIN32
-#ifdef NDEBUG
-#define YAZ_OS "WIN32 Release"
-#else
-#define YAZ_OS "WIN32 Debug"
-#endif
-#endif
-
 YAZ_BEGIN_CDECL
 
 /** \brief returns YAZ version
