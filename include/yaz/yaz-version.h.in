@@ -37,6 +37,8 @@
 
 #define YAZ_FILEVERSION @WIN_FILEVERSION@
 
+#define YAZ_VERSION_SHA1 "@VERSION_SHA1@"
+
 #define YAZ_DATE 1
 
 
@@ -50,7 +52,7 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sys_str);
+YAZ_EXPORT unsigned long yaz_version(char *version_str, char *sha1_str);
 
 YAZ_END_CDECL
 

@@ -34,11 +34,8 @@ Z_InitRequest *zget_InitRequest(ODR o)
     r->implementationId = "81";
     r->implementationName = "YAZ";
     r->implementationVersion = YAZ_VERSION
-#ifdef YAZ_DATE_STR
-    " (" YAZ_DATE_STR ")"
-#endif
-#ifdef YAZ_OS
-    " " YAZ_OS
+#ifdef YAZ_VERSION_SHA1
+    " " YAZ_VERSION_SHA1
 #endif
         ;
     r->userInformationField = 0;
@@ -61,11 +58,8 @@ Z_InitResponse *zget_InitResponse(ODR o)
     r->implementationId = "81";
     r->implementationName = "YAZ";
     r->implementationVersion = YAZ_VERSION
-#ifdef YAZ_DATE_STR
-    " (" YAZ_DATE_STR ")"
-#endif
-#ifdef YAZ_OS
-    " " YAZ_OS
+#ifdef YAZ_VERSION_SHA1
+    " " YAZ_VERSION_SHA1
 #endif
         ;
     r->userInformationField = 0;

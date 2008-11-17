@@ -15,12 +15,12 @@
 #include <string.h>
 #include <yaz/yaz-version.h>
 
-unsigned long yaz_version(char *version_str, char *sys_str)
+unsigned long yaz_version(char *version_str, char *sha1_str)
 {
     if (version_str)
         strcpy(version_str, YAZ_VERSION);
-    if (sys_str)
-        strcpy(sys_str, "");
+    if (sha1_str)
+        strcpy(sha1_str, YAZ_VERSION_SHA1);
     return YAZ_VERSIONL;
 }
 /*

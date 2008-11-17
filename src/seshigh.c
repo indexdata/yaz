@@ -2164,7 +2164,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_initResponse);
     Z_InitResponse *resp = apdu->u.initResponse;
     bend_initresult *binitres;
-    char *version;
     char options[140];
     statserv_options_block *cb = 0;  /* by default no control for backend */
 
@@ -2350,14 +2349,6 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     resp->implementationName = odr_prepend(assoc->encode,
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
-
-    version = odr_strdup(assoc->encode, "$Revision: 1.128 $");
-    if (strlen(version) > 10)   /* check for unexpanded CVS strings */
-        version[strlen(version)-2] = '\0';
-    resp->implementationVersion = odr_prepend(assoc->encode,
-                assoc->init->implementation_version,
-                odr_prepend(assoc->encode, &version[11],
-                            resp->implementationVersion));
 
     if (binitres->errcode)
     {

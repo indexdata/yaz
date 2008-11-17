@@ -394,6 +394,12 @@ WIN_FILEVERSION=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { m = $4; prin
 AC_SUBST([WIN_FILEVERSION])
 YAZ_VERSION_HEX=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { printf("%x", ($1 * 256 + $2) * 256 + $3);}'`
 AC_SUBST([YAZ_VERSION_HEX])
+if test ${srcdir}/.git; then
+    VERSION_SHA1=`git show --pretty=format:%H|head -1`
+else
+    VERSION_SHA1=`head -1 ${srcdir}/ChangeLog|awk '{print $2}'`
+fi
+AC_SUBST([VERSION_SHA1])
 dnl
 dnl ------ Makefiles
 dnl
