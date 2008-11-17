@@ -259,7 +259,7 @@ void destroy_marc8(yaz_iconv_decoder_t d)
 yaz_iconv_decoder_t yaz_marc8_decoder(const char *fromcode,
                                       yaz_iconv_decoder_t d)
 {
-    if (!yaz_matchstr(fromcode, "MARC8"))
+    if (!yaz_matchstr(fromcode, "MARC8") || !yaz_matchstr(fromcode, "ANSEL"))
         d->read_handle = read_marc8;
     else if (!yaz_matchstr(fromcode, "MARC8s"))
         d->read_handle = read_marc8s;
