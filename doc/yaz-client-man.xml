@@ -27,19 +27,21 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-client</command>
-   <arg choice="opt"><option>-a <replaceable>filename</replaceable></option></arg>
-   <arg choice="opt"><option>-b <replaceable>filename</replaceable></option></arg>
-   <arg choice="opt"><option>-c <replaceable>filename</replaceable></option></arg>
+   <arg choice="opt"><option>-a <replaceable>apdulog</replaceable></option></arg>
+   <arg choice="opt"><option>-b <replaceable>berdump</replaceable></option></arg>
+   <arg choice="opt"><option>-c <replaceable>cclfile</replaceable></option></arg>
    <arg choice="opt"><option>-d <replaceable>dump</replaceable></option></arg>
    <arg choice="opt"><option>-f <replaceable>cmdfile</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
-   <arg choice="opt"><option>-m <replaceable>filename</replaceable></option></arg>
-   <arg choice="opt"><option>-p <replaceable>addr</replaceable></option></arg>
-   <arg choice="opt"><option>-q <replaceable>filename</replaceable></option></arg>
+   <arg choice="opt"><option>-m <replaceable>marclog</replaceable></option></arg>
+   <arg choice="opt"><option>-p <replaceable>proxy-addr</replaceable></option></arg>
+   <arg choice="opt"><option>-q <replaceable>cqlfile</replaceable></option></arg>
+   <arg choice="opt"><option>-t <replaceable>dispcharset</replaceable></option></arg>
    <arg choice="opt"><option>-u <replaceable>auth</replaceable></option></arg>
-   <arg choice="opt"><option>-v <replaceable>level</replaceable></option></arg>
-   <arg choice="opt"><option>-xV</option></arg>
-   <arg choice="opt">addr</arg>
+   <arg choice="opt"><option>-v <replaceable>loglevel</replaceable></option></arg>
+   <arg choice="opt"><option>-V</option></arg>
+   <arg choice="opt"><option>-x</option></arg>
+   <arg choice="opt">server-addr</arg>
   </cmdsynopsis>
 
  </refsynopsisdiv>
@@ -51,7 +53,7 @@
    performance of Z39.50 targets and SRU servers.
   </para>
   <para>
-   If the <replaceable>addr</replaceable> is specified, the client creates
+   If the <replaceable>server-addr</replaceable> is specified, the client creates
    a connection to the Z39.50/SRU target at the address given.
   </para>
   <para>
@@ -134,7 +136,7 @@
       </para></listitem>
     </varlistentry>
     <varlistentry>
-     <term>-p <replaceable>addr</replaceable></term>
+     <term>-p <replaceable>proxy-addr</replaceable></term>
      <listitem><para>
        If specified, the client will use the proxy at the address
        given. YAZ client will
@@ -148,6 +150,13 @@
      <listitem><para>
        If specified, CQL configuration will be read from
        the file given.
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>-t <replaceable>displaycharset</replaceable></term>
+     <listitem><para>
+       If displaycharset is given, it specifies name of the character set of the
+       output (on the terminal on which YAZ client is running). 
       </para></listitem>
     </varlistentry>
     <varlistentry>
