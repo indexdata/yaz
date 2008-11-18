@@ -60,8 +60,6 @@ nsis:
 nsishelp:
 	$(NSIS)
 
-generate: generated_files
-
 # Directories
 # The current directory is supposed to be something like
 # ..../yaz/win, everything is relative to that
@@ -656,12 +654,13 @@ GENERATED_H_FILES= \
    $(ILL_CORE_H_FILES) \
    $(ITEM_REQ_H_FILES)
 
-generated_files: \
+generate: \
 	$(GENERATED_H_FILES) \
 	$(GENERATED_C_FILES) \
 	$(SRCDIR)\diagsrw.c \
 	$(SRCDIR)\diagbib1.c \
-	$(SRCDIR)\diagsru_update.c 
+	$(SRCDIR)\diagsru_update.c \
+	$(INCLDIR)\yaz\yaz-version.h 
 
 # Compiling 
 
@@ -770,6 +769,11 @@ $(SRCDIR)\diagsrw.c: $(SRCDIR)\srw.csv
 $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)
 	$(TCL) csvtosru_update.tcl $(SRCDIR)
+
+$(INCLDIR)\yaz\yaz-version.h:
+	@cd $(SRCDIR)
+	$(TCL) mk_version.tcl $(ROOTDIR)/configure.ac $(INCLDIR)\yaz\yaz-version.h
+
 
 !endif
 
