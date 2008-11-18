@@ -390,9 +390,9 @@ YAZ_BUILD_ROOT=`pwd`
 dnl
 dnl ------ versioning
 dnl
-WIN_FILEVERSION=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { m = $4; printf("%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4);}'`
+WIN_FILEVERSION=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { m = $4; printf("%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4);}'`
 AC_SUBST([WIN_FILEVERSION])
-YAZ_VERSION_HEX=`echo $PACKAGE_VERSION | awk 'BEGIN { FS = "."; } { printf("%x", ($1 * 256 + $2) * 256 + $3);}'`
+YAZ_VERSION_HEX=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { printf("%x", ($1 * 256 + $2) * 256 + $3);}'`
 AC_SUBST([YAZ_VERSION_HEX])
 if test ${srcdir}/.git; then
     VERSION_SHA1=`git show --pretty=format:%H|head -1`
