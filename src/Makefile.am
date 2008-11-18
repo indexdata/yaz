@@ -42,7 +42,7 @@ marc8.c: charconv.tcl codetables.xml
 marc8r.c: charconv.tcl codetables.xml
 	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o marc8r.c
 
-# ISO5426->UTF8 conversion is generated from codetables.xml
+# ISO5426->UTF8 conversion is generated from codetables-iso5426.xml
 iso5426.c: charconv.tcl codetables-iso5426.xml
 	$(TCLSH) $(srcdir)/charconv.tcl -p iso5426 $(srcdir)/codetables-iso5426.xml -o iso5426.c
 
