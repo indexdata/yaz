@@ -7,21 +7,13 @@
      contains the ISO5426 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
-     UCS name, only the UCS name is given.  For some tables alternate encodings 
-	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and 
+     UCS name, only the UCS name is given.  For some tables alternate encodings
+	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and
 	 alternate UTF-8 columns follow the character name. </note>
 		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" ISOcode="42">
-			<!-- ???
-			<code>
-				<marc>1B</marc>
-				<ucs>001B</ucs>
-				<utf-8>1B</utf-8>
-				<name>ESCAPE (Unlikely to occur in UCS/Unicode)</name>
-			</code>
-			-->
 			<code>
 				<marc>1D</marc>
 				<ucs>001D</ucs>
@@ -615,7 +607,6 @@ BRACKET</name>
 				<name>SPACING TILDE / TILDE</name>
 			</code>
 			<!-- 7F -->
-			
 		</characterSet>
 		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" date="1-Feb-2005, Updated Nov 2008" ISOcode="45">
 			<note>See also Zeichentabelle MAB2 (ISO 5426-1983), http://www.gymel.com/charsets/MAB2.html</note>
@@ -641,14 +632,12 @@ BRACKET</name>
 				<utf-8>C2A1</utf-8>
 				<name>INVERTED EXCLAMATION MARK</name>
 			</code>
-		
 			<code>
 				<marc>A2</marc>
 				<ucs>201E</ucs>
 				<utf-8>E2809E</utf-8>
 				<name>LOW DOUBLE COMMA QUOTATION MARK</name>
 			</code>
-		
 			<code>
 				<marc>A3</marc>
 				<ucs>00A3</ucs>
@@ -661,19 +650,18 @@ BRACKET</name>
 				<utf-8>24</utf-8>
 				<name>DOLLAR SIGN</name>
 			</code>
-		
 			<code>
 				<marc>A5</marc>
 				<ucs>00A5</ucs>
 				<utf-8>C2A5</utf-8>
 				<name>YEN SIGN</name>
-			</code>		
+			</code>
 			<code>
 				<marc>A6</marc>
 				<ucs>2020</ucs>
 				<utf-8>E280A0</utf-8>
 				<name>DAGGER</name>
-			</code>		
+			</code>
 			<code>
 				<marc>A7</marc>
 				<ucs>00A7</ucs>
@@ -686,31 +674,30 @@ BRACKET</name>
 				<utf-8>E280A0</utf-8>
 				<name>PRIME</name>
 			</code>
-		
 			<code>
 				<marc>A9</marc>
 				<ucs>2018</ucs>
 				<utf-8>E28098</utf-8>
 				<name>SINGLE TURNED COMMA QUOTATION MARK</name>
-			</code>	
+			</code>
 			<code>
 				<marc>AA</marc>
 				<ucs>201C</ucs>
 				<utf-8>E2809C</utf-8>
 				<name>DOUBLE TURNED COMMA QUOTATION MARK</name>
-			</code>			
+			</code>
 			<code>
 				<marc>AB</marc>
 				<ucs>00AB</ucs>
 				<utf-8>E280A0</utf-8>
 				<name>LEFT-POINTING DOUBLE ANGLE QUOTATION MARK (LEFT POINTING GUILLEMET)</name>
-			</code>			
+			</code>
 			<code>
 				<marc>AC</marc>
 				<ucs>266D</ucs>
 				<utf-8>E299AD</utf-8>
 				<name>MUSIC FLAT SIGN (FLAT)</name>
-			</code>			
+			</code>
 			<code>
 				<marc>AD</marc>
 				<ucs>00A9</ucs>
@@ -729,17 +716,12 @@ BRACKET</name>
 				<utf-8>C2AE</utf-8>
 				<name>PATENT MARK / REGISTERED SIGN</name>
 			</code>
-		
-		
-		
-			
 			<code>
 				<marc>B0</marc>
 				<ucs>02BB</ucs>
 				<utf-8>CABB</utf-8>
 				<name>AYN / MODIFIER LETTER TURNED COMMA</name>
 			</code>
-			
 			<code>
 				<marc>B1</marc>
 				<ucs>02BC</ucs>
@@ -747,7 +729,6 @@ BRACKET</name>
 				<altutf-8>CABE</altutf-8>
 				<name>ALIF / MODIFIER LETTER APOSTROPHE</name>
 			</code>
-			
 			<code>
 				<marc>B2</marc>
 				<ucs>201A</ucs>
@@ -772,26 +753,26 @@ BRACKET</name>
 				<ucs>2033</ucs>
 				<utf-8>E280B3</utf-8>
 				<name>DOUBLE PRIME</name>
-			</code>			
+			</code>
 			<code>
 				<marc>B9</marc>
 				<ucs>2019</ucs>
 				<utf-8>E2809D</utf-8>
 				<name>RIGHT SINGLE QUOTATION MARK (SINGLE COMMA QUOTATION MARK)</name>
-			</code>			
+			</code>
 			<code>
 				<marc>BA</marc>
 				<ucs>201D</ucs>
 				<utf-8>E2809D</utf-8>
 				<name>RIGHT DOUBLE QUOTATION MARK (DOUBLE COMMA QUOTATION MARK)</name>
-			</code>			
+			</code>
 			<code>
 				<marc>BB</marc>
 				<ucs>00BB</ucs>
 				<utf-8>C2BB</utf-8>
 				<name>RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK (RIGHT POINTING GUILLEMET)</name>
-			</code>			
-			<code>		
+			</code>
+			<code>
                                 <marc>BC</marc>
                                 <ucs>266F</ucs>
                                 <utf-8>E299AF</utf-8>
@@ -807,7 +788,7 @@ BRACKET</name>
                                 <marc>BE</marc>
                                 <ucs>02BA</ucs>
                                 <utf-8>CABA</utf-8>
-                                <name>HARD SIGN, DOUBLE PRIME / MODIFIER LETTER DOUBLE PRIME</name>		
+                                <name>HARD SIGN, DOUBLE PRIME / MODIFIER LETTER DOUBLE PRIME</name>
                         </code>
                         <code>
                                 <marc>BF</marc>
@@ -815,7 +796,6 @@ BRACKET</name>
                                 <utf-8>C2BF</utf-8>
                                 <name>INVERTED QUESTION MARK</name>
                         </code>
-		
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>C0</marc>
@@ -908,7 +888,7 @@ BRACKET</name>
                                 <marc>CC</marc>
                                 <ucs>0313</ucs>
                                 <utf-8>CC93</utf-8>
-                                <name>HIGH COMMA, CENTERED / COMBINING COMMA ABOVE (Psili)</name>		
+                                <name>HIGH COMMA, CENTERED / COMBINING COMMA ABOVE (Psili)</name>
                         </code>
                         <code>
                                 <isCombining>true</isCombining>
@@ -931,14 +911,13 @@ BRACKET</name>
                                 <utf-8>CC8C</utf-8>
                                 <name>HACEK / COMBINING CARON</name>
                         </code>
-		
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>D0</marc>
                                 <ucs>0327</ucs>
                                 <utf-8>CCA7</utf-8>
                                 <name>CEDILLA / COMBINING CEDILLA</name>
-                        </code>		
+                        </code>
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>D1</marc>
@@ -952,7 +931,7 @@ BRACKET</name>
                                 <ucs>0326</ucs>
                                 <utf-8>CCA6</utf-8>
                                 <name>LEFT HOOK (COMMA BELOW) / COMBINING COMMA BELOW</name>
-                        </code>		
+                        </code>
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>D3</marc>
@@ -1002,7 +981,6 @@ BRACKET</name>
                                 <utf-8>CCB3</utf-8>
                                 <name>DOUBLE UNDERSCORE / COMBINING DOUBLE LOW LINE</name>
                         </code>
-
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>DA</marc>
@@ -1026,7 +1004,7 @@ BRACKET</name>
                                 <alt>FE22</alt>
                                 <altutf-8>EFB8A2</altutf-8>
                                 <name>DOUBLE TILDE, FIRST HALF / COMBINING DOUBLE TILDE</name>
-                        </code>		
+                        </code>
                         <code>
                                 <isCombining>true</isCombining>
                                 <marc>DE</marc>
@@ -1035,18 +1013,18 @@ BRACKET</name>
                                 <alt>FE21</alt>
                                 <altutf-8>EFB8A1</altutf-8>
                                 <name>LIGATURE, SECOND HALF / COMBINING LIGATURE RIGHT HALF</name>
-                                <note>The Ligature that spans two characters 
-                                is constructed of two halves in MARC-8: EB 
-                                (Ligature, first half) and EC (Ligature, second 
-                                half).  The preferred Unicode/UTF-8 mapping is to 
+                                <note>The Ligature that spans two characters
+                                is constructed of two halves in MARC-8: EB
+                                (Ligature, first half) and EC (Ligature, second
+                                half).  The preferred Unicode/UTF-8 mapping is to
                                 the single character Ligature that spans two characters,
                                 U+0361.  The single character Ligature is encoded
-                                following the second of the two characters to be spanned.  
-                                The two half Ligatures in Unicode, to which the 
-                                Ligature has been mapped since 1996, are indicted 
-                                in the mapping as alternatives, but their use is not 
-                                recommended.  It is expected that font support for 
-                                the single character Ligature mark will be more 
+                                following the second of the two characters to be spanned.
+                                The two half Ligatures in Unicode, to which the
+                                Ligature has been mapped since 1996, are indicted
+                                in the mapping as alternatives, but their use is not
+                                recommended.  It is expected that font support for
+                                the single character Ligature mark will be more
                                 easily obtained than for the two halves.</note>
                         </code>
                         <code>
@@ -1057,24 +1035,22 @@ BRACKET</name>
                                 <alt>FE23</alt>
                                 <altutf-8>EFB8A3</altutf-8>
                                 <name>DOUBLE TILDE, SECOND HALF / COMBINING DOUBLE TILDE RIGHT HALF</name>
-                                <note>The Double Tilde that spans two characters is 
-                                constructed of two halves in MARC-8: FA (Double 
-                                Tilde, first half) and FB (Double Tilde, second 
-                                half).  The preferred Unicode/UTF-8 mapping 
-                                is to the single character Double Tilde that 
-                                spans two characters, U+0360.  The single 
-                                character Double Tilde is encoded following 
-                                the second of the two characters to be spanned.  
-                                The two half Double Tildes in Unicode, to 
-                                which the MARC8 Double Tilde has been 
-                                mapped since 1996, are indicted in the 
-                                mapping as alternatives, but their use is not 
-                                recommended.  It is expected that font support 
-                                for the single character Double Tilde mark will 
+                                <note>The Double Tilde that spans two characters is
+                                constructed of two halves in MARC-8: FA (Double
+                                Tilde, first half) and FB (Double Tilde, second
+                                half).  The preferred Unicode/UTF-8 mapping
+                                is to the single character Double Tilde that
+                                spans two characters, U+0360.  The single
+                                character Double Tilde is encoded following
+                                the second of the two characters to be spanned.
+                                The two half Double Tildes in Unicode, to
+                                which the MARC8 Double Tilde has been
+                                mapped since 1996, are indicted in the
+                                mapping as alternatives, but their use is not
+                                recommended.  It is expected that font support
+                                for the single character Double Tilde mark will
                                 be more easily obtained than for the two halves.</note>
                         </code>
-		
-		
 			<!-- E0 -->
                         <code>
                                 <marc>E1</marc>
@@ -1100,7 +1076,7 @@ BRACKET</name>
                                 <marc>E8</marc>
                                 <ucs>0141</ucs>
                                 <utf-8>C581</utf-8>
-                                <name>UPPERCASE POLISH L / LATIN CAPITAL LETTER L WITH STROKE</name>			
+                                <name>UPPERCASE POLISH L / LATIN CAPITAL LETTER L WITH STROKE</name>
                         </code>
                         <code>
                                 <marc>E9</marc>
@@ -1152,7 +1128,7 @@ BRACKET</name>
                                 <ucs>0133</ucs>
                                 <utf-8>C4B3</utf-8>
                                 <name>LATIN SMALL LIGATURE IJ (LATIN SMALL LETTER I J)</name>
-                        </code>			
+                        </code>
 			<!-- F7 -->
                         <code>
                                 <marc>F8</marc>
