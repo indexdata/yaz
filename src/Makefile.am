@@ -36,12 +36,12 @@ AM_YFLAGS=-p cql_
 
 # MARC8->UTF8 conversion is generated from codetables.xml
 marc8.c: charconv.tcl codetables.xml
-	$(TCLSH) $(srcdir)/charconv.tcl -p marc8 $(srcdir)/codetables.xml -o $@
+	$(TCLSH) $(srcdir)/charconv.tcl -p marc8 $(srcdir)/codetables.xml -o $@.tmp
 	mv -f $@.tmp $@
 
 # UTF-8->MARC8 conversion is generated from codetables.xml
 marc8r.c: charconv.tcl codetables.xml
-	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o $@
+	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o $@.tmp
 	mv -f $@.tmp $@
 
 # ISO5426->UTF8 conversion is generated from codetables-iso5426.xml
