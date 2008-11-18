@@ -18,7 +18,7 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
  csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv \
- csvtosru_update.tcl sru_update.csv \
+ csvtosru_update.tcl sru_update.csv mk_version.tcl \
  oidtoc.tcl oid.csv sc_test.c
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
