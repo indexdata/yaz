@@ -2,9 +2,9 @@
 <!-- Switched <marc>212320</marc> and <marc>212320</marc> -->
 <codeTables>
 	<codeTable name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" date="Nov 2008" number="1">
-		<note>The first column in this table contains the MARC-8 code (in hex) for
+		<note>The first column in this table contains the ISO5426 code (in hex) for
      the character as coming from the G0 graphic set, the second column
-     contains the MARC-8 code (in hex) for the character as coming from the G1
+     contains the ISO5426 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
      characters, the fifth column contains a representation of the character (where possible), 
@@ -14,12 +14,14 @@
 	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and 
 	 alternate UTF-8 columns follow the character name. </note>
 		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" ISOcode="42">
+			<!-- ???
 			<code>
 				<marc>1B</marc>
 				<ucs>001B</ucs>
 				<utf-8>1B</utf-8>
 				<name>ESCAPE (Unlikely to occur in UCS/Unicode)</name>
 			</code>
+			-->
 			<code>
 				<marc>1D</marc>
 				<ucs>001D</ucs>
@@ -612,8 +614,14 @@ BRACKET</name>
 				<utf-8>7E</utf-8>
 				<name>SPACING TILDE / TILDE</name>
 			</code>
+			<!-- 7F -->
+			
 		</characterSet>
 		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" date="1-Feb-2005, Updated Nov 2008" ISOcode="45">
+			<note>See also Zeichentabelle MAB2 (ISO 5426-1983), http://www.gymel.com/charsets/MAB2.html</note>
+			<note>See also MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983, http://www.d-nb.de/standardisierung/pdf/mab_unic.pdf</note>
+			<note>See also Zeichenkonkordanz MAB2-Zeichensatz - MARC-8, http://www.d-nb.de/standardisierung/pdf/mab_marc.pdf</note>
+			<!-- 80 - 87 -->
 			<code>
 				<marc>88</marc>
 				<ucs>0098</ucs>
@@ -626,61 +634,132 @@ BRACKET</name>
 				<utf-8>C29C</utf-8>
 				<name>NON-SORT END / STRING TERMINATOR</name>
 			</code>
+			<!-- 8A - 8F -->
 			<code>
-				<marc>8D</marc>
-				<ucs>200D</ucs>
-				<utf-8>E2808D</utf-8>
-				<name>JOINER / ZERO WIDTH JOINER</name>
+				<marc>A1</marc>
+				<ucs>00A1</ucs>
+				<utf-8>C2A1</utf-8>
+				<name>INVERTED EXCLAMATION MARK</name>
 			</code>
-
-			<!-- fix sort order later -->
+		
 			<code>
-				<marc>E8</marc>
-				<ucs>0141</ucs>
-				<utf-8>C581</utf-8>
-				<name>UPPERCASE POLISH L / LATIN CAPITAL LETTER L WITH
-STROKE</name>
+				<marc>A2</marc>
+				<ucs>201E</ucs>
+				<utf-8>E2809E</utf-8>
+				<name>LOW DOUBLE COMMA QUOTATION MARK</name>
 			</code>
+		
 			<code>
-				<marc>E9</marc>
-				<ucs>00D8</ucs>
-				<utf-8>C398</utf-8>
-				<name>UPPERCASE SCANDINAVIAN O / LATIN CAPITAL LETTER
-O WITH STROKE</name>
-			</code>
-			<code>
-				<marc>E2</marc>
-				<ucs>0110</ucs>
-				<utf-8>C490</utf-8>
-				<name>UPPERCASE D WITH CROSSBAR / LATIN CAPITAL LETTER
-D WITH STROKE</name>
+				<marc>A3</marc>
+				<ucs>00A3</ucs>
+				<utf-8>C2A3</utf-8>
+				<name>BRITISH POUND / POUND SIGN</name>
 			</code>
 			<code>
-				<marc>EC</marc>
-				<ucs>00DE</ucs>
-				<utf-8>C39E</utf-8>
-				<name>UPPERCASE ICELANDIC THORN / LATIN CAPITAL LETTER
-THORN (Icelandic)</name>
+				<marc>A4</marc>
+				<ucs>0024</ucs>
+				<utf-8>24</utf-8>
+				<name>DOLLAR SIGN</name>
 			</code>
+		
 			<code>
-				<marc>E1</marc>
-				<ucs>00C6</ucs>
-				<utf-8>C386</utf-8>
-				<name>UPPERCASE DIGRAPH AE / LATIN CAPITAL LIGATURE
-AE</name>
-			</code>
+				<marc>A5</marc>
+				<ucs>00A5</ucs>
+				<utf-8>C2A5</utf-8>
+				<name>YEN SIGN</name>
+			</code>		
 			<code>
 				<marc>A6</marc>
-				<ucs>0152</ucs>
-				<utf-8>C592</utf-8>
-				<name>UPPERCASE DIGRAPH OE / LATIN CAPITAL LIGATURE
-OE</name>
+				<ucs>2020</ucs>
+				<utf-8>E280A0</utf-8>
+				<name>DAGGER</name>
+			</code>		
+			<code>
+				<marc>A7</marc>
+				<ucs>00A7</ucs>
+				<utf-8>C2A7</utf-8>
+				<name>SECTION SIGN</name>
 			</code>
 			<code>
-				<marc>EA</marc>
-				<ucs>02B9</ucs>
-				<utf-8>CAB9</utf-8>
-				<name>SOFT SIGN, PRIME / MODIFIER LETTER PRIME</name>
+				<marc>A8</marc>
+				<ucs>2032</ucs>
+				<utf-8>E280A0</utf-8>
+				<name>PRIME</name>
+			</code>
+		
+			<code>
+				<marc>A9</marc>
+				<ucs>2018</ucs>
+				<utf-8>E28098</utf-8>
+				<name>SINGLE TURNED COMMA QUOTATION MARK</name>
+			</code>	
+			<code>
+				<marc>AA</marc>
+				<ucs>201C</ucs>
+				<utf-8>E2809C</utf-8>
+				<name>DOUBLE TURNED COMMA QUOTATION MARK</name>
+			</code>			
+			<code>
+				<marc>AB</marc>
+				<ucs>00AB</ucs>
+				<utf-8>E280A0</utf-8>
+				<name>LEFT-POINTING DOUBLE ANGLE QUOTATION MARK (LEFT POINTING GUILLEMET)</name>
+			</code>			
+			<code>
+				<marc>AC</marc>
+				<ucs>266D</ucs>
+				<utf-8>E299AD</utf-8>
+				<name>MUSIC FLAT SIGN (FLAT)</name>
+			</code>			
+			<code>
+				<marc>AD</marc>
+				<ucs>00A9</ucs>
+				<utf-8>C2A9</utf-8>
+				<name>COPYRIGHT SIGN</name>
+			</code>
+			<code>
+				<marc>AE</marc>
+				<ucs>2117</ucs>
+				<utf-8>E28497</utf-8>
+				<name>SOUND RECORDING COPYRIGHT</name>
+			</code>
+			<code>
+				<marc>AF</marc>
+				<ucs>00AE</ucs>
+				<utf-8>C2AE</utf-8>
+				<name>PATENT MARK / REGISTERED SIGN</name>
+			</code>
+		
+		
+		
+			
+			<code>
+				<marc>B0</marc>
+				<ucs>02BB</ucs>
+				<utf-8>CABB</utf-8>
+				<name>AYN / MODIFIER LETTER TURNED COMMA</name>
+			</code>
+			
+			<code>
+				<marc>B1</marc>
+				<ucs>02BC</ucs>
+				<utf-8>CABC</utf-8>
+				<altutf-8>CABE</altutf-8>
+				<name>ALIF / MODIFIER LETTER APOSTROPHE</name>
+			</code>
+			
+			<code>
+				<marc>B2</marc>
+				<ucs>201A</ucs>
+				<utf-8>E2809A</utf-8>
+				<name>SINGLE LOW-9 QUOTATION MARK (LOW SINGLE COMMA QUOTATION MARK)</name>
+			</code>
+			<!-- B3, B4, B5 -->
+			<code>
+				<marc>B6</marc>
+				<ucs>2021</ucs>
+				<utf-8>E280A1</utf-8>
+				<name></name>
 			</code>
 			<code>
 				<marc>B7</marc>
@@ -689,441 +768,432 @@ OE</name>
 				<name>MIDDLE DOT</name>
 			</code>
 			<code>
-				<marc>AC</marc>
-				<ucs>266D</ucs>
-				<utf-8>E299AD</utf-8>
-				<name>MUSIC FLAT SIGN</name>
-			</code>
-			<code>
-				<marc>AF</marc>
-				<ucs>00AE</ucs>
-				<utf-8>C2AE</utf-8>
-				<name>PATENT MARK / REGISTERED SIGN</name>
-			</code>
-
-			<!-- unknown
-			<code>
-				<marc>AB</marc>
-				<ucs>00B1</ucs>
-				<utf-8>C2B1</utf-8>
-				<name>PLUS OR MINUS / PLUS-MINUS SIGN</name>
-			</code>
-			-->
-			<code>
-				<marc>AC</marc>
-				<ucs>01A0</ucs>
-				<utf-8>C6A0</utf-8>
-				<name>UPPERCASE O-HOOK / LATIN CAPITAL LETTER O WITH
-HORN</name>
-			</code>
-			<code>
-				<marc>AD</marc>
-				<ucs>01AF</ucs>
-				<utf-8>C6AF</utf-8>
-				<name>UPPERCASE U-HOOK / LATIN CAPITAL LETTER U WITH
-HORN</name>
-			</code>
-			<code>
-				<marc>AE</marc>
-				<ucs>02BC</ucs>
-				<utf-8>CABC</utf-8>
-				<altutf-8>CABE</altutf-8>
-				<name>ALIF / MODIFIER LETTER APOSTROPHE</name>
-			</code>
-			<code>
-				<marc>B0</marc>
-				<ucs>02BB</ucs>
-				<utf-8>CABB</utf-8>
-				<name>AYN / MODIFIER LETTER TURNED COMMA</name>
-			</code>
-			<code>
-				<marc>B1</marc>
-				<ucs>0142</ucs>
-				<utf-8>C582</utf-8>
-				<name>LOWERCASE POLISH L / LATIN SMALL LETTER L WITH
-STROKE</name>
-			</code>
-			<code>
-				<marc>B2</marc>
-				<ucs>00F8</ucs>
-				<utf-8>C3B8</utf-8>
-				<name>LOWERCASE SCANDINAVIAN O / LATIN SMALL LETTER O
-WITH STROKE</name>
-			</code>
-			<code>
-				<marc>B3</marc>
-				<ucs>0111</ucs>
-				<utf-8>C491</utf-8>
-				<name>LOWERCASE D WITH CROSSBAR / LATIN SMALL LETTER
-D WITH STROKE</name>
-			</code>
-			<code>
-				<marc>B4</marc>
-				<ucs>00FE</ucs>
-				<utf-8>C3BE</utf-8>
-				<name>LOWERCASE ICELANDIC THORN / LATIN SMALL LETTER
-THORN (Icelandic)</name>
-			</code>
-			<code>
-				<marc>B5</marc>
-				<ucs>00E6</ucs>
-				<utf-8>C3A6</utf-8>
-				<name>LOWERCASE DIGRAPH AE / LATIN SMALL LIGATURE
-AE</name>
-			</code>
-			<code>
-				<marc>B6</marc>
-				<ucs>0153</ucs>
-				<utf-8>C593</utf-8>
-				<name>LOWERCASE DIGRAPH OE / LATIN SMALL LIGATURE
-OE</name>
-			</code>
-			<code>
-				<marc>B7</marc>
-				<ucs>02BA</ucs>
-				<utf-8>CABA</utf-8>
-				<name>HARD SIGN, DOUBLE PRIME / MODIFIER LETTER DOUBLE
-PRIME</name>
-			</code>
-			<code>
 				<marc>B8</marc>
-				<ucs>0131</ucs>
-				<utf-8>C4B1</utf-8>
-				<name>LOWERCASE TURKISH I / LATIN SMALL LETTER DOTLESS
-I</name>
-			</code>
+				<ucs>2033</ucs>
+				<utf-8>E280B3</utf-8>
+				<name>DOUBLE PRIME</name>
+			</code>			
 			<code>
 				<marc>B9</marc>
-				<ucs>00A3</ucs>
-				<utf-8>C2A3</utf-8>
-				<name>BRITISH POUND / POUND SIGN</name>
-			</code>
+				<ucs>2019</ucs>
+				<utf-8>E2809D</utf-8>
+				<name>RIGHT SINGLE QUOTATION MARK (SINGLE COMMA QUOTATION MARK)</name>
+			</code>			
 			<code>
 				<marc>BA</marc>
-				<ucs>00F0</ucs>
-				<utf-8>C3B0</utf-8>
-				<name>LOWERCASE ETH / LATIN SMALL LETTER ETH
-(Icelandic)</name>
-			</code>
+				<ucs>201D</ucs>
+				<utf-8>E2809D</utf-8>
+				<name>RIGHT DOUBLE QUOTATION MARK (DOUBLE COMMA QUOTATION MARK)</name>
+			</code>			
 			<code>
-				<marc>BC</marc>
-				<ucs>01A1</ucs>
-				<utf-8>C6A1</utf-8>
-				<name>LOWERCASE O-HOOK / LATIN SMALL LETTER O WITH
-HORN</name>
-			</code>
-			<code>
-				<marc>BD</marc>
-				<ucs>01B0</ucs>
-				<utf-8>C6B0</utf-8>
-				<name>LOWERCASE U-HOOK / LATIN SMALL LETTER U WITH
-HORN</name>
-			</code>
-			<code>
-				<marc>C0</marc>
-				<ucs>00B0</ucs>
-				<utf-8>C2B0</utf-8>
-				<name>DEGREE SIGN</name>
-			</code>
-			<code>
-				<marc>C1</marc>
-				<ucs>2113</ucs>
-				<utf-8>E28493</utf-8>
-				<name>SCRIPT SMALL L</name>
-			</code>
-			<code>
-				<marc>C2</marc>
-				<ucs>2117</ucs>
-				<utf-8>E28497</utf-8>
-				<name>SOUND RECORDING COPYRIGHT</name>
-			</code>
-			<code>
-				<marc>C3</marc>
-				<ucs>00A9</ucs>
-				<utf-8>C2A9</utf-8>
-				<name>COPYRIGHT SIGN</name>
-			</code>
-			<code>
-				<marc>C4</marc>
-				<ucs>266F</ucs>
-				<utf-8>E299AF</utf-8>
-				<name>MUSIC SHARP SIGN</name>
-			</code>
-			<code>
-				<marc>C5</marc>
-				<ucs>00BF</ucs>
-				<utf-8>C2BF</utf-8>
-				<name>INVERTED QUESTION MARK</name>
-			</code>
-			<code>
-				<marc>C6</marc>
-				<ucs>00A1</ucs>
-				<utf-8>C2A1</utf-8>
-				<name>INVERTED EXCLAMATION MARK</name>
-			</code>
-			<code>
-				<marc>C7</marc>
-				<ucs>00DF</ucs>
-				<utf-8>C39F</utf-8>
-				<name>ESZETT SYMBOL</name>
-			</code>
-			<code>
-				<marc>C8</marc>
-				<ucs>20AC</ucs>
-				<utf-8>E282AC</utf-8>
-				<name>EURO SIGN</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E0</marc>
-				<ucs>0309</ucs>
-				<utf-8>CC89</utf-8>
-				<name>PSEUDO QUESTION MARK / COMBINING HOOK
-ABOVE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E1</marc>
-				<ucs>0300</ucs>
-				<utf-8>CC80</utf-8>
-				<name>GRAVE / COMBINING GRAVE ACCENT (Varia)</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E2</marc>
-				<ucs>0301</ucs>
-				<utf-8>CC81</utf-8>
-				<name>ACUTE / COMBINING ACUTE ACCENT (Oxia)</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E3</marc>
-				<ucs>0302</ucs>
-				<utf-8>CC82</utf-8>
-				<name>CIRCUMFLEX / COMBINING CIRCUMFLEX
-ACCENT</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E4</marc>
-				<ucs>0303</ucs>
-				<utf-8>CC83</utf-8>
-				<name>TILDE / COMBINING TILDE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E5</marc>
-				<ucs>0304</ucs>
-				<utf-8>CC84</utf-8>
-				<name>MACRON / COMBINING MACRON</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E6</marc>
-				<ucs>0306</ucs>
-				<utf-8>CC86</utf-8>
-				<name>BREVE / COMBINING BREVE (Vrachy)</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E7</marc>
-				<ucs>0307</ucs>
-				<utf-8>CC87</utf-8>
-				<name>SUPERIOR DOT / COMBINING DOT ABOVE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E8</marc>
-				<ucs>0308</ucs>
-				<utf-8>CC88</utf-8>
-				<name>UMLAUT, DIAERESIS / COMBINING DIAERESIS
-(Dialytika)</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>E9</marc>
-				<ucs>030C</ucs>
-				<utf-8>CC8C</utf-8>
-				<name>HACEK / COMBINING CARON</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>EA</marc>
-				<ucs>030A</ucs>
-				<utf-8>CC8A</utf-8>
-				<name>CIRCLE ABOVE, ANGSTROM / COMBINING RING
-ABOVE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>EB</marc>
-				<ucs>0361</ucs>
-				<utf-8>CDA1</utf-8>
-				<alt>FE20</alt>
-				<altutf-8>EFB8A0</altutf-8>
-				<name>LIGATURE, FIRST HALF / COMBINING DOUBLE 
-				INVERTED BREVE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>EC</marc>
-				<ucs></ucs>
-				<utf-8></utf-8>
-				<alt>FE21</alt>
-				<altutf-8>EFB8A1</altutf-8>
-				<name>LIGATURE, SECOND HALF / COMBINING LIGATURE RIGHT HALF</name>
-				<note>The Ligature that spans two characters 
-				is constructed of two halves in MARC-8: EB 
-				(Ligature, first half) and EC (Ligature, second 
-				half).  The preferred Unicode/UTF-8 mapping is to 
-				the single character Ligature that spans two characters,
-				U+0361.  The single character Ligature is encoded
-				following the second of the two characters to be spanned.  
-				The two half Ligatures in Unicode, to which the 
-				Ligature has been mapped since 1996, are indicted 
-				in the mapping as alternatives, but their use is not 
-				recommended.  It is expected that font support for 
-				the single character Ligature mark will be more 
-				easily obtained than for the two halves.</note>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>ED</marc>
-				<ucs>0315</ucs>
-				<utf-8>CC95</utf-8>
-				<name>HIGH COMMA, OFF CENTER / COMBINING COMMA ABOVE
-RIGHT</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>EE</marc>
-				<ucs>030B</ucs>
-				<utf-8>CC8B</utf-8>
-				<name>DOUBLE ACUTE / COMBINING DOUBLE ACUTE
-ACCENT</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>EF</marc>
-				<ucs>0310</ucs>
-				<utf-8>CC90</utf-8>
-				<name>CANDRABINDU / COMBINING CANDRABINDU</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F0</marc>
-				<ucs>0327</ucs>
-				<utf-8>CCA7</utf-8>
-				<name>CEDILLA / COMBINING CEDILLA</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F1</marc>
-				<ucs>0328</ucs>
-				<utf-8>CCA8</utf-8>
-				<name>RIGHT HOOK, OGONEK / COMBINING OGONEK</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F2</marc>
-				<ucs>0323</ucs>
-				<utf-8>CCA3</utf-8>
-				<name>DOT BELOW / COMBINING DOT BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F3</marc>
-				<ucs>0324</ucs>
-				<utf-8>CCA4</utf-8>
-				<name>DOUBLE DOT BELOW / COMBINING DIAERESIS
-BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F4</marc>
-				<ucs>0325</ucs>
-				<utf-8>CCA5</utf-8>
-				<name>CIRCLE BELOW / COMBINING RING BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F5</marc>
-				<ucs>0333</ucs>
-				<utf-8>CCB3</utf-8>
-				<name>DOUBLE UNDERSCORE / COMBINING DOUBLE LOW
-LINE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F6</marc>
-				<ucs>0332</ucs>
-				<utf-8>CCB2</utf-8>
-				<name>UNDERSCORE / COMBINING LOW LINE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F7</marc>
-				<ucs>0326</ucs>
-				<utf-8>CCA6</utf-8>
-				<name>LEFT HOOK (COMMA BELOW) / COMBINING COMMA
-BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F8</marc>
-				<ucs>031C</ucs>
-				<utf-8>CC9C</utf-8>
-				<name>RIGHT CEDILLA / COMBINING LEFT HALF RING
-BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>F9</marc>
-				<ucs>032E</ucs>
-				<utf-8>CCAE</utf-8>
-				<name>UPADHMANIYA / COMBINING BREVE BELOW</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>FA</marc>
-				<ucs>0360</ucs>
-				<utf-8>CDA0</utf-8>
-				<alt>FE22</alt>
-				<altutf-8>EFB8A2</altutf-8>
-				<name>DOUBLE TILDE, FIRST HALF / COMBINING DOUBLE TILDE</name>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>FB</marc>
-				<ucs></ucs>
-				<utf-8></utf-8>
-				<alt>FE23</alt>
-				<altutf-8>EFB8A3</altutf-8>
-				<name>DOUBLE TILDE, SECOND HALF / COMBINING DOUBLE TILDE RIGHT HALF</name>
-				<note>The Double Tilde that spans two characters is 
-				constructed of two halves in MARC-8: FA (Double 
-				Tilde, first half) and FB (Double Tilde, second 
-				half).  The preferred Unicode/UTF-8 mapping 
-				is to the single character Double Tilde that 
-				spans two characters, U+0360.  The single 
-				character Double Tilde is encoded following 
-				the second of the two characters to be spanned.  
-				The two half Double Tildes in Unicode, to 
-				which the MARC8 Double Tilde has been 
-				mapped since 1996, are indicted in the 
-				mapping as alternatives, but their use is not 
-				recommended.  It is expected that font support 
-				for the single character Double Tilde mark will 
-				be more easily obtained than for the two halves.</note>
-			</code>
-			<code>
-				<isCombining>true</isCombining>
-				<marc>FE</marc>
-				<ucs>0313</ucs>
-				<utf-8>CC93</utf-8>
-				<name>HIGH COMMA, CENTERED / COMBINING COMMA ABOVE
-(Psili)</name>
-			</code>
+				<marc>BB</marc>
+				<ucs>00BB</ucs>
+				<utf-8>C2BB</utf-8>
+				<name>RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK (RIGHT POINTING GUILLEMET)</name>
+			</code>			
+			<code>		
+                                <marc>BC</marc>
+                                <ucs>266F</ucs>
+                                <utf-8>E299AF</utf-8>
+                                <name>MUSIC SHARP SIGN</name>
+                        </code>
+                        <code>
+                                <marc>BD</marc>
+                                <ucs>02B9</ucs>
+                                <utf-8>CAB9</utf-8>
+                                <name>SOFT SIGN, PRIME / MODIFIER LETTER PRIME</name>
+                        </code>
+                        <code>
+                                <marc>BE</marc>
+                                <ucs>02BA</ucs>
+                                <utf-8>CABA</utf-8>
+                                <name>HARD SIGN, DOUBLE PRIME / MODIFIER LETTER DOUBLE PRIME</name>		
+                        </code>
+                        <code>
+                                <marc>BF</marc>
+                                <ucs>00BF</ucs>
+                                <utf-8>C2BF</utf-8>
+                                <name>INVERTED QUESTION MARK</name>
+                        </code>
+		
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C0</marc>
+                                <ucs>0309</ucs>
+                                <utf-8>CC89</utf-8>
+                                <name>PSEUDO QUESTION MARK / COMBINING HOOK ABOVE</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C1</marc>
+                                <ucs>0300</ucs>
+                                <utf-8>CC80</utf-8>
+                                <name>GRAVE / COMBINING GRAVE ACCENT (Varia)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C2</marc>
+                                <ucs>0301</ucs>
+                                <utf-8>CC81</utf-8>
+                                <name>ACUTE / COMBINING ACUTE ACCENT (Oxia)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C3</marc>
+                                <ucs>0302</ucs>
+                                <utf-8>CC82</utf-8>
+                                <name>CIRCUMFLEX / COMBINING CIRCUMFLEX ACCENT</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C4</marc>
+                                <ucs>0303</ucs>
+                                <utf-8>CC83</utf-8>
+                                <name>TILDE / COMBINING TILDE</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C5</marc>
+                                <ucs>0304</ucs>
+                                <utf-8>CC84</utf-8>
+                                <name>MACRON / COMBINING MACRON</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C6</marc>
+                                <ucs>0306</ucs>
+                                <utf-8>CC86</utf-8>
+                                <name>BREVE / COMBINING BREVE (Vrachy)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C7</marc>
+                                <ucs>0307</ucs>
+                                <utf-8>CC87</utf-8>
+                                <name>SUPERIOR DOT / COMBINING DOT ABOVE</name>
+                        </code>
+                        <code>
+				<note>Q: Unicode doesn't seem to distinguish between tréma and umlaut,
+				but I need to distinguish. What shall I do?
+				http://www.unicode.org/faq/char_combmark.html#18</note>
+                                <isCombining>true</isCombining>
+                                <marc>C8</marc>
+                                <ucs>034F0308</ucs>
+                                <utf-8>CC88</utf-8>
+                                <name>U+034F COMBINING GRAPHEME JOINER (CGJ) / tréma</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>C9</marc>
+                                <ucs>0308</ucs>
+                                <utf-8>CC88</utf-8>
+                                <name>UMLAUT, DIAERESIS / COMBINING DIAERESIS (Dialytika)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CA</marc>
+                                <ucs>030A</ucs>
+                                <utf-8>CC8A</utf-8>
+                                <name>CIRCLE ABOVE, ANGSTROM / COMBINING RING ABOVE</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CB</marc>
+                                <ucs>0315</ucs>
+                                <utf-8>CC95</utf-8>
+                                <name>HIGH COMMA, OFF CENTER / COMBINING COMMA ABOVE RIGHT</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CC</marc>
+                                <ucs>0313</ucs>
+                                <utf-8>CC93</utf-8>
+                                <name>HIGH COMMA, CENTERED / COMBINING COMMA ABOVE (Psili)</name>		
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CD</marc>
+                                <ucs>030B</ucs>
+                                <utf-8>CC8B</utf-8>
+                                <name>DOUBLE ACUTE / COMBINING DOUBLE ACUTE ACCENT</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CE</marc>
+                                <ucs>031B</ucs>
+                                <utf-8>CC9B</utf-8>
+                                <name>COMBINING HORN (NON-SPACING HORN)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>CF</marc>
+                                <ucs>030C</ucs>
+                                <utf-8>CC8C</utf-8>
+                                <name>HACEK / COMBINING CARON</name>
+                        </code>
+		
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D0</marc>
+                                <ucs>0327</ucs>
+                                <utf-8>CCA7</utf-8>
+                                <name>CEDILLA / COMBINING CEDILLA</name>
+                        </code>		
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D1</marc>
+                                <ucs>031C</ucs>
+                                <utf-8>CC9C</utf-8>
+                                <name>RIGHT CEDILLA / COMBINING LEFT HALF RING BELOW</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D2</marc>
+                                <ucs>0326</ucs>
+                                <utf-8>CCA6</utf-8>
+                                <name>LEFT HOOK (COMMA BELOW) / COMBINING COMMA BELOW</name>
+                        </code>		
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D3</marc>
+                                <ucs>0328</ucs>
+                                <utf-8>CCA8</utf-8>
+                                <name>RIGHT HOOK, OGONEK / COMBINING OGONEK</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D4</marc>
+                                <ucs>0325</ucs>
+                                <utf-8>CCA5</utf-8>
+                                <name>CIRCLE BELOW / COMBINING RING BELOW</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D5</marc>
+                                <ucs>032E</ucs>
+                                <utf-8>CCAE</utf-8>
+                                <name>UPADHMANIYA / COMBINING BREVE BELOW</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D6</marc>
+                                <ucs>0323</ucs>
+                                <utf-8>CCA3</utf-8>
+                                <name>DOT BELOW / COMBINING DOT BELOW</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D7</marc>
+                                <ucs>0324</ucs>
+                                <utf-8>CCA4</utf-8>
+                                <name>DOUBLE DOT BELOW / COMBINING DIAERESIS BELOW</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D8</marc>
+                                <ucs>0332</ucs>
+                                <utf-8>CCB2</utf-8>
+                                <name>UNDERSCORE / COMBINING LOW LINE</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>D9</marc>
+                                <ucs>0333</ucs>
+                                <utf-8>CCB3</utf-8>
+                                <name>DOUBLE UNDERSCORE / COMBINING DOUBLE LOW LINE</name>
+                        </code>
+
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>DA</marc>
+                                <ucs>0329</ucs>
+                                <utf-8>CCA9</utf-8>
+                                <name>COMBINING VERTICAL LINE BELOW (NON-SPACING VERTICAL LINE BELOW)</name>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>DB</marc>
+                                <ucs>032D</ucs>
+                                <utf-8>CCAD</utf-8>
+                                <name>COMBINING CIRCUMFLEX ACCENT BELOW (NON-SPACING CIRCUMFLEX BELOW)</name>
+                        </code>
+			<!-- DC -->
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>DD</marc>
+                                <ucs>0360</ucs>
+                                <utf-8>CDA0</utf-8>
+                                <alt>FE22</alt>
+                                <altutf-8>EFB8A2</altutf-8>
+                                <name>DOUBLE TILDE, FIRST HALF / COMBINING DOUBLE TILDE</name>
+                        </code>		
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>DE</marc>
+                                <ucs></ucs>
+                                <utf-8></utf-8>
+                                <alt>FE21</alt>
+                                <altutf-8>EFB8A1</altutf-8>
+                                <name>LIGATURE, SECOND HALF / COMBINING LIGATURE RIGHT HALF</name>
+                                <note>The Ligature that spans two characters 
+                                is constructed of two halves in MARC-8: EB 
+                                (Ligature, first half) and EC (Ligature, second 
+                                half).  The preferred Unicode/UTF-8 mapping is to 
+                                the single character Ligature that spans two characters,
+                                U+0361.  The single character Ligature is encoded
+                                following the second of the two characters to be spanned.  
+                                The two half Ligatures in Unicode, to which the 
+                                Ligature has been mapped since 1996, are indicted 
+                                in the mapping as alternatives, but their use is not 
+                                recommended.  It is expected that font support for 
+                                the single character Ligature mark will be more 
+                                easily obtained than for the two halves.</note>
+                        </code>
+                        <code>
+                                <isCombining>true</isCombining>
+                                <marc>DF</marc>
+                                <ucs></ucs>
+                                <utf-8></utf-8>
+                                <alt>FE23</alt>
+                                <altutf-8>EFB8A3</altutf-8>
+                                <name>DOUBLE TILDE, SECOND HALF / COMBINING DOUBLE TILDE RIGHT HALF</name>
+                                <note>The Double Tilde that spans two characters is 
+                                constructed of two halves in MARC-8: FA (Double 
+                                Tilde, first half) and FB (Double Tilde, second 
+                                half).  The preferred Unicode/UTF-8 mapping 
+                                is to the single character Double Tilde that 
+                                spans two characters, U+0360.  The single 
+                                character Double Tilde is encoded following 
+                                the second of the two characters to be spanned.  
+                                The two half Double Tildes in Unicode, to 
+                                which the MARC8 Double Tilde has been 
+                                mapped since 1996, are indicted in the 
+                                mapping as alternatives, but their use is not 
+                                recommended.  It is expected that font support 
+                                for the single character Double Tilde mark will 
+                                be more easily obtained than for the two halves.</note>
+                        </code>
+		
+		
+			<!-- E0 -->
+                        <code>
+                                <marc>E1</marc>
+                                <ucs>00C6</ucs>
+                                <utf-8>C386</utf-8>
+                                <name>UPPERCASE DIGRAPH AE / LATIN CAPITAL LIGATURE AE</name>
+                        </code>
+                        <code>
+                                <marc>E2</marc>
+                                <ucs>0110</ucs>
+                                <utf-8>C490</utf-8>
+                                <name>UPPERCASE D WITH CROSSBAR / LATIN CAPITAL LETTER D WITH STROKE</name>
+                        </code>
+			<!-- E3, E4, E5 -->
+                        <code>
+                                <marc>E6</marc>
+                                <ucs>0132</ucs>
+                                <utf-8>C4B2</utf-8>
+                                <name>LATIN CAPITAL LIGATURE IJ (LATIN CAPITAL LETTER I J)</name>
+                        </code>
+			<!-- E7 -->
+                        <code>
+                                <marc>E8</marc>
+                                <ucs>0141</ucs>
+                                <utf-8>C581</utf-8>
+                                <name>UPPERCASE POLISH L / LATIN CAPITAL LETTER L WITH STROKE</name>			
+                        </code>
+                        <code>
+                                <marc>E9</marc>
+                                <ucs>00D8</ucs>
+                                <utf-8>C398</utf-8>
+                                <name>UPPERCASE SCANDINAVIAN O / LATIN CAPITAL LETTER O WITH STROKE</name>
+                        </code>
+                        <code>
+                                <marc>EA</marc>
+                                <ucs>0152</ucs>
+                                <utf-8>C592</utf-8>
+                                <name>UPPERCASE DIGRAPH OE / LATIN CAPITAL LIGATURE OE</name>
+                        </code>
+			<!-- EB -->
+                        <code>
+                                <marc>EC</marc>
+                                <ucs>00DE</ucs>
+                                <utf-8>C39E</utf-8>
+                                <name>UPPERCASE ICELANDIC THORN / LATIN CAPITAL LETTER THORN (Icelandic)</name>
+                        </code>
+			<!-- ED, EE, EF -->
+                        <code>
+                                <marc>F1</marc>
+                                <ucs>00E6</ucs>
+                                <utf-8>C3A6</utf-8>
+                                <name>LOWERCASE DIGRAPH AE / LATIN SMALL LIGATURE AE</name>
+                        </code>
+                        <code>
+                                <marc>F2</marc>
+                                <ucs>0111</ucs>
+                                <utf-8>C491</utf-8>
+                                <name>LOWERCASE D WITH CROSSBAR / LATIN SMALL LETTER D WITH STROKE</name>
+                        </code>
+                        <code>
+                                <marc>F3</marc>
+                                <ucs>00F0</ucs>
+                                <utf-8>C3B0</utf-8>
+                                <name>LOWERCASE ETH / LATIN SMALL LETTER ETH (Icelandic)</name>
+                        </code>
+			<!-- F4 -->
+                        <code>
+                                <marc>F5</marc>
+                                <ucs>0131</ucs>
+                                <utf-8>C4B1</utf-8>
+                                <name>LOWERCASE TURKISH I / LATIN SMALL LETTER DOTLESS I</name>
+                        </code>
+                        <code>
+                                <marc>F6</marc>
+                                <ucs>0133</ucs>
+                                <utf-8>C4B3</utf-8>
+                                <name>LATIN SMALL LIGATURE IJ (LATIN SMALL LETTER I J)</name>
+                        </code>			
+			<!-- F7 -->
+                        <code>
+                                <marc>F8</marc>
+                                <ucs>0142</ucs>
+                                <utf-8>C582</utf-8>
+                                <name>LOWERCASE POLISH L / LATIN SMALL LETTER L WITH STROKE</name>
+                        </code>
+                        <code>
+                                <marc>F9</marc>
+                                <ucs>00F8</ucs>
+                                <utf-8>C3B8</utf-8>
+                                <name>LOWERCASE SCANDINAVIAN O / LATIN SMALL LETTER O WITH STROKE</name>
+                        </code>
+                        <code>
+                                <marc>FA</marc>
+                                <ucs>0153</ucs>
+                                <utf-8>C593</utf-8>
+                                <name>LOWERCASE DIGRAPH OE / LATIN SMALL LIGATURE OE</name>
+                        </code>
+                        <code>
+                                <marc>FB</marc>
+                                <ucs>00DF</ucs>
+                                <utf-8>C39F</utf-8>
+                                <name>ESZETT SYMBOL</name>
+                        </code>
+                        <code>
+                                <marc>FC</marc>
+                                <ucs>00FE</ucs>
+                                <utf-8>C3BE</utf-8>
+                                <name>LOWERCASE ICELANDIC THORN / LATIN SMALL LETTER THORN (Icelandic)</name>
+                        </code>
+			<!-- FD, FE, FF -->
+			
+			<!-- not yet defined
+                        <code>
+                                <marc>??</marc>
+                                <ucs>20AC</ucs>
+                                <utf-8>E282AC</utf-8>
+                                <name>EURO SIGN</name>
+                        </code>
+			-->
 		</characterSet>
 	</codeTable>
 </codeTables>
