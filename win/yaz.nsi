@@ -155,7 +155,7 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\*.tcl
 	File ..\src\*.csv
 	File ..\src\*.asn
-	File ..\src\codetables.xml
+	File ..\src\codetables*.xml
 	SetOutPath $INSTDIR\test
 	File ..\test\marc*.*
 	File ..\test\*.sh

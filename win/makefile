@@ -443,6 +443,7 @@ MISC_OBJS= \
    $(OBJDIR)\snprintf.obj \
    $(OBJDIR)\marc8.obj \
    $(OBJDIR)\marc8r.obj \
+   $(OBJDIR)\iso5426.obj \
    $(OBJDIR)\record_conv.obj \
    $(OBJDIR)\retrieval.obj \
    $(OBJDIR)\libxml2_error.obj \
@@ -493,6 +494,7 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_encode_marc8.obj \
    $(OBJDIR)\iconv_decode_marc8.obj \
    $(OBJDIR)\iconv_encode_wchar.obj \
+   $(OBJDIR)\iconv_decode_iso5426.obj \
    $(OBJDIR)\mutex.obj \
    $(OBJDIR)\sc.obj
 
@@ -753,6 +755,10 @@ $(SRCDIR)\marc8.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 $(SRCDIR)\marc8r.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -r -p marc8r codetables.xml -o marc8r.c
+
+$(SRCDIR)\iso5426.c: $(SRCDIR)\codetables-iso5426.xml $(SRCDIR)\charconv.tcl
+	@cd $(SRCDIR)
+	$(TCL) charconv.tcl -r -p iso5426 codetables-iso5426.xml -o iso5426.c
 
 $(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
