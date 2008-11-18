@@ -1185,15 +1185,6 @@ BRACKET</name>
                                 <name>LOWERCASE ICELANDIC THORN / LATIN SMALL LETTER THORN (Icelandic)</name>
                         </code>
 			<!-- FD, FE, FF -->
-			
-			<!-- not yet defined
-                        <code>
-                                <marc>??</marc>
-                                <ucs>20AC</ucs>
-                                <utf-8>E282AC</utf-8>
-                                <name>EURO SIGN</name>
-                        </code>
-			-->
 		</characterSet>
 	</codeTable>
 </codeTables>
