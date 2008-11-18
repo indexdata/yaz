@@ -36,15 +36,18 @@ AM_YFLAGS=-p cql_
 
 # MARC8->UTF8 conversion is generated from codetables.xml
 marc8.c: charconv.tcl codetables.xml
-	$(TCLSH) $(srcdir)/charconv.tcl -p marc8 $(srcdir)/codetables.xml -o marc8.c
+	$(TCLSH) $(srcdir)/charconv.tcl -p marc8 $(srcdir)/codetables.xml -o $@
+	mv -f $@.tmp $@
 
 # UTF-8->MARC8 conversion is generated from codetables.xml
 marc8r.c: charconv.tcl codetables.xml
-	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o marc8r.c
+	$(TCLSH) $(srcdir)/charconv.tcl -r -p marc8r $(srcdir)/codetables.xml -o $@
+	mv -f $@.tmp $@
 
 # ISO5426->UTF8 conversion is generated from codetables-iso5426.xml
 iso5426.c: charconv.tcl codetables-iso5426.xml
-	$(TCLSH) $(srcdir)/charconv.tcl -p iso5426 $(srcdir)/codetables-iso5426.xml -o iso5426.c
+	$(TCLSH) $(srcdir)/charconv.tcl -p iso5426 $(srcdir)/codetables-iso5426.xml -o $@.tmp
+	mv -f $@.tmp $@
 
 # Generate OID database from CSV
 oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
