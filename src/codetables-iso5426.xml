@@ -858,7 +858,7 @@ BRACKET</name>
 				http://www.unicode.org/faq/char_combmark.html#18</note>
                                 <isCombining>true</isCombining>
                                 <marc>C8</marc>
-                                <ucs>034F0308</ucs>
+                                <ucs>0308</ucs> <!-- 034F0308 -->
                                 <utf-8>CC88</utf-8>
                                 <name>U+034F COMBINING GRAPHEME JOINER (CGJ) / tréma</name>
                         </code>
