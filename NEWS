@@ -1,3 +1,5 @@
+Added support for ISO5426 to UTF-8 conversion.
+
 --- 3.0.38 2008/11/10
 
 ZOOM C now only fires one ZOOM_EVENT_SEARCH per search-task. Previously,
