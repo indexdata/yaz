@@ -207,7 +207,7 @@ static void display_records(ZOOM_connection c,
                        schema ? schema : "unknown");
                 if (render)
                 {
-                    if (write(render, 1, len, stdout) != len)
+                    if (fwrite(render, 1, len, stdout) != len)
                     {
                         printf("write to stdout failed\n");
                     }
