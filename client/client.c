@@ -197,11 +197,12 @@ const char* query_type_as_string(QueryType q)
     }
 }
 
-static void do_hex_dump(const char* buf, int len)
+static void do_hex_dump(const char* buf, size_t len)
 {
     if (hex_dump)
     {
-        int i,x;
+        size_t i;
+        int x;
         for (i = 0; i < len ; i = i+16 )
         {
             printf(" %4.4d ",i);
@@ -590,7 +591,7 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
     }
     else if ((*arg)[0] == '<')
     {
-        long fsize;
+        size_t fsize;
         FILE *inf;
         const char *fname;
         const char *arg_start = ++(*arg);
@@ -3914,7 +3915,7 @@ static void handle_srw_record(Z_SRW_record *rec)
     if (rec->recordData_buf && rec->recordData_len)
     {
         if (fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout) !=
-            rec->recordData_len)
+            (size_t) (rec->recordData_len))
         {
             printf("write to stdout failed\n");
         }

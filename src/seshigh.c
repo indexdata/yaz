@@ -1657,7 +1657,7 @@ static int check_path(const char *path)
     return 1;
 }
 
-static char *read_file(const char *fname, ODR o, int *sz)
+static char *read_file(const char *fname, ODR o, size_t *sz)
 {
     char *buf;
     FILE *inf = fopen(fname, "rb");

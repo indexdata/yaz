@@ -76,7 +76,7 @@ int file_history_save(file_history_t fh)
     char* homedir = getenv("HOME");
     char fname[1024];
     int ret = 0;
-    int sz = wrbuf_len(fh->wr);
+    size_t sz = wrbuf_len(fh->wr);
 
     if (!sz)
         return 0;
@@ -116,11 +116,11 @@ int file_history_save(file_history_t fh)
 int file_history_trav(file_history_t fh, void *client_data,
                       void (*callback)(void *client_data, const char *line))
 {
-    int off = 0;
+    size_t off = 0;
 
     while (off < wrbuf_len(fh->wr))
     {
-        int i;
+        size_t i;
         for (i = off; i < wrbuf_len(fh->wr); i++)
         {
             if (wrbuf_buf(fh->wr)[i] == '\n')

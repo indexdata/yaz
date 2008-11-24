@@ -207,7 +207,7 @@ static void display_records(ZOOM_connection c,
                        schema ? schema : "unknown");
                 if (render)
                 {
-                    if (write(render, 1, len, stdout) != len)
+                    if (fwrite(render, 1, len, stdout) != (size_t) len)
                     {
                         printf("write to stdout failed\n");
                     }
@@ -215,7 +215,8 @@ static void display_records(ZOOM_connection c,
                 printf("\n");
                 if (opac_render)
                 {
-                    if (fwrite(opac_render, 1, opac_len, stdout) != opac_len)
+                    if (fwrite(opac_render, 1, opac_len, stdout) != (size_t) 
+                               opac_len)
                         printf("write to stdout failed\n");
                 }
             }
