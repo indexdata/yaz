@@ -105,7 +105,7 @@ int main(int argc, char **argv)
                             (db ? db : "unknown"));
                     if (rec)
                     {
-                        if (fwrite (str, 1, len, stdout) != len)
+                        if (fwrite (str, 1, len, stdout) != (size_t) len)
                             printf("write to stdout failed\n");
                     }
                     printf ("\n");

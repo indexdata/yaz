@@ -1051,7 +1051,7 @@ static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
         no = sscanf(cp, "%d=%20[^,]%n", &pos, val, &no_read);
         if (no < 2 || no_read < 3)
             return -1;
-        if (pos < 0 || pos >= size)
+        if (pos < 0 || (size_t) pos >= size)
             return -1;
 
         if (*val == '\'')

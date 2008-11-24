@@ -30,7 +30,7 @@ static void display_records (const char *tname, ZOOM_resultset r)
                 printf ("%d %s\n", pos+1, (db ? db : "unknown"));
                 if (render)
                 {
-                    if (fwrite (render, 1, len, stdout) != len)
+                    if (fwrite (render, 1, len, stdout) != (size_t) len)
                         printf("write to stdout failed\n");
                 }
                 printf ("\n");

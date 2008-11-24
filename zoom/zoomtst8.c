@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         {
             int j;
             printf ("%s\n", ZOOM_connection_option_get(z[i], "host"));
-            for (j = 0; j<ZOOM_scanset_size (s[i]); j++)
+            for (j = 0; j < (int) ZOOM_scanset_size (s[i]); j++)
             {
                 int occur, len;
                 const char *term;

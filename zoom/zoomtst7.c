@@ -159,7 +159,7 @@ int main(int argc, char **argv)
                 while (ZOOM_event (1, &z))
                     ;
             printf (" scan size = %ld\n", (long) ZOOM_scanset_size(scan));
-            for (j = 0; j<ZOOM_scanset_size (scan); j++)
+            for (j = 0; j < (int) ZOOM_scanset_size (scan); j++)
             {
                 int occur, len;
                 const char *term;

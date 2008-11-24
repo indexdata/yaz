@@ -20,7 +20,7 @@ static int arg_off = 0;
 int options (const char *desc, char **argv, int argc, char **arg)
 {
     const char *opt_buf = 0;
-    int i = 0;
+    size_t i = 0;
     int ch = 0;
     
     if (arg_no >= argc)
@@ -55,7 +55,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
         int type = 0;
         while (desc[i] == '{')
         {
-            int i0 = ++i;
+            size_t i0 = ++i;
             while (desc[i] && desc[i] != '}')
                 i++;
             if (opt_buf && (i - i0) == strlen(opt_buf) &&

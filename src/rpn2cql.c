@@ -99,7 +99,7 @@ static int rpn2cql_simple(cql_transform_t ct,
 
         if (term)
         {
-            int i;
+            size_t i;
             int must_quote = 0;
             for (i = 0 ; i < lterm; i++)
                 if (sterm[i] == ' ')
