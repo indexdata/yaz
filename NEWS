@@ -1,4 +1,12 @@
+For configure, using option --without-xml2 also disables Libxslt/Libexslt
+support.
+
 Added support for ISO5426 to UTF-8 conversion.
+
+zget_InitRequest/zget_InitResponse returns GIT SHA1 hash as part of 
+implementation version.
+
+Function yaz_version returns GIT SHA1 hash for parameter sha1_str.
 
 --- 3.0.38 2008/11/10
 
