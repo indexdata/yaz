@@ -103,6 +103,12 @@ When building from a CVS checkout, you need these Debian packages:
   xsltproc, docbook, docbook-xml, docbook-xsl,
   libxslt1-dev, libssl-dev, libreadline5-dev, libwrap0-dev,
   libpcap0.8-dev
+
+Also perhaps: libgnutls-dev libicu-dev
+
+And if you want to make a Debian package: dpkg-dev fakeroot debhelper
+(Then run "dpkg-buildpackage -rfakeroot" in this directory.)
+
 EOF
     fi
     if [ "`uname -s`" = FreeBSD ]; then
