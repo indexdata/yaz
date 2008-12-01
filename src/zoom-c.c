@@ -1375,11 +1375,10 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
     ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_3);
     
-    /* Index Data's Z39.50 Implementor Id is 81 */
     ireq->implementationId =
         odr_prepend(c->odr_out,
                     ZOOM_options_get(c->options, "implementationId"),
-                    odr_prepend(c->odr_out, "81", ireq->implementationId));
+                    ireq->implementationId);
     
     ireq->implementationName = 
         odr_prepend(c->odr_out,
@@ -1387,14 +1386,10 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
                     odr_prepend(c->odr_out, "ZOOM-C",
                                 ireq->implementationName));
     
-    version = odr_strdup(c->odr_out, "$Revision: 1.154 $");
-    if (strlen(version) > 10)   /* check for unexpanded CVS strings */
-        version[strlen(version)-2] = '\0';
     ireq->implementationVersion = 
         odr_prepend(c->odr_out,
                     ZOOM_options_get(c->options, "implementationVersion"),
-                    odr_prepend(c->odr_out, &version[11],
-                                ireq->implementationVersion));
+                                ireq->implementationVersion);
     
     *ireq->maximumRecordSize = c->maximum_record_size;
     *ireq->preferredMessageSize = c->preferred_message_size;
