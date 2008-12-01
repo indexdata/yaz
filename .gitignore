@@ -18,3 +18,7 @@ build-stamp
 config.guess
 config.sub
 *~
+debian/*.debhelper.log
+debian/*.substvars
+debian/*.postinst.debhelper
+debian/*.postrm.debhelper
