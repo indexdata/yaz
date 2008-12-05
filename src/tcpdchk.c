@@ -10,24 +10,22 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <winsock.h>
+#endif
+
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
-#ifdef WIN32
-#include <winsock.h>
-#else
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
+#if HAVE_NETDB_H
 #include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
 #endif
 
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#include <yaz/yconfig.h>
 #include <yaz/comstack.h>
 #include <yaz/statserv.h>
 #include <yaz/log.h>

@@ -23,7 +23,8 @@
 
 #ifdef WIN32
 #include <winsock.h>
-#else
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

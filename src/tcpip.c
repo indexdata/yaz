@@ -25,7 +25,6 @@
 #endif
 
 #ifdef WIN32
-
 /* VS 2003 or later has getaddrinfo; older versions do not */
 #include <winsock2.h>
 #if _MSC_VER >= 1300
@@ -34,14 +33,20 @@
 #else
 #define HAVE_GETADDRINFO 0
 #endif
-
-#else
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
 #endif
 
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
