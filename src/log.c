@@ -14,6 +14,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <sys/stat.h>
 #endif
 
 #if HAVE_SYS_STAT_H

@@ -27,10 +27,6 @@
 #include <sys/types.h>
 #endif
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
 #include <fcntl.h>
 
 #if HAVE_PWD_H
