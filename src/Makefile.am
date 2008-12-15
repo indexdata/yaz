@@ -105,7 +105,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c \
   copy_types.c match_glob.c poll.c daemon.c \
   iconv_encode_marc8.c iconv_encode_iso_8859_1.c iconv_encode_wchar.c \
-  iconv_decode_marc8.c iconv_decode_iso5426.c sc.c
+  iconv_decode_marc8.c iconv_decode_iso5426.c iconv_decode_danmarc.c sc.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
