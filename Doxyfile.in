@@ -244,12 +244,12 @@ EXTRACT_ALL            = YES
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class 
 # will be included in the documentation.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_STATIC tag is set to YES all static members of a file 
 # will be included in the documentation.
 
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES classes (and structs) 
 # defined locally in source files will be included in the documentation. 
@@ -1058,7 +1058,8 @@ PREDEFINED             = "YAZ_BEGIN_CDECL=  " \
                          "YAZ_END_CDECL= " \
                          "YAZ_EXPORT= " \
                          "YAZ_HAVE_XML2=1 " \
-                         "YAZ_HAVE_XSLT=1 "
+                         "YAZ_HAVE_XSLT=1 " \
+                         "HAVE_GETADDRINFO=1 "
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
