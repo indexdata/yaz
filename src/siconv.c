@@ -92,6 +92,8 @@ static int prepare_decoders(yaz_iconv_t cd, const char *tocode)
         return 1;
     if (yaz_wchar_decoder(tocode, &cd->decoder))
         return 1;
+    if (yaz_danmarc_decoder(tocode, &cd->decoder))
+        return 1;
     return 0;
 }
 

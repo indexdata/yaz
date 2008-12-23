@@ -418,8 +418,27 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
     return 1;
 }
 
-
 #if HAVE_GETADDRINFO
+/** \brief Creates socket using particular address family (AF_)
+    \param ai getaddrinfo result
+    \param mask family mask
+    \returns socket or -1 if none could be created
+
+*/
+static int create_socket_family(struct addrinfo *ai, unsigned mask)
+{
+    for (; ai; ai = ai->ai_next)
+    {
+        if ((ai->ai_family & mask) == mask)
+        {
+            int s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+            if (s != -1)
+                return s;
+        }
+    }
+    return -1;
+}
+
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -434,14 +453,13 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     sp->ai = tcpip_getaddrinfo(str, port);
     if (sp->ai && h->state == CS_ST_UNBND)
     {
-        int s = -1;
-        struct addrinfo *ai = sp->ai;
-        for (; ai; ai = ai->ai_next)
-        {
-            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-            if (s != -1)
-                break;
-        }
+        /* The getaddrinfo call may return multiple addresses when passive
+           flags are used (AI_PASSIVE). This function picks the IPV6 if a
+           socket can be created for it. Otherwise IPV4 is used.
+           See also bug #2350 */
+        int s = create_socket_family(sp->ai, AF_INET6);
+        if (s == -1)
+            s = create_socket_family(sp->ai, AF_INET);
         if (s == -1)
             return 0;
         h->iofile = s;
