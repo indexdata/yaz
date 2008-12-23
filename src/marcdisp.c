@@ -467,7 +467,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
                    the code is a single character .. However we've
                    seen multibyte codes, so see how big it really is */
                 size_t using_code_len = 
-                    (identifier_length != 2) ? identifier_length - 1
+                    (identifier_length > 2) ? identifier_length - 1
                     :
                     cdata_one_character(mt, s->code_data);
                 
@@ -616,7 +616,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                    the code is a single character .. However we've
                    seen multibyte codes, so see how big it really is */
                 size_t using_code_len = 
-                    (identifier_length != 2) ? identifier_length - 1
+                    (identifier_length > 2) ? identifier_length - 1
                     :
                     cdata_one_character(mt, s->code_data);
                 
@@ -786,7 +786,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                    the code is a single character .. However we've
                    seen multibyte codes, so see how big it really is */
                 size_t using_code_len = 
-                    (identifier_length != 2) ? identifier_length - 1
+                    (identifier_length > 2) ? identifier_length - 1
                     :
                     cdata_one_character(mt, s->code_data);
 
