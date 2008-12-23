@@ -434,6 +434,17 @@ int yaz_marc_write_check(yaz_marc_t mt, WRBUF wr)
     return 0;
 }
 
+static size_t get_subfield_len(yaz_marc_t mt, const char *data,
+                               int identifier_length)
+{
+    /* if identifier length is 2 (most MARCs) or less (probably an error),
+       the code is a single character .. However we've
+       seen multibyte codes, so see how big it really is */
+    if (identifier_length > 2)
+        return identifier_length - 1;
+    else
+        return cdata_one_character(mt, data);
+}
 
 int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
 {
@@ -463,13 +474,8 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
                          n->u.datafield.indicator);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                /* if identifier length is 2 (most MARCs),
-                   the code is a single character .. However we've
-                   seen multibyte codes, so see how big it really is */
-                size_t using_code_len = 
-                    (identifier_length > 2) ? identifier_length - 1
-                    :
-                    cdata_one_character(mt, s->code_data);
+                size_t using_code_len = get_subfield_len(mt, s->code_data,
+                                                         identifier_length);
                 
                 wrbuf_puts (wr, mt->subfield_str); 
                 wrbuf_iconv_write(wr, mt->iconv_cd, s->code_data, 
@@ -612,14 +618,8 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, ">\n");
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                /* if identifier length is 2 (most MARCs),
-                   the code is a single character .. However we've
-                   seen multibyte codes, so see how big it really is */
-                size_t using_code_len = 
-                    (identifier_length > 2) ? identifier_length - 1
-                    :
-                    cdata_one_character(mt, s->code_data);
-                
+                size_t using_code_len = get_subfield_len(mt, s->code_data,
+                                                         identifier_length);
                 wrbuf_iconv_puts(wr, mt->iconv_cd, "    <subfield code=\"");
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data, using_code_len);
@@ -782,14 +782,8 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 xmlNode *ptr_subfield;
-                /* if identifier length is 2 (most MARCs),
-                   the code is a single character .. However we've
-                   seen multibyte codes, so see how big it really is */
-                size_t using_code_len = 
-                    (identifier_length > 2) ? identifier_length - 1
-                    :
-                    cdata_one_character(mt, s->code_data);
-
+                size_t using_code_len = get_subfield_len(mt, s->code_data,
+                                                         identifier_length);
                 wrbuf_rewind(wr_cdata);
                 wrbuf_iconv_puts(wr_cdata, mt->iconv_cd,
                                  s->code_data + using_code_len);
