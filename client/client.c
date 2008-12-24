@@ -890,7 +890,8 @@ static void display_record(Z_External *r)
     {
         print_record((const unsigned char *) r->u.octet_aligned->buf,
                      r->u.octet_aligned->len);
-        marc_file_write(r->u.octet_aligned->buf, r->u.octet_aligned->len);
+        marc_file_write((const char *) r->u.octet_aligned->buf,
+                        r->u.octet_aligned->len);
     }
     else if (oid && r->which == Z_External_octet)
     {
@@ -981,7 +982,7 @@ static void display_record(Z_External *r)
             return;
         }
         print_record(r->u.sutrs->buf, r->u.sutrs->len);
-        marc_file_write(r->u.sutrs->buf, r->u.sutrs->len);
+        marc_file_write((const char *) r->u.sutrs->buf, r->u.sutrs->len);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {

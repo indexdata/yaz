@@ -77,7 +77,7 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
             else
             {
                 unsigned long v;
-                sscanf(inp+1, "%4lx", &v);
+                sscanf((const char *) inp+1, "%4lx", &v);
                 *no_read = 5;
                 x = v;
             }
