@@ -1362,7 +1362,6 @@ static zoom_ret ZOOM_connection_send_init(ZOOM_connection c)
     Z_InitRequest *ireq = apdu->u.initRequest;
     Z_IdAuthentication *auth = (Z_IdAuthentication *)
         odr_malloc(c->odr_out, sizeof(*auth));
-    char *version;
 
     ODR_MASK_SET(ireq->options, Z_Options_search);
     ODR_MASK_SET(ireq->options, Z_Options_present);
