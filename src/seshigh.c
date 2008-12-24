@@ -1710,7 +1710,7 @@ static void process_http_request(association *assoc, request *req)
         }
         else
         {
-            int content_size = 0;
+            size_t content_size = 0;
             char *content_buf = read_file(hreq->path+1, o, &content_size);
             if (!content_buf)
             {
