@@ -151,6 +151,7 @@ ZOOM_connection_last_event(ZOOM_connection cs);
 #define ZOOM_EVENT_RECV_RECORD 8
 #define ZOOM_EVENT_RECV_SEARCH 9
 #define ZOOM_EVENT_END 10
+#define ZOOM_EVENT_MAX 10
 
 /* ----------------------------------------------------------- */
 /* result sets */
