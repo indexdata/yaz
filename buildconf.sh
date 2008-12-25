@@ -4,6 +4,7 @@ automake=automake
 aclocal=aclocal
 autoconf=autoconf
 libtoolize=libtoolize
+autoheader=autoheader
 
 test -d config || mkdir config
 if [ -d .git ]; then
@@ -17,6 +18,7 @@ if [ "`uname -s`" = FreeBSD ]; then
     aclocal="aclocal19 -I /usr/local/share/aclocal"
     autoconf=autoconf259
     libtoolize=libtoolize15
+    autoheader=autoheader259
 fi
 
 if [ "`uname -s`" = Darwin ]; then
@@ -35,6 +37,9 @@ fi
 
 set -x
 $aclocal -I m4
+if grep AC_CONFIG_HEADERS configure.ac >/dev/null; then
+    $autoheader
+fi
 $libtoolize --automake --force 
 $automake --add-missing 
 $autoconf
