@@ -107,6 +107,9 @@ if test "$yaz_echo_source" = "yes"; then
         if test "$lib_server" = "yes"; then
     	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB"
         fi
+        if test "$lib_icu" = "yes"; then
+    	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_icu.a $YAZLIB"
+        fi
     else
         YAZLIB="-L${yaz_build_root}/src/.libs $lyaz"
     fi
