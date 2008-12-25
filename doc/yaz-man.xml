@@ -24,12 +24,6 @@
   <refpurpose>Z39.50 toolkit.</refpurpose>
  </refnamediv>
  
- <refsynopsisdiv>
-  <cmdsynopsis>
-   <command>YAZ</command>
-  </cmdsynopsis>
- </refsynopsisdiv>
- 
  <refsect1><title>DESCRIPTION</title>
   <para>
    YAZ is a C/C++ programmer's toolkit supporting the development
