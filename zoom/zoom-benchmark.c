@@ -15,10 +15,10 @@
 
 
 /* naming events */
-static char* zoom_events[10];
+static char* zoom_events[ZOOM_EVENT_MAX+1];
 
 /* re-sorting event numbers to progress numbers */
-static int zoom_progress[10];
+static int zoom_progress[ZOOM_EVENT_MAX+1];
 
 /* commando line parameters */
 static struct parameters_t { 
