@@ -66,7 +66,7 @@ case $1 in
 esac
 
 if $enable_configure; then
-    if test -n "$sh_flags"; then
+    if test -n "$sh_cflags"; then
 	CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure --disable-shared --enable-static $*
     else
 	./configure $*
