@@ -914,14 +914,31 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
+        else if (!strcmp((const char *) node->name, "normalize"))
+        {
+            yaz_log(YLOG_WARN, "Element %s is deprecated. "
+                    "Use transform instead", node->name);
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_normalize, 
+                                         (const uint8_t *) xml_rule, status);
+        }
+        else if (!strcmp((const char *) node->name, "index")
+                 || !strcmp((const char *) node->name, "sortkey"))
+        {
+            yaz_log(YLOG_WARN, "Element %s is no longer needed. "
+                    "Remove it from the configuration", node->name);
+        }
+        else
+        {
+            yaz_log(YLOG_WARN, "Unknown element %s", node->name);
+            icu_chain_destroy(chain);
+            return 0;
+        }
         xmlFree(xml_rule);
-        if (!step || U_FAILURE(*status))
+        if (step && U_FAILURE(*status))
         {
             icu_chain_destroy(chain);
             return 0;
         }
-        
-
     }
     return chain;
 }
