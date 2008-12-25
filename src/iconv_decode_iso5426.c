@@ -110,6 +110,8 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     return x;
 }
 
+#if 0
+/* not used */
 static unsigned long read_iso5426s(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                  unsigned char *inp,
                                  size_t inbytesleft, size_t *no_read)
@@ -126,6 +128,7 @@ static unsigned long read_iso5426s(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     }
     return x;
 }
+#endif
 
 static unsigned long yaz_read_iso5426_comb(yaz_iconv_t cd,
                                          struct decoder_data *data,
