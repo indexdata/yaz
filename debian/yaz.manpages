@@ -4,3 +4,4 @@ debian/tmp/usr/share/man/man1/zoomsh.1
 debian/tmp/usr/share/man/man1/yaz-marcdump.1
 debian/tmp/usr/share/man/man1/yaz-iconv.1
 debian/tmp/usr/share/man/man7/yaz-log.7
+debian/tmp/usr/share/man/man7/bib1-attr.7
