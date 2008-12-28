@@ -252,6 +252,10 @@
      <refentrytitle>yaz</refentrytitle>
      <manvolnum>7</manvolnum>
     </citerefentry>
+    <citerefentry>
+     <refentrytitle>bib1-attr</refentrytitle>
+     <manvolnum>7</manvolnum>
+    </citerefentry>
    </para>
   </refsect1>
 </refentry>

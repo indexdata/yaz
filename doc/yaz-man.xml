@@ -105,6 +105,10 @@
      <refentrytitle>zoomsh</refentrytitle>
      <manvolnum>1</manvolnum>
     </citerefentry>
+    <citerefentry>
+     <refentrytitle>bib1-attr</refentrytitle>
+     <manvolnum>7</manvolnum>
+    </citerefentry>
   </para>
   <para>YAZ manual (
    <filename>&prefix;/share/doc/yaz</filename>)

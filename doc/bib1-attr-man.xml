@@ -20,7 +20,7 @@
  </refmeta>
  
  <refnamediv>
-  <refname>bib1_attr</refname>
+  <refname>bib1-attr</refname>
   <refpurpose>Bib-1 Attribute Set</refpurpose>
  </refnamediv>
  
@@ -219,7 +219,7 @@
  
  <refsect1><title>SEE ALSO</title>
   <para>
-   <ulink url="&url.z39.50;">Z39.50 Maintenance Agency Page</ulink>.
+   <ulink url="&url.z39.50.attset.bib1;">Bib-1 Attribute Set</ulink>
   </para>
   <para>
    <ulink url="http://www.loc.gov/z3950/agency/bib1.html">Attibute

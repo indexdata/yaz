@@ -15,11 +15,11 @@ HTMLFILES = index.html
 MANFILES=yaz-client.1 yaz-ztest.8 \
 	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
 	yaz-marcdump.1 yaz-iconv.1 yaz-log.7 \
-	yaz-illclient.1 yaz-icu.1 bib1_attr.7
+	yaz-illclient.1 yaz-icu.1 bib1-attr.7
 REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml \
-	yaz-illclient-man.xml yaz-icu-man.xml bib1-man.xml
+	yaz-illclient-man.xml yaz-icu-man.xml bib1-attr-man.xml
 
 SUPPORTFILES=entities.ent apilayer.obj local.ent.in
 
@@ -44,8 +44,8 @@ yaz-config.8: yaz-config-man.xml
 yaz.7: yaz-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-man.xml
 
-bib1_attr.7: bib1-man.xml
-	$(MAN_COMPILE) $(srcdir)/bib1-man.xml
+bib1-attr.7: bib1-attr-man.xml
+	$(MAN_COMPILE) $(srcdir)/bib1-attr-man.xml
 
 zoomsh.1: zoomsh-man.xml
 	$(MAN_COMPILE) $(srcdir)/zoomsh-man.xml
