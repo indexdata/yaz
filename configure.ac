@@ -396,7 +396,7 @@ WIN_FILEVERSION=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { m = $4; pri
 AC_SUBST([WIN_FILEVERSION])
 YAZ_VERSION_HEX=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { printf("%x", ($1 * 256 + $2) * 256 + $3);}'`
 AC_SUBST([YAZ_VERSION_HEX])
-if test ${srcdir}/.git; then
+if test -d ${srcdir}/.git; then
     VERSION_SHA1=`git show --pretty=format:%H|head -1`
 else
     VERSION_SHA1=`head -1 ${srcdir}/ChangeLog|awk '{print $2}'`
