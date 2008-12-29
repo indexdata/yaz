@@ -1,3 +1,7 @@
+--- 3.0.41 2008/12/29
+
+Fixed Fixed test that makes VERSION_SHA1 appear on dist versions too.
+
 --- 3.0.40 2008/12/29
 
 For configure, using option --without-xml2 also disables Libxslt/Libexslt
