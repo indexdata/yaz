@@ -83,6 +83,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_mandir}/man1/yaz-marcdump.*
 %{_mandir}/man1/yaz-iconv.*
 %{_mandir}/man7/yaz-log.*
+%{_mandir}/man7/bib1-attr.*
 
 %files -n libyaz3
 %defattr(-,root,root)
