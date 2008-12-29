@@ -1,5 +1,13 @@
+--- 3.0.40 2008/12/29
+
 For configure, using option --without-xml2 also disables Libxslt/Libexslt
 support.
+
+Fixed bug #2352: yaz-marcdump crashes for certain record.
+
+Added man page 'bib1-attr' which includes list of common Bib-1 attributes.
+
+Added support for Danmarc2 to UTF-8 conversion.
 
 Added support for ISO5426 to UTF-8 conversion.
 
