@@ -26,8 +26,9 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
  marccol3.u8.marc marccol3.u8.1.lst marccol3.u8.2.lst \
  marccol4.u8.marc marccol4.u8.1.lst marccol4.u8.2.lst \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
- tst_record_conv.xsl \
- tsticu-0.xml tsticu-0.input tsticu-0.output
+ tsticu-0.xml tsticu-0.input tsticu-0.output \
+ tsticu-1.xml tsticu-1.input tsticu-1.output \
+ tst_record_conv.xsl 
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)

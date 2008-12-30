@@ -1,0 +1,7 @@
+<icu_chain locale="en">
+  <transform rule="[:Control:] Any-Remove"/>
+  <tokenize rule="l"/>
+  <transform rule="NFD; [[:WhiteSpace:][:Punctuation:][:Diacritic:]] Remove"/>
+  <display/>
+  <casemap rule="l"/>
+</icu_chain>
