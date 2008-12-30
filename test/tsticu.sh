@@ -5,7 +5,6 @@
 # Writes tsticu-[0-9].output / output.tmp files
 # Config tsticu-[0-9].xml
 
-set -x
 srcdir=${srcdir:-.}
 ecode=0
 
