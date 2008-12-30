@@ -438,11 +438,11 @@ static void process_text_file(const struct config_t *p_config)
     UErrorCode status = U_ZERO_ERROR;
     int success = 0;
     
-    if (! xml_node)
+    if (!xml_node)
     {   
         printf("Could not parse XML config file '%s' \n",
                 config.conffile);
-        exit (1);
+        exit(1);
     }
 
     config.chain = icu_chain_xml_config(xml_node, 1, &status);
@@ -452,7 +452,7 @@ static void process_text_file(const struct config_t *p_config)
     else {   
         printf("Could not set up ICU chain from config file '%s' \n",
                 config.conffile);
-        exit (1);
+        exit(1);
     }
 
     if (p_config->xmloutput)
@@ -539,7 +539,7 @@ int main(int argc, char **argv)
     exit(3);
 #endif /* YAZ_HAVE_ICU */
 
-    return(0);
+    return 0;
 }
 
 
