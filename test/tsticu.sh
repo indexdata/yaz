@@ -18,7 +18,7 @@ for f in ${srcdir}/tsticu-[0-9].input; do
     CONFIG=${srcdir}/${fb}.xml
     NEW=${fb}.output.tmp
     OLD=${srcdir}/${fb}.output
-    DIFF=`basename ${f}`.diff
+    DIFF=`basename ${fb}`.diff
     ../util/yaz-icu -c $CONFIG <$f > $NEW
     if test $? != "0"; then
 	echo "$f: yaz-icu returned error"
