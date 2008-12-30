@@ -26,6 +26,7 @@ tst_comstack
 tst_query_charset
 tst_icu_I18N
 tst_match_glob
+tst_rpn2cql
 nfatest1
 nfaxmltest1
 tst_oid
