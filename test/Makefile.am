@@ -5,7 +5,7 @@ check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob tst_rpn2cql
-check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh
+check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
@@ -26,7 +26,8 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
  marccol3.u8.marc marccol3.u8.1.lst marccol3.u8.2.lst \
  marccol4.u8.marc marccol4.u8.1.lst marccol4.u8.2.lst \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
- tst_record_conv.xsl 
+ tst_record_conv.xsl \
+ tsticu-0.xml tsticu-0.input tsticu-0.output
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
