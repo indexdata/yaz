@@ -393,7 +393,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     if(U_FAILURE(status))
     {
         fprintf(stderr, "ICU Error: %d %s\n", status, u_errorName(status));
-        exit(status);
+        exit(2);
     }
 }
 
@@ -536,6 +536,7 @@ int main(int argc, char **argv)
            "re-configure and re-compile\n");
 
 
+    exit(3);
 #endif /* YAZ_HAVE_ICU */
 
     return(0);
