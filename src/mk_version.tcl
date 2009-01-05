@@ -44,7 +44,7 @@ set maps(VERSION) $version
 set c [split $version .]
 
 set versionl [expr ([lindex $c 0] * 256 + [lindex $c 1]) * 256 + [lindex $c 2]]
-set maps(YAZ_VERSION_HEX) [format %x $versionl]
+set maps(VERSION_HEX) [format %x $versionl]
 
 if {[llength $c] == 3} {
     lappend c 1
