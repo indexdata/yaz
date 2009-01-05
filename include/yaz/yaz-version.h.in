@@ -36,7 +36,7 @@
 #define YAZ_VERSION "@VERSION@"
 
 /** \brief YAZ version as integer (for comparison purposes) */
-#define YAZ_VERSIONL 0x@YAZ_VERSION_HEX@
+#define YAZ_VERSIONL 0x@VERSION_HEX@
 
 /** \brief YAZ file version for YAZ DLL (resource) */
 #define YAZ_FILEVERSION @WIN_FILEVERSION@
