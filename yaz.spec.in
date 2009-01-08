@@ -71,7 +71,7 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc README LICENSE NEWS TODO
+%doc README LICENSE NEWS
 %{_bindir}/yaz-client
 %{_bindir}/yaz-ztest
 %{_bindir}/zoomsh
