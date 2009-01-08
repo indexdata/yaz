@@ -367,7 +367,7 @@ fi
 
 dnl
 dnl 
-AC_CHECK_ICU([3.6],[
+AC_CHECK_ICU([3.4],[
 	if test "$xml_enabled" = "true"; then
 	    ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"
 	else
