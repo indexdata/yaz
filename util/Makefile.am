@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2008 Index Data
+## Copyright (C) 1995-2009 Index Data
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
