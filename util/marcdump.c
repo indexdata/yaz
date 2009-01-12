@@ -58,11 +58,22 @@ static char *prog;
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-c cfile] [-f from] [-t to] "
-             "[-i format] [-o format] "
-             "[-n] [-l pos=value] [-v] [-C chunk] [-s splitfname] [-p] file...\n",
+    fprintf (stderr, "Usage: %s [-i format] [-o format] [-f from] [-t to] "
+             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
+             "[-p] [-v] [-V] file...\n",
              prog);
 } 
+
+static void show_version(void)
+{
+    char vstr[20], sha1_str[41];
+
+    yaz_version(vstr, sha1_str);
+    printf("YAZ version: %s %s\n", YAZ_VERSION, YAZ_VERSION_SHA1);
+    if (strcmp(sha1_str, YAZ_VERSION_SHA1))
+        printf("YAZ DLL/SO: %s %s\n", vstr, sha1_str);
+    exit(0);
+}
 
 static int getbyte_stream(void *client_data)
 {
@@ -402,7 +413,7 @@ int main (int argc, char **argv)
 #endif
 
     prog = *argv;
-    while ((r = options("i:o:C:npvc:xOeXIf:t:s:l:", argv, argc, &arg)) != -2)
+    while ((r = options("i:o:C:npc:xOeXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
@@ -498,6 +509,9 @@ int main (int argc, char **argv)
             break;
         case 'v':
             verbose++;
+            break;
+        case 'V': 
+            show_version();
             break;
         default:
             usage(prog);

@@ -31,11 +31,13 @@
    <arg choice="opt"><option>-f <replaceable>from</replaceable></option></arg>
    <arg choice="opt"><option>-t <replaceable>to</replaceable></option></arg>
    <arg choice="opt"><option>-l <replaceable>spec</replaceable></option></arg>
-   <arg choice="opt"><option>-v</option></arg>
    <arg choice="opt"><option>-c <replaceable>cfile</replaceable></option></arg>
    <arg choice="opt"><option>-s <replaceable>prefix</replaceable></option></arg>
    <arg choice="opt"><option>-C <replaceable>size</replaceable></option></arg>
+   <arg choice="opt"><option>-n</option></arg>
    <arg choice="opt"><option>-p</option></arg>
+   <arg choice="opt"><option>-v</option></arg>
+   <arg choice="opt"><option>-V</option></arg>
    <arg choice="opt" rep="repeat">file</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -122,14 +124,6 @@
    </varlistentry>
 
    <varlistentry>
-    <term>-v</term>
-    <listitem><para>
-      Writes more information about the parsing process.
-      Useful if you have ill-formatted ISO2709 records as input.
-     </para></listitem>
-   </varlistentry>
-
-   <varlistentry>
     <term>-s <replaceable>prefix</replaceable></term>
     <listitem><para>
       Writes a chunk of records to a separate file with prefix given,
@@ -152,6 +146,28 @@
     <listitem><para>
       Makes yaz-marcdump prints record number and input file offset
       of each record read.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-n</term>
+    <listitem><para>
+      MARC output is omitted so that MARC input is only checkecd.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-v</term>
+    <listitem><para>
+      Writes more information about the parsing process.
+      Useful if you have ill-formatted ISO2709 records as input.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-V</term>
+    <listitem><para>
+      Prints YAZ version.
      </para></listitem>
    </varlistentry>
 
