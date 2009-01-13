@@ -66,7 +66,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
         }
         if (desc[i] == ':')
         {       /* option with string argument */
-                type = desc[i++];
+            type = desc[i++];
         }
         if (desc_char == ch)
         { 
