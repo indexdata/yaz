@@ -90,9 +90,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
             }
             else /* option with no argument */
             {
-                if (argv[arg_no][arg_off])
-                    arg_off++;
-                else
+                if (!argv[arg_no][arg_off])
                 {
                     arg_off = 0;
                     arg_no++;
