@@ -30,6 +30,7 @@ static struct config_t {
     char conffile[1024];
     char print[1024];
     int xmloutput;
+    int sortoutput;
     yaz_icu_chain_t chain;
     FILE * infile;
     FILE * outfile;
@@ -43,6 +44,7 @@ void print_option_error(const struct config_t *p_config)
     fprintf(stderr, "yaz-icu\n"
             "   [-c (path/to/config/file.xml)]\n"
             "   [-p (a|c|l|t)] print ICU info \n"
+            "   [-s] Show sort normalization key\n"
             "   [-x] XML output\n"
             "\n"
             "Examples:\n"
@@ -71,13 +73,14 @@ void read_params(int argc, char **argv, struct config_t *p_config)
     p_config->conffile[0] = 0;
     p_config->print[0] = 0;
     p_config->xmloutput = 0;
+    p_config->sortoutput = 0;
     p_config->chain = 0;
     p_config->infile = stdin;
     p_config->outfile = stdout;
     
     /* set up command line parameters */
     
-    while ((ret = options("c:p:x", argv, argc, &arg)) != -2)
+    while ((ret = options("c:p:xs", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -87,10 +90,14 @@ void read_params(int argc, char **argv, struct config_t *p_config)
         case 'p':
             strcpy(p_config->print, arg);
             break;
+        case 's':
+            p_config->sortoutput = 1;
+            break;
         case 'x':
             p_config->xmloutput = 1;
             break;
         default:
+            printf("Got %d\n", ret);
             print_option_error(p_config);
         }
     }
@@ -482,20 +489,31 @@ static void process_text_file(const struct config_t *p_config)
                     /* should XML encode this. Bug #1902 */
                     fprintf(config.outfile, 
                             "<token id=\"%lu\" line=\"%lu\""
-                            " norm=\"%s\" display=\"%s\" sortkey=\"%s\"/>\n",
+                            " norm=\"%s\" display=\"%s\"",
                             token_count,
                             line_count,
                             icu_chain_token_norm(config.chain),
-                            icu_chain_token_display(config.chain),
-                            wrbuf_cstr(sw));
+                            icu_chain_token_display(config.chain));
+                    if (p_config->sortoutput)
+                    {
+                        fprintf(config.outfile, " sortkey=\"%s\"",
+                                wrbuf_cstr(sw));
+                    }
+                    fprintf(config.outfile, "/>\n");
                 }
                 else
-                    fprintf(config.outfile, "%lu %lu '%s' '%s' '%s'\n",
+                {
+                    fprintf(config.outfile, "%lu %lu '%s' '%s'",
                             token_count,
                             line_count,
                             icu_chain_token_norm(config.chain),
-                            icu_chain_token_display(config.chain),
-                            wrbuf_cstr(sw));
+                            icu_chain_token_display(config.chain));
+                    if (p_config->sortoutput)
+                    {
+                        fprintf(config.outfile, " '%s'", wrbuf_cstr(sw));
+                    }
+                    fprintf(config.outfile, "\n");
+                }
             }
             wrbuf_destroy(sw);
         }
@@ -546,6 +564,7 @@ int main(int argc, char **argv)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

@@ -30,6 +30,7 @@
    <arg choice="opt" rep="repeat">commands</arg>
    <arg>-c <replaceable>config</replaceable></arg>
    <arg>-p <replaceable>opt</replaceable></arg>
+   <arg>-s</arg>
    <arg>-x</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -65,7 +66,15 @@
    </varlistentry>
 
    <varlistentry>
-    <term>-x <replaceable>config</replaceable></term>
+    <term>-s</term>
+    <listitem><para>
+      Specifies that output should include sort key as well. Note that
+      sort key differs between ICU versions.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-x</term>
     <listitem><para>
       Specifies that output should be XML based rather than
       "text" based.
