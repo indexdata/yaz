@@ -32,7 +32,7 @@ Retrieval.
 %package -n libyaz3-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz3 = %{version} libxml2-devel libxslt-devel
+Requires: libyaz3 = %{version} libxml2-devel libxslt-devel libicu-devel gnutls-devel %{TCPWRAPPER}
 Conflicts: libyaz-devel
 
 %description -n libyaz3-devel
