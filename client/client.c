@@ -205,7 +205,7 @@ static void do_hex_dump(const char* buf, size_t len)
         int x;
         for (i = 0; i < len ; i = i+16 )
         {
-            printf(" %4.4d ",i);
+            printf(" %4.4ld ", (long) i);
             for(x=0 ; i+x<len && x<16; ++x)
             {
                 printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
