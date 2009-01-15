@@ -544,6 +544,7 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

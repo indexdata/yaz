@@ -163,6 +163,7 @@ int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

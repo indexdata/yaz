@@ -576,6 +576,7 @@ void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

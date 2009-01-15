@@ -266,6 +266,7 @@ void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

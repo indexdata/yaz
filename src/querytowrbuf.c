@@ -253,6 +253,7 @@ void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

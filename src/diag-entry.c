@@ -25,6 +25,7 @@ const char *yaz_diag_to_str(struct yaz_diag_entry *tab, int code)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

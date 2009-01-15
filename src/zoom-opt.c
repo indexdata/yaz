@@ -232,6 +232,7 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

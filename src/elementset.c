@@ -47,6 +47,7 @@ void yaz_set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

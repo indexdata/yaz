@@ -59,6 +59,7 @@ Z_Query *yaz_copy_Z_Query(Z_Query *q, ODR out)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

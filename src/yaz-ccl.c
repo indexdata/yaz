@@ -49,6 +49,7 @@ Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab

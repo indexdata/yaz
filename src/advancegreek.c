@@ -399,7 +399,9 @@ yaz_iconv_decoder_t yaz_advancegreek_decoder(const char *name,
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
+

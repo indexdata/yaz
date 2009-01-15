@@ -842,6 +842,7 @@ int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
 /*
  * Local variables:
  * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
  * indent-tabs-mode: nil
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
