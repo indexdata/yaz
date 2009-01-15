@@ -149,8 +149,23 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         {
             /* datafield */
             i += identifier_flag-1;
-            yaz_marc_add_datafield(mt, tag, buf+i, indicator_length);
-            i += indicator_length;
+            if (indicator_length)
+            {
+                /* skip RS/FS bytes in indicator. They are not allowed there */
+                int j;
+                for (j = indicator_length; --j >= 0; )
+                    if (buf[j+i] < ' ')
+                    {
+                        j++;
+                        i += j;
+                        end_offset += j;
+                        yaz_marc_cprintf(mt, "Bad indicator data. "
+                                         "Skipping %d bytes", j);
+                        break;
+                    }
+                yaz_marc_add_datafield(mt, tag, buf+i, indicator_length);
+                i += indicator_length;
+            }
 
             while (i < end_offset &&
                     buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
@@ -182,7 +197,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         if (buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
         {
             yaz_marc_cprintf(mt, "No separator at end of field length=%d",
-                    data_length);
+                             data_length);
         }
     }
     return record_length;
