@@ -37,8 +37,20 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt, const char *name)
         return odr_missing(o, opt, name);
     if (o->direction == ODR_PRINT)
     {
+        int i = ODR_BITMASK_SIZE;
+        int j;
         odr_prname(o, name);
-        odr_printf(o, "BITSTRING(len=%d)\n",(*p)->top + 1);
+        odr_printf(o, "BITSTRING(len=%d) ",(*p)->top + 1);
+        while (--i > 0)
+            if (ODR_MASK_GET(*p, i))
+                break;
+        for (j = 0; j <= i; j++)
+        {
+            odr_printf(o, "%c", ODR_MASK_GET(*p, j) ? '1' : '0');
+            if (j && ((j+1)&7) == 0)
+                odr_printf(o, "-");
+        }
+        odr_printf(o, "\n");
         return 1;
     }
     if (o->direction == ODR_DECODE)
