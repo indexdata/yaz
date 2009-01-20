@@ -471,33 +471,43 @@ static void process_text_file(const struct config_t *p_config)
     /* read input lines for processing */
     while ((line=fgets(linebuf, sizeof(linebuf)-1, config.infile)))
     {
+        WRBUF sw = wrbuf_alloc();
+        WRBUF cdata = wrbuf_alloc();
         int success = icu_chain_assign_cstr(config.chain, line, &status);
         line_count++;
 
         while (success && icu_chain_next_token(config.chain, &status))
         {
-            WRBUF sw = wrbuf_alloc();
             if (U_FAILURE(status))
                 success = 0;
-            else {
+            else
+            {
                 const char *sortkey = icu_chain_token_sortkey(config.chain);
                 wrbuf_rewind(sw);
                 wrbuf_puts_escaped(sw, sortkey);
                 token_count++;
                 if (p_config->xmloutput)                    
                 {
-                    /* should XML encode this. Bug #1902 */
                     fprintf(config.outfile, 
-                            "<token id=\"%lu\" line=\"%lu\""
-                            " norm=\"%s\" display=\"%s\"",
-                            token_count,
-                            line_count,
-                            icu_chain_token_norm(config.chain),
-                            icu_chain_token_display(config.chain));
+                            "<token id=\"%lu\" line=\"%lu\"",
+                            token_count, line_count);
+
+                    wrbuf_rewind(cdata);
+                    wrbuf_xmlputs(cdata, icu_chain_token_norm(config.chain));
+                    fprintf(config.outfile, " norm=\"%s\"",
+                            wrbuf_cstr(cdata));
+
+                    wrbuf_rewind(cdata);
+                    wrbuf_xmlputs(cdata, icu_chain_token_display(config.chain));
+                    fprintf(config.outfile, " display=\"%s\"",
+                            wrbuf_cstr(cdata));
+                    
                     if (p_config->sortoutput)
                     {
+                        wrbuf_rewind(cdata);
+                        wrbuf_xmlputs(cdata, wrbuf_cstr(sw));
                         fprintf(config.outfile, " sortkey=\"%s\"",
-                                wrbuf_cstr(sw));
+                                wrbuf_cstr(cdata));
                     }
                     fprintf(config.outfile, "/>\n");
                 }
@@ -515,16 +525,16 @@ static void process_text_file(const struct config_t *p_config)
                     fprintf(config.outfile, "\n");
                 }
             }
-            wrbuf_destroy(sw);
         }
-        
+        wrbuf_destroy(sw);
+        wrbuf_destroy(cdata);
     }
 
     if (p_config->xmloutput)
-        fprintf(config.outfile, 
+        fprintf(config.outfile,
                 "</tokens>\n"
                 "</icu>\n");
-
+    
     icu_chain_destroy(config.chain);
     xmlFreeDoc(doc);
     if (line)
