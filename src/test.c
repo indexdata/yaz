@@ -191,7 +191,7 @@ void yaz_check_print1(int type, const char *file, int line,
     }
     if (printit)
     {
-        fprintf(get_file(), "%s:%d %s: ", file, line, msg);
+        fprintf(get_file(), "%s:%d: %s: ", file, line, msg);
         fprintf(get_file(), "%s\n", expr);
     }
     if (log_tests)
