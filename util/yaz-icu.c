@@ -443,7 +443,6 @@ static void process_text_file(const struct config_t *p_config)
     long unsigned int line_count = 0;    
     
     UErrorCode status = U_ZERO_ERROR;
-    int success = 0;
     
     if (!xml_node)
     {   
@@ -454,11 +453,12 @@ static void process_text_file(const struct config_t *p_config)
 
     config.chain = icu_chain_xml_config(xml_node, 1, &status);
 
-    if (config.chain && U_SUCCESS(status))
-        success = 1;
-    else {   
+    if (!config.chain || !U_SUCCESS(status))
+    {   
         printf("Could not set up ICU chain from config file '%s' \n",
                 config.conffile);
+        if (!U_SUCCESS(status))
+            printf("ICU Error: %d %s\n", status, u_errorName(status));
         exit(1);
     }
 
@@ -471,7 +471,7 @@ static void process_text_file(const struct config_t *p_config)
     /* read input lines for processing */
     while ((line=fgets(linebuf, sizeof(linebuf)-1, config.infile)))
     {
-        success = icu_chain_assign_cstr(config.chain, line, &status);
+        int success = icu_chain_assign_cstr(config.chain, line, &status);
         line_count++;
 
         while (success && icu_chain_next_token(config.chain, &status))
