@@ -312,14 +312,14 @@ int test_icu_normalizer(const char * rules8cstr,
     struct icu_buf_utf16 * src16 = icu_buf_utf16_create(0);
     struct icu_buf_utf16 * dest16 = icu_buf_utf16_create(0);
     struct icu_buf_utf8 * dest8 = icu_buf_utf8_create(0);
-    struct icu_normalizer * normalizer
-        = icu_normalizer_create(rules8cstr, 'f', &status);
+    struct icu_transform * transform
+        = icu_transform_create(rules8cstr, 'f', &status);
     icu_check_status(status);
     
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
     icu_check_status(status);
 
-    icu_normalizer_normalize(normalizer, dest16, src16, &status);
+    icu_transform_trans(transform, dest16, src16, &status);
     icu_check_status(status);
 
     icu_utf16_to_utf8(dest8, dest16, &status);
@@ -339,7 +339,7 @@ int test_icu_normalizer(const char * rules8cstr,
     }
     
 
-    icu_normalizer_destroy(normalizer);
+    icu_transform_destroy(transform);
     icu_buf_utf16_destroy(src16);
     icu_buf_utf16_destroy(dest16);
     icu_buf_utf8_destroy(dest8);

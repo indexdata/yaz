@@ -162,7 +162,7 @@ int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer);
 
 
 
-struct icu_normalizer
+struct icu_transform
 {
     char action;
     struct icu_buf_utf16 * rules16;
@@ -170,22 +170,22 @@ struct icu_normalizer
     UTransliterator * trans;
 };
 
-struct icu_normalizer * icu_normalizer_create(const char *rules, char action,
+struct icu_transform * icu_transform_create(const char *rules, char action,
                                               UErrorCode *status);
 
 
-void icu_normalizer_destroy(struct icu_normalizer * normalizer);
+void icu_transform_destroy(struct icu_transform * transform);
 
-int icu_normalizer_normalize(struct icu_normalizer * normalizer,
-                             struct icu_buf_utf16 * dest16,
-                             struct icu_buf_utf16 * src16,
-                             UErrorCode *status);
+int icu_transform_trans(struct icu_transform * transform,
+                        struct icu_buf_utf16 * dest16,
+                        struct icu_buf_utf16 * src16,
+                        UErrorCode *status);
 
 enum icu_chain_step_type {
     ICU_chain_step_type_none,
     ICU_chain_step_type_display,   /* convert to utf8 display format */
     ICU_chain_step_type_casemap,   /* apply utf16 charmap */
-    ICU_chain_step_type_normalize, /* apply utf16 normalization */
+    ICU_chain_step_type_transform, /* apply utf16 transform */
     ICU_chain_step_type_tokenize   /* apply utf16 tokenization */
 };
 
@@ -197,7 +197,7 @@ struct icu_chain_step
     enum icu_chain_step_type type;
     union {
 	struct icu_casemap * casemap;
-	struct icu_normalizer * normalizer;
+	struct icu_transform * transform;
 	struct icu_tokenizer * tokenizer;  
     } u;
     /* temprary post-action utf16 buffer */
