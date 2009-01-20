@@ -155,10 +155,20 @@
     <varlistentry>
      <term>transform</term>
      <listitem><para>
-       Specifies an ICU transform rule. The rule attribute is the
-       custom transformation rule to be used. This is a text based format
-       which is offered by the ICU transform system. See
-       <ulink url="&url.icu.transform;">ICU Transforms</ulink> for
+       Specifies an ICU transform rule using a transliterator
+       Identifier.
+       The rule attribute is the transliterator Identifier.
+       See  <ulink url="&url.icu.transform;">ICU Transforms</ulink> for
+       more information.
+      </para></listitem>
+    </varlistentry>
+    
+    <varlistentry>
+     <term>transliterate</term>
+     <listitem><para>
+       Specifies a rule-based transliterator.
+       The rule attribute is the custom transformation rule to be used.
+       See <ulink url="&url.icu.transform;">ICU Transforms</ulink> for
        more information.
       </para></listitem>
     </varlistentry>
@@ -226,6 +236,7 @@
   <transform rule="[:Control:] Any-Remove"/>
   <tokenize rule="w"/>
   <transform rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
+  <transliterate rule="xy -> z"/>
   <display/>
   <casemap rule="l"/>
 </icu_chain>

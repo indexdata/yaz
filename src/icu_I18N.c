@@ -652,43 +652,52 @@ int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer)
 
 
 
-struct icu_transform * icu_transform_create(const char *rules, char action,
+struct icu_transform * icu_transform_create(const char *id, char action,
+                                            const char *rules, 
                                             UErrorCode *status)
 {
+    struct icu_buf_utf16 *id16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf16 *rules16 = icu_buf_utf16_create(0);
 
     struct icu_transform * transform
         = (struct icu_transform *) xmalloc(sizeof(struct icu_transform));
 
     transform->action = action;
     transform->trans = 0;
-    transform->rules16 =  icu_buf_utf16_create(0);
-    icu_utf16_from_utf8_cstr(transform->rules16, rules, status);
+
+    if (id)
+        icu_utf16_from_utf8_cstr(id16, id, status);
+    if (rules)
+        icu_utf16_from_utf8_cstr(rules16, rules, status);
 
     switch(transform->action)
     {
     case 'f':
     case 'F':
         transform->trans
-            = utrans_openU(transform->rules16->utf16, 
-                           transform->rules16->utf16_len,
+            = utrans_openU(id16->utf16, 
+                           id16->utf16_len,
                            UTRANS_FORWARD,
-                           0, 0, 
+                           rules16->utf16, 
+                           rules16->utf16_len,
                            &transform->parse_error, status);
         break;
     case 'r':
     case 'R':
         transform->trans
-            = utrans_openU(transform->rules16->utf16,
-                           transform->rules16->utf16_len,
+            = utrans_openU(id16->utf16,
+                           id16->utf16_len,
                            UTRANS_REVERSE ,
-                           0, 0,
+                           rules16->utf16, 
+                           rules16->utf16_len,
                            &transform->parse_error, status);
         break;
     default:
         *status = U_UNSUPPORTED_ERROR;
-        return 0;
         break;
     }
+    icu_buf_utf16_destroy(rules16);
+    icu_buf_utf16_destroy(id16);
     
     if (U_SUCCESS(*status))
         return transform;
@@ -701,8 +710,6 @@ struct icu_transform * icu_transform_create(const char *rules, char action,
 
 void icu_transform_destroy(struct icu_transform * transform){
     if (transform) {
-        if (transform->rules16) 
-            icu_buf_utf16_destroy(transform->rules16);
         if (transform->trans)
             utrans_close(transform->trans);
         xfree(transform);
@@ -769,11 +776,18 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
         step->u.casemap = icu_casemap_create(rule[0], status);
         break;
     case ICU_chain_step_type_transform:
-        step->u.transform = icu_transform_create((char *) rule, 'f', status);
+        /* rule omitted. Only ID used */
+        step->u.transform = icu_transform_create((const char *) rule, 'f',
+                                                 0, status);
         break;
     case ICU_chain_step_type_tokenize:
         step->u.tokenizer = icu_tokenizer_create((char *) chain->locale, 
                                                  (char) rule[0], status);
+        break;
+    case ICU_chain_step_type_transliterate:
+        /* we pass a dummy ID to utrans_openU.. */
+        step->u.transform = icu_transform_create("custom", 'f',
+                                                 (const char *) rule, status);
         break;
     default:
         break;
@@ -798,6 +812,7 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
         icu_buf_utf16_destroy(step->buf16);
         break;
     case ICU_chain_step_type_transform:
+    case ICU_chain_step_type_transliterate:
         icu_transform_destroy(step->u.transform);
         icu_buf_utf16_destroy(step->buf16);
         break;
@@ -909,6 +924,9 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         else if (!strcmp((const char *) node->name, "transform"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
                                          (const uint8_t *) xml_rule, status);
+        else if (!strcmp((const char *) node->name, "transliterate"))
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate, 
+                                         (const uint8_t *) xml_rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize, 
                                          (const uint8_t *) xml_rule, status);
@@ -977,10 +995,12 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
         buf16 = icu_buf_utf16_create(0);
         break;
     case ICU_chain_step_type_transform:
+    case ICU_chain_step_type_transliterate:
         buf16 = icu_buf_utf16_create(0);
         break;
     case ICU_chain_step_type_tokenize:
         buf16 = icu_buf_utf16_create(0);
+        break;
         break;
     default:
         break;
@@ -1052,6 +1072,7 @@ int icu_chain_step_next_token(struct icu_chain * chain,
                             chain->locale);
         break;
     case ICU_chain_step_type_transform:
+    case ICU_chain_step_type_transliterate:
         icu_transform_trans(step->u.transform,
                             step->buf16, src16, status);
         break;

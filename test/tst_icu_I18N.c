@@ -313,7 +313,7 @@ int test_icu_normalizer(const char * rules8cstr,
     struct icu_buf_utf16 * dest16 = icu_buf_utf16_create(0);
     struct icu_buf_utf8 * dest8 = icu_buf_utf8_create(0);
     struct icu_transform * transform
-        = icu_transform_create(rules8cstr, 'f', &status);
+        = icu_transform_create(rules8cstr, 'f', 0, &status);
     icu_check_status(status);
     
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
