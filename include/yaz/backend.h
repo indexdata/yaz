@@ -308,6 +308,8 @@ typedef struct bend_initrequest
     /** \brief SRU record update handler */
     int (*bend_srw_update)(void *handle, bend_update_rr *rr);
 
+    /** \brief whether named result sets are supported (0=disable, 1=enable) */
+    int named_result_sets;
 } bend_initrequest;
 
 /** \brief result for init handler (must be filled by handler) */

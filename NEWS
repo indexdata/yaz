@@ -1,3 +1,6 @@
+Added member named_result_sets for init handler struct for the GFS. This
+allows a server to disable named result sets.
+
 --- 3.0.41 2008/12/29
 
 Fixed Fixed test that makes VERSION_SHA1 appear on dist versions too.

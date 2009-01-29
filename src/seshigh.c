@@ -509,6 +509,7 @@ static void assoc_init_reset(association *assoc)
     assoc->init->bend_explain = NULL;
     assoc->init->bend_srw_scan = NULL;
     assoc->init->bend_srw_update = NULL;
+    assoc->init->named_result_sets = 0;
 
     assoc->init->charneg_request = NULL;
     assoc->init->charneg_response = NULL;
@@ -2198,6 +2199,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             assoc->init->charneg_request = negotiation;
     }
 
+    /* by default named_result_sets is 0 .. Enable it if client asks for it. */
+    if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
+        assoc->init->named_result_sets = 1;
+
     assoc->backend = 0;
     if (cb)
     {
@@ -2264,7 +2269,8 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         ODR_MASK_SET(resp->options, Z_Options_extendedServices);
         strcat(options, " extendedServices");
     }
-    if (ODR_MASK_GET(req->options, Z_Options_namedResultSets))
+    if (ODR_MASK_GET(req->options, Z_Options_namedResultSets)
+        && assoc->init->named_result_sets)
     {
         ODR_MASK_SET(resp->options, Z_Options_namedResultSets);
         strcat(options, " namedresults");
