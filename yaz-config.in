@@ -133,7 +133,7 @@ else
     if test "$yazprefix" != "/usr"; then
 	YAZLIB="-L$yazprefix/lib"
     fi
-    YAZLIB="$YAZLIB $lyaz $LIBS"
+    YAZLIB="$YAZLIB $lyaz ${SSL_LIBS} $LIBS"
     YAZLALIB=$YAZLIB
     if test "$yazprefix" != "/usr"; then
 	YAZINC="-I$yazprefix/include $YAZINC"
