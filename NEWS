@@ -1,5 +1,31 @@
+--- 3.0.42 2009/02/02
+
+YAZ' RPM spec works for both SUSE Linux Enterprise and RedHat Fedora.
+
 Added member named_result_sets for init handler struct for the GFS. This
 allows a server to disable named result sets.
+
+Removed OID record syntax application-xml.
+
+Added support for rule-based transliterator for ICU wrapper of YAZ.
+
+Fixed bug #1902: yaz-icu XML output.
+
+Make YAZ checks Emacs friendly.
+
+BITSTRING value shows value. Bug #2346.
+
+ISO2709 decoding: skip control characters from indicator data.
+
+Omit sort key by default in yaz-icu's output.
+
+Allow combined single char options (again) for YAZ' options function.
+
+Utility yaz-marcdump got option to display YAZ version (-V).
+
+Allow YAZ to use ICU 3.4.
+
+Added new ICU test case which illustrates removal of diacritics.
 
 --- 3.0.41 2008/12/29
 
