@@ -27,7 +27,7 @@ VS_VERSION_INFO VERSIONINFO
 #endif
             VALUE "FileVersion", YAZ_VERSION "\0"
             VALUE "InternalName", "YAZ\0"
-            VALUE "LegalCopyright", "Copyright © 1995-2008 Index Data ApS\0"
+            VALUE "LegalCopyright", "Copyright © 1995-2009 Index Data ApS\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "yaz.res\0"
             VALUE "PrivateBuild", "\0"
