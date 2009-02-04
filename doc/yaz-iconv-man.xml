@@ -85,9 +85,13 @@
   <para>
    The yaz-iconv command and the API as defined in
    <filename>yaz/yaz-iconv.h</filename> is a wrapper for the
-   library system call iconv. But YAZ' implementation also implements
-   conversions on its own. So regardless of iconv, the following
-   below are always supported by YAZ:
+   library system call iconv. But YAZ' iconv utility also implements
+   conversions on its own. The table below lists characters sets (or encodings).
+   that are supported by YAZ. Each character set is marked with either
+   <emphasis>encode</emphasis> or <emphasis>decode</emphasis>. If
+   an encoding is encode-enabled YAZ may convert <emphasis>to</emphasis>
+   to the designated encoding. If an encoding is decode-enabled, YAZ
+   may convert <emphasis>from</emphasis> the designated encoding.
   </para>
   <variablelist>
    <varlistentry>
