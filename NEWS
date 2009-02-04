@@ -1,3 +1,5 @@
+List supported encodings in man page for yaz-iconv.
+
 Fixed missing SSL libs for --libs output
 
 Re-established OID record syntax application-xml. Nobody should use it
