@@ -169,6 +169,15 @@
      </para>
     </listitem>
    </varlistentry>
+   <varlistentry>
+    <term>danmarc (decode)</term>
+    <listitem>
+     <para>
+      <ulink url="&url.danmarc.charset;">Danmarc (in danish)</ulink> is
+      an encoding based on UNICODE which is used for DanMARC2 records.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
  </refsect1>
 
