@@ -7,7 +7,6 @@ yaz-illclient
 tmp
 yaz
 yaz-doc
-yaz.substvars
 *.debhelper.log
 *.substvars
 *.postinst.debhelper
