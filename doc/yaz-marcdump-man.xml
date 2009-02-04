@@ -202,7 +202,7 @@
  <refsect1><title>SEE ALSO</title>
   <para>
    yaz(7)
-   yaz_iconv(1)
+   yaz-iconv(1)
   </para>
  </refsect1>
 </refentry>
