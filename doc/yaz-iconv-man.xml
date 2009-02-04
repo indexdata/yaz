@@ -80,7 +80,7 @@
 
   </variablelist>
  </refsect1>
-
+ 
  <refsect1><title>ENCODINGS</title>
   <para>
    The yaz-iconv command and the API as defined in
@@ -92,60 +92,78 @@
   <variablelist>
    <varlistentry>
     <term>marc8 (encode, decode)</term>
+    <listitem>
      <para>
       The <ulink url="&url.marc8;">MARC8</ulink> encoding as defined by
       the Library of Congress. Most MARC21/USMARC records usees
       this encoding.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>marc8s (encode, decode)</term>
+    <listitem>
      <para>
       Like MARC8 but with conversion prefers non-combined characters
       in the Latin-1 plane over combined characters.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>marc8lossy (encode)</term>
+    <listitem>
      <para>
       Lossy encoding of MARC-8.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>marc8lossless (encode)</term>
+    <listitem>
      <para>
       Lossless encoding of MARC8.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>utf8 (encode, decode)</term>
+    <listitem>
      <para>
       The most commonly used UNICODE encoding on the Internet.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>iso8859-1 (encode, decode)</term>
+    <listitem>
      <para>
       ISO-8859-1, AKA Latin-1.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>iso5426 (decode)</term>
+    <listitem>
      <para>
       ISO 5426. Some MARC records (UNIMARC) uses this encoding.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>iso5428:1984 (encode, decode)</term>
+    <listitem>
      <para>
       ISO 5428:1984.
      </para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>advancegreek (encode, decode)</term>
+    <listitem>
      <para>
       An encoding for Greek used by some vendors (Advance).
      </para>
+    </listitem>
    </varlistentry>
   </variablelist>
  </refsect1>
