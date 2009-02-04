@@ -1,3 +1,8 @@
+Fixed missing SSL libs for --libs output
+
+Re-established OID record syntax application-xml. Nobody should use it
+but we don't want to change soname because of this symbol being absent.
+
 --- 3.0.42 2009/02/02
 
 YAZ' RPM spec works for both SUSE Linux Enterprise and RedHat Fedora.
