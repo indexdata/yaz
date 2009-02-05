@@ -236,7 +236,7 @@
   <transform rule="[:Control:] Any-Remove"/>
   <tokenize rule="w"/>
   <transform rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
-  <transliterate rule="xy -> z"/>
+  <transliterate rule="xy > z"/>
   <display/>
   <casemap rule="l"/>
 </icu_chain>
