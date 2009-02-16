@@ -3547,16 +3547,12 @@ int cmd_source(const char* arg, int echo )
         return -1;
     }
 
-    while (!feof(includeFile)) {
-        memset(line, 0, sizeof(line));
-        if (!fgets(line, sizeof(line), includeFile))
-        {
-            perror("fgets");
-            break;
-        }
-
-        if (strlen(line) < 2) continue;
-        if (line[0] == '#') continue;
+    while (fgets(line, sizeof(line), includeFile)) 
+    {
+        if (strlen(line) < 2)
+            continue;
+        if (line[0] == '#')
+            continue;
 
         if ((cp = strrchr(line, '\n')))
             *cp = '\0';
