@@ -829,7 +829,11 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         h->cerrno = CSOUTSTATE;
         return -1;
     }
+#ifdef WIN32
+    h->newfd = accept(h->iofile, 0, 0);
+#else
     h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len);
+#endif
     if (h->newfd < 0)
     {
         if (
