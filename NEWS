@@ -1,3 +1,5 @@
+--- 3.0.42 2009/02/17
+
 List supported encodings in man page for yaz-iconv.
 
 Fixed missing SSL libs for --libs output
