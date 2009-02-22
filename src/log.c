@@ -73,11 +73,14 @@ static char l_new_default_format[] = "%Y%m%d-%H%M%S";
 static char l_custom_format[TIMEFORMAT_LEN] = "";
 static char *l_actual_format = l_old_default_format;
 
-/** l_max_size tells when to rotate the log. Default is 1 GB 
-    This is almost the same as never, but it saves applications in the
-    case of 2 or 4 GB file size limits..
+/** l_max_size tells when to rotate the log. The default value is
+    0 which means DISABLED. This is to be preffered if YAZ runs
+    as a server using logrotate etc.
+    A positive size specifies the file size in bytes when a log rotate
+    will occur. Note that in order for this to work YAZ must have
+    permissions to do so.
  */
-static int l_max_size = 1024*1024*1024;
+static int l_max_size = 0;
 
 #define MAX_MASK_NAMES 35   /* 32 bits plus a few combo names */
 static struct {
