@@ -665,7 +665,6 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         rr->output_format = match_syntax;
     if (match_schema)
         rr->schema = odr_strdup(rr->stream, match_schema);
-    return 0;
 #else
     (*assoc->init->bend_fetch)(assoc->backend, rr);
 #endif
