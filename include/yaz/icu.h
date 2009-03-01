@@ -41,27 +41,72 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief opaque ICU chain */
 typedef struct icu_chain *yaz_icu_chain_t;
 
+/** \brief destroys ICU chain */
 YAZ_EXPORT void icu_chain_destroy(yaz_icu_chain_t chain);
 
+/** \brief constructs ICU chain from XML specification
+    \param \param xml_node icu_chain XML node - with attribute locale in it
+    \param \param sort 1 if ICU chain is to deal with sort keys; 0 otherwise
+    \param \param status May include ICU error code on failure
+    \returns chain ptr or NULL on failure in which case status may hold info
+*/
 YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
                                                 int sort,
                                                 UErrorCode * status);
-
+/** \brief pass string to ICU for parsing/tokenization/etc
+    \param chain ICU chain to be used for parsing
+    \param src8cstr input C string (\0-terminated)
+    \param status may include ICU error on failure
+    \retval 0 failure
+    \retval 1 success
+*/
 YAZ_EXPORT int icu_chain_assign_cstr(yaz_icu_chain_t chain,
                                      const char * src8cstr, 
                                      UErrorCode *status);
 
+/** \brief returns one token (if any)
+    \param chain ICU chain
+    \param status may include ICU error on failure
+    \retval 0 error or end-of-tokens (no more tokens)
+    \retval >0 token number (1, 3, 3, ..)
+
+    This function tries to move to "next" token in assigned
+    C-string .. Or returns 0 if no more is to be found
+*/
 YAZ_EXPORT int icu_chain_next_token(yaz_icu_chain_t chain,
                                     UErrorCode *status);
 
+/** \brief returns token number of last token processed
+    \brief chain ICU chain
+    \returns token number (numbered from 1)
+*/
 YAZ_EXPORT int icu_chain_token_number(yaz_icu_chain_t chain);
 
+/** \brief returns display token of last token processed
+    \param chain ICU chain
+    \returns display token string (C string)
+    This function returns display string for last token returned
+    by icu_chain_next_token.
+*/
 YAZ_EXPORT const char * icu_chain_token_display(yaz_icu_chain_t chain);
 
+/** \brief returns normalized token of last token processed
+    \param chain ICU chain
+    \returns normalized token string (C string)
+    This function returns normalized string for last token returned
+    by icu_chain_next_token.
+*/
 YAZ_EXPORT const char * icu_chain_token_norm(yaz_icu_chain_t chain);
 
+/** \brief returns sortkey token of last token processed
+    \param chain ICU chain
+    \returns sortkey token string (C string)
+    This function returns sortkey string for last token returned
+    by icu_chain_next_token.
+*/
 YAZ_EXPORT const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
 
 YAZ_END_CDECL
