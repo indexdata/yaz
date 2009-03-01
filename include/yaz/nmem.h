@@ -124,8 +124,20 @@ YAZ_EXPORT void nmem_destroy(NMEM n);
  */
 YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
 
+/** \brief returns errno 
+    \returns errno value 
+*/
 YAZ_EXPORT int yaz_errno(void);
+
+/** \brief sets errno to value
+    \param v errno value
+*/
 YAZ_EXPORT void yaz_set_errno (int v);
+
+/** \brief returns system error description string
+    \param buf buffer for result
+    \param max maximum number of bytes to store
+*/
 YAZ_EXPORT void yaz_strerror(char *buf, int max);
 
 YAZ_END_CDECL
