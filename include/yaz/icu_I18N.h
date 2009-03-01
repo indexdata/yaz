@@ -257,6 +257,11 @@ int icu_chain_token_number(yaz_icu_chain_t chain);
 
 const UCollator * icu_chain_get_coll(yaz_icu_chain_t chain);
 
+yaz_icu_chain_t icu_chain_create(const char * locale,
+                                 int sort,
+                                 UErrorCode * status);
+
+
 #endif /* ICU_I18NL_H */
 
 /*

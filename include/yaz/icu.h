@@ -43,22 +43,18 @@ YAZ_BEGIN_CDECL
 
 typedef struct icu_chain *yaz_icu_chain_t;
 
-YAZ_EXPORT yaz_icu_chain_t icu_chain_create(const char * locale,
-                                 int sort,
-                                 UErrorCode * status);
-
 YAZ_EXPORT void icu_chain_destroy(yaz_icu_chain_t chain);
 
 YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
-                                     int sort,
-                                     UErrorCode * status);
+                                                int sort,
+                                                UErrorCode * status);
 
 YAZ_EXPORT int icu_chain_assign_cstr(yaz_icu_chain_t chain,
-                          const char * src8cstr, 
-                          UErrorCode *status);
+                                     const char * src8cstr, 
+                                     UErrorCode *status);
 
 YAZ_EXPORT int icu_chain_next_token(yaz_icu_chain_t chain,
-                         UErrorCode *status);
+                                    UErrorCode *status);
 
 YAZ_EXPORT int icu_chain_token_number(yaz_icu_chain_t chain);
 
