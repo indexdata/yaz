@@ -27,6 +27,9 @@
 
 /** \file
     \brief Internal header for ICU utilities
+
+    These functions, while non-static, are considered unstable and internal
+    and may be renamed for each YAZ release.
 */
 
 #ifndef ICU_I18NL_H
