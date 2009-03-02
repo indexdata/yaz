@@ -48,9 +48,9 @@ typedef struct icu_chain *yaz_icu_chain_t;
 YAZ_EXPORT void icu_chain_destroy(yaz_icu_chain_t chain);
 
 /** \brief constructs ICU chain from XML specification
-    \param \param xml_node icu_chain XML node - with attribute locale in it
-    \param \param sort 1 if ICU chain is to deal with sort keys; 0 otherwise
-    \param \param status May include ICU error code on failure
+    \param xml_node icu_chain XML node - with attribute locale in it
+    \param sort 1 if ICU chain is to deal with sort keys; 0 otherwise
+    \param status May include ICU error code on failure
     \returns chain ptr or NULL on failure in which case status may hold info
 */
 YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
@@ -58,7 +58,7 @@ YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
                                                 UErrorCode * status);
 /** \brief pass string to ICU for parsing/tokenization/etc
     \param chain ICU chain to be used for parsing
-    \param src8cstr input C string (\0-terminated)
+    \param src8cstr input C string (null-terminated)
     \param status may include ICU error on failure
     \retval 0 failure
     \retval 1 success
