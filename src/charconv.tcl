@@ -414,12 +414,14 @@ if {![info exists ifiles]} {
     usage
 }
 
-set ofilehandle [open $ofile w]
+set ofilehandle [open ${ofile}.tmp w]
 preamble_trie $ofilehandle $ifiles $ofile
 
 foreach ifile $ifiles {
     readfile $ifile $ofilehandle $prefix $omits $reverse_map
 }
 close $ofilehandle
+
+file rename -force ${ofile}.tmp ${ofile}
 
 
