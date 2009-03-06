@@ -268,7 +268,11 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
             for (i = 1; i < argc; i++)
             {
                 wrbuf_puts(w, " ");
+                if (strchr(argv[i], ' '))
+                    wrbuf_puts(w, "\"");
                 wrbuf_puts(w, argv[i]);
+                if (strchr(argv[i], ' '))
+                    wrbuf_puts(w, "\"");
             }
             wrbuf_puts(w, " -run \"");
             wrbuf_puts(w, cwdstr);
