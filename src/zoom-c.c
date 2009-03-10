@@ -2157,11 +2157,10 @@ ZOOM_API(const char *)
                                        charset);
         else if (r->which == Z_External_octet)
         {
-            int marc_decode_type = YAZ_MARC_MARCXML;
             if (yaz_oid_is_iso2709(oid))
             {
                 const char *ret_buf = marc_iconv_return(
-                    rec, marc_decode_type, len,
+                    rec, YAZ_MARC_MARCXML, len,
                     (const char *) r->u.octet_aligned->buf,
                     r->u.octet_aligned->len,
                     charset);
@@ -2183,16 +2182,30 @@ ZOOM_API(const char *)
     else if (!strcmp(type, "raw"))
     {
         Z_External *r = (Z_External *) npr->u.databaseRecord;
+        const Odr_oid *oid = r->direct_reference;
         
         if (r->which == Z_External_sutrs)
         {
-            if (len) *len = r->u.sutrs->len;
-            return (const char *) r->u.sutrs->buf;
+            return record_iconv_return(rec, len,
+                                       (const char *) r->u.sutrs->buf,
+                                       r->u.sutrs->len,
+                                       charset);
         }
         else if (r->which == Z_External_octet)
         {
-            if (len) *len = r->u.octet_aligned->len;
-            return (const char *) r->u.octet_aligned->buf;
+            if (yaz_oid_is_iso2709(oid) && *charset)
+            {
+                const char *ret_buf = marc_iconv_return(
+                    rec, YAZ_MARC_ISO2709, len,
+                    (const char *) r->u.octet_aligned->buf,
+                    r->u.octet_aligned->len,
+                    charset);
+                return ret_buf;
+            }
+            return record_iconv_return(rec, len,
+                                       (const char *) r->u.octet_aligned->buf,
+                                       r->u.octet_aligned->len,
+                                       charset);
         }
         else /* grs-1, explain, OPAC, ... */
         {
