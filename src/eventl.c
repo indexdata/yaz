@@ -29,6 +29,7 @@
 #include <yaz/log.h>
 #include <yaz/comstack.h>
 #include <yaz/xmalloc.h>
+#include <yaz/errno.h>
 #include "eventl.h"
 #include "session.h"
 #include <yaz/statserv.h>

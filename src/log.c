@@ -27,7 +27,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
-#include <yaz/nmem.h>
+#include <yaz/errno.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>

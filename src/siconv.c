@@ -27,7 +27,7 @@
 #endif
 
 #include <yaz/xmalloc.h>
-#include <yaz/nmem.h>
+#include <yaz/errno.h>
 #include "iconv-p.h"
 
 struct yaz_iconv_struct {

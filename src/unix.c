@@ -38,7 +38,7 @@
 #endif
 
 #include <yaz/unix.h>
-#include <yaz/nmem.h>
+#include <yaz/errno.h>
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int

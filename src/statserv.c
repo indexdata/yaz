@@ -53,6 +53,7 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/options.h>
+#include <yaz/errno.h>
 #ifdef USE_XTIMOSI
 #include <yaz/xmosi.h>
 #endif

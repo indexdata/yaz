@@ -68,7 +68,7 @@
 
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
-#include <yaz/nmem.h>
+#include <yaz/errno.h>
 
 static int tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
