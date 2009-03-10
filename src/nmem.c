@@ -26,10 +26,6 @@
 #include <yaz/nmem.h>
 #include <yaz/log.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #define NMEM_CHUNK (4*1024)
 
 struct nmem_block
@@ -184,61 +180,6 @@ void nmem_transfer (NMEM dst, NMEM src)
     src->total = 0;
 }
 
-int yaz_errno(void)
-{
-    return errno;
-}
-
-void yaz_set_errno(int v)
-{
-    errno = v;
-}
-
-void yaz_strerror(char *buf, int max)
-{
-#ifdef WIN32
-    DWORD err;
-#endif
-    char *cp;
-    if (!log_level_initialized)
-    {
-        log_level = yaz_log_module_level("nmem");
-        log_level_initialized = 1;
-    }
-    
-#ifdef WIN32
-    err = GetLastError();
-    if (err)
-    {
-        FormatMessage(
-                FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                err,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default lang */
-                (LPTSTR) buf,
-                max-1,
-                NULL);
-    }
-    else
-        *buf = '\0';
-#else
-/* UNIX */
-#if HAVE_STRERROR_R
-    *buf = '\0';
-    strerror_r(errno, buf, max);
-    /* if buffer is unset - use strerror anyway (GLIBC bug) */
-    if (*buf == '\0')
-        strcpy(buf, strerror(yaz_errno()));
-#else
-    strcpy(buf, strerror(yaz_errno()));
-#endif
-/* UNIX */
-#endif
-    if ((cp = strrchr(buf, '\n')))
-        *cp = '\0';
-    if ((cp = strrchr(buf, '\r')))
-        *cp = '\0';
-}
 /*
  * Local variables:
  * c-basic-offset: 4

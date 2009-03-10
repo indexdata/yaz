@@ -403,6 +403,7 @@ MISC_OBJS= \
    $(OBJDIR)\ber_oid.obj \
    $(OBJDIR)\ber_tag.obj \
    $(OBJDIR)\dumpber.obj \
+   $(OBJDIR)\errno.obj \
    $(OBJDIR)\odr.obj \
    $(OBJDIR)\odr_any.obj \
    $(OBJDIR)\odr_bit.obj \
