@@ -6,13 +6,14 @@
 /**
  * \file errno.c
  * \brief errno utilities
+ *
+ * This file unlike other files in YAZ core is thread-aware, due to
+ * the use errno.
  */
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-/* prepare for threads.. even in non-threaded appliactions.
-   The yaz_errno/yaz_set_errno is part of core YAZ and shared */
 #ifndef _REENTRANT
 #define _REENTRANT
 #endif
@@ -21,7 +22,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stddef.h>
-#include <yaz/nmem.h>
+#include <yaz/errno.h>
 
 #ifdef WIN32
 #include <windows.h>
