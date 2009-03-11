@@ -34,11 +34,12 @@ struct yaz_timing {
 #endif
 #if HAVE_SYS_TIME_H
     struct timeval start_time, end_time;
-#endif
+#else
 #ifdef WIN32
     LONGLONG start_time, end_time;
     LONGLONG start_time_sys, start_time_user;
     LONGLONG end_time_sys, end_time_user;
+#endif
 #endif
     double real_sec, user_sec, sys_sec;
 };
@@ -91,13 +92,14 @@ void yaz_timing_start(yaz_timing_t t)
 #if HAVE_SYS_TIME_H
     gettimeofday(&t->start_time, 0);
     t->real_sec = 0.0;
-#endif
+#else
 #ifdef WIN32
     t->real_sec = 0.0;
     t->user_sec = 0.0;
     t->sys_sec = 0.0;
     get_date_as_largeinteger(&t->start_time);
     get_process_time(&t->start_time_user, &t->start_time_sys);
+#endif
 #endif
 }
 
@@ -113,8 +115,7 @@ void yaz_timing_stop(yaz_timing_t t)
     gettimeofday(&t->end_time, 0);
     t->real_sec = ((t->end_time.tv_sec - t->start_time.tv_sec) * 1000000.0 +
                    t->end_time.tv_usec - t->start_time.tv_usec) / 1000000;
-    
-#endif
+#else    
 #ifdef WIN32
     get_date_as_largeinteger(&t->end_time);
     t->real_sec = (t->end_time - t->start_time) / 10000000.0;
@@ -122,6 +123,7 @@ void yaz_timing_stop(yaz_timing_t t)
     get_process_time(&t->end_time_user, &t->end_time_sys);
     t->user_sec = (t->end_time_user - t->start_time_user) / 10000000.0;
     t->sys_sec = (t->end_time_sys - t->start_time_sys) / 10000000.0;
+#endif
 #endif
 }
 

@@ -27,7 +27,7 @@ struct yaz_oid_db {
 };
 
 struct yaz_oid_db standard_db_l = {
-    yaz_oid_standard_entries, 0, 0
+    0, 0, 0
 };
 yaz_oid_db_t standard_db = &standard_db_l;
 
@@ -35,6 +35,8 @@ yaz_oid_db_t yaz_oid_std(void)
 {
     return standard_db;
 }
+
+#define get_entries(db) (db->xmalloced==0 ? yaz_oid_standard_entries : db->entries)
 
 const Odr_oid *yaz_string_to_oid(yaz_oid_db_t oid_db,
                                  oid_class oclass, const char *name)
@@ -44,13 +46,13 @@ const Odr_oid *yaz_string_to_oid(yaz_oid_db_t oid_db,
         struct yaz_oid_entry *e;
         if (oclass != CLASS_GENERAL)
         {
-            for (e = oid_db->entries; e->name; e++)
+            for (e = get_entries(oid_db); e->name; e++)
             {
                 if (!yaz_matchstr(e->name, name) && oclass == e->oclass)
                     return e->oid;
             }
         }
-        for (e = oid_db->entries; e->name; e++)
+        for (e = get_entries(oid_db); e->name; e++)
         {
             if (!yaz_matchstr(e->name, name))
                 return e->oid;
@@ -81,7 +83,7 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
 	return 0;
     for (; oid_db; oid_db = oid_db->next)
     {
-	struct yaz_oid_entry *e = oid_db->entries;
+	struct yaz_oid_entry *e = get_entries(oid_db);
 	for (; e->name; e++)
 	{
 	    if (!oid_oidcmp(e->oid, oid))
@@ -97,7 +99,7 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
 
 const char *yaz_oid_to_string_buf(const Odr_oid *oid, oid_class *oclass, char *buf)
 {
-    const char *p = yaz_oid_to_string(standard_db, oid, oclass);
+    const char *p = yaz_oid_to_string(yaz_oid_std(), oid, oclass);
     if (p)
 	return p;
     if (oclass)
@@ -192,7 +194,7 @@ void yaz_oid_trav(yaz_oid_db_t oid_db,
 {
     for (; oid_db; oid_db = oid_db->next)
     {
-	struct yaz_oid_entry *e = oid_db->entries;
+	struct yaz_oid_entry *e = get_entries(oid_db);
 	
 	for (; e->name; e++)
 	    func(e->oid, e->oclass, e->name, client_data);
