@@ -52,6 +52,10 @@ Z_Query *yaz_clone_z_Query(Z_Query *q, NMEM out);
 YAZ_EXPORT
 Z_NamePlusRecord *yaz_clone_z_NamePlusRecord(Z_NamePlusRecord *s, NMEM out);
 
+YAZ_EXPORT
+Z_RecordComposition *yaz_clone_z_RecordComposition(Z_RecordComposition *s,
+                                                   NMEM out);
+
 YAZ_END_CDECL
 
 #endif

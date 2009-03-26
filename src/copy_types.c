@@ -37,6 +37,7 @@ Z_##x *yaz_clone_z_##x(Z_##x *q, NMEM nmem_out) \
 clone_z_type(NamePlusRecord)
 clone_z_type(RPNQuery)
 clone_z_type(Query)
+clone_z_type(RecordComposition)
 
 Z_RPNQuery *yaz_copy_z_RPNQuery(Z_RPNQuery *q, ODR out)
 {
