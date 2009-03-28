@@ -1050,8 +1050,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     TRC(fprintf(stderr, "tcpip_get: bufsize=%d\n", *bufsize));
     if (sp->altlen) /* switch buffers */
     {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
-            (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  %d bytes in altbuf (%p)\n", sp->altlen,
+                    sp->altbuf));
         tmpc = *buf;
         tmpi = *bufsize;
         *buf = sp->altbuf;
@@ -1156,8 +1156,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 h->cerrno = CSYSERR;
                 return -1;
             }
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
-            (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
+                    sp->altbuf));
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_TCPIP_BUFCHUNK - 1)
@@ -1181,8 +1181,8 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
     TRC(fprintf(stderr, "ssl_get: bufsize=%d\n", *bufsize));
     if (sp->altlen) /* switch buffers */
     {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
-            (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  %d bytes in altbuf (%p)\n", sp->altlen,
+                    sp->altbuf));
         tmpc = *buf;
         tmpi = *bufsize;
         *buf = sp->altbuf;
@@ -1240,8 +1240,8 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         } else if (sp->altsize < req)
             if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
                 return -1;
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
-            (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
+                    sp->altbuf));
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_TCPIP_BUFCHUNK - 1)
