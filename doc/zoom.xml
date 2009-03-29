@@ -17,7 +17,7 @@ ZOOM_options_setl(opt, name, value, len)
 ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
-ZOOM_connection_scan1 (ZOOM_connection c, ZOOM_query startterm)
+ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
  <chapter id="zoom"><title>ZOOM</title>
@@ -95,7 +95,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     
     void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
-    void ZOOM_connection_destroy (ZOOM_connection c);
+    void ZOOM_connection_destroy(ZOOM_connection c);
    </synopsis>
    <para>
     Connection objects are created with either function
@@ -289,10 +289,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      Character Set and Language Negotiation</ulink> is in effect.
    </para>
    <synopsis>
-     int ZOOM_connection_error (ZOOM_connection c, const char **cp,
-                                const char **addinfo);
-     int ZOOM_connection_error_x (ZOOM_connection c, const char **cp,
-                                  const char **addinfo, const char **dset);
+     int ZOOM_connection_error(ZOOM_connection c, const char **cp,
+                               const char **addinfo);
+     int ZOOM_connection_error_x(ZOOM_connection c, const char **cp,
+                                 const char **addinfo, const char **dset);
    </synopsis>
    <para>
     Function <function>ZOOM_connection_error</function> checks for
@@ -406,12 +406,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     a target.
    </para>
    <synopsis>
-     ZOOM_resultset ZOOM_connection_search(ZOOM_connection,
-                                           ZOOM_query q);
+     ZOOM_resultset ZOOM_connection_search(ZOOM_connection, ZOOM_query q);
 
      ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c,
                                                const char *q);
-
      void ZOOM_resultset_destroy(ZOOM_resultset r);
    </synopsis>
    <para>
@@ -424,14 +422,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     creating query objects is not necessary.
    </para>
    <synopsis>
-     void ZOOM_resultset_option_set (ZOOM_resultset r,
-                                      const char *key,
-                                      const char *val);
+     void ZOOM_resultset_option_set(ZOOM_resultset r,
+                                    const char *key, const char *val);
 
-     const char *ZOOM_resultset_option_get (ZOOM_resultset r,
-                                             const char *key);
+     const char *ZOOM_resultset_option_get(ZOOM_resultset r, const char *key);
 
-     size_t ZOOM_resultset_size (ZOOM_resultset r);
+     size_t ZOOM_resultset_size(ZOOM_resultset r);
    </synopsis>
    <para>
     Functions <function>ZOOM_resultset_options_set</function> and
@@ -680,9 +676,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      int ZOOM_record_error(ZOOM_record rec, const char **msg,
                            const char **addinfo, const char **diagset);
 
-     ZOOM_record ZOOM_record_clone (ZOOM_record rec);
+     ZOOM_record ZOOM_record_clone(ZOOM_record rec);
 
-     void ZOOM_record_destroy (ZOOM_record rec);
+     void ZOOM_record_destroy(ZOOM_record rec);
    </synopsis>
    <para>
     References to temporary records are returned by functions 
@@ -875,10 +871,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     const char * ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
                                            int *occ, size_t *len);
 
-    void ZOOM_scanset_destroy (ZOOM_scanset scan);
+    void ZOOM_scanset_destroy(ZOOM_scanset scan);
 
     const char *ZOOM_scanset_option_get(ZOOM_scanset scan,
-                                         const char *key);
+                                        const char *key);
 
     void ZOOM_scanset_option_set(ZOOM_scanset scan, const char *key,
                                  const char *val);
@@ -1346,26 +1342,26 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     an associative array / hash.
    </para>
    <synopsis>
-     ZOOM_options ZOOM_options_create (void);
+     ZOOM_options ZOOM_options_create(void);
 
-     ZOOM_options ZOOM_options_create_with_parent (ZOOM_options parent);
+     ZOOM_options ZOOM_options_create_with_parent(ZOOM_options parent);
 
-     void ZOOM_options_destroy (ZOOM_options opt);
+     void ZOOM_options_destroy(ZOOM_options opt);
    </synopsis>
    <synopsis>
-     const char *ZOOM_options_get (ZOOM_options opt, const char *name);
+     const char *ZOOM_options_get(ZOOM_options opt, const char *name);
 
-     void ZOOM_options_set (ZOOM_options opt, const char *name,
-                            const char *v);
+     void ZOOM_options_set(ZOOM_options opt, const char *name,
+                           const char *v);
    </synopsis>
    <synopsis>
      typedef const char *(*ZOOM_options_callback)
-                                     (void *handle, const char *name);
+                            (void *handle, const char *name);
 
      ZOOM_options_callback
-             ZOOM_options_set_callback (ZOOM_options opt,
-                                        ZOOM_options_callback c,
-                                        void *handle);
+             ZOOM_options_set_callback(ZOOM_options opt,
+                                       ZOOM_options_callback c,
+                                       void *handle);
    </synopsis>
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
@@ -1374,7 +1370,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     with events.
    </para>
    <synopsis>
-    int ZOOM_event (int no, ZOOM_connection *cs);
+    int ZOOM_event(int no, ZOOM_connection *cs);
    </synopsis>
    <para>
     The <function>ZOOM_event</function> executes pending events for
