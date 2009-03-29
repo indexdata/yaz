@@ -416,7 +416,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </synopsis>
    <para>
     Function <function>ZOOM_connection_search</function> creates
-     a result set given a connection and query.
+    a result set given a connection and query.
     Destroy a result set by calling
     <function>ZOOM_resultset_destroy</function>.
     Simple clients may using PQF only may use function
@@ -461,13 +461,21 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         start</entry><entry>Offset of first record to be 
         retrieved from target. First record has offset 0 unlike the
         protocol specifications where first record has position 1.
+	This option affects ZOOM_resultset_search and
+	ZOOM_resultset_search_pqf and must be set before any of
+	these functions are invoked. If a range of
+	records must be fetched manually after search,
+	function ZOOM_resultset_records should be used.
        </entry><entry>0</entry></row>
       <row><entry>
-        count</entry><entry>Number of records to be retrieved.
+        count</entry><entry>Number of records to be retrieved.	
+	This option affects ZOOM_resultset_search and
+	ZOOM_resultset_search_pqf and must be set before any of
+	these functions are invoked.
        </entry><entry>0</entry></row>
       <row><entry>
 	presentChunk</entry><entry>The number of records to be
-	requested from the server in each chunk (present requst).  The
+	requested from the server in each chunk (present request). The
 	value 0 means to request all the records in a single chunk.
 	(The old <literal>step</literal>
 	option is also supported for the benefit of old applications.)
