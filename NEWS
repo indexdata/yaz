@@ -1,3 +1,19 @@
+Fixed bug #2709: TCP connect returns Invalid argument.
+
+Fixed compilation for mingw.
+
+Honor charset for raw records (ZOOM_record_get).
+
+Fixed use of errno for threaded mode that was seen on Solaris 10.
+
+Fixed argument passing with blanks in value for Windows Service.
+
+Disable YAZ' own log rotate by default (no 1 GB limit).
+The variable l_max_size which specifies the log file limit is set to 0
+(DISABLED): This is due to the fact that YAZ is most often deployed using
+logrotate. Also YAZ can not perform log rotate because of unsufficient
+permissions (setuid).
+
 --- 3.0.44 2009/02/17
 
 List supported encodings in man page for yaz-iconv.
