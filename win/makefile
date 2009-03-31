@@ -762,7 +762,7 @@ $(SRCDIR)\iso5426.c: $(SRCDIR)\codetables-iso5426.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -r -p iso5426 codetables-iso5426.xml -o iso5426.c
 
-$(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv $(SRCDIR)\charconv.tcl
+$(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv 
 	@cd $(SRCDIR)
 	$(TCL) oidtoc.tcl $(SRCDIR) oid.csv oid_std.c oid_std.h
 
