@@ -138,15 +138,9 @@ int iochan_event_loop(IOCHAN *iochans)
             }
             else
             {
-                /* Destroy the first member in the chain, and try again */
-                association *assoc = (association *)iochan_getdata(*iochans);
-                COMSTACK conn = assoc->client_link;
-
-                cs_close(conn);
-                destroy_association(assoc);
-                iochan_destroy(*iochans);
-                yaz_log(log_level, "error select, destroying iochan %p",
-                        *iochans);
+                yaz_log(YLOG_WARN|YLOG_ERRNO, "yaz_poll");
+                xfree(fds);
+                continue;
             }
         }
         now = time(0);
