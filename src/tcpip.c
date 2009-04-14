@@ -610,8 +610,10 @@ int tcpip_rcvconnect(COMSTACK h)
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
         
-        gnutls_transport_set_ptr(sp->session, (gnutls_transport_ptr_t) h->iofile);
-        
+        /* cast to intermediate size_t to avoid GCC warning. */
+        gnutls_transport_set_ptr(sp->session, 
+                                 (gnutls_transport_ptr_t) 
+                                 (size_t) h->iofile);
         res = gnutls_handshake(sp->session);
         if (res < 0)
         {
@@ -965,8 +967,10 @@ COMSTACK tcpip_accept(COMSTACK h)
                 xfree(state);
                 return 0;
             }
+            /* cast to intermediate size_t to avoid GCC warning. */
             gnutls_transport_set_ptr(state->session, 
-                                     (gnutls_transport_ptr_t) cnew->iofile);
+                                     (gnutls_transport_ptr_t)
+                                     (size_t) cnew->iofile);
         }
 #elif HAVE_OPENSSL_SSL_H
         state->ctx = st->ctx;
