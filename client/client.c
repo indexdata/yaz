@@ -133,7 +133,6 @@ static char* yazLang = 0;
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
 static char *refid = NULL;
-static char *last_open_command = NULL;
 static int auto_reconnect = 0;
 static int auto_wait = 1;
 static Odr_bitmask z3950_options;
@@ -181,6 +180,8 @@ int cmd_querycharset(const char *arg);
 static void close_session(void);
 
 static void marc_file_write(const char *buf, size_t sz);
+
+static void wait_and_handle_response(int one_response_only);
 
 ODR getODROutputStream(void)
 {
@@ -664,15 +665,6 @@ static int cmd_base(const char *arg)
     return set_base(arg);
 }
 
-void cmd_open_remember_last_open_command(const char* arg, char* new_open_command)
-{
-    if(last_open_command != arg)
-    {
-        if(last_open_command) xfree(last_open_command);
-        last_open_command = xstrdup(new_open_command);
-    }
-}
-
 int session_connect(const char *arg)
 {
     void *add;
@@ -693,8 +685,6 @@ int session_connect(const char *arg)
 
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
-
-    cmd_open_remember_last_open_command(arg, type_and_host);
 
     if (yazProxy)
         conn = cs_create_host(yazProxy, 1, &add);
@@ -753,22 +743,6 @@ int cmd_open(const char *arg)
     if (conn && conn->protocol == PROTO_HTTP)
         queryType = QueryType_CQL;
     return r;
-}
-
-void try_reconnect(void)
-{
-    char* open_command;
-
-    if(!( auto_reconnect && last_open_command) ) return ;
-
-    open_command = (char *) xmalloc(strlen(last_open_command)+6);
-    strcpy(open_command, "open ");
-
-    strcat(open_command, last_open_command);
-
-    process_cmd_line(open_command);
-
-    xfree(open_command);
 }
 
 int cmd_authentication(const char *arg)
@@ -2583,17 +2557,39 @@ static int cmd_find(const char *arg)
     }
     else
     {
-        if (!conn)
+        if (*cur_host && auto_reconnect)
         {
-            try_reconnect();
-
-            if (!conn) {
-                printf("Not connected yet\n");
-                return 0;
+            int i = 0;
+            for (;;)
+            {
+                if (conn)
+                {
+                    if (!send_searchRequest(arg))
+                        return 0;
+                    wait_and_handle_response(0);
+                    if (conn)
+                        break;
+                }
+                if (++i == 2)
+                {
+                    printf("Unable to reconnect\n");
+                    break;
+                }
+                session_connect(cur_host);
+                wait_and_handle_response(0);
             }
-        }
-        if (!send_searchRequest(arg))
             return 0;
+        }
+        else if (conn)
+        {
+            if (!send_searchRequest(arg))
+                return 0;
+        }
+        else
+        {
+            printf("Not connected yet\n");
+            return 0;
+        }
     }
     return 2;
 }
@@ -3217,15 +3213,13 @@ static int cmd_scan_common(const char *set, const char *arg)
     }
     else
     {
-        if (!conn)
+        if (*cur_host && !conn && auto_reconnect)
         {
-            try_reconnect();
-
-            if (!conn) {
-                printf("Session not initialized yet\n");
-                return 0;
-            }
+            session_connect(cur_host);
+            wait_and_handle_response(0);
         }
+        if (!conn)
+            return 0;
         if (session_initResponse &&
             !ODR_MASK_GET(session_initResponse->options, Z_Options_scan))
         {
@@ -4087,7 +4081,7 @@ static void http_response(Z_HTTP_Response *hres)
 }
 #endif
 
-void wait_and_handle_response(int one_response_only)
+static void wait_and_handle_response(int one_response_only)
 {
     int reconnect_ok = 1;
     int res;
@@ -4383,16 +4377,13 @@ int cmd_list_all(const char* args) {
     int i;
 
     /* connection options */
-    if(conn) {
-        printf("Connected to         : %s\n",last_open_command);
-    } else {
-        if(last_open_command)
-            printf("Not connected to     : %s\n",last_open_command);
-        else
-            printf("Not connected        : \n");
-
-    }
-    if(yazProxy) printf("using proxy          : %s\n",yazProxy);
+    if (conn)
+        printf("Connected to         : %s\n", cur_host);
+    else if (*cur_host)
+        printf("Not connected to     : %s\n", cur_host);
+    else
+        printf("Not connected        : \n");
+    if (yazProxy) printf("using proxy          : %s\n",yazProxy);
 
     printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
     printf("auto_wait            : %s\n",auto_wait?"on":"off");
