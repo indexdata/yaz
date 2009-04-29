@@ -92,7 +92,10 @@ static Z_SRW_PDU *srw_sr = 0;
 static FILE *apdu_file = 0;
 static FILE *ber_file = 0;
 static COMSTACK conn = 0;               /* our z-association */
+
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
+static NMEM nmem_auth = NULL;
+
 char *databaseNames[128];
 int num_databaseNames = 0;
 static Z_External *record_last = 0;
@@ -770,56 +773,61 @@ void try_reconnect(void)
 
 int cmd_authentication(const char *arg)
 {
-    static Z_IdAuthentication au;
-    static char user[40], group[40], pass[40];
-    static Z_IdPass idPass;
+    char **args;
     int r;
 
-    if (!*arg)
-    {
-        printf("Auth field set to null\n");
-        auth = 0;
-        return 1;
-    }
-    r = sscanf(arg, "%39s %39s %39s", user, group, pass);
+    nmem_reset(nmem_auth);
+    nmem_strsplit_blank(nmem_auth, arg, &args, &r);
+
     if (r == 0)
     {
         printf("Authentication set to null\n");
         auth = 0;
     }
-    if (r == 1)
+    else if (r == 1)
     {
-        auth = &au;
-        if (!strcmp(user, "-")) {
-            au.which = Z_IdAuthentication_anonymous;
+        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        if (!strcmp(args[0], "-"))
+        {
+            auth->which = Z_IdAuthentication_anonymous;
+            auth->u.anonymous = odr_nullval();
             printf("Authentication set to Anonymous\n");
-        } else {
-            au.which = Z_IdAuthentication_open;
-            au.u.open = user;
-            printf("Authentication set to Open (%s)\n", user);
+        } 
+        else
+        {
+            auth->which = Z_IdAuthentication_open;
+            auth->u.open = args[0];
+            printf("Authentication set to Open (%s)\n", args[0]);
         }
     }
-    if (r == 2)
+    else if (r == 2)
     {
-        auth = &au;
-        au.which = Z_IdAuthentication_idPass;
-        au.u.idPass = &idPass;
-        idPass.groupId = NULL;
-        idPass.userId = !strcmp(user, "-") ? 0 : user;
-        idPass.password = !strcmp(group, "-") ? 0 : group;
-        printf("Authentication set to User (%s), Pass (%s)\n", user, group);
+        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        auth->which = Z_IdAuthentication_idPass;
+        auth->u.idPass = nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
+        auth->u.idPass->groupId = NULL;
+        auth->u.idPass->userId = !strcmp(args[0], "-") ? 0 : args[0];
+        auth->u.idPass->password = !strcmp(args[1], "-") ? 0 : args[1];
+        printf("Authentication set to User (%s), Pass (%s)\n",
+               args[0], args[1]);
     }
-    if (r == 3)
+    else if (r == 3)
     {
-        auth = &au;
-        au.which = Z_IdAuthentication_idPass;
-        au.u.idPass = &idPass;
-        idPass.groupId = group;
-        idPass.userId = user;
-        idPass.password = pass;
+        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        auth->which = Z_IdAuthentication_idPass;
+        auth->u.idPass = nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
+        auth->u.idPass->groupId = args[1];
+        auth->u.idPass->userId = args[0];
+        auth->u.idPass->password = args[2];
         printf("Authentication set to User (%s), Group (%s), Pass (%s)\n",
-               user, group, pass);
+               args[0], args[1], args[2]);
     }
+    else
+    {
+        printf("Bad number of args to auth\n");
+        auth = 0;
+    }
+
     return 1;
 }
 
@@ -2867,6 +2875,7 @@ void exit_client(int code)
 {
     file_history_save(file_history);
     file_history_destroy(&file_history);
+    nmem_destroy(nmem_auth);
     exit(code);
 }
 
@@ -4921,6 +4930,8 @@ int main(int argc, char **argv)
     ODR_MASK_SET(&z3950_options, Z_Options_sort);
     ODR_MASK_SET(&z3950_options, Z_Options_extendedServices);
     ODR_MASK_SET(&z3950_options, Z_Options_delSet);
+
+    nmem_auth = nmem_create();
 
     while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
     {
