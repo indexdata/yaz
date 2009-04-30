@@ -27,7 +27,11 @@
 
 /**
  * \file xmalloc.h
- * \brief Header for malloc interface.
+ * \brief Header for memory handling functions.
+ *
+ * This is a set of wrapper functions for the memory allocation routines
+ * from stdlib.h.. Such as malloc, free, realloc etc.
+ * These functions calls exit if memory allocation fails.
  */
 
 #ifndef XMALLOC_H
@@ -39,22 +43,99 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief utility macro which calls xrealloc_f */
 #define xrealloc(o, x) xrealloc_f(o, x, __FILE__, __LINE__)
+/** \brief utility macro which calls malloc_f */
 #define xmalloc(x) xmalloc_f(x, __FILE__, __LINE__)
+/** \brief utility macro which calls xcalloc_f */
 #define xcalloc(x,y) xcalloc_f(x,y, __FILE__, __LINE__)
+/** \brief utility macro which calls xfree_f */
 #define xfree(x) xfree_f(x, __FILE__, __LINE__)
+/** \brief utility macro which calls xstrdup_f */
 #define xstrdup(s) xstrdup_f(s, __FILE__, __LINE__)
+/** \brief utility macro which calls xstrndup_f */
 #define xstrndup(s, n) xstrndup_f(s, n, __FILE__, __LINE__)
+/** \brief utility macro which calls malloc_trav_f */
 #define xmalloc_trav(s) xmalloc_trav_f(s, __FILE__, __LINE__)
     
-YAZ_EXPORT void *xrealloc_f (void *o, size_t size, const char *file, int line);
-YAZ_EXPORT void *xmalloc_f (size_t size, const char *file, int line);
-YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size,
-                            const char *file, int line);
-YAZ_EXPORT char *xstrdup_f (const char *p, const char *file, int line);
+/** \brief realloc
+    \param o buffer to be reallocated
+    \param size size of buffer to be allocated
+    \param file fname location of use
+    \param line line location of use
+    \returns buffer
+
+    This function is invoked via macro xrealloc in which file and line are set
+    automatically.
+*/
+
+YAZ_EXPORT void *xrealloc_f(void *o, size_t size, const char *file, int line);
+/** \brief malloc
+    \param size size of buffer to be allocated
+    \param file fname location of use
+    \param line line location of use
+    \returns buffer
+
+    This function is invoked via macro xmalloc in which file and line are set
+    automatically.
+*/
+YAZ_EXPORT void *xmalloc_f(size_t size, const char *file, int line);
+
+/** \brief calloc
+    \param nmemb number of members
+    \param size size of member
+    \param file fname location of use
+    \param line line location of use
+    \returns buffer
+
+    This function is invoked via macro xcalloc in which file and line are set
+    automatically.
+*/
+YAZ_EXPORT void *xcalloc_f(size_t nmemb, size_t size,
+                           const char *file, int line);
+/** \brief strdup
+    \param p string to be cloned
+    \param file fname location of use
+    \param line line location of use
+    \returns resulting string
+
+    This function is invoked via macro xstrdup in which file and line are set
+    automatically.
+*/
+YAZ_EXPORT char *xstrdup_f(const char *p, const char *file, int line);
+
+/** \brief strndup
+    \param p string to be cloned
+    \param n max size of resulting string (excluding 0)
+    \param file fname location of use
+    \param line line location of use
+    \returns resulting string
+
+    This function is invoked via macro xstrndup in which file and line are set
+    automatically.
+*/
 YAZ_EXPORT char *xstrndup_f(const char *p, size_t n,
                             const char *file, int line);
-YAZ_EXPORT void xfree_f (void *p, const char *file, int line);
+
+/** \brief free
+    \param p string to be freed (might be NULL)
+    \param file fname location of use
+    \param line line location of use
+
+    This function is invoked via macro xfree in which file and line are set
+    automatically.
+*/
+YAZ_EXPORT void xfree_f(void *p, const char *file, int line);
+
+/** \brief logs all xmalloc buffers
+    \param s not used
+    \param file fname location of use
+    \param line line location of use
+
+    This function is invoked via macro xmalloc_trav in which file and line
+    are set automatically. Only if TRACE_XMALLOC > 1 this function
+    does any real work!
+*/
 YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
 
 YAZ_END_CDECL
