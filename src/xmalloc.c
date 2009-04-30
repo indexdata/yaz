@@ -341,6 +341,20 @@ void xfree_f(void *p, const char *file, int line)
         yaz_log (log_level, "%s:%d: xfree %p", file, line, p);
     xfree_d(p, file, line);
 }
+
+char *xstrndup_f(const char *s, size_t n, const char *file, int line)
+{
+    size_t l = strlen(s);
+    if (l < n)
+        return xstrdup_f(s, file, line);
+    {
+        char *a = xmalloc_f(n+1, file, line);
+        memcpy(a, s, n);
+        a[n] = '\0';
+        return a;
+    } 
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

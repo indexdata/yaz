@@ -1,7 +1,8 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2009 Index Data
 
-check_PROGRAMS = tsticonv tstnmem tstmatchstr tstwrbuf tstodr tstccl tstlog \
+check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
+ tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob tst_rpn2cql
@@ -50,6 +51,7 @@ tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
 
 CONFIG_CLEAN_FILES=*.log
 
+tstxmalloc_SOURCES = tstxmalloc.c
 tsticonv_SOURCES = tsticonv.c
 tstnmem_SOURCES = tstnmem.c
 tstmatchstr_SOURCES = tstmatchstr.c

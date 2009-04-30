@@ -44,6 +44,7 @@ YAZ_BEGIN_CDECL
 #define xcalloc(x,y) xcalloc_f(x,y, __FILE__, __LINE__)
 #define xfree(x) xfree_f(x, __FILE__, __LINE__)
 #define xstrdup(s) xstrdup_f(s, __FILE__, __LINE__)
+#define xstrndup(s, n) xstrndup_f(s, n, __FILE__, __LINE__)
 #define xmalloc_trav(s) xmalloc_trav_f(s, __FILE__, __LINE__)
     
 YAZ_EXPORT void *xrealloc_f (void *o, size_t size, const char *file, int line);
@@ -51,6 +52,8 @@ YAZ_EXPORT void *xmalloc_f (size_t size, const char *file, int line);
 YAZ_EXPORT void *xcalloc_f (size_t nmemb, size_t size,
                             const char *file, int line);
 YAZ_EXPORT char *xstrdup_f (const char *p, const char *file, int line);
+YAZ_EXPORT char *xstrndup_f(const char *p, size_t n,
+                            const char *file, int line);
 YAZ_EXPORT void xfree_f (void *p, const char *file, int line);
 YAZ_EXPORT void xmalloc_trav_f(const char *s, const char *file, int line);
 
