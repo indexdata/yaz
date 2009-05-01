@@ -3914,11 +3914,6 @@ static void handle_srw_record(Z_SRW_record *rec)
     printf("\n");
     if (rec->recordData_buf && rec->recordData_len)
     {
-        if (fwrite(rec->recordData_buf, 1, rec->recordData_len, stdout) !=
-            (size_t) (rec->recordData_len))
-        {
-            printf("write to stdout failed\n");
-        }
         printf("%.*s", rec->recordData_len, rec->recordData_buf);
         marc_file_write(rec->recordData_buf, rec->recordData_len);
     }
