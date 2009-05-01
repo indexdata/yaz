@@ -40,6 +40,12 @@ $aclocal -I m4
 if grep AC_CONFIG_HEADERS configure.ac >/dev/null; then
     $autoheader
 fi
+if grep AM_PROG_LIBTOOL configure.ac >/dev/null; then
+    has_libtool=true
+else
+    has_libtool=false
+fi
+
 $libtoolize --automake --force 
 $automake --add-missing 
 $autoconf
@@ -71,7 +77,11 @@ esac
 
 if $enable_configure; then
     if [ -n "$sh_cflags" ]; then
-	CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure --disable-shared --enable-static $*
+	if $has_libtool; then
+	    CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure --disable-shared --enable-static $*
+        else
+	    CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure $*
+        fi
     else
 	./configure $*
     fi
