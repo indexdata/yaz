@@ -357,7 +357,7 @@ static size_t write_advancegreek(yaz_iconv_t cd, yaz_iconv_encoder_t w,
     case 0x03c4 : out[k++]=0x94; break;
     case 0x03c5 : out[k++]=0x95; break;
     case 0x03c6 : out[k++]=0x96; break;
-    case 0x03c7 : out[k++]=0x96; break;
+    case 0x03c7 : out[k++]=0x97; break;
     case 0x03c8 : out[k++]=0x98; break;
     case 0x03c9 : out[k++]=0x99; break;
     default:
