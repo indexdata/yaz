@@ -434,14 +434,31 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     if (sp->ai && h->state == CS_ST_UNBND)
     {
         int s = -1;
-        struct addrinfo *ai = sp->ai;
-        for (; ai; ai = ai->ai_next)
+        struct addrinfo *ai;
+        /* try to make IPV6 socket first */
+        for (ai = sp->ai; ai; ai = ai->ai_next)
         {
-            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-            if (s != -1)
+            if (ai->ai_family == AF_INET6)
             {
-                sp->ai = ai;
-                break;
+                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+                if (s != -1)
+                {
+                    sp->ai = ai;
+                    break;
+                }
+            }
+        }
+        if (s == -1)
+        {
+            /* no IPV6 could be made.. Try them all */
+            for (ai = sp->ai; ai; ai = ai->ai_next)
+            {
+                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+                if (s != -1)
+                {
+                    sp->ai = ai;
+                    break;
+                }
             }
         }
         if (s == -1)
