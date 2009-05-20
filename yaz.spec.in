@@ -10,7 +10,8 @@ Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 %define TCPWRAPPER tcpd-devel
 %if "%{_vendor}" == "redhat"
-%define TCPWRAPPER tcp_wrappers-devel
+# Fedora requires tcp_wrappers-devel .
+%define TCPWRAPPER tcp_wrappers
 %endif
 BuildRequires: pkgconfig libxml2-devel libxslt-devel gnutls-devel readline-devel libicu-devel %{TCPWRAPPER}
 Packager: Adam Dickmeiss <adam@indexdata.dk>
