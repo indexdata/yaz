@@ -1018,8 +1018,6 @@ ZOOM_API(void)
                 wrbuf_destroy(rc->rec.wrbuf_marc);
             if (rc->rec.wrbuf_iconv)
                 wrbuf_destroy(rc->rec.wrbuf_iconv);
-            if (rc->rec.wrbuf_opac)
-                wrbuf_destroy(rc->rec.wrbuf_opac);
         }
         r->record_hash[i] = 0;
     }
@@ -1776,7 +1774,6 @@ ZOOM_API(ZOOM_record)
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf_marc = 0;
     nrec->wrbuf_iconv = 0;
-    nrec->wrbuf_opac = 0;
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
     
@@ -1830,8 +1827,6 @@ ZOOM_API(void)
         wrbuf_destroy(rec->wrbuf_marc);
     if (rec->wrbuf_iconv)
         wrbuf_destroy(rec->wrbuf_iconv);
-    if (rec->wrbuf_opac)
-        wrbuf_destroy(rec->wrbuf_opac);
     odr_destroy(rec->odr);
     xfree(rec);
 }
@@ -2207,7 +2202,6 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->rec.odr = 0;
         rc->rec.wrbuf_marc = 0;
         rc->rec.wrbuf_iconv = 0;
-        rc->rec.wrbuf_opac = 0;
         rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
         
         rc->syntax = odr_strdup_null(r->odr, syntax);
