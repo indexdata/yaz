@@ -146,8 +146,7 @@ struct ZOOM_resultset_p {
 
 struct ZOOM_record_p {
     ODR odr;
-    WRBUF wrbuf_marc;
-    WRBUF wrbuf_iconv;
+    WRBUF wrbuf;
     Z_NamePlusRecord *npr;
     const char *schema;
 

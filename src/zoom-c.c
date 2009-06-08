@@ -1014,10 +1014,8 @@ ZOOM_API(void)
         ZOOM_record_cache rc;
         for (rc = r->record_hash[i]; rc; rc = rc->next)
         {
-            if (rc->rec.wrbuf_marc)
-                wrbuf_destroy(rc->rec.wrbuf_marc);
-            if (rc->rec.wrbuf_iconv)
-                wrbuf_destroy(rc->rec.wrbuf_iconv);
+            if (rc->rec.wrbuf)
+                wrbuf_destroy(rc->rec.wrbuf);
         }
         r->record_hash[i] = 0;
     }
@@ -1772,8 +1770,7 @@ ZOOM_API(ZOOM_record)
     
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
-    nrec->wrbuf_marc = 0;
-    nrec->wrbuf_iconv = 0;
+    nrec->wrbuf = 0;
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
     
@@ -1823,10 +1820,8 @@ ZOOM_API(void)
 {
     if (!rec)
         return;
-    if (rec->wrbuf_marc)
-        wrbuf_destroy(rec->wrbuf_marc);
-    if (rec->wrbuf_iconv)
-        wrbuf_destroy(rec->wrbuf_iconv);
+    if (rec->wrbuf)
+        wrbuf_destroy(rec->wrbuf);
     odr_destroy(rec->odr);
     xfree(rec);
 }
@@ -1875,14 +1870,14 @@ static const char *return_marc_record(ZOOM_record rec, int marc_type,
     if (cd)
         yaz_marc_iconv(mt, cd);
     yaz_marc_xml(mt, marc_type);
-    if (!rec->wrbuf_marc)
-        rec->wrbuf_marc = wrbuf_alloc();
-    wrbuf_rewind(rec->wrbuf_marc);
-    if (yaz_marc_decode_wrbuf(mt, buf, sz, rec->wrbuf_marc) > 0)
+    if (!rec->wrbuf)
+        rec->wrbuf = wrbuf_alloc();
+    wrbuf_rewind(rec->wrbuf);
+    if (yaz_marc_decode_wrbuf(mt, buf, sz, rec->wrbuf) > 0)
     {
         if (len)
-            *len = wrbuf_len(rec->wrbuf_marc);
-        ret_string = wrbuf_cstr(rec->wrbuf_marc);
+            *len = wrbuf_len(rec->wrbuf);
+        ret_string = wrbuf_cstr(rec->wrbuf);
     }
     yaz_marc_destroy(mt);
     if (cd)
@@ -1902,18 +1897,18 @@ static const char *return_opac_record(ZOOM_record rec, int marc_type,
         yaz_marc_iconv(mt, cd);
     yaz_marc_xml(mt, marc_type);
 
-    if (!rec->wrbuf_marc)
-        rec->wrbuf_marc = wrbuf_alloc();
-    wrbuf_rewind(rec->wrbuf_marc);
+    if (!rec->wrbuf)
+        rec->wrbuf = wrbuf_alloc();
+    wrbuf_rewind(rec->wrbuf);
 
-    yaz_opac_decode_wrbuf(mt, opac_rec, rec->wrbuf_marc);
+    yaz_opac_decode_wrbuf(mt, opac_rec, rec->wrbuf);
     yaz_marc_destroy(mt);
 
     if (cd)
         yaz_iconv_close(cd);
     if (len)
-        *len = wrbuf_len(rec->wrbuf_marc);
-    return wrbuf_cstr(rec->wrbuf_marc);
+        *len = wrbuf_len(rec->wrbuf);
+    return wrbuf_cstr(rec->wrbuf);
 }
 
 static const char *return_string_record(ZOOM_record rec, int *len,
@@ -1924,16 +1919,16 @@ static const char *return_string_record(ZOOM_record rec, int *len,
 
     if (cd)
     {
-        if (!rec->wrbuf_iconv)
-            rec->wrbuf_iconv = wrbuf_alloc();
+        if (!rec->wrbuf)
+            rec->wrbuf = wrbuf_alloc();
 
-        wrbuf_rewind(rec->wrbuf_iconv);
+        wrbuf_rewind(rec->wrbuf);
 
-        wrbuf_iconv_write(rec->wrbuf_iconv, cd, buf, sz);
-        wrbuf_iconv_reset(rec->wrbuf_iconv, cd);
+        wrbuf_iconv_write(rec->wrbuf, cd, buf, sz);
+        wrbuf_iconv_reset(rec->wrbuf, cd);
 
-        buf = wrbuf_cstr(rec->wrbuf_iconv);
-        sz = wrbuf_len(rec->wrbuf_iconv);
+        buf = wrbuf_cstr(rec->wrbuf);
+        sz = wrbuf_len(rec->wrbuf);
         yaz_iconv_close(cd);
     }
     if (len)
@@ -1978,13 +1973,13 @@ static const char *return_record(ZOOM_record rec, int *len,
     }
     else if (r->which == Z_External_grs1)
     {
-        if (!rec->wrbuf_marc)
-            rec->wrbuf_marc = wrbuf_alloc();
-        wrbuf_rewind(rec->wrbuf_marc);
-        yaz_display_grs1(rec->wrbuf_marc, r->u.grs1, 0);
+        if (!rec->wrbuf)
+            rec->wrbuf = wrbuf_alloc();
+        wrbuf_rewind(rec->wrbuf);
+        yaz_display_grs1(rec->wrbuf, r->u.grs1, 0);
         return return_string_record(rec, len,
-                                    wrbuf_buf(rec->wrbuf_marc),
-                                    wrbuf_len(rec->wrbuf_marc),
+                                    wrbuf_buf(rec->wrbuf),
+                                    wrbuf_len(rec->wrbuf),
                                     charset);
     }
     return 0;
@@ -2200,8 +2195,7 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     {
         rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
         rc->rec.odr = 0;
-        rc->rec.wrbuf_marc = 0;
-        rc->rec.wrbuf_iconv = 0;
+        rc->rec.wrbuf = 0;
         rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
         
         rc->syntax = odr_strdup_null(r->odr, syntax);
