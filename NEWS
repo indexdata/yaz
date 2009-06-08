@@ -1,3 +1,5 @@
+--- 3.0.46 2009/06/08
+
 zoom: ZOOM_record_get now renders OPAC records when type=xml. Previously
 only the bibliographic record was rendered. For type=opac, an OPAC
 record is only returned if it is present.
