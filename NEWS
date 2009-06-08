@@ -1,6 +1,20 @@
-ZOOM_record_get now renders OPAC records when type=xml. Previously
+zoom: ZOOM_record_get now renders OPAC records when type=xml. Previously
 only the bibliographic record was rendered. For type=opac, an OPAC
 record is only returned if it is present.
+
+iconv: small fix for encoding of advancegreek.
+
+yaz-client: avoid double display of SRU/SRW records (bug #2798).
+
+yaz-client: option auto_reconnect=on really reconnects.
+
+yaz-client: fix bug #2770 - avoid length limit for auth parameters.
+
+server: avoid null ptr ref for for yaz_poll errors.
+
+build: fix RPM build for RHEL 5.3.
+
+comstack: prefer IPV6 addresses over IPV4 - should refix bug #2350
 
 --- 3.0.45 2009/03/31
 
