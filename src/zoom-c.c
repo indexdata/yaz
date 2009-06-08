@@ -2144,14 +2144,15 @@ ZOOM_API(const char *)
     {
         return return_record(rec, len, npr, YAZ_MARC_ISO2709, charset);
     }
-    else if (!strcmp (type, "ext"))
+    else if (!strcmp(type, "ext"))
     {
         if (len) *len = -1;
         return (const char *) npr->u.databaseRecord;
     }
-    else if (!strcmp (type, "opac"))
+    else if (!strcmp(type, "opac"))
     {
-        return return_record(rec, len, npr, YAZ_MARC_MARCXML, charset);
+        if (npr->u.databaseRecord->which == Z_External_OPAC)
+            return return_record(rec, len, npr, YAZ_MARC_MARCXML, charset);
     }
     return 0;
 }

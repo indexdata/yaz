@@ -792,14 +792,18 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	 MARCXML
 	 </ulink> 
 	(converted from ISO2709 to MARCXML by YAZ).
-	GRS-1 and OPAC records are not supported for this form.
+	OPAC records are also converted to XML and the 
+	bibliographic record is converted to MARCXML (when possible).
+	GRS-1 records are not supported for this form.
         Upon completion, the XML buffer is returned
 	(type <literal>const char *</literal>) and length is stored in
         <literal>*len</literal>.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>opac</literal></term>
-      <listitem><para>OPAC for record is returned in XML.
+      <listitem><para>OPAC information for record is returned in XML
+	if an OPAC record is present at the position given. If no
+	OPAC record is present, a NULL pointer is returned.
        </para></listitem>
      </varlistentry>
     </variablelist>

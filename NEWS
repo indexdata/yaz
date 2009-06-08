@@ -1,3 +1,7 @@
+ZOOM_record_get now renders OPAC records when type=xml. Previously
+only the bibliographic record was rendered. For type=opac, an OPAC
+record is only returned if it is present.
+
 --- 3.0.45 2009/03/31
 
 Fixed bug #2709: TCP connect returns Invalid argument.
