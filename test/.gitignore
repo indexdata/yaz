@@ -17,6 +17,7 @@ tstodrstack
 tstlogthread
 tstxmlquery
 tstpquery
+tstxmalloc
 tst_filepath
 tst_record_conv
 tst_retrieval
