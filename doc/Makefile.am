@@ -5,7 +5,7 @@ SUBDIRS = common
 
 XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
- asn.xml tools.xml odr.xml comstack.xml frontend.xml license.xml \
+ asn.xml tools.xml odr.xml comstack.xml server.xml license.xml \
  future.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
  std-oid-table.xml manref.xml
