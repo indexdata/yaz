@@ -830,7 +830,7 @@ typedef struct bend_scan_rr {
      The server will change identity to <literal>nobody</literal>
      and write its log to <filename>/var/log/app.log</filename>.
      <screen>
-      <replaceable>appname</replaceable> -l /var/log/app.log -u nobody tcp:@:210
+      application -l /var/log/app.log -u nobody tcp:@:210
      </screen>
     </para>
     <para>
@@ -867,7 +867,7 @@ typedef struct bend_scan_rr {
      on UNIX file socket rather than a Internet socket. To listen on
      <filename>/tmp/mysocket</filename> start the server as follows:
      <screen>
-      <replaceable>appname</replaceable> tcp:/tmp/mysocket
+      application unix:/tmp/mysocket
      </screen>
     </para>
    </example>
