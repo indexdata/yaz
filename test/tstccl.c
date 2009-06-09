@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <yaz/ccl_xml.h>
+#include <yaz/log.h>
 #include <yaz/test.h>
 
 
@@ -32,14 +33,22 @@ static int tst_ccl_query(CCL_bibset bibset,
             if (result && !strcmp(wrbuf_cstr(wrbuf), result))
                 ret = 1;
             else
+            {
+                yaz_log(YLOG_WARN, "%s: result does not match", query);
+                yaz_log(YLOG_WARN, " expected %s", result);
+                yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(wrbuf));
                 ret = 0;
+            }
             ccl_rpn_delete(rpn);
             wrbuf_destroy(wrbuf);
         }
         else 
         {
             if (result)
+            {
+                yaz_log(YLOG_WARN, "%s: parse failed", query);
                 ret = 0;
+            }
             else
                 ret = 1;
         }
@@ -61,7 +70,7 @@ void tst1(int pass)
     {
     case 0:
         ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
-        ccl_qual_fitem(bibset, "1=1016 s=al,pw",    "term");
+        ccl_qual_fitem(bibset, "1=1016 s=al,pw t=r",    "term");
         ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
         ccl_qual_fitem(bibset, "r=r",         "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
@@ -70,7 +79,7 @@ void tst1(int pass)
         strcpy(tstline, "ti u=4    s=pw t=l,r");
         ccl_qual_line(bibset, tstline);
 
-        strcpy(tstline, "term 1=1016 s=al,pw   # default term");
+        strcpy(tstline, "term 1=1016 s=al,pw t=r  # default term");
         ccl_qual_line(bibset, tstline);
 
         strcpy(tstline, "dc.title 1=/my/title");
@@ -84,7 +93,7 @@ void tst1(int pass)
         break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
-                     "term 1=1016 s=al,pw\r\n"
+                     "term 1=1016 s=al,pw t=r\r\n"
                      "\n"
                      "dc.title 1=/my/title\n"
                      "date r=r\n" 
@@ -108,6 +117,7 @@ void tst1(int pass)
                 " <qual name=\"term\">\n"
                 "   <attr type=\"1\" value=\"1016\"/>\n"
                 "   <attr type=\"s\" value=\"al,pw\"/>\n"
+                "   <attr type=\"t\" value=\"r\"/>\n"
                 " </qual>\n"
                 " <qual name=\"dc.title\">\n"
                 "   <attr type=\"1\" value=\"/my/title\"/>\n"
@@ -197,6 +207,26 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b", "@attr 4=1 @attr 1=4 \"a, b\" "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=a-b", "@attr 4=2 @attr 1=4 a-b "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b", "@attr 4=1 @attr 1=4 \"a - b\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a?", "@attr 5=1 @attr 4=2 @attr 1=1016 a "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a b", 
+                            "@and @attr 4=2 @attr 1=1016 a "
+                            "@attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a b?", 
+                            "@and @attr 4=2 @attr 1=1016 a "
+                            "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
+
+    /* Bug #2895 */
+    YAZ_CHECK(tst_ccl_query(bibset, "a? b?", 
+#if 1
+                            /* incorrect. */
+                            "@and @attr 4=2 @attr 1=1016 a? "
+#else
+                            /* correct */
+                            "@and @attr 5=1 @attr 4=2 @attr 1=1016 a "
+#endif
+                            "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
     ccl_qual_rm(&bibset);
 }
 
