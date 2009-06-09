@@ -218,15 +218,17 @@ void tst1(int pass)
                             "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
 
     /* Bug #2895 */
-    YAZ_CHECK(tst_ccl_query(bibset, "a? b?", 
 #if 1
+    YAZ_CHECK(tst_ccl_query(bibset, "a? b?", 
                             /* incorrect. */
                             "@and @attr 4=2 @attr 1=1016 a? "
+                            "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
 #else
+    YAZ_CHECK(tst_ccl_query(bibset, "a? b?", 
                             /* correct */
                             "@and @attr 5=1 @attr 4=2 @attr 1=1016 a "
-#endif
                             "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
+#endif
     ccl_qual_rm(&bibset);
 }
 
