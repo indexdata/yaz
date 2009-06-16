@@ -53,7 +53,7 @@
 %}
 
 %pure_parser
-%token DOTTERM TERM AND OR NOT PROX GE LE NE EXACT
+%token DOTTERM TERM AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
 
@@ -61,11 +61,19 @@ top: {
     $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem,
 			    "cql.serverChoice", "=", 0);
     ((CQL_parser) parm)->top = 0;
-} cqlQuery1 {
+} cqlQuery1 sortby {
     cql_node_destroy($$.rel);
     ((CQL_parser) parm)->top = $2.cql; 
 }
 ;
+
+sortby: /* empty */
+| SORTBY sortSpec;
+
+sortSpec: sortSpec singleSpec
+| singleSpec; 
+
+singleSpec: index modifiers ;
 
 cqlQuery1: cqlQuery
 | cqlQuery error {
@@ -203,6 +211,7 @@ searchTerm:
 | OR
 | NOT
 | PROX
+| SORTBY
 ;
 
 %%
@@ -357,6 +366,11 @@ int yylex(YYSTYPE *lval, void *vp)
 	{
 	    lval->buf = "prox";
 	    return PROX;
+	}
+	if (!cql_strcmp(lval->buf, "sortby"))
+	{
+	    lval->buf = "sortby";
+	    return SORTBY;
 	}
 	if (!cql_strcmp(lval->buf, "all"))
 	    relation_like = 1;
