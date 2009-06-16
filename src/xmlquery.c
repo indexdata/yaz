@@ -40,10 +40,11 @@ void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
         if (setname)
             xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
 
-        sprintf(formstr, "%d", *element->attributeType);
+        assert(*element->attributeType > 0 && *element->attributeType < 20);
+        sprintf(formstr, ODR_INT_PRINTF, *element->attributeType);
         xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
 
-        sprintf(formstr, "%d", *element->value.numeric);
+        sprintf(formstr, ODR_INT_PRINTF, *element->value.numeric);
         xmlNewProp(node, BAD_CAST "value", BAD_CAST formstr);
     }
     else if (element->which == Z_AttributeValue_complex)
@@ -56,7 +57,7 @@ void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
             if (setname)
                 xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
             
-            sprintf(formstr, "%d", *element->attributeType);
+            sprintf(formstr, ODR_INT_PRINTF, *element->attributeType);
             xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
             
             if (element->value.complex->list[i]->which ==
@@ -68,7 +69,7 @@ void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
             {
-                sprintf(formstr, "%d",
+                sprintf(formstr, ODR_INT_PRINTF,
                         *element->value.complex->list[i]->u.numeric);
                 xmlNewProp(node, BAD_CAST "value", BAD_CAST formstr);
             }
@@ -93,7 +94,7 @@ xmlNodePtr yaz_query2xml_term(const Z_Term *term,
         break;
     case Z_Term_numeric:
         type = "numeric";
-	sprintf(formstr, "%d", *term->u.numeric);
+	sprintf(formstr, ODR_INT_PRINTF, *term->u.numeric);
 	t = xmlNewText(BAD_CAST formstr);	
         break;
     case Z_Term_characterString:
@@ -172,7 +173,7 @@ void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
             else
                 xmlNewProp(node, BAD_CAST "exclusion", BAD_CAST "false");
         }
-        sprintf(formstr, "%d", *op->u.prox->distance);
+        sprintf(formstr, ODR_INT_PRINTF, *op->u.prox->distance);
         xmlNewProp(node, BAD_CAST "distance", BAD_CAST formstr);
 
         if (*op->u.prox->ordered)
@@ -180,13 +181,13 @@ void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
         else 
             xmlNewProp(node, BAD_CAST "ordered", BAD_CAST "false");
        
-        sprintf(formstr, "%d", *op->u.prox->relationType);
+        sprintf(formstr, ODR_INT_PRINTF, *op->u.prox->relationType);
         xmlNewProp(node, BAD_CAST "relationType", BAD_CAST formstr);
         
         switch(op->u.prox->which)
         {
         case Z_ProximityOperator_known:
-            sprintf(formstr, "%d", *op->u.prox->u.known);
+            sprintf(formstr, ODR_INT_PRINTF, *op->u.prox->u.known);
             xmlNewProp(node, BAD_CAST "knownProximityUnit",
                        BAD_CAST formstr);
             break;
@@ -308,11 +309,11 @@ void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp)
 bool_t *boolVal(ODR odr, const char *str)
 {
     if (*str == '\0' || strchr("0fF", *str))
-        return odr_intdup(odr, 0);
-    return odr_intdup(odr, 1);
+        return odr_booldup(odr, 0);
+    return odr_booldup(odr, 1);
 }
 
-int *intVal(ODR odr, const char *str)
+odr_int_t *intVal(ODR odr, const char *str)
 {
     return odr_intdup(odr, atoi(str));
 }
@@ -372,7 +373,7 @@ void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         if (atval)
             pop->ordered = boolVal(odr, atval);
         else
-            pop->ordered = odr_intdup(odr, 1);
+            pop->ordered = odr_booldup(odr, 1);
 
         atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
                                           BAD_CAST "relationType");

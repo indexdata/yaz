@@ -22,8 +22,9 @@ static void display_variant(WRBUF w, Z_Variant *v, int level)
 
     for (i = 0; i < v->num_triples; i++)
     {
-        printf("%*sclass=%d,type=%d", level * 4, "", *v->triples[i]->zclass,
-            *v->triples[i]->type);
+        printf("%*sclass=" ODR_INT_PRINTF ",type=" ODR_INT_PRINTF,
+               level * 4, "", *v->triples[i]->zclass,
+               *v->triples[i]->type);
         if (v->triples[i]->which == Z_Triple_internationalString)
             printf(",value=%s\n", v->triples[i]->value.internationalString);
         else
@@ -47,11 +48,11 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         t = r->elements[i];
         wrbuf_printf(w, "(");
         if (t->tagType)
-            wrbuf_printf(w, "%d,", *t->tagType);
+            wrbuf_printf(w, ODR_INT_PRINTF, *t->tagType);
         else
             wrbuf_printf(w, "?,");
         if (t->tagValue->which == Z_StringOrNumeric_numeric)
-            wrbuf_printf(w, "%d) ", *t->tagValue->u.numeric);
+            wrbuf_printf(w, ODR_INT_PRINTF ") ", *t->tagValue->u.numeric);
         else
             wrbuf_printf(w, "%s) ", t->tagValue->u.string);
         if (t->content->which == Z_ElementData_subtree)
@@ -71,7 +72,7 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         }
         else if (t->content->which == Z_ElementData_numeric)
         {
-            wrbuf_printf(w, "%d\n", *t->content->u.numeric);
+            wrbuf_printf(w, ODR_INT_PRINTF "\n", *t->content->u.numeric);
         }
         else if (t->content->which == Z_ElementData_oid)
         {

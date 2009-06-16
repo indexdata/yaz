@@ -104,7 +104,7 @@ static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0;
-static int setno = 1;                   /* current set offset */
+static odr_int_t setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 #define RECORDSYNTAX_MAX 20
 static char *recordsyntax_list[RECORDSYNTAX_MAX];
@@ -526,7 +526,7 @@ static void render_diag(Z_DiagnosticFormat *diag) {
         case Z_DiagnosticFormat_s_defaultDiagRec: {
             Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
             /* ### should check `dd->diagnosticSetId' */
-            printf("code=%d (%s)", *dd->condition,
+            printf("code=" ODR_INT_PRINTF " (%s)", *dd->condition,
                    diagbib1_str(*dd->condition));
             /* Both types of addinfo are the same, so use type-pun */
             if (dd->u.v2Addinfo != 0)
@@ -1121,7 +1121,8 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
             if (oid_oidcmp(r->diagnosticSetId, yaz_oid_diagset_bib_1))
                 printf("Unknown diagset: %s\n", diag_name);
         }
-        printf("    [%d] %s", *r->condition, diagbib1_str(*r->condition));
+        printf("    [" ODR_INT_PRINTF "] %s",
+               *r->condition, diagbib1_str(*r->condition));
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
@@ -1182,8 +1183,7 @@ static int send_deleteResultSetRequest(const char *arg)
                names[0], names[1], names[2], names[3],
                names[4], names[5], names[6], names[7]);
 
-    req->deleteFunction = (int *)
-        odr_malloc(out, sizeof(*req->deleteFunction));
+    req->deleteFunction = odr_intdup(out, 0);
     if (req->num_resultSetList > 0)
     {
         *req->deleteFunction = Z_DeleteResultSetRequest_list;
@@ -1542,7 +1542,7 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
                 printf("%s", term->u.characterString);
                 break;
             case Z_Term_numeric:
-                printf("%d", *term->u.numeric);
+                printf(ODR_INT_PRINTF, *term->u.numeric);
                 break;
             case Z_Term_null:
                 printf("null");
@@ -1582,7 +1582,8 @@ static void display_searchResult(Z_OtherInformation *o)
                     display_queryExpression("recommendation",
                         sr->elements[j]->subqueryRecommendation);
                     if (sr->elements[j]->subqueryCount)
-                        printf(" cnt=%d", *sr->elements[j]->subqueryCount);
+                        printf(" cnt=" ODR_INT_PRINTF,
+                               *sr->elements[j]->subqueryCount);
                     if (sr->elements[j]->subqueryId)
                         printf(" id=%s ", sr->elements[j]->subqueryId);
                 }
@@ -1600,7 +1601,7 @@ static int process_searchResponse(Z_SearchResponse *res)
         printf("Search was a success.\n");
     else
         printf("Search was a bloomin' failure.\n");
-    printf("Number of hits: %d", *res->resultCount);
+    printf("Number of hits: " ODR_INT_PRINTF, *res->resultCount);
     last_hit_count = *res->resultCount;
     if (setnumber >= 0)
         printf(", setno %d", setnumber);
@@ -1619,12 +1620,12 @@ static int process_searchResponse(Z_SearchResponse *res)
         case Z_SearchResponse_estimate:
             printf("estimate"); break;
         default:
-            printf("%d", *res->resultSetStatus);
+            printf(ODR_INT_PRINTF, *res->resultSetStatus);
         }
         putchar('\n');
     }
     display_searchResult(res->additionalSearchInfo);
-    printf("records returned: %d\n",
+    printf("records returned: " ODR_INT_PRINTF "\n",
            *res->numberOfRecordsReturned);
     setno += *res->numberOfRecordsReturned;
     if (res->records)
@@ -1639,12 +1640,12 @@ static void print_level(int iLevel)
         printf(" ");
 }
 
-static void print_int(int iLevel, const char *pTag, int *pInt)
+static void print_int(int iLevel, const char *pTag, odr_int_t *pInt)
 {
     if (pInt != NULL)
     {
         print_level(iLevel);
-        printf("%s: %d\n", pTag, *pInt);
+        printf("%s: " ODR_INT_PRINTF "\n", pTag, *pInt);
     }
 }
 
@@ -2044,9 +2045,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
     r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->resultSetId = "1";
 
     r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item =
-        (int *) odr_malloc(out, sizeof(int));
-    *r->u.itemOrder->u.esRequest->notToKeep->resultSetItem->item = itemno;
-
+        odr_intdup(out, itemno);
     if (!strcmp (type, "item") || !strcmp(type, "2"))
     {
         printf("using item-request\n");
@@ -2283,8 +2282,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         }
         toKeep->elementSetName = 0;
 
-        toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
-        *toKeep->action = action_no;
+        toKeep->action = odr_intdup(out, action_no);
 
         notToKeep = r->u.update0->u.esRequest->notToKeep = (Z_IU0SuppliedRecords *)
             odr_malloc(out, sizeof(*r->u.update0->u.esRequest->notToKeep));
@@ -2331,8 +2329,7 @@ static int cmd_update_Z3950(int version, int action_no, const char *recid,
         }
         toKeep->elementSetName = 0;
         toKeep->actionQualifier = 0;
-        toKeep->action = (int *) odr_malloc(out, sizeof(*toKeep->action));
-        *toKeep->action = action_no;
+        toKeep->action = odr_intdup(out, action_no);
 
         notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
             odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
@@ -2653,7 +2650,7 @@ static int cmd_setnames(const char *arg)
 /* PRESENT SERVICE ----------------------------- */
 
 static void parse_show_args(const char *arg_c, char *setstring,
-                            int *start, int *number)
+                            odr_int_t *start, odr_int_t *number)
 {
     char arg[40];
     char *p;
@@ -2689,7 +2686,7 @@ static int send_presentRequest(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
     Z_RecordComposition compo;
-    int nos = 1;
+    odr_int_t nos = 1;
     char setstring[100];
 
     req->referenceId = set_refid(out);
@@ -2771,7 +2768,8 @@ static int send_presentRequest(const char *arg)
         compo.u.simple = elementSetNames;
     }
     send_apdu(apdu);
-    printf("Sent presentRequest (%d+%d).\n", setno, nos);
+    printf("Sent presentRequest (" ODR_INT_PRINTF "+" ODR_INT_PRINTF ").\n",
+           setno, nos);
     return 2;
 }
 
@@ -2779,7 +2777,7 @@ static int send_presentRequest(const char *arg)
 static int send_SRW_presentRequest(const char *arg)
 {
     char setstring[100];
-    int nos = 1;
+    odr_int_t nos = 1;
     Z_SRW_PDU *sr = srw_sr;
 
     if (!sr)
@@ -2925,7 +2923,7 @@ int cmd_cancel_find(const char *arg) {
 }
 
 int send_scanrequest(const char *set,  const char *query,
-                     int pp, int num, const char *term)
+                     odr_int_t pp, odr_int_t num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
@@ -3061,7 +3059,7 @@ void display_term(Z_TermInfo *t)
             t->term->u.general->buf);
 
     if (t->globalOccurrences)
-        printf(" (%d)\n", *t->globalOccurrences);
+        printf(" (" ODR_INT_PRINTF ")\n", *t->globalOccurrences);
     else
         printf("\n");
 }
@@ -3074,12 +3072,12 @@ void process_scanResponse(Z_ScanResponse *res)
 
     printf("Received ScanResponse\n");
     print_refid(res->referenceId);
-    printf("%d entries", *res->numberOfEntriesReturned);
+    printf(ODR_INT_PRINTF " entries", *res->numberOfEntriesReturned);
     if (res->positionOfTerm)
-        printf(", position=%d", *res->positionOfTerm);
+        printf(", position=" ODR_INT_PRINTF, *res->positionOfTerm);
     printf("\n");
     if (*res->scanStatus != Z_Scan_success)
-        printf("Scan returned code %d\n", *res->scanStatus);
+        printf("Scan returned code " ODR_INT_PRINTF "\n", *res->scanStatus);
     if (!res->entries)
         return;
     if ((entries = res->entries->entries))
@@ -3112,7 +3110,7 @@ void process_sortResponse(Z_SortResponse *res)
     case Z_SortResponse_failure:
         printf("failure"); break;
     default:
-        printf("unknown (%d)", *res->sortStatus);
+        printf("unknown (" ODR_INT_PRINTF ")", *res->sortStatus);
     }
     printf("\n");
     print_refid (res->referenceId);
@@ -3123,15 +3121,16 @@ void process_sortResponse(Z_SortResponse *res)
 
 void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
 {
-    printf("Got deleteResultSetResponse status=%d\n",
+    printf("Got deleteResultSetResponse status=" ODR_INT_PRINTF "\n",
            *res->deleteOperationStatus);
     if (res->deleteListStatuses)
     {
         int i;
         for (i = 0; i < res->deleteListStatuses->num; i++)
         {
-            printf("%s status=%d\n", res->deleteListStatuses->elements[i]->id,
-                    *res->deleteListStatuses->elements[i]->status);
+            printf("%s status=" ODR_INT_PRINTF "\n",
+                   res->deleteListStatuses->elements[i]->id,
+                   *res->deleteListStatuses->elements[i]->status);
         }
     }
 }
@@ -3906,7 +3905,7 @@ static void handle_srw_record(Z_SRW_record *rec)
 {
     if (rec->recordPosition)
     {
-        printf("pos=%d", *rec->recordPosition);
+        printf("pos=" ODR_INT_PRINTF, *rec->recordPosition);
         setno = *rec->recordPosition + 1;
     }
     if (rec->recordSchema)
@@ -3946,7 +3945,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
             printf("Details: %s\n", res->diagnostics[i].details);
     }
     if (res->numberOfRecords)
-        printf("Number of hits: %d\n", *res->numberOfRecords);
+        printf("Number of hits: " ODR_INT_PRINTF "\n", *res->numberOfRecords);
     for (i = 0; i<res->num_records; i++)
         handle_srw_record(res->records + i);
 }
@@ -3960,7 +3959,7 @@ static void handle_srw_scan_term(Z_SRW_scanTerm *term)
     else
         printf("No value:");
     if (term->numberOfRecords)
-        printf(" %d", *term->numberOfRecords);
+        printf(" " ODR_INT_PRINTF, *term->numberOfRecords);
     if (term->whereInList)
         printf(" %s", term->whereInList);
     if (term->value && term->displayTerm)
@@ -4176,7 +4175,7 @@ static void wait_and_handle_response(int one_response_only)
                     display_records(apdu->u.presentResponse->records);
                 else
                     printf("No records.\n");
-                printf("nextResultSetPosition = %d\n",
+                printf("nextResultSetPosition = " ODR_INT_PRINTF "\n",
                         *apdu->u.presentResponse->nextResultSetPosition);
                 break;
             case Z_APDU_sortResponse:

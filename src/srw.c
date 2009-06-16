@@ -60,12 +60,13 @@ xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val)
     return add_xsd_string_ns(ptr, elem, val, 0);
 }
 
-static void add_xsd_integer(xmlNodePtr ptr, const char *elem, const int *val)
+static void add_xsd_integer(xmlNodePtr ptr, const char *elem,
+                            const odr_int_t *val)
 {
     if (val)
     {
-        char str[30];
-        sprintf(str, "%d", *val);
+        char str[40];
+        sprintf(str, ODR_INT_PRINTF, *val);
         xmlNewTextChild(ptr, 0, BAD_CAST elem, BAD_CAST str);
     }
 }
@@ -164,7 +165,8 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
     return 1;
 }
                      
-static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, int **val)
+static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
+                             odr_int_t **val)
 {
 #if CHECK_TYPE
     struct _xmlAttr *attr;

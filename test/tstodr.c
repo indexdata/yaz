@@ -25,7 +25,7 @@ void tst_MySequence1(ODR encode, ODR decode)
     s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;
-    s->third = odr_intdup(encode, 1);
+    s->third = odr_booldup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
     
@@ -80,7 +80,7 @@ void tst_MySequence2(ODR encode, ODR decode)
     s->second->buf = (unsigned char *) "hello";
     s->second->len = 5;
     s->second->size = 0;
-    s->third = odr_intdup(encode, 1);
+    s->third = odr_booldup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
     s->myoid = odr_getoidbystr(encode, MYOID);

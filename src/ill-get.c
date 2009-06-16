@@ -35,8 +35,8 @@ bool_t *ill_get_bool (struct ill_get_ctl *gc, const char *name,
     return r;
 }
 
-int *ill_get_int (struct ill_get_ctl *gc, const char *name,
-                  const char *sub, int val)
+odr_int_t *ill_get_int(struct ill_get_ctl *gc, const char *name,
+                       const char *sub, odr_int_t val)
 {
     ODR o = gc->odr;
     char element[128];
@@ -54,8 +54,8 @@ int *ill_get_int (struct ill_get_ctl *gc, const char *name,
     return odr_intdup(o, val);
 }
 
-int *ill_get_enumerated (struct ill_get_ctl *gc, const char *name,
-                         const char *sub, int val)
+odr_int_t *ill_get_enumerated (struct ill_get_ctl *gc, const char *name,
+                         const char *sub, odr_int_t val)
 {
     return ill_get_int(gc, name, sub, val);
 }

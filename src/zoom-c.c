@@ -3137,7 +3137,7 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
         req->u.esRequest->notToKeep->resultSetItem->resultSetId =
             odr_strdup(p->odr_out, str);
         req->u.esRequest->notToKeep->resultSetItem->item =
-            (int *) odr_malloc(p->odr_out, sizeof(int));
+            odr_intdup(p->odr_out, 0);
         
         str = ZOOM_options_get(p->options, "itemorder-item");
         *req->u.esRequest->notToKeep->resultSetItem->item =

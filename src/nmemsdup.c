@@ -38,9 +38,16 @@ char *nmem_strdupn (NMEM mem, const char *src, size_t n)
     return dst;
 }
 
+long long int *nmem_longintdup(NMEM mem, long long int v)
+{
+    long long int *dst = (long long int*) nmem_malloc (mem, sizeof(*dst));
+    *dst = v;
+    return dst;
+}
+
 int *nmem_intdup(NMEM mem, int v)
 {
-    int *dst = (int*) nmem_malloc (mem, sizeof(int));
+    int *dst = (int*) nmem_malloc (mem, sizeof(*dst));
     *dst = v;
     return dst;
 }

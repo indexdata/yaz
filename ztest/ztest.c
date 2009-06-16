@@ -134,10 +134,10 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
 
     if (rr->esr->packageName)
         yaz_log(log_level, "packagename: %s", rr->esr->packageName);
-    yaz_log(log_level, "Waitaction: %d", *rr->esr->waitAction);
+    yaz_log(log_level, "Waitaction: " ODR_INT_PRINTF, *rr->esr->waitAction);
 
 
-    yaz_log(log_level, "function: %d", *rr->esr->function);
+    yaz_log(log_level, "function: " ODR_INT_PRINTF, *rr->esr->function);
 
     if (!rr->esr->taskSpecificParameters)
     {
@@ -172,7 +172,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             {
                 yaz_log(log_level, "resultsetItem");
                 yaz_log(log_level, "setId: %s", n->resultSetItem->resultSetId);
-                yaz_log(log_level, "item: %d", *n->resultSetItem->item);
+                yaz_log(log_level, "item: " ODR_INT_PRINTF, *n->resultSetItem->item);
             }
             if (n->itemRequest)
             {
@@ -254,7 +254,8 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 }
                 if (item_req)
                 {
-                    yaz_log(log_level, "ILL protocol version = %d",
+                    yaz_log(log_level, "ILL protocol version = "
+                            ODR_INT_PRINTF,
                             *item_req->protocol_version_num);
                 }
             }
@@ -345,7 +346,8 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                     yaz_log(log_level, " specialUpdate");
                     break;
                 default:
-                    yaz_log(log_level, " unknown (%d)", *toKeep->action);
+                    yaz_log(log_level, " unknown (" ODR_INT_PRINTF ")",
+                            *toKeep->action);
                 }
             }
             if (toKeep->databaseName)
@@ -402,8 +404,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 ext->u.update->u.taskPackage->originPart = keep;
                 ext->u.update->u.taskPackage->targetPart = targetPart;
 
-                keep->action = (int *) odr_malloc(rr->stream, sizeof(int));
-                *keep->action = *toKeep->action;
+                keep->action = odr_intdup(rr->stream, *toKeep->action);
                 keep->databaseName =
                     odr_strdup(rr->stream, toKeep->databaseName);
                 keep->schema = 0;

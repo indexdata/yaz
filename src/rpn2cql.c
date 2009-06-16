@@ -86,7 +86,7 @@ static int rpn2cql_simple(cql_transform_t ct,
             sterm = (const char *) term->u.general->buf;
             break;
         case Z_Term_numeric:
-            wrbuf_printf(w, "%d", *term->u.numeric);
+            wrbuf_printf(w, ODR_INT_PRINTF, *term->u.numeric);
             break;
         case Z_Term_characterString:
             sterm = term->u.characterString;

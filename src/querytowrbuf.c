@@ -55,11 +55,12 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
     switch (element->which) 
     {
     case Z_AttributeValue_numeric:
-        wrbuf_printf(b,"@attr %s%s%d=%d ", setname, sep,
+        wrbuf_printf(b,"@attr %s%s" ODR_INT_PRINTF "=" ODR_INT_PRINTF " ",
+                     setname, sep,
                      *element->attributeType, *element->value.numeric);
         break;
     case Z_AttributeValue_complex:
-        wrbuf_printf(b,"@attr %s%s\"%d=", setname, sep,
+        wrbuf_printf(b,"@attr %s%s\""ODR_INT_PRINTF "=", setname, sep,
                      *element->attributeType);
         for (i = 0; i<element->value.complex->num_list; i++)
         {
@@ -71,7 +72,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
                               element->value.complex->list[i]->u.string);
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
-                wrbuf_printf (b, "%d", 
+                wrbuf_printf (b, ODR_INT_PRINTF, 
                               *element->value.complex->list[i]->u.numeric);
         }
         wrbuf_printf(b, "\" ");
@@ -117,7 +118,8 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
                             strlen(zapt->term->u.characterString));
         break;
     case Z_Term_numeric:
-        wrbuf_printf(b, "@term numeric %d ", *zapt->term->u.numeric);
+        wrbuf_printf(b, "@term numeric " ODR_INT_PRINTF " ",
+                     *zapt->term->u.numeric);
         break;
     case Z_Term_null:
         wrbuf_printf(b, "@term null x");
@@ -142,7 +144,8 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
             else
                 wrbuf_putc(b, '0');
 
-            wrbuf_printf(b, " %d %d %d ", *op->u.prox->distance,
+            wrbuf_printf(b, " " ODR_INT_PRINTF " %d " 
+                         ODR_INT_PRINTF " ", *op->u.prox->distance,
                          *op->u.prox->ordered,
                          *op->u.prox->relationType);
 
@@ -158,7 +161,7 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
                 wrbuf_printf(b, "%d", op->u.prox->which);
             }
             if (op->u.prox->u.known)
-                wrbuf_printf(b, " %d ", *op->u.prox->u.known);
+                wrbuf_printf(b, " " ODR_INT_PRINTF " ", *op->u.prox->u.known);
             else
                 wrbuf_printf(b, " 0 ");
         }
@@ -240,7 +243,7 @@ void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags)
     {
         Z_DefaultDiagFormat *e=diags[0]->u.defaultFormat;
         if (e->condition)
-            wrbuf_printf(b, "%d ",*e->condition);
+            wrbuf_printf(b, ODR_INT_PRINTF " ",*e->condition);
         else
             wrbuf_printf(b, "?? ");
         if ((e->which==Z_DefaultDiagFormat_v2Addinfo) && (e->u.v2Addinfo))

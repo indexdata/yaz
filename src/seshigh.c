@@ -972,7 +972,8 @@ static void srw_bend_search(association *assoc, request *req,
                 int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
                 int start = srw_req->startRecord ? *srw_req->startRecord : 1;
                 
-                yaz_log(log_requestdetail, "Request to pack %d+%d out of %d",
+                yaz_log(log_requestdetail, "Request to pack %d+%d out of "
+                        ODR_INT_PRINTF,
                         start, number, rr.hits);
                 
                 srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
@@ -1129,11 +1130,11 @@ static void srw_bend_search(association *assoc, request *req,
             wrbuf_printf(wr, "ERROR info:http/%d", *http_code);
         else if (srw_res->numberOfRecords)
         {
-            wrbuf_printf(wr, "OK %d",
+            wrbuf_printf(wr, "OK " ODR_INT_PRINTF,
                          (srw_res->numberOfRecords ?
                           *srw_res->numberOfRecords : 0));
         }
-        wrbuf_printf(wr, " %s %d+%d", 
+        wrbuf_printf(wr, " %s " ODR_INT_PRINTF " +%d", 
                      (srw_res->resultSetId ?
                       srw_res->resultSetId : "-"),
                      (srw_req->startRecord ? *srw_req->startRecord : 1), 
@@ -1401,7 +1402,7 @@ static void srw_bend_scan(association *assoc, request *req,
         else
             wrbuf_printf(wr, "OK - - ");
 
-        wrbuf_printf(wr, "%d+%d+0 ",
+        wrbuf_printf(wr, ODR_INT_PRINTF "+" ODR_INT_PRINTF " ",
                      (srw_req->responsePosition ? 
                       *srw_req->responsePosition : 1),
                      (srw_req->maximumTerms ?
@@ -2457,9 +2458,9 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc,
     return zget_surrogateDiagRec(assoc->encode, dbname, error, addinfo);
 }
 
-static Z_Records *pack_records(association *a, char *setname, int start,
-                               int *num, Z_RecordComposition *comp,
-                               int *next, int *pres,
+static Z_Records *pack_records(association *a, char *setname, odr_int_t start,
+                               odr_int_t *num, Z_RecordComposition *comp,
+                               odr_int_t *next, odr_int_t *pres,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
@@ -2479,8 +2480,9 @@ static Z_Records *pack_records(association *a, char *setname, int start,
     *num = 0;
     *next = 0;
 
-    yaz_log(log_requestdetail, "Request to pack %d+%d %s", start, toget, setname);
-    yaz_log(log_requestdetail, "pms=%d, mrs=%d", a->preferredMessageSize,
+    yaz_log(log_requestdetail, "Request to pack " ODR_INT_PRINTF "+%d %s", start, toget, setname);
+    yaz_log(log_requestdetail, "pms=" ODR_INT_PRINTF
+            ", mrs=" ODR_INT_PRINTF, a->preferredMessageSize,
         a->maximumRecordSize);
     for (recno = start; reclist->num_records < toget; recno++)
     {
@@ -2575,7 +2577,8 @@ static Z_Records *pack_records(association *a, char *setname, int start,
             }
             else /* too big entirely */
             {
-                yaz_log(log_requestdetail, "Record > maxrcdsz this=%d max=%d",
+                yaz_log(log_requestdetail, "Record > maxrcdsz "
+                        "this=%d max=" ODR_INT_PRINTF,
                         this_length, a->maximumRecordSize);
                 reclist->records[reclist->num_records] =
                     surrogatediagrec(a, freq.basename, 17, 0);
@@ -2701,9 +2704,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
     Z_SearchResponse *resp = (Z_SearchResponse *)
         odr_malloc(assoc->encode, sizeof(*resp));
-    int *nulint = odr_intdup(assoc->encode, 0);
-    int *next = odr_intdup(assoc->encode, 0);
-    int *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
+    odr_int_t *nulint = odr_intdup(assoc->encode, 0);
+    odr_int_t *next = odr_intdup(assoc->encode, 0);
+    odr_int_t *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
     int returnedrecs = 0;
 
     apdu->which = Z_APDU_searchResponse;
@@ -2723,17 +2726,17 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         resp->resultCount = nulint;
         resp->numberOfRecordsReturned = nulint;
         resp->nextResultSetPosition = nulint;
-        resp->searchStatus = nulint;
+        resp->searchStatus = odr_booldup(assoc->encode, 0);
         resp->resultSetStatus = none;
         resp->presentStatus = 0;
     }
     else
     {
-        bool_t *sr = odr_intdup(assoc->encode, 1);
-        int *toget = odr_intdup(assoc->encode, 0);
+        bool_t *sr = odr_booldup(assoc->encode, 1);
+        odr_int_t *toget = odr_intdup(assoc->encode, 0);
         Z_RecordComposition comp, *compp = 0;
 
-        yaz_log(log_requestdetail, "resultCount: %d", bsrt->hits);
+        yaz_log(log_requestdetail, "resultCount: " ODR_INT_PRINTF, bsrt->hits);
 
         resp->records = 0;
         resp->resultCount = &bsrt->hits;
@@ -2759,7 +2762,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
         if (*toget && !resp->records)
         {
-            int *presst = odr_intdup(assoc->encode, 0);
+            odr_int_t *presst = odr_intdup(assoc->encode, 0);
             /* Call bend_present if defined */
             if (assoc->init->bend_present)
             {
@@ -2837,7 +2840,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         if (bsrt->errcode)
             wrbuf_printf(wr, "ERROR %d", bsrt->errcode);
         else
-            wrbuf_printf(wr, "OK %d", bsrt->hits);
+            wrbuf_printf(wr, "OK " ODR_INT_PRINTF, bsrt->hits);
         wrbuf_printf(wr, " %s 1+%d ",
                      req->resultSetName, returnedrecs);
         yaz_query_to_wrbuf(wr, req->query);
@@ -2869,8 +2872,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     Z_APDU *apdu;
     Z_PresentResponse *resp;
-    int *next;
-    int *num;
+    odr_int_t *next;
+    odr_int_t *num;
     int errcode = 0;
     const char *errstring = 0;
 
@@ -2936,9 +2939,10 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         else if (*resp->presentStatus == Z_PresentStatus_success)
             wrbuf_printf(wr, "OK -  ");
         else
-            wrbuf_printf(wr, "Partial %d - ", *resp->presentStatus);
+            wrbuf_printf(wr, "Partial " ODR_INT_PRINTF " - ",
+                         *resp->presentStatus);
 
-        wrbuf_printf(wr, " %s %d+%d ",
+        wrbuf_printf(wr, " %s " ODR_INT_PRINTF "+" ODR_INT_PRINTF " ",
                 req->resultSetId, *req->resultSetStartPoint,
                 *req->numberOfRecordsRequested);
         yaz_log(log_request, "%s", wrbuf_cstr(wr) );
@@ -2962,8 +2966,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
     Z_ScanResponse *res = (Z_ScanResponse *)
         odr_malloc(assoc->encode, sizeof(*res));
-    int *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
-    int *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
+    odr_int_t *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
+    odr_int_t *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
     Z_ListEntries *ents = (Z_ListEntries *)
         odr_malloc(assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
@@ -3061,7 +3065,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
             *scanStatus = Z_Scan_success;
         ents->entries = tab;
         ents->num_entries = bsrr->num_entries;
-        res->numberOfEntriesReturned = &ents->num_entries;          
+        res->numberOfEntriesReturned = odr_intdup(assoc->encode, 
+                                                   ents->num_entries);
         res->positionOfTerm = &bsrr->term_position;
         for (i = 0; i < bsrr->num_entries; i++)
         {
@@ -3100,7 +3105,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
                     odr_malloc(assoc->encode, o->len = o->size =
                                strlen(bsrr->entries[i].term));
                 memcpy(o->buf, bsrr->entries[i].term, o->len);
-                yaz_log(YLOG_DEBUG, "  term #%d: '%s' (%d)", i,
+                yaz_log(YLOG_DEBUG, "  term #%d: '%s' (" ODR_INT_PRINTF ")", i,
                          bsrr->entries[i].term, bsrr->entries[i].occurrences);
             }
             else
@@ -3139,7 +3144,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
         else
             wrbuf_printf(wr, "OK"); 
 
-        wrbuf_printf(wr, " %d - %d+%d+%d",
+        wrbuf_printf(wr, " " ODR_INT_PRINTF " - " ODR_INT_PRINTF "+" 
+                     ODR_INT_PRINTF "+" ODR_INT_PRINTF,
                      res->numberOfEntriesReturned ?
                      *res->numberOfEntriesReturned : 0,
                      (req->preferredPositionInResponse ?
@@ -3262,7 +3268,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->statuses = 0;
     if (bdrr->num_setnames > 0)
     {
-        bdrr->statuses = (int*) 
+        bdrr->statuses = (odr_int_t*) 
             odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
                        bdrr->num_setnames);
         for (i = 0; i < bdrr->num_setnames; i++)

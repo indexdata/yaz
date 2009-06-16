@@ -65,13 +65,13 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
         hc->circulationData[0] = (Z_CircRecord *)
              odr_malloc(odr, sizeof(**hc->circulationData));
 
-        hc->circulationData[0]->availableNow = odr_intdup(odr, 1);
+        hc->circulationData[0]->availableNow = odr_booldup(odr, 1);
         hc->circulationData[0]->availablityDate = 0;
         hc->circulationData[0]->availableThru = 0;
         hc->circulationData[0]->restrictions = 0;
         hc->circulationData[0]->itemId = "1226176";
-        hc->circulationData[0]->renewable = odr_intdup(odr, 0);
-        hc->circulationData[0]->onHold = odr_intdup(odr, 0);
+        hc->circulationData[0]->renewable = odr_booldup(odr, 0);
+        hc->circulationData[0]->onHold = odr_booldup(odr, 0);
         hc->circulationData[0]->enumAndChron = 0;
         hc->circulationData[0]->midspine = 0;
         hc->circulationData[0]->temporaryLocation = 0;

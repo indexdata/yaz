@@ -368,7 +368,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     odr_reset(odr_prt); /*!*/
 
     e->identifier = odr_intdup(odr,1);
-    e->critical = odr_intdup(odr,0);
+    e->critical = odr_booldup(odr,0);
     e->item = (Odr_any *) odr_malloc(odr,sizeof(*e->item));
     if ( ! z_External(odr_ext, &ext,0,0) ) {
         yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
@@ -427,7 +427,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     odr_reset(odr_prt); /*!*/
 
     e->identifier = odr_intdup(odr,1);
-    e->critical = odr_intdup(odr,0);
+    e->critical = odr_booldup(odr,0);
     e->item = (Odr_any *) odr_malloc(odr,sizeof(*e->item));
     if ( ! z_External(odr_ext, &ext,0,0) ) {
         yaz_log(YLOG_FATAL,"Encoding of z_External failed ");
@@ -608,7 +608,7 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                     printf("Already forwarded: \n");
                     break;
                 case ILL_User_Error_Report_intermediary_problem:
-                    printf("Intermediary problem: %d\n", 
+                    printf("Intermediary problem: " ODR_INT_PRINTF "\n", 
                         *uerr->u.intermediary_problem);
                     break;
                 case ILL_User_Error_Report_security_problem:
@@ -616,7 +616,7 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                         getillstring(uerr->u.security_problem));
                     break;
                 case ILL_User_Error_Report_unable_to_perform:
-                    printf("Unable to perform: %d\n", 
+                    printf("Unable to perform: " ODR_INT_PRINTF "\n", 
                           *uerr->u.unable_to_perform);
                     break;
                 default:
@@ -628,11 +628,11 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
             ILL_Provider_Error_Report *perr= err->provider_error_report;
             switch( perr->which ) {
                 case ILL_Provider_Error_Report_general_problem:
-                    printf("General Problem: %d:", 
+                    printf("General Problem: " ODR_INT_PRINTF ":", 
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_transaction_id_problem:
-                    printf("Transaction Id Problem: %d:", 
+                    printf("Transaction Id Problem: " ODR_INT_PRINTF ":", 
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_state_transition_prohibited:

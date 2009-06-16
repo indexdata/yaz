@@ -101,6 +101,8 @@ YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
 */
 YAZ_EXPORT int *nmem_intdup(NMEM nmem, int v);
 
+YAZ_EXPORT long long int *nmem_longintdup(NMEM nmem, long long int v);
+
 /** \brief transfers memory from one NMEM handle to another
     \param src source NMEM handle
     \param dst destination NMEM handle

@@ -206,7 +206,8 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
             yaz_log (loglevel, "%*.0s%s %s", depth, "", attset_name, str);
             break;
         case Z_AttributeValue_complex:
-            yaz_log (loglevel, "%*.0s%s attributeType=%d complex",
+            yaz_log (loglevel, "%*.0s%s attributeType=" ODR_INT_PRINTF
+                     " complex",
                   depth, "", attset_name, *element->attributeType);
             for (i = 0; i<element->value.complex->num_list; i++)
             {
@@ -216,7 +217,8 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
                              element->value.complex->list[i]->u.string);
                 else if (element->value.complex->list[i]->which ==
                          Z_StringOrNumeric_numeric)
-                    yaz_log (loglevel, "%*.0s  numeric: '%d'", depth, "",
+                    yaz_log (loglevel, "%*.0s  numeric: '" ODR_INT_PRINTF
+                             " '", depth, "",
                              *element->value.complex->list[i]->u.numeric);
             }
             break;
@@ -279,7 +281,8 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
             yaz_log (loglevel, "%*.0s %s", depth, "", complex_op_name(op) );
             break;
         case Z_Operator_prox:
-            yaz_log (loglevel, "%*.0s prox excl=%s dist=%d order=%s "
+            yaz_log (loglevel, "%*.0s prox excl=%s dist=" ODR_INT_PRINTF
+                     " order=%s "
                      "rel=%s unit=%s",
                      depth, "", op->u.prox->exclusion ?
                      (*op->u.prox->exclusion ? "T" : "F") : "N", 
@@ -313,7 +316,8 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
                          zapt->term->u.characterString);
                 break;
             case Z_Term_numeric:
-                yaz_log (loglevel, "%*.0s term '%d' (numeric)", depth, "",
+                yaz_log (loglevel, "%*.0s term '" ODR_INT_PRINTF
+                         "' (numeric)", depth, "",
                          *zapt->term->u.numeric);
                 break;
             case Z_Term_null:

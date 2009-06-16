@@ -279,7 +279,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
 }
 #endif
 
-void yaz_uri_val_int(const char *path, const char *name, ODR o, int **intp)
+void yaz_uri_val_int(const char *path, const char *name, ODR o, odr_int_t **intp)
 {
     const char *v = yaz_uri_val(path, name, o);
     if (v)
@@ -463,7 +463,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 
 #if YAZ_HAVE_XML2
 static int yaz_sru_decode_integer(ODR odr, const char *pname, 
-                                  const char *valstr, int **valp,
+                                  const char *valstr, odr_int_t **valp,
                                   Z_SRW_diagnostic **diag, int *num_diag,
                                   int min_value)
 {
@@ -1197,13 +1197,13 @@ int yaz_diag_srw_to_bib1(int code)
 }
 
 static void add_val_int(ODR o, char **name, char **value,  int *i,
-                        char *a_name, int *val)
+                        char *a_name, odr_int_t *val)
 {
     if (val)
     {
         name[*i] = a_name;
-        value[*i] = (char *) odr_malloc(o, 30);
-        sprintf(value[*i], "%d", *val);
+        value[*i] = (char *) odr_malloc(o, 40);
+        sprintf(value[*i], ODR_INT_PRINTF, *val);
         (*i)++;
     }
 }

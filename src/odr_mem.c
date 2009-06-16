@@ -47,7 +47,12 @@ char *odr_strdupn(ODR o, const char *str, size_t n)
     return nmem_strdupn(o->mem, str, n);
 }
 
-int *odr_intdup(ODR o, int v)
+odr_int_t *odr_intdup(ODR o, odr_int_t v)
+{
+    return nmem_longintdup(o->mem, v);
+}
+
+odr_bool_t *odr_booldup(ODR o, odr_bool_t v)
 {
     return nmem_intdup(o->mem, v);
 }

@@ -31,7 +31,7 @@ struct yaz_pqf_parser {
 
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                      int num_attr, int max_attr, 
-                                     int *attr_list, char **attr_clist,
+                                     odr_int_t *attr_list, char **attr_clist,
                                      Odr_oid **attr_set);
 
 static Odr_oid *query_oid_getvalbyname(struct yaz_pqf_parser *li, ODR o)
@@ -183,7 +183,7 @@ static int escape_string(char *out_buf, const char *in, int len)
 }
 
 static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
-                              int num_attr, int *attr_list,
+                              int num_attr, odr_int_t *attr_list,
                               char **attr_clist, Odr_oid **attr_set)
 {
     const char *cp;
@@ -239,7 +239,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
 }
 
 static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
-                                      int num_attr, int *attr_list,
+                                      int num_attr, odr_int_t *attr_list,
                                       char **attr_clist, Odr_oid **attr_set)
 {
     Z_AttributesPlusTerm *zapt;
@@ -256,13 +256,13 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
     else
     {
         int i, k = 0;
-        int *attr_tmp;
+        odr_int_t *attr_tmp;
 
         elements = (Z_AttributeElement**)
             odr_malloc (o, num_attr * sizeof(*elements));
 
-        attr_tmp = (int *)odr_malloc (o, num_attr * 2 * sizeof(int));
-        memcpy (attr_tmp, attr_list, num_attr * 2 * sizeof(int));
+        attr_tmp = (odr_int_t *)odr_malloc(o, num_attr * 2 * sizeof(*attr_tmp));
+        memcpy(attr_tmp, attr_list, num_attr * 2 * sizeof(*attr_tmp));
         for (i = num_attr; --i >= 0; )
         {
             int j;
@@ -348,7 +348,8 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
 }
 
 static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
-                             int num_attr, int *attr_list, char **attr_clist,
+                             int num_attr, odr_int_t *attr_list,
+                             char **attr_clist,
                              Odr_oid **attr_set)
 {
     Z_Operand *zo;
@@ -395,9 +396,9 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf == '1')
-        p->exclusion = odr_intdup (o, 1);
+        p->exclusion = odr_booldup(o, 1);
     else if (*li->lex_buf == '0')
-        p->exclusion = odr_intdup (o, 0);
+        p->exclusion = odr_booldup(o, 0);
     else if (*li->lex_buf == 'v' || *li->lex_buf == 'n')
         p->exclusion = NULL;
     else
@@ -425,9 +426,9 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf == '1')
-        p->ordered = odr_intdup (o, 1);
+        p->ordered = odr_booldup(o, 1);
     else if (*li->lex_buf == '0')
-        p->ordered = odr_intdup (o, 0);
+        p->ordered = odr_booldup(o, 0);
     else
     {
         li->error = YAZ_PQF_ERROR_PROXIMITY;
@@ -483,7 +484,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
 
 static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
                               int num_attr, int max_attr, 
-                              int *attr_list, char **attr_clist,
+                              odr_int_t *attr_list, char **attr_clist,
                               Odr_oid **attr_set)
 {
     Z_Complex *zc;
@@ -559,7 +560,7 @@ static void rpn_term_type(struct yaz_pqf_parser *li, ODR o)
                            
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                      int num_attr, int max_attr, 
-                                     int *attr_list,
+                                     odr_int_t *attr_list,
                                      char **attr_clist,
                                      Odr_oid **attr_set)
 {
@@ -622,7 +623,7 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
 Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li, const char *qbuf)
 {
     Z_RPNQuery *zq;
-    int attr_array[1024];
+    odr_int_t attr_array[1024];
     char *attr_clist[512];
     Odr_oid *attr_set[512];
     Odr_oid *top_set = 0;
@@ -684,7 +685,7 @@ Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
                                       Odr_oid **attributeSetP,
                                       const char *qbuf)
 {
-    int attr_list[1024];
+    odr_int_t attr_list[1024];
     char *attr_clist[512];
     Odr_oid *attr_set[512];
     int num_attr = 0;

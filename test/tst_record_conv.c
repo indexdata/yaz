@@ -182,10 +182,12 @@ static int conv_convert_test(yaz_record_conv_t p,
             else if (strcmp(output_expect_record, wrbuf_cstr(output_record)))
             {
                 ret = 0;
-                printf("got-output_record len=%d: %s\n", 
-                       wrbuf_len(output_record),wrbuf_cstr(output_record));
-                printf("output_expect_record len=%d %s\n",
-                       strlen(output_expect_record), output_expect_record);
+                printf("got-output_record len=%ld: %s\n", 
+                       (long) wrbuf_len(output_record),
+                       wrbuf_cstr(output_record));
+                printf("output_expect_record len=%ld %s\n",
+                       (long) strlen(output_expect_record),
+                       output_expect_record);
             }
             else
             {

@@ -54,7 +54,7 @@ typedef struct {
 #define Z_SRW_recordPacking_URL 2
     char *recordData_buf;
     int recordData_len;
-    int *recordPosition;
+    odr_int_t *recordPosition;
 } Z_SRW_record;
 
 typedef struct {
@@ -84,27 +84,27 @@ typedef struct {
         char *sortKeys;
         char *xSortKeys;
     } sort;
-    int *startRecord;
-    int *maximumRecords;
+    odr_int_t *startRecord;
+    odr_int_t *maximumRecords;
     char *recordSchema;
     char *recordPacking;
     char *recordXPath;
     char *database;
     char *stylesheet;
-    int *resultSetTTL;
+    odr_int_t *resultSetTTL;
 } Z_SRW_searchRetrieveRequest;
 
 typedef struct {
-    int * numberOfRecords;
+    odr_int_t *numberOfRecords;
     char * resultSetId;
-    int * resultSetIdleTime;
+    odr_int_t *resultSetIdleTime;
     
     Z_SRW_record *records;
     int num_records;
 
     Z_SRW_diagnostic *diagnostics;
     int num_diagnostics;
-    int *nextRecordPosition;
+    odr_int_t *nextRecordPosition;
 
     Z_SRW_extra_record **extra_records;  /* of size num_records */
 } Z_SRW_searchRetrieveResponse;
@@ -129,15 +129,15 @@ typedef struct {
         char *xcql;
         char *pqf;
     } scanClause;
-    int *responsePosition;
-    int *maximumTerms;
+    odr_int_t *responsePosition;
+    odr_int_t *maximumTerms;
     char *stylesheet;
     char *database;
 } Z_SRW_scanRequest;
 
 typedef struct {
     char *value;
-    int *numberOfRecords;
+    odr_int_t *numberOfRecords;
     char *displayTerm;
     char *whereInList;
 } Z_SRW_scanTerm;
@@ -238,7 +238,7 @@ YAZ_EXPORT int yaz_srw_str_to_pack(const char *str);
 
 YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
 YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
-                                ODR o, int **intp);
+                                ODR o, odr_int_t **intp);
 YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, char **charset);
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,

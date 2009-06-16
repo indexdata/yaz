@@ -54,7 +54,7 @@ Z_InitResponse *zget_InitResponse(ODR o)
     ODR_MASK_ZERO(r->protocolVersion);
     r->preferredMessageSize = odr_intdup(o, 30*1024);
     r->maximumRecordSize = odr_intdup(o, 30*1024);
-    r->result = odr_intdup(o, 1);
+    r->result = odr_booldup(o, 1);
     r->implementationId = "81";
     r->implementationName = "YAZ";
     r->implementationVersion = YAZ_VERSION
@@ -75,7 +75,7 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     r->smallSetUpperBound = odr_intdup(o, 0);
     r->largeSetLowerBound = odr_intdup(o, 1);
     r->mediumSetPresentNumber = odr_intdup(o, 0);
-    r->replaceIndicator = odr_intdup(o, 1);
+    r->replaceIndicator = odr_booldup(o, 1);
     r->resultSetName = "default";
     r->num_databaseNames = 0;
     r->databaseNames = 0;
@@ -96,7 +96,7 @@ Z_SearchResponse *zget_SearchResponse(ODR o)
     r->resultCount = odr_intdup(o, 0);
     r->numberOfRecordsReturned = odr_intdup(o, 0);
     r->nextResultSetPosition = odr_intdup(o, 0);
-    r->searchStatus = odr_intdup(o, 1);
+    r->searchStatus = odr_booldup(o, 1);
     r->resultSetStatus = 0;
     r->presentStatus = 0;
     r->records = 0;
@@ -218,7 +218,7 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
     r->suspendedFlag = 0;
     r->resourceReport = 0;
     r->partialResultsAvailable = 0;
-    r->responseRequired = odr_intdup(o, 0);
+    r->responseRequired = odr_booldup(o, 0);
     r->triggeredRequestFlag = 0;
     r->otherInfo = 0;
     return r;
@@ -230,7 +230,7 @@ Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
         odr_malloc(o, sizeof(*r));
 
     r->referenceId = 0;
-    r->continueFlag = odr_intdup(o, 1);
+    r->continueFlag = odr_booldup(o, 1);
     r->resultSetWanted = 0;
     r->otherInfo = 0;
     return r;
