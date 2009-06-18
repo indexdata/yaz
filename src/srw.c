@@ -61,7 +61,7 @@ xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val)
 }
 
 static void add_xsd_integer(xmlNodePtr ptr, const char *elem,
-                            const odr_int_t *val)
+                            const Odr_int *val)
 {
     if (val)
     {
@@ -166,7 +166,7 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 }
                      
 static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
-                             odr_int_t **val)
+                             Odr_int **val)
 {
 #if CHECK_TYPE
     struct _xmlAttr *attr;

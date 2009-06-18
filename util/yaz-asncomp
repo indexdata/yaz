@@ -1217,11 +1217,11 @@ proc asnBasicEXTERNAL {} {
 }
 
 proc asnBasicINTEGER {} {
-    return {odr_integer {odr_int_t}}
+    return {odr_integer {Odr_int}}
 }
 
 proc asnBasicENUMERATED {} {
-    return {odr_enum {odr_int_t}}
+    return {odr_enum {Odr_int}}
 }
 
 proc asnBasicNULL {} {
@@ -1229,7 +1229,7 @@ proc asnBasicNULL {} {
 }
 
 proc asnBasicBOOLEAN {} {
-    return {odr_bool {bool_t}}
+    return {odr_bool {Odr_bool}}
 }
 
 proc asnBasicOCTET {} {

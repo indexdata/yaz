@@ -61,7 +61,7 @@ typedef struct {
     bend_request request;
     bend_association association;
     int *fd;
-    odr_int_t hits;                  /* number of hits */
+    Odr_int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
     Z_OtherInformation *search_info; /* additional search info */
@@ -114,7 +114,7 @@ typedef struct bend_fetch_rr {
 /** \brief Information for scan entry */
 struct scan_entry {
     char *term;         /* the returned scan term */
-    odr_int_t occurrences;/* no of occurrences or -1 if error (see below) */
+    Odr_int occurrences;/* no of occurrences or -1 if error (see below) */
     int errcode;        /* Bib-1 diagnostic code; only used when occur.= -1 */
     char *errstring;    /* Additional string */
     char *display_term;
@@ -135,8 +135,8 @@ typedef struct bend_scan_rr {
     ODR stream;         /* encoding stream - memory source if required */
     ODR print;          /* printing stream */
 
-    odr_int_t *step_size;     /* step size */
-    odr_int_t term_position;  /* desired index of term in result list/returned */
+    Odr_int *step_size;     /* step size */
+    Odr_int term_position;  /* desired index of term in result list/returned */
     int num_entries;    /* number of entries requested/returned */
 
     /* scan term entries. The called handler does not have
@@ -178,8 +178,8 @@ typedef struct bend_delete_rr {
     int num_setnames;
     char **setnames;
     Z_ReferenceId *referenceId;
-    int delete_status;      /* status for the whole operation */
-    odr_int_t *statuses;    /* status each set - indexed as setnames */
+    int delete_status;    /* status for the whole operation */
+    Odr_int *statuses;    /* status each set - indexed as setnames */
     ODR stream;
     ODR print; 
 } bend_delete_rr;

@@ -104,7 +104,7 @@ static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0;
-static odr_int_t setno = 1;                   /* current set offset */
+static Odr_int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 #define RECORDSYNTAX_MAX 20
 static char *recordsyntax_list[RECORDSYNTAX_MAX];
@@ -1640,12 +1640,21 @@ static void print_level(int iLevel)
         printf(" ");
 }
 
-static void print_int(int iLevel, const char *pTag, odr_int_t *pInt)
+static void print_int(int iLevel, const char *pTag, Odr_int *pInt)
 {
     if (pInt != NULL)
     {
         print_level(iLevel);
         printf("%s: " ODR_INT_PRINTF "\n", pTag, *pInt);
+    }
+}
+
+static void print_bool(int iLevel, const char *pTag, Odr_bool *pInt)
+{
+    if (pInt != NULL)
+    {
+        print_level(iLevel);
+        printf("%s: %d\n", pTag, *pInt);
     }
 }
 
@@ -1793,10 +1802,10 @@ static int process_resourceControlRequest(Z_ResourceControlRequest *req)
 {
     printf("Received ResourceControlRequest.\n");
     print_referenceId(1, req->referenceId);
-    print_int(1, "Suspended Flag", req->suspendedFlag);
+    print_bool(1, "Suspended Flag", req->suspendedFlag);
     print_int(1, "Partial Results Available", req->partialResultsAvailable);
-    print_int(1, "Response Required", req->responseRequired);
-    print_int(1, "Triggered Request Flag", req->triggeredRequestFlag);
+    print_bool(1, "Response Required", req->responseRequired);
+    print_bool(1, "Triggered Request Flag", req->triggeredRequestFlag);
     print_external(1, req->resourceReport);
     return 0;
 }
@@ -2650,7 +2659,7 @@ static int cmd_setnames(const char *arg)
 /* PRESENT SERVICE ----------------------------- */
 
 static void parse_show_args(const char *arg_c, char *setstring,
-                            odr_int_t *start, odr_int_t *number)
+                            Odr_int *start, Odr_int *number)
 {
     char arg[40];
     char *p;
@@ -2686,7 +2695,7 @@ static int send_presentRequest(const char *arg)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
     Z_RecordComposition compo;
-    odr_int_t nos = 1;
+    Odr_int nos = 1;
     char setstring[100];
 
     req->referenceId = set_refid(out);
@@ -2777,7 +2786,7 @@ static int send_presentRequest(const char *arg)
 static int send_SRW_presentRequest(const char *arg)
 {
     char setstring[100];
-    odr_int_t nos = 1;
+    Odr_int nos = 1;
     Z_SRW_PDU *sr = srw_sr;
 
     if (!sr)
@@ -2923,7 +2932,7 @@ int cmd_cancel_find(const char *arg) {
 }
 
 int send_scanrequest(const char *set,  const char *query,
-                     odr_int_t pp, odr_int_t num, const char *term)
+                     Odr_int pp, Odr_int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;

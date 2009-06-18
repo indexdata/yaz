@@ -2458,9 +2458,9 @@ static Z_NamePlusRecord *surrogatediagrec(association *assoc,
     return zget_surrogateDiagRec(assoc->encode, dbname, error, addinfo);
 }
 
-static Z_Records *pack_records(association *a, char *setname, odr_int_t start,
-                               odr_int_t *num, Z_RecordComposition *comp,
-                               odr_int_t *next, odr_int_t *pres,
+static Z_Records *pack_records(association *a, char *setname, Odr_int start,
+                               Odr_int *num, Z_RecordComposition *comp,
+                               Odr_int *next, Odr_int *pres,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
@@ -2704,9 +2704,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
     Z_SearchResponse *resp = (Z_SearchResponse *)
         odr_malloc(assoc->encode, sizeof(*resp));
-    odr_int_t *nulint = odr_intdup(assoc->encode, 0);
-    odr_int_t *next = odr_intdup(assoc->encode, 0);
-    odr_int_t *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
+    Odr_int *nulint = odr_intdup(assoc->encode, 0);
+    Odr_int *next = odr_intdup(assoc->encode, 0);
+    Odr_int *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
     int returnedrecs = 0;
 
     apdu->which = Z_APDU_searchResponse;
@@ -2733,7 +2733,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     else
     {
         bool_t *sr = odr_booldup(assoc->encode, 1);
-        odr_int_t *toget = odr_intdup(assoc->encode, 0);
+        Odr_int *toget = odr_intdup(assoc->encode, 0);
         Z_RecordComposition comp, *compp = 0;
 
         yaz_log(log_requestdetail, "resultCount: " ODR_INT_PRINTF, bsrt->hits);
@@ -2762,7 +2762,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
         if (*toget && !resp->records)
         {
-            odr_int_t *presst = odr_intdup(assoc->encode, 0);
+            Odr_int *presst = odr_intdup(assoc->encode, 0);
             /* Call bend_present if defined */
             if (assoc->init->bend_present)
             {
@@ -2872,8 +2872,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     Z_APDU *apdu;
     Z_PresentResponse *resp;
-    odr_int_t *next;
-    odr_int_t *num;
+    Odr_int *next;
+    Odr_int *num;
     int errcode = 0;
     const char *errstring = 0;
 
@@ -2966,8 +2966,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
     Z_ScanResponse *res = (Z_ScanResponse *)
         odr_malloc(assoc->encode, sizeof(*res));
-    odr_int_t *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
-    odr_int_t *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
+    Odr_int *scanStatus = odr_intdup(assoc->encode, Z_Scan_failure);
+    Odr_int *numberOfEntriesReturned = odr_intdup(assoc->encode, 0);
     Z_ListEntries *ents = (Z_ListEntries *)
         odr_malloc(assoc->encode, sizeof(*ents));
     Z_DiagRecs *diagrecs_p = NULL;
@@ -3268,7 +3268,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     bdrr->statuses = 0;
     if (bdrr->num_setnames > 0)
     {
-        bdrr->statuses = (odr_int_t*) 
+        bdrr->statuses = (Odr_int*) 
             odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
                        bdrr->num_setnames);
         for (i = 0; i < bdrr->num_setnames; i++)

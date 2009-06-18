@@ -43,6 +43,24 @@ YAZ_BEGIN_CDECL
 /** \brief NMEM handle (an opaque pointer to memory) */
 typedef struct nmem_control *NMEM;
 
+/** \brief Set to 1 if YAZ BER integer is 64-bit ; 0 otherwise */
+#define NMEM_64 0
+
+#if NMEM_64
+/** \brief BER/utility integer (64-bit or more) */
+typedef long long int nmem_int_t;
+/** \brief printf format for nmem_int_t type */
+#define NMEM_INT_PRINTF "%lld"
+#else
+/** \brief BER/utility integer (32-bit on most platforms) */
+typedef int nmem_int_t;
+/** \brief printf format for nmem_int_t type */
+#define NMEM_INT_PRINTF "%d"
+#endif
+
+/** \brief BER/utility boolean */
+typedef int nmem_bool_t;
+
 /** \brief releases memory associaged with an NMEM handle 
     \param n NMEM handle
 */
@@ -94,14 +112,19 @@ YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
                                     char ***darray, int *num);
 
-/** \brief allocates integer for NMEM
+/** \brief allocates and sets integer for NMEM
     \param nmem NMEM handle
     \param v integer value
     \returns pointer to created integer
 */
-YAZ_EXPORT int *nmem_intdup(NMEM nmem, int v);
+YAZ_EXPORT nmem_int_t *nmem_intdup(NMEM nmem, nmem_int_t v);
 
-YAZ_EXPORT long long int *nmem_longintdup(NMEM nmem, long long int v);
+/** \brief allocates and sets boolean for NMEM
+    \param nmem NMEM handle
+    \param v value (0=false, != 0 true)
+    \returns pointer to created boolean
+*/
+YAZ_EXPORT nmem_bool_t *nmem_booldup(NMEM nmem, nmem_bool_t v);
 
 /** \brief transfers memory from one NMEM handle to another
     \param src source NMEM handle

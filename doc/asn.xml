@@ -5,7 +5,8 @@
     various PDUs of the Z39.50 protocol, as well as for the complex types
     appearing within the PDUs. For the primitive data types, the C
     representation often takes the form of an ordinary C language type,
-    such as <literal>int</literal>. For ASN.1 constructs that have no direct
+    such as <literal>Odr_int</literal> which is equivalent to an integral
+    C integer. For ASN.1 constructs that have no direct
     representation in C, such as general octet strings and bit strings,
     the &odr; module (see section <link linkend="odr">The ODR Module</link>)
     provides auxiliary definitions.
@@ -308,10 +309,10 @@ typedef struct Z_ext_typeent
        options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
       </entry></row>
      <row><entry>
-       preferredMessageSize</entry><entry>int</entry><entry>30*1024
+       preferredMessageSize</entry><entry>Odr_int</entry><entry>30*1024
       </entry></row>
      <row><entry>
-       maximumRecordSize</entry><entry>int</entry><entry>30*1024
+       maximumRecordSize</entry><entry>Odr_int</entry><entry>30*1024
       </entry></row>
      <row><entry>
        idAuthentication</entry><entry>Z_IdAuthentication</entry><entry>NULL
@@ -360,13 +361,13 @@ typedef struct Z_ext_typeent
 	options</entry><entry>Odr_bitmask</entry><entry>Empty bitmask
        </entry></row>
       <row><entry>
-	preferredMessageSize</entry><entry>int</entry><entry>30*1024
+	preferredMessageSize</entry><entry>Odr_int</entry><entry>30*1024
        </entry></row>
       <row><entry>
-	maximumRecordSize</entry><entry>int</entry><entry>30*1024
+	maximumRecordSize</entry><entry>Odr_int</entry><entry>30*1024
        </entry></row>
       <row><entry>
-	result</entry><entry>bool_t</entry><entry>TRUE
+	result</entry><entry>Odr_bool</entry><entry>TRUE
        </entry></row>
       <row><entry>
 	implementationId</entry><entry>char*</entry><entry>"id)"
@@ -405,22 +406,22 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	smallSetUpperBound</entry><entry>int</entry><entry>0
+	smallSetUpperBound</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	largeSetLowerBound</entry><entry>int</entry><entry>1
+	largeSetLowerBound</entry><entry>Odr_int</entry><entry>1
        </entry></row>
       <row><entry>
-	mediumSetPresentNumber</entry><entry>int</entry><entry>0
+	mediumSetPresentNumber</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	replaceIndicator</entry><entry>bool_t</entry><entry>TRUE
+	replaceIndicator</entry><entry>Odr_bool</entry><entry>TRUE
        </entry></row>
       <row><entry>
 	resultSetName</entry><entry>char *</entry><entry>"default"
        </entry></row>
       <row><entry>
-	num_databaseNames</entry><entry>int</entry><entry>0
+	num_databaseNames</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	databaseNames</entry><entry>char **</entry><entry>NULL
@@ -469,22 +470,22 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	resultCount</entry><entry>int</entry><entry>0
+	resultCount</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	numberOfRecordsReturned</entry><entry>int</entry><entry>0
+	numberOfRecordsReturned</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	nextResultSetPosition</entry><entry>int</entry><entry>0
+	nextResultSetPosition</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	searchStatus</entry><entry>bool_t</entry><entry>TRUE
+	searchStatus</entry><entry>Odr_bool</entry><entry>TRUE
        </entry></row>
       <row><entry>
-	resultSetStatus</entry><entry>int</entry><entry>NULL
+	resultSetStatus</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	presentStatus</entry><entry>int</entry><entry>NULL
+	presentStatus</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
 	records</entry><entry>Z_Records</entry><entry>NULL
@@ -521,13 +522,13 @@ typedef struct Z_ext_typeent
 	resultSetId</entry><entry>char*</entry><entry>"default"
        </entry></row>
       <row><entry>
-	resultSetStartPoint</entry><entry>int</entry><entry>1
+	resultSetStartPoint</entry><entry>Odr_int</entry><entry>1
        </entry></row>
       <row><entry>
-	numberOfRecordsRequested</entry><entry>int</entry><entry>10
+	numberOfRecordsRequested</entry><entry>Odr_int</entry><entry>10
        </entry></row>
       <row><entry>
-	num_ranges</entry><entry>int</entry><entry>0
+	num_ranges</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	additionalRanges</entry><entry>Z_Range</entry><entry>NULL
@@ -539,13 +540,13 @@ typedef struct Z_ext_typeent
 	preferredRecordSyntax</entry><entry>Odr_oid</entry><entry>NULL
        </entry></row>
       <row><entry>
-	maxSegmentCount</entry><entry>int</entry><entry>NULL
+	maxSegmentCount</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	maxRecordSize</entry><entry>int</entry><entry>NULL
+	maxRecordSize</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	maxSegmentSize</entry><entry>int</entry><entry>NULL
+	maxSegmentSize</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
@@ -572,13 +573,13 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	numberOfRecordsReturned</entry><entry>int</entry><entry>0
+	numberOfRecordsReturned</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	nextResultSetPosition</entry><entry>int</entry><entry>0
+	nextResultSetPosition</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	presentStatus</entry><entry>int</entry><entry>Z_PresentStatus_success
+	presentStatus</entry><entry>Odr_int</entry><entry>Z_PresentStatus_success
        </entry></row>
       <row><entry>
 	records</entry><entry>Z_Records</entry><entry>NULL
@@ -609,10 +610,10 @@ typedef struct Z_ext_typeent
        </entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	deleteFunction</entry><entry>int</entry><entry>Z_DeleteResultSetRequest_list
+	deleteFunction</entry><entry>Odr_int</entry><entry>Z_DeleteResultSetRequest_list
        </entry></row>
       <row><entry>
-	num_ids</entry><entry>int</entry><entry>0
+	num_ids</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	resultSetList</entry><entry>char**</entry><entry>NULL
@@ -643,19 +644,19 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	deleteOperationStatus</entry><entry>int</entry>
+	deleteOperationStatus</entry><entry>Odr_int</entry>
        <entry>Z_DeleteStatus_success</entry></row>
       <row><entry>
-	num_statuses</entry><entry>int</entry><entry>0
+	num_statuses</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	deleteListStatuses</entry><entry>Z_ListStatus**</entry><entry>NULL
        </entry></row>
       <row><entry>
-	numberNotDeleted</entry><entry>int</entry><entry>NULL
+	numberNotDeleted</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	num_bulkStatuses</entry><entry>int</entry><entry>0
+	num_bulkStatuses</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	bulkStatuses</entry><entry>Z_ListStatus</entry><entry>NUL
@@ -689,7 +690,7 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	num_databaseNames</entry><entry>int</entry><entry>0
+	num_databaseNames</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	databaseNames</entry><entry>char**</entry><entry>NULL
@@ -701,13 +702,13 @@ typedef struct Z_ext_typeent
 	termListAndStartPoint</entry><entry>Z_AttributesPlus...
        </entry><entry>NULL</entry></row>
       <row><entry>
-	stepSize</entry><entry>int</entry><entry>NULL
+	stepSize</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	numberOfTermsRequested</entry><entry>int</entry><entry>20
+	numberOfTermsRequested</entry><entry>Odr_int</entry><entry>20
        </entry></row>
       <row><entry>
-	preferredPositionInResponse</entry><entry>int</entry><entry>NULL
+	preferredPositionInResponse</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
@@ -736,16 +737,16 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	stepSize</entry><entry>int</entry><entry>NULL
+	stepSize</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	scanStatus</entry><entry>int</entry><entry>Z_Scan_success
+	scanStatus</entry><entry>Odr_int</entry><entry>Z_Scan_success
        </entry></row>
       <row><entry>
-	numberOfEntriesReturned</entry><entry>int</entry><entry>0
+	numberOfEntriesReturned</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	positionOfTerm</entry><entry>int</entry><entry>NULL
+	positionOfTerm</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
 	entries</entry><entry>Z_ListEntris</entry><entry>NULL
@@ -779,14 +780,14 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	requestedAction</entry><entry>int</entry><entry>
+	requestedAction</entry><entry>Odr_int</entry><entry>
 	Z_TriggerResourceCtrl_resou..
        </entry></row>
       <row><entry>
 	prefResourceReportFormat</entry><entry>Odr_oid</entry><entry>NULL
        </entry></row>
       <row><entry>
-	resultSetWanted</entry><entry>bool_t</entry><entry>NULL
+	resultSetWanted</entry><entry>Odr_bool</entry><entry>NULL
        </entry></row>
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
@@ -815,19 +816,19 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	suspendedFlag</entry><entry>bool_t</entry><entry>NULL
+	suspendedFlag</entry><entry>Odr_bool</entry><entry>NULL
        </entry></row>
       <row><entry>
 	resourceReport</entry><entry>Z_External</entry><entry>NULL
        </entry></row>
       <row><entry>
-	partialResultsAvailable</entry><entry>int</entry><entry>NULL
+	partialResultsAvailable</entry><entry>Odr_int</entry><entry>NULL
        </entry></row>
       <row><entry>
-	responseRequired</entry><entry>bool_t</entry><entry>FALSE
+	responseRequired</entry><entry>Odr_bool</entry><entry>FALSE
        </entry></row>
       <row><entry>
-	triggeredRequestFlag</entry><entry>bool_t</entry><entry>NULL
+	triggeredRequestFlag</entry><entry>Odr_bool</entry><entry>NULL
        </entry></row>
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
@@ -951,10 +952,10 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	numberOfRecordsReturned</entry><entry>int</entry><entry>value=0
+	numberOfRecordsReturned</entry><entry>Odr_int</entry><entry>value=0
        </entry></row>
       <row><entry>
-	num_segmentRecords</entry><entry>int</entry><entry>0
+	num_segmentRecords</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
 	segmentRecords</entry><entry>Z_NamePlusRecord</entry><entry>NULL
@@ -984,7 +985,7 @@ typedef struct Z_ext_typeent
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
       <row><entry>
-	closeReason</entry><entry>int</entry><entry>Z_Close_finished
+	closeReason</entry><entry>Odr_int</entry><entry>Z_Close_finished
        </entry></row>
       <row><entry>
 	diagnosticInformation</entry><entry>char*</entry><entry>NULL

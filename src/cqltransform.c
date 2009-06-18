@@ -106,7 +106,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             wrbuf_puts(type_str, yaz_tok_parse_string(tp));
             t = yaz_tok_move(tp);
         }
-        elem->attributeType = nmem_longintdup(ct->nmem, 0);
+        elem->attributeType = nmem_intdup(ct->nmem, 0);
         if (sscanf(wrbuf_cstr(type_str), ODR_INT_PRINTF, elem->attributeType)
             != 1)
         {
@@ -140,7 +140,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         {
             elem->which = Z_AttributeValue_numeric;
             elem->value.numeric =
-                nmem_longintdup(ct->nmem, atoi(value_str));
+                nmem_intdup(ct->nmem, atoi(value_str));
         }
         else
         {

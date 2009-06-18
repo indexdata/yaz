@@ -136,6 +136,44 @@ static void tst(void)
     odr_destroy(odr_decode);
 }
 
+/* example from documentation.. 'Using Odr' */
+void do_nothing_useful(int value)
+{
+    ODR encode, decode;
+    Odr_int *valp, *resvalp;
+    char *bufferp;
+    int len;
+     
+    /* allocate streams */
+    if (!(encode = odr_createmem(ODR_ENCODE)))
+        return;
+    if (!(decode = odr_createmem(ODR_DECODE)))
+        return;
+
+    valp = &value;
+    if (odr_integer(encode, &valp, 0, 0) == 0)
+    {
+        printf("encoding went bad\n");
+        return;
+    }
+    bufferp = odr_getbuf(encode, &len, 0);
+    printf("length of encoded data is %d\n", len);
+
+    /* now let's decode the thing again */
+    odr_setbuf(decode, bufferp, len, 0);
+    if (odr_integer(decode, &resvalp, 0, 0) == 0)
+    {
+        printf("decoding went bad\n");
+        return;
+    }
+    /* ODR_INT_PRINTF format for printf (such as %d) */
+    printf("the value is " ODR_INT_PRINTF "\n", *resvalp);
+
+    /* clean up */
+    odr_destroy(encode);
+    odr_destroy(decode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);

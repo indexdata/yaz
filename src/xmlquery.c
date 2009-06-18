@@ -313,7 +313,7 @@ bool_t *boolVal(ODR odr, const char *str)
     return odr_booldup(odr, 1);
 }
 
-odr_int_t *intVal(ODR odr, const char *str)
+Odr_int *intVal(ODR odr, const char *str)
 {
     return odr_intdup(odr, atoi(str));
 }

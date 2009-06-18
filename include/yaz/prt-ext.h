@@ -58,7 +58,7 @@ typedef struct Z_ext_typeent
 struct Z_External
 {
     Odr_oid *direct_reference;
-    odr_int_t *indirect_reference;
+    Odr_int *indirect_reference;
     char *descriptor;
     int which;
 /* Generic types */

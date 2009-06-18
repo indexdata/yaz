@@ -47,14 +47,14 @@ char *odr_strdupn(ODR o, const char *str, size_t n)
     return nmem_strdupn(o->mem, str, n);
 }
 
-odr_int_t *odr_intdup(ODR o, odr_int_t v)
-{
-    return nmem_longintdup(o->mem, v);
-}
-
-odr_bool_t *odr_booldup(ODR o, odr_bool_t v)
+Odr_int *odr_intdup(ODR o, Odr_int v)
 {
     return nmem_intdup(o->mem, v);
+}
+
+Odr_bool *odr_booldup(ODR o, Odr_bool v)
+{
+    return nmem_booldup(o->mem, v);
 }
 
 int odr_total(ODR o)

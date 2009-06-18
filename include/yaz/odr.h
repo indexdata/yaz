@@ -44,10 +44,9 @@
 
 YAZ_BEGIN_CDECL
 
-#define ODR_INT_PRINTF "%lld"
-
-typedef long long int odr_int_t;
-typedef int odr_bool_t;
+typedef nmem_int_t Odr_int;
+typedef nmem_bool_t Odr_bool;
+#define ODR_INT_PRINTF NMEM_INT_PRINTF
 
 #ifndef bool_t
 #define bool_t int
@@ -189,8 +188,8 @@ YAZ_EXPORT void *odr_malloc(ODR o, int size);
 YAZ_EXPORT char *odr_strdup(ODR o, const char *str);
 YAZ_EXPORT char *odr_strdupn(ODR o, const char *str, size_t n);
 YAZ_EXPORT char *odr_strdup_null(ODR o, const char *str);
-YAZ_EXPORT odr_int_t *odr_intdup(ODR o, odr_int_t v);
-YAZ_EXPORT odr_bool_t *odr_booldup(ODR o, odr_bool_t v);
+YAZ_EXPORT Odr_int *odr_intdup(ODR o, Odr_int v);
+YAZ_EXPORT Odr_bool *odr_booldup(ODR o, Odr_bool v);
 YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf,
                                        int sz);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
@@ -234,16 +233,16 @@ YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
 YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
 YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
                           int *tag, int *constructed, int max);
-YAZ_EXPORT int odr_bool(ODR o, int **p, int opt, const char *name);
-YAZ_EXPORT int odr_integer(ODR o, odr_int_t **p, int opt, const char *name);
-YAZ_EXPORT int odr_enum(ODR o, odr_int_t **p, int opt, const char *name);
+YAZ_EXPORT int odr_bool(ODR o, Odr_bool **p, int opt, const char *name);
+YAZ_EXPORT int odr_integer(ODR o, Odr_int **p, int opt, const char *name);
+YAZ_EXPORT int odr_enum(ODR o, Odr_int **p, int opt, const char *name);
 YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
 YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
 YAZ_EXPORT int ber_declen(const unsigned char *buf, int *len, int max);
 YAZ_EXPORT void odr_prname(ODR o, const char *name);
 YAZ_EXPORT int ber_null(ODR o);
 YAZ_EXPORT int odr_null(ODR o, Odr_null **p, int opt, const char *name);
-YAZ_EXPORT int ber_integer(ODR o, odr_int_t *val);
+YAZ_EXPORT int ber_integer(ODR o, Odr_int *val);
 YAZ_EXPORT int odr_constructed_begin(ODR o, void *p, int zclass, int tag,
                                      const char *name);
 YAZ_EXPORT int odr_constructed_end(ODR o);
@@ -304,7 +303,7 @@ YAZ_EXPORT char *odr_prepend(ODR o, const char *prefix, const char *old);
 typedef struct Odr_external
 {
     Odr_oid *direct_reference;       /* OPTIONAL */
-    odr_int_t *indirect_reference;   /* OPTIONAL */
+    Odr_int *indirect_reference;     /* OPTIONAL */
     char    *descriptor;             /* OPTIONAL */
     int which;
 #define ODR_EXTERNAL_single 0

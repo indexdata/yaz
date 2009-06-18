@@ -16,7 +16,7 @@
  * Top level enum en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_enum(ODR o, odr_int_t **p, int opt, const char *name)
+int odr_enum(ODR o, Odr_int **p, int opt, const char *name)
 {
     int res, cons = 0;
 
@@ -44,7 +44,7 @@ int odr_enum(ODR o, odr_int_t **p, int opt, const char *name)
         return 0;
     }
     if (o->direction == ODR_DECODE)
-        *p = (odr_int_t *)odr_malloc(o, sizeof(**p));
+        *p = (Odr_int *)odr_malloc(o, sizeof(**p));
     return ber_integer(o, *p);
 }
 /*

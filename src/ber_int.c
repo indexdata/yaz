@@ -30,10 +30,10 @@
 
 #include "odr-priv.h"
 
-static int ber_encinteger(ODR o, odr_int_t val);
-static int ber_decinteger(const unsigned char *buf, odr_int_t *val, int max);
+static int ber_encinteger(ODR o, Odr_int val);
+static int ber_decinteger(const unsigned char *buf, Odr_int *val, int max);
 
-int ber_integer(ODR o, odr_int_t *val)
+int ber_integer(ODR o, Odr_int *val)
 {
     int res;
 
@@ -61,7 +61,7 @@ int ber_integer(ODR o, odr_int_t *val)
 /*
  * Returns: number of bytes written or -1 for error (out of bounds).
  */
-int ber_encinteger(ODR o, odr_int_t val)
+int ber_encinteger(ODR o, Odr_int val)
 {
     int a, len;
     union { int i; unsigned char c[sizeof(int)]; } tmp;
@@ -82,7 +82,7 @@ int ber_encinteger(ODR o, odr_int_t val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int ber_decinteger(const unsigned char *buf, odr_int_t *val, int max)
+int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
 {
     const unsigned char *b = buf;
     unsigned char fill;

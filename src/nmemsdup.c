@@ -38,16 +38,16 @@ char *nmem_strdupn (NMEM mem, const char *src, size_t n)
     return dst;
 }
 
-long long int *nmem_longintdup(NMEM mem, long long int v)
+nmem_int_t *nmem_intdup(NMEM mem, nmem_int_t v)
 {
-    long long int *dst = (long long int*) nmem_malloc (mem, sizeof(*dst));
+    nmem_int_t *dst = (nmem_int_t*) nmem_malloc (mem, sizeof(*dst));
     *dst = v;
     return dst;
 }
 
-int *nmem_intdup(NMEM mem, int v)
+nmem_bool_t *nmem_booldup(NMEM mem, nmem_bool_t v)
 {
-    int *dst = (int*) nmem_malloc (mem, sizeof(*dst));
+    nmem_bool_t *dst = (nmem_bool_t*) nmem_malloc (mem, sizeof(*dst));
     *dst = v;
     return dst;
 }
