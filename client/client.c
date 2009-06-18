@@ -760,7 +760,7 @@ int cmd_authentication(const char *arg)
     }
     else if (r == 1)
     {
-        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        auth = (Z_IdAuthentication *) nmem_malloc(nmem_auth, sizeof(*auth));
         if (!strcmp(args[0], "-"))
         {
             auth->which = Z_IdAuthentication_anonymous;
@@ -776,9 +776,10 @@ int cmd_authentication(const char *arg)
     }
     else if (r == 2)
     {
-        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        auth = (Z_IdAuthentication *) nmem_malloc(nmem_auth, sizeof(*auth));
         auth->which = Z_IdAuthentication_idPass;
-        auth->u.idPass = nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
+        auth->u.idPass = (Z_IdPass *)
+            nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
         auth->u.idPass->groupId = NULL;
         auth->u.idPass->userId = !strcmp(args[0], "-") ? 0 : args[0];
         auth->u.idPass->password = !strcmp(args[1], "-") ? 0 : args[1];
@@ -787,9 +788,10 @@ int cmd_authentication(const char *arg)
     }
     else if (r == 3)
     {
-        auth = nmem_malloc(nmem_auth, sizeof(*auth));
+        auth = (Z_IdAuthentication*) nmem_malloc(nmem_auth, sizeof(*auth));
         auth->which = Z_IdAuthentication_idPass;
-        auth->u.idPass = nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
+        auth->u.idPass = (Z_IdPass *)
+            nmem_malloc(nmem_auth, sizeof(*auth->u.idPass));
         auth->u.idPass->groupId = args[1];
         auth->u.idPass->userId = args[0];
         auth->u.idPass->password = args[2];

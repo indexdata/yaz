@@ -16,9 +16,9 @@ void tst(void)
 {
     char *p = 0;
 
-    p = xmalloc(10);
+    p = (char *) xmalloc(10);
     YAZ_CHECK(p);
-    p = xrealloc(p, 20);
+    p = (char *) xrealloc(p, 20);
     YAZ_CHECK(p);
     xfree(p);
 
