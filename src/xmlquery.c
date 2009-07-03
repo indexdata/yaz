@@ -20,6 +20,45 @@
 #include <yaz/nmem_xml.h>
 #include <yaz/oid_db.h>
 
+static int check_diagnostic(const xmlNode *ptr, ODR odr,
+                            int *error_code, const char **addinfo)
+{
+    if (ptr && ptr->type == XML_ELEMENT_NODE &&
+        !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
+    {
+        struct _xmlAttr *attr;
+        const char *code_str = 0;
+        const char *addinfo_str = 0;
+        for (attr = ptr->properties; attr; attr = attr->next)
+        {
+            if (!xmlStrcmp(attr->name, BAD_CAST "code") &&
+                attr->children && attr->children->type == XML_TEXT_NODE)
+                code_str = (const char *) attr->children->content;
+            else if (!xmlStrcmp(attr->name, BAD_CAST "addinfo") &&
+                     attr->children && attr->children->type == XML_TEXT_NODE)
+                addinfo_str = (const char *) attr->children->content;
+            else
+            {
+                *error_code = 1;
+                *addinfo = "bad attribute for diagnostic element";
+                return 1;
+            }
+        }
+        if (!code_str)
+        {
+            *error_code = 1;
+            *addinfo = "missing @code for diagnostic element";
+            return 1;
+        }
+        *error_code = atoi(code_str);
+        if (addinfo_str)
+            *addinfo = odr_strdup(odr, addinfo_str);
+        return 1;
+    }
+    else
+        return 0;
+}
+
 void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
                                      xmlNodePtr parent)
 {
@@ -619,6 +658,9 @@ void yaz_xml2query_apt(const xmlNode *ptr_apt,
             else
                 break;
         }
+    if (check_diagnostic(ptr, odr, error_code, addinfo))
+        return;
+
     if (ptr && ptr->type == XML_ELEMENT_NODE)
     {
         if (!xmlStrcmp(ptr->name, BAD_CAST "term"))
@@ -665,6 +707,9 @@ void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
         *addinfo = "missing rpn operator, rset, apt node";
         return;
     }
+    if (check_diagnostic(ptr, odr, error_code, addinfo))
+        return;
+
     *zs = (Z_RPNStructure *) odr_malloc(odr, sizeof(Z_RPNStructure));
     if (!xmlStrcmp(ptr->name, BAD_CAST "operator"))
     {
@@ -729,6 +774,8 @@ void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
 static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
                            int *error_code, const char **addinfo)
 {
+    if (check_diagnostic(ptr, odr, error_code, addinfo))
+        return;
     if (ptr && ptr->type == XML_ELEMENT_NODE && 
         !xmlStrcmp(ptr->name, BAD_CAST "query"))
     {
