@@ -1,3 +1,15 @@
+--- 3.0.47 2009/07/08
+
+Function yaz_xml2query allows a diagnostic element in the PQF XML
+representation .. diagnostic@code and diagnostic@addinfo is diagnostic
+code and additional info respectively.
+
+The BER BOOLEAN is now the integral type Odr_bool which still happens
+to be an 'int'. The BER INTEGER which used to be a plain 'int' is now
+typedef'd to Odr_int. This is still an integral 'int', but it may be
+changed to 64-bit via a one-liner in nmem.h (NMEM_64=1). The documentation,
+ASN-1 compiler as well as programs has been updated to use the new types.
+
 --- 3.0.46 2009/06/08
 
 zoom: ZOOM_record_get now renders OPAC records when type=xml. Previously
