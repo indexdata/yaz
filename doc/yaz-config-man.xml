@@ -33,6 +33,7 @@
    <arg choice="opt"><option>--lalibs</option></arg>
    <arg choice="opt"><option>--cflags</option></arg>
    <arg choice="opt"><option>--comp</option></arg>
+   <arg choice="opt"><option>-V</option></arg>
    <arg choice="opt" rep="repeat">libraries</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -101,6 +102,13 @@
     <term>--comp</term>
     <listitem><para>
       Returns full path to YAZ' ASN.1 compiler: yaz-asncomp.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-V</term>
+    <listitem><para>
+      veturns YAZ SHA1 ID (from Git) and version.
      </para></listitem>
    </varlistentry>
 
