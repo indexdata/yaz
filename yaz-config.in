@@ -31,6 +31,7 @@ Options:
 	[--lalibs]
 	[--cflags]
 	[--comp]
+        [-V]
 Libraries:
 	threads icu server
 EOF
