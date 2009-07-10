@@ -679,7 +679,7 @@ ZOOM_API(int)
         ccl_pquery(wr, rpn);
         ccl_rpn_delete(rpn);
         ret = ZOOM_query_prefix(s, wrbuf_buf(wr));
-        wrbuf_free(wr, 1);
+        wrbuf_destroy(wr);
     }
     ccl_qual_rm(&bibset);
     return ret;
@@ -927,11 +927,11 @@ ZOOM_API(void)
         for (rc = r->record_hash[i]; rc; rc = rc->next)
         {
             if (rc->rec.wrbuf_marc)
-                wrbuf_free(rc->rec.wrbuf_marc, 1);
+                wrbuf_destroy(rc->rec.wrbuf_marc);
             if (rc->rec.wrbuf_iconv)
-                wrbuf_free(rc->rec.wrbuf_iconv, 1);
+                wrbuf_destroy(rc->rec.wrbuf_iconv);
             if (rc->rec.wrbuf_opac)
-                wrbuf_free(rc->rec.wrbuf_opac, 1);
+                wrbuf_destroy(rc->rec.wrbuf_opac);
         }
         r->record_hash[i] = 0;
     }
@@ -1730,11 +1730,11 @@ ZOOM_API(void)
     if (!rec)
         return;
     if (rec->wrbuf_marc)
-        wrbuf_free(rec->wrbuf_marc, 1);
+        wrbuf_destroy(rec->wrbuf_marc);
     if (rec->wrbuf_iconv)
-        wrbuf_free(rec->wrbuf_iconv, 1);
+        wrbuf_destroy(rec->wrbuf_iconv);
     if (rec->wrbuf_opac)
-        wrbuf_free(rec->wrbuf_opac, 1);
+        wrbuf_destroy(rec->wrbuf_opac);
     odr_destroy(rec->odr);
     xfree(rec);
 }
