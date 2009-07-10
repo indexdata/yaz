@@ -37,7 +37,7 @@ WRBUF wrbuf_alloc(void)
 
 void wrbuf_free(WRBUF b, int x)
 {
-     return wrbuf_destroy(b);
+    wrbuf_destroy(b);
 }
 
 void wrbuf_destroy(WRBUF b)
