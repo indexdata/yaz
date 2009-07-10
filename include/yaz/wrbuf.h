@@ -50,6 +50,9 @@ typedef struct wrbuf
 /** \brief allocate / construct WRBUF */
 YAZ_EXPORT WRBUF wrbuf_alloc(void);
 
+/** \brief free WRBUF and possibly its buffer */
+YAZ_EXPORT void wrbuf_free(WRBUF b, int free_buf);
+
 /** \brief destroy WRBUF and its buffer */
 YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 
