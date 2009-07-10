@@ -2268,7 +2268,7 @@ typedef struct oident
         <para>
          The <literal>marc</literal> element specifies a conversion 
          to - and from ISO2709 encoded MARC and 
-         <ulink url="&url.marcxml;">&marcxml;</ulink>/MarcXchange.
+         <ulink url="&url.marcxml;">&acro.marcxml;</ulink>/MarcXchange.
          The following attributes may be specified:
 
          <variablelist>
@@ -2322,7 +2322,7 @@ typedef struct oident
        <listitem>
         <para>
          The <literal>xslt</literal> element specifies a conversion
-         via &xslt;. The following attributes may be specified:
+         via &acro.xslt;. The following attributes may be specified:
 
          <variablelist>
           <varlistentry><term><literal>stylesheet</literal> (REQUIRED)</term>
