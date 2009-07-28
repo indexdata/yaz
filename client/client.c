@@ -435,8 +435,8 @@ static int process_initResponse(Z_InitResponse *res)
                 else
                 {
                     /* Peek at any private Init-diagnostic APDUs */
-                    printf("### NAUGHTY: External is '%.*s'\n",
-                           sat->len, sat->buf);
+                    printf("yaz-client ignoring unrecognised userInformationField: %d-octet External '%.*s'\n",
+                           (int) sat->len, sat->len, sat->buf);
                 }
             }
             odr_reset(print);
