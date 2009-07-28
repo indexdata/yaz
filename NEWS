@@ -1,3 +1,8 @@
+--- [IN PROGRESS]
+
+yaz-client emits a better message when receiving an unrecognised
+userInformationField.
+
 --- 3.0.47 2009/07/08
 
 Function yaz_xml2query allows a diagnostic element in the PQF XML
