@@ -203,8 +203,22 @@
   </refsect1>
  <refsect1><title>SEE ALSO</title>
   <para>
-   yaz(7)
-   yaz-iconv(1)
+   <citerefentry>
+    <refentrytitle>yaz</refentrytitle>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
+  </para>
+  <para>
+   <citerefentry>
+    <refentrytitle>yaz-iconv</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>
+  </para>
+  <para>
+   <ulink url="&url.marcxml;">MARCXML</ulink>.
+  </para>
+  <para>
+   <ulink url="&url.marcxchange;">ISO25577</ulink>.
   </para>
  </refsect1>
 </refentry>
