@@ -65,7 +65,7 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_MARCXML   3
 /** \brief Output format: ISO2709 */
 #define YAZ_MARC_ISO2709   4
-/** \brief Output format: MarcXchange */
+/** \brief Output format: MarcXchange (ISO25577) */
 #define YAZ_MARC_XCHANGE   5
 /** \brief Output format: check only (no marc output) */
 #define YAZ_MARC_CHECK  6
@@ -188,7 +188,7 @@ YAZ_EXPORT int yaz_marc_write_line(yaz_marc_t mt, WRBUF wrbuf);
 */
 YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
 
-/** \brief writes record in MarcXchange XML
+/** \brief writes record in MarcXchange XML (ISO25577)
     \param mt handle
     \param wrbuf WRBUF for output
     \param format record format (e.g. "MARC21")
