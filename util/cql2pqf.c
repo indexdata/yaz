@@ -48,7 +48,10 @@ int main(int argc, char **argv)
     }
     if (!fname)
         usage();
-    ct = cql_transform_open_fname(fname);
+    if (!strcmp(fname, "-"))
+        ct = cql_transform_create();
+    else
+        ct = cql_transform_open_fname(fname);
     if (!ct)
     {
         fprintf(stderr, "failed to read properties %s\n", fname);
