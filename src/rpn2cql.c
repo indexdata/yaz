@@ -21,6 +21,7 @@
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
     int j;
+    int server_choice = 1;
     for (j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
@@ -37,8 +38,11 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
                         return son->u.string;
                 }
             }
+            server_choice = 0; /* not serverChoice because we have use attr */
         }
     }
+    if (server_choice)
+        return "cql.serverChoice";
     return 0;
 }
 
