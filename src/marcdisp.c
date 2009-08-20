@@ -713,7 +713,7 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
                                const char *type)
 {
     return yaz_marc_write_marcxml_ns(mt, wr,
-                                     "http://www.bs.dk/standards/MarcXchange",
+                                     "info:lc/xmlns/marcxchange-v1",
                                      0, 0);
 }
 

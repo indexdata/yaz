@@ -18,19 +18,58 @@
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
 
+static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
+{
+    int j;
+    int server_choice = 1;
+    for (j = 0; j < attributes->num_attributes; j++)
+    {
+        Z_AttributeElement *ae = attributes->attributes[j];
+        if (*ae->attributeType == 1) /* use attribute */
+        {
+            if (ae->which == Z_AttributeValue_complex)
+            {
+                Z_ComplexAttribute *ca = ae->value.complex;
+                int i;
+                for (i = 0; i < ca->num_list; i++)
+                {
+                    Z_StringOrNumeric *son = ca->list[i];
+                    if (son->which == Z_StringOrNumeric_string)
+                        return son->u.string;
+                }
+            }
+            server_choice = 0; /* not serverChoice because we have use attr */
+        }
+    }
+    if (server_choice)
+        return "cql.serverChoice";
+    return 0;
+}
+
 static int rpn2cql_attr(cql_transform_t ct,
                         Z_AttributeList *attributes, WRBUF w)
 {
     const char *relation = cql_lookup_reverse(ct, "relation.", attributes);
     const char *index = cql_lookup_reverse(ct, "index.", attributes);
     const char *structure = cql_lookup_reverse(ct, "structure.", attributes);
-    if (index && strcmp(index, "index.cql.serverChoice"))
+
+    /* if transform (properties) do not match, we'll just use a USE
+       string attribute (bug #2978) */
+    if (!index)
+        index = lookup_index_from_string_attr(attributes);
+
+    if (!index)
     {
-        wrbuf_puts(w, index+6);
+        cql_transform_set_error(ct,
+                                YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
+        return -1;
+    }
+    /* for serverChoice we omit index+relation+structure */
+    if (strcmp(index, "cql.serverChoice"))
+    {
+        wrbuf_puts(w, index);
         if (relation)
         {
-            relation += 9;
-
             if (!strcmp(relation, "exact"))
                 relation = "==";
             else if (!strcmp(relation, "eq"))
@@ -46,7 +85,6 @@ static int rpn2cql_attr(cql_transform_t ct,
 
         if (structure)
         {
-            structure += 10;
             if (strcmp(structure, "*"))
             {
                 wrbuf_puts(w, "/");

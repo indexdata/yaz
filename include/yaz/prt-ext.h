@@ -92,6 +92,11 @@ struct Z_External
 #define Z_External_multisrch2 26
 #define Z_External_CQL 27
 #define Z_External_OCLCUserInfo 28
+#define Z_External_persistentResultSet 29
+#define Z_External_persistentQuery 30
+#define Z_External_periodicQuerySchedule 31
+#define Z_External_exportSpecification 32
+#define Z_External_exportInvocation 33
     union
     {
         /* Generic types */
@@ -131,6 +136,12 @@ struct Z_External
         Z_MultipleSearchTerms_2 *multipleSearchTerms_2;
         Z_InternationalString *cql;
         Z_OCLC_UserInformation *oclc;
+        Z_PRPersistentResultSet *persistentResultSet;
+
+        Z_PQueryPersistentQuery *persistentQuery;
+        Z_PQSPeriodicQuerySchedule *periodicQuerySchedule;
+        Z_ESExportSpecification *exportSpecification;
+        Z_EIExportInvocation *exportInvocation;
     } u;
 };
 

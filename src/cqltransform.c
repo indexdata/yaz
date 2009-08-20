@@ -350,7 +350,7 @@ const char *cql_lookup_reverse(cql_transform_t ct,
                     
             }
             if (i == e->attr_list.num_attributes)
-                return e->pattern;
+                return e->pattern + clen;
         }
     }
     return 0;

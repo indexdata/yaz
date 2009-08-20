@@ -51,6 +51,11 @@ static Z_ext_typeent type_table[] =
     {{1, 2, 840, 10003, 8, 3,-1}, Z_External_acfKrb1, (Odr_fun) z_KRBObject},
     {{1, 2, 840, 10003, 10, 5,-1}, Z_External_multisrch2, (Odr_fun) z_MultipleSearchTerms_2},
     {{1, 2, 840, 10003, 16,  2, -1}, Z_External_CQL, (Odr_fun) z_InternationalString},
+    {{1, 2, 840, 10003, 9, 1,-1}, Z_External_persistentResultSet, (Odr_fun)z_PRPersistentResultSet},
+    {{1, 2, 840, 10003, 9, 2,-1}, Z_External_persistentQuery, (Odr_fun)z_PQueryPersistentQuery},
+    {{1, 2, 840, 10003, 9, 3,-1}, Z_External_periodicQuerySchedule, (Odr_fun)z_PQSPeriodicQuerySchedule},
+    {{1, 2, 840, 10003, 9, 6,-1}, Z_External_exportSpecification, (Odr_fun)z_ESExportSpecification},
+    {{1, 2, 840, 10003, 9, 7,-1}, Z_External_exportInvocation, (Odr_fun)z_EIExportInvocation},
     {{-1}, 0, 0}
 };
 
@@ -152,6 +157,17 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
          (Odr_fun)z_InternationalString, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_OCLCUserInfo,
          (Odr_fun)z_OCLC_UserInformation, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_persistentResultSet,
+         (Odr_fun)z_PRPersistentResultSet, 0},
+
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_persistentQuery,
+         (Odr_fun)z_PQueryPersistentQuery, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_periodicQuerySchedule,
+         (Odr_fun)z_PQSPeriodicQuerySchedule, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_exportSpecification,
+         (Odr_fun)z_ESExportSpecification, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_exportInvocation,
+         (Odr_fun)z_EIExportInvocation, 0},
         {-1, -1, -1, -1, 0, 0}
     };
 
