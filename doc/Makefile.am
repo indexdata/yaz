@@ -72,10 +72,6 @@ $(HTMLFILES): $(XMLFILES)
 	rm -f *.html
 	$(HTML_COMPILE) $(srcdir)/yaz.xml
 
-index.tkl: $(XMLFILES)
-	rm -f *.tkl
-	$(TKL_COMPILE) $(srcdir)/yaz.xml
-
 yaz.pdf: $(XMLFILES)
 	$(PDF_COMPILE) $(srcdir)/yaz.xml
 
@@ -105,7 +101,7 @@ dist-hook:
 	done
 
 doc-clean:
-	rm -f *.html *.[0-9] *.pdf *.tkl
+	rm -f *.html *.[0-9] *.pdf
 
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \
