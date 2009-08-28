@@ -9,5 +9,5 @@ if test -s stderr; then
 fi
 (cd doc && make ${P}.pdf index.html)
 cp NEWS doc/
-tar cz --exclude=.git -f - dox doc|ssh us2 'cd software/${P}; tar xzf -'
+tar cz --exclude=.git -f - dox doc|ssh us2 "cd software/${P}; tar xzf -"
 exit 0
