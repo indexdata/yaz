@@ -235,8 +235,9 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
     if (next_token_copy(args, start_str, sizeof(start_str)) >= 0)
         ZOOM_options_set(options, "start", start_str);
 
-    if (next_token_copy(args, count_str, sizeof(count_str)) >= 0)
-        ZOOM_options_set(options, "count", count_str);
+    if (next_token_copy(args, count_str, sizeof(count_str)) <= 0)
+        strcpy(count_str, "1");
+    ZOOM_options_set(options, "count", count_str);
 
     if (next_token_copy(args, render_str, sizeof(render_str)) >= 0)
         type = render_str;
