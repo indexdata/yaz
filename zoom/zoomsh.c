@@ -471,7 +471,7 @@ static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
 {
     printf("connect <zurl>\n");
     printf("search <pqf>\n");
-    printf("show [<start> [<count>]\n");
+    printf("show [<start> [<count> [<type]]]\n");
     printf("scan <term>\n");
     printf("quit\n");
     printf("close <zurl>\n");
