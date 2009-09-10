@@ -341,7 +341,7 @@ static void dump(const char *fname, const char *from, const char *to,
             }
             len_result = rlen;
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
-            if (r > 0 && result)
+            if (r > 0 && result && len_result)
             {
                 if (fwrite(result, len_result, 1, stdout) != 1)
                 {
