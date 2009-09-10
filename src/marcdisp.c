@@ -425,7 +425,7 @@ int yaz_marc_write_check(yaz_marc_t mt, WRBUF wr)
         case YAZ_MARC_COMMENT:
             wrbuf_iconv_write(wr, mt->iconv_cd, 
                               n->u.comment, strlen(n->u.comment));
-            wrbuf_puts(wr, ")\n");
+            wrbuf_puts(wr, "\n");
             break;
         default:
             break;
