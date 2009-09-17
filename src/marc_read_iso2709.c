@@ -177,7 +177,8 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                         buf[i] != ISO2709_RS && buf[i] != ISO2709_IDFS &&
                        buf[i] != ISO2709_FS)
                     i++;
-                yaz_marc_add_subfield(mt, buf+code_offset, i - code_offset);
+                if (i > code_offset)
+                    yaz_marc_add_subfield(mt, buf+code_offset, i - code_offset);
             }
         }
         else
