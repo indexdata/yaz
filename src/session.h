@@ -98,8 +98,8 @@ typedef struct request_q
  */
 typedef enum
 {
-    ASSOC_NEW,                /* not initialized yet */
-    ASSOC_UP,                 /* normal operation */
+    ASSOC_NEW,                /* not initialized yet or HTTP session */
+    ASSOC_UP,                 /* Z39.50 session is UP */
     ASSOC_DEAD                /* dead. Close if input arrives */
 } association_state;
 
