@@ -1690,6 +1690,7 @@ static void process_http_request(association *assoc, request *req)
     int num_diagnostic = 0;
     const char *host = z_HTTP_header_lookup(hreq->headers, "Host");
 
+    yaz_log(log_request, "%s %s HTTP/%s", hreq->method, hreq->path, hreq->version);
     if (!control_association(assoc, host, 0))
     {
         p = z_get_HTTP_Response(o, 404);
