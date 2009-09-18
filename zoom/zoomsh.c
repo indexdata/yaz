@@ -173,7 +173,7 @@ static void cmd_close(ZOOM_connection *c, ZOOM_resultset *r,
 
 static void display_records(ZOOM_connection c,
                             ZOOM_resultset r,
-                            int start, int count)
+                            int start, int count, const char *type)
 {
     int i;
     for (i = 0; i<count; i++)
@@ -195,7 +195,7 @@ static void display_records(ZOOM_connection c,
         else
         {
             int len, opac_len;
-            const char *render = ZOOM_record_get(rec, "render", &len);
+            const char *render = ZOOM_record_get(rec, type, &len);
             const char *opac_render = ZOOM_record_get(rec, "opac", &opac_len);
             const char *syntax = ZOOM_record_get(rec, "syntax", 0);
             const char *schema = ZOOM_record_get(rec, "schema", 0);
@@ -229,13 +229,18 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
                      const char **args)
 {
     int i;
-    char start_str[10], count_str[10];
+    char start_str[10], count_str[10], render_str[60];
+    const char *type = "render";
 
     if (next_token_copy(args, start_str, sizeof(start_str)) >= 0)
         ZOOM_options_set(options, "start", start_str);
 
-    if (next_token_copy(args, count_str, sizeof(count_str)) >= 0)
-        ZOOM_options_set(options, "count", count_str);
+    if (next_token_copy(args, count_str, sizeof(count_str)) <= 0)
+        strcpy(count_str, "1");
+    ZOOM_options_set(options, "count", count_str);
+
+    if (next_token_copy(args, render_str, sizeof(render_str)) >= 0)
+        type = render_str;
 
     for (i = 0; i<MAX_CON; i++)
         ZOOM_resultset_records(r[i], 0, atoi(start_str), atoi(count_str));
@@ -258,7 +263,7 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
             /* OK, no major errors. Display records... */
             int start = ZOOM_options_get_int(options, "start", 0);
             int count = ZOOM_options_get_int(options, "count", 0);
-            display_records(c[i], r[i], start, count);
+            display_records(c[i], r[i], start, count, type);
         }
     }
     ZOOM_options_set(options, "count", "0");
@@ -380,7 +385,7 @@ static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
             printf("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
                    (long) ZOOM_resultset_size(r[i]));
             /* and display */
-            display_records(c[i], r[i], start, count);
+            display_records(c[i], r[i], start, count, "render");
         }
     }
 }
@@ -471,7 +476,7 @@ static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
 {
     printf("connect <zurl>\n");
     printf("search <pqf>\n");
-    printf("show [<start> [<count>]\n");
+    printf("show [<start> [<count> [<type]]]\n");
     printf("scan <term>\n");
     printf("quit\n");
     printf("close <zurl>\n");

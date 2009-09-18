@@ -24,3 +24,8 @@ dist-hook:
 	test -d $(distdir)/win || mkdir $(distdir)/win
 	-cp $(srcdir)/win/* $(distdir)/win
 
+.PHONY:debian
+debian:
+	dpkg-buildpackage -rfakeroot
+
+

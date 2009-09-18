@@ -377,7 +377,7 @@ void ir_session(IOCHAN h, int event)
     {
         if (assoc->state != ASSOC_UP)
         {
-            yaz_log(YLOG_DEBUG, "Final timeout - closing connection.");
+            yaz_log(log_session, "Timeout. Closing connection");
             /* do we need to lod this at all */
             cs_close(conn);
             destroy_association(assoc);
@@ -385,8 +385,7 @@ void ir_session(IOCHAN h, int event)
         }
         else
         {
-            yaz_log(log_sessiondetail, 
-                    "Session idle too long. Sending close.");
+            yaz_log(log_sessiondetail, "Timeout. Sending Z39.50 Close");
             do_close(assoc, Z_Close_lackOfActivity, 0);
         }
         return;
@@ -1691,6 +1690,7 @@ static void process_http_request(association *assoc, request *req)
     int num_diagnostic = 0;
     const char *host = z_HTTP_header_lookup(hreq->headers, "Host");
 
+    yaz_log(log_request, "%s %s HTTP/%s", hreq->method, hreq->path, hreq->version);
     if (!control_association(assoc, host, 0))
     {
         p = z_get_HTTP_Response(o, 404);
@@ -2364,6 +2364,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                              binitres->errstring);
         *resp->result = 0;
     }
+    else
+        assoc->state = ASSOC_UP;
+    
     if (log_request)
     {
         if (!req->idAuthentication)
