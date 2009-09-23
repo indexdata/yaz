@@ -406,6 +406,7 @@ ZOOM_API(ZOOM_connection)
 
     c->odr_in = odr_createmem(ODR_DECODE);
     c->odr_out = odr_createmem(ODR_ENCODE);
+    c->odr_print = 0;
 
     c->async = 0;
     c->support_named_resultsets = 0;
@@ -479,6 +480,11 @@ ZOOM_API(void)
     set_ZOOM_error(c, ZOOM_ERROR_NONE, 0);
     ZOOM_connection_remove_tasks(c);
 
+    if (c->odr_print)
+    {
+        odr_setprint(c->odr_print, 0); /* prevent destroy from fclose'ing */
+        odr_destroy(c->odr_print);
+    }
     if (ZOOM_options_get_bool(c->options, "apdulog", 0))
     {
         c->odr_print = odr_createmem(ODR_PRINT);
