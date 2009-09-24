@@ -59,8 +59,8 @@ static int check_diagnostic(const xmlNode *ptr, ODR odr,
         return 0;
 }
 
-void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
-                                     xmlNodePtr parent)
+static void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
+                                            xmlNodePtr parent)
 {
     char formstr[30];
     const char *setname = 0;
@@ -117,8 +117,7 @@ void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
 }
 
 
-xmlNodePtr yaz_query2xml_term(const Z_Term *term,
-			      xmlNodePtr parent)
+static xmlNodePtr yaz_query2xml_term(const Z_Term *term, xmlNodePtr parent)
 {
     xmlNodePtr t = 0;
     xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "term", 0);
@@ -165,8 +164,8 @@ xmlNodePtr yaz_query2xml_term(const Z_Term *term,
     return node;
 }
 
-xmlNodePtr yaz_query2xml_apt(const Z_AttributesPlusTerm *zapt,
-			     xmlNodePtr parent)
+static xmlNodePtr yaz_query2xml_apt(const Z_AttributesPlusTerm *zapt,
+                                    xmlNodePtr parent)
 {
     xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "apt", 0);
     int num_attributes = zapt->attributes->num_attributes;
@@ -179,7 +178,7 @@ xmlNodePtr yaz_query2xml_apt(const Z_AttributesPlusTerm *zapt,
 }
 
 
-void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
+static void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
 {
     const char *type = 0;
     switch(op->which)
@@ -239,8 +238,8 @@ void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
     }
 }
 
-xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
-				      xmlNodePtr parent)
+static xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
+                                             xmlNodePtr parent)
 {
     if (zs->which == Z_RPNStructure_complex)
     {
@@ -265,7 +264,7 @@ xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
     return 0;
 }
 
-xmlNodePtr yaz_query2xml_rpn(const Z_RPNQuery *rpn, xmlNodePtr parent)
+static xmlNodePtr yaz_query2xml_rpn(const Z_RPNQuery *rpn, xmlNodePtr parent)
 {
     if (rpn->attributeSetId)
     {
@@ -278,17 +277,17 @@ xmlNodePtr yaz_query2xml_rpn(const Z_RPNQuery *rpn, xmlNodePtr parent)
     return yaz_query2xml_rpnstructure(rpn->RPNStructure, parent);
 }
 
-xmlNodePtr yaz_query2xml_ccl(const Odr_oct *ccl, xmlNodePtr node)
+static xmlNodePtr yaz_query2xml_ccl(const Odr_oct *ccl, xmlNodePtr node)
 {
     return 0;
 }
 
-xmlNodePtr yaz_query2xml_z3958(const Odr_oct *ccl, xmlNodePtr node)
+static xmlNodePtr yaz_query2xml_z3958(const Odr_oct *ccl, xmlNodePtr node)
 {
     return 0;
 }
 
-xmlNodePtr yaz_query2xml_cql(const char *cql, xmlNodePtr node)
+static xmlNodePtr yaz_query2xml_cql(const char *cql, xmlNodePtr node)
 {
     return 0;
 }
@@ -345,20 +344,21 @@ void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp)
     }
 }
 
-bool_t *boolVal(ODR odr, const char *str)
+static bool_t *boolVal(ODR odr, const char *str)
 {
     if (*str == '\0' || strchr("0fF", *str))
         return odr_booldup(odr, 0);
     return odr_booldup(odr, 1);
 }
 
-Odr_int *intVal(ODR odr, const char *str)
+static Odr_int *intVal(ODR odr, const char *str)
 {
     return odr_intdup(odr, atoi(str));
 }
 
-void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
-                            ODR odr, int *error_code, const char **addinfo)
+static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
+                                   ODR odr,
+                                   int *error_code, const char **addinfo)
 {
     const char *type = (const char *)
         xmlGetProp((xmlNodePtr) ptr, BAD_CAST "type");
@@ -450,9 +450,10 @@ void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
     }
 }
 
-void yaz_xml2query_attribute_element(const xmlNode *ptr, 
-                                     Z_AttributeElement **elem, ODR odr,
-                                     int *error_code, const char **addinfo)
+static void yaz_xml2query_attribute_element(const xmlNode *ptr, 
+                                            Z_AttributeElement **elem, ODR odr,
+                                            int *error_code,
+                                            const char **addinfo)
 {
     int i;
     xmlChar *set = 0;
@@ -544,14 +545,13 @@ void yaz_xml2query_attribute_element(const xmlNode *ptr,
     }
 }
 
-char *strVal(const xmlNode *ptr_cdata, ODR odr)
+static char *strVal(const xmlNode *ptr_cdata, ODR odr)
 {
     return nmem_text_node_cdata(ptr_cdata, odr_getmem(odr));
 }
 
-void yaz_xml2query_term(const xmlNode *ptr,
-                       Z_Term **term, ODR odr,
-                       int *error_code, const char **addinfo)
+static void yaz_xml2query_term(const xmlNode *ptr, Z_Term **term, ODR odr,
+                               int *error_code, const char **addinfo)
 {
     xmlChar *type = 0;
     struct _xmlAttr *attr;
@@ -614,9 +614,9 @@ void yaz_xml2query_term(const xmlNode *ptr,
     }
 }
 
-void yaz_xml2query_apt(const xmlNode *ptr_apt,
-                       Z_AttributesPlusTerm **zapt, ODR odr,
-                       int *error_code, const char **addinfo)
+static void yaz_xml2query_apt(const xmlNode *ptr_apt,
+                              Z_AttributesPlusTerm **zapt, ODR odr,
+                              int *error_code, const char **addinfo)
 {
     const xmlNode *ptr = ptr_apt->children;
     int i, num_attr = 0;
@@ -681,8 +681,8 @@ void yaz_xml2query_apt(const xmlNode *ptr_apt,
     }
 }
 
-void yaz_xml2query_rset(const xmlNode *ptr, Z_ResultSetId **rset,
-                        ODR odr, int *error_code, const char **addinfo)
+static void yaz_xml2query_rset(const xmlNode *ptr, Z_ResultSetId **rset,
+                               ODR odr, int *error_code, const char **addinfo)
 {
     if (ptr->children)
     {
@@ -695,8 +695,9 @@ void yaz_xml2query_rset(const xmlNode *ptr, Z_ResultSetId **rset,
     }
 }
 
-void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
-                                ODR odr, int *error_code, const char **addinfo)
+static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
+                                       ODR odr,
+                                       int *error_code, const char **addinfo)
 {
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
@@ -755,8 +756,8 @@ void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
     }
 }
 
-void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
-                   int *error_code, const char **addinfo)
+static void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
+                              int *error_code, const char **addinfo)
 {
     const char *set = (const char *)
         xmlGetProp((xmlNodePtr) ptr, BAD_CAST "set");

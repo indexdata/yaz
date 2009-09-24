@@ -98,7 +98,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
 #if HAVE_UNISTD_H
         /* wait up to 3 seconds and check if connection is still alive */
         int i;
-        for (i = 0; i<3; i++)
+        for (i = 0; i<20; i++)
         {
             if (!bend_assoc_is_alive(rr->association))
             {
