@@ -360,8 +360,7 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
                                    ODR odr,
                                    int *error_code, const char **addinfo)
 {
-    const char *type = (const char *)
-        xmlGetProp((xmlNodePtr) ptr, BAD_CAST "type");
+    xmlChar *type = xmlGetProp((xmlNodePtr) ptr, BAD_CAST "type");
     if (!type)
     {
         *error_code = 1;
@@ -369,78 +368,66 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         return;
     }
     *op = (Z_Operator*) odr_malloc(odr, sizeof(Z_Operator));
-    if (!strcmp(type, "and"))
+    if (!xmlStrcmp(type, BAD_CAST "and"))
     {
         (*op)->which = Z_Operator_and;
         (*op)->u.op_and = odr_nullval();
     }
-    else if (!strcmp(type, "or"))
+    else if (!xmlStrcmp(type, BAD_CAST "or"))
     {
         (*op)->which = Z_Operator_or;
         (*op)->u.op_or = odr_nullval();
     }
-    else if (!strcmp(type, "not"))
+    else if (!xmlStrcmp(type, BAD_CAST "not"))
     {
         (*op)->which = Z_Operator_and_not;
         (*op)->u.and_not = odr_nullval();
     }
-    else if (!strcmp(type, "prox"))
+    else if (!xmlStrcmp(type, BAD_CAST "prox"))
     {
-        const char *atval;
-        Z_ProximityOperator *pop = (Z_ProximityOperator *) 
-            odr_malloc(odr, sizeof(Z_ProximityOperator));
-
+        struct _xmlAttr *attr;
+        Z_ProximityOperator *pop = (Z_ProximityOperator *)
+            odr_malloc(odr, sizeof(*pop));
         (*op)->which = Z_Operator_prox;
         (*op)->u.prox = pop;
+        /* default values */
+        pop->exclusion = 0;
+        pop->ordered = odr_booldup(odr, 1);
+        pop->relationType =
+            odr_intdup(odr, Z_ProximityOperator_Prox_lessThanOrEqual);
+        pop->which = Z_ProximityOperator_known;
+        pop->u.known = odr_intdup(odr, Z_ProxUnit_word);
+        pop->distance = odr_intdup(odr, 1);
 
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "exclusion");
-        if (atval)
-            pop->exclusion = boolVal(odr, atval);
-        else
-            pop->exclusion = 0;
-
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "distance");
-        if (atval)
-            pop->distance = intVal(odr, atval);
-        else
-            pop->distance = odr_intdup(odr, 1);
-
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "ordered");
-        if (atval)
-            pop->ordered = boolVal(odr, atval);
-        else
-            pop->ordered = odr_booldup(odr, 1);
-
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "relationType");
-        if (atval)
-            pop->relationType = intVal(odr, atval);
-        else
-            pop->relationType =
-                odr_intdup(odr, Z_ProximityOperator_Prox_lessThanOrEqual);
-
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "knownProximityUnit");
-        if (atval)
+        for (attr = ptr->properties; attr; attr = attr->next)
         {
-            pop->which = Z_ProximityOperator_known;            
-            pop->u.known = intVal(odr, atval);
-        }
-        else
-        {
-            pop->which = Z_ProximityOperator_known;
-            pop->u.known = odr_intdup(odr, Z_ProxUnit_word);
-        }
-
-        atval = (const char *) xmlGetProp((xmlNodePtr) ptr,
-                                          BAD_CAST "privateProximityUnit");
-        if (atval)
-        {
-            pop->which = Z_ProximityOperator_private;
-            pop->u.zprivate = intVal(odr, atval);
+            const char *value = (const char *) attr->children->content;
+            if (!xmlStrcmp(attr->name, BAD_CAST "type"))
+                ;
+            else if (!xmlStrcmp(attr->name, BAD_CAST "exclusion"))
+                pop->exclusion = boolVal(odr, value);
+            else if (!xmlStrcmp(attr->name, BAD_CAST "distance"))
+                pop->distance = intVal(odr, value);
+            else if (!xmlStrcmp(attr->name, BAD_CAST "ordered"))
+                pop->ordered = boolVal(odr, value);
+            else if (!xmlStrcmp(attr->name, BAD_CAST "relationType"))
+                pop->relationType = intVal(odr, value);
+            else if (!xmlStrcmp(attr->name, BAD_CAST "knownProximityUnit"))
+            {
+                pop->which = Z_ProximityOperator_known;
+                pop->u.known = intVal(odr, value);
+            }
+            else if (!xmlStrcmp(attr->name, BAD_CAST "privateProximityUnit"))
+            {
+                pop->which = Z_ProximityOperator_private;
+                pop->u.known = intVal(odr, value);
+            }
+            else
+            {
+                *error_code = 1;
+                *addinfo = "bad proximity attribute";
+                break;
+            }
         }
     }
     else
@@ -448,6 +435,7 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         *error_code = 1;
         *addinfo = "bad operator type";
     }
+    xmlFree(type);
 }
 
 static void yaz_xml2query_attribute_element(const xmlNode *ptr, 
@@ -759,13 +747,16 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
 static void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
                               int *error_code, const char **addinfo)
 {
-    const char *set = (const char *)
-        xmlGetProp((xmlNodePtr) ptr, BAD_CAST "set");
+    xmlChar *set = xmlGetProp((xmlNodePtr) ptr, BAD_CAST "set");
 
     *query = (Z_RPNQuery*) odr_malloc(odr, sizeof(Z_RPNQuery));
     if (set)
-        (*query)->attributeSetId = yaz_string_to_oid_odr(yaz_oid_std(),
-                                                         CLASS_ATTSET, set, odr);
+    {
+        (*query)->attributeSetId =
+            yaz_string_to_oid_odr(yaz_oid_std(),
+                                  CLASS_ATTSET, (const char *) set, odr);
+        xmlFree(set);
+    }
     else
         (*query)->attributeSetId = 0;
     yaz_xml2query_rpnstructure(ptr->children, &(*query)->RPNStructure,

@@ -93,6 +93,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
                 status = XML_NO_MATCH;
             }
             xmlFreeDoc(doc);
+            xmlFree(buf_out);
         }
 #else
         status = QUERY2XML_FAILED;
