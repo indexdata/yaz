@@ -83,6 +83,39 @@ static int get_hit_count(Z_Query *q)
     return h;
 }
 
+/** \brief checks if it's a dummy Slow database..
+    \param basename database name to check
+    \param association backend association (or NULL if not available)
+    \retval 1 is slow database
+    \retval 0 is not a slow database
+
+    The Slow database is for testing.. It allows us to simulate
+    a slow server...
+*/
+static int check_slow(const char *basename, bend_association association)
+{
+    if (strncmp(basename, "Slow", 4) == 0)
+    {
+#if HAVE_UNISTD_H
+        int i, w = 3;
+        if (basename[4])
+            sscanf(basename+4, "%d", &w);
+        /* wait up to 3 seconds and check if connection is still alive */
+        for (i = 0; i < w; i++)
+        {
+            if (association && !bend_assoc_is_alive(association))
+            {
+                yaz_log(YLOG_LOG, "search aborted");
+                break;
+            }
+            sleep(1);
+        }
+#endif
+        return 1;
+    }
+    return 0;
+}
+
 int ztest_search(void *handle, bend_search_rr *rr)
 {
     if (rr->num_bases != 1)
@@ -93,21 +126,8 @@ int ztest_search(void *handle, bend_search_rr *rr)
     /* Throw Database unavailable if other than Default or Slow */
     if (!yaz_matchstr(rr->basenames[0], "Default"))
         ;  /* Default is OK in our test */
-    else if(!yaz_matchstr(rr->basenames[0], "Slow"))
+    else if (check_slow(rr->basenames[0], rr->association))
     {
-#if HAVE_UNISTD_H
-        /* wait up to 3 seconds and check if connection is still alive */
-        int i;
-        for (i = 0; i<3; i++)
-        {
-            if (!bend_assoc_is_alive(rr->association))
-            {
-                yaz_log(YLOG_LOG, "search aborted");
-                break;
-            }
-            sleep(1);
-        }
-#endif
         rr->estimated_hit_count = 1;
     }
     else
@@ -636,13 +656,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     /* Throw Database unavailable if other than Default or Slow */
     if (!yaz_matchstr(q->basenames[0], "Default"))
         ;  /* Default is OK in our test */
-    else if(!yaz_matchstr(q->basenames[0], "Slow"))
-    {
-#if HAVE_UNISTD_H
-        sleep(3);
-#endif
+    else if (check_slow(q->basenames[0], 0 /* no assoc for scan */))
         ;
-    }
     else
     {
         q->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
