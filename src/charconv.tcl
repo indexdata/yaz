@@ -37,19 +37,22 @@ proc preamble_trie {ofilehandle ifiles ofile} {
         static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
                                     size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, int boffset)
         {
-            struct yaz_iconv_trie *t = (ptr > 0) ? ptrs[ptr-1] : 0;
-            if (!t || inbytesleft < 1)
+            struct yaz_iconv_trie *t = ptrs[ptr-1];
+            if (inbytesleft < 1)
                 return 0;
             if (t->dir)
             {
                 size_t ch = (inp[0] & mask) + boffset;
-                unsigned long code =
-                lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read, combining, mask, boffset);
-                if (code)
+                unsigned long code;
+                if (t->dir[ch].ptr)
                 {
-                    (*no_read)++;
-                    return code;
-                }
+                    code = lookup(ptrs, t->dir[ch].ptr, inp+1, inbytesleft-1, no_read, combining, mask, boffset);
+		    if (code)
+		    {
+			(*no_read)++;
+			return code;
+		    }
+		}
                 if (t->dir[ch].to)
                 {
                     code = t->dir[ch].to;
