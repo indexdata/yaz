@@ -1971,6 +1971,9 @@ static const char *return_record(ZOOM_record rec, int *len,
                 charset);
             if (ret_buf)
                 return ret_buf;
+            /* bad ISO2709. Return fail unless raw (ISO2709) is wanted */
+            if (marctype != YAZ_MARC_ISO2709)
+                return 0;
         }
         return return_string_record(rec, len,
                                     (const char *) r->u.octet_aligned->buf,
