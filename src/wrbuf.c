@@ -163,7 +163,7 @@ static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
 {
     if (cd)
     {
-        char outbuf[16];
+        char outbuf[128];
         size_t inbytesleft = size;
         const char *inp = buf;
         while (inbytesleft)
