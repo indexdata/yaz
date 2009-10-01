@@ -57,7 +57,8 @@
 	<xsl:for-each select="marc:datafield[@tag='700']">
 	  <xsl:call-template name="printfield">
 	    <xsl:with-param name="name">A</xsl:with-param>
-	    <xsl:with-param name="value"><xsl:value-of select="marc:subfield[@code='a']"/>
+	    <xsl:with-param name="value">
+	      <xsl:value-of select="marc:subfield[@code='a']"/>
 	    </xsl:with-param>
 	  </xsl:call-template>
 	</xsl:for-each>
@@ -70,7 +71,8 @@
     <xsl:for-each select="marc:datafield[@tag='245']">
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">T</xsl:with-param>
-	<xsl:with-param name="value"><xsl:value-of select="marc:subfield[@code='a']"/>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
 	</xsl:with-param>
       </xsl:call-template>
     </xsl:for-each>
@@ -79,66 +81,64 @@
       <!-- Place Published -->
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">C</xsl:with-param>
-	<xsl:with-param name="value"><xsl:value-of select="marc:subfield[@code='a']"/>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
 	</xsl:with-param>
       </xsl:call-template>
       <!-- Publisher -->
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">I</xsl:with-param>
-	<xsl:with-param name="value"><xsl:value-of select="marc:subfield[@code='b']"/>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='b']"/>
 	</xsl:with-param>
       </xsl:call-template>
       <!-- Year -->
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">D</xsl:with-param>
-	<xsl:with-param name="value"><xsl:value-of select="marc:subfield[@code='c']"/>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='c']"/>
 	</xsl:with-param>
       </xsl:call-template>
     </xsl:for-each>
   
     <!-- Keywords -->
     <xsl:for-each select="marc:datafield[@tag='650']">
-      <xsl:if test="marc:subfield[@code='a']">
-      <xsl:text>%K </xsl:text>
-      <xsl:value-of select="marc:subfield[@code='a']"/>
-      <xsl:text>
-</xsl:text>
-      </xsl:if>
-  </xsl:for-each>
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">K</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
   
     <!-- URL -->
     <xsl:for-each select="marc:datafield[@tag='856']">
-      <xsl:if test="marc:subfield[@code='u']">
-	<xsl:text>%U </xsl:text>
-	<xsl:value-of select="marc:subfield[@code='u']"/>
-	<xsl:text>
-</xsl:text>
-      </xsl:if>
-  </xsl:for-each>
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">U</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='u']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
   
     <!-- ISBN -->
     <xsl:for-each select="marc:datafield[@tag='020']">
-      <xsl:if test="marc:subfield[@code='a']">
-	<xsl:text>%@ </xsl:text>
-	<xsl:value-of select="marc:subfield[@code='a']"/>
-      <xsl:text>
-</xsl:text>
-    </xsl:if>
-  </xsl:for-each>
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">@</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
   
     <!-- ISSN -->
     <xsl:for-each select="marc:datafield[@tag='022']">
-      <xsl:if test="marc:subfield[@code='a']">
-	<xsl:text>%@ </xsl:text>
-	<xsl:value-of select="marc:subfield[@code='a']"/>
-	<xsl:text>
-</xsl:text>
-     </xsl:if>
-  </xsl:for-each>
-
-
-  
-  
-  
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">@</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
   </xsl:template>
 </xsl:stylesheet>
