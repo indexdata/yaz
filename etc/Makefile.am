@@ -11,6 +11,7 @@ etcdata_DATA =  \
  MARC21slim2MODS.xsl \
  MARC21slim2RDFDC.xsl \
  MARC21slimUtils.xsl \
+ marc21_to_endnote.xsl \
  opacxml.xsd
 
 EXTRA_DIST = $(etcdata_DATA) debian.init.d
