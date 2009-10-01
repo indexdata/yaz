@@ -53,7 +53,17 @@
 
     <!-- Author -->
     <xsl:choose>
-      <xsl:when test="marc:datafield[@tag='700']">
+      <xsl:when test="marc:datafield[@tag='100' and @ind1='1']">
+	<xsl:for-each select="marc:datafield[@tag='100']">
+	  <xsl:call-template name="printfield">
+	    <xsl:with-param name="name">A</xsl:with-param>
+	    <xsl:with-param name="value">
+	      <xsl:value-of select="marc:subfield[@code='a']"/>
+	    </xsl:with-param>
+	  </xsl:call-template>
+	</xsl:for-each>
+      </xsl:when>
+      <xsl:when test="marc:datafield[@tag='700' and @ind1='1']">
 	<xsl:for-each select="marc:datafield[@tag='700']">
 	  <xsl:call-template name="printfield">
 	    <xsl:with-param name="name">A</xsl:with-param>
@@ -67,12 +77,20 @@
       </xsl:otherwise>
     </xsl:choose>
       
-    <!-- Title -->
     <xsl:for-each select="marc:datafield[@tag='245']">
+      <!-- Title -->
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">T</xsl:with-param>
 	<xsl:with-param name="value">
 	  <xsl:value-of select="marc:subfield[@code='a']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+
+      <!-- Secondary title -->
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">B</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='b']"/>
 	</xsl:with-param>
       </xsl:call-template>
     </xsl:for-each>
@@ -111,12 +129,52 @@
       </xsl:call-template>
     </xsl:for-each>
   
+    <!-- Callnumber -->
+    <xsl:for-each select="marc:datafield[@tag='852']">
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">L</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='h']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
+  
+    <!-- Pages -->
+    <xsl:for-each select="marc:datafield[@tag='300']">
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">P</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
+  
     <!-- URL -->
     <xsl:for-each select="marc:datafield[@tag='856']">
       <xsl:call-template name="printfield">
 	<xsl:with-param name="name">U</xsl:with-param>
 	<xsl:with-param name="value">
 	  <xsl:value-of select="marc:subfield[@code='u']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
+  
+    <!-- Volume -->
+    <xsl:for-each select="marc:datafield[@tag='245']">
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">V</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='n']"/>
+	</xsl:with-param>
+      </xsl:call-template>
+    </xsl:for-each>
+  
+    <!-- Abstract -->
+    <xsl:for-each select="marc:datafield[@tag='520']">
+      <xsl:call-template name="printfield">
+	<xsl:with-param name="name">X</xsl:with-param>
+	<xsl:with-param name="value">
+	  <xsl:value-of select="marc:subfield[@code='a']"/>
 	</xsl:with-param>
       </xsl:call-template>
     </xsl:for-each>
