@@ -199,4 +199,5 @@
       </xsl:call-template>
     </xsl:for-each>
   </xsl:template>
+  <xsl:template match="text()"/>
 </xsl:stylesheet>
