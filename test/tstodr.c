@@ -137,7 +137,7 @@ static void tst(void)
 }
 
 /* example from documentation.. 'Using Odr' */
-void do_nothing_useful(int value)
+void do_nothing_useful(Odr_int value)
 {
     ODR encode, decode;
     Odr_int *valp, *resvalp;
