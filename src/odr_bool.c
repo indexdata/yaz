@@ -18,7 +18,7 @@
  * Top level boolean en/decoder.
  * Returns 1 on success, 0 on error.
  */
-int odr_bool(ODR o, Odr_int **p, int opt, const char *name)
+int odr_bool(ODR o, Odr_bool **p, int opt, const char *name)
 {
     int res, cons = 0;
 
