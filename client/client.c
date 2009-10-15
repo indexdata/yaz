@@ -3899,9 +3899,10 @@ static void initialize(const char *rc_file)
 
     cmd_format("usmarc");
 
+    file_history = file_history_new();
+
     source_rc_file(rc_file);
 
-    file_history = file_history_new();
     file_history_load(file_history);
     file_history_trav(file_history, 0, add_to_readline_history);
 }
