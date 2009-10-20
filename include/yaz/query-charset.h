@@ -43,6 +43,10 @@ YAZ_EXPORT void yaz_query_charset_convert_apt(Z_AttributesPlusTerm *apt,
 
 YAZ_EXPORT void yaz_query_charset_convert_rpnquery(Z_RPNQuery *q,
                                                    ODR o, yaz_iconv_t cd);
+
+YAZ_EXPORT int yaz_query_charset_convert_rpnquery_check(Z_RPNQuery *q,
+                                                        ODR o, yaz_iconv_t cd);
+
 YAZ_END_CDECL
 
 #endif
