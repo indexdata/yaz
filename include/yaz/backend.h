@@ -70,6 +70,8 @@ typedef struct {
     int *srw_setnameIdleTime;  /* holds SRU/SRW life-time */
     int estimated_hit_count;   /* if hit count is estimated */
     int partial_resultset;     /* if result set is partial */
+    Z_SRW_extra_arg *extra_args; /* extra URL arguments */
+    char *extra_response_data;   /* extra XML response. */
 } bend_search_rr;
 
 /** \brief Information for present handler. Does not replace bend_fetch. */

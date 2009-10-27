@@ -137,6 +137,29 @@ int ztest_search(void *handle, bend_search_rr *rr)
         return 0;
     }
 
+    if (rr->extra_args)
+    {
+        Z_SRW_extra_arg *a;
+        WRBUF response_xml = wrbuf_alloc();
+        wrbuf_puts(response_xml, "<extra>");
+        for (a = rr->extra_args; a; a = a->next)
+        {
+            wrbuf_puts(response_xml, "<extra name=\"");
+            wrbuf_xmlputs(response_xml, a->name);
+            wrbuf_puts(response_xml, "\"");
+            if (a->value)
+            {
+                wrbuf_puts(response_xml, " value=\"");
+                wrbuf_xmlputs(response_xml, a->value);
+                wrbuf_puts(response_xml, "\"");
+            }
+            wrbuf_puts(response_xml, "/>");
+        }
+        wrbuf_puts(response_xml, "</extra>");
+        rr->extra_response_data =
+            odr_strdup(rr->stream, wrbuf_cstr(response_xml));
+        wrbuf_destroy(response_xml);
+    }
     rr->hits = get_hit_count(rr->query);
     return 0;
 }

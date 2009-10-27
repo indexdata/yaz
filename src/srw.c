@@ -740,6 +740,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 if (match_xsd_string(ptr, "version", o,
                                      &(*p)->srw_version))
                     ;
+                else if (match_xsd_XML_n(ptr, "extraResponseData", o, 
+                                         &(*p)->extraResponseData_buf,
+                                         &(*p)->extraResponseData_len))
+                    ;
                 else if (match_xsd_integer(ptr, "numberOfRecords", o, 
                                       &res->numberOfRecords))
                     ;
@@ -778,6 +782,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 if (match_xsd_string(ptr, "version", o,
                                            &(*p)->srw_version))
                     ;
+                else if (match_xsd_XML_n(ptr, "extraResponseData", o, 
+                                         &(*p)->extraResponseData_buf,
+                                         &(*p)->extraResponseData_len))
+                    ;
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
@@ -809,6 +817,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 if (match_xsd_string(ptr, "version", o,
                                            &(*p)->srw_version))
                     ;
+                else if (match_xsd_XML_n(ptr, "extraResponseData", o, 
+                                         &(*p)->extraResponseData_buf,
+                                         &(*p)->extraResponseData_len))
+                    ;
                 else if (match_element(ptr, "record"))
                     yaz_srw_record(o, ptr, &res->record, &res->extra_record,
                                    client_data, ns);
@@ -838,6 +850,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             {
                 if (match_xsd_string(ptr, "version", o,
                                      &(*p)->srw_version))
+                    ;
+                else if (match_xsd_XML_n(ptr, "extraResponseData", o, 
+                                         &(*p)->extraResponseData_buf,
+                                         &(*p)->extraResponseData_len))
                     ;
                 else if (match_xsd_string(ptr, "scanClause", o,
                                      &req->scanClause.cql))
@@ -879,6 +895,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 if (match_xsd_string(ptr, "version", o,
                                      &(*p)->srw_version))
                     ;
+                else if (match_xsd_XML_n(ptr, "extraResponseData", o, 
+                                         &(*p)->extraResponseData_buf,
+                                         &(*p)->extraResponseData_len))
+                    ;
                 else if (match_element(ptr, "terms"))
                     yaz_srw_terms(o, ptr, &res->terms,
                                   &res->num_terms, client_data,
@@ -902,12 +922,12 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
     {
         Z_SRW_PDU **p = handler_data;
         xmlNsPtr ns_srw;
+        xmlNodePtr ptr = 0;
         
         if ((*p)->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_searchRetrieveRequest *req = (*p)->u.request;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0,
-                                         BAD_CAST "searchRetrieveRequest", 0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "searchRetrieveRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -948,8 +968,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_searchRetrieve_response)
         {
             Z_SRW_searchRetrieveResponse *res = (*p)->u.response;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0,
-                                         BAD_CAST "searchRetrieveResponse", 0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "searchRetrieveResponse", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -978,8 +997,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_explain_request)
         {
             Z_SRW_explainRequest *req = (*p)->u.explain_request;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "explainRequest",
-                                         0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "explainRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -991,8 +1009,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_explain_response)
         {
             Z_SRW_explainResponse *res = (*p)->u.explain_response;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "explainResponse",
-                                         0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "explainResponse", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -1014,7 +1031,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_scan_request)
         {
             Z_SRW_scanRequest *req = (*p)->u.scan_request;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "scanRequest", 0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "scanRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -1036,7 +1053,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_scan_response)
         {
             Z_SRW_scanResponse *res = (*p)->u.scan_response;
-            xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "scanResponse", 0);
+            ptr = xmlNewChild(pptr, 0, BAD_CAST "scanResponse", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
@@ -1058,6 +1075,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         }
         else
             return -1;
+        if (ptr && (*p)->extraResponseData_len)
+            add_XML_n(ptr, "extraResponseData", 
+                      (*p)->extraResponseData_buf, 
+                      (*p)->extraResponseData_len, ns_srw);
+            
 
     }
     return 0;

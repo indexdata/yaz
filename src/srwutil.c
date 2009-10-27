@@ -862,6 +862,8 @@ static Z_SRW_PDU *yaz_srw_get_core_ver(ODR o, const char *version)
     p->username = 0;
     p->password = 0;
     p->extra_args = 0;
+    p->extraResponseData_buf = 0;
+    p->extraResponseData_len = 0;
     return p;
 }
 

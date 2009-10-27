@@ -212,7 +212,9 @@ typedef struct {
     char *srw_version;
     char *username; /* From HTTP header or request */
     char *password; /* From HTTP header or request  */
-    Z_SRW_extra_arg *extra_args; /* only used for SRU GET/POST */
+    Z_SRW_extra_arg *extra_args; /* extraRequestData SRU GET/POST */
+    char *extraResponseData_buf;
+    int extraResponseData_len;
 } Z_SRW_PDU;
 
 YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,

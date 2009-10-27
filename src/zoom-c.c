@@ -4087,6 +4087,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
 
             ZOOM_options_set(c->options, "sru_version", sr->srw_version);
+            ZOOM_options_setl(c->options, "sru_extra_response_data",
+                sr->extraResponseData_buf, sr->extraResponseData_len);
             if (sr->which == Z_SRW_searchRetrieve_response)
                 cret = handle_srw_response(c, sr->u.response);
             else if (sr->which == Z_SRW_scan_response)

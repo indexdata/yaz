@@ -847,9 +847,10 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
 
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_PDU *sr,
-                            Z_SRW_searchRetrieveResponse *srw_res,
+                            Z_SRW_PDU *res,
                             int *http_code)
 {
+    Z_SRW_searchRetrieveResponse *srw_res = res->u.response;
     int srw_error = 0;
     Z_External *ext;
     Z_SRW_searchRetrieveRequest *srw_req = sr->u.request;
@@ -872,6 +873,8 @@ static void srw_bend_search(association *assoc, request *req,
         rr.partial_resultset = 0;
         rr.query = (Z_Query *) odr_malloc(assoc->decode, sizeof(*rr.query));
         rr.query->u.type_1 = 0;
+        rr.extra_args = sr->extra_args;
+        rr.extra_response_data = 0;
         
         if (srw_req->query_type == Z_SRW_query_type_cql)
         {
@@ -1092,6 +1095,11 @@ static void srw_bend_search(association *assoc, request *req,
                         if (!j)
                             srw_res->records = 0;
                     }
+                }
+                if (rr.extra_response_data)
+                {
+                    res->extraResponseData_buf = rr.extra_response_data;
+                    res->extraResponseData_len = strlen(rr.extra_response_data);
                 }
                 if (rr.estimated_hit_count || rr.partial_resultset)
                 {
@@ -1783,8 +1791,7 @@ static void process_http_request(association *assoc, request *req)
             }
             else
             {
-                srw_bend_search(assoc, req, sr, res->u.response, 
-                                &http_code);
+                srw_bend_search(assoc, req, sr, res, &http_code);
             }
             if (http_code == 200)
                 soap_package->u.generic->p = res;
@@ -2628,6 +2635,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bsrr->srw_setnameIdleTime = 0;
     bsrr->estimated_hit_count = 0;
     bsrr->partial_resultset = 0;
+    bsrr->extra_args = 0;
+    bsrr->extra_response_data = 0;
 
     yaz_log (log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)

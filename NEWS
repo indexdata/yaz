@@ -1,3 +1,9 @@
+Add support for extra request / response data for SRU codecs and GFS.
+The Z_SRW_PDU structure has two new members extraResponseData_{buf,len}
+for extra data response buffer and length. For the GFS, both request
+and response data (XML) is carried in extra_args and extra_response_data
+for the search handler. Patch by Ko van der Sloot.
+
 --- 3.0.49 2009/10/01
 
 Make a number of functions defined in xmlquery.c static. These have
