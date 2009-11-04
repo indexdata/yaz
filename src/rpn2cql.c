@@ -46,6 +46,67 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
     return 0;
 }
 
+static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
+{
+    int j;
+    int server_choice = 1;
+    for (j = 0; j < attributes->num_attributes; j++)
+    {
+        Z_AttributeElement *ae = attributes->attributes[j];
+        if (*ae->attributeType == 2) /* relation attribute */
+        {
+            if (ae->which == Z_AttributeValue_numeric)
+            {
+                /* Only support for numeric relation */
+                Odr_int *relation = ae->value.numeric;
+                /* map this numeric to represetation in cql */
+                switch (*relation) {
+                    /* Unsure on whether this is the relation attribute 
+                       const? */
+                    case Z_ProximityOperator_Prox_lessThan: 
+                        return "<";
+                    case Z_ProximityOperator_Prox_lessThanOrEqual: 
+                        return "<="; 
+                    case Z_ProximityOperator_Prox_equal: 
+                        return "="; 
+                    case Z_ProximityOperator_Prox_greaterThanOrEqual: 
+                        return ">="; 
+                    case Z_ProximityOperator_Prox_greaterThan: 
+                        return ">"; 
+                    case Z_ProximityOperator_Prox_notEqual: 
+                        return "<>"; 
+
+                    /* phonetic */
+                    case 100: 
+                        return "??"; 
+
+                        /* stem */
+                    case 101: 
+                        return "??"; 
+
+                        /* relevance */
+                    case 102: 
+                        return "??"; 
+                otherwise: 
+                        /* Invalid relation */
+                        return 0;
+                }
+
+            }
+            else {
+                /* Can we have a complex relation value? 
+                   Should we implement something? 
+                 */
+            }
+                
+            server_choice = 0; /* Which ServerChoice if relation? */
+        }
+    }
+    if (server_choice)
+        return "cql.serverChoice";
+    return 0;
+}
+
 static int rpn2cql_attr(cql_transform_t ct,
                         Z_AttributeList *attributes, WRBUF w)
 {
@@ -57,6 +118,10 @@ static int rpn2cql_attr(cql_transform_t ct,
        string attribute (bug #2978) */
     if (!index)
         index = lookup_index_from_string_attr(attributes);
+
+    /* Attempt to fix bug #2978): Look for a relation attribute */
+    if (!relation) 
+        relation = lookup_relation_index_from_attr(attributes);
 
     if (!index)
     {
@@ -78,6 +143,7 @@ static int rpn2cql_attr(cql_transform_t ct,
                 relation = "<=";
             else if (!strcmp(relation, "ge"))
                 relation = ">=";
+            /* Missing mapping of not equal, phonetic, stem and relevance */
             wrbuf_puts(w, relation);
         }
         else
