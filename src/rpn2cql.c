@@ -59,10 +59,9 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
             {
                 /* Only support for numeric relation */
                 Odr_int *relation = ae->value.numeric;
-                /* map this numeric to represetation in cql */
+                /* map this numeric to representation in CQL */
                 switch (*relation) {
-                    /* Unsure on whether this is the relation attribute 
-                       const? */
+                    /* Unsure on whether this is the relation attribute constants? */
                     case Z_ProximityOperator_Prox_lessThan: 
                         return "<";
                     case Z_ProximityOperator_Prox_lessThanOrEqual: 
