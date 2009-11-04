@@ -39,6 +39,7 @@ int main(int argc, char **argv)
             break;
         case 'r':
             reverse = 1;
+            break;
         case 'n':
             iterations = atoi(arg);
             break;
