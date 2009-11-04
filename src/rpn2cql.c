@@ -75,18 +75,18 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                         return ">"; 
                     case Z_ProximityOperator_Prox_notEqual: 
                         return "<>"; 
-
-                    /* phonetic */
+                                                
                     case 100: 
-                        return "??"; 
+                        /* phonetic is not supported in CQL */
+                        return 0; 
 
-                        /* stem */
                     case 101: 
-                        return "??"; 
+                        /* stem is not supported in CQL */
+                        return 0; 
 
-                        /* relevance */
                     case 102: 
-                        return "??"; 
+                        /* relevance is not supported in CQL ?*/
+                        return 0; 
                 otherwise: 
                         /* Invalid relation */
                         return 0;
