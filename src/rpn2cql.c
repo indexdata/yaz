@@ -49,7 +49,6 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
 {
     int j;
-    int server_choice = 1;
     for (j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
@@ -74,36 +73,28 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                         return ">"; 
                     case Z_ProximityOperator_Prox_notEqual: 
                         return "<>"; 
-                                                
                     case 100: 
                         /* phonetic is not supported in CQL */
                         return 0; 
-
                     case 101: 
                         /* stem is not supported in CQL */
                         return 0; 
-
                     case 102: 
-                        /* relevance is not supported in CQL ?*/
+                        /* relevance is supported in CQL, but not implemented yet */
                         return 0; 
                 otherwise: 
                         /* Invalid relation */
                         return 0;
                 }
-
             }
             else {
-                /* Can we have a complex relation value? 
-                   Should we implement something? 
+                /*  Can we have a complex relation value?
+                    Should we implement something?
                  */
             }
-                
-            server_choice = 0; /* Which ServerChoice if relation? */
         }
     }
-    if (server_choice)
-        return "cql.serverChoice";
-    return 0;
+    return "=";
 }
 
 static int rpn2cql_attr(cql_transform_t ct,
@@ -113,8 +104,7 @@ static int rpn2cql_attr(cql_transform_t ct,
     const char *index = cql_lookup_reverse(ct, "index.", attributes);
     const char *structure = cql_lookup_reverse(ct, "structure.", attributes);
 
-    /* if transform (properties) do not match, we'll just use a USE
-       string attribute (bug #2978) */
+    /* if transform (properties) do not match, we'll just use a USE string attribute (bug #2978) */
     if (!index)
         index = lookup_index_from_string_attr(attributes);
 
@@ -160,6 +150,37 @@ static int rpn2cql_attr(cql_transform_t ct,
     }
     return 0;
 }
+
+/* Bug 2878: Currently only support left and right truncation. Specific check for this */
+static int checkForTruncation(int flag, Z_AttributeList *attributes) {
+    int j;
+    int server_choice = 1;
+    for (j = 0; j < attributes->num_attributes; j++)
+    {
+        Z_AttributeElement *ae = attributes->attributes[j];
+        if (*ae->attributeType == 5) /* truncation attribute */
+        {
+            if (ae->which == Z_AttributeValue_numeric)
+            {
+				int truncation = *(ae->value.numeric);
+        		/* This logic only works for Left, right and both. eg. 1,2,3 */
+            	if (truncation <= 3)
+            		return (int) (truncation & flag);
+            }
+            /* Complex: Shouldn't happen */
+        }
+    }
+    /* No truncation or unsupported */
+    return 0;
+};
+
+static int checkForLeftTruncation(Z_AttributeList *attributes) {
+	return checkForTruncation(1, attributes);
+}
+
+static int checkForRightTruncation(Z_AttributeList *attributes) {
+	return checkForTruncation(2, attributes);
+};
 
 static int rpn2cql_simple(cql_transform_t ct,
                           void (*pr)(const char *buf, void *client_data),
@@ -209,7 +230,13 @@ static int rpn2cql_simple(cql_transform_t ct,
                     must_quote = 1;
             if (must_quote)
                 wrbuf_puts(w, "\"");
+            /* Bug 2878: Check and add Truncation */
+			if (checkForLeftTruncation(apt->attributes))
+                wrbuf_puts(w, "*");
             wrbuf_write(w, sterm, lterm);
+            /* Bug 2878: Check and add Truncation */
+			if (checkForRightTruncation(apt->attributes))
+                wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
         }
@@ -218,6 +245,7 @@ static int rpn2cql_simple(cql_transform_t ct,
     }
     return ret;
 }
+
 
 static int rpn2cql_structure(cql_transform_t ct,
                              void (*pr)(const char *buf, void *client_data),
