@@ -118,7 +118,7 @@ static int rpn2cql_attr(cql_transform_t ct,
     if (!index)
         index = lookup_index_from_string_attr(attributes);
 
-    /* Attempt to fix bug #2978): Look for a relation attribute */
+    /* Attempt to fix bug #2978: Look for a relation attribute */
     if (!relation) 
         relation = lookup_relation_index_from_attr(attributes);
 
