@@ -1,0 +1,20 @@
+# CQL queries for testing.
+# from http://www.loc.gov/z3950/agency/zing/cql/sample-queries.html
+# Simple Term
+
+# Index Relation Term
+@attr 1=date @attr 2=1 1980
+@attr 1=date @attr 2=2 1980
+@attr 1=date @attr 2=3 1980
+@attr 1=date @attr 2=4 1980
+@attr 1=date @attr 2=5 1980
+@attr 1=date @attr 2=6 1980
+@attr 1=date @attr 2=x 1980
+
+# Truncation
+x
+@attr 5=100 x
+@attr 5=1 x
+@attr 5=2 x
+@attr 5=3 x
+@attr 5=other x
