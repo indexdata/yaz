@@ -15,15 +15,15 @@ TCL="C:\Tcl\bin\tclsh85.exe"
 HAVE_TCL=1
 
 # iconv charcter conversion utility
-HAVE_ICONV=1
+HAVE_ICONV=0
 ICONV_DIR = c:\iconv-1.9.2.win32
 
 # libxslt
-HAVE_LIBXSLT=1
+HAVE_LIBXSLT=0
 LIBXSLT_DIR=c:\libxslt-1.1.24.win32
 
 # libxml2
-HAVE_LIBXML2=1
+HAVE_LIBXML2=0
 LIBXML2_DIR=c:\libxml2-2.7.1.win32
 
 # zlib compression (used by libxml2)
