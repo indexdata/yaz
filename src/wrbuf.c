@@ -81,7 +81,8 @@ int wrbuf_write(WRBUF b, const char *buf, int size)
 
 int wrbuf_puts(WRBUF b, const char *buf)
 {
-    wrbuf_write(b, buf, strlen(buf));
+    wrbuf_write(b, buf, strlen(buf) + 1);
+    (b->pos)--;           /* don't include '\0' in count */
     return 0;
 }
 
