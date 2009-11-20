@@ -333,20 +333,21 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
     if (code != 200)
     {
         hres->content_buf = (char*) odr_malloc(o, 400);
-        sprintf (hres->content_buf, 
-                 "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
-                 "<HTML>\n"
-                 " <HEAD>\n"
-                 "  <TITLE>YAZ " YAZ_VERSION "</TITLE>\n"
-                 " </HEAD>\n"
-                 " <BODY>\n"
-                 "  <P><A HREF=\"http://www.indexdata.dk/yaz/\">YAZ</A> " 
-                 YAZ_VERSION "</P>\n"
-                 "  <P>Error: %d</P>\n"
-                 "  <P>Description: %.50s</P>\n"
-                 " </BODY>\n"
-                 "</HTML>\n",
-                 code, z_HTTP_errmsg(code));
+        sprintf(hres->content_buf, 
+                "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
+                " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+                "<HTML>\n"
+                " <HEAD>\n"
+                "  <TITLE>YAZ " YAZ_VERSION "</TITLE>\n"
+                " </HEAD>\n"
+                " <BODY>\n"
+                "  <P><A HREF=\"http://www.indexdata.com/yaz/\">YAZ</A> " 
+                YAZ_VERSION "</P>\n"
+                "  <P>Error: %d</P>\n"
+                "  <P>Description: %.50s</P>\n"
+                " </BODY>\n"
+                "</HTML>\n",
+                code, z_HTTP_errmsg(code));
         hres->content_len = strlen(hres->content_buf);
         z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
     }
