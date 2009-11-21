@@ -238,9 +238,18 @@ YAZ_EXPORT int yaz_diag_srw_to_bib1(int srw_code);
 YAZ_EXPORT const char *yaz_srw_pack_to_str(int pack);
 YAZ_EXPORT int yaz_srw_str_to_pack(const char *str);
 
+/** \brief deprecated */
 YAZ_EXPORT char *yaz_uri_val(const char *path, const char *name, ODR o);
+
+/** \brief deprecated */
 YAZ_EXPORT void yaz_uri_val_int(const char *path, const char *name,
                                 ODR o, Odr_int **intp);
+
+YAZ_EXPORT int yaz_uri_to_array(const char *path, ODR o,
+                                char ***name, char ***val);
+YAZ_EXPORT void yaz_array_to_uri(char **path, ODR o,
+                                 char **name, char **value);
+
 YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, char **charset);
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,

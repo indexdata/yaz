@@ -484,6 +484,7 @@ MISC_OBJS= \
    $(OBJDIR)\xcqlutil.obj \
    $(OBJDIR)\elementset.obj \
    $(OBJDIR)\timing.obj \
+   $(OBJDIR)\uri.obj \
    $(OBJDIR)\query-charset.obj \
    $(OBJDIR)\tokenizer.obj \
    $(OBJDIR)\copy_types.obj \
