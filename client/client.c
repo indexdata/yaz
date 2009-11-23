@@ -1215,13 +1215,8 @@ static int send_srw(Z_SRW_PDU *sr)
     const char *charset = negotiationCharset;
     const char *host_port = cur_host;
     Z_GDU *gdu;
-    char *path = 0;
+    char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
 
-    path = (char *) odr_malloc(out, 2+strlen(databaseNames[0]));
-    *path = '/';
-    strcpy(path+1, databaseNames[0]);
-
-    printf("path=%s\n", path);
     gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
     if (!yaz_matchstr(sru_method, "get"))

@@ -1213,14 +1213,14 @@ static zoom_ret do_connect(ZOOM_connection c)
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
 #if YAZ_HAVE_XML2
-        const char *path = 0;
+        const char *db = 0;
 
         c->proto = PROTO_HTTP;
-        cs_get_host_args(c->host_port, &path);
+        cs_get_host_args(c->host_port, &db);
         xfree(c->path);
-        c->path = (char*) xmalloc(strlen(path)+2);
-        c->path[0] = '/';
-        strcpy(c->path+1, path);
+
+        c->path = xmalloc(strlen(db) * 3 + 2);
+        yaz_encode_sru_dbpath_buf(c->path, db);
 #else
         set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
         do_close(c);
@@ -1445,11 +1445,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     char *fdatabase = 0;
     
     if (database)
-    {
-        fdatabase = (char *) odr_malloc(c->odr_out, strlen(database)+2);
-        strcpy(fdatabase, "/");
-        strcat(fdatabase, database);
-    }
+        fdatabase = yaz_encode_sru_dbpath_odr(c->odr_out, database);
     gdu = z_get_HTTP_Request_host_path(c->odr_out, c->host_port,
                                        fdatabase ? fdatabase : c->path);
 

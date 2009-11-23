@@ -8,9 +8,36 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/yaz-iconv.h>
+
+/** \brief decodes HTTP path (which should hold SRU database)
+    \param o memory for returned result
+    \param uri URI path (up to but not including ?)
+    \returns ODR allocated database
+*/
+static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)
+{
+    char *ret = odr_malloc(n, strlen(uri) + 1);
+    yaz_decode_uri_component(ret, uri, len);
+    return ret;
+}
+
+void yaz_encode_sru_dbpath_buf(char *dst, const char *db)
+{
+    assert(db);
+    *dst = '/';
+    yaz_encode_uri_component(dst+1, db);
+}
+
+char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
+{
+    char *dst = odr_malloc(out, 3 * strlen(db) + 2);
+    yaz_encode_sru_dbpath_buf(dst, db);
+    return dst;
+}
 
 #if YAZ_HAVE_XML2
 static int yaz_base64decode(const char *in, char *out)
@@ -258,12 +285,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             if (!p1)
                 p1 = p0 + strlen(p0);
             if (p1 != p0)
-            {
-                db = (char*) odr_malloc(decode, p1 - p0 + 1);
-                memcpy (db, p0, p1 - p0);
-                db[p1 - p0] = '\0';
-            }
-
+                db = yaz_decode_sru_dbpath_odr(decode, p0, p1 - p0);
             grab_charset(decode, content_type, charset);
 
             ret = z_soap_codec(decode, soap_package, 
@@ -386,11 +408,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         if (!p1)
             p1 = p0 + strlen(p0);
         if (p1 != p0)
-        {
-            db = (char*) odr_malloc(decode, p1 - p0 + 1);
-            memcpy (db, p0, p1 - p0);
-            db[p1 - p0] = '\0';
-        }
+            db = yaz_decode_sru_dbpath_odr(decode, p0, p1 - p0);
         if (!strcmp(hreq->method, "POST"))
             p1 = hreq->content_buf;
         yaz_uri_to_array(p1, decode, &uri_name, &uri_val);
@@ -1303,7 +1321,6 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args)
         *ea = 0;
     }
 }
-
 
 
 /*

@@ -250,6 +250,20 @@ YAZ_EXPORT int yaz_uri_to_array(const char *path, ODR o,
 YAZ_EXPORT void yaz_array_to_uri(char **path, ODR o,
                                  char **name, char **value);
 
+/** \brief encodes URI component
+    \param dst destination string (should be at least 3*strlen(uri)+1)
+    \param uri URI component C-string (source)
+*/
+YAZ_EXPORT void yaz_encode_uri_component(char *dst, const char *uri);
+
+/** \brief decodes URI component
+    \param dst destination string (should be at least strlen(uri)+1)
+    \param uri URI component buffer (source)
+    \param len number of bytes to decode from uri
+*/
+YAZ_EXPORT void yaz_decode_uri_component(char *dst, const char *uri,
+                                         size_t len);
+
 YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, char **charset);
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
@@ -306,7 +320,23 @@ int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
 YAZ_EXPORT
 void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
                           int code, const char *details);
-    
+
+/** \brief encode SRU database for HTTP path
+    \param out memory handle for resulting encoded database string
+    \param db source database
+    \returns encoded database path (includes leading /)
+*/
+YAZ_EXPORT
+char *yaz_encode_sru_dbpath_odr(ODR out, const char *db);
+
+/** \brief encode SRU database for HTTP path
+    \param dst destination buffer (should be at least strlen(db) +2 in size)
+    \param db source database
+   
+    The resulting database (dst) includes a leading /
+*/
+YAZ_EXPORT
+void yaz_encode_sru_dbpath_buf(char *dst, const char *db);
 
 YAZ_END_CDECL
 

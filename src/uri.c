@@ -20,10 +20,10 @@ static int hex_digit (int ch)
         return ch - 'a'+10;
     else if (ch >= 'A' && ch <= 'F')
         return ch - 'A'+10;
-    return 0;
+    return -1;
 }
 
-void encode_uri_char(char *dst, char ch)
+static void encode_uri_char(char *dst, char ch)
 {
     if (ch == ' ')
         strcpy(dst, "+");
@@ -41,6 +41,59 @@ void encode_uri_char(char *dst, char ch)
     }
 }
 
+void yaz_encode_uri_component(char *dst, const char *uri)
+{
+    for (; *uri; uri++)
+    {
+        encode_uri_char(dst, *uri);
+        dst += strlen(dst);
+    }
+    *dst = '\0';
+}
+
+static unsigned char decode_uri_char(const char *path, size_t *len)
+{
+    unsigned char ch;
+    if (*path == '+')
+    {
+        ch = ' ';
+        *len = 1;
+    }
+    else if (*path == '%' && *len >= 3)
+    {
+        int d1 = hex_digit(path[1]);
+        int d2 = hex_digit(path[2]);
+        if (d1 >= 0 && d2 >= 0)
+        {
+            ch = d1 * 16 + d2;
+            *len = 3;
+        }
+        else
+        {
+            ch = *path;
+            *len = 1;
+        }
+    }
+    else
+    {
+        ch = *path;
+        *len = 1;
+    }
+    return ch;
+}
+
+void yaz_decode_uri_component(char *dst, const char *uri, size_t len)
+{
+    while (len)
+    {
+        size_t sz = len;
+        *dst++ = decode_uri_char(uri, &sz);
+        uri += sz;
+        len = len - sz;
+    }
+    *dst = '\0';
+}
+
 void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
 {
     size_t i, szp = 0, sz = 1;
@@ -50,22 +103,16 @@ void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
     
     for(i = 0; name[i]; i++)
     {
-        size_t j, ilen;
+        size_t ilen;
         if (i)
             (*path)[szp++] = '&';
         ilen = strlen(name[i]);
         memcpy(*path+szp, name[i], ilen);
         szp += ilen;
         (*path)[szp++] = '=';
-        for (j = 0; value[i][j]; j++)
-        {
-            size_t vlen;
-            char vstr[5];
-            encode_uri_char(vstr, value[i][j]);
-            vlen = strlen(vstr);
-            memcpy(*path+szp, vstr, vlen);
-            szp += vlen;
-        }
+
+        yaz_encode_uri_component(*path + szp, value[i]);
+        szp += strlen(*path + szp);
     }
     (*path)[szp] = '\0';
 }
@@ -107,18 +154,9 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
         (*val)[no] = ret = (char *) odr_malloc(o, p1 - path + 1);
         while (*path && *path != '&')
         {
-            if (*path == '+')
-            {
-                ret[i++] = ' ';
-                path++;
-            }
-            else if (*path == '%' && path[1] && path[2])
-            {
-                ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
-                path = path + 3;
-            }
-            else
-                ret[i++] = *path++;
+            size_t l = 3;
+            ret[i++] = decode_uri_char(path, &l);
+            path += l;
         }
         ret[i] = '\0';
 
@@ -153,18 +191,9 @@ char *yaz_uri_val(const char *path, const char *name, ODR o)
             ret = (char *) odr_malloc(o, p1 - path + 1);
             while (*path && *path != '&')
             {
-                if (*path == '+')
-                {
-                    ret[i++] = ' ';
-                    path++;
-                }
-                else if (*path == '%' && path[1] && path[2])
-                {
-                    ret[i++] = hex_digit (path[1])*16 + hex_digit (path[2]);
-                    path = path + 3;
-                }
-                else
-                    ret[i++] = *path++;
+                size_t l = 3;
+                ret[i++] = decode_uri_char(path, &l);
+                path += l;
             }
             ret[i] = '\0';
             return ret;
