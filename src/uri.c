@@ -25,11 +25,9 @@ static int hex_digit (int ch)
 
 static void encode_uri_char(char *dst, char ch)
 {
-    if (ch == ' ')
-        strcpy(dst, "+");
     /*  mark        = "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")" */
-    else if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-             (ch >= '0' && ch <= '9') || strchr("-_.!~*'(|)", ch))
+    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
+        (ch >= '0' && ch <= '9') || strchr("-_.!~*'(|)", ch))
     {
         dst[0] = ch;
         dst[1] = '\0';
