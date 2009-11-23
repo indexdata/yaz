@@ -423,6 +423,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     const char *port = "210";
+    struct addrinfo *ai;
     if (h->protocol == PROTO_HTTP)
         port = "80";
     if (!tcpip_init())
@@ -434,7 +435,6 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     if (sp->ai && h->state == CS_ST_UNBND)
     {
         int s = -1;
-        struct addrinfo *ai;
         /* try to make IPV6 socket first */
         for (ai = sp->ai; ai; ai = ai->ai_next)
         {
@@ -442,10 +442,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             {
                 s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
                 if (s != -1)
-                {
-                    sp->ai = ai;
                     break;
-                }
             }
         }
         if (s == -1)
@@ -455,20 +452,18 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             {
                 s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
                 if (s != -1)
-                {
-                    sp->ai = ai;
                     break;
-                }
             }
         }
         if (s == -1)
             return 0;
+        assert(ai);
         h->iofile = s;
         
         if (!tcpip_set_blocking(h, h->flags))
             return 0;
     }
-    return sp->ai;
+    return ai;
 }
 #else
 void *tcpip_straddr(COMSTACK h, const char *str)
@@ -512,6 +507,7 @@ int tcpip_more(COMSTACK h)
 int tcpip_connect(COMSTACK h, void *address)
 {
 #if HAVE_GETADDRINFO
+    struct addrinfo *ai = (struct addrinfo *) address;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 #else
     struct sockaddr_in *add = (struct sockaddr_in *) address;
@@ -528,13 +524,6 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-#if HAVE_GETADDRINFO
-    if (sp->ai != (struct addrinfo *) address)
-    {
-        h->cerrno = CSOUTSTATE;
-        return -1;
-    }
-#endif
 #ifdef __sun__
     /* On Suns, you must set a bigger Receive Buffer BEFORE a call to connect
      * This gives the connect a chance to negotiate with the other side
@@ -563,7 +552,7 @@ int tcpip_connect(COMSTACK h, void *address)
 #endif
 
 #if HAVE_GETADDRINFO
-    r = connect(h->iofile, sp->ai->ai_addr, sp->ai->ai_addrlen);
+    r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
     sp->ai = 0;
 #else
@@ -703,7 +692,8 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-#if HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO 
+    struct addrinfo *ai = (struct addrinfo *) address;   
 #else
     struct sockaddr *addr = (struct sockaddr *)address;
 #endif
@@ -711,14 +701,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     BOOL one = 1;
 #else
     int one = 1;
-#endif
-
-#if HAVE_GETADDRINFO
-    if (sp->ai != (struct addrinfo *) address)
-    {
-        h->cerrno = CSOUTSTATE;
-        return -1;
-    }
 #endif
 
 #if HAVE_GNUTLS_H
@@ -797,7 +779,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 #endif
     tcpip_setsockopt(h->iofile);
 #if HAVE_GETADDRINFO
-    r = bind(h->iofile, sp->ai->ai_addr, sp->ai->ai_addrlen);
+    r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
     sp->ai = 0;
 #else
