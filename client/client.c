@@ -706,10 +706,6 @@ int session_connect(const char *arg)
     }
 #endif
     protocol = conn->protocol;
-    if (conn->protocol == PROTO_HTTP)
-        set_base("");
-    else
-        set_base("Default");
     printf("Connecting...");
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
@@ -722,7 +718,10 @@ int session_connect(const char *arg)
     printf("OK.\n");
     cs_print_session_info(conn);
     if (basep && *basep)
-        set_base (basep);
+        set_base(basep);
+    else if (protocol == PROTO_Z3950)
+        set_base("Default");
+
     if (protocol == PROTO_Z3950)
     {
         send_initRequest(type_and_host);
@@ -739,9 +738,13 @@ int cmd_open(const char *arg)
         strncpy(cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
+
+    set_base("");
     r = session_connect(cur_host);
     if (conn && conn->protocol == PROTO_HTTP)
         queryType = QueryType_CQL;
+
+
     return r;
 }
 
@@ -1218,6 +1221,7 @@ static int send_srw(Z_SRW_PDU *sr)
     *path = '/';
     strcpy(path+1, databaseNames[0]);
 
+    printf("path=%s\n", path);
     gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
     if (!yaz_matchstr(sru_method, "get"))
@@ -4009,6 +4013,12 @@ static void http_response(Z_HTTP_Response *hres)
     int ret = -1;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
+
+    if (hres->code != 200)
+    {
+        printf("HTTP Error Status=%d\n", hres->code);
+    }
+
     if (!yaz_srw_check_content_type(hres))
         printf("Content type does not appear to be XML\n");
     else
@@ -4036,12 +4046,14 @@ static void http_response(Z_HTTP_Response *hres)
                 printf("Got update response. Status: %s\n",
                        sr->u.update_response->operationStatus);
             else
+            {
+                printf("Decoding of SRW package failed\n");
                 ret = -1;
+            }
         }
         else if (soap_package && (soap_package->which == Z_SOAP_fault
                                   || soap_package->which == Z_SOAP_error))
         {
-            printf("HTTP Error Status=%d\n", hres->code);
             printf("SOAP Fault code %s\n",
                     soap_package->u.fault->fault_code);
             printf("SOAP Fault string %s\n",
@@ -4058,17 +4070,7 @@ static void http_response(Z_HTTP_Response *hres)
         odr_destroy(o);
     }
     if (ret)
-    {
-        if (hres->code != 200)
-        {
-            printf("HTTP Error Status=%d\n", hres->code);
-        }
-        else
-        {
-            printf("Decoding of SRW package failed\n");
-        }
-        close_session();
-    }
+        close_session(); /* close session on error */
     else
     {
         if (!strcmp(hres->version, "1.0"))
