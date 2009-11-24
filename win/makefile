@@ -48,13 +48,13 @@ all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog testprog icon
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
 
-dist: 
+dist: yaz.nsi
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
 	nmake DEBUG=0
 	$(NSIS) yaz.nsi
 
-nsis:
+nsis: all yaz.nsi
 	$(NSIS) yaz.nsi
 
 nsishelp:
