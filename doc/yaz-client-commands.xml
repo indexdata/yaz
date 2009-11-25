@@ -369,12 +369,12 @@
     <literal>update</literal>. The second argument, 
     <replaceable>recid</replaceable>, is the
     record identifier (any string). Third argument which is optional is
-    the record document for the request. If doc is a quoted string
-    (double quotes) the string content is used verbatim. If doc is not
-    a quoted string, it is assumed to be a filename which is read, then
-    sent as the docuemnt content. If doc is omitted, the last received
-    record (as parf of present response or piggybacked search response) 
-    is used for the update.
+    the record document for the request. If doc is preceded with 
+    "&lt;", then the following characters are treated as a filename
+    with the records to be updated. Otherwise doc is treated as
+    a document itself. The doc may also be quited in double quotes.
+    If doc is omitted, the last received record (as part of present
+    response or piggybacked search response) is used for the update.
    </para>
   </listitem>
  </varlistentry>
@@ -533,7 +533,7 @@
     <para>
      MARC records are not covered by Z39.50 character set negotiation,
      so that's why there is a separate character that must be known
-     in order to do meaningful converson(s).
+     in order to do meaningful conversion(s).
     </para>
    </note>
   </listitem>
