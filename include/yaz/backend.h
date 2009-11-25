@@ -87,7 +87,6 @@ typedef struct {
     bend_request request;
     bend_association association;
 
-    int hits;                  /* number of hits */
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
 } bend_present_rr;
