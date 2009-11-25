@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2009 Index Data
 
-YAZ_VERSION_INFO=3:0:0
+YAZ_VERSION_INFO=4:0:0
 
 lib_LTLIBRARIES = libyaz.la libyaz_server.la libyaz_icu.la
 
