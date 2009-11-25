@@ -44,7 +44,7 @@ YAZ_BEGIN_CDECL
 typedef struct nmem_control *NMEM;
 
 /** \brief Set to 1 if YAZ BER integer is 64-bit ; 0 otherwise */
-#define NMEM_64 0
+#define NMEM_64 1
 
 #if NMEM_64
 /** \brief BER/utility integer (64-bit or more) */
