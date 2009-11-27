@@ -88,10 +88,6 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
 void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8);
 
 
-UErrorCode icu_utf16_from_utf8(struct icu_buf_utf16 * dest16,
-                               struct icu_buf_utf8 * src8,
-                               UErrorCode * status);
-
 UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
                                     const char * src8cstr,
                                     UErrorCode * status);

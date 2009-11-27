@@ -205,38 +205,6 @@ void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8)
 }
 
 
-
-UErrorCode icu_utf16_from_utf8(struct icu_buf_utf16 * dest16,
-                               struct icu_buf_utf8 * src8,
-                               UErrorCode * status)
-{
-    int32_t utf16_len = 0;
-  
-    u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
-                  &utf16_len,
-                  (const char *) src8->utf8, src8->utf8_len, status);
-  
-    /* check for buffer overflow, resize and retry */
-    if (*status == U_BUFFER_OVERFLOW_ERROR)
-    {
-        icu_buf_utf16_resize(dest16, utf16_len * 2);
-        *status = U_ZERO_ERROR;
-        u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
-                      &utf16_len,
-                      (const char *) src8->utf8, src8->utf8_len, status);
-    }
-
-    if (U_SUCCESS(*status)  
-        && utf16_len <= dest16->utf16_cap)
-        dest16->utf16_len = utf16_len;
-    else 
-        icu_buf_utf16_clear(dest16);
-  
-    return *status;
-}
-
- 
-
 UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
                                     const char * src8cstr,
                                     UErrorCode * status)
