@@ -427,8 +427,6 @@ void icu_sortkey8_from_utf16(UCollator *coll,
         icu_buf_utf8_clear(dest8);
 }
 
-
-
 struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
                                             UErrorCode *status)
 {
@@ -508,7 +506,7 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
         return 0;
 
     return 1;
-};
+}
 
 int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer, 
                          struct icu_buf_utf16 * tkn16, 
@@ -766,7 +764,6 @@ void icu_chain_step_destroy(struct icu_chain_step * step)
     xfree(step);
 }
 
-
 struct icu_chain * icu_chain_create(const char *locale,  int sort,
                                     UErrorCode * status)
 {
@@ -798,7 +795,6 @@ struct icu_chain * icu_chain_create(const char *locale,  int sort,
 
     return chain;
 }
-
 
 void icu_chain_destroy(struct icu_chain * chain)
 {
@@ -939,7 +935,6 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
     default:
         break;
     }
-
     /* create actual chain step with this buffer */
     step = icu_chain_step_create(chain, type, rule, buf16, status);
 
@@ -948,7 +943,6 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
 
     return step;
 }
-
 
 int icu_chain_step_next_token(struct icu_chain * chain,
                               struct icu_chain_step * step,
@@ -1047,7 +1041,6 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     return 1;
 }
 
-
 int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
                           UErrorCode *status)
 {
@@ -1109,7 +1102,7 @@ int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
     /* usual case, one or more icu chain steps existing */
     else 
     {
-        while(!got_token && chain->steps && chain->steps->more_tokens)
+        while (!got_token && chain->steps && chain->steps->more_tokens)
             got_token = icu_chain_step_next_token(chain, chain->steps, status);
 
         if (got_token)
