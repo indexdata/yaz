@@ -30,12 +30,9 @@
 
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
-
-
 #include <unicode/ucol.h> 
 
-
-int icu_check_status (UErrorCode status)
+int icu_check_status(UErrorCode status)
 {
     if (U_FAILURE(status))
     {
@@ -43,10 +40,7 @@ int icu_check_status (UErrorCode status)
         return 0;   
     }
     return 1;
-    
 }
-
-
 
 struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
 {
@@ -57,7 +51,8 @@ struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
     buf16->utf16_len = 0;
     buf16->utf16_cap = 0;
 
-    if (capacity > 0){
+    if (capacity > 0)
+    {
         buf16->utf16 = (UChar *) xmalloc(sizeof(UChar) * capacity);
         buf16->utf16[0] = (UChar) 0;
         buf16->utf16_cap = capacity;
@@ -67,7 +62,8 @@ struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
 
 struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16)
 {
-    if (buf16){
+    if (buf16)
+    {
         if (buf16->utf16)
             buf16->utf16[0] = (UChar) 0;
         buf16->utf16_len = 0;
@@ -81,7 +77,8 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
     if (!buf16)
         return 0;
     
-    if (capacity >  0){
+    if (capacity >  0)
+    {
         if (0 == buf16->utf16)
             buf16->utf16 = (UChar *) xmalloc(sizeof(UChar) * capacity);
         else
@@ -91,7 +88,8 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
         icu_buf_utf16_clear(buf16);
         buf16->utf16_cap = capacity;
     } 
-    else { 
+    else
+    {
         xfree(buf16->utf16);
         buf16->utf16 = 0;
         buf16->utf16_len = 0;
@@ -105,8 +103,7 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
 struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
                                           struct icu_buf_utf16 * src16)
 {
-    if(!dest16 || !src16
-       || dest16 == src16)
+    if (!dest16 || !src16 || dest16 == src16)
         return 0;
 
     if (dest16->utf16_cap < src16->utf16_len)
@@ -118,15 +115,12 @@ struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
     return dest16;
 }
 
-
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16)
 {
     if (buf16)
         xfree(buf16->utf16);
     xfree(buf16);
 }
-
-
 
 struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity)
 {
@@ -137,7 +131,8 @@ struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity)
     buf8->utf8_len = 0;
     buf8->utf8_cap = 0;
 
-    if (capacity > 0){
+    if (capacity > 0)
+    {
         buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         buf8->utf8[0] = (uint8_t) 0;
         buf8->utf8_cap = capacity;
@@ -145,17 +140,16 @@ struct icu_buf_utf8 * icu_buf_utf8_create(size_t capacity)
     return buf8;
 }
 
-
 struct icu_buf_utf8 * icu_buf_utf8_clear(struct icu_buf_utf8 * buf8)
 {
-    if (buf8){
+    if (buf8)
+    {
         if (buf8->utf8)
             buf8->utf8[0] = (uint8_t) 0;
         buf8->utf8_len = 0;
     }
     return buf8;
 }
-
 
 struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
                                           size_t capacity)
@@ -182,7 +176,6 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
     return buf8;
 }
 
-
 const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
 {
     if (!src8 || src8->utf8_len == 0)
@@ -196,14 +189,12 @@ const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
     return (const char *) src8->utf8;
 }
 
-
 void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8)
 {
     if (buf8)
         xfree(buf8->utf8);
     xfree(buf8);
 }
-
 
 UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
                                     const char * src8cstr,
@@ -238,9 +229,6 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
     return *status;
 }
 
-
-
-
 UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
                              struct icu_buf_utf16 * src16,
                              UErrorCode * status)
@@ -259,7 +247,6 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
         u_strToUTF8((char *) dest8->utf8, dest8->utf8_cap,
                     &utf8_len,
                     src16->utf16, src16->utf16_len, status);
-
     }
 
     if (U_SUCCESS(*status)  
@@ -279,7 +266,8 @@ struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
         = (struct icu_casemap *) xmalloc(sizeof(struct icu_casemap));
     casemap->action = action;
 
-    switch(casemap->action) {    
+    switch(casemap->action)
+    {
     case 'l':   
     case 'L':   
     case 'u':   
@@ -293,7 +281,6 @@ struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
         icu_casemap_destroy(casemap);
         return 0;
     }
-
     return casemap;
 }
 
@@ -301,7 +288,6 @@ void icu_casemap_destroy(struct icu_casemap * casemap)
 {
     xfree(casemap);
 }
-
 
 int icu_casemap_casemap(struct icu_casemap * casemap,
                         struct icu_buf_utf16 * dest16,
@@ -316,7 +302,6 @@ int icu_casemap_casemap(struct icu_casemap * casemap,
                              casemap->action, status);
 }
 
-
 int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
                       struct icu_buf_utf16 * src16,
                       const char *locale, char action,
@@ -324,16 +309,16 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
 {
     int32_t dest16_len = 0;
 
-
-    if (!src16->utf16_len){           /* guarding for empty source string */
+    if (!src16->utf16_len)
+    {           /* guarding for empty source string */
         if (dest16->utf16)
             dest16->utf16[0] = (UChar) 0;
         dest16->utf16_len = 0;
         return U_ZERO_ERROR;
     }
-
     
-    switch(action) {    
+    switch(action)
+    {
     case 'l':    
     case 'L':    
         dest16_len = u_strToLower(dest16->utf16, dest16->utf16_cap,
@@ -367,11 +352,11 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
     /* check for buffer overflow, resize and retry */
     if (*status == U_BUFFER_OVERFLOW_ERROR
         && dest16 != src16        /* do not resize if in-place conversion */
-        ){
+        )
+    {
         icu_buf_utf16_resize(dest16, dest16_len * 2);
         *status = U_ZERO_ERROR;
 
-    
         switch(action) {    
         case 'l':    
         case 'L':    
@@ -407,7 +392,8 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
     if (U_SUCCESS(*status)
         && dest16_len <= dest16->utf16_cap)
         dest16->utf16_len = dest16_len;
-    else {
+    else
+    {
         if (dest16->utf16)
             dest16->utf16[0] = (UChar) 0;
         dest16->utf16_len = 0;
@@ -416,21 +402,19 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
     return *status;
 }
 
-
-
 void icu_sortkey8_from_utf16(UCollator *coll,
                              struct icu_buf_utf8 * dest8, 
                              struct icu_buf_utf16 * src16,
                              UErrorCode * status)
 { 
-  
     int32_t sortkey_len = 0;
 
     sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
                                   dest8->utf8, dest8->utf8_cap);
 
     /* check for buffer overflow, resize and retry */
-    if (sortkey_len > dest8->utf8_cap) {
+    if (sortkey_len > dest8->utf8_cap)
+    {
         icu_buf_utf8_resize(dest8, sortkey_len * 2);
         sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
                                       dest8->utf8, dest8->utf8_cap);
@@ -459,8 +443,8 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
     tokenizer->token_start = 0;
     tokenizer->token_end = 0;
 
-
-    switch(tokenizer->action) {    
+    switch(tokenizer->action)
+    {    
     case 'l':
     case 'L':
         tokenizer->bi = ubrk_open(UBRK_LINE, locale, 0, 0, status);
@@ -512,7 +496,6 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
     if (!tokenizer || !tokenizer->bi || !src16)
         return 0;
 
-
     tokenizer->buf16 = src16;
     tokenizer->token_count = 0;
     tokenizer->token_id = 0;
@@ -520,8 +503,7 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
     tokenizer->token_end = 0;
 
     ubrk_setText(tokenizer->bi, src16->utf16, src16->utf16_len, status);
-    
- 
+     
     if (U_FAILURE(*status))
         return 0;
 
@@ -535,12 +517,10 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
     int32_t tkn_start = 0;
     int32_t tkn_end = 0;
     int32_t tkn_len = 0;
-    
 
     if (!tokenizer || !tokenizer->bi
         || !tokenizer->buf16 || !tokenizer->buf16->utf16_len)
         return 0;
-
     /*
     never change tokenizer->buf16 and keep always invariant
     0 <= tokenizer->token_start 
@@ -575,8 +555,7 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
         tokenizer->token_id = 0;    
     }
     tokenizer->token_start = tkn_start;
-    tokenizer->token_end = tkn_end;
-    
+    tokenizer->token_end = tkn_end;    
 
     /* copying into token buffer if it exists */
     if (tkn16){
@@ -591,7 +570,6 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
 
     return tkn_len;
 }
-
 
 int32_t icu_tokenizer_token_id(struct icu_tokenizer * tokenizer)
 {
@@ -617,8 +595,6 @@ int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer)
 {
     return tokenizer->token_count;
 }
-
-
 
 struct icu_transform * icu_transform_create(const char *id, char action,
                                             const char *rules, 
@@ -675,16 +651,15 @@ struct icu_transform * icu_transform_create(const char *id, char action,
     return 0;
 }
 
-
-void icu_transform_destroy(struct icu_transform * transform){
-    if (transform) {
+void icu_transform_destroy(struct icu_transform * transform)
+{
+    if (transform)
+    {
         if (transform->trans)
             utrans_close(transform->trans);
         xfree(transform);
     }
 }
-
-
 
 int icu_transform_trans(struct icu_transform * transform,
                         struct icu_buf_utf16 * dest16,
@@ -692,11 +667,11 @@ int icu_transform_trans(struct icu_transform * transform,
                         UErrorCode *status)
 {
     if (!transform || !transform->trans 
-        || !src16
-        || !dest16)
+        || !src16  || !dest16)
         return 0;
 
-    if (!src16->utf16_len){           /* guarding for empty source string */
+    if (!src16->utf16_len)
+    {           /* guarding for empty source string */
         icu_buf_utf16_clear(dest16);
         return 0;
     }
@@ -704,7 +679,6 @@ int icu_transform_trans(struct icu_transform * transform,
     if (!icu_buf_utf16_copy(dest16, src16))
         return 0;
 
-   
     utrans_transUChars (transform->trans, 
                         dest16->utf16, &(dest16->utf16_len),
                         dest16->utf16_cap,
@@ -715,9 +689,6 @@ int icu_transform_trans(struct icu_transform * transform,
     
     return dest16->utf16_len;
 }
-
-
-
 
 struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
                                               enum icu_chain_step_type type,
@@ -737,7 +708,8 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     step->buf16 = buf16;
 
     /* create auxilary objects */
-    switch(step->type) {
+    switch(step->type)
+    {
     case ICU_chain_step_type_display:
         break;
     case ICU_chain_step_type_casemap:
@@ -760,19 +732,19 @@ struct icu_chain_step * icu_chain_step_create(struct icu_chain * chain,
     default:
         break;
     }
-
     return step;
 }
 
 
-void icu_chain_step_destroy(struct icu_chain_step * step){
-    
+void icu_chain_step_destroy(struct icu_chain_step * step)
+{
     if (!step)
         return;
 
     icu_chain_step_destroy(step->previous);
 
-    switch(step->type) {
+    switch(step->type)
+    {
     case ICU_chain_step_type_display:
         break;
     case ICU_chain_step_type_casemap:
@@ -793,7 +765,6 @@ void icu_chain_step_destroy(struct icu_chain_step * step){
     }
     xfree(step);
 }
-
 
 
 struct icu_chain * icu_chain_create(const char *locale,  int sort,
@@ -847,8 +818,6 @@ void icu_chain_destroy(struct icu_chain * chain)
         xfree(chain);
     }
 }
-
-
 
 struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node, 
                                         int sort,
@@ -930,8 +899,6 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
     return chain;
 }
 
-
-
 struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
                                               enum icu_chain_step_type type,
                                               const uint8_t * rule,
@@ -952,7 +919,6 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
     else
         return 0;
 
-    
     /* create utf16 destination buffers as needed, or */
     switch(type)
     {
@@ -1082,8 +1048,7 @@ int icu_chain_step_next_token(struct icu_chain * chain,
 }
 
 
-int icu_chain_assign_cstr(struct icu_chain * chain,
-                          const char * src8cstr, 
+int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
                           UErrorCode *status)
 {
     struct icu_chain_step * stp = 0; 
@@ -1116,10 +1081,7 @@ int icu_chain_assign_cstr(struct icu_chain * chain,
     return 1;
 }
 
-
-
-int icu_chain_next_token(struct icu_chain * chain,
-                         UErrorCode *status)
+int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
 {
     int got_token = 0;
     
@@ -1160,7 +1122,6 @@ int icu_chain_next_token(struct icu_chain * chain,
                 icu_sortkey8_from_utf16(chain->coll,
                                         chain->sort8, chain->steps->buf16,
                                         status);
-
             return chain->token_count;
         }
     }
@@ -1175,7 +1136,6 @@ int icu_chain_token_number(struct icu_chain * chain)
     
     return chain->token_count;
 }
-
 
 const char * icu_chain_token_display(struct icu_chain * chain)
 {
