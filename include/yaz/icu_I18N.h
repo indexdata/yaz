@@ -248,10 +248,6 @@ struct icu_chain_step * icu_chain_insert_step(yaz_icu_chain_t chain,
                                               const uint8_t * rule,
                                               UErrorCode *status);
 
-int icu_chain_step_next_token(yaz_icu_chain_t chain,
-                              struct icu_chain_step * step,
-                              UErrorCode *status);
-
 int icu_chain_token_number(yaz_icu_chain_t chain);
 
 const UCollator * icu_chain_get_coll(yaz_icu_chain_t chain);

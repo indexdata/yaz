@@ -540,13 +540,14 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
         tkn_end = tokenizer->buf16->utf16_len;
 
     /* copy out if everything is well */
-    if(U_FAILURE(*status))
+    if (U_FAILURE(*status))
         return 0;        
     
     /* everything OK, now update internal state */
     tkn_len = tkn_end - tkn_start;
 
-    if (0 < tkn_len){
+    if (0 < tkn_len)
+    {
         tokenizer->token_count++;
         tokenizer->token_id++;
     } else {
@@ -944,9 +945,9 @@ struct icu_chain_step * icu_chain_insert_step(struct icu_chain * chain,
     return step;
 }
 
-int icu_chain_step_next_token(struct icu_chain * chain,
-                              struct icu_chain_step * step,
-                              UErrorCode *status)
+static int icu_chain_step_next_token(struct icu_chain * chain,
+                                     struct icu_chain_step * step,
+                                     UErrorCode *status)
 {
     struct icu_buf_utf16 * src16 = 0;
     int got_new_token = 0;
@@ -954,7 +955,7 @@ int icu_chain_step_next_token(struct icu_chain * chain,
     if (!chain || !chain->src16 || !step || !step->more_tokens)
         return 0;
 
-    /* assign utf16 src buffers as neeed, advance in previous steps
+    /* assign utf16 src buffers as needed, advance in previous steps
        tokens until non-zero token met, and setting stop condition */
 
     if (step->previous)
