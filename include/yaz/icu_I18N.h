@@ -63,8 +63,8 @@ struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16);
 struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
                                             size_t capacity);
 
-struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
-                                          struct icu_buf_utf16 * src16);
+struct icu_buf_utf16 *icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
+                                         const struct icu_buf_utf16 * src16);
 
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16);
 
@@ -94,8 +94,8 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
 const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8);
 
 
-UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
-                             struct icu_buf_utf16 * src16,
+UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
+                             const struct icu_buf_utf16 *src16,
                              UErrorCode * status);
 
 struct icu_casemap;

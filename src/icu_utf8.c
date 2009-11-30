@@ -61,7 +61,8 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
     if (!buf8)
         return 0;
 
-    if (capacity >  0){
+    if (capacity >  0)
+    {
         if (0 == buf8->utf8)
             buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         else
@@ -133,8 +134,8 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
     return *status;
 }
 
-UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
-                             struct icu_buf_utf16 * src16,
+UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
+                             const struct icu_buf_utf16 *src16,
                              UErrorCode * status)
 {
     int32_t utf8_len = 0;

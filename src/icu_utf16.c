@@ -85,7 +85,7 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
 
 
 struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
-                                          struct icu_buf_utf16 * src16)
+                                          const struct icu_buf_utf16 * src16)
 {
     if (!dest16 || !src16 || dest16 == src16)
         return 0;
