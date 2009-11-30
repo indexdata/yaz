@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <unicode/ustring.h>
+
 struct icu_casemap
 {
     char action;
