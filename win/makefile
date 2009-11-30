@@ -544,7 +544,13 @@ DLL_OBJS =\
    $(ILL_OBJS) \
    
 ICU_DLL_OBJS =\
-   $(OBJDIR)\icu_I18N.obj
+   $(OBJDIR)\icu_chain.obj \
+   $(OBJDIR)\icu_utf16.obj \
+   $(OBJDIR)\icu_utf8.obj \
+   $(OBJDIR)\icu_transform.obj \
+   $(OBJDIR)\icu_casemap.obj \
+   $(OBJDIR)\icu_tokenizer.obj \
+   $(OBJDIR)\icu_sortkey.obj
 
 # Generated C and H files
 
