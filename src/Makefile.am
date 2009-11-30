@@ -111,7 +111,8 @@ libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-libyaz_icu_la_SOURCES = icu_I18N.c
+libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c \
+	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3
