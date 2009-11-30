@@ -40,9 +40,8 @@
 #include <unicode/utypes.h>   /* Basic ICU data types */
 #include <unicode/uchar.h>    /* char names           */
 
-#include <unicode/ucol.h> 
+#include <unicode/ucol.h>
 #include <unicode/ubrk.h>
-#include <unicode/utrans.h>
 
 #include <yaz/icu.h>
 
@@ -69,7 +68,7 @@ struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
 
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16);
 
-
+struct icu_buf_utf8;
 
 struct icu_buf_utf8
 {
@@ -88,23 +87,18 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
 void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8);
 
 
-UErrorCode icu_utf16_from_utf8(struct icu_buf_utf16 * dest16,
-                               struct icu_buf_utf8 * src8,
-                               UErrorCode * status);
-
 UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
                                     const char * src8cstr,
                                     UErrorCode * status);
+
+const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8);
 
 
 UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 * dest8,
                              struct icu_buf_utf16 * src16,
                              UErrorCode * status);
 
-struct icu_casemap
-{
-    char action;
-};
+struct icu_casemap;
 
 struct icu_casemap * icu_casemap_create(char action, UErrorCode *status);
 
@@ -157,20 +151,9 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
                                  struct icu_buf_utf16 * tkn16, 
                                  UErrorCode *status);
 
-int32_t icu_tokenizer_token_id(struct icu_tokenizer * tokenizer);
-int32_t icu_tokenizer_token_start(struct icu_tokenizer * tokenizer);
-int32_t icu_tokenizer_token_end(struct icu_tokenizer * tokenizer);
-int32_t icu_tokenizer_token_length(struct icu_tokenizer * tokenizer);
 int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer);
 
-
-
-struct icu_transform
-{
-    char action;
-    UParseError parse_error;
-    UTransliterator * trans;
-};
+struct icu_transform;
 
 struct icu_transform * icu_transform_create(const char *id, char action,
                                             const char *rules,
@@ -183,82 +166,9 @@ int icu_transform_trans(struct icu_transform * transform,
                         struct icu_buf_utf16 * src16,
                         UErrorCode *status);
 
-enum icu_chain_step_type {
-    ICU_chain_step_type_none,
-    ICU_chain_step_type_display,   /* convert to utf8 display format */
-    ICU_chain_step_type_casemap,   /* apply utf16 charmap */
-    ICU_chain_step_type_transform, /* apply utf16 transform */
-    ICU_chain_step_type_tokenize,  /* apply utf16 tokenization */
-    ICU_chain_step_type_transliterate  /* apply utf16 tokenization */
-};
-
-
-
-struct icu_chain_step
-{
-    /* type and action object */
-    enum icu_chain_step_type type;
-    union {
-	struct icu_casemap * casemap;
-	struct icu_transform * transform;
-	struct icu_tokenizer * tokenizer;  
-    } u;
-    /* temprary post-action utf16 buffer */
-    struct icu_buf_utf16 * buf16;  
-    struct icu_chain_step * previous;
-    int more_tokens;
-    int need_new_token;
-};
-
-
-struct icu_chain;
-
-struct icu_chain_step * icu_chain_step_create(yaz_icu_chain_t chain,
-                                              enum icu_chain_step_type type,
-                                              const uint8_t * rule,
-                                              struct icu_buf_utf16 * buf16,
-                                              UErrorCode *status);
-
-
-void icu_chain_step_destroy(struct icu_chain_step * step);
-
-
-struct icu_chain
-{
-    char *locale;
-    int sort;
-
-    const char * src8cstr;
-
-    UCollator * coll;
-    
-    /* number of tokens returned so far */
-    int32_t token_count;
-    
-    /* utf8 output buffers */
-    struct icu_buf_utf8 * display8;
-    struct icu_buf_utf8 * norm8;
-    struct icu_buf_utf8 * sort8;
-    
-    /* utf16 source buffer */
-    struct icu_buf_utf16 * src16;
-    
-    /* linked list of chain steps */
-    struct icu_chain_step * steps;
-};
-
-struct icu_chain_step * icu_chain_insert_step(yaz_icu_chain_t chain,
-                                              enum icu_chain_step_type type,
-                                              const uint8_t * rule,
-                                              UErrorCode *status);
-
-int icu_chain_step_next_token(yaz_icu_chain_t chain,
-                              struct icu_chain_step * step,
-                              UErrorCode *status);
+struct icu_chain_step;
 
 int icu_chain_token_number(yaz_icu_chain_t chain);
-
-const UCollator * icu_chain_get_coll(yaz_icu_chain_t chain);
 
 yaz_icu_chain_t icu_chain_create(const char * locale,
                                  int sort,
