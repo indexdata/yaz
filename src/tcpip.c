@@ -513,10 +513,6 @@ int tcpip_connect(COMSTACK h, void *address)
     struct sockaddr_in *add = (struct sockaddr_in *) address;
 #endif
     int r;
-#ifdef __sun__
-    int recbuflen;
-    YAZ_SOCKLEN_T rbufsize = sizeof(recbuflen);
-#endif
     TRC(fprintf(stderr, "tcpip_connect\n"));
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
@@ -524,33 +520,6 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-#ifdef __sun__
-    /* On Suns, you must set a bigger Receive Buffer BEFORE a call to connect
-     * This gives the connect a chance to negotiate with the other side
-     * (see 'man tcp') 
-     */
-    if (getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) < 0 )
-    {
-        h->cerrno = CSYSERR;
-        return -1;
-    }
-    TRC(fprintf( stderr, "Current Size of TCP Receive Buffer= %d\n",
-                 recbuflen ));
-    recbuflen *= 10; /* lets be optimistic */
-    if (setsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, rbufsize ) < 0 )
-    {
-        h->cerrno = CSYSERR;
-        return -1;
-    }
-    if (getsockopt(h->iofile, SOL_SOCKET, SO_RCVBUF, (void *)&recbuflen, &rbufsize ) )
-    {
-        h->cerrno = CSYSERR;
-        return -1;
-    }
-    TRC(fprintf(stderr, "New Size of TCP Receive Buffer = %d\n",
-                recbuflen ));
-#endif
-
 #if HAVE_GETADDRINFO
     r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
