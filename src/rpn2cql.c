@@ -59,38 +59,39 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                 /* Only support for numeric relation */
                 Odr_int *relation = ae->value.numeric;
                 /* map this numeric to representation in CQL */
-                switch (*relation) {
+                switch (*relation)
+                {
                     /* Unsure on whether this is the relation attribute constants? */
-                    case Z_ProximityOperator_Prox_lessThan: 
-                        return "<";
-                    case Z_ProximityOperator_Prox_lessThanOrEqual: 
-                        return "<="; 
-                    case Z_ProximityOperator_Prox_equal: 
-                        return "="; 
-                    case Z_ProximityOperator_Prox_greaterThanOrEqual: 
-                        return ">="; 
-                    case Z_ProximityOperator_Prox_greaterThan: 
-                        return ">"; 
-                    case Z_ProximityOperator_Prox_notEqual: 
-                        return "<>"; 
-                    case 100: 
-                        /* phonetic is not supported in CQL */
-                        return 0; 
-                    case 101: 
-                        /* stem is not supported in CQL */
-                        return 0; 
-                    case 102: 
-                        /* relevance is supported in CQL, but not implemented yet */
-                        return 0; 
+                case Z_ProximityOperator_Prox_lessThan: 
+                    return "<";
+                case Z_ProximityOperator_Prox_lessThanOrEqual: 
+                    return "<="; 
+                case Z_ProximityOperator_Prox_equal: 
+                    return "="; 
+                case Z_ProximityOperator_Prox_greaterThanOrEqual: 
+                    return ">="; 
+                case Z_ProximityOperator_Prox_greaterThan: 
+                    return ">"; 
+                case Z_ProximityOperator_Prox_notEqual: 
+                    return "<>"; 
+                case 100: 
+                    /* phonetic is not supported in CQL */
+                    return 0; 
+                case 101: 
+                    /* stem is not supported in CQL */
+                    return 0; 
+                case 102: 
+                    /* relevance is supported in CQL, but not implemented yet */
+                    return 0; 
                 default:
-                        /* Invalid relation */
-                        return 0;
+                    /* Invalid relation */
+                    return 0;
                 }
             }
             else {
                 /*  Can we have a complex relation value?
                     Should we implement something?
-                 */
+                */
             }
         }
     }
