@@ -82,7 +82,7 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                     case 102: 
                         /* relevance is supported in CQL, but not implemented yet */
                         return 0; 
-                otherwise: 
+                default:
                         /* Invalid relation */
                         return 0;
                 }
