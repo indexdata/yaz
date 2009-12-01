@@ -153,9 +153,9 @@ static int rpn2cql_attr(cql_transform_t ct,
 }
 
 /* Bug 2878: Currently only support left and right truncation. Specific check for this */
-static int checkForTruncation(int flag, Z_AttributeList *attributes) {
+static int checkForTruncation(int flag, Z_AttributeList *attributes)
+{
     int j;
-    int server_choice = 1;
     for (j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
@@ -163,10 +163,10 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes) {
         {
             if (ae->which == Z_AttributeValue_numeric)
             {
-				int truncation = *(ae->value.numeric);
-        		/* This logic only works for Left, right and both. eg. 1,2,3 */
+                int truncation = *(ae->value.numeric);
+                /* This logic only works for Left, right and both. eg. 1,2,3 */
             	if (truncation <= 3)
-            		return (int) (truncation & flag);
+                    return (int) (truncation & flag);
             }
             /* Complex: Shouldn't happen */
         }
