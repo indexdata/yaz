@@ -34,7 +34,7 @@ struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
 
     tokenizer->action = action;
     tokenizer->bi = 0;
-    tokenizer->buf16 = 0;
+    tokenizer->buf16 = icu_buf_utf16_create(0);
     tokenizer->token_count = 0;
     tokenizer->token_id = 0;
     tokenizer->token_start = 0;
@@ -81,6 +81,7 @@ void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer)
 {
     if (tokenizer)
     {
+        icu_buf_utf16_destroy(tokenizer->buf16);
         if (tokenizer->bi)
             ubrk_close(tokenizer->bi);
         xfree(tokenizer);
@@ -94,13 +95,15 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
     if (!tokenizer || !tokenizer->bi || !src16)
         return 0;
 
-    tokenizer->buf16 = src16;
+    icu_buf_utf16_copy(tokenizer->buf16, src16);
+
     tokenizer->token_count = 0;
     tokenizer->token_id = 0;
     tokenizer->token_start = 0;
     tokenizer->token_end = 0;
 
-    ubrk_setText(tokenizer->bi, src16->utf16, src16->utf16_len, status);
+    ubrk_setText(tokenizer->bi,
+                 tokenizer->buf16->utf16, tokenizer->buf16->utf16_len, status);
      
     if (U_FAILURE(*status))
         return 0;

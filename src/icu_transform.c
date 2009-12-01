@@ -99,7 +99,7 @@ void icu_transform_destroy(struct icu_transform * transform)
 
 int icu_transform_trans(struct icu_transform * transform,
                         struct icu_buf_utf16 * dest16,
-                        struct icu_buf_utf16 * src16,
+                        const struct icu_buf_utf16 * src16,
                         UErrorCode *status)
 {
     if (!transform || !transform->trans 
@@ -118,7 +118,7 @@ int icu_transform_trans(struct icu_transform * transform,
     utrans_transUChars (transform->trans, 
                         dest16->utf16, &(dest16->utf16_len),
                         dest16->utf16_cap,
-                        0, &(src16->utf16_len), status);
+                        0, &(dest16->utf16_len), status);
 
     if (U_FAILURE(*status))
         icu_buf_utf16_clear(dest16);

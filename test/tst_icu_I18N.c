@@ -616,6 +616,97 @@ void test_chain_empty_chain(void)
     icu_chain_destroy(chain);
 }
 
+void test_icu_iter1(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain * chain = 0;
+    xmlNode *xml_node;
+    struct icu_iter *iter;
+    struct icu_buf_utf8 *token;
+
+    const char * xml_str = "<icu locale=\"en\">"
+        "<tokenize rule=\"w\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "</icu>";
+    
+    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+
+    chain = icu_chain_xml_config(xml_node, 0, &status);
+
+    xmlFreeDoc(doc);
+    YAZ_CHECK(chain);
+    
+    iter = icu_iter_create(chain, "a string with 15 tokens and 8 displays");
+    YAZ_CHECK(iter);
+    if (!iter)
+        return;
+#if 1
+    token = icu_buf_utf8_create(0);
+    while (icu_iter_next(iter, token))
+    {
+        printf("[%.*s]", (int) token->utf8_len, token->utf8);
+    }
+    icu_buf_utf8_destroy(token);
+#endif
+
+    icu_iter_destroy(iter);
+    icu_chain_destroy(chain);
+}
+
+
+void test_icu_iter2(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain * chain = 0;
+    xmlNode *xml_node;
+    struct icu_iter *iter;
+    struct icu_buf_utf8 *token;
+
+    const char * xml_str = "<icu locale=\"en\">"
+        "<transform rule=\"[:Control:] Any-Remove\"/>"
+        "<tokenize rule=\"l\"/>"
+        "<tokenize rule=\"w\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "<display/>"
+        "<casemap rule=\"l\"/>"
+        "</icu>";
+
+    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+
+    chain = icu_chain_xml_config(xml_node, 0, &status);
+
+    xmlFreeDoc(doc);
+    YAZ_CHECK(chain);
+    
+    iter = icu_iter_create(chain, "Adobe Acrobat Reader, 1991-1999.");
+    YAZ_CHECK(iter);
+    if (!iter)
+        return;
+    token = icu_buf_utf8_create(0);
+    while (icu_iter_next(iter, token))
+    {
+        printf("[%.*s]", (int) token->utf8_len, token->utf8);
+    }
+    icu_buf_utf8_destroy(token);
+
+    icu_iter_destroy(iter);
+    icu_chain_destroy(chain);
+}
+
 #endif /* YAZ_HAVE_ICU */
 
 int main(int argc, char **argv)
@@ -632,6 +723,9 @@ int main(int argc, char **argv)
     test_icu_I18N_chain(argc, argv);
     test_chain_empty_token();
     test_chain_empty_chain();
+    test_icu_iter1();
+    test_icu_iter2();
+    
     test_bug_1140();
 
 #else /* YAZ_HAVE_ICU */

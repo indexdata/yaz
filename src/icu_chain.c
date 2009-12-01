@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
@@ -438,6 +439,154 @@ static int icu_chain_step_next_token(struct icu_chain * chain,
     /*    return 0; */ 
 
     return 1;
+}
+
+struct icu_iter {
+    struct icu_chain *chain;
+    struct icu_buf_utf16 *next;
+    UErrorCode status;
+    struct icu_buf_utf8 *display;
+    struct icu_buf_utf8 *sort8;
+};
+
+static void utf16_print(struct icu_buf_utf16 *src16)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    const char *p;
+    struct icu_buf_utf8 *dst8 = icu_buf_utf8_create(0);
+    icu_utf16_to_utf8(dst8, src16, &status);
+
+    assert(status != 1234);
+    if (U_FAILURE(status))
+    {
+        printf("utf8:failure\n");
+    }
+    else
+    {
+        p = icu_buf_utf8_to_cstr(dst8);
+        printf("utf8:%s\n", p);
+    }
+    icu_buf_utf8_destroy(dst8);
+}
+
+struct icu_buf_utf16 *icu_iter_invoke(struct icu_iter *iter,
+                                      struct icu_chain_step *step,
+                                      struct icu_buf_utf16 *src)
+{
+    if (!step)
+        return src;
+    else
+    {
+        struct icu_buf_utf16 *dst = icu_iter_invoke(iter, step->previous, src);
+        
+        switch (step->type)
+        {
+        case ICU_chain_step_type_casemap:
+            if (dst)
+            {
+                struct icu_buf_utf16 *src = dst;
+
+                dst = icu_buf_utf16_create(0);
+                icu_casemap_casemap(step->u.casemap, dst, src, &iter->status,
+                                    iter->chain->locale);
+                icu_buf_utf16_destroy(src);
+            }
+            break;
+        case ICU_chain_step_type_tokenize:
+            if (dst)
+            {
+                struct icu_buf_utf16 *src = dst;
+
+                icu_tokenizer_attach(step->u.tokenizer, src, &iter->status);
+                icu_buf_utf16_destroy(src);
+            }
+            dst = icu_buf_utf16_create(0);
+            iter->status = U_ZERO_ERROR;
+            if (!icu_tokenizer_next_token(step->u.tokenizer, dst, &iter->status))
+            {
+                icu_buf_utf16_destroy(dst);
+                dst = 0;
+            }
+            break;
+        case ICU_chain_step_type_transform:
+        case ICU_chain_step_type_transliterate:
+            if (dst)
+            {
+                struct icu_buf_utf16 *src = dst;
+                dst = icu_buf_utf16_create(0);
+                icu_transform_trans(step->u.transform, dst, src, &iter->status);
+                icu_buf_utf16_destroy(src);
+            }
+            break;
+        case ICU_chain_step_type_display:
+            if (dst)
+                icu_utf16_to_utf8(iter->display, dst, &iter->status);
+            break;
+        default:
+            assert(0);
+        }
+        return dst;
+    }
+}
+
+struct icu_iter *icu_iter_create(struct icu_chain *chain,
+                                 const char *src8cstr)
+{
+    if (!src8cstr)
+        return 0;
+    else
+    {
+        struct icu_buf_utf16 *src16 = icu_buf_utf16_create(0);
+        struct icu_iter *iter = xmalloc(sizeof(*iter));
+        iter->chain = chain;
+        iter->status = U_ZERO_ERROR;
+        iter->display = icu_buf_utf8_create(0);
+        iter->sort8 = icu_buf_utf8_create(0);
+
+        icu_utf16_from_utf8_cstr(src16, src8cstr, &iter->status);
+        iter->next = icu_iter_invoke(iter, chain->steps, src16);
+        return iter;
+    }
+}
+
+void icu_iter_destroy(struct icu_iter *iter)
+{
+    if (iter)
+    {
+        icu_buf_utf8_destroy(iter->display);
+        icu_buf_utf8_destroy(iter->sort8);
+        xfree(iter);
+    }
+}
+
+int icu_iter_next(struct icu_iter *iter, struct icu_buf_utf8 *result)
+{
+    struct icu_buf_utf16 *last = iter->next;
+    if (!last)
+        return 0;
+    else
+    {
+        if (iter->chain->sort)
+        {        
+            icu_sortkey8_from_utf16(iter->chain->coll,
+                                    iter->sort8, last,
+                                    &iter->status);
+        }
+        icu_utf16_to_utf8(result, last, &iter->status);
+        iter->next = icu_iter_invoke(iter, iter->chain->steps, 0);
+        icu_buf_utf16_destroy(last);
+        return 1;
+    }
+}
+
+const char *icu_iter_get_sortkey(struct icu_iter *iter)
+{
+    return icu_buf_utf8_to_cstr(iter->sort8);
+}
+
+const char *icu_iter_get_display(struct icu_iter *iter)
+{ 
+    return icu_buf_utf8_to_cstr(iter->display);   
 }
 
 int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
