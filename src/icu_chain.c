@@ -36,6 +36,8 @@ enum icu_chain_step_type {
     ICU_chain_step_type_transliterate  /* apply utf16 tokenization */
 };
 
+#define USE_ITER 1
+
 struct icu_chain_step
 {
     /* type and action object */
@@ -45,32 +47,46 @@ struct icu_chain_step
 	struct icu_transform * transform;
 	struct icu_tokenizer * tokenizer;  
     } u;
+    struct icu_chain_step * previous;
+#if USE_ITER
+#else
     /* temprary post-action utf16 buffer */
     struct icu_buf_utf16 * buf16;  
-    struct icu_chain_step * previous;
     int more_tokens;
     int need_new_token;
+#endif
 };
+
 
 struct icu_chain
 {
+#if USE_ITER
+    struct icu_iter *iter;
+#endif
+
     char *locale;
     int sort;
 
-    const char * src8cstr;
-
     UCollator * coll;
     
+#if USE_ITER
+#else
+    const char * src8cstr;
+
     /* number of tokens returned so far */
     int32_t token_count;
+#endif
     
     /* utf8 output buffers */
-    struct icu_buf_utf8 * display8;
     struct icu_buf_utf8 * norm8;
+#if USE_ITER
+#else
+    struct icu_buf_utf8 * display8;
     struct icu_buf_utf8 * sort8;
     
     /* utf16 source buffer */
     struct icu_buf_utf16 * src16;
+#endif
     
     /* linked list of chain steps */
     struct icu_chain_step * steps;
@@ -88,7 +104,11 @@ int icu_check_status(UErrorCode status)
 
 static struct icu_chain_step *icu_chain_step_create(
     struct icu_chain * chain,  enum icu_chain_step_type type,
-    const uint8_t * rule, struct icu_buf_utf16 * buf16,
+    const uint8_t * rule, 
+#if USE_ITER
+#else
+    struct icu_buf_utf16 * buf16,
+#endif
     UErrorCode *status)
 {
     struct icu_chain_step * step = 0;
@@ -99,9 +119,10 @@ static struct icu_chain_step *icu_chain_step_create(
     step = (struct icu_chain_step *) xmalloc(sizeof(struct icu_chain_step));
 
     step->type = type;
-
+#if USE_ITER
+#else
     step->buf16 = buf16;
-
+#endif
     /* create auxilary objects */
     switch (step->type)
     {
@@ -144,16 +165,25 @@ static void icu_chain_step_destroy(struct icu_chain_step * step)
         break;
     case ICU_chain_step_type_casemap:
         icu_casemap_destroy(step->u.casemap);
+#if USE_ITER
+#else
         icu_buf_utf16_destroy(step->buf16);
+#endif
         break;
     case ICU_chain_step_type_transform:
     case ICU_chain_step_type_transliterate:
         icu_transform_destroy(step->u.transform);
+#if USE_ITER
+#else
         icu_buf_utf16_destroy(step->buf16);
+#endif
         break;
     case ICU_chain_step_type_tokenize:
         icu_tokenizer_destroy(step->u.tokenizer);
+#if USE_ITER
+#else
         icu_buf_utf16_destroy(step->buf16);
+#endif
         break;
     default:
         break;
@@ -169,6 +199,9 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
 
     *status = U_ZERO_ERROR;
 
+#if USE_ITER
+    chain->iter = 0;
+#endif
     chain->locale = xstrdup(locale);
 
     chain->sort = sort;
@@ -177,16 +210,19 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
 
     if (U_FAILURE(*status))
         return 0;
-
+#if USE_ITER
+#else
     chain->token_count = 0;
-
     chain->src8cstr = 0;
+#endif
 
-    chain->display8 = icu_buf_utf8_create(0);
     chain->norm8 = icu_buf_utf8_create(0);
+#if USE_ITER
+#else
+    chain->display8 = icu_buf_utf8_create(0);
     chain->sort8 = icu_buf_utf8_create(0);
-
     chain->src16 = icu_buf_utf16_create(0);
+#endif
 
     chain->steps = 0;
 
@@ -200,11 +236,15 @@ void icu_chain_destroy(struct icu_chain * chain)
         if (chain->coll)
             ucol_close(chain->coll);
 
-        icu_buf_utf8_destroy(chain->display8);
         icu_buf_utf8_destroy(chain->norm8);
+#if USE_ITER
+        if (chain->iter)
+            icu_iter_destroy(chain->iter);
+#else
+        icu_buf_utf8_destroy(chain->display8);
         icu_buf_utf8_destroy(chain->sort8);
-        
         icu_buf_utf16_destroy(chain->src16);
+#endif        
     
         icu_chain_step_destroy(chain->steps);
         xfree(chain->locale);
@@ -301,12 +341,16 @@ static struct icu_chain_step *icu_chain_insert_step(
     const uint8_t * rule, UErrorCode *status)
 {    
     struct icu_chain_step * step = 0;
+#if USE_ITER
+#else
     struct icu_buf_utf16 * src16 = 0;
     struct icu_buf_utf16 * buf16 = 0;
-
+#endif
     if (!chain || !type || !rule)
         return 0;
 
+#if USE_ITER
+#else
     /* assign utf16 src buffers as needed */
     if (chain->steps && chain->steps->buf16)
         src16 = chain->steps->buf16;
@@ -335,8 +379,14 @@ static struct icu_chain_step *icu_chain_insert_step(
     default:
         break;
     }
+#endif
     /* create actual chain step with this buffer */
-    step = icu_chain_step_create(chain, type, rule, buf16, status);
+    step = icu_chain_step_create(chain, type, rule,
+#if USE_ITER
+#else
+                                 buf16,
+#endif
+                                 status);
 
     step->previous = chain->steps;
     chain->steps = step;
@@ -344,6 +394,8 @@ static struct icu_chain_step *icu_chain_insert_step(
     return step;
 }
 
+#if USE_ITER
+#else
 static int icu_chain_step_next_token(struct icu_chain * chain,
                                      struct icu_chain_step * step,
                                      UErrorCode *status)
@@ -440,16 +492,19 @@ static int icu_chain_step_next_token(struct icu_chain * chain,
 
     return 1;
 }
+#endif
 
 struct icu_iter {
     struct icu_chain *chain;
-    struct icu_buf_utf16 *next;
+    struct icu_buf_utf16 *last;
     UErrorCode status;
     struct icu_buf_utf8 *display;
     struct icu_buf_utf8 *sort8;
+    struct icu_buf_utf16 *input;
+    int token_count;
 };
 
-static void utf16_print(struct icu_buf_utf16 *src16)
+void icu_utf16_print(struct icu_buf_utf16 *src16)
 {
     UErrorCode status = U_ZERO_ERROR;
     const char *p;
@@ -459,12 +514,12 @@ static void utf16_print(struct icu_buf_utf16 *src16)
     assert(status != 1234);
     if (U_FAILURE(status))
     {
-        printf("utf8:failure\n");
+        printf("failure");
     }
     else
     {
         p = icu_buf_utf8_to_cstr(dst8);
-        printf("utf8:%s\n", p);
+        printf("%s", p);
     }
     icu_buf_utf8_destroy(dst8);
 }
@@ -536,16 +591,20 @@ struct icu_iter *icu_iter_create(struct icu_chain *chain,
         return 0;
     else
     {
-        struct icu_buf_utf16 *src16 = icu_buf_utf16_create(0);
         struct icu_iter *iter = xmalloc(sizeof(*iter));
         iter->chain = chain;
         iter->status = U_ZERO_ERROR;
         iter->display = icu_buf_utf8_create(0);
         iter->sort8 = icu_buf_utf8_create(0);
+        iter->token_count = 0;
+        iter->last = 0; /* no last returned string (yet) */
 
-        icu_utf16_from_utf8_cstr(src16, src8cstr, &iter->status);
-        iter->next = icu_iter_invoke(iter, chain->steps, src16);
+        /* fill and assign input string.. It will be 0 after
+           first iteration */
+        iter->input =  icu_buf_utf16_create(0);
+        icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
         return iter;
+
     }
 }
 
@@ -555,26 +614,36 @@ void icu_iter_destroy(struct icu_iter *iter)
     {
         icu_buf_utf8_destroy(iter->display);
         icu_buf_utf8_destroy(iter->sort8);
+        if (iter->input)
+            icu_buf_utf16_destroy(iter->input);
         xfree(iter);
     }
 }
 
 int icu_iter_next(struct icu_iter *iter, struct icu_buf_utf8 *result)
 {
-    struct icu_buf_utf16 *last = iter->next;
-    if (!last)
+    if (!iter->input && iter->last == 0)
         return 0;
     else
     {
+        /* on first call, iter->input is the input string. Thereafter: 0. */
+        iter->last = icu_iter_invoke(iter, iter->chain->steps, iter->input);
+        iter->input = 0;
+        
+        if (!iter->last)
+            return 0;
+
+        iter->token_count++;
+
         if (iter->chain->sort)
         {        
             icu_sortkey8_from_utf16(iter->chain->coll,
-                                    iter->sort8, last,
+                                    iter->sort8, iter->last,
                                     &iter->status);
         }
-        icu_utf16_to_utf8(result, last, &iter->status);
-        iter->next = icu_iter_invoke(iter, iter->chain->steps, 0);
-        icu_buf_utf16_destroy(last);
+        icu_utf16_to_utf8(result, iter->last, &iter->status);
+        icu_buf_utf16_destroy(iter->last);
+
         return 1;
     }
 }
@@ -592,6 +661,12 @@ const char *icu_iter_get_display(struct icu_iter *iter)
 int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
                           UErrorCode *status)
 {
+#if USE_ITER
+    if (chain->iter)
+        icu_iter_destroy(chain->iter);
+    chain->iter = icu_iter_create(chain, src8cstr);
+    return 1;
+#else
     struct icu_chain_step * stp = 0; 
 
     if (!chain || !src8cstr)
@@ -620,10 +695,15 @@ int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr,
         return 0;
 
     return 1;
+#endif
 }
 
 int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
 {
+#if USE_ITER
+    *status = U_ZERO_ERROR;
+    return icu_iter_next(chain->iter, chain->norm8);
+#else
     int got_token = 0;
     
     *status = U_ZERO_ERROR;
@@ -668,40 +748,59 @@ int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
     }
         
     return 0;
+#endif
 }
 
 int icu_chain_token_number(struct icu_chain * chain)
 {
+#if USE_ITER
+    if (chain && chain->iter)
+        return chain->iter->token_count;
+    return 0;
+#else
     if (!chain)
         return 0;
     
     return chain->token_count;
+#endif
 }
 
 const char * icu_chain_token_display(struct icu_chain * chain)
 {
+#if USE_ITER
+    if (chain->iter)
+        return icu_iter_get_display(chain->iter);
+#else
     if (chain->display8)
         return icu_buf_utf8_to_cstr(chain->display8);
-    
+#endif
     return 0;
 }
 
 const char * icu_chain_token_norm(struct icu_chain * chain)
 {
+#if USE_ITER
+    if (chain->norm8)
+        return icu_buf_utf8_to_cstr(chain->norm8);
+#else
     if (!chain->steps)
         return chain->src8cstr;
 
     if (chain->norm8)
         return icu_buf_utf8_to_cstr(chain->norm8);
-    
+#endif
     return 0;
 }
 
 const char * icu_chain_token_sortkey(struct icu_chain * chain)
 {
+#if USE_ITER
+    if (chain->iter)
+        return icu_iter_get_sortkey(chain->iter);
+#else
     if (chain->sort8)
         return icu_buf_utf8_to_cstr(chain->sort8);
-    
+#endif
     return 0;
 }
 
