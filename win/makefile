@@ -25,11 +25,11 @@ ICU_DIR = c:\icu
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.24.win32
+LIBXSLT_DIR=c:\libxslt-1.1.26.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.7.1.win32
+LIBXML2_DIR=c:\libxml2-2.7.6.win32
 
 # zlib compression (used by libxml2)
 ZLIB_DIR = c:\zlib-1.2.3.win32
@@ -172,15 +172,15 @@ ICU_DEF= \
   /I"$(ICU_DIR)\include"
 ICU_LIB= \
   $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
-icu: $(BINDIR)\icudt40.dll $(BINDIR)\icuin40.dll $(BINDIR)\icuuc40.dll
+icu: $(BINDIR)\icudt42.dll $(BINDIR)\icuin42.dll $(BINDIR)\icuuc42.dll
 yazicu: dirs generate $(YAZ_ICU) 
 
-$(BINDIR)\icudt40.dll:
-  copy "$(ICU_DIR)\bin\icudt40.dll" $(BINDIR)
-$(BINDIR)\icuin40.dll:
-  copy "$(ICU_DIR)\bin\icuin40.dll" $(BINDIR)
-$(BINDIR)\icuuc40.dll:
-  copy "$(ICU_DIR)\bin\icuuc40.dll" $(BINDIR)
+$(BINDIR)\icudt42.dll:
+  copy "$(ICU_DIR)\bin\icudt42.dll" $(BINDIR)
+$(BINDIR)\icuin42.dll:
+  copy "$(ICU_DIR)\bin\icuin42.dll" $(BINDIR)
+$(BINDIR)\icuuc42.dll:
+  copy "$(ICU_DIR)\bin\icuuc42.dll" $(BINDIR)
 !else
 ICU_DEF= \
   /D YAZ_HAVE_ICU=0
