@@ -1,3 +1,19 @@
+--- 3.0.51 2009/12/02
+
+tcpip comstack: Remove TCP receiver buffer optimizations for Solaris.
+
+tcpip comstack: fix leak for getaddrinfo.
+
+Encoding of SRU database is performed by yaz_encode_sru_dbpath_odr or
+yaz_encode_sru_dbpath_buf. Now used by yaz-client and the ZOOM API.
+Decoding of SRU "path" database is performed by private function
+yaz_decode_sru_dbpath_odr . This in turn is used by yaz_srw_decode
+and yaz_sru_decode in server applications, GFS, yazproxy, metaproxy.
+
+yaz-client: honor base command for SRU. Change when database setting
+is applied for SRU and ensure it is kept when a connection is reset.
+Change also the way errors are displayed or SRU (decoding of packages).
+
 --- 3.0.50 2009/11/02
 
 Add support for extra request / response data for SRU codecs and GFS.
