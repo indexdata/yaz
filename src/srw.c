@@ -192,7 +192,7 @@ static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
     ptr = ptr->children;
     if (!ptr || ptr->type != XML_TEXT_NODE)
         return 0;
-    *val = odr_intdup(o, atoi((const char *) ptr->content));
+    *val = odr_intdup(o, odr_atoi((const char *) ptr->content));
     return 1;
 }
 
