@@ -2755,7 +2755,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
         comp.which = Z_RecordComp_simple;
         /* how many records does the user agent want, then? */
-        if (bsrt->hits <= *req->smallSetUpperBound)
+        if (bsrt->hits < 0)
+            *toget = 0;
+        else if (bsrt->hits <= *req->smallSetUpperBound)
         {
             *toget = bsrt->hits;
             if ((comp.u.simple = req->smallSetElementSetNames))
