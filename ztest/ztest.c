@@ -38,9 +38,9 @@ int ztest_delete(void *handle, bend_delete_rr *rr);
     Only terms  that looks a numeric is used.. Returns -1 if
     no sub tree has a hit count term
 */
-static int get_term_hit(Z_RPNStructure *s)
+static Odr_int get_term_hit(Z_RPNStructure *s)
 {
-    int h = -1;
+    Odr_int h = -1;
     switch(s->which)
     {
     case Z_RPNStructure_simple:
@@ -51,7 +51,17 @@ static int get_term_hit(Z_RPNStructure *s)
             {
                 Odr_oct *oct = apt->term->u.general;
                 if (oct->len > 0 && oct->buf[0] >= '0' && oct->buf[0] <= '9')
-                    h = atoi_n((const char *) oct->buf, oct->len);
+                {
+                    char *endptr;
+                    WRBUF hits_str = wrbuf_alloc();
+                    wrbuf_write(hits_str, (const char *) oct->buf, oct->len);
+#ifdef WIN32
+                    h = _strtoui64(wrbuf_cstr(hits_str), &endptr, 10);
+#else
+                    h = strtoll(wrbuf_cstr(hits_str), &endptr, 10);
+#endif
+                    wrbuf_destroy(hits_str);
+                }
             }
         }
         break;
@@ -73,9 +83,9 @@ static int get_term_hit(Z_RPNStructure *s)
     have a way to trigger a certain hit count. Good for testing of
     client applications etc
 */
-static int get_hit_count(Z_Query *q)
+static Odr_int get_hit_count(Z_Query *q)
 {
-    int h = -1;
+    Odr_int h = -1;
     if (q->which == Z_Query_type_1 || q->which == Z_Query_type_101)
         h = get_term_hit(q->u.type_1->RPNStructure);
     if (h == -1)

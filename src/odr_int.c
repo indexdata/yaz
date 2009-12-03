@@ -35,7 +35,7 @@ int odr_integer(ODR o, Odr_int **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
         odr_prname(o, name);
-        odr_printf(o, "%d\n", **p);
+        odr_printf(o, ODR_INT_PRINTF "\n", **p);
         return 1;
     }
     if (cons)
