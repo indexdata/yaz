@@ -130,7 +130,7 @@ struct ZOOM_resultset_p {
     Z_SortKeySpecList *r_sort_spec;
     ZOOM_query query;
     int refcount;
-    int size;
+    Odr_int size;
     int step;
     int piggyback;
     char *setname;
