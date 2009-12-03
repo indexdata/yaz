@@ -55,11 +55,7 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
                     char *endptr;
                     WRBUF hits_str = wrbuf_alloc();
                     wrbuf_write(hits_str, (const char *) oct->buf, oct->len);
-#ifdef WIN32
-                    h = _strtoui64(wrbuf_cstr(hits_str), &endptr, 10);
-#else
-                    h = strtoll(wrbuf_cstr(hits_str), &endptr, 10);
-#endif
+                    h = odr_atoi(wrbuf_cstr(hits_str));
                     wrbuf_destroy(hits_str);
                 }
             }
