@@ -124,6 +124,22 @@ int odr_seek(ODR o, int whence, int offset)
     o->pos = offset;
     return 0;
 }
+
+Odr_int odr_atoi(const char *s)
+{
+#if NMEM_64
+    char *endptr;
+#if WIN32
+    return _strtoui64(s, &endptr, 10);
+#else
+    return strtoll(s, &endptr, 10);
+#endif
+
+#else
+    return atoi(s);
+#endif
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4
