@@ -423,7 +423,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     const char *port = "210";
-    struct addrinfo *ai;
+    struct addrinfo *ai = 0;
     if (h->protocol == PROTO_HTTP)
         port = "80";
     if (!tcpip_init())
