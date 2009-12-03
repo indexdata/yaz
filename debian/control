@@ -47,7 +47,7 @@ Description: development files for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes development libraries and C/C++ header files.
+ This package includes development libraries and C/C++ header files.
 
 Package: yaz-illclient
 Section: utils
@@ -57,7 +57,7 @@ Description: ILL utility for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes the yaz-illclient program which sends ILL
+ This package includes the yaz-illclient program which sends ILL
  (Inter-Library-Loan) requests to a server and decodes the response.
 
 Package: yaz-icu
@@ -68,6 +68,6 @@ Description: ICU utility for the Z39.50 toolkit
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This packages includes the yaz-icu program which exposes the ICU chain
+ This package includes the yaz-icu program which exposes the ICU chain
  facility of Z39.50 toolkit.
 
