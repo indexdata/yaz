@@ -14,8 +14,9 @@
 #include <yaz/yaz-iconv.h>
 
 /** \brief decodes HTTP path (which should hold SRU database)
-    \param o memory for returned result
+    \param n memory for returned result
     \param uri URI path (up to but not including ?)
+    \param len URI len (up to but not including ?)
     \returns ODR allocated database
 */
 static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)

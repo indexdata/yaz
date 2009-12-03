@@ -1,3 +1,8 @@
+--- 3.0.52 2009/12/03
+
+tcpip comstack: fix use of uinitialized variable in cs_straddr. This
+bug was introduced in 3.0.51.
+
 --- 3.0.51 2009/12/02
 
 tcpip comstack: Remove TCP receiver buffer optimizations for Solaris.
