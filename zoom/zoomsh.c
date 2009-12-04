@@ -168,12 +168,12 @@ static void cmd_close(ZOOM_connection *c, ZOOM_resultset *r,
 
 static void display_records(ZOOM_connection c,
                             ZOOM_resultset r,
-                            int start, int count, const char *type)
+                            size_t start, size_t count, const char *type)
 {
-    int i;
-    for (i = 0; i<count; i++)
+    size_t i;
+    for (i = 0; i < count; i++)
     {
-        int pos = i + start;
+        size_t pos = i + start;
         ZOOM_record rec = ZOOM_resultset_record(r, pos);
         const char *db = ZOOM_record_get(rec, "database", 0);
         
@@ -184,7 +184,8 @@ static void display_records(ZOOM_connection c,
             const char *diagset;
             int error = ZOOM_record_error(rec, &msg, &addinfo, &diagset);
             
-            printf("%d %s: %s (%s:%d) %s\n", pos, (db ? db : "unknown"),
+            printf("%lld %s: %s (%s:%d) %s\n", (long long) pos,
+                   (db ? db : "unknown"),
                    msg, diagset, error, addinfo ? addinfo : "none");
         }
         else
@@ -197,8 +198,8 @@ static void display_records(ZOOM_connection c,
             /* if rec is non-null, we got a record for display */
             if (rec)
             {
-                printf("%d database=%s syntax=%s schema=%s\n",
-                       pos, (db ? db : "unknown"), syntax,
+                printf("%lld database=%s syntax=%s schema=%s\n",
+                       (long long) pos, (db ? db : "unknown"), syntax,
                        schema ? schema : "unknown");
                 if (render)
                 {
@@ -224,25 +225,28 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
                      const char **args)
 {
     int i;
-    char start_str[10], count_str[10], render_str[60];
+    size_t start = 0, count = 1;
     const char *type = "render";
+    char render_str[40];
 
-    if (next_token_copy(args, start_str, sizeof(start_str)) >= 0)
-        ZOOM_options_set(options, "start", start_str);
+    {
+        char start_str[30], count_str[30];
+        if (next_token_copy(args, start_str, sizeof(start_str)) > 0)
+            start = atoi(start_str);
+        
+        if (next_token_copy(args, count_str, sizeof(count_str)) > 0)
+            count = atoi(count_str);
+        
+        if (next_token_copy(args, render_str, sizeof(render_str)) > 0)
+            type = render_str;
+    }
 
-    if (next_token_copy(args, count_str, sizeof(count_str)) <= 0)
-        strcpy(count_str, "1");
-    ZOOM_options_set(options, "count", count_str);
-
-    if (next_token_copy(args, render_str, sizeof(render_str)) >= 0)
-        type = render_str;
-
-    for (i = 0; i<MAX_CON; i++)
-        ZOOM_resultset_records(r[i], 0, atoi(start_str), atoi(count_str));
+    for (i = 0; i < MAX_CON; i++)
+        ZOOM_resultset_records(r[i], 0, start, count);
     while (ZOOM_event(MAX_CON, c))
         ;
 
-    for (i = 0; i<MAX_CON; i++)
+    for (i = 0; i < MAX_CON; i++)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
@@ -256,13 +260,9 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
         else if (r[i])
         {
             /* OK, no major errors. Display records... */
-            int start = ZOOM_options_get_int(options, "start", 0);
-            int count = ZOOM_options_get_int(options, "count", 0);
             display_records(c[i], r[i], start, count, type);
         }
     }
-    ZOOM_options_set(options, "count", "0");
-    ZOOM_options_set(options, "start", "0");
 }
 
 static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
