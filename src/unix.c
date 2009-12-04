@@ -52,7 +52,7 @@
 #endif
 #endif
 
-static int unix_close(COMSTACK h);
+static void unix_close(COMSTACK h);
 static int unix_put(COMSTACK h, char *buf, int size);
 static int unix_get(COMSTACK h, char **buf, int *bufsize);
 static int unix_connect(COMSTACK h, void *address);
@@ -65,7 +65,7 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 static int unix_set_blocking(COMSTACK p, int blocking);
 
 static COMSTACK unix_accept(COMSTACK h);
-static char *unix_addrstr(COMSTACK h);
+static const char *unix_addrstr(COMSTACK h);
 static void *unix_straddr(COMSTACK h, const char *str);
 
 #ifndef SUN_LEN
@@ -157,7 +157,6 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
-    p->stackerr = 0;
     p->user = 0;
 
     state->altbuf = 0;
@@ -701,7 +700,7 @@ static int unix_put(COMSTACK h, char *buf, int size)
     return 0;
 }
 
-static int unix_close(COMSTACK h)
+static void unix_close(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
 
@@ -714,10 +713,9 @@ static int unix_close(COMSTACK h)
         xfree(sp->altbuf);
     xfree(sp);
     xfree(h);
-    return 0;
 }
 
-static char *unix_addrstr(COMSTACK h)
+static const char *unix_addrstr(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
     char *buf = sp->buf;

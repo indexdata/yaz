@@ -49,7 +49,6 @@ struct comstack
 {
     CS_TYPE type;
     int cerrno;     /* current error code of this stack */
-    char *stackerr;/* current lower-layer error string, or null if none */
     int iofile;    /* UNIX file descriptor for iochannel */
     int timeout;   /* how long to wait for trailing blocks (ignored for now) */
     void *cprivate;/* state info for lower stack */
@@ -84,8 +83,8 @@ struct comstack
                    int (*check_ip)(void *cd, const char *a, int len, int type),
                    void *cd);
     COMSTACK (*f_accept)(COMSTACK handle);
-    int (*f_close)(COMSTACK handle);
-    char *(*f_addrstr)(COMSTACK handle);
+    void (*f_close)(COMSTACK handle);
+    const char *(*f_addrstr)(COMSTACK handle);
     void *(*f_straddr)(COMSTACK handle, const char *str);
     int (*f_set_blocking)(COMSTACK handle, int blocking);
     void *user;       /* user defined data associated with COMSTACK */
@@ -106,7 +105,6 @@ struct comstack
         ((*type)(sock, blocking, proto, 0))
 #define cs_type(handle) ((handle)->type)
 #define cs_fileno(handle) ((handle)->iofile)
-#define cs_stackerr(handle) ((handle)->stackerr)
 #define cs_getstate(handle) ((handle)->getstate)
 #define cs_errno(handle) ((handle)->cerrno)
 #define cs_getproto(handle) ((handle)->protocol)

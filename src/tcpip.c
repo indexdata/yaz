@@ -70,7 +70,7 @@
 #include <yaz/tcpip.h>
 #include <yaz/errno.h>
 
-static int tcpip_close(COMSTACK h);
+static void tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
 static int tcpip_get(COMSTACK h, char **buf, int *bufsize);
 static int tcpip_put_connect(COMSTACK h, char *buf, int size);
@@ -90,7 +90,7 @@ static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
 
 static COMSTACK tcpip_accept(COMSTACK h);
-static char *tcpip_addrstr(COMSTACK h);
+static const char *tcpip_addrstr(COMSTACK h);
 static void *tcpip_straddr(COMSTACK h, const char *str);
 
 #if 0
@@ -206,7 +206,6 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->state = s < 0 ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
-    p->stackerr = 0;
     p->user = 0;
 
 #if HAVE_GNUTLS_H
@@ -1346,7 +1345,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
 }
 #endif
 
-int tcpip_close(COMSTACK h)
+void tcpip_close(COMSTACK h)
 {
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
@@ -1406,10 +1405,9 @@ int tcpip_close(COMSTACK h)
     xfree(sp->connect_response_buf);
     xfree(sp);
     xfree(h);
-    return 0;
 }
 
-char *tcpip_addrstr(COMSTACK h)
+const char *tcpip_addrstr(COMSTACK h)
 {
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r = 0, *buf = sp->buf;

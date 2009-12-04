@@ -995,7 +995,7 @@ static void listener(IOCHAN h, int event)
 
 static void *new_session(void *vp)
 {
-    char *a;
+    const char *a;
     association *newas;
     IOCHAN new_chan;
     COMSTACK new_line = (COMSTACK) vp;
@@ -1063,7 +1063,7 @@ static void inetd_connection(int what)
     COMSTACK line;
     IOCHAN chan;
     association *assoc;
-    char *addr;
+    const char *addr;
 
     if ((line = cs_createbysocket(0, tcpip_type, 0, what)))
     {

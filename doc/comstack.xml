@@ -148,7 +148,7 @@
     </para>
 
     <synopsis>
-     int cs_close(COMSTACK handle);
+     void cs_close(COMSTACK handle);
     </synopsis>
 
     <para>
@@ -404,7 +404,7 @@
    </para>
 
    <synopsis>
-    char *cs_addrstr(COMSTACK);
+    const char *cs_addrstr(COMSTACK);
    </synopsis>
 
    <para>
@@ -460,7 +460,7 @@
    </para>
 
    <synopsis>
-    char *cs_addrstr(COMSTACK h);
+    const char *cs_addrstr(COMSTACK h);
    </synopsis>
 
    <para>
@@ -581,19 +581,18 @@
   </sect1>
   <sect1 id="comstack.summary"><title>Summary and Synopsis</title>
 
-   <synopsis>
-    #include &lt;yaz/comstack.h>
+   <synopsis><![CDATA[
+    #include <yaz/comstack.h>
     
-    #include &lt;yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
-    #include &lt;yaz/unix.h>   /* this is for UNIX sockeL support */
+    #include <yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
+    #include <yaz/unix.h>   /* this is for UNIX socket support */
     
-     
     COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
      
     COMSTACK cs_createbysocket(int s, CS_TYPE type, int blocking,
                                int protocol);
-    COMSTACK cs_create_host (const char *str, int blocking,
-                             void **vp);
+    COMSTACK cs_create_host(const char *str, int blocking,
+                            void **vp);
      
     int cs_bind(COMSTACK handle, int mode);
      
@@ -611,21 +610,14 @@
 
     int cs_more(COMSTACK handle);
 
-    int cs_close(COMSTACK handle);
+    void cs_close(COMSTACK handle);
 
     int cs_look(COMSTACK handle);
 
     void *cs_straddr(COMSTACK handle, const char *str);
 
-    char *cs_addrstr(COMSTACK h);
-
-    extern int cs_errno;
-
-    void cs_perror(COMSTACK handle char *message);
-
-    const char *cs_stackerr(COMSTACK handle);
-
-    extern const char *cs_errlist[];
+    const char *cs_addrstr(COMSTACK h);
+]]>
    </synopsis>
   </sect1>
 
