@@ -251,11 +251,11 @@ ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query startterm);
 
 ZOOM_API(const char *)
 ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
-                  int *occ, int *len);
+                  size_t *occ, size_t *len);
 
 ZOOM_API(const char *)
 ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
-                          int *occ, int *len);
+                          size_t *occ, size_t *len);
 
 ZOOM_API(size_t)
 ZOOM_scanset_size(ZOOM_scanset scan);

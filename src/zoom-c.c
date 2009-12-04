@@ -2911,7 +2911,7 @@ ZOOM_API(size_t)
 }
 
 static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
-                                int *occ,
+                                size_t *occ,
                                 const char **value_term, size_t *value_len,
                                 const char **disp_term, size_t *disp_len)
 {
@@ -2969,7 +2969,7 @@ static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
 
 ZOOM_API(const char *)
     ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
-                      int *occ, int *len)
+                      size_t *occ, size_t *len)
 {
     const char *value_term = 0;
     size_t value_len = 0;
@@ -2985,7 +2985,7 @@ ZOOM_API(const char *)
 
 ZOOM_API(const char *)
     ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
-                              int *occ, int *len)
+                              size_t *occ, size_t *len)
 {
     const char *value_term = 0;
     size_t value_len = 0;

@@ -12,8 +12,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <yaz/comstack.h>
-
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h> 
 #endif
@@ -21,10 +19,7 @@
 #include <readline/history.h>
 #endif
 
-#include <yaz/xmalloc.h>
-
 #include <yaz/log.h>
-#include <yaz/nmem.h>
 #include <yaz/zoom.h>
 
 #define MAX_CON 100
@@ -382,8 +377,8 @@ static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
             int start = ZOOM_options_get_int(options, "start", 0);
             int count = ZOOM_options_get_int(options, "count", 0);
 
-            printf("%s: %ld hits\n", ZOOM_connection_option_get(c[i], "host"),
-                   (long) ZOOM_resultset_size(r[i]));
+            printf("%s: %lld hits\n", ZOOM_connection_option_get(c[i], "host"),
+                   (long long int) ZOOM_resultset_size(r[i]));
             /* and display */
             display_records(c[i], r[i], start, count, "render");
         }
@@ -439,12 +434,11 @@ static void cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
             size_t p, sz = ZOOM_scanset_size(s[i]);
             for (p = 0; p < sz; p++)
             {
-                int occ = 0;
-                int len = 0;
+                size_t occ = 0;
+                size_t len = 0;
                 const char *term = ZOOM_scanset_display_term(s[i], p,
                                                              &occ, &len);
-                
-                printf("%.*s %d\n", len, term, occ);
+                printf("%.*s %lld\n", (int) len, term, (long long int) occ);
             }            
             ZOOM_scanset_destroy(s[i]);
         }
