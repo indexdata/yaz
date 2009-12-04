@@ -541,39 +541,37 @@ if (buf)
    </para>
 
    <para>
-    When a function (including the data exchange functions) reports an
-    error condition, use the function
-    <function>cs_errno()</function> to determine the cause of the
-    problem. The function
+    The error code for the COMSTACK can be retrieved using C macro
+    <function>cs_errno</function> which will return one
+    of the error codes <literal>CSYSERR</literal>,
+    <literal>CSOUTSTATE</literal>,
+    <literal>CSNODATA</literal>, ...
    </para>
 
    <synopsis>
-    void cs_perror(COMSTACK handle char *message);
+    int cs_errno(COMSTACK handle);
    </synopsis>
 
    <para>
-    works like <function>perror(2)</function> and prints the
-    <literal>message</literal> argument, along with a system message, to
-    <literal>stderr</literal>. Use the character array
+    You can the textual representation of the error code
+    by using <function>cs_errmsg</function> - which
+    works like <function>strerror(3)</function>
    </para>
 
    <synopsis>
-    extern const char *cs_errlist[];
+    const char *cs_errmsg(int n);
    </synopsis>
-
+   
    <para>
-    to get hold of the message, if you want to process it differently.
-    The function
+    It is also possible to get straight to the textual represenataion
+    without the error code by using 
+    <function>cs_strerror</function>.
    </para>
-
+   
    <synopsis>
-    const char *cs_stackerr(COMSTACK handle);
+    const char *cs_strerror(COMSTACK h);
    </synopsis>
-
-   <para>
-    Returns an error message from the lower layer, if one has been
-    provided.
-   </para>
+   
   </sect1>
   <sect1 id="comstack.summary"><title>Summary and Synopsis</title>
 
