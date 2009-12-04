@@ -1071,7 +1071,7 @@ static void resultset_destroy(ZOOM_resultset r)
 ZOOM_API(size_t)
     ZOOM_resultset_size(ZOOM_resultset r)
 {
-    yaz_log(log_details, "ZOOM_resultset_size r=" ODR_INT_PRINTF " count=%d",
+    yaz_log(log_details, "ZOOM_resultset_size r=%p count=" ODR_INT_PRINTF,
             r, r->size);
     return r->size;
 }
