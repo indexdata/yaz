@@ -869,11 +869,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 
     size_t ZOOM_scanset_size(ZOOM_scanset scan);
 
-    const char * ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
-                                   int *occ, size_t *len);
+    const char *ZOOM_scanset_term(ZOOM_scanset scan, size_t pos,
+                                  size_t *occ, size_t *len);
 
-    const char * ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
-                                           int *occ, size_t *len);
+    const char *ZOOM_scanset_display_term(ZOOM_scanset scan, size_t pos,
+                                          size_t *occ, size_t *len);
 
     void ZOOM_scanset_destroy(ZOOM_scanset scan);
 
