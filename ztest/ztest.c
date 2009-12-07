@@ -52,7 +52,6 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
                 Odr_oct *oct = apt->term->u.general;
                 if (oct->len > 0 && oct->buf[0] >= '0' && oct->buf[0] <= '9')
                 {
-                    char *endptr;
                     WRBUF hits_str = wrbuf_alloc();
                     wrbuf_write(hits_str, (const char *) oct->buf, oct->len);
                     h = odr_atoi(wrbuf_cstr(hits_str));
