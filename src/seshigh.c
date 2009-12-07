@@ -84,20 +84,16 @@ static int process_z_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
 static Z_External *init_diagnostics(ODR odr, int errcode,
                                     const char *errstring);
-static Z_APDU *process_searchRequest(association *assoc, request *reqb,
-    int *fd);
+static Z_APDU *process_searchRequest(association *assoc, request *reqb);
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
-    bend_search_rr *bsrr, int *fd);
-static Z_APDU *process_presentRequest(association *assoc, request *reqb,
-    int *fd);
-static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
-static Z_APDU *process_sortRequest(association *assoc, request *reqb, int *fd);
+                                      bend_search_rr *bsrr);
+static Z_APDU *process_presentRequest(association *assoc, request *reqb);
+static Z_APDU *process_scanRequest(association *assoc, request *reqb);
+static Z_APDU *process_sortRequest(association *assoc, request *reqb);
 static void process_close(association *assoc, request *reqb);
-static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
-    int *fd);
+static Z_APDU *process_deleteRequest(association *assoc, request *reqb);
 static Z_APDU *process_segmentRequest(association *assoc, request *reqb);
-
-static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd);
+static Z_APDU *process_ESRequest(association *assoc, request *reqb);
 
 /* dynamic logging levels */
 static int logbits_set = 0;
@@ -944,7 +940,6 @@ static void srw_bend_search(association *assoc, request *req,
                 rr.srw_sortKeys = odr_strdup(assoc->encode, 
                                              srw_req->sort.sortKeys );
             rr.association = assoc;
-            rr.fd = 0;
             rr.hits = 0;
             rr.errcode = 0;
             rr.errstring = 0;
@@ -1950,7 +1945,6 @@ static void process_gdu_request(association *assoc, request *req)
  */
 static int process_z_request(association *assoc, request *req, char **msg)
 {
-    int fd = -1;
     Z_APDU *res;
     int retval;
     
@@ -1966,12 +1960,12 @@ static int process_z_request(association *assoc, request *req, char **msg)
     case Z_APDU_initRequest:
         res = process_initRequest(assoc, req); break;
     case Z_APDU_searchRequest:
-        res = process_searchRequest(assoc, req, &fd); break;
+        res = process_searchRequest(assoc, req); break;
     case Z_APDU_presentRequest:
-        res = process_presentRequest(assoc, req, &fd); break;
+        res = process_presentRequest(assoc, req); break;
     case Z_APDU_scanRequest:
         if (assoc->init->bend_scan)
-            res = process_scanRequest(assoc, req, &fd);
+            res = process_scanRequest(assoc, req);
         else
         {
             *msg = "Cannot handle Scan APDU";
@@ -1980,7 +1974,7 @@ static int process_z_request(association *assoc, request *req, char **msg)
         break;
     case Z_APDU_extendedServicesRequest:
         if (assoc->init->bend_esrequest)
-            res = process_ESRequest(assoc, req, &fd);
+            res = process_ESRequest(assoc, req);
         else
         {
             *msg = "Cannot handle Extended Services APDU";
@@ -1989,7 +1983,7 @@ static int process_z_request(association *assoc, request *req, char **msg)
         break;
     case Z_APDU_sortRequest:
         if (assoc->init->bend_sort)
-            res = process_sortRequest(assoc, req, &fd);
+            res = process_sortRequest(assoc, req);
         else
         {
             *msg = "Cannot handle Sort APDU";
@@ -2001,7 +1995,7 @@ static int process_z_request(association *assoc, request *req, char **msg)
         return 0;
     case Z_APDU_deleteResultSetRequest:
         if (assoc->init->bend_delete)
-            res = process_deleteRequest(assoc, req, &fd);
+            res = process_deleteRequest(assoc, req);
         else
         {
             *msg = "Cannot handle Delete APDU";
@@ -2030,66 +2024,12 @@ static int process_z_request(association *assoc, request *req, char **msg)
         yaz_log(YLOG_DEBUG, "  result immediately available");
         retval = process_z_response(assoc, req, res);
     }
-    else if (fd < 0)
+    else
     {
         yaz_log(YLOG_DEBUG, "  result unavailble");
-        retval = 0;
-    }
-    else /* no result yet - one will be provided later */
-    {
-        IOCHAN chan;
-
-        /* Set up an I/O handler for the fd supplied by the backend */
-
-        yaz_log(YLOG_DEBUG, "   establishing handler for result");
-        req->state = REQUEST_PENDING;
-        if (!(chan = iochan_create(fd, backend_response, EVENT_INPUT, 0)))
-            abort();
-        iochan_setdata(chan, assoc);
-        retval = 0;
+        retval = -1;
     }
     return retval;
-}
-
-/*
- * Handle message from the backend.
- */
-void backend_response(IOCHAN i, int event)
-{
-    association *assoc = (association *)iochan_getdata(i);
-    request *req = request_head(&assoc->incoming);
-    Z_APDU *res;
-    int fd;
-
-    yaz_log(YLOG_DEBUG, "backend_response");
-    assert(assoc && req && req->state != REQUEST_IDLE);
-    /* determine what it is we're waiting for */
-    switch (req->apdu_request->which)
-    {
-        case Z_APDU_searchRequest:
-            res = response_searchRequest(assoc, req, 0, &fd); break;
-#if 0
-        case Z_APDU_presentRequest:
-            res = response_presentRequest(assoc, req, 0, &fd); break;
-        case Z_APDU_scanRequest:
-            res = response_scanRequest(assoc, req, 0, &fd); break;
-#endif
-        default:
-            yaz_log(YLOG_FATAL, "Serious programmer's lapse or bug");
-            abort();
-    }
-    if ((res && process_z_response(assoc, req, res) < 0) || fd < 0)
-    {
-        yaz_log(YLOG_WARN, "Fatal error when talking to backend");
-        do_close(assoc, Z_Close_systemProblem, 0);
-        iochan_destroy(i);
-        return;
-    }
-    else if (!res) /* no result yet - try again later */
-    {
-        yaz_log(YLOG_DEBUG, "   no result yet");
-        iochan_setfd(i, fd); /* in case fd has changed */
-    }
 }
 
 /*
@@ -2612,15 +2552,13 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     return records;
 }
 
-static Z_APDU *process_searchRequest(association *assoc, request *reqb,
-    int *fd)
+static Z_APDU *process_searchRequest(association *assoc, request *reqb)
 {
     Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     bend_search_rr *bsrr = 
         (bend_search_rr *)nmem_malloc(reqb->request_mem, sizeof(*bsrr));
     
     yaz_log(log_requestdetail, "Got SearchRequest.");
-    bsrr->fd = fd;
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
     bsrr->srw_sortKeys = 0;
@@ -2688,7 +2626,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
         /* FIXME - make a diagnostic for it */
         yaz_log(YLOG_WARN,"Search not supported ?!?!");
     }
-    return response_searchRequest(assoc, reqb, bsrr, fd);
+    return response_searchRequest(assoc, reqb, bsrr);
 }
 
 int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
@@ -2701,7 +2639,7 @@ int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
  * event, and we'll have to get the response for ourselves.
  */
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
-    bend_search_rr *bsrt, int *fd)
+    bend_search_rr *bsrt)
 {
     Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
@@ -2717,7 +2655,6 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     resp->referenceId = req->referenceId;
     resp->additionalSearchInfo = 0;
     resp->otherInfo = 0;
-    *fd = -1;
     if (!bsrt && !bend_searchresponse(assoc->backend, bsrt))
     {
         yaz_log(YLOG_FATAL, "Bad result from backend");
@@ -2868,8 +2805,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
  * operation is more fun in operations that have an unpredictable execution
  * speed - which is normally more true for search than for present.
  */
-static Z_APDU *process_presentRequest(association *assoc, request *reqb,
-                                      int *fd)
+static Z_APDU *process_presentRequest(association *assoc, request *reqb)
 {
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     Z_APDU *apdu;
@@ -2959,7 +2895,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
  * Scan was implemented rather in a hurry, and with support for only the basic
  * elements of the service in the backend API. Suggestions are welcome.
  */
-static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
+static Z_APDU *process_scanRequest(association *assoc, request *reqb)
 {
     Z_ScanRequest *req = reqb->apdu_request->u.scanRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
@@ -3164,8 +3100,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd)
     return apdu;
 }
 
-static Z_APDU *process_sortRequest(association *assoc, request *reqb,
-    int *fd)
+static Z_APDU *process_sortRequest(association *assoc, request *reqb)
 {
     int i;
     Z_SortRequest *req = reqb->apdu_request->u.sortRequest;
@@ -3241,8 +3176,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb,
     return apdu;
 }
 
-static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
-    int *fd)
+static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
 {
     int i;
     Z_DeleteResultSetRequest *req =
@@ -3367,7 +3301,7 @@ static Z_APDU *process_segmentRequest(association *assoc, request *reqb)
     return 0;
 }
 
-static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
+static Z_APDU *process_ESRequest(association *assoc, request *reqb)
 {
     bend_esrequest_rr esrequest;
     const char *ext_name = "unknown";
@@ -3387,7 +3321,6 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.association = assoc;
     esrequest.taskPackage = 0;
     esrequest.referenceId = req->referenceId;
-
     
     if (esrequest.esr && esrequest.esr->taskSpecificParameters)
     {

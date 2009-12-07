@@ -63,7 +63,6 @@ typedef struct {
     ODR print;                 /**< print stream (input) */
 
     bend_association association; /**< GFS association / sesssion (input) */
-    int *fd;                   /**< select fd - not working (output) */
     Odr_int hits;              /**< hits (output) */
     int errcode;               /**< Diagnostic code / 0 for no error (output) */
     char *errstring;           /**< Additional info (output) */
