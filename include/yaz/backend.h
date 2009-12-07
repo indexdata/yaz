@@ -43,7 +43,6 @@
 
 YAZ_BEGIN_CDECL
     
-typedef struct request *bend_request;
 typedef struct association *bend_association;
 
 /** \brief Information for Z39.50/SRU search handler
@@ -63,7 +62,6 @@ typedef struct {
     ODR decode;                /**< decode stream (input) */
     ODR print;                 /**< print stream (input) */
 
-    bend_request request;      /**< GFS request handle (input) */
     bend_association association; /**< GFS association / sesssion (input) */
     int *fd;                   /**< select fd - not working (output) */
     Odr_int hits;              /**< hits (output) */
@@ -89,7 +87,6 @@ typedef struct {
     Z_RecordComposition *comp; /**< Formatting instructions (input) */
     ODR stream;                /**< encoding stream (input) */
     ODR print;                 /**< printing stream (input) */
-    bend_request request;      /**< GFS request handle (input) */
     bend_association association; /**< GFS association / sesssion (input) */
 
     int errcode;               /**< Diagnostic code / 0 for no error (output) */
@@ -216,7 +213,6 @@ typedef struct bend_esrequest_rr
     ODR decode;                /* decoding stream */
     ODR print;                 /* printing stream */
     Z_ReferenceId *referenceId;/* reference ID */
-    bend_request request;
     bend_association association;
     int errcode;               /* 0==success, -1==accepted, >0 = failure */
     char *errstring;           /* system error string or NULL */
@@ -229,7 +225,6 @@ typedef struct bend_segment_rr {
     ODR stream;
     ODR decode;
     ODR print;
-    bend_request request;
     bend_association association;
 } bend_segment_rr;
 
@@ -369,6 +364,7 @@ YAZ_EXPORT int statserv_main(
     int argc, char **argv,
     bend_initresult *(*bend_init)(bend_initrequest *r),
     void (*bend_close)(void *handle));
+
 YAZ_EXPORT statserv_options_block *statserv_getcontrol(void);
 YAZ_EXPORT void statserv_setcontrol(statserv_options_block *block);
 YAZ_EXPORT int check_ip_tcpd(void *cd, const char *addr, int len, int type);

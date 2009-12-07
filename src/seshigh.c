@@ -940,7 +940,6 @@ static void srw_bend_search(association *assoc, request *req,
             rr.stream = assoc->encode;
             rr.decode = assoc->decode;
             rr.print = assoc->print;
-            rr.request = req;
             if ( srw_req->sort.sortKeys )
                 rr.srw_sortKeys = odr_strdup(assoc->encode, 
                                              srw_req->sort.sortKeys );
@@ -1027,14 +1026,11 @@ static void srw_bend_search(association *assoc, request *req,
                         bprr->stream = assoc->encode;
                         bprr->referenceId = 0;
                         bprr->print = assoc->print;
-                        bprr->request = req;
                         bprr->association = assoc;
                         bprr->errcode = 0;
                         bprr->errstring = NULL;
                         (*assoc->init->bend_present)(assoc->backend, bprr);
                         
-                        if (!bprr->request)
-                            return;
                         if (bprr->errcode)
                         {
                             srw_error = yaz_diag_bib1_to_srw(bprr->errcode);
@@ -2625,7 +2621,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     
     yaz_log(log_requestdetail, "Got SearchRequest.");
     bsrr->fd = fd;
-    bsrr->request = reqb;
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
     bsrr->srw_sortKeys = 0;
@@ -2687,8 +2682,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
 
         if (!bsrr->errcode)
             (assoc->init->bend_search)(assoc->backend, bsrr);
-        if (!bsrr->request)  /* backend not ready with the search response */
-            return 0;  /* should not be used any more */
     }
     else
     { 
@@ -2788,14 +2781,11 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                 bprr->referenceId = req->referenceId;
                 bprr->stream = assoc->encode;
                 bprr->print = assoc->print;
-                bprr->request = reqb;
                 bprr->association = assoc;
                 bprr->errcode = 0;
                 bprr->errstring = NULL;
                 (*assoc->init->bend_present)(assoc->backend, bprr);
 
-                if (!bprr->request)
-                    return 0;
                 if (bprr->errcode)
                 {
                     resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
@@ -2906,14 +2896,11 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
         bprr->referenceId = req->referenceId;
         bprr->stream = assoc->encode;
         bprr->print = assoc->print;
-        bprr->request = reqb;
         bprr->association = assoc;
         bprr->errcode = 0;
         bprr->errstring = NULL;
         (*assoc->init->bend_present)(assoc->backend, bprr);
         
-        if (!bprr->request)
-            return 0; /* should not happen */
         if (bprr->errcode)
         {
             resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
@@ -3397,7 +3384,6 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
     esrequest.print = assoc->print;
     esrequest.errcode = 0;
     esrequest.errstring = NULL;
-    esrequest.request = reqb;
     esrequest.association = assoc;
     esrequest.taskPackage = 0;
     esrequest.referenceId = req->referenceId;
@@ -3421,10 +3407,6 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb, int *fd)
 
     (*assoc->init->bend_esrequest)(assoc->backend, &esrequest);
     
-    /* If the response is being delayed, return NULL */
-    if (esrequest.request == NULL)
-        return(NULL);
-
     resp->referenceId = req->referenceId;
 
     if (esrequest.errcode == -1)
