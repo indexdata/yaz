@@ -75,8 +75,6 @@ request *request_get(request_q *q)
         r->size_response = 0;
     }
     r->q = q;
-    r->len_refid = 0;
-    r->refid = 0;
     r->gdu_request = 0;
     r->apdu_request = 0;
     r->request_mem = 0;

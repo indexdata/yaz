@@ -93,7 +93,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb,
 static Z_APDU *process_scanRequest(association *assoc, request *reqb, int *fd);
 static Z_APDU *process_sortRequest(association *assoc, request *reqb, int *fd);
 static void process_close(association *assoc, request *reqb);
-void save_referenceId(request *reqb, Z_ReferenceId *refid);
 static Z_APDU *process_deleteRequest(association *assoc, request *reqb,
     int *fd);
 static Z_APDU *process_segmentRequest(association *assoc, request *reqb);
@@ -2629,7 +2628,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb,
     bsrr->request = reqb;
     bsrr->association = assoc;
     bsrr->referenceId = req->referenceId;
-    save_referenceId (reqb, bsrr->referenceId);
     bsrr->srw_sortKeys = 0;
     bsrr->srw_setname = 0;
     bsrr->srw_setnameIdleTime = 0;
@@ -3365,72 +3363,6 @@ static void process_close(association *assoc, request *reqb)
     do_close_req(assoc, Z_Close_finished,
                  "Association terminated by client", reqb);
     yaz_log(log_request,"Close OK");
-}
-
-void save_referenceId(request *reqb, Z_ReferenceId *refid)
-{
-    if (refid)
-    {
-        reqb->len_refid = refid->len;
-        reqb->refid = (char *)nmem_malloc(reqb->request_mem, refid->len);
-        memcpy(reqb->refid, refid->buf, refid->len);
-    }
-    else
-    {
-        reqb->len_refid = 0;
-        reqb->refid = NULL;
-    }
-}
-
-void bend_request_send(bend_association a, bend_request req, Z_APDU *res)
-{
-    process_z_response(a, req, res);
-}
-
-bend_request bend_request_mk(bend_association a)
-{
-    request *nreq = request_get(&a->outgoing);
-    nreq->request_mem = nmem_create();
-    return nreq;
-}
-
-Z_ReferenceId *bend_request_getid(ODR odr, bend_request req)
-{
-    Z_ReferenceId *id;
-    if (!req->refid)
-        return 0;
-    id = (Odr_oct *)odr_malloc(odr, sizeof(*odr));
-    id->buf = (unsigned char *)odr_malloc(odr, req->len_refid);
-    id->len = id->size = req->len_refid;
-    memcpy(id->buf, req->refid, req->len_refid);
-    return id;
-}
-
-void bend_request_destroy(bend_request *req)
-{
-    nmem_destroy((*req)->request_mem);
-    request_release(*req);
-    *req = NULL;
-}
-
-int bend_backend_respond(bend_association a, bend_request req)
-{
-    char *msg;
-    int r;
-    r = process_z_request(a, req, &msg);
-    if (r < 0)
-        yaz_log(YLOG_WARN, "%s", msg);
-    return r;
-}
-
-void bend_request_setdata(bend_request r, void *p)
-{
-    r->clientData = p;
-}
-
-void *bend_request_getdata(bend_request r)
-{
-    return r->clientData;
 }
 
 static Z_APDU *process_segmentRequest(association *assoc, request *reqb)

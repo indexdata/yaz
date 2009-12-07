@@ -68,8 +68,6 @@ typedef enum {
 
 typedef struct request
 {
-    int len_refid;          /* length of referenceid */
-    char *refid;            /* referenceid */
     request_state state;
 
     Z_GDU *gdu_request;     /* Current request */

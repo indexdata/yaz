@@ -326,18 +326,6 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
-YAZ_EXPORT void bend_request_send (bend_association a, bend_request req,
-                                   Z_APDU *res);
-
-YAZ_EXPORT bend_request bend_request_mk (bend_association a);
-
-YAZ_EXPORT void bend_request_destroy (bend_request *req);
-
-YAZ_EXPORT Z_ReferenceId *bend_request_getid (ODR odr, bend_request req);
-YAZ_EXPORT int bend_backend_respond (bend_association a, bend_request req);
-YAZ_EXPORT void bend_request_setdata(bend_request r, void *p);
-YAZ_EXPORT void *bend_request_getdata(bend_request r);
-
 /** \brief control block for server */
 typedef struct statserv_options_block
 {
