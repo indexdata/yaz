@@ -78,7 +78,6 @@
 
 static void process_gdu_request(association *assoc, request *req);
 static int process_z_request(association *assoc, request *req, char **msg);
-void backend_response(IOCHAN i, int event);
 static int process_gdu_response(association *assoc, request *req, Z_GDU *res);
 static int process_z_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
@@ -115,20 +114,17 @@ static void get_logbits(void)
     }
 }
 
-
-
 static void wr_diag(WRBUF w, int error, const char *addinfo)
 {
     wrbuf_printf(w, "ERROR %d+", error);
     wrbuf_puts_replace_char(w, diagbib1_str(error), ' ', '_');
-    if (addinfo){
+    if (addinfo)
+    {
         wrbuf_puts(w, "+");
         wrbuf_puts_replace_char(w, addinfo, ' ', '_');
     }
-    
     wrbuf_puts(w, " ");    
 }
-
 
 /*
  * Create and initialize a new association-handle.
@@ -256,7 +252,7 @@ static void do_close_req(association *a, int reason, char *message,
 static void do_close(association *a, int reason, char *message)
 {
     request *req = request_get(&a->outgoing);
-    do_close_req (a, reason, message, req);
+    do_close_req(a, reason, message, req);
 }
 
 
@@ -480,7 +476,7 @@ static int process_z_request(association *assoc, request *req, char **msg);
 
 static void assoc_init_reset(association *assoc)
 {
-    xfree (assoc->init);
+    xfree(assoc->init);
     assoc->init = (bend_initrequest *) xmalloc(sizeof(*assoc->init));
 
     assoc->init->stream = assoc->encode;
@@ -823,13 +819,15 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
                    
 
 static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
-                   bend_search_rr *bsrr) {
+                   bend_search_rr *bsrr)
+{
     char *ccl0;
     struct ccl_rpn_node *node;
     int errcode, pos;
 
     ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
-    if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0) {
+    if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0)
+    {
         bsrr->errstring = (char*) ccl_err_msg(errcode);
         return YAZ_SRW_QUERY_SYNTAX_ERROR;    /* Query syntax error */
     }
@@ -2472,7 +2470,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                 if (freq.errcode == YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE  && 
                                 freq.errstring == 0)
                 {
-                    sprintf (s, "%d", recno);
+                    sprintf(s, "%d", recno);
                     freq.errstring = s;
                 }
                 if (errcode)
@@ -2629,8 +2627,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
     return response_searchRequest(assoc, reqb, bsrr);
 }
 
-int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
-
 /*
  * Prepare a searchresponse based on the backend results. We probably want
  * to look at making the fetching of records nonblocking as well, but
@@ -2639,7 +2635,7 @@ int bend_searchresponse(void *handle, bend_search_rr *bsrr) {return 0;}
  * event, and we'll have to get the response for ourselves.
  */
 static Z_APDU *response_searchRequest(association *assoc, request *reqb,
-    bend_search_rr *bsrt)
+                                      bend_search_rr *bsrt)
 {
     Z_SearchRequest *req = reqb->apdu_request->u.searchRequest;
     Z_APDU *apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
@@ -2655,7 +2651,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     resp->referenceId = req->referenceId;
     resp->additionalSearchInfo = 0;
     resp->otherInfo = 0;
-    if (!bsrt && !bend_searchresponse(assoc->backend, bsrt))
+    if (!bsrt)
     {
         yaz_log(YLOG_FATAL, "Bad result from backend");
         return 0;
@@ -2769,7 +2765,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
         int i;
         WRBUF wr = wrbuf_alloc();
 
-        for (i = 0 ; i < req->num_databaseNames; i++){
+        for (i = 0 ; i < req->num_databaseNames; i++)
+        {
             if (i)
                 wrbuf_printf(wr, "+");
             wrbuf_puts(wr, req->databaseNames[i]);
