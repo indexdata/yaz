@@ -89,7 +89,7 @@ static Odr_int get_hit_count(Z_Query *q)
     return h;
 }
 
-/** \brief checks if it's a dummy Slow database..
+/** \brief checks if it's a dummy Slow database
     \param basename database name to check
     \param association backend association (or NULL if not available)
     \retval 1 is slow database

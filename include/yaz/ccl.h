@@ -98,7 +98,7 @@ struct ccl_rpn_attr {
     struct ccl_rpn_attr *next;
     /** \brief attribute set */
     char *set;
-    /** \brief attribute type, Bib-1: 1=use, 2=relation, 3=position, .. */
+    /** \brief attribute type, Bib-1: 1=use, 2=relation, 3=position, etc */
     int type;
     /** \brief attribute value type (numeric or string) */
     int kind;
@@ -124,7 +124,7 @@ enum ccl_rpn_kind {
 
 /** \brief RPN tree structure node */
 struct ccl_rpn_node {
-    /** \brief node type, one of CCL_RPN_AND, CCL_RPN_OR,.. */
+    /** \brief node type, one of CCL_RPN_AND, CCL_RPN_OR, etc */
     enum ccl_rpn_kind kind;
     union {
         /** \brief Boolean including proximity 0=left, 1=right, 2=prox parms */

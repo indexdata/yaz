@@ -46,99 +46,104 @@ YAZ_BEGIN_CDECL
 typedef struct request *bend_request;
 typedef struct association *bend_association;
 
-/** \brief Information for Z39.50/SRU search handler */
-typedef struct {
-    char *setname;             /* name to give to this set */
-    int replace_set;           /* replace set, if it already exists */
-    int num_bases;             /* number of databases in list */
-    char **basenames;          /* databases to search */
-    Z_ReferenceId *referenceId;/* reference ID */
-    Z_Query *query;            /* query structure */
-    ODR stream;                /* encode stream */
-    ODR decode;                /* decode stream */
-    ODR print;                 /* print stream */
+/** \brief Information for Z39.50/SRU search handler
 
-    bend_request request;
-    bend_association association;
-    int *fd;
-    Odr_int hits;                  /* number of hits */
-    int errcode;               /* 0==OK */
-    char *errstring;           /* system error string or NULL */
-    Z_OtherInformation *search_info; /* additional search info */
-    char *srw_sortKeys;        /* holds SRU/SRW sortKeys info */
-    char *srw_setname;         /* holds SRU/SRW generated resultsetID */
-    int *srw_setnameIdleTime;  /* holds SRU/SRW life-time */
-    int estimated_hit_count;   /* if hit count is estimated */
-    int partial_resultset;     /* if result set is partial */
-    Z_SRW_extra_arg *extra_args; /* extra URL arguments */
-    char *extra_response_data;   /* extra XML response. */
+    This structure is passed to the search handler. Some members
+    are read-only (input), some are read-write (input and ouput),
+    and others are write-only.
+ */
+typedef struct {
+    char *setname;             /**< result set ID (input) */
+    int replace_set;           /**< replace set indicator (input) */
+    int num_bases;             /**< number of databases (input) */
+    char **basenames;          /**< databases to search (input) */
+    Z_ReferenceId *referenceId;/**< reference ID (input) */
+    Z_Query *query;            /**< query structure (input) */
+    ODR stream;                /**< encode stream (input) */
+    ODR decode;                /**< decode stream (input) */
+    ODR print;                 /**< print stream (input) */
+
+    bend_request request;      /**< GFS request handle (input) */
+    bend_association association; /**< GFS association / sesssion (input) */
+    int *fd;                   /**< select fd - not working (output) */
+    Odr_int hits;              /**< hits (output) */
+    int errcode;               /**< Diagnostic code / 0 for no error (output) */
+    char *errstring;           /**< Additional info (output) */
+    Z_OtherInformation *search_info; /**< extra search info result (output) */
+    char *srw_sortKeys;        /**< SRU sortKeys info (input) */
+    char *srw_setname;         /**< SRU generated resultsetID (output) */
+    int *srw_setnameIdleTime;  /**< SRU result set idle time (output) */
+    int estimated_hit_count;   /**< 1=estimated hits; 0=exact (output) */
+    int partial_resultset;     /**< 1=partial results; 0=full (output)*/
+    Z_SRW_extra_arg *extra_args; /**< SRU extra request parameters (input) */
+    char *extra_response_data;   /**< SRW extra XML response (output) */
 } bend_search_rr;
 
 /** \brief Information for present handler. Does not replace bend_fetch. */
 typedef struct {
-    char *setname;             /* set name */
-    int start;
-    int number;                /* record number */
-    Odr_oid *format;           /* format, transfer syntax (OID) */
-    Z_ReferenceId *referenceId;/* reference ID */
-    Z_RecordComposition *comp; /* Formatting instructions */
-    ODR stream;                /* encoding stream - memory source if required */
-    ODR print;                 /* printing stream */
-    bend_request request;
-    bend_association association;
+    char *setname;             /**< result set ID (input) */
+    int start;                 /**< range start, starting from 1 (input) */
+    int number;                /**< number of records to fetch (input) */
+    Odr_oid *format;           /**< record syntax OID (input) */
+    Z_ReferenceId *referenceId;/**< reference ID (input) */
+    Z_RecordComposition *comp; /**< Formatting instructions (input) */
+    ODR stream;                /**< encoding stream (input) */
+    ODR print;                 /**< printing stream (input) */
+    bend_request request;      /**< GFS request handle (input) */
+    bend_association association; /**< GFS association / sesssion (input) */
 
-    int errcode;               /* 0==OK */
-    char *errstring;           /* system error string or NULL */
+    int errcode;               /**< Diagnostic code / 0 for no error (output) */
+    char *errstring;           /**< Additional info (output) */
 } bend_present_rr;
 
 /** \brief Information for fetch record handler */
 typedef struct bend_fetch_rr {
-    char *setname;             /* set name */
-    int number;                /* record number */
-    Z_ReferenceId *referenceId;/* reference ID */
-    Odr_oid *request_format;        /* format, transfer syntax (OID) */
-    Z_RecordComposition *comp; /* Formatting instructions */
-    ODR stream;                /* encoding stream - memory source if req */
-    ODR print;                 /* printing stream */
+    char *setname;             /**< result set ID (input) */
+    int number;                /**< record position (1,2,etc) (input) */
+    Z_ReferenceId *referenceId;/**< reference ID (input) */
+    Odr_oid *request_format;   /**< record syntax OID (input) */
+    Z_RecordComposition *comp; /**< Formatting instructions (input) */
+    ODR stream;                /**< encoding stream (input) */
+    ODR print;                 /**< printing stream (input) */
 
-    char *basename;            /* name of database that provided record */
-    int len;                   /* length of record or -1 if structured */
-    char *record;              /* record */
-    int last_in_set;           /* is it?  */
-    Odr_oid *output_format;        /* response format/syntax (OID) */
-    int errcode;               /* 0==success */
-    char *errstring;           /* system error string or NULL */
-    int surrogate_flag;        /* surrogate diagnostic */
-    char *schema;              /* string record schema input/output */
+    char *basename;            /**< name of database for record (output) */
+    int len;                   /**< record length or -1 if structured (output)*/
+    char *record;              /**< record buffer (output) */
+    int last_in_set;           /**< 1=last in set; 0=not last (output)  */
+    Odr_oid *output_format;    /**< record syntax OIT (output) */
+    int errcode;               /**< Diagnostic code / 0 for no error (output) */
+    char *errstring;           /**< Additional info (output) */
+    int surrogate_flag;        /**< 1=surrogate diagnostic(SD); 0=NSD (output)*/
+    char *schema;              /**< string record schema (input/output) */
 } bend_fetch_rr;
 
 /** \brief Information for scan entry */
 struct scan_entry {
-    char *term;         /* the returned scan term */
-    Odr_int occurrences;/* no of occurrences or -1 if error (see below) */
-    int errcode;        /* Bib-1 diagnostic code; only used when occur.= -1 */
-    char *errstring;    /* Additional string */
+    char *term;         /**< the returned scan term (output) */
+    Odr_int occurrences;/**< >=hits or -1 if error (output) */
+    int errcode;        /**< Bib-1 diagnostic; only when occur = -1 (output) */
+    char *errstring;    /**< Additional string (output) */
     char *display_term;
 };
 
 typedef enum {
-    BEND_SCAN_SUCCESS,  /* ok */
-    BEND_SCAN_PARTIAL   /* not all entries could be found */
+    BEND_SCAN_SUCCESS,  /**< ok */
+    BEND_SCAN_PARTIAL   /**< not all entries could be found */
 } bend_scan_status;
 
 /** \brief Information for SRU / Z39.50 scan handler */
 typedef struct bend_scan_rr {
-    int num_bases;      /* number of elements in databaselist */
-    char **basenames;   /* databases to search */
-    Odr_oid *attributeset;
-    Z_ReferenceId *referenceId; /* reference ID */
-    Z_AttributesPlusTerm *term;
-    ODR stream;         /* encoding stream - memory source if required */
-    ODR print;          /* printing stream */
+    int num_bases;      /**< number of databases (input) */
+    char **basenames;   /**< databases to scan (input) */
+    Odr_oid *attributeset; /**< attribute-set for term (input) */
+    Z_ReferenceId *referenceId; /**< reference ID (input) */
+    Z_AttributesPlusTerm *term; /**< start term (input) */
+    ODR stream;         /**< encoding stream (input) */
+    ODR print;          /**< printing stream (input) */
 
-    Odr_int *step_size;     /* step size */
-    Odr_int term_position;  /* desired index of term in result list/returned */
-    int num_entries;    /* number of entries requested/returned */
+    Odr_int *step_size;     /**< step size */
+    Odr_int term_position;  /**< desired index of term in result list/returned */
+    int num_entries;    /**< number of entries requested/returned */
 
     /* scan term entries. The called handler does not have
        to allocate this. Size of entries is num_entries (see above) */
@@ -146,17 +151,17 @@ typedef struct bend_scan_rr {
     bend_scan_status status;
     int errcode;
     char *errstring;
-    char *scanClause;   /* CQL scan clause */
-    char *setname;      /* Scan in result set (NULL if omitted) */
+    char *scanClause;   /**< CQL scan clause */
+    char *setname;      /**< Scan in result set (NULL if omitted) */
 } bend_scan_rr;
 
 /** \brief Information for SRU record update handler */
 typedef struct bend_update_rr {
-    int num_bases;      /* number of elements in databaselist */
-    char **basenames;   /* databases to search */
-    Z_ReferenceId *referenceId; /* reference ID */
-    ODR stream;         /* encoding stream - memory source if required */
-    ODR print;          /* printing stream */
+    int num_bases;      /**< number of databases (input) */
+    char **basenames;   /**< databases to update (input) */
+    Z_ReferenceId *referenceId; /**< reference ID (input) */
+    ODR stream;         /**< encoding stream (input) */
+    ODR print;          /**< printing stream (input) */
     char *operation;
     char *operation_status;
     char *record_id;
@@ -179,8 +184,8 @@ typedef struct bend_delete_rr {
     int num_setnames;
     char **setnames;
     Z_ReferenceId *referenceId;
-    int delete_status;    /* status for the whole operation */
-    Odr_int *statuses;    /* status each set - indexed as setnames */
+    int delete_status;    /**< status for the whole operation */
+    Odr_int *statuses;    /**< status each set - indexed as setnames */
     ODR stream;
     ODR print; 
 } bend_delete_rr;
@@ -194,7 +199,7 @@ typedef struct bend_sort_rr
     Z_SortKeySpecList *sort_sequence;
     ODR stream;
     ODR print;
-    Z_ReferenceId *referenceId;/* reference ID */
+    Z_ReferenceId *referenceId;
 
     int sort_status;
     int errcode;
@@ -336,40 +341,40 @@ YAZ_EXPORT void *bend_request_getdata(bend_request r);
 /** \brief control block for server */
 typedef struct statserv_options_block
 {
-    int dynamic;                  /* fork on incoming requests */
-    int threads;                  /* use threads */
-    int one_shot;                 /* one session then exit(1) */
-    char apdufile[ODR_MAXNAME+1]; /* file for pretty-printed PDUs */
-    char logfile[ODR_MAXNAME+1];  /* file for diagnostic output */
-    char default_listen[1024];    /* 0 == no default listen */
-    enum oid_proto default_proto; /* PROTO_SR or PROTO_Z3950 */ 
-    int idle_timeout;             /* how many minutes to wait before closing */
-    int maxrecordsize;            /* maximum value for negotiation */
-    char configname[ODR_MAXNAME+1];  /* given to the backend in bend_init */
-    char setuid[ODR_MAXNAME+1];     /* setuid to this user after binding */
+    int dynamic;                  /**< fork on incoming requests */
+    int threads;                  /**< use threads */
+    int one_shot;                 /**< one session then exit(1) */
+    char apdufile[ODR_MAXNAME+1]; /**< file for pretty-printed PDUs */
+    char logfile[ODR_MAXNAME+1];  /**< file for diagnostic output */
+    char default_listen[1024];    /**< 0 == no default listen */
+    enum oid_proto default_proto; /**< PROTO_SR or PROTO_Z3950 */ 
+    int idle_timeout;             /**< how many minutes to wait before closing */
+    int maxrecordsize;            /**< maximum value for negotiation */
+    char configname[ODR_MAXNAME+1]; /**< given to the backend in bend_init */
+    char setuid[ODR_MAXNAME+1];     /**< setuid to this user after binding */
     void (*bend_start)(struct statserv_options_block *p);
     void (*bend_stop)(struct statserv_options_block *p);
     int (*options_func)(int argc, char **argv);
     int (*check_ip)(void *cd, const char *addr, int len, int type);
     char daemon_name[128];
-    int inetd;                    /* Do we use the inet deamon or not */
+    int inetd;                    /**< Do we use the inet deamon or not */
 
-    void *handle;                 /* Handle */
+    void *handle;                 /**< Handle */
     bend_initresult *(*bend_init)(bend_initrequest *r);
     void (*bend_close)(void *handle);
 #ifdef WIN32
     /* We only have these members for the windows version */
     /* They seemed a bit large to have them there in general */
-    char service_name[128];         /* NT Service Name */
-    char app_name[128];             /* Application Name */
-    char service_dependencies[128]; /* The services we are dependent on */
-    char service_display_name[128]; /* The service display name */
+    char service_name[128];         /**< NT Service Name */
+    char app_name[128];             /**< Application Name */
+    char service_dependencies[128]; /**< The services we are dependent on */
+    char service_display_name[128]; /**< The service display name */
 #endif /* WIN32 */
     struct bend_soap_handler *soap_handlers;
-    char pid_fname[128];            /* pid fname */
-    int background;                 /* auto daemon */
-    char cert_fname[128];           /* SSL certificate fname */
-    char xml_config[128];           /* XML config filename */
+    char pid_fname[128];            /**< pid fname */
+    int background;                 /**< auto daemon */
+    char cert_fname[128];           /**< SSL certificate fname */
+    char xml_config[128];           /**< XML config filename */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(

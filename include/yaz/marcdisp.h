@@ -70,10 +70,10 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 /** \brief Output format: check only (no marc output) */
 #define YAZ_MARC_CHECK  6
 
-/** \brief set iconv handle for character set conversion .. */
+/** \brief set iconv handle for character set conversion */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
 
-/** \brief supply iconv handle for character set conversion .. */
+/** \brief supply iconv handle for character set conversion */
 YAZ_EXPORT yaz_iconv_t yaz_marc_get_iconv(yaz_marc_t mt);
 
 /** \brief set debug level 
