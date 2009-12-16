@@ -9,7 +9,7 @@
      <!ENTITY % idcommon SYSTEM "common/common.ent">
      %idcommon;
 ]>
-<book id="yaz">
+<book>
  &bookinfo; 
  &chap-introduction;
  &chap-installation;
