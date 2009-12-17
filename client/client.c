@@ -2493,6 +2493,130 @@ static int cmd_init(const char *arg)
     return 2;
 }
 
+static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url)
+{
+    Z_GDU *p = z_get_HTTP_Request(odr);
+    const char *host = url;
+    const char *cp0 = strstr(host, "://");
+    const char *cp1 = 0;
+    if (cp0)
+        cp0 = cp0+3;
+    else
+        cp0 = host;
+    
+    cp1 = strchr(cp0, '/');
+    if (!cp1)
+        cp1 = cp0 + strlen(cp0);
+    
+    if (cp0 && cp1)
+    {
+        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
+        memcpy (h, cp0, cp1 - cp0);
+        h[cp1-cp0] = '\0';
+        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
+    }
+    p->u.HTTP_Request->path = odr_strdup(odr, *cp1 ? cp1 : "/");
+    return p;
+}
+
+static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
+                     int *code, int show_headers)
+{
+    WRBUF result = 0;
+    ODR out = odr_createmem(ODR_ENCODE);
+    ODR in = odr_createmem(ODR_DECODE);
+    Z_GDU *gdu = get_HTTP_Request_url(out, uri);
+    
+    gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
+    if (username && password)
+    {
+        z_HTTP_header_add_basic_auth(out, &gdu->u.HTTP_Request->headers,
+                                     wrbuf_cstr(username),
+                                     wrbuf_cstr(password));
+    }
+    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Accept",
+                      "text/xml");
+    if (!z_GDU(out, &gdu, 0, 0))
+    {
+        yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);        
+    }
+    else
+    {
+        void *add;
+        COMSTACK conn = cs_create_host(uri, 1, &add);
+        if (cs_connect(conn, add) < 0)
+            yaz_log(YLOG_WARN, "Can not connect to URL:%s", uri);
+        else
+        {
+            int len;
+            char *buf = odr_getbuf(out, &len, 0);
+            
+            if (cs_put(conn, buf, len) < 0)
+                yaz_log(YLOG_WARN, "cs_put failed URL:%s", uri);
+            else
+            {
+                char *netbuffer = 0;
+                int netlen = 0;
+                int res = cs_get(conn, &netbuffer, &netlen);
+                if (res <= 0)
+                {
+                    yaz_log(YLOG_WARN, "cs_get failed URL:%s", uri);
+                }
+                else
+                {
+                    Z_GDU *gdu;
+                    odr_setbuf(in, netbuffer, res, 0);
+                    if (!z_GDU(in, &gdu, 0, 0)
+                        || gdu->which != Z_GDU_HTTP_Response)
+                    {
+                        yaz_log(YLOG_WARN, "decode failed URL: %s", uri);
+                    }
+                    else
+                    {
+                        Z_HTTP_Response *res = gdu->u.HTTP_Response;
+                        struct Z_HTTP_Header *h;
+                        result = wrbuf_alloc();
+                        if (show_headers)
+                        {
+                            
+                            wrbuf_printf(result, "HTTP %d\n", res->code);
+                            for (h = res->headers; h; h = h->next)
+                                wrbuf_printf(result, "%s: %s\n",
+                                             h->name, h->value);
+                        }
+                        *code = res->code;
+                        wrbuf_write(result, res->content_buf, res->content_len);
+                    }
+                }
+                xfree(netbuffer);
+            }
+            cs_close(conn);
+        }
+    }
+    odr_destroy(out);
+    odr_destroy(in);
+    return result;
+}
+    
+
+static int cmd_url(const char *arg)
+{
+    int code = 0;
+    WRBUF res = get_url(arg, 0, 0, &code, 1);
+    if (res)
+    {
+        if (wrbuf_len(res) > 1200)
+        {
+            fwrite(wrbuf_buf(res), 1, 1200, stdout);
+            printf(".. out of %lld\n", (long long) wrbuf_len(res));
+        }
+        else
+            puts(wrbuf_cstr(res));
+        wrbuf_destroy(res);
+    }
+    return 0;
+}
+
 static int cmd_sru(const char *arg)
 {
     if (!*arg)
@@ -4559,6 +4683,7 @@ static struct {
     {"help", cmd_help, "", NULL,0,NULL},
     {"init", cmd_init, "", NULL,0,NULL},
     {"sru", cmd_sru, "<method> <version>", NULL,0,NULL},
+    {"url", cmd_url, "<url>", NULL,0,NULL},
     {"exit", cmd_quit, "",NULL,0,NULL},
     {0,0,0,0,0,0}
 };
