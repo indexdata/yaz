@@ -208,6 +208,82 @@ static int skip_crlf(const char *buf, int len, int *i)
 
 #define CHUNK_DEBUG 0
 
+static int cs_read_chunk(const char *buf, int i, int len)
+{
+    /* inside chunked body .. */
+    while (1)
+    {
+        int chunk_len = 0;
+#if CHUNK_DEBUG
+        if (i < len-2)
+        {
+            printf ("\n<<<");
+            int j;
+            for (j = i; j <= i+3; j++)
+                printf ("%c", buf[j]);
+            printf (">>>\n");
+        }
+#endif
+        /* read chunk length */
+        while (1)
+            if (i >= len-2) {
+#if CHUNK_DEBUG
+                printf ("returning incomplete read at 1\n");
+                printf ("i=%d len=%d\n", i, len);
+#endif
+                return 0;
+            } else if (isdigit(buf[i]))
+                chunk_len = chunk_len * 16 + 
+                    (buf[i++] - '0');
+            else if (isupper(buf[i]))
+                chunk_len = chunk_len * 16 + 
+                    (buf[i++] - ('A'-10));
+            else if (islower(buf[i]))
+                chunk_len = chunk_len * 16 + 
+                    (buf[i++] - ('a'-10));
+            else
+                break;
+        if (chunk_len == 0)
+            break;
+        if (chunk_len < 0)
+            return i;
+        
+        while (1)
+        {
+            if (i >= len -1)
+                return 0;
+            if (skip_crlf(buf, len, &i))
+                break;
+            i++;
+        }
+        /* got CRLF */
+#if CHUNK_DEBUG
+        printf ("chunk_len=%d\n", chunk_len);
+#endif                      
+        i += chunk_len;
+        if (i >= len-2)
+            return 0;
+        if (!skip_crlf(buf, len, &i))
+            return 0;
+    }
+    /* consider trailing headers .. */
+    while (i < len)
+    {
+        if (skip_crlf(buf, len, &i))
+        {
+            if (skip_crlf(buf, len, &i))
+                return i;
+        }
+        else
+            i++;
+    }
+#if CHUNK_DEBUG
+    printf ("returning incomplete read at 2\n");
+    printf ("i=%d len=%d\n", i, len);
+#endif
+    return 0;
+}
+
 static int cs_complete_http(const char *buf, int len, int head_only)
 {
     /* deal with HTTP request/response */
@@ -238,80 +314,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             {
                 /* inside content */
                 if (chunked)
-                { 
-                    /* inside chunked body .. */
-                    while(1)
-                    {
-                        int chunk_len = 0;
-#if CHUNK_DEBUG
-                        if (i < len-2)
-                        {
-                            printf ("\n<<<");
-                            int j;
-                            for (j = i; j <= i+3; j++)
-                                printf ("%c", buf[j]);
-                            printf (">>>\n");
-                        }
-#endif
-                        /* read chunk length */
-                        while (1)
-                            if (i >= len-2) {
-#if CHUNK_DEBUG
-                                printf ("returning incomplete read at 1\n");
-                                printf ("i=%d len=%d\n", i, len);
-#endif
-                                return 0;
-                            } else if (isdigit(buf[i]))
-                                chunk_len = chunk_len * 16 + 
-                                    (buf[i++] - '0');
-                            else if (isupper(buf[i]))
-                                chunk_len = chunk_len * 16 + 
-                                    (buf[i++] - ('A'-10));
-                            else if (islower(buf[i]))
-                                chunk_len = chunk_len * 16 + 
-                                    (buf[i++] - ('a'-10));
-                            else
-                                break;
-                        if (chunk_len == 0)
-                            break;
-                        if (chunk_len < 0)
-                            return i;
-                        
-                        while (1)
-                        {
-                            if (i >= len -1)
-                                return 0;
-                            if (skip_crlf(buf, len, &i))
-                                break;
-                            i++;
-                        }
-                        /* got CRLF */
-#if CHUNK_DEBUG
-                        printf ("chunk_len=%d\n", chunk_len);
-#endif                      
-                        i += chunk_len;
-                        if (i >= len-2)
-                            return 0;
-                        if (!skip_crlf(buf, len, &i))
-                            return 0;
-                    }
-                    /* consider trailing headers .. */
-                    while (i < len)
-                    {
-                        if (skip_crlf(buf, len, &i))
-                        {
-                            if (skip_crlf(buf, len, &i))
-                                return i;
-                        }
-                        else
-                            i++;
-                    }
-#if CHUNK_DEBUG
-                    printf ("returning incomplete read at 2\n");
-                    printf ("i=%d len=%d\n", i, len);
-#endif
-                    return 0;
-                }
+                    return cs_read_chunk(buf, i, len);
                 else
                 {   /* not chunked ; inside body */
                     if (content_len == -1)
