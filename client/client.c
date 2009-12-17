@@ -286,14 +286,14 @@ int send_apdu(Z_APDU *a)
     return 1;
 }
 
-static void print_stringn(const unsigned char *buf, size_t len)
+static void print_stringn(const char *buf, size_t len)
 {
     size_t i;
-    for (i = 0; i<len; i++)
+    for (i = 0; i < len; i++)
         if ((buf[i] <= 126 && buf[i] >= 32) || strchr("\n\r\t\f", buf[i]))
             printf("%c", buf[i]);
         else
-            printf("\\X%02X", buf[i]);
+            printf("\\X%02X", ((const unsigned char *)buf)[i]);
 }
 
 static void print_refid(Z_ReferenceId *id)
@@ -301,7 +301,7 @@ static void print_refid(Z_ReferenceId *id)
     if (id)
     {
         printf("Reference Id: ");
-        print_stringn(id->buf, id->len);
+        print_stringn((const char *) id->buf, id->len);
         printf("\n");
     }
 }
@@ -813,7 +813,7 @@ int cmd_authentication(const char *arg)
 /* SEARCH SERVICE ------------------------------ */
 static void display_record(Z_External *r);
 
-static void print_record(const unsigned char *buf, size_t len)
+static void print_record(const char *buf, size_t len)
 {
     size_t i = len;
     print_stringn(buf, len);
@@ -873,91 +873,72 @@ static void display_record(Z_External *r)
             }
         }
     }
-    if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_soif))
+    if (oid && r->which == Z_External_octet)
     {
-        print_record((const unsigned char *) r->u.octet_aligned->buf,
-                     r->u.octet_aligned->len);
-        marc_file_write((const char *) r->u.octet_aligned->buf,
-                        r->u.octet_aligned->len);
-    }
-    else if (oid && r->which == Z_External_octet)
-    {
-        const char *octet_buf = (char*)r->u.octet_aligned->buf;
-        if (oid && (!oid_oidcmp(oid, yaz_oid_recsyn_xml)
-                    || !oid_oidcmp(oid, yaz_oid_recsyn_xml)
-                    || !oid_oidcmp(oid, yaz_oid_recsyn_html)))
+        const char *octet_buf = (const char*)r->u.octet_aligned->buf;
+        size_t octet_len = r->u.octet_aligned->len;
+        if (!oid_oidcmp(oid, yaz_oid_recsyn_xml)
+            || !oid_oidcmp(oid, yaz_oid_recsyn_xml)
+            || !oid_oidcmp(oid, yaz_oid_recsyn_html))
         {
-            print_record((const unsigned char *) octet_buf,
-                         r->u.octet_aligned->len);
+            fwrite(octet_buf, 1, octet_len, stdout);
         }
-        else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_postscript))
+        else if (yaz_oid_is_iso2709(oid))
         {
-            int size = r->u.octet_aligned->len;
-            if (size > 100)
-                size = 100;
-            print_record((const unsigned char *) octet_buf, size);
-        }
-        else
-        {
-            if (oid && yaz_oid_is_iso2709(oid))
+            const char *result;
+            size_t rlen;
+            yaz_iconv_t cd = 0;
+            yaz_marc_t mt = yaz_marc_create();
+            const char *from = 0;
+            
+            if (marcCharset && !strcmp(marcCharset, "auto"))
             {
-                const char *result;
-                size_t rlen;
-                yaz_iconv_t cd = 0;
-                yaz_marc_t mt = yaz_marc_create();
-                const char *from = 0;
-
-                if (marcCharset && !strcmp(marcCharset, "auto"))
+                if (!oid_oidcmp(oid, yaz_oid_recsyn_usmarc))
                 {
-                    if (!oid_oidcmp(oid, yaz_oid_recsyn_usmarc))
-                    {
-                        if (octet_buf[9] == 'a')
-                            from = "UTF-8";
-                        else
-                            from = "MARC-8";
-                    }
+                    if (octet_buf[9] == 'a')
+                        from = "UTF-8";
                     else
-                        from = "ISO-8859-1";
-                }
-                else if (marcCharset)
-                    from = marcCharset;
-                if (outputCharset && from)
-                {
-                    cd = yaz_iconv_open(outputCharset, from);
-                    printf("convert from %s to %s", from,
-                            outputCharset);
-                    if (!cd)
-                        printf(" unsupported\n");
-                    else
-                    {
-                        yaz_marc_iconv(mt, cd);
-                        printf("\n");
-                    }
-                }
-
-                if (yaz_marc_decode_buf(mt, octet_buf, r->u.octet_aligned->len,
-                                        &result, &rlen)> 0)
-                {
-                    if (fwrite(result, rlen, 1, stdout) != 1)
-                    {
-                        printf("write to stdout failed\n");
-                    }
+                        from = "MARC-8";
                 }
                 else
+                    from = "ISO-8859-1";
+            }
+            else if (marcCharset)
+                from = marcCharset;
+            if (outputCharset && from)
+            {
+                cd = yaz_iconv_open(outputCharset, from);
+                printf("convert from %s to %s", from,
+                       outputCharset);
+                if (!cd)
+                    printf(" unsupported\n");
+                else
                 {
-                    printf("bad MARC. Dumping as it is:\n");
-                    print_record((const unsigned char*) octet_buf,
-                                  r->u.octet_aligned->len);
+                    yaz_marc_iconv(mt, cd);
+                    printf("\n");
                 }
-                yaz_marc_destroy(mt);
-                if (cd)
-                    yaz_iconv_close(cd);
+            }
+            
+            if (yaz_marc_decode_buf(mt, octet_buf, octet_len,
+                                    &result, &rlen)> 0)
+            {
+                if (fwrite(result, rlen, 1, stdout) != 1)
+                {
+                    printf("write to stdout failed\n");
+                }
             }
             else
             {
-                print_record((const unsigned char*) octet_buf,
-                             r->u.octet_aligned->len);
+                printf("bad MARC. Dumping as it is:\n");
+                print_record(octet_buf, octet_len);
             }
+            yaz_marc_destroy(mt);
+            if (cd)
+                yaz_iconv_close(cd);
+        }
+        else
+        {
+            print_record(octet_buf, octet_len);
         }
         marc_file_write(octet_buf, r->u.octet_aligned->len);
     }
@@ -968,7 +949,7 @@ static void display_record(Z_External *r)
             printf("Expecting single SUTRS type for SUTRS.\n");
             return;
         }
-        print_record(r->u.sutrs->buf, r->u.sutrs->len);
+        print_record((const char *) r->u.sutrs->buf, r->u.sutrs->len);
         marc_file_write((const char *) r->u.sutrs->buf, r->u.sutrs->len);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
@@ -1844,7 +1825,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         if (id)
         {
             printf("Target Reference: ");
-            print_stringn (id->buf, id->len);
+            print_stringn((const char *) id->buf, id->len);
             printf("\n");
         }
         if (ext->which == Z_External_update)
