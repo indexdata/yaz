@@ -16,9 +16,7 @@ Z_##x *yaz_clone_z_##x(Z_##x *q, NMEM nmem_out) \
     Z_##x *q1 = 0; \
     ODR enc = odr_createmem(ODR_ENCODE); \
     ODR dec = odr_createmem(ODR_DECODE); \
-    if (!z_##x(enc, &q, 0, 0)) \
-        return 0; \
-    else \
+    if (z_##x(enc, &q, 0, 0)) \
     { \
         int len; \
         char *buf = odr_getbuf(enc, &len, 0); \
