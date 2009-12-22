@@ -120,6 +120,187 @@ void tst_MySequence3(ODR encode, ODR decode)
     }
 }
 
+static void tst_berint(ODR encode, ODR decode)
+{
+    char *buf = 0;
+    int len = 0;
+    Odr_int val;
+    Odr_int ret_val;
+    int r;
+    
+    odr_reset(encode);
+    val = 0;
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 2);
+    YAZ_CHECK_EQ(buf[0], 1);
+    YAZ_CHECK_EQ(buf[1], 0);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, 0);
+
+    val = 1;
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 2);
+    YAZ_CHECK_EQ(buf[0], 1);
+    YAZ_CHECK_EQ(buf[1], 1);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, 1);
+
+    val = -1;
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 2);
+    YAZ_CHECK_EQ(buf[0], 1);
+    YAZ_CHECK_EQ(buf[1], -1);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, -1);
+
+    val = 127;
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 2);
+    YAZ_CHECK_EQ(buf[0], 1);
+    YAZ_CHECK_EQ(buf[1], 127);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, 127);
+
+
+    val = 128;
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 3);
+    YAZ_CHECK_EQ(buf[0], 2);
+    YAZ_CHECK_EQ(buf[1], 0);
+    YAZ_CHECK_EQ(((unsigned char *) buf)[2], 128);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, 128);
+
+    val = 2147483647; /* 2^31-1 */
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 5);
+    YAZ_CHECK_EQ(buf[0], 4);
+    YAZ_CHECK_EQ(buf[1], 127);
+    YAZ_CHECK_EQ(buf[2], -1);
+    YAZ_CHECK_EQ(buf[3], -1);
+    YAZ_CHECK_EQ(buf[4], -1);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, 2147483647);
+
+    val = -2147483648L; /* -2^31 */
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 5);
+    YAZ_CHECK_EQ(buf[0], 4);
+    YAZ_CHECK_EQ(buf[1], -128);
+    YAZ_CHECK_EQ(buf[2], 0);
+    YAZ_CHECK_EQ(buf[3], 0);
+    YAZ_CHECK_EQ(buf[4], 0);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, -2147483648L);
+
+    val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 6);
+    YAZ_CHECK_EQ(buf[0], 5);
+    YAZ_CHECK_EQ(buf[1], 1);
+    YAZ_CHECK_EQ(buf[2], 0);
+    YAZ_CHECK_EQ(buf[3], 0);
+    YAZ_CHECK_EQ(buf[4], 0);
+    YAZ_CHECK_EQ(buf[5], 0);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, val);
+
+
+    val = (Odr_int) -2 * 2147483648UL; /* -2^32 */
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 6);
+    YAZ_CHECK_EQ(buf[0], 5);
+    YAZ_CHECK_EQ(buf[1], -1);
+    YAZ_CHECK_EQ(buf[2], 0);
+    YAZ_CHECK_EQ(buf[3], 0);
+    YAZ_CHECK_EQ(buf[4], 0);
+    YAZ_CHECK_EQ(buf[5], 0);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, val);
+
+    val = (Odr_int) 1000 * 1000000000L; /* 10^12 */
+    odr_reset(encode);
+    r = ber_integer(encode, &val);
+    YAZ_CHECK_EQ(r, 1);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK(buf);
+    YAZ_CHECK_EQ(len, 7);
+    YAZ_CHECK_EQ(buf[0], 6);
+    YAZ_CHECK_EQ(buf[1], 0);
+    YAZ_CHECK_EQ(buf[2], -24);
+    YAZ_CHECK_EQ(buf[3], -44);
+    YAZ_CHECK_EQ(buf[4], -91);
+    YAZ_CHECK_EQ(buf[5], 16);
+    YAZ_CHECK_EQ(buf[6], 0);
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, len, 0);
+    ber_integer(decode, &ret_val);
+    YAZ_CHECK_EQ(ret_val, val);
+}
+
 static void tst(void)
 {
     ODR odr_encode = odr_createmem(ODR_ENCODE);
@@ -131,6 +312,8 @@ static void tst(void)
     tst_MySequence1(odr_encode, odr_decode);
     tst_MySequence2(odr_encode, odr_decode);
     tst_MySequence3(odr_encode, odr_decode);
+
+    tst_berint(odr_encode, odr_decode);
 
     odr_destroy(odr_encode);
     odr_destroy(odr_decode);
