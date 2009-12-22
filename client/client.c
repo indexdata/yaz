@@ -141,7 +141,7 @@ static int scan_stepSize = 0;
 static int scan_position = 1;
 static int scan_size = 20;
 static char cur_host[200];
-static int last_hit_count = 0;
+static Odr_int last_hit_count = 0;
 
 typedef enum {
     QueryType_Prefix,
@@ -2775,7 +2775,7 @@ static void parse_show_args(const char *arg_c, char *setstring,
 
     if ((p = strchr(arg, '+')))
     {
-        *number = atoi(p + 1);
+        *number = odr_atoi(p + 1);
         *p = '\0';
     }
     if (*arg)
@@ -2786,7 +2786,7 @@ static void parse_show_args(const char *arg_c, char *setstring,
             *start = 1;
         }
         else
-            *start = atoi(arg);
+            *start = odr_atoi(arg);
     }
     if (p && (p=strchr(p+1, '+')))
         strcpy(setstring, p+1);
