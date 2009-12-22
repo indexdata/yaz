@@ -24,9 +24,6 @@
 #ifdef WIN32
 #include <winsock.h>
 #endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 
 #include "odr-priv.h"
 
@@ -63,18 +60,23 @@ int ber_integer(ODR o, Odr_int *val)
  */
 int ber_encinteger(ODR o, Odr_int val)
 {
-    int a, len;
-    union { int i; unsigned char c[sizeof(int)]; } tmp;
-
-    tmp.i = htonl(val);   /* ensure that that we're big-endian */
-    for (a = 0; a < (int) sizeof(int) - 1; a++)  /* skip superfluous octets */
-        if (!((tmp.c[a] == 0 && !(tmp.c[a+1] & 0X80)) ||
-            (tmp.c[a] == 0XFF && (tmp.c[a+1] & 0X80))))
+    unsigned char tmp[sizeof(Odr_int)];
+    unsigned long long uval = val;
+    int i, len;
+    for (i = sizeof(uval); i > 0; )
+    {
+        tmp[--i] = uval;
+        uval >>= 8;
+    }
+    for (i = 0; i < sizeof(Odr_int)-1; i++)
+        if (!((tmp[i] == 0 && !(tmp[i+1] & 0x80))
+              ||
+              (tmp[i] == 0xFF && (tmp[i+1] & 0x80))))
             break;
-    len = sizeof(int) - a;
+    len = sizeof(Odr_int) - i;
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
-    if (odr_write(o, (unsigned char*) tmp.c + a, len) < 0)
+    if (odr_write(o, (unsigned char*) tmp + i, len) < 0)
         return -1;
     return 0;
 }
@@ -84,28 +86,25 @@ int ber_encinteger(ODR o, Odr_int val)
  */
 int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
 {
+    unsigned long long uval = 0;
+    int i, len;
+    int res;
     const unsigned char *b = buf;
-    unsigned char fill;
-    int res, len, remains;
-    union { int i; unsigned char c[sizeof(int)]; } tmp;
 
     if ((res = ber_declen(b, &len, max)) < 0)
         return -1;
     if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
         return -1;  
-    if (len > (int) sizeof(int))  /* let's be reasonable, here */
+    if (len > (int) sizeof(Odr_int))  /* let's be reasonable, here */
         return -1;
-    b+= res;
+    b += res;
 
-    remains = sizeof(int) - len;
-    memcpy(tmp.c + remains, b, len);
-    if (*b & 0X80)
-        fill = 0XFF;
-    else
-        fill = 0X00;
-    memset(tmp.c, fill, remains);
-    *val = ntohl(tmp.i);
-
+    if (*b & 0x80)
+        for (; i < sizeof(uval) - len; i++)
+            uval = (uval << 8) + 0xFF;
+    for (i = 0; i < len; i++)
+        uval = (uval << 8) + b[i];
+    *val = uval;
     b += len;
     return b - buf;
 }
