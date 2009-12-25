@@ -60,20 +60,20 @@ int ber_integer(ODR o, Odr_int *val)
  */
 int ber_encinteger(ODR o, Odr_int val)
 {
-    unsigned char tmp[sizeof(Odr_int)];
     unsigned long long uval = val;
+    unsigned char tmp[sizeof(uval)];
     int i, len;
     for (i = sizeof(uval); i > 0; )
     {
         tmp[--i] = uval;
         uval >>= 8;
     }
-    for (i = 0; i < sizeof(Odr_int)-1; i++)
+    for (i = 0; i < sizeof(uval)-1; i++)
         if (!((tmp[i] == 0 && !(tmp[i+1] & 0x80))
               ||
               (tmp[i] == 0xFF && (tmp[i+1] & 0x80))))
             break;
-    len = sizeof(Odr_int) - i;
+    len = sizeof(uval) - i;
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
     if (odr_write(o, (unsigned char*) tmp + i, len) < 0)
@@ -95,7 +95,7 @@ int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
         return -1;
     if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
         return -1;  
-    if (len > (int) sizeof(Odr_int))  /* let's be reasonable, here */
+    if (len > (int) sizeof(uval))  /* let's be reasonable, here */
         return -1;
     b += res;
 
