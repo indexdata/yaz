@@ -161,11 +161,12 @@ int main(int argc, char **argv)
             printf (" scan size = %ld\n", (long) ZOOM_scanset_size(scan));
             for (j = 0; j < (int) ZOOM_scanset_size (scan); j++)
             {
-                int occur, len;
+                size_t len;
+                size_t occur;
                 const char *term;
                 term = ZOOM_scanset_term (scan, j, &occur, &len);
                 if (term)
-                    printf ("%d %.*s %d\n", j, len, term, occur);
+                    printf ("%d %.*s %d\n", j, (int) len, term, (int) occur);
                 
             }
             ZOOM_scanset_destroy (scan);

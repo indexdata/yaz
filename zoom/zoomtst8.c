@@ -67,11 +67,11 @@ int main(int argc, char **argv)
             printf ("%s\n", ZOOM_connection_option_get(z[i], "host"));
             for (j = 0; j < (int) ZOOM_scanset_size (s[i]); j++)
             {
-                int occur, len;
+                size_t occur, len;
                 const char *term;
                 term = ZOOM_scanset_term (s[i], j, &occur, &len);
                 if (term)
-                    printf ("%d %.*s %d\n", j, len, term, occur);
+                    printf ("%d %.*s %d\n", j, (int) len, term, (int) occur);
             }
         }
     }
