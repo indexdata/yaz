@@ -120,7 +120,7 @@ void tst_MySequence3(ODR encode, ODR decode)
     }
 }
 
-static void tst_berint(ODR encode, ODR decode)
+static void tst_berint32(ODR encode, ODR decode)
 {
     char *buf = 0;
     int len = 0;
@@ -128,8 +128,8 @@ static void tst_berint(ODR encode, ODR decode)
     Odr_int ret_val;
     int r;
     
-    odr_reset(encode);
     val = 0;
+    odr_reset(encode);
     r = ber_integer(encode, &val);
     YAZ_CHECK_EQ(r, 1);
     buf = odr_getbuf(encode, &len, 0);
@@ -223,7 +223,7 @@ static void tst_berint(ODR encode, ODR decode)
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, 2147483647);
 
-    val = (Odr_int) -2147483647L -1; /* -2^31 */
+    val = -2147483647L -1; /* -2^31 */
     odr_reset(encode);
     r = ber_integer(encode, &val);
     YAZ_CHECK_EQ(r, 1);
@@ -240,7 +240,17 @@ static void tst_berint(ODR encode, ODR decode)
     odr_setbuf(decode, buf, len, 0);
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, (Odr_int) -2147483647L -1);
+}
 
+static void tst_berint64(ODR encode, ODR decode)
+{
+#if NMEM_64
+    char *buf = 0;
+    int len = 0;
+    Odr_int val;
+    Odr_int ret_val;
+    int r;
+    
     val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
     odr_reset(encode);
     r = ber_integer(encode, &val);
@@ -259,7 +269,6 @@ static void tst_berint(ODR encode, ODR decode)
     odr_setbuf(decode, buf, len, 0);
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, val);
-
 
     val = (Odr_int) -2 * 2147483648UL; /* -2^32 */
     odr_reset(encode);
@@ -299,6 +308,7 @@ static void tst_berint(ODR encode, ODR decode)
     odr_setbuf(decode, buf, len, 0);
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, val);
+#endif
 }
 
 static void tst(void)
@@ -313,7 +323,8 @@ static void tst(void)
     tst_MySequence2(odr_encode, odr_decode);
     tst_MySequence3(odr_encode, odr_decode);
 
-    tst_berint(odr_encode, odr_decode);
+    tst_berint32(odr_encode, odr_decode);
+    tst_berint64(odr_encode, odr_decode);
 
     odr_destroy(odr_encode);
     odr_destroy(odr_decode);
