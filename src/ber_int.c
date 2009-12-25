@@ -100,7 +100,7 @@ int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
     b += res;
 
     if (*b & 0x80)
-        for (; i < sizeof(uval) - len; i++)
+        for (i = 0; i < sizeof(uval) - len; i++)
             uval = (uval << 8) + 0xFF;
     for (i = 0; i < len; i++)
         uval = (uval << 8) + b[i];
