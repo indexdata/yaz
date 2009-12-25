@@ -223,7 +223,7 @@ static void tst_berint(ODR encode, ODR decode)
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, 2147483647);
 
-    val = -2147483648L; /* -2^31 */
+    val = (Odr_int) -2147483647L -1; /* -2^31 */
     odr_reset(encode);
     r = ber_integer(encode, &val);
     YAZ_CHECK_EQ(r, 1);
@@ -239,7 +239,7 @@ static void tst_berint(ODR encode, ODR decode)
     odr_reset(decode);
     odr_setbuf(decode, buf, len, 0);
     ber_integer(decode, &ret_val);
-    YAZ_CHECK_EQ(ret_val, -2147483648L);
+    YAZ_CHECK_EQ(ret_val, (Odr_int) -2147483647L -1);
 
     val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
     odr_reset(encode);
