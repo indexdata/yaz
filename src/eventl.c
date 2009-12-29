@@ -117,8 +117,9 @@ int iochan_event_loop(IOCHAN *iochans)
                     w = p->max_idle;
                 else
                     w = ftime - now;
+                /* tv_sec will be minimum wait.. */
                 if (w < tv_sec)
-                    tv_sec = w;
+                    tv_sec = (int) w; /* can hold it because w < tv_sec */
             }
             fds[i].fd = p->fd;
             fds[i].input_mask = input_mask;
