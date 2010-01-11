@@ -495,6 +495,7 @@ static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     printf(" implementationName\n");
     printf(" charset\n");
     printf(" lang\n");
+    printf(" timeout\n");
 }
 
 static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
