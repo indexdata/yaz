@@ -93,11 +93,70 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str);
 YAZ_EXPORT
 const char *json_parser_get_errmsg(json_parser_t p);
 
+/** \brief parses JSON string
+    \param json_str JSON string
+    \param errmsg pointer to error message string
+    \returns JSON tree or NULL if parse error occurred.
+
+    The resulting tree should be removed with a call to json_remove_node.
+    The errmsg may be NULL in which case the error message is not returned.
+*/
+YAZ_EXPORT
+struct json_node *json_parse(const char *json_str, const char **errmsg);
+
 /** \brief destroys JSON tree node and its children
     \param n JSON node
 */
 YAZ_EXPORT
 void json_remove_node(struct json_node *n);
+
+/** \brief gets object pair value for some name
+    \param n JSON node (presumably object node)
+    \param name name to match
+    \returns node or NULL if not found
+*/
+YAZ_EXPORT
+struct json_node *json_get_object(struct json_node *n, const char *name);
+
+/** \brief gets object value and detaches from existing tree
+    \param n JSON node (presumably object node)
+    \param name name to match
+    \returns node or NULL if not found
+*/
+YAZ_EXPORT
+struct json_node *json_detach_object(struct json_node *n, const char *name);
+
+/** \brief gets array element
+    \param n JSON node (presumably array node)
+    \param idx (0=first, 1=second, ..)
+    \returns node or NULL if not found
+*/
+YAZ_EXPORT
+struct json_node *json_get_elem(struct json_node *n, int idx);
+
+/** \brief returns number of children (array or object)
+    \param n JSON node (presumably array node or object node)
+    \returns number of children
+*/
+YAZ_EXPORT
+int json_count_children(struct json_node *n);
+
+/** \brief appends array to another
+    \param dst original array and resulting array
+    \param src array to be appended to dst
+    \retval -1 not arrays
+    \retval 0 array appended OK
+*/
+YAZ_EXPORT
+int json_append_array(struct json_node *dst, struct json_node *src);
+
+/** \brief configure subst rule
+    \param p JSON parser
+    \param idx (%id)
+    \param node node to be substituted for idx (%idx)
+*/
+YAZ_EXPORT
+void json_parser_subst(json_parser_t p, int idx, struct json_node *n);
 
 /** \brief converts JSON tree to JSON string
     \param node JSON tree

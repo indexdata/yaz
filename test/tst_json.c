@@ -117,10 +117,87 @@ static void tst1(void)
     json_parser_destroy(p);
 }
 
+static void tst2(void)
+{
+    struct json_node *n, *n1;
+
+    n = json_parse("{\"a\":1,\"b\":2,\"c\":[true,false,null]}", 0);
+    YAZ_CHECK(n);
+    if (!n)
+        return;
+
+    YAZ_CHECK_EQ(json_count_children(n), 3);
+    
+    n1 = json_get_object(n, "a");
+    YAZ_CHECK(n1 && n1->type == json_node_number && n1->u.number == 1.0);
+    YAZ_CHECK_EQ(json_count_children(n1), 0);
+
+    n1 = json_get_object(n, "b");
+    YAZ_CHECK(n1 && n1->type == json_node_number && n1->u.number == 2.0);
+    YAZ_CHECK_EQ(json_count_children(n1), 0);
+
+    n1 = json_get_object(n, "b");
+    YAZ_CHECK(n1 && n1->type == json_node_number && n1->u.number == 2.0);
+    YAZ_CHECK_EQ(json_count_children(n1), 0);
+
+    n1 = json_get_object(n, "c");
+    YAZ_CHECK(n1 && n1->type == json_node_array);
+    YAZ_CHECK_EQ(json_count_children(n1), 3);
+
+    n1 = json_get_elem(json_get_object(n, "c"), 0);
+    YAZ_CHECK(n1 && n1->type == json_node_true);
+
+    n1 = json_get_elem(json_get_object(n, "c"), 1);
+    YAZ_CHECK(n1 && n1->type == json_node_false);
+
+    n1 = json_get_elem(json_get_object(n, "c"), 2);
+    YAZ_CHECK(n1 && n1->type == json_node_null);
+
+    n1 = json_get_elem(json_get_object(n, "c"), 3);
+    YAZ_CHECK(n1 == 0);
+
+    json_remove_node(n);
+}
+
+static int append_check(const char *a, const char *b, const char *exp)
+{
+    WRBUF w = wrbuf_alloc();
+    struct json_node *n_a, *n_b;
+    int ret = 0;
+
+    n_a = json_parse(a, 0);
+    n_b = json_parse(b, 0);
+    json_append_array(json_get_object(n_a, "a"),
+                      json_detach_object(n_b, "b"));
+
+    json_write_wrbuf(n_a, w);
+
+    if (!strcmp(wrbuf_cstr(w), exp))
+        ret = 1;
+    wrbuf_destroy(w);
+    json_remove_node(n_a);
+    json_remove_node(n_b);
+    return ret;
+}
+
+static void tst3(void)
+{
+    YAZ_CHECK(append_check("{\"a\":[1,2,3]}", "{\"b\":[5,6,7]}",
+                           "{\"a\":[1,2,3,5,6,7]}"));
+
+    YAZ_CHECK(append_check("{\"a\":[]}", "{\"b\":[5,6,7]}",
+                           "{\"a\":[5,6,7]}"));
+
+    YAZ_CHECK(append_check("{\"a\":[1,2,3]}", "{\"b\":[]}",
+                           "{\"a\":[1,2,3]}"));
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst1();
+    tst2();
+    tst3();
     YAZ_CHECK_TERM;
 }
 

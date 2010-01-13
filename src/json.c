@@ -18,10 +18,17 @@
 
 #include <yaz/xmalloc.h>
 
+struct json_subst_info {
+    int idx;
+    struct json_subst_info *next;
+    struct json_node *node;
+};
+
 struct json_parser_s {
     const char *buf;
     const char *cp;
     const char *err_msg;
+    struct json_subst_info *subst;
 };
 
 json_parser_t json_parser_create(void)
@@ -31,11 +38,34 @@ json_parser_t json_parser_create(void)
     p->buf = 0;
     p->cp = 0;
     p->err_msg = 0;
+    p->subst = 0;
     return p;
+}
+
+void json_parser_subst(json_parser_t p, int idx, struct json_node *n)
+{
+    struct json_subst_info **sb = &p->subst;
+    for (; *sb; sb = &(*sb)->next)
+        if ((*sb)->idx == idx)
+        {
+            (*sb)->node = n;
+            return;
+        }
+    *sb = xmalloc(sizeof(**sb));
+    (*sb)->next = 0;
+    (*sb)->node = n;
+    (*sb)->idx = idx;
 }
 
 void json_parser_destroy(json_parser_t p)
 {
+    struct json_subst_info *sb = p->subst;
+    while (sb)
+    {
+        struct json_subst_info *sb_next = sb->next;
+        xfree(sb);
+        sb = sb_next;
+    }
     xfree(p);
 }
 
@@ -212,6 +242,22 @@ static struct json_node *json_parse_value(json_parser_t p)
         return json_parse_object(p);
     else if (c == '[')
         return json_parse_array(p);
+    else if (c == '%')
+    {
+        struct json_subst_info *sb;
+        int idx = 0;
+        p->cp++;
+        c = *p->cp;
+        while (c >= '0' && c <= '9')
+        {
+            idx = idx*10 + (c - '0');
+            p->cp++;
+            c = *p->cp;
+        }
+        for (sb = p->subst; sb; sb = sb->next)
+            if (sb->idx == idx)
+                return sb->node;
+    }
     else
     {
         char tok[8];
@@ -229,12 +275,9 @@ static struct json_node *json_parse_value(json_parser_t p)
             return json_new_node(p, json_node_false);
         else if (!strcmp(tok, "null"))
             return json_new_node(p, json_node_null);
-        else
-        {
-            p->err_msg = "bad value";
-            return 0;
-        }
     }
+    p->err_msg = "bad token";
+    return 0;
 }
 
 static struct json_node *json_parse_elements(json_parser_t p)
@@ -295,6 +338,7 @@ static struct json_node *json_parse_pair(json_parser_t p)
         return 0;
     if (look_ch(p) != ':')
     {
+        p->err_msg = "missing :";
         json_remove_node(s);
         return 0;
     }
@@ -377,12 +421,33 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
     p->cp = p->buf;
 
     n = json_parse_object(p);
+    if (!n)
+        return 0;
     c = look_ch(p);
     if (c != 0)
     {
         p->err_msg = "extra characters";
         json_remove_node(n);
         return 0;
+    }
+    return n;
+}
+
+struct json_node *json_parse(const char *json_str, const char **errmsg)
+{
+    json_parser_t p = json_parser_create();
+    struct json_node *n = 0;
+    if (!p)
+    {
+        if (errmsg)
+            *errmsg = "could not create parser";
+    }
+    else
+    {
+        n = json_parser_parse(p, json_str);
+        if (!n && errmsg)
+            *errmsg = json_parser_get_errmsg(p);
+        json_parser_destroy(p);
     }
     return n;
 }
@@ -434,6 +499,86 @@ void json_write_wrbuf(struct json_node *node, WRBUF result)
         wrbuf_puts(result, "null");
         break;
     }
+}
+
+static struct json_node **json_get_objectp(struct json_node *n,
+                                           const char *name)
+{
+    if (n && n->type == json_node_object)
+    {
+        for (n = n->u.link[0]; n; n = n->u.link[1])
+        {
+            struct json_node *c = n->u.link[0];
+            if (c && c->type == json_node_pair &&
+                c->u.link[0] && c->u.link[0]->type == json_node_string)
+                if (!strcmp(name, c->u.link[0]->u.string))
+                    return &c->u.link[1];
+        }
+    }
+    return 0;
+}
+
+struct json_node *json_get_object(struct json_node *n, const char *name)
+{
+    struct json_node **np = json_get_objectp(n, name);
+    
+    if (np)
+        return *np;
+    return 0;
+}
+
+struct json_node *json_detach_object(struct json_node *n, const char *name)
+{
+    struct json_node **np = json_get_objectp(n, name);
+    
+    if (np)
+    {
+        struct json_node *n = *np;
+        *np = 0;
+        return n;
+    }
+    return 0;
+}
+
+struct json_node *json_get_elem(struct json_node *n, int idx)
+{
+    if (n && n->type == json_node_array)
+    {
+        for (n = n->u.link[0]; n; n = n->u.link[1])
+        {
+            if (--idx < 0)
+                return n->u.link[0];
+        }
+    }
+    return 0;
+}
+
+int json_count_children(struct json_node *n)
+{
+    int i = 0;
+
+    if (n && (n->type == json_node_array || n->type == json_node_object))
+    {
+        for (n = n->u.link[0]; n; n = n->u.link[1])
+            i++;
+    }
+    return i;
+}
+
+int json_append_array(struct json_node *dst, struct json_node *src)
+{
+    if (dst && src &&
+        dst->type == json_node_array && src->type == json_node_array)
+    {
+        struct json_node **np = &dst->u.link[0];
+        while (*np)
+            np = &(*np)->u.link[1];
+        *np = src->u.link[0];
+        src->u.link[0] = 0;
+        json_remove_node(src);
+        return 0;
+    }
+    return -1;
 }
 
 const char *json_parser_get_errmsg(json_parser_t p)
