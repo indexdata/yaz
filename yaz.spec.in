@@ -2,7 +2,7 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 1
-Requires: libxslt gnutls readline libyaz3 = %{version}
+Requires: libxslt gnutls readline libyaz4 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -21,31 +21,31 @@ URL: http://www.indexdata.dk/yaz/
 This package contains both a test-server and clients (normal & ssl)
 for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 
-%package -n libyaz3
+%package -n libyaz4
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt gnutls libicu
 
-%description -n libyaz3
+%description -n libyaz4
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
 Retrieval.
 
 %post -p /sbin/ldconfig 
 %postun -p /sbin/ldconfig 
 
-%package -n libyaz3-devel
+%package -n libyaz4-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz3 = %{version} libxml2-devel libxslt-devel libicu-devel gnutls-devel %{TCPWRAPPER}
+Requires: libyaz4 = %{version} libxml2-devel libxslt-devel libicu-devel gnutls-devel %{TCPWRAPPER}
 Conflicts: libyaz-devel
 
-%description -n libyaz3-devel
+%description -n libyaz4-devel
 Development libraries and includes for the libyaz package.
 
 %package -n yaz-illclient
 Summary: ILL client
 Group: Applications/Communication
-Requires: readline libyaz3 = %{version}
+Requires: readline libyaz4 = %{version}
 
 %description -n yaz-illclient
 yaz-illclient: an ISO ILL client.
@@ -53,7 +53,7 @@ yaz-illclient: an ISO ILL client.
 %package -n yaz-icu
 Summary: Command line utility for ICU utilities of YAZ
 Group: Applications/Communication
-Requires: libyaz3 = %{version}
+Requires: libyaz4 = %{version}
 
 %description -n yaz-icu
 The yaz-icu program is a command-line based client which exposes the ICU
@@ -93,11 +93,11 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_mandir}/man7/yaz-log.*
 %{_mandir}/man7/bib1-attr.*
 
-%files -n libyaz3
+%files -n libyaz4
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
-%files -n libyaz3-devel
+%files -n libyaz4-devel
 %defattr(-,root,root)
 %{_bindir}/yaz-config
 %{_bindir}/yaz-asncomp
