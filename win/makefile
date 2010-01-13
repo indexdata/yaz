@@ -499,6 +499,7 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_decode_iso5426.obj \
    $(OBJDIR)\iconv_decode_danmarc.obj \
    $(OBJDIR)\mutex.obj \
+   $(OBJDIR)\json.obj \
    $(OBJDIR)\sc.obj
 
 Z3950_OBJS= \
