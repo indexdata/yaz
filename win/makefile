@@ -91,15 +91,15 @@ TMP=$(TMPDIR)
 # Targets - what to make
 
 !if $(DEBUG)
-YAZ_DLL=$(BINDIR)\yaz3d.dll
-YAZ_IMPLIB=$(LIBDIR)\yaz3d.lib
-YAZ_ICU_DLL=$(BINDIR)\yaz_icu3d.dll
-YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu3d.lib
+YAZ_DLL=$(BINDIR)\yaz4d.dll
+YAZ_IMPLIB=$(LIBDIR)\yaz4d.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu4d.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4d.lib
 !else
-YAZ_DLL=$(BINDIR)\yaz3.dll
-YAZ_IMPLIB=$(LIBDIR)\yaz3.lib
-YAZ_ICU_DLL=$(BINDIR)\yaz_icu3.dll
-YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu3.lib
+YAZ_DLL=$(BINDIR)\yaz4.dll
+YAZ_IMPLIB=$(LIBDIR)\yaz4.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu4.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
