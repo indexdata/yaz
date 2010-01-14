@@ -124,9 +124,9 @@ typedef struct association
     Odr_int maximumRecordSize;
     int version;                  /* highest version-bit set (2 or 3) */
 
-    unsigned cs_get_mask;
-    unsigned cs_put_mask;
-    unsigned cs_accept_mask;
+    int cs_get_mask;
+    int cs_put_mask;
+    int cs_accept_mask;
 
     struct bend_initrequest *init;
     statserv_options_block *last_control;
