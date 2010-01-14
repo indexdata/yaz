@@ -527,7 +527,7 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
         {
             Z_IdAuthentication *auth = (Z_IdAuthentication *)
                 odr_malloc(assoc->decode, sizeof(*auth));
-            int len;
+            size_t len;
 
             len = strlen(sr->username) + 1;
             if (sr->password) 
