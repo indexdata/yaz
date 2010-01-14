@@ -48,9 +48,9 @@ YAZ_EXPORT void yaz_set_errno(int v);
 
 /** \brief returns system error description string
     \param buf buffer for result
-    \param max maximum number of bytes to store
+    \param bufsz maximum number of bytes to store
 */
-YAZ_EXPORT void yaz_strerror(char *buf, int max);
+YAZ_EXPORT void yaz_strerror(char *buf, size_t bufsz);
 
 YAZ_END_CDECL
 

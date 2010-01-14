@@ -38,7 +38,7 @@ void yaz_set_errno(int v)
     errno = v;
 }
 
-void yaz_strerror(char *buf, int max)
+void yaz_strerror(char *buf, size_t bufsz)
 {
 #ifdef WIN32
     DWORD err;
@@ -54,7 +54,7 @@ void yaz_strerror(char *buf, int max)
                 err,
                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default lang */
                 (LPTSTR) buf,
-                max-1,
+                bufsz-1,
                 NULL);
     }
     else
@@ -63,7 +63,7 @@ void yaz_strerror(char *buf, int max)
 /* UNIX */
 #if HAVE_STRERROR_R
     *buf = '\0';
-    strerror_r(errno, buf, max);
+    strerror_r(errno, buf, bufsz);
     /* if buffer is unset - use strerror anyway (GLIBC bug) */
     if (*buf == '\0')
         strcpy(buf, strerror(yaz_errno()));
