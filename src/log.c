@@ -577,7 +577,7 @@ int yaz_log_mask_str_x(const char *str, int level)
         else 
         {
             char clean[509];
-            char *n = clean_name(str, p-str, clean, sizeof(clean));
+            char *n = clean_name(str, (size_t) (p - str), clean, sizeof(clean));
             int mask = define_module_bit(n);
             if (!mask)
                 level = 0;  /* 'none' clears them all */
