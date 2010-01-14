@@ -62,7 +62,8 @@ int ber_encinteger(ODR o, Odr_int val)
 {
     unsigned long long uval = val;
     unsigned char tmp[sizeof(uval)];
-    int i, len;
+    int len;
+    size_t i;
     for (i = sizeof(uval); i > 0; )
     {
         tmp[--i] = uval;
@@ -87,7 +88,8 @@ int ber_encinteger(ODR o, Odr_int val)
 int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
 {
     unsigned long long uval = 0;
-    int i, len;
+    int len;
+    size_t i;
     int res;
     const unsigned char *b = buf;
 
