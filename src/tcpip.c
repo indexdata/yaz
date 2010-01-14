@@ -635,27 +635,6 @@ int tcpip_rcvconnect(COMSTACK h)
 #define CERTF "ztest.pem"
 #define KEYF "ztest.pem"
 
-static void tcpip_setsockopt(int fd)
-{
-#if 0
-    int len = 4096;
-    int set = 1;
-    
-    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&set, sizeof(int)))
-    {
-        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt TCP_NODELAY");
-    }
-    if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char*)&len, sizeof(int)))
-    {
-        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt SNDBUF");
-    }
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, (char*)&len, sizeof(int)))
-    {
-        yaz_log(LOG_WARN|LOG_ERRNO, "setsockopt RCVBUF");
-    }
-#endif
-}
-
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
@@ -745,7 +724,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         return -1;
     }
 #endif
-    tcpip_setsockopt(h->iofile);
 #if HAVE_GETADDRINFO
     r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
@@ -831,7 +809,6 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         return -1;
     }
     h->state = CS_ST_INCON;
-    tcpip_setsockopt(h->newfd);
     return 0;
 }
 
