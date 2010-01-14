@@ -78,7 +78,7 @@ YAZ_EXPORT void nmem_reset(NMEM n);
 /** \brief returns size in bytes of memory for NMEM handle
     \returns number of bytes
  */
-YAZ_EXPORT int nmem_total(NMEM n);
+YAZ_EXPORT size_t nmem_total(NMEM n);
 
 /** \brief allocates string on NMEM handle (similar strdup) 
     \param mem HNEM handle
@@ -156,7 +156,7 @@ YAZ_EXPORT void nmem_destroy(NMEM n);
     \param size number of bytes to be allocated
     \returns pointer to allocated memory
  */
-YAZ_EXPORT void *nmem_malloc(NMEM n, int size);
+YAZ_EXPORT void *nmem_malloc(NMEM n, size_t size);
 
 YAZ_END_CDECL
 

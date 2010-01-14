@@ -10,8 +10,6 @@
  * This is a simple and fairly wasteful little module for nibble memory
  * allocation. Evemtually we'll put in something better.
  *
- * FIXME - it also has some semaphore stuff, and stuff to handle errno.
- *         These should be moved to some other place!
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -38,7 +36,7 @@ struct nmem_block
 
 struct nmem_control
 {
-    int total;
+    size_t total;
     struct nmem_block *blocks;
     struct nmem_control *next;
 };
@@ -111,7 +109,7 @@ void nmem_reset(NMEM n)
     n->total = 0;
 }
 
-void *nmem_malloc(NMEM n, int size)
+void *nmem_malloc(NMEM n, size_t size)
 {
     struct nmem_block *p;
     char *r;
@@ -135,7 +133,7 @@ void *nmem_malloc(NMEM n, int size)
     return r;
 }
 
-int nmem_total(NMEM n)
+size_t nmem_total(NMEM n)
 {
     return n->total;
 }
