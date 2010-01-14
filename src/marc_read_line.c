@@ -231,7 +231,6 @@ int yaz_marc_read_line(yaz_marc_t mt,
                             cp++;
                         }
                     }
-                    assert(len >= 0);
                     yaz_marc_add_subfield(mt, cp, len);
                     if (!next)
                         break;
