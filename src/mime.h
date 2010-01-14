@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2009 Index Data.
+ * Copyright (C) 1995-2010 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:

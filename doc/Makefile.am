@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2009 Index Data
+## Copyright (C) 1995-2010 Index Data
 
 SUBDIRS = common
 
@@ -101,7 +101,7 @@ dist-hook:
 	done
 
 doc-clean:
-	rm -f *.html *.[0-9] *.pdf
+	rm -f manref.xml *.html *.[0-9] *.pdf
 
 install-data-hook:
 	if test -f index.html; then d=.; else d="$(srcdir)"; fi; \

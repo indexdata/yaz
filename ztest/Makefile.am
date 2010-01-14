@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2009 Index Data
+## Copyright (C) 1995-2010 Index Data
 
 bin_PROGRAMS=yaz-ztest
 noinst_PROGRAMS=gfs-example

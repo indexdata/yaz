@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2009 Index Data
+## Copyright (C) 1995-2010 Index Data
 
 check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
  tstccl tstlog tstcomstack \
