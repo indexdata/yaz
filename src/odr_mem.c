@@ -27,7 +27,7 @@ NMEM odr_extract_mem(ODR o)
     return r;
 }
 
-void *odr_malloc(ODR o, int size)
+void *odr_malloc(ODR o, size_t size)
 {
     return nmem_malloc(o->mem, size);
 }
@@ -57,7 +57,7 @@ Odr_bool *odr_booldup(ODR o, Odr_bool v)
     return nmem_booldup(o->mem, v);
 }
 
-int odr_total(ODR o)
+size_t odr_total(ODR o)
 {
     return nmem_total(o->mem);
 }
