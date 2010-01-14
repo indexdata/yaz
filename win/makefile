@@ -1,8 +1,5 @@
 # This file is part of the YAZ toolkit.
-# Copyright (C) 1995-2009 Index Data
-#
-# Programmed by
-#  Heikki Levanto & Adam Dickmeiss
+# Copyright (C) 1995-2010 Index Data
 
 # Parameters 
 
