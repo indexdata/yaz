@@ -452,7 +452,7 @@ void yaz_log(int level, const char *fmt, ...)
 
     if (o_level & YLOG_ERRNO)
     {
-        int remain = sizeof(buf) - strlen(buf);
+        size_t remain = sizeof(buf) - strlen(buf);
         if (remain > 100) /* reasonable minimum space for error */
         {
             strcat(buf, " [");
@@ -491,7 +491,7 @@ void yaz_log_time_format(const char *fmt)
 }
 
 /** cleans a loglevel name from leading paths and suffixes */
-static char *clean_name(const char *name, int len, char *namebuf, int buflen)
+static char *clean_name(const char *name, size_t len, char *namebuf, size_t buflen)
 {
     char *p = namebuf;
     char *start = namebuf;
@@ -508,19 +508,19 @@ static char *clean_name(const char *name, int len, char *namebuf, int buflen)
 
 static int define_module_bit(const char *name)
 {
-    int i;
+    size_t i;
 
     for (i = 0; mask_names[i].name; i++)
         if (0 == strcmp(mask_names[i].name, name))
         {
             return mask_names[i].mask;
         }
-    if ( (i>=MAX_MASK_NAMES) || (next_log_bit & (1<<31) ))
+    if ( (i>=MAX_MASK_NAMES) || (next_log_bit & (1U<<31) ))
     {
         yaz_log(YLOG_WARN, "No more log bits left, not logging '%s'", name);
         return 0;
     }
-    mask_names[i].mask = next_log_bit;
+    mask_names[i].mask = (int) next_log_bit; /* next_log_bit can hold int */
     next_log_bit = next_log_bit<<1;
     mask_names[i].name = (char *) malloc(strlen(name)+1);
     strcpy(mask_names[i].name, name);
