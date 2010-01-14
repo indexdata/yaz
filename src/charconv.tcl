@@ -211,7 +211,7 @@ proc dump_trie {ofilehandle} {
 		set v [lindex $m 3]
                 puts $f "\}, /* $v */"
             }
-            puts $f "  \{\"\", 0\}"
+            puts $f "  \{\"\", 0, 0\}"
             puts $f "\};"
             puts $f "struct yaz_iconv_trie $trie(prefix)page${this} = \{"
             puts $f "  $trie(prefix)page${this}_flat, 0"
