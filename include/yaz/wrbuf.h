@@ -56,19 +56,19 @@ YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 
 /** \brief writes (append) buffer to WRBUF */
-YAZ_EXPORT int wrbuf_write(WRBUF b, const char *buf, int size);
+YAZ_EXPORT void wrbuf_write(WRBUF b, const char *buf, size_t size);
 /** \brief appends C-string to WRBUF (returns int) */
-YAZ_EXPORT int wrbuf_puts(WRBUF b, const char *buf);
+YAZ_EXPORT void wrbuf_puts(WRBUF b, const char *buf);
 /** \brief appends C-string to WRBUF (void) */
 YAZ_EXPORT void wrbuf_vputs(const char *buf, void *client_data);
 
 /** \brief writes buffer to WRBUF and XML encode (as CDATA) */
-YAZ_EXPORT int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size);
+YAZ_EXPORT void wrbuf_xmlputs_n(WRBUF b, const char *cp, size_t size);
 /** \brief writes C-String to WRBUF and XML encode (as CDATA) */
-YAZ_EXPORT int wrbuf_xmlputs(WRBUF b, const char *cp);
+YAZ_EXPORT void wrbuf_xmlputs(WRBUF b, const char *cp);
 
-YAZ_EXPORT int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
-                                       const char from, const char to);
+YAZ_EXPORT void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+                                        const char from, const char to);
 
 /** \brief writes buffer to WRBUF and escape non-ASCII characters */
 YAZ_EXPORT void wrbuf_puts_escaped(WRBUF b, const char *str);
@@ -83,16 +83,16 @@ YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
 #endif
         ;
 
-YAZ_EXPORT int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
-                                 int size);
-YAZ_EXPORT int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
-                                       const char *buf, int size);
-YAZ_EXPORT int wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd,
-                                      const char *strz);
+YAZ_EXPORT void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
+                                 size_t size);
+YAZ_EXPORT void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
+                                       const char *buf, size_t size);
+YAZ_EXPORT void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd,
+                                       const char *strz);
 
-YAZ_EXPORT int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
+YAZ_EXPORT void wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
 
-YAZ_EXPORT int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
+YAZ_EXPORT void wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
 
 YAZ_EXPORT void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd);
 
@@ -105,7 +105,7 @@ YAZ_EXPORT void wrbuf_cut_right(WRBUF b, size_t no_to_remove);
 /** \brief grow WRBUF larger 
     This function is normally not used by applications
 */
-YAZ_EXPORT int wrbuf_grow(WRBUF b, int minsize);
+YAZ_EXPORT int wrbuf_grow(WRBUF b, size_t minsize);
 
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)

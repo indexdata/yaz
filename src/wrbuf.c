@@ -44,9 +44,9 @@ void wrbuf_rewind(WRBUF b)
     b->pos = 0;
 }
 
-int wrbuf_grow(WRBUF b, int minsize)
+int wrbuf_grow(WRBUF b, size_t minsize)
 {
-    int togrow;
+    size_t togrow;
 
     if (!b->size)
         togrow = 1024;
@@ -61,21 +61,19 @@ int wrbuf_grow(WRBUF b, int minsize)
     return 0;
 }
 
-int wrbuf_write(WRBUF b, const char *buf, int size)
+void wrbuf_write(WRBUF b, const char *buf, size_t size)
 {
     if (size <= 0)
-        return 0;
+        return;
     if (b->pos + size >= b->size)
         wrbuf_grow(b, size);
     memcpy(b->buf + b->pos, buf, size);
     b->pos += size;
-    return 0;
 }
 
-int wrbuf_puts(WRBUF b, const char *buf)
+void wrbuf_puts(WRBUF b, const char *buf)
 {
     wrbuf_write(b, buf, strlen(buf));
-    return 0;
 }
 
 void wrbuf_vputs(const char *buf, void *client_data)
@@ -83,7 +81,7 @@ void wrbuf_vputs(const char *buf, void *client_data)
     wrbuf_write((WRBUF) client_data, buf, strlen(buf));
 }
 
-int wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                             const char from, const char to)
 {
     while(*buf)
@@ -94,7 +92,6 @@ int wrbuf_puts_replace_char(WRBUF b, const char *buf,
             wrbuf_putc(b, *buf);
         buf++;
     }
-    return 0;
 }
 
 void wrbuf_chop_right(WRBUF b)
@@ -105,14 +102,14 @@ void wrbuf_chop_right(WRBUF b)
     }
 }
 
-int wrbuf_xmlputs(WRBUF b, const char *cp)
+void wrbuf_xmlputs(WRBUF b, const char *cp)
 {
-    return wrbuf_xmlputs_n(b, cp, strlen(cp));
+    wrbuf_xmlputs_n(b, cp, strlen(cp));
 }
 
-int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
+void wrbuf_xmlputs_n(WRBUF b, const char *cp, size_t size)
 {
-    while (--size >= 0)
+    for (; size; size--)
     {
         /* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
         if (*cp >= 0 && *cp <= 31)
@@ -143,7 +140,6 @@ int wrbuf_xmlputs_n(WRBUF b, const char *cp, int size)
         }
         cp++;
     }
-    return 0;
 }
 
 void wrbuf_printf(WRBUF b, const char *fmt, ...)
@@ -158,8 +154,8 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     va_end(ap);
 }
 
-static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
-                               int size, int cdata)
+static void wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
+                                size_t size, int cdata)
 {
     if (cd)
     {
@@ -191,34 +187,33 @@ static int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
         else
             wrbuf_write(b, buf, size);
     }
-    return wrbuf_len(b);
 }
 
-int wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, size_t size)
 {
-    return wrbuf_iconv_write_x(b, cd, buf, size, 0);
+    wrbuf_iconv_write_x(b, cd, buf, size, 0);
 }
 
-int wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
+void wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    return wrbuf_iconv_write(b, cd, strz, strlen(strz));
+    wrbuf_iconv_write(b, cd, strz, strlen(strz));
 }
 
-int wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch)
+void wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch)
 {
     char buf[1];
     buf[0] = ch;
-    return wrbuf_iconv_write(b, cd, buf, 1);
+    wrbuf_iconv_write(b, cd, buf, 1);
 }
 
-int wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, int size)
+void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, size_t size)
 {
-    return wrbuf_iconv_write_x(b, cd, buf, size, 1);
+    wrbuf_iconv_write_x(b, cd, buf, size, 1);
 }
 
-int wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd, const char *strz)
+void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    return wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 1);
+    wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 1);
 }
 
 void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
