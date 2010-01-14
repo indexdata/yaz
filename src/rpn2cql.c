@@ -18,6 +18,11 @@
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
 
+static void wrbuf_vputs(const char *buf, void *client_data)
+{
+    wrbuf_write((WRBUF) client_data, buf, strlen(buf));
+}
+
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
     int j;

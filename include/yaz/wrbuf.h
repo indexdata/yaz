@@ -46,63 +46,146 @@ typedef struct wrbuf
     size_t size;
 } wrbuf, *WRBUF;
 
-/** \brief allocate / construct WRBUF */
+/** \brief construct WRBUF
+    \returns WRBUF
+ */
 YAZ_EXPORT WRBUF wrbuf_alloc(void);
 
-/** \brief destroy WRBUF and its buffer */
+/** \brief destroy WRBUF and its buffer
+    \param b WRBUF
+ */
 YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 
-/** \brief empty WRBUF content */
+/** \brief empty WRBUF content (length of buffer set to 0)
+    \param b WRBUF
+ */
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 
-/** \brief writes (append) buffer to WRBUF */
+/** \brief append constant size buffer to WRBU
+    \param b WRBUF
+    \param buf buffer
+    \param size size of buffer
+ */
 YAZ_EXPORT void wrbuf_write(WRBUF b, const char *buf, size_t size);
-/** \brief appends C-string to WRBUF (returns int) */
-YAZ_EXPORT void wrbuf_puts(WRBUF b, const char *buf);
-/** \brief appends C-string to WRBUF (void) */
-YAZ_EXPORT void wrbuf_vputs(const char *buf, void *client_data);
 
-/** \brief writes buffer to WRBUF and XML encode (as CDATA) */
+/** \brief appends C-string to WRBUF
+    \param b WRBUF
+    \param buf C-string (0-terminated)
+ */
+YAZ_EXPORT void wrbuf_puts(WRBUF b, const char *buf);
+
+/** \brief writes buffer of certain size to WRBUF and XML encode (as CDATA)
+    \param b WRBUF
+    \param cp CDATA
+    \param size size of CDATA
+ */
 YAZ_EXPORT void wrbuf_xmlputs_n(WRBUF b, const char *cp, size_t size);
-/** \brief writes C-String to WRBUF and XML encode (as CDATA) */
+
+/** \brief writes C-String to WRBUF and XML encode (as CDATA)
+    \param b WRBUF
+    \param cp CDATA buffer (0-terminated)
+ */
 YAZ_EXPORT void wrbuf_xmlputs(WRBUF b, const char *cp);
 
+/** \brief puts buf to WRBUF and replaces a single char
+    \param b WRBUF
+    \param buf buffer to append (C-string)
+    \param from character "from"
+    \param to charcter "to"
+*/
 YAZ_EXPORT void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                                         const char from, const char to);
 
-/** \brief writes buffer to WRBUF and escape non-ASCII characters */
+/** \brief writes C-string to WRBUF and escape non-ASCII characters
+    \param b WRBUF
+    \param str C-string
+
+    Non-ASCII characters will be presented as \\xDD .
+ */
 YAZ_EXPORT void wrbuf_puts_escaped(WRBUF b, const char *str);
 
-/** \brief writes C-string to WRBUF and escape non-ASCII characters */
+/** \brief writes buffer to WRBUF and escape non-ASCII characters
+    \param b WRBUF
+    \param buf buffer
+    \param len size of buffer
+
+    Non-ASCII characters will be presented as \\xDD .
+ */
 YAZ_EXPORT void wrbuf_write_escaped(WRBUF b, const char *buf, size_t len);
 
-/** \brief writes printf result to WRBUF */
+/** \brief writes printf result to WRBUF
+    \param b WRBUF
+    \param fmt printf-like format
+ */
 YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
 #ifdef __GNUC__
         __attribute__ ((format (printf, 2, 3)))
 #endif
         ;
-
+/** \brief iconv converts buffer and appends to WRBUF
+    \param b WRBUF
+    \param cd iconv handle
+    \param buf buffer
+    \param size size of buffer
+*/
 YAZ_EXPORT void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
                                  size_t size);
+
+/** \brief iconv converts buffer and appends to WRBUF as XML CDATA
+    \param b WRBUF
+    \param cd iconv handle
+    \param buf buffer
+    \param size size of buffer
+*/
 YAZ_EXPORT void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd,
                                        const char *buf, size_t size);
+
+/** \brief iconv converts C-string and appends to WRBUF
+    \param b WRBUF
+    \param cd iconv handle
+    \param str C-string
+*/
+YAZ_EXPORT void wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *str);
+
+/** \brief iconv converts C-string and appends to WRBUF as XML CDATA
+    \param b WRBUF
+    \param cd iconv handle
+    \param str C-string
+*/
 YAZ_EXPORT void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd,
-                                       const char *strz);
+                                       const char *str);
 
-YAZ_EXPORT void wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
-
+/** \brief iconv converts character and appends to WRBUF
+    \param b WRBUF
+    \param cd iconv handle
+    \param ch character
+*/
 YAZ_EXPORT void wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
 
+/** \brief iconv reset(flush) to WRBUF
+    \param b
+    \param cd iconv handle
+    
+    This function calls iconv(cd, 0, 0, ..) to make it
+    flush any remaining content.
+*/
 YAZ_EXPORT void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd);
 
+/** \brief chips traling blanks away from WRBUF
+    \param b WRBUF
+*/
 YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
 
-/** \brief cut size of WRBUF */
+/** \brief cut size of WRBUF
+    \param b WRBUF
+    \param no_to_remove number of bytes to remove
+ */
 YAZ_EXPORT void wrbuf_cut_right(WRBUF b, size_t no_to_remove);
 
-
 /** \brief grow WRBUF larger 
+    \param b WRBUF
+    \param minsize make WRBUF at least this size
+
     This function is normally not used by applications
 */
 YAZ_EXPORT int wrbuf_grow(WRBUF b, size_t minsize);
@@ -110,6 +193,10 @@ YAZ_EXPORT int wrbuf_grow(WRBUF b, size_t minsize);
 #define wrbuf_len(b) ((b)->pos)
 #define wrbuf_buf(b) ((b)->buf)
 
+/** \brief returns WRBUF content as C-string
+    \param b WRBUF
+    \returns C-string
+*/
 YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
 
 #define wrbuf_putc(b, c) \
