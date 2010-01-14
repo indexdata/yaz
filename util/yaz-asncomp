@@ -519,7 +519,7 @@ proc asnSequence {name tag implicit tagtype} {
 
         lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), 0))"
         lappend l "\t\{"
-	lappend l "\t\tif(o->direction == ODR_DECODE)"
+	lappend l "\t\tif (o->direction == ODR_DECODE)"
         lappend l "\t\t\t*p = 0;"
         lappend l "\t\treturn 0;"
         lappend l "\t\}"
@@ -732,7 +732,7 @@ proc asnOf {name tag implicit tagtype isset} {
     }
     lappend j "\}"
     lappend l "\t\treturn 1;"
-    lappend l "\tif(o->direction == ODR_DECODE)"
+    lappend l "\tif (o->direction == ODR_DECODE)"
     lappend l "\t\t*p = 0;"
     lappend l "\treturn odr_missing(o, opt, name);"
     return [list [join $l \n] [join $j \n]]
@@ -847,7 +847,7 @@ proc asnChoice {name tag implicit tagtype} {
     }
     lappend l "\t\treturn 1;"
 
-    lappend l "\tif(o->direction == ODR_DECODE)"
+    lappend l "\tif (o->direction == ODR_DECODE)"
     lappend l "\t\t*p = 0;"
 
     lappend l "\treturn odr_missing(o, opt, name);"
