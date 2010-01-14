@@ -78,6 +78,8 @@
 
     Record retrieval: \ref retrieval.h .
 
+    Timing : \ref timing.h .
+
     \section queryparsers Query parsers
 
     PQF parsing: \ref pquery.h .
