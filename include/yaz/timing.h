@@ -27,7 +27,8 @@
 
 /**
  * \file timing.h
- * \brief Timing Utilities
+   \brief Timing Utilities
+
  */
 
 #ifndef YAZ_TIMING_H
@@ -37,20 +38,69 @@
 
 YAZ_BEGIN_CDECL
 
+/** \brief YAZ timing handle (opaque type)
+ */
 typedef struct yaz_timing *yaz_timing_t;
 
+/** \brief create timing handle
+    \returns timing handle
+
+   \verbatim
+    yaz_timing_t my = yaz_timing_create();
+    yaz_timing_start(my);
+    do_work();
+    yaz_timing_stop(my);
+
+    printf("real=%g user=%g sys=%g\n", 
+       yaz_timing_get_real(my),
+       yaz_timing_get_user(my),
+       yaz_timing_get_sys(my));
+
+    yaz_timing_destroy(my);
+
+   \endverbatim
+ */
 YAZ_EXPORT
 yaz_timing_t yaz_timing_create(void);
+
+/** \brief start timer
+    \param t timing handle
+ */
 YAZ_EXPORT
 void yaz_timing_start(yaz_timing_t t);
+
+/** \brief stop timer
+    \param t timing handle
+    
+    Use yaz_timing_get_real, yaz_timing_get_user and yaz_timing_get_sys
+    to fetch timing results.
+*/
 YAZ_EXPORT
 void yaz_timing_stop(yaz_timing_t t);
+
+/** \brief returns real time in seconds
+    \param t timing handle
+    \returns time in seconds
+*/
 YAZ_EXPORT
 double yaz_timing_get_real(yaz_timing_t t);
+
+/** \brief returns user time in seconds
+    \param t timing handle
+    \returns time in seconds
+*/
 YAZ_EXPORT
 double yaz_timing_get_user(yaz_timing_t t);
+
+/** \brief returns system time in seconds
+    \param t timing handle
+    \returns time in seconds
+*/
 YAZ_EXPORT
 double yaz_timing_get_sys(yaz_timing_t t);
+
+/** \brief destroys timing handle
+*/
 YAZ_EXPORT
 void yaz_timing_destroy(yaz_timing_t *tp);
 
