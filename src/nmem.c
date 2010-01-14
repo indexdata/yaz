@@ -8,7 +8,7 @@
  * \brief Implements Nibble Memory
  *
  * This is a simple and fairly wasteful little module for nibble memory
- * allocation. Evemtually we'll put in something better.
+ * allocation.
  *
  */
 #if HAVE_CONFIG_H
@@ -66,7 +66,7 @@ static void free_block(struct nmem_block *p)
     xfree(p->buf);
     xfree(p);
     if (log_level)
-        yaz_log (log_level, "nmem free_block p=%p", p);
+        yaz_log(log_level, "nmem free_block p=%p", p);
 }
 
 /*
@@ -78,14 +78,13 @@ static struct nmem_block *get_block(size_t size)
     size_t get = NMEM_CHUNK;
 
     if (log_level)
-        yaz_log (log_level, "nmem get_block size=%ld", (long) size);
+        yaz_log(log_level, "nmem get_block size=%ld", (long) size);
 
-    
     if (get < size)
         get = size;
-    if(log_level)
-        yaz_log (log_level, "nmem get_block alloc new block size=%ld",
-                 (long) get);
+    if (log_level)
+        yaz_log(log_level, "nmem get_block alloc new block size=%ld",
+                (long) get);
     
     r = (struct nmem_block *) xmalloc(sizeof(*r));
     r->buf = (char *)xmalloc(r->size = get);
@@ -97,7 +96,7 @@ void nmem_reset(NMEM n)
 {
     struct nmem_block *t;
     
-    yaz_log (log_level, "nmem_reset p=%p", n);
+    yaz_log(log_level, "nmem_reset p=%p", n);
     if (!n)
         return;
     while (n->blocks)
@@ -116,8 +115,8 @@ void *nmem_malloc(NMEM n, size_t size)
 
     if (!n)
     {
-        yaz_log (YLOG_FATAL, "calling nmem_malloc with an null pointer");
-        abort ();
+        yaz_log(YLOG_FATAL, "calling nmem_malloc with an null pointer");
+        abort();
     }
     p = n->blocks;
     if (!p || p->size < size + p->top)
@@ -165,7 +164,7 @@ void nmem_destroy(NMEM n)
     xfree(n);
 }
 
-void nmem_transfer (NMEM dst, NMEM src)
+void nmem_transfer(NMEM dst, NMEM src)
 {
     struct nmem_block *t;
     while ((t = src->blocks))
