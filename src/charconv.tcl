@@ -35,7 +35,7 @@ proc preamble_trie {ofilehandle ifiles ofile} {
     "
     puts $f {
         static unsigned long lookup(struct yaz_iconv_trie **ptrs, int ptr, unsigned char *inp,
-                                    size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, int boffset)
+                                    size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, unsigned int boffset)
         {
             struct yaz_iconv_trie *t = ptrs[ptr-1];
             if (inbytesleft < 1)
@@ -264,7 +264,7 @@ proc dump_trie {ofilehandle} {
     puts $f ""
 
     puts $f "unsigned long yaz_$trie(prefix)_conv
-            (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, int boffset)
+            (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, unsigned int boffset)
         {
             unsigned long code;
             
