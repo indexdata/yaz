@@ -153,7 +153,7 @@ int json_append_array(struct json_node *dst, struct json_node *src);
 /** \brief configure subst rule
     \param p JSON parser
     \param idx (%id)
-    \param node node to be substituted for idx (%idx)
+    \param n node to be substituted for idx (%idx)
 */
 YAZ_EXPORT
 void json_parser_subst(json_parser_t p, int idx, struct json_node *n);
