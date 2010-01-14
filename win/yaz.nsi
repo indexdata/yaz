@@ -1,5 +1,5 @@
 ; This file is part of the YAZ toolkit.
-; Copyright (C) 1995-2009 Index Data
+; Copyright (C) 1995-2010 Index Data
 
 !include version.nsi
 
@@ -105,9 +105,9 @@ Noservice:
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
-	File ..\bin\yaz3.dll
+	File ..\bin\yaz4.dll
 	File ..\bin\icu*.dll
-	File ..\bin\yaz_icu3.dll
+	File ..\bin\yaz_icu4.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
