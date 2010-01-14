@@ -531,7 +531,7 @@ static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
     return zc;
 }
 
-static void rpn_term_type(struct yaz_pqf_parser *li, ODR o)
+static void rpn_term_type(struct yaz_pqf_parser *li)
 {
     if (!li->query_look)
         return ;
@@ -609,7 +609,7 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                            attr_clist,  attr_set);
     case 'y':
         lex (li);
-        rpn_term_type (li, o);
+        rpn_term_type(li);
         return
             rpn_structure (li, o, num_attr, max_attr, attr_list,
                            attr_clist, attr_set);
@@ -620,7 +620,7 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
     return sz;
 }
 
-Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li, const char *qbuf)
+static Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li)
 {
     Z_RPNQuery *zq;
     Odr_int attr_array[1024];
@@ -676,14 +676,13 @@ Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf)
     li.term_type = Z_Term_general;
     li.query_buf = li.query_ptr = qbuf;
     li.lex_buf = 0;
-    return p_query_rpn_mk(o, &li, qbuf);
+    return p_query_rpn_mk(o, &li);
 }
 
 
-Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
-                                      ODR o, oid_proto proto,
-                                      Odr_oid **attributeSetP,
-                                      const char *qbuf)
+static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
+                                             ODR o,
+                                             Odr_oid **attributeSetP)
 {
     Odr_int attr_list[1024];
     char *attr_clist[512];
@@ -735,7 +734,7 @@ Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
         else if (li->query_look == 'y')
         {
             lex (li);
-            rpn_term_type (li, o);
+            rpn_term_type(li);
         }
         else
             break;
@@ -771,7 +770,7 @@ Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
     li.query_buf = li.query_ptr = qbuf;
     li.lex_buf = 0;
 
-    return p_query_scan_mk (&li, o, proto, attributeSetP, qbuf);
+    return p_query_scan_mk(&li, o, attributeSetP);
 }
 
 YAZ_PQF_Parser yaz_pqf_create (void)
@@ -798,7 +797,7 @@ Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o, const char *qbuf)
         return 0;
     p->query_buf = p->query_ptr = qbuf;
     p->lex_buf = 0;
-    return p_query_rpn_mk (o, p, qbuf);
+    return p_query_rpn_mk(o, p);
 }
 
 Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
@@ -809,7 +808,7 @@ Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
         return 0;
     p->query_buf = p->query_ptr = qbuf;
     p->lex_buf = 0;
-    return p_query_scan_mk (p, o, PROTO_Z3950, attributeSetP, qbuf);
+    return p_query_scan_mk(p, o, attributeSetP);
 }
 
 int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
