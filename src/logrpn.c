@@ -34,14 +34,14 @@ static const char *relToStr(Odr_int v)
     return str;
 }
 
-static void attrStr (Odr_int type, Odr_int value, char *str)
+static void attrStr(Odr_int type, Odr_int value, char *str)
 {
     const char *rstr;
     *str = '\0';
     switch (type)
     {
     case 1:
-        sprintf (str, "use");
+        sprintf(str, "use");
         break;
     case 2:
         rstr = relToStr(value);
@@ -201,29 +201,29 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
         switch (element->which) 
         {
         case Z_AttributeValue_numeric:
-            attrStr (*element->attributeType,
+            attrStr(*element->attributeType,
                      *element->value.numeric, str);
-            yaz_log (loglevel, "%*.0s%s %s", depth, "", attset_name, str);
+            yaz_log(loglevel, "%*.0s%s %s", depth, "", attset_name, str);
             break;
         case Z_AttributeValue_complex:
-            yaz_log (loglevel, "%*.0s%s attributeType=" ODR_INT_PRINTF
+            yaz_log(loglevel, "%*.0s%s attributeType=" ODR_INT_PRINTF
                      " complex",
                   depth, "", attset_name, *element->attributeType);
             for (i = 0; i<element->value.complex->num_list; i++)
             {
                 if (element->value.complex->list[i]->which ==
                     Z_StringOrNumeric_string)
-                    yaz_log (loglevel, "%*.0s  string: '%s'", depth, "",
+                    yaz_log(loglevel, "%*.0s  string: '%s'", depth, "",
                              element->value.complex->list[i]->u.string);
                 else if (element->value.complex->list[i]->which ==
                          Z_StringOrNumeric_numeric)
-                    yaz_log (loglevel, "%*.0s  numeric: '" ODR_INT_PRINTF
+                    yaz_log(loglevel, "%*.0s  numeric: '" ODR_INT_PRINTF
                              " '", depth, "",
                              *element->value.complex->list[i]->u.numeric);
             }
             break;
         default:
-            yaz_log (loglevel, "%.*s%s attribute unknown",
+            yaz_log(loglevel, "%.*s%s attribute unknown",
                      depth, "", attset_name);
         }
     }
@@ -278,10 +278,10 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
         case Z_Operator_and:
         case Z_Operator_or:
         case Z_Operator_and_not:
-            yaz_log (loglevel, "%*.0s %s", depth, "", complex_op_name(op) );
+            yaz_log(loglevel, "%*.0s %s", depth, "", complex_op_name(op) );
             break;
         case Z_Operator_prox:
-            yaz_log (loglevel, "%*.0s prox excl=%s dist=" ODR_INT_PRINTF
+            yaz_log(loglevel, "%*.0s prox excl=%s dist=" ODR_INT_PRINTF
                      " order=%s "
                      "rel=%s unit=%s",
                      depth, "", op->u.prox->exclusion ?
@@ -292,11 +292,11 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
                      prox_unit_name(op->u.prox) );
             break;
         default:
-            yaz_log (loglevel, "%*.0s unknown complex", depth, "");
+            yaz_log(loglevel, "%*.0s unknown complex", depth, "");
             return;
         }
-        zlog_structure (zs->u.complex->s1, depth+2, ast, loglevel);
-        zlog_structure (zs->u.complex->s2, depth+2, ast, loglevel);
+        zlog_structure(zs->u.complex->s1, depth+2, ast, loglevel);
+        zlog_structure(zs->u.complex->s2, depth+2, ast, loglevel);
     } 
     else if (zs->which == Z_RPNStructure_simple)
     {
@@ -307,40 +307,40 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
             switch (zapt->term->which)
             {
             case Z_Term_general:
-                yaz_log (loglevel, "%*.0s term '%.*s' (general)", depth, "",
+                yaz_log(loglevel, "%*.0s term '%.*s' (general)", depth, "",
                          zapt->term->u.general->len,
                          zapt->term->u.general->buf);
                 break;
             case Z_Term_characterString:
-                yaz_log (loglevel, "%*.0s term '%s' (string)", depth, "",
+                yaz_log(loglevel, "%*.0s term '%s' (string)", depth, "",
                          zapt->term->u.characterString);
                 break;
             case Z_Term_numeric:
-                yaz_log (loglevel, "%*.0s term '" ODR_INT_PRINTF
+                yaz_log(loglevel, "%*.0s term '" ODR_INT_PRINTF
                          "' (numeric)", depth, "",
                          *zapt->term->u.numeric);
                 break;
             case Z_Term_null:
-                yaz_log (loglevel, "%*.0s term (null)", depth, "");
+                yaz_log(loglevel, "%*.0s term (null)", depth, "");
                 break;
             default:
-                yaz_log (loglevel, "%*.0s term (not general)", depth, "");
+                yaz_log(loglevel, "%*.0s term (not general)", depth, "");
             }
             zlog_attributes(zapt, depth+2, ast, loglevel);
         }
         else if (zs->u.simple->which == Z_Operand_resultSetId)
         {
-            yaz_log (loglevel, "%*.0s set '%s'", depth, "",
+            yaz_log(loglevel, "%*.0s set '%s'", depth, "",
                      zs->u.simple->u.resultSetId);
         }
         else
-            yaz_log (loglevel, "%*.0s unknown simple structure", depth, "");
+            yaz_log(loglevel, "%*.0s unknown simple structure", depth, "");
     }
     else
-        yaz_log (loglevel, "%*.0s unknown structure", depth, "");
+        yaz_log(loglevel, "%*.0s unknown structure", depth, "");
 }
 
-void log_rpn_query_level (int loglevel, Z_RPNQuery *rpn)
+void log_rpn_query_level(int loglevel, Z_RPNQuery *rpn)
 {
     zlog_structure(rpn->RPNStructure, 0, rpn->attributeSetId, loglevel);
 }
@@ -358,27 +358,27 @@ void log_scan_term_level(int loglevel,
         return;
     if (zapt->term->which == Z_Term_general) 
     {
-        yaz_log (loglevel, "%*.0s term '%.*s' (general)", depth, "",
+        yaz_log(loglevel, "%*.0s term '%.*s' (general)", depth, "",
                  zapt->term->u.general->len, zapt->term->u.general->buf);
     }
     else
-        yaz_log (loglevel, "%*.0s term (not general)", depth, "");
+        yaz_log(loglevel, "%*.0s term (not general)", depth, "");
     zlog_attributes(zapt, depth+2, ast, loglevel);
 }
 
 void log_scan_term(Z_AttributesPlusTerm *zapt, const Odr_oid *ast)
 {
-    log_scan_term_level (YLOG_LOG, zapt, ast);
+    log_scan_term_level(YLOG_LOG, zapt, ast);
 }
 
-void yaz_log_zquery_level (int loglevel, Z_Query *q)
+void yaz_log_zquery_level(int loglevel, Z_Query *q)
 {
     if (!loglevel)
         return; 
     switch (q->which)
     {
     case Z_Query_type_1: case Z_Query_type_101:
-        log_rpn_query_level (loglevel, q->u.type_1);
+        log_rpn_query_level(loglevel, q->u.type_1);
         break;
     case Z_Query_type_2:
         yaz_log(loglevel, "CCL: %.*s", q->u.type_2->len, q->u.type_2->buf);
@@ -389,11 +389,11 @@ void yaz_log_zquery_level (int loglevel, Z_Query *q)
         break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
-            yaz_log (loglevel, "CQL: %s", q->u.type_104->u.cql);
+            yaz_log(loglevel, "CQL: %s", q->u.type_104->u.cql);
     }
 }
 
-void yaz_log_zquery (Z_Query *q)
+void yaz_log_zquery(Z_Query *q)
 {
     yaz_log_zquery_level(YLOG_LOG, q);
 }
