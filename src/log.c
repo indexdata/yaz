@@ -32,21 +32,6 @@
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
 
-#define HAS_STRERROR 1
-
-
-#if HAS_STRERROR
-
-#else
-char *strerror(int n)
-{
-    extern char *sys_errlist[];
-    return sys_errlist[n];
-}
-
-#endif
-
-
 static int l_level = YLOG_DEFAULT_LEVEL;
 
 enum l_file_type { use_stderr, use_none, use_file };
