@@ -202,56 +202,6 @@ YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
 */
 YAZ_EXPORT void yaz_log_xml_errors(const char *prefix, int log_level);
 
-/* by default, do not enable the old LOG_-defines */
-#ifndef YAZ_USE_NEW_LOG
-#define YAZ_USE_NEW_LOG 1
-#endif
-
-#if YAZ_USE_NEW_LOG
-
-#else
-
-#include <yaz/xmalloc.h>
-
-/** The old LOG_ bit names are here for compatibility only. They may 
-    conflict with bits defined in syslog.h, or other places. 'LOG'
-    really is not such a good name. YLOG must be more unique
-*/
-
-/** \brief old log level */
-#define LOG_FATAL  YLOG_FATAL
-/** \brief old log level */
-#define LOG_DEBUG  YLOG_DEBUG
-/** \brief old log level */
-#define LOG_WARN   YLOG_WARN
-/** \brief old log level */
-#define LOG_LOG    YLOG_LOG
-/** \brief old log level */
-#define LOG_ERRNO  YLOG_ERRNO 
-/** \brief old log level */
-#define LOG_FILE   0x00000020
-/** \brief old log level */
-#define LOG_APP    YLOG_APP
-/** \brief old log level */
-#define LOG_MALLOC YLOG_MALLOC
-/** \brief old log level */
-#define LOG_NOTIME YLOG_NOTIME
-/** \brief old log level */
-#define LOG_APP2   YLOG_APP2
-/** \brief old log level */
-#define LOG_APP3   YLOG_APP3
-/** \brief old log level */
-#define LOG_FLUSH  YLOG_FLUSH 
-/** \brief old log level */
-#define LOG_ALL    YLOG_ALL
-/** \brief old log level */
-#define LOG_DEFAULT_LEVEL YLOG_DEFAULT_LEVEL
-
-/** \brief logf is deprecated, as it conflicts with a math function */
-#define logf yaz_log
-
-#endif /* if !YAZ_USE_NEW_LOG  */
-
 YAZ_END_CDECL
 
 #endif
