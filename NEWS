@@ -1,3 +1,46 @@
+--- 4.0.0 2010/01/1X
+
+Windows binaries for YAZ now compiled with Visual Studio 2008 (VC9).
+Older versions of YAZ was compiled with Visual Studio 6.0 (1998).
+
+Update so/DLL to version 4. Windows version builds YAZ4.DLL.
+POSIX/Unix builds .so with major version 4.
+
+Remove old LOG_-defines from log.h. They have been obsolete and
+undefined by default for the last 5 years.
+
+Odr_int is now of type 'long long'. Used to be 'int' in YAZ 3 series.
+
+GFS: Remove socket (int *fd) from search_rr handler. The socket
+descriptor ptr is a facility that allowed a search handler to supply
+a socket which would serve as a callback - when search was complete.
+This facility has now been in use for years.
+
+COMSTACK API changes: cs_stackerr, cs_addrstr. COMSTACK method cs_stackerr
+removed. It is not implemented by tcpip or unix COMSTACK, perhaps for ISO
+SR which was removed 7 years ago. COMSTACK macro / method cs_addrstr now
+returns 'const char *' rather than 'char *. The returned string is
+read-only and should not be modified by applications. COMSTACK cs_close is
+now a void function - it no longer returns int. No applications check for
+the value and the implementations has always returned 0.
+
+ZOOM: use size_t for scan hit counts and str size. Functions
+ZOOM_scanset_term and ZOOM_scanset_display_term have changed, so that
+occ (hit count) and len (string length) are now of type size_t pointer
+rather than int pointer. This is to be able to represent large hit counts
+and to also just to use the proper type for string length (strlen result).
+
+New JSON parser. Refer to include/yaz/json.h .
+
+WRBUF API changes.. For size parameters for WRBUF size_t is now used ..
+Used to be int in some cases. Many wrbuf_-functions used to return an int
+indicating some length.. These return values were never used. And so they
+are now void.
+
+ODR: odr_malloc, odr_total now takes size_t for size.
+
+clone_z_type: fix leak; occurred for encoding failures.
+
 --- 3.0.52 2009/12/03
 
 tcpip comstack: fix use of uinitialized variable in cs_straddr. This
