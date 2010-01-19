@@ -120,8 +120,8 @@ typedef struct association
     association_state state;
 
     /* session parameters */
-    Odr_int preferredMessageSize;
-    Odr_int maximumRecordSize;
+    int preferredMessageSize;
+    int maximumRecordSize;
     int version;                  /* highest version-bit set (2 or 3) */
 
     int cs_get_mask;

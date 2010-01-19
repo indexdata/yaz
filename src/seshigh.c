@@ -26,6 +26,7 @@
  *
  */
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -835,6 +836,14 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
     return 0;
 }
 
+static int odr_int_to_int(Odr_int v)
+{
+    if (v >= INT_MAX)
+        return INT_MAX;
+    else if (v <= INT_MIN)
+        return INT_MIN;
+    else return v;
+}
 
 static void srw_bend_search(association *assoc, request *req,
                             Z_SRW_PDU *sr,
@@ -960,8 +969,10 @@ static void srw_bend_search(association *assoc, request *req,
             }
             else
             {
-                int number = srw_req->maximumRecords ? *srw_req->maximumRecords : 0;
-                int start = srw_req->startRecord ? *srw_req->startRecord : 1;
+                int number = srw_req->maximumRecords ?
+                    odr_int_to_int(*srw_req->maximumRecords) : 0;
+                int start = srw_req->startRecord ?
+                    odr_int_to_int(*srw_req->startRecord) : 1;
                 
                 yaz_log(log_requestdetail, "Request to pack %d+%d out of "
                         ODR_INT_PRINTF,
@@ -990,7 +1001,7 @@ static void srw_bend_search(association *assoc, request *req,
                     int i;
                     int ok = 1;
                     if (start + number > rr.hits)
-                        number = rr.hits - start + 1;
+                        number = odr_int_to_int(rr.hits) - start + 1;
                     
                     /* Call bend_present if defined */
                     if (assoc->init->bend_present)
@@ -1241,7 +1252,7 @@ static void srw_bend_scan(association *assoc, request *req,
         bsrr->basenames = &srw_req->database;
 
         bsrr->num_entries = srw_req->maximumTerms ?
-            *srw_req->maximumTerms : 10;
+            odr_int_to_int(*srw_req->maximumTerms) : 10;
         bsrr->term_position = srw_req->responsePosition ?
             *srw_req->responsePosition : 1;
 
@@ -2283,8 +2294,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     if (*req->preferredMessageSize < assoc->preferredMessageSize)
         assoc->preferredMessageSize = *req->preferredMessageSize;
 
-    resp->preferredMessageSize = &assoc->preferredMessageSize;
-    resp->maximumRecordSize = &assoc->maximumRecordSize;
+    resp->preferredMessageSize =
+        odr_intdup(assoc->encode, assoc->preferredMessageSize);
+    resp->maximumRecordSize = 
+        odr_intdup(assoc->encode, assoc->maximumRecordSize);
 
     resp->implementationId = odr_prepend(assoc->encode,
                 assoc->init->implementation_id,
@@ -2405,7 +2418,8 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
-    int recno, total_length = 0, toget = *num, dumped_records = 0;
+    int recno, total_length = 0, dumped_records = 0;
+    int toget = odr_int_to_int(*num);
     Z_Records *records =
         (Z_Records *) odr_malloc(a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist =
@@ -2422,10 +2436,9 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     *next = 0;
 
     yaz_log(log_requestdetail, "Request to pack " ODR_INT_PRINTF "+%d %s", start, toget, setname);
-    yaz_log(log_requestdetail, "pms=" ODR_INT_PRINTF
-            ", mrs=" ODR_INT_PRINTF, a->preferredMessageSize,
+    yaz_log(log_requestdetail, "pms=%d, mrs=%d", a->preferredMessageSize,
         a->maximumRecordSize);
-    for (recno = start; reclist->num_records < toget; recno++)
+    for (recno = odr_int_to_int(start); reclist->num_records < toget; recno++)
     {
         bend_fetch_rr freq;
         Z_NamePlusRecord *thisrec;
@@ -2519,7 +2532,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             else /* too big entirely */
             {
                 yaz_log(log_requestdetail, "Record > maxrcdsz "
-                        "this=%d max=" ODR_INT_PRINTF,
+                        "this=%d max=%d",
                         this_length, a->maximumRecordSize);
                 reclist->records[reclist->num_records] =
                     surrogatediagrec(a, freq.basename, 17, 0);
@@ -2642,7 +2655,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     Odr_int *nulint = odr_intdup(assoc->encode, 0);
     Odr_int *next = odr_intdup(assoc->encode, 0);
     Odr_int *none = odr_intdup(assoc->encode, Z_SearchResponse_none);
-    int returnedrecs = 0;
+    Odr_int returnedrecs = 0;
 
     apdu->which = Z_APDU_searchResponse;
     apdu->u.searchResponse = resp;
@@ -2706,7 +2719,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                     nmem_malloc(reqb->request_mem, sizeof(*bprr));
                 bprr->setname = req->resultSetName;
                 bprr->start = 1;
-                bprr->number = *toget;
+                bprr->number = odr_int_to_int(*toget);
                 bprr->format = req->preferredRecordSyntax;
                 bprr->comp = compp;
                 bprr->referenceId = req->referenceId;
@@ -2775,7 +2788,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
             wrbuf_printf(wr, "ERROR %d", bsrt->errcode);
         else
             wrbuf_printf(wr, "OK " ODR_INT_PRINTF, bsrt->hits);
-        wrbuf_printf(wr, " %s 1+%d ",
+        wrbuf_printf(wr, " %s 1+" ODR_INT_PRINTF " ",
                      req->resultSetName, returnedrecs);
         yaz_query_to_wrbuf(wr, req->query);
         
@@ -2820,8 +2833,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
         bend_present_rr *bprr = (bend_present_rr *)
             nmem_malloc(reqb->request_mem, sizeof(*bprr));
         bprr->setname = req->resultSetId;
-        bprr->start = *req->resultSetStartPoint;
-        bprr->number = *req->numberOfRecordsRequested;
+        bprr->start = odr_int_to_int(*req->resultSetStartPoint);
+        bprr->number = odr_int_to_int(*req->numberOfRecordsRequested);
         bprr->format = req->preferredRecordSyntax;
         bprr->comp = req->recordComposition;
         bprr->referenceId = req->referenceId;
@@ -2938,7 +2951,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->errstring = 0;
     bsrr->num_bases = req->num_databaseNames;
     bsrr->basenames = req->databaseNames;
-    bsrr->num_entries = *req->numberOfTermsRequested;
+    bsrr->num_entries = odr_int_to_int(*req->numberOfTermsRequested);
     bsrr->term = req->termListAndStartPoint;
     bsrr->referenceId = req->referenceId;
     bsrr->stream = assoc->encode;
@@ -3191,7 +3204,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
                 req->resultSetList[i]);
     bdrr->stream = assoc->encode;
     bdrr->print = assoc->print;
-    bdrr->function = *req->deleteFunction;
+    bdrr->function = odr_int_to_int(*req->deleteFunction);
     bdrr->referenceId = req->referenceId;
     bdrr->statuses = 0;
     if (bdrr->num_setnames > 0)
