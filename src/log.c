@@ -265,14 +265,14 @@ void yaz_log_set_handler(void (*func)(int, const char *, void *), void *info)
 
 void log_event_start(void (*func)(int, const char *, void *), void *info)
 {
-     start_hook_func = func;
-     start_hook_info = info;
+    start_hook_func = func;
+    start_hook_info = info;
 }
 
 void log_event_end(void (*func)(int, const char *, void *), void *info)
 {
-     end_hook_func = func;
-     end_hook_info = info;
+    end_hook_func = func;
+    end_hook_info = info;
 }
 
 static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
