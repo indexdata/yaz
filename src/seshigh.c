@@ -1244,6 +1244,7 @@ static void srw_bend_scan(association *assoc, request *req,
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
+        int step_size = 0;
         struct scan_entry *save_entries;
 
         bend_scan_rr *bsrr = (bend_scan_rr *)
@@ -1254,14 +1255,14 @@ static void srw_bend_scan(association *assoc, request *req,
         bsrr->num_entries = srw_req->maximumTerms ?
             odr_int_to_int(*srw_req->maximumTerms) : 10;
         bsrr->term_position = srw_req->responsePosition ?
-            *srw_req->responsePosition : 1;
+            odr_int_to_int(*srw_req->responsePosition) : 1;
 
         bsrr->errcode = 0;
         bsrr->errstring = 0;
         bsrr->referenceId = 0;
         bsrr->stream = assoc->encode;
         bsrr->print = assoc->print;
-        bsrr->step_size = odr_intdup(assoc->decode, 0);
+        bsrr->step_size = &step_size;
         bsrr->entries = 0;
         bsrr->setname = 0;
 
@@ -2917,6 +2918,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc(assoc->encode, sizeof(*bsrr));
     struct scan_entry *save_entries;
+    int step_size = 0;
 
     yaz_log(log_requestdetail, "Got ScanRequest");
 
@@ -2925,9 +2927,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     res->referenceId = req->referenceId;
 
     /* if step is absent, set it to 0 */
-    res->stepSize = odr_intdup(assoc->encode, 0);
     if (req->stepSize)
-        *res->stepSize = *req->stepSize;
+        step_size = odr_int_to_int(*req->stepSize);
 
     res->scanStatus = scanStatus;
     res->numberOfEntriesReturned = numberOfEntriesReturned;
@@ -2956,7 +2957,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->referenceId = req->referenceId;
     bsrr->stream = assoc->encode;
     bsrr->print = assoc->print;
-    bsrr->step_size = res->stepSize;
+    bsrr->step_size = &step_size;
     bsrr->setname = yaz_oi_get_string_oid(&req->otherInfo, 
                                           yaz_oid_userinfo_scan_set, 1, 0);
     bsrr->entries = 0;
@@ -2988,7 +2989,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     log_scan_term_level(log_requestdetail, req->termListAndStartPoint, 
                         bsrr->attributeset);
     bsrr->term_position = req->preferredPositionInResponse ?
-        *req->preferredPositionInResponse : 1;
+        odr_int_to_int(*req->preferredPositionInResponse) : 1;
 
     ((int (*)(void *, bend_scan_rr *))
      (*assoc->init->bend_scan))(assoc->backend, bsrr);
@@ -3006,11 +3007,12 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
             *scanStatus = Z_Scan_partial_5;
         else
             *scanStatus = Z_Scan_success;
+        res->stepSize = odr_intdup(assoc->encode, step_size);
         ents->entries = tab;
         ents->num_entries = bsrr->num_entries;
         res->numberOfEntriesReturned = odr_intdup(assoc->encode, 
                                                    ents->num_entries);
-        res->positionOfTerm = &bsrr->term_position;
+        res->positionOfTerm = odr_intdup(assoc->encode, bsrr->term_position);
         for (i = 0; i < bsrr->num_entries; i++)
         {
             Z_Entry *e;
@@ -3209,7 +3211,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
     bdrr->statuses = 0;
     if (bdrr->num_setnames > 0)
     {
-        bdrr->statuses = (Odr_int*) 
+        bdrr->statuses = (int*) 
             odr_malloc(assoc->encode, sizeof(*bdrr->statuses) *
                        bdrr->num_setnames);
         for (i = 0; i < bdrr->num_setnames; i++)
@@ -3239,7 +3241,8 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
                 (Z_ListStatus *)
                 odr_malloc(assoc->encode,
                             sizeof(**res->deleteListStatuses->elements));
-            res->deleteListStatuses->elements[i]->status = bdrr->statuses+i;
+            res->deleteListStatuses->elements[i]->status =
+                odr_intdup(assoc->encode, bdrr->statuses[i]);
             res->deleteListStatuses->elements[i]->id =
                 odr_strdup(assoc->encode, bdrr->setnames[i]);
         }

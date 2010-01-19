@@ -137,8 +137,8 @@ typedef struct bend_scan_rr {
     ODR stream;         /**< encoding stream (input) */
     ODR print;          /**< printing stream (input) */
 
-    Odr_int *step_size;     /**< step size */
-    Odr_int term_position;  /**< desired index of term in result list/returned */
+    int *step_size;     /**< step size */
+    int term_position;  /**< desired index of term in result list/returned */
     int num_entries;    /**< number of entries requested/returned */
 
     /* scan term entries. The called handler does not have
@@ -181,7 +181,7 @@ typedef struct bend_delete_rr {
     char **setnames;
     Z_ReferenceId *referenceId;
     int delete_status;    /**< status for the whole operation */
-    Odr_int *statuses;    /**< status each set - indexed as setnames */
+    int *statuses;    /**< status each set - indexed as setnames */
     ODR stream;
     ODR print; 
 } bend_delete_rr;
