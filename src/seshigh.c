@@ -127,6 +127,16 @@ static void wr_diag(WRBUF w, int error, const char *addinfo)
     wrbuf_puts(w, " ");    
 }
 
+static int odr_int_to_int(Odr_int v)
+{
+    if (v >= INT_MAX)
+        return INT_MAX;
+    else if (v <= INT_MIN)
+        return INT_MIN;
+    else
+        return (int) v;
+}
+
 /*
  * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
@@ -834,15 +844,6 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
     bsrr->query->which = Z_Query_type_1;
     bsrr->query->u.type_1 = ccl_rpn_query(odr, node);
     return 0;
-}
-
-static int odr_int_to_int(Odr_int v)
-{
-    if (v >= INT_MAX)
-        return INT_MAX;
-    else if (v <= INT_MIN)
-        return INT_MIN;
-    else return v;
 }
 
 static void srw_bend_search(association *assoc, request *req,
@@ -2289,10 +2290,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
     yaz_log(log_requestdetail, "Negotiated to v%d: %s", assoc->version, options);
 
     if (*req->maximumRecordSize < assoc->maximumRecordSize)
-        assoc->maximumRecordSize = *req->maximumRecordSize;
+        assoc->maximumRecordSize = odr_int_to_int(*req->maximumRecordSize);
 
     if (*req->preferredMessageSize < assoc->preferredMessageSize)
-        assoc->preferredMessageSize = *req->preferredMessageSize;
+        assoc->preferredMessageSize = odr_int_to_int(*req->preferredMessageSize);
 
     resp->preferredMessageSize =
         odr_intdup(assoc->encode, assoc->preferredMessageSize);
