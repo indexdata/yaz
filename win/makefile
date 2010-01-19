@@ -782,7 +782,7 @@ $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)
 	$(TCL) csvtosru_update.tcl $(SRCDIR)
 
-$(INCLDIR)\yaz\yaz-version.h:
+$(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/configure.ac
 	@cd $(SRCDIR)
 	$(TCL) mk_version.tcl $(ROOTDIR)/configure.ac $(INCLDIR)\yaz\yaz-version.h
 
