@@ -751,8 +751,12 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  int (*check_ip)(void *cd, const char *a, int len, int t),
                  void *cd)
 {
+#ifdef WIN32
+    /* we don't get peer address on Windows (via accept) */
+#else
     struct sockaddr_in addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
+#endif
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
     if (h->state != CS_ST_IDLE)
@@ -792,6 +796,10 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         }
         return -1;
     }
+#ifdef WIN32
+    if (addrlen)
+        *addrlen = 0;
+#else
     if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_in))
         memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
     else if (addrlen)
@@ -808,6 +816,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         h->newfd = -1;
         return -1;
     }
+#endif
     h->state = CS_ST_INCON;
     return 0;
 }
