@@ -72,6 +72,58 @@
 #include <yaz/marcdisp.h>
 YAZ_BEGIN_CDECL
 
+#if 1
+#define Z_PRES_SUCCESS   Z_PresentStatus_success
+#define Z_PRES_PARTIAL_1 Z_PresentStatus_partial_1
+#define Z_PRES_PARTIAL_2 Z_PresentStatus_partial_2
+#define Z_PRES_PARTIAL_3 Z_PresentStatus_partial_3
+#define Z_PRES_PARTIAL_4 Z_PresentStatus_partial_4
+#define Z_PRES_FAILURE   Z_PresentStatus_failure
+
+#define Z_RES_SUBSET  Z_SearchResponse_subset
+#define Z_RES_INTERIM Z_SearchResponse_interim
+#define Z_RES_NONE    Z_SearchResponse_none
+
+#define Z_SortStatus_success Z_SortResponse_success 
+#define Z_SortStatus_partial_1 Z_SortResponse_partial_1
+#define Z_SortStatus_failure Z_SortResponse_failure
+
+#define Z_SortRelation_ascending            Z_SortKeySpec_ascending 
+#define Z_SortRelation_descending           Z_SortKeySpec_descending
+#define Z_SortRelation_ascendingByFreq      Z_SortKeySpec_ascendingByFrequency
+#define Z_SortRelation_descendingByFreq     Z_SortKeySpec_descendingByfrequency 
+
+#define Z_SortCase_caseSensitive            Z_SortKeySpec_caseSensitive
+#define Z_SortCase_caseInsensitive          Z_SortKeySpec_caseInsensitive
+
+#define Z_TriggerResourceCtrl_resourceReport Z_TriggerResourceControlRequest_resourceReport
+#define Z_TriggerResourceCtrl_resourceControl  Z_TriggerResourceControlRequest_resourceControl
+#define Z_TriggerResourceCtrl_cancel Z_TriggerResourceControlRequest_cancel
+
+#define Z_DeleteRequest_list    Z_DeleteResultSetRequest_list
+#define Z_DeleteRequest_all     Z_DeleteResultSetRequest_all
+
+#define Z_AccessRequest_simpleForm Z_AccessControlRequest_simpleForm
+#define Z_AccessRequest_externallyDefined Z_AccessControlRequest_externallyDefined
+
+#define Z_AccessResponse_simpleForm Z_AccessControlResponse_simpleForm
+#define Z_AccessResponse_externallyDefined Z_AccessControlResponse_externallyDefined
+
+#define Z_ResourceReportStatus_success   Z_ResourceReportResponse_success
+#define Z_ResourceReportStatus_partial   Z_ResourceReportResponse_partial
+#define Z_ResourceReportStatus_failure_1 Z_ResourceReportResponse_failure_1
+#define Z_ResourceReportStatus_failure_2 Z_ResourceReportResponse_failure_2
+#define Z_ResourceReportStatus_failure_3 Z_ResourceReportResponse_failure_3
+#define Z_ResourceReportStatus_failure_4 Z_ResourceReportResponse_failure_4
+#define Z_ResourceReportStatus_failure_5 Z_ResourceReportResponse_failure_5
+#define Z_ResourceReportStatus_failure_6 Z_ResourceReportResponse_failure_6
+
+#define Z_SortResultSetStatus_empty       Z_SortResponse_empty
+#define Z_SortResultSetStatus_interim     Z_SortResponse_interim
+#define Z_SortResultSetStatus_unchanged   Z_SortResponse_unchanged
+#define Z_SortResultSetStatus_none        Z_SortResponse_none
+#endif
+
 typedef Z_External Z_DatabaseRecord;
 typedef struct Z_IOItemOrder Z_ItemOrder;
 
