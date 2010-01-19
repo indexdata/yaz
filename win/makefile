@@ -4,7 +4,7 @@
 # Parameters 
 
 DEBUG=0   # 0 for release, 1 for debug
-USE_MANIFEST = 0
+USE_MANIFEST = 1
 
 # TCL
 TCL="C:\Tcl\bin\tclsh85.exe"
