@@ -435,7 +435,7 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
             int i;
             while (*cp1 && *cp1 != ' ')
                 cp1++;
-            if (cp1 - cp0 >= sizeof(buf))
+            if (cp1 - cp0 >= (ptrdiff_t) sizeof(buf))
                 break;
             memcpy(buf, cp0, cp1 - cp0);
             buf[cp1-cp0] = 0;

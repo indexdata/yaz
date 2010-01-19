@@ -59,7 +59,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
 
             xmlDocDumpMemory(doc, (xmlChar **) &buf_out, &len_out);
             
-            if (len_out == strlen(expect_xml)
+            if (len_out == (int) strlen(expect_xml)
                 && memcmp(buf_out, expect_xml, len_out) == 0)
             {
                 Z_Query *query2 = 0;

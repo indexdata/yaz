@@ -1945,7 +1945,7 @@ static Z_External *create_external_itemRequest(void)
     return r;
 }
 
-static Z_External *create_external_ILL_APDU(int which)
+static Z_External *create_external_ILL_APDU(void)
 {
     struct ill_get_ctl ctl;
     ILL_APDU *ill_apdu;
@@ -2047,7 +2047,7 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
     {
         printf("using ILL-request\n");
         r->u.itemOrder->u.esRequest->notToKeep->itemRequest =
-            create_external_ILL_APDU(ILL_APDU_ILL_Request);
+            create_external_ILL_APDU();
     }
     else if (!strcmp(type, "xml") || !strcmp(type, "3"))
     {

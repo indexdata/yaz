@@ -233,7 +233,7 @@ void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
     yaz_apt_to_wrbuf(b, zapt);
 }
 
-void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags)
+void wrbuf_diags(WRBUF b, int num_diagnostics, Z_DiagRec **diags)
 {
     /* we only dump the first diag - that keeps the log cleaner. */
     wrbuf_printf(b," ERROR ");

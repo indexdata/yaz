@@ -1848,7 +1848,7 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset)
     {
         /* Use "from,to" or just "from" */
         const char *cp = strchr(record_charset, ',');
-        int clen = strlen(record_charset);
+        size_t clen = strlen(record_charset);
         if (cp && cp[1])
         {
             strncpy( to, cp+1, sizeof(to)-1);
@@ -2065,7 +2065,7 @@ ZOOM_API(const char *)
     char charset[40];
     char xpath[512];
     const char *cp;
-    int i;
+    size_t i;
     Z_NamePlusRecord *npr;
     
     if (len)
@@ -2093,7 +2093,7 @@ ZOOM_API(const char *)
             i++;
         if (!strncmp(type_spec+i, "charset=", 8))
         {
-            int j = 0;
+            size_t j = 0;
             i = i + 8; /* skip charset= */
             for (j = 0; type_spec[i]  && j < sizeof(charset)-1; i++, j++)
             {
@@ -2105,7 +2105,7 @@ ZOOM_API(const char *)
         }
         else if (!strncmp(type_spec+i, "xpath=", 6))
         {
-            int j = 0; 
+            size_t j = 0; 
             i = i + 6;
             for (j = 0; type_spec[i] && j < sizeof(xpath)-1; i++, j++)
                 xpath[j] = cp[i];
@@ -2924,7 +2924,7 @@ static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
     *disp_len = 0;
 
     *occ = 0;
-    if (pos >= noent || pos < 0)
+    if (pos >= noent)
         return;
     if (scan->scan_response)
     {

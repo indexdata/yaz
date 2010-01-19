@@ -12,7 +12,7 @@
 #include <yaz/odr.h>
 #include <yaz/zgdu.h>
 
-int z_GDU (ODR o, Z_GDU **p, int opt, const char *name)
+int z_GDU(ODR o, Z_GDU **p, int opt, const char *name)
 {
     if (o->direction == ODR_DECODE) {
         *p = (Z_GDU *) odr_malloc(o, sizeof(**p));

@@ -721,7 +721,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
             return 0;
         }
         len = q->term->term->u.general->len;
-        if (len >= sizeof(term))
+        if (len >= (int ) sizeof(term))
             len = sizeof(term)-1;
         memcpy(term, q->term->term->u.general->buf, len);
         term[len] = '\0';

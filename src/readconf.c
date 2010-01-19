@@ -37,7 +37,7 @@ int readconf_line(FILE *f, int *lineno, char *line, int len,
     if (!p)
         return 0;
     
-    for (argc = 0; *p ; argc++)
+    for (argc = 0; *p && argc < num ; argc++)
     {
         if (*p == '#')  /* trailing comment */
             break;

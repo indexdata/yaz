@@ -22,13 +22,14 @@ static void display_variant(WRBUF w, Z_Variant *v, int level)
 
     for (i = 0; i < v->num_triples; i++)
     {
-        printf("%*sclass=" ODR_INT_PRINTF ",type=" ODR_INT_PRINTF,
-               level * 4, "", *v->triples[i]->zclass,
-               *v->triples[i]->type);
+        wrbuf_printf(w, "%*sclass=" ODR_INT_PRINTF ",type=" ODR_INT_PRINTF,
+                     level * 4, "", *v->triples[i]->zclass,
+                     *v->triples[i]->type);
         if (v->triples[i]->which == Z_Triple_internationalString)
-            printf(",value=%s\n", v->triples[i]->value.internationalString);
+            wrbuf_printf(w, ",value=%s\n",
+                         v->triples[i]->value.internationalString);
         else
-            printf("\n");
+            wrbuf_printf(w, "\n");
     }
 }
 
@@ -122,7 +123,7 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
 
 void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags)
 {
-    display_grs1 (wrbuf, r, 0);
+    display_grs1(wrbuf, r, 0);
 }
 
 /*

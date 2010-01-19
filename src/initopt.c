@@ -50,7 +50,7 @@ int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
     while (*cp)
     {
         char this_opt[42];
-        int i, j;
+        size_t i, j;
         if (*cp == ' ' || *cp == ',')
         {
             cp++;

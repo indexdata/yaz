@@ -79,7 +79,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
             /* lead is first of a list of qualifier aliaeses */
             /* qualifier alias: q1 q2 ... */
             char *qlist[10];
-            int i = 0;
+            size_t i = 0;
 
             qlist[i++] = lead_str;
 
@@ -239,7 +239,7 @@ void ccl_qual_buf(CCL_bibset bibset, const char *buf)
     while (1)
     {
         const char *cp2 = cp1;
-        int len;
+        size_t len;
         while (*cp2 && !strchr("\r\n", *cp2))
             cp2++;
         len = cp2 - cp1;

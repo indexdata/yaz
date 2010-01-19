@@ -28,13 +28,13 @@ void tst(void)
     {
         cp = (char *) nmem_malloc(n, j);
         YAZ_CHECK(cp);
-        if (sizeof(long) >= j)
+        if ((int) sizeof(long) >= j)
             *(long*) cp = 123L;
 #if HAVE_LONG_LONG
-        if (sizeof(long long) >= j)
+        if ((int) sizeof(long long) >= j)
             *(long long*) cp = 123L;
 #endif
-        if (sizeof(double) >= j)
+        if ((int) sizeof(double) >= j)
             *(double*) cp = 12.2;
     }
     

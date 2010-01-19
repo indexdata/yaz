@@ -846,7 +846,7 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
     return 0;
 }
 
-static void srw_bend_search(association *assoc, request *req,
+static void srw_bend_search(association *assoc,
                             Z_SRW_PDU *sr,
                             Z_SRW_PDU *res,
                             int *http_code)
@@ -1149,7 +1149,7 @@ static void srw_bend_search(association *assoc, request *req,
     }
 }
 
-static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
+static char *srw_bend_explain_default(bend_explain_rr *rr)
 {
 #if YAZ_HAVE_XML2
     xmlNodePtr ptr = (xmlNode *) rr->server_node_ptr;
@@ -1185,7 +1185,7 @@ static char *srw_bend_explain_default(void *handle, bend_explain_rr *rr)
     return 0;
 }
 
-static void srw_bend_explain(association *assoc, request *req,
+static void srw_bend_explain(association *assoc,
                              Z_SRW_PDU *sr,
                              Z_SRW_explainResponse *srw_res,
                              int *http_code)
@@ -1211,7 +1211,7 @@ static void srw_bend_explain(association *assoc, request *req,
         if (assoc->init->bend_explain)
             (*assoc->init->bend_explain)(assoc->backend, &rr);
         else
-            srw_bend_explain_default(assoc->backend, &rr);
+            srw_bend_explain_default(&rr);
 
         if (rr.explain_buf)
         {
@@ -1233,7 +1233,7 @@ static void srw_bend_explain(association *assoc, request *req,
     }
 }
 
-static void srw_bend_scan(association *assoc, request *req,
+static void srw_bend_scan(association *assoc,
                           Z_SRW_PDU *sr,
                           Z_SRW_scanResponse *srw_res,
                           int *http_code)
@@ -1421,7 +1421,7 @@ static void srw_bend_scan(association *assoc, request *req,
 
 }
 
-static void srw_bend_update(association *assoc, request *req,
+static void srw_bend_update(association *assoc,
 			    Z_SRW_PDU *sr,
 			    Z_SRW_updateResponse *srw_res,
 			    int *http_code)
@@ -1790,7 +1790,7 @@ static void process_http_request(association *assoc, request *req)
             }
             else
             {
-                srw_bend_search(assoc, req, sr, res, &http_code);
+                srw_bend_search(assoc, sr, res, &http_code);
             }
             if (http_code == 200)
                 soap_package->u.generic->p = res;
@@ -1805,8 +1805,7 @@ static void process_http_request(association *assoc, request *req)
                 res->u.explain_response->diagnostics = diagnostic;
                 res->u.explain_response->num_diagnostics = num_diagnostic;
             }
-            srw_bend_explain(assoc, req, sr,
-                             res->u.explain_response, &http_code);
+            srw_bend_explain(assoc, sr, res->u.explain_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -1820,8 +1819,7 @@ static void process_http_request(association *assoc, request *req)
                 res->u.scan_response->diagnostics = diagnostic;
                 res->u.scan_response->num_diagnostics = num_diagnostic;
             }
-            srw_bend_scan(assoc, req, sr,
-                          res->u.scan_response, &http_code);
+            srw_bend_scan(assoc, sr, res->u.scan_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -1836,8 +1834,7 @@ static void process_http_request(association *assoc, request *req)
                 res->u.update_response->num_diagnostics = num_diagnostic;
             }
             yaz_log(YLOG_DEBUG, "num_diag = %d", res->u.update_response->num_diagnostics );
-            srw_bend_update(assoc, req, sr,
-                            res->u.update_response, &http_code);
+            srw_bend_update(assoc, sr, res->u.update_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }

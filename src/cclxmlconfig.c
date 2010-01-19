@@ -15,7 +15,7 @@
 
 #if YAZ_HAVE_XML2
 
-static int ccl_xml_config_attr(CCL_bibset bibset, const char *default_set,
+static int ccl_xml_config_attr(const char *default_set,
                                WRBUF wrbuf,
                                const xmlNode *ptr,
                                const char **addinfo)
@@ -89,7 +89,7 @@ static int ccl_xml_config_qual(CCL_bibset bibset, const char *default_set,
         {
             if (!xmlStrcmp(a_ptr->name, BAD_CAST "attr"))
             {
-                int r = ccl_xml_config_attr(bibset, default_set, wrbuf,
+                int r = ccl_xml_config_attr(default_set, wrbuf,
                                             a_ptr, addinfo);
                 if (r)
                     return r;

@@ -105,13 +105,13 @@ void tst_MySequence3(ODR encode, ODR decode)
     Yc_MySequence *t;
 
     srand(123);
-    for (i = 0; i<1000; i++)
+    for (i = 0; i < 1000; i++)
     {
         int j;
-        for (j = 0; j<sizeof(buf); j++)
+        for (j = 0; j < (int) sizeof(buf); j++)
             buf[j] = rand();
 
-        for (j = 1; j<sizeof(buf); j++)
+        for (j = 1; j < (int) sizeof(buf); j++)
         {
             odr_setbuf(decode, buf, j, 0);
             yc_MySequence(decode, &t, 0, 0);

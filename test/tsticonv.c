@@ -96,7 +96,7 @@ static int tst_convert_x(yaz_iconv_t cd, const char *buf, const char *cmpbuf,
     size_t inbytesleft = strlen(buf);
     const char *inp = buf;
     int rounds = 0;
-    for (rounds = 0; inbytesleft && rounds < sizeof(outbuf); rounds++)
+    for (rounds = 0; inbytesleft && rounds < (int) sizeof(outbuf); rounds++)
     {
         size_t outbytesleft = sizeof(outbuf);
         char *outp = outbuf;

@@ -49,7 +49,7 @@ static void write_pidfile(int pid_fd)
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "ftruncate");
             exit(1);
         }
-        if (write(pid_fd, buf, strlen(buf)) != strlen(buf))
+        if (write(pid_fd, buf, strlen(buf)) != (int) strlen(buf))
         {
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "write");
             exit(1);
