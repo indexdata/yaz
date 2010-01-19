@@ -10,7 +10,7 @@
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>
 
-Z_InitRequest *zget_InitRequest(ODR o)
+static Z_InitRequest *zget_InitRequest(ODR o)
 {
     Z_InitRequest *r = (Z_InitRequest *)odr_malloc(o, sizeof(*r));
 
@@ -43,7 +43,7 @@ Z_InitRequest *zget_InitRequest(ODR o)
     return r;
 }
 
-Z_InitResponse *zget_InitResponse(ODR o)
+static Z_InitResponse *zget_InitResponse(ODR o)
 {
     Z_InitResponse *r = (Z_InitResponse *)odr_malloc(o, sizeof(*r));
 
@@ -67,7 +67,7 @@ Z_InitResponse *zget_InitResponse(ODR o)
     return r;
 }
 
-Z_SearchRequest *zget_SearchRequest(ODR o)
+static Z_SearchRequest *zget_SearchRequest(ODR o)
 {
     Z_SearchRequest *r = (Z_SearchRequest *)odr_malloc(o, sizeof(*r));
 
@@ -88,7 +88,7 @@ Z_SearchRequest *zget_SearchRequest(ODR o)
     return r;
 }
 
-Z_SearchResponse *zget_SearchResponse(ODR o)
+static Z_SearchResponse *zget_SearchResponse(ODR o)
 {
     Z_SearchResponse *r = (Z_SearchResponse *)odr_malloc(o, sizeof(*r));
 
@@ -105,7 +105,7 @@ Z_SearchResponse *zget_SearchResponse(ODR o)
     return r;
 }
 
-Z_PresentRequest *zget_PresentRequest(ODR o)
+static Z_PresentRequest *zget_PresentRequest(ODR o)
 {
     Z_PresentRequest *r = (Z_PresentRequest *)odr_malloc(o, sizeof(*r));
 
@@ -124,7 +124,7 @@ Z_PresentRequest *zget_PresentRequest(ODR o)
     return r;
 }
 
-Z_PresentResponse *zget_PresentResponse(ODR o)
+static Z_PresentResponse *zget_PresentResponse(ODR o)
 {
     Z_PresentResponse *r = (Z_PresentResponse *)odr_malloc(o, sizeof(*r));
 
@@ -137,7 +137,7 @@ Z_PresentResponse *zget_PresentResponse(ODR o)
     return r;
 }
 
-Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
+static Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
 {
     Z_DeleteResultSetRequest *r = (Z_DeleteResultSetRequest *)
         odr_malloc(o, sizeof(*r));
@@ -150,7 +150,7 @@ Z_DeleteResultSetRequest *zget_DeleteResultSetRequest(ODR o)
     return r;
 }
 
-Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
+static Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
 {
     Z_DeleteResultSetResponse *r = (Z_DeleteResultSetResponse *)
         odr_malloc(o, sizeof(*r));
@@ -165,7 +165,7 @@ Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
     return r;
 }
 
-Z_ScanRequest *zget_ScanRequest(ODR o)
+static Z_ScanRequest *zget_ScanRequest(ODR o)
 {
     Z_ScanRequest *r = (Z_ScanRequest *)odr_malloc(o, sizeof(*r));
     
@@ -181,7 +181,7 @@ Z_ScanRequest *zget_ScanRequest(ODR o)
     return r;
 }
 
-Z_ScanResponse *zget_ScanResponse(ODR o)
+static Z_ScanResponse *zget_ScanResponse(ODR o)
 {
     Z_ScanResponse *r = (Z_ScanResponse *)odr_malloc(o, sizeof(*r));
     
@@ -196,7 +196,7 @@ Z_ScanResponse *zget_ScanResponse(ODR o)
     return r;
 }
 
-Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
+static Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
 {
     Z_TriggerResourceControlRequest *r = (Z_TriggerResourceControlRequest *)
         odr_malloc(o, sizeof(*r));
@@ -209,7 +209,7 @@ Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o)
     return r;
 }
 
-Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
+static Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
 {
     Z_ResourceControlRequest *r = (Z_ResourceControlRequest *)
         odr_malloc(o, sizeof(*r));
@@ -224,7 +224,7 @@ Z_ResourceControlRequest *zget_ResourceControlRequest(ODR o)
     return r;
 }
 
-Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
+static Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
 {
     Z_ResourceControlResponse *r = (Z_ResourceControlResponse *)
         odr_malloc(o, sizeof(*r));
@@ -236,7 +236,7 @@ Z_ResourceControlResponse *zget_ResourceControlResponse(ODR o)
     return r;
 }
 
-Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
+static Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
 {
     Z_AccessControlRequest *r = (Z_AccessControlRequest *)
         odr_malloc(o, sizeof(*r));
@@ -248,7 +248,7 @@ Z_AccessControlRequest *zget_AccessControlRequest(ODR o)
     return r;
 }
 
-Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
+static Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
 {
     Z_AccessControlResponse *r = (Z_AccessControlResponse *)
         odr_malloc(o, sizeof(*r));
@@ -261,7 +261,7 @@ Z_AccessControlResponse *zget_AccessControlResponse(ODR o)
     return r;
 }
 
-Z_Segment *zget_Segment(ODR o)
+static Z_Segment *zget_Segment(ODR o)
 {
     Z_Segment *r = (Z_Segment *)odr_malloc(o, sizeof(*r));
 
@@ -273,7 +273,7 @@ Z_Segment *zget_Segment(ODR o)
     return r;
 }
 
-Z_Close *zget_Close(ODR o)
+static Z_Close *zget_Close(ODR o)
 {
     Z_Close *r = (Z_Close *)odr_malloc(o, sizeof(*r));
 
@@ -286,7 +286,7 @@ Z_Close *zget_Close(ODR o)
     return r;
 }
 
-Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
+static Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
 {
     Z_ResourceReportRequest *r = (Z_ResourceReportRequest *)
         odr_malloc(o, sizeof(*r));
@@ -298,7 +298,7 @@ Z_ResourceReportRequest *zget_ResourceReportRequest(ODR o)
     return r;
 }
 
-Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
+static Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
 {
     Z_ResourceReportResponse *r = (Z_ResourceReportResponse *)
         odr_malloc(o, sizeof(*r));
@@ -310,7 +310,7 @@ Z_ResourceReportResponse *zget_ResourceReportResponse(ODR o)
     return r;
 }
 
-Z_SortRequest *zget_SortRequest(ODR o)
+static Z_SortRequest *zget_SortRequest(ODR o)
 {
     Z_SortRequest *r = (Z_SortRequest *)odr_malloc(o, sizeof(*r));
 
@@ -322,7 +322,7 @@ Z_SortRequest *zget_SortRequest(ODR o)
     return r;
 }
 
-Z_SortResponse *zget_SortResponse(ODR o)
+static Z_SortResponse *zget_SortResponse(ODR o)
 {
     Z_SortResponse *r = (Z_SortResponse *)odr_malloc(o, sizeof(*r));
 
@@ -335,7 +335,7 @@ Z_SortResponse *zget_SortResponse(ODR o)
     return r;
 }
 
-Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
+static Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
 {
     Z_ExtendedServicesRequest *r = (Z_ExtendedServicesRequest *)
         odr_malloc(o, sizeof(*r));
@@ -355,7 +355,7 @@ Z_ExtendedServicesRequest *zget_ExtendedServicesRequest(ODR o)
     return r;
 }
 
-Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
+static Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
 {
     Z_ExtendedServicesResponse *r = (Z_ExtendedServicesResponse *)
         odr_malloc(o, sizeof(*r));
@@ -369,7 +369,7 @@ Z_ExtendedServicesResponse *zget_ExtendedServicesResponse(ODR o)
     return r;
 }
 
-Z_DuplicateDetectionRequest *zget_DuplicateDetectionRequest(ODR o)
+static Z_DuplicateDetectionRequest *zget_DuplicateDetectionRequest(ODR o)
 {
     Z_DuplicateDetectionRequest *r = (Z_DuplicateDetectionRequest *)
         odr_malloc(o, sizeof(*r));
@@ -390,7 +390,7 @@ Z_DuplicateDetectionRequest *zget_DuplicateDetectionRequest(ODR o)
     return r;
 }
 
-Z_DuplicateDetectionResponse *zget_DuplicateDetectionResponse(ODR o)
+static Z_DuplicateDetectionResponse *zget_DuplicateDetectionResponse(ODR o)
 {
     Z_DuplicateDetectionResponse *r = (Z_DuplicateDetectionResponse *)
         odr_malloc(o, sizeof(*r));

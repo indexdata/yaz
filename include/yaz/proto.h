@@ -130,7 +130,6 @@ typedef Z_External Z_DatabaseRecord;
 typedef struct Z_IOItemOrder Z_ItemOrder;
 
 YAZ_EXPORT Z_APDU *zget_APDU(ODR o, int which);
-YAZ_EXPORT Z_Close *zget_Close (ODR o);
 
 /** \brief Performs "pretty" display of GRS-1 record to WRBUF */
 YAZ_EXPORT void yaz_display_grs1(WRBUF wrbuf, Z_GenericRecord *r, int flags);
