@@ -756,23 +756,6 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     return apt;
 }
 
-Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
-                                    Odr_oid **attributeSetP,
-                                    const char *qbuf)
-{
-    struct yaz_pqf_parser li;
-
-    li.error = 0;
-    li.left_sep = "{\"";
-    li.right_sep = "}\"";
-    li.escape_char = '@';
-    li.term_type = Z_Term_general;
-    li.query_buf = li.query_ptr = qbuf;
-    li.lex_buf = 0;
-
-    return p_query_scan_mk(&li, o, attributeSetP);
-}
-
 YAZ_PQF_Parser yaz_pqf_create (void)
 {
     YAZ_PQF_Parser p = (YAZ_PQF_Parser) xmalloc (sizeof(*p));

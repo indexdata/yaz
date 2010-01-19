@@ -42,8 +42,6 @@ typedef struct yaz_pqf_parser *YAZ_PQF_Parser;
 
 YAZ_EXPORT Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf);
 
-YAZ_EXPORT Z_AttributesPlusTerm *p_query_scan(ODR o, oid_proto proto,
-                                              Odr_oid **attributeSetP, const char *qbuf);
 YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create(void);
 YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o,
                                      const char *qbuf);
