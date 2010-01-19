@@ -222,8 +222,8 @@ void destroy_association(association *h)
 static void do_close_req(association *a, int reason, char *message,
                          request *req)
 {
-    Z_APDU apdu;
-    Z_Close *cls = zget_Close(a->encode);
+    Z_APDU *apdu = zget_APDU(a->encode, Z_APDU_close);
+    Z_Close *cls = apdu->u.close;
     
     /* Purge request queue */
     while (request_deq(&a->incoming));
@@ -232,11 +232,9 @@ static void do_close_req(association *a, int reason, char *message,
     {
         yaz_log(log_requestdetail, "Sending Close PDU, reason=%d, message=%s",
             reason, message ? message : "none");
-        apdu.which = Z_APDU_close;
-        apdu.u.close = cls;
         *cls->closeReason = reason;
         cls->diagnosticInformation = message;
-        process_z_response(a, req, &apdu);
+        process_z_response(a, req, apdu);
         iochan_settimeout(a->client_chan, 20);
     }
     else
