@@ -7,7 +7,6 @@
 #include <yaz/wrbuf.h>
 #include <string.h>
 #include <yaz/log.h>
-#include <yaz/libxml2_error.h>
 
 #if HAVE_CONFIG_H
 #include <config.h>
