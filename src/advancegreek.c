@@ -366,7 +366,7 @@ static size_t write_advancegreek(yaz_iconv_t cd, yaz_iconv_encoder_t w,
             yaz_iconv_set_errno(cd, YAZ_ICONV_EILSEQ);
             return (size_t) -1;
         }
-        out[k++] = x;
+        out[k++] = (unsigned char ) x;
         break;
     }
     *outbytesleft -= k;
