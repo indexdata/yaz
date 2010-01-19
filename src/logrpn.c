@@ -48,7 +48,7 @@ static void attrStr(Odr_int type, Odr_int value, char *str)
         if (rstr)
             sprintf(str, "relation=%s", rstr);
         else
-            sprintf(str, "relation=%d", value);
+            sprintf(str, "relation=" ODR_INT_PRINTF, value);
         break;
     case 3:
         switch (value)
@@ -170,9 +170,10 @@ static void attrStr(Odr_int type, Odr_int value, char *str)
         break;
     }
     if (*str)
-        sprintf(str + strlen(str), " (%d=%d)", type, value);
+        sprintf(str + strlen(str), " (" ODR_INT_PRINTF "=" ODR_INT_PRINTF")",
+                type, value);
     else
-        sprintf(str, "%d=%d", type, value);
+        sprintf(str, ODR_INT_PRINTF "=" ODR_INT_PRINTF, type, value);
 }
 
 /*
