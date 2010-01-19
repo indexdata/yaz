@@ -78,12 +78,19 @@ YAZ_BEGIN_CDECL
 /** \brief sets level, prefix and filename for logging
     \param level log level
     \param prefix log message prefix
-    \param fname filename 
+    \param fname filename
+
+    If fname is NULL, the filename logging is not changed.
 */
 YAZ_EXPORT void yaz_log_init(int level, const char *prefix, const char *fname);
 
-/** \brief sets log to a file 
-    \param fname filename 
+/** \brief sets log file
+    \param fname filename
+
+    A filename of NULL makes the log to be completely disabled.
+    A filename which is the empty string ("") makes the system
+    log to stderr (which is also the default). Otherwise the
+    filename given is used.
 */
 YAZ_EXPORT void yaz_log_init_file(const char *fname);
 
@@ -152,13 +159,13 @@ YAZ_EXPORT int yaz_log_mask_str(const char *str);
     \return log level mask
 
     yaz_log_mask_str_x() is like yaz_log_mask_str(), but with a given start
-    value
+    value.
 */
 YAZ_EXPORT int yaz_log_mask_str_x(const char *str, int level);
 
-
 /** \brief returns level for module
     \param name module name
+    \returns log level for module
 
     yaz_log_module_level() returns a log level mask corresponding to the
     module name. If that had been specified on the -v arguments (that is
@@ -169,7 +176,7 @@ YAZ_EXPORT int yaz_log_mask_str_x(const char *str, int level);
 YAZ_EXPORT int yaz_log_module_level(const char *name);
 
 /** \brief returns FILE handle for log or NULL if no file is in use
-    \retval FILE FILE handle in use
+    \retval FILE FILE handle in use (possibly stderr)
     \retval NULL log is currently not written to a file
 */
 YAZ_EXPORT FILE *yaz_log_file(void);
@@ -184,21 +191,30 @@ YAZ_EXPORT FILE *yaz_log_file(void);
 YAZ_EXPORT void yaz_log_set_handler(void (*func)(int, const char *,
                                                  void *), void *info);
 
+/** \brief reopen current log file (unless disabled or stderr)
+ */
 YAZ_EXPORT void yaz_log_reopen(void);
 
 /** \brief Truncate the log file */
 YAZ_EXPORT void yaz_log_trunc(void);
 
+/** \brief installs hook to be called before each log msg
+    \param func function to be called
+    \param info user data to be passed to function
+ */
 YAZ_EXPORT void log_event_start(void (*func)(int level, const char *msg,
                                              void *info), void *info);
 
+/** \brief installs hook to be called after each log msg
+    \param func function to be called
+    \param info user data to be passed to function
+ */
 YAZ_EXPORT void log_event_end(void (*func)(int level, const char *msg,
                                            void *info), void *info);
 
-
-/** \brief Makes Libxml2/Libxslt log errors via yaz_log
+/** \brief Makes Libxml2 and Libxslt log errors through yaz_log
     \param prefix prefix to use for log messages (may be 0)
-    \param log_level log level to use for messages
+    \param log_level log level to use for Libxml2/Libxslt messages
 */
 YAZ_EXPORT void yaz_log_xml_errors(const char *prefix, int log_level);
 
