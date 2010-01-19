@@ -33,7 +33,7 @@ static void xml_error_handler(void *ctx, const char *fmt, ...)
     va_start(ap, fmt);
 
     yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
-    yaz_log(YLOG_WARN, "%s: %s", prefix, buf);
+    yaz_log(xml_error_log_level, "%s: %s", prefix, buf);
 
     va_end (ap);
 }
