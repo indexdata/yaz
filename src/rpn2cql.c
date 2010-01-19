@@ -168,10 +168,10 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
         {
             if (ae->which == Z_AttributeValue_numeric)
             {
-                int truncation = *(ae->value.numeric);
+                Odr_int truncation = *(ae->value.numeric);
                 /* This logic only works for Left, right and both. eg. 1,2,3 */
             	if (truncation <= 3)
-                    return (int) (truncation & flag);
+                    return ((int) truncation & flag);
             }
             /* Complex: Shouldn't happen */
         }

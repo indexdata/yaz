@@ -15,7 +15,7 @@
 #include <yaz/logrpn.h>
 #include <yaz/oid_db.h>
 
-static const char *relToStr(int v)
+static const char *relToStr(Odr_int v)
 {
     const char *str = 0;
     switch (v)
@@ -34,7 +34,7 @@ static const char *relToStr(int v)
     return str;
 }
 
-static void attrStr (int type, int value, char *str)
+static void attrStr (Odr_int type, Odr_int value, char *str)
 {
     const char *rstr;
     *str = '\0';
