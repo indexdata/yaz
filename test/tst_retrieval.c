@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
 
-    libxml2_error_to_yazlog(0 /* disable it */, "");
+    yaz_log_xml_errors(0, 0 /* disable it */);
 
 #if YAZ_HAVE_XSLT
     tst_configure();

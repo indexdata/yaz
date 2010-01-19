@@ -334,7 +334,7 @@ static void tst_convert2(void)
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-    libxml2_error_to_yazlog(0 /* disable log */, 0);
+    yaz_log_xml_errors(0, 0 /* disable log */);
 #if YAZ_HAVE_XML2
     tst_configure();
 #endif

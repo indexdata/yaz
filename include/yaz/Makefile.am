@@ -10,7 +10,7 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h comstack.h \
  readconf.h record_conv.h retrieval.h statserv.h \
  tcpip.h test.h timing.h unix.h tpath.h wrbuf.h xmalloc.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
- xmlquery.h libxml2_error.h xmltypes.h snprintf.h query-charset.h \
+ xmlquery.h xmltypes.h snprintf.h query-charset.h \
  mutex.h oid_db.h oid_util.h oid_std.h tokenizer.h copy_types.h \
  icu.h match_glob.h poll.h daemon.h sc.h \
  \

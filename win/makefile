@@ -444,7 +444,6 @@ MISC_OBJS= \
    $(OBJDIR)\iso5426.obj \
    $(OBJDIR)\record_conv.obj \
    $(OBJDIR)\retrieval.obj \
-   $(OBJDIR)\libxml2_error.obj \
    $(OBJDIR)\test.obj \
    $(OBJDIR)\diagbib1.obj \
    $(OBJDIR)\diagsru_update.obj \

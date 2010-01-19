@@ -82,7 +82,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
   ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
-  dumpber.c odr_enum.c odr-priv.h libxml2_error.c \
+  dumpber.c odr_enum.c odr-priv.h \
   comstack.c tcpip.c waislen.c unix.c \
   prt-ext.c \
   ill-get.c \
