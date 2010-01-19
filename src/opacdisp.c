@@ -160,15 +160,6 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
     wrbuf_puts(wrbuf, "</opacRecord>\n");
 }
 
-void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *opac_rec, int flags)
-{
-    yaz_marc_t mt = yaz_marc_create();
-
-    yaz_marc_xml(mt, YAZ_MARC_MARCXML);
-    yaz_opac_decode_wrbuf(mt, opac_rec, wrbuf);
-    yaz_marc_destroy(mt);
-}
-
 /*
  * Local variables:
  * c-basic-offset: 4

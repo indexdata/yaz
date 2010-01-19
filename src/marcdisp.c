@@ -274,16 +274,6 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
     }
 }
 
-int atoi_n_check(const char *buf, int size, int *val)
-{
-    int i;
-    for (i = 0; i < size; i++)
-        if (!isdigit(i[(const unsigned char *) buf]))
-            return 0;
-    *val = atoi_n(buf, size);
-    return 1;
-}
-
 void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
                          int *indicator_length,
                          int *identifier_length,

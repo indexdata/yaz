@@ -16,20 +16,27 @@
 #include <ctype.h>
 #include <yaz/marcdisp.h>
 
-/**
- * atoi_n: like atoi but reads at most len characters.
- */
-int atoi_n (const char *buf, int len)
+int atoi_n(const char *buf, int len)
 {
     int val = 0;
 
     while (--len >= 0)
     {
-        if (isdigit (*(const unsigned char *) buf))
+        if (isdigit(*(const unsigned char *) buf))
             val = val*10 + (*buf - '0');
         buf++;
     }
     return val;
+}
+
+int atoi_n_check(const char *buf, int size, int *val)
+{
+    int i;
+    for (i = 0; i < size; i++)
+        if (!isdigit(i[(const unsigned char *) buf]))
+            return 0;
+    *val = atoi_n(buf, size);
+    return 1;
 }
 
 /*

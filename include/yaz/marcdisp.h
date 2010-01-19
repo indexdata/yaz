@@ -116,7 +116,11 @@ YAZ_EXPORT void yaz_marc_endline_str(yaz_marc_t mt, const char *s);
 YAZ_EXPORT void yaz_marc_modify_leader(yaz_marc_t mt, size_t off,
                                        const char *str);
 
-/** \brief like atoi(3) except that it reads exactly len characters */
+/** \brief like atoi(3) except that it reads exactly len characters
+    \param buf buffer to read
+    \param len number of bytes to consider (being digits)
+    \returns value
+ */
 YAZ_EXPORT int atoi_n(const char *buf, int len);
 
 /** \brief like atoi_n but checks for proper formatting
@@ -142,7 +146,8 @@ int atoi_n_check(const char *buf, int size, int *val);
     \param bsize size of buffer (-1 for unlimited size)
 
     Parses ISO2709 record from supplied buffer
-    Returns > 0 for OK (same as length), -1=ERROR
+    \retval -1 ERROR
+    \retval >0 OK (length)
 */
 YAZ_EXPORT int yaz_marc_read_iso2709(yaz_marc_t mt,
                                      const char *buf, int bsize);
@@ -152,6 +157,8 @@ YAZ_EXPORT int yaz_marc_read_iso2709(yaz_marc_t mt,
     \param getbyte get one byte handler
     \param ungetbyte unget one byte handler
     \param client_data opaque data for handers
+    \retval -1 ERROR
+    \retval >0 OK (length)
 
     Parses MARC line record from stream
     Returns > 0 for OK (same as length), -1=ERROR
@@ -166,8 +173,8 @@ int yaz_marc_read_line(yaz_marc_t mt,
 /** \brief parses MARCXML/MarcXchange record from xmlNode pointer 
     \param mt handle
     \param ptr is a pointer to root xml node 
-
-    Returns 0=OK, -1=ERROR
+    \retval 0 OK
+    \retval -1 ERROR
 */
 YAZ_EXPORT int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr);
 #endif
@@ -175,16 +182,18 @@ YAZ_EXPORT int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr);
 /** \brief writes record in line format
     \param mt handle
     \param wrbuf WRBUF for output
-
-    Returns 0=OK, -1=ERROR
+    \retval 0 OK
+    \retval -1 ERROR
 */
 YAZ_EXPORT int yaz_marc_write_line(yaz_marc_t mt, WRBUF wrbuf);
 
 /** \brief writes record in MARCXML format
     \param mt handle
     \param wrbuf WRBUF for output
+    \retval 0 OK
+    \retval -1 ERROR
 
-    Sets leader[9]='a' . Returns 0=OK, -1=ERROR . 
+    Sets leader[9]='a' .
 */
 YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
 
@@ -193,8 +202,8 @@ YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
     \param wrbuf WRBUF for output
     \param format record format (e.g. "MARC21")
     \param type record type (e.g. Bibliographic)
-
-    Returns 0=OK, -1=ERROR
+    \retval 0 OK
+    \retval -1 ERROR
 */
 YAZ_EXPORT int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wrbuf,
                                           const char *format,
@@ -203,16 +212,19 @@ YAZ_EXPORT int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wrbuf,
 /** \brief writes record in ISO2709 format
     \param mt handle
     \param wrbuf WRBUF for output
-    Returns 0=OK, -1=ERROR
+    \retval 0 OK
+    \retval -1 ERROR
 */
 YAZ_EXPORT int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wrbuf);
 
 /** \brief writes record in mode - given by yaz_marc_xml mode
     \param mt handle
     \param wrbuf WRBUF for output
+    \retval 0 OK
+    \retval -1 ERROR
+
     This function calls yaz_marc_write_iso2709, yaz_marc_write_marcxml,
     etc.. depending on mode given by yaz_marc_xml. 
-    Returns 0=OK, -1=ERROR 
 */  
 YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
 
@@ -354,26 +366,28 @@ void yaz_marc_reset(yaz_marc_t mt);
 YAZ_EXPORT
 int yaz_marc_get_debug(yaz_marc_t mt);
 
-/** \brief convert MARC format type to format type(YAZ_MARC_..)
+/** \brief Converts MARC format type to format type(YAZ_MARC_..)
     \param arg string
-    \returns -1 if arg is not a known format; YAZ_MARC_.. otherwise (OK)
+    \retval -1 unknown format (bad arg)
+    \retval >= 0 OK (one of YAZ_MARC - values)
 */  
 YAZ_EXPORT
 int yaz_marc_decode_formatstr(const char *arg);
 
-/** \brief enable writing of MARC XML records using Libxml2 
+/** \brief Enables or disables writing of MARC XML records using Libxml2 
     \param mt handle
     \param enable 0=disable, 1=enable
 */  
 YAZ_EXPORT
 void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
 
-/** \brief Performs "pretty" display of OPAC record to WRBUF */
-YAZ_EXPORT void yaz_display_OPAC(WRBUF wrbuf, Z_OPACRecord *r, int flags);
-
-/** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t */
-YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf);
-
+/** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t
+    \param mt handle
+    \param r OPAC record
+    \param wrbuf WRBUF for resulting display string
+    \*/
+YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r,
+                                      WRBUF wrbuf);
 
 /** \brief flushes records
     \param mt handle
