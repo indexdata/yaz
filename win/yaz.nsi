@@ -6,8 +6,8 @@
 ; Microsoft runtime CRT 
 ; Uncomment exactly ONE section of the three below
 ; 1: MSVC 6
-!define VS_RUNTIME_DLL ""
-!define VS_RUNTIME_MANIFEST ""
+; !define VS_RUNTIME_DLL ""
+; !define VS_RUNTIME_MANIFEST ""
 
 ; 2: VS 2003
 ; !define VS_RUNTIME_DLL "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin\msvcr71.dll"
@@ -16,6 +16,10 @@
 ; 3: VS 2005
 ;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\msvcr80.dll"
 ;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\Microsoft.VC80.CRT.manifest"
+
+; 4: VS 2008
+!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 9\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll"
+!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 9\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
 
 
 !include "MUI.nsh"
@@ -105,9 +109,8 @@ Noservice:
 	File ..\bin\zlib1.dll
 	File ..\bin\libxml2.dll
 	File ..\bin\libxslt.dll
-	File ..\bin\yaz4.dll
 	File ..\bin\icu*.dll
-	File ..\bin\yaz_icu4.dll
+	File ..\bin\yaz*.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
@@ -126,7 +129,7 @@ Section "YAZ Development" YAZ_Development
 	SetOutPath $INSTDIR\include\yaz
 	File ..\include\yaz\*.h
 	SetOutPath $INSTDIR\lib
-	File ..\lib\yaz3.lib
+	File ..\lib\yaz*.lib
 SectionEnd
 
 Section "YAZ Documentation" YAZ_Documentation
