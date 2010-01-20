@@ -1725,9 +1725,9 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
    <screen>
     NMEM nmem_create(void);
     void nmem_destroy(NMEM n);
-    void *nmem_malloc(NMEM n, int size);
+    void *nmem_malloc(NMEM n, size_t size);
     void nmem_reset(NMEM n);
-    int nmem_total(NMEM n);
+    size_t nmem_total(NMEM n);
     void nmem_init(void);
     void nmem_exit(void);
    </screen>

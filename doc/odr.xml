@@ -94,7 +94,7 @@
     </para>
 
     <synopsis>
-     void *odr_malloc(ODR o, int size);
+     void *odr_malloc(ODR o, size_t size);
     </synopsis>
 
     <para>
@@ -120,7 +120,7 @@
     </para>
 
     <synopsis>
-     int odr_total(ODR o);
+     size_t odr_total(ODR o);
     </synopsis>
 
     <para>
