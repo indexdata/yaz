@@ -1,4 +1,4 @@
---- 4.0.0 2010/01/1X
+--- 4.0.0 2010/01/20
 
 Windows binaries for YAZ now compiled with Visual Studio 2008 (VC9).
 Older versions of YAZ was compiled with Visual Studio 6.0 (1998).
