@@ -2081,8 +2081,9 @@ static const char *get_record_format(ZOOM_record rec, int *len,
     if (*format == '1' && len)
     {
         /* try to XML format res */
-        xmlKeepBlanksDefault(0);
-        xmlDocPtr doc = xmlParseMemory(res, *len);
+        xmlDocPtr doc;
+        xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
+        doc = xmlParseMemory(res, *len);
         if (doc)
         {
             if (rec->xml_mem)
