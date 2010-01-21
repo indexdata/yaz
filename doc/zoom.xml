@@ -726,7 +726,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     The <parameter>type</parameter> is a string of the format:
    </para>
    <para>
-    <replaceable>form</replaceable>[; charset=<replaceable>from</replaceable>[,<replaceable>to</replaceable>]]
+    <replaceable>form</replaceable>[;charset=<replaceable>from</replaceable>[,<replaceable>to</replaceable>]][;format=<replaceable>v</replaceable>]
    </para>
    <para>
     where <replaceable>form</replaceable> specifies the format of the
@@ -737,6 +737,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     character set encoding.
     If charset is not given, then no character set conversion takes place.
     If <replaceable>to</replaceable> is omitted UTF-8 is assumed.
+   </para>
+   <para>
+    The format argument controls whether record data should be XML
+    pretty-printed (post process operation).
+    It is enabled only if format value <replaceable>v</replaceable> is 
+    <literal>1</literal> and the record content is XML well-formed.
    </para>
    <para>
     In addition, for certain types, the length

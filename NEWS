@@ -1,3 +1,6 @@
+ZOOM_record_get supports new parameter "format" which makes it format
+XML record content.
+
 --- 4.0.0 2010/01/20
 
 Windows binaries for YAZ now compiled with Visual Studio 2008 (VC9).
