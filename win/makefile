@@ -496,7 +496,8 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_decode_danmarc.obj \
    $(OBJDIR)\mutex.obj \
    $(OBJDIR)\json.obj \
-   $(OBJDIR)\sc.obj
+   $(OBJDIR)\sc.obj \
+   $(OBJDIR)\xml_include.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
