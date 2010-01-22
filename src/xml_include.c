@@ -133,7 +133,7 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
 
 static int process_config_includes(yaz_xml_include_t config, xmlNode *n)
 {
-    for (; n; n = n->next)
+    for (n = n->children; n; n = n->next)
     {
         if (n->type == XML_ELEMENT_NODE)
         {
@@ -152,7 +152,7 @@ static int process_config_includes(yaz_xml_include_t config, xmlNode *n)
             }
             else
             {
-                if (process_config_includes(config, n->children))
+                if (process_config_includes(config, n))
                     return -1;
             }
         }
