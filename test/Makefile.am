@@ -2,7 +2,7 @@
 ## Copyright (C) 1995-2010 Index Data
 
 check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
- tstccl tstlog tstcomstack \
+ tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob \
@@ -62,7 +62,6 @@ tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
 tstodrstack_SOURCES = tstodrstack.c
 tstccl_SOURCES = tstccl.c
 tstlog_SOURCES = tstlog.c
-tstcomstack_SOURCES = tstcomstack.c
 tstsoap1_SOURCES = tstsoap1.c
 tstsoap2_SOURCES = tstsoap2.c
 tstlogthread_SOURCES = tstlogthread.c
