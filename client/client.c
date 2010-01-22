@@ -4966,7 +4966,7 @@ static void client(void)
             line_in=readline(C_PROMPT);
             if (!line_in)
             {
-                putchar("\n");
+                putchar('\n');
                 break;
             }
 #if HAVE_READLINE_HISTORY_H
