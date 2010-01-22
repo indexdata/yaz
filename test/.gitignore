@@ -29,6 +29,7 @@ tst_icu_I18N
 tst_match_glob
 tst_rpn2cql
 tst_json
+tst_xml_include
 nfatest1
 nfaxmltest1
 tst_oid
