@@ -2,11 +2,11 @@
 ## Copyright (C) 1995-2010 Index Data
 
 check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
- tstccl tstlog tstcomstack \
+ tstccl tstlog \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob \
- tst_rpn2cql tst_json
+ tst_rpn2cql tst_json tst_xml_include
 
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
@@ -31,7 +31,7 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
  tsticu-0.xml tsticu-0.input tsticu-0.output \
  tsticu-1.xml tsticu-1.input tsticu-1.output \
- tst_record_conv.xsl 
+ tst_record_conv.xsl tst_xml_include.xml
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -62,7 +62,6 @@ tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
 tstodrstack_SOURCES = tstodrstack.c
 tstccl_SOURCES = tstccl.c
 tstlog_SOURCES = tstlog.c
-tstcomstack_SOURCES = tstcomstack.c
 tstsoap1_SOURCES = tstsoap1.c
 tstsoap2_SOURCES = tstsoap2.c
 tstlogthread_SOURCES = tstlogthread.c
@@ -80,3 +79,4 @@ tst_icu_I18N_SOURCES = tst_icu_I18N.c
 tst_match_glob_SOURCES = tst_match_glob.c
 tst_rpn2cql_SOURCES = tst_rpn2cql.c
 tst_json_SOURCES = tst_json.c
+tst_xml_include_SOURCES = tst_xml_include.c

@@ -1011,6 +1011,20 @@ ZOOM_API(int)
     return 0;
 }
 
+static void ZOOM_record_release(ZOOM_record rec)
+{
+    if (!rec)
+        return;
+    if (rec->wrbuf)
+        wrbuf_destroy(rec->wrbuf);
+#if YAZ_HAVE_XML2
+    if (rec->xml_mem)
+        xmlFree(rec->xml_mem);
+#endif
+    if (rec->odr)
+        odr_destroy(rec->odr);
+}
+
 ZOOM_API(void)
     ZOOM_resultset_cache_reset(ZOOM_resultset r)
 {
@@ -1020,8 +1034,7 @@ ZOOM_API(void)
         ZOOM_record_cache rc;
         for (rc = r->record_hash[i]; rc; rc = rc->next)
         {
-            if (rc->rec.wrbuf)
-                wrbuf_destroy(rc->rec.wrbuf);
+            ZOOM_record_release(&rc->rec);
         }
         r->record_hash[i] = 0;
     }
@@ -1780,6 +1793,10 @@ ZOOM_API(ZOOM_record)
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf = 0;
+#if YAZ_HAVE_XML2
+    nrec->xml_mem = 0;
+    nrec->xml_size = 0;
+#endif
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
     
@@ -1827,11 +1844,7 @@ ZOOM_API(ZOOM_record)
 ZOOM_API(void)
     ZOOM_record_destroy(ZOOM_record rec)
 {
-    if (!rec)
-        return;
-    if (rec->wrbuf)
-        wrbuf_destroy(rec->wrbuf);
-    odr_destroy(rec->odr);
+    ZOOM_record_release(rec);
     xfree(rec);
 }
 
@@ -2058,12 +2071,40 @@ ZOOM_API(int)
     return 0;
 }
 
+static const char *get_record_format(ZOOM_record rec, int *len,
+                                     Z_NamePlusRecord *npr,
+                                     int marctype, const char *charset,
+                                     const char *format)
+{
+    const char *res = return_record(rec, len, npr, marctype, charset);
+#if YAZ_HAVE_XML2
+    if (*format == '1' && len)
+    {
+        /* try to XML format res */
+        xmlDocPtr doc;
+        xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
+        doc = xmlParseMemory(res, *len);
+        if (doc)
+        {
+            if (rec->xml_mem)
+                xmlFree(rec->xml_mem);
+            xmlDocDumpFormatMemory(doc, &rec->xml_mem, &rec->xml_size, 1);
+            xmlFreeDoc(doc);
+            res = (char *) rec->xml_mem;
+            *len = rec->xml_size;
+        } 
+    }
+#endif
+    return res;
+}
+
+
 ZOOM_API(const char *)
     ZOOM_record_get(ZOOM_record rec, const char *type_spec, int *len)
 {
     char type[40];
     char charset[40];
-    char xpath[512];
+    char format[3];
     const char *cp;
     size_t i;
     Z_NamePlusRecord *npr;
@@ -2078,41 +2119,43 @@ ZOOM_API(const char *)
         return 0;
 
     cp = type_spec;
-    for (i = 0; cp[i] && i < sizeof(type)-1; i++)
-    {
-        if (cp[i] == ';' || cp[i] == ' ')
-            break;
+    for (i = 0; cp[i] && cp[i] != ';' && cp[i] != ' ' && i < sizeof(type)-1;
+         i++)
         type[i] = cp[i];
-    }
     type[i] = '\0';
     charset[0] = '\0';
-    while (type_spec[i] == ';')
+    format[0] = '\0';
+    while (1)
     {
-        i++;
-        while (type_spec[i] == ' ')
+        while (cp[i] == ' ')
             i++;
-        if (!strncmp(type_spec+i, "charset=", 8))
+        if (cp[i] != ';')
+            break;
+        i++;
+        while (cp[i] == ' ')
+            i++;
+        if (!strncmp(cp + i, "charset=", 8))
         {
             size_t j = 0;
             i = i + 8; /* skip charset= */
-            for (j = 0; type_spec[i]  && j < sizeof(charset)-1; i++, j++)
+            for (j = 0; cp[i] && cp[i] != ';' && cp[i] != ' '; i++)
             {
-                if (type_spec[i] == ';' || type_spec[i] == ' ')
-                    break;
-                charset[j] = cp[i];
+                if (j < sizeof(charset)-1)
+                    charset[j++] = cp[i];
             }
             charset[j] = '\0';
         }
-        else if (!strncmp(type_spec+i, "xpath=", 6))
+        else if (!strncmp(cp + i, "format=", 7))
         {
             size_t j = 0; 
-            i = i + 6;
-            for (j = 0; type_spec[i] && j < sizeof(xpath)-1; i++, j++)
-                xpath[j] = cp[i];
-            xpath[j] = '\0';
+            i = i + 7;
+            for (j = 0; cp[i] && cp[i] != ';' && cp[i] != ' '; i++)
+            {
+                if (j < sizeof(format)-1)
+                    format[j++] = cp[i];
+            }
+            format[j] = '\0';
         } 
-        while (type_spec[i] == ' ')
-            i++;
     }
     if (!strcmp(type, "database"))
     {
@@ -2146,15 +2189,17 @@ ZOOM_API(const char *)
     /* from now on - we have a database record .. */
     if (!strcmp(type, "render"))
     {
-        return return_record(rec, len, npr, YAZ_MARC_LINE, charset);
+        return get_record_format(rec, len, npr, YAZ_MARC_LINE, charset, format);
     }
     else if (!strcmp(type, "xml"))
     {
-        return return_record(rec, len, npr, YAZ_MARC_MARCXML, charset);
+        return get_record_format(rec, len, npr, YAZ_MARC_MARCXML, charset,
+                                 format);
     }
     else if (!strcmp(type, "raw"))
     {
-        return return_record(rec, len, npr, YAZ_MARC_ISO2709, charset);
+        return get_record_format(rec, len, npr, YAZ_MARC_ISO2709, charset,
+            format);
     }
     else if (!strcmp(type, "ext"))
     {
@@ -2164,7 +2209,8 @@ ZOOM_API(const char *)
     else if (!strcmp(type, "opac"))
     {
         if (npr->u.databaseRecord->which == Z_External_OPAC)
-            return return_record(rec, len, npr, YAZ_MARC_MARCXML, charset);
+            return get_record_format(rec, len, npr, YAZ_MARC_MARCXML, charset,
+                format);
     }
     return 0;
 }
@@ -2209,6 +2255,9 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
         rc->rec.odr = 0;
         rc->rec.wrbuf = 0;
+#if YAZ_HAVE_XML2
+        rc->rec.xml_mem = 0;
+#endif
         rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
         
         rc->syntax = odr_strdup_null(r->odr, syntax);

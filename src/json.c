@@ -420,7 +420,7 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
     p->buf = json_str;
     p->cp = p->buf;
 
-    n = json_parse_object(p);
+    n = json_parse_value(p);
     if (!n)
         return 0;
     c = look_ch(p);

@@ -12,7 +12,7 @@ pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h comstack.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
  xmlquery.h xmltypes.h snprintf.h query-charset.h \
  mutex.h oid_db.h oid_util.h oid_std.h tokenizer.h copy_types.h \
- icu.h match_glob.h poll.h daemon.h sc.h \
+ icu.h match_glob.h poll.h daemon.h sc.h xml_include.h \
  \
  ill.h ill-core.h item-req.h oclc-ill-req-ext.h z-accdes1.h z-accform1.h \
  z-acckrb1.h z-core.h z-date.h z-diag1.h z-espec1.h z-estask.h z-exp.h \
