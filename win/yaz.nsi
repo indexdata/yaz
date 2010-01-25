@@ -4,7 +4,7 @@
 !include version.nsi
 
 ; Microsoft runtime CRT 
-; Uncomment exactly ONE section of the three below
+; Uncomment exactly ONE of the sections below
 ; 1: MSVC 6
 ; !define VS_RUNTIME_DLL ""
 ; !define VS_RUNTIME_MANIFEST ""
