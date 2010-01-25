@@ -128,9 +128,11 @@ int ztest_search(void *handle, bend_search_rr *rr)
         rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
         return 0;
     }
-    /* Throw Database unavailable if other than Default or Slow */
+    /* Allow Default, db.* and Slow */
     if (!yaz_matchstr(rr->basenames[0], "Default"))
         ;  /* Default is OK in our test */
+    else if (!strncmp(rr->basenames[0], "db", 2))
+        ;  /* db.* is OK in our test */
     else if (check_slow(rr->basenames[0], rr->association))
     {
         rr->estimated_hit_count = 1;
