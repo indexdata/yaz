@@ -47,7 +47,7 @@ YAZ_BEGIN_CDECL
 
     Nodes of the form <include src="glob-pattern"/> are substituted with
     contents of files matching glob-pattern. Do not use this function
-    on XML from untrusted sources -- from the net from example -- local
+    on XML from untrusted sources -- from the net for example -- local
     trusted XML configuration ONLY.
 */
 YAZ_EXPORT
