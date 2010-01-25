@@ -24,11 +24,45 @@
 static int log_level=0;
 static int log_level_set=0;
 
+struct result_set {
+    char *name;
+    char *db;
+    Odr_int hits;
+    struct result_set *next;
+};
+
+struct session_handle {
+    struct result_set *result_sets;
+};
+
 int ztest_search(void *handle, bend_search_rr *rr);
 int ztest_sort(void *handle, bend_sort_rr *rr);
 int ztest_present(void *handle, bend_present_rr *rr);
 int ztest_esrequest(void *handle, bend_esrequest_rr *rr);
 int ztest_delete(void *handle, bend_delete_rr *rr);
+
+static struct result_set *get_set(struct session_handle *sh, const char *name)
+{
+    struct result_set *set = sh->result_sets;
+    for (; set; set = set->next)
+        if (!strcmp(name, set->name))
+            return set;
+    return 0;
+}
+
+static void remove_sets(struct session_handle *sh)
+{
+    struct result_set *set = sh->result_sets;
+    while (set)
+    {
+        struct result_set *set_next = set->next;
+        xfree(set->name);
+        xfree(set->db);
+        xfree(set);
+        set = set_next;
+    }
+    sh->result_sets = 0;
+}
 
 /** \brief use term value as hit count 
     \param s RPN structure
@@ -123,6 +157,9 @@ static int check_slow(const char *basename, bend_association association)
 
 int ztest_search(void *handle, bend_search_rr *rr)
 {
+    struct session_handle *sh = (struct session_handle*) handle;
+    struct result_set *new_set;
+
     if (rr->num_bases != 1)
     {
         rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
@@ -142,6 +179,24 @@ int ztest_search(void *handle, bend_search_rr *rr)
         rr->errcode = YAZ_BIB1_DATABASE_UNAVAILABLE;
         rr->errstring = rr->basenames[0];
         return 0;
+    }
+
+    new_set = get_set(sh, rr->setname);    
+    if (new_set)
+    {
+        if (!rr->replace_set)
+        {
+            rr->errcode = YAZ_BIB1_RESULT_SET_EXISTS_AND_REPLACE_INDICATOR_OFF;
+            return 0;
+        }
+        xfree(new_set->db);
+    }
+    else
+    {
+        new_set = xmalloc(sizeof(*new_set));
+        new_set->next = sh->result_sets;
+        sh->result_sets = new_set;
+        new_set->name = xstrdup(rr->setname);
     }
 
     if (rr->extra_args)
@@ -168,6 +223,10 @@ int ztest_search(void *handle, bend_search_rr *rr)
         wrbuf_destroy(response_xml);
     }
     rr->hits = get_hit_count(rr->query);
+
+    new_set->hits = rr->hits;
+    new_set->db = xstrdup(rr->basenames[0]);
+    
     return 0;
 }
 
@@ -562,19 +621,33 @@ int ztest_present(void *handle, bend_present_rr *rr)
 /* retrieval of a single record (present, and piggy back search) */
 int ztest_fetch(void *handle, bend_fetch_rr *r)
 {
+    struct session_handle *sh = (struct session_handle*) handle;
     char *cp;
     const Odr_oid *oid = r->request_format;
+    struct result_set *set = get_set(sh, r->setname);    
 
+    if (!set)
+    {
+        r->errcode = YAZ_BIB1_SPECIFIED_RESULT_SET_DOES_NOT_EXIST;
+        r->errstring = odr_strdup(r->stream, r->setname);
+        return 0;
+    }
     r->last_in_set = 0;
-    r->basename = "Default";
+    r->basename = set->db;
     r->output_format = r->request_format;
 
+    if (r->number < 1 || r->number > set->hits)
+    {
+        r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+        return 0;
+    }
     if (!oid || yaz_oid_is_iso2709(oid))
     {
         cp = dummy_marc_record(r->number, r->stream);
         if (!cp)
         {
-            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
             return 0;
         }
         else
@@ -589,7 +662,8 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         cp = dummy_marc_record(r->number, r->stream);
         if (!cp)
         {
-            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
             return 0;
         }
         r->record = (char *) dummy_opac(r->number, r->stream, cp);
@@ -612,7 +686,8 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         r->record = (char*) dummy_grs_record(r->number, r->stream);
         if (!r->record)
         {
-            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
             return 0;
         }
     }
@@ -626,7 +701,8 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         f = fopen(fname, "rb");
         if (!f)
         {
-            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
             return 0;
         }
         fseek(f, 0L, SEEK_END);
@@ -634,6 +710,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         if (size <= 0 || size >= 5000000)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
         }
         fseek(f, 0L, SEEK_SET);
         r->record = (char*) odr_malloc(r->stream, size);
@@ -641,6 +718,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         if (fread(r->record, size, 1, f) != 1)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
         }
         fclose(f);
     }
@@ -653,7 +731,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         }
         else 
         {
-            r->errcode = YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE;
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             r->surrogate_flag = 1;
             return 0;
         }
@@ -814,7 +892,9 @@ bend_initresult *bend_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *)
         odr_malloc(q->stream, sizeof(*r));
-    int *counter = (int *) xmalloc(sizeof(int));
+    struct session_handle *sh = xmalloc(sizeof(*sh));
+
+    sh->result_sets = 0;
 
     if (!log_level_set)
     {
@@ -822,10 +902,9 @@ bend_initresult *bend_init(bend_initrequest *q)
         log_level_set=1;
     }
 
-    *counter = 0;
     r->errcode = 0;
     r->errstring = 0;
-    r->handle = counter;         /* user handle, in this case a simple int */
+    r->handle = sh;                         /* tell GFS about our handle */
     q->bend_sort = ztest_sort;              /* register sort handler */
     q->bend_search = ztest_search;          /* register search handler */
     q->bend_present = ztest_present;        /* register present handle */
@@ -847,7 +926,9 @@ bend_initresult *bend_init(bend_initrequest *q)
 
 void bend_close(void *handle)
 {
-    xfree(handle);              /* release our user-defined handle */
+    struct session_handle *sh = (struct session_handle*) handle;
+    remove_sets(sh);
+    xfree(sh);              /* release our session */
     return;
 }
 
