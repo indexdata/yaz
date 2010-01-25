@@ -1578,6 +1578,9 @@ char *dummy_marc_record (int num, ODR odr)
     inf = fopen ("dummy-records", "r");
     if (!inf) 
     { /* file not there. Get them from fixed array */
+        if (num < 1)
+            return 0;
+        return marc_records[(num-1) % 24];
         if (num < 1 || num > 24)
             return 0;
         return marc_records[num-1];
