@@ -6,7 +6,7 @@ check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
  tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
  tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
  tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob \
- tst_rpn2cql tst_json tst_xml_include
+ tst_rpn2cql tst_json tst_xml_include tst_file_glob
 
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
@@ -80,3 +80,4 @@ tst_match_glob_SOURCES = tst_match_glob.c
 tst_rpn2cql_SOURCES = tst_rpn2cql.c
 tst_json_SOURCES = tst_json.c
 tst_xml_include_SOURCES = tst_xml_include.c
+tst_file_glob_SOURCES = tst_file_glob.c
