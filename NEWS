@@ -1,5 +1,19 @@
-ZOOM_record_get supports new parameter "format" which makes it format
-XML record content.
+--- 4.0.1 2010/01/26
+
+New glob file pattern utility. Like POSIX glob. For Windows too. Refer to
+yaz/file_glob.h.
+
+New simple local-file XML include facility which allows file glob-patterns.
+Refer to yaz/xml_include.h.
+
+Utility yaz-json-parse which parses JSON and demonstrates the JSON parser
+API.
+
+ZOOM_record_get supports new parameter "format" which makes it format XML
+record content.
+
+Fix JSON parser WRT start symbol. The start grammar symbol (referred to as
+JSONText in ECMA-262) is JSONValue, not JSONObject.
 
 --- 4.0.0 2010/01/20
 
