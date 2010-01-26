@@ -18,7 +18,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/tpath.h>
 #include <yaz/log.h>
-#include <dirent.h>
+#include <yaz/dirent.h>
 #include <yaz/nmem.h>
 #include <yaz/file_glob.h>
 #include <yaz/match_glob.h>

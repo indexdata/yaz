@@ -497,7 +497,9 @@ MISC_OBJS= \
    $(OBJDIR)\mutex.obj \
    $(OBJDIR)\json.obj \
    $(OBJDIR)\sc.obj \
-   $(OBJDIR)\xml_include.obj
+   $(OBJDIR)\xml_include.obj \
+   $(OBJDIR)\file_glob.obj \
+   $(OBJDIR)\dirent.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\

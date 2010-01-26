@@ -10,15 +10,7 @@
 #include <config.h>
 #endif
 
-#if HAVE_GLOB_H
-#define USE_POSIX_GLOB 1
-#else
-#define USE_POSIX_GLOB 0
-#endif
-
-#if USE_POSIX_GLOB
-#include <glob.h>
-#endif
+#include <yaz/file_glob.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -105,22 +97,21 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
 
     wrbuf_rewind(w);
     conf_dir_path(config, w, src);
-#if USE_POSIX_GLOB
     {
-        size_t i;
-        glob_t glob_res;
-        glob(wrbuf_cstr(w), 0 /* flags */, 0 /* errfunc */, &glob_res);
+        int glob_ret;
+        yaz_glob_res_t glob_res;
+
+        glob_ret = yaz_file_glob(wrbuf_cstr(w), &glob_res);
         
-        for (i = 0; ret == 0 && i < glob_res.gl_pathc; i++)
+        if (glob_ret == 0)
         {
-            const char *path = glob_res.gl_pathv[i];
-            ret = config_include_one(config, &sib, path);
+            size_t i;
+            const char *path;
+            for (i = 0; (path = yaz_file_glob_get_file(glob_res, i)); i++)
+                ret = config_include_one(config, &sib, path);
+            yaz_file_globfree(&glob_res);
         }
-        globfree(&glob_res);
     }
-#else
-    ret = config_include_one(config, &sib, wrbuf_cstr(w));
-#endif
     wrbuf_rewind(w);
     wrbuf_printf(w, " end include src=\"%s\" ", src);
     c = xmlNewComment((const xmlChar *) wrbuf_cstr(w));

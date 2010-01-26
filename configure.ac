@@ -21,7 +21,7 @@ dnl
 YAZ_DOC
 dnl 
 dnl
-AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h glob.h sys/un.h sys/wait.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h],[],[],[])
+AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h],[],[],[])
 AC_CHECK_HEADERS([net/if.h netinet/in.h netinet/if_ether.h],[],[],[
  #if HAVE_SYS_TYPES_H
  #include <sys/types.h>
