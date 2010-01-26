@@ -78,7 +78,7 @@ Section "" ; (default section)
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Program Directory.lnk" \
                  "$INSTDIR"
 	WriteINIStr "$SMPROGRAMS\YAZ\YAZ Home page.url" \
-              "InternetShortcut" "URL" "http://www.indexdata.dk/yaz/"
+              "InternetShortcut" "URL" "http://www.indexdata.com/yaz/"
 	CreateShortCut "$SMPROGRAMS\YAZ\Uninstall YAZ.lnk" \
 		"$INSTDIR\uninst.exe"
 	SetOutPath $INSTDIR
