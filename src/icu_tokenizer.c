@@ -26,6 +26,25 @@
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
 
+struct icu_tokenizer
+{
+    char action;
+    UBreakIterator* bi;
+    struct icu_buf_utf16 * buf16;
+    int32_t token_count;
+    int32_t token_id;
+    int32_t token_start;
+    int32_t token_end;
+/*
+  keep always invariant
+  0 <= token_start 
+  <= token_end 
+  <= buf16->utf16_len
+  and invariant
+  0 <= token_id <= token_count
+*/
+};
+
 struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
                                            UErrorCode *status)
 {

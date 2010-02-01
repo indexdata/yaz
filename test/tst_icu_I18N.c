@@ -17,9 +17,14 @@
 
 #include <yaz/test.h>
 #include <yaz/log.h>
+#include <yaz/wrbuf.h>
 
 #if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
+
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -32,7 +37,7 @@ struct icu_termmap
 };
 
 
-int icu_termmap_cmp(const void *vp1, const void *vp2)
+static int icu_termmap_cmp(const void *vp1, const void *vp2)
 {
     struct icu_termmap *itmp1 = *(struct icu_termmap **) vp1;
     struct icu_termmap *itmp2 = *(struct icu_termmap **) vp2;
@@ -45,8 +50,8 @@ int icu_termmap_cmp(const void *vp1, const void *vp2)
 }
 
 
-int test_icu_casemap(const char * locale, char action,
-                     const char * src8cstr, const char * chk8cstr)
+static int test_icu_casemap(const char * locale, char action,
+                            const char * src8cstr, const char * chk8cstr)
 {
     int success = 0;
     UErrorCode status = U_ZERO_ERROR;
@@ -98,7 +103,7 @@ int test_icu_casemap(const char * locale, char action,
     return success;
 }
 
-void test_icu_I18N_casemap(int argc, char **argv)
+static void check_icu_casemap(void)
 {
     /* Locale 'en' */
 
@@ -159,8 +164,8 @@ void test_icu_I18N_casemap(int argc, char **argv)
 
 }
 
-int test_icu_sortmap(const char * locale, int src_list_len,
-                     const char ** src_list, const char ** chk_list)
+static int test_icu_sortmap(const char * locale, int src_list_len,
+                            const char ** src_list, const char ** chk_list)
 {
     int success = 1;
 
@@ -176,7 +181,7 @@ int test_icu_sortmap(const char * locale, int src_list_len,
     UCollator *coll = ucol_open(locale, &status); 
     icu_check_status(status);
 
-    if(U_FAILURE(status))
+    if (U_FAILURE(status))
         return 0;
 
     /* assigning display terms and sort keys using buf 8 and buf16 */
@@ -239,7 +244,7 @@ int test_icu_sortmap(const char * locale, int src_list_len,
     return success;  
 }
 
-void test_icu_I18N_sortmap(int argc, char **argv)
+static void check_icu_sortmap(void)
 {
     /* successful tests */
     size_t en_1_len = 6;
@@ -268,12 +273,11 @@ void test_icu_I18N_sortmap(int argc, char **argv)
         YAZ_CHECK(test_icu_sortmap("de_AT", de_1_len, de_1_src, de_1_cck));
         YAZ_CHECK(test_icu_sortmap("de_DE", de_1_len, de_1_src, de_1_cck));
     }
-    
 }
 
-int test_icu_normalizer(const char * rules8cstr,
-                        const char * src8cstr,
-                        const char * chk8cstr)
+static int test_icu_normalizer(const char * rules8cstr,
+                               const char * src8cstr,
+                               const char * chk8cstr)
 {
     int success = 0;
     
@@ -296,7 +300,7 @@ int test_icu_normalizer(const char * rules8cstr,
     icu_check_status(status);
 
 
-    if(!strcmp((const char *) dest8->utf8, 
+    if (!strcmp((const char *) dest8->utf8, 
                (const char *) chk8cstr))
         success = 1;
     else
@@ -317,7 +321,7 @@ int test_icu_normalizer(const char * rules8cstr,
     return success;
 }
 
-void test_icu_I18N_normalizer(int argc, char **argv)
+static void check_icu_normalizer(void)
 {
     YAZ_CHECK(test_icu_normalizer("[:Punctuation:] Any-Remove",
                                   "Don't shoot!",
@@ -349,8 +353,8 @@ void test_icu_I18N_normalizer(int argc, char **argv)
                                   "a cote de l'alcove ovoide"));
 }
 
-int test_icu_tokenizer(const char * locale, char action,
-                       const char * src8cstr, int count)
+static int test_icu_tokenizer(const char * locale, char action,
+                              const char * src8cstr, int count)
 {
     int success = 1;
 
@@ -372,17 +376,18 @@ int test_icu_tokenizer(const char * locale, char action,
     /* attach text buffer to tokenizer */
     icu_tokenizer_attach(tokenizer, src16, &status);    
     icu_check_status(status);
-    YAZ_CHECK(tokenizer->bi);
 
     /* perform work on tokens */
-    while(icu_tokenizer_next_token(tokenizer, tkn16, &status)){
+    while (icu_tokenizer_next_token(tokenizer, tkn16, &status))
+    {
         icu_check_status(status);
 
         /* converting to UTF8 */
         icu_utf16_to_utf8(tkn8, tkn16, &status);
     }
 
-    if (count != icu_tokenizer_token_count(tokenizer)){
+    if (count != icu_tokenizer_token_count(tokenizer))
+    {
         success = 0;
         yaz_log(YLOG_LOG, "Tokenizer '%s:%c' Error:", locale, action);
         yaz_log(YLOG_LOG, " Input:  '%s'", src8cstr);
@@ -398,7 +403,7 @@ int test_icu_tokenizer(const char * locale, char action,
     return success;
 }
 
-void test_icu_I18N_tokenizer(int argc, char **argv)
+static void check_icu_tokenizer(void)
 {
     const char * en_str 
         = "O Romeo, Romeo! wherefore art thou Romeo?";
@@ -420,7 +425,7 @@ void test_icu_I18N_tokenizer(int argc, char **argv)
     }
 }
 
-void test_icu_I18N_chain(int argc, char **argv)
+static void check_icu_chain(void)
 {
     const char * en_str 
         = "O Romeo, Romeo! wherefore art thou\t Romeo?";
@@ -478,7 +483,7 @@ void test_icu_I18N_chain(int argc, char **argv)
 }
 
 
-void test_bug_1140(void)
+static void check_bug_1140(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
@@ -539,7 +544,7 @@ void test_bug_1140(void)
 }
 
 
-void test_chain_empty_token(void)
+static void check_chain_empty_token(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
@@ -576,7 +581,7 @@ void test_chain_empty_token(void)
     icu_chain_destroy(chain);
 }
 
-void test_chain_empty_chain(void)
+static void check_chain_empty_chain(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
@@ -617,7 +622,7 @@ void test_chain_empty_chain(void)
     icu_chain_destroy(chain);
 }
 
-void test_icu_iter1(void)
+static void check_icu_iter1(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
@@ -659,14 +664,75 @@ void test_icu_iter1(void)
     icu_chain_destroy(chain);
 }
 
+static int test_iter(struct icu_chain *chain, const char *input,
+                     const char *expected)
+{
+    struct icu_iter *iter = icu_iter_create(chain, input);
+    WRBUF result;
+    struct icu_buf_utf8 *token;
 
-void test_icu_iter2(void)
+    if (!iter)
+    {
+        yaz_log(YLOG_WARN, "test_iter: input=%s !iter", input);
+        return 0;
+    }
+
+    token = icu_buf_utf8_create(0);
+    result = wrbuf_alloc();
+    while (icu_iter_next(iter, token))
+    {
+        wrbuf_puts(result, "[");
+        wrbuf_write(result, (const char *) token->utf8, (int) token->utf8_len);
+        wrbuf_puts(result, "]");
+    }
+    icu_buf_utf8_destroy(token);
+
+    icu_iter_destroy(iter);
+
+    if (strcmp(expected, wrbuf_cstr(result)))
+    {
+        yaz_log(YLOG_WARN, "test_iter: input=%s expected=%s got=%s",
+                input, expected, wrbuf_cstr(result));
+        wrbuf_destroy(result);
+        return 0;
+    }
+    wrbuf_destroy(result);
+    return 1;
+}
+
+static void *iter_thread(void *p)
+{
+    struct icu_chain *chain = (struct icu_chain *) p;
+    int i;
+    
+    for (i = 0; i < 10000; i++)
+    {
+        YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
+                            "[adobe][acrobat][reader][1991][][1999][]"));
+    }
+    return 0;
+}
+
+static void check_iter_threads(struct icu_chain *chain)
+{
+#if YAZ_POSIX_THREADS
+#define NO_THREADS 1
+
+    pthread_t t[NO_THREADS];
+    int i;
+
+    for (i = 0; i < NO_THREADS; i++)
+        pthread_create(t + i, 0, iter_thread, chain);
+
+    for (i = 0; i < NO_THREADS; i++)
+        pthread_join(t[i], 0);
+#endif
+}
+static void check_icu_iter2(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
     xmlNode *xml_node;
-    struct icu_iter *iter;
-    struct icu_buf_utf8 *token;
 
     const char * xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
@@ -691,18 +757,11 @@ void test_icu_iter2(void)
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
     
-    iter = icu_iter_create(chain, "Adobe Acrobat Reader, 1991-1999.");
-    YAZ_CHECK(iter);
-    if (!iter)
-        return;
-    token = icu_buf_utf8_create(0);
-    while (icu_iter_next(iter, token))
-    {
-        yaz_log(YLOG_LOG, "[%.*s]", (int) token->utf8_len, token->utf8);
-    }
-    icu_buf_utf8_destroy(token);
+    YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
+                        "[adobe][acrobat][reader][1991][][1999][]"));
 
-    icu_iter_destroy(iter);
+    check_iter_threads(chain);
+
     icu_chain_destroy(chain);
 }
 
@@ -715,17 +774,17 @@ int main(int argc, char **argv)
 
 #if YAZ_HAVE_ICU
 
-    test_icu_I18N_casemap(argc, argv);
-    test_icu_I18N_sortmap(argc, argv);
-    test_icu_I18N_normalizer(argc, argv); 
-    test_icu_I18N_tokenizer(argc, argv);
-    test_icu_I18N_chain(argc, argv);
-    test_chain_empty_token();
-    test_chain_empty_chain();
-    test_icu_iter1();
-    test_icu_iter2();
+    check_icu_casemap();
+    check_icu_sortmap();
+    check_icu_normalizer();
+    check_icu_tokenizer();
+    check_icu_chain();
+    check_chain_empty_token();
+    check_chain_empty_chain();
+    check_icu_iter1();
+    check_icu_iter2();
     
-    test_bug_1140();
+    check_bug_1140();
 
 #else /* YAZ_HAVE_ICU */
 

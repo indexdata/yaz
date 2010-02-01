@@ -51,6 +51,7 @@ tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
 LDADD = ../src/libyaz.la
 tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
 
+
 CONFIG_CLEAN_FILES=*.log
 
 tstxmalloc_SOURCES = tstxmalloc.c
@@ -75,6 +76,7 @@ tst_retrieval_SOURCES = tst_retrieval.c
 tst_tpath_SOURCES = tst_tpath.c
 tst_timing_SOURCES = tst_timing.c
 tst_query_charset_SOURCES = tst_query_charset.c
+tst_icu_I18N_CFLAGS = $(PTHREAD_CFLAGS)
 tst_icu_I18N_SOURCES = tst_icu_I18N.c
 tst_match_glob_SOURCES = tst_match_glob.c
 tst_rpn2cql_SOURCES = tst_rpn2cql.c
