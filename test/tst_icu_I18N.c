@@ -16,6 +16,7 @@
 #endif
 
 #include <yaz/test.h>
+#include <yaz/log.h>
 
 #if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
@@ -77,12 +78,15 @@ int test_icu_casemap(const char * locale, char action,
         success = 0;
 
     /* report failures */
-    if (!success){
-        printf("\nERROR\n");
-        printf("original string:   '%s' (%d)\n", src8cstr, src8cstr_len);
-        printf("icu_casemap '%s:%c' '%s' (%d)\n", 
-               locale, action, dest8->utf8, dest8->utf8_len);
-        printf("expected string:   '%s' (%d)\n", chk8cstr, chk8cstr_len);
+    if (!success)
+    {
+        yaz_log(YLOG_WARN, "test_icu_casemap failed");
+        yaz_log(YLOG_LOG, "Original string:   '%s' (%d)",
+                src8cstr, src8cstr_len);
+        yaz_log(YLOG_LOG, "icu_casemap '%s:%c' '%s' (%d)", 
+                locale, action, dest8->utf8, dest8->utf8_len);
+        yaz_log(YLOG_LOG, "expected string:   '%s' (%d)",
+                chk8cstr, chk8cstr_len);
     }
   
     /* clean the buffers */
@@ -209,22 +213,19 @@ int test_icu_sortmap(const char * locale, int src_list_len,
 
     if (!success)
     {
-        printf("\nERROR\n"); 
-        printf("Input str: '%s' : ", locale); 
+        yaz_log(YLOG_LOG, "ERROR"); 
+        yaz_log(YLOG_LOG, "Input str:'%s':", locale); 
         for (i = 0; i < src_list_len; i++) {
-            printf(" '%s'", list[i]->disp_term); 
+            yaz_log(YLOG_LOG, "  '%s'", list[i]->disp_term); 
         }
-        printf("\n");
-        printf("ICU sort:  '%s' : ", locale); 
+        yaz_log(YLOG_LOG, "ICU sort: '%s':", locale); 
         for (i = 0; i < src_list_len; i++) {
-            printf(" '%s'", list[i]->disp_term); 
+            yaz_log(YLOG_LOG, " '%s'", list[i]->disp_term); 
         }
-        printf("\n"); 
-        printf("Expected:  '%s' : ", locale); 
+        yaz_log(YLOG_LOG, "Expected: '%s':", locale); 
         for (i = 0; i < src_list_len; i++) {
-            printf(" '%s'", chk_list[i]); 
+            yaz_log(YLOG_LOG, " '%s'", chk_list[i]); 
         }
-        printf("\n"); 
     }
   
     for (i = 0; i < src_list_len; i++)
@@ -301,11 +302,11 @@ int test_icu_normalizer(const char * rules8cstr,
     else
     {
         success = 0;
-        printf("Normalization\n");
-        printf("Rules:      '%s'\n", rules8cstr);
-        printf("Input:      '%s'\n", src8cstr);
-        printf("Normalized: '%s'\n", dest8->utf8);
-        printf("Expected:   '%s'\n", chk8cstr);
+        yaz_log(YLOG_LOG, "Normalization");
+        yaz_log(YLOG_LOG, " Rules:      '%s'", rules8cstr);
+        yaz_log(YLOG_LOG, " Input:      '%s'", src8cstr);
+        yaz_log(YLOG_LOG, " Normalized: '%s'", dest8->utf8);
+        yaz_log(YLOG_LOG, " Expected:   '%s'", chk8cstr);
     }
 
     icu_transform_destroy(transform);
@@ -383,10 +384,10 @@ int test_icu_tokenizer(const char * locale, char action,
 
     if (count != icu_tokenizer_token_count(tokenizer)){
         success = 0;
-        printf("\nTokenizer '%s:%c' Error: \n", locale, action);
-        printf("Input:  '%s'\n", src8cstr);
-        printf("Tokens: %d", icu_tokenizer_token_count(tokenizer));
-        printf(", expected: %d\n", count);
+        yaz_log(YLOG_LOG, "Tokenizer '%s:%c' Error:", locale, action);
+        yaz_log(YLOG_LOG, " Input:  '%s'", src8cstr);
+        yaz_log(YLOG_LOG, " Tokens: %d", icu_tokenizer_token_count(tokenizer));
+        yaz_log(YLOG_LOG, " Expected: %d", count);
     }
 
     icu_tokenizer_destroy(tokenizer);
@@ -647,14 +648,12 @@ void test_icu_iter1(void)
     YAZ_CHECK(iter);
     if (!iter)
         return;
-#if 1
     token = icu_buf_utf8_create(0);
     while (icu_iter_next(iter, token))
     {
-        printf("[%.*s]", (int) token->utf8_len, token->utf8);
+        yaz_log(YLOG_LOG, "[%.*s]", (int) token->utf8_len, token->utf8);
     }
     icu_buf_utf8_destroy(token);
-#endif
 
     icu_iter_destroy(iter);
     icu_chain_destroy(chain);
@@ -699,7 +698,7 @@ void test_icu_iter2(void)
     token = icu_buf_utf8_create(0);
     while (icu_iter_next(iter, token))
     {
-        printf("[%.*s]", (int) token->utf8_len, token->utf8);
+        yaz_log(YLOG_LOG, "[%.*s]", (int) token->utf8_len, token->utf8);
     }
     icu_buf_utf8_destroy(token);
 
@@ -730,8 +729,7 @@ int main(int argc, char **argv)
 
 #else /* YAZ_HAVE_ICU */
 
-    printf("ICU unit tests omitted.\n"
-           "Please install libicu36-dev and icu-doc or similar\n");
+    yaz_log(YLOG_LOG, "ICU unit tests omitted");
     YAZ_CHECK(0 == 0);
 
 #endif /* YAZ_HAVE_ICU */
