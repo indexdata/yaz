@@ -455,11 +455,10 @@ static void check_icu_chain(void)
 
     while (icu_chain_next_token(chain, &status))
     {
-        ;
-        /* printf("%d '%s' '%s'\n",
-           icu_chain_token_number(chain),
-           icu_chain_token_norm(chain),
-           icu_chain_token_display(chain)); */
+        yaz_log(YLOG_LOG, "%d '%s' '%s'",
+                icu_chain_token_number(chain),
+                icu_chain_token_norm(chain),
+                icu_chain_token_display(chain));
     }
 
     YAZ_CHECK_EQ(icu_chain_token_number(chain), 7);
@@ -469,11 +468,10 @@ static void check_icu_chain(void)
 
     while (icu_chain_next_token(chain, &status))
     {
-        ;
-        /* printf("%d '%s' '%s'\n",
-           icu_chain_token_number(chain),
-           icu_chain_token_norm(chain),
-           icu_chain_token_display(chain)); */
+        yaz_log(YLOG_LOG, "%d '%s' '%s'",
+                icu_chain_token_number(chain),
+                icu_chain_token_norm(chain),
+                icu_chain_token_display(chain));
     }
 
 

@@ -19,6 +19,7 @@
 
 #include <yaz/log.h>
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -45,12 +46,9 @@ struct icu_tokenizer
 */
 };
 
-struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
-                                           UErrorCode *status)
+static void icu_tokenizer_reset(struct icu_tokenizer *tokenizer,
+                                char action)
 {
-    struct icu_tokenizer * tokenizer
-        = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
-
     tokenizer->action = action;
     tokenizer->bi = 0;
     tokenizer->buf16 = icu_buf_utf16_create(0);
@@ -58,7 +56,32 @@ struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
     tokenizer->token_id = 0;
     tokenizer->token_start = 0;
     tokenizer->token_end = 0;
+    tokenizer->bi = 0;
+}
 
+struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old)
+{
+    uint32_t bufferSize = 10000;
+    UErrorCode status = 0;
+    struct icu_tokenizer * tokenizer
+        = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
+
+    assert(old);
+    icu_tokenizer_reset(tokenizer, old->action);
+    assert(old->bi);
+    tokenizer->bi = ubrk_safeClone(old->bi, NULL, &bufferSize, &status);
+    if (U_SUCCESS(status))
+        return tokenizer;
+    return tokenizer;
+}
+
+struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
+                                           UErrorCode *status)
+{
+    struct icu_tokenizer * tokenizer
+        = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
+
+    icu_tokenizer_reset(tokenizer, action);
     switch (tokenizer->action)
     {    
     case 'l':

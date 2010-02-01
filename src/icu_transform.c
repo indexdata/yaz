@@ -19,6 +19,7 @@
 
 #include <yaz/log.h>
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +32,19 @@ struct icu_transform
     UParseError parse_error;
     UTransliterator * trans;
 };
+
+struct icu_transform *icu_transform_clone(struct icu_transform *old)
+{
+    struct icu_transform *transform
+        = (struct icu_transform *) xmalloc(sizeof(struct icu_transform));
+    UErrorCode status;
+    assert(old);
+    transform->action = old->action;
+    assert(old->trans);
+    transform->trans = utrans_clone(old->trans, &status);
+    assert(transform->trans);
+    return transform;
+}
 
 struct icu_transform * icu_transform_create(const char *id, char action,
                                             const char *rules, 

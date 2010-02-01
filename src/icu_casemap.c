@@ -54,6 +54,14 @@ struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
     return casemap;
 }
 
+struct icu_casemap *icu_casemap_clone(struct icu_casemap *old)
+{
+    struct icu_casemap * casemap
+        = (struct icu_casemap *) xmalloc(sizeof(struct icu_casemap));
+    casemap->action = old->action;
+    return casemap;
+}
+
 void icu_casemap_destroy(struct icu_casemap * casemap)
 {
     xfree(casemap);

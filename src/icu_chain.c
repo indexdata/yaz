@@ -60,7 +60,7 @@ struct icu_chain
     struct icu_buf_utf8 * norm8;
     
     /* linked list of chain steps */
-    struct icu_chain_step * steps;
+    struct icu_chain_step * csteps;
 };
 
 int icu_check_status(UErrorCode status)
@@ -80,7 +80,7 @@ static struct icu_chain_step *icu_chain_step_create(
 {
     struct icu_chain_step * step = 0;
     
-    if(!chain || !type || !rule)
+    if (!chain || !type || !rule)
         return 0;
 
     step = (struct icu_chain_step *) xmalloc(sizeof(struct icu_chain_step));
@@ -142,6 +142,39 @@ static void icu_chain_step_destroy(struct icu_chain_step * step)
     xfree(step);
 }
 
+struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
+{
+    struct icu_chain_step *step = 0;
+    struct icu_chain_step **sp = &step;
+    while (old)
+    {
+        *sp = (struct icu_chain_step *) xmalloc(sizeof(**sp));
+        (*sp)->type = old->type;
+        
+        switch ((*sp)->type)
+        {
+        case ICU_chain_step_type_display:
+            break;
+        case ICU_chain_step_type_casemap:
+            (*sp)->u.casemap = icu_casemap_clone(old->u.casemap);
+            break;
+        case ICU_chain_step_type_transform:
+        case ICU_chain_step_type_transliterate:
+            (*sp)->u.transform = icu_transform_clone(old->u.transform);
+            break;
+        case ICU_chain_step_type_tokenize:
+            (*sp)->u.tokenizer = icu_tokenizer_clone(old->u.tokenizer);
+            break;
+        case ICU_chain_step_type_none:
+            break;
+        }
+        old = old->previous;
+        sp = &(*sp)->previous;
+    }
+    *sp = 0;
+    return step;
+}
+
 struct icu_chain *icu_chain_create(const char *locale, int sort,
                                    UErrorCode * status)
 {
@@ -161,7 +194,7 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
         return 0;
 
     chain->norm8 = icu_buf_utf8_create(0);
-    chain->steps = 0;
+    chain->csteps = 0;
 
     return chain;
 }
@@ -176,7 +209,7 @@ void icu_chain_destroy(struct icu_chain * chain)
         icu_buf_utf8_destroy(chain->norm8);
         if (chain->iter)
             icu_iter_destroy(chain->iter);
-        icu_chain_step_destroy(chain->steps);
+        icu_chain_step_destroy(chain->csteps);
         xfree(chain->locale);
         xfree(chain);
     }
@@ -266,6 +299,7 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
     return chain;
 }
 
+
 static struct icu_chain_step *icu_chain_insert_step(
     struct icu_chain * chain, enum icu_chain_step_type type,
     const uint8_t * rule, UErrorCode *status)
@@ -278,8 +312,8 @@ static struct icu_chain_step *icu_chain_insert_step(
     step = icu_chain_step_create(chain, type, rule,
                                  status);
 
-    step->previous = chain->steps;
-    chain->steps = step;
+    step->previous = chain->csteps;
+    chain->csteps = step;
 
     return step;
 }
@@ -292,6 +326,7 @@ struct icu_iter {
     struct icu_buf_utf8 *sort8;
     struct icu_buf_utf16 *input;
     int token_count;
+    struct icu_chain_step *steps;
 };
 
 void icu_utf16_print(struct icu_buf_utf16 *src16)
@@ -388,13 +423,17 @@ struct icu_iter *icu_iter_create(struct icu_chain *chain,
         iter->sort8 = icu_buf_utf8_create(0);
         iter->token_count = 0;
         iter->last = 0; /* no last returned string (yet) */
+#if 0
+        iter->steps = icu_chain_step_clone(chain->csteps);
+#else
+        iter->steps = 0;
+#endif
 
         /* fill and assign input string.. It will be 0 after
            first iteration */
         iter->input =  icu_buf_utf16_create(0);
         icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
         return iter;
-
     }
 }
 
@@ -406,6 +445,7 @@ void icu_iter_destroy(struct icu_iter *iter)
         icu_buf_utf8_destroy(iter->sort8);
         if (iter->input)
             icu_buf_utf16_destroy(iter->input);
+        icu_chain_step_destroy(iter->steps);
         xfree(iter);
     }
 }
@@ -417,7 +457,9 @@ int icu_iter_next(struct icu_iter *iter, struct icu_buf_utf8 *result)
     else
     {
         /* on first call, iter->input is the input string. Thereafter: 0. */
-        iter->last = icu_iter_invoke(iter, iter->chain->steps, iter->input);
+        iter->last = icu_iter_invoke(iter, iter->steps ?
+                                     iter->steps : iter->chain->csteps,
+                                     iter->input);
         iter->input = 0;
         
         if (!iter->last)
