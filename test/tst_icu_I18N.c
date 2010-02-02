@@ -647,7 +647,8 @@ static void check_icu_iter1(void)
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
     
-    iter = icu_iter_create(chain, "a string with 15 tokens and 8 displays");
+    iter = icu_iter_create(chain);
+    icu_iter_first(iter, "a string with 15 tokens and 8 displays");
     YAZ_CHECK(iter);
     if (!iter)
         return;
@@ -665,8 +666,9 @@ static void check_icu_iter1(void)
 static int test_iter(struct icu_chain *chain, const char *input,
                      const char *expected)
 {
-    struct icu_iter *iter = icu_iter_create(chain, input);
-    WRBUF result;
+    struct icu_iter *iter = icu_iter_create(chain);
+    WRBUF result, second;
+    int success = 1;
     struct icu_buf_utf8 *token;
 
     if (!iter)
@@ -676,26 +678,52 @@ static int test_iter(struct icu_chain *chain, const char *input,
     }
 
     token = icu_buf_utf8_create(0);
+
+    if (icu_iter_next(iter, token))
+    {
+        yaz_log(YLOG_WARN, "test_iter: expecting 0 before icu_iter_first");
+        return 0;
+    }
+
     result = wrbuf_alloc();
+    icu_iter_first(iter, input);
     while (icu_iter_next(iter, token))
     {
         wrbuf_puts(result, "[");
         wrbuf_write(result, (const char *) token->utf8, (int) token->utf8_len);
         wrbuf_puts(result, "]");
     }
-    icu_buf_utf8_destroy(token);
 
+
+    second = wrbuf_alloc();
+    icu_iter_first(iter, input);
+    while (icu_iter_next(iter, token))
+    {
+        wrbuf_puts(second, "[");
+        wrbuf_write(second, (const char *) token->utf8, (int) token->utf8_len);
+        wrbuf_puts(second, "]");
+    }
+
+    icu_buf_utf8_destroy(token);
     icu_iter_destroy(iter);
 
     if (strcmp(expected, wrbuf_cstr(result)))
     {
         yaz_log(YLOG_WARN, "test_iter: input=%s expected=%s got=%s",
                 input, expected, wrbuf_cstr(result));
-        wrbuf_destroy(result);
-        return 0;
+        success = 0;
     }
+
+    if (strcmp(expected, wrbuf_cstr(second)))
+    {
+        yaz_log(YLOG_WARN, "test_iter: input=%s expected=%s got=%s (2nd)",
+                input, expected, wrbuf_cstr(second));
+        success = 0;
+    }
+
     wrbuf_destroy(result);
-    return 1;
+    wrbuf_destroy(second);
+    return success;
 }
 
 static void *iter_thread(void *p)

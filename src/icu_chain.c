@@ -409,28 +409,29 @@ struct icu_buf_utf16 *icu_iter_invoke(struct icu_iter *iter,
     }
 }
 
-struct icu_iter *icu_iter_create(struct icu_chain *chain,
-                                 const char *src8cstr)
+struct icu_iter *icu_iter_create(struct icu_chain *chain)
 {
-    if (!src8cstr)
-        return 0;
-    else
-    {
-        struct icu_iter *iter = xmalloc(sizeof(*iter));
-        iter->chain = chain;
-        iter->status = U_ZERO_ERROR;
-        iter->display = icu_buf_utf8_create(0);
-        iter->sort8 = icu_buf_utf8_create(0);
-        iter->token_count = 0;
-        iter->last = 0; /* no last returned string (yet) */
-        iter->steps = icu_chain_step_clone(chain->csteps);
+    struct icu_iter *iter = xmalloc(sizeof(*iter));
+    iter->chain = chain;
+    iter->status = U_ZERO_ERROR;
+    iter->display = icu_buf_utf8_create(0);
+    iter->sort8 = icu_buf_utf8_create(0);
+    iter->last = 0; /* no last returned string (yet) */
+    iter->steps = icu_chain_step_clone(chain->csteps);
+    iter->input = 0;
 
-        /* fill and assign input string.. It will be 0 after
-           first iteration */
-        iter->input =  icu_buf_utf16_create(0);
-        icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
-        return iter;
-    }
+    return iter;
+}
+
+void icu_iter_first(struct icu_iter *iter, const char *src8cstr)
+{
+    if (iter->input)
+        icu_buf_utf16_destroy(iter->input);
+    iter->input = icu_buf_utf16_create(0);
+    iter->token_count = 0;
+    /* fill and assign input string.. It will be 0 after
+       first iteration */
+    icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
 }
 
 void icu_iter_destroy(struct icu_iter *iter)
@@ -491,7 +492,8 @@ int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr,
 {
     if (chain->iter)
         icu_iter_destroy(chain->iter);
-    chain->iter = icu_iter_create(chain, src8cstr);
+    chain->iter = icu_iter_create(chain);
+    icu_iter_first(chain->iter, src8cstr);
     return 1;
 }
 
