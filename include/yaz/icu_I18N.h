@@ -159,15 +159,6 @@ yaz_icu_chain_t icu_chain_create(const char * locale,
                                  int sort,
                                  UErrorCode * status);
 
-
-struct icu_iter;
-struct icu_iter *icu_iter_create(struct icu_chain *chain);
-void icu_iter_first(struct icu_iter *iter, const char *src8cstr);
-void icu_iter_destroy(struct icu_iter *iter);
-int icu_iter_next(struct icu_iter *iter, struct icu_buf_utf8 *result);
-const char *icu_iter_get_sortkey(struct icu_iter *iter);
-const char *icu_iter_get_display(struct icu_iter *iter);
-
 #endif /* ICU_I18NL_H */
 
 /*

@@ -109,6 +109,67 @@ YAZ_EXPORT const char * icu_chain_token_norm(yaz_icu_chain_t chain);
 */
 YAZ_EXPORT const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
 
+/** \brief ICU tokenizer iterator type (opaque) */
+typedef struct icu_iter *yaz_icu_iter_t;
+
+/** \brief create ICU tokenizer iterator from chain
+    \param chain ICU chain
+    \returns ICU iterator
+*/
+YAZ_EXPORT
+yaz_icu_iter_t icu_iter_create(struct icu_chain *chain);
+
+/** \brief starts iteration over string
+    \param iter ICU tokenizer iterator
+    \param src8cstr input string (0-terminated)
+    
+    Call icu_iter_next to iterate over each token.
+*/
+YAZ_EXPORT
+void icu_iter_first(yaz_icu_iter_t iter, const char *src8cstr);
+
+/** \brief iterates over one token
+    \param iter ICU tokenizer iterator
+    \retval 0 no more tokens (EOF)
+    \retval 1 got one token (use icu_iter_get..-functions)
+*/
+YAZ_EXPORT
+int icu_iter_next(yaz_icu_iter_t iter);
+
+/** \brief destroy ICU tokenizer iterator
+    \param iter ICU tokenizer iterator
+*/
+YAZ_EXPORT
+void icu_iter_destroy(yaz_icu_iter_t iter);
+
+/** \brief returns ICU normalized token
+    \param iter ICU tokenizer iterator
+    \returns string (0-terminated)
+*/
+YAZ_EXPORT
+const char *icu_iter_get_norm(yaz_icu_iter_t iter);
+
+/** \brief returns ICU sortkey string
+    \param iter ICU tokenizer iterator
+    \returns string (0-terminated)
+*/
+YAZ_EXPORT
+const char *icu_iter_get_sortkey(yaz_icu_iter_t iter);
+
+/** \brief returns ICU display string
+    \param iter ICU tokenizer iterator
+    \returns string (0-terminated)
+*/
+YAZ_EXPORT
+const char *icu_iter_get_display(yaz_icu_iter_t iter);
+
+/** \brief returns ICU token count for iterator
+    \param iter ICU tokenizer iterator
+    \returns token count (1, 2, 3...)
+*/
+YAZ_EXPORT
+const char *icu_iter_get_token_number(yaz_icu_iter_t iter);
+
 YAZ_END_CDECL
 
 #endif /* YAZ_ICU_H */

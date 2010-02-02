@@ -625,8 +625,7 @@ static void check_icu_iter1(void)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain * chain = 0;
     xmlNode *xml_node;
-    struct icu_iter *iter;
-    struct icu_buf_utf8 *token;
+    yaz_icu_iter_t iter;
 
     const char * xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
@@ -652,13 +651,10 @@ static void check_icu_iter1(void)
     YAZ_CHECK(iter);
     if (!iter)
         return;
-    token = icu_buf_utf8_create(0);
-    while (icu_iter_next(iter, token))
+    while (icu_iter_next(iter))
     {
-        yaz_log(YLOG_LOG, "[%.*s]", (int) token->utf8_len, token->utf8);
+        yaz_log(YLOG_LOG, "[%s]", icu_iter_get_norm(iter));
     }
-    icu_buf_utf8_destroy(token);
-
     icu_iter_destroy(iter);
     icu_chain_destroy(chain);
 }
@@ -666,10 +662,9 @@ static void check_icu_iter1(void)
 static int test_iter(struct icu_chain *chain, const char *input,
                      const char *expected)
 {
-    struct icu_iter *iter = icu_iter_create(chain);
+    yaz_icu_iter_t iter = icu_iter_create(chain);
     WRBUF result, second;
     int success = 1;
-    struct icu_buf_utf8 *token;
 
     if (!iter)
     {
@@ -677,9 +672,7 @@ static int test_iter(struct icu_chain *chain, const char *input,
         return 0;
     }
 
-    token = icu_buf_utf8_create(0);
-
-    if (icu_iter_next(iter, token))
+    if (icu_iter_next(iter))
     {
         yaz_log(YLOG_WARN, "test_iter: expecting 0 before icu_iter_first");
         return 0;
@@ -687,24 +680,22 @@ static int test_iter(struct icu_chain *chain, const char *input,
 
     result = wrbuf_alloc();
     icu_iter_first(iter, input);
-    while (icu_iter_next(iter, token))
+    while (icu_iter_next(iter))
     {
         wrbuf_puts(result, "[");
-        wrbuf_write(result, (const char *) token->utf8, (int) token->utf8_len);
+        wrbuf_puts(result, icu_iter_get_norm(iter));
         wrbuf_puts(result, "]");
     }
 
-
     second = wrbuf_alloc();
     icu_iter_first(iter, input);
-    while (icu_iter_next(iter, token))
+    while (icu_iter_next(iter))
     {
         wrbuf_puts(second, "[");
-        wrbuf_write(second, (const char *) token->utf8, (int) token->utf8_len);
+        wrbuf_puts(second, icu_iter_get_norm(iter));
         wrbuf_puts(second, "]");
     }
 
-    icu_buf_utf8_destroy(token);
     icu_iter_destroy(iter);
 
     if (strcmp(expected, wrbuf_cstr(result)))
