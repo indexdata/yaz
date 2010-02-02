@@ -61,8 +61,8 @@ static void icu_tokenizer_reset(struct icu_tokenizer *tokenizer,
 
 struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old)
 {
-    uint32_t bufferSize = 10000;
-    UErrorCode status = 0;
+    int32_t bufferSize = U_BRK_SAFECLONE_BUFFERSIZE;
+    UErrorCode status = U_ZERO_ERROR;
     struct icu_tokenizer * tokenizer
         = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
 
