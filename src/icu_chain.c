@@ -423,11 +423,7 @@ struct icu_iter *icu_iter_create(struct icu_chain *chain,
         iter->sort8 = icu_buf_utf8_create(0);
         iter->token_count = 0;
         iter->last = 0; /* no last returned string (yet) */
-#if 0
         iter->steps = icu_chain_step_clone(chain->csteps);
-#else
-        iter->steps = 0;
-#endif
 
         /* fill and assign input string.. It will be 0 after
            first iteration */
