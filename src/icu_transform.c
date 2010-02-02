@@ -37,7 +37,7 @@ struct icu_transform *icu_transform_clone(struct icu_transform *old)
 {
     struct icu_transform *transform
         = (struct icu_transform *) xmalloc(sizeof(struct icu_transform));
-    UErrorCode status;
+    UErrorCode status = U_ZERO_ERROR;
     assert(old);
     transform->action = old->action;
     assert(old->trans);
