@@ -166,7 +166,7 @@ static void tst_berint32(ODR encode, ODR decode)
     YAZ_CHECK(buf);
     YAZ_CHECK_EQ(len, 2);
     YAZ_CHECK_EQ(buf[0], 1);
-    YAZ_CHECK_EQ(buf[1], -1);
+    YAZ_CHECK_EQ((unsigned char) buf[1], 255);
 
     odr_reset(decode);
     odr_setbuf(decode, buf, len, 0);
@@ -214,9 +214,9 @@ static void tst_berint32(ODR encode, ODR decode)
     YAZ_CHECK_EQ(len, 5);
     YAZ_CHECK_EQ(buf[0], 4);
     YAZ_CHECK_EQ(buf[1], 127);
-    YAZ_CHECK_EQ(buf[2], -1);
-    YAZ_CHECK_EQ(buf[3], -1);
-    YAZ_CHECK_EQ(buf[4], -1);
+    YAZ_CHECK_EQ((unsigned char) buf[2], 255);
+    YAZ_CHECK_EQ((unsigned char) buf[3], 255);
+    YAZ_CHECK_EQ((unsigned char) buf[4], 255);
 
     odr_reset(decode);
     odr_setbuf(decode, buf, len, 0);
@@ -231,7 +231,7 @@ static void tst_berint32(ODR encode, ODR decode)
     YAZ_CHECK(buf);
     YAZ_CHECK_EQ(len, 5);
     YAZ_CHECK_EQ(buf[0], 4);
-    YAZ_CHECK_EQ(buf[1], -128);
+    YAZ_CHECK_EQ((unsigned char) buf[1], 128);
     YAZ_CHECK_EQ(buf[2], 0);
     YAZ_CHECK_EQ(buf[3], 0);
     YAZ_CHECK_EQ(buf[4], 0);
@@ -278,7 +278,7 @@ static void tst_berint64(ODR encode, ODR decode)
     YAZ_CHECK(buf);
     YAZ_CHECK_EQ(len, 6);
     YAZ_CHECK_EQ(buf[0], 5);
-    YAZ_CHECK_EQ(buf[1], -1);
+    YAZ_CHECK_EQ((unsigned char) buf[1], 255);
     YAZ_CHECK_EQ(buf[2], 0);
     YAZ_CHECK_EQ(buf[3], 0);
     YAZ_CHECK_EQ(buf[4], 0);
@@ -298,9 +298,9 @@ static void tst_berint64(ODR encode, ODR decode)
     YAZ_CHECK_EQ(len, 7);
     YAZ_CHECK_EQ(buf[0], 6);
     YAZ_CHECK_EQ(buf[1], 0);
-    YAZ_CHECK_EQ(buf[2], -24);
-    YAZ_CHECK_EQ(buf[3], -44);
-    YAZ_CHECK_EQ(buf[4], -91);
+    YAZ_CHECK_EQ((unsigned char) buf[2], 232);
+    YAZ_CHECK_EQ((unsigned char) buf[3], 212);
+    YAZ_CHECK_EQ((unsigned char) buf[4], 165);
     YAZ_CHECK_EQ(buf[5], 16);
     YAZ_CHECK_EQ(buf[6], 0);
 
