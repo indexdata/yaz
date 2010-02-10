@@ -87,7 +87,7 @@
 
     <para>
      YAZ 3.0.16 and later includes a wrapper for the 
-     <ulink url="%url.icu;">ICU</ulink> 
+     <ulink url="&url.icu;">ICU</ulink> 
      (International Components for Unicode).
      In order to use this, the developer version of the ICU library
      must be available.
