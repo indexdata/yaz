@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <yaz/wrbuf.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h> 
@@ -57,20 +58,17 @@ static int next_token(const char **cpp, const char **t_start)
     return len;  /* return -1 if no token was read .. */
 }
 
-static int next_token_copy(const char **cpp, char *buf_out, int buf_max)
+static WRBUF next_token_new_wrbuf(const char **cpp)
 {
+    WRBUF w = 0;
     const char *start;
     int len = next_token(cpp, &start);
     if (len < 0)
-    {
-        *buf_out = 0;
-        return len;
-    }
-    if (len >= buf_max)
-        len = buf_max-1;
-    memcpy(buf_out, start, len);
-    buf_out[len] = '\0';
-    return len;
+        return 0;
+    w = wrbuf_alloc();
+    if (len > 0)
+        wrbuf_write(w, start, len);
+    return w;
 }
 
 static int is_command(const char *cmd_str, const char *this_str, int this_len)
@@ -87,32 +85,37 @@ static void cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
                     ZOOM_options options,
                     const char **args)
 {
-    char key[40], val[80];
+    WRBUF key, val;
 
-    if (next_token_copy(args, key, sizeof(key)) < 0)
+    if (!(key = next_token_new_wrbuf(args)))
     {
         printf("missing argument for set\n");
         return ;
     }
-    if (next_token_copy(args, val, sizeof(val)) < 0)
-        ZOOM_options_set(options, key, 0);
+    if ((val = next_token_new_wrbuf(args)))
+    {
+        ZOOM_options_set(options, wrbuf_cstr(key), wrbuf_cstr(val));
+        wrbuf_destroy(val);
+    }
     else
-        ZOOM_options_set(options, key, val);
+        ZOOM_options_set(options, wrbuf_cstr(key), 0);
+    wrbuf_destroy(key);
 }
 
 static void cmd_get(ZOOM_connection *c, ZOOM_resultset *r,
                     ZOOM_options options,
                     const char **args)
 {
-    char key[40];
-    if (next_token_copy(args, key, sizeof(key)) < 0)
+    WRBUF key;
+    if (!(key = next_token_new_wrbuf(args)))
     {
         printf("missing argument for get\n");
     }
     else
     {
-        const char *val = ZOOM_options_get(options, key);
-        printf("%s = %s\n", key, val ? val : "<null>");
+        const char *val = ZOOM_options_get(options, wrbuf_cstr(key));
+        printf("%s = %s\n", wrbuf_cstr(key), val ? val : "<null>");
+        wrbuf_destroy(key);
     }
 }
 
@@ -120,8 +123,8 @@ static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
                      ZOOM_options options,
                      const char **args)
 {
-    char key[40];
-    if (next_token_copy(args, key, sizeof(key)) < 0)
+    WRBUF key;
+    if (!(key = next_token_new_wrbuf(args)))
     {
         printf("missing argument for get\n");
     }
@@ -134,9 +137,10 @@ static void cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
             if (!r[i])
                 continue;
             
-            val = ZOOM_resultset_option_get(r[i], key);
-            printf("%s = %s\n", key, val ? val : "<null>");
+            val = ZOOM_resultset_option_get(r[i], wrbuf_cstr(key));
+            printf("%s = %s\n", wrbuf_cstr(key), val ? val : "<null>");
         }
+        wrbuf_destroy(key);
     }
 }
 
@@ -144,26 +148,28 @@ static void cmd_close(ZOOM_connection *c, ZOOM_resultset *r,
                       ZOOM_options options,
                       const char **args)
 {
-    char host[60];
+    WRBUF host;
     int i;
-    next_token_copy(args, host, sizeof(host));
+    host = next_token_new_wrbuf(args);
     for (i = 0; i<MAX_CON; i++)
     {
         const char *h;
         if (!c[i])
             continue;
-        if ((h = ZOOM_connection_option_get(c[i], "host"))
-            && !strcmp(h, host))
+        if (!host)
         {
             ZOOM_connection_destroy(c[i]);
             c[i] = 0;
         }
-        else if (*host == '\0')
+        else if ((h = ZOOM_connection_option_get(c[i], "host"))
+                 && !strcmp(h, wrbuf_cstr(host)))
         {
             ZOOM_connection_destroy(c[i]);
             c[i] = 0;
         }
     }
+    if (host)
+        wrbuf_destroy(host);
 }
 
 static void display_records(ZOOM_connection c,
@@ -227,19 +233,26 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
     int i;
     size_t start = 0, count = 1;
     const char *type = "render";
-    char render_str[40];
+    WRBUF render_str = 0;
 
     {
-        char start_str[30], count_str[30];
-        if (next_token_copy(args, start_str, sizeof(start_str)) > 0)
-            start = atoi(start_str);
-        
-        if (next_token_copy(args, count_str, sizeof(count_str)) > 0)
-            count = atoi(count_str);
-        
-        if (next_token_copy(args, render_str, sizeof(render_str)) > 0)
-            type = render_str;
+        WRBUF tmp;
+
+        if ((tmp = next_token_new_wrbuf(args)))
+        {
+            start = atoi(wrbuf_cstr(tmp));
+            wrbuf_destroy(tmp);
+        }
+
+        if ((tmp = next_token_new_wrbuf(args)))
+        {
+            count = atoi(wrbuf_cstr(tmp));
+            wrbuf_destroy(tmp);
+        }
+        render_str = next_token_new_wrbuf(args);
     }
+    if (render_str)
+        type = wrbuf_cstr(render_str);
 
     for (i = 0; i < MAX_CON; i++)
         ZOOM_resultset_records(r[i], 0, start, count);
@@ -263,6 +276,9 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
             display_records(c[i], r[i], start, count, type);
         }
     }
+    if (render_str)
+        wrbuf_destroy(render_str);
+       
 }
 
 static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
@@ -270,19 +286,15 @@ static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
                     const char **args)
 {
     ZOOM_package p[MAX_CON];
-    char ext_type_str[10];
-    
     int i;
-
-    if (next_token_copy(args, ext_type_str, sizeof(ext_type_str)) < 0)
-        return;
+    WRBUF ext_type_str = next_token_new_wrbuf(args);
     
     for (i = 0; i<MAX_CON; i++)
     {
         if (c[i])
         {
             p[i] = ZOOM_connection_package(c[i], 0);
-            ZOOM_package_send(p[i], ext_type_str);
+            ZOOM_package_send(p[i], ext_type_str ? wrbuf_cstr(ext_type_str):0);
         }
         else
             p[i] = 0;
@@ -315,6 +327,8 @@ static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
         }
         ZOOM_package_destroy(p[i]);
     }
+    if (ext_type_str)
+        wrbuf_destroy(ext_type_str);
 }
 
 static void cmd_debug(ZOOM_connection *c, ZOOM_resultset *r,
@@ -504,9 +518,9 @@ static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
 {
     int error;
     const char *errmsg, *addinfo, *dset;
-    char host[60];
     int j, i;
-    if (next_token_copy(args, host, sizeof(host)) < 0)
+    WRBUF host = next_token_new_wrbuf(args);
+    if (!host)
     {
         printf("missing host after connect\n");
         return ;
@@ -515,7 +529,7 @@ static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
     {
         const char *h;
         if (c[i] && (h = ZOOM_connection_option_get(c[i], "host")) &&
-            !strcmp(h, host))
+            !strcmp(h, wrbuf_cstr(host)))
         {
             ZOOM_connection_destroy(c[i]);
             break;
@@ -528,17 +542,19 @@ static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
         if (j == -1)
         {
             printf("no more connection available\n");
+            wrbuf_destroy(host);
             return;
         }
         i = j;   /* OK, use this one is available */
     }
     c[i] = ZOOM_connection_create(options);
-    ZOOM_connection_connect(c[i], host, 0);
+    ZOOM_connection_connect(c[i], wrbuf_cstr(host), 0);
         
     if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
         printf("%s error: %s (%s:%d) %s\n",
                ZOOM_connection_option_get(c[i], "host"), errmsg,
                dset, error, addinfo);
+    wrbuf_destroy(host);
 }
 
 static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,

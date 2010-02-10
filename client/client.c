@@ -1200,6 +1200,25 @@ static int send_srw(Z_SRW_PDU *sr)
 
     gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
+    if (auth)
+    {
+        if (auth->which == Z_IdAuthentication_open)
+        {
+            char **darray;
+            int num;
+            nmem_strsplit(out->mem, "/", auth->u.open, &darray, &num);
+            if (num >= 1)
+                sr->username = darray[0];
+            if (num >= 2)
+                sr->password = darray[1];
+        }
+        else if (auth->which == Z_IdAuthentication_idPass)
+        {
+            sr->username = auth->u.idPass->userId;
+            sr->password = auth->u.idPass->password;
+        }
+    }
+
     if (!yaz_matchstr(sru_method, "get"))
     {
         yaz_sru_get_encode(gdu->u.HTTP_Request, sr, out, charset);
