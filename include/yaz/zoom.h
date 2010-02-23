@@ -74,6 +74,9 @@ ZOOM_API(void)
 ZOOM_connection_connect(ZOOM_connection c, const char *host,
                               int portnum);
 
+ZOOM_API(void)
+ZOOM_connection_close(ZOOM_connection c);
+
 /* destroy connection (close connection also) */
 ZOOM_API(void)
 ZOOM_connection_destroy(ZOOM_connection c);

@@ -4670,6 +4670,11 @@ ZOOM_API(int) ZOOM_connection_get_timeout(ZOOM_connection c)
     return ZOOM_options_get_int(c->options, "timeout", 30);
 }
 
+ZOOM_API(void) ZOOM_connection_close(ZOOM_connection c)
+{
+    do_close(c);
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4
