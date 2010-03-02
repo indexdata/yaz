@@ -2088,7 +2088,7 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
  */
 static int process_z_response(association *assoc, request *req, Z_APDU *res)
 {
-    Z_GDU *gres = (Z_GDU *) odr_malloc(assoc->encode, sizeof(*res));
+    Z_GDU *gres = (Z_GDU *) odr_malloc(assoc->encode, sizeof(*gres));
     gres->which = Z_GDU_Z3950;
     gres->u.z3950 = res;
 
