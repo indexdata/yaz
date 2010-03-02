@@ -2423,13 +2423,19 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         (Z_Records *) odr_malloc(a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist =
         (Z_NamePlusRecordList *) odr_malloc(a->encode, sizeof(*reclist));
-    Z_NamePlusRecord **list =
-        (Z_NamePlusRecord **) odr_malloc(a->encode, sizeof(*list) * toget);
 
     records->which = Z_Records_DBOSD;
     records->u.databaseOrSurDiagnostics = reclist;
     reclist->num_records = 0;
-    reclist->records = list;
+
+    if (toget < 0)
+        return diagrec(a, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, 0);
+    else if (toget == 0)
+        reclist->records = odr_nullval();
+    else
+        reclist->records = (Z_NamePlusRecord **)
+            odr_malloc(a->encode, sizeof(*reclist->records) * toget);
+
     *pres = Z_PresentStatus_success;
     *num = 0;
     *next = 0;
