@@ -69,6 +69,8 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_XCHANGE   5
 /** \brief Output format: check only (no marc output) */
 #define YAZ_MARC_CHECK  6
+/** \brief Output format: Turbo MARCXML Index Data format*/
+#define YAZ_MARC_TMARCXML   7
 
 /** \brief set iconv handle for character set conversion */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
