@@ -163,6 +163,16 @@ void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     n->u.controlfield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
     n->u.controlfield.data = nmem_text_node_cdata(ptr_data, mt->nmem);
 }
+
+void yaz_marc_add_controlfield_turbo_xml(yaz_marc_t mt, const char *tag,
+                                   const xmlNode *ptr_data)
+{
+    struct yaz_marc_node *n = yaz_marc_add_node(mt);
+    n->which = YAZ_MARC_CONTROLFIELD;
+    n->u.controlfield.tag = tag;
+    n->u.controlfield.data = nmem_text_node_cdata(ptr_data, mt->nmem);
+}
+
 #endif
 
 
@@ -527,6 +537,7 @@ int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr)
         switch(mt->output_format)
         {
         case YAZ_MARC_MARCXML:
+        case YAZ_MARC_TMARCXML:
             wrbuf_printf(wr, "</collection>\n");
             break;
         case YAZ_MARC_XCHANGE:
@@ -751,6 +762,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
     	char field[10];
     	field[0] = 'd';
         strncpy(field + 1, n->u.datafield.tag, 3);
+        field[4] = '\0';
         ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST field, 0);
     }
     if (n->u.datafield.indicator)
@@ -883,6 +895,7 @@ int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             	char field[10];
 				field[0] = 'c';
                 strncpy(field + 1, n->u.controlfield.tag, 3);
+                field[4] = '\0';
                 ptr = xmlNewTextChild(record_ptr, ns_record,
 									  BAD_CAST field,
 									  BAD_CAST wrbuf_cstr(wr_cdata));

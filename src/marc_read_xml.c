@@ -99,13 +99,13 @@ const char *tag_value_extract(const char *name, char tag_buffer[5]) {
 	return 0;
 }
 
-// pattern <on character or -AB[CD]
+// pattern <one character or -AB[CD]
 const char *code_value_extract(const char *name, char tag_buffer[5]) {
 	size_t length = strlen(name);
 	if (length == 1 ) {
 		return name;
 	}
-	if (length > 2 && length < 5) {
+	if (length > 2 && length < 6) {
 		if (name[0] != '-') {
 			return 0;
 		}
@@ -314,7 +314,7 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
     return 0;
 }
 
-struct yaz_marc_node* yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, const char *tag_value);
+struct yaz_marc_node* yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, char *tag_value);
 
 static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 {
@@ -325,7 +325,6 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
             {
         		NMEM nmem = yaz_marc_get_nmem(mt);
         		char *buffer = (char *) nmem_malloc(nmem, 5);
-        		//Extract the tag value out of the rest of the element name
         		const char *tag_value = tag_value_extract((const char *)(ptr->name+1), buffer);
                 if (!tag_value)
                 {
@@ -334,7 +333,6 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                     return -1;
                 }
                 yaz_marc_add_controlfield_turbo_xml(mt, tag_value, ptr->children);
-                //wrbuf_destroy(tag_value);
             }
             else if (!strncmp((const char *) ptr->name, "d",1))
             {
