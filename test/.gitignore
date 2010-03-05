@@ -36,3 +36,6 @@ tst_oid
 *.log
 *.o
 *~
+*.diff
+*.hex*
+*.revert*
