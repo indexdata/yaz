@@ -15,6 +15,35 @@
 
 #if YAZ_HAVE_XML2
 
+static int ccl_xml_config_combqual(WRBUF wrbuf,
+                                   const xmlNode *ptr,
+                                   const char **addinfo)
+{
+    struct _xmlAttr *attr;
+    const char *name = 0;
+    for (attr = ptr->properties; attr; attr = attr->next)
+    {
+        if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
+            attr->children && attr->children->type == XML_TEXT_NODE)
+            name = (const char *) attr->children->content;
+        else
+        {
+            *addinfo = "bad attribute for 'attr'. "
+                "Expecting 'type', 'value', or 'attrset'";
+            return 1;
+        }
+    }
+    if (!name)
+    {
+        *addinfo = "missing attribute for 'name' for element 'qual'";
+        return 1;
+    }
+    wrbuf_printf(wrbuf, "%s", name);
+    return 0;
+
+
+}
+
 static int ccl_xml_config_attr(const char *default_set,
                                WRBUF wrbuf,
                                const xmlNode *ptr,
@@ -91,6 +120,13 @@ static int ccl_xml_config_qual(CCL_bibset bibset, const char *default_set,
             {
                 int r = ccl_xml_config_attr(default_set, wrbuf,
                                             a_ptr, addinfo);
+                if (r)
+                    return r;
+                wrbuf_printf(wrbuf, " ");
+            }
+            else if (!xmlStrcmp(a_ptr->name, BAD_CAST "qual"))
+            {
+                int r = ccl_xml_config_combqual(wrbuf, a_ptr, addinfo);
                 if (r)
                     return r;
                 wrbuf_printf(wrbuf, " ");
