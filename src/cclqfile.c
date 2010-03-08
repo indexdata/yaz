@@ -83,10 +83,11 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
 
             qlist[i++] = lead_str;
 
-            while ((t=yaz_tok_move(tp)) == YAZ_TOK_STRING)
+            while (t == YAZ_TOK_STRING)
             {
                 if (i < sizeof(qlist)/sizeof(*qlist)-1)
                     qlist[i++] = xstrdup(yaz_tok_parse_string(tp));
+                t = yaz_tok_move(tp);
             }
             qlist[i] = 0;
             yaz_tok_parse_destroy(tp);
