@@ -490,7 +490,7 @@ const char *icu_iter_get_display(yaz_icu_iter_t iter)
     return icu_buf_utf8_to_cstr(iter->display);   
 }
 
-const char *icu_iter_get_token_number(yaz_icu_iter_t iter)
+int icu_iter_get_token_number(yaz_icu_iter_t iter)
 { 
     return iter->token_count;
 }
