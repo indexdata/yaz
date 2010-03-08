@@ -74,6 +74,8 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "1=/my/title",         "dc.title");
         ccl_qual_fitem(bibset, "r=r",         "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
+        ccl_qual_fitem(bibset, "dc.title", "title");
+        ccl_qual_fitem(bibset, "term dc.title", "comb");
         break;
     case 1:
         strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -90,6 +92,12 @@ void tst1(int pass)
 
         strcpy(tstline, "x r=o # ordered relation");
         ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "title dc.title # alias");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "comb term dc.title # combination");
+        ccl_qual_line(bibset, tstline);
         break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
@@ -98,6 +106,8 @@ void tst1(int pass)
                      "dc.title 1=/my/title\n"
                      "date r=r\n" 
                      "x r=o\n"
+                     "title dc.title\n"
+                     "comb term dc.title\n"
             );
         break;
     case 3:
@@ -127,6 +137,13 @@ void tst1(int pass)
                 " </qual>\n"
                 " <qual name=\"x\">\n"
                 "   <attr type=\"r\" value=\"o\"/>\n"
+                " </qual>\n"
+                " <qual name=\"title\">\n"
+                "   <qual name=\"dc.title\"/>\n"
+                " </qual>\n"
+                " <qual name=\"comb\">\n"
+                "   <qual name=\"term\"/>\n"
+                "   <qual name=\"dc.title\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
             
@@ -216,6 +233,13 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "a b?", 
                             "@and @attr 4=2 @attr 1=1016 a "
                             "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "title=a", 
+                            "@attr 1=/my/title a "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "comb=a", 
+                            "@or @attr 4=2 @attr 1=1016 a "
+                            "@attr 1=/my/title a "));
 
     /* Bug #2895 */
 #if 1
