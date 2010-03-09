@@ -53,6 +53,8 @@ YAZ_EXPORT WRBUF wrbuf_alloc(void);
 
 /** \brief destroy WRBUF and its buffer
     \param b WRBUF
+ 
+    For YAZ 4.0.2 WRBUF b may be NULL.
  */
 YAZ_EXPORT void wrbuf_destroy(WRBUF b);
 

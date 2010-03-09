@@ -12,10 +12,13 @@
 static void tstwrbuf(void)
 {
     int step;
-    WRBUF wr = wrbuf_alloc();
+    WRBUF wr;
 
+    wr = 0;
+    wrbuf_destroy(wr);
+
+    wr = wrbuf_alloc();
     YAZ_CHECK(wr);
-
     wrbuf_destroy(wr);
 
     wr = wrbuf_alloc();

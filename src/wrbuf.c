@@ -35,8 +35,11 @@ WRBUF wrbuf_alloc(void)
 
 void wrbuf_destroy(WRBUF b)
 {
-    xfree(b->buf);
-    xfree(b);
+    if (b)
+    {
+        xfree(b->buf);
+        xfree(b);
+    }
 }
 
 void wrbuf_rewind(WRBUF b)
