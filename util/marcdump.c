@@ -221,7 +221,6 @@ static void dump(const char *fname, const char *from, const char *to,
     yaz_marc_set_read_format(mt, input_format);
     yaz_marc_set_write_format(mt, output_format);
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
-    yaz_marc_write_turbo_format(mt, output_format == YAZ_MARC_TMARCXML);
     yaz_marc_debug(mt, verbose);
 
     if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TMARCXML || input_format == YAZ_MARC_XCHANGE)
