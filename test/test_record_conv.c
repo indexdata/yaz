@@ -115,7 +115,7 @@ static void tst_configure(void)
 
 #if YAZ_HAVE_XSLT
     YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "<marc"
                                   " inputcharset=\"marc-8\""
                                   " outputcharset=\"marc-8\""
@@ -135,12 +135,12 @@ static void tst_configure(void)
                                   " inputformat=\"xml\""
                                   " outputformat=\"marc\""
                                   "/>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "</backend>",
                                   0, 0));
 #else
     YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "</backend>",
                                   "xslt unsupported."
                                   " YAZ compiled without XSLT support", 0));
@@ -258,8 +258,8 @@ static void tst_convert1(void)
 
 
     YAZ_CHECK(conv_configure_test("<backend>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
                                   " outputcharset=\"marc-8\""
@@ -279,8 +279,8 @@ static void tst_convert1(void)
 
 
     YAZ_CHECK(conv_configure_test("<backend>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
-                                  "<xslt stylesheet=\"tst_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "<marc"
                                   " outputcharset=\"marc-8\""
                                   " inputformat=\"xml\""

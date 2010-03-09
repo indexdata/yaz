@@ -15,7 +15,7 @@ static void tst_xml_include(void)
     const char *srcdir = getenv("srcdir");
     xmlDocPtr doc;
     xmlNodePtr node;
-    const char *xml_in = "<x><include src=\"tst_xml_inc*.xml\"/></x>";
+    const char *xml_in = "<x><include src=\"test_xml_inc*.xml\"/></x>";
 
     if (srcdir == 0)
         srcdir = ".";
@@ -30,9 +30,9 @@ static void tst_xml_include(void)
     {
         const char *expect =
             "<?xml version=\"1.0\"?>\n"
-            "<x><!-- begin include src=\"tst_xml_inc*.xml\" -->"
+            "<x><!-- begin include src=\"test_xml_inc*.xml\" -->"
             "<y>some</y>"
-            "<!-- end include src=\"tst_xml_inc*.xml\" --></x>\n";
+            "<!-- end include src=\"test_xml_inc*.xml\" --></x>\n";
 
         xmlChar *xml_out;
         int len_out;

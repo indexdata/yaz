@@ -1,6 +1,6 @@
 -- Small ASN.1 spec for tstodr test
-tstodrcodec
-{tstodrcodec} DEFINITIONS ::=
+test_odrcodec
+{test_odrcodec} DEFINITIONS ::=
 BEGIN
 MySequence ::= SEQUENCE {
 	first [1] IMPLICIT INTEGER,
