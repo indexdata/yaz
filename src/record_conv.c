@@ -304,6 +304,12 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
         if (input_charset && !output_charset)
             output_charset = "utf-8";
     }
+    else if (!strcmp(output_format, "tmarcxml"))
+    {
+        output_format_mode = YAZ_MARC_TMARCXML;
+        if (input_charset && !output_charset)
+            output_charset = "utf-8";
+    }
     else if (!strcmp(output_format, "marc"))
     {
         output_format_mode = YAZ_MARC_ISO2709;
