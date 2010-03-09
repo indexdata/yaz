@@ -91,7 +91,6 @@ struct yaz_marc_t_ {
     int output_format;
     int debug;
     int write_using_libxml2;
-    int turbo_format;
     enum yaz_collection_state enable_collection;
     yaz_iconv_t iconv_cd;
     char subfield_str[8];
@@ -697,9 +696,9 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
         int ret;
         xmlNode *root_ptr;
 
-        if (!mt->turbo_format)
+        if (yaz_marc_get_write_format(mt) == YAZ_MARC_MARCXML)
         	ret = yaz_marc_write_xml(mt, &root_ptr, ns, format, type);
-        else
+        else // Check for Turbo XML
         	ret = yaz_marc_write_turbo_xml(mt, &root_ptr, ns, format, type);
         if (ret == 0)
         {
@@ -752,7 +751,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
 {
     xmlNode *ptr;
     struct yaz_marc_subfield *s;
-    int turbo = mt->turbo_format;
+    int turbo = mt->output_format == YAZ_MARC_TMARCXML;
     if (!turbo) {
         ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST "datafield", 0);
         xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.datafield.tag);
@@ -844,7 +843,7 @@ int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
     xmlNode *record_ptr;
     xmlNsPtr ns_record;
     WRBUF wr_cdata = 0;
-    int turbo = mt->turbo_format;
+    int turbo = mt->output_format == YAZ_MARC_TMARCXML;
     for (n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
         {
@@ -1207,8 +1206,12 @@ int yaz_marc_get_read_format(yaz_marc_t mt)
 
 void yaz_marc_set_write_format(yaz_marc_t mt, int format)
 {
-    if (mt)
+    if (mt) {
         mt->output_format = format;
+        // Force using libxml2
+        if (mt->output_format == YAZ_MARC_TMARCXML)
+        	mt->write_using_libxml2 = 1;
+    }
 }
 
 int yaz_marc_get_write_format(yaz_marc_t mt)
@@ -1224,8 +1227,7 @@ int yaz_marc_get_write_format(yaz_marc_t mt)
  */
 void yaz_marc_xml(yaz_marc_t mt, int xmlmode)
 {
-    if (mt)
-        mt->output_format = xmlmode;
+	yaz_marc_set_write_format(mt, xmlmode);
 }
 
 
@@ -1337,14 +1339,9 @@ void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable)
     mt->write_using_libxml2 = enable;
 }
 
-void yaz_marc_write_turbo_format(yaz_marc_t mt, int enable)
-{
-    mt->turbo_format = enable;
-}
-
 int yaz_marc_is_turbo_format(yaz_marc_t mt)
 {
-    return mt->turbo_format;
+    return mt->output_format == YAZ_MARC_TMARCXML;
 }
 
 
