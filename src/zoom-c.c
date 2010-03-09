@@ -2196,6 +2196,11 @@ ZOOM_API(const char *)
         return get_record_format(rec, len, npr, YAZ_MARC_MARCXML, charset,
                                  format);
     }
+    else if (!strcmp(type, "txml"))
+    {
+        return get_record_format(rec, len, npr, YAZ_MARC_TMARCXML, charset,
+                                 format);
+    }
     else if (!strcmp(type, "raw"))
     {
         return get_record_format(rec, len, npr, YAZ_MARC_ISO2709, charset,
