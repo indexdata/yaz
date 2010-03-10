@@ -241,6 +241,33 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
+char *element_name_encode(yaz_marc_t mt, WRBUF buffer, char *code_data, size_t code_len) {
+	// TODO Map special codes to something possible for XML ELEMENT names
+
+	int encode = 0;
+	int index = 0;
+	for (index = 0; index < code_len; index++) {
+		if (!((code_data[index] >= '0' && code_data[index] <= '9') ||
+			  (code_data[index] >= 'a' && code_data[index] <= 'z') ||
+			  (code_data[index] >= 'A' && code_data[index] <= 'Z')))
+			encode = 1;
+	}
+	if (!encode) {
+		wrbuf_iconv_write(buffer, mt->iconv_cd, code_data, code_len);
+	}
+	else {
+		char temp[2*code_len + 1];
+		wrbuf_puts(buffer, "-");
+		int index;
+		for (index = 0; index < code_len; index++) {
+			sprintf(temp, "%02X", (unsigned char) code_data[index] & 0xFF);
+			temp[2] = 0;
+			wrbuf_puts(buffer, temp);
+		};
+		yaz_log(YLOG_WARN, "Using numeric value in element name: %s", wrbuf_cstr(buffer));
+	}
+}
+
 #if YAZ_HAVE_XML2
 void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                 const char *indicator, size_t indicator_len)
@@ -576,6 +603,7 @@ const char *record_name[2]  	= { "record", "r"};
 const char *leader_name[2]  	= { "leader", "l"};
 const char *controlfield_name[2]= { "controlfield", "c"};
 const char *datafield_name[2]  	= { "datafield", "d"};
+const char *indicator_name[2]  	= { "ind", "i"};
 const char *subfield_name[2]  	= { "subfield", "s"};
 
 
@@ -635,42 +663,24 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
         case YAZ_MARC_DATAFIELD:
 
         	wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
-            if (!turbo) {
+            if (!turbo)
             	wrbuf_printf(wr, " tag=\"");
-            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
                                     strlen(n->u.datafield.tag));
-	            wrbuf_printf(wr, "\"");
-    	        if (n->u.datafield.indicator)
-        	    {
-            	    int i;
-                	for (i = 0; n->u.datafield.indicator[i]; i++)
-	                {
-    	                wrbuf_printf(wr, " ind%d=\"", i+1);
-        	            wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-            	                              n->u.datafield.indicator+i, 1);
-                	    wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
-                	}
-            	}
-	            wrbuf_printf(wr, ">\n");
-            } else {
-            	// TODO Not CDATA.
-            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
-            			strlen(n->u.datafield.tag));
-            	// Write tag
-            	wrbuf_printf(wr, ">\n");
-            	if (n->u.datafield.indicator)
-            	{
-            		int i;
-            		for (i = 0; n->u.datafield.indicator[i]; i++)
-            		{
-            			wrbuf_printf(wr, "    <i%d>", i+1);
-            			wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-            					n->u.datafield.indicator+i, 1);
-            			wrbuf_printf(wr, "</i%d>", i+1);
-                        wrbuf_puts(wr, "\n");
-            		}
-            	}
+	        if (!turbo)
+	        	wrbuf_printf(wr, "\"");
+    	    if (n->u.datafield.indicator)
+    	    {
+    	    	int i;
+    	    	for (i = 0; n->u.datafield.indicator[i]; i++)
+    	    	{
+    	    		wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
+    	    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+    	    				n->u.datafield.indicator+i, 1);
+    	    		wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
+				}
             }
+	        wrbuf_printf(wr, ">\n");
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
@@ -682,9 +692,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                         s->code_data, using_code_len);
 	                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
 				} else {
-					// TODO check this. encode special characters.
-                	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                        s->code_data, using_code_len);
+		        	element_name_encode(mt, wr, s->code_data, using_code_len);
  					wrbuf_puts(wr, ">");
 				}
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
@@ -943,14 +951,8 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
             
             ind_val[0] = n->u.datafield.indicator[i];
             ind_val[1] = '\0';
-            if (!turbo) {
-                sprintf(ind_str, "ind%d", i+1);
-            	xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
-            }
-            else {
-                sprintf(ind_str, "i%d", i+1);
-            	xmlNewTextChild(ptr, ns_record, BAD_CAST ind_str, BAD_CAST ind_val);
-            }
+            sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
+			xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
         }
     }
 	WRBUF subfield_name = wrbuf_alloc();
@@ -975,24 +977,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
         else { // Turbo format
         	wrbuf_rewind(subfield_name);
         	wrbuf_puts(subfield_name, "s");
-        	// TODO Map special codes to something possible for XML ELEMENT names
-        	if ((s->code_data[0] >= '0' && s->code_data[0] <= '9') ||
-        	    (s->code_data[0] >= 'a' && s->code_data[0] <= 'z') ||
-				(s->code_data[0] >= 'A' && s->code_data[0] <= 'Z'))
-        	{
-        		wrbuf_iconv_write(subfield_name, mt->iconv_cd,s->code_data, using_code_len);
-        	}
-        	else {
-				char buffer[2*using_code_len + 1];
-				int index;
-				for (index = 0; index < using_code_len; index++) {
-					sprintf(buffer + 2*index, "%02X", (unsigned char) s->code_data[index] & 0xFF);
-				};
-				buffer[2*(index+1)] = 0;
-				wrbuf_puts(subfield_name, "-");
-				wrbuf_puts(subfield_name, buffer);
-        		yaz_log(YLOG_WARN, "Using numeric value in element name: %s", buffer);
-        	}
+        	element_name_encode(mt, subfield_name, s->code_data, using_code_len);
         	ptr_subfield = xmlNewTextChild(ptr, ns_record,
         			BAD_CAST wrbuf_cstr(subfield_name),
         			BAD_CAST wrbuf_cstr(wr_cdata));
