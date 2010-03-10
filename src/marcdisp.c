@@ -571,6 +571,14 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
     return -1;
 }
 
+const char *collection_name[2]  = { "collection", "collection"};
+const char *record_name[2]  	= { "record", "r"};
+const char *leader_name[2]  	= { "leader", "l"};
+const char *controlfield_name[2]= { "controlfield", "c"};
+const char *datafield_name[2]  	= { "datafield", "d"};
+const char *subfield_name[2]  	= { "subfield", "s"};
+
+
 /** \brief common MARC XML/Xchange writer
     \param mt handle
     \param wr WRBUF output
@@ -578,6 +586,151 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
     \param format record format (e.g. "MARC21")
     \param type record type (e.g. "Bibliographic")
 */
+static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
+                                      const char *ns, 
+                                      const char *format,
+                                      const char *type)
+{
+    struct yaz_marc_node *n;
+    int identifier_length;
+    const char *leader = 0;
+
+    int turbo = yaz_marc_get_write_format(mt) == YAZ_MARC_TMARCXML;
+
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            leader = n->u.leader;
+            break;
+        }
+    
+    if (!leader)
+        return -1;
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+    
+    if (mt->enable_collection != no_collection)
+    {
+        if (mt->enable_collection == collection_first)
+            wrbuf_printf(wr, "<%s xmlns=\"%s\">\n", collection_name[turbo], ns);
+        mt->enable_collection = collection_second;
+        wrbuf_printf(wr, "<%s", record_name[turbo]);
+    }
+    else
+    {
+        wrbuf_printf(wr, "<%s xmlns=\"%s\"", record_name[turbo], ns);
+    }
+    if (format)
+        wrbuf_printf(wr, " format=\"%.80s\"", format);
+    if (type)
+        wrbuf_printf(wr, " type=\"%.80s\"", type);
+    wrbuf_printf(wr, ">\n");
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+
+        switch(n->which)
+        {
+        case YAZ_MARC_DATAFIELD:
+            wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
+            if (!turbo) {
+            	wrbuf_printf(wr, " tag=\"");
+            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+                                    strlen(n->u.datafield.tag));
+	            wrbuf_printf(wr, "\"");
+    	        if (n->u.datafield.indicator)
+        	    {
+            	    int i;
+                	for (i = 0; n->u.datafield.indicator[i]; i++)
+	                {
+    	                wrbuf_printf(wr, " ind%d=\"", i+1);
+        	            wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+            	                              n->u.datafield.indicator+i, 1);
+                	    wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
+                	}
+            	}
+	            wrbuf_printf(wr, ">\n");
+            } else {
+            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+            			strlen(n->u.datafield.tag));
+            	// Write tag
+            	wrbuf_printf(wr, ">\n");
+            	if (n->u.datafield.indicator)
+            	{
+            		int i;
+            		for (i = 0; n->u.datafield.indicator[i]; i++)
+            		{
+            			wrbuf_printf(wr, "    <i%d>", i+1);
+            			wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+            					n->u.datafield.indicator+i, 1);
+            			wrbuf_printf(wr, "</i%d>", i+1);
+                        wrbuf_puts(wr, "\n");
+            		}
+            	}
+            }
+            for (s = n->u.datafield.subfields; s; s = s->next)
+            {
+                size_t using_code_len = get_subfield_len(mt, s->code_data,
+                                                         identifier_length);
+                wrbuf_printf(wr, "    <%s", subfield_name[turbo]);
+				if (!turbo) {
+					wrbuf_printf(wr, " code=\"");
+                	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                        s->code_data, using_code_len);
+	                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
+				} else {
+					// TODO check this. encode special characters.
+                	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                        s->code_data, using_code_len);
+ 					wrbuf_puts(wr, ">\n");
+				}
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                        s->code_data + using_code_len,
+                                        strlen(s->code_data + using_code_len));
+                marc_iconv_reset(mt, wr);
+				wrbuf_printf(wr, "</%s>", subfield_name[turbo]);
+                wrbuf_puts(wr, "\n");
+            }
+            wrbuf_printf(wr, "  </%s>\n", datafield_name[turbo]);
+            break;
+        case YAZ_MARC_CONTROLFIELD:
+        	wrbuf_printf(wr, "  <%s", controlfield_name[turbo]);
+        	if (!turbo) {
+            	wrbuf_printf(wr, " tag=\"");
+        		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+        				strlen(n->u.controlfield.tag));
+        		wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
+        	}
+        	else {
+        		//TODO convert special
+        		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+        				strlen(n->u.controlfield.tag));
+        		wrbuf_iconv_puts(wr, mt->iconv_cd, ">");
+        	}
+    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+									n->u.controlfield.data,
+									strlen(n->u.controlfield.data));
+    		marc_iconv_reset(mt, wr);
+    		wrbuf_printf(wr, "</%s>", controlfield_name[turbo]);
+    		wrbuf_puts(wr, "\n");
+            break;
+        case YAZ_MARC_COMMENT:
+            wrbuf_printf(wr, "<!-- ");
+            wrbuf_puts(wr, n->u.comment);
+            wrbuf_printf(wr, " -->\n");
+            break;
+        case YAZ_MARC_LEADER:
+            wrbuf_printf(wr, "  <%s>", leader_name[turbo]);
+            wrbuf_iconv_write_cdata(wr, 
+                                    0 /* no charset conversion for leader */,
+                                    n->u.leader, strlen(n->u.leader));
+            wrbuf_printf(wr, "  </%s>", leader_name[turbo]);
+        }
+    }
+    wrbuf_printf(wr, "</%s", record_name[turbo]);
+    return 0;
+}
+
 static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                       const char *ns, 
                                       const char *format,
@@ -684,6 +837,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
     wrbuf_puts(wr, "</record>\n");
     return 0;
 }
+
 
 static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
                                      const char *ns, 
@@ -858,7 +1012,7 @@ int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
     wr_cdata = wrbuf_alloc();
 
-    record_ptr = xmlNewNode(0, BAD_CAST "record");
+    record_ptr = xmlNewNode(0, BAD_CAST "r");
     *root_ptr = record_ptr;
 
     ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
