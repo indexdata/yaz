@@ -163,7 +163,7 @@ void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     n->u.controlfield.data = nmem_text_node_cdata(ptr_data, mt->nmem);
 }
 
-void yaz_marc_add_controlfield_turbo_xml(yaz_marc_t mt, const char *tag,
+void yaz_marc_add_controlfield_turbo_xml(yaz_marc_t mt, char *tag,
                                    const xmlNode *ptr_data)
 {
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
@@ -586,7 +586,7 @@ const char *subfield_name[2]  	= { "subfield", "s"};
     \param format record format (e.g. "MARC21")
     \param type record type (e.g. "Bibliographic")
 */
-static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
+static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                       const char *ns, 
                                       const char *format,
                                       const char *type)
@@ -632,7 +632,8 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-            wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
+
+        	wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
             if (!turbo) {
             	wrbuf_printf(wr, " tag=\"");
             	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
@@ -651,6 +652,7 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
             	}
 	            wrbuf_printf(wr, ">\n");
             } else {
+            	// TODO Not CDATA.
             	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
             			strlen(n->u.datafield.tag));
             	// Write tag
@@ -682,16 +684,22 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
 					// TODO check this. encode special characters.
                 	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data, using_code_len);
- 					wrbuf_puts(wr, ">\n");
+ 					wrbuf_puts(wr, ">");
 				}
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data + using_code_len,
                                         strlen(s->code_data + using_code_len));
                 marc_iconv_reset(mt, wr);
-				wrbuf_printf(wr, "</%s>", subfield_name[turbo]);
-                wrbuf_puts(wr, "\n");
+				wrbuf_printf(wr, "</%s", subfield_name[turbo]);
+            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                    s->code_data, using_code_len);
+                wrbuf_puts(wr, ">\n");
             }
-            wrbuf_printf(wr, "  </%s>\n", datafield_name[turbo]);
+            wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
+        	//TODO Not CDATA
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+            		strlen(n->u.datafield.tag));
+            wrbuf_printf(wr, ">\n", datafield_name[turbo]);
             break;
         case YAZ_MARC_CONTROLFIELD:
         	wrbuf_printf(wr, "  <%s", controlfield_name[turbo]);
@@ -711,8 +719,11 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
 									n->u.controlfield.data,
 									strlen(n->u.controlfield.data));
     		marc_iconv_reset(mt, wr);
-    		wrbuf_printf(wr, "</%s>", controlfield_name[turbo]);
-    		wrbuf_puts(wr, "\n");
+    		wrbuf_printf(wr, "</%s", controlfield_name[turbo]);
+    		//TODO convert special
+    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+    				strlen(n->u.controlfield.tag));
+    		wrbuf_puts(wr, ">\n");
             break;
         case YAZ_MARC_COMMENT:
             wrbuf_printf(wr, "<!-- ");
@@ -727,11 +738,11 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, "  </%s>", leader_name[turbo]);
         }
     }
-    wrbuf_printf(wr, "</%s", record_name[turbo]);
+    wrbuf_printf(wr, "</%s>", record_name[turbo]);
     return 0;
 }
 
-static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
+static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
                                       const char *ns, 
                                       const char *format,
                                       const char *type)
@@ -1362,9 +1373,11 @@ void yaz_marc_set_write_format(yaz_marc_t mt, int format)
 {
     if (mt) {
         mt->output_format = format;
+/*
         // Force using libxml2
         if (mt->output_format == YAZ_MARC_TMARCXML)
         	mt->write_using_libxml2 = 1;
+*/
     }
 }
 
