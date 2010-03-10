@@ -23,7 +23,8 @@ binmarc_convert() {
         NEW=${PREFIX}${fb}.new.xml
         OLD=${srcdir}/${PREFIX}${fb}.xml
         DIFF=`basename ${f}`.diff
-        ../util/yaz-marcdump -f $CHR -t utf-8 -o ${OUTPUT_FORMAT} $f > $NEW
+        #echo "../util/yaz-marcdump -f $CHR -t utf-8 -i marc -o ${OUTPUT_FORMAT} $f > $NEW"
+        ../util/yaz-marcdump -f $CHR -t utf-8 -i marc -o ${OUTPUT_FORMAT} $f > $NEW
         if test $? != "0"; then
        	    echo "$f: yaz-marcdump returned error"
     	    ecode=1
@@ -92,10 +93,13 @@ echo "binmarc -> marcxml: $?"
 binmarc_convert "xml,marcxml" "marcxml" "xml2" 
 echo "binmarc -> marcxml(libxml2): $?" 
 
-binmarc_convert "xml,tmarcxml"  "tmarcxml" "t" 
+binmarc_convert "tmarcxml"  "tmarcxml" "t" 
 echo "binmarc -> tmarcxml: $?" 
 
-# exit $ecode
+binmarc_convert "xml,tmarcxml"  "tmarcxml" "xml2t" 
+echo "binmarc -> tmarcxml(libxml2): $?" 
+
+exit $ecode
 
 # Local Variables:
 # mode:shell-script
