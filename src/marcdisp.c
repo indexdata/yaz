@@ -611,9 +611,10 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
     
     if (mt->enable_collection != no_collection)
     {
-        if (mt->enable_collection == collection_first)
+        if (mt->enable_collection == collection_first) {
             wrbuf_printf(wr, "<%s xmlns=\"%s\">\n", collection_name[turbo], ns);
-        mt->enable_collection = collection_second;
+            mt->enable_collection = collection_second;
+        }
         wrbuf_printf(wr, "<%s", record_name[turbo]);
     }
     else
@@ -691,14 +692,16 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                         strlen(s->code_data + using_code_len));
                 marc_iconv_reset(mt, wr);
 				wrbuf_printf(wr, "</%s", subfield_name[turbo]);
-            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                    s->code_data, using_code_len);
+            	if (turbo)
+            		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+            				s->code_data, using_code_len);
                 wrbuf_puts(wr, ">\n");
             }
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
         	//TODO Not CDATA
-            wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
-            		strlen(n->u.datafield.tag));
+            if (turbo)
+            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+            			strlen(n->u.datafield.tag));
             wrbuf_printf(wr, ">\n", datafield_name[turbo]);
             break;
         case YAZ_MARC_CONTROLFIELD:
@@ -721,8 +724,9 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
     		marc_iconv_reset(mt, wr);
     		wrbuf_printf(wr, "</%s", controlfield_name[turbo]);
     		//TODO convert special
-    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
-    				strlen(n->u.controlfield.tag));
+    		if (turbo)
+    			wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+    					strlen(n->u.controlfield.tag));
     		wrbuf_puts(wr, ">\n");
             break;
         case YAZ_MARC_COMMENT:
@@ -735,10 +739,10 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
             wrbuf_iconv_write_cdata(wr, 
                                     0 /* no charset conversion for leader */,
                                     n->u.leader, strlen(n->u.leader));
-            wrbuf_printf(wr, "  </%s>", leader_name[turbo]);
+            wrbuf_printf(wr, "</%s>\n", leader_name[turbo]);
         }
     }
-    wrbuf_printf(wr, "</%s>", record_name[turbo]);
+    wrbuf_printf(wr, "</%s>\n", record_name[turbo]);
     return 0;
 }
 
