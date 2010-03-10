@@ -12,7 +12,7 @@ check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
-EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
+EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  cql2pqf-order.txt cql2pqfsample \
  $(check_SCRIPTS) \
  marc1.marc marc1.xml marc1.chr marc1.xml.marc \
