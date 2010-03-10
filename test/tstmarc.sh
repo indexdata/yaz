@@ -63,7 +63,7 @@ binmarc_convert() {
     		echo "Failed decode of $f"
     		ecode=1
     	    elif test -f $OLD; then
-#    		echo "diff $OLD $NEW " 
+# echo "diff $OLD $NEW " 
 		if diff $OLD $NEW >$DIFF; then
     		    rm $DIFF
     		    rm $NEW
@@ -77,10 +77,10 @@ binmarc_convert() {
     	    fi
 	    # check with original
     	    REVERT=`basename ${f}`.marc.revert
-    	    ../util/yaz-marcdump -f utf-8 -t $CHR  -i ${REVERT_FORMAT} -o marc $f > $REVERT
-	    hexdump -cx $REVERT   > $REVERT.hex  
-	    hexdump -cx $ORIGINAL > $ORIGINAL.hex
-	    diff $REVERT.hex $ORIGINAL.hex > $REVERT.diff
+    	    #../util/yaz-marcdump -f utf-8 -t $CHR  -i ${REVERT_FORMAT} -o marc $f > $REVERT
+	    #hexdump -cx $REVERT   > $REVERT.hex  
+	    #hexdump -cx $ORIGINAL > $ORIGINAL.hex
+	    #diff $REVERT.hex $ORIGINAL.hex > $REVERT.diff
         fi
     done
     return $ecode
