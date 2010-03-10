@@ -1,2 +1,33 @@
-<?xml version="1.0"?>
-<record xmlns="http://www.indexdata.com/MARC21/turboxml"><l>00492nam a22001455a 4500</l><c001>000277485</c001><c005>20051026111436.0</c005><c008>050413s1894    gr            000 0 gre d</c008><d100><i1>1</i1><i2> </i2><sa>&#x39C;&#x3B1;&#x3C1;&#x3BF;&#x3CD;&#x3B4;&#x3B7;&#x3C2;, &#x39A;&#x3C9;&#x3BD;&#x3C3;&#x3C4;&#x3B1;&#x3BD;&#x3C4;&#x3AF;&#x3BD;&#x3BF;&#x3C2; &#x399;&#x3C9;</sa></d100><d245><i1>1</i1><i2>0</i2><sa>&#x395;&#x3BB;&#x3BB;&#x3B7;&#x3BD;&#x3B9;&#x3BA;&#x3CC;&#x3BD; &#x3BA;&#x3C1;&#x3C5;&#x3C0;&#x3C4;&#x3BF;&#x3B3;&#x3C1;&#x3B1;&#x3C6;&#x3B9;&#x3BA;&#x3CC;&#x3BD; &#x3BB;&#x3B5;&#x3BE;&#x3B9;&#x3BA;&#x3CC;&#x3BD; /</sa><sc>&#x39A;&#x3C9;&#x3BD;&#x3C3;&#x3C4;. &#x399;. &#x39C;&#x3B1;&#x3C1;&#x3BF;&#x3CD;&#x3B4;&#x3B7;&#x3C2;.</sc></d245><d250><i1> </i1><i2> </i2><s-CEB7> &#x3B5;&#x3BA;&#x3B4;.</s-CEB7></d250><d260><i1> </i1><i2> </i2><sa>&#x391;&#x3B8;&#x3AE;&#x3BD;&#x3B1;,</sa><sc>1894.</sc></d260><d300><i1> </i1><i2> </i2><sa>248 &#x3C3;&#x3B5;&#x3BB;.</sa></d300><d650><i1> </i1><i2>0</i2><sa>Greek language, Modern</sa><sx>Dialects</sx><sv>Dictionaries</sv></d650><d650><i1> </i1><i2>0</i2><sa>Cryptography.</sa></d650></record>
+<collection xmlns="http://www.indexdata.com/MARC21/turboxml">
+<r>
+  <l>00492nam a22001455a 4500</l>
+  <c001>000277485</c001>
+  <c005>20051026111436.0</c005>
+  <c008>050413s1894    gr            000 0 gre d</c008>
+  <d100 i1="1" i2=" ">
+    <sa>Μαρούδης, Κωνσταντίνος Ιω</sa>
+  </d100>
+  <d245 i1="1" i2="0">
+    <sa>Ελληνικόν κρυπτογραφικόν λεξικόν /</sa>
+    <sc>Κωνστ. Ι. Μαρούδης.</sc>
+  </d245>
+  <d250 i1=" " i2=" ">
+    <s-CEB7> εκδ.</s-CEB7>
+  </d250>
+  <d260 i1=" " i2=" ">
+    <sa>Αθήνα,</sa>
+    <sc>1894.</sc>
+  </d260>
+  <d300 i1=" " i2=" ">
+    <sa>248 σελ.</sa>
+  </d300>
+  <d650 i1=" " i2="0">
+    <sa>Greek language, Modern</sa>
+    <sx>Dialects</sx>
+    <sv>Dictionaries</sv>
+  </d650>
+  <d650 i1=" " i2="0">
+    <sa>Cryptography.</sa>
+  </d650>
+</r>
+</collection>
