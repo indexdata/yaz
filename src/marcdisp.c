@@ -260,11 +260,11 @@ char *element_name_encode(yaz_marc_t mt, WRBUF buffer, char *code_data, size_t c
 		wrbuf_puts(buffer, "-");
 		int index;
 		for (index = 0; index < code_len; index++) {
-			sprintf(temp, "%02X", (unsigned char) code_data[index] & 0xFF);
-			temp[2] = 0;
-			wrbuf_puts(buffer, temp);
+			sprintf(temp+2*index, "%02X", (unsigned char) code_data[index] & 0xFF);
 		};
-		yaz_log(YLOG_WARN, "Using numeric value in element name: %s", wrbuf_cstr(buffer));
+		temp[2*code_len+1] = 0;
+		wrbuf_puts(buffer, temp);
+		yaz_log(YLOG_WARN, "Using numeric value in element name: %s", temp);
 	}
 }
 
@@ -700,9 +700,8 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                         strlen(s->code_data + using_code_len));
                 marc_iconv_reset(mt, wr);
 				wrbuf_printf(wr, "</%s", subfield_name[turbo]);
-            	if (turbo)
-            		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-            				s->code_data, using_code_len);
+				if (turbo)
+		        	element_name_encode(mt, wr, s->code_data, using_code_len);
                 wrbuf_puts(wr, ">\n");
             }
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
@@ -743,9 +742,9 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, " -->\n");
             break;
         case YAZ_MARC_LEADER:
-            wrbuf_printf(wr, "  <%s>", leader_name[turbo]);
-            wrbuf_iconv_write_cdata(wr, 
-                                    0 /* no charset conversion for leader */,
+        	wrbuf_printf(wr, "  <%s>", leader_name[turbo]);
+        	wrbuf_iconv_write_cdata(wr,
+                                    0 , /* no charset conversion for leader */
                                     n->u.leader, strlen(n->u.leader));
             wrbuf_printf(wr, "</%s>\n", leader_name[turbo]);
         }
