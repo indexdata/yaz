@@ -1,3 +1,20 @@
+--- 4.0.2 2010/03/09
+
+wrbuf_destroy allows NULL WRBUF passed to it.
+
+Fix CCL qualifier aliases (did not work since YAZ 2.1.56).
+
+Add ZOOM_connection_close.
+
+No fixed size buffers for ZOOM shell - bug #3257.
+
+tstodr: make it work on s390 platform.
+
+New icu iterator-functions. The new icu_iter-functions makes it possible
+to use ICU chains from many threads.
+
+yaz-client: better syntax check for show command.
+
 --- 4.0.1 2010/01/26
 
 New glob file pattern utility. Like POSIX glob. For Windows too. Refer to

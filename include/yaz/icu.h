@@ -168,7 +168,7 @@ const char *icu_iter_get_display(yaz_icu_iter_t iter);
     \returns token count (1, 2, 3...)
 */
 YAZ_EXPORT
-const char *icu_iter_get_token_number(yaz_icu_iter_t iter);
+int icu_iter_get_token_number(yaz_icu_iter_t iter);
 
 YAZ_END_CDECL
 

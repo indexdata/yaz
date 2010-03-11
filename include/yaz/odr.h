@@ -342,6 +342,8 @@ YAZ_EXPORT const char **odr_get_element_path(ODR o);
 
 YAZ_EXPORT Odr_int odr_atoi(const char *s);
 
+YAZ_EXPORT Odr_int odr_strtol(const char *nptr, char **endptr, int base);
+
 YAZ_END_CDECL
 
 #include <yaz/xmalloc.h>

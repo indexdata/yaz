@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <yaz/oid_util.h>
-#include "tstodrcodec.h"
+#include "test_odrcodec.h"
 
 #include <yaz/test.h>
 

@@ -125,19 +125,24 @@ int odr_seek(ODR o, int whence, int offset)
     return 0;
 }
 
-Odr_int odr_atoi(const char *s)
+Odr_int odr_strtol(const char *nptr, char **endptr, int base)
 {
 #if NMEM_64
-    char *endptr;
 #if WIN32
-    return _strtoui64(s, &endptr, 10);
+    return _strtoui64(nptr, endptr, base);
 #else
-    return strtoll(s, &endptr, 10);
+    return strtoll(nptr, endptr, base);
 #endif
 
 #else
-    return atoi(s);
+    return strtol(nptr, endptr, base);
 #endif
+}
+
+Odr_int odr_atoi(const char *s)
+{
+    char *endptr;
+    return odr_strtol(s, &endptr, 10);
 }
 
 /*

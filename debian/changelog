@@ -1,3 +1,9 @@
+yaz (4.0.2-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 09 Mar 2010 09:54:56 +0100
+
 yaz (4.0.1-2indexdata) unstable; urgency=low
 
   * Testing ZOOM_connection_close.

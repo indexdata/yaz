@@ -2783,36 +2783,50 @@ static int cmd_setnames(const char *arg)
 
 /* PRESENT SERVICE ----------------------------- */
 
-static void parse_show_args(const char *arg_c, char *setstring,
-                            Odr_int *start, Odr_int *number)
+static int parse_show_args(const char *arg_c, char *setstring,
+                           Odr_int *start, Odr_int *number)
 {
-    char arg[40];
-    char *p;
+    char *end_ptr;
 
-    strncpy(arg, arg_c, sizeof(arg)-1);
-    arg[sizeof(arg)-1] = '\0';
-
-    if ((p = strchr(arg, '+')))
-    {
-        *number = odr_atoi(p + 1);
-        *p = '\0';
-    }
-    if (*arg)
-    {
-        if (!strcmp(arg, "all"))
-        {
-            *number = last_hit_count;
-            *start = 1;
-        }
-        else
-            *start = odr_atoi(arg);
-    }
-    if (p && (p=strchr(p+1, '+')))
-        strcpy(setstring, p+1);
-    else if (setnumber >= 0)
+    if (setnumber >= 0)
         sprintf(setstring, "%d", setnumber);
     else
         *setstring = '\0';
+
+    if (!strcmp(arg_c, "all"))
+    {
+        *number = last_hit_count;
+        *start = 1;
+    }
+    *start = odr_strtol(arg_c, &end_ptr, 10);
+    if (end_ptr == arg_c || *end_ptr == '\0')
+        return 1;
+    while (isspace(*(unsigned char *)end_ptr))
+        end_ptr++;
+    if (*end_ptr != '+')
+    {
+        printf("Bad show arg: expected +. Got %s\n", end_ptr);
+        return 0;
+    }
+    end_ptr++;
+    arg_c = end_ptr;
+    *number = odr_strtol(arg_c, &end_ptr, 10);
+    if (end_ptr == arg_c)
+    {
+        printf("Bad show arg: expected number after +\n");
+        return 0;
+    }
+    if (*end_ptr == '\0')
+        return 1;
+    while (isspace(*(unsigned char *)end_ptr))
+        end_ptr++;
+    if (*end_ptr != '+')
+    {
+        printf("Bad show arg: + expected. Got %s\n", end_ptr);
+        return 0;
+    }
+    strcpy(setstring, end_ptr+1);
+    return 1;
 }
 
 static int send_presentRequest(const char *arg)
@@ -2825,7 +2839,8 @@ static int send_presentRequest(const char *arg)
 
     req->referenceId = set_refid(out);
 
-    parse_show_args(arg, setstring, &setno, &nos);
+    if (!parse_show_args(arg, setstring, &setno, &nos))
+        return 0;
     if (*setstring)
         req->resultSetId = setstring;
 
@@ -2916,7 +2931,8 @@ static int send_SRW_presentRequest(const char *arg)
 
     if (!sr)
         return 0;
-    parse_show_args(arg, setstring, &setno, &nos);
+    if (!parse_show_args(arg, setstring, &setno, &nos))
+        return 0;
     sr->u.request->startRecord = odr_intdup(out, setno);
     sr->u.request->maximumRecords = odr_intdup(out, nos);
     if (record_schema)

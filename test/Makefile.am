@@ -1,18 +1,18 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2010 Index Data
 
-check_PROGRAMS = tstxmalloc tsticonv tstnmem tstmatchstr tstwrbuf tstodr \
- tstccl tstlog \
- tstsoap1 tstsoap2 tstodrstack tstlogthread tstxmlquery tstpquery \
- tst_comstack tst_filepath tst_record_conv tst_retrieval tst_tpath \
- tst_timing tst_query_charset tst_oid tst_icu_I18N tst_match_glob \
- tst_rpn2cql tst_json tst_xml_include tst_file_glob
+check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
+ test_odr test_ccl test_log \
+ test_soap1 test_soap2 test_odrstack test_log_thread test_xmlquery test_pquery \
+ test_comstack test_filepath test_record_conv test_retrieval test_tpath \
+ test_timing test_query_charset test_oid test_icu test_match_glob \
+ test_rpn2cql test_json test_xml_include test_file_glob
 
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
-EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
+EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  cql2pqf-order.txt cql2pqfsample \
  $(check_SCRIPTS) \
  marc1.marc marc1.xml marc1.chr marc1.xml.marc \
@@ -31,7 +31,7 @@ EXTRA_DIST = tstodr.asn tstodrcodec.c tstodrcodec.h cql2xcqlsample \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
  tsticu-0.xml tsticu-0.input tsticu-0.output \
  tsticu-1.xml tsticu-1.input tsticu-1.output \
- tst_record_conv.xsl tst_xml_include.xml
+ test_record_conv.xsl test_xml_include.xml
 
 YAZCOMP = ../util/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
@@ -45,41 +45,41 @@ dist-hook:
 	cp $(srcdir)/cql2pqf/*.err $(srcdir)/cql2pqf/*.out $(distdir)/cql2pqf
 
 # Rule for generating codecs for our small ASN.1 spec
-tstodrcodec.c tstodrcodec.h: tstodr.asn $(YAZCOMP)
+test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
-tst_icu_I18N_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
+test_icu_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
+AM_CFLAGS = $(PTHREAD_CFLAGS)
 
 
 CONFIG_CLEAN_FILES=*.log
 
-tstxmalloc_SOURCES = tstxmalloc.c
-tsticonv_SOURCES = tsticonv.c
-tstnmem_SOURCES = tstnmem.c
-tstmatchstr_SOURCES = tstmatchstr.c
-tstwrbuf_SOURCES = tstwrbuf.c
-tstodr_SOURCES = tstodrcodec.c tstodrcodec.h tstodr.c
-tstodrstack_SOURCES = tstodrstack.c
-tstccl_SOURCES = tstccl.c
-tstlog_SOURCES = tstlog.c
-tstsoap1_SOURCES = tstsoap1.c
-tstsoap2_SOURCES = tstsoap2.c
-tstlogthread_SOURCES = tstlogthread.c
-tstxmlquery_SOURCES = tstxmlquery.c
-tstpquery_SOURCES = tstpquery.c
-tst_comstack_SOURCES = tst_comstack.c
-tst_filepath_SOURCES = tst_filepath.c
-tst_oid_SOURCES = tst_oid.c
-tst_record_conv_SOURCES = tst_record_conv.c
-tst_retrieval_SOURCES = tst_retrieval.c
-tst_tpath_SOURCES = tst_tpath.c
-tst_timing_SOURCES = tst_timing.c
-tst_query_charset_SOURCES = tst_query_charset.c
-tst_icu_I18N_CFLAGS = $(PTHREAD_CFLAGS)
-tst_icu_I18N_SOURCES = tst_icu_I18N.c
-tst_match_glob_SOURCES = tst_match_glob.c
-tst_rpn2cql_SOURCES = tst_rpn2cql.c
-tst_json_SOURCES = tst_json.c
-tst_xml_include_SOURCES = tst_xml_include.c
-tst_file_glob_SOURCES = tst_file_glob.c
+test_xmalloc_SOURCES = test_xmalloc.c
+test_iconv_SOURCES = test_iconv.c
+test_nmem_SOURCES = test_nmem.c
+test_matchstr_SOURCES = test_matchstr.c
+test_wrbuf_SOURCES = test_wrbuf.c
+test_odr_SOURCES = test_odrcodec.c test_odrcodec.h test_odr.c
+test_odrstack_SOURCES = test_odrstack.c
+test_ccl_SOURCES = test_ccl.c
+test_log_SOURCES = test_log.c
+test_soap1_SOURCES = test_soap1.c
+test_soap2_SOURCES = test_soap2.c
+test_log_thread_SOURCES = test_log_thread.c
+test_xmlquery_SOURCES = test_xmlquery.c
+test_pquery_SOURCES = test_pquery.c
+test_comstack_SOURCES = test_comstack.c
+test_filepath_SOURCES = test_filepath.c
+test_oid_SOURCES = test_oid.c
+test_record_conv_SOURCES = test_record_conv.c
+test_retrieval_SOURCES = test_retrieval.c
+test_tpath_SOURCES = test_tpath.c
+test_timing_SOURCES = test_timing.c
+test_query_charset_SOURCES = test_query_charset.c
+test_icu_SOURCES = test_icu.c
+test_match_glob_SOURCES = test_match_glob.c
+test_rpn2cql_SOURCES = test_rpn2cql.c
+test_json_SOURCES = test_json.c
+test_xml_include_SOURCES = test_xml_include.c
+test_file_glob_SOURCES = test_file_glob.c
