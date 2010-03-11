@@ -59,12 +59,12 @@ binmarc_convert() {
     	    OLD=${f}.marc
     	    NEW=`basename ${f}`.new.marc
     	    DIFF=`basename ${f}`.diff
+    	    #echo "../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW" 
     	    ../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW
     	    if test $? != "0"; then
     		echo "Failed decode of $f"
     		ecode=1
     	    elif test -f $OLD; then
-# echo "diff $OLD $NEW " 
 		if diff $OLD $NEW >$DIFF; then
     		    rm $DIFF
     		    rm $NEW
