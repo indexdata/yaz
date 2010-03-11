@@ -225,6 +225,14 @@ static void tst_convert1(void)
         "    <subfield code=\"a\">   11224466 </subfield>\n"
         "  </datafield>\n"
         "</record>\n";
+    const char *tmarcxml_rec =
+        "<r xmlns=\"http://www.indexdata.com/MARC21/turboxml\">\n"
+        "  <l>00080nam a22000498a 4500</l>\n"
+        "  <c001>   11224466 </c001>\n"
+        "  <d010 i1=\" \" i2=\" \">\n"
+        "    <sa>   11224466 </sa>\n"
+        "  </d010>\n"
+        "</r>\n";
     const char *iso2709_rec =
         "\x30\x30\x30\x38\x30\x6E\x61\x6D\x20\x61\x32\x32\x30\x30\x30\x34"
         "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
@@ -242,6 +250,7 @@ static void tst_convert1(void)
                                   "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, iso2709_rec));
+    YAZ_CHECK(conv_convert_test(p, tmarcxml_rec, iso2709_rec));
     yaz_record_conv_destroy(p);
 
     YAZ_CHECK(conv_configure_test("<backend>"
