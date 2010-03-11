@@ -283,17 +283,16 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
-struct yaz_marc_node* yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, char *tag_value)
+void yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, char *tag_value, char *indicators)
 {
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_DATAFIELD;
     n->u.datafield.tag = tag_value;
-    n->u.datafield.indicator = 0;
+    n->u.datafield.indicator = indicators;
     n->u.datafield.subfields = 0;
 
-    /* make subfield_pp the current (last one) */
+    // make subfield_pp the current (last one)
     mt->subfield_pp = &n->u.datafield.subfields;
-    return n;
 }
 
 void yaz_marc_datafield_set_indicators(struct yaz_marc_node *n, char *indicator)
@@ -1361,11 +1360,6 @@ void yaz_marc_set_write_format(yaz_marc_t mt, int format)
 {
     if (mt) {
         mt->output_format = format;
-/*
-        // Force using libxml2
-        if (mt->output_format == YAZ_MARC_TMARCXML)
-        	mt->write_using_libxml2 = 1;
-*/
     }
 }
 
