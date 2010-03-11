@@ -133,7 +133,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
             {
                 const char *name = (const char *) 
                     xmlTextReaderLocalName(reader);
-                if (!strcmp(name, "record"))
+                if (!strcmp(name, "record") || !strcmp(name, "r"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
         
@@ -167,7 +167,8 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                     ptr = ptr->children;
                     continue;
                 }
-                if (!strcmp((const char *) ptr->name, "record"))
+                if (!strcmp((const char *) ptr->name, "record") ||
+                	!strcmp((const char *) ptr->name, "r"))
                 {
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
