@@ -99,30 +99,20 @@ const char *tag_value_extract(const char *name, char tag_buffer[5]) {
 	return 0;
 }
 
-// pattern <one character or -AB[CD]
-const char *code_value_extract(const char *name, char tag_buffer[5]) {
+// Given a xmlNode ptr,  extract a value from either a element name or from a given attribute
+const char *element_attribute_value_extract(const xmlNode *ptr, const char *attribute_name, NMEM nmem) {
+
+	const char *name = ptr->name;
 	size_t length = strlen(name);
-	if (length == 1 ) {
-		return name;
+	if (length > 1 ) {
+		return nmem_strdup(nmem, name+1);
 	}
-	if (length > 2 && length < 6) {
-		if (name[0] != '-') {
-			return 0;
-		}
-		length--;
-		const char *ptr = name+1;
-		int index = 0;
-		for (index = 0; index < length/2; index++) {
-			unsigned int value;
-			char temp[3];
-			strncpy(temp, ptr + 2*index, 2);
-			sscanf(temp, "%02X", &value);
-			tag_buffer[index] = (unsigned char) value;
-		}
-		tag_buffer[index] = '\0';
-		if (index > 0)
-			return tag_buffer;
-	}
+	// TODO Extract from attribute where matches attribute_name
+	xmlAttr *attr;
+    for (attr = ptr->properties; attr; attr = attr->next)
+        if (!strcmp((const char *)attr->name, attribute_name)) {
+        	return nmem_text_node_cdata(attr->children, nmem);
+        }
 	return 0;
 }
 
@@ -139,7 +129,7 @@ int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
             {
         		NMEM nmem = yaz_marc_get_nmem(mt);
         		char *buffer = (char *) nmem_malloc(nmem, 5);
-				const char *tag_value = code_value_extract((ptr->name+1), buffer);
+				const char *tag_value = element_attribute_value_extract(ptr, "code", nmem);
                 if (!tag_value)
                 {
                     yaz_marc_cprintf(
@@ -313,8 +303,7 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
         	if (!strncmp( (const char *) ptr->name, "c", 1))
             {
         		NMEM nmem = yaz_marc_get_nmem(mt);
-        		char *buffer = (char *) nmem_malloc(nmem, 5);
-        		const char *tag_value = tag_value_extract((const char *)(ptr->name+1), buffer);
+        		const char *tag_value = element_attribute_value_extract(ptr, "tag", nmem);
                 if (!tag_value)
                 {
                     yaz_marc_cprintf(
@@ -331,8 +320,7 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                 int index = 0;
                 for (index = 0; index < 11; index++)
 					indstr[index] = '\0';
-        		char *buffer = (char *) nmem_malloc(nmem, 5);
-				char *tag_value = tag_value_extract(ptr->name+1, buffer);
+        		const char *tag_value = element_attribute_value_extract(ptr, "tag", nmem);
                 if (!tag_value)
 				{
                     yaz_marc_cprintf(
