@@ -127,7 +127,7 @@ const char *code_value_extract(const char *name, char tag_buffer[5]) {
 }
 
 
-int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr, char indicators[11])
+int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     NMEM nmem = yaz_marc_get_nmem(mt);
     for (; ptr; ptr = ptr->next)
@@ -135,18 +135,7 @@ int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr, char in
         if (ptr->type == XML_ELEMENT_NODE)
         {
         	xmlNode *p;
-        	if (!strncmp((const char *) ptr->name, "i", 1)) {
-            	int length = strlen(ptr->name+1);
-            	if (length > 0) {
-            		int index = (int)strtol(ptr->name+1, (char **)NULL, 10);
-    				for (p = ptr->children; p ; p = p->next)
-                        if (p->type == XML_TEXT_NODE) {
-                            indicators[index] = ((const char *)p->content)[0];
-                            break;
-                        }
-            	}
-            }
-            else if (!strncmp((const char *) ptr->name, "s", 1))
+            if (!strncmp((const char *) ptr->name, "s", 1))
             {
         		NMEM nmem = yaz_marc_get_nmem(mt);
         		char *buffer = (char *) nmem_malloc(nmem, 5);
@@ -314,7 +303,7 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
     return 0;
 }
 
-struct yaz_marc_node* yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, char *tag_value);
+void yaz_marc_add_datafield_turbo_xml(yaz_marc_t mt, char *tag_value, char *indicators);
 
 static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 {
@@ -336,21 +325,39 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
             }
             else if (!strncmp((const char *) ptr->name, "d",1))
             {
+                struct _xmlAttr *attr;
         		NMEM nmem = yaz_marc_get_nmem(mt);
                 char *indstr = nmem_malloc(nmem, 11);  /* 0(unused), 1,....9, + zero term */
+                int index = 0;
+                for (index = 0; index < 11; index++)
+					indstr[index] = '\0';
         		char *buffer = (char *) nmem_malloc(nmem, 5);
-				const char *tag_value = tag_value_extract(ptr->name+1, buffer);
+				char *tag_value = tag_value_extract(ptr->name+1, buffer);
                 if (!tag_value)
 				{
                     yaz_marc_cprintf(
                         mt, "Missing attribute 'tag' for 'datafield'" );
                     return -1;
                 }
+                for (attr = ptr->properties; attr; attr = attr->next)
+                    if (strlen((const char *)attr->name) == 2 &&
+                             attr->name[0] == 'i')
+                    {
+                    	//extract indicator attribute from i#="Y" pattern
+                        int no = atoi((const char *)attr->name+1);
+                        if (attr->children
+                            && attr->children->type == XML_TEXT_NODE)
+                            indstr[no] = attr->children->content[0];
+                    }
+                    else
+                    {
+                        yaz_marc_cprintf(
+                            mt, "Bad attribute '%.80s' for 'datafield'",
+                            attr->name);
+                    }
                 /* note that indstr[0] is unused so we use indstr[1..] */
-                struct yaz_marc_node *n = yaz_marc_add_datafield_turbo_xml(mt, tag_value);
-
-                int rc = yaz_marc_read_turbo_xml_subfields(mt, ptr->children, indstr);
-                yaz_marc_datafield_set_indicators(n, indstr+1, strlen(indstr+1));
+                yaz_marc_add_datafield_turbo_xml(mt, tag_value, indstr+1);
+                int rc = yaz_marc_read_turbo_xml_subfields(mt, ptr->children /*, indstr */);
                 if (rc)
                     return -1;
             }
@@ -376,9 +383,15 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
         {
-            if (!strcmp((const char *) ptr->name, "record"))
+			//TODO Should actually look at the namespace but...
+            if (!strcmp((const char *) ptr->name, "record")) {
+            	yaz_marc_set_read_format(mt, YAZ_MARC_MARCXML);
                 break;
-            else
+            }
+            else if (!strcmp((const char *) ptr->name, "r")) {
+            	yaz_marc_set_read_format(mt, YAZ_MARC_TMARCXML);
+                break;
+            }
             {
                 yaz_marc_cprintf(
                     mt, "Unknown element '%.80s' in MARC XML reader",
