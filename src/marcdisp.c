@@ -241,7 +241,11 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
-char *element_name_encode(yaz_marc_t mt, WRBUF buffer, char *code_data, size_t code_len) {
+// Magic function: adds a attribute value to the element name if it is plain characters.
+// if not, and if the attribute name is not null, it will append a attribute element with the value
+// if attribute name is null it will return a non-zero value meaning it couldnt handle the value.
+
+int element_name_append_attribute_value(yaz_marc_t mt, WRBUF buffer, const char *attribute_name, char *code_data, size_t code_len) {
 	// TODO Map special codes to something possible for XML ELEMENT names
 
 	int encode = 0;
@@ -252,20 +256,18 @@ char *element_name_encode(yaz_marc_t mt, WRBUF buffer, char *code_data, size_t c
 			  (code_data[index] >= 'A' && code_data[index] <= 'Z')))
 			encode = 1;
 	}
-	if (!encode) {
-		wrbuf_iconv_write(buffer, mt->iconv_cd, code_data, code_len);
-	}
-	else {
-		char temp[2*code_len + 1];
-		wrbuf_puts(buffer, "-");
-		int index;
-		for (index = 0; index < code_len; index++) {
-			sprintf(temp+2*index, "%02X", (unsigned char) code_data[index] & 0xFF);
-		};
-		temp[2*code_len+1] = 0;
-		wrbuf_puts(buffer, temp);
-		yaz_log(YLOG_WARN, "Using numeric value in element name: %s", temp);
-	}
+	// Add as attribute
+	if (encode && attribute_name)
+		wrbuf_printf(buffer, " %s=\"", attribute_name);
+
+	if (!encode || attribute_name)
+		wrbuf_iconv_write_cdata(buffer, mt->iconv_cd, code_data, code_len);
+	if (encode && attribute_name)
+		wrbuf_printf(buffer, "\"");
+	// return error if we couldn't handle it.
+	if (encode && !attribute_name);
+		return -1;
+	return 0;
 }
 
 #if YAZ_HAVE_XML2
@@ -691,7 +693,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                                         s->code_data, using_code_len);
 	                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
 				} else {
-		        	element_name_encode(mt, wr, s->code_data, using_code_len);
+					element_name_append_attribute_value(mt, wr, "code", s->code_data, using_code_len);
  					wrbuf_puts(wr, ">");
 				}
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
@@ -700,7 +702,7 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
                 marc_iconv_reset(mt, wr);
 				wrbuf_printf(wr, "</%s", subfield_name[turbo]);
 				if (turbo)
-		        	element_name_encode(mt, wr, s->code_data, using_code_len);
+		        	element_name_append_attribute_value(mt, wr, 0, s->code_data, using_code_len);
                 wrbuf_puts(wr, ">\n");
             }
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
@@ -975,10 +977,14 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
         else { // Turbo format
         	wrbuf_rewind(subfield_name);
         	wrbuf_puts(subfield_name, "s");
-        	element_name_encode(mt, subfield_name, s->code_data, using_code_len);
+        	int encoding = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len);
         	ptr_subfield = xmlNewTextChild(ptr, ns_record,
         			BAD_CAST wrbuf_cstr(subfield_name),
         			BAD_CAST wrbuf_cstr(wr_cdata));
+        	if (encoding) {
+        		wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
+        		xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));
+        	}
         }
     }
 	wrbuf_destroy(subfield_name);
