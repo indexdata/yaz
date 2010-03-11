@@ -256,18 +256,19 @@ int element_name_append_attribute_value(yaz_marc_t mt, WRBUF buffer, const char 
 			  (code_data[index] >= 'A' && code_data[index] <= 'Z')))
 			encode = 1;
 	}
+	int success = 0;
 	// Add as attribute
 	if (encode && attribute_name)
 		wrbuf_printf(buffer, " %s=\"", attribute_name);
 
 	if (!encode || attribute_name)
 		wrbuf_iconv_write_cdata(buffer, mt->iconv_cd, code_data, code_len);
+	else
+		success = -1;
+
 	if (encode && attribute_name)
-		wrbuf_printf(buffer, "\"");
-	// return error if we couldn't handle it.
-	if (encode && !attribute_name);
-		return -1;
-	return 0;
+		wrbuf_printf(buffer, "\"");	// return error if we couldn't handle it.
+	return success;
 }
 
 #if YAZ_HAVE_XML2
@@ -969,6 +970,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
         	ptr_subfield = xmlNewTextChild(
         			ptr, ns_record,
         			BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
+        	// Generate code attribute value and add
         	wrbuf_rewind(wr_cdata);
         	wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
         	xmlNewProp(ptr_subfield, BAD_CAST "code",
@@ -977,11 +979,13 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
         else { // Turbo format
         	wrbuf_rewind(subfield_name);
         	wrbuf_puts(subfield_name, "s");
-        	int encoding = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len);
+        	int not_written = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len) != 0;
         	ptr_subfield = xmlNewTextChild(ptr, ns_record,
         			BAD_CAST wrbuf_cstr(subfield_name),
         			BAD_CAST wrbuf_cstr(wr_cdata));
-        	if (encoding) {
+        	if (not_written) {
+            	// Generate code attribute value and add
+            	wrbuf_rewind(wr_cdata);
         		wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
         		xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));
         	}
