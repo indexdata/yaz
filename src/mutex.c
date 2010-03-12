@@ -30,74 +30,94 @@
 #include <pthread.h>
 #endif
 
-#if YAZ_GNU_THREADS
-#include <pth.h>
-#endif
-
+struct yaz_mutex {
 #ifdef WIN32
-struct yaz_mutex {
-    CRITICAL_SECTION m_handle;
-};
+    CRITICAL_SECTION handle;
 #elif YAZ_POSIX_THREADS
-struct yaz_mutex {
-    pthread_mutex_t m_handle;
-};
-#elif YAZ_GNU_THREADS
-struct yaz_mutex {
-    pth_mutex_t m_handle;
-};
-#else
-struct yaz_mutex {
-    int dummy;
-};
+    pthread_mutex_t handle;
 #endif
+    char *name;
+};
 
-YAZ_EXPORT void yaz_mutex_create(YAZ_MUTEX *p)
+void yaz_mutex_create(YAZ_MUTEX *p)
 {
     if (!*p)
     {
         *p = (YAZ_MUTEX) malloc(sizeof(**p));
 #ifdef WIN32
-        InitializeCriticalSection(&(*p)->m_handle);
+        InitializeCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutex_init(&(*p)->m_handle, 0);
-#elif YAZ_GNU_THREADS
-        pth_mutex_init(&(*p)->m_handle);
+        pthread_mutex_init(&(*p)->handle, 0);
 #endif
+        (*p)->name = 0;
     }
 }
 
-YAZ_EXPORT void yaz_mutex_enter(YAZ_MUTEX p)
+void yaz_mutex_set_name(YAZ_MUTEX p, const char *name)
+{
+    if (p->name)
+        free(p->name);
+    p->name = 0;
+    if (name)
+        p->name = strdup(name);
+}
+
+void yaz_mutex_enter(YAZ_MUTEX p)
 {
     if (p)
     {
 #ifdef WIN32
-        EnterCriticalSection(&p->m_handle);
+        EnterCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutex_lock(&p->m_handle);
+        int r = 1;
+        if (p->name)
+        {   /* debugging */
+            r = pthread_mutex_trylock(&p->handle);
+            if (r)
+            {
+                yaz_log(YLOG_WARN|YLOG_ERRNO,
+                        "yaz_mutex_enter: %p name=%s waiting", p, p->name);
+            }
+        }
+        if (r && pthread_mutex_lock(&p->handle))
+        {
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "yaz_mutex_enter: %p error", p);
+        }
 #endif
+        if (p->name)
+        {
+            yaz_log(YLOG_LOG, "yaz_mutex_enter: %p name=%s lock", p, p->name);
+        }
     }
 }
 
-YAZ_EXPORT void yaz_mutex_leave(YAZ_MUTEX p)
+void yaz_mutex_leave(YAZ_MUTEX p)
 {
     if (p)
     {
 #ifdef WIN32
-        LeaveCriticalSection(&p->m_handle);
+        LeaveCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutex_unlock(&p->m_handle);
+        pthread_mutex_unlock(&p->handle);
 #endif
+        if (p->name)
+        {
+            yaz_log(YLOG_LOG, "yaz_mutex_leave: %p name=%s unlock", p, p->name);
+        }
     }
 }
 
-YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *p)
+void yaz_mutex_destroy(YAZ_MUTEX *p)
 {
     if (*p)
     {
 #ifdef WIN32
-        DeleteCriticalSection(&(*p)->m_handle);
+        DeleteCriticalSection(&(*p)->handle);
+#elif YAZ_POSIX_THREADS
+        pthread_mutex_destroy(&(*p)->handle);
 #endif
+        if ((*p)->name)
+            free((*p)->name);
         free(*p);
         *p = 0;
     }
