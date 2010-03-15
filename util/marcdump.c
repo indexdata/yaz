@@ -133,7 +133,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
             {
                 const char *name = (const char *) 
                     xmlTextReaderLocalName(reader);
-                if (!strcmp(name, "record"))
+                if (!strcmp(name, "record") || !strcmp(name, "r"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
         
@@ -142,7 +142,9 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                         fprintf(stderr, "yaz_marc_read_xml failed\n");
                     else
                     {
-                        yaz_marc_write_mode(mt, wrbuf);
+                        int write_rc = yaz_marc_write_mode(mt, wrbuf);
+						if (write_rc)
+							yaz_log(YLOG_WARN, "yaz_marc_write_mode: write error: %d", write_rc);
                         
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
@@ -165,7 +167,8 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                     ptr = ptr->children;
                     continue;
                 }
-                if (!strcmp((const char *) ptr->name, "record"))
+                if (!strcmp((const char *) ptr->name, "record") ||
+                	!strcmp((const char *) ptr->name, "r"))
                 {
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
@@ -215,12 +218,13 @@ static void dump(const char *fname, const char *from, const char *to,
         }
         yaz_marc_iconv(mt, cd);
     }
-    yaz_marc_xml(mt, output_format);
     yaz_marc_enable_collection(mt);
+    yaz_marc_set_read_format(mt, input_format);
+    yaz_marc_set_write_format(mt, output_format);
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 
-    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_XCHANGE)
+    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TMARCXML || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
         marcdump_read_xml(mt, fname);

@@ -1,0 +1,33 @@
+<collection xmlns="http://www.indexdata.com/MARC21/turboxml">
+<r>
+  <l>00492nam a22001455a 4500</l>
+  <c001>000277485</c001>
+  <c005>20051026111436.0</c005>
+  <c008>050413s1894    gr            000 0 gre d</c008>
+  <d100 i1="1" i2=" ">
+    <sa>Μαρούδης, Κωνσταντίνος Ιω</sa>
+  </d100>
+  <d245 i1="1" i2="0">
+    <sa>Ελληνικόν κρυπτογραφικόν λεξικόν /</sa>
+    <sc>Κωνστ. Ι. Μαρούδης.</sc>
+  </d245>
+  <d250 i1=" " i2=" ">
+    <s code="η"> εκδ.</s>
+  </d250>
+  <d260 i1=" " i2=" ">
+    <sa>Αθήνα,</sa>
+    <sc>1894.</sc>
+  </d260>
+  <d300 i1=" " i2=" ">
+    <sa>248 σελ.</sa>
+  </d300>
+  <d650 i1=" " i2="0">
+    <sa>Greek language, Modern</sa>
+    <sx>Dialects</sx>
+    <sv>Dictionaries</sv>
+  </d650>
+  <d650 i1=" " i2="0">
+    <sa>Cryptography.</sa>
+  </d650>
+</r>
+</collection>

@@ -304,6 +304,12 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
         if (input_charset && !output_charset)
             output_charset = "utf-8";
     }
+    else if (!strcmp(output_format, "tmarcxml"))
+    {
+        output_format_mode = YAZ_MARC_TMARCXML;
+        if (input_charset && !output_charset)
+            output_charset = "utf-8";
+    }
     else if (!strcmp(output_format, "marc"))
     {
         output_format_mode = YAZ_MARC_ISO2709;
@@ -472,7 +478,8 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                 else
                     ret = -1;
             }
-            else if (r->u.marc.input_format == YAZ_MARC_MARCXML)
+            else if (r->u.marc.input_format == YAZ_MARC_MARCXML ||
+					 r->u.marc.input_format == YAZ_MARC_TMARCXML)
             {
                 xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
                                                wrbuf_len(record));
@@ -483,7 +490,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                 }
                 else
                 {
-                    ret = yaz_marc_read_xml(mt, xmlDocGetRootElement(doc));
+					ret = yaz_marc_read_xml(mt, xmlDocGetRootElement(doc));
                     if (ret)
                         wrbuf_printf(p->wr_error, "yaz_marc_read_xml failed");
                 }

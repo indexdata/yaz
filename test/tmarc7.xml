@@ -1,0 +1,88 @@
+<collection xmlns="http://www.indexdata.com/MARC21/turboxml">
+<r>
+  <l>03114cam a2200349 i 4500</l>
+  <c001>   77123332 </c001>
+  <c003>DLC</c003>
+  <c005>20051218154744.0</c005>
+  <c008>981008b2001    ilu           000 0 eng  </c008>
+  <d035 i1=" " i2=" ">
+    <sa>57779</sa>
+  </d035>
+  <d035 i1=" " i2=" ">
+    <sa>90490</sa>
+  </d035>
+  <d035 i1=" " i2=" ">
+    <sa>93202</sa>
+  </d035>
+  <d040 i1=" " i2=" ">
+    <sa>DLC</sa>
+    <sc>DLC</sc>
+  </d040>
+  <d906 i1=" " i2=" ">
+    <sa>0</sa>
+    <sb>und</sb>
+    <sc>orignew</sc>
+    <sd>u</sd>
+    <se>ncip</se>
+    <sf>19</sf>
+    <sg>y-gencatlg</sg>
+  </d906>
+  <d010 i1=" " i2=" ">
+    <sa>   77123332 </sa>
+  </d010>
+  <d245 i1="0" i2="0">
+    <sa>Voyager Diacritic test -- New input 001 (SBIE).</sa>
+  </d245>
+  <d260 i1=" " i2=" ">
+    <sa>ny :</sa>
+    <sb>ny,</sb>
+    <sc>2001.</sc>
+  </d260>
+  <d300 i1=" " i2=" ">
+    <sa>100 p. ;</sa>
+    <sc>12 cm.</sc>
+  </d300>
+  <d500 i1=" " i2=" ">
+    <sa>New copy imported from file (8/12/99).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 0  (NEW):  Degree sign (°);  Phono Copyright mark (℗);  Copyright mark (©);  Sharp (♯);  Inverted Question mark (¿);  Inverted Exclamation mark (¡).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 1:  Script L (ℓ);  Polish L (Ł);  Scandanavian O (Ø);  D with Crossbar (Đ);  Icelandic Thorn (Þ);  AE Digraph (Æ); OE Digraph (Œ);  Miagkii Znak (ʹ);  Dot at Midline (·).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 2:  Musical Flat (♭);  Patent Mark (®);  Plus or Minus (±);  O Hook (Ơ);  U Hook (Ư);  Alif (ʼ);  alpha α;  Ayn (ʻ);  Polish l (ł).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 3:  Scandanavian o (ø);  d with crossbar (đ);  Icelandic Thorn (þ);  ae Digraph (æ);  oe Digraph (œ);  Tverdii Znak (ʺ);  Turkish i (ı);  British Pound (£);  eth (ð).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 4:  Dagger (DO NOT USE);  o Hook (ơ);  u Hook (ư);  Beta β;  Gamma γ;  Superscript 0 (⁰);  Superscript 1 (¹);  Superscript 2 (²);  Superscript 3 (³).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 5:  Superscript 4 (⁴);  Superscript 5 (⁵);  Superscript 6 (⁶);  Superscript 7 (⁷);  Superscript 8 (⁸);  Superscript 9 (⁹);  Superscript + (⁺);  Superscript - (⁻);  Superscript ( (⁽).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 6:  Superscript ) (⁾);  Subscript 0 (₀);  Subscript  1 (₁);  Subscript 2 (₂);  Subscript 3 (₃);  Subscript 4 (₄);  Subscript 5 (₅);  Subscript 6 (₆);  Subscript 7 (₇).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 7:  Subscript 8 (₈);  Subscript 9 (₉);  Subscript + (₊);  Subscript - (₋);  Subscript ( (₍);  Subscript ) (₎);  Pseudo Question Mark (ỏ);  Grave (ò);  Acute (ó).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 8:  Circumflex (ô);  Tilde (õ);  Macron (ō);  Breve (ŏ);  Superior Dot (ȯ);  Umlaut (ö);  Hacek (ǒ);  Circle Above (o̊);  Ligature left (o͡).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 9:  Ligature right (o) ;  High Comma off center (o̕);  Double Acute (ő);  Candrabindu (o̐);  Cedilla (o̧);  Right Hook (ǫ);  Dot Below (ọ);  Double Dot Below (o̤);  Circle Below (o̥).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER COLUMN 10:  Double Underscore (o̳);  Underscore (o̲);  Left Hook (o̦);  Right Cedilla (o̜);  Upadhmaniya (o̮);  Double Tilde 1st half (o͠);  Double Tilde 2nd half (o) ;  High Comma centered (o̓).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>VOYAGER PC Keyboard:  Spacing Circumflex (^); Spacing Underscore (_); Spacing Grave (`); Open Curly Bracket ({); Close Curly Bracket (}); Spacing Tilde (~).</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>Standard PC Keyboard:   1234567890-=   !@#$%^&amp;*()_+   qwertyuiop[]\   QWERTYUIOP{}|   asdfghjkl;&apos;  ASDFGHJKL:&quot;   zxcvbnm,./   ZXCVBNM&lt;&gt;?</sa>
+  </d500>
+</r>
+</collection>

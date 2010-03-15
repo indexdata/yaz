@@ -1,0 +1,95 @@
+<collection xmlns="http://www.indexdata.com/MARC21/turboxml">
+<r>
+<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
+  <l>00988nam0a32003011  450 </l>
+  <d001 i1="0" i2="0" i3="0">
+    <sa>9 181 423 4</sa>
+    <sb>710100</sb>
+    <sf>a</sf>
+  </d001>
+  <d004 i1="0" i2="0" i3="0">
+    <sr>n</sr>
+    <sa>e</sa>
+  </d004>
+  <d008 i1="0" i2="0" i3="0">
+    <st>m</st>
+    <su>u</su>
+    <sa>2002</sa>
+    <sb>us</sb>
+    <sl>eng</sl>
+    <sv>0</sv>
+  </d008>
+  <d009 i1="0" i2="0" i3="0">
+    <sa>a</sa>
+    <sg>xx</sg>
+  </d009>
+  <d021 i1="0" i2="0" i3="0">
+    <sa>1-4000-4596-7</sa>
+    <sd>$14,00</sd>
+  </d021>
+  <d032 i1="0" i2="0" i3="0">
+    <s code="&amp;">DBC200439</s>
+  </d032>
+  <d100 i1="0" i2="0" i3="0">
+    <s0></s0>
+    <sa>Sloman</sa>
+    <sh>Larry</sh>
+  </d100>
+  <d245 i1="0" i2="0" i3="0">
+    <sa>On the road with Bob Dylan</sa>
+    <se>Larry &quot;Ratso&quot; Sloman</se>
+  </d245>
+  <d250 i1="0" i2="0" i3="0">
+    <sa>Revised edition</sa>
+    <sb>Three Rivers Press</sb>
+  </d250>
+  <d260 i1="0" i2="0" i3="0">
+    <sa>New York</sa>
+    <sb>Three Rivers Press</sb>
+    <sc>2002</sc>
+  </d260>
+  <d300 i1="0" i2="0" i3="0">
+    <sa>xv, 464 sider, tavler</sa>
+  </d300>
+  <d504 i1="0" i2="0" i3="0">
+    <sa>Larry &quot;Ratso&quot; Slomans meget personlige beretning om Bob Dylans koncertturne i USA i 1975: &quot;The Rolling Thunder revue&quot;</sa>
+  </d504>
+  <d512 i1="0" i2="0" i3="0">
+    <sa>På omslaget: With a new introduction by Kinky Friedman</sa>
+  </d512>
+  <d520 i1="0" i2="0" i3="0">
+    <sa>Tidligere: 1. udgave. New York, Bantam, 1978</sa>
+  </d520>
+  <d652 i1="0" i2="0" i3="0">
+    <s0></s0>
+    <sm>99.4</sm>
+    <sa>Dylan</sa>
+    <sh>Bob</sh>
+  </d652>
+  <d652 i1="0" i2="0" i3="0">
+    <sp>78.9064</sp>
+    <sv>5</sv>
+  </d652>
+  <d666 i1="0" i2="0" i3="0">
+    <sf>folkemusik</sf>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <sf>folkemusikere</sf>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <sf>rockmusik</sf>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <sf>rockmusikere</sf>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <sf>rockkoncerter</sf>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <se>USA</se>
+  </d666>
+  <d666 i1="0" i2="0" i3="0">
+    <si>1970-1979</si>
+  </d666>
+</r>
+</collection>
