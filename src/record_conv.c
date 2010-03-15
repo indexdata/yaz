@@ -479,7 +479,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                     ret = -1;
             }
             else if (r->u.marc.input_format == YAZ_MARC_MARCXML ||
-					 r->u.marc.input_format == YAZ_MARC_TMARCXML)
+                     r->u.marc.input_format == YAZ_MARC_TMARCXML)
             {
                 xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
                                                wrbuf_len(record));
@@ -490,7 +490,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                 }
                 else
                 {
-					ret = yaz_marc_read_xml(mt, xmlDocGetRootElement(doc));
+                    ret = yaz_marc_read_xml(mt, xmlDocGetRootElement(doc));
                     if (ret)
                         wrbuf_printf(p->wr_error, "yaz_marc_read_xml failed");
                 }
