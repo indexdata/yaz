@@ -143,8 +143,8 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                     else
                     {
                         int write_rc = yaz_marc_write_mode(mt, wrbuf);
-						if (write_rc)
-							yaz_log(YLOG_WARN, "yaz_marc_write_mode: write error: %d", write_rc);
+                        if (write_rc)
+                            yaz_log(YLOG_WARN, "yaz_marc_write_mode: write error: %d", write_rc);
                         
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
@@ -168,7 +168,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                     continue;
                 }
                 if (!strcmp((const char *) ptr->name, "record") ||
-                	!strcmp((const char *) ptr->name, "r"))
+                    !strcmp((const char *) ptr->name, "r"))
                 {
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)

@@ -164,7 +164,7 @@ void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
 }
 
 void yaz_marc_add_controlfield_turbo_xml(yaz_marc_t mt, char *tag,
-                                   const xmlNode *ptr_data)
+                                         const xmlNode *ptr_data)
 {
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_CONTROLFIELD;
@@ -245,30 +245,32 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
 // if not, and if the attribute name is not null, it will append a attribute element with the value
 // if attribute name is null it will return a non-zero value meaning it couldnt handle the value.
 
-int element_name_append_attribute_value(yaz_marc_t mt, WRBUF buffer, const char *attribute_name, char *code_data, size_t code_len) {
-	// TODO Map special codes to something possible for XML ELEMENT names
+int element_name_append_attribute_value(yaz_marc_t mt, WRBUF buffer, const char *attribute_name, char *code_data, size_t code_len)
+{
+    // TODO Map special codes to something possible for XML ELEMENT names
 
-	int encode = 0;
-	int index = 0;
-	for (index = 0; index < code_len; index++) {
-		if (!((code_data[index] >= '0' && code_data[index] <= '9') ||
-			  (code_data[index] >= 'a' && code_data[index] <= 'z') ||
-			  (code_data[index] >= 'A' && code_data[index] <= 'Z')))
-			encode = 1;
-	}
-	int success = 0;
-	// Add as attribute
-	if (encode && attribute_name)
-		wrbuf_printf(buffer, " %s=\"", attribute_name);
+    int encode = 0;
+    int index = 0;
+    for (index = 0; index < code_len; index++)
+    {
+        if (!((code_data[index] >= '0' && code_data[index] <= '9') ||
+              (code_data[index] >= 'a' && code_data[index] <= 'z') ||
+              (code_data[index] >= 'A' && code_data[index] <= 'Z')))
+            encode = 1;
+    }
+    int success = 0;
+    // Add as attribute
+    if (encode && attribute_name)
+        wrbuf_printf(buffer, " %s=\"", attribute_name);
 
-	if (!encode || attribute_name)
-		wrbuf_iconv_write_cdata(buffer, mt->iconv_cd, code_data, code_len);
-	else
-		success = -1;
+    if (!encode || attribute_name)
+        wrbuf_iconv_write_cdata(buffer, mt->iconv_cd, code_data, code_len);
+    else
+        success = -1;
 
-	if (encode && attribute_name)
-		wrbuf_printf(buffer, "\"");	// return error if we couldn't handle it.
-	return success;
+    if (encode && attribute_name)
+        wrbuf_printf(buffer, "\"");	// return error if we couldn't handle it.
+    return success;
 }
 
 #if YAZ_HAVE_XML2
@@ -641,7 +643,8 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
     
     if (mt->enable_collection != no_collection)
     {
-        if (mt->enable_collection == collection_first) {
+        if (mt->enable_collection == collection_first)
+        {
             wrbuf_printf(wr, "<%s xmlns=\"%s\">\n", collection_name[turbo], ns);
             mt->enable_collection = collection_second;
         }
@@ -664,79 +667,84 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
         {
         case YAZ_MARC_DATAFIELD:
 
-        	wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
+            wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
             if (!turbo)
             	wrbuf_printf(wr, " tag=\"");
             wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
                                     strlen(n->u.datafield.tag));
-	        if (!turbo)
-	        	wrbuf_printf(wr, "\"");
+            if (!turbo)
+                wrbuf_printf(wr, "\"");
     	    if (n->u.datafield.indicator)
     	    {
     	    	int i;
     	    	for (i = 0; n->u.datafield.indicator[i]; i++)
     	    	{
-    	    		wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
-    	    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-    	    				n->u.datafield.indicator+i, 1);
-    	    		wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
-				}
+                    wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
+                    wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                            n->u.datafield.indicator+i, 1);
+                    wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
+                }
             }
-	        wrbuf_printf(wr, ">\n");
+            wrbuf_printf(wr, ">\n");
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                          identifier_length);
                 wrbuf_printf(wr, "    <%s", subfield_name[turbo]);
-				if (!turbo) {
-					wrbuf_printf(wr, " code=\"");
-                	wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                        s->code_data, using_code_len);
-	                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
-				} else {
-					element_name_append_attribute_value(mt, wr, "code", s->code_data, using_code_len);
- 					wrbuf_puts(wr, ">");
-				}
+                if (!turbo)
+                {
+                    wrbuf_printf(wr, " code=\"");
+                    wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                            s->code_data, using_code_len);
+                    wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
+                } 
+                else
+                {
+                    element_name_append_attribute_value(mt, wr, "code", s->code_data, using_code_len);
+                    wrbuf_puts(wr, ">");
+                }
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                         s->code_data + using_code_len,
                                         strlen(s->code_data + using_code_len));
                 marc_iconv_reset(mt, wr);
-				wrbuf_printf(wr, "</%s", subfield_name[turbo]);
-				if (turbo)
-		        	element_name_append_attribute_value(mt, wr, 0, s->code_data, using_code_len);
+                wrbuf_printf(wr, "</%s", subfield_name[turbo]);
+                if (turbo)
+                    element_name_append_attribute_value(mt, wr, 0, s->code_data, using_code_len);
                 wrbuf_puts(wr, ">\n");
             }
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
-        	//TODO Not CDATA
+            //TODO Not CDATA
             if (turbo)
             	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
-            			strlen(n->u.datafield.tag));
+                                        strlen(n->u.datafield.tag));
             wrbuf_printf(wr, ">\n", datafield_name[turbo]);
             break;
         case YAZ_MARC_CONTROLFIELD:
-        	wrbuf_printf(wr, "  <%s", controlfield_name[turbo]);
-        	if (!turbo) {
+            wrbuf_printf(wr, "  <%s", controlfield_name[turbo]);
+            if (!turbo)
+            {
             	wrbuf_printf(wr, " tag=\"");
-        		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
         				strlen(n->u.controlfield.tag));
-        		wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
-        	}
-        	else {
-        		//TODO convert special
-        		wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+                wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
+            }
+            else
+            {
+                //TODO convert special
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
         				strlen(n->u.controlfield.tag));
-        		wrbuf_iconv_puts(wr, mt->iconv_cd, ">");
-        	}
-    		wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-									n->u.controlfield.data,
-									strlen(n->u.controlfield.data));
-    		marc_iconv_reset(mt, wr);
-    		wrbuf_printf(wr, "</%s", controlfield_name[turbo]);
-    		//TODO convert special
-    		if (turbo)
-    			wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
+                wrbuf_iconv_puts(wr, mt->iconv_cd, ">");
+            }
+            wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
+                                    n->u.controlfield.data,
+                                    strlen(n->u.controlfield.data));
+            marc_iconv_reset(mt, wr);
+            wrbuf_printf(wr, "</%s", controlfield_name[turbo]);
+            //TODO convert special
+            if (turbo)
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
     					strlen(n->u.controlfield.tag));
-    		wrbuf_puts(wr, ">\n");
+            wrbuf_puts(wr, ">\n");
             break;
         case YAZ_MARC_COMMENT:
             wrbuf_printf(wr, "<!-- ");
@@ -744,8 +752,8 @@ static int yaz_marc_write_marcxml_ns1(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, " -->\n");
             break;
         case YAZ_MARC_LEADER:
-        	wrbuf_printf(wr, "  <%s>", leader_name[turbo]);
-        	wrbuf_iconv_write_cdata(wr,
+            wrbuf_printf(wr, "  <%s>", leader_name[turbo]);
+            wrbuf_iconv_write_cdata(wr,
                                     0 , /* no charset conversion for leader */
                                     n->u.leader, strlen(n->u.leader));
             wrbuf_printf(wr, "</%s>\n", leader_name[turbo]);
@@ -810,7 +818,7 @@ static int yaz_marc_write_marcxml_ns2(yaz_marc_t mt, WRBUF wr,
                 {
                     wrbuf_printf(wr, " ind%d=\"", i+1);
                     wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                          n->u.datafield.indicator+i, 1);
+                                            n->u.datafield.indicator+i, 1);
                     wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
                 }
             }
@@ -875,9 +883,9 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
         xmlNode *root_ptr;
 
         if (yaz_marc_get_write_format(mt) == YAZ_MARC_MARCXML)
-        	ret = yaz_marc_write_xml(mt, &root_ptr, ns, format, type);
+            ret = yaz_marc_write_xml(mt, &root_ptr, ns, format, type);
         else // Check for Turbo XML
-        	ret = yaz_marc_write_turbo_xml(mt, &root_ptr, ns, format, type);
+            ret = yaz_marc_write_turbo_xml(mt, &root_ptr, ns, format, type);
         if (ret == 0)
         {
             xmlChar *buf_out;
@@ -930,11 +938,13 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
     xmlNode *ptr;
     struct yaz_marc_subfield *s;
     int turbo = mt->output_format == YAZ_MARC_TMARCXML;
-    if (!turbo) {
+    if (!turbo)
+    {
         ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST "datafield", 0);
         xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.datafield.tag);
     }
-    else {
+    else
+    {
         //TODO consider if safe
     	char field[10];
     	field[0] = 'd';
@@ -953,10 +963,10 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
             ind_val[0] = n->u.datafield.indicator[i];
             ind_val[1] = '\0';
             sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
-			xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+            xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
         }
     }
-	WRBUF subfield_name = wrbuf_alloc();
+    WRBUF subfield_name = wrbuf_alloc();
     for (s = n->u.datafield.subfields; s; s = s->next)
     {
         xmlNode *ptr_subfield;
@@ -966,38 +976,41 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n, xmlNod
         wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, s->code_data + using_code_len);
         marc_iconv_reset(mt, wr_cdata);
         
-        if (!turbo) {
-        	ptr_subfield = xmlNewTextChild(
-        			ptr, ns_record,
-        			BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
-        	// Generate code attribute value and add
-        	wrbuf_rewind(wr_cdata);
-        	wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
-        	xmlNewProp(ptr_subfield, BAD_CAST "code",
-        			BAD_CAST wrbuf_cstr(wr_cdata));
+        if (!turbo)
+        {
+            ptr_subfield = xmlNewTextChild(
+                ptr, ns_record,
+                BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
+            // Generate code attribute value and add
+            wrbuf_rewind(wr_cdata);
+            wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
+            xmlNewProp(ptr_subfield, BAD_CAST "code",
+                       BAD_CAST wrbuf_cstr(wr_cdata));
         }
-        else { // Turbo format
-        	wrbuf_rewind(subfield_name);
-        	wrbuf_puts(subfield_name, "s");
-        	int not_written = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len) != 0;
-        	ptr_subfield = xmlNewTextChild(ptr, ns_record,
-        			BAD_CAST wrbuf_cstr(subfield_name),
-        			BAD_CAST wrbuf_cstr(wr_cdata));
-        	if (not_written) {
+        else
+        { // Turbo format
+            wrbuf_rewind(subfield_name);
+            wrbuf_puts(subfield_name, "s");
+            int not_written = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len) != 0;
+            ptr_subfield = xmlNewTextChild(ptr, ns_record,
+                                           BAD_CAST wrbuf_cstr(subfield_name),
+                                           BAD_CAST wrbuf_cstr(wr_cdata));
+            if (not_written)
+            {
             	// Generate code attribute value and add
             	wrbuf_rewind(wr_cdata);
-        		wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
-        		xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));
-        	}
+                wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
+                xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));
+            }
         }
     }
-	wrbuf_destroy(subfield_name);
+    wrbuf_destroy(subfield_name);
 }
 
 int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
-                       const char *ns, 
-                       const char *format,
-                       const char *type)
+                             const char *ns, 
+                             const char *format,
+                             const char *type)
 {
     struct yaz_marc_node *n;
     int identifier_length;
@@ -1038,28 +1051,30 @@ int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-        	add_marc_datafield_turbo_xml(mt, n, record_ptr, ns_record, wr_cdata, identifier_length);
+            add_marc_datafield_turbo_xml(mt, n, record_ptr, ns_record, wr_cdata, identifier_length);
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_rewind(wr_cdata);
             wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
             marc_iconv_reset(mt, wr_cdata);
             
-            if (!turbo) {
-				ptr = xmlNewTextChild(record_ptr, ns_record,
-									  BAD_CAST "controlfield",
-									  BAD_CAST wrbuf_cstr(wr_cdata));
-				xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
+            if (!turbo)
+            {
+                ptr = xmlNewTextChild(record_ptr, ns_record,
+                                      BAD_CAST "controlfield",
+                                      BAD_CAST wrbuf_cstr(wr_cdata));
+                xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
             }
-            else {
+            else
+            {
             	// TODO required iconv?
             	char field[10];
-				field[0] = 'c';
+                field[0] = 'c';
                 strncpy(field + 1, n->u.controlfield.tag, 3);
                 field[4] = '\0';
                 ptr = xmlNewTextChild(record_ptr, ns_record,
-									  BAD_CAST field,
-									  BAD_CAST wrbuf_cstr(wr_cdata));
+                                      BAD_CAST field,
+                                      BAD_CAST wrbuf_cstr(wr_cdata));
             }
 
             break;
@@ -1068,14 +1083,14 @@ int yaz_marc_write_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             xmlAddChild(record_ptr, ptr);
             break;
         case YAZ_MARC_LEADER:
-			{
-				char *field = "leader";
-				if (turbo)
-					field = "l";
-				xmlNewTextChild(record_ptr, ns_record, BAD_CAST field,
-								BAD_CAST n->u.leader);
-			}
-            break;
+        {
+            char *field = "leader";
+            if (turbo)
+                field = "l";
+            xmlNewTextChild(record_ptr, ns_record, BAD_CAST field,
+                            BAD_CAST n->u.leader);
+        }
+        break;
         }
     }
     wrbuf_destroy(wr_cdata);
@@ -1386,7 +1401,7 @@ int yaz_marc_get_write_format(yaz_marc_t mt)
  */
 void yaz_marc_xml(yaz_marc_t mt, int xmlmode)
 {
-	yaz_marc_set_write_format(mt, xmlmode);
+    yaz_marc_set_write_format(mt, xmlmode);
 }
 
 
