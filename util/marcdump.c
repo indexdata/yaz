@@ -219,8 +219,7 @@ static void dump(const char *fname, const char *from, const char *to,
         yaz_marc_iconv(mt, cd);
     }
     yaz_marc_enable_collection(mt);
-    yaz_marc_set_read_format(mt, input_format);
-    yaz_marc_set_write_format(mt, output_format);
+    yaz_marc_xml(mt, output_format);
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 

@@ -52,7 +52,12 @@ YAZ_EXPORT yaz_marc_t yaz_marc_create(void);
 /** \brief destroy yaz_marc_t handle */
 YAZ_EXPORT void yaz_marc_destroy(yaz_marc_t mt);
 
-/** \brief set XML mode YAZ_MARC_LINE, YAZ_MARC_SIMPLEXML, ... */
+/** \brief set XML mode YAZ_MARC_LINE, YAZ_MARCXML, YAZ_MARC_ISO2709 .. 
+    \param mt MARC handle
+    \param xmlmode mode.
+
+    This function ONLY affects yaz_marc_write_mode, yaz_marc_write_trailer.
+*/
 YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 
 /** \brief Output format: Line-format */
@@ -199,6 +204,14 @@ YAZ_EXPORT int yaz_marc_write_line(yaz_marc_t mt, WRBUF wrbuf);
 */
 YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
 
+/** \brief writes record in TMARCXML format
+    \param mt handle
+    \param wrbuf WRBUF for output
+    \retval 0 OK
+    \retval -1 ERROR
+*/
+YAZ_EXPORT int yaz_marc_write_turbo_xml(yaz_marc_t mt, WRBUF wrbuf);
+
 /** \brief writes record in MarcXchange XML (ISO25577)
     \param mt handle
     \param wrbuf WRBUF for output
@@ -325,6 +338,15 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
 YAZ_EXPORT
 void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                    const xmlNode *ptr_data);
+
+/** \brief adds controlfield to MARC structure using xml Nodes for data
+    \param mt handle
+    \param tag string tag
+    \param ptr_data value of data (TEXT xmlNode)
+*/  
+YAZ_EXPORT
+void yaz_marc_add_controlfield_xml2(yaz_marc_t mt, char *tag,
+                                    const xmlNode *ptr_data);
 #endif
 
 /** \brief adds datafield to MARC structure using strings
@@ -347,6 +369,16 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
 YAZ_EXPORT
 void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                 const char *indicator, size_t indicator_len);
+
+/** \brief adds datafield to MARC structure using xml Nodes
+    \param mt handle
+    \param tag_value string value (pointer copied verbatim, not strdupped)
+    \param indicators indicator string ; pointer copied verbatim; not strdupped
+*/  
+YAZ_EXPORT
+void yaz_marc_add_datafield_xml2(yaz_marc_t mt, char *tag_value,
+                                 char *indicators);
+
 #endif
 
 /** \brief returns memory for MARC handle
