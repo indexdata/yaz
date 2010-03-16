@@ -15,15 +15,6 @@ TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  cql2pqf-order.txt cql2pqfsample \
  $(check_SCRIPTS) \
- marc1.marc marc1.xml marc1.chr marc1.xml.marc \
- marc2.marc marc2.xml marc2.chr marc2.xml.marc \
- marc3.marc marc3.xml marc3.chr marc3.xml.marc \
- marc4.marc marc4.xml marc4.chr marc4.xml.marc \
- marc5.marc marc5.xml marc5.chr marc5.xml.marc \
- marc6.marc marc6.xml marc6.chr marc6.xml.marc \
- marc7.marc marc7.xml marc7.chr marc7.xml.marc \
- marc8.marc marc8.xml marc8.chr marc8.xml.marc \
- marc9.marc marc9.xml marc9.chr marc9.xml.marc \
  marccol1.u8.marc marccol1.u8.1.lst marccol1.u8.2.lst \
  marccol2.u8.marc marccol2.u8.1.lst marccol2.u8.2.lst \
  marccol3.u8.marc marccol3.u8.1.lst marccol3.u8.2.lst \
@@ -43,6 +34,13 @@ dist-hook:
 	cp $(srcdir)/cql/*.err $(srcdir)/cql/*.out $(distdir)/cql
 	mkdir -p $(distdir)/cql2pqf
 	cp $(srcdir)/cql2pqf/*.err $(srcdir)/cql2pqf/*.out $(distdir)/cql2pqf
+	cp $(srcdir)/marc?.chr $(distdir)
+	cp $(srcdir)/marc?.marc $(distdir)
+	cp $(srcdir)/marc?.xml $(distdir)
+	cp $(srcdir)/*.xml.marc $(distdir)
+	cp $(srcdir)/xml2marc?.xml $(distdir)
+	cp $(srcdir)/tmarc?.xml $(distdir)
+	cp $(srcdir)/xml2tmarc?.xml $(distdir)
 
 # Rule for generating codecs for our small ASN.1 spec
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
