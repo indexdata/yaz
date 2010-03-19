@@ -182,6 +182,7 @@ static void close_session(void);
 static void marc_file_write(const char *buf, size_t sz);
 
 static void wait_and_handle_response(int one_response_only);
+static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url);
 
 ODR getODROutputStream(void)
 {
@@ -1191,12 +1192,39 @@ static int send_deleteResultSetRequest(const char *arg)
 }
 
 #if YAZ_HAVE_XML2
-static int send_srw(Z_SRW_PDU *sr)
+static int send_gdu(Z_GDU *gdu)
+{
+    if (z_GDU(out, &gdu, 0, 0))
+    {
+        /* encode OK */
+        char *buf_out;
+        int len_out;
+        int r;
+        if (apdu_file)
+        {
+            if (!z_GDU(print, &gdu, 0, 0))
+                printf("Failed to print outgoing SRU package\n");
+            odr_reset(print);
+        }
+        buf_out = odr_getbuf(out, &len_out, 0);
+
+        /* we don't odr_reset(out), since we may need the buffer again */
+
+        do_hex_dump(buf_out, len_out);
+
+        r = cs_put(conn, buf_out, len_out);
+
+        if (r >= 0)
+            return 2;
+    }
+    return 0;
+}
+
+static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
+                              char *path)
 {
     const char *charset = negotiationCharset;
-    const char *host_port = cur_host;
     Z_GDU *gdu;
-    char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
 
     gdu = z_get_HTTP_Request_host_path(out, host_port, path);
 
@@ -1231,31 +1259,59 @@ static int send_srw(Z_SRW_PDU *sr)
     {
         yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
+    return send_gdu(gdu);
+}
 
-    if (z_GDU(out, &gdu, 0, 0))
+static int send_srw(Z_SRW_PDU *sr)
+{
+    char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
+    return send_srw_host_path(sr, cur_host, path);
+}
+
+static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
+{
+    const char *username = 0;
+    const char *password = 0;
+    struct Z_HTTP_Header *h;
+    Z_GDU *gdu = get_HTTP_Request_url(out, uri);
+
+    gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
+    z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Accept",
+                      "text/xml");
+    
+    for (h = cookie_hres->headers; h; h = h->next)
     {
-        /* encode OK */
-        char *buf_out;
-        int len_out;
-        int r;
-        if (apdu_file)
-        {
-            if (!z_GDU(print, &gdu, 0, 0))
-                printf("Failed to print outgoing SRU package\n");
-            odr_reset(print);
-        }
-        buf_out = odr_getbuf(out, &len_out, 0);
-
-        /* we don't odr_reset(out), since we may need the buffer again */
-
-        do_hex_dump(buf_out, len_out);
-
-        r = cs_put(conn, buf_out, len_out);
-
-        if (r >= 0)
-            return 2;
+        if (!strcmp(h->name, "Set-Cookie"))
+            z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
+                              "Cookie", h->value);
     }
-    return 0;
+
+    if (auth)
+    {
+        if (auth->which == Z_IdAuthentication_open)
+        {
+            char **darray;
+            int num;
+            nmem_strsplit(out->mem, "/", auth->u.open, &darray, &num);
+            if (num >= 1)
+                username = darray[0];
+            if (num >= 2)
+                password = darray[1];
+        }
+        else if (auth->which == Z_IdAuthentication_idPass)
+        {
+            username = auth->u.idPass->userId;
+            password = auth->u.idPass->password;
+        }
+    }
+
+    if (username && password)
+    {
+        z_HTTP_header_add_basic_auth(out, &gdu->u.HTTP_Request->headers,
+                                     username, password);
+    }
+
+    return send_gdu(gdu);
 }
 #endif
 
@@ -4224,9 +4280,12 @@ static void http_response(Z_HTTP_Response *hres)
 }
 #endif
 
+#define max_HTTP_redirects 2
+
 static void wait_and_handle_response(int one_response_only)
 {
     int reconnect_ok = 1;
+    int no_redirects = 0;
     int res;
     char *netbuffer= 0;
     int netbufferlen = 0;
@@ -4355,7 +4414,25 @@ static void wait_and_handle_response(int one_response_only)
 #if YAZ_HAVE_XML2
         else if (gdu->which == Z_GDU_HTTP_Response)
         {
-            http_response(gdu->u.HTTP_Response);
+            Z_HTTP_Response *hres = gdu->u.HTTP_Response;
+            int code = hres->code;
+            const char *location = 0;
+            if ((code == 301 || code == 302)
+                && no_redirects < max_HTTP_redirects
+                && !yaz_matchstr(sru_method, "get")
+                && (location = z_HTTP_header_lookup(hres->headers, "Location")))
+            {
+                session_connect(location);
+                no_redirects++;
+                if (conn)
+                {
+                    if (send_SRW_redirect(location, hres) == 2)
+                        continue;
+                }
+                printf("Redirect failed\n");
+            }
+            else
+                http_response(gdu->u.HTTP_Response);
         }
 #endif
         if (one_response_only)
