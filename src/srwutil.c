@@ -13,24 +13,16 @@
 #include <yaz/matchstr.h>
 #include <yaz/yaz-iconv.h>
 
-/** \brief decodes HTTP path (which should hold SRU database)
-    \param n memory for returned result
-    \param uri URI path (up to but not including ?)
-    \param len URI len (up to but not including ?)
-    \returns ODR allocated database
-*/
 static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)
 {
-    char *ret = odr_malloc(n, strlen(uri) + 1);
-    yaz_decode_uri_component(ret, uri, len);
-    return ret;
+    return odr_strdupn(n, uri, len);
 }
 
 void yaz_encode_sru_dbpath_buf(char *dst, const char *db)
 {
     assert(db);
     *dst = '/';
-    yaz_encode_uri_component(dst+1, db);
+    strcpy(dst+1, db);
 }
 
 char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
