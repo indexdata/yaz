@@ -144,7 +144,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                                 &length_implementation);
             header_created = 1;
         }
-        else if (line_len > 5 && line[0] != ' ' && line[1] != ' ' 
+        else if (line_len > 4 && line[0] != ' ' && line[1] != ' '
                  && line[2] != ' ' && line[3] == ' ' )
         {
             /* deal with data/control lines: 245 12 ........ */
