@@ -4,7 +4,7 @@
  */
 
 /** \file
- * \brief Little toy-thing to read MARC records from a file or fixed array.
+ * \brief Little toy-thing to read MARC records from a fixed array.
  */
 
 #include <ctype.h>
@@ -1536,7 +1536,7 @@ char *marc_records[NO_MARC_RECORDS] = {
 };
 
 /* read MARC record from offset 'num' */
-char *dummy_marc_record (int num, ODR odr)
+char *dummy_marc_record(int num, ODR odr)
 {
     if (num < 1)
         return 0;
@@ -1544,26 +1544,26 @@ char *dummy_marc_record (int num, ODR odr)
 }
 
 /* read MARC record and convert to XML */
-char *dummy_xml_record (int num, ODR odr)
+char *dummy_xml_record(int num, ODR odr)
 {
-    yaz_marc_t mt = yaz_marc_create();
-    const char *result;
-    size_t rlen;
-    char *rec = dummy_marc_record (num, odr);
-    int len;
+    char *rec = dummy_marc_record(num, odr);
 
-    if (!rec)
-        return 0;
-
-    yaz_marc_xml(mt, YAZ_MARC_MARCXML);
-    len = yaz_marc_decode_buf (mt, rec, -1, &result, &rlen);
-    if (len > 1)
+    if (rec)
     {
-        rec = (char *) odr_malloc(odr, rlen+1);
-        memcpy(rec, result, rlen);
-        rec[rlen] = '\0';
+        const char *result;
+        size_t rlen;
+        int len;
+        yaz_marc_t mt = yaz_marc_create();
+        yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+        len = yaz_marc_decode_buf(mt, rec, -1, &result, &rlen);
+        if (len > 1)
+        {
+            rec = (char *) odr_malloc(odr, rlen+1);
+            memcpy(rec, result, rlen);
+            rec[rlen] = '\0';
+        }
+        yaz_marc_destroy(mt);
     }
-    yaz_marc_destroy(mt);
     return rec;
 }
 /*
