@@ -666,11 +666,10 @@ static int cmd_base(const char *arg)
     return set_base(arg);
 }
 
-int session_connect(const char *arg)
+static int session_connect_base(const char *arg, const char **basep)
 {
     void *add;
     char type_and_host[101];
-    const char *basep = 0;
     if (conn)
     {
         cs_close(conn);
@@ -682,7 +681,7 @@ int session_connect(const char *arg)
         session_mem = NULL;
         session_initResponse = 0;
     }
-    cs_get_host_args(arg, &basep);
+    cs_get_host_args(arg, basep);
 
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
@@ -718,17 +717,25 @@ int session_connect(const char *arg)
     }
     printf("OK.\n");
     cs_print_session_info(conn);
-    if (basep && *basep)
-        set_base(basep);
-    else if (protocol == PROTO_Z3950)
-        set_base("Default");
-
     if (protocol == PROTO_Z3950)
     {
         send_initRequest(type_and_host);
         return 2;
     }
     return 0;
+}
+
+static int session_connect(const char *arg)
+{
+    int r;
+    const char *basep = 0;
+
+    r = session_connect_base(arg, &basep);
+    if (basep && *basep)
+        set_base(basep);
+    else if (protocol == PROTO_Z3950)
+        set_base("Default");
+    return r;
 }
 
 int cmd_open(const char *arg)
@@ -4422,7 +4429,8 @@ static void wait_and_handle_response(int one_response_only)
                 && !yaz_matchstr(sru_method, "get")
                 && (location = z_HTTP_header_lookup(hres->headers, "Location")))
             {
-                session_connect(location);
+                const char *base_tmp;
+                session_connect_base(location, &base_tmp);
                 no_redirects++;
                 if (conn)
                 {
