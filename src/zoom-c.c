@@ -2386,7 +2386,10 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
             {
                 /* present response and we didn't get any records! */
                 Z_NamePlusRecord *myrec = 
-                    zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
+                    zget_surrogateDiagRec(
+                        resultset->odr, 0, 
+                        YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
+                        "ZOOM C generated. Present phase and no records");
                 record_cache_add(resultset, myrec, *start,
                                  syntax, elementSetName, 0, 0);
             }
@@ -2395,7 +2398,10 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
         {
             /* present response and we didn't get any records! */
             Z_NamePlusRecord *myrec = 
-                zget_surrogateDiagRec(resultset->odr, 0, 14, 0);
+                zget_surrogateDiagRec(
+                    resultset->odr, 0,
+                    YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
+                    "ZOOM C generated: Present response and no records");
             record_cache_add(resultset, myrec, *start, syntax, elementSetName,
                              0, 0);
         }
