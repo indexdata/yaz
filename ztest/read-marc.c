@@ -14,7 +14,9 @@
 
 #include "ztest.h"
 
-char *marc_records[] = {
+#define NO_MARC_RECORDS 24
+
+char *marc_records[NO_MARC_RECORDS] = {
 
   "\x30\x30\x33\x36\x36\x6E\x61\x6D\x20\x20\x32\x32\x30\x30\x31\x36"
   "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
@@ -1533,67 +1535,12 @@ char *marc_records[] = {
   "\x38\x34\x32\x1E\x1D"
 };
 
-static int atoin (const char *buf, int n)
-{
-    int val = 0;
-    while (--n >= 0)
-    {
-        if (isdigit(*(const unsigned char *) buf))
-            val = val*10 + (*buf - '0');
-        buf++;
-    }
-    return val;
-}
-
-/* read one MARC record from a file */
-char *marc_read(FILE *inf, ODR odr)
-{
-    char length_str[5];
-    size_t size;
-    char *buf;
-
-    if (fread (length_str, 1, 5, inf) != 5)
-        return NULL;
-    size = atoin (length_str, 5);
-    if (size <= 6)
-        return NULL;
-    if (!(buf = (char*) odr_malloc (odr, size+1)))
-        return NULL;
-    if (fread (buf+5, 1, size-5, inf) != (size-5))
-    {
-        xfree (buf);
-        return NULL;
-    }
-    memcpy (buf, length_str, 5);
-    buf[size] = '\0';
-    return buf;
-}
-
 /* read MARC record from offset 'num' */
 char *dummy_marc_record (int num, ODR odr)
 {
-    FILE *inf;
-    char *buf = 0;
-
-    inf = fopen ("dummy-records", "r");
-    if (!inf) 
-    { /* file not there. Get them from fixed array */
-        if (num < 1)
-            return 0;
-        return marc_records[(num-1) % 24];
-        if (num < 1 || num > 24)
-            return 0;
-        return marc_records[num-1];
-    }
-    /* OK, try to get proper MARC records from the file */
-    while (--num >= 0)
-    {
-        buf = marc_read (inf, odr);
-        if (!buf)
-            break;
-    }
-    fclose(inf);
-    return buf;
+    if (num < 1)
+        return 0;
+    return marc_records[(num-1) % NO_MARC_RECORDS];
 }
 
 /* read MARC record and convert to XML */

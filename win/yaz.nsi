@@ -87,7 +87,6 @@ Section "" ; (default section)
 	File ..\NEWS
 	SetOutPath $INSTDIR
 	SetOutPath $INSTDIR\ztest
-	File ..\ztest\dummy-records
 	File ..\ztest\dummy-grs
 	File ..\ztest\dummy-words
 	SetOutPath $INSTDIR\etc
