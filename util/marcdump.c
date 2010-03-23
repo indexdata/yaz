@@ -443,8 +443,14 @@ int main (int argc, char **argv)
                rather than WRBUF */
             if (strlen(arg) > 4 && strncmp(arg, "xml,", 4) == 0)
             {
+                /* Only supported for Libxml2 2.6.0 or later */
+#if LIBXML_VERSION >= 20600
                 arg = arg + 4;
                 write_using_libxml2 = 1;
+#else
+                fprintf(stderr, "%s: output using Libxml2 unsupported\n", prog);
+                exit(4);
+#endif
             }
             output_format = yaz_marc_decode_formatstr(arg);
             if (output_format == -1)
