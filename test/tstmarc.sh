@@ -13,6 +13,11 @@ if test $? = "3"; then
     noxml=1
 fi
 
+../util/yaz-marcdump -o xml,marcxml >/dev/null 2>&1
+if test $? = "4"; then
+    noxmlwrite=1
+fi
+
 binmarc_convert() {  
     OUTPUT_FORMAT="$1"
     REVERT_FORMAT="$2"
@@ -90,14 +95,19 @@ binmarc_convert() {
 binmarc_convert "marcxml"  "marcxml" "" 
 echo "binmarc -> marcxml: $?" 
 
+
+if test -z "$noxmlwrite"; then
 binmarc_convert "xml,marcxml" "marcxml" "xml2" 
 echo "binmarc -> marcxml(libxml2): $?" 
+fi
 
 binmarc_convert "tmarcxml"  "tmarcxml" "t" 
 echo "binmarc -> tmarcxml: $?" 
 
+if test -z "$noxmlwrite"; then
 binmarc_convert "xml,tmarcxml"  "tmarcxml" "xml2t" 
 echo "binmarc -> tmarcxml(libxml2): $?" 
+fi
 
 exit $ecode
 
