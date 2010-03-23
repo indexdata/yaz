@@ -37,6 +37,7 @@ struct yaz_mutex {
     pthread_mutex_t handle;
 #endif
     char *name;
+    int log_level;
 };
 
 void yaz_mutex_create(YAZ_MUTEX *p)
@@ -50,16 +51,21 @@ void yaz_mutex_create(YAZ_MUTEX *p)
         pthread_mutex_init(&(*p)->handle, 0);
 #endif
         (*p)->name = 0;
+        (*p)->log_level = 0;
     }
 }
 
-void yaz_mutex_set_name(YAZ_MUTEX p, const char *name)
+void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name)
 {
     if (p->name)
         free(p->name);
     p->name = 0;
+    p->log_level = 0;
     if (name)
+    {
         p->name = strdup(name);
+        p->log_level = log_level;
+    }
 }
 
 void yaz_mutex_enter(YAZ_MUTEX p)
@@ -70,23 +76,26 @@ void yaz_mutex_enter(YAZ_MUTEX p)
         EnterCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
         int r = 1;
-        if (p->name)
+        if (p->log_level)
         {   /* debugging */
             r = pthread_mutex_trylock(&p->handle);
             if (r)
             {
-                yaz_log(YLOG_WARN|YLOG_ERRNO,
+                yaz_log(p->log_level,
                         "yaz_mutex_enter: %p name=%s waiting", p, p->name);
             }
         }
+        /* r == 0 if already locked */
         if (r && pthread_mutex_lock(&p->handle))
         {
-            yaz_log(YLOG_WARN|YLOG_ERRNO, "yaz_mutex_enter: %p error", p);
+            yaz_log(p->log_level ? p->log_level : YLOG_WARN,
+                    "yaz_mutex_enter: %p error", p);
         }
 #endif
-        if (p->name)
+        if (p->log_level)
         {
-            yaz_log(YLOG_LOG, "yaz_mutex_enter: %p name=%s lock", p, p->name);
+            yaz_log(p->log_level, "yaz_mutex_enter: %p name=%s lock", p,
+                    p->name);
         }
     }
 }
@@ -100,9 +109,10 @@ void yaz_mutex_leave(YAZ_MUTEX p)
 #elif YAZ_POSIX_THREADS
         pthread_mutex_unlock(&p->handle);
 #endif
-        if (p->name)
+        if (p->log_level)
         {
-            yaz_log(YLOG_LOG, "yaz_mutex_leave: %p name=%s unlock", p, p->name);
+            yaz_log(p->log_level, "yaz_mutex_leave: %p name=%s unlock", p,
+                    p->name);
         }
     }
 }

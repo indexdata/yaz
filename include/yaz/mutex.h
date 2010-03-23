@@ -48,7 +48,7 @@ YAZ_EXPORT void yaz_mutex_leave(YAZ_MUTEX);
 /** \brief destroy MUTEX */
 YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *);
 /** \brief sets name of MUTEX for debugging purposes */
-void yaz_mutex_set_name(YAZ_MUTEX p, const char *name);
+void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name);
 
 YAZ_END_CDECL
 
