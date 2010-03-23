@@ -26,6 +26,10 @@
 #include <windows.h>
 #endif
 
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
 #endif
@@ -75,28 +79,47 @@ void yaz_mutex_enter(YAZ_MUTEX p)
 #ifdef WIN32
         EnterCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
-        int r = 1;
+        int r = 1; /* signal : not locked (yet) */
+        
         if (p->log_level)
         {   /* debugging */
             r = pthread_mutex_trylock(&p->handle);
             if (r)
             {
+#if HAVE_SYS_TIME_H
+                long long d;
+                struct timeval tv1, tv2;
+                gettimeofday(&tv1, 0);
+#endif
                 yaz_log(p->log_level,
-                        "yaz_mutex_enter: %p name=%s waiting", p, p->name);
+                        "yaz_mutex_enter: %p tid=%p name=%s waiting",
+                        p, (void *) pthread_self(), p->name);
+#if HAVE_SYS_TIME_H
+                r = pthread_mutex_lock(&p->handle);
+                gettimeofday(&tv2, 0);
+                d = 1000000LL * ((long long) tv2.tv_sec - tv1.tv_sec) +
+                    tv2.tv_usec - tv1.tv_usec;
+                yaz_log(p->log_level, "yaz_mutex_enter: %p tid=%p name=%s "
+                        "lock delay=%lld",
+                        p, (void *) pthread_self(), p->name, d);
+#endif
+            }
+            else
+            {
+                yaz_log(p->log_level, "yaz_mutex_enter: %p tid=%p name=%s lock",
+                        p, (void *) pthread_self(), p->name);
             }
         }
-        /* r == 0 if already locked */
-        if (r && pthread_mutex_lock(&p->handle))
+        if (r)
         {
-            yaz_log(p->log_level ? p->log_level : YLOG_WARN,
-                    "yaz_mutex_enter: %p error", p);
+            r = pthread_mutex_lock(&p->handle);
+            if (p->log_level)
+            {
+                yaz_log(p->log_level, "yaz_mutex_enter: %p tid=%p name=%s lock",
+                        p, (void *) pthread_self(), p->name);
+            }
         }
 #endif
-        if (p->log_level)
-        {
-            yaz_log(p->log_level, "yaz_mutex_enter: %p name=%s lock", p,
-                    p->name);
-        }
     }
 }
 
@@ -108,12 +131,13 @@ void yaz_mutex_leave(YAZ_MUTEX p)
         LeaveCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
         pthread_mutex_unlock(&p->handle);
-#endif
         if (p->log_level)
         {
-            yaz_log(p->log_level, "yaz_mutex_leave: %p name=%s unlock", p,
-                    p->name);
+            yaz_log(p->log_level,
+                    "yaz_mutex_leave: %p tid=%p name=%s unlock",
+                    p, (void *) pthread_self(), p->name);
         }
+#endif
     }
 }
 
