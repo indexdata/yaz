@@ -28,6 +28,8 @@ static void tst(void)
     yaz_mutex_leave(p);
     yaz_mutex_destroy(&p);
     YAZ_CHECK(p == 0);
+
+    yaz_mutex_destroy(&p); /* OK to "destroy" NULL handle */
 }
 
 int main (int argc, char **argv)
