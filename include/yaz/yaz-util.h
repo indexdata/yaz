@@ -80,6 +80,8 @@
 
     Timing : \ref timing.h .
 
+    Locking: \ref mutex.h .
+
     \section queryparsers Query parsers
 
     PQF parsing: \ref pquery.h .

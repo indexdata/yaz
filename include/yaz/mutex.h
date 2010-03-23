@@ -37,18 +37,50 @@
 
 YAZ_BEGIN_CDECL
 
-/** \brief NMEM/YAZ MUTEX opaque pointer */
+/** \brief YAZ MUTEX opaque pointer */
 typedef struct yaz_mutex *YAZ_MUTEX;
-/** \brief create Mutex */
-YAZ_EXPORT void yaz_mutex_create(YAZ_MUTEX *);
-/** \brief enter critical section / AKA lock */
-YAZ_EXPORT void yaz_mutex_enter(YAZ_MUTEX);
-/** \brief leave critical section / AKA unlock */
-YAZ_EXPORT void yaz_mutex_leave(YAZ_MUTEX);
-/** \brief destroy MUTEX */
-YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *);
-/** \brief sets name of MUTEX for debugging purposes */
-void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name);
+
+/** \brief create MUTEX
+    \param mutexp is pointer to MUTEX handle (*mutexp must be NULL)
+    
+    It is important that *mutexp is NULL. If not, yaz_mutex_create will
+    not modify the handle (assumes it is already created!)
+ */
+YAZ_EXPORT void yaz_mutex_create(YAZ_MUTEX *mutexp);
+
+/** \brief enter critical section / AKA lock
+    \param mutex MUTEX handle
+ */
+YAZ_EXPORT void yaz_mutex_enter(YAZ_MUTEX mutex);
+
+
+/** \brief leave critical section / AKA unlock
+    \param mutex MUTEX handle
+ */
+YAZ_EXPORT void yaz_mutex_leave(YAZ_MUTEX mutex);
+
+
+/** \brief destroy MUTEX
+    \param mutexp pointer to MUTEX handle
+
+    If *mutexp is NULL, then this function does nothing.
+ */
+YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *mutexp);
+
+
+/** \brief sets name of MUTEX for debugging purposes
+    \param mutex MUTEX handle
+    \param log_level YAZ log level
+    \param name user-given name associated with MUTEX
+
+    If log_level != 0 and name != 0 this function will make yaz_mutex_enter
+    and yaz_mutex_leave print information for each invocation using yaz_log
+    with the level given. In particular when YAZ is compiled with pthreads,
+    yaz_mutex_enter will inform if a lock is not immediately acquired.
+    This function should be called after a MUTEX is created but before
+    it is used for locking.
+ */
+void yaz_mutex_set_name(YAZ_MUTEX mutex, int log_level, const char *name);
 
 YAZ_END_CDECL
 
