@@ -33,6 +33,7 @@ test_xml_include
 test_oid
 test_file_glob
 test_log_thread
+test_mutex
 *.log
 *.o
 *~

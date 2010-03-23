@@ -2,7 +2,7 @@
 ## Copyright (C) 1995-2010 Index Data
 
 check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
- test_odr test_ccl test_log \
+ test_odr test_ccl test_log test_mutex \
  test_soap1 test_soap2 test_odrstack test_log_thread test_xmlquery test_pquery \
  test_comstack test_filepath test_record_conv test_retrieval test_tpath \
  test_timing test_query_charset test_oid test_icu test_match_glob \
@@ -47,7 +47,8 @@ test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
-test_icu_LDADD = ../src/libyaz_icu.la $(ICU_LIBS)
+test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
+test_mutex_LDADD = ../src/libyaz_server.la ../src/libyaz.la $(PTHREAD_LIBS)
 AM_CFLAGS = $(PTHREAD_CFLAGS)
 
 
@@ -62,6 +63,7 @@ test_odr_SOURCES = test_odrcodec.c test_odrcodec.h test_odr.c
 test_odrstack_SOURCES = test_odrstack.c
 test_ccl_SOURCES = test_ccl.c
 test_log_SOURCES = test_log.c
+test_mutex_SOURCES = test_mutex.c
 test_soap1_SOURCES = test_soap1.c
 test_soap2_SOURCES = test_soap2.c
 test_log_thread_SOURCES = test_log_thread.c
