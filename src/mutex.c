@@ -100,7 +100,7 @@ void yaz_mutex_enter(YAZ_MUTEX p)
                 d = 1000000LL * ((long long) tv2.tv_sec - tv1.tv_sec) +
                     tv2.tv_usec - tv1.tv_usec;
                 yaz_log(p->log_level, "yaz_mutex_enter: %p tid=%p name=%s "
-                        "lock delay=%lld",
+                        "lock delay %lld",
                         p, (void *) pthread_self(), p->name, d);
 #endif
             }
