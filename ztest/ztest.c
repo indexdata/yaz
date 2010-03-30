@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
 #if HAVE_UNISTD_H
@@ -24,10 +25,18 @@
 static int log_level=0;
 static int log_level_set=0;
 
+struct delay {
+    double d1;
+    double d2;
+};
+
 struct result_set {
     char *name;
     char *db;
     Odr_int hits;
+    struct delay search_delay;
+    struct delay present_delay;
+    struct delay fetch_delay;
     struct result_set *next;
 };
 
@@ -155,20 +164,53 @@ static int check_slow(const char *basename, bend_association association)
     return 0;
 }
 
+static int strcmp_prefix(const char *s, const char *p)
+{
+    size_t l = strlen(p);
+    if (strlen(s) >= l && !memcmp(s, p, l))
+        return 1;
+    return 0;
+}
+
+static void init_delay(struct delay *delayp)
+{
+    delayp->d1 = delayp->d2 = 0.0;
+}
+
+static int parse_delay(struct delay *delayp, const char *value)
+{
+    delayp->d1 = atof(value);
+    delayp->d2 = 0.0;
+    return 0;
+}
+
+static void do_delay(const struct delay *delayp)
+{
+    struct timeval tv;
+
+    tv.tv_sec = floor(delayp->d1);
+    tv.tv_usec = (delayp->d1 - floor(delayp->d1)) * 1000000;
+    select(0, 0, 0, 0, &tv);
+}
+
 int ztest_search(void *handle, bend_search_rr *rr)
 {
     struct session_handle *sh = (struct session_handle*) handle;
     struct result_set *new_set;
+    const char *db, *db_sep;
 
     if (rr->num_bases != 1)
     {
         rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
         return 0;
     }
+    
+    db = rr->basenames[0];
+
     /* Allow Default, db.* and Slow */
-    if (!yaz_matchstr(rr->basenames[0], "Default"))
+    if (strcmp_prefix(db, "Default"))
         ;  /* Default is OK in our test */
-    else if (!strncmp(rr->basenames[0], "db", 2))
+    else if (strcmp_prefix(db, "db"))
         ;  /* db.* is OK in our test */
     else if (check_slow(rr->basenames[0], rr->association))
     {
@@ -198,6 +240,37 @@ int ztest_search(void *handle, bend_search_rr *rr)
         sh->result_sets = new_set;
         new_set->name = xstrdup(rr->setname);
     }
+    new_set->hits = 0;
+    new_set->db = xstrdup(db);
+    init_delay(&new_set->search_delay);
+    init_delay(&new_set->present_delay);
+
+    db_sep = strchr(db, '?');
+    if (db_sep)
+    {
+        char **names;
+        char **values;
+        int no_parms = yaz_uri_to_array(db_sep+1, rr->stream, &names, &values);
+        int i;
+        for (i = 0; i < no_parms; i++)
+        {
+            const char *name = names[i];
+            const char *value = values[i];
+            if (!strcmp(name, "seed"))
+                srandom(atoi(value));
+            else if (!strcmp(name, "search-delay"))
+                parse_delay(&new_set->search_delay, value);
+            else if (!strcmp(name, "present-delay"))
+                parse_delay(&new_set->present_delay, value);
+            else if (!strcmp(name, "fetch-delay"))
+                parse_delay(&new_set->fetch_delay, value);
+            else
+            {
+                rr->errcode = YAZ_BIB1_SERVICE_UNSUPP_FOR_THIS_DATABASE;
+                rr->errstring = odr_strdup(rr->stream, name);
+            }
+        }
+    }
 
     if (rr->extra_args)
     {
@@ -224,8 +297,8 @@ int ztest_search(void *handle, bend_search_rr *rr)
     }
     rr->hits = get_hit_count(rr->query);
 
+    do_delay(&new_set->search_delay);
     new_set->hits = rr->hits;
-    new_set->db = xstrdup(rr->basenames[0]);
     
     return 0;
 }
