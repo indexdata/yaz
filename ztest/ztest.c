@@ -179,18 +179,28 @@ static void init_delay(struct delay *delayp)
 
 static int parse_delay(struct delay *delayp, const char *value)
 {
-    delayp->d1 = atof(value);
-    delayp->d2 = 0.0;
+    if (sscanf(value, "%lf:%lf", &delayp->d1, &delayp->d2) == 2)
+        ;
+    else if (sscanf(value, "%lf", &delayp->d1) == 1)
+        delayp->d2 = 0.0;
+    else
+        return -1;
     return 0;
 }
 
 static void do_delay(const struct delay *delayp)
 {
-    struct timeval tv;
+    double d = delayp->d1;
 
-    tv.tv_sec = floor(delayp->d1);
-    tv.tv_usec = (delayp->d1 - floor(delayp->d1)) * 1000000;
-    select(0, 0, 0, 0, &tv);
+    if (d > 0.0)
+    {
+        struct timeval tv;
+        if (delayp->d2 > d)
+            d += (rand()) * (delayp->d2 - d) / RAND_MAX;
+        tv.tv_sec = floor(d);
+        tv.tv_usec = (d - floor(d)) * 1000000;
+        select(0, 0, 0, 0, &tv);
+    }
 }
 
 int ztest_search(void *handle, bend_search_rr *rr)
@@ -244,6 +254,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
     new_set->db = xstrdup(db);
     init_delay(&new_set->search_delay);
     init_delay(&new_set->present_delay);
+    init_delay(&new_set->fetch_delay);
 
     db_sep = strchr(db, '?');
     if (db_sep)
@@ -688,6 +699,16 @@ int ztest_sort(void *handle, bend_sort_rr *rr)
 /* present request handler */
 int ztest_present(void *handle, bend_present_rr *rr)
 {
+    struct session_handle *sh = (struct session_handle*) handle;
+    struct result_set *set = get_set(sh, rr->setname);    
+
+    if (!set)
+    {
+        rr->errcode = YAZ_BIB1_SPECIFIED_RESULT_SET_DOES_NOT_EXIST;
+        rr->errstring = odr_strdup(rr->stream, rr->setname);
+        return 0;
+    }
+    do_delay(&set->present_delay);
     return 0;
 }
 
@@ -705,6 +726,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         r->errstring = odr_strdup(r->stream, r->setname);
         return 0;
     }
+    do_delay(&set->fetch_delay);
     r->last_in_set = 0;
     r->basename = set->db;
     r->output_format = r->request_format;

@@ -58,6 +58,52 @@
   <title>OPTIONS</title>
   &gfs-options;
  </refsect1>
+ <refsect1>
+   <title>TESTING</title>
+   <para>
+    <command>yaz-ztest</command> normally returns a random hit count between
+    0 and 24. However, if a query term includes leading digits, then the 
+    integer value of that term is used as hit count. This allows testers
+    to return any number of hits. <command>yaz-ztest</command> includes
+    24 MARC records for testing. Hit counts exceeding 24 will make 
+    <command>yaz-ztest</command> return the same record batch over and over..
+    So record at position 1, 25, 49, etc .. are equivalent.
+   </para>
+   <para>
+     The following databases are honored by <command>yaz-ztest</command>:
+     <literal>Default</literal>, <literal>slow</literal>
+     and <literal>db.*</literal> (all databases with prefix "db"). Any
+     other database will make <command>yaz-ztest</command> return diagnostic
+     109: "Database unavailable".
+   </para>
+   <para>
+     Options for search may be included in the form or URL get arguments
+     included as part of the Z39.50 database name. The following
+     database options are present: <literal>search-delay</literal>,
+     <literal>present-delay</literal>, <literal>fetch-delay</literal>
+     and <literal>seed</literal>.
+   </para>
+   <para>
+     The former, delay type options, specify
+     a fake delay (sleep) that <command>yaz-ztest</command> will perform
+     when searching, presenting, fetching records respectively.
+     The value of the delay may either be a fixed floating point
+     value which specifies the delay in seconds.
+     Alternatively the value may be given as two floating point numbers
+     separated by colon, which wil make <command>yaz-ztest</command> perform
+     a random sleep between the first and second number.
+   </para>
+   <para>
+     The database parameter <literal>seed</literal> takes an integer 
+     as value. This will call <literal>srand</literal> with this integer to
+     ensure that the random behavior can be re-played.
+   </para>
+   <para>
+     Suppose we want searches to take between 0.1 and 0.5 seconds and
+     a fetch to take 0.2 second. To access test database Default we'd use:
+     <literal>Default?search-delay=0.1:0.5&amp;fetch-delay=0.2</literal>.
+   </para>
+ </refsect1>
  <refsect1><title>GFS CONFIGURATION AND VIRTUAL HOSTS</title>
   &gfs-virtual;
  </refsect1>
