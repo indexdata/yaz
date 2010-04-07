@@ -223,7 +223,7 @@ static void dump(const char *fname, const char *from, const char *to,
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 
-    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TMARCXML || input_format == YAZ_MARC_XCHANGE)
+    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
         marcdump_read_xml(mt, fname);

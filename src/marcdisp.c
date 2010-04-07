@@ -569,7 +569,7 @@ int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr)
         switch(mt->output_format)
         {
         case YAZ_MARC_MARCXML:
-        case YAZ_MARC_TMARCXML:
+        case YAZ_MARC_TURBOMARC:
             wrbuf_printf(wr, "</collection>\n");
             break;
         case YAZ_MARC_XCHANGE:
@@ -593,8 +593,8 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
         return yaz_marc_write_line(mt, wr);
     case YAZ_MARC_MARCXML:
         return yaz_marc_write_marcxml(mt, wr);
-    case YAZ_MARC_TMARCXML:
-        return yaz_marc_write_turbo_xml(mt, wr);
+    case YAZ_MARC_TURBOMARC:
+        return yaz_marc_write_turbomarc(mt, wr);
     case YAZ_MARC_XCHANGE:
         return yaz_marc_write_marcxchange(mt, wr, 0, 0); /* no format, type */
     case YAZ_MARC_ISO2709:
@@ -816,7 +816,7 @@ int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wr)
                                      0, 0, 0);
 }
 
-int yaz_marc_write_turbo_xml(yaz_marc_t mt, WRBUF wr)
+int yaz_marc_write_turbomarc(yaz_marc_t mt, WRBUF wr)
 {
     /* set leader 09 to 'a' for UNICODE */
     /* http://www.loc.gov/marc/bibliographic/ecbdldrd.html#mrcblea */
@@ -1336,8 +1336,8 @@ int yaz_marc_decode_formatstr(const char *arg)
         mode = YAZ_MARC_ISO2709;
     if (!strcmp(arg, "marcxml"))
         mode = YAZ_MARC_MARCXML;
-    if (!strcmp(arg, "tmarcxml"))
-        mode = YAZ_MARC_TMARCXML;
+    if (!strcmp(arg, "turbomarc"))
+        mode = YAZ_MARC_TURBOMARC;
     if (!strcmp(arg, "marcxchange"))
         mode = YAZ_MARC_XCHANGE;
     if (!strcmp(arg, "line"))

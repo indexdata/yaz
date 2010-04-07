@@ -2196,7 +2196,7 @@ ZOOM_API(const char *)
     }
     else if (!strcmp(type, "txml"))
     {
-        return get_record_format(rec, len, npr, YAZ_MARC_TMARCXML, charset,
+        return get_record_format(rec, len, npr, YAZ_MARC_TURBOMARC, charset,
                                  format);
     }
     else if (!strcmp(type, "raw"))

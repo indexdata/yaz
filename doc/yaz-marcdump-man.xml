@@ -79,7 +79,8 @@
       Specifies input format. Must be one of
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
       <literal>marcxchange</literal> (ISO25577),
-      <literal>line</literal> (line mode MARC).
+      <literal>line</literal> (line mode MARC),
+      or <literal>turbomarc</literal> (Turbo MARC).
      </para></listitem>
    </varlistentry>
 
@@ -89,7 +90,8 @@
       Specifies output format. Must be one of
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
       <literal>marcxchange</literal> (ISO25577),
-      <literal>line</literal> (line mode MARC).
+      <literal>line</literal> (line mode MARC),
+      or <literal>turbomarc</literal> (Turbo MARC).
      </para></listitem>
    </varlistentry>
 
@@ -189,6 +191,16 @@
    The same records may be converted to MARCXML instead in UTF-8:
    <screen>
     yaz-marcdump -f MARC-8 -t UTF-8 -o marcxml marc21.raw >marcxml.xml
+   </screen>
+  </para>
+
+  <para>
+   Turbo MARC is a compact XML notation with same semantics as
+   MARCXML, but which allows for faster processing via XSLT. In order
+   to generate Turbo MARC records encoded in UTF-8 from MARC21 (ISO), one
+   could use:
+   <screen>
+    yaz-marcdump -f MARC8 -t UTF8 -o turbomarc -i marc marc21.raw >out.xml
    </screen>
   </para>
  </refsect1> 

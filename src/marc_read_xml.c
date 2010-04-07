@@ -377,7 +377,7 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
             }
             else if (!strcmp((const char *) ptr->name, "r"))
             {
-                format = YAZ_MARC_TMARCXML;
+                format = YAZ_MARC_TURBOMARC;
                 break;
             }
             else
@@ -402,7 +402,7 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     {
     case YAZ_MARC_MARCXML:
         return yaz_marc_read_xml_fields(mt, ptr->next);
-    case YAZ_MARC_TMARCXML:
+    case YAZ_MARC_TURBOMARC:
         return yaz_marc_read_turbo_xml_fields(mt, ptr->next);
     }
     return -1;

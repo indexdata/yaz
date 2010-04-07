@@ -304,9 +304,9 @@ static int conv_marc(yaz_record_conv_t p, const xmlNode *ptr)
         if (input_charset && !output_charset)
             output_charset = "utf-8";
     }
-    else if (!strcmp(output_format, "tmarcxml"))
+    else if (!strcmp(output_format, "turbomarc"))
     {
-        output_format_mode = YAZ_MARC_TMARCXML;
+        output_format_mode = YAZ_MARC_TURBOMARC;
         if (input_charset && !output_charset)
             output_charset = "utf-8";
     }
@@ -479,7 +479,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                     ret = -1;
             }
             else if (r->u.marc.input_format == YAZ_MARC_MARCXML ||
-                     r->u.marc.input_format == YAZ_MARC_TMARCXML)
+                     r->u.marc.input_format == YAZ_MARC_TURBOMARC)
             {
                 xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
                                                wrbuf_len(record));

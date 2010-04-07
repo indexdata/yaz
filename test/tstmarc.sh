@@ -101,12 +101,12 @@ binmarc_convert "xml,marcxml" "marcxml" "xml2"
 echo "binmarc -> marcxml(libxml2): $?" 
 fi
 
-binmarc_convert "tmarcxml"  "tmarcxml" "t" 
-echo "binmarc -> tmarcxml: $?" 
+binmarc_convert "turbomarc"  "turbomarc" "t" 
+echo "binmarc -> turbomarc: $?" 
 
 if test -z "$noxmlwrite"; then
-binmarc_convert "xml,tmarcxml"  "tmarcxml" "xml2t" 
-echo "binmarc -> tmarcxml(libxml2): $?" 
+binmarc_convert "xml,turbomarc"  "turbomarc" "xml2t" 
+echo "binmarc -> turbomarc(libxml2): $?" 
 fi
 
 exit $ecode

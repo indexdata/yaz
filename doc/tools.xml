@@ -1912,9 +1912,9 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
   <sect1 id="marc"><title>MARC</title>
    
    <para>
-    YAZ provides a fast utility that decodes MARC records and
-    encodes to a varity of output formats. The MARC records must
-    be encoded in ISO2709.
+    YAZ provides a fast utility for working with MARC records.
+    Early versions of the MARC utility only allowed decoding of ISO2709.
+    Today the utility may both encode - and decode to a varity of formats.
    </para>
    <synopsis><![CDATA[
     #include <yaz/marcdisp.h>
@@ -1932,6 +1932,8 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     #define YAZ_MARC_MARCXML   3
     #define YAZ_MARC_ISO2709   4
     #define YAZ_MARC_XCHANGE   5
+    #define YAZ_MARC_CHECK     6
+    #define YAZ_MARC_TURBOMARC 7
 
     /* supply iconv handle for character set conversion .. */
     void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
@@ -1941,15 +1943,22 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 
     /* decode MARC in buf of size bsize. Returns >0 on success; <=0 on failure.
     On success, result in *result with size *rsize. */
-    int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
-                             char **result, int *rsize);
+    int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
+                            const char **result, size_t *rsize);
 
     /* decode MARC in buf of size bsize. Returns >0 on success; <=0 on failure.
        On success, result in WRBUF */
-    int yaz_marc_decode_wrbuf (yaz_marc_t mt, const char *buf,
-                               int bsize, WRBUF wrbuf);
+    int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf,
+                              int bsize, WRBUF wrbuf);
 ]]>
    </synopsis>
+   <note>
+    <para>
+     The synopsis is just a basic subset of all functionality. Refer
+     to the actual header file <filename>marcdisp.h</filename> for
+     details.
+    </para>
+   </note>
    <para>
     A MARC conversion handle must be created by using
     <function>yaz_marc_create</function> and destroyed
@@ -1974,7 +1983,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       <term>YAZ_MARC_MARCXML</term>
       <listitem>
        <para>
-	The resulting record is converted to MARCXML.
+	<ulink url="&url.marcxml;">MARCXML</ulink>.
        </para>
       </listitem>
      </varlistentry>
@@ -1983,10 +1992,41 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       <term>YAZ_MARC_ISO2709</term>
       <listitem>
        <para>
-	The resulting record is converted to ISO2709 (MARC).
+	ISO2709 (sometimes just referred to as "MARC").
        </para>
       </listitem>
      </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_XCHANGE</term>
+      <listitem>
+       <para>
+	<ulink url="&url.marcxchange;">MarcXchange</ulink>.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_CHECK</term>
+      <listitem>
+       <para>
+	Pseudo format for validation only. Does not generate
+	any real output except diagnostics.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_TURBOMARC</term>
+      <listitem>
+       <para>
+	XML format with same semantics as MARCXML but more compact
+	and geared towards fast processing with XSLT. Refer to
+	<xref linkend="tools.turbomarc"/> for more information.
+       </para>
+      </listitem>
+     </varlistentry>
+
     </variablelist>
    </para>
    <para>
@@ -2000,13 +2040,13 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
    <example id="example.marc.display">
     <title>Display of MARC record</title>
     <para>
-     The followint program snippet illustrates how the MARC API may
+     The following program snippet illustrates how the MARC API may
      be used to convert a MARC record to the line-by-line format:
      <programlisting><![CDATA[
       void print_marc(const char *marc_buf, int marc_buf_size)
       {
          char *result;      /* for result buf */
-         int result_len;    /* for size of result */
+         size_t result_len;    /* for size of result */
          yaz_marc_t mt = yaz_marc_create();
          yaz_marc_xml(mt, YAZ_MARC_LINE);
          yaz_marc_decode_buf(mt, marc_buf, marc_buf_size,
@@ -2018,6 +2058,71 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       </programlisting>
     </para>
    </example>
+   <sect2 id="tools.turbomarc">
+    <title>TurboMARC</title>
+    <para>
+     TurboMARC is yet another XML encoding of a MARC record. The format
+     was designed for fast processing with XSLT.
+    </para>
+    <para>
+     Applications like
+     Pazpar2 uses XSLT to convert an XML encode MARC record to an internal
+     representation. This conversion mostly check the tag of a MARC field
+     to determine the basic rules in the conversion. This check is
+     costly when that is tag is encoded as an attribute in MARCXML.
+     By having the tag value as the element instead, makes processing
+     many times faster (at least for Libxslt).
+    </para>
+    <para>
+     TurboMARC is encoded as follows:
+     <itemizedlist>
+      <listitem><para>
+	Record elements is part of namespace
+	"<literal>http://www.indexdata.com/MARC21/turboxml</literal>".
+       </para></listitem>
+      <listitem><para>
+	A record is enclosed in element <literal>r</literal>.
+       </para></listitem>
+      <listitem><para>
+	A collection of records is enclosed in element
+	<literal>collection</literal>.
+       </para></listitem>
+      <listitem><para>
+	The leader is encoded as element <literal>l</literal> with the 
+	leader content as its (text) value.
+       </para></listitem>
+      <listitem><para>
+	A control field is encoded as element <literal>c</literal> concatenated
+	with the tag value of the control field if the tag value
+	matches the regular expression <literal>[a-zA-Z0-9]*</literal>.
+	If the tag value do not match the regular expression
+	<literal>[a-zA-Z0-9]*</literal> the control field is encoded
+	as element <literal>c</literal> and attribute <literal>code</literal>
+	will hold the tag value.
+	This rule ensure that in the rare cases where a tag value might
+	result in a non-wellformed XML YAZ encode it as a coded	attribute
+	(as in MARCXML).
+       </para>
+       <para>
+	The control field content is the the text value of this element.
+	Indicators are encoded as attribute names
+	<literal>i1</literal>, <literal>i2</literal>, etc.. and
+	corresponding values for each indicator.
+       </para></listitem>
+      <listitem><para>
+	A data field is encoded as element <literal>d</literal> concatenated
+	with the tag value of the data field or using the attribute
+	<literal>code</literal> as described in the rules for control fields.
+	The children of the data field element is subfield elements.
+	Each subfield element is encoded as <literal>s</literal>
+	concatenated with the sub field code.
+	The text of the subfield element is the contents of the subfield.
+	Indicators are encoded as attributes for the data field element similar
+	to the encoding for control fields.
+       </para></listitem>
+     </itemizedlist>
+    </para>
+   </sect2>
   </sect1>
 
   <sect1 id="tools.retrieval">

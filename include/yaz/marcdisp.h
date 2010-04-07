@@ -73,9 +73,9 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 /** \brief Output format: MarcXchange (ISO25577) */
 #define YAZ_MARC_XCHANGE   5
 /** \brief Output format: check only (no marc output) */
-#define YAZ_MARC_CHECK  6
-/** \brief Output format: Turbo MARCXML Index Data format*/
-#define YAZ_MARC_TMARCXML   7
+#define YAZ_MARC_CHECK     6
+/** \brief Output format: Turbo MARC Index Data format (XML based) */
+#define YAZ_MARC_TURBOMARC 7
 
 /** \brief set iconv handle for character set conversion */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
@@ -177,7 +177,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                        void *client_data);
 
 #if YAZ_HAVE_XML2
-/** \brief parses MARCXML/MarcXchange record from xmlNode pointer 
+/** \brief parses MARCXML/MarcXchange/TurboMARC record from xmlNode pointer 
     \param mt handle
     \param ptr is a pointer to root xml node 
     \retval 0 OK
@@ -204,13 +204,13 @@ YAZ_EXPORT int yaz_marc_write_line(yaz_marc_t mt, WRBUF wrbuf);
 */
 YAZ_EXPORT int yaz_marc_write_marcxml(yaz_marc_t mt, WRBUF wrbuf);
 
-/** \brief writes record in TMARCXML format
+/** \brief writes record in TurboMARC format
     \param mt handle
     \param wrbuf WRBUF for output
     \retval 0 OK
     \retval -1 ERROR
 */
-YAZ_EXPORT int yaz_marc_write_turbo_xml(yaz_marc_t mt, WRBUF wrbuf);
+YAZ_EXPORT int yaz_marc_write_turbomarc(yaz_marc_t mt, WRBUF wrbuf);
 
 /** \brief writes record in MarcXchange XML (ISO25577)
     \param mt handle
