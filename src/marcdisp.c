@@ -823,7 +823,7 @@ int yaz_marc_write_turbomarc(yaz_marc_t mt, WRBUF wr)
     if (!mt->leader_spec)
         yaz_marc_modify_leader(mt, 9, "a");
     return yaz_marc_write_marcxml_ns(mt, wr,
-                                     "http://www.indexdata.com/MARC21/turboxml", 0, 0, 1);
+                                     "http://www.indexdata.com/turbomarc", 0, 0, 1);
 }
 
 int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,

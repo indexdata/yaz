@@ -1,4 +1,4 @@
-<collection xmlns="http://www.indexdata.com/MARC21/turboxml">
+<collection xmlns="http://www.indexdata.com/turbomarc">
 <r>
 <!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
   <l>00988nam0a32003011  450 </l>

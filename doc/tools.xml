@@ -2078,7 +2078,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
      <itemizedlist>
       <listitem><para>
 	Record elements is part of namespace
-	"<literal>http://www.indexdata.com/MARC21/turboxml</literal>".
+	"<literal>http://www.indexdata.com/turbomarc</literal>".
        </para></listitem>
       <listitem><para>
 	A record is enclosed in element <literal>r</literal>.
