@@ -416,6 +416,20 @@ ZOOM_API(int)
 ZOOM_connection_process(ZOOM_connection c);
 
 
+/** \brief executes non-blocking tasks for connection
+    \param c connection
+    \retval 0 no task was executed
+    \retval 1 task was executed (but probably not completed)
+
+    This function, unlike, ZOOM_connection_process, does not try to
+    return any events (and remove them). But events may be generated
+    from it. These are saved and may later be retrieved with
+    ZOOM_connection_process and ZOOM_connection_last_event .
+*/
+ZOOM_API(int)
+ZOOM_connection_exec_task(ZOOM_connection c);
+
+
 /** \brief get socket fd for ZOOM connection
     \param c connection
     \retval -1 no socket assigned for connection
@@ -475,7 +489,6 @@ ZOOM_connection_fire_event_timeout(ZOOM_connection c);
 */
 ZOOM_API(int)
 ZOOM_connection_fire_event_socket(ZOOM_connection c, int mask);
-
 
 
 /** \brief peek at next event

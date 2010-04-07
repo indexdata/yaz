@@ -349,8 +349,6 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
     }
 }
 
-static int ZOOM_connection_exec_task(ZOOM_connection c);
-
 void ZOOM_connection_remove_tasks(ZOOM_connection c)
 {
     while (c->tasks)
@@ -3612,7 +3610,8 @@ ZOOM_API(void)
     ZOOM_options_setl(p->options, key, val, len);
 }
 
-static int ZOOM_connection_exec_task(ZOOM_connection c)
+ZOOM_API(int)
+    ZOOM_connection_exec_task(ZOOM_connection c)
 {
     ZOOM_task task = c->tasks;
     zoom_ret ret = zoom_complete;
