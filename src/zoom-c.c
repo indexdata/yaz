@@ -414,6 +414,7 @@ ZOOM_API(ZOOM_connection)
     c->m_queue_back = 0;
 
     c->sru_version = 0;
+    c->no_redirects = 0;
     return c;
 }
 
@@ -1205,15 +1206,25 @@ static void get_cert(ZOOM_connection c)
     }
 }
 
+static zoom_ret do_connect_host(ZOOM_connection c,
+                                const char *effective_host,
+                                const char *logical_url);
+
 static zoom_ret do_connect(ZOOM_connection c)
 {
-    void *add;
     const char *effective_host;
 
     if (c->proxy)
         effective_host = c->proxy;
     else
         effective_host = c->host_port;
+    return do_connect_host(c, effective_host, c->host_port);
+}
+
+static zoom_ret do_connect_host(ZOOM_connection c, const char *effective_host,
+    const char *logical_url)
+{
+    void *add;
 
     yaz_log(log_details, "%p do_connect effective_host=%s", c, effective_host);
 
@@ -1224,14 +1235,17 @@ static zoom_ret do_connect(ZOOM_connection c)
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
 #if YAZ_HAVE_XML2
-        const char *db = 0;
-
-        c->proto = PROTO_HTTP;
-        cs_get_host_args(c->host_port, &db);
-        xfree(c->path);
-
-        c->path = xmalloc(strlen(db) * 3 + 2);
-        yaz_encode_sru_dbpath_buf(c->path, db);
+        if (logical_url)
+        {
+            const char *db = 0;
+            
+            c->proto = PROTO_HTTP;
+            cs_get_host_args(logical_url, &db);
+            xfree(c->path);
+            
+            c->path = xmalloc(strlen(db) * 3 + 2);
+            yaz_encode_sru_dbpath_buf(c->path, db);
+        }
 #else
         set_ZOOM_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
         do_close(c);
@@ -1272,7 +1286,7 @@ static zoom_ret do_connect(ZOOM_connection c)
         }
     }
     c->state = STATE_IDLE;
-    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, c->host_port);
+    set_ZOOM_error(c, ZOOM_ERROR_CONNECT, logical_url);
     return zoom_complete;
 }
 
@@ -4113,6 +4127,63 @@ static void handle_srw_scan_response(ZOOM_connection c,
 #endif
 
 #if YAZ_HAVE_XML2
+static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url)
+{
+    Z_GDU *p = z_get_HTTP_Request(odr);
+    const char *host = url;
+    const char *cp0 = strstr(host, "://");
+    const char *cp1 = 0;
+    if (cp0)
+        cp0 = cp0+3;
+    else
+        cp0 = host;
+    
+    cp1 = strchr(cp0, '/');
+    if (!cp1)
+        cp1 = cp0 + strlen(cp0);
+    
+    if (cp0 && cp1)
+    {
+        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
+        memcpy (h, cp0, cp1 - cp0);
+        h[cp1-cp0] = '\0';
+        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
+    }
+    p->u.HTTP_Request->path = odr_strdup(odr, *cp1 ? cp1 : "/");
+    return p;
+}
+
+static zoom_ret send_SRW_redirect(ZOOM_connection c, const char *uri,
+                                  Z_HTTP_Response *cookie_hres)
+{
+    struct Z_HTTP_Header *h;
+    Z_GDU *gdu = get_HTTP_Request_url(c->odr_out, uri);
+
+    gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
+    z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers, "Accept",
+                      "text/xml");
+    
+    for (h = cookie_hres->headers; h; h = h->next)
+    {
+        if (!strcmp(h->name, "Set-Cookie"))
+            z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                              "Cookie", h->value);
+    }
+    if (c->user && c->password)
+    {
+        z_HTTP_header_add_basic_auth(c->odr_out, &gdu->u.HTTP_Request->headers,
+                                     c->user, c->password);
+    }
+    if (!z_GDU(c->odr_out, &gdu, 0, 0))
+        return zoom_complete;
+    if (c->odr_print)
+        z_GDU(c->odr_print, &gdu, 0, 0);
+    c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
+
+    odr_reset(c->odr_out);
+    return do_write(c);
+}
+
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     zoom_ret cret = zoom_complete;
@@ -4120,46 +4191,78 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     const char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
+    const char *location;
+
     ZOOM_connection_set_mask(c, 0);
     yaz_log(log_details, "%p handle_http", c);
     
-    if (!yaz_srw_check_content_type(hres))
-        addinfo = "content-type";
-    else
+    if ((hres->code == 301 || hres->code == 302) && c->sru_mode == zoom_sru_get
+        && (location = z_HTTP_header_lookup(hres->headers, "Location")))
     {
-        Z_SOAP *soap_package = 0;
-        ODR o = c->odr_in;
-        Z_SOAP_Handler soap_handlers[2] = {
-            {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
-            {0, 0, 0}
-        };
-        ret = z_soap_codec(o, &soap_package,
-                           &hres->content_buf, &hres->content_len,
-                           soap_handlers);
-        if (!ret && soap_package->which == Z_SOAP_generic &&
-            soap_package->u.generic->no == 0)
+        c->no_redirects++;
+        if (c->no_redirects > 10)
         {
-            Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
-
-            ZOOM_options_set(c->options, "sru_version", sr->srw_version);
-            ZOOM_options_setl(c->options, "sru_extra_response_data",
-                sr->extraResponseData_buf, sr->extraResponseData_len);
-            if (sr->which == Z_SRW_searchRetrieve_response)
-                cret = handle_srw_response(c, sr->u.response);
-            else if (sr->which == Z_SRW_scan_response)
-                handle_srw_scan_response(c, sr->u.scan_response);
-            else
-                ret = -1;
-        }
-        else if (!ret && (soap_package->which == Z_SOAP_fault
-                          || soap_package->which == Z_SOAP_error))
-        {
-            set_HTTP_error(c, hres->code,
-                           soap_package->u.fault->fault_code,
-                           soap_package->u.fault->fault_string);
+            set_HTTP_error(c, hres->code, 0, 0);
+            c->no_redirects = 0;
+            do_close(c);
         }
         else
-            ret = -1;
+        {
+            /* since redirect may change host we just reconnect. A smarter
+               implementation might check whether it's the same server */
+            do_connect_host(c, location, 0);
+            send_SRW_redirect(c, location, hres);
+            /* we're OK for now. Operation is not really complete */
+            ret = 0;
+            cret = zoom_pending;
+        }
+    }
+    else 
+    {   /* not redirect (normal response) */
+        if (!yaz_srw_check_content_type(hres))
+            addinfo = "content-type";
+        else
+        {
+            Z_SOAP *soap_package = 0;
+            ODR o = c->odr_in;
+            Z_SOAP_Handler soap_handlers[2] = {
+                {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+                {0, 0, 0}
+            };
+            ret = z_soap_codec(o, &soap_package,
+                               &hres->content_buf, &hres->content_len,
+                               soap_handlers);
+            if (!ret && soap_package->which == Z_SOAP_generic &&
+                soap_package->u.generic->no == 0)
+            {
+                Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
+                
+                ZOOM_options_set(c->options, "sru_version", sr->srw_version);
+                ZOOM_options_setl(c->options, "sru_extra_response_data",
+                                  sr->extraResponseData_buf, sr->extraResponseData_len);
+                if (sr->which == Z_SRW_searchRetrieve_response)
+                    cret = handle_srw_response(c, sr->u.response);
+                else if (sr->which == Z_SRW_scan_response)
+                    handle_srw_scan_response(c, sr->u.scan_response);
+                else
+                    ret = -1;
+            }
+            else if (!ret && (soap_package->which == Z_SOAP_fault
+                              || soap_package->which == Z_SOAP_error))
+            {
+                set_HTTP_error(c, hres->code,
+                               soap_package->u.fault->fault_code,
+                               soap_package->u.fault->fault_string);
+            }
+            else
+                ret = -1;
+        }   
+        if (ret == 0)
+        {
+            if (c->no_redirects) /* end of redirect. change hosts again */
+                do_close(c);
+        }
+        c->no_redirects = 0;
     }
     if (ret)
     {
