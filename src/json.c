@@ -433,7 +433,8 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
     return n;
 }
 
-struct json_node *json_parse(const char *json_str, const char **errmsg)
+struct json_node *json_parse2(const char *json_str, const char **errmsg,
+                              size_t *pos)
 {
     json_parser_t p = json_parser_create();
     struct json_node *n = 0;
@@ -447,9 +448,16 @@ struct json_node *json_parse(const char *json_str, const char **errmsg)
         n = json_parser_parse(p, json_str);
         if (!n && errmsg)
             *errmsg = json_parser_get_errmsg(p);
+        if (pos)
+            *pos = json_parser_get_position(p);
         json_parser_destroy(p);
     }
     return n;
+}
+
+struct json_node *json_parse(const char *json_str, const char **errmsg)
+{
+    return json_parse2(json_str, errmsg, 0);
 }
 
 void json_write_wrbuf(struct json_node *node, WRBUF result)
@@ -584,6 +592,11 @@ int json_append_array(struct json_node *dst, struct json_node *src)
 const char *json_parser_get_errmsg(json_parser_t p)
 {
     return p->err_msg;
+}
+
+size_t json_parser_get_position(json_parser_t p)
+{
+    return p->cp - p->buf;
 }
 
 /*

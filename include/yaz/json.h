@@ -93,6 +93,15 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str);
 YAZ_EXPORT
 const char *json_parser_get_errmsg(json_parser_t p);
 
+/** \brief returns parser position
+    \param p JSON parser handle
+    \returns number of bytes read from parser
+
+    This function should be called if json_parser_parse returns NULL .
+*/
+YAZ_EXPORT
+size_t json_parser_get_position(json_parser_t p);
+
 /** \brief parses JSON string
     \param json_str JSON string
     \param errmsg pointer to error message string
@@ -103,6 +112,19 @@ const char *json_parser_get_errmsg(json_parser_t p);
 */
 YAZ_EXPORT
 struct json_node *json_parse(const char *json_str, const char **errmsg);
+
+/** \brief parses JSON string
+    \param json_str JSON string
+    \param errmsg pointer to error message string
+    \param pos position of parser stop (probably error)
+    \returns JSON tree or NULL if parse error occurred.
+
+    The resulting tree should be removed with a call to json_remove_node.
+    The errmsg may be NULL in which case the error message is not returned.
+*/
+YAZ_EXPORT
+struct json_node *json_parse2(const char *json_str, const char **errmsg,
+                              size_t *pos);
 
 /** \brief destroys JSON tree node and its children
     \param n JSON node
