@@ -2066,7 +2066,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     </para>
     <para>
      Applications like
-     Pazpar2 uses XSLT to convert an XML encode MARC record to an internal
+     Pazpar2 uses XSLT to convert an XML encoded MARC record to an internal
      representation. This conversion mostly check the tag of a MARC field
      to determine the basic rules in the conversion. This check is
      costly when that is tag is encoded as an attribute in MARCXML.
