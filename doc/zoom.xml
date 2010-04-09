@@ -812,6 +812,19 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	OPAC record is present, a NULL pointer is returned.
        </para></listitem>
      </varlistentry>
+     <varlistentry><term><literal>txml</literal></term>
+      <listitem><para>The record is returned in TurboMARC if possible.
+	SRU and Z39.50 records with transfer syntax XML are
+	returned verbatim. MARC records are returned in
+	<link linkend="tools.turbomarc">
+	 TurboMARC
+	</link> 
+	(converted from ISO2709 to TurboMARC by YAZ).
+	Upon completion, the XML buffer is returned
+	(type <literal>const char *</literal>) and length is stored in
+        <literal>*len</literal>.
+       </para></listitem>
+     </varlistentry>
     </variablelist>
    </para>
    <para>
