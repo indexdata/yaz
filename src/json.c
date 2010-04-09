@@ -134,7 +134,7 @@ static int json_one_char(const char **p, char *out)
         case 'b':
             *out = '\b'; break;
         case 'f':
-            *out = '\b'; break;
+            *out = '\f'; break;
         case 'n':
             *out = '\n'; break;
         case 'r':
@@ -460,6 +460,46 @@ struct json_node *json_parse(const char *json_str, const char **errmsg)
     return json_parse2(json_str, errmsg, 0);
 }
 
+static void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
+{
+    size_t i;
+    for (i = 0; i < sz; i++)
+    {
+        if (cp[i] > 0 && cp[i] < 32)
+        {
+            wrbuf_putc(b, '\\');
+            switch (cp[i])
+            {
+            case '\b': wrbuf_putc(b, 'b'); break;
+            case '\f': wrbuf_putc(b, 'f'); break;
+            case '\n': wrbuf_putc(b, 'n'); break;
+            case '\r': wrbuf_putc(b, 'r'); break;
+            case '\t': wrbuf_putc(b, 't'); break;
+            default:
+                wrbuf_printf(b, "u%04x", cp[i]);
+            }
+        }
+        else if (cp[i] == '"')
+        {
+            wrbuf_putc(b, '\\'); wrbuf_putc(b, '"');
+        }
+        else if (cp[i] == '\\')
+        {
+            wrbuf_putc(b, '\\'); wrbuf_putc(b, '\\');
+        }
+        else
+        {   /* leave encoding as raw UTF-8 */
+            wrbuf_putc(b, cp[i]);
+        }
+    }       
+        
+}
+
+void wrbuf_json_puts(WRBUF b, const char *str)
+{
+    return wrbuf_json_write(b, str, strlen(str));
+}
+
 void json_write_wrbuf(struct json_node *node, WRBUF result)
 {
     switch (node->type)
@@ -491,7 +531,7 @@ void json_write_wrbuf(struct json_node *node, WRBUF result)
         break;
     case json_node_string:
         wrbuf_puts(result, "\"");
-        wrbuf_puts(result, node->u.string);
+        wrbuf_json_puts(result, node->u.string);
         wrbuf_puts(result, "\"");
         break;
     case json_node_number:

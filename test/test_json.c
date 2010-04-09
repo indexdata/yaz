@@ -110,9 +110,24 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "{\"a\":[1,2,3]}", "{\"a\":[1,2,3]}"));
 
-    YAZ_CHECK(expect(p, "{\"k\":\"\\t\"}", "{\"k\":\"\x09\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\\t\"}", "{\"k\":\"\\t\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\t\"}", "{\"k\":\"\\t\"}"));
 
-    YAZ_CHECK(expect(p, "{\"k\":\"\\u0009\"}", "{\"k\":\"\x09\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\\n\"}", "{\"k\":\"\\n\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\n\"}", "{\"k\":\"\\n\"}"));
+
+    YAZ_CHECK(expect(p, "{\"k\":\"\\r\"}", "{\"k\":\"\\r\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\r\"}", "{\"k\":\"\\r\"}"));
+
+    YAZ_CHECK(expect(p, "{\"k\":\"\\f\"}", "{\"k\":\"\\f\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\f\"}", "{\"k\":\"\\f\"}"));
+
+    YAZ_CHECK(expect(p, "{\"k\":\"\\b\"}", "{\"k\":\"\\b\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\b\"}", "{\"k\":\"\\b\"}"));
+
+    YAZ_CHECK(expect(p,
+                     "{\"k\":\"\\u0001\\u0002\"}",
+                     "{\"k\":\"\\u0001\\u0002\"}"));
 
     json_parser_destroy(p);
 }
