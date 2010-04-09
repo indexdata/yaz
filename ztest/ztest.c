@@ -21,6 +21,9 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 #include <yaz/log.h>
 #include <yaz/backend.h>
