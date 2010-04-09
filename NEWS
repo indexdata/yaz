@@ -1,3 +1,23 @@
+--- 4.0.3 2010/04/09
+
+Handle HTTP redirect for SRU GET in yaz-client and ZOOM C. Based on
+patch from Giannis Kosmas.
+
+SRU: no longer URL encode SRU database. The URL for an SRU server is
+a URL and such is alreeady encoded - at least when given with leading
+http:// or https://. This reverts behavior to YAZ 3.0.50.
+
+Support for new MARC XML notation TurboMARC which like MARCXML is a
+complete representation of MARC/ISO2709.. This one, however, is more
+compact and allows for faster processing with XSLT. TurboMARC can be
+used in the marcdisp.h API, from the yaz-marcdump utility and from
+the API of ZOOM C.
+
+yaz-ztest can be configured - via the database - to perform certain
+delays when it performs operations search, present and single record
+fetch. This allows testers to make yaz-ztest act as a real or even slow
+Z39.50 server. Refer to the yaz-ztest man pages for details.
+
 --- 4.0.2 2010/03/09
 
 wrbuf_destroy allows NULL WRBUF passed to it.
