@@ -11,8 +11,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
 #endif
 
 #include <yaz/log.h>
@@ -188,18 +195,27 @@ static int parse_delay(struct delay *delayp, const char *value)
     return 0;
 }
 
+static void ztest_sleep(double d)
+{
+#ifdef WIN32
+    Sleep( (DWORD) (d * 1000));
+#else
+    struct timeval tv;
+    tv.tv_sec = floor(d);
+    tv.tv_usec = (d - floor(d)) * 1000000;
+    select(0, 0, 0, 0, &tv);
+#endif
+}
+
 static void do_delay(const struct delay *delayp)
 {
     double d = delayp->d1;
 
     if (d > 0.0)
     {
-        struct timeval tv;
         if (delayp->d2 > d)
             d += (rand()) * (delayp->d2 - d) / RAND_MAX;
-        tv.tv_sec = floor(d);
-        tv.tv_usec = (d - floor(d)) * 1000000;
-        select(0, 0, 0, 0, &tv);
+        ztest_sleep(d);
     }
 }
 
