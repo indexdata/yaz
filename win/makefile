@@ -120,8 +120,8 @@ CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
 YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
 
-TSTLOG=$(BINDIR)\tstlog.exe
-TST_TIMING=$(BINDIR)\tst_timing.exe
+TSTLOG=$(BINDIR)\test_log.exe
+TST_TIMING=$(BINDIR)\test_timing.exe
 
 # shortcut names defined here
 dll: dirs generate $(YAZ_DLL) 
@@ -366,10 +366,10 @@ YAZ_MARCDUMP_OBJS = \
 
 
 TSTLOG_OBJS = \
-   $(OBJDIR)\tstlog.obj
+   $(OBJDIR)\test_log.obj
 
 TST_TIMING_OBJS = \
-   $(OBJDIR)\tst_timing.obj
+   $(OBJDIR)\test_timing.obj
 
 MISC_OBJS= \
    $(OBJDIR)\version.obj \
