@@ -287,7 +287,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
             const char *name = names[i];
             const char *value = values[i];
             if (!strcmp(name, "seed"))
-                srandom(atoi(value));
+                srand(atoi(value));
             else if (!strcmp(name, "search-delay"))
                 parse_delay(&new_set->search_delay, value);
             else if (!strcmp(name, "present-delay"))
