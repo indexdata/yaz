@@ -2850,6 +2850,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
                            Odr_int *start, Odr_int *number)
 {
     char *end_ptr;
+    Odr_int start_position;
 
     if (setnumber >= 0)
         sprintf(setstring, "%d", setnumber);
@@ -2861,8 +2862,11 @@ static int parse_show_args(const char *arg_c, char *setstring,
         *number = last_hit_count;
         *start = 1;
     }
-    *start = odr_strtol(arg_c, &end_ptr, 10);
-    if (end_ptr == arg_c || *end_ptr == '\0')
+    start_position = odr_strtol(arg_c, &end_ptr, 10);
+    if (end_ptr == arg_c)
+        return 1;
+    *start = start_position;
+    if (*end_ptr == '\0')
         return 1;
     while (isspace(*(unsigned char *)end_ptr))
         end_ptr++;
