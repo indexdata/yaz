@@ -497,7 +497,7 @@ static void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
 
 void wrbuf_json_puts(WRBUF b, const char *str)
 {
-    return wrbuf_json_write(b, str, strlen(str));
+    wrbuf_json_write(b, str, strlen(str));
 }
 
 void json_write_wrbuf(struct json_node *node, WRBUF result)
