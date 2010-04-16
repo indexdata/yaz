@@ -48,6 +48,8 @@ YAZ_BEGIN_CDECL
 #define YLOG_LOG    0x00000008
 /** \brief log level: append system error message */
 #define YLOG_ERRNO  0x00000010
+/** \brief log level: append thread Id */
+#define YLOG_TID    0x00000020
 /** \brief log level: application */
 #define YLOG_APP    0x00000040 
 /** \brief log level: malloc debug */

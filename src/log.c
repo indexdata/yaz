@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <time.h>
 #include <yaz/errno.h>
+#include <yaz/thread_id.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
@@ -55,6 +56,7 @@ static char l_fname[512] = "";
 static char l_old_default_format[] = "%H:%M:%S-%d/%m";
 static char l_new_default_format[] = "%Y%m%d-%H%M%S";
 #define TIMEFORMAT_LEN 50
+#define TID_LEN        30
 static char l_custom_format[TIMEFORMAT_LEN] = "";
 static char *l_actual_format = l_old_default_format;
 
@@ -79,7 +81,8 @@ static struct {
     { YLOG_LOG,    "log"  },
     { YLOG_ERRNO,  ""},
     { YLOG_MALLOC, "malloc"},
-    { YLOG_APP,    "app"  },
+    { YLOG_TID,    "tid"  },
+    { YLOG_APP,    "app"   },
     { YLOG_NOTIME, "notime" },
     { YLOG_APP2,   "app2" }, 
     { YLOG_APP3,   "app3" },
@@ -382,6 +385,7 @@ static void yaz_log_to_file(int level, const char *log_message)
     if (file)
     {
         char tbuf[TIMEFORMAT_LEN];
+        char tid[TID_LEN];
         char flags[1024];
         int i;
         
@@ -411,7 +415,16 @@ static void yaz_log_to_file(int level, const char *log_message)
         }
         if (tbuf[0])
             strcat(tbuf, " ");
-        fprintf(file, "%s%s%s %s%s\n", tbuf, l_prefix, flags, l_prefix2,
+        tid[0] = '\0';
+
+        if (l_level & YLOG_TID)
+        {
+            yaz_thread_id_cstr(tid, sizeof(tid)-1);
+            if (tid[0])
+                strcat(tid, " ");
+        }
+
+        fprintf(file, "%s%s%s%s %s%s\n", tbuf, l_prefix, tid, flags, l_prefix2,
                 log_message);
         if (l_level & YLOG_FLUSH)
             fflush(file);
