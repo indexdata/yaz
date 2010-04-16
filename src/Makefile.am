@@ -27,7 +27,6 @@ YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 libyaz_la_LIBADD = $(SSL_LIBS)
-libyaz_server_la_CFLAGS = $(PTHREAD_CFLAGS)
 libyaz_server_la_LIBADD = libyaz.la
 libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS)
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
@@ -103,12 +102,12 @@ libyaz_la_SOURCES=version.c options.c log.c \
   copy_types.c match_glob.c poll.c daemon.c \
   iconv_encode_marc8.c iconv_encode_iso_8859_1.c iconv_encode_wchar.c \
   iconv_decode_marc8.c iconv_decode_iso5426.c iconv_decode_danmarc.c sc.c \
-  json.c xml_include.c file_glob.c dirent.c
+  json.c xml_include.c file_glob.c dirent.c mutex.c
 
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
-  requestq.c eventl.h session.h mutex.c
+  requestq.c eventl.h session.h 
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 

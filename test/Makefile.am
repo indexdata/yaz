@@ -48,9 +48,6 @@ test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
 
 LDADD = ../src/libyaz.la
 test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
-test_mutex_LDADD = ../src/libyaz_server.la ../src/libyaz.la $(PTHREAD_LIBS)
-AM_CFLAGS = $(PTHREAD_CFLAGS)
-
 
 CONFIG_CLEAN_FILES=*.log
 

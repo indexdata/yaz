@@ -11,8 +11,6 @@ yaz_echo_lalibs=no
 yaz_echo_comp=no
 yaz_src_root=@YAZ_SRC_ROOT@
 yaz_build_root=@YAZ_BUILD_ROOT@
-PTHREAD_LIBS="@PTHREAD_LIBS@"
-PTHREAD_CFLAGS="@PTHREAD_CFLAGS@"
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
@@ -147,9 +145,7 @@ else
 fi
 
 if test "$lib_thread" = "yes"; then
-    YAZINC="$PTHREAD_CFLAGS $YAZINC"
-    YAZLIB="$YAZLIB $PTHREAD_LIBS"
-    YAZLALIB="$YAZLALIB $PTHREAD_LIBS"
+    :
 fi
 
 if test "$lib_icu" = "yes"; then
