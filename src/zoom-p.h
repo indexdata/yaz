@@ -35,6 +35,7 @@
 #include <yaz/zoom.h>
 #include <yaz/sortspec.h>
 #include <yaz/srw.h>
+#include <yaz/mutex.h>
 
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
@@ -150,6 +151,7 @@ struct ZOOM_resultset_p {
     ZOOM_connection connection;
     char **databaseNames;
     int num_databaseNames;
+    YAZ_MUTEX mutex;
 };
 
 struct ZOOM_record_p {
