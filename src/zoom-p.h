@@ -60,6 +60,8 @@ typedef struct ZOOM_task_p *ZOOM_task;
 #define STATE_CONNECTING 1
 #define STATE_ESTABLISHED 2
 
+typedef struct ZOOM_resultsets_p *ZOOM_resultsets;
+
 struct ZOOM_connection_p {
     enum oid_proto proto;
     COMSTACK cs;
@@ -99,12 +101,18 @@ struct ZOOM_connection_p {
 
     ZOOM_task tasks;
     ZOOM_options options;
-    ZOOM_resultset resultsets;
+    ZOOM_resultsets resultsets;
     ZOOM_Event m_queue_front;
     ZOOM_Event m_queue_back;
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
 };
+
+struct ZOOM_resultsets_p {
+    ZOOM_resultset resultset;
+    ZOOM_resultsets next;
+};
+
 
 struct ZOOM_options_entry {
     char *name;
@@ -140,7 +148,6 @@ struct ZOOM_resultset_p {
     ZOOM_record_cache record_hash[RECORD_HASH_SIZE];
     ZOOM_options options;
     ZOOM_connection connection;
-    ZOOM_resultset next;
     char **databaseNames;
     int num_databaseNames;
 };

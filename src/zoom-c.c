@@ -790,14 +790,21 @@ static zoom_ret do_write(ZOOM_connection c);
 ZOOM_API(void)
     ZOOM_connection_destroy(ZOOM_connection c)
 {
-    ZOOM_resultset r;
+    ZOOM_resultsets list;
     if (!c)
         return;
     yaz_log(log_api, "%p ZOOM_connection_destroy", c);
     if (c->cs)
         cs_close(c->cs);
-    for (r = c->resultsets; r; r = r->next)
-        r->connection = 0;
+
+    // Remove the connection's usage of resultsets
+    list = c->resultsets;
+    while (list) {
+        ZOOM_resultsets removed = list;
+        ZOOM_resultset_destroy(list->resultset);
+        list = list->next;
+        xfree(removed);
+    }
 
     xfree(c->buf_in);
     xfree(c->addinfo);
@@ -857,7 +864,6 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->r_sort_spec = 0;
     r->query = 0;
     r->connection = 0;
-    r->next = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
     return r;
@@ -884,6 +890,7 @@ ZOOM_API(ZOOM_resultset)
     const char *cp;
     int start, count;
     const char *syntax, *elementSetName;
+    ZOOM_resultsets set;
 
     yaz_log(log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = q->sort_spec;
@@ -912,10 +919,12 @@ ZOOM_API(ZOOM_resultset)
     
     r->connection = c;
 
-    r->next = c->resultsets;
-    c->resultsets = r;
-
-    
+    yaz_log(log_details, "%p ZOOM_connection_search: Adding new resultset (%p) to resultsets (%p) ", c, r, c->resultsets);
+    set = xmalloc(sizeof(*set));
+    ZOOM_resultset_addref(r);
+    set->resultset = r;
+    set->next = c->resultsets;
+    c->resultsets = set;
 
     if (c->host_port && c->proto == PROTO_HTTP)
     {
@@ -1056,21 +1065,8 @@ static void resultset_destroy(ZOOM_resultset r)
     {
         ZOOM_resultset_cache_reset(r);
 
-        if (r->connection)
-        {
-            /* remove ourselves from the resultsets in connection */
-            ZOOM_resultset *rp = &r->connection->resultsets;
-            while (1)
-            {
-                assert(*rp);   /* we must be in this list!! */
-                if (*rp == r)
-                {   /* OK, we're here - take us out of it */
-                    *rp = (*rp)->next;
-                    break;
-                }
-                rp = &(*rp)->next;
-            }
-        }
+        yaz_log(log_details, "%p ZOOM_connection resultset_destroy: Deleting resultset (%p) ", r->connection, r);
+
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
@@ -1736,12 +1732,12 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
                result sets on the server. */
             for (ord = 1; ; ord++)
             {
-                ZOOM_resultset rp;
+                ZOOM_resultsets rsp;
                 sprintf(setname, "%d", ord);
-                for (rp = c->resultsets; rp; rp = rp->next)
-                    if (rp->setname && !strcmp(rp->setname, setname))
+                for (rsp = c->resultsets; rsp; rsp = rsp->next)
+                    if (rsp->resultset->setname && !strcmp(rsp->resultset->setname, setname))
                         break;
-                if (!rp)
+                if (!rsp)
                     break;
             }
             r->setname = xstrdup(setname);
