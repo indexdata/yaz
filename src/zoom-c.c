@@ -838,9 +838,11 @@ void ZOOM_resultset_addref(ZOOM_resultset r)
 {
     if (r)
     {
+        yaz_mutex_enter(r->mutex);
         (r->refcount)++;
         yaz_log(log_details, "%p ZOOM_resultset_addref count=%d",
                 r, r->refcount);
+        yaz_mutex_leave(r->mutex);
     }
 }
 
@@ -866,6 +868,8 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->connection = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
+    r->mutex = 0;
+    yaz_mutex_create(&r->mutex);
     return r;
 }
 
@@ -1058,22 +1062,25 @@ static void resultset_destroy(ZOOM_resultset r)
 {
     if (!r)
         return;
+    yaz_mutex_enter(r->mutex);
     (r->refcount)--;
     yaz_log(log_details, "%p ZOOM_resultset_destroy r=%p count=%d",
             r, r, r->refcount);
     if (r->refcount == 0)
     {
-        ZOOM_resultset_cache_reset(r);
-
+        yaz_mutex_leave(r->mutex);
         yaz_log(log_details, "%p ZOOM_connection resultset_destroy: Deleting resultset (%p) ", r->connection, r);
-
+        ZOOM_resultset_cache_reset(r);
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
         xfree(r->setname);
         xfree(r->schema);
+        yaz_mutex_destroy(&r->mutex);
         xfree(r);
     }
+    else
+        yaz_mutex_leave(r->mutex);
 }
 
 ZOOM_API(size_t)
