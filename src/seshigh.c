@@ -2518,6 +2518,8 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             {
                 yaz_log(log_requestdetail, "  Dropped last normal-sized record");
                 *pres = Z_PresentStatus_partial_2;
+                if (*next > 0)
+                    (*next)--;
                 break;
             }
             /* record can only be fetched by itself */
