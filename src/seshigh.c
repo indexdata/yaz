@@ -2530,7 +2530,9 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                 {
                     yaz_log(YLOG_DEBUG, "  Dropped it");
                     reclist->records[reclist->num_records] =
-                         surrogatediagrec(a, freq.basename, 16, 0);
+                         surrogatediagrec(
+                             a, freq.basename,
+                             YAZ_BIB1_RECORD_EXCEEDS_PREFERRED_MESSAGE_SIZE, 0);
                     reclist->num_records++;
                     dumped_records += this_length;
                     continue;
@@ -2542,7 +2544,9 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                         "this=%d max=%d",
                         this_length, a->maximumRecordSize);
                 reclist->records[reclist->num_records] =
-                    surrogatediagrec(a, freq.basename, 17, 0);
+                    surrogatediagrec(
+                        a, freq.basename,
+                        YAZ_BIB1_RECORD_EXCEEDS_MAXIMUM_RECORD_SIZE, 0);
                 reclist->num_records++;
                 dumped_records += this_length;
                 continue;
