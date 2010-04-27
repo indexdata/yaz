@@ -44,6 +44,14 @@ struct yaz_mutex {
     int log_level;
 };
 
+struct yaz_cond {
+#ifdef WIN32
+
+#elif YAZ_POSIX_THREADS
+    pthread_cond_t cond;
+#endif
+};
+
 void yaz_mutex_create(YAZ_MUTEX *p)
 {
     if (!*p)
@@ -155,6 +163,65 @@ void yaz_mutex_destroy(YAZ_MUTEX *p)
         free(*p);
         *p = 0;
     }
+}
+
+
+void yaz_cond_create(YAZ_COND *p)
+{
+    *p = (YAZ_COND) malloc(sizeof(**p));
+#ifdef WIN32
+#elif YAZ_POSIX_THREADS
+    pthread_cond_init(&(*p)->cond, 0);
+#endif
+}
+
+void yaz_cond_destroy(YAZ_COND *p)
+{
+    if (*p)
+    {
+#ifdef WIN32
+#elif YAZ_POSIX_THREADS
+        pthread_cond_destroy(&(*p)->cond);
+#endif
+        free(*p);
+        *p = 0;
+    }
+}
+
+int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timespec *abstime)
+{
+#ifdef WIN32
+    return -1;
+#elif YAZ_POSIX_THREADS
+    if (abstime)
+        return pthread_cond_timedwait(&p->cond, &m->handle, abstime);
+    else
+        return pthread_cond_wait(&p->cond, &m->handle);
+#else
+    return -1;
+#endif
+}
+
+int yaz_cond_signal(YAZ_COND p)
+{
+#ifdef WIN32
+    return -1;
+#elif YAZ_POSIX_THREADS
+    return pthread_cond_signal(&p->cond);
+#else
+    return -1;
+#endif
+}
+
+int yaz_cond_broadcast(YAZ_COND p)
+{
+#ifdef WIN32
+    return -1;
+#elif YAZ_POSIX_THREADS
+    return pthread_cond_broadcast(&p->cond);
+#else
+    return -1;
+#endif
 }
 
 /*

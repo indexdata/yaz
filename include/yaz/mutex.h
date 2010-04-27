@@ -33,12 +33,16 @@
 #define YAZ_MUTEX_H
 
 #include <stddef.h>
+#include <time.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
 
 /** \brief YAZ MUTEX opaque pointer */
 typedef struct yaz_mutex *YAZ_MUTEX;
+
+/** \brief YAZ condition opaque pointer */
+typedef struct yaz_cond *YAZ_COND;
 
 /** \brief create MUTEX
     \param mutexp is pointer to MUTEX handle (*mutexp must be NULL)
@@ -81,6 +85,40 @@ YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *mutexp);
     it is used for locking.
  */
 void yaz_mutex_set_name(YAZ_MUTEX mutex, int log_level, const char *name);
+
+/** \brief creates condition variable
+    \param p reference to condition handle
+    
+    Upon successful completion *p holds the condition handle; *p = 0
+    on error.
+*/
+void yaz_cond_create(YAZ_COND *p);
+
+/** \brief destroys condition variable
+    \param p reference to condition handle
+    
+    Upon completion *p holds 0.
+*/
+void yaz_cond_destroy(YAZ_COND *p);
+
+/** \brief waits for condition
+    \param p condition variable handle
+    \param m mutex
+    \param abstime wait until this time; 0 for indefinite wait
+
+    Semantics like pthread_cond_wait.
+*/
+int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timespec *abstime);
+
+/** \brief unblock one thread waiting for block
+    \param p condition variable handle
+*/
+int yaz_cond_signal(YAZ_COND p);
+
+/** \brief unblock all threads waiting for block
+    \param p condition variable handle
+*/
+int yaz_cond_broadcast(YAZ_COND p);
 
 YAZ_END_CDECL
 
