@@ -26,7 +26,7 @@
  */
 
 /**
- * \file mutex.h
+ * \file thread_id.h
  * \brief Header for Mutex functions
  */
 #ifndef YAZ_THREAD_ID_H
@@ -39,7 +39,7 @@ YAZ_BEGIN_CDECL
 
 /** \brief format current thread as printable C-string
     \param buf buffer for string
-    \param buf_max maximum number of bytes (including trailing \0)
+    \param buf_max maximum number of bytes (including trailing \\0)
  */
 
 YAZ_EXPORT
