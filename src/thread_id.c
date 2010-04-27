@@ -4,7 +4,7 @@
  */
 
 /**
- * \file thraedid.c
+ * \file thread_id.c
  * \brief Returns printable thread ID
  *
  */
