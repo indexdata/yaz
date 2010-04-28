@@ -92,11 +92,15 @@ YAZ_DLL=$(BINDIR)\yaz4d.dll
 YAZ_IMPLIB=$(LIBDIR)\yaz4d.lib
 YAZ_ICU_DLL=$(BINDIR)\yaz_icu4d.dll
 YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4d.lib
+YAZ_COND_DLL=$(BINDIR)\yaz_cond4d.dll
+YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond4d.lib
 !else
 YAZ_DLL=$(BINDIR)\yaz4.dll
 YAZ_IMPLIB=$(LIBDIR)\yaz4.lib
 YAZ_ICU_DLL=$(BINDIR)\yaz_icu4.dll
 YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4.lib
+YAZ_COND_DLL=$(BINDIR)\yaz_cond4.dll
+YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond4.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
@@ -125,7 +129,7 @@ TST_TIMING=$(BINDIR)\test_timing.exe
 TEST_MUTEX=$(BINDIR)\test_mutex.exe
 
 # shortcut names defined here
-dll: dirs generate $(YAZ_DLL) 
+dll: dirs generate $(YAZ_DLL) $(YAZ_COND_DLL)
 client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
 
@@ -324,6 +328,7 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\fhistory.obj
 
 YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj 
+COND_DLL_OBJS= $(OBJDIR)\condvar.obj
 
 ZTEST_OBJS= \
     $(OBJDIR)\dummy-opac.obj \
@@ -843,6 +848,14 @@ $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
 		/implib:"$(YAZ_ICU_IMPLIB)" 
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
+$(YAZ_COND_DLL) $(YAZ_COND_IMPLIB): "$(BINDIR)" $(COND_DLL_OBJS) $(YAZ_COND_RES)
+	$(LINK_DLL) $(COND_LIB) $(YAZ_IMPLIB)\
+		$(COND_DLL_OBJS) \
+		$(YAZ_COND_RES) \
+		/out:$@ \
+		/implib:"$(YAZ_COND_IMPLIB)" 
+	$(MT) -manifest $@.manifest -outputresource:$@;2
+
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CLIENT_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
@@ -925,8 +938,8 @@ $(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TST_TIMING_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
-$(TEST_MUTEX) : "$(BINDIR)" $(TEST_MUTEX_OBJS) $(YAZ_DLL)
-	$(LINK_PROGRAM) $(TEST_MUTEX_OBJS) /out:$@
+$(TEST_MUTEX) : "$(BINDIR)" $(TEST_MUTEX_OBJS) $(YAZ_COND_DLL)
+	$(LINK_PROGRAM) $(YAZ_COND_IMPLIB) $(TEST_MUTEX_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 # Other rules
