@@ -333,7 +333,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		done
 		LIBS=$OLIBS
 	    fi
-	    LIBS=$PTHREAD_LIBS
+	    LIBS="$LIBS $PTHREAD_LIBS"
 	    CFLAGS="$CFLAGS -DYAZ_POSIX_THREADS=1"
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_POSIX_THREADS=1"
 	    ])
