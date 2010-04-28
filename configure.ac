@@ -299,16 +299,18 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
 	[struct request_info request_info; int i;
 	    i = hosts_access(&request_info);],
 	tcpd_ok=1, tcpd_ok=0)
+    LIBS=$oldLibs
     if test "$tcpd_ok" = "0"; then
 	AC_MSG_RESULT([no])
 	AC_MSG_ERROR([tcpd development libraries missing])
-		LIBS=$oldLibs
-		CPPFLAGS=$oldCPPFLAGS
+	CPPFLAGS=$oldCPPFLAGS
     else
+	TCPD_LIBS="-lwrap"
 	AC_MSG_RESULT([yes])
 	AC_DEFINE([HAVE_TCPD_H])
     fi
 fi
+AC_SUBST([TCPD_LIBS])
 dnl
 AC_SUBST([YAZ_CONFIG_CFLAGS])
 dnl
