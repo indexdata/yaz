@@ -680,18 +680,18 @@
 	 <filename>yaz_cond4d.dll</filename>.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>bin/yaz_icu3.dll</filename> /
-          <filename>bin/yaz_icu3d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz_icu4.dll</filename> /
+          <filename>bin/yaz_icu4d.dll</filename></term>
        <listitem><para>
          Release/Debug DLL for the ICU wrapper utility.
 	 Only build if HAVE_ICU is 1.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>lib/yaz_icu3.lib</filename> /
-	  <filename>lib/yaz_icu3d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz_icu4.lib</filename> /
+	  <filename>lib/yaz_icu4d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz_icu3.dll</filename> /
-	 <filename>yaz_icu3d.dll</filename>.
+         Import library for <filename>yaz_icu4.dll</filename> /
+	 <filename>yaz_icu4d.dll</filename>.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>bin/yaz-ztest.exe</filename></term>
