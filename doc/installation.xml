@@ -654,17 +654,17 @@
      The following files are generated upon successful compilation:
      
      <variablelist>
-      <varlistentry><term><filename>bin/yaz3.dll</filename> / 
-	  <filename>bin/yaz3d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz4.dll</filename> / 
+	  <filename>bin/yaz4d.dll</filename></term>
        <listitem><para>
          &yaz; Release/Debug DLL.
         </para></listitem></varlistentry>
       
-      <varlistentry><term><filename>lib/yaz3.lib</filename> / 
-	  <filename>lib/yaz3d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz4.lib</filename> / 
+	  <filename>lib/yaz4d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz3.dll</filename> /
-	 <filename>yaz3d.dll</filename>.
+         Import library for <filename>yaz4.dll</filename> /
+	 <filename>yaz4d.dll</filename>.
         </para></listitem></varlistentry>
       
       <varlistentry><term><filename>bin/yaz_icu3.dll</filename> /
@@ -738,14 +738,14 @@
       <varlistentry><term>include path</term><listitem><para>
          Set it to the <filename>include</filename> directory of &yaz;.
         </para></listitem></varlistentry>
-      <varlistentry><term>import library <filename>yaz3.lib</filename>
+      <varlistentry><term>import library <filename>yaz4.lib</filename>
        </term><listitem><para>
          You must link with this library. It's located in the 
          sub directory <filename>lib</filename> of &yaz;.
 	 If you want to link with the debug version of &yaz;, you must
-	 link against <filename>yaz3d.lib</filename> instead.
+	 link against <filename>yaz4d.lib</filename> instead.
         </para></listitem></varlistentry>
-      <varlistentry><term>dynamic link library <filename>yaz3.dll</filename>
+      <varlistentry><term>dynamic link library <filename>yaz4.dll</filename>
        </term><listitem><para>
          This DLL must be in your execution path when you invoke
          your application. Specifically, you should distribute this
