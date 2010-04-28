@@ -78,6 +78,9 @@ while test $# -gt 0; do
 		lib_icu=yes
 	    fi
 	    ;;
+	ssl)
+	    lib_ssl=yes
+	    ;;
 	server)
 	    lib_thread=yes
 	    lib_server=yes
@@ -101,6 +104,10 @@ if test "$lib_icu" = "yes"; then
     lyaz="-lyaz_icu $lyaz"
 fi
 
+if test "$lib_ssl" = "yes"; then
+    LIBS="${SSL_LIBS} $LIBS"
+fi
+
 YAZINC="@YAZ_CONFIG_CFLAGS@"
 
 if test "$yaz_echo_source" = "yes"; then
@@ -117,7 +124,7 @@ if test "$yaz_echo_source" = "yes"; then
     else
         YAZLIB="-L${yaz_build_root}/src/.libs $lyaz"
     fi
-    YAZLIB="$YAZLIB ${SSL_LIBS} $LIBS"
+    YAZLIB="$YAZLIB $LIBS"
 
     YAZLALIB="${yaz_build_root}/src/libyaz.la"
     if test "$lib_server" = "yes"; then
@@ -137,7 +144,7 @@ else
     if test "$yazprefix" != "/usr"; then
 	YAZLIB="-L$yazprefix/lib"
     fi
-    YAZLIB="$YAZLIB $lyaz ${SSL_LIBS} $LIBS"
+    YAZLIB="$YAZLIB $lyaz $LIBS"
     YAZLALIB=$YAZLIB
     if test "$yazprefix" != "/usr"; then
 	YAZINC="-I$yazprefix/include $YAZINC"
