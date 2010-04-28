@@ -1,3 +1,18 @@
+--- 4.0.4 2010/04/28
+
+Add functions yaz_cond_{create,destroy,wait,signal,broadcast}. These
+are wrappers for pthreads or Windows. For Windows these are put in
+a separate DLL: yaz_cond4.
+
+libyaz.la (whole source) is compiled with thread. If thread support
+is enabled enabled, all source of YAZ is compiled with treading support.
+This allows core utilities such as yaz_log to use thread facilities.
+Previously (YAZ 3 and YAZ 4 releases), only libyaz_server.la was using
+thread utilities. This commit moves mutex utilities (mutex.c) from
+libyaz_server.la to libyaz.la.
+
+yaz-json-parse displays leading text until error.
+
 --- 4.0.3 2010/04/09
 
 Handle HTTP redirect for SRU GET in yaz-client and ZOOM C. Based on
