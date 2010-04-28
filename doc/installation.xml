@@ -667,6 +667,19 @@
 	 <filename>yaz4d.dll</filename>.
         </para></listitem></varlistentry>
       
+      <varlistentry><term><filename>bin/yaz_cond4.dll</filename> / 
+	  <filename>bin/yaz_cond4d.dll</filename></term>
+       <listitem><para>
+	 Release/Debug DLL for condition variable utilities (condvar.c).
+        </para></listitem></varlistentry>
+      
+      <varlistentry><term><filename>lib/yaz_cond4.lib</filename> / 
+	  <filename>lib/yaz_cond4d.lib</filename></term>
+       <listitem><para>
+         Import library for <filename>yaz_cond4.dll</filename> /
+	 <filename>yaz_cond4d.dll</filename>.
+        </para></listitem></varlistentry>
+      
       <varlistentry><term><filename>bin/yaz_icu3.dll</filename> /
           <filename>bin/yaz_icu3d.dll</filename></term>
        <listitem><para>
