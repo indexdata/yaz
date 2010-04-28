@@ -7,9 +7,16 @@
 #include <stdio.h>
 
 #include <yaz/mutex.h>
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <yaz/test.h>
 #include <yaz/log.h>
+#include <yaz/gettimeofday.h>
 
 static void tst_mutex(void)
 {
@@ -37,8 +44,7 @@ static void tst_cond(void)
 {
     YAZ_MUTEX p = 0;
     YAZ_COND c;
-    struct timespec abstime;
-    struct timeval tval;
+    struct timeval abstime;
     int r;
 
     yaz_mutex_create(&p);
@@ -51,11 +57,10 @@ static void tst_cond(void)
     if (!c)
         return;
 
-    r = gettimeofday(&tval, 0);
+    r = yaz_gettimeofday(&abstime);
     YAZ_CHECK_EQ(r, 0);
     
-    abstime.tv_sec = tval.tv_sec + 1; /* wait 2 seconds */
-    abstime.tv_nsec = tval.tv_usec * 1000;
+    abstime.tv_sec += 1; /* wait 1 second */
     
     r = yaz_cond_wait(c, p, &abstime);
     YAZ_CHECK(r != 0);

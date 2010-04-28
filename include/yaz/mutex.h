@@ -84,6 +84,7 @@ YAZ_EXPORT void yaz_mutex_destroy(YAZ_MUTEX *mutexp);
     This function should be called after a MUTEX is created but before
     it is used for locking.
  */
+YAZ_EXPORT
 void yaz_mutex_set_name(YAZ_MUTEX mutex, int log_level, const char *name);
 
 /** \brief creates condition variable
@@ -92,13 +93,14 @@ void yaz_mutex_set_name(YAZ_MUTEX mutex, int log_level, const char *name);
     Upon successful completion *p holds the condition handle; *p = 0
     on error.
 */
-void yaz_cond_create(YAZ_COND *p);
+YAZ_EXPORT void yaz_cond_create(YAZ_COND *p);
 
 /** \brief destroys condition variable
     \param p reference to condition handle
     
     Upon completion *p holds 0.
 */
+YAZ_EXPORT
 void yaz_cond_destroy(YAZ_COND *p);
 
 /** \brief waits for condition
@@ -108,16 +110,19 @@ void yaz_cond_destroy(YAZ_COND *p);
 
     Semantics like pthread_cond_wait.
 */
-int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timespec *abstime);
+YAZ_EXPORT
+int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime);
 
 /** \brief unblock one thread waiting for block
     \param p condition variable handle
 */
+YAZ_EXPORT
 int yaz_cond_signal(YAZ_COND p);
 
 /** \brief unblock all threads waiting for block
     \param p condition variable handle
 */
+YAZ_EXPORT
 int yaz_cond_broadcast(YAZ_COND p);
 
 YAZ_END_CDECL

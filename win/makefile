@@ -122,6 +122,7 @@ YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
 
 TSTLOG=$(BINDIR)\test_log.exe
 TST_TIMING=$(BINDIR)\test_timing.exe
+TEST_MUTEX=$(BINDIR)\test_mutex.exe
 
 # shortcut names defined here
 dll: dirs generate $(YAZ_DLL) 
@@ -135,7 +136,7 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST10)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) 
-testprog: $(TSTLOG) $(TST_TIMING)
+testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
 
@@ -371,6 +372,9 @@ TSTLOG_OBJS = \
 TST_TIMING_OBJS = \
    $(OBJDIR)\test_timing.obj
 
+TEST_MUTEX_OBJS = \
+   $(OBJDIR)\test_mutex.obj
+
 MISC_OBJS= \
    $(OBJDIR)\version.obj \
    $(OBJDIR)\oid_std.obj \
@@ -495,10 +499,12 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_decode_iso5426.obj \
    $(OBJDIR)\iconv_decode_danmarc.obj \
    $(OBJDIR)\mutex.obj \
+   $(OBJDIR)\gettimeofday.obj \
    $(OBJDIR)\json.obj \
    $(OBJDIR)\sc.obj \
    $(OBJDIR)\xml_include.obj \
    $(OBJDIR)\file_glob.obj \
+   $(OBJDIR)\thread_id.obj \
    $(OBJDIR)\dirent.obj
 
 Z3950_OBJS= \
@@ -917,6 +923,10 @@ $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
 
 $(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TST_TIMING_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
+
+$(TEST_MUTEX) : "$(BINDIR)" $(TEST_MUTEX_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(TEST_MUTEX_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 # Other rules
