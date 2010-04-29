@@ -20,7 +20,9 @@
 #include <windows.h>
 #include <sys/timeb.h>
 #endif
-#include <time.h>
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #include <yaz/gettimeofday.h>
 
 int yaz_gettimeofday(struct timeval *tval)

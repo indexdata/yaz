@@ -32,10 +32,11 @@
 #ifndef YAZ_GETTIMEOFDAY_H
 #define YAZ_GETTIMEOFDAY_H
 
-#include <time.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
+
+YAZ_EXPORT struct timeval;
 
 /** \brief gettimeofday
     \param tval timeval for resulting time
