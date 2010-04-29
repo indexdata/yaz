@@ -103,7 +103,7 @@ YAZ_EXPORT void yaz_cond_create(YAZ_COND *p);
 YAZ_EXPORT
 void yaz_cond_destroy(YAZ_COND *p);
 
-YAZ_EXPORT struct timeval;
+struct timeval;
 
 /** \brief waits for condition
     \param p condition variable handle

@@ -36,7 +36,7 @@
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT struct timeval;
+struct timeval;
 
 /** \brief gettimeofday
     \param tval timeval for resulting time
