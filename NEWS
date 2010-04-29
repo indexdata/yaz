@@ -1,3 +1,7 @@
+--- 4.0.6 2010/04/29
+
+Fix yaz-config for static mode and the use of SSL (gnutls).
+
 --- 4.0.5 2010/04/29
 
 Forward decl timeval struct in mutex.h and gettimeofday.h.
