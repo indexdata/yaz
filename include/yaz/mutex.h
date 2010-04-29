@@ -110,6 +110,8 @@ void yaz_cond_destroy(YAZ_COND *p);
 
     Semantics like pthread_cond_wait.
 */
+YAZ_EXPORT struct timeval;
+
 YAZ_EXPORT
 int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime);
 
