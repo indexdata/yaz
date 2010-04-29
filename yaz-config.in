@@ -104,7 +104,7 @@ if test "$lib_icu" = "yes"; then
     lyaz="-lyaz_icu $lyaz"
 fi
 
-if test "$lib_ssl" = "yes"; then
+if test "$lib_ssl" = "yes" -o "$lib_static" = "yes"; then
     LIBS="${SSL_LIBS} $LIBS"
 fi
 
