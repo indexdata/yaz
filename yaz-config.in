@@ -31,7 +31,7 @@ Options:
 	[--comp]
         [-V]
 Libraries:
-	threads icu server
+	threads icu server static
 EOF
 	exit $1
 }
@@ -95,13 +95,13 @@ while test $# -gt 0; do
     shift
 done
 
-lyaz="-lyaz"
+YAZLIB="-lyaz"
 if test "$lib_server" = "yes"; then
-    lyaz="-lyaz_server $lyaz"
+    YAZLIB="-lyaz_server $YAZLIB"
 fi
 
 if test "$lib_icu" = "yes"; then
-    lyaz="-lyaz_icu $lyaz"
+    YAZLIB="-lyaz_icu $YAZLIB"
 fi
 
 if test "$lib_ssl" = "yes" -o "$lib_static" = "yes"; then
@@ -113,7 +113,7 @@ YAZINC="@YAZ_CONFIG_CFLAGS@"
 if test "$yaz_echo_source" = "yes"; then
     YAZBIN=${yaz_build_root}/bin
 
-    if test "$lib_static" = "yes"; then
+    if test "$lib_static" = "x"; then
         YAZLIB="${yaz_build_root}/src/.libs/libyaz.a"
         if test "$lib_server" = "yes"; then
     	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB"
@@ -122,7 +122,7 @@ if test "$yaz_echo_source" = "yes"; then
     	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_icu.a $YAZLIB"
         fi
     else
-        YAZLIB="-L${yaz_build_root}/src/.libs $lyaz"
+        YAZLIB="-L${yaz_build_root}/src/.libs $YAZLIB"
     fi
     YAZLIB="$YAZLIB $LIBS"
 
@@ -142,9 +142,9 @@ else
     YAZCOMP=${yazprefix}/bin/yaz-asncomp
 
     if test "$yazprefix" != "/usr"; then
-	YAZLIB="-L$yazprefix/lib"
+	YAZLIB="-L$yazprefix/lib $YAZLIB"
     fi
-    YAZLIB="$YAZLIB $lyaz $LIBS"
+    YAZLIB="$YAZLIB $LIBS"
     YAZLALIB=$YAZLIB
     if test "$yazprefix" != "/usr"; then
 	YAZINC="-I$yazprefix/include $YAZINC"
