@@ -104,7 +104,7 @@ if test "$lib_icu" = "yes"; then
     YAZLIB="-lyaz_icu $YAZLIB"
 fi
 
-if test "$lib_ssl" = "yes" -o "$lib_static" = "yes"; then
+if test "$lib_ssl" = "yes"; then
     LIBS="${SSL_LIBS} $LIBS"
 fi
 
@@ -113,7 +113,10 @@ YAZINC="@YAZ_CONFIG_CFLAGS@"
 if test "$yaz_echo_source" = "yes"; then
     YAZBIN=${yaz_build_root}/bin
 
-    if test "$lib_static" = "x"; then
+    if test "$lib_static" = "yes"; then
+        if test "$lib_ssl" != "yes"; then
+            LIBS="${SSL_LIBS} $LIBS"
+        fi
         YAZLIB="${yaz_build_root}/src/.libs/libyaz.a"
         if test "$lib_server" = "yes"; then
     	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB"
