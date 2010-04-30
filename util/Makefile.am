@@ -11,7 +11,7 @@ AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 
 bin_PROGRAMS = yaz-marcdump yaz-iconv yaz-illclient yaz-icu yaz-json-parse
 noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark \
- yaz-xmlquery
+ yaz-xmlquery yaz-record-conv
 
 # MARC dumper utility
 yaz_marcdump_SOURCES = marcdump.c
@@ -47,4 +47,7 @@ yaz_icu_LDADD =../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 
 yaz_json_parse_SOURCES = json-parse.c
 yaz_json_parse_LDADD = ../src/libyaz.la
+
+yaz_record_conv_SOURCES = yaz-record-conv.c
+yaz_record_conv_LDADD = ../src/libyaz.la
 

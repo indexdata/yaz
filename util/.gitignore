@@ -21,3 +21,4 @@ yaz-xmlquery
 yaz-illclient
 yaz-icu
 yaz-json-parse
+yaz-record-conv
