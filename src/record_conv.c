@@ -192,7 +192,9 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
                 wrbuf_printf(p->wr_error, " with path '%s'", p->path);
             return -1;
         }
-        xsp = xsltParseStylesheetDoc(xsp_doc);
+        /* need to copy this before passing it to the processor. It will
+           be encapsulated in the xsp and destroyed by xsltFreeStylesheet */
+        xsp = xsltParseStylesheetDoc(xmlCopyDoc(xsp_doc, 1));
         if (!xsp)
         {
             wrbuf_printf(p->wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
@@ -207,14 +209,15 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
                          "EXSLT not supported"
 #endif
                          ")");
+            xmlFreeDoc(xsp_doc);
             return -1;
         }
         else
         {
             struct yaz_record_conv_rule *r = 
                 add_rule(p, YAZ_RECORD_CONV_RULE_XSLT);
-            r->u.xslt.xsp_doc = xmlCopyDoc(xsp_doc, 1);
-            xsltFreeStylesheet(xsp); /* will free xsp_doc */
+            r->u.xslt.xsp_doc = xsp_doc;
+            xsltFreeStylesheet(xsp);
         }
     }
     return 0;
