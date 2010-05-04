@@ -965,7 +965,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       <row><entry>
         number</entry><entry>Number of Scan Terms requested in next scan.
         After scan it holds the actual number of terms returned.
-       </entry><entry>10</entry></row>
+       </entry><entry>20</entry></row>
       <row><entry>
         position</entry><entry>Preferred Position of term in response
         in next scan; actual position after completion of scan.

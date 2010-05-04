@@ -2906,7 +2906,7 @@ static zoom_ret ZOOM_connection_send_scan(ZOOM_connection c)
     }
 
     *req->numberOfTermsRequested =
-        ZOOM_options_get_int(scan->options, "number", 10);
+        ZOOM_options_get_int(scan->options, "number", 20);
 
     req->preferredPositionInResponse =
         odr_intdup(c->odr_out,
