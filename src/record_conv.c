@@ -532,7 +532,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
                     xmlChar *out_buf = 0;
                     int out_len;
 
-#if YAZ_HAVE_XSLTSAVERESULTTOSTRING
+#if HAVE_XSLTSAVERESULTTOSTRING
                     xsltSaveResultToString(&out_buf, &out_len, res, xsp);
 #else
                     xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
