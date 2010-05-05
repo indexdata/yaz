@@ -195,6 +195,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         proxy</entry><entry>Proxy host
        </entry><entry>none</entry></row>
       <row><entry>
+        clientIP</entry><entry>Client IP. If set, is
+	encoded in the otherInfo area of a Z39.50 PDU with OID
+	1.2.840.10003.10.1000.81.3. Holds the original IP addreses
+	of a client. Is used of ZOOM is used in a gateway of some sort.
+       </entry><entry>none</entry></row>
+      <row><entry>
         async</entry><entry>If true (1) the connection operates in 
         asynchronous operation which means that all calls are non-blocking
         except
