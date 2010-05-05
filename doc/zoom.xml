@@ -192,7 +192,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         It's automatically set internally when connecting to a target.
        </entry><entry>none</entry></row>
       <row><entry>
-        proxy</entry><entry>Proxy host
+        proxy</entry><entry>Proxy host. If set, the logical host
+	is encoded in the otherInfo area of the Z39.50 Init PDU
+	with OID 1.2.840.10003.10.1000.81.1.
        </entry><entry>none</entry></row>
       <row><entry>
         clientIP</entry><entry>Client IP. If set, is
