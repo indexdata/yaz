@@ -16,45 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <yaz/mutex.h>
+#include <yaz/shptr.h>
 #include <yaz/wrbuf.h>
 #include <yaz/test.h>
-
-#define YAZ_SHPTR_TYPE(type) \
-    struct type##_shptr \
-    {                          \
-    type ptr;                  \
-    int ref;                   \
-    YAZ_MUTEX mutex;           \
-    };  \
-    typedef struct type##_shptr *type##_shptr_t;
-
-#define YAZ_SHPTR_INIT(p,n) {                   \
-        p = xmalloc(sizeof(*p));                \
-        p->ptr = n;                             \
-        p->ref = 1;                             \
-        p->mutex = 0;  \
-        yaz_mutex_create(&p->mutex);            \
-    }
-
-#define YAZ_SHPTR_INC(p) {                      \
-        yaz_mutex_enter(p->mutex);              \
-        p->ref++;                               \
-        yaz_mutex_leave(p->mutex);              \
-    }
-
-#define YAZ_SHPTR_DEC(p, destroy)  {             \
-    yaz_mutex_enter(p->mutex);                   \
-    if (--p->ref == 0) {                         \
-        yaz_mutex_leave(p->mutex);               \
-        destroy(p->ptr);                         \
-        yaz_mutex_destroy(&p->mutex);            \
-        xfree(p);                                \
-        p = 0;                                   \
-    } else { \
-    yaz_mutex_leave(p->mutex); \
-    } \
-    }
 
 YAZ_SHPTR_TYPE(WRBUF)
 
