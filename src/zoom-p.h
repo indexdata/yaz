@@ -38,6 +38,7 @@
 #include <yaz/mutex.h>
 
 #define SHPTR 1
+#define ZOOM_RESULT_LISTS 0
 
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
@@ -63,7 +64,9 @@ typedef struct ZOOM_task_p *ZOOM_task;
 #define STATE_CONNECTING 1
 #define STATE_ESTABLISHED 2
 
+#if ZOOM_RESULT_LISTS
 typedef struct ZOOM_resultsets_p *ZOOM_resultsets;
+#endif
 
 struct ZOOM_connection_p {
     enum oid_proto proto;
@@ -104,18 +107,23 @@ struct ZOOM_connection_p {
 
     ZOOM_task tasks;
     ZOOM_options options;
+#if ZOOM_RESULT_LISTS
     ZOOM_resultsets resultsets;
+#else
+    ZOOM_resultset resultsets;
+#endif
     ZOOM_Event m_queue_front;
     ZOOM_Event m_queue_back;
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
 };
 
+#if ZOOM_RESULT_LISTS
 struct ZOOM_resultsets_p {
     ZOOM_resultset resultset;
     ZOOM_resultsets next;
 };
-
+#endif
 
 struct ZOOM_options_entry {
     char *name;
@@ -156,6 +164,10 @@ struct ZOOM_resultset_p {
     YAZ_MUTEX mutex;
 #if SHPTR
     struct WRBUF_shptr *record_wrbuf;
+#endif
+#if ZOOM_RESULT_LISTS
+#else
+    ZOOM_resultset next;
 #endif
 };
 
