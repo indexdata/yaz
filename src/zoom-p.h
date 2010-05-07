@@ -37,6 +37,8 @@
 #include <yaz/srw.h>
 #include <yaz/mutex.h>
 
+#define SHPTR 1
+
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
 struct ZOOM_query_p {
@@ -152,11 +154,19 @@ struct ZOOM_resultset_p {
     char **databaseNames;
     int num_databaseNames;
     YAZ_MUTEX mutex;
+#if SHPTR
+    struct WRBUF_shptr *record_wrbuf;
+#endif
 };
 
 struct ZOOM_record_p {
     ODR odr;
+#if SHPTR
+    struct WRBUF_shptr *record_wrbuf;
+#else
     WRBUF wrbuf;
+#endif
+
     Z_NamePlusRecord *npr;
     const char *schema;
 
