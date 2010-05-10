@@ -1806,6 +1806,7 @@ ZOOM_API(ZOOM_record)
     buf = odr_getbuf(odr_enc, &size, 0);
     
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
+    yaz_log(log_details, "ZOOM_record create");
     nrec->odr = odr_createmem(ODR_DECODE);
     nrec->wrbuf = 0;
 #if YAZ_HAVE_XML2
@@ -1860,6 +1861,7 @@ ZOOM_API(void)
     ZOOM_record_destroy(ZOOM_record rec)
 {
     ZOOM_record_release(rec);
+    yaz_log(log_details, "ZOOM_record destroy");
     xfree(rec);
 }
 
