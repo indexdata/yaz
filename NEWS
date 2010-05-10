@@ -1,3 +1,8 @@
+--- 4.0.7 2010/05/04
+
+record-conv: fix problem with at least one XSL conversion -
+due to probably incorrect usage of XML XSL documents.
+
 --- 4.0.6 2010/04/29
 
 Fix yaz-config for static mode and the use of SSL (gnutls).

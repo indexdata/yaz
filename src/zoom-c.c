@@ -28,6 +28,12 @@
 #include <yaz/copy_types.h>
 #include <yaz/snprintf.h>
 
+#include <yaz/shptr.h>
+
+#if SHPTR
+YAZ_SHPTR_TYPE(WRBUF)
+#endif
+
 static int log_api = 0;
 static int log_details = 0;
 
@@ -790,13 +796,18 @@ static zoom_ret do_write(ZOOM_connection c);
 ZOOM_API(void)
     ZOOM_connection_destroy(ZOOM_connection c)
 {
+#if ZOOM_RESULT_LISTS
     ZOOM_resultsets list;
+#else
+    ZOOM_resultset r;
+#endif
     if (!c)
         return;
     yaz_log(log_api, "%p ZOOM_connection_destroy", c);
     if (c->cs)
         cs_close(c->cs);
 
+#if ZOOM_RESULT_LISTS
     // Remove the connection's usage of resultsets
     list = c->resultsets;
     while (list) {
@@ -805,6 +816,10 @@ ZOOM_API(void)
         list = list->next;
         xfree(removed);
     }
+#else
+    for (r = c->resultsets; r; r = r->next)
+        r->connection = 0;
+#endif
 
     xfree(c->buf_in);
     xfree(c->addinfo);
@@ -870,6 +885,12 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->num_databaseNames = 0;
     r->mutex = 0;
     yaz_mutex_create(&r->mutex);
+#if SHPTR
+    {
+        WRBUF w = wrbuf_alloc();
+        YAZ_SHPTR_INIT(r->record_wrbuf, w);
+    }
+#endif
     return r;
 }
 
@@ -894,7 +915,9 @@ ZOOM_API(ZOOM_resultset)
     const char *cp;
     int start, count;
     const char *syntax, *elementSetName;
+#if ZOOM_RESULT_LISTS
     ZOOM_resultsets set;
+#endif
 
     yaz_log(log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = q->sort_spec;
@@ -923,13 +946,17 @@ ZOOM_API(ZOOM_resultset)
     
     r->connection = c;
 
+#if ZOOM_RESULT_LISTS
     yaz_log(log_details, "%p ZOOM_connection_search: Adding new resultset (%p) to resultsets (%p) ", c, r, c->resultsets);
     set = xmalloc(sizeof(*set));
     ZOOM_resultset_addref(r);
     set->resultset = r;
     set->next = c->resultsets;
     c->resultsets = set;
-
+#else
+    r->next = c->resultsets;
+    c->resultsets = r;
+#endif
     if (c->host_port && c->proto == PROTO_HTTP)
     {
         if (!c->cs)
@@ -1027,8 +1054,15 @@ static void ZOOM_record_release(ZOOM_record rec)
 {
     if (!rec)
         return;
+
+#if SHPTR
+    if (rec->record_wrbuf)
+        YAZ_SHPTR_DEC(rec->record_wrbuf, wrbuf_destroy);
+#else
     if (rec->wrbuf)
         wrbuf_destroy(rec->wrbuf);
+#endif
+
 #if YAZ_HAVE_XML2
     if (rec->xml_mem)
         xmlFree(rec->xml_mem);
@@ -1069,14 +1103,36 @@ static void resultset_destroy(ZOOM_resultset r)
     if (r->refcount == 0)
     {
         yaz_mutex_leave(r->mutex);
+
         yaz_log(log_details, "%p ZOOM_connection resultset_destroy: Deleting resultset (%p) ", r->connection, r);
         ZOOM_resultset_cache_reset(r);
+#if ZOOM_RESULT_LISTS
+#else
+        if (r->connection)
+        {
+            /* remove ourselves from the resultsets in connection */
+            ZOOM_resultset *rp = &r->connection->resultsets;
+            while (1)
+            {
+                assert(*rp);   /* we must be in this list!! */
+                if (*rp == r)
+                {   /* OK, we're here - take us out of it */
+                    *rp = (*rp)->next;
+                    break;
+                }
+                rp = &(*rp)->next;
+            }
+        }
+#endif
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
         xfree(r->setname);
         xfree(r->schema);
         yaz_mutex_destroy(&r->mutex);
+#if SHPTR
+        YAZ_SHPTR_DEC(r->record_wrbuf, wrbuf_destroy);
+#endif
         xfree(r);
     }
     else
@@ -1739,6 +1795,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
                result sets on the server. */
             for (ord = 1; ; ord++)
             {
+#if ZOOM_RESULT_LISTS
                 ZOOM_resultsets rsp;
                 sprintf(setname, "%d", ord);
                 for (rsp = c->resultsets; rsp; rsp = rsp->next)
@@ -1746,6 +1803,16 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
                         break;
                 if (!rsp)
                     break;
+#else
+                ZOOM_resultset rp;
+                sprintf(setname, "%d", ord);
+                for (rp = c->resultsets; rp; rp = rp->next)
+                    if (rp->setname && !strcmp(rp->setname, setname))
+                        break;
+                if (!rp)
+                    break;
+#endif
+
             }
             r->setname = xstrdup(setname);
             yaz_log(log_details, "%p ZOOM_connection_send_search: allocating "
@@ -1808,7 +1875,11 @@ ZOOM_API(ZOOM_record)
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     yaz_log(log_details, "ZOOM_record create");
     nrec->odr = odr_createmem(ODR_DECODE);
+#if SHPTR
+    nrec->record_wrbuf = 0;
+#else
     nrec->wrbuf = 0;
+#endif
 #if YAZ_HAVE_XML2
     nrec->xml_mem = 0;
     nrec->xml_size = 0;
@@ -1897,7 +1968,8 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset)
     return cd;
 }
 
-static const char *return_marc_record(ZOOM_record rec, int marc_type,
+static const char *return_marc_record(ZOOM_record rec, WRBUF wrbuf,
+                                      int marc_type,
                                       int *len,
                                       const char *buf, int sz,
                                       const char *record_charset)
@@ -1909,14 +1981,11 @@ static const char *return_marc_record(ZOOM_record rec, int marc_type,
     if (cd)
         yaz_marc_iconv(mt, cd);
     yaz_marc_xml(mt, marc_type);
-    if (!rec->wrbuf)
-        rec->wrbuf = wrbuf_alloc();
-    wrbuf_rewind(rec->wrbuf);
-    if (yaz_marc_decode_wrbuf(mt, buf, sz, rec->wrbuf) > 0)
+    if (yaz_marc_decode_wrbuf(mt, buf, sz, wrbuf) > 0)
     {
         if (len)
-            *len = wrbuf_len(rec->wrbuf);
-        ret_string = wrbuf_cstr(rec->wrbuf);
+            *len = wrbuf_len(wrbuf);
+        ret_string = wrbuf_cstr(wrbuf);
     }
     yaz_marc_destroy(mt);
     if (cd)
@@ -1924,7 +1993,8 @@ static const char *return_marc_record(ZOOM_record rec, int marc_type,
     return ret_string;
 }
 
-static const char *return_opac_record(ZOOM_record rec, int marc_type,
+static const char *return_opac_record(ZOOM_record rec, WRBUF wrbuf,
+                                      int marc_type,
                                       int *len,
                                       Z_OPACRecord *opac_rec,
                                       const char *record_charset)
@@ -1936,21 +2006,18 @@ static const char *return_opac_record(ZOOM_record rec, int marc_type,
         yaz_marc_iconv(mt, cd);
     yaz_marc_xml(mt, marc_type);
 
-    if (!rec->wrbuf)
-        rec->wrbuf = wrbuf_alloc();
-    wrbuf_rewind(rec->wrbuf);
-
-    yaz_opac_decode_wrbuf(mt, opac_rec, rec->wrbuf);
+    yaz_opac_decode_wrbuf(mt, opac_rec, wrbuf);
     yaz_marc_destroy(mt);
 
     if (cd)
         yaz_iconv_close(cd);
     if (len)
-        *len = wrbuf_len(rec->wrbuf);
-    return wrbuf_cstr(rec->wrbuf);
+        *len = wrbuf_len(wrbuf);
+    return wrbuf_cstr(wrbuf);
 }
 
-static const char *return_string_record(ZOOM_record rec, int *len,
+static const char *return_string_record(ZOOM_record rec, WRBUF wrbuf,
+                                        int *len,
                                         const char *buf, int sz,
                                         const char *record_charset)
 {
@@ -1958,16 +2025,11 @@ static const char *return_string_record(ZOOM_record rec, int *len,
 
     if (cd)
     {
-        if (!rec->wrbuf)
-            rec->wrbuf = wrbuf_alloc();
+        wrbuf_iconv_write(wrbuf, cd, buf, sz);
+        wrbuf_iconv_reset(wrbuf, cd);
 
-        wrbuf_rewind(rec->wrbuf);
-
-        wrbuf_iconv_write(rec->wrbuf, cd, buf, sz);
-        wrbuf_iconv_reset(rec->wrbuf, cd);
-
-        buf = wrbuf_cstr(rec->wrbuf);
-        sz = wrbuf_len(rec->wrbuf);
+        buf = wrbuf_cstr(wrbuf);
+        sz = wrbuf_len(wrbuf);
         yaz_iconv_close(cd);
     }
     if (len)
@@ -1981,15 +2043,29 @@ static const char *return_record(ZOOM_record rec, int *len,
 {
     Z_External *r = (Z_External *) npr->u.databaseRecord;
     const Odr_oid *oid = r->direct_reference;
-    
+    WRBUF wrbuf;
+
+#if SHPTR
+    if (!rec->record_wrbuf)
+    {
+        WRBUF w = wrbuf_alloc();
+        YAZ_SHPTR_INIT(rec->record_wrbuf, w);
+    }
+    wrbuf = rec->record_wrbuf->ptr;
+#else
+    if (!rec->wrbuf)
+        rec->wrbuf = wrbuf_alloc();
+    wrbuf = rec->wrbuf;
+#endif
+    wrbuf_rewind(wrbuf);
     /* render bibliographic record .. */
     if (r->which == Z_External_OPAC)
     {
-        return return_opac_record(rec, marctype, len,
+        return return_opac_record(rec, wrbuf, marctype, len,
                                   r->u.opac, charset);
     }
     if (r->which == Z_External_sutrs)
-        return return_string_record(rec, len,
+        return return_string_record(rec, wrbuf, len,
                                     (char*) r->u.sutrs->buf,
                                     r->u.sutrs->len,
                                     charset);
@@ -1998,7 +2074,7 @@ static const char *return_record(ZOOM_record rec, int *len,
         if (yaz_oid_is_iso2709(oid))
         {
             const char *ret_buf = return_marc_record(
-                rec, marctype, len,
+                rec, wrbuf, marctype, len,
                 (const char *) r->u.octet_aligned->buf,
                 r->u.octet_aligned->len,
                 charset);
@@ -2008,20 +2084,17 @@ static const char *return_record(ZOOM_record rec, int *len,
             if (marctype != YAZ_MARC_ISO2709)
                 return 0;
         }
-        return return_string_record(rec, len,
+        return return_string_record(rec, wrbuf, len,
                                     (const char *) r->u.octet_aligned->buf,
                                     r->u.octet_aligned->len,
                                     charset);
     }
     else if (r->which == Z_External_grs1)
     {
-        if (!rec->wrbuf)
-            rec->wrbuf = wrbuf_alloc();
-        wrbuf_rewind(rec->wrbuf);
-        yaz_display_grs1(rec->wrbuf, r->u.grs1, 0);
-        return return_string_record(rec, len,
-                                    wrbuf_buf(rec->wrbuf),
-                                    wrbuf_len(rec->wrbuf),
+        yaz_display_grs1(wrbuf, r->u.grs1, 0);
+        return return_string_record(rec, wrbuf, len,
+                                    wrbuf_buf(wrbuf),
+                                    wrbuf_len(wrbuf),
                                     charset);
     }
     return 0;
@@ -2276,7 +2349,12 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     {
         rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
         rc->rec.odr = 0;
+#if SHPTR
+        YAZ_SHPTR_INC(r->record_wrbuf);
+        rc->rec.record_wrbuf = r->record_wrbuf;
+#else
         rc->rec.wrbuf = 0;
+#endif
 #if YAZ_HAVE_XML2
         rc->rec.xml_mem = 0;
 #endif
@@ -2908,7 +2986,7 @@ static zoom_ret ZOOM_connection_send_scan(ZOOM_connection c)
     }
 
     *req->numberOfTermsRequested =
-        ZOOM_options_get_int(scan->options, "number", 10);
+        ZOOM_options_get_int(scan->options, "number", 20);
 
     req->preferredPositionInResponse =
         odr_intdup(c->odr_out,

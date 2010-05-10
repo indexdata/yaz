@@ -1,2 +1,2 @@
 DEBIAN_DIST="squeeze etch lenny"
-UBUNTU_DIST="karmic jaunty intrepid hardy"
+UBUNTU_DIST="lucid karmic jaunty intrepid hardy"

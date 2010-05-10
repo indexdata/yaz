@@ -192,7 +192,15 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         It's automatically set internally when connecting to a target.
        </entry><entry>none</entry></row>
       <row><entry>
-        proxy</entry><entry>Proxy host
+        proxy</entry><entry>Proxy host. If set, the logical host
+	is encoded in the otherInfo area of the Z39.50 Init PDU
+	with OID 1.2.840.10003.10.1000.81.1.
+       </entry><entry>none</entry></row>
+      <row><entry>
+        clientIP</entry><entry>Client IP. If set, is
+	encoded in the otherInfo area of a Z39.50 PDU with OID
+	1.2.840.10003.10.1000.81.3. Holds the original IP addreses
+	of a client. Is used of ZOOM is used in a gateway of some sort.
        </entry><entry>none</entry></row>
       <row><entry>
         async</entry><entry>If true (1) the connection operates in 
@@ -965,7 +973,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       <row><entry>
         number</entry><entry>Number of Scan Terms requested in next scan.
         After scan it holds the actual number of terms returned.
-       </entry><entry>10</entry></row>
+       </entry><entry>20</entry></row>
       <row><entry>
         position</entry><entry>Preferred Position of term in response
         in next scan; actual position after completion of scan.
