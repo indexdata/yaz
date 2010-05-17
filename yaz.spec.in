@@ -107,7 +107,6 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_libdir}/pkgconfig/yaz.pc
 %{_libdir}/*.so
 %{_libdir}/*.a
-%{_libdir}/*.la
 %{_datadir}/aclocal/yaz.m4
 %{_mandir}/man1/yaz-asncomp.*
 %{_mandir}/man7/yaz.*
