@@ -196,9 +196,8 @@ static void display_records(ZOOM_connection c,
         }
         else
         {
-            int len, opac_len;
+            int len;
             const char *render = ZOOM_record_get(rec, type, &len);
-            const char *opac_render = ZOOM_record_get(rec, "opac", &opac_len);
             const char *syntax = ZOOM_record_get(rec, "syntax", 0);
             const char *schema = ZOOM_record_get(rec, "schema", 0);
             /* if rec is non-null, we got a record for display */
@@ -215,12 +214,6 @@ static void display_records(ZOOM_connection c,
                     }
                 }
                 printf("\n");
-                if (opac_render)
-                {
-                    if (fwrite(opac_render, 1, opac_len, stdout) != (size_t) 
-                               opac_len)
-                        printf("write to stdout failed\n");
-                }
             }
         }
     }
