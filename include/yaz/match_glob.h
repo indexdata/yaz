@@ -46,6 +46,7 @@ YAZ_BEGIN_CDECL
           * (any number of any char)
     * (zero or more)
 */
+YAZ_EXPORT
 int yaz_match_glob(const char *glob, const char *text);
 
 YAZ_END_CDECL
