@@ -48,11 +48,14 @@ struct yaz_cond {
 
 void yaz_cond_create(YAZ_COND *p)
 {
-    *p = (YAZ_COND) malloc(sizeof(**p));
 #ifdef WIN32
+    *p = (YAZ_COND) malloc(sizeof(**p));
     InitializeConditionVariable(&(*p)->cond);
 #elif YAZ_POSIX_THREADS
+    *p = (YAZ_COND) malloc(sizeof(**p));
     pthread_cond_init(&(*p)->cond, 0);
+#else
+    *p = 0;
 #endif
 }
 

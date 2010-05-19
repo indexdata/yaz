@@ -54,18 +54,17 @@ static void tst_cond(void)
         return;
 
     yaz_cond_create(&c);
-    YAZ_CHECK(c);
-    if (!c)
-        return;
+    if (c)
+    {
+        r = yaz_gettimeofday(&abstime);
+        YAZ_CHECK_EQ(r, 0);
+        
+        abstime.tv_sec += 1; /* wait 1 second */
+        
+        r = yaz_cond_wait(c, p, &abstime);
+        YAZ_CHECK(r != 0);
 
-    r = yaz_gettimeofday(&abstime);
-    YAZ_CHECK_EQ(r, 0);
-    
-    abstime.tv_sec += 1; /* wait 1 second */
-    
-    r = yaz_cond_wait(c, p, &abstime);
-    YAZ_CHECK(r != 0);
-
+    }
     yaz_cond_destroy(&c);
     YAZ_CHECK(c == 0);
     yaz_mutex_destroy(&p);
