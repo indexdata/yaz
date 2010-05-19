@@ -72,6 +72,7 @@ void yaz_cond_destroy(YAZ_COND *p)
 int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime)
 {
 #ifdef WIN32
+    BOOL v;
     if (abstime)
     {
         struct timeval tval_now;
@@ -81,10 +82,11 @@ int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime)
 
         sec = abstime->tv_sec - tval_now.tv_sec;
         msec = (abstime->tv_usec - tval_now.tv_usec) / 1000;
-        return SleepConditionVariableCS(&p->cond, &m->handle, sec*1000 + msec);
+        v = SleepConditionVariableCS(&p->cond, &m->handle, sec*1000 + msec);
     }
     else
-        return SleepConditionVariableCS(&p->cond, &m->handle, INFINITE);
+        v = SleepConditionVariableCS(&p->cond, &m->handle, INFINITE);
+    return v ? 0 : -1;
 #elif YAZ_POSIX_THREADS
     if (abstime)
     {
