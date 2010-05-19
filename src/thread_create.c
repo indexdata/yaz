@@ -26,18 +26,31 @@
 #endif
 #ifdef WIN32
 #include <windows.h>
+#include <process.h>
 #endif
 
 struct yaz_thread {
 #if YAZ_POSIX_THREADS
     pthread_t id;
 #else
-    void *return_data;
 #ifdef WIN32
-    HANDLE id;
+    HANDLE handle;
+    void *(*routine)(void *p);
 #endif
+    void *data;
 #endif
 };
+
+#ifdef WIN32
+unsigned int __stdcall win32_routine(void *p)
+{
+    yaz_thread_t t = (yaz_thread_t) p;
+    void *userdata = t->data;
+    t->data = t->routine(userdata);
+    _endthreadex(0);
+    return 0;
+}
+#endif
 
 yaz_thread_t yaz_thread_create(void *(*start_routine)(void *p), void *arg)
 {
@@ -50,7 +63,22 @@ yaz_thread_t yaz_thread_create(void *(*start_routine)(void *p), void *arg)
         t = 0;
     }
 #else
-    t->return_data = start_routine(arg);
+#ifdef WIN32
+    /* we create a wrapper on windows and pass yaz_thread struct to that */
+    unsigned threadID;
+    uintptr_t ex_ret;
+    t->data = arg; /* use data for both input and output */
+    t->routine = start_routine;
+    ex_ret = _beginthreadex(NULL, 0, win32_routine, t, 0, &threadID);
+    if (ex_ret == -1L)
+    {
+        xfree(t);
+        t = 0;
+    }
+    t->handle = (HANDLE) ex_ret;
+#else
+    t->data = start_routine(arg);
+#endif
 #endif
     return t;
 }
@@ -62,8 +90,12 @@ void yaz_thread_join(yaz_thread_t *tp, void **value_ptr)
 #ifdef YAZ_POSIX_THREADS
         pthread_join((*tp)->id, value_ptr);
 #else
+#ifdef WIN32
+        WaitForSingleObject((*tp)->handle, INFINITE);
+        CloseHandle((*tp)->handle);
+#endif
         if (value_ptr)
-            *value_ptr = (*tp)->return_data;
+            *value_ptr = (*tp)->data;
 #endif
         xfree(*tp);
         *tp = 0;
@@ -76,6 +108,10 @@ void yaz_thread_detach(yaz_thread_t *tp)
     {
 #ifdef YAZ_POSIX_THREADS
         pthread_detach((*tp)->id);
+#else
+#ifdef WIN32
+        CloseHandle((*tp)->handle);
+#endif
 #endif
         xfree(*tp);
         *tp = 0;
