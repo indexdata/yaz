@@ -505,6 +505,7 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_decode_danmarc.obj \
    $(OBJDIR)\mutex.obj \
    $(OBJDIR)\thread_create.obj \
+   $(OBJDIR)\spipe.obj \
    $(OBJDIR)\gettimeofday.obj \
    $(OBJDIR)\json.obj \
    $(OBJDIR)\sc.obj \
