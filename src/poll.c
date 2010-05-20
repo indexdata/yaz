@@ -63,6 +63,10 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
         enum yaz_poll_mask mask = fds[i].input_mask;
         int fd = fds[i].fd;
 
+        /* Timeout events */
+        if (fd < 0)
+            continue;
+
         if (mask & yaz_poll_read)
             FD_SET(fd, &input);
         if (mask & yaz_poll_write)
@@ -84,8 +88,7 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
             int fd = fds[i].fd;
             if (!r)
                 yaz_poll_add(mask, yaz_poll_timeout);
-            else
-            {
+            else if (fd >= 0) {
                 if (FD_ISSET(fd, &input))
                     yaz_poll_add(mask, yaz_poll_read);
                 if (FD_ISSET(fd, &output))
