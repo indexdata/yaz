@@ -43,9 +43,9 @@ struct dirent {
 
 typedef struct DIR DIR;
 
-DIR *opendir (const char *path);
-struct dirent *readdir (DIR *dd);
-void closedir (DIR *dd);
+YAZ_EXPORT DIR *opendir (const char *path);
+YAZ_EXPORT struct dirent *readdir (DIR *dd);
+YAZ_EXPORT void closedir (DIR *dd);
 
 YAZ_END_CDECL
 

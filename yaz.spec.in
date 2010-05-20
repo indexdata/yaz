@@ -36,7 +36,7 @@ Retrieval.
 %package -n libyaz4-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz4 = %{version} libxml2-devel libxslt-devel libicu-devel gnutls-devel %{TCPWRAPPER}
+Requires: libyaz4 = %{version} libxml2-devel libxslt-devel libicu-devel
 Conflicts: libyaz-devel
 
 %description -n libyaz4-devel
@@ -73,6 +73,7 @@ make CFLAGS="$RPM_OPT_FLAGS"
 rm -fr ${RPM_BUILD_ROOT}
 make prefix=${RPM_BUILD_ROOT}/%{_prefix} mandir=${RPM_BUILD_ROOT}/%{_mandir} \
 	libdir=${RPM_BUILD_ROOT}/%{_libdir} install
+rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 
 %clean
 rm -fr ${RPM_BUILD_ROOT}

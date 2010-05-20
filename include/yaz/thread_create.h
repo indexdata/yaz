@@ -25,29 +25,39 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file
-    \brief Glob expression matcher
-*/
+/**
+ * \file thread_create.h
+ * \brief Implements thread creation wrappers
+ */
+#ifndef YAZ_THREAD_CREATE_H
+#define YAZ_THREAD_CREATE_H
 
-#ifndef YAZ_MATCH_GLOB_H
-#define YAZ_MATCH_GLOB_H
-
+#include <stddef.h>
+#include <time.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
 
-/** \brief matches a glob  expression against text
-    \param glob glob expression
-    \param text the text
-    \retval 0 no match
-    \retval 1 match
+/** \brief Thread Identifier opaque pointer */
+typedef struct yaz_thread *yaz_thread_t;
 
-    Operators: c (literal char), ? (any char),
-          * (any number of any char)
-    * (zero or more)
+/** \brief create thread
+    \param start_routine thread handler
+    \param arg user data to be passed to handler
+    \returns thread_id identifier if successful; NULL on failure
+ */
+YAZ_EXPORT yaz_thread_t yaz_thread_create(void *(*start_routine)(void *p), void *arg);
+
+/** \brief join thread
+    \param tp thread_id reference .. Will be 0 upon completion
+    \param value_ptr ref pointer to routine result (0 if not needed)
 */
-YAZ_EXPORT
-int yaz_match_glob(const char *glob, const char *text);
+YAZ_EXPORT void yaz_thread_join(yaz_thread_t *tp, void **value_ptr);
+
+/** \brief detach thread
+    \param tp thread_id reference .. Will be 0 upon completion
+*/
+void yaz_thread_detach(yaz_thread_t *tp);
 
 YAZ_END_CDECL
 

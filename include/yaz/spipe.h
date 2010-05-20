@@ -25,29 +25,44 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file
-    \brief Glob expression matcher
-*/
+/**
+ * \file spipe.h
+ * \brief socket-pipe header
+ */
+#ifndef YAZ_SPIPE_H
+#define YAZ_SPIPE_H
 
-#ifndef YAZ_MATCH_GLOB_H
-#define YAZ_MATCH_GLOB_H
-
+#include <stddef.h>
+#include <time.h>
 #include <yaz/yconfig.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
-/** \brief matches a glob  expression against text
-    \param glob glob expression
-    \param text the text
-    \retval 0 no match
-    \retval 1 match
+/** \brief YAZ socket pipe opaque pointer */
+typedef struct yaz_spipe *yaz_spipe_t;
 
-    Operators: c (literal char), ? (any char),
-          * (any number of any char)
-    * (zero or more)
-*/
-YAZ_EXPORT
-int yaz_match_glob(const char *glob, const char *text);
+/** \brief create socket pipe
+    \param port_to_use port that we temporarily bind to
+    \param err_msg error message reference (0 if not to be set)
+    \returns 0 on failure; != 0 on success
+ */
+YAZ_EXPORT yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg);
+
+/** \brief destroys socket pipe
+    \param p socket pipe pointer
+ */
+YAZ_EXPORT void yaz_spipe_destroy(yaz_spipe_t p);
+
+/** \brief returns reading socket
+    \param p socket pipe pointer
+ */
+YAZ_EXPORT int yaz_spipe_get_read_fd(yaz_spipe_t p);
+
+/** \brief returns writing socket
+    \param p socket pipe pointer
+ */
+YAZ_EXPORT int yaz_spipe_get_write_fd(yaz_spipe_t p);
 
 YAZ_END_CDECL
 

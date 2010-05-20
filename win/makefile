@@ -286,7 +286,7 @@ MT=echo
 LINK_LIBS= kernel32.lib ws2_32.lib advapi32.lib \
 	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
-COMMON_LNK_OPTIONS= /nologo /subsystem:windows /machine:i386 /incremental:no
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no
 
 DEBUG_LNK_OPTIONS= /debug 
 
@@ -504,6 +504,8 @@ MISC_OBJS= \
    $(OBJDIR)\iconv_decode_iso5426.obj \
    $(OBJDIR)\iconv_decode_danmarc.obj \
    $(OBJDIR)\mutex.obj \
+   $(OBJDIR)\thread_create.obj \
+   $(OBJDIR)\spipe.obj \
    $(OBJDIR)\gettimeofday.obj \
    $(OBJDIR)\json.obj \
    $(OBJDIR)\sc.obj \

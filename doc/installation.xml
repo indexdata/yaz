@@ -527,8 +527,8 @@
        <term><literal>HAVE_TCL</literal>, <literal>TCL</literal></term>
        <listitem><para>
          If <literal>HAVE_TCL</literal> is set to 1, nmake will
-         use the ASN.1 compiler (Tcl based). You must set
-         <literal>TCL</literal> to the full path of the Tcl
+         use the ASN.1 compiler (<ulink url="&url.tcl;">Tcl</ulink> based).
+         You must set <literal>TCL</literal> to the full path of the Tcl
          interpreter.
         </para>
         <para>

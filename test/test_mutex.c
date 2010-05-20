@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include <yaz/mutex.h>
+#include <yaz/thread_create.h>
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -53,22 +54,52 @@ static void tst_cond(void)
         return;
 
     yaz_cond_create(&c);
-    YAZ_CHECK(c);
-    if (!c)
-        return;
+    if (c)
+    {
+        r = yaz_gettimeofday(&abstime);
+        YAZ_CHECK_EQ(r, 0);
+        
+        abstime.tv_sec += 1; /* wait 1 second */
+        
+        r = yaz_cond_wait(c, p, &abstime);
+        YAZ_CHECK(r != 0);
 
-    r = yaz_gettimeofday(&abstime);
-    YAZ_CHECK_EQ(r, 0);
-    
-    abstime.tv_sec += 1; /* wait 1 second */
-    
-    r = yaz_cond_wait(c, p, &abstime);
-    YAZ_CHECK(r != 0);
-
+    }
     yaz_cond_destroy(&c);
     YAZ_CHECK(c == 0);
     yaz_mutex_destroy(&p);
     YAZ_CHECK(p == 0);
+}
+
+static void *my_handler(void *arg)
+{
+    int *mydata = (int*) arg;
+    (*mydata)++;
+    return mydata;
+}
+
+static void tst_create_thread(void)
+{
+    void *return_data;
+    int mydata = 42;
+    yaz_thread_t t[2];
+
+    t[0] = yaz_thread_create(my_handler, &mydata);
+    YAZ_CHECK(t[0]);
+    t[1] = yaz_thread_create(my_handler, &mydata);
+    YAZ_CHECK(t[1]);
+    
+    return_data = 0;
+    yaz_thread_join(&t[0], &return_data);
+    YAZ_CHECK(!t[0]);
+    YAZ_CHECK(return_data == &mydata);
+
+    return_data = 0;
+    yaz_thread_join(&t[1], &return_data);
+    YAZ_CHECK(!t[1]);
+    YAZ_CHECK(return_data == &mydata);
+    
+    YAZ_CHECK_EQ(mydata, 44);
 }
 
 int main (int argc, char **argv)
@@ -77,6 +108,7 @@ int main (int argc, char **argv)
     YAZ_CHECK_LOG();
     tst_mutex();
     tst_cond();
+    tst_create_thread();
     YAZ_CHECK_TERM;
 }
 
