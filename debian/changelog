@@ -1,3 +1,9 @@
+yaz (4.0.9-2indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Fri, 21 May 2010 11:56:06 +0200
+
 yaz (4.0.9-1indexdata) unstable; urgency=low
 
   * New yaz_thread functions
