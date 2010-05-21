@@ -1,3 +1,19 @@
+--- 4.0.9 2010/05/21
+
+New utility for managing threads - thread_create.h.
+
+Add socket pipe utility - spipe.h. The socket pipe has same purpose as
+Unix pipe . Unfortunately Windows pipes do not work on select/poll -
+but YAZ' implementation do.
+
+Fixes for yaz_cond-functions on Windows 7.
+
+DLL export more symbols.
+
+zoomsh: show record do NOT render opac.
+
+Remove *.la files from Debian and RPM packages.
+
 --- 4.0.8 2010/05/11
 
 Debian package libyaz-dev depends on libgnutls-dev again (was
