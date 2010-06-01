@@ -2032,7 +2032,7 @@ static int process_z_request(association *assoc, request *req, char **msg)
     }
     else
     {
-        yaz_log(YLOG_DEBUG, "  result unavailble");
+        yaz_log(YLOG_DEBUG, "  result unavailable");
         retval = -1;
     }
     return retval;
@@ -2560,7 +2560,10 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         thisrec->which = Z_NamePlusRecord_databaseRecord;
 
         if (!freq.output_format)
-            freq.output_format = freq.request_format;
+        {
+            yaz_log(YLOG_WARN, "bend_fetch output_format not set");
+            return 0;
+        }
         thisrec->u.databaseRecord = z_ext_record_oid(
             a->encode, freq.output_format, freq.record, freq.len);
         if (!thisrec->u.databaseRecord)
