@@ -40,7 +40,7 @@ static Odr_oid *query_oid_getvalbyname(struct yaz_pqf_parser *li, ODR o)
 
     if (li->lex_len >= sizeof(buf)-1)
         return 0;
-    memcpy (buf, li->lex_buf, li->lex_len);
+    memcpy(buf, li->lex_buf, li->lex_len);
     buf[li->lex_len] = '\0';
     return yaz_string_to_oid_odr(yaz_oid_std(), CLASS_ATTSET, buf, o);
 }
@@ -50,7 +50,7 @@ static int compare_term(struct yaz_pqf_parser *li, const char *src,
 {
     size_t len=strlen(src);
     
-    if (li->lex_len == len+off && !memcmp (li->lex_buf+off, src, len-off))
+    if (li->lex_len == len+off && !memcmp(li->lex_buf+off, src, len-off))
         return 1;
     return 0;
 }
@@ -66,14 +66,14 @@ static int query_token(struct yaz_pqf_parser *li)
     if (**qptr == '\0')
         return 0;
     li->lex_len = 0;
-    if ((sep_match = strchr (li->left_sep, **qptr)))
+    if ((sep_match = strchr(li->left_sep, **qptr)))
     {
         sep_char = li->right_sep[sep_match - li->left_sep];
         ++(*qptr);
     }
     li->lex_buf = *qptr;
    
-    if (**qptr == li->escape_char && isdigit (((const unsigned char *) *qptr)[1]))
+    if (**qptr == li->escape_char && isdigit(((const unsigned char *) *qptr)[1]))
     {
         ++(li->lex_len);
         ++(*qptr);
@@ -94,21 +94,21 @@ static int query_token(struct yaz_pqf_parser *li)
     if (sep_char == ' ' &&
         li->lex_len >= 1 && li->lex_buf[0] == li->escape_char)
     {
-        if (compare_term (li, "and", 1))
+        if (compare_term(li, "and", 1))
             return 'a';
-        if (compare_term (li, "or", 1))
+        if (compare_term(li, "or", 1))
             return 'o';
-        if (compare_term (li, "not", 1))
+        if (compare_term(li, "not", 1))
             return 'n';
-        if (compare_term (li, "attr", 1))
+        if (compare_term(li, "attr", 1))
             return 'l';
-        if (compare_term (li, "set", 1))
+        if (compare_term(li, "set", 1))
             return 's';
-        if (compare_term (li, "attrset", 1))
+        if (compare_term(li, "attrset", 1))
             return 'r';
-        if (compare_term (li, "prox", 1))
+        if (compare_term(li, "prox", 1))
             return 'p';
-        if (compare_term (li, "term", 1))
+        if (compare_term(li, "term", 1))
             return 'y';
     }
     return 't';
@@ -150,7 +150,7 @@ static int escape_string(char *out_buf, const char *in, int len)
                     s[1] = *++in;
                     s[2] = '\0';
                     len = len - 2;
-                    sscanf (s, "%x", &n);
+                    sscanf(s, "%x", &n);
                     *out++ = n;
                 }
                 break;
@@ -167,7 +167,7 @@ static int escape_string(char *out_buf, const char *in, int len)
                     s[2] = *++in;
                     s[3] = '\0';
                     len = len - 2;
-                    sscanf (s, "%o", &n);
+                    sscanf(s, "%o", &n);
                     *out++ = n;
                 }
                 break;
@@ -187,22 +187,23 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               char **attr_clist, Odr_oid **attr_set)
 {
     const char *cp;
+    size_t i;
 
-    if (!(cp = strchr (li->lex_buf, '=')) ||
+    if (!(cp = strchr(li->lex_buf, '=')) ||
         (size_t) (cp-li->lex_buf) > li->lex_len)
     {
-        attr_set[num_attr] = query_oid_getvalbyname (li, o);
+        attr_set[num_attr] = query_oid_getvalbyname(li, o);
         if (attr_set[num_attr] == 0)
         {
             li->error = YAZ_PQF_ERROR_ATTSET;
             return 0;
         }
-        if (!lex (li))
+        if (!lex(li))
         {
             li->error = YAZ_PQF_ERROR_MISSING;
             return 0;
         }
-        if (!(cp = strchr (li->lex_buf, '=')))
+        if (!(cp = strchr(li->lex_buf, '=')))
         {
             li->error = YAZ_PQF_ERROR_BADATTR;
             return 0;
@@ -222,19 +223,20 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
     }
     attr_list[2*num_attr] = odr_atoi(li->lex_buf);
     cp++;
-    if (*cp >= '0' && *cp <= '9')
-    {
-        attr_list[2*num_attr+1] = odr_atoi(cp);
-        attr_clist[num_attr] = 0;
-    }
-    else
-    {
-        int len = li->lex_len - (cp - li->lex_buf);
-        attr_list[2*num_attr+1] = 0;
-        attr_clist[num_attr] = (char *) odr_malloc (o, len+1);
-        len = escape_string(attr_clist[num_attr], cp, len);
-        attr_clist[num_attr][len] = '\0';
-    }
+
+    /* inspect value .. and make it a integer if it appears to be */
+    for (i = cp - li->lex_buf; i < li->lex_len; i++)
+        if (li->lex_buf[i] < '0' || li->lex_buf[i] > '9')
+        {
+            int len = li->lex_len - (cp - li->lex_buf);
+            attr_list[2*num_attr+1] = 0;
+            attr_clist[num_attr] = (char *) odr_malloc(o, len+1);
+            len = escape_string(attr_clist[num_attr], cp, len);
+            attr_clist[num_attr][len] = '\0';
+            return 1;
+        }
+    attr_list[2*num_attr+1] = odr_atoi(cp);
+    attr_clist[num_attr] = 0;
     return 1;
 }
 
@@ -247,9 +249,9 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
     Z_Term *term;
     Z_AttributeElement **elements;
 
-    zapt = (Z_AttributesPlusTerm *)odr_malloc (o, sizeof(*zapt));
-    term_octet = (Odr_oct *)odr_malloc (o, sizeof(*term_octet));
-    term = (Z_Term *)odr_malloc (o, sizeof(*term));
+    zapt = (Z_AttributesPlusTerm *)odr_malloc(o, sizeof(*zapt));
+    term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
+    term = (Z_Term *)odr_malloc(o, sizeof(*term));
 
     if (!num_attr)
         elements = (Z_AttributeElement**)odr_nullval();
@@ -272,7 +274,7 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
             if (j < num_attr)
                 continue;
             elements[k] =
-                (Z_AttributeElement*)odr_malloc (o,sizeof(**elements));
+                (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
             elements[k]->attributeType = &attr_tmp[2*i];
             elements[k]->attributeSet = attr_set[i];
 
@@ -280,14 +282,14 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
             {
                 elements[k]->which = Z_AttributeValue_complex;
                 elements[k]->value.complex = (Z_ComplexAttribute *)
-                    odr_malloc (o, sizeof(Z_ComplexAttribute));
+                    odr_malloc(o, sizeof(Z_ComplexAttribute));
                 elements[k]->value.complex->num_list = 1;
                 elements[k]->value.complex->list =
                     (Z_StringOrNumeric **)
-                    odr_malloc (o, 1 * sizeof(Z_StringOrNumeric *));
+                    odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
                 elements[k]->value.complex->list[0] =
                     (Z_StringOrNumeric *)
-                    odr_malloc (o, sizeof(Z_StringOrNumeric));
+                    odr_malloc(o, sizeof(Z_StringOrNumeric));
                 elements[k]->value.complex->list[0]->which =
                     Z_StringOrNumeric_string;
                 elements[k]->value.complex->list[0]->u.string =
@@ -305,15 +307,15 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
         num_attr = k;
     }
     zapt->attributes = (Z_AttributeList *)
-        odr_malloc (o, sizeof(*zapt->attributes));
+        odr_malloc(o, sizeof(*zapt->attributes));
     zapt->attributes->num_attributes = num_attr;
     zapt->attributes->attributes = elements;
 
     zapt->term = term;
 
-    term_octet->buf = (unsigned char *)odr_malloc (o, 1 + li->lex_len);
+    term_octet->buf = (unsigned char *)odr_malloc(o, 1 + li->lex_len);
     term_octet->size = term_octet->len =
-        escape_string ((char *) (term_octet->buf), li->lex_buf, li->lex_len);
+        escape_string((char *) (term_octet->buf), li->lex_buf, li->lex_len);
     term_octet->buf[term_octet->size] = 0;  /* null terminate */
     
     switch (li->term_type)
@@ -325,7 +327,7 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
     case Z_Term_characterString:
         term->which = Z_Term_characterString;
         term->u.characterString = (char*) term_octet->buf; 
-                                    /* null terminated above */
+        /* null terminated above */
         break;
     case Z_Term_numeric:
         term->which = Z_Term_numeric;
@@ -354,7 +356,7 @@ static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
 {
     Z_Operand *zo;
 
-    zo = (Z_Operand *)odr_malloc (o, sizeof(*zo));
+    zo = (Z_Operand *)odr_malloc(o, sizeof(*zo));
     switch (li->query_look)
     {
     case 't':
@@ -362,20 +364,20 @@ static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
         if (!(zo->u.attributesPlusTerm =
               rpn_term(li, o, num_attr, attr_list, attr_clist, attr_set)))
             return 0;
-        lex (li);
+        lex(li);
         break;
     case 's':
-        lex (li);
+        lex(li);
         if (!li->query_look)
         {
             li->error = YAZ_PQF_ERROR_MISSING;
             return 0;
         }
         zo->which = Z_Operand_resultSetId;
-        zo->u.resultSetId = (char *)odr_malloc (o, li->lex_len+1);
-        memcpy (zo->u.resultSetId, li->lex_buf, li->lex_len);
+        zo->u.resultSetId = (char *)odr_malloc(o, li->lex_len+1);
+        memcpy(zo->u.resultSetId, li->lex_buf, li->lex_len);
         zo->u.resultSetId[li->lex_len] = '\0';
-        lex (li);
+        lex(li);
         break;
     default:
         /* we're only called if one of the above types are seens so
@@ -386,11 +388,11 @@ static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
     return zo;
 }
 
-static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
+static Z_ProximityOperator *rpn_proximity(struct yaz_pqf_parser *li, ODR o)
 {
-    Z_ProximityOperator *p = (Z_ProximityOperator *)odr_malloc (o, sizeof(*p));
+    Z_ProximityOperator *p = (Z_ProximityOperator *)odr_malloc(o, sizeof(*p));
 
-    if (!lex (li))
+    if (!lex(li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
@@ -407,7 +409,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
 
-    if (!lex (li))
+    if (!lex(li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
@@ -420,7 +422,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
 
-    if (!lex (li))
+    if (!lex(li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
@@ -448,7 +450,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
 
-    if (!lex (li))
+    if (!lex(li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
@@ -458,7 +460,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
     else if (*li->lex_buf == 'p')
         p->which = Z_ProximityOperator_private;
     else
-        p->which = atoi (li->lex_buf);
+        p->which = atoi(li->lex_buf);
 
     if (p->which != Z_ProximityOperator_known
         && p->which != Z_ProximityOperator_private)
@@ -467,7 +469,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
 
-    if (!lex (li))
+    if (!lex(li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return NULL;
@@ -490,8 +492,8 @@ static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
     Z_Complex *zc;
     Z_Operator *zo;
 
-    zc = (Z_Complex *)odr_malloc (o, sizeof(*zc));
-    zo = (Z_Operator *)odr_malloc (o, sizeof(*zo));
+    zc = (Z_Complex *)odr_malloc(o, sizeof(*zc));
+    zo = (Z_Operator *)odr_malloc(o, sizeof(*zo));
     zc->roperator = zo;
     switch (li->query_look)
     {
@@ -509,7 +511,7 @@ static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
         break;
     case 'p':
         zo->which = Z_Operator_prox;
-        zo->u.prox = rpn_proximity (li, o);
+        zo->u.prox = rpn_proximity(li, o);
         if (!zo->u.prox)
             return NULL;
         break;
@@ -519,7 +521,7 @@ static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
         li->error = YAZ_PQF_ERROR_INTERNAL;
         return NULL;
     }
-    lex (li);
+    lex(li);
     if (!(zc->s1 =
           rpn_structure(li, o, num_attr, max_attr, attr_list,
                         attr_clist, attr_set)))
@@ -535,17 +537,17 @@ static void rpn_term_type(struct yaz_pqf_parser *li)
 {
     if (!li->query_look)
         return ;
-    if (compare_term (li, "general", 0))
+    if (compare_term(li, "general", 0))
         li->term_type = Z_Term_general;
-    else if (compare_term (li, "numeric", 0))
+    else if (compare_term(li, "numeric", 0))
         li->term_type = Z_Term_numeric;
-    else if (compare_term (li, "string", 0))
+    else if (compare_term(li, "string", 0))
         li->term_type = Z_Term_characterString;
-    else if (compare_term (li, "oid", 0))
+    else if (compare_term(li, "oid", 0))
         li->term_type = Z_Term_oid;
-    else if (compare_term (li, "datetime", 0))
+    else if (compare_term(li, "datetime", 0))
         li->term_type = Z_Term_dateTime;
-    else if (compare_term (li, "null", 0))
+    else if (compare_term(li, "null", 0))
         li->term_type = Z_Term_null;
 #if 0
     else if (compare_term(li, "range", 0))
@@ -555,7 +557,7 @@ static void rpn_term_type(struct yaz_pqf_parser *li)
         li->external_type = VAL_MULTISRCH2;
     }
 #endif
-    lex (li);
+    lex(li);
 }
                            
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
@@ -566,7 +568,7 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
 {
     Z_RPNStructure *sz;
 
-    sz = (Z_RPNStructure *)odr_malloc (o, sizeof(*sz));
+    sz = (Z_RPNStructure *)odr_malloc(o, sizeof(*sz));
     switch (li->query_look)
     {
     case 'a':
@@ -575,20 +577,20 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
     case 'p':
         sz->which = Z_RPNStructure_complex;
         if (!(sz->u.complex =
-              rpn_complex (li, o, num_attr, max_attr, attr_list,
-                           attr_clist, attr_set)))
+              rpn_complex(li, o, num_attr, max_attr, attr_list,
+                          attr_clist, attr_set)))
             return NULL;
         break;
     case 't':
     case 's':
         sz->which = Z_RPNStructure_simple;
         if (!(sz->u.simple =
-              rpn_simple (li, o, num_attr, attr_list,
-                          attr_clist, attr_set)))
+              rpn_simple(li, o, num_attr, attr_list,
+                         attr_clist, attr_set)))
             return NULL;
         break;
     case 'l':
-        lex (li);
+        lex(li);
         if (!li->query_look)
         {
             li->error = YAZ_PQF_ERROR_MISSING;
@@ -603,16 +605,16 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                 attr_clist, attr_set))
             return 0;
         num_attr++;
-        lex (li);
+        lex(li);
         return
-            rpn_structure (li, o, num_attr, max_attr, attr_list,
-                           attr_clist,  attr_set);
+            rpn_structure(li, o, num_attr, max_attr, attr_list,
+                          attr_clist,  attr_set);
     case 'y':
-        lex (li);
+        lex(li);
         rpn_term_type(li);
         return
-            rpn_structure (li, o, num_attr, max_attr, attr_list,
-                           attr_clist, attr_set);
+            rpn_structure(li, o, num_attr, max_attr, attr_list,
+                          attr_clist, attr_set);
     case 0:                /* operator/operand expected! */
         li->error = YAZ_PQF_ERROR_MISSING;
         return 0;
@@ -628,18 +630,18 @@ static Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li)
     Odr_oid *attr_set[512];
     Odr_oid *top_set = 0;
 
-    zq = (Z_RPNQuery *)odr_malloc (o, sizeof(*zq));
-    lex (li);
+    zq = (Z_RPNQuery *)odr_malloc(o, sizeof(*zq));
+    lex(li);
     if (li->query_look == 'r')
     {
-        lex (li);
+        lex(li);
         top_set = query_oid_getvalbyname(li, o);
         if (!top_set)
         {
             li->error = YAZ_PQF_ERROR_ATTSET;
             return NULL;
         }
-        lex (li);
+        lex(li);
     }
     if (!top_set)
     {
@@ -692,17 +694,17 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     Odr_oid *top_set = 0;
     Z_AttributesPlusTerm *apt;
 
-    lex (li);
+    lex(li);
     if (li->query_look == 'r')
     {
-        lex (li);
+        lex(li);
         top_set = query_oid_getvalbyname(li, o);
         if (!top_set)
         {
             li->error = YAZ_PQF_ERROR_ATTSET;
             return NULL;
         }
-        lex (li);
+        lex(li);
     }
     if (!top_set)
     {
@@ -714,7 +716,7 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     {
         if (li->query_look == 'l')
         {
-            lex (li);
+            lex(li);
             if (!li->query_look)
             {
                 li->error = YAZ_PQF_ERROR_MISSING;
@@ -729,11 +731,11 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
                                     attr_clist, attr_set))
                 return 0;
             num_attr++;
-            lex (li);
+            lex(li);
         }
         else if (li->query_look == 'y')
         {
-            lex (li);
+            lex(li);
             rpn_term_type(li);
         }
         else
@@ -746,7 +748,7 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     }
     apt = rpn_term(li, o, num_attr, attr_list, attr_clist, attr_set);
 
-    lex (li);
+    lex(li);
 
     if (li->query_look != 0)
     {
@@ -756,9 +758,9 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     return apt;
 }
 
-YAZ_PQF_Parser yaz_pqf_create (void)
+YAZ_PQF_Parser yaz_pqf_create(void)
 {
-    YAZ_PQF_Parser p = (YAZ_PQF_Parser) xmalloc (sizeof(*p));
+    YAZ_PQF_Parser p = (YAZ_PQF_Parser) xmalloc(sizeof(*p));
 
     p->error = 0;
     p->left_sep = "{\"";
@@ -771,7 +773,7 @@ YAZ_PQF_Parser yaz_pqf_create (void)
 
 void yaz_pqf_destroy(YAZ_PQF_Parser p)
 {
-    xfree (p);
+    xfree(p);
 }
 
 Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o, const char *qbuf)
@@ -794,7 +796,7 @@ Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
     return p_query_scan_mk(p, o, attributeSetP);
 }
 
-int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off)
+int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off)
 {
     switch (p->error)
     {
