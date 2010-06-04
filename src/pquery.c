@@ -220,11 +220,11 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
         li->error = YAZ_PQF_ERROR_BAD_INTEGER;
         return 0;
     }
-    attr_list[2*num_attr] = atoi(li->lex_buf);
+    attr_list[2*num_attr] = odr_atoi(li->lex_buf);
     cp++;
     if (*cp >= '0' && *cp <= '9')
     {
-        attr_list[2*num_attr+1] = atoi (cp);
+        attr_list[2*num_attr+1] = odr_atoi(cp);
         attr_clist[num_attr] = 0;
     }
     else
@@ -329,7 +329,7 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
         break;
     case Z_Term_numeric:
         term->which = Z_Term_numeric;
-        term->u.numeric = odr_intdup (o, atoi((char*) (term_octet->buf)));
+        term->u.numeric = odr_intdup(o, odr_atoi((const char*) term_octet->buf));
         break;
     case Z_Term_null:
         term->which = Z_Term_null;
@@ -413,7 +413,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
-        p->distance = odr_intdup (o, atoi (li->lex_buf));
+        p->distance = odr_intdup(o, odr_atoi(li->lex_buf));
     else
     {
         li->error = YAZ_PQF_ERROR_BAD_INTEGER;
@@ -441,7 +441,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
-        p->relationType = odr_intdup (o, atoi (li->lex_buf));
+        p->relationType = odr_intdup(o, odr_atoi(li->lex_buf));
     else
     {
         li->error = YAZ_PQF_ERROR_BAD_INTEGER;
@@ -473,7 +473,7 @@ static Z_ProximityOperator *rpn_proximity (struct yaz_pqf_parser *li, ODR o)
         return NULL;
     }
     if (*li->lex_buf >= '0' && *li->lex_buf <= '9')
-        p->u.known = odr_intdup (o, atoi(li->lex_buf));
+        p->u.known = odr_intdup(o, odr_atoi(li->lex_buf));
     else
     {
         li->error = YAZ_PQF_ERROR_BAD_INTEGER;
