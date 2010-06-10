@@ -2158,7 +2158,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             yaz_log(log_requestdetail, "Config:    %s",
                     cb->configname);
     
-        iochan_settimeout(assoc->client_chan, cb->idle_timeout * 60);
+        iochan_settimeout(assoc->client_chan, cb->idle_timeout);
         
         /* we have a backend control block, so call that init function */
         if (!(binitres = (*cb->bend_init)(assoc->init)))

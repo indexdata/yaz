@@ -1443,7 +1443,7 @@ int check_options(int argc, char **argv)
                 fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
                 return(1);
             }
-            control_block.idle_timeout = r;
+            control_block.idle_timeout = strchr(arg, 's') ? r : 60 * r;
             break;
         case  'k':
             if (!arg || !(r = atoi(arg)))
