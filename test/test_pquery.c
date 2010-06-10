@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <yaz/log.h>
 #include <yaz/wrbuf.h>
 #include <yaz/querytowrbuf.h>
 #include <yaz/pquery.h>
@@ -44,7 +45,9 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
             yaz_rpnquery_to_wrbuf(wrbuf, rpn);
             
             if (!strcmp(wrbuf_cstr(wrbuf), expect_pqf))
+            {
                 res = 1;
+            }
             wrbuf_destroy(wrbuf);
         }
     }
@@ -57,6 +60,7 @@ static void tst(void)
 {
     YAZ_CHECK(expect_pqf("a", "@attrset Bib-1 a", YAZ_PQF_ERROR_NONE));
     YAZ_CHECK(expect_pqf("@attr 1=4 a", "@attrset Bib-1 @attr 1=4 a", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("@attr 1=title a", "@attrset Bib-1 @attr 1=title a", YAZ_PQF_ERROR_NONE));
     YAZ_CHECK(expect_pqf("a b", "", YAZ_PQF_ERROR_EXTRA));
     YAZ_CHECK(expect_pqf("@and a", "", YAZ_PQF_ERROR_MISSING));
     YAZ_CHECK(expect_pqf("@attr p=q a", "", YAZ_PQF_ERROR_BAD_INTEGER));
@@ -65,6 +69,8 @@ static void tst(void)
                          YAZ_PQF_ERROR_NONE));
     YAZ_CHECK(expect_pqf("@prox 0 0 0 0 3 0 a b", "",
                          YAZ_PQF_ERROR_PROXIMITY));
+    YAZ_CHECK(expect_pqf("@attr 1=12345678901 x", "@attrset Bib-1 @attr 1=12345678901 x", YAZ_PQF_ERROR_NONE));
+    YAZ_CHECK(expect_pqf("@attr 1=1234567890.1 x", "@attrset Bib-1 @attr 1=1234567890.1 x", YAZ_PQF_ERROR_NONE));
 }
 
 int main (int argc, char **argv)

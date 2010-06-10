@@ -52,7 +52,8 @@ static int my_fetch(void *handle, bend_fetch_rr *r)
     {
         char buf[40];
         yaz_snprintf(buf, sizeof(buf), "<record>%d</record>\n", r->number);
-        
+
+        r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_xml);
         r->record = odr_strdup(r->stream, buf);
         r->len = strlen(r->record);
     }

@@ -39,47 +39,44 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
                                            const Z_AttributeElement *element)
 {
     int i;
-    char oid_name_str[OID_STR_MAX];
-    const char *setname = 0;
-    char *sep = " "; /* optional space after attrset name */
+
+    wrbuf_puts(b, "@attr ");
     if (element->attributeSet)
     {
-        setname = yaz_oid_to_string_buf(element->attributeSet, 
-                                        0, oid_name_str);
+        char oid_name_str[OID_STR_MAX];
+        const char *setname = yaz_oid_to_string_buf(element->attributeSet, 
+                                                    0, oid_name_str);
+        if (setname)
+        {
+            wrbuf_puts(b, setname);
+            wrbuf_puts(b, " ");
+        }
     }
-    if (!setname)
-    {
-        setname = "";
-        sep = "";
-    }
+    wrbuf_printf(b, ODR_INT_PRINTF "=", *element->attributeType);
     switch (element->which) 
     {
     case Z_AttributeValue_numeric:
-        wrbuf_printf(b,"@attr %s%s" ODR_INT_PRINTF "=" ODR_INT_PRINTF " ",
-                     setname, sep,
-                     *element->attributeType, *element->value.numeric);
+        wrbuf_printf(b, ODR_INT_PRINTF, *element->value.numeric);
         break;
     case Z_AttributeValue_complex:
-        wrbuf_printf(b,"@attr %s%s\""ODR_INT_PRINTF "=", setname, sep,
-                     *element->attributeType);
         for (i = 0; i<element->value.complex->num_list; i++)
         {
             if (i)
-                wrbuf_printf(b,",");
+                wrbuf_printf(b, ",");
             if (element->value.complex->list[i]->which ==
                 Z_StringOrNumeric_string)
-                wrbuf_printf (b, "%s",
-                              element->value.complex->list[i]->u.string);
+                wrbuf_printf(b, "%s",
+                             element->value.complex->list[i]->u.string);
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
-                wrbuf_printf (b, ODR_INT_PRINTF, 
-                              *element->value.complex->list[i]->u.numeric);
+                wrbuf_printf(b, ODR_INT_PRINTF, 
+                             *element->value.complex->list[i]->u.numeric);
         }
-        wrbuf_printf(b, "\" ");
         break;
     default:
-        wrbuf_printf (b, "@attr 1=unknown ");
+        wrbuf_printf (b, "@attr 1=unknown");
     }
+    wrbuf_puts(b, " ");
 }
 
 static const char *complex_op_name(const Z_Operator *op)

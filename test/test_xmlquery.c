@@ -125,7 +125,7 @@ static void tst(void)
                      "<attr type=\"2\" value=\"1\"/>"
                      "<term type=\"general\">computer</term></apt>"
                      "</rpn></query>\n",
-                     "RPN @attrset Bib-1 @attr \"1=title\" @attr 2=1 computer"
+                     "RPN @attrset Bib-1 @attr 1=title @attr 2=1 computer"
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
