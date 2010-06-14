@@ -1,10 +1,9 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2008 Index Data
+ * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
 /*
-  YACC CQL grammar taken verbatim from the official spec. We don't
-  use that in YAZ but I don't know of a better place to put it.
+  YACC CQL grammar taken verbatim from the official 1.2 spec
  */
 %term GE LE NE AND OR NOT PROX CHARSTRING1 CHARSTRING2 SORTBY
 
@@ -27,7 +26,7 @@ booleanGroup: boolean | boolean modifierList;
 boolean : AND | OR | NOT | PROX ;
 
 searchClause : '(' cqlQuery ')'
-             | index relation searchClause
+             | index relation searchTerm
 	     | searchTerm
 	     ;
 
