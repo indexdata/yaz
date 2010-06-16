@@ -1280,6 +1280,8 @@ static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
     const char *username = 0;
     const char *password = 0;
     struct Z_HTTP_Header *h;
+    char *combined_cookies;
+    int combined_cookies_len = 0;
     Z_GDU *gdu = get_HTTP_Request_url(out, uri);
 
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
@@ -1288,9 +1290,24 @@ static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
     
     for (h = cookie_hres->headers; h; h = h->next)
     {
-        if (!strcmp(h->name, "Set-Cookie"))
-            z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers,
-                              "Cookie", h->value);
+        if (!strcmp(h->name, "Set-Cookie")) {
+            char *cp;
+
+            if (!(cp = strchr(h->value, ';')))
+                cp = h->value + strlen(h->value);
+            if (cp - h->value >= 1) {
+                combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
+                memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
+                combined_cookies[combined_cookies_len + cp - h->value] = '\0';
+                strcat(combined_cookies,"; ");
+                combined_cookies_len = strlen(combined_cookies);
+            }
+        }
+    }
+    if (combined_cookies_len)
+    {
+        z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Cookie", combined_cookies);
+        xfree(combined_cookies);
     }
 
     if (auth)

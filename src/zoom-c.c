@@ -4241,17 +4241,38 @@ static zoom_ret send_SRW_redirect(ZOOM_connection c, const char *uri,
 {
     struct Z_HTTP_Header *h;
     Z_GDU *gdu = get_HTTP_Request_url(c->odr_out, uri);
+    char *combined_cookies;
+    int combined_cookies_len = 0;
 
     gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers, "Accept",
                       "text/xml");
-    
+
     for (h = cookie_hres->headers; h; h = h->next)
     {
         if (!strcmp(h->name, "Set-Cookie"))
-            z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                              "Cookie", h->value);
+        {
+            char *cp;
+
+            if (!(cp = strchr(h->value, ';')))
+                cp = h->value + strlen(h->value);
+            if (cp - h->value >= 1) {
+                combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
+                memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
+                combined_cookies[combined_cookies_len + cp - h->value] = '\0';
+                strcat(combined_cookies,"; ");
+                combined_cookies_len = strlen(combined_cookies);
+            }
+        }
     }
+
+    if (combined_cookies_len)
+    {
+        z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
+                          "Cookie", combined_cookies);
+        xfree(combined_cookies);
+    }
+
     if (c->user && c->password)
     {
         z_HTTP_header_add_basic_auth(c->odr_out, &gdu->u.HTTP_Request->headers,
