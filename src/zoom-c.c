@@ -4350,18 +4350,34 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         do_close(c);
     }
     if (cret == zoom_complete)
+    {
+        yaz_log(YLOG_LOG, "removing tasks in handle_http");
         ZOOM_connection_remove_task(c);
-    if (!strcmp(hres->version, "1.0"))
-    {
-        /* HTTP 1.0: only if Keep-Alive we stay alive.. */
-        if (!connection_head || strcmp(connection_head, "Keep-Alive"))
-            do_close(c);
     }
-    else 
     {
-        /* HTTP 1.1: only if no close we stay alive .. */
-        if (connection_head && !strcmp(connection_head, "close"))
+        int must_close = 0;
+        if (!strcmp(hres->version, "1.0"))
+        {
+            /* HTTP 1.0: only if Keep-Alive we stay alive.. */
+            if (!connection_head || strcmp(connection_head, "Keep-Alive"))
+                must_close = 1;
+        }
+        else
+        {
+            /* HTTP 1.1: only if no close we stay alive.. */
+            if (connection_head && !strcmp(connection_head, "close"))
+                must_close = 1;
+        }
+        if (must_close)
+        {
             do_close(c);
+            if (c->tasks)
+            {
+                c->tasks->running = 0;
+                ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
+                c->reconnect_ok = 0;
+            }
+        }
     }
 }
 #endif
