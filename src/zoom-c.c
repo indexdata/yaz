@@ -1063,10 +1063,6 @@ static void ZOOM_record_release(ZOOM_record rec)
         wrbuf_destroy(rec->wrbuf);
 #endif
 
-#if YAZ_HAVE_XML2
-    if (rec->xml_mem)
-        xmlFree(rec->xml_mem);
-#endif
     if (rec->odr)
         odr_destroy(rec->odr);
 }
@@ -1880,10 +1876,6 @@ ZOOM_API(ZOOM_record)
 #else
     nrec->wrbuf = 0;
 #endif
-#if YAZ_HAVE_XML2
-    nrec->xml_mem = 0;
-    nrec->xml_size = 0;
-#endif
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
     
@@ -1968,7 +1960,7 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset)
     return cd;
 }
 
-static const char *return_marc_record(ZOOM_record rec, WRBUF wrbuf,
+static const char *return_marc_record(WRBUF wrbuf,
                                       int marc_type,
                                       int *len,
                                       const char *buf, int sz,
@@ -1993,7 +1985,7 @@ static const char *return_marc_record(ZOOM_record rec, WRBUF wrbuf,
     return ret_string;
 }
 
-static const char *return_opac_record(ZOOM_record rec, WRBUF wrbuf,
+static const char *return_opac_record(WRBUF wrbuf,
                                       int marc_type,
                                       int *len,
                                       Z_OPACRecord *opac_rec,
@@ -2016,7 +2008,7 @@ static const char *return_opac_record(ZOOM_record rec, WRBUF wrbuf,
     return wrbuf_cstr(wrbuf);
 }
 
-static const char *return_string_record(ZOOM_record rec, WRBUF wrbuf,
+static const char *return_string_record(WRBUF wrbuf,
                                         int *len,
                                         const char *buf, int sz,
                                         const char *record_charset)
@@ -2037,35 +2029,22 @@ static const char *return_string_record(ZOOM_record rec, WRBUF wrbuf,
     return buf;
 }
 
-static const char *return_record(ZOOM_record rec, int *len,
-                                 Z_NamePlusRecord *npr,
-                                 int marctype, const char *charset)
+static const char *return_record_wrbuf(WRBUF wrbuf, int *len,
+                                       Z_NamePlusRecord *npr,
+                                       int marctype, const char *charset)
 {
     Z_External *r = (Z_External *) npr->u.databaseRecord;
     const Odr_oid *oid = r->direct_reference;
-    WRBUF wrbuf;
 
-#if SHPTR
-    if (!rec->record_wrbuf)
-    {
-        WRBUF w = wrbuf_alloc();
-        YAZ_SHPTR_INIT(rec->record_wrbuf, w);
-    }
-    wrbuf = rec->record_wrbuf->ptr;
-#else
-    if (!rec->wrbuf)
-        rec->wrbuf = wrbuf_alloc();
-    wrbuf = rec->wrbuf;
-#endif
     wrbuf_rewind(wrbuf);
     /* render bibliographic record .. */
     if (r->which == Z_External_OPAC)
     {
-        return return_opac_record(rec, wrbuf, marctype, len,
+        return return_opac_record(wrbuf, marctype, len,
                                   r->u.opac, charset);
     }
     if (r->which == Z_External_sutrs)
-        return return_string_record(rec, wrbuf, len,
+        return return_string_record(wrbuf, len,
                                     (char*) r->u.sutrs->buf,
                                     r->u.sutrs->len,
                                     charset);
@@ -2074,7 +2053,7 @@ static const char *return_record(ZOOM_record rec, int *len,
         if (yaz_oid_is_iso2709(oid))
         {
             const char *ret_buf = return_marc_record(
-                rec, wrbuf, marctype, len,
+                wrbuf, marctype, len,
                 (const char *) r->u.octet_aligned->buf,
                 r->u.octet_aligned->len,
                 charset);
@@ -2084,7 +2063,7 @@ static const char *return_record(ZOOM_record rec, int *len,
             if (marctype != YAZ_MARC_ISO2709)
                 return 0;
         }
-        return return_string_record(rec, wrbuf, len,
+        return return_string_record(wrbuf, len,
                                     (const char *) r->u.octet_aligned->buf,
                                     r->u.octet_aligned->len,
                                     charset);
@@ -2092,7 +2071,7 @@ static const char *return_record(ZOOM_record rec, int *len,
     else if (r->which == Z_External_grs1)
     {
         yaz_display_grs1(wrbuf, r->u.grs1, 0);
-        return return_string_record(rec, wrbuf, len,
+        return return_string_record(wrbuf, len,
                                     wrbuf_buf(wrbuf),
                                     wrbuf_len(wrbuf),
                                     charset);
@@ -2100,7 +2079,6 @@ static const char *return_record(ZOOM_record rec, int *len,
     return 0;
 }
     
-
 ZOOM_API(int)
     ZOOM_record_error(ZOOM_record rec, const char **cp,
                       const char **addinfo, const char **diagset)
@@ -2161,27 +2139,31 @@ ZOOM_API(int)
     return 0;
 }
 
-static const char *get_record_format(ZOOM_record rec, int *len,
+static const char *get_record_format(WRBUF wrbuf, int *len,
                                      Z_NamePlusRecord *npr,
                                      int marctype, const char *charset,
                                      const char *format)
 {
-    const char *res = return_record(rec, len, npr, marctype, charset);
+    const char *res = return_record_wrbuf(wrbuf, len, npr, marctype, charset);
 #if YAZ_HAVE_XML2
     if (*format == '1' && len)
     {
+        yaz_log(YLOG_LOG, "format=1");
         /* try to XML format res */
         xmlDocPtr doc;
         xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
         doc = xmlParseMemory(res, *len);
         if (doc)
         {
-            if (rec->xml_mem)
-                xmlFree(rec->xml_mem);
-            xmlDocDumpFormatMemory(doc, &rec->xml_mem, &rec->xml_size, 1);
+            xmlChar *xml_mem;
+            int xml_size;
+            xmlDocDumpFormatMemory(doc, &xml_mem, &xml_size, 1);
+            wrbuf_rewind(wrbuf);
+            wrbuf_write(wrbuf, (const char *) xml_mem, xml_size);
+            xmlFree(xml_mem);
             xmlFreeDoc(doc);
-            res = (char *) rec->xml_mem;
-            *len = rec->xml_size;
+            res = wrbuf_cstr(wrbuf);
+            *len = wrbuf_len(wrbuf);
         } 
     }
 #endif
@@ -2189,26 +2171,16 @@ static const char *get_record_format(ZOOM_record rec, int *len,
 }
 
 
-ZOOM_API(const char *)
-    ZOOM_record_get(ZOOM_record rec, const char *type_spec, int *len)
+static const char *npr_format(Z_NamePlusRecord *npr, const char *schema,
+                              WRBUF wrbuf,
+                              const char *type_spec, int *len)
 {
+    size_t i;
     char type[40];
     char charset[40];
     char format[3];
-    const char *cp;
-    size_t i;
-    Z_NamePlusRecord *npr;
-    
-    if (len)
-        *len = 0; /* default return */
-        
-    if (!rec)
-        return 0;
-    npr = rec->npr;
-    if (!npr)
-        return 0;
+    const char *cp = type_spec;
 
-    cp = type_spec;
     for (i = 0; cp[i] && cp[i] != ';' && cp[i] != ' ' && i < sizeof(type)-1;
          i++)
         type[i] = cp[i];
@@ -2256,8 +2228,8 @@ ZOOM_API(const char *)
     else if (!strcmp(type, "schema"))
     {
         if (len)
-            *len = rec->schema ? strlen(rec->schema) : 0;
-        return rec->schema;
+            *len = schema ? strlen(schema) : 0;
+        return schema;
     }
     else if (!strcmp(type, "syntax"))
     {
@@ -2279,21 +2251,21 @@ ZOOM_API(const char *)
     /* from now on - we have a database record .. */
     if (!strcmp(type, "render"))
     {
-        return get_record_format(rec, len, npr, YAZ_MARC_LINE, charset, format);
+        return get_record_format(wrbuf, len, npr, YAZ_MARC_LINE, charset, format);
     }
     else if (!strcmp(type, "xml"))
     {
-        return get_record_format(rec, len, npr, YAZ_MARC_MARCXML, charset,
+        return get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
                                  format);
     }
     else if (!strcmp(type, "txml"))
     {
-        return get_record_format(rec, len, npr, YAZ_MARC_TURBOMARC, charset,
+        return get_record_format(wrbuf, len, npr, YAZ_MARC_TURBOMARC, charset,
                                  format);
     }
     else if (!strcmp(type, "raw"))
     {
-        return get_record_format(rec, len, npr, YAZ_MARC_ISO2709, charset,
+        return get_record_format(wrbuf, len, npr, YAZ_MARC_ISO2709, charset,
             format);
     }
     else if (!strcmp(type, "ext"))
@@ -2304,10 +2276,36 @@ ZOOM_API(const char *)
     else if (!strcmp(type, "opac"))
     {
         if (npr->u.databaseRecord->which == Z_External_OPAC)
-            return get_record_format(rec, len, npr, YAZ_MARC_MARCXML, charset,
-                format);
+            return get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
+                                     format);
     }
     return 0;
+}
+
+ZOOM_API(const char *)
+    ZOOM_record_get(ZOOM_record rec, const char *type_spec, int *len)
+{
+    WRBUF wrbuf;
+    
+    if (len)
+        *len = 0; /* default return */
+        
+    if (!rec || !rec->npr)
+        return 0;
+
+#if SHPTR
+    if (!rec->record_wrbuf)
+    {
+        WRBUF w = wrbuf_alloc();
+        YAZ_SHPTR_INIT(rec->record_wrbuf, w);
+    }
+    wrbuf = rec->record_wrbuf->ptr;
+#else
+    if (!rec->wrbuf)
+        rec->wrbuf = wrbuf_alloc();
+    wrbuf = rec->wrbuf;
+#endif
+    return npr_format(rec->npr, rec->schema, wrbuf, type_spec, len);
 }
 
 static int strcmp_null(const char *v1, const char *v2)
@@ -2354,9 +2352,6 @@ static void record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->rec.record_wrbuf = r->record_wrbuf;
 #else
         rc->rec.wrbuf = 0;
-#endif
-#if YAZ_HAVE_XML2
-        rc->rec.xml_mem = 0;
 #endif
         rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
         

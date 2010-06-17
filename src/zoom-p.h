@@ -182,11 +182,6 @@ struct ZOOM_record_p {
     Z_NamePlusRecord *npr;
     const char *schema;
 
-#if YAZ_HAVE_XML2
-    xmlChar *xml_mem;
-    int xml_size;
-#endif
-
     const char *diag_uri;
     const char *diag_message;
     const char *diag_details;
