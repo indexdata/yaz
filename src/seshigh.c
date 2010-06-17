@@ -1139,7 +1139,7 @@ static void srw_bend_search(association *assoc,
                          (srw_res->numberOfRecords ?
                           *srw_res->numberOfRecords : 0));
         }
-        wrbuf_printf(wr, " %s " ODR_INT_PRINTF " +%d", 
+        wrbuf_printf(wr, " %s " ODR_INT_PRINTF "+%d", 
                      (srw_res->resultSetId ?
                       srw_res->resultSetId : "-"),
                      (srw_req->startRecord ? *srw_req->startRecord : 1), 
