@@ -2148,7 +2148,6 @@ static const char *get_record_format(WRBUF wrbuf, int *len,
 #if YAZ_HAVE_XML2
     if (*format == '1' && len)
     {
-        yaz_log(YLOG_LOG, "format=1");
         /* try to XML format res */
         xmlDocPtr doc;
         xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
