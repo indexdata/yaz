@@ -170,6 +170,14 @@ ZOOM_connection_search_pqf(ZOOM_connection c, const char *q);
 ZOOM_API(void)
 ZOOM_resultset_destroy(ZOOM_resultset r);
 
+/** release result set from connection.
+
+    The result will will no longer be able to perform retrievals
+    from the connection from which it was created.
+*/
+ZOOM_API(void)
+ZOOM_resultset_release(ZOOM_resultset r);
+
 /* result set option */
 ZOOM_API(const char *)
 ZOOM_resultset_option_get(ZOOM_resultset r, const char *key);

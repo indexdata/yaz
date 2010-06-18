@@ -793,6 +793,29 @@ ZOOM_API(int)
 
 static zoom_ret do_write(ZOOM_connection c);
 
+ZOOM_API(void) ZOOM_resultset_release(ZOOM_resultset r)
+{
+#if ZOOM_RESULT_LISTS
+#else
+    if (r->connection)
+    {
+        /* remove ourselves from the resultsets in connection */
+        ZOOM_resultset *rp = &r->connection->resultsets;
+        while (1)
+        {
+            assert(*rp);   /* we must be in this list!! */
+            if (*rp == r)
+            {   /* OK, we're here - take us out of it */
+                *rp = (*rp)->next;
+                break;
+            }
+            rp = &(*rp)->next;
+        }
+        r->connection = 0;
+    }
+#endif
+}
+
 ZOOM_API(void)
     ZOOM_connection_destroy(ZOOM_connection c)
 {
@@ -1102,24 +1125,7 @@ static void resultset_destroy(ZOOM_resultset r)
 
         yaz_log(log_details, "%p ZOOM_connection resultset_destroy: Deleting resultset (%p) ", r->connection, r);
         ZOOM_resultset_cache_reset(r);
-#if ZOOM_RESULT_LISTS
-#else
-        if (r->connection)
-        {
-            /* remove ourselves from the resultsets in connection */
-            ZOOM_resultset *rp = &r->connection->resultsets;
-            while (1)
-            {
-                assert(*rp);   /* we must be in this list!! */
-                if (*rp == r)
-                {   /* OK, we're here - take us out of it */
-                    *rp = (*rp)->next;
-                    break;
-                }
-                rp = &(*rp)->next;
-            }
-        }
-#endif
+        ZOOM_resultset_release(r);
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
