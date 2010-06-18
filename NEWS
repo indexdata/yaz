@@ -1,3 +1,21 @@
+--- 4.0.10 2010/06/18
+
+ZOOM C: Add ZOOM_resultset_release. ZOOM_resultset_release releases a
+result set from a connection. The result set will be on its own
+thereafter; no operations on it will perform retrievals from a target.
+Only cached copies are returned.
+
+ZOOM C:fix case for HTTP servers responding with Connection:close.
+Ensure that if there is a current task it is resumed (like fetching
+more records in a result set) . Bug #3484.
+
+PQF parser: use odr_atoi for Odr_int (not atoi)
+
+Minor PQF encoding and decoding changes; reformat. PQF decoding: attribute
+values that contain any non-digits are treated as string attributes
+(previously decoding only checked for leading character ([0-9]). PQF
+encoding: attribute string values are not surrounded by double-quotes.
+
 --- 4.0.9 2010/05/21
 
 New utility for managing threads - thread_create.h.
