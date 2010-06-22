@@ -17,14 +17,21 @@
 #include <yaz/matchstr.h>
 #include <yaz/snprintf.h>
 
+/* session handle . Put anything you like in here! */
+struct my_handle {
+    int counter;
+};
+
 static int my_search(void *handle, bend_search_rr *rr)
 {
+    struct my_handle *my_p = (struct my_handle *) handle;
+
     if (rr->num_bases != 1)
     {
         rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
         return 0;
     }
-    /* Throw Database unavailable if other than Default or Slow */
+    /* Throw Database unavailable if other than Default */
     if (!yaz_matchstr (rr->basenames[0], "Default"))
         ;  /* Default is OK in our test */
     else
@@ -35,6 +42,7 @@ static int my_search(void *handle, bend_search_rr *rr)
     }
 
     rr->hits = 123; /* dummy hit count */
+    my_p->counter++;
     return 0;
 }
 
@@ -70,14 +78,14 @@ static bend_initresult *my_init(bend_initrequest *q)
 {
     bend_initresult *r = (bend_initresult *)
         odr_malloc (q->stream, sizeof(*r));
-    int *counter = (int *) xmalloc (sizeof(int));
+    struct my_handle *my_p = (struct my_handle *) xmalloc (sizeof(*my_p));
 
-    *counter = 0;
+    my_p->counter = 0;
     r->errcode = 0;
     r->errstring = 0;
-    r->handle = counter;         /* user handle, in this case a simple int */
+    r->handle = my_p;            /* user handle */
     q->bend_search = my_search;  /* register search handler */
-    q->bend_fetch = my_fetch;     /* register fetch handle */
+    q->bend_fetch = my_fetch;    /* register fetch handle */
     q->query_charset = "UTF-8";
     q->records_in_same_charset = 1;
 
