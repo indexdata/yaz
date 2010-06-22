@@ -133,12 +133,16 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
 */
 static Odr_int get_hit_count(Z_Query *q)
 {
-    Odr_int h = -1;
     if (q->which == Z_Query_type_1 || q->which == Z_Query_type_101)
+    {
+        Odr_int h = -1;
         h = get_term_hit(q->u.type_1->RPNStructure);
-    if (h == -1)
-        h = rand() % 24;
-    return h;
+        if (h == -1)
+            h = rand() % 24;
+        return h;
+    }
+    else
+        return 24;
 }
 
 /** \brief checks if it's a dummy Slow database
