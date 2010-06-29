@@ -49,7 +49,7 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         t = r->elements[i];
         wrbuf_printf(w, "(");
         if (t->tagType)
-            wrbuf_printf(w, ODR_INT_PRINTF, *t->tagType);
+            wrbuf_printf(w, ODR_INT_PRINTF ",", *t->tagType);
         else
             wrbuf_printf(w, "?,");
         if (t->tagValue->which == Z_StringOrNumeric_numeric)
