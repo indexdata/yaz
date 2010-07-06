@@ -342,6 +342,9 @@ set m NegotiationRecordDefinition-charSetandLanguageNegotiation-3
 set filename($m) z-charneg
 set membermap($m,OriginProposal_0,private) {OriginProposal_0_private zprivate}
 set membermap($m,TargetResponse,private) {TargetResponse_private zprivate}
+# ----
+set m UserInfoFormat-facet-1
+set filename($m) z-facet-1
 # ----------------------------------------------------------
 # "Constructed" types defined by means of C-types are declared here.
 # Each function returns the C-handler and the C-type.

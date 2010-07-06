@@ -1,0 +1,21 @@
+UserInfoFormat-facet-1
+{Z39-50-userInfoFormat facet-1 (1)} DEFINITIONS ::=
+BEGIN
+IMPORTS AttributeList, Term FROM Z39-50-APDU-1995;
+FacetList ::= SEQUENCE OF FacetField;
+
+FacetField ::= SEQUENCE {
+  -- attributes will specify:
+  --   1=use (field name)
+  --   3=sortorder 0=most frequent, 1=least frequent, ..
+  --   3=limit (integer)
+  attributes [1] IMPLICIT AttributeList,
+  terms [2] IMPLICIT SEQUENCE OF FacetTerm OPTIONAL
+}
+
+FacetTerm ::= SEQUENCE {
+  term [1] IMPLICIT Term,
+  count [2] IMPLICIT INTEGER
+}
+
+END

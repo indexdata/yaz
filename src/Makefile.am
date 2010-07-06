@@ -185,6 +185,12 @@ $(top_srcdir)/include/yaz/z-oclcui.h: \
 $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/oclcui.asn
 
+# UserInfoFormat-facet-1
+z-facet-1.c \
+$(top_srcdir)/include/yaz/z-facet-1.h: $(srcdir)/facet.asn $(YAZCOMP)
+	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/facet.asn
+
+
 # ILL protocol
 ill-core.c \
 $(top_srcdir)/include/yaz/ill-core.h: \
@@ -202,4 +208,5 @@ item-req.c \
 $(top_srcdir)/include/yaz/item-req.h: \
 $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/item-req.asn
+
 
