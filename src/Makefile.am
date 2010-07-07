@@ -10,7 +10,7 @@ dist-hook:
 
 tabdatadir = $(pkgdatadir)/z39.50
 tabdata_DATA=datetime.asn esupdate.asn univres.asn z3950v3.asn z.tcl \
- esadmin.asn charneg-3.asn mterm2.asn oclcui.asn
+ esadmin.asn charneg-3.asn mterm2.asn oclcui.asn facet.asn
 
 illdatadir=$(pkgdatadir)/ill
 illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
