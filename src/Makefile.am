@@ -63,7 +63,7 @@ diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl
 GEN_FILES = oid_std.c \
   marc8.c marc8r.c iso5426.c \
   diagbib1.c diagsrw.c diagsru_update.c \
-  z-accdes1.c z-accform1.c z-acckrb1.c z-core.c \
+  z-accdes1.c z-accform1.c z-acckrb1.c z-core.c z-facet-1.c \
   z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
   z-uifr1.c z-rrf1.c z-rrf2.c z-sum.c z-sutrs.c z-oclcui.c\
   zes-expi.c zes-exps.c zes-order.c zes-pquery.c zes-psched.c \
