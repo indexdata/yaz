@@ -1,3 +1,14 @@
+--- 4.0.11 2010/07/09
+
+CCL fixes: bug 2895 and bug 3539.
+
+GR1-display: add comma in display - was removed by mistake in
+version 4.0.0.
+
+Windows installer: bundle MSVCP90.dll - used by icuuc42.dll.
+
+SRU: Merge cookies on HTTP redirects (Giannis Kosmas <kosmas@lib.uoc.gr>).
+
 --- 4.0.10 2010/06/18
 
 ZOOM C: Add ZOOM_resultset_release. ZOOM_resultset_release releases a
