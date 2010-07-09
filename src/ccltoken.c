@@ -198,6 +198,7 @@ struct ccl_token *ccl_token_add(struct ccl_token *at)
         n->next->prev = n;
 
     n->kind = CCL_TOK_TERM;
+    n->left_trunc = n->right_trunc = 0;
     n->name = 0;
     n->len = 0;
     n->ws_prefix_buf = 0;
