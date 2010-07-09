@@ -1,0 +1,7 @@
+ti       u=4    s=pw t=l,r
+term     1=1016 s=al,pw t=r
+dc.title 1=/my/title
+date     r=r
+x        r=o
+title    dc.title
+comb     term dc.title
