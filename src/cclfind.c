@@ -247,15 +247,14 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         struct ccl_rpn_node *p;
         size_t no, i;
         int no_spaces = 0;
-        int left_trunc = 0;
-        int right_trunc = 0;
-        int mid_trunc = 0;
         int relation_value = -1;
         int position_value = -1;
         int structure_value = -1;
         int truncation_value = -1;
         int completeness_value = -1;
         int len = 0;
+        int left_trunc = 0;
+        int right_trunc = 0;
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
@@ -275,17 +274,9 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             for (i = 0; i<lookahead->len; i++)
                 if (lookahead->name[i] == ' ')
                     no_spaces++;
-                else if (strchr(truncation_aliases[0], lookahead->name[i]))
-                {
-                    if (no == 0 && i == 0 && lookahead->len >= 1)
-                        left_trunc = 1;
-                    else if (!is_term_ok(lookahead->next->kind, term_list) &&
-                             i == lookahead->len-1 && i >= 1)
-                        right_trunc = 1;
-                    else
-                        mid_trunc = 1;
-                }
             len += 1+lookahead->len+lookahead->ws_prefix_len;
+            left_trunc = lookahead->left_trunc;
+            right_trunc = lookahead->right_trunc;
             lookahead = lookahead->next;
         }
 
@@ -339,7 +330,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                             if (truncation_value != -1)
                                 continue;
                             truncation_value = attr->value.numeric;
-                            left_trunc = right_trunc = mid_trunc = 0;
                             break;
                         case CCL_BIB1_COM:
                             if (completeness_value != -1)
@@ -374,13 +364,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             const char *src_str = cclp->look_token->name;
             size_t src_len = cclp->look_token->len;
             
-            if (i == 0 && left_trunc)
-            {
-                src_len--;
-                src_str++;
-            }
-            if (i == no-1 && right_trunc)
-                src_len--;
             if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
                 size_t len = strlen(p->u.t.term);

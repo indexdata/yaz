@@ -79,6 +79,7 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
             last->next->prev = last;
             last = last->next;
         }
+        last->left_trunc = last->right_trunc = 0;
         last->ws_prefix_buf = (const char *) cp0;
         last->ws_prefix_len = cp - cp0;
         last->next = NULL;
@@ -121,53 +122,66 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
             else
                 last->kind = CCL_TOK_REL;
             break;
-        case '\"':
-            last->kind = CCL_TOK_TERM;
-            last->name = (const char *) cp;
-            last->len = 0;
-            while (*cp && *cp != '\"')
-            {
-                cp++;
-                ++ last->len;
-            }
-            if (*cp == '\"')
-                cp++;
-            break;
         default:
-            if (!strchr("(),%!><= \t\n\r", cp[-1]))
+            --cp;
+            --last->len;
+            if (*cp == '?')
             {
-                while (*cp && !strchr("(),%!><= \t\n\r", *cp))
+                last->left_trunc = 1;
+                cp++;
+            }
+            if (*cp == '"')
+            {
+                cp++;
+                last->kind = CCL_TOK_TERM;
+                last->name = (const char *) cp;
+                while (*cp && *cp != '"')
                 {
                     cp++;
                     ++ last->len;
                 }
+                if (*cp)
+                    cp++;
             }
-            last->kind = CCL_TOK_TERM;
-
-            aliases = ccl_qual_search_special(cclp->bibset, "and");
-            if (!aliases)
-                aliases = cclp->ccl_token_and;
-            if (token_cmp(cclp, aliases, last))
-                last->kind = CCL_TOK_AND;
-
-            aliases = ccl_qual_search_special(cclp->bibset, "or");
-            if (!aliases)
-                aliases = cclp->ccl_token_or;
-            if (token_cmp(cclp, aliases, last))
-                last->kind = CCL_TOK_OR;
-
-            aliases = ccl_qual_search_special(cclp->bibset, "not");
-            if (!aliases)
-                aliases = cclp->ccl_token_not;
-            if (token_cmp(cclp, aliases, last))
-                last->kind = CCL_TOK_NOT;
-
-            aliases = ccl_qual_search_special(cclp->bibset, "set");
-            if (!aliases)
-                aliases = cclp->ccl_token_set;
-
-            if (token_cmp(cclp, aliases, last))
-                last->kind = CCL_TOK_SET;
+            else
+            {
+                last->kind = CCL_TOK_TERM;
+                last->name = (const char *) cp;
+                while (*cp && !strchr("(),%!><=? \t\n\r", *cp))
+                {
+                    ++ last->len;
+                    cp++;
+                }
+                aliases = ccl_qual_search_special(cclp->bibset, "and");
+                if (!aliases)
+                    aliases = cclp->ccl_token_and;
+                if (token_cmp(cclp, aliases, last))
+                    last->kind = CCL_TOK_AND;
+                
+                aliases = ccl_qual_search_special(cclp->bibset, "or");
+                if (!aliases)
+                    aliases = cclp->ccl_token_or;
+                if (token_cmp(cclp, aliases, last))
+                    last->kind = CCL_TOK_OR;
+                
+                aliases = ccl_qual_search_special(cclp->bibset, "not");
+                if (!aliases)
+                    aliases = cclp->ccl_token_not;
+                if (token_cmp(cclp, aliases, last))
+                    last->kind = CCL_TOK_NOT;
+                
+                aliases = ccl_qual_search_special(cclp->bibset, "set");
+                if (!aliases)
+                    aliases = cclp->ccl_token_set;
+                
+                if (token_cmp(cclp, aliases, last))
+                    last->kind = CCL_TOK_SET;
+            }
+            if (*cp == '?')
+            {
+                last->right_trunc = 1;
+                cp++;
+            }
         }
     }
     return first;

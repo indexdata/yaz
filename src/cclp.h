@@ -55,6 +55,8 @@ struct ccl_token {
     struct ccl_token *prev;
     const char *ws_prefix_buf;  /* leading white space buf */
     size_t ws_prefix_len;       /* leading white space len */
+    int left_trunc;             /* left truncated */
+    int right_trunc;            /* right truncated */
 };
 
 /** CCL parser structure */
