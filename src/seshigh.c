@@ -950,6 +950,7 @@ static void srw_bend_search(association *assoc,
             rr.errcode = 0;
             rr.errstring = 0;
             rr.search_info = 0;
+            rr.search_input = 0;
             yaz_log_zquery_level(log_requestdetail,rr.query);
             
             (assoc->init->bend_search)(assoc->backend, &rr);
@@ -2617,6 +2618,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
         bsrr->errcode = 0;
         bsrr->errstring = NULL;
         bsrr->search_info = NULL;
+        bsrr->search_input = req->otherInfo;
 
         if (assoc->server && assoc->server->cql_transform 
             && req->query->which == Z_Query_type_104

@@ -74,6 +74,7 @@ typedef struct {
     int partial_resultset;     /**< 1=partial results; 0=full (output)*/
     Z_SRW_extra_arg *extra_args; /**< SRU extra request parameters (input) */
     char *extra_response_data;   /**< SRW extra XML response (output) */
+    Z_OtherInformation *search_input; /**< extra search info request (input) */
 } bend_search_rr;
 
 /** \brief Information for present handler. Does not replace bend_fetch. */
