@@ -44,6 +44,7 @@
 #include <yaz/z-espec1.h>
 #include <yaz/z-estask.h>
 #include <yaz/z-exp.h>
+#include <yaz/z-facet-1.h>
 #include <yaz/z-grs.h>
 #include <yaz/z-opac.h>
 #include <yaz/z-rrf1.h>
