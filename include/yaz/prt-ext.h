@@ -97,6 +97,7 @@ struct Z_External
 #define Z_External_periodicQuerySchedule 31
 #define Z_External_exportSpecification 32
 #define Z_External_exportInvocation 33
+#define Z_External_userFacets 34
     union
     {
         /* Generic types */
@@ -142,6 +143,7 @@ struct Z_External
         Z_PQSPeriodicQuerySchedule *periodicQuerySchedule;
         Z_ESExportSpecification *exportSpecification;
         Z_EIExportInvocation *exportInvocation;
+        Z_FacetList *facetList;
     } u;
 };
 
