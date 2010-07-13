@@ -48,6 +48,12 @@ YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o,
 YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
                                               Odr_oid **attributeSetId,
                                               const char *qbuf);
+
+YAZ_EXPORT Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
+                                              Odr_oid **attributeSetId,
+                                              const char *qbuf);
+
+
 YAZ_EXPORT void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
 YAZ_EXPORT int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
