@@ -92,6 +92,7 @@ Z_OtherInformationUnit *yaz_oi_update (
     {
         if (!oid)
         {
+            /*  DS: Want does this do? Returns the first element without a category */
             if (!otherInformation->list[i]->category)
                 return otherInformation->list[i];
         }
@@ -175,6 +176,25 @@ char *yaz_oi_get_string_oid (
         oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
     return 0;
+}
+
+void yaz_oi_set_facetlist_oid (
+    Z_OtherInformation **otherInformation, ODR odr,
+    const Odr_oid *oid, int categoryValue,
+    Z_FacetList *facet_list)
+{
+    Z_External *z_external = 0;
+    Z_OtherInformationUnit *oi =
+        yaz_oi_update(otherInformation, odr, oid, categoryValue, 0);
+    if (!oi)
+        return;
+    oi->which = Z_OtherInfo_externallyDefinedInfo;
+    z_external = odr_malloc(odr, sizeof(*z_external));
+    z_external->which = Z_External_userFacets;
+    z_external->direct_reference = odr_oiddup(odr, oid);
+    z_external->indirect_reference = 0;
+    z_external->u.facetList = facet_list;
+    oi->information.externallyDefinedInfo = z_external;
 }
 
 /*
