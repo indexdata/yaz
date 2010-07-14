@@ -182,7 +182,7 @@ static int escape_string(char *out_buf, const char *in, int len)
     return out - out_buf;
 }
 
-static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
+int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               int num_attr, Odr_int *attr_list,
                               char **attr_clist, Odr_oid **attr_set)
 {
@@ -240,78 +240,77 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
     return 1;
 }
 
-static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
-                                      int num_attr, Odr_int *attr_list,
-                                      char **attr_clist, Odr_oid **attr_set)
+Z_AttributeList *get_attributeList(ODR o,
+        int num_attr, Odr_int *attr_list,
+        char **attr_clist, Odr_oid **attr_set)
 {
+    int i, k = 0;
+    Odr_int *attr_tmp;
+    Z_AttributeElement **elements;
+    Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
+    attributes->num_attributes = num_attr;
+    if (!num_attr) {
+        attributes->attributes = (Z_AttributeElement**)odr_nullval();
+        return attributes;
+    }
+    elements = (Z_AttributeElement**) odr_malloc (o, num_attr * sizeof(*elements));
+
+    attr_tmp = (Odr_int *)odr_malloc(o, num_attr * 2 * sizeof(*attr_tmp));
+    memcpy(attr_tmp, attr_list, num_attr * 2 * sizeof(*attr_tmp));
+    for (i = num_attr; --i >= 0; )
+    {
+        int j;
+        for (j = i+1; j<num_attr; j++)
+            if (attr_tmp[2*j] == attr_tmp[2*i])
+                break;
+        if (j < num_attr)
+            continue;
+        elements[k] =
+            (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
+        elements[k]->attributeType = &attr_tmp[2*i];
+        elements[k]->attributeSet = attr_set[i];
+
+        if (attr_clist[i])
+        {
+            elements[k]->which = Z_AttributeValue_complex;
+            elements[k]->value.complex = (Z_ComplexAttribute *)
+                odr_malloc(o, sizeof(Z_ComplexAttribute));
+            elements[k]->value.complex->num_list = 1;
+            elements[k]->value.complex->list =
+                (Z_StringOrNumeric **)
+                odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
+            elements[k]->value.complex->list[0] =
+                (Z_StringOrNumeric *)
+                odr_malloc(o, sizeof(Z_StringOrNumeric));
+            elements[k]->value.complex->list[0]->which =
+                Z_StringOrNumeric_string;
+            elements[k]->value.complex->list[0]->u.string =
+                attr_clist[i];
+            elements[k]->value.complex->semanticAction = 0;
+            elements[k]->value.complex->num_semanticAction = 0;
+        }
+        else
+        {
+            elements[k]->which = Z_AttributeValue_numeric;
+            elements[k]->value.numeric = &attr_tmp[2*i+1];
+        }
+        k++;
+    }
+    attributes->num_attributes = k;
+    attributes->attributes = elements;
+    return attributes;
+}
+
+static Z_AttributesPlusTerm *rpn_term_attributes(struct yaz_pqf_parser *li, ODR o, Z_AttributeList *attributes) {
     Z_AttributesPlusTerm *zapt;
     Odr_oct *term_octet;
     Z_Term *term;
-    Z_AttributeElement **elements;
 
     zapt = (Z_AttributesPlusTerm *)odr_malloc(o, sizeof(*zapt));
     term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
     term = (Z_Term *)odr_malloc(o, sizeof(*term));
-
-    if (!num_attr)
-        elements = (Z_AttributeElement**)odr_nullval();
-    else
-    {
-        int i, k = 0;
-        Odr_int *attr_tmp;
-
-        elements = (Z_AttributeElement**)
-            odr_malloc (o, num_attr * sizeof(*elements));
-
-        attr_tmp = (Odr_int *)odr_malloc(o, num_attr * 2 * sizeof(*attr_tmp));
-        memcpy(attr_tmp, attr_list, num_attr * 2 * sizeof(*attr_tmp));
-        for (i = num_attr; --i >= 0; )
-        {
-            int j;
-            for (j = i+1; j<num_attr; j++)
-                if (attr_tmp[2*j] == attr_tmp[2*i])
-                    break;
-            if (j < num_attr)
-                continue;
-            elements[k] =
-                (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
-            elements[k]->attributeType = &attr_tmp[2*i];
-            elements[k]->attributeSet = attr_set[i];
-
-            if (attr_clist[i])
-            {
-                elements[k]->which = Z_AttributeValue_complex;
-                elements[k]->value.complex = (Z_ComplexAttribute *)
-                    odr_malloc(o, sizeof(Z_ComplexAttribute));
-                elements[k]->value.complex->num_list = 1;
-                elements[k]->value.complex->list =
-                    (Z_StringOrNumeric **)
-                    odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
-                elements[k]->value.complex->list[0] =
-                    (Z_StringOrNumeric *)
-                    odr_malloc(o, sizeof(Z_StringOrNumeric));
-                elements[k]->value.complex->list[0]->which =
-                    Z_StringOrNumeric_string;
-                elements[k]->value.complex->list[0]->u.string =
-                    attr_clist[i];
-                elements[k]->value.complex->semanticAction = 0;
-                elements[k]->value.complex->num_semanticAction = 0;
-            }
-            else
-            {
-                elements[k]->which = Z_AttributeValue_numeric;
-                elements[k]->value.numeric = &attr_tmp[2*i+1];
-            }
-            k++;
-        }
-        num_attr = k;
-    }
-    zapt->attributes = (Z_AttributeList *)
-        odr_malloc(o, sizeof(*zapt->attributes));
-    zapt->attributes->num_attributes = num_attr;
-    zapt->attributes->attributes = elements;
-
     zapt->term = term;
+    zapt->attributes = attributes;
 
     term_octet->buf = (unsigned char *)odr_malloc(o, 1 + li->lex_len);
     term_octet->size = term_octet->len =
@@ -347,6 +346,14 @@ static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
         break;
     }
     return zapt;
+
+}
+
+static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
+                                      int num_attr, Odr_int *attr_list,
+                                      char **attr_clist, Odr_oid **attr_set)
+{
+    return rpn_term_attributes(li, o, get_attributeList(o, num_attr, attr_list, attr_clist, attr_set));
 }
 
 static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
@@ -682,7 +689,7 @@ Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf)
 }
 
 
-static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
+static Z_AttributeList *p_query_scan_attributes_mk(struct yaz_pqf_parser *li,
                                              ODR o,
                                              Odr_oid **attributeSetP)
 {
@@ -692,7 +699,6 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
     int num_attr = 0;
     int max_attr = 512;
     Odr_oid *top_set = 0;
-    Z_AttributesPlusTerm *apt;
 
     lex(li);
     if (li->query_look == 'r')
@@ -741,12 +747,22 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
         else
             break;
     }
+    return get_attributeList(o, num_attr, attr_list, attr_clist, attr_set);
+}
+
+static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
+                                                 ODR o,
+                                                 Odr_oid **attributeSetP)
+{
+    Z_AttributeList *attr_list = p_query_scan_attributes_mk(li, o, attributeSetP);
+    Z_AttributesPlusTerm *apt;
+
     if (!li->query_look)
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return 0;
     }
-    apt = rpn_term(li, o, num_attr, attr_list, attr_clist, attr_set);
+    apt = rpn_term_attributes(li, o, attr_list);
 
     lex(li);
 
@@ -795,6 +811,18 @@ Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
     p->lex_buf = 0;
     return p_query_scan_mk(p, o, attributeSetP);
 }
+
+Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
+                                   Odr_oid **attributeSetP,
+                                   const char *qbuf)
+{
+    if (!p)
+        return 0;
+    p->query_buf = p->query_ptr = qbuf;
+    p->lex_buf = 0;
+    return p_query_scan_attributes_mk(p, o, attributeSetP);
+}
+
 
 int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off)
 {
