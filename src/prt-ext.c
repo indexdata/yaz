@@ -44,6 +44,7 @@ static Z_ext_typeent type_table[] =
     {{1, 2, 840, 10003, 7, 1000, 81, 1,-1}, Z_External_universeReport,(Odr_fun)z_UniverseReport},
     {{1, 2, 840, 10003, 9, 1000, 81, 1,-1}, Z_External_ESAdmin, (Odr_fun)z_Admin},
     {{1, 2, 840, 10003, 10, 3,-1}, Z_External_userInfo1, (Odr_fun) z_OtherInformation},
+    {{1, 2, 840, 10003, 10, 1000, 81, 5,-1}, Z_External_userFacets, (Odr_fun) z_FacetList},
     {{1, 2, 840, 10003, 15, 3,-1}, Z_External_charSetandLanguageNegotiation, (Odr_fun)
                   z_CharSetandLanguageNegotiation},
     {{1, 2, 840, 10003, 8, 1,-1}, Z_External_acfPrompt1, (Odr_fun) z_PromptObject1},
@@ -142,6 +143,8 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
          (Odr_fun)z_IU0Update, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userInfo1,
          (Odr_fun)z_OtherInformation, 0},
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userFacets,
+         (Odr_fun)z_FacetList, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_charSetandLanguageNegotiation,
          (Odr_fun)z_CharSetandLanguageNegotiation, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfPrompt1,
