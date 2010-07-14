@@ -104,6 +104,7 @@ static int smallSetUpperBound = 0;
 static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0;
+static Z_FacetList *facet_list = 0;
 static Odr_int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 #define RECORDSYNTAX_MAX 20
@@ -243,10 +244,14 @@ static void do_hex_dump(const char* buf, size_t len)
 void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
-    int i;
+    int i = 0;
 
     yaz_oi_APDU(a, &oi);
-    for(i=0; i<maxOtherInfosSupported; ++i)
+    if (facet_list) {
+        yaz_oi_set_facetlist_oid(oi, out, yaz_oid_userinfo_facet_1, 1, facet_list);
+        i++;
+    }
+    for(; i<maxOtherInfosSupported; ++i)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
@@ -1633,6 +1638,58 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
     }
 }
 
+static void* display_facets(Z_FacetList *fl)
+{
+    int index, attribute_index;
+    printf("UserFacets-1:");
+    for (index = 0; index < fl->num ; index++) {
+        if (index)
+            printf(",");
+        if (!fl->elements[index]->attributes) {
+            Z_AttributeList *al = fl->elements[index]->attributes;
+            for (attribute_index = 0; attribute_index < al->num_attributes; attribute_index++) {
+                switch (al->attributes[attribute_index]->which) {
+                    case Z_AttributeValue_complex:
+                        break;
+                    case Z_AttributeValue_numeric:
+                        break;
+                    default:
+                        break;
+                };
+            }
+        }
+
+    }
+    return 0;
+}
+
+void display_searchResult1(Z_SearchInfoReport *sr)
+{
+    int j;
+    printf("SearchResult-1:");
+    for (j = 0; j < sr->num; j++)
+    {
+        if (j)
+            printf(",");
+        if (!sr->elements[j]->subqueryExpression)
+            printf("%d", j);
+        display_queryExpression("term",
+            sr->elements[j]->subqueryExpression);
+        display_queryExpression("interpretation",
+            sr->elements[j]->subqueryInterpretation);
+        display_queryExpression("recommendation",
+            sr->elements[j]->subqueryRecommendation);
+        if (sr->elements[j]->subqueryCount)
+            printf(" cnt=" ODR_INT_PRINTF,
+                   *sr->elements[j]->subqueryCount);
+        if (sr->elements[j]->subqueryId)
+            printf(" id=%s ", sr->elements[j]->subqueryId);
+    }
+    printf("\n");
+}
+
+
+
 /* see if we can find USR:SearchResult-1 */
 static void display_searchResult(Z_OtherInformation *o)
 {
@@ -1646,30 +1703,9 @@ static void display_searchResult(Z_OtherInformation *o)
             Z_External *ext = o->list[i]->information.externallyDefinedInfo;
 
             if (ext->which == Z_External_searchResult1)
-            {
-                int j;
-                Z_SearchInfoReport *sr = ext->u.searchResult1;
-                printf("SearchResult-1:");
-                for (j = 0; j < sr->num; j++)
-                {
-                    if (j)
-                        printf(",");
-                    if (!sr->elements[j]->subqueryExpression)
-                        printf("%d", j);
-                    display_queryExpression("term",
-                        sr->elements[j]->subqueryExpression);
-                    display_queryExpression("interpretation",
-                        sr->elements[j]->subqueryInterpretation);
-                    display_queryExpression("recommendation",
-                        sr->elements[j]->subqueryRecommendation);
-                    if (sr->elements[j]->subqueryCount)
-                        printf(" cnt=" ODR_INT_PRINTF,
-                               *sr->elements[j]->subqueryCount);
-                    if (sr->elements[j]->subqueryId)
-                        printf(" id=%s ", sr->elements[j]->subqueryId);
-                }
-                printf("\n");
-            }
+                display_searchResult1(ext->u.searchResult1);
+            else if  (ext->which == Z_External_userFacets)
+                display_facets(ext->u.facetList);
         }
     }
 }
@@ -2805,6 +2841,89 @@ static int cmd_find(const char *arg)
     return 2;
 }
 
+static Z_FacetField* parse_facet(ODR odr, char *facet, int length)
+{
+    YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
+    char buffer[length+1];
+    Odr_oid *attributeSetId;
+    Z_FacetField *facet_field;
+    Z_AttributeList *attribute_list;
+    memcpy(buffer, facet, length);
+    buffer[length] = '\0';
+    attribute_list = yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, buffer);
+
+    if (!attribute_list) {
+        printf("Invalid facet definition: %s", facet);
+        return 0;
+    }
+    facet_field = odr_malloc(odr, sizeof(*facet_field));
+    facet_field->attributes = attribute_list;
+    facet_field->num_terms = 0;
+    facet_field->terms = 0;
+    return facet_field;
+}
+
+static int scan_facet_argument(const char *arg) {
+    int index;
+    int length = strlen(arg);
+    int count = 1;
+    for (index = 0; index < length; index++) {
+        if (arg[index] == ',')
+            count++;
+    }
+    return count;
+}
+
+static int cmd_facets(const char *arg)
+{
+    int size = 0;
+    if (!*arg)
+    {
+        printf("Which facets?\n");
+        return 0;
+    }
+    size = strlen(arg);
+    if (only_z3950())
+    {
+        printf("Currently only supported for Z39.50.\n");
+        return 0;
+    }
+    else
+    {
+        int index = 0;
+        Z_FacetField  **elements;
+        int num_elements ;
+        char *facet = arg;
+        // parse facets list
+        ODR odr = odr_createmem(ODR_ENCODE);
+        num_elements = scan_facet_argument(arg);
+        facet_list = odr_malloc(odr, sizeof(*facet_list));
+        elements = odr_malloc(odr, num_elements * sizeof(*elements));
+        for (index = 0; index < num_elements;) {
+            char *pos = strchr(facet, ',');
+            if (pos == 0)
+                pos = facet + strlen(facet);
+            elements[index] = parse_facet(odr, facet, (pos - facet));
+            if (elements[index]) {
+                index++;
+            }
+            else
+                num_elements--;
+            facet = pos + 1;
+        }
+
+        if (!num_elements || !facet_list) {
+            printf("Invalid facet list: %s", arg);
+            return 0;
+        }
+        facet_list->elements = elements;
+        facet_list->num = index;
+        return 1;
+    }
+    return 2;
+}
+
+
 static int cmd_delete(const char *arg)
 {
     if (only_z3950())
@@ -3188,6 +3307,7 @@ int send_scanrequest(const char *set,  const char *query,
     else
     {
         YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
+
 
         if (!(req->termListAndStartPoint =
               yaz_pqf_scan(pqf_parser, out, &req->attributeSet, query)))
@@ -4752,6 +4872,7 @@ static struct {
     {"open", cmd_open, "('tcp'|'ssl')':<host>[':'<port>][/<db>]",NULL,0,NULL},
     {"quit", cmd_quit, "",NULL,0,NULL},
     {"find", cmd_find, "<query>",NULL,0,NULL},
+    {"facets", cmd_facets, "<query>",NULL,0,NULL},
     {"delete", cmd_delete, "<setname>",NULL,0,NULL},
     {"base", cmd_base, "<base-name>",NULL,0,NULL},
     {"show", cmd_show, "<rec#>['+'<#recs>['+'<setname>]]",NULL,0,NULL},
