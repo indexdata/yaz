@@ -45,6 +45,17 @@ Z_OtherInformationUnit *yaz_oi_update (
     const Odr_oid *oid, int categoryValue, int delete_flag);
 
 YAZ_EXPORT
+void yaz_oi_set_facetlist_oid (
+    Z_OtherInformation **otherInformation, ODR odr,
+    const Odr_oid *oid, int categoryValue,
+    Z_FacetList *facet_list);
+
+YAZ_EXPORT
+Z_FacetList *yaz_oi_get_facetlist_oid (
+    Z_OtherInformation **otherInformation, ODR odr,
+    const Odr_oid *oid, int categoryValue, int delete_flag);
+
+YAZ_EXPORT
 void yaz_oi_set_string_oid (
     Z_OtherInformation **otherInformation, ODR odr,
     const Odr_oid *oid, int categoryValue,
