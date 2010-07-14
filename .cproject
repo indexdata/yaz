@@ -38,27 +38,13 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805.791362720" name="/" resourcePath="zoom">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.474709397" name="cdt.managedbuild.toolchain.gnu.macosx.base" superClass="cdt.managedbuild.toolchain.gnu.macosx.base" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1024820357" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1175453977"/>
-							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.1291126016" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.524764932"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1716146569" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base.1871976203">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2100292690" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.424756820" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base.1171332498"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1371212607" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1658301018"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.2071622157" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707">
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.986509299" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="util"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="client"/>
+						<entry excluding="*.lo|*.o" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="*.o|*.lo" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="util"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="client"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="include"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="zoom"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="test"/>
+						<entry excluding="*.lo|*.o" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="zoom"/>
+						<entry excluding="*.o|*.lo" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="test"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
