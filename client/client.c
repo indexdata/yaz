@@ -751,6 +751,9 @@ int cmd_open(const char *arg)
         strncpy(cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
+    /* TODO Make facet definition survive the open command without crashing */
+    /* TODO Fix deallocation */
+    facet_list = 0;
 
     set_base("");
     r = session_connect(cur_host);
@@ -2841,7 +2844,7 @@ static int cmd_find(const char *arg)
     return 2;
 }
 
-static Z_FacetField* parse_facet(ODR odr, char *facet, int length)
+static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
 {
     YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
     char buffer[length+1];
@@ -2863,12 +2866,14 @@ static Z_FacetField* parse_facet(ODR odr, char *facet, int length)
     return facet_field;
 }
 
+#define FACET_DElIMITER ','
+
 static int scan_facet_argument(const char *arg) {
     int index;
     int length = strlen(arg);
     int count = 1;
     for (index = 0; index < length; index++) {
-        if (arg[index] == ',')
+        if (arg[index] == FACET_DElIMITER)
             count++;
     }
     return count;
@@ -2879,7 +2884,8 @@ static int cmd_facets(const char *arg)
     int size = 0;
     if (!*arg)
     {
-        printf("Which facets?\n");
+        facet_list = 0;
+        printf("Facets cleared.\n");
         return 0;
     }
     size = strlen(arg);
@@ -2893,17 +2899,17 @@ static int cmd_facets(const char *arg)
         int index = 0;
         Z_FacetField  **elements;
         int num_elements ;
-        char *facet = arg;
+        const char *facet = arg;
         // parse facets list
         ODR odr = odr_createmem(ODR_ENCODE);
         num_elements = scan_facet_argument(arg);
         facet_list = odr_malloc(odr, sizeof(*facet_list));
         elements = odr_malloc(odr, num_elements * sizeof(*elements));
         for (index = 0; index < num_elements;) {
-            char *pos = strchr(facet, ',');
+            const char *pos = strchr(facet, FACET_DElIMITER);
             if (pos == 0)
                 pos = facet + strlen(facet);
-            elements[index] = parse_facet(odr, facet, (pos - facet));
+            elements[index] = parse_facet(odr, (const char *) facet, (pos - facet));
             if (elements[index]) {
                 index++;
             }
