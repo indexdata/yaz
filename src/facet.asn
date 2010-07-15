@@ -10,12 +10,12 @@ FacetField ::= SEQUENCE {
   --   2=sortorder 0=most frequent, 1=least frequent, ..
   --   3=limit (integer)
   attributes [1] IMPLICIT AttributeList,
-  terms [2] IMPLICIT SEQUENCE OF FacetTerm OPTIONAL
+  terms      [2] IMPLICIT SEQUENCE OF FacetTerm OPTIONAL
 }
 
 FacetTerm ::= SEQUENCE {
-  term [1] IMPLICIT Term,
-  count [2] IMPLICIT INTEGER
+  term  Term,
+  count INTEGER
 }
 
 END
