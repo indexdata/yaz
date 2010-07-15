@@ -197,6 +197,24 @@ void yaz_oi_set_facetlist_oid (
     oi->information.externallyDefinedInfo = z_external;
 }
 
+Z_FacetList *yaz_oi_get_facetlist_oid (
+    Z_OtherInformation **otherInformation, ODR odr,
+    const Odr_oid *oid, int categoryValue, int delete_flag)
+{
+    Z_External *z_external = 0;
+    Z_OtherInformationUnit *oi =
+        yaz_oi_update(otherInformation, odr, oid, categoryValue, delete_flag);
+    if (!oi)
+        return 0;
+    z_external = oi->information.externallyDefinedInfo;
+
+    if (z_external && z_external->which == Z_External_userFacets) {
+        return z_external->u.facetList;
+    }
+    return 0;
+}
+
+
 /*
  * Local variables:
  * c-basic-offset: 4
