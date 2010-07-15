@@ -14,8 +14,8 @@ FacetField ::= SEQUENCE {
 }
 
 FacetTerm ::= SEQUENCE {
-  term [1] IMPLICIT Term,
-  count [2] IMPLICIT INTEGER
+  term  Term,
+  count INTEGER
 }
 
 END
