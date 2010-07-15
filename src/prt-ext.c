@@ -144,7 +144,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userInfo1,
          (Odr_fun)z_OtherInformation, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_userFacets,
-         (Odr_fun)z_FacetList, 0},
+         (Odr_fun)z_FacetList, "FacetList" },
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_charSetandLanguageNegotiation,
          (Odr_fun)z_CharSetandLanguageNegotiation, 0},
         {ODR_EXPLICIT, ODR_CONTEXT, 0, Z_External_acfPrompt1,
