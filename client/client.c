@@ -62,6 +62,7 @@
 #include <yaz/yaz-ccl.h>
 #include <yaz/cql.h>
 #include <yaz/log.h>
+#include <yaz/facet.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -1611,6 +1612,24 @@ static int send_searchRequest(const char *arg)
     return 2;
 }
 
+static void display_term(Z_Term *term) {
+    switch (term->which)
+    {
+    case Z_Term_general:
+        printf("%.*s", term->u.general->len, term->u.general->buf);
+        break;
+    case Z_Term_characterString:
+        printf("%s", term->u.characterString);
+        break;
+    case Z_Term_numeric:
+        printf(ODR_INT_PRINTF, *term->u.numeric);
+        break;
+    case Z_Term_null:
+        printf("null");
+        break;
+    }
+}
+
 /* display Query Expression as part of searchResult-1 */
 static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
 {
@@ -1622,46 +1641,43 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
         if (qe->u.term->queryTerm)
         {
             Z_Term *term = qe->u.term->queryTerm;
-            switch (term->which)
-            {
-            case Z_Term_general:
-                printf("%.*s", term->u.general->len, term->u.general->buf);
-                break;
-            case Z_Term_characterString:
-                printf("%s", term->u.characterString);
-                break;
-            case Z_Term_numeric:
-                printf(ODR_INT_PRINTF, *term->u.numeric);
-                break;
-            case Z_Term_null:
-                printf("null");
-                break;
+            display_term(term);
+        }
+    }
+}
+
+static void display_facet(Z_FacetField *facet) {
+    if (facet->attributes) {
+        Z_AttributeList *al = facet->attributes;
+        struct attrvalues attr_values;
+        attr_values.errcode = 0;
+        attr_values.limit = -1;
+        attr_values.useattr = 0;
+        attr_values.relation = "default";
+
+        facetattrs(al, &attr_values);
+        if (!attr_values.errcode) {
+            int term_index;
+            printf("Facet: %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
+            for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
+                Z_FacetTerm *facetTerm = facet->terms[term_index];
+                display_term(facetTerm->term);
+s                printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
             }
         }
+
     }
 }
 
 static void* display_facets(Z_FacetList *fl)
 {
-    int index, attribute_index;
-    printf("UserFacets-1:");
+    int index;
+    printf("Facets (%d): \n", fl->num);
+
     for (index = 0; index < fl->num ; index++) {
         if (index)
             printf(",");
-        if (!fl->elements[index]->attributes) {
-            Z_AttributeList *al = fl->elements[index]->attributes;
-            for (attribute_index = 0; attribute_index < al->num_attributes; attribute_index++) {
-                switch (al->attributes[attribute_index]->which) {
-                    case Z_AttributeValue_complex:
-                        break;
-                    case Z_AttributeValue_numeric:
-                        break;
-                    default:
-                        break;
-                };
-            }
-        }
-
+        display_facet(fl->elements[index]);
     }
     return 0;
 }
@@ -2863,6 +2879,8 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
     facet_field->attributes = attribute_list;
     facet_field->num_terms = 0;
     facet_field->terms = 0;
+    //debug_add_facet_term(odr, facet_field);
+
     return facet_field;
 }
 
@@ -3406,7 +3424,7 @@ int send_sortrequest(const char *arg, int newset)
     return 2;
 }
 
-void display_term(Z_TermInfo *t)
+void display_term_info(Z_TermInfo *t)
 {
     if (t->displayTerm)
         printf("%s", t->displayTerm);
@@ -3448,7 +3466,7 @@ void process_scanResponse(Z_ScanResponse *res)
         if (entries[i]->which == Z_Entry_termInfo)
         {
             printf("%c ", i + 1 == pos_term ? '*' : ' ');
-            display_term(entries[i]->u.termInfo);
+            display_term_info(entries[i]->u.termInfo);
         }
         else
             display_diagrecs(&entries[i]->u.surrogateDiagnostic, 1);
