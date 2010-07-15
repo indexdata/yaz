@@ -1662,7 +1662,7 @@ static void display_facet(Z_FacetField *facet) {
             for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
                 display_term(facetTerm->term);
-s                printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
+                printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
             }
         }
 
