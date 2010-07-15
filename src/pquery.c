@@ -119,7 +119,7 @@ static int lex(struct yaz_pqf_parser *li)
     return li->query_look = query_token(li);
 }
 
-static int escape_string(char *out_buf, const char *in, int len)
+int escape_string(char *out_buf, const char *in, int len)
 {
 
     char *out = out_buf;
@@ -307,11 +307,11 @@ static Z_AttributesPlusTerm *rpn_term_attributes(struct yaz_pqf_parser *li, ODR 
     Z_Term *term;
 
     zapt = (Z_AttributesPlusTerm *)odr_malloc(o, sizeof(*zapt));
-    term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
     term = (Z_Term *)odr_malloc(o, sizeof(*term));
     zapt->term = term;
     zapt->attributes = attributes;
 
+    term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
     term_octet->buf = (unsigned char *)odr_malloc(o, 1 + li->lex_len);
     term_octet->size = term_octet->len =
         escape_string((char *) (term_octet->buf), li->lex_buf, li->lex_len);
