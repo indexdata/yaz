@@ -1616,16 +1616,16 @@ static void display_term(Z_Term *term) {
     switch (term->which)
     {
     case Z_Term_general:
-        printf("%.*s", term->u.general->len, term->u.general->buf);
+        printf("    %.*s", term->u.general->len, term->u.general->buf);
         break;
     case Z_Term_characterString:
-        printf("%s", term->u.characterString);
+        printf("    %s", term->u.characterString);
         break;
     case Z_Term_numeric:
-        printf(ODR_INT_PRINTF, *term->u.numeric);
+        printf("    " ODR_INT_PRINTF, *term->u.numeric);
         break;
     case Z_Term_null:
-        printf("null");
+        printf("    null");
         break;
     }
 }
@@ -1658,7 +1658,7 @@ static void display_facet(Z_FacetField *facet) {
         facetattrs(al, &attr_values);
         if (!attr_values.errcode) {
             int term_index;
-            printf("Facet: %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
+            printf("  %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
             for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
                 display_term(facetTerm->term);
@@ -1672,11 +1672,9 @@ static void display_facet(Z_FacetField *facet) {
 static void* display_facets(Z_FacetList *fl)
 {
     int index;
-    printf("Facets (%d): \n", fl->num);
+    printf("Facets(%d): \n", fl->num);
 
     for (index = 0; index < fl->num ; index++) {
-        if (index)
-            printf(",");
         display_facet(fl->elements[index]);
     }
     return 0;
