@@ -53,6 +53,8 @@ YAZ_EXPORT Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
                                               Odr_oid **attributeSetId,
                                               const char *qbuf);
 
+YAZ_EXPORT
+Z_FacetList *yaz_pqf_parse_facet_list(ODR odr, const char *args );
 
 YAZ_EXPORT void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
