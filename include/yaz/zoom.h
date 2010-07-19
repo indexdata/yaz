@@ -52,6 +52,7 @@ typedef struct ZOOM_query_p *ZOOM_query;
 typedef struct ZOOM_connection_p *ZOOM_connection;
 typedef struct ZOOM_resultset_p *ZOOM_resultset;
 typedef struct ZOOM_record_p *ZOOM_record;
+typedef struct ZOOM_facet_field_p *ZOOM_facet_field;
 typedef struct ZOOM_scanset_p *ZOOM_scanset;
 typedef struct ZOOM_package_p *ZOOM_package;
 
@@ -205,6 +206,27 @@ ZOOM_resultset_record_immediate(ZOOM_resultset s, size_t pos);
 ZOOM_API(void)
 ZOOM_resultset_cache_reset(ZOOM_resultset r);
 
+
+/* retrieve facet field */
+ZOOM_API(ZOOM_facet_field)
+ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *facet_name);
+
+/* retrieve facet field at position. Returns 0 if unavailable */
+ZOOM_API(ZOOM_facet_field)
+ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int pos);
+
+/* Optional API ? */
+/* return number of facets available */
+ZOOM_API(size_t)
+ZOOM_resultset_facet_size(ZOOM_resultset r);
+
+/* retrieve (array of pointers to) facet fields */
+ZOOM_API(void)
+ZOOM_resultset_facets(ZOOM_resultset r, ZOOM_facet_field *recs,
+                       size_t start, size_t count);
+
+
+
 /* ----------------------------------------------------------- */
 /* records */
 
@@ -226,6 +248,23 @@ ZOOM_API(int)
                       const char **addinfo, const char **diagset);
     
 /* ----------------------------------------------------------- */
+/* facets */
+
+/* get facet name */
+ZOOM_API(const char *)
+ZOOM_facet_field_name(ZOOM_facet_field facet_field);
+
+/* get terms count on facet */
+ZOOM_API(size_t)
+ZOOM_facet_field_term_count(ZOOM_facet_field facet_field);
+
+/* get facet information, term and frequency, at a position. Returns 0 if out of bounds */
+ZOOM_API(const char *)
+ZOOM_facet_field_get_term(ZOOM_facet_field facet_field, size_t idx, int *freq);
+
+/* ----------------------------------------------------------- */
+
+
 /* queries */
 
 /* create search object */
