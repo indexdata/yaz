@@ -27,6 +27,7 @@
 #include <yaz/query-charset.h>
 #include <yaz/copy_types.h>
 #include <yaz/snprintf.h>
+#include <yaz/facet.h>
 
 #include <yaz/shptr.h>
 
@@ -906,6 +907,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->connection = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
+    r->facets = 0;
     r->mutex = 0;
     yaz_mutex_create(&r->mutex);
 #if SHPTR
@@ -1677,6 +1679,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
     const char *elementSetName;
     const char *smallSetElementSetName;
     const char *mediumSetElementSetName;
+    const char *facets;
 
     assert(c->tasks);
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
@@ -1697,6 +1700,18 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
 
     if (!mediumSetElementSetName)
         mediumSetElementSetName = elementSetName;
+
+    facets = ZOOM_options_get(r->options, "facets");
+    if (facets) {
+        Z_FacetList *facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
+        if (facet_list) {
+            Z_OtherInformation **oi;
+            yaz_oi_APDU(apdu, &oi);
+            if (facet_list) {
+                yaz_oi_set_facetlist_oid(oi, c->odr_out, yaz_oid_userinfo_facet_1, 1, facet_list);
+            }
+        }
+    }
 
     assert(r);
     assert(r->query);
@@ -2546,7 +2561,7 @@ static void handle_queryExpression(ZOOM_options opt, const char *name,
     }
 }
 
-static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
+static void handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                                 Z_OtherInformation *o)
 {
     int i;
@@ -2614,6 +2629,60 @@ static void handle_searchResult(ZOOM_connection c, ZOOM_resultset resultset,
     }
 }
 
+static char *get_term_cstr(ODR odr, Z_Term *term) {
+
+    switch (term->which) {
+    case Z_Term_general:
+            return odr_strdupn(odr, (const char *) term->u.general->buf, (size_t) term->u.general->len);
+        break;
+    case Z_Term_characterString:
+        return odr_strdup(odr, term->u.characterString);
+    }
+    return 0;
+}
+
+static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
+    int term_index;
+    struct attrvalues attr_values;
+    ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
+    facetattrs(facet->attributes, &attr_values);
+    facet_field->facet_name = odr_strdup(odr, attr_values.useattr);
+    facet_field->num_terms = facet->num_terms;
+    facet_field->facet_terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->facet_terms));
+    for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
+        struct facet_term_p *facet_term = odr_malloc(odr, sizeof(*facet_field));
+        Z_FacetTerm *facetTerm = facet->terms[term_index];
+        facet_term->term = get_term_cstr(odr, facetTerm->term);
+        /* TODO */
+        facet_term->frequency = *facetTerm->count;
+    }
+    return facet_field;
+}
+
+static void handle_facet_result(ZOOM_connection c, ZOOM_resultset resultset,
+                                Z_OtherInformation *o)
+{
+    int i;
+    for (i = 0; o && i < o->num_elements; i++)
+    {
+        if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
+        {
+            Z_External *ext = o->list[i]->information.externallyDefinedInfo;
+            if (ext->which == Z_External_userFacets)
+            {
+                int j;
+                Z_FacetList *fl = ext->u.facetList;
+                resultset->facets = odr_malloc(resultset->odr, fl->num * sizeof(*resultset->facets));
+                for (j = 0; j < fl->num; j++)
+                {
+                    resultset->facets[j] = get_zoom_facet_field(resultset->odr, fl->elements[j]);
+                }
+            }
+        }
+    }
+}
+
+
 static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
 {
     ZOOM_resultset resultset;
@@ -2637,7 +2706,9 @@ static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
         ZOOM_options_set_int(resultset->options, "presentStatus",
                              *sr->presentStatus);
     }
-    handle_searchResult(c, resultset, sr->additionalSearchInfo);
+    handle_search_result(c, resultset, sr->additionalSearchInfo);
+
+    handle_facet_result(c, resultset, sr->otherInfo);
 
     resultset->size = *sr->resultCount;
     handle_records(c, sr->records, 0);
