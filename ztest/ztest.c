@@ -29,6 +29,7 @@
 #include <yaz/backend.h>
 #include <yaz/ill.h>
 #include <yaz/diagbib1.h>
+#include <yaz/otherinfo.h>
 
 #include "ztest.h"
 
@@ -226,6 +227,52 @@ static void do_delay(const struct delay *delayp)
     }
 }
 
+Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input) {
+    Z_OtherInformation **oi;
+    Z_FacetList *facet_list = yaz_oi_get_facetlist_oid(oi, odr, yaz_oid_userinfo_facet_1, 1, 0);
+
+    return facet_list;
+}
+
+Z_Term *term_new(ODR odr, const char *cstr) {
+    Z_Term *term = odr_malloc(odr, sizeof(*term));
+    term->which = Z_Term_characterString;
+    term->u.characterString = odr_strdup(odr, cstr);
+    return term;
+}
+
+static void addterms(ODR odr, Z_FacetField *facet_field) {
+    int index;
+    int count = 100;
+    facet_field->num_terms = 3;
+    facet_field->terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->terms));
+    for (index = 0; index < facet_field->num_terms; index++) {
+        Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
+        facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
+        *facet_term->count = count;
+        facet_term->term = term_new(odr, "key");
+        count = count - 10 ;
+        facet_field->terms[index] = facet_term;
+    }
+}
+Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
+    int index;
+    Z_OtherInformation *oi = odr_malloc(odr, sizeof(*oi));
+    Z_OtherInformationUnit *oiu = odr_malloc(odr, sizeof(*oiu));
+    for (index = 0; index < facet_list->num; index++) {
+        addterms(odr, facet_list->elements[index]);
+    }
+    oi->list = odr_malloc(odr, sizeof(*oi->list));
+    oiu->category = 0;
+    oiu->which = Z_OtherInfo_externallyDefinedInfo;
+    oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
+    oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
+
+    oiu->information.externallyDefinedInfo->u.facetList = facet_list;
+    oi->list[0] = oiu;
+    return oi;
+}
+
 int ztest_search(void *handle, bend_search_rr *rr)
 {
     struct session_handle *sh = (struct session_handle*) handle;
@@ -331,6 +378,14 @@ int ztest_search(void *handle, bend_search_rr *rr)
     }
     rr->hits = get_hit_count(rr->query);
 
+    if (1)
+    {
+        /* TODO Not general. Only handles one (Facet) OtherInformation. Overwrite  */
+        Z_FacetList *facet_list = extract_facet_request(rr->stream, rr->search_input);
+        if (facet_list) {
+            rr->search_info = build_facet_response(rr->stream, facet_list);
+        }
+    }
     do_delay(&new_set->search_delay);
     new_set->hits = rr->hits;
     
