@@ -287,6 +287,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	first operation), holds the negotiated version with the server
 	(same or lower version).
        </entry><entry>1.2</entry></row>
+      <row><entry>
+        facets</entry><entry>
+	A FacetList is comma-separated list of facet, which is defined as <literal>AttributeList</literal> 
+	and a optional FacetTerm (a Term and a frequency). On request the terms is missing. 
+	On response the the list contains the terms that the target could collect. 
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
