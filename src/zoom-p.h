@@ -168,6 +168,7 @@ struct ZOOM_resultset_p {
 #if ZOOM_RESULT_LISTS
 #else
     ZOOM_resultset next;
+    ZOOM_facet_field **facets;
 #endif
 };
 
@@ -187,6 +188,18 @@ struct ZOOM_record_p {
     const char *diag_details;
     const char *diag_set;
 };
+
+struct facet_term_p {
+    char *term;
+    int frequency;
+};
+
+struct ZOOM_facet_field_p {
+    char *facet_name;
+    int num_terms;
+    struct facet_term_p *facet_terms;
+};
+
 
 struct ZOOM_record_cache_p {
     struct ZOOM_record_p rec;
