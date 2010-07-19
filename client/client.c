@@ -2858,43 +2858,6 @@ static int cmd_find(const char *arg)
     return 2;
 }
 
-static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
-{
-    YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
-    char buffer[length+1];
-    Odr_oid *attributeSetId;
-    Z_FacetField *facet_field;
-    Z_AttributeList *attribute_list;
-    memcpy(buffer, facet, length);
-    buffer[length] = '\0';
-    attribute_list = yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, buffer);
-
-    if (!attribute_list) {
-        printf("Invalid facet definition: %s", facet);
-        return 0;
-    }
-    facet_field = odr_malloc(odr, sizeof(*facet_field));
-    facet_field->attributes = attribute_list;
-    facet_field->num_terms = 0;
-    facet_field->terms = 0;
-    //debug_add_facet_term(odr, facet_field);
-
-    return facet_field;
-}
-
-#define FACET_DElIMITER ','
-
-static int scan_facet_argument(const char *arg) {
-    int index;
-    int length = strlen(arg);
-    int count = 1;
-    for (index = 0; index < length; index++) {
-        if (arg[index] == FACET_DElIMITER)
-            count++;
-    }
-    return count;
-}
-
 static int cmd_facets(const char *arg)
 {
     int size = 0;
@@ -2912,34 +2875,14 @@ static int cmd_facets(const char *arg)
     }
     else
     {
-        int index = 0;
-        Z_FacetField  **elements;
-        int num_elements ;
-        const char *facet = arg;
-        // parse facets list
+        /* TODO Wrong odr. Loosing memory */
         ODR odr = odr_createmem(ODR_ENCODE);
-        num_elements = scan_facet_argument(arg);
-        facet_list = odr_malloc(odr, sizeof(*facet_list));
-        elements = odr_malloc(odr, num_elements * sizeof(*elements));
-        for (index = 0; index < num_elements;) {
-            const char *pos = strchr(facet, FACET_DElIMITER);
-            if (pos == 0)
-                pos = facet + strlen(facet);
-            elements[index] = parse_facet(odr, (const char *) facet, (pos - facet));
-            if (elements[index]) {
-                index++;
-            }
-            else
-                num_elements--;
-            facet = pos + 1;
-        }
+        facet_list = yaz_pqf_parse_facet_list(odr, arg);
 
-        if (!num_elements || !facet_list) {
+        if (!facet_list) {
             printf("Invalid facet list: %s", arg);
             return 0;
         }
-        facet_list->elements = elements;
-        facet_list->num = index;
         return 1;
     }
     return 2;
