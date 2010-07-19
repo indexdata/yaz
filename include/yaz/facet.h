@@ -46,6 +46,4 @@ void limitattr ( Z_AttributeElement *ae, struct attrvalues *av );
 YAZ_EXPORT
 void facetattrs( Z_AttributeList *attributes, struct attrvalues *av );
 
-
-
 #endif
