@@ -908,6 +908,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->databaseNames = 0;
     r->num_databaseNames = 0;
     r->facets = 0;
+    r->facets_names = 0;
     r->mutex = 0;
     yaz_mutex_create(&r->mutex);
 #if SHPTR
@@ -1255,6 +1256,43 @@ ZOOM_API(void)
             recs[i] = ZOOM_resultset_record_immediate(r, i+start);
     }
 }
+
+ZOOM_API(size_t)
+    ZOOM_resultset_facets_size(ZOOM_resultset r) {
+    return r->num_facets;
+}
+
+
+ZOOM_API(ZOOM_facet_field *)
+    ZOOM_resultset_facets(ZOOM_resultset r)
+{
+    return r->facets;
+}
+
+ZOOM_API(const char**)
+    ZOOM_resultset_facet_names(ZOOM_resultset r)
+{
+    return (const char **) r->facets_names;
+}
+
+ZOOM_API(const char*)
+    ZOOM_facet_field_name(ZOOM_facet_field field)
+{
+    return field->facet_name;
+}
+
+ZOOM_API(size_t)
+    ZOOM_facet_field_term_count(ZOOM_facet_field field)
+{
+    return field->num_terms;
+}
+
+ZOOM_API(const char*)
+    ZOOM_facet_field_get_term(ZOOM_facet_field field, size_t idx, int *freq) {
+    *freq = field->facet_terms[idx].frequency;
+    return field->facet_terms[idx].term;
+}
+
 
 static void get_cert(ZOOM_connection c)
 {
@@ -2645,21 +2683,20 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
     int term_index;
     struct attrvalues attr_values;
     ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
+    memset(&attr_values, 0, sizeof(attr_values));
     facetattrs(facet->attributes, &attr_values);
     facet_field->facet_name = odr_strdup(odr, attr_values.useattr);
     facet_field->num_terms = facet->num_terms;
     facet_field->facet_terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->facet_terms));
     for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
-        struct facet_term_p *facet_term = odr_malloc(odr, sizeof(*facet_field));
         Z_FacetTerm *facetTerm = facet->terms[term_index];
-        facet_term->term = get_term_cstr(odr, facetTerm->term);
-        /* TODO */
-        facet_term->frequency = *facetTerm->count;
+        facet_field->facet_terms[term_index].frequency = *facetTerm->count;
+        facet_field->facet_terms[term_index].term = get_term_cstr(odr, facetTerm->term);
     }
     return facet_field;
 }
 
-static void handle_facet_result(ZOOM_connection c, ZOOM_resultset resultset,
+static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                                 Z_OtherInformation *o)
 {
     int i;
@@ -2672,10 +2709,13 @@ static void handle_facet_result(ZOOM_connection c, ZOOM_resultset resultset,
             {
                 int j;
                 Z_FacetList *fl = ext->u.facetList;
-                resultset->facets = odr_malloc(resultset->odr, fl->num * sizeof(*resultset->facets));
+                r->num_facets   = fl->num;
+                r->facets       =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets));
+                r->facets_names =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets_names));
                 for (j = 0; j < fl->num; j++)
                 {
-                    resultset->facets[j] = get_zoom_facet_field(resultset->odr, fl->elements[j]);
+                    r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
+                    r->facets_names[j] = (char *) ZOOM_facet_field_name(r->facets[j]);
                 }
             }
         }
@@ -2708,7 +2748,7 @@ static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
     }
     handle_search_result(c, resultset, sr->additionalSearchInfo);
 
-    handle_facet_result(c, resultset, sr->otherInfo);
+    handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
     handle_records(c, sr->records, 0);
