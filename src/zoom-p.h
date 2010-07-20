@@ -168,8 +168,10 @@ struct ZOOM_resultset_p {
 #if ZOOM_RESULT_LISTS
 #else
     ZOOM_resultset next;
-    ZOOM_facet_field **facets;
 #endif
+    ZOOM_facet_field *facets;
+    int num_facets;
+    char **facets_names;
 };
 
 struct ZOOM_record_p {
