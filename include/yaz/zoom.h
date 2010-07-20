@@ -215,15 +215,17 @@ ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *facet_name);
 ZOOM_API(ZOOM_facet_field)
 ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int pos);
 
-/* Optional API ? */
 /* return number of facets available */
 ZOOM_API(size_t)
-ZOOM_resultset_facet_size(ZOOM_resultset r);
+ZOOM_resultset_facets_size(ZOOM_resultset r);
 
 /* retrieve (array of pointers to) facet fields */
-ZOOM_API(void)
-ZOOM_resultset_facets(ZOOM_resultset r, ZOOM_facet_field *recs,
-                       size_t start, size_t count);
+ZOOM_API(ZOOM_facet_field *)
+ZOOM_resultset_facets(ZOOM_resultset r);
+
+/* retrieve (array of pointers to) facet fields */
+ZOOM_API(const char **)
+ZOOM_resultset_facets_names(ZOOM_resultset r);
 
 
 
