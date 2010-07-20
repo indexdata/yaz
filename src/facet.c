@@ -2,6 +2,10 @@
 
 #include <yaz/facet.h>
 #include <yaz/diagbib1.h>
+#include <yaz/oid_db.h>
+#include <yaz/oid_std.h>
+#include <yaz/otherinfo.h>
+#include <assert.h>
 
 /* Little helper to extract a string attribute */
 /* Gets the first string, there is usually only one */
@@ -117,4 +121,51 @@ void facetattrs( Z_AttributeList *attributes,
     }
     return;
 } /* facetattrs */
+
+
+Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input) {
+    Z_OtherInformation **oi;
+    Z_FacetList *facet_list = yaz_oi_get_facetlist_oid(oi, odr, yaz_oid_userinfo_facet_1, 1, 0);
+
+    return facet_list;
+}
+
+Z_Term *term_create(ODR odr, const char *cstr) {
+    Z_Term *term = odr_malloc(odr, sizeof(*term));
+    term->which = Z_Term_characterString;
+    term->u.characterString = odr_strdup(odr, cstr);
+    return term;
+}
+
+Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq) {
+    Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
+    facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
+    *facet_term->count = freq;
+    return facet_term;
+}
+
+Z_FacetField* facet_field_create(ODR odr, Z_AttributeList *attributes, int num_terms) {
+    Z_FacetField *facet_field = odr_malloc(odr, sizeof(*facet_field));
+    facet_field->attributes = attributes;
+    facet_field->num_terms = num_terms;
+    facet_field->terms = odr_malloc(odr, num_terms * sizeof(*facet_field->terms));
+    return facet_field;
+}
+
+void facet_field_term_set(ODR odr, Z_FacetField *field, Z_FacetTerm *facet_term, int index) {
+    assert(0 <= index && index < field->num_terms);
+    field->terms[index] = facet_term;
+}
+
+Z_FacetList* facet_list_create(ODR odr, int num_facets) {
+    Z_FacetList *facet_list = odr_malloc(odr, sizeof(*facet_list));
+    facet_list->num = num_facets;
+    facet_list->elements = odr_malloc(odr, facet_list->num * sizeof(*facet_list->elements));
+    return facet_list;
+}
+
+void facet_list_field_set(ODR odr, Z_FacetList *list, Z_FacetField *field, int index) {
+    assert(0 <= index && index < list->num);
+    list->elements[index] = field;
+}
 
