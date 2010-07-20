@@ -49,6 +49,9 @@ YAZ_EXPORT
 void facetattrs( Z_AttributeList *attributes, struct attrvalues *av );
 
 YAZ_EXPORT
+Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input);
+
+YAZ_EXPORT
 Z_Term *term_create(ODR odr, const char *cstr);
 
 YAZ_EXPORT
