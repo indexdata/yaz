@@ -30,6 +30,7 @@
 #include <yaz/ill.h>
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
+#include <yaz/facet.h>
 
 #include "ztest.h"
 
@@ -227,47 +228,33 @@ static void do_delay(const struct delay *delayp)
     }
 }
 
-Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input) {
-    Z_OtherInformation **oi;
-    Z_FacetList *facet_list = yaz_oi_get_facetlist_oid(oi, odr, yaz_oid_userinfo_facet_1, 1, 0);
-
-    return facet_list;
-}
-
-Z_Term *term_new(ODR odr, const char *cstr) {
-    Z_Term *term = odr_malloc(odr, sizeof(*term));
-    term->which = Z_Term_characterString;
-    term->u.characterString = odr_strdup(odr, cstr);
-    return term;
-}
-
 static void addterms(ODR odr, Z_FacetField *facet_field) {
     int index;
-    int count = 100;
-    facet_field->num_terms = 3;
-    facet_field->terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->terms));
+    int freq = 100;
+    const char *key = "key";
     for (index = 0; index < facet_field->num_terms; index++) {
-        Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
-        facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
-        *facet_term->count = count;
-        facet_term->term = term_new(odr, "key");
-        count = count - 10 ;
-        facet_field->terms[index] = facet_term;
+        Z_FacetTerm *facet_term = facet_term_create(odr, term_create(odr, key), freq);
+        freq = freq - 10 ;
+        facet_field_term_set(odr, facet_field, facet_term, index);
     }
 }
 Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     int index;
     Z_OtherInformation *oi = odr_malloc(odr, sizeof(*oi));
     Z_OtherInformationUnit *oiu = odr_malloc(odr, sizeof(*oiu));
+    Z_FacetList *new_list = facet_list_create(odr, facet_list->num);
+
     for (index = 0; index < facet_list->num; index++) {
+        new_list->elements[index] = facet_field_create(odr, facet_list->elements[index]->attributes, 3);
         addterms(odr, facet_list->elements[index]);
     }
-    oi->list = odr_malloc(odr, sizeof(*oi->list));
+    oi->num_elements = 1;
+    oi->list = odr_malloc(odr, oi->num_elements * sizeof(*oi->list));
     oiu->category = 0;
     oiu->which = Z_OtherInfo_externallyDefinedInfo;
     oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
     oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
-
+    oiu->information.externallyDefinedInfo->which = Z_External_userFacets;
     oiu->information.externallyDefinedInfo->u.facetList = facet_list;
     oi->list[0] = oiu;
     return oi;
