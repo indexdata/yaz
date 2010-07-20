@@ -3,7 +3,9 @@
 #define YAZ_FACET_H
 
 #include <yaz/yconfig.h>
+#include <yaz/odr.h>
 #include <yaz/z-core.h>
+#include <yaz/z-facet-1.h>
 #include <yaz/log.h>
 
 YAZ_BEGIN_CDECL
@@ -45,5 +47,23 @@ void limitattr ( Z_AttributeElement *ae, struct attrvalues *av );
 
 YAZ_EXPORT
 void facetattrs( Z_AttributeList *attributes, struct attrvalues *av );
+
+YAZ_EXPORT
+Z_Term *term_create(ODR odr, const char *cstr);
+
+YAZ_EXPORT
+Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq);
+
+YAZ_EXPORT
+Z_FacetField* facet_field_create(ODR odr, Z_AttributeList *attributes, int num_terms);
+
+YAZ_EXPORT
+void facet_field_term_set(ODR odr, Z_FacetField *field, Z_FacetTerm *facetTerm, int index);
+
+YAZ_EXPORT
+Z_FacetList* facet_list_create(ODR odr, int num_facets);
+
+YAZ_EXPORT
+void facet_list_field_set(ODR odr, Z_FacetList *list, Z_FacetField *field, int index);
 
 #endif
