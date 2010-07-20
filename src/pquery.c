@@ -875,6 +875,7 @@ Z_FacetList *yaz_pqf_parse_facet_list(ODR odr, const char *facet) {
     facet_list = odr_malloc(odr, sizeof(*facet_list));
     facet_list->num = num_elements;
     elements = odr_malloc(odr, num_elements * sizeof(*elements));
+    facet_list->elements = elements;
     for (index = 0; index < num_elements;) {
         const char *pos = strchr(facet, FACET_DElIMITER);
         if (pos == 0)
@@ -883,11 +884,12 @@ Z_FacetList *yaz_pqf_parse_facet_list(ODR odr, const char *facet) {
         if (elements[index]) {
             index++;
         }
-        else
+        else {
             num_elements--;
+            facet_list->num = num_elements;
+        }
         facet = pos + 1;
     }
-    facet_list->elements = elements;
     return facet_list;
 }
 
