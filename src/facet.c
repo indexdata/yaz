@@ -124,9 +124,7 @@ void facetattrs( Z_AttributeList *attributes,
 
 
 Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input) {
-    Z_OtherInformation **oi;
-    Z_FacetList *facet_list = yaz_oi_get_facetlist_oid(oi, odr, yaz_oid_userinfo_facet_1, 1, 0);
-
+    Z_FacetList *facet_list = yaz_oi_get_facetlist_oid(&search_input, odr, yaz_oid_userinfo_facet_1, 1, 0);
     return facet_list;
 }
 
@@ -140,6 +138,7 @@ Z_Term *term_create(ODR odr, const char *cstr) {
 Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq) {
     Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
     facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
+    facet_term->term = term;
     *facet_term->count = freq;
     return facet_term;
 }
