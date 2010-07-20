@@ -274,6 +274,84 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
        
 }
 
+static void display_facets(ZOOM_facet_field *facets, int count) {
+    int index;
+    printf("Facets: \n");
+    for (index = 0; index <  count; index++) {
+        int term_index;
+        const char *facet_name = ZOOM_facet_field_name(facets[index]);
+        printf("  %s: \n", facet_name);
+        for (term_index = 0; term_index < ZOOM_facet_field_term_count(facets[index]); term_index++) {
+            int freq = 0;
+            const char *term = ZOOM_facet_field_get_term(facets[index], term_index, &freq);
+            printf("    %s(%d) \n", term,  freq);
+        }
+    }
+}
+
+static void cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options,
+                     const char **args)
+{
+    int i;
+    size_t start = 0, count = 1;
+    const char *type = "render";
+    WRBUF render_str = 0;
+
+    if (0)
+    {
+        WRBUF tmp;
+
+        if ((tmp = next_token_new_wrbuf(args)))
+        {
+            start = atoi(wrbuf_cstr(tmp));
+            wrbuf_destroy(tmp);
+        }
+
+        if ((tmp = next_token_new_wrbuf(args)))
+        {
+            count = atoi(wrbuf_cstr(tmp));
+            wrbuf_destroy(tmp);
+        }
+        render_str = next_token_new_wrbuf(args);
+    }
+    if (render_str)
+        type = wrbuf_cstr(render_str);
+
+    /*
+    for (i = 0; i < MAX_CON; i++) {
+        int num_facets = ZOOM_resultset_facet_size(r[i]);
+        ZOOM_resultset_records(r[i], 0, start, count);
+    }
+    */
+    while (ZOOM_event(MAX_CON, c))
+        ;
+
+    for (i = 0; i < MAX_CON; i++)
+    {
+        int error;
+        const char *errmsg, *addinfo, *dset;
+        /* display errors if any */
+        if (!c[i])
+            continue;
+        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
+        else if (r[i])
+        {
+            int num_facets = ZOOM_resultset_facets_size(r[i]);
+            if (num_facets) {
+                ZOOM_facet_field  *facets = ZOOM_resultset_facets(r[i]);
+                display_facets(facets, num_facets);
+            }
+        }
+    }
+    if (render_str)
+        wrbuf_destroy(render_str);
+
+}
+
 static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
                     ZOOM_options options,
                     const char **args)
@@ -574,6 +652,8 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
         cmd_connect(c, r, options, buf);
     else if (is_command("search", cmd_str, cmd_len))
         cmd_search(c, r, options, buf);
+    else if (is_command("facets", cmd_str, cmd_len))
+        cmd_facets(c, r, options, buf);
     else if (is_command("find", cmd_str, cmd_len))
         cmd_search(c, r, options, buf);
     else if (is_command("show", cmd_str, cmd_len))
