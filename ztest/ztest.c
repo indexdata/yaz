@@ -233,9 +233,11 @@ static void addterms(ODR odr, Z_FacetField *facet_field) {
     int freq = 100;
     const char *key = "key";
     for (index = 0; index < facet_field->num_terms; index++) {
-        Z_FacetTerm *facet_term = facet_term_create(odr, term_create(odr, key), freq);
+        Z_Term *term = term_create(odr, key);
+        Z_FacetTerm *facet_term = facet_term_create(odr, term, freq);
         freq = freq - 10 ;
         facet_field_term_set(odr, facet_field, facet_term, index);
+        //yaz_log(YLOG_DEBUG, "Facet term %d %d", term->u.characterString, *facet_term->count);
     }
 }
 Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
@@ -246,7 +248,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
 
     for (index = 0; index < facet_list->num; index++) {
         new_list->elements[index] = facet_field_create(odr, facet_list->elements[index]->attributes, 3);
-        addterms(odr, facet_list->elements[index]);
+        addterms(odr, new_list->elements[index]);
     }
     oi->num_elements = 1;
     oi->list = odr_malloc(odr, oi->num_elements * sizeof(*oi->list));
@@ -255,7 +257,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
     oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
     oiu->information.externallyDefinedInfo->which = Z_External_userFacets;
-    oiu->information.externallyDefinedInfo->u.facetList = facet_list;
+    oiu->information.externallyDefinedInfo->u.facetList = new_list;
     oi->list[0] = oiu;
     return oi;
 }
@@ -369,9 +371,14 @@ int ztest_search(void *handle, bend_search_rr *rr)
     {
         /* TODO Not general. Only handles one (Facet) OtherInformation. Overwrite  */
         Z_FacetList *facet_list = extract_facet_request(rr->stream, rr->search_input);
+
         if (facet_list) {
+            yaz_log(YLOG_LOG, "%d Facets in search request.", facet_list->num);
             rr->search_info = build_facet_response(rr->stream, facet_list);
         }
+        else
+            yaz_log(YLOG_DEBUG, "No facets parsed search request.");
+
     }
     do_delay(&new_set->search_delay);
     new_set->hits = rr->hits;
