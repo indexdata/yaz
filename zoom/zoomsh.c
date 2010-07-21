@@ -556,6 +556,7 @@ static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     printf("connect <zurl>\n");
     printf("search <pqf>\n");
     printf("show [<start> [<count> [<type]]]\n");
+    printf("facets\n");
     printf("scan <term>\n");
     printf("quit\n");
     printf("close <zurl>\n");
@@ -581,6 +582,7 @@ static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     printf(" charset\n");
     printf(" lang\n");
     printf(" timeout\n");
+    printf(" facets\n");
 }
 
 static void cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
