@@ -193,6 +193,7 @@ void yaz_oi_set_facetlist_oid (
     z_external->which = Z_External_userFacets;
     z_external->direct_reference = odr_oiddup(odr, oid);
     z_external->indirect_reference = 0;
+    z_external->descriptor = 0;
     z_external->u.facetList = facet_list;
     oi->information.externallyDefinedInfo = z_external;
 }
