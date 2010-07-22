@@ -1262,6 +1262,19 @@ ZOOM_API(size_t)
     return r->num_facets;
 }
 
+ZOOM_API(ZOOM_facet_field)
+    ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *name) {
+    int num = r->num_facets;
+    ZOOM_facet_field *facets = r->facets;
+    int index;
+    for (index = 0; index < num; index++) {
+        if (!strcmp(facets[index]->facet_name, name)) {
+            return facets[index];
+        }
+    }
+    return 0;
+}
+
 
 ZOOM_API(ZOOM_facet_field *)
     ZOOM_resultset_facets(ZOOM_resultset r)
