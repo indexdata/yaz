@@ -908,6 +908,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->databaseNames = 0;
     r->num_databaseNames = 0;
     r->facets = 0;
+    r->num_facets = 0;
     r->facets_names = 0;
     r->mutex = 0;
     yaz_mutex_create(&r->mutex);
@@ -2700,11 +2701,14 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
     facetattrs(facet->attributes, &attr_values);
     facet_field->facet_name = odr_strdup(odr, attr_values.useattr);
     facet_field->num_terms = facet->num_terms;
+    yaz_log(YLOG_DEBUG, "ZOOM_facet_field %s %d terms %d", attr_values.useattr, attr_values.limit, facet->num_terms);
     facet_field->facet_terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->facet_terms));
     for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
         Z_FacetTerm *facetTerm = facet->terms[term_index];
         facet_field->facet_terms[term_index].frequency = *facetTerm->count;
         facet_field->facet_terms[term_index].term = get_term_cstr(odr, facetTerm->term);
+        yaz_log(YLOG_DEBUG, "    term[%d] %s %d",
+                term_index, facet_field->facet_terms[term_index].term, facet_field->facet_terms[term_index].frequency);
     }
     return facet_field;
 }
@@ -2723,11 +2727,14 @@ static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                 int j;
                 Z_FacetList *fl = ext->u.facetList;
                 r->num_facets   = fl->num;
+                yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
                 r->facets       =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets));
                 r->facets_names =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets_names));
                 for (j = 0; j < fl->num; j++)
                 {
                     r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
+                    if (!r->facets[j])
+                        yaz_log(YLOG_DEBUG, "Facet field missing on index %d !", j);
                     r->facets_names[j] = (char *) ZOOM_facet_field_name(r->facets[j]);
                 }
             }
