@@ -31,6 +31,8 @@ struct attrvalues {
     int limit; /* for facet attributes */
 };
 
+YAZ_EXPORT
+void facet_struct_init(struct attrvalues *attr_values);
 
 /* Use attribute, @attr1, can be numeric or string */
 YAZ_EXPORT
