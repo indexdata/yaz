@@ -237,8 +237,8 @@ static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
     for (index = 0; index < facet_field->num_terms; index++) {
         Z_Term *term;
         Z_FacetTerm *facet_term;
-        // sprintf(key, "%s%d", facet_name, index);
-        //yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
+        sprintf(key, "%s%d", facet_name, index);
+        yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
         term = term_create(odr, key);
         facet_term = facet_term_create(odr, term, freq);
         freq = freq - 10 ;
@@ -254,9 +254,8 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
         struct attrvalues attrvalues;
         facet_struct_init(&attrvalues);
         attrvalues.limit = 10;
-        yaz_log(YLOG_LOG, "Attributes: %s %s %d ", attrvalues.useattr, attrvalues.useattrbuff, attrvalues.limit);
         facetattrs(facet_list->elements[index]->attributes, &attrvalues);
-        yaz_log(YLOG_LOG, "Attributes: %s %s %d ", attrvalues.useattr, attrvalues.useattrbuff, attrvalues.limit);
+        yaz_log(YLOG_LOG, "Attributes: %s %d ", attrvalues.useattr, attrvalues.limit);
         if (attrvalues.errstring)
             yaz_log(YLOG_LOG, "Error parsing attributes: %s", attrvalues.errstring);
         if (attrvalues.limit > 0) {
@@ -264,6 +263,10 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
             addterms(odr, new_list->elements[new_index], attrvalues.useattr);
             new_index++;
         }
+        else {
+            yaz_log(YLOG_DEBUG, "Facet: skipping %s due to 0 limit.", attrvalues.useattr);
+        }
+
     }
     new_list->num = new_index;
     if (new_index > 0) {
