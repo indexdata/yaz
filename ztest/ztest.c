@@ -228,38 +228,59 @@ static void do_delay(const struct delay *delayp)
     }
 }
 
-static void addterms(ODR odr, Z_FacetField *facet_field) {
+static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name) {
     int index;
     int freq = 100;
-    const char *key = "key";
+    int length = strlen(facet_name) + 10;
+    char key[length];
+    key[0] = '\0';
     for (index = 0; index < facet_field->num_terms; index++) {
-        Z_Term *term = term_create(odr, key);
-        Z_FacetTerm *facet_term = facet_term_create(odr, term, freq);
+        Z_Term *term;
+        Z_FacetTerm *facet_term;
+        // sprintf(key, "%s%d", facet_name, index);
+        //yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
+        term = term_create(odr, key);
+        facet_term = facet_term_create(odr, term, freq);
         freq = freq - 10 ;
         facet_field_term_set(odr, facet_field, facet_term, index);
-        //yaz_log(YLOG_DEBUG, "Facet term %d %d", term->u.characterString, *facet_term->count);
     }
 }
+
 Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
-    int index;
-    Z_OtherInformation *oi = odr_malloc(odr, sizeof(*oi));
-    Z_OtherInformationUnit *oiu = odr_malloc(odr, sizeof(*oiu));
+    int index, new_index = 0;
     Z_FacetList *new_list = facet_list_create(odr, facet_list->num);
 
     for (index = 0; index < facet_list->num; index++) {
-        new_list->elements[index] = facet_field_create(odr, facet_list->elements[index]->attributes, 3);
-        addterms(odr, new_list->elements[index]);
+        struct attrvalues attrvalues;
+        facet_struct_init(&attrvalues);
+        attrvalues.limit = 10;
+        yaz_log(YLOG_LOG, "Attributes: %s %s %d ", attrvalues.useattr, attrvalues.useattrbuff, attrvalues.limit);
+        facetattrs(facet_list->elements[index]->attributes, &attrvalues);
+        yaz_log(YLOG_LOG, "Attributes: %s %s %d ", attrvalues.useattr, attrvalues.useattrbuff, attrvalues.limit);
+        if (attrvalues.errstring)
+            yaz_log(YLOG_LOG, "Error parsing attributes: %s", attrvalues.errstring);
+        if (attrvalues.limit > 0) {
+            new_list->elements[new_index] = facet_field_create(odr, facet_list->elements[index]->attributes, attrvalues.limit);
+            addterms(odr, new_list->elements[new_index], attrvalues.useattr);
+            new_index++;
+        }
     }
-    oi->num_elements = 1;
-    oi->list = odr_malloc(odr, oi->num_elements * sizeof(*oi->list));
-    oiu->category = 0;
-    oiu->which = Z_OtherInfo_externallyDefinedInfo;
-    oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
-    oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
-    oiu->information.externallyDefinedInfo->which = Z_External_userFacets;
-    oiu->information.externallyDefinedInfo->u.facetList = new_list;
-    oi->list[0] = oiu;
-    return oi;
+    new_list->num = new_index;
+    if (new_index > 0) {
+        Z_OtherInformation *oi = odr_malloc(odr, sizeof(*oi));
+        Z_OtherInformationUnit *oiu = odr_malloc(odr, sizeof(*oiu));
+        oi->num_elements = 1;
+        oi->list = odr_malloc(odr, oi->num_elements * sizeof(*oi->list));
+        oiu->category = 0;
+        oiu->which = Z_OtherInfo_externallyDefinedInfo;
+        oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
+        oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
+        oiu->information.externallyDefinedInfo->which = Z_External_userFacets;
+        oiu->information.externallyDefinedInfo->u.facetList = new_list;
+        oi->list[0] = oiu;
+        return oi;
+    }
+    return 0;
 }
 
 int ztest_search(void *handle, bend_search_rr *rr)
