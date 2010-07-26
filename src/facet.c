@@ -10,6 +10,16 @@
 /* Little helper to extract a string attribute */
 /* Gets the first string, there is usually only one */
 /* in case of errors, returns null */
+
+void facet_struct_init(struct attrvalues *attr_values) {
+    attr_values->errcode   = 0;
+    attr_values->errstring = 0;
+    attr_values->relation  = 0;
+    attr_values->useattr   = 0;
+    attr_values->useattrbuff[0] = 0;
+    attr_values->limit     = 0;
+}
+
 const char *stringattr( Z_ComplexAttribute *c ) {
     int i;
      Z_StringOrNumeric *son;
@@ -28,6 +38,7 @@ void useattr ( Z_AttributeElement *ae,
     const char *s;
     if ( ae->which == Z_AttributeValue_complex ) {
         s = stringattr( ae->value.complex );
+        yaz_log(YLOG_DEBUG, "useattr %s %s", s, av->useattr);
         if (s) {
             if (!av->useattr)
                 av->useattr = s;
@@ -97,9 +108,11 @@ void facetattrs( Z_AttributeList *attributes,
 {
     int i;
     Z_AttributeElement *ae;
+    yaz_log(YLOG_DEBUG, "Attribute num attributes: %d", attributes->num_attributes);
     for ( i=0; i < attributes->num_attributes; i++ ) {
         ae = attributes->attributes[i];
         /* ignoring the attributeSet here */
+        yaz_log(YLOG_DEBUG, "Attribute type %d", (int) *ae->attributeType);
         if ( *ae->attributeType == 1 ) { /* use attribute */
             useattr(ae, av);
         } else if ( *ae->attributeType == 2 ) { /* sortorder */
@@ -111,8 +124,7 @@ void facetattrs( Z_AttributeList *attributes,
             sprintf(av->useattrbuff, ODR_INT_PRINTF,
                         *ae-> attributeType);
             av->errstring = av->useattrbuff;
-            yaz_log(YLOG_DEBUG,"Unsupported attribute type %s",
-                av->useattrbuff);
+            yaz_log(YLOG_DEBUG, "Unsupported attribute type %s", av->useattrbuff);
             /* would like to give a better message, but the standard */
             /* tells me to return the attribute type */
         }
