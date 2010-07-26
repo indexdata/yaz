@@ -87,6 +87,7 @@ void limitattr ( Z_AttributeElement *ae,
   /* TODO - check numeric first, then value! */
     if ( ae->which == Z_AttributeValue_numeric ) {
         av->limit = *ae->value.numeric;
+        yaz_log(YLOG_DEBUG, "limitattr %d ", av->limit);
     } else {
         av->errcode = YAZ_BIB1_UNSUPP_ATTRIBUTE;
         av->errstring = "non-numeric limit attribute";
