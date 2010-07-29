@@ -278,6 +278,8 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
         oiu->which = Z_OtherInfo_externallyDefinedInfo;
         oiu->information.externallyDefinedInfo = odr_malloc(odr, sizeof(*oiu->information.externallyDefinedInfo));
         oiu->information.externallyDefinedInfo->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
+        oiu->information.externallyDefinedInfo->descriptor = 0;
+        oiu->information.externallyDefinedInfo->indirect_reference = 0;
         oiu->information.externallyDefinedInfo->which = Z_External_userFacets;
         oiu->information.externallyDefinedInfo->u.facetList = new_list;
         oi->list[0] = oiu;
