@@ -26,6 +26,7 @@
 
 static int stop = 0;
 
+/*
 static int send_packet(const char *host)
 {
     char buf[PACKET_SIZE];
@@ -51,7 +52,9 @@ static int send_packet(const char *host)
     cs_close(cs);
     return 0;
 }
+*/
 
+/*
 static void test_file(const char *fname)
 {
     Z_GDU *req;
@@ -61,7 +64,7 @@ static void test_file(const char *fname)
     int fd =open(fname, O_RDONLY, 0666);
     if (fd == -1)
     {
-        yaz_log(LOG_ERRNO|LOG_FATAL, "open %s", fname);
+        yaz_log(YLOG_ERRNO|YLOG_FATAL, "open %s", fname);
         exit (1);
     }
     while (off < sizeof(buf))
@@ -69,7 +72,7 @@ static void test_file(const char *fname)
         ssize_t rd;
         rd = read(fd, buf+off, sizeof(buf)-off);
         if (rd == -1) {
-            yaz_log(LOG_ERRNO|LOG_FATAL, "read %s", fname);
+            yaz_log(YLOG_ERRNO|YLOG_FATAL, "read %s", fname);
             exit (1);
         }
         if (rd == 0)
@@ -78,7 +81,7 @@ static void test_file(const char *fname)
     }
     if (close(fd) == -1)
     {
-        yaz_log(LOG_ERRNO|LOG_FATAL, "close %s", fname);
+        yaz_log(YLOG_ERRNO|YLOG_FATAL, "close %s", fname);
         exit (1);
     }
     odr_setbuf(odr, buf, off, 0);
@@ -86,6 +89,7 @@ static void test_file(const char *fname)
 
     odr_destroy(odr);
 }
+*/
 
 static void test_random(int run, const char *fname, const char *fname2,
                         int *estat)
@@ -111,7 +115,6 @@ static void test_random(int run, const char *fname, const char *fname2,
         char *mbuf;
         ODR odr;
 
-        nmem_init();
         odr = odr_createmem(ODR_DECODE);
         if (fname)
         {
@@ -119,7 +122,7 @@ static void test_random(int run, const char *fname, const char *fname2,
             int fd =open(fname, O_TRUNC|O_CREAT|O_WRONLY, 0666);
             if (fd == -1)
             {
-                yaz_log(LOG_ERRNO|LOG_FATAL, "open %s", fname);
+                yaz_log(YLOG_ERRNO|YLOG_FATAL, "open %s", fname);
                 exit (1);
             }
             while (sizeof(buf)-j-off > 0)
@@ -127,14 +130,14 @@ static void test_random(int run, const char *fname, const char *fname2,
                 ssize_t wrote;
                 wrote = write(fd, buf+off+j, sizeof(buf)-j-off);
                 if (wrote <= 0) {
-                    yaz_log(LOG_ERRNO|LOG_FATAL, "write %s", fname);
+                    yaz_log(YLOG_ERRNO|YLOG_FATAL, "write %s", fname);
                     exit (1);
                 }
                 off += wrote;
             }
             if (close(fd) == -1)
             {
-                yaz_log(LOG_ERRNO|LOG_FATAL, "close %s", fname);
+                yaz_log(YLOG_ERRNO|YLOG_FATAL, "close %s", fname);
                 exit (1);
             }
         }
@@ -154,7 +157,6 @@ static void test_random(int run, const char *fname, const char *fname2,
         free(mbuf);
         odr_reset(odr);
         odr_destroy(odr);
-        nmem_exit();
     }
     if (dumpfile && dumpfile != stdout)
         fclose(dumpfile);
