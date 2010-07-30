@@ -15,10 +15,13 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
 #include <yaz/sc.h>
+
+#ifdef WIN32
 
 /** \brief handle that is used to stop that service should be stopped */
 HANDLE    default_stop_event = NULL;
@@ -51,14 +54,20 @@ static int default_sc_main(yaz_sc_t s, int argc, char **argv)
     return 0;
 }
 
+#endif
+
 /** \brief the system main function */
 int main(int argc, char **argv)
 {
+#ifdef WIN32
     yaz_sc_t s = yaz_sc_create("yaz_sc_test", "YAZ Service Control Test");
 
     yaz_sc_program(s, argc, argv, default_sc_main, default_sc_stop);
 
     yaz_sc_destroy(&s);
+#else
+    printf("Only on Windows\n");
+#endif
     exit(0);
 }
 /*
