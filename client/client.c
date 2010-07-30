@@ -786,7 +786,7 @@ int cmd_authentication(const char *arg)
             auth->which = Z_IdAuthentication_anonymous;
             auth->u.anonymous = odr_nullval();
             printf("Authentication set to Anonymous\n");
-        } 
+        }
         else
         {
             auth->which = Z_IdAuthentication_open;
@@ -907,7 +907,7 @@ static void display_record(Z_External *r)
             yaz_iconv_t cd = 0;
             yaz_marc_t mt = yaz_marc_create();
             const char *from = 0;
-            
+
             if (marcCharset && !strcmp(marcCharset, "auto"))
             {
                 if (!oid_oidcmp(oid, yaz_oid_recsyn_usmarc))
@@ -935,7 +935,7 @@ static void display_record(Z_External *r)
                     printf("\n");
                 }
             }
-            
+
             if (yaz_marc_decode_buf(mt, octet_buf, octet_len,
                                     &result, &rlen)> 0)
             {
@@ -1289,14 +1289,14 @@ static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
     const char *username = 0;
     const char *password = 0;
     struct Z_HTTP_Header *h;
-    char *combined_cookies;
+    char *combined_cookies = 0;
     int combined_cookies_len = 0;
     Z_GDU *gdu = get_HTTP_Request_url(out, uri);
 
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
     z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Accept",
                       "text/xml");
-    
+
     for (h = cookie_hres->headers; h; h = h->next)
     {
         if (!strcmp(h->name, "Set-Cookie")) {
@@ -2655,11 +2655,11 @@ static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url)
         cp0 = cp0+3;
     else
         cp0 = host;
-    
+
     cp1 = strchr(cp0, '/');
     if (!cp1)
         cp1 = cp0 + strlen(cp0);
-    
+
     if (cp0 && cp1)
     {
         char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
@@ -2678,7 +2678,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
     ODR out = odr_createmem(ODR_ENCODE);
     ODR in = odr_createmem(ODR_DECODE);
     Z_GDU *gdu = get_HTTP_Request_url(out, uri);
-    
+
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
     if (username && password)
     {
@@ -2690,7 +2690,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                       "text/xml");
     if (!z_GDU(out, &gdu, 0, 0))
     {
-        yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);        
+        yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);
     }
     else
     {
@@ -2702,7 +2702,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
         {
             int len;
             char *buf = odr_getbuf(out, &len, 0);
-            
+
             if (cs_put(conn, buf, len) < 0)
                 yaz_log(YLOG_WARN, "cs_put failed URL:%s", uri);
             else
@@ -2730,7 +2730,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                         result = wrbuf_alloc();
                         if (show_headers)
                         {
-                            
+
                             wrbuf_printf(result, "HTTP %d\n", res->code);
                             for (h = res->headers; h; h = h->next)
                                 wrbuf_printf(result, "%s: %s\n",
@@ -2749,7 +2749,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
     odr_destroy(in);
     return result;
 }
-    
+
 
 static int cmd_url(const char *arg)
 {
@@ -3602,7 +3602,7 @@ int cmd_format(const char *arg)
     while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0
            && idx < RECORDSYNTAX_MAX)
     {
-        if (strcmp(form_str, "none") && 
+        if (strcmp(form_str, "none") &&
             !yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN, form_str, out))
         {
             printf("Bad format: %s\n", form_str);
@@ -3615,7 +3615,7 @@ int cmd_format(const char *arg)
         xfree(recordsyntax_list[i]);
         recordsyntax_list[i] = 0;
     }
-    
+
     cp = arg;
     while (sscanf(cp, "%40s%n", form_str, &nor) >= 1 && nor > 0
            && idx < RECORDSYNTAX_MAX)
@@ -3868,7 +3868,7 @@ int cmd_source(const char* arg, int echo )
         return -1;
     }
 
-    while (fgets(line, sizeof(line), includeFile)) 
+    while (fgets(line, sizeof(line), includeFile))
     {
         if (strlen(line) < 2)
             continue;
