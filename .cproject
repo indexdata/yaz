@@ -5,7 +5,13 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805" moduleId="org.eclipse.cdt.core.settings" name="Default">
-				<externalSettings/>
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/yaz"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/yaz/Default"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="yaz"/>
+					</externalSetting>
+				</externalSettings>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.MachO" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -16,28 +22,92 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="yaz" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration artifactName="yaz" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" description="" id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805.761048058" name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.1850362137" name="cdt.managedbuild.toolchain.gnu.macosx.base" superClass="cdt.managedbuild.toolchain.gnu.macosx.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO" id="cdt.managedbuild.target.gnu.platform.macosx.base.736382379" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.gnu.platform.macosx.base"/>
-							<builder buildPath="/Users/dennis/proj/yaz" id="cdt.managedbuild.target.gnu.builder.macosx.base.1919262822" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
+							<builder buildPath="/Users/dennis/proj/yaz" id="cdt.managedbuild.target.gnu.builder.macosx.base.1919262822" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" parallelizationNumber="-2" stopOnErr="false" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1175453977" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base">
+								<option defaultValue="true" id="macosx.c.link.option.nostart.1974371577" name="Do not use standard start files (-nostartfiles)" superClass="macosx.c.link.option.nostart" valueType="boolean"/>
+								<option defaultValue="true" id="macosx.c.link.option.nodeflibs.1314356050" name="Do not use default libraries (-nodefaultlibs)" superClass="macosx.c.link.option.nodeflibs" valueType="boolean"/>
+								<option defaultValue="true" id="macosx.c.link.option.shared.708972951" name="Shared (-dynamiclib)" superClass="macosx.c.link.option.shared" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.macosx.c.linker.input.1936915484" superClass="cdt.managedbuild.tool.macosx.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.524764932" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base"/>
+							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.524764932" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base">
+								<option defaultValue="true" id="macosx.cpp.link.option.shared.2082905640" name="Shared (-dynamiclib)" superClass="macosx.cpp.link.option.shared" valueType="boolean"/>
+							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1871976203" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1256561366" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1171332498" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1658301018" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1155166778" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="HAVE_STDLIB_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_STRING_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_MEMORY_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_STRINGS_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_INTTYPES_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_STDINT_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_UNISTD_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_DLFCN_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_DIRENT_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_FNMATCH_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_WCHAR_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_LOCALE_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_LANGINFO_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_PWD_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_UNISTD_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_SELECT_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_SOCKET_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_STAT_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_TIME_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_TIMES_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_TYPES_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_UN_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_SYS_WAIT_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NETDB_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_ARPA_INET_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NETINET_TCP_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NETINET_IN_SYSTM_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NET_IF_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NETINET_IN_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_NETINET_IF_ETHER_H=1"/>
+									<listOptionValue builtIn="false" value="STDC_HEADERS=1"/>
+									<listOptionValue builtIn="false" value="HAVE_LONG_LONG1="/>
+									<listOptionValue builtIn="false" value="HAVE_READLINE_READLINE_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_READLINE_HISTORY_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_READLINE_COMPLETION_OVER=1"/>
+									<listOptionValue builtIn="false" value="HAVE_READLINE_RL_COMPLETION_MATCHES=1"/>
+									<listOptionValue builtIn="false" value="HAVE_ICONV_H=1"/>
+									<listOptionValue builtIn="false" value="HAVE_GETADDRINFO=1"/>
+									<listOptionValue builtIn="false" value="HAVE_VSNPRINTF=1"/>
+									<listOptionValue builtIn="false" value="HAVE_GETTIMEOFDAY=1"/>
+									<listOptionValue builtIn="false" value="HAVE_POLL=1"/>
+									<listOptionValue builtIn="false" value="HAVE_STRERROR_R=1"/>
+									<listOptionValue builtIn="false" value="HAVE_LOCALTIME_R=1"/>
+									<listOptionValue builtIn="false" value="HAVE_USLEEP=1"/>
+									<listOptionValue builtIn="false" value="YAZ_SOCKLEN_T=socklen_t"/>
+									<listOptionValue builtIn="false" value="YAZ_USE_NEW_LOG=1"/>
+									<listOptionValue builtIn="false" value="YAZ_HAVE_XML2=1"/>
+									<listOptionValue builtIn="false" value="YAZ_HAVE_XSLT=1"/>
+									<listOptionValue builtIn="false" value="YAZ_HAVE_EXSLT=1"/>
+									<listOptionValue builtIn="false" value="HAVE_XSLTSAVERESULTTOSTRING=1"/>
+								</option>
+								<option id="gnu.c.compiler.option.include.paths.773210380" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+									<listOptionValue builtIn="false" value="/usr/local/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1402339125" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.368006805.1041315687" name="client.c" rcbsApplicability="disable" resourcePath="client/client.c" toolsToInvoke="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707.2080555490">
+						<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707.2080555490" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707"/>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="*.lo|*.o" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 						<entry excluding="*.o|*.lo" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="util"/>
@@ -51,7 +121,26 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
-			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+				<buildTargets>
+					<target name="yaz-client" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-C client</buildArguments>
+						<buildTarget>yaz-client</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+					<target name="libyaz" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+						<buildCommand>make</buildCommand>
+						<buildArguments>-C src</buildArguments>
+						<buildTarget>all</buildTarget>
+						<stopOnError>false</stopOnError>
+						<useDefaultCommand>false</useDefaultCommand>
+						<runAllBuilders>true</runAllBuilders>
+					</target>
+				</buildTargets>
+			</storageModule>
 			<storageModule moduleId="scannerConfiguration">
 				<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 				<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
@@ -134,6 +223,89 @@
 						<parser enabled="true"/>
 					</scannerInfoProvider>
 				</profile>
+				<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.368006805;cdt.managedbuild.toolchain.gnu.macosx.base.368006805.1041315687;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707.2080555490;cdt.managedbuild.tool.gnu.c.compiler.input.1402339125">
+					<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile"/>
+					<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="makefileGenerator">
+							<runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/${specs_file}&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'g++ -E -P -v -dD &quot;${plugin_state_location}/specs.cpp&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+					<profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
+						<buildOutputProvider>
+							<openAction enabled="true" filePath=""/>
+							<parser enabled="true"/>
+						</buildOutputProvider>
+						<scannerInfoProvider id="specsFile">
+							<runAction arguments="-c 'gcc -E -P -v -dD &quot;${plugin_state_location}/specs.c&quot;'" command="sh" useDefault="true"/>
+							<parser enabled="true"/>
+						</scannerInfoProvider>
+					</profile>
+				</scannerConfigBuildInfo>
 				<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.368006805;cdt.managedbuild.toolchain.gnu.macosx.base.368006805.791362720;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.2071622157;cdt.managedbuild.tool.gnu.c.compiler.input.986509299">
 					<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 					<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
