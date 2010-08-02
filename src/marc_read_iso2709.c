@@ -74,18 +74,34 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         }
         if (yaz_marc_get_debug(mt))
         {
-            yaz_marc_cprintf(mt, "Directory offset %d: Tag %.3s",
-                             entry_p, buf+entry_p);
+            WRBUF hex = wrbuf_alloc();
+
+            wrbuf_puts(hex, "Tag ");
+            wrbuf_write_escaped(hex, buf + entry_p, 3);
+            wrbuf_puts(hex, ", length ");
+            wrbuf_write_escaped(hex, buf + entry_p + 3,
+                                length_data_entry);
+            wrbuf_puts(hex, ", starting ");
+            wrbuf_write_escaped(hex, buf + entry_p + 3 + length_data_entry,
+                                length_starting);
+            yaz_marc_cprintf(mt, "Directory offset %d: %s",
+                             entry_p, wrbuf_cstr(hex));
+            wrbuf_destroy(hex);
         }
-        /* Check for digits in length info */
+        /* Check for digits in length+starting info */
         while (--l >= 3)
             if (!isdigit(*(const unsigned char *) (buf + entry_p+l)))
                 break;
         if (l >= 3)
         {
+            WRBUF hex = wrbuf_alloc();
             /* Not all digits, so stop directory scan */
+            wrbuf_write_escaped(hex, buf + entry_p, 
+                                length_data_entry + length_starting + 3);
             yaz_marc_cprintf(mt, "Directory offset %d: Bad value for data"
-                             " length and/or length starting", entry_p);
+                             " length and/or length starting (%s)", entry_p,
+                             wrbuf_cstr(hex));
+            wrbuf_destroy(hex);
             break;
         }
         entry_p += 3 + length_data_entry + length_starting;
