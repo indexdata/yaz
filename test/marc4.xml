@@ -5,7 +5,7 @@
 <!-- Base address at offsets 12..16 should hold a number. Assuming 0 -->
 <!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
   <leader>009140091a22a  22003370 </leader>
-<!-- Directory offset 24: Bad value for data length and/or length starting -->
+<!-- Directory offset 24: Bad value for data length and/or length starting ( 45  00100170) -->
 <!-- Base address not at end of directory, base 0, end 25 -->
 </record>
 </collection>
