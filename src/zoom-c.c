@@ -2695,7 +2695,7 @@ static char *get_term_cstr(ODR odr, Z_Term *term) {
 
 static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
     int term_index;
-    struct attrvalues attr_values;
+    struct yaz_facet_attr attr_values;
     ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
     memset(&attr_values, 0, sizeof(attr_values));
     facetattrs(facet->attributes, &attr_values);

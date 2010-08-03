@@ -23,7 +23,7 @@
 /* Gets the first string, there is usually only one */
 /* in case of errors, returns null */
 
-void facet_struct_init(struct attrvalues *attr_values) {
+void facet_struct_init(struct yaz_facet_attr *attr_values) {
     attr_values->errcode   = 0;
     attr_values->errstring = 0;
     attr_values->relation  = 0;
@@ -45,7 +45,7 @@ const char *stringattr( Z_ComplexAttribute *c ) {
 
 /* Use attribute, @attr1, can be numeric or string */
 void useattr ( Z_AttributeElement *ae,
-                       struct attrvalues *av )
+                       struct yaz_facet_attr *av )
 {
     const char *s;
     if ( ae->which == Z_AttributeValue_complex ) {
@@ -71,7 +71,7 @@ void useattr ( Z_AttributeElement *ae,
 
 /* TODO rename to sortorder attr */
 void relationattr ( Z_AttributeElement *ae,
-                           struct attrvalues *av )
+                           struct yaz_facet_attr *av )
 {
     if ( ae->which == Z_AttributeValue_numeric ) {
         if ( *ae->value.numeric == 0 )
@@ -94,7 +94,7 @@ void relationattr ( Z_AttributeElement *ae,
 } /* relationattr */
 
 void limitattr ( Z_AttributeElement *ae,
-                        struct attrvalues *av )
+                        struct yaz_facet_attr *av )
 {
   /* TODO - check numeric first, then value! */
     if ( ae->which == Z_AttributeValue_numeric ) {
@@ -117,7 +117,7 @@ void limitattr ( Z_AttributeElement *ae,
 */
 
 void facetattrs( Z_AttributeList *attributes,
-                          struct attrvalues *av )
+                          struct yaz_facet_attr *av )
 {
     int i;
     Z_AttributeElement *ae;

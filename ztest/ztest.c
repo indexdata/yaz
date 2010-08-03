@@ -251,7 +251,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     Z_FacetList *new_list = facet_list_create(odr, facet_list->num);
 
     for (index = 0; index < facet_list->num; index++) {
-        struct attrvalues attrvalues;
+        struct yaz_facet_attr attrvalues;
         facet_struct_init(&attrvalues);
         attrvalues.limit = 10;
         facetattrs(facet_list->elements[index]->attributes, &attrvalues);

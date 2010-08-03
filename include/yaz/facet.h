@@ -47,11 +47,11 @@ YAZ_BEGIN_CDECL
  *
  */
 
-/* A helper structure to extract all the attribute stuff
-   from one Z_AttributesList. The pointers will all be to
+/** A helper structure to extract all the attribute stuff
+   from one Z_AttributesList for facets. The pointers will all be to
    the Z-structures, or to constants, so there is no need to
    worry about freeing them */
-struct attrvalues {
+struct yaz_facet_attr {
     int  errcode;   /* set in case of errors */
     char *errstring; /* opt */
     const char *useattr; /* @attr 1, from a string attr */
@@ -63,23 +63,23 @@ struct attrvalues {
 };
 
 YAZ_EXPORT
-void facet_struct_init(struct attrvalues *attr_values);
+void facet_struct_init(struct yaz_facet_attr *attr_values);
 
 /* Use attribute, @attr1, can be numeric or string */
 YAZ_EXPORT
-void useattr ( Z_AttributeElement *ae, struct attrvalues *av );
+void useattr ( Z_AttributeElement *ae, struct yaz_facet_attr *av );
 
 YAZ_EXPORT
-void relationattr ( Z_AttributeElement *ae, struct attrvalues *av );
+void relationattr ( Z_AttributeElement *ae, struct yaz_facet_attr *av );
 
 YAZ_EXPORT
-void limitattr ( Z_AttributeElement *ae, struct attrvalues *av );
+void limitattr ( Z_AttributeElement *ae, struct yaz_facet_attr *av );
 
 YAZ_EXPORT
-void limitattr ( Z_AttributeElement *ae, struct attrvalues *av );
+void limitattr ( Z_AttributeElement *ae, struct yaz_facet_attr *av );
 
 YAZ_EXPORT
-void facetattrs( Z_AttributeList *attributes, struct attrvalues *av );
+void facetattrs( Z_AttributeList *attributes, struct yaz_facet_attr *av );
 
 YAZ_EXPORT
 Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input);

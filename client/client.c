@@ -1649,7 +1649,7 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
 static void display_facet(Z_FacetField *facet) {
     if (facet->attributes) {
         Z_AttributeList *al = facet->attributes;
-        struct attrvalues attr_values;
+        struct yaz_facet_attr attr_values;
         attr_values.errcode = 0;
         attr_values.limit = -1;
         attr_values.useattr = 0;
