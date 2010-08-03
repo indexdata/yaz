@@ -1,4 +1,16 @@
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2010 Index Data
+ * See the file LICENSE for details.
+ */
 
+/** 
+ * \file facet.c
+ * \brief Facet utilities
+ */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/facet.h>
 #include <yaz/diagbib1.h>
@@ -180,4 +192,13 @@ void facet_list_field_set(ODR odr, Z_FacetList *list, Z_FacetField *field, int i
     assert(0 <= index && index < list->num);
     list->elements[index] = field;
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
 
