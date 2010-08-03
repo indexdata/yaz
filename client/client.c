@@ -1655,7 +1655,7 @@ static void display_facet(Z_FacetField *facet) {
         attr_values.useattr = 0;
         attr_values.relation = "default";
 
-        facetattrs(al, &attr_values);
+        yaz_facet_attr_get_z_attributes(al, &attr_values);
         if (!attr_values.errcode) {
             int term_index;
             printf("  %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);

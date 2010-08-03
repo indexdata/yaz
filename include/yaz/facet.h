@@ -62,23 +62,11 @@ struct yaz_facet_attr {
 };
 
 YAZ_EXPORT
-void facet_struct_init(struct yaz_facet_attr *attr_values);
-
-/* Use attribute, @attr1, can be numeric or string */
-YAZ_EXPORT
-void useattr(Z_AttributeElement *ae, struct yaz_facet_attr *av);
+void yaz_facet_attr_init(struct yaz_facet_attr *attr_values);
 
 YAZ_EXPORT
-void relationattr(Z_AttributeElement *ae, struct yaz_facet_attr *av);
-
-YAZ_EXPORT
-void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av);
-
-YAZ_EXPORT
-void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av);
-
-YAZ_EXPORT
-void facetattrs(Z_AttributeList *attributes, struct yaz_facet_attr *av);
+void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
+				     struct yaz_facet_attr *av);
 
 YAZ_EXPORT
 Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input);
