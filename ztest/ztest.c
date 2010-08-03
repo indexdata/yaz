@@ -258,7 +258,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
         yaz_log(YLOG_LOG, "Attributes: %s %d ", attrvalues.useattr, attrvalues.limit);
         if (attrvalues.errstring)
             yaz_log(YLOG_LOG, "Error parsing attributes: %s", attrvalues.errstring);
-        if (attrvalues.limit > 0) {
+        if (attrvalues.limit > 0 && attrvalues.useattr) {
             new_list->elements[new_index] = facet_field_create(odr, facet_list->elements[index]->attributes, attrvalues.limit);
             addterms(odr, new_list->elements[new_index], attrvalues.useattr);
             new_index++;
