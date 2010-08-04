@@ -245,14 +245,13 @@ static void do_hex_dump(const char* buf, size_t len)
 void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
-    int i = 0;
+    int i;
 
     yaz_oi_APDU(a, &oi);
     if (facet_list) {
         yaz_oi_set_facetlist_oid(oi, out, yaz_oid_userinfo_facet_1, 1, facet_list);
-        i++;
     }
-    for(; i<maxOtherInfosSupported; ++i)
+    for (i = 0; i < maxOtherInfosSupported; ++i)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
