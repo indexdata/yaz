@@ -193,7 +193,8 @@ ODR getODROutputStream(void)
 
 const char* query_type_as_string(QueryType q)
 {
-    switch (q) {
+    switch (q)
+    {
     case QueryType_Prefix: return "prefix (RPN sent to server)";
     case QueryType_CCL: return "CCL (CCL sent to server) ";
     case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
@@ -213,7 +214,7 @@ static void do_hex_dump(const char* buf, size_t len)
         for (i = 0; i < len ; i = i+16 )
         {
             printf(" %4.4ld ", (long) i);
-            for(x=0 ; i+x<len && x<16; ++x)
+            for (x = 0 ; i+x < len && x < 16; ++x)
             {
                 printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
             }
@@ -350,7 +351,8 @@ static void send_initRequest(const char* type_and_host)
                               1, type_and_host);
     }
 
-    if (negotiationCharset || yazLang) {
+    if (negotiationCharset || yazLang)
+    {
         Z_OtherInformation **p;
         Z_OtherInformationUnit *p0;
 
@@ -406,16 +408,18 @@ static int process_initResponse(Z_InitResponse *res)
     if (res->userInformationField)
     {
         Z_External *uif = res->userInformationField;
-        if (uif->which == Z_External_userInfo1) {
+        if (uif->which == Z_External_userInfo1)
             render_initUserInfo(uif->u.userInfo1);
-        } else {
+        else
+        {
             printf("UserInformationfield:\n");
             if (!z_External(print, (Z_External**)&uif, 0, 0))
             {
                 odr_perror(print, "Printing userinfo\n");
                 odr_reset(print);
             }
-            if (uif->which == Z_External_octet) {
+            if (uif->which == Z_External_octet)
+            {
                 printf("Guessing visiblestring:\n");
                 printf("'%.*s'\n", uif->u.octet_aligned->len,
                        uif->u.octet_aligned->buf);
@@ -454,8 +458,8 @@ static int process_initResponse(Z_InitResponse *res)
     if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
         setnumber = 0;
 
-    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel)) {
-
+    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel))
+    {
         Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(res->otherInfo);
 
@@ -491,18 +495,21 @@ static int process_initResponse(Z_InitResponse *res)
 }
 
 
-static void render_initUserInfo(Z_OtherInformation *ui1) {
+static void render_initUserInfo(Z_OtherInformation *ui1)
+{
     int i;
     printf("Init response contains %d otherInfo unit%s:\n",
            ui1->num_elements, ui1->num_elements == 1 ? "" : "s");
 
-    for (i = 0; i < ui1->num_elements; i++) {
+    for (i = 0; i < ui1->num_elements; i++)
+    {
         Z_OtherInformationUnit *unit = ui1->list[i];
         printf("  %d: otherInfo unit contains ", i+1);
         if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
             unit->information.externallyDefinedInfo &&
             unit->information.externallyDefinedInfo->which ==
-            Z_External_diag1) {
+            Z_External_diag1)
+        {
             render_diag(unit->information.externallyDefinedInfo->u.diag1);
         }
         else if (unit->which != Z_OtherInfo_externallyDefinedInfo)
@@ -520,14 +527,17 @@ static void render_initUserInfo(Z_OtherInformation *ui1) {
 
 
 /* ### should this share code with display_diagrecs()? */
-static void render_diag(Z_DiagnosticFormat *diag) {
+static void render_diag(Z_DiagnosticFormat *diag)
+{
     int i;
 
     printf("%d diagnostic%s:\n", diag->num, diag->num == 1 ? "" : "s");
-    for (i = 0; i < diag->num; i++) {
+    for (i = 0; i < diag->num; i++)
+    {
         Z_DiagnosticFormat_s *ds = diag->elements[i];
         printf("    %d: ", i+1);
-        switch (ds->which) {
+        switch (ds->which)
+        {
         case Z_DiagnosticFormat_s_defaultDiagRec: {
             Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
             /* ### should check `dd->diagnosticSetId' */
@@ -1297,12 +1307,14 @@ static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
 
     for (h = cookie_hres->headers; h; h = h->next)
     {
-        if (!strcmp(h->name, "Set-Cookie")) {
+        if (!strcmp(h->name, "Set-Cookie"))
+        {
             char *cp;
 
             if (!(cp = strchr(h->value, ';')))
                 cp = h->value + strlen(h->value);
-            if (cp - h->value >= 1) {
+            if (cp - h->value >= 1)
+            {
                 combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
                 memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
                 combined_cookies[combined_cookies_len + cp - h->value] = '\0';
@@ -1487,23 +1499,28 @@ static int send_searchRequest(const char *arg)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return 0;
         }
-    } else if (myQueryType == QueryType_CQL2RPN) {
+    } 
+    else if (myQueryType == QueryType_CQL2RPN)
+    {
         /* ### All this code should be wrapped in a utility function */
         CQL_parser parser;
         struct cql_node *node;
         const char *addinfo;
-        if (cqltrans == 0) {
+        if (cqltrans == 0)
+        {
             printf("Can't use CQL: no translation file.  Try set_cqlfile\n");
             return 0;
         }
         parser = cql_parser_create();
-        if ((error = cql_parser_string(parser, arg)) != 0) {
+        if ((error = cql_parser_string(parser, arg)) != 0)
+        {
             printf("Can't parse CQL: must be a syntax error\n");
             return 0;
         }
         node = cql_parser_result(parser);
         if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
-                                       sizeof pqfbuf)) != 0) {
+                                       sizeof pqfbuf)) != 0)
+        {
             error = cql_transform_error(cqltrans, &addinfo);
             printf("Can't convert CQL to PQF: %s (addinfo=%s)\n",
                     cql_strerror(error), addinfo);
@@ -1610,7 +1627,8 @@ static int send_searchRequest(const char *arg)
     return 2;
 }
 
-static void display_term(Z_Term *term) {
+static void display_term(Z_Term *term)
+{
     switch (term->which)
     {
     case Z_Term_general:
@@ -1644,8 +1662,10 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
     }
 }
 
-static void display_facet(Z_FacetField *facet) {
-    if (facet->attributes) {
+static void display_facet(Z_FacetField *facet)
+{
+    if (facet->attributes)
+    {
         Z_AttributeList *al = facet->attributes;
         struct yaz_facet_attr attr_values;
         attr_values.errcode = 0;
@@ -1654,10 +1674,12 @@ static void display_facet(Z_FacetField *facet) {
         attr_values.relation = "default";
 
         yaz_facet_attr_get_z_attributes(al, &attr_values);
-        if (!attr_values.errcode) {
+        if (!attr_values.errcode)
+        {
             int term_index;
             printf("  %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
-            for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
+            for (term_index = 0 ; term_index < facet->num_terms; term_index++)
+            {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
                 display_term(facetTerm->term);
                 printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
@@ -1672,7 +1694,8 @@ static void* display_facets(Z_FacetList *fl)
     int index;
     printf("Facets(%d): \n", fl->num);
 
-    for (index = 0; index < fl->num ; index++) {
+    for (index = 0; index < fl->num ; index++)
+    {
         display_facet(fl->elements[index]);
     }
     return 0;
@@ -1961,7 +1984,8 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         printf("unknown\n");
     }
     if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
-        (res->num_diagnostics != 0) ) {
+        (res->num_diagnostics != 0) )
+    {
         display_diagrecs(res->diagnostics, res->num_diagnostics);
     }
     print_refid (res->referenceId);
@@ -2877,7 +2901,8 @@ static int cmd_facets(const char *arg)
         ODR odr = odr_createmem(ODR_ENCODE);
         facet_list = yaz_pqf_parse_facet_list(odr, arg);
 
-        if (!facet_list) {
+        if (!facet_list)
+        {
             printf("Invalid facet list: %s", arg);
             return 0;
         }
@@ -3229,10 +3254,11 @@ int cmd_cancel(const char *arg)
 }
 
 
-int cmd_cancel_find(const char *arg) {
-    int fres;
-    fres=cmd_find(arg);
-    if( fres > 0 ) {
+int cmd_cancel_find(const char *arg)
+{
+    int fres = cmd_find(arg);
+    if (fres > 0)
+    {
         return cmd_cancel("");
     };
     return fres;
@@ -3835,7 +3861,8 @@ int cmd_charset(const char* arg)
 
 int cmd_lang(const char* arg)
 {
-    if (*arg == '\0') {
+    if (*arg == '\0')
+    {
         printf("Current language is `%s'\n", yazLang ? yazLang : "none");
         return 1;
     }
@@ -3928,7 +3955,7 @@ int cmd_set_berfile(const char *arg)
 
 int cmd_set_apdufile(const char *arg)
 {
-    if(apdu_file && apdu_file != stderr && apdu_file != stderr)
+    if (apdu_file && apdu_file != stderr && apdu_file != stderr)
         fclose(apdu_file);
     if (!strcmp(arg, ""))
         apdu_file = 0;
@@ -3966,7 +3993,8 @@ int cmd_set_cqlfile(const char* arg)
 {
     cql_transform_t newcqltrans;
 
-    if ((newcqltrans = cql_transform_open_fname(arg)) == 0) {
+    if ((newcqltrans = cql_transform_open_fname(arg)) == 0)
+    {
         perror("unable to open CQL file");
         return 0;
     }
@@ -3980,17 +4008,18 @@ int cmd_set_cqlfile(const char* arg)
 
 int cmd_set_auto_reconnect(const char* arg)
 {
-    if(strlen(arg)==0) {
+    if (strlen(arg)==0)
         auto_reconnect = ! auto_reconnect;
-    } else if(strcmp(arg,"on")==0) {
+    else if (strcmp(arg,"on")==0)
         auto_reconnect = 1;
-    } else if(strcmp(arg,"off")==0) {
+    else if (strcmp(arg,"off")==0)
         auto_reconnect = 0;
-    } else {
+    else
+    {
         printf("Error use on or off\n");
         return 1;
     }
-
+    
     if (auto_reconnect)
         printf("Set auto reconnect enabled.\n");
     else
@@ -4002,13 +4031,14 @@ int cmd_set_auto_reconnect(const char* arg)
 
 int cmd_set_auto_wait(const char* arg)
 {
-    if(strlen(arg)==0) {
+    if (strlen(arg)==0)
         auto_wait = ! auto_wait;
-    } else if(strcmp(arg,"on")==0) {
+    else if (strcmp(arg,"on")==0)
         auto_wait = 1;
-    } else if(strcmp(arg,"off")==0) {
+    else if (strcmp(arg,"off")==0)
         auto_wait = 0;
-    } else {
+    else
+    {
         printf("Error use on or off\n");
         return 1;
     }
@@ -4023,7 +4053,8 @@ int cmd_set_auto_wait(const char* arg)
 
 int cmd_set_marcdump(const char* arg)
 {
-    if(marc_file && marc_file != stderr) { /* don't close stdout*/
+    if (marc_file && marc_file != stderr)
+    { /* don't close stdout*/
         fclose(marc_file);
     }
 
@@ -4053,7 +4084,8 @@ static void marc_file_write(const char *buf, size_t sz)
 /*
    this command takes 3 arge {name class oid}
 */
-int cmd_register_oid(const char* args) {
+int cmd_register_oid(const char* args)
+{
     static struct {
         char* className;
         oid_class oclass;
@@ -4081,12 +4113,14 @@ int cmd_register_oid(const char* args) {
     Odr_oid oid[OID_SIZE];
 
     if (sscanf(args, "%100[^ ] %100[^ ] %100s",
-                oname_str,oclass_str, oid_str) < 1) {
+                oname_str,oclass_str, oid_str) < 1)
+    {
         printf("Error in register command \n");
         return 0;
     }
 
-    for (i = 0; oid_classes[i].className; i++) {
+    for (i = 0; oid_classes[i].className; i++)
+    {
         if (!strcmp(oid_classes[i].className, oclass_str))
         {
             oidclass=oid_classes[i].oclass;
@@ -4094,7 +4128,8 @@ int cmd_register_oid(const char* args) {
         }
     }
 
-    if(!(oid_classes[i].className)) {
+    if (!(oid_classes[i].className))
+    {
         printf("Unknown oid class %s\n",oclass_str);
         return 0;
     }
@@ -4112,7 +4147,7 @@ int cmd_register_oid(const char* args) {
 int cmd_push_command(const char* arg)
 {
 #if HAVE_READLINE_HISTORY_H
-    if(strlen(arg)>1)
+    if (strlen(arg) > 1)
         add_history(arg);
 #else
     fprintf(stderr,"Not compiled with the readline/history module\n");
@@ -4198,7 +4233,8 @@ static void initialize(const char *rc_file)
     rl_attempted_completion_function =
         (char **(*)(const char *, int, int)) readline_completer;
 #endif
-    for(i = 0; i < maxOtherInfosSupported; ++i) {
+    for (i = 0; i < maxOtherInfosSupported; ++i)
+    {
         extraOtherInfos[i].oid[0] = -1;
         extraOtherInfos[i].value = 0;
     }
@@ -4579,7 +4615,8 @@ int cmd_cclparse(const char* arg)
 
     rpn = ccl_find_str(bibset, arg, &error, &pos);
 
-    if (error) {
+    if (error)
+    {
         int ioff = 3+strlen(last_cmd)+1+pos;
         printf("%*s^ - ", ioff, " ");
         printf("%s\n", ccl_err_msg(error));
@@ -4609,7 +4646,8 @@ int cmd_set_otherinfo(const char* args)
     sscan_res = sscanf(args, "%d %100[^ ] %100s",
                         &otherinfoNo, oidstr, otherinfoString);
 
-    if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported) {
+    if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported)
+    {
         printf("Error otherinfo index too large (%d>=%d)\n",
                otherinfoNo,maxOtherInfosSupported);
         return 0;
@@ -4624,7 +4662,8 @@ int cmd_set_otherinfo(const char* args)
         extraOtherInfos[otherinfoNo].value = 0;
         return 0;
     }
-    if (sscan_res != 3) {
+    if (sscan_res != 3)
+    {
         printf("Error in set_otherinfo command \n");
         return 0;
     }
@@ -4647,8 +4686,9 @@ int cmd_set_otherinfo(const char* args)
 
 int cmd_sleep(const char* args )
 {
-    int sec=atoi(args);
-    if( sec > 0 ) {
+    int sec = atoi(args);
+    if (sec > 0)
+    {
 #ifdef WIN32
         Sleep(sec*1000);
 #else
@@ -4686,7 +4726,7 @@ int cmd_list_otherinfo(const char* args)
     }
     else
     {
-        for(i = 0; i < maxOtherInfosSupported; ++i)
+        for (i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
             {
@@ -4705,7 +4745,8 @@ int cmd_list_otherinfo(const char* args)
 }
 
 
-int cmd_list_all(const char* args) {
+int cmd_list_all(const char* args)
+{
     int i;
 
     /* connection options */
@@ -4720,10 +4761,12 @@ int cmd_list_all(const char* args) {
     printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
     printf("auto_wait            : %s\n",auto_wait?"on":"off");
 
-    if (!auth) {
+    if (!auth)
         printf("Authentication       : none\n");
-    } else {
-        switch(auth->which) {
+    else
+    {
+        switch (auth->which)
+        {
         case Z_IdAuthentication_idPass:
             printf("Authentication       : IdPass\n");
             printf("    Login User       : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
@@ -4777,9 +4820,11 @@ int cmd_list_all(const char* args) {
 
 int cmd_clear_otherinfo(const char* args)
 {
-    if(strlen(args)>0) {
+    if (strlen(args) > 0)
+    {
         int otherinfoNo = atoi(args);
-        if (otherinfoNo >= maxOtherInfosSupported) {
+        if (otherinfoNo >= maxOtherInfosSupported)
+        {
             printf("Error otherinfo index too large (%d>=%d)\n",
                    otherinfoNo, maxOtherInfosSupported);
             return 0;
@@ -4791,9 +4836,11 @@ int cmd_clear_otherinfo(const char* args)
             xfree(extraOtherInfos[otherinfoNo].value);
             extraOtherInfos[otherinfoNo].value = 0;
         }
-    } else {
+    }
+    else
+    {
         int i;
-        for(i = 0; i < maxOtherInfosSupported; ++i)
+        for (i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
             {
@@ -4808,15 +4855,13 @@ int cmd_clear_otherinfo(const char* args)
 
 int cmd_wait_response(const char *arg)
 {
+    int i;
     int wait_for = atoi(arg);
-    int i=0;
-    if( wait_for < 1 ) {
+    if (wait_for < 1) 
         wait_for = 1;
-    };
 
-    for( i=0 ; i < wait_for ; ++i ) {
+    for (i = 0 ; i < wait_for; ++i )
         wait_and_handle_response(1);
-    };
     return 0;
 }
 
@@ -4980,18 +5025,20 @@ int cmd_register_tab(const char* arg)
     int num_of_tabs;
     const char** tabslist;
 
-    if (sscanf(arg, "%100s %100s", command, tabargument) < 1) {
+    if (sscanf(arg, "%100s %100s", command, tabargument) < 1)
+    {
         return 0;
     }
 
     /* locate the amdn in the list */
-    for (i = 0; cmd_array[i].cmd; i++) {
-        if (!strncmp(cmd_array[i].cmd, command, strlen(command))) {
+    for (i = 0; cmd_array[i].cmd; i++)
+    {
+        if (!strncmp(cmd_array[i].cmd, command, strlen(command)))
             break;
-        }
     }
 
-    if (!cmd_array[i].cmd) {
+    if (!cmd_array[i].cmd)
+    {
         fprintf(stderr,"Unknown command %s\n",command);
         return 1;
     }
@@ -5003,9 +5050,8 @@ int cmd_register_tab(const char* arg)
     num_of_tabs=0;
 
     tabslist = cmd_array[i].local_tabcompletes;
-    for(; tabslist && *tabslist; tabslist++) {
+    for (; tabslist && *tabslist; tabslist++)
         num_of_tabs++;
-    }
 
     cmd_array[i].local_tabcompletes = (const char **)
         realloc(cmd_array[i].local_tabcompletes,
@@ -5041,12 +5087,12 @@ void process_cmd_line(char* line)
         char* p = arg;
         char* lastnonspace=NULL;
 
-        for(;*p; ++p) {
-            if(!isspace(*(unsigned char *) p)) {
+        for (; *p; ++p)
+        {
+            if (!isspace(*(unsigned char *) p))
                 lastnonspace = p;
-            }
         }
-        if(lastnonspace)
+        if (lastnonspace)
             *(++lastnonspace) = 0;
     }
 
@@ -5064,14 +5110,15 @@ void process_cmd_line(char* line)
         res = 1;
     }
 
-    if(apdu_file) fflush(apdu_file);
+    if (apdu_file)
+        fflush(apdu_file);
 
     if (res >= 2 && auto_wait)
         wait_and_handle_response(0);
 
-    if(apdu_file)
+    if (apdu_file)
         fflush(apdu_file);
-    if(marc_file)
+    if (marc_file)
         fflush(marc_file);
 }
 
@@ -5079,11 +5126,12 @@ static char *command_generator(const char *text, int state)
 {
 #if HAVE_READLINE_READLINE_H
     static int idx;
-    if (state==0) {
+    if (state == 0)
         idx = 0;
-    }
-    for( ; cmd_array[idx].cmd; ++idx) {
-        if (!strncmp(cmd_array[idx].cmd, text, strlen(text))) {
+    for (; cmd_array[idx].cmd; ++idx)
+    {
+        if (!strncmp(cmd_array[idx].cmd, text, strlen(text)))
+        {
             ++idx;  /* skip this entry on the next run */
             return strdup(cmd_array[idx-1].cmd);
         }
@@ -5110,7 +5158,8 @@ char **readline_completer(char *text, int start, int end)
 {
     completerFunctionType completerToUse;
 
-    if(start == 0) {
+    if (start == 0)
+    {
 #if HAVE_READLINE_RL_COMPLETION_MATCHES
         char** res = rl_completion_matches(text, command_generator);
 #else
@@ -5119,10 +5168,13 @@ char **readline_completer(char *text, int start, int end)
 #endif
         rl_attempted_completion_over = 1;
         return res;
-    } else {
+    }
+    else
+    {
         char arg[10240],word[32];
-        int i=0 ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0) {
+        int i ,res;
+        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0)
+        {
             rl_attempted_completion_over = 1;
             return NULL;
         }
@@ -5131,7 +5183,7 @@ char **readline_completer(char *text, int start, int end)
             if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
                 break;
 
-        if(!cmd_array[i].cmd)
+        if (!cmd_array[i].cmd)
             return NULL;
 
         default_completer_list = cmd_array[i].local_tabcompletes;
@@ -5141,7 +5193,8 @@ char **readline_completer(char *text, int start, int end)
         { /* if command completer is not defined use the default completer */
             completerToUse = default_completer;
         }
-        if (completerToUse) {
+        if (completerToUse)
+        {
 #ifdef HAVE_READLINE_RL_COMPLETION_MATCHES
             char** res=
                 rl_completion_matches(text, completerToUse);
@@ -5152,7 +5205,9 @@ char **readline_completer(char *text, int start, int end)
             if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return res;
-        } else {
+        }
+        else
+        {
             if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return 0;
