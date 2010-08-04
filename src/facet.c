@@ -19,6 +19,44 @@
 #include <yaz/otherinfo.h>
 #include <assert.h>
 
+void yaz_oi_set_facetlist(
+    Z_OtherInformation **otherInformation, ODR odr,
+    Z_FacetList *facet_list)
+{
+    int categoryValue = 1;
+    Z_External *z_external = 0;
+    Z_OtherInformationUnit *oi =
+        yaz_oi_update(otherInformation, odr, yaz_oid_userinfo_facet_1,
+                      categoryValue, 0);
+    if (!oi)
+        return;
+    oi->which = Z_OtherInfo_externallyDefinedInfo;
+    z_external = odr_malloc(odr, sizeof(*z_external));
+    z_external->which = Z_External_userFacets;
+    z_external->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_facet_1);
+    z_external->indirect_reference = 0;
+    z_external->descriptor = 0;
+    z_external->u.facetList = facet_list;
+    oi->information.externallyDefinedInfo = z_external;
+}
+
+Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation)
+{
+    int categoryValue = 1;
+    Z_External *z_external = 0;
+    Z_OtherInformationUnit *oi =
+        yaz_oi_update(otherInformation, 0, yaz_oid_userinfo_facet_1,
+                      categoryValue, 0);
+    if (!oi)
+        return 0;
+    z_external = oi->information.externallyDefinedInfo;
+
+    if (z_external && z_external->which == Z_External_userFacets) {
+        return z_external->u.facetList;
+    }
+    return 0;
+}
+
 /* Little helper to extract a string attribute */
 /* Gets the first string, there is usually only one */
 /* in case of errors, returns null */
@@ -166,15 +204,6 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
     }
     return;
 } /* facetattrs */
-
-
-Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input)
-{
-    Z_FacetList *facet_list =
-        yaz_oi_get_facetlist_oid(&search_input, odr,
-                                 yaz_oid_userinfo_facet_1, 1, 0);
-    return facet_list;
-}
 
 Z_Term *term_create(ODR odr, const char *cstr)
 {

@@ -69,9 +69,6 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
 				     struct yaz_facet_attr *av);
 
 YAZ_EXPORT
-Z_FacetList *extract_facet_request(ODR odr, Z_OtherInformation *search_input);
-
-YAZ_EXPORT
 Z_Term *term_create(ODR odr, const char *cstr);
 
 YAZ_EXPORT
@@ -91,6 +88,12 @@ Z_FacetList* facet_list_create(ODR odr, int num_facets);
 YAZ_EXPORT
 void facet_list_field_set(ODR odr, Z_FacetList *list, Z_FacetField *field,
 			  int index);
+YAZ_EXPORT
+void yaz_oi_set_facetlist(
+    Z_OtherInformation **otherInformation, ODR odr, Z_FacetList *facet_list);
+
+YAZ_EXPORT
+Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation);
 
 YAZ_END_CDECL
 

@@ -396,9 +396,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
 
     if (1)
     {
-        /* TODO Not general. Only handles one (Facet) OtherInformation. Overwrite  */
-        Z_FacetList *facet_list = extract_facet_request(rr->stream, rr->search_input);
-
+        Z_FacetList *facet_list = yaz_oi_get_facetlist(&rr->search_input);
         if (facet_list) {
             yaz_log(YLOG_LOG, "%d Facets in search request.", facet_list->num);
             rr->search_info = build_facet_response(rr->stream, facet_list);

@@ -1760,7 +1760,7 @@ static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
             Z_OtherInformation **oi;
             yaz_oi_APDU(apdu, &oi);
             if (facet_list) {
-                yaz_oi_set_facetlist_oid(oi, c->odr_out, yaz_oid_userinfo_facet_1, 1, facet_list);
+                yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
             }
         }
     }
