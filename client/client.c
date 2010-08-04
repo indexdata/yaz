@@ -171,13 +171,13 @@ struct eoi {
     char* value;
 } extraOtherInfos[maxOtherInfosSupported];
 
-void process_cmd_line(char* line);
+static void process_cmd_line(char* line);
 #if HAVE_READLINE_READLINE_H
-char **readline_completer(char *text, int start, int end);
+static char **readline_completer(char *text, int start, int end);
 #endif
 static char *command_generator(const char *text, int state);
-int cmd_register_tab(const char* arg);
-int cmd_querycharset(const char *arg);
+static int cmd_register_tab(const char* arg);
+static int cmd_querycharset(const char *arg);
 
 static void close_session(void);
 
@@ -191,7 +191,7 @@ ODR getODROutputStream(void)
     return out;
 }
 
-const char* query_type_as_string(QueryType q)
+static const char* query_type_as_string(QueryType q)
 {
     switch (q)
     {
@@ -243,7 +243,7 @@ static void do_hex_dump(const char* buf, size_t len)
     }
 }
 
-void add_otherInfos(Z_APDU *a)
+static void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
     int i;
@@ -752,7 +752,7 @@ static int session_connect(const char *arg)
     return r;
 }
 
-int cmd_open(const char *arg)
+static int cmd_open(const char *arg)
 {
     int r;
     if (arg)
@@ -773,7 +773,7 @@ int cmd_open(const char *arg)
     return r;
 }
 
-int cmd_authentication(const char *arg)
+static int cmd_authentication(const char *arg)
 {
     char **args;
     int r;
@@ -1965,7 +1965,7 @@ static int process_resourceControlRequest(Z_ResourceControlRequest *req)
     return 0;
 }
 
-void process_ESResponse(Z_ExtendedServicesResponse *res)
+static void process_ESResponse(Z_ExtendedServicesResponse *res)
 {
     printf("Status: ");
     switch (*res->operationStatus)
@@ -2063,7 +2063,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
-const char *get_ill_element(void *clientData, const char *element)
+static const char *get_ill_element(void *clientData, const char *element)
 {
     return 0;
 }
@@ -3146,7 +3146,7 @@ static void close_session(void)
     last_hit_count = 0;
 }
 
-void process_close(Z_Close *req)
+static void process_close(Z_Close *req)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
     Z_Close *res = apdu->u.close;
@@ -3206,7 +3206,7 @@ static int cmd_show(const char *arg)
     return 2;
 }
 
-void exit_client(int code)
+static void exit_client(int code)
 {
     file_history_save(file_history);
     file_history_destroy(&file_history);
@@ -3214,7 +3214,7 @@ void exit_client(int code)
     exit(code);
 }
 
-int cmd_quit(const char *arg)
+static int cmd_quit(const char *arg)
 {
     printf("See you later, alligator.\n");
     xmalloc_trav("");
@@ -3222,7 +3222,7 @@ int cmd_quit(const char *arg)
     return 0;
 }
 
-int cmd_cancel(const char *arg)
+static int cmd_cancel(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
     Z_TriggerResourceControlRequest *req =
@@ -3253,8 +3253,7 @@ int cmd_cancel(const char *arg)
     return 1;
 }
 
-
-int cmd_cancel_find(const char *arg)
+static int cmd_cancel_find(const char *arg)
 {
     int fres = cmd_find(arg);
     if (fres > 0)
@@ -3264,8 +3263,8 @@ int cmd_cancel_find(const char *arg)
     return fres;
 }
 
-int send_scanrequest(const char *set,  const char *query,
-                     Odr_int pp, Odr_int num, const char *term)
+static int send_scanrequest(const char *set,  const char *query,
+                            Odr_int pp, Odr_int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
@@ -3352,7 +3351,7 @@ int send_scanrequest(const char *set,  const char *query,
     return 2;
 }
 
-int send_sortrequest(const char *arg, int newset)
+static int send_sortrequest(const char *arg, int newset)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
@@ -3389,7 +3388,7 @@ int send_sortrequest(const char *arg, int newset)
     return 2;
 }
 
-void display_term_info(Z_TermInfo *t)
+static void display_term_info(Z_TermInfo *t)
 {
     if (t->displayTerm)
         printf("%s", t->displayTerm);
@@ -3407,7 +3406,7 @@ void display_term_info(Z_TermInfo *t)
         printf("\n");
 }
 
-void process_scanResponse(Z_ScanResponse *res)
+static void process_scanResponse(Z_ScanResponse *res)
 {
     int i;
     Z_Entry **entries = NULL;
@@ -3441,7 +3440,7 @@ void process_scanResponse(Z_ScanResponse *res)
                           res->entries->num_nonsurrogateDiagnostics);
 }
 
-void process_sortResponse(Z_SortResponse *res)
+static void process_sortResponse(Z_SortResponse *res)
 {
     printf("Received SortResponse: status=");
     switch (*res->sortStatus)
@@ -3462,7 +3461,7 @@ void process_sortResponse(Z_SortResponse *res)
                          res->num_diagnostics);
 }
 
-void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
+static void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
 {
     printf("Got deleteResultSetResponse status=" ODR_INT_PRINTF "\n",
            *res->deleteOperationStatus);
@@ -3478,7 +3477,7 @@ void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
     }
 }
 
-int cmd_sort_generic(const char *arg, int newset)
+static int cmd_sort_generic(const char *arg, int newset)
 {
     if (only_z3950())
         return 0;
@@ -3497,23 +3496,23 @@ int cmd_sort_generic(const char *arg, int newset)
     return 0;
 }
 
-int cmd_sort(const char *arg)
+static int cmd_sort(const char *arg)
 {
     return cmd_sort_generic(arg, 0);
 }
 
-int cmd_sort_newset(const char *arg)
+static int cmd_sort_newset(const char *arg)
 {
     return cmd_sort_generic(arg, 1);
 }
 
-int cmd_scanstep(const char *arg)
+static int cmd_scanstep(const char *arg)
 {
     scan_stepSize = atoi(arg);
     return 0;
 }
 
-int cmd_scanpos(const char *arg)
+static int cmd_scanpos(const char *arg)
 {
     int r = sscanf(arg, "%d", &scan_position);
     if (r == 0)
@@ -3521,7 +3520,7 @@ int cmd_scanpos(const char *arg)
     return 0;
 }
 
-int cmd_scansize(const char *arg)
+static int cmd_scansize(const char *arg)
 {
     int r = sscanf(arg, "%d", &scan_size);
     if (r == 0)
@@ -3585,12 +3584,12 @@ static int cmd_scan_common(const char *set, const char *arg)
     }
 }
 
-int cmd_scan(const char *arg)
+static int cmd_scan(const char *arg)
 {
     return cmd_scan_common(0, arg);
 }
 
-int cmd_setscan(const char *arg)
+static int cmd_setscan(const char *arg)
 {
     char setstring[100];
     int nor;
@@ -3602,7 +3601,7 @@ int cmd_setscan(const char *arg)
     return cmd_scan_common(setstring, arg + nor);
 }
 
-int cmd_schema(const char *arg)
+static int cmd_schema(const char *arg)
 {
     xfree(record_schema);
     record_schema = 0;
@@ -3611,7 +3610,7 @@ int cmd_schema(const char *arg)
     return 1;
 }
 
-int cmd_format(const char *arg)
+static int cmd_format(const char *arg)
 {
     const char *cp = arg;
     int nor;
@@ -3654,7 +3653,7 @@ int cmd_format(const char *arg)
     return 1;
 }
 
-int cmd_elements(const char *arg)
+static int cmd_elements(const char *arg)
 {
     static Z_ElementSetNames esn;
     static char what[100];
@@ -3671,7 +3670,7 @@ int cmd_elements(const char *arg)
     return 1;
 }
 
-int cmd_querytype(const char *arg)
+static int cmd_querytype(const char *arg)
 {
     if (!strcmp(arg, "ccl"))
         queryType = QueryType_CCL;
@@ -3696,7 +3695,7 @@ int cmd_querytype(const char *arg)
     return 1;
 }
 
-int cmd_refid(const char *arg)
+static int cmd_refid(const char *arg)
 {
     xfree(refid);
     refid = NULL;
@@ -3705,7 +3704,7 @@ int cmd_refid(const char *arg)
     return 1;
 }
 
-int cmd_close(const char *arg)
+static int cmd_close(const char *arg)
 {
     Z_APDU *apdu;
     Z_Close *req;
@@ -3729,7 +3728,7 @@ int cmd_packagename(const char* arg)
     return 1;
 }
 
-int cmd_proxy(const char* arg)
+static int cmd_proxy(const char* arg)
 {
     xfree(yazProxy);
     yazProxy = 0;
@@ -3738,7 +3737,7 @@ int cmd_proxy(const char* arg)
     return 1;
 }
 
-int cmd_marccharset(const char *arg)
+static int cmd_marccharset(const char *arg)
 {
     char l1[30];
 
@@ -3756,7 +3755,7 @@ int cmd_marccharset(const char *arg)
     return 1;
 }
 
-int cmd_querycharset(const char *arg)
+static int cmd_querycharset(const char *arg)
 {
     char l1[30];
 
@@ -3774,7 +3773,7 @@ int cmd_querycharset(const char *arg)
     return 1;
 }
 
-int cmd_displaycharset(const char *arg)
+static int cmd_displaycharset(const char *arg)
 {
     char l1[30];
 
@@ -3804,7 +3803,7 @@ int cmd_displaycharset(const char *arg)
     return 1;
 }
 
-int cmd_negcharset(const char *arg)
+static int cmd_negcharset(const char *arg)
 {
     char l1[30];
 
@@ -3834,7 +3833,7 @@ int cmd_negcharset(const char *arg)
     return 1;
 }
 
-int cmd_charset(const char* arg)
+static int cmd_charset(const char* arg)
 {
     char l1[30], l2[30], l3[30], l4[30];
 
@@ -3859,7 +3858,7 @@ int cmd_charset(const char* arg)
     return 1;
 }
 
-int cmd_lang(const char* arg)
+static int cmd_lang(const char* arg)
 {
     if (*arg == '\0')
     {
@@ -3873,7 +3872,7 @@ int cmd_lang(const char* arg)
     return 1;
 }
 
-int cmd_source(const char* arg, int echo )
+static int cmd_source(const char* arg, int echo )
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
@@ -3916,20 +3915,13 @@ int cmd_source(const char* arg, int echo )
     return 1;
 }
 
-int cmd_source_echo(const char* arg)
+static int cmd_source_echo(const char* arg)
 {
     cmd_source(arg, 1);
     return 1;
 }
 
-int cmd_source_noecho(const char* arg)
-{
-    cmd_source(arg, 0);
-    return 1;
-}
-
-
-int cmd_subshell(const char* args)
+static int cmd_subshell(const char* args)
 {
     int ret = system(strlen(args) ? args : getenv("SHELL"));
     printf("\n");
@@ -3940,7 +3932,7 @@ int cmd_subshell(const char* args)
     return 1;
 }
 
-int cmd_set_berfile(const char *arg)
+static int cmd_set_berfile(const char *arg)
 {
     if (ber_file && ber_file != stdout && ber_file != stderr)
         fclose(ber_file);
@@ -3953,7 +3945,7 @@ int cmd_set_berfile(const char *arg)
     return 1;
 }
 
-int cmd_set_apdufile(const char *arg)
+static int cmd_set_apdufile(const char *arg)
 {
     if (apdu_file && apdu_file != stderr && apdu_file != stderr)
         fclose(apdu_file);
@@ -3972,7 +3964,7 @@ int cmd_set_apdufile(const char *arg)
     return 1;
 }
 
-int cmd_set_cclfile(const char* arg)
+static int cmd_set_cclfile(const char* arg)
 {
     FILE *inf;
 
@@ -3989,7 +3981,7 @@ int cmd_set_cclfile(const char* arg)
     return 0;
 }
 
-int cmd_set_cqlfile(const char* arg)
+static int cmd_set_cqlfile(const char* arg)
 {
     cql_transform_t newcqltrans;
 
@@ -4006,7 +3998,7 @@ int cmd_set_cqlfile(const char* arg)
     return 0;
 }
 
-int cmd_set_auto_reconnect(const char* arg)
+static int cmd_set_auto_reconnect(const char* arg)
 {
     if (strlen(arg)==0)
         auto_reconnect = ! auto_reconnect;
@@ -4028,8 +4020,7 @@ int cmd_set_auto_reconnect(const char* arg)
     return 0;
 }
 
-
-int cmd_set_auto_wait(const char* arg)
+static int cmd_set_auto_wait(const char* arg)
 {
     if (strlen(arg)==0)
         auto_wait = ! auto_wait;
@@ -4051,7 +4042,7 @@ int cmd_set_auto_wait(const char* arg)
     return 0;
 }
 
-int cmd_set_marcdump(const char* arg)
+static int cmd_set_marcdump(const char* arg)
 {
     if (marc_file && marc_file != stderr)
     { /* don't close stdout*/
@@ -4084,7 +4075,7 @@ static void marc_file_write(const char *buf, size_t sz)
 /*
    this command takes 3 arge {name class oid}
 */
-int cmd_register_oid(const char* args)
+static int cmd_register_oid(const char* args)
 {
     static struct {
         char* className;
@@ -4144,7 +4135,7 @@ int cmd_register_oid(const char* args)
     return 1;
 }
 
-int cmd_push_command(const char* arg)
+static int cmd_push_command(const char* arg)
 {
 #if HAVE_READLINE_HISTORY_H
     if (strlen(arg) > 1)
@@ -4193,7 +4184,7 @@ void source_rc_file(const char *rc_file)
     }
 }
 
-void add_to_readline_history(void *client_data, const char *line)
+static void add_to_readline_history(void *client_data, const char *line)
 {
 #if HAVE_READLINE_HISTORY_H
     if (strlen(line))
@@ -4606,8 +4597,7 @@ static void wait_and_handle_response(int one_response_only)
     xfree(netbuffer);
 }
 
-
-int cmd_cclparse(const char* arg)
+static int cmd_cclparse(const char* arg)
 {
     int error, pos;
     struct ccl_rpn_node *rpn=NULL;
@@ -4636,8 +4626,7 @@ int cmd_cclparse(const char* arg)
     return 0;
 }
 
-
-int cmd_set_otherinfo(const char* args)
+static int cmd_set_otherinfo(const char* args)
 {
     char oidstr[101], otherinfoString[101];
     int otherinfoNo;
@@ -4684,7 +4673,7 @@ int cmd_set_otherinfo(const char* args)
     return 0;
 }
 
-int cmd_sleep(const char* args )
+static int cmd_sleep(const char* args )
 {
     int sec = atoi(args);
     if (sec > 0)
@@ -4699,7 +4688,7 @@ int cmd_sleep(const char* args )
     return 1;
 }
 
-int cmd_list_otherinfo(const char* args)
+static int cmd_list_otherinfo(const char* args)
 {
     int i;
 
@@ -4744,8 +4733,7 @@ int cmd_list_otherinfo(const char* args)
     return 0;
 }
 
-
-int cmd_list_all(const char* args)
+static int cmd_list_all(const char* args)
 {
     int i;
 
@@ -4818,7 +4806,7 @@ int cmd_list_all(const char* args)
     return 0;
 }
 
-int cmd_clear_otherinfo(const char* args)
+static int cmd_clear_otherinfo(const char* args)
 {
     if (strlen(args) > 0)
     {
@@ -4853,7 +4841,7 @@ int cmd_clear_otherinfo(const char* args)
     return 0;
 }
 
-int cmd_wait_response(const char *arg)
+static int cmd_wait_response(const char *arg)
 {
     int i;
     int wait_for = atoi(arg);
@@ -5017,7 +5005,7 @@ static int cmd_help(const char *line)
     return 1;
 }
 
-int cmd_register_tab(const char* arg)
+static int cmd_register_tab(const char* arg)
 {
 #if HAVE_READLINE_READLINE_H
     char command[101], tabargument[101];
@@ -5063,8 +5051,7 @@ int cmd_register_tab(const char* arg)
     return 1;
 }
 
-
-void process_cmd_line(char* line)
+static void process_cmd_line(char* line)
 {
     int i, res;
     char word[32], arg[10240];
@@ -5154,7 +5141,7 @@ static char* default_completer(const char* text, int state)
 /*
    This function only known how to complete on the first word
 */
-char **readline_completer(char *text, int start, int end)
+static char **readline_completer(char *text, int start, int end)
 {
     completerFunctionType completerToUse;
 
@@ -5217,7 +5204,7 @@ char **readline_completer(char *text, int start, int end)
 #endif
 
 #ifndef WIN32
-void ctrl_c_handler(int x)
+static void ctrl_c_handler(int x)
 {
     exit_client(0);
 }

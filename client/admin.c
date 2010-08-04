@@ -36,7 +36,7 @@ ODR getODROutputStream(void);
 extern char *databaseNames[];
 extern int num_databaseNames;
 
-int sendAdminES(int type, char* param1)
+static int sendAdminES(int type, char* param1)
 {
     ODR out = getODROutputStream();
     char *dbname = odr_strdup (out, databaseNames[0]);
