@@ -204,7 +204,7 @@ Z_FacetList *yaz_oi_get_facetlist_oid (
 {
     Z_External *z_external = 0;
     Z_OtherInformationUnit *oi =
-        yaz_oi_update(otherInformation, odr, oid, categoryValue, delete_flag);
+        yaz_oi_update(otherInformation, 0, oid, categoryValue, delete_flag);
     if (!oi)
         return 0;
     z_external = oi->information.externallyDefinedInfo;
