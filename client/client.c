@@ -326,7 +326,7 @@ static Z_ReferenceId *set_refid(ODR out)
 
 /* INIT SERVICE ------------------------------- */
 
-static void send_initRequest(const char* type_and_host)
+static void send_Z3950_initRequest(const char* type_and_host)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
@@ -375,7 +375,6 @@ static void send_initRequest(const char* type_and_host)
 }
 
 
-/* These two are used only from process_initResponse() */
 static void render_initUserInfo(Z_OtherInformation *ui1);
 static void render_diag(Z_DiagnosticFormat *diag);
 
@@ -384,7 +383,7 @@ static void pr_opt(const char *opt, void *clientData)
     printf(" %s", opt);
 }
 
-static int process_initResponse(Z_InitResponse *res)
+static int process_Z3950_initResponse(Z_InitResponse *res)
 {
     int ver = 0;
     /* save session parameters for later use */
@@ -733,7 +732,7 @@ static int session_connect_base(const char *arg, const char **basep)
     cs_print_session_info(conn);
     if (protocol == PROTO_Z3950)
     {
-        send_initRequest(type_and_host);
+        send_Z3950_initRequest(type_and_host);
         return 2;
     }
     return 0;
@@ -1179,7 +1178,7 @@ static void display_records(Z_Records *p)
     }
 }
 
-static int send_deleteResultSetRequest(const char *arg)
+static int send_Z3950_deleteResultSetRequest(const char *arg)
 {
     char names[8][32];
     int i;
@@ -1391,7 +1390,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
     /* regular requestse .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_scan_request, sru_version);
 
-    switch(queryType)
+    switch (queryType)
     {
     case QueryType_CQL:
         sr->u.scan_request->query_type = Z_SRW_query_type_cql;
@@ -1430,7 +1429,7 @@ static int send_SRW_searchRequest(const char *arg)
     /* regular request .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_searchRetrieve_request, sru_version);
 
-    switch(queryType)
+    switch (queryType)
     {
     case QueryType_CQL:
         srw_sr->u.request->query_type = Z_SRW_query_type_cql;
@@ -1476,7 +1475,7 @@ static void query_charset_convert(Z_RPNQuery *q)
     }
 }
 
-static int send_searchRequest(const char *arg)
+static int send_Z3950_searchRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
@@ -1748,7 +1747,7 @@ static void display_searchResult(Z_OtherInformation *o)
     }
 }
 
-static int process_searchResponse(Z_SearchResponse *res)
+static int process_Z3950_searchResponse(Z_SearchResponse *res)
 {
     printf("Received SearchResponse.\n");
     print_refid(res->referenceId);
@@ -1764,7 +1763,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     if (res->resultSetStatus)
     {
         printf("Result Set Status: ");
-        switch(*res->resultSetStatus)
+        switch (*res->resultSetStatus)
         {
         case Z_SearchResponse_subset:
             printf("subset"); break;
@@ -1953,7 +1952,7 @@ static void print_external(int iLevel, Z_External *pExternal)
     }
 }
 
-static int process_resourceControlRequest(Z_ResourceControlRequest *req)
+static int process_Z3950_resourceControlRequest(Z_ResourceControlRequest *req)
 {
     printf("Received ResourceControlRequest.\n");
     print_referenceId(1, req->referenceId);
@@ -1965,7 +1964,7 @@ static int process_resourceControlRequest(Z_ResourceControlRequest *req)
     return 0;
 }
 
-static void process_ESResponse(Z_ExtendedServicesResponse *res)
+static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
 {
     printf("Status: ");
     switch (*res->operationStatus)
@@ -2244,8 +2243,8 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
     return r;
 }
 
-static int send_itemorder(const char *type, int itemno,
-                          const char *xml_buf, int xml_len)
+static int send_Z3950_itemorder(const char *type, int itemno,
+                                const char *xml_buf, int xml_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2288,11 +2287,11 @@ static int cmd_update0(const char *arg)
     return cmd_update_common(arg, 0);
 }
 
-static int cmd_update_Z3950(int version, int action_no, const char *recid,
+static int send_Z3950_update(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len);
 
 #if YAZ_HAVE_XML2
-static int cmd_update_SRW(int action_no, const char *recid,
+static int send_SRW_update(int action_no, const char *recid,
                           char *rec_buf, int rec_len);
 #endif
 
@@ -2347,14 +2346,14 @@ static int cmd_update_common(const char *arg, int version)
 
 #if YAZ_HAVE_XML2
     if (protocol == PROTO_HTTP)
-        return cmd_update_SRW(action_no, recid_buf, rec_buf, rec_len);
+        return send_SRW_update(action_no, recid_buf, rec_buf, rec_len);
 #endif
-    return cmd_update_Z3950(version, action_no, recid_buf, rec_buf, rec_len);
+    return send_Z3950_update(version, action_no, recid_buf, rec_buf, rec_len);
 }
 
 #if YAZ_HAVE_XML2
-static int cmd_update_SRW(int action_no, const char *recid,
-                          char *rec_buf, int rec_len)
+static int send_SRW_update(int action_no, const char *recid,
+                           char *rec_buf, int rec_len)
 {
     if (!conn)
         session_connect(cur_host);
@@ -2365,7 +2364,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
         Z_SRW_PDU *srw = yaz_srw_get(out, Z_SRW_update_request);
         Z_SRW_updateRequest *sr = srw->u.update_request;
 
-        switch(action_no)
+        switch (action_no)
         {
         case Z_IUOriginPartToKeep_recordInsert:
             sr->operation = "info:srw/action/1/create";
@@ -2391,7 +2390,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
 }
 #endif
 
-static int cmd_update_Z3950(int version, int action_no, const char *recid,
+static int send_Z3950_update(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
@@ -2593,7 +2592,7 @@ static int cmd_itemorder(const char *arg)
     parse_cmd_doc(&arg, out, &xml_buf, &xml_len);
 
     fflush(stdout);
-    send_itemorder(type, itemno, xml_buf, xml_len);
+    send_Z3950_itemorder(type, itemno, xml_buf, xml_len);
     return 2;
 }
 
@@ -2663,7 +2662,7 @@ static int cmd_init(const char *arg)
     }
     if (only_z3950())
         return 1;
-    send_initRequest(cur_host);
+    send_Z3950_initRequest(cur_host);
     return 2;
 }
 
@@ -2850,7 +2849,7 @@ static int cmd_find(const char *arg)
             {
                 if (conn)
                 {
-                    if (!send_searchRequest(arg))
+                    if (!send_Z3950_searchRequest(arg))
                         return 0;
                     wait_and_handle_response(0);
                     if (conn)
@@ -2868,7 +2867,7 @@ static int cmd_find(const char *arg)
         }
         else if (conn)
         {
-            if (!send_searchRequest(arg))
+            if (!send_Z3950_searchRequest(arg))
                 return 0;
         }
         else
@@ -2916,7 +2915,7 @@ static int cmd_delete(const char *arg)
 {
     if (only_z3950())
         return 0;
-    if (!send_deleteResultSetRequest(arg))
+    if (!send_Z3950_deleteResultSetRequest(arg))
         return 0;
     return 2;
 }
@@ -3020,7 +3019,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     return 1;
 }
 
-static int send_presentRequest(const char *arg)
+static int send_Z3950_presentRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
@@ -3146,7 +3145,7 @@ static void close_session(void)
     last_hit_count = 0;
 }
 
-static void process_close(Z_Close *req)
+static void process_Z3950_close(Z_Close *req)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
     Z_Close *res = apdu->u.close;
@@ -3200,7 +3199,7 @@ static int cmd_show(const char *arg)
             printf("Not connected yet\n");
             return 0;
         }
-        if (!send_presentRequest(arg))
+        if (!send_Z3950_presentRequest(arg))
             return 0;
     }
     return 2;
@@ -3224,38 +3223,46 @@ static int cmd_quit(const char *arg)
 
 static int cmd_cancel(const char *arg)
 {
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
-    Z_TriggerResourceControlRequest *req =
-        apdu->u.triggerResourceControlRequest;
-    bool_t rfalse = 0;
-    char command[16];
-
-    *command = '\0';
-    sscanf(arg, "%15s", command);
-
     if (only_z3950())
         return 0;
-    if (session_initResponse &&
-        !ODR_MASK_GET(session_initResponse->options,
-                      Z_Options_triggerResourceCtrl))
+    else
     {
-        printf("Target doesn't support cancel (trigger resource ctrl)\n");
-        return 0;
+        Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
+        Z_TriggerResourceControlRequest *req =
+            apdu->u.triggerResourceControlRequest;
+        bool_t rfalse = 0;
+        char command[16];
+        
+        *command = '\0';
+        sscanf(arg, "%15s", command);
+        
+        if (only_z3950())
+            return 0;
+        if (session_initResponse &&
+            !ODR_MASK_GET(session_initResponse->options,
+                          Z_Options_triggerResourceCtrl))
+        {
+            printf("Target doesn't support cancel (trigger resource ctrl)\n");
+            return 0;
+        }
+        *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
+        req->resultSetWanted = &rfalse;
+        req->referenceId = set_refid(out);
+        
+        send_apdu(apdu);
+        printf("Sent cancel request\n");
+        if (!strcmp(command, "wait"))
+            return 2;
+        return 1;
     }
-    *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
-    req->resultSetWanted = &rfalse;
-    req->referenceId = set_refid(out);
-
-    send_apdu(apdu);
-    printf("Sent cancel request\n");
-    if (!strcmp(command, "wait"))
-         return 2;
-    return 1;
 }
 
 static int cmd_cancel_find(const char *arg)
 {
-    int fres = cmd_find(arg);
+    int fres;
+    if (only_z3950())
+        return 0;
+    fres = cmd_find(arg);
     if (fres > 0)
     {
         return cmd_cancel("");
@@ -3263,8 +3270,8 @@ static int cmd_cancel_find(const char *arg)
     return fres;
 }
 
-static int send_scanrequest(const char *set,  const char *query,
-                            Odr_int pp, Odr_int num, const char *term)
+static int send_Z3950_scanrequest(const char *set,  const char *query,
+                                  Odr_int pp, Odr_int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
@@ -3406,7 +3413,7 @@ static void display_term_info(Z_TermInfo *t)
         printf("\n");
 }
 
-static void process_scanResponse(Z_ScanResponse *res)
+static void process_Z3950_scanResponse(Z_ScanResponse *res)
 {
     int i;
     Z_Entry **entries = NULL;
@@ -3440,7 +3447,7 @@ static void process_scanResponse(Z_ScanResponse *res)
                           res->entries->num_nonsurrogateDiagnostics);
 }
 
-static void process_sortResponse(Z_SortResponse *res)
+static void process_Z3950_sortResponse(Z_SortResponse *res)
 {
     printf("Received SortResponse: status=");
     switch (*res->sortStatus)
@@ -3461,7 +3468,8 @@ static void process_sortResponse(Z_SortResponse *res)
                          res->num_diagnostics);
 }
 
-static void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
+static void process_Z3950_deleteResultSetResponse(
+    Z_DeleteResultSetResponse *res)
 {
     printf("Got deleteResultSetResponse status=" ODR_INT_PRINTF "\n",
            *res->deleteOperationStatus);
@@ -3570,14 +3578,14 @@ static int cmd_scan_common(const char *set, const char *arg)
         if (*arg)
         {
             strcpy(last_scan_query, arg);
-            if (send_scanrequest(set, arg,
-                                 scan_position, scan_size, 0) < 0)
+            if (send_Z3950_scanrequest(set, arg,
+                                       scan_position, scan_size, 0) < 0)
                 return 0;
         }
         else
         {
-            if (send_scanrequest(set, last_scan_query,
-                                 1, scan_size, last_scan_line) < 0)
+            if (send_Z3950_scanrequest(set, last_scan_query,
+                                      1, scan_size, last_scan_line) < 0)
                 return 0;
         }
         return 2;
@@ -4204,7 +4212,7 @@ static void initialize(const char *rc_file)
         fprintf(stderr, "failed to allocate ODR streams\n");
         exit(1);
     }
-
+    
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
@@ -4502,16 +4510,16 @@ static void wait_and_handle_response(int one_response_only)
         if (gdu->which == Z_GDU_Z3950)
         {
             Z_APDU *apdu = gdu->u.z3950;
-            switch(apdu->which)
+            switch (apdu->which)
             {
             case Z_APDU_initResponse:
-                process_initResponse(apdu->u.initResponse);
+                process_Z3950_initResponse(apdu->u.initResponse);
                 break;
             case Z_APDU_searchResponse:
-                process_searchResponse(apdu->u.searchResponse);
+                process_Z3950_searchResponse(apdu->u.searchResponse);
                 break;
             case Z_APDU_scanResponse:
-                process_scanResponse(apdu->u.scanResponse);
+                process_Z3950_scanResponse(apdu->u.scanResponse);
                 break;
             case Z_APDU_presentResponse:
                 print_refid(apdu->u.presentResponse->referenceId);
@@ -4525,23 +4533,23 @@ static void wait_and_handle_response(int one_response_only)
                         *apdu->u.presentResponse->nextResultSetPosition);
                 break;
             case Z_APDU_sortResponse:
-                process_sortResponse(apdu->u.sortResponse);
+                process_Z3950_sortResponse(apdu->u.sortResponse);
                 break;
             case Z_APDU_extendedServicesResponse:
                 printf("Got extended services response\n");
-                process_ESResponse(apdu->u.extendedServicesResponse);
+                process_Z3950_ESResponse(apdu->u.extendedServicesResponse);
                 break;
             case Z_APDU_close:
                 printf("Target has closed the association.\n");
-                process_close(apdu->u.close);
+                process_Z3950_close(apdu->u.close);
                 break;
             case Z_APDU_resourceControlRequest:
-                process_resourceControlRequest
-                    (apdu->u.resourceControlRequest);
+                process_Z3950_resourceControlRequest(
+                    apdu->u.resourceControlRequest);
                 break;
             case Z_APDU_deleteResultSetResponse:
-                process_deleteResultSetResponse(apdu->u.
-                                                deleteResultSetResponse);
+                process_Z3950_deleteResultSetResponse(
+                    apdu->u.deleteResultSetResponse);
                 break;
             default:
                 printf("Received unknown APDU type (%d).\n",
