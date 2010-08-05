@@ -80,6 +80,7 @@
 
 static file_history_t file_history = 0;
 
+static char webservice_type[10];
 static char sru_method[10] = "soap";
 static char sru_version[10] = "1.2";
 static char *codeset = 0;               /* character set for output */
@@ -1407,6 +1408,43 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
     sr->u.scan_request->responsePosition = odr_intdup(out, pos);
     sr->u.scan_request->maximumTerms = odr_intdup(out, num);
     return send_srw(sr);
+}
+
+static void encode_SOLR_search(Z_HTTP_Request *hreq, ODR encode,
+                               const char *query)
+{
+    char *path;
+    const char *name[10], *value[10];
+    char *uri_args;
+
+    name[0] = "q";
+    value[0] = query;
+    name[1] = 0;
+
+    yaz_array_to_uri(&uri_args, encode, (char **) name, (char **) value);
+
+    path = (char *)
+        odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
+
+    hreq->method = "GET";
+
+    if (strchr(hreq->path, '?'))
+        sprintf(path, "%s&%s", hreq->path, uri_args);
+    else
+        sprintf(path, "%s?%s", hreq->path, uri_args);
+    hreq->path = path;
+}
+
+static int send_SOLR_searchRequest(const char *arg)
+{
+    Z_GDU *gdu;
+    char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
+
+    gdu = z_get_HTTP_Request_host_path(out, cur_host, path);
+
+    encode_SOLR_search(gdu->u.HTTP_Request, out, arg);
+
+    return send_gdu(gdu);
 }
 
 static int send_SRW_searchRequest(const char *arg)
@@ -2800,6 +2838,7 @@ static int cmd_sru(const char *arg)
     else
     {
         int r;
+        strcpy(webservice_type, "sru");
         r = sscanf(arg, "%9s %9s", sru_method, sru_version);
         if (r >= 1)
         {
@@ -2820,6 +2859,29 @@ static int cmd_sru(const char *arg)
     return 0;
 }
 
+static int cmd_webservice(const char *arg)
+{
+    if (!*arg)
+    {
+        printf("Webservice: %s\n", webservice_type);
+    }
+    else
+    {
+        if (!strcmp(arg, "sru"))
+            ;
+        else if (!strcmp(arg, "solr"))
+            ;
+        else
+        {
+            printf("Unknown webservice type\n");
+            return 0;
+        }
+        strcpy(webservice_type, arg);
+    }
+    return 0;
+}
+
+
 static int cmd_find(const char *arg)
 {
     if (!*arg)
@@ -2834,8 +2896,16 @@ static int cmd_find(const char *arg)
             session_connect(cur_host);
         if (!conn)
             return 0;
-        if (!send_SRW_searchRequest(arg))
-            return 0;
+        if (!strcmp(webservice_type, "solr"))
+        {
+            if (!send_SOLR_searchRequest(arg))
+                return 0;
+        }
+        else
+        {
+            if (!send_SRW_searchRequest(arg))
+                return 0;
+        }
 #else
         return 0;
 #endif
@@ -4213,6 +4283,8 @@ static void initialize(const char *rc_file)
         exit(1);
     }
     
+    strcpy(webservice_type, "sru");
+
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
@@ -4345,6 +4417,91 @@ static void handle_srw_scan_response(Z_SRW_scanResponse *res)
             handle_srw_scan_term(res->terms + i);
 }
 
+static int decode_SOLR_response(const char *content_buf, int content_len)
+{
+    xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
+    int ret = 0;
+    xmlNodePtr ptr = 0;
+    Odr_int hits = 0;
+    Odr_int start = 0;
+
+    if (!doc)
+    {
+        ret = -1;
+    }
+    if (doc)
+    {
+        xmlNodePtr root = xmlDocGetRootElement(doc);
+        if (!root)
+        {
+            ret = -1;
+        }
+        else if (strcmp((const char *) root->name, "response"))
+        {
+            ret = -1;
+        }
+        else
+        {
+            /** look for result node */
+            for (ptr = root->children; ptr; ptr = ptr->next)
+            {
+                if (ptr->type == XML_ELEMENT_NODE &&
+                    !strcmp((const char *) ptr->name, "result"))
+                    break;
+            }
+            if (!ptr)
+            {
+                ret = -1;
+            }
+        }
+    }
+    if (ptr)
+    {   /* got result node */
+        struct _xmlAttr *attr;
+        for (attr = ptr->properties; attr; attr = attr->next)
+            if (attr->children && attr->children->type == XML_TEXT_NODE)
+            {
+                if (!strcmp((const char *) attr->name, "numFound"))
+                {
+                    hits = odr_atoi((const char *) attr->children->content);
+                }
+                else if (!strcmp((const char *) attr->name, "start"))
+                {
+                    start = odr_atoi((const char *) attr->children->content);
+                }
+            }
+        printf("Number of hits: " ODR_INT_PRINTF "\n", hits);
+    }
+    if (ptr)
+    {
+        xmlNodePtr node;
+        int offset = 0;
+
+        for (node = ptr->children; node; node = node->next)
+        {
+            if (node->type == XML_ELEMENT_NODE)
+            {
+                xmlBufferPtr buf = xmlBufferCreate();
+                xmlNode *tmp = xmlCopyNode(node, 1);
+
+                printf(ODR_INT_PRINTF "\n", start + offset);
+
+                xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
+
+                xmlFreeNode(tmp);
+
+                fwrite(buf->content, 1, buf->use, stdout);
+                xmlBufferFree(buf);
+                offset++;
+                printf("\n");
+            }
+        }
+    }
+    if (doc)
+        xmlFreeDoc(doc);
+    return ret;
+}
+
 static void http_response(Z_HTTP_Response *hres)
 {
     int ret = -1;
@@ -4358,7 +4515,11 @@ static void http_response(Z_HTTP_Response *hres)
 
     if (!yaz_srw_check_content_type(hres))
         printf("Content type does not appear to be XML\n");
-    else
+    else if (!strcmp(webservice_type, "solr"))
+    {
+        decode_SOLR_response(hres->content_buf, hres->content_len);
+    }
+    else if (!strcmp(webservice_type, "sru"))
     {
         Z_SOAP *soap_package = 0;
         ODR o = odr_createmem(ODR_DECODE);
@@ -4950,6 +5111,7 @@ static struct {
     {"init", cmd_init, "", NULL,0,NULL},
     {"sru", cmd_sru, "<method> <version>", NULL,0,NULL},
     {"url", cmd_url, "<url>", NULL,0,NULL},
+    {"webservice", cmd_webservice, "<type>", NULL,0,NULL},
     {"exit", cmd_quit, "",NULL,0,NULL},
     {0,0,0,0,0,0}
 };
