@@ -56,7 +56,7 @@ void yaz_mutex_create_attr(YAZ_MUTEX *p, int flags) {
 }
 
 void yaz_mutex_create(YAZ_MUTEX *p) {
-    yaz_mutex_create(YAZ_MUTEX *p, 0);
+    yaz_mutex_create_attr(p, 0);
 }
 
 void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name)
@@ -148,7 +148,7 @@ void yaz_mutex_destroy(YAZ_MUTEX *p)
 #ifdef WIN32
         DeleteCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutexattr_destroy(&(*p)->attr);
+        pthread_mutexattr_destroy((*p)->attr);
         free((*p)->attr);
         pthread_mutex_destroy(&(*p)->handle);
 #endif
