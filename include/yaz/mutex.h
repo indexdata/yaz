@@ -52,6 +52,17 @@ typedef struct yaz_cond *YAZ_COND;
  */
 YAZ_EXPORT void yaz_mutex_create(YAZ_MUTEX *mutexp);
 
+/** \brief create MUTEX with custom MUTEX flags
+    \param mutexp is pointer to MUTEX handle (*mutexp must be NULL)
+    \param attr is flags defined by PTHREAD_MUTEX_xxx
+
+    It is important that *mutexp is NULL. If not, yaz_mutex_create will
+    not modify the handle (assumes it is already created!)
+
+    This calls yax_mutex_create_attr(mutexp, PTHREAD_MUTEX_NORMAL)
+ */
+YAZ_EXPORT void yaz_mutex_create_attr(YAZ_MUTEX *mutexp, int flags);
+
 /** \brief enter critical section / AKA lock
     \param mutex MUTEX handle
  */

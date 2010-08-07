@@ -38,19 +38,25 @@
 
 #include "mutex-p.h"
 
-void yaz_mutex_create(YAZ_MUTEX *p)
-{
+void yaz_mutex_create_attr(YAZ_MUTEX *p, int flags) {
     if (!*p)
     {
         *p = (YAZ_MUTEX) malloc(sizeof(**p));
 #ifdef WIN32
         InitializeCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
-        pthread_mutex_init(&(*p)->handle, 0);
+        (*p)->attr = malloc(sizeof( (*p)->attr));
+        pthread_mutexattr_init((*p)->attr);
+        pthread_mutexattr_settype((*p)->attr, flags);
+        pthread_mutex_init(&(*p)->handle, (*p)->attr);
 #endif
         (*p)->name = 0;
         (*p)->log_level = 0;
     }
+}
+
+void yaz_mutex_create(YAZ_MUTEX *p) {
+    yaz_mutex_create(YAZ_MUTEX *p, 0);
 }
 
 void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name)
@@ -142,6 +148,8 @@ void yaz_mutex_destroy(YAZ_MUTEX *p)
 #ifdef WIN32
         DeleteCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
+        pthread_mutexattr_destroy(&(*p)->attr);
+        free((*p)->attr);
         pthread_mutex_destroy(&(*p)->handle);
 #endif
         if ((*p)->name)

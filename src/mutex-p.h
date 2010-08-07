@@ -8,6 +8,7 @@ struct yaz_mutex {
     CRITICAL_SECTION handle;
 #elif YAZ_POSIX_THREADS
     pthread_mutex_t handle;
+    pthread_mutexattr_t *attr;
 #endif
     char *name;
     int log_level;
