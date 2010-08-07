@@ -69,7 +69,7 @@ void yaz_oi_APDU(Z_APDU *apdu, Z_OtherInformation ***oip)
     }
 }
 
-Z_OtherInformationUnit *yaz_oi_update (
+Z_OtherInformationUnit *yaz_oi_update(
     Z_OtherInformation **otherInformationP, ODR odr,
     const Odr_oid *oid, int categoryValue, int delete_flag)
 {
@@ -175,43 +175,6 @@ char *yaz_oi_get_string_oid (
                             delete_flag)) &&
         oi->which == Z_OtherInfo_characterInfo)
         return oi->information.characterInfo;
-    return 0;
-}
-
-void yaz_oi_set_facetlist_oid (
-    Z_OtherInformation **otherInformation, ODR odr,
-    const Odr_oid *oid, int categoryValue,
-    Z_FacetList *facet_list)
-{
-    Z_External *z_external = 0;
-    Z_OtherInformationUnit *oi =
-        yaz_oi_update(otherInformation, odr, oid, categoryValue, 0);
-    if (!oi)
-        return;
-    oi->which = Z_OtherInfo_externallyDefinedInfo;
-    z_external = odr_malloc(odr, sizeof(*z_external));
-    z_external->which = Z_External_userFacets;
-    z_external->direct_reference = odr_oiddup(odr, oid);
-    z_external->indirect_reference = 0;
-    z_external->descriptor = 0;
-    z_external->u.facetList = facet_list;
-    oi->information.externallyDefinedInfo = z_external;
-}
-
-Z_FacetList *yaz_oi_get_facetlist_oid (
-    Z_OtherInformation **otherInformation, ODR odr,
-    const Odr_oid *oid, int categoryValue, int delete_flag)
-{
-    Z_External *z_external = 0;
-    Z_OtherInformationUnit *oi =
-        yaz_oi_update(otherInformation, odr, oid, categoryValue, delete_flag);
-    if (!oi)
-        return 0;
-    z_external = oi->information.externallyDefinedInfo;
-
-    if (z_external && z_external->which == Z_External_userFacets) {
-        return z_external->u.facetList;
-    }
     return 0;
 }
 

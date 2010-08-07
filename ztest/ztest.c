@@ -251,14 +251,15 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     Z_FacetList *new_list = facet_list_create(odr, facet_list->num);
 
     for (index = 0; index < facet_list->num; index++) {
-        struct attrvalues attrvalues;
-        facet_struct_init(&attrvalues);
+        struct yaz_facet_attr attrvalues;
+        yaz_facet_attr_init(&attrvalues);
         attrvalues.limit = 10;
-        facetattrs(facet_list->elements[index]->attributes, &attrvalues);
+        yaz_facet_attr_get_z_attributes(facet_list->elements[index]->attributes,
+                                        &attrvalues);
         yaz_log(YLOG_LOG, "Attributes: %s %d ", attrvalues.useattr, attrvalues.limit);
         if (attrvalues.errstring)
             yaz_log(YLOG_LOG, "Error parsing attributes: %s", attrvalues.errstring);
-        if (attrvalues.limit > 0) {
+        if (attrvalues.limit > 0 && attrvalues.useattr) {
             new_list->elements[new_index] = facet_field_create(odr, facet_list->elements[index]->attributes, attrvalues.limit);
             addterms(odr, new_list->elements[new_index], attrvalues.useattr);
             new_index++;
@@ -395,9 +396,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
 
     if (1)
     {
-        /* TODO Not general. Only handles one (Facet) OtherInformation. Overwrite  */
-        Z_FacetList *facet_list = extract_facet_request(rr->stream, rr->search_input);
-
+        Z_FacetList *facet_list = yaz_oi_get_facetlist(&rr->search_input);
         if (facet_list) {
             yaz_log(YLOG_LOG, "%d Facets in search request.", facet_list->num);
             rr->search_info = build_facet_response(rr->stream, facet_list);

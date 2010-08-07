@@ -171,13 +171,13 @@ struct eoi {
     char* value;
 } extraOtherInfos[maxOtherInfosSupported];
 
-void process_cmd_line(char* line);
+static void process_cmd_line(char* line);
 #if HAVE_READLINE_READLINE_H
-char **readline_completer(char *text, int start, int end);
+static char **readline_completer(char *text, int start, int end);
 #endif
 static char *command_generator(const char *text, int state);
-int cmd_register_tab(const char* arg);
-int cmd_querycharset(const char *arg);
+static int cmd_register_tab(const char* arg);
+static int cmd_querycharset(const char *arg);
 
 static void close_session(void);
 
@@ -191,9 +191,10 @@ ODR getODROutputStream(void)
     return out;
 }
 
-const char* query_type_as_string(QueryType q)
+static const char* query_type_as_string(QueryType q)
 {
-    switch (q) {
+    switch (q)
+    {
     case QueryType_Prefix: return "prefix (RPN sent to server)";
     case QueryType_CCL: return "CCL (CCL sent to server) ";
     case QueryType_CCL2RPN: return "CCL -> RPN (RPN sent to server)";
@@ -213,7 +214,7 @@ static void do_hex_dump(const char* buf, size_t len)
         for (i = 0; i < len ; i = i+16 )
         {
             printf(" %4.4ld ", (long) i);
-            for(x=0 ; i+x<len && x<16; ++x)
+            for (x = 0 ; i+x < len && x < 16; ++x)
             {
                 printf("%2.2X ",(unsigned int)((unsigned char)buf[i+x]));
             }
@@ -242,17 +243,15 @@ static void do_hex_dump(const char* buf, size_t len)
     }
 }
 
-void add_otherInfos(Z_APDU *a)
+static void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
-    int i = 0;
+    int i;
 
     yaz_oi_APDU(a, &oi);
-    if (facet_list) {
-        yaz_oi_set_facetlist_oid(oi, out, yaz_oid_userinfo_facet_1, 1, facet_list);
-        i++;
-    }
-    for(; i<maxOtherInfosSupported; ++i)
+    if (facet_list)
+        yaz_oi_set_facetlist(oi, out, facet_list);
+    for (i = 0; i < maxOtherInfosSupported; ++i)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
@@ -327,7 +326,7 @@ static Z_ReferenceId *set_refid(ODR out)
 
 /* INIT SERVICE ------------------------------- */
 
-static void send_initRequest(const char* type_and_host)
+static void send_Z3950_initRequest(const char* type_and_host)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
@@ -352,7 +351,8 @@ static void send_initRequest(const char* type_and_host)
                               1, type_and_host);
     }
 
-    if (negotiationCharset || yazLang) {
+    if (negotiationCharset || yazLang)
+    {
         Z_OtherInformation **p;
         Z_OtherInformationUnit *p0;
 
@@ -375,7 +375,6 @@ static void send_initRequest(const char* type_and_host)
 }
 
 
-/* These two are used only from process_initResponse() */
 static void render_initUserInfo(Z_OtherInformation *ui1);
 static void render_diag(Z_DiagnosticFormat *diag);
 
@@ -384,7 +383,7 @@ static void pr_opt(const char *opt, void *clientData)
     printf(" %s", opt);
 }
 
-static int process_initResponse(Z_InitResponse *res)
+static int process_Z3950_initResponse(Z_InitResponse *res)
 {
     int ver = 0;
     /* save session parameters for later use */
@@ -408,16 +407,18 @@ static int process_initResponse(Z_InitResponse *res)
     if (res->userInformationField)
     {
         Z_External *uif = res->userInformationField;
-        if (uif->which == Z_External_userInfo1) {
+        if (uif->which == Z_External_userInfo1)
             render_initUserInfo(uif->u.userInfo1);
-        } else {
+        else
+        {
             printf("UserInformationfield:\n");
             if (!z_External(print, (Z_External**)&uif, 0, 0))
             {
                 odr_perror(print, "Printing userinfo\n");
                 odr_reset(print);
             }
-            if (uif->which == Z_External_octet) {
+            if (uif->which == Z_External_octet)
+            {
                 printf("Guessing visiblestring:\n");
                 printf("'%.*s'\n", uif->u.octet_aligned->len,
                        uif->u.octet_aligned->buf);
@@ -456,8 +457,8 @@ static int process_initResponse(Z_InitResponse *res)
     if (ODR_MASK_GET(res->options, Z_Options_namedResultSets))
         setnumber = 0;
 
-    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel)) {
-
+    if (ODR_MASK_GET(res->options, Z_Options_negotiationModel))
+    {
         Z_CharSetandLanguageNegotiation *p =
                 yaz_get_charneg_record(res->otherInfo);
 
@@ -493,18 +494,21 @@ static int process_initResponse(Z_InitResponse *res)
 }
 
 
-static void render_initUserInfo(Z_OtherInformation *ui1) {
+static void render_initUserInfo(Z_OtherInformation *ui1)
+{
     int i;
     printf("Init response contains %d otherInfo unit%s:\n",
            ui1->num_elements, ui1->num_elements == 1 ? "" : "s");
 
-    for (i = 0; i < ui1->num_elements; i++) {
+    for (i = 0; i < ui1->num_elements; i++)
+    {
         Z_OtherInformationUnit *unit = ui1->list[i];
         printf("  %d: otherInfo unit contains ", i+1);
         if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
             unit->information.externallyDefinedInfo &&
             unit->information.externallyDefinedInfo->which ==
-            Z_External_diag1) {
+            Z_External_diag1)
+        {
             render_diag(unit->information.externallyDefinedInfo->u.diag1);
         }
         else if (unit->which != Z_OtherInfo_externallyDefinedInfo)
@@ -522,14 +526,17 @@ static void render_initUserInfo(Z_OtherInformation *ui1) {
 
 
 /* ### should this share code with display_diagrecs()? */
-static void render_diag(Z_DiagnosticFormat *diag) {
+static void render_diag(Z_DiagnosticFormat *diag)
+{
     int i;
 
     printf("%d diagnostic%s:\n", diag->num, diag->num == 1 ? "" : "s");
-    for (i = 0; i < diag->num; i++) {
+    for (i = 0; i < diag->num; i++)
+    {
         Z_DiagnosticFormat_s *ds = diag->elements[i];
         printf("    %d: ", i+1);
-        switch (ds->which) {
+        switch (ds->which)
+        {
         case Z_DiagnosticFormat_s_defaultDiagRec: {
             Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
             /* ### should check `dd->diagnosticSetId' */
@@ -725,7 +732,7 @@ static int session_connect_base(const char *arg, const char **basep)
     cs_print_session_info(conn);
     if (protocol == PROTO_Z3950)
     {
-        send_initRequest(type_and_host);
+        send_Z3950_initRequest(type_and_host);
         return 2;
     }
     return 0;
@@ -744,7 +751,7 @@ static int session_connect(const char *arg)
     return r;
 }
 
-int cmd_open(const char *arg)
+static int cmd_open(const char *arg)
 {
     int r;
     if (arg)
@@ -765,7 +772,7 @@ int cmd_open(const char *arg)
     return r;
 }
 
-int cmd_authentication(const char *arg)
+static int cmd_authentication(const char *arg)
 {
     char **args;
     int r;
@@ -1171,7 +1178,7 @@ static void display_records(Z_Records *p)
     }
 }
 
-static int send_deleteResultSetRequest(const char *arg)
+static int send_Z3950_deleteResultSetRequest(const char *arg)
 {
     char names[8][32];
     int i;
@@ -1299,12 +1306,14 @@ static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
 
     for (h = cookie_hres->headers; h; h = h->next)
     {
-        if (!strcmp(h->name, "Set-Cookie")) {
+        if (!strcmp(h->name, "Set-Cookie"))
+        {
             char *cp;
 
             if (!(cp = strchr(h->value, ';')))
                 cp = h->value + strlen(h->value);
-            if (cp - h->value >= 1) {
+            if (cp - h->value >= 1)
+            {
                 combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
                 memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
                 combined_cookies[combined_cookies_len + cp - h->value] = '\0';
@@ -1381,7 +1390,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
     /* regular requestse .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_scan_request, sru_version);
 
-    switch(queryType)
+    switch (queryType)
     {
     case QueryType_CQL:
         sr->u.scan_request->query_type = Z_SRW_query_type_cql;
@@ -1420,7 +1429,7 @@ static int send_SRW_searchRequest(const char *arg)
     /* regular request .. */
     sr = yaz_srw_get_pdu(out, Z_SRW_searchRetrieve_request, sru_version);
 
-    switch(queryType)
+    switch (queryType)
     {
     case QueryType_CQL:
         srw_sr->u.request->query_type = Z_SRW_query_type_cql;
@@ -1466,7 +1475,7 @@ static void query_charset_convert(Z_RPNQuery *q)
     }
 }
 
-static int send_searchRequest(const char *arg)
+static int send_Z3950_searchRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_searchRequest);
     Z_SearchRequest *req = apdu->u.searchRequest;
@@ -1489,23 +1498,28 @@ static int send_searchRequest(const char *arg)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return 0;
         }
-    } else if (myQueryType == QueryType_CQL2RPN) {
+    } 
+    else if (myQueryType == QueryType_CQL2RPN)
+    {
         /* ### All this code should be wrapped in a utility function */
         CQL_parser parser;
         struct cql_node *node;
         const char *addinfo;
-        if (cqltrans == 0) {
+        if (cqltrans == 0)
+        {
             printf("Can't use CQL: no translation file.  Try set_cqlfile\n");
             return 0;
         }
         parser = cql_parser_create();
-        if ((error = cql_parser_string(parser, arg)) != 0) {
+        if ((error = cql_parser_string(parser, arg)) != 0)
+        {
             printf("Can't parse CQL: must be a syntax error\n");
             return 0;
         }
         node = cql_parser_result(parser);
         if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
-                                       sizeof pqfbuf)) != 0) {
+                                       sizeof pqfbuf)) != 0)
+        {
             error = cql_transform_error(cqltrans, &addinfo);
             printf("Can't convert CQL to PQF: %s (addinfo=%s)\n",
                     cql_strerror(error), addinfo);
@@ -1612,7 +1626,8 @@ static int send_searchRequest(const char *arg)
     return 2;
 }
 
-static void display_term(Z_Term *term) {
+static void display_term(Z_Term *term)
+{
     switch (term->which)
     {
     case Z_Term_general:
@@ -1646,20 +1661,24 @@ static void display_queryExpression(const char *lead, Z_QueryExpression *qe)
     }
 }
 
-static void display_facet(Z_FacetField *facet) {
-    if (facet->attributes) {
+static void display_facet(Z_FacetField *facet)
+{
+    if (facet->attributes)
+    {
         Z_AttributeList *al = facet->attributes;
-        struct attrvalues attr_values;
+        struct yaz_facet_attr attr_values;
         attr_values.errcode = 0;
         attr_values.limit = -1;
         attr_values.useattr = 0;
         attr_values.relation = "default";
 
-        facetattrs(al, &attr_values);
-        if (!attr_values.errcode) {
+        yaz_facet_attr_get_z_attributes(al, &attr_values);
+        if (!attr_values.errcode)
+        {
             int term_index;
             printf("  %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
-            for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
+            for (term_index = 0 ; term_index < facet->num_terms; term_index++)
+            {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
                 display_term(facetTerm->term);
                 printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
@@ -1674,7 +1693,8 @@ static void* display_facets(Z_FacetList *fl)
     int index;
     printf("Facets(%d): \n", fl->num);
 
-    for (index = 0; index < fl->num ; index++) {
+    for (index = 0; index < fl->num ; index++)
+    {
         display_facet(fl->elements[index]);
     }
     return 0;
@@ -1727,7 +1747,7 @@ static void display_searchResult(Z_OtherInformation *o)
     }
 }
 
-static int process_searchResponse(Z_SearchResponse *res)
+static int process_Z3950_searchResponse(Z_SearchResponse *res)
 {
     printf("Received SearchResponse.\n");
     print_refid(res->referenceId);
@@ -1743,7 +1763,7 @@ static int process_searchResponse(Z_SearchResponse *res)
     if (res->resultSetStatus)
     {
         printf("Result Set Status: ");
-        switch(*res->resultSetStatus)
+        switch (*res->resultSetStatus)
         {
         case Z_SearchResponse_subset:
             printf("subset"); break;
@@ -1932,7 +1952,7 @@ static void print_external(int iLevel, Z_External *pExternal)
     }
 }
 
-static int process_resourceControlRequest(Z_ResourceControlRequest *req)
+static int process_Z3950_resourceControlRequest(Z_ResourceControlRequest *req)
 {
     printf("Received ResourceControlRequest.\n");
     print_referenceId(1, req->referenceId);
@@ -1944,7 +1964,7 @@ static int process_resourceControlRequest(Z_ResourceControlRequest *req)
     return 0;
 }
 
-void process_ESResponse(Z_ExtendedServicesResponse *res)
+static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
 {
     printf("Status: ");
     switch (*res->operationStatus)
@@ -1963,7 +1983,8 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
         printf("unknown\n");
     }
     if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
-        (res->num_diagnostics != 0) ) {
+        (res->num_diagnostics != 0) )
+    {
         display_diagrecs(res->diagnostics, res->num_diagnostics);
     }
     print_refid (res->referenceId);
@@ -2041,7 +2062,7 @@ void process_ESResponse(Z_ExtendedServicesResponse *res)
     }
 }
 
-const char *get_ill_element(void *clientData, const char *element)
+static const char *get_ill_element(void *clientData, const char *element)
 {
     return 0;
 }
@@ -2222,8 +2243,8 @@ static Z_External *create_ItemOrderExternal(const char *type, int itemno,
     return r;
 }
 
-static int send_itemorder(const char *type, int itemno,
-                          const char *xml_buf, int xml_len)
+static int send_Z3950_itemorder(const char *type, int itemno,
+                                const char *xml_buf, int xml_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2266,11 +2287,11 @@ static int cmd_update0(const char *arg)
     return cmd_update_common(arg, 0);
 }
 
-static int cmd_update_Z3950(int version, int action_no, const char *recid,
+static int send_Z3950_update(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len);
 
 #if YAZ_HAVE_XML2
-static int cmd_update_SRW(int action_no, const char *recid,
+static int send_SRW_update(int action_no, const char *recid,
                           char *rec_buf, int rec_len);
 #endif
 
@@ -2325,14 +2346,14 @@ static int cmd_update_common(const char *arg, int version)
 
 #if YAZ_HAVE_XML2
     if (protocol == PROTO_HTTP)
-        return cmd_update_SRW(action_no, recid_buf, rec_buf, rec_len);
+        return send_SRW_update(action_no, recid_buf, rec_buf, rec_len);
 #endif
-    return cmd_update_Z3950(version, action_no, recid_buf, rec_buf, rec_len);
+    return send_Z3950_update(version, action_no, recid_buf, rec_buf, rec_len);
 }
 
 #if YAZ_HAVE_XML2
-static int cmd_update_SRW(int action_no, const char *recid,
-                          char *rec_buf, int rec_len)
+static int send_SRW_update(int action_no, const char *recid,
+                           char *rec_buf, int rec_len)
 {
     if (!conn)
         session_connect(cur_host);
@@ -2343,7 +2364,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
         Z_SRW_PDU *srw = yaz_srw_get(out, Z_SRW_update_request);
         Z_SRW_updateRequest *sr = srw->u.update_request;
 
-        switch(action_no)
+        switch (action_no)
         {
         case Z_IUOriginPartToKeep_recordInsert:
             sr->operation = "info:srw/action/1/create";
@@ -2369,7 +2390,7 @@ static int cmd_update_SRW(int action_no, const char *recid,
 }
 #endif
 
-static int cmd_update_Z3950(int version, int action_no, const char *recid,
+static int send_Z3950_update(int version, int action_no, const char *recid,
                             char *rec_buf, int rec_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
@@ -2571,7 +2592,7 @@ static int cmd_itemorder(const char *arg)
     parse_cmd_doc(&arg, out, &xml_buf, &xml_len);
 
     fflush(stdout);
-    send_itemorder(type, itemno, xml_buf, xml_len);
+    send_Z3950_itemorder(type, itemno, xml_buf, xml_len);
     return 2;
 }
 
@@ -2641,7 +2662,7 @@ static int cmd_init(const char *arg)
     }
     if (only_z3950())
         return 1;
-    send_initRequest(cur_host);
+    send_Z3950_initRequest(cur_host);
     return 2;
 }
 
@@ -2828,7 +2849,7 @@ static int cmd_find(const char *arg)
             {
                 if (conn)
                 {
-                    if (!send_searchRequest(arg))
+                    if (!send_Z3950_searchRequest(arg))
                         return 0;
                     wait_and_handle_response(0);
                     if (conn)
@@ -2846,7 +2867,7 @@ static int cmd_find(const char *arg)
         }
         else if (conn)
         {
-            if (!send_searchRequest(arg))
+            if (!send_Z3950_searchRequest(arg))
                 return 0;
         }
         else
@@ -2879,7 +2900,8 @@ static int cmd_facets(const char *arg)
         ODR odr = odr_createmem(ODR_ENCODE);
         facet_list = yaz_pqf_parse_facet_list(odr, arg);
 
-        if (!facet_list) {
+        if (!facet_list)
+        {
             printf("Invalid facet list: %s", arg);
             return 0;
         }
@@ -2893,7 +2915,7 @@ static int cmd_delete(const char *arg)
 {
     if (only_z3950())
         return 0;
-    if (!send_deleteResultSetRequest(arg))
+    if (!send_Z3950_deleteResultSetRequest(arg))
         return 0;
     return 2;
 }
@@ -2997,7 +3019,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     return 1;
 }
 
-static int send_presentRequest(const char *arg)
+static int send_Z3950_presentRequest(const char *arg)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_presentRequest);
     Z_PresentRequest *req = apdu->u.presentRequest;
@@ -3123,7 +3145,7 @@ static void close_session(void)
     last_hit_count = 0;
 }
 
-void process_close(Z_Close *req)
+static void process_Z3950_close(Z_Close *req)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
     Z_Close *res = apdu->u.close;
@@ -3177,13 +3199,13 @@ static int cmd_show(const char *arg)
             printf("Not connected yet\n");
             return 0;
         }
-        if (!send_presentRequest(arg))
+        if (!send_Z3950_presentRequest(arg))
             return 0;
     }
     return 2;
 }
 
-void exit_client(int code)
+static void exit_client(int code)
 {
     file_history_save(file_history);
     file_history_destroy(&file_history);
@@ -3191,7 +3213,7 @@ void exit_client(int code)
     exit(code);
 }
 
-int cmd_quit(const char *arg)
+static int cmd_quit(const char *arg)
 {
     printf("See you later, alligator.\n");
     xmalloc_trav("");
@@ -3199,49 +3221,57 @@ int cmd_quit(const char *arg)
     return 0;
 }
 
-int cmd_cancel(const char *arg)
+static int cmd_cancel(const char *arg)
 {
-    Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
-    Z_TriggerResourceControlRequest *req =
-        apdu->u.triggerResourceControlRequest;
-    bool_t rfalse = 0;
-    char command[16];
-
-    *command = '\0';
-    sscanf(arg, "%15s", command);
-
     if (only_z3950())
         return 0;
-    if (session_initResponse &&
-        !ODR_MASK_GET(session_initResponse->options,
-                      Z_Options_triggerResourceCtrl))
+    else
     {
-        printf("Target doesn't support cancel (trigger resource ctrl)\n");
-        return 0;
+        Z_APDU *apdu = zget_APDU(out, Z_APDU_triggerResourceControlRequest);
+        Z_TriggerResourceControlRequest *req =
+            apdu->u.triggerResourceControlRequest;
+        bool_t rfalse = 0;
+        char command[16];
+        
+        *command = '\0';
+        sscanf(arg, "%15s", command);
+        
+        if (only_z3950())
+            return 0;
+        if (session_initResponse &&
+            !ODR_MASK_GET(session_initResponse->options,
+                          Z_Options_triggerResourceCtrl))
+        {
+            printf("Target doesn't support cancel (trigger resource ctrl)\n");
+            return 0;
+        }
+        *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
+        req->resultSetWanted = &rfalse;
+        req->referenceId = set_refid(out);
+        
+        send_apdu(apdu);
+        printf("Sent cancel request\n");
+        if (!strcmp(command, "wait"))
+            return 2;
+        return 1;
     }
-    *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
-    req->resultSetWanted = &rfalse;
-    req->referenceId = set_refid(out);
-
-    send_apdu(apdu);
-    printf("Sent cancel request\n");
-    if (!strcmp(command, "wait"))
-         return 2;
-    return 1;
 }
 
-
-int cmd_cancel_find(const char *arg) {
+static int cmd_cancel_find(const char *arg)
+{
     int fres;
-    fres=cmd_find(arg);
-    if( fres > 0 ) {
+    if (only_z3950())
+        return 0;
+    fres = cmd_find(arg);
+    if (fres > 0)
+    {
         return cmd_cancel("");
     };
     return fres;
 }
 
-int send_scanrequest(const char *set,  const char *query,
-                     Odr_int pp, Odr_int num, const char *term)
+static int send_Z3950_scanrequest(const char *set,  const char *query,
+                                  Odr_int pp, Odr_int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
@@ -3328,7 +3358,7 @@ int send_scanrequest(const char *set,  const char *query,
     return 2;
 }
 
-int send_sortrequest(const char *arg, int newset)
+static int send_sortrequest(const char *arg, int newset)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_sortRequest);
     Z_SortRequest *req = apdu->u.sortRequest;
@@ -3365,7 +3395,7 @@ int send_sortrequest(const char *arg, int newset)
     return 2;
 }
 
-void display_term_info(Z_TermInfo *t)
+static void display_term_info(Z_TermInfo *t)
 {
     if (t->displayTerm)
         printf("%s", t->displayTerm);
@@ -3383,7 +3413,7 @@ void display_term_info(Z_TermInfo *t)
         printf("\n");
 }
 
-void process_scanResponse(Z_ScanResponse *res)
+static void process_Z3950_scanResponse(Z_ScanResponse *res)
 {
     int i;
     Z_Entry **entries = NULL;
@@ -3417,7 +3447,7 @@ void process_scanResponse(Z_ScanResponse *res)
                           res->entries->num_nonsurrogateDiagnostics);
 }
 
-void process_sortResponse(Z_SortResponse *res)
+static void process_Z3950_sortResponse(Z_SortResponse *res)
 {
     printf("Received SortResponse: status=");
     switch (*res->sortStatus)
@@ -3438,7 +3468,8 @@ void process_sortResponse(Z_SortResponse *res)
                          res->num_diagnostics);
 }
 
-void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
+static void process_Z3950_deleteResultSetResponse(
+    Z_DeleteResultSetResponse *res)
 {
     printf("Got deleteResultSetResponse status=" ODR_INT_PRINTF "\n",
            *res->deleteOperationStatus);
@@ -3454,7 +3485,7 @@ void process_deleteResultSetResponse(Z_DeleteResultSetResponse *res)
     }
 }
 
-int cmd_sort_generic(const char *arg, int newset)
+static int cmd_sort_generic(const char *arg, int newset)
 {
     if (only_z3950())
         return 0;
@@ -3473,23 +3504,23 @@ int cmd_sort_generic(const char *arg, int newset)
     return 0;
 }
 
-int cmd_sort(const char *arg)
+static int cmd_sort(const char *arg)
 {
     return cmd_sort_generic(arg, 0);
 }
 
-int cmd_sort_newset(const char *arg)
+static int cmd_sort_newset(const char *arg)
 {
     return cmd_sort_generic(arg, 1);
 }
 
-int cmd_scanstep(const char *arg)
+static int cmd_scanstep(const char *arg)
 {
     scan_stepSize = atoi(arg);
     return 0;
 }
 
-int cmd_scanpos(const char *arg)
+static int cmd_scanpos(const char *arg)
 {
     int r = sscanf(arg, "%d", &scan_position);
     if (r == 0)
@@ -3497,7 +3528,7 @@ int cmd_scanpos(const char *arg)
     return 0;
 }
 
-int cmd_scansize(const char *arg)
+static int cmd_scansize(const char *arg)
 {
     int r = sscanf(arg, "%d", &scan_size);
     if (r == 0)
@@ -3547,26 +3578,26 @@ static int cmd_scan_common(const char *set, const char *arg)
         if (*arg)
         {
             strcpy(last_scan_query, arg);
-            if (send_scanrequest(set, arg,
-                                 scan_position, scan_size, 0) < 0)
+            if (send_Z3950_scanrequest(set, arg,
+                                       scan_position, scan_size, 0) < 0)
                 return 0;
         }
         else
         {
-            if (send_scanrequest(set, last_scan_query,
-                                 1, scan_size, last_scan_line) < 0)
+            if (send_Z3950_scanrequest(set, last_scan_query,
+                                      1, scan_size, last_scan_line) < 0)
                 return 0;
         }
         return 2;
     }
 }
 
-int cmd_scan(const char *arg)
+static int cmd_scan(const char *arg)
 {
     return cmd_scan_common(0, arg);
 }
 
-int cmd_setscan(const char *arg)
+static int cmd_setscan(const char *arg)
 {
     char setstring[100];
     int nor;
@@ -3578,7 +3609,7 @@ int cmd_setscan(const char *arg)
     return cmd_scan_common(setstring, arg + nor);
 }
 
-int cmd_schema(const char *arg)
+static int cmd_schema(const char *arg)
 {
     xfree(record_schema);
     record_schema = 0;
@@ -3587,7 +3618,7 @@ int cmd_schema(const char *arg)
     return 1;
 }
 
-int cmd_format(const char *arg)
+static int cmd_format(const char *arg)
 {
     const char *cp = arg;
     int nor;
@@ -3630,7 +3661,7 @@ int cmd_format(const char *arg)
     return 1;
 }
 
-int cmd_elements(const char *arg)
+static int cmd_elements(const char *arg)
 {
     static Z_ElementSetNames esn;
     static char what[100];
@@ -3647,7 +3678,7 @@ int cmd_elements(const char *arg)
     return 1;
 }
 
-int cmd_querytype(const char *arg)
+static int cmd_querytype(const char *arg)
 {
     if (!strcmp(arg, "ccl"))
         queryType = QueryType_CCL;
@@ -3672,7 +3703,7 @@ int cmd_querytype(const char *arg)
     return 1;
 }
 
-int cmd_refid(const char *arg)
+static int cmd_refid(const char *arg)
 {
     xfree(refid);
     refid = NULL;
@@ -3681,7 +3712,7 @@ int cmd_refid(const char *arg)
     return 1;
 }
 
-int cmd_close(const char *arg)
+static int cmd_close(const char *arg)
 {
     Z_APDU *apdu;
     Z_Close *req;
@@ -3705,7 +3736,7 @@ int cmd_packagename(const char* arg)
     return 1;
 }
 
-int cmd_proxy(const char* arg)
+static int cmd_proxy(const char* arg)
 {
     xfree(yazProxy);
     yazProxy = 0;
@@ -3714,7 +3745,7 @@ int cmd_proxy(const char* arg)
     return 1;
 }
 
-int cmd_marccharset(const char *arg)
+static int cmd_marccharset(const char *arg)
 {
     char l1[30];
 
@@ -3732,7 +3763,7 @@ int cmd_marccharset(const char *arg)
     return 1;
 }
 
-int cmd_querycharset(const char *arg)
+static int cmd_querycharset(const char *arg)
 {
     char l1[30];
 
@@ -3750,7 +3781,7 @@ int cmd_querycharset(const char *arg)
     return 1;
 }
 
-int cmd_displaycharset(const char *arg)
+static int cmd_displaycharset(const char *arg)
 {
     char l1[30];
 
@@ -3780,7 +3811,7 @@ int cmd_displaycharset(const char *arg)
     return 1;
 }
 
-int cmd_negcharset(const char *arg)
+static int cmd_negcharset(const char *arg)
 {
     char l1[30];
 
@@ -3810,7 +3841,7 @@ int cmd_negcharset(const char *arg)
     return 1;
 }
 
-int cmd_charset(const char* arg)
+static int cmd_charset(const char* arg)
 {
     char l1[30], l2[30], l3[30], l4[30];
 
@@ -3835,9 +3866,10 @@ int cmd_charset(const char* arg)
     return 1;
 }
 
-int cmd_lang(const char* arg)
+static int cmd_lang(const char* arg)
 {
-    if (*arg == '\0') {
+    if (*arg == '\0')
+    {
         printf("Current language is `%s'\n", yazLang ? yazLang : "none");
         return 1;
     }
@@ -3848,7 +3880,7 @@ int cmd_lang(const char* arg)
     return 1;
 }
 
-int cmd_source(const char* arg, int echo )
+static int cmd_source(const char* arg, int echo )
 {
     /* first should open the file and read one line at a time.. */
     FILE* includeFile;
@@ -3891,20 +3923,13 @@ int cmd_source(const char* arg, int echo )
     return 1;
 }
 
-int cmd_source_echo(const char* arg)
+static int cmd_source_echo(const char* arg)
 {
     cmd_source(arg, 1);
     return 1;
 }
 
-int cmd_source_noecho(const char* arg)
-{
-    cmd_source(arg, 0);
-    return 1;
-}
-
-
-int cmd_subshell(const char* args)
+static int cmd_subshell(const char* args)
 {
     int ret = system(strlen(args) ? args : getenv("SHELL"));
     printf("\n");
@@ -3915,7 +3940,7 @@ int cmd_subshell(const char* args)
     return 1;
 }
 
-int cmd_set_berfile(const char *arg)
+static int cmd_set_berfile(const char *arg)
 {
     if (ber_file && ber_file != stdout && ber_file != stderr)
         fclose(ber_file);
@@ -3928,9 +3953,9 @@ int cmd_set_berfile(const char *arg)
     return 1;
 }
 
-int cmd_set_apdufile(const char *arg)
+static int cmd_set_apdufile(const char *arg)
 {
-    if(apdu_file && apdu_file != stderr && apdu_file != stderr)
+    if (apdu_file && apdu_file != stderr && apdu_file != stderr)
         fclose(apdu_file);
     if (!strcmp(arg, ""))
         apdu_file = 0;
@@ -3947,7 +3972,7 @@ int cmd_set_apdufile(const char *arg)
     return 1;
 }
 
-int cmd_set_cclfile(const char* arg)
+static int cmd_set_cclfile(const char* arg)
 {
     FILE *inf;
 
@@ -3964,11 +3989,12 @@ int cmd_set_cclfile(const char* arg)
     return 0;
 }
 
-int cmd_set_cqlfile(const char* arg)
+static int cmd_set_cqlfile(const char* arg)
 {
     cql_transform_t newcqltrans;
 
-    if ((newcqltrans = cql_transform_open_fname(arg)) == 0) {
+    if ((newcqltrans = cql_transform_open_fname(arg)) == 0)
+    {
         perror("unable to open CQL file");
         return 0;
     }
@@ -3980,19 +4006,20 @@ int cmd_set_cqlfile(const char* arg)
     return 0;
 }
 
-int cmd_set_auto_reconnect(const char* arg)
+static int cmd_set_auto_reconnect(const char* arg)
 {
-    if(strlen(arg)==0) {
+    if (strlen(arg)==0)
         auto_reconnect = ! auto_reconnect;
-    } else if(strcmp(arg,"on")==0) {
+    else if (strcmp(arg,"on")==0)
         auto_reconnect = 1;
-    } else if(strcmp(arg,"off")==0) {
+    else if (strcmp(arg,"off")==0)
         auto_reconnect = 0;
-    } else {
+    else
+    {
         printf("Error use on or off\n");
         return 1;
     }
-
+    
     if (auto_reconnect)
         printf("Set auto reconnect enabled.\n");
     else
@@ -4001,16 +4028,16 @@ int cmd_set_auto_reconnect(const char* arg)
     return 0;
 }
 
-
-int cmd_set_auto_wait(const char* arg)
+static int cmd_set_auto_wait(const char* arg)
 {
-    if(strlen(arg)==0) {
+    if (strlen(arg)==0)
         auto_wait = ! auto_wait;
-    } else if(strcmp(arg,"on")==0) {
+    else if (strcmp(arg,"on")==0)
         auto_wait = 1;
-    } else if(strcmp(arg,"off")==0) {
+    else if (strcmp(arg,"off")==0)
         auto_wait = 0;
-    } else {
+    else
+    {
         printf("Error use on or off\n");
         return 1;
     }
@@ -4023,9 +4050,10 @@ int cmd_set_auto_wait(const char* arg)
     return 0;
 }
 
-int cmd_set_marcdump(const char* arg)
+static int cmd_set_marcdump(const char* arg)
 {
-    if(marc_file && marc_file != stderr) { /* don't close stdout*/
+    if (marc_file && marc_file != stderr)
+    { /* don't close stdout*/
         fclose(marc_file);
     }
 
@@ -4055,7 +4083,8 @@ static void marc_file_write(const char *buf, size_t sz)
 /*
    this command takes 3 arge {name class oid}
 */
-int cmd_register_oid(const char* args) {
+static int cmd_register_oid(const char* args)
+{
     static struct {
         char* className;
         oid_class oclass;
@@ -4083,12 +4112,14 @@ int cmd_register_oid(const char* args) {
     Odr_oid oid[OID_SIZE];
 
     if (sscanf(args, "%100[^ ] %100[^ ] %100s",
-                oname_str,oclass_str, oid_str) < 1) {
+                oname_str,oclass_str, oid_str) < 1)
+    {
         printf("Error in register command \n");
         return 0;
     }
 
-    for (i = 0; oid_classes[i].className; i++) {
+    for (i = 0; oid_classes[i].className; i++)
+    {
         if (!strcmp(oid_classes[i].className, oclass_str))
         {
             oidclass=oid_classes[i].oclass;
@@ -4096,7 +4127,8 @@ int cmd_register_oid(const char* args) {
         }
     }
 
-    if(!(oid_classes[i].className)) {
+    if (!(oid_classes[i].className))
+    {
         printf("Unknown oid class %s\n",oclass_str);
         return 0;
     }
@@ -4111,10 +4143,10 @@ int cmd_register_oid(const char* args) {
     return 1;
 }
 
-int cmd_push_command(const char* arg)
+static int cmd_push_command(const char* arg)
 {
 #if HAVE_READLINE_HISTORY_H
-    if(strlen(arg)>1)
+    if (strlen(arg) > 1)
         add_history(arg);
 #else
     fprintf(stderr,"Not compiled with the readline/history module\n");
@@ -4160,7 +4192,7 @@ void source_rc_file(const char *rc_file)
     }
 }
 
-void add_to_readline_history(void *client_data, const char *line)
+static void add_to_readline_history(void *client_data, const char *line)
 {
 #if HAVE_READLINE_HISTORY_H
     if (strlen(line))
@@ -4180,7 +4212,7 @@ static void initialize(const char *rc_file)
         fprintf(stderr, "failed to allocate ODR streams\n");
         exit(1);
     }
-
+    
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
@@ -4200,7 +4232,8 @@ static void initialize(const char *rc_file)
     rl_attempted_completion_function =
         (char **(*)(const char *, int, int)) readline_completer;
 #endif
-    for(i = 0; i < maxOtherInfosSupported; ++i) {
+    for (i = 0; i < maxOtherInfosSupported; ++i)
+    {
         extraOtherInfos[i].oid[0] = -1;
         extraOtherInfos[i].value = 0;
     }
@@ -4477,16 +4510,16 @@ static void wait_and_handle_response(int one_response_only)
         if (gdu->which == Z_GDU_Z3950)
         {
             Z_APDU *apdu = gdu->u.z3950;
-            switch(apdu->which)
+            switch (apdu->which)
             {
             case Z_APDU_initResponse:
-                process_initResponse(apdu->u.initResponse);
+                process_Z3950_initResponse(apdu->u.initResponse);
                 break;
             case Z_APDU_searchResponse:
-                process_searchResponse(apdu->u.searchResponse);
+                process_Z3950_searchResponse(apdu->u.searchResponse);
                 break;
             case Z_APDU_scanResponse:
-                process_scanResponse(apdu->u.scanResponse);
+                process_Z3950_scanResponse(apdu->u.scanResponse);
                 break;
             case Z_APDU_presentResponse:
                 print_refid(apdu->u.presentResponse->referenceId);
@@ -4500,23 +4533,23 @@ static void wait_and_handle_response(int one_response_only)
                         *apdu->u.presentResponse->nextResultSetPosition);
                 break;
             case Z_APDU_sortResponse:
-                process_sortResponse(apdu->u.sortResponse);
+                process_Z3950_sortResponse(apdu->u.sortResponse);
                 break;
             case Z_APDU_extendedServicesResponse:
                 printf("Got extended services response\n");
-                process_ESResponse(apdu->u.extendedServicesResponse);
+                process_Z3950_ESResponse(apdu->u.extendedServicesResponse);
                 break;
             case Z_APDU_close:
                 printf("Target has closed the association.\n");
-                process_close(apdu->u.close);
+                process_Z3950_close(apdu->u.close);
                 break;
             case Z_APDU_resourceControlRequest:
-                process_resourceControlRequest
-                    (apdu->u.resourceControlRequest);
+                process_Z3950_resourceControlRequest(
+                    apdu->u.resourceControlRequest);
                 break;
             case Z_APDU_deleteResultSetResponse:
-                process_deleteResultSetResponse(apdu->u.
-                                                deleteResultSetResponse);
+                process_Z3950_deleteResultSetResponse(
+                    apdu->u.deleteResultSetResponse);
                 break;
             default:
                 printf("Received unknown APDU type (%d).\n",
@@ -4572,8 +4605,7 @@ static void wait_and_handle_response(int one_response_only)
     xfree(netbuffer);
 }
 
-
-int cmd_cclparse(const char* arg)
+static int cmd_cclparse(const char* arg)
 {
     int error, pos;
     struct ccl_rpn_node *rpn=NULL;
@@ -4581,7 +4613,8 @@ int cmd_cclparse(const char* arg)
 
     rpn = ccl_find_str(bibset, arg, &error, &pos);
 
-    if (error) {
+    if (error)
+    {
         int ioff = 3+strlen(last_cmd)+1+pos;
         printf("%*s^ - ", ioff, " ");
         printf("%s\n", ccl_err_msg(error));
@@ -4601,8 +4634,7 @@ int cmd_cclparse(const char* arg)
     return 0;
 }
 
-
-int cmd_set_otherinfo(const char* args)
+static int cmd_set_otherinfo(const char* args)
 {
     char oidstr[101], otherinfoString[101];
     int otherinfoNo;
@@ -4611,7 +4643,8 @@ int cmd_set_otherinfo(const char* args)
     sscan_res = sscanf(args, "%d %100[^ ] %100s",
                         &otherinfoNo, oidstr, otherinfoString);
 
-    if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported) {
+    if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported)
+    {
         printf("Error otherinfo index too large (%d>=%d)\n",
                otherinfoNo,maxOtherInfosSupported);
         return 0;
@@ -4626,7 +4659,8 @@ int cmd_set_otherinfo(const char* args)
         extraOtherInfos[otherinfoNo].value = 0;
         return 0;
     }
-    if (sscan_res != 3) {
+    if (sscan_res != 3)
+    {
         printf("Error in set_otherinfo command \n");
         return 0;
     }
@@ -4647,10 +4681,11 @@ int cmd_set_otherinfo(const char* args)
     return 0;
 }
 
-int cmd_sleep(const char* args )
+static int cmd_sleep(const char* args )
 {
-    int sec=atoi(args);
-    if( sec > 0 ) {
+    int sec = atoi(args);
+    if (sec > 0)
+    {
 #ifdef WIN32
         Sleep(sec*1000);
 #else
@@ -4661,7 +4696,7 @@ int cmd_sleep(const char* args )
     return 1;
 }
 
-int cmd_list_otherinfo(const char* args)
+static int cmd_list_otherinfo(const char* args)
 {
     int i;
 
@@ -4688,7 +4723,7 @@ int cmd_list_otherinfo(const char* args)
     }
     else
     {
-        for(i = 0; i < maxOtherInfosSupported; ++i)
+        for (i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
             {
@@ -4706,8 +4741,8 @@ int cmd_list_otherinfo(const char* args)
     return 0;
 }
 
-
-int cmd_list_all(const char* args) {
+static int cmd_list_all(const char* args)
+{
     int i;
 
     /* connection options */
@@ -4722,10 +4757,12 @@ int cmd_list_all(const char* args) {
     printf("auto_reconnect       : %s\n",auto_reconnect?"on":"off");
     printf("auto_wait            : %s\n",auto_wait?"on":"off");
 
-    if (!auth) {
+    if (!auth)
         printf("Authentication       : none\n");
-    } else {
-        switch(auth->which) {
+    else
+    {
+        switch (auth->which)
+        {
         case Z_IdAuthentication_idPass:
             printf("Authentication       : IdPass\n");
             printf("    Login User       : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
@@ -4777,11 +4814,13 @@ int cmd_list_all(const char* args) {
     return 0;
 }
 
-int cmd_clear_otherinfo(const char* args)
+static int cmd_clear_otherinfo(const char* args)
 {
-    if(strlen(args)>0) {
+    if (strlen(args) > 0)
+    {
         int otherinfoNo = atoi(args);
-        if (otherinfoNo >= maxOtherInfosSupported) {
+        if (otherinfoNo >= maxOtherInfosSupported)
+        {
             printf("Error otherinfo index too large (%d>=%d)\n",
                    otherinfoNo, maxOtherInfosSupported);
             return 0;
@@ -4793,9 +4832,11 @@ int cmd_clear_otherinfo(const char* args)
             xfree(extraOtherInfos[otherinfoNo].value);
             extraOtherInfos[otherinfoNo].value = 0;
         }
-    } else {
+    }
+    else
+    {
         int i;
-        for(i = 0; i < maxOtherInfosSupported; ++i)
+        for (i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
             {
@@ -4808,17 +4849,15 @@ int cmd_clear_otherinfo(const char* args)
     return 0;
 }
 
-int cmd_wait_response(const char *arg)
+static int cmd_wait_response(const char *arg)
 {
+    int i;
     int wait_for = atoi(arg);
-    int i=0;
-    if( wait_for < 1 ) {
+    if (wait_for < 1) 
         wait_for = 1;
-    };
 
-    for( i=0 ; i < wait_for ; ++i ) {
+    for (i = 0 ; i < wait_for; ++i )
         wait_and_handle_response(1);
-    };
     return 0;
 }
 
@@ -4974,7 +5013,7 @@ static int cmd_help(const char *line)
     return 1;
 }
 
-int cmd_register_tab(const char* arg)
+static int cmd_register_tab(const char* arg)
 {
 #if HAVE_READLINE_READLINE_H
     char command[101], tabargument[101];
@@ -4982,18 +5021,20 @@ int cmd_register_tab(const char* arg)
     int num_of_tabs;
     const char** tabslist;
 
-    if (sscanf(arg, "%100s %100s", command, tabargument) < 1) {
+    if (sscanf(arg, "%100s %100s", command, tabargument) < 1)
+    {
         return 0;
     }
 
     /* locate the amdn in the list */
-    for (i = 0; cmd_array[i].cmd; i++) {
-        if (!strncmp(cmd_array[i].cmd, command, strlen(command))) {
+    for (i = 0; cmd_array[i].cmd; i++)
+    {
+        if (!strncmp(cmd_array[i].cmd, command, strlen(command)))
             break;
-        }
     }
 
-    if (!cmd_array[i].cmd) {
+    if (!cmd_array[i].cmd)
+    {
         fprintf(stderr,"Unknown command %s\n",command);
         return 1;
     }
@@ -5005,9 +5046,8 @@ int cmd_register_tab(const char* arg)
     num_of_tabs=0;
 
     tabslist = cmd_array[i].local_tabcompletes;
-    for(; tabslist && *tabslist; tabslist++) {
+    for (; tabslist && *tabslist; tabslist++)
         num_of_tabs++;
-    }
 
     cmd_array[i].local_tabcompletes = (const char **)
         realloc(cmd_array[i].local_tabcompletes,
@@ -5019,8 +5059,7 @@ int cmd_register_tab(const char* arg)
     return 1;
 }
 
-
-void process_cmd_line(char* line)
+static void process_cmd_line(char* line)
 {
     int i, res;
     char word[32], arg[10240];
@@ -5043,12 +5082,12 @@ void process_cmd_line(char* line)
         char* p = arg;
         char* lastnonspace=NULL;
 
-        for(;*p; ++p) {
-            if(!isspace(*(unsigned char *) p)) {
+        for (; *p; ++p)
+        {
+            if (!isspace(*(unsigned char *) p))
                 lastnonspace = p;
-            }
         }
-        if(lastnonspace)
+        if (lastnonspace)
             *(++lastnonspace) = 0;
     }
 
@@ -5066,14 +5105,15 @@ void process_cmd_line(char* line)
         res = 1;
     }
 
-    if(apdu_file) fflush(apdu_file);
+    if (apdu_file)
+        fflush(apdu_file);
 
     if (res >= 2 && auto_wait)
         wait_and_handle_response(0);
 
-    if(apdu_file)
+    if (apdu_file)
         fflush(apdu_file);
-    if(marc_file)
+    if (marc_file)
         fflush(marc_file);
 }
 
@@ -5081,11 +5121,12 @@ static char *command_generator(const char *text, int state)
 {
 #if HAVE_READLINE_READLINE_H
     static int idx;
-    if (state==0) {
+    if (state == 0)
         idx = 0;
-    }
-    for( ; cmd_array[idx].cmd; ++idx) {
-        if (!strncmp(cmd_array[idx].cmd, text, strlen(text))) {
+    for (; cmd_array[idx].cmd; ++idx)
+    {
+        if (!strncmp(cmd_array[idx].cmd, text, strlen(text)))
+        {
             ++idx;  /* skip this entry on the next run */
             return strdup(cmd_array[idx-1].cmd);
         }
@@ -5108,11 +5149,12 @@ static char* default_completer(const char* text, int state)
 /*
    This function only known how to complete on the first word
 */
-char **readline_completer(char *text, int start, int end)
+static char **readline_completer(char *text, int start, int end)
 {
     completerFunctionType completerToUse;
 
-    if(start == 0) {
+    if (start == 0)
+    {
 #if HAVE_READLINE_RL_COMPLETION_MATCHES
         char** res = rl_completion_matches(text, command_generator);
 #else
@@ -5121,10 +5163,13 @@ char **readline_completer(char *text, int start, int end)
 #endif
         rl_attempted_completion_over = 1;
         return res;
-    } else {
+    }
+    else
+    {
         char arg[10240],word[32];
-        int i=0 ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0) {
+        int i ,res;
+        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0)
+        {
             rl_attempted_completion_over = 1;
             return NULL;
         }
@@ -5133,7 +5178,7 @@ char **readline_completer(char *text, int start, int end)
             if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
                 break;
 
-        if(!cmd_array[i].cmd)
+        if (!cmd_array[i].cmd)
             return NULL;
 
         default_completer_list = cmd_array[i].local_tabcompletes;
@@ -5143,7 +5188,8 @@ char **readline_completer(char *text, int start, int end)
         { /* if command completer is not defined use the default completer */
             completerToUse = default_completer;
         }
-        if (completerToUse) {
+        if (completerToUse)
+        {
 #ifdef HAVE_READLINE_RL_COMPLETION_MATCHES
             char** res=
                 rl_completion_matches(text, completerToUse);
@@ -5154,7 +5200,9 @@ char **readline_completer(char *text, int start, int end)
             if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return res;
-        } else {
+        }
+        else
+        {
             if (!cmd_array[i].complete_filenames)
                 rl_attempted_completion_over = 1;
             return 0;
@@ -5164,7 +5212,7 @@ char **readline_completer(char *text, int start, int end)
 #endif
 
 #ifndef WIN32
-void ctrl_c_handler(int x)
+static void ctrl_c_handler(int x)
 {
     exit_client(0);
 }
