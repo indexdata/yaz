@@ -33,6 +33,10 @@
 #include <pwd.h>
 #endif
 
+#if HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif
+
 #include <yaz/daemon.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
@@ -199,6 +203,13 @@ int yaz_daemon(const char *progname,
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
             exit(1);
         }
+        /* Linux don't produce core dumps evern if the limit is right and
+           files are writable.. This fixes this. See prctl(2) */
+#if HAVE_SYS_PRCTL_H
+#ifdef PR_SET_DUMPABLE
+        prctl(PR_SET_DUMPABLE, 1, 0, 0);
+#endif
+#endif
     }
 
     if (flags & YAZ_DAEMON_FORK)
