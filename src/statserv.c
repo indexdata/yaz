@@ -61,6 +61,7 @@
 #include "eventl.h"
 #include "session.h"
 #include <yaz/statserv.h>
+#include <yaz/daemon.h>
 
 static IOCHAN pListener = NULL;
 
@@ -853,22 +854,11 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-int statserv_must_terminate(void)
-{
-    return 0;
-}
-
 #else /* ! WIN32 */
 
-static int term_flag = 0;
 /* To save having an #ifdef in event_loop we need to
    define this empty function 
 */
-int statserv_must_terminate(void)
-{
-    return term_flag;
-}
-
 void statserv_remove(IOCHAN pIOChannel)
 {
 }
@@ -883,11 +873,6 @@ static void statserv_closedown(void)
         iochan_destroy(p);
     }
     xml_config_close();
-}
-
-void sigterm(int sig)
-{
-    term_flag = 1;
 }
 
 static void *new_session(void *vp);
@@ -1205,6 +1190,12 @@ static void statserv_reset(void)
 {
 }
 
+static void daemon_handler(void *data)
+{
+    IOCHAN *pListener = data;
+    iochan_event_loop(pListener);
+}
+
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     char sep;
@@ -1233,128 +1224,38 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
     
     xml_config_bend_start();
 
-#ifdef WIN32
-    xml_config_add_listeners();
-
-    yaz_log(log_server, "Starting server %s", me);
-    if (!pListener && *control_block.default_listen)
-        add_listener(control_block.default_listen, 0);
-#else
-/* UNIX */
     if (control_block.inetd)
+    {
+#ifdef WIN32
+        ; /* no inetd on Windows */
+#else
         inetd_connection(control_block.default_proto);
+#endif
+    }
     else
     {
-        static int hand[2];
-        if (control_block.background)
-        {
-            /* create pipe so that parent waits until child has created
-               PID (or failed) */
-            if (pipe(hand) < 0)
-            {
-                yaz_log(YLOG_FATAL|YLOG_ERRNO, "pipe");
-                return 1;
-            }
-            switch (fork())
-            {
-            case 0: 
-                break;
-            case -1:
-                return 1;
-            default:
-                close(hand[1]);
-                while(1)
-                {
-                    char dummy[1];
-                    int res = read(hand[0], dummy, 1);
-                    if (res < 0 && yaz_errno() != EINTR)
-                    {
-                        yaz_log(YLOG_FATAL|YLOG_ERRNO, "read fork handshake");
-                        break;
-                    }
-                    else if (res >= 0)
-                        break;
-                }
-                close(hand[0]);
-                _exit(0);
-            }
-            /* child */
-            close(hand[0]);
-            if (setsid() < 0)
-                return 1;
-            
-            close(0);
-            close(1);
-            close(2);
-            open("/dev/null", O_RDWR);
-            if (dup(0) == -1)
-                return 1;
-            if (dup(0) == -1)
-                return 1;
-        }
         xml_config_add_listeners();
 
         if (!pListener && *control_block.default_listen)
             add_listener(control_block.default_listen, 0);
-        
-        if (!pListener)
-            return 1;
 
-        if (*control_block.pid_fname)
-        {
-            FILE *f = fopen(control_block.pid_fname, "w");
-            if (!f)
-            {
-                yaz_log(YLOG_FATAL|YLOG_ERRNO, "Couldn't create %s", 
-                        control_block.pid_fname);
-                exit(0);
-            }
-            fprintf(f, "%ld", (long) getpid());
-            fclose(f);
-        }
-        
-        if (control_block.background)
-            close(hand[1]);
-
-
-        yaz_log(log_server, "Starting server %s pid=%ld", programname, 
-                (long) getpid());
-#if 0
-        sigset_t sigs_to_block;
-        
-        sigemptyset(&sigs_to_block);
-        sigaddset(&sigs_to_block, SIGTERM);
-        pthread_sigmask(SIG_BLOCK, &sigs_to_block, 0);
-        /* missing... */
-#endif
+#ifndef WIN32
         if (control_block.dynamic)
             signal(SIGCHLD, catchchld);
-    }
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGTERM, sigterm);
-    if (*control_block.setuid)
-    {
-        struct passwd *pw;
-        
-        if (!(pw = getpwnam(control_block.setuid)))
-        {
-            yaz_log(YLOG_FATAL, "%s: Unknown user", control_block.setuid);
-            return(1);
-        }
-        if (setuid(pw->pw_uid) < 0)
-        {
-            yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
-            exit(1);
-        }
-    }
-/* UNIX */
 #endif
+    }
     if (pListener == NULL)
         return 1;
     if (s)
         yaz_sc_running(s);
     yaz_log(YLOG_DEBUG, "Entering event loop.");
-    return iochan_event_loop(&pListener);
+
+    yaz_daemon(programname,
+               (control_block.background ? YAZ_DAEMON_FORK : 0),
+               daemon_handler, &pListener,
+               *control_block.pid_fname ? control_block.pid_fname : 0,
+               *control_block.setuid ? control_block.setuid : 0);
+    return 0;
 }
 
 static void option_copy(char *dst, const char *src)
