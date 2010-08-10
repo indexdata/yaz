@@ -826,24 +826,20 @@ Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
 static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
 {
     YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
-    char buffer[length+1];
+    char *buffer = odr_strdupn(odr, facet, length);
     Odr_oid *attributeSetId;
-    Z_FacetField *facet_field;
-    Z_AttributeList *attribute_list;
-    memcpy(buffer, facet, length);
-    buffer[length] = '\0';
-    attribute_list = yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, buffer);
-
-    if (!attribute_list) {
-        printf("Invalid facet definition: %s", facet);
-        return 0;
+    Z_FacetField *facet_field = 0;
+    Z_AttributeList *attribute_list =
+        yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, buffer);
+    
+    if (attribute_list)
+    {
+        facet_field = odr_malloc(odr, sizeof(*facet_field));
+        facet_field->attributes = attribute_list;
+        facet_field->num_terms = 0;
+        facet_field->terms = 0;
     }
-    facet_field = odr_malloc(odr, sizeof(*facet_field));
-    facet_field->attributes = attribute_list;
-    facet_field->num_terms = 0;
-    facet_field->terms = 0;
-    //debug_add_facet_term(odr, facet_field);
-
+    yaz_pqf_destroy(pqf_parser);
     return facet_field;
 }
 
