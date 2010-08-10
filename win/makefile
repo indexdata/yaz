@@ -473,6 +473,7 @@ MISC_OBJS= \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
+   $(OBJDIR)\facet.obj \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\zoom-socket.obj \
    $(OBJDIR)\initopt.obj \
@@ -544,7 +545,8 @@ Z3950_OBJS= \
    $(OBJDIR)\prt-ext.obj \
    $(OBJDIR)\z-charneg.obj \
    $(OBJDIR)\z-mterm2.obj \
-   $(OBJDIR)\z-oclcui.obj
+   $(OBJDIR)\z-oclcui.obj \
+   $(OBJDIR)\z-facet-1.obj
 
 ILL_OBJS= \
    $(OBJDIR)\ill-get.obj\
@@ -598,6 +600,10 @@ MTERM2_C_FILES = $(Z3950_C_DIR)\z-mterm2.c
 # Files generated from mterm2.asn
 OCLCUI_H_FILES = $(INCLDIR)\yaz\z-oclcui.h
 OCLCUI_C_FILES = $(Z3950_C_DIR)\z-oclcui.c
+
+# Files generated from facet.asn
+FACET_H_FILES = $(INCLDIR)\yaz\z-facet-1.h
+FACET_C_FILES = $(Z3950_C_DIR)\z-facet-1.c
 
 # Files created from z3950v3.asn
 Z3950V3_H_FILES= \
@@ -653,6 +659,7 @@ ITEM_REQ_FILES= $(ITEM_REQ_C_FILES) $(ITEM_REQ_H_FILES)
 CHARNEG_FILES = $(CHARNEG_C_FILES) $(CHARNEG_H_FILES)
 MTERM2_FILES = $(MTERM2_C_FILES) $(MTERM2_H_FILES)
 OCLCUI_FILES = $(OCLCUI_C_FILES) $(OCLCUI_H_FILES)
+FACET_FILES = $(FACET_C_FILES) $(FACET_H_FILES)
 
 GENERATED_C_FILES= \
    $(Z3950V3_C_FILES)  \
@@ -663,6 +670,7 @@ GENERATED_C_FILES= \
    $(CHARNEG_C_FILES) \
    $(MTERM2_C_FILES) \
    $(OCLCUI_C_FILES) \
+   $(FACET_C_FILES) \
    $(ILL_CORE_C_FILES) \
    $(ITEM_REQ_C_FILES)
 
@@ -675,6 +683,7 @@ GENERATED_H_FILES= \
    $(CHARNEG_H_FILES) \
    $(MTERM2_H_FILES) \
    $(OCLCUI_H_FILES) \
+   $(FACET_H_FILES) \
    $(ILL_CORE_H_FILES) \
    $(ITEM_REQ_H_FILES)
 
@@ -758,6 +767,11 @@ $(MTERM2_FILES): $(SRCDIR)\mterm2.asn
 $(OCLCUI_FILES): $(SRCDIR)\oclcui.asn
 	@cd $(SRCDIR)
 	$(TCL) $(TCLOPT) -d z.tcl oclcui.asn
+	@cd $(WINDIR)
+
+$(FACET_FILES): $(SRCDIR)\facet.asn
+	@cd $(SRCDIR)
+	$(TCL) $(TCLOPT) -d z.tcl facet.asn
 	@cd $(WINDIR)
 
 $(ILL_CORE_FILES): $(SRCDIR)\ill9702.asn
