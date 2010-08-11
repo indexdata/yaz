@@ -290,6 +290,15 @@ char *ZOOM_query_get_query_string(ZOOM_query s);
 
 int ZOOM_uri_to_code(const char *uri);
 
+zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c);
+zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c);
+
+int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
+                    zoom_ret *cret);
+
+void ZOOM_set_HTTP_error(ZOOM_connection c, int error,
+                         const char *addinfo, const char *addinfo2);
+
 /*
  * Local variables:
  * c-basic-offset: 4
