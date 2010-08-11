@@ -1721,7 +1721,7 @@ static zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 }
 #endif
 
-static zoom_ret ZOOM_connection_send_search(ZOOM_connection c)
+static zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
 {
     ZOOM_resultset r;
     int lslb, ssub, mspn;
@@ -2478,8 +2478,8 @@ static ZOOM_record record_cache_lookup(ZOOM_resultset r, int pos,
     return 0;
 }
                                              
-static void handle_records(ZOOM_connection c, Z_Records *sr,
-                           int present_phase)
+static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
+                                 int present_phase)
 {
     ZOOM_resultset resultset;
     int *start, *count;
@@ -2570,9 +2570,10 @@ static void handle_records(ZOOM_connection c, Z_Records *sr,
     }
 }
 
-static void handle_present_response(ZOOM_connection c, Z_PresentResponse *pr)
+static void handle_Z3950_present_response(ZOOM_connection c,
+                                          Z_PresentResponse *pr)
 {
-    handle_records(c, pr->records, 1);
+    handle_Z3950_records(c, pr->records, 1);
 }
 
 static void handle_queryExpressionTerm(ZOOM_options opt, const char *name,
@@ -2742,8 +2743,8 @@ static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
     }
 }
 
-
-static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
+static void handle_Z3950_search_response(ZOOM_connection c,
+                                         Z_SearchResponse *sr)
 {
     ZOOM_resultset resultset;
     ZOOM_Event event;
@@ -2771,16 +2772,16 @@ static void handle_search_response(ZOOM_connection c, Z_SearchResponse *sr)
     handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
-    handle_records(c, sr->records, 0);
+    handle_Z3950_records(c, sr->records, 0);
 }
 
-static void sort_response(ZOOM_connection c, Z_SortResponse *res)
+static void handle_Z3950_sort_response(ZOOM_connection c, Z_SortResponse *res)
 {
     if (res->diagnostics && res->num_diagnostics > 0)
         response_diag(c, res->diagnostics[0]);
 }
 
-static int scan_response(ZOOM_connection c, Z_ScanResponse *res)
+static int handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
 {
     NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan;
@@ -2807,8 +2808,8 @@ static int scan_response(ZOOM_connection c, Z_ScanResponse *res)
     return 1;
 }
 
-static zoom_ret send_sort(ZOOM_connection c,
-                          ZOOM_resultset resultset)
+static zoom_ret send_Z3950_sort(ZOOM_connection c,
+                                ZOOM_resultset resultset)
 {
     if (c->error)
         resultset->r_sort_spec = 0;
@@ -2830,7 +2831,7 @@ static zoom_ret send_sort(ZOOM_connection c,
     return zoom_complete;
 }
 
-static zoom_ret send_present(ZOOM_connection c)
+static zoom_ret send_Z3950_present(ZOOM_connection c)
 {
     Z_APDU *apdu = 0;
     Z_PresentRequest *req = 0;
@@ -3065,7 +3066,7 @@ static zoom_ret send_package(ZOOM_connection c)
     return do_write(c);
 }
 
-static zoom_ret ZOOM_connection_send_scan(ZOOM_connection c)
+static zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
 {
     ZOOM_scanset scan;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
@@ -3871,13 +3872,13 @@ ZOOM_API(int)
             if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_search(c);
             else
-                ret = ZOOM_connection_send_search(c);
+                ret = ZOOM_connection_Z3950_send_search(c);
             break;
         case ZOOM_TASK_RETRIEVE:
             if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_search(c);
             else
-                ret = send_present(c);
+                ret = send_Z3950_present(c);
             break;
         case ZOOM_TASK_CONNECT:
             ret = do_connect(c);
@@ -3886,7 +3887,7 @@ ZOOM_API(int)
             if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_scan(c);
             else
-                ret = ZOOM_connection_send_scan(c);
+                ret = ZOOM_connection_Z3950_send_scan(c);
             break;
         case ZOOM_TASK_PACKAGE:
             ret = send_package(c);
@@ -3894,7 +3895,7 @@ ZOOM_API(int)
         case ZOOM_TASK_SORT:
             c->tasks->u.sort.resultset->r_sort_spec = 
                 c->tasks->u.sort.q->sort_spec;
-            ret = send_sort(c, c->tasks->u.sort.resultset);
+            ret = send_Z3950_sort(c, c->tasks->u.sort.resultset);
             break;
         }
     }
@@ -3916,14 +3917,14 @@ ZOOM_API(int)
     return 1;
 }
 
-static zoom_ret send_sort_present(ZOOM_connection c)
+static zoom_ret send_Z3950_sort_present(ZOOM_connection c)
 {
     zoom_ret r = zoom_complete;
 
     if (c->tasks && c->tasks->which == ZOOM_TASK_SEARCH)
-        r = send_sort(c, c->tasks->u.search.resultset);
+        r = send_Z3950_sort(c, c->tasks->u.search.resultset);
     if (r == zoom_complete)
-        r = send_present(c);
+        r = send_Z3950_present(c);
     return r;
 }
 
@@ -3988,8 +3989,8 @@ static int es_response_taskpackage(ZOOM_connection c,
 }
 
 
-static int es_response(ZOOM_connection c,
-                       Z_ExtendedServicesResponse *res)
+static int handle_Z3950_es_response(ZOOM_connection c,
+                                    Z_ExtendedServicesResponse *res)
 {
     if (!c->tasks || c->tasks->which != ZOOM_TASK_PACKAGE)
         return 0;
@@ -4061,16 +4062,16 @@ static void set_init_option(const char *name, void *clientData) {
 }
 
 
-static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
+static void handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
     
     ZOOM_connection_set_mask(c, 0);
-    yaz_log(log_details, "%p recv_apdu apdu->which=%d", c, apdu->which);
-    switch(apdu->which)
+    yaz_log(log_details, "%p handle_Z3950_apdu apdu->which=%d", c, apdu->which);
+    switch (apdu->which)
     {
     case Z_APDU_initResponse:
-        yaz_log(log_api, "%p recv_apdu: Received Init response", c);
+        yaz_log(log_api, "%p handle_Z3950_apdu: Received Init response", c);
         initrs = apdu->u.initResponse;
         ZOOM_connection_option_set(c, "serverImplementationId",
                                    initrs->implementationId ?
@@ -4135,7 +4136,7 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
                 int sel;
                 
                 yaz_get_response_charneg(tmpmem, p, &charset, &lang, &sel);
-                yaz_log(log_details, "%p recv_apdu target accepted: "
+                yaz_log(log_details, "%p handle_Z3950_apdu target accepted: "
                         "charset %s, language %s, select %d",
                         c,
                         charset ? charset : "none", lang ? lang : "none", sel);
@@ -4154,35 +4155,35 @@ static void recv_apdu(ZOOM_connection c, Z_APDU *apdu)
         }       
         break;
     case Z_APDU_searchResponse:
-        yaz_log(log_api, "%p recv_apdu Search response", c);
-        handle_search_response(c, apdu->u.searchResponse);
-        if (send_sort_present(c) == zoom_complete)
+        yaz_log(log_api, "%p handle_Z3950_apdu Search response", c);
+        handle_Z3950_search_response(c, apdu->u.searchResponse);
+        if (send_Z3950_sort_present(c) == zoom_complete)
             ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_presentResponse:
-        yaz_log(log_api, "%p recv_apdu Present response", c);
-        handle_present_response(c, apdu->u.presentResponse);
-        if (send_present(c) == zoom_complete)
+        yaz_log(log_api, "%p handle_Z3950_apdu Present response", c);
+        handle_Z3950_present_response(c, apdu->u.presentResponse);
+        if (send_Z3950_present(c) == zoom_complete)
             ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_sortResponse:
-        yaz_log(log_api, "%p recv_apdu Sort response", c);
-        sort_response(c, apdu->u.sortResponse);
-        if (send_present(c) == zoom_complete)
+        yaz_log(log_api, "%p handle_Z3950_apdu Sort response", c);
+        handle_Z3950_sort_response(c, apdu->u.sortResponse);
+        if (send_Z3950_present(c) == zoom_complete)
             ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_scanResponse:
-        yaz_log(log_api, "%p recv_apdu Scan response", c);
-        scan_response(c, apdu->u.scanResponse);
+        yaz_log(log_api, "%p handle_Z3950_apdu Scan response", c);
+        handle_Z3950_scan_response(c, apdu->u.scanResponse);
         ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_extendedServicesResponse:
-        yaz_log(log_api, "%p recv_apdu Extended Services response", c);
-        es_response(c, apdu->u.extendedServicesResponse);
+        yaz_log(log_api, "%p handle_Z3950_apdu Extended Services response", c);
+        handle_Z3950_es_response(c, apdu->u.extendedServicesResponse);
         ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_close:
-        yaz_log(log_api, "%p recv_apdu Close PDU", c);
+        yaz_log(log_api, "%p handle_Z3950_apdu Close PDU", c);
         if (!ZOOM_test_reconnect(c))
         {
             set_ZOOM_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
@@ -4595,7 +4596,7 @@ static int do_read(ZOOM_connection c)
             if (c->odr_print)
                 z_GDU(c->odr_print, &gdu, 0, 0);
             if (gdu->which == Z_GDU_Z3950)
-                recv_apdu(c, gdu->u.z3950);
+                handle_Z3950_apdu(c, gdu->u.z3950);
             else if (gdu->which == Z_GDU_HTTP_Response)
             {
 #if YAZ_HAVE_XML2
