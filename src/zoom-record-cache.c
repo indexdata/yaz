@@ -13,6 +13,7 @@
 #include "zoom-p.h"
 
 #include <yaz/diagbib1.h>
+#include <yaz/record_render.h>
 #include <yaz/shptr.h>
 
 #if SHPTR
@@ -232,7 +233,7 @@ ZOOM_API(const char *)
         rec->wrbuf = wrbuf_alloc();
     wrbuf = rec->wrbuf;
 #endif
-    return ZOOM_npr_format(rec->npr, rec->schema, wrbuf, type_spec, len);
+    return yaz_record_render(rec->npr, rec->schema, wrbuf, type_spec, len);
 }
 
 ZOOM_API(int)
