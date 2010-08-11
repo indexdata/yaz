@@ -293,6 +293,9 @@ ZOOM_query_prefix(ZOOM_query s, const char *str);
 ZOOM_API(int)
 ZOOM_query_sortby(ZOOM_query s, const char *criteria);
 
+ZOOM_API(void)
+ZOOM_query_addref(ZOOM_query s);
+
 /* ----------------------------------------------------------- */
 /* scan */
 ZOOM_API(ZOOM_scanset)
