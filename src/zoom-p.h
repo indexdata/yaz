@@ -168,23 +168,6 @@ struct ZOOM_resultset_p {
     char **facets_names;
 };
 
-struct ZOOM_record_p {
-    ODR odr;
-#if SHPTR
-    struct WRBUF_shptr *record_wrbuf;
-#else
-    WRBUF wrbuf;
-#endif
-
-    Z_NamePlusRecord *npr;
-    const char *schema;
-
-    const char *diag_uri;
-    const char *diag_message;
-    const char *diag_details;
-    const char *diag_set;
-};
-
 struct facet_term_p {
     char *term;
     int frequency;
@@ -194,16 +177,6 @@ struct ZOOM_facet_field_p {
     char *facet_name;
     int num_terms;
     struct facet_term_p *facet_terms;
-};
-
-
-struct ZOOM_record_cache_p {
-    struct ZOOM_record_p rec;
-    char *elementSetName;
-    char *syntax;
-    char *schema;
-    int pos;
-    ZOOM_record_cache next;
 };
 
 struct ZOOM_scanset_p {
@@ -314,6 +287,11 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s);
 Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s);
 char *ZOOM_query_get_query_string(ZOOM_query s);
+
+const char *ZOOM_npr_format(Z_NamePlusRecord *npr, const char *schema,
+                            WRBUF wrbuf,
+                            const char *type_spec, int *len);
+int ZOOM_uri_to_code(const char *uri);
 
 /*
  * Local variables:

@@ -473,6 +473,7 @@ MISC_OBJS= \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
+   $(OBJDIR)\zoom-record-cache.obj \
    $(OBJDIR)\zoom-z3950.obj \
    $(OBJDIR)\zoom-query.obj \
    $(OBJDIR)\facet.obj \
