@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file record-render.c
+ * \file record_render.c
  * \brief Render Z39.50 records (NamePlusRecord)
  */
 
