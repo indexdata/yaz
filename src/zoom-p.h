@@ -116,6 +116,9 @@ struct ZOOM_connection_p {
     ZOOM_Event m_queue_back;
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
+
+    int log_details;
+    int log_api;
 };
 
 #if ZOOM_RESULT_LISTS
@@ -277,7 +280,46 @@ struct ZOOM_Event_p {
     ZOOM_Event prev;
 };
 
+typedef enum {
+    zoom_pending,
+    zoom_complete
+} zoom_ret;
+
 void ZOOM_options_addref (ZOOM_options opt);
+
+void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu);
+
+void ZOOM_set_dset_error(ZOOM_connection c, int error,
+                         const char *dset,
+                         const char *addinfo, const char *addinfo2);
+
+void ZOOM_set_error(ZOOM_connection c, int error, const char *addinfo);
+
+ZOOM_Event ZOOM_Event_create(int kind);
+void ZOOM_connection_put_event(ZOOM_connection c, ZOOM_Event event);
+
+zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c);
+zoom_ret send_Z3950_present(ZOOM_connection c);
+zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c);
+zoom_ret ZOOM_send_buf(ZOOM_connection c);
+zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset);
+char **ZOOM_connection_get_databases(ZOOM_connection con, ZOOM_options options,
+                                     int *num, ODR odr);
+zoom_ret ZOOM_connection_Z3950_send_init(ZOOM_connection c);
+
+ZOOM_task ZOOM_connection_add_task(ZOOM_connection c, int which);
+void ZOOM_connection_remove_task(ZOOM_connection c);
+int ZOOM_test_reconnect(ZOOM_connection c);
+
+ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
+                                     const char *syntax,
+                                     const char *elementSetName);
+void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
+                           int pos,
+                           const char *syntax, const char *elementSetName,
+                           const char *schema,
+                           Z_SRW_diagnostic *diag);
+
 
 /*
  * Local variables:
