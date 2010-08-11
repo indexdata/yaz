@@ -474,6 +474,7 @@ MISC_OBJS= \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-z3950.obj \
+   $(OBJDIR)\zoom-query.obj \
    $(OBJDIR)\facet.obj \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\zoom-socket.obj \

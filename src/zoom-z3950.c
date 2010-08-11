@@ -21,9 +21,6 @@
 #include <yaz/diagbib1.h>
 #include <yaz/charneg.h>
 #include <yaz/ill.h>
-#include <yaz/srw.h>
-#include <yaz/cql.h>
-#include <yaz/ccl.h>
 #include <yaz/query-charset.h>
 #include <yaz/copy_types.h>
 #include <yaz/snprintf.h>
@@ -676,14 +673,14 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     assert(r->query);
 
     /* prepare query for the search request */
-    search_req->query = r->query->z_query;
+    search_req->query = ZOOM_query_get_Z_Query(r->query);
     if (!search_req->query)
     {
         ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
         return zoom_complete;
     }
-    if (r->query->z_query->which == Z_Query_type_1 || 
-        r->query->z_query->which == Z_Query_type_101)
+    if (search_req->query->which == Z_Query_type_1 || 
+        search_req->query->which == Z_Query_type_101)
     {
         const char *cp = ZOOM_options_get(r->options, "rpnCharset");
         if (cp)
@@ -811,6 +808,7 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
     ZOOM_scanset scan;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
+    Z_Query *z_query;
 
     yaz_log(c->log_details, "%p send_scan", c);
     if (!c->tasks)
@@ -818,11 +816,13 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     scan = c->tasks->u.scan.scan;
 
+    z_query = ZOOM_query_get_Z_Query(scan->query);
+
     /* Z39.50 scan can only carry RPN */
-    if (scan->query->z_query->which == Z_Query_type_1 ||
-        scan->query->z_query->which == Z_Query_type_101)
+    if (z_query->which == Z_Query_type_1 ||
+        z_query->which == Z_Query_type_101)
     {
-        Z_RPNQuery *rpn = scan->query->z_query->u.type_1;
+        Z_RPNQuery *rpn = z_query->u.type_1;
         const char *cp = ZOOM_options_get(scan->options, "rpnCharset");
         if (cp)
         {

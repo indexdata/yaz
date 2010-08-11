@@ -33,7 +33,6 @@
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
-#include <yaz/sortspec.h>
 #include <yaz/srw.h>
 #include <yaz/mutex.h>
 
@@ -41,14 +40,6 @@
 #define ZOOM_RESULT_LISTS 0
 
 typedef struct ZOOM_Event_p *ZOOM_Event;
-
-struct ZOOM_query_p {
-    Z_Query *z_query;
-    Z_SortKeySpecList *sort_spec;
-    int refcount;
-    ODR odr;
-    char *query_string;
-};
 
 typedef enum {
     zoom_sru_error,
@@ -320,6 +311,9 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                            const char *schema,
                            Z_SRW_diagnostic *diag);
 
+Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s);
+Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s);
+char *ZOOM_query_get_query_string(ZOOM_query s);
 
 /*
  * Local variables:
