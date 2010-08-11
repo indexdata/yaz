@@ -88,11 +88,6 @@ int iochan_event_loop(IOCHAN *iochans)
         int res;
         time_t now = time(0);
 
-        if (statserv_must_terminate())
-        {
-            for (p = *iochans; p; p = p->next)
-                p->force_event = EVENT_TIMEOUT;
-        }
         for (p = *iochans; p; p = p->next)
             no_fds++;
         fds = (struct yaz_poll_fd *) xmalloc(no_fds * sizeof(*fds));
@@ -129,11 +124,6 @@ int iochan_event_loop(IOCHAN *iochans)
         {
             if (yaz_errno() == EINTR)
             {
-                if (statserv_must_terminate())
-                {
-                    for (p = *iochans; p; p = p->next)
-                        p->force_event = EVENT_TIMEOUT;
-                }
                 xfree(fds);
                 continue;
             }

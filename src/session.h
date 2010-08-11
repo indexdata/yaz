@@ -148,8 +148,6 @@ void request_delq(request_q *q);
 request *request_get(request_q *q);
 void request_release(request *r);
 
-int statserv_must_terminate(void);
-
 int control_association(association *assoc, const char *host, int force);
 
 int ir_read(IOCHAN h, int event);
