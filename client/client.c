@@ -4369,7 +4369,7 @@ static void http_response(Z_HTTP_Response *hres)
         {
             Z_SRW_PDU *sr = 0;
             ODR o = odr_createmem(ODR_DECODE);
-            ret = yaz_solr_decode(o, hres, &sr);
+            ret = yaz_solr_decode_response(o, hres, &sr);
 
             if (ret == 0 && sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(sr->u.response);

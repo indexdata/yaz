@@ -388,7 +388,7 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
     else if (c->sru_mode == zoom_sru_solr)
     {
         Z_SRW_PDU *sr;
-        ret = yaz_solr_decode(c->odr_in, hres, &sr);
+        ret = yaz_solr_decode_response(c->odr_in, hres, &sr);
         if (ret == 0)
             if (sr->which == Z_SRW_searchRetrieve_response)
                 *cret = handle_srw_response(c, sr->u.response);

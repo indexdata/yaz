@@ -20,7 +20,7 @@
 #include <libxml/tree.h>
 #endif
 
-int yaz_solr_decode(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
+int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
 #if YAZ_HAVE_XML2
     const char *content_buf = hres->content_buf;
