@@ -271,6 +271,9 @@ YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               char **charset,
                               Z_SRW_diagnostic **, int *num_diagnostic);
 
+YAZ_EXPORT int yaz_solr_decode(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup);
+
+
 YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                        int *num, int code,
                                        const char *addinfo);
@@ -297,6 +300,8 @@ YAZ_EXPORT int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR encode, const char *charset);
 YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
+YAZ_EXPORT int yaz_solr_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                               ODR encode, const char *charset);
 
 YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
 

@@ -12,6 +12,7 @@
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/yaz-iconv.h>
+#include "sru-p.h"
 
 static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)
 {
@@ -339,7 +340,7 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
 #endif
 
 /**
-  http://www.loc.gov/z3950/agency/zing/srw/service.html
+   http://www.loc.gov/z3950/agency/zing/srw/service.html
 */ 
 int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                    Z_SOAP **soap_package, ODR decode, char **charset,
@@ -352,7 +353,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     };
 #endif
     const char *content_type = z_HTTP_header_lookup(hreq->headers,
-                                            "Content-Type");
+                                                    "Content-Type");
 
     /*
       SRU GET: ignore content type.
@@ -361,9 +362,9 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     */
     if (!strcmp(hreq->method, "GET")
         || 
-             (!strcmp(hreq->method, "POST") && content_type &&
-              !yaz_strcmp_del("application/x-www-form-urlencoded",
-                              content_type, "; ")))
+        (!strcmp(hreq->method, "POST") && content_type &&
+         !yaz_strcmp_del("application/x-www-form-urlencoded",
+                         content_type, "; ")))
     {
         char *db = "Default";
         const char *p0 = hreq->path, *p1;
@@ -1045,8 +1046,8 @@ int yaz_diag_srw_to_bib1(int code)
     return 1;
 }
 
-static void add_val_int(ODR o, char **name, char **value,  int *i,
-                        char *a_name, Odr_int *val)
+void yaz_add_name_value_int(ODR o, char **name, char **value, int *i,
+                            char *a_name, Odr_int *val)
 {
     if (val)
     {
@@ -1057,8 +1058,8 @@ static void add_val_int(ODR o, char **name, char **value,  int *i,
     }
 }
 
-static void add_val_str(ODR o, char **name, char **value,  int *i,
-                        char *a_name, char *val)
+void yaz_add_name_value_str(ODR o, char **name, char **value,  int *i,
+                            char *a_name, char *val)
 {
     if (val)
     {
@@ -1072,7 +1073,7 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                              char **name, char **value, int max_names)
 {
     int i = 0;
-    add_val_str(encode, name, value, &i, "version", srw_pdu->srw_version);
+    yaz_add_name_value_str(encode, name, value, &i, "version", srw_pdu->srw_version);
     name[i] = "operation";
     switch(srw_pdu->which)
     {
@@ -1081,16 +1082,16 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         switch(srw_pdu->u.request->query_type)
         {
         case Z_SRW_query_type_cql:
-            add_val_str(encode, name, value, &i, "query",
-                        srw_pdu->u.request->query.cql);
+            yaz_add_name_value_str(encode, name, value, &i, "query",
+                                   srw_pdu->u.request->query.cql);
             break;
         case Z_SRW_query_type_pqf:
-            add_val_str(encode, name, value, &i, "x-pquery",
-                        srw_pdu->u.request->query.pqf);
+            yaz_add_name_value_str(encode, name, value, &i, "x-pquery",
+                                   srw_pdu->u.request->query.pqf);
             break;
         case Z_SRW_query_type_xcql:
-            add_val_str(encode, name, value, &i, "x-cql",
-                        srw_pdu->u.request->query.xcql);
+            yaz_add_name_value_str(encode, name, value, &i, "x-cql",
+                                   srw_pdu->u.request->query.xcql);
             break;
         }
         switch(srw_pdu->u.request->sort_type)
@@ -1098,29 +1099,29 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         case Z_SRW_sort_type_none:
             break;
         case Z_SRW_sort_type_sort:            
-            add_val_str(encode, name, value, &i, "sortKeys",
-                        srw_pdu->u.request->sort.sortKeys);
+            yaz_add_name_value_str(encode, name, value, &i, "sortKeys",
+                                   srw_pdu->u.request->sort.sortKeys);
             break;
         }
-        add_val_int(encode, name, value, &i, "startRecord", 
-                    srw_pdu->u.request->startRecord);
-        add_val_int(encode, name, value, &i, "maximumRecords", 
-                    srw_pdu->u.request->maximumRecords);
-        add_val_str(encode, name, value, &i, "recordSchema",
-                    srw_pdu->u.request->recordSchema);
-        add_val_str(encode, name, value, &i, "recordPacking",
-                    srw_pdu->u.request->recordPacking);
-        add_val_str(encode, name, value, &i, "recordXPath",
-                    srw_pdu->u.request->recordXPath);
-        add_val_str(encode, name, value, &i, "stylesheet",
-                    srw_pdu->u.request->stylesheet);
-        add_val_int(encode, name, value, &i, "resultSetTTL", 
-                    srw_pdu->u.request->resultSetTTL);
+        yaz_add_name_value_int(encode, name, value, &i, "startRecord", 
+                               srw_pdu->u.request->startRecord);
+        yaz_add_name_value_int(encode, name, value, &i, "maximumRecords", 
+                               srw_pdu->u.request->maximumRecords);
+        yaz_add_name_value_str(encode, name, value, &i, "recordSchema",
+                               srw_pdu->u.request->recordSchema);
+        yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
+                               srw_pdu->u.request->recordPacking);
+        yaz_add_name_value_str(encode, name, value, &i, "recordXPath",
+                               srw_pdu->u.request->recordXPath);
+        yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
+                               srw_pdu->u.request->stylesheet);
+        yaz_add_name_value_int(encode, name, value, &i, "resultSetTTL", 
+                               srw_pdu->u.request->resultSetTTL);
         break;
     case Z_SRW_explain_request:
         value[i++] = "explain";
-        add_val_str(encode, name, value, &i, "stylesheet",
-                    srw_pdu->u.explain_request->stylesheet);
+        yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
+                               srw_pdu->u.explain_request->stylesheet);
         break;
     case Z_SRW_scan_request:
         value[i++] = "scan";
@@ -1128,24 +1129,24 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         switch(srw_pdu->u.scan_request->query_type)
         {
         case Z_SRW_query_type_cql:
-            add_val_str(encode, name, value, &i, "scanClause",
-                        srw_pdu->u.scan_request->scanClause.cql);
+            yaz_add_name_value_str(encode, name, value, &i, "scanClause",
+                                   srw_pdu->u.scan_request->scanClause.cql);
             break;
         case Z_SRW_query_type_pqf:
-            add_val_str(encode, name, value, &i, "x-pScanClause",
-                        srw_pdu->u.scan_request->scanClause.pqf);
+            yaz_add_name_value_str(encode, name, value, &i, "x-pScanClause",
+                                   srw_pdu->u.scan_request->scanClause.pqf);
             break;
         case Z_SRW_query_type_xcql:
-            add_val_str(encode, name, value, &i, "x-cqlScanClause",
-                        srw_pdu->u.scan_request->scanClause.xcql);
+            yaz_add_name_value_str(encode, name, value, &i, "x-cqlScanClause",
+                                   srw_pdu->u.scan_request->scanClause.xcql);
             break;
         }
-        add_val_int(encode, name, value, &i, "responsePosition", 
-                    srw_pdu->u.scan_request->responsePosition);
-        add_val_int(encode, name, value, &i, "maximumTerms", 
-                    srw_pdu->u.scan_request->maximumTerms);
-        add_val_str(encode, name, value, &i, "stylesheet",
-                    srw_pdu->u.scan_request->stylesheet);
+        yaz_add_name_value_int(encode, name, value, &i, "responsePosition", 
+                               srw_pdu->u.scan_request->responsePosition);
+        yaz_add_name_value_int(encode, name, value, &i, "maximumTerms", 
+                               srw_pdu->u.scan_request->maximumTerms);
+        yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
+                               srw_pdu->u.scan_request->stylesheet);
         break;
     case Z_SRW_update_request:
         value[i++] = "update";

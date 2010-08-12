@@ -45,7 +45,8 @@ typedef enum {
     zoom_sru_error,
     zoom_sru_soap,
     zoom_sru_get,
-    zoom_sru_post
+    zoom_sru_post,
+    zoom_sru_solr
 } zoom_sru_mode;
     
 

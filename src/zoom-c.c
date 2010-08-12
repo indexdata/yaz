@@ -338,6 +338,8 @@ static zoom_sru_mode get_sru_mode_from_string(const char *s)
         return zoom_sru_get;
     else if (!yaz_matchstr(s, "post"))
         return zoom_sru_post;
+    else if (!yaz_matchstr(s, "solr"))
+        return zoom_sru_solr;
     return zoom_sru_error;
 }
 
@@ -1595,7 +1597,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     }
     if (cret == zoom_complete)
     {
-        yaz_log(YLOG_LOG, "removing tasks in handle_http");
+        yaz_log(c->log_details, "removing tasks in handle_http");
         ZOOM_connection_remove_task(c);
     }
     {

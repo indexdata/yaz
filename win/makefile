@@ -470,6 +470,7 @@ MISC_OBJS= \
    $(OBJDIR)\opacdisp.obj \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
+   $(OBJDIR)\solr.obj \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
