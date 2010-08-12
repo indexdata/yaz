@@ -639,11 +639,11 @@ static int has_modifier(struct solr_node *cn, const char *name) {
 }
 
 
-void emit_term(solr_transform_t ct,
-               struct solr_node *cn,
-               const char *term, int length,
-               void (*pr)(const char *buf, void *client_data),
-               void *client_data)
+static void emit_term(solr_transform_t ct,
+                      struct solr_node *cn,
+                      const char *term, int length,
+                      void (*pr)(const char *buf, void *client_data),
+                      void *client_data)
 {
     int i;
     const char *ns = cn->u.st.index_uri;
@@ -780,11 +780,11 @@ void emit_term(solr_transform_t ct,
     xfree(z3958_mem);
 }
 
-void emit_terms(solr_transform_t ct,
-                struct solr_node *cn,
-                void (*pr)(const char *buf, void *client_data),
-                void *client_data,
-                const char *op)
+static void emit_terms(solr_transform_t ct,
+                       struct solr_node *cn,
+                       void (*pr)(const char *buf, void *client_data),
+                       void *client_data,
+                       const char *op)
 {
     struct solr_node *ne = cn->u.st.extra_terms;
     if (ne)
@@ -808,11 +808,11 @@ void emit_terms(solr_transform_t ct,
     }
 }
 
-void emit_wordlist(solr_transform_t ct,
-                   struct solr_node *cn,
-                   void (*pr)(const char *buf, void *client_data),
-                   void *client_data,
-                   const char *op)
+static void emit_wordlist(solr_transform_t ct,
+                          struct solr_node *cn,
+                          void (*pr)(const char *buf, void *client_data),
+                          void *client_data,
+                          const char *op)
 {
     const char *cp0 = cn->u.st.term;
     const char *cp1;

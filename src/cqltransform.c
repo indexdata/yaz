@@ -607,11 +607,11 @@ static int has_modifier(struct cql_node *cn, const char *name) {
 }
 
 
-void emit_term(cql_transform_t ct,
-               struct cql_node *cn,
-               const char *term, int length,
-               void (*pr)(const char *buf, void *client_data),
-               void *client_data)
+static void emit_term(cql_transform_t ct,
+                      struct cql_node *cn,
+                      const char *term, int length,
+                      void (*pr)(const char *buf, void *client_data),
+                      void *client_data)
 {
     int i;
     const char *ns = cn->u.st.index_uri;
@@ -748,11 +748,11 @@ void emit_term(cql_transform_t ct,
     xfree(z3958_mem);
 }
 
-void emit_terms(cql_transform_t ct,
-                struct cql_node *cn,
-                void (*pr)(const char *buf, void *client_data),
-                void *client_data,
-                const char *op)
+static void emit_terms(cql_transform_t ct,
+                       struct cql_node *cn,
+                       void (*pr)(const char *buf, void *client_data),
+                       void *client_data,
+                       const char *op)
 {
     struct cql_node *ne = cn->u.st.extra_terms;
     if (ne)
@@ -776,11 +776,11 @@ void emit_terms(cql_transform_t ct,
     }
 }
 
-void emit_wordlist(cql_transform_t ct,
-                   struct cql_node *cn,
-                   void (*pr)(const char *buf, void *client_data),
-                   void *client_data,
-                   const char *op)
+static void emit_wordlist(cql_transform_t ct,
+                          struct cql_node *cn,
+                          void (*pr)(const char *buf, void *client_data),
+                          void *client_data,
+                          const char *op)
 {
     const char *cp0 = cn->u.st.term;
     const char *cp1;
