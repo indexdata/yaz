@@ -140,10 +140,12 @@ static void marc_iconv_reset(yaz_marc_t mt, WRBUF wr)
 
 static int marc_exec_leader(const char *leader_spec, char *leader,
                             size_t size);
+#if YAZ_HAVE_XML2
 static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
                                         const char *ns, 
                                         const char *format,
                                         const char *type);
+#endif
 
 static struct yaz_marc_node *yaz_marc_add_node(yaz_marc_t mt)
 {
