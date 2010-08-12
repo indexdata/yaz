@@ -89,6 +89,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c \
   zoom-c.c zoom-z3950.c zoom-sru.c zoom-query.c zoom-record-cache.c \
+  zoom-event.c \
   record_render.c zoom-socket.c zoom-opt.c zoom-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
