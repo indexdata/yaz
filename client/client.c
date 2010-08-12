@@ -1284,7 +1284,7 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
     }
     else if (!yaz_matchstr(sru_method, "solr"))
     {
-        yaz_solr_encode(gdu->u.HTTP_Request, sr, out, charset);
+        yaz_solr_encode_request(gdu->u.HTTP_Request, sr, out, charset);
     }
 
     return send_gdu(gdu);

@@ -51,7 +51,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     }
     else if (c->sru_mode == zoom_sru_solr)
     {
-        yaz_solr_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+        yaz_solr_encode_request(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;

@@ -132,8 +132,8 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 #endif
 }
 
-int yaz_solr_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
-                    ODR encode, const char *charset)
+int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                            ODR encode, const char *charset)
 {
     const char *solr_op = 0;
     char *name[30], *value[30];

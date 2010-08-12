@@ -309,8 +309,17 @@ YAZ_EXPORT int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR encode, const char *charset);
 YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
-YAZ_EXPORT int yaz_solr_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
-                               ODR encode, const char *charset);
+
+/** \brief encode SOLR request (HTTP)
+    \param hreq HTTP request to be modified (with encoded request)
+    \param srw_pdu SRW request
+    \param encode ODR for result
+    \param charset character set for request (may be NULL)
+    \retval -1 fail
+    \retval 0 OK
+*/
+YAZ_EXPORT int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                                       ODR encode, const char *charset);
 
 YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
 
