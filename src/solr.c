@@ -170,6 +170,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         }
         yaz_add_name_value_int(encode, name, value, &i,
                                "rows", srw_pdu->u.request->maximumRecords);
+        yaz_add_name_value_str(encode, name, value, &i,
+                               "fl", srw_pdu->u.request->recordSchema);
         break;
     default:
         return -1;
