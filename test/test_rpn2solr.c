@@ -56,6 +56,7 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@and a b", "a AND b"));
     YAZ_CHECK(compare(ct, "@or a b", "a OR b"));
     YAZ_CHECK(compare(ct, "@attr 1=field abc", "field:abc"));
+    YAZ_CHECK(compare(ct, "@attr 1=field \"a b c\"", "field:\"a b c\""));
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", 0)); /* should fail */
 
     solr_transform_define_pattern(ct, "index.title", "1=4");
@@ -63,6 +64,9 @@ static void tst1(void)
 
     solr_transform_define_pattern(ct, "index.foo", "1=bar");
     YAZ_CHECK(compare(ct, "@attr 1=bar abc", "foo:abc"));
+    /*
+    YAZ_CHECK(compare(ct, "@or @attr 1=1016 water @attr 7=1 @attr 1=4 0", "any:water rank:??");
+     */
 
     solr_transform_close(ct);
 }
