@@ -11,6 +11,22 @@
 
 #include <yaz/xmalloc.h>
 
+struct ZOOM_options_entry {
+    char *name;
+    char *value;
+    int len;                  /* of `value', which may contain NULs */
+    struct ZOOM_options_entry *next;
+};
+
+struct ZOOM_options_p {
+    int refcount;
+    void *callback_handle;
+    ZOOM_options_callback callback_func;
+    struct ZOOM_options_entry *entries;
+    ZOOM_options parent1;
+    ZOOM_options parent2;
+};
+
 static void set_value(struct ZOOM_options_entry **e,
                       const char *value, int len)
 {

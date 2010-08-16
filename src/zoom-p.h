@@ -45,7 +45,8 @@ typedef enum {
     zoom_sru_error,
     zoom_sru_soap,
     zoom_sru_get,
-    zoom_sru_post
+    zoom_sru_post,
+    zoom_sru_solr
 } zoom_sru_mode;
     
 
@@ -118,23 +119,6 @@ struct ZOOM_resultsets_p {
     ZOOM_resultsets next;
 };
 #endif
-
-struct ZOOM_options_entry {
-    char *name;
-    char *value;
-    int len;                  /* of `value', which may contain NULs */
-    struct ZOOM_options_entry *next;
-};
-
-struct ZOOM_options_p {
-    int refcount;
-    void *callback_handle;
-    ZOOM_options_callback callback_func;
-    struct ZOOM_options_entry *entries;
-    ZOOM_options parent1;
-    ZOOM_options parent2;
-};
-
 
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
 
@@ -238,12 +222,6 @@ struct ZOOM_task_p {
     ZOOM_task next;
 };
 
-struct ZOOM_Event_p {
-    int kind;
-    ZOOM_Event next;
-    ZOOM_Event prev;
-};
-
 typedef enum {
     zoom_pending,
     zoom_complete
@@ -298,6 +276,10 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
 
 void ZOOM_set_HTTP_error(ZOOM_connection c, int error,
                          const char *addinfo, const char *addinfo2);
+
+ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c);
+void ZOOM_connection_remove_events(ZOOM_connection c);
+void ZOOM_Event_destroy(ZOOM_Event event);
 
 /*
  * Local variables:

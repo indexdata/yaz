@@ -266,10 +266,22 @@ YAZ_EXPORT void yaz_decode_uri_component(char *dst, const char *uri,
 
 YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, char **charset);
+
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, 
                               char **charset,
                               Z_SRW_diagnostic **, int *num_diagnostic);
+
+/** \brief decode SOLR response (HTTP)
+    \param o ODR for result
+    \param hres HTTP response to be decoded
+    \param pdup SRW response pointer (set if successful)
+    \retval -1 fail
+    \retval 0 OK
+*/
+YAZ_EXPORT int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres,
+                                        Z_SRW_PDU **pdup);
+
 
 YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                        int *num, int code,
@@ -297,6 +309,17 @@ YAZ_EXPORT int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR encode, const char *charset);
 YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                    ODR odr, const char *charset);
+
+/** \brief encode SOLR request (HTTP)
+    \param hreq HTTP request to be modified (with encoded request)
+    \param srw_pdu SRW request
+    \param encode ODR for result
+    \param charset character set for request (may be NULL)
+    \retval -1 fail
+    \retval 0 OK
+*/
+YAZ_EXPORT int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
+                                       ODR encode, const char *charset);
 
 YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
 

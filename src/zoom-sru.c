@@ -24,7 +24,6 @@ static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
 #endif
 
 
-
 #if YAZ_HAVE_XML2
 static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 {
@@ -49,6 +48,10 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     else if (c->sru_mode == zoom_sru_soap)
     {
         yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+    }
+    else if (c->sru_mode == zoom_sru_solr)
+    {
+        yaz_solr_encode_request(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
     if (!z_GDU(c->odr_out, &gdu, 0, 0))
         return zoom_complete;
@@ -378,7 +381,18 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
 
     /* not redirect (normal response) */
     if (!yaz_srw_check_content_type(hres))
+    {
         addinfo = "content-type";
+        ret = -1;
+    }
+    else if (c->sru_mode == zoom_sru_solr)
+    {
+        Z_SRW_PDU *sr;
+        ret = yaz_solr_decode_response(c->odr_in, hres, &sr);
+        if (ret == 0)
+            if (sr->which == Z_SRW_searchRetrieve_response)
+                *cret = handle_srw_response(c, sr->u.response);
+    }
     else
     {
         Z_SOAP *soap_package = 0;
