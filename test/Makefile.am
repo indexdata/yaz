@@ -6,7 +6,7 @@ check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_soap1 test_soap2 test_odrstack test_log_thread test_xmlquery test_pquery \
  test_comstack test_filepath test_record_conv test_retrieval test_tpath \
  test_timing test_query_charset test_oid test_icu test_match_glob \
- test_rpn2cql test_json test_xml_include test_file_glob test_shared_ptr
+ test_rpn2cql test_rpn2solr test_json test_xml_include test_file_glob test_shared_ptr
 
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
@@ -77,6 +77,7 @@ test_query_charset_SOURCES = test_query_charset.c
 test_icu_SOURCES = test_icu.c
 test_match_glob_SOURCES = test_match_glob.c
 test_rpn2cql_SOURCES = test_rpn2cql.c
+test_rpn2solr_SOURCES = test_rpn2solr.c
 test_json_SOURCES = test_json.c
 test_xml_include_SOURCES = test_xml_include.c
 test_file_glob_SOURCES = test_file_glob.c
