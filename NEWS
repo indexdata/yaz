@@ -1,3 +1,12 @@
+--- 4.0.12 2010/08/17
+
+Z39.50 facet support. Facet specifications are passed for search in
+other-information with ASN.1 as defined in facet.asn and OID
+.10.1000.81.5 . Facets are expressed as an Attribute list as known
+from Type-1/RPN queries.  Type 1 is field. Type 2 is sort order. Type
+3 is limit (number of entries to get in response). yaz-ztest returns
+dummy facets if a client asks for them.
+
 --- 4.0.11 2010/07/09
 
 CCL fixes: bug 2895 and bug 3539.
