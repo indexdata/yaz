@@ -115,6 +115,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="include"/>
 						<entry excluding="*.lo|*.o" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="zoom"/>
 						<entry excluding="*.o|*.lo" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="test"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="zoom"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
