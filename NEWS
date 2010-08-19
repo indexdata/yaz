@@ -1,3 +1,7 @@
+--- 4.0.13 2010/MM/DD
+
+SOLR WebService support for yaz-client and ZOOM.
+
 --- 4.0.12 2010/08/17
 
 Z39.50 facet support. Facet specifications are passed for search in

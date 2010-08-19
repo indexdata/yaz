@@ -1,3 +1,9 @@
+yaz (4.0.13-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 19 Aug 2010 10:08:53 +0200
+
 yaz (4.0.12-1indexdata) unstable; urgency=low
 
   * Upstream.
