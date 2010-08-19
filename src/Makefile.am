@@ -88,11 +88,14 @@ libyaz_la_SOURCES=version.c options.c log.c \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h \
   logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c \
-  zoom-c.c zoom-socket.c zoom-opt.c zoom-p.h \
-  grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c \
+  zoom-c.c zoom-z3950.c zoom-sru.c zoom-query.c zoom-record-cache.c \
+  zoom-event.c \
+  record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru-p.h \
+  grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c solr.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
   cclqfile.c cclstr.c cclxmlconfig.c ccl_stop_words.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c rpn2cql.c \
+  rpn2solr.c solrtransform.c \
   cqlstrer.c querytowrbuf.c \
   tcpdchk.c \
   test.c timing.c \

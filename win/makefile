@@ -470,9 +470,16 @@ MISC_OBJS= \
    $(OBJDIR)\opacdisp.obj \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
+   $(OBJDIR)\solr.obj \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
+   $(OBJDIR)\zoom-event.obj \
+   $(OBJDIR)\zoom-record-cache.obj \
+   $(OBJDIR)\zoom-z3950.obj \
+   $(OBJDIR)\zoom-sru.obj \
+   $(OBJDIR)\zoom-query.obj \
+   $(OBJDIR)\record-render.obj \
    $(OBJDIR)\facet.obj \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\zoom-socket.obj \

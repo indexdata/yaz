@@ -4,8 +4,8 @@
  */
 
 /**
- * \file cqltransform.c
- * \brief Implements CQL transform (CQL to RPN conversion).
+ * \file solrtransform.c
+ * \brief Implements SOLR transform (SOLR to RPN conversion).
  *
  * Evaluation order of rules:
  *
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <yaz/rpn2cql.h>
+#include <yaz/rpn2solr.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
 #include <yaz/tokenizer.h>
@@ -31,16 +31,17 @@
 #include <yaz/matchstr.h>
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
+#include <yaz/cql.h>
 
-struct cql_prop_entry {
+struct solr_prop_entry {
     char *pattern;
     char *value;
     Z_AttributeList attr_list;
-    struct cql_prop_entry *next;
+    struct solr_prop_entry *next;
 };
 
-struct cql_transform_t_ {
-    struct cql_prop_entry *entry;
+struct solr_transform_t_ {
+    struct solr_prop_entry *entry;
     yaz_tok_cfg_t tok_cfg;
     int error;
     char *addinfo;
@@ -49,9 +50,40 @@ struct cql_transform_t_ {
 };
 
 
-cql_transform_t cql_transform_create(void)
+/* TODO Utility functions, evt. split out int separate file */
+int solr_strcmp(const char *s1, const char *s2) {
+    return cql_strcmp(s1, s2);
+}
+
+int solr_strncmp(const char *s1, const char *s2, size_t n) {
+    return cql_strncmp(s1, s2, n);
+}
+
+/* TODO FIX */
+const char *solr_uri(void)
 {
-    cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
+    return "TODO:SOLR URI";
+}
+
+void solr_buf_write_handler (const char *b, void *client_data)
+{
+    struct solr_buf_write_info *info = (struct solr_buf_write_info *)client_data;
+    int l = strlen(b);
+    if (info->off < 0 || (info->off + l >= info->max))
+    {
+        info->off = -1;
+        return;
+    }
+    memcpy (info->buf + info->off, b, l);
+    info->off += l;
+}
+
+
+/* Utillity functions end */
+
+solr_transform_t solr_transform_create(void)
+{
+    solr_transform_t ct = (solr_transform_t) xmalloc(sizeof(*ct));
     ct->tok_cfg = yaz_tok_cfg_create();
     ct->w = wrbuf_alloc();
     ct->error = 0;
@@ -61,7 +93,7 @@ cql_transform_t cql_transform_create(void)
     return ct;
 }
 
-static int cql_transform_parse_tok_line(cql_transform_t ct,
+static int solr_transform_parse_tok_line(solr_transform_t ct,
                                         const char *pattern,
                                         yaz_tok_parse_t tp)
 {
@@ -166,10 +198,10 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
     }
     if (ret == 0) /* OK? */
     {
-        struct cql_prop_entry **pp = &ct->entry;
+        struct solr_prop_entry **pp = &ct->entry;
         while (*pp)
             pp = &(*pp)->next;
-        *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
+        *pp = (struct solr_prop_entry *) xmalloc(sizeof(**pp));
         (*pp)->pattern = xstrdup(pattern);
         (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
 
@@ -199,20 +231,20 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
     return ret;
 }
 
-int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
+int solr_transform_define_pattern(solr_transform_t ct, const char *pattern,
                                  const char *value)
 {
     int r;
     yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, value);
     yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
-    r = cql_transform_parse_tok_line(ct, pattern, tp);
+    r = solr_transform_parse_tok_line(ct, pattern, tp);
     yaz_tok_parse_destroy(tp);
     return r;
 }
     
-cql_transform_t cql_transform_open_FILE(FILE *f)
+solr_transform_t solr_transform_open_FILE(FILE *f)
 {
-    cql_transform_t ct = cql_transform_create();
+    solr_transform_t ct = solr_transform_create();
     char line[1024];
 
     yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
@@ -230,13 +262,13 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
             if (t != '=')
             {
                 yaz_tok_parse_destroy(tp);
-                cql_transform_close(ct);
+                solr_transform_close(ct);
                 return 0;
             }
-            if (cql_transform_parse_tok_line(ct, pattern, tp))
+            if (solr_transform_parse_tok_line(ct, pattern, tp))
             {
                 yaz_tok_parse_destroy(tp);
-                cql_transform_close(ct);
+                solr_transform_close(ct);
                 return 0;
             }
             xfree(pattern);
@@ -244,7 +276,7 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
         else if (t != YAZ_TOK_EOF)
         {
             yaz_tok_parse_destroy(tp);
-            cql_transform_close(ct);
+            solr_transform_close(ct);
             return 0;
         }
         yaz_tok_parse_destroy(tp);
@@ -252,15 +284,15 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
     return ct;
 }
 
-void cql_transform_close(cql_transform_t ct)
+void solr_transform_close(solr_transform_t ct)
 {
-    struct cql_prop_entry *pe;
+    struct solr_prop_entry *pe;
     if (!ct)
         return;
     pe = ct->entry;
     while (pe)
     {
-        struct cql_prop_entry *pe_next = pe->next;
+        struct solr_prop_entry *pe_next = pe->next;
         xfree(pe->pattern);
         xfree(pe->value);
         xfree(pe);
@@ -273,13 +305,13 @@ void cql_transform_close(cql_transform_t ct)
     xfree(ct);
 }
 
-cql_transform_t cql_transform_open_fname(const char *fname)
+solr_transform_t solr_transform_open_fname(const char *fname)
 {
-    cql_transform_t ct;
+    solr_transform_t ct;
     FILE *f = fopen(fname, "r");
     if (!f)
         return 0;
-    ct = cql_transform_open_FILE(f);
+    ct = solr_transform_open_FILE(f);
     fclose(f);
     return ct;
 }
@@ -319,11 +351,11 @@ static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
     return ret;
 }
 
-const char *cql_lookup_reverse(cql_transform_t ct, 
+const char *solr_lookup_reverse(solr_transform_t ct,
                                const char *category,
                                Z_AttributeList *attributes)
 {
-    struct cql_prop_entry *e;
+    struct solr_prop_entry *e;
     size_t clen = strlen(category);
     for (e = ct->entry; e; e = e->next)
     {
@@ -356,12 +388,12 @@ const char *cql_lookup_reverse(cql_transform_t ct,
     return 0;
 }
                                       
-static const char *cql_lookup_property(cql_transform_t ct,
+static const char *solr_lookup_property(solr_transform_t ct,
                                        const char *pat1, const char *pat2,
                                        const char *pat3)
 {
     char pattern[120];
-    struct cql_prop_entry *e;
+    struct solr_prop_entry *e;
 
     if (pat1 && pat2 && pat3)
         sprintf(pattern, "%.39s.%.39s.%.39s", pat1, pat2, pat3);
@@ -376,13 +408,13 @@ static const char *cql_lookup_property(cql_transform_t ct,
     
     for (e = ct->entry; e; e = e->next)
     {
-        if (!cql_strcmp(e->pattern, pattern))
+        if (!solr_strcmp(e->pattern, pattern))
             return e->value;
     }
     return 0;
 }
 
-int cql_pr_attr_uri(cql_transform_t ct, const char *category,
+int solr_pr_attr_uri(solr_transform_t ct, const char *category,
                    const char *uri, const char *val, const char *default_val,
                    void (*pr)(const char *buf, void *client_data),
                    void *client_data,
@@ -394,7 +426,7 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     
     if (uri)
     {
-        struct cql_prop_entry *e;
+        struct solr_prop_entry *e;
         
         for (e = ct->entry; e; e = e->next)
             if (!memcmp(e->pattern, "set.", 4) && e->value &&
@@ -409,21 +441,21 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     if (!uri || prefix)
     {
         if (!res)
-            res = cql_lookup_property(ct, category, prefix, eval);
+            res = solr_lookup_property(ct, category, prefix, eval);
         /* we have some aliases for some relations unfortunately.. */
         if (!res && !prefix && !strcmp(category, "relation"))
         {
             if (!strcmp(val, "=="))
-                res = cql_lookup_property(ct, category, prefix, "exact");
+                res = solr_lookup_property(ct, category, prefix, "exact");
             if (!strcmp(val, "="))
-                res = cql_lookup_property(ct, category, prefix, "eq");
+                res = solr_lookup_property(ct, category, prefix, "eq");
             if (!strcmp(val, "<="))
-                res = cql_lookup_property(ct, category, prefix, "le");
+                res = solr_lookup_property(ct, category, prefix, "le");
             if (!strcmp(val, ">="))
-                res = cql_lookup_property(ct, category, prefix, "ge");
+                res = solr_lookup_property(ct, category, prefix, "ge");
         }
         if (!res)
-            res = cql_lookup_property(ct, category, prefix, "*");
+            res = solr_lookup_property(ct, category, prefix, "*");
     }
     if (res)
     {
@@ -472,18 +504,18 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
     return 0;
 }
 
-int cql_pr_attr(cql_transform_t ct, const char *category,
+int solr_pr_attr(solr_transform_t ct, const char *category,
                 const char *val, const char *default_val,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data,
                 int errcode)
 {
-    return cql_pr_attr_uri(ct, category, 0 /* uri */,
+    return solr_pr_attr_uri(ct, category, 0 /* uri */,
                            val, default_val, pr, client_data, errcode);
 }
 
 
-static void cql_pr_int(int val,
+static void solr_pr_int(int val,
                        void (*pr)(const char *buf, void *client_data),
                        void *client_data)
 {
@@ -494,7 +526,7 @@ static void cql_pr_int(int val,
 }
 
 
-static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
+static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
                        void (*pr)(const char *buf, void *client_data),
                        void *client_data)
 {
@@ -566,12 +598,12 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
     if (!distance_defined)
         distance = (unit == 2) ? 1 : 0;
 
-    cql_pr_int(exclusion, pr, client_data);
-    cql_pr_int(distance, pr, client_data);
-    cql_pr_int(ordered, pr, client_data);
-    cql_pr_int(proxrel, pr, client_data);
+    solr_pr_int(exclusion, pr, client_data);
+    solr_pr_int(distance, pr, client_data);
+    solr_pr_int(ordered, pr, client_data);
+    solr_pr_int(proxrel, pr, client_data);
     (*pr)("k ", client_data);
-    cql_pr_int(unit, pr, client_data);
+    solr_pr_int(unit, pr, client_data);
 
     return 1;
 }
@@ -595,9 +627,9 @@ static const char *wcchar(int start, const char *term, int length)
 }
 
 
-/* ### checks for CQL relation-name rather than Type-1 attribute */
-static int has_modifier(struct cql_node *cn, const char *name) {
-    struct cql_node *mod;
+/* ### checks for SOLR relation-name rather than Type-1 attribute */
+static int has_modifier(struct solr_node *cn, const char *name) {
+    struct solr_node *mod;
     for (mod = cn->u.st.modifiers; mod != 0; mod = mod->u.st.modifiers) {
         if (!strcmp(mod->u.st.index, name))
             return 1;
@@ -607,8 +639,8 @@ static int has_modifier(struct cql_node *cn, const char *name) {
 }
 
 
-static void emit_term(cql_transform_t ct,
-                      struct cql_node *cn,
+static void emit_term(solr_transform_t ct,
+                      struct solr_node *cn,
                       const char *term, int length,
                       void (*pr)(const char *buf, void *client_data),
                       void *client_data)
@@ -618,33 +650,33 @@ static void emit_term(cql_transform_t ct,
     int process_term = !has_modifier(cn, "regexp");
     char *z3958_mem = 0;
 
-    assert(cn->which == CQL_NODE_ST);
+    assert(cn->which == SOLR_NODE_ST);
 
     if (process_term && length > 0)
     {
         if (length > 1 && term[0] == '^' && term[length-1] == '^')
         {
-            cql_pr_attr(ct, "position", "firstAndLast", 0,
+            solr_pr_attr(ct, "position", "firstAndLast", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length -= 2;
         }
         else if (term[0] == '^')
         {
-            cql_pr_attr(ct, "position", "first", 0,
+            solr_pr_attr(ct, "position", "first", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length--;
         }
         else if (term[length-1] == '^')
         {
-            cql_pr_attr(ct, "position", "last", 0,
+            solr_pr_attr(ct, "position", "last", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             length--;
         }
         else
         {
-            cql_pr_attr(ct, "position", "any", 0,
+            solr_pr_attr(ct, "position", "any", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
         }
     }
@@ -663,13 +695,13 @@ static void emit_term(cql_transform_t ct,
          */
         if (first_wc == term && second_wc == term + length-1 
             && *first_wc == '*' && *second_wc == '*' 
-            && cql_pr_attr(ct, "truncation", "both", 0, pr, client_data, 0)) 
+            && solr_pr_attr(ct, "truncation", "both", 0, pr, client_data, 0))
         {
             term++;
             length -= 2;
         }
         else if (first_wc == term && second_wc == 0 && *first_wc == '*'
-                 && cql_pr_attr(ct, "truncation", "left", 0,
+                 && solr_pr_attr(ct, "truncation", "left", 0,
                                 pr, client_data, 0))
         {
             term++;
@@ -677,7 +709,7 @@ static void emit_term(cql_transform_t ct,
         }
         else if (first_wc == term + length-1 && second_wc == 0
                  && *first_wc == '*'
-                 && cql_pr_attr(ct, "truncation", "right", 0, 
+                 && solr_pr_attr(ct, "truncation", "right", 0,
                                 pr, client_data, 0))
         {
             length--;
@@ -694,7 +726,7 @@ static void emit_term(cql_transform_t ct,
              * supported".
              */
             int i;
-            cql_pr_attr(ct, "truncation", "z3958", 0,
+            solr_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
             z3958_mem = (char *) xmalloc(length+1);
             for (i = 0; i < length; i++)
@@ -713,21 +745,21 @@ static void emit_term(cql_transform_t ct,
         }
         else {
             /* No masking characters.  Use "truncation.none" if given. */
-            cql_pr_attr(ct, "truncation", "none", 0,
+            solr_pr_attr(ct, "truncation", "none", 0,
                         pr, client_data, 0);
         }
     }
     if (ns) {
-        cql_pr_attr_uri(ct, "index", ns,
+        solr_pr_attr_uri(ct, "index", ns,
                         cn->u.st.index, "serverChoice",
                         pr, client_data, YAZ_SRW_UNSUPP_INDEX);
     }
     if (cn->u.st.modifiers)
     {
-        struct cql_node *mod = cn->u.st.modifiers;
+        struct solr_node *mod = cn->u.st.modifiers;
         for (; mod; mod = mod->u.st.modifiers)
         {
-            cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
+            solr_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
                         pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
         }
     }
@@ -737,7 +769,7 @@ static void emit_term(cql_transform_t ct,
     {
         /* pr(int) each character */
         /* we do not need to deal with \-sequences because the
-           CQL and PQF terms have same \-format, bug #1988 */
+           SOLR and PQF terms have same \-format, bug #1988 */
         char buf[2];
 
         buf[0] = term[i];
@@ -748,13 +780,13 @@ static void emit_term(cql_transform_t ct,
     xfree(z3958_mem);
 }
 
-static void emit_terms(cql_transform_t ct,
-                       struct cql_node *cn,
+static void emit_terms(solr_transform_t ct,
+                       struct solr_node *cn,
                        void (*pr)(const char *buf, void *client_data),
                        void *client_data,
                        const char *op)
 {
-    struct cql_node *ne = cn->u.st.extra_terms;
+    struct solr_node *ne = cn->u.st.extra_terms;
     if (ne)
     {
         (*pr)("@", client_data);
@@ -776,8 +808,8 @@ static void emit_terms(cql_transform_t ct,
     }
 }
 
-static void emit_wordlist(cql_transform_t ct,
-                          struct cql_node *cn,
+static void emit_wordlist(solr_transform_t ct,
+                          struct solr_node *cn,
                           void (*pr)(const char *buf, void *client_data),
                           void *client_data,
                           const char *op)
@@ -809,24 +841,25 @@ static void emit_wordlist(cql_transform_t ct,
         emit_term(ct, cn, last_term, last_length, pr, client_data);
 }
 
-void cql_transform_r(cql_transform_t ct,
-                     struct cql_node *cn,
+void solr_transform_r(solr_transform_t ct,
+                     struct solr_node *cn,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data)
 {
     const char *ns;
-    struct cql_node *mods;
+    struct solr_node *mods;
 
     if (!cn)
         return;
     switch (cn->which)
     {
-    case CQL_NODE_ST:
+    case SOLR_NODE_ST:
         ns = cn->u.st.index_uri;
         if (ns)
         {
-            if (!strcmp(ns, cql_uri())
-                && cn->u.st.index && !cql_strcmp(cn->u.st.index, "resultSet"))
+            /* TODO If relevant fix with solr_uri */
+            if (!strcmp(ns, solr_uri())
+                && cn->u.st.index && !solr_strcmp(cn->u.st.index, "resultSet"))
             {
                 (*pr)("@set \"", client_data);
                 (*pr)(cn->u.st.term, client_data);
@@ -842,26 +875,26 @@ void cql_transform_r(cql_transform_t ct,
                 ct->addinfo = 0;
             }
         }
-        cql_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
-        cql_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data,
+        solr_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
+        solr_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data,
                     YAZ_SRW_UNSUPP_RELATION);
-        cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
+        solr_pr_attr(ct, "structure", cn->u.st.relation, 0,
                     pr, client_data, YAZ_SRW_UNSUPP_COMBI_OF_RELATION_AND_TERM);
-        if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
+        if (cn->u.st.relation && !solr_strcmp(cn->u.st.relation, "all"))
             emit_wordlist(ct, cn, pr, client_data, "and");
-        else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "any"))
+        else if (cn->u.st.relation && !solr_strcmp(cn->u.st.relation, "any"))
             emit_wordlist(ct, cn, pr, client_data, "or");
         else
             emit_terms(ct, cn, pr, client_data, "and");
         break;
-    case CQL_NODE_BOOL:
+    case SOLR_NODE_BOOL:
         (*pr)("@", client_data);
         (*pr)(cn->u.boolean.value, client_data);
         (*pr)(" ", client_data);
         mods = cn->u.boolean.modifiers;
         if (!strcmp(cn->u.boolean.value, "prox")) 
         {
-            if (!cql_pr_prox(ct, mods, pr, client_data))
+            if (!solr_pr_prox(ct, mods, pr, client_data))
                 return;
         } 
         else if (mods)
@@ -872,21 +905,21 @@ void cql_transform_r(cql_transform_t ct,
             return;
         }
 
-        cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
-        cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
+        solr_transform_r(ct, cn->u.boolean.left, pr, client_data);
+        solr_transform_r(ct, cn->u.boolean.right, pr, client_data);
         break;
 
     default:
-        fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
+        fprintf(stderr, "Fatal: impossible SOLR node-type %d\n", cn->which);
         abort();
     }
 }
 
-int cql_transform(cql_transform_t ct, struct cql_node *cn,
+int solr_transform(solr_transform_t ct, struct solr_node *cn,
                   void (*pr)(const char *buf, void *client_data),
                   void *client_data)
 {
-    struct cql_prop_entry *e;
+    struct solr_prop_entry *e;
     NMEM nmem = nmem_create();
 
     ct->error = 0;
@@ -895,31 +928,34 @@ int cql_transform(cql_transform_t ct, struct cql_node *cn,
 
     for (e = ct->entry; e ; e = e->next)
     {
-        if (!cql_strncmp(e->pattern, "set.", 4))
-            cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
-        else if (!cql_strcmp(e->pattern, "set"))
-            cql_apply_prefix(nmem, cn, 0, e->value);
+        /* TODO remove as SOLR dont supports sets.
+        if (!solr_strncmp(e->pattern, "set.", 4))
+            solr_apply_prefix(nmem, cn, e->pattern+4, e->value);
+        else if (!solr_strcmp(e->pattern, "set"))
+            solr_apply_prefix(nmem, cn, 0, e->value);
+         */
     }
-    cql_transform_r(ct, cn, pr, client_data);
+    solr_transform_r(ct, cn, pr, client_data);
     nmem_destroy(nmem);
     return ct->error;
 }
 
 
-int cql_transform_FILE(cql_transform_t ct, struct cql_node *cn, FILE *f)
+int solr_transform_FILE(solr_transform_t ct, struct solr_node *cn, FILE *f)
 {
-    return cql_transform(ct, cn, cql_fputs, f);
+    /* We can use the cql_fputs util */
+    return solr_transform(ct, cn, cql_fputs, f);
 }
 
-int cql_transform_buf(cql_transform_t ct, struct cql_node *cn, char *out, int max)
+int solr_transform_buf(solr_transform_t ct, struct solr_node *cn, char *out, int max)
 {
-    struct cql_buf_write_info info;
+    struct solr_buf_write_info info;
     int r;
 
     info.off = 0;
     info.max = max;
     info.buf = out;
-    r = cql_transform(ct, cn, cql_buf_write_handler, &info);
+    r = solr_transform(ct, cn, cql_buf_write_handler, &info);
     if (info.off < 0) {
         /* Attempt to write past end of buffer.  For some reason, this
            SRW diagnostic is deprecated, but it's so perfect for our
@@ -935,13 +971,13 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn, char *out, int ma
     return r;
 }
 
-int cql_transform_error(cql_transform_t ct, const char **addinfo)
+int solr_transform_error(solr_transform_t ct, const char **addinfo)
 {
     *addinfo = ct->addinfo;
     return ct->error;
 }
 
-void cql_transform_set_error(cql_transform_t ct, int error, const char *addinfo)
+void solr_transform_set_error(solr_transform_t ct, int error, const char *addinfo)
 {
     xfree(ct->addinfo);
     ct->addinfo = addinfo ? xstrdup(addinfo) : 0;

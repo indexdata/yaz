@@ -1282,6 +1282,11 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
     {
         yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, out, charset);
     }
+    else if (!yaz_matchstr(sru_method, "solr"))
+    {
+        yaz_solr_encode_request(gdu->u.HTTP_Request, sr, out, charset);
+    }
+
     return send_gdu(gdu);
 }
 
@@ -2799,8 +2804,7 @@ static int cmd_sru(const char *arg)
     }
     else
     {
-        int r;
-        r = sscanf(arg, "%9s %9s", sru_method, sru_version);
+        int r = sscanf(arg, "%9s %9s", sru_method, sru_version);
         if (r >= 1)
         {
             if (!yaz_matchstr(sru_method, "post"))
@@ -2809,11 +2813,13 @@ static int cmd_sru(const char *arg)
                 ;
             else if (!yaz_matchstr(sru_method, "soap"))
                 ;
+            else if (!yaz_matchstr(sru_method, "solr"))
+                ;
             else
             {
                 strcpy(sru_method, "soap");
                 printf("Unknown SRU method: %s\n", arg);
-                printf("Specify one of POST, GET, SOAP\n");
+                printf("Specify one of POST, GET, SOAP, SOLR\n");
             }
         }
     }
@@ -4350,7 +4356,6 @@ static void http_response(Z_HTTP_Response *hres)
     int ret = -1;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
-
     if (hres->code != 200)
     {
         printf("HTTP Error Status=%d\n", hres->code);
@@ -4360,51 +4365,69 @@ static void http_response(Z_HTTP_Response *hres)
         printf("Content type does not appear to be XML\n");
     else
     {
-        Z_SOAP *soap_package = 0;
-        ODR o = odr_createmem(ODR_DECODE);
-        Z_SOAP_Handler soap_handlers[3] = {
-            {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
-            {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
-            {0, 0, 0}
-        };
-        ret = z_soap_codec(o, &soap_package,
-                           &hres->content_buf, &hres->content_len,
-                           soap_handlers);
-        if (!ret && soap_package->which == Z_SOAP_generic)
+        if (!yaz_matchstr(sru_method, "solr"))
         {
-            Z_SRW_PDU *sr = (Z_SRW_PDU *) soap_package->u.generic->p;
-            if (sr->which == Z_SRW_searchRetrieve_response)
+            Z_SRW_PDU *sr = 0;
+            ODR o = odr_createmem(ODR_DECODE);
+            ret = yaz_solr_decode_response(o, hres, &sr);
+
+            if (ret == 0 && sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(sr->u.response);
-            else if (sr->which == Z_SRW_explain_response)
-                handle_srw_explain_response(sr->u.explain_response);
-            else if (sr->which == Z_SRW_scan_response)
-                handle_srw_scan_response(sr->u.scan_response);
-            else if (sr->which == Z_SRW_update_response)
-                printf("Got update response. Status: %s\n",
-                       sr->u.update_response->operationStatus);
             else
             {
-                printf("Decoding of SRW package failed\n");
+                printf("Decoding of SOLR package failed\n");
                 ret = -1;
             }
-        }
-        else if (soap_package && (soap_package->which == Z_SOAP_fault
-                                  || soap_package->which == Z_SOAP_error))
-        {
-            printf("SOAP Fault code %s\n",
-                    soap_package->u.fault->fault_code);
-            printf("SOAP Fault string %s\n",
-                    soap_package->u.fault->fault_string);
-            if (soap_package->u.fault->details)
-                printf("SOAP Details %s\n",
-                        soap_package->u.fault->details);
+            odr_destroy(o);
         }
         else
         {
-            printf("z_soap_codec failed. (no SOAP error)\n");
-            ret = -1;
+            Z_SOAP *soap_package = 0;
+            ODR o = odr_createmem(ODR_DECODE);
+            Z_SOAP_Handler soap_handlers[3] = {
+                {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+                {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
+                {0, 0, 0}
+            };
+            ret = z_soap_codec(o, &soap_package,
+                               &hres->content_buf, &hres->content_len,
+                               soap_handlers);
+            if (!ret && soap_package->which == Z_SOAP_generic)
+            {
+                Z_SRW_PDU *sr = (Z_SRW_PDU *) soap_package->u.generic->p;
+                if (sr->which == Z_SRW_searchRetrieve_response)
+                    handle_srw_response(sr->u.response);
+                else if (sr->which == Z_SRW_explain_response)
+                    handle_srw_explain_response(sr->u.explain_response);
+                else if (sr->which == Z_SRW_scan_response)
+                    handle_srw_scan_response(sr->u.scan_response);
+                else if (sr->which == Z_SRW_update_response)
+                    printf("Got update response. Status: %s\n",
+                           sr->u.update_response->operationStatus);
+                else
+                {
+                    printf("Decoding of SRW package failed\n");
+                    ret = -1;
+                }
+            }
+            else if (soap_package && (soap_package->which == Z_SOAP_fault
+                                      || soap_package->which == Z_SOAP_error))
+            {
+                printf("SOAP Fault code %s\n",
+                       soap_package->u.fault->fault_code);
+                printf("SOAP Fault string %s\n",
+                       soap_package->u.fault->fault_string);
+                if (soap_package->u.fault->details)
+                    printf("SOAP Details %s\n",
+                           soap_package->u.fault->details);
+            }
+            else
+            {
+                printf("z_soap_codec failed. (no SOAP error)\n");
+                ret = -1;
+            }
+            odr_destroy(o);
         }
-        odr_destroy(o);
     }
     if (ret)
         close_session(); /* close session on error */

@@ -33,7 +33,6 @@
 #include <yaz/comstack.h>
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
-#include <yaz/sortspec.h>
 #include <yaz/srw.h>
 #include <yaz/mutex.h>
 
@@ -42,19 +41,12 @@
 
 typedef struct ZOOM_Event_p *ZOOM_Event;
 
-struct ZOOM_query_p {
-    Z_Query *z_query;
-    Z_SortKeySpecList *sort_spec;
-    int refcount;
-    ODR odr;
-    char *query_string;
-};
-
 typedef enum {
     zoom_sru_error,
     zoom_sru_soap,
     zoom_sru_get,
-    zoom_sru_post
+    zoom_sru_post,
+    zoom_sru_solr
 } zoom_sru_mode;
     
 
@@ -116,6 +108,9 @@ struct ZOOM_connection_p {
     ZOOM_Event m_queue_back;
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
+
+    int log_details;
+    int log_api;
 };
 
 #if ZOOM_RESULT_LISTS
@@ -124,23 +119,6 @@ struct ZOOM_resultsets_p {
     ZOOM_resultsets next;
 };
 #endif
-
-struct ZOOM_options_entry {
-    char *name;
-    char *value;
-    int len;                  /* of `value', which may contain NULs */
-    struct ZOOM_options_entry *next;
-};
-
-struct ZOOM_options_p {
-    int refcount;
-    void *callback_handle;
-    ZOOM_options_callback callback_func;
-    struct ZOOM_options_entry *entries;
-    ZOOM_options parent1;
-    ZOOM_options parent2;
-};
-
 
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
 
@@ -174,23 +152,6 @@ struct ZOOM_resultset_p {
     char **facets_names;
 };
 
-struct ZOOM_record_p {
-    ODR odr;
-#if SHPTR
-    struct WRBUF_shptr *record_wrbuf;
-#else
-    WRBUF wrbuf;
-#endif
-
-    Z_NamePlusRecord *npr;
-    const char *schema;
-
-    const char *diag_uri;
-    const char *diag_message;
-    const char *diag_details;
-    const char *diag_set;
-};
-
 struct facet_term_p {
     char *term;
     int frequency;
@@ -200,16 +161,6 @@ struct ZOOM_facet_field_p {
     char *facet_name;
     int num_terms;
     struct facet_term_p *facet_terms;
-};
-
-
-struct ZOOM_record_cache_p {
-    struct ZOOM_record_p rec;
-    char *elementSetName;
-    char *syntax;
-    char *schema;
-    int pos;
-    ZOOM_record_cache next;
 };
 
 struct ZOOM_scanset_p {
@@ -271,13 +222,64 @@ struct ZOOM_task_p {
     ZOOM_task next;
 };
 
-struct ZOOM_Event_p {
-    int kind;
-    ZOOM_Event next;
-    ZOOM_Event prev;
-};
+typedef enum {
+    zoom_pending,
+    zoom_complete
+} zoom_ret;
 
 void ZOOM_options_addref (ZOOM_options opt);
+
+void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu);
+
+void ZOOM_set_dset_error(ZOOM_connection c, int error,
+                         const char *dset,
+                         const char *addinfo, const char *addinfo2);
+
+void ZOOM_set_error(ZOOM_connection c, int error, const char *addinfo);
+
+ZOOM_Event ZOOM_Event_create(int kind);
+void ZOOM_connection_put_event(ZOOM_connection c, ZOOM_Event event);
+
+zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c);
+zoom_ret send_Z3950_present(ZOOM_connection c);
+zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c);
+zoom_ret ZOOM_send_buf(ZOOM_connection c);
+zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset);
+char **ZOOM_connection_get_databases(ZOOM_connection con, ZOOM_options options,
+                                     int *num, ODR odr);
+zoom_ret ZOOM_connection_Z3950_send_init(ZOOM_connection c);
+
+ZOOM_task ZOOM_connection_add_task(ZOOM_connection c, int which);
+void ZOOM_connection_remove_task(ZOOM_connection c);
+int ZOOM_test_reconnect(ZOOM_connection c);
+
+ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
+                                     const char *syntax,
+                                     const char *elementSetName);
+void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
+                           int pos,
+                           const char *syntax, const char *elementSetName,
+                           const char *schema,
+                           Z_SRW_diagnostic *diag);
+
+Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s);
+Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s);
+char *ZOOM_query_get_query_string(ZOOM_query s);
+
+int ZOOM_uri_to_code(const char *uri);
+
+zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c);
+zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c);
+
+int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
+                    zoom_ret *cret);
+
+void ZOOM_set_HTTP_error(ZOOM_connection c, int error,
+                         const char *addinfo, const char *addinfo2);
+
+ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c);
+void ZOOM_connection_remove_events(ZOOM_connection c);
+void ZOOM_Event_destroy(ZOOM_Event event);
 
 /*
  * Local variables:
