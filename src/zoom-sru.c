@@ -285,7 +285,6 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     {
         if (res->numberOfRecords) {
             resultset->size = *res->numberOfRecords;
-            yaz_log(YLOG_DEBUG, "res numberOfRecords " ODR_INT_PRINTF, *res->numberOfRecords);
         }
         for (i = 0; i<res->num_records; i++)
         {
@@ -305,8 +304,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                 pos = *res->records[i].recordPosition - 1;
             else
                 pos = *start + i;
-            yaz_log(YLOG_DEBUG, "pos %d start %d ", pos, *start);
-            
+
             sru_rec = &res->records[i];
             
             npr->databaseName = 0;
