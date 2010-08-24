@@ -283,8 +283,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     }
     else
     {
-        if (res->numberOfRecords)
+        if (res->numberOfRecords) {
             resultset->size = *res->numberOfRecords;
+            yaz_log(YLOG_DEBUG, "res numberOfRecords " ODR_INT_PRINTF, *res->numberOfRecords);
+        }
         for (i = 0; i<res->num_records; i++)
         {
             int pos;
@@ -294,12 +296,16 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             
             Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
                 odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
-            
+            /*
+             * TODO This does not work with 0-based recordPositions.
+             * We will iterate over one twice
+             */
             if (res->records[i].recordPosition && 
                 *res->records[i].recordPosition > 0)
                 pos = *res->records[i].recordPosition - 1;
             else
                 pos = *start + i;
+            yaz_log(YLOG_DEBUG, "pos %d start %d ", pos, *start);
             
             sru_rec = &res->records[i];
             
@@ -336,9 +342,9 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         *start += i;
         if (*count + *start > resultset->size)
             *count = resultset->size - *start;
+        yaz_log(YLOG_DEBUG, "SRU result set size " ODR_INT_PRINTF " start %d count %d", resultset->size, *start, *count);
         if (*count < 0)
             *count = 0;
-        
         nmem = odr_extract_mem(c->odr_in);
         nmem_transfer(odr_getmem(resultset->odr), nmem);
         nmem_destroy(nmem);

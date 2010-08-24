@@ -12,6 +12,7 @@
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/yaz-iconv.h>
+#include <yaz/log.h>
 
 #include "sru-p.h"
 
@@ -75,10 +76,12 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                         odr_intdup(o, 
                                    odr_atoi(
                                        (const char *) attr->children->content));
+                    yaz_log(YLOG_DEBUG, "SOLR total results: %d ", atoi( attr->children->content));
                 }
                 else if (!strcmp((const char *) attr->name, "start"))
                 {
                     start = odr_atoi((const char *) attr->children->content);
+                    yaz_log(YLOG_DEBUG, "SOLR start: %d ", atoi( attr->children->content));
                 }
             }
     }
@@ -92,6 +95,7 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
         for (node = ptr->children; node; node = node->next)
             if (node->type == XML_ELEMENT_NODE)
                 sr->num_records++;
+        yaz_log(YLOG_DEBUG, "SOLR results in response: %d ", sr->num_records);
 
         sr->records = odr_malloc(o, sizeof(*sr->records) * sr->num_records);
 
@@ -113,7 +117,9 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                 record->recordData_buf = odr_malloc(o, buf->use + 1);
                 memcpy(record->recordData_buf, buf->content, buf->use);
                 record->recordData_buf[buf->use] = '\0';
-                record->recordPosition = odr_intdup(o, start + offset);
+                // TODO Solve the real problem: Making the recordPosition 1-based due to "funny" code in zoom-sru
+                record->recordPosition = odr_intdup(o, start + offset + 1);
+                yaz_log(YLOG_DEBUG, "SOLR pos=" ODR_INT_PRINTF, *record->recordPosition);
 
                 xmlBufferFree(buf);
 
