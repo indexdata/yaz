@@ -37,6 +37,7 @@
 #include <yaz/zgdu.h>
 #include <yaz/diagsrw.h>
 #include <yaz/diagsru_update.h>
+#include "facet.h"
 
 YAZ_BEGIN_CDECL
 
@@ -92,6 +93,7 @@ typedef struct {
     char *database;
     char *stylesheet;
     Odr_int *resultSetTTL;
+    Z_FacetList *facet_list;
 } Z_SRW_searchRetrieveRequest;
 
 typedef struct {
@@ -107,6 +109,7 @@ typedef struct {
     Odr_int *nextRecordPosition;
 
     Z_SRW_extra_record **extra_records;  /* of size num_records */
+    Z_FacetList *facet_list;
 } Z_SRW_searchRetrieveResponse;
 
 typedef struct {
