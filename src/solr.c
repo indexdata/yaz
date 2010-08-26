@@ -14,6 +14,7 @@
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
 #include <yaz/facet.h>
+#include <yaz/wrbuf.h>
 
 #include "sru-p.h"
 
@@ -120,8 +121,20 @@ static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) 
 
 
 static const char *get_facet_term_count(xmlNodePtr node, int *freq) {
-    // TODO implement
-    return 0;
+
+    const char *term = xml_node_attribute_value_get(node, "int", "name");
+    xmlNodePtr child;
+    WRBUF wrbuf = wrbuf_alloc();
+    if (!term)
+        return term;
+
+    for (child = node->children; child ; child = child->next) {
+        if (child->type == XML_TEXT_NODE)
+        wrbuf_puts(wrbuf, (const char *) child->content);
+    }
+    *freq = atoi(wrbuf_cstr(wrbuf));
+    wrbuf_destroy(wrbuf);
+    return term;
 }
 
 Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr)
