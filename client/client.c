@@ -1455,7 +1455,7 @@ static int send_SRW_searchRequest(const char *arg)
         return 0;
     }
     sr->u.request->maximumRecords = odr_intdup(out, 0);
-
+    sr->u.request->facetList = facet_list;
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
     if (recordsyntax_size == 1 && !yaz_matchstr(recordsyntax_list[0], "xml"))
@@ -2895,25 +2895,23 @@ static int cmd_facets(const char *arg)
         return 0;
     }
     size = strlen(arg);
-    if (only_z3950())
+/*
+    MOVE to non-usage of it?
+    if (only_z3950() && !yaz_matchstr(sru_method, "solr")) {
+        // We are not Z39.50 and not SOLR (I think)
+        printf("WARN: Currently supported for Z39.50 and SOLR.\n");
+    }
+º/
+    /* TODO Wrong odr. Loosing memory */
+    ODR odr = odr_createmem(ODR_ENCODE);
+    facet_list = yaz_pqf_parse_facet_list(odr, arg);
+
+    if (!facet_list)
     {
-        printf("Currently only supported for Z39.50.\n");
+        printf("Invalid facet list: %s", arg);
         return 0;
     }
-    else
-    {
-        /* TODO Wrong odr. Loosing memory */
-        ODR odr = odr_createmem(ODR_ENCODE);
-        facet_list = yaz_pqf_parse_facet_list(odr, arg);
-
-        if (!facet_list)
-        {
-            printf("Invalid facet list: %s", arg);
-            return 0;
-        }
-        return 1;
-    }
-    return 2;
+    return 1;
 }
 
 
