@@ -1454,7 +1454,8 @@ static int send_SRW_searchRequest(const char *arg)
         printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
-    sr->u.request->maximumRecords = odr_intdup(out, 0);
+    // TODO check. 
+    sr->u.request->maximumRecords = odr_intdup(out, 20);
     sr->u.request->facetList = facet_list;
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
@@ -2887,6 +2888,8 @@ static int cmd_find(const char *arg)
 
 static int cmd_facets(const char *arg)
 {
+    /* TODO Wrong odr. Loosing memory */
+    ODR odr = odr_createmem(ODR_ENCODE);
     int size = 0;
     if (!*arg)
     {
@@ -2895,15 +2898,10 @@ static int cmd_facets(const char *arg)
         return 0;
     }
     size = strlen(arg);
-/*
-    MOVE to non-usage of it?
     if (only_z3950() && !yaz_matchstr(sru_method, "solr")) {
-        // We are not Z39.50 and not SOLR (I think)
+        /* We are not Z39.50 and not SOLR (I think) */
         printf("WARN: Currently supported for Z39.50 and SOLR.\n");
     }
-º/
-    /* TODO Wrong odr. Loosing memory */
-    ODR odr = odr_createmem(ODR_ENCODE);
     facet_list = yaz_pqf_parse_facet_list(odr, arg);
 
     if (!facet_list)
