@@ -93,7 +93,7 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr, Odr_int start, Z_
     }
 }
 
-static void yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr) {
+static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr) {
     Odr_int start = 0;
     struct _xmlAttr *attr;
     for (attr = ptr->properties; attr; attr = attr->next)
@@ -101,11 +101,16 @@ static void yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveRe
             if (!strcmp((const char *) attr->name, "numFound")) {
                 sr->numberOfRecords = odr_intdup(o, odr_atoi(
                         (const char *) attr->children->content));
-            } else if (!strcmp((const char *) attr->name, "start")) {
+            } 
+            else if (!strcmp((const char *) attr->name, "start")) {
                 start = odr_atoi((const char *) attr->children->content);
             }
         }
-    yaz_solr_decode_result_docs(o, ptr, start, sr);
+    if (sr->numberOfRecords && *sr->numberOfRecords > 0)
+        yaz_solr_decode_result_docs(o, ptr, start, sr);
+    if (sr->numberOfRecords)
+        return 0;
+    return -1;
 }
 
 static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) {
@@ -142,7 +147,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
     return facet_field;
 }
 
-static void yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRetrieveResponse *sr) {
+static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRetrieveResponse *sr) {
     xmlNodePtr ptr;
     for (ptr = root->children; ptr; ptr = ptr->next)
     {
@@ -166,6 +171,7 @@ static void yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRet
             break;
         }
     }
+    return 0;
 }
 
 static void yaz_solr_decode_facets(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr) {
