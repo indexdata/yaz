@@ -162,7 +162,7 @@ static void yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRet
                 facet_list_field_set(o, facet_list, yaz_solr_decode_facet_field(o, node, sr), num_facets);
                 num_facets++;
             }
-            sr->facet_list = facet_list;
+            sr->facetList = facet_list;
             break;
         }
     }
@@ -294,8 +294,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         yaz_add_name_value_str(encode, name, value, &i,
                                "fl", request->recordSchema);
 
-        if (request->facet_list) {
-            Z_FacetList *facet_list = request->facet_list;
+        if (request->facetList) {
+            Z_FacetList *facet_list = request->facetList;
             int limit;
             Odr_int olimit;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
