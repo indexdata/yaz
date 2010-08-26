@@ -202,19 +202,18 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
         }
         else
         {
-            /** look for result node */
+            /** look for result (required) and facets node (optional) */
+            int rc_result = -1;
+            int rc_facets = 0;
             for (ptr = root->children; ptr; ptr = ptr->next)
             {
                 if (ptr->type == XML_ELEMENT_NODE &&
                     !strcmp((const char *) ptr->name, "result"))
-                        yaz_solr_decode_result(o, ptr, sr);
+                        rc_result = yaz_solr_decode_result(o, ptr, sr);
                 if (match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
-                        yaz_solr_decode_facet_counts(o, ptr, sr);
+                    rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
             }
-            if (!ptr)
-            {
-                ret = -1;
-            }
+            ret = rc_result + rc_facets;
         }
     }
     if (doc)
