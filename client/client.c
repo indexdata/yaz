@@ -2280,6 +2280,22 @@ static int only_z3950(void)
     return 0;
 }
 
+static int is_SRW(void)
+{
+    if (!conn)
+    {
+        printf("Not connected yet\n");
+        return 1;
+    }
+    if (protocol == PROTO_HTTP && yaz_matchstr(sru_method, "solr"))
+    {
+        printf("Not supported by SRW\n");
+        return 1;
+    }
+    return 0;
+}
+
+
 static int cmd_update_common(const char *arg, int version);
 
 static int cmd_update(const char *arg)
