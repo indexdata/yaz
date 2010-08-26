@@ -21,6 +21,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+#define SOLR_MAX_PARAMETERS  100
 
 const char *xml_node_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
 
@@ -226,17 +227,37 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 #endif
 }
 
-void solr_encode_facet_field(ODR encode, Z_FacetField *facet_field) {
-
+static void yaz_solr_encode_facet_field(ODR encode, char **name, char **value, int *i, Z_FacetField *facet_field, int *limit) {
+      Z_AttributeList *attribute_list = facet_field->attributes;
+      struct yaz_facet_attr attr_values;
+      yaz_facet_attr_init(&attr_values);
+      yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
+      // TODO do we want to support server decided
+      if (!attr_values.errcode && attr_values.useattr) {
+          yaz_add_name_value_str(encode, name, value, i, "facet.field", (char *) attr_values.useattr);
+          // TODO max(attr_values, *limit);
+          if (attr_values.limit > 0 && attr_values.limit > *limit) {
+              *limit = attr_values.limit;
+          }
+      }
 }
+
+static void yaz_solr_encode_facet_list(ODR encode, char **name, char **value, int *i, Z_FacetList *facet_list, int *limit) {
+
+    int index;
+    for (index = 0; index < facet_list->num; index++)  {
+        yaz_solr_encode_facet_field(encode, name, value, i, facet_list->elements[index], limit);
+
+    }
+}
+
 
 int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                             ODR encode, const char *charset)
 {
     const char *solr_op = 0;
     //TODO Change. not a nice hard coded, unchecked limit.
-    int max = 100;
-    char *name[100], *value[100];
+    char *name[SOLR_MAX_PARAMETERS], *value[SOLR_MAX_PARAMETERS];
     char *uri_args;
     char *path;
     int i = 0;
@@ -274,13 +295,14 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                "fl", request->recordSchema);
 
         if (request->facet_list) {
-            int index;
             Z_FacetList *facet_list = request->facet_list;
+            int limit;
+            Odr_int olimit;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
-            for (index = 0; index < facet_list->num; index++) {
-                //TODO impl
-                //solr_encode_facet_field(encode, name, value, &i, facet_list->elements[index]);
-            }
+            yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
+            olimit = limit;
+            yaz_add_name_value_int(encode, name, value, &i, "facet.limit", &olimit);
+
         }
         break;
     }
