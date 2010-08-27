@@ -4315,6 +4315,9 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     }
     if (res->numberOfRecords)
         printf("Number of hits: " ODR_INT_PRINTF "\n", *res->numberOfRecords);
+    if (res->facetList) {
+        display_facets(res->facetList);
+    }
     for (i = 0; i<res->num_records; i++)
         handle_srw_record(res->records + i);
 }
