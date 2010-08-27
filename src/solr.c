@@ -115,8 +115,31 @@ static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveRe
 }
 
 static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) {
-    // TODO IMPLEMENT
-    return 0;
+    Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
+    Z_AttributeElement ** elements;
+    attributes->num_attributes = 1;
+    /* TODO check on name instead
+    if (!attributes->num_attributes) {
+        attributes->attributes = (Z_AttributeElement**)odr_nullval();
+        return attributes;
+    }
+    */
+    elements = (Z_AttributeElement**) odr_malloc (o, attributes->num_attributes * sizeof(*elements));
+    elements[0] = (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
+    elements[0]->attributeType = odr_malloc(o, sizeof(*elements[0]->attributeType));
+    *elements[0]->attributeType = 1;
+    elements[0]->attributeSet = odr_nullval();
+    elements[0]->which = Z_AttributeValue_complex;
+    elements[0]->value.complex = (Z_ComplexAttribute *) odr_malloc(o, sizeof(Z_ComplexAttribute));
+    elements[0]->value.complex->num_list = 1;
+    elements[0]->value.complex->list = (Z_StringOrNumeric **) odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
+    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *) odr_malloc(o, sizeof(Z_StringOrNumeric));
+    elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
+    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) name;
+    elements[0]->value.complex->semanticAction = 0;
+    elements[0]->value.complex->num_semanticAction = 0;
+    attributes->attributes = elements;
+    return attributes;
 }
 
 
@@ -314,7 +337,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
         if (request->facetList) {
             Z_FacetList *facet_list = request->facetList;
-            int limit;
+            int limit = 0;
             Odr_int olimit;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
             yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
