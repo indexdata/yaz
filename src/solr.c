@@ -135,7 +135,7 @@ static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) 
     elements[0]->value.complex->list = (Z_StringOrNumeric **) odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
     elements[0]->value.complex->list[0] = (Z_StringOrNumeric *) odr_malloc(o, sizeof(Z_StringOrNumeric));
     elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
-    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) name;
+    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) odr_strdup(o, name);
     elements[0]->value.complex->semanticAction = 0;
     elements[0]->value.complex->num_semanticAction = 0;
     attributes->attributes = elements;
