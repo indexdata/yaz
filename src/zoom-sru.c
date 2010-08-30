@@ -13,6 +13,9 @@
 #include "zoom-p.h"
 
 #include <yaz/log.h>
+#include <yaz/pquery.h>
+
+void handle_facet_list(ZOOM_resultset r, Z_FacetList *fl);
 
 #if YAZ_HAVE_XML2
 static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
@@ -138,7 +141,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     Z_SRW_PDU *sr = 0;
     const char *option_val = 0;
     Z_Query *z_query;
-
+    Z_FacetList *facet_list = 0;
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
     assert(c->tasks);
@@ -151,6 +154,10 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         ZOOM_options_set(resultset->options, "setname", resultset->setname);
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
+        const char *facets = ZOOM_options_get(resultset->options, "facets");
+        if (facets) {
+            facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
+        }
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
@@ -213,6 +220,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         c->odr_out, (resultset->step > 0 && resultset->step < *count) ? 
         resultset->step : *count);
     sr->u.request->recordSchema = resultset->schema;
+    sr->u.request->facetList = facet_list;
     
     option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
     if (option_val)
@@ -258,6 +266,8 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             ZOOM_connection_put_event(c, event);
             c->tasks->u.search.recv_search_fired = 1;
         }
+        if (res->facetList)
+            handle_facet_list(resultset, res->facetList);
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
