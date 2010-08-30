@@ -747,6 +747,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.request->database = 0;
         sr->u.request->resultSetTTL = 0;
         sr->u.request->stylesheet = 0;
+        sr->u.request->facetList = 0;
         break;
     case Z_SRW_searchRetrieve_response:
         sr->u.response = (Z_SRW_searchRetrieveResponse *)
@@ -760,6 +761,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.response->num_diagnostics = 0;
         sr->u.response->nextRecordPosition = 0;
         sr->u.response->extra_records = 0;
+        sr->u.response->facetList = 0;
         break;
     case Z_SRW_explain_request:
         sr->u.explain_request = (Z_SRW_explainRequest *)
