@@ -1136,6 +1136,22 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
     return facet_field;
 }
 
+/* Can be share with SOLR/SRU/SRW requests */
+void handle_facet_list(ZOOM_resultset r, Z_FacetList *fl) {
+    int j;
+    r->num_facets   = fl->num;
+    yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
+    r->facets       =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets));
+    r->facets_names =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets_names));
+    for (j = 0; j < fl->num; j++)
+    {
+        r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
+        if (!r->facets[j])
+            yaz_log(YLOG_DEBUG, "Facet field missing on index %d !", j);
+        r->facets_names[j] = (char *) ZOOM_facet_field_name(r->facets[j]);
+    }
+}
+
 static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                                 Z_OtherInformation *o)
 {
@@ -1147,19 +1163,7 @@ static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
             Z_External *ext = o->list[i]->information.externallyDefinedInfo;
             if (ext->which == Z_External_userFacets)
             {
-                int j;
-                Z_FacetList *fl = ext->u.facetList;
-                r->num_facets   = fl->num;
-                yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
-                r->facets       =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets));
-                r->facets_names =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets_names));
-                for (j = 0; j < fl->num; j++)
-                {
-                    r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
-                    if (!r->facets[j])
-                        yaz_log(YLOG_DEBUG, "Facet field missing on index %d !", j);
-                    r->facets_names[j] = (char *) ZOOM_facet_field_name(r->facets[j]);
-                }
+                handle_facet_list(r, ext->u.facetList);
             }
         }
     }
