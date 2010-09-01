@@ -164,6 +164,11 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
 {
     // USE attribute
     const char* name = xml_node_attribute_value_get(ptr, "lst", "name");
+    char *pos = strstr(name, "_exact");
+    /* HACK */
+    if (pos) {
+        pos[0] = 0;
+    }
     Z_AttributeList *list = yaz_solr_use_atttribute_create(o, name);
     Z_FacetField *facet_field;
     int num_terms = 0;
@@ -275,11 +280,22 @@ static void yaz_solr_encode_facet_field(ODR encode, char **name, char **value, i
       yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
       // TODO do we want to support server decided
       if (!attr_values.errcode && attr_values.useattr) {
-          yaz_add_name_value_str(encode, name, value, i, "facet.field", (char *) attr_values.useattr);
-          // TODO max(attr_values, *limit);
-          if (attr_values.limit > 0 && attr_values.limit > *limit) {
-              *limit = attr_values.limit;
+          WRBUF wrbuf = wrbuf_alloc();
+          wrbuf_puts(wrbuf, (char *) attr_values.useattr);
+          /* Skip date field */
+          if (strcmp("date", attr_values.useattr) != 0)
+              wrbuf_puts(wrbuf, "_exact");
+          yaz_add_name_value_str(encode, name, value, i, "facet.field", odr_strdup(encode, wrbuf_cstr(wrbuf)));
+          if (attr_values.limit > 0) {
+              WRBUF wrbuf2 = wrbuf_alloc();
+              wrbuf_puts(wrbuf2, "f.");
+              wrbuf_puts(wrbuf2, wrbuf_cstr(wrbuf));
+              wrbuf_puts(wrbuf2, ".facet.limit");
+              Odr_int olimit = attr_values.limit;
+              yaz_add_name_value_int(encode, name, value, i, odr_strdup(encode, wrbuf_cstr(wrbuf2)), &olimit);
+              wrbuf_destroy(wrbuf2);
           }
+          wrbuf_destroy(wrbuf);
       }
 }
 
@@ -341,8 +357,10 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
             Odr_int olimit;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
             yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
+            /*
             olimit = limit;
             yaz_add_name_value_int(encode, name, value, &i, "facet.limit", &olimit);
+             */
 
         }
         break;
