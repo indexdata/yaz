@@ -161,7 +161,13 @@ static const char *get_facet_term_count(xmlNodePtr node, int *freq) {
 }
 
 Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr)
+
 {
+    Z_AttributeList *list;
+    Z_FacetField *facet_field;
+    int num_terms = 0;
+    int index = 0;
+    xmlNodePtr node;
     // USE attribute
     const char* name = xml_node_attribute_value_get(ptr, "lst", "name");
     char *pos = strstr(name, "_exact");
@@ -169,11 +175,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
     if (pos) {
         pos[0] = 0;
     }
-    Z_AttributeList *list = yaz_solr_use_atttribute_create(o, name);
-    Z_FacetField *facet_field;
-    int num_terms = 0;
-    int index = 0;
-    xmlNodePtr node;
+    list = yaz_solr_use_atttribute_create(o, name);
     for (node = ptr->children; node; node = node->next) {
         num_terms++;
     }
@@ -215,10 +217,6 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRetr
     return 0;
 }
 
-static void yaz_solr_decode_facets(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr) {
-    if (match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
-        yaz_solr_decode_facet_counts(o, ptr->children, sr);
-}
 #endif
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
@@ -288,10 +286,11 @@ static void yaz_solr_encode_facet_field(ODR encode, char **name, char **value, i
           yaz_add_name_value_str(encode, name, value, i, "facet.field", odr_strdup(encode, wrbuf_cstr(wrbuf)));
           if (attr_values.limit > 0) {
               WRBUF wrbuf2 = wrbuf_alloc();
+              Odr_int olimit;
               wrbuf_puts(wrbuf2, "f.");
               wrbuf_puts(wrbuf2, wrbuf_cstr(wrbuf));
               wrbuf_puts(wrbuf2, ".facet.limit");
-              Odr_int olimit = attr_values.limit;
+              olimit = attr_values.limit;
               yaz_add_name_value_int(encode, name, value, i, odr_strdup(encode, wrbuf_cstr(wrbuf2)), &olimit);
               wrbuf_destroy(wrbuf2);
           }
@@ -354,7 +353,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         if (request->facetList) {
             Z_FacetList *facet_list = request->facetList;
             int limit = 0;
-            Odr_int olimit;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
             yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
             /*
