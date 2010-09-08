@@ -30,8 +30,8 @@ Requires: libxslt gnutls libicu
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
 Retrieval.
 
-%post -p /sbin/ldconfig 
-%postun -p /sbin/ldconfig 
+%post -n libyaz4 -p /sbin/ldconfig 
+%postun -n libyaz4 -p /sbin/ldconfig 
 
 %package -n libyaz4-devel
 Summary: Z39.50 Library - development package
