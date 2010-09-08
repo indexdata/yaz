@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 %endif
 BuildRequires: pkgconfig libxml2-devel libxslt-devel gnutls-devel readline-devel libicu-devel %{TCPWRAPPER}
 Packager: Adam Dickmeiss <adam@indexdata.dk>
-URL: http://www.indexdata.dk/yaz/
+URL: http://www.indexdata.com/yaz
 
 %description
 This package contains both a test-server and clients (normal & ssl)
