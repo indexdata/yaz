@@ -356,6 +356,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
             Z_FacetList *facet_list = request->facetList;
             int limit = 0;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
+            yaz_add_name_value_str(encode, name, value, &i, "facet.mincount", "1");
             yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
             /*
             olimit = limit;
