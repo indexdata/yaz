@@ -284,7 +284,7 @@ int send_apdu(Z_APDU *a)
     do_hex_dump(buf, len);
     if (cs_put(conn, buf, len) < 0)
     {
-        fprintf(stderr, "cs_put: %s", cs_errmsg(cs_errno(conn)));
+        fprintf(stderr, "cs_put: %s\n", cs_errmsg(cs_errno(conn)));
         close_session();
         return 0;
     }
