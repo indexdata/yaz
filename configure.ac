@@ -387,12 +387,6 @@ elif test "$enable_memdebug" = "no"; then
     AC_DEFINE([TRACE_XMALLOC],[0])
 fi
 dnl
-dnl ------ Using this for "in-source" yaz-config
-AC_SUBST([YAZ_SRC_ROOT])
-AC_SUBST([YAZ_BUILD_ROOT])
-YAZ_SRC_ROOT=`cd ${srcdir}; pwd`
-YAZ_BUILD_ROOT=`pwd`
-dnl
 dnl ------ versioning
 dnl
 WIN_FILEVERSION=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { m = $4; printf("%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4);}'`
