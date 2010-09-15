@@ -255,7 +255,9 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                 if (ptr->type == XML_ELEMENT_NODE &&
                     !strcmp((const char *) ptr->name, "result"))
                         rc_result = yaz_solr_decode_result(o, ptr, sr);
-                if (match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
+                /* TODO The check on hits is a work-around to avoid garbled facets on zero results from the SOLR server.
+                 * The work-around works because the results is before the facets in the xml. */
+                if (rc_result == 0 && match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
                     rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
             }
             ret = rc_result + rc_facets;
@@ -354,6 +356,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
             Z_FacetList *facet_list = request->facetList;
             int limit = 0;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
+            yaz_add_name_value_str(encode, name, value, &i, "facet.mincount", "1");
             yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
             /*
             olimit = limit;
