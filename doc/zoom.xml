@@ -29,22 +29,22 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    programming language or toolkit.
   </para>
 
-  <note>
-   <para>
-    A recent addition to &yaz; is SRU support. You can now make
-    SRU ZOOM connections by specifying scheme <literal>http://</literal>
-    for the hostname for a connection.  The dialect of SRU used is
-    specified by the value of the connection's <literal>sru</literal>
-    option, which may be SRU over HTTP GET (<literal>get</literal>),
-    SRU over HTTP POST (<literal>post</literal>) or SRW (SRU over
-    SOAP) (<literal>soap</literal>).  Using the facility for embedding
-    options in target strings, a connection can be forced to use SRU
-    rather the SRW (the default) by prefixing the target string with
-    <literal>sru=get,</literal>, like this:
+  <para>
+    From YAZ version 2.1.12, <ulink url="&url.sru;">SRU</ulink> is supported.
+    You can make SRU ZOOM connections by specifying scheme
+    <literal>http://</literal> for the hostname for a connection.
+    The dialect of SRU used is specified by the value of the
+    connection's <literal>sru</literal> option, which may be SRU over
+    HTTP GET (<literal>get</literal>),
+    SRU over HTTP POST (<literal>post</literal>), (SRU over
+    SOAP) (<literal>soap</literal>) or <literal>SOLR</literal>
+    (<ulink url="&url.solr;">SOLR</ulink> Web Service).
+    Using the facility for embedding options in target strings, a
+    connection can be forced to use SRU rather the SRW (the default) by
+    prefixing the target string with <literal>sru=get,</literal>, like this:
     <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
    </para>
-  </note>
-
+  
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
    and more apparent over time. So when the first &zoom; specification
@@ -277,7 +277,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       <row><entry>
         sru</entry><entry>
 	SRU transport type. Must be either <literal>soap</literal>,
-	<literal>get</literal> or <literal>post</literal>.
+	<literal>get</literal>, <literal>post</literal>, or
+	<literal>solr</literal>.
        </entry><entry>soap</entry></row>
       <row><entry>
         sru_version</entry><entry>
@@ -289,9 +290,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        </entry><entry>1.2</entry></row>
       <row><entry>
         facets</entry><entry>
-	A FacetList is comma-separated list of facet, which is defined as <literal>AttributeList</literal> 
-	and a optional FacetTerm (a Term and a frequency). On request the terms is missing. 
-	On response the the list contains the terms that the target could collect. 
+	A FacetList is comma-separated list of facet, which is defined
+	as <literal>AttributeList</literal>  and a optional FacetTerm
+	(a Term and a frequency). On request the terms is missing. 
+	On response the the list contains the terms that the target
+	could collect. 
        </entry><entry>none</entry></row>
      </tbody>
     </tgroup>

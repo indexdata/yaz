@@ -16,12 +16,16 @@
     <listitem><para>
       Supports 
       <ulink url="&url.sru;">SRU GET/POST/SOAP</ulink>
-      version 1.1 (over HTTP and HTTPS).
+      version 1.2 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
       Includes BER encoders/decoders for the 
       <ulink url="&url.ill;">ISO ILL</ulink>
       protocol.
+     </para></listitem>
+    <listitem><para>
+      Supports 
+      <ulink url="&url.solr;">SOLR</ulink> Web Service (client side only)
      </para></listitem>
     <listitem><para>
       Supports the following transports: BER over TCP/IP
@@ -38,8 +42,8 @@
      </para></listitem>
     <listitem><para>
       Offers 
-      <ulink url="&url.zoom;">ZOOM</ulink> C API implementing both
-      Z39.50 and SRU.
+      <ulink url="&url.zoom;">ZOOM</ulink> C API implementing
+      Z39.50, SRU and SOLR Web Service.
      </para></listitem>
     <listitem><para>
       The &yaz; library offers a set of useful utilities
