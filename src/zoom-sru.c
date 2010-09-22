@@ -261,8 +261,9 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;        
 
-        if (!c->tasks->u.search.recv_search_fired)
-        {
+        /* Required not for reporting client hit count multiple times into session */
+        if (!c->tasks->u.search.recv_search_fired) {
+            yaz_log(YLOG_DEBUG, "posting ZOOM_EVENT_RECV_SEARCH");
             event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
             ZOOM_connection_put_event(c, event);
             c->tasks->u.search.recv_search_fired = 1;
