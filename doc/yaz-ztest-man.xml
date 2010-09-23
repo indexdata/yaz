@@ -24,7 +24,7 @@
  
  <refnamediv>
   <refname>yaz-ztest</refname>
-  <refpurpose>Z39.50 Test Server</refpurpose>
+  <refpurpose>Z39.50/SRU Test Server</refpurpose>
  </refnamediv>
  
  <refsynopsisdiv>
@@ -32,9 +32,9 @@
  </refsynopsisdiv>
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-ztest</command> is a Z39.50 test server that uses
-   the YAZ generic frontend server API.
-   The server acts as a real Z39.50 server but does not use a database.
+   <command>yaz-ztest</command> is a Z39.50/SRU test server that uses
+   the YAZ generic frontend server (GFS) API.
+   The server acts as a real Z39.50/SRU server but does not use a database.
    It returns a random hit count and returns a subset of a few built-in
    records.
   </para>

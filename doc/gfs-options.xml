@@ -154,6 +154,15 @@
    </para></listitem>
  </varlistentry>
 
+ <varlistentry><term><literal>-K</literal></term>
+  <listitem><para>
+    Forces no-keepalive for HTTP sessions. By default GFS will keep
+    sessions alive for HTTP 1.1 sessions (as defined by the standard).
+    Using this option will force GFS to close the connection for each
+    operation.
+   </para></listitem>
+ </varlistentry>
+
  <varlistentry><term><literal>-r </literal>
    <replaceable>size</replaceable></term>
   <listitem><para>

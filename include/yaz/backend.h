@@ -358,6 +358,7 @@ typedef struct statserv_options_block
     int background;                 /**< auto daemon */
     char cert_fname[128];           /**< SSL certificate fname */
     char xml_config[128];           /**< XML config filename */
+    int keepalive;                  /**< keep alive if HTTP 1.1 (default: 1) */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(

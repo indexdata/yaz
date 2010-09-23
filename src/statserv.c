@@ -117,7 +117,8 @@ statserv_options_block control_block = {
     "",                         /* PID fname */
     0,                          /* background daemon */
     "",                         /* SSL certificate filename */
-    ""                          /* XML config filename */
+    "",                         /* XML config filename */
+    1                           /* keepalive */
 };
 
 static int max_sessions = 0;
@@ -1259,7 +1260,7 @@ int check_options(int argc, char **argv)
 
     get_logbits(1); 
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:d:A:p:DC:f:m:r:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1336,6 +1337,9 @@ int check_options(int argc, char **argv)
                 return(1);
             }
             control_block.maxrecordsize = r * 1024;
+            break;
+        case 'K':
+            control_block.keepalive = 0;
             break;
         case 'i':
             control_block.inetd = 1;

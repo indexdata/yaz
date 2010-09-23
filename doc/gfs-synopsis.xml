@@ -17,6 +17,7 @@
  <arg choice="opt"><option>-C <replaceable>fname</replaceable></option></arg>
  <arg choice="opt"><option>-t <replaceable>minutes</replaceable></option></arg>
  <arg choice="opt"><option>-k <replaceable>kilobytes</replaceable></option></arg>
+ <arg choice="opt"><option>-K</option></arg>
  <arg choice="opt"><option>-d <replaceable>daemon</replaceable></option></arg>
  <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
  <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
