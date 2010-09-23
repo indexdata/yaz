@@ -42,8 +42,6 @@
 
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
-#elif YAZ_GNU_THREADS
-#include <pth.h>
 #endif
 
 #include <fcntl.h>
@@ -947,18 +945,6 @@ static void listener(IOCHAN h, int event)
             pthread_t child_thread;
             pthread_create(&child_thread, 0, new_session, new_line);
             pthread_detach(child_thread);
-#elif YAZ_GNU_THREADS
-            pth_attr_t attr;
-            pth_t child_thread;
-
-            attr = pth_attr_new();
-            pth_attr_set(attr, PTH_ATTR_JOINABLE, FALSE);
-            pth_attr_set(attr, PTH_ATTR_STACK_SIZE, 32*1024);
-            pth_attr_set(attr, PTH_ATTR_NAME, "session");
-            yaz_log(YLOG_DEBUG, "pth_spawn begin");
-            child_thread = pth_spawn(attr, new_session, new_line);
-            yaz_log(YLOG_DEBUG, "pth_spawn finish");
-            pth_attr_destroy(attr);
 #else
             new_session(new_line);
 #endif
@@ -1298,9 +1284,6 @@ int check_options(int argc, char **argv)
             break;
         case 'T':
 #if YAZ_POSIX_THREADS
-            control_block.dynamic = 0;
-            control_block.threads = 1;
-#elif YAZ_GNU_THREADS
             control_block.dynamic = 0;
             control_block.threads = 1;
 #else
