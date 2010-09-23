@@ -470,10 +470,8 @@ static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
 
             printf("%s: %lld hits\n", ZOOM_connection_option_get(c[i], "host"),
                    (long long int) ZOOM_resultset_size(r[i]));
-#if 0
             /* and display */
             display_records(c[i], r[i], start, count, "render");
-#endif
         }
     }
 }
