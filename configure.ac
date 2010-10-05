@@ -424,7 +424,7 @@ Doxyfile
 win/version.nsi
 include/yaz/yaz-version.h
 ],[
-	sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
+	sed s%echo_source=yes%echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
     ]
 )
 
