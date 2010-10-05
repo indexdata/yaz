@@ -1,6 +1,8 @@
---- 4.0.13 2010/MM/DD
+--- 4.1.0 2010/10/05
 
 SOLR WebService support for yaz-client and ZOOM.
+
+Define record syntax JSON. OID: 1.2.840.10003.5.1000.81.3 .
 
 --- 4.0.12 2010/08/17
 

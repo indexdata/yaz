@@ -54,7 +54,7 @@
    you to test behavior and performance of Z39.50 targets and SRU servers.
   </para>
   <para>
-   From YAZ version 4.0.13, <command>yaz-client</command> may also operate as a
+   From YAZ version 4.1.0 <command>yaz-client</command> may also operate as a
    <ulink url="&url.solr;">SOLR</ulink> Web Service
    client.
   </para>
