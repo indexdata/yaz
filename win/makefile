@@ -479,7 +479,7 @@ MISC_OBJS= \
    $(OBJDIR)\zoom-z3950.obj \
    $(OBJDIR)\zoom-sru.obj \
    $(OBJDIR)\zoom-query.obj \
-   $(OBJDIR)\record-render.obj \
+   $(OBJDIR)\record_render.obj \
    $(OBJDIR)\facet.obj \
    $(OBJDIR)\zoom-opt.obj \
    $(OBJDIR)\zoom-socket.obj \
