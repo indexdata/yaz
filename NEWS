@@ -1,3 +1,7 @@
+--- 4.1.1 2010/10/05
+
+Fix yaz-config output: echo_source not set correctly by configure.
+
 --- 4.1.0 2010/10/05
 
 SOLR WebService support for yaz-client and ZOOM.
