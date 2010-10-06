@@ -884,6 +884,49 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
    </sect2>
   </sect1>
+  <sect1 id="zoom.facets"><title>Facets</title>
+   <para>
+    In case the target can and is requested to return facets, using a result set the ZOOM client 
+    can request one or all facet fields. Using a facet field the client can request the term count and 
+    then interate over the terms.
+   </para>
+   <synopsis>
+    ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
+    const char ** ZOOM_resultset_facets_names(ZOOM_resultset r);
+    ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *facet_name);
+    ZOOM_facet_field ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int pos);
+    size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
+
+    const char *ZOOM_facet_field_name(ZOOM_facet_field facet_field);
+    size_t ZOOM_facet_field_term_count(ZOOM_facet_field facet_field);
+    const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field, size_t idx, int *freq);
+   </synopsis>
+   <para>
+    References to temporary structures are returned by all functions. They are only valid as long the Result set is valid.  
+    <function>ZOOM_resultset_get_facet_field</function> or
+    <function>ZOOM_resultset_get_facet_field_by_index</function>.
+    <function>ZOOM_resultset_facets</function>.
+    <function>ZOOM_resultset_facets_names</function>.
+    <function>ZOOM_facet_field_name</function>.
+    <function>ZOOM_facet_field_get_term</function>.
+    </para>
+   <para id="zoom.resultset.get_facet_field">
+    A single Facet field  is returned by function
+    <function>ZOOM_resultset_get_facet_field</function> or <function>ZOOM_resultset_get_facet_field_by_index</function> that takes a 
+    result set and facet name or positive index respectively. First facet has position zero.
+    If no facet could be obtained (invalid name or index out of bounds) <literal>NULL</literal> is returned.
+   </para>
+   <para id="zoom.resultset.facets">
+    An array of facets field can be returned by <function>ZOOM_resultset_facets</function>. The length of the array is 
+    given by <function>ZOOM_resultset_facets_size</function>. The array is zero-based and last entry will be at 
+    <function>ZOOM_resultset_facets_size(result_set)</function>-1. 
+   </para>
+   <para id="zoom.resultset.facets_names">
+    It is possible to interate over facets by name, by calling <function>ZOOM_resultset_facets_names</function>. 
+    This will return an const array of char * where each string can be used as parameter for 
+    <function>ZOOM_resultset_get_facet_field</function>. 
+   </para>
+   </sect1>
   <sect1 id="zoom.scan"><title>Scan</title>
    <para>
     This section describes an interface for Scan. Scan is not an
