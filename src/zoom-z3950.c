@@ -663,10 +663,10 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
         if (facet_list) {
             Z_OtherInformation **oi;
             yaz_oi_APDU(apdu, &oi);
-            if (facet_list) {
-                yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
-            }
+            yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
+        else
+            yaz_log(YLOG_WARN, "Unable to parse facets: ", facets);
     }
 
     assert(r);
