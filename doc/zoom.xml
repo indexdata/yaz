@@ -926,6 +926,15 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     This will return an const array of char * where each string can be used as parameter for 
     <function>ZOOM_resultset_get_facet_field</function>. 
    </para>
+   <para>
+   Function <function>ZOOM_facet_field_name</function> gets the request facet name from a returned facet field. 
+   </para>
+   <para>
+   Function <function>ZOOM_facet_field_get_term</function> returns the idx'th term and term count for a facet field. 
+   Idx must between 0 and <function>ZOOM_facet_field_term_count</function>-1, otherwise the returned reference will be 
+   <literal>NULL</literal>. On a valid idx, the value of the freq reference will be the term count. 
+   The *freq parameter must be valid pointer to integer.   
+   </para>
    </sect1>
   <sect1 id="zoom.scan"><title>Scan</title>
    <para>
