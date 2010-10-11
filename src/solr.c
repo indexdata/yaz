@@ -18,11 +18,11 @@
 
 #include "sru-p.h"
 
+#define SOLR_MAX_PARAMETERS  100
+
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-
-#define SOLR_MAX_PARAMETERS  100
 
 const char *xml_node_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
 
