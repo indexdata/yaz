@@ -18,8 +18,8 @@
 ;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\Microsoft.VC80.CRT.manifest"
 
 ; 4: VS 2008
-!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvc*90.dll"
-!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
+;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvc*90.dll"
+;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
 
 
 !include "MUI.nsh"
@@ -104,12 +104,7 @@ Noservice:
 	SetOutPath $INSTDIR\bin
 	File "${VS_RUNTIME_DLL}"
 	File "${VS_RUNTIME_MANIFEST}"
-	File ..\bin\iconv.dll
-	File ..\bin\zlib1.dll
-	File ..\bin\libxml2.dll
-	File ..\bin\libxslt.dll
-	File ..\bin\icu*.dll
-	File ..\bin\yaz*.dll
+	File ..\bin\*.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
@@ -134,12 +129,12 @@ SectionEnd
 Section "YAZ Documentation" YAZ_Documentation
 	SectionIn 1 2
 	SetOutPath $INSTDIR\doc
-	File /r ..\doc\*.css
-	File /r ..\doc\*.ent
-	File /r ..\doc\*.html
+	File /nonfatal /r ..\doc\*.css
+	File /nonfatal /r ..\doc\*.ent
+	File /nonfatal /r ..\doc\*.html
 	File /r ..\doc\*.xml
 	File /r ..\doc\*.png
-	File /r ..\doc\*.xsl
+	File /nonfatal /r ..\doc\*.xsl
 	SetOutPath $SMPROGRAMS\YAZ
 	CreateShortCut "$SMPROGRAMS\YAZ\HTML Documentation.lnk" \
                  "$INSTDIR\doc\index.html"
