@@ -480,6 +480,7 @@ MISC_OBJS= \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
    $(OBJDIR)\solr.obj \
+   $(OBJDIR)\solrtransform.obj \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
@@ -503,6 +504,7 @@ MISC_OBJS= \
    $(OBJDIR)\cqlutil.obj \
    $(OBJDIR)\cqlstrer.obj \
    $(OBJDIR)\rpn2cql.obj \
+   $(OBJDIR)\rpn2solr.obj \
    $(OBJDIR)\xcqlutil.obj \
    $(OBJDIR)\elementset.obj \
    $(OBJDIR)\timing.obj \
