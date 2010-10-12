@@ -666,7 +666,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
             yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
         else
-            yaz_log(YLOG_WARN, "Unable to parse facets: ", facets);
+            yaz_log(YLOG_WARN, "Unable to parse facets: %s", facets);
     }
 
     assert(r);
