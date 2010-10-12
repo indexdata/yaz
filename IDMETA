@@ -1,2 +1,2 @@
 DEBIAN_DIST="squeeze lenny"
-UBUNTU_DIST="lucid karmic"
+UBUNTU_DIST="maverick lucid karmic"
