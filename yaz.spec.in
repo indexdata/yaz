@@ -2,7 +2,7 @@ Summary: Z39.50 Programs
 Name: yaz
 Version: @VERSION@
 Release: 1
-Requires: libxslt gnutls readline libyaz4 = %{version}
+Requires: libxslt, gnutls, readline, libyaz4 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 # Fedora requires tcp_wrappers-devel .
 %define TCPWRAPPER tcp_wrappers
 %endif
-BuildRequires: pkgconfig libxml2-devel libxslt-devel gnutls-devel readline-devel libicu-devel %{TCPWRAPPER}
+BuildRequires: pkgconfig, libxml2-devel, libxslt-devel, gnutls-devel, readline-devel, libicu-devel, %{TCPWRAPPER}
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
@@ -24,7 +24,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz4
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt gnutls libicu
+Requires: libxslt, gnutls, libicu
 
 %description -n libyaz4
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
@@ -36,7 +36,7 @@ Retrieval.
 %package -n libyaz4-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz4 = %{version} libxml2-devel libxslt-devel libicu-devel
+Requires: libyaz4 = %{version}, libxml2-devel, libxslt-devel, libicu-devel
 Conflicts: libyaz-devel
 
 %description -n libyaz4-devel
@@ -45,7 +45,7 @@ Development libraries and includes for the libyaz package.
 %package -n yaz-illclient
 Summary: ILL client
 Group: Applications/Communication
-Requires: readline libyaz4 = %{version}
+Requires: readline, libyaz4 = %{version}
 
 %description -n yaz-illclient
 yaz-illclient: an ISO ILL client.
