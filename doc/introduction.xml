@@ -2,7 +2,7 @@
 
   <para>
    &yaz; is a C/C++ library for information retrieval applications
-   using the Z39.50/SRU protocols for information retrieval.
+   using the Z39.50/SRU/SOLR protocols for information retrieval.
   </para>
   
   <para>
@@ -25,7 +25,7 @@
      </para></listitem>
     <listitem><para>
       Supports 
-      <ulink url="&url.solr;">SOLR</ulink> Web Service (client side only)
+      <ulink url="&url.solr;">SOLR</ulink> Web Service version 1.4.x (client side only)
      </para></listitem>
     <listitem><para>
       Supports the following transports: BER over TCP/IP
