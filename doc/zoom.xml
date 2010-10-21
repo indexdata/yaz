@@ -43,8 +43,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     connection can be forced to use SRU rather the SRW (the default) by
     prefixing the target string with <literal>sru=get,</literal>, like this:
     <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
-   </para>
-  
+  </para>
+  <para>
+    <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to YAZ in version 4.1.0, 
+    as a dialect of a SRU protocol, since both are HTTP based protocols. 
+  </para>
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
    and more apparent over time. So when the first &zoom; specification
@@ -115,7 +118,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
-    The scheme <literal>http</literal> selects SRU over HTTP.
+    The scheme <literal>http</literal> selects SRU/get over HTTP by default, 
+    but can overridded to use SRU/post, SRW and the SOLR protocol. 
    </para>
    <para>
     You can prefix the scheme-qualified host-string with one or more
@@ -274,12 +278,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	discover whether the server claims to support the specified
 	operations.
        </entry><entry>none</entry></row>
-      <row><entry>
-        sru</entry><entry>
-	SRU transport type. Must be either <literal>soap</literal>,
+      <row>
+	<entry>sru</entry><entry>
+	SRU/SOLR transport type. Must be either <literal>soap</literal>,
 	<literal>get</literal>, <literal>post</literal>, or
 	<literal>solr</literal>.
-       </entry><entry>soap</entry></row>
+        </entry><entry>soap</entry></row>
       <row><entry>
         sru_version</entry><entry>
 	SRU/SRW version. Should be <literal>1.1</literal>, or
@@ -362,14 +366,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
     </sect2>
    <sect2 id="zoom.sru.init.behavior">
-    <title>SRU Protocol behavior</title>
+    <title>SRU/SOLR Protocol behavior</title>
     <para>
-     The SRU protocol doesn't feature an Inititialize Request, so
+     The HTTP based protocols (SRU, SRW, SOLR) doesn't feature an Inititialize Request, so
      the connection phase merely establishes a TCP/IP connection
      with the SOAP service.
     </para>
     <para>Most of the ZOOM connection options do not
-     affect SRU and they are ignored. However, future versions
+     affect SRU/SOLR and they are ignored. However, future versions
      of &yaz; might honor <literal>implementationName</literal> and
      put that as part of User-Agent header for HTTP requests.
      </para>
@@ -667,7 +671,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      SRU SearchRetrieveRequest.
     </para>
     <para>
-     Unfortunately, SRU does not define a database setting. Hence,
+     SOLR queries has to be done in SOLR query format.
+    </para>
+    <para>
+     Unfortunately, SRU or SOLR does not define a database setting. Hence,
      <literal>databaseName</literal> is unsupported and ignored.
      However, the path part in host parameter for functions 
      <function>ZOOM_connecton_new</function> and
@@ -809,7 +816,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </varlistentry>
      <varlistentry><term><literal>xml</literal></term>
       <listitem><para>The record is returned in XML if possible.
-	SRU and Z39.50 records with transfer syntax XML are
+	SRU, SOLR and Z39.50 records with transfer syntax XML are
 	returned verbatim. MARC records are returned in
 	<ulink url="&url.marcxml;">
 	 MARCXML
@@ -876,9 +883,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
    </sect2>
    <sect2 id="zoom.sru.record.behavior">
-    <title>SRU Protocol behavior</title>
+    <title>SRU/SOLR Protocol behavior</title>
     <para>
-     The ZOOM driver for SRU treats records returned by a SRU server
+     The ZOOM driver for SRU/SOLR treats records returned by a SRU/SOLR server
      as if they where Z39.50 records with transfer syntax XML and
      no element set name or database name.
     </para>
@@ -886,6 +893,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
   </sect1>
   <sect1 id="zoom.facets"><title>Facets</title>
    <para>
+    Facets operations is not part of the official ZOOM specification, but is an Index Data extension 
+    for YAZ-based Z39.50 targets or <ulink url="&url.solr;">SOLR</ulink> targets. 
     In case the target can and is requested to return facets, using a result set the ZOOM client 
     can request one or all facet fields. Using a facet field the client can request the term count and 
     then interate over the terms.
@@ -945,7 +954,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
 
    <para>
-    The Scan interface is supported for both Z39.50 and SRU.
+    The Scan interface is supported for both Z39.50, SRU (and SOLR?).
    </para>
 
    <synopsis>
