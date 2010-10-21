@@ -31,7 +31,7 @@
    YAZ is a C/C++ programmer's toolkit supporting the development
    of Z39.50v3 clients and servers. The YAZ toolkit offers
    several different levels of access to the ISO23950/Z39.50, SRU
-   and ILL protocols. The level that you need to use depends
+   SOLR and ILL protocols. The level that you need to use depends
    on your requirements, and the role (server of client) that you want
    to implement.
   </para>
