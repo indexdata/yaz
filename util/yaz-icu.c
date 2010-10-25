@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 #else /* YAZ_HAVE_ICU */
 
     printf("ICU not available on your system.\n"
-           "Please install libicu36-dev and icu-doc or similar, "
+           "Please install libicu-dev and icu-doc or similar, "
            "re-configure and re-compile\n");
 
 
