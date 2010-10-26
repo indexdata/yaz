@@ -78,7 +78,8 @@ esac
 if $enable_configure; then
     if [ -n "$sh_cflags" ]; then
 	if $has_libtool; then
-	    CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure --disable-shared --enable-static $*
+	    CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure \
+		--disable-shared --enable-static --with-pic $*
         else
 	    CFLAGS="$sh_cflags" CXXFLAGS="$sh_cxxflags" ./configure $*
         fi
