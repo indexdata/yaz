@@ -1,3 +1,12 @@
+tcp comstack: change behavior for @-specs (anyaddr). @ listens on
+AF_INET (IPV4) peers, and @6 listens to AF_INET6 (ipv6) peers.
+Previously @ listened on AF_INET6 which accepted both IPV4 and IPV6
+peers on some Linux systems. However, in general that does not work
+so YAZ can not rely on that to work. Debian changed behavior in this
+respect from Debian lenny to Debian squeeze (still testing as of Oct
+2010). Refer to:
+http://www.mail-archive.com/debian-devel@lists.debian.org/msg277726.html
+
 --- 4.1.1 2010/10/05
 
 Fix yaz-config output: echo_source not set correctly by configure.

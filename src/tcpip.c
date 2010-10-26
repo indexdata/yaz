@@ -363,6 +363,13 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port)
     if (!strcmp("@", host))
     {
         hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_INET;
+        error = getaddrinfo(0, port, &hints, &res);
+    }
+    else if (!strcmp("@6", host))
+    {
+        hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_INET6;
         error = getaddrinfo(0, port, &hints, &res);
     }
     else
@@ -434,25 +441,11 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     if (sp->ai && h->state == CS_ST_UNBND)
     {
         int s = -1;
-        /* try to make IPV6 socket first */
         for (ai = sp->ai; ai; ai = ai->ai_next)
         {
-            if (ai->ai_family == AF_INET6)
-            {
-                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-                if (s != -1)
-                    break;
-            }
-        }
-        if (s == -1)
-        {
-            /* no IPV6 could be made.. Try them all */
-            for (ai = sp->ai; ai; ai = ai->ai_next)
-            {
-                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-                if (s != -1)
-                    break;
-            }
+            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+            if (s != -1)
+                break;
         }
         if (s == -1)
             return 0;
