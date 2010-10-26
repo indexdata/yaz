@@ -1,7 +1,7 @@
 dnl This file is part of the YAZ toolkit.
 dnl Copyright (C) 1995-2010 Index Data
 AC_PREREQ([2.60])
-AC_INIT([yaz],[4.0.13],[yaz-help@indexdata.dk])
+AC_INIT([yaz],[4.1.1],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9])
@@ -387,12 +387,6 @@ elif test "$enable_memdebug" = "no"; then
     AC_DEFINE([TRACE_XMALLOC],[0])
 fi
 dnl
-dnl ------ Using this for "in-source" yaz-config
-AC_SUBST([YAZ_SRC_ROOT])
-AC_SUBST([YAZ_BUILD_ROOT])
-YAZ_SRC_ROOT=`cd ${srcdir}; pwd`
-YAZ_BUILD_ROOT=`pwd`
-dnl
 dnl ------ versioning
 dnl
 WIN_FILEVERSION=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { m = $4; printf("%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4);}'`
@@ -430,7 +424,7 @@ Doxyfile
 win/version.nsi
 include/yaz/yaz-version.h
 ],[
-	sed s%yaz_echo_source=yes%yaz_echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
+	sed s%echo_source=yes%echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
     ]
 )
 

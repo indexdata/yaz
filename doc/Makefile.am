@@ -13,7 +13,7 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
 HTMLFILES = index.html
 
 MANFILES=yaz-client.1 yaz-ztest.8 \
-	yaz-config.8 yaz.7 zoomsh.1 yaz-asncomp.1 \
+	yaz-config.1 yaz.7 zoomsh.1 yaz-asncomp.1 \
 	yaz-marcdump.1 yaz-iconv.1 yaz-log.7 \
 	yaz-illclient.1 yaz-icu.1 bib1-attr.7 \
 	yaz-json-parse.1
@@ -40,7 +40,7 @@ yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
 yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-ztest-man.xml
 
-yaz-config.8: yaz-config-man.xml
+yaz-config.1: yaz-config-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-config-man.xml
 
 yaz.7: yaz-man.xml

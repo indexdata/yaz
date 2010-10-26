@@ -7,6 +7,7 @@
 #include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <yaz/options.h>
 #include <yaz/record_conv.h>
 
@@ -30,6 +31,7 @@ int main (int argc, char **argv)
         case 'V':
             break;
         case 0:
+#if YAZ_HAVE_XML2
             if (!p)
             {
                 xmlDocPtr doc = xmlParseFile(arg);
@@ -92,11 +94,19 @@ int main (int argc, char **argv)
                 fclose(f);
             }
             break;
+#else
+            fprintf(stderr, "%s: YAZ not compiled with Libxml2 support\n",
+                prog);
+            usage();
+            break;
+#endif
         default:
             usage();
         }
-    }   
+    }
+#if YAZ_HAVE_XML2
     yaz_record_conv_destroy(p);
+#endif
     if (no_errors)
         exit(1);
     exit(0);

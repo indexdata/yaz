@@ -1,5 +1,5 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
- "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
      %local;
@@ -12,11 +12,13 @@
  <refentryinfo>
   <productname>YAZ</productname>
   <productnumber>&version;</productnumber>
+  <info><orgname>Index Data</orgname></info>
  </refentryinfo>
  
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
   <manvolnum>7</manvolnum>
+  <refmiscinfo class="manual">Conventions and miscellaneous</refmiscinfo>
  </refmeta>
  
  <refnamediv>
@@ -29,8 +31,8 @@
    YAZ is a C/C++ programmer's toolkit supporting the development
    of Z39.50v3 clients and servers. The YAZ toolkit offers
    several different levels of access to the ISO23950/Z39.50, SRU
-   and ILL protocols. The level that you need to use depends
-   on your requirements, and the role (server of client) that you want
+   SOLR (client only) and ILL protocols. The level that you need to use depends
+   on your requirements, and the role (server or client) that you want
    to implement.
   </para>
  </refsect1>

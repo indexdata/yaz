@@ -161,25 +161,25 @@ static void print_icu_converters(const struct config_t *p_config)
 
 static void print_icu_transliterators(const struct config_t *p_config)
 {
-    int32_t buf_cap = 128;
-    char buf[128];
-    int32_t i;
-    int32_t count = utrans_countAvailableIDs();
-    
+    UErrorCode status;
+    UEnumeration *en = utrans_openIDs(&status);
+    int32_t count = uenum_count(en, &status);
+    const char *name;
+    int32_t length;
+
     if (p_config->xmloutput)
         fprintf(config.outfile, "<transliterators count=\"%d\">\n",  count);
     else 
         fprintf(config.outfile, "Available ICU transliterators: %d\n", count);
-    
-    for(i = 0; i <count; i++)
+
+    while ((name = uenum_next(en, &length, &status)))
     {
-        utrans_getAvailableID(i, buf, buf_cap);
         if (p_config->xmloutput)
-            fprintf(config.outfile, "<transliterator id=\"%s\"/>\n", buf);
+            fprintf(config.outfile, "<transliterator id=\"%s\"/>\n", name);
         else
-            fprintf(config.outfile, " %s", buf);
+            fprintf(config.outfile, " %s", name);
     }
-    
+    uenum_close(en);
     if (p_config->xmloutput)
     {
         fprintf(config.outfile, "</transliterators>\n");
@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 #else /* YAZ_HAVE_ICU */
 
     printf("ICU not available on your system.\n"
-           "Please install libicu36-dev and icu-doc or similar, "
+           "Please install libicu-dev and icu-doc or similar, "
            "re-configure and re-compile\n");
 
 

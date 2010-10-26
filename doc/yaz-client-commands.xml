@@ -186,11 +186,13 @@
    <literal>sru</literal> <replaceable>method</replaceable> <replaceable>version</replaceable>
   </term>
   <listitem>
-   <para>Selects SRU method and version.
+   <para>Selects Web Service method and version.
     Must be one of <literal>POST</literal>,
-    <literal>GET</literal>, <literal>SOAP</literal> (default). Version
-    should be either 1.1 or 1.2. Other versions are allowed - for testing
-    purposes (version negotiation with SRU server).
+    <literal>GET</literal>, <literal>SOAP</literal> (default)
+    or <literal>SOLR</literal>. Version
+    should be either 1.1 or 1.2 for SRU. Other versions are allowed - for testing
+    purposes (version negotiation with SRU server). 
+    The version is currently not used for SOLR Web Services
    </para>
   </listitem>
  </varlistentry>
@@ -213,7 +215,7 @@
     See the
     <ulink
      url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
-     Z39.50 standard
+     Z39.50 standard on set bounds
     </ulink>
     for more details.
    </para>
@@ -229,7 +231,7 @@
     See the
     <ulink
      url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
-     Z39.50 standard
+     Z39.50 standard on set bounds
     </ulink> for more details.
    </para>
   </listitem>
@@ -245,7 +247,7 @@
     See the
     <ulink
      url="http://www.loc.gov/z3950/agency/markup/04.html#3.2.2.1.6">
-     Z39.50 standard
+     Z39.50 standard on set bounds
     </ulink>
     for more details.
    </para>
@@ -285,10 +287,10 @@
     are registered. See
     <ulink
      url="http://www.loc.gov/z3950/agency/defns/oids.html#5">
-     Z39.50 Standard
+     Z39.50 Record Syntax Identifiers
     </ulink>
     for more details. Commonly used records syntaxes include usmarc,
-    sutrs, grs1 and xml.
+    sutrs and xml.
    </para>
   </listitem>
  </varlistentry>

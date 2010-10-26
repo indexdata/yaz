@@ -178,7 +178,6 @@ ZOOM_task ZOOM_connection_insert_task(ZOOM_connection c, int which)
 
     task->running = 0;
     task->which = which;
-    clear_error(c);
     return task;
 }
 

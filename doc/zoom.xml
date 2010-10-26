@@ -29,22 +29,25 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    programming language or toolkit.
   </para>
 
-  <note>
-   <para>
-    A recent addition to &yaz; is SRU support. You can now make
-    SRU ZOOM connections by specifying scheme <literal>http://</literal>
-    for the hostname for a connection.  The dialect of SRU used is
-    specified by the value of the connection's <literal>sru</literal>
-    option, which may be SRU over HTTP GET (<literal>get</literal>),
-    SRU over HTTP POST (<literal>post</literal>) or SRW (SRU over
-    SOAP) (<literal>soap</literal>).  Using the facility for embedding
-    options in target strings, a connection can be forced to use SRU
-    rather the SRW (the default) by prefixing the target string with
-    <literal>sru=get,</literal>, like this:
+  <para>
+    From YAZ version 2.1.12, <ulink url="&url.sru;">SRU</ulink> is supported.
+    You can make SRU ZOOM connections by specifying scheme
+    <literal>http://</literal> for the hostname for a connection.
+    The dialect of SRU used is specified by the value of the
+    connection's <literal>sru</literal> option, which may be SRU over
+    HTTP GET (<literal>get</literal>),
+    SRU over HTTP POST (<literal>post</literal>), (SRU over
+    SOAP) (<literal>soap</literal>) or <literal>SOLR</literal>
+    (<ulink url="&url.solr;">SOLR</ulink> Web Service).
+    Using the facility for embedding options in target strings, a
+    connection can be forced to use SRU rather the SRW (the default) by
+    prefixing the target string with <literal>sru=get,</literal>, like this:
     <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
-   </para>
-  </note>
-
+  </para>
+  <para>
+    <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to YAZ in version 4.1.0, 
+    as a dialect of a SRU protocol, since both are HTTP based protocols. 
+  </para>
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
    and more apparent over time. So when the first &zoom; specification
@@ -115,7 +118,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
-    The scheme <literal>http</literal> selects SRU over HTTP.
+    The scheme <literal>http</literal> selects SRU/get over HTTP by default, 
+    but can overridded to use SRU/post, SRW and the SOLR protocol. 
    </para>
    <para>
     You can prefix the scheme-qualified host-string with one or more
@@ -274,11 +278,12 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	discover whether the server claims to support the specified
 	operations.
        </entry><entry>none</entry></row>
-      <row><entry>
-        sru</entry><entry>
-	SRU transport type. Must be either <literal>soap</literal>,
-	<literal>get</literal> or <literal>post</literal>.
-       </entry><entry>soap</entry></row>
+      <row>
+	<entry>sru</entry><entry>
+	SRU/SOLR transport type. Must be either <literal>soap</literal>,
+	<literal>get</literal>, <literal>post</literal>, or
+	<literal>solr</literal>.
+        </entry><entry>soap</entry></row>
       <row><entry>
         sru_version</entry><entry>
 	SRU/SRW version. Should be <literal>1.1</literal>, or
@@ -289,9 +294,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        </entry><entry>1.2</entry></row>
       <row><entry>
         facets</entry><entry>
-	A FacetList is comma-separated list of facet, which is defined as <literal>AttributeList</literal> 
-	and a optional FacetTerm (a Term and a frequency). On request the terms is missing. 
-	On response the the list contains the terms that the target could collect. 
+	A FacetList is comma-separated list of facet, which is defined
+	as <literal>AttributeList</literal>  and a optional FacetTerm
+	(a Term and a frequency). On request the terms is missing. 
+	On response the the list contains the terms that the target
+	could collect. 
        </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
@@ -359,14 +366,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
     </sect2>
    <sect2 id="zoom.sru.init.behavior">
-    <title>SRU Protocol behavior</title>
+    <title>SRU/SOLR Protocol behavior</title>
     <para>
-     The SRU protocol doesn't feature an Inititialize Request, so
+     The HTTP based protocols (SRU, SRW, SOLR) doesn't feature an Inititialize Request, so
      the connection phase merely establishes a TCP/IP connection
      with the SOAP service.
     </para>
     <para>Most of the ZOOM connection options do not
-     affect SRU and they are ignored. However, future versions
+     affect SRU/SOLR and they are ignored. However, future versions
      of &yaz; might honor <literal>implementationName</literal> and
      put that as part of User-Agent header for HTTP requests.
      </para>
@@ -664,7 +671,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      SRU SearchRetrieveRequest.
     </para>
     <para>
-     Unfortunately, SRU does not define a database setting. Hence,
+     SOLR queries has to be done in SOLR query format.
+    </para>
+    <para>
+     Unfortunately, SRU or SOLR does not define a database setting. Hence,
      <literal>databaseName</literal> is unsupported and ignored.
      However, the path part in host parameter for functions 
      <function>ZOOM_connecton_new</function> and
@@ -806,7 +816,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </varlistentry>
      <varlistentry><term><literal>xml</literal></term>
       <listitem><para>The record is returned in XML if possible.
-	SRU and Z39.50 records with transfer syntax XML are
+	SRU, SOLR and Z39.50 records with transfer syntax XML are
 	returned verbatim. MARC records are returned in
 	<ulink url="&url.marcxml;">
 	 MARCXML
@@ -873,14 +883,68 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
    </sect2>
    <sect2 id="zoom.sru.record.behavior">
-    <title>SRU Protocol behavior</title>
+    <title>SRU/SOLR Protocol behavior</title>
     <para>
-     The ZOOM driver for SRU treats records returned by a SRU server
+     The ZOOM driver for SRU/SOLR treats records returned by a SRU/SOLR server
      as if they where Z39.50 records with transfer syntax XML and
      no element set name or database name.
     </para>
    </sect2>
   </sect1>
+  <sect1 id="zoom.facets"><title>Facets</title>
+   <para>
+    Facets operations is not part of the official ZOOM specification, but is an Index Data extension 
+    for YAZ-based Z39.50 targets or <ulink url="&url.solr;">SOLR</ulink> targets. 
+    In case the target can and is requested to return facets, using a result set the ZOOM client 
+    can request one or all facet fields. Using a facet field the client can request the term count and 
+    then interate over the terms.
+   </para>
+   <synopsis>
+    ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
+    const char ** ZOOM_resultset_facets_names(ZOOM_resultset r);
+    ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *facet_name);
+    ZOOM_facet_field ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int pos);
+    size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
+
+    const char *ZOOM_facet_field_name(ZOOM_facet_field facet_field);
+    size_t ZOOM_facet_field_term_count(ZOOM_facet_field facet_field);
+    const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field, size_t idx, int *freq);
+   </synopsis>
+   <para>
+    References to temporary structures are returned by all functions. They are only valid as long the Result set is valid.  
+    <function>ZOOM_resultset_get_facet_field</function> or
+    <function>ZOOM_resultset_get_facet_field_by_index</function>.
+    <function>ZOOM_resultset_facets</function>.
+    <function>ZOOM_resultset_facets_names</function>.
+    <function>ZOOM_facet_field_name</function>.
+    <function>ZOOM_facet_field_get_term</function>.
+    </para>
+   <para id="zoom.resultset.get_facet_field">
+    A single Facet field  is returned by function
+    <function>ZOOM_resultset_get_facet_field</function> or <function>ZOOM_resultset_get_facet_field_by_index</function> that takes a 
+    result set and facet name or positive index respectively. First facet has position zero.
+    If no facet could be obtained (invalid name or index out of bounds) <literal>NULL</literal> is returned.
+   </para>
+   <para id="zoom.resultset.facets">
+    An array of facets field can be returned by <function>ZOOM_resultset_facets</function>. The length of the array is 
+    given by <function>ZOOM_resultset_facets_size</function>. The array is zero-based and last entry will be at 
+    <function>ZOOM_resultset_facets_size(result_set)</function>-1. 
+   </para>
+   <para id="zoom.resultset.facets_names">
+    It is possible to interate over facets by name, by calling <function>ZOOM_resultset_facets_names</function>. 
+    This will return an const array of char * where each string can be used as parameter for 
+    <function>ZOOM_resultset_get_facet_field</function>. 
+   </para>
+   <para>
+   Function <function>ZOOM_facet_field_name</function> gets the request facet name from a returned facet field. 
+   </para>
+   <para>
+   Function <function>ZOOM_facet_field_get_term</function> returns the idx'th term and term count for a facet field. 
+   Idx must between 0 and <function>ZOOM_facet_field_term_count</function>-1, otherwise the returned reference will be 
+   <literal>NULL</literal>. On a valid idx, the value of the freq reference will be the term count. 
+   The *freq parameter must be valid pointer to integer.   
+   </para>
+   </sect1>
   <sect1 id="zoom.scan"><title>Scan</title>
    <para>
     This section describes an interface for Scan. Scan is not an
@@ -890,7 +954,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
 
    <para>
-    The Scan interface is supported for both Z39.50 and SRU.
+    The Scan interface is supported for both Z39.50, SRU (and SOLR?).
    </para>
 
    <synopsis>

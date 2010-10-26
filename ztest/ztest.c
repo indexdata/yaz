@@ -210,8 +210,8 @@ static void ztest_sleep(double d)
     Sleep( (DWORD) (d * 1000));
 #else
     struct timeval tv;
-    tv.tv_sec = floor(d);
-    tv.tv_usec = (d - floor(d)) * 1000000;
+    tv.tv_sec = d;
+    tv.tv_usec = (d - (long) d) * 1000000;
     select(0, 0, 0, 0, &tv);
 #endif
 }

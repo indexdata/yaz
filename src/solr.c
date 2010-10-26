@@ -18,11 +18,11 @@
 
 #include "sru-p.h"
 
+#define SOLR_MAX_PARAMETERS  100
+
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-
-#define SOLR_MAX_PARAMETERS  100
 
 const char *xml_node_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
 
@@ -127,7 +127,7 @@ static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) 
     elements = (Z_AttributeElement**) odr_malloc (o, attributes->num_attributes * sizeof(*elements));
     elements[0] = (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
     elements[0]->attributeType = odr_malloc(o, sizeof(*elements[0]->attributeType));
-    *elements[0]->attributeType = 1;
+   *elements[0]->attributeType = 1;
     elements[0]->attributeSet = odr_nullval();
     elements[0]->which = Z_AttributeValue_complex;
     elements[0]->value.complex = (Z_ComplexAttribute *) odr_malloc(o, sizeof(Z_ComplexAttribute));

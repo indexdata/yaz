@@ -66,9 +66,11 @@ int main(int argc, char **argv)
     while ((i = ZOOM_event (no, z)))
     {
         int peek = ZOOM_connection_peek_event(z[i-1]);
-        printf ("no = %d peek = %d event = %d\n", i-1,
+	int event = ZOOM_connection_last_event(z[i-1]);
+        printf ("no = %d peek = %d event = %d %s\n", i-1,
                 peek,
-                ZOOM_connection_last_event(z[i-1]));
+		event,
+		ZOOM_get_event_str(event));
     }
     
     /* no more to be done. Inspect results */

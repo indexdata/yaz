@@ -25,6 +25,22 @@
 
 #define MAX_CON 100
 
+static void process_events(ZOOM_connection *c)
+{
+    int i;
+
+    printf("process_events\n");
+    while ((i = ZOOM_event(MAX_CON, c)) != 0)
+    {
+        int peek = ZOOM_connection_peek_event(c[i-1]);
+        int event = ZOOM_connection_last_event(c[i-1]);
+        printf ("no = %d peek = %d event = %d %s\n", i-1,
+                peek,
+                event,
+                ZOOM_get_event_str(event));
+    }
+}
+
 static int next_token(const char **cpp, const char **t_start)
 {
     int len = 0;
@@ -249,8 +265,7 @@ static void cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
 
     for (i = 0; i < MAX_CON; i++)
         ZOOM_resultset_records(r[i], 0, start, count);
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
 
     for (i = 0; i < MAX_CON; i++)
     {
@@ -318,14 +333,7 @@ static void cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
     if (render_str)
         type = wrbuf_cstr(render_str);
 
-    /*
-    for (i = 0; i < MAX_CON; i++) {
-        int num_facets = ZOOM_resultset_facet_size(r[i]);
-        ZOOM_resultset_records(r[i], 0, start, count);
-    }
-    */
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
 
     for (i = 0; i < MAX_CON; i++)
     {
@@ -371,8 +379,7 @@ static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
             p[i] = 0;
     }
 
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
 
     for (i = 0; i<MAX_CON; i++)
     {
@@ -442,8 +449,7 @@ static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
     }
     ZOOM_query_destroy(s);
 
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
 
     for (i = 0; i<MAX_CON; i++)
     {
@@ -501,8 +507,8 @@ static void cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
     }
     ZOOM_query_destroy(query);
 
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
+
     for (i = 0; i<MAX_CON; i++)
     {
         int error;
@@ -545,8 +551,7 @@ static void cmd_sort(ZOOM_connection *c, ZOOM_resultset *r,
         if (r[i])
             ZOOM_resultset_sort(r[i], "yaz", sort_spec);
     }
-    while (ZOOM_event(MAX_CON, c))
-        ;
+    process_events(c);
 }
 
 static void cmd_help(ZOOM_connection *c, ZOOM_resultset *r,

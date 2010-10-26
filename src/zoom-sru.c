@@ -261,8 +261,9 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;        
 
-        if (!c->tasks->u.search.recv_search_fired)
-        {
+        /* Required not for reporting client hit count multiple times into session */
+        if (!c->tasks->u.search.recv_search_fired) {
+            yaz_log(YLOG_DEBUG, "posting ZOOM_EVENT_RECV_SEARCH");
             event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
             ZOOM_connection_put_event(c, event);
             c->tasks->u.search.recv_search_fired = 1;
@@ -391,6 +392,7 @@ static void handle_srw_scan_response(ZOOM_connection c,
 int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
                     zoom_ret *cret)
 {
+#if YAZ_HAVE_XML2
     int ret = 0;
     const char *addinfo = 0;
 
@@ -445,6 +447,9 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
             ret = -1;
     }   
     return ret;
+#else
+    return -1;
+#endif
 }
 
 /*

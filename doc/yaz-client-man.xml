@@ -1,5 +1,5 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" 
- "http://www.oasis-open.org/docbook/xml/4.1/docbookx.dtd"
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
      %local;
@@ -12,11 +12,13 @@
  <refentryinfo>
   <productname>YAZ</productname>
   <productnumber>&version;</productnumber>
+  <info><orgname>Index Data</orgname></info>
  </refentryinfo>
  
  <refmeta>
   <refentrytitle>yaz-client</refentrytitle>
   <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
  
  <refnamediv>
@@ -48,9 +50,15 @@
   
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-client</command> is a Z39.50/SRU client (origin) with a
-   simple command line interface that allows you to test behavior and
-   performance of Z39.50 targets and SRU servers.
+   <command>yaz-client</command> is a
+   <ulink url="&url.z39.50;">Z39.50</ulink>/<ulink url="&url.sru;">SRU</ulink>
+   client (origin) with a simple command line interface that allows
+   you to test behavior and performance of Z39.50 targets and SRU servers.
+  </para>
+  <para>
+   From YAZ version 4.1.0 <command>yaz-client</command> may also operate as a
+   <ulink url="&url.solr;">SOLR</ulink> Web Service
+   client.
   </para>
   <para>
    If the <replaceable>server-addr</replaceable> is specified, the client creates

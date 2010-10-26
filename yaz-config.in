@@ -2,20 +2,20 @@
 # This file is part of the YAZ toolkit.
 # Copyright (C) 1995-2008 Index Data
 
-yazprefix=@prefix@
-yaz_echo_cflags=no
-yaz_echo_libs=no
-yaz_echo_help=no
-yaz_echo_source=yes
-yaz_echo_lalibs=no
-yaz_echo_comp=no
-yaz_src_root=@YAZ_SRC_ROOT@
-yaz_build_root=@YAZ_BUILD_ROOT@
+prefix=@prefix@
+echo_cflags=no
+echo_libs=no
+echo_help=no
+echo_source=yes
+echo_lalibs=no
+echo_comp=no
+src_root=@abs_top_srcdir@
+build_root=@abs_top_builddir@
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
 LIBS="@LIBS@"
-YAZVERSION=@VERSION@
+VERSION=@VERSION@
 VERSION_SHA1=@VERSION_SHA1@
 
 usage()
@@ -44,31 +44,31 @@ while test $# -gt 0; do
     
     case $1 in
 	--prefix=*)
-	    yazprefix=$optarg
+	    prefix=$optarg
 	    ;;
 	--prefix)
-	    echo $yazprefix
+	    echo $prefix
 	    exit 0
 	    ;;
         -V)
-	    echo "$YAZVERSION $VERSION_SHA1"
+	    echo "$VERSION $VERSION_SHA1"
 	    exit 0
             ;;
 	--version)
-	    echo $YAZVERSION
+	    echo $VERSION
 	    exit 0
 	    ;;
 	--cflags)
-	    yaz_echo_cflags=yes
+	    echo_cflags=yes
 	    ;;
 	--libs)
-	    yaz_echo_libs=yes
+	    echo_libs=yes
 	    ;;
 	--lalibs)
-	    yaz_echo_lalibs=yes
+	    echo_lalibs=yes
 	    ;;
 	--comp)
-	    yaz_echo_comp=yes
+	    echo_comp=yes
 	    ;;
 	threads)
 	    lib_thread=yes
@@ -89,7 +89,7 @@ while test $# -gt 0; do
 	    lib_static=yes
 	    ;;
 	-*)
-	    yaz_echo_help=yes
+	    echo_help=yes
 	    ;;
     esac
     shift
@@ -110,47 +110,47 @@ fi
 
 YAZINC="@YAZ_CONFIG_CFLAGS@"
 
-if test "$yaz_echo_source" = "yes"; then
-    YAZBIN=${yaz_build_root}/bin
+if test "$echo_source" = "yes"; then
+    YAZBIN=${build_root}/bin
 
     if test "$lib_static" = "yes"; then
         if test "$lib_ssl" != "yes"; then
             LIBS="${SSL_LIBS} $LIBS"
         fi
-        YAZLIB="${yaz_build_root}/src/.libs/libyaz.a"
+        YAZLIB="${build_root}/src/.libs/libyaz.a"
         if test "$lib_server" = "yes"; then
-    	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_server.a $YAZLIB"
+    	    YAZLIB="${build_root}/src/.libs/libyaz_server.a $YAZLIB"
         fi
         if test "$lib_icu" = "yes"; then
-    	    YAZLIB="${yaz_build_root}/src/.libs/libyaz_icu.a $YAZLIB"
+    	    YAZLIB="${build_root}/src/.libs/libyaz_icu.a $YAZLIB"
         fi
     else
-        YAZLIB="-L${yaz_build_root}/src/.libs $YAZLIB"
+        YAZLIB="-L${build_root}/src/.libs $YAZLIB"
     fi
     YAZLIB="$YAZLIB $LIBS"
 
-    YAZLALIB="${yaz_build_root}/src/libyaz.la"
+    YAZLALIB="${build_root}/src/libyaz.la"
     if test "$lib_server" = "yes"; then
-	YAZLALIB="${yaz_build_root}/src/libyaz_server.la $YAZLALIB"
+	YAZLALIB="${build_root}/src/libyaz_server.la $YAZLALIB"
     fi
     if test "$lib_icu" = "yes"; then
-	YAZLALIB="${yaz_build_root}/src/libyaz_icu.la $YAZLALIB"
+	YAZLALIB="${build_root}/src/libyaz_icu.la $YAZLALIB"
     fi
     YAZLALIB="$YAZLALIB $LIBS"
 
-    YAZINC="-I${yaz_src_root}/include $YAZINC"
-    YAZCOMP=${yaz_src_root}/util/yaz-asncomp
+    YAZINC="-I${src_root}/include $YAZINC"
+    YAZCOMP=${src_root}/util/yaz-asncomp
 else
-    YAZBIN=${yazprefix}/bin
-    YAZCOMP=${yazprefix}/bin/yaz-asncomp
+    YAZBIN=${prefix}/bin
+    YAZCOMP=${prefix}/bin/yaz-asncomp
 
-    if test "$yazprefix" != "/usr"; then
-	YAZLIB="-L$yazprefix/lib $YAZLIB"
+    if test "$prefix" != "/usr"; then
+	YAZLIB="-L$prefix/lib $YAZLIB"
     fi
     YAZLIB="$YAZLIB $LIBS"
     YAZLALIB=$YAZLIB
-    if test "$yazprefix" != "/usr"; then
-	YAZINC="-I$yazprefix/include $YAZINC"
+    if test "$prefix" != "/usr"; then
+	YAZINC="-I$prefix/include $YAZINC"
     fi
 fi
 
@@ -164,19 +164,19 @@ if test "$lib_icu" = "yes"; then
     YAZLALIB="$YAZLALIB $ICU_LIBS"
 fi
 
-if test "$yaz_echo_help" = "yes"; then
+if test "$echo_help" = "yes"; then
     usage 1 1>&2
 fi
-if test "$yaz_echo_cflags" = "yes"; then
+if test "$echo_cflags" = "yes"; then
     echo $YAZINC
 fi
-if test "$yaz_echo_libs" = "yes"; then
+if test "$echo_libs" = "yes"; then
     echo $YAZLIB
 fi
-if test "$yaz_echo_lalibs" = "yes"; then
+if test "$echo_lalibs" = "yes"; then
     echo $YAZLALIB
 fi
-if test "$yaz_echo_comp" = "yes"; then
+if test "$echo_comp" = "yes"; then
     echo $YAZCOMP
 fi
 # Local Variables:

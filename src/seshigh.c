@@ -1907,7 +1907,7 @@ static void process_http_request(association *assoc, request *req)
             keepalive = 1;
         hres->version = "1.1";
     }
-    if (!keepalive)
+    if (!keepalive || !assoc->last_control->keepalive)
     {
         z_HTTP_header_add(o, &hres->headers, "Connection", "close");
         assoc->state = ASSOC_DEAD;

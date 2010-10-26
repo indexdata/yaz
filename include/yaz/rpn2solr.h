@@ -70,6 +70,7 @@ int solr_transform_rpn2solr_wrbuf(solr_transform_t ct,
     \param attributes RPN attributes
     \returns pattern value or NULL if not found
  */
+YAZ_EXPORT
 const char *solr_lookup_reverse(solr_transform_t ct,
                                const char *category,
                                Z_AttributeList *attributes);

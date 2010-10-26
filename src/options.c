@@ -24,14 +24,14 @@ int options (const char *desc, char **argv, int argc, char **arg)
     int ch = 0;
     
     if (arg_no >= argc)
-        return -2;
+        return YAZ_OPTIONS_EOF;
     if (arg_off == 0)
     {
         while (argv[arg_no][0] == '\0')
         {
             arg_no++;
             if (arg_no >= argc)
-                return -2;
+                return YAZ_OPTIONS_EOF;
         }
         if (argv[arg_no][0] != '-' || argv[arg_no][1] == '\0')
         {
@@ -102,7 +102,7 @@ int options (const char *desc, char **argv, int argc, char **arg)
     *arg = argv[arg_no]+arg_off-1;
     arg_no = arg_no + 1;
     arg_off = 0;
-    return -1;
+    return YAZ_OPTIONS_ERROR;
 }
 /*
  * Local variables:
