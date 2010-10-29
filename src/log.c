@@ -36,8 +36,16 @@
 static int l_level = YLOG_DEFAULT_LEVEL;
 
 enum l_file_type { use_stderr, use_none, use_file };
-static enum l_file_type yaz_file_type = use_stderr;
-static FILE *yaz_global_log_file = NULL;
+
+struct {
+    enum l_file_type type;
+    FILE *log_file;
+    char l_prefix[512];
+    char l_prefix2[512];
+    char l_fname[512];
+} yaz_log_info = {
+    use_stderr, 0, "", "", ""
+};
 
 static void (*start_hook_func)(int, const char *, void *) = NULL;
 static void *start_hook_info;
@@ -47,11 +55,6 @@ static void *end_hook_info;
 
 static void (*hook_func)(int, const char *, void *) = NULL;
 static void *hook_info;
-
-static char l_prefix[512] = "";
-static char l_prefix2[512] = "";
-static char l_fname[512] = "";
-
 
 static char l_old_default_format[] = "%H:%M:%S-%d/%m";
 static char l_new_default_format[] = "%Y%m%d-%H%M%S";
@@ -114,21 +117,21 @@ static void internal_log_init(void)
 FILE *yaz_log_file(void)
 {
     FILE *f = 0;
-    switch(yaz_file_type)
+    switch (yaz_log_info.type)
     {
         case use_stderr: f = stderr; break;
         case use_none: f = 0; break;
-        case use_file: f = yaz_global_log_file; break;
+        case use_file: f = yaz_log_info.log_file; break;
     }
     return f;
 }
 
 void yaz_log_close(void)
 {
-    if (yaz_file_type == use_file && yaz_global_log_file)
+    if (yaz_log_info.type == use_file && yaz_log_info.log_file)
     {
-        fclose(yaz_global_log_file);
-        yaz_global_log_file = 0;
+        fclose(yaz_log_info.log_file);
+        yaz_log_info.log_file = 0;
     }
 }
 
@@ -140,16 +143,16 @@ void yaz_log_init_file(const char *fname)
     if (fname)
     {
         if (*fname == '\0')
-            yaz_file_type = use_stderr; /* empty name; use stderr */
+            yaz_log_info.type = use_stderr; /* empty name; use stderr */
         else
-            yaz_file_type = use_file;
-        strncpy(l_fname, fname, sizeof(l_fname)-1);
-        l_fname[sizeof(l_fname)-1] = '\0';
+            yaz_log_info.type = use_file;
+        strncpy(yaz_log_info.l_fname, fname, sizeof(yaz_log_info.l_fname)-1);
+        yaz_log_info.l_fname[sizeof(yaz_log_info.l_fname)-1] = '\0';
     }
     else
     {
-        yaz_file_type = use_none;  /* NULL name; use no file at all */
-        l_fname[0] = '\0'; 
+        yaz_log_info.type = use_none;  /* NULL name; use no file at all */
+        yaz_log_info.l_fname[0] = '\0'; 
     }
     yaz_log_reopen();
 }
@@ -230,17 +233,19 @@ void yaz_log_init_level(int level)
 void yaz_log_init_prefix(const char *prefix)
 {
     if (prefix && *prefix)
-        yaz_snprintf(l_prefix, sizeof(l_prefix), "%s ", prefix);
+        yaz_snprintf(yaz_log_info.l_prefix,
+                     sizeof(yaz_log_info.l_prefix), "%s ", prefix);
     else
-        *l_prefix = 0;
+        *yaz_log_info.l_prefix = 0;
 }
 
 void yaz_log_init_prefix2(const char *prefix)
 {
     if (prefix && *prefix)
-        yaz_snprintf(l_prefix2, sizeof(l_prefix2), "%s ", prefix);
+        yaz_snprintf(yaz_log_info.l_prefix2,
+                     sizeof(yaz_log_info.l_prefix2), "%s ", prefix);
     else
-        *l_prefix2 = 0;
+        *yaz_log_info.l_prefix2 = 0;
 }
 
 void yaz_log_init(int level, const char *prefix, const char *fname)
@@ -283,12 +288,13 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
     char new_filename[512];
     static char cur_filename[512] = "";
 
-    if (yaz_file_type != use_file)
+    if (yaz_log_info.type != use_file)
         return;
 
-    if (*l_fname)
+    if (*yaz_log_info.l_fname)
     {
-        strftime(new_filename, sizeof(new_filename)-1, l_fname, tm);
+        strftime(new_filename, sizeof(new_filename)-1, yaz_log_info.l_fname,
+                 tm);
         if (strcmp(new_filename, cur_filename))
         {
             strcpy(cur_filename, new_filename);
@@ -296,9 +302,9 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
         }
     }
 
-    if (l_max_size > 0 && yaz_global_log_file)
+    if (l_max_size > 0 && yaz_log_info.log_file)
     {
-        long flen = ftell(yaz_global_log_file);
+        long flen = ftell(yaz_log_info.log_file);
         if (flen > l_max_size)
         {
             rotate_log(cur_filename);
@@ -315,9 +321,9 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
         if (new_file)
         {
             yaz_log_close();
-            yaz_global_log_file = new_file;
+            yaz_log_info.log_file = new_file;
             if (l_level & YLOG_FLUSH)
-                setvbuf(yaz_global_log_file, 0, _IONBF, 0);
+                setvbuf(yaz_log_info.log_file, 0, _IONBF, 0);
         }
         else
         {
@@ -424,7 +430,8 @@ static void yaz_log_to_file(int level, const char *log_message)
                 strcat(tid, " ");
         }
 
-        fprintf(file, "%s%s%s%s %s%s\n", tbuf, l_prefix, tid, flags, l_prefix2,
+        fprintf(file, "%s%s%s%s %s%s\n", tbuf, yaz_log_info.l_prefix,
+                tid, flags, yaz_log_info.l_prefix2,
                 log_message);
         if (l_level & YLOG_FLUSH)
             fflush(file);
