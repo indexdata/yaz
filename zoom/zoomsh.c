@@ -12,6 +12,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <yaz/wrbuf.h>
+#include <yaz/log.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h> 
@@ -29,12 +30,12 @@ static void process_events(ZOOM_connection *c)
 {
     int i;
 
-    printf("process_events\n");
+    yaz_log(YLOG_DEBUG, "process_events");
     while ((i = ZOOM_event(MAX_CON, c)) != 0)
     {
         int peek = ZOOM_connection_peek_event(c[i-1]);
         int event = ZOOM_connection_last_event(c[i-1]);
-        printf ("no = %d peek = %d event = %d %s\n", i-1,
+        yaz_log(YLOG_DEBUG, "no = %d peek = %d event = %d %s", i-1,
                 peek,
                 event,
                 ZOOM_get_event_str(event));
