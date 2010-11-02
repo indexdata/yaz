@@ -1,3 +1,9 @@
+--- 4.1.2 2010/11/02
+
+Move yaz-config man pages to section 1.
+
+More documentation about SOLR.
+
 tcp comstack: change behavior for @-specs (anyaddr). @ listens on
 AF_INET (IPV4) peers, and @6 listens to AF_INET6 (ipv6) peers.
 Previously @ listened on AF_INET6 which accepted both IPV4 and IPV6
@@ -6,6 +12,8 @@ so YAZ can not rely on that to work. Debian changed behavior in this
 respect from Debian lenny to Debian squeeze (still testing as of Oct
 2010). Refer to:
 http://www.mail-archive.com/debian-devel@lists.debian.org/msg277726.html
+
+zoomsh: remove "debugging" output. Was added by mistake in 4.1.0.
 
 --- 4.1.1 2010/10/05
 
