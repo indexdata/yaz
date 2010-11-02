@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <yaz/wrbuf.h>
 #include <yaz/tpath.h>
@@ -97,6 +98,34 @@ static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
     }
 }
 
+static int cmp_entry(const void *a, const void *b)
+{
+    struct res_entry *ent_a = *(struct res_entry **) a;
+    struct res_entry *ent_b = *(struct res_entry **) b;
+    return strcmp(ent_a->file, ent_b->file);
+}
+
+static void sort_them(yaz_glob_res_t res)
+{
+    size_t i;
+    struct res_entry **ent_p;
+    struct res_entry **ent = nmem_malloc(res->nmem, sizeof(*ent) * res->number_of_entries);
+    struct res_entry *ent_i = res->entries;
+    for (i = 0; i < res->number_of_entries; i++)
+    {
+        ent[i] = ent_i;
+        ent_i = ent_i->next;
+    }
+    qsort(ent, res->number_of_entries, sizeof(*ent), cmp_entry);
+    ent_p = &res->entries;
+    for (i = 0; i < res->number_of_entries; i++)
+    {
+        *ent_p = ent[i];
+        ent_p = &ent[i]->next;
+    }
+    *ent_p = 0;
+}
+
 int yaz_file_glob(const char *pattern, yaz_glob_res_t *res)
 {
     char prefix[FILENAME_MAX+1];
@@ -109,6 +138,7 @@ int yaz_file_glob(const char *pattern, yaz_glob_res_t *res)
     (*res)->entries = 0;
     (*res)->last_entry = &(*res)->entries;
     glob_r(*res, pattern, 0, prefix);
+    sort_them(*res);
     return 0;
 }
 
