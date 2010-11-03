@@ -2,11 +2,13 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file cqlutil.c
  * \brief Implements CQL tree node utilities.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>

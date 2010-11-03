@@ -6,6 +6,9 @@
  * \file yaz-ccl.c
  * \brief Implements CCL node tree to RPN converson.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

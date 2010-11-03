@@ -2,11 +2,13 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file logrpn.c
  * \brief Implements Z39.50 Query Printing
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <assert.h>

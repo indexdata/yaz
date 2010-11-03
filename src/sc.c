@@ -2,11 +2,13 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file sc.c
  * \brief Windows Service Control
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifdef WIN32
 #include <windows.h>

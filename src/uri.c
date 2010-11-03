@@ -3,9 +3,12 @@
  * See the file LICENSE for details.
  */
 /**
- * \file srwutil.c
- * \brief Implements SRW/SRU utilities.
+ * \file uri.c
+ * \brief Implements URI utilities.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <yaz/srw.h>

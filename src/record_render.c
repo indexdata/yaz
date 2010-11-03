@@ -6,6 +6,9 @@
  * \file record_render.c
  * \brief Render Z39.50 records (NamePlusRecord)
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>

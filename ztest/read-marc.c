@@ -2,10 +2,12 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /** \file
  * \brief Little toy-thing to read MARC records from a fixed array.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <ctype.h>
 #include <yaz/wrbuf.h>

@@ -9,6 +9,9 @@
  * This implements encoding and decoding of SOAP packages using
  * Libxml2.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/soap.h>
 

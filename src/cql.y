@@ -11,6 +11,9 @@
  * This is a YACC parser, but since it must be reentrant, Bison is required.
  * The original source file is cql.y.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

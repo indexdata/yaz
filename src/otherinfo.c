@@ -6,6 +6,10 @@
  * \file otherinfo.c
  * \brief Implements Z39.50 OtherInfo utilities
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
 

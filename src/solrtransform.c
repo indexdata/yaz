@@ -2,21 +2,13 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file solrtransform.c
  * \brief Implements SOLR transform (SOLR to RPN conversion).
- *
- * Evaluation order of rules:
- *
- * always
- * relation
- * structure
- * position
- * truncation
- * index
- * relationModifier
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <stdlib.h>

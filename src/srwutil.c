@@ -6,6 +6,9 @@
  * \file srwutil.c
  * \brief Implements SRW/SRU utilities.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <assert.h>

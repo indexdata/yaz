@@ -6,6 +6,9 @@
  * \file tcpip.c
  * \brief Implements TCP/IP + SSL COMSTACK.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>

@@ -2,6 +2,7 @@ dnl This file is part of the YAZ toolkit.
 dnl Copyright (C) 1995-2010 Index Data
 AC_PREREQ([2.60])
 AC_INIT([yaz],[4.1.2],[yaz-help@indexdata.dk])
+AC_CONFIG_HEADERS(include/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9])
@@ -112,7 +113,7 @@ if test "$openssl" != "no"; then
     fi
     AC_MSG_CHECKING([for SSL])
     if test "$sslver" != "no"; then
-	SSL_CFLAGS="-DHAVE_OPENSSL_SSL_H=1 $SSL_CFLAGS"
+	AC_DEFINE([HAVE_OPENSSL_SSL_H],[1],[Define to 1 if OpenSSL is present])
 	AC_MSG_RESULT([$sslver])
     else
 	SSL_CFLAGS=""
@@ -146,7 +147,7 @@ if test "$gnutls" != "no" -a "$sslver" = "no"; then
     fi
     AC_MSG_CHECKING([for GNU TLS])
     if test "$gnutlsver" != "no"; then
-	SSL_CFLAGS="-DHAVE_GNUTLS_H=1 $SSL_CFLAGS"
+	AC_DEFINE([HAVE_GNUTLS_H],[1],[Define to 1 if GNUTLS is present])
 	AC_MSG_RESULT([$gnutlsver])
     else
 	SSL_CFLAGS=""
@@ -174,13 +175,13 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
 	#include <readline/readline.h>
 	    ],[
 	    rl_attempted_completion_over = 0;
-	    ],AC_DEFINE([HAVE_READLINE_COMPLETION_OVER]))
+	    ],AC_DEFINE([HAVE_READLINE_COMPLETION_OVER],1,[Define to 1 if rl_attempted_completion_over is defined]))
     AC_TRY_LINK([
 	#include <stdio.h>
 	#include <readline/readline.h>
 	    ],[
 	    rl_completion_matches (0, 0);
-	    ],[AC_DEFINE([HAVE_READLINE_RL_COMPLETION_MATCHES])])
+	    ],[AC_DEFINE([HAVE_READLINE_RL_COMPLETION_MATCHES],1,[Define to 1 if rl_completion_matches is defined])])
     LIBS=$xLIBS
 fi
 dnl ------ iconv
@@ -198,7 +199,7 @@ if test "$with_iconv" != "no"; then
 	    ],[
 	    iconv_t t = iconv_open("", "");
 	    ],[
-	    AC_DEFINE([HAVE_ICONV_H])
+	    AC_DEFINE([HAVE_ICONV_H],1,[Define to 1 if iconv.h is present])
 	    AC_MSG_RESULT([yes])
 	    ],[
 	    LIBS="$LIBS -liconv"
@@ -207,7 +208,7 @@ if test "$with_iconv" != "no"; then
 		    ],[
 	    iconv_t t = iconv_open("", "");
 		    ],[
-	    AC_DEFINE([HAVE_ICONV_H])
+	    AC_DEFINE([HAVE_ICONV_H],1)
 	    AC_MSG_RESULT([yes])
 		    ],[
 	    LIBS="$oldLIBS"
@@ -278,8 +279,7 @@ extern int accept(int, struct sockaddr *, size_t t *);
 		])
 	])
 AC_MSG_RESULT([$ac_cv_check_socklen_t])
-AC_DEFINE_UNQUOTED([YAZ_SOCKLEN_T],[$ac_cv_check_socklen_t])
-AC_DEFINE([YAZ_USE_NEW_LOG])
+AC_DEFINE_UNQUOTED([YAZ_SOCKLEN_T],[$ac_cv_check_socklen_t],[socklen_t type])
 dnl
 dnl ------ tcpd
 AC_ARG_ENABLE([tcpd],[  --enable-tcpd[=PREFIX]  enable TCP wrapper for server if available])
@@ -307,7 +307,7 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
     else
 	TCPD_LIBS="-lwrap"
 	AC_MSG_RESULT([yes])
-	AC_DEFINE([HAVE_TCPD_H])
+	AC_DEFINE([HAVE_TCPD_H],1,[Define to 1 if tcp wrap library is present])
     fi
 fi
 AC_SUBST([TCPD_LIBS])
@@ -336,7 +336,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		LIBS=$OLIBS
 	    fi
 	    LIBS="$LIBS $PTHREAD_LIBS"
-	    CFLAGS="$CFLAGS -DYAZ_POSIX_THREADS=1"
+	    AC_DEFINE(YAZ_POSIX_THREADS,1,[Define to 1 if POSIX threads is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_POSIX_THREADS=1"
 	    ])
 fi
@@ -346,18 +346,18 @@ AC_SUBST([XML2_CFLAGS])
 
 xml_enabled=false
 YAZ_LIBXML2([
-	AC_DEFINE(YAZ_HAVE_XML2) 
+	AC_DEFINE(YAZ_HAVE_XML2,1,[Define to 1 if Libxml2 is present])
 	YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_XML2=1"
 	xml_enabled=true
     ])
 
 if test "$xml_enabled" = "true"; then
     YAZ_LIBXSLT([
-	    AC_DEFINE(YAZ_HAVE_XSLT)
+	    AC_DEFINE(YAZ_HAVE_XSLT,1,[Define to 1 if Libxslt is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_XSLT=1"
 	])
     YAZ_LIBEXSLT([
-	    AC_DEFINE(YAZ_HAVE_EXSLT)
+	    AC_DEFINE(YAZ_HAVE_EXSLT,1,[Define to 1 if EXSLT is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_EXSLT=1"
 	])
     
@@ -378,15 +378,6 @@ AC_CHECK_ICU([3.4],[
 	    AC_MSG_WARN([ICU support disabled because XML support is unavailable])
 	fi
 ])
-dnl
-dnl ------ Memory debugging
-AC_ARG_ENABLE([memdebug],[  --enable-memdebug       enable memory debugging],[enable_memdebug=$enableval],[enable_memdebug=none])
-if test "$enable_memdebug" = "yes"; then
-    AC_DEFINE([TRACE_XMALLOC],[2])
-elif test "$enable_memdebug" = "no"; then
-    AC_DEFINE([TRACE_XMALLOC],[0])
-fi
-dnl
 dnl ------ versioning
 dnl
 WIN_FILEVERSION=`echo $PACKAGE_VERSION | $AWK 'BEGIN { FS = "."; } { m = $4; printf("%d,%d,%d,%d", $1, $2, $3 == "" ? "0" : $3, $4 == "" ? "1" : $4);}'`

@@ -11,6 +11,9 @@
  * of lookahead in the handling of relational operations.. So
  * it's not really pure.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 #include <string.h>

@@ -2,7 +2,6 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file cqltransform.c
  * \brief Implements CQL transform (CQL to RPN conversion).
@@ -17,6 +16,9 @@
  * index
  * relationModifier
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <stdlib.h>
