@@ -18,7 +18,8 @@
 #include <yaz/icu_I18N.h>
 
 #include <yaz/log.h>
-
+#include <yaz/nmem.h>
+#include <yaz/nmem_xml.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -218,7 +219,9 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
                                        UErrorCode *status)
 {
     xmlNode *node = 0;
+    int no_errors = 0;
     struct icu_chain *chain = 0;
+    NMEM nmem = 0;
    
     *status = U_ZERO_ERROR;
 
@@ -239,30 +242,53 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
     if (!chain)
         return 0;
 
+    nmem = nmem_create();
     for (node = xml_node->children; node; node = node->next)
     {
-        xmlChar *xml_rule;
+        char *rule = 0;
         struct icu_chain_step *step = 0;
+        struct _xmlAttr *attr;
 
+        nmem_reset(nmem);
         if (node->type != XML_ELEMENT_NODE)
             continue;
 
-        xml_rule = xmlGetProp(node, (xmlChar *) "rule");
-
-        yaz_log(YLOG_LOG, "rule=%s", xml_rule);
-
+        for (attr = node->properties; attr; attr = attr->next)
+        {
+            if (!strcmp((const char *) attr->name, "rule"))
+            {
+                rule = nmem_text_node_cdata(attr->children, nmem);
+            }
+            else
+            {
+                yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "
+                        "element '%s'", attr->name, node->name);
+                no_errors++;
+                continue;
+            }
+        }
+        if (!rule && node->children)
+            rule = nmem_text_node_cdata(node->children, nmem);
+        
+        if (!rule || !*rule)
+        {
+            yaz_log(YLOG_WARN, "Missing rule for element '%s'", node->name);
+            no_errors++;
+            continue;
+        }
+            
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transform"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transliterate"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
@@ -271,7 +297,7 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
                     "Use transform instead", node->name);
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         }
         else if (!strcmp((const char *) node->name, "index")
                  || !strcmp((const char *) node->name, "sortkey"))
@@ -282,15 +308,20 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         else
         {
             yaz_log(YLOG_WARN, "Unknown element %s", node->name);
-            icu_chain_destroy(chain);
-            return 0;
+            no_errors++;
+            continue;
         }
-        xmlFree(xml_rule);
         if (step && U_FAILURE(*status))
         {
-            icu_chain_destroy(chain);
-            return 0;
+            no_errors++;
+            break;
         }
+    }
+    nmem_destroy(nmem);
+    if (no_errors)
+    {
+        icu_chain_destroy(chain);
+        return 0;
     }
     return chain;
 }
