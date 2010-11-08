@@ -17,6 +17,8 @@
 
 #include <yaz/icu_I18N.h>
 
+#include <yaz/stemmer.h>
+
 #include <yaz/log.h>
 
 #include <string.h>
@@ -29,11 +31,12 @@
 
 enum icu_chain_step_type {
     ICU_chain_step_type_none,
-    ICU_chain_step_type_display,   /* convert to utf8 display format */
-    ICU_chain_step_type_casemap,   /* apply utf16 charmap */
-    ICU_chain_step_type_transform, /* apply utf16 transform */
-    ICU_chain_step_type_tokenize,  /* apply utf16 tokenization */
-    ICU_chain_step_type_transliterate  /* apply utf16 tokenization */
+    ICU_chain_step_type_display,        /* convert to utf8 display format */
+    ICU_chain_step_type_casemap,        /* apply utf16 charmap */
+    ICU_chain_step_type_transform,      /* apply utf16 transform */
+    ICU_chain_step_type_tokenize,       /* apply utf16 tokenization */
+    ICU_chain_step_type_transliterate,  /* apply utf16 tokenization */
+    YAZ_chain_step_type_stemming        /* apply utf16 stemming (YAZ) */
 };
 
 struct icu_chain_step
@@ -41,9 +44,10 @@ struct icu_chain_step
     /* type and action object */
     enum icu_chain_step_type type;
     union {
-	struct icu_casemap * casemap;
-	struct icu_transform * transform;
-	struct icu_tokenizer * tokenizer;  
+        struct icu_casemap   * casemap;
+        struct icu_transform * transform;
+        struct icu_tokenizer * tokenizer;
+        yaz_stemmer_p          stemmer;
     } u;
     struct icu_chain_step * previous;
 };
@@ -105,6 +109,9 @@ static struct icu_chain_step *icu_chain_step_create(
         step->u.transform = icu_transform_create("custom", 'f',
                                                  (const char *) rule, status);
         break;
+    case YAZ_chain_step_type_stemming:
+        step->u.stemmer = yaz_stemmer_create((char *) chain->locale, (const char *) rule, status);
+        break;
     default:
         break;
     }
@@ -132,6 +139,9 @@ static void icu_chain_step_destroy(struct icu_chain_step * step)
         break;
     case ICU_chain_step_type_tokenize:
         icu_tokenizer_destroy(step->u.tokenizer);
+        break;
+    case YAZ_chain_step_type_stemming:
+        yaz_stemmer_destroy(step->u.stemmer);
         break;
     default:
         break;
@@ -161,6 +171,9 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
             break;
         case ICU_chain_step_type_tokenize:
             (*sp)->u.tokenizer = icu_tokenizer_clone(old->u.tokenizer);
+            break;
+        case YAZ_chain_step_type_stemming:
+            yaz_stemmer_clone(step->u.stemmer);
             break;
         case ICU_chain_step_type_none:
             break;
@@ -265,6 +278,9 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
+        else if (!strcmp((const char *) node->name, "stemming"))
+            step = yaz_chain_insert_step(chain, YAZ_chain_step_type_stemming,
+                                         (const uint8_t *) xml_rule, status);
         else if (!strcmp((const char *) node->name, "normalize"))
         {
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
@@ -397,6 +413,15 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
         case ICU_chain_step_type_display:
             if (dst)
                 icu_utf16_to_utf8(iter->display, dst, &iter->status);
+            break;
+        case YAZ_chain_step_type_stemming:
+            if (dst)
+            {
+                struct icu_buf_utf16 *src = dst;
+                dst = icu_buf_utf16_create(0);
+                yaz_stemmer_stem(step->u.stemmer, dst, src, &iter->status);
+                icu_buf_utf16_destroy(src);
+            }
             break;
         default:
             assert(0);
