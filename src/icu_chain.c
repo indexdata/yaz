@@ -41,11 +41,11 @@ struct icu_chain_step
     /* type and action object */
     enum icu_chain_step_type type;
     union {
-	struct icu_casemap * casemap;
-	struct icu_transform * transform;
-	struct icu_tokenizer * tokenizer;  
+	struct icu_casemap *casemap;
+	struct icu_transform *transform;
+	struct icu_tokenizer *tokenizer;  
     } u;
-    struct icu_chain_step * previous;
+    struct icu_chain_step *previous;
 };
 
 struct icu_chain
@@ -54,10 +54,10 @@ struct icu_chain
     char *locale;
     int sort;
 
-    UCollator * coll;
+    UCollator *coll;
     
     /* linked list of chain steps */
-    struct icu_chain_step * csteps;
+    struct icu_chain_step *csteps;
 };
 
 int icu_check_status(UErrorCode status)
@@ -71,11 +71,10 @@ int icu_check_status(UErrorCode status)
 }
 
 static struct icu_chain_step *icu_chain_step_create(
-    struct icu_chain * chain,  enum icu_chain_step_type type,
-    const uint8_t * rule, 
-    UErrorCode *status)
+    struct icu_chain *chain,  enum icu_chain_step_type type,
+    const uint8_t *rule, UErrorCode *status)
 {
-    struct icu_chain_step * step = 0;
+    struct icu_chain_step *step = 0;
     
     if (!chain || !type || !rule)
         return 0;
@@ -112,7 +111,7 @@ static struct icu_chain_step *icu_chain_step_create(
 }
 
 
-static void icu_chain_step_destroy(struct icu_chain_step * step)
+static void icu_chain_step_destroy(struct icu_chain_step *step)
 {
     if (!step)
         return;
@@ -173,9 +172,9 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
 }
 
 struct icu_chain *icu_chain_create(const char *locale, int sort,
-                                   UErrorCode * status)
+                                   UErrorCode *status)
 {
-    struct icu_chain * chain 
+    struct icu_chain *chain 
         = (struct icu_chain *) xmalloc(sizeof(*chain));
 
     *status = U_ZERO_ERROR;
@@ -195,7 +194,7 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
     return chain;
 }
 
-void icu_chain_destroy(struct icu_chain * chain)
+void icu_chain_destroy(struct icu_chain *chain)
 {
     if (chain)
     {
@@ -211,15 +210,15 @@ void icu_chain_destroy(struct icu_chain * chain)
 }
 
 static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain * chain, enum icu_chain_step_type type,
-    const uint8_t * rule, UErrorCode *status);
+    struct icu_chain *chain, enum icu_chain_step_type type,
+    const uint8_t *rule, UErrorCode *status);
 
-struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node, 
-                                        int sort,
-                                        UErrorCode * status)
+struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node, 
+                                       int sort,
+                                       UErrorCode *status)
 {
     xmlNode *node = 0;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
    
     *status = U_ZERO_ERROR;
 
@@ -227,8 +226,8 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         return 0;
     
     {
-        xmlChar * xml_locale = xmlGetProp((xmlNode *) xml_node, 
-                                          (xmlChar *) "locale");
+        xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node, 
+                                         (xmlChar *) "locale");
         
         if (xml_locale)
         {
@@ -243,12 +242,14 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
     for (node = xml_node->children; node; node = node->next)
     {
         xmlChar *xml_rule;
-        struct icu_chain_step * step = 0;
+        struct icu_chain_step *step = 0;
 
         if (node->type != XML_ELEMENT_NODE)
             continue;
 
         xml_rule = xmlGetProp(node, (xmlChar *) "rule");
+
+        yaz_log(YLOG_LOG, "rule=%s", xml_rule);
 
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
@@ -296,10 +297,10 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
 
 
 static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain * chain, enum icu_chain_step_type type,
-    const uint8_t * rule, UErrorCode *status)
+    struct icu_chain *chain, enum icu_chain_step_type type,
+    const uint8_t *rule, UErrorCode *status)
 {    
-    struct icu_chain_step * step = 0;
+    struct icu_chain_step *step = 0;
     if (!chain || !type || !rule)
         return 0;
 
@@ -495,7 +496,7 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
     return iter->token_count;
 }
 
-int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
+int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr, 
                           UErrorCode *status)
 {
     if (chain->iter)
@@ -505,34 +506,34 @@ int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr,
     return 1;
 }
 
-int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
+int icu_chain_next_token(struct icu_chain *chain, UErrorCode *status)
 {
     *status = U_ZERO_ERROR;
     return icu_iter_next(chain->iter);
 }
 
-int icu_chain_token_number(struct icu_chain * chain)
+int icu_chain_token_number(struct icu_chain *chain)
 {
     if (chain && chain->iter)
         return chain->iter->token_count;
     return 0;
 }
 
-const char * icu_chain_token_display(struct icu_chain * chain)
+const char *icu_chain_token_display(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_display(chain->iter);
     return 0;
 }
 
-const char * icu_chain_token_norm(struct icu_chain * chain)
+const char *icu_chain_token_norm(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_norm(chain->iter);
     return 0;
 }
 
-const char * icu_chain_token_sortkey(struct icu_chain * chain)
+const char *icu_chain_token_sortkey(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_sortkey(chain->iter);
