@@ -71,8 +71,8 @@ int icu_check_status(UErrorCode status)
     return 1;
 }
 
-static struct icu_chain_step *icu_chain_step_create(
-    struct icu_chain *chain,  enum icu_chain_step_type type,
+static struct icu_chain_step *icu_chain_insert_step(
+    struct icu_chain *chain, enum icu_chain_step_type type,
     const uint8_t *rule, UErrorCode *status)
 {
     struct icu_chain_step *step = 0;
@@ -108,6 +108,9 @@ static struct icu_chain_step *icu_chain_step_create(
     default:
         break;
     }
+    step->previous = chain->csteps;
+    chain->csteps = step;
+
     return step;
 }
 
@@ -317,25 +320,6 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         return 0;
     }
     return chain;
-}
-
-
-static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain *chain, enum icu_chain_step_type type,
-    const uint8_t *rule, UErrorCode *status)
-{    
-    struct icu_chain_step *step = 0;
-    if (!chain || !type || !rule)
-        return 0;
-
-    /* create actual chain step with this buffer */
-    step = icu_chain_step_create(chain, type, rule,
-                                 status);
-
-    step->previous = chain->csteps;
-    chain->csteps = step;
-
-    return step;
 }
 
 struct icu_iter {
