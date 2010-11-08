@@ -138,13 +138,14 @@ static void print_icu_converters(const struct config_t *p_config)
     if (p_config->xmloutput)
         fprintf(config.outfile, "<converters count=\"%d\" default=\"%s\">\n",
                 count, ucnv_getDefaultName());
-    else {    
+    else
+    {    
         fprintf(config.outfile, "Available ICU converters: %d\n", count);
         fprintf(config.outfile, "Default ICU Converter is: '%s'\n", 
                 ucnv_getDefaultName());
     }
     
-    for(i=0;i<count;i++)
+    for (i = 0; i < count; i++)
     {
         if (p_config->xmloutput)
             fprintf(config.outfile, "<converter id=\"%s\"/>\n", 
@@ -181,9 +182,7 @@ static void print_icu_transliterators(const struct config_t *p_config)
     }
     uenum_close(en);
     if (p_config->xmloutput)
-    {
         fprintf(config.outfile, "</transliterators>\n");
-    }
     else
     {
         fprintf(config.outfile, "\n\nUnicode Set Patterns:\n"
@@ -287,7 +286,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
         fprintf(config.outfile, "Default locale is: %s\n",  uloc_getDefault());
     }
   
-    for(i=0;i<count;i++) 
+    for (i = 0; i < count; i++) 
     {
 
         keyword_len 
@@ -400,7 +399,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     else
         fprintf(config.outfile, "\n");
 
-    if(U_FAILURE(status))
+    if (U_FAILURE(status))
     {
         fprintf(stderr, "ICU Error: %d %s\n", status, u_errorName(status));
         exit(2);
