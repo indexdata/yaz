@@ -270,13 +270,6 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         if (!rule && node->children)
             rule = nmem_text_node_cdata(node->children, nmem);
         
-        if (!rule || !*rule)
-        {
-            yaz_log(YLOG_WARN, "Missing rule for element '%s'", node->name);
-            no_errors++;
-            continue;
-        }
-            
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
                                          (const uint8_t *) rule, status);
