@@ -77,7 +77,7 @@ libyaz_la_SOURCES=version.c options.c log.c \
   wrbuf.c oid_db.c errno.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c iconv-p.h utf8.c ucs4.c iso5428.c advancegreek.c \
-  odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c facet.c \
+  odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c facet.c stemmer.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
   ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
