@@ -34,6 +34,7 @@
 #define YAZ_STEMMER_H
 
 #include <yaz/yconfig.h>
+#include <yaz/xmltypes.h>
 #include <yaz/icu_I18N.h>
 #include <yaz/log.h>
 

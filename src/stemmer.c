@@ -1,5 +1,12 @@
 
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#if YAZ_HAVE_ICU
+
+#include <yaz/yconfig.h>
 
 #include <yaz/stemmer.h>
 
@@ -31,3 +38,4 @@ void yaz_stemmer_destroy(yaz_stemmer_p stemmer) {
 
 }
 
+#endif /* YAZ_HAVE_ICU */

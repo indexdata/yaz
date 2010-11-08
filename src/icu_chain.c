@@ -20,7 +20,8 @@
 #include <yaz/stemmer.h>
 
 #include <yaz/log.h>
-
+#include <yaz/nmem.h>
+#include <yaz/nmem_xml.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -44,12 +45,12 @@ struct icu_chain_step
     /* type and action object */
     enum icu_chain_step_type type;
     union {
-        struct icu_casemap   * casemap;
-        struct icu_transform * transform;
-        struct icu_tokenizer * tokenizer;
-        yaz_stemmer_p          stemmer;
+	struct icu_casemap   *casemap;
+	struct icu_transform *transform;
+	struct icu_tokenizer *tokenizer;  
+        yaz_stemmer_p         stemmer;
     } u;
-    struct icu_chain_step * previous;
+    struct icu_chain_step *previous;
 };
 
 struct icu_chain
@@ -58,10 +59,10 @@ struct icu_chain
     char *locale;
     int sort;
 
-    UCollator * coll;
+    UCollator *coll;
     
     /* linked list of chain steps */
-    struct icu_chain_step * csteps;
+    struct icu_chain_step *csteps;
 };
 
 int icu_check_status(UErrorCode status)
@@ -74,12 +75,11 @@ int icu_check_status(UErrorCode status)
     return 1;
 }
 
-static struct icu_chain_step *icu_chain_step_create(
-    struct icu_chain * chain,  enum icu_chain_step_type type,
-    const uint8_t * rule, 
-    UErrorCode *status)
+static struct icu_chain_step *icu_chain_insert_step(
+    struct icu_chain *chain, enum icu_chain_step_type type,
+    const uint8_t *rule, UErrorCode *status)
 {
-    struct icu_chain_step * step = 0;
+    struct icu_chain_step *step = 0;
     
     if (!chain || !type || !rule)
         return 0;
@@ -115,11 +115,14 @@ static struct icu_chain_step *icu_chain_step_create(
     default:
         break;
     }
+    step->previous = chain->csteps;
+    chain->csteps = step;
+
     return step;
 }
 
 
-static void icu_chain_step_destroy(struct icu_chain_step * step)
+static void icu_chain_step_destroy(struct icu_chain_step *step)
 {
     if (!step)
         return;
@@ -186,9 +189,9 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
 }
 
 struct icu_chain *icu_chain_create(const char *locale, int sort,
-                                   UErrorCode * status)
+                                   UErrorCode *status)
 {
-    struct icu_chain * chain 
+    struct icu_chain *chain 
         = (struct icu_chain *) xmalloc(sizeof(*chain));
 
     *status = U_ZERO_ERROR;
@@ -208,7 +211,7 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
     return chain;
 }
 
-void icu_chain_destroy(struct icu_chain * chain)
+void icu_chain_destroy(struct icu_chain *chain)
 {
     if (chain)
     {
@@ -224,15 +227,17 @@ void icu_chain_destroy(struct icu_chain * chain)
 }
 
 static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain * chain, enum icu_chain_step_type type,
-    const uint8_t * rule, UErrorCode *status);
+    struct icu_chain *chain, enum icu_chain_step_type type,
+    const uint8_t *rule, UErrorCode *status);
 
-struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node, 
-                                        int sort,
-                                        UErrorCode * status)
+struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node, 
+                                       int sort,
+                                       UErrorCode *status)
 {
     xmlNode *node = 0;
-    struct icu_chain * chain = 0;
+    int no_errors = 0;
+    struct icu_chain *chain = 0;
+    NMEM nmem = 0;
    
     *status = U_ZERO_ERROR;
 
@@ -240,8 +245,8 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         return 0;
     
     {
-        xmlChar * xml_locale = xmlGetProp((xmlNode *) xml_node, 
-                                          (xmlChar *) "locale");
+        xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node, 
+                                         (xmlChar *) "locale");
         
         if (xml_locale)
         {
@@ -253,40 +258,58 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
     if (!chain)
         return 0;
 
+    nmem = nmem_create();
     for (node = xml_node->children; node; node = node->next)
     {
-        xmlChar *xml_rule;
-        struct icu_chain_step * step = 0;
+        char *rule = 0;
+        struct icu_chain_step *step = 0;
+        struct _xmlAttr *attr;
 
+        nmem_reset(nmem);
         if (node->type != XML_ELEMENT_NODE)
             continue;
 
-        xml_rule = xmlGetProp(node, (xmlChar *) "rule");
-
+        for (attr = node->properties; attr; attr = attr->next)
+        {
+            if (!strcmp((const char *) attr->name, "rule"))
+            {
+                rule = nmem_text_node_cdata(attr->children, nmem);
+            }
+            else
+            {
+                yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "
+                        "element '%s'", attr->name, node->name);
+                no_errors++;
+                continue;
+            }
+        }
+        if (!rule && node->children)
+            rule = nmem_text_node_cdata(node->children, nmem);
+        
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transform"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transliterate"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
                                          (const uint8_t *) "", status);
         else if (!strcmp((const char *) node->name, "stemming"))
-            step = yaz_chain_insert_step(chain, YAZ_chain_step_type_stemming,
-                                         (const uint8_t *) xml_rule, status);
+            step = icu_chain_insert_step(chain, YAZ_chain_step_type_stemming,
+                                         (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "normalize"))
         {
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
                     "Use transform instead", node->name);
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
-                                         (const uint8_t *) xml_rule, status);
+                                         (const uint8_t *) rule, status);
         }
         else if (!strcmp((const char *) node->name, "index")
                  || !strcmp((const char *) node->name, "sortkey"))
@@ -297,36 +320,22 @@ struct icu_chain * icu_chain_xml_config(const xmlNode *xml_node,
         else
         {
             yaz_log(YLOG_WARN, "Unknown element %s", node->name);
-            icu_chain_destroy(chain);
-            return 0;
+            no_errors++;
+            continue;
         }
-        xmlFree(xml_rule);
         if (step && U_FAILURE(*status))
         {
-            icu_chain_destroy(chain);
-            return 0;
+            no_errors++;
+            break;
         }
     }
-    return chain;
-}
-
-
-static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain * chain, enum icu_chain_step_type type,
-    const uint8_t * rule, UErrorCode *status)
-{    
-    struct icu_chain_step * step = 0;
-    if (!chain || !type || !rule)
+    nmem_destroy(nmem);
+    if (no_errors)
+    {
+        icu_chain_destroy(chain);
         return 0;
-
-    /* create actual chain step with this buffer */
-    step = icu_chain_step_create(chain, type, rule,
-                                 status);
-
-    step->previous = chain->csteps;
-    chain->csteps = step;
-
-    return step;
+    }
+    return chain;
 }
 
 struct icu_iter {
@@ -520,7 +529,7 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
     return iter->token_count;
 }
 
-int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr, 
+int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr, 
                           UErrorCode *status)
 {
     if (chain->iter)
@@ -530,34 +539,34 @@ int icu_chain_assign_cstr(struct icu_chain * chain, const char * src8cstr,
     return 1;
 }
 
-int icu_chain_next_token(struct icu_chain * chain, UErrorCode *status)
+int icu_chain_next_token(struct icu_chain *chain, UErrorCode *status)
 {
     *status = U_ZERO_ERROR;
     return icu_iter_next(chain->iter);
 }
 
-int icu_chain_token_number(struct icu_chain * chain)
+int icu_chain_token_number(struct icu_chain *chain)
 {
     if (chain && chain->iter)
         return chain->iter->token_count;
     return 0;
 }
 
-const char * icu_chain_token_display(struct icu_chain * chain)
+const char *icu_chain_token_display(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_display(chain->iter);
     return 0;
 }
 
-const char * icu_chain_token_norm(struct icu_chain * chain)
+const char *icu_chain_token_norm(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_norm(chain->iter);
     return 0;
 }
 
-const char * icu_chain_token_sortkey(struct icu_chain * chain)
+const char *icu_chain_token_sortkey(struct icu_chain *chain)
 {
     if (chain->iter)
         return icu_iter_get_sortkey(chain->iter);

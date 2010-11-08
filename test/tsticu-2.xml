@@ -1,0 +1,8 @@
+<icu_chain locale="en">
+ <transliterate>
+$back = \` ;
+$back $back > “ ; # generate right d.q.m. (double quotation mark)
+$back > ‘ ;
+ </transliterate>
+</icu_chain>
+
