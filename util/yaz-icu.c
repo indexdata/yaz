@@ -150,7 +150,7 @@ static void print_icu_converters(const struct config_t *p_config)
             fprintf(config.outfile, "<converter id=\"%s\"/>\n", 
                     ucnv_getAvailableName(i));
         else     
-            fprintf(config.outfile, "%s ", ucnv_getAvailableName(i));
+            fprintf(config.outfile, "%s\n", ucnv_getAvailableName(i));
     }
     
     if (p_config->xmloutput)
@@ -177,7 +177,7 @@ static void print_icu_transliterators(const struct config_t *p_config)
         if (p_config->xmloutput)
             fprintf(config.outfile, "<transliterator id=\"%s\"/>\n", name);
         else
-            fprintf(config.outfile, " %s", name);
+            fprintf(config.outfile, "%s\n", name);
     }
     uenum_close(en);
     if (p_config->xmloutput)
@@ -223,10 +223,8 @@ static void print_icu_transliterators(const struct config_t *p_config)
                 "   [A-Za-z]; Lower(); Latin-Katakana; Katakana-Hiragana (transforms latin and katagana to hiragana)\n"
                 "   [[:separator:][:start punctuation:][:initial punctuation:]] Remove \n"
                 "\n"
-                "see http://icu.sourceforge.net/userguide/Transform.html\n"
-                "    http://www.unicode.org/Public/UNIDATA/UCD.html\n"
-                "    http://icu.sourceforge.net/userguide/Transform.html\n"
-                "    http://icu.sourceforge.net/userguide/TransformRule.html\n"
+                "see http://userguide.icu-project.org/transforms/general\n"
+                "    http://www.unicode.org/reports/tr44/\n"
             );
         
         
@@ -282,6 +280,11 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     {
         fprintf(config.outfile, "<locales count=\"%d\" default=\"%s\" collations=\"%d\">\n", 
                 count, uloc_getDefault(), ucol_countAvailable());
+    }
+    else
+    {
+        fprintf(config.outfile, "Available ICU locales: %d\n", count);
+        fprintf(config.outfile, "Default locale is: %s\n",  uloc_getDefault());
     }
   
     for(i=0;i<count;i++) 
@@ -390,7 +393,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
             fprintf(config.outfile, "\n");
         }
         else
-            fprintf(config.outfile, "%s ", uloc_getAvailable(i));
+            fprintf(config.outfile, "%s\n", uloc_getAvailable(i));
     }
     if (p_config->xmloutput)
         fprintf(config.outfile, "</locales>\n");
