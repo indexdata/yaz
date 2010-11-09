@@ -19,3 +19,4 @@ config.guess
 config.sub
 Default
 *~
+.settings
