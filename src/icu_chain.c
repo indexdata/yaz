@@ -176,7 +176,7 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
             (*sp)->u.tokenizer = icu_tokenizer_clone(old->u.tokenizer);
             break;
         case YAZ_chain_step_type_stemming:
-            yaz_stemmer_clone(step->u.stemmer);
+            (*sp)->u.stemmer = yaz_stemmer_clone(old->u.stemmer);
             break;
         case ICU_chain_step_type_none:
             break;
