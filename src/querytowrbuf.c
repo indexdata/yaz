@@ -2,10 +2,12 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /** \file querytowrbuf.c
     \brief Convert Z39.50 Z_Query to PQF (as WRBUF string)
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <assert.h>

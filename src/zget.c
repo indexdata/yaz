@@ -6,6 +6,9 @@
  * \file zget.c
  * \brief Implements Z39.50 package creator utilities
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>

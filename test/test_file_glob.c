@@ -33,6 +33,16 @@ void tst_with_path(const char *tpath)
     yaz_file_globfree(&glob_res);
 }
 
+static check_file(const char *got, const char *expect)
+{
+    const char *f = got;
+    size_t l_match = strlen(expect);
+    YAZ_CHECK(f && strlen(f) >= l_match);
+    if (f && strlen(f) >= l_match && !strcmp(f + strlen(f) - l_match, expect))
+        return 1;
+    return 0;
+}
+
 void tst(void)
 {
     yaz_glob_res_t glob_res;
@@ -45,20 +55,17 @@ void tst(void)
         wrbuf_puts(tpath, srcdir);
         wrbuf_puts(tpath, "/");
     }
-    wrbuf_puts(tpath, "Make*.am");
+    wrbuf_puts(tpath, "test_file*.c");
     ret = yaz_file_glob(wrbuf_cstr(tpath), &glob_res);
     YAZ_CHECK_EQ(ret, 0);
 
-    YAZ_CHECK_EQ(1, yaz_file_glob_get_num(glob_res));
-    if (yaz_file_glob_get_num(glob_res) == 1)
+    YAZ_CHECK_EQ(2, yaz_file_glob_get_num(glob_res));
+    if (yaz_file_glob_get_num(glob_res) == 2)
     {
-        const char *f = yaz_file_glob_get_file(glob_res, 0);
-        size_t l_match = strlen("Makefile.am");
-        YAZ_CHECK(f && strlen(f) >= l_match);
-        if (f && strlen(f) >= l_match)
-        {
-            YAZ_CHECK(!strcmp(f + strlen(f) - l_match, "Makefile.am"));
-        }
+        YAZ_CHECK(check_file(yaz_file_glob_get_file(glob_res, 0),
+                             "test_file_glob.c"));
+        YAZ_CHECK(check_file(yaz_file_glob_get_file(glob_res, 1),
+                             "test_filepath.c"));
     }
     wrbuf_destroy(tpath);
     yaz_file_globfree(&glob_res);

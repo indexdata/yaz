@@ -6,6 +6,9 @@
  * \file zoom-z3950.c
  * \brief Implements ZOOM Z39.50 handling
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>

@@ -6,6 +6,9 @@
  * \file unix.c
  * \brief Implements UNIX domain socket COMSTACK
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifndef WIN32
 

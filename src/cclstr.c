@@ -6,6 +6,9 @@
  * \file cclstr.c
  * \brief Implements CCL string compare utilities
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

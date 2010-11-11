@@ -2,6 +2,9 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <signal.h>
 #if HAVE_SYS_TYPES_H

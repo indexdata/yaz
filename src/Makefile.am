@@ -28,7 +28,7 @@ YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS) 
 libyaz_la_LIBADD = $(SSL_LIBS) $(TCPD_LIBS)
 libyaz_server_la_LIBADD = libyaz.la
-libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS)
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -I../libstemmer_c/include
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
 
 AM_YFLAGS=-p cql_
@@ -115,8 +115,19 @@ libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c \
-	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c
+STEMMER_SOURCES = \
+	../libstemmer_c/include/libstemmer.h \
+	../libstemmer_c/libstemmer/libstemmer.c \
+	../libstemmer_c/runtime/api.c \
+	../libstemmer_c/runtime/api.h \
+	../libstemmer_c/runtime/header.h \
+	../libstemmer_c/runtime/utilities.c \
+	../libstemmer_c/src_c/stem_UTF_8_english.c \
+	../libstemmer_c/src_c/stem_UTF_8_english.h
+
+libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
+	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c \
+	$(STEMMER_SOURCES)
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 # Rules for Z39.50 V3

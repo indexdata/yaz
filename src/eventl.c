@@ -2,7 +2,6 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file eventl.c
  * \brief Implements event loop handling for GFS.
@@ -10,6 +9,9 @@
  * This source implements the main event loop for the Generic Frontend
  * Server.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <errno.h>

@@ -6,6 +6,10 @@
  * \file zoom-opt.c
  * \brief Implements ZOOM options handling
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <assert.h>
 #include "zoom-p.h"
 

@@ -2,10 +2,12 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /** \file
  * \brief Little toy-thing to read GRS-1 records from a file.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <ctype.h>

@@ -9,6 +9,9 @@
  * This source file implements mapping between CCL error code and
  * their string equivalents.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/ccl.h>
 

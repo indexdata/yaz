@@ -6,6 +6,9 @@
  * \file srw.c
  * \brief Implements SRW/SRU package encoding and decoding
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/srw.h>
 #if YAZ_HAVE_XML2

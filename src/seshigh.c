@@ -25,6 +25,9 @@
  * minimize memory allocation/deallocation during normal operation.
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <limits.h>
 #include <stdlib.h>

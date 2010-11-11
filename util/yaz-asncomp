@@ -1092,6 +1092,11 @@ proc asnModules {} {
 	    puts $file(outc) ""
 	    puts $file(outc) "    ${greeting} ${yc_version}"
 	    puts $file(outc) "*/"
+
+	    puts $file(outc) "\#if HAVE_CONFIG_H"
+	    puts $file(outc) "\#include <config.h>"
+	    puts $file(outc) "\#endif"
+
 	    puts $file(outc) {}
 
 	    puts $file(outh) "/** \\file $inf(h-file)"

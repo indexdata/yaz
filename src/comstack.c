@@ -2,11 +2,13 @@
  * Copyright (C) 1995-2010 Index Data
  * See the file LICENSE for details.
  */
-
 /** 
  * \file comstack.c
  * \brief Implements Generic COMSTACK functions
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
 #include <ctype.h>

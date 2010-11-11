@@ -23,6 +23,7 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
  tsticu-0.xml tsticu-0.input tsticu-0.output \
  tsticu-1.xml tsticu-1.input tsticu-1.output \
+ tsticu-2.xml tsticu-2.input tsticu-2.output \
  test_record_conv.xsl test_xml_include.xml
 
 YAZCOMP = ../util/yaz-asncomp

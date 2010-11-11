@@ -9,6 +9,9 @@
  * This source file implements functions to parse and print
  * a CCL node tree (as a result of parsing).
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <string.h>
