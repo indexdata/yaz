@@ -90,6 +90,7 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
                     icu_utf16_from_utf8_cstr(dst, cstr , status);
                 }
             }
+            icu_buf_utf16_destroy(utf8_buf);
             return ;
             break;
         }
