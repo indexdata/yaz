@@ -47,7 +47,7 @@ yaz_stemmer_p yaz_stemmer_snowball_create(const char *locale, const char *rule, 
     yaz_stemmer_p yaz_stemmer;
     yaz_log(YLOG_DEBUG, "create snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
     if (stemmer == 0) {
-        *status = U_ARGUMENT_TYPE_MISMATCH;
+        *status = U_ILLEGAL_ARGUMENT_ERROR;
         yaz_log(YLOG_DEBUG, "failed to create stemmer. Creating NOP stemmer");
 
         return 0;
