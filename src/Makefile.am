@@ -118,10 +118,13 @@ libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 STEMMER_SOURCES = \
 	../libstemmer_c/include/libstemmer.h \
 	../libstemmer_c/libstemmer/libstemmer.c \
+	../libstemmer_c/libstemmer/modules.h \
 	../libstemmer_c/runtime/api.c \
 	../libstemmer_c/runtime/api.h \
 	../libstemmer_c/runtime/header.h \
 	../libstemmer_c/runtime/utilities.c \
+	../libstemmer_c/src_c/stem_UTF_8_porter.c \
+	../libstemmer_c/src_c/stem_UTF_8_porter.h \
 	../libstemmer_c/src_c/stem_UTF_8_english.c \
 	../libstemmer_c/src_c/stem_UTF_8_english.h
 
