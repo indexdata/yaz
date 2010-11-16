@@ -45,15 +45,16 @@ yaz_stemmer_p yaz_stemmer_snowball_create(const char *locale, const char *rule, 
     const char *algorithm = yaz_stemmer_lookup_algorithm(locale,rule);
     struct sb_stemmer *stemmer = sb_stemmer_new(algorithm, charenc);
     yaz_stemmer_p yaz_stemmer;
-    yaz_log(YLOG_DEBUG, "create snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
     if (stemmer == 0) {
         *status = U_ILLEGAL_ARGUMENT_ERROR;
-        yaz_log(YLOG_DEBUG, "failed to create stemmer. Creating NOP stemmer");
-
-        return 0;
+        yaz_log(YLOG_FATAL, "yaz_stemmer: Failed to create snowball stemmer from locale %srule %s. Showball: charenc %s algorithm %s ", 
+		locale, rule, charenc, algorithm);
+	return 0;
     }
+    yaz_log(YLOG_DEBUG, "created snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
     yaz_stemmer = xmalloc(sizeof(*yaz_stemmer));
     yaz_stemmer->implementation = yaz_snowball;
+      
     yaz_stemmer->locale = xstrdup(locale);
     yaz_stemmer->rule = xstrdup(rule);
     yaz_stemmer->sb_stemmer = stemmer;
@@ -70,6 +71,8 @@ yaz_stemmer_p yaz_stemmer_create(const char *locale, const char *rule, UErrorCod
 
 yaz_stemmer_p yaz_stemmer_clone(yaz_stemmer_p stemmer) {
     UErrorCode error = U_ZERO_ERROR;
+    if (stemmer == 0)
+      return 0;
     return yaz_stemmer_create(stemmer->locale, stemmer->rule, &error);
 }
 
@@ -94,22 +97,29 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
             return ;
             break;
         }
-        default: {
+    case yaz_no_operation:
+      yaz_log(YLOG_DEBUG, "Stemmer (No operation) called");
+    default: {
             // Default return the same as given.
             icu_buf_utf16_copy(dst, src);
         }
     }
 }
 
-void yaz_stemmer_destroy(yaz_stemmer_p stemmer) {
-    switch (stemmer->implementation) {
-    case yaz_snowball:
-        sb_stemmer_delete(stemmer->sb_stemmer);
-        break;
-    }
-    xfree(stemmer->locale);
-    xfree(stemmer->rule);
-    xfree(stemmer);
+void yaz_stemmer_destroy(yaz_stemmer_p stemmer) 
+{
+  /* Handle no stemmer correctly */
+  if (stemmer == 0)
+    return ;
+
+  switch (stemmer->implementation) {
+  case yaz_snowball:
+    sb_stemmer_delete(stemmer->sb_stemmer);
+    break;
+  }
+  xfree(stemmer->locale);
+  xfree(stemmer->rule);
+  xfree(stemmer);
 }
 
 #endif /* YAZ_HAVE_ICU */
