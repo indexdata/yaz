@@ -395,7 +395,6 @@ dnl ------ Makefiles
 dnl
 AC_OUTPUT([
 Makefile
-yaz.spec
 src/Makefile
 test/Makefile
 util/Makefile

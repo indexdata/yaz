@@ -1,6 +1,6 @@
 Summary: Z39.50 Programs
 Name: yaz
-Version: @VERSION@
+Version: 4.1.2
 Release: 1
 Requires: libxslt, gnutls, readline, libyaz4 = %{version}
 License: BSD
