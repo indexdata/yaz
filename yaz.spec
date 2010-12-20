@@ -8,6 +8,7 @@ Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
+Prefix: %{_prefix}
 %define TCPWRAPPER tcpd-devel
 %if "%{_vendor}" == "redhat"
 # Fedora requires tcp_wrappers-devel .
