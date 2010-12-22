@@ -3,6 +3,9 @@
 # Copyright (C) 1995-2008 Index Data
 
 prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
 echo_cflags=no
 echo_libs=no
 echo_help=no
@@ -145,12 +148,12 @@ else
     YAZCOMP=${prefix}/bin/yaz-asncomp
 
     if test "$prefix" != "/usr"; then
-	YAZLIB="-L$prefix/lib $YAZLIB"
+	YAZLIB="-L$libdir $YAZLIB"
     fi
     YAZLIB="$YAZLIB $LIBS"
     YAZLALIB=$YAZLIB
     if test "$prefix" != "/usr"; then
-	YAZINC="-I$prefix/include $YAZINC"
+	YAZINC="-I${includedir} $YAZINC"
     fi
 fi
 
