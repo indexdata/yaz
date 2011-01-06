@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2010 Index Data
+## Copyright (C) 1995-2011 Index Data
 
 YAZ_VERSION_INFO=4:0:0
 

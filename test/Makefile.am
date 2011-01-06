@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2010 Index Data
+## Copyright (C) 1995-2011 Index Data
 
 check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_odr test_ccl test_log test_mutex \

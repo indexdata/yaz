@@ -1,5 +1,5 @@
 dnl This file is part of the YAZ toolkit.
-dnl Copyright (C) 1995-2010 Index Data
+dnl Copyright (C) 1995-2011 Index Data
 AC_PREREQ([2.60])
 AC_INIT([yaz],[4.1.2],[yaz-help@indexdata.dk])
 AC_CONFIG_HEADERS(include/config.h)
