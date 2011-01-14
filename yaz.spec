@@ -1,3 +1,12 @@
+# This file is part of the YAZ toolkit
+# Copyright (C) 1995-2011 Index Data
+#
+# spec file for YAZ
+
+# determine system
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 Summary: Z39.50 Programs
 Name: yaz
 Version: 4.1.2
@@ -9,12 +18,18 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-%if "%{_vendor}" == "redhat"
-# Fedora requires tcp_wrappers-devel .
-BuildRequires: tcp_wrappers
-%else
-BuildRequires: tcpd-devel
+
+%define TCPWRAPPER tcp_wrappers
+
+%if %is_fedora
+%define TCPWRAPPER tcp_wrappers-devel
 %endif
+
+%if %is_suse
+%define TCPWRAPPER tcpd-devel
+%endif
+
+BuildRequires: %{TCPWRAPPER}
 BuildRequires: pkgconfig
 BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
