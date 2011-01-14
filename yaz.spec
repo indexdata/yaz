@@ -9,12 +9,18 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-%define TCPWRAPPER tcpd-devel
 %if "%{_vendor}" == "redhat"
 # Fedora requires tcp_wrappers-devel .
-%define TCPWRAPPER tcp_wrappers
+BuildRequires: tcp_wrappers
+%else
+BuildRequires: tcpd-devel
 %endif
-BuildRequires: pkgconfig, libxml2-devel, libxslt-devel, gnutls-devel, readline-devel, libicu-devel, %{TCPWRAPPER}
+BuildRequires: pkgconfig
+BuildRequires: libxml2-devel
+BuildRequires: libxslt-devel
+BuildRequires: gnutls-devel
+BuildRequires: readline-devel
+BuildRequires: libicu-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
