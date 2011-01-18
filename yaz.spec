@@ -6,6 +6,7 @@
 # determine system
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
+%define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 Summary: Z39.50 Programs
 Name: yaz
@@ -30,10 +31,16 @@ Prefix: %{_prefix}
 %endif
 
 BuildRequires: %{TCPWRAPPER}
+
+%if %is_suse11
+BuildRequires: libgnutls-devel
+%else
+BuildRequires: gnutls-devel
+%endif
+
 BuildRequires: pkgconfig
 BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
-BuildRequires: gnutls-devel
 BuildRequires: readline-devel
 BuildRequires: libicu-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
