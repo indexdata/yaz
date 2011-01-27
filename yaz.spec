@@ -3,15 +3,16 @@
 #
 # spec file for YAZ
 
+Name: yaz
+Summary: Z39.50 Programs
+Version: 4.1.2
+Release: 1indexdata
+
 # determine system
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-Summary: Z39.50 Programs
-Name: yaz
-Version: 4.1.2
-Release: 1
 Requires: libxslt, gnutls, readline, libyaz4 = %{version}
 License: BSD
 Group: Applications/Internet
