@@ -3,14 +3,16 @@
  * See the file LICENSE for details.
  */
 #if HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <yaz/stemmer.h>
 #include <yaz/test.h>
+
+#if YAZ_HAVE_ICU
+#include <yaz/stemmer.h>
 
 int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *expected) 
 {
@@ -36,7 +38,6 @@ int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *ex
 }
 
 
-
 static void tst(void)
 {
     UErrorCode status;
@@ -60,11 +61,14 @@ static void tst(void)
 
     yaz_stemmer_destroy(stemmer);
 }
+#endif
 
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+#if YAZ_HAVE_ICU
     tst();
+#endif
     YAZ_CHECK_TERM;
 }
 
