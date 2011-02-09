@@ -1,7 +1,7 @@
 dnl This file is part of the YAZ toolkit.
-dnl Copyright (C) 1995-2009 Index Data
+dnl Copyright (C) 1995-2011 Index Data
 AC_PREREQ([2.60])
-AC_INIT([yaz],[3.0.52],[yaz-help@indexdata.dk])
+AC_INIT([yaz],[3.0.53],[yaz-help@indexdata.dk])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9])

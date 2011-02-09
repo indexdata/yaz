@@ -1,3 +1,12 @@
+--- 3.0.53 2011/02/09
+
+clone_z_type: fix leak; occurred for enc failures.
+
+Add libyaz.la to yaz-icu's LDADD list. yaz-icu uses libyaz.la symbols - not
+only libyaz_icu.la. This should fix Debian bug:
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=556768
+A similar problem was present for yaz-ztest, IDs bugzilla #3036.
+
 --- 3.0.52 2009/12/03
 
 tcpip comstack: fix use of uinitialized variable in cs_straddr. This
