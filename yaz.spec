@@ -1,7 +1,18 @@
-Summary: Z39.50 Programs
+# This file is part of the YAZ toolkit
+# Copyright (C) 1995-2011 Index Data
+#
+# spec file for YAZ
+
 Name: yaz
-Version: 4.1.2
-Release: 1
+Summary: Z39.50 Programs
+Version: 4.1.3
+Release: 1indexdata
+
+# determine system
+%define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
+%define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
+%define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 Requires: libxslt, gnutls, readline, libyaz4 = %{version}
 License: BSD
 Group: Applications/Internet
@@ -9,12 +20,30 @@ Vendor: Index Data ApS <info@indexdata.dk>
 Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
-%define TCPWRAPPER tcpd-devel
-%if "%{_vendor}" == "redhat"
-# Fedora requires tcp_wrappers-devel .
+
 %define TCPWRAPPER tcp_wrappers
+
+%if %is_fedora
+%define TCPWRAPPER tcp_wrappers-devel
 %endif
-BuildRequires: pkgconfig, libxml2-devel, libxslt-devel, gnutls-devel, readline-devel, libicu-devel, %{TCPWRAPPER}
+
+%if %is_suse
+%define TCPWRAPPER tcpd-devel
+%endif
+
+BuildRequires: %{TCPWRAPPER}
+
+%if %is_suse11
+BuildRequires: libgnutls-devel
+%else
+BuildRequires: gnutls-devel
+%endif
+
+BuildRequires: pkgconfig
+BuildRequires: libxml2-devel
+BuildRequires: libxslt-devel
+BuildRequires: readline-devel
+BuildRequires: libicu-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 

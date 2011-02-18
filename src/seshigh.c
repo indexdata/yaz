@@ -2505,6 +2505,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         }
         if (freq.record == 0)  /* no error and no record ? */
         {
+            *pres = Z_PresentStatus_partial_4;
             *next = 0;   /* signal end-of-set and stop */
             break;
         }

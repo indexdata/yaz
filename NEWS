@@ -1,3 +1,20 @@
+--- 4.1.3 2011/01/27
+
+Update yaz.spec to operate on both SLES11 / Centos 5.5.
+
+RPM: Release includes 'indexdata' name. Use indexdata in release name so
+this package can be distinguished from other vendors.
+
+yaz-config: Use exec_prefix, libdir, includedir .  Use these variables
+as determined by configure
+
+yaz-config: set YAZ_VERSION env. php_yaz relies on it.
+
+GFS: Z_PresentStatus_partial_4 for missing record. If bend_fetch handler
+returns no error and no record, the present request is considered
+partial (only a subset of the records could be returned by backend), and
+so it is appropriate to set Present Status to partial-4.
+
 --- 4.1.2 2010/11/02
 
 Move yaz-config man pages to section 1.
