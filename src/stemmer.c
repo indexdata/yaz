@@ -27,9 +27,7 @@ struct yaz_stemmer_t
     // Required for cloning.
     char *locale;
     char *rule;
-    union {
-        struct sb_stemmer *sb_stemmer;
-    };
+    struct sb_stemmer *sb_stemmer;
 };
 
 const char* yaz_stemmer_lookup_charenc(const char *charenc, const char *rule) {
