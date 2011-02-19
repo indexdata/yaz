@@ -129,8 +129,8 @@ EOF
     if [ "`uname -s`" = FreeBSD ]; then
         cat <<EOF
 When building from a Git, you need these FreeBSD Ports:
-  autoconf259, automake19, libtool15, bison, tcl84,
-  docbook-xsl, libxml2, libxslt, g++-4.0, make
+  pkg_add -r autoconf262 automake110 libtool bison tcl84 \\
+             docbook-xsl libxml2 libxslt
 EOF
     fi
 fi
