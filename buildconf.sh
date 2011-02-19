@@ -14,11 +14,11 @@ fi
 if [ "`uname -s`" = FreeBSD ]; then
     # FreeBSD intalls the various auto* tools with version numbers
     echo "Using special configuration for FreeBSD ..."
-    automake=automake19
-    aclocal="aclocal19 -I /usr/local/share/aclocal"
-    autoconf=autoconf259
-    libtoolize=libtoolize15
-    autoheader=autoheader259
+    automake=automake
+    aclocal="aclocal -I /usr/local/share/aclocal"
+    autoconf=autoconf
+    libtoolize=libtoolize
+    autoheader=autoheader
 fi
 
 if [ "`uname -s`" = Darwin ]; then
