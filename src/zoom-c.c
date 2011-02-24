@@ -40,6 +40,7 @@ static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out);
 static void initlog(void)
 {
     static int log_level_initialized = 0;
+
     if (!log_level_initialized)
     {
         log_api0 = yaz_log_module_level("zoom");
@@ -609,6 +610,27 @@ void ZOOM_resultset_addref(ZOOM_resultset r)
     }
 }
 
+static int g_resultsets = 0;
+static YAZ_MUTEX g_resultset_mutex = 0;
+
+/* TODO We need to initialize this before running threaded:
+ * call resultset_use(0)  */
+
+static int resultset_use(int delta) {
+    int resultset_count;
+    if (g_resultset_mutex == 0)
+        yaz_mutex_create(&g_resultset_mutex);
+    yaz_mutex_enter(g_resultset_mutex);
+    g_resultsets += delta;
+    resultset_count = g_resultsets;
+    yaz_mutex_leave(g_resultset_mutex);
+    return resultset_count;
+}
+
+int resultsets_count(void) {
+    return resultset_use(0);
+}
+
 ZOOM_resultset ZOOM_resultset_create(void)
 {
     int i;
@@ -642,6 +664,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
         YAZ_SHPTR_INIT(r->record_wrbuf, w);
     }
 #endif
+    resultset_use(1);
     return r;
 }
 
@@ -831,6 +854,7 @@ static void resultset_destroy(ZOOM_resultset r)
 #if SHPTR
         YAZ_SHPTR_DEC(r->record_wrbuf, wrbuf_destroy);
 #endif
+        resultset_use(-1);
         xfree(r);
     }
     else
