@@ -19,6 +19,8 @@
 #include <libxml/tree.h>
 #include <assert.h>
 
+#include "sru-p.h"
+
 static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,
                       xmlNsPtr ns_ptr)
 {
