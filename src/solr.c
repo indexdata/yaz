@@ -49,8 +49,12 @@ static int match_xml_node_attribute(xmlNodePtr ptr, const char *node_name, const
     // check if the node name matches
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
-    attribute_value = xml_node_attribute_value_get(ptr, node_name, attribute_name);
-    if (attribute_value && !strcmp(attribute_value, value))
+    if (attribute_name) {
+        attribute_value = xml_node_attribute_value_get(ptr, node_name, attribute_name);
+        if (attribute_value && !strcmp(attribute_value, value))
+            return 1;
+    }
+    else /* No attribute to check */
         return 1;
     return 0;
 }
@@ -117,35 +121,6 @@ static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveRe
     return -1;
 }
 
-static Z_AttributeList *yaz_solr_use_atttribute_create(ODR o, const char *name) {
-    Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
-    Z_AttributeElement ** elements;
-    attributes->num_attributes = 1;
-    /* TODO check on name instead
-    if (!attributes->num_attributes) {
-        attributes->attributes = (Z_AttributeElement**)odr_nullval();
-        return attributes;
-    }
-    */
-    elements = (Z_AttributeElement**) odr_malloc (o, attributes->num_attributes * sizeof(*elements));
-    elements[0] = (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
-    elements[0]->attributeType = odr_malloc(o, sizeof(*elements[0]->attributeType));
-   *elements[0]->attributeType = 1;
-    elements[0]->attributeSet = odr_nullval();
-    elements[0]->which = Z_AttributeValue_complex;
-    elements[0]->value.complex = (Z_ComplexAttribute *) odr_malloc(o, sizeof(Z_ComplexAttribute));
-    elements[0]->value.complex->num_list = 1;
-    elements[0]->value.complex->list = (Z_StringOrNumeric **) odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
-    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *) odr_malloc(o, sizeof(Z_StringOrNumeric));
-    elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
-    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) odr_strdup(o, name);
-    elements[0]->value.complex->semanticAction = 0;
-    elements[0]->value.complex->num_semanticAction = 0;
-    attributes->attributes = elements;
-    return attributes;
-}
-
-
 static const char *get_facet_term_count(xmlNodePtr node, int *freq) {
 
     const char *term = xml_node_attribute_value_get(node, "int", "name");
@@ -178,7 +153,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
     if (pos) {
         pos[0] = 0;
     }
-    list = yaz_solr_use_atttribute_create(o, name);
+    list = yaz_use_atttribute_create(o, name);
     for (node = ptr->children; node; node = node->next) {
         num_terms++;
     }
