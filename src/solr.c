@@ -27,22 +27,6 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-const char *xml_node_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
-
-    struct _xmlAttr *attr;
-    // check if the node name matches
-    if (strcmp((const char*) ptr->name, node_name))
-        return 0;
-    // check if the attribute name and return the value
-    for (attr = ptr->properties; attr; attr = attr->next)
-        if (attr->children && attr->children->type == XML_TEXT_NODE) {
-            if (!strcmp((const char *) attr->name, attribute_name))
-                return (const char *) attr->children->content;
-        }
-    return 0;
-}
-
-
 static int match_xml_node_attribute(xmlNodePtr ptr, const char *node_name, const char *attribute_name, const char *value)
 {
     const char *attribute_value;
@@ -50,7 +34,7 @@ static int match_xml_node_attribute(xmlNodePtr ptr, const char *node_name, const
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
     if (attribute_name) {
-        attribute_value = xml_node_attribute_value_get(ptr, node_name, attribute_name);
+        attribute_value = yaz_element_attribute_value_get(ptr, node_name, attribute_name);
         if (attribute_value && !strcmp(attribute_value, value))
             return 1;
     }
@@ -123,7 +107,7 @@ static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveRe
 
 static const char *get_facet_term_count(xmlNodePtr node, int *freq) {
 
-    const char *term = xml_node_attribute_value_get(node, "int", "name");
+    const char *term = yaz_element_attribute_value_get(node, "int", "name");
     xmlNodePtr child;
     WRBUF wrbuf = wrbuf_alloc();
     if (!term)
@@ -147,7 +131,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
     int index = 0;
     xmlNodePtr node;
     // USE attribute
-    const char* name = xml_node_attribute_value_get(ptr, "lst", "name");
+    const char* name = yaz_element_attribute_value_get(ptr, "lst", "name");
     char *pos = strstr(name, "_exact");
     /* HACK */
     if (pos) {
