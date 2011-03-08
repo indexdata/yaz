@@ -1,3 +1,12 @@
+--- 4.1.5 2011/03/28
+
+SRU: add methods for handling DADS SRU-proxy facets.
+
+Separate OPAC record character set for ZOOM_record. yaz_record_render
+allows a character set given as charset=from/opacfrom,to where 'from' is
+the character set of a bibliographic record, 'opacfrom' is character set
+of OPAC record and 'to' is the target character set.
+
 --- 4.1.4 2011/02/21
 
 yaz-client: show may XML format records. Command show followed by 'format'
