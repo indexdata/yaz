@@ -419,9 +419,24 @@ void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
     \param mt handle
     \param r OPAC record
     \param wrbuf WRBUF for resulting display string
+    
+    This function uses iconv_handle of yaz_marc_t for character set
+    conversion of both OPAC + ISO2709 part.
     \*/
 YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r,
                                       WRBUF wrbuf);
+
+/** \brief Performs "pretty" display of OPAC record to WRBUF using marc_t
+    \param mt handle
+    \param r OPAC record
+    \param wrbuf WRBUF for resulting display string
+    \param cd iconv handle for OPAC content (not ISO2709 part)
+
+    This function uses iconv handle of yaz_marc_t for character set
+    conversion of ISO2709 part and supplied handle (cd) for OPAC part.
+    \*/
+YAZ_EXPORT void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r,
+                                       WRBUF wrbuf, yaz_iconv_t cd);
 
 /** \brief flushes records
     \param mt handle
