@@ -36,7 +36,51 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
     return dst;
 }
 
+Z_AttributeList *yaz_use_atttribute_create(ODR o, const char *name) {
+    Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
+    Z_AttributeElement ** elements;
+    attributes->num_attributes = 1;
+    /* TODO check on name instead
+    if (!attributes->num_attributes) {
+        attributes->attributes = (Z_AttributeElement**)odr_nullval();
+        return attributes;
+    }
+    */
+    elements = (Z_AttributeElement**) odr_malloc (o, attributes->num_attributes * sizeof(*elements));
+    elements[0] = (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
+    elements[0]->attributeType = odr_malloc(o, sizeof(*elements[0]->attributeType));
+   *elements[0]->attributeType = 1;
+    elements[0]->attributeSet = odr_nullval();
+    elements[0]->which = Z_AttributeValue_complex;
+    elements[0]->value.complex = (Z_ComplexAttribute *) odr_malloc(o, sizeof(Z_ComplexAttribute));
+    elements[0]->value.complex->num_list = 1;
+    elements[0]->value.complex->list = (Z_StringOrNumeric **) odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
+    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *) odr_malloc(o, sizeof(Z_StringOrNumeric));
+    elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
+    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) odr_strdup(o, name);
+    elements[0]->value.complex->semanticAction = 0;
+    elements[0]->value.complex->num_semanticAction = 0;
+    attributes->attributes = elements;
+    return attributes;
+}
+
 #if YAZ_HAVE_XML2
+const char *yaz_element_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
+
+    struct _xmlAttr *attr;
+    // check if the node name matches
+    if (strcmp((const char*) ptr->name, node_name))
+        return 0;
+    // check if the attribute name and return the value
+    for (attr = ptr->properties; attr; attr = attr->next)
+        if (attr->children && attr->children->type == XML_TEXT_NODE) {
+            if (!strcmp((const char *) attr->name, attribute_name))
+                return (const char *) attr->children->content;
+        }
+    return 0;
+}
+
+
 static int yaz_base64decode(const char *in, char *out)
 {
     const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -1193,6 +1237,7 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
     sprintf(path, "%s?%s", hreq->path, uri_args);
+    yaz_log(YLOG_DEBUG, "SRU HTTP Get Request %s", path);
     hreq->path = path;
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,
