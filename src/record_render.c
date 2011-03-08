@@ -20,34 +20,49 @@
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>
 
-static yaz_iconv_t iconv_create_charset(const char *record_charset)
+static yaz_iconv_t iconv_create_charset(const char *record_charset,
+                                        yaz_iconv_t *cd2)
 {
-    char to[40];
-    char from[40];
+    char charset_buf[40];
     yaz_iconv_t cd = 0;
-
-    *from = '\0';
-    strcpy(to, "UTF-8");
-    if (record_charset && *record_charset)
+    char *from_set1 = 0;
+    char *from_set2 = 0;
+    char *to_set = 0;
+    if (record_charset)
     {
-        /* Use "from,to" or just "from" */
-        const char *cp = strchr(record_charset, ',');
-        size_t clen = strlen(record_charset);
-        if (cp && cp[1])
-        {
-            strncpy( to, cp+1, sizeof(to)-1);
-            to[sizeof(to)-1] = '\0';
-            clen = cp - record_charset;
-        }
-        if (clen > sizeof(from)-1)
-            clen = sizeof(from)-1;
+        char *cp = charset_buf;
         
-        if (clen)
-            strncpy(from, record_charset, clen);
-        from[clen] = '\0';
+        strncpy(charset_buf, record_charset, sizeof(charset_buf)-1);
+        charset_buf[sizeof(charset_buf)-1] = '\0';
+        
+        from_set1 = cp;
+        while (*cp && *cp != ',' && *cp != '/')
+            cp++;
+        if (*cp == '/')
+        {
+            *cp++ = '\0'; /* terminate from_set1 */
+            from_set2 = cp;
+            while (*cp && *cp != ',')
+                cp++;
+        }
+        if (*cp == ',')
+        {
+            *cp++ = '\0';  /* terminate from_set1 or from_set2 */
+            to_set = cp;
+            while (*cp)
+                cp++;
+        }
     }
-    if (*from && *to)
-        cd = yaz_iconv_open(to, from);
+    
+    if (from_set1)
+        cd = yaz_iconv_open(to_set ? to_set : "UTF-8", from_set1);
+    if (cd2)
+    {
+        if (from_set2)
+            *cd2 = yaz_iconv_open(to_set ? to_set : "UTF-8", from_set2);
+        else
+            *cd2 = 0;
+    }
     return cd;
 }
 
@@ -57,7 +72,7 @@ static const char *return_marc_record(WRBUF wrbuf,
                                       const char *buf, int sz,
                                       const char *record_charset)
 {
-    yaz_iconv_t cd = iconv_create_charset(record_charset);
+    yaz_iconv_t cd = iconv_create_charset(record_charset, 0);
     yaz_marc_t mt = yaz_marc_create();
     const char *ret_string = 0;
 
@@ -82,18 +97,25 @@ static const char *return_opac_record(WRBUF wrbuf,
                                       Z_OPACRecord *opac_rec,
                                       const char *record_charset)
 {
-    yaz_iconv_t cd = iconv_create_charset(record_charset);
+    yaz_iconv_t cd2;
+    yaz_iconv_t cd = iconv_create_charset(record_charset, &cd2);
     yaz_marc_t mt = yaz_marc_create();
 
     if (cd)
         yaz_marc_iconv(mt, cd);
     yaz_marc_xml(mt, marc_type);
 
-    yaz_opac_decode_wrbuf(mt, opac_rec, wrbuf);
+    if (cd2)
+        yaz_opac_decode_wrbuf2(mt, opac_rec, wrbuf, cd2);
+    else
+        yaz_opac_decode_wrbuf(mt, opac_rec, wrbuf);
+        
     yaz_marc_destroy(mt);
 
     if (cd)
         yaz_iconv_close(cd);
+    if (cd2)
+        yaz_iconv_close(cd2);
     if (len)
         *len = wrbuf_len(wrbuf);
     return wrbuf_cstr(wrbuf);
@@ -104,7 +126,7 @@ static const char *return_string_record(WRBUF wrbuf,
                                         const char *buf, int sz,
                                         const char *record_charset)
 {
-    yaz_iconv_t cd = iconv_create_charset(record_charset);
+    yaz_iconv_t cd = iconv_create_charset(record_charset, 0);
 
     if (cd)
     {
