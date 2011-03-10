@@ -28,7 +28,7 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset,
     char *from_set1 = 0;
     char *from_set2 = 0;
     char *to_set = 0;
-    if (record_charset)
+    if (record_charset && *record_charset)
     {
         char *cp = charset_buf;
         
