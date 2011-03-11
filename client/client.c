@@ -148,6 +148,8 @@ static int scan_size = 20;
 static char cur_host[200];
 static Odr_int last_hit_count = 0;
 
+static int pretty_xml = 0;
+
 typedef enum {
     QueryType_Prefix,
     QueryType_CCL,
@@ -849,6 +851,31 @@ static void print_record(const char *buf, size_t len)
         printf("\n");
 }
 
+static void print_xml_record(const char *buf, size_t len)
+{
+    int has_printed = 0;
+#if YAZ_HAVE_XML2
+    if (pretty_xml)
+    {
+        xmlDocPtr doc;
+        xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
+        doc = xmlParseMemory(buf, len);
+        if (doc)
+        {
+            xmlChar *xml_mem;
+            int xml_size;
+            xmlDocDumpFormatMemory(doc, &xml_mem, &xml_size, 1);
+            fwrite(xml_mem, 1, xml_size, stdout);
+            xmlFree(xml_mem);
+            xmlFreeDoc(doc);
+            has_printed = 1;
+        }
+    }
+#endif
+    if (!has_printed)
+        fwrite(buf, 1, len, stdout);
+}
+
 static void display_record(Z_External *r)
 {
     const Odr_oid *oid = r->direct_reference;
@@ -908,7 +935,8 @@ static void display_record(Z_External *r)
             || !oid_oidcmp(oid, yaz_oid_recsyn_xml)
             || !oid_oidcmp(oid, yaz_oid_recsyn_html))
         {
-            fwrite(octet_buf, 1, octet_len, stdout);
+            print_xml_record(octet_buf, octet_len);
+
         }
         else if (yaz_oid_is_iso2709(oid))
         {
@@ -2988,21 +3016,50 @@ static int cmd_setnames(const char *arg)
 
 /* PRESENT SERVICE ----------------------------- */
 
+size_t check_token(const char *haystack, const char *token)
+{
+    size_t len = strlen(token);
+    size_t extra;
+    if (strncmp(haystack, token, len))
+        return 0;
+    for (extra = 0; haystack[extra + len] != '\0'; extra++)
+        if (!strchr(" \r\n\t", haystack[extra + len]))
+        {
+            if (extra)
+                break;
+            else
+                return 0;  /* no whitespace after token */
+        }
+    return extra + len;
+}
+
 static int parse_show_args(const char *arg_c, char *setstring,
                            Odr_int *start, Odr_int *number)
 {
     char *end_ptr;
     Odr_int start_position;
+    size_t token_len;
 
     if (setnumber >= 0)
         sprintf(setstring, "%d", setnumber);
     else
         *setstring = '\0';
+    
+    token_len = check_token(arg_c, "format");
+    if (token_len)
+    {
+        pretty_xml = 1;
+        arg_c += token_len;
+    }
+    else
+        pretty_xml = 0;
 
-    if (!strcmp(arg_c, "all"))
+    token_len = check_token(arg_c, "all");
+    if (token_len)
     {
         *number = last_hit_count;
         *start = 1;
+        return 1;
     }
     start_position = odr_strtol(arg_c, &end_ptr, 10);
     if (end_ptr == arg_c)
@@ -4285,7 +4342,7 @@ static void handle_srw_record(Z_SRW_record *rec)
     printf("\n");
     if (rec->recordData_buf && rec->recordData_len)
     {
-        printf("%.*s", rec->recordData_len, rec->recordData_buf);
+        print_xml_record(rec->recordData_buf, rec->recordData_len);
         marc_file_write(rec->recordData_buf, rec->recordData_len);
     }
     else

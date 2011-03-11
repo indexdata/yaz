@@ -10,11 +10,16 @@
 #include <config.h>
 #endif
 
+#include <stdlib.h>
+
 #include <yaz/srw.h>
+#include <yaz/wrbuf.h>
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <assert.h>
+
+#include "sru-p.h"
 
 static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,
                       xmlNsPtr ns_ptr)
@@ -442,11 +447,91 @@ static int yaz_srw_versions(ODR o, xmlNodePtr pptr,
     return 0;
 }
 
+Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node) {
+
+    int freq;
+    xmlNodePtr child;
+    WRBUF wrbuf = wrbuf_alloc();
+    const char *freq_string = yaz_element_attribute_value_get(node, "facetvalue", "est_representation");
+    Z_Term *term;
+    if (freq_string)
+        freq =  atoi(freq_string);
+    else
+        freq = -1;
+
+    for (child = node->children; child ; child = child->next) {
+        if (child->type == XML_TEXT_NODE)
+        wrbuf_puts(wrbuf, (const char *) child->content);
+    }
+    term = term_create(odr, wrbuf_cstr(wrbuf));
+    yaz_log(YLOG_DEBUG, "sru-proxy facet: %s %d", wrbuf_cstr(wrbuf), freq);
+    wrbuf_destroy(wrbuf);
+    return facet_term_create(odr, term, freq);
+};
+
+static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr) {
+    Z_AttributeList *list;
+    Z_FacetField *facet_field;
+    int num_terms = 0;
+    int index = 0;
+    xmlNodePtr node;
+    // USE attribute
+    const char* name = yaz_element_attribute_value_get(ptr, "facet", "code");
+    yaz_log(YLOG_DEBUG, "sru-proxy facet type: %s", name);
+
+    list = yaz_use_atttribute_create(odr, name);
+    for (node = ptr->children; node; node = node->next) {
+        if (match_element(node, "facetvalue"))
+            num_terms++;
+    }
+    facet_field = facet_field_create(odr, list, num_terms);
+    index = 0;
+    for (node = ptr->children; node; node = node->next) {
+        if (match_element(node, "facetvalue")) {
+            facet_field_term_set(odr, facet_field, yaz_sru_proxy_get_facet_term_count(odr, node), index);
+        index++;
+        }
+    }
+    return facet_field;
+}
+
+static int yaz_sru_proxy_decode_facets(ODR o, xmlNodePtr root, Z_FacetList **facetList)
+{
+    xmlNodePtr ptr;
+
+    for (ptr = root->children; ptr; ptr = ptr->next)
+    {
+        if (match_element(ptr, "facets"))
+        {
+            xmlNodePtr node;
+            Z_FacetList *facet_list;
+            int num_facets = 0;
+            for (node = ptr->children; node; node= node->next)
+            {
+                if (node->type == XML_ELEMENT_NODE)
+                    num_facets++;
+            }
+            facet_list = facet_list_create(o, num_facets);
+            num_facets = 0;
+            for (node = ptr->children; node; node= node->next)
+            {
+                if (match_element(node, "facet")) {
+                    facet_list_field_set(o, facet_list, yaz_sru_proxy_decode_facet_field(o, node), num_facets);
+                    num_facets++;
+                }
+            }
+            *facetList = facet_list;
+            break;
+        }
+    }
+    return 0;
+}
+
+
 
 static int yaz_srw_decode_diagnostics(ODR o, xmlNodePtr pptr,
                                       Z_SRW_diagnostic **recs, int *num,
                                       void *client_data, const char *ns)
-    
 {
     int i;
     xmlNodePtr ptr;
@@ -768,6 +853,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                     yaz_srw_diagnostics(o, ptr, &res->diagnostics,
                                         &res->num_diagnostics,
                                         client_data, ns);
+                else if (match_element(ptr, "facet_analysis"))
+                    yaz_sru_proxy_decode_facets(o, ptr, &res->facetList);
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "explainRequest"))

@@ -750,18 +750,29 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     The <parameter>type</parameter> is a string of the format:
    </para>
    <para>
-    <replaceable>form</replaceable>[;charset=<replaceable>from</replaceable>[,<replaceable>to</replaceable>]][;format=<replaceable>v</replaceable>]
+    <replaceable>format</replaceable>[;charset=<replaceable>from</replaceable>[/<replaceable>opacfrom</replaceable>][,<replaceable>to</replaceable>]][;format=<replaceable>v</replaceable>]
    </para>
    <para>
-    where <replaceable>form</replaceable> specifies the format of the
+    where <replaceable>format</replaceable> specifies the format of the
     returned record, <replaceable>from</replaceable>
     specifies the character set of the record in its original form
     (as returned by the server), <replaceable>to</replaceable> specifies
     the output (returned)
     character set encoding.
-    If charset is not given, then no character set conversion takes place.
     If <replaceable>to</replaceable> is omitted UTF-8 is assumed.
+    If charset is not given, then no character set conversion takes place.
    </para>
+   
+   <para>OPAC records may be returned in a different
+     set from the bibliographic MARC record. If this is this the case,
+    <replaceable>opacfrom</replaceable> should be set to the character set
+    of the OPAC record part.
+   </para>
+   <note>
+     <para>
+       Specifying the OPAC record character set requires YAZ 4.1.5 or later.
+     </para>
+   </note>
    <para>
     The format argument controls whether record data should be XML
     pretty-printed (post process operation).

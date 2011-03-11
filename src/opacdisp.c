@@ -52,10 +52,10 @@ static void opac_element_bool(WRBUF wrbuf, int l, const char *elem, int *data)
     }
 }
 
-void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
+void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
+                            yaz_iconv_t cd)
 {
     int i;
-    yaz_iconv_t cd = yaz_marc_get_iconv(mt);
 
     wrbuf_puts(wrbuf, "<opacRecord>\n");
     if (r->bibliographicRecord)
@@ -161,6 +161,11 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
     }
     wrbuf_puts(wrbuf, "</holdings>\n");
     wrbuf_puts(wrbuf, "</opacRecord>\n");
+}
+
+void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
+{
+    yaz_opac_decode_wrbuf2(mt, r, wrbuf, yaz_marc_get_iconv(mt));
 }
 
 /*

@@ -34,6 +34,15 @@ void yaz_add_name_value_str(ODR o, char **name, char **value,  int *i,
 
 void yaz_add_name_value_int(ODR o, char **name, char **value, int *i,
                             char *a_name, Odr_int *val);
+
+Z_AttributeList *yaz_use_atttribute_create(ODR o, const char *name);
+
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+const char *yaz_element_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name);
+#endif
+
 /*
  * Local variables:
  * c-basic-offset: 4
