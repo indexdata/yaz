@@ -89,8 +89,12 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
                     icu_buf_utf16_copy(dst, src);
                 }
                 else {
-                    const char *cstr = (const char *) sb_symbol;
-                    icu_utf16_from_utf8_cstr(dst, cstr , status);
+
+                    const char *cstr2 = (const char *) sb_symbol;
+                    icu_utf16_from_utf8_cstr(dst, cstr2 , status);
+#if 0		  
+		    yaz_log(YLOG_DEBUG, "stemming %s to %s ", cstr, cstr2);
+#endif
                 }
             }
             icu_buf_utf8_destroy(utf8_buf);
