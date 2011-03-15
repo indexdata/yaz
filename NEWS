@@ -1,3 +1,9 @@
+--- 4.1.7 2011/03/15
+
+Add -lCrun when linking with ICU on Solaris.
+
+More quicks character set conversions for OPAC records.
+
 --- 4.1.6 2011/03/10
 
 fix problem with record_render: records were converted (character set
