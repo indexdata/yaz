@@ -143,6 +143,7 @@ SectionEnd
 Section "YAZ Source" YAZ_Source
 	SectionIn 1
 	SetOutPath $INSTDIR
+	File ../configure.ac
 	File /r ..\*.c
 	File /r /x yaz ..\*.h
 	SetOutPath $INSTDIR\util
