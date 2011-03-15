@@ -152,9 +152,10 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     va_end(ap);
 }
 
-static void wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
-                                size_t size, int cdata)
+int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
+                        size_t size, int cdata)
 {
+    int ret = 0;
     if (cd)
     {
         char outbuf[128];
@@ -170,7 +171,10 @@ static void wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
             {
                 int e = yaz_iconv_error(cd);
                 if (e != YAZ_ICONV_E2BIG)
+                {
+                    ret = -1;
                     break;
+                }
             }
             if (cdata)
                 wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
@@ -185,6 +189,7 @@ static void wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
         else
             wrbuf_write(b, buf, size);
     }
+    return ret;
 }
 
 void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, size_t size)

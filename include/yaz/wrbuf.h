@@ -124,6 +124,19 @@ YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
         __attribute__ ((format (printf, 2, 3)))
 #endif
         ;
+
+/** \brief general writer of string using iconv and cdata
+    \param b WRBUF
+    \param cd iconv handle (0 for no conversion)
+    \param buf buffer
+    \param size size of buffer
+    \param cdata non-zero for CDATA; 0 for cdata
+    \returns -1 if invalid sequence was encountered (truncation in effect)
+    \returns 0 if buffer could be converted and written
+*/
+int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
+                        size_t size, int cdata);
+
 /** \brief iconv converts buffer and appends to WRBUF
     \param b WRBUF
     \param cd iconv handle
