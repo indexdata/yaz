@@ -257,7 +257,8 @@ COMMON_C_OPTIONS=          \
   /Fd"$(OBJDIR)\\" 
 
 COMMON_C_INCLUDES= \
-  /I"$(ROOTDIR)\include"
+  /I"$(ROOTDIR)\include" \
+  /I"$(ROOTDIR)\libstemmer_c\include"
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
@@ -571,10 +572,17 @@ ILL_OBJS= \
    $(OBJDIR)\ill-core.obj\
    $(OBJDIR)\item-req.obj
 
+STEMMER_OBJS = \
+   $(OBJDIR)\libstemmer.obj \
+   $(OBJDIR)\api.obj \
+   $(OBJDIR)\utilities.obj \
+   $(OBJDIR)\stem_UTF_8_porter.obj \
+   $(OBJDIR)\stem_UTF_8_english.obj
+
 DLL_OBJS =\
    $(MISC_OBJS) \
    $(Z3950_OBJS) \
-   $(ILL_OBJS) \
+   $(ILL_OBJS)
    
 ICU_DLL_OBJS =\
    $(OBJDIR)\icu_chain.obj \
@@ -583,7 +591,9 @@ ICU_DLL_OBJS =\
    $(OBJDIR)\icu_transform.obj \
    $(OBJDIR)\icu_casemap.obj \
    $(OBJDIR)\icu_tokenizer.obj \
-   $(OBJDIR)\icu_sortkey.obj
+   $(OBJDIR)\icu_sortkey.obj \
+   $(OBJDIR)\stemmer.obj \
+   $(STEMMER_OBJS) 
 
 # Generated C and H files
 
@@ -741,6 +751,15 @@ generate: \
 	$(CPP) $(COPT) $< 
 
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
+{$(ROOTDIR)\libstemmer_c\libstemmer}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
+{$(ROOTDIR)\libstemmer_c\runtime}.c{$(OBJDIR)}.obj:
+	$(CPP) $(COPT) $< 
+
+{$(ROOTDIR)\libstemmer_c\src_c}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $< 
 
 # ASN-generated files
