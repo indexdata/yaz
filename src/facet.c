@@ -91,7 +91,6 @@ static void useattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
     if (ae->which == Z_AttributeValue_complex)
     {
         s = stringattr(ae->value.complex);
-        yaz_log(YLOG_DEBUG, "useattr %s %s", s, av->useattr);
         if (s)
         {
             if (!av->useattr)
@@ -147,7 +146,6 @@ static void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
     if (ae->which == Z_AttributeValue_numeric)
     {
         av->limit = *ae->value.numeric;
-        yaz_log(YLOG_DEBUG, "limitattr %d ", av->limit);
     }
     else
     {
@@ -171,12 +169,9 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
 {
     int i;
     Z_AttributeElement *ae;
-    yaz_log(YLOG_DEBUG, "Attribute num attributes: %d",
-            attributes->num_attributes);
     for (i=0; i < attributes->num_attributes; i++) {
         ae = attributes->attributes[i];
         /* ignoring the attributeSet here */
-        yaz_log(YLOG_DEBUG, "Attribute type %d", (int) *ae->attributeType);
         if (*ae->attributeType == 1)
         { /* use attribute */
             useattr(ae, av);
@@ -195,7 +190,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
             sprintf(av->useattrbuff, ODR_INT_PRINTF,
                         *ae-> attributeType);
             av->errstring = av->useattrbuff;
-            yaz_log(YLOG_DEBUG, "Unsupported attribute type %s", av->useattrbuff);
+            yaz_log(YLOG_WARN, "Unsupported attribute type %s", av->useattrbuff);
             /* would like to give a better message, but the standard */
             /* tells me to return the attribute type */
         }
