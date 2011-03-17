@@ -610,6 +610,8 @@ static void xml_config_bend_stop(void)
     }
 }
 
+static void remove_listeners(void);
+
 /*
  * handle incoming connect requests.
  * The dynamic mode is a bit tricky mostly because we want to avoid
@@ -909,6 +911,9 @@ static void listener(IOCHAN h, int event)
             return;
         }
 
+        if (control_block.one_shot)
+            remove_listeners();
+
         yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
 
         no_sessions++;
@@ -1127,6 +1132,13 @@ static int add_listener(char *where, int listen_id)
     lst->next = pListener;
     pListener = lst;
     return 0; /* OK */
+}
+
+static void remove_listeners(void)
+{
+    IOCHAN l = pListener;
+    for (; l; l = l->next)
+        iochan_destroy(l);
 }
 
 #ifndef WIN32
