@@ -1881,6 +1881,12 @@ ZOOM_API(const char *)
         return "CCL configuration error";
     case ZOOM_ERROR_CCL_PARSE:
         return "CCL parsing error";
+    case ZOOM_ERROR_ES_INVALID_ACTION:
+        return "Extended Service. invalid action";
+    case ZOOM_ERROR_ES_INVALID_VERSION:
+        return "Extended Service. invalid version";
+    case ZOOM_ERROR_ES_INVALID_SYNTAX:
+        return "Extended Service. invalid syntax";
     default:
         return diagbib1_str(error);
     }

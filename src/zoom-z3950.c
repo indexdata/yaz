@@ -324,12 +324,15 @@ static Z_APDU *create_update_package(ZOOM_package p)
                                            p->odr_out);
     }
     if (!syntax_oid)
+    { 
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_SYNTAX, syntax_str);
         return 0;
+    }
 
     if (num_db > 0)
         first_db = db[0];
     
-    switch(*version)
+    switch (*version)
     {
     case '1':
         package_oid = yaz_oid_extserv_database_update_first_version;
@@ -348,6 +351,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         package_oid = yaz_oid_extserv_database_update;
         break;
     default:
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_VERSION, version);
         return 0;
     }
     
@@ -362,7 +366,10 @@ static Z_APDU *create_update_package(ZOOM_package p)
     else if (!strcmp(action, "specialUpdate"))
         action_no = Z_IUOriginPartToKeep_specialUpdate;
     else
+    {
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_ACTION, action);
         return 0;
+    }
 
     apdu = create_es_package(p, package_oid);
     if (apdu)
