@@ -1,12 +1,14 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file zgdu.c
  * \brief Implements HTTP and Z39.50 encoding and decoding.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
 #include <yaz/odr.h>

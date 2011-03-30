@@ -16,6 +16,11 @@ proc preamble_trie {ofilehandle ifiles ofile} {
     puts $f "    Generated automatically by charconv.tcl"
     puts $f "*/"
     puts $f "\#include <string.h>"
+
+    puts $f "\#if HAVE_CONFIG_H"
+    puts $f "\#include <config.h>"
+    puts $f "\#endif"
+
     puts $f "
         struct yaz_iconv_trie_flat {
             char from\[6\];

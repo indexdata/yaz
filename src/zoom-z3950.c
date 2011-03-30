@@ -1,11 +1,14 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 /**
  * \file zoom-z3950.c
  * \brief Implements ZOOM Z39.50 handling
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>
@@ -321,12 +324,15 @@ static Z_APDU *create_update_package(ZOOM_package p)
                                            p->odr_out);
     }
     if (!syntax_oid)
+    { 
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_SYNTAX, syntax_str);
         return 0;
+    }
 
     if (num_db > 0)
         first_db = db[0];
     
-    switch(*version)
+    switch (*version)
     {
     case '1':
         package_oid = yaz_oid_extserv_database_update_first_version;
@@ -345,6 +351,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         package_oid = yaz_oid_extserv_database_update;
         break;
     default:
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_VERSION, version);
         return 0;
     }
     
@@ -359,7 +366,10 @@ static Z_APDU *create_update_package(ZOOM_package p)
     else if (!strcmp(action, "specialUpdate"))
         action_no = Z_IUOriginPartToKeep_specialUpdate;
     else
+    {
+        ZOOM_set_error(p->connection, ZOOM_ERROR_ES_INVALID_ACTION, action);
         return 0;
+    }
 
     apdu = create_es_package(p, package_oid);
     if (apdu)
@@ -666,7 +676,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
             yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
         else
-            yaz_log(YLOG_WARN, "Unable to parse facets: ", facets);
+            yaz_log(YLOG_WARN, "Unable to parse facets: %s", facets);
     }
 
     assert(r);

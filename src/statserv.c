@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 
@@ -7,6 +7,10 @@
  * \file statserv.c
  * \brief Implements GFS logic
  */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -606,6 +610,8 @@ static void xml_config_bend_stop(void)
     }
 }
 
+static void remove_listeners(void);
+
 /*
  * handle incoming connect requests.
  * The dynamic mode is a bit tricky mostly because we want to avoid
@@ -905,6 +911,9 @@ static void listener(IOCHAN h, int event)
             return;
         }
 
+        if (control_block.one_shot)
+            remove_listeners();
+
         yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
 
         no_sessions++;
@@ -1123,6 +1132,13 @@ static int add_listener(char *where, int listen_id)
     lst->next = pListener;
     pListener = lst;
     return 0; /* OK */
+}
+
+static void remove_listeners(void)
+{
+    IOCHAN l = pListener;
+    for (; l; l = l->next)
+        iochan_destroy(l);
 }
 
 #ifndef WIN32

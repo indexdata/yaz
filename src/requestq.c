@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -9,6 +9,9 @@
  * We also use the request-freelist to store encoding buffers, rather than
  * freeing and xmalloc'ing them on each cycle.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdlib.h>
 

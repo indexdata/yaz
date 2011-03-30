@@ -1,11 +1,14 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 /**
  * \file 
  * \brief Select, poll wrapper
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 #include <string.h>

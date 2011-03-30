@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2008 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */ 
 /* bison parser for CQL grammar. */
@@ -11,6 +11,9 @@
  * This is a YACC parser, but since it must be reentrant, Bison is required.
  * The original source file is cql.y.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

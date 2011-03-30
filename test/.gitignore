@@ -34,6 +34,7 @@ test_oid
 test_file_glob
 test_log_thread
 test_mutex
+test_libstemmer
 *.log
 *.o
 *~

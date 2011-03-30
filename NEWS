@@ -1,3 +1,67 @@
+--- 4.1.7 2011/03/15
+
+Add -lCrun when linking with ICU on Solaris.
+
+More quicks character set conversions for OPAC records.
+
+--- 4.1.6 2011/03/10
+
+fix problem with record_render: records were converted (character set
+wise) even if no charset was given. Problem introduced in YAZ 4.1.5.
+
+--- 4.1.5 2011/03/08
+
+SRU: add methods for handling DADS SRU-proxy facets.
+
+Separate OPAC record character set for ZOOM_record. yaz_record_render
+allows a character set given as charset=from/opacfrom,to where 'from' is
+the character set of a bibliographic record, 'opacfrom' is character set
+of OPAC record and 'to' is the target character set.
+
+--- 4.1.4 2011/02/21
+
+yaz-client: show may XML format records. Command show followed by 'format'
+will format XML records retrieved using Libxml2's xmlDocDumpFormatMemory
+function.
+
+src/stemmer.c: Avoid using unnamed union. It is not supported by some
+older C compilers.
+
+For PHPYAZ: set YAZVERSION, not YAZ_VERSION.
+
+--- 4.1.3 2011/01/27
+Update yaz.spec to operate on both SLES11 / Centos 5.5.
+
+RPM: Release includes 'indexdata' name. Use indexdata in release name so
+this package can be distinguished from other vendors.
+
+yaz-config: Use exec_prefix, libdir, includedir .  Use these variables
+as determined by configure
+
+yaz-config: set YAZ_VERSION env. php_yaz relies on it.
+
+GFS: Z_PresentStatus_partial_4 for missing record. If bend_fetch handler
+returns no error and no record, the present request is considered
+partial (only a subset of the records could be returned by backend), and
+so it is appropriate to set Present Status to partial-4.
+
+--- 4.1.2 2010/11/02
+
+Move yaz-config man pages to section 1.
+
+More documentation about SOLR.
+
+tcp comstack: change behavior for @-specs (anyaddr). @ listens on
+AF_INET (IPV4) peers, and @6 listens to AF_INET6 (ipv6) peers.
+Previously @ listened on AF_INET6 which accepted both IPV4 and IPV6
+peers on some Linux systems. However, in general that does not work
+so YAZ can not rely on that to work. Debian changed behavior in this
+respect from Debian lenny to Debian squeeze (still testing as of Oct
+2010). Refer to:
+http://www.mail-archive.com/debian-devel@lists.debian.org/msg277726.html
+
+zoomsh: remove "debugging" output. Was added by mistake in 4.1.0.
+
 --- 4.1.1 2010/10/05
 
 Fix yaz-config output: echo_source not set correctly by configure.

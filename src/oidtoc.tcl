@@ -109,6 +109,10 @@ proc oid_to_c {srcdir input cname hname} {
     puts $hfile "\#ifndef OID_STD_H"
     puts $hfile "\#define OID_STD_H"
 
+    puts $cfile "\#if HAVE_CONFIG_H"
+    puts $cfile "\#include <config.h>"
+    puts $cfile "\#endif"
+
     puts $cfile "\#include <yaz/oid_db.h>"
     puts $cfile ""
     # To avoid LNK4049

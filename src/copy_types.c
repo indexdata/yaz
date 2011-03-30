@@ -1,11 +1,13 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
 /** \file copy_types.c
     \brief Copies various Z39.50 types
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/copy_types.h>
 

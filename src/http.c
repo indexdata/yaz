@@ -1,12 +1,14 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file http.c
  * \brief Implements HTTP decoding
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <ctype.h>
 #include <yaz/odr.h>

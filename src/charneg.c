@@ -1,14 +1,17 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
 /** 
  * \file charneg.c
  * \brief Implements Z39.50 Charset negotiation utilities
  *
  * Helper functions for Character Set and Language Negotiation - 3
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
 #include <yaz/otherinfo.h>
 #include <yaz/z-charneg.h>

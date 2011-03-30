@@ -1,9 +1,10 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
-/* CCL test */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <string.h>
 #include <yaz/ccl_xml.h>

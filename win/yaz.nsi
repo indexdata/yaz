@@ -1,5 +1,5 @@
 ; This file is part of the YAZ toolkit.
-; Copyright (C) 1995-2010 Index Data
+; Copyright (C) 1995-2011 Index Data
 
 !include version.nsi
 
@@ -143,6 +143,7 @@ SectionEnd
 Section "YAZ Source" YAZ_Source
 	SectionIn 1
 	SetOutPath $INSTDIR
+	File ..\configure.ac
 	File /r ..\*.c
 	File /r /x yaz ..\*.h
 	SetOutPath $INSTDIR\util

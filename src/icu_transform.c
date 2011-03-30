@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 
@@ -60,10 +60,8 @@ struct icu_transform * icu_transform_create(const char *id, char action,
     transform->trans = 0;
 
     if (id)
-    {
         icu_utf16_from_utf8_cstr(id16, id, status);
-        id16->utf16[id16->utf16_len] = 0;
-    }
+
     if (rules)
         icu_utf16_from_utf8_cstr(rules16, rules, status);
 

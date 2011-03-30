@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2010 Index Data
+## Copyright (C) 1995-2011 Index Data
 
 check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_odr test_ccl test_log test_mutex \
@@ -7,7 +7,7 @@ check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_comstack test_filepath test_record_conv test_retrieval test_tpath \
  test_timing test_query_charset test_oid test_icu test_match_glob \
  test_rpn2cql test_rpn2solr test_json test_xml_include test_file_glob \
- test_shared_ptr
+ test_shared_ptr test_libstemmer
 
 check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
 
@@ -23,6 +23,7 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
  tsticu-0.xml tsticu-0.input tsticu-0.output \
  tsticu-1.xml tsticu-1.input tsticu-1.output \
+ tsticu-2.xml tsticu-2.input tsticu-2.output \
  test_record_conv.xsl test_xml_include.xml
 
 YAZCOMP = ../util/yaz-asncomp
@@ -47,8 +48,9 @@ dist-hook:
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
-LDADD = ../src/libyaz.la
+LDADD = ../src/libyaz.la 
 test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
+test_libstemmer_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 
 CONFIG_CLEAN_FILES=*.log
 
@@ -83,3 +85,4 @@ test_json_SOURCES = test_json.c
 test_xml_include_SOURCES = test_xml_include.c
 test_file_glob_SOURCES = test_file_glob.c
 test_shared_ptr_SOURCES = test_shared_ptr.c
+test_libstemmer_SOURCES = test_libstemmer.c

@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 
@@ -450,6 +450,8 @@ static void check_icu_chain(void)
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
+    if (!chain)
+        return;
 
     YAZ_CHECK(icu_chain_assign_cstr(chain, en_str, &status));
 
@@ -507,6 +509,8 @@ static void check_bug_1140(void)
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
+    if (!chain)
+        return;
     
     YAZ_CHECK(icu_chain_assign_cstr(
                   chain,  "O Romeo, Romeo! wherefore art thou\t Romeo?",
@@ -773,6 +777,8 @@ static void check_icu_iter2(void)
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
+    if (!chain)
+        return;
     
     YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
                         "[adobe][acrobat][reader][1991][][1999][]"));

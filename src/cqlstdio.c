@@ -1,12 +1,14 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
-
 /**
  * \file cqlstdio.c
  * \brief Implements query stream reading using FILE handle.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <yaz/cql.h>
 

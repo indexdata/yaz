@@ -190,8 +190,9 @@
     Must be one of <literal>POST</literal>,
     <literal>GET</literal>, <literal>SOAP</literal> (default)
     or <literal>SOLR</literal>. Version
-    should be either 1.1 or 1.2. Other versions are allowed - for testing
-    purposes (version negotiation with SRU server).
+    should be either 1.1 or 1.2 for SRU. Other versions are allowed - for testing
+    purposes (version negotiation with SRU server). 
+    The version is currently not used for SOLR Web Services
    </para>
   </listitem>
  </varlistentry>

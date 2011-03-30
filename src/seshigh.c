@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data
+ * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -25,6 +25,9 @@
  * minimize memory allocation/deallocation during normal operation.
  *
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <limits.h>
 #include <stdlib.h>
@@ -224,10 +227,6 @@ void destroy_association(association *h)
     request_delq(&h->outgoing);
     xfree(h);
     xmalloc_trav("session closed");
-    if (cb && cb->one_shot)
-    {
-        exit(0);
-    }
 }
 
 static void do_close_req(association *a, int reason, char *message,
@@ -2502,6 +2501,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         }
         if (freq.record == 0)  /* no error and no record ? */
         {
+            *pres = Z_PresentStatus_partial_4;
             *next = 0;   /* signal end-of-set and stop */
             break;
         }

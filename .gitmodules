@@ -4,3 +4,6 @@
 [submodule "doc/common"]
 	path = doc/common
 	url = git://git.indexdata.com/id-docbook-common
+[submodule "libstemmer_c"]
+	path = libstemmer_c
+	url = git://git.indexdata.com/libstemmer_c

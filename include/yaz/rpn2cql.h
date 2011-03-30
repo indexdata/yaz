@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2010 Index Data.
+ * Copyright (C) 1995-2011 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -70,6 +70,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     \param attributes RPN attributes
     \returns pattern value or NULL if not found
  */
+YAZ_EXPORT
 const char *cql_lookup_reverse(cql_transform_t ct, 
                                const char *category,
                                Z_AttributeList *attributes);
