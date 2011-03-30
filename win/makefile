@@ -18,7 +18,9 @@ ICONV_DIR = c:\iconv-1.9.2.win32
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_DIR = c:\icu
+ICU_LIB = c:\icu\lib
+ICU_BIN = c:\icu\bin
+ICU_INCLUDE = c:\icu\include
 
 # libxslt
 HAVE_LIBXSLT=1
@@ -50,8 +52,8 @@ dist: yaz.win32.nsi yaz.nsi distclean
 	$(NSIS) yaz.win32.nsi
 
 dist64: yaz.win64.nsi yaz.nsi distclean
-	nmake DEBUG=0 HAVE_LIBXSLT=0 HAVE_LIBXML2=0 HAVE_ICONV=0 HAVE_ICU=0
-	$(NSIS) yaz.win64.nsi
+	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64
+	$(NSIS) yaz.win64.nsi 
 
 distclean:
 	nmake DEBUG=1 clean
@@ -179,23 +181,22 @@ iconv:
 
 !if $(HAVE_ICU)
 ICU_DEF= \
-  /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 \
-  /I"$(ICU_DIR)\include"
-ICU_LIB= \
-  $(ICU_DIR)\lib\icudt.lib $(ICU_DIR)\lib\icuin.lib $(ICU_DIR)\lib\icuuc.lib
+  /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
+ICU_LIBS= \
+  $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
 icu: $(BINDIR)\icudt42.dll $(BINDIR)\icuin42.dll $(BINDIR)\icuuc42.dll
 yazicu: dirs generate $(YAZ_ICU) 
 
 $(BINDIR)\icudt42.dll:
-  copy "$(ICU_DIR)\bin\icudt42.dll" $(BINDIR)
+  copy "$(ICU_BIN)\icudt42.dll" $(BINDIR)
 $(BINDIR)\icuin42.dll:
-  copy "$(ICU_DIR)\bin\icuin42.dll" $(BINDIR)
+  copy "$(ICU_BIN)\icuin42.dll" $(BINDIR)
 $(BINDIR)\icuuc42.dll:
-  copy "$(ICU_DIR)\bin\icuuc42.dll" $(BINDIR)
+  copy "$(ICU_BIN)\icuuc42.dll" $(BINDIR)
 !else
 ICU_DEF= \
   /D YAZ_HAVE_ICU=0
-ICU_LIB=
+ICU_LIBS=
 icu:
 yazicu:
 !endif
@@ -873,7 +874,7 @@ $(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
-	$(LINK_DLL) $(ICU_LIB) $(YAZ_IMPLIB)\
+	$(LINK_DLL) $(ICU_LIBS) $(YAZ_IMPLIB)\
 		$(ICU_DLL_OBJS) \
 		$(YAZ_ICU_RES) \
 		/out:$@ \
@@ -893,7 +894,7 @@ $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(YAZ_DLL)
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
-	$(LINK_PROGRAM) $(ICU_LIB) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
+	$(LINK_PROGRAM) $(ICU_LIBS) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 
