@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <yaz/options.h>
 
@@ -40,12 +41,12 @@ static struct config_t {
   
 void print_option_error(const struct config_t *p_config)
 {  
-    fprintf(stderr, "Calling error, valid options are :\n");
-    fprintf(stderr, "yaz-icu\n"
-            "   [-c (path/to/config/file.xml)]\n"
-            "   [-p (a|c|l|t)] print ICU info \n"
-            "   [-s] Show sort normalization key\n"
-            "   [-x] XML output\n"
+    fprintf(stderr, "yaz-icu [options] [infile]\n"
+            "Options:\n"
+            "   -c file         XML configuration\n"
+            "   -p a|c|l|t      Print ICU info \n"
+            "   -s              Show sort normalization key\n"
+            "   -x              XML output instread of text\n"
             "\n"
             "Examples:\n"
             "cat hugetextfile.txt | ./yaz-icu -c config.xml \n"
@@ -75,7 +76,7 @@ void read_params(int argc, char **argv, struct config_t *p_config)
     p_config->xmloutput = 0;
     p_config->sortoutput = 0;
     p_config->chain = 0;
-    p_config->infile = stdin;
+    p_config->infile = 0;
     p_config->outfile = stdout;
     
     /* set up command line parameters */
@@ -96,17 +97,30 @@ void read_params(int argc, char **argv, struct config_t *p_config)
         case 'x':
             p_config->xmloutput = 1;
             break;
+        case 0:
+            if (p_config->infile)
+            {
+                fprintf(stderr, "yaz-icu: only one input file may be given\n");
+                print_option_error(p_config);
+            }
+            p_config->infile = fopen(arg, "r");
+            if (!p_config->infile)
+            {
+                fprintf(stderr, "yaz-icu: cannot open %s : %s\n",
+                        arg, strerror(errno));
+                exit(1);
+            }
+            break;
         default:
-            printf("Got %d\n", ret);
+            fprintf(stderr, "yaz_icu: invalid option: %s\n", arg);
             print_option_error(p_config);
         }
     }
-    
-    if ((!strlen(p_config->conffile)
-         && !strlen(p_config->print))
-        || !config.infile
-        || !config.outfile)
-        
+
+    if (p_config->infile == 0)
+        p_config->infile = stdin;
+
+    if (!strlen(p_config->conffile) && !strlen(p_config->print))
         print_option_error(p_config);
 }
 
