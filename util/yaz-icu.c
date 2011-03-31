@@ -123,25 +123,6 @@ void read_params(int argc, char **argv, struct config_t *p_config)
         print_option_error(p_config);
 }
 
-
-/*     UConverter *conv; */
-/*     conv = ucnv_open("utf-8", &status); */
-/*     assert(U_SUCCESS(status)); */
-
-/*     *ustr16_len  */
-/*       = ucnv_toUChars(conv, ustr16, 1024,  */
-/*                       (const char *) *xstr8, strlen((const char *) *xstr8), */
-/*                       &status); */
-  
-
-
-/*      ucnv_fromUChars(conv, */
-/*                      (char *) *xstr8, strlen((const char *) *xstr8), */
-/*                      ustr16, *ustr16_len, */
-/*                      &status); */
-/*      ucnv_close(conv); */
-
-
 static void print_icu_converters(const struct config_t *p_config)
 {
     int32_t count;
@@ -371,11 +352,6 @@ static void print_icu_xml_locales(const struct config_t *p_config)
         if (p_config->xmloutput)
         {
             fprintf(p_config->outfile, "<locale id=\"%s\"", uloc_getAvailable(i)); 
-            /* fprintf(p_config->outfile, " locale=\"%s\"", uloc_getAvailable(i)); */
-            /* if (strlen(keyword_str)) */
-            /*   fprintf(p_config->outfile, " keyword=\"%s\"", keyword_str); */
-            /* if (ucol_getAvailable(i)) */
-            /*   fprintf(p_config->outfile, " collation=\"1\""); */
             if (strlen(lang_str))
                 fprintf(p_config->outfile, " language=\"%s\"", lang_str);
             if (strlen(script_str))
