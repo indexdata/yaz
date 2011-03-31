@@ -249,7 +249,9 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
 // if not, and if the attribute name is not null, it will append a attribute element with the value
 // if attribute name is null it will return a non-zero value meaning it couldnt handle the value.
 
-int element_name_append_attribute_value(yaz_marc_t mt, WRBUF buffer, const char *attribute_name, char *code_data, size_t code_len)
+static int element_name_append_attribute_value(
+    yaz_marc_t mt, WRBUF buffer,
+    const char *attribute_name, char *code_data, size_t code_len)
 {
     // TODO Map special codes to something possible for XML ELEMENT names
 
