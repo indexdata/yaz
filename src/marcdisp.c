@@ -245,15 +245,17 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
-// Magic function: adds a attribute value to the element name if it is plain characters.
-// if not, and if the attribute name is not null, it will append a attribute element with the value
-// if attribute name is null it will return a non-zero value meaning it couldnt handle the value.
-
+/** \brief adds a attribute value to the element name if it is plain chars
+    
+    If not, and if the attribute name is not null, it will append a
+    attribute element with the value if attribute name is null it will
+    return a non-zero value meaning it couldnt handle the value.
+*/
 static int element_name_append_attribute_value(
     yaz_marc_t mt, WRBUF buffer,
     const char *attribute_name, char *code_data, size_t code_len)
 {
-    // TODO Map special codes to something possible for XML ELEMENT names
+    /* TODO Map special codes to something possible for XML ELEMENT names */
 
     int encode = 0;
     int index = 0;
@@ -265,7 +267,7 @@ static int element_name_append_attribute_value(
               (code_data[index] >= 'A' && code_data[index] <= 'Z')))
             encode = 1;
     }
-    // Add as attribute
+    /* Add as attribute */
     if (encode && attribute_name)
         wrbuf_printf(buffer, " %s=\"", attribute_name);
 
@@ -275,7 +277,7 @@ static int element_name_append_attribute_value(
         success = -1;
 
     if (encode && attribute_name)
-        wrbuf_printf(buffer, "\"");	// return error if we couldn't handle it.
+        wrbuf_printf(buffer, "\""); /* return error if we couldn't handle it.*/
     return success;
 }
 
@@ -302,7 +304,7 @@ void yaz_marc_add_datafield_xml2(yaz_marc_t mt, char *tag_value, char *indicator
     n->u.datafield.indicator = indicators;
     n->u.datafield.subfields = 0;
 
-    // make subfield_pp the current (last one)
+    /* make subfield_pp the current (last one) */
     mt->subfield_pp = &n->u.datafield.subfields;
 }
 
@@ -720,7 +722,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
                 wrbuf_puts(wr, ">\n");
             }
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
-            //TODO Not CDATA
+            /* TODO Not CDATA */
             if (turbo)
             	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
                                         strlen(n->u.datafield.tag));
@@ -737,7 +739,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             }
             else
             {
-                //TODO convert special
+                /* TODO convert special */
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
         				strlen(n->u.controlfield.tag));
                 wrbuf_iconv_puts(wr, mt->iconv_cd, ">");
@@ -747,7 +749,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
                                     strlen(n->u.controlfield.data));
             marc_iconv_reset(mt, wr);
             wrbuf_printf(wr, "</%s", controlfield_name[turbo]);
-            //TODO convert special
+            /* TODO convert special */
             if (turbo)
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
     					strlen(n->u.controlfield.tag));
@@ -850,7 +852,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
     struct yaz_marc_subfield *s;
     WRBUF subfield_name = wrbuf_alloc();
 
-    //TODO consider if safe
+    /* TODO consider if safe */
     char field[10];
     field[0] = 'd';
     strncpy(field + 1, n->u.datafield.tag, 3);
@@ -889,7 +891,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
                                        BAD_CAST wrbuf_cstr(wr_cdata));
         if (not_written)
         {
-            // Generate code attribute value and add
+            /* Generate code attribute value and add */
             wrbuf_rewind(wr_cdata);
             wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
             xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));

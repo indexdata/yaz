@@ -557,7 +557,7 @@ ZOOM_API(void)
         cs_close(c->cs);
 
 #if ZOOM_RESULT_LISTS
-    // Remove the connection's usage of resultsets
+    /* Remove the connection's usage of resultsets */
     list = c->resultsets;
     while (list) {
         ZOOM_resultsets removed = list;
