@@ -21,6 +21,7 @@
 
 #if YAZ_HAVE_ICU
 #include <yaz/icu_I18N.h>
+#include <unicode/uclean.h>
 
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
@@ -645,7 +646,7 @@ static void check_icu_iter1(void)
     if (!xml_node)
         return ;
 
-    chain = icu_chain_xml_config(xml_node, 0, &status);
+    chain = icu_chain_xml_config(xml_node, 1, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -667,7 +668,7 @@ static int test_iter(struct icu_chain *chain, const char *input,
                      const char *expected)
 {
     yaz_icu_iter_t iter = icu_iter_create(chain);
-    WRBUF result, second;
+    WRBUF result, second, sort_result;
     int success = 1;
 
     if (!iter)
@@ -682,15 +683,27 @@ static int test_iter(struct icu_chain *chain, const char *input,
         return 0;
     }
 
+    sort_result = wrbuf_alloc();
     result = wrbuf_alloc();
     icu_iter_first(iter, input);
     while (icu_iter_next(iter))
     {
+        const char *sort_str = icu_iter_get_sortkey(iter);
+        if (sort_str)
+        {
+            wrbuf_puts(sort_result, "[");
+            wrbuf_puts_escaped(sort_result, sort_str);
+            wrbuf_puts(sort_result, "]");
+        }
+        else
+        {
+            wrbuf_puts(sort_result, "[NULL]");
+        }
         wrbuf_puts(result, "[");
         wrbuf_puts(result, icu_iter_get_norm(iter));
         wrbuf_puts(result, "]");
     }
-
+    yaz_log(YLOG_LOG, "sortkey=%s", wrbuf_cstr(sort_result));
     second = wrbuf_alloc();
     icu_iter_first(iter, input);
     while (icu_iter_next(iter))
@@ -718,6 +731,7 @@ static int test_iter(struct icu_chain *chain, const char *input,
 
     wrbuf_destroy(result);
     wrbuf_destroy(second);
+    wrbuf_destroy(sort_result);
     return success;
 }
 
@@ -726,7 +740,7 @@ static void *iter_thread(void *p)
     struct icu_chain *chain = (struct icu_chain *) p;
     int i;
     
-    for (i = 0; i < 10000; i++)
+    for (i = 0; i < 1000; i++)
     {
         YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
                             "[adobe][acrobat][reader][1991][][1999][]"));
@@ -749,6 +763,7 @@ static void check_iter_threads(struct icu_chain *chain)
         pthread_join(t[i], 0);
 #endif
 }
+
 static void check_icu_iter2(void)
 {
     UErrorCode status = U_ZERO_ERROR;
@@ -773,7 +788,7 @@ static void check_icu_iter2(void)
     if (!xml_node)
         return ;
 
-    chain = icu_chain_xml_config(xml_node, 0, &status);
+    chain = icu_chain_xml_config(xml_node, 1, &status);
 
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
@@ -783,7 +798,50 @@ static void check_icu_iter2(void)
     YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
                         "[adobe][acrobat][reader][1991][][1999][]"));
 
+    YAZ_CHECK(test_iter(chain, "Νόταρης, Γιάννης Σωτ",
+                        "[νόταρης][γιάννης][σωτ]"));
+
     check_iter_threads(chain);
+
+    icu_chain_destroy(chain);
+}
+
+static void check_icu_iter3(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain * chain = 0;
+    xmlNode *xml_node;
+
+    const char * xml_str = 
+        "<icu_chain id=\"sort\" locale=\"el\">\n"
+        "<transform rule=\"[:Control:] Any-Remove\"/>\n"
+        "<transform rule=\"[[:Control:][:WhiteSpace:][:Punctuation:]] Remove\"/>\n"
+        "<transform rule=\"NFD; [:Nonspacing Mark:] Remove; NFC\"/>\n"
+        "<casemap rule=\"l\"/>\n"
+        "<display/>\n"
+        "</icu_chain>\n";
+
+    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+
+    chain = icu_chain_xml_config(xml_node, 1, &status);
+
+    xmlFreeDoc(doc);
+    YAZ_CHECK(chain);
+    if (!chain)
+        return;
+    
+    YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
+                        "[adobeacrobatreader19911999]"));
+
+    YAZ_CHECK(test_iter(chain, "Νόταρης, Γιάννης Σωτ",
+                        "[νοταρηςγιαννηςσωτ]"));
 
     icu_chain_destroy(chain);
 }
@@ -804,11 +862,13 @@ int main(int argc, char **argv)
     check_icu_chain();
     check_chain_empty_token();
     check_chain_empty_chain();
-    check_icu_iter1();
+    check_icu_iter1();  
     check_icu_iter2();
-    
+    check_icu_iter3();
+  
     check_bug_1140();
 
+    u_cleanup();
 #else /* YAZ_HAVE_ICU */
 
     yaz_log(YLOG_LOG, "ICU unit tests omitted");
