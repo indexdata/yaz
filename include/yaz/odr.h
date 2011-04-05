@@ -211,7 +211,7 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
 
 #define ODR_MASK_SET(mask, num)\
     (((mask)->bits[(num) >> 3] |= 0X80 >> ((num) & 0X07)),\
-    (mask)->top < (num) >> 3 ? ((mask)->top = (num) >> 3) : 0)
+    (void) ((mask)->top < (num) >> 3 ? ((mask)->top = (num) >> 3) : 0))
 
 #define ODR_MASK_CLEAR(mask, num)\
     ((mask)->bits[(num) >> 3] &= ~(0X80 >> ((num) & 0X07)))

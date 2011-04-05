@@ -262,10 +262,9 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                                      &ex.extraRecordData_buf,
                                      &ex.extraRecordData_len) )
                 ;
-            else if (match_xsd_string(ptr, "recordIdentifier", o, 
-                                      &ex.recordIdentifier))
-                ;
-
+            else
+                match_xsd_string(ptr, "recordIdentifier", o, 
+                                 &ex.recordIdentifier);
         }
         if (data_ptr)
         {
@@ -392,9 +391,8 @@ static int yaz_srw_version(ODR o, xmlNodePtr pptr, Z_SRW_recordVersion *rec,
             if (match_xsd_string(ptr, "versionType", o, 
                                  &rec->versionType))
                 ;
-            else if (match_xsd_string(ptr, "versionValue", o, 
-                                      &rec->versionValue))
-                ;
+            else
+                match_xsd_string(ptr, "versionValue", o, &rec->versionValue);
         }
     }
     else if (o->direction == ODR_ENCODE)
@@ -572,9 +570,8 @@ static int yaz_srw_decode_diagnostics(ODR o, xmlNodePtr pptr,
                 else if (match_xsd_string(rptr, "details", o, 
                                           &(*recs)[i].details))
                     ;
-                else if (match_xsd_string(rptr, "message", o, 
-                                          &(*recs)[i].message))
-                    ;
+                else
+                    match_xsd_string(rptr, "message", o, &(*recs)[i].message);
             }
             i++;
         }
@@ -668,9 +665,8 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
             else if (match_xsd_string(ptr, "displayTerm", o, 
                                       &term->displayTerm))
                 ;
-            else if (match_xsd_string(ptr, "whereInList", o, 
-                                      &term->whereInList))
-                ;
+            else
+                match_xsd_string(ptr, "whereInList", o, &term->whereInList);
         }
     }
     else if (o->direction == ODR_ENCODE)
@@ -799,9 +795,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
-                else if (match_xsd_string(ptr, "database", o,
-                                          &req->database))
-                    ;
+                else
+                    match_xsd_string(ptr, "database", o, &req->database);
             }
             if (!req->query.cql && !req->query.pqf && !req->query.xcql)
             {
@@ -887,9 +882,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "recordPacking", o,
                                           &req->recordPacking))
                     ;
-                else if (match_xsd_string(ptr, "database", o,
-                                          &req->database))
-                    ;
+                else
+                    match_xsd_string(ptr, "database", o, &req->database);
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "explainResponse"))
@@ -967,9 +961,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
-                else if (match_xsd_string(ptr, "database", o,
-                                          &req->database))
-                    ;
+                else
+                    match_xsd_string(ptr, "database", o, &req->database);
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "scanResponse"))
@@ -1252,9 +1245,8 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
-                else if (match_xsd_string(ptr, "database", o,
-                                          &req->database))
-                    ;
+                else
+                    match_xsd_string(ptr, "database", o, &req->database);
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "updateResponse"))

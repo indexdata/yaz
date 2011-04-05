@@ -215,7 +215,7 @@ YAZ_EXPORT int wrbuf_grow(WRBUF b, size_t minsize);
 YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
 
 #define wrbuf_putc(b, c) \
-    (((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
+    ((void) ((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
 
 YAZ_END_CDECL
