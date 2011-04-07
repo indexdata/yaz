@@ -37,7 +37,6 @@ ComponentText "This will install the YAZ Toolkit on your computer:"
 InstType "Full (w/ Source)"
 InstType "Lite (w/o Source)"
 
-InstallDir "$PROGRAMFILES\YAZ"
 InstallDirRegKey HKLM "SOFTWARE\Index Data\YAZ" ""
 
 
