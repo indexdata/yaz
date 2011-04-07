@@ -125,7 +125,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
 #endif
         fd_set write_set;
 
-        // create server socket
+        /* create server socket */
         p->m_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (p->m_socket == YAZ_INVALID_SOCKET)
         {
@@ -147,7 +147,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
             }
         }
 #endif
-        // bind server socket
+        /* bind server socket */
         add.sin_family = AF_INET;
         add.sin_port = htons(port_to_use);
         add.sin_addr.s_addr = INADDR_ANY;
@@ -169,7 +169,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
             return 0;
         }
 
-        // client socket
+        /* client socket */
         tmpadd = (unsigned) inet_addr("127.0.0.1");
         if (!tmpadd)
         {
@@ -194,9 +194,9 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
         {
             if (
 #ifdef WIN32
-            WSAGetLastError() != WSAEWOULDBLOCK
+                WSAGetLastError() != WSAEWOULDBLOCK
 #else
-            errno != EINPROGRESS
+                errno != EINPROGRESS
 #endif
                 )
             {

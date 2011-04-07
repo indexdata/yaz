@@ -29,11 +29,11 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-icu</command>
-   <arg choice="opt" rep="repeat">commands</arg>
    <arg>-c <replaceable>config</replaceable></arg>
    <arg>-p <replaceable>opt</replaceable></arg>
    <arg>-s</arg>
    <arg>-x</arg>
+   <arg choice="opt">infile</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
  
@@ -41,6 +41,17 @@
   <para>
    <command>yaz-icu</command> is utility which demonstrates 
    the ICU chain module of yaz. (<filename>yaz/icu.h</filename>).
+  </para>
+  <para>
+    The utility can be used in two ways. It may read some text
+    using an XML configuration for configuring ICU and show text analysis.
+    This mode is triggered by option <literal>-c</literal> which specififies
+    the configuration to be used. The input file is read from standard
+    input or from a file if <literal>infile</literal> is specified.
+  </para>
+  <para>
+    The utility may also show ICU information. This is triggered by
+    option <literal>-p</literal>.
   </para>
  </refsect1>
 

@@ -58,10 +58,10 @@ static char *prog;
 
 static void usage(const char *prog)
 {
-    fprintf (stderr, "Usage: %s [-i format] [-o format] [-f from] [-t to] "
-             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
-             "[-p] [-v] [-V] file...\n",
-             prog);
+    fprintf(stderr, "Usage: %s [-i format] [-o format] [-f from] [-t to] "
+            "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
+            "[-p] [-v] [-V] file...\n",
+            prog);
 } 
 
 static void show_version(void)
@@ -99,8 +99,8 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
     FILE *inf = fopen(fname, "rb");
     if (!inf)
     {
-        fprintf (stderr, "%s: cannot open %s:%s\n",
-                 prog, fname, strerror (errno));
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
         exit(1);
     }
     
@@ -241,12 +241,12 @@ static void dump(const char *fname, const char *from, const char *to,
         int split_file_no = -1;
         if (!inf)
         {
-            fprintf (stderr, "%s: cannot open %s:%s\n",
-                     prog, fname, strerror (errno));
+            fprintf(stderr, "%s: cannot open %s:%s\n",
+                    prog, fname, strerror(errno));
             exit(1);
         }
         if (cfile)
-            fprintf (cfile, "char *marc_records[] = {\n");
+            fprintf(cfile, "char *marc_records[] = {\n");
         for(;; marc_no++)
         {
             const char *result = 0;
@@ -256,12 +256,12 @@ static void dump(const char *fname, const char *from, const char *to,
             size_t r;
             char buf[100001];
             
-            r = fread (buf, 1, 5, inf);
+            r = fread(buf, 1, 5, inf);
             if (r < 5)
             {
                 if (r && print_offset && verbose)
-                    printf ("<!-- Extra %ld bytes at end of file -->\n",
-                            (long) r);
+                    printf("<!-- Extra %ld bytes at end of file -->\n",
+                           (long) r);
                 break;
             }
             while (*buf < '0' || *buf > '9')
@@ -282,14 +282,14 @@ static void dump(const char *fname, const char *from, const char *to,
             if (r < 1)
             {
                 if (verbose || print_offset)
-                    printf ("<!-- End of file with data -->\n");
+                    printf("<!-- End of file with data -->\n");
                 break;
             }
             if (print_offset)
             {
                 long off = ftell(inf) - 5;
-                printf ("<!-- Record %d offset %ld (0x%lx) -->\n",
-                        num, off, off);
+                printf("<!-- Record %d offset %ld (0x%lx) -->\n",
+                       num, off, off);
             }
             len = atoi_n(buf, 5);
             if (len < 25 || len > 100000)
@@ -300,14 +300,14 @@ static void dump(const char *fname, const char *from, const char *to,
                 break;
             }
             rlen = len - 5;
-            r = fread (buf + 5, 1, rlen, inf);
+            r = fread(buf + 5, 1, rlen, inf);
             if (r < rlen)
                 break;
             while (buf[len-1] != ISO2709_RS)
             {
                 if (len > sizeof(buf)-2)
                     break;
-                r = fread (buf + len, 1, 1, inf);
+                r = fread(buf + len, 1, 1, inf);
                 if (r != 1)
                     break;
                 len++;
@@ -357,26 +357,26 @@ static void dump(const char *fname, const char *from, const char *to,
                 char *p = buf;
                 size_t i;
                 if (marc_no)
-                    fprintf (cfile, ",");
-                fprintf (cfile, "\n");
+                    fprintf(cfile, ",");
+                fprintf(cfile, "\n");
                 for (i = 0; i < r; i++)
                 {
                     if ((i & 15) == 0)
-                        fprintf (cfile, "  \"");
-                    fprintf (cfile, "\\x%02X", p[i] & 255);
+                        fprintf(cfile, "  \"");
+                    fprintf(cfile, "\\x%02X", p[i] & 255);
                     
                     if (i < r - 1 && (i & 15) == 15)
-                        fprintf (cfile, "\"\n");
+                        fprintf(cfile, "\"\n");
                     
                 }
-                fprintf (cfile, "\"\n");
+                fprintf(cfile, "\"\n");
             }
             num++;
             if (verbose)
                 printf("\n");
         }
         if (cfile)
-            fprintf (cfile, "};\n");
+            fprintf(cfile, "};\n");
         fclose(inf);
     }
     {
@@ -470,7 +470,7 @@ int main (int argc, char **argv)
             break;
         case 'c':
             if (cfile)
-                fclose (cfile);
+                fclose(cfile);
             cfile = fopen(arg, "w");
             break;
         case 'x':
@@ -528,13 +528,13 @@ int main (int argc, char **argv)
         }
     }
     if (cfile)
-        fclose (cfile);
+        fclose(cfile);
     if (!no)
     {
         usage(prog);
-        exit (1);
+        exit(1);
     }
-    exit (0);
+    exit(0);
 }
 /*
  * Local variables:

@@ -227,10 +227,6 @@ void destroy_association(association *h)
     request_delq(&h->outgoing);
     xfree(h);
     xmalloc_trav("session closed");
-    if (cb && cb->one_shot)
-    {
-        exit(0);
-    }
 }
 
 static void do_close_req(association *a, int reason, char *message,

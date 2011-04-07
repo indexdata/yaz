@@ -2,15 +2,15 @@
  * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <yaz/retrieval.h>
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
 #include <string.h>
 #include <yaz/log.h>
-
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #if YAZ_HAVE_XSLT
 

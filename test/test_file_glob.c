@@ -33,7 +33,7 @@ void tst_with_path(const char *tpath)
     yaz_file_globfree(&glob_res);
 }
 
-static check_file(const char *got, const char *expect)
+static int check_file(const char *got, const char *expect)
 {
     const char *f = got;
     size_t l_match = strlen(expect);
