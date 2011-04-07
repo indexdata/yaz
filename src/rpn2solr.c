@@ -184,7 +184,10 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
             	if (truncation <= 3)
                     return ((int) truncation & flag);
             }
-            /* Complex: Shouldn't happen */
+            else if (ae->which == Z_AttributeValue_complex) {
+                //yaz_log(YLOG_DEBUG, "Z_Attribute_complex");
+                /* Complex: Shouldn't happen */
+            }
         }
     }
     /* No truncation or unsupported */
@@ -192,11 +195,11 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
 };
 
 static int checkForLeftTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(1, attributes);
+	return checkForTruncation(2, attributes);
 }
 
 static int checkForRightTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(2, attributes);
+	return checkForTruncation(1, attributes);
 };
 
 static int rpn2solr_simple(solr_transform_t ct,
