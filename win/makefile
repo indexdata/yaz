@@ -52,8 +52,11 @@ dist: yaz.win32.nsi yaz.nsi distclean
 	$(NSIS) yaz.win32.nsi
 
 dist64: yaz.win64.nsi yaz.nsi distclean
-	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64
+	nmake make64
 	$(NSIS) yaz.win64.nsi 
+
+make64:
+	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64
 
 distclean:
 	nmake DEBUG=1 clean
