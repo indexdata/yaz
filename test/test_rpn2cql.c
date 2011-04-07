@@ -90,8 +90,10 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date>1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date<=1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date>=1980"));
-    /* truncation tests */
-    YAZ_CHECK(compare(ct, "@attr 1=1016 @attr 5=r abc", "abc"));
+    /* Truncation */
+    YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
+    YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
+    YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
     /* Other */
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "cql.allRecords=1"));
     YAZ_CHECK(compare(ct, "@attr 1=500 abc", 0));
