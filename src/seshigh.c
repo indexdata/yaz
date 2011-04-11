@@ -540,6 +540,9 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
             len = strlen(sr->username) + 1;
             if (sr->password) 
                 len += strlen(sr->password) + 2;
+            yaz_log(log_requestdetail, "username=%s password-len=%ld",
+                    sr->username, (long) 
+                    (sr->password ? strlen(sr->password) : 0));
             auth->which = Z_IdAuthentication_open;
             auth->u.open = (char *) odr_malloc(assoc->decode, len);
             strcpy(auth->u.open, sr->username);
