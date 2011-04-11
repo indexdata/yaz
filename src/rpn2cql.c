@@ -182,11 +182,11 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
 };
 
 static int checkForLeftTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(1, attributes);
+	return checkForTruncation(2, attributes);
 }
 
 static int checkForRightTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(2, attributes);
+	return checkForTruncation(1, attributes);
 };
 
 static int rpn2cql_simple(cql_transform_t ct,

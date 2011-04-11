@@ -70,6 +70,12 @@ static void tst1(void)
 
     solr_transform_define_pattern(ct, "index.foo", "1=bar");
     YAZ_CHECK(compare(ct, "@attr 1=bar abc", "foo:abc"));
+
+    /* Truncation */
+    YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
+    YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
+    YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
+
     /*
     YAZ_CHECK(compare(ct, "@or @attr 1=1016 water @attr 7=1 @attr 1=4 0", "any:water rank:??");
      */

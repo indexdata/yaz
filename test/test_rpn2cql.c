@@ -82,15 +82,19 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", "dc.title=abc"));
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=108 abc", "dc.title=/exact abc"));
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 3=1 @attr 6=1 abc", "dc.title=abc"));
-    YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=1 @attr 6=1 abc",
-                      "dc.title=abc"));
+    YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=1 @attr 6=1 abc", "dc.title=abc"));
     YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
+    /* Date tests */
     YAZ_CHECK(compare(ct, "@attr 2=1 @attr 1=30 1980", "dc.date<1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date=1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date>1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date<=1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date>=1980"));
-
+    /* Truncation */
+    YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
+    YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
+    YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
+    /* Other */
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "cql.allRecords=1"));
     YAZ_CHECK(compare(ct, "@attr 1=500 abc", 0));
     cql_transform_close(ct);
