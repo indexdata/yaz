@@ -36,7 +36,7 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
     return dst;
 }
 
-Z_AttributeList *yaz_use_atttribute_create(ODR o, const char *name) {
+Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name) {
     Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
     Z_AttributeElement ** elements;
     attributes->num_attributes = 1;

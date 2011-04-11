@@ -137,7 +137,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
     if (pos) {
         pos[0] = 0;
     }
-    list = yaz_use_atttribute_create(o, name);
+    list = yaz_use_attribute_create(o, name);
     for (node = ptr->children; node; node = node->next) {
         num_terms++;
     }
