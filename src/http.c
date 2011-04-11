@@ -233,6 +233,8 @@ void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
 
     if (username == 0)
         return;
+    if (password == 0)
+        password = "";
 
     len = strlen(username) + strlen(password);
     tmp = (char *) odr_malloc(o, len+2);
