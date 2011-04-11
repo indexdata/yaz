@@ -335,6 +335,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             if (ret == 0 && (*soap_package)->which == Z_SOAP_generic)
             {
                 *srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
+                yaz_srw_decodeauth(*srw_pdu, hreq, 0, 0, decode);
                 
                 if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
                     (*srw_pdu)->u.request->database == 0)
