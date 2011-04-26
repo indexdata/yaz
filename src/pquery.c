@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>
@@ -77,7 +76,7 @@ static int query_token(struct yaz_pqf_parser *li)
     }
     li->lex_buf = *qptr;
    
-    if (**qptr == li->escape_char && isdigit(((const unsigned char *) *qptr)[1]))
+    if (**qptr == li->escape_char && yaz_isdigit((*qptr)[1]))
     {
         ++(li->lex_len);
         ++(*qptr);

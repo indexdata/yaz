@@ -13,7 +13,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <yaz/xmalloc.h>
 
 #include "mime.h"

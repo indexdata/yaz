@@ -12,8 +12,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
-
+#include <yaz/yaz-iconv.h>
 #include "cclp.h"
 
 /*
@@ -105,7 +104,7 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
         case '%':
         case '!':
             last->kind = CCL_TOK_PROX;
-            while (isdigit(*cp))
+            while (yaz_isdigit(*cp))
             {
                 ++ last->len;
                 cp++;

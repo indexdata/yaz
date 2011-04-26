@@ -82,6 +82,15 @@ YAZ_EXPORT size_t yaz_write_UTF8_char(unsigned long x,
                                       char **outbuf, size_t *outbytesleft,
                                       int *error);
 
+/* ctype.h macros ASCII based. That do not depend on LANG, nor require
+   unsigned int as argument */
+#define yaz_isdigit(x) ((x) >= '0' && (x) <= '9')
+#define yaz_isspace(x) strchr(" \f\r\n\t\v", x)
+#define yaz_toupper(x) ((x) + ('A' - 'a'))
+#define yaz_isupper(x) ((x) >= 'A' && (x) <= 'Z')
+#define yaz_tolower(x) ((x) + ('a' - 'A'))
+#define yaz_islower(x) ((x) >= 'a' && (x) <= 'z')
+
 YAZ_END_CDECL
 
 #endif

@@ -10,7 +10,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #include <yaz/tpath.h>
 #include <yaz/test.h>

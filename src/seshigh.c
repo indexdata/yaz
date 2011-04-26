@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <ctype.h>
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -1920,7 +1919,7 @@ static void process_http_request(association *assoc, request *req)
         int t;
         const char *alive = z_HTTP_header_lookup(hreq->headers, "Keep-Alive");
 
-        if (alive && isdigit(*(const unsigned char *) alive))
+        if (alive && yaz_isdigit(*(const unsigned char *) alive))
             t = atoi(alive);
         else
             t = 15;

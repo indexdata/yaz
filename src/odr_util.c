@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "odr-priv.h"
 #include <yaz/oid_util.h>
 

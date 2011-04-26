@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
+#include <yaz/yaz-iconv.h>
 #include <yaz/snprintf.h>
 #include <yaz/oid_util.h>
 
@@ -76,7 +76,7 @@ int oid_dotstring_to_oid(const char *name, Odr_oid *oid)
 {
     int i = 0;
     int val = 0;
-    while (isdigit (*(unsigned char *) name))
+    while (yaz_isdigit (*name))
     {
         val = val*10 + (*name - '0');
         name++;

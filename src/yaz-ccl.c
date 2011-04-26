@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <yaz/yaz-ccl.h>
 #include <yaz/pquery.h>

@@ -13,7 +13,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <yaz/yaz-util.h>
 #include <yaz/odr.h>

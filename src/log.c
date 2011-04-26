@@ -22,11 +22,11 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <time.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/errno.h>
 #include <yaz/thread_id.h>
 #include <yaz/log.h>
@@ -575,7 +575,7 @@ int yaz_log_mask_str_x(const char *str, int level)
             negated = 1;
             str++;
         }
-        if (isdigit(*(unsigned char *) str))
+        if (yaz_isdigit(*str))
         {
             level = atoi(str);
         }

@@ -10,7 +10,6 @@
 #endif
 
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
 
 #include <yaz/proto.h>
@@ -34,7 +33,7 @@ static Z_GenericRecord *read_grs1(FILE *f, ODR o)
 
         while (fgets(buf = line, 512, f))
         {
-            while (*buf && isspace(*(unsigned char *) buf))
+            while (*buf && yaz_isspace(*buf))
                 buf++;
             if (!*buf || *buf == '#')
                 continue;
@@ -52,7 +51,7 @@ static Z_GenericRecord *read_grs1(FILE *f, ODR o)
         if (!(buf = strchr(buf, ')')))
             return 0;
         buf++;
-        while (*buf && isspace(*(unsigned char *) buf))
+        while (*buf && yaz_isspace(*buf))
             buf++;
         if (!*buf)
             return 0;

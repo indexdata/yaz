@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #ifdef WIN32
 #include <process.h>
@@ -64,6 +63,7 @@
 #include "session.h"
 #include <yaz/statserv.h>
 #include <yaz/daemon.h>
+#include <yaz/yaz-iconv.h>
 
 static IOCHAN pListener = NULL;
 
@@ -195,7 +195,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
             cp = p->content;
             if (first)
             {
-                while(*cp && isspace(*cp))
+                while(*cp && yaz_isspace(*cp))
                     cp++;
                 if (*cp)
                     first = 0;  /* reset if we got non-whitespace out */
@@ -205,7 +205,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
     }
     /* remove trailing whitespace */
     cp = strlen((const char *)str) + str;
-    while (cp != str && isspace(cp[-1]))
+    while (cp != str && yaz_isspace(cp[-1]))
         cp--;
     *cp = '\0';
     /* return resulting string */

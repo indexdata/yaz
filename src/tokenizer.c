@@ -13,7 +13,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
 #include <yaz/tokenizer.h>

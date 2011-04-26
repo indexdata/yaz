@@ -12,7 +12,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 
 #include <yaz/xmalloc.h>

@@ -15,9 +15,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <yaz/querytowrbuf.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/ccl.h>
 
 static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent);
@@ -45,7 +45,7 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
             if (*cp == '!')
             {   
                 /* word order specified */
-                if (isdigit(((const unsigned char *) cp)[1]))
+                if (yaz_isdigit(cp[1]))
                     wrbuf_printf(w, "@prox 0 %s 1 2 k 2", cp+1);
                 else
                     wrbuf_printf(w, "@prox 0 1 1 2 k 2");
@@ -53,7 +53,7 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
             else if (*cp == '%')
             {
                 /* word order not specified */
-                if (isdigit(((const unsigned char *) cp)[1]))
+                if (yaz_isdigit(cp[1]))
                     wrbuf_printf(w, "@prox 0 %s 0 2 k 2", cp+1);
                 else
                     wrbuf_printf(w, "@prox 0 1 0 2 k 2");

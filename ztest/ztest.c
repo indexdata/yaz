@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1010,8 +1009,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
         strcpy(term, "0");
 
     for (p = term; *p; p++)
-        if (islower(*(unsigned char *) p))
-            *p = toupper(*p);
+        if (yaz_islower(*p))
+            *p = yaz_toupper(*p);
 
     fseek(f, 0, SEEK_SET);
     q->num_entries = 0;

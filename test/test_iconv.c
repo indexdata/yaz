@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <yaz/yaz-util.h>
 #include <yaz/test.h>

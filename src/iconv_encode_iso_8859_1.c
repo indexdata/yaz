@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <yaz/xmalloc.h>
 #include "iconv-p.h"

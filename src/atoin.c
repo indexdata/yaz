@@ -13,8 +13,8 @@
 #endif
 
 #include <string.h>
-#include <ctype.h>
 #include <yaz/marcdisp.h>
+#include <yaz/yaz-iconv.h>
 
 int atoi_n(const char *buf, int len)
 {
@@ -22,7 +22,7 @@ int atoi_n(const char *buf, int len)
 
     while (--len >= 0)
     {
-        if (isdigit(*(const unsigned char *) buf))
+        if (yaz_isdigit(*buf))
             val = val*10 + (*buf - '0');
         buf++;
     }
@@ -33,7 +33,7 @@ int atoi_n_check(const char *buf, int size, int *val)
 {
     int i;
     for (i = 0; i < size; i++)
-        if (!isdigit(i[(const unsigned char *) buf]))
+        if (!yaz_isdigit(*buf))
             return 0;
     *val = atoi_n(buf, size);
     return 1;

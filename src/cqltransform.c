@@ -23,7 +23,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <yaz/rpn2cql.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
@@ -138,7 +137,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             break;
         }
         value_str = yaz_tok_parse_string(tp);
-        if (isdigit(*value_str))
+        if (yaz_isdigit(*value_str))
         {
             elem->which = Z_AttributeValue_numeric;
             elem->value.numeric =

@@ -9,7 +9,7 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <ctype.h>
+#include <yaz/yaz-iconv.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,7 +17,10 @@
 
 static int ccli_toupper (int c)
 {
-    return toupper (c);
+    if (yaz_islower(c))
+        return yaz_toupper(c);
+    else
+        return c;
 }
 
 int (*ccl_toupper)(int c) = NULL;

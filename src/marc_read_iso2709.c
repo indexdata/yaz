@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <yaz/marcdisp.h>
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
@@ -90,7 +89,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         }
         /* Check for digits in length+starting info */
         while (--l >= 3)
-            if (!isdigit(*(const unsigned char *) (buf + entry_p+l)))
+            if (!yaz_isdigit(buf[entry_p + l]))
                 break;
         if (l >= 3)
         {

@@ -13,7 +13,6 @@
 #endif
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include <yaz/log.h>
 #include <yaz/readconf.h>

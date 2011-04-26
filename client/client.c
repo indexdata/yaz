@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
-#include <ctype.h>
 #ifndef WIN32
 #include <signal.h>
 #endif
@@ -3067,7 +3066,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     *start = start_position;
     if (*end_ptr == '\0')
         return 1;
-    while (isspace(*(unsigned char *)end_ptr))
+    while (yaz_isspace(*end_ptr))
         end_ptr++;
     if (*end_ptr != '+')
     {
@@ -3084,7 +3083,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     }
     if (*end_ptr == '\0')
         return 1;
-    while (isspace(*(unsigned char *)end_ptr))
+    while (yaz_isspace(*end_ptr))
         end_ptr++;
     if (*end_ptr != '+')
     {
@@ -5180,7 +5179,7 @@ static void process_cmd_line(char* line)
 
         for (; *p; ++p)
         {
-            if (!isspace(*(unsigned char *) p))
+            if (!yaz_isspace(*p))
                 lastnonspace = p;
         }
         if (lastnonspace)

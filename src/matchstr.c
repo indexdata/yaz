@@ -14,8 +14,8 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <ctype.h>
 #include <string.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/matchstr.h>
 
 int yaz_matchstr(const char *s1, const char *s2)
@@ -35,10 +35,10 @@ int yaz_matchstr(const char *s1, const char *s2)
             break;
         if (c2 != '.')
         {
-            if (isupper(c1))
-                c1 = tolower(c1);
-            if (isupper(c2))
-                c2 = tolower(c2);
+            if (yaz_isupper(c1))
+                c1 = yaz_tolower(c1);
+            if (yaz_isupper(c2))
+                c2 = yaz_tolower(c2);
             if (c1 != c2)
                 break;
         }

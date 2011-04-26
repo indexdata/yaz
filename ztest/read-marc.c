@@ -9,7 +9,6 @@
 #include <config.h>
 #endif
 
-#include <ctype.h>
 #include <yaz/wrbuf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/odr.h>

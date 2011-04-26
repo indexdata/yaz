@@ -14,7 +14,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h>
 #if HAVE_WCHAR_H
 #include <wchar.h>
 #endif

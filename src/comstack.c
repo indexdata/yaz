@@ -11,9 +11,9 @@
 #endif
 
 #include <string.h>
-#include <ctype.h>
 #include <errno.h>
 
+#include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
@@ -234,13 +234,13 @@ static int cs_read_chunk(const char *buf, int i, int len)
                 printf ("i=%d len=%d\n", i, len);
 #endif
                 return 0;
-            } else if (isdigit(buf[i]))
+            } else if (yaz_isdigit(buf[i]))
                 chunk_len = chunk_len * 16 + 
                     (buf[i++] - '0');
-            else if (isupper(buf[i]))
+            else if (yaz_isupper(buf[i]))
                 chunk_len = chunk_len * 16 + 
                     (buf[i++] - ('A'-10));
-            else if (islower(buf[i]))
+            else if (yaz_islower(buf[i]))
                 chunk_len = chunk_len * 16 + 
                     (buf[i++] - ('a'-10));
             else
@@ -345,7 +345,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 while (buf[i] == ' ')
                     i++;
                 content_len = 0;
-                while (i <= len-4 && isdigit(buf[i]))
+                while (i <= len-4 && yaz_isdigit(buf[i]))
                     content_len = content_len*10 + (buf[i++] - '0');
                 if (content_len < 0) /* prevent negative offsets */
                     content_len = 0;

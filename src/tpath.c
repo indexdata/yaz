@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <yaz/tpath.h>
 #include <yaz/log.h>
 #if HAVE_SYS_TYPES_H

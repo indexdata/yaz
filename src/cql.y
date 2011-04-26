@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <yaz/yaz-iconv.h>
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/cql.h>
@@ -266,7 +266,7 @@ int yylex(YYSTYPE *lval, void *vp)
             return 0;
         if (c == '\n')
             return 0;
-    } while (isspace(c));
+    } while (yaz_isspace(c));
     if (strchr("()=></", c))
     {
         int c1;

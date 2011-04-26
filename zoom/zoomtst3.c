@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <yaz/yaz-iconv.h>
 
 #include <yaz/xmalloc.h>
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
                          "%s number target query\n", *argv, *argv);
         exit (1);
     }
-    if (argc == 4 && isdigit(argv[1][0]) && !strchr(argv[1],'.'))
+    if (argc == 4 && yaz_isdigit(argv[1][0]) && !strchr(argv[1],'.'))
     {
         no = atoi(argv[1]);
         same_target = 1;

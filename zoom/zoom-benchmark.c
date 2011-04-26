@@ -2,17 +2,18 @@
  * Copyright (C) 1995-2011 Index Data
  * See the file LICENSE for details.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/time.h>
 
 #include <yaz/xmalloc.h>
 #include <yaz/options.h>
 #include <yaz/zoom.h>
-
 
 /* naming events */
 static char* zoom_events[ZOOM_EVENT_MAX+1];

@@ -10,7 +10,6 @@
 #include <config.h>
 #endif
 
-#include <ctype.h>
 #include <yaz/odr.h>
 #include <yaz/yaz-version.h>
 #include <yaz/yaz-iconv.h>
@@ -143,13 +142,13 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             /* chunk length .. */
             int chunk_len = 0;
             for (; i  < o->size-2; i++)
-                if (isdigit(o->buf[i]))
+                if (yaz_isdigit(o->buf[i]))
                     chunk_len = chunk_len * 16 + 
                         (o->buf[i] - '0');
-                else if (isupper(o->buf[i]))
+                else if (yaz_isupper(o->buf[i]))
                     chunk_len = chunk_len * 16 + 
                         (o->buf[i] - ('A'-10));
-                else if (islower(o->buf[i]))
+                else if (yaz_islower(o->buf[i]))
                     chunk_len = chunk_len * 16 + 
                         (o->buf[i] - ('a'-10));
                 else

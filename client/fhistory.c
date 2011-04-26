@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
-#include <ctype.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif

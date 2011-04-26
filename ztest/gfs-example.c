@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #include <yaz/log.h>
 #include <yaz/backend.h>

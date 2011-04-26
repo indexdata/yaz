@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include <ctype.h>
 
 #if HAVE_ICONV_H
 #include <iconv.h>
