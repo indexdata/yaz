@@ -23,7 +23,7 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
         if (strchr(" \"{", term[i]))
             break;
     if (i == len && i)
-        wrbuf_printf(b, "%.*s ", len, term);
+        wrbuf_write(b, term, len);
     else
     {
         wrbuf_putc(b, '"');
@@ -33,8 +33,9 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
                 wrbuf_putc(b, '\\');
             wrbuf_putc(b, term[i]);
         }
-        wrbuf_printf(b, "\" ");
+        wrbuf_putc(b, '"');
     }
+    wrbuf_putc(b, ' ');
 }
 
 static void yaz_attribute_element_to_wrbuf(WRBUF b,
@@ -64,11 +65,10 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
         for (i = 0; i<element->value.complex->num_list; i++)
         {
             if (i)
-                wrbuf_printf(b, ",");
+                wrbuf_puts(b, ",");
             if (element->value.complex->list[i]->which ==
                 Z_StringOrNumeric_string)
-                wrbuf_printf(b, "%s",
-                             element->value.complex->list[i]->u.string);
+                wrbuf_puts(b, element->value.complex->list[i]->u.string);
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
                 wrbuf_printf(b, ODR_INT_PRINTF, 
@@ -76,7 +76,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
         }
         break;
     default:
-        wrbuf_printf (b, "@attr 1=unknown");
+        wrbuf_puts(b, "@attr 1=unknown");
     }
     wrbuf_puts(b, " ");
 }
@@ -112,7 +112,7 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
                             zapt->term->u.general->len);
         break;
     case Z_Term_characterString:
-        wrbuf_printf(b, "@term string ");
+        wrbuf_puts(b, "@term string ");
         yaz_encode_pqf_term(b, zapt->term->u.characterString,
                             strlen(zapt->term->u.characterString));
         break;
@@ -121,7 +121,7 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
                      *zapt->term->u.numeric);
         break;
     case Z_Term_null:
-        wrbuf_printf(b, "@term null x");
+        wrbuf_puts(b, "@term null x");
         break;
     default:
         wrbuf_printf(b, "@term null unknown%d ", zapt->term->which);
@@ -178,7 +178,7 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
                                 strlen(zs->u.simple->u.resultSetId));
         }
         else
-            wrbuf_printf (b, "(unknown simple structure)");
+            wrbuf_puts(b, "(unknown simple structure)");
     }
     else
         wrbuf_puts(b, "(unknown structure)");
@@ -206,19 +206,23 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
     {
     case Z_Query_type_1: 
     case Z_Query_type_101:
-        wrbuf_printf(b,"RPN ");
+        wrbuf_puts(b,"RPN ");
         yaz_rpnquery_to_wrbuf(b, q->u.type_1);
         break;
     case Z_Query_type_2:
-        wrbuf_printf(b, "CCL %.*s", q->u.type_2->len, q->u.type_2->buf);
+        wrbuf_puts(b, "CCL ");
+        wrbuf_write(b, (const char *) q->u.type_2->buf, q->u.type_2->len);
         break;
     case Z_Query_type_100:
-        wrbuf_printf(b, "Z39.58 %.*s", q->u.type_100->len,
-                     q->u.type_100->buf);
+        wrbuf_puts(b, "Z39.58 ");
+        wrbuf_write(b, (const char *) q->u.type_100->buf, q->u.type_100->len);
         break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
-            wrbuf_printf(b, "CQL %s", q->u.type_104->u.cql);
+        {
+            wrbuf_puts(b, "CQL ");
+            wrbuf_puts(b, q->u.type_104->u.cql);
+        }
         else
             wrbuf_printf(b,"UNKNOWN type 104 query %d", q->u.type_104->which);
     }
@@ -228,27 +232,28 @@ void yaz_scan_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt,
                        const Odr_oid *attrbute_set)
 {
     /* should print attr set here */
-    wrbuf_printf(b, "RPN ");
+    wrbuf_puts(b, "RPN ");
     yaz_apt_to_wrbuf(b, zapt);
 }
 
 void wrbuf_diags(WRBUF b, int num_diagnostics, Z_DiagRec **diags)
 {
     /* we only dump the first diag - that keeps the log cleaner. */
-    wrbuf_printf(b," ERROR ");
+    wrbuf_puts(b," ERROR ");
     if (diags[0]->which != Z_DiagRec_defaultFormat)
-        wrbuf_printf(b,"(diag not in default format?)");
+        wrbuf_puts(b,"(diag not in default format?)");
     else
     {
         Z_DefaultDiagFormat *e=diags[0]->u.defaultFormat;
         if (e->condition)
             wrbuf_printf(b, ODR_INT_PRINTF " ",*e->condition);
         else
-            wrbuf_printf(b, "?? ");
+            wrbuf_puts(b, "?? ");
         if ((e->which==Z_DefaultDiagFormat_v2Addinfo) && (e->u.v2Addinfo))
-            wrbuf_printf(b,"%s ",e->u.v2Addinfo);
+            wrbuf_puts(b, e->u.v2Addinfo);
         else if ((e->which==Z_DefaultDiagFormat_v3Addinfo) && (e->u.v3Addinfo))
-            wrbuf_printf(b,"%s ",e->u.v3Addinfo);
+            wrbuf_puts(b, e->u.v3Addinfo);
+        wrbuf_puts(b, " ");
     }
 }
 

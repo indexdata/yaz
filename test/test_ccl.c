@@ -166,6 +166,11 @@ void tst1(int pass)
     }
     
     YAZ_CHECK(tst_ccl_query(bibset, "x1", "@attr 4=2 @attr 1=1016 x1 "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "k\xc3\xb8" "benhavn", "@attr 4=2 @attr 1=1016 k\xc3\xb8" "benhavn "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "k\xf8" "benhavn", "@attr 4=2 @attr 1=1016 ""k\xf8" "benhavn "));
+
     YAZ_CHECK(tst_ccl_query(bibset, "(((((x1)))))", "@attr 4=2 @attr 1=1016 x1 "));
     YAZ_CHECK(tst_ccl_query(bibset, "x1 and x2",
                   "@and "

@@ -1192,8 +1192,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-            wrbuf_printf(wr, "%.*s", indicator_length,
-                         n->u.datafield.indicator);
+            wrbuf_write(wr, n->u.datafield.indicator, indicator_length);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 wrbuf_putc(wr, ISO2709_IDFS);
