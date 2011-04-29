@@ -1,12 +1,10 @@
 
 
 #if HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #if YAZ_HAVE_ICU
-
-#include <yaz/yconfig.h>
 
 #include <yaz/stemmer.h>
 

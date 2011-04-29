@@ -56,7 +56,6 @@
 #include <libxml/tree.h>
 #endif
 
-#include <yaz/yconfig.h>
 #include <yaz/xmalloc.h>
 #include <yaz/comstack.h>
 #include "eventl.h"
