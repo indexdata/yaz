@@ -1,2 +1,2 @@
-DEBIAN_DIST="squeeze lenny"
-UBUNTU_DIST="maverick lucid karmic"
+DEBIAN_DIST="wheezy squeeze lenny"
+UBUNTU_DIST="natty maverick lucid karmic"
