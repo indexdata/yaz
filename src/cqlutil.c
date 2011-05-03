@@ -83,6 +83,19 @@ struct cql_node *cql_node_mk_boolean(NMEM nmem, const char *op)
     return p;
 }
 
+struct cql_node *cql_node_mk_sort(NMEM nmem, const char *index,
+    struct cql_node *modifiers)
+{
+    struct cql_node *p = (struct cql_node *) nmem_malloc(nmem, sizeof(*p));
+    p->which = CQL_NODE_SORT;
+    p->u.sort.index = 0;
+    if (index)
+        p->u.sort.index = nmem_strdup(nmem, index);
+    p->u.sort.modifiers = modifiers;
+    p->u.sort.next = 0;
+    return p;
+}
+
 const char *cql_uri(void)
 {
     return "info:srw/cql-context-set/1/cql-v1.2";
@@ -144,6 +157,11 @@ void cql_node_destroy(struct cql_node *cn)
         cql_node_destroy(cn->u.boolean.left);
         cql_node_destroy(cn->u.boolean.right);
         cql_node_destroy(cn->u.boolean.modifiers);
+        break;
+    case CQL_NODE_SORT:
+        cql_node_destroy(cn->u.sort.search);
+        cql_node_destroy(cn->u.sort.next);
+        cql_node_destroy(cn->u.sort.modifiers);
     }
 }
 

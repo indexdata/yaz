@@ -100,6 +100,9 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
 #define CQL_NODE_ST 1
 /** \brief Node type: boolean */
 #define CQL_NODE_BOOL 2
+/** \brief Node type: sortby single spec */
+#define CQL_NODE_SORT 3
+
 /** \brief CQL parse tree (node)
  */
 struct cql_node {
@@ -134,6 +137,16 @@ struct cql_node {
             /** modifiers (NULL for no list) */
             struct cql_node *modifiers;
         } boolean;
+        /** which == CQL_NODE_SORT */
+        struct {
+            char *index;
+            /** next spec */
+            struct cql_node *next;
+            /** modifiers (NULL for no list) */
+            struct cql_node *modifiers;
+            /** search node */
+            struct cql_node *search;
+        } sort;
     } u;
 };
 
@@ -178,6 +191,11 @@ struct cql_node *cql_apply_prefix(NMEM nmem, struct cql_node *cn,
 YAZ_EXPORT
 struct cql_node *cql_node_mk_boolean(NMEM nmem, const char *op);
 
+/** \brief creates a sort single spec node. */
+YAZ_EXPORT
+struct cql_node *cql_node_mk_sort(NMEM nmem, const char *index,
+    struct cql_node *modifiers);
+
 /** \brief destroys a node and its children. */
 YAZ_EXPORT
 void cql_node_destroy(struct cql_node *cn);
@@ -192,6 +210,13 @@ struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp);
 */
 YAZ_EXPORT
 struct cql_node *cql_parser_result(CQL_parser cp);
+
+/** \brief returns the sortby tree of the most recently parsed CQL query.
+    \param cp CQL parser
+    \returns CQL node or NULL for failure
+*/
+YAZ_EXPORT
+struct cql_node *cql_parser_sort_result(CQL_parser cp);
 
 /** \brief converts CQL tree to XCQL and writes to user-defined stream
     \param cn CQL node (tree)

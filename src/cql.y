@@ -66,17 +66,35 @@ top: {
     ((CQL_parser) parm)->top = 0;
 } cqlQuery1 sortby {
     cql_node_destroy($$.rel);
-    ((CQL_parser) parm)->top = $2.cql; 
+    if ($3.cql)
+    {
+        $3.cql->u.sort.search = $2.cql;
+        ((CQL_parser) parm)->top = $3.cql;
+    } else {
+        ((CQL_parser) parm)->top = $2.cql;
+    }
 }
 ;
 
 sortby: /* empty */
-| SORTBY sortSpec;
+  { $$.cql = 0; }
+| SORTBY sortSpec {
+    $$.cql = $2.cql;
+ };
 
-sortSpec: sortSpec singleSpec
-| singleSpec; 
+sortSpec: sortSpec singleSpec {
+    $$.cql = $1.cql;
+    $$.cql->u.sort.next = $2.cql;
+ }
+| singleSpec
+{
+    $$.cql = $1.cql;
+}; 
 
-singleSpec: index modifiers ;
+singleSpec: index modifiers {
+    $$.cql = cql_node_mk_sort(((CQL_parser) parm)->nmem, $1.buf, $2.cql);
+ }
+;
 
 cqlQuery1: cqlQuery
 | cqlQuery error {
@@ -395,8 +413,7 @@ int cql_parser_stream(CQL_parser cp,
     cp->getbyte = getbyte;
     cp->ungetbyte = ungetbyte;
     cp->client_data = client_data;
-    if (cp->top)
-        cql_node_destroy(cp->top);
+    cql_node_destroy(cp->top);
     cql_parse(cp);
     if (cp->top)
         return 0;
@@ -428,6 +445,7 @@ struct cql_node *cql_parser_result(CQL_parser cp)
 {
     return cp->top;
 }
+
 /*
  * Local variables:
  * c-basic-offset: 4

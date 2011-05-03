@@ -118,9 +118,36 @@ static void cql_to_xml_mod(struct cql_node *m,
     }
 }
 
+static void cql_sort_to_xml(struct cql_node *cn, 
+                         void (*pr)(const char *buf, void *client_data),
+                            void *client_data, int level)
+{
+    if (cn)
+    {
+        pr_n("<sortKeys>\n", pr, client_data, level);
+        for (; cn; cn = cn->u.sort.next)
+        {
+            pr_n("<key>\n", pr, client_data, level+2);
+            
+            if (cn->u.sort.index)
+            {
+                pr_n("<index>", pr, client_data, level+4);
+                pr_cdata(cn->u.sort.index, pr, client_data);
+                pr_n("</index>\n", pr, client_data, 0);
+
+                cql_to_xml_mod(cn->u.sort.modifiers,
+                               pr, client_data, level+6);
+            }
+            pr_n("</key>\n", pr, client_data, level+2);
+        }
+        pr_n("</sortKeys>\n", pr, client_data, level);
+    }
+}
+
 static void cql_to_xml_r(struct cql_node *cn,
                          void (*pr)(const char *buf, void *client_data),
-                         void *client_data, int level)
+                         void *client_data, int level,
+                         struct cql_node *sort_node)
 {
     if (!cn)
         return;
@@ -171,6 +198,7 @@ static void cql_to_xml_r(struct cql_node *cn,
                 pr_n("</term>\n", pr, client_data, 0);
             }
         }
+        cql_sort_to_xml(sort_node, pr, client_data, level+2);
         pr_n("</searchClause>\n", pr, client_data, level);
         break;
     case CQL_NODE_BOOL:
@@ -191,16 +219,20 @@ static void cql_to_xml_r(struct cql_node *cn,
         if (cn->u.boolean.left)
         {
             printf ("%*s<leftOperand>\n", level+2, "");
-            cql_to_xml_r(cn->u.boolean.left, pr, client_data, level+4);
+            cql_to_xml_r(cn->u.boolean.left, pr, client_data, level+4, 0);
             printf ("%*s</leftOperand>\n", level+2, "");
         }
         if (cn->u.boolean.right)
         {
             printf ("%*s<rightOperand>\n", level+2, "");
-            cql_to_xml_r(cn->u.boolean.right, pr, client_data, level+4);
+            cql_to_xml_r(cn->u.boolean.right, pr, client_data, level+4, 0);
             printf ("%*s</rightOperand>\n", level+2, "");
         }
+        cql_sort_to_xml(sort_node, pr, client_data, level+2);
         pr_n("</triple>\n", pr, client_data, level);
+        break;
+    case CQL_NODE_SORT:
+        cql_to_xml_r(cn->u.sort.search, pr, client_data, level, cn);
     }
 }
 
@@ -208,7 +240,7 @@ void cql_to_xml(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
-    cql_to_xml_r(cn, pr, client_data, 0);
+    cql_to_xml_r(cn, pr, client_data, 0, 0);
 }
 
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f)
