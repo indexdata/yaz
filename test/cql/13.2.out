@@ -1,0 +1,36 @@
+<triple>
+  <boolean>
+    <value>or</value>
+  </boolean>
+  <leftOperand>
+    <searchClause>
+      <index>cql.serverChoice</index>
+      <relation>
+        <value>=</value>
+      </relation>
+      <term>a</term>
+    </searchClause>
+  </leftOperand>
+  <rightOperand>
+    <searchClause>
+      <index>cql.serverChoice</index>
+      <relation>
+        <value>=</value>
+      </relation>
+      <term>b</term>
+    </searchClause>
+  </rightOperand>
+  <sortKeys>
+    <key>
+      <index>title</index>
+        <modifiers>
+          <modifier>
+            <type>ascending</type>
+          </modifier>
+        </modifiers>
+    </key>
+    <key>
+      <index>author</index>
+    </key>
+  </sortKeys>
+</triple>

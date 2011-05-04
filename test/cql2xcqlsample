@@ -112,3 +112,7 @@ dc.title a b c and d
 # free-form term (Syntax error)
 a b.c
 a and
+
+# sortby
+a sortby title
+a or b sortby title/ascending author
