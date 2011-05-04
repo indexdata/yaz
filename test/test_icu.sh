@@ -13,7 +13,7 @@ if test $? = "3"; then
     exit 0
 fi
 
-for f in ${srcdir}/tsticu-[0-9].input; do
+for f in ${srcdir}/test_icu.[0-9].input; do
     fb=`basename ${f} .input`
     CONFIG=${srcdir}/${fb}.xml
     NEW=${fb}.output.tmp

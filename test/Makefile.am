@@ -9,7 +9,8 @@ check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_rpn2cql test_rpn2solr test_json test_xml_include test_file_glob \
  test_shared_ptr test_libstemmer
 
-check_SCRIPTS = tstmarc.sh tstmarccol.sh tstcql2xcql.sh tstcql2pqf.sh tsticu.sh
+check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
+	test_cql2pqf.sh test_icu.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 
@@ -21,9 +22,10 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  marccol3.u8.marc marccol3.u8.1.lst marccol3.u8.2.lst \
  marccol4.u8.marc marccol4.u8.1.lst marccol4.u8.2.lst \
  marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
- tsticu-0.xml tsticu-0.input tsticu-0.output \
- tsticu-1.xml tsticu-1.input tsticu-1.output \
- tsticu-2.xml tsticu-2.input tsticu-2.output \
+ test_icu.0.xml test_icu.0.input test_icu.0.output \
+ test_icu.1.xml test_icu.1.input test_icu.1.output \
+ test_icu.2.xml test_icu.2.input test_icu.2.output \
+ test_icu.3.xml test_icu.3.input test_icu.3.output \
  test_record_conv.xsl test_xml_include.xml
 
 YAZCOMP = ../util/yaz-asncomp
