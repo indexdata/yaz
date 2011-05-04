@@ -734,7 +734,7 @@ static void emit_term(cql_transform_t ct,
     }
 
     (*pr)("\"", client_data);
-    for (i = 0; i<length; i++)
+    for (i = 0; i < length; i++)
     {
         /* pr(int) each character */
         /* we do not need to deal with \-sequences because the
@@ -914,7 +914,8 @@ int cql_transform_FILE(cql_transform_t ct, struct cql_node *cn, FILE *f)
     return cql_transform(ct, cn, cql_fputs, f);
 }
 
-int cql_transform_buf(cql_transform_t ct, struct cql_node *cn, char *out, int max)
+int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
+                      char *out, int max)
 {
     struct cql_buf_write_info info;
     int r;

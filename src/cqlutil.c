@@ -21,7 +21,7 @@ void cql_fputs(const char *buf, void *client_data)
     fputs(buf, f);
 }
 
-struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp)
+struct cql_node *cql_node_dup(NMEM nmem, struct cql_node *cp)
 {
     struct cql_node *cn = 0;
 
