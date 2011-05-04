@@ -386,6 +386,37 @@ int cql_strcmp(const char *s1, const char *s2);
 YAZ_EXPORT
 int cql_strncmp(const char *s1, const char *s2, size_t n);
 
+/** \brief converts CQL sortby to sortkeys (ala versions 1.1)
+    \param cn CQL tree
+    \param pr print function
+    \param client_data data to be passed to pr function
+    
+    This will take CQL_NODE_SORT entries and conver them to
+
+    path,schema,ascending,caseSensitive,missingValue
+    items..
+
+    One for each sort keys. Where
+
+    path is string index for sorting
+
+    schema is schema for sort index
+
+    ascending is a boolean (0=false, 1=true). Default is true.
+
+    caseSensitive is a boolean. Default is false.
+
+    missingValue is a string and one of 'abort', 'highValue', 'lowValue',
+    or 'omit'. Default is 'highValue'.
+
+    See also
+    http://www.loc.gov/standards/sru/sru1-1archive/search-retrieve-operation.html#sort
+*/
+YAZ_EXPORT
+int cql_sortby_to_sortkeys(struct cql_node *cn,
+                           void (*pr)(const char *buf, void *client_data),
+                           void *client_data);
+
 YAZ_END_CDECL
 
 #endif

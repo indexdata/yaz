@@ -94,7 +94,8 @@ libyaz_la_SOURCES=version.c options.c log.c \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c solr.c \
   opacdisp.c cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
   cclqfile.c cclstr.c cclxmlconfig.c ccl_stop_words.c \
-  cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c rpn2cql.c \
+  cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \
+  cql_sortkeys.c rpn2cql.c \
   rpn2solr.c solrtransform.c \
   cqlstrer.c querytowrbuf.c \
   tcpdchk.c \
