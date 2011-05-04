@@ -43,6 +43,11 @@ struct cql_node *cql_node_dup (NMEM nmem, struct cql_node *cp)
         cn = cql_node_mk_boolean(nmem, cp->u.boolean.value);
         cn->u.boolean.left = cql_node_dup(nmem, cp->u.boolean.left);
         cn->u.boolean.right = cql_node_dup(nmem, cp->u.boolean.right);
+        break;
+    case CQL_NODE_SORT:
+        cn = cql_node_mk_sort(nmem, cp->u.sort.index, cp->u.sort.modifiers);
+        cn->u.sort.next = cql_node_dup(nmem, cp->u.sort.next);
+        cn->u.sort.search = cql_node_dup(nmem, cp->u.sort.search);
     }
     return cn;
 }
@@ -140,6 +145,10 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
     {
         cql_apply_prefix(nmem, n->u.boolean.left, prefix, uri);
         cql_apply_prefix(nmem, n->u.boolean.right, prefix, uri);
+    }
+    else if (n->which == CQL_NODE_SORT)
+    {
+        cql_apply_prefix(nmem, n->u.sort.search, prefix, uri);
     }
     return n;
 }

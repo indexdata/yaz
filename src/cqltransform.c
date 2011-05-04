@@ -876,7 +876,9 @@ void cql_transform_r(cql_transform_t ct,
         cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
         cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
         break;
-
+    case CQL_NODE_SORT:
+        cql_transform_r(ct, cn->u.sort.search, pr, client_data);
+        break;
     default:
         fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
         abort();
