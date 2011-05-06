@@ -755,7 +755,7 @@ static int srw_bend_fetch(association *assoc, int pos,
 }
 
 static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
-                   Z_Query *query_result)
+                   Z_Query *query_result, char **sortkeys_p)
 {
     /* have a CQL query and  CQL to PQF transform .. */
     CQL_parser cp = cql_parser_create();
@@ -763,7 +763,8 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     int srw_errcode = 0;
     const char *add = 0;
     char rpn_buf[5120];
-            
+         
+    *sortkeys_p = 0;
     r = cql_parser_string(cp, cql);
     if (r)
     {
@@ -771,12 +772,29 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     }
     if (!r)
     {
+        struct cql_node *cn = cql_parser_result(cp);
+
         /* Syntax OK */
-        r = cql_transform_buf(ct,
-                              cql_parser_result(cp),
-                              rpn_buf, sizeof(rpn_buf)-1);
+        r = cql_transform_buf(ct, cn, rpn_buf, sizeof(rpn_buf)-1);
         if (r)
             srw_errcode = cql_transform_error(ct, &add);
+        else
+        {
+            char out[100];
+            int r = cql_sortby_to_sortkeys_buf(cn, out, sizeof(out)-1);
+    
+            if (r == 0)
+            {
+                if (*out)
+                    yaz_log (log_requestdetail, "srw_sortKeys '%s'", out);
+                *sortkeys_p = odr_strdup(odr, out);
+            }
+            else
+            {
+                yaz_log(log_requestdetail, "failed to create srw_sortKeys");
+                srw_errcode = YAZ_SRW_UNSUPP_SORT_TYPE;
+            }
+        }
     }
     if (!r)
     {
@@ -809,7 +827,8 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
 {
     Z_Query query;
     Z_RPNQuery *rpn;
-    int srw_error = cql2pqf(odr, cql, ct, &query);
+    char *sortkeys = 0;
+    int srw_error = cql2pqf(odr, cql, ct, &query, &sortkeys);
     if (srw_error)
         return srw_error;
     if (query.which != Z_Query_type_1 && query.which != Z_Query_type_101)
@@ -883,7 +902,9 @@ static void srw_bend_search(association *assoc,
             {
                 int srw_errcode = cql2pqf(assoc->encode, srw_req->query.cql,
                                           assoc->server->cql_transform,
-                                          rr.query);
+                                          rr.query,
+                                          &rr.srw_sortKeys);
+
                 if (srw_errcode)
                 {
                     yaz_add_srw_diagnostic(assoc->encode,
@@ -942,9 +963,9 @@ static void srw_bend_search(association *assoc,
             rr.stream = assoc->encode;
             rr.decode = assoc->decode;
             rr.print = assoc->print;
-            if ( srw_req->sort.sortKeys )
+            if (srw_req->sort.sortKeys)
                 rr.srw_sortKeys = odr_strdup(assoc->encode, 
-                                             srw_req->sort.sortKeys );
+                                             srw_req->sort.sortKeys);
             rr.association = assoc;
             rr.hits = 0;
             rr.errcode = 0;
@@ -2628,7 +2649,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
             /* have a CQL query and a CQL to PQF transform .. */
             int srw_errcode = 
                 cql2pqf(bsrr->stream, req->query->u.type_104->u.cql,
-                        assoc->server->cql_transform, bsrr->query);
+                        assoc->server->cql_transform, bsrr->query,
+                        &bsrr->srw_sortKeys);
             if (srw_errcode)
                 bsrr->errcode = yaz_diag_srw_to_bib1(srw_errcode);
         }
