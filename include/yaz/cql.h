@@ -417,6 +417,16 @@ int cql_sortby_to_sortkeys(struct cql_node *cn,
                            void (*pr)(const char *buf, void *client_data),
                            void *client_data);
 
+/** \brief converts CQL sortby to sortkeys .. 
+    \param cn CQL tree
+    \param out result buffer
+    \param max size of buffer (allocated)
+    \retval 0 OK
+    \retval -1 ERROR
+*/
+YAZ_EXPORT
+int cql_sortby_to_sortkeys_buf(struct cql_node *cn, char *out, int max);
+
 YAZ_END_CDECL
 
 #endif
