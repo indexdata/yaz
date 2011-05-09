@@ -10,7 +10,7 @@
 %%
 cql_query : query | query sort_spec;
 
-query : prefix_assignment search_clause_group | search_clause_group ;
+query : prefix_assignment query | search_clause_group ;
 
 search_clause_group: search_clause_group boolean_modified subquery | subquery;
 
