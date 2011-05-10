@@ -56,7 +56,7 @@
 %}
 
 %pure_parser
-%token DOTTERM TERM AND OR NOT PROX GE LE NE EXACT SORTBY
+%token PREFIX_NAME SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
 
@@ -162,7 +162,7 @@ searchTerm extraTerms {
 ;
 
 extraTerms:
-extraTerms TERM {
+extraTerms SIMPLE_STRING {
     struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem, 
 					 /* index */ 0, /* rel */ 0, $2.buf);
     st->u.st.extra_terms = $1.cql;
@@ -173,7 +173,7 @@ extraTerms TERM {
 ;
 
 
-/* unary NOT search TERM here .. */
+/* unary NOT search SIMPLE_STRING here .. */
 
 boolean: 
   AND | OR | NOT | PROX ;
@@ -201,7 +201,7 @@ modifiers '/' searchTerm relation_symbol searchTerm
 }
 ;
 
-relation: DOTTERM | relation_symbol;
+relation: PREFIX_NAME | relation_symbol;
 
 relation_symbol:
   '=' 
@@ -217,8 +217,8 @@ index:
   searchTerm;
 
 searchTerm:
-  TERM
-| DOTTERM
+  SIMPLE_STRING
+| PREFIX_NAME
 | AND
 | OR
 | NOT
@@ -334,7 +334,7 @@ int yylex(YYSTYPE *lval, void *vp)
 	    putb(lval, cp, c);
         }
         putb(lval, cp, 0);
-	return TERM;
+	return SIMPLE_STRING;
     }
     else
     {
@@ -389,9 +389,9 @@ int yylex(YYSTYPE *lval, void *vp)
 	if (!cql_strcmp(lval->buf, "any"))
 	    relation_like = 1;
 	if (relation_like)
-	    return DOTTERM;
+	    return PREFIX_NAME;
     }
-    return TERM;
+    return SIMPLE_STRING;
 }
 
 
