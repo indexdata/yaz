@@ -187,7 +187,7 @@ modifiers: modifiers '/' searchTerm
     $$.cql = mod;
 }
 |
-modifiers '/' searchTerm mrelation searchTerm
+modifiers '/' searchTerm relation_symbol searchTerm
 {
     struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
 					  $3.buf, $4.buf, $5.buf);
@@ -201,17 +201,9 @@ modifiers '/' searchTerm mrelation searchTerm
 }
 ;
 
-mrelation:
-  '=' 
-| '>' 
-| '<'
-| GE
-| LE
-| NE
-| EXACT
-;
+relation: DOTTERM | relation_symbol;
 
-relation: 
+relation_symbol:
   '=' 
 | '>' 
 | '<'
@@ -219,7 +211,6 @@ relation:
 | LE
 | NE
 | EXACT
-| DOTTERM
 ;
 
 index: 
