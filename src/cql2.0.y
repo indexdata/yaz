@@ -3,9 +3,9 @@
  * See the file LICENSE for details.
  */
 /*
-  YACC CQL grammar taken verbatim from the 2.0 draft (June 2010).
+  YACC CQL grammar taken verbatim from the 2.0 draft (Feb 18 2011).
  */
-%term PREFIX_NAME QUOTED_URI_STRING QUOTED_STRING AND OR NOT PROX SORTBY SIMPLE_STRING
+%term PREFIX_NAME SIMPLE_STRING QUOTED_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
 cql_query : query | query sort_spec;
@@ -18,7 +18,7 @@ subquery : '(' query ')' | search_clause;
 
 search_clause: index relation_modified search_term | search_term;
 
-search_term : SIMPLE_STRING | QUOTED_STRING;
+search_term : SIMPLE_STRING | QUOTED_STRING | reserved_string;
 
 sort_spec : sort_by index_modified_list;
 
@@ -30,7 +30,9 @@ prefix_assignment: '>' prefix '=' uri | '>' uri;
 
 prefix: SIMPLE_STRING;
 
-uri : QUOTED_URI_STRING;
+uri : quoted_uri_string;
+
+quoted_uri_string: QUOTED_STRING;
 
 index_modified: index modifier_list | index;
 
@@ -42,7 +44,7 @@ relation : relation_name | relation_symbol;
 
 relation_name: simple_name | PREFIX_NAME;
 
-relation_symbol : '=' | '>' | '<' ;
+relation_symbol : '=' | '>' | '<' | GE | LE | NE | EXACT;
 
 boolean_modified : boolean modifier_list | boolean;
 
@@ -57,6 +59,8 @@ modifier_name: simple_name;
 modifier_relation : relation_symbol modifier_value;
 
 modifier_value : SIMPLE_STRING | QUOTED_STRING;
+
+reserved_string: boolean | SORTBY;
 
 simple_name: SIMPLE_STRING;
 
