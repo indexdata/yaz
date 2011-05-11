@@ -469,9 +469,31 @@ static void cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
             /* OK, no major errors. Look at the result count */
             int start = ZOOM_options_get_int(options, "start", 0);
             int count = ZOOM_options_get_int(options, "count", 0);
+            int facet_num;
 
             printf("%s: %lld hits\n", ZOOM_connection_option_get(c[i], "host"),
                    (long long int) ZOOM_resultset_size(r[i]));
+            
+            facet_num = ZOOM_resultset_facets_size(r[i]);
+            if (facet_num)
+            {
+                ZOOM_facet_field *facets = ZOOM_resultset_facets(r[i]);
+                int facet_idx;
+                for (facet_idx = 0; facet_idx < facet_num; facet_idx++)
+                {
+                    const char *name = ZOOM_facet_field_name(facets[facet_idx]);
+                    size_t term_idx;
+                    size_t term_num = ZOOM_facet_field_term_count(facets[facet_idx]);
+                    printf("facet: %s\n", name);
+                    for (term_idx = 0; term_idx < term_num; term_idx++ )
+                    {
+                        int freq;
+                        const char *term =
+                            ZOOM_facet_field_get_term(facets[facet_idx], term_idx, &freq);
+                        printf("term: %s %d\n", term, freq);
+                    }
+                }
+            }
             /* and display */
             display_records(c[i], r[i], start, count, "render");
         }
