@@ -56,7 +56,7 @@ int compare_solr_req(ODR odr, Z_SRW_PDU *sr,
 }
 #endif
 
-void tst(void)
+void tst_encoding(void)
 {
 #if YAZ_HAVE_XML2
     ODR odr = odr_createmem(ODR_ENCODE);
@@ -129,13 +129,72 @@ void tst(void)
 #endif
 }
 
+
+int check_response(ODR o, const char *content, Z_SRW_searchRetrieveResponse **p)
+{
+    int r;
+    Z_GDU *gdu;
+    Z_SRW_PDU *sr_p;
+    char *http_response = odr_malloc(o, strlen(content) + 300);
+
+    strcpy(http_response, 
+           "HTTP/1.1 200 OK\r\n"
+           "Last-Modified: Wed, 13 Apr 2011 08:30:59 GMT\r\n"
+           "ETag: \"MjcyMWE5M2JiNDgwMDAwMFNvbHI=\"\r\n"
+           "Content-Type: text/xml; charset=utf-8\r\n");
+    sprintf(http_response + strlen(http_response),
+            "Content-Length: %d\r\n\r\n", (int) strlen(content));
+    strcat(http_response, content);
+
+    odr_setbuf(o, http_response, strlen(http_response), 0);
+
+    r = z_GDU(o, &gdu, 0, 0);
+    if (!r || gdu->which != Z_GDU_HTTP_Response)
+        return 0;
+    r = yaz_solr_decode_response(o, gdu->u.HTTP_Response, &sr_p);
+    if (r)
+        return 0;
+    if (sr_p->which != Z_SRW_searchRetrieve_response)
+        return 0;
+    *p = sr_p->u.response;
+    return 1;
+}
+
+void tst_decoding(void)
+{
+#if YAZ_HAVE_XML2
+    ODR odr = odr_createmem(ODR_DECODE);
+
+    Z_SRW_searchRetrieveResponse *response;
+    YAZ_CHECK(check_response(
+                  odr, 
+                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                  "<response>\n"
+                  "<lst name=\"responseHeader\"><int name=\"status\">0</int>"
+                  "<int name=\"QTime\">1</int><lst name=\"params\">"
+                  "<str name=\"start\">0</str><str name=\"q\">@attr 1=title solr</str>"
+                  "<str name=\"rows\">0</str></lst>"
+                  "</lst><result name=\"response\" numFound=\"91\" start=\"0\"/>\n"
+                  "</response>\n", &response));
+    YAZ_CHECK_EQ(*response->numberOfRecords, 91);
+    YAZ_CHECK_EQ(response->num_records, 0);
+    YAZ_CHECK(response->records == 0);
+    YAZ_CHECK_EQ(response->num_diagnostics, 0);
+    YAZ_CHECK(response->diagnostics == 0);
+    YAZ_CHECK(response->nextRecordPosition == 0);
+
+    odr_reset(odr);
+    odr_destroy(odr);
+#endif
+}
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
 #if YAZ_HAVE_XML2
     LIBXML_TEST_VERSION;
 #endif
-    tst();
+    tst_encoding();
+    tst_decoding();
     YAZ_CHECK_TERM;
 }
 
