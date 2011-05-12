@@ -27,14 +27,18 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-static int match_xml_node_attribute(xmlNodePtr ptr, const char *node_name, const char *attribute_name, const char *value)
+static int match_xml_node_attribute(
+    xmlNodePtr ptr,
+    const char *node_name, const char *attribute_name, const char *value)
 {
     const char *attribute_value;
     // check if the node name matches
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
-    if (attribute_name) {
-        attribute_value = yaz_element_attribute_value_get(ptr, node_name, attribute_name);
+    if (attribute_name)
+    {
+        attribute_value = yaz_element_attribute_value_get(ptr, node_name,
+                                                          attribute_name);
         if (attribute_value && !strcmp(attribute_value, value))
             return 1;
     }
@@ -43,7 +47,10 @@ static int match_xml_node_attribute(xmlNodePtr ptr, const char *node_name, const
     return 0;
 }
 
-static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr, Odr_int start, Z_SRW_searchRetrieveResponse *sr) {
+static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
+                                        Odr_int start,
+                                        Z_SRW_searchRetrieveResponse *sr)
+{
     xmlNodePtr node;
     int offset = 0;
     int i = 0;
@@ -85,16 +92,21 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr, Odr_int start, Z_
     }
 }
 
-static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr) {
+static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
+                                  Z_SRW_searchRetrieveResponse *sr)
+{
     Odr_int start = 0;
     struct _xmlAttr *attr;
     for (attr = ptr->properties; attr; attr = attr->next)
-        if (attr->children && attr->children->type == XML_TEXT_NODE) {
-            if (!strcmp((const char *) attr->name, "numFound")) {
+        if (attr->children && attr->children->type == XML_TEXT_NODE)
+        {
+            if (!strcmp((const char *) attr->name, "numFound"))
+            {
                 sr->numberOfRecords = odr_intdup(o, odr_atoi(
                         (const char *) attr->children->content));
             } 
-            else if (!strcmp((const char *) attr->name, "start")) {
+            else if (!strcmp((const char *) attr->name, "start"))
+            {
                 start = odr_atoi((const char *) attr->children->content);
             }
         }
@@ -105,24 +117,26 @@ static int  yaz_solr_decode_result(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveRe
     return -1;
 }
 
-static const char *get_facet_term_count(xmlNodePtr node, int *freq) {
-
+static const char *get_facet_term_count(xmlNodePtr node, int *freq)
+{
     const char *term = yaz_element_attribute_value_get(node, "int", "name");
     xmlNodePtr child;
     WRBUF wrbuf = wrbuf_alloc();
     if (!term)
         return term;
 
-    for (child = node->children; child ; child = child->next) {
+    for (child = node->children; child ; child = child->next)
+    {
         if (child->type == XML_TEXT_NODE)
-        wrbuf_puts(wrbuf, (const char *) child->content);
+            wrbuf_puts(wrbuf, (const char *) child->content);
     }
     *freq = atoi(wrbuf_cstr(wrbuf));
     wrbuf_destroy(wrbuf);
     return term;
 }
 
-Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRetrieveResponse *sr)
+Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
+                                          Z_SRW_searchRetrieveResponse *sr)
 
 {
     Z_AttributeList *list;
@@ -138,21 +152,25 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr, Z_SRW_searchRet
         pos[0] = 0;
     }
     list = yaz_use_attribute_create(o, name);
-    for (node = ptr->children; node; node = node->next) {
+    for (node = ptr->children; node; node = node->next)
         num_terms++;
-    }
     facet_field = facet_field_create(o, list, num_terms);
     index = 0;
-    for (node = ptr->children; node; node = node->next) {
+    for (node = ptr->children; node; node = node->next)
+    {
         int count = 0;
         const char *term = get_facet_term_count(node, &count);
-        facet_field_term_set(o, facet_field, facet_term_create(o, term_create(o, term), count), index);
+        facet_field_term_set(o, facet_field,
+                             facet_term_create(o, term_create(o, term), count),
+                             index);
         index++;
     }
     return facet_field;
 }
 
-static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRetrieveResponse *sr) {
+static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
+                                        Z_SRW_searchRetrieveResponse *sr)
+{
     xmlNodePtr ptr;
     for (ptr = root->children; ptr; ptr = ptr->next)
     {
@@ -169,7 +187,9 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root, Z_SRW_searchRetr
             num_facets = 0;
             for (node = ptr->children; node; node= node->next)
             {
-                facet_list_field_set(o, facet_list, yaz_solr_decode_facet_field(o, node, sr), num_facets);
+                facet_list_field_set(o, facet_list,
+                                     yaz_solr_decode_facet_field(o, node, sr),
+                                     num_facets);
                 num_facets++;
             }
             sr->facetList = facet_list;
@@ -219,7 +239,9 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                         rc_result = yaz_solr_decode_result(o, ptr, sr);
                 /* TODO The check on hits is a work-around to avoid garbled facets on zero results from the SOLR server.
                  * The work-around works because the results is before the facets in the xml. */
-                if (rc_result == 0 &&  *sr->numberOfRecords > 0 && match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
+                if (rc_result == 0 &&  *sr->numberOfRecords > 0 &&
+                    match_xml_node_attribute(ptr, "lst", "name",
+                                             "facet_counts"))
                     rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
             }
             ret = rc_result + rc_facets;
@@ -235,42 +257,54 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 #endif
 }
 
-static void yaz_solr_encode_facet_field(ODR encode, char **name, char **value, int *i, Z_FacetField *facet_field, int *limit) {
-      Z_AttributeList *attribute_list = facet_field->attributes;
-      struct yaz_facet_attr attr_values;
-      yaz_facet_attr_init(&attr_values);
-      yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
-      // TODO do we want to support server decided
-      if (!attr_values.errcode && attr_values.useattr) {
-          WRBUF wrbuf = wrbuf_alloc();
-          wrbuf_puts(wrbuf, (char *) attr_values.useattr);
-          /* Skip date field */
-          if (strcmp("date", attr_values.useattr) != 0)
-              wrbuf_puts(wrbuf, "_exact");
-          yaz_add_name_value_str(encode, name, value, i, "facet.field", odr_strdup(encode, wrbuf_cstr(wrbuf)));
-          if (attr_values.limit > 0) {
-              WRBUF wrbuf2 = wrbuf_alloc();
-              Odr_int olimit;
-              wrbuf_puts(wrbuf2, "f.");
-              wrbuf_puts(wrbuf2, wrbuf_cstr(wrbuf));
-              wrbuf_puts(wrbuf2, ".facet.limit");
-              olimit = attr_values.limit;
-              yaz_add_name_value_int(encode, name, value, i, odr_strdup(encode, wrbuf_cstr(wrbuf2)), &olimit);
-              wrbuf_destroy(wrbuf2);
-          }
-          wrbuf_destroy(wrbuf);
-      }
-}
-
-static void yaz_solr_encode_facet_list(ODR encode, char **name, char **value, int *i, Z_FacetList *facet_list, int *limit) {
-
-    int index;
-    for (index = 0; index < facet_list->num; index++)  {
-        yaz_solr_encode_facet_field(encode, name, value, i, facet_list->elements[index], limit);
-
+static void yaz_solr_encode_facet_field(
+    ODR encode, char **name, char **value, int *i,
+    Z_FacetField *facet_field)
+{
+    Z_AttributeList *attribute_list = facet_field->attributes;
+    struct yaz_facet_attr attr_values;
+    yaz_facet_attr_init(&attr_values);
+    yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
+    // TODO do we want to support server decided
+    if (!attr_values.errcode && attr_values.useattr)
+    {
+        WRBUF wrbuf = wrbuf_alloc();
+        wrbuf_puts(wrbuf, (char *) attr_values.useattr);
+        /* Skip date field */
+        if (strcmp("date", attr_values.useattr) != 0)
+            wrbuf_puts(wrbuf, "_exact");
+        yaz_add_name_value_str(encode, name, value, i,
+                               "facet.field",
+                               odr_strdup(encode, wrbuf_cstr(wrbuf)));
+        if (attr_values.limit > 0)
+        {
+            WRBUF wrbuf2 = wrbuf_alloc();
+            Odr_int olimit;
+            wrbuf_puts(wrbuf2, "f.");
+            wrbuf_puts(wrbuf2, wrbuf_cstr(wrbuf));
+            wrbuf_puts(wrbuf2, ".facet.limit");
+            olimit = attr_values.limit;
+            yaz_add_name_value_int(encode, name, value, i,
+                                   odr_strdup(encode, wrbuf_cstr(wrbuf2)),
+                                   &olimit);
+            wrbuf_destroy(wrbuf2);
+        }
+        wrbuf_destroy(wrbuf);
     }
 }
 
+static void yaz_solr_encode_facet_list(
+    ODR encode, char **name, char **value,
+    int *i, Z_FacetList *facet_list)
+{
+    int index;
+    for (index = 0; index < facet_list->num; index++)
+    {
+        yaz_solr_encode_facet_field(encode, name, value, i,
+                                    facet_list->elements[index]);
+        
+    }
+}
 
 int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                             ODR encode, const char *charset)
@@ -281,16 +315,14 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *uri_args;
     char *path;
     int i = 0;
-
+    
     z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
                                  srw_pdu->username, srw_pdu->password);
-
-    switch (srw_pdu->which)
+    if (srw_pdu->which == Z_SRW_searchRetrieve_request)
     {
-    case Z_SRW_searchRetrieve_request: {
         Z_SRW_searchRetrieveRequest *request = srw_pdu->u.request;
         solr_op = "select";
-        switch(srw_pdu->u.request->query_type)
+        switch (srw_pdu->u.request->query_type)
         {
         case Z_SRW_query_type_pqf:
             yaz_add_name_value_str(encode, name, value, &i,
@@ -314,23 +346,21 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         yaz_add_name_value_str(encode, name, value, &i,
                                "fl", request->recordSchema);
 
-        if (request->facetList) {
+        if (request->facetList)
+        {
             Z_FacetList *facet_list = request->facetList;
-            int limit = 0;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
             yaz_add_name_value_str(encode, name, value, &i, "facet.mincount", "1");
-            yaz_solr_encode_facet_list(encode, name, value, &i, facet_list, &limit);
+            yaz_solr_encode_facet_list(encode, name, value, &i, facet_list);
             /*
             olimit = limit;
             yaz_add_name_value_int(encode, name, value, &i, "facet.limit", &olimit);
              */
 
         }
-        break;
     }
-    default:
+    else
         return -1;
-    }
     name[i] = 0;
     yaz_array_to_uri(&uri_args, encode, name, value);
     
