@@ -159,9 +159,8 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
         facets = ZOOM_options_get(resultset->options, "facets");
-        if (facets) {
+        if (facets)
             facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
-        }
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
