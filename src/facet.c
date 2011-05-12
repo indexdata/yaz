@@ -51,9 +51,8 @@ Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation)
         return 0;
     z_external = oi->information.externallyDefinedInfo;
 
-    if (z_external && z_external->which == Z_External_userFacets) {
+    if (z_external && z_external->which == Z_External_userFacets)
         return z_external->u.facetList;
-    }
     return 0;
 }
 
@@ -169,7 +168,8 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
 {
     int i;
     Z_AttributeElement *ae;
-    for (i=0; i < attributes->num_attributes; i++) {
+    for (i = 0; i < attributes->num_attributes; i++)
+    {
         ae = attributes->attributes[i];
         /* ignoring the attributeSet here */
         if (*ae->attributeType == 1)
