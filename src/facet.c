@@ -111,25 +111,24 @@ static void useattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
         sprintf(av->useattrbuff, ODR_INT_PRINTF, *ae->value.numeric);
         av->useattr = av->useattrbuff;
     }
-} /* useattr */
+}
 
 
-/* TODO rename to sortorder attr */
-static void relationattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
+static void sortorderattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
 {
     if (ae->which == Z_AttributeValue_numeric)
     {
         if (*ae->value.numeric == 0)
             av->relation = "desc";
         else if (*ae->value.numeric == 1)
-                av->relation = "asc";
-            else
-        if (*ae->value.numeric == 3) {
+            av->relation = "asc";
+        else if (*ae->value.numeric == 3)
             av->relation = "unknown/unordered";
-        } else {
+        else
+        {
             av->errcode = YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE;
             sprintf(av->useattrbuff, ODR_INT_PRINTF,
-                        *ae-> attributeType);
+                    *ae-> attributeType);
             av->errstring = av->useattrbuff;
         }
     }
@@ -138,7 +137,7 @@ static void relationattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
         av->errcode = YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE;
         av->errstring = "non-numeric relation attribute";
     }
-} /* relationattr */
+}
 
 static void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
 {
@@ -151,7 +150,7 @@ static void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
         av->errcode = YAZ_BIB1_UNSUPP_ATTRIBUTE;
         av->errstring = "non-numeric limit attribute";
     }
-} /* relationattr */
+}
 
 /* Get the index to be searched from the attributes.
    @attr 1
@@ -178,7 +177,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
         }
         else if (*ae->attributeType == 2)
         { /* sortorder */
-            relationattr(ae, av);
+            sortorderattr(ae, av);
         }
         else if (*ae->attributeType == 3)
         { /* limit */
