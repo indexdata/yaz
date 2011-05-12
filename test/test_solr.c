@@ -111,7 +111,7 @@ void tst(void)
         sr->u.request->startRecord = odr_intdup(odr, 3);
         sr->u.request->maximumRecords = odr_intdup(odr, 10);
         sr->u.request->facetList = yaz_pqf_parse_facet_list(
-            odr, "@attr 1=date @attr 2=0, @attr 1=title @attr 3=17");
+            odr, "@attr 1=date @attr 2=0, @attr 1=title_exact @attr 3=17");
 
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,

@@ -146,11 +146,6 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     xmlNodePtr node;
     // USE attribute
     const char* name = yaz_element_attribute_value_get(ptr, "lst", "name");
-    char *pos = strstr(name, "_exact");
-    /* HACK */
-    if (pos) {
-        pos[0] = 0;
-    }
     list = yaz_use_attribute_create(o, name);
     for (node = ptr->children; node; node = node->next)
         num_terms++;
@@ -257,7 +252,7 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 #endif
 }
 
-static void yaz_solr_encode_facet_field(
+static int yaz_solr_encode_facet_field(
     ODR encode, char **name, char **value, int *i,
     Z_FacetField *facet_field)
 {
@@ -266,13 +261,13 @@ static void yaz_solr_encode_facet_field(
     yaz_facet_attr_init(&attr_values);
     yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
     // TODO do we want to support server decided
-    if (!attr_values.errcode && attr_values.useattr)
+
+    if (attr_values.errcode)
+        return -1;
+    if (attr_values.useattr)
     {
         WRBUF wrbuf = wrbuf_alloc();
         wrbuf_puts(wrbuf, (char *) attr_values.useattr);
-        /* Skip date field */
-        if (strcmp("date", attr_values.useattr) != 0)
-            wrbuf_puts(wrbuf, "_exact");
         yaz_add_name_value_str(encode, name, value, i,
                                "facet.field",
                                odr_strdup(encode, wrbuf_cstr(wrbuf)));
@@ -291,19 +286,23 @@ static void yaz_solr_encode_facet_field(
         }
         wrbuf_destroy(wrbuf);
     }
+    return 0;
 }
 
-static void yaz_solr_encode_facet_list(
+static int yaz_solr_encode_facet_list(
     ODR encode, char **name, char **value,
     int *i, Z_FacetList *facet_list)
 {
     int index;
     for (index = 0; index < facet_list->num; index++)
     {
-        yaz_solr_encode_facet_field(encode, name, value, i,
-                                    facet_list->elements[index]);
+        int r = yaz_solr_encode_facet_field(encode, name, value, i,
+                                            facet_list->elements[index]);
+        if (r)
+            return -1;
         
     }
+    return 0;
 }
 
 int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
@@ -351,12 +350,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
             Z_FacetList *facet_list = request->facetList;
             yaz_add_name_value_str(encode, name, value, &i, "facet", "true");
             yaz_add_name_value_str(encode, name, value, &i, "facet.mincount", "1");
-            yaz_solr_encode_facet_list(encode, name, value, &i, facet_list);
-            /*
-            olimit = limit;
-            yaz_add_name_value_int(encode, name, value, &i, "facet.limit", &olimit);
-             */
-
+            if (yaz_solr_encode_facet_list(encode, name, value, &i, facet_list))
+                return -1;
         }
     }
     else
