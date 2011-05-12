@@ -59,8 +59,9 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
     for (node = ptr->children; node; node = node->next)
         if (node->type == XML_ELEMENT_NODE)
             sr->num_records++;
-
-    sr->records = odr_malloc(o, sizeof(*sr->records) * sr->num_records);
+    
+    if (sr->num_records)
+        sr->records = odr_malloc(o, sizeof(*sr->records) * sr->num_records);
 
     for (node = ptr->children; node; node = node->next)
     {
