@@ -450,14 +450,16 @@ Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
     int freq;
     xmlNodePtr child;
     WRBUF wrbuf = wrbuf_alloc();
-    const char *freq_string = yaz_element_attribute_value_get(node, "facetvalue", "est_representation");
+    const char *freq_string = yaz_element_attribute_value_get(
+        node, "facetvalue", "est_representation");
     Z_Term *term;
     if (freq_string)
         freq =  atoi(freq_string);
     else
         freq = -1;
 
-    for (child = node->children; child ; child = child->next) {
+    for (child = node->children; child ; child = child->next)
+    {
         if (child->type == XML_TEXT_NODE)
             wrbuf_puts(wrbuf, (const char *) child->content);
     }
@@ -489,7 +491,9 @@ static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
     {
         if (match_element(node, "facetvalue"))
         {
-            facet_field_term_set(odr, facet_field, yaz_sru_proxy_get_facet_term_count(odr, node), index);
+            facet_field_term_set(odr, facet_field,
+                                 yaz_sru_proxy_get_facet_term_count(odr, node),
+                                 index);
             index++;
         }
     }
