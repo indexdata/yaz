@@ -14,7 +14,7 @@
 #include <yaz/nmem.h>
 #include <yaz/test.h>
 
-void tst(void)
+void tst_nmem_malloc(void)
 {
     NMEM n;
     int j;
@@ -45,10 +45,50 @@ void tst(void)
     nmem_destroy(n);
 }
 
+void tst_nmem_strsplit(void)
+{
+    NMEM nmem = nmem_create();
+    int num = 0;
+    char **array = 0;
+
+    nmem_strsplit(nmem, ",", "", &array, &num);
+    YAZ_CHECK(num == 0);
+
+    nmem_strsplitx(nmem, ",", "", &array, &num, 0);
+    YAZ_CHECK(num == 1);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
+    
+    nmem_strsplit(nmem, ",", ",,", &array, &num);
+    YAZ_CHECK(num == 0);
+
+    nmem_strsplitx(nmem, ",", ",,", &array, &num, 0);
+    YAZ_CHECK(num == 3);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], ""));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], ""));
+ 
+    nmem_strsplit(nmem, ",", ",a,b,,cd", &array, &num);
+    YAZ_CHECK(num == 3);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b"));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], "cd"));
+    nmem_strsplitx(nmem, ",", ",a,b,,cd", &array, &num, 0);
+
+    YAZ_CHECK(num == 5);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "a"));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], "b"));
+    YAZ_CHECK(num > 3 && !strcmp(array[3], ""));
+    YAZ_CHECK(num > 4 && !strcmp(array[4], "cd"));
+
+    nmem_destroy(nmem);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-    tst();
+    tst_nmem_malloc();
+    tst_nmem_strsplit();
     YAZ_CHECK_TERM;
 }
 /*
