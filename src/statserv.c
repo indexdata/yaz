@@ -418,9 +418,14 @@ static void xml_config_read(void)
                 }
                 else if (!strcmp((const char *) ptr->name, "cql2rpn"))
                 {
-                    gfs->cql_transform = cql_transform_open_fname(
-                        nmem_dup_xml_content(gfs_nmem, ptr->children)
-                        );
+                    char *name = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    gfs->cql_transform = cql_transform_open_fname(name);
+                    if (!gfs->cql_transform)
+                    {
+                        yaz_log(YLOG_FATAL|YLOG_ERRNO,
+                                "open CQL transform file '%s'", name);
+                        exit(1);
+                    }
                 }
                 else if (!strcmp((const char *) ptr->name, "ccl2rpn"))
                 {
