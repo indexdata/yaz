@@ -17,6 +17,7 @@
 #include <yaz/oid_db.h>
 #include <yaz/oid_std.h>
 #include <yaz/otherinfo.h>
+#include <yaz/pquery.h>
 #include <assert.h>
 
 void yaz_oi_set_facetlist(
@@ -199,6 +200,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
     return;
 } /* facetattrs */
 
+#if 0
 Z_Term *term_create(ODR odr, const char *cstr)
 {
     Z_Term *term = odr_malloc(odr, sizeof(*term));
@@ -213,6 +215,16 @@ Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq)
     facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
     facet_term->term = term;
     *facet_term->count = freq;
+    return facet_term;
+}
+#endif
+
+Z_FacetTerm *facet_term_create_cstr(ODR odr, const char *cstr, Odr_int freq)
+{
+    Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
+    Z_Term *term = z_Term_create(odr, Z_Term_general, cstr, strlen(cstr));
+    facet_term->term = term;
+    facet_term->count = odr_intdup(odr, freq);
     return facet_term;
 }
 

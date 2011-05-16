@@ -230,19 +230,20 @@ static void do_delay(const struct delay *delayp)
     }
 }
 
-static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name) {
+static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
+{
     int index;
     int freq = 100;
     int length = strlen(facet_name) + 10;
     char *key = odr_malloc(odr, length);
     key[0] = '\0';
-    for (index = 0; index < facet_field->num_terms; index++) {
-        Z_Term *term;
+    for (index = 0; index < facet_field->num_terms; index++)
+    {
         Z_FacetTerm *facet_term;
         sprintf(key, "%s%d", facet_name, index);
         yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
-        term = term_create(odr, key);
-        facet_term = facet_term_create(odr, term, freq);
+        
+        facet_term = facet_term_create_cstr(odr, key, freq);
         freq = freq - 10 ;
         facet_field_term_set(odr, facet_field, facet_term, index);
     }

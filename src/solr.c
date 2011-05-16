@@ -118,7 +118,7 @@ static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
     return -1;
 }
 
-static const char *get_facet_term_count(xmlNodePtr node, int *freq)
+static const char *get_facet_term_count(xmlNodePtr node, Odr_int *freq)
 {
     const char *term = yaz_element_attribute_value_get(node, "int", "name");
     xmlNodePtr child;
@@ -131,7 +131,7 @@ static const char *get_facet_term_count(xmlNodePtr node, int *freq)
         if (child->type == XML_TEXT_NODE)
             wrbuf_puts(wrbuf, (const char *) child->content);
     }
-    *freq = atoi(wrbuf_cstr(wrbuf));
+    *freq = odr_atoi(wrbuf_cstr(wrbuf));
     wrbuf_destroy(wrbuf);
     return term;
 }
@@ -154,11 +154,10 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     index = 0;
     for (node = ptr->children; node; node = node->next)
     {
-        int count = 0;
+        Odr_int count = 0;
         const char *term = get_facet_term_count(node, &count);
         facet_field_term_set(o, facet_field,
-                             facet_term_create(o, term_create(o, term), count),
-                             index);
+                             facet_term_create_cstr(o, term, count), index);
         index++;
     }
     return facet_field;

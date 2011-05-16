@@ -69,10 +69,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
 				     struct yaz_facet_attr *av);
 
 YAZ_EXPORT
-Z_Term *term_create(ODR odr, const char *cstr);
-
-YAZ_EXPORT
-Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq);
+Z_FacetTerm *facet_term_create_cstr(ODR odr, const char *cstr, Odr_int freq);
 
 YAZ_EXPORT
 Z_FacetField* facet_field_create(ODR odr, Z_AttributeList *attributes,

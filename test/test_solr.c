@@ -164,8 +164,8 @@ void tst_decoding(void)
 {
 #if YAZ_HAVE_XML2
     ODR odr = odr_createmem(ODR_DECODE);
-
     Z_SRW_searchRetrieveResponse *response;
+
     YAZ_CHECK(check_response(
                   odr, 
                   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -182,8 +182,150 @@ void tst_decoding(void)
     YAZ_CHECK_EQ(response->num_diagnostics, 0);
     YAZ_CHECK(response->diagnostics == 0);
     YAZ_CHECK(response->nextRecordPosition == 0);
+    YAZ_CHECK(response->facetList == 0);
 
     odr_reset(odr);
+
+    YAZ_CHECK(
+        check_response(
+            odr, 
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<response><lst name=\"responseHeader\">"
+            "<int name=\"status\">0</int><int name=\"QTime\">2</int>"
+            "<lst name=\"params\"><str name=\"facet\">true</str>"
+            "<str name=\"facet.mincount\">1</str><str name=\"start\">0</str>"
+            "<str name=\"q\">@attr 1=title solr</str>"
+            "<str name=\"f.date.facet.limit\">5</str>"
+            "<str name=\"facet.field\">date</str>"
+            "<str name=\"rows\">1</str></lst>"
+            "</lst><result name=\"response\" numFound=\"91000000000\" start=\"0\">"
+            "<doc><str name=\"author\">Alenius, Hans,</str>"
+            "<str name=\"author-date\">1937-</str>"
+            "<str name=\"author-title\"/>"
+            "<arr name=\"date\"><str>1969</str></arr>"
+            "<str name=\"id\">   73857731 </str>"
+            "<arr name=\"lccn\"><str>   73857731 </str></arr>"
+            "<arr name=\"medium\"><str>book</str></arr>"
+            "<arr name=\"medium_exact\"><str>book</str></arr>"
+            "<arr name=\"physical-accomp\"><str/></arr>"
+            "<arr name=\"physical-dimensions\"><str>20 cm.</str></arr>"
+            "<arr name=\"physical-extent\"><str>140, (1) p.</str></arr>"
+            "<arr name=\"physical-format\"><str>illus.</str></arr>"
+            "<arr name=\"physical-specified\"><str/></arr>"
+            "<arr name=\"physical-unitsize\"><str/></arr>"
+            "<arr name=\"physical-unittype\"><str/></arr>"
+            "<arr name=\"publication-date\"><str>1969.</str></arr>"
+            "<arr name=\"publication-name\"><str>Norstedt,</str></arr>"
+            "<arr name=\"publication-place\"><str>Stockholm,</str></arr>"
+            "<arr name=\"subject\"><str>Photography</str><str>Artistic</str></arr>"
+            "<arr name=\"subject-long\"><str>Photography, Artistic.</str></arr>"
+            "<arr name=\"subject_exact\"><str>Photography</str><str>Artistic</str></arr>"
+            "<arr name=\"system-control-nr\"><str>(OCoLC)36247690</str></arr>"
+            "<str name=\"title\">Solring.</str><str name=\"title-complete\">Solring.</str>"
+            "<str name=\"title-dates\"/><str name=\"title-medium\"/>"
+            "<str name=\"title-number-section\"/><str name=\"title-remainder\"/>"
+            "<str name=\"title-responsibility\"/><str name=\"title_exact\">Solring.</str>"
+            "</doc></result><lst name=\"facet_counts\">"
+            "<lst name=\"facet_queries\"/>"
+            "<lst name=\"facet_fields\">"
+            "<lst name=\"date\"><int name=\"1978\">5000000000</int><int name=\"1983\">4</int>"
+            "<int name=\"1987\">4</int><int name=\"1988\">4</int>"
+            "<int name=\"2003\">3</int></lst></lst><lst name=\"facet_dates\"/>"
+            "</lst></response>", &response));
+#if HAVE_LONG_LONG
+    YAZ_CHECK(*response->numberOfRecords == 91000000000LL);
+#endif
+    YAZ_CHECK_EQ(response->num_records, 1);
+    YAZ_CHECK(response->records);
+    if (response->records)
+    {
+        const char *doc =
+            "<doc><str name=\"author\">Alenius, Hans,</str>"
+            "<str name=\"author-date\">1937-</str>"
+            "<str name=\"author-title\"/>"
+            "<arr name=\"date\"><str>1969</str></arr>"
+            "<str name=\"id\">   73857731 </str>"
+            "<arr name=\"lccn\"><str>   73857731 </str></arr>"
+            "<arr name=\"medium\"><str>book</str></arr>"
+            "<arr name=\"medium_exact\"><str>book</str></arr>"
+            "<arr name=\"physical-accomp\"><str/></arr>"
+            "<arr name=\"physical-dimensions\"><str>20 cm.</str></arr>"
+            "<arr name=\"physical-extent\"><str>140, (1) p.</str></arr>"
+            "<arr name=\"physical-format\"><str>illus.</str></arr>"
+            "<arr name=\"physical-specified\"><str/></arr>"
+            "<arr name=\"physical-unitsize\"><str/></arr>"
+            "<arr name=\"physical-unittype\"><str/></arr>"
+            "<arr name=\"publication-date\"><str>1969.</str></arr>"
+            "<arr name=\"publication-name\"><str>Norstedt,</str></arr>"
+            "<arr name=\"publication-place\"><str>Stockholm,</str></arr>"
+            "<arr name=\"subject\"><str>Photography</str><str>Artistic</str></arr>"
+            "<arr name=\"subject-long\"><str>Photography, Artistic.</str></arr>"
+            "<arr name=\"subject_exact\"><str>Photography</str><str>Artistic</str></arr>"
+            "<arr name=\"system-control-nr\"><str>(OCoLC)36247690</str></arr>"
+            "<str name=\"title\">Solring.</str><str name=\"title-complete\">Solring.</str>"
+            "<str name=\"title-dates\"/><str name=\"title-medium\"/>"
+            "<str name=\"title-number-section\"/><str name=\"title-remainder\"/>"
+            "<str name=\"title-responsibility\"/><str name=\"title_exact\">Solring.</str>"
+            "</doc>";
+
+        Z_SRW_record *record = response->records;
+        
+        YAZ_CHECK(record->recordData_len == strlen(doc) &&
+                  !memcmp(record->recordData_buf, doc, record->recordData_len));
+    }
+    YAZ_CHECK_EQ(response->num_diagnostics, 0);
+    YAZ_CHECK(response->diagnostics == 0);
+    YAZ_CHECK(response->nextRecordPosition == 0);
+
+    YAZ_CHECK(response->facetList);
+    if (response->facetList)
+    {
+        Z_FacetList *facetList = response->facetList;
+
+        YAZ_CHECK(facetList->num == 1);
+        if (facetList->num == 1)
+        {
+            Z_FacetField *facetField = facetList->elements[0];
+            int i;
+
+            YAZ_CHECK(facetField->num_terms == 5);
+            if (facetField->num_terms == 5)
+            {
+                for (i = 0; i < facetField->num_terms; i++)
+                {
+                    YAZ_CHECK(
+                        facetField->terms[i] &&
+                        facetField->terms[i]->term &&
+                        facetField->terms[i]->term->which == Z_Term_general);
+                }
+#if HAVE_LONG_LONG
+                YAZ_CHECK(*facetField->terms[0]->count == 5000000000LL);
+#endif
+                YAZ_CHECK(facetField->terms[0]->term->u.general->len == 4
+                          && !memcmp(facetField->terms[0]->term->u.general->buf,
+                                     "1978", 4));
+                YAZ_CHECK(*facetField->terms[1]->count == 4);
+                YAZ_CHECK(facetField->terms[1]->term->u.general->len == 4
+                          && !memcmp(facetField->terms[1]->term->u.general->buf,
+                                     "1983", 4));
+                YAZ_CHECK(*facetField->terms[2]->count == 4);
+                YAZ_CHECK(facetField->terms[2]->term->u.general->len == 4
+                          && !memcmp(facetField->terms[2]->term->u.general->buf,
+                                     "1987", 4));
+                YAZ_CHECK(*facetField->terms[3]->count == 4);
+                YAZ_CHECK(facetField->terms[3]->term->u.general->len == 4
+                          && !memcmp(facetField->terms[3]->term->u.general->buf,
+                                     "1988", 4));
+                YAZ_CHECK(*facetField->terms[4]->count == 3);
+                YAZ_CHECK(facetField->terms[4]->term->u.general->len == 4
+                          && !memcmp(facetField->terms[4]->term->u.general->buf,
+                                     "2003", 4));
+            }
+        }
+    }
+
+    odr_reset(odr);
+
     odr_destroy(odr);
 #endif
 }
