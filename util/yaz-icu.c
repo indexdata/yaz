@@ -537,9 +537,9 @@ static void process_text_file(struct config_t *p_config)
 
 int main(int argc, char **argv) 
 {
+#if YAZ_HAVE_ICU
     struct config_t config;
 
-#if YAZ_HAVE_ICU
     read_params(argc, argv, &config);
 
     if (config.conffile && strlen(config.conffile))
