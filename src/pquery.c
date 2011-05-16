@@ -304,23 +304,16 @@ Z_AttributeList *get_attributeList(ODR o,
     return attributes;
 }
 
-static Z_AttributesPlusTerm *rpn_term_attributes(struct yaz_pqf_parser *li, ODR o, Z_AttributeList *attributes) {
-    Z_AttributesPlusTerm *zapt;
-    Odr_oct *term_octet;
-    Z_Term *term;
-
-    zapt = (Z_AttributesPlusTerm *)odr_malloc(o, sizeof(*zapt));
-    term = (Z_Term *)odr_malloc(o, sizeof(*term));
-    zapt->term = term;
-    zapt->attributes = attributes;
-
-    term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
-    term_octet->buf = (unsigned char *)odr_malloc(o, 1 + li->lex_len);
-    term_octet->size = term_octet->len =
-        escape_string((char *) (term_octet->buf), li->lex_buf, li->lex_len);
+Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
+{
+    Z_Term *term = (Z_Term *)odr_malloc(o, sizeof(*term));
+    Odr_oct *term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
+    term_octet->buf = (unsigned char *)odr_malloc(o, 1 + len);
+    memcpy(term_octet->buf, buf, len);
+    term_octet->size = term_octet->len = len;
     term_octet->buf[term_octet->size] = 0;  /* null terminate */
     
-    switch (li->term_type)
+    switch (term_type)
     {
     case Z_Term_general:
         term->which = Z_Term_general;
@@ -348,8 +341,21 @@ static Z_AttributesPlusTerm *rpn_term_attributes(struct yaz_pqf_parser *li, ODR 
         term->u.null = odr_nullval();
         break;
     }
-    return zapt;
+    return term;
+}
 
+static Z_AttributesPlusTerm *rpn_term_attributes(
+    struct yaz_pqf_parser *li, ODR o, Z_AttributeList *attributes)
+{
+    char *es_str = odr_malloc(o, li->lex_len+1);
+    int es_len = escape_string(es_str, li->lex_buf, li->lex_len);
+    Z_Term *term = z_Term_create(o, li->term_type, es_str, es_len);
+    Z_AttributesPlusTerm *zapt = (Z_AttributesPlusTerm *)
+        odr_malloc(o, sizeof(*zapt));
+
+    zapt->term = term;
+    zapt->attributes = attributes;
+    return zapt;
 }
 
 static Z_AttributesPlusTerm *rpn_term(struct yaz_pqf_parser *li, ODR o,
