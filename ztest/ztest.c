@@ -256,7 +256,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     for (index = 0; index < facet_list->num; index++) {
         struct yaz_facet_attr attrvalues;
         yaz_facet_attr_init(&attrvalues);
-        attrvalues.limit = 0;
+        attrvalues.limit = 10;
         yaz_facet_attr_get_z_attributes(facet_list->elements[index]->attributes,
                                         &attrvalues);
         yaz_log(YLOG_LOG, "Attributes: %s %d ", attrvalues.useattr, attrvalues.limit);
