@@ -91,6 +91,13 @@ YAZ_EXPORT size_t yaz_write_UTF8_char(unsigned long x,
 #define yaz_tolower(x) ((x) + ('a' - 'A'))
 #define yaz_islower(x) ((x) >= 'a' && (x) <= 'z')
 
+/** \brief check whether string apppers to be UTF-8 encoded
+    \param cstr string to check
+    \retval 1 OK (appears to be UTF-8)
+    \retval 0 definitely not UTF-8
+*/
+YAZ_EXPORT int yaz_utf8_check(const char *cstr);
+
 YAZ_END_CDECL
 
 #endif

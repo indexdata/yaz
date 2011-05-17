@@ -239,7 +239,25 @@ yaz_iconv_decoder_t yaz_utf8_decoder(const char *fromcode,
     }
     return 0;
 }
-   
+
+int yaz_utf8_check(const char *str)
+{
+    /* cast OK: yaz_read_UTF8_char is read-only */
+    unsigned char *inp = (unsigned char *) str;
+    size_t inbytesleft = strlen(str);
+
+    while (inbytesleft)
+    {
+        int error = 0;
+        size_t no_read;
+        yaz_read_UTF8_char(inp, inbytesleft, &no_read, &error);
+        if (error)
+            return 0;
+        inp += no_read;
+        inbytesleft -= no_read;
+    }
+    return 1;
+}   
 
 /*
  * Local variables:
