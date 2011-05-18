@@ -48,7 +48,6 @@
 #include <yaz/comstack.h>
 
 #include <yaz/oid_db.h>
-#define NO_OID 1
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
