@@ -108,6 +108,7 @@ static int largeSetLowerBound = 1;
 static int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0;
 static Z_FacetList *facet_list = 0;
+static ODR facet_odr = 0;
 static Odr_int setno = 1;                   /* current set offset */
 static enum oid_proto protocol = PROTO_Z3950;      /* current app protocol */
 #define RECORDSYNTAX_MAX 20
@@ -763,10 +764,6 @@ static int cmd_open(const char *arg)
         strncpy(cur_host, arg, sizeof(cur_host)-1);
         cur_host[sizeof(cur_host)-1] = 0;
     }
-    /* TODO Make facet definition survive the open command without crashing */
-    /* TODO Fix deallocation */
-    facet_list = 0;
-
     set_base("");
     r = session_connect(cur_host);
     if (conn && conn->protocol == PROTO_HTTP)
@@ -2310,22 +2307,6 @@ static int only_z3950(void)
     return 0;
 }
 
-static int is_SRW(void)
-{
-    if (!conn)
-    {
-        printf("Not connected yet\n");
-        return 1;
-    }
-    if (protocol == PROTO_HTTP && yaz_matchstr(sru_method, "solr"))
-    {
-        printf("Not supported by SRW\n");
-        return 1;
-    }
-    return 0;
-}
-
-
 static int cmd_update_common(const char *arg, int version);
 
 static int cmd_update(const char *arg)
@@ -2933,21 +2914,17 @@ static int cmd_find(const char *arg)
 
 static int cmd_facets(const char *arg)
 {
-    /* TODO Wrong odr. Loosing memory */
-    ODR odr = odr_createmem(ODR_ENCODE);
-    int size = 0;
+    if (!facet_odr)
+        facet_odr = odr_createmem(ODR_ENCODE);
+    odr_reset(facet_odr);
+
     if (!*arg)
     {
         facet_list = 0;
         printf("Facets cleared.\n");
         return 0;
     }
-    size = strlen(arg);
-    if (is_SRW()) {
-        printf("WARN: No supported for SRW/SRU.\n");
-    }
-    facet_list = yaz_pqf_parse_facet_list(odr, arg);
-
+    facet_list = yaz_pqf_parse_facet_list(facet_odr, arg);
     if (!facet_list)
     {
         printf("Invalid facet list: %s", arg);
@@ -2955,7 +2932,6 @@ static int cmd_facets(const char *arg)
     }
     return 1;
 }
-
 
 static int cmd_delete(const char *arg)
 {
