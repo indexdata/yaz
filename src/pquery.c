@@ -852,14 +852,14 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
     return facet_field;
 }
 
-#define FACET_DElIMITER ','
+#define FACET_DELIMITER ','
 
 static int scan_facet_argument(const char *arg) {
     int index;
     int length = strlen(arg);
     int count = 1;
     for (index = 0; index < length; index++) {
-        if (arg[index] == FACET_DElIMITER)
+        if (arg[index] == FACET_DELIMITER)
             count++;
     }
     return count;
@@ -882,7 +882,7 @@ Z_FacetList *yaz_pqf_parse_facet_list(ODR odr, const char *facet) {
     elements = odr_malloc(odr, num_elements * sizeof(*elements));
     facet_list->elements = elements;
     for (index = 0; index < num_elements;) {
-        const char *pos = strchr(facet, FACET_DElIMITER);
+        const char *pos = strchr(facet, FACET_DELIMITER);
         if (pos == 0)
             pos = facet + strlen(facet);
         elements[index] = parse_facet(odr, (const char *) facet, (pos - facet));
