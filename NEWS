@@ -1,3 +1,23 @@
+--- 4.2.0 2011/05/18
+
+CQL: parse CQL sortby spec. The resulting sort spec is stored in the
+resulting CQL node (tree) in a new node CQL_NODE_SORT.
+
+CQL and GFS: add utility cql_sortby_to_sortkeys which converts CQL sortby
+1.2 node tree to CQL 1.1 spec. This in turn allows the generic frontend
+server to only consider srw_sortkeys and support both SRU 1.1 and 1.2.
+Note that the CQL sortby spec is only converted when the GFS is already
+converting from CQL to RPN (cql2rpn element).
+
+New function nmem_strsplitx. This is like nmem_strsplit but allows us to
+specify whether to collapse delimitors or not. The existing nmem_strsplit
+do collapse (collapse parameter = 1).
+
+Windows installer: For NSIS, set InstallDir depending on x86/x64.
+
+Rename internal func yaz_use_attribute_create. While non-static, this
+function is not declared in a public header.
+
 --- 4.1.7 2011/03/15
 
 Add -lCrun when linking with ICU on Solaris.
