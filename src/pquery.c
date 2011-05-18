@@ -761,8 +761,8 @@ static Z_AttributeList *p_query_scan_attributes_mk(struct yaz_pqf_parser *li,
 }
 
 static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
-                                                 ODR o,
-                                                 Odr_oid **attributeSetP)
+                                             ODR o,
+                                             Odr_oid **attributeSetP)
 {
     Z_AttributeList *attr_list = p_query_scan_attributes_mk(li, o, attributeSetP);
     Z_AttributesPlusTerm *apt;
@@ -833,18 +833,17 @@ Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
     return p_query_scan_attributes_mk(p, o, attributeSetP);
 }
 
-static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
+static Z_FacetField* parse_facet(ODR odr, const char *facet)
 {
     YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
-    char *buffer = odr_strdupn(odr, facet, length);
     Odr_oid *attributeSetId;
     Z_FacetField *facet_field = 0;
     Z_AttributeList *attribute_list =
-        yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, buffer);
+        yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, facet);
     
     if (attribute_list)
     {
-        facet_field = odr_malloc(odr, sizeof(*facet_field));
+        facet_field = (Z_FacetField *) odr_malloc(odr, sizeof(*facet_field));
         facet_field->attributes = attribute_list;
         facet_field->num_terms = 0;
         facet_field->terms = 0;
@@ -853,54 +852,25 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet, int length)
     return facet_field;
 }
 
-#define FACET_DELIMITER ','
-
-static int scan_facet_argument(const char *arg)
+Z_FacetList *yaz_pqf_parse_facet_list(ODR o, const char *qbuf)
 {
-    int index;
-    int length = strlen(arg);
-    int count = 1;
-    for (index = 0; index < length; index++)
-    {
-        if (arg[index] == FACET_DELIMITER)
-            count++;
-    }
-    return count;
-}
+    char **darray;
+    int num;
 
-/**
- * yax_pdg_parse_facet_list: Parses a comma-separated list of AttributeList(s) into a FacetList.
- * It does not handle the optional facet term(s).
- *
- */
-Z_FacetList *yaz_pqf_parse_facet_list(ODR odr, const char *facet)
-{
-    Z_FacetList *facet_list = 0;
-    Z_FacetField  **elements;
-    int index = 0;
-    int num_elements = scan_facet_argument(facet);
-    if (num_elements == 0)
-        return facet_list;
-    facet_list = odr_malloc(odr, sizeof(*facet_list));
-    facet_list->num = num_elements;
-    elements = odr_malloc(odr, num_elements * sizeof(*elements));
-    facet_list->elements = elements;
-    while (index < num_elements)
+    nmem_strsplit(odr_getmem(o), ",", qbuf, &darray, &num);
+    if (num > 0)
     {
-        const char *pos = strchr(facet, FACET_DELIMITER);
-        if (pos == 0)
-            pos = facet + strlen(facet);
-        elements[index] = parse_facet(odr, (const char *) facet, (pos - facet));
-        if (elements[index])
-            index++;
-        else
-        {
-            num_elements--;
-            facet_list->num = num_elements;
-        }
-        facet = pos + 1;
+        int i;
+        Z_FacetList *fl = (Z_FacetList*) odr_malloc(o, sizeof(*fl));
+        fl->num = num;
+        fl->elements = (Z_FacetField **)
+            odr_malloc(o, num * sizeof(*fl->elements));
+        for (i = 0; i < num; i++)
+            fl->elements[i] = parse_facet(o, darray[i]);
+        return fl;
     }
-    return facet_list;
+    else
+        return 0;
 }
 
 int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off)
