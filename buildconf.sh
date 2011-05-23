@@ -119,8 +119,6 @@ When building from Git, you need these Debian packages:
   libxslt1-dev libgnutls-dev libreadline5-dev libwrap0-dev
   pkg-config libicu-dev 
 
-Also perhaps: libgnutls-dev libicu-dev
-
 And if you want to make a Debian package: dpkg-dev fakeroot debhelper
 (Then run "dpkg-buildpackage -rfakeroot" in this directory.)
 
