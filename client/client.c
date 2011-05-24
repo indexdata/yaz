@@ -1661,16 +1661,16 @@ static void display_term(Z_Term *term)
     switch (term->which)
     {
     case Z_Term_general:
-        printf("    %.*s", term->u.general->len, term->u.general->buf);
+        printf("%.*s", term->u.general->len, term->u.general->buf);
         break;
     case Z_Term_characterString:
-        printf("    %s", term->u.characterString);
+        printf("%s", term->u.characterString);
         break;
     case Z_Term_numeric:
-        printf("    " ODR_INT_PRINTF, *term->u.numeric);
+        printf(ODR_INT_PRINTF, *term->u.numeric);
         break;
     case Z_Term_null:
-        printf("    null");
+        printf("null");
         break;
     }
 }
@@ -1710,6 +1710,7 @@ static void display_facet(Z_FacetField *facet)
             for (term_index = 0 ; term_index < facet->num_terms; term_index++)
             {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
+                printf("    ");
                 display_term(facetTerm->term);
                 printf(" (" NMEM_INT_PRINTF ")\n", *facetTerm->count);
             }
