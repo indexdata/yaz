@@ -36,28 +36,27 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
     return dst;
 }
 
-Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name) {
-    Z_AttributeList *attributes= (Z_AttributeList *) odr_malloc(o, sizeof(*attributes));
+Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
+{
+    Z_AttributeList *attributes= (Z_AttributeList *)
+        odr_malloc(o, sizeof(*attributes));
     Z_AttributeElement ** elements;
     attributes->num_attributes = 1;
-    /* TODO check on name instead
-    if (!attributes->num_attributes) {
-        attributes->attributes = (Z_AttributeElement**)odr_nullval();
-        return attributes;
-    }
-    */
-    elements = (Z_AttributeElement**) odr_malloc (o, attributes->num_attributes * sizeof(*elements));
-    elements[0] = (Z_AttributeElement*)odr_malloc(o,sizeof(**elements));
-    elements[0]->attributeType = odr_malloc(o, sizeof(*elements[0]->attributeType));
-   *elements[0]->attributeType = 1;
+    elements = (Z_AttributeElement**)
+        odr_malloc (o, attributes->num_attributes * sizeof(*elements));
+    elements[0] = (Z_AttributeElement*) odr_malloc(o,sizeof(**elements));
+    elements[0]->attributeType = odr_intdup(o, 1);
     elements[0]->attributeSet = odr_nullval();
     elements[0]->which = Z_AttributeValue_complex;
-    elements[0]->value.complex = (Z_ComplexAttribute *) odr_malloc(o, sizeof(Z_ComplexAttribute));
+    elements[0]->value.complex = (Z_ComplexAttribute *)
+        odr_malloc(o, sizeof(Z_ComplexAttribute));
     elements[0]->value.complex->num_list = 1;
-    elements[0]->value.complex->list = (Z_StringOrNumeric **) odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
-    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *) odr_malloc(o, sizeof(Z_StringOrNumeric));
+    elements[0]->value.complex->list = (Z_StringOrNumeric **)
+        odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
+    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *)
+        odr_malloc(o, sizeof(Z_StringOrNumeric));
     elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
-    elements[0]->value.complex->list[0]->u.string = (Z_InternationalString *) odr_strdup(o, name);
+    elements[0]->value.complex->list[0]->u.string = odr_strdup(o, name);
     elements[0]->value.complex->semanticAction = 0;
     elements[0]->value.complex->num_semanticAction = 0;
     attributes->attributes = elements;
@@ -65,15 +64,18 @@ Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name) {
 }
 
 #if YAZ_HAVE_XML2
-const char *yaz_element_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name) {
-
+const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
+                                            const char *node_name,
+                                            const char *attribute_name)
+{
     struct _xmlAttr *attr;
     // check if the node name matches
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
     // check if the attribute name and return the value
     for (attr = ptr->properties; attr; attr = attr->next)
-        if (attr->children && attr->children->type == XML_TEXT_NODE) {
+        if (attr->children && attr->children->type == XML_TEXT_NODE)
+        {
             if (!strcmp((const char *) attr->name, attribute_name))
                 return (const char *) attr->children->content;
         }
@@ -155,7 +157,8 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
     if (password)
         sr->password = password;
 
-    if (basic) {
+    if (basic)
+    {
         int len, olen;
         char out[256];
         char ubuf[256] = "", pbuf[256] = "", *p;
@@ -168,7 +171,8 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
         olen = yaz_base64decode(basic, out);
         /* Format of out should be username:password at this point */
         strcpy(ubuf, out);
-        if ((p = strchr(ubuf, ':'))) {
+        if ((p = strchr(ubuf, ':')))
+        {
             *(p++) = '\0';
             if (*p)
                 strcpy(pbuf, p);
@@ -1305,12 +1309,13 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                             charset);
 }
 
-Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR odr, int num )
+Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR odr, int num)
 {
     Z_SRW_recordVersion *ver 
-        = (Z_SRW_recordVersion *) odr_malloc( odr, num * sizeof(*ver) );
+        = (Z_SRW_recordVersion *) odr_malloc(odr,num * sizeof(*ver));
     int i;
-    for ( i=0; i < num; ++i ){
+    for (i = 0; i < num; ++i)
+    {
         ver[i].versionType = 0;
         ver[i].versionValue = 0;
     }
