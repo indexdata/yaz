@@ -15,6 +15,7 @@
 
 static void tst_xml_include(void)
 {
+#if YAZ_HAVE_XML2
     const char *srcdir = getenv("srcdir");
     xmlDocPtr doc;
     xmlNodePtr node;
@@ -59,6 +60,7 @@ static void tst_xml_include(void)
         }
     }
     xmlFreeDoc(doc);
+#endif
 }
 
 
