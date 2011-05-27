@@ -79,7 +79,7 @@ const char *yaz_element_attribute_value_get(xmlNodePtr ptr, const char *node_nam
         }
     return 0;
 }
-
+#endif
 
 static int yaz_base64decode(const char *in, char *out)
 {
@@ -126,7 +126,6 @@ static int yaz_base64decode(const char *in, char *out)
     *out = '\0';
     return olen;
 }
-#endif
 
 int yaz_srw_check_content_type(Z_HTTP_Response *hres)
 {
@@ -146,7 +145,6 @@ int yaz_srw_check_content_type(Z_HTTP_Response *hres)
  * Look for authentication tokens in HTTP Basic parameters or in x-username/x-password
  * parameters. Added by SH.
  */
-#if YAZ_HAVE_XML2
 static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
                                char *username, char *password, ODR decode)
 {
@@ -181,7 +179,6 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
             sr->password = odr_strdup(decode, pbuf);
     }
 }
-#endif
 
 void yaz_uri_val_int(const char *path, const char *name, ODR o, Odr_int **intp)
 {
