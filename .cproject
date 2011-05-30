@@ -45,7 +45,7 @@
 <tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1171332498" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1658301018" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base"/>
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1367873707" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
-<option id="gnu.c.compiler.option.preprocessor.def.symbols.1155166778" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.1155166778" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
 <option id="gnu.c.compiler.option.include.paths.773210380" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/yaz/include}&quot;"/>
 <listOptionValue builtIn="false" value="/usr/include/libxml2"/>
