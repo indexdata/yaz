@@ -1,3 +1,10 @@
+--- 4.2.1 2011/06/07
+
+Make compilation work without Libxml2.
+
+yaz-client: remove redundant blanks in display of searchResult-1 term
+hit counts.
+
 --- 4.2.0 2011/05/18
 
 CQL: parse CQL sortby spec. The resulting sort spec is stored in the
