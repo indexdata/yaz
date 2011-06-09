@@ -32,12 +32,15 @@ void icu_sortkey8_from_utf16(UCollator *coll,
                              UErrorCode * status)
 { 
     int32_t sortkey_len = 0;
-
+    /* we'll fake a capacity of one less, because it turns out
+       that ucol_getSortKey writes ONE character too much */
+    int32_t cap = dest8->utf8_cap ? dest8->utf8_cap - 1 : 0;
+    
     sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
-                                  dest8->utf8, dest8->utf8_cap);
+                                  dest8->utf8, cap);
 
     /* check for buffer overflow, resize and retry */
-    if (sortkey_len > dest8->utf8_cap)
+    if (sortkey_len > cap)
     {
         icu_buf_utf8_resize(dest8, sortkey_len * 2);
         sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
