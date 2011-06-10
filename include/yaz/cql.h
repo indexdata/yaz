@@ -264,7 +264,9 @@ void cql_to_ccl_stdio(struct cql_node *cn, FILE *f);
     \param cn CQL node (tree)
     \param out buffer
     \param max size of buffer (max chars to write)
-    \returns length of resulting buffer
+    \retval 0 OK
+    \retval -1 conversion error
+    \retval -2 buffer too small (truncated)
  */
 YAZ_EXPORT
 int cql_to_ccl_buf(struct cql_node *cn, char *out, int max);

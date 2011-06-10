@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file xcqlutil.c
+ * \file cql2ccl.c
  * \brief Implements CQL to XCQL conversion.
  */
 #if HAVE_CONFIG_H
@@ -21,8 +21,8 @@ static int cql_to_ccl_r(struct cql_node *cn,
                         void *client_data);
 
 static void pr_term(struct cql_node *cn,
-                void (*pr)(const char *buf, void *client_data),
-                void *client_data)
+                    void (*pr)(const char *buf, void *client_data),
+                    void *client_data)
 {
     while (cn)
     {
@@ -111,7 +111,6 @@ static int node(struct cql_node *cn,
             pr(split_op, client_data);
             pr(" ", client_data);            
         }
-        return -1;
     }
     return 0;
 }
@@ -171,13 +170,16 @@ void cql_to_ccl_stdio(struct cql_node *cn, FILE *f)
 int cql_to_ccl_buf(struct cql_node *cn, char *out, int max)
 {
     struct cql_buf_write_info info;
+    int r;
     info.off = 0;
     info.max = max;
     info.buf = out;
-    cql_to_ccl(cn, cql_buf_write_handler, &info);
+    r = cql_to_ccl(cn, cql_buf_write_handler, &info);
     if (info.off >= 0)
         info.buf[info.off] = '\0';
-    return info.off;
+    else
+        return -2; /* buffer overflow */
+    return r;
 }
 
 /*
