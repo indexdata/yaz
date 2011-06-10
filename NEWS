@@ -1,3 +1,11 @@
+--- 4.2.2 2011/06/10
+
+Add new utilities to convert from CQL to CCL . These utilities have
+prefix cql_to_ccl defined in cql.h.
+
+Defensive coding for an off-by-one bug in ucol_getSortKey. This could
+lead to memory heap corruptions when ICU utilities were in use.
+
 --- 4.2.1 2011/06/07
 
 Make compilation work without Libxml2.
