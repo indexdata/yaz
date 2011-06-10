@@ -168,7 +168,17 @@ void cql_to_ccl_stdio(struct cql_node *cn, FILE *f)
     cql_to_ccl(cn, cql_fputs, f);
 }
 
-
+int cql_to_ccl_buf(struct cql_node *cn, char *out, int max)
+{
+    struct cql_buf_write_info info;
+    info.off = 0;
+    info.max = max;
+    info.buf = out;
+    cql_to_ccl(cn, cql_buf_write_handler, &info);
+    if (info.off >= 0)
+        info.buf[info.off] = '\0';
+    return info.off;
+}
 
 /*
  * Local variables:

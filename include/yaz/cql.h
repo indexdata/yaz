@@ -260,6 +260,15 @@ int cql_to_ccl(struct cql_node *cn,
 YAZ_EXPORT
 void cql_to_ccl_stdio(struct cql_node *cn, FILE *f);
 
+/** \brief converts CQL tree to CCL and writes result to buffer
+    \param cn CQL node (tree)
+    \param out buffer
+    \param max size of buffer (max chars to write)
+    \returns length of resulting buffer
+ */
+YAZ_EXPORT
+int cql_to_ccl_buf(struct cql_node *cn, char *out, int max);
+
 /** \brief stream handle for file (used by cql_to_xml_stdio) */
 YAZ_EXPORT
 void cql_fputs(const char *buf, void *client_data);
