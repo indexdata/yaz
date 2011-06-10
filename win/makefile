@@ -503,6 +503,7 @@ MISC_OBJS= \
    $(OBJDIR)\xmlerror.obj \
    $(OBJDIR)\mime.obj \
    $(OBJDIR)\cql.obj \
+   $(OBJDIR)\cql2ccl.obj \
    $(OBJDIR)\cql_sortkeys.obj \
    $(OBJDIR)\cqlstdio.obj \
    $(OBJDIR)\cqlstring.obj \
