@@ -243,6 +243,23 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 YAZ_EXPORT
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
 
+/** \brief converts CQL tree to CCL and writes to user-defined stream
+    \param cn CQL node (tree)
+    \param pr print function
+    \param client_data data to be passed to pr function
+ */
+YAZ_EXPORT
+int cql_to_ccl(struct cql_node *cn, 
+               void (*pr)(const char *buf, void *client_data),
+               void *client_data);
+
+/** \brief converts CQL tree to CCL and writes to file
+    \param cn CQL node (tree)
+    \param f file handle
+ */
+YAZ_EXPORT
+void cql_to_ccl_stdio(struct cql_node *cn, FILE *f);
+
 /** \brief stream handle for file (used by cql_to_xml_stdio) */
 YAZ_EXPORT
 void cql_fputs(const char *buf, void *client_data);
