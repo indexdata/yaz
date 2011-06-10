@@ -35,6 +35,9 @@ test_file_glob
 test_log_thread
 test_mutex
 test_libstemmer
+test_rpn2solr
+test_shared_ptr
+test_solr
 *.log
 *.o
 *~
