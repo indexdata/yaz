@@ -277,7 +277,6 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
         attrp = &(*qp)->attr_list;
         for (attr = q->attr_list; attr; attr = attr->next)
         {
-            int i;
             *attrp = xmalloc(sizeof(**attrp));
             (*attrp)->next = 0;
             (*attrp)->set = attr->set ? xstrdup(attr->set) : 0;
@@ -287,14 +286,20 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
             else if (attr->kind == CCL_RPN_ATTR_STRING)
                 (*attrp)->value.str = xstrdup(attr->value.str);
 
+            attrp = &(*attrp)->next;
+        }
+        (*qp)->no_sub = q->no_sub;
+        if (!q->sub)
+            (*qp)->sub = 0;
+        else
+        {
             /* fix up the sub qualifiers.. */
-            for (i = 0; q->sub[i]; i++)
-                ;
-            (*qp)->sub = xmalloc(sizeof(*(*qp)->sub) * (i+1));
-            for (i = 0; q->sub[i]; i++)
+            int i;
+            (*qp)->sub = xmalloc(sizeof(*q->sub) * (q->no_sub + 1));
+            for (i = 0; i < q->no_sub; i++)
             {
                 struct ccl_qualifier *q1, *q2;
-
+                
                 /* sweep though original and match up the corresponding ent */
                 q2 = n->list;
                 for (q1 = b->list; q1 && q2; q1 = q1->next, q2 = q2->next)
@@ -302,9 +307,6 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
                         break;
                 (*qp)->sub[i] = q2;
             }
-            (*qp)->sub[i] = 0;
-
-            attrp = &(*attrp)->next;
         }
         qp = &(*qp)->next;
     }
