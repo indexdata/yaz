@@ -1,3 +1,7 @@
+--- 4.2.3 2011/06/17
+
+Add new CCL utility, ccl_qual_dup, which makes a copy of a CCL bibset.
+
 --- 4.2.2 2011/06/10
 
 Add new utilities to convert from CQL to CCL . These utilities have
