@@ -226,6 +226,10 @@ void ccl_qual_fitem(CCL_bibset bibset, const char *value,
 YAZ_EXPORT
 CCL_bibset ccl_qual_mk(void);
 
+/** Make CCL qualifier set from an existing one (duplicate it) */
+YAZ_EXPORT
+CCL_bibset ccl_qual_dup(CCL_bibset b);
+
 /** Delete CCL qualifier set */
 YAZ_EXPORT
 void ccl_qual_rm(CCL_bibset *b);

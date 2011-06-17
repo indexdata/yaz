@@ -259,6 +259,74 @@ void ccl_qual_rm(CCL_bibset *b)
     *b = NULL;
 }
 
+CCL_bibset ccl_qual_dup(CCL_bibset b)
+{
+    CCL_bibset n = ccl_qual_mk();
+    struct ccl_qualifier *q, **qp;
+    struct ccl_qualifier_special *s, **sp;
+
+    qp = &n->list;
+    for (q = b->list; q; q = q->next)
+    {
+        struct ccl_rpn_attr *attr, **attrp;
+        *qp = xmalloc(sizeof(**qp));
+        (*qp)->next = 0;
+        (*qp)->attr_list = 0;
+        (*qp)->name = xstrdup(q->name);
+        
+        attrp = &(*qp)->attr_list;
+        for (attr = q->attr_list; attr; attr = attr->next)
+        {
+            int i;
+            *attrp = xmalloc(sizeof(**attrp));
+            (*attrp)->next = 0;
+            (*attrp)->set = attr->set ? xstrdup(attr->set) : 0;
+            (*attrp)->type = attr->type;
+            if (attr->kind == CCL_RPN_ATTR_NUMERIC)
+                (*attrp)->value.numeric = attr->value.numeric;
+            else if (attr->kind == CCL_RPN_ATTR_STRING)
+                (*attrp)->value.str = xstrdup(attr->value.str);
+
+            /* fix up the sub qualifiers.. */
+            for (i = 0; q->sub[i]; i++)
+                ;
+            (*qp)->sub = xmalloc(sizeof(*(*qp)->sub) * (i+1));
+            for (i = 0; q->sub[i]; i++)
+            {
+                struct ccl_qualifier *q1, *q2;
+
+                /* sweep though original and match up the corresponding ent */
+                q2 = n->list;
+                for (q1 = b->list; q1 && q2; q1 = q1->next, q2 = q2->next)
+                    if (q1 == q->sub[i])
+                        break;
+                (*qp)->sub[i] = q2;
+            }
+            (*qp)->sub[i] = 0;
+
+            attrp = &(*attrp)->next;
+        }
+        qp = &(*qp)->next;
+    }
+    sp = &n->special;
+    for (s = b->special; s; s = s->next)
+    {
+        int i;
+
+        for (i = 0; s->values[i]; i++)
+            ;
+        *sp = xmalloc(sizeof(**sp));
+        (*sp)->next = 0;
+        (*sp)->name = xstrdup(s->name);
+        (*sp)->values = xmalloc(sizeof(*(*sp)->values) * (i+1));
+        for (i = 0; s->values[i]; i++)
+            (*sp)->values[i] = xstrdup(s->values[i]);
+        (*sp)->values[i] = 0;
+        sp = &(*sp)->next;
+    }
+    return n;
+}
+
 ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name, 
                                 size_t name_len, int seq)
 {

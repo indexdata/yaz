@@ -67,6 +67,13 @@ void tst1(int pass)
     if (!bibset)
         return;
 
+    if (pass == 1)
+    {
+        CCL_bibset nbibset = ccl_qual_dup(bibset);
+        ccl_qual_rm(&bibset);
+        bibset = nbibset;
+    }
+
     switch(pass)
     {
     case 0:
