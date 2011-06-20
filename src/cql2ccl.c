@@ -26,9 +26,19 @@ static void pr_term(struct cql_node *cn,
 {
     while (cn)
     {
-        pr("\"", client_data);
-        pr(cn->u.st.term, client_data);
-        pr("\"", client_data);
+        const char *cp;
+        cp = cn->u.st.term;
+        while (*cp)
+        {
+            char x[2];
+            if (*cp == '*')
+                x[0] = '?';
+            else
+                x[0] = *cp;
+            x[1] = 0;
+            pr(x, client_data);
+            cp++;
+        }
         if (cn->u.st.extra_terms)
             pr(" ", client_data);
         cn = cn->u.st.extra_terms;
@@ -98,7 +108,10 @@ static int node(struct cql_node *cn,
             while (*cp && *cp != ' ')
             {
                 char x[2];
-                x[0] = *cp;
+                if (*cp == '*')
+                    x[0] = '?';
+                else
+                    x[0] = *cp;
                 x[1] = '\0';
                 pr(x, client_data);
                 cp++;
