@@ -328,6 +328,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             npr->u.databaseRecord->descriptor = 0;
             npr->u.databaseRecord->direct_reference =
                 odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
+            npr->u.databaseRecord->indirect_reference = 0;
             npr->u.databaseRecord->which = Z_External_octet;
             
             npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
