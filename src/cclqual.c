@@ -281,6 +281,7 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
             (*attrp)->next = 0;
             (*attrp)->set = attr->set ? xstrdup(attr->set) : 0;
             (*attrp)->type = attr->type;
+            (*attrp)->kind = attr->kind;
             if (attr->kind == CCL_RPN_ATTR_NUMERIC)
                 (*attrp)->value.numeric = attr->value.numeric;
             else if (attr->kind == CCL_RPN_ATTR_STRING)
