@@ -1,3 +1,11 @@
+--- 4.2.4 2011/06/21
+
+Fix a bug in SRU decoding of records.. The datbase records stored
+had un-initialized memory, but it would only be seen with yaz_record_render
+and type_spec="ext" .
+
+Fix a bug in ccl_qual_dup introduced in 4.2.3.
+
 --- 4.2.3 2011/06/17
 
 Add new CCL utility, ccl_qual_dup, which makes a copy of a CCL bibset.
