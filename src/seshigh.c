@@ -2968,6 +2968,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     if (req->stepSize)
         step_size = odr_int_to_int(*req->stepSize);
 
+    res->stepSize = 0;
     res->scanStatus = scanStatus;
     res->numberOfEntriesReturned = numberOfEntriesReturned;
     res->positionOfTerm = 0;
