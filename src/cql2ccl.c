@@ -133,7 +133,11 @@ static int bool(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
+    char *value = cn->u.boolean.value;
     int r;
+
+    /* Rather lame initial attempt at interpreting proximity */
+    if (!strcmp(value, "prox")) value = "!";
 
     pr("(", client_data);
     r = cql_to_ccl_r(cn->u.boolean.left, pr, client_data);
@@ -141,7 +145,7 @@ static int bool(struct cql_node *cn,
         return r;
     
     pr(" ", client_data);
-    pr(cn->u.boolean.value, client_data);
+    pr(value, client_data);
     pr(" ", client_data);
 
     r = cql_to_ccl_r(cn->u.boolean.right, pr, client_data);
