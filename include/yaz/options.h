@@ -56,7 +56,7 @@ YAZ_BEGIN_CDECL
     The second is zero ore more long option values (synonum for single char)
     If colon is appended, it means the option takes an argument.
 */
-YAZ_EXPORT int options (const char *desc, char **argv, int argc, char **arg);
+YAZ_EXPORT int options(const char *desc, char **argv, int argc, char **arg);
 
 #define YAZ_OPTIONS_ERROR (-1)
 #define YAZ_OPTIONS_EOF (-2)

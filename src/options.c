@@ -17,7 +17,7 @@
 static int arg_no = 1;
 static size_t arg_off = 0;
 
-int options (const char *desc, char **argv, int argc, char **arg)
+int options(const char *desc, char **argv, int argc, char **arg)
 {
     const char *opt_buf = 0;
     size_t i = 0;
