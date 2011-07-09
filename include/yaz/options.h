@@ -31,7 +31,7 @@
  */
 
 #ifndef YAZ_OPTIONS_H
-#define TAZ_OPTIONS_H
+#define YAZ_OPTIONS_H
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL
