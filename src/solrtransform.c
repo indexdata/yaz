@@ -41,7 +41,7 @@ struct solr_transform_t_ {
 };
 
 
-/* TODO Utility functions, evt. split out int separate file */
+/* TODO Utility functions, split out into separate file */
 int solr_strcmp(const char *s1, const char *s2) {
     return cql_strcmp(s1, s2);
 }
@@ -70,7 +70,7 @@ void solr_buf_write_handler (const char *b, void *client_data)
 }
 
 
-/* Utillity functions end */
+/* Utility functions end */
 
 solr_transform_t solr_transform_create(void)
 {
