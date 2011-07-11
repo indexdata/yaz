@@ -245,6 +245,7 @@ static int rpn2solr_simple(solr_transform_t ct,
         {
             size_t i;
             int must_quote = 0;
+
             for (i = 0 ; i < lterm; i++)
                 if (sterm[i] == ' ')
                     must_quote = 1;
@@ -253,7 +254,13 @@ static int rpn2solr_simple(solr_transform_t ct,
             /* Bug 2878: Check and add Truncation */
 			if (checkForLeftTruncation(apt->attributes))
                 wrbuf_puts(w, "*");
-            wrbuf_write(w, sterm, lterm);
+			/* BUG 4415: Escape : (as \:) in string terms */
+			for (i = 0 ; i < lterm; i++) {
+			    if (sterm[i] == ':') {
+			       wrbuf_putc(w, '\\');
+			    }
+			    wrbuf_putc(w, sterm[i]);
+			}
             /* Bug 2878: Check and add Truncation */
 			if (checkForRightTruncation(apt->attributes))
                 wrbuf_puts(w, "*");
