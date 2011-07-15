@@ -4,7 +4,7 @@
  */
 /**
  * \file solr.c
- * \brief Implements SOAP Webservice decoding/encoding
+ * \brief Implements Solr decoding/encoding
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -356,7 +356,20 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     }
     else
         return -1;
-    name[i] = 0;
+
+    if (srw_pdu->extra_args)
+    {
+        Z_SRW_extra_arg *ea = srw_pdu->extra_args;
+        for (; ea && i < SOLR_MAX_PARAMETERS; ea = ea->next)
+        {
+            name[i] = ea->name;
+            value[i] = ea->value;
+            i++;
+        }
+    }
+
+    name[i++] = 0;
+
     yaz_array_to_uri(&uri_args, encode, name, value);
     
     hreq->method = "GET";

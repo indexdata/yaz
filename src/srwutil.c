@@ -17,6 +17,8 @@
 #include <yaz/yaz-iconv.h>
 #include "sru-p.h"
 
+#define MAX_SRU_PARAMETERS 30
+
 static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)
 {
     return odr_strdupn(n, uri, len);
@@ -1223,13 +1225,13 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
 int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                        ODR encode, const char *charset)
 {
-    char *name[30], *value[30]; /* definite upper limit for SRU params */
+    char *name[MAX_SRU_PARAMETERS], *value[MAX_SRU_PARAMETERS]; /* definite upper limit for SRU params */
     char *uri_args;
     char *path;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
                                  srw_pdu->username, srw_pdu->password);
-    if (yaz_get_sru_parms(srw_pdu, encode, name, value, 30))
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value, MAX_SRU_PARAMETERS))
         return -1;
     yaz_array_to_uri(&uri_args, encode, name, value);
 
@@ -1250,12 +1252,12 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                         ODR encode, const char *charset)
 {
-    char *name[30], *value[30]; /* definite upper limit for SRU params */
+    char *name[MAX_SRU_PARAMETERS], *value[MAX_SRU_PARAMETERS]; /* definite upper limit for SRU params */
     char *uri_args;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
                                  srw_pdu->username, srw_pdu->password);
-    if (yaz_get_sru_parms(srw_pdu, encode, name, value, 30))
+    if (yaz_get_sru_parms(srw_pdu, encode, name, value, MAX_SRU_PARAMETERS))
         return -1;
 
     yaz_array_to_uri(&uri_args, encode, name, value);
