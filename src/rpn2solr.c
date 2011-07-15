@@ -254,9 +254,9 @@ static int rpn2solr_simple(solr_transform_t ct,
             /* Bug 2878: Check and add Truncation */
 			if (checkForLeftTruncation(apt->attributes))
                 wrbuf_puts(w, "*");
-			/* BUG 4415: Escape : (as \:) in string terms */
 			for (i = 0 ; i < lterm; i++) {
-			    if (sterm[i] == ':') {
+                /* BUG 4415: Escape special characters in string terms */
+			    if (strchr("+-&|!(){}[]^\"~*?:\\", sterm[i])) {
 			       wrbuf_putc(w, '\\');
 			    }
 			    wrbuf_putc(w, sterm[i]);
