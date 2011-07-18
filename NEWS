@@ -1,6 +1,6 @@
 --- 4.2.4 2011/06/21
 
-Fix a bug in SRU decoding of records.. The datbase records stored
+Fix a bug in SRU decoding of records.. The database records stored
 had un-initialized memory, but it would only be seen with yaz_record_render
 and type_spec="ext" .
 
