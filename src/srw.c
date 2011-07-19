@@ -133,10 +133,11 @@ static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
     return match_xsd_string_n(ptr, elem, o, val, 0);
 }
 
-static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
-                           char **val, int *len)
+static int match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
+                            char **val, int *len, int fixup_root)
 {
     xmlBufferPtr buf;
+    int no_root_nodes = 0;
 
     if (!match_element(ptr, elem))
         return 0;
@@ -158,9 +159,14 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
             xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
             
             xmlFreeNode(tmp);
+            no_root_nodes++;
         }
     }
-    
+    if (no_root_nodes != 1 && fixup_root)
+    {
+        xmlBufferAddHead(buf, (const xmlChar *) "<yaz_record>", -1);
+        xmlBufferAdd(buf, (const xmlChar *) "</yaz_record>", -1);
+    }
     *val = (char *) odr_malloc(o, buf->use+1);
     memcpy (*val, buf->content, buf->use);
     (*val)[buf->use] = '\0';
@@ -172,7 +178,13 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
 
     return 1;
 }
-                     
+
+static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
+                           char **val, int *len)
+{
+    return match_xsd_XML_n2(ptr, elem, o, val, len, 0);
+}
+
 static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
                              Odr_int **val)
 {
@@ -271,8 +283,8 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
             switch(pack)
             {
             case Z_SRW_recordPacking_XML:
-                match_xsd_XML_n(data_ptr, "recordData", o, 
-                                &rec->recordData_buf, &rec->recordData_len);
+                match_xsd_XML_n2(data_ptr, "recordData", o, 
+                                &rec->recordData_buf, &rec->recordData_len, 1);
                 break;
             case Z_SRW_recordPacking_URL:
                 /* just store it as a string.
