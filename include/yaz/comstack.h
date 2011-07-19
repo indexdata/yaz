@@ -122,6 +122,10 @@ YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host, 
                                    int blocking, void **vp);
+
+YAZ_EXPORT COMSTACK cs_create_host_proxy(const char *vhost,
+                                         int blocking, void **vp,
+                                         const char *proxy_host);
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);

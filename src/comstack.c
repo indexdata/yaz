@@ -157,6 +157,12 @@ static int cs_parse_host(const char *uri, const char **host,
 
 COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
 {
+    return cs_create_host_proxy(vhost, blocking, vp, 0);
+}
+
+COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
+                              const char *proxy_host)
+{
     enum oid_proto proto = PROTO_Z3950;
     const char *host = 0;
     COMSTACK cs;
@@ -175,6 +181,8 @@ COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
     }
     if (cs)
     {
+        if (proxy_host)
+            host = proxy_host;
         if (!(*vp = cs_straddr(cs, connect_host ? connect_host : host)))
         {
             cs_close (cs);
