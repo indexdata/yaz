@@ -351,7 +351,6 @@ ZOOM_API(void)
                             const char *host, int portnum)
 {
     const char *val;
-    ZOOM_task task;
 
     initlog();
 
@@ -510,7 +509,7 @@ ZOOM_API(void)
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
     yaz_log(c->log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
  
-    task = ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
+    ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
 
     if (!c->async)
     {
@@ -1027,41 +1026,35 @@ static void get_cert(ZOOM_connection c)
 }
 
 static zoom_ret do_connect_host(ZOOM_connection c,
-                                const char *effective_host,
                                 const char *logical_url);
 
 static zoom_ret do_connect(ZOOM_connection c)
 {
-    const char *effective_host;
-
-    if (c->proxy)
-        effective_host = c->proxy;
-    else
-        effective_host = c->host_port;
-    return do_connect_host(c, effective_host, c->host_port);
+    return do_connect_host(c, c->host_port);
 }
 
-static zoom_ret do_connect_host(ZOOM_connection c, const char *effective_host,
-    const char *logical_url)
+static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 {
     void *add;
 
-    yaz_log(c->log_details, "%p do_connect effective_host=%s", c, effective_host);
-
     if (c->cs)
         cs_close(c->cs);
-    c->cs = cs_create_host(effective_host, 0, &add);
-
+    c->cs = cs_create_host_proxy(logical_url, 0, &add, c->proxy);
+    
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
 #if YAZ_HAVE_XML2
-        if (logical_url)
+        c->proto = PROTO_HTTP;
+        xfree(c->path);
+        if (c->proxy)
+        {
+            c->path = xstrdup(logical_url);
+        }
+        else
         {
             const char *db = 0;
             
-            c->proto = PROTO_HTTP;
             cs_get_host_args(logical_url, &db);
-            xfree(c->path);
             
             c->path = xmalloc(strlen(db) * 3 + 2);
             yaz_encode_sru_dbpath_buf(c->path, db);
@@ -1596,7 +1589,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         {
             /* since redirect may change host we just reconnect. A smarter
                implementation might check whether it's the same server */
-            do_connect_host(c, location, 0);
+            do_connect_host(c, location);
             send_HTTP_redirect(c, location, hres);
             /* we're OK for now. Operation is not really complete */
             ret = 0;
