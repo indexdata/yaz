@@ -127,7 +127,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
         }
         else if (line[0] == '(') /* annotation, skip it */
             ;
-        else if (line_len == 24 && atoi_n_check(line, 5, &val) && val >= 24)
+        else if (line_len == 24 && atoi_n_check(line, 5, &val))
         {
             /* deal with header lines:  00366nam  22001698a 4500
             */
