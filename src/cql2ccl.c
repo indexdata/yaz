@@ -136,16 +136,60 @@ static int bool(struct cql_node *cn,
     char *value = cn->u.boolean.value;
     int r;
 
-    /* Rather lame initial attempt at interpreting proximity */
-    if (!strcmp(value, "prox")) value = "!";
-
     pr("(", client_data);
     r = cql_to_ccl_r(cn->u.boolean.left, pr, client_data);
     if (r)
         return r;
     
     pr(" ", client_data);
-    pr(value, client_data);
+
+    if (strcmp(value, "prox"))
+    {   /* not proximity. assuming boolean */
+        pr(value, client_data);
+    }
+    else
+    {
+        struct cql_node *n = cn->u.boolean.modifiers;
+        int ordered = 0;
+        int distance = 1;
+        for (; n ; n = n->u.st.modifiers)
+            if (n->which == CQL_NODE_ST)
+            {
+                if (!strcmp(n->u.st.index, "unit"))
+                {
+                    if (!strcmp(n->u.st.term, "word"))
+                        ;
+                    else
+                        return -1;
+                }
+                else if (!strcmp(n->u.st.index, "distance"))
+                {
+                    if (!strcmp(n->u.st.relation, "<="))
+                        distance = atoi(n->u.st.term);
+                    else if (!strcmp(n->u.st.relation, "<"))
+                        distance = atoi(n->u.st.term) - 1;
+                    else
+                        return -1;
+                }
+                else if (!strcmp(n->u.st.index, "unordered"))
+                {
+                    ordered = 0;
+                }
+                else if (!strcmp(n->u.st.index, "ordered"))
+                {
+                    ordered = 1;
+                }
+                else
+                    return -1;
+            }
+        pr(ordered ? "!" : "%", client_data);
+        if (distance != 1)
+        {
+            char x[40];
+            sprintf(x, "%d", distance);
+            pr(x, client_data);
+        }
+    }
     pr(" ", client_data);
 
     r = cql_to_ccl_r(cn->u.boolean.right, pr, client_data);
