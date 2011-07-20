@@ -1507,7 +1507,7 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri,
 {
     struct Z_HTTP_Header *h;
     Z_GDU *gdu = get_HTTP_Request_url(c->odr_out, uri);
-    char *combined_cookies;
+    char *combined_cookies = 0;
     int combined_cookies_len = 0;
 
     gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
