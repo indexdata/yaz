@@ -265,7 +265,6 @@ ZOOM_API(ZOOM_connection)
     c->options = ZOOM_options_create_with_parent(options);
 
     c->host_port = 0;
-    c->path = 0;
     c->proxy = 0;
     
     c->charset = c->lang = 0;
@@ -583,7 +582,6 @@ ZOOM_API(void)
     ZOOM_connection_remove_tasks(c);
     ZOOM_connection_remove_events(c);
     xfree(c->host_port);
-    xfree(c->path);
     xfree(c->proxy);
     xfree(c->charset);
     xfree(c->lang);
@@ -1045,20 +1043,6 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
     {
 #if YAZ_HAVE_XML2
         c->proto = PROTO_HTTP;
-        xfree(c->path);
-        if (c->proxy)
-        {
-            c->path = xstrdup(logical_url);
-        }
-        else
-        {
-            const char *db = 0;
-            
-            cs_get_host_args(logical_url, &db);
-            
-            c->path = xmalloc(strlen(db) * 3 + 2);
-            yaz_encode_sru_dbpath_buf(c->path, db);
-        }
 #else
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, "SRW");
         ZOOM_connection_close(c);
@@ -1476,39 +1460,14 @@ ZOOM_API(int)
 }
 
 #if YAZ_HAVE_XML2
-static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url)
-{
-    Z_GDU *p = z_get_HTTP_Request(odr);
-    const char *host = url;
-    const char *cp0 = strstr(host, "://");
-    const char *cp1 = 0;
-    if (cp0)
-        cp0 = cp0+3;
-    else
-        cp0 = host;
-    
-    cp1 = strchr(cp0, '/');
-    if (!cp1)
-        cp1 = cp0 + strlen(cp0);
-    
-    if (cp0 && cp1)
-    {
-        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
-        memcpy (h, cp0, cp1 - cp0);
-        h[cp1-cp0] = '\0';
-        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
-    }
-    p->u.HTTP_Request->path = odr_strdup(odr, *cp1 ? cp1 : "/");
-    return p;
-}
 
 static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri,
                                   Z_HTTP_Response *cookie_hres)
 {
     struct Z_HTTP_Header *h;
-    Z_GDU *gdu = get_HTTP_Request_url(c->odr_out, uri);
     char *combined_cookies = 0;
     int combined_cookies_len = 0;
+    Z_GDU *gdu = z_get_HTTP_Request_uri(c->odr_out, uri, 0, c->proxy ? 1 : 0);
 
     gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers, "Accept",
@@ -1574,7 +1533,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
     ZOOM_connection_set_mask(c, 0);
     yaz_log(c->log_details, "%p handle_http", c);
-    
+
     if ((hres->code == 301 || hres->code == 302) && c->sru_mode == zoom_sru_get
         && (location = z_HTTP_header_lookup(hres->headers, "Location")))
     {
@@ -1592,8 +1551,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             do_connect_host(c, location);
             send_HTTP_redirect(c, location, hres);
             /* we're OK for now. Operation is not really complete */
-            ret = 0;
-            cret = zoom_pending;
+            return;
         }
     }
     else 

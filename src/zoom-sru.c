@@ -36,12 +36,10 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     Z_GDU *gdu;
     ZOOM_Event event;
     const char *database =  ZOOM_options_get(c->options, "databaseName");
-    char *fdatabase = 0;
-    
-    if (database)
-        fdatabase = yaz_encode_sru_dbpath_odr(c->odr_out, database);
-    gdu = z_get_HTTP_Request_host_path(c->odr_out, c->host_port,
-                                       fdatabase ? fdatabase : c->path);
+
+    gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port,
+                                 database,
+                                 c->proxy ? 1 : 0);
 
     if (c->sru_mode == zoom_sru_get)
     {
