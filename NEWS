@@ -1,3 +1,23 @@
+--- 4.2.5 2011/07/21
+
+ZOOM HTTP: use absoluteURI's in proxy mode as required by RFC 2616 (HTTP).
+Fix a bug in handling of cookies. Fix a bug that would occur if proxy +
+redirect was used at the same time.
+
+MARC line mode decoding: be less picky about length given - first
+5 digits of header that is.
+
+CQL to CCL conversion: deal with CQL proximity (cql_to_ccl function).
+
+Changes to decoding of SRU records: a record with recordPacking=xml is
+modified with a new root element <yaz_record> if the recordData contains
+multiple children elements. This is to make the record XML parseable
+afterwards.
+
+RPN to SOLR conversion: encode special characters.
+
+Generic Frontend Server: fix uinitialized member, stepSize.
+
 --- 4.2.4 2011/06/21
 
 Fix a bug in SRU decoding of records.. The database records stored
