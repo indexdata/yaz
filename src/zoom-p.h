@@ -64,7 +64,6 @@ struct ZOOM_connection_p {
     enum oid_proto proto;
     COMSTACK cs;
     char *host_port;
-    char *path;
     int error;
     char *addinfo;
     char *diagset;

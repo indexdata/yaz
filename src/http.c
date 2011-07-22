@@ -317,6 +317,48 @@ Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
     return p;
 }
 
+Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
+                              int use_full_uri)
+{
+    Z_GDU *p = z_get_HTTP_Request(odr);
+    const char *cp0 = strstr(uri, "://");
+    const char *cp1 = 0;
+    if (cp0)
+        cp0 = cp0+3;
+    else
+        cp0 = uri;
+    
+    cp1 = strchr(cp0, '/');
+    if (!cp1)
+        cp1 = cp0+strlen(cp0);
+    
+    if (cp0 && cp1)
+    {
+        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
+        memcpy (h, cp0, cp1 - cp0);
+        h[cp1-cp0] = '\0';
+        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers,
+                          "Host", h);
+    }
+
+    if (!args)
+    {
+        if (*cp1)
+            args = cp1 + 1;
+        else
+            args = "";
+    }
+    p->u.HTTP_Request->path = odr_malloc(odr, cp1 - uri + strlen(args) + 2);
+    if (use_full_uri)
+    {
+        memcpy(p->u.HTTP_Request->path, uri, cp1 - uri);
+        strcpy(p->u.HTTP_Request->path + (cp1 - uri), "/");
+    }
+    else
+        strcpy(p->u.HTTP_Request->path, "/");
+    strcat(p->u.HTTP_Request->path, args);
+    return p;
+}
 
 Z_GDU *z_get_HTTP_Response(ODR o, int code)
 {

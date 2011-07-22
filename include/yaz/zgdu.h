@@ -92,7 +92,9 @@ YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
                                                const char *host,
                                                const char *path);
-
+YAZ_EXPORT Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri,
+                                         const char *args,
+                                         int use_full_uri);
 YAZ_EXPORT int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p);
 YAZ_EXPORT int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p);
 YAZ_EXPORT int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr);
