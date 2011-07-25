@@ -129,7 +129,8 @@ int yaz_is_abspath(const char *p)
 #ifdef WIN32
     if (*p == '\\')
         return 1;
-    if (*p && p[1] == ':' && isalpha(*p))
+    if (*p && p[1] == ':' && 
+        ((*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z')))
         return 1;
 #endif
     return 0;
