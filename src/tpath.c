@@ -32,12 +32,12 @@
 
 FILE *yaz_path_fopen(const char *path, const char *name, const char *mode)
 {
-    return yaz_fopen (path, name, mode, 0);
+    return yaz_fopen(path, name, mode, 0);
 }
 
 int yaz_fclose (FILE *f)
 {
-    return fclose (f);
+    return fclose(f);
 }
 
 
@@ -50,10 +50,10 @@ size_t yaz_filepath_comp(const char **path_p, const char **comp)
     /* somewhat dirty since we have to consider Windows
      * drive letters..
      */
-    if (path[0] && strchr ("/\\.", path[0]))
-        path_sep = strchr (path+1, ':');
+    if (path[0] && strchr("/\\.", path[0]))
+        path_sep = strchr(path+1, ':');
     else if (path[0] && path[1])
-        path_sep = strchr (path+2, ':');
+        path_sep = strchr(path+2, ':');
     else
         path_sep = 0;
     
@@ -74,7 +74,9 @@ size_t yaz_filepath_comp(const char **path_p, const char **comp)
 char *yaz_filepath_resolve(const char *fname, const char *path,
                            const char *base, char *fullpath)
 {
-    for(;;)
+    if (path && *path == '\0')
+        path = 0;
+    for (;;)
     {
         struct stat stat_buf;
         size_t slen = 0;
@@ -89,19 +91,19 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
             if (!len)
                 break;
 
-            if (!strchr ("/\\", *comp) && base)
+            if (!strchr("/\\", *comp) && base)
             {
                 /* yes: make base the first part */
-                strcpy (fullpath, base);
+                strcpy(fullpath, base);
                 slen = strlen(fullpath);
                 fullpath[slen++] = '/';
             }
-            memcpy (fullpath+slen, comp, len);
+            memcpy(fullpath+slen, comp, len);
             slen += len;
-            if (slen > 0 && !strchr("/\\", fullpath[slen-1]))
+            if(slen > 0 && !strchr("/\\", fullpath[slen-1]))
                 fullpath[slen++] = '/';
         }
-        strcpy (fullpath+slen, fname);
+        strcpy(fullpath+slen, fname);
         if (stat(fullpath, &stat_buf) == 0)
             return fullpath;
         if (!path)
@@ -120,14 +122,15 @@ FILE *yaz_fopen(const char *path, const char *fname, const char *mode,
     return fopen(fullpath, mode);
 }
 
-int yaz_is_abspath (const char *p)
+int yaz_is_abspath(const char *p)
 {
     if (*p == '/')
         return 1;
 #ifdef WIN32
     if (*p == '\\')
         return 1;
-    if (*p && p[1] == ':' && isalpha(*p))
+    if (*p && p[1] == ':' && 
+        ((*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z')))
         return 1;
 #endif
     return 0;
