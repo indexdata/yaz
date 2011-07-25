@@ -23,7 +23,7 @@ static void tst_tpath(void)
     YAZ_CHECK(!yaz_filepath_resolve("does_not_exist", ".", 0, fullpath));
     YAZ_CHECK(yaz_filepath_resolve("test_tpath", 0, 0, fullpath));
 
-    YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "", 0, fullpath));
+    YAZ_CHECK(yaz_filepath_resolve("test_tpath", "", 0, fullpath));
     YAZ_CHECK(yaz_filepath_resolve("test_tpath", ".", 0, fullpath));
 
     YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "unknown_dir", 0, fullpath));

@@ -74,7 +74,9 @@ size_t yaz_filepath_comp(const char **path_p, const char **comp)
 char *yaz_filepath_resolve(const char *fname, const char *path,
                            const char *base, char *fullpath)
 {
-    for(;;)
+    if (path && *path == '\0')
+        path = 0;
+    for (;;)
     {
         struct stat stat_buf;
         size_t slen = 0;
