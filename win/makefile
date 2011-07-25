@@ -409,6 +409,7 @@ MISC_OBJS= \
    $(OBJDIR)\cclqual.obj \
    $(OBJDIR)\cclstr.obj \
    $(OBJDIR)\ccltoken.obj \
+   $(OBJDIR)\cclxmlconfig.obj \
    $(OBJDIR)\ccl_stop_words.obj \
    $(OBJDIR)\comstack.obj \
    $(OBJDIR)\tcpip.obj \
