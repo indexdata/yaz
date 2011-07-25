@@ -43,7 +43,7 @@ YAZ_BEGIN_CDECL
     \retval 1 path is absolute
     \retval 0 path is relative
 */
-YAZ_EXPORT int yaz_is_abspath (const char *path);
+YAZ_EXPORT int yaz_is_abspath(const char *path);
 
 /** \brief get next path component in filepath
     \param path_p pointer to path (updated to "next" entry if any)
@@ -63,7 +63,7 @@ YAZ_EXPORT size_t yaz_filepath_comp(const char **path_p, const char **comp);
     \param fname "short" filename (without path)
     \param path the path (dir1:dir2,..) - ala Unix
     \param base can be added to relative paths (NULL for no append)
-    \param fullpath the full path to filename (if succesful)
+    \param fullpath the full path to filename (if successful)
 
     Returns 0/NULL if no fname could be found in path; 
     pointer to fullpath if fname could be found.
