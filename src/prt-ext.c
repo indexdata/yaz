@@ -261,18 +261,12 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len)
 {
     Z_External *thisext;
-    char oid_str_buf[OID_STR_MAX];
-    const char *oid_str;
-    oid_class oclass;
 
     if (!oid)
         return 0;
     thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
     thisext->descriptor = 0;
     thisext->indirect_reference = 0;
-
-    oid_str = yaz_oid_to_string_buf(oid, &oclass, oid_str_buf);
-
     thisext->direct_reference = odr_oiddup(o, oid);
 
     if (len < 0) /* Structured data */
@@ -343,18 +337,12 @@ Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid,
                                  const char *buf, int len)
 {
     Z_External *thisext;
-    char oid_str_buf[OID_STR_MAX];
-    const char *oid_str;
-    oid_class oclass;
 
     if (!oid)
         return 0;
     thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
     thisext->descriptor = 0;
     thisext->indirect_reference = 0;
-
-    oid_str = yaz_oid_to_string_buf(oid, &oclass, oid_str_buf);
-
     thisext->direct_reference = odr_oiddup(o, oid);
 
     thisext->which = Z_External_single;

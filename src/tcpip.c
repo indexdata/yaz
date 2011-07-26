@@ -1524,47 +1524,44 @@ void cs_print_session_info(COMSTACK cs)
 void *cs_get_ssl(COMSTACK cs)
 {
 #if HAVE_OPENSSL_SSL_H
-    struct tcpip_state *sp;
-    if (!cs || cs->type != ssl_type)
-        return 0;
-    sp = (struct tcpip_state *) cs->cprivate;
-    return sp->ssl;  
-#else
-    return 0;
+    if (cs && cs->type == ssl_type)
+    {
+        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+        return sp->ssl;  
+    }
 #endif
+    return 0;
 }
 
 int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 {
 #if ENABLE_SSL
-    struct tcpip_state *sp;
-    if (!cs || cs->type != ssl_type)
-        return 0;
-    sp = (struct tcpip_state *) cs->cprivate;
+    if (cs && cs->type == ssl_type)
+    {
 #if HAVE_OPENSSL_SSL_H
-    if (sp->ctx_alloc)
-        return 0;
-    sp->ctx = (SSL_CTX *) ctx;
+        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+        if (sp->ctx_alloc)
+            return 0;
+        sp->ctx = (SSL_CTX *) ctx;
 #endif
-    return 1;
-#else
+        return 1;
+    }
+#endif
     return 0;
-#endif
 }
 
 int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 {
 #if ENABLE_SSL
-    struct tcpip_state *sp;
-    if (!cs || cs->type != ssl_type)
-        return 0;
-    sp = (struct tcpip_state *) cs->cprivate;
-    strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
-    sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
-    return 1;
-#else
-    return 0;
+    if (cs && cs->type == ssl_type)
+    {
+        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+        strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
+        sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+        return 1;
+    }
 #endif
+    return 0;
 }
 
 int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
