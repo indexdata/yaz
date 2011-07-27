@@ -10,11 +10,12 @@
 #include <stdlib.h>
 
 #include <yaz/cql.h>
+#include <yaz/wrbuf.h>
 #include <yaz/options.h>
 
 static void usage(const char *prog)
 {
-    fprintf(stderr, "%s: [-c] [-n iterations] [infile]\n", prog);
+    fprintf(stderr, "%s: [-c] [-n iterations] [-s] [infile]\n", prog);
     exit(1);
 }
 
@@ -28,8 +29,9 @@ int main(int argc, char **argv)
     int convert_to_ccl = 0;
     char *arg;
     char *prog = argv[0];
+    int do_sortkeys = 0;
 
-    while ((ret = options("cn:", argv, argc, &arg)) != -2)
+    while ((ret = options("cn:s", argv, argc, &arg)) != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
@@ -41,6 +43,9 @@ int main(int argc, char **argv)
             break;
         case 'n':
             iterations = atoi(arg);
+            break;
+        case 's':
+            do_sortkeys = 1;
             break;
         default:
             usage(prog);            
@@ -67,6 +72,17 @@ int main(int argc, char **argv)
         }
         else
             cql_to_xml_stdio(cql_parser_result(cp), stdout);
+        if (do_sortkeys)
+        {
+            WRBUF w = wrbuf_alloc();
+            r = cql_sortby_to_sortkeys(cql_parser_result(cp), 
+                                       wrbuf_vp_puts, w);
+            if (r == 0)
+                printf("sortkeys: %s\n", wrbuf_cstr(w));
+            else
+                fprintf(stderr, "failed to generate sortkeys\n");
+            wrbuf_destroy(w);
+        }
     }
     cql_parser_destroy(cp);
     return 0;
