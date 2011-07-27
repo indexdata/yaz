@@ -182,11 +182,11 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
 };
 
 static int checkForLeftTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(2, attributes);
+    return checkForTruncation(2, attributes);
 }
 
 static int checkForRightTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(1, attributes);
+    return checkForTruncation(1, attributes);
 };
 
 static int rpn2cql_simple(cql_transform_t ct,
@@ -238,11 +238,11 @@ static int rpn2cql_simple(cql_transform_t ct,
             if (must_quote)
                 wrbuf_puts(w, "\"");
             /* Bug 2878: Check and add Truncation */
-			if (checkForLeftTruncation(apt->attributes))
+            if (checkForLeftTruncation(apt->attributes))
                 wrbuf_puts(w, "*");
             wrbuf_write(w, sterm, lterm);
             /* Bug 2878: Check and add Truncation */
-			if (checkForRightTruncation(apt->attributes))
+            if (checkForRightTruncation(apt->attributes))
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
