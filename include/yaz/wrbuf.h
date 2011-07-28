@@ -80,7 +80,7 @@ YAZ_EXPORT void wrbuf_puts(WRBUF b, const char *buf);
     \param buf C-string
     \param client_data assumed WRBUF
 */
-void wrbuf_vp_puts(const char *buf, void *client_data);
+YAZ_EXPORT void wrbuf_vp_puts(const char *buf, void *client_data);
 
 /** \brief writes buffer of certain size to WRBUF and XML encode (as CDATA)
     \param b WRBUF
