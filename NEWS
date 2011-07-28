@@ -1,3 +1,12 @@
+--- 4.2.6 2011/07/28
+
+zoom: throw diagnostic for invalid value for option "sru". Before a
+bad SRU request was sent.
+
+Adding new utility wrbuf_vp_puts.
+
+Add cclxmlconfig.obj to win/makefile. It was missing completely.
+
 --- 4.2.5 2011/07/21
 
 ZOOM HTTP: use absoluteURI's in proxy mode as required by RFC 2616 (HTTP).
