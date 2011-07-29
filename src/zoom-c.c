@@ -506,8 +506,15 @@ ZOOM_API(void)
         ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
+
+    if (c->sru_mode == zoom_sru_error)
+    {
+        ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, val);
+        ZOOM_connection_remove_tasks(c);
+        return;
+    }
+
     yaz_log(c->log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
- 
     ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
 
     if (!c->async)

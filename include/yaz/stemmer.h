@@ -26,8 +26,10 @@
  */
 
 /**
- * \file stemming.h
- * \brief Header for the stemming API. Simple wrapper to hide underlying implementation.
+ * \file stemmer.h
+ * \brief Header for the stemming API.
+ *
+ * Simple wrapper to hide underlying implementation.
  */
 
 #ifndef YAZ_STEMMER_H

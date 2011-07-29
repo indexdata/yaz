@@ -158,8 +158,7 @@ static int rpn2cql_attr(cql_transform_t ct,
     return 0;
 }
 
-/* Bug 2878: Currently only support left and right truncation. Specific check for this */
-static int checkForTruncation(int flag, Z_AttributeList *attributes)
+static Odr_int lookup_truncation(Z_AttributeList *attributes)
 {
     int j;
     for (j = 0; j < attributes->num_attributes; j++)
@@ -168,25 +167,11 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
         if (*ae->attributeType == 5) /* truncation attribute */
         {
             if (ae->which == Z_AttributeValue_numeric)
-            {
-                Odr_int truncation = *(ae->value.numeric);
-                /* This logic only works for Left, right and both. eg. 1,2,3 */
-            	if (truncation <= 3)
-                    return ((int) truncation & flag);
-            }
-            /* Complex: Shouldn't happen */
+                return *(ae->value.numeric);
         }
     }
-    /* No truncation or unsupported */
+    /* No truncation specified */
     return 0;
-};
-
-static int checkForLeftTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(2, attributes);
-}
-
-static int checkForRightTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(1, attributes);
 };
 
 static int rpn2cql_simple(cql_transform_t ct,
@@ -232,17 +217,23 @@ static int rpn2cql_simple(cql_transform_t ct,
         {
             size_t i;
             int must_quote = 0;
+            Odr_int trunc = lookup_truncation(apt->attributes);
+
+            if (trunc > 3 && trunc != 100)
+            {
+                cql_transform_set_error(
+                    ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
+                ret = -1;
+            }
             for (i = 0 ; i < lterm; i++)
                 if (sterm[i] == ' ')
                     must_quote = 1;
             if (must_quote)
                 wrbuf_puts(w, "\"");
-            /* Bug 2878: Check and add Truncation */
-			if (checkForLeftTruncation(apt->attributes))
+            if (trunc == 2 || trunc == 3)
                 wrbuf_puts(w, "*");
             wrbuf_write(w, sterm, lterm);
-            /* Bug 2878: Check and add Truncation */
-			if (checkForRightTruncation(apt->attributes))
+            if (trunc == 1 || trunc == 3)
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");

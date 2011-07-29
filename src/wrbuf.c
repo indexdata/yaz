@@ -79,6 +79,12 @@ void wrbuf_puts(WRBUF b, const char *buf)
     wrbuf_write(b, buf, strlen(buf));
 }
 
+void wrbuf_vp_puts(const char *buf, void *client_data)
+{
+    WRBUF b = (WRBUF) client_data;
+    wrbuf_puts(b, buf);
+}
+
 void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
                             const char from, const char to)
 {

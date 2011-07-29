@@ -76,6 +76,12 @@ YAZ_EXPORT void wrbuf_write(WRBUF b, const char *buf, size_t size);
  */
 YAZ_EXPORT void wrbuf_puts(WRBUF b, const char *buf);
 
+/** \brief appends C-string to WRBUF - void pointer variant
+    \param buf C-string
+    \param client_data assumed WRBUF
+*/
+YAZ_EXPORT void wrbuf_vp_puts(const char *buf, void *client_data);
+
 /** \brief writes buffer of certain size to WRBUF and XML encode (as CDATA)
     \param b WRBUF
     \param cp CDATA

@@ -1,4 +1,12 @@
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2011 Index Data
+ * See the file LICENSE for details.
+ */
 
+/** 
+ * \file stemmer.c
+ * \brief Implements stemmer wrapper
+ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
