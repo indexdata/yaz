@@ -187,6 +187,13 @@ void json_parser_subst(json_parser_t p, int idx, struct json_node *n);
 YAZ_EXPORT
 void json_write_wrbuf(struct json_node *node, WRBUF result);
 
+/** \brief writes JSON text to WRBUF with escaping
+    \param b result
+    \param str input string to be encoded
+*/
+YAZ_EXPORT
+void wrbuf_json_puts(WRBUF b, const char *str);
+
 YAZ_END_CDECL
 
 #endif
