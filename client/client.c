@@ -2377,9 +2377,9 @@ static int cmd_update_common(const char *arg, int version)
 
 #if YAZ_HAVE_XML2
     if (protocol == PROTO_HTTP)
-        return send_SRW_update(action_no, recid_buf, rec_buf, rec_len);
+        return send_SRW_update(action_no, recid, rec_buf, rec_len);
 #endif
-    return send_Z3950_update(version, action_no, recid_buf, rec_buf, rec_len);
+    return send_Z3950_update(version, action_no, recid, rec_buf, rec_len);
 }
 
 #if YAZ_HAVE_XML2
