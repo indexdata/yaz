@@ -51,13 +51,6 @@
 int allow_severity = LOG_INFO;  /* not YLOG !! */
 int deny_severity = LOG_WARNING;
 
-#ifdef LOG_DEBUG
-#undef LOG_DEBUG
-#endif
-#ifdef LOG_WARN
-#undef LOG_WARN
-#endif
-
 #endif
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
@@ -97,8 +90,8 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                          host_name ? host_name : host_addr);
                 return 1;
             }
-            yaz_log (YLOG_DEBUG, "access granted from %s",
-                     host_name ? host_name : host_addr);
+            yaz_log(YLOG_DEBUG, "access granted from %s",
+                    host_name ? host_name : host_addr);
 #endif
         }
     }
