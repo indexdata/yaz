@@ -311,29 +311,6 @@ static void cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
                      const char **args)
 {
     int i;
-    size_t start = 0, count = 1;
-    const char *type = "render";
-    WRBUF render_str = 0;
-
-    if (0)
-    {
-        WRBUF tmp;
-
-        if ((tmp = next_token_new_wrbuf(args)))
-        {
-            start = atoi(wrbuf_cstr(tmp));
-            wrbuf_destroy(tmp);
-        }
-
-        if ((tmp = next_token_new_wrbuf(args)))
-        {
-            count = atoi(wrbuf_cstr(tmp));
-            wrbuf_destroy(tmp);
-        }
-        render_str = next_token_new_wrbuf(args);
-    }
-    if (render_str)
-        type = wrbuf_cstr(render_str);
 
     process_events(c);
 
@@ -357,9 +334,6 @@ static void cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
             }
         }
     }
-    if (render_str)
-        wrbuf_destroy(render_str);
-
 }
 
 static void cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
