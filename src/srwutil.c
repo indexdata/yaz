@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
+#include <yaz/base64.h>
 #include <yaz/yaz-iconv.h>
 #include "sru-p.h"
 
@@ -84,52 +85,6 @@ const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
     return 0;
 }
 #endif
-
-static int yaz_base64decode(const char *in, char *out)
-{
-    const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	"abcdefghijklmnopqrstuvwxyz0123456789+/";
-    int olen = 0;
-    int len = strlen(in);
-
-    while (len >= 4)
-    {
-	char i0, i1, i2, i3;
-	char *p;
-
-	if (!(p = strchr(map, in[0])))
-	    return 0;
-	i0 = p - map;
-	len--;
-	if (!(p = strchr(map, in[1])))
-	    return 0;
-	i1 = p - map;
-	len--;
-	*(out++) = i0 << 2 | i1 >> 4;
-	olen++;
-	if (in[2] == '=')
-	    break;
-	if (!(p = strchr(map, in[2])))
-	    return 0;
-	i2 = p - map;
-	len--;
-	*(out++) = i1 << 4 | i2 >> 2;
-	olen++;
-	if (in[3] == '=')
-	    break;
-	if (!(p = strchr(map, in[3])))
-	    return 0;
-	i3 = p - map;
-	len--;
-	*(out++) = i2 << 6 | i3;
-	olen++;
-
-	in += 4;
-    }
-
-    *out = '\0';
-    return olen;
-}
 
 int yaz_srw_check_content_type(Z_HTTP_Response *hres)
 {

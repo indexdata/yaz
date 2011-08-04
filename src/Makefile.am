@@ -71,7 +71,7 @@ GEN_FILES = oid_std.c \
   z-charneg.c \
   ill-core.c item-req.c oclc-ill-req-ext.c
 
-libyaz_la_SOURCES=version.c options.c log.c \
+libyaz_la_SOURCES=base64.c version.c options.c log.c \
  $(GEN_FILES) \
   marcdisp.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
   wrbuf.c oid_db.c errno.c \
