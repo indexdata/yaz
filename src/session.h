@@ -43,6 +43,7 @@
 struct gfs_server {
     statserv_options_block cb;
     char *host;
+    char *id;
     int listen_ref;
     cql_transform_t cql_transform;
     CCL_bibset ccl_transform;

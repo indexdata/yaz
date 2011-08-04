@@ -214,7 +214,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
 #endif
 
 #if YAZ_HAVE_XML2
-static struct gfs_server * gfs_server_new(void)
+static struct gfs_server * gfs_server_new(const char *id)
 {
     struct gfs_server *n = (struct gfs_server *)
         nmem_malloc(gfs_nmem, sizeof(*n));
@@ -228,6 +228,7 @@ static struct gfs_server * gfs_server_new(void)
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
+    n->id = nmem_strdup_null(gfs_nmem, id);
     n->retrieval = yaz_retrieval_create();
     return n;
 }
@@ -386,7 +387,7 @@ static void xml_config_read(void)
                 else
                     yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
                             attr->name);
-            gfs = *gfsp = gfs_server_new();
+            gfs = *gfsp = gfs_server_new(id);
             gfs->server_node_ptr = ptr_server;
             if (listenref)
             {

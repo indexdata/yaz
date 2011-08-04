@@ -71,7 +71,6 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 #if HAVE_TCPD_H
             struct request_info request_info;
             int i;
-#endif
             char *host_name = 0, *host_addr = 0;
             struct hostent *host;
 
@@ -82,7 +81,6 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                                       AF_INET)))
                 host_name = (char*) host->h_name;
             host_addr = inet_ntoa(addr_in->sin_addr);
-#if HAVE_TCPD_H
             if (host_addr)
                 request_init(&request_info, RQ_DAEMON, daemon_name,
                              RQ_CLIENT_NAME, host_name,

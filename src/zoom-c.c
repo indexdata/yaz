@@ -1533,7 +1533,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     zoom_ret cret = zoom_complete;
     int ret = -1;
-    const char *addinfo = 0;
+    char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
     const char *location;

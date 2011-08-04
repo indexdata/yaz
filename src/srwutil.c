@@ -161,7 +161,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
 
     if (basic)
     {
-        int len, olen;
+        int len;
         char out[256];
         char ubuf[256] = "", pbuf[256] = "", *p;
         if (strncmp(basic, "Basic ", 6))
@@ -170,7 +170,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
         len = strlen(basic);
         if (!len || len > 256)
             return;
-        olen = yaz_base64decode(basic, out);
+        yaz_base64decode(basic, out);
         /* Format of out should be username:password at this point */
         strcpy(ubuf, out);
         if ((p = strchr(ubuf, ':')))
@@ -437,7 +437,6 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *startRecord = 0;
         char *maximumTerms = 0;
         char *responsePosition = 0;
-        char *extraRequestData = 0;
         Z_SRW_extra_arg *extra_args = 0;
 #endif
         char **uri_name;
@@ -500,7 +499,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 else if (!strcmp(n, "responsePosition"))
                     responsePosition = v;
                 else if (!strcmp(n, "extraRequestData"))
-                    extraRequestData = v;
+                    ; /* ignoring extraRequestData */
                 else if (n[0] == 'x' && n[1] == '-')
                 {
                     Z_SRW_extra_arg **l = &extra_args;
