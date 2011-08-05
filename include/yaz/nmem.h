@@ -134,6 +134,21 @@ YAZ_EXPORT void nmem_strsplitx(NMEM nmem, const char *delim,
 YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
                                     char ***darray, int *num);
 
+
+/** \brief allocates sub strings out of string using certain delimitors
+    \param nmem NMEM handle
+    \param delim delimitor chars (splits on each char in there) 
+    \param dstr string to be split
+    \param darray result string array for each sub string
+    \param num number of result strings
+    \param collapse 1=collapse multiple delims to one; 0=no collapse
+    \param escape_char != 0, an escape char (could be \)
+*/
+YAZ_EXPORT void nmem_strsplit_escape(NMEM nmem, const char *delim,
+                                     const char *dstr,
+                                     char ***darray, int *num, int collapse,
+                                     int escape_char);
+
 /** \brief allocates and sets integer for NMEM
     \param nmem NMEM handle
     \param v integer value

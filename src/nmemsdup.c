@@ -67,40 +67,19 @@ void nmem_strsplit(NMEM nmem, const char *delim, const char *dstr,
 void nmem_strsplitx(NMEM nmem, const char *delim, const char *dstr,
                     char ***darray, int *num, int collapse)
 {
-    const char *cp = dstr;
-    *num = 0;
+    nmem_strsplit_escape(nmem, delim, dstr, darray, num, collapse, 0);
+}
 
+void nmem_strsplit_escape(NMEM nmem, const char *delim, const char *dstr,
+                          char ***darray, int *num, int collapse,
+                          int escape_char)
+{
+    *darray = 0;
+    /* two passes over the input string.. */
     while (1)
     {
-        if (collapse)
-        {
-            if (!*cp)
-                break;
-            while (*cp && strchr(delim, *cp))
-                cp++;
-            if (!*cp)
-                break;
-            while (*cp && !strchr(delim, *cp))
-                cp++;
-            (*num)++;
-        }
-        else
-        {
-            (*num)++;
-            while (*cp && !strchr(delim, *cp))
-                cp++;
-            if (!*cp)
-                break;
-            cp++;
-        }
-    }
-    if (!*num)
-        *darray = 0;
-    else
-    {
         size_t i = 0;
-        *darray = (char **) nmem_malloc(nmem, *num * sizeof(**darray));
-        cp = dstr;
+        const char *cp = dstr;
         while (1)
         {
             const char *cp0;
@@ -108,26 +87,44 @@ void nmem_strsplitx(NMEM nmem, const char *delim, const char *dstr,
             {
                 if (!*cp)
                     break;
-                while (*cp && strchr(delim, *cp))
+                while (*cp && strchr(delim, *cp) && *cp != escape_char)
                     cp++;
                 if (!*cp)
                     break;
                 cp0 = cp;
                 while (*cp && !strchr(delim, *cp))
+                {
+                    if (*cp == escape_char)
+                        cp++;
                     cp++;
-                (*darray)[i++] = nmem_strdupn(nmem, cp0, cp - cp0);
+                }
+                if (*darray)
+                    (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
+                i++;
             }
             else
             {
                 cp0 = cp;
                 while (*cp && !strchr(delim, *cp))
+                {
+                    if (*cp == escape_char)
+                        cp++;
                     cp++;
-                (*darray)[i++] = nmem_strdupn(nmem, cp0, cp - cp0);
+                }
+                if (*darray)
+                    (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
+                i++;
                 if (!*cp)
                     break;
                 cp++;
             }
         }
+        *num = i;
+        if (!*num)
+            break; /* no items, so stop, *darray=0 already */
+        else if (*darray)
+            break; /* second pass, stop */
+        *darray = (char **) nmem_malloc(nmem, *num * sizeof(**darray));
     }
 }
 
