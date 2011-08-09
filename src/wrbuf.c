@@ -74,6 +74,17 @@ void wrbuf_write(WRBUF b, const char *buf, size_t size)
     b->pos += size;
 }
 
+void wrbuf_insert(WRBUF b, size_t pos, const char *buf, size_t size)
+{
+    if (size <= 0 || pos > b->pos)
+        return;
+    if (b->pos + size >= b->size)
+        wrbuf_grow(b, size);
+    memmove(b->buf + pos + size, b->buf + pos, b->pos - pos);
+    memcpy(b->buf + pos, buf, size);
+    b->pos += size;
+}
+
 void wrbuf_puts(WRBUF b, const char *buf)
 {
     wrbuf_write(b, buf, strlen(buf));

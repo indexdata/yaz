@@ -15,63 +15,13 @@
 #include <yaz/yaz-iconv.h>
 #include <yaz/matchstr.h>
 #include <yaz/zgdu.h>
+#include <yaz/base64.h>
 
 #ifdef WIN32
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
 #endif
  
-
-/*
- * This function's counterpart, yaz_base64decode(), is in srwutil.c.
- * I feel bad that they're not together, but each function is only
- * needed in one place, and those places are not together.  Maybe one
- * day we'll move them into a new httputil.c, and declare them in a
- * corresponding httputil.h
- */
-static void yaz_base64encode(const char *in, char *out)
-{
-    static char encoding[] =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    unsigned char buf[3];
-    long n;
-
-    while (*in != 0) {
-	char *pad = 0;
-        buf[0] = in[0];
-	buf[1] = in[1];
-	if (in[1] == 0) {
-	    buf[2] = 0;
-	    pad = "==";
-	} else {
-	    buf[2] = in[2];
-	    if (in[2] == 0)
-		pad = "=";
-	}
-
-	/* Treat three eight-bit numbers as on 24-bit number */
-	n = (buf[0] << 16) + (buf[1] << 8) + buf[2];
-
-	/* Write the six-bit chunks out as four encoded characters */
-	*out++ = encoding[(n >> 18) & 63];
-	*out++ = encoding[(n >> 12) & 63];
-	if (in[1] != 0)
-	    *out++ = encoding[(n >> 6) & 63];
-	if (in[1] != 0 && in[2] != 0)
-	    *out++ = encoding[n & 63];
-
-	if (pad != 0) {
-	    while (*pad != 0)
-		*out++ = *pad++;
-	    break;
-	}
-	in += 3;
-    }
-
-    *out++ = 0;
-}
-
-
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {

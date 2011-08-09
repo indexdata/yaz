@@ -395,6 +395,7 @@ TEST_MUTEX_OBJS = \
    $(OBJDIR)\test_mutex.obj
 
 MISC_OBJS= \
+   $(OBJDIR)\base64.obj \
    $(OBJDIR)\version.obj \
    $(OBJDIR)\oid_std.obj \
    $(OBJDIR)\eventl.obj \

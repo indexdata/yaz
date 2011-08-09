@@ -20,7 +20,6 @@ int main(int argc, char **argv)
     char buf[163840];
     char *content_buf = buf;
     int content_len;
-    int ret;
     size_t no;
     Z_SOAP *soap_package = 0;
     ODR decode, encode;
@@ -37,8 +36,8 @@ int main(int argc, char **argv)
     decode = odr_createmem(ODR_DECODE);
     encode = odr_createmem(ODR_ENCODE);
     content_len = no;
-    ret = z_soap_codec(decode, &soap_package, 
-                       &content_buf, &content_len, h);
+    z_soap_codec(decode, &soap_package, 
+                 &content_buf, &content_len, h);
     if (!soap_package)
     {
         fprintf(stderr, "Decoding seriously failed\n");
@@ -88,8 +87,7 @@ int main(int argc, char **argv)
 
         }
     }
-    ret = z_soap_codec(encode, &soap_package,
-                       &content_buf, &content_len, h);
+    z_soap_codec(encode, &soap_package, &content_buf, &content_len, h);
     if (content_buf && content_len)
     {
         printf("%.*s", content_len, content_buf);

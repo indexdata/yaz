@@ -1533,7 +1533,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     zoom_ret cret = zoom_complete;
     int ret = -1;
-    const char *addinfo = 0;
+    char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
     const char *location;
@@ -1563,7 +1563,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     }
     else 
     {  
-        ret = ZOOM_handle_sru(c, hres, &cret);
+        ret = ZOOM_handle_sru(c, hres, &cret, &addinfo);
         if (ret == 0)
         {
             if (c->no_redirects) /* end of redirect. change hosts again */
@@ -1576,7 +1576,11 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         if (hres->code != 200)
             ZOOM_set_HTTP_error(c, hres->code, 0, 0);
         else
+        {
+            yaz_log(YLOG_LOG, "set error... addinfo=%s", addinfo ?
+                    addinfo : "NULL");
             ZOOM_set_error(c, ZOOM_ERROR_DECODE, addinfo);
+        }
         ZOOM_connection_close(c);
     }
     if (cret == zoom_complete)

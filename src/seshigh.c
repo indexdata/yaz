@@ -1879,7 +1879,6 @@ static void process_http_request(association *assoc, request *req)
                 {0, 0, 0}
             };
             char ctype[80];
-            int ret;
             p = z_get_HTTP_Response(o, 200);
             hres = p->u.HTTP_Response;
 
@@ -1890,9 +1889,9 @@ static void process_http_request(association *assoc, request *req)
             if (stylesheet && *stylesheet == '\0')
                 stylesheet = 0;
 
-            ret = z_soap_codec_enc_xsl(assoc->encode, &soap_package,
-                                       &hres->content_buf, &hres->content_len,
-                                       soap_handlers, charset, stylesheet);
+            z_soap_codec_enc_xsl(assoc->encode, &soap_package,
+                                 &hres->content_buf, &hres->content_len,
+                                 soap_handlers, charset, stylesheet);
             hres->code = http_code;
 
             strcpy(ctype, "text/xml");
@@ -2860,7 +2859,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
     Odr_int *next;
     Odr_int *num;
     int errcode = 0;
-    const char *errstring = 0;
 
     yaz_log(log_requestdetail, "Got PresentRequest.");
 
@@ -2889,7 +2887,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
             resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
             *resp->presentStatus = Z_PresentStatus_failure;
             errcode = bprr->errcode;
-            errstring = bprr->errstring;
         }
     }
     apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));

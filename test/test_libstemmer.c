@@ -20,13 +20,12 @@ int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *ex
     struct icu_buf_utf16 *src  = icu_buf_utf16_create(0);
     struct icu_buf_utf16 *dst  = icu_buf_utf16_create(0);
     struct icu_buf_utf8  *dst8 = icu_buf_utf8_create(0);
-
+    int rc = 0;
     UErrorCode status; 
     const char *result;
+
     icu_utf16_from_utf8_cstr(src, to_stem, &status);
     yaz_stemmer_stem(stemmer, dst, src, &status); 
-    /* Assume fail */
-    int rc = 0;
     if (status == U_ZERO_ERROR) {
         icu_utf16_to_utf8(dst8, dst, &status);
         result = icu_buf_utf8_to_cstr(dst8);

@@ -1,3 +1,10 @@
+--- 4.2.7 2011/08/03
+
+ZOOM C includes HTTP response buffer as additional info if it fails
+to decode the SRU response.
+
+Make wrbuf_json_puts available.
+
 --- 4.2.6 2011/07/28
 
 zoom: throw diagnostic for invalid value for option "sru". Before a

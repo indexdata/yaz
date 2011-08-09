@@ -391,16 +391,15 @@ static void handle_srw_scan_response(ZOOM_connection c,
 #endif
 
 int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
-                    zoom_ret *cret)
+                    zoom_ret *cret, char **addinfo)
 {
 #if YAZ_HAVE_XML2
     int ret = 0;
-    const char *addinfo = 0;
 
     /* not redirect (normal response) */
     if (!yaz_srw_check_content_type(hres))
     {
-        addinfo = "content-type";
+        *addinfo = "content-type";
         ret = -1;
     }
     else if (c->sru_mode == zoom_sru_solr)
@@ -445,7 +444,19 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
                                 soap_package->u.fault->fault_string);
         }
         else
+        {
+            size_t max_chars = 1000;
+            size_t sz = hres->content_len;
+            if (sz > max_chars - 1)
+                sz = max_chars;
+            *addinfo = odr_malloc(c->odr_in, sz + 4);
+            memcpy(*addinfo, hres->content_buf, sz);
+            if (sz == max_chars)
+                strcpy(*addinfo + sz, "...");
+            else
+                strcpy(*addinfo + sz, "");
             ret = -1;
+        }
     }   
     return ret;
 #else

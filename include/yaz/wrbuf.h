@@ -63,12 +63,20 @@ YAZ_EXPORT void wrbuf_destroy(WRBUF b);
  */
 YAZ_EXPORT void wrbuf_rewind(WRBUF b);
 
-/** \brief append constant size buffer to WRBU
+/** \brief append constant size buffer to WRBUF
     \param b WRBUF
     \param buf buffer
     \param size size of buffer
  */
 YAZ_EXPORT void wrbuf_write(WRBUF b, const char *buf, size_t size);
+
+/** \brief inserts buffer into WRBUF at some position
+    \param b WRBUF
+    \param pos position (0=beginning)
+    \param buf buffer
+    \param size size of buffer
+ */
+YAZ_EXPORT void wrbuf_insert(WRBUF b, size_t pos, const char *buf, size_t size);
 
 /** \brief appends C-string to WRBUF
     \param b WRBUF

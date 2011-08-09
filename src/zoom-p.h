@@ -271,7 +271,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c);
 zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c);
 
 int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
-                    zoom_ret *cret);
+                    zoom_ret *cret, char **addinfo);
 
 void ZOOM_set_HTTP_error(ZOOM_connection c, int error,
                          const char *addinfo, const char *addinfo2);

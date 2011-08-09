@@ -3,7 +3,8 @@
 
 noinst_HEADERS = icu_I18N.h
 
-pkginclude_HEADERS= backend.h ccl.h ccl_xml.h cql.h rpn2cql.h rpn2solr.h \
+pkginclude_HEADERS= backend.h base64.h \
+ ccl.h ccl_xml.h cql.h rpn2cql.h rpn2solr.h \
  solr.h comstack.h \
  diagbib1.h diagsrw.h diagsru_update.h sortspec.h log.h logrpn.h marcdisp.h \
  nmem.h nmem_xml.h odr.h errno.h facet.h \

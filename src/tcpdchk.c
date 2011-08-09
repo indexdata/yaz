@@ -51,13 +51,6 @@
 int allow_severity = LOG_INFO;  /* not YLOG !! */
 int deny_severity = LOG_WARNING;
 
-#ifdef LOG_DEBUG
-#undef LOG_DEBUG
-#endif
-#ifdef LOG_WARN
-#undef LOG_WARN
-#endif
-
 #endif
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
@@ -71,7 +64,6 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 #if HAVE_TCPD_H
             struct request_info request_info;
             int i;
-#endif
             char *host_name = 0, *host_addr = 0;
             struct hostent *host;
 
@@ -82,7 +74,6 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                                       AF_INET)))
                 host_name = (char*) host->h_name;
             host_addr = inet_ntoa(addr_in->sin_addr);
-#if HAVE_TCPD_H
             if (host_addr)
                 request_init(&request_info, RQ_DAEMON, daemon_name,
                              RQ_CLIENT_NAME, host_name,
@@ -99,8 +90,8 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                          host_name ? host_name : host_addr);
                 return 1;
             }
-            yaz_log (YLOG_DEBUG, "access granted from %s",
-                     host_name ? host_name : host_addr);
+            yaz_log(YLOG_DEBUG, "access granted from %s",
+                    host_name ? host_name : host_addr);
 #endif
         }
     }

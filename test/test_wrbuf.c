@@ -54,6 +54,27 @@ static void tstwrbuf(void)
             }
         wrbuf_rewind(wr);
     }
+
+    wrbuf_rewind(wr);
+    wrbuf_puts(wr, "1234");
+    wrbuf_insert(wr, 0, "abc", 3);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "abc1234"));
+
+    wrbuf_rewind(wr);
+    wrbuf_puts(wr, "1234");
+    wrbuf_insert(wr, 1, "abc", 3);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1abc234"));
+
+    wrbuf_rewind(wr);
+    wrbuf_puts(wr, "1234");
+    wrbuf_insert(wr, 4, "abc", 3);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234abc"));
+
+    wrbuf_rewind(wr);
+    wrbuf_puts(wr, "1234");
+    wrbuf_insert(wr, 5, "abc", 3);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234"));
+
     wrbuf_destroy(wr);
 }
 

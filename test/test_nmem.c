@@ -72,14 +72,40 @@ void tst_nmem_strsplit(void)
     YAZ_CHECK(num > 0 && !strcmp(array[0], "a"));
     YAZ_CHECK(num > 1 && !strcmp(array[1], "b"));
     YAZ_CHECK(num > 2 && !strcmp(array[2], "cd"));
-    nmem_strsplitx(nmem, ",", ",a,b,,cd", &array, &num, 0);
 
+    nmem_strsplitx(nmem, ",", ",a,b,,cd", &array, &num, 0);
     YAZ_CHECK(num == 5);
     YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
     YAZ_CHECK(num > 1 && !strcmp(array[1], "a"));
     YAZ_CHECK(num > 2 && !strcmp(array[2], "b"));
     YAZ_CHECK(num > 3 && !strcmp(array[3], ""));
     YAZ_CHECK(num > 4 && !strcmp(array[4], "cd"));
+
+    nmem_strsplit_escape(nmem, ",", ",a,b,,cd", &array, &num, 0, '\\');
+    YAZ_CHECK(num == 5);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "a"));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], "b"));
+    YAZ_CHECK(num > 3 && !strcmp(array[3], ""));
+    YAZ_CHECK(num > 4 && !strcmp(array[4], "cd"));
+
+    nmem_strsplit_escape(nmem, ",", ",a,b\\,,cd", &array, &num, 0, '\\');
+    YAZ_CHECK(num == 4);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "a"));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], "b\\,"));
+    YAZ_CHECK(num > 3 && !strcmp(array[3], "cd"));
+
+    nmem_strsplit_escape(nmem, ",", "\\,a,b\\,,cd", &array, &num, 0, '\\');
+    YAZ_CHECK(num == 3);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "\\,a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\,"));
+    YAZ_CHECK(num > 2 && !strcmp(array[2], "cd"));
+
+    nmem_strsplit_escape(nmem, ",", "\\,a,b\\,\\,cd", &array, &num, 0, '\\');
+    YAZ_CHECK(num == 2);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "\\,a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\,\\,cd"));
 
     nmem_destroy(nmem);
 }
