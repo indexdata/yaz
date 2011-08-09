@@ -685,6 +685,12 @@ static Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li)
     return zq;
 }
 
+static void pqf_parser_begin(struct yaz_pqf_parser *li, const char *buf)
+{
+    li->query_buf = li->query_ptr = buf;
+    li->lex_buf = 0;
+}
+
 Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf)
 {
     struct yaz_pqf_parser li;
@@ -694,8 +700,8 @@ Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf)
     li.right_sep = "}\"";
     li.escape_char = '@';
     li.term_type = Z_Term_general;
-    li.query_buf = li.query_ptr = qbuf;
-    li.lex_buf = 0;
+
+    pqf_parser_begin(&li, qbuf);
     return p_query_rpn_mk(o, &li);
 }
 
@@ -806,8 +812,7 @@ Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o, const char *qbuf)
 {
     if (!p)
         return 0;
-    p->query_buf = p->query_ptr = qbuf;
-    p->lex_buf = 0;
+    pqf_parser_begin(p, qbuf);
     return p_query_rpn_mk(o, p);
 }
 
@@ -817,8 +822,7 @@ Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
 {
     if (!p)
         return 0;
-    p->query_buf = p->query_ptr = qbuf;
-    p->lex_buf = 0;
+    pqf_parser_begin(p, qbuf);
     return p_query_scan_mk(p, o, attributeSetP);
 }
 
@@ -828,25 +832,43 @@ Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
 {
     if (!p)
         return 0;
-    p->query_buf = p->query_ptr = qbuf;
-    p->lex_buf = 0;
+    pqf_parser_begin(p, qbuf);
     return p_query_scan_attributes_mk(p, o, attributeSetP);
 }
 
 static Z_FacetField* parse_facet(ODR odr, const char *facet)
 {
     YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
+    struct yaz_pqf_parser *li = pqf_parser;
     Odr_oid *attributeSetId;
     Z_FacetField *facet_field = 0;
-    Z_AttributeList *attribute_list =
-        yaz_pqf_scan_attribute_list(pqf_parser, odr, &attributeSetId, facet);
-    
+    Z_AttributeList *attribute_list;
+
+    pqf_parser_begin(pqf_parser, facet);
+    attribute_list = p_query_scan_attributes_mk(li, odr, &attributeSetId);
     if (attribute_list)
     {
         facet_field = (Z_FacetField *) odr_malloc(odr, sizeof(*facet_field));
         facet_field->attributes = attribute_list;
         facet_field->num_terms = 0;
-        facet_field->terms = 0;
+        facet_field->terms = odr_malloc(odr, 10 * sizeof(*facet_field->terms));
+        while (li->query_look == 't')
+        {
+            if (facet_field->num_terms < 10)
+            {
+                char *es_str = odr_malloc(odr, li->lex_len+1);
+                int es_len = escape_string(es_str, li->lex_buf, li->lex_len);
+                Z_Term *term = z_Term_create(odr, li->term_type, es_str, es_len);
+
+                facet_field->terms[facet_field->num_terms] =
+                    (Z_FacetTerm *) odr_malloc(odr, sizeof(Z_FacetTerm));
+                facet_field->terms[facet_field->num_terms]->term = term;
+                facet_field->terms[facet_field->num_terms]->count = 
+                    odr_intdup(odr, 0);
+                facet_field->num_terms++;
+            }
+            lex(li);
+        }
     }
     yaz_pqf_destroy(pqf_parser);
     return facet_field;
