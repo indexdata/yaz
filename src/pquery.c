@@ -888,7 +888,11 @@ Z_FacetList *yaz_pqf_parse_facet_list(ODR o, const char *qbuf)
         fl->elements = (Z_FacetField **)
             odr_malloc(o, num * sizeof(*fl->elements));
         for (i = 0; i < num; i++)
+        {
             fl->elements[i] = parse_facet(o, darray[i]);
+            if (!fl->elements[i])
+                return 0;
+        }
         return fl;
     }
     else
