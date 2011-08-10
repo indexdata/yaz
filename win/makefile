@@ -42,7 +42,8 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog testprog iconv icu libxml2 libxslt
+all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
+ testprog iconv icu libxml2 libxslt $(YAZ_URL)
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -119,6 +120,7 @@ YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond4.lib
 
 CLIENT=$(BINDIR)\yaz-client.exe
 YAZ_ICU=$(BINDIR)\yaz-icu.exe
+YAZ_URL=$(BINDIR)\yaz-url.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
 SC_TEST=$(BINDIR)\sc_test.exe
@@ -342,6 +344,7 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\fhistory.obj
 
 YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj 
+YAZ_URL_OBJS= $(OBJDIR)\yaz-url.obj 
 COND_DLL_OBJS= $(OBJDIR)\condvar.obj
 
 ZTEST_OBJS= \
@@ -540,7 +543,8 @@ MISC_OBJS= \
    $(OBJDIR)\xml_include.obj \
    $(OBJDIR)\file_glob.obj \
    $(OBJDIR)\thread_id.obj \
-   $(OBJDIR)\dirent.obj
+   $(OBJDIR)\dirent.obj \
+   $(OBJDIR)\url.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
@@ -925,6 +929,9 @@ $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
 	$(LINK_PROGRAM) $(ICU_LIBS) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
 	$(MT) -manifest $@.manifest -outputresource:$@;1
 
+$(YAZ_URL) : "$(BINDIR)" $(YAZ_URL_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_URL_OBJS) /out:$@
+	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(SC_TEST) : "$(BINDIR)" $(SC_TEST_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(SC_TEST_OBJS) /out:$@

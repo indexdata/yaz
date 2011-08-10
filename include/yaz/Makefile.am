@@ -24,7 +24,7 @@ pkginclude_HEADERS= backend.h base64.h \
  zes-psched.h zes-admin.h zes-pset.h zes-update.h zes-update0.h \
  zoom.h z-charneg.h charneg.h soap.h srw.h zgdu.h matchstr.h json.h \
  file_glob.h dirent.h thread_id.h gettimeofday.h shptr.h thread_create.h \
- spipe.h stemmer.h
+ spipe.h stemmer.h url.h
 
 EXTRA_DIST = yaz-version.h.in
 
