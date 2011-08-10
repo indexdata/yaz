@@ -43,7 +43,8 @@ static void process_events(ZOOM_connection *c)
     }
 }
 
-static int next_token(const char **cpp, const char **t_start)
+static int next_token_chars(const char **cpp, const char **t_start,
+                            const char *tok_chars)
 {
     int len = 0;
     const char *cp = *cpp;
@@ -64,7 +65,7 @@ static int next_token(const char **cpp, const char **t_start)
     else
     {
         *t_start = cp;
-        while (*cp && *cp != ' ' && *cp != '\r' && *cp != '\n')
+        while (*cp && !strchr(tok_chars, *cp))
         {
             cp++;
             len++;
@@ -75,6 +76,12 @@ static int next_token(const char **cpp, const char **t_start)
     *cpp = cp;
     return len;  /* return -1 if no token was read .. */
 }
+
+static int next_token(const char **cpp, const char **t_start)
+{
+    return next_token_chars(cpp, t_start, "\r\n ");
+}
+
 
 static WRBUF next_token_new_wrbuf(const char **cpp)
 {
@@ -103,18 +110,18 @@ static void cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
                     ZOOM_options options,
                     const char **args)
 {
-    WRBUF key, val;
+    WRBUF key;
+    const char *val_buf;
+    int val_len;
 
     if (!(key = next_token_new_wrbuf(args)))
     {
         printf("missing argument for set\n");
         return ;
     }
-    if ((val = next_token_new_wrbuf(args)))
-    {
-        ZOOM_options_set(options, wrbuf_cstr(key), wrbuf_cstr(val));
-        wrbuf_destroy(val);
-    }
+    val_len = next_token_chars(args, &val_buf, "");
+    if (val_len)
+        ZOOM_options_setl(options, wrbuf_cstr(key), val_buf, val_len);
     else
         ZOOM_options_set(options, wrbuf_cstr(key), 0);
     wrbuf_destroy(key);
