@@ -17,8 +17,9 @@
 static void usage(void)
 {
     printf("yaz-icu [options] url ..\n");
-    printf(" -H name=value       HTTP header\n");
-    printf(" -p file             POST content of file\n");
+    printf(" -H name:value       Set HTTP header (repeat if necessary)\n");
+    printf(" -m method           HTTP method\n");
+    printf(" -p file             POSTs file at following url\n");
     printf(" -u user/password    Basic HTTP auth\n");
     printf(" -x proxy            HTTP proxy\n");
     exit(1);
@@ -39,9 +40,12 @@ static char *get_file(const char *fname, size_t *len)
         exit(1);
     }
     *len = ftell(inf);
-    buf = xmalloc(*len);
-    fseek(inf, 0L, SEEK_SET);
-    fread(buf, 1, *len, inf);
+    if (*len)  /* zero length not considered an error */
+    {
+        buf = xmalloc(*len);
+        fseek(inf, 0L, SEEK_SET);
+        fread(buf, 1, *len, inf);
+    }
     fclose(inf);
     return buf;
 }
@@ -60,7 +64,7 @@ int main(int argc, char **argv)
     int exit_code = 0;
     int no_urls = 0;
 
-    while ((ret = options("hH:p:u:x:", argv, argc, &arg))
+    while ((ret = options("hH:m:p:u:x:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
@@ -69,20 +73,25 @@ int main(int argc, char **argv)
             usage();
             break;
         case 'H':
-            if (!strchr(arg, '='))
+            if (!strchr(arg, ':'))
             {
-                yaz_log(YLOG_FATAL, "bad header option (missing =): %s\n", arg);
+                yaz_log(YLOG_FATAL, "bad header option (missing :) %s\n", arg);
                 exit_code = 1;
             }
             else
             {
-                char *cp = strchr(arg, '=');
+                char *cp = strchr(arg, ':');
                 char *name = odr_malloc(odr, 1 + cp - arg);
                 char *value = cp + 1;
                 memcpy(name, arg, cp - arg);
                 name[cp - arg] = '\0';
+                while (*value == ' ') /* skip space after = */
+                    value++;
                 z_HTTP_header_add(odr, &http_headers, name, value);
             }
+            break;
+        case 'm':
+            method = arg;
             break;
         case 'p':
             xfree(post_buf);
@@ -122,6 +131,7 @@ int main(int argc, char **argv)
             usage();
         }
     }
+    xfree(post_buf);
     yaz_url_destroy(p);
     odr_destroy(odr);
     if (no_urls == 0)
