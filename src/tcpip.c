@@ -434,7 +434,12 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     const char *port = "210";
     struct addrinfo *ai = 0;
     if (h->protocol == PROTO_HTTP)
-        port = "80";
+    {
+        if (h->type == ssl_type)
+            port = "443";
+        else
+            port = "80";
+    }
     if (!tcpip_init())
         return 0;
 
