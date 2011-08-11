@@ -19,6 +19,7 @@ static void usage(void)
     printf("yaz-icu [options] url ..\n");
     printf(" -H name:value       Set HTTP header (repeat if necessary)\n");
     printf(" -m method           HTTP method\n");
+    printf(" -O file             Write to file, instead of stdout\n");
     printf(" -p file             POSTs file at following url\n");
     printf(" -u user/password    Basic HTTP auth\n");
     printf(" -x proxy            HTTP proxy\n");
@@ -63,8 +64,9 @@ int main(int argc, char **argv)
     ODR odr = odr_createmem(ODR_ENCODE);
     int exit_code = 0;
     int no_urls = 0;
+    const char *outfname = 0;
 
-    while ((ret = options("hH:m:p:u:x:", argv, argc, &arg))
+    while ((ret = options("hH:m:O:p:u:x:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
@@ -92,6 +94,9 @@ int main(int argc, char **argv)
             break;
         case 'm':
             method = arg;
+            break;
+        case 'O':
+            outfname = arg;
             break;
         case 'p':
             xfree(post_buf);
@@ -122,8 +127,20 @@ int main(int argc, char **argv)
                 exit_code = 1;
             else
             {
+                FILE *outf = stdout;
+                if (outfname)
+                {
+                    outf = fopen(outfname, "w");
+                    if (!outf)
+                    {
+                        yaz_log(YLOG_FATAL|YLOG_ERRNO, "open %s", outfname);
+                        exit(1);
+                    }
+                }
                 fwrite(http_response->content_buf, 1,
-                       http_response->content_len, stdout);
+                       http_response->content_len, outf);
+                if (outfname)
+                    fclose(outf);
             }
             no_urls++;
             break;
