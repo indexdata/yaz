@@ -17,12 +17,12 @@
 static void usage(void)
 {
     printf("yaz-icu [options] url ..\n");
-    printf(" -H name:value       Set HTTP header (repeat if necessary)\n");
-    printf(" -m method           HTTP method\n");
-    printf(" -O file             Write to file, instead of stdout\n");
-    printf(" -p file             POSTs file at following url\n");
-    printf(" -u user/password    Basic HTTP auth\n");
-    printf(" -x proxy            HTTP proxy\n");
+    printf(" -H name:value       Sets HTTP header (repeat if necessary)\n");
+    printf(" -m method           Sets HTTP method\n");
+    printf(" -O fname            Writes HTTP content to file\n");
+    printf(" -p fname            POSTs file at following url\n");
+    printf(" -u user/password    Sets Basic HTTP auth\n");
+    printf(" -x proxy            Sets HTTP proxy\n");
     exit(1);
 }
 

@@ -4,3 +4,4 @@ debian/tmp/usr/bin/zoomsh
 debian/tmp/usr/bin/yaz-marcdump
 debian/tmp/usr/bin/yaz-iconv
 debian/tmp/usr/bin/yaz-json-parse
+debian/tmp/usr/bin/yaz-url

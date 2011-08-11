@@ -117,8 +117,10 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_bindir}/yaz-marcdump
 %{_bindir}/yaz-iconv
 %{_bindir}/yaz-json-parse
+%{_bindir}/yaz-url
 %{_mandir}/man1/yaz-client.*
 %{_mandir}/man1/yaz-json-parse.*
+%{_mandir}/man1/yaz-url.*
 %{_mandir}/man8/yaz-ztest.*
 %{_mandir}/man1/zoomsh.*
 %{_mandir}/man1/yaz-marcdump.*
