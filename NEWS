@@ -1,3 +1,12 @@
+--- 4.2.8 2011/08/11
+
+New utility to get web content. Header is url.h. A command line tool
+yaz-url is part of the distribution and packages.
+
+Fixes for SSL COMSTACK (when gnutls is in use).
+
+New functions yaz_base64{encode,decode}. Header is base64.h.
+
 --- 4.2.7 2011/08/03
 
 ZOOM C includes HTTP response buffer as additional info if it fails
