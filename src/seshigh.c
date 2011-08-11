@@ -298,7 +298,9 @@ int ir_read(IOCHAN h, int event)
             else if (res <= 0)
             {
                 yaz_log(log_session, "Connection closed by client");
-                assoc->state = ASSOC_DEAD;
+                cs_close(conn);
+                destroy_association(assoc);
+                iochan_destroy(h);
                 return 0;
             }
             else if (res == 1) /* incomplete read - wait for more  */
