@@ -1159,7 +1159,12 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
 #if HAVE_GNUTLS_H
         res = gnutls_record_recv(sp->session, *buf + hasread,
                                  CS_TCPIP_BUFCHUNK);
-        if (res < 0)
+        if (res == 0)
+        {
+            TRC(fprintf(stderr, "gnutls_record_recv returned 0\n"));
+            return 0;
+        }
+        else if (res < 0)
         {
             if (ssl_check_error(h, sp, res))
                 break;
