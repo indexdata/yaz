@@ -58,6 +58,7 @@ int main(int argc, char **argv)
     Z_HTTP_Header *http_headers = 0;
     ODR odr = odr_createmem(ODR_ENCODE);
     int exit_code = 0;
+    int no_urls = 0;
 
     while ((ret = options("hH:p:u:x:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
@@ -115,6 +116,7 @@ int main(int argc, char **argv)
                 fwrite(http_response->content_buf, 1,
                        http_response->content_len, stdout);
             }
+            no_urls++;
             break;
         default:
             usage();
@@ -122,6 +124,8 @@ int main(int argc, char **argv)
     }
     yaz_url_destroy(p);
     odr_destroy(odr);
+    if (no_urls == 0)
+        usage();
     exit(exit_code);
 }
 
