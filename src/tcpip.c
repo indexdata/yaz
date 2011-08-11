@@ -471,7 +471,12 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     int port = 210;
     if (h->protocol == PROTO_HTTP)
-        port = 80;
+    {
+        if (h->type == ssl_type)
+            port = 443;
+        else
+            port = 80;
+    }
 
     if (!tcpip_init())
         return 0;
