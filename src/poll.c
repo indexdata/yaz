@@ -159,7 +159,7 @@ int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 
 int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 {
-#if YAZ_HAVE_SYS_POLL_H
+#if HAVE_SYS_POLL_H
     return yaz_poll_poll(fds, num_fds, sec, nsec);
 #else
     return yaz_poll_select(fds, num_fds, sec, nsec);
