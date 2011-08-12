@@ -43,7 +43,7 @@ BISON=bison
 default: all
 
 all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
- testprog iconv icu libxml2 libxslt $(YAZ_URL)
+ testprog iconv icu libxml2 libxslt yaz_url
 
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
@@ -154,6 +154,8 @@ sc_test: $(SC_TEST)
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
  $(ZOOMTST10)
+
+yaz_url: $(YAZ_URL)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) 
 testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
