@@ -169,7 +169,8 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
     CS_TYPE t;
     char *connect_host = 0;
 
-    cs_parse_host(vhost, &host, &t, &proto, &connect_host);
+    if (!cs_parse_host(vhost, &host, &t, &proto, &connect_host))
+        return 0;
 
     if (t == tcpip_type)
     {
