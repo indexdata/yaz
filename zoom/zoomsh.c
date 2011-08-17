@@ -120,7 +120,7 @@ static void cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
         return ;
     }
     val_len = next_token_chars(args, &val_buf, "");
-    if (val_len)
+    if (val_len != -1)
         ZOOM_options_setl(options, wrbuf_cstr(key), val_buf, val_len);
     else
         ZOOM_options_set(options, wrbuf_cstr(key), 0);
