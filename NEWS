@@ -1,3 +1,13 @@
+--- 4.2.9 2011/08/18
+
+Fix SEGV that could occur if set command of zoomsh was given without
+value (2nd argument).
+
+Fix SEGV that could occur if unsupported transport was given for
+COMSTACK - say https (when SSL was unavailable).
+
+Build yaz-url on Windows too.
+
 --- 4.2.8 2011/08/11
 
 New utility to get web content. Header is url.h. A command line tool
