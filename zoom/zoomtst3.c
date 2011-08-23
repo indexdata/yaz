@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 
     /* get first 10 records of result set (using piggyback) */
     ZOOM_options_set (o, "count", "10");
+    ZOOM_options_set (o, "step", "5");
 
     /* preferred record syntax */
     ZOOM_options_set (o, "preferredRecordSyntax", "usmarc");
