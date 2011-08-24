@@ -249,7 +249,7 @@ static char *complex_op_name(Z_Operator *op)
     }
 }
 
-static char *prox_unit_name(Z_ProximityOperator *op)
+char *yaz_prox_unit_name(Z_ProximityOperator *op)
 {
     if (op->which!=Z_ProximityOperator_known)
          return "private";
@@ -292,7 +292,7 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
                      *op->u.prox->distance,
                      *op->u.prox->ordered ? "T" : "F",
                      relToStr(*op->u.prox->relationType),
-                     prox_unit_name(op->u.prox) );
+                     yaz_prox_unit_name(op->u.prox) );
             break;
         default:
             yaz_log(loglevel, "%*.0s unknown complex", depth, "");
