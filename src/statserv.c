@@ -1402,7 +1402,7 @@ int check_options(int argc, char **argv)
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
-                    " -ziDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
+                    " -zKiDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }
     }
