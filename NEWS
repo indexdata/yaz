@@ -1,4 +1,6 @@
-[IN PROGRESS]
+-- 4.2.10 2011/08/24
+
+ZOOM SRU mode: more aggressive re-connect.
 
 Private function prox_unit_name() renamed to yaz_prox_unit_name() and
 made available as a utility function, declared in <yaz/logrpn.h>
