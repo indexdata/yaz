@@ -278,8 +278,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 if (lookahead->name[i] == ' ')
                     no_spaces++;
             len += 1+lookahead->len+lookahead->ws_prefix_len;
-            left_trunc = lookahead->left_trunc;
-            right_trunc = lookahead->right_trunc;
             lookahead = lookahead->next;
         }
 
@@ -366,7 +364,18 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         {
             const char *src_str = cclp->look_token->name;
             size_t src_len = cclp->look_token->len;
-            
+
+            if (i == 0 && src_len > 0 && *src_str == '?')
+            {
+                src_len--;
+                src_str++;
+                left_trunc = 1;
+            }
+            if (i == no - 1 && src_len > 0 && src_str[src_len-1] == '?')
+            {
+                src_len--;
+                right_trunc = 1;
+            }
             if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
                 size_t len = strlen(p->u.t.term);

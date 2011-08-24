@@ -81,7 +81,6 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
             last->next->prev = last;
             last = last->next;
         }
-        last->left_trunc = last->right_trunc = 0;
         last->ws_prefix_buf = (const char *) cp0;
         last->ws_prefix_len = cp - cp0;
         last->next = NULL;
@@ -127,11 +126,6 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
         default:
             --cp;
             --last->len;
-            if (*cp == '?')
-            {
-                last->left_trunc = 1;
-                cp++;
-            }
             if (*cp == '"')
             {
                 cp++;
@@ -149,7 +143,7 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
             {
                 last->kind = CCL_TOK_TERM;
                 last->name = (const char *) cp;
-                while (*cp && !strchr("(),%!><=? \t\n\r", *cp))
+                while (*cp && !strchr("(),%!><= \t\n\r", *cp))
                 {
                     ++ last->len;
                     cp++;
@@ -179,11 +173,6 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
                 if (token_cmp(cclp, aliases, last))
                     last->kind = CCL_TOK_SET;
             }
-            if (*cp == '?')
-            {
-                last->right_trunc = 1;
-                cp++;
-            }
         }
     }
     return first;
@@ -200,7 +189,6 @@ struct ccl_token *ccl_token_add(struct ccl_token *at)
         n->next->prev = n;
 
     n->kind = CCL_TOK_TERM;
-    n->left_trunc = n->right_trunc = 0;
     n->name = 0;
     n->len = 0;
     n->ws_prefix_buf = 0;
