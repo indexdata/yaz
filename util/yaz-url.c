@@ -45,7 +45,7 @@ static char *get_file(const char *fname, size_t *len)
     {
         buf = xmalloc(*len);
         fseek(inf, 0L, SEEK_SET);
-        fread(buf, 1, *len, inf);
+        (void) fread(buf, 1, *len, inf);
     }
     fclose(inf);
     return buf;
