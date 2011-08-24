@@ -1,3 +1,12 @@
+[IN PROGRESS]
+
+Private function prox_unit_name() renamed to yaz_prox_unit_name() and
+made available as a utility function, declared in <yaz/logrpn.h>
+
+rpn2cql_structure() supports proximity nodes (except that the Type-1
+proximity node's "exclusion" binary is ignored, as there is no way to
+express that in CQL).  Fixes bug #4564.
+
 --- 4.2.9 2011/08/18
 
 Fix SEGV that could occur if set command of zoomsh was given without
