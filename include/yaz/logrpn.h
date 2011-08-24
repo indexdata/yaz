@@ -38,6 +38,7 @@
 
 YAZ_BEGIN_CDECL
 
+YAZ_EXPORT char *yaz_prox_unit_name(Z_ProximityOperator *op);
 YAZ_EXPORT void log_rpn_query(Z_RPNQuery *rpn);
 YAZ_EXPORT void log_rpn_query_level(int loglevel, Z_RPNQuery *rpn);
 
