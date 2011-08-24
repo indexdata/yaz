@@ -1612,6 +1612,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
                 c->reconnect_ok = 0;
             }
         }
+        else
+            c->reconnect_ok = 1; /* if the server closes anyway */
     }
 }
 #endif
@@ -1682,7 +1684,6 @@ static int do_read(ZOOM_connection c)
 #endif
             }
         }
-        c->reconnect_ok = 0;
     }
     return 1;
 }
