@@ -18,6 +18,7 @@
 #include <yaz/diagbib1.h>
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
+#include <yaz/logrpn.h> /* For yaz_prox_unit_name() */
 
 static void wrbuf_vputs(const char *buf, void *client_data)
 {
@@ -275,9 +276,40 @@ static int rpn2cql_structure(cql_transform_t ct,
         case  Z_Operator_and_not:
             pr(" not ", client_data);
             break;
-        case  Z_Operator_prox:
-            cql_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH, 0);
-            return -1;
+        case  Z_Operator_prox: {
+            pr(" prox", client_data);
+            Z_ProximityOperator *prox = op->u.prox;
+            /* No way to express Odr_bool *exclusion -- ignore it */
+            if (prox->distance) {
+                char buf[21]; /* Enough for any 64-bit int */
+                char *op2name[6] = { "<", "<=", "=", ">=", ">","<>" };
+                pr("/distance", client_data);
+                if (!prox->relationType ||
+                    *prox->relationType < Z_ProximityOperator_Prox_lessThan ||
+                    *prox->relationType > Z_ProximityOperator_Prox_notEqual) {
+                    cql_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH,
+                        "unrecognised proximity relationType");
+                    return -1;
+                }
+                pr(op2name[*prox->relationType-1], client_data);
+                sprintf(buf, "%ld", (long) *prox->distance);
+                pr(buf, client_data);
+            }
+            if (prox->ordered) {
+                if (*prox->ordered) {
+                    pr("/ordered", client_data);
+                } else {
+                    pr("/unordered", client_data);
+                }
+            }
+            if (prox->which != Z_ProximityOperator_known ||
+                *prox->u.known != Z_ProxUnit_word) {
+                    pr("/unit=", client_data);
+                    pr(yaz_prox_unit_name(prox), client_data);
+            }
+            pr(" ", client_data);
+            break;
+        }
         }
         r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s2, 1, w);
         if (nested)
