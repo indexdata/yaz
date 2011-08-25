@@ -220,20 +220,43 @@ static int rpn2cql_simple(cql_transform_t ct,
             int must_quote = 0;
             Odr_int trunc = lookup_truncation(apt->attributes);
 
-            if (trunc > 3 && trunc != 100)
+            if (trunc > 3 && trunc != 100 && trunc != 102)
             {
                 cql_transform_set_error(
                     ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
                 ret = -1;
             }
             for (i = 0 ; i < lterm; i++)
-                if (sterm[i] == ' ')
+                if (strchr(" ()=></", sterm[i]))
                     must_quote = 1;
             if (must_quote)
                 wrbuf_puts(w, "\"");
             if (trunc == 2 || trunc == 3)
                 wrbuf_puts(w, "*");
-            wrbuf_write(w, sterm, lterm);
+            for (i = 0; i < lterm; i++)
+            {
+                if (sterm[i] == '\\' && i < lterm - 1)
+                {
+                    i++;
+                    if (strchr("*?\"", sterm[i]))
+                        wrbuf_putc(w, '\\');
+                    wrbuf_putc(w, sterm[i]);
+                }
+                else if (trunc == 102 && sterm[i] == '.' && sterm[i+1] == '*')
+                {
+                    wrbuf_putc(w, '*');
+                    i++;
+                }
+                else if (trunc == 102 && sterm[i] == '.')
+                    wrbuf_putc(w, '?');
+                else if (strchr("*?\"", sterm[i]))
+                {
+                    wrbuf_putc(w, '\\');
+                    wrbuf_putc(w, sterm[i]);
+                }
+                else
+                    wrbuf_putc(w, sterm[i]);
+            }
             if (trunc == 1 || trunc == 3)
                 wrbuf_puts(w, "*");
             if (must_quote)
