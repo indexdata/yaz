@@ -731,6 +731,15 @@
 	    set to both left&amp;right.
 	   </entry>
 	  </row>
+
+	  <row><entry><literal>t=x</literal></entry><entry>
+	    Allows masking anywhere in a term, thus fully supporting
+	    # (mask one character) and ? (zero or more of any).
+	    If masking is used, trunction is set to 102 (regexp-1 in term)
+	    and the term is converted accordingly to a regular expression.
+	   </entry>
+	  </row>
+
 	 </tbody>
 	</tgroup>
        </table>

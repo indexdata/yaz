@@ -158,6 +158,8 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                         value = CCL_BIB1_TRU_CAN_BOTH;
                     else if (!ccl_stricmp (value_str, "n"))
                         value = CCL_BIB1_TRU_CAN_NONE;
+                    else if (!ccl_stricmp (value_str, "x"))
+                        value = CCL_BIB1_TRU_CAN_REGEX;
                     break;                
                 case 'c':
                 case 'C':

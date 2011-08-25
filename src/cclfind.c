@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "cclp.h"
 
@@ -258,6 +259,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         int len = 0;
         int left_trunc = 0;
         int right_trunc = 0;
+        int regex_trunc = 0;
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
@@ -356,26 +358,23 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 1);
         }
 
+        if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_REGEX,
+                          &attset))
+        {
+            regex_trunc = 1; /* regex trunc (102) allowed */
+        }
+
         /* make the RPN token */
-        p->u.t.term = (char *)xmalloc(len);
+        p->u.t.term = (char *)xmalloc(len * 2 + 2);
         ccl_assert(p->u.t.term);
         p->u.t.term[0] = '\0';
         for (i = 0; i<no; i++)
         {
             const char *src_str = cclp->look_token->name;
             size_t src_len = cclp->look_token->len;
+            int j;
+            int quote_mode = 0;
 
-            if (i == 0 && src_len > 0 && *src_str == '?')
-            {
-                src_len--;
-                src_str++;
-                left_trunc = 1;
-            }
-            if (i == no - 1 && src_len > 0 && src_str[src_len-1] == '?')
-            {
-                src_len--;
-                right_trunc = 1;
-            }
             if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
                 size_t len = strlen(p->u.t.term);
@@ -383,7 +382,61 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                        cclp->look_token->ws_prefix_len);
                 p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
             }
-            strxcat(p->u.t.term, src_str, src_len);
+            for (j = 0; j < src_len; j++)
+            {
+                if (j > 0 && src_str[j-1] == '\\')
+                {
+                    if (regex_trunc && strchr("()[]?*.", src_str[j]))
+                    {
+                        regex_trunc = 2;
+                        strcat(p->u.t.term, "\\\\");
+                    }
+                    strxcat(p->u.t.term, src_str + j, 1);
+                }
+                else if (src_str[j] == '"')
+                    quote_mode = !quote_mode;
+                else if (!quote_mode && src_str[j] == '?')
+                {
+                    if (regex_trunc)
+                    {
+                        strcat(p->u.t.term, ".*");
+                        regex_trunc = 2; /* regex trunc is really needed */
+                    }
+                    else if (i == 0 && j == 0)
+                        left_trunc = 1;
+                    else if (i == no - 1 && j == src_len - 1)
+                        right_trunc = 1;
+                    else
+                    {
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        ccl_rpn_delete(p);
+                        return NULL;
+                    }
+                }
+                else if (!quote_mode && src_str[j] == '#')
+                {
+                    if (regex_trunc)
+                    {
+                        strcat(p->u.t.term, ".");
+                        regex_trunc = 2; /* regex trunc is really needed */
+                    }
+                    else
+                    {
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        ccl_rpn_delete(p);
+                        return NULL;
+                    }
+                }
+                else if (src_str[j] != '\\')
+                {
+                    if (regex_trunc && strchr("()[]?*.", src_str[j]))
+                    {
+                        regex_trunc = 2;
+                        strcat(p->u.t.term, "\\\\");
+                    }
+                    strxcat(p->u.t.term, src_str + j, 1);                    
+                }
+            }
             ADVANCE;
         }
 
@@ -439,6 +492,10 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 return NULL;
             }
             ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 2);
+        }
+        else if (regex_trunc == 2)
+        {
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 102);
         }
         else
         {
