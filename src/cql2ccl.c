@@ -27,17 +27,35 @@ static void pr_term(struct cql_node *cn,
     while (cn)
     {
         const char *cp;
-        cp = cn->u.st.term;
-        while (*cp)
+        for (cp = cn->u.st.term; *cp; cp++)
         {
-            char x[2];
-            if (*cp == '*')
-                x[0] = '?';
+            char x[4];
+
+            if (*cp == '\\' && cp[1])
+            {
+                x[0] = cp[0];
+                x[1] = cp[1];
+                x[2] = '\0';
+                cp++;
+            }
+            else if (*cp == '#')
+            {
+                strcpy(x, "\\#");
+            }
+            else if (*cp == '*')
+            {
+                strcpy(x, "?");
+            }
+            else if (*cp == '?')
+            {
+                strcpy(x, "#");
+            }
             else
+            {
                 x[0] = *cp;
-            x[1] = 0;
+                x[1] = '\0';
+            }
             pr(x, client_data);
-            cp++;
         }
         if (cn->u.st.extra_terms)
             pr(" ", client_data);
