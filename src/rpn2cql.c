@@ -238,7 +238,7 @@ static int rpn2cql_simple(cql_transform_t ct,
                 if (sterm[i] == '\\' && i < lterm - 1)
                 {
                     i++;
-                    if (strchr("*?\"", sterm[i]))
+                    if (strchr("*?\"\\", sterm[i]))
                         wrbuf_putc(w, '\\');
                     wrbuf_putc(w, sterm[i]);
                 }
