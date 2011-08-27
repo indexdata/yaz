@@ -213,6 +213,7 @@ void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
 }
 
 
+#define REGEX_CHARS "^[]{}()|.*+?!\"$"
 /**
  * search_term: Parse CCL search term. 
  * cclp:   CCL Parser
@@ -386,11 +387,13 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             {
                 if (j > 0 && src_str[j-1] == '\\')
                 {
-                    if (regex_trunc && strchr("()[]?*.", src_str[j]))
+                    if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
                     {
                         regex_trunc = 2;
                         strcat(p->u.t.term, "\\\\");
                     }
+                    if (src_str[j] == '\\')
+                        strcat(p->u.t.term, "\\");
                     strxcat(p->u.t.term, src_str + j, 1);
                 }
                 else if (src_str[j] == '"')
@@ -429,7 +432,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 }
                 else if (src_str[j] != '\\')
                 {
-                    if (regex_trunc && strchr("()[]?*.", src_str[j]))
+                    if (regex_trunc && strchr(REGEX_CHARS, src_str[j]))
                     {
                         regex_trunc = 2;
                         strcat(p->u.t.term, "\\\\");

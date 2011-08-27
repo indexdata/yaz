@@ -260,11 +260,23 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "title=.", 
                             "@attr 5=102 @attr 1=/my/title \\\\. "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=\\.", 
+    YAZ_CHECK(tst_ccl_query(bibset, "title=.", 
                             "@attr 5=102 @attr 1=/my/title \\\\. "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "title=\".\"", 
                             "@attr 5=102 @attr 1=/my/title \\\\. "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "title=?\\?", 
+                            "@attr 5=102 @attr 1=/my/title .*\\\\? "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "title=\"?\\?\"", 
+                            "@attr 5=102 @attr 1=/my/title \\\\?\\\\? "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "title=\\\\", 
+                            "@attr 5=102 @attr 1=/my/title \\\\\\\\ "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "\\\\", 
+                            "@attr 4=2 @attr 1=1016 \\\\ "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "comb=a", 
                             "@or @attr 4=2 @attr 1=1016 a "
