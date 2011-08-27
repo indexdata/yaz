@@ -26,36 +26,56 @@ static void pr_term(struct cql_node *cn,
 {
     while (cn)
     {
-        const char *cp;
-        for (cp = cn->u.st.term; *cp; cp++)
+        if (! *cn->u.st.term) /* empty term special case */
+            pr("\"\"", client_data);
+        else
         {
-            char x[4];
-
-            if (*cp == '\\' && cp[1])
+            const char *cp;
+            int quote_mode = 0;
+            for (cp = cn->u.st.term; *cp; cp++)
             {
-                x[0] = cp[0];
-                x[1] = cp[1];
-                x[2] = '\0';
-                cp++;
+                char x[4];
+                
+                if (*cp == '\\' && cp[1])
+                {
+                    x[0] = cp[0];
+                    x[1] = cp[1];
+                    x[2] = '\0';
+                    cp++;
+                    pr(x, client_data);
+                }
+                else if (*cp == '*')
+                {
+                    if (quote_mode)
+                    {
+                        pr("\"", client_data);
+                        quote_mode = 0;
+                    }
+                    pr("?", client_data);
+                }
+                else if (*cp == '?')
+                {
+                    if (quote_mode)
+                    {
+                        pr("\"", client_data);
+                        quote_mode = 0;
+                    }
+                    pr("#", client_data);
+                }
+                else
+                {
+                    if (!quote_mode)
+                    {
+                        pr("\"", client_data);
+                        quote_mode = 1;
+                    }
+                    x[0] = *cp;
+                    x[1] = '\0';
+                    pr(x, client_data);
+                }
             }
-            else if (*cp == '#')
-            {
-                strcpy(x, "\\#");
-            }
-            else if (*cp == '*')
-            {
-                strcpy(x, "?");
-            }
-            else if (*cp == '?')
-            {
-                strcpy(x, "#");
-            }
-            else
-            {
-                x[0] = *cp;
-                x[1] = '\0';
-            }
-            pr(x, client_data);
+            if (quote_mode)
+                pr("\"", client_data);
         }
         if (cn->u.st.extra_terms)
             pr(" ", client_data);
