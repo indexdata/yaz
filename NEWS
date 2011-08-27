@@ -1,3 +1,8 @@
+-- 4.2.12 2011/08/27 RPM package only
+
+cql2ccl: fix conversion of terms: operator characters were not
+quoted/escaped.
+
 -- 4.2.11 2011/08/25 RPM package only
 
 ccl2rpn: Conversion to regexp-1 terms (trunc=102). For mode t=x, the
