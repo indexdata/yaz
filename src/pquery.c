@@ -84,7 +84,7 @@ static int query_token(struct yaz_pqf_parser *li)
     }
     while (**qptr && **qptr != sep_char)
     {
-        if (**qptr == '\\')
+        if (**qptr == '\\' && (*qptr)[1])
         {
             ++(li->lex_len);
             ++(*qptr);
