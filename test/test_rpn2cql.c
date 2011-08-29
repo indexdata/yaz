@@ -40,6 +40,11 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
             {
                 ret = 1;
             }
+            else
+            {
+                yaz_log(YLOG_WARN, " expected: %s", cql ? cql : "null");
+                yaz_log(YLOG_WARN, " got:      %s", wrbuf_cstr(w));
+            }
         }
     }
     wrbuf_destroy(w);
@@ -90,10 +95,54 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date>1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date<=1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date>=1980"));
+
     /* Truncation */
     YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
     YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
     YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
+    YAZ_CHECK(compare(ct, "@attr 5=100 water", "water"));
+    YAZ_CHECK(compare(ct, "@attr 5=102 water", "water"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 water", "water"));
+
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat.*er", "wat*er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat?er", "wat*er"));
+
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat.er", "wat?er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat#er", "wat?er"));
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat?er", "wat\\?er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat*er", "wat\\*er"));
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat#er", "wat#er"));
+
+    /* \. is 'eaten' by PQF parser */
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat\\.er", "wat?er"));
+
+    /* Escape sequences */
+    /* note: escape sequences that survive after PQF parse below */
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat\\\\?er", "wat\\?er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat\\\\?er", "wat\\?er"));
+
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat\\\\*er", "wat\\*er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat\\\\*er", "wat\\*er"));
+
+    YAZ_CHECK(compare(ct, "wat\\\\#er", "wat#er"));
+    YAZ_CHECK(compare(ct, "@attr 5=100 wat\\\\#er", "wat#er"));
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat\\\\#er", "wat#er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat\\\\#er", "wat#er"));
+    YAZ_CHECK(compare(ct, "@attr 5=102 wat\\\\.er", "wat.er"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 wat\\\\.er", "wat.er"));
+
+    /* Quoting */
+    YAZ_CHECK(compare(ct, "@attr 5=100 \"\"", "\"\""));
+    YAZ_CHECK(compare(ct, "@attr 5=1 \"\"", "\"*\""));
+    YAZ_CHECK(compare(ct, "@attr 5=2 \"\"", "\"*\""));
+    YAZ_CHECK(compare(ct, "@attr 5=3 \"\"", "\"**\""));
+    YAZ_CHECK(compare(ct, "@attr 5=102 \"\"", "\"\""));
+    YAZ_CHECK(compare(ct, "@attr 5=104 \"\"", "\"\""));
+
+    YAZ_CHECK(compare(ct, "@attr 5=1 \"water basket\"", "\"water basket*\""));
+    YAZ_CHECK(compare(ct, "@attr 5=2 \"water basket\"", "\"*water basket\""));
+    YAZ_CHECK(compare(ct, "@attr 5=3 \"water basket\"", "\"*water basket*\""));
+
     /* Other */
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "cql.allRecords=1"));
     YAZ_CHECK(compare(ct, "@attr 1=500 abc", 0));

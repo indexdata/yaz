@@ -22,14 +22,21 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
     for (i = 0; i < len; i++)
         if (strchr(" \"{", term[i]))
             break;
-    if (i == len && i)
-        wrbuf_write(b, term, len);
+    if (len > 0 && i == len)
+    {
+        for (i = 0; i<len; i++)
+        {
+            if (term[i] == '\\')
+                wrbuf_putc(b, '\\');
+            wrbuf_putc(b, term[i]);
+        }
+    }
     else
     {
         wrbuf_putc(b, '"');
         for (i = 0; i<len; i++)
         {
-            if (term[i] == '"')
+            if (term[i] == '"' || term[i] == '\\')
                 wrbuf_putc(b, '\\');
             wrbuf_putc(b, term[i]);
         }

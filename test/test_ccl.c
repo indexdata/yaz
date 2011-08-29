@@ -79,7 +79,9 @@ void tst1(int pass)
     case 0:
         ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
         ccl_qual_fitem(bibset, "1=1016 s=al,pw t=r",    "term");
-        ccl_qual_fitem(bibset, "1=/my/title t=x",       "dc.title");
+        ccl_qual_fitem(bibset, "t=x", "reg");
+        ccl_qual_fitem(bibset, "t=z", "z");
+        ccl_qual_fitem(bibset, "1=/my/title",       "dc.title");
         ccl_qual_fitem(bibset, "r=r",         "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
@@ -92,7 +94,13 @@ void tst1(int pass)
         strcpy(tstline, "term 1=1016 s=al,pw t=r  # default term");
         ccl_qual_line(bibset, tstline);
 
-        strcpy(tstline, "dc.title 1=/my/title t=x");
+        strcpy(tstline, "reg t=x");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "z t=z");
+        ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "dc.title 1=/my/title");
         ccl_qual_line(bibset, tstline);
 
         strcpy(tstline, "date r=r # ordered relation");
@@ -111,7 +119,9 @@ void tst1(int pass)
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
                      "term 1=1016 s=al,pw t=r\r\n"
                      "\n"
-                     "dc.title 1=/my/title t=x\n"
+                     "reg t=x\r\n"
+                     "z t=z\r\n"
+                     "dc.title 1=/my/title\n"
                      "date r=r\n" 
                      "x r=o\n"
                      "title dc.title\n"
@@ -137,9 +147,14 @@ void tst1(int pass)
                 "   <attr type=\"s\" value=\"al,pw\"/>\n"
                 "   <attr type=\"t\" value=\"r\"/>\n"
                 " </qual>\n"
+                " <qual name=\"reg\">\n"
+                "   <attr type=\"t\" value=\"x\"/>\n"
+                " </qual>\n"
+                " <qual name=\"z\">\n"
+                "   <attr type=\"t\" value=\"z\"/>\n"
+                " </qual>\n"
                 " <qual name=\"dc.title\">\n"
                 "   <attr type=\"1\" value=\"/my/title\"/>\n"
-                "   <attr type=\"t\" value=\"x\"/>\n"
                 " </qual>\n"
                 " <qual name=\"date\">\n"
                 "   <attr type=\"r\" value=\"r\"/>\n"
@@ -222,24 +237,41 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "date=1980", "@attr 2=3 1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=234- 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=234 -1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=-1980", "@attr 2=2 1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "date=- 1980", "@attr 2=2 1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "x=-1980", "@attr 2=3 -1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "x=- 1980", "@attr 2=2 1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "x= -1980", "@attr 2=3 -1980 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "x=234-1990", "@attr 2=3 234-1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "x=234 - 1990", "@and @attr 2=4 234 @attr 2=2 1990 "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a,b", "@attr 4=1 @attr 1=4 a,b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b", "@attr 4=1 @attr 1=4 \"a, b\" "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a-b", "@attr 4=2 @attr 1=4 a-b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b", "@attr 4=1 @attr 1=4 \"a - b\" "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=1980",
+                            "@attr 2=3 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990",
+                            "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234- 1990",
+                            "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234 -1990",
+                            "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=234 - 1990",
+                            "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=-1980",
+                            "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date=- 1980",
+                            "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=-1980",
+                            "@attr 2=3 -1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=- 1980",
+                            "@attr 2=2 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x= -1980",
+                            "@attr 2=3 -1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=234-1990",
+                            "@attr 2=3 234-1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "x=234 - 1990",
+                            "@and @attr 2=4 234 @attr 2=2 1990 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a,b",
+                            "@attr 4=1 @attr 1=4 a,b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a, b",
+                            "@attr 4=1 @attr 1=4 \"a, b\" "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a-b",
+                            "@attr 4=2 @attr 1=4 a-b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "ti=a - b",
+                            "@attr 4=1 @attr 1=4 \"a - b\" "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a?", "@attr 5=1 @attr 4=2 @attr 1=1016 a "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a?",
+                            "@attr 5=1 @attr 4=2 @attr 1=1016 a "));
     YAZ_CHECK(tst_ccl_query(bibset, "a b", 
                             "@and @attr 4=2 @attr 1=1016 a "
                             "@attr 4=2 @attr 1=1016 b "));
@@ -251,29 +283,45 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "title=a", 
                             "@attr 1=/my/title a "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=a?b#\"c?\"", 
-                            "@attr 5=102 @attr 1=/my/title a.*b.c\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=a?b#\"c?\"", 
+                            "@attr 5=102 a.*b.c\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=a?b#\"c?\"", 
+                            "@attr 5=104 a?b#c\\\\? "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=\\(", 
-                            "@attr 5=102 @attr 1=/my/title \\\\( "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\(", 
+                            "@attr 5=102 \\\\( "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\\(", 
+                            "( "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=.", 
-                            "@attr 5=102 @attr 1=/my/title \\\\. "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\"", 
+                            "\"\\\"\" "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\\\"", 
+                            "\"\\\"\" "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=.", 
-                            "@attr 5=102 @attr 1=/my/title \\\\. "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=.",
+                            "@attr 5=102 \\\\. "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=.",
+                            ". "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=\".\"", 
-                            "@attr 5=102 @attr 1=/my/title \\\\. "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\".\"", 
+                            "@attr 5=102 \\\\. "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\".\"", 
+                            ". "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=?\\?", 
-                            "@attr 5=102 @attr 1=/my/title .*\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=?\\?",
+                            "@attr 5=102 .*\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=?\\?",
+                            "@attr 5=104 ?\\\\? "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=\"?\\?\"", 
-                            "@attr 5=102 @attr 1=/my/title \\\\?\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\"?\\?\"",
+                            "@attr 5=102 \\\\?\\\\? "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\"?\\?\"",
+                            "@attr 5=104 \\\\?\\\\? "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=\\\\", 
-                            "@attr 5=102 @attr 1=/my/title \\\\\\\\ "));
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\\",
+                            "@attr 5=102 \\\\\\\\ "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\\\\",
+                            "@attr 5=104 \\\\\\\\ "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "\\\\", 
                             "@attr 4=2 @attr 1=1016 \\\\ "));

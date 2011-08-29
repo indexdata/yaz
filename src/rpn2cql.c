@@ -192,11 +192,14 @@ static int rpn2cql_simple(cql_transform_t ct,
         Z_Term *term = apt->term;
         const char *sterm = 0;
         size_t lterm = 0;
+        Odr_int trunc = lookup_truncation(apt->attributes);
+        size_t i;
+        int must_quote = 0;
 
         wrbuf_rewind(w);
         ret = rpn2cql_attr(ct, apt->attributes, w);
 
-        switch(term->which)
+        switch (term->which)
         {
         case Z_Term_general:
             lterm = term->u.general->len;
@@ -210,25 +213,17 @@ static int rpn2cql_simple(cql_transform_t ct,
             lterm = strlen(sterm);
             break;
         default:
-            ret = -1;
             cql_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
+            return -1;
         }
 
-        if (term)
+        if (trunc <= 3 || trunc == 100 || trunc == 102 || trunc == 104)
         {
-            size_t i;
-            int must_quote = 0;
-            Odr_int trunc = lookup_truncation(apt->attributes);
-
-            if (trunc > 3 && trunc != 100 && trunc != 102)
-            {
-                cql_transform_set_error(
-                    ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
-                ret = -1;
-            }
             for (i = 0 ; i < lterm; i++)
                 if (strchr(" ()=></", sterm[i]))
-                    must_quote = 1;
+                    break;
+            if (i < lterm || lterm == 0)
+                must_quote = 1;
             if (must_quote)
                 wrbuf_puts(w, "\"");
             if (trunc == 2 || trunc == 3)
@@ -249,6 +244,10 @@ static int rpn2cql_simple(cql_transform_t ct,
                 }
                 else if (trunc == 102 && sterm[i] == '.')
                     wrbuf_putc(w, '?');
+                else if (trunc == 104 && sterm[i] == '?')
+                    wrbuf_putc(w, '*');
+                else if (trunc == 104 && sterm[i] == '#')
+                    wrbuf_putc(w, '?');
                 else if (strchr("*?\"", sterm[i]))
                 {
                     wrbuf_putc(w, '\\');
@@ -261,6 +260,12 @@ static int rpn2cql_simple(cql_transform_t ct,
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
+        }
+        else
+        {
+            cql_transform_set_error(
+                ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
+            ret = -1;
         }
         if (ret == 0)
             pr(wrbuf_cstr(w), client_data);
@@ -280,6 +285,7 @@ static int rpn2cql_structure(cql_transform_t ct,
     else
     {
         Z_Operator *op = q->u.complex->roperator;
+        Z_ProximityOperator *prox;
         int r;
 
         if (nested)
@@ -301,7 +307,7 @@ static int rpn2cql_structure(cql_transform_t ct,
             break;
         case  Z_Operator_prox: {
             pr(" prox", client_data);
-            Z_ProximityOperator *prox = op->u.prox;
+            prox = op->u.prox;
             /* No way to express Odr_bool *exclusion -- ignore it */
             if (prox->distance) {
                 char buf[21]; /* Enough for any 64-bit int */

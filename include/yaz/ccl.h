@@ -353,7 +353,7 @@ int ccl_stop_words_info(ccl_stop_words_t csw, int idx,
 #define CCL_BIB1_TRU_CAN_BOTH  (-3)
 #define CCL_BIB1_TRU_CAN_NONE  (-4)
 #define CCL_BIB1_TRU_CAN_REGEX (-5)
-
+#define CCL_BIB1_TRU_CAN_Z3958 (-6)
 
 
 YAZ_END_CDECL

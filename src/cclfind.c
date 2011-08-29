@@ -213,7 +213,8 @@ void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
 }
 
 
-#define REGEX_CHARS "^[]{}()|.*+?!\"$"
+#define REGEX_CHARS "^[]{}()|.*+?!$"
+#define CCL_CHARS "#?\\"
 /**
  * search_term: Parse CCL search term. 
  * cclp:   CCL Parser
@@ -261,6 +262,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         int left_trunc = 0;
         int right_trunc = 0;
         int regex_trunc = 0;
+        int z3958_trunc = 0;
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
@@ -364,6 +366,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         {
             regex_trunc = 1; /* regex trunc (102) allowed */
         }
+        else if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_Z3958,
+                          &attset))
+        {
+            z3958_trunc = 1; /* Z39.58 trunc (CCL) trunc allowed */
+        }
 
         /* make the RPN token */
         p->u.t.term = (char *)xmalloc(len * 2 + 2);
@@ -390,10 +397,13 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
                     {
                         regex_trunc = 2;
-                        strcat(p->u.t.term, "\\\\");
-                    }
-                    if (src_str[j] == '\\')
                         strcat(p->u.t.term, "\\");
+                    }
+                    else if (z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
+                    {
+                        z3958_trunc = 2;
+                        strcat(p->u.t.term, "\\");
+                    }
                     strxcat(p->u.t.term, src_str + j, 1);
                 }
                 else if (src_str[j] == '"')
@@ -404,6 +414,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     {
                         strcat(p->u.t.term, ".*");
                         regex_trunc = 2; /* regex trunc is really needed */
+                    }
+                    else if (z3958_trunc)
+                    {
+                        strcat(p->u.t.term, "?");
+                        z3958_trunc = 2;
                     }
                     else if (i == 0 && j == 0)
                         left_trunc = 1;
@@ -423,6 +438,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                         strcat(p->u.t.term, ".");
                         regex_trunc = 2; /* regex trunc is really needed */
                     }
+                    else if (z3958_trunc)
+                    {
+                        strcat(p->u.t.term, "#");
+                        z3958_trunc = 2;
+                    }
                     else
                     {
                         cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
@@ -435,7 +455,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     if (regex_trunc && strchr(REGEX_CHARS, src_str[j]))
                     {
                         regex_trunc = 2;
-                        strcat(p->u.t.term, "\\\\");
+                        strcat(p->u.t.term, "\\");
+                    }
+                    else if (z3958_trunc && strchr(CCL_CHARS, src_str[j]))
+                    {
+                        z3958_trunc = 2;
+                        strcat(p->u.t.term, "\\");
                     }
                     strxcat(p->u.t.term, src_str + j, 1);                    
                 }
@@ -499,6 +524,10 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         else if (regex_trunc == 2)
         {
             ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 102);
+        }
+        else if (z3958_trunc == 2)
+        {
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 104);
         }
         else
         {

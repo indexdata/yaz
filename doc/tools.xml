@@ -740,6 +740,15 @@
 	   </entry>
 	  </row>
 
+	  <row><entry><literal>t=z</literal></entry><entry>
+	    Allows masking anywhere in a term, thus fully supporting
+	    # (mask one character) and ? (zero or more of any).
+	    If masking is used, trunction is set to 104 (Z39.58 in term)
+	    and the term is converted accordingly to Z39.58 masking term -
+	    actually the same truncation as CCL itself.
+	   </entry>
+	  </row>
+
 	 </tbody>
 	</tgroup>
        </table>
