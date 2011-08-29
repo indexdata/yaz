@@ -202,9 +202,18 @@
     2 Left truncation
     3 Left and right truncation
     100 Do not truncate
-    101 Process # in search term
+    101 Process # in search term 
     102 RegExpr-1
     103 RegExpr-2
+   </screen>
+   </para>
+  <para>
+    Thw 104-106 truncation attributes below are only supported by
+    Index Data's Zebra server.
+    <screen>
+    104 Process * # ?n regular: * = .*, #=., ?n=.{n}
+    105 Process * ! regular: *=.*, !=. and right truncate
+    106 Process * ! regular: *=.*, !=.
    </screen>
   </para>
  </refsect1>
@@ -219,6 +228,20 @@
   </para>
  </refsect1>
  
+ <refsect1><title>SORTING (7)</title>
+  <para>
+   <screen>
+    1 ascending
+    2 descending
+   </screen>
+  </para>
+  <para>
+    Type 7 is an Index Data extension to RPN queries that allows
+    embedding a sort critieria into a query.
+  </para>
+ </refsect1>
+ 
+
  <refsect1><title>SEE ALSO</title>
   <para>
    <ulink url="&url.z39.50.attset.bib1;">Bib-1 Attribute Set</ulink>
