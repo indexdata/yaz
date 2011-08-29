@@ -202,16 +202,16 @@
     2 Left truncation
     3 Left and right truncation
     100 Do not truncate
-    101 Process # in search term 
+    101 Process # in search term  . regular #=.*
     102 RegExpr-1
     103 RegExpr-2
+    104 Process # ?n . regular: #=., ?n=.{0,n} or ?=.* Z39.58
    </screen>
    </para>
   <para>
-    Thw 104-106 truncation attributes below are only supported by
+    Thw 105-106 truncation attributes below are only supported by
     Index Data's Zebra server.
     <screen>
-    104 Process * # ?n regular: * = .*, #=., ?n=.{n}
     105 Process * ! regular: *=.*, !=. and right truncate
     106 Process * ! regular: *=.*, !=.
    </screen>
