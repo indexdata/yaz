@@ -38,11 +38,20 @@ static void pr_term(struct cql_node *cn,
                 
                 if (*cp == '\\' && cp[1])
                 {
-                    x[0] = cp[0];
-                    x[1] = cp[1];
-                    x[2] = '\0';
+                    if (!quote_mode)
+                    {
+                        pr("\"", client_data);
+                        quote_mode = 1;
+                    }
                     cp++;
-                    pr(x, client_data);
+                    if (*cp == '\"' || *cp == '\\')
+                        pr("\\\"", client_data);
+                    else
+                    {
+                        x[0] = *cp;
+                        x[1] = '\0';
+                        pr(x, client_data);
+                    }
                 }
                 else if (*cp == '*')
                 {
