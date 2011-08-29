@@ -90,8 +90,15 @@ static void tst(void)
     YAZ_CHECK(tst_query("title=x or author=y",
                         "(title=\"x\" or author=\"y\")"));
 
+    YAZ_CHECK(tst_query("title all \"\"", "title=\"\""));
 
-    YAZ_CHECK(tst_query("title all x", "title=x"));
+    YAZ_CHECK(tst_query("title all x", "title=\"x\""));
+    YAZ_CHECK(tst_query("title all x y", "title=\"x\" and title=\"y\""));
+    YAZ_CHECK(tst_query("title all \"x y\"", "title=\"x\" and title=\"y\""));
+
+    YAZ_CHECK(tst_query("title any x", "title=\"x\""));
+    YAZ_CHECK(tst_query("title any x y", "title=\"x\" or title=\"y\""));
+    YAZ_CHECK(tst_query("title any \"x y\"", "title=\"x\" or title=\"y\""));
 }
 
 int main(int argc, char **argv)

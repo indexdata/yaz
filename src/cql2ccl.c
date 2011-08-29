@@ -20,73 +20,67 @@ static int cql_to_ccl_r(struct cql_node *cn,
                         void (*pr)(const char *buf, void *client_data),
                         void *client_data);
 
-static void pr_term(struct cql_node *cn,
+static void pr_term(const char **cpp, int stop_at_space,
                     void (*pr)(const char *buf, void *client_data),
                     void *client_data)
 {
-    while (cn)
+    const char *cp;
+    int quote_mode = 0;
+    for (cp = *cpp; *cp; cp++)
     {
-        if (! *cn->u.st.term) /* empty term special case */
-            pr("\"\"", client_data);
+        char x[4];
+        
+        if (*cp == '\\' && cp[1])
+        {
+            if (!quote_mode)
+            {
+                pr("\"", client_data);
+                quote_mode = 1;
+            }
+            cp++;
+            if (*cp == '\"' || *cp == '\\')
+                pr("\\", client_data);
+            x[0] = *cp;
+            x[1] = '\0';
+            pr(x, client_data);
+        }
+        else if (*cp == '*')
+        {
+            if (quote_mode)
+            {
+                pr("\"", client_data);
+                quote_mode = 0;
+            }
+            pr("?", client_data);
+        }
+        else if (*cp == '?')
+        {
+            if (quote_mode)
+            {
+                pr("\"", client_data);
+                quote_mode = 0;
+            }
+            pr("#", client_data);
+        }
+        else if (*cp == ' ')
+            break;
         else
         {
-            const char *cp;
-            int quote_mode = 0;
-            for (cp = cn->u.st.term; *cp; cp++)
+            if (!quote_mode)
             {
-                char x[4];
-                
-                if (*cp == '\\' && cp[1])
-                {
-                    if (!quote_mode)
-                    {
-                        pr("\"", client_data);
-                        quote_mode = 1;
-                    }
-                    cp++;
-                    if (*cp == '\"' || *cp == '\\')
-                        pr("\\", client_data);
-                    x[0] = *cp;
-                    x[1] = '\0';
-                    pr(x, client_data);
-                }
-                else if (*cp == '*')
-                {
-                    if (quote_mode)
-                    {
-                        pr("\"", client_data);
-                        quote_mode = 0;
-                    }
-                    pr("?", client_data);
-                }
-                else if (*cp == '?')
-                {
-                    if (quote_mode)
-                    {
-                        pr("\"", client_data);
-                        quote_mode = 0;
-                    }
-                    pr("#", client_data);
-                }
-                else
-                {
-                    if (!quote_mode)
-                    {
-                        pr("\"", client_data);
-                        quote_mode = 1;
-                    }
-                    x[0] = *cp;
-                    x[1] = '\0';
-                    pr(x, client_data);
-                }
-            }
-            if (quote_mode)
                 pr("\"", client_data);
+                quote_mode = 1;
+            }
+            x[0] = *cp;
+            x[1] = '\0';
+            pr(x, client_data);
         }
-        if (cn->u.st.extra_terms)
-            pr(" ", client_data);
-        cn = cn->u.st.extra_terms;
     }
+    if (quote_mode)
+        pr("\"", client_data);
+    if (cp == *cpp)
+        pr("\"\"", client_data);
+    *cpp = cp;
 }
 
 static int node(struct cql_node *cn, 
@@ -127,46 +121,35 @@ static int node(struct cql_node *cn,
         /* unsupported relation */
         return -1;
     }
-    if (!split_op)
-    {
-        if (ccl_field && ccl_rel)
-        {
-            pr(ccl_field, client_data);
-            pr(ccl_rel, client_data);
-        }
-        pr_term(cn, pr, client_data);
-    }
-    else
+    for (; cn; cn = cn->u.st.extra_terms)
     {
         const char *cp = cn->u.st.term;
-        
         while (1)
         {
-            if (*cp == '\0')
-                break;
             if (ccl_field && ccl_rel)
             {
                 pr(ccl_field, client_data);
                 pr(ccl_rel, client_data);
             }
-            while (*cp && *cp != ' ')
-            {
-                char x[2];
-                if (*cp == '*')
-                    x[0] = '?';
-                else
-                    x[0] = *cp;
-                x[1] = '\0';
-                pr(x, client_data);
-                cp++;
-            }
+            pr_term(&cp, split_op ? 1 : 0, pr, client_data);
+            if (!split_op)
+                break;
             while (*cp == ' ')
                 cp++;
             if (*cp == '\0')
                 break;
             pr(" ", client_data);
             pr(split_op, client_data);
-            pr(" ", client_data);            
+            pr(" ", client_data);
+        }
+        if (cn->u.st.extra_terms)
+        {
+            pr(" ", client_data);
+            if (split_op)
+            {
+                pr(split_op, client_data);
+                pr(" ", client_data);
+            }
         }
     }
     return 0;
