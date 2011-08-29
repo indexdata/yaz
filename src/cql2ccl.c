@@ -4,7 +4,7 @@
  */
 /**
  * \file cql2ccl.c
- * \brief Implements CQL to XCQL conversion.
+ * \brief Implements CQL to CCL conversion.
  */
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -45,13 +45,10 @@ static void pr_term(struct cql_node *cn,
                     }
                     cp++;
                     if (*cp == '\"' || *cp == '\\')
-                        pr("\\\"", client_data);
-                    else
-                    {
-                        x[0] = *cp;
-                        x[1] = '\0';
-                        pr(x, client_data);
-                    }
+                        pr("\\", client_data);
+                    x[0] = *cp;
+                    x[1] = '\0';
+                    pr(x, client_data);
                 }
                 else if (*cp == '*')
                 {
@@ -214,7 +211,7 @@ static int bool(struct cql_node *cn,
                     if (!strcmp(n->u.st.relation, "<="))
                         distance = atoi(n->u.st.term);
                     else if (!strcmp(n->u.st.relation, "<"))
-                        distance = atoi(n->u.st.term) - 1;
+                            distance = atoi(n->u.st.term) - 1;
                     else
                         return -1;
                 }

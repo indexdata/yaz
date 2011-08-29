@@ -77,8 +77,9 @@ static void tst(void)
     YAZ_CHECK(tst_query("a b", "\"a\" \"b\""));
     YAZ_CHECK(tst_query("ab bc", "\"ab\" \"bc\""));
 
-    YAZ_CHECK(tst_query("\\\\", "\"\\\"\""));
-    YAZ_CHECK(tst_query("\\\"",   "\"\\\"\""));
+    YAZ_CHECK(tst_query("\\\\", "\"\\\\\""));
+    YAZ_CHECK(tst_query("\\\"", "\"\\\"\""));
+    YAZ_CHECK(tst_query("\\x" , "\"x\""));
 
     YAZ_CHECK(tst_query("\\*", "\"*\""));
     YAZ_CHECK(tst_query("\"\\*\"", "\"*\""));
