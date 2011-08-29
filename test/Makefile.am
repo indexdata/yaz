@@ -1,7 +1,8 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2011 Index Data
 
-check_PROGRAMS = test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
+check_PROGRAMS = test_cql2ccl \
+ test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
  test_odr test_ccl test_log test_mutex \
  test_soap1 test_soap2 test_solr test_odrstack test_log_thread \
  test_xmlquery test_pquery \
@@ -57,6 +58,7 @@ test_libstemmer_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 
 CONFIG_CLEAN_FILES=*.log
 
+test_cql2ccl_SOURCES = test_cql2ccl.c
 test_xmalloc_SOURCES = test_xmalloc.c
 test_iconv_SOURCES = test_iconv.c
 test_nmem_SOURCES = test_nmem.c

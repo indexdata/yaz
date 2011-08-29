@@ -4,6 +4,7 @@ Makefile.in
 test_odrcodec.c
 test_odrcodec.h
 .libs
+test_cql2ccl
 test_ccl
 test_iconv
 test_matchstr
