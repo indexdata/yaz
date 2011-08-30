@@ -26,11 +26,12 @@ int main(int argc, char **argv)
     char *query = 0;
     char *fname = 0;
     int reverse = 0;
+    int verbose = 1;
 
     int ret;
     char *arg;
 
-    while ((ret = options("n:r", argv, argc, &arg)) != -2)
+    while ((ret = options("n:rv", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -40,11 +41,14 @@ int main(int argc, char **argv)
             else
                 query = arg;
             break;
+        case 'n':
+            iterations = atoi(arg);
+            break;
         case 'r':
             reverse = 1;
             break;
-        case 'n':
-            iterations = atoi(arg);
+        case 'v':
+            verbose = 1;
             break;
         default:
             usage();
@@ -100,6 +104,8 @@ int main(int argc, char **argv)
         
         if (query)
         {
+            if (verbose)
+                printf("Parsing CQL %s\n", query);
             for (i = 0; i<iterations; i++)
                 r = cql_parser_string(cp, query);
         }

@@ -1,18 +1,15 @@
 # CQL queries for testing.
-# from http://www.loc.gov/z3950/agency/zing/cql/sample-queries.html
+# Read by test_cql2pqf.sh
+# No blank lines!
+#
 # Simple Term
-
 a
 a b
 "a b"
-
 # Index Relation Term
-
 title = fish
 dc.title = fish
-
 # Simple Boolean
-
 cat or dog
 cat and fish
 cat not frog
@@ -22,4 +19,21 @@ xml and "prox///"
 fred and any
 ((fred or all))
 a or b and c not d 
-
+# Masking/Truncation
+*a
+a*
+*a*
+a*a
+?a
+a?
+?a?
+a?a
+a#a?
+*a#
+a#a*
+a*3
+# Escape sequences (sh reads one slash, though)
+a*\\3
+\\*a#
+\\*a*b#
+\\"

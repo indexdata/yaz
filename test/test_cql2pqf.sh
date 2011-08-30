@@ -9,7 +9,7 @@ comment=0
 ecode=0
 test -f ${srcdir}/cql2pqfsample || exit 1
 test -d cql2pqf || mkdir cql2pqf
-for f in `cat ${srcdir}/cql2pqfsample`; do
+while read f; do
 	if echo $f | grep '^#' >/dev/null; then
 		comment=1
 	else
@@ -24,7 +24,7 @@ for f in `cat ${srcdir}/cql2pqfsample`; do
 		OUT2=cql2pqf/$secno.$testno.out.tmp
 		ERR2=cql2pqf/$secno.$testno.err.tmp
 		DIFF=cql2pqf/$secno.$testno.diff
-		../util/cql2pqf ${srcdir}/../etc/pqf.properties "$f" >$OUT2 2>$ERR2
+		../util/cql2pqf -v ${srcdir}/../etc/pqf.properties "$f" >$OUT2 2>$ERR2
 		if test -f $OUT1 -a -f $ERR1; then
 			if diff $OUT1 $OUT2 >$DIFF; then
 				rm $DIFF
@@ -49,6 +49,6 @@ for f in `cat ${srcdir}/cql2pqfsample`; do
 			ecode=1
 		fi	
 	fi		
-done
+done < cql2pqfsample
 IFS="$oIFS"
 exit $ecode

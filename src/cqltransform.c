@@ -617,7 +617,7 @@ static void emit_term(cql_transform_t ct,
     int i;
     const char *ns = cn->u.st.index_uri;
     int process_term = !has_modifier(cn, "regexp");
-    char *z3958_mem = 0;
+    int z3958_mode = 0;
 
     assert(cn->which == CQL_NODE_ST);
 
@@ -685,34 +685,12 @@ static void emit_term(cql_transform_t ct,
         }
         else if (first_wc)
         {
-            /* We have one or more wildcard characters, but not in a
-             * way that can be dealt with using only the standard
-             * left-, right- and both-truncation attributes.  We need
-             * to translate the pattern into a Z39.58-type pattern,
-             * which has been supported in BIB-1 since 1996.  If
-             * there's no configuration element for "truncation.z3958"
-             * we indicate this as error 28 "Masking character not
-             * supported".
-             */
-            int i;
+            z3958_mode = 1;
             cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
-            z3958_mem = (char *) xmalloc(length+1);
-            for (i = 0; i < length; i++)
-            {
-                if (i > 0 && term[i-1] == '\\')
-                    z3958_mem[i] = term[i];
-                else if (term[i] == '*')
-                    z3958_mem[i] = '?';
-                else if (term[i] == '?')
-                    z3958_mem[i] = '#';
-                else
-                    z3958_mem[i] = term[i];
-            }
-            z3958_mem[length] = '\0';
-            term = z3958_mem;
         }
-        else {
+        else
+        {
             /* No masking characters.  Use "truncation.none" if given. */
             cql_pr_attr(ct, "truncation", "none", 0,
                         pr, client_data, 0);
@@ -733,20 +711,47 @@ static void emit_term(cql_transform_t ct,
         }
     }
 
+    /* produce only \-sequences if:
+       1) the output is a Z39.58-trunc reserved character
+       2) the output is a PQF reserved character (\\, \")
+    */
     (*pr)("\"", client_data);
     for (i = 0; i < length; i++)
     {
-        /* pr(int) each character */
-        /* we do not need to deal with \-sequences because the
-           CQL and PQF terms have same \-format, bug #1988 */
-        char buf[2];
-
-        buf[0] = term[i];
-        buf[1] = '\0';
-        (*pr)(buf, client_data);
+        char x[3]; /* temp buffer */
+        if (i > 0 && term[i-1] == '\\')
+        {
+            if (term[i] == '\"' || term[i] == '\\')
+                pr("\\", client_data);
+            if (z3958_mode && strchr("#?", term[i]))
+                pr("\\\\", client_data); /* double \\ to survive PQF parse */
+            x[0] = term[i];
+            x[1] = '\0';
+            pr(x, client_data);
+        }
+        else if (z3958_mode && term[i] == '*')
+        {
+            pr("?", client_data);
+            /* avoid ?n sequences output (n=[0-9]) because that has
+               different semantics than just a single ? in Z39.58
+            */
+            if (i < length - 1 && yaz_isdigit(term[i+1]))
+                pr("\\\\", client_data); /* double \\ to survive PQF parse */
+        }
+        else if (z3958_mode && term[i] == '?')
+            pr("#", client_data);
+        else if (term[i] != '\\')
+        {
+            if (term[i] == '\"')
+                pr("\\", client_data);
+            if (z3958_mode && strchr("#?", term[i]))
+                pr("\\\\", client_data); /* double \\ to survive PQF parse */
+            x[0] = term[i];
+            x[1] = '\0';
+            pr(x, client_data);
+        }
     }
     (*pr)("\" ", client_data);
-    xfree(z3958_mem);
 }
 
 static void emit_terms(cql_transform_t ct,
