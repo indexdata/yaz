@@ -142,7 +142,7 @@ static int auto_wait = 1;
 static Odr_bitmask z3950_options;
 static int z3950_version = 3;
 static int scan_stepSize = 0;
-static int scan_position = 1;
+static char scan_position[64];
 static int scan_size = 20;
 static char cur_host[200];
 static Odr_int last_hit_count = 0;
@@ -1413,7 +1413,7 @@ static char *encode_SRW_term(ODR o, const char *q)
 }
 
 
-static int send_SRW_scanRequest(const char *arg, int pos, int num)
+static int send_SRW_scanRequest(const char *arg, Odr_int *pos, int num)
 {
     Z_SRW_PDU *sr = 0;
 
@@ -1434,7 +1434,7 @@ static int send_SRW_scanRequest(const char *arg, int pos, int num)
         printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
-    sr->u.scan_request->responsePosition = odr_intdup(out, pos);
+    sr->u.scan_request->responsePosition = pos;
     sr->u.scan_request->maximumTerms = odr_intdup(out, num);
     return send_srw(sr);
 }
@@ -3321,13 +3321,14 @@ static int cmd_cancel_find(const char *arg)
 }
 
 static int send_Z3950_scanrequest(const char *set,  const char *query,
-                                  Odr_int pp, Odr_int num, const char *term)
+                                  Odr_int *pos, Odr_int num, const char *term)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
 
     if (only_z3950())
         return 0;
+    printf("query: %s\n", query);
     if (queryType == QueryType_CCL2RPN)
     {
         int error, pos;
@@ -3397,7 +3398,7 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
     req->num_databaseNames = num_databaseNames;
     req->databaseNames = databaseNames;
     req->numberOfTermsRequested = &num;
-    req->preferredPositionInResponse = &pp;
+    req->preferredPositionInResponse = pos;
     req->stepSize = odr_intdup(out, scan_stepSize);
 
     if (set)
@@ -3572,9 +3573,17 @@ static int cmd_scanstep(const char *arg)
 
 static int cmd_scanpos(const char *arg)
 {
-    int r = sscanf(arg, "%d", &scan_position);
-    if (r == 0)
-        scan_position = 1;
+    if (!strcmp(arg, "none"))
+        strcpy(scan_position, "none");
+    else
+    {
+        int dummy;
+        int r = sscanf(arg, "%d", &dummy);
+        if (r == 1 && strlen(arg) < sizeof(scan_position)-1)
+            strcpy(scan_position, arg);
+        else
+            printf("specify number of none for scanpos\n");
+    }
     return 0;
 }
 
@@ -3588,6 +3597,28 @@ static int cmd_scansize(const char *arg)
 
 static int cmd_scan_common(const char *set, const char *arg)
 {
+    Odr_int pos, *pos_p = 0;
+    const char *scan_term = 0;
+    const char *scan_query = 0;
+
+    if (!*arg)
+    {
+        pos = 1;
+        pos_p = &pos;
+        scan_query = last_scan_query;
+        scan_term = last_scan_line;
+    }
+    else 
+    {
+        strcpy(last_scan_query, arg);
+        scan_query = arg;
+        if (strcmp(scan_position, "none"))
+        {
+            pos = odr_atoi(scan_position);
+            pos_p = &pos;
+        }
+    }
+
     if (protocol == PROTO_HTTP)
     {
 #if YAZ_HAVE_XML2
@@ -3595,16 +3626,8 @@ static int cmd_scan_common(const char *set, const char *arg)
             session_connect(cur_host);
         if (!conn)
             return 0;
-        if (*arg)
-        {
-            if (send_SRW_scanRequest(arg, scan_position, scan_size) < 0)
-                return 0;
-        }
-        else
-        {
-            if (send_SRW_scanRequest(last_scan_line, 1, scan_size) < 0)
-                return 0;
-        }
+        if (send_SRW_scanRequest(scan_query, pos_p, scan_size) < 0)
+            return 0;
         return 2;
 #else
         return 0;
@@ -3625,19 +3648,9 @@ static int cmd_scan_common(const char *set, const char *arg)
             printf("Target doesn't support scan\n");
             return 0;
         }
-        if (*arg)
-        {
-            strcpy(last_scan_query, arg);
-            if (send_Z3950_scanrequest(set, arg,
-                                       scan_position, scan_size, 0) < 0)
-                return 0;
-        }
-        else
-        {
-            if (send_Z3950_scanrequest(set, last_scan_query,
-                                      1, scan_size, last_scan_line) < 0)
-                return 0;
-        }
+        if (send_Z3950_scanrequest(set, scan_query, pos_p,
+                                   scan_size, scan_term) < 0)
+            return 0;
         return 2;
     }
 }
@@ -4263,6 +4276,8 @@ static void initialize(const char *rc_file)
         exit(1);
     }
     
+    strcpy(scan_position, "1");
+
     setvbuf(stdout, 0, _IONBF, 0);
     if (apdu_file)
         odr_setprint(print, apdu_file);
