@@ -5,7 +5,7 @@
 
 Name: yaz
 Summary: Z39.50 Programs
-Version: 4.2.12
+Version: 4.2.13
 Release: 1indexdata
 
 # determine system
