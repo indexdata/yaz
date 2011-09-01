@@ -1,3 +1,18 @@
+-- 4.2.13 IN PROGRESS
+
+Fixes for cql2rpn, cql2ccl and ccl2rpn; mostly in the area of special
+cases using escapes (\-sequences) and masking.
+
+PQF parse fix: A trailing backslash followed by end-of-string (\0)
+would result in a read one byte beyond string.
+
+rpn2ccl may use Z39.50 masking for terms (t=z).
+
+ICU check fix. Don't include library -lCrun on Solaris, unless present.
+
+ICU check fix: Use --cppflags-searchpath to determine ICU include files;
+not --cppflags (which seeems like an error in icu-config).
+
 -- 4.2.12 2011/08/27 RPM package only
 
 cql2ccl: fix conversion of terms: operator characters were not
