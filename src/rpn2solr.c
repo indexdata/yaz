@@ -105,7 +105,7 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
 }
 
 static int rpn2solr_attr(solr_transform_t ct,
-                        Z_AttributeList *attributes, WRBUF w)
+                         Z_AttributeList *attributes, WRBUF w)
 {
     const char *relation = solr_lookup_reverse(ct, "relation.", attributes);
     const char *index = solr_lookup_reverse(ct, "index.", attributes);
@@ -122,7 +122,7 @@ static int rpn2solr_attr(solr_transform_t ct,
     if (!index)
     {
         solr_transform_set_error(ct,
-                                YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
+                                 YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
         return -1;
     }
     /* for serverChoice we omit index+relation+structure */
@@ -138,15 +138,15 @@ static int rpn2solr_attr(solr_transform_t ct,
                 relation = ":";
             else if (!strcmp(relation, "le")) {
                 /* TODO Not support as such, but could perhaps be transformed into a range
-                relation = ":[ * to ";
-                close_range = "]"
+                   relation = ":[ * to ";
+                   close_range = "]"
                 */
             }
             else if (!strcmp(relation, "ge")) {
                 /* TODO Not support as such, but could perhaps be transformed into a range
-                relation = "[";
-                relation = ":[ * to ";
-                close_range = "]"
+                   relation = "[";
+                   relation = ":[ * to ";
+                   close_range = "]"
                 */
             }
             /* Missing mapping of not equal, phonetic, stem and relevance */
@@ -168,10 +168,10 @@ static int rpn2solr_attr(solr_transform_t ct,
     return 0;
 }
 
-/* Bug 2878: Currently only support left and right truncation. Specific check for this */
-static int checkForTruncation(int flag, Z_AttributeList *attributes)
+static Odr_int get_truncation(Z_AttributesPlusTerm *apt)
 {
     int j;
+    Z_AttributeList *attributes = apt->attributes;
     for (j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
@@ -179,33 +179,25 @@ static int checkForTruncation(int flag, Z_AttributeList *attributes)
         {
             if (ae->which == Z_AttributeValue_numeric)
             {
-                Odr_int truncation = *(ae->value.numeric);
-                /* This logic only works for Left, right and both. eg. 1,2,3 */
-            	if (truncation <= 3)
-                    return ((int) truncation & flag);
+                return *(ae->value.numeric);
             }
             else if (ae->which == Z_AttributeValue_complex) {
+                ;
                 //yaz_log(YLOG_DEBUG, "Z_Attribute_complex");
                 /* Complex: Shouldn't happen */
             }
         }
     }
-    /* No truncation or unsupported */
+    /* No truncation given */
     return 0;
-};
-
-static int checkForLeftTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(2, attributes);
 }
 
-static int checkForRightTruncation(Z_AttributeList *attributes) {
-	return checkForTruncation(1, attributes);
-};
+#define SOLR_SPECIAL "+-&|!(){}[]^\"~*?:\\"
 
 static int rpn2solr_simple(solr_transform_t ct,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data,
-                          Z_Operand *q, WRBUF w)
+                           void (*pr)(const char *buf, void *client_data),
+                           void *client_data,
+                           Z_Operand *q, WRBUF w)
 {
     int ret = 0;
     if (q->which != Z_Operand_APT)
@@ -219,11 +211,19 @@ static int rpn2solr_simple(solr_transform_t ct,
         Z_Term *term = apt->term;
         const char *sterm = 0;
         size_t lterm = 0;
+        Odr_int trunc = get_truncation(apt);
 
         wrbuf_rewind(w);
         ret = rpn2solr_attr(ct, apt->attributes, w);
 
-        switch(term->which)
+        if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
+            ;
+        else
+        {
+            solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
+            return -1;
+        }
+        switch (term->which)
         {
         case Z_Term_general:
             lterm = term->u.general->len;
@@ -241,7 +241,7 @@ static int rpn2solr_simple(solr_transform_t ct,
             solr_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
         }
 
-        if (term)
+        if (sterm)
         {
             size_t i;
             int must_quote = 0;
@@ -251,18 +251,32 @@ static int rpn2solr_simple(solr_transform_t ct,
                     must_quote = 1;
             if (must_quote)
                 wrbuf_puts(w, "\"");
-            /* Bug 2878: Check and add Truncation */
-			if (checkForLeftTruncation(apt->attributes))
-                wrbuf_puts(w, "*");
-			for (i = 0 ; i < lterm; i++) {
-                /* BUG 4415: Escape special characters in string terms */
-			    if (strchr("+-&|!(){}[]^\"~*?:\\", sterm[i])) {
-			       wrbuf_putc(w, '\\');
-			    }
-			    wrbuf_putc(w, sterm[i]);
-			}
-            /* Bug 2878: Check and add Truncation */
-			if (checkForRightTruncation(apt->attributes))
+            for (i = 0 ; i < lterm; i++)
+            {
+                if (sterm[i] == '\\' && i < lterm - 1)
+                {
+                    i++;
+                    if (strchr(SOLR_SPECIAL, sterm[i]))
+                        wrbuf_putc(w, '\\');
+                    wrbuf_putc(w, sterm[i]);                    
+                }
+                else if (sterm[i] == '?' && trunc == 104)
+                {
+                    wrbuf_putc(w, '*');
+                }
+                else if (sterm[i] == '#' && trunc == 104)
+                {
+                    wrbuf_putc(w, '?');
+                }
+                else if (strchr(SOLR_SPECIAL, sterm[i]))
+                {
+                    wrbuf_putc(w, '\\');
+                    wrbuf_putc(w, sterm[i]);
+                }
+                else
+                    wrbuf_putc(w, sterm[i]);
+            }
+            if (trunc == 1)
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
@@ -275,10 +289,10 @@ static int rpn2solr_simple(solr_transform_t ct,
 
 
 static int rpn2solr_structure(solr_transform_t ct,
-                             void (*pr)(const char *buf, void *client_data),
-                             void *client_data,
-                             Z_RPNStructure *q, int nested,
-                             WRBUF w)
+                              void (*pr)(const char *buf, void *client_data),
+                              void *client_data,
+                              Z_RPNStructure *q, int nested,
+                              WRBUF w)
 {
     if (q->which == Z_RPNStructure_simple)
         return rpn2solr_simple(ct, pr, client_data, q->u.simple, w);
@@ -316,9 +330,9 @@ static int rpn2solr_structure(solr_transform_t ct,
 }
 
 int solr_transform_rpn2solr_stream(solr_transform_t ct,
-                                 void (*pr)(const char *buf, void *client_data),
-                                 void *client_data,
-                                 Z_RPNQuery *q)
+                                   void (*pr)(const char *buf, void *client_data),
+                                   void *client_data,
+                                   Z_RPNQuery *q)
 {
     int r;
     WRBUF w = wrbuf_alloc();
@@ -330,8 +344,8 @@ int solr_transform_rpn2solr_stream(solr_transform_t ct,
 
 
 int solr_transform_rpn2solr_wrbuf(solr_transform_t ct,
-                                WRBUF w,
-                                Z_RPNQuery *q)
+                                  WRBUF w,
+                                  Z_RPNQuery *q)
 {
     return solr_transform_rpn2solr_stream(ct, wrbuf_vputs, w, q);
 }

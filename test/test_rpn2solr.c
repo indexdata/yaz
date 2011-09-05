@@ -53,10 +53,6 @@ static void tst1(void)
 
     YAZ_CHECK(compare(ct, "abc", "abc"));
     YAZ_CHECK(compare(ct, "\"a b c\"", "\"a b c\""));
-#if 0
-/* Invalid PQF, so this will never work */
-    YAZ_CHECK(compare(ct, "a b", "a b"));
-#endif
     YAZ_CHECK(compare(ct, "@not a b", "a AND NOT b"));
     YAZ_CHECK(compare(ct, "@and @or a b c", "(a OR b) AND c"));
     YAZ_CHECK(compare(ct, "@and a b", "a AND b"));
@@ -73,12 +69,27 @@ static void tst1(void)
 
     /* Truncation */
     YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
-    YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
-    YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
+    YAZ_CHECK(compare(ct, "@attr 5=2 water", 0));
+    YAZ_CHECK(compare(ct, "@attr 5=3 water", 0));
+    YAZ_CHECK(compare(ct, "@attr 5=100 water", "water"));
+    YAZ_CHECK(compare(ct, "@attr 5=101 water", 0));
+    YAZ_CHECK(compare(ct, "@attr 5=104 w#ter", "w?ter"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 w#t?r", "w?t*r"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 w#te?", "w?te*"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 w\\#te?", "w?te*")); /* PQF eats # */
+    YAZ_CHECK(compare(ct, "@attr 5=104 w\\\\#te?", "w#te*"));
 
-    /*
-    YAZ_CHECK(compare(ct, "@or @attr 1=1016 water @attr 7=1 @attr 1=4 0", "any:water rank:??");
-     */
+    /* reserved characters */
+    YAZ_CHECK(compare(ct, "@attr 5=104 \\\"\\\\\\\\",
+                      "\\\"" "\\\\"));
+    YAZ_CHECK(compare(ct, "@attr 5=104 \\\"\\\\\\\\\\\"",
+                      "\\\"" "\\\\" "\\\""));
+    YAZ_CHECK(compare(ct, "@attr 5=104 \\\"\\\\", "\\\"\\\\"));
+
+    YAZ_CHECK(compare(ct, "@attr 5=104 \\{:\\}", "\\{\\:\\}"));
+
+    YAZ_CHECK(compare(ct, "@attr 5=104 \\\"\\\\\\\\\\\"",
+                      "\\\"" "\\\\" "\\\""));
 
     solr_transform_close(ct);
 }
