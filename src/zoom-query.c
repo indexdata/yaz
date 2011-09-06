@@ -39,6 +39,7 @@ struct ZOOM_query_p {
     int query_type;
     char *query_string;
     WRBUF full_query;
+    WRBUF sru11_sort_spec;
 };
 
 static int generate(ZOOM_query s)
@@ -51,6 +52,16 @@ static int generate(ZOOM_query s)
         wrbuf_puts(s->full_query, s->query_string);
         odr_reset(s->odr_query);
 
+        if (s->sort_spec && s->sort_strategy == SORT_STRATEGY_SRU11)
+        {
+            int r;
+            wrbuf_rewind(s->sru11_sort_spec);
+
+            r = yaz_sort_spec_to_srw_sortkeys(s->sort_spec,
+                                              s->sru11_sort_spec);
+            if (r)
+                return r;
+        }
         switch (s->query_type)
         {
         case Z_Query_type_1: /* RPN */
@@ -97,6 +108,13 @@ static int generate(ZOOM_query s)
             break;
         }
     }
+    return 0;
+}
+
+const char *ZOOM_query_get_sru11(ZOOM_query s)
+{
+    if (wrbuf_len(s->sru11_sort_spec))
+        return wrbuf_cstr(s->sru11_sort_spec);
     return 0;
 }
 
@@ -192,6 +210,7 @@ ZOOM_API(ZOOM_query)
     s->query_string = 0;
     s->full_query = wrbuf_alloc();
     s->sort_strategy = SORT_STRATEGY_Z3950;
+    s->sru11_sort_spec = wrbuf_alloc();
     return s;
 }
 
@@ -208,6 +227,7 @@ ZOOM_API(void)
         odr_destroy(s->odr_sort_spec);
         xfree(s->query_string);
         wrbuf_destroy(s->full_query);
+        wrbuf_destroy(s->sru11_sort_spec);
         xfree(s);
     }
 }

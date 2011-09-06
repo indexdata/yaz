@@ -217,6 +217,13 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
+   
+    option_val = ZOOM_query_get_sru11(resultset->query);
+    if (option_val)
+    {
+        sr->u.request->sort_type = Z_SRW_sort_type_sort;
+        sr->u.request->sort.sortKeys = odr_strdup(c->odr_out, option_val);
+    }
     sr->u.request->startRecord = odr_intdup(c->odr_out, *start + 1);
     sr->u.request->maximumRecords = odr_intdup(
         c->odr_out, (resultset->step > 0 && resultset->step < *count) ? 

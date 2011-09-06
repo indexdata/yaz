@@ -107,6 +107,52 @@ static int type7(const char *arg, const char *expected_result)
     return ret;
 }
 
+static int srw_sortkeys(const char *arg, const char *expected_result)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    Z_SortKeySpecList *sort_spec = yaz_sort_spec(odr, arg);
+    int ret = 0;
+
+    if (!sort_spec)
+    {
+        yaz_log(YLOG_WARN, "yaz_sort_spec : parse error: %s", arg);
+    }
+    else
+    {
+        WRBUF w = wrbuf_alloc();
+        int r = yaz_sort_spec_to_srw_sortkeys(sort_spec, w);
+
+        if (!expected_result && r)
+            ret = 1;
+        else if (expected_result && r == 0)
+        {
+            if (strcmp(wrbuf_cstr(w), expected_result) == 0)
+                ret = 1;
+            else
+            {
+                yaz_log(YLOG_WARN, "sort: diff: %s", arg);
+                yaz_log(YLOG_WARN, " expected %s", expected_result);
+                yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(w));
+            }
+        }
+        else if (r)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected %s", expected_result);
+            yaz_log(YLOG_WARN, " got error %d", r);
+        }
+        else if (r == 0)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected error");
+            yaz_log(YLOG_WARN, " got %s", wrbuf_cstr(w));
+        }
+        wrbuf_destroy(w);
+    }
+    odr_destroy(odr);
+    return ret;
+}
+
 static void tst(void)
 {
     YAZ_CHECK(cql("title a",
@@ -115,6 +161,8 @@ static void tst(void)
                   " SORTBY title/ascending/ignoreCase"
                   " date/descending/respectCase"));
     YAZ_CHECK(cql("1=4,2=3 a", 0));
+    YAZ_CHECK(cql("date a=1900",
+                  " SORTBY date/ascending/ignoreCase/missingValue=1900"));
 
     YAZ_CHECK(type7("title a",
                   "@or q @attr 1=title @attr 7=1 0"));
@@ -123,6 +171,17 @@ static void tst(void)
                     " @attr 1=date @attr 7=2 1"));
     YAZ_CHECK(type7("1=4,2=3 a",
                   "@or q @attr 1=4 @attr 2=3 @attr 7=1 0"));
+    YAZ_CHECK(type7("date a=1900",
+                  "@or q @attr 1=date @attr 7=1 0"));
+
+    YAZ_CHECK(srw_sortkeys("title a",
+                           "title,,1,0,highValue"));
+    YAZ_CHECK(srw_sortkeys("title a date ds",
+                           "title,,1,0,highValue "
+                           "date,,0,1,highValue"));
+    YAZ_CHECK(srw_sortkeys("1=4,2=3 a", 0));
+    YAZ_CHECK(srw_sortkeys("date a=1900",
+                           "date,,1,0,1900"));
 }
 
 int main(int argc, char **argv)

@@ -82,6 +82,14 @@ YAZ_EXPORT int yaz_sort_spec_to_cql(Z_SortKeySpecList *sksl, WRBUF w);
 */
 YAZ_EXPORT int yaz_sort_spec_to_type7(Z_SortKeySpecList *sksl, WRBUF pqf);
 
+/* \brief converts Z39.50 SortKeySpecList to SRU 1.1 sort key
+   \param sksl SortKeySpecList
+   \param w resulting sortkey will be appended to this
+   \retval 0 successful
+   \retval -1 failure
+*/
+YAZ_EXPORT int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w);
+
 YAZ_END_CDECL
 
 #endif

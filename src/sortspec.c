@@ -233,6 +233,65 @@ int yaz_sort_spec_to_type7(Z_SortKeySpecList *sksl, WRBUF pqf)
     return 0;
 }
 
+int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
+{
+    int i;
+    for (i = 0; i < sksl->num_specs; i++)
+    {
+        Z_SortKeySpec *sks = sksl->specs[i];
+        Z_SortKey *sk;
+
+        if (sks->sortElement->which != Z_SortElement_generic)
+            return -1;
+
+        sk = sks->sortElement->u.generic;
+
+        if (i)
+            wrbuf_puts(w, " ");
+
+        if (sk->which == Z_SortKey_sortAttributes)
+            return -1;
+        else if (sk->which == Z_SortKey_sortField)
+        {
+            wrbuf_puts(w, sk->u.sortField);
+        }
+        wrbuf_puts(w, ",,"); /* path is absent */
+        switch (*sks->sortRelation)
+        {
+        case Z_SortKeySpec_ascending:
+            wrbuf_puts(w, "1");
+            break;
+        case Z_SortKeySpec_descending:
+            wrbuf_puts(w, "0");
+            break;
+        }
+        wrbuf_puts(w, ",");
+        switch (*sks->caseSensitivity)
+        {
+        case Z_SortKeySpec_caseSensitive:
+            wrbuf_puts(w, "1");
+            break;
+        case Z_SortKeySpec_caseInsensitive:
+            wrbuf_puts(w, "0");
+            break;
+        }
+        wrbuf_puts(w, ",");
+        switch (sks->which)
+        {
+        case Z_SortKeySpec_null:
+            wrbuf_puts(w, "highValue");
+            break;
+        case Z_SortKeySpec_abort:
+            wrbuf_puts(w, "abort");
+            break;
+        case Z_SortKeySpec_missingValueData:
+            wrbuf_write(w, (const char *) sks->u.missingValueData->buf,
+                        sks->u.missingValueData->len);
+        }
+    }
+    return 0;
+}
+
 
 /*
  * Local variables:
