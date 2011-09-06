@@ -153,6 +153,43 @@ static int srw_sortkeys(const char *arg, const char *expected_result)
     return ret;
 }
 
+static int check_srw_sortkeys_to_sort_spec(const char *arg,
+                                           const char *expected_result)
+{
+    WRBUF w = wrbuf_alloc();
+    int ret = 0;
+    int r = yaz_srw_sortkeys_to_sort_spec(arg, w);
+
+    if (!expected_result && r)
+        ret = 1;
+    else if (expected_result && r == 0)
+    {
+        if (strcmp(wrbuf_cstr(w), expected_result) == 0)
+            ret = 1;
+        else
+        {
+            yaz_log(YLOG_WARN, "sort: diff: %s", arg);
+            yaz_log(YLOG_WARN, " expected %s", expected_result);
+            yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(w));
+        }
+    }
+    else if (r)
+    {
+        yaz_log(YLOG_WARN, "sort: diff %s", arg);
+        yaz_log(YLOG_WARN, " expected %s", expected_result);
+        yaz_log(YLOG_WARN, " got error %d", r);
+    }
+    else if (r == 0)
+    {
+        yaz_log(YLOG_WARN, "sort: diff %s", arg);
+        yaz_log(YLOG_WARN, " expected error");
+        yaz_log(YLOG_WARN, " got %s", wrbuf_cstr(w));
+    }
+    wrbuf_destroy(w);
+    return ret;
+}
+
+
 static void tst(void)
 {
     YAZ_CHECK(cql("title a",
@@ -182,6 +219,9 @@ static void tst(void)
     YAZ_CHECK(srw_sortkeys("1=4,2=3 a", 0));
     YAZ_CHECK(srw_sortkeys("date a=1900",
                            "date,,1,0,1900"));
+    YAZ_CHECK(check_srw_sortkeys_to_sort_spec(
+                  "date,,1,0,1900",
+                  "date ai=1900"));
 }
 
 int main(int argc, char **argv)

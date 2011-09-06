@@ -292,6 +292,64 @@ int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
     return 0;
 }
 
+int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
+{
+    /* sru sortkey layout: path,schema,ascending,caseSensitive,missingValue */
+    /* see cql_sortby_to_sortkeys of YAZ. */
+    char **sortspec;
+    int num_sortspec = 0;
+    int i;
+    NMEM nmem = nmem_create();
+    
+    if (srw_sortkeys)
+        nmem_strsplit_blank(nmem, srw_sortkeys, &sortspec, &num_sortspec);
+    if (num_sortspec > 0)
+    {
+        for (i = 0; i < num_sortspec; i++)
+        {
+            char **arg;
+            int num_arg;
+            int ascending = 1;
+            int case_sensitive = 0;
+            const char *missing = 0;
+            nmem_strsplitx(nmem, ",", sortspec[i], &arg, &num_arg, 0);
+            
+            if (num_arg > 2 && arg[2][0])
+                ascending = atoi(arg[2]);
+            if (num_arg > 3 && arg[3][0])
+                case_sensitive = atoi(arg[3]);
+            if (num_arg > 4 && arg[4][0])
+                missing = arg[4];
+
+            if (i)
+                wrbuf_puts(w, " ");
+
+            wrbuf_puts(w, arg[0]); /* field */
+            wrbuf_puts(w, " ");
+
+            wrbuf_puts(w, ascending ? "a" : "d");
+            wrbuf_puts(w, case_sensitive ? "s" : "i");
+            if (missing)
+            {
+                if (!strcmp(missing, "omit"))
+                    ;
+                else if (!strcmp(missing, "abort"))
+                    wrbuf_puts(w, "!");
+                else if (!strcmp(missing, "lowValue"))
+                    ;
+                else if (!strcmp(missing, "highValue"))
+                    ;
+                else
+                {
+                    wrbuf_puts(w, "=");
+                    wrbuf_puts(w, missing);
+                }
+            }
+        }
+    }
+    nmem_destroy(nmem);
+    return 0;
+}
 
 /*
  * Local variables:
