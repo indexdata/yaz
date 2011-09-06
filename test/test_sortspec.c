@@ -1,0 +1,143 @@
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) 1995-2011 Index Data
+ * See the file LICENSE for details.
+ */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <string.h>
+#include <yaz/wrbuf.h>
+#include <yaz/sortspec.h>
+#include <yaz/log.h>
+#include <yaz/test.h>
+
+static int cql(const char *arg, const char *expected_result)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    Z_SortKeySpecList *sort_spec = yaz_sort_spec(odr, arg);
+    int ret = 0;
+
+    if (!sort_spec)
+    {
+        yaz_log(YLOG_WARN, "yaz_sort_spec : parse error: %s", arg);
+    }
+    else
+    {
+        WRBUF w = wrbuf_alloc();
+        int r = yaz_sort_spec_to_cql(sort_spec, w);
+
+        if (!expected_result && r)
+            ret = 1;
+        else if (expected_result && r == 0)
+        {
+            if (strcmp(wrbuf_cstr(w), expected_result) == 0)
+                ret = 1;
+            else
+            {
+                yaz_log(YLOG_WARN, "sort: diff: %s", arg);
+                yaz_log(YLOG_WARN, " expected %s", expected_result);
+                yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(w));
+            }
+        }
+        else if (r)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected %s", expected_result);
+            yaz_log(YLOG_WARN, " got error %d", r);
+        }
+        else if (r == 0)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected error");
+            yaz_log(YLOG_WARN, " got %s", wrbuf_cstr(w));
+        }
+        wrbuf_destroy(w);
+    }
+    odr_destroy(odr);
+    return ret;
+}
+
+static int type7(const char *arg, const char *expected_result)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    Z_SortKeySpecList *sort_spec = yaz_sort_spec(odr, arg);
+    int ret = 0;
+
+    if (!sort_spec)
+    {
+        yaz_log(YLOG_WARN, "yaz_sort_spec : parse error: %s", arg);
+    }
+    else
+    {
+        WRBUF w = wrbuf_alloc();
+        int r;
+
+        wrbuf_puts(w, "q");
+        r = yaz_sort_spec_to_type7(sort_spec, w);
+
+        if (!expected_result && r)
+            ret = 1;
+        else if (expected_result && r == 0)
+        {
+            if (strcmp(wrbuf_cstr(w), expected_result) == 0)
+                ret = 1;
+            else
+            {
+                yaz_log(YLOG_WARN, "sort: diff: %s", arg);
+                yaz_log(YLOG_WARN, " expected %s", expected_result);
+                yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(w));
+            }
+        }
+        else if (r)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected %s", expected_result);
+            yaz_log(YLOG_WARN, " got error %d", r);
+        }
+        else if (r == 0)
+        {
+            yaz_log(YLOG_WARN, "sort: diff %s", arg);
+            yaz_log(YLOG_WARN, " expected error");
+            yaz_log(YLOG_WARN, " got %s", wrbuf_cstr(w));
+        }
+        wrbuf_destroy(w);
+    }
+    odr_destroy(odr);
+    return ret;
+}
+
+static void tst(void)
+{
+    YAZ_CHECK(cql("title a",
+                  " SORTBY title/ascending/ignoreCase"));
+    YAZ_CHECK(cql("title a date ds",
+                  " SORTBY title/ascending/ignoreCase"
+                  " date/descending/respectCase"));
+    YAZ_CHECK(cql("1=4,2=3 a", 0));
+
+    YAZ_CHECK(type7("title a",
+                  "@or q @attr 1=title @attr 7=1 0"));
+    YAZ_CHECK(type7("title a date ds",
+                    "@or @or q @attr 1=title @attr 7=1 0"
+                    " @attr 1=date @attr 7=2 1"));
+    YAZ_CHECK(type7("1=4,2=3 a",
+                  "@or q @attr 1=4 @attr 2=3 @attr 7=1 0"));
+}
+
+int main(int argc, char **argv)
+{
+    YAZ_CHECK_INIT(argc, argv);
+    YAZ_CHECK_LOG();
+    tst();
+    YAZ_CHECK_TERM;
+}
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * c-file-style: "Stroustrup"
+ * indent-tabs-mode: nil
+ * End:
+ * vim: shiftwidth=4 tabstop=8 expandtab
+ */
+

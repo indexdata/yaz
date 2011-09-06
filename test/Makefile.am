@@ -1,15 +1,17 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) 1995-2011 Index Data
 
-check_PROGRAMS = test_cql2ccl \
- test_xmalloc test_iconv test_nmem test_matchstr test_wrbuf \
- test_odr test_ccl test_log test_mutex \
- test_soap1 test_soap2 test_solr test_odrstack test_log_thread \
- test_xmlquery test_pquery \
- test_comstack test_filepath test_record_conv test_retrieval test_tpath \
- test_timing test_query_charset test_oid test_icu test_match_glob \
- test_rpn2cql test_rpn2solr test_json test_xml_include test_file_glob \
- test_shared_ptr test_libstemmer
+check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
+ test_filepath test_file_glob \
+ test_iconv test_icu test_json \
+ test_libstemmer test_log test_log_thread \
+ test_match_glob test_matchstr test_mutex \
+ test_nmem test_odr test_odrstack test_oid  \
+ test_pquery test_query_charset \
+ test_record_conv test_rpn2cql test_rpn2solr test_retrieval \
+ test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec \
+ test_timing test_tpath test_wrbuf \
+ test_xmalloc test_xml_include test_xmlquery
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
@@ -72,6 +74,7 @@ test_mutex_SOURCES = test_mutex.c
 test_soap1_SOURCES = test_soap1.c
 test_soap2_SOURCES = test_soap2.c
 test_solr_SOURCES = test_solr.c
+test_sortspec_SOURCES = test_sortspec.c
 test_log_thread_SOURCES = test_log_thread.c
 test_xmlquery_SOURCES = test_xmlquery.c
 test_pquery_SOURCES = test_pquery.c

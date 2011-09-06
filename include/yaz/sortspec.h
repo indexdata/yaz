@@ -33,11 +33,54 @@
 #define SORTSPEC_H
 
 #include <yaz/yconfig.h>
-#include <yaz/proto.h>
+#include <yaz/wrbuf.h>
+#include <yaz/z-core.h>
 
 YAZ_BEGIN_CDECL
 
-YAZ_EXPORT Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg);
+/** \brief parse sort spec string
+    \param odr memory for result
+    \param arg sort spec string
+    \returns Z39.50 SortKeySpecList or NULL on error
+    
+    The sort spec list is of the form:
+    (field flags)+ 
+    where field is either a string or one or more attribute pairs
+    key=value (there must be no blanks in either field of flags).
+    flags is a character list:
+    dD>    : descending
+    aA<    : ascending   (default)
+    iI     : ignoreccase / case-insensitive (default)
+    sS     : respectcase / case-sensitive
+    !      : abort of key is omitted in result
+    =value : missing value
+    
+    Examples:
+
+      title a
+
+      1=4 ia 1=1003 sd
+*/
+YAZ_EXPORT Z_SortKeySpecList *yaz_sort_spec(ODR odr, const char *arg);
+
+/* \brief converts SortKeySpecList to CQL sortby string
+   \param sksl SortKeySpecList
+   \param w resulting CQL SORTBY string (of string to be appended)
+   \retval 0 successful
+   \retval -1 failure
+*/
+YAZ_EXPORT int yaz_sort_spec_to_cql(Z_SortKeySpecList *sksl, WRBUF w);
+
+/* \brief adds PQF type-7 sorting to existing PQF from SortKeySpecList
+   \param sksl SortKeySpecList
+   \param w original PQF (without the Type-7)
+   \retval 0 successful
+   \retval -1 failure
+
+   If successful, the pqf WRBUF holds the new PQF including the Type-7
+   part.
+*/
+YAZ_EXPORT int yaz_sort_spec_to_type7(Z_SortKeySpecList *sksl, WRBUF pqf);
 
 YAZ_END_CDECL
 
