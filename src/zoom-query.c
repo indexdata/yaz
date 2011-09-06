@@ -23,23 +23,91 @@
 #include <yaz/ccl.h>
 #include <yaz/sortspec.h>
 
+#define SORT_STRATEGY_Z3950 0
+#define SORT_STRATEGY_TYPE7 1
+#define SORT_STRATEGY_CQL 2
+#define SORT_STRATEGY_SRU11 3
+#define SORT_STRATEGY_EMBED 4
+
 struct ZOOM_query_p {
     Z_Query *z_query;
+    int sort_strategy;
     Z_SortKeySpecList *sort_spec;
     int refcount;
-    ODR odr;
+    ODR odr_sort_spec;
+    ODR odr_query;
+    int query_type;
     char *query_string;
+    WRBUF full_query;
 };
+
+static int generate(ZOOM_query s)
+{
+    if (s->query_string)
+    {
+        Z_External *ext;
+
+        wrbuf_rewind(s->full_query);
+        wrbuf_puts(s->full_query, s->query_string);
+        odr_reset(s->odr_query);
+
+        switch (s->query_type)
+        {
+        case Z_Query_type_1: /* RPN */
+            if (s->sort_spec &&
+                (s->sort_strategy == SORT_STRATEGY_TYPE7 ||
+                 s->sort_strategy == SORT_STRATEGY_EMBED))
+            {
+                int r = yaz_sort_spec_to_type7(s->sort_spec, s->full_query);
+                if (r)
+                    return r;
+            }
+            s->z_query = (Z_Query *) odr_malloc(s->odr_query,
+                                                sizeof(*s->z_query));
+            s->z_query->which = Z_Query_type_1;
+            s->z_query->u.type_1 = 
+                p_query_rpn(s->odr_query, wrbuf_cstr(s->full_query));
+            if (!s->z_query->u.type_1)
+            {
+                s->z_query = 0;
+                return -1;
+            }
+            break;
+        case Z_Query_type_104: /* CQL */
+            if (s->sort_spec &&
+                (s->sort_strategy == SORT_STRATEGY_CQL ||
+                 s->sort_strategy == SORT_STRATEGY_EMBED))
+            {
+                int r = yaz_sort_spec_to_cql(s->sort_spec, s->full_query);
+                if (r)
+                    return r;
+            }
+            ext = (Z_External *) odr_malloc(s->odr_query, sizeof(*ext));
+            ext->direct_reference = odr_oiddup(s->odr_query,
+                                               yaz_oid_userinfo_cql);
+            ext->indirect_reference = 0;
+            ext->descriptor = 0;
+            ext->which = Z_External_CQL;
+            ext->u.cql = odr_strdup(s->odr_query, wrbuf_cstr(s->full_query));
+            
+            s->z_query = (Z_Query *) odr_malloc(s->odr_query, sizeof(*s->z_query));
+            s->z_query->which = Z_Query_type_104;
+            s->z_query->u.type_104 =  ext;
+            
+            break;
+        }
+    }
+    return 0;
+}
 
 Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s)
 {
     return s->z_query;
 }
 
-
 Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s)
 {
-    return s->sort_spec;
+    return s->sort_strategy == SORT_STRATEGY_Z3950 ? s->sort_spec : 0;
 }
 
 static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
@@ -48,9 +116,9 @@ static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
     wrbuf_puts(wrbuf, buf);
 }
 
-char *ZOOM_query_get_query_string(ZOOM_query s)
+const char *ZOOM_query_get_query_string(ZOOM_query s)
 {
-    return s->query_string;
+    return wrbuf_cstr(s->full_query);
 }
 
 /*
@@ -119,9 +187,11 @@ ZOOM_API(ZOOM_query)
     s->refcount = 1;
     s->z_query = 0;
     s->sort_spec = 0;
-    s->odr = odr_createmem(ODR_ENCODE);
+    s->odr_query = odr_createmem(ODR_ENCODE);
+    s->odr_sort_spec = odr_createmem(ODR_ENCODE);
     s->query_string = 0;
-
+    s->full_query = wrbuf_alloc();
+    s->sort_strategy = SORT_STRATEGY_Z3950;
     return s;
 }
 
@@ -134,7 +204,10 @@ ZOOM_API(void)
     (s->refcount)--;
     if (s->refcount == 0)
     {
-        odr_destroy(s->odr);
+        odr_destroy(s->odr_query);
+        odr_destroy(s->odr_sort_spec);
+        xfree(s->query_string);
+        wrbuf_destroy(s->full_query);
         xfree(s);
     }
 }
@@ -145,40 +218,23 @@ ZOOM_API(void)
     s->refcount++;
 }
 
+
 ZOOM_API(int)
     ZOOM_query_prefix(ZOOM_query s, const char *str)
 {
-    s->query_string = odr_strdup(s->odr, str);
-    s->z_query = (Z_Query *) odr_malloc(s->odr, sizeof(*s->z_query));
-    s->z_query->which = Z_Query_type_1;
-    s->z_query->u.type_1 =  p_query_rpn(s->odr, str);
-    if (!s->z_query->u.type_1)
-    {
-        s->z_query = 0;
-        return -1;
-    }
-    return 0;
+    xfree(s->query_string);
+    s->query_string = xstrdup(str);
+    s->query_type = Z_Query_type_1;
+    return generate(s);
 }
 
 ZOOM_API(int)
     ZOOM_query_cql(ZOOM_query s, const char *str)
 {
-    Z_External *ext;
-
-    s->query_string = odr_strdup(s->odr, str);
-
-    ext = (Z_External *) odr_malloc(s->odr, sizeof(*ext));
-    ext->direct_reference = odr_oiddup(s->odr, yaz_oid_userinfo_cql);
-    ext->indirect_reference = 0;
-    ext->descriptor = 0;
-    ext->which = Z_External_CQL;
-    ext->u.cql = s->query_string;
-    
-    s->z_query = (Z_Query *) odr_malloc(s->odr, sizeof(*s->z_query));
-    s->z_query->which = Z_Query_type_104;
-    s->z_query->u.type_104 =  ext;
-
-    return 0;
+    xfree(s->query_string);
+    s->query_string = xstrdup(str);
+    s->query_type = Z_Query_type_104;
+    return generate(s);
 }
 
 /*
@@ -247,12 +303,41 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_query_sortby(ZOOM_query s, const char *criteria)
 {
-    s->sort_spec = yaz_sort_spec(s->odr, criteria);
-    if (!s->sort_spec)
-        return -1;
-    return 0;
+    return ZOOM_query_sortby2(s, "z3950", criteria);
 }
 
+ZOOM_API(int)
+ZOOM_query_sortby2(ZOOM_query s, const char *strategy, const char *criteria)
+{
+    if (!strcmp(strategy, "z3950"))
+    {
+        s->sort_strategy = SORT_STRATEGY_Z3950;
+    }
+    else if (!strcmp(strategy, "type7"))
+    {
+        s->sort_strategy = SORT_STRATEGY_TYPE7;
+    }
+    else if (!strcmp(strategy, "cql"))
+    {
+        s->sort_strategy = SORT_STRATEGY_CQL;
+    }
+    else if (!strcmp(strategy, "sru11"))
+    {
+        s->sort_strategy = SORT_STRATEGY_SRU11;
+    }
+    else if (!strcmp(strategy, "embed"))
+    {
+        s->sort_strategy = SORT_STRATEGY_EMBED;
+    }
+    else
+        return -1;
+
+    odr_reset(s->odr_sort_spec);
+    s->sort_spec = yaz_sort_spec(s->odr_sort_spec, criteria);
+    if (!s->sort_spec)
+        return -1;
+    return generate(s);
+}
 
 /*
  * Local variables:

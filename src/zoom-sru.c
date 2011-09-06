@@ -101,14 +101,14 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     {
         sr->u.scan_request->query_type = Z_SRW_query_type_cql;
         sr->u.scan_request->scanClause.cql =
-            ZOOM_query_get_query_string(scan->query);
+            odr_strdup(c->odr_out, ZOOM_query_get_query_string(scan->query));
     }
     else if (z_query->which == Z_Query_type_1
              || z_query->which == Z_Query_type_101)
     {
         sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
         sr->u.scan_request->scanClause.pqf =
-            ZOOM_query_get_query_string(scan->query);
+            odr_strdup(c->odr_out, ZOOM_query_get_query_string(scan->query));
     }
     else
     {
@@ -209,7 +209,8 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     {
         sr->u.request->query_type = Z_SRW_query_type_pqf;
         sr->u.request->query.pqf =
-            ZOOM_query_get_query_string(resultset->query);
+            odr_strdup(c->odr_out, 
+                       ZOOM_query_get_query_string(resultset->query));
     }
     else
     {

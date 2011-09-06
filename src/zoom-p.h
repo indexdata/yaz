@@ -263,7 +263,7 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 
 Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s);
 Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s);
-char *ZOOM_query_get_query_string(ZOOM_query s);
+const char *ZOOM_query_get_query_string(ZOOM_query s);
 
 int ZOOM_uri_to_code(const char *uri);
 

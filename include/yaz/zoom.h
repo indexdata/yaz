@@ -295,6 +295,8 @@ ZOOM_query_prefix(ZOOM_query s, const char *str);
 /* specify sort criteria for search */
 ZOOM_API(int)
 ZOOM_query_sortby(ZOOM_query s, const char *criteria);
+ZOOM_API(int)
+ZOOM_query_sortby2(ZOOM_query s, const char *strategy, const char *criteria);
 
 ZOOM_API(void)
 ZOOM_query_addref(ZOOM_query s);
