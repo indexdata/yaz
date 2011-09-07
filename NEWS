@@ -1,3 +1,20 @@
+-- 4.2.14 2011/09/07
+
+Fix problem in CQL sort node creation: un-initialized memory.
+
+New ZOOM utility ZOOM_query_sortby2. That takes a strategy parameter: one of
+"z3950", "type7", "cql", "sru11" or "embed". The "embed" chooses type-7 or
+CQL sortby depending on whether Type-1 or CQL is actually sent to the
+target.
+
+New sortspec utilities: yaz_srw_sortkeys_to_sort_spec,
+yaz_sort_spec_to_srw_sortkeys, yaz_sort_spec_to_type and 7yaz_sort_spec_to_cql.
+
+rpn2solr supports Z39.58 truncation (104). Thus, CCL truncation mode t=z
+will make it possible to use both single-character mask (#) and wildcard (?)
+in CCL . Throw diagnostic for left truncation because that is not supported
+by SOLR.
+
 -- 4.2.13 2011/09/01
 
 Fixes for cql2rpn, cql2ccl and ccl2rpn; mostly in the area of special
