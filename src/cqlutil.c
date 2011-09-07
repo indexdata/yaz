@@ -98,6 +98,7 @@ struct cql_node *cql_node_mk_sort(NMEM nmem, const char *index,
         p->u.sort.index = nmem_strdup(nmem, index);
     p->u.sort.modifiers = modifiers;
     p->u.sort.next = 0;
+    p->u.sort.search = 0;
     return p;
 }
 
