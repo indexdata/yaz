@@ -177,7 +177,7 @@ static int conv_xslt(yaz_record_conv_t p, const xmlNode *ptr)
         {
             wrbuf_printf(p->wr_error, "Element <xslt stylesheet=\"%s\"/>:"
                          " could not locate stylesheet '%s'",
-                         stylesheet, fullpath);
+                         stylesheet, stylesheet);
             if (p->path)
                 wrbuf_printf(p->wr_error, " with path '%s'", p->path);
                 
