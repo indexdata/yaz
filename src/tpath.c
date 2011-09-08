@@ -76,6 +76,8 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
 {
     if (path && *path == '\0')
         path = 0;
+    if (strchr("/\\", *fname))
+        path = 0;
     for (;;)
     {
         struct stat stat_buf;
