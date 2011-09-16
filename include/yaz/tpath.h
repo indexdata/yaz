@@ -64,10 +64,9 @@ YAZ_EXPORT size_t yaz_filepath_comp(const char **path_p, const char **comp);
     \param path the path (dir1:dir2,..) - ala Unix
     \param base can be added to relative paths (NULL for no append)
     \param fullpath the full path to filename (if successful)
+    \returns fullpath or NULL if file could not be found
 
-    Returns 0/NULL if no fname could be found in path; 
-    pointer to fullpath if fname could be found.
-    We assume fullpath is 1024 bytes in length!
+    Be sure to allocate at least 1024 bytes for fullpath
 */
 YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
                                       const char *base, char *fullpath);
@@ -78,9 +77,7 @@ YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
     \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix
     \param base can be added to relative paths (NULL for no append)
-
-    Returns 0/NULL if no fname could be found in path; 
-    FILE pointer if fname could be found.
+    \returns FILE pointer if fname could be found; NULL otherwise
 */
 YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *fname,
                            const char *mode, const char *base);
@@ -89,9 +86,7 @@ YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *fname,
     \param fname "short" filename (without path)
     \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix
-
-    Returns 0/NULL if no fname could be found in path; 
-    FILE pointer if fname could be found.
+    \returns FILE pointer if fname could be found; NULL otherwise
 */
 YAZ_EXPORT FILE *yaz_path_fopen(const char *path, const char *fname,
                                 const char *mode);
