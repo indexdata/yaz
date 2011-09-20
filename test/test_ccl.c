@@ -343,7 +343,15 @@ void tst1(int pass)
                             
     YAZ_CHECK(tst_ccl_query(bibset, "a@and",
                             "@attr 4=2 @attr 1=1016 a@and "));
-                            
+                           
+    YAZ_CHECK(tst_ccl_query(bibset, "}",
+                            "@attr 4=2 @attr 1=1016 } "));
+    
+    YAZ_CHECK(tst_ccl_query(bibset, "{",
+                            "@attr 4=2 @attr 1=1016 \"{\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "\"a b c\"",
+                            "@attr 4=1 @attr 1=1016 \"a b c\" "));
 
     ccl_qual_rm(&bibset);
 }
