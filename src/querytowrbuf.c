@@ -26,7 +26,7 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
     {
         if (term[0] == '@')
             wrbuf_putc(b, '\\');
-        for (i = 0; i<len; i++)
+        for (i = 0; i < len; i++)
         {
             if (term[i] == '\\')
                 wrbuf_putc(b, '\\');
@@ -36,7 +36,7 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
     else
     {
         wrbuf_putc(b, '"');
-        for (i = 0; i<len; i++)
+        for (i = 0; i < len; i++)
         {
             if (term[i] == '"' || term[i] == '\\')
                 wrbuf_putc(b, '\\');
@@ -71,7 +71,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
         wrbuf_printf(b, ODR_INT_PRINTF, *element->value.numeric);
         break;
     case Z_AttributeValue_complex:
-        for (i = 0; i<element->value.complex->num_list; i++)
+        for (i = 0; i < element->value.complex->num_list; i++)
         {
             if (i)
                 wrbuf_puts(b, ",");
@@ -111,7 +111,7 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
 {
     int num_attributes = zapt->attributes->num_attributes;
     int i;
-    for (i = 0; i<num_attributes; i++)
+    for (i = 0; i < num_attributes; i++)
         yaz_attribute_element_to_wrbuf(b,zapt->attributes->attributes[i]);
     
     switch (zapt->term->which)
@@ -253,7 +253,7 @@ void wrbuf_diags(WRBUF b, int num_diagnostics, Z_DiagRec **diags)
         wrbuf_puts(b,"(diag not in default format?)");
     else
     {
-        Z_DefaultDiagFormat *e=diags[0]->u.defaultFormat;
+        Z_DefaultDiagFormat *e = diags[0]->u.defaultFormat;
         if (e->condition)
             wrbuf_printf(b, ODR_INT_PRINTF " ",*e->condition);
         else
