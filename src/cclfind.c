@@ -385,10 +385,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
             if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
-                size_t len = strlen(p->u.t.term);
-                memcpy(p->u.t.term + len, cclp->look_token->ws_prefix_buf,
-                       cclp->look_token->ws_prefix_len);
-                p->u.t.term[len + cclp->look_token->ws_prefix_len] = '\0';
+                strxcat(p->u.term, cclp->look_token->ws_prefix_buf,
+                        cclp->look_token->ws_prefix_len);
             }
             for (j = 0; j < src_len; j++)
             {
