@@ -24,6 +24,8 @@ void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
             break;
     if (len > 0 && i == len)
     {
+        if (term[0] == '@')
+            wrbuf_putc(b, '\\');
         for (i = 0; i<len; i++)
         {
             if (term[i] == '\\')
