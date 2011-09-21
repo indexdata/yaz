@@ -14,6 +14,7 @@
 #include <string.h>
 #include <yaz/wrbuf.h>
 #include <yaz/log.h>
+#include <yaz/options.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h> 
@@ -724,8 +725,8 @@ void shell(ZOOM_connection *c, ZOOM_resultset *r,
 
 static void zoomsh(int argc, char **argv)
 {
-    ZOOM_options options = ZOOM_options_create();
-    int i, res;
+    ZOOM_options zoom_options = ZOOM_options_create();
+    int i, res = 1;
     ZOOM_connection z39_con[MAX_CON];
     ZOOM_resultset  z39_res[MAX_CON];
 
@@ -734,21 +735,31 @@ static void zoomsh(int argc, char **argv)
         z39_con[i] = 0;
         z39_res[i] = 0;
     }
-
-    for (i = 0; i<MAX_CON; i++)
-        z39_con[i] = 0;
-
-    res = 1;
-    for (i = 1; i<argc; i++)
+    while (res)
     {
-        const char *bp = argv[i];
-        res = cmd_parse(z39_con, z39_res, options, &bp);
-        if (res == 0)  /* received quit */
+        int mask;
+        char *arg = 0;
+        int option_ret = options("v:", argv, argc, &arg);
+        const char *bp = arg;
+        switch (option_ret)
+        {
+        case 0:
+            res = cmd_parse(z39_con, z39_res, zoom_options, &bp);
+            /* returns res == 0 on quit */
             break;
+        case YAZ_OPTIONS_EOF:
+            shell(z39_con, z39_res, zoom_options);
+            res = 0;
+            break;
+        case 'v':
+            mask = yaz_log_mask_str(arg);
+            yaz_log_init_level(mask);
+            break;
+        default:
+            fprintf(stderr, "zoomsh: [-v] [commands]\n");
+            res = 0;
+        }
     }
-    if (res)  /* do cmdline shell only if not quitting */
-        shell(z39_con, z39_res, options);
-    ZOOM_options_destroy(options);
 
     for (i = 0; i<MAX_CON; i++)
     {
@@ -759,24 +770,6 @@ static void zoomsh(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    const char *maskstr = 0;
-    if (argc > 2 && !strcmp(argv[1], "-v"))
-    {
-        maskstr = argv[2];
-        argv += 2;
-        argc -= 2;
-    }
-    else if (argc > 1 && !strncmp(argv[1], "-v", 2))
-    {
-        maskstr = argv[1]+2;
-        argv++;
-        argc--;
-    }
-    if (maskstr)
-    {
-        int mask = yaz_log_mask_str(maskstr);
-        yaz_log_init_level(mask);
-    }
     zoomsh(argc, argv);
     exit(0);
 }
