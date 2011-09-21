@@ -6,7 +6,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_iconv test_icu test_json \
  test_libstemmer test_log test_log_thread \
  test_match_glob test_matchstr test_mutex \
- test_nmem test_odr test_odrstack test_oid  \
+ test_nmem test_odr test_odrstack test_oid test_options \
  test_pquery test_query_charset \
  test_record_conv test_rpn2cql test_rpn2solr test_retrieval \
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec \
@@ -77,6 +77,7 @@ test_solr_SOURCES = test_solr.c
 test_sortspec_SOURCES = test_sortspec.c
 test_log_thread_SOURCES = test_log_thread.c
 test_xmlquery_SOURCES = test_xmlquery.c
+test_options_SOURCES = test_options.c
 test_pquery_SOURCES = test_pquery.c
 test_comstack_SOURCES = test_comstack.c
 test_filepath_SOURCES = test_filepath.c

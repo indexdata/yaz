@@ -55,6 +55,9 @@ YAZ_BEGIN_CDECL
     The first char is what is returned when met (single char option char).
     The second is zero ore more long option values (synonum for single char)
     If colon is appended, it means the option takes an argument.
+    If argv includes empty long option (--) that means "end of options" :
+    all argv data following that is considered non-options .. (0 returned
+    for each).
 */
 YAZ_EXPORT int options(const char *desc, char **argv, int argc, char **arg);
 

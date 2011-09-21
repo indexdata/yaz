@@ -16,6 +16,7 @@
 
 static int arg_no = 1;
 static size_t arg_off = 0;
+static int eof_options = 0;
 
 int options(const char *desc, char **argv, int argc, char **arg)
 {
@@ -33,15 +34,26 @@ int options(const char *desc, char **argv, int argc, char **arg)
             if (arg_no >= argc)
                 return YAZ_OPTIONS_EOF;
         }
-        if (argv[arg_no][0] != '-' || argv[arg_no][1] == '\0')
+        if (argv[arg_no][0] != '-' || argv[arg_no][1] == '\0' || eof_options)
         {
             *arg = argv[arg_no++];
             return 0;
         }
         arg_off++; /* skip - */
     }
+    /* we're in option mode */
     if (argv[arg_no][1] == '-')
     {   /* long opt */
+        if (argv[arg_no][2] == '\0') /* -- : end of options */
+        {
+            eof_options = 1;
+            arg_off = 0;
+            ++arg_no;
+            if (arg_no >= argc)
+                return YAZ_OPTIONS_EOF;
+            *arg = argv[arg_no++];
+            return 0;
+        }
         opt_buf = argv[arg_no]+2;
         arg_off = strlen(argv[arg_no]);
     }
