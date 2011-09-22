@@ -91,29 +91,29 @@ void nmem_strsplit_escape(NMEM nmem, const char *delim, const char *dstr,
                     cp++;
                 if (!*cp)
                     break;
-                cp0 = cp;
-                while (*cp && !strchr(delim, *cp))
-                {
-                    if (*cp == escape_char)
-                        cp++;
-                    cp++;
-                }
-                if (*darray)
-                    (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
-                i++;
             }
-            else
+
+            cp0 = cp;
+            while (*cp && !strchr(delim, *cp))
             {
-                cp0 = cp;
-                while (*cp && !strchr(delim, *cp))
-                {
-                    if (*cp == escape_char)
-                        cp++;
+                if (*cp == escape_char)
                     cp++;
+                cp++;
+            }
+            if (*darray)
+            {
+                char *dst, *src;
+                (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
+                dst = src = (*darray)[i];
+                for (; (*dst = *src) != '\0'; src++)                    
+                {
+                    if (*src != escape_char)
+                        dst++;
                 }
-                if (*darray)
-                    (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
-                i++;
+            }
+            i++;
+            if (!collapse)
+            {
                 if (!*cp)
                     break;
                 cp++;
