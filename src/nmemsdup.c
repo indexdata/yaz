@@ -105,11 +105,13 @@ void nmem_strsplit_escape(NMEM nmem, const char *delim, const char *dstr,
                 char *dst, *src;
                 (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
                 dst = src = (*darray)[i];
-                for (; (*dst = *src) != '\0'; src++)                    
+                while (*src != '\0')
                 {
-                    if (*src != escape_char)
-                        dst++;
+                    if (*src == escape_char && src[1])
+                        src++;
+                    *dst++ = *src++;
                 }
+                *dst = '\0';
             }
             i++;
             if (!collapse)
