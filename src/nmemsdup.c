@@ -74,6 +74,14 @@ void nmem_strsplit_escape(NMEM nmem, const char *delim, const char *dstr,
                           char ***darray, int *num, int collapse,
                           int escape_char)
 {
+    nmem_strsplit_escape2(nmem, delim, dstr, darray, num, collapse,
+                          escape_char, 1);
+}
+
+void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
+                           char ***darray, int *num, int collapse,
+                           int escape_char, int subst_escape)
+{
     *darray = 0;
     /* two passes over the input string.. */
     while (1)
@@ -102,16 +110,19 @@ void nmem_strsplit_escape(NMEM nmem, const char *delim, const char *dstr,
             }
             if (*darray)
             {
-                char *dst, *src;
                 (*darray)[i] = nmem_strdupn(nmem, cp0, cp - cp0);
-                dst = src = (*darray)[i];
-                while (*src != '\0')
+                if (subst_escape)
                 {
-                    if (*src == escape_char && src[1])
-                        src++;
-                    *dst++ = *src++;
+                    char *dst = (*darray)[i];
+                    const char *src = dst;
+                    while (*src != '\0')
+                    {
+                        if (*src == escape_char && src[1])
+                            src++;
+                        *dst++ = *src++;
+                    }
+                    *dst = '\0';
                 }
-                *dst = '\0';
             }
             i++;
             if (!collapse)
