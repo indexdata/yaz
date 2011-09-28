@@ -102,10 +102,18 @@ void tst_nmem_strsplit(void)
     YAZ_CHECK(num > 1 && !strcmp(array[1], "b,"));
     YAZ_CHECK(num > 2 && !strcmp(array[2], "cd"));
 
-    nmem_strsplit_escape(nmem, ",", "\\,a,b\\,\\,c\\\\\\|d", &array, &num, 0, '\\');
+    nmem_strsplit_escape2(nmem, ",", "\\,a,b\\,\\,c\\\\\\|d",
+                          &array, &num, 0, '\\', 1);
     YAZ_CHECK(num == 2);
     YAZ_CHECK(num > 0 && !strcmp(array[0], ",a"));
     YAZ_CHECK(num > 1 && !strcmp(array[1], "b,,c\\|d"));
+
+
+    nmem_strsplit_escape2(nmem, ",", "\\,a,b\\,\\,c\\\\\\|d",
+                          &array, &num, 0, '\\', 0);
+    YAZ_CHECK(num == 2);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "\\,a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\,\\,c\\\\\\|d"));
 
     nmem_destroy(nmem);
 }
