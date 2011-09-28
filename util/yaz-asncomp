@@ -397,12 +397,12 @@ proc asnSub {name t tname tag implicit tagtype} {
     if {$ignore} return
 
     puts $file(outc) {}
-    puts $file(outc) "int $inf(fprefix)$name (ODR o, $inf(vprefix)$name **p, int opt, const char *name)"
+    puts $file(outc) "int $inf(fprefix)${name}(ODR o, $inf(vprefix)$name **p, int opt, const char *name)"
     puts $file(outc) \{
     puts $file(outc) [lindex $l 0]
     puts $file(outc) \}
     set ok 1
-    set fdef "$inf(cprefix)int $inf(fprefix)$name (ODR o, $inf(vprefix)$name **p, int opt, const char *name);"
+    set fdef "$inf(cprefix)int $inf(fprefix)${name}(ODR o, $inf(vprefix)$name **p, int opt, const char *name);"
     switch -- $t {
         Simple {
             set decl "typedef [lindex $l 1] $inf(vprefix)$name;"
@@ -479,10 +479,10 @@ proc asnSimple {name tname tag implicit tagtype} {
         set l "\treturn [lindex $tname 0] (o, p, opt, name);" 
     } elseif {$implicit} {
         set l \
-  "\treturn odr_implicit_tag (o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" 
+  "\treturn odr_implicit_tag(o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" 
     } else {
         set l \
-  "\treturn odr_explicit_tag (o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" \
+  "\treturn odr_explicit_tag(o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" \
     }
     if {[info exists jj]} {
 	return [list $l $j $jj]
@@ -505,19 +505,19 @@ proc asnSequence {name tag implicit tagtype} {
     set level 0
     set nchoice 0
     if {![string length $tag]} {
-        lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), name))"
+        lappend l "\tif (!odr_sequence_begin(o, p, sizeof(**p), name))"
         lappend l "\t\treturn odr_missing(o, opt, name) && odr_ok (o);"
     } elseif {$implicit} {
-        lappend l "\tif (!odr_implicit_settag (o, $tagtype, $tag) ||"
+        lappend l "\tif (!odr_implicit_settag(o, $tagtype, $tag) ||"
         lappend l "\t\t!odr_sequence_begin (o, p, sizeof(**p), name))"
         lappend l "\t\treturn odr_missing(o, opt, name);"
     } else {
-        lappend l "\tif (!odr_constructed_begin (o, p, $tagtype, $tag, name))"
+        lappend l "\tif (!odr_constructed_begin(o, p, $tagtype, $tag, name))"
         lappend l "\t\treturn odr_missing(o, opt, name);"
         lappend l "\tif (o->direction == ODR_DECODE)"
-        lappend l "\t\t*p = ($inf(vprefix)$name *) odr_malloc (o, sizeof(**p));"
+        lappend l "\t\t*p = ($inf(vprefix)$name *) odr_malloc(o, sizeof(**p));"
 
-        lappend l "\tif (!odr_sequence_begin (o, p, sizeof(**p), 0))"
+        lappend l "\tif (!odr_sequence_begin(o, p, sizeof(**p), 0))"
         lappend l "\t\{"
 	lappend l "\t\tif (o->direction == ODR_DECODE)"
         lappend l "\t\t\t*p = 0;"
@@ -546,10 +546,10 @@ proc asnSequence {name tag implicit tagtype} {
             if {![string length $ltag]} {
                 lappend l "\t\t[lindex $tname 0](o, &(*p)->$p, $opt, \"$p\") &&"
             } elseif {$limplicit} {
-                lappend l "\t\todr_implicit_tag (o, [lindex $tname 0],"
+                lappend l "\t\todr_implicit_tag(o, [lindex $tname 0],"
                 lappend l "\t\t\t&(*p)->$p, $ltagtype, $ltag, $opt, \"$p\") &&"
             } else {
-                lappend l "\t\todr_explicit_tag (o, [lindex $tname 0],"
+                lappend l "\t\todr_explicit_tag(o, [lindex $tname 0],"
                 lappend l "\t\t\t&(*p)->$p, $ltagtype, $ltag, $opt, \"$p\") &&"
             }
             set dec "\t[lindex $tname 1] *$p;"
@@ -564,7 +564,7 @@ proc asnSequence {name tag implicit tagtype} {
                 if {!$limplicit} {
                     asnError explicittag
                 }
-                lappend l "\t\todr_implicit_settag (o, $ltagtype, $ltag) &&"
+                lappend l "\t\todr_implicit_settag(o, $ltagtype, $ltag) &&"
             }
             switch -- $u {
                 Simple {
@@ -610,7 +610,7 @@ proc asnSequence {name tag implicit tagtype} {
             set ob {}
             if {[string length $ltag]} {
                 if {$limplicit} {
-                    lappend l "\t\todr_implicit_settag (o, $ltagtype, $ltag) &&"
+                    lappend l "\t\todr_implicit_settag(o, $ltagtype, $ltag) &&"
                     if {$opt} {
                         asnWarning "optional handling missing in CHOICE in SEQUENCE"
 			asnWarning " set unionmap($inf(module),$name,$p) to {}"
@@ -621,7 +621,7 @@ proc asnSequence {name tag implicit tagtype} {
                     } else {
                         set la ""
                     }
-                    lappend l "\t\t${la}odr_constructed_begin (o, &(*p)->[lindex $uName 1], $ltagtype, $ltag, \"$p\") &&"
+                    lappend l "\t\t${la}odr_constructed_begin(o, &(*p)->[lindex $uName 1], $ltagtype, $ltag, \"$p\") &&"
                 }
             } else {
                 if {$opt} {
@@ -629,7 +629,7 @@ proc asnSequence {name tag implicit tagtype} {
                     set ob " || odr_ok(o))" 
                 }
             }
-            lappend l "\t\t${oa}odr_choice (o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], 0)${ob} &&"
+            lappend l "\t\t${oa}odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], 0)${ob} &&"
             if {[string length $ltag]} {
                 if {!$limplicit} {
                     if {$opt} {
@@ -637,7 +637,7 @@ proc asnSequence {name tag implicit tagtype} {
                     } else {
                         set lb ""
                     }
-                    lappend l "\t\todr_constructed_end (o)${lb} &&"
+                    lappend l "\t\todr_constructed_end(o)${lb} &&"
                 } 
             }
         } else {
@@ -645,12 +645,12 @@ proc asnSequence {name tag implicit tagtype} {
             asnSub $subName $t {} {} 0 {}
             set opt [asnOptional]
             if {![string length $ltag]} {
-                lappend l "\t\t$inf(fprefix)${subName} (o, &(*p)->$p, $opt, \"$p\") &&"
+                lappend l "\t\t$inf(fprefix)${subName}(o, &(*p)->$p, $opt, \"$p\") &&"
             } elseif {$limplicit} {
-                lappend l "\t\todr_implicit_tag (o, $inf(fprefix)${subName},"
+                lappend l "\t\todr_implicit_tag(o, $inf(fprefix)${subName},"
                 lappend l "\t\t\t&(*p)->$p, $ltagtype, $ltag, $opt, \"$p\") &&"
             } else {
-                lappend l "\t\todr_explicit_tag (o, $inf(fprefix)${subName},"
+                lappend l "\t\todr_explicit_tag(o, $inf(fprefix)${subName},"
                 lappend l "\t\t\t&(*p)->$p, $ltagtype, $ltag, $opt, \"$p\") &&"
             }
             set dec "\t$inf(vprefix)${subName} *$p;"
@@ -665,10 +665,10 @@ proc asnSequence {name tag implicit tagtype} {
     }
     lappend j "\}"
     if {[string length $tag] && !$implicit} {
-        lappend l "\t\todr_sequence_end (o) &&"
-        lappend l "\t\todr_constructed_end (o);"
+        lappend l "\t\todr_sequence_end(o) &&"
+        lappend l "\t\todr_constructed_end(o);"
     } else {
-        lappend l "\t\todr_sequence_end (o);"
+        lappend l "\t\todr_sequence_end(o);"
     }
     if {[string compare $type \}]} {
         asnError "Missing \} got $type '$val'"
@@ -705,11 +705,11 @@ proc asnOf {name tag implicit tagtype isset} {
     lappend j "struct $inf(vprefix)$name \{"
     lappend j "\tint [lindex $numName 0];"
 
-    lappend l "\tif (!odr_initmember (o, p, sizeof(**p)))"
+    lappend l "\tif (!odr_initmember(o, p, sizeof(**p)))"
     lappend l "\t\treturn odr_missing(o, opt, name);"
     if {[string length $tag]} {
         if {$implicit} {
-            lappend l "\todr_implicit_settag (o, $tagtype, $tag);"
+            lappend l "\todr_implicit_settag(o, $tagtype, $tag);"
         } else {
             asnWarning "Constructed SEQUENCE/SET OF not handled"
         }
@@ -718,13 +718,13 @@ proc asnOf {name tag implicit tagtype isset} {
     switch -- $t {
         Simple {
             asnEnum $name j
-            lappend l "\tif ($func (o, (Odr_fun) [lindex $tname 0], &(*p)->[lindex $numName 1],"
+            lappend l "\tif (${func}(o, (Odr_fun) [lindex $tname 0], &(*p)->[lindex $numName 1],"
             lappend l "\t\t&(*p)->[lindex $numName 0], name))"
             lappend j "\t[lindex $tname 1] **[lindex $numName 1];"
         }
         default {
             set subName [mapName ${name}_s]
-            lappend l "\tif ($func (o, (Odr_fun) $inf(fprefix)$subName, &(*p)->[lindex $numName 1],"
+            lappend l "\tif (${func}(o, (Odr_fun) $inf(fprefix)$subName, &(*p)->[lindex $numName 1],"
             lappend l "\t\t&(*p)->[lindex $numName 0], name))"
             lappend j "\t$inf(vprefix)$subName **[lindex $numName 1];"
             asnSub $subName $t {} {} 0 {}
