@@ -258,7 +258,7 @@ Z_AttributeList *get_attributeList(ODR o, int num_attr, Odr_int *attr_list,
         return attributes;
     }
     elements = (Z_AttributeElement**)
-        odr_malloc (o, num_attr * sizeof(*elements));
+        odr_malloc(o, num_attr * sizeof(*elements));
 
     attr_tmp = (Odr_int *)odr_malloc(o, num_attr * 2 * sizeof(*attr_tmp));
     memcpy(attr_tmp, attr_list, num_attr * 2 * sizeof(*attr_tmp));

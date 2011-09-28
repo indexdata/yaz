@@ -31,12 +31,7 @@ static char *err_msg_array[] = {
     "Right truncation not supported"
 };
 
-/*
- * ccl_err_msg: return name of CCL error
- * ccl_errno:   Error no.
- * return:      Name of error.
- */
-const char *ccl_err_msg (int ccl_errno)
+const char *ccl_err_msg(int ccl_errno)
 {
     return err_msg_array[ccl_errno];
 }

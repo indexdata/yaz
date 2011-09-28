@@ -788,7 +788,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
             if (r == 0)
             {
                 if (*out)
-                    yaz_log (log_requestdetail, "srw_sortKeys '%s'", out);
+                    yaz_log(log_requestdetail, "srw_sortKeys '%s'", out);
                 *sortkeys_p = odr_strdup(odr, out);
             }
             else
@@ -2616,7 +2616,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
     bsrr->extra_args = 0;
     bsrr->extra_response_data = 0;
 
-    yaz_log (log_requestdetail, "ResultSet '%s'", req->resultSetName);
+    yaz_log(log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
     {
         int i;

@@ -46,7 +46,7 @@ Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
     Z_AttributeElement ** elements;
     attributes->num_attributes = 1;
     elements = (Z_AttributeElement**)
-        odr_malloc (o, attributes->num_attributes * sizeof(*elements));
+        odr_malloc(o, attributes->num_attributes * sizeof(*elements));
     elements[0] = (Z_AttributeElement*) odr_malloc(o,sizeof(**elements));
     elements[0]->attributeType = odr_intdup(o, 1);
     elements[0]->attributeSet = odr_nullval();
@@ -177,9 +177,9 @@ void yaz_add_srw_diagnostic_uri(ODR o, Z_SRW_diagnostic **d,
                                 const char *message, const char *details)
 {
     Z_SRW_diagnostic *d_new;
-    d_new = (Z_SRW_diagnostic *) odr_malloc (o, (*num + 1)* sizeof(**d));
+    d_new = (Z_SRW_diagnostic *) odr_malloc(o, (*num + 1)* sizeof(**d));
     if (*num)
-        memcpy (d_new, *d, *num *sizeof(**d));
+        memcpy(d_new, *d, *num *sizeof(**d));
     *d = d_new;
 
     yaz_mk_srw_diagnostic(o, *d + *num, uri, message, details);

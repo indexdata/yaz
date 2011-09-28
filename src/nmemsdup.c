@@ -15,10 +15,10 @@
 #include <string.h>
 #include <yaz/nmem_xml.h>
 
-char *nmem_strdup (NMEM mem, const char *src)
+char *nmem_strdup(NMEM mem, const char *src)
 {
-    char *dst = (char *)nmem_malloc (mem, strlen(src)+1);
-    strcpy (dst, src);
+    char *dst = (char *) nmem_malloc(mem, strlen(src)+1);
+    strcpy(dst, src);
     return dst;
 }
 
@@ -30,9 +30,9 @@ char *nmem_strdup_null(NMEM mem, const char *src)
         return nmem_strdup(mem, src);
 }
 
-char *nmem_strdupn (NMEM mem, const char *src, size_t n)
+char *nmem_strdupn(NMEM mem, const char *src, size_t n)
 {
-    char *dst = (char *)nmem_malloc (mem, n+1);
+    char *dst = (char *) nmem_malloc(mem, n+1);
     memcpy (dst, src, n);
     dst[n] = '\0';
     return dst;
@@ -40,14 +40,14 @@ char *nmem_strdupn (NMEM mem, const char *src, size_t n)
 
 nmem_int_t *nmem_intdup(NMEM mem, nmem_int_t v)
 {
-    nmem_int_t *dst = (nmem_int_t*) nmem_malloc (mem, sizeof(*dst));
+    nmem_int_t *dst = (nmem_int_t*) nmem_malloc(mem, sizeof(*dst));
     *dst = v;
     return dst;
 }
 
 nmem_bool_t *nmem_booldup(NMEM mem, nmem_bool_t v)
 {
-    nmem_bool_t *dst = (nmem_bool_t*) nmem_malloc (mem, sizeof(*dst));
+    nmem_bool_t *dst = (nmem_bool_t*) nmem_malloc(mem, sizeof(*dst));
     *dst = v;
     return dst;
 }

@@ -24,20 +24,18 @@ static Z_External* z_ext_record2(ODR o, const char *buf)
     Z_External *p;
     int len = strlen(buf);
     
-    if (!(p = (Z_External *)odr_malloc(o, sizeof(*p)))) return 0;
-    
+    if (!(p = (Z_External *)odr_malloc(o, sizeof(*p))))
+        return 0;
     p->descriptor = 0;
     p->indirect_reference = 0;
     
     p->direct_reference = odr_oiddup(o, yaz_oid_negot_charset_id);
     
     p->which = Z_External_octet;
-    if (!(p->u.octet_aligned = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)))) {
+    if (!(p->u.octet_aligned = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct))))
         return 0;
-    }
-    if (!(p->u.octet_aligned->buf = (unsigned char *)odr_malloc(o, len))) {
+    if (!(p->u.octet_aligned->buf = (unsigned char *)odr_malloc(o, len)))
         return 0;
-    }
     p->u.octet_aligned->len = p->u.octet_aligned->size = len;
     memcpy(p->u.octet_aligned->buf, buf, len);
         
@@ -47,7 +45,6 @@ static Z_External* z_ext_record2(ODR o, const char *buf)
 static int get_form(const char *charset)
 {
     int form = -1;
-
 
     if (!yaz_matchstr(charset, "UCS-2"))
         form = 2;
@@ -61,7 +58,7 @@ static int get_form(const char *charset)
     return form;
 }
 
-static char *set_form (Odr_oid *encoding)
+static char *set_form(Odr_oid *encoding)
 {
     static char *charset = 0;
     if ( oid_oidlen(encoding) != 6)
@@ -79,7 +76,7 @@ static char *set_form (Odr_oid *encoding)
 
 static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
 {
-    int form = get_form (charset);
+    int form = get_form(charset);
     Z_OriginProposal_0 *p0 =
         (Z_OriginProposal_0*)odr_malloc(o, sizeof(*p0));
 
@@ -89,12 +86,12 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
     {   /* ISO 10646 (UNICODE) */
         char oidname[20];
 
-        Z_Iso10646 *is = (Z_Iso10646 *) odr_malloc (o, sizeof(*is));
+        Z_Iso10646 *is = (Z_Iso10646 *) odr_malloc(o, sizeof(*is));
         p0->which = Z_OriginProposal_0_iso10646;
         p0->u.iso10646 = is;
         is->collections = 0;
-        sprintf (oidname, "1.0.10646.1.0.%d", form);
-        is->encodingLevel = odr_getoidbystr (o, oidname);
+        sprintf(oidname, "1.0.10646.1.0.%d", form);
+        is->encodingLevel = odr_getoidbystr(o, oidname);
     }
     else
     {   /* private ones */
@@ -122,31 +119,27 @@ static Z_OriginProposal *z_get_OriginProposal(
     memset(p, 0, sizeof(*p));
 
     p->recordsInSelectedCharSets = (bool_t *)odr_malloc(o, sizeof(bool_t));
-    *p->recordsInSelectedCharSets = (selected) ? 1:0;
+    *p->recordsInSelectedCharSets = (selected) ? 1 : 0;
 
-    if (charsets && num_charsets) {             
-        
+    if (charsets && num_charsets)
+    {
         p->num_proposedCharSets = num_charsets;
         p->proposedCharSets = 
             (Z_OriginProposal_0**)
             odr_malloc(o, num_charsets*sizeof(Z_OriginProposal_0*));
 
-        for (i = 0; i<num_charsets; i++)
+        for (i = 0; i < num_charsets; i++)
             p->proposedCharSets[i] =
                 z_get_OriginProposal_0(o, charsets[i]);
     }
-    if (langs && num_langs) {
-        
+    if (langs && num_langs)
+    {
         p->num_proposedlanguages = num_langs;
-
         p->proposedlanguages = 
             (char **) odr_malloc(o, num_langs*sizeof(char *));
 
-        for (i = 0; i<num_langs; i++) {
-
+        for (i = 0; i < num_langs; i++)
             p->proposedlanguages[i] = (char *)langs[i];
-                        
-        }
     }
     return p;
 }
@@ -219,7 +212,6 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
     int form = get_form(charset);
 
     memset(p, 0, sizeof(*p));
-
     if (form > 0)
     {
         char oidname[20];
@@ -228,7 +220,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
         p->which = Z_TargetResponse_iso10646;
         p->u.iso10646 = is;
         is->collections = 0;
-        sprintf (oidname, "1.0.10646.1.0.%d", form);
+        sprintf(oidname, "1.0.10646.1.0.%d", form);
         is->encodingLevel = odr_getoidbystr (o, oidname);
     }
     else
@@ -246,9 +238,9 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
             z_ext_record2(o, charset);
     }
     p->recordsInSelectedCharSets = (bool_t *)odr_malloc(o, sizeof(bool_t));
-    *p->recordsInSelectedCharSets = (selected) ? 1:0;
+    *p->recordsInSelectedCharSets = (selected) ? 1 : 0;
     
-    p->selectedLanguage = lang ? (char *)odr_strdup(o, lang) : 0;
+    p->selectedLanguage = lang ? (char *) odr_strdup(o, lang) : 0;
     return p;
 }
 
@@ -279,11 +271,12 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
     if (!p)
         return 0;
         
-    for (i = 0; i < p->num_elements; i++) {
+    for (i = 0; i < p->num_elements; i++)
+    {
         Z_External *pext;
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
-            (pext = p->list[i]->information.externallyDefinedInfo)) {
-            
+            (pext = p->list[i]->information.externallyDefinedInfo))
+        {
             if (!oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
@@ -302,7 +295,8 @@ int yaz_del_charneg_record(Z_OtherInformation **p)
     if (!*p)
         return 0;
         
-    for (i = 0; i < (*p)->num_elements; i++) {
+    for (i = 0; i < (*p)->num_elements; i++)
+    {
         Z_External *pext;
         if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = (*p)->list[i]->information.externallyDefinedInfo))
@@ -315,7 +309,7 @@ int yaz_del_charneg_record(Z_OtherInformation **p)
                 else
                 {
                     --((*p)->num_elements);
-                    for(; i < (*p)->num_elements; i++)
+                    for (; i < (*p)->num_elements; i++)
                         (*p)->list[i] = (*p)->list[i+1];
                 }
                 return 1;
@@ -343,33 +337,32 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
             (*charsets) = (char **)
                 nmem_malloc(mem, pro->num_proposedCharSets * sizeof(char *));
             
-            for (i=0; i<pro->num_proposedCharSets; i++) 
+            for (i = 0; i < pro->num_proposedCharSets; i++) 
             {
                 (*charsets)[i] = 0;
                 
                 if (pro->proposedCharSets[i]->which ==
                     Z_OriginProposal_0_private &&
                     pro->proposedCharSets[i]->u.zprivate->which ==
-                    Z_PrivateCharacterSet_externallySpecified) {
-                    
+                    Z_PrivateCharacterSet_externallySpecified)
+                {
                     Z_External *pext =
                         pro->proposedCharSets[i]->u.zprivate->u.externallySpecified;
                     
-                    if (pext->which == Z_External_octet) {
-                        
+                    if (pext->which == Z_External_octet)
+                    {
                         (*charsets)[i] = (char *)
                             nmem_malloc(mem, (1+pext->u.octet_aligned->len) *
                                         sizeof(char));
                         
-                        memcpy ((*charsets)[i], pext->u.octet_aligned->buf,
-                                pext->u.octet_aligned->len);
+                        memcpy((*charsets)[i], pext->u.octet_aligned->buf,
+                               pext->u.octet_aligned->len);
                         (*charsets)[i][pext->u.octet_aligned->len] = 0;
-                        
                     }
                 }
                 else if (pro->proposedCharSets[i]->which ==
                          Z_OriginProposal_0_iso10646)
-                    (*charsets)[i] = set_form (
+                    (*charsets)[i] = set_form(
                         pro->proposedCharSets[i]->u.iso10646->encodingLevel);
             }
         }
@@ -386,14 +379,14 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
             (*langs) = (char **)
                 nmem_malloc(mem, pro->num_proposedlanguages * sizeof(char *));
             
-            for (i=0; i<pro->num_proposedlanguages; i++)
+            for (i = 0; i < pro->num_proposedlanguages; i++)
                 (*langs)[i] = nmem_strdup(mem, pro->proposedlanguages[i]);
         }
         else
             *num_langs = 0;
     }
     
-    if(pro->recordsInSelectedCharSets && selected)
+    if (pro->recordsInSelectedCharSets && selected)
         *selected = *pro->recordsInSelectedCharSets;
 }
 
@@ -404,25 +397,25 @@ void yaz_get_response_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
     Z_TargetResponse *res = p->u.response;
         
     if (charset && res->which == Z_TargetResponse_private &&
-        res->u.zprivate->which == Z_PrivateCharacterSet_externallySpecified) {
-
+        res->u.zprivate->which == Z_PrivateCharacterSet_externallySpecified)
+    {
         Z_External *pext = res->u.zprivate->u.externallySpecified;
         
-        if (pext->which == Z_External_octet) {
-            
+        if (pext->which == Z_External_octet)
+        {
             *charset = (char *)
                 nmem_malloc(mem, (1+pext->u.octet_aligned->len)*sizeof(char));
-            memcpy (*charset, pext->u.octet_aligned->buf,
-                    pext->u.octet_aligned->len);
+            memcpy(*charset, pext->u.octet_aligned->buf,
+                   pext->u.octet_aligned->len);
             (*charset)[pext->u.octet_aligned->len] = 0;
         }       
     }
     if (charset && res->which == Z_TargetResponse_iso10646)
-        *charset = set_form (res->u.iso10646->encodingLevel);
+        *charset = set_form(res->u.iso10646->encodingLevel);
     if (lang && res->selectedLanguage)
-        *lang = nmem_strdup (mem, res->selectedLanguage);
+        *lang = nmem_strdup(mem, res->selectedLanguage);
 
-    if(selected && res->recordsInSelectedCharSets)
+    if (selected && res->recordsInSelectedCharSets)
         *selected = *res->recordsInSelectedCharSets;
 }
 /*

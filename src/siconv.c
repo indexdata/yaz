@@ -98,7 +98,7 @@ static int prepare_decoders(yaz_iconv_t cd, const char *tocode)
 
 yaz_iconv_t yaz_iconv_open(const char *tocode, const char *fromcode)
 {
-    yaz_iconv_t cd = (yaz_iconv_t) xmalloc (sizeof(*cd));
+    yaz_iconv_t cd = (yaz_iconv_t) xmalloc(sizeof(*cd));
 
     cd->encoder.data = 0;
     cd->encoder.write_handle = 0;

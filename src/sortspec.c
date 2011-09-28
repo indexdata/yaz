@@ -23,7 +23,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
 {
     char sort_string_buf[64], sort_flags[64];
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
-        odr_malloc (out, sizeof(*sksl));
+        odr_malloc(out, sizeof(*sksl));
     int off;
     
     sksl->num_specs = 0;
@@ -41,7 +41,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
         arg += off;
         sksl->specs[sksl->num_specs++] = sks;
         sks->sortElement = (Z_SortElement *)
-            odr_malloc (out, sizeof(*sks->sortElement));
+            odr_malloc(out, sizeof(*sks->sortElement));
         sks->sortElement->which = Z_SortElement_generic;
         sks->sortElement->u.generic = sk;
         
@@ -60,7 +60,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
             while (i < 10 && sort_string && sort_string_sep)
             {
                 Z_AttributeElement *el = (Z_AttributeElement *)
-                    odr_malloc (out, sizeof(*el));
+                    odr_malloc(out, sizeof(*el));
                 sk->u.sortAttributes->list->attributes[i] = el;
                 el->attributeSet = 0;
                 el->attributeType = odr_intdup(out, atoi(sort_string));

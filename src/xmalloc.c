@@ -260,12 +260,12 @@ void *xrealloc_f(void *o, size_t size, const char *file, int line)
     }
 
     if (log_level)
-        yaz_log (log_level,
-                 "%s:%d: xrealloc(s=%ld) %p -> %p", file, line, (long) size, o, p);
+        yaz_log(log_level,
+                "%s:%d: xrealloc(s=%ld) %p -> %p", file, line, (long) size, o, p);
     if (!p)
     {
-        yaz_log (YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%ld bytes)",
-                 (long) size);
+        yaz_log(YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%ld bytes)",
+                (long) size);
         xmalloc_fatal();
     }
     return p;

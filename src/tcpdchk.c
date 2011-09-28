@@ -86,8 +86,8 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
             i = hosts_access(&request_info);
             if (!i)
             {
-                yaz_log (YLOG_DEBUG, "access denied from %s",
-                         host_name ? host_name : host_addr);
+                yaz_log(YLOG_DEBUG, "access denied from %s",
+                        host_name ? host_name : host_addr);
                 return 1;
             }
             yaz_log(YLOG_DEBUG, "access granted from %s",

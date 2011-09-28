@@ -499,7 +499,7 @@ Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
                                             const char *addinfo)
 {
     Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
-        odr_malloc (o, sizeof(*dr));
+        odr_malloc(o, sizeof(*dr));
     
     dr->diagnosticSetId = odr_oiddup(o, yaz_oid_diagset_bib_1);
     dr->condition = odr_intdup(o, error);
@@ -529,8 +529,8 @@ Z_DiagRecs *zget_DiagRecs(ODR o, int error, const char *addinfo)
 Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
                                         int error, const char *addinfo)
 {
-    Z_NamePlusRecord *rec = (Z_NamePlusRecord *) odr_malloc (o, sizeof(*rec));
-    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc (o, sizeof(*drec));
+    Z_NamePlusRecord *rec = (Z_NamePlusRecord *) odr_malloc(o, sizeof(*rec));
+    Z_DiagRec *drec = (Z_DiagRec *)odr_malloc(o, sizeof(*drec));
     
     if (dbname)
         rec->databaseName = odr_strdup(o, dbname);
@@ -576,8 +576,8 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
     x2->u.diag1 = d;
     d->num = 1;
-    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
-    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
+    d->elements = (Z_DiagnosticFormat_s**) odr_malloc(odr, sizeof *d->elements);
+    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc(odr, sizeof *d->elements[0]);
     e = d->elements[0];
 
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;
@@ -617,8 +617,8 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     d = (Z_DiagnosticFormat*) odr_malloc(odr, sizeof *d);
     x2->u.diag1 = d;
     d->num = 1;
-    d->elements = (Z_DiagnosticFormat_s**) odr_malloc (odr, sizeof *d->elements);
-    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc (odr, sizeof *d->elements[0]);
+    d->elements = (Z_DiagnosticFormat_s**) odr_malloc(odr, sizeof *d->elements);
+    d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc(odr, sizeof *d->elements[0]);
     e = d->elements[0];
 
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;

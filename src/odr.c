@@ -22,12 +22,12 @@
 #include <yaz/snprintf.h>
 #include "odr-priv.h"
 
-static int log_level=0;
-static int log_level_initialized=0;
+static int log_level = 0;
+static int log_level_initialized = 0;
 
 Odr_null *ODR_NULLVAL = (Odr_null *) "NULL";  /* the presence of a null value */
 
-Odr_null *odr_nullval (void)
+Odr_null *odr_nullval(void)
 {
     return ODR_NULLVAL;
 }
@@ -144,7 +144,7 @@ void odr_FILE_write(ODR o, void *handle, int type,
         fputs("\n", (FILE*) handle);
     }
 #endif
-    for (i = 0; i<len; i++)
+    for (i = 0; i < len; i++)
     {
         unsigned c = ((const unsigned char *) buf)[i];
         if (i == 2000 && len > 3100)
@@ -193,7 +193,7 @@ int odr_set_charset(ODR o, const char *to, const char *from)
     o->op->iconv_handle = 0;
     if (to && from)
     {
-        o->op->iconv_handle = yaz_iconv_open (to, from);
+        o->op->iconv_handle = yaz_iconv_open(to, from);
         if (o->op->iconv_handle == 0)
             return -1;
     }
@@ -206,13 +206,13 @@ ODR odr_createmem(int direction)
     ODR o;
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("odr");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("odr");
+        log_level_initialized = 1;
     }
 
-    if (!(o = (ODR)xmalloc(sizeof(*o))))
+    if (!(o = (ODR) xmalloc(sizeof(*o))))
         return 0;
-    o->op = (struct Odr_private *) xmalloc (sizeof(*o->op));
+    o->op = (struct Odr_private *) xmalloc(sizeof(*o->op));
     o->direction = direction;
     o->buf = 0;
     o->size = o->pos = o->top = 0;
@@ -223,7 +223,7 @@ ODR odr_createmem(int direction)
     o->op->iconv_handle = 0;
     odr_setprint(o, stderr);
     odr_reset(o);
-    yaz_log (log_level, "odr_createmem dir=%d o=%p", direction, o);
+    yaz_log(log_level, "odr_createmem dir=%d o=%p", direction, o);
     return o;
 }
 
@@ -231,8 +231,8 @@ void odr_reset(ODR o)
 {
     if (!log_level_initialized)
     {
-        log_level=yaz_log_module_level("odr");
-        log_level_initialized=1;
+        log_level = yaz_log_module_level("odr");
+        log_level_initialized = 1;
     }
 
     odr_seterror(o, ONONE, 0);
@@ -251,7 +251,7 @@ void odr_reset(ODR o)
     o->op->lenlen = 1;
     if (o->op->iconv_handle != 0)
         yaz_iconv(o->op->iconv_handle, 0, 0, 0, 0);
-    yaz_log (log_level, "odr_reset o=%p", o);
+    yaz_log(log_level, "odr_reset o=%p", o);
 }
     
 void odr_destroy(ODR o)
@@ -262,17 +262,16 @@ void odr_destroy(ODR o)
     if (o->op->stream_close)
         o->op->stream_close(o->op->print);
     if (o->op->iconv_handle != 0)
-        yaz_iconv_close (o->op->iconv_handle);
+        yaz_iconv_close(o->op->iconv_handle);
     xfree(o->op);
     xfree(o);
-    yaz_log (log_level, "odr_destroy o=%p", o);
+    yaz_log(log_level, "odr_destroy o=%p", o);
 }
 
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
     odr_seterror(o, ONONE, 0);
     o->bp = (unsigned char *) buf;
-
     o->buf = (unsigned char *) buf;
     o->op->can_grow = can_grow;
     o->top = o->pos = 0;

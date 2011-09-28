@@ -223,7 +223,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
             Odr_oct *oct;
             int r;
             if (!odr_implicit_tag(o, odr_octetstring, &oct,
-                                 ODR_CONTEXT, 1, 0, "octetaligned"))
+                                  ODR_CONTEXT, 1, 0, "octetaligned"))
                 return 0;
 
             /* Save our decoding ODR members */
@@ -308,8 +308,8 @@ Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len
             return 0;
         }
     }
-    else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs)) /* SUTRS is a single-ASN.1-type */
-    {
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
+    {    /* SUTRS is a single-ASN.1-type */
         Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
         
         thisext->which = Z_External_sutrs;

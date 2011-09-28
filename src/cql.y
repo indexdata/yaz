@@ -245,7 +245,7 @@ static void putb(YYSTYPE *lval, CQL_parser cp, int c)
     {
         char *nb = (char *)
 	    nmem_malloc(cp->nmem, (lval->size = lval->len * 2 + 20));
-        memcpy (nb, lval->buf, lval->len);
+        memcpy(nb, lval->buf, lval->len);
         lval->buf = nb;
     }
     if (c)
@@ -415,7 +415,7 @@ int cql_parser_stream(CQL_parser cp,
 
 CQL_parser cql_parser_create(void)
 {
-    CQL_parser cp = (CQL_parser) xmalloc (sizeof(*cp));
+    CQL_parser cp = (CQL_parser) xmalloc(sizeof(*cp));
 
     cp->top = 0;
     cp->getbyte = 0;
