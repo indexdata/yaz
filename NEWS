@@ -1,3 +1,8 @@
+-- 4.2.17 2011/09/28
+
+Fix function nmem_strsplit_escape2 which extends nmem_strsplit_escape
+with a flag whether to substitute escape sequences or not.
+
 -- 4.2.16 2011/09/22
 
 Fix nmem_strsplit_escape to substitute escape char properly.
