@@ -1699,14 +1699,14 @@ static void display_facet(Z_FacetField *facet)
         struct yaz_facet_attr attr_values;
         attr_values.errcode = 0;
         attr_values.limit = -1;
-        attr_values.useattr = 0;
+        attr_values.useattr = "NONE";
         attr_values.relation = "default";
 
         yaz_facet_attr_get_z_attributes(al, &attr_values);
         if (!attr_values.errcode)
         {
             int term_index;
-            printf("  %s (%d): \n", attr_values.useattr, /* attr_values.relation, attr_values.limit, */ facet->num_terms);
+            printf("  %s (%d): \n", attr_values.useattr, facet->num_terms);
             for (term_index = 0 ; term_index < facet->num_terms; term_index++)
             {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
