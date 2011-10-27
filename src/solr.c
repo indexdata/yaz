@@ -26,6 +26,16 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#endif
+
+static void extract_text_node(xmlNodePtr node, WRBUF wrbuf) {
+    xmlNodePtr child;
+    for (child = node->children; child ; child = child->next)
+    {
+        if (child->type == XML_TEXT_NODE)
+            wrbuf_puts(wrbuf, (const char *) child->content);
+    }
+}
 
 static int match_xml_node_attribute(
     xmlNodePtr ptr,
@@ -194,7 +204,62 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
     return 0;
 }
 
-#endif
+static yaz_solr_decode_suggestion_values(xmlNodePtr ptr, WRBUF wrbuf) {
+    xmlNodePtr node;
+    for (node = ptr; node; node= node->next) {
+        if (!strcmp(ptr->name,"lst")) {
+            xmlNodePtr child;
+            for (child = ptr->children; child; child= child->next) {
+                if (match(child, "str", "name", "word")) {
+                    wrbuf_puts(wrbuf, "<suggestion>");
+                    extract_text_node(child, wrbuf);
+                    wrbuf_puts(wrbuf, "</suggestion>\n");
+                }
+            }
+        }
+    }
+}
+
+static yaz_solr_decode_suggestion_lst(xmlNodePtr lstPtr, WRBUF wrbuf) {
+    xmlNodePtr node;
+    for (node = lstPtr; node; node= node->next) {
+        if (match_xml_node_attribute(node, "arr", "name", "suggestion")) {
+            yaz_solr_decode_suggestion_values(node->children, wrbuf);
+        }
+    }
+}
+
+static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
+{
+    xmlNodePtr node;
+    for (node = lstPtr; node; node= node->next)
+    {
+        if (strcmp((const char*) node->name, "lst")) {
+            const char *misspelled = yaz_element_attribute_value_get(node, "lst", "name");
+            if (misspelled) {
+                wrbuf_printf(wrbuf, "<misspelled term=\"%s\">", misspelled);
+                yaz_solr_decode_suggestion_lst(node->children, wrbuf);
+                wrbuf_puts(wrbuf, "</misspelled>\n");
+            }
+        }
+    }
+}
+
+static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr, Z_SRW_searchRetrieveResponse *sr)
+{
+    xmlNodePtr ptr;
+    WRBUF wrbuf = wrbuf_alloc();
+    wrbuf_puts(wrbuf, "");
+    for (ptr = spellcheckPtr->children; ptr; ptr = ptr->next)
+    {
+        if (match_xml_node_attribute(ptr, "lst", "name", "suggestions"))
+        {
+            yaz_solr_decode_misspelled(ptr->children, wrbuf);
+        }
+    }
+    sr->suggestions = odr_strdup(o, wrbuf_cstr(wrbuf));
+    return 0;
+}
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
@@ -235,9 +300,12 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                 /* TODO The check on hits is a work-around to avoid garbled facets on zero results from the SOLR server.
                  * The work-around works because the results is before the facets in the xml. */
                 if (rc_result == 0 &&  *sr->numberOfRecords > 0 &&
-                    match_xml_node_attribute(ptr, "lst", "name",
-                                             "facet_counts"))
+                    match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
                     rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
+                if (rc_result == 0 &&  *sr->numberOfRecords == 0 &&
+                    match_xml_node_attribute(ptr, "lst", "name", "spellcheck"))
+                    rc_facets =  yaz_solr_decode_spellcheck(o, ptr, sr);
+
             }
             ret = rc_result + rc_facets;
         }
