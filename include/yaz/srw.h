@@ -110,6 +110,7 @@ typedef struct {
 
     Z_SRW_extra_record **extra_records;  /* of size num_records */
     Z_FacetList *facetList;
+    char *suggestions;
 } Z_SRW_searchRetrieveResponse;
 
 typedef struct {
