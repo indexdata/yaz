@@ -204,13 +204,14 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
     return 0;
 }
 
-static yaz_solr_decode_suggestion_values(xmlNodePtr ptr, WRBUF wrbuf) {
+static void yaz_solr_decode_suggestion_values(xmlNodePtr ptr, WRBUF wrbuf)
+{
     xmlNodePtr node;
     for (node = ptr; node; node= node->next) {
-        if (!strcmp(ptr->name,"lst")) {
+        if (!strcmp((char*)ptr->name, "lst")) {
             xmlNodePtr child;
             for (child = ptr->children; child; child= child->next) {
-                if (match(child, "str", "name", "word")) {
+                if (match_xml_node_attribute(child, "str", "name", "word")) {
                     wrbuf_puts(wrbuf, "<suggestion>");
                     extract_text_node(child, wrbuf);
                     wrbuf_puts(wrbuf, "</suggestion>\n");
@@ -220,7 +221,8 @@ static yaz_solr_decode_suggestion_values(xmlNodePtr ptr, WRBUF wrbuf) {
     }
 }
 
-static yaz_solr_decode_suggestion_lst(xmlNodePtr lstPtr, WRBUF wrbuf) {
+static void yaz_solr_decode_suggestion_lst(xmlNodePtr lstPtr, WRBUF wrbuf)
+{
     xmlNodePtr node;
     for (node = lstPtr; node; node= node->next) {
         if (match_xml_node_attribute(node, "arr", "name", "suggestion")) {
