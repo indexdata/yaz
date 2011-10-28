@@ -359,6 +359,39 @@ static int cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
     return ret;
 }
 
+static int cmd_suggestions(ZOOM_connection *c, ZOOM_resultset *r, ZOOM_options options, const char **args)
+{
+    int i;
+    int ret = 0;
+
+    process_events(c);
+
+    for (i = 0; i < MAX_CON; i++)
+    {
+        int error;
+        const char *errmsg, *addinfo, *dset;
+        /* display errors if any */
+        if (!c[i])
+            continue;
+        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        {
+            printf("%s error: %s (%s:%d) %s\n",
+                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   dset, error, addinfo);
+            ret = 1;
+        }
+        else if (r[i])
+        {
+            const char *suggestions = ZOOM_resultset_option_get(r[i], "suggestions");
+            if (suggestions) {
+                printf("Suggestions: \n%s\n", suggestions);
+            }
+        }
+    }
+    return ret;
+}
+
+
 static int cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
                    ZOOM_options options,
                    const char **args)
@@ -629,6 +662,8 @@ static int cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     printf(" lang\n");
     printf(" timeout\n");
     printf(" facets\n");
+    printf(" extraArgs\n");
+    printf(" suggestions\n");
     return 0;
 }
 
@@ -722,6 +757,8 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
         ret = cmd_search(c, r, options, buf);
     else if (is_command("show", cmd_str, cmd_len))
         ret = cmd_show(c, r, options, buf);
+    else if (is_command("suggestions", cmd_str, cmd_len))
+        ret = cmd_suggestions(c, r, options, buf);
     else if (is_command("close", cmd_str, cmd_len))
         ret = cmd_close(c, r, options, buf);
     else if (is_command("help", cmd_str, cmd_len))
