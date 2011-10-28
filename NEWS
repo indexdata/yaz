@@ -1,3 +1,8 @@
+Add support for Solr spell-checking/suggestions through ZOOM.
+If a Solr target has been configured correctly for spelling-checking 
+and suggestions, these will now be returned on the ResultSet option 
+"suggestions". zoomsh has been extended to show this with the cmd suggestions.
+
 -- 4.2.17 2011/09/28
 
 Fix function nmem_strsplit_escape2 which extends nmem_strsplit_escape
