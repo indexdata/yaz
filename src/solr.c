@@ -204,13 +204,13 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
     return 0;
 }
 
-static void yaz_solr_decode_suggestion_values(xmlNodePtr ptr, WRBUF wrbuf)
+static void yaz_solr_decode_suggestion_values(xmlNodePtr listPptr, WRBUF wrbuf)
 {
     xmlNodePtr node;
-    for (node = ptr; node; node= node->next) {
-        if (!strcmp((char*)ptr->name, "lst")) {
+    for (node = listPptr; node; node= node->next) {
+        if (!strcmp((char*) node->name, "lst")) {
             xmlNodePtr child;
-            for (child = ptr->children; child; child= child->next) {
+            for (child = node->children; child; child= child->next) {
                 if (match_xml_node_attribute(child, "str", "name", "word")) {
                     wrbuf_puts(wrbuf, "<suggestion>");
                     extract_text_node(child, wrbuf);
@@ -236,10 +236,10 @@ static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
     xmlNodePtr node;
     for (node = lstPtr; node; node= node->next)
     {
-        if (strcmp((const char*) node->name, "lst")) {
+        if (!strcmp((const char*) node->name, "lst")) {
             const char *misspelled = yaz_element_attribute_value_get(node, "lst", "name");
             if (misspelled) {
-                wrbuf_printf(wrbuf, "<misspelled term=\"%s\">", misspelled);
+                wrbuf_printf(wrbuf, "<misspelled term=\"%s\">\n", misspelled);
                 yaz_solr_decode_suggestion_lst(node->children, wrbuf);
                 wrbuf_puts(wrbuf, "</misspelled>\n");
             }
