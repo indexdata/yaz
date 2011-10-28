@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 4),
 	pkg-config,
 	libxslt1-dev,
 	libgnutls-dev,
-	libreadline5-dev,
+	libreadline-dev|libreadline5-dev,
 	libwrap0-dev,
 	libicu36-dev | libicu-dev
 
