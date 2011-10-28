@@ -767,6 +767,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.response->nextRecordPosition = 0;
         sr->u.response->extra_records = 0;
         sr->u.response->facetList = 0;
+        sr->u.response->suggestions = 0;
         break;
     case Z_SRW_explain_request:
         sr->u.explain_request = (Z_SRW_explainRequest *)
