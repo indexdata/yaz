@@ -146,7 +146,6 @@ static char scan_position[64];
 static int scan_size = 20;
 static char cur_host[200];
 static Odr_int last_hit_count = 0;
-
 static int pretty_xml = 0;
 
 typedef enum {
@@ -4366,6 +4365,8 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
         printf("Number of hits: " ODR_INT_PRINTF "\n", *res->numberOfRecords);
     if (res->facetList)
         display_facets(res->facetList);
+    if (res->suggestions)
+        printf("Suggestions:\n%s\n", res->suggestions);
     for (i = 0; i<res->num_records; i++)
         handle_srw_record(res->records + i);
 }
