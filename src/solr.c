@@ -26,7 +26,6 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#endif
 
 static void extract_text_node(xmlNodePtr node, WRBUF wrbuf) {
     xmlNodePtr child;
@@ -262,6 +261,7 @@ static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr, Z_SRW_sea
     sr->suggestions = odr_strdup(o, wrbuf_cstr(wrbuf));
     return 0;
 }
+#endif
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
