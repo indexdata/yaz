@@ -306,6 +306,9 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         if (res->numberOfRecords) {
             resultset->size = *res->numberOfRecords;
         }
+        if (res->suggestions) {
+            ZOOM_resultset_option_set(resultset, "suggestions", res->suggestions);
+        }
         for (i = 0; i<res->num_records; i++)
         {
             int pos;
