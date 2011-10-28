@@ -1,3 +1,5 @@
+-- 4.2.18 2011/10/28
+
 Add support for Solr spell-checking/suggestions through ZOOM.
 If a Solr target has been configured correctly for spelling-checking 
 and suggestions, these will now be returned on the ResultSet option 
