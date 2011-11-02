@@ -70,8 +70,9 @@ void ZOOM_set_dset_error(ZOOM_connection c, int error,
     }
     if (addinfo && addinfo2)
     {
-        c->addinfo = (char*) xmalloc(strlen(addinfo) + strlen(addinfo2) + 2);
+        c->addinfo = (char*) xmalloc(strlen(addinfo) + strlen(addinfo2) + 3);
         strcpy(c->addinfo, addinfo);
+        strcat(c->addinfo, ": ");
         strcat(c->addinfo, addinfo2);
     }
     else if (addinfo)
