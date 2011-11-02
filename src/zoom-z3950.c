@@ -1766,7 +1766,7 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
         yaz_log(c->log_api, "%p handle_Z3950_apdu Close PDU", c);
         if (!ZOOM_test_reconnect(c))
         {
-            ZOOM_set_error(c, ZOOM_ERROR_CONNECTION_LOST, c->host_port);
+            ZOOM_set_dset_error(c, ZOOM_ERROR_CONNECTION_LOST, "ZOOM", c->host_port, apdu->u.close->diagnosticInformation);
             ZOOM_connection_close(c);
         }
         break;
