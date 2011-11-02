@@ -1,3 +1,12 @@
+-- IN PROGRESS
+
+Error handling for Z_APDU_close uses ZOOM_set_dset_error() to pass
+back-end's addinfo through into the ZOOM response addinfo.
+
+When ZOOM_set_dset_error() is passed an addinfo2 as well as addinfo,
+they are separated by a colon and a space rather than simply
+concatenated.
+
 -- 4.2.18 2011/10/28
 
 Add support for Solr spell-checking/suggestions through ZOOM.
