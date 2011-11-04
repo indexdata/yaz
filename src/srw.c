@@ -841,6 +841,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             res->num_diagnostics = 0;
             res->nextRecordPosition = 0;
             res->facetList = 0;
+            res->suggestions = 0;
 
             for (; ptr; ptr = ptr->next)
             {
