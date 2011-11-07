@@ -1,4 +1,4 @@
--- IN PROGRESS
+-- 4.2.19 2011/11/07
 
 Fix uninitialized variable in Solr spell support (could cause SEGV
 for SRU response decoding).
