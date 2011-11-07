@@ -1,5 +1,8 @@
 -- IN PROGRESS
 
+Fix uninitialized variable in Solr spell support (could cause SEGV
+for SRU response decoding).
+
 Error handling for Z_APDU_close uses ZOOM_set_dset_error() to pass
 back-end's addinfo through into the ZOOM response addinfo.
 
