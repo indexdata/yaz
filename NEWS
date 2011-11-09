@@ -1,3 +1,11 @@
+-- 4.2.20 2011/11/09
+
+New ZOOM connection setting: tproxy.  It's like proxy, but does not
+set Z39.50 proxy OID or change HTTP for proxy behavior. Can be used
+to set resolved address + port for a connection outside ZOOM itself.
+
+Fix atoi_n_check digit test. Thanks to Giannis Kosmas for spotting it.
+
 -- 4.2.19 2011/11/07
 
 Fix uninitialized variable in Solr spell support (could cause SEGV
