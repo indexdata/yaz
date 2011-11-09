@@ -267,6 +267,7 @@ ZOOM_API(ZOOM_connection)
 
     c->host_port = 0;
     c->proxy = 0;
+    c->tproxy = 0;
     
     c->charset = c->lang = 0;
 
@@ -388,6 +389,16 @@ ZOOM_API(void)
         yaz_log(c->log_details, "%p ZOOM_connection_connect proxy=%s", c, val);
         c->proxy = xstrdup(val);
     }
+
+    xfree(c->tproxy);
+    c->tproxy = 0;
+    val = ZOOM_options_get(c->options, "tproxy");
+    if (val && *val)
+    {
+        yaz_log(c->log_details, "%p ZOOM_connection_connect tproxy=%s", c, val);
+        c->tproxy = xstrdup(val);
+    }
+
 
     xfree(c->charset);
     c->charset = 0;
@@ -591,6 +602,7 @@ ZOOM_API(void)
     ZOOM_connection_remove_events(c);
     xfree(c->host_port);
     xfree(c->proxy);
+    xfree(c->tproxy);
     xfree(c->charset);
     xfree(c->lang);
     xfree(c->cookie_out);
@@ -1045,7 +1057,8 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 
     if (c->cs)
         cs_close(c->cs);
-    c->cs = cs_create_host_proxy(logical_url, 0, &add, c->proxy);
+    c->cs = cs_create_host_proxy(logical_url, 0, &add,
+                                 c->tproxy ? c->tproxy : c->proxy);
     
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
