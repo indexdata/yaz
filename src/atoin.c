@@ -33,7 +33,7 @@ int atoi_n_check(const char *buf, int size, int *val)
 {
     int i;
     for (i = 0; i < size; i++)
-        if (!yaz_isdigit(*buf))
+        if (!yaz_isdigit(buf[i]))
             return 0;
     *val = atoi_n(buf, size);
     return 1;
