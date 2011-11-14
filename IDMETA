@@ -1,2 +1,3 @@
 DEBIAN_DIST="wheezy squeeze lenny"
 UBUNTU_DIST="natty maverick lucid karmic"
+VERSION=4.2.20
