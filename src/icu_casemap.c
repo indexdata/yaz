@@ -73,7 +73,7 @@ int icu_casemap_casemap(struct icu_casemap * casemap,
                         UErrorCode *status,
                         const char *locale)
 {
-    if(!casemap)
+    if (!casemap)
         return 0;
     
     return icu_utf16_casemap(dest16, src16, locale,

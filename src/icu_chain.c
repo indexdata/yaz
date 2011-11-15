@@ -101,7 +101,7 @@ static struct icu_chain_step *icu_chain_insert_step(
                                                  0, status);
         break;
     case ICU_chain_step_type_tokenize:
-        step->u.tokenizer = icu_tokenizer_create((char *) chain->locale, 
+        step->u.tokenizer = icu_tokenizer_create(chain->locale, 
                                                  (char) rule[0], status);
         break;
     case ICU_chain_step_type_transliterate:
@@ -110,7 +110,8 @@ static struct icu_chain_step *icu_chain_insert_step(
                                                  (const char *) rule, status);
         break;
     case YAZ_chain_step_type_stemming:
-        step->u.stemmer = yaz_stemmer_create((char *) chain->locale, (const char *) rule, status);
+        step->u.stemmer = yaz_stemmer_create(chain->locale,
+                                             (const char *) rule, status);
         break;
     default:
         break;
@@ -201,7 +202,7 @@ struct icu_chain *icu_chain_create(const char *locale, int sort,
 
     chain->sort = sort;
 
-    chain->coll = ucol_open((const char *) chain->locale, status);
+    chain->coll = ucol_open(chain->locale, status);
 
     if (U_FAILURE(*status))
         return 0;
@@ -226,10 +227,6 @@ void icu_chain_destroy(struct icu_chain *chain)
     }
 }
 
-static struct icu_chain_step *icu_chain_insert_step(
-    struct icu_chain *chain, enum icu_chain_step_type type,
-    const uint8_t *rule, UErrorCode *status);
-
 struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node, 
                                        int sort,
                                        UErrorCode *status)
@@ -241,20 +238,17 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
    
     *status = U_ZERO_ERROR;
 
-    if (!xml_node ||xml_node->type != XML_ELEMENT_NODE)
-        return 0;
-    
+    if (xml_node && xml_node->type == XML_ELEMENT_NODE)
     {
         xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node, 
                                          (xmlChar *) "locale");
-        
         if (xml_locale)
         {
             chain = icu_chain_create((const char *) xml_locale, sort, status);
             xmlFree(xml_locale);
         }
-        
     }
+
     if (!chain)
         return 0;
 
