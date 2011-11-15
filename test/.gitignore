@@ -19,6 +19,7 @@ test_logthread
 test_xmlquery
 test_pquery
 test_xmalloc
+test_options
 test_filepath
 test_record_conv
 test_retrieval
