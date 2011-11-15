@@ -192,21 +192,17 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
 struct icu_chain *icu_chain_create(const char *locale, int sort,
                                    UErrorCode *status)
 {
-    struct icu_chain *chain 
-        = (struct icu_chain *) xmalloc(sizeof(*chain));
-
-    *status = U_ZERO_ERROR;
-
-    chain->iter = 0;
-    chain->locale = xstrdup(locale);
-
-    chain->sort = sort;
-
-    chain->coll = ucol_open(chain->locale, status);
+    struct icu_chain *chain;
+    UCollator *coll = ucol_open(locale, status);
 
     if (U_FAILURE(*status))
         return 0;
 
+    chain = (struct icu_chain *) xmalloc(sizeof(*chain));
+    chain->iter = 0;
+    chain->locale = xstrdup(locale);
+    chain->sort = sort;
+    chain->coll = coll;
     chain->csteps = 0;
 
     return chain;
