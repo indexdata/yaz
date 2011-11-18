@@ -842,7 +842,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
 static int bib1_srw_map[] = {
     1, 1,
     2, 2,
-    3, 11,
+    3, 48,
     4, 35,
     5, 12,
     6, 38,
