@@ -849,7 +849,6 @@ static int bib1_srw_map[] = {
     7, 30,
     8, 32,
     9, 29,
-    108, 10,  /* Malformed query : Syntax error */
     10, 10,
     11, 12,
     11, 23,
@@ -887,6 +886,7 @@ static int bib1_srw_map[] = {
     105, 3, 
     106, 66,
     107, 11,
+    108, 10,
     108, 13,
     108, 14,
     108, 25,
@@ -1014,6 +1014,7 @@ static int bib1_srw_map[] = {
  * the best back-translation of that SRW error.
  */
 static int srw_bib1_map[] = {
+    10, 108,
     66, 238,
     /* No doubt there are many more */
     0
