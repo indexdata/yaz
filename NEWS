@@ -1,3 +1,9 @@
+-- 4.2.21 2011/11/23
+
+Fix cql_sortby_to_sortkeys. Completely broken before.
+
+Make CCL's @truncation work again.
+
 -- 4.2.20 2011/11/09
 
 New ZOOM connection setting: tproxy.  It's like proxy, but does not
