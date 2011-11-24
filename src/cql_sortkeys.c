@@ -33,10 +33,11 @@ static void pr_n(void (*pr)(const char *buf, void *client_data),
         }
         else
         {
-            strcpy(tmp, buf);
+            memcpy(tmp, buf, left);
+            tmp[left] = '\0';
             left = 0;
         }
-        pr(client_data, tmp);
+        pr(tmp, client_data);
     }
 }
 

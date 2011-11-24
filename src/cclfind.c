@@ -212,6 +212,19 @@ void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
     n->value.str = xstrdup(value);
 }
 
+static size_t cmp_operator(const char **aliases, const char *input)
+{
+    for (; *aliases; aliases++)
+    {
+        const char *cp = *aliases;
+        size_t i;
+        for (i = 0; *cp && *cp == input[i]; i++, cp++)
+            ;
+        if (*cp == '\0')
+            return i;
+    }
+    return 0;
+}
 
 #define REGEX_CHARS "^[]{}()|.*+?!$"
 #define CCL_CHARS "#?\\"
@@ -390,6 +403,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             for (j = 0; j < src_len; j++)
             {
+                size_t op_size;
                 if (j > 0 && src_str[j-1] == '\\')
                 {
                     if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
@@ -406,8 +420,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 }
                 else if (src_str[j] == '"')
                     quote_mode = !quote_mode;
-                else if (!quote_mode && src_str[j] == '?')
+                else if (!quote_mode &&
+                         (op_size = cmp_operator(truncation_aliases,
+                                                 src_str + j))
+                    )
                 {
+                    j += (op_size - 1);  /* j++ in for loop */
                     if (regex_trunc)
                     {
                         strcat(p->u.t.term, ".*");
