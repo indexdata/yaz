@@ -6,6 +6,7 @@ autoconf=autoconf
 libtoolize=libtoolize
 autoheader=autoheader
 
+test -d autom4te.cache && rm -r autom4te.cache
 test -d config || mkdir config
 if [ -d .git ]; then
     git submodule init
