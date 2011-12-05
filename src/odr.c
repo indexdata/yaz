@@ -175,6 +175,7 @@ void odr_setprint(ODR o, FILE *file)
     odr_set_stream(o, file, odr_FILE_write, odr_FILE_close);
 }
 
+
 void odr_set_stream(ODR o, void *handle,
                     void (*stream_write)(ODR o, 
                                          void *handle, int type,

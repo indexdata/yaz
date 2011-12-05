@@ -236,6 +236,12 @@ void ZOOM_connection_remove_tasks(ZOOM_connection c)
         ZOOM_connection_remove_task(c);
 }
 
+static void odr_wrbuf_write(ODR o, void *handle, int type,
+                            const char *buf, int len)
+{
+    WRBUF w = (WRBUF) handle;
+    wrbuf_write(w, buf, len);
+}
 
 ZOOM_API(ZOOM_connection)
     ZOOM_connection_create(ZOOM_options options)
@@ -286,6 +292,7 @@ ZOOM_API(ZOOM_connection)
     c->odr_in = odr_createmem(ODR_DECODE);
     c->odr_out = odr_createmem(ODR_ENCODE);
     c->odr_print = 0;
+    c->odr_save = 0;
 
     c->async = 0;
     c->support_named_resultsets = 0;
@@ -299,6 +306,19 @@ ZOOM_API(ZOOM_connection)
     return c;
 }
 
+ZOOM_API(void) ZOOM_connection_save_apdu_wrbuf(ZOOM_connection c, WRBUF w)
+{
+    if (c->odr_save)
+    {
+        odr_destroy(c->odr_save);
+        c->odr_save = 0;
+    }
+    if (w)
+    {
+        c->odr_save = odr_createmem(ODR_PRINT);
+        odr_set_stream(c->odr_save, w, odr_wrbuf_write, 0);
+    }
+}
 
 /* set database names. Take local databases (if set); otherwise
    take databases given in ZURL (if set); otherwise use Default */
@@ -592,6 +612,8 @@ ZOOM_API(void)
     xfree(c->diagset);
     odr_destroy(c->odr_in);
     odr_destroy(c->odr_out);
+    if (c->odr_save)
+        odr_destroy(c->odr_save);
     if (c->odr_print)
     {
         odr_setprint(c->odr_print, 0); /* prevent destroy from fclose'ing */
@@ -1528,6 +1550,8 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri,
         return zoom_complete;
     if (c->odr_print)
         z_GDU(c->odr_print, &gdu, 0, 0);
+    if (c->odr_save)
+        z_GDU(c->odr_save, &gdu, 0, 0);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
 
     odr_reset(c->odr_out);
@@ -1686,6 +1710,8 @@ static int do_read(ZOOM_connection c)
         {
             if (c->odr_print)
                 z_GDU(c->odr_print, &gdu, 0, 0);
+            if (c->odr_save)
+                z_GDU(c->odr_save, &gdu, 0, 0);
             if (gdu->which == Z_GDU_Z3950)
                 ZOOM_handle_Z3950_apdu(c, gdu->u.z3950);
             else if (gdu->which == Z_GDU_HTTP_Response)

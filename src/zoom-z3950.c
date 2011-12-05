@@ -539,6 +539,8 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
     }
     if (c->odr_print)
         z_APDU(c->odr_print, &a, 0, 0);
+    if (c->odr_save)
+        z_APDU(c->odr_save, &a, 0, 0);
     yaz_log(c->log_details, "%p encoding_APDU encoding OK", c);
     return 0;
 }

@@ -61,6 +61,8 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
         return zoom_complete;
     if (c->odr_print)
         z_GDU(c->odr_print, &gdu, 0, 0);
+    if (c->odr_save)
+        z_GDU(c->odr_save, &gdu, 0, 0);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
         
     event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
