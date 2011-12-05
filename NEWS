@@ -1,3 +1,8 @@
+-- 4.2.22 2011/12/05
+
+Add ZOOM_connection_save_apdu_wrbuf. This function may be used to save
+APDUs for a connection to a WRBUF.
+
 -- 4.2.21 2011/11/23
 
 Fix cql_sortby_to_sortkeys. Completely broken before.
