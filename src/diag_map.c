@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file srwutil.c
+ * \file diag_map.c
  * \brief Implements SRU/Z39.50 diagnostic mappings
  */
 #if HAVE_CONFIG_H
