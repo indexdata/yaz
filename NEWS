@@ -3,18 +3,18 @@ Allow =val to be omitted for yaz_uri_to_array. Also, multiple &'s in
 sequence is treated as one. For example, &&a=b&&&c& is identical to
 a=b&c= .
 
--- 4.2.22 2011/12/05
+--- 4.2.22 2011/12/05
 
 Add ZOOM_connection_save_apdu_wrbuf. This function may be used to save
 APDUs for a connection to a WRBUF.
 
--- 4.2.21 2011/11/23
+--- 4.2.21 2011/11/23
 
 Fix cql_sortby_to_sortkeys. Completely broken before.
 
 Make CCL's @truncation work again.
 
--- 4.2.20 2011/11/09
+--- 4.2.20 2011/11/09
 
 New ZOOM connection setting: tproxy.  It's like proxy, but does not
 set Z39.50 proxy OID or change HTTP for proxy behavior. Can be used
@@ -22,7 +22,7 @@ to set resolved address + port for a connection outside ZOOM itself.
 
 Fix atoi_n_check digit test. Thanks to Giannis Kosmas for spotting it.
 
--- 4.2.19 2011/11/07
+--- 4.2.19 2011/11/07
 
 Fix uninitialized variable in Solr spell support (could cause SEGV
 for SRU response decoding).
@@ -34,19 +34,19 @@ When ZOOM_set_dset_error() is passed an addinfo2 as well as addinfo,
 they are separated by a colon and a space rather than simply
 concatenated.
 
--- 4.2.18 2011/10/28
+--- 4.2.18 2011/10/28
 
 Add support for Solr spell-checking/suggestions through ZOOM.
 If a Solr target has been configured correctly for spelling-checking 
 and suggestions, these will now be returned on the ResultSet option 
 "suggestions". zoomsh has been extended to show this with the cmd suggestions.
 
--- 4.2.17 2011/09/28
+--- 4.2.17 2011/09/28
 
 Fix function nmem_strsplit_escape2 which extends nmem_strsplit_escape
 with a flag whether to substitute escape sequences or not.
 
--- 4.2.16 2011/09/22
+--- 4.2.16 2011/09/22
 
 Fix nmem_strsplit_escape to substitute escape char properly.
 
@@ -56,7 +56,7 @@ return process exit code to indicate success/failure.
 YAZ options utility supports special option -- which makes all it treat
 all following arguments as non-options.
 
--- 4.2.15 2011/09/16
+--- 4.2.15 2011/09/16
 
 Fix yaz_file_path_resolve/yaz_path_fopen/yaz_fopen so that path is not
 searched if absolute filename is given.
@@ -64,7 +64,7 @@ searched if absolute filename is given.
 Fix conv_xslt() error-reporting when stylesheet is not found.
 (The value of fullpath is meaningless in this situation.)
 
--- 4.2.14 2011/09/07
+--- 4.2.14 2011/09/07
 
 Fix problem in CQL sort node creation: un-initialized memory.
 
@@ -81,7 +81,7 @@ will make it possible to use both single-character mask (#) and wildcard (?)
 in CCL . Throw diagnostic for left truncation because that is not supported
 by SOLR.
 
--- 4.2.13 2011/09/01
+--- 4.2.13 2011/09/01
 
 Fixes for cql2rpn, cql2ccl and ccl2rpn; mostly in the area of special
 cases using escapes (\-sequences) and masking.
@@ -96,12 +96,12 @@ ICU check fix. Don't include library -lCrun on Solaris, unless present.
 ICU check fix: Use --cppflags-searchpath to determine ICU include files;
 not --cppflags (which seeems like an error in icu-config).
 
--- 4.2.12 2011/08/27 RPM package only
+--- 4.2.12 2011/08/27 RPM package only
 
 cql2ccl: fix conversion of terms: operator characters were not
 quoted/escaped.
 
--- 4.2.11 2011/08/25 RPM package only
+--- 4.2.11 2011/08/25 RPM package only
 
 ccl2rpn: Conversion to regexp-1 terms (trunc=102). For mode t=x, the
 CCL parser will map both # and ? to their regular expression
@@ -113,7 +113,7 @@ of reserved CQL characters.
 cql2ccl: deal with both * and ? in conversion. Also leave escaped ones as
 is, so that they are passed through.
 
--- 4.2.10 2011/08/24
+--- 4.2.10 2011/08/24
 
 ZOOM SRU mode: more aggressive re-connect.
 
