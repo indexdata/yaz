@@ -138,31 +138,37 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
 
     for (no = 0; *path; no++)
     {
-        const char *p1 = strchr(path, '=');
-        size_t i = 0;
-        char *ret;
-        if (!p1)
+        while (*path == '&')
+            path++;
+        if (!*path)
             break;
 
-        (*name)[no] = (char *) odr_malloc(o, (p1-path)+1);
-        memcpy((*name)[no], path, p1-path);
-        (*name)[no][p1-path] = '\0';
+        for (cp = path; *cp && *cp != '=' && *cp != '&'; cp++)
+            ;
 
-        path = p1 + 1;
-        p1 = strchr(path, '&');
-        if (!p1)
-            p1 = strlen(path) + path;
-        (*val)[no] = ret = (char *) odr_malloc(o, p1 - path + 1);
-        while (*path && *path != '&')
+        (*name)[no] = (char *) odr_malloc(o, (cp-path)+1);
+        memcpy((*name)[no], path, cp-path);
+        (*name)[no][cp-path] = '\0';
+
+        path = cp;
+        if (*path == '=')
         {
-            size_t l = 3;
-            ret[i++] = decode_uri_char(path, &l);
-            path += l;
-        }
-        ret[i] = '\0';
-
-        if (*path)
+            size_t i = 0;
+            char *ret;
             path++;
+            for (cp = path; *cp && *cp != '&'; cp++)
+                ;
+            (*val)[no] = ret = (char *) odr_malloc(o, cp - path + 1);
+            while (*path && *path != '&')
+            {
+                size_t l = 3;
+                ret[i++] = decode_uri_char(path, &l);
+                path += l;
+            }
+            ret[i] = '\0';
+        }
+        else
+            (*val)[no] = odr_strdup(o, "");
     }
     (*name)[no] = 0;
     (*val)[no] = 0;
