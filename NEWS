@@ -1,3 +1,8 @@
+
+Allow =val to be omitted for yaz_uri_to_array. Also, multiple &'s in
+sequence is treated as one. For example, &&a=b&&&c& is identical to
+a=b&c= .
+
 -- 4.2.22 2011/12/05
 
 Add ZOOM_connection_save_apdu_wrbuf. This function may be used to save
