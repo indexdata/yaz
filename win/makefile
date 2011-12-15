@@ -864,9 +864,9 @@ $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)
 	$(TCL) csvtosru_update.tcl $(SRCDIR)
 
-$(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/configure.ac
+$(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	@cd $(SRCDIR)
-	$(TCL) mk_version.tcl $(ROOTDIR)/configure.ac $(INCLDIR)\yaz\yaz-version.h
+	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
 
 
 !endif
