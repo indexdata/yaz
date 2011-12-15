@@ -143,6 +143,7 @@ Section "YAZ Source" YAZ_Source
 	SectionIn 1
 	SetOutPath $INSTDIR
 	File ..\configure.ac
+	File ..\IDMETA
 	File /r ..\*.c
 	File /r /x yaz ..\*.h
 	SetOutPath $INSTDIR\util
