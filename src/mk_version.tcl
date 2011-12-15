@@ -1,7 +1,7 @@
 #!/usr/bin/tclsh
 
 proc usage {} {
-    puts {mk_version.tcl [-v] configure.ac infile ..}
+    puts {mk_version.tcl [-v] IDMETA infile ..}
     exit 1
 }
 
@@ -35,7 +35,7 @@ while {1} {
     if {$cnt < 0} {
 	break
     }
-    regexp {AC_INIT\([^,]+,\[([0-9.]+)\]} $line s version
+    regexp {VERSION=([0-9.]+)} $line s version
 }
 close $f
 
