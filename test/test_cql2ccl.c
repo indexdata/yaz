@@ -36,7 +36,7 @@ static int tst_query_s(const char *cql, const char *expected_ccl,
             if (!r)
             {
                 ret = 0;
-                yaz_log(YLOG_WARN, "cql: diff %s", cql);
+                yaz_log(YLOG_WARN, "cql: diff: %s", cql);
                 yaz_log(YLOG_WARN, " exp error");
                 yaz_log(YLOG_WARN, " got ccl %s", wrbuf_cstr(w));
             }
@@ -137,6 +137,10 @@ static void tst(void)
     YAZ_CHECK(tst_query("title any x", "title=\"x\""));
     YAZ_CHECK(tst_query("title any x y", "title=\"x\" or title=\"y\""));
     YAZ_CHECK(tst_query("title any \"x y\"", "title=\"x\" or title=\"y\""));
+
+    YAZ_CHECK(tst_query("title = \"x y\"", "title=\"x y\""));
+    YAZ_CHECK(tst_query("title = x y", "title=\"x\" \"y\""));
+
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox dinosaurs",
                         "(dc.title=\"encyclopedia\") % (\"dinosaurs\")"));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance<=3 dinosaurs",

@@ -62,7 +62,7 @@ static void pr_term(const char **cpp, int stop_at_space,
             }
             pr("#", client_data);
         }
-        else if (*cp == ' ')
+        else if (*cp == ' ' && stop_at_space)
             break;
         else
         {
@@ -130,17 +130,20 @@ static int node(struct cql_node *cn,
             {
                 pr(ccl_field, client_data);
                 pr(ccl_rel, client_data);
+                if (!split_op)
+                    ccl_rel = 0;
             }
             pr_term(&cp, split_op ? 1 : 0, pr, client_data);
-            if (!split_op)
-                break;
             while (*cp == ' ')
                 cp++;
             if (*cp == '\0')
                 break;
             pr(" ", client_data);
-            pr(split_op, client_data);
-            pr(" ", client_data);
+            if (split_op)
+            {
+                pr(split_op, client_data);
+                pr(" ", client_data);
+            }
         }
         if (cn->u.st.extra_terms)
         {
