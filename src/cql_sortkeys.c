@@ -51,6 +51,8 @@ static int cql_sort_modifiers(struct cql_node *cn,
     for (; cn; cn = cn->u.st.modifiers)
     {
         const char *indx = cn->u.st.index;
+        if (!strncmp(indx, "sort.", 5))
+            indx = indx + 5;
         if (!strcmp(indx, "ignoreCase"))
             caseSensitive = 0;
         else if (!strcmp(indx, "respectCase"))
