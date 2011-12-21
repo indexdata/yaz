@@ -178,6 +178,8 @@ static void tst(void)
                           "title,,1,0,lowValue"));
     YAZ_CHECK(tst_query_s("a sortby title/missingHigh", "\"a\"",
                           "title,,1,0,highValue"));
+    YAZ_CHECK(tst_query_s("a sortby title/sort.missingHigh", "\"a\"",
+                          "title,,1,0,highValue"));
     YAZ_CHECK(tst_query_s("a sortby title/bogus", "\"a\"", 0));
 
     YAZ_CHECK(tst_query_s("a sortby dc.year dc.author", "\"a\"",
