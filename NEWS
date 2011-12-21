@@ -1,3 +1,5 @@
+--- 4.2.24 2011/12/21
+
 cql_sortby_to_sortkeys: honor sort prefix.
 
 RPN to CQL: always quote resulting terms. For bizarre reasons, JSTOR's
@@ -6,7 +8,7 @@ The rpn2cql family of functions now always returns quoted CQL terms.
 
 Fix CQL to CCL conversion for multiple terms. Add two test cases as well.
 
---- 4.2.22 2011/12/15
+--- 4.2.23 2011/12/15
 
 Allow =val to be omitted for yaz_uri_to_array. Also, multiple &'s in
 sequence is treated as one. For example, &&a=b&&&c& is identical to
