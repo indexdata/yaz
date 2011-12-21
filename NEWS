@@ -1,3 +1,11 @@
+cql_sortby_to_sortkeys: honor sort prefix.
+
+RPN to CQL: always quote resulting terms. For bizarre reasons, JSTOR's
+SRU server returns 0 hits on ISSN searches unless a CQL term is quoted.
+The rpn2cql family of functions now always returns quoted CQL terms.
+
+Fix CQL to CCL conversion for multiple terms. Add two test cases as well.
+
 --- 4.2.22 2011/12/15
 
 Allow =val to be omitted for yaz_uri_to_array. Also, multiple &'s in
