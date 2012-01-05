@@ -565,6 +565,37 @@ static struct ccl_rpn_node *search_term(CCL_parser cclp, ccl_qualifier_t *qa)
     return search_term_x(cclp, qa, list, 0);
 }
 
+
+static struct ccl_rpn_node *search_terms2(CCL_parser cclp,
+                                          ccl_qualifier_t *qa)
+{
+    if (KIND == CCL_TOK_LP)
+    {
+        struct ccl_rpn_node *p;
+        ADVANCE;
+        if (!(p = find_spec(cclp, qa)))
+            return NULL;
+        if (KIND != CCL_TOK_RP)
+        {
+            cclp->error_code = CCL_ERR_RP_EXPECTED;
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        ADVANCE;
+        return p;
+    }
+    else
+    {
+        static int list[] = {
+            CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
+            CCL_TOK_REL, CCL_TOK_SET, -1};
+        
+        return search_term_x(cclp, qa, list, 1);
+    }
+}
+
+
+
 static
 struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                                       ccl_qualifier_t *ap, char *attset)
@@ -707,20 +738,6 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, 2);
         return p;
     }
-    else if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        if (!(p = find_spec(cclp, ap)))
-            return NULL;
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p);
-            return NULL;
-        }
-        ADVANCE;
-        return p;
-    }
     else
     {
         if (!(p = search_terms(cclp, ap)))
@@ -736,7 +753,6 @@ static
 struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
 {
     char *attset;
-    struct ccl_rpn_node *p;
     
     if (qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_ORDER, &attset)
         || qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, &attset))
@@ -749,24 +765,7 @@ struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
         return NULL;
     }
     ADVANCE;
-    if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        if (!(p = find_spec(cclp, ap)))
-        {
-            return NULL;
-        }
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p);
-            return NULL;
-        }
-        ADVANCE;
-    }
-    else
-        p = search_terms(cclp, ap);
-    return p;
+    return search_terms(cclp, ap);
 }
 
 /**
@@ -933,9 +932,10 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
 static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
 {
     static int list[] = {
-        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, CCL_TOK_SET, -1};
+        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
+        CCL_TOK_REL, CCL_TOK_SET, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
-    p1 = search_term_x(cclp, qa, list, 1);
+    p1 = search_terms2(cclp, qa);
     if (!p1)
         return NULL;
     while (1)
@@ -953,7 +953,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
             p_prox->u.t.attr_list = 0;
 
             ADVANCE;
-            p2 = search_term_x(cclp, qa, list, 1);
+            p2 = search_terms2(cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete(p1);
@@ -967,7 +967,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
         }
         else if (is_term_ok(KIND, list))
         {
-            p2 = search_term_x(cclp, qa, list, 1);
+            p2 = search_terms2(cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete(p1);
@@ -996,22 +996,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
 {
     struct ccl_rpn_node *p1;
     struct ccl_token *lookahead;
-    if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        p1 = find_spec(cclp, qa);
-        if (!p1)
-            return NULL;
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p1);
-            return NULL;
-        }
-        ADVANCE;
-        return p1;
-    }
-    else if (KIND == CCL_TOK_SET)
+    if (KIND == CCL_TOK_SET)
     {
         ADVANCE;
         if (KIND == CCL_TOK_EQ)
