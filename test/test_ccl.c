@@ -201,10 +201,19 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 x2 "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=x3", "@attr 4=2 @attr 1=4 x3 "));
     YAZ_CHECK(tst_ccl_query(bibset, "dc.title=x4", "@attr 1=/my/title x4 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "dc.title=(x4)", "@attr 1=/my/title x4 "));
     YAZ_CHECK(tst_ccl_query(bibset, "x1 and", 0));
     YAZ_CHECK(tst_ccl_query(bibset, "tix=x5", 0));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a%b", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a%(b)", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%(b)", 
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
@@ -214,6 +223,11 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 b "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a%2b", 
+                  "@prox 0 2 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%2(b)", 
                   "@prox 0 2 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
@@ -236,6 +250,17 @@ void tst1(int pass)
                   "@prox 0 2 1 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a% (b or dc.title=c)", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@or @attr 4=2 @attr 1=1016 b "
+                            "@attr 4=2 @attr 1=1016 @attr 1=/my/title c "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)", 
+                            "@prox 0 1 0 2 k 2 @and "
+                            "@attr 4=2 @attr 1=1016 a @attr 4=2 @attr 1=1016 b "
+                            "@attr 4=2 @attr 1=1016 c " ));
 
     YAZ_CHECK(tst_ccl_query(bibset, "date=1980",
                             "@attr 2=3 1980 "));
