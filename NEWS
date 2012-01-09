@@ -1,3 +1,12 @@
+CCL: allow parantheses for proximity operands. For example CCL query
+(a) % (b)   is now allowed.
+
+GFS: fix bend_assoc_is_alive. When cs_get returns 0 the association is
+marked dead, rather then being destroyed. If not, the session memory is
+being free'd before the search/scan handler is finished. Also destroy
+'request' memory in request_release rather than in various places,
+which resulted in leaks from time to time.
+
 --- 4.2.24 2011/12/21
 
 cql_sortby_to_sortkeys: honor sort prefix.
