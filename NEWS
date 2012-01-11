@@ -1,3 +1,7 @@
+--- 4.2.25 2012/01/11
+
+Build YAZ for Ubuntu Oneiric.
+
 CCL: allow parantheses for proximity operands. For example CCL query
 (a) % (b)   is now allowed.
 
