@@ -1022,7 +1022,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
             break;
         lookahead = lookahead->next;
     }
-    if (qa)
+    if (qa || lookahead->kind == CCL_TOK_LP)
         return search_terms(cclp, qa);
     else
     {

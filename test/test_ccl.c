@@ -264,6 +264,8 @@ void tst1(int pass)
 
     YAZ_CHECK(tst_ccl_query(bibset, "date=1980",
                             "@attr 2=3 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "(date=1980)",
+                            "@attr 2=3 1980 "));
     YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990",
                             "@and @attr 2=4 234 @attr 2=2 1990 "));
     YAZ_CHECK(tst_ccl_query(bibset, "date=234- 1990",
