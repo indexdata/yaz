@@ -1,3 +1,7 @@
+--- 4.2.26 2012/02/23
+
+CCL: fix use of "term" field in sub queries. Bug introduced in YAZ 4.2.25.
+
 --- 4.2.25 2012/01/11
 
 Build YAZ for Ubuntu Oneiric.
