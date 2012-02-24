@@ -180,6 +180,14 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
 
         else {
 
+            if (el->record_conv)
+            {
+                wrbuf_printf(p->wr_error, "Element <retrieval>: "
+                             "only one <backend> allowed");
+                yaz_record_conv_destroy(el->record_conv);
+                return -1;
+            }
+
             /* parsing attributees */
             struct _xmlAttr *attr;
             for (attr = ptr->properties; attr; attr = attr->next){

@@ -262,6 +262,25 @@ static void tst_configure(void)
                                   "Element <marc inputformat='not-existent'>:  Unsupported"
                                   " input format defined by attribute value", 0));
 
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval syntax=\"usmarc\">"
+                                  "<backend syntax=\"xml\" name=\"dc\">"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</backend>"
+                                  "<backend/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Element <retrieval>: "
+                                  "only one <backend> allowed", 0));
+
+
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval syntax=\"usmarc\">"
                                   "<backend syntax=\"xml\" name=\"dc\">"
