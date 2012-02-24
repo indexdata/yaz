@@ -110,7 +110,6 @@ void yaz_retrieval_reset(yaz_retrieval_t p)
 /** \brief parse retrieval XML config */
 static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
 {
-
     struct _xmlAttr *attr;
     struct yaz_retrieval_elem *el = (struct yaz_retrieval_elem *)
         nmem_malloc(p->nmem, sizeof(*el));
@@ -171,15 +170,15 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     {
         if (ptr->type != XML_ELEMENT_NODE)
             continue;
-        if (strcmp((const char *) ptr->name, "backend")){
+        if (strcmp((const char *) ptr->name, "backend"))
+        {
             wrbuf_printf(p->wr_error, "Element <retrieval>: expected"
                          " zero or one element <backend>, got <%s>",
                          (const char *) ptr->name);
             return -1;
         }
-
-        else {
-
+        else
+        {
             if (el->record_conv)
             {
                 wrbuf_printf(p->wr_error, "Element <retrieval>: "
@@ -187,28 +186,29 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 yaz_record_conv_destroy(el->record_conv);
                 return -1;
             }
-
             /* parsing attributees */
             struct _xmlAttr *attr;
-            for (attr = ptr->properties; attr; attr = attr->next){
-            
+            for (attr = ptr->properties; attr; attr = attr->next)
+            {
                 if (!xmlStrcmp(attr->name, BAD_CAST "name") 
                          && attr->children 
                          && attr->children->type == XML_TEXT_NODE)
                     el->backend_name 
                         = nmem_strdup(p->nmem, 
                                       (const char *) attr->children->content);
-
+                
                 else if (!xmlStrcmp(attr->name, BAD_CAST "syntax") 
                          && attr->children 
-                         && attr->children->type == XML_TEXT_NODE){
+                         && attr->children->type == XML_TEXT_NODE)
+                {
                     el->backend_syntax 
                         = yaz_string_to_oid_odr(
                             yaz_oid_std(),
                             CLASS_RECSYN,
                             (const char *) attr->children->content,
                             p->odr);
-                    if (!el->backend_syntax){
+                    if (!el->backend_syntax)
+                    {
                         wrbuf_printf(p->wr_error, 
                                      "Element <backend syntax='%s'>: "
                                      "attribute 'syntax' has invalid "
@@ -218,7 +218,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                         return -1;
                     } 
                 }
-                else {
+                else
+                {
                     wrbuf_printf(p->wr_error, "Element <backend>: expected "
                                  "attributes 'syntax' or 'name, got '%s'", 
                                  attr->name);
@@ -226,13 +227,11 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 }
             }
           
- 
-            /* parsing internal of record conv */
+             /* parsing internal of record conv */
             el->record_conv = yaz_record_conv_create();
             
             yaz_record_conv_set_path(el->record_conv, p->path);
 
-        
             if (yaz_record_conv_configure(el->record_conv, ptr))
             {
                 wrbuf_printf(p->wr_error, "%s",
