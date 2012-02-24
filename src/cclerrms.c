@@ -35,7 +35,11 @@ static char *err_msg_array[] = {
 
 const char *ccl_err_msg(int ccl_errno)
 {
-    return err_msg_array[ccl_errno];
+    if (ccl_errno >= 0 && 
+        ccl_errno < sizeof(err_msg_array)/sizeof(*err_msg_array))
+        return err_msg_array[ccl_errno];
+    else
+        return 0;
 }
 /*
  * Local variables:
