@@ -91,6 +91,8 @@ YAZ_BEGIN_CDECL
 #define CCL_ERR_TRUNC_NOT_LEFT   10
 #define CCL_ERR_TRUNC_NOT_BOTH   11
 #define CCL_ERR_TRUNC_NOT_RIGHT  12
+#define CCL_ERR_TRUNC_NOT_EMBED  13
+#define CCL_ERR_TRUNC_NOT_SINGLE 14
     
 /** \brief attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {

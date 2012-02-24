@@ -442,7 +442,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                         right_trunc = 1;
                     else
                     {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_EMBED;
                         ccl_rpn_delete(p);
                         return NULL;
                     }
@@ -461,7 +461,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     }
                     else
                     {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
                         ccl_rpn_delete(p);
                         return NULL;
                     }

@@ -28,7 +28,9 @@ static char *err_msg_array[] = {
     "Bad relation",
     "Left truncation not supported",
     "Both left - and right truncation not supported",
-    "Right truncation not supported"
+    "Right truncation not supported",
+    "Embedded truncation not supported",
+    "Single charcacter mask not supported"
 };
 
 const char *ccl_err_msg(int ccl_errno)
