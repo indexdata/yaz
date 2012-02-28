@@ -1,3 +1,13 @@
+--- 4.2.27 2012/02/28
+
+Add non-standard SRU diagnostic: 235: "Database does not exist".
+Couldn't live without it. HTTP 404: "Not found" is just so anonymous.
+Update SRU to Bib-1 diagnostic maps accordingly.
+
+CCL: add two new diagnostics for unsupported masking. The new
+diagnostics are: "Embedded truncation not supported" and
+"Single charcacter mask not supported".  
+
 --- 4.2.26 2012/02/23
 
 CCL: fix use of "term" field in sub queries. Bug introduced in YAZ 4.2.25.
