@@ -92,3 +92,4 @@
 111, "Unsupported stylesheet"
 120, "Response position out of range"
 121, "Too many terms requested"
+235, "Database does not exist"
