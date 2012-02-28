@@ -70,7 +70,7 @@ static int bib1_srw_map[] = {
     108, 27,
     108, 45,
         
-    109, 2,
+    109, 235,
     110, 37,
     111, 1,
     112, 58,
@@ -134,7 +134,7 @@ static int bib1_srw_map[] = {
     232, 1,
     233, 1, /* bad map */
     234, 1, /* bad map */
-    235, 2,
+    235, 235,
     236, 3, 
     237, 82,
     238, 67,
@@ -192,6 +192,7 @@ static int bib1_srw_map[] = {
 static int srw_bib1_map[] = {
     10, 108,
     66, 238,
+    235, 235,
     /* No doubt there are many more */
     0
 };
