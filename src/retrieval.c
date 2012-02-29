@@ -179,6 +179,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
         }
         else
         {
+            struct _xmlAttr *attr;
             if (el->record_conv)
             {
                 wrbuf_printf(p->wr_error, "Element <retrieval>: "
@@ -187,7 +188,6 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 return -1;
             }
             /* parsing attributees */
-            struct _xmlAttr *attr;
             for (attr = ptr->properties; attr; attr = attr->next)
             {
                 if (!xmlStrcmp(attr->name, BAD_CAST "name") 
