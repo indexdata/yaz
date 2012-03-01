@@ -495,14 +495,17 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
         {
             wrbuf_rewind(p->wr_error);
             info = t->construct(p, ptr, p->path, p->wr_error);
-            if (info)
+
+            if (info || wrbuf_len(p->wr_error))
                 break;
+            /* info== 0 and no error reported , ie not handled by it */
         }
         if (!info)
         {
-            wrbuf_printf(p->wr_error, "Element <backend>: expected "
-                         "<marc> or <xslt> element, got <%s>"
-                         , ptr->name);
+            if (wrbuf_len(p->wr_error) == 0)
+                wrbuf_printf(p->wr_error, "Element <backend>: expected "
+                             "<marc> or <xslt> element, got <%s>"
+                             , ptr->name);
             return -1;
         }
         r = (struct yaz_record_conv_rule *) nmem_malloc(p->nmem, sizeof(*r));
