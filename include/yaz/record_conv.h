@@ -132,6 +132,7 @@ void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
     \param type info
 */    
 
+#if YAZ_HAVE_XML2
 /** record conversion type */
 struct yaz_record_conv_type {
     /** \brief internal; no need to set */
@@ -152,6 +153,7 @@ YAZ_EXPORT
 void yaz_record_conv_add_type(yaz_record_conv_t p,
                               struct yaz_record_conv_type *type);
 
+#endif
 YAZ_END_CDECL
 
 #endif
