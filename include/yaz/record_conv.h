@@ -44,22 +44,6 @@ YAZ_BEGIN_CDECL
 /** record conversion handle  */
 typedef struct yaz_record_conv_struct *yaz_record_conv_t;
 
-/** record conversion type */
-struct yaz_record_conv_type {
-    /** \brief internal; no need to set */
-    struct yaz_record_conv_type *next;
-
-    /** \brief construct and configure a type of ours */
-    void * (*construct)(yaz_record_conv_t , const xmlNode *, const char *path,
-                        WRBUF error_msg);
-
-    /** \brief converts a record */
-    int  (*convert)(void *info, WRBUF record, WRBUF error_msg);
-
-    /** \brief destroys our conversion handler */
-    void (*destroy)(void *info);
-};
-
 /** creates record handle
     \return record handle
 */
@@ -147,6 +131,23 @@ void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
     \param p record conversion handle
     \param type info
 */    
+
+/** record conversion type */
+struct yaz_record_conv_type {
+    /** \brief internal; no need to set */
+    struct yaz_record_conv_type *next;
+
+    /** \brief construct and configure a type of ours */
+    void * (*construct)(yaz_record_conv_t , const xmlNode *, const char *path,
+                        WRBUF error_msg);
+
+    /** \brief converts a record */
+    int  (*convert)(void *info, WRBUF record, WRBUF error_msg);
+
+    /** \brief destroys our conversion handler */
+    void (*destroy)(void *info);
+};
+
 YAZ_EXPORT
 void yaz_record_conv_add_type(yaz_record_conv_t p,
                               struct yaz_record_conv_type *type);
