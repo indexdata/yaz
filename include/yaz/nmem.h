@@ -157,7 +157,7 @@ YAZ_EXPORT void nmem_strsplit_escape(NMEM nmem, const char *delim,
     \param num number of result strings
     \param collapse 1=collapse multiple delims to one; 0=no collapse
     \param escape_char != 0, an escape char (could be \)
-    \param subst_escape, 1=substitute escapes, 0 leave as is
+    \param subst_escape 1=substitute escapes, 0 leave as is
 */
 YAZ_EXPORT void nmem_strsplit_escape2(NMEM nmem, const char *delim,
                                       const char *dstr,
