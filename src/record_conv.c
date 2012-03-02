@@ -97,7 +97,7 @@ void yaz_record_conv_destroy(yaz_record_conv_t p)
 }
 
 #if YAZ_HAVE_XSLT
-static void *construct_xslt(yaz_record_conv_t p, const xmlNode *ptr,
+static void *construct_xslt(const xmlNode *ptr,
                             const char *path, WRBUF wr_error)
 {
     struct _xmlAttr *attr;
@@ -241,7 +241,7 @@ static void destroy_xslt(void *info)
 #endif
 
 
-static void *construct_marc(yaz_record_conv_t p, const xmlNode *ptr,
+static void *construct_marc(const xmlNode *ptr,
                             const char *path, WRBUF wr_error)
 {
     NMEM nmem = nmem_create();
@@ -288,7 +288,7 @@ static void *construct_marc(yaz_record_conv_t p, const xmlNode *ptr,
     }
     if (!input_format)
     {
-        wrbuf_printf(p->wr_error, "Element <marc>: "
+        wrbuf_printf(wr_error, "Element <marc>: "
                      "attribute 'inputformat' required");
         nmem_destroy(info->nmem);
         return 0;
@@ -364,7 +364,7 @@ static void *construct_marc(yaz_record_conv_t p, const xmlNode *ptr,
                                         info->input_charset);
         if (!cd)
         {
-            wrbuf_printf(p->wr_error, 
+            wrbuf_printf(wr_error, 
                          "Element <marc inputcharset='%s' outputcharset='%s'>:"
                          " Unsupported character set mapping"
                          " defined by attribute values",
@@ -388,8 +388,8 @@ static void *construct_marc(yaz_record_conv_t p, const xmlNode *ptr,
         nmem_destroy(info->nmem);
         return 0;
     }
-    info->input_charset = nmem_strdup(p->nmem, info->input_charset);
-    info->output_charset = nmem_strdup(p->nmem, info->output_charset);
+    info->input_charset = nmem_strdup(info->nmem, info->input_charset);
+    info->output_charset = nmem_strdup(info->nmem, info->output_charset);
     return info;
 }
 
@@ -491,7 +491,7 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
         for (t = &bt[0]; t; t = t->next)
         {
             wrbuf_rewind(p->wr_error);
-            info = t->construct(p, ptr, p->path, p->wr_error);
+            info = t->construct(ptr, p->path, p->wr_error);
 
             if (info || wrbuf_len(p->wr_error))
                 break;

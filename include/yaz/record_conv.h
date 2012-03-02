@@ -61,7 +61,7 @@ struct yaz_record_conv_type {
     struct yaz_record_conv_type *next;
 
     /** \brief construct and configure a type of ours */
-    void * (*construct)(yaz_record_conv_t , const xmlNode *, const char *path,
+    void * (*construct)(const xmlNode *, const char *path,
                         WRBUF error_msg);
 
     /** \brief converts a record */
