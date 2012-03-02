@@ -49,9 +49,6 @@ struct yaz_record_conv_struct {
 
     /** \brief path for opening files  */
     char *path;
-
-    /** \brief handlers */
-    struct yaz_record_conv_type *types;
 };
 
 struct marc_info {
@@ -86,33 +83,14 @@ static void yaz_record_conv_reset(yaz_record_conv_t p)
     p->rules_p = &p->rules;
 }
 
-void yaz_record_conv_add_type(yaz_record_conv_t p,
-                              struct yaz_record_conv_type *type)
-{
-    struct yaz_record_conv_type **tp = &p->types;
-    while (*tp)
-        tp = &(*tp)->next;
-    *tp = xmalloc(sizeof(*type));
-    memcpy(*tp, type, sizeof(*type));
-    (*tp)->next = 0;
-}
-
 void yaz_record_conv_destroy(yaz_record_conv_t p)
 {
     if (p)
     {
-        struct yaz_record_conv_type *t = p->types;
-
         yaz_record_conv_reset(p);
         nmem_destroy(p->nmem);
         wrbuf_destroy(p->wr_error);
 
-        while (t)
-        { 
-            struct yaz_record_conv_type *t_next = t->next;
-            xfree(t);
-            t = t_next;
-        }
         xfree(p->path);
         xfree(p);
     }
@@ -479,8 +457,27 @@ static void destroy_marc(void *info)
     nmem_destroy(mi->nmem);
 }
 
-int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
+int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
+                                struct yaz_record_conv_type *types)
 {
+    struct yaz_record_conv_type bt[2];
+    
+    /* register marc */
+    bt[0].construct = construct_marc;
+    bt[0].convert = convert_marc;
+    bt[0].destroy = destroy_marc;
+
+#if YAZ_HAVE_XSLT
+    /* register xslt */
+    bt[0].next = &bt[1];
+    bt[1].next = types;
+    bt[1].construct = construct_xslt;
+    bt[1].convert = convert_xslt;
+    bt[1].destroy = destroy_xslt;
+#else
+    bt[0].next = types;
+#endif
+    
     yaz_record_conv_reset(p);
 
     /* parsing element children */
@@ -491,7 +488,7 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
         void *info = 0;
         if (ptr->type != XML_ELEMENT_NODE)
             continue;
-        for (t = p->types; t; t = t->next)
+        for (t = &bt[0]; t; t = t->next)
         {
             wrbuf_rewind(p->wr_error);
             info = t->construct(p, ptr, p->path, p->wr_error);
@@ -511,11 +508,17 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
         r = (struct yaz_record_conv_rule *) nmem_malloc(p->nmem, sizeof(*r));
         r->next = 0;
         r->info = info;
-        r->type = t;
+        r->type = nmem_malloc(p->nmem, sizeof(*t));
+        memcpy(r->type, t, sizeof(*t));
         *p->rules_p = r;
         p->rules_p = &r->next;
     }
     return 0;
+}
+
+int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
+{
+    return yaz_record_conv_configure_t(p, ptr, 0);
 }
 
 static int yaz_record_conv_record_rule(yaz_record_conv_t p,
@@ -602,31 +605,9 @@ yaz_record_conv_t yaz_record_conv_create()
     p->wr_error = wrbuf_alloc();
     p->rules = 0;
     p->path = 0;
-    p->types = 0;
-
 #if YAZ_HAVE_EXSLT
     exsltRegisterAll(); 
 #endif    
-    { /* register marc */
-        struct yaz_record_conv_type t;
-
-        t.construct = construct_marc;
-        t.convert = convert_marc;
-        t.destroy = destroy_marc;
-
-        yaz_record_conv_add_type(p, &t);
-    }
-#if YAZ_HAVE_XSLT
-    { /* register xslt */
-        struct yaz_record_conv_type t;
-        
-        t.construct = construct_xslt;
-        t.convert = convert_xslt;
-        t.destroy = destroy_xslt;
-
-        yaz_record_conv_add_type(p, &t);
-    }
-#endif
     return p;
 }
 

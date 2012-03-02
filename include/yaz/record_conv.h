@@ -55,6 +55,22 @@ YAZ_EXPORT yaz_record_conv_t yaz_record_conv_create(void);
 YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 
 #if YAZ_HAVE_XML2
+/** record conversion type */
+struct yaz_record_conv_type {
+    /** \brief pointer to next type ; NULL for last */
+    struct yaz_record_conv_type *next;
+
+    /** \brief construct and configure a type of ours */
+    void * (*construct)(yaz_record_conv_t , const xmlNode *, const char *path,
+                        WRBUF error_msg);
+
+    /** \brief converts a record */
+    int  (*convert)(void *info, WRBUF record, WRBUF error_msg);
+
+    /** \brief destroys our conversion handler */
+    void (*destroy)(void *info);
+};
+
 /** configures record conversion
     \param p record conversion handle
     \param node xmlNode pointer (root element of XML config)
@@ -80,6 +96,19 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 */
 YAZ_EXPORT
 int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *node);
+
+/** configures record conversion with user-defined conversion types
+    \param p record conversion handle
+    \param node xmlNode pointer (root element of XML config)
+    \param types conversion types
+    \retval 0 success
+    \retval -1 failure
+
+*/
+YAZ_EXPORT
+int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *node,
+                                struct yaz_record_conv_type *types);
+
 #endif
 
 /** performs record conversion on record buffer (OCTET aligned)
@@ -132,28 +161,6 @@ void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
     \param type info
 */    
 
-#if YAZ_HAVE_XML2
-/** record conversion type */
-struct yaz_record_conv_type {
-    /** \brief internal; no need to set */
-    struct yaz_record_conv_type *next;
-
-    /** \brief construct and configure a type of ours */
-    void * (*construct)(yaz_record_conv_t , const xmlNode *, const char *path,
-                        WRBUF error_msg);
-
-    /** \brief converts a record */
-    int  (*convert)(void *info, WRBUF record, WRBUF error_msg);
-
-    /** \brief destroys our conversion handler */
-    void (*destroy)(void *info);
-};
-
-YAZ_EXPORT
-void yaz_record_conv_add_type(yaz_record_conv_t p,
-                              struct yaz_record_conv_type *type);
-
-#endif
 YAZ_END_CDECL
 
 #endif

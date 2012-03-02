@@ -108,7 +108,8 @@ void yaz_retrieval_reset(yaz_retrieval_t p)
 }
 
 /** \brief parse retrieval XML config */
-static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
+static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
+                          struct yaz_record_conv_type *types)
 {
     struct _xmlAttr *attr;
     struct yaz_retrieval_elem *el = (struct yaz_retrieval_elem *)
@@ -229,10 +230,10 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
           
              /* parsing internal of record conv */
             el->record_conv = yaz_record_conv_create();
-            
+
             yaz_record_conv_set_path(el->record_conv, p->path);
 
-            if (yaz_record_conv_configure(el->record_conv, ptr))
+            if (yaz_record_conv_configure_t(el->record_conv, ptr, types))
             {
                 wrbuf_printf(p->wr_error, "%s",
                              yaz_record_conv_get_error(el->record_conv));
@@ -247,7 +248,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     return 0;
 }
 
-int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
+int yaz_retrieval_configure_t(yaz_retrieval_t p, const xmlNode *ptr,
+                              struct yaz_record_conv_type *types)
 {
     yaz_retrieval_reset(p);
 
@@ -260,7 +262,7 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
                 continue;
             if (!strcmp((const char *) ptr->name, "retrieval"))
             {
-                if (conf_retrieval(p, ptr))
+                if (conf_retrieval(p, ptr, types))
                     return -1;
             }
             else
@@ -278,6 +280,11 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
         return -1;
     }
     return 0;
+}
+
+int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
+{
+    return yaz_retrieval_configure_t(p, ptr, 0);
 }
 
 int yaz_retrieval_request(yaz_retrieval_t p,
