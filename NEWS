@@ -1,3 +1,5 @@
+--- 4.2.28 2012/03/06
+
 record_conv: modify new API for conversion types. The conversion types
 may be passed in new functions yaz_record_conv_configure_t and
 yaz_retrieval_configure_t.  Removing yaz_record_conv_add_type .
