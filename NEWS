@@ -1,3 +1,10 @@
+record_conv: modify new API for conversion types. The conversion types
+may be passed in new functions yaz_record_conv_configure_t and
+yaz_retrieval_configure_t.  Removing yaz_record_conv_add_type .
+
+Avoid mixed statement/variable declare; fixes compilation with Visual
+Studio.
+
 --- 4.2.27 2012/02/28
 
 Add non-standard SRU diagnostic: 235: "Database does not exist".
