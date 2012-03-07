@@ -162,10 +162,10 @@ searchTerm extraTerms {
 ;
 
 extraTerms:
-extraTerms SIMPLE_STRING {
+SIMPLE_STRING extraTerms {
     struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem, 
-					 /* index */ 0, /* rel */ 0, $2.buf);
-    st->u.st.extra_terms = $1.cql;
+					 /* index */ 0, /* rel */ 0, $1.buf);
+    st->u.st.extra_terms = $2.cql;
     $$.cql = st;
 }
 | 

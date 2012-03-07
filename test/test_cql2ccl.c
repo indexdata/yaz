@@ -141,6 +141,8 @@ static void tst(void)
     YAZ_CHECK(tst_query("title = \"x y\"", "title=\"x y\""));
     YAZ_CHECK(tst_query("title = x y", "title=\"x\" \"y\""));
 
+    YAZ_CHECK(tst_query("title = x y z",  "title=\"x\" \"y\" \"z\""));
+
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox dinosaurs",
                         "(dc.title=\"encyclopedia\") % (\"dinosaurs\")"));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance<=3 dinosaurs",
