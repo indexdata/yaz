@@ -98,11 +98,21 @@ void yaz_record_conv_destroy(yaz_record_conv_t p)
 }
 
 #if YAZ_HAVE_XSLT
+struct xslt_info {
+    NMEM nmem;
+    xmlDocPtr xsp_doc;
+    const char **xsl_parms;
+};
+
 static void *construct_xslt(const xmlNode *ptr,
                             const char *path, WRBUF wr_error)
 {
     struct _xmlAttr *attr;
     const char *stylesheet = 0;
+    struct xslt_info *info = 0;
+    NMEM nmem = 0;
+    int max_parms = 10;
+    int no_parms = 0;
 
     if (strcmp((const char *) ptr->name, "xslt"))
         return 0;
@@ -119,6 +129,67 @@ static void *construct_xslt(const xmlNode *ptr,
             return 0;
         }
     }
+    nmem = nmem_create();
+    info = nmem_malloc(nmem, sizeof(*info));
+    info->nmem = nmem;
+    info->xsl_parms = nmem_malloc(
+        nmem, (2 * max_parms + 1) * sizeof(*info->xsl_parms));
+
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+    {
+        const char *name = 0;
+        const char *value = 0;
+        char *qvalue = 0;
+        if (ptr->type != XML_ELEMENT_NODE)
+            continue;
+        if (strcmp((const char *) ptr->name, "param"))
+        {
+            wrbuf_printf(wr_error, "Bad element '%s'"
+                         "Expected param.", ptr->name);
+            nmem_destroy(nmem);
+            return 0;
+        }
+        for (attr = ptr->properties; attr; attr = attr->next)
+        {
+            if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
+                attr->children && attr->children->type == XML_TEXT_NODE)
+                name = (const char *) attr->children->content;
+            else if (!xmlStrcmp(attr->name, BAD_CAST "value") &&
+                attr->children && attr->children->type == XML_TEXT_NODE)
+                value = (const char *) attr->children->content;
+            else
+            {
+                wrbuf_printf(wr_error, "Bad attribute '%s'"
+                             "Expected name or value.", attr->name);
+                nmem_destroy(nmem);
+                return 0;
+            }
+        }
+        if (!name || !value)
+        {
+            wrbuf_printf(wr_error, "Missing attributes name or value");
+            nmem_destroy(nmem);
+            return 0;
+        }
+        if (no_parms >= max_parms)
+        {
+            wrbuf_printf(wr_error, "Too many parameters given");
+            nmem_destroy(nmem);
+            return 0;
+        }
+
+        qvalue = nmem_malloc(nmem, strlen(value) + 3);
+        strcpy(qvalue, "\'");
+        strcat(qvalue, value);
+        strcat(qvalue, "\'");
+
+        info->xsl_parms[2 * no_parms] = nmem_strdup(nmem, name);
+        info->xsl_parms[2 * no_parms + 1] = qvalue;
+        no_parms++;
+    }
+
+    info->xsl_parms[2 * no_parms] = '\0';
+
     if (!stylesheet)
     {
         wrbuf_printf(wr_error, "Element <xslt>: "
@@ -129,7 +200,6 @@ static void *construct_xslt(const xmlNode *ptr,
     {
         char fullpath[1024];
         xsltStylesheetPtr xsp;
-        xmlDocPtr xsp_doc;
         if (!yaz_filepath_resolve(stylesheet, path, 0, fullpath))
         {
             wrbuf_printf(wr_error, "Element <xslt stylesheet=\"%s\"/>:"
@@ -140,8 +210,8 @@ static void *construct_xslt(const xmlNode *ptr,
                 
             return 0;
         }
-        xsp_doc = xmlParseFile(fullpath);
-        if (!xsp_doc)
+        info->xsp_doc = xmlParseFile(fullpath);
+        if (!info->xsp_doc)
         {
             wrbuf_printf(wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
                          " xml parse failed: %s", stylesheet, fullpath);
@@ -151,7 +221,7 @@ static void *construct_xslt(const xmlNode *ptr,
         }
         /* need to copy this before passing it to the processor. It will
            be encapsulated in the xsp and destroyed by xsltFreeStylesheet */
-        xsp = xsltParseStylesheetDoc(xmlCopyDoc(xsp_doc, 1));
+        xsp = xsltParseStylesheetDoc(xmlCopyDoc(info->xsp_doc, 1));
         if (!xsp)
         {
             wrbuf_printf(wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
@@ -166,21 +236,24 @@ static void *construct_xslt(const xmlNode *ptr,
                          "EXSLT not supported"
 #endif
                          ")");
-            xmlFreeDoc(xsp_doc);
+            xmlFreeDoc(info->xsp_doc);
+            nmem_destroy(info->nmem);
             return 0;
         }
         else
         {
             xsltFreeStylesheet(xsp);
-            return xsp_doc;
+            return info;
         }
     }
     return 0;
 }
 
-static int convert_xslt(void *info, WRBUF record, WRBUF wr_error)
+static int convert_xslt(void *vinfo, WRBUF record, WRBUF wr_error)
 {
     int ret = 0;
+    struct xslt_info *info = vinfo;
+
     xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
                                    wrbuf_len(record));
     if (!doc)
@@ -190,9 +263,9 @@ static int convert_xslt(void *info, WRBUF record, WRBUF wr_error)
     }
     else
     {
-        xmlDocPtr xsp_doc = xmlCopyDoc((xmlDocPtr) info, 1);
+        xmlDocPtr xsp_doc = xmlCopyDoc(info->xsp_doc, 1);
         xsltStylesheetPtr xsp = xsltParseStylesheetDoc(xsp_doc);
-        xmlDocPtr res = xsltApplyStylesheet(xsp, doc, 0);
+        xmlDocPtr res = xsltApplyStylesheet(xsp, doc, info->xsl_parms);
         if (res)
         {
             xmlChar *out_buf = 0;
@@ -229,12 +302,14 @@ static int convert_xslt(void *info, WRBUF record, WRBUF wr_error)
     return ret;
 }
 
-static void destroy_xslt(void *info)
+static void destroy_xslt(void *vinfo)
 {
+    struct xslt_info *info = vinfo;
+
     if (info)
     {
-        xmlDocPtr xsp_doc = info;
-        xmlFreeDoc(xsp_doc);
+        xmlFreeDoc(info->xsp_doc);
+        nmem_destroy(info->nmem);
     }
 }
 
