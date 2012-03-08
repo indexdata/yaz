@@ -374,14 +374,14 @@ static void *construct_marc(const xmlNode *ptr,
         }
         yaz_iconv_close(cd);
     }
-    else if (info->input_charset)
+    else if (!info->output_charset)
     {
         wrbuf_printf(wr_error, "Element <marc>: "
                      "attribute 'outputcharset' missing");
         nmem_destroy(info->nmem);
         return 0;
     }
-    else if (info->output_charset)
+    else if (!info->input_charset)
     {
         wrbuf_printf(wr_error, "Element <marc>: "
                      "attribute 'inputcharset' missing");
