@@ -57,6 +57,7 @@ struct marc_info {
     const char *output_charset;
     int input_format_mode;
     int output_format_mode;
+    const char *leader_spec;
 };
 
 /** \brief tranformation info (rule info) */
@@ -261,6 +262,7 @@ static void *construct_marc(const xmlNode *ptr,
     info->output_charset = 0;
     info->input_format_mode = 0;
     info->output_format_mode = 0;
+    info->leader_spec = 0;
 
     for (attr = ptr->properties; attr; attr = attr->next)
     {
@@ -276,6 +278,10 @@ static void *construct_marc(const xmlNode *ptr,
         else if (!xmlStrcmp(attr->name, BAD_CAST "outputformat") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
             output_format = (const char *) attr->children->content;
+        else if (!xmlStrcmp(attr->name, BAD_CAST "leaderspec") &&
+                 attr->children && attr->children->type == XML_TEXT_NODE)
+            info->leader_spec =
+                nmem_strdup(info->nmem,(const char *) attr->children->content);
         else
         {
             wrbuf_printf(wr_error, "Element <marc>: expected attributes"
@@ -402,7 +408,9 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
     yaz_marc_t mt = yaz_marc_create();
     
     yaz_marc_xml(mt, mi->output_format_mode);
-    
+    if (mi->leader_spec)
+        yaz_marc_leader_spec(mt, mi->leader_spec);
+        
     if (cd)
         yaz_marc_iconv(mt, cd);
     if (mi->input_format_mode == YAZ_MARC_ISO2709)
