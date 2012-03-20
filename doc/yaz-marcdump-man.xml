@@ -126,7 +126,7 @@
       pairs, where pos is an integer offset (0 - 23) for leader. Value
       is either a quoted string or an integer (character value in decimal).
       Pairs are comma separated. For example, to set leader at offset 9
-      to a, use <literal>9=a</literal>.
+      to a, use <literal>9='a'</literal>.
      </para></listitem>
    </varlistentry>
 
