@@ -1,3 +1,19 @@
+record_conv: leader spec may be given for marc element.
+The leader spec is given as attribute leaderspec for element marc. 
+For example to convert a MARC21 record from MARC-8 to UTF-8:
+     <marc inputformat="marc" outputformat="marc"
+      inputcharset="marc-8" outputcharset="utf-8 "leaderspec="9='a'"/>
+
+record_conv: allow user-XSLT params. For example:
+       <xslt stylesheet="MARC21slim2DC.xsl">
+          <param name="myparameter" value="myvalue"/>
+          <param name="otherparameter" value="othervalue"/>
+       </xslt>
+
+record_conv: fix error handling for missing marc charsets.
+
+CQL: fix extra terms in wrong order.
+
 --- 4.2.28 2012/03/06
 
 record_conv: modify new API for conversion types. The conversion types
