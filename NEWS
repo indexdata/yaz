@@ -1,3 +1,5 @@
+--- 4.2.29 2012/03/20
+
 record_conv: leader spec may be given for marc element.
 The leader spec is given as attribute leaderspec for element marc. 
 For example to convert a MARC21 record from MARC-8 to UTF-8:
