@@ -93,3 +93,5 @@
 120, "Response position out of range"
 121, "Too many terms requested"
 235, "Database does not exist"
+236, "Access to specified database denied"
+1015, "Init/AC: Maximum number of simultaneous sessions for Userid"
