@@ -1,3 +1,14 @@
+--- 4.2.30 2012/04/11
+
+Add two new SRU diagnostics:
+ 236: Access to specified database denied
+ 1015: Init/AC: Maximum number of simultaneous sessions for Userid
+
+Document the very useful ZOOM-C option "apdulog".
+
+CQL to RPN: term may be passed through verbatim. This is enabled with
+truncation.cql . The assumption being that the term is already CQL.
+
 --- 4.2.29 2012/03/20
 
 record_conv: leader spec may be given for marc element.
