@@ -123,7 +123,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
                 sks->u.missingValueData->size = sks->u.missingValueData->len;
                 sks->u.missingValueData->buf = (unsigned char*)
                                           odr_strdup(out, sort_flags+i);
-                i += strlen(sort_flags+i);
+                i += strlen(sort_flags+i) - 1;
             }
         }
     }
