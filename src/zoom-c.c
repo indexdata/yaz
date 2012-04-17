@@ -337,7 +337,7 @@ char **ZOOM_connection_get_databases(ZOOM_connection con, ZOOM_options options,
         if (cp)
             cp++;
     }
-    if (!cp)
+    if (!cp || !*cp)
         cp = "Default";
     nmem_strsplit(odr_getmem(odr), "+", cp,  &databaseNames, num);
     return databaseNames;
