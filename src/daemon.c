@@ -75,12 +75,14 @@ static void keepalive(void (*work)(void *data), void *data)
     int cont = 1;
     void (*old_sighup)(int);
     void (*old_sigterm)(int);
+    void (*old_sigusr1)(int);
     
     /* keep signals in their original state and make sure that some signals
        to parent process also gets sent to the child.. 
     */
     old_sighup = signal(SIGHUP, kill_child_handler);
     old_sigterm = signal(SIGTERM, kill_child_handler);
+    old_sigusr1 = signal(SIGUSR1, kill_child_handler);
     while (cont)
     {
         pid_t p = fork();
@@ -97,6 +99,7 @@ static void keepalive(void (*work)(void *data), void *data)
                 /* child */
             signal(SIGHUP, old_sighup);  /* restore */
             signal(SIGTERM, old_sigterm);/* restore */
+            signal(SIGUSR1, old_sigusr1);/* restore */
             
             work(data);
             exit(0);
