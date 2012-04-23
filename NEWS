@@ -1,3 +1,13 @@
+--- 4.2.31 2012/04/23
+
+YAZ daemon utility relays SIGUSR1 to child process.
+
+ZOOM: handle trailing slash for Z39.50 urls. Previously localhost:9999/
+would result in en empty database list - which in turn would result in
+encoding failure for search.
+
+Fix reading beyond string in yaz_sort_spec.
+
 --- 4.2.30 2012/04/11
 
 Add two new SRU diagnostics:
