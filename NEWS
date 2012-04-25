@@ -1,3 +1,5 @@
+--- 4.2.32 2012/04/25
+
 Add some Bib-1/SRU diagnostics + mappings. Bib-1: 1073 and
 Bib-1 1074: Proxy failure. SRU: 1074: Proxy failure
 
