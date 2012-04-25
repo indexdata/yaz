@@ -95,3 +95,4 @@
 235, "Database does not exist"
 236, "Access to specified database denied"
 1015, "Init/AC: Maximum number of simultaneous sessions for Userid"
+1074, "Proxy failure"
