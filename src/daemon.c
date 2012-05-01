@@ -66,7 +66,10 @@ pid_t child_pid = 0;
 static void kill_child_handler(int num)
 {
     if (child_pid)
+    {
         kill(child_pid, num);
+        _exit(0);
+    }
 }
 
 static void keepalive(void (*work)(void *data), void *data)
