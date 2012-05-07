@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -55,6 +55,22 @@ YAZ_EXPORT yaz_record_conv_t yaz_record_conv_create(void);
 YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 
 #if YAZ_HAVE_XML2
+/** record conversion type */
+struct yaz_record_conv_type {
+    /** \brief pointer to next type ; NULL for last */
+    struct yaz_record_conv_type *next;
+
+    /** \brief construct and configure a type of ours */
+    void * (*construct)(const xmlNode *, const char *path,
+                        WRBUF error_msg);
+
+    /** \brief converts a record */
+    int  (*convert)(void *info, WRBUF record, WRBUF error_msg);
+
+    /** \brief destroys our conversion handler */
+    void (*destroy)(void *info);
+};
+
 /** configures record conversion
     \param p record conversion handle
     \param node xmlNode pointer (root element of XML config)
@@ -80,6 +96,19 @@ YAZ_EXPORT void yaz_record_conv_destroy(yaz_record_conv_t p);
 */
 YAZ_EXPORT
 int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *node);
+
+/** configures record conversion with user-defined conversion types
+    \param p record conversion handle
+    \param node xmlNode pointer (root element of XML config)
+    \param types conversion types
+    \retval 0 success
+    \retval -1 failure
+
+*/
+YAZ_EXPORT
+int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *node,
+                                struct yaz_record_conv_type *types);
+
 #endif
 
 /** performs record conversion on record buffer (OCTET aligned)
@@ -126,6 +155,11 @@ const char *yaz_record_conv_get_error(yaz_record_conv_t p);
 */    
 YAZ_EXPORT
 void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
+
+/** adds a type to our conversion handler
+    \param p record conversion handle
+    \param type info
+*/    
 
 YAZ_END_CDECL
 

@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -270,11 +270,10 @@ int ir_read(IOCHAN h, int event)
     
     if ((assoc->cs_put_mask & EVENT_INPUT) == 0 && (event & assoc->cs_get_mask))
     {
-        yaz_log(YLOG_DEBUG, "ir_session (input)");
         /* We aren't speaking to this fellow */
         if (assoc->state == ASSOC_DEAD)
         {
-            yaz_log(log_sessiondetail, "Connection closed - end of session");
+            yaz_log(log_session, "Connection closed - end of session");
             cs_close(conn);
             destroy_association(assoc);
             iochan_destroy(h);
@@ -297,10 +296,8 @@ int ir_read(IOCHAN h, int event)
             }
             else if (res <= 0)
             {
+                assoc->state = ASSOC_DEAD;
                 yaz_log(log_session, "Connection closed by client");
-                cs_close(conn);
-                destroy_association(assoc);
-                iochan_destroy(h);
                 return 0;
             }
             else if (res == 1) /* incomplete read - wait for more  */
@@ -447,7 +444,6 @@ void ir_session(IOCHAN h, int event)
             yaz_log(YLOG_DEBUG, "HTTP out:\n%.*s", req->len_response,
                     req->response);
 #endif
-            nmem_destroy(req->request_mem);
             request_deq(&assoc->outgoing);
             request_release(req);
             if (!request_head(&assoc->outgoing))

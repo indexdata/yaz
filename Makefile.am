@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2011 Index Data
+## Copyright (C) 1995-2012 Index Data
 
 AUTOMAKE_OPTIONS = foreign 
 
@@ -15,7 +15,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = yaz.pc
 
 SPEC_FILE=$(PACKAGE).spec
-EXTRA_DIST=$(SPEC_FILE) README LICENSE NEWS \
+EXTRA_DIST=$(SPEC_FILE) IDMETA README LICENSE NEWS \
 	yaz-config.in yaz.pc.in m4/yaz.m4 m4/yaz_libxml2.m4 buildconf.sh \
 	Doxyfile.in m4/acx_pthread.m4 m4/ac_check_icu.m4
 

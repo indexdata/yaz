@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -156,8 +156,7 @@ int yaz_xml_include_simple(xmlNode *n, const char *base_path)
     struct yaz_xml_include_s s;
 
     s.confdir = base_path;
-    process_config_includes(&s, n);
-    return 0;
+    return process_config_includes(&s, n);
 }
 
 /* YAZ_HAVE_XML2 */

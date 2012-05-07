@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 #if HAVE_CONFIG_H
@@ -50,6 +50,110 @@ static void tst_srw(void)
 }
 #endif
 
+static void tst_array_to_uri(void)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    char **names;
+    char **values;
+    char *query_string;
+    int r;
+
+    r = yaz_uri_to_array("&", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 0);
+    if (r == 0)
+    {
+        YAZ_CHECK(names[0] == 0);
+        YAZ_CHECK(values[0] == 0);
+    }
+    r = yaz_uri_to_array("&&", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 0);
+    if (r == 0)
+    {
+        yaz_array_to_uri(&query_string, odr, names, values);
+        YAZ_CHECK(!strcmp(query_string, ""));
+
+        YAZ_CHECK(names[0] == 0);
+        YAZ_CHECK(values[0] == 0);
+    }
+    r = yaz_uri_to_array("a=AA&bb=%42B", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 2);
+    if (r == 2)
+    {
+        YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
+        YAZ_CHECK(values[0] && !strcmp(values[0], "AA"));
+        
+        YAZ_CHECK(names[1] && !strcmp(names[1], "bb"));
+        YAZ_CHECK(values[1] && !strcmp(values[1], "BB"));
+
+        YAZ_CHECK(names[2] == 0);
+        YAZ_CHECK(values[2] == 0);
+
+        yaz_array_to_uri(&query_string, odr, names, values);
+        YAZ_CHECK(!strcmp(query_string, "a=AA&bb=BB"));
+    }
+    r = yaz_uri_to_array("a=AA&bb&x", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 3);
+    if (r == 3)
+    {
+        YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
+        YAZ_CHECK(values[0] && !strcmp(values[0], "AA"));
+
+        YAZ_CHECK(names[1] && !strcmp(names[1], "bb"));
+        YAZ_CHECK(values[1] && !strcmp(values[1], ""));
+
+        YAZ_CHECK(names[2] && !strcmp(names[2], "x"));
+        YAZ_CHECK(values[2] && !strcmp(values[1], ""));
+
+        YAZ_CHECK(names[3] == 0);
+        YAZ_CHECK(values[3] == 0);
+
+        yaz_array_to_uri(&query_string, odr, names, values);
+        YAZ_CHECK(!strcmp(query_string, "a=AA&bb=&x="));
+    }
+
+    r = yaz_uri_to_array("a=AA&bb=&x=", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 3);
+    if (r == 3)
+    {
+        YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
+        YAZ_CHECK(values[0] && !strcmp(values[0], "AA"));
+
+        YAZ_CHECK(names[1] && !strcmp(names[1], "bb"));
+        YAZ_CHECK(values[1] && !strcmp(values[1], ""));
+
+        YAZ_CHECK(names[2] && !strcmp(names[2], "x"));
+        YAZ_CHECK(values[2] && !strcmp(values[1], ""));
+
+        YAZ_CHECK(names[3] == 0);
+        YAZ_CHECK(values[3] == 0);
+
+        yaz_array_to_uri(&query_string, odr, names, values);
+        YAZ_CHECK(!strcmp(query_string, "a=AA&bb=&x="));
+    }
+
+    r = yaz_uri_to_array("a=AA&&&bb&x&&", odr, &names, &values);
+    YAZ_CHECK_EQ(r, 3);
+    if (r == 3)
+    {
+        YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
+        YAZ_CHECK(values[0] && !strcmp(values[0], "AA"));
+
+        YAZ_CHECK(names[1] && !strcmp(names[1], "bb"));
+        YAZ_CHECK(values[1] && !strcmp(values[1], ""));
+
+        YAZ_CHECK(names[2] && !strcmp(names[2], "x"));
+        YAZ_CHECK(values[2] && !strcmp(values[2], "")); 
+
+        YAZ_CHECK(names[3] == 0);
+        YAZ_CHECK(values[3] == 0);
+
+        yaz_array_to_uri(&query_string, odr, names, values);
+        YAZ_CHECK(!strcmp(query_string, "a=AA&bb=&x="));
+    }
+
+    odr_destroy(odr);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -57,6 +161,7 @@ int main(int argc, char **argv)
     LIBXML_TEST_VERSION;
     tst_srw();
 #endif
+    tst_array_to_uri();
     YAZ_CHECK_TERM;
 }
 /*

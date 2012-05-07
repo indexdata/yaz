@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -91,6 +91,8 @@ request *request_get(request_q *q)
 void request_release(request *r)
 {
     request_q *q = r->q;
+    if (r->request_mem)
+        nmem_destroy(r->request_mem);
     r->next = q->list;
     q->list = r;
 }

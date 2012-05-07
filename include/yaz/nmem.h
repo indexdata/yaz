@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -157,7 +157,7 @@ YAZ_EXPORT void nmem_strsplit_escape(NMEM nmem, const char *delim,
     \param num number of result strings
     \param collapse 1=collapse multiple delims to one; 0=no collapse
     \param escape_char != 0, an escape char (could be \)
-    \param subst_escape, 1=substitute escapes, 0 leave as is
+    \param subst_escape 1=substitute escapes, 0 leave as is
 */
 YAZ_EXPORT void nmem_strsplit_escape2(NMEM nmem, const char *delim,
                                       const char *dstr,

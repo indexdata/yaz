@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -108,9 +108,9 @@ void yaz_retrieval_reset(yaz_retrieval_t p)
 }
 
 /** \brief parse retrieval XML config */
-static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
+static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
+                          struct yaz_record_conv_type *types)
 {
-
     struct _xmlAttr *attr;
     struct yaz_retrieval_elem *el = (struct yaz_retrieval_elem *)
         nmem_malloc(p->nmem, sizeof(*el));
@@ -171,36 +171,45 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     {
         if (ptr->type != XML_ELEMENT_NODE)
             continue;
-        if (strcmp((const char *) ptr->name, "backend")){
+        if (strcmp((const char *) ptr->name, "backend"))
+        {
             wrbuf_printf(p->wr_error, "Element <retrieval>: expected"
                          " zero or one element <backend>, got <%s>",
                          (const char *) ptr->name);
             return -1;
         }
-
-        else {
-
-            /* parsing attributees */
+        else
+        {
             struct _xmlAttr *attr;
-            for (attr = ptr->properties; attr; attr = attr->next){
-            
+            if (el->record_conv)
+            {
+                wrbuf_printf(p->wr_error, "Element <retrieval>: "
+                             "only one <backend> allowed");
+                yaz_record_conv_destroy(el->record_conv);
+                return -1;
+            }
+            /* parsing attributees */
+            for (attr = ptr->properties; attr; attr = attr->next)
+            {
                 if (!xmlStrcmp(attr->name, BAD_CAST "name") 
                          && attr->children 
                          && attr->children->type == XML_TEXT_NODE)
                     el->backend_name 
                         = nmem_strdup(p->nmem, 
                                       (const char *) attr->children->content);
-
+                
                 else if (!xmlStrcmp(attr->name, BAD_CAST "syntax") 
                          && attr->children 
-                         && attr->children->type == XML_TEXT_NODE){
+                         && attr->children->type == XML_TEXT_NODE)
+                {
                     el->backend_syntax 
                         = yaz_string_to_oid_odr(
                             yaz_oid_std(),
                             CLASS_RECSYN,
                             (const char *) attr->children->content,
                             p->odr);
-                    if (!el->backend_syntax){
+                    if (!el->backend_syntax)
+                    {
                         wrbuf_printf(p->wr_error, 
                                      "Element <backend syntax='%s'>: "
                                      "attribute 'syntax' has invalid "
@@ -210,7 +219,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                         return -1;
                     } 
                 }
-                else {
+                else
+                {
                     wrbuf_printf(p->wr_error, "Element <backend>: expected "
                                  "attributes 'syntax' or 'name, got '%s'", 
                                  attr->name);
@@ -218,14 +228,12 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
                 }
             }
           
- 
-            /* parsing internal of record conv */
+             /* parsing internal of record conv */
             el->record_conv = yaz_record_conv_create();
-            
+
             yaz_record_conv_set_path(el->record_conv, p->path);
 
-        
-            if (yaz_record_conv_configure(el->record_conv, ptr))
+            if (yaz_record_conv_configure_t(el->record_conv, ptr, types))
             {
                 wrbuf_printf(p->wr_error, "%s",
                              yaz_record_conv_get_error(el->record_conv));
@@ -240,7 +248,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr)
     return 0;
 }
 
-int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
+int yaz_retrieval_configure_t(yaz_retrieval_t p, const xmlNode *ptr,
+                              struct yaz_record_conv_type *types)
 {
     yaz_retrieval_reset(p);
 
@@ -253,7 +262,7 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
                 continue;
             if (!strcmp((const char *) ptr->name, "retrieval"))
             {
-                if (conf_retrieval(p, ptr))
+                if (conf_retrieval(p, ptr, types))
                     return -1;
             }
             else
@@ -271,6 +280,11 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
         return -1;
     }
     return 0;
+}
+
+int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
+{
+    return yaz_retrieval_configure_t(p, ptr, 0);
 }
 
 int yaz_retrieval_request(yaz_retrieval_t p,

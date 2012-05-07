@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -61,7 +61,7 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     \retval 0 success
     \retval -1 failure
 
-    On failure, use yaz_retrieval_get_error to get error string.
+    On failure, call yaz_retrieval_get_error to get error string.
     
     For retrieval:
     \verbatim
@@ -87,6 +87,21 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
 */
 YAZ_EXPORT
 int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *node);
+
+
+/** configures retrieval with user-defined conversion types
+    \param p retrieval handle
+    \param node xmlNode pointer (root element of XML config)
+    \param types record conversion types
+    \retval 0 success
+    \retval -1 failure
+
+    On failure, use yaz_retrieval_get_error to get error string.
+*/
+YAZ_EXPORT
+int yaz_retrieval_configure_t(yaz_retrieval_t p, const xmlNode *node,
+                              struct yaz_record_conv_type *types);
+
 #endif
 
 /** performs retrieval request based on schema and format

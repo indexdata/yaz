@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -561,6 +561,15 @@ ZOOM_connection_peek_event(ZOOM_connection c);
 
 ZOOM_API(const char *)
 ZOOM_get_event_str(int event);
+
+#ifdef WRBUF_H
+
+/** \brief log APDUs to WRBUF
+    \param c connection
+    \param w WRBUF where APDUs are logged
+*/
+ZOOM_API(void) ZOOM_connection_save_apdu_wrbuf(ZOOM_connection c, WRBUF w);
+#endif
 
 ZOOM_END_CDECL
 

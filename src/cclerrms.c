@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /** 
@@ -28,12 +28,18 @@ static char *err_msg_array[] = {
     "Bad relation",
     "Left truncation not supported",
     "Both left - and right truncation not supported",
-    "Right truncation not supported"
+    "Right truncation not supported",
+    "Embedded truncation not supported",
+    "Single character mask not supported"
 };
 
 const char *ccl_err_msg(int ccl_errno)
 {
-    return err_msg_array[ccl_errno];
+    if (ccl_errno >= 0 && 
+        ccl_errno < sizeof(err_msg_array)/sizeof(*err_msg_array))
+        return err_msg_array[ccl_errno];
+    else
+        return 0;
 }
 /*
  * Local variables:

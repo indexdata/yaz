@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -86,11 +86,11 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         conn = cs_create_host_proxy(uri, 1, &add, p->proxy);
         if (!conn)
         {
-            yaz_log(YLOG_WARN, "Bad address for URL:%s", uri);
+            yaz_log(YLOG_WARN, "Could not resolve URL: %s", uri);
         }
         else if (cs_connect(conn, add) < 0)
         {
-            yaz_log(YLOG_WARN, "Can not connect to URL:%s", uri);
+            yaz_log(YLOG_WARN, "Can not connect to URL: %s", uri);
         }
         else
         {
@@ -98,7 +98,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             char *buf = odr_getbuf(p->odr_out, &len, 0);
             
             if (cs_put(conn, buf, len) < 0)
-                yaz_log(YLOG_WARN, "cs_put failed URL:%s", uri);
+                yaz_log(YLOG_WARN, "cs_put failed URL: %s", uri);
             else
             {
                 char *netbuffer = 0;
@@ -106,7 +106,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                 int cs_res = cs_get(conn, &netbuffer, &netlen);
                 if (cs_res <= 0)
                 {
-                    yaz_log(YLOG_WARN, "cs_get failed URL:%s", uri);
+                    yaz_log(YLOG_WARN, "cs_get failed URL: %s", uri);
                 }
                 else
                 {

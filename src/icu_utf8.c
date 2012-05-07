@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -61,7 +61,7 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
     if (!buf8)
         return 0;
 
-    if (capacity >  0)
+    if (capacity > 0)
     {
         if (0 == buf8->utf8)
             buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
@@ -71,7 +71,8 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
         
         buf8->utf8_cap = capacity;
     } 
-    else { 
+    else
+    { 
         xfree(buf8->utf8);
         buf8->utf8 = 0;
         buf8->utf8_len = 0;
@@ -125,8 +126,7 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
                       src8cstr, src8cstr_len, status);
     }
 
-    if (U_SUCCESS(*status)  
-        && utf16_len <= dest16->utf16_cap)
+    if (U_SUCCESS(*status) && utf16_len <= dest16->utf16_cap)
         dest16->utf16_len = utf16_len;
     else 
         icu_buf_utf16_clear(dest16);
@@ -154,8 +154,7 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
                     src16->utf16, src16->utf16_len, status);
     }
 
-    if (U_SUCCESS(*status)  
-        && utf8_len <= dest8->utf8_cap)
+    if (U_SUCCESS(*status) && utf8_len <= dest8->utf8_cap)
         dest8->utf8_len = utf8_len;
     else 
         icu_buf_utf8_clear(dest8);

@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -61,7 +61,7 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
     if (!buf16)
         return 0;
     
-    if (capacity >  0)
+    if (capacity > 0)
     {
         if (0 == buf16->utf16)
             buf16->utf16 = (UChar *) xmalloc(sizeof(UChar) * capacity);
@@ -79,7 +79,6 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
         buf16->utf16_len = 0;
         buf16->utf16_cap = 0;
     }
-
     return buf16;
 }
 

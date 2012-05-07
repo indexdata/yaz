@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -73,6 +73,8 @@ struct ZOOM_connection_p {
     ODR odr_in;
     ODR odr_out;
     ODR odr_print;
+    ODR odr_save;
+
     char *buf_in;
     int len_in;
     char *buf_out;

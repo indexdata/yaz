@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -62,11 +62,31 @@ static void write_pidfile(int pid_fd)
     }
 }
 
+int child_got_signal_from_us = 0;
 pid_t child_pid = 0;
-static void kill_child_handler(int num)
+static void normal_stop_handler(int num)
 {
     if (child_pid)
+    {
+        /* tell child to terminate . ensure keepalive stops running -
+           let wait(2) wait once - so we exit AFTER the child */
+        child_got_signal_from_us = 1;
         kill(child_pid, num);
+    }
+}
+
+static void graceful_stop_handler(int num)
+{
+    if (child_pid)
+    {
+        /* tell our child to stop listening and wait some in time
+           in the hope that it has stopped listening by then. Then
+           we exit - quite possibly the child is still running - serving
+           remaining requests */
+        kill(child_pid, num);
+        sleep(2);
+        _exit(0);
+    }
 }
 
 static void keepalive(void (*work)(void *data), void *data)
@@ -75,13 +95,15 @@ static void keepalive(void (*work)(void *data), void *data)
     int cont = 1;
     void (*old_sighup)(int);
     void (*old_sigterm)(int);
+    void (*old_sigusr1)(int);
     
     /* keep signals in their original state and make sure that some signals
        to parent process also gets sent to the child.. 
     */
-    old_sighup = signal(SIGHUP, kill_child_handler);
-    old_sigterm = signal(SIGTERM, kill_child_handler);
-    while (cont)
+    old_sighup = signal(SIGHUP, normal_stop_handler);
+    old_sigterm = signal(SIGTERM, normal_stop_handler);
+    old_sigusr1 = signal(SIGUSR1, graceful_stop_handler);
+    while (cont && !child_got_signal_from_us)
     {
         pid_t p = fork();
         pid_t p1;
@@ -97,6 +119,7 @@ static void keepalive(void (*work)(void *data), void *data)
                 /* child */
             signal(SIGHUP, old_sighup);  /* restore */
             signal(SIGTERM, old_sigterm);/* restore */
+            signal(SIGUSR1, old_sigusr1);/* restore */
             
             work(data);
             exit(0);

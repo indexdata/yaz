@@ -1,3 +1,75 @@
+yaz (4.2.32-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 25 Apr 2012 10:06:23 +0200
+
+yaz (4.2.31-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 23 Apr 2012 10:53:37 +0200
+
+yaz (4.2.30-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 11 Apr 2012 10:24:28 +0200
+
+yaz (4.2.29-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 20 Mar 2012 10:35:29 +0100
+
+yaz (4.2.28-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 06 Mar 2012 12:23:00 +0100
+
+yaz (4.2.27-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Tue, 28 Feb 2012 19:40:46 +0000
+
+yaz (4.2.26-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 23 Feb 2012 08:13:08 +0000
+
+yaz (4.2.25-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 11 Jan 2012 09:29:11 +0100
+
+yaz (4.2.24-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 21 Dec 2011 14:51:55 +0100
+
+yaz (4.2.23-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 15 Dec 2011 10:31:19 +0100
+
+yaz (4.2.22-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Mon, 05 Dec 2011 10:51:46 +0000
+
+yaz (4.2.21-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 23 Nov 2011 16:06:36 +0000
+
 yaz (4.2.20-1indexdata) unstable; urgency=low
 
   * Upstream.
@@ -7,7 +79,6 @@ yaz (4.2.20-1indexdata) unstable; urgency=low
 yaz (4.2.19-1indexdata) unstable; urgency=low
 
   * Upstream.
-  * .i
 
  -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 09 Nov 2011 15:58:38 +0100
 

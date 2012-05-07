@@ -1,4 +1,111 @@
--- 4.2.20 2011/11/09
+--- 4.2.32 2012/04/25
+
+Add some Bib-1/SRU diagnostics + mappings. Bib-1: 1073 and
+Bib-1 1074: Proxy failure. SRU: 1074: Proxy failure
+
+--- 4.2.31 2012/04/23
+
+YAZ daemon utility relays SIGUSR1 to child process.
+
+ZOOM: handle trailing slash for Z39.50 urls. Previously localhost:9999/
+would result in en empty database list - which in turn would result in
+encoding failure for search.
+
+Fix reading beyond string in yaz_sort_spec.
+
+--- 4.2.30 2012/04/11
+
+Add two new SRU diagnostics:
+ 236: Access to specified database denied
+ 1015: Init/AC: Maximum number of simultaneous sessions for Userid
+
+Document the very useful ZOOM-C option "apdulog".
+
+CQL to RPN: term may be passed through verbatim. This is enabled with
+truncation.cql . The assumption being that the term is already CQL.
+
+--- 4.2.29 2012/03/20
+
+record_conv: leader spec may be given for marc element.
+The leader spec is given as attribute leaderspec for element marc. 
+For example to convert a MARC21 record from MARC-8 to UTF-8:
+     <marc inputformat="marc" outputformat="marc"
+      inputcharset="marc-8" outputcharset="utf-8 "leaderspec="9='a'"/>
+
+record_conv: allow user-XSLT params. For example:
+       <xslt stylesheet="MARC21slim2DC.xsl">
+          <param name="myparameter" value="myvalue"/>
+          <param name="otherparameter" value="othervalue"/>
+       </xslt>
+
+record_conv: fix error handling for missing marc charsets.
+
+CQL: fix extra terms in wrong order.
+
+--- 4.2.28 2012/03/06
+
+record_conv: modify new API for conversion types. The conversion types
+may be passed in new functions yaz_record_conv_configure_t and
+yaz_retrieval_configure_t.  Removing yaz_record_conv_add_type .
+
+Avoid mixed statement/variable declare; fixes compilation with Visual
+Studio.
+
+--- 4.2.27 2012/02/28
+
+Add non-standard SRU diagnostic: 235: "Database does not exist".
+Couldn't live without it. HTTP 404: "Not found" is just so anonymous.
+Update SRU to Bib-1 diagnostic maps accordingly.
+
+CCL: add two new diagnostics for unsupported masking. The new
+diagnostics are: "Embedded truncation not supported" and
+"Single charcacter mask not supported".  
+
+--- 4.2.26 2012/02/23
+
+CCL: fix use of "term" field in sub queries. Bug introduced in YAZ 4.2.25.
+
+--- 4.2.25 2012/01/11
+
+Build YAZ for Ubuntu Oneiric.
+
+CCL: allow parantheses for proximity operands. For example CCL query
+(a) % (b)   is now allowed.
+
+GFS: fix bend_assoc_is_alive. When cs_get returns 0 the association is
+marked dead, rather then being destroyed. If not, the session memory is
+being free'd before the search/scan handler is finished. Also destroy
+'request' memory in request_release rather than in various places,
+which resulted in leaks from time to time.
+
+--- 4.2.24 2011/12/21
+
+cql_sortby_to_sortkeys: honor sort prefix.
+
+RPN to CQL: always quote resulting terms. For bizarre reasons, JSTOR's
+SRU server returns 0 hits on ISSN searches unless a CQL term is quoted.
+The rpn2cql family of functions now always returns quoted CQL terms.
+
+Fix CQL to CCL conversion for multiple terms. Add two test cases as well.
+
+--- 4.2.23 2011/12/15
+
+Allow =val to be omitted for yaz_uri_to_array. Also, multiple &'s in
+sequence is treated as one. For example, &&a=b&&&c& is identical to
+a=b&c= .
+
+--- 4.2.22 2011/12/05
+
+Add ZOOM_connection_save_apdu_wrbuf. This function may be used to save
+APDUs for a connection to a WRBUF.
+
+--- 4.2.21 2011/11/23
+
+Fix cql_sortby_to_sortkeys. Completely broken before.
+
+Make CCL's @truncation work again.
+
+--- 4.2.20 2011/11/09
 
 New ZOOM connection setting: tproxy.  It's like proxy, but does not
 set Z39.50 proxy OID or change HTTP for proxy behavior. Can be used
@@ -6,7 +113,7 @@ to set resolved address + port for a connection outside ZOOM itself.
 
 Fix atoi_n_check digit test. Thanks to Giannis Kosmas for spotting it.
 
--- 4.2.19 2011/11/07
+--- 4.2.19 2011/11/07
 
 Fix uninitialized variable in Solr spell support (could cause SEGV
 for SRU response decoding).
@@ -18,19 +125,19 @@ When ZOOM_set_dset_error() is passed an addinfo2 as well as addinfo,
 they are separated by a colon and a space rather than simply
 concatenated.
 
--- 4.2.18 2011/10/28
+--- 4.2.18 2011/10/28
 
 Add support for Solr spell-checking/suggestions through ZOOM.
 If a Solr target has been configured correctly for spelling-checking 
 and suggestions, these will now be returned on the ResultSet option 
 "suggestions". zoomsh has been extended to show this with the cmd suggestions.
 
--- 4.2.17 2011/09/28
+--- 4.2.17 2011/09/28
 
 Fix function nmem_strsplit_escape2 which extends nmem_strsplit_escape
 with a flag whether to substitute escape sequences or not.
 
--- 4.2.16 2011/09/22
+--- 4.2.16 2011/09/22
 
 Fix nmem_strsplit_escape to substitute escape char properly.
 
@@ -40,7 +147,7 @@ return process exit code to indicate success/failure.
 YAZ options utility supports special option -- which makes all it treat
 all following arguments as non-options.
 
--- 4.2.15 2011/09/16
+--- 4.2.15 2011/09/16
 
 Fix yaz_file_path_resolve/yaz_path_fopen/yaz_fopen so that path is not
 searched if absolute filename is given.
@@ -48,7 +155,7 @@ searched if absolute filename is given.
 Fix conv_xslt() error-reporting when stylesheet is not found.
 (The value of fullpath is meaningless in this situation.)
 
--- 4.2.14 2011/09/07
+--- 4.2.14 2011/09/07
 
 Fix problem in CQL sort node creation: un-initialized memory.
 
@@ -65,7 +172,7 @@ will make it possible to use both single-character mask (#) and wildcard (?)
 in CCL . Throw diagnostic for left truncation because that is not supported
 by SOLR.
 
--- 4.2.13 2011/09/01
+--- 4.2.13 2011/09/01
 
 Fixes for cql2rpn, cql2ccl and ccl2rpn; mostly in the area of special
 cases using escapes (\-sequences) and masking.
@@ -80,12 +187,12 @@ ICU check fix. Don't include library -lCrun on Solaris, unless present.
 ICU check fix: Use --cppflags-searchpath to determine ICU include files;
 not --cppflags (which seeems like an error in icu-config).
 
--- 4.2.12 2011/08/27 RPM package only
+--- 4.2.12 2011/08/27 RPM package only
 
 cql2ccl: fix conversion of terms: operator characters were not
 quoted/escaped.
 
--- 4.2.11 2011/08/25 RPM package only
+--- 4.2.11 2011/08/25 RPM package only
 
 ccl2rpn: Conversion to regexp-1 terms (trunc=102). For mode t=x, the
 CCL parser will map both # and ? to their regular expression
@@ -97,7 +204,7 @@ of reserved CQL characters.
 cql2ccl: deal with both * and ? in conversion. Also leave escaped ones as
 is, so that they are passed through.
 
--- 4.2.10 2011/08/24
+--- 4.2.10 2011/08/24
 
 ZOOM SRU mode: more aggressive re-connect.
 

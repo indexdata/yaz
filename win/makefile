@@ -1,5 +1,5 @@
 # This file is part of the YAZ toolkit.
-# Copyright (C) 1995-2011 Index Data
+# Copyright (C) 1995-2012 Index Data
 
 # Parameters 
 
@@ -400,6 +400,7 @@ TEST_MUTEX_OBJS = \
    $(OBJDIR)\test_mutex.obj
 
 MISC_OBJS= \
+   $(OBJDIR)\diag_map.obj \
    $(OBJDIR)\base64.obj \
    $(OBJDIR)\version.obj \
    $(OBJDIR)\oid_std.obj \
@@ -863,9 +864,9 @@ $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)
 	$(TCL) csvtosru_update.tcl $(SRCDIR)
 
-$(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/configure.ac
+$(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	@cd $(SRCDIR)
-	$(TCL) mk_version.tcl $(ROOTDIR)/configure.ac $(INCLDIR)\yaz\yaz-version.h
+	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
 
 
 !endif

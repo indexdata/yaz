@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -33,10 +33,11 @@ static void pr_n(void (*pr)(const char *buf, void *client_data),
         }
         else
         {
-            strcpy(tmp, buf);
+            memcpy(tmp, buf, left);
+            tmp[left] = '\0';
             left = 0;
         }
-        pr(client_data, tmp);
+        pr(tmp, client_data);
     }
 }
 
@@ -50,6 +51,8 @@ static int cql_sort_modifiers(struct cql_node *cn,
     for (; cn; cn = cn->u.st.modifiers)
     {
         const char *indx = cn->u.st.index;
+        if (!strncmp(indx, "sort.", 5))
+            indx = indx + 5;
         if (!strcmp(indx, "ignoreCase"))
             caseSensitive = 0;
         else if (!strcmp(indx, "respectCase"))

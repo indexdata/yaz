@@ -1,2 +1,3 @@
-DEBIAN_DIST="wheezy squeeze lenny"
-UBUNTU_DIST="natty maverick lucid karmic"
+DEBIAN_DIST="wheezy squeeze"
+UBUNTU_DIST="precise oneiric natty lucid"
+VERSION=4.2.32

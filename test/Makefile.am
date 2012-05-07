@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2011 Index Data
+## Copyright (C) 1995-2012 Index Data
 
 check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_filepath test_file_glob \

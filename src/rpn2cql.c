@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -194,7 +194,6 @@ static int rpn2cql_simple(cql_transform_t ct,
         size_t lterm = 0;
         Odr_int trunc = lookup_truncation(apt->attributes);
         size_t i;
-        int must_quote = 0;
 
         wrbuf_rewind(w);
         ret = rpn2cql_attr(ct, apt->attributes, w);
@@ -222,10 +221,7 @@ static int rpn2cql_simple(cql_transform_t ct,
             for (i = 0 ; i < lterm; i++)
                 if (strchr(" ()=></", sterm[i]))
                     break;
-            if (i < lterm || lterm == 0)
-                must_quote = 1;
-            if (must_quote)
-                wrbuf_puts(w, "\"");
+            wrbuf_puts(w, "\"");
             if (trunc == 2 || trunc == 3)
                 wrbuf_puts(w, "*");
             for (i = 0; i < lterm; i++)
@@ -258,8 +254,7 @@ static int rpn2cql_simple(cql_transform_t ct,
             }
             if (trunc == 1 || trunc == 3)
                 wrbuf_puts(w, "*");
-            if (must_quote)
-                wrbuf_puts(w, "\"");
+            wrbuf_puts(w, "\"");
         }
         else
         {

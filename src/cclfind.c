@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /** 
@@ -212,6 +212,19 @@ void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
     n->value.str = xstrdup(value);
 }
 
+static size_t cmp_operator(const char **aliases, const char *input)
+{
+    for (; *aliases; aliases++)
+    {
+        const char *cp = *aliases;
+        size_t i;
+        for (i = 0; *cp && *cp == input[i]; i++, cp++)
+            ;
+        if (*cp == '\0')
+            return i;
+    }
+    return 0;
+}
 
 #define REGEX_CHARS "^[]{}()|.*+?!$"
 #define CCL_CHARS "#?\\"
@@ -390,6 +403,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             for (j = 0; j < src_len; j++)
             {
+                size_t op_size;
                 if (j > 0 && src_str[j-1] == '\\')
                 {
                     if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
@@ -406,8 +420,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 }
                 else if (src_str[j] == '"')
                     quote_mode = !quote_mode;
-                else if (!quote_mode && src_str[j] == '?')
+                else if (!quote_mode &&
+                         (op_size = cmp_operator(truncation_aliases,
+                                                 src_str + j))
+                    )
                 {
+                    j += (op_size - 1);  /* j++ in for loop */
                     if (regex_trunc)
                     {
                         strcat(p->u.t.term, ".*");
@@ -424,7 +442,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                         right_trunc = 1;
                     else
                     {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_EMBED;
                         ccl_rpn_delete(p);
                         return NULL;
                     }
@@ -443,7 +461,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     }
                     else
                     {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+                        cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
                         ccl_rpn_delete(p);
                         return NULL;
                     }
@@ -546,6 +564,37 @@ static struct ccl_rpn_node *search_term(CCL_parser cclp, ccl_qualifier_t *qa)
     static int list[] = {CCL_TOK_TERM, CCL_TOK_COMMA, -1};
     return search_term_x(cclp, qa, list, 0);
 }
+
+
+static struct ccl_rpn_node *search_terms2(CCL_parser cclp,
+                                          ccl_qualifier_t *qa)
+{
+    if (KIND == CCL_TOK_LP)
+    {
+        struct ccl_rpn_node *p;
+        ADVANCE;
+        if (!(p = find_spec(cclp, qa)))
+            return NULL;
+        if (KIND != CCL_TOK_RP)
+        {
+            cclp->error_code = CCL_ERR_RP_EXPECTED;
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        ADVANCE;
+        return p;
+    }
+    else
+    {
+        static int list[] = {
+            CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
+            CCL_TOK_REL, CCL_TOK_SET, -1};
+        
+        return search_term_x(cclp, qa, list, 1);
+    }
+}
+
+
 
 static
 struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
@@ -689,20 +738,6 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, 2);
         return p;
     }
-    else if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        if (!(p = find_spec(cclp, ap)))
-            return NULL;
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p);
-            return NULL;
-        }
-        ADVANCE;
-        return p;
-    }
     else
     {
         if (!(p = search_terms(cclp, ap)))
@@ -718,7 +753,6 @@ static
 struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
 {
     char *attset;
-    struct ccl_rpn_node *p;
     
     if (qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_ORDER, &attset)
         || qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, &attset))
@@ -731,24 +765,7 @@ struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
         return NULL;
     }
     ADVANCE;
-    if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        if (!(p = find_spec(cclp, ap)))
-        {
-            return NULL;
-        }
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p);
-            return NULL;
-        }
-        ADVANCE;
-    }
-    else
-        p = search_terms(cclp, ap);
-    return p;
+    return search_terms(cclp, ap);
 }
 
 /**
@@ -915,9 +932,10 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
 static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
 {
     static int list[] = {
-        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ, CCL_TOK_REL, CCL_TOK_SET, -1};
+        CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
+        CCL_TOK_REL, CCL_TOK_SET, -1};
     struct ccl_rpn_node *p1, *p2, *pn;
-    p1 = search_term_x(cclp, qa, list, 1);
+    p1 = search_terms2(cclp, qa);
     if (!p1)
         return NULL;
     while (1)
@@ -935,7 +953,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
             p_prox->u.t.attr_list = 0;
 
             ADVANCE;
-            p2 = search_term_x(cclp, qa, list, 1);
+            p2 = search_terms2(cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete(p1);
@@ -949,7 +967,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
         }
         else if (is_term_ok(KIND, list))
         {
-            p2 = search_term_x(cclp, qa, list, 1);
+            p2 = search_terms2(cclp, qa);
             if (!p2)
             {
                 ccl_rpn_delete(p1);
@@ -978,22 +996,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
 {
     struct ccl_rpn_node *p1;
     struct ccl_token *lookahead;
-    if (KIND == CCL_TOK_LP)
-    {
-        ADVANCE;
-        p1 = find_spec(cclp, qa);
-        if (!p1)
-            return NULL;
-        if (KIND != CCL_TOK_RP)
-        {
-            cclp->error_code = CCL_ERR_RP_EXPECTED;
-            ccl_rpn_delete(p1);
-            return NULL;
-        }
-        ADVANCE;
-        return p1;
-    }
-    else if (KIND == CCL_TOK_SET)
+    if (KIND == CCL_TOK_SET)
     {
         ADVANCE;
         if (KIND == CCL_TOK_EQ)
@@ -1019,7 +1022,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
             break;
         lookahead = lookahead->next;
     }
-    if (qa)
+    if (qa || lookahead->kind == CCL_TOK_LP)
         return search_terms(cclp, qa);
     else
     {

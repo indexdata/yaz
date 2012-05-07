@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 #if HAVE_CONFIG_H
@@ -201,10 +201,19 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 x2 "));
     YAZ_CHECK(tst_ccl_query(bibset, "ti=x3", "@attr 4=2 @attr 1=4 x3 "));
     YAZ_CHECK(tst_ccl_query(bibset, "dc.title=x4", "@attr 1=/my/title x4 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "dc.title=(x4)", "@attr 1=/my/title x4 "));
     YAZ_CHECK(tst_ccl_query(bibset, "x1 and", 0));
     YAZ_CHECK(tst_ccl_query(bibset, "tix=x5", 0));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a%b", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "a%(b)", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%(b)", 
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
@@ -214,6 +223,11 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 b "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a%2b", 
+                  "@prox 0 2 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@attr 4=2 @attr 1=1016 b "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%2(b)", 
                   "@prox 0 2 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
@@ -237,7 +251,20 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
+    YAZ_CHECK(tst_ccl_query(bibset, "a% (b or dc.title=c)", 
+                  "@prox 0 1 0 2 k 2 "
+                  "@attr 4=2 @attr 1=1016 a "
+                  "@or @attr 4=2 @attr 1=1016 b "
+                            "@attr 4=2 @attr 1=1016 @attr 1=/my/title c "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)", 
+                            "@prox 0 1 0 2 k 2 @and "
+                            "@attr 4=2 @attr 1=1016 a @attr 4=2 @attr 1=1016 b "
+                            "@attr 4=2 @attr 1=1016 c " ));
+
     YAZ_CHECK(tst_ccl_query(bibset, "date=1980",
+                            "@attr 2=3 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "(date=1980)",
                             "@attr 2=3 1980 "));
     YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990",
                             "@and @attr 2=4 234 @attr 2=2 1990 "));
@@ -359,6 +386,43 @@ void tst1(int pass)
     ccl_qual_rm(&bibset);
 }
 
+void tst2(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+
+    YAZ_CHECK(bibset);
+    if (!bibset)
+        return;
+
+    ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
+    ccl_qual_fitem(bibset, "1=1016 s=al,pw t=z",    "term");
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a*",
+                            "@attr 4=2 @attr 1=1016 a* "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a?",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a? "));
+
+    ccl_qual_fitem(bibset, "*", "@truncation");
+    YAZ_CHECK(tst_ccl_query(bibset, "a*",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a? "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a?",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a\\\\? "));
+
+    ccl_qual_fitem(bibset, "og", "@and");
+    ccl_qual_fitem(bibset, "eller", "@or");
+    ccl_qual_fitem(bibset, "ikke", "@not");
+
+    YAZ_CHECK(tst_ccl_query(bibset, "a og b eller c ikke d",
+                            "@not @or @and @attr 4=2 @attr 1=1016 a "
+                            "@attr 4=2 @attr 1=1016 b "
+                            "@attr 4=2 @attr 1=1016 c "
+                            "@attr 4=2 @attr 1=1016 d "));
+    ccl_qual_rm(&bibset);
+}
+
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -367,6 +431,7 @@ int main(int argc, char **argv)
     tst1(1);
     tst1(2);
     tst1(3);
+    tst2();
     YAZ_CHECK_TERM;
 }
 /*

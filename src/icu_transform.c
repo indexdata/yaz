@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -130,10 +130,10 @@ int icu_transform_trans(struct icu_transform * transform,
     if (!icu_buf_utf16_copy(dest16, src16))
         return 0;
 
-    utrans_transUChars (transform->trans, 
-                        dest16->utf16, &(dest16->utf16_len),
-                        dest16->utf16_cap,
-                        0, &(dest16->utf16_len), status);
+    utrans_transUChars(transform->trans, 
+                       dest16->utf16, &(dest16->utf16_len),
+                       dest16->utf16_cap,
+                       0, &(dest16->utf16_len), status);
 
     if (U_FAILURE(*status))
         icu_buf_utf16_clear(dest16);

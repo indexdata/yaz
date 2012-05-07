@@ -173,3 +173,5 @@
 1070, "user not authorized to receive record(s) in requested syntax"
 1071, "preferredRecordSyntax not supplied"
 1072, "Query term includes characters that do not translate into the target character set"
+1073, "Database records do not contain data associated with access point"
+1074, "Proxy failure"

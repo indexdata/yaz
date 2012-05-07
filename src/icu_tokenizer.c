@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -195,14 +195,16 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
     {
         tokenizer->token_count++;
         tokenizer->token_id++;
-    } else {
-        tokenizer->token_id = 0;    
     }
+    else
+        tokenizer->token_id = 0;    
+
     tokenizer->token_start = tkn_start;
     tokenizer->token_end = tkn_end;    
 
     /* copying into token buffer if it exists */
-    if (tkn16){
+    if (tkn16)
+    {
         if (tkn16->utf16_cap < tkn_len)
             icu_buf_utf16_resize(tkn16, (size_t) tkn_len * 2);
 

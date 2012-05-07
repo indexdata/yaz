@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 #if HAVE_CONFIG_H
@@ -261,6 +261,25 @@ static void tst_configure(void)
                                   "</retrievalinfo>",
                                   "Element <marc inputformat='not-existent'>:  Unsupported"
                                   " input format defined by attribute value", 0));
+
+
+    YAZ_CHECK(conv_configure_test("<retrievalinfo>"
+                                  "<retrieval syntax=\"usmarc\">"
+                                  "<backend syntax=\"xml\" name=\"dc\">"
+                                  "<xslt stylesheet=\"test_record_conv.xsl\"/>"
+                                  "<marc"
+                                  " inputcharset=\"utf-8\""
+                                  " outputcharset=\"marc-8\""
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marc\""
+                                  "/>"
+                                  "</backend>"
+                                  "<backend/>"
+                                  "</retrieval>"
+                                  "</retrievalinfo>",
+                                  "Element <retrieval>: "
+                                  "only one <backend> allowed", 0));
+
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
                                   "<retrieval syntax=\"usmarc\">"

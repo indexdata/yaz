@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -616,9 +616,17 @@ static void emit_term(cql_transform_t ct,
 {
     int i;
     const char *ns = cn->u.st.index_uri;
-    int process_term = !has_modifier(cn, "regexp");
     int z3958_mode = 0;
+    int process_term = 1;
 
+    if (has_modifier(cn, "regexp"))
+        process_term = 0;
+    else if (cql_lookup_property(ct, "truncation", 0, "cql"))
+    {
+        process_term = 0;
+        cql_pr_attr(ct, "truncation", "cql", 0,
+                    pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
+    }
     assert(cn->which == CQL_NODE_ST);
 
     if (process_term && length > 0)

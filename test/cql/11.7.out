@@ -9,9 +9,9 @@
         <value>=</value>
       </relation>
       <term>dc.title</term>
-      <term>c</term>
-      <term>b</term>
       <term>a</term>
+      <term>b</term>
+      <term>c</term>
     </searchClause>
   </leftOperand>
   <rightOperand>

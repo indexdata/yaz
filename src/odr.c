@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 
@@ -174,6 +174,7 @@ void odr_setprint(ODR o, FILE *file)
 {
     odr_set_stream(o, file, odr_FILE_write, odr_FILE_close);
 }
+
 
 void odr_set_stream(ODR o, void *handle,
                     void (*stream_write)(ODR o, 

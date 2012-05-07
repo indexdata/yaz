@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data
+ * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
 /**
@@ -74,15 +74,14 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                                       AF_INET)))
                 host_name = (char*) host->h_name;
             host_addr = inet_ntoa(addr_in->sin_addr);
-            if (host_addr)
+            if (host_addr && host_name)
                 request_init(&request_info, RQ_DAEMON, daemon_name,
                              RQ_CLIENT_NAME, host_name,
                              RQ_CLIENT_SIN, addr_in,
                              RQ_CLIENT_ADDR, host_addr, 0);
             else
                 request_init(&request_info, RQ_DAEMON, daemon_name,
-                             RQ_CLIENT_SIN, addr_in,
-                             RQ_CLIENT_ADDR, host_addr, 0);
+                             RQ_CLIENT_SIN, addr_in, 0);
             i = hosts_access(&request_info);
             if (!i)
             {

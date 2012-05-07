@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2011 Index Data.
+ * Copyright (C) 1995-2012 Index Data.
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -91,6 +91,8 @@ YAZ_BEGIN_CDECL
 #define CCL_ERR_TRUNC_NOT_LEFT   10
 #define CCL_ERR_TRUNC_NOT_BOTH   11
 #define CCL_ERR_TRUNC_NOT_RIGHT  12
+#define CCL_ERR_TRUNC_NOT_EMBED  13
+#define CCL_ERR_TRUNC_NOT_SINGLE 14
     
 /** \brief attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {
