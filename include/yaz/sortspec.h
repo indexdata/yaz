@@ -96,7 +96,7 @@ YAZ_EXPORT int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w);
    \retval 0 successful
    \retval -1 failure
 */
-int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w);
+YAZ_EXPORT int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w);
 YAZ_END_CDECL
 
 #endif
