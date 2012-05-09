@@ -1,4 +1,4 @@
---- 4.2.33 2012/09/09
+--- 4.2.33 2012/05/09
 
 New function for daemon utility, yaz_daemon_stop .
 
