@@ -1,3 +1,7 @@
+New function for daemon utility, yaz_daemon_stop .
+
+Makes yaz_srw_sortkeys_to_sort_spec public on Windows.
+
 --- 4.2.32 2012/04/25
 
 Add some Bib-1/SRU diagnostics + mappings. Bib-1: 1073 and
