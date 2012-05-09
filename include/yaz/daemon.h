@@ -68,6 +68,17 @@ int yaz_daemon(const char *progname,
                void (*work)(void *data), void *data,
                const char *pidfile, const char *uid);
 
+/** \brief stop daemon - stop parent process
+
+    This function sends a signal to the parent keepalive process that
+    makes it exit immediately - without waiting. If there's no parent
+    keepalive process, this function does nothing. SHould be called
+    when the child process has freed resources, such as listening socket.
+    But the child process may continue running.
+*/
+YAZ_EXPORT
+void yaz_daemon_stop(void);
+
 YAZ_END_CDECL
 
 #endif

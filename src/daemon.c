@@ -68,26 +68,18 @@ static void normal_stop_handler(int num)
 {
     if (child_pid)
     {
-        /* tell child to terminate . ensure keepalive stops running -
-           let wait(2) wait once - so we exit AFTER the child */
+        /* relay signal to child */
         child_got_signal_from_us = 1;
         kill(child_pid, num);
     }
 }
 
-static void graceful_stop_handler(int num)
+static void immediate_exit_handler(int num)
 {
-    if (child_pid)
-    {
-        /* tell our child to stop listening and wait some in time
-           in the hope that it has stopped listening by then. Then
-           we exit - quite possibly the child is still running - serving
-           remaining requests */
-        kill(child_pid, num);
-        sleep(2);
-        _exit(0);
-    }
+    _exit(0);
 }
+
+static pid_t keepalive_pid = 0;
 
 static void keepalive(void (*work)(void *data), void *data)
 {
@@ -96,13 +88,16 @@ static void keepalive(void (*work)(void *data), void *data)
     void (*old_sighup)(int);
     void (*old_sigterm)(int);
     void (*old_sigusr1)(int);
+    void (*old_sigusr2)(int);
     
+    keepalive_pid = getpid();
+
     /* keep signals in their original state and make sure that some signals
-       to parent process also gets sent to the child.. 
-    */
+       to parent process also gets sent to the child..  */
     old_sighup = signal(SIGHUP, normal_stop_handler);
     old_sigterm = signal(SIGTERM, normal_stop_handler);
-    old_sigusr1 = signal(SIGUSR1, graceful_stop_handler);
+    old_sigusr1 = signal(SIGUSR1, normal_stop_handler);
+    old_sigusr2 = signal(SIGUSR2, immediate_exit_handler);
     while (cont && !child_got_signal_from_us)
     {
         pid_t p = fork();
@@ -110,16 +105,16 @@ static void keepalive(void (*work)(void *data), void *data)
         int status;
         if (p == (pid_t) (-1))
         {
-            
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
             exit(1);
         }
         else if (p == 0)
         {
-                /* child */
+            /* child */
             signal(SIGHUP, old_sighup);  /* restore */
             signal(SIGTERM, old_sigterm);/* restore */
             signal(SIGUSR1, old_sigusr1);/* restore */
+            signal(SIGUSR2, old_sigusr2);/* restore */
             
             work(data);
             exit(0);
@@ -142,7 +137,8 @@ static void keepalive(void (*work)(void *data), void *data)
         if (WIFSIGNALED(status))
         {
             /*  keep the child alive in case of errors, but _log_ */
-            switch(WTERMSIG(status)) {
+            switch (WTERMSIG(status))
+            {
             case SIGILL:
                 yaz_log(YLOG_WARN, "Received SIGILL from child %ld", (long) p);
                 cont = 1;
@@ -170,12 +166,14 @@ static void keepalive(void (*work)(void *data), void *data)
                 cont = 0;
             }
         }
-        else if (status == 0)
-            cont = 0; /* child exited normally */
-        else
-        {   /* child exited with error */
-            yaz_log(YLOG_LOG, "Exit %d from child %ld", status, (long) p);
+        else if (WIFEXITED(status))
+        {
             cont = 0;
+            if (WEXITSTATUS(status) != 0)
+            {   /* child exited with error */
+                yaz_log(YLOG_LOG, "Exit %d from child %ld",
+                        WEXITSTATUS(status), (long) p);
+            }
         }
         if (cont) /* respawn slower as we get more errors */
             sleep(1 + run/5);
@@ -183,6 +181,15 @@ static void keepalive(void (*work)(void *data), void *data)
     }
 }
 #endif
+
+void yaz_daemon_stop(void)
+{
+#if HAVE_PWD_H
+    if (keepalive_pid)
+        kill(keepalive_pid, SIGUSR2); /* invoke immediate_exit_handler */
+#endif
+}
+
 
 int yaz_daemon(const char *progname,
                unsigned int flags,
