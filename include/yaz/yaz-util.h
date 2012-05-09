@@ -55,6 +55,7 @@
     YAZ User's Guide and Reference at
     http://www.indexdata.com/yaz/doc/
     This is also located in the doc directory of the YAZ distribution.
+    (This main page is from yaz-util.h).
 
     The following sections is just a summary of the most important
     header files and where they belong.
@@ -81,6 +82,10 @@
     Timing : \ref timing.h .
 
     Locking: \ref mutex.h .
+
+    Daemon: \ref daemon.h .
+
+    Windows Service: \ref sc.h .
 
     \section queryparsers Query parsers
 
