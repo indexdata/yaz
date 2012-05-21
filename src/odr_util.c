@@ -17,10 +17,13 @@
 
 void odr_prname(ODR o, const char *name)
 {
-    if (name)
-        odr_printf(o, "%*s%s ", o->op->indent*4, "", name);
+    if (o->op->indent < 16)
+        odr_printf(o, "%*s", o->op->indent * 2, "");
     else
-        odr_printf(o, "%*s", o->op->indent*4, "");
+        odr_printf(o, "level=%-7d%*s", o->op->indent, 
+                   2 * (o->op->indent % 8) , "");
+    if (name)
+        odr_printf(o, "%s ", name);
 }
 
 int odp_more_chunks(ODR o, const unsigned char *base, int len)
