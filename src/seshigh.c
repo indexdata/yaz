@@ -760,7 +760,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     int r;
     int srw_errcode = 0;
     const char *add = 0;
-    char rpn_buf[5120];
+    WRBUF rpn_buf = wrbuf_alloc();
          
     *sortkeys_p = 0;
     r = cql_parser_string(cp, cql);
@@ -773,7 +773,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
         struct cql_node *cn = cql_parser_result(cp);
 
         /* Syntax OK */
-        r = cql_transform_buf(ct, cn, rpn_buf, sizeof(rpn_buf)-1);
+        r = cql_transform(ct, cn, wrbuf_vp_puts, rpn_buf);
         if (r)
             srw_errcode = cql_transform_error(ct, &add);
         else
@@ -799,7 +799,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
         /* Syntax & transform OK. */
         /* Convert PQF string to Z39.50 to RPN query struct */
         YAZ_PQF_Parser pp = yaz_pqf_create();
-        Z_RPNQuery *rpnquery = yaz_pqf_parse(pp, odr, rpn_buf);
+        Z_RPNQuery *rpnquery = yaz_pqf_parse(pp, odr, wrbuf_cstr(rpn_buf));
         if (!rpnquery)
         {
             size_t off;
@@ -817,6 +817,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
         yaz_pqf_destroy(pp);
     }
     cql_parser_destroy(cp);
+    wrbuf_destroy(rpn_buf);
     return srw_errcode;
 }
 
