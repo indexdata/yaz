@@ -785,7 +785,7 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
     int res = 0;
     while (res == 0)
     {
-        char buf[1000];
+        char buf[100000];
         char *cp;
         const char *bp = buf;
 #if HAVE_READLINE_READLINE_H
@@ -800,7 +800,7 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
         if (*line_in)
             add_history(line_in);
 #endif
-        if (strlen(line_in) > 999)
+        if (strlen(line_in) > sizeof(buf)-1)
         {
             printf("Input line too long\n");
             res = 1;
@@ -810,7 +810,7 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
         free(line_in);
 #else    
         printf("ZOOM>"); fflush(stdout);
-        if (!fgets(buf, 999, stdin))
+        if (!fgets(buf, sizeof(buf)-1, stdin))
         {
             res = -1;
             break;
