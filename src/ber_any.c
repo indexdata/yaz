@@ -109,10 +109,9 @@ int completeBER_n(const unsigned char *buf, int len, int level)
     {
         if (b[0] == 0 && b[1] == 0)
             break;
-        if (!(res = completeBER_n(b, len, level+1)))
-            return 0;
-        if (res == -1)
-            return -1;
+        res = completeBER_n(b, len, level+1);
+        if (res <= 0)
+            return res;
         b += res;
         len -= res;
     }
