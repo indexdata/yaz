@@ -1,5 +1,4 @@
 <icu_chain locale="en">
-<tokenize rule="s" /> 
   <transliterate>
 [,. -]* } [$] > ; 
  </transliterate>
