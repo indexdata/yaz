@@ -16,13 +16,12 @@
    <para>
     The software is regularly tested on
     <ulink url="&url.debian;">Debian GNU/Linux</ulink>,
-    <ulink url="&url.redhat;">Redhat Linux</ulink>,
+    <ulink url="&url.centos;">CentOS</ulink>,
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
     <ulink url="&url.solaris;">SunOS 5.10 (sparc)</ulink>,
-    <ulink url="&url.windows2000;">Windows 2000</ulink>,
-    <ulink url="&url.windows2003server;">Windows 2003 server</ulink>.
+    Windows 7, Windows Xp.
    </para>
    
    <para>
@@ -60,14 +59,58 @@
 
    <para>
     We provide 
-    <ulink url="&url.debian;">Debian GNU/Linux</ulink>
+    <ulink url="&url.debian;">Debian GNU/Linux</ulink> (i386 and amd64),
+    <ulink url="&url.ubuntu;">Ubuntu</ulink> (i386 and amd64)
     and 
-    <ulink url="&url.redhat;">Redhat</ulink> packages for &yaz;. 
-    Only i386 binary packages are available. You should be able to
-    create packages for other CPUs by building them from the source
-    package.
+    <ulink url="&url.centos;">CentOS</ulink> (amd64 only) packages for &yaz;. 
+    You should be able to create packages for other CPUs by building
+    them from the source package.
    </para>
    
+   <para>
+    YAZ is also part of several packages repositories. Some of them are
+   </para>    
+
+   <itemizedlist>
+    <listitem>
+     <para>
+      Solaris CSW: <ulink url="http://www.opencsw.org/packages/yaz/"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Solaris: <ulink url="http://unixpackages.com"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      FreeBSD: <ulink url="http://www.freshports.org/net/yaz"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Debian: <ulink url="http://packages.debian.org/search?keywords=yaz"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Ubuntu: <ulink url="https://launchpad.net/ubuntu/+source/yaz"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      NetBSD:
+      <ulink url="http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/net/yaz/README.html"/>
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      OpenBSD:
+      <ulink url="http://www.openbsd.org/4.4_packages/powerpc/yaz-3.0.24.tgz-long.html"/>
+     </para>
+    </listitem>
+   </itemizedlist>
+    
    <sect2 id="installation.source.unix">
     <title>Compiling from source on Unix</title>
     
