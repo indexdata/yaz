@@ -419,7 +419,6 @@ ZOOM_API(void)
         c->tproxy = xstrdup(val);
     }
 
-
     xfree(c->charset);
     c->charset = 0;
     val = ZOOM_options_get(c->options, "charset");
@@ -466,21 +465,22 @@ ZOOM_API(void)
         char *pcomma;
         char *pequals;
         while ((pcomma = strchr(remainder, ',')) != 0 &&
-               (pcolon == 0 || pcomma < pcolon)) {
+               (pcolon == 0 || pcomma < pcolon))
+        {
             *pcomma = '\0';
-            if ((pequals = strchr(remainder, '=')) != 0) {
+            if ((pequals = strchr(remainder, '=')) != 0)
+            {
                 *pequals = '\0';
-                /*printf("# setting '%s'='%s'\n", remainder, pequals+1);*/
                 ZOOM_connection_option_set(c, remainder, pequals+1);
             }
             remainder = pcomma+1;
         }
 
-        if (remainder != c->host_port) {
+        if (remainder != c->host_port)
+        {
             remainder = xstrdup(remainder);
             xfree(c->host_port);
             c->host_port = remainder;
-            /*printf("# reset hp='%s'\n", remainder);*/
         }
     }
 
