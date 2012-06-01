@@ -477,8 +477,9 @@ ZOOM_API(void)
         }
 
         if (remainder != c->host_port) {
+            remainder = xstrdup(remainder);
             xfree(c->host_port);
-            c->host_port = xstrdup(remainder);
+            c->host_port = remainder;
             /*printf("# reset hp='%s'\n", remainder);*/
         }
     }
