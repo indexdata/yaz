@@ -90,8 +90,6 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
             record->recordData_buf = odr_malloc(o, buf->use + 1);
             memcpy(record->recordData_buf, buf->content, buf->use);
             record->recordData_buf[buf->use] = '\0';
-            // TODO Solve the real problem in zoom-sru, that doesnt work with 0-based indexes.
-            // Work-around: Making the recordPosition 1-based.
             record->recordPosition = odr_intdup(o, start + offset + 1);
 
             xmlBufferFree(buf);

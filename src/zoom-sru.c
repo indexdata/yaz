@@ -320,10 +320,8 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             
             Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
                 odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
-            /*
-             * TODO This does not work with 0-based recordPositions.
-             * We will iterate over one twice
-             */
+
+            /* recordPosition is 1 based */
             if (res->records[i].recordPosition && 
                 *res->records[i].recordPosition > 0)
                 pos = *res->records[i].recordPosition - 1;
