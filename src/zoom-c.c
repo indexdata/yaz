@@ -1028,7 +1028,7 @@ ZOOM_API(ZOOM_facet_field *)
 }
 
 ZOOM_API(const char**)
-    ZOOM_resultset_facet_names(ZOOM_resultset r)
+    ZOOM_resultset_facets_names(ZOOM_resultset r)
 {
     return (const char **) r->facets_names;
 }
