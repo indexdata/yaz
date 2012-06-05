@@ -2,7 +2,7 @@
 ## Copyright (C) 1995-2012 Index Data
 
 check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
- test_filepath test_file_glob \
+ test_embed_record test_filepath test_file_glob \
  test_iconv test_icu test_json \
  test_libstemmer test_log test_log_thread \
  test_match_glob test_matchstr test_mutex \
@@ -97,3 +97,4 @@ test_xml_include_SOURCES = test_xml_include.c
 test_file_glob_SOURCES = test_file_glob.c
 test_shared_ptr_SOURCES = test_shared_ptr.c
 test_libstemmer_SOURCES = test_libstemmer.c
+test_embed_record_SOURCES = test_embed_record.c

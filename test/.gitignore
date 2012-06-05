@@ -6,6 +6,7 @@ test_odrcodec.h
 .libs
 test_cql2ccl
 test_ccl
+test_embed_record
 test_iconv
 test_matchstr
 test_nmem
