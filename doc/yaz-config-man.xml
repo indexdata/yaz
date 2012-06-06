@@ -34,6 +34,7 @@
    <arg choice="opt"><option>--libs</option></arg>
    <arg choice="opt"><option>--lalibs</option></arg>
    <arg choice="opt"><option>--cflags</option></arg>
+   <arg choice="opt"><option>--include</option></arg>
    <arg choice="opt"><option>--comp</option></arg>
    <arg choice="opt"><option>-V</option></arg>
    <arg choice="opt" rep="repeat">libraries</arg>
@@ -97,6 +98,13 @@
     <term>--cflags</term>
     <listitem><para>
       Return C Compiler flags.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>--include</term>
+    <listitem><para>
+      Return C compiler includes for YAZ header files (-Ipath).
      </para></listitem>
    </varlistentry>
 

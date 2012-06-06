@@ -9,6 +9,7 @@ includedir=@includedir@
 echo_cflags=no
 echo_libs=no
 echo_help=no
+echo_include=no
 echo_source=yes
 echo_lalibs=no
 echo_comp=no
@@ -32,6 +33,7 @@ Options:
 	[--libs]
 	[--lalibs]
 	[--cflags]
+	[--include]
 	[--comp]
         [-V]
 Libraries:
@@ -64,6 +66,9 @@ while test $# -gt 0; do
 	    ;;
 	--cflags)
 	    echo_cflags=yes
+	    ;;
+	--include)
+	    echo_include=yes
 	    ;;
 	--libs)
 	    echo_libs=yes
@@ -142,7 +147,8 @@ if test "$echo_source" = "yes"; then
     fi
     YAZLALIB="$YAZLALIB $LIBS"
 
-    YAZINC="-I${src_root}/include $YAZINC"
+    YAZBINC="-I${src_root}/include"
+    YAZINC="$YAZBINC $YAZINC"
     YAZCOMP=${src_root}/util/yaz-asncomp
 else
     YAZBIN=${prefix}/bin
@@ -154,7 +160,8 @@ else
     YAZLIB="$YAZLIB $LIBS"
     YAZLALIB=$YAZLIB
     if test "$prefix" != "/usr"; then
-	YAZINC="-I${includedir} $YAZINC"
+	YAZBINC="-I${includedir}"
+	YAZINC="$YAZBINC $YAZINC"
     fi
 fi
 
@@ -170,6 +177,9 @@ fi
 
 if test "$echo_help" = "yes"; then
     usage 1 1>&2
+fi
+if test "$echo_include" = "yes"; then
+    echo $YAZBINC
 fi
 if test "$echo_cflags" = "yes"; then
     echo $YAZINC
