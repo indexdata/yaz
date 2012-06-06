@@ -1021,6 +1021,15 @@ ZOOM_API(ZOOM_facet_field)
     return 0;
 }
 
+ZOOM_API(ZOOM_facet_field)
+    ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int index) {
+    int num = r->num_facets;
+    ZOOM_facet_field *facets = r->facets;
+    if (index >= 0 && index < num) {
+        return facets[index];
+    }
+    return 0;
+}
 
 ZOOM_API(ZOOM_facet_field *)
     ZOOM_resultset_facets(ZOOM_resultset r)
@@ -1029,7 +1038,7 @@ ZOOM_API(ZOOM_facet_field *)
 }
 
 ZOOM_API(const char**)
-    ZOOM_resultset_facet_names(ZOOM_resultset r)
+    ZOOM_resultset_facets_names(ZOOM_resultset r)
 {
     return (const char **) r->facets_names;
 }
