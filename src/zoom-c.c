@@ -1022,7 +1022,7 @@ ZOOM_API(ZOOM_facet_field)
 }
 
 ZOOM_API(ZOOM_facet_field)
-    ZOOM_resultset_get_facet_by_index(ZOOM_resultset r, int index) {
+    ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int index) {
     int num = r->num_facets;
     ZOOM_facet_field *facets = r->facets;
     if (index >= 0 && index < num) {
