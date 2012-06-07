@@ -1,3 +1,27 @@
+
+Add missing definitions ZOOM_resultset_get_facet_field_by_index
+and ZOOM_resultset_facets_names.
+
+zoom: fix bad free for ZOOM_connect - happened when ZOOM connection
+options was in use.
+
+Change APDU dump printing to avoid long leading blanks. For levels 16
+or larger the level is shown and the indentation is truncated but
+recursed with modula 8. This makes it still reasonable easy to read
+- even for nested BER dumps.
+
+Fix bug completeBER_n WRT too nested BER. Function completeBER_n could
+return 0 (incomplete package) in case where the BER package was
+considered too nested (return value of -2).
+
+dumpber: lines of level 15 are not indented further. Two spaces per
+indentation; indentation 15 or more is indented to a fixed indentation
+and augmented with a level=<no> indication.
+
+zoomsh: increase max size of command+args
+
+GFS: No limit in RPN buf size in CQL to RPN conversion.
+
 --- 4.2.33 2012/05/09
 
 New function for daemon utility, yaz_daemon_stop .
