@@ -1,3 +1,4 @@
+--- 4.2.34 2012/06/07
 
 Add missing definitions ZOOM_resultset_get_facet_field_by_index
 and ZOOM_resultset_facets_names.
