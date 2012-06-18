@@ -19,6 +19,11 @@
 #include <yaz/yaz-iconv.h>
 #include <yaz/proto.h>
 #include <yaz/oid_db.h>
+#include <yaz/nmem_xml.h>
+#include <yaz/base64.h>
+
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 
 static yaz_iconv_t iconv_create_charset(const char *record_charset,
                                         yaz_iconv_t *cd2)
@@ -222,10 +227,116 @@ static const char *get_record_format(WRBUF wrbuf, int *len,
     return res;
 }
 
+static int replace_node(NMEM nmem, xmlNode *ptr,
+                        const char *type_spec, char *record_buf)
+{
+    int ret = -1;
+    const char *res;
+    int len;
+    int m_len;
+    WRBUF wrbuf = wrbuf_alloc();
+    ODR odr = odr_createmem(ODR_ENCODE);
+    Z_NamePlusRecord *npr = odr_malloc(odr, sizeof(*npr));
+    npr->which = Z_NamePlusRecord_databaseRecord;
+
+    if (atoi_n_check(record_buf, 5, &m_len))
+        npr->u.databaseRecord =
+            z_ext_record_usmarc(odr, record_buf, strlen(record_buf));
+    else
+        npr->u.databaseRecord =
+            z_ext_record_xml(odr, record_buf, strlen(record_buf));
+    res = yaz_record_render(npr, 0, wrbuf, type_spec, &len);
+    if (res)
+    {
+        xmlDoc *doc = xmlParseMemory(res, strlen(res));
+        xmlNode *nptr;
+        if (doc)
+        {
+            nptr = xmlCopyNode(xmlDocGetRootElement(doc), 1);
+            xmlReplaceNode(ptr, nptr);
+            xmlFreeDoc(doc);
+        }
+        else
+        {
+            nptr = xmlNewText(BAD_CAST res);
+            xmlReplaceNode(ptr, nptr);
+        }
+        ret = 0;
+    }
+    wrbuf_destroy(wrbuf);
+    odr_destroy(odr);
+    return ret;
+}
+
+static const char *base64_render(NMEM nmem, WRBUF wrbuf,
+                                 const char *buf, int *len,
+                                 const char *expr, const char *type_spec)
+{
+    xmlDocPtr doc = xmlParseMemory(buf, *len);
+    if (doc)
+    {
+        xmlChar *buf_out;
+        int len_out;
+        xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
+        if (xpathCtx)
+        {
+            xmlXPathObjectPtr xpathObj =
+                xmlXPathEvalExpression((const xmlChar *) expr, xpathCtx);
+            if (xpathObj)
+            {
+                xmlNodeSetPtr nodes = xpathObj->nodesetval;
+                if (nodes)
+                {
+                    int i;
+                    for (i = 0; i < nodes->nodeNr; i++)
+                    {
+                        xmlNode *ptr = nodes->nodeTab[i];
+                        if (ptr->type == XML_TEXT_NODE)
+                        {
+                            const char *input =
+                                nmem_text_node_cdata(ptr, nmem);
+                            char *output = nmem_malloc(
+                                nmem, strlen(input) + 1);
+                            if (yaz_base64decode(input, output) == 0)
+                            {
+                                if (!replace_node(nmem, ptr, type_spec, output))
+                                {
+                                    /* replacement OK */
+                                    xmlFreeNode(ptr);
+                                    /* unset below to avoid a bad reference in
+                                       xmlXPathFreeObject below */
+                                    nodes->nodeTab[i] = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                xmlXPathFreeObject(xpathObj);
+            }
+            xmlXPathFreeContext(xpathCtx);
+        }
+        xmlDocDumpMemory(doc, &buf_out, &len_out);
+        if (buf_out)
+        {
+            wrbuf_rewind(wrbuf);
+            wrbuf_write(wrbuf, (const char *) buf_out, len_out);
+            buf = wrbuf_cstr(wrbuf);
+            *len = len_out;
+        }
+        xmlFreeDoc(doc);
+        xmlFree(buf_out);
+    }
+    return buf;
+}
+
 const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
                               WRBUF wrbuf,
                               const char *type_spec, int *len)
 {
+    const char *ret = 0;
+    NMEM nmem = 0;
+    char *base64_xpath = 0;
+    char *base64_type_spec = 0;
     size_t i;
     char type[40];
     char charset[40];
@@ -269,18 +380,47 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
             }
             format[j] = '\0';
         } 
+        else if (!strncmp(cp + i, "base64", 6))
+        {
+            i = i + 6;
+
+            while (cp[i] == ' ')
+                i++;
+            if (cp[i] == '(')
+            {
+                size_t i0;
+                nmem = nmem_create();
+                i++;
+                while (cp[i] == ' ')
+                    i++;
+                i0 = i;
+                while (cp[i] != ',' && cp[i])
+                    i++;
+                base64_xpath = nmem_strdupn(nmem, cp + i0, i - i0);
+                if (cp[i])
+                    i++;
+                while (cp[i] == ' ')
+                    i++;
+                i0 = i;
+                while (cp[i] != ')' && cp[i])
+                    i++;
+                base64_type_spec = nmem_strdupn(nmem, cp + i0, i - i0);
+                if (cp[i])
+                    i++;
+            }
+        } 
     }
     if (!strcmp(type, "database"))
     {
         if (len)
             *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
-        return npr->databaseName;
+        ret = npr->databaseName;
     }
     else if (!strcmp(type, "schema"))
     {
         if (len)
             *len = schema ? strlen(schema) : 0;
-        return schema;
+        ret = schema;
     }
     else if (!strcmp(type, "syntax"))
     {
@@ -294,43 +434,46 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
             desc = "none";
         if (len)
             *len = strlen(desc);
-        return desc;
+        ret = desc;
     }
     if (npr->which != Z_NamePlusRecord_databaseRecord)
-        return 0;
-
-    /* from now on - we have a database record .. */
-    if (!strcmp(type, "render"))
+        ;
+    else if (!strcmp(type, "render"))
     {
-        return get_record_format(wrbuf, len, npr, YAZ_MARC_LINE, charset, format);
+        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_LINE, charset, format);
     }
     else if (!strcmp(type, "xml"))
     {
-        return get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
-                                 format);
+        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
+                                format);
     }
     else if (!strcmp(type, "txml"))
     {
-        return get_record_format(wrbuf, len, npr, YAZ_MARC_TURBOMARC, charset,
-                                 format);
+        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_TURBOMARC, charset,
+                                format);
     }
     else if (!strcmp(type, "raw"))
     {
-        return get_record_format(wrbuf, len, npr, YAZ_MARC_ISO2709, charset,
-            format);
+        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_ISO2709, charset,
+                                format);
     }
     else if (!strcmp(type, "ext"))
     {
         if (len) *len = -1;
-        return (const char *) npr->u.databaseRecord;
+        ret = (const char *) npr->u.databaseRecord;
     }
     else if (!strcmp(type, "opac"))
     {
         if (npr->u.databaseRecord->which == Z_External_OPAC)
-            return get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
-                                     format);
+            ret = get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
+                                    format);
     }
-    return 0;
+
+    if (base64_xpath)
+        ret = base64_render(nmem, wrbuf,
+                            ret, len, base64_xpath, base64_type_spec);
+    nmem_destroy(nmem);
+    return ret;
 }
 
 /*

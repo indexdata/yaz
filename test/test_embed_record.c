@@ -11,16 +11,19 @@
 #include <yaz/wrbuf.h>
 #include <string.h>
 #include <yaz/log.h>
+#include <yaz/record_render.h>
 
 #if YAZ_HAVE_XML2
 
 #include <yaz/base64.h>
 #include <yaz/marcdisp.h>
+#include <yaz/proto.h>
+#include <yaz/prt-ext.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-void test(void)
+void test1(void)
 {
   char base_enc[] = 
     "MDA3NjZuYW0gIDIyMDAyNjU4YSA0NTAwMDAxMDAxMjAwMDAwMDAzMDAwNjAwMDEyMDA1MDAx"
@@ -44,13 +47,14 @@ void test(void)
 
     int marc_size = strlen(bin_marc);
     char out_rec[1000];
+    yaz_marc_t marc = yaz_marc_create();
+    WRBUF buf = wrbuf_alloc();
+
     yaz_base64decode(base_enc, out_rec);
     YAZ_CHECK(strcmp(out_rec, bin_marc) == 0);
 
-    yaz_marc_t marc = yaz_marc_create();
     yaz_marc_read_iso2709(marc, out_rec, marc_size);
 
-    WRBUF buf = wrbuf_alloc();
     yaz_marc_write_marcxml(marc, buf);
 
     yaz_marc_destroy(marc);
@@ -59,12 +63,166 @@ void test(void)
 }
 #endif
 
+static int test_render(const char *type_spec, int is_marc, const char *input,
+                    const char *expected_output)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    const char *actual_output;
+    int actual_len;
+    int res = 0;
+    WRBUF wrbuf = wrbuf_alloc();
+
+    Z_NamePlusRecord *npr = odr_malloc(odr, sizeof(*npr));
+    npr->which = Z_NamePlusRecord_databaseRecord;
+    if (is_marc)
+        npr->u.databaseRecord = z_ext_record_usmarc(odr, input, strlen(input));
+    else
+        npr->u.databaseRecord = z_ext_record_xml(odr, input, strlen(input));
+
+    actual_output = yaz_record_render(npr, 0, wrbuf, type_spec, &actual_len);
+
+    if (actual_output && expected_output)
+    {
+        if (strlen(expected_output) == actual_len &&
+            !memcmp(expected_output, actual_output, actual_len))
+            res = 1;
+        else
+        {
+            yaz_log(YLOG_LOG, "Got result");
+            yaz_log(YLOG_LOG, "%.*s", actual_len, actual_output);
+            yaz_log(YLOG_LOG, "Expected result");
+            yaz_log(YLOG_LOG, "%s", expected_output);
+        }
+    }
+    else if (!actual_output && !expected_output)
+        res = 1;
+    else if (!actual_output && expected_output)
+    {
+        yaz_log(YLOG_LOG, "Got null result, but expected");
+        yaz_log(YLOG_LOG, "%s", expected_output);
+    }
+    else
+    {
+        yaz_log(YLOG_LOG, "Got result, but expected no result");
+        yaz_log(YLOG_LOG, "%.*s", actual_len, actual_output);
+    }
+    wrbuf_destroy(wrbuf);
+    odr_destroy(odr);
+    return res;
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
 #if YAZ_HAVE_XML2
-    test();
+    test1();
+    YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
+
+    YAZ_CHECK(test_render(
+                  "xml", 1, 
+                  "\x30\x30\x31\x33\x38\x6E\x61\x6D\x20\x20\x32\x32\x30\x30\x30\x37"
+                  "\x33\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
+                  "\x30\x30\x30\x30\x30\x30\x33\x30\x30\x30\x34\x30\x30\x30\x31\x33"
+                  "\x31\x30\x30\x30\x30\x31\x37\x30\x30\x30\x31\x37\x32\x34\x35\x30"
+                  "\x30\x33\x30\x30\x30\x30\x33\x34\x1E\x20\x20\x20\x31\x31\x32\x32"
+                  "\x34\x34\x36\x36\x20\x1E\x44\x4C\x43\x1E\x31\x30\x1F\x61\x4A\x61"
+                  "\x63\x6B\x20\x43\x6F\x6C\x6C\x69\x6E\x73\x1E\x31\x30\x1F\x61\x48"
+                  "\x6F\x77\x20\x74\x6F\x20\x70\x72\x6F\x67\x72\x61\x6D\x20\x61\x20"
+                  "\x63\x6F\x6D\x70\x75\x74\x65\x72\x1E\x1D",
+                  "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                  "  <leader>00138nam a22000738a 4500</leader>\n"
+                  "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+                  "  <controlfield tag=\"003\">DLC</controlfield>\n"
+                  "  <datafield tag=\"100\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">Jack Collins</subfield>\n"
+                  "  </datafield>\n"
+                  "  <datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">How to program a computer</subfield>\n"
+                  "  </datafield>\n"
+                  "</record>\n"));
+
+    YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
+
+    YAZ_CHECK(test_render(
+                  "xml; base64(/my/text(),xml)", 0,
+                  "<my>"
+                  "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
+                  "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
+                  "IHRvIHByb2dyYW0gYSBjb21wdXRlch4d"
+                  "</my>",
+                  "<?xml version=\"1.0\"?>\n"
+                  "<my><record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                  "  <leader>00138nam a22000738a 4500</leader>\n"
+                  "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+                  "  <controlfield tag=\"003\">DLC</controlfield>\n"
+                  "  <datafield tag=\"100\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">Jack Collins</subfield>\n"
+                  "  </datafield>\n"
+                  "  <datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">How to program a computer</subfield>\n"
+                  "  </datafield>\n"
+                  "</record></my>\n"));
+
+    YAZ_CHECK(test_render(
+                  "xml; charset=utf-8; base64(/my/text(),xml)", 0,
+                  "<my>"
+                  "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
+                  "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
+                  "IHRvIHByb2dyYW0gYSBjb21wdXRlch4d"
+                  "</my>",
+                  "<?xml version=\"1.0\"?>\n"
+                  "<my><record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                  "  <leader>00138nam a22000738a 4500</leader>\n"
+                  "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+                  "  <controlfield tag=\"003\">DLC</controlfield>\n"
+                  "  <datafield tag=\"100\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">Jack Collins</subfield>\n"
+                  "  </datafield>\n"
+                  "  <datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">How to program a computer</subfield>\n"
+                  "  </datafield>\n"
+                  "</record></my>\n"));
+
+    YAZ_CHECK(test_render(
+                  "xml; base64(/my/text(),xml);charset=utf-8", 0,
+                  "<my>"
+                  "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
+                  "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
+                  "IHRvIHByb2dyYW0gYSBjb21wdXRlch4d"
+                  "</my>",
+                  "<?xml version=\"1.0\"?>\n"
+                  "<my><record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                  "  <leader>00138nam a22000738a 4500</leader>\n"
+                  "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+                  "  <controlfield tag=\"003\">DLC</controlfield>\n"
+                  "  <datafield tag=\"100\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">Jack Collins</subfield>\n"
+                  "  </datafield>\n"
+                  "  <datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n"
+                  "    <subfield code=\"a\">How to program a computer</subfield>\n"
+                  "  </datafield>\n"
+                  "</record></my>\n"));
+
+    YAZ_CHECK(test_render(
+                  "xml; base64(/my/text(),txml;charset=utf-8)", 0,
+                  "<my>"
+                  "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
+                  "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
+                  "IHRvIHByb2dyYW0gYSBjb21wdXRlch4d"
+                  "</my>",
+                  "<?xml version=\"1.0\"?>\n"
+                  "<my><r xmlns=\"http://www.indexdata.com/turbomarc\">\n"
+                  "  <l>00138nam a22000738a 4500</l>\n"
+                  "  <c001>   11224466 </c001>\n"
+                  "  <c003>DLC</c003>\n"
+                  "  <d100 i1=\"1\" i2=\"0\">\n"
+                  "    <sa>Jack Collins</sa>\n"
+                  "  </d100>\n"
+                  "  <d245 i1=\"1\" i2=\"0\">\n"
+                  "    <sa>How to program a computer</sa>\n"
+                  "  </d245>\n"
+                  "</r></my>\n"));
 #endif
     YAZ_CHECK_TERM;
 }

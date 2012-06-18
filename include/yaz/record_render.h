@@ -48,6 +48,10 @@ YAZ_BEGIN_CDECL
     \param len length of returned buffer
     \retval !=0 buffer
     \retval =0 record could not be rendered
+
+    txml; charset=marc-8
+    xml; charset=utf-8
+    xml; charset=utf-8; base64(/rec/my/text(), txml; charset=marc-8)
 */
 YAZ_EXPORT
 const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
