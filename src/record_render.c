@@ -22,8 +22,10 @@
 #include <yaz/nmem_xml.h>
 #include <yaz/base64.h>
 
+#if YAZ_HAVE_XML2
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#endif
 
 static yaz_iconv_t iconv_create_charset(const char *record_charset,
                                         yaz_iconv_t *cd2)
@@ -227,6 +229,7 @@ static const char *get_record_format(WRBUF wrbuf, int *len,
     return res;
 }
 
+#if YAZ_HAVE_XML2
 static int replace_node(NMEM nmem, xmlNode *ptr,
                         const char *type_spec, char *record_buf)
 {
@@ -267,11 +270,13 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
     odr_destroy(odr);
     return ret;
 }
+#endif
 
 static const char *base64_render(NMEM nmem, WRBUF wrbuf,
                                  const char *buf, int *len,
                                  const char *expr, const char *type_spec)
 {
+#if YAZ_HAVE_XML2
     xmlDocPtr doc = xmlParseMemory(buf, *len);
     if (doc)
     {
@@ -326,6 +331,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
         xmlFreeDoc(doc);
         xmlFree(buf_out);
     }
+#endif
     return buf;
 }
 
