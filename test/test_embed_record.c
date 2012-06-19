@@ -145,7 +145,7 @@ int main(int argc, char **argv)
     YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
 
     YAZ_CHECK(test_render(
-                  "xml; base64(/my/text(),xml)", 0,
+                  "xml; base64=/my/text()", 0,
                   "<my>"
                   "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
                   "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
                   "</record></my>\n"));
 
     YAZ_CHECK(test_render(
-                  "xml; charset=utf-8; base64(/my/text(),xml)", 0,
+                  "xml; charset=utf-8; base64=/my/text()", 0,
                   "<my>"
                   "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
                   "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
                   "</record></my>\n"));
 
     YAZ_CHECK(test_render(
-                  "xml; base64(/my/text(),xml);charset=utf-8", 0,
+                  "xml; base64=/my/text();charset=utf-8", 0,
                   "<my>"
                   "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
                   "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
                   "</record></my>\n"));
 
     YAZ_CHECK(test_render(
-                  "xml; base64(/my/text(),txml;charset=utf-8)", 0,
+                  "txml;base64=/my/text();charset=utf-8", 0,
                   "<my>"
                   "MDAxMzhuYW0gIDIyMDAwNzM4YSA0NTAwMDAxMDAxMzAwMDAwMDAzMDAwNDAwMDEzMTAwMDAxNzAw"
                   "MDE3MjQ1MDAzMDAwMDM0HiAgIDExMjI0NDY2IB5ETEMeMTAfYUphY2sgQ29sbGlucx4xMB9hSG93"

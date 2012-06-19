@@ -51,7 +51,7 @@ YAZ_BEGIN_CDECL
 
     txml; charset=marc-8
     xml; charset=utf-8
-    xml; charset=utf-8; base64(/rec/my/text(), txml; charset=marc-8)
+    txml; charset=marc-8; base64=/rec/my/text()
 */
 YAZ_EXPORT
 const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,

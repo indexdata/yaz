@@ -252,16 +252,15 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
     if (res)
     {
         xmlDoc *doc = xmlParseMemory(res, strlen(res));
-        xmlNode *nptr;
         if (doc)
         {
-            nptr = xmlCopyNode(xmlDocGetRootElement(doc), 1);
+            xmlNode *nptr = xmlCopyNode(xmlDocGetRootElement(doc), 1);
             xmlReplaceNode(ptr, nptr);
             xmlFreeDoc(doc);
         }
         else
         {
-            nptr = xmlNewText(BAD_CAST res);
+            xmlNode *nptr = xmlNewText(BAD_CAST res);
             xmlReplaceNode(ptr, nptr);
         }
         ret = 0;
@@ -342,7 +341,6 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     const char *ret = 0;
     NMEM nmem = 0;
     char *base64_xpath = 0;
-    char *base64_type_spec = 0;
     size_t i;
     char type[40];
     char charset[40];
@@ -386,34 +384,17 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
             }
             format[j] = '\0';
         } 
-        else if (!strncmp(cp + i, "base64", 6))
+        else if (!strncmp(cp + i, "base64=", 7))
         {
-            i = i + 6;
+            size_t i0;
+            i = i + 7;
 
-            while (cp[i] == ' ')
+            i0 = i;
+            while (cp[i] && cp[i] != ';')
                 i++;
-            if (cp[i] == '(')
-            {
-                size_t i0;
-                nmem = nmem_create();
-                i++;
-                while (cp[i] == ' ')
-                    i++;
-                i0 = i;
-                while (cp[i] != ',' && cp[i])
-                    i++;
-                base64_xpath = nmem_strdupn(nmem, cp + i0, i - i0);
-                if (cp[i])
-                    i++;
-                while (cp[i] == ' ')
-                    i++;
-                i0 = i;
-                while (cp[i] != ')' && cp[i])
-                    i++;
-                base64_type_spec = nmem_strdupn(nmem, cp + i0, i - i0);
-                if (cp[i])
-                    i++;
-            }
+
+            nmem = nmem_create();
+            base64_xpath = nmem_strdupn(nmem, cp + i0, i - i0);
         } 
     }
     if (!strcmp(type, "database"))
@@ -476,8 +457,17 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     }
 
     if (base64_xpath)
-        ret = base64_render(nmem, wrbuf,
-                            ret, len, base64_xpath, base64_type_spec);
+    {
+        char *type_spec = nmem_malloc(nmem,
+                                      strlen(format) + strlen(charset) + 11);
+        strcpy(type_spec, type);
+        if (*charset)
+        {
+            strcat(type_spec, "; charset=");
+            strcat(type_spec, charset);
+        }
+        ret = base64_render(nmem, wrbuf, ret, len, base64_xpath, type_spec);
+    }
     nmem_destroy(nmem);
     return ret;
 }
