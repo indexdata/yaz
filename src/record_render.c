@@ -367,6 +367,8 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         {
             size_t j = 0;
             i = i + 8; /* skip charset= */
+            while (cp[i] == ' ')
+                i++;
             for (j = 0; cp[i] && cp[i] != ';' && cp[i] != ' '; i++)
             {
                 if (j < sizeof(charset)-1)
@@ -378,6 +380,8 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         {
             size_t j = 0; 
             i = i + 7;
+            while (cp[i] == ' ')
+                i++;
             for (j = 0; cp[i] && cp[i] != ';' && cp[i] != ' '; i++)
             {
                 if (j < sizeof(format)-1)
@@ -389,7 +393,8 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         {
             size_t i0;
             i = i + 7;
-
+            while (cp[i] == ' ')
+                i++;
             i0 = i;
             while (cp[i] && cp[i] != ';')
                 i++;
