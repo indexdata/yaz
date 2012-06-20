@@ -276,7 +276,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
                                  const char *expr, const char *type_spec)
 {
 #if YAZ_HAVE_XML2
-    xmlDocPtr doc = xmlParseMemory(buf, *len);
+    xmlDocPtr doc = xmlParseMemory(buf, strlen(buf));
     if (doc)
     {
         xmlChar *buf_out;
@@ -325,7 +325,8 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
             wrbuf_rewind(wrbuf);
             wrbuf_write(wrbuf, (const char *) buf_out, len_out);
             buf = wrbuf_cstr(wrbuf);
-            *len = len_out;
+            if (len)
+                *len = len_out;
         }
         xmlFreeDoc(doc);
         xmlFree(buf_out);
