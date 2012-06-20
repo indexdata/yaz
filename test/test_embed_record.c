@@ -13,17 +13,39 @@
 #include <yaz/log.h>
 #include <yaz/record_render.h>
 
-#if YAZ_HAVE_XML2
-
 #include <yaz/base64.h>
 #include <yaz/marcdisp.h>
 #include <yaz/proto.h>
 #include <yaz/prt-ext.h>
 
+#if YAZ_HAVE_XML2
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#endif
 
 void test1(void)
+{
+    int buflen;
+    for (buflen = 0; buflen < 256; buflen++)
+    {
+        char buf[256];
+        char buf_a[1024];
+        char buf_b[1024];
+        int i;
+        for (i = 0; i < buflen; i++)
+            buf[i] = 1 + i;
+        buf[i] = 0;
+
+        yaz_base64encode(buf, buf_a);
+
+        YAZ_CHECK(yaz_base64decode(buf_a, buf_b) == 0);
+
+        YAZ_CHECK(strcmp(buf, buf_b) == 0);
+    }
+}
+
+void test2(void)
 {
   char base_enc[] = 
     "MDA3NjZuYW0gIDIyMDAyNjU4YSA0NTAwMDAxMDAxMjAwMDAwMDAzMDAwNjAwMDEyMDA1MDAx"
@@ -61,7 +83,6 @@ void test1(void)
     wrbuf_destroy(buf);
 
 }
-#endif
 
 static int test_render(const char *type_spec, int is_marc, const char *input,
                     const char *expected_output)
@@ -115,8 +136,9 @@ int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
-#if YAZ_HAVE_XML2
     test1();
+    test2();
+#if YAZ_HAVE_XML2
     YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
 
     YAZ_CHECK(test_render(
