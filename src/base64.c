@@ -58,44 +58,55 @@ void yaz_base64encode(const char *in, char *out)
     *out++ = 0;
 }
 
-int yaz_base64decode(const char *in, char *out)
+static int next_char(const char **in, size_t *len)
 {
     const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"abcdefghijklmnopqrstuvwxyz0123456789+/";
-    int len = strlen(in);
+    const char *p;
+    while (*len > 0 && strchr("\r\n\t\f ", **in))
+    {
+        (*len)--;
+        (*in)++;
+    }
+    if (*len > 0 && **in == '=')
+        return -2;
+    if (*len > 0 && (p = strchr(map, **in)))
+    {
+        (*len)--;
+        (*in)++;
+        return p - map;
+    }
+    return -1;
+}
+
+int yaz_base64decode(const char *in, char *out)
+{
+    size_t len = strlen(in);
 
     while (len >= 4)
     {
 	char i0, i1, i2, i3;
-	char *p;
-
-	if (!(p = strchr(map, in[0])))
-	    return -1;
-	i0 = p - map;
-	len--;
-	if (!(p = strchr(map, in[1])))
-	    return -1;
-	i1 = p - map;
-	len--;
+        
+	i0 = next_char(&in, &len);
+        if (i0 < 0)
+            return -1;
+	i1 = next_char(&in, &len);
+        if (i1 < 0)
+            return -1;
 	*(out++) = i0 << 2 | i1 >> 4;
-	if (in[2] == '=')
-	    break;
-	if (!(p = strchr(map, in[2])))
-	    return -1;
-	i2 = p - map;
-	len--;
+        i2 = next_char(&in, &len);
+        if (i2 == -2)
+            break;
+        if (i2 == -1)
+            return -1;
 	*(out++) = i1 << 4 | i2 >> 2;
-	if (in[3] == '=')
-	    break;
-	if (!(p = strchr(map, in[3])))
-	    return -1;
-	i3 = p - map;
-	len--;
+        i3 = next_char(&in, &len);
+        if (i3 == -2)
+            break;
+        if (i3 == -1)
+            return -1;
 	*(out++) = i2 << 6 | i3;
-
-	in += 4;
     }
-
     *out = '\0';
     return 0;
 }
