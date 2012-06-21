@@ -34,7 +34,7 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset,
     yaz_iconv_t cd = 0;
     char *from_set1 = 0;
     char *from_set2 = 0;
-    char *to_set = 0;
+    char *to_set = "utf-8";
     if (record_charset && *record_charset)
     {
         char *cp = charset_buf;
@@ -62,11 +62,11 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset,
     }
     
     if (from_set1)
-        cd = yaz_iconv_open(to_set ? to_set : "UTF-8", from_set1);
+        cd = yaz_iconv_open(to_set, from_set1);
     if (cd2)
     {
         if (from_set2)
-            *cd2 = yaz_iconv_open(to_set ? to_set : "UTF-8", from_set2);
+            *cd2 = yaz_iconv_open(to_set, from_set2);
         else
             *cd2 = 0;
     }
