@@ -465,7 +465,7 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     if (base64_xpath)
     {
         char *type_spec = nmem_malloc(nmem,
-                                      strlen(format) + strlen(charset) + 11);
+                                      strlen(type) + strlen(charset) + 11);
         strcpy(type_spec, type);
         if (*charset)
         {
