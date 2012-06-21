@@ -245,6 +245,54 @@ int main(int argc, char **argv)
                   "    <sa>How to program a computer</sa>\n"
                   "  </d245>\n"
                   "</r></my>\n"));
+
+    YAZ_CHECK(test_render(
+                  "xml; charset=utf-8; base64=/my/text()", 0,
+                  "<my>"
+"MDA0OTJuYW0gYTIyMDAxNDU1YSA0NTAwMDAxMDAxMDAwMDAwMDA1MDAxNzAwMDEwMDA4MDA0MTAw"
+"MDI3MTAwMDA1MjAwMDY4MjQ1MDEwNDAwMTIwMjUwMDAxNDAwMjI0MjYwMDAyMzAwMjM4MzAwMDAx"
+"NjAwMjYxNjUwMDA1MTAwMjc3NjUwMDAxODAwMzI4HjAwMDI3NzQ4NR4yMDA1MTAyNjExMTQzNi4w"
+"HjA1MDQxM3MxODk0ICAgIGdyICAgICAgICAgICAgMDAwIDAgZ3JlIGQeMSAfYc6czrHPgc6/z43O"
+"tM63z4IsIM6az4nOvc+Dz4TOsc69z4TOr869zr/PgiDOmc+JHjEwH2HOlc67zrvOt869zrnOus+M"
+"zr0gzrrPgc+Fz4DPhM6/zrPPgc6xz4bOuc66z4zOvSDOu861zr7Ouc66z4zOvSAvH2POms+Jzr3P"
+"g8+ELiDOmS4gzpzOsc+Bzr/Pjc60zrfPgi4eICAyzrcgzrXOus60Lh4gIB9hzpHOuM6uzr3OsSwf"
+"YzE4OTQuHiAgH2EyNDggz4POtc67Lh4gMB9hR3JlZWsgbGFuZ3VhZ2UsIE1vZGVybh94RGlhbGVj"
+"dHMfdkRpY3Rpb25hcmllcx4gMB9hQ3J5cHRvZ3JhcGh5Lh4d"
+                  "</my>",
+"<?xml version=\"1.0\"?>\n"
+"<my><record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+"  <leader>00492nam a22001455a 4500</leader>\n"
+"  <controlfield tag=\"001\">000277485</controlfield>\n"
+"  <controlfield tag=\"005\">20051026111436.0</controlfield>\n"
+"  <controlfield tag=\"008\">050413s1894    gr            000 0 gre d</controlfield>\n"
+"  <datafield tag=\"100\" ind1=\"1\" ind2=\" \">\n"
+"    <subfield code=\"a\">&#x39C;&#x3B1;&#x3C1;&#x3BF;&#x3CD;&#x3B4;&#x3B7;&#x3C2;, &#x39A;&#x3C9;&#x3BD;&#x3C3;&#x3C4;&#x3B1;&#x3BD;&#x3C4;&#x3AF;&#x3BD;&#x3BF;&#x3C2; &#x399;&#x3C9;</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n"
+"    <subfield code=\"a\">&#x395;&#x3BB;&#x3BB;&#x3B7;&#x3BD;&#x3B9;&#x3BA;&#x3CC;&#x3BD; &#x3BA;&#x3C1;&#x3C5;&#x3C0;&#x3C4;&#x3BF;&#x3B3;&#x3C1;&#x3B1;&#x3C6;&#x3B9;&#x3BA;&#x3CC;&#x3BD; &#x3BB;&#x3B5;&#x3BE;&#x3B9;&#x3BA;&#x3CC;&#x3BD; /</subfield>\n"
+"    <subfield code=\"c\">&#x39A;&#x3C9;&#x3BD;&#x3C3;&#x3C4;. &#x399;. &#x39C;&#x3B1;&#x3C1;&#x3BF;&#x3CD;&#x3B4;&#x3B7;&#x3C2;.</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"250\" ind1=\" \" ind2=\" \">\n"
+"    <subfield code=\"&#x3B7;\"> &#x3B5;&#x3BA;&#x3B4;.</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"260\" ind1=\" \" ind2=\" \">\n"
+"    <subfield code=\"a\">&#x391;&#x3B8;&#x3AE;&#x3BD;&#x3B1;,</subfield>\n"
+"    <subfield code=\"c\">1894.</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"300\" ind1=\" \" ind2=\" \">\n"
+"    <subfield code=\"a\">248 &#x3C3;&#x3B5;&#x3BB;.</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"650\" ind1=\" \" ind2=\"0\">\n"
+"    <subfield code=\"a\">Greek language, Modern</subfield>\n"
+"    <subfield code=\"x\">Dialects</subfield>\n"
+"    <subfield code=\"v\">Dictionaries</subfield>\n"
+"  </datafield>\n"
+"  <datafield tag=\"650\" ind1=\" \" ind2=\"0\">\n"
+"    <subfield code=\"a\">Cryptography.</subfield>\n"
+"  </datafield>\n"
+"</record></my>\n"));
+
+
 #endif
     YAZ_CHECK_TERM;
 }
