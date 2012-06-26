@@ -1,3 +1,5 @@
+--- 4.2.35 2012/06/26
+
 zoom/record_render: add support for Base64 decoding fo MARC records
 within XML element. For example: "xml; charset=marc-8; base64=/my/text()"
 which will decode base64 + ISO2709 marc-8 encoded material from text node
