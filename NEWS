@@ -1,3 +1,8 @@
+zoom/record_render: add support for Base64 decoding fo MARC records
+within XML element. For example: "xml; charset=marc-8; base64=/my/text()"
+which will decode base64 + ISO2709 marc-8 encoded material from text node
+under /my .
+
 --- 4.2.34 2012/06/07
 
 Add missing definitions ZOOM_resultset_get_facet_field_by_index
