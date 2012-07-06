@@ -522,8 +522,7 @@ static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
                        void *client_data)
 {
     int exclusion = 0;
-    int distance;               /* to be filled in later depending on unit */
-    int distance_defined = 0;
+    int distance = -1;
     int ordered = 0;
     int proxrel = 2;            /* less than or equal */
     int unit = 2;               /* word */
@@ -536,7 +535,6 @@ static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
 
         if (!strcmp(name, "distance")) {
             distance = strtol(term, (char**) 0, 0);
-            distance_defined = 1;
             if (!strcmp(relation, "="))
                 proxrel = 3;
             else if (!strcmp(relation, ">"))
@@ -586,7 +584,7 @@ static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
         mods = mods->u.st.modifiers;
     }
 
-    if (!distance_defined)
+    if (distance == -1)
         distance = (unit == 2) ? 1 : 0;
 
     solr_pr_int(exclusion, pr, client_data);
