@@ -401,6 +401,12 @@ static int cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
     int ret = 0;
     WRBUF ext_type_str = next_token_new_wrbuf(args);
     
+    if (!ext_type_str)
+    {
+        printf("es: missing type "
+               "(itemorder, create, drop, commit, update, xmlupdate)\n");
+        return 1;
+    }
     for (i = 0; i<MAX_CON; i++)
     {
         if (c[i])
