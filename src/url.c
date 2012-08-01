@@ -48,6 +48,44 @@ void yaz_url_set_proxy(yaz_url_t p, const char *proxy)
         p->proxy = xstrdup(proxy);
 }
 
+static void extract_user_pass(NMEM nmem,
+                              const char *uri,
+                              char **uri_lean, char **http_user,
+                              char **http_pass)
+{
+    const char *cp1 = strchr(uri, '/');
+    *uri_lean = 0;
+    *http_user = 0;
+    *http_pass = 0;
+    if (cp1 && cp1 > uri)
+    {
+        cp1--;
+        
+        if (!strncmp(cp1, "://", 3))
+        {
+            const char *cp3 = 0;
+            const char *cp2 = cp1 + 3;
+            while (*cp2 && *cp2 != '/' && *cp2 != '@')
+            {
+                if (*cp2 == ':')
+                    cp3 = cp2;
+                cp2++;
+            }
+            if (*cp2 == '@' && cp3)
+            {
+                *uri_lean = nmem_malloc(nmem, strlen(uri) + 1);
+                memcpy(*uri_lean, uri, cp1 + 3 - uri);
+                strcpy(*uri_lean + (cp1 + 3 - uri), cp2 + 1);
+               
+                *http_user = nmem_strdupn(nmem, cp1 + 3, cp3 - (cp1 + 3));
+                *http_pass = nmem_strdupn(nmem, cp3 + 1, cp2 - (cp3 + 1));
+            }
+        }
+    }
+    if (*uri_lean == 0)
+        *uri_lean = nmem_strdup(nmem, uri);
+}
+
 Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                               const char *method,
                               Z_HTTP_Header *headers,
@@ -63,9 +101,21 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         int code;
         struct Z_HTTP_Header **last_header_entry;
         const char *location = 0;
-        Z_GDU *gdu = z_get_HTTP_Request_uri(p->odr_out, uri, 0,
-                                            p->proxy ? 1 : 0);
+        char *http_user = 0;
+        char *http_pass = 0;
+        char *uri_lean = 0;
+        Z_GDU *gdu;
+
+        extract_user_pass(p->odr_out->mem, uri, &uri_lean,
+                          &http_user, &http_pass);
+
+        gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy ? 1 : 0);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
+
+        if (http_user && http_pass)
+            z_HTTP_header_add_basic_auth(p->odr_out,
+                                         &gdu->u.HTTP_Request->headers,
+                                         http_user, http_pass);
 
         res = 0;
         last_header_entry = &gdu->u.HTTP_Request->headers;
@@ -83,7 +133,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);
             return 0;
         }
-        conn = cs_create_host_proxy(uri, 1, &add, p->proxy);
+        conn = cs_create_host_proxy(uri_lean, 1, &add, p->proxy);
         if (!conn)
         {
             yaz_log(YLOG_WARN, "Could not resolve URL: %s", uri);
