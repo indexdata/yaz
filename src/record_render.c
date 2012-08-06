@@ -88,8 +88,7 @@ static const char *return_marc_record(WRBUF wrbuf,
     yaz_marc_xml(mt, marc_type);
     if (yaz_marc_decode_wrbuf(mt, buf, sz, wrbuf) > 0)
     {
-        if (len)
-            *len = wrbuf_len(wrbuf);
+        *len = wrbuf_len(wrbuf);
         ret_string = wrbuf_cstr(wrbuf);
     }
     yaz_marc_destroy(mt);
@@ -123,8 +122,7 @@ static const char *return_opac_record(WRBUF wrbuf,
         yaz_iconv_close(cd);
     if (cd2)
         yaz_iconv_close(cd2);
-    if (len)
-        *len = wrbuf_len(wrbuf);
+    *len = wrbuf_len(wrbuf);
     return wrbuf_cstr(wrbuf);
 }
 
@@ -144,8 +142,7 @@ static const char *return_string_record(WRBUF wrbuf,
         sz = wrbuf_len(wrbuf);
         yaz_iconv_close(cd);
     }
-    if (len)
-        *len = sz;
+    *len = sz;
     return buf;
 }
 
@@ -206,7 +203,7 @@ static const char *get_record_format(WRBUF wrbuf, int *len,
 {
     const char *res = return_record_wrbuf(wrbuf, len, npr, marctype, charset);
 #if YAZ_HAVE_XML2
-    if (*format == '1' && len)
+    if (*format == '1')
     {
         /* try to XML format res */
         xmlDocPtr doc;
@@ -276,7 +273,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
                                  const char *expr, const char *type_spec)
 {
 #if YAZ_HAVE_XML2
-    xmlDocPtr doc = xmlParseMemory(buf, strlen(buf));
+    xmlDocPtr doc = xmlParseMemory(buf, *len);
     if (doc)
     {
         xmlChar *buf_out;
@@ -325,8 +322,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
             wrbuf_rewind(wrbuf);
             wrbuf_write(wrbuf, (const char *) buf_out, len_out);
             buf = wrbuf_cstr(wrbuf);
-            if (len)
-                *len = len_out;
+            *len = len_out;
         }
         xmlFreeDoc(doc);
         xmlFree(buf_out);
@@ -347,6 +343,10 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     char charset[40];
     char format[3];
     const char *cp = type_spec;
+    int len0;
+
+    if (!len)
+        len = &len0;
 
     for (i = 0; cp[i] && cp[i] != ';' && cp[i] != ' ' && i < sizeof(type)-1;
          i++)
@@ -405,14 +405,12 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     }
     if (!strcmp(type, "database"))
     {
-        if (len)
-            *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
+        *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
         ret = npr->databaseName;
     }
     else if (!strcmp(type, "schema"))
     {
-        if (len)
-            *len = schema ? strlen(schema) : 0;
+        *len = schema ? strlen(schema) : 0;
         ret = schema;
     }
     else if (!strcmp(type, "syntax"))
@@ -425,8 +423,7 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         }
         if (!desc)
             desc = "none";
-        if (len)
-            *len = strlen(desc);
+        *len = strlen(desc);
         ret = desc;
     }
     if (npr->which != Z_NamePlusRecord_databaseRecord)
@@ -452,7 +449,7 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     }
     else if (!strcmp(type, "ext"))
     {
-        if (len) *len = -1;
+        *len = -1;
         ret = (const char *) npr->u.databaseRecord;
     }
     else if (!strcmp(type, "opac"))
@@ -462,7 +459,7 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
                                     format);
     }
 
-    if (base64_xpath)
+    if (base64_xpath && *len != -1)
     {
         char *type_spec = nmem_malloc(nmem,
                                       strlen(type) + strlen(charset) + 11);
