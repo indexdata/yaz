@@ -147,7 +147,7 @@ void odr_FILE_write(ODR o, void *handle, int type,
     for (i = 0; i < len; i++)
     {
         unsigned c = ((const unsigned char *) buf)[i];
-        if (i == 2000 && len > 3100)
+        if (i == 20000 && len > 31000)
         {
             fputs(" ..... ", (FILE*) handle);
                 i = len - 1000;
