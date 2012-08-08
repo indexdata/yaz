@@ -147,6 +147,7 @@ static int scan_size = 20;
 static char cur_host[200];
 static Odr_int last_hit_count = 0;
 static int pretty_xml = 0;
+static Odr_int sru_maximumRecords = 0;
 
 typedef enum {
     QueryType_Prefix,
@@ -1478,6 +1479,7 @@ static int send_SRW_searchRequest(const char *arg)
         printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
+    sru_maximumRecords = 0;
     sr->u.request->maximumRecords = odr_intdup(out, 0);
     sr->u.request->facetList = facet_list;
     if (record_schema)
@@ -3173,6 +3175,7 @@ static int send_SRW_presentRequest(const char *arg)
     if (!parse_show_args(arg, setstring, &setno, &nos))
         return 0;
     sr->u.request->startRecord = odr_intdup(out, setno);
+    sru_maximumRecords = nos;
     sr->u.request->maximumRecords = odr_intdup(out, nos);
     if (record_schema)
         sr->u.request->recordSchema = record_schema;
@@ -4367,8 +4370,17 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
         display_facets(res->facetList);
     if (res->suggestions)
         printf("Suggestions:\n%s\n", res->suggestions);
-    for (i = 0; i<res->num_records; i++)
+    for (i = 0; i < res->num_records; i++)
+    {
+        if (i >= sru_maximumRecords)
+        {
+            printf("SRU server returns extra records. Skipping "
+                   ODR_INT_PRINTF " records.\n",
+                   res->num_records - sru_maximumRecords);
+            break;
+        }
         handle_srw_record(res->records + i);
+    }
 }
 
 static void handle_srw_scan_term(Z_SRW_scanTerm *term)
