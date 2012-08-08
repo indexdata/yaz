@@ -236,9 +236,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         Z_SRW_extra_record ex;
 
         char *spack = 0;
-        int pack = Z_SRW_recordPacking_string;
         xmlNodePtr ptr;
-        xmlNodePtr data_ptr = 0;
         rec->recordSchema = 0;
         rec->recordData_buf = 0;
         rec->recordData_len = 0;
@@ -256,20 +254,33 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                                  &rec->recordSchema))
                 ;
             else if (match_xsd_string(ptr, "recordPacking", o, &spack))
-            {
-                if (spack)
-                    pack = yaz_srw_str_to_pack(spack);
-            }
+                ;  /* can't rely on it: in SRU 2.0 it's different semantics */
             else if (match_xsd_integer(ptr, "recordPosition", o, 
                                        &rec->recordPosition))
                 ;
             else if (match_element(ptr, "recordData"))
             {
-                /* save position of Data until after the loop
-                   then we will know the packing (hopefully), and
-                   unpacking is done once
-                */
-                data_ptr = ptr;
+                /* we assume XML packing, if any element nodes exist below
+                   recordData. Unfortunately, in SRU 2.0 recordPacking
+                   means something different */
+                xmlNode *p = ptr->children;
+                for (; p; p = p->next)
+                    if (p->type == XML_ELEMENT_NODE)
+                        break;
+                if (p)
+                {
+                    match_xsd_XML_n2(
+                        ptr, "recordData", o, 
+                        &rec->recordData_buf, &rec->recordData_len, 1);
+                    rec->recordPacking = Z_SRW_recordPacking_XML;
+                }
+                else
+                {
+                    match_xsd_string_n(
+                        ptr, "recordData", o, 
+                        &rec->recordData_buf, &rec->recordData_len);
+                    rec->recordPacking = Z_SRW_recordPacking_string;
+                }
             }
             else if (match_xsd_XML_n(ptr, "extraRecordData", o, 
                                      &ex.extraRecordData_buf,
@@ -279,27 +290,6 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                 match_xsd_string(ptr, "recordIdentifier", o, 
                                  &ex.recordIdentifier);
         }
-        if (data_ptr)
-        {
-            switch (pack)
-            {
-            case Z_SRW_recordPacking_XML:
-                match_xsd_XML_n2(data_ptr, "recordData", o, 
-                                &rec->recordData_buf, &rec->recordData_len, 1);
-                break;
-            case Z_SRW_recordPacking_URL:
-                /* just store it as a string.
-                   leave it to the backend to collect the document */
-                match_xsd_string_n(data_ptr, "recordData", o, 
-                                   &rec->recordData_buf, &rec->recordData_len);
-                break;
-            case Z_SRW_recordPacking_string:
-                match_xsd_string_n(data_ptr, "recordData", o, 
-                                   &rec->recordData_buf, &rec->recordData_len);
-                break;
-            }
-        }
-        rec->recordPacking = pack;
         if (ex.extraRecordData_buf || ex.recordIdentifier)
         {
             *extra = (Z_SRW_extra_record *)
