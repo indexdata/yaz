@@ -335,6 +335,7 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args);
 #define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"
 #define YAZ_XMLNS_DIAG_v1_1 "http://www.loc.gov/zing/srw/diagnostic/"
 #define YAZ_XMLNS_UPDATE_v0_9 "http://www.loc.gov/zing/srw/update/"
+#define YAZ_XMLNS_SRU_v2_response "http://docs.oasis-open.org/ns/search-ws/sru*esponse"
 
 YAZ_EXPORT
 int yaz_srw_check_content_type(Z_HTTP_Response *hres);

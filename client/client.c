@@ -4458,8 +4458,9 @@ static void http_response(Z_HTTP_Response *hres)
         {
             Z_SOAP *soap_package = 0;
             ODR o = odr_createmem(ODR_DECODE);
-            Z_SOAP_Handler soap_handlers[3] = {
+            Z_SOAP_Handler soap_handlers[4] = {
                 {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+                {YAZ_XMLNS_SRU_v2_response, 0, (Z_SOAP_fun) yaz_srw_codec},
                 {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
                 {0, 0, 0}
             };

@@ -14,6 +14,7 @@
 #endif
 
 #include <yaz/soap.h>
+#include <yaz/match_glob.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -56,7 +57,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         /* check for SRU root node match */
         
         for (i = 0; handlers[i].ns; i++)
-            if (!xmlStrcmp(ptr->ns->href, BAD_CAST handlers[i].ns))
+            if (yaz_match_glob(handlers[i].ns, (const char *)ptr->ns->href))
                 break;
         if (handlers[i].ns)
         {
@@ -66,7 +67,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             p_top_tmp.children = ptr;
             ret = (*handlers[i].f)(o, &p_top_tmp, &handler_data,
                                    handlers[i].client_data,
-                                   handlers[i].ns);
+                                   (const char *)ptr->ns->href);
             
             if (ret || !handler_data)
                 z_soap_error(o, p, "SOAP-ENV:Client",
@@ -182,15 +183,19 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         }
         else
         {
+            const char *ns = (const char *) ptr->ns->href;
             for (i = 0; handlers[i].ns; i++)
-                if (!xmlStrcmp(ptr->ns->href, BAD_CAST handlers[i].ns))
+            {
+                fprintf(stderr, "checking globns=%s ns=%s\n",
+                         handlers[i].ns, ns);
+                if (yaz_match_glob(handlers[i].ns, ns))
                     break;
+            }
             if (handlers[i].ns)
             {
                 void *handler_data = 0;
                 ret = (*handlers[i].f)(o, pptr, &handler_data,
-                                       handlers[i].client_data,
-                                       handlers[i].ns);
+                                       handlers[i].client_data, ns);
                 if (ret || !handler_data)
                     z_soap_error(o, p, "SOAP-ENV:Client",
                                  "SOAP Handler returned error", 0);
@@ -207,8 +212,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             else
             {
                 ret = z_soap_error(o, p, "SOAP-ENV:Client", 
-                                   "No handler for NS",
-                                   (const char *)ptr->ns->href);
+                                   "No handler for NS", ns);
             }
         }
         xmlFreeDoc(doc);

@@ -425,15 +425,15 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
     {
         Z_SOAP *soap_package = 0;
         ODR o = c->odr_in;
-        Z_SOAP_Handler soap_handlers[2] = {
+        Z_SOAP_Handler soap_handlers[3] = {
             {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+            {YAZ_XMLNS_SRU_v2_response, 0, (Z_SOAP_fun) yaz_srw_codec},
             {0, 0, 0}
         };
         ret = z_soap_codec(o, &soap_package,
                            &hres->content_buf, &hres->content_len,
                            soap_handlers);
-        if (!ret && soap_package->which == Z_SOAP_generic &&
-            soap_package->u.generic->no == 0)
+        if (!ret && soap_package->which == Z_SOAP_generic)
         {
             Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
             
