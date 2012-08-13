@@ -2130,6 +2130,7 @@ static Z_External *create_external_itemRequest(void)
     }
     else
     {
+        item_request_buf = odr_getbuf (out, &item_request_size, 0);
         r = (Z_External *) odr_malloc(out, sizeof(*r));
         r->direct_reference = odr_oiddup(out, yaz_oid_general_isoill_1);
         r->indirect_reference = 0;
