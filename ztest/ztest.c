@@ -418,13 +418,6 @@ int ztest_search(void *handle, bend_search_rr *rr)
 /* this huge function handles extended services */
 int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
 {
-    /* user-defined handle - created in bend_init */
-    int *counter = (int*) handle;  
-
-    yaz_log(log_level, "ESRequest no %d", *counter);
-
-    (*counter)++;
-
     if (rr->esr->packageName)
         yaz_log(log_level, "packagename: %s", rr->esr->packageName);
     yaz_log(log_level, "Waitaction: " ODR_INT_PRINTF, *rr->esr->waitAction);
