@@ -148,6 +148,15 @@ static int cmd_get(ZOOM_connection *c, ZOOM_resultset *r,
     return 0;
 }
 
+static int cmd_shell(ZOOM_connection *c, ZOOM_resultset *r,
+                     ZOOM_options options, const char **args)
+{
+    int ret = system(*args);
+    if (ret)
+         printf("system command returned %d\n", ret);
+    return 0;
+}
+
 static int cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
                     ZOOM_options options,
                      const char **args)
@@ -648,6 +657,7 @@ static int cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     printf("ext <type>\n");
     printf("set <option> [<value>]\n");
     printf("get <option>\n");
+    printf("shell cmdline\n");
     printf("\n");
     printf("options:\n");
     printf(" start\n");
@@ -777,6 +787,8 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
         ret = cmd_scan(c, r, options, buf);
     else if (is_command("sort", cmd_str, cmd_len))
         ret = cmd_sort(c, r, options, buf);
+    else if (is_command("shell", cmd_str, cmd_len))
+        ret = cmd_shell(c, r, options, buf);
     else
     {
         printf("unknown command %.*s\n", cmd_len, cmd_str);
