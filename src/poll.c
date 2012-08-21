@@ -60,7 +60,7 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
     FD_ZERO(&output);
     FD_ZERO(&except);
 
-    assert(num_fds > 0);
+    assert(num_fds >= 0);
     for (i = 0; i < num_fds; i++)
     {
         enum yaz_poll_mask mask = fds[i].input_mask;
@@ -108,12 +108,13 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 #if HAVE_SYS_POLL_H
 int yaz_poll_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 {
-    int r;
-    struct pollfd *pollfds = (struct pollfd *) 
-        xmalloc(num_fds * sizeof *pollfds);
-    int i;
+    int i, r;
+    struct pollfd *pollfds = 0;
 
-    assert(num_fds > 0);
+    if (num_fds > 0)
+        pollfds = (struct pollfd *) xmalloc(num_fds * sizeof *pollfds);
+
+    assert(num_fds >= 0);
     for (i = 0; i < num_fds; i++)
     {
         enum yaz_poll_mask mask = fds[i].input_mask;
