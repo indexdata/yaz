@@ -1,3 +1,5 @@
+--- 4.2.36 2012/08/22
+
 yaz-client: don't display bogus records from SRU servers. Some SRU servers
 return more records than given by *maximumRecords*. Skipping those in
 display!
