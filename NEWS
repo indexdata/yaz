@@ -1,3 +1,39 @@
+yaz-client: don't display bogus records from SRU servers. Some SRU servers
+return more records than given by *maximumRecords*. Skipping those in
+display!
+
+record_render: simplify buffer return handling and fix at least one bad
+memory reference, that broke the test_embed_record sometimes.
+
+Allow http://user:pass@host notation for yaz_url_exec.
+
+zoomsh: allow shell command to be executed. Via the system(3) call.
+
+yaz_poll: Allow num_fds == 0
+
+yaz-client: fix bad encoding of "itemorder item". The itemorder
+item <no>  - command forgot to use length of encoded Item Request
+package. Error present since YAZ 3.
+
+yaz-ztest: fix bad usage of session handle. Bug was introduced when
+result sets were saved (271a9c83).
+
+SRU recordPacking: guess record packing in response rather than looking
+at the recordPacking element which, OF COURSE, changed semantics in SRU
+2.0.
+
+Decode SRU 2.0 responses. The official namespace for responses, according
+to http://docs.oasis-open.org/search-ws/searchRetrieve/v1.0/cs01/schemas/sruRes
+appears to be http://docs.oasis-open.org/ns/search-ws/sruResponse .
+nature.com's server, however, usee namespace
+http://docs.oasis-open.org/ns/search-ws/sru-2-0-response . For this reason
+we are now using a glob-expr to match up the namespace. ZOOM C and
+yaz-client updated. Perhaps SRU 1.2 uses same namespace, I don't know.
+I can not find a single real example showing the "real" namespace in
+the documentation from OASIS. The namespace for requests is different
+from responses, but this is not added to YAZ yet, when we don't encode
+them yet.
+
 --- 4.2.35 2012/06/26
 
 zoom/record_render: add support for Base64 decoding fo MARC records
