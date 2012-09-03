@@ -235,7 +235,7 @@ int statserv_main(int argc, char **argv,
      <varlistentry><term>
        <literal>int maxrecordsize;</literal></term>
       <listitem><para>Maximum permissible record (message) size. Default
-	is 1Mb. This amount of memory will only be allocated if a
+	is 64 MB. This amount of memory will only be allocated if a
 	client requests a very large amount of records in one operation
 	(or a big record).
 	Set it to a lower number if you are worried about resource

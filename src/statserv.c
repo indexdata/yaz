@@ -99,7 +99,7 @@ statserv_options_block control_block = {
     "tcp:@:9999",               /* default listener port */
     PROTO_Z3950,                /* default application protocol */
     900,                        /* idle timeout (seconds) */
-    1024*1024,                  /* maximum PDU size (approx.) to allow */
+    64*1024*1024,               /* maximum PDU size (approx.) to allow */
     "default-config",           /* configuration name to pass to backend */
     "",                         /* set user id */
     0,                          /* bend_start handler */
