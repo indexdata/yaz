@@ -534,9 +534,9 @@ ZOOM_API(void)
         c->password = xstrdup(val);
     
     c->maximum_record_size =
-        ZOOM_options_get_int(c->options, "maximumRecordSize", 1024*1024);
+        ZOOM_options_get_int(c->options, "maximumRecordSize", 64*1024*1024);
     c->preferred_message_size =
-        ZOOM_options_get_int(c->options, "preferredMessageSize", 1024*1024);
+        ZOOM_options_get_int(c->options, "preferredMessageSize", 64*1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
 
