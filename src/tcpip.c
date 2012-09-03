@@ -204,7 +204,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->f_addrstr = tcpip_addrstr;
     p->f_straddr = tcpip_straddr;
     p->f_set_blocking = tcpip_set_blocking;
-    p->max_recv_bytes = 5000000;
+    p->max_recv_bytes = 128 * 1024 * 1024;
 
     p->state = s < 0 ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
