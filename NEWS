@@ -1,3 +1,11 @@
+--- 4.2.37 2012/09/04
+
+yaz-json-parse: JSON output may be pretty printed by using option
+-p twice.
+
+Increase default value of max message for Z39.50 Init for GFS, ZOOM
+and yaz-client. Old value was 1 MB. New value is 64 MB.
+
 --- 4.2.36 2012/08/22
 
 yaz-client: don't display bogus records from SRU servers. Some SRU servers
