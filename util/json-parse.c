@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         switch (ret)
         {
         case 'p':
-            print = 1;
+            print++;
             break;
         default:
             usage(argv[0]);
@@ -67,7 +67,10 @@ int main(int argc, char **argv)
     if (print)
     {
         WRBUF result = wrbuf_alloc();
-        json_write_wrbuf(n, result);
+        if (print > 1)
+            json_write_wrbuf_pretty(n, result);
+        else
+            json_write_wrbuf(n, result);
         puts(wrbuf_cstr(result));
         wrbuf_destroy(result);
     }

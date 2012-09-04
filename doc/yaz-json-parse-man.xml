@@ -52,7 +52,8 @@
     <term>-p</term>
     <listitem><para>
       Makes the JSON parser echo the JSON result string to standard output -
-      if parsing from stdin was successful.
+      if parsing from stdin was successful. If -p is given twice the
+      output is a multi line output with indentation (pretty print).
      </para></listitem>
    </varlistentry>
 

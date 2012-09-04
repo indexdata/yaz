@@ -502,34 +502,76 @@ void wrbuf_json_puts(WRBUF b, const char *str)
     wrbuf_json_write(b, str, strlen(str));
 }
 
-void json_write_wrbuf(struct json_node *node, WRBUF result)
+static void json_indent(WRBUF result, int indent)
 {
+    size_t l = wrbuf_len(result);
+    if (l == 0 || wrbuf_buf(result)[l-1] == '\n')
+    {
+        int i;
+        for (i = 0; i < indent; i++)
+            wrbuf_putc(result, ' ');
+    }
+}
+
+static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
+{
+    int sub_indent = -1;
+    if (indent >= 0)
+        sub_indent = indent + 1;
     switch (node->type)
     {
     case json_node_object:
+        json_indent(result, indent);
         wrbuf_puts(result, "{");
+        if (indent >= 0)
+        {
+            wrbuf_puts(result, "\n"); 
+            json_indent(result, sub_indent);
+        }
         if (node->u.link[0])
-            json_write_wrbuf(node->u.link[0], result);
+            json_write_wrbuf_r(node->u.link[0], result, sub_indent);
+        if (indent >= 0)
+        {
+            wrbuf_puts(result, "\n");
+            json_indent(result, indent);
+        }
         wrbuf_puts(result, "}");
         break;
     case json_node_array:
+        json_indent(result, indent);
         wrbuf_puts(result, "[");
+        if (indent >= 0)
+        {
+            wrbuf_puts(result, "\n");
+            json_indent(result, sub_indent);
+        }
         if (node->u.link[0])
-            json_write_wrbuf(node->u.link[0], result);
+        {
+            json_write_wrbuf_r(node->u.link[0], result, sub_indent);
+        }
+        if (indent >= 0)
+        {
+            wrbuf_puts(result, "\n");
+            json_indent(result, indent);
+        }
         wrbuf_puts(result, "]");
         break;
     case json_node_list:
-        json_write_wrbuf(node->u.link[0], result);
+        json_write_wrbuf_r(node->u.link[0], result, indent);
         if (node->u.link[1])
         {
             wrbuf_puts(result, ",");
-            json_write_wrbuf(node->u.link[1], result);
+            if (indent >= 0)
+                wrbuf_puts(result, " ");
+            json_write_wrbuf_r(node->u.link[1], result, indent);
         }
         break;
     case json_node_pair:
-        json_write_wrbuf(node->u.link[0], result);
+        json_write_wrbuf_r(node->u.link[0], result, indent);
         wrbuf_puts(result, ":");
-        json_write_wrbuf(node->u.link[1], result);
+        if (indent >= 0)
+            wrbuf_puts(result, " ");
+        json_write_wrbuf_r(node->u.link[1], result, indent);
         break;
     case json_node_string:
         wrbuf_puts(result, "\"");
@@ -549,6 +591,16 @@ void json_write_wrbuf(struct json_node *node, WRBUF result)
         wrbuf_puts(result, "null");
         break;
     }
+}
+
+void json_write_wrbuf_pretty(struct json_node *node, WRBUF result)
+{
+    json_write_wrbuf_r(node, result, 1);
+}
+
+void json_write_wrbuf(struct json_node *node, WRBUF result)
+{
+    json_write_wrbuf_r(node, result, -1);
 }
 
 static struct json_node **json_get_objectp(struct json_node *n,
