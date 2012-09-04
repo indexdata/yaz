@@ -134,7 +134,7 @@
      <term>-k <replaceable>size</replaceable></term>
      <listitem><para>
       Sets preferred messages and maximum record size for Initialize
-      Request in kilobytes. Default value is 1024 (1 MB).
+      Request in kilobytes. Default value is 65536 (64 MB).
       </para></listitem>
     </varlistentry>
     <varlistentry>
