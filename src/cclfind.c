@@ -226,8 +226,99 @@ static size_t cmp_operator(const char **aliases, const char *input)
     return 0;
 }
 
+
 #define REGEX_CHARS "^[]{}()|.*+?!$"
 #define CCL_CHARS "#?\\"
+static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
+                       char *dst_term, int *regex_trunc, int *z3958_trunc,
+                       const char **truncation_aliases,
+                       int is_first, int is_last,
+                       int *left_trunc, int *right_trunc)
+{
+    size_t j;
+    int quote_mode = 0;
+
+    for (j = 0; j < src_len; j++)
+    {
+        size_t op_size;
+        if (j > 0 && src_str[j-1] == '\\')
+        {
+            if (*regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
+            {
+                *regex_trunc = 2;
+                strcat(dst_term, "\\");
+            }
+            else if (*z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
+            {
+                *z3958_trunc = 2;
+                strcat(dst_term, "\\");
+            }
+            strxcat(dst_term, src_str + j, 1);
+        }
+        else if (src_str[j] == '"')
+            quote_mode = !quote_mode;
+        else if (!quote_mode &&
+                 (op_size = cmp_operator(truncation_aliases,
+                                         src_str + j))
+            )
+        {
+            j += (op_size - 1);  /* j++ in for loop */
+            if (*regex_trunc)
+            {
+                strcat(dst_term, ".*");
+                *regex_trunc = 2; /* regex trunc is really needed */
+            }
+            else if (*z3958_trunc)
+            {
+                strcat(dst_term, "?");
+                *z3958_trunc = 2;
+            }
+            else if (is_first && j == 0)
+                *left_trunc = 1;
+            else if (is_last && j == src_len - 1)
+                *right_trunc = 1;
+            else
+            {
+                cclp->error_code = CCL_ERR_TRUNC_NOT_EMBED;
+                return -1;
+            }
+        }
+        else if (!quote_mode && src_str[j] == '#')
+        {
+            if (*regex_trunc)
+            {
+                strcat(dst_term, ".");
+                *regex_trunc = 2; /* regex trunc is really needed */
+            }
+            else if (*z3958_trunc)
+            {
+                strcat(dst_term, "#");
+                *z3958_trunc = 2;
+            }
+            else
+            {
+                cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
+                return -1;
+            }
+        }
+        else if (src_str[j] != '\\')
+        {
+            if (*regex_trunc && strchr(REGEX_CHARS, src_str[j]))
+            {
+                *regex_trunc = 2;
+                strcat(dst_term, "\\");
+            }
+            else if (*z3958_trunc && strchr(CCL_CHARS, src_str[j]))
+            {
+                *z3958_trunc = 2;
+                strcat(dst_term, "\\");
+            }
+            strxcat(dst_term, src_str + j, 1);                    
+        }
+    }
+    return 0;
+}
+
 /**
  * search_term: Parse CCL search term. 
  * cclp:   CCL Parser
@@ -393,97 +484,21 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         {
             const char *src_str = cclp->look_token->name;
             size_t src_len = cclp->look_token->len;
-            int j;
-            int quote_mode = 0;
 
             if (p->u.t.term[0] && cclp->look_token->ws_prefix_len)
             {
                 strxcat(p->u.t.term, cclp->look_token->ws_prefix_buf,
                         cclp->look_token->ws_prefix_len);
             }
-            for (j = 0; j < src_len; j++)
+            if (append_term(cclp, src_str, src_len, p->u.t.term, &regex_trunc,
+                            &z3958_trunc, truncation_aliases, i == 0, i == no - 1,
+                            &left_trunc, &right_trunc))
             {
-                size_t op_size;
-                if (j > 0 && src_str[j-1] == '\\')
-                {
-                    if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
-                    {
-                        regex_trunc = 2;
-                        strcat(p->u.t.term, "\\");
-                    }
-                    else if (z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
-                    {
-                        z3958_trunc = 2;
-                        strcat(p->u.t.term, "\\");
-                    }
-                    strxcat(p->u.t.term, src_str + j, 1);
-                }
-                else if (src_str[j] == '"')
-                    quote_mode = !quote_mode;
-                else if (!quote_mode &&
-                         (op_size = cmp_operator(truncation_aliases,
-                                                 src_str + j))
-                    )
-                {
-                    j += (op_size - 1);  /* j++ in for loop */
-                    if (regex_trunc)
-                    {
-                        strcat(p->u.t.term, ".*");
-                        regex_trunc = 2; /* regex trunc is really needed */
-                    }
-                    else if (z3958_trunc)
-                    {
-                        strcat(p->u.t.term, "?");
-                        z3958_trunc = 2;
-                    }
-                    else if (i == 0 && j == 0)
-                        left_trunc = 1;
-                    else if (i == no - 1 && j == src_len - 1)
-                        right_trunc = 1;
-                    else
-                    {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_EMBED;
-                        ccl_rpn_delete(p);
-                        return NULL;
-                    }
-                }
-                else if (!quote_mode && src_str[j] == '#')
-                {
-                    if (regex_trunc)
-                    {
-                        strcat(p->u.t.term, ".");
-                        regex_trunc = 2; /* regex trunc is really needed */
-                    }
-                    else if (z3958_trunc)
-                    {
-                        strcat(p->u.t.term, "#");
-                        z3958_trunc = 2;
-                    }
-                    else
-                    {
-                        cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
-                        ccl_rpn_delete(p);
-                        return NULL;
-                    }
-                }
-                else if (src_str[j] != '\\')
-                {
-                    if (regex_trunc && strchr(REGEX_CHARS, src_str[j]))
-                    {
-                        regex_trunc = 2;
-                        strcat(p->u.t.term, "\\");
-                    }
-                    else if (z3958_trunc && strchr(CCL_CHARS, src_str[j]))
-                    {
-                        z3958_trunc = 2;
-                        strcat(p->u.t.term, "\\");
-                    }
-                    strxcat(p->u.t.term, src_str + j, 1);                    
-                }
+                ccl_rpn_delete(p);
+                return NULL;
             }
             ADVANCE;
         }
-
         /* make the top node point to us.. */
         if (p_top)
         {
