@@ -86,6 +86,7 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
         ccl_qual_fitem(bibset, "term dc.title", "comb");
+        ccl_qual_fitem(bibset, "s=ag,pw", "ag");
         break;
     case 1:
         strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -114,6 +115,9 @@ void tst1(int pass)
 
         strcpy(tstline, "comb term dc.title # combination");
         ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "ag s=ag,pw");
+        ccl_qual_line(bibset, tstline);
         break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
@@ -126,6 +130,7 @@ void tst1(int pass)
                      "x r=o\n"
                      "title dc.title\n"
                      "comb term dc.title\n"
+                     "ag s=ag,pw\n"
             );
         break;
     case 3:
@@ -168,6 +173,9 @@ void tst1(int pass)
                 " <qual name=\"comb\">\n"
                 "   <qual name=\"term\"/>\n"
                 "   <qual name=\"dc.title\"/>\n"
+                " </qual>\n"
+                " <qual name=\"ag\">\n"
+                "   <attr type=\"s\" value=\"ag,pw\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
             
@@ -383,6 +391,30 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "\"a b  c  \"",
                             "@attr 4=1 @attr 1=1016 \"a b  c  \" "));
 
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a",
+                            "@attr 4=2 a "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a b",
+                            "@attr 4=2 \"a b\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a b \"c d\"",
+                            "@and @attr 4=2 \"a b\" @attr 4=1 \"c d\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a b \"c\"",
+                            "@attr 4=2 \"a b c\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a b \"\"",
+                            "@attr 4=2 \"a b \" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=a \"b c\" d",
+                            "@and @and "
+                            "@attr 4=2 a @attr 4=1 \"b c\" @attr 4=2 d "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\"",
+                            "@attr 4=1 \"a b c\" "));
+ 
+    YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\" \"d e\"",
+                            "@and @attr 4=1 \"a b c\" @attr 4=1 \"d e\" "));
     ccl_qual_rm(&bibset);
 }
 
