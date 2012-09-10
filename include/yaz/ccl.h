@@ -347,6 +347,7 @@ int ccl_stop_words_info(ccl_stop_words_t csw, int idx,
 #define CCL_BIB1_STR_WP (-1)
 #define CCL_BIB1_STR_AND_LIST (-2)
 #define CCL_BIB1_STR_OR_LIST (-3)
+#define CCL_BIB1_STR_AUTO_GROUP (-4)
 #define CCL_BIB1_REL_ORDER (-1)
 #define CCL_BIB1_REL_PORDER (-2)
 

@@ -334,6 +334,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
     struct ccl_rpn_node *p_top = 0;
     struct ccl_token *lookahead = cclp->look_token;
     int and_list = 0;
+    int auto_group = 0;
     int or_list = 0;
     char *attset;
     const char **truncation_aliases;
@@ -350,13 +351,15 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_AND_LIST, 0))
         and_list = 1;
+    if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_AUTO_GROUP, 0))
+        auto_group = 1;
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_OR_LIST, 0))
         or_list = 1;
     while (1)
     {
         struct ccl_rpn_node *p;
         size_t no, i;
-        int no_spaces = 0;
+        int is_phrase = 0;
         int relation_value = -1;
         int position_value = -1;
         int structure_value = -1;
@@ -378,14 +381,21 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             ADVANCE;
             continue;
         }
-        /* go through each TERM token. If no truncation attribute is yet
-           met, then look for left/right truncation markers (?) and
-           set left_trunc/right_trunc/mid_trunc accordingly */
         for (no = 0; no < max && is_term_ok(lookahead->kind, term_list); no++)
         {
+            int this_is_phrase = 0;
             for (i = 0; i<lookahead->len; i++)
                 if (lookahead->name[i] == ' ')
-                    no_spaces++;
+                    this_is_phrase = 1;
+
+            if (auto_group)
+            {
+                if (no > 0 && (is_phrase || is_phrase != this_is_phrase))
+                    break;
+                is_phrase = this_is_phrase;
+            }
+            else if (this_is_phrase || no > 0)
+                is_phrase = 1;
             len += 1+lookahead->len+lookahead->ws_prefix_len;
             lookahead = lookahead->next;
         }
@@ -459,7 +469,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
         {   /* no structure attribute met. Apply either structure attribute 
                WORD or PHRASE depending on number of CCL tokens */
-            if (no == 1 && no_spaces == 0)
+            if (!is_phrase)
                 ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 2);
             else
                 ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 1);
