@@ -86,7 +86,7 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
         ccl_qual_fitem(bibset, "term dc.title", "comb");
-        ccl_qual_fitem(bibset, "s=ag,pw", "ag");
+        ccl_qual_fitem(bibset, "s=ag", "ag");
         break;
     case 1:
         strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -116,7 +116,7 @@ void tst1(int pass)
         strcpy(tstline, "comb term dc.title # combination");
         ccl_qual_line(bibset, tstline);
 
-        strcpy(tstline, "ag s=ag,pw");
+        strcpy(tstline, "ag s=ag");
         ccl_qual_line(bibset, tstline);
         break;
     case 2:
@@ -130,7 +130,7 @@ void tst1(int pass)
                      "x r=o\n"
                      "title dc.title\n"
                      "comb term dc.title\n"
-                     "ag s=ag,pw\n"
+                     "ag s=ag\n"
             );
         break;
     case 3:
@@ -175,7 +175,7 @@ void tst1(int pass)
                 "   <qual name=\"dc.title\"/>\n"
                 " </qual>\n"
                 " <qual name=\"ag\">\n"
-                "   <attr type=\"s\" value=\"ag,pw\"/>\n"
+                "   <attr type=\"s\" value=\"ag\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
             

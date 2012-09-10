@@ -462,13 +462,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     }
                 }
         }
-        /* len now holds the number of characters in the RPN term */
-        /* no holds the number of CCL tokens (1 or more) */
-        
-        if (structure_value == -1 && 
-            qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
-        {   /* no structure attribute met. Apply either structure attribute 
-               WORD or PHRASE depending on number of CCL tokens */
+        if (structure_value == -1 && (
+                auto_group || 
+                qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
+            )
+        {
             if (!is_phrase)
                 ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 2);
             else
