@@ -462,6 +462,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                     }
                 }
         }
+        attset = 0;
         if (structure_value == -1 && (
                 auto_group || 
                 qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
