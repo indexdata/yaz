@@ -963,13 +963,9 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             xmlAddChild(record_ptr, ptr);
             break;
         case YAZ_MARC_LEADER:
-        {
-            char *field = "leader";
-            field = "l";
-            xmlNewTextChild(record_ptr, ns_record, BAD_CAST field,
+            xmlNewTextChild(record_ptr, ns_record, BAD_CAST "l",
                             BAD_CAST n->u.leader);
-        }
-        break;
+            break;
         }
     }
     wrbuf_destroy(wr_cdata);
