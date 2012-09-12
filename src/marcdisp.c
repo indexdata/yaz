@@ -771,12 +771,31 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
     return 0;
 }
 
+static void sanitise_leader_for_utf8(yaz_marc_t mt)
+{
+    /* the leader MUST be ASCII for UTF-8 output (XML) */
+    struct yaz_marc_node *n;
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+        {
+            size_t i;
+            for (i = 0; n->u.leader[i]; i++)
+                if (n->u.leader[i] < ' ' || n->u.leader[i] > 126)
+                {
+                    n->u.leader[i] = ' ';
+                    yaz_marc_cprintf(mt, "Fixing leader char at offset %d",
+                                     (int) (i+1));
+                }
+        }
+}
+
 static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
                                      const char *ns, 
                                      const char *format,
                                      const char *type,
                                      int turbo)
 {
+    sanitise_leader_for_utf8(mt);
     if (mt->write_using_libxml2)
     {
 #if YAZ_HAVE_XML2
