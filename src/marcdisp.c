@@ -342,6 +342,18 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
     }
 }
 
+static void check_ascii(yaz_marc_t mt, char *leader, int offset,
+                        int ch_default)
+{
+    if (leader[offset] < ' ' || leader[offset] > 127)
+    {
+        yaz_marc_cprintf(mt, 
+                         "Leader character at offset %d is non-ASCII. "
+                         "Setting value to '%c'", offset, ch_default);
+        leader[offset] = ch_default;
+    }
+}
+
 void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
                          int *indicator_length,
                          int *identifier_length,
@@ -354,6 +366,11 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
 
     memcpy(leader, leader_c, 24);
 
+    check_ascii(mt, leader, 5, 'a');
+    check_ascii(mt, leader, 6, 'a');
+    check_ascii(mt, leader, 7, 'a');
+    check_ascii(mt, leader, 8, '#');
+    check_ascii(mt, leader, 9, '#');
     if (!atoi_n_check(leader+10, 1, indicator_length))
     {
         yaz_marc_cprintf(mt, 
@@ -377,6 +394,9 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
                          " Assuming 0");
         *base_address = 0;
     }
+    check_ascii(mt, leader, 17, '#');
+    check_ascii(mt, leader, 18, '#');
+    check_ascii(mt, leader, 19, '#');
     if (!atoi_n_check(leader+20, 1, length_data_entry))
     {
         yaz_marc_cprintf(mt, 
@@ -401,6 +421,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
         *length_implementation = 0;
         leader[22] = '0';
     }
+    check_ascii(mt, leader, 23, '0');
 
     if (mt->debug)
     {
@@ -771,31 +792,12 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
     return 0;
 }
 
-static void sanitise_leader_for_utf8(yaz_marc_t mt)
-{
-    /* the leader MUST be ASCII for UTF-8 output (XML) */
-    struct yaz_marc_node *n;
-    for (n = mt->nodes; n; n = n->next)
-        if (n->which == YAZ_MARC_LEADER)
-        {
-            size_t i;
-            for (i = 0; n->u.leader[i]; i++)
-                if (n->u.leader[i] < ' ' || n->u.leader[i] > 126)
-                {
-                    n->u.leader[i] = ' ';
-                    yaz_marc_cprintf(mt, "Fixing leader char at offset %d",
-                                     (int) (i+1));
-                }
-        }
-}
-
 static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
                                      const char *ns, 
                                      const char *format,
                                      const char *type,
                                      int turbo)
 {
-    sanitise_leader_for_utf8(mt);
     if (mt->write_using_libxml2)
     {
 #if YAZ_HAVE_XML2
