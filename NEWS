@@ -1,3 +1,11 @@
+--- 4.2.38 2012/09/17
+
+MARC: fix non-ASCII characters for leader. This is to ensure we can
+generate XML in UTF-8.
+
+CCL: new special attribute s=ag . Almost s=pw,al but preserves words
+in one node with structure word.
+
 --- 4.2.37 2012/09/04
 
 yaz-json-parse: JSON output may be pretty printed by using option
