@@ -679,6 +679,17 @@
 	   </entry>
 	  </row>
 	  
+	  <row><entry><literal>s=ag</literal></entry><entry>
+	    Tokens that appears as phrases (with blank in them) gets
+	    structure phrase attached. Tokens that appers as words
+	    gets structure phrase attached. Phrases and words are
+	    ANDed. This is a variant of s=al and s=pw, with the main
+	    difference that words are not split (with operator AND)
+	    but instead kept in one RPN token. This facility appeared
+	    in YAZ 4.2.38.
+	   </entry>
+	  </row>
+
 	  <row><entry><literal>r=o</literal></entry><entry>
 	    Allows ranges and the operators greather-than, less-than, ...
 	    equals.
