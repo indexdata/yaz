@@ -53,7 +53,7 @@ YAZ_EXPORT WRBUF wrbuf_alloc(void);
 
 /** \brief destroy WRBUF and its buffer
     \param b WRBUF
- 
+
     For YAZ 4.0.2 WRBUF b may be NULL.
  */
 YAZ_EXPORT void wrbuf_destroy(WRBUF b);
@@ -109,7 +109,7 @@ YAZ_EXPORT void wrbuf_xmlputs(WRBUF b, const char *cp);
     \param from character "from"
     \param to charcter "to"
 */
-YAZ_EXPORT void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+YAZ_EXPORT void wrbuf_puts_replace_char(WRBUF b, const char *buf,
                                         const char from, const char to);
 
 /** \brief writes C-string to WRBUF and escape non-ASCII characters
@@ -194,7 +194,7 @@ YAZ_EXPORT void wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch);
 /** \brief iconv reset(flush) to WRBUF
     \param b
     \param cd iconv handle
-    
+
     This function calls iconv(cd, 0, 0, ..) to make it
     flush any remaining content.
 */
@@ -211,7 +211,7 @@ YAZ_EXPORT void wrbuf_chop_right(WRBUF b);
  */
 YAZ_EXPORT void wrbuf_cut_right(WRBUF b, size_t no_to_remove);
 
-/** \brief grow WRBUF larger 
+/** \brief grow WRBUF larger
     \param b WRBUF
     \param minsize make WRBUF at least this size
 

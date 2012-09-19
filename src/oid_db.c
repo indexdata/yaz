@@ -119,7 +119,7 @@ char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oid_buf)
 int yaz_oid_is_iso2709(const Odr_oid *oid)
 {
     if (oid_oidlen(oid) == 6 && oid[0] == 1 && oid[1] == 2
-	&& oid[2] == 840 && oid[3] == 10003 && oid[4] == 5 
+	&& oid[2] == 840 && oid[3] == 10003 && oid[4] == 5
 	&& oid[5] <= 29 && oid[5] != 16)
 	return 1;
     return 0;
@@ -194,7 +194,7 @@ void yaz_oid_trav(yaz_oid_db_t oid_db,
     for (; oid_db; oid_db = oid_db->next)
     {
 	struct yaz_oid_entry *e = get_entries(oid_db);
-	
+
 	for (; e->name; e++)
 	    func(e->oid, e->oclass, e->name, client_data);
     }

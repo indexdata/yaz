@@ -22,7 +22,7 @@ static unsigned long read_UCS4(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
-    
+
     if (inbytesleft < 4)
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
@@ -41,7 +41,7 @@ static unsigned long read_UCS4LE(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                  size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
-    
+
     if (inbytesleft < 4)
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
@@ -102,7 +102,7 @@ static size_t write_UCS4LE(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 
 yaz_iconv_encoder_t yaz_ucs4_encoder(const char *tocode,
                                      yaz_iconv_encoder_t e)
-    
+
 {
     if (!yaz_matchstr(tocode, "UCS4"))
         e->write_handle = write_UCS4;
@@ -115,7 +115,7 @@ yaz_iconv_encoder_t yaz_ucs4_encoder(const char *tocode,
 
 yaz_iconv_decoder_t yaz_ucs4_decoder(const char *tocode,
                                      yaz_iconv_decoder_t d)
-    
+
 {
     if (!yaz_matchstr(tocode, "UCS4"))
         d->read_handle = read_UCS4;

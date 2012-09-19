@@ -51,7 +51,7 @@ yaz_record_conv_t conv_configure(const char *xmlstring, WRBUF w)
 
 
             int r = yaz_record_conv_configure(p, ptr);
-            
+
             if (r)
             {
                 wrbuf_puts(w, yaz_record_conv_get_error(p));
@@ -61,7 +61,7 @@ yaz_record_conv_t conv_configure(const char *xmlstring, WRBUF w)
         }
         xmlFreeDoc(doc);
         return p;
-    }    
+    }
 }
 
 int conv_configure_test(const char *xmlstring, const char *expect_error,
@@ -144,7 +144,7 @@ static void tst_configure(void)
                                   "</backend>",
                                   "xslt unsupported."
                                   " YAZ compiled without XSLT support", 0));
-#endif 
+#endif
 }
 
 static int conv_convert_test(yaz_record_conv_t p,
@@ -181,7 +181,7 @@ static int conv_convert_test(yaz_record_conv_t p,
             else if (strcmp(output_expect_record, wrbuf_cstr(output_record)))
             {
                 ret = 0;
-                printf("got-output_record len=%ld: %s\n", 
+                printf("got-output_record len=%ld: %s\n",
                        (long) wrbuf_len(output_record),
                        wrbuf_cstr(output_record));
                 printf("output_expect_record len=%ld %s\n",
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     tst_configure();
 #endif
-#if  YAZ_HAVE_XSLT 
+#if  YAZ_HAVE_XSLT
     tst_convert1();
     tst_convert2();
 #endif

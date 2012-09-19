@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file 
+/** \file
     \brief File globbing (ala POSIX glob, but simpler)
 */
 
@@ -52,7 +52,7 @@ int yaz_file_glob(const char *pattern, yaz_glob_res_t *res);
 
 /** \brief release glob result
     \param res pointer to glob result
-    
+
     A value of *res == NULL is allowed. If *res != NULL, then
     *res is set to NULL
     */

@@ -56,7 +56,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
     if (element->attributeSet)
     {
         char oid_name_str[OID_STR_MAX];
-        const char *setname = yaz_oid_to_string_buf(element->attributeSet, 
+        const char *setname = yaz_oid_to_string_buf(element->attributeSet,
                                                     0, oid_name_str);
         if (setname)
         {
@@ -65,7 +65,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
         }
     }
     wrbuf_printf(b, ODR_INT_PRINTF "=", *element->attributeType);
-    switch (element->which) 
+    switch (element->which)
     {
     case Z_AttributeValue_numeric:
         wrbuf_printf(b, ODR_INT_PRINTF, *element->value.numeric);
@@ -80,7 +80,7 @@ static void yaz_attribute_element_to_wrbuf(WRBUF b,
                 wrbuf_puts(b, element->value.complex->list[i]->u.string);
             else if (element->value.complex->list[i]->which ==
                      Z_StringOrNumeric_numeric)
-                wrbuf_printf(b, ODR_INT_PRINTF, 
+                wrbuf_printf(b, ODR_INT_PRINTF,
                              *element->value.complex->list[i]->u.numeric);
         }
         break;
@@ -113,7 +113,7 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
     int i;
     for (i = 0; i < num_attributes; i++)
         yaz_attribute_element_to_wrbuf(b,zapt->attributes->attributes[i]);
-    
+
     switch (zapt->term->which)
     {
     case Z_Term_general:
@@ -152,7 +152,7 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
             else
                 wrbuf_putc(b, '0');
 
-            wrbuf_printf(b, " " ODR_INT_PRINTF " %d " 
+            wrbuf_printf(b, " " ODR_INT_PRINTF " %d "
                          ODR_INT_PRINTF " ", *op->u.prox->distance,
                          *op->u.prox->ordered,
                          *op->u.prox->relationType);
@@ -202,7 +202,7 @@ void yaz_rpnquery_to_wrbuf(WRBUF b, const Z_RPNQuery *rpn)
                                                      0, oid_name_str);
         if (oid_name)
             wrbuf_printf(b, "@attrset %s ", oid_name);
-    } 
+    }
     yaz_rpnstructure_to_wrbuf(b, rpn->RPNStructure);
     wrbuf_chop_right(b);
 }
@@ -213,7 +213,7 @@ void yaz_query_to_wrbuf(WRBUF b, const Z_Query *q)
     assert(b);
     switch (q->which)
     {
-    case Z_Query_type_1: 
+    case Z_Query_type_1:
     case Z_Query_type_101:
         wrbuf_puts(b,"RPN ");
         yaz_rpnquery_to_wrbuf(b, q->u.type_1);

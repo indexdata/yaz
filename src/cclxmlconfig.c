@@ -91,7 +91,7 @@ static int ccl_xml_config_attr(const char *default_set,
 }
 
 static int ccl_xml_config_qual(CCL_bibset bibset, const char *default_set,
-                               WRBUF wrbuf, 
+                               WRBUF wrbuf,
                                const xmlNode *ptr,
                                const char **addinfo)
 {
@@ -181,7 +181,7 @@ int ccl_xml_config_directive(CCL_bibset bibset, const xmlNode *ptr,
 
 int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr, const char **addinfo)
 {
-    if (ptr && ptr->type == XML_ELEMENT_NODE && 
+    if (ptr && ptr->type == XML_ELEMENT_NODE &&
         !xmlStrcmp(ptr->name, BAD_CAST "cclmap"))
     {
         const xmlNode *c_ptr;

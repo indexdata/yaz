@@ -13,7 +13,7 @@
  *  and yaz already provides the APDUS for it.
  *
  *  This is not an interactive client like yaz-client, but driven by command-
- *  line arguments. Its output is a return code, and possibly some text on 
+ *  line arguments. Its output is a return code, and possibly some text on
  *  stdout.
  *
  *  Exit codes  (note, the program exits as soon as it finds a good reason)
@@ -106,9 +106,9 @@ struct nameval *parse_nameval( char *arg ) {
     struct nameval *nv = (struct nameval *) xmalloc(sizeof(*nv));
     char *p=arg;
     int len;
-    if (!p || !*p) 
+    if (!p || !*p)
         return 0; /* yeah, leaks a bit of memory. so what */
-    while ( *p && ( *p != '=' ) ) 
+    while ( *p && ( *p != '=' ) )
         p++;
     len = p - arg;
     if (!len)
@@ -134,7 +134,7 @@ void append_nameval (struct prog_args *args, struct nameval *nv) {
         return;
     if (args->namevals) {
         nv->next=args->namevals->next; /* first */
-        args->namevals->next=nv; 
+        args->namevals->next=nv;
         args->namevals=nv;
     } else {
         nv->next=nv;
@@ -145,7 +145,7 @@ void append_nameval (struct prog_args *args, struct nameval *nv) {
 /** \brief parse a parameter file */
 void parse_paramfile(char *arg, struct prog_args *args) {
     FILE *f=fopen(arg,"r");
-#define BUFSIZE 4096    
+#define BUFSIZE 4096
     char buf[BUFSIZE];
     int len;
     struct nameval *nv;
@@ -195,7 +195,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
     args->oclc_recno=0;
     args->auth_userid = 0;
     args->auth_passwd = 0;
-#if 0    
+#if 0
     /* Example 3 - directly from OCLC, supposed to work on their test server*/
     args->auth_userid = "100-310-658" ; /* FIXME - get from cmd line */
     args->auth_passwd = "apii2test" ;   /* FIXME - get from cmd line */
@@ -290,7 +290,7 @@ COMSTACK connect_to( char *hostaddr ){
                  hostaddr );
         exit(2);
     }
-    
+
     yaz_log(YLOG_DEBUG,"Created stack ok ");
 
     status = cs_connect(stack, server_address_ip);
@@ -309,11 +309,11 @@ COMSTACK connect_to( char *hostaddr ){
 Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     Z_PromptObject1 *p = (Z_PromptObject1 *) odr_malloc(odr, sizeof(*p) );
     Z_ResponseUnit1 *ru = (Z_ResponseUnit1 *) odr_malloc(odr, sizeof(*ru) );
-    
+
     p->which=Z_PromptObject1_response;
     p->u.response = (Z_Response1*) odr_malloc(odr, sizeof(*(p->u.response)) );
     p->u.response->num=2;
-    p->u.response->elements= (Z_ResponseUnit1 **) odr_malloc(odr, 
+    p->u.response->elements= (Z_ResponseUnit1 **) odr_malloc(odr,
              p->u.response->num*sizeof(*(p->u.response->elements)) );
     /* user id, aka "oclc authorization number" */
     p->u.response->elements[0] = ru;
@@ -321,7 +321,7 @@ Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
     ru->promptId->u.enumeratedPrompt = (Z_PromptIdEnumeratedPrompt *)
         odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
-    ru->promptId->u.enumeratedPrompt->type = 
+    ru->promptId->u.enumeratedPrompt->type =
          odr_intdup(odr,Z_PromptIdEnumeratedPrompt_userId);
     ru->promptId->u.enumeratedPrompt->suggestedString = 0 ;
     ru->which = Z_ResponseUnit1_string ;
@@ -333,7 +333,7 @@ Z_PromptObject1 *makeprompt(struct prog_args *args, ODR odr) {
     ru->promptId->which = Z_PromptId_enumeratedPrompt;
     ru->promptId->u.enumeratedPrompt =  (Z_PromptIdEnumeratedPrompt *)
         odr_malloc(odr, sizeof(*(ru->promptId->u.enumeratedPrompt) ));
-    ru->promptId->u.enumeratedPrompt->type = 
+    ru->promptId->u.enumeratedPrompt->type =
          odr_intdup(odr,Z_PromptIdEnumeratedPrompt_password);
     ru->promptId->u.enumeratedPrompt->suggestedString = 0 ;
     ru->which = Z_ResponseUnit1_string ;
@@ -357,12 +357,12 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
         yaz_log(YLOG_FATAL,"Encoding of z_PromptObject1 failed ");
         exit (6);
     }
-    
+
     printf ("Prompt: \n"); /*!*/
     z_PromptObject1(odr_prt, &p, 0,0 ); /*!*/
 
     buf= odr_getbuf(odr_ext,&siz,0);
-    ext->u.single_ASN1_type=(Odr_any *) 
+    ext->u.single_ASN1_type=(Odr_any *)
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
     ext->u.single_ASN1_type->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
@@ -379,7 +379,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     }
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
-    buf= odr_getbuf(odr_ext,&siz,0); 
+    buf= odr_getbuf(odr_ext,&siz,0);
     e->item->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(e->item->buf,buf, siz );
     e->item->len = e->item->size = siz;
@@ -416,7 +416,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
         yaz_log(YLOG_FATAL,"Encoding of ill_OCLCILLRequestExtension failed ");
         exit (6);
     }
-    
+
     printf ("OCLC: \n"); /*!*/
     ill_OCLCILLRequestExtension(odr_prt, &oc, 0,0 ); /*!*/
 
@@ -438,7 +438,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     }
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
-    buf= odr_getbuf(odr_ext,&siz,0); 
+    buf= odr_getbuf(odr_ext,&siz,0);
     e->item->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(e->item->buf, buf, siz);
     e->item->len = e->item->size = siz;
@@ -484,7 +484,7 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
     char *buf_out;
     int len_out;
     int res;
-    if (!ill_APDU  (odr, &apdu, 0, 0)) { 
+    if (!ill_APDU  (odr, &apdu, 0, 0)) {
         yaz_log(YLOG_FATAL,"ill_Apdu failed");
         exit(2);
     }
@@ -518,7 +518,7 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
                 yaz_log(YLOG_FATAL|YLOG_ERRNO, "write req.apdu failed");
         }
     }
-    
+
 } /* sendrequest */
 
 /* * * * * * * * * * * * * * * */
@@ -533,7 +533,7 @@ ILL_APDU *getresponse( COMSTACK stack, ODR in_odr ){
     yaz_log(YLOG_DEBUG,"Got a response of %d bytes at %p. res=%d", len_in,buf_in, res);
     if (res<0) {
         yaz_log(YLOG_FATAL,"Could not receive packet. code %d",res );
-        yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...", 
+        yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...",
                 buf_in[0], buf_in[1], buf_in[2], buf_in[3],
                 buf_in[4], buf_in[5], buf_in[6], buf_in[7]  );
         yaz_log(YLOG_DEBUG,"PDU Dump:");
@@ -550,7 +550,7 @@ ILL_APDU *getresponse( COMSTACK stack, ODR in_odr ){
         sprintf(msg, "ODR code %d:%d element=%-20s",
                 err, x, element ? element : "<unknown>");
         yaz_log(YLOG_FATAL,"Error decoding incoming packet: %s",msg);
-        yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...", 
+        yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...",
                 buf_in[0], buf_in[1], buf_in[2], buf_in[3],
                 buf_in[4], buf_in[5], buf_in[6], buf_in[7]  );
         yaz_log(YLOG_DEBUG,"PDU Dump:");
@@ -573,7 +573,7 @@ void dumpapdu( ILL_APDU *apdu) {
 ILL_Status_Or_Error_Report *getstaterr( ILL_APDU *resp, ODR in_odr ) {
     if (resp->which != ILL_APDU_Status_Or_Error_Report ) {
         const char *element = odr_getelement(in_odr);
-        if (!element) 
+        if (!element)
             element="unknown";
         printf("Server returned wrong packet type: %d\n", resp->which);
         yaz_log(YLOG_FATAL,"Server returned a (%d) and "
@@ -586,9 +586,9 @@ ILL_Status_Or_Error_Report *getstaterr( ILL_APDU *resp, ODR in_odr ) {
 
 /** \brief  Return a printable string from an ILL_String */
 char *getillstring( ILL_String *s) {
-    if (s->which == ILL_String_GeneralString ) 
+    if (s->which == ILL_String_GeneralString )
         return s->u.GeneralString;
-    else if (s->which == ILL_String_EDIFACTString ) 
+    else if (s->which == ILL_String_EDIFACTString )
         return s->u.EDIFACTString;
     else {
         yaz_log(YLOG_FATAL,"Invalid ILL_String ");
@@ -611,15 +611,15 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                     printf("Already forwarded: \n");
                     break;
                 case ILL_User_Error_Report_intermediary_problem:
-                    printf("Intermediary problem: " ODR_INT_PRINTF "\n", 
+                    printf("Intermediary problem: " ODR_INT_PRINTF "\n",
                         *uerr->u.intermediary_problem);
                     break;
                 case ILL_User_Error_Report_security_problem:
-                    printf("Security problem: %s\n", 
+                    printf("Security problem: %s\n",
                         getillstring(uerr->u.security_problem));
                     break;
                 case ILL_User_Error_Report_unable_to_perform:
-                    printf("Unable to perform: " ODR_INT_PRINTF "\n", 
+                    printf("Unable to perform: " ODR_INT_PRINTF "\n",
                           *uerr->u.unable_to_perform);
                     break;
                 default:
@@ -631,11 +631,11 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
             ILL_Provider_Error_Report *perr= err->provider_error_report;
             switch( perr->which ) {
                 case ILL_Provider_Error_Report_general_problem:
-                    printf("General Problem: " ODR_INT_PRINTF ":", 
+                    printf("General Problem: " ODR_INT_PRINTF ":",
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_transaction_id_problem:
-                    printf("Transaction Id Problem: " ODR_INT_PRINTF ":", 
+                    printf("Transaction Id Problem: " ODR_INT_PRINTF ":",
                           *perr->u.general_problem);
                     break;
                 case ILL_Provider_Error_Report_state_transition_prohibited:
@@ -643,11 +643,11 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
                     break;
             }
             /*exit(7);*/
-        } 
+        }
         /* fallbacks */
-        if ( staterr->note ) 
+        if ( staterr->note )
             printf("%s", getillstring(staterr->note));
-        else 
+        else
             printf("Unknown error type");
         printf("\n");
         exit(7);
@@ -658,7 +658,7 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
 
 /* * * * * * * * * * * * * * * */
 
-/** \brief Main program 
+/** \brief Main program
  *
  * Parse arguments
  * Validate arguments
@@ -683,11 +683,11 @@ int main (int argc, char * argv[]) {
     validateargs(&args);
     stack = connect_to(args.host);
     apdu = createrequest(&args, out_odr);
-    if (1) 
+    if (1)
         dumpapdu(apdu);
-    sendrequest(apdu, out_odr, stack ); 
+    sendrequest(apdu, out_odr, stack );
     resp = getresponse(stack, in_odr );
-    if (1) 
+    if (1)
         dumpapdu(resp);
     staterr=getstaterr(resp, in_odr);
     checkerr(staterr);

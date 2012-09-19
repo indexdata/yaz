@@ -118,7 +118,7 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
                       UErrorCode *status);
 
 void icu_sortkey8_from_utf16(UCollator *coll,
-                             struct icu_buf_utf8 * dest8, 
+                             struct icu_buf_utf8 * dest8,
                              struct icu_buf_utf16 * src16,
                              UErrorCode * status);
 
@@ -129,11 +129,11 @@ struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
 struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old);
 void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer);
 
-int icu_tokenizer_attach(struct icu_tokenizer * tokenizer, 
+int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
                          struct icu_buf_utf16 * src16, UErrorCode *status);
 
-int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer, 
-                                 struct icu_buf_utf16 * tkn16, 
+int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
+                                 struct icu_buf_utf16 * tkn16,
                                  UErrorCode *status);
 
 int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer);

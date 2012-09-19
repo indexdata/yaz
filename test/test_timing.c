@@ -44,11 +44,11 @@ static void tst(void)
     user = yaz_timing_get_user(t);
     YAZ_CHECK(user == -1.0 || user >= 0.0);
 
-    sys = yaz_timing_get_sys(t); 
+    sys = yaz_timing_get_sys(t);
     YAZ_CHECK(sys == -1.0 || sys >= 0.0);
 
     yaz_log(YLOG_LOG, "real=%f user=%f sys=%f", real, user, sys);
-   
+
     yaz_timing_destroy(&t);
     YAZ_CHECK(!t);
 }

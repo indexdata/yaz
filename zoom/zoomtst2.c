@@ -50,7 +50,7 @@ int main(int argc, char **argv)
         exit (2);
     }
     else /* OK print hit count */
-        printf ("Result count: %ld\n", (long) ZOOM_resultset_size(r));  
+        printf ("Result count: %ld\n", (long) ZOOM_resultset_size(r));
     ZOOM_resultset_destroy (r);
     ZOOM_connection_destroy (z);
     exit (0);

@@ -31,7 +31,7 @@ static void tst(void)
     int argc = sizeof(argv) / sizeof(*argv);
     char *arg = 0;
     const char *desc = "a{longa}b{longb}cdn:m{marmelade}:";
-    
+
     YAZ_CHECK_EQ(options(desc, argv, argc, &arg), 'a');
     YAZ_CHECK_EQ(options(desc, argv, argc, &arg), 'b');
     YAZ_CHECK_EQ(options(desc, argv, argc, &arg), 0);

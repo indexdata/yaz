@@ -134,7 +134,7 @@ Z_OtherInformationUnit *yaz_oi_update(
         for (i = 0; i<otherInformation->num_elements; i++)
             newlist[i] = otherInformation->list[i];
         otherInformation->list = newlist;
-        
+
         otherInformation->list[i] = (Z_OtherInformationUnit*)
             odr_malloc (odr, sizeof(Z_OtherInformationUnit));
         if (oid)
@@ -143,14 +143,14 @@ Z_OtherInformationUnit *yaz_oi_update(
                 odr_malloc (odr, sizeof(Z_InfoCategory));
             otherInformation->list[i]->category->categoryTypeId = (Odr_oid*)
                 odr_oiddup (odr, oid);
-            otherInformation->list[i]->category->categoryValue = 
+            otherInformation->list[i]->category->categoryValue =
                 odr_intdup(odr, categoryValue);
         }
         else
             otherInformation->list[i]->category = 0;
         otherInformation->list[i]->which = Z_OtherInfo_characterInfo;
         otherInformation->list[i]->information.characterInfo = 0;
-        
+
         otherInformation->num_elements = i+1;
         return otherInformation->list[i];
     }
@@ -174,7 +174,7 @@ char *yaz_oi_get_string_oid (
     const Odr_oid *oid, int categoryValue, int delete_flag)
 {
     Z_OtherInformationUnit *oi;
-    
+
     if ((oi = yaz_oi_update(otherInformation, 0, oid, categoryValue,
                             delete_flag)) &&
         oi->which == Z_OtherInfo_characterInfo)

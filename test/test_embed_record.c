@@ -47,7 +47,7 @@ void test1(void)
 
 void test2(void)
 {
-  char base_enc[] = 
+  char base_enc[] =
     "MDA3NjZuYW0gIDIyMDAyNjU4YSA0NTAwMDAxMDAxMjAwMDAwMDAzMDAwNjAwMDEyMDA1MDAx"
     "NzAwMDE4MDA4MDA0MTAwMDM1MDEwMDAxNzAwMDc2MDIwMDAxNTAwMDkzMDM1MDAxODAwMTA4"
     "MDQwMDAxODAwMTI2MDQ5MDAwOTAwMTQ0MDUwMDAyNjAwMTUzMDgyMDAxNzAwMTc5MTAwMDAx"
@@ -64,7 +64,7 @@ void test2(void)
     "bmQgaW5kZXguHiAwH2FDT01NT04gTElTUCAoQ29tcHV0ZXIgcHJvZ3JhbSBsYW5ndWFnZSke"
     "H2xVQUhJTEweHQ==";
 
-    char bin_marc[] = 
+    char bin_marc[] =
       "00766nam  22002658a 4500001001200000003000600012005001700018008004100035010001700076020001500093035001800108040001800126049000900144050002600153082001700179100001800196245006700214260005200281263000900333300002700342500002700369504005100396650004400447999000900491\036ocm28339863\036OCoLC\03619940105074522.0\036930609s1994    cou      b    001 0 eng  \036  \037a   93009047 \036  \037a0130305529\036  \037a(ocm)28339863\036  \037aDLC\037cDLC\037dKKU\036  \037aKKUJ\03600\037aQA76.73.C28\037bG73 1994\03600\037a005.13/3\037220\0361 \037aGraham, Paul.\03610\037aOn Lisp :\037badvanced techniques for common Lisp /\037cPaul Graham.\036  \037aEnglewood Cliffs, N.J. :\037bPrentice Hall,\037c1994.\036  \037a9410\036  \037axiii, 413 p. ;\037c23 cm.\036  \037a\"An Alan R. Apt book.\"\036  \037aIncludes bibliographical references and index.\036 0\037aCOMMON LISP (Computer program language)\036\037lUAHILL\036\035";
 
     int marc_size = strlen(bin_marc);
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
 
     YAZ_CHECK(test_render(
-                  "xml", 1, 
+                  "xml", 1,
                   "\x30\x30\x31\x33\x38\x6E\x61\x6D\x20\x20\x32\x32\x30\x30\x30\x37"
                   "\x33\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
                   "\x30\x30\x30\x30\x30\x30\x33\x30\x30\x30\x34\x30\x30\x30\x31\x33"

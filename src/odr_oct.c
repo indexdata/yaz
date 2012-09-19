@@ -141,9 +141,9 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             size_t outleft = 4 * inleft + 2;
             char *outbuf = (char *) odr_malloc (o, outleft);
             size_t ret;
-            
+
             t->buf = (unsigned char *) outbuf;
-            
+
             ret = yaz_iconv(o->op->iconv_handle, &inbuf, &inleft,
                             &outbuf, &outleft);
             if (ret == (size_t)(-1))
@@ -188,7 +188,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             size_t ret;
 
             *p = outbuf;
-            
+
             ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
                              &outbuf, &outleft);
             if (ret == (size_t)(-1))
@@ -204,7 +204,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
                 return 0;
             }
             inleft = outbuf - (char*) *p;
-            
+
             (*p)[inleft] = '\0';    /* null terminate it */
         }
         if (!*p)

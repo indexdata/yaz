@@ -88,14 +88,14 @@ YAZ_BEGIN_CDECL
 #define Z_RES_INTERIM Z_SearchResponse_interim
 #define Z_RES_NONE    Z_SearchResponse_none
 
-#define Z_SortStatus_success Z_SortResponse_success 
+#define Z_SortStatus_success Z_SortResponse_success
 #define Z_SortStatus_partial_1 Z_SortResponse_partial_1
 #define Z_SortStatus_failure Z_SortResponse_failure
 
-#define Z_SortRelation_ascending            Z_SortKeySpec_ascending 
+#define Z_SortRelation_ascending            Z_SortKeySpec_ascending
 #define Z_SortRelation_descending           Z_SortKeySpec_descending
 #define Z_SortRelation_ascendingByFreq      Z_SortKeySpec_ascendingByFrequency
-#define Z_SortRelation_descendingByFreq     Z_SortKeySpec_descendingByfrequency 
+#define Z_SortRelation_descendingByFreq     Z_SortKeySpec_descendingByfrequency
 
 #define Z_SortCase_caseSensitive            Z_SortKeySpec_caseSensitive
 #define Z_SortCase_caseInsensitive          Z_SortKeySpec_caseInsensitive

@@ -107,7 +107,7 @@ void yaz_timing_stop(yaz_timing_t t)
 {
 #if HAVE_SYS_TIMES_H
     times(&t->tms2);
-    
+
     t->user_sec = (double) (t->tms2.tms_utime - t->tms1.tms_utime)/100;
     t->sys_sec = (double) (t->tms2.tms_stime - t->tms1.tms_stime)/100;
 #endif
@@ -115,7 +115,7 @@ void yaz_timing_stop(yaz_timing_t t)
     gettimeofday(&t->end_time, 0);
     t->real_sec = ((t->end_time.tv_sec - t->start_time.tv_sec) * 1000000.0 +
                    t->end_time.tv_usec - t->start_time.tv_usec) / 1000000;
-#else    
+#else
 #ifdef WIN32
     get_date_as_largeinteger(&t->end_time);
     t->real_sec = (t->end_time - t->start_time) / 10000000.0;

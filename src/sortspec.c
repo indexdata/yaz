@@ -25,10 +25,10 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
         odr_malloc(out, sizeof(*sksl));
     int off;
-    
+
     sksl->num_specs = 0;
     sksl->specs = (Z_SortKeySpec **)odr_malloc(out, sizeof(sksl->specs) * 20);
-    
+
     while ((sscanf(arg, "%63s %63s%n", sort_string_buf,
                    sort_flags, &off)) == 2  && off > 1)
     {
@@ -37,14 +37,14 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
         char *sort_string = sort_string_buf;
         Z_SortKeySpec *sks = (Z_SortKeySpec *) odr_malloc(out, sizeof(*sks));
         Z_SortKey *sk = (Z_SortKey *) odr_malloc(out, sizeof(*sk));
-        
+
         arg += off;
         sksl->specs[sksl->num_specs++] = sks;
         sks->sortElement = (Z_SortElement *)
             odr_malloc(out, sizeof(*sks->sortElement));
         sks->sortElement->which = Z_SortElement_generic;
         sks->sortElement->u.generic = sk;
-        
+
         if ((sort_string_sep = strchr(sort_string, '=')))
         {
             int i = 0;
@@ -55,7 +55,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
             sk->u.sortAttributes->list = (Z_AttributeList *)
                 odr_malloc(out, sizeof(*sk->u.sortAttributes->list));
             sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
-                odr_malloc(out, 10 * 
+                odr_malloc(out, 10 *
                             sizeof(*sk->u.sortAttributes->list->attributes));
             while (i < 10 && sort_string && sort_string_sep)
             {
@@ -87,7 +87,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
 
         sks->which = Z_SortKeySpec_null;
         sks->u.null = odr_nullval ();
-        
+
         for (i = 0; sort_flags[i]; i++)
         {
             switch (sort_flags[i])
@@ -300,7 +300,7 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
     int num_sortspec = 0;
     int i;
     NMEM nmem = nmem_create();
-    
+
     if (srw_sortkeys)
         nmem_strsplit_blank(nmem, srw_sortkeys, &sortspec, &num_sortspec);
     if (num_sortspec > 0)
@@ -313,7 +313,7 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
             int case_sensitive = 0;
             const char *missing = 0;
             nmem_strsplitx(nmem, ",", sortspec[i], &arg, &num_arg, 0);
-            
+
             if (num_arg > 2 && arg[2][0])
                 ascending = atoi(arg[2]);
             if (num_arg > 3 && arg[3][0])

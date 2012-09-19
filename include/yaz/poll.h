@@ -58,7 +58,7 @@ struct yaz_poll_fd {
     void *client_data;
 };
 
-/** \brief poll wrapper for poll or select 
+/** \brief poll wrapper for poll or select
     \param fds array of sockets to be polled
     \param num_fds size of fds array (number of sockets)
     \param sec number of seconds to wait (-1 for no timeout)

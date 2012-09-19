@@ -60,7 +60,7 @@ static void extract_user_pass(NMEM nmem,
     if (cp1 && cp1 > uri)
     {
         cp1--;
-        
+
         if (!strncmp(cp1, "://", 3))
         {
             const char *cp3 = 0;
@@ -76,7 +76,7 @@ static void extract_user_pass(NMEM nmem,
                 *uri_lean = nmem_malloc(nmem, strlen(uri) + 1);
                 memcpy(*uri_lean, uri, cp1 + 3 - uri);
                 strcpy(*uri_lean + (cp1 + 3 - uri), cp2 + 1);
-               
+
                 *http_user = nmem_strdupn(nmem, cp1 + 3, cp3 - (cp1 + 3));
                 *http_pass = nmem_strdupn(nmem, cp3 + 1, cp2 - (cp3 + 1));
             }
@@ -146,7 +146,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         {
             int len;
             char *buf = odr_getbuf(p->odr_out, &len, 0);
-            
+
             if (cs_put(conn, buf, len) < 0)
                 yaz_log(YLOG_WARN, "cs_put failed URL: %s", uri);
             else

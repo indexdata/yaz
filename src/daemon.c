@@ -89,7 +89,7 @@ static void keepalive(void (*work)(void *data), void *data)
     void (*old_sigterm)(int);
     void (*old_sigusr1)(int);
     void (*old_sigusr2)(int);
-    
+
     keepalive_pid = getpid();
 
     /* keep signals in their original state and make sure that some signals
@@ -115,25 +115,25 @@ static void keepalive(void (*work)(void *data), void *data)
             signal(SIGTERM, old_sigterm);/* restore */
             signal(SIGUSR1, old_sigusr1);/* restore */
             signal(SIGUSR2, old_sigusr2);/* restore */
-            
+
             work(data);
             exit(0);
         }
-        
+
         /* enable signalling in kill_child_handler */
         child_pid = p;
-        
+
         p1 = wait(&status);
-        
+
         /* disable signalling in kill_child_handler */
         child_pid = 0;
-        
+
         if (p1 != p)
         {
             yaz_log(YLOG_FATAL, "p1=%d != p=%d", p1, p);
             exit(1);
         }
-        
+
         if (WIFSIGNALED(status))
         {
             /*  keep the child alive in case of errors, but _log_ */
@@ -151,7 +151,7 @@ static void keepalive(void (*work)(void *data), void *data)
                 yaz_log(YLOG_WARN, "Received SIGSEGV from child %ld", (long) p);
                 cont = 1;
                 break;
-            case SIGBUS:        
+            case SIGBUS:
                 yaz_log(YLOG_WARN, "Received SIGBUS from child %ld", (long) p);
                 cont = 1;
                 break;
@@ -254,7 +254,7 @@ int yaz_daemon(const char *progname,
         }
         switch (fork())
         {
-        case 0: 
+        case 0:
             break;
         case -1:
             return 1;
@@ -279,7 +279,7 @@ int yaz_daemon(const char *progname,
         close(hand[0]);
         if (setsid() < 0)
             return 1;
-        
+
         close(0);
         close(1);
         close(2);

@@ -147,7 +147,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
-            el->name = 
+            el->name =
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else
         {
@@ -191,18 +191,18 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
             /* parsing attributees */
             for (attr = ptr->properties; attr; attr = attr->next)
             {
-                if (!xmlStrcmp(attr->name, BAD_CAST "name") 
-                         && attr->children 
+                if (!xmlStrcmp(attr->name, BAD_CAST "name")
+                         && attr->children
                          && attr->children->type == XML_TEXT_NODE)
-                    el->backend_name 
-                        = nmem_strdup(p->nmem, 
+                    el->backend_name
+                        = nmem_strdup(p->nmem,
                                       (const char *) attr->children->content);
-                
-                else if (!xmlStrcmp(attr->name, BAD_CAST "syntax") 
-                         && attr->children 
+
+                else if (!xmlStrcmp(attr->name, BAD_CAST "syntax")
+                         && attr->children
                          && attr->children->type == XML_TEXT_NODE)
                 {
-                    el->backend_syntax 
+                    el->backend_syntax
                         = yaz_string_to_oid_odr(
                             yaz_oid_std(),
                             CLASS_RECSYN,
@@ -210,24 +210,24 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
                             p->odr);
                     if (!el->backend_syntax)
                     {
-                        wrbuf_printf(p->wr_error, 
+                        wrbuf_printf(p->wr_error,
                                      "Element <backend syntax='%s'>: "
                                      "attribute 'syntax' has invalid "
-                                     "value '%s'", 
+                                     "value '%s'",
                                      attr->children->content,
                                      attr->children->content);
                         return -1;
-                    } 
+                    }
                 }
                 else
                 {
                     wrbuf_printf(p->wr_error, "Element <backend>: expected "
-                                 "attributes 'syntax' or 'name, got '%s'", 
+                                 "attributes 'syntax' or 'name, got '%s'",
                                  attr->name);
                     return -1;
                 }
             }
-          
+
              /* parsing internal of record conv */
             el->record_conv = yaz_record_conv_create();
 
@@ -242,7 +242,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
             }
         }
     }
-    
+
     *p->list_p = el;
     p->list_p = &el->next;
     return 0;
@@ -268,7 +268,7 @@ int yaz_retrieval_configure_t(yaz_retrieval_t p, const xmlNode *ptr,
             else
             {
                 wrbuf_printf(p->wr_error, "Element <retrievalinfo>: "
-                             "expected element <retrieval>, got <%s>", 
+                             "expected element <retrieval>, got <%s>",
                              ptr->name);
                 return -1;
             }
@@ -317,7 +317,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             if (!el->name && !el->identifier)
                 schema_ok = 1;
         }
-        
+
         if (syntax && el->syntax && !oid_oidcmp(syntax, el->syntax))
             syntax_ok = 1;
         if (!syntax)
@@ -339,7 +339,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                 if (el->backend_name)
                     *backend_schema = el->backend_name;
                 else if (el->name)
-                    *backend_schema = el->name;                    
+                    *backend_schema = el->name;
                 else
                     *backend_schema = schema;
             }

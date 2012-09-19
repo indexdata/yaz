@@ -14,7 +14,7 @@
 #include <yaz/options.h>
 
 #if HAVE_READLINE_READLINE_H
-#include <readline/readline.h> 
+#include <readline/readline.h>
 #endif
 #if HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
@@ -44,8 +44,8 @@ int main(int argc, char **argv)
     WRBUF q_wrbuf = 0;
 
     prog = *argv;
-    bibset = ccl_qual_mk();    
-    
+    bibset = ccl_qual_mk();
+
     while ((ret = options("db:x:", argv, argc, &arg)) != -2)
     {
         switch(ret)
@@ -97,11 +97,11 @@ int main(int argc, char **argv)
         CCL_parser cclp = ccl_parser_create(bibset);
         int error;
         struct ccl_rpn_node *rpn;
-        
+
         rpn = ccl_parser_find_str(cclp, wrbuf_cstr(q_wrbuf));
-        
+
         error = ccl_parser_get_error(cclp, 0);
-        
+
         if (error)
         {
             printf("%s\n", ccl_err_msg(error));
@@ -141,19 +141,19 @@ int main(int argc, char **argv)
             }
             strcpy(buf,line_in);
             free(line_in);
-#else    
+#else
         printf("CCLSH>"); fflush(stdout);
         if (!fgets(buf, 999, stdin))
             break;
-#endif 
+#endif
 
         for (i = 0; i<1; i++)
         {
             CCL_parser cclp = ccl_parser_create(bibset);
             int pos;
-            
+
             rpn = ccl_parser_find_str(cclp, buf);
-            
+
             error = ccl_parser_get_error(cclp, &pos);
 
             if (error)
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
                         printf("Second:\n");
                         ccl_pr_tree(rpn, stdout);
                         printf("\n");
-                        
+
                         for (idx = 0; ; idx++)
                         {
                             const char *qname;
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
                             if (!ccl_stop_words_info(csw, idx,
                                                      &qname, &term))
                                 break;
-                            printf("Removed from %s: %s\n", 
+                            printf("Removed from %s: %s\n",
                                    qname ? qname : "none", term);
                         }
                     }

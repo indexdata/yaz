@@ -70,7 +70,7 @@ typedef int nmem_int_t;
 /** \brief BER/utility boolean */
 typedef int nmem_bool_t;
 
-/** \brief releases memory associaged with an NMEM handle 
+/** \brief releases memory associaged with an NMEM handle
     \param n NMEM handle
 */
 YAZ_EXPORT void nmem_reset(NMEM n);
@@ -80,7 +80,7 @@ YAZ_EXPORT void nmem_reset(NMEM n);
  */
 YAZ_EXPORT size_t nmem_total(NMEM n);
 
-/** \brief allocates string on NMEM handle (similar strdup) 
+/** \brief allocates string on NMEM handle (similar strdup)
     \param mem HNEM handle
     \param src string
     \returns duplicated string
@@ -103,7 +103,7 @@ YAZ_EXPORT char *nmem_strdupn(NMEM mem, const char *src, size_t n);
 
 /** \brief allocates sub strings out of string using certain delimitors
     \param nmem NMEM handle
-    \param delim delimitor chars (splits on each char in there) 
+    \param delim delimitor chars (splits on each char in there)
     \param dstr string to be split
     \param darray result string array for each sub string
     \param num number of result strings
@@ -114,7 +114,7 @@ YAZ_EXPORT void nmem_strsplit(NMEM nmem, const char *delim,
 
 /** \brief allocates sub strings out of string using certain delimitors
     \param nmem NMEM handle
-    \param delim delimitor chars (splits on each char in there) 
+    \param delim delimitor chars (splits on each char in there)
     \param dstr string to be split
     \param darray result string array for each sub string
     \param num number of result strings
@@ -137,7 +137,7 @@ YAZ_EXPORT void nmem_strsplit_blank(NMEM nmem, const char *dstr,
 
 /** \brief allocates sub strings out of string using certain delimitors
     \param nmem NMEM handle
-    \param delim delimitor chars (splits on each char in there) 
+    \param delim delimitor chars (splits on each char in there)
     \param dstr string to be split
     \param darray result string array for each sub string
     \param num number of result strings
@@ -151,7 +151,7 @@ YAZ_EXPORT void nmem_strsplit_escape(NMEM nmem, const char *delim,
 
 /** \brief allocates sub strings out of string using certain delimitors
     \param nmem NMEM handle
-    \param delim delimitor chars (splits on each char in there) 
+    \param delim delimitor chars (splits on each char in there)
     \param dstr string to be split
     \param darray result string array for each sub string
     \param num number of result strings
@@ -184,7 +184,7 @@ YAZ_EXPORT nmem_bool_t *nmem_booldup(NMEM nmem, nmem_bool_t v);
  */
 YAZ_EXPORT void nmem_transfer(NMEM dst, NMEM src);
 
-/** \brief returns new NMEM handle 
+/** \brief returns new NMEM handle
     \returns NMEM handle
  */
 YAZ_EXPORT NMEM nmem_create(void);

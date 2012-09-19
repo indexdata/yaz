@@ -42,7 +42,7 @@ YAZ_BEGIN_CDECL
 YAZ_EXPORT void yaz_snprintf(char *buf, size_t size, const char *fmt, ...);
 YAZ_EXPORT void yaz_vsnprintf(char *buf, size_t size, const char *fmt,
                               va_list ap);
-    
+
 YAZ_END_CDECL
 
 #endif

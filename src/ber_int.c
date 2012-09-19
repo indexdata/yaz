@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_int.c
  * \brief Implements BER INTEGER encoding and decoding.
  *
@@ -95,7 +95,7 @@ int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
     if ((res = ber_declen(b, &len, max)) < 0)
         return -1;
     if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
-        return -1;  
+        return -1;
     if (len > (int) sizeof(uval))  /* let's be reasonable, here */
         return -1;
     b += res;

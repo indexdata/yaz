@@ -63,7 +63,7 @@ typedef struct {
     char *details;
     char *message;
 } Z_SRW_diagnostic;
-    
+
 typedef struct {
 
 #define Z_SRW_query_type_cql  1
@@ -100,7 +100,7 @@ typedef struct {
     Odr_int *numberOfRecords;
     char * resultSetId;
     Odr_int *resultSetIdleTime;
-    
+
     Z_SRW_record *records;
     int num_records;
 
@@ -125,7 +125,7 @@ typedef struct {
     int num_diagnostics;
     Z_SRW_extra_record *extra_record;
 } Z_SRW_explainResponse;
-    
+
 typedef struct {
     int query_type;
     union {
@@ -272,7 +272,7 @@ YAZ_EXPORT int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                               Z_SOAP **soap_package, ODR decode, char **charset);
 
 YAZ_EXPORT int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
-                              Z_SOAP **soap_package, ODR decode, 
+                              Z_SOAP **soap_package, ODR decode,
                               char **charset,
                               Z_SRW_diagnostic **, int *num_diagnostic);
 
@@ -290,12 +290,12 @@ YAZ_EXPORT int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres,
 YAZ_EXPORT void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                        int *num, int code,
                                        const char *addinfo);
-    
+
 YAZ_EXPORT void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                               int *num, int code,
                                               const char *addinfo);
 
-YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+YAZ_EXPORT void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d,
                                       int code, const char *details);
 
 YAZ_EXPORT void yaz_add_srw_diagnostic_uri(ODR o, Z_SRW_diagnostic **d,
@@ -303,7 +303,7 @@ YAZ_EXPORT void yaz_add_srw_diagnostic_uri(ODR o, Z_SRW_diagnostic **d,
                                            const char *message,
                                            const char *details);
 
-YAZ_EXPORT void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+YAZ_EXPORT void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d,
                                       const char *uri, const char *message,
                                       const char *details);
 
@@ -360,7 +360,7 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db);
 /** \brief encode SRU database for HTTP path
     \param dst destination buffer (should be at least strlen(db) +2 in size)
     \param db source database
-   
+
     The resulting database (dst) includes a leading /
 */
 YAZ_EXPORT

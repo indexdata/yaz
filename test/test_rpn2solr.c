@@ -105,7 +105,7 @@ static void tst2(void)
         wrbuf_puts(w, "/");
     }
     wrbuf_puts(w, "../etc/pqf.properties");
-    
+
     ct = solr_transform_open_fname(wrbuf_cstr(w));
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", "dc.title:abc"));
 #if 0

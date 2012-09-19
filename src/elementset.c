@@ -33,7 +33,7 @@ void yaz_set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem)
 {
     Z_RecordComposition *comp = (Z_RecordComposition *)
         nmem_malloc(nmem, sizeof(*comp));
-    
+
     comp->which = Z_RecordComp_simple;
     comp->u.simple = (Z_ElementSetNames *)
         nmem_malloc(nmem, sizeof(*comp->u.simple));

@@ -52,10 +52,10 @@ int yaz_test_get_verbosity(void);
   } \
 }
 
-/** \brief a test we know will fail at this time. 
+/** \brief a test we know will fail at this time.
  *
  * Later, when the bug is fixed, this test will suddenly pass,
- * which will be reported as an error, to remind you to go and fix 
+ * which will be reported as an error, to remind you to go and fix
  * your tests.
  */
 

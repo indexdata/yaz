@@ -68,7 +68,7 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
             struct hostent *host;
 
             struct sockaddr_in *addr_in = (struct sockaddr_in *) addr;
-            
+
             if ((host = gethostbyaddr((char*)&addr_in->sin_addr,
                                       sizeof(addr_in->sin_addr),
                                       AF_INET)))

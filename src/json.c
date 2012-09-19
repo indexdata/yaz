@@ -36,7 +36,7 @@ struct json_parser_s {
 json_parser_t json_parser_create(void)
 {
     json_parser_t p = (json_parser_t) xmalloc(sizeof(*p));
-    
+
     p->buf = 0;
     p->cp = 0;
     p->err_msg = 0;
@@ -198,7 +198,7 @@ static struct json_node *json_parse_string(json_parser_t p)
     }
     n = json_new_node(p, json_node_string);
     dst = n->u.string = (char *) xmalloc(l + 1);
-    
+
     cp = p->cp;
     while (*cp && *cp != '"')
     {
@@ -302,7 +302,7 @@ static struct json_node *json_parse_elements(json_parser_t p)
         }
         m2 = json_new_node(p, json_node_list);
         m2->u.link[0] = n2;
-        
+
         m1->u.link[1] = m2;
         m1 = m2;
     }
@@ -377,7 +377,7 @@ static struct json_node *json_parse_members(json_parser_t p)
         }
         m2 = json_new_node(p, json_node_list);
         m2->u.link[0] = n2;
-        
+
         m1->u.link[1] = m2;
         m1 = m2;
     }
@@ -493,8 +493,8 @@ static void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
         {   /* leave encoding as raw UTF-8 */
             wrbuf_putc(b, cp[i]);
         }
-    }       
-        
+    }
+
 }
 
 void wrbuf_json_puts(WRBUF b, const char *str)
@@ -525,7 +525,7 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         wrbuf_puts(result, "{");
         if (indent >= 0)
         {
-            wrbuf_puts(result, "\n"); 
+            wrbuf_puts(result, "\n");
             json_indent(result, sub_indent);
         }
         if (node->u.link[0])
@@ -623,7 +623,7 @@ static struct json_node **json_get_objectp(struct json_node *n,
 struct json_node *json_get_object(struct json_node *n, const char *name)
 {
     struct json_node **np = json_get_objectp(n, name);
-    
+
     if (np)
         return *np;
     return 0;
@@ -632,7 +632,7 @@ struct json_node *json_get_object(struct json_node *n, const char *name)
 struct json_node *json_detach_object(struct json_node *n, const char *name)
 {
     struct json_node **np = json_get_objectp(n, name);
-    
+
     if (np)
     {
         struct json_node *n = *np;

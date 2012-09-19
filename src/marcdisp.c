@@ -36,10 +36,10 @@ enum yaz_collection_state {
     collection_first,
     collection_second
 };
-   
+
 /** \brief node types for yaz_marc_node */
 enum YAZ_MARC_NODE_TYPE
-{ 
+{
     YAZ_MARC_DATAFIELD,
     YAZ_MARC_CONTROLFIELD,
     YAZ_MARC_COMMENT,
@@ -141,7 +141,7 @@ static int marc_exec_leader(const char *leader_spec, char *leader,
                             size_t size);
 #if YAZ_HAVE_XML2
 static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
-                                        const char *ns, 
+                                        const char *ns,
                                         const char *format,
                                         const char *type);
 #endif
@@ -245,7 +245,7 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
 }
 
 /** \brief adds a attribute value to the element name if it is plain chars
-    
+
     If not, and if the attribute name is not null, it will append a
     attribute element with the value if attribute name is null it will
     return a non-zero value meaning it couldnt handle the value.
@@ -347,7 +347,7 @@ static void check_ascii(yaz_marc_t mt, char *leader, int offset,
 {
     if (leader[offset] < ' ' || leader[offset] > 127)
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Leader character at offset %d is non-ASCII. "
                          "Setting value to '%c'", offset, ch_default);
         leader[offset] = ch_default;
@@ -373,7 +373,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     check_ascii(mt, leader, 9, '#');
     if (!atoi_n_check(leader+10, 1, indicator_length))
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Indicator length at offset 10 should hold a digit."
                          " Assuming 2");
         leader[10] = '2';
@@ -381,7 +381,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     }
     if (!atoi_n_check(leader+11, 1, identifier_length))
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Identifier length at offset 11 should hold a digit."
                          " Assuming 2");
         leader[11] = '2';
@@ -389,7 +389,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     }
     if (!atoi_n_check(leader+12, 5, base_address))
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Base address at offsets 12..16 should hold a number."
                          " Assuming 0");
         *base_address = 0;
@@ -399,7 +399,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     check_ascii(mt, leader, 19, '#');
     if (!atoi_n_check(leader+20, 1, length_data_entry))
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Length data entry at offset 20 should hold a digit."
                          " Assuming 4");
         *length_data_entry = 4;
@@ -415,7 +415,7 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     }
     if (!atoi_n_check(leader+22, 1, length_implementation))
     {
-        yaz_marc_cprintf(mt, 
+        yaz_marc_cprintf(mt,
                          "Length implementation at offset 22 should hold a digit."
                          " Assuming 0");
         *length_implementation = 0;
@@ -470,7 +470,7 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
     }
     return 1; /* we don't know */
 }
-                              
+
 void yaz_marc_reset(yaz_marc_t mt)
 {
     nmem_reset(mt->nmem);
@@ -491,7 +491,7 @@ int yaz_marc_write_check(yaz_marc_t mt, WRBUF wr)
             leader = n->u.leader;
             break;
         }
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
@@ -502,7 +502,7 @@ int yaz_marc_write_check(yaz_marc_t mt, WRBUF wr)
         switch(n->which)
         {
         case YAZ_MARC_COMMENT:
-            wrbuf_iconv_write(wr, mt->iconv_cd, 
+            wrbuf_iconv_write(wr, mt->iconv_cd,
                               n->u.comment, strlen(n->u.comment));
             wrbuf_puts(wr, "\n");
             break;
@@ -537,7 +537,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             leader = n->u.leader;
             break;
         }
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
@@ -555,12 +555,12 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             {
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                          identifier_length);
-                
-                wrbuf_puts (wr, mt->subfield_str); 
-                wrbuf_iconv_write(wr, mt->iconv_cd, s->code_data, 
+
+                wrbuf_puts (wr, mt->subfield_str);
+                wrbuf_iconv_write(wr, mt->iconv_cd, s->code_data,
                                   using_code_len);
                 wrbuf_iconv_puts(wr, mt->iconv_cd, " ");
-                wrbuf_iconv_puts(wr, mt->iconv_cd, 
+                wrbuf_iconv_puts(wr, mt->iconv_cd,
                                  s->code_data + using_code_len);
                 marc_iconv_reset(mt, wr);
             }
@@ -575,7 +575,7 @@ int yaz_marc_write_line(yaz_marc_t mt, WRBUF wr)
             break;
         case YAZ_MARC_COMMENT:
             wrbuf_puts(wr, "(");
-            wrbuf_iconv_write(wr, mt->iconv_cd, 
+            wrbuf_iconv_write(wr, mt->iconv_cd,
                               n->u.comment, strlen(n->u.comment));
             marc_iconv_reset(mt, wr);
             wrbuf_puts(wr, ")\n");
@@ -649,7 +649,7 @@ static const char *subfield_name[2]  	= { "subfield", "s"};
     \retval -1 failure
 */
 static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
-                                        const char *ns, 
+                                        const char *ns,
                                         const char *format,
                                         const char *type,
                                         int turbo)
@@ -664,12 +664,12 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             leader = n->u.leader;
             break;
         }
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
         return -1;
-    
+
     if (mt->enable_collection != no_collection)
     {
         if (mt->enable_collection == collection_first)
@@ -726,7 +726,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
                     wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
                                             s->code_data, using_code_len);
                     wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
-                } 
+                }
                 else
                 {
                     element_name_append_attribute_value(mt, wr, "code", s->code_data, using_code_len);
@@ -793,7 +793,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
 }
 
 static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
-                                     const char *ns, 
+                                     const char *ns,
                                      const char *format,
                                      const char *type,
                                      int turbo)
@@ -886,7 +886,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
         {
             char ind_str[6];
             char ind_val[2];
-            
+
             ind_val[0] = n->u.datafield.indicator[i];
             ind_val[1] = '\0';
             sprintf(ind_str, "%s%d", indicator_name[1], i+1);
@@ -902,7 +902,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
         wrbuf_rewind(wr_cdata);
         wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, s->code_data + using_code_len);
         marc_iconv_reset(mt, wr_cdata);
-        
+
         wrbuf_rewind(subfield_name);
         wrbuf_puts(subfield_name, "s");
         not_written = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len) != 0;
@@ -921,7 +921,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
 }
 
 static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
-                                        const char *ns, 
+                                        const char *ns,
                                         const char *format,
                                         const char *type)
 {
@@ -938,7 +938,7 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             leader = n->u.leader;
             break;
         }
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
@@ -963,7 +963,7 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
         char field[10];
         field[0] = 'c';
         field[4] = '\0';
-            
+
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
@@ -973,7 +973,7 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             wrbuf_rewind(wr_cdata);
             wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
             marc_iconv_reset(mt, wr_cdata);
-            
+
             strncpy(field + 1, n->u.controlfield.tag, 3);
             ptr = xmlNewTextChild(record_ptr, ns_record,
                                   BAD_CAST field,
@@ -995,7 +995,7 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
 
 int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
-                       const char *ns, 
+                       const char *ns,
                        const char *format,
                        const char *type)
 {
@@ -1012,7 +1012,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             leader = n->u.leader;
             break;
         }
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+11, 1, &identifier_length))
@@ -1078,11 +1078,11 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             wrbuf_rewind(wr_cdata);
             wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
             marc_iconv_reset(mt, wr_cdata);
-            
+
             ptr = xmlNewTextChild(record_ptr, ns_record,
                                   BAD_CAST "controlfield",
                                   BAD_CAST wrbuf_cstr(wr_cdata));
-            
+
             xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
             break;
         case YAZ_MARC_COMMENT:
@@ -1113,11 +1113,11 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     const char *leader = 0;
     WRBUF wr_dir, wr_head, wr_data_tmp;
     int base_address;
-    
+
     for (n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
             leader = n->u.leader;
-    
+
     if (!leader)
         return -1;
     if (!atoi_n_check(leader+10, 1, &indicator_length))
@@ -1160,7 +1160,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             wrbuf_printf(wr_dir, "%.3s", n->u.controlfield.tag);
 
             wrbuf_rewind(wr_data_tmp);
-            wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd, 
+            wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd,
                              n->u.controlfield.data);
             marc_iconv_reset(mt, wr_data_tmp);
             wrbuf_iconv_putchar(wr_data_tmp, mt->iconv_cd, ' ');/* field sep */
@@ -1195,7 +1195,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     wrbuf_printf(wr_head, "%05d", base_address);
     /* from "original" leader */
     wrbuf_write(wr_head, leader+17, 7);
-    
+
     wrbuf_write(wr, wrbuf_buf(wr_head), 24);
     wrbuf_write(wr, wrbuf_buf(wr_dir), wrbuf_len(wr_dir));
     wrbuf_destroy(wr_head);
@@ -1326,7 +1326,7 @@ static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
         {
             const char *vp = strchr(val+1, '\'');
             size_t len;
-            
+
             if (!vp)
                 return -1;
             len = vp-val-1;
@@ -1352,7 +1352,7 @@ static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
 
 int yaz_marc_decode_formatstr(const char *arg)
 {
-    int mode = -1; 
+    int mode = -1;
     if (!strcmp(arg, "marc"))
         mode = YAZ_MARC_ISO2709;
     if (!strcmp(arg, "marcxml"))

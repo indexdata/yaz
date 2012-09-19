@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         if (idle)
         {
             ZOOM_connection_connect(z, 0, 0); /* allow reconnect */
-            
+
             if (++use <= 10)
             {
                 probe_search(z, use, use&1);

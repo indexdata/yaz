@@ -45,7 +45,7 @@ static struct {
 int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
 {
     const char *cp = opt_str;
-    
+
     ODR_MASK_ZERO(opt);
     while (*cp)
     {

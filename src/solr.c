@@ -68,7 +68,7 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
     for (node = ptr->children; node; node = node->next)
         if (node->type == XML_ELEMENT_NODE)
             sr->num_records++;
-    
+
     if (sr->num_records)
         sr->records = odr_malloc(o, sizeof(*sr->records) * sr->num_records);
 
@@ -112,7 +112,7 @@ static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
             {
                 sr->numberOfRecords = odr_intdup(o, odr_atoi(
                         (const char *) attr->children->content));
-            } 
+            }
             else if (!strcmp((const char *) attr->name, "start"))
             {
                 start = odr_atoi((const char *) attr->children->content);
@@ -368,7 +368,7 @@ static int yaz_solr_encode_facet_list(
                                             facet_list->elements[index]);
         if (r)
             return -1;
-        
+
     }
     return 0;
 }
@@ -382,8 +382,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *uri_args;
     char *path;
     int i = 0;
-    
-    z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
+
+    z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
     if (srw_pdu->which == Z_SRW_searchRetrieve_request)
     {
@@ -439,9 +439,9 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     name[i++] = 0;
 
     yaz_array_to_uri(&uri_args, encode, name, value);
-    
+
     hreq->method = "GET";
-    
+
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) +
                    strlen(uri_args) + strlen(solr_op) + 4);

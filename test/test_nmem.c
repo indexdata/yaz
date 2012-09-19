@@ -36,7 +36,7 @@ void tst_nmem_malloc(void)
         if ((int) sizeof(double) >= j)
             *(double*) cp = 12.2;
     }
-    
+
     for (j = 2000; j<20000; j+= 2000)
     {
         cp = (char *) nmem_malloc(n, j);
@@ -57,7 +57,7 @@ void tst_nmem_strsplit(void)
     nmem_strsplitx(nmem, ",", "", &array, &num, 0);
     YAZ_CHECK(num == 1);
     YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
-    
+
     nmem_strsplit(nmem, ",", ",,", &array, &num);
     YAZ_CHECK(num == 0);
 
@@ -66,7 +66,7 @@ void tst_nmem_strsplit(void)
     YAZ_CHECK(num > 0 && !strcmp(array[0], ""));
     YAZ_CHECK(num > 1 && !strcmp(array[1], ""));
     YAZ_CHECK(num > 2 && !strcmp(array[2], ""));
- 
+
     nmem_strsplit(nmem, ",", ",a,b,,cd", &array, &num);
     YAZ_CHECK(num == 3);
     YAZ_CHECK(num > 0 && !strcmp(array[0], "a"));

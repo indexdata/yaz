@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file cclqual.c
  * \brief Implements CCL qualifier utilities
  */
@@ -85,28 +85,28 @@ void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp)
     yaz_tok_cfg_t yt = yaz_tok_cfg_create();
     int t;
     size_t i = 0;
-    
+
     yaz_tok_parse_t tp = yaz_tok_parse_buf(yt, cp);
-    
+
     yaz_tok_cfg_destroy(yt);
-    
+
     t = yaz_tok_move(tp);
     while (t == YAZ_TOK_STRING)
     {
         if (i >= no-1)
             vlist = (char **) xrealloc(vlist, (no = no * 2) * sizeof(*vlist));
         vlist[i++] = xstrdup(yaz_tok_parse_string(tp));
-        t = yaz_tok_move(tp); 
+        t = yaz_tok_move(tp);
     }
     vlist[i] = 0;
     ccl_qual_add_special_ar(bibset, n, (const char **) vlist);
-    
+
     yaz_tok_parse_destroy(tp);
 }
 
 
 /** \brief adds specifies qualifier aliases
-    
+
     \param b bibset
     \param n qualifier name
     \param names list of qualifier aliases
@@ -124,7 +124,7 @@ void ccl_qual_add_combi(CCL_bibset b, const char *n, const char **names)
     q->attr_list = 0;
     q->next = b->list;
     b->list = q;
-    
+
     for (i = 0; names[i]; i++)
         ;
     q->no_sub = i;
@@ -135,7 +135,7 @@ void ccl_qual_add_combi(CCL_bibset b, const char *n, const char **names)
 }
 
 /** \brief adds specifies attributes for qualifier
-    
+
     \param b bibset
     \param name qualifier name
     \param no number of attribute type+value pairs
@@ -160,10 +160,10 @@ void ccl_qual_add_set(CCL_bibset b, const char *name, int no,
     {
         q = (struct ccl_qualifier *)xmalloc(sizeof(*q));
         ccl_assert(q);
-        
+
         q->next = b->list;
         b->list = q;
-        
+
         q->name = xstrdup(name);
         q->attr_list = 0;
 
@@ -206,14 +206,14 @@ CCL_bibset ccl_qual_mk(void)
 {
     CCL_bibset b = (CCL_bibset)xmalloc(sizeof(*b));
     ccl_assert(b);
-    b->list = NULL;     
+    b->list = NULL;
     b->special = NULL;
     return b;
 }
 
 /** \brief destroys Bibset
     \param b pointer to Bibset
-    
+
     *b will be set to NULL.
  */
 void ccl_qual_rm(CCL_bibset *b)
@@ -273,7 +273,7 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
         (*qp)->next = 0;
         (*qp)->attr_list = 0;
         (*qp)->name = xstrdup(q->name);
-        
+
         attrp = &(*qp)->attr_list;
         for (attr = q->attr_list; attr; attr = attr->next)
         {
@@ -300,7 +300,7 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
             for (i = 0; i < q->no_sub; i++)
             {
                 struct ccl_qualifier *q1, *q2;
-                
+
                 /* sweep though original and match up the corresponding ent */
                 q2 = n->list;
                 for (q1 = b->list; q1 && q2; q1 = q1->next, q2 = q2->next)
@@ -330,7 +330,7 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
     return n;
 }
 
-ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name, 
+ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name,
                                 size_t name_len, int seq)
 {
     struct ccl_qualifier *q = 0;
@@ -413,7 +413,7 @@ int ccl_search_stop(CCL_bibset bibset, const char *qname,
     {
         int i;
         for (i = 0; slist[i]; i++)
-            if (src_len == strlen(slist[i]) 
+            if (src_len == strlen(slist[i])
                 && ccl_memicmp(slist[i], src_str, src_len) == 0)
                 return 1;
     }

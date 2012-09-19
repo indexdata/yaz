@@ -31,14 +31,14 @@ void tst_MySequence1(ODR encode, ODR decode)
     s->third = odr_booldup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
-    
+
     s->myoid = odr_getoidbystr(decode, MYOID);
 
     ret = yc_MySequence(encode, &s, 0, 0);
     YAZ_CHECK(ret);
     if (!ret)
         return;
-    
+
     ber_buf = odr_getbuf(encode, &ber_len, 0);
 
     odr_setbuf(decode, ber_buf, ber_len, 0);
@@ -130,7 +130,7 @@ static void tst_berint32(ODR encode, ODR decode)
     Odr_int val;
     Odr_int ret_val;
     int r;
-    
+
     val = 0;
     odr_reset(encode);
     r = ber_integer(encode, &val);
@@ -253,7 +253,7 @@ static void tst_berint64(ODR encode, ODR decode)
     Odr_int val;
     Odr_int ret_val;
     int r;
-    
+
     val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
     odr_reset(encode);
     r = ber_integer(encode, &val);
@@ -340,7 +340,7 @@ void do_nothing_useful(Odr_int value)
     Odr_int *valp, *resvalp;
     char *bufferp;
     int len;
-     
+
     /* allocate streams */
     if (!(encode = odr_createmem(ODR_ENCODE)))
         return;

@@ -58,7 +58,7 @@ static void init_marc8(yaz_iconv_encoder_t w)
     data->write_marc8_g1 = 0;
 }
 
-static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd, 
+static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
                                        struct encoder_data *w,
                                        char **outbuf, size_t *outbytesleft,
                                        const char *page_chr);
@@ -84,7 +84,7 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
         size_t inbytesleft, no_read_sub = 0;
         unsigned long x;
 
-        *utf8_outbuf = '\0';        
+        *utf8_outbuf = '\0';
         inp = (unsigned char *) utf8_buf;
         inbytesleft = strlen(utf8_buf);
 
@@ -210,7 +210,7 @@ static size_t flush_combos(yaz_iconv_t cd,
     {
         *(*outbuf)++ = w->write_marc8_second_half_char;
         (*outbytesleft)--;
-    }        
+    }
 
     w->write_marc8_last = 0;
     w->write_marc8_ncr = 0;
@@ -219,7 +219,7 @@ static size_t flush_combos(yaz_iconv_t cd,
     return 0;
 }
 
-static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd, 
+static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
                                        struct encoder_data *w,
                                        char **outbuf, size_t *outbytesleft,
                                        const char *page_chr)
@@ -234,17 +234,17 @@ static size_t yaz_write_marc8_page_chr(yaz_iconv_t cd,
     {
         size_t plen = 0;
         const char *page_out = page_chr;
-        
+
         if (*outbytesleft < 8)
         {
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
-            
+
             return (size_t) (-1);
         }
 
         if (*old_page_chr)
         {
-            if (!strcmp(*old_page_chr, ESC "p") 
+            if (!strcmp(*old_page_chr, ESC "p")
                 || !strcmp(*old_page_chr, ESC "g")
                 || !strcmp(*old_page_chr, ESC "b"))
             {
@@ -290,7 +290,7 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, struct encoder_data *w,
             y = '|';
         else
         {
-            y = x; 
+            y = x;
             enable_ncr = 1;
         }
     }
@@ -356,7 +356,7 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, struct encoder_data *w,
         int ncr = w->write_marc8_ncr;
         const char *lpage = w->write_marc8_lpage;
         size_t r;
-        
+
         r = yaz_write_marc8_2(cd, w, x1,
                               outbuf, outbytesleft, loss_mode);
         if (r)
@@ -408,7 +408,7 @@ static void destroy_marc8(yaz_iconv_encoder_t e)
 
 yaz_iconv_encoder_t yaz_marc8_encoder(const char *tocode,
                                       yaz_iconv_encoder_t e)
-    
+
 {
     if (!yaz_matchstr(tocode, "MARC8"))
         e->write_handle = write_marc8_normal;

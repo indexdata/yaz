@@ -67,7 +67,7 @@ static void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
     char formstr[30];
     const char *setname = 0;
     char oid_name_str[OID_STR_MAX];
-    
+
     if (element->attributeSet)
     {
         setname = yaz_oid_to_string_buf(element->attributeSet,
@@ -94,17 +94,17 @@ static void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
         for (i = 0; i<element->value.complex->num_list; i++)
         {
             xmlNodePtr node = xmlNewChild(parent, 0, BAD_CAST "attr", 0);
-            
+
             if (setname)
                 xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
-            
+
             sprintf(formstr, ODR_INT_PRINTF, *element->attributeType);
             xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
-            
+
             if (element->value.complex->list[i]->which ==
                 Z_StringOrNumeric_string)
             {
-                xmlNewProp(node, BAD_CAST "value", BAD_CAST 
+                xmlNewProp(node, BAD_CAST "value", BAD_CAST
                            element->value.complex->list[i]->u.string);
             }
             else if (element->value.complex->list[i]->which ==
@@ -135,7 +135,7 @@ static xmlNodePtr yaz_query2xml_term(const Z_Term *term, xmlNodePtr parent)
     case Z_Term_numeric:
         type = "numeric";
 	sprintf(formstr, ODR_INT_PRINTF, *term->u.numeric);
-	t = xmlNewText(BAD_CAST formstr);	
+	t = xmlNewText(BAD_CAST formstr);
         break;
     case Z_Term_characterString:
         type = "string";
@@ -201,11 +201,11 @@ static void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
         return;
     }
     xmlNewProp(node, BAD_CAST "type", BAD_CAST type);
-    
+
     if (op->which == Z_Operator_prox)
     {
         char formstr[30];
-        
+
         if (op->u.prox->exclusion)
         {
             if (*op->u.prox->exclusion)
@@ -218,12 +218,12 @@ static void yaz_query2xml_operator(Z_Operator *op, xmlNodePtr node)
 
         if (*op->u.prox->ordered)
             xmlNewProp(node, BAD_CAST "ordered", BAD_CAST "true");
-        else 
+        else
             xmlNewProp(node, BAD_CAST "ordered", BAD_CAST "false");
-       
+
         sprintf(formstr, ODR_INT_PRINTF, *op->u.prox->relationType);
         xmlNewProp(node, BAD_CAST "relationType", BAD_CAST formstr);
-        
+
         switch(op->u.prox->which)
         {
         case Z_ProximityOperator_known:
@@ -260,7 +260,7 @@ static xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
             return yaz_query2xml_apt(zs->u.simple->u.attributesPlusTerm,
 				     parent);
         else if (zs->u.simple->which == Z_Operand_resultSetId)
-            return xmlNewChild(parent, /* NS */ 0, BAD_CAST "rset", 
+            return xmlNewChild(parent, /* NS */ 0, BAD_CAST "rset",
                                BAD_CAST zs->u.simple->u.resultSetId);
     }
     return 0;
@@ -314,7 +314,7 @@ void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp)
 
     switch (q->which)
     {
-    case Z_Query_type_1: 
+    case Z_Query_type_1:
     case Z_Query_type_101:
         q_node = xmlNewChild(top_node, 0, BAD_CAST "rpn", 0);
 	child_node = yaz_query2xml_rpn(q->u.type_1, q_node);
@@ -440,7 +440,7 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
     xmlFree(type);
 }
 
-static void yaz_xml2query_attribute_element(const xmlNode *ptr, 
+static void yaz_xml2query_attribute_element(const xmlNode *ptr,
                                             Z_AttributeElement **elem, ODR odr,
                                             int *error_code,
                                             const char **addinfo)
@@ -484,7 +484,7 @@ static void yaz_xml2query_attribute_element(const xmlNode *ptr,
         *addinfo = "missing value attribute for att content";
         return;
     }
-        
+
     *elem = (Z_AttributeElement *) odr_malloc(odr, sizeof(**elem));
     if (set)
         (*elem)->attributeSet = yaz_string_to_oid_odr(yaz_oid_std(),
@@ -526,7 +526,7 @@ static void yaz_xml2query_attribute_element(const xmlNode *ptr,
             }
         }
         (*elem)->value.complex->num_semanticAction = 0;
-        (*elem)->value.complex->semanticAction = 0;        
+        (*elem)->value.complex->semanticAction = 0;
     }
     else
     {   /* good'ld numeric value */
@@ -633,7 +633,7 @@ static void yaz_xml2query_apt(const xmlNode *ptr_apt,
     (*zapt)->attributes->attributes = (Z_AttributeElement **)
         odr_malloc(odr, sizeof(Z_AttributeElement*) * num_attr);
 
-    i = 0;    
+    i = 0;
     ptr = ptr_apt->children;
     for (; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
@@ -654,7 +654,7 @@ static void yaz_xml2query_apt(const xmlNode *ptr_apt,
     if (ptr && ptr->type == XML_ELEMENT_NODE)
     {
         if (!xmlStrcmp(ptr->name, BAD_CAST "term"))
-        {        
+        {
             /* deal with term */
             yaz_xml2query_term(ptr, &(*zapt)->term, odr, error_code, addinfo);
         }
@@ -691,7 +691,7 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
 {
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
-    
+
     if (!ptr || ptr->type != XML_ELEMENT_NODE)
     {
         *error_code = 1;
@@ -705,10 +705,10 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
     if (!xmlStrcmp(ptr->name, BAD_CAST "operator"))
     {
         Z_Complex *zc = (Z_Complex *) odr_malloc(odr, sizeof(Z_Complex));
-        
+
         (*zs)->which = Z_RPNStructure_complex;
         (*zs)->u.complex = zc;
-        
+
         yaz_xml2query_operator(ptr, &zc->roperator, odr, error_code, addinfo);
 
         ptr = ptr->children;
@@ -721,7 +721,7 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
             ptr = ptr->next;
         yaz_xml2query_rpnstructure(ptr, &zc->s2, odr, error_code, addinfo);
     }
-    else 
+    else
     {
         Z_Operand *s = (Z_Operand *) odr_malloc(odr, sizeof(Z_Operand));
         (*zs)->which = Z_RPNStructure_simple;
@@ -734,7 +734,7 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
         }
         else if (!xmlStrcmp(ptr->name, BAD_CAST "rset"))
         {
-            s->which = Z_Operand_resultSetId; 
+            s->which = Z_Operand_resultSetId;
             yaz_xml2query_rset(ptr, &s->u.resultSetId,
                                odr, error_code, addinfo);
         }
@@ -742,7 +742,7 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
         {
             *error_code = 1;
             *addinfo = "bad element: expected binary, apt or rset";
-        }        
+        }
     }
 }
 
@@ -770,7 +770,7 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
 {
     if (check_diagnostic(ptr, odr, error_code, addinfo))
         return;
-    if (ptr && ptr->type == XML_ELEMENT_NODE && 
+    if (ptr && ptr->type == XML_ELEMENT_NODE &&
         !xmlStrcmp(ptr->name, BAD_CAST "query"))
     {
         const char *type;

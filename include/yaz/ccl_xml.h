@@ -44,7 +44,7 @@ YAZ_BEGIN_CDECL
     \param addinfo has error message if configuration could not be parsed
     \retval 0 OK
     \retval -1 errors. Inspect addinfo for error message
-    
+
     Configuration example:
     \verbatim
 <cclmap defaultattrset="bib-1">

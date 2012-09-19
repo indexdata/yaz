@@ -51,13 +51,13 @@ YAZ_BEGIN_CDECL
 /** \brief log level: append thread Id */
 #define YLOG_TID    0x00000020
 /** \brief log level: application */
-#define YLOG_APP    0x00000040 
+#define YLOG_APP    0x00000040
 /** \brief log level: malloc debug */
 #define YLOG_MALLOC 0x00000080
 /** \brief log level: do not output date and time */
 #define YLOG_NOTIME 0x00000100
 /** \brief log level: application 2 */
-#define YLOG_APP2   0x00000200 
+#define YLOG_APP2   0x00000200
 /** \brief log level: application 3 */
 #define YLOG_APP3   0x00000400
 /** \brief log level: flush */
@@ -101,7 +101,7 @@ YAZ_EXPORT void yaz_log_init_file(const char *fname);
 */
 YAZ_EXPORT void yaz_log_init_level(int level);
 
-/** \brief sets log message prefix 
+/** \brief sets log message prefix
     \param prefix log message prefix
 */
 YAZ_EXPORT void yaz_log_init_prefix(const char *prefix);
@@ -121,7 +121,7 @@ YAZ_EXPORT void yaz_log_init_prefix2(const char *prefix);
 */
 YAZ_EXPORT void yaz_log_time_format(const char *fmt);
 
-/** \brief sets limit in bytes for size for log file 
+/** \brief sets limit in bytes for size for log file
     \param mx size in bytes
 
     Sets the max size for a log file. Zero means no limit.
@@ -132,7 +132,7 @@ YAZ_EXPORT void yaz_log_init_max_size(int mx);
 /** \brief Writes log message
     \param level log level mask
     \param fmt format string ala printf
-    
+
     Writes an entry in the log. Defaults to stderr if not initialized or
     to a file with yaz_log_init_file(). The level must match the level set
     via yaz_log_init_level(), optionally defined via yaz_log_mask_str().
@@ -146,12 +146,12 @@ YAZ_EXPORT void yaz_log(int level, const char *fmt, ...)
 /** \brief converts log level string to log level (integer)
     \param str log level string
     \return log level mask
-    
+
     yaz_log_mask_str() converts a comma-separated list of log levels to a
     bit mask. Starts from default level, and adds bits as specified,
     unless 'none' is specified, which clears the list. If a name matches
     the name of a YLOG_BIT above, that one is set. Otherwise a new value is
-    picked, and given to that name, to be found with yaz_log_module_level() 
+    picked, and given to that name, to be found with yaz_log_module_level()
 */
 YAZ_EXPORT int yaz_log_mask_str(const char *str);
 
@@ -186,7 +186,7 @@ YAZ_EXPORT FILE *yaz_log_file(void);
 /** \brief sets custom log handler
     \param func custom log handler
     \param info custom pointer to be passed to func handler
-    
+
     Allows log output to be captured to something else.. The
     func parameter takes a log level, a message + custom pointer
 */

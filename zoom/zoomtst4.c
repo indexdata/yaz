@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
     /* set proxy */
     ZOOM_options_set (o, "proxy", argv[1]);
-    
+
     /* create query */
     q = ZOOM_query_create ();
     if (ZOOM_query_prefix (q, argv[argc-1]))

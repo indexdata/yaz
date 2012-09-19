@@ -20,13 +20,13 @@ bool_t *ill_get_bool(struct ill_get_ctl *gc, const char *name,
     char element[128];
     const char *v;
     bool_t *r = (bool_t *) odr_malloc(o, sizeof(*r));
-    
+
     strcpy(element, name);
     if (sub)
     {
         strcat(element, ",");
         strcat(element, sub);
-    }    
+    }
 
     v = (gc->f)(gc->clientData, element);
     if (v)
@@ -43,13 +43,13 @@ Odr_int *ill_get_int(struct ill_get_ctl *gc, const char *name,
     ODR o = gc->odr;
     char element[128];
     const char *v;
-    
+
     strcpy(element, name);
     if (sub)
     {
         strcat(element, ",");
         strcat(element, sub);
-    }    
+    }
     v = (gc->f)(gc->clientData, element);
     if (v)
         val = atoi(v);
@@ -138,7 +138,7 @@ ILL_Person_Or_Institution_Symbol *ill_get_Person_Or_Insitution_Symbol(
     ODR o = gc->odr;
     ILL_Person_Or_Institution_Symbol *p =
         (ILL_Person_Or_Institution_Symbol *) odr_malloc(o, sizeof(*p));
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -163,7 +163,7 @@ static ILL_Name_Of_Person_Or_Institution *ill_get_Name_Of_Person_Or_Institution(
     ODR o = gc->odr;
     ILL_Name_Of_Person_Or_Institution *p =
         (ILL_Name_Of_Person_Or_Institution *) odr_malloc(o, sizeof(*p));
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -181,14 +181,14 @@ static ILL_Name_Of_Person_Or_Institution *ill_get_Name_Of_Person_Or_Institution(
         return p;
     return 0;
 }
-    
+
 ILL_System_Id *ill_get_System_Id(struct ill_get_ctl *gc,
                                  const char *name, const char *sub)
 {
     ODR o = gc->odr;
     char element[128];
     ILL_System_Id *p;
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -209,13 +209,13 @@ ILL_Transaction_Id *ill_get_Transaction_Id(struct ill_get_ctl *gc,
     ODR o = gc->odr;
     ILL_Transaction_Id *r = (ILL_Transaction_Id *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
         strcat(element, ",");
         strcat(element, sub);
-    }    
+    }
     r->initial_requester_id =
         ill_get_System_Id(gc, element, "initial-requester-id");
     r->transaction_group_qualifier =
@@ -235,7 +235,7 @@ ILL_Service_Date_this *ill_get_Service_Date_this(
     ILL_Service_Date_this *r =
         (ILL_Service_Date_this *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -254,7 +254,7 @@ ILL_Service_Date_original *ill_get_Service_Date_original(
     ILL_Service_Date_original *r =
         (ILL_Service_Date_original *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -275,13 +275,13 @@ ILL_Service_Date_Time *ill_get_Service_Date_Time(
     ILL_Service_Date_Time *r =
         (ILL_Service_Date_Time *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
         strcat(element, ",");
         strcat(element, sub);
-    }    
+    }
     r->date_time_of_this_service = ill_get_Service_Date_this(
         gc, element, "this");
     r->date_time_of_original_service = ill_get_Service_Date_original(
@@ -296,7 +296,7 @@ ILL_Requester_Optional_Messages_Type *ill_get_Requester_Optional_Messages_Type(
     ILL_Requester_Optional_Messages_Type *r =
         (ILL_Requester_Optional_Messages_Type *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -313,12 +313,12 @@ ILL_Requester_Optional_Messages_Type *ill_get_Requester_Optional_Messages_Type(
 }
 
 ILL_Item_Id *ill_get_Item_Id(
-    struct ill_get_ctl *gc, const char *name, const char *sub)   
+    struct ill_get_ctl *gc, const char *name, const char *sub)
 {
     ODR o = gc->odr;
     ILL_Item_Id *r = (ILL_Item_Id *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -353,7 +353,7 @@ ILL_Item_Id *ill_get_Item_Id(
     r->system_no = 0;
     r->additional_no_letters =
         ill_get_ILL_String(gc, element, "additional-no-letters");
-    r->verification_reference_source = 
+    r->verification_reference_source =
         ill_get_ILL_String(gc, element, "verification-reference-source");
     return r;
 }
@@ -393,7 +393,7 @@ ILL_Postal_Address *ill_get_Postal_Address(
         strcat(element, ",");
         strcat(element, sub);
     }
-    r->name_of_person_or_institution = 
+    r->name_of_person_or_institution =
         ill_get_Name_Of_Person_Or_Institution(
             gc, element, "name-of-person-or-institution");
     r->extended_postal_delivery_address =
@@ -417,7 +417,7 @@ ILL_System_Address *ill_get_System_Address(
     ILL_System_Address *r =
         (ILL_System_Address *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -438,7 +438,7 @@ ILL_Delivery_Address *ill_get_Delivery_Address(
     ILL_Delivery_Address *r =
         (ILL_Delivery_Address *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -458,7 +458,7 @@ ILL_Search_Type *ill_get_Search_Type(
     ODR o = gc->odr;
     ILL_Search_Type *r = (ILL_Search_Type *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -470,7 +470,7 @@ ILL_Search_Type *ill_get_Search_Type(
                                                "need-before-date", 0);
     r->expiry_date = ill_get_ILL_ISO_Date(gc, element, "expiry-date", 0);
     r->expiry_flag = ill_get_enumerated(gc, element, "expiry-flag", 3);
-                                         
+
     return r;
 }
 
@@ -480,7 +480,7 @@ ILL_Request *ill_get_ILLRequest(
     ODR o = gc->odr;
     ILL_Request *r = (ILL_Request *) odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -488,9 +488,9 @@ ILL_Request *ill_get_ILLRequest(
         strcat(element, sub);
     }
     r->protocol_version_num =
-        ill_get_enumerated(gc, element, "protocol-version-num", 
+        ill_get_enumerated(gc, element, "protocol-version-num",
                            ILL_Request_version_2);
-    
+
     r->transaction_id = ill_get_Transaction_Id(gc, element, "transaction-id");
     r->service_date_time =
         ill_get_Service_Date_Time(gc, element, "service-date-time");
@@ -522,10 +522,10 @@ ILL_Request *ill_get_ILLRequest(
     r->supply_medium_info_type = 0;
 
     r->place_on_hold = ill_get_enumerated(
-        gc, element, "place-on-hold", 
+        gc, element, "place-on-hold",
         ILL_Place_On_Hold_Type_according_to_responder_policy);
     r->client_id = ill_get_Client_Id(gc, element, "client-id");
-                           
+
     r->item_id = ill_get_Item_Id(gc, element, "item-id");
     r->supplemental_item_description = 0;
     r->cost_info_type = 0;
@@ -547,7 +547,7 @@ ILL_ItemRequest *ill_get_ItemRequest(
     ODR o = gc->odr;
     ILL_ItemRequest *r = (ILL_ItemRequest *)odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -555,9 +555,9 @@ ILL_ItemRequest *ill_get_ItemRequest(
         strcat(element, sub);
     }
     r->protocol_version_num =
-        ill_get_enumerated(gc, element, "protocol-version-num", 
+        ill_get_enumerated(gc, element, "protocol-version-num",
                            ILL_Request_version_2);
-    
+
     r->transaction_id = ill_get_Transaction_Id(gc, element, "transaction-id");
     r->service_date_time =
         ill_get_Service_Date_Time(gc, element, "service-date-time");
@@ -589,10 +589,10 @@ ILL_ItemRequest *ill_get_ItemRequest(
     r->supply_medium_info_type = 0;
 
     r->place_on_hold = ill_get_enumerated(
-        gc, element, "place-on-hold", 
+        gc, element, "place-on-hold",
         ILL_Place_On_Hold_Type_according_to_responder_policy);
     r->client_id = ill_get_Client_Id(gc, element, "client-id");
-                           
+
     r->item_id = ill_get_Item_Id(gc, element, "item-id");
     r->supplemental_item_description = 0;
     r->cost_info_type = 0;
@@ -614,7 +614,7 @@ ILL_Cancel *ill_get_Cancel(
     ODR o = gc->odr;
     ILL_Cancel *r = (ILL_Cancel *)odr_malloc(o, sizeof(*r));
     char element[128];
-    
+
     strcpy(element, name);
     if (sub)
     {
@@ -622,9 +622,9 @@ ILL_Cancel *ill_get_Cancel(
         strcat(element, sub);
     }
     r->protocol_version_num =
-        ill_get_enumerated(gc, element, "protocol-version-num", 
+        ill_get_enumerated(gc, element, "protocol-version-num",
                            ILL_Request_version_2);
-    
+
     r->transaction_id = ill_get_Transaction_Id(gc, element, "transaction-id");
     r->service_date_time =
         ill_get_Service_Date_Time(gc, element, "service-date-time");

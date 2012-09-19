@@ -48,7 +48,7 @@ void tst(void)
     int ret;
     WRBUF tpath = wrbuf_alloc();
     const char *srcdir = getenv("srcdir");
-    
+
     if (srcdir)
     {
         wrbuf_puts(tpath, srcdir);

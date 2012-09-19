@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_any.c
  * \brief Implements BER ANY encoding and decoding.
  *
@@ -21,7 +21,7 @@
 int ber_any(ODR o, Odr_any **p)
 {
     int res;
-    
+
     switch (o->direction)
     {
     case ODR_DECODE:
@@ -49,7 +49,7 @@ int completeBER_n(const unsigned char *buf, int len, int level)
 {
     int res, ll, zclass, tag, cons;
     const unsigned char *b = buf;
-    
+
     if (level > 1000)
     {
 #if BER_ANY_DEBUG
@@ -74,7 +74,7 @@ int completeBER_n(const unsigned char *buf, int len, int level)
 #endif
         return -1;  /* error */
     }
-    if (res == -1)  
+    if (res == -1)
     {
 #if BER_ANY_DEBUG
         yaz_log(YLOG_LOG, "<<<<<<<<< return2 lev=%d res=%d", level, res);

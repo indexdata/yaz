@@ -25,9 +25,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** 
- * \file cclp.h 
- * \brief CCL header with private definitions 
+/**
+ * \file cclp.h
+ * \brief CCL header with private definitions
  */
 #include <yaz/ccl.h>
 
@@ -61,14 +61,14 @@ struct ccl_token {
 struct ccl_parser {
     /** current lookahead token */
     struct ccl_token *look_token;
-    
+
     /** holds error code if error occur */
     int error_code;
     /** start of CCL string buffer */
     const char *start_pos;
     /** if error occurs, this holds position (starting from 0). */
     const char *error_pos;
-    
+
     /** current bibset */
     CCL_bibset bibset;
 
@@ -91,7 +91,7 @@ struct ccl_parser {
 YAZ_EXPORT
 struct ccl_token *ccl_parser_tokenize (CCL_parser cclp, const char *command);
 
-/** 
+/**
  * Deletes token list
  */
 YAZ_EXPORT
@@ -110,7 +110,7 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
 
 
 YAZ_EXPORT
-ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name, 
+ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name,
                                 size_t name_len, int seq);
 
 YAZ_EXPORT

@@ -43,7 +43,7 @@ static int sendAdminES(int type, char* param1)
 {
     ODR out = getODROutputStream();
     char *dbname = odr_strdup (out, databaseNames[0]);
-    
+
     /* Type: 1=reindex, 2=truncate, 3=delete, 4=create, 5=import, 6=refresh, 7=commit */
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -71,11 +71,11 @@ static int sendAdminES(int type, char* param1)
     r->u.adminService->which = Z_Admin_esRequest;
     r->u.adminService->u.esRequest = (Z_AdminEsRequest *)
         odr_malloc(out, sizeof(*r->u.adminService->u.esRequest));
-    
+
     toKeep = r->u.adminService->u.esRequest->toKeep =
-        (Z_ESAdminOriginPartToKeep *) 
+        (Z_ESAdminOriginPartToKeep *)
         odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->toKeep));
-    
+
     toKeep->which=type;
     toKeep->databaseName = dbname;
     switch ( type )
@@ -83,7 +83,7 @@ static int sendAdminES(int type, char* param1)
     case Z_ESAdminOriginPartToKeep_reIndex:
         toKeep->u.reIndex=odr_nullval();
         break;
-        
+
     case Z_ESAdminOriginPartToKeep_truncate:
         toKeep->u.truncate=odr_nullval();
         break;
@@ -115,15 +115,15 @@ static int sendAdminES(int type, char* param1)
         /* Unknown admin service */
         break;
     }
-    
+
     notToKeep = r->u.adminService->u.esRequest->notToKeep =
         (Z_ESAdminOriginPartNotToKeep *)
         odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
     notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
     notToKeep->u.recordsWillFollow=odr_nullval();
-    
+
     send_apdu(apdu);
-    
+
     return 0;
 }
 
@@ -136,7 +136,7 @@ int cmd_adm_reindex(const char *arg)
 }
 
 /* cmd_adm_truncate
-   Truncate the specified database, removing all records and index entries, but leaving 
+   Truncate the specified database, removing all records and index entries, but leaving
    the database & it's explain information intact ready for new records */
 int cmd_adm_truncate(const char *arg)
 {
@@ -198,13 +198,13 @@ int cmd_adm_import(const char *arg)
     dir = opendir(dir_str);
     if (!dir)
         return 0;
-    
+
     sendAdminES(Z_ESAdminOriginPartToKeep_import, type_str);
-    
+
     printf ("sent es request\n");
     if ((cp=strrchr(dir_str, '/')) && cp[1] == 0)
         sep="";
-        
+
     while ((ent = readdir(dir)))
     {
         if (fnmatch (pattern_str, ent->d_name, 0) == 0)
@@ -212,7 +212,7 @@ int cmd_adm_import(const char *arg)
             char fname[1024];
             struct stat status;
             FILE *inf;
-                
+
             sprintf (fname, "%s%s%s", dir_str, sep, ent->d_name);
             stat (fname, &status);
 
@@ -236,7 +236,7 @@ int cmd_adm_import(const char *arg)
                 rec->u.intermediateFragment->which =
                     Z_FragmentSyntax_notExternallyTagged;
                 rec->u.intermediateFragment->u.notExternallyTagged = oct;
-                
+
                 oct->len = oct->size = status.st_size;
                 oct->buf = (unsigned char *) odr_malloc (out, oct->size);
                 if (fread(oct->buf, 1, oct->size, inf) != (size_t) oct->size)
@@ -247,7 +247,7 @@ int cmd_adm_import(const char *arg)
                 {
                     printf("Close failed for file %s\n", fname);
                 }
-                
+
                 segment->segmentRecords[segment->num_segmentRecords++] = rec;
 
                 if (segment->num_segmentRecords == chunk)
@@ -255,7 +255,7 @@ int cmd_adm_import(const char *arg)
                     send_apdu (apdu);
                     apdu = 0;
                 }
-            }   
+            }
         }
     }
     if (apdu)
@@ -274,7 +274,7 @@ int cmd_adm_import(const char *arg)
 #endif
 
 
-/* "Freshen" the specified database, by checking metadata records against the sources from which they were 
+/* "Freshen" the specified database, by checking metadata records against the sources from which they were
    generated, and creating a new record if the source has been touched since the last extraction */
 int cmd_adm_refresh(const char *arg)
 {
@@ -286,7 +286,7 @@ int cmd_adm_refresh(const char *arg)
     return 0;
 }
 
-/* cmd_adm_commit 
+/* cmd_adm_commit
    Make imported records a permenant & visible to the live system */
 int cmd_adm_commit(const char *arg)
 {

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_tag.c
  * \brief Implements BER tags encoding and decoding
  *
@@ -157,7 +157,7 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
     }
 }
 
-/** 
+/**
  * \brief Decodes BER identifier octets.
  *
  * Returns number of bytes read or -1 for error.

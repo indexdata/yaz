@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file atoin.c
  * \brief Implements atoi_n function.
  */

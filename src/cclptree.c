@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file cclptree.c
  * \brief Implements CCL parse tree printing
  *
@@ -43,13 +43,13 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
             const char *cp = p->u.p[2]->u.t.term;
             /* exlusion distance ordered relation which-code unit-code */
             if (*cp == '!')
-            {   
+            {
                 /* word order specified */
                 if (yaz_isdigit(cp[1]))
                     wrbuf_printf(w, "@prox 0 %s 1 2 k 2", cp+1);
                 else
                     wrbuf_printf(w, "@prox 0 1 1 2 k 2");
-            } 
+            }
             else if (*cp == '%')
             {
                 /* word order not specified */
@@ -142,7 +142,7 @@ void ccl_pr_tree(struct ccl_rpn_node *rpn, FILE *fd_out)
     WRBUF w = wrbuf_alloc();
 
     ccl_pquery_indent(w, rpn, 0);
-    
+
     fputs(wrbuf_cstr(w), fd_out);
     wrbuf_destroy(w);
 }

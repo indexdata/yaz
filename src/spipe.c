@@ -137,7 +137,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
 #ifndef WIN32
         {
             unsigned long one = 1;
-            if (setsockopt(p->m_socket, SOL_SOCKET, SO_REUSEADDR, (char*) 
+            if (setsockopt(p->m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)
                            &one, sizeof(one)))
             {
                 if (err_msg)
@@ -152,7 +152,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
         add.sin_port = htons(port_to_use);
         add.sin_addr.s_addr = INADDR_ANY;
         addr = ( struct sockaddr *) &add;
-        
+
         if (bind(p->m_socket, addr, sizeof(struct sockaddr_in)))
         {
             if (err_msg)
@@ -160,7 +160,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
             yaz_spipe_destroy(p);
             return 0;
         }
-        
+
         if (listen(p->m_socket, 3) < 0)
         {
             if (err_msg)
@@ -178,7 +178,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
             yaz_spipe_destroy(p);
             return 0;
         }
-        
+
         memcpy(&add.sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
         p->m_fd[1] = socket(AF_INET, SOCK_STREAM, 0);
         if (p->m_fd[1] == YAZ_INVALID_SOCKET)

@@ -77,7 +77,7 @@
 #include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
-    
+
 #define CCL_ERR_OK                0
 #define CCL_ERR_TERM_EXPECTED     1
 #define CCL_ERR_RP_EXPECTED       2
@@ -93,7 +93,7 @@ YAZ_BEGIN_CDECL
 #define CCL_ERR_TRUNC_NOT_RIGHT  12
 #define CCL_ERR_TRUNC_NOT_EMBED  13
 #define CCL_ERR_TRUNC_NOT_SINGLE 14
-    
+
 /** \brief attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {
     /** \brief next attribute */
@@ -147,10 +147,10 @@ typedef struct ccl_qualifiers *CCL_bibset;
 
 /** \brief CCL parser */
 typedef struct ccl_parser *CCL_parser;
-    
+
 /**
    \brief parse CCL find string using CCL profile return RPN tree
-   
+
    Parses a CCL Find command in a simple C string. Returns CCL parse
    tree node describing RPN if parsing is successful. If parsing is
    unsuccesful, NULL is returned and error and pos is set accordingly.
@@ -162,7 +162,7 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
 
 /**
    \brief parse CCL find string with parser and return RPN tree
-   
+
    Parses a CCL Find command in a simple C string. Returns CCL parse
    tree node describing RPN if parsing is successful. If parsing is
    unsuccesful, NULL is returned and error and pos is set accordingly.
@@ -329,11 +329,11 @@ int ccl_stop_words_info(ccl_stop_words_t csw, int idx,
                              3  key
                              4  year
                              5  date (normalized)
-                             6  word list 
+                             6  word list
                            100  date (un-normalized)
                            101  name (normalized)
                            102  name (un-normalized)
-   truncation (5)                            
+   truncation (5)
    completeness (6)
 */
 

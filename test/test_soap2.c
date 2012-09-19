@@ -32,9 +32,9 @@ static void tst_srw(void)
     YAZ_CHECK(sr);
     YAZ_CHECK(p);
 #if 0
-    sr->u.request->query.cql = "jordb" "\xe6" "r"; 
+    sr->u.request->query.cql = "jordb" "\xe6" "r";
 #else
-    sr->u.request->query.cql = "jordbaer"; 
+    sr->u.request->query.cql = "jordbaer";
 #endif
 
     p->which = Z_SOAP_generic;
@@ -81,7 +81,7 @@ static void tst_array_to_uri(void)
     {
         YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
         YAZ_CHECK(values[0] && !strcmp(values[0], "AA"));
-        
+
         YAZ_CHECK(names[1] && !strcmp(names[1], "bb"));
         YAZ_CHECK(values[1] && !strcmp(values[1], "BB"));
 
@@ -142,7 +142,7 @@ static void tst_array_to_uri(void)
         YAZ_CHECK(values[1] && !strcmp(values[1], ""));
 
         YAZ_CHECK(names[2] && !strcmp(names[2], "x"));
-        YAZ_CHECK(values[2] && !strcmp(values[2], "")); 
+        YAZ_CHECK(values[2] && !strcmp(values[2], ""));
 
         YAZ_CHECK(names[3] == 0);
         YAZ_CHECK(values[3] == 0);

@@ -20,7 +20,7 @@ void odr_prname(ODR o, const char *name)
     if (o->op->indent < 16)
         odr_printf(o, "%*s", o->op->indent * 2, "");
     else
-        odr_printf(o, "level=%-7d%*s", o->op->indent, 
+        odr_printf(o, "level=%-7d%*s", o->op->indent,
                    2 * (o->op->indent % 8) , "");
     if (name)
         odr_printf(o, "%s ", name);

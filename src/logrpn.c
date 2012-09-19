@@ -187,7 +187,7 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
     int of, i;
     char str[80];
     int num_attributes = t->attributes->num_attributes;
-    
+
     for (of = 0; of < num_attributes; of++)
     {
         char attset_name_buf[OID_STR_MAX];
@@ -201,7 +201,7 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
         }
         if (!attset_name)
             attset_name = "";
-        switch (element->which) 
+        switch (element->which)
         {
         case Z_AttributeValue_numeric:
             attrStr(*element->attributeType,
@@ -270,7 +270,7 @@ char *yaz_prox_unit_name(Z_ProximityOperator *op)
     }
 }
 
-static void zlog_structure(Z_RPNStructure *zs, int depth, 
+static void zlog_structure(Z_RPNStructure *zs, int depth,
                            const Odr_oid *ast, int loglevel)
 {
     if (zs->which == Z_RPNStructure_complex)
@@ -288,7 +288,7 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
                      " order=%s "
                      "rel=%s unit=%s",
                      depth, "", op->u.prox->exclusion ?
-                     (*op->u.prox->exclusion ? "T" : "F") : "N", 
+                     (*op->u.prox->exclusion ? "T" : "F") : "N",
                      *op->u.prox->distance,
                      *op->u.prox->ordered ? "T" : "F",
                      relToStr(*op->u.prox->relationType),
@@ -300,7 +300,7 @@ static void zlog_structure(Z_RPNStructure *zs, int depth,
         }
         zlog_structure(zs->u.complex->s1, depth+2, ast, loglevel);
         zlog_structure(zs->u.complex->s2, depth+2, ast, loglevel);
-    } 
+    }
     else if (zs->which == Z_RPNStructure_simple)
     {
         if (zs->u.simple->which == Z_Operand_APT)
@@ -353,13 +353,13 @@ void log_rpn_query(Z_RPNQuery *rpn)
     log_rpn_query_level(YLOG_LOG, rpn);
 }
 
-void log_scan_term_level(int loglevel, 
+void log_scan_term_level(int loglevel,
                          Z_AttributesPlusTerm *zapt, const Odr_oid *ast)
 {
     int depth = 0;
     if (!loglevel)
         return;
-    if (zapt->term->which == Z_Term_general) 
+    if (zapt->term->which == Z_Term_general)
     {
         yaz_log(loglevel, "%*.0s term '%.*s' (general)", depth, "",
                  zapt->term->u.general->len, zapt->term->u.general->buf);
@@ -377,7 +377,7 @@ void log_scan_term(Z_AttributesPlusTerm *zapt, const Odr_oid *ast)
 void yaz_log_zquery_level(int loglevel, Z_Query *q)
 {
     if (!loglevel)
-        return; 
+        return;
     switch (q->which)
     {
     case Z_Query_type_1: case Z_Query_type_101:

@@ -62,7 +62,7 @@ static void usage(const char *prog)
             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
             "[-p] [-v] [-V] file...\n",
             prog);
-} 
+}
 
 static void show_version(void)
 {
@@ -103,7 +103,7 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
                 prog, fname, strerror(errno));
         exit(1);
     }
-    
+
     while (yaz_marc_read_line(mt, getbyte_stream,
                               ungetbyte_stream, inf) == 0)
     {
@@ -131,12 +131,12 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
             int type = xmlTextReaderNodeType(reader);
             if (type == XML_READER_TYPE_ELEMENT)
             {
-                const char *name = (const char *) 
+                const char *name = (const char *)
                     xmlTextReaderLocalName(reader);
                 if (!strcmp(name, "record") || !strcmp(name, "r"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
-        
+
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
                         fprintf(stderr, "yaz_marc_read_xml failed\n");
@@ -145,7 +145,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                         int write_rc = yaz_marc_write_mode(mt, wrbuf);
                         if (write_rc)
                             yaz_log(YLOG_WARN, "yaz_marc_write_mode: write error: %d", write_rc);
-                        
+
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
                     }
@@ -176,7 +176,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                     else
                     {
                         yaz_marc_write_mode(mt, wrbuf);
-                        
+
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
                     }
@@ -255,7 +255,7 @@ static void dump(const char *fname, const char *from, const char *to,
             size_t len_result;
             size_t r;
             char buf[100001];
-            
+
             r = fread(buf, 1, 5, inf);
             if (r < 5)
             {
@@ -270,7 +270,7 @@ static void dump(const char *fname, const char *from, const char *to,
                 long off = ftell(inf) - 5;
                 if (verbose || print_offset)
                     printf("<!-- Skipping bad byte %d (0x%02X) at offset "
-                           "%ld (0x%lx) -->\n", 
+                           "%ld (0x%lx) -->\n",
                            *buf & 0xff, *buf & 0xff,
                            off, off);
                 for (i = 0; i<4; i++)
@@ -364,10 +364,10 @@ static void dump(const char *fname, const char *from, const char *to,
                     if ((i & 15) == 0)
                         fprintf(cfile, "  \"");
                     fprintf(cfile, "\\x%02X", p[i] & 255);
-                    
+
                     if (i < r - 1 && (i & 15) == 15)
                         fprintf(cfile, "\"\n");
-                    
+
                 }
                 fprintf(cfile, "\"\n");
             }
@@ -430,7 +430,7 @@ int main (int argc, char **argv)
             }
 #if YAZ_HAVE_XML2
 #else
-            if (input_format == YAZ_MARC_MARCXML 
+            if (input_format == YAZ_MARC_MARCXML
                 || input_format == YAZ_MARC_XCHANGE)
             {
                 fprintf(stderr, "%s: Libxml2 support not enabled\n", prog);
@@ -519,7 +519,7 @@ int main (int argc, char **argv)
         case 'v':
             verbose++;
             break;
-        case 'V': 
+        case 'V':
             show_version();
             break;
         default:

@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         exit (1);
     }
     z = ZOOM_connection_new (argv[1], 0);
-    
+
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
     {
         fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);

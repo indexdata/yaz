@@ -21,7 +21,7 @@
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
 #endif
- 
+
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
@@ -59,11 +59,11 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             i++;
         for (po = i; i < o->size-1 && !strchr("\r\n", o->buf[i]); i++)
             ;
-        
+
         (*headers)->value = (char*) odr_malloc(o, i - po + 1);
         memcpy ((*headers)->value, o->buf + po, i - po);
         (*headers)->value[i - po] = '\0';
-        
+
         if (!strcasecmp((*headers)->name, "Transfer-Encoding")
             &&
             !strcasecmp((*headers)->value, "chunked"))
@@ -83,23 +83,23 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     if (chunked)
     {
         int off = 0;
-        
+
         /* we know buffer will be smaller than o->size - i*/
-        *content_buf = (char*) odr_malloc(o, o->size - i);  
-        
+        *content_buf = (char*) odr_malloc(o, o->size - i);
+
         while (1)
         {
             /* chunk length .. */
             int chunk_len = 0;
             for (; i  < o->size-2; i++)
                 if (yaz_isdigit(o->buf[i]))
-                    chunk_len = chunk_len * 16 + 
+                    chunk_len = chunk_len * 16 +
                         (o->buf[i] - '0');
                 else if (yaz_isupper(o->buf[i]))
-                    chunk_len = chunk_len * 16 + 
+                    chunk_len = chunk_len * 16 +
                         (o->buf[i] - ('A'-10));
                 else if (yaz_islower(o->buf[i]))
-                    chunk_len = chunk_len * 16 + 
+                    chunk_len = chunk_len * 16 +
                         (o->buf[i] - ('a'-10));
                 else
                     break;
@@ -142,7 +142,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             *content_buf = 0;
             *content_len = 0;
         }
-        else 
+        else
         {
             *content_len = o->size - i;
             *content_buf = (char*) odr_malloc(o, *content_len + 1);
@@ -277,11 +277,11 @@ Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
         cp0 = cp0+3;
     else
         cp0 = uri;
-    
+
     cp1 = strchr(cp0, '/');
     if (!cp1)
         cp1 = cp0+strlen(cp0);
-    
+
     if (cp0 && cp1)
     {
         char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
@@ -328,7 +328,7 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
     if (code != 200)
     {
         hres->content_buf = (char*) odr_malloc(o, 400);
-        sprintf(hres->content_buf, 
+        sprintf(hres->content_buf,
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
                 " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
                 "<HTML>\n"
@@ -336,7 +336,7 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
                 "  <TITLE>YAZ " YAZ_VERSION "</TITLE>\n"
                 " </HEAD>\n"
                 " <BODY>\n"
-                "  <P><A HREF=\"http://www.indexdata.com/yaz/\">YAZ</A> " 
+                "  <P><A HREF=\"http://www.indexdata.com/yaz/\">YAZ</A> "
                 YAZ_VERSION "</P>\n"
                 "  <P>Error: %d</P>\n"
                 "  <P>Description: %.50s</P>\n"
@@ -369,11 +369,11 @@ int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
 {
     int i, po;
     Z_HTTP_Response *hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
-    
+
     *hr_p = hr;
     hr->content_buf = 0;
     hr->content_len = 0;
-    
+
     po = i = 5;
     while (i < o->size-2 && !strchr(" \r\n", o->buf[i]))
         i++;
@@ -396,16 +396,16 @@ int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
     while (i < o->size-1 && o->buf[i] != '\n')
         i++;
     return decode_headers_content(o, i, &hr->headers,
-                                  &hr->content_buf, &hr->content_len);            
+                                  &hr->content_buf, &hr->content_len);
 }
 
 int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
 {
     int i, po;
     Z_HTTP_Request *hr = (Z_HTTP_Request *) odr_malloc(o, sizeof(*hr));
-    
+
     *hr_p = hr;
-    
+
     /* method .. */
     for (i = 0; o->buf[i] != ' '; i++)
         if (i >= o->size-5 || i > 30)
@@ -481,7 +481,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     }
     odr_write(o, (unsigned char *) "\r\n", 2);
     if (hr->content_buf)
-        odr_write(o, (unsigned char *) 
+        odr_write(o, (unsigned char *)
                   hr->content_buf,
                   hr->content_len);
     if (o->direction == ODR_PRINT)

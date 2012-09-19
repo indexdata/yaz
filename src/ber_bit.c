@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_bit.c
  * \brief Implements BER BITSTRING encoding and decoding.
  *
@@ -75,7 +75,7 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
         return 1;
     case ODR_PRINT:
         return 1;
-    default: 
+    default:
         odr_seterror(o, OOTHER, 8);
         return 0;
     }

@@ -109,7 +109,7 @@ int main(int argc, char **argv)
                 /* if rec is non-null, we got a record for display */
                 if (str)
                 {
-                    printf("%d %s %s\n", pos+1, syntax, 
+                    printf("%d %s %s\n", pos+1, syntax,
                            (db ? db : "unknown"));
                     if (rec)
                     {

@@ -46,7 +46,7 @@ static unsigned long read_advancegreek(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         inp++;
         --inbytesleft;
         (*no_read)++;
-    }    
+    }
     if (inbytesleft == 0)
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
@@ -55,217 +55,217 @@ static unsigned long read_advancegreek(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     }
     switch (*inp) {
     case 0x81:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x0386;
-            else 
+            else
                 x = 0x0391;
-        else 
-            if (tonos) 
+        else
+            if (tonos)
                 x = 0x03ac;
-            else 
+            else
                 x = 0x03b1;
         break;
     case 0x82:
-        if (shift) 
+        if (shift)
             x = 0x0392;
-        else 
+        else
             x = 0x03b2;
-        
+
         break;
     case 0x83:
-        if (shift) 
+        if (shift)
             x = 0x0393;
-        else 
+        else
             x = 0x03b3;
         break;
     case 0x84:
-        if (shift) 
+        if (shift)
             x = 0x0394;
-        else 
+        else
             x = 0x03b4;
         break;
     case 0x85:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x0388;
-            else 
+            else
                 x = 0x0395;
-        else 
-            if (tonos) 
+        else
+            if (tonos)
                 x = 0x03ad;
-            else 
+            else
                 x = 0x03b5;
         break;
     case 0x86:
-        if (shift) 
+        if (shift)
             x = 0x0396;
-        else 
+        else
             x = 0x03b6;
         break;
     case 0x87:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x0389;
-            else 
+            else
                 x = 0x0397;
-        else 
-            if (tonos) 
+        else
+            if (tonos)
                 x = 0x03ae;
-            else 
+            else
                 x = 0x03b7;
         break;
     case 0x88:
-        if (shift) 
+        if (shift)
             x = 0x0398;
-        else 
+        else
             x = 0x03b8;
         break;
     case 0x89:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x038a;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03aa;
-                else 
+                else
                     x = 0x0399;
-        else 
-            if (tonos) 
-                if (dialitika) 
+        else
+            if (tonos)
+                if (dialitika)
                     x = 0x0390;
-                else 
+                else
                     x = 0x03af;
-        
-            else 
-                if (dialitika) 
+
+            else
+                if (dialitika)
                     x = 0x03ca;
-                else 
+                else
                     x = 0x03b9;
         break;
     case 0x8a:
-        if (shift) 
+        if (shift)
             x = 0x039a;
-        else 
+        else
             x = 0x03ba;
-        
+
         break;
     case 0x8b:
-        if (shift) 
+        if (shift)
             x = 0x039b;
-        else 
+        else
             x = 0x03bb;
         break;
     case 0x8c:
-        if (shift) 
+        if (shift)
             x = 0x039c;
-        else 
+        else
             x = 0x03bc;
-        
+
         break;
     case 0x8d:
-        if (shift) 
+        if (shift)
             x = 0x039d;
-        else 
+        else
             x = 0x03bd;
         break;
     case 0x8e:
-        if (shift) 
+        if (shift)
             x = 0x039e;
-        else 
+        else
             x = 0x03be;
         break;
     case 0x8f:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x038c;
-            else 
+            else
                 x = 0x039f;
-        else 
-            if (tonos) 
+        else
+            if (tonos)
                 x = 0x03cc;
-            else 
+            else
                 x = 0x03bf;
         break;
     case 0x90:
-        if (shift) 
+        if (shift)
             x = 0x03a0;
-        else 
+        else
             x = 0x03c0;
         break;
     case 0x91:
-        if (shift) 
+        if (shift)
             x = 0x03a1;
-        else 
+        else
             x = 0x03c1;
         break;
     case 0x92:
         x = 0x03c2;
         break;
     case 0x93:
-        if (shift) 
+        if (shift)
             x = 0x03a3;
-        else 
+        else
             x = 0x03c3;
         break;
     case 0x94:
-        if (shift) 
+        if (shift)
             x = 0x03a4;
-        else 
+        else
             x = 0x03c4;
         break;
     case 0x95:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x038e;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03ab;
-                else 
+                else
                     x = 0x03a5;
-        else 
-            if (tonos) 
-                if (dialitika) 
+        else
+            if (tonos)
+                if (dialitika)
                     x = 0x03b0;
-                else 
+                else
                     x = 0x03cd;
-        
-            else 
-                if (dialitika) 
+
+            else
+                if (dialitika)
                     x = 0x03cb;
-                else 
+                else
                     x = 0x03c5;
         break;
     case 0x96:
-        if (shift) 
+        if (shift)
             x = 0x03a6;
-        else 
+        else
             x = 0x03c6;
         break;
     case 0x97:
-        if (shift) 
+        if (shift)
             x = 0x03a7;
-        else 
+        else
             x = 0x03c7;
         break;
     case 0x98:
-        if (shift) 
+        if (shift)
             x = 0x03a8;
-        else 
+        else
             x = 0x03c8;
-        
+
         break;
-        
+
     case 0x99:
-        if (shift) 
-            if (tonos) 
+        if (shift)
+            if (tonos)
                 x = 0x038f;
-            else 
+            else
                 x = 0x03a9;
-        else 
-            if (tonos) 
+        else
+            if (tonos)
                 x = 0x03ce;
-            else 
+            else
                 x = 0x03c9;
         break;
     default:
@@ -273,7 +273,7 @@ static unsigned long read_advancegreek(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         break;
     }
     (*no_read)++;
-    
+
     return x;
 }
 

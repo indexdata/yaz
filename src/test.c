@@ -27,7 +27,7 @@ static int test_failed = 0;
 static int test_todo = 0;
 static int test_verbose = 1;
 static const char *test_prog = 0;
-static int log_tests = 0; 
+static int log_tests = 0;
 
 static FILE *get_file(void)
 {
@@ -76,7 +76,7 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
             }
             else if (!strcmp(suf, "help"))
             {
-                fprintf(stderr, 
+                fprintf(stderr,
                         "--test-help           help\n"
                         "--test-file fname     output to fname\n"
                         "--test-verbose level  verbose level\n"
@@ -95,7 +95,7 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
                 fprintf(stderr, "Use --test-help for more info\n");
                 exit(1);
             }
-            
+
         }
         break;
     }
@@ -110,7 +110,7 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
 void yaz_check_init_log(const char *argv0)
 {
     char logfilename[2048];
-    log_tests = 1; 
+    log_tests = 1;
     sprintf(logfilename,"%s.log", progname(argv0) );
     yaz_log_init_file(logfilename);
     yaz_log_trunc();
@@ -160,15 +160,15 @@ void yaz_check_eq1(int type, const char *file, int line,
                    const char *left, const char *right, int lval, int rval)
 {
     char formstr[2048];
-    
-    if (type == YAZ_TEST_TYPE_OK) 
+
+    if (type == YAZ_TEST_TYPE_OK)
         sprintf(formstr, "%.500s == %.500s ", left, right);
     else
         sprintf(formstr, "%.500s != %.500s\n %d != %d", left, right, lval,rval);
     yaz_check_print1(type, file, line, formstr);
 }
 
-void yaz_check_print1(int type, const char *file, int line, 
+void yaz_check_print1(int type, const char *file, int line,
                       const char *expr)
 {
     const char *msg = "unknown";

@@ -52,7 +52,7 @@ static size_t write_wchar_t(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 
 yaz_iconv_encoder_t yaz_wchar_encoder(const char *tocode,
 				      yaz_iconv_encoder_t e)
-    
+
 {
 #if HAVE_WCHAR_H
     if (!yaz_matchstr(tocode, "wchar_t"))
@@ -70,7 +70,7 @@ static unsigned long read_wchar_t(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                   size_t inbytesleft, size_t *no_read)
 {
     unsigned long x = 0;
-    
+
     if (inbytesleft < sizeof(wchar_t))
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
@@ -89,7 +89,7 @@ static unsigned long read_wchar_t(yaz_iconv_t cd, yaz_iconv_decoder_t d,
 
 yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
 				      yaz_iconv_decoder_t d)
-    
+
 {
 #if HAVE_WCHAR_H
     if (!yaz_matchstr(fromcode, "wchar_t"))

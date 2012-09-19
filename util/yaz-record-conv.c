@@ -72,15 +72,15 @@ int main (int argc, char **argv)
                 }
                 while ((c = getc(f)) != EOF)
                     wrbuf_putc(input_record, c);
-                
-                r = yaz_record_conv_record(p, 
+
+                r = yaz_record_conv_record(p,
                                            wrbuf_buf(input_record),
                                            wrbuf_len(input_record),
                                            output_record);
                 if (r)
                 {
                     fprintf(stderr, "%s: %s: Error %s\n",
-                            prog, arg, 
+                            prog, arg,
                             yaz_record_conv_get_error(p));
                     no_errors++;
                 }

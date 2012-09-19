@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file cclerrms.c
  * \brief Implements CCL error code to error string map.
  *
@@ -35,7 +35,7 @@ static char *err_msg_array[] = {
 
 const char *ccl_err_msg(int ccl_errno)
 {
-    if (ccl_errno >= 0 && 
+    if (ccl_errno >= 0 &&
         ccl_errno < sizeof(err_msg_array)/sizeof(*err_msg_array))
         return err_msg_array[ccl_errno];
     else

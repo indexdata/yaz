@@ -41,7 +41,7 @@ static void tstwrbuf(void)
             buf[i] = '\0';
             wrbuf_puts(wr, buf);
         }
-        
+
         cp = wrbuf_buf(wr);
         len = wrbuf_len(wr);
         YAZ_CHECK(len == step * (step-1) / 2);

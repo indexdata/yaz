@@ -247,7 +247,7 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
             {
                 char * end;
                 char * arg = s + 6;
-                
+
                 sp->umask = strtol(arg, &end, 8);
                 if (errno == EINVAL ||
                     *end)
@@ -513,7 +513,7 @@ static COMSTACK unix_accept(COMSTACK h)
             }
             return 0;
         }
-        if (!(cnew->flags&CS_FLAGS_BLOCKING) && 
+        if (!(cnew->flags&CS_FLAGS_BLOCKING) &&
             (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
             )
         {

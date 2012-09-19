@@ -64,7 +64,7 @@ YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
     \retval 1 success
 */
 YAZ_EXPORT int icu_chain_assign_cstr(yaz_icu_chain_t chain,
-                                     const char * src8cstr, 
+                                     const char * src8cstr,
                                      UErrorCode *status);
 
 /** \brief returns one token (if any)
@@ -122,7 +122,7 @@ yaz_icu_iter_t icu_iter_create(struct icu_chain *chain);
 /** \brief starts iteration over string
     \param iter ICU tokenizer iterator
     \param src8cstr input string (0-terminated)
-    
+
     Call icu_iter_next to iterate over each token.
 */
 YAZ_EXPORT

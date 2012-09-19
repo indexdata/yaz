@@ -185,10 +185,10 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
     if (cd->init_flag)
     {
         cd->my_errno = YAZ_ICONV_UNKNOWN;
-        
+
         if (cd->encoder.init_handle)
             (*cd->encoder.init_handle)(&cd->encoder);
-        
+
         cd->unget_x = 0;
         cd->no_read_x = 0;
 
@@ -198,7 +198,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
             size_t r = (cd->decoder.init_handle)(
                 cd, &cd->decoder,
                 inbuf ? (unsigned char *) *inbuf : 0,
-                inbytesleft ? *inbytesleft : 0, 
+                inbytesleft ? *inbytesleft : 0,
                 &no_read);
             if (r)
             {
@@ -249,7 +249,7 @@ size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
                 break;
             }
             x = (*cd->decoder.read_handle)(
-                cd, &cd->decoder, 
+                cd, &cd->decoder,
                 (unsigned char *) *inbuf, *inbytesleft, &no_read);
             if (no_read == 0)
             {

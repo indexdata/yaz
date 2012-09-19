@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file comstack.c
  * \brief Implements Generic COMSTACK functions
  */
@@ -66,7 +66,7 @@ const char *cs_strerror(COMSTACK h)
 
 void cs_get_host_args(const char *type_and_host, const char **args)
 {
-    
+
     *args = "";
     if (*type_and_host && strncmp(type_and_host, "unix:", 5))
     {
@@ -188,7 +188,7 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
         {
             cs_close (cs);
             cs = 0;
-        }    
+        }
     }
     xfree(connect_host);
     return cs;
@@ -244,13 +244,13 @@ static int cs_read_chunk(const char *buf, int i, int len)
 #endif
                 return 0;
             } else if (yaz_isdigit(buf[i]))
-                chunk_len = chunk_len * 16 + 
+                chunk_len = chunk_len * 16 +
                     (buf[i++] - '0');
             else if (yaz_isupper(buf[i]))
-                chunk_len = chunk_len * 16 + 
+                chunk_len = chunk_len * 16 +
                     (buf[i++] - ('A'-10));
             else if (yaz_islower(buf[i]))
-                chunk_len = chunk_len * 16 + 
+                chunk_len = chunk_len * 16 +
                     (buf[i++] - ('a'-10));
             else
                 break;
@@ -258,7 +258,7 @@ static int cs_read_chunk(const char *buf, int i, int len)
             break;
         if (chunk_len < 0)
             return i;
-        
+
         while (1)
         {
             if (i >= len -1)
@@ -270,7 +270,7 @@ static int cs_read_chunk(const char *buf, int i, int len)
         /* got CRLF */
 #if CHUNK_DEBUG
         printf ("chunk_len=%d\n", chunk_len);
-#endif                      
+#endif
         i += chunk_len;
         if (i >= len-2)
             return 0;
@@ -306,7 +306,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     /* if dealing with HTTP responses - then default
        content length is unlimited (socket close) */
     if (!head_only && !memcmp(buf, "HTTP/", 5))
-        content_len = -1; 
+        content_len = -1;
 
 #if 0
     printf("len = %d\n", len);
@@ -337,7 +337,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 }
                 break;
             }
-            else if (i < len - 20 && 
+            else if (i < len - 20 &&
                      !strncasecmp((const char *) buf+i, "Transfer-Encoding:", 18))
             {
                 i+=18;

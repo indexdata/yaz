@@ -78,7 +78,7 @@ void convert(FILE *inf, yaz_iconv_t cd, int verbose)
                 return ;
             }
             else if (e == YAZ_ICONV_EINVAL) /* incomplete input */
-            { 
+            {
                 size_t i;
                 for (i = 0; i<inbytesleft; i++)
                     inbuf0[i] = inbuf[i];

@@ -64,7 +64,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     if (c->odr_save)
         z_GDU(c->odr_save, &gdu, 0, 0);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
-        
+
     event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
     odr_reset(c->odr_out);
@@ -94,7 +94,7 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
         return zoom_complete;
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     scan = c->tasks->u.scan.scan;
-        
+
     sr = ZOOM_srw_get_pdu(c, Z_SRW_scan_request);
 
     z_query = ZOOM_query_get_Z_Query(scan->query);
@@ -120,10 +120,10 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
 
     sr->u.scan_request->maximumTerms = odr_intdup(
         c->odr_out, ZOOM_options_get_int(scan->options, "number", 10));
-    
+
     sr->u.scan_request->responsePosition = odr_intdup(
         c->odr_out, ZOOM_options_get_int(scan->options, "position", 1));
-    
+
     option_val = ZOOM_options_get(scan->options, "extraArgs");
     yaz_encode_sru_extra(sr, c->odr_out, option_val);
     return send_srw(c, sr);
@@ -197,7 +197,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         return zoom_complete;
     }
     assert(resultset->query);
-        
+
     sr = ZOOM_srw_get_pdu(c, Z_SRW_searchRetrieve_request);
     z_query = ZOOM_query_get_Z_Query(resultset->query);
 
@@ -211,7 +211,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     {
         sr->u.request->query_type = Z_SRW_query_type_pqf;
         sr->u.request->query.pqf =
-            odr_strdup(c->odr_out, 
+            odr_strdup(c->odr_out,
                        ZOOM_query_get_query_string(resultset->query));
     }
     else
@@ -219,7 +219,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
-   
+
     option_val = ZOOM_query_get_sru11(resultset->query);
     if (option_val)
     {
@@ -228,11 +228,11 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     sr->u.request->startRecord = odr_intdup(c->odr_out, *start + 1);
     sr->u.request->maximumRecords = odr_intdup(
-        c->odr_out, (resultset->step > 0 && resultset->step < *count) ? 
+        c->odr_out, (resultset->step > 0 && resultset->step < *count) ?
         resultset->step : *count);
     sr->u.request->recordSchema = resultset->schema;
     sr->u.request->facetList = facet_list;
-    
+
     option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
     if (option_val)
         sr->u.request->recordPacking = odr_strdup(c->odr_out, option_val);
@@ -269,7 +269,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         start = &c->tasks->u.search.start;
         count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
-        elementSetName = c->tasks->u.search.elementSetName;        
+        elementSetName = c->tasks->u.search.elementSetName;
 
         /* Required not for reporting client hit count multiple times into session */
         if (!c->tasks->u.search.recv_search_fired) {
@@ -317,19 +317,19 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             Z_SRW_record *sru_rec;
             Z_SRW_diagnostic *diag = 0;
             int num_diag;
-            
+
             Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
                 odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
 
             /* recordPosition is 1 based */
-            if (res->records[i].recordPosition && 
+            if (res->records[i].recordPosition &&
                 *res->records[i].recordPosition > 0)
                 pos = *res->records[i].recordPosition - 1;
             else
                 pos = *start + i;
 
             sru_rec = &res->records[i];
-            
+
             npr->databaseName = 0;
             npr->which = Z_NamePlusRecord_databaseRecord;
             npr->u.databaseRecord = (Z_External *)
@@ -339,16 +339,16 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                 odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
             npr->u.databaseRecord->indirect_reference = 0;
             npr->u.databaseRecord->which = Z_External_octet;
-            
+
             npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
                 odr_malloc(c->odr_in, sizeof(Odr_oct));
             npr->u.databaseRecord->u.octet_aligned->buf = (unsigned char*)
                 sru_rec->recordData_buf;
-            npr->u.databaseRecord->u.octet_aligned->len = 
-                npr->u.databaseRecord->u.octet_aligned->size = 
+            npr->u.databaseRecord->u.octet_aligned->len =
+                npr->u.databaseRecord->u.octet_aligned->size =
                 sru_rec->recordData_len;
-            
-            if (sru_rec->recordSchema 
+
+            if (sru_rec->recordSchema
                 && !strcmp(sru_rec->recordSchema,
                            "info:srw/schema/1/diagnostics-v1.1"))
             {
@@ -436,7 +436,7 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
         if (!ret && soap_package->which == Z_SOAP_generic)
         {
             Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
-            
+
             ZOOM_options_set(c->options, "sru_version", sr->srw_version);
             ZOOM_options_setl(c->options, "sru_extra_response_data",
                               sr->extraResponseData_buf, sr->extraResponseData_len);
@@ -468,7 +468,7 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
                 strcpy(*addinfo + sz, "");
             ret = -1;
         }
-    }   
+    }
     return ret;
 #else
     return -1;

@@ -101,7 +101,7 @@ void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
     for(i = 0; name[i]; i++)
         sz += strlen(name[i]) + 3 + strlen(value[i]) * 3;
     *path = (char *) odr_malloc(o, sz);
-    
+
     for(i = 0; name[i]; i++)
     {
         size_t ilen;
@@ -190,7 +190,7 @@ char *yaz_uri_val(const char *path, const char *name, ODR o)
         {
             size_t i = 0;
             char *ret;
-            
+
             path = p1 + 1;
             p1 = strchr(path, '&');
             if (!p1)

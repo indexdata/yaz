@@ -459,7 +459,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             return 0;
         assert(ai);
         h->iofile = s;
-        
+
         if (!tcpip_set_blocking(h, h->flags))
             return 0;
     }
@@ -500,7 +500,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-    
+
     return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
 }
 
@@ -582,17 +582,17 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         int res;
         gnutls_global_init();
-        
+
         tcpip_create_cred(h);
 
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-        
+
         /* cast to intermediate size_t to avoid GCC warning. */
-        gnutls_transport_set_ptr(sp->session, 
-                                 (gnutls_transport_ptr_t) 
+        gnutls_transport_set_ptr(sp->session,
+                                 (gnutls_transport_ptr_t)
                                  (size_t) h->iofile);
         res = gnutls_handshake(sp->session);
         if (res < 0)
@@ -645,8 +645,8 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-#if HAVE_GETADDRINFO 
-    struct addrinfo *ai = (struct addrinfo *) address;   
+#if HAVE_GETADDRINFO
+    struct addrinfo *ai = (struct addrinfo *) address;
 #else
     struct sockaddr *addr = (struct sockaddr *)address;
 #endif
@@ -664,7 +664,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 
         tcpip_create_cred(h);
 
-        res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred, 
+        res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
                                                    sp->cert_fname,
                                                    GNUTLS_X509_FMT_PEM);
@@ -723,7 +723,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     TRC(fprintf(stderr, "tcpip_bind\n"));
 #endif
 #ifndef WIN32
-    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*) 
+    if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
         &one, sizeof(one)) < 0)
     {
         h->cerrno = CSYSERR;
@@ -781,7 +781,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #ifdef WIN32
             WSAGetLastError() == WSAEWOULDBLOCK
 #else
-            yaz_errno() == EWOULDBLOCK 
+            yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
             || yaz_errno() == EAGAIN
@@ -894,7 +894,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
-        
+
 #if HAVE_GNUTLS_H
         state->cred_ptr = st->cred_ptr;
         state->session = 0;
@@ -918,7 +918,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 return 0;
             }
             res = gnutls_credentials_set(state->session,
-                                         GNUTLS_CRD_CERTIFICATE, 
+                                         GNUTLS_CRD_CERTIFICATE,
                                          st->cred_ptr->xcred);
             if (res != GNUTLS_E_SUCCESS)
             {
@@ -927,7 +927,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 return 0;
             }
             /* cast to intermediate size_t to avoid GCC warning. */
-            gnutls_transport_set_ptr(state->session, 
+            gnutls_transport_set_ptr(state->session,
                                      (gnutls_transport_ptr_t)
                                      (size_t) cnew->iofile);
         }
@@ -1050,7 +1050,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
         if (res < 0)
         {
-            TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(), 
+            TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(),
                       strerror(yaz_errno())));
 #ifdef WIN32
             if (WSAGetLastError() == WSAEWOULDBLOCK)
@@ -1064,8 +1064,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 return -1;
             }
 #else
-            if (yaz_errno() == EWOULDBLOCK 
-#ifdef EAGAIN   
+            if (yaz_errno() == EWOULDBLOCK
+#ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
                 || yaz_errno() == EAGAIN
 #endif
@@ -1245,7 +1245,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     {
         if ((res =
              send(h->iofile, buf + state->written, size -
-                  state->written, 
+                  state->written,
 #ifdef MSG_NOSIGNAL
                   MSG_NOSIGNAL
 #else
@@ -1257,7 +1257,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 #ifdef WIN32
                 WSAGetLastError() == WSAEWOULDBLOCK
 #else
-                yaz_errno() == EWOULDBLOCK 
+                yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
              || yaz_errno() == EAGAIN
@@ -1314,7 +1314,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
     while (state->towrite > state->written)
     {
 #if HAVE_GNUTLS_H
-        res = gnutls_record_send(state->session, buf + state->written, 
+        res = gnutls_record_send(state->session, buf + state->written,
                                  size - state->written);
         if (res <= 0)
         {
@@ -1323,7 +1323,7 @@ int ssl_put(COMSTACK h, char *buf, int size)
             return -1;
         }
 #else
-        res = SSL_write(state->ssl, buf + state->written, 
+        res = SSL_write(state->ssl, buf + state->written,
                         size - state->written);
         if (res <= 0)
         {
@@ -1377,7 +1377,7 @@ void tcpip_close(COMSTACK h)
 
         if (--(sp->cred_ptr->ref) == 0)
         {
-            TRC(fprintf(stderr, "Removed credentials %p pid=%d\n", 
+            TRC(fprintf(stderr, "Removed credentials %p pid=%d\n",
                         sp->cred_ptr->xcred, getpid()));
             gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
             xfree(sp->cred_ptr);
@@ -1413,27 +1413,27 @@ const char *tcpip_addrstr(COMSTACK h)
     char host[120];
     struct sockaddr_storage addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
-    
+
     if (getpeername(h->iofile, (struct sockaddr *)&addr, &len) < 0)
     {
         h->cerrno = CSYSERR;
         return 0;
     }
-    if (getnameinfo((struct sockaddr *) &addr, len, host, sizeof(host)-1, 
-                    0, 0, 
+    if (getnameinfo((struct sockaddr *) &addr, len, host, sizeof(host)-1,
+                    0, 0,
                     (h->flags & CS_FLAGS_NUMERICHOST) ? NI_NUMERICHOST : 0))
     {
         r = "unknown";
     }
     else
         r = host;
-    
+
 #else
 
     struct sockaddr_in addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
     struct hostent *host;
-    
+
     if (getpeername(h->iofile, (struct sockaddr*) &addr, &len) < 0)
     {
         h->cerrno = CSYSERR;
@@ -1447,7 +1447,7 @@ const char *tcpip_addrstr(COMSTACK h)
             r = (char*) host->h_name;
     }
     if (!r)
-        r = inet_ntoa(addr.sin_addr);        
+        r = inet_ntoa(addr.sin_addr);
 #endif
 
     if (h->protocol == PROTO_HTTP)
@@ -1477,7 +1477,7 @@ const char *tcpip_addrstr(COMSTACK h)
 static int tcpip_set_blocking(COMSTACK p, int flags)
 {
     unsigned long flag;
-    
+
 #ifdef WIN32
     flag = (flags & CS_FLAGS_BLOCKING) ? 0 : 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
@@ -1514,7 +1514,7 @@ void cs_print_session_info(COMSTACK cs)
     if (ssl)
     {
         X509 *server_cert = SSL_get_peer_certificate(ssl);
-        
+
         if (server_cert)
         {
             char *pem_buf;
@@ -1542,7 +1542,7 @@ void *cs_get_ssl(COMSTACK cs)
     if (cs && cs->type == ssl_type)
     {
         struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-        return sp->ssl;  
+        return sp->ssl;
     }
 #endif
     return 0;
@@ -1623,7 +1623,7 @@ static int tcpip_get_connect(COMSTACK h, char **buf, int *bufsize)
     struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
     int r;
 
-    r = tcpip_get(h, &state->connect_response_buf, 
+    r = tcpip_get(h, &state->connect_response_buf,
                   &state->connect_response_len);
     if (r < 1)
         return r;

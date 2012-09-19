@@ -81,7 +81,7 @@ typedef struct request
 
     void *clientData;
     struct request *next;
-    struct request_q *q; 
+    struct request_q *q;
 } request;
 
 typedef struct request_q

@@ -31,21 +31,21 @@ struct icu_casemap
 };
 
 struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
-{    
+{
     struct icu_casemap * casemap
         = (struct icu_casemap *) xmalloc(sizeof(struct icu_casemap));
     casemap->action = action;
 
     switch (casemap->action)
     {
-    case 'l':   
-    case 'L':   
-    case 'u':   
-    case 'U':   
-    case 't':  
-    case 'T':  
-    case 'f':  
-    case 'F':  
+    case 'l':
+    case 'L':
+    case 'u':
+    case 'U':
+    case 't':
+    case 'T':
+    case 'f':
+    case 'F':
         break;
     default:
         icu_casemap_destroy(casemap);
@@ -75,7 +75,7 @@ int icu_casemap_casemap(struct icu_casemap * casemap,
 {
     if (!casemap)
         return 0;
-    
+
     return icu_utf16_casemap(dest16, src16, locale,
                              casemap->action, status);
 }
@@ -88,25 +88,25 @@ static uint32_t icu_utf16_sub(struct icu_buf_utf16 * dest16,
 {
     switch (action)
     {
-    case 'l':    
-    case 'L':    
+    case 'l':
+    case 'L':
         return u_strToLower(dest16->utf16, dest16->utf16_cap,
-                            src16->utf16, src16->utf16_len, 
+                            src16->utf16, src16->utf16_len,
                             locale, status);
-    case 'u':    
-    case 'U':    
+    case 'u':
+    case 'U':
         return u_strToUpper(dest16->utf16, dest16->utf16_cap,
-                            src16->utf16, src16->utf16_len, 
+                            src16->utf16, src16->utf16_len,
                             locale, status);
         break;
-    case 't':    
-    case 'T':    
+    case 't':
+    case 'T':
         return u_strToTitle(dest16->utf16, dest16->utf16_cap,
                             src16->utf16, src16->utf16_len,
                             0, locale, status);
         break;
-    case 'f':    
-    case 'F':    
+    case 'f':
+    case 'F':
         return u_strFoldCase(dest16->utf16, dest16->utf16_cap,
                              src16->utf16, src16->utf16_len,
                              U_FOLD_CASE_DEFAULT, status);
@@ -133,7 +133,7 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
         dest16->utf16_len = 0;
         return U_ZERO_ERROR;
     }
-    
+
     dest16_len = icu_utf16_sub(dest16, src16, locale, action, status);
 
     /* check for buffer overflow, resize and retry */
@@ -154,7 +154,7 @@ int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
             dest16->utf16[0] = (UChar) 0;
         dest16->utf16_len = 0;
     }
-  
+
     return *status;
 }
 

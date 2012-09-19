@@ -22,7 +22,7 @@
 /*
  * The table below should be moved to the ODR structure itself and
  * be an image of the association context: To help
- * map indirect references when they show up. 
+ * map indirect references when they show up.
  */
 static Z_ext_typeent type_table[] =
 {
@@ -85,7 +85,7 @@ Z_ext_typeent *z_ext_getentbyref(const Odr_oid *oid)
     encoding              CHOICE {
       single-ASN1-type   [0] ABSTRACT_SYNTAX.&Type,
       octet-aligned      [1] IMPLICIT OCTET STRING,
-      arbitrary          [2] IMPLICIT BIT STRING 
+      arbitrary          [2] IMPLICIT BIT STRING
       }
     }
   </pre>
@@ -227,7 +227,7 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
                 return 0;
 
             /* Save our decoding ODR members */
-            o_bp = o->bp; 
+            o_bp = o->bp;
             o_buf = o->buf;
             o_size = o->size;
 
@@ -239,16 +239,16 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
             r = (*type->fun)(o, &voidp, 0, 0);
             (*p)->which = type->what;
             (*p)->u.single_ASN1_type = (Odr_any*) voidp;
-                
+
             /* Restore our decoding ODR member */
-            o->bp = o_bp; 
+            o->bp = o_bp;
             o->buf = o_buf;
             o->size = o_size;
 
             return r && odr_sequence_end(o);
         }
         if (zclass == ODR_CONTEXT && tag == 0 && cons == 1)
-        { 
+        {
             /* It's single ASN.1 type, bias the CHOICE. */
             odr_choice_bias(o, type->what);
         }
@@ -311,7 +311,7 @@ Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {    /* SUTRS is a single-ASN.1-type */
         Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
-        
+
         thisext->which = Z_External_sutrs;
         thisext->u.sutrs = sutrs;
         sutrs->buf = (unsigned char *)odr_malloc(o, len);

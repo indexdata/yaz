@@ -79,11 +79,11 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "PQF syntax error\n");
             }
-            else 
+            else
             {
                 int ret = cql_transform_rpn2cql_stream(ct, cql_fputs,
                                                        stdout, rpn);
-                
+
                 if (ret)
                 {
                     const char *addinfo;
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     {
         CQL_parser cp = cql_parser_create();
         int r = 0;
-        
+
         if (query)
         {
             if (verbose)
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
         }
         else
             r = cql_parser_stdio(cp, stdin);
-        
+
         if (r)
             fprintf(stderr, "Syntax error\n");
         else

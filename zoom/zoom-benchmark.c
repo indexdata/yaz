@@ -22,7 +22,7 @@ static char* zoom_events[ZOOM_EVENT_MAX+1];
 static int zoom_progress[ZOOM_EVENT_MAX+1];
 
 /* commando line parameters */
-static struct parameters_t { 
+static struct parameters_t {
     char host[1024];
     char query[1024];
     int progress[4096];
@@ -34,7 +34,7 @@ static struct parameters_t {
     int gnuplot;
 } parameters;
 
-struct  event_line_t 
+struct  event_line_t
 {
     int connection;
     long time_sec;
@@ -50,9 +50,9 @@ struct  event_line_t
 void print_event_line(struct event_line_t *pel)
 {
     printf ("%d\t%ld.%06ld\t%d\t%d\t%s\t%d\t%s\n",
-            pel->connection, pel->time_sec, pel->time_usec, 
+            pel->connection, pel->time_sec, pel->time_usec,
             pel->progress,
-            pel->event, pel->zoom_event, 
+            pel->event, pel->zoom_event,
             pel->error, pel->errmsg);
 }
 
@@ -87,7 +87,7 @@ void  update_events(int *elc, struct event_line_t *els,
     elc[ielc] += 1;
 }
 
-void  print_events(int *elc,  struct event_line_t *els, 
+void  print_events(int *elc,  struct event_line_t *els,
                    int connections){
     int i;
     int j;
@@ -153,10 +153,10 @@ void init_statics(void)
     for (i = 0; i < 4096; i++){
         parameters.progress[i] = 0;
     }
-    
+
 }
- 
-struct time_type 
+
+struct time_type
 {
     struct timeval now;
     struct timeval then;
@@ -207,7 +207,7 @@ void print_option_error(void)
 }
 
 
-void read_params(int argc, char **argv, struct parameters_t *p_parameters){    
+void read_params(int argc, char **argv, struct parameters_t *p_parameters){
     char *arg;
     int ret;
     while ((ret = options("h:q:c:t:p:bgn:", argv, argc, &arg)) != -2)
@@ -247,7 +247,7 @@ void read_params(int argc, char **argv, struct parameters_t *p_parameters){
             print_option_error();
         }
     }
-    
+
     if(0){
         printf("zoom-benchmark\n");
         printf("   host:       %s \n", p_parameters->host);
@@ -324,7 +324,7 @@ int main(int argc, char **argv)
         ZOOM_options_set (o, "preferredRecordSyntax", "usmarc");
         ZOOM_options_set (o, "elementSetName", "F");
     }
-    
+
     time_init(&time);
     /* repeat loop */
     for (k = 0; k < parameters.repeat; k++){
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 
             /* create connection - pass options (they are the same for all) */
             z[i] = ZOOM_connection_create(o);
-            
+
             /* connect and init */
             ZOOM_connection_connect(z[i], parameters.host, 0);
         }
@@ -350,13 +350,13 @@ int main(int argc, char **argv)
             r[i] = ZOOM_connection_search_pqf (z[i], parameters.query);
 
         /* network I/O. pass number of connections and array of connections */
-        while ((i = ZOOM_event (parameters.concurrent, z))){ 
+        while ((i = ZOOM_event (parameters.concurrent, z))){
             int event = ZOOM_connection_last_event(z[i-1]);
             const char *errmsg;
             const char *addinfo;
             int error = 0;
             //int progress = zoom_progress[event];
-            
+
             if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
                 continue;
 
@@ -372,12 +372,12 @@ int main(int argc, char **argv)
             else
                 //parameters.progress[i] = zoom_progress[event];
                 parameters.progress[i] += 1;
-            
+
             update_events(elc, els,
-                          k, i-1, 
-                          time_sec(&time), time_usec(&time), 
+                          k, i-1,
+                          time_sec(&time), time_usec(&time),
                           parameters.progress[i],
-                          event, zoom_events[event], 
+                          event, zoom_events[event],
                           error, errmsg);
         }
 
@@ -409,10 +409,10 @@ int main(int argc, char **argv)
         printf("\n");
         printf("\n");
     }
-    
-    print_table_header();    
+
+    print_table_header();
     print_events(elc,  els, parameters.concurrent);
-    
+
     if (parameters.gnuplot){
         printf("end\n");
         printf("pause -1 \"Hit ENTER to return\"\n");

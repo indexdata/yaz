@@ -17,7 +17,7 @@ int odr_external(ODR o, Odr_external **p, int opt, const char *name)
     Odr_external *pp;
     static Odr_arm arm[] =
     {
-        {ODR_EXPLICIT, ODR_CONTEXT, 0, ODR_EXTERNAL_single, 
+        {ODR_EXPLICIT, ODR_CONTEXT, 0, ODR_EXTERNAL_single,
          (Odr_fun)odr_any, "single"},
         {ODR_IMPLICIT, ODR_CONTEXT, 1, ODR_EXTERNAL_octet,
          (Odr_fun)odr_octetstring, "octet"},
@@ -42,7 +42,7 @@ int odr_visiblestring(ODR o, char **p, int opt, const char *name)
 {
     return odr_implicit_tag(o, odr_cstring, p, ODR_UNIVERSAL,
                             ODR_VISIBLESTRING, opt, name);
-}    
+}
 
 /*
  * a char may not be sufficient to hold a general string, but we'll deal
@@ -52,13 +52,13 @@ int odr_generalstring(ODR o, char **p, int opt, const char *name)
 {
     return odr_implicit_tag(o, odr_iconv_string, p, ODR_UNIVERSAL,
                             ODR_GENERALSTRING,opt, name);
-}    
+}
 
 int odr_graphicstring(ODR o, char **p, int opt, const char *name)
 {
     return odr_implicit_tag(o, odr_cstring, p, ODR_UNIVERSAL,
                         ODR_GRAPHICSTRING, opt, name);
-}    
+}
 
 int odr_generalizedtime(ODR o, char **p, int opt, const char *name)
 {

@@ -84,9 +84,9 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
             {
                 char oid_name_str[OID_STR_MAX];
                 oid_class oclass;
-                const char *oid_name 
+                const char *oid_name
                     = yaz_oid_to_string_buf(ip, &oclass, oid_name_str);
-            
+
                 if (oid_name)
                     wrbuf_printf(w, "OID: %s\n", oid_name);
             }
@@ -103,7 +103,7 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
         {
             printf ("External\n");
             /* we cannot print externals here. Srry */
-        } 
+        }
         else
             wrbuf_printf(w, "? type = %d\n",t->content->which);
         if (t->appliedVariant)

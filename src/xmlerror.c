@@ -44,11 +44,11 @@ static void xml_error_handler(void *ctx, const char *fmt, ...)
 void yaz_log_xml_errors(const char *prefix, int log_level)
 {
     xml_error_log_level = log_level;
-    
+
 #if YAZ_HAVE_XML2
     xmlSetGenericErrorFunc((void *) (prefix ? prefix : "XML"),
                            xml_error_handler);
-#if YAZ_HAVE_XSLT 
+#if YAZ_HAVE_XSLT
     xsltSetGenericErrorFunc((void *) (prefix ? prefix : "XSLT"),
                             xml_error_handler);
 #endif

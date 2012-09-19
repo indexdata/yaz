@@ -87,10 +87,10 @@ static void remove_sets(struct session_handle *sh)
     sh->result_sets = 0;
 }
 
-/** \brief use term value as hit count 
+/** \brief use term value as hit count
     \param s RPN structure
     \return >= 0: search term number or -1: not found
-   
+
     Traverse RPN tree 'in order' and use term value as hit count.
     Only terms  that looks a numeric is used.. Returns -1 if
     no sub tree has a hit count term
@@ -129,7 +129,7 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
 /** \brief gets hit count for numeric terms in RPN queries
     \param q RPN Query
     \return number of hits (random or number for term)
-    
+
     This is just for testing.. A real database of course uses
     the content of a database to establish a value.. In our case, we
     have a way to trigger a certain hit count. Good for testing of
@@ -242,7 +242,7 @@ static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
         Z_FacetTerm *facet_term;
         sprintf(key, "%s%d", facet_name, index);
         yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
-        
+
         facet_term = facet_term_create_cstr(odr, key, freq);
         freq = freq - 10 ;
         facet_field_term_set(odr, facet_field, facet_term, index);
@@ -303,7 +303,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
         rr->errcode = YAZ_BIB1_COMBI_OF_SPECIFIED_DATABASES_UNSUPP;
         return 0;
     }
-    
+
     db = rr->basenames[0];
 
     /* Allow Default, db.* and Slow */
@@ -322,7 +322,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
         return 0;
     }
 
-    new_set = get_set(sh, rr->setname);    
+    new_set = get_set(sh, rr->setname);
     if (new_set)
     {
         if (!rr->replace_set)
@@ -410,7 +410,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
     }
     do_delay(&new_set->search_delay);
     new_set->hits = rr->hits;
-    
+
     return 0;
 }
 
@@ -439,7 +439,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             Z_IOOriginPartToKeep *k = ir->toKeep;
             Z_IOOriginPartNotToKeep *n = ir->notToKeep;
             const char *xml_in_response = 0;
-            
+
             if (k && k->contact)
             {
                 if (k->contact->name)
@@ -453,7 +453,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             {
                 yaz_log(log_level, "Billing info (not shown)");
             }
-            
+
             if (n->resultSetItem)
             {
                 yaz_log(log_level, "resultsetItem");
@@ -469,7 +469,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 {
                     char oid_name_str[OID_STR_MAX];
                     oid_class oclass;
-                    const char *oid_name = 
+                    const char *oid_name =
                         yaz_oid_to_string_buf(r->direct_reference,
                                               &oclass, oid_name_str);
                     if (oid_name)
@@ -480,10 +480,10 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                         if (r->which == Z_External_octet)
                             yaz_log(log_level, "%.*s",
                                     r->u.octet_aligned->len,
-                                    r->u.octet_aligned->buf); 
+                                    r->u.octet_aligned->buf);
                         xml_in_response = "<dummy>x</dummy>";
                     }
-                    if (!oid_oidcmp(r->direct_reference, 
+                    if (!oid_oidcmp(r->direct_reference,
                                     yaz_oid_general_isoill_1))
                     {
                         yaz_log(log_level, "Decode ItemRequest begin");
@@ -492,7 +492,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                             odr_setbuf(rr->decode,
                                        (char *) r->u.single_ASN1_type->buf,
                                        r->u.single_ASN1_type->len, 0);
-                            
+
                             if (!ill_ItemRequest(rr->decode, &item_req, 0, 0))
                             {
                                 yaz_log(log_level,
@@ -515,7 +515,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                             odr_setbuf(rr->decode,
                                        (char*) r->u.single_ASN1_type->buf,
                                        r->u.single_ASN1_type->len, 0);
-                            
+
                             if (!ill_APDU(rr->decode, &ill_apdu, 0, 0))
                             {
                                 yaz_log(log_level,
@@ -595,7 +595,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                                          strlen(xml_in_response));
                 else
                     targetPart->itemRequest = 0;
-                    
+
                 targetPart->statusOrErrorReport = 0;
                 targetPart->auxiliaryStatus = 0;
             }
@@ -610,7 +610,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             Z_IUUpdateEsRequest *esRequest = up->u.esRequest;
             Z_IUOriginPartToKeep *toKeep = esRequest->toKeep;
             Z_IUSuppliedRecords *notToKeep = esRequest->notToKeep;
-            
+
             yaz_log(log_level, "action");
             if (toKeep->action)
             {
@@ -701,7 +701,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 targetPart->num_globalDiagnostics = 0;
                 targetPart->globalDiagnostics = (Z_DiagRec **) odr_nullval();
                 targetPart->num_taskPackageRecords = 1;
-                targetPart->taskPackageRecords = 
+                targetPart->taskPackageRecords =
                     (Z_IUTaskPackageRecordStructure **)
                     odr_malloc(rr->stream,
                                sizeof(Z_IUTaskPackageRecordStructure *));
@@ -709,15 +709,15 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                     (Z_IUTaskPackageRecordStructure *)
                     odr_malloc(rr->stream,
                                sizeof(Z_IUTaskPackageRecordStructure));
-                
+
                 targetPart->taskPackageRecords[0]->which =
                     Z_IUTaskPackageRecordStructure_record;
-                targetPart->taskPackageRecords[0]->u.record = 
+                targetPart->taskPackageRecords[0]->u.record =
                     z_ext_record_sutrs(rr->stream, "test", 4);
-                targetPart->taskPackageRecords[0]->correlationInfo = 0; 
+                targetPart->taskPackageRecords[0]->correlationInfo = 0;
                 targetPart->taskPackageRecords[0]->recordStatus =
                     odr_intdup(rr->stream,
-                               Z_IUTaskPackageRecordStructure_success);  
+                               Z_IUTaskPackageRecordStructure_success);
                 targetPart->taskPackageRecords[0]->num_supplementalDiagnostics
                     = 0;
 
@@ -733,7 +733,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                     if (rec->direct_reference)
                     {
                         char oid_name_str[OID_STR_MAX];
-                        const char *oid_name 
+                        const char *oid_name
                             = oid_name = yaz_oid_to_string_buf(
                                 rec->direct_reference, 0,
                                 oid_name_str);
@@ -793,7 +793,7 @@ int ztest_sort(void *handle, bend_sort_rr *rr)
 int ztest_present(void *handle, bend_present_rr *rr)
 {
     struct session_handle *sh = (struct session_handle*) handle;
-    struct result_set *set = get_set(sh, rr->setname);    
+    struct result_set *set = get_set(sh, rr->setname);
 
     if (!set)
     {
@@ -811,7 +811,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     struct session_handle *sh = (struct session_handle*) handle;
     char *cp;
     const Odr_oid *oid = r->request_format;
-    struct result_set *set = get_set(sh, r->setname);    
+    struct result_set *set = get_set(sh, r->setname);
 
     if (!set)
     {
@@ -861,7 +861,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     {
         /* this section returns a small record */
         char buf[100];
-        
+
         sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
 
         r->len = strlen(buf);
@@ -917,7 +917,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             r->len = strlen(cp);
             r->record = cp;
         }
-        else 
+        else
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             r->surrogate_flag = 1;

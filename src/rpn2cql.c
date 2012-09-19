@@ -69,27 +69,27 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                 switch (*relation)
                 {
                     /* Unsure on whether this is the relation attribute constants? */
-                case Z_ProximityOperator_Prox_lessThan: 
+                case Z_ProximityOperator_Prox_lessThan:
                     return "<";
-                case Z_ProximityOperator_Prox_lessThanOrEqual: 
-                    return "<="; 
-                case Z_ProximityOperator_Prox_equal: 
-                    return "="; 
-                case Z_ProximityOperator_Prox_greaterThanOrEqual: 
-                    return ">="; 
-                case Z_ProximityOperator_Prox_greaterThan: 
-                    return ">"; 
-                case Z_ProximityOperator_Prox_notEqual: 
-                    return "<>"; 
-                case 100: 
+                case Z_ProximityOperator_Prox_lessThanOrEqual:
+                    return "<=";
+                case Z_ProximityOperator_Prox_equal:
+                    return "=";
+                case Z_ProximityOperator_Prox_greaterThanOrEqual:
+                    return ">=";
+                case Z_ProximityOperator_Prox_greaterThan:
+                    return ">";
+                case Z_ProximityOperator_Prox_notEqual:
+                    return "<>";
+                case 100:
                     /* phonetic is not supported in CQL */
-                    return 0; 
-                case 101: 
+                    return 0;
+                case 101:
                     /* stem is not supported in CQL */
-                    return 0; 
-                case 102: 
+                    return 0;
+                case 102:
                     /* relevance is supported in CQL, but not implemented yet */
-                    return 0; 
+                    return 0;
                 default:
                     /* Invalid relation */
                     return 0;
@@ -117,7 +117,7 @@ static int rpn2cql_attr(cql_transform_t ct,
         index = lookup_index_from_string_attr(attributes);
 
     /* Attempt to fix bug #2978: Look for a relation attribute */
-    if (!relation) 
+    if (!relation)
         relation = lookup_relation_index_from_attr(attributes);
 
     if (!index)

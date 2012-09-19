@@ -16,7 +16,7 @@
 
 #include <yaz/cql.h>
 
-static void pr_n(const char *buf, 
+static void pr_n(const char *buf,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data, int n)
 {
@@ -53,7 +53,7 @@ static void pr_cdata(const char *buf,
         src++;
     }
 }
-                    
+
 static void prefixes(struct cql_node *cn,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data, int level)
@@ -86,7 +86,7 @@ static void prefixes(struct cql_node *cn,
     if (head)
         pr_n("</prefixes>\n", pr, client_data, level);
 }
-                     
+
 static void cql_to_xml_mod(struct cql_node *m,
                            void (*pr)(const char *buf, void *client_data),
                            void *client_data, int level)
@@ -118,7 +118,7 @@ static void cql_to_xml_mod(struct cql_node *m,
     }
 }
 
-static void cql_sort_to_xml(struct cql_node *cn, 
+static void cql_sort_to_xml(struct cql_node *cn,
                          void (*pr)(const char *buf, void *client_data),
                             void *client_data, int level)
 {
@@ -128,7 +128,7 @@ static void cql_sort_to_xml(struct cql_node *cn,
         for (; cn; cn = cn->u.sort.next)
         {
             pr_n("<key>\n", pr, client_data, level+2);
-            
+
             if (cn->u.sort.index)
             {
                 pr_n("<index>", pr, client_data, level+4);
@@ -236,7 +236,7 @@ static void cql_to_xml_r(struct cql_node *cn,
     }
 }
 
-void cql_to_xml(struct cql_node *cn, 
+void cql_to_xml(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {

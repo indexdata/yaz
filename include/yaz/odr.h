@@ -312,7 +312,7 @@ typedef struct Odr_external
     union
     {
         Odr_any  *single_ASN1_type;
-        Odr_oct  *octet_aligned; 
+        Odr_oct  *octet_aligned;
         Odr_bitmask *arbitrary;      /* we aren't really equipped for this*/
     } u;
 } Odr_external;
@@ -329,7 +329,7 @@ YAZ_EXPORT int odr_generalizedtime(ODR o, char **p, int opt,
 YAZ_EXPORT int odr_set_charset(ODR o, const char *to, const char *from);
 
 YAZ_EXPORT void odr_set_stream(ODR o,  void *handle,
-                               void (*stream_write)(ODR o, 
+                               void (*stream_write)(ODR o,
                                                     void *handle,
                                                     int type,
                                                     const char *buf,

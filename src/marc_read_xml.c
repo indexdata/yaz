@@ -59,7 +59,7 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                 }
                 if (ptr_code->type == XML_TEXT_NODE)
                 {
-                    ctrl_data_len = 
+                    ctrl_data_len =
                         strlen((const char *)ptr_code->content);
                 }
                 else
@@ -276,7 +276,7 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                 /* note that indstr[0] is unused so we use indstr[1..] */
                 yaz_marc_add_datafield_xml(mt, ptr_tag,
                                            indstr+1, strlen(indstr+1));
-                
+
                 if (yaz_marc_read_xml_subfields(mt, ptr->children))
                     return -1;
             }
@@ -365,7 +365,7 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
 {
     int format = 0;
     yaz_marc_reset(mt);
-    
+
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
         {
@@ -396,7 +396,7 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     ptr = ptr->children;
     if (yaz_marc_read_xml_leader(mt, &ptr))
         return -1;
-    
+
     switch (format)
     {
     case YAZ_MARC_MARCXML:

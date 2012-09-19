@@ -50,7 +50,7 @@ YAZ_EXPORT int yaz_is_abspath(const char *path);
     \param comp upon pointer to component (if component is found)
     \retval 0 no component found (and no more componennts)
     \retval >0 length of component (length of *comp)
-    
+
     A filepath has components separted by colon. For example
     /usr/lib/modules:c:/my:/:lib
     which has these components
@@ -59,7 +59,7 @@ YAZ_EXPORT int yaz_is_abspath(const char *path);
 YAZ_EXPORT size_t yaz_filepath_comp(const char **path_p, const char **comp);
 
 
-/** \brief resolve file on path 
+/** \brief resolve file on path
     \param fname "short" filename (without path)
     \param path the path (dir1:dir2,..) - ala Unix
     \param base can be added to relative paths (NULL for no append)
@@ -72,7 +72,7 @@ YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
                                       const char *base, char *fullpath);
 
 
-/** \brief opens first file in path in path 
+/** \brief opens first file in path in path
     \param fname "short" filename (without path)
     \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix
@@ -82,7 +82,7 @@ YAZ_EXPORT char *yaz_filepath_resolve(const char *fname, const char *path,
 YAZ_EXPORT FILE *yaz_fopen(const char *path, const char *fname,
                            const char *mode, const char *base);
 
-/** \brief opens first file in path in path 
+/** \brief opens first file in path in path
     \param fname "short" filename (without path)
     \param mode mode as in fopen(3)
     \param path the path (dir1:dir2,..) - ala Unix

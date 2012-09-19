@@ -66,7 +66,7 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         *no_read = data->comb_no_read[data->comb_offset];
         x = data->comb_x[data->comb_offset];
 
-        /* special case for double-diacritic combining characters, 
+        /* special case for double-diacritic combining characters,
            INVERTED BREVE and DOUBLE TILDE.
            We'll increment the no_read counter by 1, since we want to skip over
            the processing of the closing ligature character

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file 
+ * \file
  * \brief JSON test
  */
 #if HAVE_CONFIG_H
@@ -15,7 +15,7 @@
 #include <string.h>
 #include <yaz/log.h>
 
-static int expect(json_parser_t p, const char *input, 
+static int expect(json_parser_t p, const char *input,
                   const char *output)
 {
     int ret = 0;
@@ -84,7 +84,7 @@ static void tst1(void)
     YAZ_CHECK(expect(p, "{}  extra", 0));
 
     YAZ_CHECK(expect(p, "{\"a\":[1,2,3}", 0));
-    
+
     YAZ_CHECK(expect(p, "{\"a\":[1,2,", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":\"wa\"}", "{\"k\":\"wa\"}"));
@@ -150,7 +150,7 @@ static void tst2(void)
         return;
 
     YAZ_CHECK_EQ(json_count_children(n), 3);
-    
+
     n1 = json_get_object(n, "a");
     YAZ_CHECK(n1 && n1->type == json_node_number && n1->u.number == 1.0);
     YAZ_CHECK_EQ(json_count_children(n1), 0);

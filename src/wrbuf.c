@@ -96,7 +96,7 @@ void wrbuf_vp_puts(const char *buf, void *client_data)
     wrbuf_puts(b, buf);
 }
 
-void wrbuf_puts_replace_char(WRBUF b, const char *buf, 
+void wrbuf_puts_replace_char(WRBUF b, const char *buf,
                             const char from, const char to)
 {
     while(*buf)

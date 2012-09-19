@@ -28,7 +28,7 @@
 
 struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
 {
-    struct icu_buf_utf8 * buf8 
+    struct icu_buf_utf8 * buf8
         = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
 
     buf8->utf8 = 0;
@@ -66,19 +66,19 @@ struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
         if (0 == buf8->utf8)
             buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         else
-            buf8->utf8 
+            buf8->utf8
                 = (uint8_t *) xrealloc(buf8->utf8, sizeof(uint8_t) * capacity);
-        
+
         buf8->utf8_cap = capacity;
-    } 
+    }
     else
-    { 
+    {
         xfree(buf8->utf8);
         buf8->utf8 = 0;
         buf8->utf8_len = 0;
         buf8->utf8_cap = 0;
     }
-    
+
     return buf8;
 }
 
@@ -111,11 +111,11 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
 
     *status = U_ZERO_ERROR;
     src8cstr_len = strlen(src8cstr);
-  
+
     u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
                   &utf16_len,
                   src8cstr, src8cstr_len, status);
-  
+
     /* check for buffer overflow, resize and retry */
     if (*status == U_BUFFER_OVERFLOW_ERROR)
     {
@@ -128,9 +128,9 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
 
     if (U_SUCCESS(*status) && utf16_len <= dest16->utf16_cap)
         dest16->utf16_len = utf16_len;
-    else 
+    else
         icu_buf_utf16_clear(dest16);
-  
+
     return *status;
 }
 
@@ -139,11 +139,11 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
                              UErrorCode * status)
 {
     int32_t utf8_len = 0;
-  
+
     u_strToUTF8((char *) dest8->utf8, dest8->utf8_cap,
                 &utf8_len,
                 src16->utf16, src16->utf16_len, status);
-  
+
     /* check for buffer overflow, resize and retry */
     if (*status == U_BUFFER_OVERFLOW_ERROR)
     {
@@ -156,9 +156,9 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
 
     if (U_SUCCESS(*status) && utf8_len <= dest8->utf8_cap)
         dest8->utf8_len = utf8_len;
-    else 
+    else
         icu_buf_utf8_clear(dest8);
-  
+
     return *status;
 }
 

@@ -39,7 +39,7 @@ int compare_solr_req(ODR odr, Z_SRW_PDU *sr,
     {
         int len = 0;
         char *buf = odr_getbuf(odr, &len, 0);
-        
+
         if (buf)
         {
             if (len == strlen(expect) && !memcmp(buf, expect, len))
@@ -64,7 +64,7 @@ void tst_encoding(void)
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
-        
+
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,
                       "GET Default/select? HTTP/1.1\r\n"
@@ -87,7 +87,7 @@ void tst_encoding(void)
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
-        
+
         sr->u.request->query_type = Z_SRW_query_type_cql;
         sr->u.request->query.cql = "title:solr";
         sr->u.request->startRecord = odr_intdup(odr, 3);
@@ -105,7 +105,7 @@ void tst_encoding(void)
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
-        
+
         sr->u.request->query_type = Z_SRW_query_type_cql;
         sr->u.request->query.cql = "title:solr";
         sr->u.request->startRecord = odr_intdup(odr, 3);
@@ -137,7 +137,7 @@ int check_response(ODR o, const char *content, Z_SRW_searchRetrieveResponse **p)
     Z_SRW_PDU *sr_p;
     char *http_response = odr_malloc(o, strlen(content) + 300);
 
-    strcpy(http_response, 
+    strcpy(http_response,
            "HTTP/1.1 200 OK\r\n"
            "Last-Modified: Wed, 13 Apr 2011 08:30:59 GMT\r\n"
            "ETag: \"MjcyMWE5M2JiNDgwMDAwMFNvbHI=\"\r\n"
@@ -167,7 +167,7 @@ void tst_decoding(void)
     Z_SRW_searchRetrieveResponse *response;
 
     YAZ_CHECK(check_response(
-                  odr, 
+                  odr,
                   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                   "<response>\n"
                   "<lst name=\"responseHeader\"><int name=\"status\">0</int>"
@@ -188,7 +188,7 @@ void tst_decoding(void)
 
     YAZ_CHECK(
         check_response(
-            odr, 
+            odr,
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             "<response><lst name=\"responseHeader\">"
             "<int name=\"status\">0</int><int name=\"QTime\">2</int>"
@@ -269,7 +269,7 @@ void tst_decoding(void)
             "</doc>";
 
         Z_SRW_record *record = response->records;
-        
+
         YAZ_CHECK(record->recordData_len == strlen(doc) &&
                   !memcmp(record->recordData_buf, doc, record->recordData_len));
     }

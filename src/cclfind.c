@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file cclfind.c
  * \brief Implements parsing of a CCL FIND query.
  *
@@ -61,7 +61,7 @@ static int qual_val_type(ccl_qualifier_t *qa, int type, int value,
 
 /**
  * strxcat: concatenate strings.
- * n:      Null-terminated Destination string 
+ * n:      Null-terminated Destination string
  * src:    Source string to be appended (not null-terminated)
  * len:    Length of source string.
  */
@@ -171,7 +171,7 @@ static struct ccl_rpn_attr *add_attr_node(struct ccl_rpn_node *p,
                                            const char *set, int type)
 {
     struct ccl_rpn_attr *n;
-    
+
     n = (struct ccl_rpn_attr *)xmalloc(sizeof(*n));
     ccl_assert(n);
     if (set)
@@ -181,7 +181,7 @@ static struct ccl_rpn_attr *add_attr_node(struct ccl_rpn_node *p,
     n->type = type;
     n->next = p->u.t.attr_list;
     p->u.t.attr_list = n;
-    
+
     return n;
 }
 
@@ -313,14 +313,14 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
                 *z3958_trunc = 2;
                 strcat(dst_term, "\\");
             }
-            strxcat(dst_term, src_str + j, 1);                    
+            strxcat(dst_term, src_str + j, 1);
         }
     }
     return 0;
 }
 
 /**
- * search_term: Parse CCL search term. 
+ * search_term: Parse CCL search term.
  * cclp:   CCL Parser
  * qa:     Qualifier attributes already applied.
  * term_list: tokens we accept as terms in context
@@ -373,7 +373,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
-        
+
         /* ignore commas when dealing with and-lists .. */
         if (and_list && lookahead && lookahead->kind == CCL_TOK_COMMA)
         {
@@ -402,7 +402,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
         if (len == 0)
             break;      /* no more terms . stop . */
-                
+
         /* create the term node, but wait a moment before adding the term */
         p = ccl_rpn_node_create(CCL_RPN_TERM);
         p->u.t.attr_list = NULL;
@@ -418,7 +418,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         for (i=0; qa && qa[i]; i++)
         {
             struct ccl_rpn_attr *attr;
-            
+
             for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
                 switch(attr->kind)
                 {
@@ -464,7 +464,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         }
         attset = 0;
         if (structure_value == -1 && (
-                auto_group || 
+                auto_group ||
                 qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
             )
         {
@@ -613,7 +613,7 @@ static struct ccl_rpn_node *search_terms2(CCL_parser cclp,
         static int list[] = {
             CCL_TOK_TERM, CCL_TOK_COMMA,CCL_TOK_EQ,
             CCL_TOK_REL, CCL_TOK_SET, -1};
-        
+
         return search_term_x(cclp, qa, list, 1);
     }
 }
@@ -664,7 +664,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                 if (cclp->look_token->name[i] == '-')
                     break;
             }
-            
+
             if (cclp->look_token->len > 1 && i == 0)
             {   /*  -xx*/
                 struct ccl_token *ntoken = ccl_token_add(cclp->look_token);
@@ -706,7 +706,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                      cclp->look_token->next->kind == CCL_TOK_TERM &&
                      cclp->look_token->next->len > 1 &&
                      cclp->look_token->next->name[0] == '-')
-                     
+
             {   /* xx -yy */
                 /* we _know_ that xx does not have - in it */
                 struct ccl_token *ntoken = ccl_token_add(cclp->look_token);
@@ -716,11 +716,11 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                 ntoken->len = 1;
 
                 (ntoken->next->name)++;        /* adjust yy */
-                (ntoken->next->len)--; 
+                (ntoken->next->len)--;
             }
         }
     }
-        
+
     if (rel == 3 &&
         KIND == CCL_TOK_TERM &&
         cclp->look_token->next && cclp->look_token->next->len == 1 &&
@@ -733,7 +733,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         if (KIND == CCL_TOK_TERM)  /* = term - term  ? */
         {
             struct ccl_rpn_node *p2;
-            
+
             if (!(p2 = search_term(cclp, ap)))
             {
                 ccl_rpn_delete(p1);
@@ -777,7 +777,7 @@ static
 struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
 {
     char *attset;
-    
+
     if (qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_ORDER, &attset)
         || qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, &attset))
         return qualifiers_order(cclp, ap, attset);
@@ -793,13 +793,13 @@ struct ccl_rpn_node *qualifier_relation(CCL_parser cclp, ccl_qualifier_t *ap)
 }
 
 /**
- * qualifier_list: Parse CCL qualifiers and search terms. 
+ * qualifier_list: Parse CCL qualifiers and search terms.
  * cclp:   CCL Parser
  * la:     Token pointer to RELATION token.
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
-static struct ccl_rpn_node *qualifier_list(CCL_parser cclp, 
+static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
                                            struct ccl_token *la,
                                            ccl_qualifier_t *qa)
 {
@@ -849,7 +849,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             {
                 struct ccl_rpn_node *node_sub;
                 cclp->look_token = la;
-                
+
                 node_sub = qualifier_relation(cclp, ap);
                 if (!node_sub)
                 {
@@ -859,7 +859,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
                 }
                 if (node)
                 {
-                    struct ccl_rpn_node *node_this = 
+                    struct ccl_rpn_node *node_this =
                         ccl_rpn_node_create(CCL_RPN_OR);
                     node_this->u.p[0] = node;
                     node_this->u.p[1] = node_sub;
@@ -912,17 +912,17 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             if (qa)
             {
                 ccl_qualifier_t *qa0 = qa;
-                
+
                 while (*qa0)
                     ap[i++] = *qa0++;
             }
             ap[i] = NULL;
-            
+
             if (!found)
                 break;
-            
+
             cclp->look_token = lookahead;
-            
+
             node_sub = qualifier_relation(cclp, ap);
             if (!node_sub)
             {
@@ -931,7 +931,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             }
             if (node)
             {
-                struct ccl_rpn_node *node_this = 
+                struct ccl_rpn_node *node_this =
                     ccl_rpn_node_create(CCL_RPN_OR);
                 node_this->u.p[0] = node;
                 node_this->u.p[1] = node_sub;
@@ -1073,7 +1073,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
             }
             if (node)
             {
-                struct ccl_rpn_node *node_this = 
+                struct ccl_rpn_node *node_this =
                     ccl_rpn_node_create(CCL_RPN_OR);
                 node_this->u.p[0] = node;
                 node_this->u.p[1] = node_sub;
@@ -1161,7 +1161,7 @@ struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str)
     return p;
 }
 
-struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp, 
+struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
                                            struct ccl_token *list)
 {
     struct ccl_rpn_node *p;

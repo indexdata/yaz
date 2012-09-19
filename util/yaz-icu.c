@@ -19,7 +19,7 @@
 
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
-#include <unicode/ucol.h> 
+#include <unicode/ucol.h>
 #include <unicode/ubrk.h>
 #include <unicode/utrans.h>
 #include <unicode/uclean.h>
@@ -28,7 +28,7 @@
 #include <yaz/wrbuf.h>
 
 /* commando line and config parameters */
-struct config_t { 
+struct config_t {
     char conffile[1024];
     char print[1024];
     int xmloutput;
@@ -37,9 +37,9 @@ struct config_t {
     FILE * infile;
     FILE * outfile;
 };
-  
+
 void print_option_error(const struct config_t *p_config)
-{  
+{
     fprintf(stderr, "yaz-icu [options] [infile]\n"
             "Options:\n"
             "   -c file         XML configuration\n"
@@ -65,10 +65,10 @@ void print_option_error(const struct config_t *p_config)
 }
 
 void read_params(int argc, char **argv, struct config_t *p_config)
-{    
+{
     char *arg;
     int ret;
-    
+
     /* set default parameters */
     p_config->conffile[0] = 0;
     p_config->print[0] = 0;
@@ -77,9 +77,9 @@ void read_params(int argc, char **argv, struct config_t *p_config)
     p_config->chain = 0;
     p_config->infile = 0;
     p_config->outfile = stdout;
-    
+
     /* set up command line parameters */
-    
+
     while ((ret = options("c:p:xs", argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -133,21 +133,21 @@ static void print_icu_converters(const struct config_t *p_config)
         fprintf(p_config->outfile, "<converters count=\"%d\" default=\"%s\">\n",
                 count, ucnv_getDefaultName());
     else
-    {    
+    {
         fprintf(p_config->outfile, "Available ICU converters: %d\n", count);
-        fprintf(p_config->outfile, "Default ICU Converter is: '%s'\n", 
+        fprintf(p_config->outfile, "Default ICU Converter is: '%s'\n",
                 ucnv_getDefaultName());
     }
-    
+
     for (i = 0; i < count; i++)
     {
         if (p_config->xmloutput)
-            fprintf(p_config->outfile, "<converter id=\"%s\"/>\n", 
+            fprintf(p_config->outfile, "<converter id=\"%s\"/>\n",
                     ucnv_getAvailableName(i));
-        else     
+        else
             fprintf(p_config->outfile, "%s\n", ucnv_getAvailableName(i));
     }
-    
+
     if (p_config->xmloutput)
         fprintf(p_config->outfile, "</converters>\n");
     else
@@ -164,7 +164,7 @@ static void print_icu_transliterators(const struct config_t *p_config)
 
     if (p_config->xmloutput)
         fprintf(p_config->outfile, "<transliterators count=\"%d\">\n",  count);
-    else 
+    else
         fprintf(p_config->outfile, "Available ICU transliterators: %d\n", count);
 
     while ((name = uenum_next(en, &length, &status)))
@@ -219,10 +219,10 @@ static void print_icu_transliterators(const struct config_t *p_config)
                 "see http://userguide.icu-project.org/transforms/general\n"
                 "    http://www.unicode.org/reports/tr44/\n"
             );
-        
-        
+
+
         fprintf(p_config->outfile, "\n\n");
-        
+
     }
 }
 
@@ -231,7 +231,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     int32_t count;
     int32_t i;
     UErrorCode status = U_ZERO_ERROR;
-    
+
     UChar keyword[64];
     int32_t keyword_len = 0;
     char keyword_str[128];
@@ -271,7 +271,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
 
     if (p_config->xmloutput)
     {
-        fprintf(p_config->outfile, "<locales count=\"%d\" default=\"%s\" collations=\"%d\">\n", 
+        fprintf(p_config->outfile, "<locales count=\"%d\" default=\"%s\" collations=\"%d\">\n",
                 count, uloc_getDefault(), ucol_countAvailable());
     }
     else
@@ -279,23 +279,23 @@ static void print_icu_xml_locales(const struct config_t *p_config)
         fprintf(p_config->outfile, "Available ICU locales: %d\n", count);
         fprintf(p_config->outfile, "Default locale is: %s\n",  uloc_getDefault());
     }
-  
-    for (i = 0; i < count; i++) 
+
+    for (i = 0; i < count; i++)
     {
 
-        keyword_len 
-            = uloc_getDisplayKeyword(uloc_getAvailable(i), "en", 
-                                     keyword, 64, 
+        keyword_len
+            = uloc_getDisplayKeyword(uloc_getAvailable(i), "en",
+                                     keyword, 64,
                                      &status);
 
         u_strToUTF8(keyword_str, 128, &keyword_str_len,
                     keyword, keyword_len,
                     &status);
-    
-    
-        language_len 
-            = uloc_getDisplayLanguage(uloc_getAvailable(i), "en", 
-                                      language, 64, 
+
+
+        language_len
+            = uloc_getDisplayLanguage(uloc_getAvailable(i), "en",
+                                      language, 64,
                                       &status);
 
         u_strToUTF8(lang_str, 128, &lang_str_len,
@@ -303,45 +303,45 @@ static void print_icu_xml_locales(const struct config_t *p_config)
                     &status);
 
 
-        script_len 
-            = uloc_getDisplayScript(uloc_getAvailable(i), "en", 
-                                    script, 64, 
+        script_len
+            = uloc_getDisplayScript(uloc_getAvailable(i), "en",
+                                    script, 64,
                                     &status);
 
         u_strToUTF8(script_str, 128, &script_str_len,
                     script, script_len,
                     &status);
 
-        location_len 
-            = uloc_getDisplayCountry(uloc_getAvailable(i), "en", 
-                                     location, 64, 
+        location_len
+            = uloc_getDisplayCountry(uloc_getAvailable(i), "en",
+                                     location, 64,
                                      &status);
 
         u_strToUTF8(location_str, 128, &location_str_len,
                     location, location_len,
                     &status);
 
-        variant_len 
-            = uloc_getDisplayVariant(uloc_getAvailable(i), "en", 
-                                     variant, 64, 
+        variant_len
+            = uloc_getDisplayVariant(uloc_getAvailable(i), "en",
+                                     variant, 64,
                                      &status);
 
         u_strToUTF8(variant_str, 128, &variant_str_len,
                     variant, variant_len,
                     &status);
 
-        name_len 
-            = uloc_getDisplayName(uloc_getAvailable(i), "en", 
-                                  name, 64, 
+        name_len
+            = uloc_getDisplayName(uloc_getAvailable(i), "en",
+                                  name, 64,
                                   &status);
 
         u_strToUTF8(name_str, 128, &name_str_len,
                     name, name_len,
                     &status);
 
-        localname_len 
-            = uloc_getDisplayName(uloc_getAvailable(i), uloc_getAvailable(i), 
-                                  localname, 64, 
+        localname_len
+            = uloc_getDisplayName(uloc_getAvailable(i), uloc_getAvailable(i),
+                                  localname, 64,
                                   &status);
 
         u_strToUTF8(localname_str, 128, &localname_str_len,
@@ -351,7 +351,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
 
         if (p_config->xmloutput)
         {
-            fprintf(p_config->outfile, "<locale id=\"%s\"", uloc_getAvailable(i)); 
+            fprintf(p_config->outfile, "<locale id=\"%s\"", uloc_getAvailable(i));
             if (strlen(lang_str))
                 fprintf(p_config->outfile, " language=\"%s\"", lang_str);
             if (strlen(script_str))
@@ -367,11 +367,11 @@ static void print_icu_xml_locales(const struct config_t *p_config)
             fprintf(p_config->outfile, ">");
             if (strlen(localname_str))
                 fprintf(p_config->outfile, "%s", localname_str);
-            fprintf(p_config->outfile, "</locale>\n"); 
+            fprintf(p_config->outfile, "</locale>\n");
         }
         else if (1 == p_config->xmloutput)
         {
-            fprintf(p_config->outfile, "%s", uloc_getAvailable(i)); 
+            fprintf(p_config->outfile, "%s", uloc_getAvailable(i));
             fprintf(p_config->outfile, " | ");
             if (strlen(name_str))
                 fprintf(p_config->outfile, "%s", name_str);
@@ -426,17 +426,17 @@ static void process_text_file(struct config_t *p_config)
 {
     char *line = 0;
     char linebuf[1024];
- 
-    xmlDoc *doc = xmlParseFile(p_config->conffile);  
+
+    xmlDoc *doc = xmlParseFile(p_config->conffile);
     xmlNode *xml_node = xmlDocGetRootElement(doc);
 
-    long unsigned int token_count = 0;    
-    long unsigned int line_count = 0;    
-    
+    long unsigned int token_count = 0;
+    long unsigned int line_count = 0;
+
     UErrorCode status = U_ZERO_ERROR;
-    
+
     if (!xml_node)
-    {   
+    {
         printf("Could not parse XML config file '%s' \n",
                 p_config->conffile);
         exit(1);
@@ -445,7 +445,7 @@ static void process_text_file(struct config_t *p_config)
     p_config->chain = icu_chain_xml_config(xml_node, 1, &status);
 
     if (!p_config->chain || !U_SUCCESS(status))
-    {   
+    {
         printf("Could not set up ICU chain from config file '%s' \n",
                 p_config->conffile);
         if (!U_SUCCESS(status))
@@ -458,7 +458,7 @@ static void process_text_file(struct config_t *p_config)
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 "<icu>\n"
                 "<tokens>\n");
-    
+
     /* read input lines for processing */
     while ((line=fgets(linebuf, sizeof(linebuf)-1, p_config->infile)))
     {
@@ -477,9 +477,9 @@ static void process_text_file(struct config_t *p_config)
                 wrbuf_rewind(sw);
                 wrbuf_puts_escaped(sw, sortkey);
                 token_count++;
-                if (p_config->xmloutput)                    
+                if (p_config->xmloutput)
                 {
-                    fprintf(p_config->outfile, 
+                    fprintf(p_config->outfile,
                             "<token id=\"%lu\" line=\"%lu\"",
                             token_count, line_count);
 
@@ -492,7 +492,7 @@ static void process_text_file(struct config_t *p_config)
                     wrbuf_xmlputs(cdata, icu_chain_token_display(p_config->chain));
                     fprintf(p_config->outfile, " display=\"%s\"",
                             wrbuf_cstr(cdata));
-                    
+
                     if (p_config->sortoutput)
                     {
                         wrbuf_rewind(cdata);
@@ -525,7 +525,7 @@ static void process_text_file(struct config_t *p_config)
         fprintf(p_config->outfile,
                 "</tokens>\n"
                 "</icu>\n");
-    
+
     icu_chain_destroy(p_config->chain);
     xmlFreeDoc(doc);
     if (line)
@@ -535,7 +535,7 @@ static void process_text_file(struct config_t *p_config)
 #endif /* YAZ_HAVE_ICU */
 
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
 #if YAZ_HAVE_ICU
     struct config_t config;
@@ -544,7 +544,7 @@ int main(int argc, char **argv)
 
     if (config.conffile && strlen(config.conffile))
         process_text_file(&config);
-     
+
     if (config.print && strlen(config.print))
         print_info(&config);
 

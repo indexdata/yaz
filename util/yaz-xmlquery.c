@@ -52,9 +52,9 @@ void pqftoxmlquery(const char *pqf)
     else
     {
 	xmlDocPtr doc = 0;
-	
+
         yaz_rpnquery2xml(rpn, &doc);
-        
+
         if (!doc)
 	{
 	    fprintf(stderr, "%s: yaz_rpnquery2xml failed for query %s\n",
@@ -84,7 +84,7 @@ void pqftoxmlquery(const char *pqf)
 	    }
             xmlFreeDoc(doc);
 	}
-    }    
+    }
     odr_destroy(odr);
 }
 
@@ -162,7 +162,7 @@ void xmlfiletopqf(const char *xmlfile)
 	fprintf(stderr, "%s: close failed for file %s\n", prog, xmlfile);
 	exit(1);
     }
-    
+
     xmlquerytopqf(xmlstr);
     xfree(xmlstr);
 }

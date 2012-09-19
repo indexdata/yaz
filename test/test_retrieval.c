@@ -49,7 +49,7 @@ yaz_retrieval_t conv_configure(const char *xmlstring, WRBUF w)
         else
         {
             int r = yaz_retrieval_configure(p, ptr);
-            
+
             if (r)
             {
                 wrbuf_puts(w, yaz_retrieval_get_error(p));
@@ -59,7 +59,7 @@ yaz_retrieval_t conv_configure(const char *xmlstring, WRBUF w)
         }
         xmlFreeDoc(doc);
         return p;
-    }    
+    }
 }
 
 int conv_configure_test(const char *xmlstring, const char *expect_error,
@@ -102,10 +102,10 @@ int conv_configure_test(const char *xmlstring, const char *expect_error,
 
 static void tst_configure(void)
 {
-    YAZ_CHECK(conv_configure_test("<bad", 
+    YAZ_CHECK(conv_configure_test("<bad",
                                   "xmlParseMemory", 0));
 
-    YAZ_CHECK(conv_configure_test("<bad/>", 
+    YAZ_CHECK(conv_configure_test("<bad/>",
                                   "Expected element <retrievalinfo>", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo/>", 0, 0));
@@ -121,7 +121,7 @@ static void tst_configure(void)
 
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " unknown=\"unknown\""
                                   ">"
                                   "</retrieval>"
@@ -131,7 +131,7 @@ static void tst_configure(void)
                                   "'unknown'", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"unknown_synt\""
                                   ">"
                                   "</retrieval>"
@@ -140,14 +140,14 @@ static void tst_configure(void)
                                   "value syntax='unknown_synt'", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   "/>"
                                   "</retrievalinfo>",
                                   0, 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " name=\"marcxml\"/>"
                                   "</retrievalinfo>",
@@ -155,9 +155,9 @@ static void tst_configure(void)
 
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
-                                  " name=\"marcxml\"" 
+                                  " name=\"marcxml\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   "/>"
                                   "</retrievalinfo>",
@@ -166,18 +166,18 @@ static void tst_configure(void)
 
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   " name=\"marcxml\">"
                                   "<convert/>"
-                                  "</retrieval>" 
+                                  "</retrieval>"
                                   "</retrievalinfo>",
                                   "Element <retrieval>: expected zero or one element "
                                   "<backend>, got <convert>", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   " name=\"marcxml\">"
@@ -190,7 +190,7 @@ static void tst_configure(void)
                                   " got 'schema'", 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   " name=\"marcxml\">"
@@ -202,7 +202,7 @@ static void tst_configure(void)
                                   0, 0));
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                   " name=\"marcxml\">"
@@ -216,7 +216,7 @@ static void tst_configure(void)
 
 
     YAZ_CHECK(conv_configure_test("<retrievalinfo>"
-                                  "<retrieval" 
+                                  "<retrieval"
                                   " syntax=\"usmarc\""
                                   " identifier=\"info:srw/schema/1/marcxml-v1.1\""
                                     " name=\"marcxml\">"

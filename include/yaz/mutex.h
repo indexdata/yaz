@@ -46,7 +46,7 @@ typedef struct yaz_cond *YAZ_COND;
 
 /** \brief create MUTEX
     \param mutexp is pointer to MUTEX handle (*mutexp must be NULL)
-    
+
     It is important that *mutexp is NULL. If not, yaz_mutex_create will
     not modify the handle (assumes it is already created!)
  */
@@ -89,7 +89,7 @@ void yaz_mutex_set_name(YAZ_MUTEX mutex, int log_level, const char *name);
 
 /** \brief creates condition variable
     \param p reference to condition handle
-    
+
     Upon successful completion *p holds the condition handle; *p = 0
     on error.
 */
@@ -97,7 +97,7 @@ YAZ_EXPORT void yaz_cond_create(YAZ_COND *p);
 
 /** \brief destroys condition variable
     \param p reference to condition handle
-    
+
     Upon completion *p holds 0.
 */
 YAZ_EXPORT

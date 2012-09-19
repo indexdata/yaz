@@ -41,10 +41,10 @@ typedef struct solr_parser *SOLR_parser;
 
 /** \brief creates a SOLR parser.
     \returns CCL parser
-    
+
     Returns SOLR parser or NULL if parser could not be created.
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 SOLR_parser solr_parser_create(void);
 
 /** \brief destroys a SOLR parser.
@@ -52,7 +52,7 @@ SOLR_parser solr_parser_create(void);
 
     This function does nothing if NULL if received.
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 void solr_parser_destroy(SOLR_parser cp);
 
 /** \brief parses a SOLR query (string)
@@ -61,7 +61,7 @@ void solr_parser_destroy(SOLR_parser cp);
     \retval 0 success
     \retval !=0 failure
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 int solr_parser_string(SOLR_parser cp, const char *str);
 
 /** \brief parses SOLR query (query stream)
@@ -71,14 +71,14 @@ int solr_parser_string(SOLR_parser cp, const char *str);
     \param client_data data to be passed to stream functions
     \retval 0 success
     \retval !=0 failure
-    
+
     This function is similar to solr_parser_string but takes a
     functions to read each query character from a stream.
-    
+
     The functions pointers getbytes, ungetbyte are similar to
     that known from stdios getc, ungetc.
 */
-YAZ_EXPORT 
+YAZ_EXPORT
 int solr_parser_stream(SOLR_parser cp,
                       int (*getbyte)(void *client_data),
                       void (*ungetbyte)(int b, void *client_data),
@@ -89,7 +89,7 @@ int solr_parser_stream(SOLR_parser cp,
     \param f file where query is read from
     \retval 0 success
     \retval !=0 failure
-    
+
     This function is similar to solr_parser_string but reads from
     stdio FILE handle instead.
 */
@@ -129,7 +129,7 @@ struct solr_node {
             char *value;
             /** left operand */
             struct solr_node *left;
-            /** right operand */ 
+            /** right operand */
             struct solr_node *right;
             /** modifiers (NULL for no list) */
             struct solr_node *modifiers;
@@ -260,7 +260,7 @@ solr_transform_t solr_transform_open_fname(const char *fname);
 YAZ_EXPORT
 int solr_transform_define_pattern(solr_transform_t ct, const char *pattern,
                                  const char *value);
-    
+
 
 
 /** \brief destroys a SOLR transform handle

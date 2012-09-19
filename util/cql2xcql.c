@@ -48,7 +48,7 @@ int main(int argc, char **argv)
             do_sortkeys = 1;
             break;
         default:
-            usage(prog);            
+            usage(prog);
         }
     }
 
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
         if (do_sortkeys)
         {
             WRBUF w = wrbuf_alloc();
-            r = cql_sortby_to_sortkeys(cql_parser_result(cp), 
+            r = cql_sortby_to_sortkeys(cql_parser_result(cp),
                                        wrbuf_vp_puts, w);
             if (r == 0)
                 printf("sortkeys: %s\n", wrbuf_cstr(w));

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** \file 
+/** \file
     \brief File globbing (ala POSIX glob, but simpler)
 */
 #if HAVE_CONFIG_H
@@ -48,7 +48,7 @@ static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
             is_pattern = 1;
         i++;
     }
-    
+
     if (!is_pattern && pattern[i]) /* no pattern and directory part */
     {
         i++; /* skip dir sep */

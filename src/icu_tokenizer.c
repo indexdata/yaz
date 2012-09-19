@@ -38,8 +38,8 @@ struct icu_tokenizer
     int32_t token_end;
 /*
   keep always invariant
-  0 <= token_start 
-  <= token_end 
+  0 <= token_start
+  <= token_end
   <= buf16->utf16_len
   and invariant
   0 <= token_id <= token_count
@@ -83,7 +83,7 @@ struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
 
     icu_tokenizer_reset(tokenizer, action);
     switch (tokenizer->action)
-    {    
+    {
     case 'l':
     case 'L':
         tokenizer->bi = ubrk_open(UBRK_LINE, locale, 0, 0, status);
@@ -109,7 +109,7 @@ struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
         return 0;
         break;
     }
-    
+
     /* ICU error stuff is a very  funny business */
     if (U_SUCCESS(*status))
         return tokenizer;
@@ -130,8 +130,8 @@ void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer)
     }
 }
 
-int icu_tokenizer_attach(struct icu_tokenizer * tokenizer, 
-                         struct icu_buf_utf16 * src16, 
+int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
+                         struct icu_buf_utf16 * src16,
                          UErrorCode *status)
 {
     if (!tokenizer || !tokenizer->bi || !src16)
@@ -146,15 +146,15 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
 
     ubrk_setText(tokenizer->bi,
                  tokenizer->buf16->utf16, tokenizer->buf16->utf16_len, status);
-     
+
     if (U_FAILURE(*status))
         return 0;
 
     return 1;
 }
 
-int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer, 
-                                 struct icu_buf_utf16 * tkn16, 
+int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
+                                 struct icu_buf_utf16 * tkn16,
                                  UErrorCode *status)
 {
     int32_t tkn_start = 0;
@@ -166,8 +166,8 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
         return 0;
     /*
     never change tokenizer->buf16 and keep always invariant
-    0 <= tokenizer->token_start 
-       <= tokenizer->token_end 
+    0 <= tokenizer->token_start
+       <= tokenizer->token_end
        <= tokenizer->buf16->utf16_len
     returns length of token
     */
@@ -186,8 +186,8 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
 
     /* copy out if everything is well */
     if (U_FAILURE(*status))
-        return 0;        
-    
+        return 0;
+
     /* everything OK, now update internal state */
     tkn_len = tkn_end - tkn_start;
 
@@ -197,10 +197,10 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
         tokenizer->token_id++;
     }
     else
-        tokenizer->token_id = 0;    
+        tokenizer->token_id = 0;
 
     tokenizer->token_start = tkn_start;
-    tokenizer->token_end = tkn_end;    
+    tokenizer->token_end = tkn_end;
 
     /* copying into token buffer if it exists */
     if (tkn16)
@@ -208,7 +208,7 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
         if (tkn16->utf16_cap < tkn_len)
             icu_buf_utf16_resize(tkn16, (size_t) tkn_len * 2);
 
-        u_strncpy(tkn16->utf16, &(tokenizer->buf16->utf16)[tkn_start], 
+        u_strncpy(tkn16->utf16, &(tokenizer->buf16->utf16)[tkn_start],
                   tkn_len);
 
         tkn16->utf16_len = tkn_len;

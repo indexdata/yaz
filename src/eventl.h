@@ -56,7 +56,7 @@ int force_event;
     int destroyed;
     time_t last_event;
     time_t max_idle;
-    
+
     struct iochan *next;
     int chan_id; /* listening port (0 if none ) */
 } *IOCHAN;

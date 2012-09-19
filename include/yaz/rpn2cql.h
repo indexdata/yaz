@@ -71,7 +71,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     \returns pattern value or NULL if not found
  */
 YAZ_EXPORT
-const char *cql_lookup_reverse(cql_transform_t ct, 
+const char *cql_lookup_reverse(cql_transform_t ct,
                                const char *category,
                                Z_AttributeList *attributes);
 

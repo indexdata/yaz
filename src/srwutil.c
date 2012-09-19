@@ -148,7 +148,7 @@ void yaz_uri_val_int(const char *path, const char *name, ODR o, Odr_int **intp)
         *intp = odr_intdup(o, atoi(v));
 }
 
-void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d,
                            const char *uri, const char *message,
                            const char *details)
 {
@@ -163,11 +163,11 @@ void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d,
         d->details = 0;
 }
 
-void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d, 
+void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d,
                            int code, const char *details)
 {
     char uri[40];
-    
+
     sprintf(uri, "info:srw/diagnostic/1/%d", code);
     yaz_mk_srw_diagnostic(o, d, uri, 0, details);
 }
@@ -190,7 +190,7 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
                             int *num, int code, const char *addinfo)
 {
     char uri[40];
-    
+
     sprintf(uri, "info:srw/diagnostic/1/%d", code);
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
@@ -200,7 +200,7 @@ void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
                                    int *num, int code, const char *addinfo)
 {
     char uri[40];
-    
+
     sprintf(uri, "info:srw/diagnostic/12/%d", code);
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
@@ -215,9 +215,9 @@ void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
         len += strlen(message);
     if (details)
         len += strlen(details);
-    
+
     record->recordData_buf = (char *) odr_malloc(o, len);
-    
+
     sprintf(record->recordData_buf, "<diagnostic "
             "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
             " <uri>info:srw/diagnostic/1/%d</uri>\n", code);
@@ -237,7 +237,7 @@ void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
 static void grab_charset(ODR o, const char *content_type, char **charset)
 {
     if (charset)
-    { 
+    {
         const char *charset_p = 0;
         if (content_type && (charset_p = strstr(content_type, "; charset=")))
         {
@@ -260,7 +260,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
     {
         const char *content_type = z_HTTP_header_lookup(hreq->headers,
                                                         "Content-Type");
-        if (content_type && 
+        if (content_type &&
             (!yaz_strcmp_del("text/xml", content_type, "; ") ||
              !yaz_strcmp_del("application/soap+xml", content_type, "; ") ||
              !yaz_strcmp_del("text/plain", content_type, "; ")))
@@ -268,7 +268,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             char *db = "Default";
             const char *p0 = hreq->path, *p1;
             int ret = -1;
-            
+
             static Z_SOAP_Handler soap_handlers[4] = {
 #if YAZ_HAVE_XML2
                 { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
@@ -277,7 +277,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 #endif
                 {0, 0, 0}
             };
-            
+
             if (*p0 == '/')
                 p0++;
             p1 = strchr(p0, '?');
@@ -287,14 +287,14 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 db = yaz_decode_sru_dbpath_odr(decode, p0, p1 - p0);
             grab_charset(decode, content_type, charset);
 
-            ret = z_soap_codec(decode, soap_package, 
+            ret = z_soap_codec(decode, soap_package,
                                &hreq->content_buf, &hreq->content_len,
                                soap_handlers);
             if (ret == 0 && (*soap_package)->which == Z_SOAP_generic)
             {
                 *srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
                 yaz_srw_decodeauth(*srw_pdu, hreq, 0, 0, decode);
-                
+
                 if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
                     (*srw_pdu)->u.request->database == 0)
                     (*srw_pdu)->u.request->database = db;
@@ -320,7 +320,7 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 }
 
 #if YAZ_HAVE_XML2
-static int yaz_sru_decode_integer(ODR odr, const char *pname, 
+static int yaz_sru_decode_integer(ODR odr, const char *pname,
                                   const char *valstr, Odr_int **valp,
                                   Z_SRW_diagnostic **diag, int *num_diag,
                                   int min_value)
@@ -347,7 +347,7 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
 
 /**
    http://www.loc.gov/z3950/agency/zing/srw/service.html
-*/ 
+*/
 int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                    Z_SOAP **soap_package, ODR decode, char **charset,
                    Z_SRW_diagnostic **diag, int *num_diag)
@@ -367,7 +367,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
       not  "multipart/form-data" .
     */
     if (!strcmp(hreq->method, "GET")
-        || 
+        ||
         (!strcmp(hreq->method, "POST") && content_type &&
          !yaz_strcmp_del("application/x-www-form-urlencoded",
                          content_type, "; ")))
@@ -487,12 +487,12 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                                    YAZ_SRW_UNSUPP_VERSION, "1.2");
             version = "1.2";
         }
-        
+
         if (!operation)
         {
             if (uri_name)
                 yaz_add_srw_diagnostic(
-                    decode, diag, num_diag, 
+                    decode, diag, num_diag,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "operation");
             operation = "explain";
         }
@@ -516,7 +516,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             }
             else
                 yaz_add_srw_diagnostic(
-                    decode, diag, num_diag, 
+                    decode, diag, num_diag,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "query");
 
             if (sortKeys)
@@ -529,11 +529,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->recordPacking = recordPacking;
             sr->u.request->stylesheet = stylesheet;
 
-            yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords, 
-                                   &sr->u.request->maximumRecords, 
+            yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords,
+                                   &sr->u.request->maximumRecords,
                                    diag, num_diag, 0);
-            
-            yaz_sru_decode_integer(decode, "startRecord", startRecord, 
+
+            yaz_sru_decode_integer(decode, "startRecord", startRecord,
                                    &sr->u.request->startRecord,
                                    diag, num_diag, 1);
 
@@ -542,14 +542,14 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             (*soap_package) = (Z_SOAP *)
                 odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
-            
+
             (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-            
+
             (*soap_package)->u.generic->p = sr;
             (*soap_package)->u.generic->ns = soap_handlers[0].ns;
             (*soap_package)->u.generic->no = 0;
-            
+
             (*soap_package)->ns = "SRU";
 
             return 0;
@@ -572,14 +572,14 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             (*soap_package) = (Z_SOAP *)
                 odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
-            
+
             (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-            
+
             (*soap_package)->u.generic->p = sr;
             (*soap_package)->u.generic->ns = soap_handlers[0].ns;
             (*soap_package)->u.generic->no = 0;
-            
+
             (*soap_package)->ns = "SRU";
 
             return 0;
@@ -607,17 +607,17 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             }
             else
                 yaz_add_srw_diagnostic(
-                    decode, diag, num_diag, 
+                    decode, diag, num_diag,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "scanClause");
             sr->u.scan_request->database = db;
-            
+
             yaz_sru_decode_integer(decode, "maximumTerms",
-                                   maximumTerms, 
+                                   maximumTerms,
                                    &sr->u.scan_request->maximumTerms,
                                    diag, num_diag, 0);
-            
+
             yaz_sru_decode_integer(decode, "responsePosition",
-                                   responsePosition, 
+                                   responsePosition,
                                    &sr->u.scan_request->responsePosition,
                                    diag, num_diag, 0);
 
@@ -626,14 +626,14 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             (*soap_package) = (Z_SOAP *)
                 odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
-            
+
             (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-            
+
             (*soap_package)->u.generic->p = sr;
             (*soap_package)->u.generic->ns = soap_handlers[0].ns;
             (*soap_package)->u.generic->no = 0;
-            
+
             (*soap_package)->ns = "SRU";
 
             return 0;
@@ -655,17 +655,17 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             (*soap_package) = (Z_SOAP *)
                 odr_malloc(decode, sizeof(**soap_package));
             (*soap_package)->which = Z_SOAP_generic;
-            
+
             (*soap_package)->u.generic = (Z_SOAP_Generic *)
                 odr_malloc(decode, sizeof(*(*soap_package)->u.generic));
-            
+
             (*soap_package)->u.generic->p = sr;
             (*soap_package)->u.generic->ns = soap_handlers[0].ns;
             (*soap_package)->u.generic->no = 0;
-            
+
             (*soap_package)->ns = "SRU";
 
-            yaz_add_srw_diagnostic(decode, diag, num_diag, 
+            yaz_add_srw_diagnostic(decode, diag, num_diag,
                                    YAZ_SRW_UNSUPP_OPERATION, operation);
             return 0;
         }
@@ -890,14 +890,14 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         {
         case Z_SRW_sort_type_none:
             break;
-        case Z_SRW_sort_type_sort:            
+        case Z_SRW_sort_type_sort:
             yaz_add_name_value_str(encode, name, value, &i, "sortKeys",
                                    srw_pdu->u.request->sort.sortKeys);
             break;
         }
-        yaz_add_name_value_int(encode, name, value, &i, "startRecord", 
+        yaz_add_name_value_int(encode, name, value, &i, "startRecord",
                                srw_pdu->u.request->startRecord);
-        yaz_add_name_value_int(encode, name, value, &i, "maximumRecords", 
+        yaz_add_name_value_int(encode, name, value, &i, "maximumRecords",
                                srw_pdu->u.request->maximumRecords);
         yaz_add_name_value_str(encode, name, value, &i, "recordSchema",
                                srw_pdu->u.request->recordSchema);
@@ -907,7 +907,7 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                                srw_pdu->u.request->recordXPath);
         yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
                                srw_pdu->u.request->stylesheet);
-        yaz_add_name_value_int(encode, name, value, &i, "resultSetTTL", 
+        yaz_add_name_value_int(encode, name, value, &i, "resultSetTTL",
                                srw_pdu->u.request->resultSetTTL);
         break;
     case Z_SRW_explain_request:
@@ -933,9 +933,9 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                                    srw_pdu->u.scan_request->scanClause.xcql);
             break;
         }
-        yaz_add_name_value_int(encode, name, value, &i, "responsePosition", 
+        yaz_add_name_value_int(encode, name, value, &i, "responsePosition",
                                srw_pdu->u.scan_request->responsePosition);
-        yaz_add_name_value_int(encode, name, value, &i, "maximumTerms", 
+        yaz_add_name_value_int(encode, name, value, &i, "maximumTerms",
                                srw_pdu->u.scan_request->maximumTerms);
         yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
                                srw_pdu->u.scan_request->stylesheet);
@@ -968,14 +968,14 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *uri_args;
     char *path;
 
-    z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
+    z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
     if (yaz_get_sru_parms(srw_pdu, encode, name, value, MAX_SRU_PARAMETERS))
         return -1;
     yaz_array_to_uri(&uri_args, encode, name, value);
 
     hreq->method = "GET";
-    
+
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
@@ -994,7 +994,7 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *name[MAX_SRU_PARAMETERS], *value[MAX_SRU_PARAMETERS]; /* definite upper limit for SRU params */
     char *uri_args;
 
-    z_HTTP_header_add_basic_auth(encode, &hreq->headers, 
+    z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
     if (yaz_get_sru_parms(srw_pdu, encode, name, value, MAX_SRU_PARAMETERS))
         return -1;
@@ -1002,7 +1002,7 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     yaz_array_to_uri(&uri_args, encode, name, value);
 
     hreq->method = "POST";
-    
+
     hreq->content_buf = uri_args;
     hreq->content_len = strlen(uri_args);
 
@@ -1024,12 +1024,12 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     };
     Z_SOAP *p = (Z_SOAP*) odr_malloc(odr, sizeof(*p));
 
-    z_HTTP_header_add_basic_auth(odr, &hreq->headers, 
+    z_HTTP_header_add_basic_auth(odr, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
     z_HTTP_header_add_content_type(odr,
                                    &hreq->headers,
                                    "text/xml", charset);
-    
+
     z_HTTP_header_add(odr, &hreq->headers,
                       "SOAPAction", "\"\"");
     p->which = Z_SOAP_generic;
@@ -1052,7 +1052,7 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
 Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR odr, int num)
 {
-    Z_SRW_recordVersion *ver 
+    Z_SRW_recordVersion *ver
         = (Z_SRW_recordVersion *) odr_malloc(odr,num * sizeof(*ver));
     int i;
     for (i = 0; i < num; ++i)

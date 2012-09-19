@@ -27,7 +27,7 @@ static void test(void)
     WRBUF w = wrbuf_alloc();
 
     WRBUF_shptr_t t = 0;
-    
+
     YAZ_SHPTR_INIT(t, w);
     YAZ_CHECK(t);
 

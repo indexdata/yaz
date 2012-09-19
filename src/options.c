@@ -23,7 +23,7 @@ int options(const char *desc, char **argv, int argc, char **arg)
     const char *opt_buf = 0;
     size_t i = 0;
     int ch = 0;
-    
+
     if (arg_no >= argc)
         return YAZ_OPTIONS_EOF;
     if (arg_off == 0)
@@ -81,7 +81,7 @@ int options(const char *desc, char **argv, int argc, char **arg)
             type = desc[i++];
         }
         if (desc_char == ch)
-        { 
+        {
             if (type) /* option with argument */
             {
                 if (argv[arg_no][arg_off])
@@ -109,7 +109,7 @@ int options(const char *desc, char **argv, int argc, char **arg)
                 }
             }
             return ch;
-        }               
+        }
     }
     *arg = argv[arg_no]+arg_off-1;
     arg_no = arg_no + 1;

@@ -95,7 +95,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         {
             WRBUF hex = wrbuf_alloc();
             /* Not all digits, so stop directory scan */
-            wrbuf_write_escaped(hex, buf + entry_p, 
+            wrbuf_write_escaped(hex, buf + entry_p,
                                 length_data_entry + length_starting + 3);
             yaz_marc_cprintf(mt, "Directory offset %d: Bad value for data"
                              " length and/or length starting (%s)", entry_p,
@@ -135,7 +135,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
 
         if (data_length <= 0 || data_offset < 0)
             break;
-        
+
         if (yaz_marc_get_debug(mt))
         {
             yaz_marc_cprintf(mt, "Tag: %s. Directory offset %d: data-length %d,"
@@ -148,7 +148,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                              entry_p0, end_offset, record_length);
             break;
         }
-        
+
         if (memcmp (tag, "00", 2))
             identifier_flag = 1;  /* if not 00X assume subfields */
         else if (indicator_length < 4 && indicator_length > 0)
@@ -200,7 +200,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         {
             /* controlfield */
             int i0 = i;
-            while (i < end_offset && 
+            while (i < end_offset &&
                 buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
                 i++;
             yaz_marc_add_controlfield(mt, tag, buf+i0, i-i0);

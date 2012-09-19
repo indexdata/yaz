@@ -34,7 +34,7 @@ struct cql_node *cql_node_dup(NMEM nmem, struct cql_node *cp)
                             cp->u.st.relation,
                             cp->u.st.term);
         cn->u.st.modifiers = cql_node_dup(nmem, cp->u.st.modifiers);
-        cn->u.st.index_uri = cp->u.st.index_uri ? 
+        cn->u.st.index_uri = cp->u.st.index_uri ?
             nmem_strdup(nmem, cp->u.st.index_uri) : 0;
         cn->u.st.relation_uri = cp->u.st.relation_uri ?
             nmem_strdup(nmem, cp->u.st.relation_uri) : 0;
@@ -116,7 +116,7 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
         if (!n->u.st.index_uri && n->u.st.index)
         {   /* not yet resolved.. */
             const char *cp = strchr(n->u.st.index, '.');
-            if (prefix && cp && 
+            if (prefix && cp &&
                 strlen(prefix) == (size_t) (cp - n->u.st.index) &&
                 !cql_strncmp(n->u.st.index, prefix, strlen(prefix)))
             {

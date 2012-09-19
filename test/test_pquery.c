@@ -42,11 +42,11 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
     else if (expect_error == YAZ_PQF_ERROR_NONE)
     {
         WRBUF wrbuf = wrbuf_alloc();
-        
+
         if (wrbuf)
         {
             yaz_rpnquery_to_wrbuf(wrbuf, rpn);
-            
+
             if (!strcmp(wrbuf_cstr(wrbuf), expect_pqf))
             {
                 res = 1;

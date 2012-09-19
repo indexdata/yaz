@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file ccltoken.c
  * \brief Implements CCL lexical analyzer (scanner)
  */
@@ -126,7 +126,7 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
         default:
             --cp;
             --last->len;
-            
+
             last->kind = CCL_TOK_TERM;
             last->name = (const char *) cp;
             while (*cp && !strchr("(),%!><= \t\n\r", *cp))
@@ -150,7 +150,7 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
                         else if (*cp == '"')
                             break;
                     }
-                } 
+                }
                 if (!*cp)
                     break;
                 cp++;
@@ -161,23 +161,23 @@ struct ccl_token *ccl_parser_tokenize(CCL_parser cclp, const char *command)
                 aliases = cclp->ccl_token_and;
             if (token_cmp(cclp, aliases, last))
                 last->kind = CCL_TOK_AND;
-            
+
             aliases = ccl_qual_search_special(cclp->bibset, "or");
             if (!aliases)
                 aliases = cclp->ccl_token_or;
             if (token_cmp(cclp, aliases, last))
                 last->kind = CCL_TOK_OR;
-            
+
             aliases = ccl_qual_search_special(cclp->bibset, "not");
             if (!aliases)
                 aliases = cclp->ccl_token_not;
             if (token_cmp(cclp, aliases, last))
                 last->kind = CCL_TOK_NOT;
-            
+
             aliases = ccl_qual_search_special(cclp->bibset, "set");
             if (!aliases)
                 aliases = cclp->ccl_token_set;
-            
+
             if (token_cmp(cclp, aliases, last))
                 last->kind = CCL_TOK_SET;
         }
@@ -202,7 +202,7 @@ struct ccl_token *ccl_token_add(struct ccl_token *at)
     n->ws_prefix_len = 0;
     return n;
 }
-    
+
 /*
  * ccl_token_del: delete CCL tokens
  */
@@ -210,7 +210,7 @@ void ccl_token_del(struct ccl_token *list)
 {
     struct ccl_token *list1;
 
-    while (list) 
+    while (list)
     {
         list1 = list->next;
         xfree(list);

@@ -23,7 +23,7 @@
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
 
-int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp, 
+int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                          char **content_buf, int *content_len,
                          Z_SOAP_Handler *handlers,
                          const char *encoding,
@@ -55,7 +55,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                                 "No Envelope element", 0);
         }
         /* check for SRU root node match */
-        
+
         for (i = 0; handlers[i].ns; i++)
             if (yaz_match_glob(handlers[i].ns, (const char *)ptr->ns->href))
                 break;
@@ -68,7 +68,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             ret = (*handlers[i].f)(o, &p_top_tmp, &handler_data,
                                    handlers[i].client_data,
                                    (const char *)ptr->ns->href);
-            
+
             if (ret || !handler_data)
                 z_soap_error(o, p, "SOAP-ENV:Client",
                              "SOAP Handler returned error", 0);
@@ -120,7 +120,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                 ptr = ptr->next;
         }
         /* check that Body is present */
-        if (!ptr || ptr->type != XML_ELEMENT_NODE || 
+        if (!ptr || ptr->type != XML_ELEMENT_NODE ||
             xmlStrcmp(ptr->name, BAD_CAST "Body"))
         {
             xmlFreeDoc(doc);
@@ -211,7 +211,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             }
             else
             {
-                ret = z_soap_error(o, p, "SOAP-ENV:Client", 
+                ret = z_soap_error(o, p, "SOAP-ENV:Client",
                                    "No handler for NS", ns);
             }
         }
@@ -240,7 +240,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             Z_SOAP_Fault *f = p->u.fault;
             xmlNodePtr fault_ptr = xmlNewChild(body_ptr, ns_env,
                                                BAD_CAST "Fault", 0);
-            xmlNewChild(fault_ptr, ns_env, BAD_CAST "faultcode", 
+            xmlNewChild(fault_ptr, ns_env, BAD_CAST "faultcode",
                         BAD_CAST f->fault_code);
             xmlNewChild(fault_ptr, ns_env, BAD_CAST "faultstring",
                         BAD_CAST f->fault_string);
@@ -251,7 +251,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         else if (p->which == Z_SOAP_generic)
         {
             int ret, no = p->u.generic->no;
-            
+
             ret = (*handlers[no].f)(o, body_ptr, &p->u.generic->p,
                                     handlers[no].client_data,
                                     handlers[no].ns);
@@ -270,7 +270,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         if (stylesheet)
         {
             char *content = (char *) odr_malloc(o, strlen(stylesheet) + 40);
-            
+
             xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
             sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
             pi = xmlNewPI(BAD_CAST "xml-stylesheet",
@@ -296,7 +296,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
     return 0;
 }
 #else
-int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp, 
+int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                          char **content_buf, int *content_len,
                          Z_SOAP_Handler *handlers, const char *encoding,
                          const char *stylesheet)
@@ -321,7 +321,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
     return -1;
 }
 #endif
-int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
+int z_soap_codec_enc(ODR o, Z_SOAP **pp,
                      char **content_buf, int *content_len,
                      Z_SOAP_Handler *handlers,
                      const char *encoding)
@@ -330,7 +330,7 @@ int z_soap_codec_enc(ODR o, Z_SOAP **pp,
                                 encoding, 0);
 }
 
-int z_soap_codec(ODR o, Z_SOAP **pp, 
+int z_soap_codec(ODR o, Z_SOAP **pp,
                  char **content_buf, int *content_len,
                  Z_SOAP_Handler *handlers)
 {
@@ -342,7 +342,7 @@ int z_soap_error(ODR o, Z_SOAP *p,
                  const char *details)
 {
     p->which = Z_SOAP_error;
-    p->u.soap_error = (Z_SOAP_Fault *) 
+    p->u.soap_error = (Z_SOAP_Fault *)
         odr_malloc(o, sizeof(*p->u.soap_error));
     p->u.soap_error->fault_code = odr_strdup(o, fault_code);
     p->u.soap_error->fault_string = odr_strdup(o, fault_string);

@@ -62,7 +62,7 @@ YAZ_EXPORT void yaz_retrieval_destroy(yaz_retrieval_t p);
     \retval -1 failure
 
     On failure, call yaz_retrieval_get_error to get error string.
-    
+
     For retrieval:
     \verbatim
      <retrievalinfo>
@@ -130,7 +130,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
 /** returns error string (for last error)
     \param p record conversion handle
     \return error string
-*/    
+*/
 YAZ_EXPORT
 const char *yaz_retrieval_get_error(yaz_retrieval_t p);
 
@@ -138,7 +138,7 @@ const char *yaz_retrieval_get_error(yaz_retrieval_t p);
 /** set path for opening stylesheets etc.
     \param p record conversion handle
     \param path file path (UNIX style with : / Windows with ;)
-*/    
+*/
 YAZ_EXPORT
 void yaz_retrieval_set_path(yaz_retrieval_t p, const char *path);
 

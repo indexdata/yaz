@@ -93,7 +93,7 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
     int ret = 0; /* 0=OK, != 0 FAIL */
     int t;
     t = yaz_tok_move(tp);
-    
+
     while (t == YAZ_TOK_STRING && ae_num < 20)
     {
         WRBUF type_str = wrbuf_alloc();
@@ -101,7 +101,7 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
         Z_AttributeElement *elem = 0;
         const char *value_str = 0;
         /* attset type=value  OR  type=value */
-        
+
         elem = (Z_AttributeElement *) nmem_malloc(ct->nmem, sizeof(*elem));
         elem->attributeSet = 0;
         ae[ae_num] = elem;
@@ -112,19 +112,19 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
         {
             wrbuf_destroy(type_str);
             if (set_str)
-                wrbuf_destroy(set_str);                
+                wrbuf_destroy(set_str);
             break;
         }
-        if (t == YAZ_TOK_STRING)  
-        {  
+        if (t == YAZ_TOK_STRING)
+        {
             wrbuf_puts(ct->w, " ");
             wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
             set_str = type_str;
-            
+
             elem->attributeSet =
                 yaz_string_to_oid_nmem(yaz_oid_std(), CLASS_ATTSET,
                                        wrbuf_cstr(set_str), ct->nmem);
-            
+
             type_str = wrbuf_alloc();
             wrbuf_puts(type_str, yaz_tok_parse_string(tp));
             t = yaz_tok_move(tp);
@@ -135,7 +135,7 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
         {
             wrbuf_destroy(type_str);
             if (set_str)
-                wrbuf_destroy(set_str);                
+                wrbuf_destroy(set_str);
             yaz_log(YLOG_WARN, "Expected numeric attribute type");
             ret = -1;
             break;
@@ -143,8 +143,8 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
 
         wrbuf_destroy(type_str);
         if (set_str)
-            wrbuf_destroy(set_str);                
-        
+            wrbuf_destroy(set_str);
+
         if (t != '=')
         {
             yaz_log(YLOG_WARN, "Expected = after after attribute type");
@@ -204,7 +204,7 @@ static int solr_transform_parse_tok_line(solr_transform_t ct,
             (*pp)->attr_list.attributes = (Z_AttributeElement **)
                 nmem_malloc(ct->nmem,
                             ae_num * sizeof(Z_AttributeElement *));
-            memcpy((*pp)->attr_list.attributes, ae, 
+            memcpy((*pp)->attr_list.attributes, ae,
                    ae_num * sizeof(Z_AttributeElement *));
         }
         (*pp)->next = 0;
@@ -232,7 +232,7 @@ int solr_transform_define_pattern(solr_transform_t ct, const char *pattern,
     yaz_tok_parse_destroy(tp);
     return r;
 }
-    
+
 solr_transform_t solr_transform_open_FILE(FILE *f)
 {
     solr_transform_t ct = solr_transform_create();
@@ -331,7 +331,7 @@ static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
 
     z_AttributeElement(odr_a, &a, 0, 0);
     z_AttributeElement(odr_b, &b, 0, 0);
-    
+
     buf_a = odr_getbuf(odr_a, &len_a, 0);
     buf_b = odr_getbuf(odr_b, &len_b, 0);
 
@@ -370,7 +370,7 @@ const char *solr_lookup_reverse(solr_transform_t ct,
                 }
                 if (j == attributes->num_attributes)
                     break; /* i was not found at all.. try next pattern */
-                    
+
             }
             if (i == e->attr_list.num_attributes)
                 return e->pattern + clen;
@@ -378,7 +378,7 @@ const char *solr_lookup_reverse(solr_transform_t ct,
     }
     return 0;
 }
-                                      
+
 static const char *solr_lookup_property(solr_transform_t ct,
                                        const char *pat1, const char *pat2,
                                        const char *pat3)
@@ -396,7 +396,7 @@ static const char *solr_lookup_property(solr_transform_t ct,
         sprintf(pattern, "%.39s", pat1);
     else
         return 0;
-    
+
     for (e = ct->entry; e; e = e->next)
     {
         if (!solr_strcmp(e->pattern, pattern))
@@ -414,11 +414,11 @@ int solr_pr_attr_uri(solr_transform_t ct, const char *category,
     const char *res = 0;
     const char *eval = val ? val : default_val;
     const char *prefix = 0;
-    
+
     if (uri)
     {
         struct solr_prop_entry *e;
-        
+
         for (e = ct->entry; e; e = e->next)
             if (!memcmp(e->pattern, "set.", 4) && e->value &&
                 !strcmp(e->value, uri))
@@ -541,19 +541,19 @@ static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
                 proxrel = 5;
             else if (!strcmp(relation, "<"))
                 proxrel = 1;
-            else if (!strcmp(relation, ">=")) 
+            else if (!strcmp(relation, ">="))
                 proxrel = 4;
             else if (!strcmp(relation, "<="))
                 proxrel = 2;
             else if (!strcmp(relation, "<>"))
                 proxrel = 6;
-            else 
+            else
             {
                 ct->error = YAZ_SRW_UNSUPP_PROX_RELATION;
                 ct->addinfo = xstrdup(relation);
                 return 0;
             }
-        } 
+        }
         else if (!strcmp(name, "ordered"))
             ordered = 1;
         else if (!strcmp(name, "unordered"))
@@ -568,14 +568,14 @@ static int solr_pr_prox(solr_transform_t ct, struct solr_node *mods,
                 unit = 4;
             else if (!strcmp(term, "element"))
                 unit = 8;
-            else 
+            else
             {
                 ct->error = YAZ_SRW_UNSUPP_PROX_UNIT;
                 ct->addinfo = xstrdup(term);
                 return 0;
             }
-        } 
-        else 
+        }
+        else
         {
             ct->error = YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
             ct->addinfo = xstrdup(name);
@@ -682,8 +682,8 @@ static void emit_term(solr_transform_t ct,
          * there's no mapping for it, that's fine: we just use a
          * general pattern-matching attribute.
          */
-        if (first_wc == term && second_wc == term + length-1 
-            && *first_wc == '*' && *second_wc == '*' 
+        if (first_wc == term && second_wc == term + length-1
+            && *first_wc == '*' && *second_wc == '*'
             && solr_pr_attr(ct, "truncation", "both", 0, pr, client_data, 0))
         {
             term++;
@@ -791,7 +791,7 @@ static void emit_terms(solr_transform_t ct,
             (*pr)("@", client_data);
             (*pr)(op, client_data);
             (*pr)(" ", client_data);
-        }            
+        }
         emit_term(ct, cn, ne->u.st.term, strlen(ne->u.st.term),
                   pr, client_data);
     }
@@ -881,11 +881,11 @@ void solr_transform_r(solr_transform_t ct,
         (*pr)(cn->u.boolean.value, client_data);
         (*pr)(" ", client_data);
         mods = cn->u.boolean.modifiers;
-        if (!strcmp(cn->u.boolean.value, "prox")) 
+        if (!strcmp(cn->u.boolean.value, "prox"))
         {
             if (!solr_pr_prox(ct, mods, pr, client_data))
                 return;
-        } 
+        }
         else if (mods)
         {
             /* Boolean modifiers other than on proximity not supported */

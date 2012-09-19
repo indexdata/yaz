@@ -62,7 +62,7 @@ static int log_level = 0;
 static int log_level_initialized = 0;
 
 static void free_block(struct nmem_block *p)
-{  
+{
     xfree(p->buf);
     xfree(p);
     if (log_level)
@@ -85,7 +85,7 @@ static struct nmem_block *get_block(size_t size)
     if (log_level)
         yaz_log(log_level, "nmem get_block alloc new block size=%ld",
                 (long) get);
-    
+
     r = (struct nmem_block *) xmalloc(sizeof(*r));
     r->buf = (char *)xmalloc(r->size = get);
     r->top = 0;
@@ -95,7 +95,7 @@ static struct nmem_block *get_block(size_t size)
 void nmem_reset(NMEM n)
 {
     struct nmem_block *t;
-    
+
     yaz_log(log_level, "nmem_reset p=%p", n);
     if (!n)
         return;
@@ -145,7 +145,7 @@ NMEM nmem_create(void)
         log_level = yaz_log_module_level("nmem");
         log_level_initialized = 1;
     }
-    
+
     r = (struct nmem_control *)xmalloc(sizeof(*r));
 
     r->blocks = 0;
@@ -159,7 +159,7 @@ void nmem_destroy(NMEM n)
 {
     if (!n)
         return;
-    
+
     nmem_reset(n);
     xfree(n);
 }

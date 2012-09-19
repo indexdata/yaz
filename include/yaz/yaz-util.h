@@ -37,7 +37,7 @@
 #include <yaz/yaz-version.h>
 #include <yaz/xmalloc.h>
 
-#include <yaz/log.h>  
+#include <yaz/log.h>
 
 #include <yaz/tpath.h>
 #include <yaz/options.h>
@@ -59,7 +59,7 @@
 
     The following sections is just a summary of the most important
     header files and where they belong.
-    
+
     \section utilities Utilies
     Logging (syslog-like) utility \ref log.h .
 
@@ -98,29 +98,29 @@
     Z39.50 sort: \ref sortspec.h .
 
     \section ber BER handling
-    
+
     BER utilities (ODR): \ref odr.h .
 
     \section z3950 Z39.50
 
     Z39.50 common header: \ref proto.h .
-    
+
     Z39.50 core codecs: \ref z-core.h.
 
     Z39.50 related formats:
-    \ref z-accdes1.h ,  \ref z-core.h ,   
+    \ref z-accdes1.h ,  \ref z-core.h ,
     \ref z-estask.h , \ref z-oclcui.h , \ref z-sum.h
-    \ref z-accform1.h , \ref z-date.h , 
+    \ref z-accform1.h , \ref z-date.h ,
     \ref z-exp.h ,    \ref z-opac.h ,   \ref z-sutrs.h
-    \ref z-acckrb1.h ,  \ref z-diag1.h , 
+    \ref z-acckrb1.h ,  \ref z-diag1.h ,
     \ref z-grs.h ,    \ref z-rrf1.h ,   \ref z-uifr1.h
     \ref z-charneg.h ,  \ref z-espec1.h
     \ref z-mterm2.h , \ref z-rrf2.h ,   \ref z-univ.h .
 
     Z39.50 extended services:
-    \ref zes-admin.h , \ref zes-exps.h , \ref zes-pquery.h , 
+    \ref zes-admin.h , \ref zes-exps.h , \ref zes-pquery.h ,
     \ref zes-pset.h , \ref zes-update.h ,
-    \ref zes-expi.h , \ref zes-order.h ,  \ref zes-psched.h , 
+    \ref zes-expi.h , \ref zes-order.h ,  \ref zes-psched.h ,
     \ref zes-update0.h .
 
     Z39.50 diagnostics: \ref diagbib1.h .
@@ -128,7 +128,7 @@
     Z39.50 externals: \ref prt-ext.h .
 
     \section GDU Generic Data Unit (HTTP and BER)
-    
+
     Definitions for GDU and HTTP: \ref zgdu.h .
 
     \section SRU SRU
@@ -136,7 +136,7 @@
     SRU/SRW definitions: \ref srw.h .
 
     SRW diagnostics: \ref diagsrw.h .
-    
+
     \section ILL ILL
 
     Common header: \ref ill.h .
@@ -144,16 +144,16 @@
     Codecs: \ref ill-core.h
 
     \section ZOOM ZOOM
-    
+
     Common header: \ref zoom.h .
 
     \section GFS Generic Frontend Server (GFS)
-    
+
     Header: \ref backend.h .
 
 */
 #endif
-    
+
 /*
  * Local variables:
  * c-basic-offset: 4

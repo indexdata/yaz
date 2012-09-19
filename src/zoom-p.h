@@ -48,7 +48,7 @@ typedef enum {
     zoom_sru_post,
     zoom_sru_solr
 } zoom_sru_mode;
-    
+
 
 typedef struct ZOOM_task_p *ZOOM_task;
 
@@ -258,7 +258,7 @@ int ZOOM_test_reconnect(ZOOM_connection c);
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *syntax,
                                      const char *elementSetName);
-void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
+void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                            int pos,
                            const char *syntax, const char *elementSetName,
                            const char *schema,

@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     int ok;
     int nok = 0;
     char *arg;
-    
+
     while ((c = options("c:s:p:fbd:rv:", argv, argc, &arg)) != -2) {
         switch (c) {
         case 0:

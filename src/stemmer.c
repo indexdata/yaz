@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file stemmer.c
  * \brief Implements stemmer wrapper
  */
@@ -51,14 +51,14 @@ yaz_stemmer_p yaz_stemmer_snowball_create(const char *locale, const char *rule, 
     yaz_stemmer_p yaz_stemmer;
     if (stemmer == 0) {
         *status = U_ILLEGAL_ARGUMENT_ERROR;
-        yaz_log(YLOG_FATAL, "yaz_stemmer: Failed to create snowball stemmer from locale %srule %s. Showball: charenc %s algorithm %s ", 
+        yaz_log(YLOG_FATAL, "yaz_stemmer: Failed to create snowball stemmer from locale %srule %s. Showball: charenc %s algorithm %s ",
 		locale, rule, charenc, algorithm);
 	return 0;
     }
     yaz_log(YLOG_DEBUG, "created snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
     yaz_stemmer = xmalloc(sizeof(*yaz_stemmer));
     yaz_stemmer->implementation = yaz_snowball;
-      
+
     yaz_stemmer->locale = xstrdup(locale);
     yaz_stemmer->rule = xstrdup(rule);
     yaz_stemmer->sb_stemmer = stemmer;
@@ -96,7 +96,7 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
 
                     const char *cstr2 = (const char *) sb_symbol;
                     icu_utf16_from_utf8_cstr(dst, cstr2 , status);
-#if 0		  
+#if 0
 		    yaz_log(YLOG_DEBUG, "stemming %s to %s ", cstr, cstr2);
 #endif
                 }
@@ -114,7 +114,7 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
     }
 }
 
-void yaz_stemmer_destroy(yaz_stemmer_p stemmer) 
+void yaz_stemmer_destroy(yaz_stemmer_p stemmer)
 {
   /* Handle no stemmer correctly */
   if (stemmer == 0)

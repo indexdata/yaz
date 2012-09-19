@@ -91,7 +91,7 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
     return 1;
 }
 
-    
+
 int yaz_marc_read_line(yaz_marc_t mt,
                        int (*getbyte)(void *client_data),
                        void (*ungetbyte)(int b, void *client_data),
@@ -195,7 +195,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                 {
                     const char *next;
                     size_t len;
-                    
+
                     assert(cp[0] == marker_ch);
                     cp++;
                     next = cp;

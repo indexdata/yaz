@@ -59,7 +59,7 @@ YAZ_BEGIN_CDECL
 
     Flag YAZ_DAEMON_DEBUG: Puts the service in debug mode (no fork at all).
 
-    Flag YAZ_DAEMON_KEEPALIVE: Repeatedly calls work handler if it makes a 
+    Flag YAZ_DAEMON_KEEPALIVE: Repeatedly calls work handler if it makes a
     "fatal" error.
 */
 YAZ_EXPORT

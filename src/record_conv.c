@@ -207,7 +207,7 @@ static void *construct_xslt(const xmlNode *ptr,
                          stylesheet, stylesheet);
             if (path)
                 wrbuf_printf(wr_error, " with path '%s'", path);
-                
+
             return 0;
         }
         info->xsp_doc = xmlParseFile(fullpath);
@@ -230,7 +230,7 @@ static void *construct_xslt(const xmlNode *ptr,
                 wrbuf_printf(wr_error, " with path '%s'", path);
             wrbuf_printf(wr_error, " ("
 #if YAZ_HAVE_EXSLT
-                         
+
                          "EXSLT enabled"
 #else
                          "EXSLT not supported"
@@ -270,7 +270,7 @@ static int convert_xslt(void *vinfo, WRBUF record, WRBUF wr_error)
         {
             xmlChar *out_buf = 0;
             int out_len;
-            
+
 #if HAVE_XSLTSAVERESULTTOSTRING
             xsltSaveResultToString(&out_buf, &out_len, res, xsp);
 #else
@@ -286,7 +286,7 @@ static int convert_xslt(void *vinfo, WRBUF record, WRBUF wr_error)
             {
                 wrbuf_rewind(record);
                 wrbuf_write(record, (const char *) out_buf, out_len);
-                
+
                 xmlFree(out_buf);
             }
             xmlFreeDoc(res);
@@ -361,7 +361,7 @@ static void *construct_marc(const xmlNode *ptr,
         {
             wrbuf_printf(wr_error, "Element <marc>: expected attributes"
                          "'inputformat', 'inputcharset', 'outputformat' or"
-                         " 'outputcharset', got attribute '%s'", 
+                         " 'outputcharset', got attribute '%s'",
                          attr->name);
             nmem_destroy(info->nmem);
             return 0;
@@ -382,7 +382,7 @@ static void *construct_marc(const xmlNode *ptr,
     {
         info->input_format_mode = YAZ_MARC_MARCXML;
         /** Libxml2 generates UTF-8 encoding by default .
-            So we convert from UTF-8 to outputcharset (if defined) 
+            So we convert from UTF-8 to outputcharset (if defined)
         */
         if (!info->input_charset && info->output_charset)
             info->input_charset = "utf-8";
@@ -391,15 +391,15 @@ static void *construct_marc(const xmlNode *ptr,
     {
         wrbuf_printf(wr_error, "Element <marc inputformat='%s'>: "
                      " Unsupported input format"
-                     " defined by attribute value", 
+                     " defined by attribute value",
                      input_format);
         nmem_destroy(info->nmem);
         return 0;
     }
-    
+
     if (!output_format)
     {
-        wrbuf_printf(wr_error, 
+        wrbuf_printf(wr_error,
                      "Element <marc>: attribute 'outputformat' required");
         nmem_destroy(info->nmem);
         return 0;
@@ -434,7 +434,7 @@ static void *construct_marc(const xmlNode *ptr,
     {
         wrbuf_printf(wr_error, "Element <marc outputformat='%s'>: "
                      " Unsupported output format"
-                     " defined by attribute value", 
+                     " defined by attribute value",
                      output_format);
         nmem_destroy(info->nmem);
         return 0;
@@ -445,7 +445,7 @@ static void *construct_marc(const xmlNode *ptr,
                                         info->input_charset);
         if (!cd)
         {
-            wrbuf_printf(wr_error, 
+            wrbuf_printf(wr_error,
                          "Element <marc inputcharset='%s' outputcharset='%s'>:"
                          " Unsupported character set mapping"
                          " defined by attribute values",
@@ -478,14 +478,14 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
 {
     struct marc_info *mi = info;
     int ret = 0;
-    
+
     yaz_iconv_t cd = yaz_iconv_open(mi->output_charset, mi->input_charset);
     yaz_marc_t mt = yaz_marc_create();
-    
+
     yaz_marc_xml(mt, mi->output_format_mode);
     if (mi->leader_spec)
         yaz_marc_leader_spec(mt, mi->leader_spec);
-        
+
     if (cd)
         yaz_marc_iconv(mt, cd);
     if (mi->input_format_mode == YAZ_MARC_ISO2709)
@@ -536,7 +536,7 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
 static void destroy_marc(void *info)
 {
     struct marc_info *mi = info;
-    
+
     nmem_destroy(mi->nmem);
 }
 
@@ -544,7 +544,7 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
                                 struct yaz_record_conv_type *types)
 {
     struct yaz_record_conv_type bt[2];
-    
+
     /* register marc */
     bt[0].construct = construct_marc;
     bt[0].convert = convert_marc;
@@ -560,7 +560,7 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
 #else
     bt[0].next = types;
 #endif
-    
+
     yaz_record_conv_reset(p);
 
     /* parsing element children */
@@ -613,7 +613,7 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
     int ret = 0;
     WRBUF record = output_record; /* pointer transfer */
     wrbuf_rewind(p->wr_error);
-    
+
     wrbuf_write(record, input_record_buf, input_record_len);
     for (; ret == 0 && r; r = r->next)
         ret = r->type->convert(r->info, record, p->wr_error);
@@ -636,16 +636,16 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
         yaz_marc_t mt = yaz_marc_create();
         yaz_iconv_t cd = yaz_iconv_open(mi->output_charset,
                                         mi->input_charset);
-        
+
         wrbuf_rewind(p->wr_error);
         yaz_marc_xml(mt, mi->output_format_mode);
-        
+
         yaz_marc_iconv(mt, cd);
-        
+
         yaz_opac_decode_wrbuf(mt, input_record, res);
         if (ret != -1)
         {
-            ret = yaz_record_conv_record_rule(p, 
+            ret = yaz_record_conv_record_rule(p,
                                               r->next,
                                               wrbuf_buf(res), wrbuf_len(res),
                                               output_record);
@@ -689,8 +689,8 @@ yaz_record_conv_t yaz_record_conv_create()
     p->rules = 0;
     p->path = 0;
 #if YAZ_HAVE_EXSLT
-    exsltRegisterAll(); 
-#endif    
+    exsltRegisterAll();
+#endif
     return p;
 }
 

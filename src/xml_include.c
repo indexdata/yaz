@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** \file 
+/** \file
     \brief XML Include (not to be confused with W3C XInclude)
 */
 #if HAVE_CONFIG_H
@@ -102,7 +102,7 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
         yaz_glob_res_t glob_res;
 
         glob_ret = yaz_file_glob(wrbuf_cstr(w), &glob_res);
-        
+
         if (glob_ret == 0)
         {
             size_t i;
@@ -116,7 +116,7 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
     wrbuf_printf(w, " end include src=\"%s\" ", src);
     c = xmlNewComment((const xmlChar *) wrbuf_cstr(w));
     sib = xmlAddNextSibling(sib, c);
-    
+
     *np = sib;
     wrbuf_destroy(w);
     return ret;
@@ -138,7 +138,7 @@ static int process_config_includes(yaz_xml_include_t config, xmlNode *n)
                     xmlFree(src);
                     if (ret)
                         return ret;
-                        
+
                 }
             }
             else

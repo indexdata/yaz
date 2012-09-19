@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file ccl_stop_words.c
  * \brief Removes stop words from terms in RPN tree
  */
@@ -26,7 +26,7 @@ struct ccl_stop_words {
     NMEM nmem; /* memory for removed items */
     struct ccl_stop_info *removed_items;
 };
-    
+
 static void append_removed_item(ccl_stop_words_t csw,
                                 const char *qname,
                                 const char *t, size_t len)
@@ -46,7 +46,7 @@ static void append_removed_item(ccl_stop_words_t csw,
 
     while (*csip)
         csip = &(*csip)->next;
-    
+
     *csip = csi;
 }
 
@@ -163,11 +163,11 @@ int ccl_stop_words_tree(ccl_stop_words_t csw,
                         CCL_bibset bibset, struct ccl_rpn_node **t)
 {
     struct ccl_rpn_node *r;
-    
+
     /* remove list items */
     nmem_reset(csw->nmem);
     csw->removed_items = 0;
-    
+
     r = ccl_remove_stop_r(csw, bibset, *t);
     *t = r;
     if (csw->removed_items)

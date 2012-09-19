@@ -29,10 +29,10 @@ void tst(void)
 
     top = xmlNewNode(0, BAD_CAST "top");
     YAZ_CHECK(top);
-    
+
     xmlNewTextChild(top, 0, BAD_CAST "sub", BAD_CAST val);
     xmlDocSetRootElement(doc, top);
-    
+
     xmlDocDumpMemory(doc, &buf_out, &len_out);
 #if 0
     printf("%*s", len_out, buf_out);

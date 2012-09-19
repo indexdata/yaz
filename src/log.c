@@ -87,15 +87,15 @@ static struct {
     { YLOG_TID,    "tid"  },
     { YLOG_APP,    "app"   },
     { YLOG_NOTIME, "notime" },
-    { YLOG_APP2,   "app2" }, 
+    { YLOG_APP2,   "app2" },
     { YLOG_APP3,   "app3" },
     { YLOG_ALL,    "all"  },
     { YLOG_FLUSH,  "flush" },
-    { YLOG_LOGLVL, "loglevel" }, 
+    { YLOG_LOGLVL, "loglevel" },
     { 0,           "none" },
     { 0, NULL }
     /* the rest will be filled in if the user defines dynamic modules*/
-};  
+};
 
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
@@ -152,7 +152,7 @@ void yaz_log_init_file(const char *fname)
     else
     {
         yaz_log_info.type = use_none;  /* NULL name; use no file at all */
-        yaz_log_info.l_fname[0] = '\0'; 
+        yaz_log_info.l_fname[0] = '\0';
     }
     yaz_log_reopen();
 }
@@ -202,7 +202,7 @@ void yaz_log_init_level(int level)
     {
         l_level = level;
         yaz_log_reopen(); /* make sure we set buffering right */
-    } 
+    }
     else
         l_level = level;
 
@@ -366,7 +366,7 @@ static void yaz_strftime(char *dst, size_t sz,
 {
     strftime(dst, sz, fmt, tm);
 }
-                            
+
 static void yaz_log_to_file(int level, const char *log_message)
 {
     FILE *file;
@@ -384,8 +384,8 @@ static void yaz_log_to_file(int level, const char *log_message)
 #else
     tm = localtime(&ti);
 #endif
-    
-    yaz_log_open_check(tm, 0, "a");  
+
+    yaz_log_open_check(tm, 0, "a");
     file = yaz_log_file(); /* file may change in yaz_log_open_check */
 
     if (file)
@@ -394,15 +394,15 @@ static void yaz_log_to_file(int level, const char *log_message)
         char tid[TID_LEN];
         char flags[1024];
         int i;
-        
+
         *flags = '\0';
         for (i = 0; level && mask_names[i].name; i++)
             if ( mask_names[i].mask & level)
             {
-                if (*mask_names[i].name && mask_names[i].mask && 
+                if (*mask_names[i].name && mask_names[i].mask &&
                     mask_names[i].mask != YLOG_ALL)
                 {
-                    if (strlen(flags) + strlen(mask_names[i].name) 
+                    if (strlen(flags) + strlen(mask_names[i].name)
                                              <   sizeof(flags) - 4)
                     {
                         strcat(flags, "[");
@@ -412,7 +412,7 @@ static void yaz_log_to_file(int level, const char *log_message)
                     level &= ~mask_names[i].mask;
                 }
             }
-       
+
         tbuf[0] = '\0';
         if (!(l_level & YLOG_NOTIME))
         {
@@ -479,15 +479,15 @@ void yaz_log(int level, const char *fmt, ...)
 
 void yaz_log_time_format(const char *fmt)
 {
-    if ( !fmt || !*fmt) 
+    if ( !fmt || !*fmt)
     { /* no format, default to new */
         l_actual_format = l_new_default_format;
-        return; 
+        return;
     }
     if (0==strcmp(fmt, "old"))
     { /* force the old format */
         l_actual_format = l_old_default_format;
-        return; 
+        return;
     }
     /* else use custom format */
     strncpy(l_custom_format, fmt, TIMEFORMAT_LEN-1);
@@ -501,7 +501,7 @@ static char *clean_name(const char *name, size_t len, char *namebuf, size_t bufl
     char *p = namebuf;
     char *start = namebuf;
     if (buflen <= len)
-        len = buflen-1; 
+        len = buflen-1;
     strncpy(namebuf, name, len);
     namebuf[len] = '\0';
     while ((p = strchr(start, '/')))
@@ -540,16 +540,16 @@ int yaz_log_module_level(const char *name)
     char clean[255];
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
     internal_log_init();
-    
+
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n, mask_names[i].name))
         {
             yaz_log(YLOG_LOGLVL, "returning log bit 0x%x for '%s' %s",
-                    mask_names[i].mask, n, 
+                    mask_names[i].mask, n,
                     strcmp(n,name) ? name : "");
             return mask_names[i].mask;
         }
-    yaz_log(YLOG_LOGLVL, "returning NO log bit for '%s' %s", n, 
+    yaz_log(YLOG_LOGLVL, "returning NO log bit for '%s' %s", n,
             strcmp(n, name) ? name : "" );
     return 0;
 }
@@ -579,7 +579,7 @@ int yaz_log_mask_str_x(const char *str, int level)
         {
             level = atoi(str);
         }
-        else 
+        else
         {
             char clean[509];
             char *n = clean_name(str, (size_t) (p - str), clean, sizeof(clean));

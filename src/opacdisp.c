@@ -29,7 +29,7 @@ static void opac_element_str(WRBUF wrbuf, yaz_iconv_t cd1, yaz_iconv_t cd2,
         wrbuf_puts(wrbuf, "<");
         wrbuf_puts(wrbuf, elem);
         wrbuf_puts(wrbuf, ">");
-        
+
         pos = wrbuf->pos; /* save position */
         if (wrbuf_iconv_write_x(wrbuf, cd1, data, strlen(data), 1) && cd2)
         {
@@ -68,7 +68,7 @@ void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
     if (r->bibliographicRecord)
     {
         Z_External *ext = r->bibliographicRecord;
-        
+
         wrbuf_puts(wrbuf, "  <bibliographicRecord>\n");
         if (ext->which == Z_External_octet)
             yaz_marc_decode_wrbuf(mt, (const char *) ext->u.octet_aligned->buf,
@@ -96,9 +96,9 @@ void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
         else if (h->which == Z_HoldingsRecord_holdingsAndCirc)
         {
             int j;
-            
+
             Z_HoldingsAndCircData *d = h->u.holdingsAndCirc;
-        
+
             opac_element_str(wrbuf, cd1, cd2, 2, "typeOfRecord",
                              d->typeOfRecord);
             opac_element_str(wrbuf, cd1, cd2, 2, "encodingLevel",

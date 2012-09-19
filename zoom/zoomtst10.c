@@ -25,7 +25,7 @@ int main(int argc, char **argv)
         exit (1);
     }
 
-    if (ZOOM_query_ccl2rpn(q, argv[2], 
+    if (ZOOM_query_ccl2rpn(q, argv[2],
                            "term t=l,r s=al\n" "ti u=4 s=pw\n",
                            &ccl_error_code, &ccl_error_string, &ccl_error_pos))
     {
@@ -37,13 +37,13 @@ int main(int argc, char **argv)
     else
     {
         z = ZOOM_connection_new (argv[1], 0);
-        
+
         if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
         {
             fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
             exit (2);
         }
-        
+
         r = ZOOM_connection_search (z, q);
         ZOOM_query_destroy(q);
         if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))

@@ -41,7 +41,7 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         inp++;
         --inbytesleft;
         (*no_read)++;
-    }    
+    }
     if (inbytesleft == 0)
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL); /* incomplete input */
@@ -50,15 +50,15 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     }
     switch (*inp) {
     case 0xe1: /*  alpha small */
-            if (tonos) 
+            if (tonos)
                 x = 0x03ac;
-            else 
+            else
                 x = 0x03b1;
             break;
     case 0xc1: /*  alpha capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x0386;
-            else 
+            else
                 x = 0x0391;
             break;
 
@@ -83,15 +83,15 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x0394;
             break;
     case 0xe6: /*  epsilon small */
-            if (tonos) 
+            if (tonos)
                 x = 0x03ad;
-            else 
+            else
                 x = 0x03b5;
             break;
     case 0xc6: /*  epsilon capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x0388;
-            else 
+            else
                 x = 0x0395;
             break;
     case 0xe9: /*  Zeta small */
@@ -101,15 +101,15 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x0396;
             break;
     case 0xea: /*  Eta small */
-            if (tonos) 
+            if (tonos)
                 x = 0x03ae;
-            else 
+            else
                 x = 0x03b7;
             break;
     case 0xca: /*  Eta capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x0389;
-            else 
+            else
                 x = 0x0397;
             break;
     case 0xeb: /*  Theta small */
@@ -119,24 +119,24 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x0398;
             break;
     case 0xec: /*  Iota small */
-            if (tonos) 
-                if (dialitika) 
+            if (tonos)
+                if (dialitika)
                     x = 0x0390;
-                else 
+                else
                     x = 0x03af;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03ca;
-                else 
+                else
                     x = 0x03b9;
             break;
     case 0xcc: /*  Iota capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x038a;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03aa;
-                else 
+                else
                     x = 0x0399;
             break;
     case 0xed: /*  Kappa small */
@@ -170,15 +170,15 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x039e;
             break;
     case 0xf2: /*  Omicron small */
-            if (tonos) 
+            if (tonos)
                 x = 0x03cc;
-            else 
+            else
                 x = 0x03bf;
             break;
     case 0xd2: /*  Omicron capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x038c;
-            else 
+            else
                 x = 0x039f;
             break;
     case 0xf3: /*  Pi small */
@@ -209,24 +209,24 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x03a4;
             break;
     case 0xf9: /*  Upsilon small */
-            if (tonos) 
-                if (dialitika) 
+            if (tonos)
+                if (dialitika)
                     x = 0x03b0;
-                else 
+                else
                     x = 0x03cd;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03cb;
-                else 
+                else
                     x = 0x03c5;
             break;
     case 0xd9: /*  Upsilon capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x038e;
-            else 
-                if (dialitika) 
+            else
+                if (dialitika)
                     x = 0x03ab;
-                else 
+                else
                     x = 0x03a5;
             break;
     case 0xfa: /*  Phi small */
@@ -248,15 +248,15 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
             x = 0x03a8;
             break;
     case 0xfd: /*  Omega small */
-            if (tonos) 
+            if (tonos)
                 x = 0x03ce;
-            else 
+            else
                 x = 0x03c9;
             break;
     case 0xdd: /*  Omega capital */
-            if (tonos) 
+            if (tonos)
                 x = 0x038f;
-            else 
+            else
                 x = 0x03a9;
             break;
     default:
@@ -264,7 +264,7 @@ static unsigned long read_iso_5428_1984(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         break;
     }
     (*no_read)++;
-    
+
     return x;
 }
 

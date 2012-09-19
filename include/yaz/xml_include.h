@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file 
+/** \file
     \brief XML Include (not to be confused with W3C XInclude)
 */
 

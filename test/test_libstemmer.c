@@ -15,17 +15,17 @@
 #if YAZ_HAVE_ICU
 #include <yaz/stemmer.h>
 
-int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *expected) 
+int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *expected)
 {
     struct icu_buf_utf16 *src  = icu_buf_utf16_create(0);
     struct icu_buf_utf16 *dst  = icu_buf_utf16_create(0);
     struct icu_buf_utf8  *dst8 = icu_buf_utf8_create(0);
     int rc = 0;
-    UErrorCode status; 
+    UErrorCode status;
     const char *result;
 
     icu_utf16_from_utf8_cstr(src, to_stem, &status);
-    yaz_stemmer_stem(stemmer, dst, src, &status); 
+    yaz_stemmer_stem(stemmer, dst, src, &status);
     if (status == U_ZERO_ERROR) {
         icu_utf16_to_utf8(dst8, dst, &status);
         result = icu_buf_utf8_to_cstr(dst8);
@@ -41,23 +41,23 @@ int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *ex
 static void tst(void)
 {
     UErrorCode status;
-    //== U_ZERO_ERROR; 
+    //== U_ZERO_ERROR;
     yaz_stemmer_p stemmer = yaz_stemmer_create("en", "porter", &status);
-    YAZ_CHECK(stemmer); 
+    YAZ_CHECK(stemmer);
 
     /* fail  */
-    YAZ_CHECK(test_stemmer_stem(stemmer, "beer", "water") == 0 ); 
+    YAZ_CHECK(test_stemmer_stem(stemmer, "beer", "water") == 0 );
 
     /* Same */
-    YAZ_CHECK(test_stemmer_stem(stemmer, "adadwwr", "adadwwr")); 
+    YAZ_CHECK(test_stemmer_stem(stemmer, "adadwwr", "adadwwr"));
 
     /* Remove S */
-    YAZ_CHECK(test_stemmer_stem(stemmer, "beers", "beer")); 
-    YAZ_CHECK(test_stemmer_stem(stemmer, "persons", "person")); 
+    YAZ_CHECK(test_stemmer_stem(stemmer, "beers", "beer"));
+    YAZ_CHECK(test_stemmer_stem(stemmer, "persons", "person"));
 
     /* Remove s and ing  */
-    YAZ_CHECK(test_stemmer_stem(stemmer, "runs", "run")); 
-    YAZ_CHECK(test_stemmer_stem(stemmer, "running", "run")); 
+    YAZ_CHECK(test_stemmer_stem(stemmer, "runs", "run"));
+    YAZ_CHECK(test_stemmer_stem(stemmer, "running", "run"));
 
     yaz_stemmer_destroy(stemmer);
 }

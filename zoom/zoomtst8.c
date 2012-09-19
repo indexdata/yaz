@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
         /* connect and init */
         ZOOM_connection_connect (z[i], argv[1+i], 0);
-        
+
     }
     /* scan all */
     for (i = 0; i<no; i++)

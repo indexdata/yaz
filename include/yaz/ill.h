@@ -43,7 +43,7 @@ struct ill_get_ctl {
     void *clientData;
     const char *(*f)(void *clientData, const char *element);
 };
-    
+
 YAZ_EXPORT ILL_ItemRequest *ill_get_ItemRequest (
     struct ill_get_ctl *gs, const char *name, const char *sub);
 

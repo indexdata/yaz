@@ -93,7 +93,7 @@ static struct {
     { 'y', 0x0301, 0xfd}, /* LATIN SMALL LETTER Y WITH ACUTE */
     /* omitted:    0xfe      LATIN SMALL LETTER THORN */
     { 'y', 0x0308, 0xff}, /* LATIN SMALL LETTER Y WITH DIAERESIS */
-    
+
     { 0, 0, 0}
 };
 
@@ -158,7 +158,7 @@ static size_t write_iso_8859_1(yaz_iconv_t cd, yaz_iconv_encoder_t e,
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
             return (size_t)(-1);
         }
-        if (!latin1_comb[i].x1) 
+        if (!latin1_comb[i].x1)
         {   /* not found. Just write compose_char */
             *outp++ = (unsigned char) w->compose_char;
             (*outbytesleft)--;
@@ -223,7 +223,7 @@ void destroy_iso_8859_1(yaz_iconv_encoder_t e)
 
 yaz_iconv_encoder_t yaz_iso_8859_1_encoder(const char *tocode,
                                            yaz_iconv_encoder_t e)
-    
+
 {
     if (!yaz_matchstr(tocode, "iso88591"))
     {
@@ -239,7 +239,7 @@ yaz_iconv_encoder_t yaz_iso_8859_1_encoder(const char *tocode,
     return 0;
 }
 
-static unsigned long read_ISO8859_1(yaz_iconv_t cd, 
+static unsigned long read_ISO8859_1(yaz_iconv_t cd,
                                     yaz_iconv_decoder_t d,
                                     unsigned char *inp,
                                     size_t inbytesleft, size_t *no_read)
@@ -251,7 +251,7 @@ static unsigned long read_ISO8859_1(yaz_iconv_t cd,
 
 yaz_iconv_decoder_t yaz_iso_8859_1_decoder(const char *fromcode,
                                            yaz_iconv_decoder_t d)
-    
+
 {
     if (!yaz_matchstr(fromcode, "iso88591"))
     {

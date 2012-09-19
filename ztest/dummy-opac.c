@@ -31,11 +31,11 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
             odr_malloc(odr, sizeof(*hr));
         Z_HoldingsAndCircData *hc = (Z_HoldingsAndCircData *)
             odr_malloc(odr, sizeof(*hc));
-        
+
         rec->holdingsData[i] = hr;
         hr->which = Z_HoldingsRecord_holdingsAndCirc;
         hr->u.holdingsAndCirc = hc;
-            
+
         hc->typeOfRecord = "u";
 
         hc->encodingLevel = "u";
@@ -46,7 +46,7 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
         hc->completeness = 0; /* OPT */
         hc->dateOfReport = "000000";
         hc->nucCode = "s-FM/GC";
-        hc->localLocation = 
+        hc->localLocation =
             "Main or Science/Business Reading Rms - STORED OFFSITE";
         hc->shelvingLocation = 0; /* OPT */
         hc->callNumber = "MLCM 89/00602 (N)";

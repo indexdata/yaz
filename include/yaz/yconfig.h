@@ -39,7 +39,7 @@
 #  define YAZ_IMPORT __declspec(dllimport)
 # else
 #  define YAZ_EXPORT
-#  define YAZ_IMPORT 
+#  define YAZ_IMPORT
 # endif
 #endif
 
@@ -53,8 +53,8 @@
 #define YAZ_BEGIN_CDECL extern "C" {
 #define YAZ_END_CDECL }
 #else
-#define YAZ_BEGIN_CDECL 
-#define YAZ_END_CDECL 
+#define YAZ_BEGIN_CDECL
+#define YAZ_END_CDECL
 #endif
 
 #endif

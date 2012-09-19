@@ -68,27 +68,27 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                 switch (*relation)
                 {
                     /* Unsure on whether this is the relation attribute constants? */
-                case Z_ProximityOperator_Prox_lessThan: 
+                case Z_ProximityOperator_Prox_lessThan:
                     return 0;
-                case Z_ProximityOperator_Prox_lessThanOrEqual: 
+                case Z_ProximityOperator_Prox_lessThanOrEqual:
                     return 0;
-                case Z_ProximityOperator_Prox_equal: 
+                case Z_ProximityOperator_Prox_equal:
                     return ":";
-                case Z_ProximityOperator_Prox_greaterThanOrEqual: 
+                case Z_ProximityOperator_Prox_greaterThanOrEqual:
                     return 0;
-                case Z_ProximityOperator_Prox_greaterThan: 
+                case Z_ProximityOperator_Prox_greaterThan:
                     return 0;
-                case Z_ProximityOperator_Prox_notEqual: 
+                case Z_ProximityOperator_Prox_notEqual:
                     return 0;
-                case 100: 
+                case 100:
                     /* phonetic is not implemented*/
-                    return 0; 
-                case 101: 
+                    return 0;
+                case 101:
                     /* stem is not not implemented */
-                    return 0; 
-                case 102: 
+                    return 0;
+                case 102:
                     /* relevance is supported in SOLR, but not implemented yet */
-                    return 0; 
+                    return 0;
                 default:
                     /* Invalid relation */
                     return 0;
@@ -116,7 +116,7 @@ static int rpn2solr_attr(solr_transform_t ct,
         index = lookup_index_from_string_attr(attributes);
 
     /* Attempt to fix bug #2978: Look for a relation attribute */
-    if (!relation) 
+    if (!relation)
         relation = lookup_relation_index_from_attr(attributes);
 
     if (!index)
@@ -258,7 +258,7 @@ static int rpn2solr_simple(solr_transform_t ct,
                     i++;
                     if (strchr(SOLR_SPECIAL, sterm[i]))
                         wrbuf_putc(w, '\\');
-                    wrbuf_putc(w, sterm[i]);                    
+                    wrbuf_putc(w, sterm[i]);
                 }
                 else if (sterm[i] == '?' && trunc == 104)
                 {

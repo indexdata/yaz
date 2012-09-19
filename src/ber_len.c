@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_len.c
  * \brief Implements BER length octet encoding and decoding
  *
@@ -81,8 +81,8 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
 
 /**
  * ber_declen:
- * Decode BER length octets. Returns 
- *  > 0  : number of bytes read 
+ * Decode BER length octets. Returns
+ *  > 0  : number of bytes read
  *   -1  : not enough room to read bytes within max bytes
  *   -2  : other error
  *
@@ -109,7 +109,7 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     }
     if (*b == 0XFF)     /* reserved value */
         return -2;
-    /* indefinite long form */ 
+    /* indefinite long form */
     n = *b & 0X7F;
     if (n >= max)
         return -1;

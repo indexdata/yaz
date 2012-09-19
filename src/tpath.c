@@ -56,7 +56,7 @@ size_t yaz_filepath_comp(const char **path_p, const char **comp)
         path_sep = strchr(path+2, ':');
     else
         path_sep = 0;
-    
+
     if (path_sep)
     {
         len = path_sep - path;
@@ -82,7 +82,7 @@ char *yaz_filepath_resolve(const char *fname, const char *path,
     {
         struct stat stat_buf;
         size_t slen = 0;
-       
+
         *fullpath = '\0';
         if (path)
         {
@@ -131,7 +131,7 @@ int yaz_is_abspath(const char *p)
 #ifdef WIN32
     if (*p == '\\')
         return 1;
-    if (*p && p[1] == ':' && 
+    if (*p && p[1] == ':' &&
         ((*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z')))
         return 1;
 #endif

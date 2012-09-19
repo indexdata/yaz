@@ -2,7 +2,7 @@
  * Copyright (C) 1995-2012 Index Data
  * See the file LICENSE for details.
  */
-/** 
+/**
  * \file cclqfile.c
  * \brief Implements parsing of CCL qualifier specs in files
  */
@@ -40,7 +40,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
 
     yaz_tok_cfg_destroy(yt);
     *addinfo = 0;
-    
+
     t = yaz_tok_move(tp);
     while (t == YAZ_TOK_STRING)
     {
@@ -109,7 +109,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                 goto out;
             }
             value_str = yaz_tok_parse_string(tp);
-            
+
             if (sscanf(type_str, "%d", &type) == 1)
                 ;
             else if (strlen(type_str) != 1)
@@ -132,7 +132,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                         value = CCL_BIB1_REL_ORDER;
                     else if (!ccl_stricmp (value_str, "r"))
                         value = CCL_BIB1_REL_PORDER;
-                    break;                
+                    break;
                 case 'p':
                 case 'P':
                     type = CCL_BIB1_POS;
@@ -148,7 +148,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                         value = CCL_BIB1_STR_OR_LIST;
                     if (!ccl_stricmp (value_str, "ag"))
                         value = CCL_BIB1_STR_AUTO_GROUP;
-                    break;                
+                    break;
                 case 't':
                 case 'T':
                     type = CCL_BIB1_TRU;
@@ -164,7 +164,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                         value = CCL_BIB1_TRU_CAN_REGEX;
                     else if (!ccl_stricmp (value_str, "z"))
                         value = CCL_BIB1_TRU_CAN_Z3958;
-                    break;                
+                    break;
                 case 'c':
                 case 'C':
                     type = CCL_BIB1_COM;
@@ -272,7 +272,7 @@ void ccl_qual_line(CCL_bibset bibset, char *line)
     int  no_scan = 0;
     char qual_name[128];
     char *cp1, *cp = line;
-    
+
     if (*cp == '#')
         return;        /* ignore lines starting with # */
     if (sscanf (cp, "%100s%n", qual_name, &no_scan) < 1)
@@ -292,8 +292,8 @@ void ccl_qual_line(CCL_bibset bibset, char *line)
  * Each line format is:
  *  <name> <t>=<v> <t>=<v> ....
  *  Where <name> is name of qualifier;
- *  <t>=<v> is a attribute definition pair where <t> is one of: 
- *     u(use), r(relation), p(position), t(truncation), c(completeness) 
+ *  <t>=<v> is a attribute definition pair where <t> is one of:
+ *     u(use), r(relation), p(position), t(truncation), c(completeness)
  *     or plain integer.
  *  <v> is an integer or special pseudo-value.
  */

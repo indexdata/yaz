@@ -32,15 +32,15 @@ int main(int argc, char **argv)
     ZOOM_options o = ZOOM_options_create ();
     int error;
     const char *errmsg, *addinfo;
-    
+
     if (argc < 3)
         usage();
 
     z = ZOOM_connection_create (o);
-    
+
     /* connect and init */
     ZOOM_connection_connect (z, argv[1], 0);
-    
+
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
     {
         fprintf(stderr, "%s error: %s (%d) %s\n",

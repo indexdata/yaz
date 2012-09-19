@@ -47,7 +47,7 @@ struct icu_transform *icu_transform_clone(struct icu_transform *old)
 }
 
 struct icu_transform * icu_transform_create(const char *id, char action,
-                                            const char *rules, 
+                                            const char *rules,
                                             UErrorCode *status)
 {
     struct icu_buf_utf16 *id16 = icu_buf_utf16_create(0);
@@ -70,10 +70,10 @@ struct icu_transform * icu_transform_create(const char *id, char action,
     case 'f':
     case 'F':
         transform->trans
-            = utrans_openU(id16->utf16, 
+            = utrans_openU(id16->utf16,
                            id16->utf16_len,
                            UTRANS_FORWARD,
-                           rules16->utf16, 
+                           rules16->utf16,
                            rules16->utf16_len,
                            &transform->parse_error, status);
         break;
@@ -83,7 +83,7 @@ struct icu_transform * icu_transform_create(const char *id, char action,
             = utrans_openU(id16->utf16,
                            id16->utf16_len,
                            UTRANS_REVERSE ,
-                           rules16->utf16, 
+                           rules16->utf16,
                            rules16->utf16_len,
                            &transform->parse_error, status);
         break;
@@ -93,7 +93,7 @@ struct icu_transform * icu_transform_create(const char *id, char action,
     }
     icu_buf_utf16_destroy(rules16);
     icu_buf_utf16_destroy(id16);
-    
+
     if (U_SUCCESS(*status))
         return transform;
 
@@ -117,7 +117,7 @@ int icu_transform_trans(struct icu_transform * transform,
                         const struct icu_buf_utf16 * src16,
                         UErrorCode *status)
 {
-    if (!transform || !transform->trans 
+    if (!transform || !transform->trans
         || !src16  || !dest16)
         return 0;
 
@@ -130,14 +130,14 @@ int icu_transform_trans(struct icu_transform * transform,
     if (!icu_buf_utf16_copy(dest16, src16))
         return 0;
 
-    utrans_transUChars(transform->trans, 
+    utrans_transUChars(transform->trans,
                        dest16->utf16, &(dest16->utf16_len),
                        dest16->utf16_cap,
                        0, &(dest16->utf16_len), status);
 
     if (U_FAILURE(*status))
         icu_buf_utf16_clear(dest16);
-    
+
     return dest16->utf16_len;
 }
 

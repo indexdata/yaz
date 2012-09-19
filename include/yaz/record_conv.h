@@ -78,7 +78,7 @@ struct yaz_record_conv_type {
     \retval -1 failure
 
     On failure, use yaz_record_conv_get_error to get error string.
-    
+
     \verbatim
     <backend syntax='xml'>
       <xslt stylesheet="dc2marcxml.xsl"/>
@@ -144,7 +144,7 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
 /** returns error string (for last error)
     \param p record conversion handle
     \return error string
-*/    
+*/
 YAZ_EXPORT
 const char *yaz_record_conv_get_error(yaz_record_conv_t p);
 
@@ -152,14 +152,14 @@ const char *yaz_record_conv_get_error(yaz_record_conv_t p);
 /** set path for opening stylesheets etc.
     \param p record conversion handle
     \param path file path (UNIX style with : / Windows with ;)
-*/    
+*/
 YAZ_EXPORT
 void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
 
 /** adds a type to our conversion handler
     \param p record conversion handle
     \param type info
-*/    
+*/
 
 YAZ_END_CDECL
 

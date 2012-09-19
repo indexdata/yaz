@@ -157,7 +157,7 @@ static Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
 {
     Z_DeleteResultSetResponse *r = (Z_DeleteResultSetResponse *)
         odr_malloc(o, sizeof(*r));
-    
+
     r->referenceId = 0;
     r->deleteOperationStatus = odr_intdup(o, Z_DeleteStatus_success);
     r->deleteListStatuses = 0;
@@ -171,7 +171,7 @@ static Z_DeleteResultSetResponse *zget_DeleteResultSetResponse(ODR o)
 static Z_ScanRequest *zget_ScanRequest(ODR o)
 {
     Z_ScanRequest *r = (Z_ScanRequest *)odr_malloc(o, sizeof(*r));
-    
+
     r->referenceId = 0;
     r->num_databaseNames = 0;
     r->databaseNames = 0;
@@ -187,7 +187,7 @@ static Z_ScanRequest *zget_ScanRequest(ODR o)
 static Z_ScanResponse *zget_ScanResponse(ODR o)
 {
     Z_ScanResponse *r = (Z_ScanResponse *)odr_malloc(o, sizeof(*r));
-    
+
     r->referenceId = 0;
     r->stepSize = 0;
     r->scanStatus = odr_intdup(o, Z_Scan_success);
@@ -203,7 +203,7 @@ static Z_TriggerResourceControlRequest *zget_TriggerResourceControlRequest(ODR o
 {
     Z_TriggerResourceControlRequest *r = (Z_TriggerResourceControlRequest *)
         odr_malloc(o, sizeof(*r));
-    
+
     r->referenceId = 0;
     r->requestedAction = odr_intdup(o, Z_TriggerResourceControlRequest_resourceReport);
     r->prefResourceReportFormat = 0;
@@ -376,7 +376,7 @@ static Z_DuplicateDetectionRequest *zget_DuplicateDetectionRequest(ODR o)
 {
     Z_DuplicateDetectionRequest *r = (Z_DuplicateDetectionRequest *)
         odr_malloc(o, sizeof(*r));
-    
+
     r->referenceId = 0;
     r->num_inputResultSetIds = 0;
     r->inputResultSetIds = 0;
@@ -397,7 +397,7 @@ static Z_DuplicateDetectionResponse *zget_DuplicateDetectionResponse(ODR o)
 {
     Z_DuplicateDetectionResponse *r = (Z_DuplicateDetectionResponse *)
         odr_malloc(o, sizeof(*r));
- 
+
     r->referenceId = 0;
     r->status = odr_intdup(o, Z_DuplicateDetectionResponse_success);
     r->resultSetCount = 0;
@@ -406,11 +406,11 @@ static Z_DuplicateDetectionResponse *zget_DuplicateDetectionResponse(ODR o)
     r->otherInfo = 0;
     return r;
 }
- 
+
 Z_APDU *zget_APDU(ODR o, int which)
 {
     Z_APDU *r = (Z_APDU *)odr_malloc(o, sizeof(*r));
-    
+
     switch (r->which = which)
     {
     case Z_APDU_initRequest:
@@ -498,9 +498,9 @@ Z_APDU *zget_APDU(ODR o, int which)
 Z_DefaultDiagFormat *zget_DefaultDiagFormat(ODR o, int error,
                                             const char *addinfo)
 {
-    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *) 
+    Z_DefaultDiagFormat *dr = (Z_DefaultDiagFormat *)
         odr_malloc(o, sizeof(*dr));
-    
+
     dr->diagnosticSetId = odr_oiddup(o, yaz_oid_diagset_bib_1);
     dr->condition = odr_intdup(o, error);
     dr->which = Z_DefaultDiagFormat_v2Addinfo;
@@ -531,7 +531,7 @@ Z_NamePlusRecord *zget_surrogateDiagRec(ODR o, const char *dbname,
 {
     Z_NamePlusRecord *rec = (Z_NamePlusRecord *) odr_malloc(o, sizeof(*rec));
     Z_DiagRec *drec = (Z_DiagRec *)odr_malloc(o, sizeof(*drec));
-    
+
     if (dbname)
         rec->databaseName = odr_strdup(o, dbname);
     else
@@ -553,7 +553,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
 
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
-    x->indirect_reference = 0;  
+    x->indirect_reference = 0;
     x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_userInfo1;
 
@@ -633,7 +633,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
 
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
-    x->indirect_reference = 0;  
+    x->indirect_reference = 0;
     x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_octet;
     x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));

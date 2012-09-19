@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** 
+/**
  * \file charneg.h
  * \brief Header for Z39.50 Charset negotiation utilities
  *
@@ -45,7 +45,7 @@ YAZ_BEGIN_CDECL
  * client and server parts. At that moment the (*) is based on
  * Z_PrivateCharacterSet_externallySpecified method.
  *
- */  
+ */
 
 /*
  * Get (*) record from request
@@ -60,7 +60,7 @@ YAZ_EXPORT
 int yaz_del_charneg_record(Z_OtherInformation **p);
 
 /*
- * Client's part. 
+ * Client's part.
  */
 YAZ_EXPORT
 Z_External *yaz_set_proposal_charneg(ODR odr,
@@ -84,7 +84,7 @@ void yaz_get_response_charneg(NMEM mem,
 /*
  * Server's part
  */
- 
+
 YAZ_EXPORT
 Z_External *yaz_set_response_charneg(ODR odr,
                                      const char *charset, const char *lang,

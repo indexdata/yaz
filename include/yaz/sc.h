@@ -27,7 +27,7 @@
 
 /** \file sc.h
     \brief Header for Windows Service Control utility
-   
+
     This is a simple wrapper for the Windows Service Control system. It
     also operates on Unix in which case the user supplied main function
     (sc_main) is is called immediately. See sc_test.c for an example.
@@ -73,7 +73,7 @@ YAZ_EXPORT void yaz_sc_running(yaz_sc_t s);
 
 /** \brief frees service control handle
     \param s service control handle
-*/    
+*/
 YAZ_EXPORT void yaz_sc_destroy(yaz_sc_t *s);
 
 YAZ_END_CDECL

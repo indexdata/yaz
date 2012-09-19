@@ -24,7 +24,7 @@ int yaz_match_glob(const char *glob, const char *text)
         return *text == '\0';
     if (glob[0] == '*')
     {
-        do 
+        do
         {
             if (yaz_match_glob(glob+1, text))
                 return 1;

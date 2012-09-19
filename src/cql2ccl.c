@@ -16,7 +16,7 @@
 
 #include <yaz/cql.h>
 
-static int cql_to_ccl_r(struct cql_node *cn, 
+static int cql_to_ccl_r(struct cql_node *cn,
                         void (*pr)(const char *buf, void *client_data),
                         void *client_data);
 
@@ -29,7 +29,7 @@ static void pr_term(const char **cpp, int stop_at_space,
     for (cp = *cpp; *cp; cp++)
     {
         char x[4];
-        
+
         if (*cp == '\\' && cp[1])
         {
             if (!quote_mode)
@@ -83,7 +83,7 @@ static void pr_term(const char **cpp, int stop_at_space,
     *cpp = cp;
 }
 
-static int node(struct cql_node *cn, 
+static int node(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
@@ -159,7 +159,7 @@ static int node(struct cql_node *cn,
 }
 
 
-static int bool(struct cql_node *cn, 
+static int bool(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
@@ -170,7 +170,7 @@ static int bool(struct cql_node *cn,
     r = cql_to_ccl_r(cn->u.boolean.left, pr, client_data);
     if (r)
         return r;
-    
+
     pr(") ", client_data);
 
     if (strcmp(value, "prox"))
@@ -227,7 +227,7 @@ static int bool(struct cql_node *cn,
     return r;
 }
 
-static int cql_to_ccl_r(struct cql_node *cn, 
+static int cql_to_ccl_r(struct cql_node *cn,
                         void (*pr)(const char *buf, void *client_data),
                         void *client_data)
 {
@@ -246,7 +246,7 @@ static int cql_to_ccl_r(struct cql_node *cn,
     return -1;
 }
 
-int cql_to_ccl(struct cql_node *cn, 
+int cql_to_ccl(struct cql_node *cn,
                void (*pr)(const char *buf, void *client_data),
                void *client_data)
 {

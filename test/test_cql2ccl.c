@@ -18,7 +18,7 @@ static int tst_query_s(const char *cql, const char *expected_ccl,
     int ret = 1;
     CQL_parser cp = cql_parser_create();
     int r = cql_parser_string(cp, cql);
-    
+
     if (r)
     {
         yaz_log(YLOG_WARN, "cql: parse error: %s", cql);
@@ -52,7 +52,7 @@ static int tst_query_s(const char *cql, const char *expected_ccl,
                 yaz_log(YLOG_WARN, " got error");
         }
         wrbuf_rewind(w);
-        r = cql_sortby_to_sortkeys(cql_parser_result(cp), 
+        r = cql_sortby_to_sortkeys(cql_parser_result(cp),
                                    wrbuf_vp_puts, w);
         if (expected_keys && !r && !strcmp(wrbuf_cstr(w), expected_keys))
             ;
@@ -148,7 +148,7 @@ static void tst(void)
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance<=3 dinosaurs",
                         "(dc.title=\"encyclopedia\") %3 (\"dinosaurs\")"));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance<=3/unit=word "
-                        "dinosaurs", 
+                        "dinosaurs",
                         "(dc.title=\"encyclopedia\") %3 (\"dinosaurs\")"));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance<=3/unit=phrase "
                         "dinosaurs", 0));

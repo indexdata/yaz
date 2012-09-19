@@ -38,7 +38,7 @@ int cql_parser_string(CQL_parser cp, const char *str)
 
     b.str = str;
     b.off = 0;
-    
+
     return cql_parser_stream(cp, getbuf, ungetbuf, &b);
 }
 

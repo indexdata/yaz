@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** 
+/**
  * \file backend.h
  * \brief Header for GFS
  *
@@ -42,7 +42,7 @@
 #include <yaz/oid_db.h>
 
 YAZ_BEGIN_CDECL
-    
+
 typedef struct association *bend_association;
 
 /** \brief Information for Z39.50/SRU search handler
@@ -184,7 +184,7 @@ typedef struct bend_delete_rr {
     int delete_status;    /**< status for the whole operation */
     int *statuses;    /**< status each set - indexed as setnames */
     ODR stream;
-    ODR print; 
+    ODR print;
 } bend_delete_rr;
 
 /** \brief Information for Z39.50 sort handler */
@@ -208,7 +208,7 @@ typedef struct bend_esrequest_rr
 {
     int ItemNo;
     Z_ExtendedServicesRequest *esr;
-    
+
     ODR stream;                /* encoding stream */
     ODR decode;                /* decoding stream */
     ODR print;                 /* printing stream */
@@ -243,40 +243,40 @@ typedef struct {
 
 This includes both request
 information (to be read) and response information which should be
-set by the bend_init handler 
+set by the bend_init handler
 */
 typedef struct bend_initrequest
 {
     /** \brief user/name/password to be read */
-    Z_IdAuthentication *auth; 
+    Z_IdAuthentication *auth;
     /** \brief encoding stream (for results) */
     ODR stream;
     /** \brief printing stream */
     ODR print;
     /** \brief decoding stream (use stream for results) */
-    ODR decode; 
+    ODR decode;
     /** \brief reference ID */
     Z_ReferenceId *referenceId;
     /** \brief peer address of client */
-    char *peer_name;           
-    
-    /** \brief character set and language negotiation 
+    char *peer_name;
 
-    see include/yaz/z-charneg.h 
+    /** \brief character set and language negotiation
+
+    see include/yaz/z-charneg.h
     */
     Z_CharSetandLanguageNegotiation *charneg_request;
 
     /** \brief character negotiation response */
     Z_External *charneg_response;
 
-    /** \brief character set (encoding) for query terms 
-        
+    /** \brief character set (encoding) for query terms
+
     This is NULL by default. It should be set to the native character
     set that the backend assumes for query terms */
-    char *query_charset;      
+    char *query_charset;
 
-    /** \brief whehter query_charset also applies to recors 
-    
+    /** \brief whehter query_charset also applies to recors
+
     Is 0 (No) by default. Set to 1 (yes) if records is in the same
     character set as queries. If in doubt, use 0 (No).
     */
@@ -330,7 +330,7 @@ typedef struct statserv_options_block
     char apdufile[ODR_MAXNAME+1]; /**< file for pretty-printed PDUs */
     char logfile[ODR_MAXNAME+1];  /**< file for diagnostic output */
     char default_listen[1024];    /**< 0 == no default listen */
-    enum oid_proto default_proto; /**< PROTO_SR or PROTO_Z3950 */ 
+    enum oid_proto default_proto; /**< PROTO_SR or PROTO_Z3950 */
     int idle_timeout;             /**< how many minutes to wait before closing */
     int maxrecordsize;            /**< maximum value for negotiation */
     char configname[ODR_MAXNAME+1]; /**< given to the backend in bend_init */

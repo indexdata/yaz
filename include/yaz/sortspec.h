@@ -42,9 +42,9 @@ YAZ_BEGIN_CDECL
     \param odr memory for result
     \param arg sort spec string
     \returns Z39.50 SortKeySpecList or NULL on error
-    
+
     The sort spec list is of the form:
-    (field flags)+ 
+    (field flags)+
     where field is either a string or one or more attribute pairs
     key=value (there must be no blanks in either field of flags).
     flags is a character list:
@@ -54,7 +54,7 @@ YAZ_BEGIN_CDECL
     sS     : respectcase / case-sensitive
     !      : abort of key is omitted in result
     =value : missing value
-    
+
     Examples:
 
       title a

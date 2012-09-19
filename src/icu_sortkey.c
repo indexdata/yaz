@@ -27,15 +27,15 @@
 #include <unicode/uchar.h>    /* char names           */
 
 void icu_sortkey8_from_utf16(UCollator *coll,
-                             struct icu_buf_utf8 * dest8, 
+                             struct icu_buf_utf8 * dest8,
                              struct icu_buf_utf16 * src16,
                              UErrorCode * status)
-{ 
+{
     int32_t sortkey_len = 0;
     /* we'll fake a capacity of one less, because it turns out
        that ucol_getSortKey writes ONE character too much */
     int32_t cap = dest8->utf8_cap ? dest8->utf8_cap - 1 : 0;
-    
+
     sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
                                   dest8->utf8, cap);
 
@@ -50,7 +50,7 @@ void icu_sortkey8_from_utf16(UCollator *coll,
     if (U_SUCCESS(*status)
         && sortkey_len > 0)
         dest8->utf8_len = sortkey_len;
-    else 
+    else
         icu_buf_utf8_clear(dest8);
 }
 

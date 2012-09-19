@@ -74,7 +74,7 @@ void yaz_mutex_enter(YAZ_MUTEX p)
         EnterCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
         int r = 1; /* signal : not locked (yet) */
-        
+
         if (p->log_level)
         {   /* debugging */
             r = pthread_mutex_trylock(&p->handle);

@@ -52,7 +52,7 @@ YAZ_EXPORT yaz_marc_t yaz_marc_create(void);
 /** \brief destroy yaz_marc_t handle */
 YAZ_EXPORT void yaz_marc_destroy(yaz_marc_t mt);
 
-/** \brief set XML mode YAZ_MARC_LINE, YAZ_MARCXML, YAZ_MARC_ISO2709 .. 
+/** \brief set XML mode YAZ_MARC_LINE, YAZ_MARCXML, YAZ_MARC_ISO2709 ..
     \param mt MARC handle
     \param xmlmode mode.
 
@@ -83,9 +83,9 @@ YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
 /** \brief supply iconv handle for character set conversion */
 YAZ_EXPORT yaz_iconv_t yaz_marc_get_iconv(yaz_marc_t mt);
 
-/** \brief set debug level 
+/** \brief set debug level
     \param mt handle
-    \param level level, where 0=lowest, 1 more debug, 2 even more 
+    \param level level, where 0=lowest, 1 more debug, 2 even more
 */
 YAZ_EXPORT void yaz_marc_debug(yaz_marc_t mt, int level);
 
@@ -97,7 +97,7 @@ YAZ_EXPORT void yaz_marc_debug(yaz_marc_t mt, int level);
     \param rsize size of result (memory "owned" by yaz_marc_mt handle)
 
     Decodes MARC in buf of size bsize.
-    On success, result in *result with size *rsize. 
+    On success, result in *result with size *rsize.
     Returns -1 on error, or size of input record (>0) if OK
 */
 YAZ_EXPORT int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
@@ -170,16 +170,16 @@ YAZ_EXPORT int yaz_marc_read_iso2709(yaz_marc_t mt,
     Parses MARC line record from stream
     Returns > 0 for OK (same as length), -1=ERROR
 */
-YAZ_EXPORT 
+YAZ_EXPORT
 int yaz_marc_read_line(yaz_marc_t mt,
                        int (*getbyte)(void *client_data),
                        void (*ungetbyte)(int b, void *client_data),
                        void *client_data);
 
 #if YAZ_HAVE_XML2
-/** \brief parses MARCXML/MarcXchange/TurboMARC record from xmlNode pointer 
+/** \brief parses MARCXML/MarcXchange/TurboMARC record from xmlNode pointer
     \param mt handle
-    \param ptr is a pointer to root xml node 
+    \param ptr is a pointer to root xml node
     \retval 0 OK
     \retval -1 ERROR
 */
@@ -239,8 +239,8 @@ YAZ_EXPORT int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wrbuf);
     \retval -1 ERROR
 
     This function calls yaz_marc_write_iso2709, yaz_marc_write_marcxml,
-    etc.. depending on mode given by yaz_marc_xml. 
-*/  
+    etc.. depending on mode given by yaz_marc_xml.
+*/
 YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
 
 #if YAZ_HAVE_XML2
@@ -252,10 +252,10 @@ YAZ_EXPORT int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wrbuf);
     \param type MarcXchange format (NULL for none)
     \retval 0 Creation successful and *root_ptr is "record" node
     \retval -1 ERROR
-*/  
+*/
 YAZ_EXPORT
 int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
-                       const char *ns, 
+                       const char *ns,
                        const char *format,
                        const char *type);
 #endif
@@ -265,12 +265,12 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
     \param leader_spec
     \retval 0 OK
     \retval -1 ERROR
-    
+
     Spec takes form pos=val,pos=val,...
     where value is either a number (decimal char value) or a
     string in 'a', e.g. 9='a'
-    
-*/  
+
+*/
 YAZ_EXPORT int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec);
 
 
@@ -281,7 +281,7 @@ YAZ_EXPORT int yaz_marc_leader_spec(yaz_marc_t mt, const char *leader_spec);
     \param identifier_length identifier length (returned value)
     \param base_address base address (returned value)
     \param length_data_entry length of data entry (returned value)
-    \param length_starting length of starting 
+    \param length_starting length of starting
     \param length_implementation length of implementation defined data
 */
 YAZ_EXPORT
@@ -297,14 +297,14 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader,
 /** \brief adds MARC comment string
     \param mt handle
     \param comment comment to be added)
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_comment(yaz_marc_t mt, char *comment);
 
 /** \brief adds MARC annotation - printf interface
     \param mt handle
     \param fmt printf format string
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...);
 
@@ -312,7 +312,7 @@ void yaz_marc_cprintf(yaz_marc_t mt, const char *fmt, ...);
     \param mt handle
     \param code_data code data buffer
     \param code_data_len length of code data
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_subfield(yaz_marc_t mt,
                            const char *code_data, size_t code_data_len);
@@ -323,7 +323,7 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
     \param tag (e.g. "001"
     \param data value for this tag
     \param data_len length of data
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
                                const char *data, size_t data_len);
@@ -334,7 +334,7 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
     \param mt handle
     \param ptr_tag value of tag (TEXT xmlNode)
     \param ptr_data value of data (TEXT xmlNode)
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                    const xmlNode *ptr_data);
@@ -343,7 +343,7 @@ void yaz_marc_add_controlfield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     \param mt handle
     \param tag string tag
     \param ptr_data value of data (TEXT xmlNode)
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_controlfield_xml2(yaz_marc_t mt, char *tag,
                                     const xmlNode *ptr_data);
@@ -354,7 +354,7 @@ void yaz_marc_add_controlfield_xml2(yaz_marc_t mt, char *tag,
     \param tag value of tag as string
     \param indicator indicator string
     \param indicator_len length of indicator string
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
                             const char *indicator, size_t indicator_len);
@@ -365,7 +365,7 @@ void yaz_marc_add_datafield(yaz_marc_t mt, const char *tag,
     \param ptr_tag value of tag (TEXT xmlNode)
     \param indicator indicator string
     \param indicator_len length of indicator string
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
                                 const char *indicator, size_t indicator_len);
@@ -374,7 +374,7 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     \param mt handle
     \param tag_value string value (pointer copied verbatim, not strdupped)
     \param indicators indicator string ; pointer copied verbatim; not strdupped
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_add_datafield_xml2(yaz_marc_t mt, char *tag_value,
                                  char *indicators);
@@ -384,19 +384,19 @@ void yaz_marc_add_datafield_xml2(yaz_marc_t mt, char *tag_value,
 /** \brief returns memory for MARC handle
     \param mt handle
     \retval NMEM handle for MARC system
-*/  
+*/
 YAZ_EXPORT
 NMEM yaz_marc_get_nmem(yaz_marc_t mt);
 
 /** \brief clears memory and MARC record
     \param mt handle
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_reset(yaz_marc_t mt);
 
 /** \brief gets debug level for MARC system
     \param mt handle
-*/  
+*/
 YAZ_EXPORT
 int yaz_marc_get_debug(yaz_marc_t mt);
 
@@ -404,14 +404,14 @@ int yaz_marc_get_debug(yaz_marc_t mt);
     \param arg string
     \retval -1 unknown format (bad arg)
     \retval >= 0 OK (one of YAZ_MARC - values)
-*/  
+*/
 YAZ_EXPORT
 int yaz_marc_decode_formatstr(const char *arg);
 
-/** \brief Enables or disables writing of MARC XML records using Libxml2 
+/** \brief Enables or disables writing of MARC XML records using Libxml2
     \param mt handle
     \param enable 0=disable, 1=enable
-*/  
+*/
 YAZ_EXPORT
 void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
 
@@ -419,7 +419,7 @@ void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable);
     \param mt handle
     \param r OPAC record
     \param wrbuf WRBUF for resulting display string
-    
+
     This function uses iconv_handle of yaz_marc_t for character set
     conversion of both OPAC + ISO2709 part.
     \*/
@@ -443,12 +443,12 @@ YAZ_EXPORT void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r,
     \param wr WRBUF for output
     \retval 0 OK
     \retval -1 ERROR
-*/  
+*/
 YAZ_EXPORT int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr);
 
 /** \brief enables record collection output
     \param mt handle
-*/  
+*/
 YAZ_EXPORT void yaz_marc_enable_collection(yaz_marc_t mt);
 
 YAZ_END_CDECL

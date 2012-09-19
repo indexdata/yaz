@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file 
+ * \file
  * \brief Select, poll wrapper
  */
 #if HAVE_CONFIG_H
@@ -81,7 +81,7 @@ int yaz_poll_select(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
     }
     tv.tv_sec = sec;
     tv.tv_usec = nsec / 1000;
-    
+
     r = select(max_fd+1, &input, &output, &except, (sec == -1 ? 0 : &tv));
     if (r >= 0)
     {

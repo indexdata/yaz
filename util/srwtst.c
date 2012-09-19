@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     decode = odr_createmem(ODR_DECODE);
     encode = odr_createmem(ODR_ENCODE);
     content_len = no;
-    z_soap_codec(decode, &soap_package, 
+    z_soap_codec(decode, &soap_package,
                  &content_buf, &content_len, h);
     if (!soap_package)
     {
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         {
             Z_SRW_PDU *sr = (Z_SRW_PDU *) soap_package->u.generic->p;
             if (sr->which == Z_SRW_searchRetrieve_request)
-            { 
+            {
                 Z_SRW_searchRetrieveRequest *req = sr->u.request;
                 switch(req->query_type)
                 {

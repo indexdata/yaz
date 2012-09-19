@@ -1529,7 +1529,7 @@ static int send_Z3950_searchRequest(const char *arg)
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
             return 0;
         }
-    } 
+    }
     else if (myQueryType == QueryType_CQL2RPN)
     {
         /* ### All this code should be wrapped in a utility function */
@@ -3020,7 +3020,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
         sprintf(setstring, "%d", setnumber);
     else
         *setstring = '\0';
-    
+
     token_len = check_token(arg_c, "format");
     if (token_len)
     {
@@ -3285,10 +3285,10 @@ static int cmd_cancel(const char *arg)
             apdu->u.triggerResourceControlRequest;
         bool_t rfalse = 0;
         char command[16];
-        
+
         *command = '\0';
         sscanf(arg, "%15s", command);
-        
+
         if (only_z3950())
             return 0;
         if (session_initResponse &&
@@ -3301,7 +3301,7 @@ static int cmd_cancel(const char *arg)
         *req->requestedAction = Z_TriggerResourceControlRequest_cancel;
         req->resultSetWanted = &rfalse;
         req->referenceId = set_refid(out);
-        
+
         send_apdu(apdu);
         printf("Sent cancel request\n");
         if (!strcmp(command, "wait"))
@@ -3611,7 +3611,7 @@ static int cmd_scan_common(const char *set, const char *arg)
         scan_query = last_scan_query;
         scan_term = last_scan_line;
     }
-    else 
+    else
     {
         strcpy(last_scan_query, arg);
         scan_query = arg;
@@ -4085,7 +4085,7 @@ static int cmd_set_auto_reconnect(const char* arg)
         printf("Error use on or off\n");
         return 1;
     }
-    
+
     if (auto_reconnect)
         printf("Set auto reconnect enabled.\n");
     else
@@ -4278,7 +4278,7 @@ static void initialize(const char *rc_file)
         fprintf(stderr, "failed to allocate ODR streams\n");
         exit(1);
     }
-    
+
     strcpy(scan_position, "1");
 
     setvbuf(stdout, 0, _IONBF, 0);
@@ -4952,7 +4952,7 @@ static int cmd_wait_response(const char *arg)
 {
     int i;
     int wait_for = atoi(arg);
-    if (wait_for < 1) 
+    if (wait_for < 1)
         wait_for = 1;
 
     for (i = 0 ; i < wait_for; ++i )

@@ -23,7 +23,7 @@ enum query_charset_status {
     CONV_FAILED
 };
 
-enum query_charset_status t(yaz_iconv_t cd, 
+enum query_charset_status t(yaz_iconv_t cd,
                             const char *pqf, const char *expect_pqf)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();

@@ -57,7 +57,7 @@ YAZ_BEGIN_CDECL
 #define xstrndup(s, n) xstrndup_f(s, n, __FILE__, __LINE__)
 /** \brief utility macro which calls malloc_trav_f */
 #define xmalloc_trav(s) xmalloc_trav_f(s, __FILE__, __LINE__)
-    
+
 /** \brief realloc
     \param o buffer to be reallocated
     \param size size of buffer to be allocated

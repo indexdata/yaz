@@ -60,7 +60,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt, const char *name)
         (*p)->top = -1;
     }
 #if 0
-    /* ignoring the cons helps with at least one target. 
+    /* ignoring the cons helps with at least one target.
      * http://bugzilla.indexdata.dk/cgi-bin/bugzilla/show_bug.cgi?id=24
      */
     return ber_bitstring(o, *p, 0);

@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         printf ("error - couldn't connect?\n");
         exit (1);
     }
-        
+
     ZOOM_connection_destroy (z);
 
     for (block = 0; block < 3; block++)
@@ -55,15 +55,15 @@ int main(int argc, char **argv)
             sprintf (host, "localhost:9999/%d", i);
             z = ZOOM_connection_create (o);
             ZOOM_connection_connect (z, host, 0);
-            
+
             for (j = 0; j < 10; j++)
             {
                 ZOOM_record recs[2];
                 char query[40];
                 ZOOM_query s = ZOOM_query_create ();
-                
+
                 sprintf (query, "i%dr%d", i, j);
-                
+
                 if (ZOOM_query_prefix (s, query))
                 {
                     printf ("bad PQF: %s\n", query);
@@ -71,11 +71,11 @@ int main(int argc, char **argv)
                 }
                 ZOOM_options_set (o, "start", "0");
                 ZOOM_options_set (o, "count", "0");
-                
+
                 r[j] = ZOOM_connection_search (z, s); /* non-piggy */
-                
+
                 ZOOM_resultset_records (r[j], recs, 0, 2);  /* first two */
-                
+
                 ZOOM_resultset_records (r[j], recs, 1, 2);  /* third */
 
                 ZOOM_resultset_records (r[j], recs, 0, 0);  /* ignored */
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
                         exit (1);
                     }
                 }
-                
+
                 ZOOM_query_destroy (s);
 
                 printf (".");
@@ -114,15 +114,15 @@ int main(int argc, char **argv)
             sprintf (host, "localhost:9999/%d", i);
             z = ZOOM_connection_create (o);
             ZOOM_connection_connect (z, host, 0);
-            
+
             for (j = 0; j < 10; j++)
             {
                 char query[40];
-                
+
                 sprintf (query, "i%dr%d", i, j);
-                
+
                 ZOOM_options_set (o, "count", "0");
-                
+
                 r[j] = ZOOM_connection_search_pqf (z, query);
 
                 printf (".");
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
             }
 
             ZOOM_connection_destroy (z);
-            
+
             for (j = 0; j < 10; j++)
             {
                 ZOOM_resultset_records (r[j], 0, 0, 1);
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
                 term = ZOOM_scanset_term (scan, j, &occur, &len);
                 if (term)
                     printf ("%d %.*s %d\n", j, (int) len, term, (int) occur);
-                
+
             }
             ZOOM_scanset_destroy (scan);
             ZOOM_connection_destroy (z);

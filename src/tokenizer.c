@@ -21,7 +21,7 @@ struct yaz_tok_parse {
     int unget_byte;
     WRBUF wr_string;
     int look;
-    
+
     yaz_tok_cfg_t cfg;
     yaz_tok_get_byte_t get_byte_func;
     void *get_byte_data;
@@ -118,7 +118,7 @@ yaz_tok_parse_t yaz_tok_parse_create(yaz_tok_cfg_t t,
     tp->wr_string = wrbuf_alloc();
     return tp;
 }
-                                           
+
 
 void yaz_tok_parse_destroy(yaz_tok_parse_t tp)
 {
@@ -136,7 +136,7 @@ int yaz_tok_move(yaz_tok_parse_t tp)
     /* skip white space */
     while (ch && strchr(t->white_space, ch))
         ch = get_byte(tp);
-    if (!ch) 
+    if (!ch)
         ch = YAZ_TOK_EOF;
     else if (strchr(t->comment, ch))
         ch = YAZ_TOK_EOF;

@@ -164,7 +164,7 @@ static xmlNodePtr xml_config_get_root(void)
             yaz_log(YLOG_WARN, "Bad/missing root element for config %s",
                     control_block.xml_config);
             return 0;
-        
+
         }
     }
     return ptr;
@@ -235,7 +235,7 @@ static struct gfs_server * gfs_server_new(const char *id)
 #endif
 
 #if YAZ_HAVE_XML2
-static struct gfs_listen * gfs_listen_new(const char *id, 
+static struct gfs_listen * gfs_listen_new(const char *id,
                                           const char *address)
 {
     struct gfs_listen *n = (struct gfs_listen *)
@@ -308,7 +308,7 @@ int control_association(association *assoc, const char *host, int force_open)
                 assoc->server = gfs;
                 assoc->last_control = &gfs->cb;
                 statserv_setcontrol(&gfs->cb);
-                
+
                 gfs_server_chdir(gfs);
                 break;
             }
@@ -325,7 +325,7 @@ int control_association(association *assoc, const char *host, int force_open)
         statserv_setcontrol(&control_block);
         assoc->last_control = &control_block;
     }
-    yaz_log(YLOG_DEBUG, "server select: config=%s", 
+    yaz_log(YLOG_DEBUG, "server select: config=%s",
             assoc->last_control->configname);
 
     assoc->maximumRecordSize = assoc->last_control->maxrecordsize;
@@ -377,7 +377,7 @@ static void xml_config_read(void)
             struct gfs_server *gfs;
 
             for ( ; attr; attr = attr->next)
-                if (!xmlStrcmp(attr->name, BAD_CAST "listenref") 
+                if (!xmlStrcmp(attr->name, BAD_CAST "listenref")
                     && attr->children && attr->children->type == XML_TEXT_NODE)
                     listenref = nmem_dup_xml_content(gfs_nmem, attr->children);
                 else if (!xmlStrcmp(attr->name, BAD_CAST "id")
@@ -444,12 +444,12 @@ static void xml_config_read(void)
                 }
                 else if (!strcmp((const char *) ptr->name, "directory"))
                 {
-                    gfs->directory = 
+                    gfs->directory =
                         nmem_dup_xml_content(gfs_nmem, ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "docpath"))
                 {
-                    gfs->docpath = 
+                    gfs->docpath =
                         nmem_dup_xml_content(gfs_nmem, ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "maximumrecordsize"))
@@ -471,7 +471,7 @@ static void xml_config_read(void)
                 else if (!strcmp((const char *) ptr->name, "retrievalinfo"))
                 {
                     if (yaz_retrieval_configure(gfs->retrieval, ptr))
-                    {       
+                    {
                         yaz_log(YLOG_FATAL, "%s in config %s",
                                 yaz_retrieval_get_error(gfs->retrieval),
                                 control_block.xml_config);
@@ -506,7 +506,7 @@ static void xml_config_open(void)
     init_control_tls = 1;
     pthread_key_create(&current_control_tls, 0);
 #endif
-    
+
     gfs_nmem = nmem_create();
 #if YAZ_HAVE_XML2
     if (control_block.xml_config[0] == '\0')
@@ -749,7 +749,7 @@ static void statserv_closedown()
 
                 /* Allocate the thread handle array */
                 pThreadHandles = (HANDLE *)malloc(sizeof(HANDLE) * iHandles);
-                pCurrentHandle = pThreadHandles; 
+                pCurrentHandle = pThreadHandles;
 
                 for (pCurrentThread = pFirstThread;
                      pCurrentThread != NULL;
@@ -788,7 +788,7 @@ void __cdecl event_loop_thread(IOCHAN iochan)
 }
 
 /* WIN32 listener */
-static void listener(IOCHAN h, int event)   
+static void listener(IOCHAN h, int event)
 {
     COMSTACK line = (COMSTACK) iochan_getdata(h);
     IOCHAN parent_chan = line->user;
@@ -846,7 +846,7 @@ static void listener(IOCHAN h, int event)
         newHandle = (HANDLE) _beginthread(event_loop_thread, 0, new_chan);
         if (newHandle == (HANDLE) -1)
         {
-            
+
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create new thread.");
             iochan_destroy(h);
             return;
@@ -868,7 +868,7 @@ static void listener(IOCHAN h, int event)
 #else /* ! WIN32 */
 
 /* To save having an #ifdef in event_loop we need to
-   define this empty function 
+   define this empty function
 */
 void statserv_remove(IOCHAN pIOChannel)
 {
@@ -988,7 +988,7 @@ static void *new_session(void *vp)
     COMSTACK new_line = (COMSTACK) vp;
     IOCHAN parent_chan = (IOCHAN) new_line->user;
 
-    unsigned cs_get_mask, cs_accept_mask, mask =  
+    unsigned cs_get_mask, cs_accept_mask, mask =
         ((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
         ((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
 
@@ -1230,7 +1230,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
         return 1;
 
     xml_config_open();
-    
+
     xml_config_bend_start();
 
     if (control_block.inetd)
@@ -1278,9 +1278,9 @@ int check_options(int argc, char **argv)
     int ret = 0, r;
     char *arg;
 
-    yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL)); 
+    yaz_log_init_level(yaz_log_mask_str(STAT_DEFAULT_LOG_LEVEL));
 
-    get_logbits(1); 
+    get_logbits(1);
 
     while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:",
                           argv, argc, &arg)) != -2)
@@ -1291,7 +1291,7 @@ int check_options(int argc, char **argv)
             if (add_listener(arg, 0))
                 return 1;  /* failed to create listener */
             break;
-        case '1':        
+        case '1':
             control_block.one_shot = 1;
             control_block.dynamic = 0;
             break;
@@ -1327,7 +1327,7 @@ int check_options(int argc, char **argv)
             break;
         case 'v':
             yaz_log_init_level(yaz_log_mask_str(arg));
-            get_logbits(1); 
+            get_logbits(1);
             break;
         case 'a':
             option_copy(control_block.apdufile, arg);
@@ -1369,7 +1369,7 @@ int check_options(int argc, char **argv)
         case 'w':
             if (chdir(arg))
             {
-                perror(arg);            
+                perror(arg);
                 return 1;
             }
             break;

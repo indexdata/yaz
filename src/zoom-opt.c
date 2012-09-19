@@ -64,7 +64,7 @@ ZOOM_API(ZOOM_options)
         ZOOM_options dst = ZOOM_options_create();
         struct ZOOM_options_entry *src_e = src->entries;
         struct ZOOM_options_entry **dst_e = &dst->entries;
-        
+
         while(src_e)
         {
             append_entry(dst_e, src_e->name, src_e->value, src_e->len);
@@ -122,7 +122,7 @@ ZOOM_API(ZOOM_options_callback)
     void *callback_handle)
 {
     ZOOM_options_callback callback_old;
-    
+
     assert(opt);
     callback_old = opt->callback_func;
     opt->callback_func = callback_func;
@@ -139,7 +139,7 @@ ZOOM_API(void)
     if (opt->refcount == 0)
     {
         struct ZOOM_options_entry *e;
-        
+
         ZOOM_options_destroy(opt->parent1);
         ZOOM_options_destroy(opt->parent2);
         e = opt->entries;
@@ -223,7 +223,7 @@ ZOOM_API(int)
     ZOOM_options_get_bool(ZOOM_options opt, const char *name, int defa)
 {
     const char *v = ZOOM_options_get(opt, name);
-    
+
     if (!v)
         return defa;
     if (!strcmp(v, "1") || !strcmp(v, "T"))

@@ -70,14 +70,14 @@ typedef struct {
     Z_SOAP_fun f;
 } Z_SOAP_Handler;
 
-YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp, 
+YAZ_EXPORT int z_soap_codec(ODR o, Z_SOAP **pp,
                             char **content_buf, int *content_len,
                             Z_SOAP_Handler *handlers);
-YAZ_EXPORT int z_soap_codec_enc(ODR o, Z_SOAP **pp, 
+YAZ_EXPORT int z_soap_codec_enc(ODR o, Z_SOAP **pp,
                                 char **content_buf, int *content_len,
                                 Z_SOAP_Handler *handlers,
                                 const char *encoding);
-YAZ_EXPORT int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp, 
+YAZ_EXPORT int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                                     char **content_buf, int *content_len,
                                     Z_SOAP_Handler *handlers,
                                     const char *encoding,

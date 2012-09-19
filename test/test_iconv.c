@@ -22,7 +22,7 @@ static int compare_buffers(char *msg, int no,
     if (expect_len == got_len
         && !memcmp(expect_buf, got_buf, expect_len))
         return 1;
-    
+
     if (0) /* use 1 see how the buffers differ (for debug purposes) */
     {
         int i;
@@ -32,21 +32,21 @@ static int compare_buffers(char *msg, int no,
         {
             char got_char[10];
             char expect_char[10];
-            
+
             if (i < got_len)
                 sprintf(got_char, "%02X", got_buf[i]);
             else
                 sprintf(got_char, "?  ");
-            
+
             if (i < expect_len)
                 sprintf(expect_char, "%02X", expect_buf[i]);
             else
                 sprintf(expect_char, "?  ");
-            
+
             printf("%02d  %s  %s %c\n",
                    i, got_char, expect_char, got_buf[i] == expect_buf[i] ?
                    ' ' : '*');
-            
+
         }
     }
     return 0;
@@ -124,7 +124,7 @@ static int tst_convert_x(yaz_iconv_t cd, const char *buf, const char *cmpbuf,
             break;
         }
     }
-    if (wrbuf_len(b) == strlen(cmpbuf) 
+    if (wrbuf_len(b) == strlen(cmpbuf)
         && !memcmp(cmpbuf, wrbuf_buf(b), wrbuf_len(b)))
         ;
     else
@@ -139,7 +139,7 @@ static int tst_convert_x(yaz_iconv_t cd, const char *buf, const char *cmpbuf,
         wrbuf_rewind(w);
         wrbuf_write_escaped(w, wrbuf_buf(b), wrbuf_len(b));
         yaz_log(YLOG_LOG, "got %s", wrbuf_cstr(w));
-        
+
         wrbuf_rewind(w);
         wrbuf_puts_escaped(w, cmpbuf);
         yaz_log(YLOG_LOG, "exp %s", wrbuf_cstr(w));
@@ -172,12 +172,12 @@ static void tst_marc8_to_ucs4b(void)
     YAZ_CHECK(cd);
     if (!cd)
         return;
-    
+
     YAZ_CHECK(tst_convert_l(
                   cd,
                   0,
                   "\033$1" "\x21\x2B\x3B" /* FF1F */ "\033(B" "o",
-                  8, 
+                  8,
                   "\x00\x00\xFF\x1F" "\x00\x00\x00o"));
     YAZ_CHECK(tst_convert_l(
                   cd,
@@ -197,7 +197,7 @@ static void tst_marc8_to_ucs4b(void)
                   "\x21\x33\x53"  /* UCS 5206 */
                   "\x21\x44\x2B"  /* UCS 6790 */
                   "\033(B",
-                  24, 
+                  24,
                   "\x00\x00\x7C\xFB"
                   "\x00\x00\x7D\x71"
                   "\x00\x00\x5B\x89"
@@ -209,13 +209,13 @@ static void tst_marc8_to_ucs4b(void)
                   cd,
                   0,
                   "\xB0\xB2",     /* AYN and oSLASH */
-                  8, 
+                  8,
                   "\x00\x00\x02\xBB"  "\x00\x00\x00\xF8"));
     YAZ_CHECK(tst_convert_l(
                   cd,
                   0,
                   "\xF6\x61",     /* a underscore */
-                  8, 
+                  8,
                   "\x00\x00\x00\x61"  "\x00\x00\x03\x32"));
 
     YAZ_CHECK(tst_convert_l(
@@ -244,7 +244,7 @@ static void tst_marc8_to_ucs4b(void)
                   cd,
                   0,
                   "\xe5\xe8\x41",
-                  12, 
+                  12,
                   "\x00\x00\x00\x41" "\x00\x00\x03\x04" "\x00\x00\x03\x08"));
     /* bug #416 */
     YAZ_CHECK(tst_convert_l(
@@ -258,7 +258,7 @@ static void tst_marc8_to_ucs4b(void)
                   cd,
                   0,
                   "\xFA\x74\xFB\x73",
-                  12, 
+                  12,
                   "\x00\x00\x00\x74" "\x00\x00\x03\x60" "\x00\x00\x00\x73"));
 
     yaz_iconv_close(cd);
@@ -279,7 +279,7 @@ static void tst_ucs4b_to_utf8(void)
 
     YAZ_CHECK(tst_convert_l(
                   cd,
-                  8, 
+                  8,
                   "\x00\x00\xAE\x0E\x00\x00\xC0\xF4",
                   6,
                   "\xEA\xB8\x8E\xEC\x83\xB4"));
@@ -313,7 +313,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         yaz_iconv_close(cd);
         if (r == (size_t) (-1))
             return;
-        
+
         cd = yaz_iconv_open("ISO-8859-1", tmpcode);
         YAZ_CHECK(cd || !mandatory);
         if (!cd)
@@ -333,7 +333,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         }
         YAZ_CHECK(r != (size_t) (-1));
 
-        if (r != (size_t)(-1)) 
+        if (r != (size_t)(-1))
         {
             ret = compare_buffers("dconvert", i,
                                   strlen(iso_8859_1_a[i]), iso_8859_1_a[i],
@@ -362,7 +362,7 @@ int utf8_check(unsigned c)
             return 0;
         for (i = 0; i<4; i++)
             src[i] = c >> (i*8);
-        
+
         r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         yaz_iconv_close(cd);
 
@@ -389,7 +389,7 @@ int utf8_check(unsigned c)
     }
     return 1;
 }
-        
+
 static void tst_marc8_to_utf8(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC8");
@@ -398,10 +398,10 @@ static void tst_marc8_to_utf8(void)
     if (!cd)
         return;
 
-    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+    YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
     /* COMBINING ACUTE ACCENT */
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
                           "Cours de mathe\xcc\x81"));
 
     YAZ_CHECK(tst_convert(cd, "\xea" "a", "a\xcc\x8a"));
@@ -433,10 +433,10 @@ static void tst_marc8s_to_utf8(void)
     if (!cd)
         return;
 
-    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+    YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
     /* E9: LATIN SMALL LETTER E WITH ACUTE */
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
                           "Cours de math\xc3\xa9"));
 
     yaz_iconv_close(cd);
@@ -465,21 +465,21 @@ static void tst_marc8_to_latin1(void)
 
     YAZ_CHECK(tst_convert(cd, "\xea" "a"  "\xea" "a", "\xe5" "\xe5"));
 
-    YAZ_CHECK(tst_convert(cd, "Cours de math", 
+    YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe", 
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
                           "Cours de mathé"));
-    YAZ_CHECK(tst_convert(cd, "12345678âe", 
+    YAZ_CHECK(tst_convert(cd, "12345678âe",
                           "12345678é"));
-    YAZ_CHECK(tst_convert(cd, "123456789âe", 
+    YAZ_CHECK(tst_convert(cd, "123456789âe",
                           "123456789é"));
-    YAZ_CHECK(tst_convert(cd, "1234567890âe", 
+    YAZ_CHECK(tst_convert(cd, "1234567890âe",
                           "1234567890é"));
-    YAZ_CHECK(tst_convert(cd, "12345678901âe", 
+    YAZ_CHECK(tst_convert(cd, "12345678901âe",
                           "12345678901é"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâem", 
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâem",
                           "Cours de mathém"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâematiques", 
+    YAZ_CHECK(tst_convert(cd, "Cours de mathâematiques",
                           "Cours de mathématiques"));
 
     yaz_iconv_close(cd);
@@ -513,7 +513,7 @@ static void tst_utf8_to_marc8(const char *marc8_type)
     /** A MACRON + UMLAUT, DIAERESIS */
     YAZ_CHECK(tst_convert(cd, "A" "\xCC\x84" "\xCC\x88",
                           "\xE5\xE8\x41"));
-    
+
     /* Ligature spanning two characters */
     YAZ_CHECK(tst_convert(cd,
                           "\x74" "\xCD\xA1" "\x73",  /* UTF-8 */
@@ -539,21 +539,21 @@ static void tst_utf8_to_marc8(const char *marc8_type)
     YAZ_CHECK(tst_convert(cd,
                           "(\xe2\x81\xb0)",        /* UTF-8 */
                           "(\033p0\x1bs)"));
-    
-    
+
+
     /** bug #1778 */
     YAZ_CHECK(tst_convert(cd,
                           /* offset 0x530 in UTF-8 rec marccol4.u8.marc */
-                          "\xE3\x83\xB3" "\xE3\x82\xBF" 
+                          "\xE3\x83\xB3" "\xE3\x82\xBF"
                           "\xCC\x84" "\xCC\x84" "\xE3\x83\xBC" /* UTF-8 */,
                           "\x1B\x24\x31" "\x69\x25\x73"
-                          "\x1B\x28\x42" "\xE5\xE5" "\x1B\x24\x31" 
+                          "\x1B\x28\x42" "\xE5\xE5" "\x1B\x24\x31"
                           "\x69\x25\x3F"
                           "\x69\x21\x3C" "\x1B\x28\x42"));
 
-    
+
     /** bug #2120 */
-    YAZ_CHECK(tst_convert(cd, 
+    YAZ_CHECK(tst_convert(cd,
                           "\xCE\x94\xCE\xB5\xCF\x84"
                           "\xCE\xBF\xCF\x81\xCE\xB1"
                           "\xCE\xBA\xCE\xB7\xCF\x82\x2C",
@@ -562,7 +562,7 @@ static void tst_utf8_to_marc8(const char *marc8_type)
                           "\x61\x6D\x6A\x77"
                           "\x1B\x28\x42\x2C"
                   ));
- 
+
     {
         char *inbuf0 = "\xe2\x81\xb0";
         char *inbuf = inbuf0;
@@ -695,7 +695,7 @@ static void tst_danmarc_to_latin1(void)
 
     YAZ_CHECK(tst_convert(cd, "@\xe5", "aa"));
     YAZ_CHECK(tst_convert(cd, "@\xc5.", "Aa."));
-    
+
     yaz_iconv_close(cd);
 }
 

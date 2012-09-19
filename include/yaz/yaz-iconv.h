@@ -70,7 +70,7 @@ YAZ_EXPORT unsigned long yaz_read_UTF8_char(unsigned char *inp,
                                             size_t *no_read,
                                             int *error);
 
-/** \brief encodes UTF-8 sequence 
+/** \brief encodes UTF-8 sequence
     \param x the UNICODE value
     \param outbuf output buffer pointer, updated if conversion is successful
     \param outbytesleft length of buffer, updated if conversino is successful

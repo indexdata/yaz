@@ -61,9 +61,9 @@ static void tst_cond(void)
     {
         r = yaz_gettimeofday(&abstime);
         YAZ_CHECK_EQ(r, 0);
-        
+
         abstime.tv_sec += 1; /* wait 1 second */
-        
+
         r = yaz_cond_wait(c, p, &abstime);
         YAZ_CHECK(r != 0);
 
@@ -91,7 +91,7 @@ static void tst_create_thread(void)
     YAZ_CHECK(t[0]);
     t[1] = yaz_thread_create(my_handler, &mydata);
     YAZ_CHECK(t[1]);
-    
+
     return_data = 0;
     yaz_thread_join(&t[0], &return_data);
     YAZ_CHECK(!t[0]);
@@ -101,7 +101,7 @@ static void tst_create_thread(void)
     yaz_thread_join(&t[1], &return_data);
     YAZ_CHECK(!t[1]);
     YAZ_CHECK(return_data == &mydata);
-    
+
     YAZ_CHECK_EQ(mydata, 44);
 }
 

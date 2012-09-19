@@ -66,20 +66,20 @@ static size_t record_hash(int pos)
     return pos % RECORD_HASH_SIZE;
 }
 
-void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr, 
+void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                            int pos,
                            const char *syntax, const char *elementSetName,
                            const char *schema,
                            Z_SRW_diagnostic *diag)
 {
     ZOOM_record_cache rc = 0;
-    
+
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
 
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
-        if (pos == rc->pos 
+        if (pos == rc->pos
             && strcmp_null(r->schema, rc->schema) == 0
             && strcmp_null(elementSetName,rc->elementSetName) == 0
             && strcmp_null(syntax, rc->syntax) == 0)
@@ -96,9 +96,9 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->rec.wrbuf = 0;
 #endif
         rc->elementSetName = odr_strdup_null(r->odr, elementSetName);
-        
+
         rc->syntax = odr_strdup_null(r->odr, syntax);
-        
+
         rc->schema = odr_strdup_null(r->odr, r->schema);
 
         rc->pos = pos;
@@ -121,7 +121,7 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                 *cp = '\0';
             rc->rec.diag_uri = odr_strdup(r->odr, diag->uri);
         }
-        rc->rec.diag_message = odr_strdup_null(r->odr, diag->message);            
+        rc->rec.diag_message = odr_strdup_null(r->odr, diag->message);
         rc->rec.diag_details = odr_strdup_null(r->odr, diag->details);
     }
 }
@@ -131,7 +131,7 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *elementSetName)
 {
     ZOOM_record_cache rc;
-    
+
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos)
@@ -160,7 +160,7 @@ ZOOM_API(ZOOM_record)
     if (!z_NamePlusRecord(odr_enc, &srec->npr, 0, 0))
         return 0;
     buf = odr_getbuf(odr_enc, &size, 0);
-    
+
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
 #if SHPTR
@@ -170,7 +170,7 @@ ZOOM_API(ZOOM_record)
 #endif
     odr_setbuf(nrec->odr, buf, size, 0);
     z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
-    
+
     nrec->schema = odr_strdup_null(nrec->odr, srec->schema);
     nrec->diag_uri = odr_strdup_null(nrec->odr, srec->diag_uri);
     nrec->diag_message = odr_strdup_null(nrec->odr, srec->diag_message);
@@ -217,10 +217,10 @@ ZOOM_API(const char *)
     ZOOM_record_get(ZOOM_record rec, const char *type_spec, int *len)
 {
     WRBUF wrbuf;
-    
+
     if (len)
         *len = 0; /* default return */
-        
+
     if (!rec || !rec->npr)
         return 0;
 
@@ -244,7 +244,7 @@ ZOOM_API(int)
                       const char **addinfo, const char **diagset)
 {
     Z_NamePlusRecord *npr;
-    
+
     if (!rec)
         return 0;
 
@@ -269,7 +269,7 @@ ZOOM_API(int)
         {
             Z_DefaultDiagFormat *ddf = diag_rec->u.defaultFormat;
             oid_class oclass;
-    
+
             error = *ddf->condition;
             switch (ddf->which)
             {

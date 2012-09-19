@@ -60,7 +60,7 @@ YAZ_EXPORT void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
 YAZ_EXPORT int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
 
-YAZ_EXPORT    
+YAZ_EXPORT
 Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len);
 
 

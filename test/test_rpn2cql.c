@@ -21,7 +21,7 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
     ODR odr = odr_createmem(ODR_ENCODE);
     WRBUF w = wrbuf_alloc();
     Z_RPNQuery *q = p_query_rpn(odr, pqf);
-    
+
     if (q)
     {
         int r = cql_transform_rpn2cql_wrbuf(ct, w, q);
@@ -54,7 +54,7 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
 
 static void tst1(void)
 {
-    cql_transform_t ct = cql_transform_create();    
+    cql_transform_t ct = cql_transform_create();
 
     YAZ_CHECK(compare(ct, "abc", "\"abc\""));
     YAZ_CHECK(compare(ct, "\"a b c\"", "\"a b c\""));
@@ -82,7 +82,7 @@ static void tst2(void)
         wrbuf_puts(w, "/");
     }
     wrbuf_puts(w, "../etc/pqf.properties");
-    
+
     ct = cql_transform_open_fname(wrbuf_cstr(w));
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", "dc.title=\"abc\""));
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=108 abc", "dc.title=/exact \"abc\""));

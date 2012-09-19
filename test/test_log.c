@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         case 'n':
             number = atoi(arg);
             break;
-        case 'm':        
+        case 'm':
             level = yaz_log_module_level(arg);
             break;
         case 'w':

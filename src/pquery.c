@@ -33,7 +33,7 @@ struct yaz_pqf_parser {
 };
 
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
-                                     int num_attr, int max_attr, 
+                                     int num_attr, int max_attr,
                                      Odr_int *attr_list, char **attr_clist,
                                      Odr_oid **attr_set);
 
@@ -52,7 +52,7 @@ static int compare_term(struct yaz_pqf_parser *li, const char *src,
                         size_t off)
 {
     size_t len=strlen(src);
-    
+
     if (li->lex_len == len+off && !memcmp(li->lex_buf+off, src, len-off))
         return 1;
     return 0;
@@ -75,7 +75,7 @@ static int query_token(struct yaz_pqf_parser *li)
         ++(*qptr);
     }
     li->lex_buf = *qptr;
-   
+
     if (**qptr == li->escape_char && yaz_isdigit((*qptr)[1]))
     {
         ++(li->lex_len);
@@ -166,7 +166,7 @@ int escape_string(char *out_buf, const char *in, int len)
                     char s[4];
                     int n = 0;
                     s[0] = *in;
-                    s[1] = *++in;                   
+                    s[1] = *++in;
                     s[2] = *++in;
                     s[3] = '\0';
                     len = len - 2;
@@ -212,7 +212,7 @@ int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
             return 0;
         }
     }
-    else 
+    else
     {
         if (num_attr > 0)
             attr_set[num_attr] = attr_set[num_attr-1];
@@ -314,7 +314,7 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
     memcpy(term_octet->buf, buf, len);
     term_octet->size = term_octet->len = len;
     term_octet->buf[term_octet->size] = 0;  /* null terminate */
-    
+
     switch (term_type)
     {
     case Z_Term_general:
@@ -323,7 +323,7 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
         break;
     case Z_Term_characterString:
         term->which = Z_Term_characterString;
-        term->u.characterString = (char*) term_octet->buf; 
+        term->u.characterString = (char*) term_octet->buf;
         /* null terminated above */
         break;
     case Z_Term_numeric:
@@ -454,7 +454,7 @@ static Z_ProximityOperator *rpn_proximity(struct yaz_pqf_parser *li, ODR o)
         li->error = YAZ_PQF_ERROR_PROXIMITY;
         return NULL;
     }
-    
+
     if (!lex (li))
     {
         li->error = YAZ_PQF_ERROR_MISSING;
@@ -503,7 +503,7 @@ static Z_ProximityOperator *rpn_proximity(struct yaz_pqf_parser *li, ODR o)
 }
 
 static Z_Complex *rpn_complex(struct yaz_pqf_parser *li, ODR o,
-                              int num_attr, int max_attr, 
+                              int num_attr, int max_attr,
                               Odr_int *attr_list, char **attr_clist,
                               Odr_oid **attr_set)
 {
@@ -577,9 +577,9 @@ static void rpn_term_type(struct yaz_pqf_parser *li)
 #endif
     lex(li);
 }
-                           
+
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
-                                     int num_attr, int max_attr, 
+                                     int num_attr, int max_attr,
                                      Odr_int *attr_list,
                                      char **attr_clist,
                                      Odr_oid **attr_set)
@@ -863,7 +863,7 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet)
                 facet_field->terms[facet_field->num_terms] =
                     (Z_FacetTerm *) odr_malloc(odr, sizeof(Z_FacetTerm));
                 facet_field->terms[facet_field->num_terms]->term = term;
-                facet_field->terms[facet_field->num_terms]->count = 
+                facet_field->terms[facet_field->num_terms]->count =
                     odr_intdup(odr, 0);
                 facet_field->num_terms++;
             }

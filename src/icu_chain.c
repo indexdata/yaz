@@ -47,7 +47,7 @@ struct icu_chain_step
     union {
 	struct icu_casemap   *casemap;
 	struct icu_transform *transform;
-	struct icu_tokenizer *tokenizer;  
+	struct icu_tokenizer *tokenizer;
         yaz_stemmer_p         stemmer;
     } u;
     struct icu_chain_step *previous;
@@ -60,7 +60,7 @@ struct icu_chain
     int sort;
 
     UCollator *coll;
-    
+
     /* linked list of chain steps */
     struct icu_chain_step *csteps;
 };
@@ -70,7 +70,7 @@ int icu_check_status(UErrorCode status)
     if (U_FAILURE(status))
     {
         yaz_log(YLOG_WARN, "ICU: %d %s\n", status, u_errorName(status));
-        return 0;   
+        return 0;
     }
     return 1;
 }
@@ -80,7 +80,7 @@ static struct icu_chain_step *icu_chain_insert_step(
     const uint8_t *rule, UErrorCode *status)
 {
     struct icu_chain_step *step = 0;
-    
+
     if (!chain || !type || !rule)
         return 0;
 
@@ -101,7 +101,7 @@ static struct icu_chain_step *icu_chain_insert_step(
                                                  0, status);
         break;
     case ICU_chain_step_type_tokenize:
-        step->u.tokenizer = icu_tokenizer_create(chain->locale, 
+        step->u.tokenizer = icu_tokenizer_create(chain->locale,
                                                  (char) rule[0], status);
         break;
     case ICU_chain_step_type_transliterate:
@@ -161,7 +161,7 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
     {
         *sp = (struct icu_chain_step *) xmalloc(sizeof(**sp));
         (*sp)->type = old->type;
-        
+
         switch ((*sp)->type)
         {
         case ICU_chain_step_type_display:
@@ -223,7 +223,7 @@ void icu_chain_destroy(struct icu_chain *chain)
     }
 }
 
-struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node, 
+struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
                                        int sort,
                                        UErrorCode *status)
 {
@@ -231,12 +231,12 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
     int no_errors = 0;
     struct icu_chain *chain = 0;
     NMEM nmem = 0;
-   
+
     *status = U_ZERO_ERROR;
 
     if (xml_node && xml_node->type == XML_ELEMENT_NODE)
     {
-        xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node, 
+        xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node,
                                          (xmlChar *) "locale");
         if (xml_locale)
         {
@@ -275,21 +275,21 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         }
         if (!rule && node->children)
             rule = nmem_text_node_cdata(node->children, nmem);
-        
+
         if (!strcmp((const char *) node->name, "casemap"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap,
                                          (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transform"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_transform,
                                          (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "transliterate"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate,
                                          (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize,
                                          (const uint8_t *) rule, status);
         else if (!strcmp((const char *) node->name, "display"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_display, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_display,
                                          (const uint8_t *) "", status);
         else if (!strcmp((const char *) node->name, "stemming"))
             step = icu_chain_insert_step(chain, YAZ_chain_step_type_stemming,
@@ -298,7 +298,7 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         {
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
                     "Use transform instead", node->name);
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_transform, 
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_transform,
                                          (const uint8_t *) rule, status);
         }
         else if (!strcmp((const char *) node->name, "index")
@@ -369,7 +369,7 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
     else
     {
         struct icu_buf_utf16 *dst = icu_iter_invoke(iter, step->previous, src);
-        
+
         switch (step->type)
         {
         case ICU_chain_step_type_casemap:
@@ -480,14 +480,14 @@ int icu_iter_next(yaz_icu_iter_t iter)
                                      iter->steps : iter->chain->csteps,
                                      iter->input);
         iter->input = 0;
-        
+
         if (!iter->last)
             return 0;
 
         iter->token_count++;
 
         if (iter->chain->sort)
-        {        
+        {
             icu_sortkey8_from_utf16(iter->chain->coll,
                                     iter->sort8, iter->last,
                                     &iter->status);
@@ -510,16 +510,16 @@ const char *icu_iter_get_sortkey(yaz_icu_iter_t iter)
 }
 
 const char *icu_iter_get_display(yaz_icu_iter_t iter)
-{ 
-    return icu_buf_utf8_to_cstr(iter->display);   
+{
+    return icu_buf_utf8_to_cstr(iter->display);
 }
 
 int icu_iter_get_token_number(yaz_icu_iter_t iter)
-{ 
+{
     return iter->token_count;
 }
 
-int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr, 
+int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
                           UErrorCode *status)
 {
     if (chain->iter)

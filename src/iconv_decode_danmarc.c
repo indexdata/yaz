@@ -24,7 +24,7 @@ struct decoder_data {
     unsigned long x_back;
 };
 
-static unsigned long read_danmarc(yaz_iconv_t cd, 
+static unsigned long read_danmarc(yaz_iconv_t cd,
                                   yaz_iconv_decoder_t d,
                                   unsigned char *inp,
                                   size_t inbytesleft, size_t *no_read)
@@ -105,7 +105,7 @@ void destroy_danmarc(yaz_iconv_decoder_t d)
 
 yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
                                         yaz_iconv_decoder_t d)
-    
+
 {
     if (!yaz_matchstr(fromcode, "danmarc"))
     {

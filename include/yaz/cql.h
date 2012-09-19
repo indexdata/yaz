@@ -41,10 +41,10 @@ typedef struct cql_parser *CQL_parser;
 
 /** \brief creates a CQL parser.
     \returns CCL parser
-    
+
     Returns CQL parser or NULL if parser could not be created.
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 CQL_parser cql_parser_create(void);
 
 /** \brief destroys a CQL parser.
@@ -52,7 +52,7 @@ CQL_parser cql_parser_create(void);
 
     This function does nothing if NULL if received.
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 void cql_parser_destroy(CQL_parser cp);
 
 /** \brief parses a CQL query (string)
@@ -61,7 +61,7 @@ void cql_parser_destroy(CQL_parser cp);
     \retval 0 success
     \retval !=0 failure
  */
-YAZ_EXPORT 
+YAZ_EXPORT
 int cql_parser_string(CQL_parser cp, const char *str);
 
 /** \brief parses CQL query (query stream)
@@ -71,14 +71,14 @@ int cql_parser_string(CQL_parser cp, const char *str);
     \param client_data data to be passed to stream functions
     \retval 0 success
     \retval !=0 failure
-    
+
     This function is similar to cql_parser_string but takes a
     functions to read each query character from a stream.
-    
+
     The functions pointers getbytes, ungetbyte are similar to
     that known from stdios getc, ungetc.
 */
-YAZ_EXPORT 
+YAZ_EXPORT
 int cql_parser_stream(CQL_parser cp,
                       int (*getbyte)(void *client_data),
                       void (*ungetbyte)(int b, void *client_data),
@@ -89,8 +89,8 @@ int cql_parser_stream(CQL_parser cp,
     \param f file where query is read from
     \retval 0 success
     \retval !=0 failure
-    
-    This function is similar to cql_parser_string but reads from 
+
+    This function is similar to cql_parser_string but reads from
     stdio FILE handle instead.
 */
 YAZ_EXPORT
@@ -132,7 +132,7 @@ struct cql_node {
             char *value;
             /** left operand */
             struct cql_node *left;
-            /** right operand */ 
+            /** right operand */
             struct cql_node *right;
             /** modifiers (NULL for no list) */
             struct cql_node *modifiers;
@@ -224,7 +224,7 @@ struct cql_node *cql_parser_sort_result(CQL_parser cp);
     \param client_data data to be passed to pr function
  */
 YAZ_EXPORT
-void cql_to_xml(struct cql_node *cn, 
+void cql_to_xml(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data);
 /** \brief converts CQL tree to XCQL and writes to file
@@ -249,7 +249,7 @@ int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
     \param client_data data to be passed to pr function
  */
 YAZ_EXPORT
-int cql_to_ccl(struct cql_node *cn, 
+int cql_to_ccl(struct cql_node *cn,
                void (*pr)(const char *buf, void *client_data),
                void *client_data);
 
@@ -313,7 +313,7 @@ cql_transform_t cql_transform_open_fname(const char *fname);
 YAZ_EXPORT
 int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
                                  const char *value);
-    
+
 
 
 /** \brief destroys a CQL transform handle
@@ -418,7 +418,7 @@ int cql_strncmp(const char *s1, const char *s2, size_t n);
     \param cn CQL tree
     \param pr print function
     \param client_data data to be passed to pr function
-    
+
     This will take CQL_NODE_SORT entries and conver them to
 
     path,schema,ascending,caseSensitive,missingValue
@@ -445,7 +445,7 @@ int cql_sortby_to_sortkeys(struct cql_node *cn,
                            void (*pr)(const char *buf, void *client_data),
                            void *client_data);
 
-/** \brief converts CQL sortby to sortkeys .. 
+/** \brief converts CQL sortby to sortkeys ..
     \param cn CQL tree
     \param out result buffer
     \param max size of buffer (allocated)

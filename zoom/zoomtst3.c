@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 		event,
 		ZOOM_get_event_str(event));
     }
-    
+
     /* no more to be done. Inspect results */
     for (i = 0; i<no; i++)
     {

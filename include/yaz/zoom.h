@@ -251,7 +251,7 @@ ZOOM_record_clone(ZOOM_record srec);
 ZOOM_API(int)
     ZOOM_record_error(ZOOM_record rec, const char **msg,
                       const char **addinfo, const char **diagset);
-    
+
 /* ----------------------------------------------------------- */
 /* facets */
 
@@ -287,7 +287,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn);
 /* CCL translated client-side into RPN: `conn' is optional for diagnostics */
 ZOOM_API(int)
 ZOOM_query_ccl2rpn(ZOOM_query s, const char *query_str,
-                   const char *config, 
+                   const char *config,
                    int *ccl_error, const char **error_string, int *error_pos);
 /* PQF */
 ZOOM_API(int)
@@ -391,7 +391,7 @@ ZOOM_options_getl(ZOOM_options opt, const char *name, int *lenp);
 
 ZOOM_API(void)
 ZOOM_options_set(ZOOM_options opt, const char *name, const char *v);
-    
+
 ZOOM_API(void)
 ZOOM_options_setl(ZOOM_options opt, const char *name, const char *value,
                   int len);
@@ -420,7 +420,7 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value);
     \param cs connection array
     \retval 0 no event was fired
     \retval >0 event was fired for connection at (retval-1)
-    
+
     blocking poll for events on a number of connections. Returns positive
     integer if event occurred ; zero if none occurred and no more
     events are pending. The positive integer specifies the
@@ -461,7 +461,7 @@ ZOOM_event_nonblock(int no, ZOOM_connection *cs);
     \retval 0 no event was processed
     \retval 1 event was processed for connection
 
-    This function attemps to deal with outstandings events in 
+    This function attemps to deal with outstandings events in
     a non-blocking fashion. If no event was processed (return value of 0),
     then the system should attempt to deal with sockets in blocking mode
     using socket select/poll which means calling the following functions:
@@ -499,7 +499,7 @@ ZOOM_API(int)
 ZOOM_connection_get_socket(ZOOM_connection c);
 
 
-/** \brief get socket mask for connection 
+/** \brief get socket mask for connection
     \param c connection
     \returns mask for connection (possibly 0)
 

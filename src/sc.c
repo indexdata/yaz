@@ -145,7 +145,7 @@ static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
     }
 }
 
-VOID sc_ReportSvcStatus(yaz_sc_t s, 
+VOID sc_ReportSvcStatus(yaz_sc_t s,
                         DWORD dwCurrentState,
                         DWORD dwWin32ExitCode,
                         DWORD dwWaitHint)
@@ -162,13 +162,13 @@ VOID sc_ReportSvcStatus(yaz_sc_t s,
 
         if (dwCurrentState == SERVICE_START_PENDING)
             s->gSvcStatus.dwControlsAccepted = 0;
-        else 
+        else
             s->gSvcStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 
         if ( (dwCurrentState == SERVICE_RUNNING) ||
              (dwCurrentState == SERVICE_STOPPED) )
             s->gSvcStatus.dwCheckPoint = 0;
-        else 
+        else
             s->gSvcStatus.dwCheckPoint = dwCheckPoint++;
 
         // Report the status of the service to the SCM.
@@ -178,19 +178,19 @@ VOID sc_ReportSvcStatus(yaz_sc_t s,
 
 static yaz_sc_t global_sc = 0;
 
-VOID WINAPI sc_SvcCtrlHandler(DWORD dwCtrl)							 
+VOID WINAPI sc_SvcCtrlHandler(DWORD dwCtrl)
 {
-    switch(dwCtrl) 
-    {  
-    case SERVICE_CONTROL_STOP: 
+    switch(dwCtrl)
+    {
+    case SERVICE_CONTROL_STOP:
         yaz_log(YLOG_LOG, "Service %s to stop", global_sc->service_name);
         sc_ReportSvcStatus(global_sc, SERVICE_STOP_PENDING, NO_ERROR, 0);
         global_sc->sc_stop(global_sc);
         sc_ReportSvcStatus(global_sc, SERVICE_STOPPED, NO_ERROR, 0);
         return;
-    case SERVICE_CONTROL_INTERROGATE: 
-        break; 
-    default: 
+    case SERVICE_CONTROL_INTERROGATE:
+        break;
+    default:
         break;
     }
 }
@@ -202,22 +202,22 @@ static void WINAPI sc_service_main(DWORD argc, char **argv)
 
     yaz_log(YLOG_LOG, "Service %s starting", s->service_name);
 
-    s->gSvcStatusHandle = RegisterServiceCtrlHandler( 
+    s->gSvcStatusHandle = RegisterServiceCtrlHandler(
         s->service_name, sc_SvcCtrlHandler);
 
     if (!s->gSvcStatusHandle)
-    { 
+    {
         yaz_log(YLOG_FATAL|YLOG_ERRNO, "RegisterServiceCtrlHandler");
-        return; 
-    } 
+        return;
+    }
 
-    s->gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS; 
-    s->gSvcStatus.dwServiceSpecificExitCode = 0;    
+    s->gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    s->gSvcStatus.dwServiceSpecificExitCode = 0;
 
     sc_ReportSvcStatus(s, SERVICE_START_PENDING, NO_ERROR, 3000);
 
     ret_code = s->sc_main(s, s->argc, s->argv);
-	
+
     sc_ReportSvcStatus(s, SERVICE_STOPPED,
                        ret_code ? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR, ret_code);
 }
@@ -281,8 +281,8 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
             wrbuf_puts(w, "\"");
             yaz_log(YLOG_LOG, "path: %s", wrbuf_cstr(w));
 
-            schService = 
-                CreateService( 
+            schService =
+                CreateService(
                     manager,          /* SCM database */
                     TEXT(s->service_name), /* name of service */
                     TEXT(s->display_name), /* service name to display */
@@ -297,7 +297,7 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
                     NULL,                      /* no dependencies */
                     NULL,                      /* LocalSystem account */
                     NULL);                     /* no password */
-            if (schService == NULL) 
+            if (schService == NULL)
             {
                 yaz_log(YLOG_FATAL|YLOG_ERRNO, "Service %s could not be installed",
                         s->service_name);
@@ -312,9 +312,9 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
         {
             SC_HANDLE schService = 0;
             SERVICE_STATUS serviceStatus;
-			
+
             schService = OpenService(manager, TEXT(s->service_name), SERVICE_ALL_ACCESS);
-            if (schService == NULL) 
+            if (schService == NULL)
             {
                 yaz_log(YLOG_FATAL|YLOG_ERRNO, "Service %s could not be opened",
                         s->service_name);

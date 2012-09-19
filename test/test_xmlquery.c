@@ -52,7 +52,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
         xmlDocPtr doc = 0;
 
         yaz_rpnquery2xml(rpn, &doc);
-        
+
         if (!doc)
             status = QUERY2XML_FAILED;
         else
@@ -61,7 +61,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
             int len_out;
 
             xmlDocDumpMemory(doc, (xmlChar **) &buf_out, &len_out);
-            
+
             if (len_out == (int) strlen(expect_xml)
                 && memcmp(buf_out, expect_xml, len_out) == 0)
             {
@@ -70,7 +70,7 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
                 const char *addinfo = 0;
                 const xmlNode *root_element = xmlDocGetRootElement(doc);
                 ODR odr2 = odr_createmem(ODR_ENCODE);
-                
+
                 yaz_xml2query(root_element, &query2, odr2,
                               &error_code, &addinfo);
                 if (error_code || !query2)
@@ -111,7 +111,7 @@ static void tst(void)
     YAZ_CHECK_EQ(pqf2xml_text("@attr 1=4 bad query", "", 0), PQF_FAILED);
 #if YAZ_HAVE_XML2
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@attr 1=4 computer", 
+                     "@attr 1=4 computer",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<apt><attr type=\"1\" value=\"4\"/>"
@@ -119,7 +119,7 @@ static void tst(void)
                      "</rpn></query>\n",
                      "RPN @attrset Bib-1 @attr 1=4 computer"
                      ), XML_MATCH);
-    
+
     YAZ_CHECK_EQ(pqf2xml_text(
                      "@attr 2=1 @attr 1=title computer",
                      "<?xml version=\"1.0\"?>\n"
@@ -141,9 +141,9 @@ static void tst(void)
                      "</rpn></query>\n",
                      "RPN @attrset Bib-1 @attr Exp-1 1=1 @attr 2=1 computer"
                      ), XML_MATCH);
-    
+
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@and a b", 
+                     "@and a b",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<operator type=\"and\">"
@@ -152,9 +152,9 @@ static void tst(void)
                      "</operator></rpn></query>\n",
                      "RPN @attrset Bib-1 @and a b"
                      ), XML_MATCH);
-    
+
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@or @and a b c", 
+                     "@or @and a b c",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<operator type=\"or\">"
@@ -167,7 +167,7 @@ static void tst(void)
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@set abe", 
+                     "@set abe",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<rset>abe</rset></rpn></query>\n",
@@ -175,9 +175,9 @@ static void tst(void)
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
-                     /* exclusion, distance, ordered, relationtype, 
+                     /* exclusion, distance, ordered, relationtype,
                         knownunit, proxunit */
-                     "@prox 0 3 1 2 k 2           a b", 
+                     "@prox 0 3 1 2 k 2           a b",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<operator type=\"prox\" exclusion=\"false\" "
@@ -192,7 +192,7 @@ static void tst(void)
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@term numeric 32", 
+                     "@term numeric 32",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<apt>"
@@ -200,9 +200,9 @@ static void tst(void)
                      "</rpn></query>\n",
                      "RPN @attrset Bib-1 @term numeric 32"
                      ), XML_MATCH);
-    
+
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@term string computer", 
+                     "@term string computer",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<apt>"
@@ -210,9 +210,9 @@ static void tst(void)
                      "</rpn></query>\n",
                      "RPN @attrset Bib-1 @term string computer"
                      ), XML_MATCH);
-    
+
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@term null void", 
+                     "@term null void",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"Bib-1\">"
                      "<apt>"
@@ -222,7 +222,7 @@ static void tst(void)
                      ), XML_MATCH);
 
     YAZ_CHECK_EQ(pqf2xml_text(
-                     "@attrset gils @attr 4=2 x", 
+                     "@attrset gils @attr 4=2 x",
                      "<?xml version=\"1.0\"?>\n"
                      "<query><rpn set=\"GILS\">"
                      "<apt>"

@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_null.c
  * \brief Implements ber_null
  *
@@ -16,7 +16,7 @@
 
 #include "odr-priv.h"
 
-/** 
+/**
  * ber_null: BER-en/decoder for NULL type.
  */
 int ber_null(ODR o)

@@ -47,7 +47,7 @@ YAZ_EXPORT yaz_url_t yaz_url_create(void);
 
 /** \brief destroys a URL fetcher
     \param p handle
-    
+
     Note: OK to pass NULL as p
 */
 YAZ_EXPORT void yaz_url_destroy(yaz_url_t p);

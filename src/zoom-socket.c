@@ -39,7 +39,7 @@ ZOOM_API(int)
     {
         ZOOM_connection c = cs[i];
         int fd, mask;
-        
+
         if (!c)
             continue;
         fd = ZOOM_connection_get_socket(c);

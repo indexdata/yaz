@@ -51,7 +51,7 @@ typedef struct yaz_timing *yaz_timing_t;
     do_work();
     yaz_timing_stop(my);
 
-    printf("real=%g user=%g sys=%g\n", 
+    printf("real=%g user=%g sys=%g\n",
        yaz_timing_get_real(my),
        yaz_timing_get_user(my),
        yaz_timing_get_sys(my));
@@ -71,7 +71,7 @@ void yaz_timing_start(yaz_timing_t t);
 
 /** \brief stop timer
     \param t timing handle
-    
+
     Use yaz_timing_get_real, yaz_timing_get_user and yaz_timing_get_sys
     to fetch timing results.
 */

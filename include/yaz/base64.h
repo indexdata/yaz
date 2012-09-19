@@ -34,7 +34,7 @@
 #define YAZ_BASE64_H
 
 #include <yaz/yconfig.h>
- 
+
 YAZ_BEGIN_CDECL
 
 /** \brief encodes Base64 string

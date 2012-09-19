@@ -80,7 +80,7 @@ unsigned long yaz_read_UTF8_char(unsigned char *inp,
         }
         else
             *error = YAZ_ICONV_EILSEQ;
-    }            
+    }
     else if (inp[0] <= 0xf7 && inbytesleft >= 4)
     {
         if ((inp[1] & 0xc0) == 0x80 && (inp[2] & 0xc0) == 0x80
@@ -166,7 +166,7 @@ size_t yaz_write_UTF8_char(unsigned long x,
     {
         *outp++ = (unsigned char) x;
         (*outbytesleft)--;
-    } 
+    }
     else if (x <= 0x7ff && *outbytesleft >= 2)
     {
         *outp++ = (unsigned char) ((x >> 6) | 0xc0);
@@ -207,7 +207,7 @@ size_t yaz_write_UTF8_char(unsigned long x,
         *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 6;
     }
-    else 
+    else
     {
         *error = YAZ_ICONV_E2BIG;  /* not room for output */
         return (size_t)(-1);
@@ -218,7 +218,7 @@ size_t yaz_write_UTF8_char(unsigned long x,
 
 yaz_iconv_encoder_t yaz_utf8_encoder(const char *tocode,
                                      yaz_iconv_encoder_t e)
-    
+
 {
     if (!yaz_matchstr(tocode, "UTF8"))
     {
@@ -257,7 +257,7 @@ int yaz_utf8_check(const char *str)
         inbytesleft -= no_read;
     }
     return 1;
-}   
+}
 
 /*
  * Local variables:

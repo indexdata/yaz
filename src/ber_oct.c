@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_oct.c
  * \brief Implements ber_octetstring
  *

@@ -62,9 +62,9 @@ typedef enum oid_class
     CLASS_GENERAL,
     CLASS_NEGOT
 } oid_class;
-    
 
-/** \brief returns standard OID database 
+
+/** \brief returns standard OID database
     \retval OID database handle
 */
 YAZ_EXPORT
@@ -72,7 +72,7 @@ yaz_oid_db_t yaz_oid_std(void);
 
 /** \brief maps named OID string to raw OID by database lookup
     \param oid_db OID database
-    \param oclass class of string (enum oid_class) 
+    \param oclass class of string (enum oid_class)
     \param name OID name
     \returns raw OID or NULL if name is unknown (bad)
 
@@ -87,7 +87,7 @@ const Odr_oid *yaz_string_to_oid(yaz_oid_db_t oid_db,
 
 /** \brief creates NMEM malloc'ed OID from string
     \param oid_db OID database
-    \param oclass class of string (enum oid_class) 
+    \param oclass class of string (enum oid_class)
     \param name OID name
     \param nmem memory for returned OID
     \returns raw OID or NULL if name is unknown (bad)
@@ -98,7 +98,7 @@ Odr_oid *yaz_string_to_oid_nmem(yaz_oid_db_t oid_db,
 
 /** \brief creates ODR malloc'ed OID from string
     \param oid_db OID database
-    \param oclass class of string (enum oid_class) 
+    \param oclass class of string (enum oid_class)
     \param name OID name
     \param odr memory for returned OID
     \returns raw OID or NULL if name is unknown (bad)
@@ -122,7 +122,7 @@ const char *yaz_oid_to_string(yaz_oid_db_t oid_db,
     \param oid raw OID
     \param oclass holds OID class if found (output parameter)
     \param buf string buffer for result (must be of size OID_STR_MAX)
-    \returns OID string (named or dot notatition) 
+    \returns OID string (named or dot notatition)
 */
 YAZ_EXPORT
 const char *yaz_oid_to_string_buf(const Odr_oid *oid,

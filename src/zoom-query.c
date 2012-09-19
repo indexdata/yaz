@@ -76,7 +76,7 @@ static int generate(ZOOM_query s)
             s->z_query = (Z_Query *) odr_malloc(s->odr_query,
                                                 sizeof(*s->z_query));
             s->z_query->which = Z_Query_type_1;
-            s->z_query->u.type_1 = 
+            s->z_query->u.type_1 =
                 p_query_rpn(s->odr_query, wrbuf_cstr(s->full_query));
             if (!s->z_query->u.type_1)
             {
@@ -100,11 +100,11 @@ static int generate(ZOOM_query s)
             ext->descriptor = 0;
             ext->which = Z_External_CQL;
             ext->u.cql = odr_strdup(s->odr_query, wrbuf_cstr(s->full_query));
-            
+
             s->z_query = (Z_Query *) odr_malloc(s->odr_query, sizeof(*s->z_query));
             s->z_query->which = Z_Query_type_104;
             s->z_query->u.type_104 =  ext;
-            
+
             break;
         }
     }
@@ -161,18 +161,18 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     }
 
     cqlfile = ZOOM_connection_option_get(c, "cqlfile");
-    if (cqlfile == 0) 
+    if (cqlfile == 0)
     {
         ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
     }
-    else if ((trans = cql_transform_open_fname(cqlfile)) == 0) 
+    else if ((trans = cql_transform_open_fname(cqlfile)) == 0)
     {
-        char buf[512];        
+        char buf[512];
         sprintf(buf, "can't open CQL transform file '%.200s': %.200s",
                 cqlfile, strerror(errno));
         ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
     }
-    else 
+    else
     {
         WRBUF wrbuf_result = wrbuf_alloc();
         error = cql_transform(trans, cql_parser_result(parser),
@@ -181,7 +181,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
             char buf[512];
             const char *addinfo;
             error = cql_transform_error(trans, &addinfo);
-            sprintf(buf, "%.200s (addinfo=%.200s)", 
+            sprintf(buf, "%.200s (addinfo=%.200s)",
                     cql_strerror(error), addinfo);
             ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
         }

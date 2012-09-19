@@ -53,8 +53,8 @@ enum json_node_type {
 struct json_node {
     enum json_node_type type;
     union {
-        char *string; 
-        double number; 
+        char *string;
+        double number;
         struct json_node *link[2];
     } u;
 };
@@ -86,7 +86,7 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str);
 
 /** \brief returns parser error
     \param p JSON parser handle
-    \returns parse error msg 
+    \returns parse error msg
 
     This function should be called if json_parser_parse returns NULL .
 */

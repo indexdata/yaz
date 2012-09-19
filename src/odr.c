@@ -64,7 +64,7 @@ void odr_perror(ODR o, const char *message)
     fprintf(stderr, "%s: %s (code %d:%d)", message, odr_errlist[err], err, x);
     if (e && *e)
         fprintf(stderr, " element %s", e);
-    
+
     fprintf(stderr, "\n");
     if (element_path)
     {
@@ -177,7 +177,7 @@ void odr_setprint(ODR o, FILE *file)
 
 
 void odr_set_stream(ODR o, void *handle,
-                    void (*stream_write)(ODR o, 
+                    void (*stream_write)(ODR o,
                                          void *handle, int type,
                                          const char *buf, int len),
                     void (*stream_close)(void *handle))
@@ -254,7 +254,7 @@ void odr_reset(ODR o)
         yaz_iconv(o->op->iconv_handle, 0, 0, 0, 0);
     yaz_log(log_level, "odr_reset o=%p", o);
 }
-    
+
 void odr_destroy(ODR o)
 {
     nmem_destroy(o->mem);

@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file 
+/** \file
     \brief wrapper for dirent.h or our own for Windows
 */
 

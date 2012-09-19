@@ -43,7 +43,7 @@ YAZ_EXPORT void log_rpn_query(Z_RPNQuery *rpn);
 YAZ_EXPORT void log_rpn_query_level(int loglevel, Z_RPNQuery *rpn);
 
 YAZ_EXPORT void log_scan_term(Z_AttributesPlusTerm *zapt, const Odr_oid *ast);
-YAZ_EXPORT void log_scan_term_level(int loglevel, 
+YAZ_EXPORT void log_scan_term_level(int loglevel,
                                     Z_AttributesPlusTerm *zapt,
                                     const Odr_oid *ast);
 YAZ_EXPORT void yaz_log_zquery(Z_Query *q);

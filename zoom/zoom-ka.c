@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     ZOOM_connection z;
     ZOOM_options o = ZOOM_options_create ();
     const char *errmsg, *addinfo;
-    
+
     if (argc != 4)
     {
         fprintf (stderr, "usage:\nzoom-ka sleepinterval target query\n");
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
         ZOOM_resultset rset;
         ZOOM_connection_connect (z, argv[2], 0);
         rset = ZOOM_connection_search_pqf(z, argv[3]);
-        
+
         while ((i = ZOOM_event(1, &z)))
         {
             printf ("no = %d event = %d\n", i-1,

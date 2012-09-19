@@ -22,14 +22,14 @@ static int tst_ccl_query(CCL_bibset bibset,
     if (parser && bibset)
     {
         struct ccl_rpn_node *rpn;
-        
+
         rpn = ccl_parser_find_str(parser, query);
         if (rpn)
         {
             /* parse ok. check that result is there and match */
             WRBUF wrbuf = wrbuf_alloc();
             ccl_pquery(wrbuf, rpn);
-            
+
             /* check expect a result and that it matches */
             if (result && !strcmp(wrbuf_cstr(wrbuf), result))
                 ret = 1;
@@ -43,7 +43,7 @@ static int tst_ccl_query(CCL_bibset bibset,
             ccl_rpn_delete(rpn);
             wrbuf_destroy(wrbuf);
         }
-        else 
+        else
         {
             if (result)
             {
@@ -126,7 +126,7 @@ void tst1(int pass)
                      "reg t=x\r\n"
                      "z t=z\r\n"
                      "dc.title 1=/my/title\n"
-                     "date r=r\n" 
+                     "date r=r\n"
                      "x r=o\n"
                      "title dc.title\n"
                      "comb term dc.title\n"
@@ -140,7 +140,7 @@ void tst1(int pass)
             xmlDocPtr doc;
             int r;
             const char *addinfo = 0;
-            const char *xml_str = 
+            const char *xml_str =
                 "<cclmap>\n"
                 " <qual name=\"ti\">\n"
                 "   <attr type=\"u\" value=\"4\"/>\n"
@@ -178,7 +178,7 @@ void tst1(int pass)
                 "   <attr type=\"s\" value=\"ag\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
-            
+
             doc = xmlParseMemory(xml_str, strlen(xml_str));
             YAZ_CHECK(doc);
 
@@ -195,7 +195,7 @@ void tst1(int pass)
         YAZ_CHECK(0);
         return;
     }
-    
+
     YAZ_CHECK(tst_ccl_query(bibset, "x1", "@attr 4=2 @attr 1=1016 x1 "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "k\xc3\xb8" "benhavn", "@attr 4=2 @attr 1=1016 k\xc3\xb8" "benhavn "));
@@ -213,59 +213,59 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "x1 and", 0));
     YAZ_CHECK(tst_ccl_query(bibset, "tix=x5", 0));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a%b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a%b",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "a%(b)", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a%(b)",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "(a)%(b)", 
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%(b)",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "a%1b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a%1b",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a%2b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a%2b",
                   "@prox 0 2 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "(a)%2(b)", 
+    YAZ_CHECK(tst_ccl_query(bibset, "(a)%2(b)",
                   "@prox 0 2 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a%19b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a%19b",
                   "@prox 0 19 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "spid%æserne", 
+    YAZ_CHECK(tst_ccl_query(bibset, "spid%æserne",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 spid "
                   "@attr 4=2 @attr 1=1016 æserne "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a!b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a!b",
                   "@prox 0 1 1 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
-    YAZ_CHECK(tst_ccl_query(bibset, "a!2b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a!2b",
                   "@prox 0 2 1 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a% (b or dc.title=c)", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a% (b or dc.title=c)",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 a "
                   "@or @attr 4=2 @attr 1=1016 b "
                             "@attr 4=2 @attr 1=1016 @attr 1=/my/title c "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)", 
+    YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)",
                             "@prox 0 1 0 2 k 2 @and "
                             "@attr 4=2 @attr 1=1016 a @attr 4=2 @attr 1=1016 b "
                             "@attr 4=2 @attr 1=1016 c " ));
@@ -307,30 +307,30 @@ void tst1(int pass)
 
     YAZ_CHECK(tst_ccl_query(bibset, "a?",
                             "@attr 5=1 @attr 4=2 @attr 1=1016 a "));
-    YAZ_CHECK(tst_ccl_query(bibset, "a b", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a b",
                             "@and @attr 4=2 @attr 1=1016 a "
                             "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a b?", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a b?",
                             "@and @attr 4=2 @attr 1=1016 a "
                             "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "title=a", 
+    YAZ_CHECK(tst_ccl_query(bibset, "title=a",
                             "@attr 1=/my/title a "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "reg=a?b#\"c?\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=a?b#\"c?\"",
                             "@attr 5=102 a.*b.c\\\\? "));
-    YAZ_CHECK(tst_ccl_query(bibset, "z=a?b#\"c?\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "z=a?b#\"c?\"",
                             "@attr 5=104 a?b#c\\\\? "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\(", 
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\(",
                             "@attr 5=102 \\\\( "));
-    YAZ_CHECK(tst_ccl_query(bibset, "z=\\(", 
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\\(",
                             "( "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\"",
                             "\"\\\"\" "));
-    YAZ_CHECK(tst_ccl_query(bibset, "z=\\\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\\\"",
                             "\"\\\"\" "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=.",
@@ -338,9 +338,9 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "z=.",
                             ". "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "reg=\".\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "reg=\".\"",
                             "@attr 5=102 \\\\. "));
-    YAZ_CHECK(tst_ccl_query(bibset, "z=\".\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "z=\".\"",
                             ". "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=?\\?",
@@ -358,30 +358,30 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "z=\\\\",
                             "@attr 5=104 \\\\\\\\ "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "\\\\", 
+    YAZ_CHECK(tst_ccl_query(bibset, "\\\\",
                             "@attr 4=2 @attr 1=1016 \\\\ "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "comb=a", 
+    YAZ_CHECK(tst_ccl_query(bibset, "comb=a",
                             "@or @attr 4=2 @attr 1=1016 a "
                             "@attr 1=/my/title a "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "a? b?", 
+    YAZ_CHECK(tst_ccl_query(bibset, "a? b?",
                             "@and @attr 5=1 @attr 4=2 @attr 1=1016 a "
                             "@attr 5=1 @attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "\"a\"? \"b?\"", 
+    YAZ_CHECK(tst_ccl_query(bibset, "\"a\"? \"b?\"",
                             "@and @attr 5=1 @attr 4=2 @attr 1=1016 a "
                             "@attr 4=2 @attr 1=1016 b? "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "@and",
                             "@attr 4=2 @attr 1=1016 \\@and "));
-                            
+
     YAZ_CHECK(tst_ccl_query(bibset, "a@and",
                             "@attr 4=2 @attr 1=1016 a@and "));
-                           
+
     YAZ_CHECK(tst_ccl_query(bibset, "}",
                             "@attr 4=2 @attr 1=1016 } "));
-    
+
     YAZ_CHECK(tst_ccl_query(bibset, "{",
                             "@attr 4=2 @attr 1=1016 \"{\" "));
 
@@ -412,7 +412,7 @@ void tst1(int pass)
 
     YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\"",
                             "@attr 4=1 \"a b c\" "));
- 
+
     YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\" \"d e\"",
                             "@and @attr 4=1 \"a b c\" @attr 4=1 \"d e\" "));
     ccl_qual_rm(&bibset);

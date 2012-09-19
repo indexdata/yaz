@@ -36,8 +36,8 @@
 
 YAZ_BEGIN_CDECL
 
-/** \brief returns errno 
-    \returns errno value 
+/** \brief returns errno
+    \returns errno value
 */
 YAZ_EXPORT int yaz_errno(void);
 

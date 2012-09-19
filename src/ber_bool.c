@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_bool.c
  * \brief Implements BER BOOLEAN encoding and decoding
  *

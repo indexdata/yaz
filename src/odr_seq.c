@@ -60,12 +60,12 @@ int odr_set_begin(ODR o, void *p, int size, const char *name)
 
 int odr_sequence_end(ODR o)
 {
-    return odr_constructed_end(o);    
+    return odr_constructed_end(o);
 }
 
 int odr_set_end(ODR o)
 {
-    return odr_constructed_end(o);    
+    return odr_constructed_end(o);
 }
 
 static int odr_sequence_more(ODR o)

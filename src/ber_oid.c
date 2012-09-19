@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 
-/** 
+/**
  * \file ber_oid.c
  * \brief Implements BER OID encoding and decoding
  *
@@ -102,7 +102,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             n = 0;
             if (pos == 1)
                 id = p[0]*40 + p[1];
-            else 
+            else
                 id = p[pos];
             do
             {
@@ -128,7 +128,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
         }
         odr_seek(o, ODR_S_END, 0);
         return 1;
-    default: 
+    default:
         odr_seterror(o, OOTHER, 22);
         return 0;
     }

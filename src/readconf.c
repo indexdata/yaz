@@ -24,7 +24,7 @@ int readconf_line(FILE *f, int *lineno, char *line, int len,
 {
     char *p;
     int argc;
-    
+
     while ((p = fgets(line, len, f)))
     {
         (*lineno)++;
@@ -35,7 +35,7 @@ int readconf_line(FILE *f, int *lineno, char *line, int len,
     }
     if (!p)
         return 0;
-    
+
     for (argc = 0; *p && argc < num ; argc++)
     {
         if (*p == '#')  /* trailing comment */
@@ -63,7 +63,7 @@ int readconf(char *name, void *rprivate,
     char line[512], *m_argv[50];
     int m_argc;
     int lineno = 0;
-    
+
     if (!(f = fopen(name, "r")))
     {
         yaz_log(YLOG_WARN|YLOG_ERRNO, "readconf: %s", name);
@@ -72,7 +72,7 @@ int readconf(char *name, void *rprivate,
     for (;;)
     {
         int res;
-        
+
         if (!(m_argc = readconf_line(f, &lineno, line, 512, m_argv, 50)))
         {
             fclose(f);

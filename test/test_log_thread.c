@@ -34,12 +34,12 @@ static void *t_loop2(void *vp)
 static void t_test(void)
 {
     pthread_t tids[4];
-    
+
     pthread_create(tids+0, 0, t_loop2, 0);
     pthread_create(tids+1, 0, t_loop2, 0);
     pthread_create(tids+2, 0, t_loop2, 0);
     pthread_create(tids+3, 0, t_loop2, 0);
-    
+
     pthread_join(tids[0], 0);
     pthread_join(tids[1], 0);
     pthread_join(tids[2], 0);

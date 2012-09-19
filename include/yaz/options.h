@@ -46,10 +46,10 @@ YAZ_BEGIN_CDECL
     \retval -1 unknown option (error). arg is name of unknown option
     \retval -2 no more options (end of options)
     \retval c option char
-    
+
     This function is called repeatedly for each option. Both single
     char options (-x) as well as GNU long options are supported (--long).
-    The description is a sequence specs where each spec is if the form: 
+    The description is a sequence specs where each spec is if the form:
     [a-zA-Z0-9]({[a-zA-Z0-9]*})+:? . For example: h{help}f{filename}{fname}:
 
     The first char is what is returned when met (single char option char).
@@ -67,7 +67,7 @@ YAZ_EXPORT int options(const char *desc, char **argv, int argc, char **arg);
 YAZ_END_CDECL
 
 #endif
-        
+
 /*
  * Local variables:
  * c-basic-offset: 4
