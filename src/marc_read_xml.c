@@ -164,9 +164,9 @@ int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 }
 
 
-static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p)
+static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p,
+                                    int *indicator_length)
 {
-    int indicator_length;
     int identifier_length;
     int base_address;
     int length_data_entry;
@@ -205,7 +205,7 @@ static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p)
         return -1;
     }
     yaz_marc_set_leader(mt, leader,
-                        &indicator_length,
+                        indicator_length,
                         &identifier_length,
                         &base_address,
                         &length_data_entry,
@@ -215,7 +215,8 @@ static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p)
     return 0;
 }
 
-static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
+                                    int indicator_length)
 {
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
@@ -248,18 +249,29 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                 const xmlNode *ptr_tag = 0;
                 struct _xmlAttr *attr;
                 int i;
-                for (i = 0; i<11; i++)
-                    indstr[i] = '\0';
+                for (i = 0; i < indicator_length; i++)
+                    indstr[i] = ' ';
+                indstr[i] = '\0';
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (!strcmp((const char *)attr->name, "tag"))
                         ptr_tag = attr->children;
                     else if (strlen((const char *)attr->name) == 4 &&
                              !memcmp(attr->name, "ind", 3))
                     {
-                        int no = atoi((const char *)attr->name+3);
-                        if (attr->children
-                            && attr->children->type == XML_TEXT_NODE)
-                            indstr[no] = attr->children->content[0];
+                        int no = atoi((const char *)attr->name + 3);
+                        if (attr->children &&
+                            attr->children->type == XML_TEXT_NODE &&
+                            no <= indicator_length && no > 0 &&
+                            attr->children->content[0])
+                        {
+                            indstr[no - 1] = attr->children->content[0];
+                        }
+                        else
+                        {
+                            yaz_marc_cprintf(
+                                mt, "Bad attribute '%.80s' for 'datafield'",
+                                attr->name);
+                        }
                     }
                     else
                     {
@@ -273,10 +285,8 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                         mt, "Missing attribute 'tag' for 'datafield'" );
                     return -1;
                 }
-                /* note that indstr[0] is unused so we use indstr[1..] */
                 yaz_marc_add_datafield_xml(mt, ptr_tag,
-                                           indstr+1, strlen(indstr+1));
-
+                                           indstr, indicator_length);
                 if (yaz_marc_read_xml_subfields(mt, ptr->children))
                     return -1;
             }
@@ -292,7 +302,8 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 }
 
 
-static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
+                                          int indicator_length)
 {
     for(; ptr; ptr = ptr->next)
         if (ptr->type == XML_ELEMENT_NODE)
@@ -314,10 +325,11 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                 struct _xmlAttr *attr;
                 NMEM nmem = yaz_marc_get_nmem(mt);
                 char *tag_value;
-                char *indstr = nmem_malloc(nmem, 11);  /* 0(unused), 1,....9, + zero term */
-                int index = 0;
-                for (index = 0; index < 11; index++)
-                    indstr[index] = '\0';
+                char *indstr = nmem_malloc(nmem, indicator_length + 1);
+                int i = 0;
+                for (i = 0; i < indicator_length; i++)
+                    indstr[i] = ' ';
+                indstr[i] = '\0';
                 tag_value = element_attribute_value_extract(ptr, "tag", nmem);
                 if (!tag_value)
                 {
@@ -330,19 +342,26 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
                         attr->name[0] == 'i')
                     {
                     	//extract indicator attribute from i#="Y" pattern
-                        int no = atoi((const char *)attr->name+1);
-                        if (attr->children
-                            && attr->children->type == XML_TEXT_NODE)
-                            indstr[no] = attr->children->content[0];
+                        int no = atoi((const char *)attr->name + 1);
+                        if (attr->children &&
+                            attr->children->type == XML_TEXT_NODE &&
+                            no <= indicator_length && no > 0 &&
+                            attr->children->content[0])
+                        {
+                            indstr[no - 1] = attr->children->content[0];
+                        }
+                        else
+                        {
+                            yaz_marc_cprintf(
+                                mt, "Bad attribute '%.80s' for 'd'",attr->name);
+                        }
                     }
                     else
                     {
                         yaz_marc_cprintf(
-                            mt, "Bad attribute '%.80s' for 'datafield'",
-                            attr->name);
+                            mt, "Bad attribute '%.80s' for 'd'", attr->name);
                     }
-                /* note that indstr[0] is unused so we use indstr[1..] */
-                yaz_marc_add_datafield_xml2(mt, tag_value, indstr+1);
+                yaz_marc_add_datafield_xml2(mt, tag_value, indstr);
                 if (yaz_marc_read_turbo_xml_subfields(mt, ptr->children /*, indstr */))
                     return -1;
             }
@@ -363,6 +382,7 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr)
 #if YAZ_HAVE_XML2
 int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
 {
+    int indicator_length = 0;
     int format = 0;
     yaz_marc_reset(mt);
 
@@ -394,15 +414,15 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     }
     /* ptr points to record node now */
     ptr = ptr->children;
-    if (yaz_marc_read_xml_leader(mt, &ptr))
+    if (yaz_marc_read_xml_leader(mt, &ptr, &indicator_length))
         return -1;
 
     switch (format)
     {
     case YAZ_MARC_MARCXML:
-        return yaz_marc_read_xml_fields(mt, ptr->next);
+        return yaz_marc_read_xml_fields(mt, ptr->next, indicator_length);
     case YAZ_MARC_TURBOMARC:
-        return yaz_marc_read_turbo_xml_fields(mt, ptr->next);
+        return yaz_marc_read_turbo_xml_fields(mt, ptr->next, indicator_length);
     }
     return -1;
 }
