@@ -223,6 +223,9 @@ void ccl_qual_line(CCL_bibset bibset, char *line);
 YAZ_EXPORT
 void ccl_qual_fitem(CCL_bibset bibset, const char *value,
                     const char *qual_name);
+YAZ_EXPORT
+int ccl_qual_fitem2(CCL_bibset bibset, const char *value,
+                    const char *qual_name, const char **addinfo);
 
 /** Make CCL qualifier set */
 YAZ_EXPORT

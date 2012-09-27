@@ -234,12 +234,24 @@ void ccl_qual_field(CCL_bibset bibset, const char *cp, const char *qual_name)
         yaz_log(YLOG_WARN, "ccl_qual_field2 fail: %s", addinfo);
 }
 
-void ccl_qual_fitem (CCL_bibset bibset, const char *cp, const char *qual_name)
+int ccl_qual_fitem2(CCL_bibset bibset, const char *cp, const char *qual_name,
+                    const char **addinfo)
 {
     if (*qual_name == '@')
+    {
+        /* ccl_qual_add_special can not return error (yet) */
         ccl_qual_add_special(bibset, qual_name+1, cp);
+        *addinfo = 0;
+        return 0;
+    }
     else
-        ccl_qual_field(bibset, cp, qual_name);
+        return ccl_qual_field2(bibset, cp, qual_name, addinfo);
+}
+
+void ccl_qual_fitem(CCL_bibset bibset, const char *cp, const char *qual_name)
+{
+    const char *addinfo = 0;
+    ccl_qual_fitem2(bibset, cp, qual_name, &addinfo);
 }
 
 void ccl_qual_buf(CCL_bibset bibset, const char *buf)
