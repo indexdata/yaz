@@ -455,6 +455,36 @@ void tst2(void)
 }
 
 
+void tst_addinfo(void)
+{
+    const char *addinfo;
+    int r;
+    CCL_bibset bibset = ccl_qual_mk();
+
+    r = ccl_qual_fitem2(bibset, "u=4    s=pw t=l,r", "ti", &addinfo);
+    YAZ_CHECK(r == 0 && addinfo == 0);
+
+    r = ccl_qual_fitem2(bibset, "1=1016 s=al,pw t=z", "term", &addinfo);
+    YAZ_CHECK(r == 0 && addinfo == 0);
+
+    r = ccl_qual_fitem2(bibset, "x=", "term", &addinfo);
+    YAZ_CHECK(r != 0 && addinfo != 0);
+
+    r = ccl_qual_fitem2(bibset, "12=3", "term", &addinfo);
+    YAZ_CHECK(r == 0 && addinfo == 0);
+
+    r = ccl_qual_fitem2(bibset, "ab=3", "term", &addinfo);
+    YAZ_CHECK(r != 0 && addinfo != 0);
+
+    r = ccl_qual_fitem2(bibset, "x=ab", "term", &addinfo);
+    YAZ_CHECK(r != 0 && addinfo != 0);
+
+    r = ccl_qual_fitem2(bibset, "s=ab", "term", &addinfo);
+    YAZ_CHECK(r == 0 && addinfo == 0);
+
+    ccl_qual_rm(&bibset);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -464,6 +494,7 @@ int main(int argc, char **argv)
     tst1(2);
     tst1(3);
     tst2();
+    tst_addinfo();
     YAZ_CHECK_TERM;
 }
 /*
