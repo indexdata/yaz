@@ -1,3 +1,16 @@
+--- 4.2.39 2012/09/28
+
+Implement ccl_qual_fitem2. Like ccl_qual_fitem but with diagnostic
+string returned.
+
+MARC: Extra/missing indicator handled for MARCXML.
+The indicator length is given in header and is the same for the
+whole record. If attributes ind1, ind2 are missing, then content
+character defaults to blank.  Extra indicator attributes (beyond)
+indicator length are treated as an error.
+
+Reformat: delete trailing whitespace
+
 --- 4.2.38 2012/09/17
 
 MARC: fix non-ASCII characters for leader. This is to ensure we can
