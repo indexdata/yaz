@@ -107,7 +107,7 @@ static int type7(const char *arg, const char *expected_result)
     return ret;
 }
 
-static int srw_sortkeys(const char *arg, const char *expected_result)
+static int strategy_sortkeys(const char *arg, const char *expected_result, int (*strategy) (Z_SortKeySpecList *, WRBUF))
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     Z_SortKeySpecList *sort_spec = yaz_sort_spec(odr, arg);
@@ -120,7 +120,7 @@ static int srw_sortkeys(const char *arg, const char *expected_result)
     else
     {
         WRBUF w = wrbuf_alloc();
-        int r = yaz_sort_spec_to_srw_sortkeys(sort_spec, w);
+        int r = (strategy)(sort_spec, w);
 
         if (!expected_result && r)
             ret = 1;
@@ -152,6 +152,16 @@ static int srw_sortkeys(const char *arg, const char *expected_result)
     odr_destroy(odr);
     return ret;
 }
+
+static int srw_sortkeys(const char *arg, const char *expected_result) {
+    return strategy_sortkeys(arg, expected_result, yaz_sort_spec_to_srw_sortkeys);
+}
+
+static int solr_sortkeys(const char *arg, const char *expected_result) {
+    return strategy_sortkeys(arg, expected_result, yaz_sort_spec_to_solr_sortkeys);
+}
+
+
 
 static int check_srw_sortkeys_to_sort_spec(const char *arg,
                                            const char *expected_result)
@@ -222,6 +232,12 @@ static void tst(void)
     YAZ_CHECK(check_srw_sortkeys_to_sort_spec(
                   "date,,1,0,1900",
                   "date ai=1900"));
+
+    YAZ_CHECK(solr_sortkeys("title a",
+                           "title asc"));
+    YAZ_CHECK(solr_sortkeys("title a date ds",
+                           "title asc, date desc"));
+    YAZ_CHECK(solr_sortkeys("1=4,2=3 a", 0));
 }
 
 int main(int argc, char **argv)
