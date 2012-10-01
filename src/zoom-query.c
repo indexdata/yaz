@@ -25,9 +25,10 @@
 
 #define SORT_STRATEGY_Z3950 0
 #define SORT_STRATEGY_TYPE7 1
-#define SORT_STRATEGY_CQL 2
+#define SORT_STRATEGY_CQL   2
 #define SORT_STRATEGY_SRU11 3
 #define SORT_STRATEGY_EMBED 4
+#define SORT_STRATEGY_SOLR  5
 
 struct ZOOM_query_p {
     Z_Query *z_query;
@@ -52,13 +53,20 @@ static int generate(ZOOM_query s)
         wrbuf_puts(s->full_query, s->query_string);
         odr_reset(s->odr_query);
 
-        if (s->sort_spec && s->sort_strategy == SORT_STRATEGY_SRU11)
+        if (s->sort_spec && (s->sort_strategy == SORT_STRATEGY_SRU11 || s->sort_strategy == SORT_STRATEGY_SOLR))
         {
-            int r;
+            int r = 0;
             wrbuf_rewind(s->sru11_sort_spec);
 
-            r = yaz_sort_spec_to_srw_sortkeys(s->sort_spec,
-                                              s->sru11_sort_spec);
+            switch (s->sort_strategy)
+            {
+            case SORT_STRATEGY_SRU11:
+                r = yaz_sort_spec_to_srw_sortkeys(s->sort_spec, s->sru11_sort_spec);
+                break;
+            case SORT_STRATEGY_SOLR:
+                r = yaz_sort_spec_to_solr_sortkeys(s->sort_spec, s->sru11_sort_spec);
+                break;
+            }
             if (r)
                 return r;
         }
@@ -344,6 +352,10 @@ ZOOM_query_sortby2(ZOOM_query s, const char *strategy, const char *criteria)
     else if (!strcmp(strategy, "sru11"))
     {
         s->sort_strategy = SORT_STRATEGY_SRU11;
+    }
+    else if (!strcmp(strategy, "solr"))
+    {
+        s->sort_strategy = SORT_STRATEGY_SOLR;
     }
     else if (!strcmp(strategy, "embed"))
     {
