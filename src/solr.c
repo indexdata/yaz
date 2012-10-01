@@ -413,6 +413,15 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         yaz_add_name_value_str(encode, name, value, &i,
                                "fl", request->recordSchema);
 
+        switch(srw_pdu->u.request->sort_type)
+        {
+        case Z_SRW_sort_type_none:
+            break;
+        case Z_SRW_sort_type_sort:
+            yaz_add_name_value_str(encode, name, value, &i, "sort",
+                                   srw_pdu->u.request->sort.sortKeys);
+            break;
+        }
         if (request->facetList)
         {
             Z_FacetList *facet_list = request->facetList;
