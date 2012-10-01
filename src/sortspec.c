@@ -124,6 +124,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
                 sks->u.missingValueData->buf = (unsigned char*)
                                           odr_strdup(out, sort_flags+i);
                 i += strlen(sort_flags+i) - 1;
+                break;
             }
         }
     }
@@ -181,6 +182,7 @@ int yaz_sort_spec_to_cql(Z_SortKeySpecList *sksl, WRBUF w)
             wrbuf_puts(w, "/missingValue=");
             wrbuf_write(w, (const char *) sks->u.missingValueData->buf,
                         sks->u.missingValueData->len);
+            break;
         }
     }
     return 0;
@@ -287,10 +289,47 @@ int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
         case Z_SortKeySpec_missingValueData:
             wrbuf_write(w, (const char *) sks->u.missingValueData->buf,
                         sks->u.missingValueData->len);
+            break;
         }
     }
     return 0;
 }
+
+int yaz_sort_spec_to_solr_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
+{
+    int i;
+    for (i = 0; i < sksl->num_specs; i++)
+    {
+        Z_SortKeySpec *sks = sksl->specs[i];
+        Z_SortKey *sk;
+
+        if (sks->sortElement->which != Z_SortElement_generic)
+            return -1;
+
+        sk = sks->sortElement->u.generic;
+
+        if (i)
+            wrbuf_puts(w, ",");
+
+        if (sk->which == Z_SortKey_sortAttributes)
+            return -1;
+        else if (sk->which == Z_SortKey_sortField)
+        {
+            wrbuf_puts(w, sk->u.sortField);
+        }
+        switch (*sks->sortRelation)
+        {
+        case Z_SortKeySpec_ascending:
+            wrbuf_puts(w, " asc");
+            break;
+        case Z_SortKeySpec_descending:
+            wrbuf_puts(w, " desc");
+            break;
+        }
+    }
+    return 0;
+}
+
 
 int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
 {
@@ -331,14 +370,17 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
             wrbuf_puts(w, case_sensitive ? "s" : "i");
             if (missing)
             {
-                if (!strcmp(missing, "omit"))
+                if (!strcmp(missing, "omit")) {
                     ;
+                }
                 else if (!strcmp(missing, "abort"))
                     wrbuf_puts(w, "!");
-                else if (!strcmp(missing, "lowValue"))
+                else if (!strcmp(missing, "lowValue")) {
                     ;
-                else if (!strcmp(missing, "highValue"))
+                }
+                else if (!strcmp(missing, "highValue")) {
                     ;
+                }
                 else
                 {
                     wrbuf_puts(w, "=");
@@ -350,6 +392,52 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
     nmem_destroy(nmem);
     return 0;
 }
+
+int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
+{
+    /* Solr sortkey layout: field order[, field order] */
+    /* see cql_sortby_to_sortkeys of YAZ. */
+    char **sortspec;
+    int num_sortspec = 0;
+    int i;
+    NMEM nmem = nmem_create();
+
+    if (solr_sortkeys)
+        nmem_strsplit(nmem, ",", solr_sortkeys, &sortspec, &num_sortspec);
+    if (num_sortspec > 0)
+    {
+        for (i = 0; i < num_sortspec; i++)
+        {
+            char **arg;
+            int num_arg;
+            char order = 'a';
+            int case_sensitive = 0;
+            nmem_strsplitx(nmem, " ", sortspec[i], &arg, &num_arg, 0);
+
+            if (num_arg != 2)
+                return 0;
+
+            if (arg[1][0]) {
+                order = tolower(arg[1][0]);
+            }
+            if (order != 'a' || order != 'd')
+                return 0;
+
+            if (i)
+                wrbuf_puts(w, " ");
+
+            wrbuf_puts(w, arg[0]); /* field */
+            wrbuf_puts(w, " ");
+
+            wrbuf_putc(w, order);
+            // Always in-sensitive
+            wrbuf_puts(w, case_sensitive ? "s" : "i");
+        }
+    }
+    nmem_destroy(nmem);
+    return 0;
+}
+
 
 /*
  * Local variables:
