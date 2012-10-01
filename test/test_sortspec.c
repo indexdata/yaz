@@ -163,12 +163,12 @@ static int solr_sortkeys(const char *arg, const char *expected_result) {
 
 
 
-static int check_srw_sortkeys_to_sort_spec(const char *arg,
-                                           const char *expected_result)
+static int check_sortkeys_to_sort_spec(const char *arg,
+                                           const char *expected_result, int (*sort_strategy)(const char *, WRBUF))
 {
     WRBUF w = wrbuf_alloc();
     int ret = 0;
-    int r = yaz_srw_sortkeys_to_sort_spec(arg, w);
+    int r = sort_strategy(arg, w);
 
     if (!expected_result && r)
         ret = 1;
@@ -199,6 +199,13 @@ static int check_srw_sortkeys_to_sort_spec(const char *arg,
     return ret;
 }
 
+static int check_srw_sortkeys_to_sort_spec(const char *arg, const char *expected_result) {
+    return check_sortkeys_to_sort_spec(arg, expected_result, yaz_srw_sortkeys_to_sort_spec);
+}
+
+static int check_solr_sortkeys_to_sort_spec(const char *arg, const char *expected_result) {
+    return check_sortkeys_to_sort_spec(arg, expected_result, yaz_solr_sortkeys_to_sort_spec);
+}
 
 static void tst(void)
 {
@@ -236,8 +243,14 @@ static void tst(void)
     YAZ_CHECK(solr_sortkeys("title a",
                            "title asc"));
     YAZ_CHECK(solr_sortkeys("title a date ds",
-                           "title asc, date desc"));
+                           "title asc"
+                            ",date desc"));
     YAZ_CHECK(solr_sortkeys("1=4,2=3 a", 0));
+
+    YAZ_CHECK(check_solr_sortkeys_to_sort_spec(
+                  "date asc",
+                  "date ai"));
+
 }
 
 int main(int argc, char **argv)
