@@ -97,6 +97,23 @@ YAZ_EXPORT int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w);
    \retval -1 failure
 */
 YAZ_EXPORT int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w);
+
+/* \brief converts Z39.50 SortKeySpecList to Solr sort key
+   \param sksl SortKeySpecList
+   \param w resulting sortkey will be appended to this
+   \retval 0 successful
+   \retval -1 failure
+*/
+YAZ_EXPORT int yaz_sort_spec_to_solr_sortkeys(Z_SortKeySpecList *sksl, WRBUF w);
+
+/* \brief converts Solr sortkeys to Z39.50 sortspec (WRBUF)
+   \param srw_sortkeys Solr sortkeys string
+   \param w resulting Z39.50 sortspec, WRBUF string
+   \retval 0 successful
+   \retval -1 failure
+*/
+YAZ_EXPORT int yaz_solr_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w);
+
 YAZ_END_CDECL
 
 #endif
