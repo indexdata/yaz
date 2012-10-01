@@ -415,14 +415,15 @@ int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
             nmem_strsplitx(nmem, " ", sortspec[i], &arg, &num_arg, 0);
 
             if (num_arg != 2)
-                return 0;
+                return -1;
+
+            if (!strcasecmp(arg[1],"asc") &&
+                !strcasecmp(arg[1],"desc"))
+                return -1;
 
             if (arg[1][0]) {
                 order = tolower(arg[1][0]);
             }
-            if (order != 'a' || order != 'd')
-                return 0;
-
             if (i)
                 wrbuf_puts(w, " ");
 
