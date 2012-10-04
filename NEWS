@@ -1,3 +1,9 @@
+--- 4.2.40 2012/10/04
+
+Implement Solr sort strategy "solr", similar to sru11 sorting. 
+This will implement the correct parameters on Solr requst to do 
+native sorting.
+
 --- 4.2.39 2012/09/28
 
 Implement ccl_qual_fitem2. Like ccl_qual_fitem but with diagnostic
