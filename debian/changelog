@@ -1,3 +1,9 @@
+yaz (4.2.40-1indexdata) unstable; urgency=low
+
+  * Upstream.
+
+ -- Dennis Schafroth <dennis@indexdata.com>  Thu, 04 Oct 2012 20:01:29 +0200
+
 yaz (4.2.39-1indexdata) unstable; urgency=low
 
   * Upstream.
