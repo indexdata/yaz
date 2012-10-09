@@ -83,6 +83,10 @@ static pid_t keepalive_pid = 0;
 
 static void keepalive(void (*work)(void *data), void *data)
 {
+    int no_sigill = 0;
+    int no_sigabrt = 0;
+    int no_sigsegv = 0;
+    int no_sigbus = 0;
     int run = 1;
     int cont = 1;
     void (*old_sighup)(int);
@@ -142,18 +146,22 @@ static void keepalive(void (*work)(void *data), void *data)
             case SIGILL:
                 yaz_log(YLOG_WARN, "Received SIGILL from child %ld", (long) p);
                 cont = 1;
+                no_sigill++;
                 break;
             case SIGABRT:
                 yaz_log(YLOG_WARN, "Received SIGABRT from child %ld", (long) p);
                 cont = 1;
+                no_sigabrt++;
                 break ;
             case SIGSEGV:
                 yaz_log(YLOG_WARN, "Received SIGSEGV from child %ld", (long) p);
                 cont = 1;
+                ++no_sigsegv;
                 break;
             case SIGBUS:
                 yaz_log(YLOG_WARN, "Received SIGBUS from child %ld", (long) p);
                 cont = 1;
+                no_sigbus++;
                 break;
             case SIGTERM:
                 yaz_log(YLOG_LOG, "Received SIGTERM from child %ld",
@@ -179,6 +187,14 @@ static void keepalive(void (*work)(void *data), void *data)
             sleep(1 + run/5);
         run++;
     }
+    if (no_sigill)
+        yaz_log(YLOG_WARN, "keepalive stop. %d SIGILL signal(s)", no_sigill);
+    if (no_sigabrt)
+        yaz_log(YLOG_WARN, "keepalive stop. %d SIGABRT signal(s)", no_sigabrt);
+    if (no_sigsegv)
+        yaz_log(YLOG_WARN, "keepalive stop. %d SIGSEGV signal(s)", no_sigsegv);
+    if (no_sigbus)
+        yaz_log(YLOG_WARN, "keepalive stop. %d SIGBUS signal(s)", no_sigbus);
 }
 #endif
 
