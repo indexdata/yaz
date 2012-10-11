@@ -1,3 +1,11 @@
+--- 4.2.41 2012/10/11
+
+daemon: log total number of bad signals from child on stop so that it
+is more easy to spot problems with child worker processes.
+
+retrieval: empty backend name attribute omits element set
+from being used in retrieval.
+
 --- 4.2.40 2012/10/04
 
 Implement Solr sort strategy "solr", similar to sru11 sorting. 
