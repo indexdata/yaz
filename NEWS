@@ -1,3 +1,11 @@
+--- 4.2.42 2012/10/18
+
+Allow more namespaces for SRU. This is to allow, for example, an
+incorrect namespace returned from server
+http://services.igi-global.com/sru .
+
+Minor fixes for compilation on Windows.
+
 --- 4.2.41 2012/10/11
 
 daemon: log total number of bad signals from child on stop so that it
