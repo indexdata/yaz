@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <yaz/matchstr.h>
 
 #include <yaz/z-core.h>
 #include <yaz/sortspec.h>
@@ -417,8 +418,8 @@ int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
             if (num_arg != 2)
                 return -1;
 
-            if (!strcasecmp(arg[1],"asc") &&
-                !strcasecmp(arg[1],"desc"))
+            if (yaz_matchstr(arg[1], "asc") &&
+                yaz_matchstr(arg[1], "desc"))
                 return -1;
 
             if (arg[1][0]) {
