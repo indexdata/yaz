@@ -186,8 +186,6 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             const char *ns = (const char *) ptr->ns->href;
             for (i = 0; handlers[i].ns; i++)
             {
-                fprintf(stderr, "checking globns=%s ns=%s\n",
-                         handlers[i].ns, ns);
                 if (yaz_match_glob(handlers[i].ns, ns))
                     break;
             }
