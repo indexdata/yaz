@@ -1,3 +1,8 @@
+ZOOM C: don't trust recordPosition always. Some servers, such as IGI
+global's SRU service uses a recordPosition scheme starting from zero.
+First record's position should be one
+according to the standard.
+
 --- 4.2.42 2012/10/18
 
 Allow more namespaces for SRU. This is to allow, for example, an
