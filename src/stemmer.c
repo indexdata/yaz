@@ -55,14 +55,14 @@ yaz_stemmer_p yaz_stemmer_snowball_create(const char *locale, const char *rule, 
 		locale, rule, charenc, algorithm);
 	return 0;
     }
-    yaz_log(YLOG_DEBUG, "created snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
+    yaz_log(YLOG_DEBUG, "created snowball stemmer: algorithm %s charenc %s ", algorithm, charenc);
     yaz_stemmer = xmalloc(sizeof(*yaz_stemmer));
     yaz_stemmer->implementation = yaz_snowball;
 
     yaz_stemmer->locale = xstrdup(locale);
     yaz_stemmer->rule = xstrdup(rule);
     yaz_stemmer->sb_stemmer = stemmer;
-    yaz_log(YLOG_DEBUG, "created snowball stemmer: algoritm %s charenc %s ", algorithm, charenc);
+    yaz_log(YLOG_DEBUG, "created snowball stemmer: algorithm %s charenc %s ", algorithm, charenc);
     return yaz_stemmer;
 }
 
