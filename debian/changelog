@@ -14,7 +14,7 @@ yaz (4.2.41-1indexdata) unstable; urgency=low
 
   * Upstream.
 
- -- Adam Dickmeiss <adam@debian-testing>  Thu, 11 Oct 2012 08:58:44 +0200
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 11 Oct 2012 08:58:44 +0200
 
 yaz (4.2.40-1indexdata) unstable; urgency=low
 
