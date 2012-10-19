@@ -525,7 +525,7 @@
    </para>
    <note>
     <para>
-     Since character set negotation takes effect in the Z39.50
+     Since character set negotiation takes effect in the Z39.50
      Initialize Request you should issue this command before
      command <link linkend="command-open"><literal>open</literal></link>
      is used.
