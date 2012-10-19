@@ -313,7 +313,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         }
         for (i = 0; i<res->num_records; i++)
         {
-            int pos;
+            int pos = *start + i;
             Z_SRW_record *sru_rec;
             Z_SRW_diagnostic *diag = 0;
             int num_diag;
@@ -321,12 +321,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
                 odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
 
-            /* recordPosition is 1 based */
+            /* only trust recordPosition if >= calculated position */
             if (res->records[i].recordPosition &&
-                *res->records[i].recordPosition > 0)
+                *res->records[i].recordPosition >= pos + 1)
                 pos = *res->records[i].recordPosition - 1;
-            else
-                pos = *start + i;
 
             sru_rec = &res->records[i];
 
