@@ -197,12 +197,12 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
     unix_state *sp = (unix_state *)h->cprivate;
     char * s = f;
     const char * file = NULL;
-    char * eol;
 
     sp->uid = sp->gid = sp->umask = -1;
 
-    if ((eol = strchr(s, ',')))
+    if (strchr(s, '='))
     {
+        char *eol;
         do
         {
             if ((eol = strchr(s, ',')))
@@ -569,8 +569,8 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     TRC(fprintf(stderr, "unix_get: bufsize=%d\n", *bufsize));
     if (sp->altlen) /* switch buffers */
     {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (0x%x)\n", sp->altlen,
-                    (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  %d bytes in altbuf (%p )\n", sp->altlen,
+                    sp->altbuf));
         tmpc = *buf;
         tmpi = *bufsize;
         *buf = sp->altbuf;
@@ -632,8 +632,8 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         } else if (sp->altsize < req)
             if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
                 return -1;
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(0x%x)\n", tomove,
-                    (unsigned) sp->altbuf));
+        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
+                    sp->altbuf));
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_UNIX_BUFCHUNK - 1)
