@@ -329,14 +329,7 @@ char **ZOOM_connection_get_databases(ZOOM_connection con, ZOOM_options options,
     const char *cp = ZOOM_options_get(options, "databaseName");
 
     if ((!cp || !*cp) && con->host_port)
-    {
-        if (strncmp(con->host_port, "unix:", 5) == 0)
-            cp = strchr(con->host_port+5, ':');
-        else
-            cp = strchr(con->host_port, '/');
-        if (cp)
-            cp++;
-    }
+        cs_get_host_args(con->host_port, &cp);
     if (!cp || !*cp)
         cp = "Default";
     nmem_strsplit(odr_getmem(odr), "+", cp,  &databaseNames, num);

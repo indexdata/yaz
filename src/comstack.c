@@ -68,7 +68,15 @@ void cs_get_host_args(const char *type_and_host, const char **args)
 {
 
     *args = "";
-    if (*type_and_host && strncmp(type_and_host, "unix:", 5))
+    if (!strncmp(type_and_host, "unix:", 5))
+    {
+        const char *cp = strchr(type_and_host + 5, ':');
+        if (cp)
+            type_and_host = cp + 1;
+        else
+            type_and_host += strlen(type_and_host); /* empty string */
+    }
+    if (*type_and_host)
     {
         const char *cp;
         cp = strstr(type_and_host, "://");
@@ -87,22 +95,51 @@ static int cs_parse_host(const char *uri, const char **host,
                          char **connect_host)
 {
     *connect_host = 0;
+
+    *t = tcpip_type;
     if (strncmp(uri, "connect:", 8) == 0)
     {
         const char *cp = strchr(uri, ',');
         if (cp)
         {
-            size_t len = cp - (uri + 8);
-            *connect_host = (char *) xmalloc(len+1);
-            memcpy(*connect_host, uri + 8, len);
+            size_t len;
+
+            uri += 8;
+            len = cp - uri;
+            *connect_host = (char *) xmalloc(len + 1);
+            memcpy(*connect_host, uri, len);
             (*connect_host)[len] = '\0';
-            uri = cp+1;
+            uri = cp + 1;
         }
+    }
+    else if (strncmp(uri, "unix:", 5) == 0)
+    {
+        const char *cp;
+
+        uri += 5;
+        cp = strchr(uri, ':');
+        if (cp)
+        {
+            size_t len = cp - uri;
+            *connect_host = (char *) xmalloc(len + 1);
+            memcpy(*connect_host, uri, len);
+            (*connect_host)[len] = '\0';
+            uri = cp + 1;
+        }
+        else
+        {
+            *connect_host = xstrdup(uri);
+            uri += strlen(uri); /* set to "" */
+        }
+#ifdef WIN32
+        return 0;
+#else
+        *t = unix_type;
+#endif
     }
 
     if (strncmp (uri, "tcp:", 4) == 0)
     {
-        *t = tcpip_type;
         *host = uri + 4;
         *proto = PROTO_Z3950;
     }
@@ -116,19 +153,8 @@ static int cs_parse_host(const char *uri, const char **host,
         return 0;
 #endif
     }
-    else if (strncmp (uri, "unix:", 5) == 0)
-    {
-#ifndef WIN32
-        *t = unix_type;
-        *host = uri + 5;
-        *proto = PROTO_Z3950;
-#else
-        return 0;
-#endif
-    }
     else if (strncmp(uri, "http:", 5) == 0)
     {
-        *t = tcpip_type;
         *host = uri + 5;
         while (**host == '/')
             (*host)++;
@@ -148,9 +174,8 @@ static int cs_parse_host(const char *uri, const char **host,
     }
     else
     {
-        *proto = PROTO_Z3950;
-        *t = tcpip_type;
         *host = uri;
+        *proto = PROTO_Z3950;
     }
     return 1;
 }
