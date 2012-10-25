@@ -87,7 +87,7 @@ libyaz_la_SOURCES=base64.c version.c options.c log.c \
   ill-get.c \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h \
   logrpn.c \
-  otherinfo.c pquery.c sortspec.c charneg.c initopt.c \
+  otherinfo.c pquery.c sortspec.c charneg.c initopt.c init_diag.c \
   zoom-c.c zoom-z3950.c zoom-sru.c zoom-query.c zoom-record-cache.c \
   zoom-event.c \
   record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru-p.h \

@@ -1085,35 +1085,6 @@ static int handle_Z3950_es_response(ZOOM_connection c,
     return 1;
 }
 
-static void interpret_init_diag(ZOOM_connection c,
-                                Z_DiagnosticFormat *diag)
-{
-    if (diag->num > 0)
-    {
-        Z_DiagnosticFormat_s *ds = diag->elements[0];
-        if (ds->which == Z_DiagnosticFormat_s_defaultDiagRec)
-            response_default_diag(c, ds->u.defaultDiagRec);
-    }
-}
-
-
-static void interpret_otherinformation_field(ZOOM_connection c,
-                                             Z_OtherInformation *ui)
-{
-    int i;
-    for (i = 0; i < ui->num_elements; i++)
-    {
-        Z_OtherInformationUnit *unit = ui->list[i];
-        if (unit->which == Z_OtherInfo_externallyDefinedInfo &&
-            unit->information.externallyDefinedInfo &&
-            unit->information.externallyDefinedInfo->which ==
-            Z_External_diag1)
-        {
-            interpret_init_diag(c, unit->information.externallyDefinedInfo->u.diag1);
-        }
-    }
-}
-
 static char *get_term_cstr(ODR odr, Z_Term *term) {
 
     switch (term->which) {
@@ -1680,12 +1651,11 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
 
         if (!*initrs->result)
         {
-            Z_External *uif = initrs->userInformationField;
-
-            ZOOM_set_error(c, ZOOM_ERROR_INIT, 0); /* default error */
-
-            if (uif && uif->which == Z_External_userInfo1)
-                interpret_otherinformation_field(c, uif->u.userInfo1);
+            Z_DefaultDiagFormat *df = yaz_decode_init_diag(0, initrs);
+            if (df)
+                response_default_diag(c, df);
+            else
+                ZOOM_set_error(c, ZOOM_ERROR_INIT, 0); /* default error */
         }
         else
         {

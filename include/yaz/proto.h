@@ -185,6 +185,13 @@ const char *yaz_get_esn(Z_RecordComposition *comp);
 YAZ_EXPORT
 void yaz_set_esn(Z_RecordComposition **comp_p, const char *esn, NMEM nmem);
 
+/** \brief returns diagnostics from an init response
+    \param no number of diagnotic entry to get. 0=first, 1=second, ..
+    \param initrs InitResponse structure
+    \retuns diag entry or 0 (NULL) if none could be found
+*/
+YAZ_EXPORT
+Z_DefaultDiagFormat *yaz_decode_init_diag(int no, Z_InitResponse *initrs);
 
 YAZ_END_CDECL
 
