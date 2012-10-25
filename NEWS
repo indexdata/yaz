@@ -1,3 +1,18 @@
+--- 4.2.44 2012/10/25
+
+New utility yaz_decode_init_diag. Defined in proto.h.
+
+Allow HTTP protocol on unix local socket. Also Z39.50 database may be
+given for unix local socket.
+    The COMSTACK string for doing so is:
+    unix:<spec>:<uri>
+    Examples:
+      unix:/myfile:tcp:localhost:9999/mybase
+      unix:/myfile:localhost:9999/mybase
+      unix:/myfile:http://fakehost/mybase
+
+debian: Use dpkg-buildflags in build process.
+
 --- 4.2.43 2012/10/19
 
 ZOOM C: don't trust recordPosition always. Some servers, such as IGI
