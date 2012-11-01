@@ -873,7 +873,7 @@
 	 </row>
 	 <row>
 	  <entry>case</entry>
-	  <entry>Specificies if CCL operatores and qualifiers should be
+	  <entry>Specifies if CCL operators and qualifiers should be
 	   compared with case sensitivity or not. Specify 1 for
 	   case sensitive; 0 for case insensitive.</entry>
 	  <entry><literal>1</literal></entry>
