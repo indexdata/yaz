@@ -874,9 +874,9 @@
 	 <row>
 	  <entry>case</entry>
 	  <entry>Specificies if CCL operatores and qualifiers should be
-	   compared with case sensitivity or not. Specify 0 for
-	   case sensitive; 1 for case insensitive.</entry>
-	  <entry><literal>0</literal></entry>
+	   compared with case sensitivity or not. Specify 1 for
+	   case sensitive; 0 for case insensitive.</entry>
+	  <entry><literal>1</literal></entry>
 	 </row>
 
 	 <row>
