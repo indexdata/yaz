@@ -259,6 +259,64 @@ static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr, Z_SRW_sea
     sr->suggestions = odr_strdup(o, wrbuf_cstr(wrbuf));
     return 0;
 }
+
+static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
+                                       Z_SRW_scanResponse *scr)
+{
+    xmlNodePtr node;
+    xmlAttr *attr;
+    char *pos;
+    int i = 0;
+    
+    /* find the actual list */
+    for (node = ptr->children; node; node = node->next)
+        if (node->type == XML_ELEMENT_NODE) {
+            ptr = node;
+            break;
+        }
+    
+    scr->num_terms = 0;
+    for (node = ptr->children; node; node = node->next)
+        if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
+            scr->num_terms++;
+
+    if (scr->num_terms)
+        scr->terms = odr_malloc(o, sizeof(*scr->terms) * scr->num_terms);
+    
+    for (node = ptr->children; node; node = node->next)
+    {
+        if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
+        {
+            Z_SRW_scanTerm *term = scr->terms + i;
+            
+            Odr_int count = 0;
+            const char *val = get_facet_term_count(node, &count);
+
+            term->numberOfRecords = odr_intdup(o, count);
+            
+            /* if val contains a ^ then it is probably term<^>display term so separate them. This is due to
+             * SOLR not being able to encode them into 2 separate attributes.
+             */
+            pos = strchr(val, '^');
+            if (pos != NULL) {
+            	term->displayTerm = odr_strdup(o, pos + 1);
+            	*pos = '\0';
+            	term->value = odr_strdup(o, val);
+            	*pos = '^';
+            } else {
+            	term->value = odr_strdup(o, val);
+            	term->displayTerm = NULL;
+            }
+            term->whereInList = NULL;
+            
+            i++;
+        }
+    }
+    
+    if (scr->num_terms)
+        return 0;
+    return -1;
+}
 #endif
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
@@ -269,9 +327,10 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
     xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
     int ret = 0;
     xmlNodePtr ptr = 0;
-    Z_SRW_PDU *pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
-    Z_SRW_searchRetrieveResponse *sr = pdu->u.response;
-
+    Z_SRW_PDU *pdu;
+    Z_SRW_searchRetrieveResponse *sr = NULL;
+    Z_SRW_scanResponse *scr = NULL;
+    
     if (!doc)
     {
         ret = -1;
@@ -295,16 +354,27 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
             for (ptr = root->children; ptr; ptr = ptr->next)
             {
                 if (ptr->type == XML_ELEMENT_NODE &&
-                    !strcmp((const char *) ptr->name, "result"))
+                    !strcmp((const char *) ptr->name, "result")) {
+                        pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+                        sr = pdu->u.response;
                         rc_result = yaz_solr_decode_result(o, ptr, sr);
+                }
+                if (ptr->type == XML_ELEMENT_NODE &&
+                    match_xml_node_attribute(ptr, "lst", "name", "terms")) {
+                        pdu = yaz_srw_get(o, Z_SRW_scan_response);
+                        scr = pdu->u.scan_response;
+                        rc_result = yaz_solr_decode_scan_result(o, ptr, scr);
+                }
                 /* TODO The check on hits is a work-around to avoid garbled facets on zero results from the SOLR server.
                  * The work-around works because the results is before the facets in the xml. */
-                if (rc_result == 0 &&  *sr->numberOfRecords > 0 &&
-                    match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
-                    rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
-                if (rc_result == 0 &&  *sr->numberOfRecords == 0 &&
-                    match_xml_node_attribute(ptr, "lst", "name", "spellcheck"))
-                    rc_facets =  yaz_solr_decode_spellcheck(o, ptr, sr);
+                if (sr) {
+                    if (rc_result == 0 &&  *sr->numberOfRecords > 0 &&
+                        match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
+                            rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
+                    if (rc_result == 0 &&  *sr->numberOfRecords == 0 &&
+                        match_xml_node_attribute(ptr, "lst", "name", "spellcheck"))
+                            rc_facets =  yaz_solr_decode_spellcheck(o, ptr, sr);
+                }
 
             }
             ret = rc_result + rc_facets;
@@ -381,6 +451,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *name[SOLR_MAX_PARAMETERS], *value[SOLR_MAX_PARAMETERS];
     char *uri_args;
     char *path;
+    char *q;
+    char *pos;
     int i = 0;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
@@ -430,6 +502,40 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
             if (yaz_solr_encode_facet_list(encode, name, value, &i, facet_list))
                 return -1;
         }
+    }
+    else if (srw_pdu->which == Z_SRW_scan_request) {
+        Z_SRW_scanRequest *request = srw_pdu->u.scan_request;
+        solr_op = "terms";
+        switch (srw_pdu->u.scan_request->query_type)
+        {
+            case Z_SRW_query_type_pqf:
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "terms.fl", request->scanClause.pqf);
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "terms.lower", request->scanClause.pqf);
+                break;
+            case Z_SRW_query_type_cql:
+                q = request->scanClause.cql;
+                pos = strchr(q, ':');
+                if (pos != NULL) {
+					yaz_add_name_value_str(encode, name, value, &i,
+										   "terms.lower", odr_strdup(encode, pos + 1));
+					*pos = '\0';
+					yaz_add_name_value_str(encode, name, value, &i,
+										   "terms.fl", odr_strdup(encode, q));
+					*pos = ':';
+                } else {
+					yaz_add_name_value_str(encode, name, value, &i,
+										   "terms.lower", odr_strdup(encode, q));
+                }
+                break;
+            default:
+                return -1;
+        }
+        yaz_add_name_value_str(encode, name, value, &i,
+                               "terms.sort", "index");
+        yaz_add_name_value_int(encode, name, value, &i,
+                               "terms.limit", request->maximumTerms);
     }
     else
         return -1;

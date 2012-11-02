@@ -4444,6 +4444,8 @@ static void http_response(Z_HTTP_Response *hres)
 
             if (ret == 0 && sr->which == Z_SRW_searchRetrieve_response)
                 handle_srw_response(sr->u.response);
+            else if (ret == 0 && sr->which == Z_SRW_scan_response)
+            	handle_srw_scan_response(sr->u.scan_response);
             else
             {
                 printf("Decoding of SOLR package failed\n");
