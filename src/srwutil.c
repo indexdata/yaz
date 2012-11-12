@@ -466,8 +466,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     (*l)->next = 0;
                 }
                 else
-                    yaz_add_srw_diagnostic(decode, diag, num_diag,
-                                           YAZ_SRW_UNSUPP_PARAMETER, n);
+                {
+                    if (*num_diag < 10)
+                        yaz_add_srw_diagnostic(decode, diag, num_diag,
+                                               YAZ_SRW_UNSUPP_PARAMETER, n);
+                }
             }
         }
         if (!version)

@@ -132,6 +132,13 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
     {
         cp++;
         no++;
+        while (*cp != '=')
+        {
+            /* check that x-form names looks sane */
+            if (*cp <= ' ' || *cp >= 127)
+                return 0;
+            cp++;
+        }
     }
     *name = (char **) odr_malloc(o, no * sizeof(char*));
     *val = (char **) odr_malloc(o, no * sizeof(char*));
