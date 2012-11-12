@@ -49,8 +49,7 @@ Depends: libyaz4 (= ${Source-Version}),
 	tcl8.3|tclsh
 Provides: libyaz-dev
 Replaces: libyaz-dev
-Conflicts: libyaz2-dev, libyaz3-dev
-	libyaz-dev
+Conflicts: libyaz2-dev, libyaz3-dev, libyaz-dev
 Section: libdevel
 Architecture: any
 Suggests: yaz-doc
