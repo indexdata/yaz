@@ -1698,11 +1698,7 @@ static void display_facet(Z_FacetField *facet)
     {
         Z_AttributeList *al = facet->attributes;
         struct yaz_facet_attr attr_values;
-        attr_values.errcode = 0;
-        attr_values.limit = -1;
-        attr_values.useattr = "NONE";
-        attr_values.relation = "default";
-
+        yaz_facet_attr_init(&attr_values);
         yaz_facet_attr_get_z_attributes(al, &attr_values);
         if (!attr_values.errcode)
         {
