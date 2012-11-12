@@ -43,9 +43,14 @@ Description: documentation for the Z39.50 toolkit
  This package includes HTML documentation for YAZ.
 
 Package: libyaz4-dev
-Depends: libyaz4 (= ${Source-Version}), libxslt1-dev, libicu36-dev|libicu-dev, tcl8.3|tclsh
-Replaces: yaz-devel
-Conflicts: yaz-devel, libyaz-dev, libyaz2-dev, libyaz3-dev
+Depends: libyaz4 (= ${Source-Version}),
+	libxslt1-dev,
+	libicu36-dev|libicu-dev,
+	tcl8.3|tclsh
+Provides: libyaz-dev
+Replaces: libyaz-dev
+Conflicts: libyaz2-dev, libyaz3-dev
+	libyaz-dev
 Section: libdevel
 Architecture: any
 Suggests: yaz-doc
