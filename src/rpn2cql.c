@@ -218,10 +218,17 @@ static int rpn2cql_simple(cql_transform_t ct,
 
         if (trunc <= 3 || trunc == 100 || trunc == 102 || trunc == 104)
         {
+            int quote_it = 0;
             for (i = 0 ; i < lterm; i++)
                 if (strchr(" ()=></", sterm[i]))
+                {
+                    quote_it = 1;
                     break;
-            wrbuf_puts(w, "\"");
+                }
+            if (lterm == 0)
+                quote_it = 1;
+            if (quote_it)
+                wrbuf_puts(w, "\"");
             if (trunc == 2 || trunc == 3)
                 wrbuf_puts(w, "*");
             for (i = 0; i < lterm; i++)
@@ -254,7 +261,8 @@ static int rpn2cql_simple(cql_transform_t ct,
             }
             if (trunc == 1 || trunc == 3)
                 wrbuf_puts(w, "*");
-            wrbuf_puts(w, "\"");
+            if (quote_it)
+                wrbuf_puts(w, "\"");
         }
         else
         {
