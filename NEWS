@@ -1,3 +1,15 @@
+--- 4.2.45 2012/11/13
+
+Fix description of CCL directive 'case'.
+
+More tight checking of form arguments (yaz_uri_to_array). Makes
+YAZ better at rejecting big and/or bad POSTs.
+
+SRU decoding does not report more than up to 10 invalid arguments.
+
+rpn2cql: less quotes in generated terms. Semantics unchanged, but
+it's prettier this way.
+
 --- 4.2.44 2012/10/25
 
 New utility yaz_decode_init_diag. Defined in proto.h.
