@@ -1498,39 +1498,130 @@ static int tcpip_set_blocking(COMSTACK p, int flags)
     return 1;
 }
 
+#if HAVE_GNUTLS_H
+static const char *bin2hex(const void *bin, size_t bin_size)
+{
+    static char printable[110];
+    const unsigned char *_bin = bin;
+    char *print;
+    size_t i;
+    if (bin_size > 50)
+        bin_size = 50;
+    print = printable;
+    for (i = 0; i < bin_size; i++)
+    {
+        sprintf(print, "%.2x ", _bin[i]);
+        print += 2;
+    }
+    return printable;
+}
+#endif
+
 void cs_print_session_info(COMSTACK cs)
 {
 #if HAVE_GNUTLS_H
-    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-    if (sp->session)
+    if (cs->type == ssl_type)
     {
-        if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
-            return;
-        printf("X509 certificate\n");
+        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+        if (sp->session)
+        {
+            const gnutls_datum_t *cert_list;
+            unsigned i, cert_list_size;
+            if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
+                return;
+            printf("X509 certificate\n");
+            cert_list = gnutls_certificate_get_peers(sp->session,
+                                                     &cert_list_size);
+            printf("Peer provided %u certificates\n", cert_list_size);
+            for (i = 0; i < cert_list_size; i++)
+            {
+                gnutls_x509_crt_t cert;
+                gnutls_datum_t cinfo;
+                int ret;
+                time_t expiration_time, activation_time;
+                size_t size;
+                char serial[40];
+                char dn[256];
+                unsigned int algo, bits;
+
+                /* we only print information about the first certificate. */
+                gnutls_x509_crt_init(&cert);
+                gnutls_x509_crt_import(cert, &cert_list[i], GNUTLS_X509_FMT_DER);
+                printf("Certificate info %d:\n", i + 1);
+                /* This is the preferred way of printing short information about
+                   a certificate. */
+                ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_ONELINE, &cinfo);
+                if (ret == 0)
+                {
+                    printf("\t%s\n", cinfo.data);
+                    gnutls_free(cinfo.data);
+                }
+
+                /* If you want to extract fields manually for some other reason,
+                   below are popular example calls. */
+
+                expiration_time = gnutls_x509_crt_get_expiration_time(cert);
+                activation_time = gnutls_x509_crt_get_activation_time(cert);
+
+                printf("\tCertificate is valid since: %s", ctime(&activation_time));
+                printf("\tCertificate expires: %s", ctime(&expiration_time));
+
+                /* Print the serial number of the certificate. */
+                size = sizeof(serial);
+                gnutls_x509_crt_get_serial(cert, serial, &size);
+
+                printf("\tCertificate serial number: %s\n",
+                        bin2hex(serial, size));
+
+                /* Extract some of the public key algorithm's parameters
+                 */
+                algo = gnutls_x509_crt_get_pk_algorithm(cert, &bits);
+
+                printf("Certificate public key: %s",
+                        gnutls_pk_algorithm_get_name(algo));
+
+                /* Print the version of the X.509 certificate. */
+                printf("\tCertificate version: #%d\n",
+                        gnutls_x509_crt_get_version(cert));
+
+                size = sizeof(dn);
+                gnutls_x509_crt_get_dn(cert, dn, &size);
+                printf("\tDN: %s\n", dn);
+
+                size = sizeof(dn);
+                gnutls_x509_crt_get_issuer_dn(cert, dn, &size);
+                printf("\tIssuer's DN: %s\n", dn);
+
+                gnutls_x509_crt_deinit(cert);
+
+            }
+        }
     }
 #elif HAVE_OPENSSL_SSL_H
-    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-    SSL *ssl = (SSL *) sp->ssl;
-    if (ssl)
+    if (cs->type == ssl_type)
     {
-        X509 *server_cert = SSL_get_peer_certificate(ssl);
-
-        if (server_cert)
+        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+        SSL *ssl = (SSL *) sp->ssl;
+        if (ssl)
         {
-            char *pem_buf;
-            int pem_len;
-            BIO *bio = BIO_new(BIO_s_mem());
+            X509 *server_cert = SSL_get_peer_certificate(ssl);
+            if (server_cert)
+            {
+                char *pem_buf;
+                int pem_len;
+                BIO *bio = BIO_new(BIO_s_mem());
 
-            /* get PEM buffer in memory */
-            PEM_write_bio_X509(bio, server_cert);
-            pem_len = BIO_get_mem_data(bio, &pem_buf);
-            fwrite(pem_buf, pem_len, 1, stdout);
+                /* get PEM buffer in memory */
+                PEM_write_bio_X509(bio, server_cert);
+                pem_len = BIO_get_mem_data(bio, &pem_buf);
+                fwrite(pem_buf, pem_len, 1, stdout);
 
-            /* print all info on screen .. */
-            X509_print_fp(stdout, server_cert);
-            BIO_free(bio);
+                /* print all info on screen .. */
+                X509_print_fp(stdout, server_cert);
+                BIO_free(bio);
 
-            X509_free(server_cert);
+                X509_free(server_cert);
+            }
         }
     }
 #endif
