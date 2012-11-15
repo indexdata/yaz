@@ -580,21 +580,20 @@ int tcpip_rcvconnect(COMSTACK h)
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
-        int res;
         gnutls_global_init();
-
         tcpip_create_cred(h);
-
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-
         /* cast to intermediate size_t to avoid GCC warning. */
         gnutls_transport_set_ptr(sp->session,
                                  (gnutls_transport_ptr_t)
                                  (size_t) h->iofile);
-        res = gnutls_handshake(sp->session);
+    }
+    if (sp->session)
+    {
+        int res = gnutls_handshake(sp->session);
         if (res < 0)
         {
             if (ssl_check_error(h, sp, res))
