@@ -1,3 +1,10 @@
+--- 4.2.46 2012/11/15
+
+Fix cs_rcvconnect for SSL comstack GNUTLS. Did not work in non-blocking
+mode at all. Probably never did.
+
+Make a new version of ztest.pem that, at least, is not expired.
+
 --- 4.2.45 2012/11/13
 
 Fix description of CCL directive 'case'.
