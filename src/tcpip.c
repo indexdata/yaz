@@ -1498,7 +1498,19 @@ static int tcpip_set_blocking(COMSTACK p, int flags)
     return 1;
 }
 
+
 #if HAVE_GNUTLS_H
+/* gnutls_x509_crt_print appeared in 1.7.6. Memory leaks were fixed in 1.7.9.
+   GNUTLS_CRT_PRINT_FULL appeared in 2.4.0. */
+#if GNUTLS_VERSION_NUMBER >= 0x020400
+#define USE_GNUTLS_X509_CRT_PRINT 1
+#else
+#define USE_GNUTLS_X509_CRT_PRINT 0
+#endif
+
+
+#if USE_GNUTLS_X509_CRT_PRINT
+#else
 static const char *bin2hex(const void *bin, size_t bin_size)
 {
     static char printable[110];
@@ -1515,86 +1527,84 @@ static const char *bin2hex(const void *bin, size_t bin_size)
     }
     return printable;
 }
+
+static void x509_crt_print(gnutls_x509_crt_t cert)
+{
+    time_t expiration_time, activation_time;
+    size_t size;
+    char serial[40];
+    char dn[256];
+    unsigned int algo, bits;
+
+    expiration_time = gnutls_x509_crt_get_expiration_time(cert);
+    activation_time = gnutls_x509_crt_get_activation_time(cert);
+
+    printf("\tCertificate is valid since: %s", ctime(&activation_time));
+    printf("\tCertificate expires: %s", ctime(&expiration_time));
+
+    /* Print the serial number of the certificate. */
+    size = sizeof(serial);
+    gnutls_x509_crt_get_serial(cert, serial, &size);
+    
+    printf("\tCertificate serial number: %s\n", bin2hex(serial, size));
+    
+    /* Extract some of the public key algorithm's parameters
+     */
+    algo = gnutls_x509_crt_get_pk_algorithm(cert, &bits);
+    
+    printf("Certificate public key: %s", gnutls_pk_algorithm_get_name(algo));
+    
+    /* Print the version of the X.509 certificate. */
+    printf("\tCertificate version: #%d\n", gnutls_x509_crt_get_version(cert));
+    
+    size = sizeof(dn);
+    gnutls_x509_crt_get_dn(cert, dn, &size);
+    printf("\tDN: %s\n", dn);
+    
+    size = sizeof(dn);
+    gnutls_x509_crt_get_issuer_dn(cert, dn, &size);
+    printf("\tIssuer's DN: %s\n", dn);
+}
+#endif
 #endif
 
 void cs_print_session_info(COMSTACK cs)
 {
 #if HAVE_GNUTLS_H
-    if (cs->type == ssl_type)
+    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+    if (cs->type == ssl_type && sp->session)
     {
-        struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-        if (sp->session)
+        const gnutls_datum_t *cert_list;
+        unsigned i, cert_list_size;
+        if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
+            return;
+        printf("X509 certificate\n");
+        cert_list = gnutls_certificate_get_peers(sp->session,
+                                                 &cert_list_size);
+        printf("Peer provided %u certificates\n", cert_list_size);
+        for (i = 0; i < cert_list_size; i++)
         {
-            const gnutls_datum_t *cert_list;
-            unsigned i, cert_list_size;
-            if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
-                return;
-            printf("X509 certificate\n");
-            cert_list = gnutls_certificate_get_peers(sp->session,
-                                                     &cert_list_size);
-            printf("Peer provided %u certificates\n", cert_list_size);
-            for (i = 0; i < cert_list_size; i++)
+            gnutls_x509_crt_t cert;
+#if USE_GNUTLS_X509_CRT_PRINT
+            int ret;
+            gnutls_datum_t cinfo;
+#endif
+            gnutls_x509_crt_init(&cert);
+            gnutls_x509_crt_import(cert, &cert_list[i], GNUTLS_X509_FMT_DER);
+            printf("Certificate info %d:\n", i + 1);
+#if USE_GNUTLS_X509_CRT_PRINT
+            ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL,
+                                        &cinfo);
+            if (ret == 0)
             {
-                gnutls_x509_crt_t cert;
-                gnutls_datum_t cinfo;
-                int ret;
-                time_t expiration_time, activation_time;
-                size_t size;
-                char serial[40];
-                char dn[256];
-                unsigned int algo, bits;
-
-                /* we only print information about the first certificate. */
-                gnutls_x509_crt_init(&cert);
-                gnutls_x509_crt_import(cert, &cert_list[i], GNUTLS_X509_FMT_DER);
-                printf("Certificate info %d:\n", i + 1);
-                /* This is the preferred way of printing short information about
-                   a certificate. */
-                ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_ONELINE, &cinfo);
-                if (ret == 0)
-                {
-                    printf("\t%s\n", cinfo.data);
-                    gnutls_free(cinfo.data);
-                }
-
-                /* If you want to extract fields manually for some other reason,
-                   below are popular example calls. */
-
-                expiration_time = gnutls_x509_crt_get_expiration_time(cert);
-                activation_time = gnutls_x509_crt_get_activation_time(cert);
-
-                printf("\tCertificate is valid since: %s", ctime(&activation_time));
-                printf("\tCertificate expires: %s", ctime(&expiration_time));
-
-                /* Print the serial number of the certificate. */
-                size = sizeof(serial);
-                gnutls_x509_crt_get_serial(cert, serial, &size);
-
-                printf("\tCertificate serial number: %s\n",
-                        bin2hex(serial, size));
-
-                /* Extract some of the public key algorithm's parameters
-                 */
-                algo = gnutls_x509_crt_get_pk_algorithm(cert, &bits);
-
-                printf("Certificate public key: %s",
-                        gnutls_pk_algorithm_get_name(algo));
-
-                /* Print the version of the X.509 certificate. */
-                printf("\tCertificate version: #%d\n",
-                        gnutls_x509_crt_get_version(cert));
-
-                size = sizeof(dn);
-                gnutls_x509_crt_get_dn(cert, dn, &size);
-                printf("\tDN: %s\n", dn);
-
-                size = sizeof(dn);
-                gnutls_x509_crt_get_issuer_dn(cert, dn, &size);
-                printf("\tIssuer's DN: %s\n", dn);
-
-                gnutls_x509_crt_deinit(cert);
-
+                printf("\t%s\n", cinfo.data);
+                gnutls_free(cinfo.data);
             }
+#else
+            x509_crt_print(cert);
+#endif
+            gnutls_x509_crt_deinit(cert);
+
         }
     }
 #elif HAVE_OPENSSL_SSL_H
