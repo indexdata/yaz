@@ -1549,15 +1549,26 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri,
         z_HTTP_header_add_basic_auth(c->odr_out, &gdu->u.HTTP_Request->headers,
                                      c->user, c->password);
     }
-    if (!z_GDU(c->odr_out, &gdu, 0, 0))
+    return ZOOM_send_GDU(c, gdu);
+}
+
+zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
+{
+    ZOOM_Event event;
+
+    int r = z_GDU(c->odr_out, &gdu, 0, 0);
+    if (!r)
         return zoom_complete;
     if (c->odr_print)
         z_GDU(c->odr_print, &gdu, 0, 0);
     if (c->odr_save)
         z_GDU(c->odr_save, &gdu, 0, 0);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
-
     odr_reset(c->odr_out);
+
+    event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
+    ZOOM_connection_put_event(c, event);
+
     return ZOOM_send_buf(c);
 }
 

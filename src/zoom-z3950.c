@@ -959,7 +959,6 @@ ZOOM_API(void)
     }
 }
 
-
 static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                                  int present_phase);
 

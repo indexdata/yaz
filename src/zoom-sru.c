@@ -34,7 +34,6 @@ static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
 static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 {
     Z_GDU *gdu;
-    ZOOM_Event event;
     const char *database =  ZOOM_options_get(c->options, "databaseName");
 
     gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port,
@@ -57,18 +56,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     {
         yaz_solr_encode_request(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
-    if (!z_GDU(c->odr_out, &gdu, 0, 0))
-        return zoom_complete;
-    if (c->odr_print)
-        z_GDU(c->odr_print, &gdu, 0, 0);
-    if (c->odr_save)
-        z_GDU(c->odr_save, &gdu, 0, 0);
-    c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
-
-    event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
-    ZOOM_connection_put_event(c, event);
-    odr_reset(c->odr_out);
-    return ZOOM_send_buf(c);
+    return ZOOM_send_GDU(c, gdu);
 }
 #endif
 
