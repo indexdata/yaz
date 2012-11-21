@@ -303,6 +303,7 @@ ZOOM_API(ZOOM_connection)
 
     c->sru_version = 0;
     c->no_redirects = 0;
+    c->saveAPDU_wrbuf = 0;
     return c;
 }
 
@@ -628,6 +629,7 @@ ZOOM_API(void)
     xfree(c->group);
     xfree(c->password);
     xfree(c->sru_version);
+    wrbuf_destroy(c->saveAPDU_wrbuf);
     xfree(c);
 }
 
@@ -1794,20 +1796,56 @@ zoom_ret ZOOM_send_buf(ZOOM_connection c)
 ZOOM_API(const char *)
     ZOOM_connection_option_get(ZOOM_connection c, const char *key)
 {
-    return ZOOM_options_get(c->options, key);
+    if (!strcmp(key, "APDU"))
+    {
+        return c->saveAPDU_wrbuf ? wrbuf_cstr(c->saveAPDU_wrbuf) : "";
+    }
+    else
+        return ZOOM_options_get(c->options, key);
 }
 
 ZOOM_API(const char *)
     ZOOM_connection_option_getl(ZOOM_connection c, const char *key, int *lenp)
 {
-    return ZOOM_options_getl(c->options, key, lenp);
+    if (!strcmp(key, "APDU"))
+    {
+        if (c->saveAPDU_wrbuf)
+        {
+            *lenp = wrbuf_len(c->saveAPDU_wrbuf);
+            return wrbuf_cstr(c->saveAPDU_wrbuf);
+        }
+        else
+        {
+            *lenp = 0;
+            return "";
+        }
+    }
+    else
+        return ZOOM_options_getl(c->options, key, lenp);
 }
 
 ZOOM_API(void)
     ZOOM_connection_option_set(ZOOM_connection c, const char *key,
                                const char *val)
 {
-    ZOOM_options_set(c->options, key, val);
+    if (!strcmp(key, "saveAPDU"))
+    {
+        if (val && strcmp(val, "0"))
+        {
+            if (!c->saveAPDU_wrbuf)
+                c->saveAPDU_wrbuf = wrbuf_alloc();
+            else
+                wrbuf_rewind(c->saveAPDU_wrbuf);
+        }
+        else
+        {
+            wrbuf_destroy(c->saveAPDU_wrbuf);
+            c->saveAPDU_wrbuf = 0;
+        }
+        ZOOM_connection_save_apdu_wrbuf(c, c->saveAPDU_wrbuf);
+    }
+    else
+        ZOOM_options_set(c->options, key, val);
 }
 
 ZOOM_API(void)

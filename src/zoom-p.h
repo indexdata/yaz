@@ -113,6 +113,7 @@ struct ZOOM_connection_p {
 
     int log_details;
     int log_api;
+    WRBUF saveAPDU_wrbuf;
 };
 
 #if ZOOM_RESULT_LISTS

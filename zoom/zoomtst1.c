@@ -29,11 +29,14 @@ int main(int argc, char **argv)
         exit (2);
     }
 
+    ZOOM_connection_option_set(z, "saveAPDU", "1");
     r = ZOOM_connection_search_pqf (z, argv[2]);
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
         fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
     else
         printf ("Result count: %ld\n", (long) ZOOM_resultset_size(r));
+    puts("APDUlog");
+    puts(ZOOM_connection_option_get(z, "APDU"));
     ZOOM_resultset_destroy (r);
     ZOOM_connection_destroy (z);
     exit (0);
