@@ -2322,6 +2322,10 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 assoc->init->implementation_id,
                 resp->implementationId);
 
+    resp->implementationVersion = odr_prepend(assoc->encode,
+                assoc->init->implementation_version,
+                resp->implementationVersion);
+
     resp->implementationName = odr_prepend(assoc->encode,
                 assoc->init->implementation_name,
                 odr_prepend(assoc->encode, "GFS", resp->implementationName));
