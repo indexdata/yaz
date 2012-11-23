@@ -1,3 +1,19 @@
+--- 4.2.47 2012/11/23
+
+ZOOM: special options to control APDU logging.
+Using ZOOM_connection_option_set(c, "saveAPDU", "1") will enable
+logging of APDUs until "saveAPDU" option is set again. If logging is
+already enabled the effect is that current APDU buffer is cleared.
+Using ZOOM_connection_option_set(c, "saveAPDU", "0") disables
+logging (default behavior on new connection).
+The APDUs sent/received can be obtained by using
+Using ZOOM_connection_option_get(c, "APDU") or
+ZOOM_connection_option_getl(c, "APDU", &l).
+
+GFS: replay implementation_version from backend
+From 3.0.40 and later, implementation_version from backend was
+not used in init response at all.
+
 --- 4.2.46 2012/11/15
 
 Fix cs_rcvconnect for SSL comstack GNUTLS. Did not work in non-blocking
