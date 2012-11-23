@@ -1,7 +1,7 @@
  <chapter id="comstack"><title>The COMSTACK Module</title>
-  
+
   <sect1 id="comstack.synopsis"><title>Synopsis (blocking mode)</title>
-   
+
    <programlisting><![CDATA[
     COMSTACK stack;
     char *buf = 0;
@@ -18,27 +18,27 @@
         perror("cs_create");  /* use perror() here since we have no stack yet */
         return -1;
     }
-    
+
     server_address_ip = cs_straddr(stack, server_address_str);
     if (!server_address_ip)
     {
         fprintf(stderr, "cs_straddr: address could not be resolved\n");
         return -1;
     }
-    
+
     status = cs_connect(stack, server_address_ip);
     if (status != 0) {
         fprintf(stderr, "cs_connect: %s\n", cs_strerror(stack));
         return -1;
     }
-    
+
     status = cs_put(stack, protocol_package, protocol_package_length);
     if (status) {
         fprintf(stderr, "cs_put: %s\n", cs_strerror(stack));
         return -1;
     }
     /* Now get a response */
-    
+
     length_incoming = cs_get(stack, &buf, &size);
     if (!length_incoming) {
         fprintf(stderr, "Connection closed\n");
@@ -47,10 +47,10 @@
         fprintf(stderr, "cs_get: %s\n", cs_strerror(stack));
         return -1;
     }
-    
+
     /* Print result */
     fwrite(buf, length_incoming, 1, stdout);
-    
+
     /* clean up */
     cs_close(stack);
     if (buf)
@@ -74,7 +74,7 @@
     of losing generality, and it may prove that the interface will need
     extension later on.
    </para>
-   
+
    <note>
     <para>
      There hasn't been interest in the XTImOSI stack for some years.
@@ -111,20 +111,20 @@
     <synopsis>
      COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
     </synopsis>
-    
+
     <para>
      Creates an instance of the protocol stack - a communications endpoint.
      The <literal>type</literal> parameter determines the mode
      of communication. At present the following values are supported:
     </para>
-    
+
     <variablelist>
      <varlistentry><term><literal>tcpip_type</literal></term>
       <listitem><para>TCP/IP (BER over TCP/IP or HTTP over TCP/IP)
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>ssl_type</literal></term>
-      <listitem><para>Secure Socket Layer (SSL). This COMSTACK 
+      <listitem><para>Secure Socket Layer (SSL). This COMSTACK
         is experimental and is not fully implemented. If
         HTTP is used, this effectively is HTTPS.
        </para></listitem>
@@ -136,7 +136,7 @@
        </para></listitem>
       </varlistentry>
      </variablelist>
-     
+
     <para>
      The <function>cs_create</function> function returns a null-pointer
      if a system error occurs.
@@ -454,7 +454,7 @@
    <para>
     For UNIX sockets, the format of an address is the socket filename.
    </para>
-   
+
    <para>
     When a connection has been established, you can use
    </para>
@@ -535,7 +535,7 @@
    </para>
 
   </sect1>
-  
+
   <sect1 id="comstack.diagnostics"><title>Diagnostics</title>
 
    <para>
@@ -567,39 +567,39 @@
    <synopsis>
     const char *cs_errmsg(int n);
    </synopsis>
-   
+
    <para>
     It is also possible to get straight to the textual represenataion
-    without the error code by using 
+    without the error code by using
     <function>cs_strerror</function>.
    </para>
-   
+
    <synopsis>
     const char *cs_strerror(COMSTACK h);
    </synopsis>
-   
+
   </sect1>
   <sect1 id="comstack.summary"><title>Summary and Synopsis</title>
 
    <synopsis><![CDATA[
     #include <yaz/comstack.h>
-    
+
     #include <yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
     #include <yaz/unix.h>   /* this is for UNIX socket support */
-    
+
     COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
-     
+
     COMSTACK cs_createbysocket(int s, CS_TYPE type, int blocking,
                                int protocol);
     COMSTACK cs_create_host(const char *str, int blocking,
                             void **vp);
-     
+
     int cs_bind(COMSTACK handle, int mode);
-     
+
     int cs_connect(COMSTACK handle, void *address);
-     
+
     int cs_rcvconnect(COMSTACK handle);
-     
+
     int cs_listen(COMSTACK handle);
 
     COMSTACK cs_accept(COMSTACK handle);

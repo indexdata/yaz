@@ -1,6 +1,6 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
-[ 
+[
      <!ENTITY % local SYSTEM "local.ent">
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-config</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-config</refname>
   <refpurpose>Script to get information about YAZ.</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-config</command>
@@ -40,7 +40,7 @@
    <arg choice="opt" rep="repeat">libraries</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-config</command> is a script that returns information
@@ -59,11 +59,11 @@
      </para></listitem>
    </varlistentry>
   </variablelist>
-  
+
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>--prefix[=<replaceable>DIR</replaceable>]</term>
@@ -124,7 +124,7 @@
 
   </variablelist>
  </refsect1>
- 
+
  <refsect1><title>FILES</title>
   <para>
    <filename>&prefix;/bin/yaz-config</filename>

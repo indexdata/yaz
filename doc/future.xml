@@ -1,5 +1,5 @@
  <chapter id="future"><title>Future Directions</title>
-  
+
   <para>
    We have a new and better version of the front-end server on the drawing
    board. Resources and external commitments will govern when we'll be
@@ -7,7 +7,7 @@
    flexibility, greater support for access/resource control, and easy
    support for Explain (possibly with Zebra as an extra database engine).
   </para>
-  
+
   <para>
    &yaz; is a BER toolkit and as such should support all protocols
    out there based on that. We'd like to see running ILL applications.
@@ -15,7 +15,7 @@
    LDAP. Maybe a generic framework for doing IR using both LDAP and
    Z39.50 transparently.
   </para>
-  
+
   <para>
    The SOAP implementation is incomplete. In the future we hope
    to add more features to it. Perhaps make a WSDL/XML Schema compiler.
@@ -25,7 +25,7 @@
 
   <para>
    It would be neat to have a proper module mechanism for the Generic
-   Frontend Server so that backend would be dynamically 
+   Frontend Server so that backend would be dynamically
    loaded (as shared objects / DLLs).
   </para>
 
@@ -37,7 +37,7 @@
   </para>
 
  </chapter>
- 
+
  <!-- Keep this comment at the end of the file
  Local variables:
  mode: sgml

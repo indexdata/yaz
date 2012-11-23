@@ -1,6 +1,6 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
-[ 
+[
      <!ENTITY % local SYSTEM "local.ent">
      %local;
      <!ENTITY % entities SYSTEM "entities.ent">
@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-log</refentrytitle>
   <manvolnum>7</manvolnum>
   <refmiscinfo class="manual">Conventions and miscellaneous</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-log</refname>
   <refpurpose>Log handling in all yaz-based programs</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-XXXX</command>
@@ -33,7 +33,7 @@
    <arg choice="opt"><option>-l <replaceable>logfile</replaceable></option></arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    All YAZ-based programs use a common log subsystem, and should support
@@ -43,9 +43,9 @@
   <para>
   </para>
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>-l<replaceable> logfile</replaceable></term>
@@ -55,7 +55,7 @@
       <filename>stderr</filename> is used. The log is appended to this file.
       If the file grows overly large, it is silently rotated: It is renamed to
       <replaceable>logfile</replaceable>.1,
-      <replaceable>logfile</replaceable>.2, .., 9 
+      <replaceable>logfile</replaceable>.2, .., 9
       (old such file is deleted), and a
       new file is opened. The limit defaults to 1GB, but can be set by the
       program.
@@ -88,7 +88,7 @@
 
  <refsect1><title>LOG LEVELS TO CONTROL LOGGING</title>
   <para>
-   Some of the log levels control the way the log is written. 
+   Some of the log levels control the way the log is written.
   </para>
   <para>
    <literal>flush</literal> causes the log to be flushed after every write.
@@ -102,8 +102,8 @@
    intended for automatic test scripts, which should produce predictable log
    files that are easy to compare.
   </para>
-  
- </refsect1> 
+
+ </refsect1>
 
  <refsect1><title>GENERAL LOG LEVELS IN YAZ ITSELF</title>
   <para>
@@ -123,7 +123,7 @@
    levels (see below).
   </para>
   <para>
-   <literal>all</literal> turns on almost all hard-coded log levels. 
+   <literal>all</literal> turns on almost all hard-coded log levels.
   </para>
   <para>
    <literal>loglevel</literal> logs information about the log levels used by
@@ -135,28 +135,28 @@
    is to grep for <function>yaz_log_module_level</function> in the source
    code, as in
    <screen>
-      find . -name '*.[ch]' -print | 
-         xargs grep yaz_log_module_level | 
+      find . -name '*.[ch]' -print |
+         xargs grep yaz_log_module_level |
          grep '"' |
-         cut -d'"' -f2 | 
-         sort -u   
+         cut -d'"' -f2 |
+         sort -u
    </screen>
   </para>
   <para>
-   <literal>eventl</literal>, <literal>malloc</literal>, 
+   <literal>eventl</literal>, <literal>malloc</literal>,
    <literal>nmem</literal>, <literal>odr</literal> are used internally for
    debugging yaz.
   </para>
   <para>
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>LOG LEVELS FOR CLIENTS</title>
   <para>
    <literal>zoom</literal> logs the calls to the zoom API, which may be useful
    in debugging client applications.
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>LOG LEVELS FOR SERVERS</title>
   <para>
@@ -231,9 +231,9 @@
    14:45:41-23/11 yaz-ztest [requestdetail] Request to pack 1+1 1
    14:45:41-23/11 yaz-ztest [requestdetail] pms=1048576, mrs=1048576
    14:45:41-23/11 yaz-ztest [request] Present: [1] 1+1  OK 1 records returned
-   </screen> 
+   </screen>
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>LOG FILENAME EXAMPLES</title>
   <para>
@@ -243,11 +243,11 @@
    is depending on day, rotaion will occur on midnight.
   </para>
   <para>
-   A weekly log could be specified as 
+   A weekly log could be specified as
    <literal>-l my_%Y%U.log</literal>.
   </para>
  </refsect1>
-  
+
  <refsect1><title>FILES</title>
   <para>
    <filename><replaceable>prefix</replaceable>/include/yaz/log.h</filename>

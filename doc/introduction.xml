@@ -4,33 +4,33 @@
    &yaz; is a C/C++ library for information retrieval applications
    using the Z39.50/SRU/SOLR protocols for information retrieval.
   </para>
-  
+
   <para>
    Properties of &yaz;:
    <itemizedlist>
     <listitem><para>
-      Complete 
+      Complete
       <ulink url="&url.z39.50;">Z39.50</ulink> version 3 support.
       Amendments and Z39.50-2002 revision is supported.
      </para></listitem>
     <listitem><para>
-      Supports 
+      Supports
       <ulink url="&url.sru;">SRU GET/POST/SOAP</ulink>
       version 1.2 (over HTTP and HTTPS).
      </para></listitem>
     <listitem><para>
-      Includes BER encoders/decoders for the 
+      Includes BER encoders/decoders for the
       <ulink url="&url.ill;">ISO ILL</ulink>
       protocol.
      </para></listitem>
     <listitem><para>
-      Supports 
+      Supports
       <ulink url="&url.solr;">SOLR</ulink> Web Service version 1.4.x (client side only)
      </para></listitem>
     <listitem><para>
       Supports the following transports: BER over TCP/IP
       (<ulink url="&url.ber.over.tcpip;">RFC1729</ulink>),
-      BER over unix local socket, and 
+      BER over unix local socket, and
       <ulink url="&url.http.1.1;">HTTP 1.1</ulink>.
      </para></listitem>
     <listitem><para>
@@ -41,14 +41,14 @@
       "Secure BER" (for Z39.50).
      </para></listitem>
     <listitem><para>
-      Offers 
+      Offers
       <ulink url="&url.zoom;">ZOOM</ulink> C API implementing
       Z39.50, SRU and SOLR Web Service.
      </para></listitem>
     <listitem><para>
       The &yaz; library offers a set of useful utilities
       related to the protocols, such as MARC (ISO2709) parser,
-      CCL (ISO8777) parser, 
+      CCL (ISO8777) parser,
       <ulink url="&url.cql;">CQL</ulink>
       parser, memory management routines, character set conversion.
      </para></listitem>
@@ -74,7 +74,7 @@
    <itemizedlist>
     <listitem>
      <para>
-      <xref linkend="installation"/> contains installation 
+      <xref linkend="installation"/> contains installation
       instructions for &yaz;. You don't need reading this
       if you expect to download &yaz; binaries.
       However, the chapter contains information about how
@@ -90,7 +90,7 @@
       client.
      </para>
     </listitem>
-    
+
     <listitem>
      <para>
       <xref linkend="server"/> describes the generic frontend server
@@ -118,7 +118,7 @@
 
     <listitem>
      <para>
-      <xref linkend="soap"/> describes how SRU and SOAP is used 
+      <xref linkend="soap"/> describes how SRU and SOAP is used
       in &yaz;. Only if you're developing SRU applications
       this section is a must.
      </para>
@@ -158,7 +158,7 @@
    </itemizedlist>
   </sect1>
   <sect1 id="introduction.api"><title>The API</title>
-   
+
    <para>
     The <ulink url="&url.yaz;">&yaz;</ulink>
     toolkit offers several different levels of access to the
@@ -171,7 +171,7 @@
     If you're developing a client application you should consider the
     <link linkend="zoom">ZOOM</link> API.
     It is, by far, the easiest way to develop clients in C.
-    Server implementers should consider the 
+    Server implementers should consider the
     <link linkend="server">generic frontend server</link>.
     None of those high-level APIs support the whole protocol, but
     they do include most facilities used in existing Z39.50 applications.
@@ -206,7 +206,7 @@
      </listitem>
      <listitem>
       <para>
-       The second layer provides a C represenation of the 
+       The second layer provides a C represenation of the
        protocol units (packages) for Z39.50 ASN.1, ILL ASN.1,
        SRU.
       </para>
@@ -251,7 +251,7 @@
     The &asn; library also provides functions (which are, in turn,
     defined using &odr; primitives) for encoding and decoding data values.
     Their general form is
-    
+
     <funcsynopsis>
      <funcprototype><funcdef>int <function>z_<replaceable>xxx</replaceable></function></funcdef>
       <paramdef>ODR <parameter>o</parameter></paramdef>
@@ -262,7 +262,7 @@
     </funcsynopsis>
     (note the lower-case &quot;z&quot; in the function name)
    </para>
-   
+
    <note>
     <para>
      If you are using the premade definitions of the &asn; module, and you
@@ -271,7 +271,7 @@
      <xref linkend="odr.use"/>.
     </para>
    </note>
-   
+
   <para>
     When you have created a BER-encoded buffer, you can use the &comstack;
     subsystem to transmit (or receive) data over the network. The &comstack;

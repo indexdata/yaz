@@ -45,8 +45,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
   </para>
   <para>
-    <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to YAZ in version 4.1.0, 
-    as a dialect of a SRU protocol, since both are HTTP based protocols. 
+    <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to YAZ in version 4.1.0,
+    as a dialect of a SRU protocol, since both are HTTP based protocols.
   </para>
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
@@ -62,14 +62,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <ulink url="&url.zoom;">ZOOM web-site</ulink> for
    more information.
   </para>
-  
+
   <para>
    In order to fully understand this chapter you should read and
    try the example programs <literal>zoomtst1.c</literal>,
    <literal>zoomtst2.c</literal>, .. in the <literal>zoom</literal>
    directory.
   </para>
-  
+
   <para>
    The C language misses features found in object oriented languages
    such as C++, Java, etc. For example, you'll have to manually,
@@ -86,29 +86,29 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    protocol.
   </para>
   <sect1 id="zoom-connections"><title>Connections</title>
-   
+
    <para>The Connection object is a session with a target.
    </para>
    <synopsis>
     #include &lt;yaz/zoom.h>
-    
+
     ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
-    
+
     ZOOM_connection ZOOM_connection_create (ZOOM_options options);
-    
+
     void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
     void ZOOM_connection_destroy(ZOOM_connection c);
    </synopsis>
    <para>
     Connection objects are created with either function
-    <function>ZOOM_connection_new</function> or 
+    <function>ZOOM_connection_new</function> or
     <function>ZOOM_connection_create</function>.
     The former creates and automatically attempts to establish a network
     connection with the target. The latter doesn't establish
     a connection immediately, thus allowing you to specify options
     before establishing network connection using the function
-    <function>ZOOM_connection_connect</function>. 
+    <function>ZOOM_connection_connect</function>.
     If the port number, <literal>portnum</literal>, is zero, the
     <literal>host</literal> is consulted for a port specification.
     If no port is given, 210 is used. A colon denotes the beginning of
@@ -118,8 +118,8 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
-    The scheme <literal>http</literal> selects SRU/get over HTTP by default, 
-    but can overridded to use SRU/post, SRW and the SOLR protocol. 
+    The scheme <literal>http</literal> selects SRU/get over HTTP by default,
+    but can overridded to use SRU/post, SRW and the SOLR protocol.
    </para>
    <para>
     You can prefix the scheme-qualified host-string with one or more
@@ -154,7 +154,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     The functions <function>ZOOM_connection_option_set</function> and
     <function>ZOOM_connection_option_setl</function> allows you to
     set an option given by <parameter>key</parameter> to the value
-    <parameter>value</parameter> for the connection. 
+    <parameter>value</parameter> for the connection.
     For <function>ZOOM_connection_option_set</function>, the
     value is assumed to be a 0-terminated string. Function
     <function>ZOOM_connection_option_setl</function> specifies a
@@ -207,7 +207,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	of a client. Is used of ZOOM is used in a gateway of some sort.
        </entry><entry>none</entry></row>
       <row><entry>
-        async</entry><entry>If true (1) the connection operates in 
+        async</entry><entry>If true (1) the connection operates in
         asynchronous operation which means that all calls are non-blocking
         except
         <link linkend="zoom.events"><function>ZOOM_event</function></link>.
@@ -296,9 +296,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         facets</entry><entry>
 	A FacetList is comma-separated list of facet, which is defined
 	as <literal>AttributeList</literal>  and a optional FacetTerm
-	(a Term and a frequency). On request the terms is missing. 
+	(a Term and a frequency). On request the terms is missing.
 	On response the the list contains the terms that the target
-	could collect. 
+	could collect.
        </entry><entry>none</entry></row>
       <row><entry>
         apdulog</entry><entry>
@@ -311,7 +311,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </table>
    <para>
     If either option <literal>lang</literal> or <literal>charset</literal>
-    is set, then 
+    is set, then
     <ulink url="&url.z39.50.charneg;">
      Character Set and Language Negotiation</ulink> is in effect.
    </para>
@@ -415,7 +415,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     More query types will be added in future versions of &yaz;, such as
     <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
     etc. In addition to a search, a sort criteria may be set. Function
-    <function>ZOOM_query_sortby</function> specifies a 
+    <function>ZOOM_query_sortby</function> specifies a
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
@@ -466,7 +466,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     The number of hits also called result-count is returned by
     function <function>ZOOM_resultset_size</function>.
    </para>
-   <table id="zoom.resultset.options" 
+   <table id="zoom.resultset.options"
     frame="top"><title>ZOOM Result set Options</title>
     <tgroup cols="3">
      <colspec colwidth="4*" colname="name"></colspec>
@@ -481,7 +481,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </thead>
      <tbody>
       <row><entry>
-        start</entry><entry>Offset of first record to be 
+        start</entry><entry>Offset of first record to be
         retrieved from target. First record has offset 0 unlike the
         protocol specifications where first record has position 1.
 	This option affects ZOOM_resultset_search and
@@ -491,7 +491,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	function ZOOM_resultset_records should be used.
        </entry><entry>0</entry></row>
       <row><entry>
-        count</entry><entry>Number of records to be retrieved.	
+        count</entry><entry>Number of records to be retrieved.
 	This option affects ZOOM_resultset_search and
 	ZOOM_resultset_search_pqf and must be set before any of
 	these functions are invoked.
@@ -504,7 +504,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	option is also supported for the benefit of old applications.)
        </entry><entry>0</entry></row>
       <row><entry>
-        elementSetName</entry><entry>Element-Set name of records. 
+        elementSetName</entry><entry>Element-Set name of records.
         Most targets should honor element set name <literal>B</literal>
         and <literal>F</literal> for brief and full respectively.
        </entry><entry>none</entry></row>
@@ -539,14 +539,14 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
    <para>
     This information is a list of of items, where each item is
-    information about a term or subquery. All items in the list 
-    are prefixed by 
+    information about a term or subquery. All items in the list
+    are prefixed by
     <literal>SearchResult.</literal><replaceable>no</replaceable>
-    where no presents the item number (0=first, 1=second). 
+    where no presents the item number (0=first, 1=second).
     Read <literal>searchresult.size</literal> to determine the
     number of items.
    </para>
-   <table id="zoom.search.info.report.options" 
+   <table id="zoom.search.info.report.options"
     frame="top"><title>Search Info Report Options</title>
     <tgroup cols="2">
      <colspec colwidth="4*" colname="name"></colspec>
@@ -659,13 +659,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      <literal>preferredRecordSyntax</literal> are ignored.
     </para>
     <para>
-     Options <literal>start</literal> and <literal>count</literal> 
+     Options <literal>start</literal> and <literal>count</literal>
      are supported by SRU.
      The remaining options
-     <literal>piggyback</literal>, 
-     <literal>smallSetUpperBound</literal>, 
-     <literal>largeSetLowerBound</literal>, 
-     <literal>mediumSetPresentNumber</literal>, 
+     <literal>piggyback</literal>,
+     <literal>smallSetUpperBound</literal>,
+     <literal>largeSetLowerBound</literal>,
+     <literal>mediumSetPresentNumber</literal>,
      <literal>mediumSetElementSetName</literal>,
       <literal>smallSetElementSetName</literal> are
      unsupported.
@@ -682,7 +682,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <para>
      Unfortunately, SRU or SOLR does not define a database setting. Hence,
      <literal>databaseName</literal> is unsupported and ignored.
-     However, the path part in host parameter for functions 
+     However, the path part in host parameter for functions
      <function>ZOOM_connecton_new</function> and
      <function>ZOOM_connection_connect</function> acts as a
      database (at least for the &yaz; SRU server).
@@ -711,7 +711,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      void ZOOM_record_destroy(ZOOM_record rec);
    </synopsis>
    <para>
-    References to temporary records are returned by functions 
+    References to temporary records are returned by functions
     <function>ZOOM_resultset_records</function> or
     <function>ZOOM_resultset_record</function>.
     </para>
@@ -723,7 +723,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
    <para>
     A single record is returned by function
-    <function>ZOOM_resultset_record</function> that takes a 
+    <function>ZOOM_resultset_record</function> that takes a
     position as argument. First record has position zero.
     If no record could be obtained <literal>NULL</literal> is returned.
    </para>
@@ -768,7 +768,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     If <replaceable>to</replaceable> is omitted UTF-8 is assumed.
     If charset is not given, then no character set conversion takes place.
    </para>
-   
+
    <para>OPAC records may be returned in a different
      set from the bibliographic MARC record. If this is this the case,
     <replaceable>opacfrom</replaceable> should be set to the character set
@@ -782,13 +782,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     The format argument controls whether record data should be XML
     pretty-printed (post process operation).
-    It is enabled only if format value <replaceable>v</replaceable> is 
+    It is enabled only if format value <replaceable>v</replaceable> is
     <literal>1</literal> and the record content is XML well-formed.
    </para>
    <para>
     In addition, for certain types, the length
     <literal>len</literal> passed will be set to the size in bytes of
-    the returned information. 
+    the returned information.
     </para>
    <para>
     The following are the supported values for <replaceable>form</replaceable>.
@@ -796,7 +796,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      <varlistentry><term><literal>database</literal></term>
       <listitem><para>Database of record is returned
         as a C null-terminated string. Return type
-        <literal>const char *</literal>. 
+        <literal>const char *</literal>.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>syntax</literal></term>
@@ -804,13 +804,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         as a C null-terminated string containing the symbolic name of
 	the record syntax, e.g. <literal>Usmarc</literal>. Return type
 	is
-        <literal>const char *</literal>. 
+        <literal>const char *</literal>.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>schema</literal></term>
       <listitem><para>The schema of the record is returned
         as a C null-terminated string. Return type is
-        <literal>const char *</literal>. 
+        <literal>const char *</literal>.
        </para></listitem>
      </varlistentry>
      <varlistentry><term><literal>render</literal></term>
@@ -823,7 +823,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      <varlistentry><term><literal>raw</literal></term>
       <listitem><para>The record is returned in the internal
         YAZ specific format. For GRS-1, Explain, and others, the
-        raw data is returned as type 
+        raw data is returned as type
         <literal>Z_External *</literal> which is just the type for
         the member <literal>retrievalRecord</literal> in
         type <literal>NamePlusRecord</literal>.
@@ -837,9 +837,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	returned verbatim. MARC records are returned in
 	<ulink url="&url.marcxml;">
 	 MARCXML
-	 </ulink> 
+	 </ulink>
 	(converted from ISO2709 to MARCXML by YAZ).
-	OPAC records are also converted to XML and the 
+	OPAC records are also converted to XML and the
 	bibliographic record is converted to MARCXML (when possible).
 	GRS-1 records are not supported for this form.
         Upon completion, the XML buffer is returned
@@ -859,7 +859,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	returned verbatim. MARC records are returned in
 	<link linkend="tools.turbomarc">
 	 TurboMARC
-	</link> 
+	</link>
 	(converted from ISO2709 to TurboMARC by YAZ).
 	Upon completion, the XML buffer is returned
 	(type <literal>const char *</literal>) and length is stored in
@@ -871,7 +871,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <para>
     Most
     <ulink url="&url.marc21;">MARC21</ulink>
-    records uses the 
+    records uses the
     <ulink url="&url.marc8;">MARC-8</ulink>
     character set encoding.
     An application that wishes to display in Latin-1 would use
@@ -910,10 +910,10 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
   </sect1>
   <sect1 id="zoom.facets"><title>Facets</title>
    <para>
-    Facets operations is not part of the official ZOOM specification, but is an Index Data extension 
-    for YAZ-based Z39.50 targets or <ulink url="&url.solr;">SOLR</ulink> targets. 
-    In case the target can and is requested to return facets, using a result set the ZOOM client 
-    can request one or all facet fields. Using a facet field the client can request the term count and 
+    Facets operations is not part of the official ZOOM specification, but is an Index Data extension
+    for YAZ-based Z39.50 targets or <ulink url="&url.solr;">SOLR</ulink> targets.
+    In case the target can and is requested to return facets, using a result set the ZOOM client
+    can request one or all facet fields. Using a facet field the client can request the term count and
     then interate over the terms.
    </para>
    <synopsis>
@@ -928,7 +928,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field, size_t idx, int *freq);
    </synopsis>
    <para>
-    References to temporary structures are returned by all functions. They are only valid as long the Result set is valid.  
+    References to temporary structures are returned by all functions. They are only valid as long the Result set is valid.
     <function>ZOOM_resultset_get_facet_field</function> or
     <function>ZOOM_resultset_get_facet_field_by_index</function>.
     <function>ZOOM_resultset_facets</function>.
@@ -938,28 +938,28 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
    <para id="zoom.resultset.get_facet_field">
     A single Facet field  is returned by function
-    <function>ZOOM_resultset_get_facet_field</function> or <function>ZOOM_resultset_get_facet_field_by_index</function> that takes a 
+    <function>ZOOM_resultset_get_facet_field</function> or <function>ZOOM_resultset_get_facet_field_by_index</function> that takes a
     result set and facet name or positive index respectively. First facet has position zero.
     If no facet could be obtained (invalid name or index out of bounds) <literal>NULL</literal> is returned.
    </para>
    <para id="zoom.resultset.facets">
-    An array of facets field can be returned by <function>ZOOM_resultset_facets</function>. The length of the array is 
-    given by <function>ZOOM_resultset_facets_size</function>. The array is zero-based and last entry will be at 
-    <function>ZOOM_resultset_facets_size(result_set)</function>-1. 
+    An array of facets field can be returned by <function>ZOOM_resultset_facets</function>. The length of the array is
+    given by <function>ZOOM_resultset_facets_size</function>. The array is zero-based and last entry will be at
+    <function>ZOOM_resultset_facets_size(result_set)</function>-1.
    </para>
    <para id="zoom.resultset.facets_names">
-    It is possible to interate over facets by name, by calling <function>ZOOM_resultset_facets_names</function>. 
-    This will return an const array of char * where each string can be used as parameter for 
-    <function>ZOOM_resultset_get_facet_field</function>. 
+    It is possible to interate over facets by name, by calling <function>ZOOM_resultset_facets_names</function>.
+    This will return an const array of char * where each string can be used as parameter for
+    <function>ZOOM_resultset_get_facet_field</function>.
    </para>
    <para>
-   Function <function>ZOOM_facet_field_name</function> gets the request facet name from a returned facet field. 
+   Function <function>ZOOM_facet_field_name</function> gets the request facet name from a returned facet field.
    </para>
    <para>
-   Function <function>ZOOM_facet_field_get_term</function> returns the idx'th term and term count for a facet field. 
-   Idx must between 0 and <function>ZOOM_facet_field_term_count</function>-1, otherwise the returned reference will be 
-   <literal>NULL</literal>. On a valid idx, the value of the freq reference will be the term count. 
-   The *freq parameter must be valid pointer to integer.   
+   Function <function>ZOOM_facet_field_get_term</function> returns the idx'th term and term count for a facet field.
+   Idx must between 0 and <function>ZOOM_facet_field_term_count</function>-1, otherwise the returned reference will be
+   <literal>NULL</literal>. On a valid idx, the value of the freq reference will be the term count.
+   The *freq parameter must be valid pointer to integer.
    </para>
    </sect1>
   <sect1 id="zoom.scan"><title>Scan</title>
@@ -1010,7 +1010,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     a scan set offset <literal>pos</literal> and returns a pointer
     to a <emphasis>raw term</emphasis> or <literal>NULL</literal> if
     non-present.
-    If present, the <literal>occ</literal> and <literal>len</literal> 
+    If present, the <literal>occ</literal> and <literal>len</literal>
     are set to the number of occurrences and the length
     of the actual term respectively.
     <function>ZOOM_scanset_display_term</function> is similar to
@@ -1042,7 +1042,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     more generic alternative to <function>ZOOM_connection_scan</function>
     which allows to use both CQL and PQF for Scan.
    </para>
-   
+
    <table frame="top" id="zoom.scanset.options">
     <title>ZOOM Scan Set Options</title>
     <tgroup cols="3">
@@ -1156,7 +1156,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </para>
    <para>
     <function>ZOOM_package_send</function> sends
-    the package the via connection specified in 
+    the package the via connection specified in
     <function>ZOOM_connection_package</function>.
     The <parameter>type</parameter> specifies the actual extended service
     package type to be sent.
@@ -1286,7 +1286,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        <row>
 	<entry>action</entry>
 	<entry>
-	 The update action. One of 
+	 The update action. One of
 	 <literal>specialUpdate</literal>,
 	 <literal>recordInsert</literal>,
 	 <literal>recordReplace</literal>,
@@ -1317,7 +1317,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	  <literal>syntax</literal> (see below).
 	  Option <literal>recordOpaque</literal> is an alternative
 	  to record - and <literal>record</literal> option (above) is
-	  ignored if recordOpaque is set. This option is only available in 
+	  ignored if recordOpaque is set. This option is only available in
 	  YAZ 3.0.35 and later and is meant to facilitate Updates with
 	  servers from OCLC.
 	</entry>
@@ -1356,9 +1356,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 	 1, 2 or 3. Each version has a distinct OID:
 	 1.2.840.10003.9.5
 	 (<ulink url="&url.z39.50.extupdate1;">first version</ulink>) ,
-	 1.2.840.10003.9.5.1 
-	 (second version) and 
-	 1.2.840.10003.9.5.1.1 
+	 1.2.840.10003.9.5.1
+	 (second version) and
+	 1.2.840.10003.9.5.1.1
 	 (<ulink url="&url.z39.50.extupdate3;">third and
 	  newest version</ulink>).
 	</entry>
@@ -1367,7 +1367,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
       </tbody>
      </tgroup>
     </table>
-    
+
    </sect2>
 
    <sect2 id="zoom.database.create"><title>Database Create</title>
@@ -1375,7 +1375,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      For Database Create, type must be set to <literal>create</literal> in
      <function>ZOOM_package_send</function>.
     </para>
-    
+
     <table frame="top" id="zoom.database.create.options">
      <title>Database Create Options</title>
      <tgroup cols="3">
@@ -1399,13 +1399,13 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </tgroup>
     </table>
    </sect2>
-   
+
    <sect2 id="zoom.database.drop"><title>Database Drop</title>
     <para>
      For Database Drop, type must be set to <literal>drop</literal> in
      <function>ZOOM_package_send</function>.
     </para>
-    
+
     <table frame="top" id="zoom.database.drop.options">
      <title>Database Drop Options</title>
      <tgroup cols="3">
@@ -1429,7 +1429,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </tgroup>
     </table>
    </sect2>
-   
+
    <sect2 id="zoom.commit"><title>Commit Operation</title>
     <para>
      For Commit, type must be set to <literal>commit</literal> in
@@ -1484,7 +1484,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
-    If you're developing non-blocking applications, you have to deal 
+    If you're developing non-blocking applications, you have to deal
     with events.
    </para>
    <synopsis>
@@ -1574,7 +1574,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    </table>
   </sect1>
  </chapter>
- 
+
  <!-- Keep this comment at the end of the file
  Local variables:
  mode: sgml
@@ -1589,4 +1589,4 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
  sgml-namecase-general:t
  End:
  -->
- 
+

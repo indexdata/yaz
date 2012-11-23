@@ -14,13 +14,13 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>zoomsh</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>zoomsh</refname>
   <refpurpose>ZOOM shell</refpurpose>
@@ -43,7 +43,7 @@
    </para>
    <para>
     You may pass one or more commands to <command>zoomsh</command>.
-    These commands are invoked first. 
+    These commands are invoked first.
    </para>
   </refsect1>
 
@@ -76,11 +76,11 @@ ZOOM>search computer
 localhost:9999: 7 hits
 ZOOM>show 0 1
 1 Default USmarc
-001    11224466 
+001    11224466
 003 DLC
 005 00000000000000.0
-008 910710c19910701nju           00010 eng  
-010    $a    11224466 
+008 910710c19910701nju           00010 eng
+010    $a    11224466
 040    $a DLC $c DLC
 050 00 $a 123-xyz
 100 10 $a Jack Collins
@@ -103,13 +103,13 @@ ZOOM>quit
   </refsect1>
   <refsect1><title>COMMANDS</title>
    <variablelist>
-    
+
     <varlistentry><term><literal>connect</literal>
       <replaceable>zurl</replaceable></term>
      <listitem><para>
        Connects to the target given by <replaceable>zurl</replaceable>.
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>close</literal>
       [<replaceable>zurl</replaceable>]</term>
      <listitem><para>
@@ -117,7 +117,7 @@ ZOOM>quit
        <replaceable>zurl</replaceable> or all targets if
        <replaceable>zurl</replaceable> was omitted.
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>show</literal>
       [<replaceable>start</replaceable>
       [<replaceable>count</replaceable>]]
@@ -127,13 +127,13 @@ ZOOM>quit
        by <replaceable>start</replaceable>. First records has offset 0
        (unlike the Z39.50 protocol).
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>quit</literal>
      </term>
      <listitem><para>
        Quits <command>zoomsh</command>.
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>set</literal>
       <replaceable>name</replaceable>
       [<replaceable>value</replaceable>]
@@ -142,22 +142,22 @@ ZOOM>quit
        Sets option <replaceable>name</replaceable> to
        <replaceable>value</replaceable>.
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>get</literal>
       <replaceable>name</replaceable>
      </term>
      <listitem><para>
        Prints value of option <replaceable>name</replaceable>.
       </para></listitem></varlistentry>
-    
+
     <varlistentry><term><literal>help</literal>
      </term>
      <listitem><para>
        Prints list of available commands.
       </para></listitem></varlistentry>
-    
+
    </variablelist>
-   
+
   </refsect1>
   <refsect1><title>SEE ALSO</title>
    <para>

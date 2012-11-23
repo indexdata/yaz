@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-asncomp</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-asncomp</refname>
   <refpurpose>YAZ ASN.1 compiler</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-asncomp</command>
@@ -39,7 +39,7 @@
    <arg choice="opt"><option>-m <replaceable>module</replaceable></option></arg>
    <arg choice="opt">filename</arg>
   </cmdsynopsis>
-  
+
  </refsynopsisdiv>
   <refsect1><title>DESCRIPTION</title>
   <para>
@@ -68,25 +68,25 @@
     <listitem>
      <para>
       Makes the ASN.1 compiler print more verbose about the
-      various stages of operations. 
+      various stages of operations.
      </para>
     </listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-c </literal>
      <replaceable>cfile</replaceable></term>
     <listitem><para>
       Specifies the name of the C/C++ file with encoders/decoders.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-h </literal>
      <replaceable>hfile</replaceable></term>
     <listitem><para>
       Specifies the name of header file with definitions.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-p </literal>
      <replaceable>pfile</replaceable></term>
     <listitem><para>
@@ -95,14 +95,14 @@
       in header file (option -h).
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-d </literal>
      <replaceable>dfile</replaceable></term>
     <listitem><para>
       Specifies the name of a definitions file.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-I </literal>
      <replaceable>iout</replaceable></term>
     <listitem><para>
@@ -110,7 +110,7 @@
       are written.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-i </literal>
      <replaceable>idir</replaceable></term>
     <listitem><para>
@@ -118,7 +118,7 @@
       are written.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry><term><literal>-m </literal>
      <replaceable>module</replaceable></term>
     <listitem><para>
@@ -127,7 +127,7 @@
       all modules in the ASN.1 file are processed.
      </para></listitem>
    </varlistentry>
-   
+
   </variablelist>
  </refsect1>
  <refsect1><title>DEFINITIONS FILE</title>
@@ -144,7 +144,7 @@
   <para>
    Available variables are:
    <variablelist>
-    
+
     <varlistentry><term><literal>default-prefix</literal></term>
      <listitem><para>
        Sets prefix for names in the produced output.
@@ -152,7 +152,7 @@
        C typedef prefix and preprocessor prefix respectively.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>prefix(</literal><replaceable>module</replaceable><literal>)</literal></term>
      <listitem><para>
        This value sets prefix values for module
@@ -160,24 +160,24 @@
        The value has same form as <literal>default-prefix</literal>.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>filename(</literal><replaceable>module</replaceable><literal>)</literal></term>
      <listitem><para>
        Specifies filename for C/header file for module
        <replaceable>module</replaceable>.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>init(</literal><replaceable>module</replaceable><literal>,h)</literal></term>
      <listitem><para>
-       Code fragment to be put in first part of public header for module 
+       Code fragment to be put in first part of public header for module
     <replaceable>module</replaceable>.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>body(</literal><replaceable>module</replaceable><literal>,h)</literal></term>
      <listitem><para>
-       Code fragment to be put in last part of public header for module 
+       Code fragment to be put in last part of public header for module
     <replaceable>module</replaceable> (trailer).
       </para></listitem>
     </varlistentry>
@@ -188,21 +188,21 @@
        module <replaceable>module</replaceable>.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>body(</literal><replaceable>module</replaceable><literal>,c)</literal></term>
      <listitem><para>
        Code fragment to be put in last part of C based encoder/decoder for
        module <replaceable>module</replaceable> (trailer).
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>map(</literal><replaceable>module</replaceable><literal>,</literal><replaceable>name</replaceable><literal>)</literal></term>
      <listitem><para>
-       Maps ASN.1 type in module <replaceable>module</replaceable> 
+       Maps ASN.1 type in module <replaceable>module</replaceable>
        of <replaceable>name</replaceable> to value.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>membermap(</literal><replaceable>module</replaceable><literal>,</literal><replaceable>name</replaceable><literal>,</literal><replaceable>member</replaceable><literal>)</literal></term>
      <listitem><para>
        Maps member <replaceable>member</replaceable> in SEQUENCE/CHOICE of
@@ -215,7 +215,7 @@
        C <literal>struct</literal>,<literal>union</literal>.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry><term><literal>unionmap(</literal><replaceable>module</replaceable><literal>,</literal><replaceable>name</replaceable><literal>,</literal><replaceable>member</replaceable><literal>)</literal></term>
      <listitem><para>
        Maps member <replaceable>member</replaceable> in CHOICE of

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" 
+    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
      %local;
@@ -10,7 +10,7 @@
      %idcommon;
 ]>
 <book>
- &bookinfo; 
+ &bookinfo;
  &chap-introduction;
  &chap-installation;
  &chap-zoom;
@@ -39,7 +39,7 @@
  </para>
  &std-oid-table;
  </appendix>
-  
+
  &app-license;
  &app-indexdata;
  &app-credits;

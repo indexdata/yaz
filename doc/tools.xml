@@ -1,5 +1,5 @@
  <chapter id="tools"><title>Supporting Tools</title>
-  
+
   <para>
    In support of the service API - primarily the ASN module, which
    provides the pro-grammatic interface to the Z39.50 APDUs, &yaz; contains
@@ -40,7 +40,7 @@
      </para>
     </note>
     <para>
-     The PQF is defined by the pquery module in the YAZ library. 
+     The PQF is defined by the pquery module in the YAZ library.
      There are two sets of function that have similar behavior. First
      set operates on a PQF parser handle, second set doesn't. First set
      set of functions are more flexible than the second set. Second set
@@ -73,7 +73,7 @@
      a Z39.50 RPN Query is returned which is created using ODR stream
      <literal>o</literal>. If parsing failed, a NULL pointer is
      returned.
-     Function <function>yaz_pqf_scan</function> takes a scan query in 
+     Function <function>yaz_pqf_scan</function> takes a scan query in
      <literal>qbuf</literal>. If parsing was successful, the function
      returns attributes plus term pointer and modifies
      <literal>attributeSetId</literal> to hold attribute set for the
@@ -110,7 +110,7 @@
     <para>
      If the parse went well, <function>p_query_rpn()</function> returns a
      pointer to a <literal>Z_RPNQuery</literal> structure which can be
-     placed directly into a <literal>Z_SearchRequest</literal>. 
+     placed directly into a <literal>Z_SearchRequest</literal>.
      If parsing failed, due to syntax error, a NULL pointer is returned.
     </para>
     <para>
@@ -170,7 +170,7 @@
     </para>
 
     <para>
-     The @attr operator is followed by an attribute specification 
+     The @attr operator is followed by an attribute specification
      (<literal>attr-spec</literal> above). The specification consists
      of an optional attribute set, an attribute type-value pair and
      a sub-query. The attribute type-value pair is packed in one string:
@@ -194,7 +194,7 @@
      is used.  This is the only encoding allowed in both versions 2 and 3
      of the Z39.50 standard.
     </para>
-    
+
     <sect3 id="PQF-prox">
       <title>Using Proximity Operators with PQF</title>
       <note>
@@ -221,7 +221,7 @@
       <para>
         The proximity operator <literal>@prox</literal> is a special
         and more restrictive version of the conjunction operator
-        <literal>@and</literal>.  Its semantics are described in 
+        <literal>@and</literal>.  Its semantics are described in
 	section 3.7.2 (Proximity) of Z39.50 the standard itself, which
         can be read on-line at
 	<ulink url="&url.z39.50.proximity;"/>
@@ -401,9 +401,9 @@
       <para>
        <screen>
 	@or @and bob dylan @set Result-1
-	
+
 	@attr 4=1 @and @attr 1=1 "bob dylan" @attr 1=4 "slow train coming"
-	
+
 	@and @attr 2=4 @attr gils 1=2038 -114 @attr 2=2 @attr gils 1=2039 -109
       </screen>
        <note>
@@ -483,45 +483,45 @@
       -- Proximity operator
 
      </screen>
-     
+
      <example id="example.ccl.queries">
       <title>CCL queries</title>
       <para>
        The following queries are all valid:
       </para>
-      
+
       <screen>
        dylan
-       
+
        "bob dylan"
-       
+
        dylan or zimmerman
-       
+
        set=1
-       
+
        (dylan and bob) or set=1
-       
+
       </screen>
       <para>
        Assuming that the qualifiers <literal>ti</literal>,
        <literal>au</literal>
        and <literal>date</literal> are defined we may use:
       </para>
-      
+
       <screen>
        ti=self portrait
-       
+
        au=(bob dylan and slow train coming)
 
        date>1980 and (ti=((self portrait)))
-       
+
       </screen>
      </example>
-     
+
     </sect3>
     <sect3 id="ccl.qualifiers">
      <title>CCL Qualifiers</title>
-     
+
      <para>
       Qualifiers are used to direct the search to a particular searchable
       index, such as title (ti) and author indexes (au). The CCL standard
@@ -547,13 +547,13 @@
       <para>
        A qualifier specification is of the form:
       </para>
-      
+
       <para>
-       <replaceable>qualifier-name</replaceable>  
+       <replaceable>qualifier-name</replaceable>
        [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable>
-       [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable> ...      
+       [<replaceable>attributeset</replaceable><literal>,</literal>]<replaceable>type</replaceable><literal>=</literal><replaceable>val</replaceable> ...
       </para>
-      
+
       <para>
        where <replaceable>qualifier-name</replaceable> is the name of the
        qualifier to be used (eg. <literal>ti</literal>),
@@ -562,7 +562,7 @@
        <replaceable>val</replaceable> is attribute value.
        The <replaceable>type</replaceable> can be specified as an
        integer or as it be specified either as a single-letter:
-       <literal>u</literal> for use, 
+       <literal>u</literal> for use,
        <literal>r</literal> for relation,<literal>p</literal> for position,
        <literal>s</literal> for structure,<literal>t</literal> for truncation
        or <literal>c</literal> for completeness.
@@ -644,10 +644,10 @@
        <ulink url="&url.z39.50.attset.bib1;">list of Bib-1 attributes</ulink>
       </para>
       <para>
-       It is also possible to specify non-numeric attribute values, 
+       It is also possible to specify non-numeric attribute values,
        which are used in combination with certain types.
        The special combinations are:
-       
+
        <table id="ccl.special.attribute.combos">
 	<title>Special attribute combos</title>
 	<tgroup cols="2">
@@ -672,13 +672,13 @@
 	    This does not set the structure at all.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>s=ol</literal></entry><entry>
 	    Each token in the term is ORed. (or-list).
 	    This does not set the structure at all.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>s=ag</literal></entry><entry>
 	    Tokens that appears as phrases (with blank in them) gets
 	    structure phrase attached. Tokens that appers as words
@@ -696,13 +696,13 @@
 	    This sets Bib-1 relation attribute accordingly (relation
 	    ordered). A query construct is only treated as a range if
 	    dash is used and that is surrounded by white-space. So
-	    <literal>-1980</literal> is treated as term 
+	    <literal>-1980</literal> is treated as term
 	    <literal>"-1980"</literal> not <literal>&lt;= 1980</literal>.
 	    If <literal>- 1980</literal> is used, however, that is
 	    treated as a range.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>r=r</literal></entry><entry>
 	    Similar to <literal>r=o</literal> but assumes that terms
 	    are non-negative (not prefixed with <literal>-</literal>).
@@ -714,27 +714,27 @@
 	    <literal>r=r</literal> is available in YAZ 2.0.24 or later.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>t=l</literal></entry><entry>
 	    Allows term to be left-truncated.
 	    If term is of the form <literal>?x</literal>, the resulting
 	    Type-1 term is <literal>x</literal> and truncation is left.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>t=r</literal></entry><entry>
 	    Allows term to be right-truncated.
 	    If term is of the form <literal>x?</literal>, the resulting
 	    Type-1 term is <literal>x</literal> and truncation is right.
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>t=n</literal></entry><entry>
 	    If term is does not include <literal>?</literal>, the
 	    truncation attribute is set to none (100).
 	   </entry>
 	  </row>
-	  
+
 	  <row><entry><literal>t=b</literal></entry><entry>
 	    Allows term to be both left&amp;right truncated.
 	    If term is of the form <literal>?x?</literal>, the
@@ -768,7 +768,7 @@
        <para>
 	Consider the following definition:
        </para>
-       
+
        <screen>
 	ti       u=4 s=1
 	au       u=1 s=1
@@ -777,7 +777,7 @@
 	date     u=30 r=o
       </screen>
        <para>
-	<literal>ti</literal> and <literal>au</literal> both set 
+	<literal>ti</literal> and <literal>au</literal> both set
 	structure attribute to phrase (s=1).
 	<literal>ti</literal>
 	sets the use-attribute to 4. <literal>au</literal> sets the
@@ -790,7 +790,7 @@
        </para>
        <para>
 	You can combine attributes. To Search for "ranked title" you
-	can do 
+	can do
 	<screen>
 	 ti,ranked=knuth computer
 	</screen>
@@ -815,12 +815,12 @@
        A qualifier alias is of the form:
       </para>
       <para>
-       <replaceable>q</replaceable>  
+       <replaceable>q</replaceable>
        <replaceable>q1</replaceable> <replaceable>q2</replaceable> ..
       </para>
       <para>
        which declares <replaceable>q</replaceable> to
-       be an alias for <replaceable>q1</replaceable>, 
+       be an alias for <replaceable>q1</replaceable>,
        <replaceable>q2</replaceable>... such that the CCL
        query <replaceable>q=x</replaceable> is equivalent to
        <replaceable>q1=x or q2=x or ...</replaceable>.
@@ -983,7 +983,7 @@ struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
     </para>
     <tip>
      <para>
-      If you are new to CQL, read the 
+      If you are new to CQL, read the
       <ulink url="&url.cql.intro;">Gentle Introduction</ulink>.
      </para>
     </tip>
@@ -1066,7 +1066,7 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
       uses a <literal>FILE</literal> handle which is opened for reading.
      </para>
     </sect3>
-    
+
     <sect3 id="cql.tree"><title>CQL tree</title>
      <para>
       The the query string is valid, the CQL parser
@@ -1081,7 +1081,7 @@ struct cql_node *cql_parser_result(CQL_parser cp);
       a pointer to the root node of the resulting tree.
      </para>
      <para>
-      Each node in a CQL tree is represented by a 
+      Each node in a CQL tree is represented by a
       <literal>struct cql_node</literal>.
       It is defined as follows:
       <synopsis>
@@ -1175,7 +1175,7 @@ struct cql_node {
      <para>
       Conversion to PQF (and Z39.50 RPN) is tricky by the fact
       that the resulting RPN depends on the Z39.50 target
-      capabilities (combinations of supported attributes). 
+      capabilities (combinations of supported attributes).
       In addition, the CQL and SRU operates on index prefixes
       (URI or strings), whereas the RPN uses Object Identifiers
       for attribute sets.
@@ -1193,7 +1193,7 @@ void cql_transform_close(cql_transform_t ct);
       either an already open FILE or from a filename respectively.
      </para>
      <para>
-      The handle is destroyed by <function>cql_transform_close</function> 
+      The handle is destroyed by <function>cql_transform_close</function>
       in which case no further reference of the handle is allowed.
      </para>
      <para>
@@ -1203,7 +1203,7 @@ void cql_transform_close(cql_transform_t ct);
 int cql_transform_buf(cql_transform_t ct,
                       struct cql_node *cn, char *out, int max);
       </synopsis>
-      This function converts the CQL tree <literal>cn</literal> 
+      This function converts the CQL tree <literal>cn</literal>
       using handle <literal>ct</literal>.
       For the resulting PQF, you supply a buffer <literal>out</literal>
       which must be able to hold at at least <literal>max</literal>
@@ -1256,7 +1256,7 @@ int cql_transform_FILE(cql_transform_t ct,
     <sect3 id="cql.to.rpn">
      <title>Specification of CQL to RPN mappings</title>
      <para>
-      The file supplied to functions 
+      The file supplied to functions
       <function>cql_transform_open_FILE</function>,
       <function>cql_transform_open_fname</function> follows
       a structure found in many Unix utilities.
@@ -1294,7 +1294,7 @@ int cql_transform_FILE(cql_transform_t ct,
         </term>
         <listitem>
          <para>
-          This pattern is invoked when a CQL index, such as 
+          This pattern is invoked when a CQL index, such as
           dc.title is converted. <replaceable>set</replaceable>
           and <replaceable>name</replaceable> are the context set and index
           name respectively.
@@ -1308,7 +1308,7 @@ int cql_transform_FILE(cql_transform_t ct,
           If this pattern is not defined, the mapping will fail.
          </para>
          <para>
-          The pattern, 
+          The pattern,
           <literal>index.</literal><replaceable>set</replaceable><literal>.*</literal>
           is used when no other index pattern is matched.
         </para>
@@ -1373,7 +1373,7 @@ int cql_transform_FILE(cql_transform_t ct,
          <para>
           This pattern specifies how a CQL structure is mapped to RPN.
           Note that this CQL pattern is somewhat to similar to
-          CQL pattern <literal>relation</literal>. 
+          CQL pattern <literal>relation</literal>.
           The <replaceable>type</replaceable> is a CQL relation.
          </para>
          <para>
@@ -1408,7 +1408,7 @@ int cql_transform_FILE(cql_transform_t ct,
         <listitem>
          <para>
           This specification defines a CQL context set for a given prefix.
-          The value on the right hand side is the URI for the set - 
+          The value on the right hand side is the URI for the set -
           <emphasis>not</emphasis> RPN. All prefixes used in
           index patterns must be defined this way.
          </para>
@@ -1441,7 +1441,7 @@ int cql_transform_FILE(cql_transform_t ct,
        index.cql.serverChoice = 1=1016
        index.dc.title         = 1=4
        index.dc.subject       = 1=21
-  
+
        relation.<             = 2=1
        relation.eq            = 2=3
        relation.scr           = 2=3
@@ -1536,7 +1536,7 @@ int cql_transform_FILE(cql_transform_t ct,
       containing XCQL).
       <synopsis>
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
-void cql_to_xml(struct cql_node *cn, 
+void cql_to_xml(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data);
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
@@ -1558,7 +1558,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 
    <para>
     The basic YAZ representation of an OID is an array of integers,
-    terminated with the value -1. This integer is of type 
+    terminated with the value -1. This integer is of type
     <literal>Odr_oid</literal>.
    </para>
    <para>
@@ -1641,12 +1641,12 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
      Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
     </screen>
    </para>
-   
+
    <para>
     OIDs can be compared with <function>oid_oidcmp</function> which returns
     zero if the two OIDs provided are identical; non-zero otherwise.
    </para>
- 
+
    <sect2 id="tools.oid.database"><title>OID database</title>
     <para>
      From YAZ version 3 and later, the oident system has been replaced
@@ -1659,21 +1659,21 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
      convert from string to OID or other way around.
     </para>
     <para>
-     Unfortunately, whenever we supply a string we must also specify the 
+     Unfortunately, whenever we supply a string we must also specify the
      <emphasis>OID class</emphasis>. The class is necessary because some
      strings correspond to multiple OIDs. An example of such a string is
-     <literal>Bib-1</literal> which may either be an attribute-set 
+     <literal>Bib-1</literal> which may either be an attribute-set
      or a diagnostic-set.
     </para>
     <para>
-     Applications using the YAZ database should include 
+     Applications using the YAZ database should include
      <filename>yaz/oid_db.h</filename>.
     </para>
     <para>
      A YAZ database handle is of type <literal>yaz_oid_db_t</literal>.
      Actually that's a pointer. You need not think deal with that.
      YAZ has a built-in database which can be considered "constant" for
-     most purposes. 
+     most purposes.
      We can get hold that by using function <function>yaz_oid_std</function>.
     </para>
     <para>
@@ -1692,7 +1692,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       We can create an OID for the Bib-1 attribute set on the ODR stream
       odr with:
      <screen>
-        Odr_oid *bib1 = 
+        Odr_oid *bib1 =
          yaz_string_to_oid_odr(yaz_oid_std(), CLASS_ATTSET, "Bib-1", odr);
       </screen>
       This is more complex than using <function>odr_getoidbystr</function>.
@@ -1703,7 +1703,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 
    </sect2>
    <sect2 id="tools.oid.std"><title>Standard OIDs</title>
-     
+
     <para>
      All the object identifers in the standard OID database as returned
      by <function>yaz_oid_std</function> can referenced directly in a
@@ -1784,16 +1784,16 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     <emphasis>not</emphasis> call <function>nmem_init</function> or
     <function>nmem_exit</function> unless you're absolute sure what
     you're doing. Note that in previous &yaz; versions you'd have to call
-    <function>nmem_init</function> yourself. 
+    <function>nmem_init</function> yourself.
    </para>
 
   </sect1>
 
   <sect1 id="tools.log"><title>Log</title>
   <para>
-   &yaz; has evolved a fairly complex log system which should be useful both 
+   &yaz; has evolved a fairly complex log system which should be useful both
    for debugging &yaz; itself, debugging applications that use &yaz;, and for
-   production use of those applications.  
+   production use of those applications.
   </para>
   <para>
    The log functions are declared in header <filename>yaz/log.h</filename>
@@ -1847,7 +1847,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
    logged. This string should be a comma-separated list of log level names,
    and can contain both hard-coded names and dynamic ones. The log level
    calculation starts with <literal>YLOG_DEFAULT_LEVEL</literal> and adds a bit
-   for each word it meets, unless the word starts with a '-', in which case it 
+   for each word it meets, unless the word starts with a '-', in which case it
    clears the bit. If the string <literal>'none'</literal> is found,
    all bits are cleared. Typically this string comes from the command-line,
    often identified by <literal>-v</literal>. The
@@ -1856,15 +1856,15 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
   </para>
 
   <para>
-   Each module should check what log bits it should be used, by calling 
+   Each module should check what log bits it should be used, by calling
    <function>yaz_log_module_level</function> with a suitable name for the
    module. The name is cleared from a preceding path and an extension, if any,
    so it is quite possible to use <literal>__FILE__</literal> for it. If the
    name has been passed to <function>yaz_log_mask_str</function>, the routine
    returns a non-zero bitmask, which should then be used in consequent calls
    to yaz_log. (It can also be tested, so as to avoid unnecessary calls to
-   yaz_log, in time-critical places, or when the log entry would take time 
-   to construct.) 
+   yaz_log, in time-critical places, or when the log entry would take time
+   to construct.)
   </para>
 
   <para>
@@ -1926,20 +1926,20 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
   <para>
    The log system is almost independent of the rest of &yaz;, the only
    important dependence is of <filename>nmem</filename>, and that only for
-   using the semaphore definition there. 
+   using the semaphore definition there.
   </para>
 
   <para>
    The dynamic log levels and log rotation were introduced in &yaz; 2.0.28. At
    the same time, the log bit names were changed from
-   <literal>LOG_something</literal> to <literal>YLOG_something</literal>, 
+   <literal>LOG_something</literal> to <literal>YLOG_something</literal>,
    to avoid collision with <filename>syslog.h</filename>.
   </para>
 
   </sect1>
-  
+
   <sect1 id="marc"><title>MARC</title>
-   
+
    <para>
     YAZ provides a fast utility for working with MARC records.
     Early versions of the MARC utility only allowed decoding of ISO2709.
@@ -2059,7 +2059,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     </variablelist>
    </para>
    <para>
-    The actual conversion functions are 
+    The actual conversion functions are
     <function>yaz_marc_decode_buf</function> and
     <function>yaz_marc_decode_wrbuf</function> which decodes and encodes
     a MARC record. The former function operates on simple buffers, the
@@ -2117,7 +2117,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 	<literal>collection</literal>.
        </para></listitem>
       <listitem><para>
-	The leader is encoded as element <literal>l</literal> with the 
+	The leader is encoded as element <literal>l</literal> with the
 	leader content as its (text) value.
        </para></listitem>
       <listitem><para>
@@ -2160,7 +2160,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     YAZ version 2.1.20 or later includes a Retrieval facility tool
     which allows a SRU/Z39.50 to describe itself and perform record
     conversions. The idea is the following:
-    
+
     <itemizedlist>
      <listitem>
       <para>
@@ -2208,13 +2208,13 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
    <sect2 id="tools.retrieval.format">
     <title>Retrieval XML format</title>
     <para>
-     All elements should be covered by namespace 
+     All elements should be covered by namespace
      <literal>http://indexdata.com/yaz</literal> .
      The root element node must be <literal>retrievalinfo</literal>.
     </para>
     <para>
      The <literal>retrievalinfo</literal> must include one or
-     more <literal>retrieval</literal> elements. Each 
+     more <literal>retrieval</literal> elements. Each
     <literal>retrieval</literal> defines specific combination of
      syntax, name and identifier supported by this retrieval service.
     </para>
@@ -2255,7 +2255,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
      </variablelist>
     </para>
     <para>
-     The <literal>retrieval</literal> may include one 
+     The <literal>retrieval</literal> may include one
      <literal>backend</literal> element. If a <literal>backend</literal>
      element is given, it specifies how the records are retrieved by
      some backend and how the records are converted from the backend to
@@ -2276,8 +2276,8 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       <varlistentry><term><literal>marc</literal></term>
        <listitem>
         <para>
-         The <literal>marc</literal> element specifies a conversion 
-         to - and from ISO2709 encoded MARC and 
+         The <literal>marc</literal> element specifies a conversion
+         to - and from ISO2709 encoded MARC and
          <ulink url="&url.marcxml;">&acro.marcxml;</ulink>/MarcXchange.
          The following attributes may be specified:
 
@@ -2285,7 +2285,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
           <varlistentry><term><literal>inputformat</literal> (REQUIRED)</term>
            <listitem>
             <para>
-             Format of input. Supported values are 
+             Format of input. Supported values are
             <literal>marc</literal> (for ISO2709); and <literal>xml</literal>
              for MARCXML/MarcXchange.
             </para>
@@ -2295,8 +2295,8 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
           <varlistentry><term><literal>outputformat</literal> (REQUIRED)</term>
            <listitem>
             <para>
-             Format of output. Supported values are 
-            <literal>line</literal> (MARC line format); 
+             Format of output. Supported values are
+            <literal>line</literal> (MARC line format);
             <literal>marcxml</literal> (for MARCXML),
             <literal>marc</literal> (ISO2709),
             <literal>marcxhcange</literal> (for MarcXchange).
@@ -2413,13 +2413,13 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
     <para>
      It should be easy to use the retrieval systems from applications. Refer
      to the headers
-     <filename>yaz/retrieval.h</filename> and 
+     <filename>yaz/retrieval.h</filename> and
      <filename>yaz/record_conv.h</filename>.
     </para>
    </sect2>
   </sect1>
  </chapter>
- 
+
  <!-- Keep this comment at the end of the file
  Local variables:
  mode: sgml

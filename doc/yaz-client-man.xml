@@ -1,4 +1,4 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
@@ -14,13 +14,13 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-client</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-client</refname>
   <refpurpose>Z39.50/SRU client for implementors</refpurpose>
@@ -47,7 +47,7 @@
   </cmdsynopsis>
 
  </refsynopsisdiv>
-  
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-client</command> is a
@@ -69,7 +69,7 @@
    commands from one of the following files:
    <itemizedlist>
     <listitem><para>
-      Command file if it is given by option -f. 
+      Command file if it is given by option -f.
      </para></listitem>
     <listitem><para>
       <filename>.yazclientrc</filename> in current working directory.
@@ -114,9 +114,9 @@
     <varlistentry>
      <term>-d <replaceable>dump</replaceable></term>
      <listitem><para>
-       If specified, YAZ will dump BER data for all PDUs sent and received 
+       If specified, YAZ will dump BER data for all PDUs sent and received
        to individual files, named
-       <replaceable>dump</replaceable>.DDD.<literal>raw</literal>, 
+       <replaceable>dump</replaceable>.DDD.<literal>raw</literal>,
        where DDD is 001, 002, 003, ..
       </para></listitem>
     </varlistentry>
@@ -148,7 +148,7 @@
      <listitem><para>
        If specified, the client will use the proxy at the address
        given. YAZ client will
-       connect to a proxy on the address and port given. 
+       connect to a proxy on the address and port given.
        The actual target will be specified as part of the InitRequest
        to inform the proxy about actual target.
       </para></listitem>
@@ -164,7 +164,7 @@
      <term>-t <replaceable>displaycharset</replaceable></term>
      <listitem><para>
        If displaycharset is given, it specifies name of the character set of the
-       output (on the terminal on which YAZ client is running). 
+       output (on the terminal on which YAZ client is running).
       </para></listitem>
     </varlistentry>
     <varlistentry>
@@ -179,7 +179,7 @@
      </term><listitem>
       <simpara>Sets the LOG level to <replaceable>level</replaceable>.
        Level is a sequence of tokens separated by comma. Each token
-       is a integer or a named LOG item - one of 
+       is a integer or a named LOG item - one of
        <literal>fatal</literal>,
        <literal>debug</literal>,
        <literal>warn</literal>,

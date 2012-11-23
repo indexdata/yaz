@@ -14,13 +14,13 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-icu</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-icu</refname>
   <refpurpose>YAZ ICU utility</refpurpose>
@@ -36,10 +36,10 @@
    <arg choice="opt">infile</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-icu</command> is utility which demonstrates 
+   <command>yaz-icu</command> is utility which demonstrates
    the ICU chain module of yaz. (<filename>yaz/icu.h</filename>).
   </para>
   <para>
@@ -70,7 +70,7 @@
     <listitem><para>
       Specifies extra information to be printed about the ICU system.
       If <replaceable>type</replaceable> is <literal>c</literal>
-      then ICU converters are printed. 
+      then ICU converters are printed.
       If <replaceable>type</replaceable> is <literal>l</literal>
       available locales are printed.
       If <replaceable>type</replaceable> is <literal>t</literal>
@@ -116,7 +116,7 @@
   </para>
   <para>
    The following conversion elements are available:
-   
+
    <variablelist>
     <varlistentry>
      <term>casemap</term>
@@ -137,7 +137,7 @@
 	  <para>Upper case using ICU function u_strToUpper.</para>
 	 </listitem>
 	</varlistentry>
-	
+
 	<varlistentry>
 	 <term>t</term>
 	 <listitem>
@@ -151,7 +151,7 @@
 	  <para>Fold case using ICU function u_strFoldCase.</para>
 	 </listitem>
 	</varlistentry>
-	
+
        </variablelist>
       </para></listitem>
     </varlistentry>
@@ -164,7 +164,7 @@
        using function icu_chain_token_display (<filename>yaz/icu.h</filename>).
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry>
      <term>transform</term>
      <listitem><para>
@@ -175,7 +175,7 @@
        more information.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry>
      <term>transliterate</term>
      <listitem><para>
@@ -185,7 +185,7 @@
        more information.
       </para></listitem>
     </varlistentry>
-    
+
     <varlistentry>
      <term>tokenize</term>
      <listitem><para>
@@ -206,7 +206,7 @@
 	  <para>Sentence. ICU: UBRK_SENTENCE.</para>
 	 </listitem>
 	</varlistentry>
-	
+
 	<varlistentry>
 	 <term>w</term>
 	 <listitem>
@@ -231,9 +231,9 @@
        </variablelist>
       </para></listitem>
     </varlistentry>
-    
+
    </variablelist>
-   
+
   </para>
  </refsect1>
  <refsect1><title>EXAMPLES</title>

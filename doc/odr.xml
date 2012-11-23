@@ -1,5 +1,5 @@
  <chapter id="odr"><title>The ODR Module</title>
-  
+
   <sect1 id="odr.introduction"><title>Introduction</title>
 
    <para>
@@ -258,12 +258,12 @@
      data you wish to decode (eg, <function>odr_integer()</function> odr
      <function>z_APDU()</function>).
     </para>
-    
+
     <example id="example.odr.encoding.and.decoding.functions">
      <title>Encoding and decoding functions</title>
      <synopsis>
       int odr_integer(ODR o, Odr_int **p, int optional, const char *name);
-      
+
       int z_APDU(ODR o, Z_APDU **p, int optional, const char *name);
      </synopsis>
     </example>
@@ -293,7 +293,7 @@
      <function>free(2)</function> to release the memory.
      You can decode several data elements (by repeated calls to
      <function>odr_setbuf()</function> and your decoding function), and
-     new memory will be allocated each time. When you do call 
+     new memory will be allocated each time. When you do call
      <function>odr_reset()</function>, everything decoded since the
      last call to <function>odr_reset()</function> will be released.
     </para>
@@ -314,7 +314,7 @@ void do_nothing_useful(Odr_int value)
     Odr_int *valp, *resvalp;
     char *bufferp;
     int len;
-     
+
     /* allocate streams */
     if (!(encode = odr_createmem(ODR_ENCODE)))
         return;
@@ -354,7 +354,7 @@ void do_nothing_useful(Odr_int value)
       program, so the overhead is quite manageable.
      </para>
     </example>
-    
+
    </sect2>
 
    <sect2 id="odr.printing"><title>Printing</title>
@@ -378,11 +378,11 @@ void do_nothing_useful(Odr_int value)
      Here the user provides an opaque handle and two handlers,
      <replaceable>stream_write</replaceable> for writing,
      and <replaceable>stream_close</replaceable> which is supposed
-     to close/free resources associated with handle. 
+     to close/free resources associated with handle.
      The <replaceable>stream_close</replaceable> handler is optional and
      if NULL for the function is provided, it will not be invoked.
      The <replaceable>stream_write</replaceable> takes the ODR handle
-     as parameter, the user defined handle, a type 
+     as parameter, the user defined handle, a type
      <literal>ODR_OCTETSTRING</literal>, <literal>ODR_VISIBLESTRING</literal>
      which indicates the type of contents is being written.
     </para>
@@ -392,8 +392,8 @@ void do_nothing_useful(Odr_int value)
      <synopsis>
       const char **odr_get_element_path(ODR o);
      </synopsis>
-     which returns a list of current elements that ODR deals with at the 
-     moment. For the returned array, say <literal>ar</literal>, 
+     which returns a list of current elements that ODR deals with at the
+     moment. For the returned array, say <literal>ar</literal>,
      <literal>ar[0]</literal> is the top level element,
      <literal>ar[n]</literal> is the last. The last element has the
      property that <literal>ar[n+1] == NULL</literal>.
@@ -403,7 +403,7 @@ void do_nothing_useful(Odr_int value)
      <para>
       For a database record part of a PresentResponse the
       array returned by <function>odr_get_element</function>
-      is <literal>presentResponse</literal>, <literal>databaseOrSurDiagnostics</literal>, <literal>?</literal>, <literal>record</literal>, <literal>?</literal>, <literal>databaseRecord</literal> . The question mark appears due to 
+      is <literal>presentResponse</literal>, <literal>databaseOrSurDiagnostics</literal>, <literal>?</literal>, <literal>record</literal>, <literal>?</literal>, <literal>databaseRecord</literal> . The question mark appears due to
       unnamed constructions.
      </para>
      </example>
@@ -543,11 +543,11 @@ void do_nothing_useful(Odr_int value)
     <para>
      There is an ASN.1 tutorial available at
      <ulink url="&url.asn.1.tutorial;">this site</ulink>.
-     This site also has standards for ASN.1 (X.680) and BER (X.690) 
+     This site also has standards for ASN.1 (X.680) and BER (X.690)
      <ulink url="&url.asn.1.standards;">online</ulink>.
     </para>
    </tip>
-   
+
    <para>
     The ODR interface is based loosely on that of the Sun Microsystems
     XDR routines.
@@ -560,9 +560,9 @@ void do_nothing_useful(Odr_int value)
     definition for a type once - and you have the functionality of encoding,
     decoding (and pretty-printing) all in one unit.
     The resulting C source code is quite compact, and is a pretty
-    straightforward representation of the source ASN.1 specification. 
+    straightforward representation of the source ASN.1 specification.
    </para>
-   
+
    <para>
     In many cases, the model of the XDR functions works quite well in this
     role.
@@ -592,7 +592,7 @@ void do_nothing_useful(Odr_int value)
      <para>
       The <literal>Odr_int</literal> is just a simple integer.
      </para>
-     
+
      <para>
       This form is typical of the primitive &odr; functions. They are named
       after the type of data that they encode or decode. They take an &odr;
@@ -769,7 +769,7 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
 
     <para>
      The simplest way of tagging a type is to use the
-     <function>odr_implicit_tag()</function> or 
+     <function>odr_implicit_tag()</function> or
      <function>odr_explicit_tag()</function> macros:
     </para>
 
@@ -870,7 +870,7 @@ typedef struct MySequence
     Odr_int *intval;
     Odr_bool *boolval;
 } MySequence;
-     
+
 int mySequence(ODR o, MySequence **p, int optional, const char *name)
 {
     if (odr_sequence_begin(o, p, sizeof(**p), name) == 0)

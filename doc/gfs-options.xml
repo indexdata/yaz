@@ -1,10 +1,10 @@
-<!-- 
+<!--
    Options for generic frontend server and yaz-ztest.
    Included in both manual and man page for yaz-ztest
 -->
 
 <variablelist>
- 
+
  <varlistentry><term><literal>-a </literal>
    <replaceable>file</replaceable></term>
   <listitem><para>
@@ -12,7 +12,7 @@
     The special name <literal>-</literal> (dash) sends output to
     <literal>stderr</literal>.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-S</literal></term>
   <listitem><para>
     Don't fork or make threads on connection requests. This is good for
@@ -21,13 +21,13 @@
     a software malfunction (okay then, a crash) from affecting all
     current users.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-1</literal></term>
   <listitem><para>
     Like <literal>-S</literal> but after one session the server
     exits. This mode is for debugging <emphasis>only</emphasis>.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-T</literal></term>
   <listitem><para>
     Operate the server in threaded mode. The server creates a thread
@@ -94,7 +94,7 @@
  <varlistentry><term><literal>-w </literal>
    <replaceable>dir</replaceable></term>
   <listitem><para>
-    The server changes to this directory during before listening 
+    The server changes to this directory during before listening
     on incoming connections. This option is useful
     when the server is operating from the <application>inetd</application>
     daemon (see <literal>-i</literal>).
@@ -104,7 +104,7 @@
    <replaceable>pidfile</replaceable></term>
   <listitem><para>
     Specifies that the server should write its Process ID to
-    file given by <replaceable>pidfile</replaceable>. 
+    file given by <replaceable>pidfile</replaceable>.
     A typical location would be <filename>/var/run/yaz-ztest.pid</filename>.
    </para></listitem></varlistentry>
 
@@ -113,40 +113,40 @@
     Use this to make the the server run from the
     <application>inetd</application> server (UNIX only).
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-D</literal></term>
   <listitem><para>
     Use this to make the server put itself in the background and
-    run as a daemon. If neither <literal>-i</literal> nor 
+    run as a daemon. If neither <literal>-i</literal> nor
     <literal>-D</literal> is given, the server starts in the foreground.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-install</literal></term>
   <listitem><para>
     Use this to install the server as an NT service
-    (Windows NT/2000/XP only). 
+    (Windows NT/2000/XP only).
     Control the server by going to the Services in the Control Panel.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-installa</literal></term>
   <listitem><para>
     Use this to install and activate the server as an NT service
-    (Windows NT/2000/XP only). 
+    (Windows NT/2000/XP only).
     Control the server by going to the Services in the Control Panel.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-remove</literal></term>
   <listitem><para>
     Use this to remove the server from the NT services
-    (Windows NT/2000/XP only). 
+    (Windows NT/2000/XP only).
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-t </literal>
    <replaceable>minutes</replaceable></term>
   <listitem><para>
     Idle session timeout, in minutes.
    </para></listitem></varlistentry>
- 
+
  <varlistentry><term><literal>-k </literal>
    <replaceable>size</replaceable></term>
   <listitem><para>
@@ -180,7 +180,7 @@
      <refentrytitle>hosts_access</refentrytitle>
      <manvolnum>5</manvolnum>
     </citerefentry>
-    and 
+    and
     <citerefentry>
      <refentrytitle>tcpd</refentrytitle>
      <manvolnum>8</manvolnum>
@@ -195,7 +195,7 @@
    the input format to <literal>strftime()</literal>.
    </para></listitem>
  </varlistentry>
- 
+
 </variablelist>
 
 <!-- Keep this comment at the end of the file

@@ -14,13 +14,13 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-url</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-url</refname>
   <refpurpose>YAZ URL fetch utility</refpurpose>
@@ -38,7 +38,7 @@
    <arg rep="repeat">url</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-url</command> is utility to get web content. It is very

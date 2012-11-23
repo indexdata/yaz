@@ -17,18 +17,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-ztest</refentrytitle>
   <manvolnum>8</manvolnum>
   <refmiscinfo class="manual">System management commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-ztest</refname>
   <refpurpose>Z39.50/SRU Test Server</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   &gfs-synopsis;
  </refsynopsisdiv>
@@ -64,10 +64,10 @@
    <title>TESTING</title>
    <para>
     <command>yaz-ztest</command> normally returns a random hit count between
-    0 and 24. However, if a query term includes leading digits, then the 
+    0 and 24. However, if a query term includes leading digits, then the
     integer value of that term is used as hit count. This allows testers
     to return any number of hits. <command>yaz-ztest</command> includes
-    24 MARC records for testing. Hit counts exceeding 24 will make 
+    24 MARC records for testing. Hit counts exceeding 24 will make
     <command>yaz-ztest</command> return the same record batch over and over..
     So record at position 1, 25, 49, etc .. are equivalent.
    </para>
@@ -96,7 +96,7 @@
      a random sleep between the first and second number.
    </para>
    <para>
-     The database parameter <literal>seed</literal> takes an integer 
+     The database parameter <literal>seed</literal> takes an integer
      as value. This will call <literal>srand</literal> with this integer to
      ensure that the random behavior can be re-played.
    </para>

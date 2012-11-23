@@ -15,12 +15,12 @@
     The &asn; module is located in sub directory <filename>z39.50</filename>.
     There you'll find C files that implements encoders and decoders for the
     Z39.50 types. You'll also find the protocol definitions:
-    <filename>z3950v3.asn</filename>, <filename>esupdate.asn</filename>, 
+    <filename>z3950v3.asn</filename>, <filename>esupdate.asn</filename>,
     and others.
    </para>
   </sect1>
   <sect1 id="asn.preparing"><title>Preparing PDUs</title>
-   
+
    <para>
     A structure representing a complex ASN.1 type doesn't in itself contain the
     members of that type. Instead, the structure contains
@@ -38,7 +38,7 @@
     taste, there are at least three different approaches that you may take
     when you allocate the structures.
    </para>
-   
+
    <para>
     You can use static or automatic local variables in the function that
     prepares the PDU. This is a simple approach, and it provides the most
@@ -73,7 +73,7 @@
     some of its elements, while you leave other elements pointing to global
     or per-session default variables.
    </para>
-   
+
    <para>
     The &asn; module provides an important aid in creating new PDUs. For
     each of the PDU types (say, <function>Z_InitRequest</function>), a
@@ -101,11 +101,11 @@
    <synopsis>
     Z_&lt;type> *zget_&lt;type>(ODR o);
    </synopsis>
-   
+
    <para>
     eg.:
    </para>
-   
+
    <synopsis>
     Z_InitRequest *zget_InitRequest(ODR o);
    </synopsis>
@@ -119,21 +119,21 @@
     <function>zget_APDU()</function> is provided, which allocates
     a top-level Z-APDU of the type requested:
    </para>
-   
+
    <synopsis>
     Z_APDU *zget_APDU(ODR o, int which);
    </synopsis>
-   
+
    <para>
     The <varname>which</varname> parameter is (of course) the discriminator
     belonging to the <varname>Z_APDU</varname> <literal>CHOICE</literal> type.
     All of the interface described here is provided by the &asn; module, and
     you access it through the <filename>proto.h</filename> header file.
-    
+
    </para>
   </sect1>
   <sect1 id="asn.external"><title>EXTERNAL Data</title>
-   
+
    <para>
     In order to achieve extensibility and adaptability to different
     application domains, the new version of the protocol defines many
@@ -143,7 +143,7 @@
     specialized version of the EXTERNAL construct, called
     <literal>Z_External</literal>.It is defined thus:
    </para>
-   
+
    <screen>
 typedef struct Z_External
 {
@@ -184,7 +184,7 @@ typedef struct Z_External
     } u;
 } Z_External;
    </screen>
-   
+
    <para>
     When decoding, the &asn; module will attempt to determine which
     syntax describes the data by looking at the reference fields
@@ -198,7 +198,7 @@ typedef struct Z_External
     For non-ASN.1 data such as MARC records, use the
     <literal>octet_aligned</literal> arm of the union.
    </para>
-   
+
    <para>
     Some servers return ASN.1 structured data values (eg. database
     records) as BER-encoded records placed in the
@@ -207,7 +207,7 @@ typedef struct Z_External
     these records. To help you decode the records in the application, the
     function
    </para>
-   
+
    <screen>
    Z_ext_typeent *z_ext_gettypebyref(const oid *oid);
    </screen>
@@ -219,7 +219,7 @@ typedef struct Z_External
     <literal>Z_ext_typeent</literal>
     is defined as:
    </para>
-  
+
    <screen>
 typedef struct Z_ext_typeent
 {
@@ -228,7 +228,7 @@ typedef struct Z_ext_typeent
     Odr_fun fun;       /* decoder function */
 } Z_ext_typeent;
    </screen>
-   
+
    <para>
     The <literal>what</literal> member contains the
     <literal>Z_External</literal> union discriminator value for the
@@ -239,7 +239,7 @@ typedef struct Z_ext_typeent
     record syntax, the value of <literal>fun</literal> would be
     <literal>z_SUTRS</literal> (a function pointer).
    </para>
-   
+
    <para>
     If you receive an EXTERNAL which contains an octet-string value that
     you suspect of being an ASN.1-structured data value, you can use
@@ -249,7 +249,7 @@ typedef struct Z_ext_typeent
     function to decode the BER string (see <xref linkend="odr.use"/>
     ).
    </para>
-   
+
    <para>
     If you want to <emphasis>send</emphasis> EXTERNALs containing
     ASN.1-structured values in the occtet-aligned branch of the CHOICE, this
@@ -266,7 +266,7 @@ typedef struct Z_ext_typeent
     is necessary to tell the different, structured types apart
     on decoding.
    </para>
-   
+
    <note>
     <para>
      Eventually, the EXTERNAL processing will most likely
@@ -276,15 +276,15 @@ typedef struct Z_ext_typeent
      various modules.
     </para>
    </note>
-  
+
   </sect1>
   <sect1 id="asn.pdu"><title>PDU Contents Table</title>
-   
+
   <para>
     We include, for reference, a listing of the fields of each top-level
     PDU, as well as their default settings.
    </para>
-   
+
    <table frame="top" id="asn.default.initialize.request">
     <title>Default settings for PDU Initialize Request</title>
     <tgroup cols="3">
@@ -465,7 +465,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -554,7 +554,7 @@ typedef struct Z_ext_typeent
      </tbody>
     </tgroup>
    </table>
-   
+
    <table frame="top" id="asn.default.present.response">
     <title>Default settings for PDU Present Response</title>
     <tgroup cols="3">
@@ -590,7 +590,7 @@ typedef struct Z_ext_typeent
      </tbody>
     </tgroup>
    </table>
-   
+
    <table frame="top" id="asn.default.delete.result.set.request">
     <title>Default settings for Delete Result Set Request
     </title>
@@ -732,7 +732,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -775,7 +775,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -792,7 +792,7 @@ typedef struct Z_ext_typeent
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
        </entry></row>
-      
+
      </tbody>
     </tgroup>
    </table>
@@ -811,7 +811,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -851,7 +851,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -867,7 +867,7 @@ typedef struct Z_ext_typeent
      </tbody>
     </tgroup>
    </table>
-   
+
    <table frame="top" id="asn.default.access.control.request">
     <title>Default settings for Access Control Request</title>
     <tgroup cols="3">
@@ -882,7 +882,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -913,7 +913,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -947,7 +947,7 @@ typedef struct Z_ext_typeent
       </row>
      </thead>
      <tbody>
-      
+
       <row><entry>
 	referenceId</entry><entry>Z_ReferenceId</entry><entry>NULL
        </entry></row>
@@ -999,7 +999,7 @@ typedef struct Z_ext_typeent
       <row><entry>
 	otherInfo</entry><entry>Z_OtherInformation</entry><entry>NULL
        </entry></row>
-      
+
      </tbody>
     </tgroup>
    </table>

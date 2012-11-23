@@ -14,13 +14,13 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-json-parse</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-json-parse</refname>
   <refpurpose>YAZ JSON parser</refpurpose>
@@ -32,10 +32,10 @@
    <arg>-p</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-json-parse</command> is utility which demonstrates 
+   <command>yaz-json-parse</command> is utility which demonstrates
    the JSON API of YAZ. (<filename>yaz/json.h</filename>).
   </para>
   <para>

@@ -1,4 +1,4 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz</refentrytitle>
   <manvolnum>7</manvolnum>
   <refmiscinfo class="manual">Conventions and miscellaneous</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz</refname>
   <refpurpose>Z39.50 toolkit.</refpurpose>
  </refnamediv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    YAZ is a C/C++ programmer's toolkit supporting the development
@@ -44,12 +44,12 @@
   <para>
    All rights reserved.
   </para>
-  
+
   <para>
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
   </para>
-  
+
   <itemizedlist>
    <listitem>
     <para>
@@ -72,7 +72,7 @@
     </para>
    </listitem>
   </itemizedlist>
-  
+
   <para>
    THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
    EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -86,9 +86,9 @@
    OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
    SUCH DAMAGE.
   </para>
-  
+
  </refsect1>
- 
+
  <refsect1><title>SEE ALSO</title>
   <para>
     <citerefentry>

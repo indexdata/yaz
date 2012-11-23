@@ -1,4 +1,4 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN" 
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
      <!ENTITY % local SYSTEM "local.ent">
@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>Bib-1 Attribute Set</refentrytitle>
   <manvolnum>7</manvolnum>
   <refmiscinfo class="manual">Conventions and miscellaneous</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>bib1-attr</refname>
   <refpurpose>Bib-1 Attribute Set</refpurpose>
  </refnamediv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    This reference entry lists the Bib-1 attribute set types and values.
@@ -38,7 +38,7 @@
    Position (3), Structure (4), Truncation (5) and completeness (6).
   </para>
  </refsect1>
- 
+
  <refsect1><title>USE (1)</title>
   <para>
    <screen>
@@ -144,7 +144,7 @@
    </screen>
   </para>
  </refsect1>
- 
+
  <refsect1><title>RELATION (2)</title>
   <para>
    <screen>
@@ -161,7 +161,7 @@
    </screen>
   </para>
  </refsect1>
- 
+
  <refsect1><title>POSITION (3)</title>
   <para>
    <screen>
@@ -171,7 +171,7 @@
    </screen>
   </para>
  </refsect1>
- 
+
  <refsect1><title>STRUCTURE (4)</title>
   <para>
    <screen>
@@ -217,7 +217,7 @@
    </screen>
   </para>
  </refsect1>
- 
+
  <refsect1><title>COMPLETENSS (6)</title>
   <para>
    <screen>
@@ -227,7 +227,7 @@
    </screen>
   </para>
  </refsect1>
- 
+
  <refsect1><title>SORTING (7)</title>
   <para>
    <screen>
@@ -240,7 +240,7 @@
     embedding a sort critieria into a query.
   </para>
  </refsect1>
- 
+
 
  <refsect1><title>SEE ALSO</title>
   <para>

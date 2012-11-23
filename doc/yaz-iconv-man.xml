@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-iconv</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-iconv</refname>
   <refpurpose>YAZ Character set conversion utility</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-iconv</command>
@@ -35,7 +35,7 @@
    <arg choice="opt" rep="repeat">file</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-iconv</command> converts data in file in character
@@ -51,9 +51,9 @@
    <command>yaz-iconv</command> reads from standard input.
   </para>
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>-f<replaceable>from</replaceable>]</term>
@@ -82,7 +82,7 @@
 
   </variablelist>
  </refsect1>
- 
+
  <refsect1><title>ENCODINGS</title>
   <para>
    The yaz-iconv command and the API as defined in
@@ -191,7 +191,7 @@
     yaz-iconv -f ISO-8859-1 -t UTF-8 -X &lt;input.lst &gt;output.lst
    </screen>
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>FILES</title>
   <para>

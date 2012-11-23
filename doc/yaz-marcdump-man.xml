@@ -20,12 +20,12 @@
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-marcdump</refname>
   <refpurpose>MARC record dump utility</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-marcdump</command>
@@ -44,12 +44,12 @@
    <arg choice="opt" rep="repeat">file</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-marcdump</command> reads MARC records from one or
    more files.
-   It parses each record and supports output in line-format, 
+   It parses each record and supports output in line-format,
    ISO2709, MARCXML, MarcXchange as well as Hex output.
   </para>
   <para>
@@ -72,9 +72,9 @@
    character set conversion of each record.
   </para>
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>-i <replaceable>format</replaceable></term>
@@ -143,7 +143,7 @@
    <varlistentry>
     <term>-C <replaceable>chunksize</replaceable></term>
     <listitem><para>
-      Specifies chunk size; to be used conjunction with option 
+      Specifies chunk size; to be used conjunction with option
       <literal>-s</literal>.
      </para></listitem>
    </varlistentry>
@@ -170,7 +170,7 @@
       Useful if you have ill-formatted ISO2709 records as input.
      </para></listitem>
    </varlistentry>
-   
+
    <varlistentry>
     <term>-V</term>
     <listitem><para>
@@ -206,7 +206,7 @@
     yaz-marcdump -f MARC8 -t UTF8 -o turbomarc -i marc marc21.raw >out.xml
    </screen>
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>FILES</title>
   <para>

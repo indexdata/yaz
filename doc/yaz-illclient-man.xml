@@ -14,18 +14,18 @@
   <productnumber>&version;</productnumber>
   <info><orgname>Index Data</orgname></info>
  </refentryinfo>
- 
+
  <refmeta>
   <refentrytitle>yaz-illclient</refentrytitle>
   <manvolnum>1</manvolnum>
   <refmiscinfo class="manual">Commands</refmiscinfo>
  </refmeta>
- 
+
  <refnamediv>
   <refname>yaz-illclient</refname>
   <refpurpose>ILL client</refpurpose>
  </refnamediv>
- 
+
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-illclient</command>
@@ -34,12 +34,12 @@
    <arg choice="opt" rep="repeat"><option>-D</option> <replaceable>name=value</replaceable></arg>
    <arg choice="opt"><option>-o</option></arg>
    <arg choice="opt"><option>-u <replaceable>user</replaceable></option></arg>
-   <arg choice="opt"><option>-p <replaceable>password</replaceable></option></arg>   
+   <arg choice="opt"><option>-p <replaceable>password</replaceable></option></arg>
    <arg choice="opt"><option>-V</option></arg>
    <arg choice="opt">server-addr</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
- 
+
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-illclient</command> is an client which sends an ISO
@@ -48,9 +48,9 @@
    must be specified.
   </para>
  </refsect1>
- 
+
  <refsect1><title>OPTIONS</title>
-  
+
   <variablelist>
    <varlistentry>
     <term>-f <replaceable>filename</replaceable>]</term>
@@ -108,7 +108,7 @@
   <para>
    None yet.
   </para>
- </refsect1> 
+ </refsect1>
 
  <refsect1><title>FILES</title>
   <para>

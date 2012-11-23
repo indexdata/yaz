@@ -1,10 +1,10 @@
 <chapter id="soap"><title>SOAP and SRU</title>
   <sect1 id="soap.introduction"><title>Introduction</title>
     <para>
-      &yaz; uses a very simple implementation of 
+      &yaz; uses a very simple implementation of
       <ulink url="&url.soap;">SOAP</ulink> that only,
       currenly, supports what is sufficient to offer SRU SOAP functionality.
-      The implementation uses the 
+      The implementation uses the
       <ulink url="&url.libxml2.api.tree;">tree API</ulink> of
       libxml2 to encode and decode SOAP packages.
     </para>
@@ -168,7 +168,7 @@ int yaz_srw_codec(ODR o, void * pptr,
                   void *client_data, const char *ns);
       </synopsis>
       Here, <literal>Z_SRW_GDU</literal> is either
-      searchRetrieveRequest or a searchRetrieveResponse. 
+      searchRetrieveRequest or a searchRetrieveResponse.
     </para>
     <note>
       <para>
@@ -222,7 +222,7 @@ typedef struct {
     int * numberOfRecords;
     char * resultSetId;
     int * resultSetIdleTime;
-    
+
     Z_SRW_record *records;
     int num_records;
 

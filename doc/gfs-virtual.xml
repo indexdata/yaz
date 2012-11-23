@@ -1,4 +1,4 @@
-<!-- 
+<!--
    Description of the virtual host mechanism in YAZ GFS
    Included in both manual and man page for yaz-ztest
 -->
@@ -29,7 +29,7 @@
 </note>
 <para>
  The YAZ frontend server uses XML to describe the backend
- configurations. Command-line option <literal>-f</literal> 
+ configurations. Command-line option <literal>-f</literal>
  specifies filename of the XML configuration.
 </para>
 <para>
@@ -39,14 +39,14 @@
 </para>
 <para>
  The <literal>listen</literal> describes listener (transport end point),
- such as TCP/IP, Unix file socket or SSL server. Content for 
+ such as TCP/IP, Unix file socket or SSL server. Content for
  a listener:
  <variablelist>
   <varlistentry><term>CDATA (required)</term>
    <listitem>
     <para>
      The CDATA for the <literal>listen</literal> element holds the
-     listener string, such as <literal>tcp:@:210</literal>, 
+     listener string, such as <literal>tcp:@:210</literal>,
      <literal>tcp:server1:2100</literal>,
      etc.
     </para>
@@ -129,7 +129,7 @@
     <para>
      Specifies a filename that includes CQL to RPN conversion for this
      backend server. See &reference-tools-cql-map;
-     If given, the backend server will only "see" a Type-1/RPN query. 
+     If given, the backend server will only "see" a Type-1/RPN query.
     </para>
    </listitem>
   </varlistentry>
@@ -139,7 +139,7 @@
     <para>
      Specifies a filename that includes CCL to RPN conversion for this
      backend server. See &reference-tools-ccl-qualifiers;
-     If given, the backend server will only "see" a Type-1/RPN query. 
+     If given, the backend server will only "see" a Type-1/RPN query.
     </para>
    </listitem>
   </varlistentry>
@@ -154,7 +154,7 @@
     </para>
    </listitem>
   </varlistentry>
-   
+
   <varlistentry><term>element <literal>docpath</literal> (optional)</term>
    <listitem>
     <para>
@@ -167,7 +167,7 @@
     </para>
    </listitem>
   </varlistentry>
-   
+
   <varlistentry><term>element <literal>explain</literal> (optional)</term>
    <listitem>
     <para>
@@ -200,10 +200,10 @@
     </para>
    </listitem>
   </varlistentry>
-   
+
  </variablelist>
 </para>
- 
+
 <para>
  The XML below configures a server that accepts connections from
  two ports, TCP/IP port 9900 and a local UNIX file socket.
