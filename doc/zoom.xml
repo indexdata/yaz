@@ -5,6 +5,7 @@ ZOOM_connection_errmsg(c)
 ZOOM_connection_addinfo(c)
 ZOOM_connection_addinfo(c)
 ZOOM_connection_diagset(c);
+ZOOM_connection_save_apdu_wrbuf
 ZOOM_diag_str(error)
 ZOOM_resultset_record_immediate(s, pos)
 ZOOM_resultset_cache_reset(r)
@@ -17,7 +18,6 @@ ZOOM_options_setl(opt, name, value, len)
 ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
-ZOOM_connection_scan1(ZOOM_connection c, ZOOM_query startterm)
 ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
  <chapter id="zoom"><title>ZOOM</title>
@@ -45,8 +45,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     <literal>sru=get,http://sru.miketaylor.org.uk:80/sru.pl</literal>
   </para>
   <para>
-    <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to YAZ in version 4.1.0,
-    as a dialect of a SRU protocol, since both are HTTP based protocols.
+   <ulink url="&url.solr;">SOLR</ulink>  protocol support was added to
+   YAZ in version 4.1.0, as a dialect of a SRU protocol, since both are
+   HTTP based protocols.
   </para>
   <para>
    The lack of a simple Z39.50 client API for &yaz; has become more
@@ -92,9 +93,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
    <synopsis>
     #include &lt;yaz/zoom.h>
 
-    ZOOM_connection ZOOM_connection_new (const char *host, int portnum);
+    ZOOM_connection ZOOM_connection_new(const char *host, int portnum);
 
-    ZOOM_connection ZOOM_connection_create (ZOOM_options options);
+    ZOOM_connection ZOOM_connection_create(ZOOM_options options);
 
     void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
@@ -928,25 +929,37 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
   </sect1>
   <sect1 id="zoom.facets"><title>Facets</title>
    <para>
-    Facets operations is not part of the official ZOOM specification, but is an Index Data extension
-    for YAZ-based Z39.50 targets or <ulink url="&url.solr;">SOLR</ulink> targets.
-    In case the target can and is requested to return facets, using a result set the ZOOM client
-    can request one or all facet fields. Using a facet field the client can request the term count and
-    then interate over the terms.
+    Facets operations is not part of the official ZOOM specification, but
+    is an Index Data extension for YAZ-based Z39.50 targets or
+    <ulink url="&url.solr;">SOLR</ulink> targets.
+    In case the target can and is requested to return facets, using a
+    result set the ZOOM client can request one or all facet fields.
+    Using a facet field the client can request the term count and then
+    interate over the terms.
    </para>
    <synopsis>
     ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
+
     const char ** ZOOM_resultset_facets_names(ZOOM_resultset r);
-    ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *facet_name);
-    ZOOM_facet_field ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int pos);
+
+    ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r,
+                                                    const char *facet_name);
+
+    ZOOM_facet_field ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r,
+                                                             int pos);
+
     size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
 
     const char *ZOOM_facet_field_name(ZOOM_facet_field facet_field);
+
     size_t ZOOM_facet_field_term_count(ZOOM_facet_field facet_field);
-    const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field, size_t idx, int *freq);
+
+    const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field,
+                                          size_t idx, int *freq);
    </synopsis>
    <para>
-    References to temporary structures are returned by all functions. They are only valid as long the Result set is valid.
+    References to temporary structures are returned by all functions.
+    They are only valid as long the Result set is valid.
     <function>ZOOM_resultset_get_facet_field</function> or
     <function>ZOOM_resultset_get_facet_field_by_index</function>.
     <function>ZOOM_resultset_facets</function>.
@@ -956,28 +969,37 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     </para>
    <para id="zoom.resultset.get_facet_field">
     A single Facet field  is returned by function
-    <function>ZOOM_resultset_get_facet_field</function> or <function>ZOOM_resultset_get_facet_field_by_index</function> that takes a
-    result set and facet name or positive index respectively. First facet has position zero.
-    If no facet could be obtained (invalid name or index out of bounds) <literal>NULL</literal> is returned.
+    <function>ZOOM_resultset_get_facet_field</function> or
+    <function>ZOOM_resultset_get_facet_field_by_index</function> that takes
+    a  result set and facet name or positive index respectively. First
+    facet has position zero. If no facet could be obtained (invalid name
+    or index out of bounds) <literal>NULL</literal> is returned.
    </para>
    <para id="zoom.resultset.facets">
-    An array of facets field can be returned by <function>ZOOM_resultset_facets</function>. The length of the array is
-    given by <function>ZOOM_resultset_facets_size</function>. The array is zero-based and last entry will be at
+    An array of facets field can be returned by
+    <function>ZOOM_resultset_facets</function>. The length of the array is
+    given by <function>ZOOM_resultset_facets_size</function>. The array is
+    zero-based and last entry will be at
     <function>ZOOM_resultset_facets_size(result_set)</function>-1.
    </para>
    <para id="zoom.resultset.facets_names">
-    It is possible to interate over facets by name, by calling <function>ZOOM_resultset_facets_names</function>.
-    This will return an const array of char * where each string can be used as parameter for
-    <function>ZOOM_resultset_get_facet_field</function>.
+    It is possible to interate over facets by name, by calling
+    <function>ZOOM_resultset_facets_names</function>.
+    This will return an const array of char * where each string can be used
+    as parameter for <function>ZOOM_resultset_get_facet_field</function>.
    </para>
    <para>
-   Function <function>ZOOM_facet_field_name</function> gets the request facet name from a returned facet field.
+   Function <function>ZOOM_facet_field_name</function> gets the request
+    facet name from a returned facet field.
    </para>
    <para>
-   Function <function>ZOOM_facet_field_get_term</function> returns the idx'th term and term count for a facet field.
-   Idx must between 0 and <function>ZOOM_facet_field_term_count</function>-1, otherwise the returned reference will be
-   <literal>NULL</literal>. On a valid idx, the value of the freq reference will be the term count.
-   The *freq parameter must be valid pointer to integer.
+    Function <function>ZOOM_facet_field_get_term</function> returns the
+    idx'th term and term count for a facet field.
+    Idx must between 0 and
+    <function>ZOOM_facet_field_term_count</function>-1, otherwise the
+    returned reference will be <literal>NULL</literal>. On a valid idx, the
+    value of the freq reference will be the term count.
+    The <literal>freq</literal> parameter must be valid pointer to integer.
    </para>
    </sect1>
   <sect1 id="zoom.scan"><title>Scan</title>
