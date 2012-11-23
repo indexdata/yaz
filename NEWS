@@ -10,7 +10,7 @@ The APDUs sent/received can be obtained by using
 Using ZOOM_connection_option_get(c, "APDU") or
 ZOOM_connection_option_getl(c, "APDU", &l).
 
-GFS: replay implementation_version from backend
+GFS: relay implementation_version from backend
 From 3.0.40 and later, implementation_version from backend was
 not used in init response at all.
 
