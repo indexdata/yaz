@@ -306,6 +306,24 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
         protocol packets is emitted on standard error stream.  This
         can be very useful for debugging.
        </entry><entry>0</entry></row>
+      <row><entry>
+        saveAPDU</entry><entry>
+	If set to a true value such as "1", a log of low-level
+        protocol packets is saved. The log can be retrieved by reading
+	option APDU. Setting saveAPDU always has the side effect of
+	resetting the currently saved log. This setting is
+	<emphasis>write-only</emphasis>. If read, NULL will be returned.
+	It is only recognized in
+	<function>ZOOM_connection_option_set</function>.
+       </entry><entry>0</entry></row>
+      <row><entry>
+        APDU</entry><entry>
+	Returns the log of protocol packets. Will be empty if logging
+	is not enabled (see saveAPDU above). This setting is
+	<emphasis>read-only</emphasis>. It is only recognized if used
+	in call to <function>ZOOM_connection_option_get</function> or
+	<function>ZOOM_connection_option_getl</function>.
+       </entry><entry></entry></row>
      </tbody>
     </tgroup>
    </table>
