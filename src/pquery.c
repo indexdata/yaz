@@ -122,7 +122,7 @@ static int lex(struct yaz_pqf_parser *li)
     return li->query_look = query_token(li);
 }
 
-int escape_string(char *out_buf, const char *in, int len)
+static int escape_string(char *out_buf, const char *in, int len)
 {
 
     char *out = out_buf;
@@ -185,7 +185,7 @@ int escape_string(char *out_buf, const char *in, int len)
     return out - out_buf;
 }
 
-int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
+static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               int num_attr, Odr_int *attr_list,
                               char **attr_clist, Odr_oid **attr_set)
 {
@@ -243,8 +243,9 @@ int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
     return 1;
 }
 
-Z_AttributeList *get_attributeList(ODR o, int num_attr, Odr_int *attr_list,
-                                   char **attr_clist, Odr_oid **attr_set)
+static Z_AttributeList *get_attributeList(ODR o,
+                                          int num_attr, Odr_int *attr_list,
+                                          char **attr_clist, Odr_oid **attr_set)
 {
     int i, k = 0;
     Odr_int *attr_tmp;
