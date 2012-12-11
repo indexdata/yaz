@@ -43,9 +43,10 @@ static char *get_file(const char *fname, size_t *len)
     *len = ftell(inf);
     if (*len)  /* zero length not considered an error */
     {
+        size_t r;
         buf = xmalloc(*len);
         fseek(inf, 0L, SEEK_SET);
-        size_t r = fread(buf, 1, *len, inf);
+        r = fread(buf, 1, *len, inf);
         if (r != *len)
         {
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "short fread of %s", fname);
