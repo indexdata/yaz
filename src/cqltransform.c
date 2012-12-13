@@ -629,7 +629,8 @@ static void emit_term(cql_transform_t ct,
 
     if (process_term && length > 0)
     {
-        if (length > 1 && term[0] == '^' && term[length-1] == '^')
+        if (length > 1 && term[0] == '^' && term[length-1] == '^' &&
+            term[length-2] != '\\')
         {
             cql_pr_attr(ct, "position", "firstAndLast", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
@@ -643,7 +644,8 @@ static void emit_term(cql_transform_t ct,
             term++;
             length--;
         }
-        else if (term[length-1] == '^')
+        else if (term[length-1] == '^' &&
+                 (length < 2 || term[length-2] != '\\'))
         {
             cql_pr_attr(ct, "position", "last", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
