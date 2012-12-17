@@ -575,25 +575,6 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
     return 1;
 }
 
-/* Returns location of first wildcard character in the `length'
- * characters starting at `term', or a null pointer of there are
- * none -- like memchr().
- */
-static const char *wcchar(int start, const char *term, int length)
-{
-    while (length > 0)
-    {
-        if (start || term[-1] != '\\')
-            if (strchr("*?", *term))
-                return term;
-        term++;
-        length--;
-        start = 0;
-    }
-    return 0;
-}
-
-
 /* ### checks for CQL relation-name rather than Type-1 attribute */
 static int has_modifier(struct cql_node *cn, const char *name) {
     struct cql_node *mod;
@@ -627,25 +608,53 @@ static void emit_term(cql_transform_t ct,
     }
     assert(cn->which == CQL_NODE_ST);
 
-    if (process_term && length > 0)
+    if (process_term)
     {
-        if (length > 1 && term[0] == '^' && term[length-1] == '^' &&
-            term[length-2] != '\\')
+        unsigned anchor = 0;
+        unsigned trunc = 0;
+        for (i = 0; i < length; i++)
+        {
+            if (term[i] == '\\' && i < length - 1)
+                i++;
+            else
+            {
+                switch (term[i])
+                {
+                case '^':
+                    if (i == 0)
+                        anchor |= 1;
+                    else if (i == length - 1)
+                        anchor |= 2;
+                    break;
+                case '*':
+                    if (i == 0)
+                        trunc |= 1;
+                    else if (i == length - 1)
+                        trunc |= 2;
+                    else
+                        z3958_mode = 1;
+                    break;
+                case '?':
+                    z3958_mode = 1;
+                    break;
+                }
+            }
+        }
+        if (anchor == 3)
         {
             cql_pr_attr(ct, "position", "firstAndLast", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length -= 2;
         }
-        else if (term[0] == '^')
+        else if (anchor == 1)
         {
             cql_pr_attr(ct, "position", "first", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
             term++;
             length--;
         }
-        else if (term[length-1] == '^' &&
-                 (length < 2 || term[length-2] != '\\'))
+        else if (anchor == 2)
         {
             cql_pr_attr(ct, "position", "last", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
@@ -656,53 +665,34 @@ static void emit_term(cql_transform_t ct,
             cql_pr_attr(ct, "position", "any", 0,
                         pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
         }
-    }
-
-    if (process_term && length > 0)
-    {
-        const char *first_wc = wcchar(1, term, length);
-        const char *second_wc = first_wc ?
-            wcchar(0, first_wc+1, length-(first_wc-term)-1) : 0;
-
-        /* Check for well-known globbing patterns that represent
-         * simple truncation attributes as expected by, for example,
-         * Bath-compliant server.  If we find such a pattern but
-         * there's no mapping for it, that's fine: we just use a
-         * general pattern-matching attribute.
-         */
-        if (first_wc == term && second_wc == term + length-1
-            && *first_wc == '*' && *second_wc == '*'
-            && cql_pr_attr(ct, "truncation", "both", 0, pr, client_data, 0))
+        if (z3958_mode == 0)
         {
-            term++;
-            length -= 2;
+            if (trunc == 3 && cql_pr_attr(ct, "truncation",
+                                          "both", 0, pr, client_data, 0))
+            {
+                term++;
+                length -= 2;
+            }
+            else if (trunc == 1 && cql_pr_attr(ct, "truncation",
+                                               "left", 0, pr, client_data, 0))
+            {
+                term++;
+                length--;
+            }
+            else if (trunc == 2 && cql_pr_attr(ct, "truncation", "right", 0,
+                                               pr, client_data, 0))
+            {
+                length--;
+            }
+            else if (trunc)
+                z3958_mode = 1;
+            else
+                cql_pr_attr(ct, "truncation", "none", 0,
+                            pr, client_data, 0);
         }
-        else if (first_wc == term && second_wc == 0 && *first_wc == '*'
-                 && cql_pr_attr(ct, "truncation", "left", 0,
-                                pr, client_data, 0))
-        {
-            term++;
-            length--;
-        }
-        else if (first_wc == term + length-1 && second_wc == 0
-                 && *first_wc == '*'
-                 && cql_pr_attr(ct, "truncation", "right", 0,
-                                pr, client_data, 0))
-        {
-            length--;
-        }
-        else if (first_wc)
-        {
-            z3958_mode = 1;
+        if (z3958_mode)
             cql_pr_attr(ct, "truncation", "z3958", 0,
                         pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
-        }
-        else
-        {
-            /* No masking characters.  Use "truncation.none" if given. */
-            cql_pr_attr(ct, "truncation", "none", 0,
-                        pr, client_data, 0);
-        }
     }
     if (ns) {
         cql_pr_attr_uri(ct, "index", ns,
@@ -718,42 +708,48 @@ static void emit_term(cql_transform_t ct,
                         pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
         }
     }
-
-    /* produce only \-sequences if:
-       1) the output is a Z39.58-trunc reserved character
-       2) the output is a PQF reserved character (\\, \")
-    */
     (*pr)("\"", client_data);
-    for (i = 0; i < length; i++)
+    if (process_term)
+        for (i = 0; i < length; i++)
+        {
+            char x[2]; /* temp buffer */
+            if (term[i] == '\\' && i < length - 1)
+            {
+                i++;
+                if (strchr("\"\\", term[i]))
+                    pr("\\", client_data);
+                if (z3958_mode && strchr("#?", term[i]))
+                    pr("\\\\", client_data); /* double \\ to survive PQF parse */
+                x[0] = term[i];
+                x[1] = '\0';
+                pr(x, client_data);
+            }
+            else if (z3958_mode && term[i] == '*')
+            {
+                pr("?", client_data);
+                if (i < length - 1 && yaz_isdigit(term[i+1]))
+                    pr("\\\\", client_data); /* dbl \\ to survive PQF parse */
+            }
+            else if (z3958_mode && term[i] == '?')
+            {
+                pr("#", client_data);
+            }
+            else
+            {
+                if (term[i] == '\"')
+                    pr("\\", client_data);
+                if (z3958_mode && strchr("#?", term[i]))
+                    pr("\\\\", client_data); /* dbl \\ to survive PQF parse */
+                x[0] = term[i];
+                x[1] = '\0';
+                pr(x, client_data);
+            }
+        }
+    else
     {
-        char x[3]; /* temp buffer */
-        if (i > 0 && term[i-1] == '\\')
+        for (i = 0; i < length; i++)
         {
-            if (term[i] == '\"' || term[i] == '\\')
-                pr("\\", client_data);
-            if (z3958_mode && strchr("#?", term[i]))
-                pr("\\\\", client_data); /* double \\ to survive PQF parse */
-            x[0] = term[i];
-            x[1] = '\0';
-            pr(x, client_data);
-        }
-        else if (z3958_mode && term[i] == '*')
-        {
-            pr("?", client_data);
-            /* avoid ?n sequences output (n=[0-9]) because that has
-               different semantics than just a single ? in Z39.58
-            */
-            if (i < length - 1 && yaz_isdigit(term[i+1]))
-                pr("\\\\", client_data); /* double \\ to survive PQF parse */
-        }
-        else if (z3958_mode && term[i] == '?')
-            pr("#", client_data);
-        else if (term[i] != '\\')
-        {
-            if (term[i] == '\"')
-                pr("\\", client_data);
-            if (z3958_mode && strchr("#?", term[i]))
-                pr("\\\\", client_data); /* double \\ to survive PQF parse */
+            char x[2];
             x[0] = term[i];
             x[1] = '\0';
             pr(x, client_data);
