@@ -108,12 +108,11 @@ char *odr_prepend(ODR o, const char *prefix, const char *old)
 
     *res = '\0';
     if (plen > 0)
-        strcpy (res, prefix);
+        strcpy(res, prefix);
     if (plen > 0 && old != 0)
-        strcat (res, "/");
-    if (old !=0)
-        strcat (res, old);
-
+        strcat(res, "/");
+    if (old != 0)
+        strcat(res, old);
     return res;
 }
 /*
