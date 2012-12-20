@@ -671,7 +671,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 static int srw_bend_fetch(association *assoc, int pos,
                           Z_SRW_searchRetrieveRequest *srw_req,
                           Z_SRW_record *record,
-                          const char **addinfo)
+                          const char **addinfo, int *last_in_set)
 {
     bend_fetch_rr rr;
     ODR o = assoc->encode;
@@ -729,6 +729,8 @@ static int srw_bend_fetch(association *assoc, int pos,
         return 1;
 
     retrieve_fetch(assoc, &rr);
+
+    *last_in_set = rr.last_in_set;
 
     if (rr.errcode && rr.surrogate_flag)
     {
@@ -1088,6 +1090,7 @@ static void srw_bend_search(association *assoc,
                         for (i = 0; i<number; i++)
                         {
                             int errcode;
+                            int last_in_set = 0;
                             const char *addinfo = 0;
 
                             srw_res->records[j].recordPacking = packing;
@@ -1096,7 +1099,7 @@ static void srw_bend_search(association *assoc,
                             yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
                             errcode = srw_bend_fetch(assoc, i+start, srw_req,
                                                      srw_res->records + j,
-                                                     &addinfo);
+                                                     &addinfo, &last_in_set);
                             if (errcode)
                             {
                                 yaz_add_srw_diagnostic(assoc->encode,
@@ -1109,6 +1112,8 @@ static void srw_bend_search(association *assoc,
                             }
                             if (srw_res->records[j].recordData_buf)
                                 j++;
+                            if (last_in_set)
+                                break;
                         }
                         srw_res->num_records = j;
                         if (!j)
@@ -2595,6 +2600,8 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             return 0;
         reclist->records[reclist->num_records] = thisrec;
         reclist->num_records++;
+        if (freq.last_in_set)
+            break;
     }
     *num = reclist->num_records;
     return records;
