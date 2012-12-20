@@ -107,9 +107,9 @@ char *odr_prepend(ODR o, const char *prefix, const char *old)
     char *res = (char*) odr_malloc (o, olen + plen + 2);
 
     *res = '\0';
-    if (prefix != 0)
+    if (plen > 0)
         strcpy (res, prefix);
-    if (prefix != 0 && old != 0)
+    if (plen > 0 && old != 0)
         strcat (res, "/");
     if (old !=0)
         strcat (res, old);
