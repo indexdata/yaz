@@ -36,7 +36,11 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
 
     yaz_marc_reset(mt);
 
-    record_length = atoi_n (buf, 5);
+    if (!atoi_n_check(buf, 5, &record_length))
+    {
+        yaz_marc_cprintf(mt, "Bad leader");
+        return -1;
+    }
     if (record_length < 25)
     {
         yaz_marc_cprintf(mt, "Record length %d < 24", record_length);
