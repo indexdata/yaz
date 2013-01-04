@@ -56,6 +56,8 @@
 
 static char *prog;
 
+static int no_errors = 0;
+
 static void usage(const char *prog)
 {
     fprintf(stderr, "Usage: %s [-i format] [-o format] [-f from] [-t to] "
@@ -139,13 +141,19 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
 
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
+                    {
+                        no_errors++;
                         fprintf(stderr, "yaz_marc_read_xml failed\n");
+                    }
                     else
                     {
                         int write_rc = yaz_marc_write_mode(mt, wrbuf);
                         if (write_rc)
-                            yaz_log(YLOG_WARN, "yaz_marc_write_mode: write error: %d", write_rc);
-
+                        {
+                            yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
+                                    "write error: %d", write_rc);
+                            no_errors++;
+                        }
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
                     }
@@ -172,7 +180,10 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                 {
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
+                    {
+                        no_errors++;
                         fprintf(stderr, "yaz_marc_read_xml failed\n");
+                    }
                     else
                     {
                         yaz_marc_write_mode(mt, wrbuf);
@@ -259,23 +270,27 @@ static void dump(const char *fname, const char *from, const char *to,
             r = fread(buf, 1, 5, inf);
             if (r < 5)
             {
-                if (r && print_offset && verbose)
+                if (r == 0) /* normal EOF, all good */
+                    break;
+                if (print_offset && verbose)
+                {
                     printf("<!-- Extra %ld bytes at end of file -->\n",
                            (long) r);
+                }
                 break;
             }
             while (*buf < '0' || *buf > '9')
             {
                 int i;
                 long off = ftell(inf) - 5;
-                if (verbose || print_offset)
-                    printf("<!-- Skipping bad byte %d (0x%02X) at offset "
-                           "%ld (0x%lx) -->\n",
-                           *buf & 0xff, *buf & 0xff,
-                           off, off);
+                printf("<!-- Skipping bad byte %d (0x%02X) at offset "
+                       "%ld (0x%lx) -->\n",
+                       *buf & 0xff, *buf & 0xff,
+                       off, off);
                 for (i = 0; i<4; i++)
                     buf[i] = buf[i+1];
                 r = fread(buf+4, 1, 1, inf);
+                no_errors++;
                 if (r < 1)
                     break;
             }
@@ -295,22 +310,38 @@ static void dump(const char *fname, const char *from, const char *to,
             if (len < 25 || len > 100000)
             {
                 long off = ftell(inf) - 5;
-                printf("Bad Length %ld read at offset %ld (%lx)\n",
+                printf("<!-- Bad Length %ld read at offset %ld (%lx) -->\n",
                        (long)len, (long) off, (long) off);
+                no_errors++;
                 break;
             }
             rlen = len - 5;
             r = fread(buf + 5, 1, rlen, inf);
             if (r < rlen)
+            {
+                long off = ftell(inf);
+                printf("<!-- Premature EOF at offset %ld (%lx) -->\n",
+                       (long) off, (long) off);
+                no_errors++;
                 break;
+            }
             while (buf[len-1] != ISO2709_RS)
             {
                 if (len > sizeof(buf)-2)
+                {
+                    r = 0;
                     break;
+                }
                 r = fread(buf + len, 1, 1, inf);
                 if (r != 1)
                     break;
                 len++;
+            }
+            if (r < 1)
+            {
+                printf("<!-- EOF while searching for RS -->\n");
+                no_errors++;
+                break;
             }
             if (split_fname)
             {
@@ -338,17 +369,21 @@ static void dump(const char *fname, const char *from, const char *to,
                         fprintf(stderr, "Could write content to %s\n",
                                 fname);
                         split_fname = 0;
+                        no_errors++;
                     }
                     fclose(sf);
                 }
             }
             len_result = rlen;
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
+            if (r == -1)
+                no_errors++;
             if (r > 0 && result && len_result)
             {
                 if (fwrite(result, len_result, 1, stdout) != 1)
                 {
                     fprintf(stderr, "Write to stdout failed\n");
+                    no_errors++;
                     break;
                 }
             }
@@ -534,6 +569,8 @@ int main (int argc, char **argv)
         usage(prog);
         exit(1);
     }
+    if (no_errors)
+        exit(5);
     exit(0);
 }
 /*
