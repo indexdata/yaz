@@ -343,50 +343,47 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
 
     if (srw_sortkeys)
         nmem_strsplit_blank(nmem, srw_sortkeys, &sortspec, &num_sortspec);
-    if (num_sortspec > 0)
+    for (i = 0; i < num_sortspec; i++)
     {
-        for (i = 0; i < num_sortspec; i++)
-        {
-            char **arg;
-            int num_arg;
-            int ascending = 1;
-            int case_sensitive = 0;
-            const char *missing = 0;
-            nmem_strsplitx(nmem, ",", sortspec[i], &arg, &num_arg, 0);
+        char **arg;
+        int num_arg;
+        int ascending = 1;
+        int case_sensitive = 0;
+        const char *missing = 0;
+        nmem_strsplitx(nmem, ",", sortspec[i], &arg, &num_arg, 0);
 
-            if (num_arg > 2 && arg[2][0])
-                ascending = atoi(arg[2]);
-            if (num_arg > 3 && arg[3][0])
-                case_sensitive = atoi(arg[3]);
-            if (num_arg > 4 && arg[4][0])
-                missing = arg[4];
+        if (num_arg > 2 && arg[2][0])
+            ascending = atoi(arg[2]);
+        if (num_arg > 3 && arg[3][0])
+            case_sensitive = atoi(arg[3]);
+        if (num_arg > 4 && arg[4][0])
+            missing = arg[4];
 
-            if (i)
-                wrbuf_puts(w, " ");
-
-            wrbuf_puts(w, arg[0]); /* field */
+        if (i)
             wrbuf_puts(w, " ");
 
-            wrbuf_puts(w, ascending ? "a" : "d");
-            wrbuf_puts(w, case_sensitive ? "s" : "i");
-            if (missing)
+        wrbuf_puts(w, arg[0]); /* field */
+        wrbuf_puts(w, " ");
+
+        wrbuf_puts(w, ascending ? "a" : "d");
+        wrbuf_puts(w, case_sensitive ? "s" : "i");
+        if (missing)
+        {
+            if (!strcmp(missing, "omit")) {
+                ;
+            }
+            else if (!strcmp(missing, "abort"))
+                wrbuf_puts(w, "!");
+            else if (!strcmp(missing, "lowValue")) {
+                ;
+            }
+            else if (!strcmp(missing, "highValue")) {
+                ;
+            }
+            else
             {
-                if (!strcmp(missing, "omit")) {
-                    ;
-                }
-                else if (!strcmp(missing, "abort"))
-                    wrbuf_puts(w, "!");
-                else if (!strcmp(missing, "lowValue")) {
-                    ;
-                }
-                else if (!strcmp(missing, "highValue")) {
-                    ;
-                }
-                else
-                {
-                    wrbuf_puts(w, "=");
-                    wrbuf_puts(w, missing);
-                }
+                wrbuf_puts(w, "=");
+                wrbuf_puts(w, missing);
             }
         }
     }
@@ -405,36 +402,33 @@ int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
 
     if (solr_sortkeys)
         nmem_strsplit(nmem, ",", solr_sortkeys, &sortspec, &num_sortspec);
-    if (num_sortspec > 0)
+    for (i = 0; i < num_sortspec; i++)
     {
-        for (i = 0; i < num_sortspec; i++)
-        {
-            char **arg;
-            int num_arg;
-            char order = 'a';
-            int case_sensitive = 0;
-            nmem_strsplitx(nmem, " ", sortspec[i], &arg, &num_arg, 0);
+        char **arg;
+        int num_arg;
+        char order = 'a';
+        int case_sensitive = 0;
+        nmem_strsplitx(nmem, " ", sortspec[i], &arg, &num_arg, 0);
 
-            if (num_arg != 2)
-                return -1;
+        if (num_arg != 2)
+            return -1;
 
-            if (yaz_matchstr(arg[1], "asc") &&
-                yaz_matchstr(arg[1], "desc"))
-                return -1;
+        if (!yaz_matchstr(arg[1], "asc"))
+                order = 'a';
+        else if (!yaz_matchstr(arg[1], "desc"))
+            order = 'd';
+        else
+            return -1;
 
-            if (arg[1][0]) {
-                order = tolower(arg[1][0]);
-            }
-            if (i)
-                wrbuf_puts(w, " ");
-
-            wrbuf_puts(w, arg[0]); /* field */
+        if (i)
             wrbuf_puts(w, " ");
 
-            wrbuf_putc(w, order);
-            // Always in-sensitive
-            wrbuf_puts(w, case_sensitive ? "s" : "i");
-        }
+        wrbuf_puts(w, arg[0]); /* field */
+        wrbuf_puts(w, " ");
+
+        wrbuf_putc(w, order);
+        // Always in-sensitive
+        wrbuf_puts(w, case_sensitive ? "s" : "i");
     }
     nmem_destroy(nmem);
     return 0;
