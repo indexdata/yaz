@@ -1,5 +1,5 @@
 dnl This file is part of the YAZ toolkit.
-dnl Copyright (C) 1995-2012 Index Data
+dnl Copyright (C) 1995-2013 Index Data
 AC_PREREQ([2.60])
 AC_INIT([yaz],
 m4_esyscmd([. ./IDMETA; echo $VERSION|tr -d '\n']),

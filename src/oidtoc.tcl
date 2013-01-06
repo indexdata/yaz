@@ -1,5 +1,5 @@
 # This file is part of the YAZ toolkit
-# Copyright (c) Index Data 2006-2007
+# Copyright (c) Index Data 2006-2013
 # See the file LICENSE for details.
 #
 #
