@@ -24,10 +24,10 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-int yaz_gets(int (*getbyte)(void *client_data),
-             void (*ungetbyte)(int b, void *client_data),
-             void *client_data,
-             WRBUF w)
+static int yaz_gets(int (*getbyte)(void *client_data),
+                    void (*ungetbyte)(int b, void *client_data),
+                    void *client_data,
+                    WRBUF w)
 {
     size_t sz = 0;
     int ch = getbyte(client_data);

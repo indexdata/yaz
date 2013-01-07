@@ -12,7 +12,7 @@
 
 #include <yaz/cql.h>
 
-int getbyte_stream(void *client_data)
+static int getbyte_stream(void *client_data)
 {
     FILE *f = (FILE*) client_data;
 
@@ -22,7 +22,7 @@ int getbyte_stream(void *client_data)
     return c;
 }
 
-void ungetbyte_stream (int c, void *client_data)
+static void ungetbyte_stream(int c, void *client_data)
 {
     FILE *f = (FILE*) client_data;
 
