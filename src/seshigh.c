@@ -896,6 +896,8 @@ static void srw_bend_search(association *assoc,
         rr.query->u.type_1 = 0;
         rr.extra_args = sr->extra_args;
         rr.extra_response_data = 0;
+        rr.present_number = srw_req->maximumRecords ?
+            *srw_req->maximumRecords : 0;
 
         if (srw_req->query_type == Z_SRW_query_type_cql)
         {
@@ -2650,6 +2652,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
         bsrr->errstring = NULL;
         bsrr->search_info = NULL;
         bsrr->search_input = req->otherInfo;
+        bsrr->present_number = *req->mediumSetPresentNumber;
 
         if (assoc->server && assoc->server->cql_transform
             && req->query->which == Z_Query_type_104

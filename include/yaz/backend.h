@@ -62,7 +62,7 @@ typedef struct {
     ODR decode;                /**< decode stream (input) */
     ODR print;                 /**< print stream (input) */
 
-    bend_association association; /**< GFS association / sesssion (input) */
+    bend_association association; /**< GFS association / session (input) */
     Odr_int hits;              /**< hits (output) */
     int errcode;               /**< Diagnostic code / 0 for no error (output) */
     char *errstring;           /**< Additional info (output) */
@@ -75,6 +75,7 @@ typedef struct {
     Z_SRW_extra_arg *extra_args; /**< SRU extra request parameters (input) */
     char *extra_response_data;   /**< SRW extra XML response (output) */
     Z_OtherInformation *search_input; /**< extra search info request (input) */
+    Odr_int present_number;    /**<  piggyback present number (>0) (input) */
 } bend_search_rr;
 
 /** \brief Information for present handler. Does not replace bend_fetch. */
@@ -87,7 +88,7 @@ typedef struct {
     Z_RecordComposition *comp; /**< Formatting instructions (input) */
     ODR stream;                /**< encoding stream (input) */
     ODR print;                 /**< printing stream (input) */
-    bend_association association; /**< GFS association / sesssion (input) */
+    bend_association association; /**< GFS association / session (input) */
 
     int errcode;               /**< Diagnostic code / 0 for no error (output) */
     char *errstring;           /**< Additional info (output) */
