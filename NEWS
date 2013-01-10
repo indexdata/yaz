@@ -1,3 +1,27 @@
+New GFS search member: present_number. This is a hint to the
+search handler how many records are going to be fetched immediately
+following search. There's no guarantee that it's going to be the case,
+since it depends on hit count (for Z39.50 piggyback) and whether errors
+turn up.
+
+Make a few functions static (private). The functions getbyte_stream,
+ungetbyte_stream and yaz_gets are now private. They were never declared
+in a header file.
+
+yaz-marcdump: exit(5) for serious decoding errors
+
+ISO2709 decoding: be more picky WRT header
+
+GFS: bail out of fetch if last_in_set is set. Until now, last_in_set,
+was only used as to indicate that next-result-set-position should be
+set to zero.
+http://www.loc.gov/z3950/agency/markup/04.html#Next-result-set-position
+Based on patch from Ashley Sanders.
+
+Make some functions static/private in PQF parsing. Those functions were
+never declared in a public header and so should not be in use by
+applications based on YAZ.
+
 --- 4.2.47 2012/11/23
 
 ZOOM: special options to control APDU logging.
