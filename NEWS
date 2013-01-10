@@ -1,3 +1,5 @@
+--- 4.2.48 2013/01/10
+
 New GFS search member: present_number. This is a hint to the
 search handler how many records are going to be fetched immediately
 following search. There's no guarantee that it's going to be the case,
