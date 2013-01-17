@@ -347,7 +347,6 @@ void icu_utf16_print(struct icu_buf_utf16 *src16)
     struct icu_buf_utf8 *dst8 = icu_buf_utf8_create(0);
     icu_utf16_to_utf8(dst8, src16, &status);
 
-    assert(status != 1234);
     if (U_FAILURE(status))
     {
         printf("failure");
