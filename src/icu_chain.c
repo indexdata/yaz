@@ -476,9 +476,8 @@ int icu_iter_next(yaz_icu_iter_t iter)
     else
     {
         /* on first call, iter->input is the input string. Thereafter: 0. */
-        iter->last = icu_iter_invoke(iter, iter->steps ?
-                                     iter->steps : iter->chain->csteps,
-                                     iter->input);
+        assert(iter->steps || !iter->chain->csteps);
+        iter->last = icu_iter_invoke(iter, iter->steps, iter->input);
         iter->input = 0;
 
         if (!iter->last)
