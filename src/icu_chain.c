@@ -37,7 +37,8 @@ enum icu_chain_step_type {
     ICU_chain_step_type_transform,      /* apply utf16 transform */
     ICU_chain_step_type_tokenize,       /* apply utf16 tokenization */
     ICU_chain_step_type_transliterate,  /* apply utf16 tokenization */
-    YAZ_chain_step_type_stemming        /* apply utf16 stemming (YAZ) */
+    YAZ_chain_step_type_stemming,       /* apply utf16 stemming (YAZ) */
+    ICU_chain_step_type_join
 };
 
 struct icu_chain_step
@@ -49,6 +50,7 @@ struct icu_chain_step
 	struct icu_transform *transform;
 	struct icu_tokenizer *tokenizer;
         yaz_stemmer_p         stemmer;
+        struct icu_buf_utf16 *join;
     } u;
     struct icu_chain_step *previous;
 };
@@ -77,7 +79,7 @@ int icu_check_status(UErrorCode status)
 
 static struct icu_chain_step *icu_chain_insert_step(
     struct icu_chain *chain, enum icu_chain_step_type type,
-    const uint8_t *rule, UErrorCode *status)
+    const char *rule, UErrorCode *status)
 {
     struct icu_chain_step *step = 0;
 
@@ -97,21 +99,21 @@ static struct icu_chain_step *icu_chain_insert_step(
         break;
     case ICU_chain_step_type_transform:
         /* rule omitted. Only ID used */
-        step->u.transform = icu_transform_create((const char *) rule, 'f',
-                                                 0, status);
+        step->u.transform = icu_transform_create(rule, 'f', 0, status);
         break;
     case ICU_chain_step_type_tokenize:
-        step->u.tokenizer = icu_tokenizer_create(chain->locale,
-                                                 (char) rule[0], status);
+        step->u.tokenizer = icu_tokenizer_create(chain->locale, rule[0], status);
         break;
     case ICU_chain_step_type_transliterate:
         /* we pass a dummy ID to utrans_openU.. */
-        step->u.transform = icu_transform_create("custom", 'f',
-                                                 (const char *) rule, status);
+        step->u.transform = icu_transform_create("custom", 'f', rule, status);
         break;
     case YAZ_chain_step_type_stemming:
-        step->u.stemmer = yaz_stemmer_create(chain->locale,
-                                             (const char *) rule, status);
+        step->u.stemmer = yaz_stemmer_create(chain->locale, rule, status);
+        break;
+    case ICU_chain_step_type_join:
+        step->u.join = icu_buf_utf16_create(0);
+        icu_utf16_from_utf8_cstr(step->u.join, rule, status);
         break;
     default:
         break;
@@ -147,6 +149,9 @@ static void icu_chain_step_destroy(struct icu_chain_step *step)
     case YAZ_chain_step_type_stemming:
         yaz_stemmer_destroy(step->u.stemmer);
         break;
+    case ICU_chain_step_type_join:
+        icu_buf_utf16_destroy(step->u.join);
+        break;
     default:
         break;
     }
@@ -180,6 +185,10 @@ struct icu_chain_step *icu_chain_step_clone(struct icu_chain_step *old)
             (*sp)->u.stemmer = yaz_stemmer_clone(old->u.stemmer);
             break;
         case ICU_chain_step_type_none:
+            break;
+        case ICU_chain_step_type_join:
+            (*sp)->u.join = icu_buf_utf16_create(0);
+            (*sp)->u.join = icu_buf_utf16_copy((*sp)->u.join, old->u.join);
             break;
         }
         old = old->previous;
@@ -277,29 +286,37 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
             rule = nmem_text_node_cdata(node->children, nmem);
 
         if (!strcmp((const char *) node->name, "casemap"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_casemap,
-                                         (const uint8_t *) rule, status);
+            step = icu_chain_insert_step(chain,
+                                         ICU_chain_step_type_casemap,
+                                         rule, status);
         else if (!strcmp((const char *) node->name, "transform"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_transform,
-                                         (const uint8_t *) rule, status);
+            step = icu_chain_insert_step(chain,
+                                         ICU_chain_step_type_transform,
+                                         rule, status);
         else if (!strcmp((const char *) node->name, "transliterate"))
-            step = icu_chain_insert_step(chain, ICU_chain_step_type_transliterate,
-                                         (const uint8_t *) rule, status);
+            step = icu_chain_insert_step(chain,
+                                         ICU_chain_step_type_transliterate,
+                                         rule, status);
         else if (!strcmp((const char *) node->name, "tokenize"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_tokenize,
-                                         (const uint8_t *) rule, status);
+                                         rule, status);
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display,
-                                         (const uint8_t *) "", status);
+                                         "", status);
         else if (!strcmp((const char *) node->name, "stemming"))
             step = icu_chain_insert_step(chain, YAZ_chain_step_type_stemming,
-                                         (const uint8_t *) rule, status);
+                                         rule, status);
+        else if (!strcmp((const char *) node->name, "join"))
+        {
+            step = icu_chain_insert_step(chain, ICU_chain_step_type_join,
+                                         rule, status);
+        }
         else if (!strcmp((const char *) node->name, "normalize"))
         {
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
                     "Use transform instead", node->name);
             step = icu_chain_insert_step(chain, ICU_chain_step_type_transform,
-                                         (const uint8_t *) rule, status);
+                                         rule, status);
         }
         else if (!strcmp((const char *) node->name, "index")
                  || !strcmp((const char *) node->name, "sortkey"))
@@ -312,6 +329,11 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
             yaz_log(YLOG_WARN, "Unknown element %s", node->name);
             no_errors++;
             continue;
+        }
+        if (!step)
+        {
+            yaz_log(YLOG_WARN, "Step not created for %s", node->name);
+            no_errors++;
         }
         if (step && U_FAILURE(*status))
         {
@@ -419,6 +441,22 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
                 dst = icu_buf_utf16_create(0);
                 yaz_stemmer_stem(step->u.stemmer, dst, src, &iter->status);
                 icu_buf_utf16_destroy(src);
+            }
+            break;
+        case ICU_chain_step_type_join:
+            if (dst)
+            {
+                while (1)
+                {
+                    struct icu_buf_utf16 *dst1 =
+                        icu_iter_invoke(iter, step->previous, 0);
+
+                    if (!dst1)
+                        break; 
+                    dst = icu_buf_utf16_append(dst, step->u.join);
+                    dst = icu_buf_utf16_append(dst, dst1);
+                    icu_buf_utf16_destroy(dst1);
+                }
             }
             break;
         default:

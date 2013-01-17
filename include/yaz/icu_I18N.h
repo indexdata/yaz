@@ -66,6 +66,11 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
 struct icu_buf_utf16 *icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
                                          const struct icu_buf_utf16 * src16);
 
+struct icu_buf_utf16 *icu_buf_utf16_append(struct icu_buf_utf16 *dest16,
+                                           const struct icu_buf_utf16 * src16);
+
+void icu_buf_utf16_log(const char *lead, struct icu_buf_utf16 *src16);
+
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16);
 
 struct icu_buf_utf8;

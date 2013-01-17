@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
@@ -68,17 +69,14 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
         else
             buf16->utf16
                 = (UChar *) xrealloc(buf16->utf16, sizeof(UChar) * capacity);
-
-        icu_buf_utf16_clear(buf16);
-        buf16->utf16_cap = capacity;
     }
     else
     {
         xfree(buf16->utf16);
         buf16->utf16 = 0;
         buf16->utf16_len = 0;
-        buf16->utf16_cap = 0;
     }
+    buf16->utf16_cap = capacity;
     return buf16;
 }
 
@@ -98,6 +96,27 @@ struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
     return dest16;
 }
 
+
+struct icu_buf_utf16 *icu_buf_utf16_append(struct icu_buf_utf16 *dest16,
+                                           const struct icu_buf_utf16 * src16)
+{
+    assert(dest16);
+    if (!src16)
+        return dest16;
+    if (dest16 == src16)
+        return 0;
+
+    if (dest16->utf16_cap <= src16->utf16_len + dest16->utf16_len)
+        icu_buf_utf16_resize(dest16, dest16->utf16_len + src16->utf16_len * 2);
+
+    u_strncpy(dest16->utf16 + dest16->utf16_len,
+              src16->utf16, src16->utf16_len);
+    dest16->utf16_len += src16->utf16_len;
+
+    return dest16;
+}
+
+
 void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16)
 {
     if (buf16)
@@ -105,6 +124,21 @@ void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16)
     xfree(buf16);
 }
 
+void icu_buf_utf16_log(const char *lead, struct icu_buf_utf16 *src16)
+{
+    if (src16)
+    {
+        struct icu_buf_utf8 *dst8 = icu_buf_utf8_create(0);
+        UErrorCode status = U_ZERO_ERROR;
+        icu_utf16_to_utf8(dst8, src16, &status);
+        yaz_log(YLOG_LOG, "%s=%s", lead, dst8->utf8);
+        icu_buf_utf8_destroy(dst8);
+    }
+    else
+    {
+        yaz_log(YLOG_LOG, "%s=NULL", lead);
+    }
+}
 
 #endif /* YAZ_HAVE_ICU */
 
