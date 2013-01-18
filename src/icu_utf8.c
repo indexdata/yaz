@@ -28,7 +28,7 @@
 
 struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
 {
-    struct icu_buf_utf8 * buf8
+    struct icu_buf_utf8 *buf8
         = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
 
     buf8->utf8 = 0;
@@ -44,7 +44,7 @@ struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
     return buf8;
 }
 
-struct icu_buf_utf8 * icu_buf_utf8_clear(struct icu_buf_utf8 * buf8)
+struct icu_buf_utf8 *icu_buf_utf8_clear(struct icu_buf_utf8 *buf8)
 {
     if (buf8)
     {
@@ -55,8 +55,8 @@ struct icu_buf_utf8 * icu_buf_utf8_clear(struct icu_buf_utf8 * buf8)
     return buf8;
 }
 
-struct icu_buf_utf8 * icu_buf_utf8_resize(struct icu_buf_utf8 * buf8,
-                                          size_t capacity)
+struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
+                                         size_t capacity)
 {
     if (!buf8)
         return 0;
@@ -95,16 +95,16 @@ const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
     return (const char *) src8->utf8;
 }
 
-void icu_buf_utf8_destroy(struct icu_buf_utf8 * buf8)
+void icu_buf_utf8_destroy(struct icu_buf_utf8 *buf8)
 {
     if (buf8)
         xfree(buf8->utf8);
     xfree(buf8);
 }
 
-UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
-                                    const char * src8cstr,
-                                    UErrorCode * status)
+UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 *dest16,
+                                    const char *src8cstr,
+                                    UErrorCode *status)
 {
     size_t src8cstr_len = 0;
     int32_t utf16_len = 0;
@@ -136,7 +136,7 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 * dest16,
 
 UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
                              const struct icu_buf_utf16 *src16,
-                             UErrorCode * status)
+                             UErrorCode *status)
 {
     int32_t utf8_len = 0;
 

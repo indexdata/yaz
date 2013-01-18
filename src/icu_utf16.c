@@ -27,9 +27,9 @@
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
 
-struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
+struct icu_buf_utf16 *icu_buf_utf16_create(size_t capacity)
 {
-    struct icu_buf_utf16 * buf16
+    struct icu_buf_utf16 *buf16
         = (struct icu_buf_utf16 *) xmalloc(sizeof(struct icu_buf_utf16));
 
     buf16->utf16 = 0;
@@ -45,7 +45,7 @@ struct icu_buf_utf16 * icu_buf_utf16_create(size_t capacity)
     return buf16;
 }
 
-struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16)
+struct icu_buf_utf16 *icu_buf_utf16_clear(struct icu_buf_utf16 *buf16)
 {
     if (buf16)
     {
@@ -56,8 +56,8 @@ struct icu_buf_utf16 * icu_buf_utf16_clear(struct icu_buf_utf16 * buf16)
     return buf16;
 }
 
-struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
-                                            size_t capacity)
+struct icu_buf_utf16 *icu_buf_utf16_resize(struct icu_buf_utf16 *buf16,
+                                           size_t capacity)
 {
     if (!buf16)
         return 0;
@@ -81,8 +81,8 @@ struct icu_buf_utf16 * icu_buf_utf16_resize(struct icu_buf_utf16 * buf16,
 }
 
 
-struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
-                                          const struct icu_buf_utf16 * src16)
+struct icu_buf_utf16 *icu_buf_utf16_copy(struct icu_buf_utf16 *dest16,
+                                         const struct icu_buf_utf16 *src16)
 {
     if (!dest16 || !src16 || dest16 == src16)
         return 0;
@@ -98,7 +98,7 @@ struct icu_buf_utf16 * icu_buf_utf16_copy(struct icu_buf_utf16 * dest16,
 
 
 struct icu_buf_utf16 *icu_buf_utf16_append(struct icu_buf_utf16 *dest16,
-                                           const struct icu_buf_utf16 * src16)
+                                           const struct icu_buf_utf16 *src16)
 {
     assert(dest16);
     if (!src16)
@@ -117,7 +117,7 @@ struct icu_buf_utf16 *icu_buf_utf16_append(struct icu_buf_utf16 *dest16,
 }
 
 
-void icu_buf_utf16_destroy(struct icu_buf_utf16 * buf16)
+void icu_buf_utf16_destroy(struct icu_buf_utf16 *buf16)
 {
     if (buf16)
         xfree(buf16->utf16);

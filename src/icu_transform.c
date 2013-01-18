@@ -30,7 +30,7 @@ struct icu_transform
 {
     char action;
     UParseError parse_error;
-    UTransliterator * trans;
+    UTransliterator *trans;
 };
 
 struct icu_transform *icu_transform_clone(struct icu_transform *old)
@@ -46,9 +46,9 @@ struct icu_transform *icu_transform_clone(struct icu_transform *old)
     return transform;
 }
 
-struct icu_transform * icu_transform_create(const char *id, char action,
-                                            const char *rules,
-                                            UErrorCode *status)
+struct icu_transform *icu_transform_create(const char *id, char action,
+                                           const char *rules,
+                                           UErrorCode *status)
 {
     struct icu_buf_utf16 *id16 = icu_buf_utf16_create(0);
     struct icu_buf_utf16 *rules16 = icu_buf_utf16_create(0);
@@ -102,7 +102,7 @@ struct icu_transform * icu_transform_create(const char *id, char action,
     return 0;
 }
 
-void icu_transform_destroy(struct icu_transform * transform)
+void icu_transform_destroy(struct icu_transform *transform)
 {
     if (transform)
     {
@@ -112,9 +112,9 @@ void icu_transform_destroy(struct icu_transform * transform)
     }
 }
 
-int icu_transform_trans(struct icu_transform * transform,
-                        struct icu_buf_utf16 * dest16,
-                        const struct icu_buf_utf16 * src16,
+int icu_transform_trans(struct icu_transform *transform,
+                        struct icu_buf_utf16 *dest16,
+                        const struct icu_buf_utf16 *src16,
                         UErrorCode *status)
 {
     if (!transform || !transform->trans

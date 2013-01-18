@@ -51,16 +51,16 @@ static int icu_termmap_cmp(const void *vp1, const void *vp2)
 }
 
 
-static int test_icu_casemap(const char * locale, char action,
-                            const char * src8cstr, const char * chk8cstr)
+static int test_icu_casemap(const char *locale, char action,
+                            const char *src8cstr, const char *chk8cstr)
 {
     int success = 0;
     UErrorCode status = U_ZERO_ERROR;
 
-    struct icu_buf_utf8 * src8 = icu_buf_utf8_create(0);
-    struct icu_buf_utf8 * dest8 = icu_buf_utf8_create(0);
-    struct icu_buf_utf16 * src16 = icu_buf_utf16_create(0);
-    struct icu_buf_utf16 * dest16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf8 *src8 = icu_buf_utf8_create(0);
+    struct icu_buf_utf8 *dest8 = icu_buf_utf8_create(0);
+    struct icu_buf_utf16 *src16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf16 *dest16 = icu_buf_utf16_create(0);
 
 
     int src8cstr_len = strlen(src8cstr);
@@ -165,19 +165,19 @@ static void check_icu_casemap(void)
 
 }
 
-static int test_icu_sortmap(const char * locale, int src_list_len,
-                            const char ** src_list, const char ** chk_list)
+static int test_icu_sortmap(const char *locale, int src_list_len,
+                            const char **src_list, const char **chk_list)
 {
     int success = 1;
 
     UErrorCode status = U_ZERO_ERROR;
 
-    struct icu_buf_utf8 * buf8 = icu_buf_utf8_create(0);
-    struct icu_buf_utf16 * buf16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf8 *buf8 = icu_buf_utf8_create(0);
+    struct icu_buf_utf16 *buf16 = icu_buf_utf16_create(0);
 
     int i;
 
-    struct icu_termmap * list[src_list_len];
+    struct icu_termmap *list[src_list_len];
 
     UCollator *coll = ucol_open(locale, &status);
     icu_check_status(status);
@@ -249,8 +249,8 @@ static void check_icu_sortmap(void)
 {
     /* successful tests */
     size_t en_1_len = 6;
-    const char * en_1_src[6] = {"z", "K", "a", "A", "Z", "k"};
-    const char * en_1_cck[6] = {"a", "A", "k", "K", "z", "Z"};
+    const char *en_1_src[6] = {"z", "K", "a", "A", "Z", "k"};
+    const char *en_1_cck[6] = {"a", "A", "k", "K", "z", "Z"};
     YAZ_CHECK(test_icu_sortmap("en", en_1_len, en_1_src, en_1_cck));
     YAZ_CHECK(test_icu_sortmap("en_AU", en_1_len, en_1_src, en_1_cck));
     YAZ_CHECK(test_icu_sortmap("en_CA", en_1_len, en_1_src, en_1_cck));
@@ -260,34 +260,34 @@ static void check_icu_sortmap(void)
     /* successful tests */
     {
         size_t da_1_len = 6;
-        const char * da_1_src[6] = {"z", "å", "o", "æ", "a", "ø"};
-        const char * da_1_cck[6] = {"a", "o", "z", "æ", "ø", "å"};
+        const char *da_1_src[6] = {"z", "å", "o", "æ", "a", "ø"};
+        const char *da_1_cck[6] = {"a", "o", "z", "æ", "ø", "å"};
         YAZ_CHECK(test_icu_sortmap("da", da_1_len, da_1_src, da_1_cck));
         YAZ_CHECK(test_icu_sortmap("da_DK", da_1_len, da_1_src, da_1_cck));
     }
     /* successful tests */
     {
         size_t de_1_len = 9;
-        const char * de_1_src[9] = {"u", "ä", "o", "t", "s", "ß", "ü", "ö", "a"};
-        const char * de_1_cck[9] = {"a","ä", "o", "ö", "s", "ß", "t", "u", "ü"};
+        const char *de_1_src[9] = {"u", "ä", "o", "t", "s", "ß", "ü", "ö", "a"};
+        const char *de_1_cck[9] = {"a","ä", "o", "ö", "s", "ß", "t", "u", "ü"};
         YAZ_CHECK(test_icu_sortmap("de", de_1_len, de_1_src, de_1_cck));
         YAZ_CHECK(test_icu_sortmap("de_AT", de_1_len, de_1_src, de_1_cck));
         YAZ_CHECK(test_icu_sortmap("de_DE", de_1_len, de_1_src, de_1_cck));
     }
 }
 
-static int test_icu_normalizer(const char * rules8cstr,
-                               const char * src8cstr,
-                               const char * chk8cstr)
+static int test_icu_normalizer(const char *rules8cstr,
+                               const char *src8cstr,
+                               const char *chk8cstr)
 {
     int success = 0;
 
     UErrorCode status = U_ZERO_ERROR;
 
-    struct icu_buf_utf16 * src16 = icu_buf_utf16_create(0);
-    struct icu_buf_utf16 * dest16 = icu_buf_utf16_create(0);
-    struct icu_buf_utf8 * dest8 = icu_buf_utf8_create(0);
-    struct icu_transform * transform
+    struct icu_buf_utf16 *src16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf16 *dest16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf8 *dest8 = icu_buf_utf8_create(0);
+    struct icu_transform *transform
         = icu_transform_create(rules8cstr, 'f', 0, &status);
     icu_check_status(status);
 
@@ -354,16 +354,16 @@ static void check_icu_normalizer(void)
                                   "a cote de l'alcove ovoide"));
 }
 
-static int test_icu_tokenizer(const char * locale, char action,
-                              const char * src8cstr, int count)
+static int test_icu_tokenizer(const char *locale, char action,
+                              const char *src8cstr, int count)
 {
     int success = 1;
 
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_buf_utf16 * src16 = icu_buf_utf16_create(0);
-    struct icu_buf_utf16 * tkn16 = icu_buf_utf16_create(0);
-    struct icu_buf_utf8 * tkn8 = icu_buf_utf8_create(0);
-    struct icu_tokenizer * tokenizer = 0;
+    struct icu_buf_utf16 *src16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf16 *tkn16 = icu_buf_utf16_create(0);
+    struct icu_buf_utf8 *tkn8 = icu_buf_utf8_create(0);
+    struct icu_tokenizer *tokenizer = 0;
 
     /* transforming to UTF16 */
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
@@ -406,7 +406,7 @@ static int test_icu_tokenizer(const char * locale, char action,
 
 static void check_icu_tokenizer(void)
 {
-    const char * en_str
+    const char *en_str
         = "O Romeo, Romeo! wherefore art thou Romeo?";
 
     YAZ_CHECK(test_icu_tokenizer("en", 's', en_str, 2));
@@ -415,7 +415,7 @@ static void check_icu_tokenizer(void)
     YAZ_CHECK(test_icu_tokenizer("en", 'c', en_str, 41));
 
     {
-        const char * da_str
+        const char *da_str
             = "Blåbærtærte. Denne kage stammer fra Finland. "
             "Den er med blåbær, men alle sommerens forskellige bær kan bruges.";
 
@@ -428,13 +428,13 @@ static void check_icu_tokenizer(void)
 
 static void check_icu_chain(void)
 {
-    const char * en_str
+    const char *en_str
         = "O Romeo, Romeo! wherefore art thou\t Romeo?";
 
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
         "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
@@ -487,9 +487,9 @@ static void check_icu_chain(void)
 static void check_bug_1140(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
 
         /* if the first rule is normalize instead. Then it works */
 #if 0
@@ -550,9 +550,9 @@ static void check_bug_1140(void)
 static void check_chain_empty_token(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
         "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
@@ -587,13 +587,13 @@ static void check_chain_empty_token(void)
 static void check_chain_empty_chain(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "</icu>";
 
-    const char * src8 = "some 5487 weired !¤%&(/& sTuFf";
-    char * dest8 = 0;
+    const char *src8 = "some 5487 weired !¤%&(/& sTuFf";
+    char *dest8 = 0;
 
     xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
@@ -628,11 +628,11 @@ static void check_chain_empty_chain(void)
 static void check_icu_iter1(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
     xmlNode *xml_node;
     yaz_icu_iter_t iter;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
         "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
@@ -767,10 +767,10 @@ static void check_iter_threads(struct icu_chain *chain)
 static void check_icu_iter2(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
     xmlNode *xml_node;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
         "<tokenize rule=\"w\"/>"
@@ -809,10 +809,10 @@ static void check_icu_iter2(void)
 static void check_icu_iter3(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
     xmlNode *xml_node;
 
-    const char * xml_str =
+    const char *xml_str =
         "<icu_chain id=\"sort\" locale=\"el\">\n"
         "<transform rule=\"[:Control:] Any-Remove\"/>\n"
         "<transform rule=\"[[:Control:][:WhiteSpace:][:Punctuation:]] Remove\"/>\n"
@@ -850,10 +850,10 @@ static void check_icu_iter3(void)
 static void check_icu_iter4(void)
 {
     UErrorCode status = U_ZERO_ERROR;
-    struct icu_chain * chain = 0;
+    struct icu_chain *chain = 0;
     xmlNode *xml_node;
 
-    const char * xml_str = "<icu locale=\"en\">"
+    const char *xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
         "<tokenize rule=\"l\"/>"
         "<tokenize rule=\"w\"/>"

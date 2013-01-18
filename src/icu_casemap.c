@@ -30,9 +30,9 @@ struct icu_casemap
     char action;
 };
 
-struct icu_casemap * icu_casemap_create(char action, UErrorCode *status)
+struct icu_casemap *icu_casemap_create(char action, UErrorCode *status)
 {
-    struct icu_casemap * casemap
+    struct icu_casemap *casemap
         = (struct icu_casemap *) xmalloc(sizeof(struct icu_casemap));
     casemap->action = action;
 
@@ -67,9 +67,9 @@ void icu_casemap_destroy(struct icu_casemap * casemap)
     xfree(casemap);
 }
 
-int icu_casemap_casemap(struct icu_casemap * casemap,
-                        struct icu_buf_utf16 * dest16,
-                        struct icu_buf_utf16 * src16,
+int icu_casemap_casemap(struct icu_casemap *casemap,
+                        struct icu_buf_utf16 *dest16,
+                        struct icu_buf_utf16 *src16,
                         UErrorCode *status,
                         const char *locale)
 {
@@ -81,8 +81,8 @@ int icu_casemap_casemap(struct icu_casemap * casemap,
 }
 
 
-static uint32_t icu_utf16_sub(struct icu_buf_utf16 * dest16,
-                          struct icu_buf_utf16 * src16,
+static uint32_t icu_utf16_sub(struct icu_buf_utf16 *dest16,
+                          struct icu_buf_utf16 *src16,
                           const char *locale, char action,
                           UErrorCode *status)
 {
@@ -119,8 +119,8 @@ static uint32_t icu_utf16_sub(struct icu_buf_utf16 * dest16,
 }
 
 
-int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
-                      struct icu_buf_utf16 * src16,
+int icu_utf16_casemap(struct icu_buf_utf16 *dest16,
+                      struct icu_buf_utf16 *src16,
                       const char *locale, char action,
                       UErrorCode *status)
 {

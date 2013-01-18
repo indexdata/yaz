@@ -27,8 +27,8 @@
 #include <unicode/uchar.h>    /* char names           */
 
 void icu_sortkey8_from_utf16(UCollator *coll,
-                             struct icu_buf_utf8 * dest8,
-                             struct icu_buf_utf16 * src16,
+                             struct icu_buf_utf8 *dest8,
+                             struct icu_buf_utf16 *src16,
                              UErrorCode * status)
 {
     int32_t sortkey_len = 0;

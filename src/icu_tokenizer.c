@@ -78,7 +78,7 @@ struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old)
 struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
                                            UErrorCode *status)
 {
-    struct icu_tokenizer * tokenizer
+    struct icu_tokenizer *tokenizer
         = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
 
     icu_tokenizer_reset(tokenizer, action);
@@ -119,7 +119,7 @@ struct icu_tokenizer *icu_tokenizer_create(const char *locale, char action,
     return 0;
 }
 
-void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer)
+void icu_tokenizer_destroy(struct icu_tokenizer *tokenizer)
 {
     if (tokenizer)
     {
@@ -130,8 +130,8 @@ void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer)
     }
 }
 
-int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
-                         struct icu_buf_utf16 * src16,
+int icu_tokenizer_attach(struct icu_tokenizer *tokenizer,
+                         struct icu_buf_utf16 *src16,
                          UErrorCode *status)
 {
     if (!tokenizer || !tokenizer->bi || !src16)
@@ -153,8 +153,8 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
     return 1;
 }
 
-int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
-                                 struct icu_buf_utf16 * tkn16,
+int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
+                                 struct icu_buf_utf16 *tkn16,
                                  UErrorCode *status)
 {
     int32_t tkn_start = 0;
@@ -217,7 +217,7 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
     return tkn_len;
 }
 
-int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer)
+int32_t icu_tokenizer_token_count(struct icu_tokenizer *tokenizer)
 {
     return tokenizer->token_count;
 }
