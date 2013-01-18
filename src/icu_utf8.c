@@ -31,16 +31,15 @@ struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
     struct icu_buf_utf8 *buf8
         = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
 
-    buf8->utf8 = 0;
     buf8->utf8_len = 0;
-    buf8->utf8_cap = 0;
-
+    buf8->utf8_cap = capacity;
     if (capacity > 0)
     {
         buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
         buf8->utf8[0] = (uint8_t) 0;
-        buf8->utf8_cap = capacity;
     }
+    else
+        buf8->utf8 = 0;
     return buf8;
 }
 
@@ -75,7 +74,6 @@ struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
     {
         xfree(buf8->utf8);
         buf8->utf8 = 0;
-        buf8->utf8_len = 0;
         buf8->utf8_cap = 0;
     }
 
