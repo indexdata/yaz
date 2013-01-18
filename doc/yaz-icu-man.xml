@@ -232,6 +232,16 @@
       </para></listitem>
     </varlistentry>
 
+    <varlistentry>
+     <term>join</term>
+     <listitem>
+      <para>
+       Joins tokens into one string. The rule attribute is the joining
+       string, which may be empty. The join conversion element was added
+       in YAZ 4.2.49.
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
 
   </para>
@@ -249,7 +259,7 @@
   <transform rule="[:Control:] Any-Remove"/>
   <tokenize rule="w"/>
   <transform rule="[[:WhiteSpace:][:Punctuation:]] Remove"/>
-  <transliterate rule="xy > z"/>
+  <transliterate rule="xy > z;"/>
   <display/>
   <casemap rule="l"/>
 </icu_chain>
