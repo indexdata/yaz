@@ -1,3 +1,6 @@
+ICU: New conversion element 'join' which joins tokens into one
+with a custom character given by rule attribute.
+
 --- 4.2.48 2013/01/10
 
 New GFS search member: present_number. This is a hint to the
