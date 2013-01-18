@@ -1,3 +1,5 @@
+--- 4.2.49 2013/01/18
+
 ICU: New conversion element 'join' which joins tokens into one
 with a custom character given by rule attribute.
 
