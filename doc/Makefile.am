@@ -7,7 +7,7 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
  indexdata.xml \
  asn.xml tools.xml odr.xml comstack.xml server.xml license.xml \
  future.xml zoom.xml credits.xml gfs-options.xml \
- yaz.xml yaz-client-commands.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
+ yaz.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
  std-oid-table.xml manref.xml
 
 HTMLFILES = index.html
@@ -34,7 +34,7 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 std-oid-table.xml: $(srcdir)/../src/oid.csv
 	$(TCLSH) $(srcdir)/../src/oidtoc.tcl $(srcdir) $(srcdir)/../src/oid.csv std-oid-table.xml
 
-yaz-client.1: $(srcdir)/yaz-client-man.xml $(srcdir)/yaz-client-commands.xml
+yaz-client.1: $(srcdir)/yaz-client-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-client-man.xml
 
 yaz-ztest.8: yaz-ztest-man.xml gfs-options.xml gfs-synopsis.xml gfs-virtual.xml
