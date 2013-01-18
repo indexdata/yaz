@@ -846,6 +846,51 @@ static void check_icu_iter3(void)
     icu_chain_destroy(chain);
 }
 
+
+static void check_icu_iter4(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain * chain = 0;
+    xmlNode *xml_node;
+
+    const char * xml_str = "<icu locale=\"en\">"
+        "<transform rule=\"[:Control:] Any-Remove\"/>"
+        "<tokenize rule=\"l\"/>"
+        "<tokenize rule=\"w\"/>"
+        "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
+        "<display/>"
+        "<casemap rule=\"l\"/>"
+        "<join rule=\"\"/>"
+        "</icu>";
+
+    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+
+    chain = icu_chain_xml_config(xml_node, 1, &status);
+
+    xmlFreeDoc(doc);
+    YAZ_CHECK(chain);
+    if (!chain)
+        return;
+
+    YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
+                        "[adobeacrobatreader19911999]"));
+
+    YAZ_CHECK(test_iter(chain, "Νόταρης, Γιάννης Σωτ",
+                        "[νόταρηςγιάννηςσωτ]"));
+
+    // check_iter_threads(chain);
+
+    icu_chain_destroy(chain);
+}
+
+
 #endif /* YAZ_HAVE_ICU */
 
 int main(int argc, char **argv)
@@ -865,6 +910,7 @@ int main(int argc, char **argv)
     check_icu_iter1();
     check_icu_iter2();
     check_icu_iter3();
+    check_icu_iter4();
 
     check_bug_1140();
 
