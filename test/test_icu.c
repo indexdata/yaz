@@ -27,6 +27,10 @@
 #include <pthread.h>
 #endif
 
+#if YAZ_HAVE_XML2
+#include <libxml/xmlmemory.h>
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -915,6 +919,10 @@ int main(int argc, char **argv)
     check_bug_1140();
 
     u_cleanup();
+#if YAZ_HAVE_XML2
+    xmlCleanupParser();
+#endif
+
 #else /* YAZ_HAVE_ICU */
 
     yaz_log(YLOG_LOG, "ICU unit tests omitted");
