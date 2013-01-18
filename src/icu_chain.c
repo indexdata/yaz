@@ -83,35 +83,40 @@ static struct icu_chain_step *icu_chain_insert_step(
 {
     struct icu_chain_step *step = 0;
 
-    if (!chain || !type || !rule)
-        return 0;
+    assert(chain);
+    assert(type);
 
     step = (struct icu_chain_step *) xmalloc(sizeof(*step));
-
     step->type = type;
-    /* create auxilary objects */
+
     switch (step->type)
     {
     case ICU_chain_step_type_display:
         break;
     case ICU_chain_step_type_casemap:
+        assert(rule);
         step->u.casemap = icu_casemap_create(rule[0], status);
         break;
     case ICU_chain_step_type_transform:
+        assert(rule);
         /* rule omitted. Only ID used */
         step->u.transform = icu_transform_create(rule, 'f', 0, status);
         break;
     case ICU_chain_step_type_tokenize:
+        assert(rule);
         step->u.tokenizer = icu_tokenizer_create(chain->locale, rule[0], status);
         break;
     case ICU_chain_step_type_transliterate:
+        assert(rule);
         /* we pass a dummy ID to utrans_openU.. */
         step->u.transform = icu_transform_create("custom", 'f', rule, status);
         break;
     case YAZ_chain_step_type_stemming:
+        assert(rule);
         step->u.stemmer = yaz_stemmer_create(chain->locale, rule, status);
         break;
     case ICU_chain_step_type_join:
+        assert(rule);
         step->u.join = icu_buf_utf16_create(0);
         icu_utf16_from_utf8_cstr(step->u.join, rule, status);
         break;
@@ -279,12 +284,18 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
                 yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "
                         "element '%s'", attr->name, node->name);
                 no_errors++;
-                continue;
             }
         }
         if (!rule && node->children)
             rule = nmem_text_node_cdata(node->children, nmem);
 
+        if (!rule && strcmp((const char *) node->name, "display"))
+        {
+            yaz_log(YLOG_WARN, "Missing attribute rule for element %s",
+                    (const char *) node->name);
+            no_errors++;
+            continue;
+        }
         if (!strcmp((const char *) node->name, "casemap"))
             step = icu_chain_insert_step(chain,
                                          ICU_chain_step_type_casemap,
@@ -302,15 +313,13 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
                                          rule, status);
         else if (!strcmp((const char *) node->name, "display"))
             step = icu_chain_insert_step(chain, ICU_chain_step_type_display,
-                                         "", status);
+                                         rule, status);
         else if (!strcmp((const char *) node->name, "stemming"))
             step = icu_chain_insert_step(chain, YAZ_chain_step_type_stemming,
                                          rule, status);
         else if (!strcmp((const char *) node->name, "join"))
-        {
             step = icu_chain_insert_step(chain, ICU_chain_step_type_join,
                                          rule, status);
-        }
         else if (!strcmp((const char *) node->name, "normalize"))
         {
             yaz_log(YLOG_WARN, "Element %s is deprecated. "
