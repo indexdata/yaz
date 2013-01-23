@@ -501,6 +501,12 @@
 
        (dylan and bob) or set=1
 
+       righttrunc?
+
+       "notrunc?"
+
+       singlechar#mask
+
       </screen>
       <para>
        Assuming that the qualifiers <literal>ti</literal>,
