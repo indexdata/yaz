@@ -438,6 +438,18 @@ YAZ_EXPORT void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r,
 YAZ_EXPORT void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r,
                                        WRBUF wrbuf, yaz_iconv_t cd);
 
+#if YAZ_HAVE_XML2
+/** \brief Converts XML to OPAC
+    \param mt marc handle 
+    \param src XML root node (presumably opacRecord node)
+    \param dst Z39.50 OPAC result - allocated by NMEM on marc handle
+    \param cd iconv handle for the OPAC content (not ISO2709 part)
+
+    \*/
+YAZ_EXPORT void yaz_xml_to_opac(yaz_marc_t mt, xmlNode *src,
+                                Z_OPACRecord **dst, yaz_iconv_t cd);
+#endif
+
 /** \brief flushes records
     \param mt handle
     \param wr WRBUF for output
