@@ -3,8 +3,8 @@
  * See the file LICENSE for details.
  */
 /**
- * \file opacdisp.c
- * \brief Implements OPAC record display
+ * \file opac_to_xml
+ * \brief Implements OPAC to XML conversion
  */
 #if HAVE_CONFIG_H
 #include <config.h>

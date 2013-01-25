@@ -489,7 +489,7 @@ MISC_OBJS= \
    $(OBJDIR)\sortspec.obj \
    $(OBJDIR)\charneg.obj \
    $(OBJDIR)\grs1disp.obj \
-   $(OBJDIR)\opacdisp.obj \
+   $(OBJDIR)\opac_to_xml.obj \
    $(OBJDIR)\zgdu.obj \
    $(OBJDIR)\soap.obj \
    $(OBJDIR)\solr.obj \
