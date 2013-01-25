@@ -202,7 +202,8 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     while ((next = strchr(next, marker_ch)))
                     {
                         if ((next[1] >= 'A' && next[1] <= 'Z')
-                            ||(next[1] >= 'a' && next[1] <= 'z'))
+                            ||(next[1] >= 'a' && next[1] <= 'z')
+                            ||(next[1] >= '0' && next[1] <= '9'))
                         {
                             if (!marker_skip)
                                 break;
