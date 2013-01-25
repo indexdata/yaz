@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /**
- * \file opac_to_xml
+ * \file opac_to_xml.c
  * \brief Implements OPAC to XML conversion
  */
 #if HAVE_CONFIG_H

@@ -46,7 +46,7 @@ YAZ_BEGIN_CDECL
     \retval -1 errors. Inspect addinfo for error message
 
     Configuration example:
-    \verbatim
+\verbatim
 <cclmap defaultattrset="bib-1">
    <qual name="term">
        <attr type="u" value="1016"/>
@@ -60,7 +60,7 @@ YAZ_BEGIN_CDECL
    </qual>
   <directive name="and" value="+"/>
 </cclmap>
-    \endverbatim
+\endverbatim
 */
 YAZ_EXPORT
 int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr,
