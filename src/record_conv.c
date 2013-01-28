@@ -194,6 +194,7 @@ static void *construct_xslt(const xmlNode *ptr,
     {
         wrbuf_printf(wr_error, "Element <xslt>: "
                      "attribute 'stylesheet' expected");
+        nmem_destroy(nmem);
         return 0;
     }
     else
@@ -208,6 +209,7 @@ static void *construct_xslt(const xmlNode *ptr,
             if (path)
                 wrbuf_printf(wr_error, " with path '%s'", path);
 
+            nmem_destroy(nmem);
             return 0;
         }
         info->xsp_doc = xmlParseFile(fullpath);
@@ -217,6 +219,7 @@ static void *construct_xslt(const xmlNode *ptr,
                          " xml parse failed: %s", stylesheet, fullpath);
             if (path)
                 wrbuf_printf(wr_error, " with path '%s'", path);
+            nmem_destroy(nmem);
             return 0;
         }
         /* need to copy this before passing it to the processor. It will
