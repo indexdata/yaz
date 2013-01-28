@@ -11,11 +11,17 @@
 #include <yaz/wrbuf.h>
 #include <string.h>
 #include <yaz/log.h>
-
+#include <yaz/proto.h>
+#include <yaz/prt-ext.h>
+#include <yaz/oid_db.h>
 #if YAZ_HAVE_XML2
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+
+#if YAZ_HAVE_XSLT
+#include <libxslt/xslt.h>
+#endif
 
 yaz_record_conv_t conv_configure(const char *xmlstring, WRBUF w)
 {
@@ -337,6 +343,141 @@ static void tst_convert2(void)
     yaz_record_conv_destroy(p);
 }
 
+static void tst_convert3(void)
+{
+    NMEM nmem = nmem_create();
+    int ret;
+    yaz_record_conv_t p = 0;
+
+    const char *iso2709_rec =
+        "\x30\x30\x30\x37\x37\x6E\x61\x6D\x20\x61\x32\x32\x30\x30\x30\x34"
+        "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
+        "\x30\x30\x30\x30\x30\x31\x30\x30\x30\x31\x34\x30\x30\x30\x31\x33"
+        "\x1E\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x20\x20"
+        "\x1F\x61\x6b\xb2\x62\x65\x6e\x68\x61\x76\x6e\x1E\x1D";
+
+    const char *opacxml_rec =
+        "<opacRecord>\n"
+        "  <bibliographicRecord>\n"
+        "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+        "  <leader>00077nam a22000498a 4500</leader>\n"
+        "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+        "  <datafield tag=\"010\" ind1=\" \" ind2=\" \">\n"
+        "    <subfield code=\"a\">k" "\xc3" "\xb8" /* oslash in UTF_8 */ 
+        "benhavn</subfield>\n"
+        "  </datafield>\n"
+        "</record>\n"
+        "  </bibliographicRecord>\n"
+        "<holdings>\n"
+        " <holding>\n"
+        "  <typeOfRecord>u</typeOfRecord>\n"
+        "  <encodingLevel>U</encodingLevel>\n"
+        "  <receiptAcqStatus>0</receiptAcqStatus>\n"
+        "  <dateOfReport>000000</dateOfReport>\n"
+        "  <nucCode>s-FM/GC</nucCode>\n"
+        "  <localLocation>Main or Science/Business Reading Rms - STORED OFFSITE</localLocation>\n"
+        "  <callNumber>MLCM 89/00602 (N)</callNumber>\n"
+        "  <shelvingData>FT MEADE</shelvingData>\n"
+        "  <copyNumber>Copy 1</copyNumber>\n"
+        "  <circulations>\n"
+        "   <circulation>\n"
+        "    <availableNow value=\"1\"/>\n"
+        "    <itemId>1226176</itemId>\n"
+        "    <renewable value=\"0\"/>\n"
+        "    <onHold value=\"0\"/>\n"
+        "   </circulation>\n"
+        "  </circulations>\n"
+        " </holding>\n"
+        "</holdings>\n"
+        "</opacRecord>\n";
+
+    Z_OPACRecord *z_opac = nmem_malloc(nmem, sizeof(*z_opac));
+    Z_HoldingsAndCircData *h;
+    Z_CircRecord *circ;
+
+    z_opac->bibliographicRecord =
+        z_ext_record_oid_nmem(nmem, yaz_oid_recsyn_usmarc,
+                              iso2709_rec, strlen(iso2709_rec));
+    z_opac->num_holdingsData = 1;
+    z_opac->holdingsData = (Z_HoldingsRecord **)
+        nmem_malloc(nmem, sizeof(Z_HoldingsRecord *) * 1);
+    z_opac->holdingsData[0] = (Z_HoldingsRecord *)
+        nmem_malloc(nmem, sizeof(Z_HoldingsRecord));
+    z_opac->holdingsData[0]->which = Z_HoldingsRecord_holdingsAndCirc;
+    h = z_opac->holdingsData[0]->u.holdingsAndCirc = (Z_HoldingsAndCircData *)
+         nmem_malloc(nmem, sizeof(*h));
+    h->typeOfRecord = nmem_strdup(nmem, "u");
+    h->encodingLevel = nmem_strdup(nmem, "U");
+    h->format = 0;
+    h->receiptAcqStatus = nmem_strdup(nmem, "0");
+    h->generalRetention = 0;
+    h->completeness = 0;
+    h->dateOfReport = nmem_strdup(nmem, "000000");
+    h->nucCode = nmem_strdup(nmem, "s-FM/GC");
+    h->localLocation = nmem_strdup(nmem,
+                                   "Main or Science/Business Reading "
+                                   "Rms - STORED OFFSITE");
+    h->shelvingLocation = 0;
+    h->callNumber = nmem_strdup(nmem, "MLCM 89/00602 (N)");
+    h->shelvingData = nmem_strdup(nmem, "FT MEADE");
+    h->copyNumber = nmem_strdup(nmem, "Copy 1");
+    h->publicNote = 0;
+    h->reproductionNote = 0;
+    h->termsUseRepro = 0;
+    h->enumAndChron = 0;
+    h->num_volumes = 0;
+    h->volumes = 0;
+    h->num_circulationData = 1;
+    h->circulationData = (Z_CircRecord **)
+        nmem_malloc(nmem, 1 * sizeof(Z_CircRecord *));
+    circ = h->circulationData[0] = (Z_CircRecord *)
+        nmem_malloc(nmem, sizeof(Z_CircRecord));
+    circ->availableNow = nmem_booldup(nmem, 1);
+    circ->availablityDate = 0;
+    circ->availableThru = 0;
+    circ->restrictions = 0;
+    circ->itemId = nmem_strdup(nmem, "1226176");
+    circ->renewable = nmem_booldup(nmem, 0);
+    circ->onHold = nmem_booldup(nmem, 0);
+    circ->enumAndChron = 0;
+    circ->midspine = 0;
+    circ->temporaryLocation = 0;
+
+    YAZ_CHECK(conv_configure_test("<backend>"
+                                  "<marc"
+                                  " inputcharset=\"marc-8\""
+                                  " outputcharset=\"utf-8\""
+                                  " inputformat=\"marc\""
+                                  " outputformat=\"marcxml\""
+                                  "/>"
+                                  "</backend>",
+                                  0, &p));
+
+    if (p)
+    {
+        WRBUF output_record = wrbuf_alloc();
+        ret = yaz_record_conv_opac_record(p, z_opac, output_record);
+        YAZ_CHECK(ret == 0);
+        if (ret == 0)
+        {
+            ret = strcmp(wrbuf_cstr(output_record), opacxml_rec);
+            YAZ_CHECK(ret == 0);
+            if (ret)
+            {
+                printf("got-output_record len=%ld: %s\n",
+                       (long) wrbuf_len(output_record),
+                       wrbuf_cstr(output_record));
+                printf("output_expect_record len=%ld %s\n",
+                       (long) strlen(opacxml_rec),
+                       opacxml_rec);
+            }
+        }
+        yaz_record_conv_destroy(p);
+        wrbuf_destroy(output_record);
+    }
+    nmem_destroy(nmem);
+}
+
 #endif
 
 int main(int argc, char **argv)
@@ -346,9 +487,14 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     tst_configure();
 #endif
-#if  YAZ_HAVE_XSLT
+#if YAZ_HAVE_XSLT
     tst_convert1();
     tst_convert2();
+    tst_convert3();
+    xsltCleanupGlobals();
+#endif
+#if YAZ_HAVE_XML2
+    xmlCleanupParser();
 #endif
     YAZ_CHECK_TERM;
 }
