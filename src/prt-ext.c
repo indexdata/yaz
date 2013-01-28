@@ -258,16 +258,17 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         odr_sequence_end(o);
 }
 
-Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len)
+Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
+                                  const char *buf, int len)
 {
     Z_External *thisext;
 
     if (!oid)
         return 0;
-    thisext = (Z_External *) odr_malloc(o, sizeof(*thisext));
+    thisext = (Z_External *) nmem_malloc(nmem, sizeof(*thisext));
     thisext->descriptor = 0;
     thisext->indirect_reference = 0;
-    thisext->direct_reference = odr_oiddup(o, oid);
+    thisext->direct_reference = odr_oiddup_nmem(nmem, oid);
 
     if (len < 0) /* Structured data */
     {
@@ -310,11 +311,11 @@ Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_sutrs))
     {    /* SUTRS is a single-ASN.1-type */
-        Odr_oct *sutrs = (Odr_oct *)odr_malloc(o, sizeof(*sutrs));
+        Odr_oct *sutrs = (Odr_oct *)nmem_malloc(nmem, sizeof(*sutrs));
 
         thisext->which = Z_External_sutrs;
         thisext->u.sutrs = sutrs;
-        sutrs->buf = (unsigned char *)odr_malloc(o, len);
+        sutrs->buf = (unsigned char *)nmem_malloc(nmem, len);
         sutrs->len = sutrs->size = len;
         memcpy(sutrs->buf, buf, len);
     }
@@ -322,15 +323,21 @@ Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid, const char *buf, int len
     {
         thisext->which = Z_External_octet;
         if (!(thisext->u.octet_aligned = (Odr_oct *)
-              odr_malloc(o, sizeof(Odr_oct))))
+              nmem_malloc(nmem, sizeof(Odr_oct))))
             return 0;
         if (!(thisext->u.octet_aligned->buf = (unsigned char *)
-              odr_malloc(o, len)))
+              nmem_malloc(nmem, len)))
             return 0;
         memcpy(thisext->u.octet_aligned->buf, buf, len);
         thisext->u.octet_aligned->len = thisext->u.octet_aligned->size = len;
     }
     return thisext;
+}
+
+Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid,
+                             const char *buf, int len)
+{
+    return z_ext_record_oid_nmem(o->mem, oid, buf, len);
 }
 
 Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid,

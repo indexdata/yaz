@@ -155,6 +155,9 @@ YAZ_EXPORT Z_ext_typeent *z_ext_getentbyref(const Odr_oid *oid);
 /** \brief encodes EXTERNAL record based on OID (NULL if not known) */
 YAZ_EXPORT Z_External *z_ext_record_oid(ODR o, const Odr_oid *oid,
                                         const char *buf, int len);
+/** \brief encodes EXTERNAL record based on OID (NULL if not known) */
+YAZ_EXPORT Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
+                                             const char *buf, int len);
 /** \brief encodes EXTERNAL record as ANY */
 YAZ_EXPORT Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid,
                                         const char *buf, int len);
