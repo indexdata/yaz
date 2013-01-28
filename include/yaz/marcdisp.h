@@ -444,10 +444,13 @@ YAZ_EXPORT void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r,
     \param src XML root node (presumably opacRecord node)
     \param dst Z39.50 OPAC result - allocated by NMEM on marc handle
     \param cd iconv handle for the OPAC content (not ISO2709 part)
-
+    \param nmem memory for OPACRecord (if NULL, mt NMEM memory is used)
+    \retval 1 conversion OK
+    \retval 0 conversion NOT OK
     \*/
-YAZ_EXPORT void yaz_xml_to_opac(yaz_marc_t mt, xmlNode *src,
-                                Z_OPACRecord **dst, yaz_iconv_t cd);
+YAZ_EXPORT int yaz_xml_to_opac(yaz_marc_t mt, xmlNode *src,
+                               Z_OPACRecord **dst, yaz_iconv_t cd,
+                               NMEM nmem);
 #endif
 
 /** \brief flushes records
