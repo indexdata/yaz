@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- OPAC XML. This is the output of yaz_display_OPAC -->
+<!--
+OPAC XML. This is the XML that YAZ is using to represent Z39.50 OPAC
+records.
+-->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="opacRecord">
     <xs:complexType>
       <xs:sequence>
 	<xs:element name="bibliographicRecord">
-	  
 	</xs:element>
 	<xs:element name="holdings">
 	  <xs:complexType>
@@ -17,7 +19,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="holding">
     <xs:complexType>
       <xs:sequence>
@@ -26,7 +28,6 @@
 	<xs:element name="format" minOccurs="0" type="xs:string"/>
 	<xs:element name="receiptAcqStatus" minOccurs="0" type="xs:string"/>
 	<xs:element name="generalRetention" minOccurs="0" type="xs:string"/>
-	
 	<xs:element name="completeness" minOccurs="0" type="xs:string"/>
 	<xs:element name="dateOfReport" minOccurs="0" type="xs:string"/>
 	<xs:element name="nucCode" minOccurs="0" type="xs:string"/>
