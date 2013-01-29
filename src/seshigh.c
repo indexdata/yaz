@@ -639,22 +639,56 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
             rr->request_format = backend_syntax;
     }
     (*assoc->init->bend_fetch)(assoc->backend, rr);
-    if (rc && rr->record && rr->errcode == 0 && rr->len > 0)
+    if (rc && rr->record && rr->errcode == 0)
     {   /* post conversion must take place .. */
         WRBUF output_record = wrbuf_alloc();
-        int r = yaz_record_conv_record(rc, rr->record, rr->len, output_record);
-        if (r)
+        int r = 1;
+        const char *details = 0;
+        if (rr->len > 0)
         {
-            const char *details = yaz_record_conv_get_error(rc);
-            rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
-            if (details)
-                rr->errstring = odr_strdup(rr->stream, details);
+            r = yaz_record_conv_record(rc, rr->record, rr->len, output_record);
+            if (r)
+                details = yaz_record_conv_get_error(rc);
         }
-        else
+        else if (rr->len == -1 && rr->output_format &&
+                 !oid_oidcmp(rr->output_format, yaz_oid_recsyn_opac))
+        {
+            r = yaz_record_conv_opac_record(
+                rc, (Z_OPACRecord *) rr->record, output_record);
+            if (r)
+                details = yaz_record_conv_get_error(rc);
+        }
+        if (r == 0 && match_syntax &&
+            !oid_oidcmp(match_syntax, yaz_oid_recsyn_opac))
+        {
+            yaz_marc_t mt = yaz_marc_create();
+            Z_OPACRecord *opac = 0;
+            if (yaz_xml_to_opac(mt, wrbuf_buf(output_record),
+                                wrbuf_len(output_record),
+                                &opac, 0 /* iconv */, rr->stream->mem)
+                && opac)
+            {
+                rr->len = -1;
+                rr->record = (char *) opac;
+            }
+            else
+            {
+                details = "XML to OPAC conversion failed";
+                r = 1;
+            }
+            yaz_marc_destroy(mt);
+        }
+        else if (r == 0)
         {
             rr->len = wrbuf_len(output_record);
             rr->record = (char *) odr_malloc(rr->stream, rr->len);
             memcpy(rr->record, wrbuf_buf(output_record), rr->len);
+        }
+        if (r)
+        {
+            rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            if (details)
+                rr->errstring = odr_strdup(rr->stream, details);
         }
         wrbuf_destroy(output_record);
     }

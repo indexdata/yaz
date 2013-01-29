@@ -28,6 +28,18 @@
            <xslt stylesheet="MARC21slim2DC.xsl"/>
 	 </backend>
        </retrieval>
+       <retrieval syntax="xml" name="OP1">
+         <backend syntax="opac" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8" outputcharset="utf-8"/>
+	 </backend>
+       </retrieval>
+       <retrieval syntax="opac" name="OP2">
+         <backend syntax="opac" name="F">
+	   <marc inputformat="marc" outputformat="marcxml"
+		 inputcharset="marc-8" outputcharset="utf-8"/>
+	 </backend>
+       </retrieval>
      </retrievalinfo>
      <explain xmlns="http://explain.z3950.org/dtd/2.0/">
         <serverInfo>
