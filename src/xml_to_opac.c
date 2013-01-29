@@ -63,6 +63,37 @@ static int match_element_next(xmlNode **ptr, const char *elem, NMEM nmem,
     return 0;
 }
 
+static int match_v_next(xmlNode **ptr, const char *elem, NMEM nmem,
+                        Odr_bool **val)
+{
+    while (*ptr && (*ptr)->type != XML_ELEMENT_NODE)
+        (*ptr) = (*ptr)->next;
+    *val = nmem_booldup(nmem, 0);
+    if (*ptr && match_element(*ptr, elem))
+    {
+        struct _xmlAttr *attr = (*ptr)->properties;
+
+        *ptr = (*ptr)->next;
+        for (; attr; attr = attr->next)
+        {
+            if (!strcmp((const char *) attr->name, "value"))
+            {
+                if (attr->children->type == XML_TEXT_NODE)
+                {
+                    if (attr->children->content[0] == '0')
+                        return 1;
+                    else if (attr->children->content[0] == '1')
+                    {
+                        **val = 1;
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 static int bibliographicRecord(yaz_marc_t mt, xmlNode *ptr, Z_External **ext,
                                yaz_iconv_t cd, NMEM nmem)
 {
@@ -100,6 +131,8 @@ static int volumes(xmlNode *ptr, Z_Volume ***volp, int *num, NMEM nmem)
     {
         while (ptr && ptr->type != XML_ELEMENT_NODE)
             ptr = ptr->next;
+        if (!ptr)
+            break;
         if (!match_element(ptr, "volume"))
             return 0;
         ptr = ptr->next;
@@ -111,6 +144,8 @@ static int volumes(xmlNode *ptr, Z_Volume ***volp, int *num, NMEM nmem)
     {
         while (ptr && ptr->type != XML_ELEMENT_NODE)
             ptr = ptr->next;
+        if (!ptr)
+            break;
         if (!match_element(ptr, "volume"))
             return 0;
         volume(ptr->children, (*volp) + i, nmem);
@@ -119,10 +154,57 @@ static int volumes(xmlNode *ptr, Z_Volume ***volp, int *num, NMEM nmem)
     return 1;
 }
 
-static void circulations(xmlNode *ptr, Z_CircRecord ***circp,
-                         int *num, NMEM nmem)
+static int circulation(xmlNode *ptr, Z_CircRecord **circp, NMEM nmem)
 {
+    *circp = (Z_CircRecord *) nmem_malloc(nmem, sizeof(Z_CircRecord));
 
+    match_v_next(&ptr, "availableNow", nmem, &(*circp)->availableNow);
+    /* note the spelling of the ASN.1 member below */
+    match_element_next(&ptr,     "availabilityDate", nmem,
+                       &(*circp)->availablityDate);
+    match_element_next(&ptr, "availableThru", nmem, &(*circp)->availableThru);
+    match_element_next(&ptr, "restrictions", nmem, &(*circp)->restrictions);
+    match_element_next(&ptr, "itemId", nmem, &(*circp)->itemId);
+    match_v_next(&ptr, "renewable", nmem, &(*circp)->renewable);
+    match_v_next(&ptr, "onHold", nmem, &(*circp)->onHold);
+    match_element_next(&ptr, "enumAndChron", nmem, &(*circp)->enumAndChron);
+    match_element_next(&ptr, "midspine", nmem, &(*circp)->midspine);
+    match_element_next(&ptr, "temporaryLocation", nmem,
+                       &(*circp)->temporaryLocation);
+    return 1;
+}
+
+static int circulations(xmlNode *ptr, Z_CircRecord ***circp,
+                        int *num, NMEM nmem)
+{
+    int i;
+    xmlNode *ptr0 = ptr;
+
+    for (i = 0; ptr; i++)
+    {
+        while (ptr && ptr->type != XML_ELEMENT_NODE)
+            ptr = ptr->next;
+        if (!ptr)
+            break;
+        if (!match_element(ptr, "circulation"))
+            return 0;
+        ptr = ptr->next;
+    }
+    *num = i;
+    *circp = (Z_CircRecord **) nmem_malloc(nmem, sizeof(**circp) * i);
+    ptr = ptr0;
+    for (i = 0; ptr; i++)
+    {
+        while (ptr && ptr->type != XML_ELEMENT_NODE)
+            ptr = ptr->next;
+        if (!ptr)
+            break;
+        if (!match_element(ptr, "circulation"))
+            return 0;
+        circulation(ptr->children, (*circp) + i, nmem);
+        ptr = ptr->next;
+    }
+    return 1;
 }
 
 static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
@@ -176,8 +258,9 @@ static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
     return 1;
 }
 
-int yaz_xml_to_opac(yaz_marc_t mt, xmlNode *ptr, Z_OPACRecord **dst,
-                    yaz_iconv_t cd, NMEM nmem)
+static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
+                               Z_OPACRecord **dst,
+                               yaz_iconv_t cd, NMEM nmem)
 {
     int i;
     Z_External *ext = 0;
@@ -200,6 +283,7 @@ int yaz_xml_to_opac(yaz_marc_t mt, xmlNode *ptr, Z_OPACRecord **dst,
     opac->holdingsData = 0;
     opac->bibliographicRecord = ext;
 
+    ptr = ptr->next;
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
     if (!match_element(ptr, "holdings"))
@@ -236,6 +320,21 @@ int yaz_xml_to_opac(yaz_marc_t mt, xmlNode *ptr, Z_OPACRecord **dst,
     }
     return 1;
 }
+
+int yaz_xml_to_opac(yaz_marc_t mt, const char *buf_in, size_t size_in,
+                    Z_OPACRecord **dst, yaz_iconv_t cd, NMEM nmem)
+{
+    xmlDocPtr doc = xmlParseMemory(buf_in, size_in);
+    int r = 0;
+    if (doc)
+    {
+        r = yaz_xml_to_opac_ptr(mt, xmlDocGetRootElement(doc), dst, cd, nmem);
+        xmlFreeDoc(doc);
+    }
+    return r;
+}
+
+
 #endif
 
 /*

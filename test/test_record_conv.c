@@ -363,7 +363,7 @@ static void tst_convert3(void)
         "  <leader>00077nam a22000498a 4500</leader>\n"
         "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
         "  <datafield tag=\"010\" ind1=\" \" ind2=\" \">\n"
-        "    <subfield code=\"a\">k" "\xc3" "\xb8" /* oslash in UTF_8 */ 
+        "    <subfield code=\"a\">k" "\xc3" "\xb8" /* oslash in UTF_8 */
         "benhavn</subfield>\n"
         "  </datafield>\n"
         "</record>\n"
@@ -379,9 +379,22 @@ static void tst_convert3(void)
         "  <callNumber>MLCM 89/00602 (N)</callNumber>\n"
         "  <shelvingData>FT MEADE</shelvingData>\n"
         "  <copyNumber>Copy 1</copyNumber>\n"
+        "  <volumes>\n"
+        "   <volume>\n"
+        "    <enumeration>1</enumeration>\n"
+        "    <chronology>2</chronology>\n"
+        "    <enumAndChron>3</enumAndChron>\n"
+        "   </volume>\n"
+        "   <volume>\n"
+        "    <enumeration>1</enumeration>\n"
+        "    <chronology>2</chronology>\n"
+        "    <enumAndChron>3</enumAndChron>\n"
+        "   </volume>\n"
+        "  </volumes>\n"
         "  <circulations>\n"
         "   <circulation>\n"
         "    <availableNow value=\"1\"/>\n"
+        "    <availabilityDate>20130129</availabilityDate>\n"
         "    <itemId>1226176</itemId>\n"
         "    <renewable value=\"0\"/>\n"
         "    <onHold value=\"0\"/>\n"
@@ -425,15 +438,27 @@ static void tst_convert3(void)
     h->reproductionNote = 0;
     h->termsUseRepro = 0;
     h->enumAndChron = 0;
-    h->num_volumes = 0;
+    h->num_volumes = 2;
     h->volumes = 0;
+
+    h->volumes = (Z_Volume **)
+        nmem_malloc(nmem, 2 * sizeof(Z_Volume *));
+
+    h->volumes[0] = (Z_Volume *)
+        nmem_malloc(nmem, sizeof(Z_Volume));
+    h->volumes[1] = h->volumes[0];
+
+    h->volumes[0]->enumeration = nmem_strdup(nmem, "1");
+    h->volumes[0]->chronology = nmem_strdup(nmem, "2");
+    h->volumes[0]->enumAndChron = nmem_strdup(nmem, "3");
+
     h->num_circulationData = 1;
     h->circulationData = (Z_CircRecord **)
         nmem_malloc(nmem, 1 * sizeof(Z_CircRecord *));
     circ = h->circulationData[0] = (Z_CircRecord *)
         nmem_malloc(nmem, sizeof(Z_CircRecord));
     circ->availableNow = nmem_booldup(nmem, 1);
-    circ->availablityDate = 0;
+    circ->availablityDate = nmem_strdup(nmem, "20130129");
     circ->availableThru = 0;
     circ->restrictions = 0;
     circ->itemId = nmem_strdup(nmem, "1226176");
@@ -474,6 +499,44 @@ static void tst_convert3(void)
         }
         yaz_record_conv_destroy(p);
         wrbuf_destroy(output_record);
+    }
+    {
+        Z_OPACRecord *opac = 0;
+        yaz_marc_t mt =  yaz_marc_create();
+        ret = yaz_xml_to_opac(mt, opacxml_rec, strlen(opacxml_rec),
+                              &opac, 0 /* iconv */, nmem);
+        YAZ_CHECK(ret);
+        YAZ_CHECK(opac);
+
+        if (opac)
+        {
+            WRBUF output_record = wrbuf_alloc();
+            char *p;
+
+            yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+            yaz_opac_decode_wrbuf(mt, opac, output_record);
+
+            /* change MARC size to 00077 from 00078, due to
+               encoding of the aring (two bytes in UTF-8) */
+            p = strstr(wrbuf_buf(output_record), "00078");
+            YAZ_CHECK(p);
+            if (p)
+                p[4] = '7';
+
+            ret = strcmp(wrbuf_cstr(output_record), opacxml_rec);
+            YAZ_CHECK(ret == 0);
+            if (ret)
+            {
+                printf("got-output_record len=%ld: %s\n",
+                       (long) wrbuf_len(output_record),
+                       wrbuf_cstr(output_record));
+                printf("output_expect_record len=%ld %s\n",
+                       (long) strlen(opacxml_rec),
+                       opacxml_rec);
+            }
+            wrbuf_destroy(output_record);
+        }
+        yaz_marc_destroy(mt);
     }
     nmem_destroy(nmem);
 }
