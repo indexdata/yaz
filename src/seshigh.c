@@ -665,7 +665,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
             Z_OPACRecord *opac = 0;
             if (yaz_xml_to_opac(mt, wrbuf_buf(output_record),
                                 wrbuf_len(output_record),
-                                &opac, 0 /* iconv */, rr->stream->mem)
+                                &opac, 0 /* iconv */, rr->stream->mem, 0)
                 && opac)
             {
                 rr->len = -1;

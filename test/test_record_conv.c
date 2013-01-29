@@ -504,7 +504,7 @@ static void tst_convert3(void)
         Z_OPACRecord *opac = 0;
         yaz_marc_t mt =  yaz_marc_create();
         ret = yaz_xml_to_opac(mt, opacxml_rec, strlen(opacxml_rec),
-                              &opac, 0 /* iconv */, nmem);
+                              &opac, 0 /* iconv */, nmem, 0);
         YAZ_CHECK(ret);
         YAZ_CHECK(opac);
 

@@ -95,7 +95,7 @@ static int match_v_next(xmlNode **ptr, const char *elem, NMEM nmem,
 }
 
 static int bibliographicRecord(yaz_marc_t mt, xmlNode *ptr, Z_External **ext,
-                               yaz_iconv_t cd, NMEM nmem)
+                               yaz_iconv_t cd, NMEM nmem, const Odr_oid *syntax)
 {
     int ret = 0;
     if (yaz_marc_read_xml(mt, ptr) == 0)
@@ -103,8 +103,9 @@ static int bibliographicRecord(yaz_marc_t mt, xmlNode *ptr, Z_External **ext,
         WRBUF wr = wrbuf_alloc();
         if (yaz_marc_write_iso2709(mt, wr) == 0)
         {
-            *ext = z_ext_record_oid_nmem(nmem, yaz_oid_recsyn_usmarc,
-                                         wrbuf_buf(wr), wrbuf_len(wr));
+            *ext = z_ext_record_oid_nmem(
+                nmem, syntax ? syntax : yaz_oid_recsyn_usmarc,
+                wrbuf_buf(wr), wrbuf_len(wr));
             ret = 1;
         }
         wrbuf_destroy(wr);
@@ -260,7 +261,8 @@ static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
 
 static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
                                Z_OPACRecord **dst,
-                               yaz_iconv_t cd, NMEM nmem)
+                               yaz_iconv_t cd, NMEM nmem,
+                               const Odr_oid *syntax)
 {
     int i;
     Z_External *ext = 0;
@@ -276,7 +278,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
         ptr = ptr->next;
     if (!match_element(ptr, "bibliographicRecord"))
         return 0;
-    if (!bibliographicRecord(mt, ptr->children, &ext, cd, nmem))
+    if (!bibliographicRecord(mt, ptr->children, &ext, cd, nmem, syntax))
         return 0;
     *dst = opac = (Z_OPACRecord *) nmem_malloc(nmem, sizeof(*opac));
     opac->num_holdingsData = 0;
@@ -322,13 +324,15 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
 }
 
 int yaz_xml_to_opac(yaz_marc_t mt, const char *buf_in, size_t size_in,
-                    Z_OPACRecord **dst, yaz_iconv_t cd, NMEM nmem)
+                    Z_OPACRecord **dst, yaz_iconv_t cd, NMEM nmem,
+                    const Odr_oid *syntax)
 {
     xmlDocPtr doc = xmlParseMemory(buf_in, size_in);
     int r = 0;
     if (doc)
     {
-        r = yaz_xml_to_opac_ptr(mt, xmlDocGetRootElement(doc), dst, cd, nmem);
+        r = yaz_xml_to_opac_ptr(mt, xmlDocGetRootElement(doc), dst, cd, nmem,
+                                syntax);
         xmlFreeDoc(doc);
     }
     return r;
