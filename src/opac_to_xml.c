@@ -156,7 +156,7 @@ void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
                     wrbuf_puts(wrbuf,"   <circulation>\n");
                     opac_element_bool(wrbuf, 4, "availableNow",
                                       d->circulationData[j]->availableNow);
-                    opac_element_str(wrbuf, cd1, cd2, 4, "availabiltyDate",
+                    opac_element_str(wrbuf, cd1, cd2, 4,  "availabilityDate",
                                      d->circulationData[j]->availablityDate);
                     opac_element_str(wrbuf, cd1, cd2, 4, "availableThru",
                                       d->circulationData[j]->availableThru);
