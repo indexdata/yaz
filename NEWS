@@ -1,3 +1,17 @@
+New function, yaz_xml_to_opac, to convert from OPACXML to Z39.50 OPAC.
+
+OPACXML: sync spelling of availabilityDate in XML to that of Schema
+opaxxml.xsd. The schema had the correct spelling of this member always.
+The ASN.1 was mis-spelled and still is (API change) - we are
+not changing this. However, the OPAC to XML conversion had yet
+*another* typo.
+
+GFS: Allow conversion between Z39.50 OPAC and OPACXML via retrieval
+element.
+
+New function, z_ext_record_oid_nmem, which is similar to
+z_ext_record_oid but takes NMEM rather than ODR
+
 --- 4.2.49 2013/01/18
 
 ICU: New conversion element 'join' which joins tokens into one
