@@ -630,7 +630,10 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
     int ret = 0;
     struct yaz_record_conv_rule *r = p->rules;
     if (!r || r->type->construct != construct_marc)
+    {
+        wrbuf_puts(p->wr_error, "Expecting MARC rule as first rule for OPAC");
         ret = -1; /* no marc rule so we can't do OPAC */
+    }
     else
     {
         struct marc_info *mi = r->info;
