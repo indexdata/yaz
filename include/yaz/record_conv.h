@@ -156,11 +156,6 @@ const char *yaz_record_conv_get_error(yaz_record_conv_t p);
 YAZ_EXPORT
 void yaz_record_conv_set_path(yaz_record_conv_t p, const char *path);
 
-/** adds a type to our conversion handler
-    \param p record conversion handle
-    \param type info
-*/
-
 YAZ_END_CDECL
 
 #endif
