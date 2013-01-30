@@ -1,3 +1,5 @@
+--- 4.2.50 2013/01/30
+
 New function, yaz_xml_to_opac, to convert from OPACXML to Z39.50 OPAC.
 
 OPACXML: sync spelling of availabilityDate in XML to that of Schema
