@@ -507,8 +507,11 @@ static void tst_utf8_to_marc8(const char *marc8_type)
     /** UPPERCASE SCANDINAVIAN O */
     YAZ_CHECK(tst_convert(cd, "S\xc3\x98", "S\xa2"));
 
-    /** ARING */
+    /** ARING (NFD) */
     YAZ_CHECK(tst_convert(cd, "A" "\xCC\x8A", "\xEA" "A"));
+
+    /** ARING (NFC) */
+    YAZ_CHECK(tst_convert(cd, "\xC3\x85", "\xEA" "A"));
 
     /** A MACRON + UMLAUT, DIAERESIS */
     YAZ_CHECK(tst_convert(cd, "A" "\xCC\x84" "\xCC\x88",
