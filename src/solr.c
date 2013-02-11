@@ -264,7 +264,6 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
                                        Z_SRW_scanResponse *scr)
 {
     xmlNodePtr node;
-    xmlAttr *attr;
     char *pos;
     int i = 0;
 
