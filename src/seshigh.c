@@ -1329,6 +1329,7 @@ static void srw_bend_scan(association *assoc,
         bsrr->step_size = &step_size;
         bsrr->entries = 0;
         bsrr->setname = 0;
+        bsrr->extra_args = sr->extra_args;
         bsrr->extra_response_data = 0;
 
         if (bsrr->num_entries > 0)
@@ -3051,6 +3052,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->setname = yaz_oi_get_string_oid(&req->otherInfo,
                                           yaz_oid_userinfo_scan_set, 1, 0);
     bsrr->entries = 0;
+    bsrr->extra_args = 0;
     bsrr->extra_response_data = 0;
     /* For YAZ 2.0 and earlier it was the backend handler that
        initialized entries (member display_term did not exist)
