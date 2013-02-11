@@ -267,14 +267,14 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
     xmlAttr *attr;
     char *pos;
     int i = 0;
-    
+
     /* find the actual list */
     for (node = ptr->children; node; node = node->next)
         if (node->type == XML_ELEMENT_NODE) {
             ptr = node;
             break;
         }
-    
+
     scr->num_terms = 0;
     for (node = ptr->children; node; node = node->next)
         if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
@@ -282,18 +282,18 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 
     if (scr->num_terms)
         scr->terms = odr_malloc(o, sizeof(*scr->terms) * scr->num_terms);
-    
+
     for (node = ptr->children; node; node = node->next)
     {
         if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
         {
             Z_SRW_scanTerm *term = scr->terms + i;
-            
+
             Odr_int count = 0;
             const char *val = get_facet_term_count(node, &count);
 
             term->numberOfRecords = odr_intdup(o, count);
-            
+
             /* if val contains a ^ then it is probably term<^>display term so separate them. This is due to
              * SOLR not being able to encode them into 2 separate attributes.
              */
@@ -308,11 +308,11 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
             	term->displayTerm = NULL;
             }
             term->whereInList = NULL;
-            
+
             i++;
         }
     }
-    
+
     if (scr->num_terms)
         return 0;
     return -1;
@@ -330,7 +330,7 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
     Z_SRW_PDU *pdu;
     Z_SRW_searchRetrieveResponse *sr = NULL;
     Z_SRW_scanResponse *scr = NULL;
-    
+
     if (!doc)
     {
         ret = -1;
