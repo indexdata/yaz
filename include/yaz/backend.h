@@ -151,6 +151,7 @@ typedef struct bend_scan_rr {
     char *errstring;
     char *scanClause;   /**< CQL scan clause */
     char *setname;      /**< Scan in result set (NULL if omitted) */
+    char *extra_response_data;   /**< SRW extra XML response (output) */
 } bend_scan_rr;
 
 /** \brief Information for SRU record update handler */

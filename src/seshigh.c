@@ -1297,10 +1297,11 @@ static void srw_bend_explain(association *assoc,
 
 static void srw_bend_scan(association *assoc,
                           Z_SRW_PDU *sr,
-                          Z_SRW_scanResponse *srw_res,
+                          Z_SRW_PDU *res,
                           int *http_code)
 {
     Z_SRW_scanRequest *srw_req = sr->u.scan_request;
+    Z_SRW_scanResponse *srw_res = res->u.scan_response;
     yaz_log(log_requestdetail, "Got SRW ScanRequest");
 
     *http_code = 200;
@@ -1328,6 +1329,7 @@ static void srw_bend_scan(association *assoc,
         bsrr->step_size = &step_size;
         bsrr->entries = 0;
         bsrr->setname = 0;
+        bsrr->extra_response_data = 0;
 
         if (bsrr->num_entries > 0)
         {
@@ -1396,6 +1398,11 @@ static void srw_bend_scan(association *assoc,
             yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                    &srw_res->num_diagnostics,
                                    YAZ_SRW_UNSUPP_OPERATION, "scan");
+        }
+        if (bsrr->extra_response_data)
+        {
+            res->extraResponseData_buf = bsrr->extra_response_data;
+            res->extraResponseData_len = strlen(bsrr->extra_response_data);
         }
         if (bsrr->errcode)
         {
@@ -1881,7 +1888,7 @@ static void process_http_request(association *assoc, request *req)
                 res->u.scan_response->diagnostics = diagnostic;
                 res->u.scan_response->num_diagnostics = num_diagnostic;
             }
-            srw_bend_scan(assoc, sr, res->u.scan_response, &http_code);
+            srw_bend_scan(assoc, sr, res, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -3044,6 +3051,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->setname = yaz_oi_get_string_oid(&req->otherInfo,
                                           yaz_oid_userinfo_scan_set, 1, 0);
     bsrr->entries = 0;
+    bsrr->extra_response_data = 0;
     /* For YAZ 2.0 and earlier it was the backend handler that
        initialized entries (member display_term did not exist)
        YAZ 2.0 and later sets 'entries'  and initialize all members
