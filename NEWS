@@ -1,3 +1,10 @@
+--- 4.2.51 2013/02/12
+
+GFS: scan handler gets extra_args from request and may return extra
+response data . That's for SRU only.
+
+Solr scan support for ZOOM and yaz-client. Patch from Simon Jacob.
+
 --- 4.2.50 2013/01/30
 
 New function, yaz_xml_to_opac, to convert from OPACXML to Z39.50 OPAC.
