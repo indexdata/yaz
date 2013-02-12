@@ -292,6 +292,34 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
     return 0;
 }
 
+static void echo_extra_args(ODR stream,
+                            Z_SRW_extra_arg *extra_args, char **extra_response)
+{
+    if (extra_args)
+    {
+        Z_SRW_extra_arg *a;
+        WRBUF response_xml = wrbuf_alloc();
+        wrbuf_puts(response_xml, "<extra>");
+        for (a = extra_args; a; a = a->next)
+        {
+            wrbuf_puts(response_xml, "<extra name=\"");
+            wrbuf_xmlputs(response_xml, a->name);
+            wrbuf_puts(response_xml, "\"");
+            if (a->value)
+            {
+                wrbuf_puts(response_xml, " value=\"");
+                wrbuf_xmlputs(response_xml, a->value);
+                wrbuf_puts(response_xml, "\"");
+            }
+            wrbuf_puts(response_xml, "/>");
+        }
+        wrbuf_puts(response_xml, "</extra>");
+        *extra_response = odr_strdup(stream, wrbuf_cstr(response_xml));
+        wrbuf_destroy(response_xml);
+    }
+
+}
+
 int ztest_search(void *handle, bend_search_rr *rr)
 {
     struct session_handle *sh = (struct session_handle*) handle;
@@ -372,29 +400,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
         }
     }
 
-    if (rr->extra_args)
-    {
-        Z_SRW_extra_arg *a;
-        WRBUF response_xml = wrbuf_alloc();
-        wrbuf_puts(response_xml, "<extra>");
-        for (a = rr->extra_args; a; a = a->next)
-        {
-            wrbuf_puts(response_xml, "<extra name=\"");
-            wrbuf_xmlputs(response_xml, a->name);
-            wrbuf_puts(response_xml, "\"");
-            if (a->value)
-            {
-                wrbuf_puts(response_xml, " value=\"");
-                wrbuf_xmlputs(response_xml, a->value);
-                wrbuf_puts(response_xml, "\"");
-            }
-            wrbuf_puts(response_xml, "/>");
-        }
-        wrbuf_puts(response_xml, "</extra>");
-        rr->extra_response_data =
-            odr_strdup(rr->stream, wrbuf_cstr(response_xml));
-        wrbuf_destroy(response_xml);
-    }
+    echo_extra_args(rr->stream, rr->extra_args, &rr->extra_response_data);
     rr->hits = get_hit_count(rr->query);
 
     if (1)
@@ -1051,6 +1057,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
         if (q->num_entries >= num_entries_req)
             break;
     }
+    echo_extra_args(q->stream, q->extra_args, &q->extra_response_data);
     if (feof(f))
         q->status = BEND_SCAN_PARTIAL;
     return 0;
