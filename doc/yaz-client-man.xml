@@ -987,29 +987,29 @@
    </screen>
   </para>
  </refsect1>
-  <refsect1><title>FILES</title>
-   <para>
-    <filename>yaz-&lt;version&gt;/client/client.c</filename>
-   </para>
-   <para>
-    <filename>$HOME/.yazclientrc</filename>
-   </para>
-   <para>
-    <filename>$HOME/.yazclient.history</filename>
-   </para>
-  </refsect1>
-  <refsect1><title>SEE ALSO</title>
-   <para>
-    <citerefentry>
-     <refentrytitle>yaz</refentrytitle>
-     <manvolnum>7</manvolnum>
-    </citerefentry>
-    <citerefentry>
-     <refentrytitle>bib1-attr</refentrytitle>
-     <manvolnum>7</manvolnum>
-    </citerefentry>
-   </para>
-  </refsect1>
+ <refsect1><title>FILES</title>
+  <para>
+   <filename>yaz-&lt;version&gt;/client/client.c</filename>
+  </para>
+  <para>
+   <filename>$HOME/.yazclientrc</filename>
+  </para>
+  <para>
+   <filename>$HOME/.yazclient.history</filename>
+  </para>
+ </refsect1>
+ <refsect1><title>SEE ALSO</title>
+  <para>
+   <citerefentry>
+    <refentrytitle>yaz</refentrytitle>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
+   <citerefentry>
+    <refentrytitle>bib1-attr</refentrytitle>
+    <manvolnum>7</manvolnum>
+   </citerefentry>
+  </para>
+ </refsect1>
 </refentry>
 
 <!-- Keep this comment at the end of the file
