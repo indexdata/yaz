@@ -57,7 +57,7 @@
   </para>
   <para>
    From YAZ version 4.1.0 <command>yaz-client</command> may also operate as a
-   <ulink url="&url.solr;">SOLR</ulink> Web Service
+   <ulink url="&url.solr;">Solr</ulink> Web Service
    client.
   </para>
   <para>
@@ -394,12 +394,12 @@
     </term>
     <listitem>
      <para>Selects Web Service method and version.
-      Must be one of <literal>POST</literal>,
-      <literal>GET</literal>, <literal>SOAP</literal> (default)
-      or <literal>SOLR</literal>. Version
+      Must be one of <literal>post</literal>,
+      <literal>get</literal>, <literal>soap</literal> (default)
+      or <literal>solr</literal>. Version
       should be either 1.1 or 1.2 for SRU. Other versions are allowed - for testing
       purposes (version negotiation with SRU server).
-      The version is currently not used for SOLR Web Services
+      The version is currently not used for Solr Web Services
      </para>
     </listitem>
    </varlistentry>

@@ -408,7 +408,7 @@ yaz_sort_spec_to_srw_sortkeys, yaz_sort_spec_to_type and 7yaz_sort_spec_to_cql.
 rpn2solr supports Z39.58 truncation (104). Thus, CCL truncation mode t=z
 will make it possible to use both single-character mask (#) and wildcard (?)
 in CCL . Throw diagnostic for left truncation because that is not supported
-by SOLR.
+by Solr.
 
 --- 4.2.13 2011/09/01
 
@@ -504,7 +504,7 @@ modified with a new root element <yaz_record> if the recordData contains
 multiple children elements. This is to make the record XML parseable
 afterwards.
 
-RPN to SOLR conversion: encode special characters.
+RPN to Solr conversion: encode special characters.
 
 Generic Frontend Server: fix uinitialized member, stepSize.
 
@@ -606,7 +606,7 @@ so it is appropriate to set Present Status to partial-4.
 
 Move yaz-config man pages to section 1.
 
-More documentation about SOLR.
+More documentation about Solr.
 
 tcp comstack: change behavior for @-specs (anyaddr). @ listens on
 AF_INET (IPV4) peers, and @6 listens to AF_INET6 (ipv6) peers.
@@ -625,7 +625,7 @@ Fix yaz-config output: echo_source not set correctly by configure.
 
 --- 4.1.0 2010/10/05
 
-SOLR WebService support for yaz-client and ZOOM.
+Solr Web Service support for yaz-client and ZOOM.
 
 Define record syntax JSON. OID: 1.2.840.10003.5.1000.81.3 .
 

@@ -4448,7 +4448,7 @@ static void http_response(Z_HTTP_Response *hres)
                 handle_srw_scan_response(sr->u.scan_response);
             else
             {
-                printf("Decoding of SOLR package failed\n");
+                printf("Decoding of Solr package failed\n");
                 ret = -1;
             }
             odr_destroy(o);

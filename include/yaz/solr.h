@@ -26,7 +26,7 @@
  */
 
 /** \file solr.h
-    \brief Header with public definitions about SOLR.
+    \brief Header with public definitions about Solr.
 */
 
 #ifndef SOLR_H_INCLUDED
