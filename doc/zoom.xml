@@ -422,6 +422,9 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      int ZOOM_query_cql(ZOOM_query s, const char *str);
 
      int ZOOM_query_sortby(ZOOM_query q, const char *criteria);
+
+     int ZOOM_query_sortby2(ZOOM_query q, const char *strategy,
+                            const char *criteria);
    </synopsis>
    <para>
     Create query objects using <function>ZOOM_query_create</function>
@@ -438,13 +441,51 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     sort criteria using the same string notation for sort as offered by
     the <link linkend="sortspec">YAZ client</link>.
    </para>
-   <sect2 id="zoom.sort.behavior"><title>Protocol behavior</title>
-    <para>
-     The query object is just an interface for the member Query
-     in the SearchRequest. The sortby-function is an interface to the
-     sortSequence member of the SortRequest.
-    </para>
-   </sect2>
+   <para>
+    <function>ZOOM_query_sortby2</function> is similar to
+    <function>ZOOM_query_sortby</function> but allows a strategy for
+    sorting. The reason for the strategy parameter is that some
+    protocols offers multiple ways of performing sorting.
+    For example, Z39.50 has the standard sort, which is performed after
+    search on an existing result set.
+    It's also possible to use CQL in Z39.50 as the query type and use
+    CQL's SORTBY keyword. Finally, Index Data's
+    Zebra server also allows sorting to be specified as part of RPN (Type 7).
+   </para>
+   <table id="zoom-sort-strategy" frame="top">
+    <title>ZOOM sort strategy</title>
+    <tgroup cols="2">
+     <colspec colwidth="2*" colname="name"/>
+     <colspec colwidth="5*" colname="description"/>
+     <thead>
+      <row>
+       <entry>Name</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>z39.50</entry><entry>Z39.50 resultset sort</entry>
+      </row>
+      <row>
+       <entry>type7</entry><entry>Sorting embedded in RPN(Type-7)</entry>
+      </row>
+      <row>
+       <entry>cql</entry><entry>CQL SORTBY</entry>
+      </row>
+      <row>
+       <entry>sru11</entry><entry>SRU sortKeys element</entry>
+      </row>
+      <row>
+       <entry>solr</entry><entry>Solr sort</entry>
+      </row>
+      <row>
+       <entry>embed</entry><entry>type7 for Z39.50, cql for SRU,
+	solr for Solr protocol</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </sect1>
   <sect1 id="zoom.resultsets"><title>Result sets</title>
    <para>
