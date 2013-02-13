@@ -16,7 +16,6 @@ ZOOM_options_setl(opt, name, value, len)
 ZOOM_options_get_bool(opt, name, defa)
 ZOOM_options_get_int(opt, name, defa)
 ZOOM_options_set_int(opt, name, value)
-ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 -->
  <chapter id="zoom"><title>ZOOM</title>
   <para>
@@ -1585,6 +1584,38 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
                                        ZOOM_options_callback c,
                                        void *handle);
    </synopsis>
+  </sect1>
+
+  <sect1 id="zoom.queryconversions"><title>Query conversions</title>
+   <synopsis>
+    int ZOOM_query_cql2rpn(ZOOM_query s, const char *cql_str,
+                           ZOOM_connection conn);
+
+    int ZOOM_query_ccl2rpn(ZOOM_query s, const char *ccl_str,
+                           const char *config,
+                           int *ccl_error, const char **error_string,
+                           int *error_pos);
+   </synopsis>
+   <para>
+    <function>ZOOM_query_cql2rpn</function> translates the CQL string,
+    client-side, into RPN which may be passed to the server.
+    This is useful for server's that don't themselves
+    support CQL, for which <function>ZOOM_query_cql</function> is useless.
+    `conn' is used  only as a place to stash diagnostics if compilation
+    fails; if this information is not needed, a null pointer may be used.
+    The CQL conversion is driven by option <literal>cqlfile</literal> from
+    connection conn. This specifies a conversion file (eg pqf.properties)
+    which <emphasis>must</emphasis> be present.
+   </para>
+   <para>
+    <function>ZOOM_query_ccl2rpn</function> translates the CCL string,
+    client-side, into RPN which may be passed to the server.
+    The conversion is driven by the specification given by
+    <literal>config</literal>. Upon completion 0 is returned on success; -1
+    is returned on on failure. Om failure <literal>error_string</literal> and
+    <literal>error_pos</literal> holds error message and position of
+    first error in original CCL string.
+   </para>
   </sect1>
   <sect1 id="zoom.events"><title>Events</title>
    <para>
