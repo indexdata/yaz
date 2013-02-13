@@ -9,8 +9,6 @@ ZOOM_connection_save_apdu_wrbuf
 ZOOM_diag_str(error)
 ZOOM_resultset_record_immediate(s, pos)
 ZOOM_resultset_cache_reset(r)
-ZOOM_resultset_sort(r, sort_type, sort_spec)
-ZOOM_resultset_sort1(r, sort_type, sort_spec)
 ZOOM_options_set_callback(opt, function, handle)
 ZOOM_options_create_with_parent2(parent1, parent2)
 ZOOM_options_getl(opt, name, len)
@@ -437,11 +435,11 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
     More query types will be added in future versions of &yaz;, such as
     <link linkend="CCL">CCL</link> to RPN-mapping, native CCL query,
     etc. In addition to a search, a sort criteria may be set. Function
-    <function>ZOOM_query_sortby</function> specifies a
-    sort criteria using the same string notation for sort as offered by
-    the <link linkend="sortspec">YAZ client</link>.
+    <function>ZOOM_query_sortby</function> enables Z39.50 sorting and
+    it takes sort criteria using the same string notation as
+    yaz-client's <link linkend="sortspec">sort command</link>.
    </para>
-   <para>
+   <para id="zoom.query.sortby2">
     <function>ZOOM_query_sortby2</function> is similar to
     <function>ZOOM_query_sortby</function> but allows a strategy for
     sorting. The reason for the strategy parameter is that some
@@ -474,7 +472,7 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
        <entry>cql</entry><entry>CQL SORTBY</entry>
       </row>
       <row>
-       <entry>sru11</entry><entry>SRU sortKeys element</entry>
+       <entry>sru11</entry><entry>SRU sortKeys parameter</entry>
       </row>
       <row>
        <entry>solr</entry><entry>Solr sort</entry>
@@ -652,6 +650,31 @@ ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
      </tbody>
     </tgroup>
    </table>
+
+   <sect2 id="zoom.z3950.resultset.sort">
+    <title>Z39.50 Result-set Sort</title>
+    <synopsis>
+     void ZOOM_resultset_sort(ZOOM_resultset r,
+                              const char *sort_type, const char *sort_spec);
+
+     int ZOOM_resultset_sort1(ZOOM_resultset r,
+                              const char *sort_type, const char *sort_spec);
+    </synopsis>
+    <para>
+     <function>ZOOM_resultset_sort</function> and
+     <function>ZOOM_resultset_sort1</function> both sort an existing
+     result-set. The sort_type parameter is not use. Set it to "yaz".
+     The sort_spec is same notation as ZOOM_query_sortby and identical
+     to that offered by yaz-client's
+     <link linkend="sortspec">sort command</link>.
+    </para>
+    <para>
+     These functions only work for Z39.50. Use the more generic utility
+     <link linkend="zoom.query.sortby2">
+      <function>ZOOM_query_sortby2</function></link>
+     for other protocols (and even Z39.50).
+    </para>
+   </sect2>
    <sect2 id="zoom.z3950.resultset.behavior">
     <title>Z39.50 Protocol behavior</title>
     <para>
