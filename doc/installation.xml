@@ -20,7 +20,7 @@
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
-    <ulink url="&url.solaris;">SunOS 5.10 (sparc)</ulink>,
+    <ulink url="&url.solaris;">Solaris</ulink>,
     Windows 7, Windows Xp.
    </para>
 
@@ -101,12 +101,6 @@
      <para>
       NetBSD:
       <ulink url="http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/net/yaz/README.html"/>
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      OpenBSD:
-      <ulink url="http://www.openbsd.org/4.4_packages/powerpc/yaz-3.0.24.tgz-long.html"/>
      </para>
     </listitem>
    </itemizedlist>

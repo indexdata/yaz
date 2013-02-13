@@ -25,7 +25,8 @@
      </para></listitem>
     <listitem><para>
       Supports
-      <ulink url="&url.solr;">Solr</ulink> Web Service version 1.4.x (client side only)
+      <ulink url="&url.solr;">Solr</ulink> Web Service version 1.4.x
+      (client side only)
      </para></listitem>
     <listitem><para>
       Supports the following transports: BER over TCP/IP

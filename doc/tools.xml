@@ -52,17 +52,16 @@
     <synopsis>
      #include &lt;yaz/pquery.h&gt;
 
-     YAZ_PQF_Parser yaz_pqf_create (void);
+     YAZ_PQF_Parser yaz_pqf_create(void);
 
-     void yaz_pqf_destroy (YAZ_PQF_Parser p);
+     void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
-     Z_RPNQuery *yaz_pqf_parse (YAZ_PQF_Parser p, ODR o, const char *qbuf);
+     Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o, const char *qbuf);
 
-     Z_AttributesPlusTerm *yaz_pqf_scan (YAZ_PQF_Parser p, ODR o,
+     Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
                           Odr_oid **attributeSetId, const char *qbuf);
 
-
-     int yaz_pqf_error (YAZ_PQF_Parser p, const char **msg, size_t *off);
+     int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
     </synopsis>
     <para>
      A PQF parser is created and destructed by functions
@@ -91,12 +90,12 @@
     <synopsis>
      #include &lt;yaz/pquery.h&gt;
 
-     Z_RPNQuery *p_query_rpn (ODR o, oid_proto proto, const char *qbuf);
+     Z_RPNQuery *p_query_rpn(ODR o, oid_proto proto, const char *qbuf);
 
-     Z_AttributesPlusTerm *p_query_scan (ODR o, oid_proto proto,
+     Z_AttributesPlusTerm *p_query_scan(ODR o, oid_proto proto,
                              Odr_oid **attributeSetP, const char *qbuf);
 
-     int p_query_attset (const char *arg);
+     int p_query_attset(const char *arg);
     </synopsis>
     <para>
      The function <function>p_query_rpn()</function> takes as arguments an
@@ -934,8 +933,8 @@
       To parse a simple string with a FIND query use the function
      </para>
      <screen>
-struct ccl_rpn_node *ccl_find_str (CCL_bibset bibset, const char *str,
-                                   int *error, int *pos);
+struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
+                                  int *error, int *pos);
      </screen>
      <para>
       which takes the CCL profile (<literal>bibset</literal>) and query
