@@ -285,6 +285,7 @@ ZOOM_Event ZOOM_connection_get_event(ZOOM_connection c);
 void ZOOM_connection_remove_events(ZOOM_connection c);
 void ZOOM_Event_destroy(ZOOM_Event event);
 zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu);
+void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl);
 
 /*
  * Local variables:

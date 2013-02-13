@@ -18,8 +18,6 @@
 #include <yaz/log.h>
 #include <yaz/pquery.h>
 
-void handle_facet_list(ZOOM_resultset r, Z_FacetList *fl);
-
 #if YAZ_HAVE_XML2
 static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
 {
@@ -267,7 +265,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             c->tasks->u.search.recv_search_fired = 1;
         }
         if (res->facetList)
-            handle_facet_list(resultset, res->facetList);
+            ZOOM_handle_facet_list(resultset, res->facetList);
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;

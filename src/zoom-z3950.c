@@ -1117,7 +1117,8 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
 }
 
 /* Can be share with SOLR/SRU/SRW requests */
-void handle_facet_list(ZOOM_resultset r, Z_FacetList *fl) {
+void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
+{
     int j;
     r->num_facets   = fl->num;
     yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
@@ -1143,7 +1144,7 @@ static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
             Z_External *ext = o->list[i]->information.externallyDefinedInfo;
             if (ext->which == Z_External_userFacets)
             {
-                handle_facet_list(r, ext->u.facetList);
+                ZOOM_handle_facet_list(r, ext->u.facetList);
             }
         }
     }
