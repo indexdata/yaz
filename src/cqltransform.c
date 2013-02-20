@@ -586,7 +586,6 @@ static int has_modifier(struct cql_node *cn, const char *name) {
     return 0;
 }
 
-
 static void emit_term(cql_transform_t ct,
                       struct cql_node *cn,
                       const char *term, int length,
@@ -600,6 +599,8 @@ static void emit_term(cql_transform_t ct,
 
     if (has_modifier(cn, "regexp"))
         process_term = 0;
+    else if (has_modifier(cn, "unmasked"))
+        process_term = 0;
     else if (cql_lookup_property(ct, "truncation", 0, "cql"))
     {
         process_term = 0;
@@ -609,7 +610,7 @@ static void emit_term(cql_transform_t ct,
     assert(cn->which == CQL_NODE_ST);
 
     if (process_term)
-    {
+    {   /* convert term via truncation.things */
         unsigned anchor = 0;
         unsigned trunc = 0;
         for (i = 0; i < length; i++)

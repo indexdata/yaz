@@ -43,3 +43,7 @@ a^
 ^a^
 \\^
 ^a\\^
+# masking modifiers
+dc.title=/unmasked a*b
+dc.title=/masked a*b
+dc.title=/regexp a.*b
