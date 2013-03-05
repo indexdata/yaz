@@ -3,7 +3,7 @@
  * See the file LICENSE for details.
  */
 /*
-  YACC CQL grammar taken verbatim from the 2.0 draft (Feb 18 2011).
+  YACC CQL grammar as of OASIS CQL version1.0 , 30 January 2013
  */
 %term PREFIX_NAME SIMPLE_STRING QUOTED_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
