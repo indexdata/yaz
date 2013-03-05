@@ -390,6 +390,10 @@ int yylex(YYSTYPE *lval, void *vp)
 	    relation_like = 1;
 	if (!cql_strcmp(lval->buf, "adj"))
 	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "within"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "encloses"))
+	    relation_like = 1;
 	if (relation_like)
 	    return PREFIX_NAME;
     }
