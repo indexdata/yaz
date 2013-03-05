@@ -1,10 +1,10 @@
 /* This file is part of the YAZ toolkit.
  * Copyright (C) 1995-2013 Index Data
  * See the file LICENSE for details.
- */ 
+ */
 /* bison parser for CQL grammar. */
 %{
-/** 
+/**
  * \file cql.c
  * \brief Implements CQL parser.
  *
@@ -34,7 +34,7 @@
         size_t len;
 	/** size of buffer (len <= size) */
         size_t size;
-    } token;        
+    } token;
 
     struct cql_parser {
         int (*getbyte)(void *client_data);
@@ -47,10 +47,10 @@
     };
 
 #define YYSTYPE token
-    
+
 #define YYPARSE_PARAM parm
 #define YYLEX_PARAM parm
-    
+
     int yylex(YYSTYPE *lval, void *vp);
     int yyerror(char *s);
 %}
@@ -60,7 +60,7 @@
 
 %%
 
-top: { 
+top: {
     $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem,
 			    "cql.serverChoice", "=", 0);
     ((CQL_parser) parm)->top = 0;
@@ -89,7 +89,7 @@ sortSpec: sortSpec singleSpec {
 | singleSpec
 {
     $$.cql = $1.cql;
-}; 
+};
 
 singleSpec: index modifiers {
     $$.cql = cql_node_mk_sort(((CQL_parser) parm)->nmem, $1.buf, $2.cql);
@@ -115,20 +115,20 @@ cqlQuery:
 | '>' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
-    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem, 
+    $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
 			      $4.cql, 0, $2.buf);
    }
 ;
 
-scopedClause: 
+scopedClause:
   searchClause
 |
-  scopedClause boolean modifiers { 
+  scopedClause boolean modifiers {
       $$.rel = $0.rel;
   } searchClause {
       struct cql_node *cn = cql_node_mk_boolean(((CQL_parser) parm)->nmem,
 						$2.buf);
-      
+
       cn->u.boolean.modifiers = $3.cql;
       cn->u.boolean.left = $1.cql;
       cn->u.boolean.right = $5.cql;
@@ -137,10 +137,10 @@ scopedClause:
   }
 ;
 
-searchClause: 
-  '(' { 
+searchClause:
+  '(' {
       $$.rel = $0.rel;
-      
+
   } cqlQuery ')' {
       $$.cql = $3.cql;
   }
@@ -151,7 +151,7 @@ searchTerm extraTerms {
       st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
   }
-| 
+|
   index relation modifiers {
       $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem, $1.buf, $2.buf, 0);
       $$.rel->u.st.modifiers = $3.cql;
@@ -163,23 +163,23 @@ searchTerm extraTerms {
 
 extraTerms:
 SIMPLE_STRING extraTerms {
-    struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem, 
+    struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem,
 					 /* index */ 0, /* rel */ 0, $1.buf);
     st->u.st.extra_terms = $2.cql;
     $$.cql = st;
 }
-| 
+|
 { $$.cql = 0; }
 ;
 
 
 /* unary NOT search SIMPLE_STRING here .. */
 
-boolean: 
+boolean:
   AND | OR | NOT | PROX ;
 
 modifiers: modifiers '/' searchTerm
-{ 
+{
     struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
 					  $3.buf, 0, 0);
 
@@ -196,7 +196,7 @@ modifiers '/' searchTerm relation_symbol searchTerm
     $$.cql = mod;
 }
 |
-{ 
+{
     $$.cql = 0;
 }
 ;
@@ -204,8 +204,8 @@ modifiers '/' searchTerm relation_symbol searchTerm
 relation: PREFIX_NAME | relation_symbol;
 
 relation_symbol:
-  '=' 
-| '>' 
+  '='
+| '>'
 | '<'
 | GE
 | LE
@@ -213,7 +213,7 @@ relation_symbol:
 | EXACT
 ;
 
-index: 
+index:
   searchTerm;
 
 searchTerm:

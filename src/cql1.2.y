@@ -8,7 +8,7 @@
 %term GE LE NE AND OR NOT PROX CHARSTRING1 CHARSTRING2 SORTBY
 
 %%
-sortedQuery : prefixAssignment sortedQuery 
+sortedQuery : prefixAssignment sortedQuery
             | scopedClause
             | scopedClause SORTBY sortSpec;
 
@@ -40,10 +40,10 @@ namedComparitor : identifier;
 
 modifierList : modifierList modifier  | modifier;
 
-modifier : '/' modifierName 
+modifier : '/' modifierName
          | '/' modifierName comparitorSymbol modifierValue
 	 ;
-     
+
 
 prefix : term;
 uri : term;
