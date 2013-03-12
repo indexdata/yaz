@@ -102,8 +102,7 @@ make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
 rm -fr ${RPM_BUILD_ROOT}
-make prefix=${RPM_BUILD_ROOT}/%{_prefix} mandir=${RPM_BUILD_ROOT}/%{_mandir} \
-	libdir=${RPM_BUILD_ROOT}/%{_libdir} install
+make install DESTDIR=${RPM_BUILD_ROOT}
 rm ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 
 %clean
