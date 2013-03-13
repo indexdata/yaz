@@ -1092,6 +1092,7 @@ struct cql_node *cql_parser_result(CQL_parser cp);
       <synopsis>
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
+#define CQL_NODE_SORT 3
 struct cql_node {
     int which;
     union {
@@ -1109,10 +1110,17 @@ struct cql_node {
             struct cql_node *right;
             struct cql_node *modifiers;
         } boolean;
+        struct {
+            char *index;
+            struct cql_node *next;
+            struct cql_node *modifiers;
+            struct cql_node *search;
+        } sort;
     } u;
 };
       </synopsis>
-      There are two node types: search term (ST) and boolean (BOOL).
+      There are three node types: search term (ST), boolean (BOOL)
+      and sortby (SORT).
       A modifier is treated as a search term too.
      </para>
      <para>
@@ -1157,8 +1165,8 @@ struct cql_node {
      </para>
 
      <para>
-      The boolean node represents both <literal>and</literal>,
-      <literal>or</literal>, not as well as
+      The boolean node represents <literal>and</literal>,
+      <literal>or</literal>, <literal>not</literal> +
       proximity.
       <itemizedlist>
        <listitem>
@@ -1173,6 +1181,10 @@ struct cql_node {
         </para>
        </listitem>
       </itemizedlist>
+     </para>
+
+     <para>
+      The sort node represents both the SORTBY clause.
      </para>
 
     </sect3>
@@ -1555,6 +1567,27 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       a user defined output stream.
       <function>cql_to_xml_stdio</function> writes to a
       a file.
+     </para>
+    </sect3>
+    <sect3 id="rpn.to.cql">
+     <title>PQF to CQL conversion</title>
+     <para>
+      Conversion from PQF to CQL is offered by the two functions shown
+      below. The former uses a generic stream for result. The latter
+      puts result in a WRBUF (string container).
+     <synopsis>
+#include &lt;yaz/rpn2cql.h>
+
+int cql_transform_rpn2cql_stream(cql_transform_t ct,
+                                 void (*pr)(const char *buf, void *client_data),
+                                 void *client_data,
+                                 Z_RPNQuery *q);
+
+int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
+                                WRBUF w,
+                                Z_RPNQuery *q);
+      </synopsis>
+      The configuration is the same as used in CQL to PQF conversions.
      </para>
     </sect3>
    </sect2>
