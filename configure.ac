@@ -406,7 +406,7 @@ client/Makefile
 ztest/Makefile
 zoom/Makefile
 doc/Makefile
-doc/local.ent
+doc/local0.ent
 doc/common/Makefile
 doc/common/print.dsl
 etc/Makefile
@@ -417,6 +417,8 @@ win/version.nsi
 include/yaz/yaz-version.h
 ],[
 	sed s%echo_source=yes%echo_source=no%g < yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
+	diff doc/local.ent doc/local0.ent >/dev/null 2>/dev/null \
+		|| cp doc/local0.ent doc/local.ent
     ]
 )
 

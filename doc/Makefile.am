@@ -8,7 +8,7 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
  asn.xml tools.xml odr.xml comstack.xml server.xml license.xml \
  future.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
- std-oid-table.xml manref.xml
+ std-oid-table.xml manref.xml local.ent
 
 HTMLFILES = index.html
 
@@ -23,7 +23,7 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-illclient-man.xml yaz-icu-man.xml yaz-url-man.xml \
 	bib1-attr-man.xml yaz-json-parse-man.xml
 
-SUPPORTFILES=entities.ent apilayer.obj local.ent.in
+SUPPORTFILES=entities.ent apilayer.obj
 
 doc_DATA = $(HTMLFILES) apilayer.png 
 man_MANS = $(MANFILES)
@@ -79,6 +79,8 @@ yaz-json-parse.1: yaz-json-parse-man.xml
 $(HTMLFILES): $(XMLFILES)
 	rm -f *.html
 	$(HTML_COMPILE) $(srcdir)/yaz.xml
+
+$(MANFILES): local.ent
 
 yaz.pdf: $(XMLFILES)
 	$(PDF_COMPILE) $(srcdir)/yaz.xml
