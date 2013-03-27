@@ -113,7 +113,7 @@
     </citerefentry>
   </para>
   <para>YAZ manual (
-   <filename>&prefix;/share/doc/yaz</filename>)
+   <filename>/usr/share/doc/yaz</filename>)
   </para>
   <para>
    <ulink url="&url.yaz;">YAZ home page</ulink>.

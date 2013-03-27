@@ -127,13 +127,13 @@
 
  <refsect1><title>FILES</title>
   <para>
-   <filename>&prefix;/bin/yaz-config</filename>
+   <filename>/usr/bin/yaz-config</filename>
   </para>
   <para>
-   <filename>&prefix;/lib/libyaz*.a</filename>
+   <filename>/usr/lib/libyaz*.a</filename>
   </para>
   <para>
-   <filename>&prefix;/include/yaz/*.h</filename>
+   <filename>/usr/include/yaz/*.h</filename>
   </para>
   </refsect1>
  <refsect1><title>SEE ALSO</title>
