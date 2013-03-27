@@ -13,6 +13,7 @@ manpage.links
 manpage.refs
 *.[178]
 local.ent
+local0.ent
 htmlhelp.hhp
 toc.hhc
 std-oid-table.xml
