@@ -445,10 +445,13 @@
    </para>
 
    <para>
-    For TCP/IP and SSL transport modes, the special hostname &quot;@&quot;
-    is mapped to any local address
-    (the manifest constant <literal>INADDR_ANY</literal>).
-    It is used to establish local listening endpoints in the server role.
+    For TCP/IP and SSL, the special hostnames <literal>@</literal>,
+    maps to <literal>IN6ADDR_ANY_INIT</literal> with
+    IPV4 binding as well (bindv6only=0),
+    The special hostname <literal>@4</literal> binds to
+    <literal>INADDR_ANY</literal> (IPV4 only listener).
+    The special hostname <literal>@6</literal> binds to
+    <literal>IN6ADDR_ANY_INIT</literal> with bindv6only=1 (IPV6 only listener).
    </para>
 
    <para>

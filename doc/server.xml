@@ -818,11 +818,13 @@ typedef struct bend_scan_rr {
    </para>
 
    <para>
-    For TCP/IP and SSL, the special hostnames <literal>@</literal> and
-    <literal>@6</literal> are mapped to the addresses
-    <literal>INADDR_ANY</literal> (IPV4) and
-    <literal>IN6ADDR_ANY_INIT</literal> (IPV6)
-    respectively.
+    For TCP/IP and SSL, the special hostnames <literal>@</literal>,
+    maps to <literal>IN6ADDR_ANY_INIT</literal> with
+    IPV4 binding as well (bindv6only=0),
+    The special hostname <literal>@4</literal> binds to
+    <literal>INADDR_ANY</literal> (IPV4 only listener).
+    The special hostname <literal>@6</literal> binds to
+    <literal>IN6ADDR_ANY_INIT</literal> with bindv6only=1 (IPV6 only listener).
    </para>
 
    <example id="server.example.running.unix"><title>Running the GFS on Unix</title>
