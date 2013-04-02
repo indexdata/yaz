@@ -338,7 +338,8 @@ static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 
 #if HAVE_GETADDRINFO
 /* resolve using getaddrinfo */
-struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port)
+struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
+                                   int *ipv6_only)
 {
     struct addrinfo hints, *res;
     int error;
@@ -366,14 +367,23 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port)
     if (!strcmp("@", host))
     {
         hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_INET6;
+        error = getaddrinfo(0, port, &hints, &res);
+        *ipv6_only = 0;
+    }
+    else if (!strcmp("@4", host))
+    {
+        hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_INET;
         error = getaddrinfo(0, port, &hints, &res);
+        *ipv6_only = -1;
     }
     else if (!strcmp("@6", host))
     {
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_INET6;
         error = getaddrinfo(0, port, &hints, &res);
+        *ipv6_only = 1;
     }
     else
     {
@@ -433,6 +443,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     const char *port = "210";
     struct addrinfo *ai = 0;
+    int ipv6_only = 0;
     if (h->protocol == PROTO_HTTP)
     {
         if (h->type == ssl_type)
@@ -445,7 +456,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 
     if (sp->ai)
         freeaddrinfo(sp->ai);
-    sp->ai = tcpip_getaddrinfo(str, port);
+    sp->ai = tcpip_getaddrinfo(str, port, &ipv6_only);
     if (sp->ai && h->state == CS_ST_UNBND)
     {
         int s = -1;
@@ -459,7 +470,11 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             return 0;
         assert(ai);
         h->iofile = s;
-
+        if (ipv6_only >= 0 &&
+            setsockopt(h->iofile,
+                       IPPROTO_IPV6,
+                       IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)))
+                return 0;
         if (!tcpip_set_blocking(h, h->flags))
             return 0;
     }
