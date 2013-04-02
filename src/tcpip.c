@@ -388,6 +388,7 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
     else
     {
         error = getaddrinfo(host, port, &hints, &res);
+        *ipv6_only = -1;
     }
     if (error)
         return 0;
