@@ -1,3 +1,23 @@
+--- 4.2.52 2013/04/03
+
+yaz-ztest: Use hash for fake hit count. Before, random number was used.
+This is problematic for unit tests using yaz-ztest. This patch also makes
+a hash for CQL queries. For RPN, any term with a leading digit will be
+treated as pseudu hit count (to force any particular hit count by a client).
+
+yaz-ztest: return unique MARC dummy records. Beyond record offset
+24, the author surname is patched with offset to make all records
+unique.
+
+COMSTACK: make @ bind to IPV6+IPV4 consistenly and avoid depending
+on system wide default (/proc/sys/net/ipv6/bindv6only).
+@4 binds to IPV4 only. @6 binds to IPV6 only.
+
+Update CQL API documentation a bit
+
+CQL: don't accept extra terms for queries. Makes the CQL parser
+stricly conformant to the standard.
+
 --- 4.2.51 2013/02/12
 
 GFS: scan handler gets extra_args from request and may return extra
