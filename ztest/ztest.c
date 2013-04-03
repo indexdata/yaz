@@ -95,7 +95,7 @@ static void remove_sets(struct session_handle *sh)
     Only terms  that looks a numeric is used.. Returns -1 if
     no sub tree has a hit count term
 */
-static Odr_int get_term_hit(Z_RPNStructure *s)
+static Odr_int get_term_hit(Z_RPNStructure *s, unsigned *hash)
 {
     Odr_int h = -1;
     switch(s->which)
@@ -114,13 +114,19 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
                     h = odr_atoi(wrbuf_cstr(hits_str));
                     wrbuf_destroy(hits_str);
                 }
+                else
+                {
+                    int i;
+                    for (i = 0; i < oct->len; i++)
+                        *hash = *hash * 65509 + oct->buf[i];
+                }
             }
         }
         break;
     case Z_RPNStructure_complex:
-        h = get_term_hit(s->u.complex->s1);
+        h = get_term_hit(s->u.complex->s1, hash);
         if (h == -1)
-            h = get_term_hit(s->u.complex->s2);
+            h = get_term_hit(s->u.complex->s2, hash);
         break;
     }
     return h;
@@ -128,7 +134,7 @@ static Odr_int get_term_hit(Z_RPNStructure *s)
 
 /** \brief gets hit count for numeric terms in RPN queries
     \param q RPN Query
-    \return number of hits (random or number for term)
+    \return number of hits
 
     This is just for testing.. A real database of course uses
     the content of a database to establish a value.. In our case, we
@@ -139,11 +145,22 @@ static Odr_int get_hit_count(Z_Query *q)
 {
     if (q->which == Z_Query_type_1 || q->which == Z_Query_type_101)
     {
+        unsigned hash = 0;
         Odr_int h = -1;
-        h = get_term_hit(q->u.type_1->RPNStructure);
+        h = get_term_hit(q->u.type_1->RPNStructure, &hash);
         if (h == -1)
-            h = rand() % 24;
+            h = hash % 24;
         return h;
+    }
+    else if (q->which == Z_Query_type_104 &&
+             q->u.type_104->which == Z_External_CQL)
+    {
+        unsigned hash = 0;
+        const char *cql = q->u.type_104->u.cql;
+        int i;
+        for (i = 0; cql[i]; i++)
+            hash = hash * 65509 + cql[i];
+        return hash % 24;
     }
     else
         return 24;
