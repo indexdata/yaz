@@ -110,8 +110,7 @@ static void tst(void)
     YAZ_CHECK(tst_query("\\*", "\"*\""));
     YAZ_CHECK(tst_query("\"\\*\"", "\"*\""));
 
-    YAZ_CHECK(tst_query("a b", "\"a\" \"b\""));
-    YAZ_CHECK(tst_query("ab bc", "\"ab\" \"bc\""));
+    YAZ_CHECK(tst_query("\"a b\"", "\"a b\""));
 
     YAZ_CHECK(tst_query("\\\\", "\"\\\\\""));
     YAZ_CHECK(tst_query("\\\"", "\"\\\"\""));
@@ -131,17 +130,12 @@ static void tst(void)
     YAZ_CHECK(tst_query("title all \"\"", "title=\"\""));
 
     YAZ_CHECK(tst_query("title all x", "title=\"x\""));
-    YAZ_CHECK(tst_query("title all x y", "title=\"x\" and title=\"y\""));
     YAZ_CHECK(tst_query("title all \"x y\"", "title=\"x\" and title=\"y\""));
 
     YAZ_CHECK(tst_query("title any x", "title=\"x\""));
-    YAZ_CHECK(tst_query("title any x y", "title=\"x\" or title=\"y\""));
     YAZ_CHECK(tst_query("title any \"x y\"", "title=\"x\" or title=\"y\""));
 
     YAZ_CHECK(tst_query("title = \"x y\"", "title=\"x y\""));
-    YAZ_CHECK(tst_query("title = x y", "title=\"x\" \"y\""));
-
-    YAZ_CHECK(tst_query("title = x y z",  "title=\"x\" \"y\" \"z\""));
 
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox dinosaurs",
                         "(dc.title=\"encyclopedia\") % (\"dinosaurs\")"));

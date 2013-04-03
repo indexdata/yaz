@@ -91,6 +91,7 @@ static int node(struct cql_node *cn,
     const char *split_op = 0;
     const char *ccl_rel = 0;
     const char *rel = cn->u.st.relation;
+    const char *cp;
 
     if (cn->u.st.index && strcmp(cn->u.st.index,
                                  "cql.serverChoice"))
@@ -121,38 +122,26 @@ static int node(struct cql_node *cn,
         /* unsupported relation */
         return -1;
     }
-    for (; cn; cn = cn->u.st.extra_terms)
+    cp = cn->u.st.term;
+    while (1)
     {
-        const char *cp = cn->u.st.term;
-        while (1)
+        if (ccl_field && ccl_rel)
         {
-            if (ccl_field && ccl_rel)
-            {
-                pr(ccl_field, client_data);
-                pr(ccl_rel, client_data);
-                if (!split_op)
-                    ccl_rel = 0;
-            }
-            pr_term(&cp, split_op ? 1 : 0, pr, client_data);
-            while (*cp == ' ')
-                cp++;
-            if (*cp == '\0')
-                break;
-            pr(" ", client_data);
-            if (split_op)
-            {
-                pr(split_op, client_data);
-                pr(" ", client_data);
-            }
+            pr(ccl_field, client_data);
+            pr(ccl_rel, client_data);
+            if (!split_op)
+                ccl_rel = 0;
         }
-        if (cn->u.st.extra_terms)
+        pr_term(&cp, split_op ? 1 : 0, pr, client_data);
+        while (*cp == ' ')
+            cp++;
+        if (*cp == '\0')
+            break;
+        pr(" ", client_data);
+        if (split_op)
         {
+            pr(split_op, client_data);
             pr(" ", client_data);
-            if (split_op)
-            {
-                pr(split_op, client_data);
-                pr(" ", client_data);
-            }
         }
     }
     return 0;

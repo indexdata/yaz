@@ -762,29 +762,10 @@ static void emit_term(cql_transform_t ct,
 static void emit_terms(cql_transform_t ct,
                        struct cql_node *cn,
                        void (*pr)(const char *buf, void *client_data),
-                       void *client_data,
-                       const char *op)
+                       void *client_data)
 {
-    struct cql_node *ne = cn->u.st.extra_terms;
-    if (ne)
-    {
-        (*pr)("@", client_data);
-        (*pr)(op, client_data);
-        (*pr)(" ", client_data);
-    }
     emit_term(ct, cn, cn->u.st.term, strlen(cn->u.st.term),
               pr, client_data);
-    for (; ne; ne = ne->u.st.extra_terms)
-    {
-        if (ne->u.st.extra_terms)
-        {
-            (*pr)("@", client_data);
-            (*pr)(op, client_data);
-            (*pr)(" ", client_data);
-        }
-        emit_term(ct, cn, ne->u.st.term, strlen(ne->u.st.term),
-                  pr, client_data);
-    }
 }
 
 static void emit_wordlist(cql_transform_t ct,
@@ -863,7 +844,7 @@ void cql_transform_r(cql_transform_t ct,
         else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "any"))
             emit_wordlist(ct, cn, pr, client_data, "or");
         else
-            emit_terms(ct, cn, pr, client_data, "and");
+            emit_terms(ct, cn, pr, client_data);
         break;
     case CQL_NODE_BOOL:
         (*pr)("@", client_data);
