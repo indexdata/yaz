@@ -398,7 +398,10 @@ static void dump(const char *fname, const char *from, const char *to,
                 {
                     if ((i & 15) == 0)
                         fprintf(cfile, "  \"");
-                    fprintf(cfile, "\\x%02X", p[i] & 255);
+                    if (p[i] < 32 || p[i] > 126)
+                        fprintf(cfile, "\" \"\\x%02X\" \"", p[i] & 255);
+                    else
+                        fputc(p[i], cfile);
 
                     if (i < r - 1 && (i & 15) == 15)
                         fprintf(cfile, "\"\n");
