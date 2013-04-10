@@ -72,11 +72,6 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
     size_t utf8_outbytesleft = sizeof(utf8_buf)-1, r;
     int error_code;
 
-    if (x <= ' ' && x != 27)
-    {
-        *page_chr = ESC "(B";
-        return x;
-    }
     r = yaz_write_UTF8_char(x, &utf8_outbuf, &utf8_outbytesleft, &error_code);
     if (r == (size_t)(-1))
     {
@@ -288,15 +283,23 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, struct encoder_data *w,
 
     if (!y)
     {
-        if (loss_mode == 0)
-            return (size_t) (-1);
         page_chr = ESC "(B";
-        if (loss_mode == 1)
-            y = '|';
-        else
+        switch (loss_mode)
         {
+        case 0:
+            return (size_t) (-1);
+        case 1:
+            y = '|';
+            break;
+        case 2:
             y = x;
             enable_ncr = 1;
+            break;
+        case 3:
+            if (x < 32 && x != 27)
+                y = x;
+            else
+                return (size_t) (-1);
         }
     }
 
@@ -406,6 +409,14 @@ static size_t write_marc8_lossless(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                                    x, outbuf, outbytesleft, 2);
 }
 
+static size_t write_marc8_control(yaz_iconv_t cd, yaz_iconv_encoder_t e,
+                                   unsigned long x,
+                                   char **outbuf, size_t *outbytesleft)
+{
+    return yaz_write_marc8_generic(cd, (struct encoder_data *) e->data,
+                                   x, outbuf, outbytesleft, 3);
+}
+
 static void destroy_marc8(yaz_iconv_encoder_t e)
 {
     xfree(e->data);
@@ -423,6 +434,8 @@ yaz_iconv_encoder_t yaz_marc8_encoder(const char *tocode,
         e->write_handle = write_marc8_lossy;
     else if (!yaz_matchstr(tocode, "MARC8lossless"))
         e->write_handle = write_marc8_lossless;
+    else if (!yaz_matchstr(tocode, "MARC8c"))
+        e->write_handle = write_marc8_control;
     else
         return 0;
 
