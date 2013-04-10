@@ -1,3 +1,11 @@
+--- 4.2.53 2013/04/10
+
+New charset, MARC-8c, which is like MARC-8 but allows control characters
+0x01 through 0x1F, except ESC to be passed through verbatim.
+
+Fix a problem with duplicate sub field character in MARC output. Problem
+happened only when output was MARC-8 encoded.
+
 --- 4.2.52 2013/04/03
 
 yaz-ztest: Use hash for fake hit count. Before, random number was used.
