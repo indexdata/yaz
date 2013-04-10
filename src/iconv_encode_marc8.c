@@ -72,7 +72,7 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
     size_t utf8_outbytesleft = sizeof(utf8_buf)-1, r;
     int error_code;
 
-    if (x <= ' ')
+    if (x <= ' ' && x != 27)
     {
         *page_chr = ESC "(B";
         return x;
