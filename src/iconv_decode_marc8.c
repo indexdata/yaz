@@ -29,6 +29,7 @@ struct decoder_data {
     int comb_size;
     unsigned long comb_x[8];
     size_t comb_no_read[8];
+    int control_mode;
 };
 
 yaz_conv_func_t yaz_marc8_42_conv;
@@ -172,7 +173,12 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd,
     }
     if (inbytesleft == 0)
         return 0;
-    else if (*inp <= ' ')
+    else if (*inp == ' ')
+    {
+        *no_read += 1;
+        return ' ';
+    }
+    else if (*inp < ' ' && data->control_mode)
     {
         *no_read += 1;
         return *inp;
@@ -246,6 +252,18 @@ static size_t init_marc8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     data->g0_mode = 'B';
     data->g1_mode = 'E';
     data->comb_offset = data->comb_size = 0;
+    data->control_mode = 0;
+    return 0;
+}
+
+static size_t init_marc8c(yaz_iconv_t cd, yaz_iconv_decoder_t d,
+                         unsigned char *inp,
+                         size_t inbytesleft, size_t *no_read)
+{
+    struct decoder_data *data = (struct decoder_data *) d->data;
+
+    init_marc8(cd, d, inp, inbytesleft, no_read);
+    data->control_mode = 1;
     return 0;
 }
 
@@ -259,16 +277,26 @@ yaz_iconv_decoder_t yaz_marc8_decoder(const char *fromcode,
                                       yaz_iconv_decoder_t d)
 {
     if (!yaz_matchstr(fromcode, "MARC8") || !yaz_matchstr(fromcode, "ANSEL"))
+    {
         d->read_handle = read_marc8;
+        d->init_handle = init_marc8;
+    }
     else if (!yaz_matchstr(fromcode, "MARC8s"))
+    {
         d->read_handle = read_marc8s;
+        d->init_handle = init_marc8;
+    }
+    else if (!yaz_matchstr(fromcode, "MARC8c"))
+    {
+        d->read_handle = read_marc8;
+        d->init_handle = init_marc8c;
+    }
     else
         return 0;
     {
         struct decoder_data *data = (struct decoder_data *)
             xmalloc(sizeof(*data));
         d->data = data;
-        d->init_handle = init_marc8;
         d->destroy_handle = destroy_marc8;
     }
     return d;
