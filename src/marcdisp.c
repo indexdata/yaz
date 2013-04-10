@@ -463,6 +463,7 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
             size_t inbytesleft = i;
             size_t r = yaz_iconv(mt->iconv_cd, (char**) &inp, &inbytesleft,
                                  &outp, &outbytesleft);
+            yaz_iconv(mt->iconv_cd, 0, 0, &outp, &outbytesleft);
             if (r != (size_t) (-1))
                 return i;  /* got a complete sequence */
         }
