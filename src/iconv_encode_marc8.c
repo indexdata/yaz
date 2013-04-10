@@ -72,6 +72,11 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
     size_t utf8_outbytesleft = sizeof(utf8_buf)-1, r;
     int error_code;
 
+    if (x <= ' ')
+    {
+        *page_chr = ESC "(B";
+        return x;
+    }
     r = yaz_write_UTF8_char(x, &utf8_outbuf, &utf8_outbytesleft, &error_code);
     if (r == (size_t)(-1))
     {

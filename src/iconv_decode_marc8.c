@@ -172,10 +172,10 @@ static unsigned long yaz_read_marc8_comb(yaz_iconv_t cd,
     }
     if (inbytesleft == 0)
         return 0;
-    else if (*inp == ' ')
+    else if (*inp <= ' ')
     {
         *no_read += 1;
-        return ' ';
+        return *inp;
     }
     else
     {
