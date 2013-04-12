@@ -1581,25 +1581,31 @@ char *dummy_marc_record(int num, ODR odr)
 }
 
 /* read MARC record and convert to XML */
-char *dummy_xml_record(int num, ODR odr)
+char *dummy_xml_record(int num, ODR odr, const char *esn)
 {
     char *rec = dummy_marc_record(num, odr);
 
     if (rec)
     {
-        const char *result;
-        size_t rlen;
-        int len;
+        WRBUF w = wrbuf_alloc();
         yaz_marc_t mt = yaz_marc_create();
+
         yaz_marc_xml(mt, YAZ_MARC_MARCXML);
-        len = yaz_marc_decode_buf(mt, rec, -1, &result, &rlen);
-        if (len > 1)
+        if (esn && !strcmp(esn, "OP"))
         {
-            rec = (char *) odr_malloc(odr, rlen+1);
-            memcpy(rec, result, rlen);
-            rec[rlen] = '\0';
+            /* generate OPACXML (OPAC in XML) */
+            Z_OPACRecord *opac = dummy_opac(num, odr, rec);
+            yaz_opac_decode_wrbuf(mt, opac, w);
         }
+        else
+        {
+            /* generate MARCXML */
+            yaz_marc_decode_wrbuf(mt, rec, -1, w);
+        }
+        rec = odr_strdup(odr, wrbuf_cstr(w));
         yaz_marc_destroy(mt);
+        wrbuf_destroy(w);
+
     }
     return rec;
 }

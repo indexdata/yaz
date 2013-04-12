@@ -33,7 +33,7 @@
 
 Z_GenericRecord *dummy_grs_record(int num, ODR o);
 char *dummy_marc_record(int num, ODR odr);
-char *dummy_xml_record(int num, ODR odr);
+char *dummy_xml_record(int num, ODR odr, const char *esn);
 Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input);
 
 /*

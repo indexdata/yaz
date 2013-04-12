@@ -835,6 +835,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     char *cp;
     const Odr_oid *oid = r->request_format;
     struct result_set *set = get_set(sh, r->setname);
+    const char *esn = yaz_get_esn(r->comp);
 
     if (!set)
     {
@@ -935,7 +936,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_xml))
     {
-        if ((cp = dummy_xml_record(r->number, r->stream)))
+        if ((cp = dummy_xml_record(r->number, r->stream, esn)))
         {
             r->len = strlen(cp);
             r->record = cp;
