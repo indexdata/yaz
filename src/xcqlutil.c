@@ -188,6 +188,16 @@ static void cql_to_xml_r(struct cql_node *cn,
             pr_cdata(cn->u.st.term, pr, client_data);
             pr_n("</term>\n", pr, client_data, 0);
         }
+        if (cn->u.st.extra_terms)
+        {
+            struct cql_node *n = cn->u.st.extra_terms;
+            for (; n; n = n->u.st.extra_terms)
+            {
+                pr_n("<term>", pr, client_data, level+2);
+                pr_cdata(n->u.st.term, pr, client_data);
+                pr_n("</term>\n", pr, client_data, 0);
+            }
+        }
         cql_sort_to_xml(sort_node, pr, client_data, level+2);
         pr_n("</searchClause>\n", pr, client_data, level);
         break;

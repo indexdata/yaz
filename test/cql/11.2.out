@@ -1,7 +1,9 @@
 <searchClause>
-  <index>a</index>
+  <index>cql.serverChoice</index>
   <relation>
-    <value>b</value>
+    <value>=</value>
   </relation>
+  <term>a</term>
+  <term>b</term>
   <term>c</term>
 </searchClause>

@@ -56,7 +56,7 @@
 %}
 
 %pure_parser
-%token SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
+%token PREFIX_NAME SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
 
@@ -145,12 +145,12 @@ searchClause:
       $$.cql = $3.cql;
   }
 |
-searchTerm {
+searchTerm extraTerms {
       struct cql_node *st = cql_node_dup(((CQL_parser) parm)->nmem, $0.rel);
+      st->u.st.extra_terms = $2.cql;
       st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
   }
-
 |
   index relation modifiers {
       $$.rel = cql_node_mk_sc(((CQL_parser) parm)->nmem, $1.buf, $2.buf, 0);
@@ -160,6 +160,18 @@ searchTerm {
       cql_node_destroy($4.rel);
   }
 ;
+
+extraTerms:
+SIMPLE_STRING extraTerms {
+    struct cql_node *st = cql_node_mk_sc(((CQL_parser) parm)->nmem,
+					 /* index */ 0, /* rel */ 0, $1.buf);
+    st->u.st.extra_terms = $2.cql;
+    $$.cql = st;
+}
+|
+{ $$.cql = 0; }
+;
+
 
 /* unary NOT search SIMPLE_STRING here .. */
 
@@ -189,7 +201,7 @@ modifiers '/' searchTerm relation_symbol searchTerm
 }
 ;
 
-relation: SIMPLE_STRING | relation_symbol;
+relation: PREFIX_NAME | relation_symbol;
 
 relation_symbol:
   '='
@@ -206,6 +218,7 @@ index:
 
 searchTerm:
   SIMPLE_STRING
+| PREFIX_NAME
 | AND
 | OR
 | NOT
@@ -325,8 +338,11 @@ int yylex(YYSTYPE *lval, void *vp)
     }
     else
     {
+	int relation_like = 0;
 	while (c != 0 && !strchr(" \n()=<>/", c))
 	{
+	    if (c == '.')
+		relation_like = 1;
 	    if (c == '\\')
 	    {
 		putb(lval, cp, c);
@@ -368,6 +384,18 @@ int yylex(YYSTYPE *lval, void *vp)
 	    lval->buf = "sortby";
 	    return SORTBY;
 	}
+	if (!cql_strcmp(lval->buf, "all"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "any"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "adj"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "within"))
+	    relation_like = 1;
+	if (!cql_strcmp(lval->buf, "encloses"))
+	    relation_like = 1;
+	if (relation_like)
+	    return PREFIX_NAME;
     }
     return SIMPLE_STRING;
 }
