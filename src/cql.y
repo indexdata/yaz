@@ -44,6 +44,7 @@
         int last_pos;
         struct cql_node *top;
         NMEM nmem;
+        int strict;
     };
 
 #define YYSTYPE token
@@ -384,6 +385,8 @@ int yylex(YYSTYPE *lval, void *vp)
 	    lval->buf = "sortby";
 	    return SORTBY;
 	}
+        if (cp->strict)
+            return PREFIX_NAME;
 	if (!cql_strcmp(lval->buf, "all"))
 	    relation_like = 1;
 	if (!cql_strcmp(lval->buf, "any"))
@@ -424,6 +427,7 @@ CQL_parser cql_parser_create(void)
     cp->last_error = 0;
     cp->last_pos = 0;
     cp->nmem = nmem_create();
+    cp->strict = 0;
     return cp;
 }
 
@@ -437,6 +441,11 @@ void cql_parser_destroy(CQL_parser cp)
 struct cql_node *cql_parser_result(CQL_parser cp)
 {
     return cp->top;
+}
+
+void cql_parser_strict(CQL_parser cp, int mode)
+{
+    cp->strict = mode;
 }
 
 /*

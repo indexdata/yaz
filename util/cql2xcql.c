@@ -15,7 +15,7 @@
 
 static void usage(const char *prog)
 {
-    fprintf(stderr, "%s: [-c] [-n iterations] [-s] [infile]\n", prog);
+    fprintf(stderr, "%s: [-c] [-n iterations] [-s] [-S] [infile]\n", prog);
     exit(1);
 }
 
@@ -30,8 +30,9 @@ int main(int argc, char **argv)
     char *arg;
     char *prog = argv[0];
     int do_sortkeys = 0;
+    int do_strict = 0;
 
-    while ((ret = options("cn:s", argv, argc, &arg)) != YAZ_OPTIONS_EOF)
+    while ((ret = options("cn:sS", argv, argc, &arg)) != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
@@ -47,12 +48,16 @@ int main(int argc, char **argv)
         case 's':
             do_sortkeys = 1;
             break;
+        case 'S':
+            do_strict = 1;
+            break;
         default:
             usage(prog);
         }
     }
 
     cp = cql_parser_create();
+    cql_parser_strict(cp, do_strict);
     if (fname)
     {
         int i;

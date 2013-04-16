@@ -96,6 +96,16 @@ int cql_parser_stream(CQL_parser cp,
 YAZ_EXPORT
 int cql_parser_stdio(CQL_parser cp, FILE *f);
 
+/** \brief configures strict mode
+    \param cp CQL parser
+    \param mode 1=enable strict mode, 0=disable strict mode
+
+    This function is similar to cql_parser_string but reads from
+    stdio FILE handle instead.
+*/
+YAZ_EXPORT
+void cql_parser_strict(CQL_parser cp, int mode);
+
 /** \brief Node type: search term */
 #define CQL_NODE_ST 1
 /** \brief Node type: boolean */
