@@ -164,6 +164,14 @@ Section "YAZ Source" YAZ_Source
 	File *.rc
 SectionEnd
 
+Section "YAZ4J" YAZ4J
+	SectionIn 1 2
+	SetOutPath $INSTDIR\bin
+	File ..\bin\yaz4j.dll
+	SetOutPath $INSTDIR\java
+	File ..\java\yaz4j.jar
+SectionEnd
+
 ; begin uninstall settings/section
 UninstallText "This will uninstall YAZ ${VERSION} from your system"
 
@@ -189,6 +197,7 @@ LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files needed in order f
 LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import libraries required for developing software using YAZ."
 LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML. Describes both YAZ applications and the API."
 LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
+LangString DESC_YAZ4J ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
 
 ;Assign language strings to sections
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -196,6 +205,7 @@ LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you 
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Development} $(DESC_YAZ_Development)
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Documentation} $(DESC_YAZ_Documentation)
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Source} $(DESC_YAZ_Source)
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ4J} $(DESC_YAZ4J)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; eof

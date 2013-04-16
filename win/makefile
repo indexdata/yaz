@@ -48,8 +48,13 @@ all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
 NSIS="c:\program files\nsis\makensis.exe"
 HHC="c:\program files\html help workshop\hhc.exe"
 
+YAZ4J_DIR="..\..\yaz4j"
+
+YAZPATH="$(MAKEDIR)\.."
+
+
 dist: yaz.win32.nsi yaz.nsi distclean
-	nmake DEBUG=0
+	nmake DEBUG=0 all yaz4j
 	$(NSIS) yaz.win32.nsi
 
 dist64: yaz.win64.nsi yaz.nsi distclean
@@ -57,13 +62,14 @@ dist64: yaz.win64.nsi yaz.nsi distclean
 	$(NSIS) yaz.win64.nsi 
 
 make64:
-	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64
+	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64 YAZ4J_DIR=..\..\..\yaz4j all yaz4j
+
 
 distclean:
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
 
-nsis: all yaz32.nsi
+nsis: all yaz.win32.nsi
 	$(NSIS) yaz.win32.nsi
 
 nsis64: yaz.win64.nsi
@@ -83,6 +89,7 @@ BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
 DOCDIR=$(ROOTDIR)\doc       # where the doc is
+JAVADIR=$(ROOTDIR)\java
 
 # where we store intermediate files
 !if $(DEBUG)
@@ -97,8 +104,8 @@ ZOOMDIR=$(ROOTDIR)\ZOOM
 UTILDIR=$(ROOTDIR)\UTIL
 TESTDIR=$(ROOTDIR)\TEST
 
-TMPDIR=$(ROOTDIR)\win\tmp
-TMP=$(TMPDIR)
+# TMPDIR=$(ROOTDIR)\win\tmp
+# TMP=$(TMPDIR)
 
 # Targets - what to make
 
@@ -276,21 +283,14 @@ RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
   /MD /O2
 
-# /W3  = warning level
-# /GX  = Enable exception handling
-# /FD  = Generate file dependencies (what ever they are)
-# /c   = compile without linking
-# /FR  = Generate browse info (.sbr file that gets combined into .bsc)
-# /Fo  = object file name (or at least path)
-# /Fd  = debug database name (or path)
-# /MD  = Runtime library: Multithread DLL
-# /MDd = Runtime library: Multithread DLL (debug)
-# /Od  = Disable optimising (debug)
-# /O2  = Optimize for speed
-# /Gm  = Minimal rebuild (some cpp class stuff)
-# /Zi  = Program database for debuggers
-# /ZI  = Pgm database with special "edit&continue" stuff - not available in C5
-
+MVN_ARGS=-Dyaz.path=$(YAZPATH)
+# without >log below, mvn install does NOT work
+yaz4j: $(JAVADIR)
+	cd $(YAZ4J_DIR)
+	mvn clean
+	mvn $(MVN_ARGS) -DskipTests install >log
+	copy /Y win32\target\yaz4j.dll "$(MAKEDIR)\..\bin"
+	copy /Y any\target\yaz4j.jar "$(MAKEDIR)\..\java"
 
 ### Linker options
 LINK=link.exe
@@ -1051,7 +1051,7 @@ realclean: clean
 # check directories and create if needed
 dirs: $(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR)
 
-$(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR):
+$(OBJDIR) $(WINDIR) $(LIBDIR) $(BINDIR) $(TMPDIR) $(JAVADIR):
 	if not exist "$@/$(NUL)" mkdir "$@"
 
 
