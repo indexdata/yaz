@@ -15,7 +15,8 @@
 
 static void usage(void)
 {
-    fprintf(stderr, "usage\n cql2pqf [-n <n>] [-r] <properties> [<query>]\n");
+    fprintf(stderr, "usage\n cql2pqf [-n <n>] [-r] [-S] <properties> "
+            "[<query>]\n");
     exit(1);
 }
 
@@ -27,11 +28,12 @@ int main(int argc, char **argv)
     char *fname = 0;
     int reverse = 0;
     int verbose = 1;
+    int do_strict = 0;
 
     int ret;
     char *arg;
 
-    while ((ret = options("n:rv", argv, argc, &arg)) != -2)
+    while ((ret = options("n:rSv", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -46,6 +48,9 @@ int main(int argc, char **argv)
             break;
         case 'r':
             reverse = 1;
+            break;
+        case 'S':
+            do_strict = 1;
             break;
         case 'v':
             verbose = 1;
@@ -102,6 +107,7 @@ int main(int argc, char **argv)
         CQL_parser cp = cql_parser_create();
         int r = 0;
 
+        cql_parser_strict(cp, do_strict);
         if (query)
         {
             if (verbose)
