@@ -197,7 +197,7 @@ LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files needed in order f
 LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import libraries required for developing software using YAZ."
 LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML. Describes both YAZ applications and the API."
 LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
-LangString DESC_YAZ4J ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
+LangString DESC_YAZ4J ${LANG_ENGLISH} "Java wrapper for the ZOOM API of YAZ."
 
 ;Assign language strings to sections
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
