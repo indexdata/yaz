@@ -1,8 +1,8 @@
-yaz (4.2.53-1indexdata) UNRELEASED; urgency=low
+yaz (4.2.54-1indexdata) unstable; urgency=low
 
   * Upstream.
 
- -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 10 Apr 2013 14:06:46 +0200
+ -- Adam Dickmeiss <adam@indexdata.dk>  Wed, 17 Apr 2013 09:10:44 +0200
 
 yaz (4.2.52-1indexdata) unstable; urgency=low
 

@@ -1,3 +1,5 @@
+--- 4.2.54 2013/04/17
+
 Windows installer of YAZ includes YAZ4J as a component.
 
 CQL: allow "extra terms" again, by default. Thus, the CQL parser
