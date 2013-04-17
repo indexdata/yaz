@@ -1,3 +1,15 @@
+Windows installer of YAZ includes YAZ4J as a component.
+
+CQL: allow "extra terms" again, by default. Thus, the CQL parser
+accepts a superset the standard. This reverts to CQL as of YAZ 4.2.51
+and earlier. CQL parser may operate in strict mode where queries
+not conforming to the standard BNF are rejected (syntax error).
+Whether the CQL parser operates in strict mode is controlled with
+cql_parser_strict . Strict mode enabled with option -S for utilities
+cql2pqf and cql2xcql .
+
+yaz-ztest: returns OPACXML records for syntax=XML and element set=OP.
+
 --- 4.2.53 2013/04/10
 
 New charset, MARC-8c, which is like MARC-8 but allows control characters
