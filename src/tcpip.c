@@ -1366,7 +1366,7 @@ void tcpip_close(COMSTACK h)
     {
 #if HAVE_GNUTLS_H
         if (sp->session)
-            gnutls_bye(sp->session, GNUTLS_SHUT_RDWR);
+            gnutls_bye(sp->session, GNUTLS_SHUT_WR);
 #elif HAVE_OPENSSL_SSL_H
         if (sp->ssl)
         {
