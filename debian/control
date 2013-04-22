@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 4),
+Build-Depends: debhelper (>= 5),
 	pkg-config,
 	libxslt1-dev,
 	libgnutls-dev,
@@ -21,6 +21,16 @@ Description: libraries for the Z39.50 toolkit
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
  This package includes runtime files.
+
+Package: libyaz4-dbg
+Section: debug
+Architecture: any
+Depends: libyaz4 (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for libyaz4
+ YAZ is a toolkit that allows you to develop software using the
+ ANSI Z39.50/ISO23950 standard for information retrieval.
+ .
+ This package contains the debugging symbols for libyaz4.
 
 Package: yaz
 Section: utils
