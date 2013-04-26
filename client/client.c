@@ -702,7 +702,7 @@ static int session_connect_base(const char *arg, const char **basep)
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
 
-    conn = cs_create_host_proxy(yazProxy, 1, &add, yazProxy);
+    conn = cs_create_host_proxy(arg, 1, &add, yazProxy);
     if (!conn)
     {
         printf("Could not resolve address %s\n", arg);
