@@ -1,3 +1,11 @@
+Fix proxy/host problem for ZOOM that could occur if unix sockets
+was in use.
+
+New Debian package libyaz4-dbg.
+
+Fix problem with cs_close hang/wait in SSL mode. Invoke gnutls_bye
+differently in tcpip_close.
+
 --- 4.2.54 2013/04/17
 
 Windows installer of YAZ includes YAZ4J as a component.
