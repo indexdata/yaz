@@ -85,7 +85,7 @@ int yaz_base64decode(const char *in, char *out)
 
     while (len >= 4)
     {
-	char i0, i1, i2, i3;
+	int i0, i1, i2, i3;
 
 	i0 = next_char(&in, &len);
         if (i0 < 0)
