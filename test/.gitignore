@@ -42,6 +42,7 @@ test_libstemmer
 test_rpn2solr
 test_shared_ptr
 test_solr
+test_zgdu
 *.log
 *.o
 *~
