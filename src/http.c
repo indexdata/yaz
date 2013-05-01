@@ -206,6 +206,27 @@ void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
     (*hp)->next = 0;
 }
 
+#if 0
+/* not in use yet */
+static void z_HTTP_header_set(ODR o, Z_HTTP_Header **hp, const char *n,
+                       const char *v)
+{
+    while (*hp)
+    {
+        if (!strcmp((*hp)->name, n))
+        {
+            (*hp)->value = odr_strdup(o, v);
+            return;
+        }
+        hp = &(*hp)->next;
+    }
+    *hp = (Z_HTTP_Header *) odr_malloc(o, sizeof(**hp));
+    (*hp)->name = odr_strdup(o, n);
+    (*hp)->value = odr_strdup(o, v);
+    (*hp)->next = 0;
+}
+#endif
+
 const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n)
 {
     for (; hp; hp = hp->next)
@@ -453,6 +474,31 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
                                   &hr->content_buf, &hr->content_len);
 }
 
+static void dump_http_package(ODR o, const char *buf, size_t len)
+{
+    int i;
+    for (i = 0; ; i++)
+    {
+        if (i == len)
+        {
+            odr_printf(o, "%.*s\n", i, buf);
+            break;
+        }
+        else if (i > 8192)
+        {
+            odr_printf(o, "%.*s\n", i, buf);
+            odr_printf(o, "(truncated\n", (long) len);
+            break;
+        }
+        else if (buf[i] == 0)
+        {
+            odr_printf(o, "%.*s\n", i, buf);
+            odr_printf(o, "(binary data)\n", (long) len);
+            break;
+        }
+    }
+}
+
 int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
 {
     char sbuf[80];
@@ -462,7 +508,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     sprintf(sbuf, "HTTP/%s %d %s\r\n", hr->version,
             hr->code,
             z_HTTP_errmsg(hr->code));
-    odr_write(o, (unsigned char *) sbuf, strlen(sbuf));
+    odr_write2(o, sbuf, strlen(sbuf));
     /* apply Content-Length if not already applied */
     if (!z_HTTP_header_lookup(hr->headers,
                               "Content-Length"))
@@ -470,25 +516,23 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
         char lstr[60];
         sprintf(lstr, "Content-Length: %d\r\n",
                 hr->content_len);
-        odr_write(o, (unsigned char *) lstr, strlen(lstr));
+        odr_write2(o, lstr, strlen(lstr));
     }
     for (h = hr->headers; h; h = h->next)
     {
-        odr_write(o, (unsigned char *) h->name, strlen(h->name));
-        odr_write(o, (unsigned char *) ": ", 2);
-        odr_write(o, (unsigned char *) h->value, strlen(h->value));
-        odr_write(o, (unsigned char *) "\r\n", 2);
+        odr_write2(o, h->name, strlen(h->name));
+        odr_write2(o, ": ", 2);
+        odr_write2(o, h->value, strlen(h->value));
+        odr_write2(o, "\r\n", 2);
     }
     odr_write(o, (unsigned char *) "\r\n", 2);
     if (hr->content_buf)
-        odr_write(o, (unsigned char *)
-                  hr->content_buf,
-                  hr->content_len);
+        odr_write2(o, hr->content_buf, hr->content_len);
     if (o->direction == ODR_PRINT)
     {
-        odr_printf(o, "-- HTTP response:\n%.*s\n", o->top - top0,
-                   o->buf + top0);
-        odr_printf(o, "-- \n");
+        odr_printf(o, "-- HTTP response:\n");
+        dump_http_package(o, (const char *) o->buf + top0, o->top - top0);
+        odr_printf(o, "--\n");
     }
     return 1;
 }
@@ -498,15 +542,12 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
     Z_HTTP_Header *h;
     int top0 = o->top;
 
-    odr_write(o, (unsigned char *) hr->method,
-              strlen(hr->method));
-    odr_write(o, (unsigned char *) " ", 1);
-    odr_write(o, (unsigned char *) hr->path,
-              strlen(hr->path));
-    odr_write(o, (unsigned char *) " HTTP/", 6);
-    odr_write(o, (unsigned char *) hr->version,
-              strlen(hr->version));
-    odr_write(o, (unsigned char *) "\r\n", 2);
+    odr_write2(o, hr->method, strlen(hr->method));
+    odr_write2(o, " ", 1);
+    odr_write2(o, hr->path, strlen(hr->path));
+    odr_write2(o, " HTTP/", 6);
+    odr_write2(o, hr->version, strlen(hr->version));
+    odr_write2(o, "\r\n", 2);
     if (hr->content_len &&
         !z_HTTP_header_lookup(hr->headers,
                               "Content-Length"))
@@ -514,25 +555,23 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
         char lstr[60];
         sprintf(lstr, "Content-Length: %d\r\n",
                 hr->content_len);
-        odr_write(o, (unsigned char *) lstr, strlen(lstr));
+        odr_write2(o, lstr, strlen(lstr));
     }
     for (h = hr->headers; h; h = h->next)
     {
-        odr_write(o, (unsigned char *) h->name, strlen(h->name));
-        odr_write(o, (unsigned char *) ": ", 2);
-        odr_write(o, (unsigned char *) h->value, strlen(h->value));
-        odr_write(o, (unsigned char *) "\r\n", 2);
+        odr_write2(o, h->name, strlen(h->name));
+        odr_write2(o, ": ", 2);
+        odr_write2(o, h->value, strlen(h->value));
+        odr_write2(o, "\r\n", 2);
     }
-    odr_write(o, (unsigned char *) "\r\n", 2);
+    odr_write2(o, "\r\n", 2);
     if (hr->content_buf)
-        odr_write(o, (unsigned char *)
-                  hr->content_buf,
-                  hr->content_len);
+        odr_write2(o, hr->content_buf, hr->content_len);
     if (o->direction == ODR_PRINT)
     {
-        odr_printf(o, "-- HTTP request:\n%.*s\n", o->top - top0,
-                   o->buf + top0);
-        odr_printf(o, "-- \n");
+        odr_printf(o, "-- HTTP request:\n");
+        dump_http_package(o, (const char *) o->buf + top0, o->top - top0);
+        odr_printf(o, "--\n");
     }
     return 1;
 }
