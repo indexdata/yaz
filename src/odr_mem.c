@@ -96,7 +96,7 @@ int odr_grow_block(ODR b, int min_bytes)
     return 0;
 }
 
-int odr_write(ODR o, unsigned char *buf, int bytes)
+int odr_write2(ODR o, const char *buf, int bytes)
 {
     if (o->pos + bytes >= o->size && odr_grow_block(o, bytes))
     {
@@ -108,6 +108,11 @@ int odr_write(ODR o, unsigned char *buf, int bytes)
     if (o->pos > o->top)
         o->top = o->pos;
     return 0;
+}
+
+int odr_write(ODR o, unsigned char *buf, int bytes)
+{
+    return odr_write2(o, (char *) buf, bytes);
 }
 
 int odr_seek(ODR o, int whence, int offset)
