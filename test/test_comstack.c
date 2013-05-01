@@ -173,6 +173,20 @@ static void tst_http_response(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 24), 0);
     }
     {
+        /* no content, no headers */
+        const char *http_buf =
+            /*123456789012345678 */
+            "HTTP/1.1 204 OK\r\n"
+            "\r\n"
+            "HTTP/1.1 200 OK\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 18), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 19), 19);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 24), 19);
+    }
+    {
         /* response, content  */
         const char *http_buf =
             /*123456789012345678 */

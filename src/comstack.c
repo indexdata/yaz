@@ -261,8 +261,8 @@ static int cs_read_chunk(const char *buf, int i, int len)
 #if CHUNK_DEBUG
         if (i < len-2)
         {
-            printf ("\n<<<");
             int j;
+            printf ("\n<<<");
             for (j = i; j <= i+3; j++)
                 printf ("%c", buf[j]);
             printf (">>>\n");
@@ -331,22 +331,40 @@ static int cs_read_chunk(const char *buf, int i, int len)
 static int cs_complete_http(const char *buf, int len, int head_only)
 {
     /* deal with HTTP request/response */
-    int i = 2, content_len = 0, chunked = 0;
+    int i, content_len = 0, chunked = 0;
 
-    if (len < 6)
-        return 0;
+    /* need at least one line followed by \n or \r .. */
+    for (i = 0; ; i++)
+        if (i == len)
+            return 0; /* incomplete */
+        else if (buf[i] == '\n' || buf[i] == '\r')
+            break;
 
-    /* if dealing with HTTP responses - then default
-       content length is unlimited (socket close) */
+    /* check to see if it's a response with content */
     if (!head_only && !memcmp(buf, "HTTP/", 5))
-        content_len = -1;
-
+    {
+        int j;
+        for (j = 5; j < i; j++)
+            if (buf[j] == ' ')
+            {
+                ++j;
+                if (buf[j] == '1') /* 1XX */
+                    ;
+                else if (!memcmp(buf + j, "204", 3))
+                    ;
+                else if (!memcmp(buf + j, "304", 3))
+                    ;
+                else
+                    content_len = -1;
+                break;
+            }
+    }
 #if 0
     printf("len = %d\n", len);
     fwrite (buf, 1, len, stdout);
     printf("----------\n");
 #endif
-    while (i <= len-2)
+    for (i = 2; i <= len-2; )
     {
         if (i > 8192)
         {
