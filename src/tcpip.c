@@ -238,7 +238,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     sp->connect_response_len = 0;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
-    TRC(fprintf(stderr, "Created new TCPIP comstack\n"));
+    TRC(fprintf(stderr, "Created new TCPIP comstack h=%p\n", p));
 
     return p;
 }
@@ -534,7 +534,7 @@ int tcpip_connect(COMSTACK h, void *address)
     struct sockaddr_in *add = (struct sockaddr_in *) address;
 #endif
     int r;
-    TRC(fprintf(stderr, "tcpip_connect\n"));
+    TRC(fprintf(stderr, "tcpip_connect h=%p\n", h));
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
@@ -1025,7 +1025,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0, res;
 
-    TRC(fprintf(stderr, "tcpip_get: bufsize=%d\n", *bufsize));
+    TRC(fprintf(stderr, "tcpip_get: h=%p bufsize=%d\n", h, *bufsize));
     if (sp->altlen) /* switch buffers */
     {
         TRC(fprintf(stderr, "  %d bytes in altbuf (%p)\n", sp->altlen,
@@ -1243,7 +1243,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     int res;
     struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "tcpip_put: size=%d\n", size));
+    TRC(fprintf(stderr, "tcpip_put: h=%p size=%d\n", h, size));
     h->io_pending = 0;
     h->event = CS_DATA;
     if (state->towrite < 0)
@@ -1361,7 +1361,7 @@ void tcpip_close(COMSTACK h)
 {
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "tcpip_close h=%p pid=%d\n", h, getpid()));
+    TRC(fprintf(stderr, "tcpip_close: h=%p pid=%d\n", h, getpid()));
     if (h->iofile != -1)
     {
 #if HAVE_GNUTLS_H
