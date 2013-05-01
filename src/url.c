@@ -112,6 +112,11 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy ? 1 : 0);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
 
+        /* clear all headers - including "User-Agent", if already in headers
+           z_get_HTTP_Request_uri sets "User-Agent" header */
+        if (z_HTTP_header_lookup(headers, "User-Agent"))
+            gdu->u.HTTP_Request->headers = 0;
+
         if (http_user && http_pass)
             z_HTTP_header_add_basic_auth(p->odr_out,
                                          &gdu->u.HTTP_Request->headers,
