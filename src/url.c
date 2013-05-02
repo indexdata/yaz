@@ -88,7 +88,7 @@ static void extract_user_pass(NMEM nmem,
 
 Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                               const char *method,
-                              Z_HTTP_Header *headers,
+                              Z_HTTP_Header *user_headers,
                               const char *buf, size_t len)
 {
     Z_HTTP_Response *res = 0;
@@ -99,7 +99,6 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         void *add;
         COMSTACK conn = 0;
         int code;
-        struct Z_HTTP_Header **last_header_entry;
         const char *location = 0;
         char *http_user = 0;
         char *http_pass = 0;
@@ -112,22 +111,25 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy ? 1 : 0);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
 
-        /* clear all headers - including "User-Agent", if already in headers
-           z_get_HTTP_Request_uri sets "User-Agent" header */
-        if (z_HTTP_header_lookup(headers, "User-Agent"))
-            gdu->u.HTTP_Request->headers = 0;
-
+        for ( ; user_headers; user_headers = user_headers->next)
+        {
+            /* prefer new Host over user-supplied Host */
+            if (!strcmp(user_headers->name, "Host"))
+                ;
+            /* prefer user-supplied User-Agent over YAZ' own */
+            else if (!strcmp(user_headers->name, "User-Agent"))
+                z_HTTP_header_set(p->odr_out, &gdu->u.HTTP_Request->headers,
+                                  user_headers->name, user_headers->value);
+            else
+                z_HTTP_header_add(p->odr_out, &gdu->u.HTTP_Request->headers,
+                                  user_headers->name, user_headers->value);
+        }
         if (http_user && http_pass)
             z_HTTP_header_add_basic_auth(p->odr_out,
                                          &gdu->u.HTTP_Request->headers,
                                          http_user, http_pass);
 
         res = 0;
-        last_header_entry = &gdu->u.HTTP_Request->headers;
-        while (*last_header_entry)
-            last_header_entry = &(*last_header_entry)->next;
-        *last_header_entry = headers; /* attach user headers */
-
         if (buf && len)
         {
             gdu->u.HTTP_Request->content_buf = (char *) buf;
