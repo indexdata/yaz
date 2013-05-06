@@ -191,7 +191,7 @@ void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
     buf = (char *) odr_malloc(o, (len+1) * 8/6 + 12);
     strcpy(buf, "Basic ");
     yaz_base64encode(tmp, &buf[strlen(buf)]);
-    z_HTTP_header_add(o, hp, "Authorization", buf);
+    z_HTTP_header_set(o, hp, "Authorization", buf);
 }
 
 
