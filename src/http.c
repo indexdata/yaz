@@ -573,21 +573,18 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
             hr->code,
             z_HTTP_errmsg(hr->code));
     odr_write2(o, sbuf, strlen(sbuf));
-    /* apply Content-Length if not already applied */
-    if (!z_HTTP_header_lookup(hr->headers,
-                              "Content-Length"))
-    {
-        char lstr[60];
-        sprintf(lstr, "Content-Length: %d\r\n",
-                hr->content_len);
-        odr_write2(o, lstr, strlen(lstr));
-    }
+    /* use content_len for Content-Length */
+    sprintf(sbuf, "Content-Length: %d\r\n", hr->content_len);
+    odr_write2(o, sbuf, strlen(sbuf));
     for (h = hr->headers; h; h = h->next)
     {
-        odr_write2(o, h->name, strlen(h->name));
-        odr_write2(o, ": ", 2);
-        odr_write2(o, h->value, strlen(h->value));
-        odr_write2(o, "\r\n", 2);
+        if (yaz_matchstr(h->name, "Content-Length"))
+        {   /* skip Content-Length if given. content_len rules */
+            odr_write2(o, h->name, strlen(h->name));
+            odr_write2(o, ": ", 2);
+            odr_write2(o, h->value, strlen(h->value));
+            odr_write2(o, "\r\n", 2);
+        }
     }
     odr_write(o, (unsigned char *) "\r\n", 2);
     if (hr->content_buf)
