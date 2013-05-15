@@ -367,7 +367,7 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
     if (!strcmp("@", host))
     {
         hints.ai_flags = AI_PASSIVE;
-        hints.ai_family = AF_INET6;
+        hints.ai_family = AF_UNSPEC;
         error = getaddrinfo(0, port, &hints, &res);
         *ipv6_only = 0;
     }
@@ -463,15 +463,27 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         int s = -1;
         for (ai = sp->ai; ai; ai = ai->ai_next)
         {
-            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-            if (s != -1)
-                break;
+            if (ai->ai_family == AF_INET6)
+            {
+                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+                if (s != -1)
+                    break;
+            }
+        }
+        if (s == -1)
+        {
+            for (ai = sp->ai; ai; ai = ai->ai_next)
+            {
+                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+                if (s != -1)
+                     break;
+            }
         }
         if (s == -1)
             return 0;
         assert(ai);
         h->iofile = s;
-        if (ipv6_only >= 0 &&
+        if (ai->ai_family == AF_INET6 && ipv6_only >= 0 &&
             setsockopt(h->iofile,
                        IPPROTO_IPV6,
                        IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)))
