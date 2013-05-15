@@ -1,3 +1,22 @@
+--- 4.2.57 2013/05/15
+
+COMSTACK: @ uses AF_UNSPEC . But we prefer AF_INET6 over others when
+picking a socket. Problem is that some systems has IPV6 support, but
+we can't create sockets for them, so we pick AF_UNSPEC first.
+
+HTTP encode. Proper Content-Length YAZ-660. For yaz_encode_http_response
+use content_len to determine resulting Content-Length in HTTP response
+and NOT Content-Length supplied in headers by user.
+
+z_HTTP_header_add_basic_auth uses z_HTTP_header_set rather than
+z_HTTP_header_add, to avoid having two Authorization headers by mistake.
+
+Fix problem with HTTP decoding. For HTTP 1XX, 204, 304 assume no
+content-length.
+
+Fix yaz_base64decode to use proper signed. Problem occurred on platforms
+with big endian and unsigned char (by default).
+
 --- 4.2.56 2013/04/26
 
 Fix yaz-client connect (crash in 4.2.55).
