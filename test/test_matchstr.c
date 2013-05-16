@@ -32,6 +32,30 @@ int main (int argc, char **argv)
     YAZ_CHECK(yaz_matchstr("a123",   "a1.") > 0);
     YAZ_CHECK(yaz_matchstr("a123",   "a...") == 0);
 
+    YAZ_CHECK_EQ(yaz_strncasecmp("a",  "b", 0), 0);
+    YAZ_CHECK_EQ(yaz_strncasecmp("a",  "a", 1),  0);
+    YAZ_CHECK_EQ(yaz_strncasecmp("a",  "a", 2), 0);
+    YAZ_CHECK_EQ(yaz_strncasecmp("a",  "b", 1), -1);
+    YAZ_CHECK_EQ(yaz_strncasecmp("a",  "b", 2), -1);
+    YAZ_CHECK_EQ(yaz_strncasecmp("b",  "a", 1), 1);
+    YAZ_CHECK_EQ(yaz_strncasecmp("b",  "a", 2), 1);
+
+    YAZ_CHECK_EQ(yaz_strncasecmp("bb",  "ba", 1), 0);
+    YAZ_CHECK_EQ(yaz_strncasecmp("bb",  "ba", 2), 1);
+    YAZ_CHECK_EQ(yaz_strncasecmp("ba",  "bb", 2), -1);
+    YAZ_CHECK_EQ(yaz_strncasecmp("ba",  "b", 2), 'a');
+    YAZ_CHECK_EQ(yaz_strncasecmp("b",  "ba", 2), -'a');
+
+    YAZ_CHECK_EQ(yaz_strcasecmp("",  ""), 0);
+    YAZ_CHECK_EQ(yaz_strcasecmp("a",  "a"),  0);
+    YAZ_CHECK_EQ(yaz_strcasecmp("a",  "b"), -1);
+    YAZ_CHECK_EQ(yaz_strcasecmp("b",  "a"), 1);
+
+    YAZ_CHECK_EQ(yaz_strcasecmp("bb",  "ba"), 1);
+    YAZ_CHECK_EQ(yaz_strcasecmp("ba",  "bb"), -1);
+    YAZ_CHECK_EQ(yaz_strcasecmp("ba",  "b"), 'a');
+    YAZ_CHECK_EQ(yaz_strcasecmp("b",  "ba"), -'a');
+
     YAZ_CHECK_TERM;
 }
 

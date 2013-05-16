@@ -17,11 +17,6 @@
 #include <yaz/zgdu.h>
 #include <yaz/base64.h>
 
-#ifdef WIN32
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#endif
-
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
@@ -64,9 +59,9 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         memcpy ((*headers)->value, o->buf + po, i - po);
         (*headers)->value[i - po] = '\0';
 
-        if (!strcasecmp((*headers)->name, "Transfer-Encoding")
+        if (!yaz_strcasecmp((*headers)->name, "Transfer-Encoding")
             &&
-            !strcasecmp((*headers)->value, "chunked"))
+            !yaz_strcasecmp((*headers)->value, "chunked"))
             chunked = 1;
         headers = &(*headers)->next;
         if (i < o->size-1 && o->buf[i] == '\r')
@@ -211,7 +206,7 @@ void z_HTTP_header_set(ODR o, Z_HTTP_Header **hp, const char *n,
 {
     while (*hp)
     {
-        if (!strcmp((*hp)->name, n))
+        if (!yaz_strcasecmp((*hp)->name, n))
         {
             (*hp)->value = odr_strdup(o, v);
             return;
@@ -227,7 +222,7 @@ void z_HTTP_header_set(ODR o, Z_HTTP_Header **hp, const char *n,
 const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n)
 {
     for (; hp; hp = hp->next)
-        if (!yaz_matchstr(hp->name, n))
+        if (!yaz_strcasecmp(hp->name, n))
             return hp->value;
     return 0;
 }
@@ -578,8 +573,8 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     odr_write2(o, sbuf, strlen(sbuf));
     for (h = hr->headers; h; h = h->next)
     {
-        if (yaz_matchstr(h->name, "Content-Length")
-            && yaz_matchstr(h->name, "Transfer-Encoding"))
+        if (yaz_strcasecmp(h->name, "Content-Length")
+            && yaz_strcasecmp(h->name, "Transfer-Encoding"))
         {   /* skip Content-Length if given. content_len rules */
             odr_write2(o, h->name, strlen(h->name));
             odr_write2(o, ": ", 2);

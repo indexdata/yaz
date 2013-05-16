@@ -18,6 +18,27 @@
 #include <yaz/yaz-iconv.h>
 #include <yaz/matchstr.h>
 
+int yaz_strcasecmp(const char *s1, const char *s2)
+{
+    return yaz_strncasecmp(s1, s2, strlen(s1) + 1);
+}
+
+int yaz_strncasecmp(const char *s1, const char *s2, size_t n)
+{
+    while (n--)
+    {
+        unsigned char c1 = *s1++;
+        unsigned char c2 = *s2++;
+        if (yaz_isupper(c1))
+            c1 = yaz_tolower(c1);
+        if (yaz_isupper(c2))
+            c2 = yaz_tolower(c2);
+        if (c1 != c2)
+            return c1 - c2;
+    }
+    return 0;
+}
+
 int yaz_matchstr(const char *s1, const char *s2)
 {
     while (*s1 && *s2)

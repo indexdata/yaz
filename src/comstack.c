@@ -19,10 +19,7 @@
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
 #include <yaz/odr.h>
-
-#ifdef WIN32
-#define strncasecmp _strnicmp
-#endif
+#include <yaz/matchstr.h>
 
 #if HAVE_GNUTLS_H
 #define ENABLE_SSL 1
@@ -389,17 +386,19 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 break;
             }
             else if (i < len - 20 &&
-                     !strncasecmp((const char *) buf+i, "Transfer-Encoding:", 18))
+                     !yaz_strncasecmp((const char *) buf+i,
+                                      "Transfer-Encoding:", 18))
             {
                 i+=18;
                 while (buf[i] == ' ')
                     i++;
                 if (i < len - 8)
-                    if (!strncasecmp((const char *) buf+i, "chunked", 7))
+                    if (!yaz_strncasecmp((const char *) buf+i, "chunked", 7))
                         chunked = 1;
             }
             else if (i < len - 17 &&
-                     !strncasecmp((const char *)buf+i, "Content-Length:", 15))
+                     !yaz_strncasecmp((const char *)buf+i,
+                                      "Content-Length:", 15))
             {
                 i+= 15;
                 while (buf[i] == ' ')
