@@ -578,7 +578,8 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     odr_write2(o, sbuf, strlen(sbuf));
     for (h = hr->headers; h; h = h->next)
     {
-        if (yaz_matchstr(h->name, "Content-Length"))
+        if (yaz_matchstr(h->name, "Content-Length")
+            && yaz_matchstr(h->name, "Transfer-Encoding"))
         {   /* skip Content-Length if given. content_len rules */
             odr_write2(o, h->name, strlen(h->name));
             odr_write2(o, ": ", 2);
