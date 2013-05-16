@@ -89,6 +89,7 @@ static void remove_sets(struct session_handle *sh)
 
 /** \brief use term value as hit count
     \param s RPN structure
+    \param hash value for compuation
     \return >= 0: search term number or -1: not found
 
     Traverse RPN tree 'in order' and use term value as hit count.
