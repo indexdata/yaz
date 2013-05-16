@@ -65,7 +65,8 @@ YAZ_EXPORT int yaz_strcmp_del(const char *a, const char *b, const char *b_del);
     \retval >0 a > b
     \retval <0 a < b
 */
-int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b);
+YAZ_EXPORT int yaz_memcmp(const void *a, const void *b,
+                          size_t len_a, size_t len_b);
 
 /** \brief ala strncasecmp - no locale
     \param s1 first buffer
@@ -75,7 +76,7 @@ int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b);
     \retval >0 a > b
     \retval <0 a < b
 */
-int yaz_strncasecmp(const char *s1, const char *s2, size_t n);
+YAZ_EXPORT int yaz_strncasecmp(const char *s1, const char *s2, size_t n);
 
 /** \brief ala strcasecmp - no locale
     \param s1 first buffer
@@ -84,7 +85,7 @@ int yaz_strncasecmp(const char *s1, const char *s2, size_t n);
     \retval >0 a > b
     \retval <0 a < b
 */
-int yaz_strcasecmp(const char *s1, const char *s2);
+YAZ_EXPORT int yaz_strcasecmp(const char *s1, const char *s2);
 
 
 YAZ_END_CDECL
