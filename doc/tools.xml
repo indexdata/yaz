@@ -867,6 +867,11 @@
 	  <entry><literal>?</literal></entry>
 	 </row>
 	 <row>
+	  <entry>mask</entry>
+	  <entry>Masking character</entry>
+	  <entry><literal>#</literal></entry>
+	 </row>
+	 <row>
 	  <entry>field</entry>
 	  <entry>Specifies how multiple fields are to be
 	   combined. There are two modes: <literal>or</literal>:
