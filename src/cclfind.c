@@ -232,6 +232,7 @@ static size_t cmp_operator(const char **aliases, const char *input)
 static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
                        char *dst_term, int *regex_trunc, int *z3958_trunc,
                        const char **truncation_aliases,
+                       const char **mask_aliases,
                        int is_first, int is_last,
                        int *left_trunc, int *right_trunc)
 {
@@ -283,8 +284,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
                 return -1;
             }
         }
-        else if (!quote_mode && src_str[j] == '#')
+        else if (!quote_mode &&
+                 (op_size = cmp_operator(mask_aliases, src_str + j)))
         {
+            j += (op_size - 1);  /* j++ in for loop */
             if (*regex_trunc)
             {
                 strcat(dst_term, ".");
@@ -339,6 +342,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
     char *attset;
     const char **truncation_aliases;
     const char *t_default[2];
+    const char **mask_aliases;
+    const char *m_default[2];
 
     truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
@@ -348,6 +353,16 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         t_default[0] = "?";
         t_default[1] = 0;
     }
+
+    mask_aliases =
+        ccl_qual_search_special(cclp->bibset, "mask");
+    if (!mask_aliases)
+    {
+        mask_aliases = m_default;
+        m_default[0] = "#";
+        m_default[1] = 0;
+    }
+
 
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_AND_LIST, 0))
         and_list = 1;
@@ -500,7 +515,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                         cclp->look_token->ws_prefix_len);
             }
             if (append_term(cclp, src_str, src_len, p->u.t.term, &regex_trunc,
-                            &z3958_trunc, truncation_aliases, i == 0, i == no - 1,
+                            &z3958_trunc, truncation_aliases, mask_aliases,
+                            i == 0, i == no - 1,
                             &left_trunc, &right_trunc))
             {
                 ccl_rpn_delete(p);

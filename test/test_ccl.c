@@ -429,6 +429,9 @@ void tst2(void)
     ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
     ccl_qual_fitem(bibset, "1=1016 s=al,pw t=z",    "term");
 
+    YAZ_CHECK(tst_ccl_query(bibset, "a?#",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a?# "));
+
     YAZ_CHECK(tst_ccl_query(bibset, "a*",
                             "@attr 4=2 @attr 1=1016 a* "));
 
@@ -441,6 +444,16 @@ void tst2(void)
 
     YAZ_CHECK(tst_ccl_query(bibset, "a?",
                             "@attr 5=104 @attr 4=2 @attr 1=1016 a\\\\? "));
+
+    ccl_qual_fitem(bibset, "?", "@mask");
+    YAZ_CHECK(tst_ccl_query(bibset, "a?",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a# "));
+
+
+    ccl_qual_fitem(bibset, "", "@mask");
+    ccl_qual_fitem(bibset, "", "@truncation");
+    YAZ_CHECK(tst_ccl_query(bibset, "a?#",
+                            "@attr 5=104 @attr 4=2 @attr 1=1016 a\\\\?\\\\# "));
 
     ccl_qual_fitem(bibset, "og", "@and");
     ccl_qual_fitem(bibset, "eller", "@or");
