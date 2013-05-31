@@ -139,7 +139,8 @@ int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
 
 int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
                                  struct icu_buf_utf16 * tkn16,
-                                 UErrorCode *status);
+                                 UErrorCode *status,
+                                 size_t *start, size_t *len);
 
 int32_t icu_tokenizer_token_count(struct icu_tokenizer * tokenizer);
 

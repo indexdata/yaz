@@ -368,6 +368,8 @@ struct icu_iter {
     struct icu_buf_utf8 *result;
     struct icu_buf_utf16 *input;
     int token_count;
+    size_t org_start;
+    size_t org_len;
     struct icu_chain_step *steps;
 };
 
@@ -423,7 +425,8 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
             }
             dst = icu_buf_utf16_create(0);
             iter->status = U_ZERO_ERROR;
-            if (!icu_tokenizer_next_token(step->u.tokenizer, dst, &iter->status))
+            if (!icu_tokenizer_next_token(step->u.tokenizer, dst, &iter->status,
+                                          &iter->org_start, &iter->org_len))
             {
                 icu_buf_utf16_destroy(dst);
                 dst = 0;
@@ -499,6 +502,8 @@ void icu_iter_first(yaz_icu_iter_t iter, const char *src8cstr)
     /* fill and assign input string.. It will be 0 after
        first iteration */
     icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
+    iter->org_start = 0;
+    iter->org_len = iter->input->utf16_len;
 }
 
 void icu_iter_destroy(yaz_icu_iter_t iter)
@@ -564,6 +569,13 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
     return iter->token_count;
 }
 
+
+void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
+{
+    *start = iter->org_start;
+    *len = iter->org_len;
+}
+
 int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
                           UErrorCode *status)
 {
@@ -607,6 +619,13 @@ const char *icu_chain_token_sortkey(struct icu_chain *chain)
         return icu_iter_get_sortkey(chain->iter);
     return 0;
 }
+
+void icu_chain_get_org_info(struct icu_chain *chain, size_t *start, size_t *len)
+{
+    if (chain->iter)
+        icu_iter_get_org_info(chain->iter, start, len);
+}
+
 
 #endif /* YAZ_HAVE_ICU */
 

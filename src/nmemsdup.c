@@ -33,7 +33,7 @@ char *nmem_strdup_null(NMEM mem, const char *src)
 char *nmem_strdupn(NMEM mem, const char *src, size_t n)
 {
     char *dst = (char *) nmem_malloc(mem, n+1);
-    memcpy (dst, src, n);
+    memcpy(dst, src, n);
     dst[n] = '\0';
     return dst;
 }

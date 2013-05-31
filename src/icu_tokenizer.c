@@ -155,7 +155,8 @@ int icu_tokenizer_attach(struct icu_tokenizer *tokenizer,
 
 int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
                                  struct icu_buf_utf16 *tkn16,
-                                 UErrorCode *status)
+                                 UErrorCode *status,
+                                 size_t *start, size_t *len)
 {
     int32_t tkn_start = 0;
     int32_t tkn_end = 0;
@@ -201,6 +202,9 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
 
     tokenizer->token_start = tkn_start;
     tokenizer->token_end = tkn_end;
+
+    *start = tkn_start;
+    *len = tkn_end - tkn_start;
 
     /* copying into token buffer if it exists */
     if (tkn16)

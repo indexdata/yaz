@@ -473,7 +473,10 @@ static void process_text_file(struct config_t *p_config)
                 success = 0;
             else
             {
+                size_t start, len;
                 const char *sortkey = icu_chain_token_sortkey(p_config->chain);
+
+                icu_chain_get_org_info(p_config->chain, &start, &len);
                 wrbuf_rewind(sw);
                 wrbuf_puts_escaped(sw, sortkey);
                 token_count++;
@@ -504,11 +507,13 @@ static void process_text_file(struct config_t *p_config)
                 }
                 else
                 {
-                    fprintf(p_config->outfile, "%lu %lu '%s' '%s'",
+                    fprintf(p_config->outfile, "%lu %lu '%s' '%s' %ld+%ld",
                             token_count,
                             line_count,
                             icu_chain_token_norm(p_config->chain),
-                            icu_chain_token_display(p_config->chain));
+                            icu_chain_token_display(p_config->chain),
+                            (long) start,
+                            (long) len);
                     if (p_config->sortoutput)
                     {
                         fprintf(p_config->outfile, " '%s'", wrbuf_cstr(sw));

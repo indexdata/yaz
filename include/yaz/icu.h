@@ -109,6 +109,14 @@ YAZ_EXPORT const char * icu_chain_token_norm(yaz_icu_chain_t chain);
 */
 YAZ_EXPORT const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
 
+/** \brief returns token as it relates to originl text
+    \param chain ICU chain
+    \param start offset in original text
+    \param size number of uchars in original text
+*/
+YAZ_EXPORT void icu_chain_get_org_info(yaz_icu_chain_t chain,
+                                       size_t *start, size_t *len);
+
 /** \brief ICU tokenizer iterator type (opaque) */
 typedef struct icu_iter *yaz_icu_iter_t;
 
@@ -169,6 +177,14 @@ const char *icu_iter_get_display(yaz_icu_iter_t iter);
 */
 YAZ_EXPORT
 int icu_iter_get_token_number(yaz_icu_iter_t iter);
+
+/** \brief returns ICU original token start (offset) and length
+    \param iter ICU tokenizer iterator
+    \param start offset of last token in original text
+    \param len length of last token in original text
+*/
+YAZ_EXPORT
+void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len);
 
 YAZ_END_CDECL
 
