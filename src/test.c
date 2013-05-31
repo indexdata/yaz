@@ -28,6 +28,7 @@ static int test_todo = 0;
 static int test_verbose = 1;
 static const char *test_prog = 0;
 static int log_tests = 0;
+static int test_stop = 0;
 
 static FILE *get_file(void)
 {
@@ -74,11 +75,17 @@ void yaz_check_init1(int *argc_p, char ***argv_p)
                 test_verbose = atoi(argv[i]);
                 continue;
             }
+            else if (i < argc && !strcmp(suf, "stop"))
+            {
+                test_stop = 1;
+                continue;
+            }
             else if (!strcmp(suf, "help"))
             {
                 fprintf(stderr,
                         "--test-help           help\n"
                         "--test-file fname     output to fname\n"
+                        "--test-stop           stop at first failing test\n"
                         "--test-verbose level  verbose level\n"
                         "       0=Quiet. Only exit code tells what's wrong\n"
                         "       1=Report+Summary only if tests fail.\n"
@@ -198,6 +205,10 @@ void yaz_check_print1(int type, const char *file, int line,
     {
         yaz_log(YLOG_LOG, "%s:%d %s: ", file, line, msg);
         yaz_log(YLOG_LOG, "%s", expr);
+    }
+    if ( type == YAZ_TEST_TYPE_FAIL && test_stop )
+    {
+        exit(1);
     }
 }
 
