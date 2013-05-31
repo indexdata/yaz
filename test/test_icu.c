@@ -368,6 +368,7 @@ static int test_icu_tokenizer(const char *locale, char action,
     struct icu_buf_utf16 *tkn16 = icu_buf_utf16_create(0);
     struct icu_buf_utf8 *tkn8 = icu_buf_utf8_create(0);
     struct icu_tokenizer *tokenizer = 0;
+    size_t org_start, org_len;
 
     /* transforming to UTF16 */
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
@@ -383,7 +384,8 @@ static int test_icu_tokenizer(const char *locale, char action,
     icu_check_status(status);
 
     /* perform work on tokens */
-    while (icu_tokenizer_next_token(tokenizer, tkn16, &status))
+    while (icu_tokenizer_next_token(tokenizer, tkn16, &status,
+                                    &org_start, &org_len))
     {
         icu_check_status(status);
 

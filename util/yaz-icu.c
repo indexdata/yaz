@@ -33,6 +33,7 @@ struct config_t {
     char print[1024];
     int xmloutput;
     int sortoutput;
+    int org_output;
     yaz_icu_chain_t chain;
     FILE * infile;
     FILE * outfile;
@@ -45,6 +46,7 @@ void print_option_error(const struct config_t *p_config)
             "   -c file         XML configuration\n"
             "   -p a|c|l|t      Print ICU info \n"
             "   -s              Show sort normalization key\n"
+            "   -o              Show org positions\n"
             "   -x              XML output instread of text\n"
             "\n"
             "Examples:\n"
@@ -77,10 +79,11 @@ void read_params(int argc, char **argv, struct config_t *p_config)
     p_config->chain = 0;
     p_config->infile = 0;
     p_config->outfile = stdout;
+    p_config->org_output = 0;
 
     /* set up command line parameters */
 
-    while ((ret = options("c:p:xs", argv, argc, &arg)) != -2)
+    while ((ret = options("c:op:sx", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -95,6 +98,9 @@ void read_params(int argc, char **argv, struct config_t *p_config)
             break;
         case 'x':
             p_config->xmloutput = 1;
+            break;
+        case 'o':
+            p_config->org_output = 1;
             break;
         case 0:
             if (p_config->infile)
@@ -507,16 +513,19 @@ static void process_text_file(struct config_t *p_config)
                 }
                 else
                 {
-                    fprintf(p_config->outfile, "%lu %lu '%s' '%s' %ld+%ld",
+                    fprintf(p_config->outfile, "%lu %lu '%s' '%s'",
                             token_count,
                             line_count,
                             icu_chain_token_norm(p_config->chain),
-                            icu_chain_token_display(p_config->chain),
-                            (long) start,
-                            (long) len);
+                            icu_chain_token_display(p_config->chain));
                     if (p_config->sortoutput)
                     {
                         fprintf(p_config->outfile, " '%s'", wrbuf_cstr(sw));
+                    }
+                    if (p_config->org_output)
+                    {
+                        fprintf(p_config->outfile, " %ld+%ld",
+                                (long) start, (long) len);
                     }
                     fprintf(p_config->outfile, "\n");
                 }
