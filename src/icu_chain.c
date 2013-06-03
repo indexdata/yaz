@@ -366,7 +366,6 @@ struct icu_iter {
     struct icu_buf_utf8 *display;
     struct icu_buf_utf8 *sort8;
     struct icu_buf_utf8 *result;
-    struct icu_buf_utf16 *input;
     int token_count;
     size_t org_start;
     size_t org_len;
@@ -488,22 +487,19 @@ yaz_icu_iter_t icu_iter_create(struct icu_chain *chain)
     iter->result = icu_buf_utf8_create(0);
     iter->last = 0; /* no last returned string (yet) */
     iter->steps = icu_chain_step_clone(chain->csteps);
-    iter->input = 0;
+    iter->token_count = 0;
 
     return iter;
 }
 
 void icu_iter_first(yaz_icu_iter_t iter, const char *src8cstr)
 {
-    if (iter->input)
-        icu_buf_utf16_destroy(iter->input);
-    iter->input = icu_buf_utf16_create(0);
+    struct icu_buf_utf16 *input = icu_buf_utf16_create(0);
+    icu_utf16_from_utf8_cstr(input, src8cstr, &iter->status);
     iter->token_count = 0;
-    /* fill and assign input string.. It will be 0 after
-       first iteration */
-    icu_utf16_from_utf8_cstr(iter->input, src8cstr, &iter->status);
     iter->org_start = 0;
-    iter->org_len = iter->input->utf16_len;
+    iter->org_len = input->utf16_len;
+    iter->last = icu_iter_invoke(iter, iter->steps, input);
 }
 
 void icu_iter_destroy(yaz_icu_iter_t iter)
@@ -513,8 +509,6 @@ void icu_iter_destroy(yaz_icu_iter_t iter)
         icu_buf_utf8_destroy(iter->display);
         icu_buf_utf8_destroy(iter->sort8);
         icu_buf_utf8_destroy(iter->result);
-        if (iter->input)
-            icu_buf_utf16_destroy(iter->input);
         icu_chain_step_destroy(iter->steps);
         xfree(iter);
     }
@@ -522,20 +516,13 @@ void icu_iter_destroy(yaz_icu_iter_t iter)
 
 int icu_iter_next(yaz_icu_iter_t iter)
 {
-    if (!iter->input && iter->last == 0)
+    if (iter->token_count && iter->last)
+        iter->last = icu_iter_invoke(iter, iter->steps, 0);
+    if (!iter->last)
         return 0;
     else
     {
-        /* on first call, iter->input is the input string. Thereafter: 0. */
-        assert(iter->steps || !iter->chain->csteps);
-        iter->last = icu_iter_invoke(iter, iter->steps, iter->input);
-        iter->input = 0;
-
-        if (!iter->last)
-            return 0;
-
         iter->token_count++;
-
         if (iter->chain->sort)
         {
             icu_sortkey8_from_utf16(iter->chain->coll,
