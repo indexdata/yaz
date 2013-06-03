@@ -362,6 +362,7 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
 struct icu_iter {
     struct icu_chain *chain;
     struct icu_buf_utf16 *last;
+    struct icu_buf_utf16 *org;
     UErrorCode status;
     struct icu_buf_utf8 *display;
     struct icu_buf_utf8 *sort8;
@@ -485,6 +486,7 @@ yaz_icu_iter_t icu_iter_create(struct icu_chain *chain)
     iter->display = icu_buf_utf8_create(0);
     iter->sort8 = icu_buf_utf8_create(0);
     iter->result = icu_buf_utf8_create(0);
+    iter->org = icu_buf_utf16_create(0);
     iter->last = 0; /* no last returned string (yet) */
     iter->steps = icu_chain_step_clone(chain->csteps);
     iter->token_count = 0;
@@ -494,12 +496,13 @@ yaz_icu_iter_t icu_iter_create(struct icu_chain *chain)
 
 void icu_iter_first(yaz_icu_iter_t iter, const char *src8cstr)
 {
-    struct icu_buf_utf16 *input = icu_buf_utf16_create(0);
-    icu_utf16_from_utf8_cstr(input, src8cstr, &iter->status);
+    struct icu_buf_utf16 *src = icu_buf_utf16_create(0);
+    icu_utf16_from_utf8_cstr(src, src8cstr, &iter->status);
+    icu_buf_utf16_copy(iter->org, src);
     iter->token_count = 0;
     iter->org_start = 0;
-    iter->org_len = input->utf16_len;
-    iter->last = icu_iter_invoke(iter, iter->steps, input);
+    iter->org_len = src->utf16_len;
+    iter->last = icu_iter_invoke(iter, iter->steps, src);
 }
 
 void icu_iter_destroy(yaz_icu_iter_t iter)
@@ -509,6 +512,7 @@ void icu_iter_destroy(yaz_icu_iter_t iter)
         icu_buf_utf8_destroy(iter->display);
         icu_buf_utf8_destroy(iter->sort8);
         icu_buf_utf8_destroy(iter->result);
+        icu_buf_utf16_destroy(iter->org);
         icu_chain_step_destroy(iter->steps);
         xfree(iter);
     }
@@ -559,8 +563,25 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
 
 void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
 {
-    *start = iter->org_start;
-    *len = iter->org_len;
+    /* save full length of org since we're gonna cut it */
+    int32_t save_len = iter->org->utf16_len;
+
+    struct icu_buf_utf8 *tmp = icu_buf_utf8_create(0);
+    UErrorCode status;
+
+    iter->org->utf16_len = iter->org_start;
+    icu_utf16_to_utf8(tmp, iter->org, &status);
+    if (U_SUCCESS(status))
+        *start = tmp->utf8_len;
+    else
+        *start = 0;
+    iter->org->utf16_len = iter->org_start + iter->org_len;
+    icu_utf16_to_utf8(tmp, iter->org, &status);
+    if (U_SUCCESS(status))
+        *len = tmp->utf8_len - *start;
+    else
+        *len = 0;
+    iter->org->utf16_len = save_len;
 }
 
 int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
