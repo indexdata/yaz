@@ -46,21 +46,17 @@ struct icu_buf_utf16 *icu_buf_utf16_create(size_t capacity)
 
 struct icu_buf_utf16 *icu_buf_utf16_clear(struct icu_buf_utf16 *buf16)
 {
-    if (buf16)
-    {
-        if (buf16->utf16)
-            buf16->utf16[0] = (UChar) 0;
-        buf16->utf16_len = 0;
-    }
+    assert(buf16);
+    if (buf16->utf16)
+        buf16->utf16[0] = (UChar) 0;
+    buf16->utf16_len = 0;
     return buf16;
 }
 
 struct icu_buf_utf16 *icu_buf_utf16_resize(struct icu_buf_utf16 *buf16,
                                            size_t capacity)
 {
-    if (!buf16)
-        return 0;
-
+    assert(buf16);
     if (capacity > 0)
     {
         if (0 == buf16->utf16)
@@ -68,13 +64,8 @@ struct icu_buf_utf16 *icu_buf_utf16_resize(struct icu_buf_utf16 *buf16,
         else
             buf16->utf16
                 = (UChar *) xrealloc(buf16->utf16, sizeof(UChar) * capacity);
+        buf16->utf16_cap = capacity;
     }
-    else
-    {
-        xfree(buf16->utf16);
-        buf16->utf16 = 0;
-    }
-    buf16->utf16_cap = capacity;
     return buf16;
 }
 

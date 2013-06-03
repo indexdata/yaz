@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
@@ -45,21 +46,17 @@ struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
 
 struct icu_buf_utf8 *icu_buf_utf8_clear(struct icu_buf_utf8 *buf8)
 {
-    if (buf8)
-    {
-        if (buf8->utf8)
-            buf8->utf8[0] = (uint8_t) 0;
-        buf8->utf8_len = 0;
-    }
+    assert(buf8);
+    if (buf8->utf8)
+        buf8->utf8[0] = (uint8_t) 0;
+    buf8->utf8_len = 0;
     return buf8;
 }
 
 struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
                                          size_t capacity)
 {
-    if (!buf8)
-        return 0;
-
+    assert(buf8);
     if (capacity > 0)
     {
         if (0 == buf8->utf8)
@@ -70,19 +67,13 @@ struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
 
         buf8->utf8_cap = capacity;
     }
-    else
-    {
-        xfree(buf8->utf8);
-        buf8->utf8 = 0;
-        buf8->utf8_cap = 0;
-    }
-
     return buf8;
 }
 
 const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
 {
-    if (!src8 || src8->utf8_len == 0)
+    assert(src8);
+    if (src8->utf8_len == 0)
         return "";
 
     if (src8->utf8_len == src8->utf8_cap)
