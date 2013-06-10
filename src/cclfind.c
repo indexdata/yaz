@@ -229,8 +229,36 @@ static size_t cmp_operator(const char **aliases, const char *input)
 
 #define REGEX_CHARS "^[]{}()|.*+?!$"
 #define CCL_CHARS "#?\\"
+
+static int has_ccl_masking(const char *src_str,
+                           int src_len,
+                           const char **truncation_aliases,
+                           const char **mask_aliases)
+{
+    size_t j;
+    int quote_mode = 0;
+
+    for (j = 0; j < src_len; j++)
+    {
+        size_t op_size;
+        if (j > 0 && src_str[j-1] == '\\')
+            ;
+        else if (src_str[j] == '"')
+            quote_mode = !quote_mode;
+        else if (!quote_mode &&
+                 (op_size = cmp_operator(truncation_aliases,
+                                         src_str + j)))
+            return 1;
+        else if (!quote_mode &&
+                 (op_size = cmp_operator(mask_aliases,
+                                          src_str + j)))
+            return 1;
+    }
+    return 0;
+}
+
 static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
-                       char *dst_term, int *regex_trunc, int *z3958_trunc,
+                       char *dst_term, int regex_trunc, int z3958_trunc,
                        const char **truncation_aliases,
                        const char **mask_aliases,
                        int is_first, int is_last,
@@ -244,16 +272,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         size_t op_size;
         if (j > 0 && src_str[j-1] == '\\')
         {
-            if (*regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
-            {
-                *regex_trunc = 2;
+            if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
                 strcat(dst_term, "\\");
-            }
-            else if (*z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
-            {
-                *z3958_trunc = 2;
+            else if (z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
                 strcat(dst_term, "\\");
-            }
             strxcat(dst_term, src_str + j, 1);
         }
         else if (src_str[j] == '"')
@@ -264,16 +286,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
             )
         {
             j += (op_size - 1);  /* j++ in for loop */
-            if (*regex_trunc)
-            {
+            if (regex_trunc)
                 strcat(dst_term, ".*");
-                *regex_trunc = 2; /* regex trunc is really needed */
-            }
-            else if (*z3958_trunc)
-            {
+            else if (z3958_trunc)
                 strcat(dst_term, "?");
-                *z3958_trunc = 2;
-            }
             else if (is_first && j == 0)
                 *left_trunc = 1;
             else if (is_last && j == src_len - 1)
@@ -288,16 +304,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
                  (op_size = cmp_operator(mask_aliases, src_str + j)))
         {
             j += (op_size - 1);  /* j++ in for loop */
-            if (*regex_trunc)
-            {
+            if (regex_trunc)
                 strcat(dst_term, ".");
-                *regex_trunc = 2; /* regex trunc is really needed */
-            }
-            else if (*z3958_trunc)
-            {
+            else if (z3958_trunc)
                 strcat(dst_term, "#");
-                *z3958_trunc = 2;
-            }
             else
             {
                 cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
@@ -306,16 +316,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         }
         else if (src_str[j] != '\\')
         {
-            if (*regex_trunc && strchr(REGEX_CHARS, src_str[j]))
-            {
-                *regex_trunc = 2;
+            if (regex_trunc && strchr(REGEX_CHARS, src_str[j]))
                 strcat(dst_term, "\\");
-            }
-            else if (*z3958_trunc && strchr(CCL_CHARS, src_str[j]))
-            {
-                *z3958_trunc = 2;
+            else if (z3958_trunc && strchr(CCL_CHARS, src_str[j]))
                 strcat(dst_term, "\\");
-            }
             strxcat(dst_term, src_str + j, 1);
         }
     }
@@ -375,6 +379,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         struct ccl_rpn_node *p;
         size_t no, i;
         int is_phrase = 0;
+        int is_ccl_masked = 0;
         int relation_value = -1;
         int position_value = -1;
         int structure_value = -1;
@@ -402,6 +407,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             for (i = 0; i<lookahead->len; i++)
                 if (lookahead->name[i] == ' ')
                     this_is_phrase = 1;
+
+            if (has_ccl_masking(lookahead->name, lookahead->len,
+                                truncation_aliases,
+                                mask_aliases))
+                is_ccl_masked = 1;
 
             if (auto_group)
             {
@@ -492,12 +502,14 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_REGEX,
                           &attset))
         {
-            regex_trunc = 1; /* regex trunc (102) allowed */
+            if (is_ccl_masked)
+                regex_trunc = 1; /* regex trunc (102) allowed */
         }
         else if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_Z3958,
                           &attset))
         {
-            z3958_trunc = 1; /* Z39.58 trunc (CCL) trunc allowed */
+            if (is_ccl_masked)
+                z3958_trunc = 1; /* Z39.58 trunc (CCL) trunc allowed */
         }
 
         /* make the RPN token */
@@ -514,8 +526,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 strxcat(p->u.t.term, cclp->look_token->ws_prefix_buf,
                         cclp->look_token->ws_prefix_len);
             }
-            if (append_term(cclp, src_str, src_len, p->u.t.term, &regex_trunc,
-                            &z3958_trunc, truncation_aliases, mask_aliases,
+            if (append_term(cclp, src_str, src_len, p->u.t.term, regex_trunc,
+                            z3958_trunc, truncation_aliases, mask_aliases,
                             i == 0, i == no - 1,
                             &left_trunc, &right_trunc))
             {
@@ -577,11 +589,11 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 2);
         }
-        else if (regex_trunc == 2)
+        else if (regex_trunc)
         {
             ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 102);
         }
-        else if (z3958_trunc == 2)
+        else if (z3958_trunc)
         {
             ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 104);
         }

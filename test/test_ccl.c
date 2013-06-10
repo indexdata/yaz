@@ -324,9 +324,12 @@ void tst1(int pass)
                             "@attr 5=104 a?b#c\\\\? "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=\\(",
-                            "@attr 5=102 \\\\( "));
+                            "( "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=\\(",
                             "( "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "z=a b#",
+                            "@attr 5=104 \"a b#\" "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\"",
                             "\"\\\"\" "));
@@ -334,12 +337,12 @@ void tst1(int pass)
                             "\"\\\"\" "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=.",
-                            "@attr 5=102 \\\\. "));
+                            ". "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=.",
                             ". "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=\".\"",
-                            "@attr 5=102 \\\\. "));
+                            ". "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=\".\"",
                             ". "));
 
@@ -349,14 +352,14 @@ void tst1(int pass)
                             "@attr 5=104 ?\\\\? "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=\"?\\?\"",
-                            "@attr 5=102 \\\\?\\\\? "));
+                            "?? "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=\"?\\?\"",
-                            "@attr 5=104 \\\\?\\\\? "));
+                            "?? "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "reg=\\\\",
-                            "@attr 5=102 \\\\\\\\ "));
+                            "\\\\ "));
     YAZ_CHECK(tst_ccl_query(bibset, "z=\\\\",
-                            "@attr 5=104 \\\\\\\\ "));
+                            "\\\\ "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "\\\\",
                             "@attr 4=2 @attr 1=1016 \\\\ "));
@@ -432,6 +435,9 @@ void tst2(void)
     YAZ_CHECK(tst_ccl_query(bibset, "a?#",
                             "@attr 5=104 @attr 4=2 @attr 1=1016 a?# "));
 
+    YAZ_CHECK(tst_ccl_query(bibset, "a b?#",
+                            "@and @attr 4=2 @attr 1=1016 a @attr 5=104 @attr 4=2 @attr 1=1016 b?# "));
+
     YAZ_CHECK(tst_ccl_query(bibset, "a*",
                             "@attr 4=2 @attr 1=1016 a* "));
 
@@ -443,7 +449,7 @@ void tst2(void)
                             "@attr 5=104 @attr 4=2 @attr 1=1016 a? "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a?",
-                            "@attr 5=104 @attr 4=2 @attr 1=1016 a\\\\? "));
+                            "@attr 4=2 @attr 1=1016 a? "));
 
     ccl_qual_fitem(bibset, "?", "@mask");
     YAZ_CHECK(tst_ccl_query(bibset, "a?",
@@ -453,7 +459,7 @@ void tst2(void)
     ccl_qual_fitem(bibset, "", "@mask");
     ccl_qual_fitem(bibset, "", "@truncation");
     YAZ_CHECK(tst_ccl_query(bibset, "a?#",
-                            "@attr 5=104 @attr 4=2 @attr 1=1016 a\\\\?\\\\# "));
+                            "@attr 4=2 @attr 1=1016 a?# "));
 
     ccl_qual_fitem(bibset, "og", "@and");
     ccl_qual_fitem(bibset, "eller", "@or");
