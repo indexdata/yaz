@@ -1,3 +1,20 @@
+--- 4.2.58 2013/06/11
+
+ICU: Disallow 0 ptrs for some ICU string utilities.
+
+ICU: new utilities icu_iter_get_org_info and icu_chain_get_org_info:
+returns original tokens (before normalization).
+
+CCL: avoid z39.58/regex truncation when not needed. Apply only the
+conversion of those masks, when absolutely necessary.
+
+CCL: configurable masking character - @mask. Default masking character
+is # for CCL.
+
+HTTP encoding: remove Transfer-Encoding header. YAZ uses content_len and
+full response anyway, so a Transfer-Encoding header will obstruct the
+response.
+
 --- 4.2.57 2013/05/15
 
 COMSTACK: @ uses AF_UNSPEC . But we prefer AF_INET6 over others when
