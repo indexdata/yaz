@@ -84,8 +84,10 @@ YAZ_EXPORT void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
 YAZ_EXPORT void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
                                              const char *username,
                                              const char *password);
-
-YAZ_EXPORT const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n);
+YAZ_EXPORT const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp,
+                                            const char *n);
+YAZ_EXPORT const char *z_HTTP_header_remove(Z_HTTP_Header **hp,
+                                            const char *n);
 
 YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 

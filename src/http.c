@@ -219,6 +219,21 @@ void z_HTTP_header_set(ODR o, Z_HTTP_Header **hp, const char *n,
     (*hp)->next = 0;
 }
 
+const char *z_HTTP_header_remove(Z_HTTP_Header **hp, const char *n)
+{
+    while (*hp)
+    {
+        if (!yaz_strcasecmp((*hp)->name, n))
+        {
+            const char *v = (*hp)->value;
+            *hp = (*hp)->next;
+            return v;
+        }
+        hp = &(*hp)->next;
+    }
+    return 0;
+}
+
 const char *z_HTTP_header_lookup(const Z_HTTP_Header *hp, const char *n)
 {
     for (; hp; hp = hp->next)
