@@ -868,7 +868,7 @@
 	 </row>
 	 <row>
 	  <entry>mask</entry>
-	  <entry>Masking character</entry>
+	  <entry>Masking character. Requires YAZ 4.2.58 or later</entry>
 	  <entry><literal>#</literal></entry>
 	 </row>
 	 <row>
