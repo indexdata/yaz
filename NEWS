@@ -1,3 +1,7 @@
+--- 4.2.59 2013/06/11
+
+Implement z_HTTP_header_remove.
+
 --- 4.2.58 2013/06/11
 
 ICU: Disallow 0 ptrs for some ICU string utilities.
