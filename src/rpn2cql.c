@@ -173,7 +173,7 @@ static Odr_int lookup_truncation(Z_AttributeList *attributes)
     }
     /* No truncation specified */
     return 0;
-};
+}
 
 static int rpn2cql_simple(cql_transform_t ct,
                           void (*pr)(const char *buf, void *client_data),

@@ -469,7 +469,7 @@ Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
     facet_term = facet_term_create_cstr(odr, wrbuf_cstr(wrbuf), freq);
     wrbuf_destroy(wrbuf);
     return facet_term;
-};
+}
 
 static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
 {
