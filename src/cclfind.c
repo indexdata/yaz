@@ -797,7 +797,6 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, rel);
         return p;
     }
-    cclp->error_code = CCL_ERR_TERM_EXPECTED;
     return NULL;
 }
 

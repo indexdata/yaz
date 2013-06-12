@@ -672,8 +672,9 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                                    YAZ_SRW_UNSUPP_OPERATION, operation);
             return 0;
         }
-#endif
+#else
         return 1;
+#endif
     }
     return 2;
 }

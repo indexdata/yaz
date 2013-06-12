@@ -195,7 +195,6 @@ static void *construct_xslt(const xmlNode *ptr,
         wrbuf_printf(wr_error, "Element <xslt>: "
                      "attribute 'stylesheet' expected");
         nmem_destroy(nmem);
-        return 0;
     }
     else
     {
@@ -241,7 +240,6 @@ static void *construct_xslt(const xmlNode *ptr,
                          ")");
             xmlFreeDoc(info->xsp_doc);
             nmem_destroy(info->nmem);
-            return 0;
         }
         else
         {
