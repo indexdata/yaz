@@ -567,7 +567,7 @@ void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
     int32_t save_len = iter->org->utf16_len;
 
     struct icu_buf_utf8 *tmp = icu_buf_utf8_create(0);
-    UErrorCode status;
+    UErrorCode status = U_ZERO_ERROR;
 
     iter->org->utf16_len = iter->org_start;
     icu_utf16_to_utf8(tmp, iter->org, &status);
