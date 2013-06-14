@@ -1,3 +1,7 @@
+--- 4.2.60 2013/06/14
+
+ICU: fix bug in icu_iter_get_org_info (un-init variable).
+
 --- 4.2.59 2013/06/11
 
 Implement z_HTTP_header_remove.
