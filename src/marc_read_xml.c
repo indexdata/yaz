@@ -185,18 +185,13 @@ static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p,
                 for(; p; p = p->next)
                     if (p->type == XML_TEXT_NODE)
                         leader = (const char *) p->content;
-                break;
             }
-            else
-            {
-                yaz_marc_cprintf(
-                    mt, "Expected element 'leader', got '%.80s'", ptr->name);
-            }
+            break;
         }
     if (!leader)
     {
-        yaz_marc_cprintf(mt, "Missing element 'leader'");
-        return -1;
+        yaz_marc_cprintf(mt, "Missing leader. Inserting fake leader");
+        leader = "00000nam a22000000a 4500";
     }
     if (strlen(leader) != 24)
     {
