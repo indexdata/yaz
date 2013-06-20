@@ -1,3 +1,10 @@
+--- 4.2.61 2013/06/20
+
+For MARC XML parsing, allow record without leader. A fake/default leader
+is inserted and a warning is tagged with the record.
+
+ICU: fix leak in in icu_iter_get_org_info.
+
 --- 4.2.60 2013/06/14
 
 ICU: fix bug in icu_iter_get_org_info (un-init variable).
