@@ -581,6 +581,7 @@ void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
         *len = tmp->utf8_len - *start;
     else
         *len = 0;
+    icu_buf_utf8_destroy(tmp);
     iter->org->utf16_len = save_len;
 }
 
