@@ -146,19 +146,19 @@
      <ulink url="&url.libtool;">Libtool</ulink>
      are used to generate Makefiles and configure &yaz; for the system.
      You do <emphasis>not</emphasis> these tools unless you're using the
-     CVS version of &yaz;.
+     git version of &yaz;.
     </para>
 
     <para>
      The CQL parser for &yaz; is built using
      GNU <ulink url="&url.bison;">Bison</ulink>.
-     This tool is only needed if you're using the CVS version of &yaz;.
+     This tool is only needed if you're using the git version of &yaz;.
     </para>
 
     <para>
      &yaz; includes a tiny ASN.1 compiler. This compiler is
      written in <ulink url="&url.tcl;">Tcl</ulink>.
-     But as for Bison you do not need it unless you're using CVS
+     But as for Bison you do not need it unless you're using git
      version of &yaz; or you're using the compiler to built own codecs
      for private ASN.1.
     </para>
@@ -580,7 +580,7 @@
        <listitem><para>
          If GNU Bison is present, you might set <literal>HAVE_ICONV</literal>
          to 1 and specify the Bison executable in <literal>BISON</literal>.
-         Bison is only required if you use the CVS version of
+         Bison is only required if you use the git version of
          YAZ or if you modify the grammar for CQL
          (<filename>cql.y</filename>).
         </para>
