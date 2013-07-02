@@ -33,6 +33,7 @@
    <arg>-m <replaceable>method</replaceable></arg>
    <arg>-O <replaceable>fname</replaceable></arg>
    <arg>-p <replaceable>fname</replaceable></arg>
+   <arg>-R <replaceable>num</replaceable></arg>
    <arg>-u <replaceable>user/password</replaceable></arg>
    <arg>-x <replaceable>proxy</replaceable></arg>
    <arg rep="repeat">url</arg>
@@ -83,6 +84,14 @@
     <term>-p <replaceable>fname</replaceable></term>
     <listitem><para>
       Sets a file to be POSTed in the folloing URL.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-R <replaceable>num</replaceable></term>
+    <listitem><para>
+      Sets maximum number of HTTP redirects to be followed.
+      A value of zero disables follow of HTTP redirects.
      </para></listitem>
    </varlistentry>
 

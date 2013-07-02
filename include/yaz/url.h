@@ -60,6 +60,12 @@ YAZ_EXPORT void yaz_url_destroy(yaz_url_t p);
 */
 YAZ_EXPORT void yaz_url_set_proxy(yaz_url_t p, const char *proxy);
 
+/** \brief sets maximum number of redirects
+    \param p handle
+    \param num maximum number of redirects
+*/
+YAZ_EXPORT void yaz_url_set_max_redirects(yaz_url_t p, int num);
+
 /** \brief executes the actual HTTP request (including redirects, etc)
     \param p handle
     \param uri URL

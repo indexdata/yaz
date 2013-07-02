@@ -21,6 +21,7 @@ static void usage(void)
     printf(" -m method           Sets HTTP method\n");
     printf(" -O fname            Writes HTTP content to file\n");
     printf(" -p fname            POSTs file at following url\n");
+    printf(" -R num              Set maximum number of HTTP redirects\n");
     printf(" -u user/password    Sets Basic HTTP auth\n");
     printf(" -x proxy            Sets HTTP proxy\n");
     exit(1);
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
     int no_urls = 0;
     const char *outfname = 0;
 
-    while ((ret = options("hH:m:O:p:u:x:", argv, argc, &arg))
+    while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:x:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
@@ -108,6 +109,9 @@ int main(int argc, char **argv)
             xfree(post_buf);
             post_buf = get_file(arg, &post_len);
             method = "POST";
+            break;
+        case 'R':
+            yaz_url_set_max_redirects(p, atoi(arg));
             break;
         case 'u':
             if (strchr(arg, '/'))

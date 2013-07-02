@@ -18,6 +18,7 @@ struct yaz_url {
     ODR odr_in;
     ODR odr_out;
     char *proxy;
+    int max_redirects;
 };
 
 yaz_url_t yaz_url_create(void)
@@ -26,6 +27,7 @@ yaz_url_t yaz_url_create(void)
     p->odr_in = odr_createmem(ODR_DECODE);
     p->odr_out = odr_createmem(ODR_ENCODE);
     p->proxy = 0;
+    p->max_redirects = 10;
     return p;
 }
 
@@ -46,6 +48,11 @@ void yaz_url_set_proxy(yaz_url_t p, const char *proxy)
     p->proxy = 0;
     if (proxy && *proxy)
         p->proxy = xstrdup(proxy);
+}
+
+void yaz_url_set_max_redirects(yaz_url_t p, int num)
+{
+    p->max_redirects = num;
 }
 
 static void extract_user_pass(NMEM nmem,
@@ -189,7 +196,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             break;
         code = res->code;
         location = z_HTTP_header_lookup(res->headers, "Location");
-        if (++number_of_redirects < 10 &&
+        if (++number_of_redirects <= p->max_redirects &&
             location && (code == 301 || code == 302 || code == 307))
         {
             odr_reset(p->odr_out);
