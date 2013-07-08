@@ -40,6 +40,7 @@ YAZ_BEGIN_CDECL
 /** \brief file glob handle */
 typedef struct glob_res *yaz_glob_res_t;
 
+#define YAZ_FILE_GLOB_FAIL_NOTEXIST 1
 
 /** \brief perform glob
     \param pattern glob pattern file spec
@@ -49,6 +50,16 @@ typedef struct glob_res *yaz_glob_res_t;
 */
 YAZ_EXPORT
 int yaz_file_glob(const char *pattern, yaz_glob_res_t *res);
+
+/** \brief perform glob (with flags)
+    \param pattern glob pattern file spec
+    \param res returned glob result
+    \param flags YAZ_FILE_GLOB_.. flags
+    \retval 0 OK
+    \retval -1 ERROR
+*/
+YAZ_EXPORT
+int yaz_file_glob2(const char *pattern, yaz_glob_res_t *res, unsigned flags);
 
 /** \brief release glob result
     \param res pointer to glob result

@@ -82,15 +82,15 @@ static void tst_xml_include2(void)
     YAZ_CHECK(node);
     if (node)
     {
-        const char *expect =
-            "<?xml version=\"1.0\"?>\n"
-            "<x><!-- begin include src=\"test_xml_no.xml\" -->"
-            "<!-- end include src=\"test_xml_no.xml\" --></x>\n";
-
-        xmlChar *xml_out;
-        int len_out;
-        int ret = yaz_xml_include_simple(node, srcdir);
-        YAZ_CHECK(ret == -1);
+        int ret = yaz_xml_include_glob(node, srcdir,
+                                       YAZ_FILE_GLOB_FAIL_NOTEXIST);
+        YAZ_CHECK_EQ(ret, -1);
+    }
+    if (node)
+    {
+        int ret = yaz_xml_include_glob(node, srcdir,
+                                       0);
+        YAZ_CHECK_EQ(ret, 0);
     }
     xmlFreeDoc(doc);
 #endif

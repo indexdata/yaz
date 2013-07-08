@@ -31,6 +31,7 @@ struct res_entry {
 
 struct glob_res {
     NMEM nmem;
+    unsigned flags;
     size_t number_of_entries;
     struct res_entry **last_entry;
     struct res_entry *entries;
@@ -68,7 +69,8 @@ static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
         glob_r(res, pattern, i, prefix);
         prefix[prefix_len] = '\0';
     }
-    else if (!is_pattern && !pattern[i])
+    else if ((res->flags & YAZ_FILE_GLOB_FAIL_NOTEXIST) &&
+             !is_pattern && !pattern[i])
     {
         strcpy(prefix + prefix_len, pattern + off);
         add_entry(res, prefix);
@@ -138,11 +140,17 @@ static void sort_them(yaz_glob_res_t res)
 
 int yaz_file_glob(const char *pattern, yaz_glob_res_t *res)
 {
+    return yaz_file_glob2(pattern, res, 0);
+}
+
+int yaz_file_glob2(const char *pattern, yaz_glob_res_t *res, unsigned flags)
+{
     char prefix[FILENAME_MAX+1];
     NMEM nmem = nmem_create();
 
     *prefix = '\0';
     *res = nmem_malloc(nmem, sizeof(**res));
+    (*res)->flags = flags;
     (*res)->number_of_entries = 0;
     (*res)->nmem = nmem;
     (*res)->entries = 0;

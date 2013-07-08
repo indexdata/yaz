@@ -10,8 +10,6 @@
 #include <config.h>
 #endif
 
-#include <yaz/file_glob.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -29,6 +27,7 @@
 
 struct yaz_xml_include_s {
     const char *confdir;
+    unsigned glob_flags;
 };
 
 typedef struct yaz_xml_include_s *yaz_xml_include_t;
@@ -101,7 +100,7 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
         int glob_ret;
         yaz_glob_res_t glob_res;
 
-        glob_ret = yaz_file_glob(wrbuf_cstr(w), &glob_res);
+        glob_ret = yaz_file_glob2(wrbuf_cstr(w), &glob_res, config->glob_flags);
         yaz_log(YLOG_LOG, "yaz_file_glob returned w=%s %d", wrbuf_cstr(w),
                 glob_ret);
         if (glob_ret == 0)
@@ -152,13 +151,21 @@ static int process_config_includes(yaz_xml_include_t config, xmlNode *n)
     return 0;
 }
 
-int yaz_xml_include_simple(xmlNode *n, const char *base_path)
+int yaz_xml_include_glob(xmlNode *n, const char *base_path,
+                         unsigned glob_flags)
 {
     struct yaz_xml_include_s s;
 
     s.confdir = base_path;
+    s.glob_flags = glob_flags;
     return process_config_includes(&s, n);
 }
+
+int yaz_xml_include_simple(xmlNode *n, const char *base_path)
+{
+    return yaz_xml_include_glob(n, base_path, 0);
+}
+
 
 /* YAZ_HAVE_XML2 */
 #endif

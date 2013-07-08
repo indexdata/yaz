@@ -34,13 +34,14 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/xmltypes.h>
+#include <yaz/file_glob.h>
 
 YAZ_BEGIN_CDECL
 
 #if YAZ_HAVE_XML2
 
 /** \brief substitute include nodes in a tree
-    \param n node where include is peformed
+    \param n node where include is performed
     \param base_path base_path - for relative file specs
     \retval 0 OK
     \retval -1 FAILURE
@@ -52,6 +53,21 @@ YAZ_BEGIN_CDECL
 */
 YAZ_EXPORT
 int yaz_xml_include_simple(xmlNode *n, const char *base_path);
+
+/** \brief substitute include nodes in a tree
+    \param n node where include is performed
+    \param base_path base_path - for relative file specs
+    \param flags for yaz_file_glob2 (YAZ_FILE_GLOB_...)
+    \retval 0 OK
+    \retval -1 FAILURE
+
+    Nodes of the form <include src="glob-pattern"/> are substituted with
+    contents of files matching glob-pattern. Do not use this function
+    on XML from untrusted sources -- from the net for example -- local
+    trusted XML configuration ONLY.
+*/
+YAZ_EXPORT
+int yaz_xml_include_glob(xmlNode *n, const char *base_path, unsigned flags);
 
 #endif
 YAZ_END_CDECL
