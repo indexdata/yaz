@@ -102,7 +102,8 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
         yaz_glob_res_t glob_res;
 
         glob_ret = yaz_file_glob(wrbuf_cstr(w), &glob_res);
-
+        yaz_log(YLOG_LOG, "yaz_file_glob returned w=%s %d", wrbuf_cstr(w),
+                glob_ret);
         if (glob_ret == 0)
         {
             size_t i;

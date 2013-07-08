@@ -36,6 +36,17 @@ struct glob_res {
     struct res_entry *entries;
 };
 
+static void add_entry(yaz_glob_res_t res, const char *str)
+{
+    struct res_entry *ent =
+        nmem_malloc(res->nmem, sizeof(*ent));
+    ent->file = nmem_strdup(res->nmem, str);
+    ent->next = 0;
+    *res->last_entry = ent;
+    res->last_entry = &ent->next;
+    res->number_of_entries++;
+}
+
 static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
                    char *prefix)
 {
@@ -56,6 +67,11 @@ static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
         prefix[prefix_len + i - off] = '\0';
         glob_r(res, pattern, i, prefix);
         prefix[prefix_len] = '\0';
+    }
+    else if (!is_pattern && !pattern[i])
+    {
+        strcpy(prefix + prefix_len, pattern + off);
+        add_entry(res, prefix);
     }
     else
     {
@@ -82,13 +98,7 @@ static void glob_r(yaz_glob_res_t res, const char *pattern, size_t off,
                     }
                     else
                     {
-                        struct res_entry *ent =
-                            nmem_malloc(res->nmem, sizeof(*ent));
-                        ent->file = nmem_strdup(res->nmem, prefix);
-                        ent->next = 0;
-                        *res->last_entry = ent;
-                        res->last_entry = &ent->next;
-                        res->number_of_entries++;
+                        add_entry(res, prefix);
                     }
                     prefix[prefix_len] = '\0';
                 }
