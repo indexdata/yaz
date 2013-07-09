@@ -92,6 +92,8 @@ YAZ_EXPORT const char *z_HTTP_header_remove(Z_HTTP_Header **hp,
 YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 
 YAZ_EXPORT Z_GDU *z_get_HTTP_Response(ODR o, int code);
+YAZ_EXPORT Z_GDU *z_get_HTTP_Response_details(ODR o, int code,
+                                              const char *details);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
                                                const char *host,

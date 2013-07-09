@@ -338,7 +338,7 @@ Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
     return p;
 }
 
-Z_GDU *z_get_HTTP_Response(ODR o, int code)
+Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
 {
     Z_GDU *p = (Z_GDU *) odr_malloc(o, sizeof(*p));
     Z_HTTP_Response *hres;
@@ -355,7 +355,10 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
                       "YAZ/" YAZ_VERSION);
     if (code != 200)
     {
-        hres->content_buf = (char*) odr_malloc(o, 400);
+        const char *http_err = z_HTTP_errmsg(code);
+        size_t sz = 400 + strlen(http_err) + (details ?
+                                              strlen(details) : 0);
+        hres->content_buf = (char*) odr_malloc(o, sz);
         sprintf(hres->content_buf,
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
                 " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
@@ -367,14 +370,24 @@ Z_GDU *z_get_HTTP_Response(ODR o, int code)
                 "  <P><A HREF=\"http://www.indexdata.com/yaz/\">YAZ</A> "
                 YAZ_VERSION "</P>\n"
                 "  <P>Error: %d</P>\n"
-                "  <P>Description: %.50s</P>\n"
+                "  <P>Description: %s</P>\n", code, http_err);
+        if (details)
+        {
+            sprintf(hres->content_buf + strlen(hres->content_buf),
+                    "<P>Details: %s</P>\n", details);
+        }
+        sprintf(hres->content_buf + strlen(hres->content_buf),
                 " </BODY>\n"
-                "</HTML>\n",
-                code, z_HTTP_errmsg(code));
+                "</HTML>\n");
         hres->content_len = strlen(hres->content_buf);
         z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
     }
     return p;
+}
+
+Z_GDU *z_get_HTTP_Response(ODR o, int code)
+{
+    return z_get_HTTP_Response_details(o, code, 0);
 }
 
 const char *z_HTTP_errmsg(int code)
