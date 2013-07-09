@@ -1,3 +1,10 @@
+yaz-url and url functions: allow max HTTP redirects to be controlled.
+
+New functions yaz_file_glob2, yaz_xml_include_glob.
+These functions takes a flags parameter, which, for now only controls
+whether to fail inclusion of a non-existing file (without glob
+pattern) - flags YAZ_FILE_GLOB_FAIL_NOTEXIST.
+
 --- 4.2.61 2013/06/20
 
 For MARC XML parsing, allow record without leader. A fake/default leader
