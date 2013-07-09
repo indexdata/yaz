@@ -74,11 +74,20 @@ YAZ_EXPORT void yaz_url_set_max_redirects(yaz_url_t p, int num);
     \param buf content buffer for HTTP request, NULL for empty content
     \param len content length for HTTP request
     \returns HTTP response; NULL on ERROR.
+
+    Use yaz_url_get_error to get details if NULL is returned.
 */
 YAZ_EXPORT Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                                          const char *method,
                                          Z_HTTP_Header *headers,
                                          const char *buf, size_t len);
+
+/** \brief get last error from yaz_url_exec
+    \param p handle
+    \returns message (possibly empty string no error occurred)
+*/
+YAZ_EXPORT const char *yaz_url_get_error(yaz_url_t p);
+
 YAZ_END_CDECL
 
 #endif

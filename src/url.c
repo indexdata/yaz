@@ -13,12 +13,14 @@
 #include <yaz/url.h>
 #include <yaz/comstack.h>
 #include <yaz/log.h>
+#include <yaz/wrbuf.h>
 
 struct yaz_url {
     ODR odr_in;
     ODR odr_out;
     char *proxy;
     int max_redirects;
+    WRBUF w_error;
 };
 
 yaz_url_t yaz_url_create(void)
@@ -28,6 +30,7 @@ yaz_url_t yaz_url_create(void)
     p->odr_out = odr_createmem(ODR_ENCODE);
     p->proxy = 0;
     p->max_redirects = 10;
+    p->w_error = wrbuf_alloc();
     return p;
 }
 
@@ -38,6 +41,7 @@ void yaz_url_destroy(yaz_url_t p)
         odr_destroy(p->odr_in);
         odr_destroy(p->odr_out);
         xfree(p->proxy);
+        wrbuf_destroy(p->w_error);
         xfree(p);
     }
 }
@@ -93,6 +97,16 @@ static void extract_user_pass(NMEM nmem,
         *uri_lean = nmem_strdup(nmem, uri);
 }
 
+const char *yaz_url_get_error(yaz_url_t p)
+{
+    return wrbuf_cstr(p->w_error);
+}
+
+static void log_warn(yaz_url_t p)
+{
+    yaz_log(YLOG_WARN, "yaz_url: %s", wrbuf_cstr(p->w_error));
+}
+
 Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                               const char *method,
                               Z_HTTP_Header *user_headers,
@@ -101,6 +115,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     Z_HTTP_Response *res = 0;
     int number_of_redirects = 0;
 
+    wrbuf_rewind(p->w_error);
     while (1)
     {
         void *add;
@@ -144,17 +159,21 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         }
         if (!z_GDU(p->odr_out, &gdu, 0, 0))
         {
-            yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);
+            wrbuf_printf(p->w_error, "Can not encode HTTP request for URL %s",
+                         uri);
+            log_warn(p);
             return 0;
         }
         conn = cs_create_host_proxy(uri_lean, 1, &add, p->proxy);
         if (!conn)
         {
-            yaz_log(YLOG_WARN, "Could not resolve URL: %s", uri);
+            wrbuf_printf(p->w_error, "Can not resolve URL %s", uri);
+            log_warn(p);
         }
         else if (cs_connect(conn, add) < 0)
         {
-            yaz_log(YLOG_WARN, "Can not connect to URL: %s", uri);
+            wrbuf_printf(p->w_error, "Can not connect to URL %s", uri);
+            log_warn(p);
         }
         else
         {
@@ -162,7 +181,10 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             char *buf = odr_getbuf(p->odr_out, &len, 0);
 
             if (cs_put(conn, buf, len) < 0)
-                yaz_log(YLOG_WARN, "cs_put failed URL: %s", uri);
+            {
+                wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
+                log_warn(p);
+            }
             else
             {
                 char *netbuffer = 0;
@@ -170,7 +192,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                 int cs_res = cs_get(conn, &netbuffer, &netlen);
                 if (cs_res <= 0)
                 {
-                    yaz_log(YLOG_WARN, "cs_get failed URL: %s", uri);
+                    wrbuf_printf(p->w_error, "cs_get failed for URL %s", uri);
+                    log_warn(p);
                 }
                 else
                 {
@@ -179,8 +202,9 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                     if (!z_GDU(p->odr_in, &gdu, 0, 0)
                         || gdu->which != Z_GDU_HTTP_Response)
                     {
-                        yaz_log(YLOG_WARN, "HTTP decoding failed "
-                                "URL:%s", uri);
+                        wrbuf_printf(p->w_error, "HTTP decoding fail for "
+                                     "URL %s", uri);
+                        log_warn(p);
                     }
                     else
                     {
