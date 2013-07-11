@@ -1,3 +1,9 @@
+New utility z_get_HTTP_Response_details - an extended version of
+z_get_HTTP_Response.
+
+New utility yaz_url_get_error which returns error message of last
+failed yaz_url_exec call.
+
 yaz-url and url functions: allow max HTTP redirects to be controlled.
 
 New functions yaz_file_glob2, yaz_xml_include_glob.
