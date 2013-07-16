@@ -92,6 +92,20 @@ int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b)
     return len_a - len_b;
 }
 
+int yaz_strcmp_null(const char *v1, const char *v2)
+{
+    if (v1)
+    {
+        if (v2)
+            return strcmp(v1, v2);
+        else
+            return 1;
+    }
+    else if (v2)
+        return -1;
+    return 0;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

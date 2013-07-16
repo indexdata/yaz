@@ -49,16 +49,6 @@ struct ZOOM_record_cache_p {
     ZOOM_record_cache next;
 };
 
-
-static int strcmp_null(const char *v1, const char *v2)
-{
-    if (!v1 && !v2)
-        return 0;
-    if (!v1 || !v2)
-        return -1;
-    return strcmp(v1, v2);
-}
-
 static size_t record_hash(int pos)
 {
     if (pos < 0)
@@ -80,9 +70,9 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos
-            && strcmp_null(r->schema, rc->schema) == 0
-            && strcmp_null(elementSetName,rc->elementSetName) == 0
-            && strcmp_null(syntax, rc->syntax) == 0)
+            && yaz_strcmp_null(r->schema, rc->schema) == 0
+            && yaz_strcmp_null(elementSetName,rc->elementSetName) == 0
+            && yaz_strcmp_null(syntax, rc->syntax) == 0)
             break;
     }
     if (!rc)
@@ -136,11 +126,11 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
     {
         if (pos == rc->pos)
         {
-            if (strcmp_null(r->schema, rc->schema))
+            if (yaz_strcmp_null(r->schema, rc->schema))
                 continue;
-            if (strcmp_null(elementSetName,rc->elementSetName))
+            if (yaz_strcmp_null(elementSetName,rc->elementSetName))
                 continue;
-            if (strcmp_null(syntax, rc->syntax))
+            if (yaz_strcmp_null(syntax, rc->syntax))
                 continue;
             return &rc->rec;
         }

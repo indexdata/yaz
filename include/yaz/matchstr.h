@@ -87,6 +87,14 @@ YAZ_EXPORT int yaz_strncasecmp(const char *s1, const char *s2, size_t n);
 */
 YAZ_EXPORT int yaz_strcasecmp(const char *s1, const char *s2);
 
+/** \brief strcmp, null may be passed
+    \param s1 first buffer or NULL
+    \param s2 second buffer or NULL
+    \retval 0 buffers are equal
+    \retval >0 a > b
+    \retval <0 a < b
+*/
+YAZ_EXPORT int yaz_strcmp_null(const char *s1, const char *s2);
 
 YAZ_END_CDECL
 
