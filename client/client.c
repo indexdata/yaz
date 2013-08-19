@@ -923,7 +923,7 @@ static void display_record(Z_External *r)
         const char *octet_buf = (const char*)r->u.octet_aligned->buf;
         size_t octet_len = r->u.octet_aligned->len;
         if (!oid_oidcmp(oid, yaz_oid_recsyn_xml)
-            || !oid_oidcmp(oid, yaz_oid_recsyn_xml)
+            || !oid_oidcmp(oid, yaz_oid_recsyn_application_xml)
             || !oid_oidcmp(oid, yaz_oid_recsyn_html))
         {
             print_xml_record(octet_buf, octet_len);
