@@ -135,7 +135,6 @@ struct ZOOM_resultset_p {
     int step;
     int piggyback;
     char *setname;
-    char *schema;
     ODR odr;
     ZOOM_record_cache record_hash[RECORD_HASH_SIZE];
     ZOOM_options options;
@@ -199,6 +198,7 @@ struct ZOOM_task_p {
             ZOOM_resultset resultset;
             char *syntax;
             char *elementSetName;
+            char *schema;
             int recv_search_fired;
         } search;
 #define ZOOM_TASK_RETRIEVE 2
@@ -208,6 +208,7 @@ struct ZOOM_task_p {
             int count;
             char *syntax;
             char *elementSetName;
+            char *schema;
         } retrieve;
 #define ZOOM_TASK_CONNECT 3
 #define ZOOM_TASK_SCAN 4
@@ -258,7 +259,8 @@ int ZOOM_test_reconnect(ZOOM_connection c);
 
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *syntax,
-                                     const char *elementSetName);
+                                     const char *elementSetName,
+                                     const char *schema);
 void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                            int pos,
                            const char *syntax, const char *elementSetName,

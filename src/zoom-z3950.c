@@ -642,6 +642,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     ZOOM_resultset r;
     int lslb, ssub, mspn;
     const char *syntax;
+    const char *schema;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
     Z_SearchRequest *search_req = apdu->u.searchRequest;
     const char *elementSetName;
@@ -722,6 +723,8 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     /* get syntax (no need to provide unless piggyback is in effect) */
     syntax = c->tasks->u.search.syntax;
 
+    schema = c->tasks->u.search.schema;
+
     lslb = ZOOM_options_get_int(r->options, "largeSetLowerBound", -1);
     ssub = ZOOM_options_get_int(r->options, "smallSetUpperBound", -1);
     mspn = ZOOM_options_get_int(r->options, "mediumSetPresentNumber", -1);
@@ -733,7 +736,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
         *search_req->mediumSetPresentNumber = mspn;
     }
     else if (c->tasks->u.search.start == 0 && c->tasks->u.search.count > 0
-             && r->piggyback && !r->r_sort_spec && !r->schema)
+             && r->piggyback && !r->r_sort_spec && !schema)
     {
         /* Regular piggyback - do it unless we're going to do sort */
         *search_req->largeSetLowerBound = 2000000000;
@@ -1459,7 +1462,8 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
     int i = 0;
     const char *syntax = 0;
     const char *elementSetName = 0;
-    ZOOM_resultset  resultset;
+    const char *schema = 0;
+    ZOOM_resultset resultset;
     int *start, *count;
 
     if (!c->tasks)
@@ -1476,6 +1480,7 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
         count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;
+        schema =  c->tasks->u.search.schema;
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
@@ -1483,6 +1488,7 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
         count = &c->tasks->u.retrieve.count;
         syntax = c->tasks->u.retrieve.syntax;
         elementSetName = c->tasks->u.retrieve.elementSetName;
+        schema = c->tasks->u.retrieve.schema;
         break;
     default:
         return zoom_complete;
@@ -1504,7 +1510,7 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
     {
         ZOOM_record rec =
             ZOOM_record_cache_lookup(resultset, i + *start,
-                                     syntax, elementSetName);
+                                     syntax, elementSetName, schema);
         if (!rec)
             break;
         else
@@ -1543,7 +1549,7 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
         req->preferredRecordSyntax =
             zoom_yaz_str_to_z3950oid(c, CLASS_RECSYN, syntax);
 
-    if (resultset->schema && *resultset->schema)
+    if (schema && *schema)
     {
         Z_RecordComposition *compo = (Z_RecordComposition *)
             odr_malloc(c->odr_out, sizeof(*compo));
@@ -1561,14 +1567,14 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
 
         compo->u.complex->generic->which = Z_Schema_oid;
         compo->u.complex->generic->schema.oid = (Odr_oid *)
-            zoom_yaz_str_to_z3950oid (c, CLASS_SCHEMA, resultset->schema);
+            zoom_yaz_str_to_z3950oid(c, CLASS_SCHEMA, schema);
 
         if (!compo->u.complex->generic->schema.oid)
         {
             /* OID wasn't a schema! Try record syntax instead. */
 
             compo->u.complex->generic->schema.oid = (Odr_oid *)
-                zoom_yaz_str_to_z3950oid (c, CLASS_RECSYN, resultset->schema);
+                zoom_yaz_str_to_z3950oid(c, CLASS_RECSYN, schema);
         }
         if (elementSetName && *elementSetName)
         {

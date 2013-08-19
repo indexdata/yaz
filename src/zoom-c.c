@@ -199,11 +199,13 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
             resultset_destroy(task->u.search.resultset);
             xfree(task->u.search.syntax);
             xfree(task->u.search.elementSetName);
+            xfree(task->u.search.schema);
             break;
         case ZOOM_TASK_RETRIEVE:
             resultset_destroy(task->u.retrieve.resultset);
             xfree(task->u.retrieve.syntax);
             xfree(task->u.retrieve.elementSetName);
+            xfree(task->u.retrieve.schema);
             break;
         case ZOOM_TASK_CONNECT:
             break;
@@ -679,7 +681,6 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->odr = odr_createmem(ODR_ENCODE);
     r->piggyback = 1;
     r->setname = 0;
-    r->schema = 0;
     r->step = 0;
     for (i = 0; i<RECORD_HASH_SIZE; i++)
         r->record_hash[i] = 0;
@@ -723,7 +724,7 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_task task;
     const char *cp;
     int start, count;
-    const char *syntax, *elementSetName;
+    const char *syntax, *elementSetName, *schema;
 #if ZOOM_RESULT_LISTS
     ZOOM_resultsets set;
 #endif
@@ -746,9 +747,6 @@ ZOOM_API(ZOOM_resultset)
     cp = ZOOM_options_get(r->options, "setname");
     if (cp)
         r->setname = xstrdup(cp);
-    cp = ZOOM_options_get(r->options, "schema");
-    if (cp)
-        r->schema = xstrdup(cp);
 
     r->databaseNames = ZOOM_connection_get_databases(c, c->options, &r->num_databaseNames,
                                          r->odr);
@@ -789,8 +787,10 @@ ZOOM_API(ZOOM_resultset)
     syntax = ZOOM_options_get(r->options, "preferredRecordSyntax");
     task->u.search.syntax = syntax ? xstrdup(syntax) : 0;
     elementSetName = ZOOM_options_get(r->options, "elementSetName");
-    task->u.search.elementSetName = elementSetName
-        ? xstrdup(elementSetName) : 0;
+    task->u.search.elementSetName = elementSetName ?
+        xstrdup(elementSetName) : 0;
+    schema = ZOOM_options_get(r->options, "schema");
+    task->u.search.schema = schema ? xstrdup(schema) : 0;
 
     ZOOM_resultset_addref(r);
 
@@ -884,7 +884,6 @@ static void resultset_destroy(ZOOM_resultset r)
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
         xfree(r->setname);
-        xfree(r->schema);
         yaz_mutex_destroy(&r->mutex);
 #if SHPTR
         YAZ_SHPTR_DEC(r->record_wrbuf, wrbuf_destroy);
@@ -961,14 +960,7 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
         ? xstrdup(elementSetName) : 0;
 
     cp = ZOOM_options_get(r->options, "schema");
-    if (cp)
-    {
-        if (!r->schema || strcmp(r->schema, cp))
-        {
-            xfree(r->schema);
-            r->schema = xstrdup(cp);
-        }
-    }
+    task->u.retrieve.schema = cp ? xstrdup(cp) : 0;
 
     ZOOM_resultset_addref(r);
 
@@ -1146,8 +1138,10 @@ ZOOM_API(ZOOM_record)
         ZOOM_options_get(s->options, "preferredRecordSyntax");
     const char *elementSetName =
         ZOOM_options_get(s->options, "elementSetName");
+    const char *schema =
+        ZOOM_options_get(s->options, "schema");
 
-    return ZOOM_record_cache_lookup(s, pos, syntax, elementSetName);
+    return ZOOM_record_cache_lookup(s, pos, syntax, elementSetName, schema);
 }
 
 ZOOM_API(ZOOM_record)

@@ -70,7 +70,7 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos
-            && yaz_strcmp_null(r->schema, rc->schema) == 0
+            && yaz_strcmp_null(schema, rc->schema) == 0
             && yaz_strcmp_null(elementSetName,rc->elementSetName) == 0
             && yaz_strcmp_null(syntax, rc->syntax) == 0)
             break;
@@ -89,7 +89,7 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 
         rc->syntax = odr_strdup_null(r->odr, syntax);
 
-        rc->schema = odr_strdup_null(r->odr, r->schema);
+        rc->schema = odr_strdup_null(r->odr, schema);
 
         rc->pos = pos;
         rc->next = r->record_hash[record_hash(pos)];
@@ -118,7 +118,8 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *syntax,
-                                     const char *elementSetName)
+                                     const char *elementSetName,
+                                     const char *schema)
 {
     ZOOM_record_cache rc;
 
@@ -126,7 +127,7 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
     {
         if (pos == rc->pos)
         {
-            if (yaz_strcmp_null(r->schema, rc->schema))
+            if (yaz_strcmp_null(schema, rc->schema))
                 continue;
             if (yaz_strcmp_null(elementSetName,rc->elementSetName))
                 continue;

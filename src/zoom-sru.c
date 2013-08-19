@@ -130,6 +130,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     ZOOM_resultset resultset = 0;
     Z_SRW_PDU *sr = 0;
     const char *option_val = 0;
+    const char *schema = 0;
     Z_Query *z_query;
     Z_FacetList *facet_list = 0;
     if (c->error)                  /* don't continue on error */
@@ -147,9 +148,11 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         facets = ZOOM_options_get(resultset->options, "facets");
         if (facets)
             facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
+        schema = c->tasks->u.search.schema;
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
+        schema = c->tasks->u.retrieve.schema;
 
         start = &c->tasks->u.retrieve.start;
         count = &c->tasks->u.retrieve.count;
@@ -164,7 +167,8 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
             ZOOM_record rec =
                 ZOOM_record_cache_lookup(resultset, i + *start,
                                          c->tasks->u.retrieve.syntax,
-                                         c->tasks->u.retrieve.elementSetName);
+                                         c->tasks->u.retrieve.elementSetName,
+                                         schema);
             if (!rec)
                 break;
             else
@@ -216,7 +220,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     sr->u.request->maximumRecords = odr_intdup(
         c->odr_out, (resultset->step > 0 && resultset->step < *count) ?
         resultset->step : *count);
-    sr->u.request->recordSchema = resultset->schema;
+    sr->u.request->recordSchema = odr_strdup_null(c->odr_out, schema);
     sr->u.request->facetList = facet_list;
 
     option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
