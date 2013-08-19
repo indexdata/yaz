@@ -167,19 +167,16 @@ static const char *return_record_wrbuf(WRBUF wrbuf, int *len,
                                     charset);
     else if (r->which == Z_External_octet)
     {
-        if (yaz_oid_is_iso2709(oid))
-        {
-            const char *ret_buf = return_marc_record(
-                wrbuf, marctype, len,
-                (const char *) r->u.octet_aligned->buf,
-                r->u.octet_aligned->len,
-                charset);
-            if (ret_buf)
-                return ret_buf;
-            /* bad ISO2709. Return fail unless raw (ISO2709) is wanted */
-            if (marctype != YAZ_MARC_ISO2709)
-                return 0;
-        }
+        const char *ret_buf = return_marc_record(
+            wrbuf, marctype, len,
+            (const char *) r->u.octet_aligned->buf,
+            r->u.octet_aligned->len,
+            charset);
+        if (ret_buf)
+            return ret_buf;
+        /* not ISO2709. Return fail unless raw (ISO2709) is wanted */
+        if (yaz_oid_is_iso2709(oid) && marctype != YAZ_MARC_ISO2709)
+            return 0;
         return return_string_record(wrbuf, len,
                                     (const char *) r->u.octet_aligned->buf,
                                     r->u.octet_aligned->len,

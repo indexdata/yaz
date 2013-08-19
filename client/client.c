@@ -929,7 +929,7 @@ static void display_record(Z_External *r)
             print_xml_record(octet_buf, octet_len);
 
         }
-        else if (yaz_oid_is_iso2709(oid))
+        else
         {
             const char *result;
             size_t rlen;
@@ -975,16 +975,13 @@ static void display_record(Z_External *r)
             }
             else
             {
-                printf("bad MARC. Dumping as it is:\n");
+                if (yaz_oid_is_iso2709(oid))
+                     printf("bad MARC. Dumping as it is:\n");
                 print_record(octet_buf, octet_len);
             }
             yaz_marc_destroy(mt);
             if (cd)
                 yaz_iconv_close(cd);
-        }
-        else
-        {
-            print_record(octet_buf, octet_len);
         }
         marc_file_write(octet_buf, r->u.octet_aligned->len);
     }
