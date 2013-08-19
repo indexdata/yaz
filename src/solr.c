@@ -452,6 +452,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *path;
     char *q;
     char *pos;
+    char *cp;
     int i = 0;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
@@ -560,7 +561,17 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         odr_malloc(encode, strlen(hreq->path) +
                    strlen(uri_args) + strlen(solr_op) + 4);
 
-    sprintf(path, "%s/%s?%s", hreq->path, solr_op, uri_args);
+    strcpy(path, hreq->path);
+    cp = strrchr(path, '/');
+    if (cp)
+    {
+        if (!strcmp(cp, "/select") || !strcmp(cp, "/"))
+            *cp = '\0';
+    }
+    strcat(path, "/");
+    strcat(path, solr_op);
+    strcat(path, "?");
+    strcat(path, uri_args);
     hreq->path = path;
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,
