@@ -1,3 +1,13 @@
+--- 4.2.64 2013/08/21
+
+ISO2709/MARC parse most octet aligned records; not just those that
+are known to be ISO2709/MARC. This makes ZOOM and yaz-client
+MARC parse more records instead of just dumping as is. YAZ-670
+
+ZOOM: proper caching for variations of record schema. YAZ-671
+
+Solr: Check for enging / and perhaps commands (select/term) YAZ-651
+
 --- 4.2.63 2013/07/17
 
 Add yaz_strcmp_null
