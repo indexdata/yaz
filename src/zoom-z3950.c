@@ -1330,7 +1330,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
 {
     ZOOM_resultset resultset;
     int *start, *count;
-    const char *syntax = 0, *elementSetName = 0;
+    const char *syntax = 0, *elementSetName = 0, *schema = 0;
 
     if (!c->tasks)
         return ;
@@ -1342,6 +1342,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
         count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;
+        schema =  c->tasks->u.search.schema;
         break;
     case ZOOM_TASK_RETRIEVE:
         resultset = c->tasks->u.retrieve.resultset;
@@ -1349,6 +1350,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
         count = &c->tasks->u.retrieve.count;
         syntax = c->tasks->u.retrieve.syntax;
         elementSetName = c->tasks->u.retrieve.elementSetName;
+        schema =  c->tasks->u.retrieve.schema;
         break;
     default:
         return;
@@ -1377,8 +1379,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
             for (i = 0; i<p->num_records; i++)
             {
                 ZOOM_record_cache_add(resultset, p->records[i], i + *start,
-                                      syntax, elementSetName,
-                                      elementSetName, 0);
+                                      syntax, elementSetName, schema, 0);
             }
             *count -= i;
             if (*count < 0)
@@ -1400,7 +1401,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                         YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
                         "ZOOM C generated. Present phase and no records");
                 ZOOM_record_cache_add(resultset, myrec, *start,
-                                      syntax, elementSetName, 0, 0);
+                                      syntax, elementSetName, schema, 0);
             }
         }
         else if (present_phase)
@@ -1412,7 +1413,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                     YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
                     "ZOOM C generated: Present response and no records");
             ZOOM_record_cache_add(resultset, myrec, *start,
-                                  syntax, elementSetName, 0, 0);
+                                  syntax, elementSetName, schema, 0);
         }
     }
 }
