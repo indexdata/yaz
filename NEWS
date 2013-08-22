@@ -1,4 +1,8 @@
---- 4.2.64 2013/08/21
+--- 4.2.65 2013/08/22
+
+ZOOM: another fix for record caching (introduced in YAZ 4.2.64).
+
+--- 4.2.64 2013/08/21 (Broken WRT ZOOM C, do not use)
 
 ISO2709/MARC parse most octet aligned records; not just those that
 are known to be ISO2709/MARC. This makes ZOOM and yaz-client
