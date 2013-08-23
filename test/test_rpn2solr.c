@@ -35,6 +35,7 @@ static int compare(solr_transform_t ct, const char *pqf, const char *solr)
         }
         else if (r == 0)
         {
+            printf("'%s' -> '%s'\n", pqf, wrbuf_cstr(w));
             yaz_log(YLOG_LOG, "%s -> %s", pqf, wrbuf_cstr(w));
             if (solr && !strcmp(wrbuf_cstr(w), solr))
             {
@@ -114,14 +115,17 @@ static void tst2(void)
 
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 3=1 @attr 6=1 abc", "dc.title:abc"));
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=1 @attr 6=1 abc", "dc.title:abc"));
-#if 0
-    YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
-    YAZ_CHECK(compare(ct, "@attr 2=1 @attr 1=30 1980", "dc.date:[* to 1980]"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date:1980"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:[* to 1980]"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date:[* to 1980]"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date:[1980 to *]"));
 
+    YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
+
+    /* Date check */ 
+//  YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=1 1980", "dc.date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date:1980"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date:[1980 TO *]"));
+//    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO *] AND dc.date:[* TO 1990]"));
+#if 0
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "solr.allRecords=1"));
 #endif
     YAZ_CHECK(compare(ct, "@attr 1=500 abc", 0));
