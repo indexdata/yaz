@@ -90,11 +90,12 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=1 @attr 6=1 abc", "dc.title=abc"));
     YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
     /* Date tests */
-    YAZ_CHECK(compare(ct, "@attr 2=1 @attr 1=30 1980", "dc.date<1980"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date=1980"));
-    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date>1980"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=1 1980", "dc.date<1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date<=1980"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date=1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date>=1980"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date>1980"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date>=234 and dc.date<=1990"));
 
     /* Truncation */
     YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
