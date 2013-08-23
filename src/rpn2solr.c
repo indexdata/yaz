@@ -48,7 +48,7 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
         }
     }
     if (server_choice)
-        return "solr.serverChoice";
+        return "cql.serverChoice";
     return 0;
 }
 
@@ -105,7 +105,7 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
 }
 
 static int rpn2solr_attr(solr_transform_t ct,
-                         Z_AttributeList *attributes, WRBUF w)
+                         Z_AttributeList *attributes, WRBUF w, char **close_range)
 {
     const char *relation = solr_lookup_reverse(ct, "relation.", attributes);
     const char *index = solr_lookup_reverse(ct, "index.", attributes);
@@ -121,12 +121,11 @@ static int rpn2solr_attr(solr_transform_t ct,
 
     if (!index)
     {
-        solr_transform_set_error(ct,
-                                 YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
+        solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
         return -1;
     }
     /* for serverChoice we omit index+relation+structure */
-    if (strcmp(index, "solr.serverChoice"))
+    if (strcmp(index, "cql.serverChoice"))
     {
         wrbuf_puts(w, index);
         if (relation)
@@ -137,17 +136,14 @@ static int rpn2solr_attr(solr_transform_t ct,
             else if (!strcmp(relation, "eq"))
                 relation = ":";
             else if (!strcmp(relation, "le")) {
-                /* TODO Not support as such, but could perhaps be transformed into a range
-                   relation = ":[ * to ";
-                   close_range = "]"
-                */
+                /* TODO Not support as such, but could perhaps be transformed into a range */
+                relation = ":[* TO ";
+                *close_range = "]";
             }
             else if (!strcmp(relation, "ge")) {
-                /* TODO Not support as such, but could perhaps be transformed into a range
-                   relation = "[";
-                   relation = ":[ * to ";
-                   close_range = "]"
-                */
+                /* TODO Not support as such, but could perhaps be transformed into a range */
+                relation = ":[";
+                *close_range = " TO *]";
             }
             /* Missing mapping of not equal, phonetic, stem and relevance */
             wrbuf_puts(w, relation);
@@ -164,6 +160,8 @@ static int rpn2solr_attr(solr_transform_t ct,
                 wrbuf_puts(w, " ");
             }
         }
+//        if (close_range)
+//            wrbuf_puts(w, close_range);
     }
     return 0;
 }
@@ -214,7 +212,8 @@ static int rpn2solr_simple(solr_transform_t ct,
         Odr_int trunc = get_truncation(apt);
 
         wrbuf_rewind(w);
-        ret = rpn2solr_attr(ct, apt->attributes, w);
+        char *close_range = 0;
+        ret = rpn2solr_attr(ct, apt->attributes, w, &close_range);
 
         if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
             ;
@@ -280,6 +279,8 @@ static int rpn2solr_simple(solr_transform_t ct,
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
+            if (close_range)
+                wrbuf_puts(w, close_range);
         }
         if (ret == 0)
             pr(wrbuf_cstr(w), client_data);
