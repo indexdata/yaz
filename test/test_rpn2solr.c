@@ -35,7 +35,6 @@ static int compare(solr_transform_t ct, const char *pqf, const char *solr)
         }
         else if (r == 0)
         {
-            printf("'%s' -> '%s'\n", pqf, wrbuf_cstr(w));
             yaz_log(YLOG_LOG, "%s -> %s", pqf, wrbuf_cstr(w));
             if (solr && !strcmp(wrbuf_cstr(w), solr))
             {
