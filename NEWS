@@ -1,3 +1,8 @@
+ZOOM: fix record handling for Solr. ZOOM_record_get would return 0, if
+schema was given for search. YAZ-675
+
+Add Solr date range searches. YAZ-621
+
 --- 4.2.65 2013/08/22
 
 ZOOM: another fix for record caching (introduced in YAZ 4.2.64).
