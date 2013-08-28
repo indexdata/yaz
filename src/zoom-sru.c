@@ -247,7 +247,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     NMEM nmem;
     ZOOM_Event event;
     int *start, *count;
-    const char *syntax, *elementSetName;
+    const char *syntax, *elementSetName, *schema;
 
     if (!c->tasks)
         return zoom_complete;
@@ -260,7 +260,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         count = &c->tasks->u.search.count;
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;
-
+        schema = c->tasks->u.search.schema;
         /* Required not for reporting client hit count multiple times into session */
         if (!c->tasks->u.search.recv_search_fired) {
             yaz_log(YLOG_DEBUG, "posting ZOOM_EVENT_RECV_SEARCH");
@@ -277,6 +277,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         count = &c->tasks->u.retrieve.count;
         syntax = c->tasks->u.retrieve.syntax;
         elementSetName = c->tasks->u.retrieve.elementSetName;
+        schema = c->tasks->u.retrieve.schema;
         break;
     default:
         return zoom_complete;
@@ -346,7 +347,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                                  resultset->odr);
             }
             ZOOM_record_cache_add(resultset, npr, pos, syntax, elementSetName,
-                                  sru_rec->recordSchema, diag);
+                                  schema, diag);
         }
         *count -= i;
         *start += i;
