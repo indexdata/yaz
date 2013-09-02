@@ -1417,12 +1417,12 @@ static int send_SRW_scanRequest(const char *arg, Odr_int *pos, int num)
     switch (queryType)
     {
     case QueryType_CQL:
-        sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-        sr->u.scan_request->scanClause.cql = encode_SRW_term(out, arg);
+        sr->u.scan_request->queryType = "cql";
+        sr->u.scan_request->scanClause = encode_SRW_term(out, arg);
         break;
     case QueryType_Prefix:
-        sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
-        sr->u.scan_request->scanClause.pqf = encode_SRW_term(out, arg);
+        sr->u.scan_request->queryType = "pqf";
+        sr->u.scan_request->scanClause = encode_SRW_term(out, arg);
         break;
     default:
         printf("Only CQL and PQF supported in SRW\n");
@@ -1456,18 +1456,18 @@ static int send_SRW_searchRequest(const char *arg)
     switch (queryType)
     {
     case QueryType_CQL:
-        srw_sr->u.request->query_type = Z_SRW_query_type_cql;
-        srw_sr->u.request->query.cql = encode_SRW_term(srw_sr_odr_out, arg);
+        srw_sr->u.request->queryType = "cql";
+        srw_sr->u.request->query = encode_SRW_term(srw_sr_odr_out, arg);
 
-        sr->u.request->query_type = Z_SRW_query_type_cql;
-        sr->u.request->query.cql = encode_SRW_term(srw_sr_odr_out, arg);
+        sr->u.request->queryType = "cql";
+        sr->u.request->query = encode_SRW_term(srw_sr_odr_out, arg);
         break;
     case QueryType_Prefix:
-        srw_sr->u.request->query_type = Z_SRW_query_type_pqf;
-        srw_sr->u.request->query.pqf = encode_SRW_term(srw_sr_odr_out, arg);
+        srw_sr->u.request->queryType = "pqf";
+        srw_sr->u.request->query = encode_SRW_term(srw_sr_odr_out, arg);
 
-        sr->u.request->query_type = Z_SRW_query_type_pqf;
-        sr->u.request->query.pqf = encode_SRW_term(srw_sr_odr_out, arg);
+        sr->u.request->queryType = "pqf";
+        sr->u.request->query = encode_SRW_term(srw_sr_odr_out, arg);
         break;
     default:
         printf("Only CQL and PQF supported in SRW\n");

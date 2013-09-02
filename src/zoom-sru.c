@@ -87,15 +87,15 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     /* SRU scan can only carry CQL and PQF */
     if (z_query->which == Z_Query_type_104)
     {
-        sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-        sr->u.scan_request->scanClause.cql =
+        sr->u.scan_request->queryType = "cql";
+        sr->u.scan_request->scanClause =
             odr_strdup(c->odr_out, ZOOM_query_get_query_string(scan->query));
     }
     else if (z_query->which == Z_Query_type_1
              || z_query->which == Z_Query_type_101)
     {
-        sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
-        sr->u.scan_request->scanClause.pqf =
+        sr->u.scan_request->queryType = "pqf";
+        sr->u.scan_request->scanClause =
             odr_strdup(c->odr_out, ZOOM_query_get_query_string(scan->query));
     }
     else
@@ -194,13 +194,13 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     if (z_query->which == Z_Query_type_104
         && z_query->u.type_104->which == Z_External_CQL)
     {
-        sr->u.request->query_type = Z_SRW_query_type_cql;
-        sr->u.request->query.cql = z_query->u.type_104->u.cql;
+        sr->u.request->queryType = "cql";
+        sr->u.request->query = z_query->u.type_104->u.cql;
     }
     else if (z_query->which == Z_Query_type_1 && z_query->u.type_1)
     {
-        sr->u.request->query_type = Z_SRW_query_type_pqf;
-        sr->u.request->query.pqf =
+        sr->u.request->queryType = "pqf";
+        sr->u.request->query =
             odr_strdup(c->odr_out,
                        ZOOM_query_get_query_string(resultset->query));
     }

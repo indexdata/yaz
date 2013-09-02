@@ -933,11 +933,11 @@ static void srw_bend_search(association *assoc,
         rr.present_number = srw_req->maximumRecords ?
             *srw_req->maximumRecords : 0;
 
-        if (srw_req->query_type == Z_SRW_query_type_cql)
+        if (!srw_req->queryType || !strcmp(srw_req->queryType, "cql"))
         {
             if (assoc->server && assoc->server->cql_transform)
             {
-                int srw_errcode = cql2pqf(assoc->encode, srw_req->query.cql,
+                int srw_errcode = cql2pqf(assoc->encode, srw_req->query,
                                           assoc->server->cql_transform,
                                           rr.query,
                                           &rr.srw_sortKeys);
@@ -959,21 +959,20 @@ static void srw_bend_search(association *assoc,
                 ext->indirect_reference = 0;
                 ext->descriptor = 0;
                 ext->which = Z_External_CQL;
-                ext->u.cql = srw_req->query.cql;
+                ext->u.cql = srw_req->query;
 
                 rr.query->which = Z_Query_type_104;
                 rr.query->u.type_104 =  ext;
             }
         }
-        else if (srw_req->query_type == Z_SRW_query_type_pqf)
+        else if (!strcmp(srw_req->queryType, "pqf"))
         {
             Z_RPNQuery *RPNquery;
             YAZ_PQF_Parser pqf_parser;
 
             pqf_parser = yaz_pqf_create();
 
-            RPNquery = yaz_pqf_parse(pqf_parser, assoc->decode,
-                                     srw_req->query.pqf);
+            RPNquery = yaz_pqf_parse(pqf_parser, assoc->decode, srw_req->query);
             if (!RPNquery)
             {
                 const char *pqf_msg;
@@ -1175,21 +1174,8 @@ static void srw_bend_search(association *assoc,
     }
     if (log_request)
     {
-        const char *querystr = "?";
-        const char *querytype = "?";
         WRBUF wr = wrbuf_alloc();
 
-        switch (srw_req->query_type)
-        {
-        case Z_SRW_query_type_cql:
-            querytype = "CQL";
-            querystr = srw_req->query.cql;
-            break;
-        case Z_SRW_query_type_pqf:
-            querytype = "PQF";
-            querystr = srw_req->query.pqf;
-            break;
-        }
         wrbuf_printf(wr, "SRWSearch %s ", srw_req->database);
         if (srw_res->num_diagnostics)
             wrbuf_printf(wr, "ERROR %s", srw_res->diagnostics[0].uri);
@@ -1206,7 +1192,8 @@ static void srw_bend_search(association *assoc,
                       srw_res->resultSetId : "-"),
                      (srw_req->startRecord ? *srw_req->startRecord : 1),
                      srw_res->num_records);
-        yaz_log(log_request, "%s %s: %s", wrbuf_cstr(wr), querytype, querystr);
+        yaz_log(log_request, "%s %s: %s", wrbuf_cstr(wr), srw_req->queryType,
+                srw_req->query);
         wrbuf_destroy(wr);
     }
 }
@@ -1349,20 +1336,20 @@ static void srw_bend_scan(association *assoc,
         }
         save_entries = bsrr->entries;  /* save it so we can compare later */
 
-        if (srw_req->query_type == Z_SRW_query_type_pqf &&
+        if (srw_req->queryType && !strcmp(srw_req->queryType, "pqf") &&
             assoc->init->bend_scan)
         {
             YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
 
             bsrr->term = yaz_pqf_scan(pqf_parser, assoc->decode,
                                       &bsrr->attributeset,
-                                      srw_req->scanClause.pqf);
+                                      srw_req->scanClause);
             yaz_pqf_destroy(pqf_parser);
             bsrr->scanClause = 0;
             ((int (*)(void *, bend_scan_rr *))
              (*assoc->init->bend_scan))(assoc->backend, bsrr);
         }
-        else if (srw_req->query_type == Z_SRW_query_type_cql
+        else if ((!srw_req->queryType || !strcmp(srw_req->queryType, "cql"))
                  && assoc->init->bend_scan && assoc->server
                  && assoc->server->cql_transform)
         {
@@ -1372,7 +1359,7 @@ static void srw_bend_scan(association *assoc,
             bsrr->term = (Z_AttributesPlusTerm *)
                 odr_malloc(assoc->decode, sizeof(*bsrr->term));
             srw_error = cql2pqf_scan(assoc->encode,
-                                     srw_req->scanClause.cql,
+                                     srw_req->scanClause,
                                      assoc->server->cql_transform,
                                      bsrr->term);
             if (srw_error)
@@ -1385,12 +1372,12 @@ static void srw_bend_scan(association *assoc,
                  (*assoc->init->bend_scan))(assoc->backend, bsrr);
             }
         }
-        else if (srw_req->query_type == Z_SRW_query_type_cql
+        else if ((!srw_req->queryType || !strcmp(srw_req->queryType, "cql"))
                  && assoc->init->bend_srw_scan)
         {
             bsrr->term = 0;
             bsrr->attributeset = 0;
-            bsrr->scanClause = srw_req->scanClause.cql;
+            bsrr->scanClause = srw_req->scanClause;
             ((int (*)(void *, bend_scan_rr *))
              (*assoc->init->bend_srw_scan))(assoc->backend, bsrr);
         }
@@ -1451,24 +1438,6 @@ static void srw_bend_scan(association *assoc,
     if (log_request)
     {
         WRBUF wr = wrbuf_alloc();
-        const char *querytype = 0;
-        const char *querystr = 0;
-
-        switch(srw_req->query_type)
-        {
-        case Z_SRW_query_type_pqf:
-            querytype = "PQF";
-            querystr = srw_req->scanClause.pqf;
-            break;
-        case Z_SRW_query_type_cql:
-            querytype = "CQL";
-            querystr = srw_req->scanClause.cql;
-            break;
-        default:
-            querytype = "UNKNOWN";
-            querystr = "";
-        }
-
         wrbuf_printf(wr, "SRWScan %s ", srw_req->database);
 
         if (srw_res->num_diagnostics)
@@ -1484,7 +1453,7 @@ static void srw_bend_scan(association *assoc,
                      (srw_req->maximumTerms ?
                       *srw_req->maximumTerms : 1));
         /* there is no step size in SRU/W ??? */
-        wrbuf_printf(wr, "%s: %s ", querytype, querystr);
+        wrbuf_printf(wr, "%s: %s ", srw_req->queryType, srw_req->scanClause);
         yaz_log(log_request, "%s ", wrbuf_cstr(wr) );
         wrbuf_destroy(wr);
     }

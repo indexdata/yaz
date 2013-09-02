@@ -378,13 +378,12 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         const char *operation = 0;
         char *version = 0;
         char *query = 0;
-        char *pQuery = 0;
+        char *queryType = "cql";
         char *username = 0;
         char *password = 0;
         char *sortKeys = 0;
         char *stylesheet = 0;
         char *scanClause = 0;
-        char *pScanClause = 0;
         char *recordXPath = 0;
         char *recordSchema = 0;
         char *recordPacking = "xml";  /* xml packing is default for SRU */
@@ -422,7 +421,12 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 if (!strcmp(n, "query"))
                     query = v;
                 else if (!strcmp(n, "x-pquery"))
-                    pQuery = v;
+                {
+                    query = v;
+                    queryType = "pqf";
+                }
+                else if (!strcmp(n, "queryType"))
+                    queryType = v;
                 else if (!strcmp(n, "x-username"))
                     username = v;
                 else if (!strcmp(n, "x-password"))
@@ -444,7 +448,10 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 else if (!strcmp(n, "scanClause"))
                     scanClause = v;
                 else if (!strcmp(n, "x-pScanClause"))
-                    pScanClause = v;
+                {
+                    scanClause = v;
+                    queryType = "pqf";
+                }
                 else if (!strcmp(n, "maximumRecords"))
                     maximumRecords = v;
                 else if (!strcmp(n, "startRecord"))
@@ -507,17 +514,11 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->extra_args = extra_args;
             *srw_pdu = sr;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
-            if (query)
-            {
-                sr->u.request->query_type = Z_SRW_query_type_cql;
-                sr->u.request->query.cql = query;
-            }
-            else if (pQuery)
-            {
-                sr->u.request->query_type = Z_SRW_query_type_pqf;
-                sr->u.request->query.pqf = pQuery;
-            }
-            else
+
+            sr->u.request->queryType = queryType;
+            sr->u.request->query = query;
+
+            if (!query)
                 yaz_add_srw_diagnostic(
                     decode, diag, num_diag,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "query");
@@ -598,17 +599,10 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             *srw_pdu = sr;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
 
-            if (scanClause)
-            {
-                sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-                sr->u.scan_request->scanClause.cql = scanClause;
-            }
-            else if (pScanClause)
-            {
-                sr->u.scan_request->query_type = Z_SRW_query_type_pqf;
-                sr->u.scan_request->scanClause.pqf = pScanClause;
-            }
-            else
+            sr->u.scan_request->queryType = queryType;
+            sr->u.scan_request->scanClause = scanClause;
+
+            if (!scanClause)
                 yaz_add_srw_diagnostic(
                     decode, diag, num_diag,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "scanClause");
@@ -744,8 +738,8 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
     case Z_SRW_searchRetrieve_request:
         sr->u.request = (Z_SRW_searchRetrieveRequest *)
             odr_malloc(o, sizeof(*sr->u.request));
-        sr->u.request->query_type = Z_SRW_query_type_cql;
-        sr->u.request->query.cql = 0;
+        sr->u.request->queryType = "cql";
+        sr->u.request->query = 0;
         sr->u.request->sort_type = Z_SRW_sort_type_none;
         sr->u.request->sort.none = 0;
         sr->u.request->startRecord = 0;
@@ -800,8 +794,8 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.scan_request->stylesheet = 0;
         sr->u.scan_request->maximumTerms = 0;
         sr->u.scan_request->responsePosition = 0;
-        sr->u.scan_request->query_type = Z_SRW_query_type_cql;
-        sr->u.scan_request->scanClause.cql = 0;
+        sr->u.scan_request->queryType = "cql";
+        sr->u.scan_request->scanClause = 0;
         break;
     case Z_SRW_scan_response:
         sr->u.scan_response = (Z_SRW_scanResponse *)
@@ -869,28 +863,40 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                              char **name, char **value, int max_names)
 {
     int i = 0;
+    char *queryType;
     yaz_add_name_value_str(encode, name, value, &i, "version", srw_pdu->srw_version);
     name[i] = "operation";
-    switch(srw_pdu->which)
+    switch (srw_pdu->which)
     {
     case Z_SRW_searchRetrieve_request:
         value[i++] = "searchRetrieve";
-        switch(srw_pdu->u.request->query_type)
+        queryType = srw_pdu->u.request->queryType;
+        if (strcmp(srw_pdu->srw_version, "2.") > 0)
         {
-        case Z_SRW_query_type_cql:
+            yaz_add_name_value_str(encode, name, value, &i, "queryType",
+                                   queryType);
             yaz_add_name_value_str(encode, name, value, &i, "query",
-                                   srw_pdu->u.request->query.cql);
-            break;
-        case Z_SRW_query_type_pqf:
-            yaz_add_name_value_str(encode, name, value, &i, "x-pquery",
-                                   srw_pdu->u.request->query.pqf);
-            break;
-        case Z_SRW_query_type_xcql:
-            yaz_add_name_value_str(encode, name, value, &i, "x-cql",
-                                   srw_pdu->u.request->query.xcql);
-            break;
+                                   srw_pdu->u.request->query);
         }
-        switch(srw_pdu->u.request->sort_type)
+        else
+        {
+            if (!strcmp(queryType, "cql"))
+            {
+                yaz_add_name_value_str(encode, name, value, &i, "query",
+                                       srw_pdu->u.request->query);
+            }
+            else if (!strcmp(queryType, "pqf"))
+            {
+                yaz_add_name_value_str(encode, name, value, &i, "x-pquery",
+                                       srw_pdu->u.request->query);
+            }
+            else if (!strcmp(queryType, "pqf"))
+            {
+                yaz_add_name_value_str(encode, name, value, &i, "x-cql",
+                                       srw_pdu->u.request->query);
+            }
+        }
+        switch (srw_pdu->u.request->sort_type)
         {
         case Z_SRW_sort_type_none:
             break;
@@ -921,21 +927,27 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         break;
     case Z_SRW_scan_request:
         value[i++] = "scan";
-
-        switch(srw_pdu->u.scan_request->query_type)
+        queryType = srw_pdu->u.request->queryType;
+        if (strcmp(srw_pdu->srw_version, "2.") > 0)
         {
-        case Z_SRW_query_type_cql:
-            yaz_add_name_value_str(encode, name, value, &i, "scanClause",
-                                   srw_pdu->u.scan_request->scanClause.cql);
-            break;
-        case Z_SRW_query_type_pqf:
-            yaz_add_name_value_str(encode, name, value, &i, "x-pScanClause",
-                                   srw_pdu->u.scan_request->scanClause.pqf);
-            break;
-        case Z_SRW_query_type_xcql:
-            yaz_add_name_value_str(encode, name, value, &i, "x-cqlScanClause",
-                                   srw_pdu->u.scan_request->scanClause.xcql);
-            break;
+            if (queryType && strcmp(queryType, "cql"))
+                yaz_add_name_value_str(encode, name, value, &i, "queryType",
+                                       queryType);
+            yaz_add_name_value_str(encode, name, value, &i, "query",
+                                   srw_pdu->u.request->query);
+        }
+        else
+        {
+            if (!queryType || !strcmp(queryType, "cql"))
+                yaz_add_name_value_str(encode, name, value, &i, "scanClause",
+                                       srw_pdu->u.scan_request->scanClause);
+            else if (!strcmp(queryType, "pqf"))
+                yaz_add_name_value_str(encode, name, value, &i, "x-pScanClause",
+                                       srw_pdu->u.scan_request->scanClause);
+            else if (!strcmp(queryType, "xcql"))
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "x-cqlScanClause",
+                                       srw_pdu->u.scan_request->scanClause);
         }
         yaz_add_name_value_int(encode, name, value, &i, "responsePosition",
                                srw_pdu->u.scan_request->responsePosition);

@@ -461,19 +461,10 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     {
         Z_SRW_searchRetrieveRequest *request = srw_pdu->u.request;
         solr_op = "select";
-        switch (srw_pdu->u.request->query_type)
-        {
-        case Z_SRW_query_type_pqf:
-            yaz_add_name_value_str(encode, name, value, &i,
-                                   "q", request->query.pqf);
-            break;
-        case Z_SRW_query_type_cql:
-            yaz_add_name_value_str(encode, name, value, &i,
-                                   "q", request->query.cql);
-            break;
-        default:
+        if (!srw_pdu->u.request->query)
             return -1;
-        }
+        /* not considering query type here ! */
+        yaz_add_name_value_str(encode, name, value, &i, "q", request->query);
         if (srw_pdu->u.request->startRecord)
         {
             Odr_int start = *request->startRecord - 1;
@@ -506,32 +497,33 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     else if (srw_pdu->which == Z_SRW_scan_request) {
         Z_SRW_scanRequest *request = srw_pdu->u.scan_request;
         solr_op = "terms";
-        switch (srw_pdu->u.scan_request->query_type)
+        if (!srw_pdu->u.scan_request->scanClause)
+            return -1;
+        if (!strcmp(srw_pdu->u.scan_request->queryType, "pqf"))
         {
-            case Z_SRW_query_type_pqf:
-                yaz_add_name_value_str(encode, name, value, &i,
-                                       "terms.fl", request->scanClause.pqf);
-                yaz_add_name_value_str(encode, name, value, &i,
-                                       "terms.lower", request->scanClause.pqf);
-                break;
-            case Z_SRW_query_type_cql:
-                q = request->scanClause.cql;
-                pos = strchr(q, ':');
-                if (pos != NULL) {
-					yaz_add_name_value_str(encode, name, value, &i,
-										   "terms.lower", odr_strdup(encode, pos + 1));
-					*pos = '\0';
-					yaz_add_name_value_str(encode, name, value, &i,
-										   "terms.fl", odr_strdup(encode, q));
-					*pos = ':';
-                } else {
-					yaz_add_name_value_str(encode, name, value, &i,
-										   "terms.lower", odr_strdup(encode, q));
-                }
-                break;
-            default:
-                return -1;
+            yaz_add_name_value_str(encode, name, value, &i,
+                                   "terms.fl", request->scanClause);
+            yaz_add_name_value_str(encode, name, value, &i,
+                                   "terms.lower", request->scanClause);
         }
+        else if (!strcmp(srw_pdu->u.scan_request->queryType, "cql"))
+        {
+            q = request->scanClause;
+            pos = strchr(q, ':');
+            if (pos != NULL) {
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "terms.lower", odr_strdup(encode, pos + 1));
+                *pos = '\0';
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "terms.fl", odr_strdup(encode, q));
+                *pos = ':';
+            } else {
+                yaz_add_name_value_str(encode, name, value, &i,
+                                       "terms.lower", odr_strdup(encode, q));
+            }
+        }
+        else
+            return -1;
         yaz_add_name_value_str(encode, name, value, &i,
                                "terms.sort", "index");
         yaz_add_name_value_int(encode, name, value, &i,

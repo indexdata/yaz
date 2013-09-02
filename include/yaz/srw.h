@@ -66,15 +66,8 @@ typedef struct {
 
 typedef struct {
 
-#define Z_SRW_query_type_cql  1
-#define Z_SRW_query_type_xcql 2
-#define Z_SRW_query_type_pqf  3
-    int query_type;
-    union {
-        char *cql;
-        char *xcql;
-        char *pqf;
-    } query;
+    char *queryType;
+    char *query;
 
 #define Z_SRW_sort_type_none 1
 #define Z_SRW_sort_type_sort 2
@@ -127,12 +120,8 @@ typedef struct {
 } Z_SRW_explainResponse;
 
 typedef struct {
-    int query_type;
-    union {
-        char *cql;
-        char *xcql;
-        char *pqf;
-    } scanClause;
+    char *queryType;
+    char *scanClause;
     Odr_int *responsePosition;
     Odr_int *maximumTerms;
     char *stylesheet;

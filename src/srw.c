@@ -753,8 +753,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             (*p)->which = Z_SRW_searchRetrieve_request;
             req = (*p)->u.request = (Z_SRW_searchRetrieveRequest *)
                 odr_malloc(o, sizeof(*req));
-            req->query_type = Z_SRW_query_type_cql;
-            req->query.cql = 0;
+            req->queryType = "cql";
+            req->query = 0;
             req->sort_type = Z_SRW_sort_type_none;
             req->sort.none = 0;
             req->startRecord = 0;
@@ -771,15 +771,18 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 if (match_xsd_string(ptr, "version", o,
                                      &(*p)->srw_version))
                     ;
+                else if (match_xsd_string(ptr, "queryType", o,
+                                          &req->queryType))
+                    ;
                 else if (match_xsd_string(ptr, "query", o,
-                                          &req->query.cql))
-                    req->query_type = Z_SRW_query_type_cql;
+                                          &req->query))
+                    ;
                 else if (match_xsd_string(ptr, "pQuery", o,
-                                          &req->query.pqf))
-                    req->query_type = Z_SRW_query_type_pqf;
+                                          &req->query))
+                    req->queryType = "pqf";
                 else if (match_xsd_string(ptr, "xQuery", o,
-                                          &req->query.xcql))
-                    req->query_type = Z_SRW_query_type_xcql;
+                                          &req->query))
+                    req->queryType = "xcql";
                 else if (match_xsd_integer(ptr, "startRecord", o,
                                            &req->startRecord))
                     ;
@@ -807,7 +810,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else
                     match_xsd_string(ptr, "database", o, &req->database);
             }
-            if (!req->query.cql && !req->query.pqf && !req->query.xcql)
+            if (!req->query)
             {
                 /* should put proper diagnostic here */
                 return -1;
@@ -938,8 +941,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             (*p)->which = Z_SRW_scan_request;
             req = (*p)->u.scan_request = (Z_SRW_scanRequest *)
                 odr_malloc(o, sizeof(*req));
-            req->query_type = Z_SRW_query_type_cql;
-            req->scanClause.cql = 0;
+            req->queryType = "cql";
+            req->scanClause = 0;
             req->responsePosition = 0;
             req->maximumTerms = 0;
             req->stylesheet = 0;
@@ -955,12 +958,12 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                          &(*p)->extraResponseData_len))
                     ;
                 else if (match_xsd_string(ptr, "scanClause", o,
-                                          &req->scanClause.cql))
+                                          &req->scanClause))
                     ;
                 else if (match_xsd_string(ptr, "pScanClause", o,
-                                          &req->scanClause.pqf))
+                                          &req->scanClause))
                 {
-                    req->query_type = Z_SRW_query_type_pqf;
+                    req->queryType = "pqf";
                 }
                 else if (match_xsd_integer(ptr, "responsePosition", o,
                                            &req->responsePosition))
@@ -1025,23 +1028,28 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         if ((*p)->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_searchRetrieveRequest *req = (*p)->u.request;
+            const char *queryType = req->queryType;
             ptr = xmlNewChild(pptr, 0, BAD_CAST "searchRetrieveRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
             if ((*p)->srw_version)
                 add_xsd_string(ptr, "version", (*p)->srw_version);
-            switch (req->query_type)
+
+            if (strcmp((*p)->srw_version, "2.") > 0)
             {
-            case Z_SRW_query_type_cql:
-                add_xsd_string(ptr, "query", req->query.cql);
-                break;
-            case Z_SRW_query_type_xcql:
-                add_xsd_string(ptr, "xQuery", req->query.xcql);
-                break;
-            case Z_SRW_query_type_pqf:
-                add_xsd_string(ptr, "pQuery", req->query.pqf);
-                break;
+                if (queryType)
+                    add_xsd_string(ptr, "queryType", queryType);
+                add_xsd_string(ptr, "query", req->query);
+            }
+            else
+            {
+                if (!queryType || !strcmp(queryType, "cql"))
+                    add_xsd_string(ptr, "query", req->query);
+                else if (!strcmp(queryType, "xcql"))
+                    add_xsd_string(ptr, "xQuery", req->query);
+                else if (!strcmp(queryType, "pqf"))
+                    add_xsd_string(ptr, "pQuery", req->query);
             }
             add_xsd_integer(ptr, "startRecord", req->startRecord);
             add_xsd_integer(ptr, "maximumRecords", req->maximumRecords);
@@ -1129,19 +1137,25 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_scan_request)
         {
             Z_SRW_scanRequest *req = (*p)->u.scan_request;
+            const char *queryType = req->queryType;
             ptr = xmlNewChild(pptr, 0, BAD_CAST "scanRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
             add_xsd_string(ptr, "version", (*p)->srw_version);
-            switch (req->query_type)
+
+            if (strcmp((*p)->srw_version, "2.") > 0)
             {
-            case Z_SRW_query_type_cql:
-                add_xsd_string(ptr, "scanClause", req->scanClause.cql);
-                break;
-            case Z_SRW_query_type_pqf:
-                add_xsd_string(ptr, "pScanClause", req->scanClause.pqf);
-                break;
+                if (queryType && strcmp(queryType, "cql"))
+                    add_xsd_string(ptr, "queryType", queryType);
+                add_xsd_string(ptr, "scanClause", req->scanClause);
+            }
+            else
+            {
+                if (!queryType || !strcmp(queryType, "cql"))
+                    add_xsd_string(ptr, "scanClause", req->scanClause);
+                else if (!strcmp(queryType, "pqf"))
+                    add_xsd_string(ptr, "pScanClause", req->scanClause);
             }
             add_xsd_integer(ptr, "responsePosition", req->responsePosition);
             add_xsd_integer(ptr, "maximumTerms", req->maximumTerms);

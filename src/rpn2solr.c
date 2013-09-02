@@ -210,9 +210,9 @@ static int rpn2solr_simple(solr_transform_t ct,
         const char *sterm = 0;
         size_t lterm = 0;
         Odr_int trunc = get_truncation(apt);
+        char *close_range = 0;
 
         wrbuf_rewind(w);
-        char *close_range = 0;
         ret = rpn2solr_attr(ct, apt->attributes, w, &close_range);
 
         if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)

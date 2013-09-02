@@ -53,18 +53,7 @@ int main(int argc, char **argv)
             if (sr->which == Z_SRW_searchRetrieve_request)
             {
                 Z_SRW_searchRetrieveRequest *req = sr->u.request;
-                switch(req->query_type)
-                {
-                case Z_SRW_query_type_cql:
-                    fprintf(stderr, "CQL: %s\n", req->query.cql);
-                    break;
-                case Z_SRW_query_type_xcql:
-                    fprintf(stderr, "XCQL\n");
-                    break;
-                case Z_SRW_query_type_pqf:
-                    fprintf(stderr, "PQF: %s\n", req->query.pqf);
-                    break;
-                }
+                fprintf(stderr, "%s: %s\n", req->queryType, req->query);
             }
             else if (sr->which == Z_SRW_searchRetrieve_response)
             {
