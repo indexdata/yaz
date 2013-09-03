@@ -49,10 +49,18 @@ typedef struct {
 
 typedef struct {
     char *recordSchema;
-    int recordPacking;
+
+    int recordPacking; /* recordXMLEscaping in SRU 2.0 */
 #define Z_SRW_recordPacking_string 0
 #define Z_SRW_recordPacking_XML 1
 #define Z_SRW_recordPacking_URL 2
+
+#if 0
+    int packing;   /* recordPacking in SRU 2.0 */
+#define Z_SRW_packed   0
+#define Z_SRW_unpacked     1
+#endif
+
     char *recordData_buf;
     int recordData_len;
     Odr_int *recordPosition;
@@ -81,7 +89,10 @@ typedef struct {
     Odr_int *startRecord;
     Odr_int *maximumRecords;
     char *recordSchema;
-    char *recordPacking;
+
+    char *recordPacking;       /* recordXMLEscaping in SRU 2.0 */
+    char *packing;             /* recordPacking in SRU 2.0 */
+
     char *recordXPath;
     char *database;
     char *stylesheet;
@@ -108,6 +119,7 @@ typedef struct {
 
 typedef struct {
     char *recordPacking;
+    char *packing;
     char *database;
     char *stylesheet;
 } Z_SRW_explainRequest;
@@ -216,7 +228,7 @@ YAZ_EXPORT int yaz_srw_codec(ODR o, void * pptr,
 YAZ_EXPORT int yaz_ucp_codec(ODR o, void * pptr,
                              Z_SRW_PDU **handler_data,
                              void *client_data, const char *ns);
-YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o);
+YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_core_v_2_0(ODR o);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version);
 YAZ_EXPORT Z_SRW_PDU *yaz_srw_get(ODR o, int which);
 YAZ_EXPORT Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR o, int num);
@@ -324,7 +336,7 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args);
 #define YAZ_XMLNS_SRU_v1_1 "http://www.loc.gov/zing/srw/"
 #define YAZ_XMLNS_DIAG_v1_1 "http://www.loc.gov/zing/srw/diagnostic/"
 #define YAZ_XMLNS_UPDATE_v0_9 "http://www.loc.gov/zing/srw/update/"
-#define YAZ_XMLNS_SRU_v2_response "http://docs.oasis-open.org/ns/search-ws/sru*esponse"
+#define YAZ_XMLNS_SRU_v2_mask "http://docs.oasis-open.org/ns/search-ws/*"
 #define YAZ_XMLNS_SRU_v1_response "http://www.loc.gov/*"
 
 YAZ_EXPORT

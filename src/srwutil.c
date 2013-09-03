@@ -269,11 +269,12 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             const char *p0 = hreq->path, *p1;
             int ret = -1;
 
-            static Z_SOAP_Handler soap_handlers[4] = {
+            static Z_SOAP_Handler soap_handlers[5] = {
 #if YAZ_HAVE_XML2
                 { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
                 { YAZ_XMLNS_SRU_v1_0, 0, (Z_SOAP_fun) yaz_srw_codec },
                 { YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec },
+                { YAZ_XMLNS_SRU_v2_mask, 0, (Z_SOAP_fun) yaz_srw_codec },
 #endif
                 {0, 0, 0}
             };
@@ -295,6 +296,8 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 *srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
                 yaz_srw_decodeauth(*srw_pdu, hreq, 0, 0, decode);
 
+                if ((*soap_package)->u.generic->no == 3) /* SRU 2 ! */
+                    (*soap_package)->u.generic->no = 0;
                 if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
                     (*srw_pdu)->u.request->database == 0)
                     (*srw_pdu)->u.request->database = db;
@@ -386,7 +389,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *scanClause = 0;
         char *recordXPath = 0;
         char *recordSchema = 0;
-        char *recordPacking = "xml";  /* xml packing is default for SRU */
+        char *recordXMLEscaping = 0;
+        char *recordPacking = 0;
         char *maximumRecords = 0;
         char *startRecord = 0;
         char *maximumTerms = 0;
@@ -443,6 +447,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     recordSchema = v;
                 else if (!strcmp(n, "recordPacking"))
                     recordPacking = v;
+                else if (!strcmp(n, "recordXMLEscaping"))
+                    recordXMLEscaping = v;
                 else if (!strcmp(n, "version"))
                     version = v;
                 else if (!strcmp(n, "scanClause"))
@@ -480,24 +486,16 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 }
             }
         }
-        if (!version)
-        {
-            if (uri_name)
-                yaz_add_srw_diagnostic(
-                    decode, diag, num_diag,
-                    YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "version");
-            version = "1.1";
-        }
-
+        if (!operation && query)
+            operation = "searchRetrieve";
         version = yaz_negotiate_sru_version(version);
 
         if (!version)
         {   /* negotiation failed. */
             yaz_add_srw_diagnostic(decode, diag, num_diag,
-                                   YAZ_SRW_UNSUPP_VERSION, "1.2");
-            version = "1.2";
+                                   YAZ_SRW_UNSUPP_VERSION, "2.0");
+            version = "2.0";
         }
-
         if (!operation)
         {
             if (uri_name)
@@ -506,6 +504,20 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     YAZ_SRW_MANDATORY_PARAMETER_NOT_SUPPLIED, "operation");
             operation = "explain";
         }
+        if (strcmp(version, "2.0"))
+        {
+            if (recordXMLEscaping)
+            {
+                yaz_add_srw_diagnostic(decode, diag, num_diag,
+                                       YAZ_SRW_UNSUPP_PARAMETER,
+                                       "recordXMLEscaping");
+
+            }
+            recordXMLEscaping = recordPacking;
+            recordPacking = "packed";
+        }
+        if (!recordXMLEscaping)
+            recordXMLEscaping = "xml";
         if (!strcmp(operation, "searchRetrieve"))
         {
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_searchRetrieve_request);
@@ -530,7 +542,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             }
             sr->u.request->recordXPath = recordXPath;
             sr->u.request->recordSchema = recordSchema;
-            sr->u.request->recordPacking = recordPacking;
+            sr->u.request->recordPacking = recordXMLEscaping;
+            sr->u.request->packing = recordPacking;
             sr->u.request->stylesheet = stylesheet;
 
             yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords,
@@ -568,7 +581,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->extra_args = extra_args;
             yaz_srw_decodeauth(sr, hreq, username, password, decode);
             *srw_pdu = sr;
-            sr->u.explain_request->recordPacking = recordPacking;
+            sr->u.explain_request->recordPacking = recordXMLEscaping;
+            sr->u.explain_request->packing = recordPacking;
             sr->u.explain_request->database = db;
 
             sr->u.explain_request->stylesheet = stylesheet;
@@ -718,14 +732,14 @@ static Z_SRW_PDU *yaz_srw_get_core_ver(ODR o, const char *version)
     return p;
 }
 
-Z_SRW_PDU *yaz_srw_get_core_v_1_1(ODR o)
+Z_SRW_PDU *yaz_srw_get_core_v_2_0(ODR o)
 {
-    return yaz_srw_get_core_ver(o, "1.1");
+    return yaz_srw_get_core_ver(o, "2.0");
 }
 
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
-    return yaz_srw_get_pdu(o, which, "1.1");
+    return yaz_srw_get_pdu(o, which, "2.0");
 }
 
 Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
@@ -862,16 +876,19 @@ void yaz_add_name_value_str(ODR o, char **name, char **value,  int *i,
 static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                              char **name, char **value, int max_names)
 {
+    int version2 = strcmp(srw_pdu->srw_version, "2.") > 0;
     int i = 0;
     char *queryType;
-    yaz_add_name_value_str(encode, name, value, &i, "version", srw_pdu->srw_version);
+    if (!version2)
+        yaz_add_name_value_str(encode, name, value, &i, "version", srw_pdu->srw_version);
     name[i] = "operation";
     switch (srw_pdu->which)
     {
     case Z_SRW_searchRetrieve_request:
-        value[i++] = "searchRetrieve";
+        if (!version2)
+            value[i++] = "searchRetrieve";
         queryType = srw_pdu->u.request->queryType;
-        if (strcmp(srw_pdu->srw_version, "2.") > 0)
+        if (version2)
         {
             yaz_add_name_value_str(encode, name, value, &i, "queryType",
                                    queryType);
@@ -928,7 +945,7 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
     case Z_SRW_scan_request:
         value[i++] = "scan";
         queryType = srw_pdu->u.request->queryType;
-        if (strcmp(srw_pdu->srw_version, "2.") > 0)
+        if (version2)
         {
             if (queryType && strcmp(queryType, "cql"))
                 yaz_add_name_value_str(encode, name, value, &i, "queryType",
