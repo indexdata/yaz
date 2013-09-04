@@ -1192,7 +1192,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             if (!version2)
                 add_xsd_string(ptr, "version", (*p)->srw_version);
 
-            if (strcmp((*p)->srw_version, "2.") > 0)
+            if (version2)
             {
                 if (queryType && strcmp(queryType, "cql"))
                     add_xsd_string(ptr, "queryType", queryType);
