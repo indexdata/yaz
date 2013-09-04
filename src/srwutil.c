@@ -967,14 +967,14 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         break;
     case Z_SRW_scan_request:
         value[i++] = "scan";
-        queryType = srw_pdu->u.request->queryType;
+        queryType = srw_pdu->u.scan_request->queryType;
         if (version2)
         {
             if (queryType && strcmp(queryType, "cql"))
                 yaz_add_name_value_str(encode, name, value, &i, "queryType",
                                        queryType);
-            yaz_add_name_value_str(encode, name, value, &i, "query",
-                                   srw_pdu->u.request->query);
+            yaz_add_name_value_str(encode, name, value, &i, "scanClause",
+                                   srw_pdu->u.scan_request->scanClause);
         }
         else
         {
