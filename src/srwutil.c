@@ -909,7 +909,7 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                 yaz_add_name_value_str(encode, name, value, &i, "x-pquery",
                                        srw_pdu->u.request->query);
             }
-            else if (!strcmp(queryType, "pqf"))
+            else if (!strcmp(queryType, "xcql"))
             {
                 yaz_add_name_value_str(encode, name, value, &i, "x-cql",
                                        srw_pdu->u.request->query);
