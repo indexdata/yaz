@@ -296,7 +296,9 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 *srw_pdu = (Z_SRW_PDU*) (*soap_package)->u.generic->p;
                 yaz_srw_decodeauth(*srw_pdu, hreq, 0, 0, decode);
 
-                if ((*soap_package)->u.generic->no == 3) /* SRU 2 ! */
+                /* last entry in handlers - SRU 2.0 - is turned into
+                   offset 0.. due to other pieces relying on it */
+                if ((*soap_package)->u.generic->no == 3)
                     (*soap_package)->u.generic->no = 0;
                 if ((*srw_pdu)->which == Z_SRW_searchRetrieve_request &&
                     (*srw_pdu)->u.request->database == 0)
