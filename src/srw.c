@@ -880,6 +880,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_integer(ptr, "resultSetIdleTime", o,
                                            &res->resultSetIdleTime))
                     ;
+                else if (match_xsd_integer(ptr, "resultSetTTL", o,
+                                           &res->resultSetIdleTime))
+                    ;
                 else if (match_element(ptr, "records"))
                     yaz_srw_records(o, ptr, &res->records,
                                     &res->extra_records,
@@ -1120,7 +1123,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 add_xsd_string(ptr, "version", (*p)->srw_version);
             add_xsd_integer(ptr, "numberOfRecords", res->numberOfRecords);
             add_xsd_string(ptr, "resultSetId", res->resultSetId);
-            add_xsd_integer(ptr, "resultSetIdleTime", res->resultSetIdleTime);
+            add_xsd_integer(ptr,
+                            version2 ? "resultSetTTL" : "resultSetIdleTime" ,
+                            res->resultSetIdleTime);
             if (res->num_records)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "records", 0);
