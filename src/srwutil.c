@@ -760,6 +760,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.request->maximumRecords = 0;
         sr->u.request->recordSchema = 0;
         sr->u.request->recordPacking = 0;
+        sr->u.request->packing = 0;
         sr->u.request->recordXPath = 0;
         sr->u.request->database = 0;
         sr->u.request->resultSetTTL = 0;
@@ -785,6 +786,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.explain_request = (Z_SRW_explainRequest *)
             odr_malloc(o, sizeof(*sr->u.explain_request));
         sr->u.explain_request->recordPacking = 0;
+        sr->u.explain_request->packing = 0;
         sr->u.explain_request->database = 0;
         sr->u.explain_request->stylesheet = 0;
         break;
@@ -928,8 +930,16 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                                srw_pdu->u.request->maximumRecords);
         yaz_add_name_value_str(encode, name, value, &i, "recordSchema",
                                srw_pdu->u.request->recordSchema);
-        yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
-                               srw_pdu->u.request->recordPacking);
+        if (version2)
+        {
+            yaz_add_name_value_str(encode, name, value, &i, "recordXMLEscaping",
+                                   srw_pdu->u.request->recordPacking);
+            yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
+                                   srw_pdu->u.request->packing);
+        }
+        else
+            yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
+                                   srw_pdu->u.request->recordPacking);
         yaz_add_name_value_str(encode, name, value, &i, "recordXPath",
                                srw_pdu->u.request->recordXPath);
         yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
@@ -939,6 +949,17 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
         break;
     case Z_SRW_explain_request:
         value[i++] = "explain";
+
+        if (version2)
+        {
+            yaz_add_name_value_str(encode, name, value, &i, "recordXMLEscaping",
+                                   srw_pdu->u.explain_request->recordPacking);
+            yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
+                                   srw_pdu->u.explain_request->packing);
+        }
+        else
+            yaz_add_name_value_str(encode, name, value, &i, "recordPacking",
+                                   srw_pdu->u.explain_request->recordPacking);
         yaz_add_name_value_str(encode, name, value, &i, "stylesheet",
                                srw_pdu->u.explain_request->stylesheet);
         break;

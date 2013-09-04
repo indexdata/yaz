@@ -755,6 +755,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         {
             xmlNodePtr ptr = method->children;
             Z_SRW_searchRetrieveRequest *req;
+            char *recordPacking = 0;
+            char *recordXMLEscaping = 0;
 
             (*p)->which = Z_SRW_searchRetrieve_request;
             req = (*p)->u.request = (Z_SRW_searchRetrieveRequest *)
@@ -797,7 +799,10 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                            &req->maximumRecords))
                     ;
                 else if (match_xsd_string(ptr, "recordPacking", o,
-                                          &req->recordPacking))
+                                          &recordPacking))
+                    ;
+                else if (match_xsd_string(ptr, "recordXMLEscaping", o,
+                                          &recordXMLEscaping))
                     ;
                 else if (match_xsd_string(ptr, "recordSchema", o,
                                           &req->recordSchema))
@@ -821,6 +826,15 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             {
                 /* should put proper diagnostic here */
                 return -1;
+            }
+            if (!strcmp((*p)->srw_version, "2.0"))
+            {
+                req->recordPacking = recordXMLEscaping;
+                req->packing = recordPacking;
+            }
+            else
+            {
+                req->recordPacking = recordPacking;
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveResponse"))
@@ -1064,7 +1078,13 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             }
             add_xsd_integer(ptr, "startRecord", req->startRecord);
             add_xsd_integer(ptr, "maximumRecords", req->maximumRecords);
-            add_xsd_string(ptr, "recordPacking", req->recordPacking);
+            if (version2)
+            {
+                add_xsd_string(ptr, "recordXMLEscaping", req->recordPacking);
+                add_xsd_string(ptr, "recordPacking", req->packing);
+            }
+            else
+                add_xsd_string(ptr, "recordPacking", req->recordPacking);
             add_xsd_string(ptr, "recordSchema", req->recordSchema);
             add_xsd_string(ptr, "recordXPath", req->recordXPath);
             add_xsd_integer(ptr, "resultSetTTL", req->resultSetTTL);
@@ -1122,7 +1142,13 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
 
             if (!version2)
                 add_xsd_string(ptr, "version", (*p)->srw_version);
-            add_xsd_string(ptr, "recordPacking", req->recordPacking);
+            if (version2)
+            {
+                add_xsd_string(ptr, "recordXMLEscaping", req->recordPacking);
+                add_xsd_string(ptr, "recordPacking", req->packing);
+            }
+            else
+                add_xsd_string(ptr, "recordPacking", req->recordPacking);
             add_xsd_string(ptr, "stylesheet", req->stylesheet);
             add_xsd_string(ptr, "database", req->database);
         }

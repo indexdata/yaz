@@ -83,6 +83,7 @@ static file_history_t file_history = 0;
 
 static char sru_method[10] = "soap";
 static char sru_version[10] = "1.2";
+static char sru_recordPacking[10] = "";
 static char *codeset = 0;               /* character set for output */
 static int hex_dump = 0;
 static char *dump_file_prefix = 0;
@@ -1473,6 +1474,8 @@ static int send_SRW_searchRequest(const char *arg)
         printf("Only CQL and PQF supported in SRW\n");
         return 0;
     }
+    if (*sru_recordPacking)
+        sr->u.request->recordPacking = sru_recordPacking;
     sru_maximumRecords = 0;
     sr->u.request->maximumRecords = odr_intdup(out, 0);
     sr->u.request->facetList = facet_list;
@@ -2822,7 +2825,8 @@ static int cmd_sru(const char *arg)
     }
     else
     {
-        int r = sscanf(arg, "%9s %9s", sru_method, sru_version);
+        int r = sscanf(arg, "%9s %9s %9s", sru_method, sru_version,
+            sru_recordPacking);
         if (r >= 1)
         {
             if (!yaz_matchstr(sru_method, "post"))
@@ -3165,6 +3169,8 @@ static int send_SRW_presentRequest(const char *arg)
         return 0;
     if (!parse_show_args(arg, setstring, &setno, &nos))
         return 0;
+    if (*sru_recordPacking)
+        sr->u.request->recordPacking = sru_recordPacking;
     sr->u.request->startRecord = odr_intdup(out, setno);
     sru_maximumRecords = nos;
     sr->u.request->maximumRecords = odr_intdup(out, nos);
