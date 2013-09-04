@@ -232,7 +232,7 @@ char *yaz_negotiate_sru_version(char *input_ver)
 
 static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
                           Z_SRW_extra_record **extra,
-                          void *client_data)
+                          void *client_data, int version2)
 {
     if (o->direction == ODR_DECODE)
     {
@@ -311,7 +311,12 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
 
         add_xsd_string(ptr, "recordSchema", rec->recordSchema);
         if (spack)
-            add_xsd_string(ptr, "recordPacking", spack);
+        {
+            if (version2)
+                add_xsd_string(ptr, "recordXMLEscaping", spack);
+            else
+                add_xsd_string(ptr, "recordPacking", spack);
+        }
         switch (pack)
         {
         case Z_SRW_recordPacking_string:
@@ -345,7 +350,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
 
 static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
                            Z_SRW_extra_record ***extra,
-                           int *num, void *client_data)
+                           int *num, void *client_data, int version2)
 {
     if (o->direction == ODR_DECODE)
     {
@@ -367,7 +372,7 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
             if (ptr->type == XML_ELEMENT_NODE &&
                 !xmlStrcmp(ptr->name, BAD_CAST "record"))
             {
-                yaz_srw_record(o, ptr, *recs + i, *extra + i, client_data);
+                yaz_srw_record(o, ptr, *recs + i, *extra + i, client_data, 0);
                 i++;
             }
         }
@@ -380,7 +385,7 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
             xmlNodePtr rptr = xmlNewChild(pptr, 0, BAD_CAST "record",
                                           0);
             yaz_srw_record(o, rptr, (*recs)+i, (*extra ? *extra + i : 0),
-                           client_data);
+                           client_data, version2);
         }
     }
     return 0;
@@ -878,7 +883,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_element(ptr, "records"))
                     yaz_srw_records(o, ptr, &res->records,
                                     &res->extra_records,
-                                    &res->num_records, client_data);
+                                    &res->num_records, client_data, 0);
                 else if (match_xsd_integer(ptr, "nextRecordPosition", o,
                                            &res->nextRecordPosition))
                     ;
@@ -947,7 +952,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                     ;
                 else if (match_element(ptr, "record"))
                     yaz_srw_record(o, ptr, &res->record, &res->extra_record,
-                                   client_data);
+                                   client_data, 0);
                 else if (match_element(ptr, "diagnostics"))
                     yaz_srw_diagnostics(o, ptr, &res->diagnostics,
                                         &res->num_diagnostics,
@@ -1121,7 +1126,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "records", 0);
                 yaz_srw_records(o, rptr, &res->records, &res->extra_records,
                                 &res->num_records,
-                                client_data);
+                                client_data, version2);
             }
             add_xsd_integer(ptr, "nextRecordPosition",
                             res->nextRecordPosition);
@@ -1164,7 +1169,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             {
                 xmlNodePtr ptr1 = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 yaz_srw_record(o, ptr1, &res->record, &res->extra_record,
-                               client_data);
+                               client_data, version2);
             }
             if (res->num_diagnostics)
             {
@@ -1311,7 +1316,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 {
                     req->record = yaz_srw_get_record(o);
                     yaz_srw_record(o, ptr, req->record, &req->extra_record,
-                                   client_data);
+                                   client_data, 0);
                 }
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
@@ -1359,7 +1364,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 {
                     res->record = yaz_srw_get_record(o);
                     yaz_srw_record(o, ptr, res->record, &res->extra_record,
-                                   client_data);
+                                   client_data, 0);
                 }
                 else if (match_element(ptr, "diagnostics"))
                     yaz_srw_diagnostics(o, ptr, &res->diagnostics,
@@ -1404,7 +1409,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 xmlSetNs(rptr, ns_srw);
                 yaz_srw_record(o, rptr, req->record, &req->extra_record,
-                               client_data);
+                               client_data, 0);
 	    }
 	    if (req->extraRequestData_len)
             {
@@ -1436,7 +1441,7 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 xmlSetNs(rptr, ns_srw);
                 yaz_srw_record(o, rptr, res->record, &res->extra_record,
-                               client_data);
+                               client_data, 0);
 	    }
 	    if (res->num_diagnostics)
 	    {
