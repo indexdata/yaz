@@ -852,6 +852,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 odr_malloc(o, sizeof(*res));
 
             res->numberOfRecords = 0;
+            res->resultCountPrecision = 0;
             res->resultSetId = 0;
             res->resultSetIdleTime = 0;
             res->records = 0;
@@ -873,6 +874,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                     ;
                 else if (match_xsd_integer(ptr, "numberOfRecords", o,
                                            &res->numberOfRecords))
+                    ;
+                else if (match_xsd_string(ptr, "resultCountPrecision", o,
+                                           &res->resultCountPrecision))
                     ;
                 else if (match_xsd_string(ptr, "resultSetId", o,
                                           &res->resultSetId))
@@ -1142,6 +1146,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 yaz_srw_diagnostics(o, rptr, &res->diagnostics,
                                     &res->num_diagnostics, client_data, ns);
             }
+            if (res->resultCountPrecision)
+                add_xsd_string(ptr, "resultCountPrecision",
+                               res->resultCountPrecision);
         }
         else if ((*p)->which == Z_SRW_explain_request)
         {

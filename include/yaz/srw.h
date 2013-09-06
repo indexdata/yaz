@@ -102,6 +102,7 @@ typedef struct {
 
 typedef struct {
     Odr_int *numberOfRecords;
+    char *resultCountPrecision;
     char * resultSetId;
     Odr_int *resultSetIdleTime;
 

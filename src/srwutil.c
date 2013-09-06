@@ -773,6 +773,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
         sr->u.response = (Z_SRW_searchRetrieveResponse *)
             odr_malloc(o, sizeof(*sr->u.response));
         sr->u.response->numberOfRecords = 0;
+        sr->u.response->resultCountPrecision = 0;
         sr->u.response->resultSetId = 0;
         sr->u.response->resultSetIdleTime = 0;
         sr->u.response->records = 0;

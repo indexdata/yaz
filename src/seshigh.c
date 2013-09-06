@@ -1160,7 +1160,19 @@ static void srw_bend_search(association *assoc,
                     res->extraResponseData_buf = rr.extra_response_data;
                     res->extraResponseData_len = strlen(rr.extra_response_data);
                 }
-                if (rr.estimated_hit_count || rr.partial_resultset)
+                if (strcmp(res->srw_version, "2.") > 0)
+                {
+                    if (rr.estimated_hit_count)
+                        srw_res->resultCountPrecision =
+                            odr_strdup(assoc->encode, "estimate");
+                    else if (rr.partial_resultset)
+                        srw_res->resultCountPrecision =
+                            odr_strdup(assoc->encode, "minimum");
+                    else
+                        srw_res->resultCountPrecision =
+                            odr_strdup(assoc->encode, "exact");
+                }
+                else if (rr.estimated_hit_count || rr.partial_resultset)
                 {
                     yaz_add_srw_diagnostic(
                         assoc->encode,
