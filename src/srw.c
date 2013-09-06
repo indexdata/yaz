@@ -1070,9 +1070,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
-            if (!version2)
-                add_xsd_string(ptr, "version", (*p)->srw_version);
-
+            add_xsd_string(ptr, "version", (*p)->srw_version);
             if (version2)
             {
                 if (queryType)
@@ -1123,8 +1121,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
-            if (!version2)
-                add_xsd_string(ptr, "version", (*p)->srw_version);
+            add_xsd_string(ptr, "version", (*p)->srw_version);
             add_xsd_integer(ptr, "numberOfRecords", res->numberOfRecords);
             add_xsd_string(ptr, "resultSetId", res->resultSetId);
             add_xsd_integer(ptr,
@@ -1157,8 +1154,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
-            if (!version2)
-                add_xsd_string(ptr, "version", (*p)->srw_version);
+            add_xsd_string(ptr, "version", (*p)->srw_version);
             if (version2)
             {
                 add_xsd_string(ptr, "recordXMLEscaping", req->recordPacking);
@@ -1201,8 +1197,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
-            if (!version2)
-                add_xsd_string(ptr, "version", (*p)->srw_version);
+            add_xsd_string(ptr, "version", (*p)->srw_version);
 
             if (version2)
             {
@@ -1231,9 +1226,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
 
-            if (!version2)
-                add_xsd_string(ptr, "version", (*p)->srw_version);
-
+            add_xsd_string(ptr, "version", (*p)->srw_version);
             if (res->num_terms)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "terms", 0);

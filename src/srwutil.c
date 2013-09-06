@@ -488,8 +488,13 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 }
             }
         }
-        if (!operation && query)
-            operation = "searchRetrieve";
+        if (!operation)
+        {
+            if (query)
+                operation = "searchRetrieve";
+            else if (scanClause)
+                operation = "scan";
+        }
         version = yaz_negotiate_sru_version(version);
 
         if (!version)
@@ -884,19 +889,19 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
     int version2 = strcmp(srw_pdu->srw_version, "2.") > 0;
     int i = 0;
     char *queryType;
-    if (!version2)
-        yaz_add_name_value_str(encode, name, value, &i, "version", srw_pdu->srw_version);
+    yaz_add_name_value_str(encode, name, value, &i, "version",
+                           srw_pdu->srw_version);
     name[i] = "operation";
     switch (srw_pdu->which)
     {
     case Z_SRW_searchRetrieve_request:
-        if (!version2)
-            value[i++] = "searchRetrieve";
+        value[i++] = "searchRetrieve";
         queryType = srw_pdu->u.request->queryType;
         if (version2)
         {
-            yaz_add_name_value_str(encode, name, value, &i, "queryType",
-                                   queryType);
+            if (queryType && strcmp(queryType, "cql"))
+                yaz_add_name_value_str(encode, name, value, &i, "queryType",
+                                       queryType);
             yaz_add_name_value_str(encode, name, value, &i, "query",
                                    srw_pdu->u.request->query);
         }
