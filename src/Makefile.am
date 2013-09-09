@@ -90,7 +90,7 @@ libyaz_la_SOURCES=base64.c version.c options.c log.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c init_diag.c \
   zoom-c.c zoom-z3950.c zoom-sru.c zoom-query.c zoom-record-cache.c \
   zoom-event.c \
-  record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru-p.h \
+  record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru_facet.c sru-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c solr.c diag_map.c \
   opac_to_xml.c xml_to_opac.c \
   cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \

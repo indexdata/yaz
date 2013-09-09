@@ -495,6 +495,7 @@ MISC_OBJS= \
    $(OBJDIR)\soap.obj \
    $(OBJDIR)\solr.obj \
    $(OBJDIR)\solrtransform.obj \
+   $(OBJDIR)\sru_facet.obj \
    $(OBJDIR)\srw.obj \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \

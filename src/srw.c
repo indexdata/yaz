@@ -18,7 +18,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <assert.h>
-
+#include <yaz/facet.h>
 #include "sru-p.h"
 
 static void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,
@@ -68,7 +68,7 @@ xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val)
     return add_xsd_string_ns(ptr, elem, val, 0);
 }
 
-static void add_xsd_integer(xmlNodePtr ptr, const char *elem,
+void add_xsd_integer(xmlNodePtr ptr, const char *elem,
                             const Odr_int *val)
 {
     if (val)
@@ -762,6 +762,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             Z_SRW_searchRetrieveRequest *req;
             char *recordPacking = 0;
             char *recordXMLEscaping = 0;
+            const char *facetLimit = 0;
 
             (*p)->which = Z_SRW_searchRetrieve_request;
             req = (*p)->u.request = (Z_SRW_searchRetrieveRequest *)
@@ -824,8 +825,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
-                else
-                    match_xsd_string(ptr, "database", o, &req->database);
+                else if (match_xsd_string(ptr, "database", o, &req->database))
+                    ;
+                else if (match_xsd_string(ptr, "facetLimit", o,
+                                          (char**) &facetLimit))
+                    ;
             }
             if (!req->query)
             {
@@ -841,6 +845,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             {
                 req->recordPacking = recordPacking;
             }
+            yaz_sru_facet_request(o, &req->facetList, &facetLimit);
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveResponse"))
         {
@@ -900,6 +905,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                         client_data, ns);
                 else if (match_element(ptr, "facet_analysis"))
                     yaz_sru_proxy_decode_facets(o, ptr, &res->facetList);
+                else if (match_element(ptr, "facetedResults"))
+                    yaz_sru_facet_response(o, &res->facetList, ptr);
             }
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "explainRequest"))
@@ -1111,6 +1118,11 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             }
             add_xsd_string(ptr, "stylesheet", req->stylesheet);
             add_xsd_string(ptr, "database", req->database);
+            {
+                const char *limit = 0;
+                yaz_sru_facet_request(o, &req->facetList, &limit);
+                add_xsd_string(ptr, "facetLimit", limit);
+            }
         }
         else if ((*p)->which == Z_SRW_searchRetrieve_response)
         {
@@ -1146,6 +1158,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             if (res->resultCountPrecision)
                 add_xsd_string(ptr, "resultCountPrecision",
                                res->resultCountPrecision);
+            yaz_sru_facet_response(o, &res->facetList, ptr);
         }
         else if ((*p)->which == Z_SRW_explain_request)
         {

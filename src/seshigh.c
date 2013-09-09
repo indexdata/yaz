@@ -56,6 +56,7 @@
 #include <libxml/tree.h>
 #endif
 
+#include <yaz/facet.h>
 #include <yaz/xmalloc.h>
 #include <yaz/comstack.h>
 #include "eventl.h"
@@ -1008,6 +1009,11 @@ static void srw_bend_search(association *assoc,
             rr.errstring = 0;
             rr.search_info = 0;
             rr.search_input = 0;
+
+            if (srw_req->facetList)
+                yaz_oi_set_facetlist(&rr.search_input, assoc->encode,
+                                     srw_req->facetList);
+
             yaz_log_zquery_level(log_requestdetail,rr.query);
 
             (assoc->init->bend_search)(assoc->backend, &rr);
@@ -1045,7 +1051,9 @@ static void srw_bend_search(association *assoc,
                     srw_res->resultSetIdleTime =
                         odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
 		}
-
+                
+                srw_res->facetList = yaz_oi_get_facetlist(&rr.search_info);
+                yaz_log(YLOG_LOG, "facetList res = %p",srw_res->facetList);
                 if (start > rr.hits || start < 1)
                 {
                     /* if hits<=0 and start=1 we don't return a diagnostic */

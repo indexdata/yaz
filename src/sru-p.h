@@ -39,10 +39,23 @@ Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name);
 
 char *yaz_negotiate_sru_version(char *input_ver);
 
+void yaz_sru_facet_request(ODR, Z_FacetList **facetList, const char **limit);
+
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-const char *yaz_element_attribute_value_get(xmlNodePtr ptr, const char *node_name, const char *attribute_name);
+
+xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val);
+
+void add_xsd_integer(xmlNodePtr ptr, const char *elem, const Odr_int *val);
+
+xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, const char *val,
+                            int len);
+
+void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n);
+
+const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
+                                            const char *node_name, const char *attribute_name);
 #endif
 
 /*

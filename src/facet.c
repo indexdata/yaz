@@ -43,17 +43,21 @@ void yaz_oi_set_facetlist(
 
 Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation)
 {
-    int categoryValue = 1;
-    Z_External *z_external = 0;
-    Z_OtherInformationUnit *oi =
-        yaz_oi_update(otherInformation, 0, yaz_oid_userinfo_facet_1,
-                      categoryValue, 0);
-    if (!oi)
-        return 0;
-    z_external = oi->information.externallyDefinedInfo;
-
-    if (z_external && z_external->which == Z_External_userFacets)
-        return z_external->u.facetList;
+    Z_OtherInformation *oi = *otherInformation;
+    if (oi)
+    {
+        int i;
+        for (i = 0; i < oi->num_elements; i++)
+        {
+            Z_OtherInformationUnit *oiu = oi->list[i];
+            if (oiu->which == Z_OtherInfo_externallyDefinedInfo
+                && oiu->information.externallyDefinedInfo->which ==
+                Z_External_userFacets)
+            {
+                return oiu->information.externallyDefinedInfo->u.facetList;
+            }
+        }
+    }
     return 0;
 }
 

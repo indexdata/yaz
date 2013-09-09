@@ -397,6 +397,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *startRecord = 0;
         char *maximumTerms = 0;
         char *responsePosition = 0;
+        const char *facetLimit = 0;
         Z_SRW_extra_arg *extra_args = 0;
 #endif
         char **uri_name;
@@ -468,6 +469,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     maximumTerms = v;
                 else if (!strcmp(n, "responsePosition"))
                     responsePosition = v;
+                else if (!strcmp(n, "facetLimit"))
+                    facetLimit = v;
                 else if (!strcmp(n, "extraRequestData"))
                     ; /* ignoring extraRequestData */
                 else if (n[0] == 'x' && n[1] == '-')
@@ -552,6 +555,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->recordPacking = recordXMLEscaping;
             sr->u.request->packing = recordPacking;
             sr->u.request->stylesheet = stylesheet;
+            yaz_sru_facet_request(decode , &sr->u.request->facetList,
+                                  &facetLimit);
 
             yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords,
                                    &sr->u.request->maximumRecords,
@@ -954,6 +959,13 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                                srw_pdu->u.request->stylesheet);
         yaz_add_name_value_int(encode, name, value, &i, "resultSetTTL",
                                srw_pdu->u.request->resultSetTTL);
+        {
+            const char *facetLimit = 0;
+            yaz_sru_facet_request(encode, &srw_pdu->u.request->facetList,
+                                  &facetLimit);
+            yaz_add_name_value_str(encode, name, value, &i, "facetLimit",
+                                   (char *) facetLimit);
+        }
         break;
     case Z_SRW_explain_request:
         value[i++] = "explain";
@@ -1042,7 +1054,6 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
     sprintf(path, "%s?%s", hreq->path, uri_args);
-    yaz_log(YLOG_DEBUG, "SRU HTTP Get Request %s", path);
     hreq->path = path;
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,
