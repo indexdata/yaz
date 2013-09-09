@@ -1051,9 +1051,8 @@ static void srw_bend_search(association *assoc,
                     srw_res->resultSetIdleTime =
                         odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
 		}
-                
+
                 srw_res->facetList = yaz_oi_get_facetlist(&rr.search_info);
-                yaz_log(YLOG_LOG, "facetList res = %p",srw_res->facetList);
                 if (start > rr.hits || start < 1)
                 {
                     /* if hits<=0 and start=1 we don't return a diagnostic */
