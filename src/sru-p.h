@@ -37,6 +37,8 @@ void yaz_add_name_value_int(ODR o, char **name, char **value, int *i,
 
 Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name);
 
+char *yaz_negotiate_sru_version(char *input_ver);
+
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>

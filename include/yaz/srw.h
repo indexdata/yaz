@@ -327,8 +327,6 @@ YAZ_EXPORT int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 YAZ_EXPORT int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                        ODR encode, const char *charset);
 
-YAZ_EXPORT char *yaz_negotiate_sru_version(char *input_ver);
-
 YAZ_EXPORT
 void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args);
 
