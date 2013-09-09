@@ -79,7 +79,7 @@ void add_xsd_integer(xmlNodePtr ptr, const char *elem,
     }
 }
 
-static int match_element(xmlNodePtr ptr, const char *elem)
+int match_element(xmlNodePtr ptr, const char *elem)
 {
     if (ptr->type == XML_ELEMENT_NODE && !xmlStrcmp(ptr->name, BAD_CAST elem))
     {
@@ -90,8 +90,8 @@ static int match_element(xmlNodePtr ptr, const char *elem)
 
 #define CHECK_TYPE 0
 
-static int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
-                              char **val, int *len)
+int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
+                       char **val, int *len)
 {
 #if CHECK_TYPE
     struct _xmlAttr *attr;
@@ -127,8 +127,7 @@ static int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
 }
 
 
-static int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o,
-                            char **val)
+int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o, char **val)
 {
     return match_xsd_string_n(ptr, elem, o, val, 0);
 }
@@ -186,8 +185,7 @@ static int match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
     return match_xsd_XML_n2(ptr, elem, o, val, len, 0);
 }
 
-static int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
-                             Odr_int **val)
+int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, Odr_int **val)
 {
 #if CHECK_TYPE
     struct _xmlAttr *attr;

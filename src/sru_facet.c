@@ -129,6 +129,111 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
             }
         }
     }
+    else if (o->direction == ODR_DECODE)
+    {
+        Z_FacetList *fl = (Z_FacetList *) odr_malloc(o, sizeof(*fl));
+        xmlNode *p1;
+
+        fl->num = 0;
+        for (p1 = n->children; p1; p1 = p1->next)
+            if (match_element(p1, "facet"))
+                fl->num++;
+        if (fl->num > 0)
+        {
+            int i = 0;
+            *facetList = fl;
+            fl->elements = (Z_FacetField **)
+                odr_malloc(o, sizeof(*fl->elements) * fl->num);
+            for (p1 = n->children; p1; p1 = p1->next)
+                if (match_element(p1, "facet"))
+                {
+                    char *index_name = 0;
+                    xmlNode *p_terms = 0;
+                    xmlNode *p2 = p1->children;
+                    Z_FacetField *ff = (Z_FacetField *)
+                        odr_malloc(o, sizeof(*ff));
+                    fl->elements[i++] = ff;
+                    ff->attributes = 0;
+                    ff->num_terms = 0;
+                    ff->terms = 0;
+                    for (; p2; p2 = p2->next)
+                    {
+                        if (match_xsd_string(p2, "index", o, &index_name))
+                            ;
+                        else if (match_element(p2, "terms"))
+                            p_terms = p2;
+                    }
+                    if (index_name)
+                    {
+                        Z_AttributeList *al =
+                            (Z_AttributeList*) odr_malloc(o, sizeof(*al));
+                        Z_ComplexAttribute *ca =
+                            (Z_ComplexAttribute *) odr_malloc(o, sizeof(*ca));
+                        Z_AttributeElement *ae =
+                            (Z_AttributeElement *) odr_malloc(o, sizeof(*ae));
+                        al->num_attributes = 1;
+                        al->attributes = (Z_AttributeElement **)
+                            odr_malloc(o, sizeof(*al->attributes));
+                        al->attributes[0] = ae;
+                        ae->attributeSet = 0;
+                        ae->attributeType = odr_intdup(o, 1);
+                        ae->which = Z_AttributeValue_complex;
+                        ae->value.complex = ca;
+                        ca->num_semanticAction = 0;
+                        ca->semanticAction = 0;
+                        ca->num_list = 1;
+                        ca->list = (Z_StringOrNumeric **)
+                            odr_malloc(o, sizeof(*ca->list));
+                        ca->list[0] = (Z_StringOrNumeric *)
+                            odr_malloc(o, sizeof(**ca->list));
+                        ca->list[0]->which = Z_StringOrNumeric_string;
+                        ca->list[0]->u.string = index_name;
+                        ff->attributes = al;
+                    }
+                    if (p_terms)
+                    {
+                        xmlNode *p;
+                        int i = 0;
+                        for (p = p_terms->children; p; p = p->next)
+                        {
+                            if (match_element(p, "term"))
+                                ff->num_terms++;
+                        }
+                        if (ff->num_terms)
+                            ff->terms = (Z_FacetTerm **)
+                                odr_malloc(o,
+                                           sizeof(*ff->terms) * ff->num_terms);
+                        for (p = p_terms->children; p; p = p->next)
+                        {
+                            if (match_element(p, "term"))
+                            {
+                                char *cstr = 0;
+                                Odr_int *count = 0;
+                                xmlNode *p2 = p->children;
+                                for (; p2; p2 = p2->next)
+                                {
+                                    if (match_xsd_string(p2, "actualTerm", o,
+                                                         &cstr))
+                                        ;
+                                    else if (match_xsd_integer(p2, "count", o,
+                                                               &count))
+                                        ;
+                                }
+                                if (cstr && count)
+                                {
+                                    ff->terms[i++] =
+                                        facet_term_create_cstr(o, cstr, *count);
+                                }
+                            }
+                        }
+                        ff->num_terms = i;
+                        if (ff->num_terms == 0)
+                            ff->terms = 0;
+                    }
+                }
+
+        }
+    }
 }
 
 #endif

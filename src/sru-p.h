@@ -45,6 +45,12 @@ void yaz_sru_facet_request(ODR, Z_FacetList **facetList, const char **limit);
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
+int match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o, char **val);
+int match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o, Odr_int **val);
+int match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
+                       char **val, int *len);
+int match_element(xmlNodePtr ptr, const char *elem);
+
 xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val);
 
 void add_xsd_integer(xmlNodePtr ptr, const char *elem, const Odr_int *val);
