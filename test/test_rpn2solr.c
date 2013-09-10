@@ -118,12 +118,20 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
 
     /* Date check */ 
-//  YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=1 1980", "dc.date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=1 1980", "dc.date:[* TO 1980}"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date:[* TO 1980]"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=3 1980", "dc.date:1980"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=4 1980", "dc.date:[1980 TO *]"));
+    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:{1980 TO *]"));
 //    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:[* TO 1980]"));
-    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO *] AND dc.date:[* TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=2 234 @attr 1=30 @attr 2=4 1990", "dc.date:[* TO 234] AND dc.date:[1990 TO *]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=5 234 @attr 1=30 @attr 2=2 1990", "dc.date:{234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=5 234 @attr 1=30 @attr 2=1 1990", "dc.date:{234 TO 1990}"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@or  @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO *] OR dc.date:[* TO 1990]"));
+    YAZ_CHECK(compare(ct, "@or  @attr 1=30 @attr 2=2 234 @attr 1=30 @attr 2=4 1990", "dc.date:[* TO 234] OR dc.date:[1990 TO *]"));
+
 #if 0
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "solr.allRecords=1"));
 #endif
