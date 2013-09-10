@@ -10,13 +10,10 @@
 #include <config.h>
 #endif
 
-#include <stdlib.h>
+#include <stdio.h>
 
 #include <yaz/srw.h>
-#include <yaz/wrbuf.h>
 #if YAZ_HAVE_XML2
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 #include "sru-p.h"
 
 void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,

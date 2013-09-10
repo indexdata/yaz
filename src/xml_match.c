@@ -10,13 +10,8 @@
 #include <config.h>
 #endif
 
-#include <stdlib.h>
-
 #include <yaz/srw.h>
-#include <yaz/wrbuf.h>
 #if YAZ_HAVE_XML2
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 #include "sru-p.h"
 
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem)
