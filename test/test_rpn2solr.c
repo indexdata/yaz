@@ -125,6 +125,7 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:{1980 TO *]"));
 //    YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=5 1980", "dc.date:[* TO 1980]"));
     YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=2 234 @attr 1=30 @attr 2=4 1990", "dc.date:[* TO 234] AND dc.date:[1990 TO *]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=5 234 @attr 1=4  @attr 2=2 1990", "dc.date:[* TO 234] AND dc.title:[1990 TO *]"));
     YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=5 234 @attr 1=30 @attr 2=2 1990", "dc.date:{234 TO 1990]"));
     YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=4 234 @attr 1=30 @attr 2=2 1990", "dc.date:[234 TO 1990]"));
     YAZ_CHECK(compare(ct, "@and @attr 1=30 @attr 2=5 234 @attr 1=30 @attr 2=1 1990", "dc.date:{234 TO 1990}"));
