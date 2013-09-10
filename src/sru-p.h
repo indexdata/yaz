@@ -53,6 +53,12 @@ int yaz_match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
                        char **val, int *len);
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem);
 
+int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
+                         char **val, int *len, int fixup_root);
+
+int yaz_match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,
+                        char **val, int *len);
+
 xmlNodePtr add_xsd_string(xmlNodePtr ptr, const char *elem, const char *val);
 
 void add_xsd_integer(xmlNodePtr ptr, const char *elem, const Odr_int *val);
