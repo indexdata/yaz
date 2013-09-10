@@ -92,7 +92,7 @@ libyaz_la_SOURCES=base64.c version.c options.c log.c \
   zoom-event.c \
   record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru_facet.c sru-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c solr.c diag_map.c \
-  opac_to_xml.c xml_match.c xml_to_opac.c \
+  opac_to_xml.c xml_add.c xml_match.c xml_to_opac.c \
   cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
   cclqfile.c cclstr.c cclxmlconfig.c ccl_stop_words.c \
   cql.y cqlstdio.c cqltransform.c cqlutil.c xcqlutil.c cqlstring.c \

@@ -66,6 +66,12 @@ void add_xsd_integer(xmlNodePtr ptr, const char *elem, const Odr_int *val);
 xmlNodePtr add_xsd_string_n(xmlNodePtr ptr, const char *elem, const char *val,
                             int len);
 
+void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,
+               xmlNsPtr ns_ptr);
+
+xmlNodePtr add_xsd_string_ns(xmlNodePtr ptr, const char *elem, const char *val,
+                             xmlNsPtr ns_ptr);
+
 void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n);
 
 const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
