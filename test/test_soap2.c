@@ -32,9 +32,9 @@ static void tst_srw(void)
     YAZ_CHECK(sr);
     YAZ_CHECK(p);
 #if 0
-    sr->u.request->query.cql = "jordb" "\xe6" "r";
+    sr->u.request->query = "jordb" "\xe6" "r";
 #else
-    sr->u.request->query.cql = "jordbaer";
+    sr->u.request->query = "jordbaer";
 #endif
 
     p->which = Z_SOAP_generic;
