@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <yaz/srw.h>
+#include <yaz/log.h>
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
@@ -65,9 +66,10 @@ void tst_encoding(void)
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
 
+        sr->u.request->query = "title:solr";
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,
-                      "GET Default/select? HTTP/1.1\r\n"
+                      "GET Default/select?q=title%3Asolr HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
                       "Host: localhost\r\n"
                       "Content-Type: text/xml\r\n\r\n"));
@@ -76,9 +78,10 @@ void tst_encoding(void)
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
+        sr->u.request->query = "title:solr";
         YAZ_CHECK(compare_solr_req(
                       odr, sr, "utf-8",
-                      "GET Default/select? HTTP/1.1\r\n"
+                      "GET Default/select?q=title%3Asolr HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
                       "Host: localhost\r\n"
                       "Content-Type: text/xml; charset=utf-8\r\n\r\n"));
@@ -88,8 +91,7 @@ void tst_encoding(void)
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
 
-        sr->u.request->query_type = Z_SRW_query_type_cql;
-        sr->u.request->query.cql = "title:solr";
+        sr->u.request->query = "title:solr";
         sr->u.request->startRecord = odr_intdup(odr, 3);
         sr->u.request->maximumRecords = odr_intdup(odr, 10);
 
@@ -106,8 +108,7 @@ void tst_encoding(void)
         Z_SRW_PDU *sr = yaz_srw_get_pdu(odr, Z_SRW_searchRetrieve_request,
                                         "1.2");
 
-        sr->u.request->query_type = Z_SRW_query_type_cql;
-        sr->u.request->query.cql = "title:solr";
+        sr->u.request->query = "title:solr";
         sr->u.request->startRecord = odr_intdup(odr, 3);
         sr->u.request->maximumRecords = odr_intdup(odr, 10);
         sr->u.request->facetList = yaz_pqf_parse_facet_list(
