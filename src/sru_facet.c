@@ -136,7 +136,7 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
 
         fl->num = 0;
         for (p1 = n->children; p1; p1 = p1->next)
-            if (match_element(p1, "facet"))
+            if (yaz_match_xsd_element(p1, "facet"))
                 fl->num++;
         if (fl->num > 0)
         {
@@ -145,7 +145,7 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
             fl->elements = (Z_FacetField **)
                 odr_malloc(o, sizeof(*fl->elements) * fl->num);
             for (p1 = n->children; p1; p1 = p1->next)
-                if (match_element(p1, "facet"))
+                if (yaz_match_xsd_element(p1, "facet"))
                 {
                     char *index_name = 0;
                     xmlNode *p_terms = 0;
@@ -158,9 +158,9 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                     ff->terms = 0;
                     for (; p2; p2 = p2->next)
                     {
-                        if (match_xsd_string(p2, "index", o, &index_name))
+                        if (yaz_match_xsd_string(p2, "index", o, &index_name))
                             ;
-                        else if (match_element(p2, "terms"))
+                        else if (yaz_match_xsd_element(p2, "terms"))
                             p_terms = p2;
                     }
                     if (index_name)
@@ -196,7 +196,7 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                         int i = 0;
                         for (p = p_terms->children; p; p = p->next)
                         {
-                            if (match_element(p, "term"))
+                            if (yaz_match_xsd_element(p, "term"))
                                 ff->num_terms++;
                         }
                         if (ff->num_terms)
@@ -205,17 +205,17 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                                            sizeof(*ff->terms) * ff->num_terms);
                         for (p = p_terms->children; p; p = p->next)
                         {
-                            if (match_element(p, "term"))
+                            if (yaz_match_xsd_element(p, "term"))
                             {
                                 char *cstr = 0;
                                 Odr_int *count = 0;
                                 xmlNode *p2 = p->children;
                                 for (; p2; p2 = p2->next)
                                 {
-                                    if (match_xsd_string(p2, "actualTerm", o,
+                                    if (yaz_match_xsd_string(p2, "actualTerm", o,
                                                          &cstr))
                                         ;
-                                    else if (match_xsd_integer(p2, "count", o,
+                                    else if (yaz_match_xsd_integer(p2, "count", o,
                                                                &count))
                                         ;
                                 }
