@@ -81,7 +81,7 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                 case Z_ProximityOperator_Prox_notEqual:
                     return 0;
                 case 100:
-                    /* phonetic is not implemented*/
+                    /* phonetic is not implemented */
                     return 0;
                 case 101:
                     /* stem is not not implemented */
@@ -104,12 +104,23 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
     return ":";
 }
 
+struct solr_attr {
+    const char *index; 
+    const char *relation;
+    const char *term;
+    int  is_range;
+    const char *begin;
+    const char *close;
+};
+
 static int rpn2solr_attr(solr_transform_t ct,
-                         Z_AttributeList *attributes, WRBUF w, char **close_range)
+                         Z_AttributeList *attributes, WRBUF w, struct solr_attr *solr_attr)
 {
-    const char *relation = solr_lookup_reverse(ct, "relation.", attributes);
-    const char *index = solr_lookup_reverse(ct, "index.", attributes);
+    const char *relation  = solr_lookup_reverse(ct, "relation.", attributes);
+    const char *index     = solr_lookup_reverse(ct, "index.", attributes);
     const char *structure = solr_lookup_reverse(ct, "structure.", attributes);
+    /* Assume this is not a range */
+    solr_attr->is_range = 0;
 
     /* if transform (properties) do not match, we'll just use a USE string attribute (bug #2978) */
     if (!index)
@@ -127,42 +138,54 @@ static int rpn2solr_attr(solr_transform_t ct,
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
     {
-        wrbuf_puts(w, index);
+        solr_attr->index = index;
         if (relation)
         {
-            if (!strcmp(relation, "exact"))
-                /* TODO Verify if a exact  SOLR exists */
+            if (!strcmp(relation, "exact")) {
+                /* TODO Exact match does not exists in SOLR. Need to use specific field type  */
                 relation = ":";
-            else if (!strcmp(relation, "eq"))
+            }
+            else if (!strcmp(relation, "eq")) {
                 relation = ":";
+            }
+            else if (!strcmp(relation, "<")) {
+                solr_attr->is_range = 1;
+                solr_attr->begin = "[* TO ";
+                solr_attr->close = "}";
+            }
             else if (!strcmp(relation, "le")) {
-                /* TODO Not support as such, but could perhaps be transformed into a range */
-                relation = ":[* TO ";
-                *close_range = "]";
+                solr_attr->is_range = 2;
+                solr_attr->begin = "[* TO ";
+                solr_attr->close = "]";
             }
             else if (!strcmp(relation, "ge")) {
-                /* TODO Not support as such, but could perhaps be transformed into a range */
-                relation = ":[";
-                *close_range = " TO *]";
+                solr_attr->is_range = 3;
+                solr_attr->begin = "[";
+                solr_attr->close = " TO *]";
             }
-            /* Missing mapping of not equal, phonetic, stem and relevance */
-            wrbuf_puts(w, relation);
+            else if (!strcmp(relation, ">")) {
+                solr_attr->is_range = 4;
+                solr_attr->begin = "{";
+                solr_attr->close = " TO *]";
+            }
+            solr_attr->relation = relation;
         }
-        else
-            wrbuf_puts(w, ":");
-
+        // TODO is this valid for Solr? 
+        solr_attr->term = 0;
         if (structure)
         {
             if (strcmp(structure, "*"))
             {
-                wrbuf_puts(w, "/");
-                wrbuf_puts(w, structure);
-                wrbuf_puts(w, " ");
+               wrbuf_puts(w, "/");
+               wrbuf_puts(w, structure);
+               wrbuf_puts(w, " ");
+               solr_attr->index = 0;  
             }
+
         }
-//        if (close_range)
-//            wrbuf_puts(w, close_range);
     }
+    else 
+        solr_attr->index = 0;
     return 0;
 }
 
@@ -193,9 +216,7 @@ static Odr_int get_truncation(Z_AttributesPlusTerm *apt)
 #define SOLR_SPECIAL "+-&|!(){}[]^\"~*?:\\"
 
 static int rpn2solr_simple(solr_transform_t ct,
-                           void (*pr)(const char *buf, void *client_data),
-                           void *client_data,
-                           Z_Operand *q, WRBUF w)
+                           Z_Operand *q, WRBUF w, struct solr_attr *solr_attr)
 {
     int ret = 0;
     if (q->which != Z_Operand_APT)
@@ -212,8 +233,8 @@ static int rpn2solr_simple(solr_transform_t ct,
         Odr_int trunc = get_truncation(apt);
 
         wrbuf_rewind(w);
-        char *close_range = 0;
-        ret = rpn2solr_attr(ct, apt->attributes, w, &close_range);
+        
+        ret = rpn2solr_attr(ct, apt->attributes, w, solr_attr);
 
         if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
             ;
@@ -279,13 +300,73 @@ static int rpn2solr_simple(solr_transform_t ct,
                 wrbuf_puts(w, "*");
             if (must_quote)
                 wrbuf_puts(w, "\"");
-            if (close_range)
-                wrbuf_puts(w, close_range);
         }
-        if (ret == 0)
-            pr(wrbuf_cstr(w), client_data);
+        if (ret == 0) { 
+            solr_attr->term = wrbuf_cstr(w);
+        }
+        
     }
     return ret;
+};
+
+static int solr_write_range(void (*pr)(const char *buf, void *client_data),
+                            void *client_data,
+                            struct solr_attr *solr_attr_left, 
+                            struct solr_attr *solr_attr_right)
+{
+    pr(solr_attr_left->index, client_data);
+    pr(":", client_data);
+    pr(solr_attr_left->begin, client_data);
+    pr(solr_attr_left->term,  client_data);
+    pr(" TO ", client_data);
+    pr(solr_attr_right->term,  client_data);
+    pr(solr_attr_right->close, client_data);
+    return 0;
+}; 
+
+static int solr_write_structure(void (*pr)(const char *buf, void *client_data),
+                            void *client_data,
+                            struct solr_attr *solr_attr)
+{
+    if (solr_attr->index) {
+        pr(solr_attr->index, client_data);
+        pr(":", client_data);
+    }
+    if (solr_attr->is_range) {
+        pr(solr_attr->begin, client_data);
+        pr(solr_attr->term,  client_data);
+        pr(solr_attr->close, client_data);
+    }
+    else if (solr_attr->term) 
+        pr(solr_attr->term,  client_data);
+    return 0;
+}; 
+
+
+
+static int solr_write_and_or_range(void (*pr)(const char *buf, void *client_data),
+                             void *client_data,
+                             struct solr_attr *solr_attr_left, 
+                             struct solr_attr *solr_attr_right)
+{
+    if (solr_attr_left->is_range && 
+        solr_attr_right->is_range && 
+        !strcmp(solr_attr_left->index, solr_attr_left->index)) 
+    {
+        if (solr_attr_left->is_range >= 3 && solr_attr_right->is_range <= 2)
+            return solr_write_range(pr, client_data, solr_attr_left, solr_attr_right); 
+    }
+    solr_write_structure(pr, client_data, solr_attr_left);
+    pr(" AND ", client_data);
+    solr_write_structure(pr, client_data, solr_attr_right);
+    return 0;
+}
+
+static void solr_attr_init(struct solr_attr *solr_attr) {
+    solr_attr->index = 0; 
+    solr_attr->relation = 0;
+    solr_attr->is_range = 0; 
+    solr_attr->term = 0; 
 }
 
 
@@ -293,10 +374,12 @@ static int rpn2solr_structure(solr_transform_t ct,
                               void (*pr)(const char *buf, void *client_data),
                               void *client_data,
                               Z_RPNStructure *q, int nested,
-                              WRBUF w)
+                              WRBUF wa, struct solr_attr *solr_attr)
 {
-    if (q->which == Z_RPNStructure_simple)
-        return rpn2solr_simple(ct, pr, client_data, q->u.simple, w);
+    if (q->which == Z_RPNStructure_simple) {
+        solr_attr_init(solr_attr);
+        return rpn2solr_simple(ct, q->u.simple, wa, solr_attr);
+    }
     else
     {
         Z_Operator *op = q->u.complex->roperator;
@@ -305,27 +388,55 @@ static int rpn2solr_structure(solr_transform_t ct,
         if (nested)
             pr("(", client_data);
 
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
-        if (r)
+        struct solr_attr solr_attr_left;
+        solr_attr_init(&solr_attr_left);
+        WRBUF w_left = wrbuf_alloc();
+        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w_left, &solr_attr_left); 
+
+
+        if (r) {
+            wrbuf_destroy(w_left);
             return r;
+        }       
+        struct solr_attr solr_attr_right;
+        solr_attr_init(&solr_attr_right);
+        WRBUF w_right = wrbuf_alloc();
+
+        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w_right, &solr_attr_right);
+        if (r) {
+            wrbuf_destroy(w_left);
+            wrbuf_destroy(w_right);
+            return r;
+        }
+            
         switch(op->which)
         {
         case  Z_Operator_and:
-            pr(" AND ", client_data);
+            solr_write_and_or_range(pr, client_data, &solr_attr_left, &solr_attr_right);
             break;
         case  Z_Operator_or:
+            solr_write_structure(pr, client_data, &solr_attr_left);
             pr(" OR ", client_data);
+            solr_write_structure(pr, client_data, &solr_attr_right);
             break;
         case  Z_Operator_and_not:
+            solr_write_structure(pr, client_data, &solr_attr_left);
             pr(" AND NOT ", client_data);
+            solr_write_structure(pr, client_data, &solr_attr_right);
             break;
         case  Z_Operator_prox:
             solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH, 0);
+            wrbuf_destroy(w_left);
+            wrbuf_destroy(w_right);
             return -1;
         }
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w);
+
         if (nested)
             pr(")", client_data);
+        
+        solr_attr_init(solr_attr);
+        wrbuf_destroy(w_left);
+        wrbuf_destroy(w_right);
         return r;
     }
 }
@@ -338,7 +449,10 @@ int solr_transform_rpn2solr_stream(solr_transform_t ct,
     int r;
     WRBUF w = wrbuf_alloc();
     solr_transform_set_error(ct, 0, 0);
-    r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    struct solr_attr solr_attr;
+    solr_attr_init(&solr_attr);
+    r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w, &solr_attr);
+    solr_write_structure(pr, client_data, &solr_attr);
     wrbuf_destroy(w);
     return r;
 }
