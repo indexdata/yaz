@@ -45,7 +45,9 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
     if (o->direction == ODR_DECODE)
     {
         *p = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));
+#if OCT_SIZE
         (*p)->size= 0;
+#endif
         (*p)->len = 0;
         (*p)->buf = 0;
     }
@@ -85,11 +87,16 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     if (o->direction == ODR_ENCODE)
     {
         t->buf = (unsigned char *) *p;
-        t->size = t->len = strlen(*p);
+        t->len = strlen(*p);
+#if OCT_SIZE
+        t->size = t->len;
+#endif
     }
     else
     {
+#if OCT_SIZE
         t->size= 0;
+#endif
         t->len = 0;
         t->buf = 0;
     }
@@ -159,17 +166,25 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
                 odr_seterror(o, ODATA, 44);
                 return 0;
             }
-            t->size = t->len = outbuf - (char*) t->buf;
+            t->len = outbuf - (char*) t->buf;
+#if OCT_SIZE
+            t->size = t->len;
+#endif
         }
         if (!t->buf)
         {
             t->buf = (unsigned char *) *p;
-            t->size = t->len = strlen(*p);
+            t->len = strlen(*p);
+#if OCT_SIZE
+            t->size = t->len;
+#endif
         }
     }
     else
     {
+#if OCT_SIZE
         t->size= 0;
+#endif
         t->len = 0;
         t->buf = 0;
     }

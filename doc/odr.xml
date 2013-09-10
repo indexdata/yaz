@@ -670,7 +670,6 @@ typedef struct odr_oct
 {
     unsigned char *buf;
     int len;
-    int size;
 } Odr_oct;
 
 int odr_octetstring(ODR o, Odr_oct **p, int optional,
@@ -680,8 +679,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
      <para>
       The <literal>buf</literal> field should point to the character array
       that holds the octetstring. The <literal>len</literal> field holds the
-      actual length, while the <literal>size</literal> field gives the size
-      of the allocated array (not of interest to you, in most cases).
+      actual length.
       The character array need not be null terminated.
      </para>
 

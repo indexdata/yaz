@@ -237,9 +237,12 @@ int cmd_adm_import(const char *arg)
                     Z_FragmentSyntax_notExternallyTagged;
                 rec->u.intermediateFragment->u.notExternallyTagged = oct;
 
-                oct->len = oct->size = status.st_size;
-                oct->buf = (unsigned char *) odr_malloc (out, oct->size);
-                if (fread(oct->buf, 1, oct->size, inf) != (size_t) oct->size)
+                oct->len = status.st_size;
+#if OCT_SIZE
+                oct->size = status.st_size;
+#endif
+                oct->buf = (unsigned char *) odr_malloc (out, oct->len);
+                if (fread(oct->buf, 1, oct->len, inf) != (size_t) oct->len)
                 {
                     printf("Incomplete read of file %s\n", fname);
                 }

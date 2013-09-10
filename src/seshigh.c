@@ -3128,8 +3128,11 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
                 t->term->u.general = o =
                     (Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
                 o->buf = (unsigned char *)
-                    odr_malloc(assoc->encode, o->len = o->size =
+                    odr_malloc(assoc->encode, o->len =
                                strlen(bsrr->entries[i].term));
+#if OCT_SIZE
+                o->size = o->len;
+#endif
                 memcpy(o->buf, bsrr->entries[i].term, o->len);
                 yaz_log(YLOG_DEBUG, "  term #%d: '%s' (" ODR_INT_PRINTF ")", i,
                          bsrr->entries[i].term, bsrr->entries[i].occurrences);

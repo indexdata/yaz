@@ -593,8 +593,11 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->targetReference->buf =
                     (unsigned char *) odr_strdup(rr->stream, "911");
                 rr->taskPackage->targetReference->len =
-                    rr->taskPackage->targetReference->size =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
+#if OCT_SIZE
+                rr->taskPackage->targetReference->size =
+                    strlen((char *) (rr->taskPackage->targetReference->buf));
+#endif
                 rr->taskPackage->creationDateTime = 0;
                 rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
                 rr->taskPackage->packageDiagnostics = 0;
@@ -694,8 +697,11 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->targetReference->buf =
                     (unsigned char *) odr_strdup(rr->stream, "123");
                 rr->taskPackage->targetReference->len =
-                    rr->taskPackage->targetReference->size =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
+#if OCT_SIZE
+                rr->taskPackage->targetReference->size =
+                    rr->taskPackage->targetReference->len;
+#endif
                 rr->taskPackage->creationDateTime = 0;
                 rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
                 rr->taskPackage->packageDiagnostics = 0;

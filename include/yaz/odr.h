@@ -96,11 +96,15 @@ typedef nmem_bool_t Odr_bool;
 #define ODR_ENCODE      1
 #define ODR_PRINT       2
 
+#define OCT_SIZE 0
+
 typedef struct odr_oct
 {
     unsigned char *buf;
     int len;
+#if OCT_SIZE
     int size;
+#endif
 } Odr_oct;
 
 typedef void Odr_null;

@@ -32,7 +32,10 @@ int ber_any(ODR o, Odr_any **p)
         }
         (*p)->buf = (unsigned char *)odr_malloc(o, res);
         memcpy((*p)->buf, o->bp, res);
-        (*p)->len = (*p)->size = res;
+        (*p)->len = res;
+#if OCT_SIZE
+        (*p)->size = res;
+#endif
         o->bp += res;
         return 1;
     case ODR_ENCODE:

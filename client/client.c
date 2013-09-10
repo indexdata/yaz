@@ -322,7 +322,10 @@ static Z_ReferenceId *set_refid(ODR out)
     if (!refid)
         return 0;
     id = (Z_ReferenceId *) odr_malloc(out, sizeof(*id));
-    id->size = id->len = strlen(refid);
+    id->len = strlen(refid);
+#if OCT_SIZE
+    id->size = id->len;
+#endif
     id->buf = (unsigned char *) odr_malloc(out, id->len);
     memcpy(id->buf, refid, id->len);
     return id;
@@ -1565,7 +1568,10 @@ static int send_Z3950_searchRequest(const char *arg)
 
         /* send a very big referenceid to test transport stack etc. */
         memset(big, 'A', 2100);
-        bigo.len = bigo.size = 2100;
+        bigo.len = 2100;
+#if OCT_SIZE
+        bigo.size = bigo.len;
+#endif
         bigo.buf = big;
         req->referenceId = &bigo;
     }
@@ -1867,7 +1873,7 @@ static void print_referenceId(int iLevel, Z_ReferenceId *referenceId)
         int i;
 
         print_level(iLevel);
-        printf("Ref Id (%d, %d): ", referenceId->len, referenceId->size);
+        printf("Ref Id (%d): ", referenceId->len);
         for (i = 0; i < referenceId->len; i++)
             printf("%c", referenceId->buf[i]);
         printf("\n");
@@ -2135,7 +2141,9 @@ static Z_External *create_external_itemRequest(void)
         r->u.single_ASN1_type->buf = (unsigned char *)
         odr_malloc(out, item_request_size);
         r->u.single_ASN1_type->len = item_request_size;
+#if OCT_SIZE
         r->u.single_ASN1_type->size = item_request_size;
+#endif
         memcpy(r->u.single_ASN1_type->buf, item_request_buf,
                 item_request_size);
 
@@ -2188,7 +2196,9 @@ static Z_External *create_external_ILL_APDU(void)
         r->u.single_ASN1_type->buf = (unsigned char *)
         odr_malloc(out, ill_request_size);
         r->u.single_ASN1_type->len = ill_request_size;
+#if OCT_SIZE
         r->u.single_ASN1_type->size = ill_request_size;
+#endif
         memcpy(r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
 /*         printf("len = %d\n", ill_request_size); */
 /*              do_hex_dump(ill_request_buf,ill_request_size); */
@@ -2487,7 +2497,9 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc(out, sizeof(Odr_oct));
             notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+#if OCT_SIZE
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
+#endif
             notToKeep->elements[0]->u.opaque->len = strlen(recid);
         }
         else
@@ -2534,7 +2546,9 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc(out, sizeof(Odr_oct));
             notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+#if OCT_SIZE
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
+#endif
             notToKeep->elements[0]->u.opaque->len = strlen(recid);
         }
         else
@@ -3388,9 +3402,10 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
         {
             req->termListAndStartPoint->term->u.general->buf =
                 (unsigned char *) odr_strdup(out, term);
-            req->termListAndStartPoint->term->u.general->len =
-                req->termListAndStartPoint->term->u.general->size =
-                strlen(term);
+            req->termListAndStartPoint->term->u.general->len = strlen(term);
+#if OCT_SIZE
+            req->termListAndStartPoint->term->u.general->size = strlen(term);
+#endif
         }
     }
     req->referenceId = set_refid(out);

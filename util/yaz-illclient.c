@@ -366,7 +366,10 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
     ext->u.single_ASN1_type->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
-    ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
+    ext->u.single_ASN1_type->len = siz;
+#if OCT_SIZE
+    ext->u.single_ASN1_type->size = siz;
+#endif
     odr_reset(odr_ext);
     odr_reset(odr_prt); /*!*/
 
@@ -382,7 +385,10 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     buf= odr_getbuf(odr_ext,&siz,0);
     e->item->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(e->item->buf,buf, siz );
-    e->item->len = e->item->size = siz;
+    e->item->len = siz;
+#if OCT_SIZE
+    e->item->size = siz;
+#endif
 
     odr_destroy(odr_prt);
     odr_destroy(odr_ext);
@@ -425,7 +431,10 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
     ext->u.single_ASN1_type->buf = (unsigned char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
-    ext->u.single_ASN1_type->len = ext->u.single_ASN1_type->size = siz;
+    ext->u.single_ASN1_type->len = siz;
+#if OCT_SIZE
+    ext->u.single_ASN1_type->size = siz;
+#endif
     odr_reset(odr_ext);
     odr_reset(odr_prt); /*!*/
 
@@ -441,7 +450,10 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     buf= odr_getbuf(odr_ext,&siz,0);
     e->item->buf= (unsigned char *) odr_malloc(odr, siz);
     memcpy(e->item->buf, buf, siz);
-    e->item->len = e->item->size = siz;
+    e->item->len = siz;
+#if OCT_SIZE
+    e->item->size = siz;
+#endif
 
     odr_destroy(odr_prt);
     odr_destroy(odr_ext);

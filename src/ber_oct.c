@@ -16,12 +16,16 @@
 #endif
 
 #include "odr-priv.h"
+#include <yaz/log.h>
+#include <assert.h>
 
 int ber_octetstring(ODR o, Odr_oct *p, int cons)
 {
     int res, len;
     const unsigned char *base;
+#if OCT_SIZE
     unsigned char *c;
+#endif
 
     switch (o->direction)
     {
@@ -51,9 +55,14 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
             odr_seterror(o, OOTHER, 16);
             return 0;
         }
+#if OCT_SIZE
+        assert(p->size == 0);
+        assert(p->len == 0);
+        yaz_log(YLOG_LOG, "DECODE OCTET1 p->size=%d p->len=%d", p->size, p->len);
         if (len + 1 > p->size - p->len)
         {
             c = (unsigned char *)odr_malloc(o, p->size += len + 1);
+            yaz_log(YLOG_LOG, "DECODE COPY p->size=%d p->len=%d", p->size, p->len);
             if (p->len)
                 memcpy(c, p->buf, p->len);
             p->buf = c;
@@ -61,11 +70,19 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
         if (len)
             memcpy(p->buf + p->len, o->bp, len);
         p->len += len;
+        yaz_log(YLOG_LOG, "DECODE OCTET2 p->size=%d p->len=%d", p->size, p->len);
         o->bp += len;
         /* the final null is really not part of the buffer, but */
         /* it helps somes applications that assumes C strings */
         if (len)
             p->buf[p->len] = '\0';
+#else
+        p->len = len;
+        p->buf = odr_malloc(o, len + 1);
+        memcpy(p->buf, o->bp, len);
+        p->buf[len] = '\0';
+        o->bp += len;
+#endif
         return 1;
     case ODR_ENCODE:
         if ((res = ber_enclen(o, p->len, 5, 0)) < 0)
