@@ -25,8 +25,8 @@ int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem)
 
 #define CHECK_TYPE 0
 
-int yaz_match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
-                           char **val, int *len)
+int yaz_match_xsd_string_n_nmem(xmlNodePtr ptr, const char *elem, NMEM nmem,
+                                char **val, int *len)
 {
 #if CHECK_TYPE
     struct _xmlAttr *attr;
@@ -55,12 +55,17 @@ int yaz_match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
         *val = "";
         return 1;
     }
-    *val = odr_strdup(o, (const char *) ptr->content);
+    *val = nmem_strdup(nmem, (const char *) ptr->content);
     if (len)
         *len = xmlStrlen(ptr->content);
     return 1;
 }
 
+int yaz_match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
+                           char **val, int *len)
+{
+    return yaz_match_xsd_string_n_nmem(ptr, elem, o->mem, val, len);
+}
 
 int yaz_match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o, char **val)
 {

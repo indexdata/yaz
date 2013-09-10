@@ -51,6 +51,8 @@ int yaz_match_xsd_integer(xmlNodePtr ptr, const char *elem, ODR o,
                           Odr_int **val);
 int yaz_match_xsd_string_n(xmlNodePtr ptr, const char *elem, ODR o,
                        char **val, int *len);
+int yaz_match_xsd_string_n_nmem(xmlNodePtr ptr, const char *elem, NMEM nmem,
+                                char **val, int *len);
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem);
 
 int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,

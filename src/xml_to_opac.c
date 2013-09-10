@@ -20,41 +20,14 @@
 #include <yaz/oid_db.h>
 
 #if YAZ_HAVE_XML2
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-
-static int match_element(xmlNode *ptr, const char *elem)
-{
-    if (ptr->type == XML_ELEMENT_NODE && !xmlStrcmp(ptr->name, BAD_CAST elem))
-    {
-        return 1;
-    }
-    return 0;
-}
-
-static int match_xsd_string_n(xmlNodePtr ptr, const char *elem, NMEM nmem,
-                              char **val, int *len)
-{
-    if (!match_element(ptr, elem))
-        return 0;
-    ptr = ptr->children;
-    if (!ptr || ptr->type != XML_TEXT_NODE)
-    {
-        *val = "";
-        return 1;
-    }
-    *val = nmem_strdup(nmem, (const char *) ptr->content);
-    if (len)
-        *len = xmlStrlen(ptr->content);
-    return 1;
-}
+#include "sru-p.h"
 
 static int match_element_next(xmlNode **ptr, const char *elem, NMEM nmem,
                               char **val)
 {
     while (*ptr && (*ptr)->type != XML_ELEMENT_NODE)
         (*ptr) = (*ptr)->next;
-    if (*ptr && match_xsd_string_n(*ptr, elem, nmem, val, 0))
+    if (*ptr && yaz_match_xsd_string_n_nmem(*ptr, elem, nmem, val, 0))
     {
         *ptr = (*ptr)->next;
         return 1;
@@ -69,7 +42,7 @@ static int match_v_next(xmlNode **ptr, const char *elem, NMEM nmem,
     while (*ptr && (*ptr)->type != XML_ELEMENT_NODE)
         (*ptr) = (*ptr)->next;
     *val = nmem_booldup(nmem, 0);
-    if (*ptr && match_element(*ptr, elem))
+    if (*ptr && yaz_match_xsd_element(*ptr, elem))
     {
         struct _xmlAttr *attr = (*ptr)->properties;
 
@@ -134,7 +107,7 @@ static int volumes(xmlNode *ptr, Z_Volume ***volp, int *num, NMEM nmem)
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "volume"))
+        if (!yaz_match_xsd_element(ptr, "volume"))
             return 0;
         ptr = ptr->next;
     }
@@ -147,7 +120,7 @@ static int volumes(xmlNode *ptr, Z_Volume ***volp, int *num, NMEM nmem)
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "volume"))
+        if (!yaz_match_xsd_element(ptr, "volume"))
             return 0;
         volume(ptr->children, (*volp) + i, nmem);
         ptr = ptr->next;
@@ -187,7 +160,7 @@ static int circulations(xmlNode *ptr, Z_CircRecord ***circp,
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "circulation"))
+        if (!yaz_match_xsd_element(ptr, "circulation"))
             return 0;
         ptr = ptr->next;
     }
@@ -200,7 +173,7 @@ static int circulations(xmlNode *ptr, Z_CircRecord ***circp,
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "circulation"))
+        if (!yaz_match_xsd_element(ptr, "circulation"))
             return 0;
         circulation(ptr->children, (*circp) + i, nmem);
         ptr = ptr->next;
@@ -240,7 +213,7 @@ static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
     h->volumes = 0;
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
-    if (match_element(ptr, "volumes"))
+    if (yaz_match_xsd_element(ptr, "volumes"))
     {
         volumes(ptr->children, &h->volumes, &h->num_volumes, nmem);
         ptr = ptr->next;
@@ -250,7 +223,7 @@ static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
     h->circulationData = 0;
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
-    if (match_element(ptr, "circulations"))
+    if (yaz_match_xsd_element(ptr, "circulations"))
     {
         circulations(ptr->children, &h->circulationData,
                      &h->num_circulationData, nmem);
@@ -271,12 +244,12 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
 
     if (!nmem)
         nmem = yaz_marc_get_nmem(mt);
-    if (!match_element(ptr, "opacRecord"))
+    if (!yaz_match_xsd_element(ptr, "opacRecord"))
         return 0;
     ptr = ptr->children;
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
-    if (!match_element(ptr, "bibliographicRecord"))
+    if (!yaz_match_xsd_element(ptr, "bibliographicRecord"))
         return 0;
     if (!bibliographicRecord(mt, ptr->children, &ext, cd, nmem, syntax))
         return 0;
@@ -288,7 +261,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
     ptr = ptr->next;
     while (ptr && ptr->type != XML_ELEMENT_NODE)
         ptr = ptr->next;
-    if (!match_element(ptr, "holdings"))
+    if (!yaz_match_xsd_element(ptr, "holdings"))
         return 0;
 
     ptr = ptr->children;
@@ -300,7 +273,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "holding"))
+        if (!yaz_match_xsd_element(ptr, "holding"))
             return 0;
         ptr = ptr->next;
     }
@@ -314,7 +287,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
             ptr = ptr->next;
         if (!ptr)
             break;
-        if (!match_element(ptr, "holding"))
+        if (!yaz_match_xsd_element(ptr, "holding"))
             return 0;
         if (!holdingsRecord(ptr->children, opac->holdingsData + i, nmem))
             return 0;
