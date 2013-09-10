@@ -216,8 +216,8 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         if (zclass == ODR_CONTEXT && tag == 1 && cons == 0)
         {
             /* we have an OCTET STRING. decode BER contents from it */
-            const unsigned char *o_bp;
-            unsigned char *o_buf;
+            const char *o_bp;
+            char *o_buf;
             int o_size;
             char *voidp = 0;
             Odr_oct *oct;
@@ -315,7 +315,7 @@ Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
 
         thisext->which = Z_External_sutrs;
         thisext->u.sutrs = sutrs;
-        sutrs->buf = (unsigned char *)nmem_malloc(nmem, len);
+        sutrs->buf = (char *)nmem_malloc(nmem, len);
         sutrs->len = len;
 #if OCT_SIZE
         sutrs->size = len;
@@ -328,7 +328,7 @@ Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
         if (!(thisext->u.octet_aligned = (Odr_oct *)
               nmem_malloc(nmem, sizeof(Odr_oct))))
             return 0;
-        if (!(thisext->u.octet_aligned->buf = (unsigned char *)
+        if (!(thisext->u.octet_aligned->buf = (char *)
               nmem_malloc(nmem, len)))
             return 0;
         memcpy(thisext->u.octet_aligned->buf, buf, len);
@@ -362,7 +362,7 @@ Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid,
     thisext->u.single_ASN1_type = (Odr_any *) odr_malloc(o, sizeof(Odr_any));
     if (!thisext->u.single_ASN1_type)
         return 0;
-    thisext->u.single_ASN1_type->buf = (unsigned char *) odr_malloc(o, len);
+    thisext->u.single_ASN1_type->buf = (char *) odr_malloc(o, len);
     if (!thisext->u.single_ASN1_type->buf)
         return 0;
     memcpy(thisext->u.single_ASN1_type->buf, buf, len);

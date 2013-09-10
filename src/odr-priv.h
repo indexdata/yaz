@@ -63,11 +63,11 @@ struct Odr_ber_tag {
  */
 struct odr_constack
 {
-    const unsigned char *base;   /** starting point of data */
+    const char *base;            /** starting point of data */
     int base_offset;
     int len;                     /** length of data, if known, else -1
                                         (decoding only) */
-    const unsigned char *lenb;   /** where to encode length */
+    const char *lenb;            /** where to encode length */
     int len_offset;
     int lenlen;                  /** length of length-field */
     const char *name;            /** name of stack entry */

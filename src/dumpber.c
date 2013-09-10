@@ -30,7 +30,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
         return 0;
     if (!buf[0] && !buf[1])
         return 0;
-    if ((res = ber_dectag((unsigned char*)b, &zclass, &tag, &cons, len)) <= 0)
+    if ((res = ber_dectag(b, &zclass, &tag, &cons, len)) <= 0)
         return 0;
     if (res > len)
     {
@@ -62,7 +62,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     b += res;
     taglen = res;
     len -= res;
-    if ((res = ber_declen((unsigned char*)b, &ll, len)) <= 0)
+    if ((res = ber_declen(b, &ll, len)) <= 0)
     {
         fprintf(f, "\n%sBad length\n", level_str);
         return 0;

@@ -100,7 +100,7 @@ typedef nmem_bool_t Odr_bool;
 
 typedef struct odr_oct
 {
-    unsigned char *buf;
+    char *buf;
     int len;
 #if OCT_SIZE
     int size;
@@ -115,7 +115,7 @@ typedef Odr_oct Odr_any;
 typedef struct odr_bitmask
 {
 #define ODR_BITMASK_SIZE 256
-    unsigned char bits[ODR_BITMASK_SIZE];
+    char bits[ODR_BITMASK_SIZE];
     int top;
 } Odr_bitmask;
 
@@ -132,13 +132,13 @@ struct odr
 
     int error;            /* current error state (0==OK) */
 
-    unsigned char *buf;            /* memory handle */
+    char *buf;            /* memory handle */
     int top;              /* top of buffer (max pos when encoding) */
     int size;             /* current buffer size (encoding+decoding) */
 
     int pos;              /* current position (encoding) */
 
-    const unsigned char *bp; /* position in buffer (decoding) */
+    const char *bp;       /* position in buffer (decoding) */
 
     NMEM mem;            /* memory handle for decoding (primarily) */
 
@@ -194,8 +194,7 @@ YAZ_EXPORT char *odr_strdupn(ODR o, const char *str, size_t n);
 YAZ_EXPORT char *odr_strdup_null(ODR o, const char *str);
 YAZ_EXPORT Odr_int *odr_intdup(ODR o, Odr_int v);
 YAZ_EXPORT Odr_bool *odr_booldup(ODR o, Odr_bool v);
-YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf,
-                                       int sz);
+YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
@@ -235,14 +234,14 @@ YAZ_EXPORT int ber_boolean(ODR o, int *val);
 YAZ_EXPORT int ber_tag(ODR o, void *p, int zclass, int tag,
                        int *constructed, int opt, const char *name);
 YAZ_EXPORT int ber_enctag(ODR o, int zclass, int tag, int constructed);
-YAZ_EXPORT int ber_dectag(const unsigned char *buf, int *zclass,
+YAZ_EXPORT int ber_dectag(const char *buf, int *zclass,
                           int *tag, int *constructed, int max);
 YAZ_EXPORT int odr_bool(ODR o, Odr_bool **p, int opt, const char *name);
 YAZ_EXPORT int odr_integer(ODR o, Odr_int **p, int opt, const char *name);
 YAZ_EXPORT int odr_enum(ODR o, Odr_int **p, int opt, const char *name);
 YAZ_EXPORT int odr_implicit_settag(ODR o, int zclass, int tag);
 YAZ_EXPORT int ber_enclen(ODR o, int len, int lenlen, int exact);
-YAZ_EXPORT int ber_declen(const unsigned char *buf, int *len, int max);
+YAZ_EXPORT int ber_declen(const char *buf, int *len, int max);
 YAZ_EXPORT void odr_prname(ODR o, const char *name);
 YAZ_EXPORT int ber_null(ODR o);
 YAZ_EXPORT int odr_null(ODR o, Odr_null **p, int opt, const char *name);
@@ -256,7 +255,7 @@ YAZ_EXPORT int odr_sequence_end(ODR o);
 YAZ_EXPORT int odr_set_end(ODR o);
 YAZ_EXPORT int ber_octetstring(ODR o, Odr_oct *p, int cons);
 YAZ_EXPORT int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name);
-YAZ_EXPORT int odp_more_chunks(ODR o, const unsigned char *base, int len);
+YAZ_EXPORT int odp_more_chunks(ODR o, const char *base, int len);
 YAZ_EXPORT int odr_constructed_more(ODR o);
 YAZ_EXPORT int odr_bitstring(ODR o, Odr_bitmask **p, int opt,
                              const char *name);
@@ -281,14 +280,13 @@ YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
     \retval 0 package is incomplete
     \retval >0 package is complete and length is return value
 */
-YAZ_EXPORT int completeBER(const unsigned char *buf, int len);
+YAZ_EXPORT int completeBER(const char *buf, int len);
 
 YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);
 YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
 YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o);
 YAZ_EXPORT int odr_grow_block(ODR b, int min_bytes);
-YAZ_EXPORT int odr_write(ODR o, unsigned char *buf, int bytes);
 YAZ_EXPORT int odr_write2(ODR o, const char *buf, int bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
 YAZ_EXPORT int odr_dumpBER(FILE *f, const char *buf, int len);

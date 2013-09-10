@@ -22,7 +22,7 @@
 int ber_octetstring(ODR o, Odr_oct *p, int cons)
 {
     int res, len;
-    const unsigned char *base;
+    const char *base;
 #if OCT_SIZE
     unsigned char *c;
 #endif
@@ -89,7 +89,7 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
             return 0;
         if (p->len == 0)
             return 1;
-        if (odr_write(o, p->buf, p->len) < 0)
+        if (odr_write2(o, p->buf, p->len) < 0)
             return 0;
         return 1;
     case ODR_PRINT:

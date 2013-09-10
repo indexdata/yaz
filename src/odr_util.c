@@ -26,7 +26,7 @@ void odr_prname(ODR o, const char *name)
         odr_printf(o, "%s ", name);
 }
 
-int odp_more_chunks(ODR o, const unsigned char *base, int len)
+int odp_more_chunks(ODR o, const char *base, int len)
 {
     if (!len)
         return 0;

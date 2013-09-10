@@ -34,7 +34,7 @@ static Z_External* z_ext_record2(ODR o, const char *buf)
     p->which = Z_External_octet;
     if (!(p->u.octet_aligned = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct))))
         return 0;
-    if (!(p->u.octet_aligned->buf = (unsigned char *)odr_malloc(o, len)))
+    if (!(p->u.octet_aligned->buf = (char *)odr_malloc(o, len)))
         return 0;
     p->u.octet_aligned->len = len;
 #if OCT_SIZE

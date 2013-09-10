@@ -241,7 +241,7 @@ int cmd_adm_import(const char *arg)
 #if OCT_SIZE
                 oct->size = status.st_size;
 #endif
-                oct->buf = (unsigned char *) odr_malloc (out, oct->len);
+                oct->buf = (char *) odr_malloc (out, oct->len);
                 if (fread(oct->buf, 1, oct->len, inf) != (size_t) oct->len)
                 {
                     printf("Incomplete read of file %s\n", fname);

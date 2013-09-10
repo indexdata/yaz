@@ -3127,7 +3127,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
                 t->term->which = Z_Term_general;
                 t->term->u.general = o =
                     (Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
-                o->buf = (unsigned char *)
+                o->buf = (char *)
                     odr_malloc(assoc->encode, o->len =
                                strlen(bsrr->entries[i].term));
 #if OCT_SIZE

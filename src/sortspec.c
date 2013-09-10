@@ -124,8 +124,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
 #if OCT_SIZE
                 sks->u.missingValueData->size = sks->u.missingValueData->len;
 #endif
-                sks->u.missingValueData->buf = (unsigned char*)
-                                          odr_strdup(out, sort_flags+i);
+                sks->u.missingValueData->buf = odr_strdup(out, sort_flags+i);
                 i += strlen(sort_flags+i) - 1;
                 break;
             }

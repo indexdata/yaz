@@ -90,9 +90,9 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
  * len = -1   indefinite length.
  * len >= 0   definite length
  */
-int ber_declen(const unsigned char *buf, int *len, int max)
+int ber_declen(const char *buf, int *len, int max)
 {
-    const unsigned char *b = buf;
+    const unsigned char *b = (const unsigned char *) buf;
     int n;
 
     if (max < 1)
@@ -122,7 +122,7 @@ int ber_declen(const unsigned char *buf, int *len, int max)
     }
     if (*len < 0)
         return -2;
-    return (b - buf);
+    return ((const char *) b - buf);
 }
 /*
  * Local variables:

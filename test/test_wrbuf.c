@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <yaz/wrbuf.h>
 #include <yaz/test.h>

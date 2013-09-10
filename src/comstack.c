@@ -427,7 +427,7 @@ static int cs_complete_auto_x(const char *buf, int len, int head_only)
         int r = cs_complete_http(buf, len, head_only);
         return r;
     }
-    return completeBER((const unsigned char *) buf, len);
+    return completeBER(buf, len);
 }
 
 

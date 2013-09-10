@@ -326,7 +326,7 @@ static Z_ReferenceId *set_refid(ODR out)
 #if OCT_SIZE
     id->size = id->len;
 #endif
-    id->buf = (unsigned char *) odr_malloc(out, id->len);
+    id->buf = (char *) odr_malloc(out, id->len);
     memcpy(id->buf, refid, id->len);
     return id;
 }
@@ -1563,7 +1563,7 @@ static int send_Z3950_searchRequest(const char *arg)
     req->referenceId = set_refid(out);
     if (!strcmp(arg, "@big")) /* strictly for troublemaking */
     {
-        static unsigned char big[2100];
+        static char big[2100];
         static Odr_oct bigo;
 
         /* send a very big referenceid to test transport stack etc. */
@@ -1625,7 +1625,7 @@ static int send_Z3950_searchRequest(const char *arg)
     case QueryType_CCL:
         query.which = Z_Query_type_2;
         query.u.type_2 = &ccl_query;
-        ccl_query.buf = (unsigned char*) arg;
+        ccl_query.buf = (char *) arg;
         ccl_query.len = strlen(arg);
         break;
     case QueryType_CCL2RPN:
@@ -2138,8 +2138,8 @@ static Z_External *create_external_itemRequest(void)
 
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc(out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = (unsigned char *)
-        odr_malloc(out, item_request_size);
+        r->u.single_ASN1_type->buf = (char *)
+            odr_malloc(out, item_request_size);
         r->u.single_ASN1_type->len = item_request_size;
 #if OCT_SIZE
         r->u.single_ASN1_type->size = item_request_size;
@@ -2193,8 +2193,8 @@ static Z_External *create_external_ILL_APDU(void)
 
         r->u.single_ASN1_type = (Odr_oct *)
             odr_malloc(out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = (unsigned char *)
-        odr_malloc(out, ill_request_size);
+        r->u.single_ASN1_type->buf = (char *)
+            odr_malloc(out, ill_request_size);
         r->u.single_ASN1_type->len = ill_request_size;
 #if OCT_SIZE
         r->u.single_ASN1_type->size = ill_request_size;
@@ -2496,7 +2496,7 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc(out, sizeof(Odr_oct));
-            notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+            notToKeep->elements[0]->u.opaque->buf = (char *) recid;
 #if OCT_SIZE
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
 #endif
@@ -2545,7 +2545,7 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
         {
             notToKeep->elements[0]->u.opaque = (Odr_oct *)
                 odr_malloc(out, sizeof(Odr_oct));
-            notToKeep->elements[0]->u.opaque->buf = (unsigned char *) recid;
+            notToKeep->elements[0]->u.opaque->buf = (char *) recid;
 #if OCT_SIZE
             notToKeep->elements[0]->u.opaque->size = strlen(recid);
 #endif
@@ -2596,7 +2596,7 @@ static int cmd_xmles(const char *arg)
                           &ext->u.single_ASN1_type->len) == 0)
             return 0;
 
-        ext->u.single_ASN1_type->buf = (unsigned char *) asn_buf;
+        ext->u.single_ASN1_type->buf = asn_buf;
 
         oid = yaz_string_to_oid_odr(yaz_oid_std(),
                                     CLASS_EXTSERV, oid_str, out);
@@ -3401,7 +3401,7 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
             req->termListAndStartPoint->term->u.general)
         {
             req->termListAndStartPoint->term->u.general->buf =
-                (unsigned char *) odr_strdup(out, term);
+                odr_strdup(out, term);
             req->termListAndStartPoint->term->u.general->len = strlen(term);
 #if OCT_SIZE
             req->termListAndStartPoint->term->u.general->size = strlen(term);

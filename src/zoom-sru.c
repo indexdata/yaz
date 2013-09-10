@@ -331,7 +331,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
 
             npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
                 odr_malloc(c->odr_in, sizeof(Odr_oct));
-            npr->u.databaseRecord->u.octet_aligned->buf = (unsigned char*)
+            npr->u.databaseRecord->u.octet_aligned->buf =
                 sru_rec->recordData_buf;
             npr->u.databaseRecord->u.octet_aligned->len =
                 sru_rec->recordData_len;

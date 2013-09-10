@@ -591,7 +591,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->targetReference = (Odr_oct *)
                     odr_malloc(rr->stream, sizeof(Odr_oct));
                 rr->taskPackage->targetReference->buf =
-                    (unsigned char *) odr_strdup(rr->stream, "911");
+                    odr_strdup(rr->stream, "911");
                 rr->taskPackage->targetReference->len =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
 #if OCT_SIZE
@@ -695,7 +695,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->targetReference = (Odr_oct *)
                     odr_malloc(rr->stream, sizeof(Odr_oct));
                 rr->taskPackage->targetReference->buf =
-                    (unsigned char *) odr_strdup(rr->stream, "123");
+                    odr_strdup(rr->stream, "123");
                 rr->taskPackage->targetReference->len =
                     strlen((char *) (rr->taskPackage->targetReference->buf));
 #if OCT_SIZE

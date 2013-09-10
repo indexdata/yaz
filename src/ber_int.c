@@ -28,7 +28,7 @@
 #include "odr-priv.h"
 
 static int ber_encinteger(ODR o, Odr_int val);
-static int ber_decinteger(const unsigned char *buf, Odr_int *val, int max);
+static int ber_decinteger(const char *buf, Odr_int *val, int max);
 
 int ber_integer(ODR o, Odr_int *val)
 {
@@ -77,7 +77,7 @@ int ber_encinteger(ODR o, Odr_int val)
     len = sizeof(uval) - i;
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
-    if (odr_write(o, (unsigned char*) tmp + i, len) < 0)
+    if (odr_write2(o, (const char *) tmp + i, len) < 0)
         return -1;
     return 0;
 }
@@ -85,14 +85,14 @@ int ber_encinteger(ODR o, Odr_int val)
 /*
  * Returns: Number of bytes read or 0 if no match, -1 if error.
  */
-int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
+int ber_decinteger(const char *buf, Odr_int *val, int max)
 {
     unsigned long long uval = 0;
     int i, len;
     int res;
-    const unsigned char *b = buf;
+    const unsigned char *b = (const unsigned char *) buf;
 
-    if ((res = ber_declen(b, &len, max)) < 0)
+    if ((res = ber_declen((const char *) b, &len, max)) < 0)
         return -1;
     if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
         return -1;
@@ -107,7 +107,7 @@ int ber_decinteger(const unsigned char *buf, Odr_int *val, int max)
         uval = (uval << 8) + b[i];
     *val = uval;
     b += len;
-    return b - buf;
+    return (const char *) b - buf;
 }
 /*
  * Local variables:

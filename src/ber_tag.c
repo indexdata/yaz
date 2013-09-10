@@ -162,9 +162,10 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
  *
  * Returns number of bytes read or -1 for error.
  */
-int ber_dectag(const unsigned char *b, int *zclass, int *tag,
+int ber_dectag(const char *cp, int *zclass, int *tag,
                int *constructed, int max)
 {
+    const unsigned char *b = (const unsigned char *) cp;
     int l = 1;
 
     if (l > max)

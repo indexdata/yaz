@@ -364,7 +364,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     buf= odr_getbuf(odr_ext,&siz,0);
     ext->u.single_ASN1_type=(Odr_any *)
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
-    ext->u.single_ASN1_type->buf= (unsigned char *) odr_malloc(odr, siz);
+    ext->u.single_ASN1_type->buf= (char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
     ext->u.single_ASN1_type->len = siz;
 #if OCT_SIZE
@@ -383,7 +383,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
     buf= odr_getbuf(odr_ext,&siz,0);
-    e->item->buf= (unsigned char *) odr_malloc(odr, siz);
+    e->item->buf= (char *) odr_malloc(odr, siz);
     memcpy(e->item->buf,buf, siz );
     e->item->len = siz;
 #if OCT_SIZE
@@ -429,7 +429,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     buf= odr_getbuf(odr_ext,&siz,0);
     ext->u.single_ASN1_type = (Odr_any*)
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
-    ext->u.single_ASN1_type->buf = (unsigned char *) odr_malloc(odr, siz);
+    ext->u.single_ASN1_type->buf = (char *) odr_malloc(odr, siz);
     memcpy(ext->u.single_ASN1_type->buf,buf, siz );
     ext->u.single_ASN1_type->len = siz;
 #if OCT_SIZE
@@ -448,7 +448,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     printf("External: \n");
     z_External(odr_prt, &ext,0,0);  /*!*/
     buf= odr_getbuf(odr_ext,&siz,0);
-    e->item->buf= (unsigned char *) odr_malloc(odr, siz);
+    e->item->buf= (char *) odr_malloc(odr, siz);
     memcpy(e->item->buf, buf, siz);
     e->item->len = siz;
 #if OCT_SIZE

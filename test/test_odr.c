@@ -25,7 +25,7 @@ void tst_MySequence1(ODR encode, ODR decode)
     YAZ_CHECK(s);
     s->first = odr_intdup(encode, 12345);
     s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
-    s->second->buf = (unsigned char *) "hello";
+    s->second->buf = (char *) "hello";
     s->second->len = 5;
 #if OCT_SIZE
     s->second->size = 0;
@@ -82,7 +82,7 @@ void tst_MySequence2(ODR encode, ODR decode)
     YAZ_CHECK(s);
     s->first = 0;  /* deliberately miss this .. */
     s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
-    s->second->buf = (unsigned char *) "hello";
+    s->second->buf = (char *) "hello";
     s->second->len = 5;
 #if OCT_SIZE
     s->second->size = 0;

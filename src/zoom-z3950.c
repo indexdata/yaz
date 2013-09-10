@@ -126,9 +126,7 @@ static Z_External *encode_ill_request(ZOOM_package p)
         r->which = Z_External_single;
 
         r->u.single_ASN1_type =
-            odr_create_Odr_oct(out,
-                               (unsigned char *)illRequest_buf,
-                               illRequest_size);
+            odr_create_Odr_oct(out, illRequest_buf, illRequest_size);
     }
     return r;
 }
@@ -272,8 +270,7 @@ static Z_APDU *create_xmlupdate_package(ZOOM_package p)
     ext->indirect_reference = 0;
 
     ext->which = Z_External_octet;
-    ext->u.single_ASN1_type =
-        odr_create_Odr_oct(p->odr_out, (const unsigned char *) doc, len);
+    ext->u.single_ASN1_type = odr_create_Odr_oct(p->odr_out, doc, len);
     return apdu;
 }
 
@@ -417,8 +414,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
         if (recordIdOpaque)
         {
             notToKeep->elements[0]->u.opaque =
-                odr_create_Odr_oct(p->odr_out,
-                                   (const unsigned char *) recordIdOpaque,
+                odr_create_Odr_oct(p->odr_out, recordIdOpaque,
                                    recordIdOpaque_len);
         }
         else if (recordIdNumber)

@@ -30,7 +30,7 @@ int ber_any(ODR o, Odr_any **p)
             odr_seterror(o, OPROTO, 2);
             return 0;
         }
-        (*p)->buf = (unsigned char *)odr_malloc(o, res);
+        (*p)->buf = (char *)odr_malloc(o, res);
         memcpy((*p)->buf, o->bp, res);
         (*p)->len = res;
 #if OCT_SIZE
@@ -39,7 +39,7 @@ int ber_any(ODR o, Odr_any **p)
         o->bp += res;
         return 1;
     case ODR_ENCODE:
-        if (odr_write(o, (*p)->buf, (*p)->len) < 0)
+        if (odr_write2(o, (*p)->buf, (*p)->len) < 0)
             return 0;
         return 1;
     default: odr_seterror(o, OOTHER, 3); return 0;
@@ -48,10 +48,10 @@ int ber_any(ODR o, Odr_any **p)
 
 #define BER_ANY_DEBUG 0
 
-int completeBER_n(const unsigned char *buf, int len, int level)
+int completeBER_n(const char *buf, int len, int level)
 {
     int res, ll, zclass, tag, cons;
-    const unsigned char *b = buf;
+    const char *b = buf;
 
     if (level > 1000)
     {
@@ -123,7 +123,7 @@ int completeBER_n(const unsigned char *buf, int len, int level)
     return (b - buf) + 2;
 }
 
-int completeBER(const unsigned char *buf, int len)
+int completeBER(const char *buf, int len)
 {
     int res = completeBER_n(buf, len, 0);
 #if BER_ANY_DEBUG

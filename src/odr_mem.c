@@ -62,10 +62,10 @@ size_t odr_total(ODR o)
     return nmem_total(o->mem);
 }
 
-Odr_oct *odr_create_Odr_oct(ODR o, const unsigned char *buf, int sz)
+Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz)
 {
     Odr_oct *p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
-    p->buf = (unsigned char *) odr_malloc(o, sz);
+    p->buf = (char *) odr_malloc(o, sz);
     memcpy(p->buf, buf, sz);
 #if OCT_SIZE
     p->size = sz;
@@ -90,10 +90,9 @@ int odr_grow_block(ODR b, int min_bytes)
     if (togrow < min_bytes)
         togrow = min_bytes;
     if (b->size && !(b->buf =
-                     (unsigned char *) xrealloc(b->buf, b->size += togrow)))
+                     (char *) xrealloc(b->buf, b->size += togrow)))
         abort();
-    else if (!b->size && !(b->buf = (unsigned char *)
-                           xmalloc(b->size = togrow)))
+    else if (!b->size && !(b->buf = (char *) xmalloc(b->size = togrow)))
         abort();
     return 0;
 }
@@ -110,11 +109,6 @@ int odr_write2(ODR o, const char *buf, int bytes)
     if (o->pos > o->top)
         o->top = o->pos;
     return 0;
-}
-
-int odr_write(ODR o, unsigned char *buf, int bytes)
-{
-    return odr_write2(o, (char *) buf, bytes);
 }
 
 int odr_seek(ODR o, int whence, int offset)

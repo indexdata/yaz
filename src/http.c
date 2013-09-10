@@ -610,7 +610,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
             odr_write2(o, "\r\n", 2);
         }
     }
-    odr_write(o, (unsigned char *) "\r\n", 2);
+    odr_write2(o, "\r\n", 2);
     if (hr->content_buf)
         odr_write2(o, hr->content_buf, hr->content_len);
     if (o->direction == ODR_PRINT)

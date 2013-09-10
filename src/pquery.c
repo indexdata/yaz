@@ -311,7 +311,7 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
 {
     Z_Term *term = (Z_Term *)odr_malloc(o, sizeof(*term));
     Odr_oct *term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
-    term_octet->buf = (unsigned char *)odr_malloc(o, 1 + len);
+    term_octet->buf = (char *)odr_malloc(o, 1 + len);
     memcpy(term_octet->buf, buf, len);
     term_octet->len = len;
 #if OCT_SIZE

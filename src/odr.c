@@ -272,8 +272,8 @@ void odr_destroy(ODR o)
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
     odr_seterror(o, ONONE, 0);
-    o->bp = (unsigned char *) buf;
-    o->buf = (unsigned char *) buf;
+    o->bp = buf;
+    o->buf = buf;
     o->op->can_grow = can_grow;
     o->top = o->pos = 0;
     o->size = len;
