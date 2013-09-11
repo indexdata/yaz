@@ -70,7 +70,7 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
             return 0;
         if (p->top < 0)
             return 1;
-        if (odr_write2(o, p->bits, p->top + 1) < 0)
+        if (odr_write(o, p->bits, p->top + 1) < 0)
             return 0;
         return 1;
     case ODR_PRINT:

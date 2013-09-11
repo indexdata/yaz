@@ -77,7 +77,7 @@ int ber_encinteger(ODR o, Odr_int val)
     len = sizeof(uval) - i;
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
-    if (odr_write2(o, (const char *) tmp + i, len) < 0)
+    if (odr_write(o, (const char *) tmp + i, len) < 0)
         return -1;
     return 0;
 }

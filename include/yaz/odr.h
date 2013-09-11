@@ -287,7 +287,7 @@ YAZ_EXPORT void odr_end(ODR o);
 YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
 YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o);
 YAZ_EXPORT int odr_grow_block(ODR b, int min_bytes);
-YAZ_EXPORT int odr_write2(ODR o, const char *buf, int bytes);
+YAZ_EXPORT int odr_write(ODR o, const char *buf, int bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
 YAZ_EXPORT int odr_dumpBER(FILE *f, const char *buf, int len);
 YAZ_EXPORT void odr_choice_bias(ODR o, int what);

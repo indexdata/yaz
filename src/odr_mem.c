@@ -97,7 +97,7 @@ int odr_grow_block(ODR b, int min_bytes)
     return 0;
 }
 
-int odr_write2(ODR o, const char *buf, int bytes)
+int odr_write(ODR o, const char *buf, int bytes)
 {
     if (o->pos + bytes >= o->size && odr_grow_block(o, bytes))
     {

@@ -39,7 +39,7 @@ int ber_any(ODR o, Odr_any **p)
         o->bp += res;
         return 1;
     case ODR_ENCODE:
-        if (odr_write2(o, (*p)->buf, (*p)->len) < 0)
+        if (odr_write(o, (*p)->buf, (*p)->len) < 0)
             return 0;
         return 1;
     default: odr_seterror(o, OOTHER, 3); return 0;

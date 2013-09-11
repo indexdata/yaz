@@ -92,7 +92,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
 
         o->op->stack_top->lenlen = lenlen;
 
-        if (odr_write2(o, dummy, lenlen) < 0)  /* dummy */
+        if (odr_write(o, dummy, lenlen) < 0)  /* dummy */
         {
             ODR_STACK_POP(o);
             return 0;
