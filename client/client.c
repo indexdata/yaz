@@ -318,14 +318,9 @@ static void print_refid(Z_ReferenceId *id)
 
 static Z_ReferenceId *set_refid(ODR out)
 {
-    Z_ReferenceId *id;
     if (!refid)
         return 0;
-    id = (Z_ReferenceId *) odr_malloc(out, sizeof(*id));
-    id->len = strlen(refid);
-    id->buf = (char *) odr_malloc(out, id->len);
-    memcpy(id->buf, refid, id->len);
-    return id;
+    return odr_create_Odr_oct(out, refid, strlen(refid));
 }
 
 /* INIT SERVICE ------------------------------- */
@@ -2129,15 +2124,8 @@ static Z_External *create_external_itemRequest(void)
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
-
-        r->u.single_ASN1_type = (Odr_oct *)
-            odr_malloc(out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = (char *)
-            odr_malloc(out, item_request_size);
-        r->u.single_ASN1_type->len = item_request_size;
-        memcpy(r->u.single_ASN1_type->buf, item_request_buf,
-                item_request_size);
-
+        r->u.single_ASN1_type =
+            odr_create_Odr_oct(out, item_request_buf, item_request_size);
         do_hex_dump(item_request_buf,item_request_size);
     }
     return r;
@@ -2181,17 +2169,8 @@ static Z_External *create_external_ILL_APDU(void)
         r->indirect_reference = 0;
         r->descriptor = 0;
         r->which = Z_External_single;
-
-        r->u.single_ASN1_type = (Odr_oct *)
-            odr_malloc(out, sizeof(*r->u.single_ASN1_type));
-        r->u.single_ASN1_type->buf = (char *)
-            odr_malloc(out, ill_request_size);
-        r->u.single_ASN1_type->len = ill_request_size;
-        memcpy(r->u.single_ASN1_type->buf, ill_request_buf, ill_request_size);
-/*         printf("len = %d\n", ill_request_size); */
-/*              do_hex_dump(ill_request_buf,ill_request_size); */
-/*              printf("--- end of extenal\n"); */
-
+        r->u.single_ASN1_type = odr_create_Odr_oct(out, ill_request_buf,
+                                                   ill_request_size);
     }
     return r;
 }
@@ -2480,15 +2459,8 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
         notToKeep->elements[0] = (Z_IU0SuppliedRecords_elem *)
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-        if (recid)
-        {
-            notToKeep->elements[0]->u.opaque = (Odr_oct *)
-                odr_malloc(out, sizeof(Odr_oct));
-            notToKeep->elements[0]->u.opaque->buf = (char *) recid;
-            notToKeep->elements[0]->u.opaque->len = strlen(recid);
-        }
-        else
-            notToKeep->elements[0]->u.opaque = 0;
+        notToKeep->elements[0]->u.opaque = recid ?
+            odr_create_Odr_oct(out, recid, strlen(recid)) : 0;
         notToKeep->elements[0]->supplementalId = 0;
         notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record = record_this;
@@ -2526,15 +2498,8 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
         notToKeep->elements[0] = (Z_IUSuppliedRecords_elem *)
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
-        if (recid)
-        {
-            notToKeep->elements[0]->u.opaque = (Odr_oct *)
-                odr_malloc(out, sizeof(Odr_oct));
-            notToKeep->elements[0]->u.opaque->buf = (char *) recid;
-            notToKeep->elements[0]->u.opaque->len = strlen(recid);
-        }
-        else
-            notToKeep->elements[0]->u.opaque = 0;
+        notToKeep->elements[0]->u.opaque = recid ?
+            odr_create_Odr_oct(out, recid, strlen(recid)) : 0;
         notToKeep->elements[0]->supplementalId = 0;
         notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record = record_this;

@@ -329,12 +329,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             npr->u.databaseRecord->indirect_reference = 0;
             npr->u.databaseRecord->which = Z_External_octet;
 
-            npr->u.databaseRecord->u.octet_aligned = (Odr_oct *)
-                odr_malloc(c->odr_in, sizeof(Odr_oct));
-            npr->u.databaseRecord->u.octet_aligned->buf =
-                sru_rec->recordData_buf;
-            npr->u.databaseRecord->u.octet_aligned->len =
-                sru_rec->recordData_len;
+            npr->u.databaseRecord->u.octet_aligned =
+                odr_create_Odr_oct(c->odr_in,
+                                   sru_rec->recordData_buf,
+                                   sru_rec->recordData_len);
             if (sru_rec->recordSchema
                 && !strcmp(sru_rec->recordSchema,
                            "info:srw/schema/1/diagnostics-v1.1"))

@@ -588,12 +588,8 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->retentionTime = 0;
                 rr->taskPackage->permissions = 0;
                 rr->taskPackage->description = 0;
-                rr->taskPackage->targetReference = (Odr_oct *)
-                    odr_malloc(rr->stream, sizeof(Odr_oct));
-                rr->taskPackage->targetReference->buf =
-                    odr_strdup(rr->stream, "911");
-                rr->taskPackage->targetReference->len =
-                    strlen((char *) (rr->taskPackage->targetReference->buf));
+                rr->taskPackage->targetReference =
+                    odr_create_Odr_oct(rr->stream, "911", 3);
                 rr->taskPackage->creationDateTime = 0;
                 rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
                 rr->taskPackage->packageDiagnostics = 0;
@@ -688,12 +684,8 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 rr->taskPackage->retentionTime = 0;
                 rr->taskPackage->permissions = 0;
                 rr->taskPackage->description = 0;
-                rr->taskPackage->targetReference = (Odr_oct *)
-                    odr_malloc(rr->stream, sizeof(Odr_oct));
-                rr->taskPackage->targetReference->buf =
-                    odr_strdup(rr->stream, "123");
-                rr->taskPackage->targetReference->len =
-                    strlen((char *) (rr->taskPackage->targetReference->buf));
+                rr->taskPackage->targetReference =
+                    odr_create_Odr_oct(rr->stream, "123", 3);
                 rr->taskPackage->creationDateTime = 0;
                 rr->taskPackage->taskStatus = odr_intdup(rr->stream, 0);
                 rr->taskPackage->packageDiagnostics = 0;

@@ -636,10 +636,7 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     x->indirect_reference = 0;
     x->direct_reference = odr_oiddup(odr, yaz_oid_userinfo_userinfo_1);
     x->which = Z_External_octet;
-    x->u.octet_aligned = (Odr_oct *) odr_malloc(odr, sizeof(Odr_oct));
-    x->u.octet_aligned->buf = (char *) odr_malloc(odr, octet_len);
-    memcpy(x->u.octet_aligned->buf, octet_buf, octet_len);
-    x->u.octet_aligned->len = octet_len;
+    x->u.octet_aligned = odr_create_Odr_oct(odr, octet_buf, octet_len);
 
     odr_destroy(encode);
 

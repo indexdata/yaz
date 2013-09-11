@@ -310,26 +310,19 @@ static Z_AttributeList *get_attributeList(ODR o,
 Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
 {
     Z_Term *term = (Z_Term *)odr_malloc(o, sizeof(*term));
-    Odr_oct *term_octet = (Odr_oct *)odr_malloc(o, sizeof(*term_octet));
-    term_octet->buf = (char *)odr_malloc(o, 1 + len);
-    memcpy(term_octet->buf, buf, len);
-    term_octet->len = len;
-    term_octet->buf[term_octet->len] = 0;  /* null terminate */
-
     switch (term_type)
     {
     case Z_Term_general:
         term->which = Z_Term_general;
-        term->u.general = term_octet;
+        term->u.general = odr_create_Odr_oct(o, buf, len);
         break;
     case Z_Term_characterString:
         term->which = Z_Term_characterString;
-        term->u.characterString = (char*) term_octet->buf;
-        /* null terminated above */
+        term->u.characterString = odr_strdupn(o, buf, len);
         break;
     case Z_Term_numeric:
         term->which = Z_Term_numeric;
-        term->u.numeric = odr_intdup(o, odr_atoi((const char*) term_octet->buf));
+        term->u.numeric = odr_intdup(o, odr_atoi(odr_strdupn(o, buf, len)));
         break;
     case Z_Term_null:
         term->which = Z_Term_null;

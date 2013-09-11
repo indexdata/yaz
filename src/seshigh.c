@@ -3098,7 +3098,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
         {
             Z_Entry *e;
             Z_TermInfo *t;
-            Odr_oct *o;
 
             tab[i] = e = (Z_Entry *)odr_malloc(assoc->encode, sizeof(*e));
             if (bsrr->entries[i].occurrences >= 0)
@@ -3125,12 +3124,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
                 t->term = (Z_Term *)
                     odr_malloc(assoc->encode, sizeof(*t->term));
                 t->term->which = Z_Term_general;
-                t->term->u.general = o =
-                    (Odr_oct *)odr_malloc(assoc->encode, sizeof(Odr_oct));
-                o->buf = (char *)
-                    odr_malloc(assoc->encode, o->len =
-                               strlen(bsrr->entries[i].term));
-                memcpy(o->buf, bsrr->entries[i].term, o->len);
+                t->term->u.general =
+                    odr_create_Odr_oct(assoc->encode,
+                                       bsrr->entries[i].term,
+                                       strlen(bsrr->entries[i].term));
                 yaz_log(YLOG_DEBUG, "  term #%d: '%s' (" ODR_INT_PRINTF ")", i,
                          bsrr->entries[i].term, bsrr->entries[i].occurrences);
             }
