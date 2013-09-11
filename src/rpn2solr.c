@@ -386,23 +386,22 @@ static int rpn2solr_structure(solr_transform_t ct,
     {
         Z_Operator *op = q->u.complex->roperator;
         int r;
+        struct solr_attr solr_attr_left, solr_attr_right;
+        WRBUF w_left = wrbuf_alloc();
+        WRBUF w_right = wrbuf_alloc();
 
         if (nested)
             pr("(", client_data);
 
-        struct solr_attr solr_attr_left;
         solr_attr_init(&solr_attr_left);
-        WRBUF w_left = wrbuf_alloc();
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w_left, &solr_attr_left); 
+        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w_left, &solr_attr_left);
 
 
         if (r) {
             wrbuf_destroy(w_left);
             return r;
-        }       
-        struct solr_attr solr_attr_right;
+        }
         solr_attr_init(&solr_attr_right);
-        WRBUF w_right = wrbuf_alloc();
 
         r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w_right, &solr_attr_right);
         if (r) {
@@ -410,7 +409,7 @@ static int rpn2solr_structure(solr_transform_t ct,
             wrbuf_destroy(w_right);
             return r;
         }
-            
+
         switch(op->which)
         {
         case  Z_Operator_and:
@@ -450,8 +449,8 @@ int solr_transform_rpn2solr_stream(solr_transform_t ct,
 {
     int r;
     WRBUF w = wrbuf_alloc();
-    solr_transform_set_error(ct, 0, 0);
     struct solr_attr solr_attr;
+    solr_transform_set_error(ct, 0, 0);
     solr_attr_init(&solr_attr);
     r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w, &solr_attr);
     solr_write_structure(pr, client_data, &solr_attr);
