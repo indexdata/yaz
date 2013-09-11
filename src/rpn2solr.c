@@ -351,10 +351,12 @@ static int solr_write_and_or_range(void (*pr)(const char *buf, void *client_data
 {
     if (solr_attr_left->is_range && 
         solr_attr_right->is_range && 
-        !strcmp(solr_attr_left->index, solr_attr_left->index)) 
+        !strcmp(solr_attr_left->index, solr_attr_right->index)) 
     {
         if (solr_attr_left->is_range >= 3 && solr_attr_right->is_range <= 2)
             return solr_write_range(pr, client_data, solr_attr_left, solr_attr_right); 
+        else if (solr_attr_left->is_range <= 2 && solr_attr_right->is_range >= 2)
+            return solr_write_range(pr, client_data, solr_attr_right, solr_attr_left); 
     }
     solr_write_structure(pr, client_data, solr_attr_left);
     pr(" AND ", client_data);
