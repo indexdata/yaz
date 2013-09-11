@@ -69,15 +69,15 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
                 {
                     /* Unsure on whether this is the relation attribute constants? */
                 case Z_ProximityOperator_Prox_lessThan:
-                    return 0;
+                    return "<";
                 case Z_ProximityOperator_Prox_lessThanOrEqual:
-                    return 0;
+                    return "le";
                 case Z_ProximityOperator_Prox_equal:
                     return ":";
                 case Z_ProximityOperator_Prox_greaterThanOrEqual:
-                    return 0;
+                    return "ge";
                 case Z_ProximityOperator_Prox_greaterThan:
-                    return 0;
+                    return ">";
                 case Z_ProximityOperator_Prox_notEqual:
                     return 0;
                 case 100:
