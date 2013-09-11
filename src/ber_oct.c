@@ -58,11 +58,9 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
 #if OCT_SIZE
         assert(p->size == 0);
         assert(p->len == 0);
-        yaz_log(YLOG_LOG, "DECODE OCTET1 p->size=%d p->len=%d", p->size, p->len);
         if (len + 1 > p->size - p->len)
         {
             c = (unsigned char *)odr_malloc(o, p->size += len + 1);
-            yaz_log(YLOG_LOG, "DECODE COPY p->size=%d p->len=%d", p->size, p->len);
             if (p->len)
                 memcpy(c, p->buf, p->len);
             p->buf = c;
@@ -70,7 +68,6 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
         if (len)
             memcpy(p->buf + p->len, o->bp, len);
         p->len += len;
-        yaz_log(YLOG_LOG, "DECODE OCTET2 p->size=%d p->len=%d", p->size, p->len);
         o->bp += len;
         /* the final null is really not part of the buffer, but */
         /* it helps somes applications that assumes C strings */
