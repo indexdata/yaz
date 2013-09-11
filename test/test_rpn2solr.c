@@ -37,9 +37,9 @@ static int compare(solr_transform_t ct, const char *pqf, const char *solr)
         {
             yaz_log(YLOG_LOG, "%s -> %s", pqf, wrbuf_cstr(w));
             if (solr && !strcmp(wrbuf_cstr(w), solr))
-            {
                 ret = 1;
-            }
+            else
+                yaz_log(YLOG_LOG, "Exp: %s", solr);
         }
     }
     wrbuf_destroy(w);
@@ -90,6 +90,24 @@ static void tst1(void)
 
     YAZ_CHECK(compare(ct, "@attr 5=104 \\\"\\\\\\\\\\\"",
                       "\\\"" "\\\\" "\\\""));
+
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=1 1980", "date:[* TO 1980}"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=2 1980", "date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=3 1980", "date:1980"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=4 1980", "date:[1980 TO *]"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=5 1980", "date:{1980 TO *]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=2 234 @attr 1=date @attr 2=4 1990", "date:[1990 TO 234]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=2 345 @attr 1=date @attr 2=4 234",  "date:[234 TO 345]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=5 234 @attr 1=titl @attr 2=2 1990", "date:{234 TO *] AND titl:[* TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=5 234 @attr 1=date @attr 2=2 1990", "date:{234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=4 234 @attr 1=date @attr 2=2 1990", "date:[234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=5 234 @attr 1=date @attr 2=1 1990", "date:{234 TO 1990}"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=4 234 @attr 1=date @attr 2=2 1990", "date:[234 TO 1990]"));
+    YAZ_CHECK(compare(ct, "@or  @attr 1=date @attr 2=4 234 @attr 1=date @attr 2=2 1990", "date:[234 TO *] OR date:[* TO 1990]"));
+    YAZ_CHECK(compare(ct, "@or  @attr 1=date @attr 2=2 234 @attr 1=date @attr 2=4 1990", "date:[* TO 234] OR date:[1990 TO *]"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=1 1980", "date:[* TO 1980}"));
+    YAZ_CHECK(compare(ct, "@attr 1=date @attr 2=2 1980", "date:[* TO 1980]"));
+    YAZ_CHECK(compare(ct, "@and @attr 1=date @attr 2=2 234 @attr 1=date @attr 2=4 1990", "date:[1990 TO 234]"));
 
     solr_transform_close(ct);
 }

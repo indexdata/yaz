@@ -1,3 +1,5 @@
+--- 4.2.66 2013/09/11
+
 ZOOM: fix record handling for Solr. ZOOM_record_get would return 0, if
 schema was given for search. YAZ-675
 
