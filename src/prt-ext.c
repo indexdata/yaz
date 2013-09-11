@@ -317,9 +317,6 @@ Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
         thisext->u.sutrs = sutrs;
         sutrs->buf = (char *)nmem_malloc(nmem, len);
         sutrs->len = len;
-#if OCT_SIZE
-        sutrs->size = len;
-#endif
         memcpy(sutrs->buf, buf, len);
     }
     else
@@ -333,9 +330,6 @@ Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
             return 0;
         memcpy(thisext->u.octet_aligned->buf, buf, len);
         thisext->u.octet_aligned->len = len;
-#if OCT_SIZE
-        thisext->u.octet_aligned->size = len;
-#endif
     }
     return thisext;
 }
@@ -367,9 +361,6 @@ Z_External *z_ext_record_oid_any(ODR o, const Odr_oid *oid,
         return 0;
     memcpy(thisext->u.single_ASN1_type->buf, buf, len);
     thisext->u.single_ASN1_type->len = len;
-#if OCT_SIZE
-    thisext->u.single_ASN1_type->size = len;
-#endif
     return thisext;
 }
 

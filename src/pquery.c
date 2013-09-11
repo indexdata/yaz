@@ -314,9 +314,6 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
     term_octet->buf = (char *)odr_malloc(o, 1 + len);
     memcpy(term_octet->buf, buf, len);
     term_octet->len = len;
-#if OCT_SIZE
-    term_octet->size = len;
-#endif
     term_octet->buf[term_octet->len] = 0;  /* null terminate */
 
     switch (term_type)

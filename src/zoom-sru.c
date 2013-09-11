@@ -335,10 +335,6 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                 sru_rec->recordData_buf;
             npr->u.databaseRecord->u.octet_aligned->len =
                 sru_rec->recordData_len;
-#if OCT_SIZE
-            npr->u.databaseRecord->u.octet_aligned->size =
-                sru_rec->recordData_len;
-#endif
             if (sru_rec->recordSchema
                 && !strcmp(sru_rec->recordSchema,
                            "info:srw/schema/1/diagnostics-v1.1"))

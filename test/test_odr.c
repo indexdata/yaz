@@ -27,9 +27,6 @@ void tst_MySequence1(ODR encode, ODR decode)
     s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
     s->second->buf = (char *) "hello";
     s->second->len = 5;
-#if OCT_SIZE
-    s->second->size = 0;
-#endif
     s->third = odr_booldup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
@@ -84,9 +81,6 @@ void tst_MySequence2(ODR encode, ODR decode)
     s->second = (Odr_oct *) odr_malloc(encode, sizeof(*s->second));
     s->second->buf = (char *) "hello";
     s->second->len = 5;
-#if OCT_SIZE
-    s->second->size = 0;
-#endif
     s->third = odr_booldup(encode, 1);
     s->fourth = odr_nullval();
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);

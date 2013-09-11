@@ -67,9 +67,6 @@ Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz)
     Odr_oct *p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
     p->buf = (char *) odr_malloc(o, sz);
     memcpy(p->buf, buf, sz);
-#if OCT_SIZE
-    p->size = sz;
-#endif
     p->len = sz;
     return p;
 }
