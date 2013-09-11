@@ -11,7 +11,7 @@ Build-Depends: debhelper (>= 5),
 	libwrap0-dev,
 	libicu36-dev | libicu-dev
 
-Package: libyaz4
+Package: libyaz5
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -22,15 +22,15 @@ Description: libraries for the Z39.50 toolkit
  .
  This package includes runtime files.
 
-Package: libyaz4-dbg
+Package: libyaz5-dbg
 Section: debug
 Architecture: any
-Depends: libyaz4 (= ${binary:Version}), ${misc:Depends}
-Description: debugging symbols for libyaz4
+Depends: libyaz5 (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for libyaz5
  YAZ is a toolkit that allows you to develop software using the
  ANSI Z39.50/ISO23950 standard for information retrieval.
  .
- This package contains the debugging symbols for libyaz4.
+ This package contains the debugging symbols for libyaz5.
 
 Package: yaz
 Section: utils
@@ -52,8 +52,8 @@ Description: documentation for the Z39.50 toolkit
  .
  This package includes HTML documentation for YAZ.
 
-Package: libyaz4-dev
-Depends: libyaz4 (= ${Source-Version}),
+Package: libyaz5-dev
+Depends: libyaz5 (= ${Source-Version}),
 	libxslt1-dev,
 	libicu36-dev|libicu-dev,
 	tcl8.3|tclsh

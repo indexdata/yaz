@@ -14,7 +14,7 @@ Release: 1indexdata
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-Requires: libxslt, gnutls, readline, libyaz4 = %{version}
+Requires: libxslt, gnutls, readline, libyaz5 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -52,31 +52,31 @@ URL: http://www.indexdata.com/yaz
 This package contains both a test-server and clients (normal & ssl)
 for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 
-%package -n libyaz4
+%package -n libyaz5
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt, gnutls, libicu
 
-%description -n libyaz4
+%description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
 Retrieval.
 
-%post -n libyaz4 -p /sbin/ldconfig 
-%postun -n libyaz4 -p /sbin/ldconfig 
+%post -n libyaz5 -p /sbin/ldconfig 
+%postun -n libyaz5 -p /sbin/ldconfig 
 
-%package -n libyaz4-devel
+%package -n libyaz5-devel
 Summary: Z39.50 Library - development package
 Group: Development/Libraries
-Requires: libyaz4 = %{version}, libxml2-devel, libxslt-devel, libicu-devel
-Conflicts: libyaz-devel
+Requires: libyaz5 = %{version}, libxml2-devel, libxslt-devel, libicu-devel
+Conflicts: libyaz-devel, libyaz4-devel
 
-%description -n libyaz4-devel
+%description -n libyaz5-devel
 Development libraries and includes for the libyaz package.
 
 %package -n yaz-illclient
 Summary: ILL client
 Group: Applications/Communication
-Requires: readline, libyaz4 = %{version}
+Requires: readline, libyaz5 = %{version}
 
 %description -n yaz-illclient
 yaz-illclient: an ISO ILL client.
@@ -84,7 +84,7 @@ yaz-illclient: an ISO ILL client.
 %package -n yaz-icu
 Summary: Command line utility for ICU utilities of YAZ
 Group: Applications/Communication
-Requires: libyaz4 = %{version}
+Requires: libyaz5 = %{version}
 
 %description -n yaz-icu
 The yaz-icu program is a command-line based client which exposes the ICU
@@ -128,11 +128,11 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_mandir}/man7/yaz-log.*
 %{_mandir}/man7/bib1-attr.*
 
-%files -n libyaz4
+%files -n libyaz5
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
-%files -n libyaz4-devel
+%files -n libyaz5-devel
 %defattr(-,root,root)
 %{_bindir}/yaz-config
 %{_bindir}/yaz-asncomp
