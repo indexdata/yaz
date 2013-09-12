@@ -39,7 +39,9 @@ Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name);
 
 char *yaz_negotiate_sru_version(char *input_ver);
 
-void yaz_sru_facet_request(ODR, Z_FacetList **facetList, const char **limit);
+void yaz_sru_facet_request(ODR, Z_FacetList **facetList,
+                           const char **limit, const char **start,
+                           const char **sort);
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>

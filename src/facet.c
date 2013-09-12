@@ -69,10 +69,11 @@ void yaz_facet_attr_init(struct yaz_facet_attr *attr_values)
 {
     attr_values->errcode   = 0;
     attr_values->errstring = 0;
-    attr_values->relation  = 0;
+    attr_values->sortorder = 0;
     attr_values->useattr   = 0;
     attr_values->useattrbuff[0] = 0;
     attr_values->limit     = 0;
+    attr_values->start     = 0;
 }
 
 static const char *stringattr(Z_ComplexAttribute *c)
@@ -119,41 +120,17 @@ static void useattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
 }
 
 
-static void sortorderattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
+static void numattr(Z_AttributeElement *ae, struct yaz_facet_attr *av,
+                    int *v)
 {
     if (ae->which == Z_AttributeValue_numeric)
     {
-        if (*ae->value.numeric == 0)
-            av->relation = "desc";
-        else if (*ae->value.numeric == 1)
-            av->relation = "asc";
-        else if (*ae->value.numeric == 3)
-            av->relation = "unknown/unordered";
-        else
-        {
-            av->errcode = YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE;
-            sprintf(av->useattrbuff, ODR_INT_PRINTF,
-                    *ae-> attributeType);
-            av->errstring = av->useattrbuff;
-        }
-    }
-    else
-    {
-        av->errcode = YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE;
-        av->errstring = "non-numeric relation attribute";
-    }
-}
-
-static void limitattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
-{
-    if (ae->which == Z_AttributeValue_numeric)
-    {
-        av->limit = *ae->value.numeric;
+        *v = *ae->value.numeric;
     }
     else
     {
         av->errcode = YAZ_BIB1_UNSUPP_ATTRIBUTE;
-        av->errstring = "non-numeric limit attribute";
+        av->errstring = "non-numeric limit/sort/start attribute";
     }
 }
 
@@ -181,12 +158,16 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
             useattr(ae, av);
         }
         else if (*ae->attributeType == 2)
-        { /* sortorder */
-            sortorderattr(ae, av);
+        {
+            numattr(ae, av, &av->sortorder);
         }
         else if (*ae->attributeType == 3)
-        { /* limit */
-            limitattr(ae, av);
+        {
+            numattr(ae, av, &av->limit);
+        }
+        else if (*ae->attributeType == 4)
+        {
+            numattr(ae, av, &av->start);
         }
         else
         { /* unknown attribute */

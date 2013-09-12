@@ -568,6 +568,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             char *recordPacking = 0;
             char *recordXMLEscaping = 0;
             const char *facetLimit = 0;
+            const char *facetStart = 0;
+            const char *facetSort = 0;
 
             (*p)->which = Z_SRW_searchRetrieve_request;
             req = (*p)->u.request = (Z_SRW_searchRetrieveRequest *)
@@ -630,10 +632,17 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (yaz_match_xsd_string(ptr, "stylesheet", o,
                                           &req->stylesheet))
                     ;
-                else if (yaz_match_xsd_string(ptr, "database", o, &req->database))
+                else if (yaz_match_xsd_string(ptr, "database", o,
+                                              &req->database))
                     ;
                 else if (yaz_match_xsd_string(ptr, "facetLimit", o,
-                                          (char**) &facetLimit))
+                                              (char**) &facetLimit))
+                    ;
+                else if (yaz_match_xsd_string(ptr, "facetStart", o,
+                                              (char**) &facetStart))
+                    ;
+                else if (yaz_match_xsd_string(ptr, "facetSort", o,
+                                              (char**) &facetSort))
                     ;
             }
             if (!req->query)
@@ -650,7 +659,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             {
                 req->recordPacking = recordPacking;
             }
-            yaz_sru_facet_request(o, &req->facetList, &facetLimit);
+            yaz_sru_facet_request(o, &req->facetList, &facetLimit, &facetStart,
+                                  &facetSort);
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "searchRetrieveResponse"))
         {
@@ -925,8 +935,13 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             add_xsd_string(ptr, "database", req->database);
             {
                 const char *limit = 0;
-                yaz_sru_facet_request(o, &req->facetList, &limit);
+                const char *start = 0;
+                const char *sort = 0;
+                yaz_sru_facet_request(o, &req->facetList, &limit, &start,
+                                      &sort);
                 add_xsd_string(ptr, "facetLimit", limit);
+                add_xsd_string(ptr, "facetStart", start);
+                add_xsd_string(ptr, "facetSort", sort);
             }
         }
         else if ((*p)->which == Z_SRW_searchRetrieve_response)

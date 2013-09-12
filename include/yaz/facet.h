@@ -57,8 +57,9 @@ struct yaz_facet_attr {
                    /* or number converted to a string */
                    /* defaults to 'any' */
     char useattrbuff[30]; /* for converting numbers to strings */
-    char *relation; /* @attr 2, defaults to '=' */
-    int limit; /* for facet attributes */
+    int sortorder;
+    int limit;
+    int start;
 };
 
 YAZ_EXPORT

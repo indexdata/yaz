@@ -398,6 +398,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         char *maximumTerms = 0;
         char *responsePosition = 0;
         const char *facetLimit = 0;
+        const char *facetStart = 0;
+        const char *facetSort = 0;
         Z_SRW_extra_arg *extra_args = 0;
 #endif
         char **uri_name;
@@ -471,6 +473,10 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     responsePosition = v;
                 else if (!strcmp(n, "facetLimit"))
                     facetLimit = v;
+                else if (!strcmp(n, "facetStart"))
+                    facetStart = v;
+                else if (!strcmp(n, "facetSort"))
+                    facetSort = v;
                 else if (!strcmp(n, "extraRequestData"))
                     ; /* ignoring extraRequestData */
                 else if (n[0] == 'x' && n[1] == '-')
@@ -556,7 +562,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             sr->u.request->packing = recordPacking;
             sr->u.request->stylesheet = stylesheet;
             yaz_sru_facet_request(decode , &sr->u.request->facetList,
-                                  &facetLimit);
+                                  &facetLimit, &facetStart, &facetSort);
 
             yaz_sru_decode_integer(decode, "maximumRecords", maximumRecords,
                                    &sr->u.request->maximumRecords,
@@ -961,10 +967,16 @@ static int yaz_get_sru_parms(const Z_SRW_PDU *srw_pdu, ODR encode,
                                srw_pdu->u.request->resultSetTTL);
         {
             const char *facetLimit = 0;
+            const char *facetStart = 0;
+            const char *facetSort = 0;
             yaz_sru_facet_request(encode, &srw_pdu->u.request->facetList,
-                                  &facetLimit);
+                                  &facetLimit, &facetStart, &facetSort);
             yaz_add_name_value_str(encode, name, value, &i, "facetLimit",
                                    (char *) facetLimit);
+            yaz_add_name_value_str(encode, name, value, &i, "facetStart",
+                                   (char *) facetStart);
+            yaz_add_name_value_str(encode, name, value, &i, "facetSort",
+                                   (char *) facetSort);
         }
         break;
     case Z_SRW_explain_request:

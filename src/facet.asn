@@ -7,8 +7,9 @@ FacetList ::= SEQUENCE OF FacetField;
 FacetField ::= SEQUENCE {
   -- attributes will specify:
   --   1=use (field name)
-  --   2=sortorder 0=most frequent, 1=least frequent, ..
+  --   2=sortorder 0=count descending, 1=alpha ascending  ..
   --   3=limit (integer)
+  --   4=start (integer)
   attributes [1] IMPLICIT AttributeList,
   terms      [2] IMPLICIT SEQUENCE OF FacetTerm OPTIONAL
 }

@@ -277,7 +277,11 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
         attrvalues.limit = 10;
         yaz_facet_attr_get_z_attributes(facet_list->elements[index]->attributes,
                                         &attrvalues);
-        yaz_log(YLOG_LOG, "Attributes: %s %d ", attrvalues.useattr, attrvalues.limit);
+        yaz_log(YLOG_LOG, "Attributes: %s limit=%d start=%d sort=%d",
+                attrvalues.useattr,
+                attrvalues.limit,
+                attrvalues.start,
+                attrvalues.sortorder);
         if (attrvalues.errstring)
             yaz_log(YLOG_LOG, "Error parsing attributes: %s", attrvalues.errstring);
         if (attrvalues.limit > 0 && attrvalues.useattr) {

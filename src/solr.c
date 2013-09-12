@@ -397,31 +397,61 @@ static int yaz_solr_encode_facet_field(
     struct yaz_facet_attr attr_values;
     yaz_facet_attr_init(&attr_values);
     yaz_facet_attr_get_z_attributes(attribute_list, &attr_values);
-    // TODO do we want to support server decided
 
     if (attr_values.errcode)
         return -1;
     if (attr_values.useattr)
     {
         WRBUF wrbuf = wrbuf_alloc();
-        wrbuf_puts(wrbuf, (char *) attr_values.useattr);
         yaz_add_name_value_str(encode, name, value, i,
                                "facet.field",
-                               odr_strdup(encode, wrbuf_cstr(wrbuf)));
+                               odr_strdup(encode, attr_values.useattr));
+
         if (attr_values.limit > 0)
         {
-            WRBUF wrbuf2 = wrbuf_alloc();
-            Odr_int olimit;
-            wrbuf_puts(wrbuf2, "f.");
-            wrbuf_puts(wrbuf2, wrbuf_cstr(wrbuf));
-            wrbuf_puts(wrbuf2, ".facet.limit");
-            olimit = attr_values.limit;
+            Odr_int v = attr_values.limit;
+            wrbuf_rewind(wrbuf);
+            wrbuf_printf(wrbuf, "f.%s.facet.limit", attr_values.useattr);
             yaz_add_name_value_int(encode, name, value, i,
-                                   odr_strdup(encode, wrbuf_cstr(wrbuf2)),
-                                   &olimit);
-            wrbuf_destroy(wrbuf2);
+                                   odr_strdup(encode, wrbuf_cstr(wrbuf)),
+                                   &v);
+        }
+        if (attr_values.start > 1)
+        {
+            Odr_int v = attr_values.start - 1;
+            wrbuf_rewind(wrbuf);
+            wrbuf_printf(wrbuf, "f.%s.facet.offset", attr_values.useattr);
+            yaz_add_name_value_int(encode, name, value, i,
+                                   odr_strdup(encode, wrbuf_cstr(wrbuf)),
+                                   &v);
+        }
+        if (attr_values.sortorder == 1)
+        {
+            wrbuf_rewind(wrbuf);
+            wrbuf_printf(wrbuf, "f.%s.facet.sort", attr_values.useattr);
+            yaz_add_name_value_str(encode, name, value, i,
+                                   odr_strdup(encode, wrbuf_cstr(wrbuf)),
+                                   "index");
         }
         wrbuf_destroy(wrbuf);
+    }
+    else
+    {
+        if (attr_values.limit > 0)
+        {
+            Odr_int v = attr_values.limit;
+            yaz_add_name_value_int(encode, name, value, i, "facet.limit", &v);
+        }
+        if (attr_values.start > 1)
+        {
+            Odr_int v = attr_values.start - 1;
+            yaz_add_name_value_int(encode, name, value, i, "facet.offset", &v);
+        }
+        if (attr_values.sortorder == 1)
+        {
+            yaz_add_name_value_str(encode, name, value, i, "facet.sort",
+                                   "index");
+        }
     }
     return 0;
 }
