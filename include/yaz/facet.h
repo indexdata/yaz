@@ -93,6 +93,11 @@ void yaz_oi_set_facetlist(
 YAZ_EXPORT
 Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation);
 
+YAZ_EXPORT
+void yaz_oi_set_facetlist(Z_OtherInformation **otherInformation, ODR odr,
+                          Z_FacetList *facet_list);
+
+
 YAZ_END_CDECL
 
 #endif
