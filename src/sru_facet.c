@@ -86,7 +86,8 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
                     }
                     if (av.start || av.useattr)
                     {
-                        wrbuf_printf(w_start, "%d", av.start);
+                        wrbuf_printf(w_start, "%d",
+                                     av.start == 0 ? 1 : av.start);
                         if (av.useattr)
                             wrbuf_printf(w_start, ":%s", av.useattr);
                         wrbuf_puts(w_start, ",");
