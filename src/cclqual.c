@@ -379,6 +379,15 @@ struct ccl_rpn_attr *ccl_qual_get_attr(ccl_qualifier_t q)
     return q->attr_list;
 }
 
+struct ccl_rpn_attr *ccl_parser_qual_search(CCL_parser cclp, const char *name,
+                                            size_t name_len)
+{
+    ccl_qualifier_t q = ccl_qual_search(cclp, name, name_len, 0);
+    if (q)
+        return q->attr_list;
+    return 0;
+}
+
 const char *ccl_qual_get_name(ccl_qualifier_t q)
 {
     return q->name;
