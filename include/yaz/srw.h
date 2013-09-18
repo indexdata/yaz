@@ -37,7 +37,7 @@
 #include <yaz/zgdu.h>
 #include <yaz/diagsrw.h>
 #include <yaz/diagsru_update.h>
-#include <yaz/z-facet-1.h>
+#include <yaz/facet.h>
 
 YAZ_BEGIN_CDECL
 
