@@ -1,4 +1,4 @@
 DEBIAN_DIST="wheezy squeeze"
 UBUNTU_DIST="quantal precise oneiric lucid"
 CENTOS_DIST="centos5 centos6"
-VERSION=4.2.66
+VERSION=4.2.67
