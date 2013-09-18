@@ -687,9 +687,14 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         if (KIND == CCL_TOK_TERM)
         {
             size_t i;
+            int quote_mode = 0;
             for (i = 0; i<cclp->look_token->len; i++)
             {
-                if (cclp->look_token->name[i] == '-')
+                if (i > 0 && cclp->look_token->name[i] == '\\')
+                    ;
+                else if (cclp->look_token->name[i] == '"')
+                    quote_mode = !quote_mode;
+                else if (cclp->look_token->name[i] == '-' && !quote_mode)
                     break;
             }
 
