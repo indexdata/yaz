@@ -107,13 +107,16 @@ static const char *complex_op_name(const Z_Operator *op)
     }
 }
 
+static void yaz_attributes_to_wrbuf(WRBUF w, const Z_AttributeList *al)
+{
+    int i;
+    for (i = 0; i < al->num_attributes; i++)
+        yaz_attribute_element_to_wrbuf(w, al->attributes[i]);
+}
+
 static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
 {
-    int num_attributes = zapt->attributes->num_attributes;
-    int i;
-    for (i = 0; i < num_attributes; i++)
-        yaz_attribute_element_to_wrbuf(b,zapt->attributes->attributes[i]);
-
+    yaz_attributes_to_wrbuf(b, zapt->attributes);
     switch (zapt->term->which)
     {
     case Z_Term_general:
@@ -263,6 +266,19 @@ void wrbuf_diags(WRBUF b, int num_diagnostics, Z_DiagRec **diags)
         else if ((e->which==Z_DefaultDiagFormat_v3Addinfo) && (e->u.v3Addinfo))
             wrbuf_puts(b, e->u.v3Addinfo);
         wrbuf_puts(b, " ");
+    }
+}
+
+void yaz_facet_list_to_wrbuf(WRBUF w, const Z_FacetList *fl)
+{
+    int i;
+    for (i = 0; i < fl->num; i++)
+    {
+        Z_FacetField *ff = fl->elements[i];
+
+        if (i)
+            wrbuf_puts(w, ", ");
+        yaz_attributes_to_wrbuf(w, ff->attributes);
     }
 }
 

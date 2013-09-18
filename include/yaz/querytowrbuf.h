@@ -45,6 +45,9 @@ YAZ_EXPORT void yaz_rpnquery_to_wrbuf(WRBUF b, const Z_RPNQuery *rpn);
 YAZ_EXPORT void wrbuf_diags(WRBUF b, int num_diagnostics,Z_DiagRec **diags);
 
 YAZ_EXPORT void yaz_encode_pqf_term(WRBUF b, const char *term, int len);
+
+YAZ_EXPORT void yaz_facet_list_to_wrbuf(WRBUF w, const Z_FacetList *fl);
+
 YAZ_END_CDECL
 
 #endif
