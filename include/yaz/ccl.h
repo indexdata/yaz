@@ -305,6 +305,11 @@ YAZ_EXPORT
 int ccl_stop_words_info(ccl_stop_words_t csw, int idx,
                         const char **qualname, const char **term);
 
+YAZ_EXPORT
+struct ccl_rpn_attr *ccl_parser_qual_search(CCL_parser cclp, const char *name,
+                                            size_t name_len);
+
+
 #ifndef ccl_assert
 #define ccl_assert(x) ;
 #endif
