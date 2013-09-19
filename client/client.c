@@ -927,7 +927,10 @@ static void display_record(Z_External *r)
             || !oid_oidcmp(oid, yaz_oid_recsyn_html))
         {
             print_xml_record(octet_buf, octet_len);
-
+        }
+        else if (!oid_oidcmp(oid, yaz_oid_recsyn_mab))
+        {
+            print_record(octet_buf, octet_len);
         }
         else
         {
