@@ -1,3 +1,15 @@
+--- 4.2.67 2013/09/19 
+
+Don't decode MAB as MARC. Just like we don't attempt to decode
+HTML/XML as MARC. Fixes MAB display problem that was introduced in 4.2.64.
+
+CCL: allow quoted terms for date ranges. YAZ-681
+
+Introduce ccl_parser_qual_search. This function makes old function
+ccl_qual_search, from YAZ 2, available again.
+
+Add yaz_facet_list_to_wrbuf. YAZ-683
+
 --- 4.2.66 2013/09/11
 
 ZOOM: fix record handling for Solr. ZOOM_record_get would return 0, if
