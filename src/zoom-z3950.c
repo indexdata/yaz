@@ -670,8 +670,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     if (facets) {
         Z_FacetList *facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
         if (facet_list) {
-            Z_OtherInformation **oi;
-            yaz_oi_APDU(apdu, &oi);
+            Z_OtherInformation **oi = &search_req->additionalSearchInfo;
             yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
         else
