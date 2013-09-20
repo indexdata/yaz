@@ -47,18 +47,33 @@ YAZ_EXPORT
 Z_RPNQuery *yaz_clone_z_RPNQuery(Z_RPNQuery *q, NMEM out);
 
 YAZ_EXPORT
+int yaz_compare_z_RPNQuery(Z_RPNQuery *a, Z_RPNQuery *b);
+
+YAZ_EXPORT
 Z_Query *yaz_clone_z_Query(Z_Query *q, NMEM out);
 
 YAZ_EXPORT
+int yaz_compare_z_Query(Z_Query *a, Z_Query *b);
+
+YAZ_EXPORT
 Z_NamePlusRecord *yaz_clone_z_NamePlusRecord(Z_NamePlusRecord *s, NMEM out);
+YAZ_EXPORT
+int yaz_compare_z_NamePlusRecord(Z_NamePlusRecord *a, Z_NamePlusRecord *b);
 
 YAZ_EXPORT
 Z_RecordComposition *yaz_clone_z_RecordComposition(Z_RecordComposition *s,
                                                    NMEM out);
+YAZ_EXPORT
+int yaz_compare_z_RecordComposition(Z_RecordComposition *a,
+                                    Z_RecordComposition *b);
 
 YAZ_EXPORT
 Z_OtherInformation *yaz_clone_z_OtherInformation(Z_OtherInformation *s,
                                                  NMEM out);
+
+YAZ_EXPORT
+int yaz_compare_z_OtherInformation(Z_OtherInformation *a,
+                                   Z_OtherInformation *b);
 
 YAZ_END_CDECL
 

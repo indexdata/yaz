@@ -9,6 +9,7 @@
 #include <config.h>
 #endif
 
+#include <string.h>
 #include <yaz/copy_types.h>
 
 /** macro clone_z_type copies a given ASN.1 type */
@@ -32,6 +33,27 @@ Z_##x *yaz_clone_z_##x(Z_##x *q, NMEM nmem_out) \
     odr_destroy(enc); \
     odr_destroy(dec); \
     return q1; \
+} \
+int yaz_compare_z_##x(Z_##x *a, Z_##x *b) \
+{ \
+    int ret = 0; \
+    ODR o_a = odr_createmem(ODR_ENCODE); \
+    ODR o_b = odr_createmem(ODR_ENCODE); \
+    int r_a = z_##x(o_a, &a, 1, 0); \
+    int r_b = z_##x(o_b, &b, 1, 0); \
+    if (r_a && r_b) \
+    { \
+        int len_a, len_b; \
+        char *buf_a = odr_getbuf(o_a, &len_a, 0); \
+        char *buf_b = odr_getbuf(o_b, &len_b, 0); \
+        if (buf_a && buf_b && len_a == len_b && !memcmp(buf_a, buf_b, len_a)) \
+            ret = 1; \
+        else if (!buf_a && !buf_b) \
+            ret = 1; \
+    } \
+    odr_destroy(o_a); \
+    odr_destroy(o_b); \
+    return ret; \
 }
 
 clone_z_type(NamePlusRecord)
