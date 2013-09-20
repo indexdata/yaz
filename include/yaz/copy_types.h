@@ -56,6 +56,10 @@ YAZ_EXPORT
 Z_RecordComposition *yaz_clone_z_RecordComposition(Z_RecordComposition *s,
                                                    NMEM out);
 
+YAZ_EXPORT
+Z_OtherInformation *yaz_clone_z_OtherInformation(Z_OtherInformation *s,
+                                                 NMEM out);
+
 YAZ_END_CDECL
 
 #endif
