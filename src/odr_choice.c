@@ -56,7 +56,7 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
             {
                 if (o->op->stack_top && !odr_constructed_more(o))
                     return 0;
-                if (ber_dectag(o->bp, &cl, &tg, &cn, odr_max(o)) <= 0)
+                if (ber_dectag(o->op->bp, &cl, &tg, &cn, odr_max(o)) <= 0)
                     return 0;
             }
             else if (o->direction != ODR_DECODE)

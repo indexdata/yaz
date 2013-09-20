@@ -11,24 +11,25 @@
 #endif
 
 #include <string.h>
-#include <yaz/odr.h>
+#include "odr-priv.h"
 #include <yaz/zgdu.h>
 
 int z_GDU(ODR o, Z_GDU **p, int opt, const char *name)
 {
+    const char *buf = o->op->buf;
     if (o->direction == ODR_DECODE) {
         *p = (Z_GDU *) odr_malloc(o, sizeof(**p));
-        if (o->size > 10 && !memcmp(o->buf, "HTTP/", 5))
+        if (o->op->size > 10 && !memcmp(buf, "HTTP/", 5))
         {
             (*p)->which = Z_GDU_HTTP_Response;
             return yaz_decode_http_response(o, &(*p)->u.HTTP_Response);
 
         }
-        else if (o->size > 5 &&
-            o->buf[0] >= 0x20 && o->buf[0] < 0x7f
-            && o->buf[1] >= 0x20 && o->buf[1] < 0x7f
-            && o->buf[2] >= 0x20 && o->buf[2] < 0x7f
-            && o->buf[3] >= 0x20 && o->buf[3] < 0x7f)
+        else if (o->op->size > 5 &&
+            buf[0] >= 0x20 && buf[0] < 0x7f
+            && buf[1] >= 0x20 && buf[1] < 0x7f
+            && buf[2] >= 0x20 && buf[2] < 0x7f
+            && buf[3] >= 0x20 && buf[3] < 0x7f)
         {
             (*p)->which = Z_GDU_HTTP_Request;
             return yaz_decode_http_request(o, &(*p)->u.HTTP_Request);

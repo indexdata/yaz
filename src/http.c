@@ -10,7 +10,7 @@
 #include <config.h>
 #endif
 
-#include <yaz/odr.h>
+#include "odr-priv.h"
 #include <yaz/yaz-version.h>
 #include <yaz/yaz-iconv.h>
 #include <yaz/matchstr.h>
@@ -22,41 +22,43 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
 {
     int i = off;
     int chunked = 0;
+    const char *buf = o->op->buf;
+    int size = o->op->size;
 
     *headers = 0;
-    while (i < o->size-1 && o->buf[i] == '\n')
+    while (i < size-1 && buf[i] == '\n')
     {
         int po;
         i++;
-        if (o->buf[i] == '\r' && i < o->size-1 && o->buf[i+1] == '\n')
+        if (buf[i] == '\r' && i < size-1 && buf[i+1] == '\n')
         {
             i++;
             break;
         }
-        if (o->buf[i] == '\n')
+        if (buf[i] == '\n')
             break;
         for (po = i; ; i++)
         {
-            if (i == o->size)
+            if (i == size)
             {
                 o->error = OHTTP;
                 return 0;
             }
-            else if (o->buf[i] == ':')
+            else if (buf[i] == ':')
                 break;
         }
         *headers = (Z_HTTP_Header *) odr_malloc(o, sizeof(**headers));
         (*headers)->name = (char*) odr_malloc(o, i - po + 1);
-        memcpy ((*headers)->name, o->buf + po, i - po);
+        memcpy ((*headers)->name, buf + po, i - po);
         (*headers)->name[i - po] = '\0';
         i++;
-        while (i < o->size-1 && o->buf[i] == ' ')
+        while (i < size-1 && buf[i] == ' ')
             i++;
-        for (po = i; i < o->size-1 && !strchr("\r\n", o->buf[i]); i++)
+        for (po = i; i < size-1 && !strchr("\r\n", buf[i]); i++)
             ;
 
         (*headers)->value = (char*) odr_malloc(o, i - po + 1);
-        memcpy ((*headers)->value, o->buf + po, i - po);
+        memcpy ((*headers)->value, buf + po, i - po);
         (*headers)->value[i - po] = '\0';
 
         if (!yaz_strcasecmp((*headers)->name, "Transfer-Encoding")
@@ -64,11 +66,11 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             !yaz_strcasecmp((*headers)->value, "chunked"))
             chunked = 1;
         headers = &(*headers)->next;
-        if (i < o->size-1 && o->buf[i] == '\r')
+        if (i < size-1 && buf[i] == '\r')
             i++;
     }
     *headers = 0;
-    if (o->buf[i] != '\n')
+    if (buf[i] != '\n')
     {
         o->error = OHTTP;
         return 0;
@@ -80,28 +82,28 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         int off = 0;
 
         /* we know buffer will be smaller than o->size - i*/
-        *content_buf = (char*) odr_malloc(o, o->size - i);
+        *content_buf = (char*) odr_malloc(o, size - i);
 
         while (1)
         {
             /* chunk length .. */
             int chunk_len = 0;
-            for (; i  < o->size-2; i++)
-                if (yaz_isdigit(o->buf[i]))
+            for (; i  < size-2; i++)
+                if (yaz_isdigit(buf[i]))
                     chunk_len = chunk_len * 16 +
-                        (o->buf[i] - '0');
-                else if (yaz_isupper(o->buf[i]))
+                        (buf[i] - '0');
+                else if (yaz_isupper(buf[i]))
                     chunk_len = chunk_len * 16 +
-                        (o->buf[i] - ('A'-10));
-                else if (yaz_islower(o->buf[i]))
+                        (buf[i] - ('A'-10));
+                else if (yaz_islower(buf[i]))
                     chunk_len = chunk_len * 16 +
-                        (o->buf[i] - ('a'-10));
+                        (buf[i] - ('a'-10));
                 else
                     break;
             /* chunk extension ... */
-            while (o->buf[i] != '\r' && o->buf[i+1] != '\n')
+            while (buf[i] != '\r' && buf[i+1] != '\n')
             {
-                if (i >= o->size-2)
+                if (i >= size-2)
                 {
                     o->error = OHTTP;
                     return 0;
@@ -111,13 +113,13 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             i += 2;  /* skip CRLF */
             if (chunk_len == 0)
                 break;
-            if (chunk_len < 0 || off + chunk_len > o->size)
+            if (chunk_len < 0 || off + chunk_len > size)
             {
                 o->error = OHTTP;
                 return 0;
             }
             /* copy chunk .. */
-            memcpy (*content_buf + off, o->buf + i, chunk_len);
+            memcpy (*content_buf + off, buf + i, chunk_len);
             i += chunk_len + 2; /* skip chunk+CRLF */
             off += chunk_len;
         }
@@ -127,21 +129,21 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
     }
     else
     {
-        if (i > o->size)
+        if (i > size)
         {
             o->error = OHTTP;
             return 0;
         }
-        else if (i == o->size)
+        else if (i == size)
         {
             *content_buf = 0;
             *content_len = 0;
         }
         else
         {
-            *content_len = o->size - i;
+            *content_len = size - i;
             *content_buf = (char*) odr_malloc(o, *content_len + 1);
-            memcpy(*content_buf, o->buf + i, *content_len);
+            memcpy(*content_buf, buf + i, *content_len);
             (*content_buf)[*content_len] = '\0';
         }
     }
@@ -477,31 +479,33 @@ int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
 {
     int i, po;
     Z_HTTP_Response *hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
+    const char *buf = o->op->buf;
+    int size = o->op->size;
 
     *hr_p = hr;
     hr->content_buf = 0;
     hr->content_len = 0;
 
     po = i = 5;
-    while (i < o->size-2 && !strchr(" \r\n", o->buf[i]))
+    while (i < size-2 && !strchr(" \r\n", buf[i]))
         i++;
     hr->version = (char *) odr_malloc(o, i - po + 1);
     if (i - po)
-        memcpy(hr->version, o->buf + po, i - po);
+        memcpy(hr->version, buf + po, i - po);
     hr->version[i-po] = 0;
-    if (o->buf[i] != ' ')
+    if (buf[i] != ' ')
     {
         o->error = OHTTP;
         return 0;
     }
     i++;
     hr->code = 0;
-    while (i < o->size-2 && o->buf[i] >= '0' && o->buf[i] <= '9')
+    while (i < size-2 && buf[i] >= '0' && buf[i] <= '9')
     {
-        hr->code = hr->code*10 + (o->buf[i] - '0');
+        hr->code = hr->code*10 + (buf[i] - '0');
         i++;
     }
-    while (i < o->size-1 && o->buf[i] != '\n')
+    while (i < size-1 && buf[i] != '\n')
         i++;
     return decode_headers_content(o, i, &hr->headers,
                                   &hr->content_buf, &hr->content_len);
@@ -511,48 +515,50 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
 {
     int i, po;
     Z_HTTP_Request *hr = (Z_HTTP_Request *) odr_malloc(o, sizeof(*hr));
+    const char *buf = o->op->buf;
+    int size = o->op->size;
 
     *hr_p = hr;
 
     /* method .. */
-    for (i = 0; o->buf[i] != ' '; i++)
-        if (i >= o->size-5 || i > 30)
+    for (i = 0; buf[i] != ' '; i++)
+        if (i >= size-5 || i > 30)
         {
             o->error = OHTTP;
             return 0;
         }
     hr->method = (char *) odr_malloc(o, i+1);
-    memcpy (hr->method, o->buf, i);
+    memcpy (hr->method, buf, i);
     hr->method[i] = '\0';
     /* path */
     po = i+1;
-    for (i = po; o->buf[i] != ' '; i++)
-        if (i >= o->size-5)
+    for (i = po; buf[i] != ' '; i++)
+        if (i >= size-5)
         {
             o->error = OHTTP;
             return 0;
         }
     hr->path = (char *) odr_malloc(o, i - po + 1);
-    memcpy (hr->path, o->buf+po, i - po);
+    memcpy (hr->path, buf+po, i - po);
     hr->path[i - po] = '\0';
     /* HTTP version */
     i++;
-    if (i > o->size-5 || memcmp(o->buf+i, "HTTP/", 5))
+    if (i > size-5 || memcmp(buf+i, "HTTP/", 5))
     {
         o->error = OHTTP;
         return 0;
     }
     i+= 5;
     po = i;
-    while (i < o->size && !strchr("\r\n", o->buf[i]))
+    while (i < size && !strchr("\r\n", buf[i]))
         i++;
     hr->version = (char *) odr_malloc(o, i - po + 1);
-    memcpy(hr->version, o->buf + po, i - po);
+    memcpy(hr->version, buf + po, i - po);
     hr->version[i - po] = '\0';
     /* headers */
-    if (i < o->size-1 && o->buf[i] == '\r')
+    if (i < size-1 && buf[i] == '\r')
         i++;
-    if (o->buf[i] != '\n')
+    if (buf[i] != '\n')
     {
         o->error = OHTTP;
         return 0;
@@ -590,7 +596,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
 {
     char sbuf[80];
     Z_HTTP_Header *h;
-    int top0 = o->top;
+    int top0 = o->op->top;
 
     sprintf(sbuf, "HTTP/%s %d %s\r\n", hr->version,
             hr->code,
@@ -616,7 +622,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     if (o->direction == ODR_PRINT)
     {
         odr_printf(o, "-- HTTP response:\n");
-        dump_http_package(o, (const char *) o->buf + top0, o->top - top0);
+        dump_http_package(o, o->op->buf + top0, o->op->top - top0);
         odr_printf(o, "--\n");
     }
     return 1;
@@ -625,7 +631,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
 int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 {
     Z_HTTP_Header *h;
-    int top0 = o->top;
+    int top0 = o->op->top;
 
     odr_write(o, hr->method, strlen(hr->method));
     odr_write(o, " ", 1);
@@ -655,7 +661,7 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
     if (o->direction == ODR_PRINT)
     {
         odr_printf(o, "-- HTTP request:\n");
-        dump_http_package(o, (const char *) o->buf + top0, o->top - top0);
+        dump_http_package(o, o->op->buf + top0, o->op->top - top0);
         odr_printf(o, "--\n");
     }
     return 1;

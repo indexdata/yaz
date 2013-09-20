@@ -44,8 +44,8 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
     if (ODR_STACK_EMPTY(o))
     {
         odr_seek(o, ODR_S_SET, 0);
-        o->top = 0;
-        o->bp = o->buf;
+        o->op->top = 0;
+        o->op->bp = o->op->buf;
         odr_ber_tag->lclass = -1;
     }
     switch (o->direction)
@@ -76,7 +76,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
         if (odr_ber_tag->lclass < 0)
         {
             if ((odr_ber_tag->br =
-                 ber_dectag(o->bp, &odr_ber_tag->lclass,
+                 ber_dectag(o->op->bp, &odr_ber_tag->lclass,
                             &odr_ber_tag->ltag, &odr_ber_tag->lcons,
                             odr_max(o))) <= 0)
             {
@@ -87,7 +87,7 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
         }
         if (zclass == odr_ber_tag->lclass && tag == odr_ber_tag->ltag)
         {
-            o->bp += odr_ber_tag->br;
+            o->op->bp += odr_ber_tag->br;
             *constructed = odr_ber_tag->lcons;
             odr_ber_tag->lclass = -1;
             return 1;

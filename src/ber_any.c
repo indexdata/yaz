@@ -25,15 +25,15 @@ int ber_any(ODR o, Odr_any **p)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = completeBER(o->bp, odr_max(o))) <= 0)        /* FIX THIS */
+        if ((res = completeBER(o->op->bp, odr_max(o))) <= 0)        /* FIX THIS */
         {
             odr_seterror(o, OPROTO, 2);
             return 0;
         }
         (*p)->buf = (char *)odr_malloc(o, res);
-        memcpy((*p)->buf, o->bp, res);
+        memcpy((*p)->buf, o->op->bp, res);
         (*p)->len = res;
-        o->bp += res;
+        o->op->bp += res;
         return 1;
     case ODR_ENCODE:
         if (odr_write(o, (*p)->buf, (*p)->len) < 0)

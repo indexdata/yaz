@@ -31,19 +31,19 @@ int ber_boolean(ODR o, int *val)
             return 0;
         return 1;
     case ODR_DECODE:
-        if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
+        if ((res = ber_declen(o->op->bp, &len, odr_max(o))) < 0)
         {
             odr_seterror(o, OPROTO, 9);
             return 0;
         }
-        o->bp+= res;
+        o->op->bp+= res;
         if (len != 1 || odr_max(o) < len)
         {
             odr_seterror(o, OPROTO, 10);
             return 0;
         }
-        *val = *o->bp;
-        o->bp++;
+        *val = *o->op->bp;
+        o->op->bp++;
         return 1;
     case ODR_PRINT:
         return 1;

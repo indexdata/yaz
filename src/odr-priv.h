@@ -44,8 +44,7 @@ struct Odr_ber_tag {
     int lcons;
 };
 
-#define odr_max(o) ((o)->size - ((o)->bp - (o)->buf))
-#define odr_offset(o) ((o)->bp - (o)->buf)
+#define odr_max(o) ((o)->op->size - ((o)->op->bp - (o)->op->buf))
 
 /**
  * \brief stack for BER constructed items
@@ -82,6 +81,12 @@ struct odr_constack
  * \brief ODR private data
  */
 struct Odr_private {
+    char *buf;            /* memory base */
+    const char *bp;       /* position in buffer (decoding) */
+    int pos;              /* current position (encoding) */
+    int top;              /* top of buffer (max pos when encoding) */
+    int size;             /* current buffer size (encoding+decoding) */
+
     /* stack for constructed types (we above) */
     struct odr_constack *stack_first; /** first member of allocated stack */
     struct odr_constack *stack_top;   /** top of stack */
@@ -113,6 +118,8 @@ struct Odr_private {
 #define ODR_STACK_EMPTY(x) (!(x)->op->stack_top)
 #define ODR_STACK_NOT_EMPTY(x) ((x)->op->stack_top)
 
+#define odr_tell(o) ((o)->op->pos)
+
 /* Private macro.
  * write a single character at the current position - grow buffer if
  * necessary.
@@ -122,15 +129,15 @@ struct Odr_private {
 #define odr_putc(o, c) \
 ( \
     ( \
-        (o)->pos < (o)->size ? \
+        (o)->op->pos < (o)->op->size ? \
         ( \
-            (o)->buf[(o)->pos++] = (c), \
+            (o)->op->buf[(o)->op->pos++] = (c), \
             0 \
         ) : \
         ( \
             odr_grow_block((o), 1) == 0 ? \
             ( \
-                (o)->buf[(o)->pos++] = (c), \
+                (o)->op->buf[(o)->op->pos++] = (c), \
                 0 \
             ) : \
             ( \
@@ -140,9 +147,9 @@ struct Odr_private {
         ) \
     ) == 0 ? \
     ( \
-        (o)->pos > (o)->top ? \
+        (o)->op->pos > (o)->op->top ? \
         ( \
-            (o)->top = (o)->pos, \
+            (o)->op->top = (o)->op->pos, \
             0 \
         ) : \
         0 \

@@ -21,7 +21,7 @@ int odr_peektag(ODR o, int *zclass, int *tag, int *cons)
     }
     if (ODR_STACK_NOT_EMPTY(o) && !odr_constructed_more(o))
         return 0;
-    if (ber_dectag(o->bp, zclass, tag, cons, odr_max(o)) <= 0)
+    if (ber_dectag(o->op->bp, zclass, tag, cons, odr_max(o)) <= 0)
     {
         odr_seterror(o, OREQUIRED, 49);
         return 0;

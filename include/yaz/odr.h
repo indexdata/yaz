@@ -127,14 +127,6 @@ struct odr
 
     int error;            /* current error state (0==OK) */
 
-    char *buf;            /* memory handle */
-    int top;              /* top of buffer (max pos when encoding) */
-    int size;             /* current buffer size (encoding+decoding) */
-
-    int pos;              /* current position (encoding) */
-
-    const char *bp;       /* position in buffer (decoding) */
-
     NMEM mem;            /* memory handle for decoding (primarily) */
 
     struct Odr_private *op;
@@ -171,6 +163,7 @@ typedef struct odr_arm
 
 extern char *odr_errlist[];
 
+YAZ_EXPORT int odr_offset(ODR o);
 YAZ_EXPORT int odr_geterror(ODR o);
 YAZ_EXPORT int odr_geterrorx(ODR o, int *x);
 YAZ_EXPORT void odr_seterror(ODR o, int errorno, int errorid);
@@ -218,8 +211,6 @@ YAZ_EXPORT Odr_null *odr_nullval(void);
     ((mask)->bits[(num) >> 3] & (0X80 >> ((num) & 0X07)) ? 1 : 0) : 0)
 
 
-#define odr_tell(o) ((o)->pos)
-#define odr_offset(o) ((o)->bp - (o)->buf)
 #define odr_ok(o) (!(o)->error)
 #define odr_getmem(o) ((o)->mem)
 

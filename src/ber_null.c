@@ -33,7 +33,7 @@ int ber_null(ODR o)
             odr_seterror(o, OPROTO, 39);
             return 0;
         }
-        if (*(o->bp++) != 0X00)
+        if (*(o->op->bp++) != 0X00)
         {
             odr_seterror(o, OPROTO, 12);
             return 0;

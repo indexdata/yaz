@@ -83,7 +83,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
         o->op->stack_top = o->op->stack_first;
         assert(o->op->stack_top->prev == 0);
     }
-    o->op->stack_top->lenb = o->bp;
+    o->op->stack_top->lenb = o->op->bp;
     o->op->stack_top->len_offset = odr_tell(o);
     o->op->stack_top->name = name ? name : "?";
     if (o->direction == ODR_ENCODE)
@@ -100,7 +100,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
     }
     else if (o->direction == ODR_DECODE)
     {
-        if ((res = ber_declen(o->bp, &o->op->stack_top->len,
+        if ((res = ber_declen(o->op->bp, &o->op->stack_top->len,
                               odr_max(o))) < 0)
         {
             odr_seterror(o, OOTHER, 31);
@@ -108,7 +108,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
             return 0;
         }
         o->op->stack_top->lenlen = res;
-        o->bp += res;
+        o->op->bp += res;
         if (o->op->stack_top->len > odr_max(o))
         {
             odr_seterror(o, OOTHER, 32);
@@ -128,7 +128,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
         ODR_STACK_POP(o);
         return 0;
     }
-    o->op->stack_top->base = o->bp;
+    o->op->stack_top->base = o->op->bp;
     o->op->stack_top->base_offset = odr_tell(o);
     return 1;
 }
@@ -140,9 +140,9 @@ int odr_constructed_more(ODR o)
     if (ODR_STACK_EMPTY(o))
         return 0;
     if (o->op->stack_top->len >= 0)
-        return o->bp - o->op->stack_top->base < o->op->stack_top->len;
+        return o->op->bp - o->op->stack_top->base < o->op->stack_top->len;
     else
-        return (!(*o->bp == 0 && *(o->bp + 1) == 0));
+        return (!(*o->op->bp == 0 && *(o->op->bp + 1) == 0));
 }
 
 int odr_constructed_end(ODR o)
@@ -162,7 +162,7 @@ int odr_constructed_end(ODR o)
     case ODR_DECODE:
         if (o->op->stack_top->len < 0)
         {
-            if (*o->bp++ == 0 && *(o->bp++) == 0)
+            if (*o->op->bp++ == 0 && *(o->op->bp++) == 0)
             {
                 ODR_STACK_POP(o);
                 return 1;
@@ -173,7 +173,7 @@ int odr_constructed_end(ODR o)
                 return 0;
             }
         }
-        else if (o->bp - o->op->stack_top->base !=
+        else if (o->op->bp - o->op->stack_top->base !=
                  o->op->stack_top->len)
         {
             odr_seterror(o, OCONLEN, 36);

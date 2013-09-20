@@ -13,6 +13,7 @@
 #include <yaz/proto.h>
 
 #include <yaz/oid_db.h>
+#include "odr-priv.h"
 #define PRT_EXT_DEBUG 0
 
 #if PRT_EXT_DEBUG
@@ -227,13 +228,13 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
                 return 0;
 
             /* Save our decoding ODR members */
-            o_bp = o->bp;
-            o_buf = o->buf;
-            o_size = o->size;
+            o_bp = o->op->bp;
+            o_buf = o->op->buf;
+            o_size = o->op->size;
 
             /* Set up the OCTET STRING buffer */
-            o->bp = o->buf = oct->buf;
-            o->size = oct->len;
+            o->op->bp = o->op->buf = oct->buf;
+            o->op->size = oct->len;
 
             /* and decode that */
             r = (*type->fun)(o, &voidp, 0, 0);
@@ -241,9 +242,9 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
             (*p)->u.single_ASN1_type = (Odr_any*) voidp;
 
             /* Restore our decoding ODR member */
-            o->bp = o_bp;
-            o->buf = o_buf;
-            o->size = o_size;
+            o->op->bp = o_bp;
+            o->op->buf = o_buf;
+            o->op->size = o_size;
 
             return r && odr_sequence_end(o);
         }

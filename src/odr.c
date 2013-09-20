@@ -215,8 +215,8 @@ ODR odr_createmem(int direction)
         return 0;
     o->op = (struct Odr_private *) xmalloc(sizeof(*o->op));
     o->direction = direction;
-    o->buf = 0;
-    o->size = o->pos = o->top = 0;
+    o->op->buf = 0;
+    o->op->size = o->op->pos = o->op->top = 0;
     o->op->can_grow = 1;
     o->mem = nmem_create();
     o->op->enable_bias = 1;
@@ -237,9 +237,9 @@ void odr_reset(ODR o)
     }
 
     odr_seterror(o, ONONE, 0);
-    o->bp = o->buf;
+    o->op->bp = o->op->buf;
     odr_seek(o, ODR_S_SET, 0);
-    o->top = 0;
+    o->op->top = 0;
     o->op->t_class = -1;
     o->op->t_tag = -1;
     o->op->indent = 0;
@@ -258,8 +258,8 @@ void odr_reset(ODR o)
 void odr_destroy(ODR o)
 {
     nmem_destroy(o->mem);
-    if (o->buf && o->op->can_grow)
-       xfree(o->buf);
+    if (o->op->buf && o->op->can_grow)
+       xfree(o->op->buf);
     if (o->op->stream_close)
         o->op->stream_close(o->op->print);
     if (o->op->iconv_handle != 0)
@@ -272,19 +272,24 @@ void odr_destroy(ODR o)
 void odr_setbuf(ODR o, char *buf, int len, int can_grow)
 {
     odr_seterror(o, ONONE, 0);
-    o->bp = buf;
-    o->buf = buf;
+    o->op->bp = buf;
+    o->op->buf = buf;
     o->op->can_grow = can_grow;
-    o->top = o->pos = 0;
-    o->size = len;
+    o->op->top = o->op->pos = 0;
+    o->op->size = len;
 }
 
 char *odr_getbuf(ODR o, int *len, int *size)
 {
-    *len = o->top;
+    *len = o->op->top;
     if (size)
-        *size = o->size;
-    return (char*) o->buf;
+        *size = o->op->size;
+    return o->op->buf;
+}
+
+int odr_offset(ODR o)
+{
+    return o->op->bp - o->op->buf;
 }
 
 void odr_printf(ODR o, const char *fmt, ...)

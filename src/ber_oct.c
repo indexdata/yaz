@@ -27,15 +27,15 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
+        if ((res = ber_declen(o->op->bp, &len, odr_max(o))) < 0)
         {
             odr_seterror(o, OPROTO, 14);
             return 0;
         }
-        o->bp += res;
+        o->op->bp += res;
         if (cons)       /* fetch component strings */
         {
-            base = o->bp;
+            base = o->op->bp;
             while (odp_more_chunks(o, base, len))
                 if (!odr_octetstring(o, &p, 0, 0))
                     return 0;
@@ -54,9 +54,9 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
         }
         p->len = len;
         p->buf = odr_malloc(o, len + 1);
-        memcpy(p->buf, o->bp, len);
+        memcpy(p->buf, o->op->bp, len);
         p->buf[len] = '\0';
-        o->bp += len;
+        o->op->bp += len;
         return 1;
     case ODR_ENCODE:
         if ((res = ber_enclen(o, p->len, 5, 0)) < 0)

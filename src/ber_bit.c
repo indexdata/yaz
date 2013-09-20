@@ -25,15 +25,15 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = ber_declen(o->bp, &len, odr_max(o))) < 0)
+        if ((res = ber_declen(o->op->bp, &len, odr_max(o))) < 0)
         {
             odr_seterror(o, OPROTO, 4);
             return 0;
         }
-        o->bp += res;
+        o->op->bp += res;
         if (cons)       /* fetch component strings */
         {
-            base = o->bp;
+            base = o->op->bp;
             while (odp_more_chunks(o, base, len))
                 if (!odr_bitstring(o, &p, 0, 0))
                     return 0;
@@ -57,11 +57,11 @@ int ber_bitstring(ODR o, Odr_bitmask *p, int cons)
             odr_seterror(o, OOTHER, 7);
             return 0;
         }
-        o->bp++;      /* silently ignore the unused-bits field */
+        o->op->bp++;      /* silently ignore the unused-bits field */
         len--;
-        memcpy(p->bits + p->top + 1, o->bp, len);
+        memcpy(p->bits + p->top + 1, o->op->bp, len);
         p->top += len;
-        o->bp += len;
+        o->op->bp += len;
         return 1;
     case ODR_ENCODE:
         if ((res = ber_enclen(o, p->top + 2, 5, 0)) < 0)

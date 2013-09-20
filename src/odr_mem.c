@@ -80,46 +80,47 @@ int odr_grow_block(ODR b, int min_bytes)
 
     if (!b->op->can_grow)
         return -1;
-    if (!b->size)
+    if (!b->op->size)
         togrow = 1024;
     else
-        togrow = b->size;
+        togrow = b->op->size;
     if (togrow < min_bytes)
         togrow = min_bytes;
-    if (b->size && !(b->buf =
-                     (char *) xrealloc(b->buf, b->size += togrow)))
+    if (b->op->size && !(b->op->buf =
+                     (char *) xrealloc(b->op->buf, b->op->size += togrow)))
         abort();
-    else if (!b->size && !(b->buf = (char *) xmalloc(b->size = togrow)))
+    else if (!b->op->size && !(b->op->buf = (char *)
+                               xmalloc(b->op->size = togrow)))
         abort();
     return 0;
 }
 
 int odr_write(ODR o, const char *buf, int bytes)
 {
-    if (o->pos + bytes >= o->size && odr_grow_block(o, bytes))
+    if (o->op->pos + bytes >= o->op->size && odr_grow_block(o, bytes))
     {
         odr_seterror(o, OSPACE, 40);
         return -1;
     }
-    memcpy(o->buf + o->pos, buf, bytes);
-    o->pos += bytes;
-    if (o->pos > o->top)
-        o->top = o->pos;
+    memcpy(o->op->buf + o->op->pos, buf, bytes);
+    o->op->pos += bytes;
+    if (o->op->pos > o->op->top)
+        o->op->top = o->op->pos;
     return 0;
 }
 
 int odr_seek(ODR o, int whence, int offset)
 {
     if (whence == ODR_S_CUR)
-        offset += o->pos;
+        offset += o->op->pos;
     else if (whence == ODR_S_END)
-        offset += o->top;
-    if (offset > o->size && odr_grow_block(o, offset - o->size))
+        offset += o->op->top;
+    if (offset > o->op->size && odr_grow_block(o, offset - o->op->size))
     {
         odr_seterror(o, OSPACE, 41);
         return -1;
     }
-    o->pos = offset;
+    o->op->pos = offset;
     return 0;
 }
 

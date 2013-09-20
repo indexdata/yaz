@@ -37,12 +37,12 @@ int ber_integer(ODR o, Odr_int *val)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = ber_decinteger(o->bp, val, odr_max(o))) <= 0)
+        if ((res = ber_decinteger(o->op->bp, val, odr_max(o))) <= 0)
         {
             odr_seterror(o, OPROTO, 50);
             return 0;
         }
-        o->bp += res;
+        o->op->bp += res;
         return 1;
     case ODR_ENCODE:
         if ((res = ber_encinteger(o, *val)) < 0)

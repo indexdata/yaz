@@ -25,7 +25,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = ber_declen(o->bp, &len, odr_max(o))) < 1)
+        if ((res = ber_declen(o->op->bp, &len, odr_max(o))) < 1)
         {
             odr_seterror(o, OPROTO, 18);
             return 0;
@@ -35,7 +35,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             odr_seterror(o, OPROTO, 19);
             return 0;
         }
-        o->bp += res;
+        o->op->bp += res;
         if (len > odr_max(o))
         {
             odr_seterror(o, OPROTO, 20);
@@ -53,10 +53,10 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
                     return 0;
                 }
                 id <<= 7;
-                id |= *o->bp & 0X7F;
+                id |= *o->op->bp & 0X7F;
                 len--;
             }
-            while (*(o->bp++) & 0X80);
+            while (*(o->op->bp++) & 0X80);
 
             if (id < 0)
             {

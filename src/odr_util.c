@@ -32,16 +32,16 @@ int odp_more_chunks(ODR o, const char *base, int len)
         return 0;
     if (len < 0) /* indefinite length */
     {
-        if (*o->bp == 0 && *(o->bp + 1) == 0)
+        if (*o->op->bp == 0 && *(o->op->bp + 1) == 0)
         {
-            o->bp += 2;
+            o->op->bp += 2;
             return 0;
         }
         else
             return 1;
     }
     else
-        return o->bp - base < len;
+        return o->op->bp - base < len;
 }
 
 Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o)
