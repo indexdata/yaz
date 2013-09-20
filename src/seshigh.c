@@ -2681,7 +2681,9 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
         bsrr->errcode = 0;
         bsrr->errstring = NULL;
         bsrr->search_info = NULL;
-        bsrr->search_input = req->otherInfo;
+        bsrr->search_input = req->additionalSearchInfo;
+        if (!bsrr->search_input)
+            bsrr->search_input = req->otherInfo;
         bsrr->present_number = *req->mediumSetPresentNumber;
 
         if (assoc->server && assoc->server->cql_transform

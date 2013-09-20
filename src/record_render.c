@@ -169,6 +169,7 @@ static const char *return_record_wrbuf(WRBUF wrbuf, int *len,
     {
         if (oid_oidcmp(oid, yaz_oid_recsyn_xml)
             && oid_oidcmp(oid, yaz_oid_recsyn_application_xml)
+            && oid_oidcmp(oid, yaz_oid_recsyn_mab)
             && oid_oidcmp(oid, yaz_oid_recsyn_html))
         {
             const char *ret_buf = return_marc_record(
