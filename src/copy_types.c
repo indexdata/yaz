@@ -38,6 +38,7 @@ clone_z_type(NamePlusRecord)
 clone_z_type(RPNQuery)
 clone_z_type(Query)
 clone_z_type(RecordComposition)
+clone_z_type(OtherInformation)
 
 Z_RPNQuery *yaz_copy_z_RPNQuery(Z_RPNQuery *q, ODR out)
 {
