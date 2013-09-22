@@ -104,88 +104,84 @@ static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
     return ":";
 }
 
-struct solr_attr {
-    const char *index; 
-    const char *relation;
-    const char *term;
-    int  is_range;
-    const char *begin;
-    const char *close;
-};
+static int check_range(solr_transform_t ct, Z_Complex *q,
+                       Z_AttributesPlusTerm **p_apt1,
+                       Z_AttributesPlusTerm **p_apt2)
+{
+    Z_Operator *op = q->roperator;
+    if (op->which == Z_Operator_and &&
+        q->s1->which == Z_RPNStructure_simple &&
+        q->s2->which == Z_RPNStructure_simple &&
+        q->s1->u.simple->which == Z_Operand_APT &&
+        q->s2->u.simple->which == Z_Operand_APT)
+    {
+        Z_AttributesPlusTerm *apt1 = q->s1->u.simple->u.attributesPlusTerm;
+        Z_AttributesPlusTerm *apt2 = q->s2->u.simple->u.attributesPlusTerm;
+        const char *i1 = solr_lookup_reverse(ct, "index.", apt1->attributes);
+        const char *i2 = solr_lookup_reverse(ct, "index.", apt2->attributes);
+        const char *rel1 = solr_lookup_reverse(ct, "relation.",
+                                               apt1->attributes);
+        const char *rel2 = solr_lookup_reverse(ct, "relation.",
+                                               apt2->attributes);
+        if (!rel1)
+            rel1 = lookup_relation_index_from_attr(apt1->attributes);
+        if (!rel2)
+            rel2 = lookup_relation_index_from_attr(apt2->attributes);
+        if (!i1)
+            i1 = lookup_index_from_string_attr(apt1->attributes);
+        if (!i2)
+            i2 = lookup_index_from_string_attr(apt2->attributes);
+        if (i1 && i2 && !strcmp(i1, i2) && rel1 && rel2)
+        {
+            if ((rel1[0] == '>' || rel1[0] == 'g') &&
+                (rel2[0] == '<' || rel2[0] == 'l'))
+            {
+                *p_apt1 = apt1;
+                *p_apt2 = apt2;
+                return 1;
+            }
+            if ((rel2[0] == '>' || rel2[0] == 'g') &&
+                (rel1[0] == '<' || rel1[0] == 'l'))
+            {
+                *p_apt1 = apt2;
+                *p_apt2 = apt1;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 static int rpn2solr_attr(solr_transform_t ct,
-                         Z_AttributeList *attributes, WRBUF w, struct solr_attr *solr_attr)
+                         Z_AttributeList *attributes, WRBUF w)
 {
-    const char *relation  = solr_lookup_reverse(ct, "relation.", attributes);
-    const char *index     = solr_lookup_reverse(ct, "index.", attributes);
+    const char *index = solr_lookup_reverse(ct, "index.", attributes);
     const char *structure = solr_lookup_reverse(ct, "structure.", attributes);
-    /* Assume this is not a range */
-    solr_attr->is_range = 0;
 
     /* if transform (properties) do not match, we'll just use a USE string attribute (bug #2978) */
     if (!index)
         index = lookup_index_from_string_attr(attributes);
-
-    /* Attempt to fix bug #2978: Look for a relation attribute */
-    if (!relation)
-        relation = lookup_relation_index_from_attr(attributes);
-
     if (!index)
     {
-        solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
+        solr_transform_set_error(ct,
+                                 YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
         return -1;
     }
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
     {
-        solr_attr->index = index;
-        if (relation)
-        {
-            if (!strcmp(relation, "exact")) {
-                /* TODO Exact match does not exists in SOLR. Need to use specific field type  */
-                relation = ":";
-            }
-            else if (!strcmp(relation, "eq")) {
-                relation = ":";
-            }
-            else if (!strcmp(relation, "<")) {
-                solr_attr->is_range = 1;
-                solr_attr->begin = "[* TO ";
-                solr_attr->close = "}";
-            }
-            else if (!strcmp(relation, "le")) {
-                solr_attr->is_range = 2;
-                solr_attr->begin = "[* TO ";
-                solr_attr->close = "]";
-            }
-            else if (!strcmp(relation, "ge")) {
-                solr_attr->is_range = 4;
-                solr_attr->begin = "[";
-                solr_attr->close = " TO *]";
-            }
-            else if (!strcmp(relation, ">")) {
-                solr_attr->is_range = 5;
-                solr_attr->begin = "{";
-                solr_attr->close = " TO *]";
-            }
-            solr_attr->relation = relation;
-        }
-        // TODO is this valid for Solr? 
-        solr_attr->term = 0;
+        wrbuf_puts(w, index);
+        wrbuf_puts(w, ":");
         if (structure)
         {
             if (strcmp(structure, "*"))
             {
-               wrbuf_puts(w, "/");
-               wrbuf_puts(w, structure);
-               wrbuf_puts(w, " ");
-               solr_attr->index = 0;  
+                wrbuf_puts(w, "/");
+                wrbuf_puts(w, structure);
+                wrbuf_puts(w, " ");
             }
-
         }
     }
-    else 
-        solr_attr->index = 0;
     return 0;
 }
 
@@ -215,229 +211,199 @@ static Odr_int get_truncation(Z_AttributesPlusTerm *apt)
 
 #define SOLR_SPECIAL "+-&|!(){}[]^\"~*?:\\"
 
-static int rpn2solr_simple(solr_transform_t ct,
-                           Z_Operand *q, WRBUF w, struct solr_attr *solr_attr)
+static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
 {
-    int ret = 0;
-    if (q->which != Z_Operand_APT)
+    size_t lterm = 0;
+    const char *sterm = 0;
+    switch (term->which)
     {
-        ret = -1;
-        solr_transform_set_error(ct, YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM, 0);
+    case Z_Term_general:
+        lterm = term->u.general->len;
+        sterm = (const char *) term->u.general->buf;
+        break;
+    case Z_Term_numeric:
+        wrbuf_printf(w, ODR_INT_PRINTF, *term->u.numeric);
+        break;
+    case Z_Term_characterString:
+        sterm = term->u.characterString;
+        lterm = strlen(sterm);
+        break;
+    default:
+        solr_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
+        return -1;
     }
-    else
+
+    if (sterm)
     {
-        Z_AttributesPlusTerm *apt = q->u.attributesPlusTerm;
-        Z_Term *term = apt->term;
-        const char *sterm = 0;
-        size_t lterm = 0;
-        Odr_int trunc = get_truncation(apt);
+        size_t i;
+        int must_quote = 0;
 
-        wrbuf_rewind(w);
-        
-        ret = rpn2solr_attr(ct, apt->attributes, w, solr_attr);
-
-        if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
-            ;
-        else
+        for (i = 0 ; i < lterm; i++)
+            if (sterm[i] == ' ')
+                must_quote = 1;
+        if (must_quote)
+            wrbuf_puts(w, "\"");
+        for (i = 0 ; i < lterm; i++)
         {
-            solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
-            return -1;
-        }
-        switch (term->which)
-        {
-        case Z_Term_general:
-            lterm = term->u.general->len;
-            sterm = (const char *) term->u.general->buf;
-            break;
-        case Z_Term_numeric:
-            wrbuf_printf(w, ODR_INT_PRINTF, *term->u.numeric);
-            break;
-        case Z_Term_characterString:
-            sterm = term->u.characterString;
-            lterm = strlen(sterm);
-            break;
-        default:
-            ret = -1;
-            solr_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
-        }
-
-        if (sterm)
-        {
-            size_t i;
-            int must_quote = 0;
-
-            for (i = 0 ; i < lterm; i++)
-                if (sterm[i] == ' ')
-                    must_quote = 1;
-            if (must_quote)
-                wrbuf_puts(w, "\"");
-            for (i = 0 ; i < lterm; i++)
+            if (sterm[i] == '\\' && i < lterm - 1)
             {
-                if (sterm[i] == '\\' && i < lterm - 1)
-                {
-                    i++;
-                    if (strchr(SOLR_SPECIAL, sterm[i]))
-                        wrbuf_putc(w, '\\');
-                    wrbuf_putc(w, sterm[i]);
-                }
-                else if (sterm[i] == '?' && trunc == 104)
-                {
-                    wrbuf_putc(w, '*');
-                }
-                else if (sterm[i] == '#' && trunc == 104)
-                {
-                    wrbuf_putc(w, '?');
-                }
-                else if (strchr(SOLR_SPECIAL, sterm[i]))
-                {
+                i++;
+                if (strchr(SOLR_SPECIAL, sterm[i]))
                     wrbuf_putc(w, '\\');
-                    wrbuf_putc(w, sterm[i]);
-                }
-                else
-                    wrbuf_putc(w, sterm[i]);
+                wrbuf_putc(w, sterm[i]);
             }
-            if (trunc == 1)
-                wrbuf_puts(w, "*");
-            if (must_quote)
-                wrbuf_puts(w, "\"");
+            else if (sterm[i] == '?' && trunc == 104)
+            {
+                wrbuf_putc(w, '*');
+            }
+            else if (sterm[i] == '#' && trunc == 104)
+            {
+                wrbuf_putc(w, '?');
+            }
+            else if (strchr(SOLR_SPECIAL, sterm[i]))
+            {
+                wrbuf_putc(w, '\\');
+                wrbuf_putc(w, sterm[i]);
+            }
+            else
+                wrbuf_putc(w, sterm[i]);
         }
-        if (ret == 0) { 
-            solr_attr->term = wrbuf_cstr(w);
-        }
-        
+        if (trunc == 1)
+            wrbuf_puts(w, "*");
+        if (must_quote)
+            wrbuf_puts(w, "\"");
     }
-    return ret;
-};
-
-static int solr_write_range(void (*pr)(const char *buf, void *client_data),
-                            void *client_data,
-                            struct solr_attr *solr_attr_left, 
-                            struct solr_attr *solr_attr_right)
-{
-    pr(solr_attr_left->index, client_data);
-    pr(":", client_data);
-    pr(solr_attr_left->begin, client_data);
-    pr(solr_attr_left->term,  client_data);
-    pr(" TO ", client_data);
-    pr(solr_attr_right->term,  client_data);
-    pr(solr_attr_right->close, client_data);
-    return 0;
-}; 
-
-static int solr_write_structure(void (*pr)(const char *buf, void *client_data),
-                            void *client_data,
-                            struct solr_attr *solr_attr)
-{
-    if (solr_attr->index) {
-        pr(solr_attr->index, client_data);
-        pr(":", client_data);
-    }
-    if (solr_attr->is_range) {
-        pr(solr_attr->begin, client_data);
-        pr(solr_attr->term,  client_data);
-        pr(solr_attr->close, client_data);
-    }
-    else if (solr_attr->term) 
-        pr(solr_attr->term,  client_data);
-    return 0;
-}; 
-
-
-
-static int solr_write_and_or_range(void (*pr)(const char *buf, void *client_data),
-                             void *client_data,
-                             struct solr_attr *solr_attr_left, 
-                             struct solr_attr *solr_attr_right)
-{
-    if (solr_attr_left->is_range && 
-        solr_attr_right->is_range && 
-        !strcmp(solr_attr_left->index, solr_attr_right->index)) 
-    {
-        if (solr_attr_left->is_range > 3 && solr_attr_right->is_range < 3)
-            return solr_write_range(pr, client_data, solr_attr_left, solr_attr_right); 
-        else if (solr_attr_left->is_range < 3 && solr_attr_right->is_range > 3)
-            return solr_write_range(pr, client_data, solr_attr_right, solr_attr_left); 
-    }
-    solr_write_structure(pr, client_data, solr_attr_left);
-    pr(" AND ", client_data);
-    solr_write_structure(pr, client_data, solr_attr_right);
     return 0;
 }
 
-static void solr_attr_init(struct solr_attr *solr_attr) {
-    solr_attr->index = 0; 
-    solr_attr->relation = 0;
-    solr_attr->is_range = 0; 
-    solr_attr->term = 0; 
-}
+static int rpn2solr_simple(solr_transform_t ct,
+                           void (*pr)(const char *buf, void *client_data),
+                           void *client_data,
+                           Z_AttributesPlusTerm *apt, WRBUF w,
+                           Z_AttributesPlusTerm *apt2)
+ {
+     int ret = 0;
+     Z_Term *term = apt->term;
+     Odr_int trunc = get_truncation(apt);
+     const char *relation2 = 0;
+     const char *relation1 = solr_lookup_reverse(ct, "relation.",
+                                                 apt->attributes);
+     /* Attempt to fix bug #2978: Look for a relation attribute */
+     if (!relation1)
+         relation1 = lookup_relation_index_from_attr(apt->attributes);
+     if (!relation1)
+     {
+         solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE, 0);
+         return -1;
+     }
+     if (apt2)
+     {
+         relation2 = solr_lookup_reverse(ct, "relation.",
+                                         apt2->attributes);
+         if (!relation2)
+             relation2 = lookup_relation_index_from_attr(apt2->attributes);
+     }
+     wrbuf_rewind(w);
+     ret = rpn2solr_attr(ct, apt->attributes, w);
+     if (ret)
+         return ret;
+     if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
+             ;
+     else
+     {
+         solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
+         return -1;
+     }
+
+     if (!relation1)
+         ret = emit_term(ct, w, term, trunc);
+     else if (relation1[0] == '<' || relation1[0] == 'l')
+     {
+         wrbuf_puts(w, "[* TO ");
+         ret = emit_term(ct, w, term, trunc);
+         if (!strcmp(relation1, "le") || !strcmp(relation1, "<="))
+             wrbuf_puts(w, "]");
+         else
+             wrbuf_puts(w, "}");
+     }
+     else if (relation1[0] == '>' || relation1[0] == 'g')
+     {
+         if (!strcmp(relation1, ">=") || !strcmp(relation1, "ge"))
+             wrbuf_puts(w, "[");
+         else
+             wrbuf_puts(w, "{");
+         ret = emit_term(ct, w, term, trunc);
+         wrbuf_puts(w, " TO ");
+         if (apt2)
+         {
+             emit_term(ct, w, apt2->term, 0);
+             if (!relation2 || !strcmp(relation2, "<=") ||
+                 !strcmp(relation2, "le"))
+                 wrbuf_puts(w, "]");
+             else
+                 wrbuf_puts(w, "}");
+         }
+         else
+             wrbuf_puts(w, "*]");
+     }
+     else
+         ret = emit_term(ct, w, term, trunc);
+     if (ret == 0)
+         pr(wrbuf_cstr(w), client_data);
+     return ret;
+ }
 
 
 static int rpn2solr_structure(solr_transform_t ct,
                               void (*pr)(const char *buf, void *client_data),
-                              void *client_data,
+                               void *client_data,
                               Z_RPNStructure *q, int nested,
-                              WRBUF wa, struct solr_attr *solr_attr)
+                              WRBUF w)
 {
-    if (q->which == Z_RPNStructure_simple) {
-        solr_attr_init(solr_attr);
-        return rpn2solr_simple(ct, q->u.simple, wa, solr_attr);
+    if (q->which == Z_RPNStructure_simple)
+    {
+        if (q->u.simple->which != Z_Operand_APT)
+        {
+            solr_transform_set_error(
+                ct, YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM, 0);
+            return -1;
+        }
+        else
+            return rpn2solr_simple(ct, pr, client_data,
+                                   q->u.simple->u.attributesPlusTerm, w, 0);
     }
     else
     {
         Z_Operator *op = q->u.complex->roperator;
+        Z_AttributesPlusTerm *apt1, *apt2;
         int r;
-        struct solr_attr solr_attr_left, solr_attr_right;
-        WRBUF w_left = wrbuf_alloc();
-        WRBUF w_right = wrbuf_alloc();
 
+        if (check_range(ct, q->u.complex, &apt1, &apt2))
+            return rpn2solr_simple(ct, pr, client_data, apt1, w, apt2);
         if (nested)
             pr("(", client_data);
 
-        solr_attr_init(&solr_attr_left);
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w_left, &solr_attr_left);
-
-
-        if (r) {
-            wrbuf_destroy(w_left);
+        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
+        if (r)
             return r;
-        }
-        solr_attr_init(&solr_attr_right);
-
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w_right, &solr_attr_right);
-        if (r) {
-            wrbuf_destroy(w_left);
-            wrbuf_destroy(w_right);
-            return r;
-        }
-
         switch(op->which)
         {
         case  Z_Operator_and:
-            solr_write_and_or_range(pr, client_data, &solr_attr_left, &solr_attr_right);
+            pr(" AND ", client_data);
             break;
         case  Z_Operator_or:
-            solr_write_structure(pr, client_data, &solr_attr_left);
             pr(" OR ", client_data);
-            solr_write_structure(pr, client_data, &solr_attr_right);
             break;
         case  Z_Operator_and_not:
-            solr_write_structure(pr, client_data, &solr_attr_left);
             pr(" AND NOT ", client_data);
-            solr_write_structure(pr, client_data, &solr_attr_right);
             break;
         case  Z_Operator_prox:
             solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH, 0);
-            wrbuf_destroy(w_left);
-            wrbuf_destroy(w_right);
             return -1;
         }
-
+        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w);
         if (nested)
             pr(")", client_data);
-        
-        solr_attr_init(solr_attr);
-        wrbuf_destroy(w_left);
-        wrbuf_destroy(w_right);
         return r;
     }
 }
@@ -449,11 +415,8 @@ int solr_transform_rpn2solr_stream(solr_transform_t ct,
 {
     int r;
     WRBUF w = wrbuf_alloc();
-    struct solr_attr solr_attr;
     solr_transform_set_error(ct, 0, 0);
-    solr_attr_init(&solr_attr);
-    r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w, &solr_attr);
-    solr_write_structure(pr, client_data, &solr_attr);
+    r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w);
     wrbuf_destroy(w);
     return r;
 }

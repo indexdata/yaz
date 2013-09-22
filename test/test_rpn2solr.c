@@ -51,6 +51,7 @@ static void tst1(void)
 {
     solr_transform_t ct = solr_transform_create();
 
+    YAZ_CHECK(compare(ct, "@or a @and b c", "a OR (b AND c)"));
     YAZ_CHECK(compare(ct, "abc", "abc"));
     YAZ_CHECK(compare(ct, "\"a b c\"", "\"a b c\""));
     YAZ_CHECK(compare(ct, "@not a b", "a AND NOT b"));
