@@ -232,6 +232,7 @@ static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
         solr_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
         return -1;
     }
+
     if (sterm)
     {
         size_t i;
