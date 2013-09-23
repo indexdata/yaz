@@ -62,8 +62,29 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type)
 {
     Z_SRW_PDU *sr = yaz_srw_get_pdu(c->odr_out, type, c->sru_version);
-    sr->username = c->user;
-    sr->password = c->password;
+    if (c->url_authentication && c->user)
+    {
+        Z_SRW_extra_arg **ea = &sr->extra_args;
+        while (*ea)
+            ea = &(*ea)->next;
+        *ea = (Z_SRW_extra_arg *) odr_malloc(c->odr_out, sizeof(**ea));
+        (*ea)->name = "x-username";
+        (*ea)->value = c->user;
+        ea = &(*ea)->next;
+        if (c->password)
+        {
+            *ea = (Z_SRW_extra_arg *) odr_malloc(c->odr_out, sizeof(**ea));
+            (*ea)->name = "x-password";
+            (*ea)->value = c->password;
+            ea = &(*ea)->next;
+        }
+        *ea = 0;
+    }
+    else
+    {
+        sr->username = c->user;
+        sr->password = c->password;
+    }
     return sr;
 }
 #endif

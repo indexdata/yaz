@@ -287,6 +287,7 @@ ZOOM_API(ZOOM_connection)
     c->user = 0;
     c->group = 0;
     c->password = 0;
+    c->url_authentication = 0;
 
     c->maximum_record_size = 0;
     c->preferred_message_size = 0;
@@ -525,9 +526,14 @@ ZOOM_API(void)
     val = ZOOM_options_get(c->options, "password");
     if (!val)
         val = ZOOM_options_get(c->options, "pass");
-
     if (val && *val)
         c->password = xstrdup(val);
+
+    val = ZOOM_options_get(c->options, "authenticationMode");
+    if (val && !strcmp(val, "url"))
+        c->url_authentication = 1;
+    else
+        c->url_authentication = 0;
 
     c->maximum_record_size =
         ZOOM_options_get_int(c->options, "maximumRecordSize", 64*1024*1024);
