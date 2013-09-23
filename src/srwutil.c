@@ -1101,6 +1101,9 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args)
         Z_SRW_extra_arg **ea = &sr->extra_args;
         yaz_uri_to_array(extra_args, odr, &name, &val);
 
+        /** append rather than override */
+        while (*ea)
+            ea = &(*ea)->next;
         while (*name)
         {
             *ea = (Z_SRW_extra_arg *) odr_malloc(odr, sizeof(**ea));
