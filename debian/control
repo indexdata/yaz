@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 5),
 	libgnutls-dev,
 	libreadline-dev|libreadline5-dev,
 	libwrap0-dev,
-	libicu36-dev | libicu-dev
+	libicu-dev
 
 Package: libyaz4
 Section: libs
@@ -55,7 +55,7 @@ Description: documentation for the Z39.50 toolkit
 Package: libyaz4-dev
 Depends: libyaz4 (= ${Source-Version}),
 	libxslt1-dev,
-	libicu36-dev|libicu-dev,
+	libicu-dev,
 	tcl8.3|tclsh
 Provides: libyaz-dev
 Replaces: libyaz-dev
