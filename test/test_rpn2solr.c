@@ -64,7 +64,7 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@or a @and b c", "a OR (b AND c)"));
     YAZ_CHECK(compare(ct, "@or @and a b @and c d", "(a AND b) OR (c AND d)"));
     YAZ_CHECK(compare(ct, "@or @or a b @or c d", "(a OR b) OR (c OR d)"));
-    YAZ_CHECK(compare(ct, "@or @or @or a b @or c d @or e f", "(a OR b) OR (c OR d)"));
+    YAZ_CHECK(compare(ct, "@or @or @or a b @or c d @or e f", "((a OR b) OR (c OR d)) OR (e OR f)"));
     YAZ_CHECK(compare(ct, "@and @and a b @and c d", "(a AND b) AND (c AND d)"));
     YAZ_CHECK(compare(ct, "@attr 1=field abc", "field:abc"));
     YAZ_CHECK(compare(ct, "@attr 1=field \"a b c\"", "field:\"a b c\""));
