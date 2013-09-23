@@ -1,3 +1,12 @@
+New ZOOM setting, authenticationMode, which allows authentication
+paramters to be encoded in the URL rather than via HTTP Basic auth.
+YAZ-686
+
+rpn2solr: fix nested AND/OR handling. YAZ-685
+
+Add comparison routines for some Z-types, such as NamePlusRecord,
+RPNQuery, Query, RecordComposition and OtherInformation.
+
 --- 4.2.67 2013/09/19 
 
 Don't decode MAB as MARC. Just like we don't attempt to decode
