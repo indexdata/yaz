@@ -1,3 +1,5 @@
+--- 4.2.68 2013/09/23 
+
 GFS: pass additionalSearchInfo to search memeber search_input if
 given. Otherwise pass otherInfo. Request for facets and other search
 related things will be passed there in future versions of YAZ.
