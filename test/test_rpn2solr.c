@@ -39,7 +39,10 @@ static int compare(solr_transform_t ct, const char *pqf, const char *solr)
             if (solr && !strcmp(wrbuf_cstr(w), solr))
                 ret = 1;
             else
-                yaz_log(YLOG_LOG, "Exp: %s", solr);
+            {
+                yaz_log(YLOG_WARN, " expected: %s", solr ? solr : "null");
+                yaz_log(YLOG_WARN, " got:      %s", wrbuf_cstr(w));
+            }
         }
     }
     wrbuf_destroy(w);
@@ -57,6 +60,11 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@and @or a b c", "(a OR b) AND c"));
     YAZ_CHECK(compare(ct, "@and a b", "a AND b"));
     YAZ_CHECK(compare(ct, "@or a b", "a OR b"));
+    YAZ_CHECK(compare(ct, "@or a @and b c", "a OR (b AND c)"));
+    YAZ_CHECK(compare(ct, "@or @and a b @and c d", "(a AND b) OR (c AND d)"));
+    YAZ_CHECK(compare(ct, "@or @or a b @or c d", "(a OR b) OR (c OR d)"));
+    YAZ_CHECK(compare(ct, "@or @or @or a b @or c d @or e f", "(a OR b) OR (c OR d)"));
+    YAZ_CHECK(compare(ct, "@and @and a b @and c d", "(a AND b) AND (c AND d)"));
     YAZ_CHECK(compare(ct, "@attr 1=field abc", "field:abc"));
     YAZ_CHECK(compare(ct, "@attr 1=field \"a b c\"", "field:\"a b c\""));
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", 0)); /* should fail */
@@ -134,7 +142,6 @@ static void tst2(void)
     YAZ_CHECK(compare(ct, "@attr 1=4 @attr 4=1 @attr 6=1 abc", "dc.title:abc"));
 
     YAZ_CHECK(compare(ct, "@attr 1=1016 abc", "abc"));
-
     /* Date check */ 
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=1 1980", "dc.date:[* TO 1980}"));
     YAZ_CHECK(compare(ct, "@attr 1=30 @attr 2=2 1980", "dc.date:[* TO 1980]"));
