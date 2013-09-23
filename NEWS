@@ -1,3 +1,7 @@
+GFS: pass additionalSearchInfo to search memeber search_input if
+given. Otherwise pass otherInfo. Request for facets and other search
+related things will be passed there in future versions of YAZ.
+
 New ZOOM setting, authenticationMode, which allows authentication
 paramters to be encoded in the URL rather than via HTTP Basic auth.
 YAZ-686
