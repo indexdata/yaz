@@ -190,6 +190,9 @@ ZOOM_options_set_int(opt, name, value)
         password</entry><entry>Authentication password.
        </entry><entry>none</entry></row>
       <row><entry>
+        authenticationMode</entry><entry>How authentication is encoded.
+       </entry><entry>basic</entry></row>
+      <row><entry>
         host</entry><entry>Target host. This setting is "read-only".
         It's automatically set internally when connecting to a target.
        </entry><entry>none</entry></row>
@@ -390,9 +393,9 @@ ZOOM_options_set_int(opt, name, value)
    <sect2 id="zoom.sru.init.behavior">
     <title>SRU/Solr Protocol behavior</title>
     <para>
-     The HTTP based protocols (SRU, SRW, Solr) doesn't feature an Inititialize Request, so
-     the connection phase merely establishes a TCP/IP connection
-     with the SOAP service.
+     The HTTP based protocols (SRU, SRW, Solr) doesn't feature an
+     Inititialize Request, so  the connection phase merely establishes a
+     TCP/IP connection with the HTTP server.
     </para>
     <para>Most of the ZOOM connection options do not
      affect SRU/Solr and they are ignored. However, future versions
@@ -402,6 +405,19 @@ ZOOM_options_set_int(opt, name, value)
     <para>
      The <literal>charset</literal> is used in the Content-Type header
      of HTTP requests.
+    </para>
+    <para>
+     Setting <literal>authentcationMode</literal> specifies how
+     authentication parameters are encoded for HTTP. The default is
+     "<literal>basic</literal>" where <literal>user</literal> and
+     <literal>password</literal> are encoded by using HTTP basic
+     authentication.
+     </para>
+    <para>
+     If <literal>authentcationMode</literal> is "<literal>url</literal>", then
+     user and password are encoded in the URL by parameters
+     <literal>x-username</literal> and <literal>x-password</literal> as
+     given by the SRU standard.
     </para>
    </sect2>
   </sect1>

@@ -91,6 +91,7 @@ struct ZOOM_connection_p {
     char *user;
     char *group;
     char *password;
+    int url_authentication;
 
     int async;
     int support_named_resultsets;
