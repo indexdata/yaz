@@ -841,6 +841,50 @@ static void print_record(const char *buf, size_t len)
         printf("\n");
 }
 
+static void print_mab_record(const char *buf, size_t len)
+{
+    size_t i;
+    size_t last_linebreak = 0;
+    size_t last_subfield  = 0;
+    for (i = 0; i < len; i++)
+    {
+        // line break after header
+        if ( i == 24 )
+        {
+            printf("\n");
+            last_linebreak = i - 1;
+        }
+
+        // space between field and content
+        if ( i > 24 && i - last_linebreak == 5 )
+            printf(" ");
+
+        // space after subfield
+        if ( last_subfield != 0 && i - last_subfield == 2 )
+            printf(" ");
+
+        if ((buf[i] <= 126 && buf[i] >= 32) || strchr("\n\r\t\f", buf[i]))
+            printf("%c", buf[i]);
+        else if ( buf[i] == 29 ) // record separator
+            printf("\n");
+        else if ( buf[i] == 30 ) // field separator
+        {
+            printf("\n");
+            last_linebreak = i;
+        }
+        else if ( buf[i] == 31 ) // subfield
+        {
+            // space before subfields; except first one
+            if ( i > 24 && i - last_linebreak > 5 )
+                printf(" ");
+            printf("$");
+            last_subfield = i;
+        }
+        else
+            printf("\\X%02X", ((const unsigned char *)buf)[i]);
+    }
+}
+
 static void print_xml_record(const char *buf, size_t len)
 {
     int has_printed = 0;
@@ -929,7 +973,7 @@ static void display_record(Z_External *r)
         }
         else if (!oid_oidcmp(oid, yaz_oid_recsyn_mab))
         {
-            print_record(octet_buf, octet_len);
+            print_mab_record(octet_buf, octet_len);
         }
         else
         {
