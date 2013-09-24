@@ -340,7 +340,8 @@ Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
     return p;
 }
 
-Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
+Z_GDU *z_get_HTTP_Response_server(ODR o, int code, const char *details,
+                                  const char *server, const char *server_url)
 {
     Z_GDU *p = (Z_GDU *) odr_malloc(o, sizeof(*p));
     Z_HTTP_Response *hres;
@@ -353,8 +354,7 @@ Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
     hres->content_buf = 0;
     hres->code = code;
     hres->version = "1.1";
-    z_HTTP_header_add(o, &hres->headers, "Server",
-                      "YAZ/" YAZ_VERSION);
+    z_HTTP_header_add(o, &hres->headers, "Server", server);
     if (code != 200)
     {
         const char *http_err = z_HTTP_errmsg(code);
@@ -366,13 +366,13 @@ Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
                 " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
                 "<HTML>\n"
                 " <HEAD>\n"
-                "  <TITLE>YAZ " YAZ_VERSION "</TITLE>\n"
+                "  <TITLE>%s</TITLE>\n"
                 " </HEAD>\n"
                 " <BODY>\n"
-                "  <P><A HREF=\"http://www.indexdata.com/yaz/\">YAZ</A> "
-                YAZ_VERSION "</P>\n"
+                "  <P><A HREF=\"%s\">%s</A></P>\n"
                 "  <P>Error: %d</P>\n"
-                "  <P>Description: %s</P>\n", code, http_err);
+                "  <P>Description: %s</P>\n", server, server_url, server,
+                code, http_err);
         if (details)
         {
             sprintf(hres->content_buf + strlen(hres->content_buf),
@@ -385,6 +385,12 @@ Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
         z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
     }
     return p;
+}
+
+Z_GDU *z_get_HTTP_Response_details(ODR o, int code, const char *details)
+{
+    return z_get_HTTP_Response_server(o, code, details, "YAZ/" YAZ_VERSION,
+                                      "http://www.indexdata.com/yaz");
 }
 
 Z_GDU *z_get_HTTP_Response(ODR o, int code)

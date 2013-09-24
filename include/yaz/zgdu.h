@@ -94,6 +94,10 @@ YAZ_EXPORT const char *z_HTTP_errmsg(int code);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Response(ODR o, int code);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Response_details(ODR o, int code,
                                               const char *details);
+YAZ_EXPORT Z_GDU *z_get_HTTP_Response_server(ODR o,
+                                             int code, const char *details,
+                                             const char *server,
+                                             const char *server_url);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
                                                const char *host,
