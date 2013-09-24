@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     char *query = 0;
     char *fname = 0;
     int reverse = 0;
-    int verbose = 1;
+    int verbose = 0
     int do_strict = 0;
 
     int ret;
@@ -73,9 +73,14 @@ int main(int argc, char **argv)
 
     if (reverse)
     {
+        char buf[1024];
+
         if (!query)
-            usage();
-        else
+        {
+            if (fgets(buf, sizeof buf, stdin))
+                query = buf;
+        }
+        if (query)
         {
             ODR odr = odr_createmem(ODR_ENCODE);
             YAZ_PQF_Parser pp = yaz_pqf_create();
