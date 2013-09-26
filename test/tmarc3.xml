@@ -1,6 +1,6 @@
 <collection xmlns="http://www.indexdata.com/turbomarc">
 <r>
-<!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
+<!-- Length implementation at offset 22 should hold a number. Assuming 0 -->
   <l>00914naa a2200337   450 </l>
   <d001 i1=" " i2=" ">
     <sa>a00001508</sa>
