@@ -371,53 +371,48 @@ void yaz_marc_set_leader(yaz_marc_t mt, const char *leader_c,
     check_ascii(mt, leader, 7, 'a');
     check_ascii(mt, leader, 8, '#');
     check_ascii(mt, leader, 9, '#');
-    if (!atoi_n_check(leader+10, 1, indicator_length))
+    if (!atoi_n_check(leader+10, 1, indicator_length) || *indicator_length == 0)
     {
-        yaz_marc_cprintf(mt,
-                         "Indicator length at offset 10 should hold a digit."
-                         " Assuming 2");
+        yaz_marc_cprintf(mt, "Indicator length at offset 10 should"
+                         " hold a number 1-9. Assuming 2");
         leader[10] = '2';
         *indicator_length = 2;
     }
-    if (!atoi_n_check(leader+11, 1, identifier_length))
+    if (!atoi_n_check(leader+11, 1, identifier_length) || *identifier_length == 0)
     {
-        yaz_marc_cprintf(mt,
-                         "Identifier length at offset 11 should hold a digit."
-                         " Assuming 2");
+        yaz_marc_cprintf(mt, "Identifier length at offset 11 should "
+                         " hold a number 1-9. Assuming 2");
         leader[11] = '2';
         *identifier_length = 2;
     }
     if (!atoi_n_check(leader+12, 5, base_address))
     {
-        yaz_marc_cprintf(mt,
-                         "Base address at offsets 12..16 should hold a number."
-                         " Assuming 0");
+        yaz_marc_cprintf(mt, "Base address at offsets 12..16 should"
+                         " hold a number. Assuming 0");
         *base_address = 0;
     }
     check_ascii(mt, leader, 17, '#');
     check_ascii(mt, leader, 18, '#');
     check_ascii(mt, leader, 19, '#');
-    if (!atoi_n_check(leader+20, 1, length_data_entry))
+    if (!atoi_n_check(leader+20, 1, length_data_entry) ||
+        *length_data_entry < 3)
     {
-        yaz_marc_cprintf(mt,
-                         "Length data entry at offset 20 should hold a digit."
-                         " Assuming 4");
+        yaz_marc_cprintf(mt, "Length data entry at offset 20 should"
+                         " hold a number 3-9. Assuming 4");
         *length_data_entry = 4;
         leader[20] = '4';
     }
-    if (!atoi_n_check(leader+21, 1, length_starting))
+    if (!atoi_n_check(leader+21, 1, length_starting) || *length_starting < 4)
     {
-        yaz_marc_cprintf(mt,
-                         "Length starting at offset 21 should hold a digit."
-                         " Assuming 5");
+        yaz_marc_cprintf(mt, "Length starting at offset 21 should"
+                         " hold a number 4-9. Assuming 5");
         *length_starting = 5;
         leader[21] = '5';
     }
     if (!atoi_n_check(leader+22, 1, length_implementation))
     {
-        yaz_marc_cprintf(mt,
-                         "Length implementation at offset 22 should hold a digit."
-                         " Assuming 0");
+        yaz_marc_cprintf(mt, "Length implementation at offset 22 should"
+                         " hold a number. Assuming 0");
         *length_implementation = 0;
         leader[22] = '0';
     }
