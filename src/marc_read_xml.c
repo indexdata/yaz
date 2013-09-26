@@ -185,6 +185,7 @@ static int yaz_marc_read_xml_leader(yaz_marc_t mt, const xmlNode **ptr_p,
                 for(; p; p = p->next)
                     if (p->type == XML_TEXT_NODE)
                         leader = (const char *) p->content;
+                ptr = ptr->next;
             }
             break;
         }
@@ -415,9 +416,9 @@ int yaz_marc_read_xml(yaz_marc_t mt, const xmlNode *ptr)
     switch (format)
     {
     case YAZ_MARC_MARCXML:
-        return yaz_marc_read_xml_fields(mt, ptr->next, indicator_length);
+        return yaz_marc_read_xml_fields(mt, ptr, indicator_length);
     case YAZ_MARC_TURBOMARC:
-        return yaz_marc_read_turbo_xml_fields(mt, ptr->next, indicator_length);
+        return yaz_marc_read_turbo_xml_fields(mt, ptr, indicator_length);
     }
     return -1;
 }
