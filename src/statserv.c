@@ -1026,7 +1026,7 @@ static void *new_session(void *vp)
     a = 0;
 #endif
     yaz_log_xml_errors(0, YLOG_WARN);
-    yaz_log(log_session, "Session - OK %d %s %ld",
+    yaz_log(log_session, "Session - OK %d %s PID=%ld",
             no_sessions, a ? a : "[Unknown]", (long) getpid());
     if (max_sessions && no_sessions >= max_sessions)
         control_block.one_shot = 1;
@@ -1102,8 +1102,8 @@ static int add_listener(char *where, int listen_id)
     else
         mode = "static";
 
-    yaz_log(log_server, "Adding %s listener on %s id=%d", mode, where,
-            listen_id);
+    yaz_log(log_server, "Adding %s listener on %s id=%d PID=%ld", mode, where,
+            listen_id, (long) getpid());
 
     l = cs_create_host(where, 2, &ap);
     if (!l)
@@ -1205,6 +1205,14 @@ static void daemon_handler(void *data)
     iochan_event_loop(pListener);
 }
 
+#ifndef WIN32
+static void normal_stop_handler(int num)
+{
+    yaz_log(log_server, "Received SIGTERM. PID=%ld", (long) getpid());
+    exit(0);
+}
+#endif
+
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     char sep;
@@ -1257,8 +1265,10 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
         return 1;
     if (s)
         yaz_sc_running(s);
-    yaz_log(YLOG_DEBUG, "Entering event loop.");
 
+#ifndef WIN32
+    signal(SIGTERM, normal_stop_handler);
+#endif
     yaz_daemon(programname,
                (control_block.background ? YAZ_DAEMON_FORK : 0),
                daemon_handler, &pListener,
