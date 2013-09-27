@@ -133,8 +133,7 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
             int type = xmlTextReaderNodeType(reader);
             if (type == XML_READER_TYPE_ELEMENT)
             {
-                const char *name = (const char *)
-                    xmlTextReaderLocalName(reader);
+                char *name = (char *) xmlTextReaderLocalName(reader);
                 if (!strcmp(name, "record") || !strcmp(name, "r"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
@@ -158,8 +157,10 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                         wrbuf_rewind(wrbuf);
                     }
                 }
+                xmlFree(name);
             }
         }
+        xmlFreeTextReader(reader);
     }
 #else
     xmlDocPtr doc = xmlParseFile(fname);
