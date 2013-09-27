@@ -65,7 +65,7 @@ YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
 /** \brief tests whether conversion is handled by YAZ' iconv or system iconv */
 YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
 
-YAZ_EXPORT unsigned long yaz_read_UTF8_char(unsigned char *inp,
+YAZ_EXPORT unsigned long yaz_read_UTF8_char(const unsigned char *inp,
                                             size_t inbytesleft,
                                             size_t *no_read,
                                             int *error);

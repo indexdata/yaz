@@ -38,7 +38,7 @@ static size_t init_utf8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     return 0;
 }
 
-unsigned long yaz_read_UTF8_char(unsigned char *inp,
+unsigned long yaz_read_UTF8_char(const unsigned char *inp,
                                  size_t inbytesleft, size_t *no_read,
                                  int *error)
 {

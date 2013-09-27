@@ -464,6 +464,15 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
         }
         return 1; /* giving up */
     }
+    else
+    {
+        int error = 0;
+        size_t no_read = 0;
+        (void) yaz_read_UTF8_char((const unsigned char *) buf, strlen(buf),
+                                  &no_read, &error);
+        if (error == 0 && no_read > 0)
+            return no_read;
+    }
     return 1; /* we don't know */
 }
 
