@@ -357,7 +357,6 @@ typedef struct statserv_options_block
     char service_dependencies[BEND_NAME_MAX];
     char service_display_name[BEND_NAME_MAX];
 #endif /* WIN32 */
-    struct bend_soap_handler *soap_handlers;
     char pid_fname[BEND_NAME_MAX]; /**< pid fname */
     int background;                /**< auto daemon */
     char cert_fname[BEND_NAME_MAX];/**< SSL certificate fname */

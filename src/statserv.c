@@ -116,7 +116,6 @@ statserv_options_block control_block = {
     "",                         /* NT Service Dependencies */
     "Z39.50 Server",            /* NT Service Display Name */
 #endif /* WIN32 */
-    0,                          /* SOAP handlers */
     "",                         /* PID fname */
     0,                          /* background daemon */
     "",                         /* SSL certificate filename */
