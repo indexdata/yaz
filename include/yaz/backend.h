@@ -324,25 +324,26 @@ typedef struct bend_initresult
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
 
+#define BEND_NAME_MAX 1024
+
 /** \brief control block for server */
 typedef struct statserv_options_block
 {
     int dynamic;                  /**< fork on incoming requests */
     int threads;                  /**< use threads */
     int one_shot;                 /**< one session then exit(1) */
-    char apdufile[ODR_MAXNAME+1]; /**< file for pretty-printed PDUs */
-    char logfile[ODR_MAXNAME+1];  /**< file for diagnostic output */
-    char default_listen[1024];    /**< 0 == no default listen */
+    char apdufile[BEND_NAME_MAX]; /**< file for pretty-printed PDUs */
+    char logfile[BEND_NAME_MAX];  /**< file for diagnostic output */
     enum oid_proto default_proto; /**< PROTO_SR or PROTO_Z3950 */
     int idle_timeout;             /**< how many minutes to wait before closing */
     int maxrecordsize;            /**< maximum value for negotiation */
-    char configname[ODR_MAXNAME+1]; /**< given to the backend in bend_init */
-    char setuid[ODR_MAXNAME+1];     /**< setuid to this user after binding */
+    char configname[BEND_NAME_MAX]; /**< given to the backend in bend_init */
+    char setuid[BEND_NAME_MAX];   /**< setuid to this user after binding */
     void (*bend_start)(struct statserv_options_block *p);
     void (*bend_stop)(struct statserv_options_block *p);
     int (*options_func)(int argc, char **argv);
     int (*check_ip)(void *cd, const char *addr, int len, int type);
-    char daemon_name[128];
+    char daemon_name[BEND_NAME_MAX];
     int inetd;                    /**< Do we use the inet deamon or not */
 
     void *handle;                 /**< Handle */
@@ -351,17 +352,17 @@ typedef struct statserv_options_block
 #ifdef WIN32
     /* We only have these members for the windows version */
     /* They seemed a bit large to have them there in general */
-    char service_name[128];         /**< NT Service Name */
-    char app_name[128];             /**< Application Name */
-    char service_dependencies[128]; /**< The services we are dependent on */
-    char service_display_name[128]; /**< The service display name */
+    char service_name[BEND_NAME_MAX];/**< NT Service Name */
+    char app_name[BEND_NAME_MAX];  /**< Application Name */
+    char service_dependencies[BEND_NAME_MAX];
+    char service_display_name[BEND_NAME_MAX];
 #endif /* WIN32 */
     struct bend_soap_handler *soap_handlers;
-    char pid_fname[128];            /**< pid fname */
-    int background;                 /**< auto daemon */
-    char cert_fname[128];           /**< SSL certificate fname */
-    char xml_config[128];           /**< XML config filename */
-    int keepalive;                  /**< keep alive if HTTP 1.1 (default: 1) */
+    char pid_fname[BEND_NAME_MAX]; /**< pid fname */
+    int background;                /**< auto daemon */
+    char cert_fname[BEND_NAME_MAX];/**< SSL certificate fname */
+    char xml_config[BEND_NAME_MAX];/**< XML config filename */
+    int keepalive;                 /**< keep alive if HTTP 1.1 (default: 1) */
 } statserv_options_block;
 
 YAZ_EXPORT int statserv_main(

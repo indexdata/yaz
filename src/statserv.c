@@ -96,7 +96,6 @@ statserv_options_block control_block = {
     0,                          /* one shot (single session) */
     "",                         /* no PDUs */
     "",                         /* diagnostic output to stderr */
-    "tcp:@:9999",               /* default listener port */
     PROTO_Z3950,                /* default application protocol */
     900,                        /* idle timeout (seconds) */
     64*1024*1024,               /* maximum PDU size (approx.) to allow */
@@ -1253,8 +1252,8 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
     {
         xml_config_add_listeners();
 
-        if (!pListener && *control_block.default_listen)
-            add_listener(control_block.default_listen, 0);
+        if (!pListener)
+            add_listener("tcp:@:9999", 0);
 
 #ifndef WIN32
         if (control_block.dynamic)
@@ -1279,8 +1278,8 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 
 static void option_copy(char *dst, const char *src)
 {
-    strncpy(dst, src ? src : "", 127);
-    dst[127] = '\0';
+    strncpy(dst, src ? src : "", BEND_NAME_MAX-1);
+    dst[BEND_NAME_MAX-1] = '\0';
 }
 
 int check_options(int argc, char **argv)
