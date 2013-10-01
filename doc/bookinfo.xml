@@ -15,7 +15,7 @@
   <abstract><simpara>
     This document is the programmer's guide and reference to the &yaz;
     package version &version;. &yaz; is a compact toolkit that provides
-    access to the Z39.50 and SRW/SRU protocols, as well as a set of
+    access to the Z39.50 and SRU/Solr protocols, as well as a set of
     higher-level tools for implementing the server and client
     roles, respectively.
     The documentation can be used on its own, or as a reference when
