@@ -1,5 +1,8 @@
+Increase various buffers in GFS's statserv_options_block
 Change many 'unsigned char *' to 'char *' for ODR-related utilties.
 This change makes many type-casts redundant, and, thus simplifies code.
+
+Remove last bits of WAIS support.
 
 Remove member 'size' from Odr_oct.
 
