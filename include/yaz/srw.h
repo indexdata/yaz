@@ -55,12 +55,6 @@ typedef struct {
 #define Z_SRW_recordPacking_XML 1
 #define Z_SRW_recordPacking_URL 2
 
-#if 0
-    int packing;   /* recordPacking in SRU 2.0 */
-#define Z_SRW_packed   0
-#define Z_SRW_unpacked     1
-#endif
-
     char *recordData_buf;
     int recordData_len;
     Odr_int *recordPosition;
