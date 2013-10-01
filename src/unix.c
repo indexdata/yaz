@@ -167,7 +167,6 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     state->towrite = state->written = -1;
     state->complete = cs_complete_auto;
 
-    p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new UNIX comstack\n"));
 
     return p;

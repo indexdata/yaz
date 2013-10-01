@@ -234,7 +234,6 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     sp->connect_response_buf = 0;
     sp->connect_response_len = 0;
 
-    p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new TCPIP comstack h=%p\n", p));
 
     return p;

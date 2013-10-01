@@ -39,8 +39,6 @@
 
 YAZ_BEGIN_CDECL
 
-#define COMSTACK_DEFAULT_TIMEOUT -1  /* not used yet */
-
 struct comstack;
 typedef struct comstack *COMSTACK;
 typedef COMSTACK (*CS_TYPE)(int s, int flags, int protocol, void *vp);
@@ -50,7 +48,6 @@ struct comstack
     CS_TYPE type;
     int cerrno;     /* current error code of this stack */
     int iofile;    /* UNIX file descriptor for iochannel */
-    int timeout;   /* how long to wait for trailing blocks (ignored for now) */
     void *cprivate;/* state info for lower stack */
     int max_recv_bytes;      /* max size of incoming package */
     int state;     /* current state */
