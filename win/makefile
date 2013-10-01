@@ -110,19 +110,19 @@ TESTDIR=$(ROOTDIR)\TEST
 # Targets - what to make
 
 !if $(DEBUG)
-YAZ_DLL=$(BINDIR)\yaz4d.dll
-YAZ_IMPLIB=$(LIBDIR)\yaz4d.lib
-YAZ_ICU_DLL=$(BINDIR)\yaz_icu4d.dll
-YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4d.lib
-YAZ_COND_DLL=$(BINDIR)\yaz_cond4d.dll
-YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond4d.lib
+YAZ_DLL=$(BINDIR)\yaz5d.dll
+YAZ_IMPLIB=$(LIBDIR)\yaz5d.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu5d.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu5d.lib
+YAZ_COND_DLL=$(BINDIR)\yaz_cond5d.dll
+YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond5d.lib
 !else
-YAZ_DLL=$(BINDIR)\yaz4.dll
-YAZ_IMPLIB=$(LIBDIR)\yaz4.lib
-YAZ_ICU_DLL=$(BINDIR)\yaz_icu4.dll
-YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu4.lib
-YAZ_COND_DLL=$(BINDIR)\yaz_cond4.dll
-YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond4.lib
+YAZ_DLL=$(BINDIR)\yaz5.dll
+YAZ_IMPLIB=$(LIBDIR)\yaz5.lib
+YAZ_ICU_DLL=$(BINDIR)\yaz_icu5.dll
+YAZ_ICU_IMPLIB=$(LIBDIR)\yaz_icu5.lib
+YAZ_COND_DLL=$(BINDIR)\yaz_cond5.dll
+YAZ_COND_IMPLIB=$(LIBDIR)\yaz_cond5.lib
 !endif
 
 CLIENT=$(BINDIR)\yaz-client.exe
