@@ -420,7 +420,6 @@ MISC_OBJS= \
    $(OBJDIR)\ccl_stop_words.obj \
    $(OBJDIR)\comstack.obj \
    $(OBJDIR)\tcpip.obj \
-   $(OBJDIR)\waislen.obj \
    $(OBJDIR)\ber_any.obj \
    $(OBJDIR)\ber_bit.obj \
    $(OBJDIR)\ber_bool.obj \

@@ -82,7 +82,7 @@ libyaz_la_SOURCES=base64.c version.c options.c log.c \
   odr_seq.c odr_oct.c ber_oct.c odr_bit.c ber_bit.c odr_oid.c \
   ber_oid.c odr_use.c odr_choice.c odr_any.c ber_any.c odr.c odr_mem.c \
   dumpber.c odr_enum.c odr-priv.h \
-  comstack.c tcpip.c waislen.c unix.c \
+  comstack.c tcpip.c unix.c \
   prt-ext.c \
   ill-get.c \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h \

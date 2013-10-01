@@ -227,10 +227,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     sp->altbuf = 0;
     sp->altsize = sp->altlen = 0;
     sp->towrite = sp->written = -1;
-    if (protocol == PROTO_WAIS)
-        sp->complete = completeWAIS;
-    else
-        sp->complete = cs_complete_auto;
+    sp->complete = cs_complete_auto;
 
     sp->connect_request_buf = 0;
     sp->connect_request_len = 0;

@@ -134,8 +134,6 @@ YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
-YAZ_EXPORT int completeWAIS(const char *buf, int len);
-
 YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 
 /*

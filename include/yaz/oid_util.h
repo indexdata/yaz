@@ -46,8 +46,6 @@ typedef enum oid_proto
     PROTO_NOP=0,
     PROTO_Z3950,
     PROTO_SR,
-    PROTO_GENERAL,
-    PROTO_WAIS,
     PROTO_HTTP
 } oid_proto;
 

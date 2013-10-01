@@ -165,10 +165,7 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
-    if (protocol == PROTO_WAIS)
-        state->complete = completeWAIS;
-    else
-        state->complete = cs_complete_auto;
+    state->complete = cs_complete_auto;
 
     p->timeout = COMSTACK_DEFAULT_TIMEOUT;
     TRC(fprintf(stderr, "Created new UNIX comstack\n"));
