@@ -1,3 +1,38 @@
+Change many 'unsigned char *' to 'char *' for ODR-related utilties.
+This change makes many type-casts redundant, and, thus simplifies code.
+
+Remove member 'size' from Odr_oct.
+
+Slim down the public part of 'struct odr'. Most elements are not part
+of struct Odr_private.
+
+Add support for SRU 2.0. Since SRU 2.0 is incompatible with earlier
+versions of SRU, yaz-client and zoom C are using SRU 1.2 by default.
+In particular facets are supported in both client - and server side.
+Facets are also supported for Z39.50 and is carried in additionalSearchInfo
+of searchRequest/searchResponse with OID 1.2.840.10003.10.1000.81.5 AKA
+"Facet-1" in oid.csv. The info is defined in facet.asn (which covers
+both request/response). This is what a search handler in the GFS
+will see (regardless of whether operating in SRU mode or Z39.50).
+
+Changes to the srw.h (SRU/Solr) definitions include:
+- New element in Z_SRW_searchRetrieveRequest, queryType (char*) and query
+(char*), which replace union query and query_type (int).  This is because
+SRU 2.0 supports a queryType parameter. This also means that, to carry
+PQF, in SRU we can now use queryType=pqf and query=PQFstring , rather than
+x-pquery=PQFstring (extention parameter). The extension parameter
+is still supported.
+- New element, packing, that has information about SRU
+2.0 recordPacking (not to be confused with SRU 2.0 recordXMLEscaping).
+
+New element in Z_SRW_searchRetrieveResponse, resultCountPrecision.
+
+New element, packing, in Z_SRW_explainRequest.
+
+New elements in Z_SRW_scanRequest, queryType and scanClause.
+These replace query_type and scanClase untion. This is similar to what
+happend to search.
+
 --- 4.2.69 2013/10/01
 
 GFS: log when closing down - at least SIGTERM YAZ-684
