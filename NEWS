@@ -1,3 +1,37 @@
+--- 4.2.69 2013/10/01
+
+GFS: log when closing down - at least SIGTERM YAZ-684
+Also change formatting WRT PID logging a bit.
+
+Improve display of MARC records with multi-byte subfield IDs YAZ-695
+In some rare cases subfield identifiers are multi-byte characters.
+This will try to deterime length of those and split accordingly.
+This affects display in line mode as MARCXML/MarcXchange. The encoding
+of ISO2709 is the same.
+
+Change inp argument to const for yaz_read_UTF8_char.
+
+yaz-marcdump: fix leaks for MARCXML parsing. YAZ-694
+
+MARCXML parsing: avoid skipping 1st field if no leader. YAZ-693
+
+Better check of marc leader info YAZ-691
+Problem is that some systems generate MARCXML/MarcXchange with
+funny headers. These will not work if encoded as ISO2709.
+Some tests produce new output, due to updated warning messages
+
+cql2pqf: allow PQF queries from stdin (because CQL is also allowed)
+
+yaz-client: display MAB records YAZ-689.
+Thanks for Heiko Jansen for this patch.
+
+New utility z_get_HTTP_Response_server which allows both HTTP server name
+and HTTP server URL to be given in response.
+
+Debian: do not depend on obs tcl8.3.
+
+Debian: do not depend on obs libicu36-dev.
+
 --- 4.2.68 2013/09/23 
 
 GFS: pass additionalSearchInfo to search memeber search_input if
