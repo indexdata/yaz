@@ -150,10 +150,6 @@ YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 #define CSBUFSIZE  7
 #define CSLASTERROR CSBUFSIZE  /* must be the value of last CS error */
 
-/* backwards compatibility */
-#define CS_SR     PROTO_SR
-#define CS_Z3950  PROTO_Z3950
-
 #define CS_FLAGS_BLOCKING 1
 #define CS_FLAGS_NUMERICHOST 2
 

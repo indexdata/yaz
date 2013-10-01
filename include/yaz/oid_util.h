@@ -45,7 +45,6 @@ typedef enum oid_proto
 {
     PROTO_NOP=0,
     PROTO_Z3950,
-    PROTO_SR,
     PROTO_HTTP
 } oid_proto;
 
