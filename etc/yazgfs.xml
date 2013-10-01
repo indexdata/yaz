@@ -1,5 +1,5 @@
 <!-- sample YAZ GFS config file .. see 
-  http://indexdata.dk/yaz/doc/server.vhosts.tkl -->
+  http://www.indexdata.com/yaz/doc/server.vhosts.html -->
 <yazgfs>
   <listen id="public1">tcp:@:9000</listen>
   <server id="server1" listenref="public1">
