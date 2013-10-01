@@ -47,7 +47,7 @@
 
 /* declared structs and functions */
 
-int icu_check_status (UErrorCode status);
+int icu_check_status(UErrorCode status);
 
 struct icu_buf_utf16
 {
@@ -105,40 +105,40 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
 
 struct icu_casemap;
 
-struct icu_casemap * icu_casemap_create(char action, UErrorCode *status);
+struct icu_casemap *icu_casemap_create(char action, UErrorCode *status);
 
 struct icu_casemap *icu_casemap_clone(struct icu_casemap *old);
 
-void icu_casemap_destroy(struct icu_casemap * casemap);
+void icu_casemap_destroy(struct icu_casemap *casemap);
 
-int icu_casemap_casemap(struct icu_casemap * casemap,
-                        struct icu_buf_utf16 * dest16,
-                        struct icu_buf_utf16 * src16,
+int icu_casemap_casemap(struct icu_casemap *casemap,
+                        struct icu_buf_utf16 *dest16,
+                        struct icu_buf_utf16 *src16,
                         UErrorCode *status,
                         const char *locale);
 
-int icu_utf16_casemap(struct icu_buf_utf16 * dest16,
-                      struct icu_buf_utf16 * src16,
+int icu_utf16_casemap(struct icu_buf_utf16 *dest16,
+                      struct icu_buf_utf16 *src16,
                       const char *locale, char action,
                       UErrorCode *status);
 
 void icu_sortkey8_from_utf16(UCollator *coll,
-                             struct icu_buf_utf8 * dest8,
-                             struct icu_buf_utf16 * src16,
-                             UErrorCode * status);
+                             struct icu_buf_utf8 *dest8,
+                             struct icu_buf_utf16 *src16,
+                             UErrorCode *status);
 
 struct icu_tokenizer;
 struct icu_tokenizer * icu_tokenizer_create(const char *locale, char action,
                                             UErrorCode *status);
 
 struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old);
-void icu_tokenizer_destroy(struct icu_tokenizer * tokenizer);
+void icu_tokenizer_destroy(struct icu_tokenizer *tokenizer);
 
-int icu_tokenizer_attach(struct icu_tokenizer * tokenizer,
-                         struct icu_buf_utf16 * src16, UErrorCode *status);
+int icu_tokenizer_attach(struct icu_tokenizer *tokenizer,
+                         struct icu_buf_utf16 *src16, UErrorCode *status);
 
-int32_t icu_tokenizer_next_token(struct icu_tokenizer * tokenizer,
-                                 struct icu_buf_utf16 * tkn16,
+int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
+                                 struct icu_buf_utf16 *tkn16,
                                  UErrorCode *status,
                                  size_t *start, size_t *len);
 
@@ -152,18 +152,17 @@ struct icu_transform * icu_transform_create(const char *id, char action,
 struct icu_transform *icu_transform_clone(struct icu_transform *old);
 void icu_transform_destroy(struct icu_transform * transform);
 
-int icu_transform_trans(struct icu_transform * transform,
-                        struct icu_buf_utf16 * dest16,
-                        const struct icu_buf_utf16 * src16,
+int icu_transform_trans(struct icu_transform *transform,
+                        struct icu_buf_utf16 *dest16,
+                        const struct icu_buf_utf16 *src16,
                         UErrorCode *status);
 
 struct icu_chain_step;
 
 int icu_chain_token_number(yaz_icu_chain_t chain);
 
-yaz_icu_chain_t icu_chain_create(const char * locale,
-                                 int sort,
-                                 UErrorCode * status);
+yaz_icu_chain_t icu_chain_create(const char *locale,
+                                 int sort, UErrorCode *status);
 
 #endif /* ICU_I18NL_H */
 

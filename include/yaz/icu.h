@@ -55,7 +55,7 @@ YAZ_EXPORT void icu_chain_destroy(yaz_icu_chain_t chain);
 */
 YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
                                                 int sort,
-                                                UErrorCode * status);
+                                                UErrorCode *status);
 /** \brief pass string to ICU for parsing/tokenization/etc
     \param chain ICU chain to be used for parsing
     \param src8cstr input C string (null-terminated)
@@ -64,7 +64,7 @@ YAZ_EXPORT yaz_icu_chain_t icu_chain_xml_config(const xmlNode *xml_node,
     \retval 1 success
 */
 YAZ_EXPORT int icu_chain_assign_cstr(yaz_icu_chain_t chain,
-                                     const char * src8cstr,
+                                     const char *src8cstr,
                                      UErrorCode *status);
 
 /** \brief returns one token (if any)
