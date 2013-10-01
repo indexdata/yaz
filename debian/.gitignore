@@ -1,6 +1,7 @@
 copyright
 files
 libyaz4
+libyaz4-dbg
 libyaz4-dev
 yaz-icu
 yaz-illclient
