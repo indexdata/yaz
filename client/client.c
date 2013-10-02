@@ -2712,7 +2712,7 @@ static int cmd_explain(const char *arg)
         setno = 1;
 
         /* save this for later .. when fetching individual records */
-        sr = yaz_srw_get(out, Z_SRW_explain_request);
+        sr = yaz_srw_get_pdu(out, Z_SRW_explain_request, sru_version);
         if (recordsyntax_size == 1
             && !yaz_matchstr(recordsyntax_list[0], "xml"))
             sr->u.explain_request->recordPacking = "xml";
