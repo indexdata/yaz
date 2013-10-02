@@ -53,9 +53,7 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
             return 0;
         }
         p->len = len;
-        p->buf = odr_malloc(o, len + 1);
-        memcpy(p->buf, o->op->bp, len);
-        p->buf[len] = '\0';
+        p->buf = odr_strdupn(o, o->op->bp, len);
         o->op->bp += len;
         return 1;
     case ODR_ENCODE:

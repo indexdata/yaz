@@ -386,9 +386,7 @@ static Z_Operand *rpn_simple(struct yaz_pqf_parser *li, ODR o,
             return 0;
         }
         zo->which = Z_Operand_resultSetId;
-        zo->u.resultSetId = (char *)odr_malloc(o, li->lex_len+1);
-        memcpy(zo->u.resultSetId, li->lex_buf, li->lex_len);
-        zo->u.resultSetId[li->lex_len] = '\0';
+        zo->u.resultSetId = odr_strdupn(o, li->lex_buf, li->lex_len);
         lex(li);
         break;
     default:

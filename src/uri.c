@@ -153,10 +153,7 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
         for (cp = path; *cp && *cp != '=' && *cp != '&'; cp++)
             ;
 
-        (*name)[no] = (char *) odr_malloc(o, (cp-path)+1);
-        memcpy((*name)[no], path, cp-path);
-        (*name)[no][cp-path] = '\0';
-
+        (*name)[no] = odr_strdupn(o, path, cp - path);
         path = cp;
         if (*path == '=')
         {

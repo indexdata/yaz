@@ -246,9 +246,7 @@ static void grab_charset(ODR o, const char *content_type, char **charset)
             while (i < 20 && charset_p[i] &&
                    !strchr("; \n\r", charset_p[i]))
                 i++;
-            *charset = (char*) odr_malloc(o, i+1);
-            memcpy(*charset, charset_p, i);
-            (*charset)[i] = '\0';
+            *charset = odr_strdupn(o, charset_p, i);
         }
     }
 }

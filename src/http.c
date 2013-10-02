@@ -48,19 +48,14 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                 break;
         }
         *headers = (Z_HTTP_Header *) odr_malloc(o, sizeof(**headers));
-        (*headers)->name = (char*) odr_malloc(o, i - po + 1);
-        memcpy ((*headers)->name, buf + po, i - po);
-        (*headers)->name[i - po] = '\0';
+        (*headers)->name = odr_strdupn(o, buf + po, i - po);
         i++;
         while (i < size-1 && buf[i] == ' ')
             i++;
         for (po = i; i < size-1 && !strchr("\r\n", buf[i]); i++)
             ;
 
-        (*headers)->value = (char*) odr_malloc(o, i - po + 1);
-        memcpy ((*headers)->value, buf + po, i - po);
-        (*headers)->value[i - po] = '\0';
-
+        (*headers)->value = odr_strdupn(o, buf + po, i - po);
         if (!yaz_strcasecmp((*headers)->name, "Transfer-Encoding")
             &&
             !yaz_strcasecmp((*headers)->value, "chunked"))
@@ -142,9 +137,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         else
         {
             *content_len = size - i;
-            *content_buf = (char*) odr_malloc(o, *content_len + 1);
-            memcpy(*content_buf, buf + i, *content_len);
-            (*content_buf)[*content_len] = '\0';
+            *content_buf = odr_strdupn(o, buf + i, *content_len);
         }
     }
     return 1;
@@ -287,11 +280,8 @@ Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
 
         if (cp0 && cp1)
         {
-            char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
-            memcpy (h, cp0, cp1 - cp0);
-            h[cp1-cp0] = '\0';
-            z_HTTP_header_add(odr, &p->u.HTTP_Request->headers,
-                              "Host", h);
+            char *h = odr_strdupn(odr, cp0, cp1 - cp0);
+            z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
         }
     }
     return p;
@@ -314,11 +304,8 @@ Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri, const char *args,
 
     if (cp0 && cp1)
     {
-        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
-        memcpy (h, cp0, cp1 - cp0);
-        h[cp1-cp0] = '\0';
-        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers,
-                          "Host", h);
+        char *h = odr_strdupn(odr, cp0, cp1 - cp0);
+        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
     }
 
     if (!args)
@@ -495,10 +482,7 @@ int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
     po = i = 5;
     while (i < size-2 && !strchr(" \r\n", buf[i]))
         i++;
-    hr->version = (char *) odr_malloc(o, i - po + 1);
-    if (i - po)
-        memcpy(hr->version, buf + po, i - po);
-    hr->version[i-po] = 0;
+    hr->version = odr_strdupn(o, buf + po, i - po);
     if (buf[i] != ' ')
     {
         o->error = OHTTP;
@@ -533,9 +517,7 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
             o->error = OHTTP;
             return 0;
         }
-    hr->method = (char *) odr_malloc(o, i+1);
-    memcpy (hr->method, buf, i);
-    hr->method[i] = '\0';
+    hr->method = odr_strdupn(o, buf, i);
     /* path */
     po = i+1;
     for (i = po; buf[i] != ' '; i++)
@@ -544,9 +526,7 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
             o->error = OHTTP;
             return 0;
         }
-    hr->path = (char *) odr_malloc(o, i - po + 1);
-    memcpy (hr->path, buf+po, i - po);
-    hr->path[i - po] = '\0';
+    hr->path = odr_strdupn(o, buf + po, i - po);
     /* HTTP version */
     i++;
     if (i > size-5 || memcmp(buf+i, "HTTP/", 5))
@@ -558,9 +538,7 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
     po = i;
     while (i < size && !strchr("\r\n", buf[i]))
         i++;
-    hr->version = (char *) odr_malloc(o, i - po + 1);
-    memcpy(hr->version, buf + po, i - po);
-    hr->version[i - po] = '\0';
+    hr->version = odr_strdupn(o, buf + po, i - po);
     /* headers */
     if (i < size-1 && buf[i] == '\r')
         i++;
