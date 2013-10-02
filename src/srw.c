@@ -113,7 +113,11 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         int pack = rec->recordPacking;
         const char *spack = yaz_srw_pack_to_str(pack);
 
-        add_xsd_string(ptr, "recordSchema", rec->recordSchema);
+        /* recordSchema and recordData are required */
+        if (!rec->recordSchema)
+            xmlNewChild(ptr, 0, BAD_CAST "recordSchema", 0);
+        else
+            add_xsd_string(ptr, "recordSchema", rec->recordSchema);
         if (spack)
         {
             if (version2)
@@ -121,20 +125,25 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
             else
                 add_xsd_string(ptr, "recordPacking", spack);
         }
-        switch (pack)
+        if (!rec->recordData_buf)
+            xmlNewChild(ptr, 0, BAD_CAST "recordData", 0);
+        else
         {
-        case Z_SRW_recordPacking_string:
-            add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
-                             rec->recordData_len);
-            break;
-        case Z_SRW_recordPacking_XML:
-            add_XML_n(ptr, "recordData", rec->recordData_buf,
-                      rec->recordData_len, 0);
-            break;
-        case Z_SRW_recordPacking_URL:
-            add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
-                             rec->recordData_len);
-            break;
+            switch (pack)
+            {
+            case Z_SRW_recordPacking_string:
+                add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
+                                 rec->recordData_len);
+                break;
+            case Z_SRW_recordPacking_XML:
+                add_XML_n(ptr, "recordData", rec->recordData_buf,
+                          rec->recordData_len, 0);
+                break;
+            case Z_SRW_recordPacking_URL:
+                add_xsd_string_n(ptr, "recordData", rec->recordData_buf,
+                                 rec->recordData_len);
+                break;
+            }
         }
         if (rec->recordPosition)
             add_xsd_integer(ptr, "recordPosition", rec->recordPosition );
