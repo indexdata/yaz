@@ -1260,8 +1260,9 @@ static void srw_bend_explain(association *assoc,
 {
     Z_SRW_explainRequest *srw_req = sr->u.explain_request;
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
-    *http_code = 404;
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    if (!assoc->init && srw_res->num_diagnostics == 0)
+        *http_code = 404;
     if (assoc->init)
     {
         bend_explain_rr rr;
@@ -1487,8 +1488,9 @@ static void srw_bend_update(association *assoc,
     Z_SRW_updateRequest *srw_req = sr->u.update_request;
     yaz_log(log_session, "SRWUpdate action=%s", srw_req->operation);
     yaz_log(YLOG_DEBUG, "num_diag = %d", srw_res->num_diagnostics );
-    *http_code = 404;
     srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    if (!assoc->init && srw_res->num_diagnostics == 0)
+        *http_code = 404;
     if (assoc->init)
     {
 	bend_update_rr rr;
