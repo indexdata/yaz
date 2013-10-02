@@ -983,6 +983,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_explain_request)
         {
             Z_SRW_explainRequest *req = (*p)->u.explain_request;
+            if (version2)
+                ns = "http://docs.oasis-open.org/ns/search-ws/sruRequest";
             ptr = xmlNewChild(pptr, 0, BAD_CAST "explainRequest", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
@@ -1001,6 +1003,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         else if ((*p)->which == Z_SRW_explain_response)
         {
             Z_SRW_explainResponse *res = (*p)->u.explain_response;
+            if (version2)
+                ns = "http://docs.oasis-open.org/ns/search-ws/sruResponse";
             ptr = xmlNewChild(pptr, 0, BAD_CAST "explainResponse", 0);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns, BAD_CAST "zs");
             xmlSetNs(ptr, ns_srw);
