@@ -179,42 +179,6 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
     return no;
 }
 
-char *yaz_uri_val(const char *path, const char *name, ODR o)
-{
-    size_t nlen = strlen(name);
-    if (*path != '?')
-        return 0;
-    path++;
-    while (path && *path)
-    {
-        const char *p1 = strchr(path, '=');
-        if (!p1)
-            break;
-        if ((size_t)(p1 - path) == nlen && !memcmp(path, name, nlen))
-        {
-            size_t i = 0;
-            char *ret;
-
-            path = p1 + 1;
-            p1 = strchr(path, '&');
-            if (!p1)
-                p1 = strlen(path) + path;
-            ret = (char *) odr_malloc(o, p1 - path + 1);
-            while (*path && *path != '&')
-            {
-                size_t l = 3;
-                ret[i++] = decode_uri_char(path, &l);
-                path += l;
-            }
-            ret[i] = '\0';
-            return ret;
-        }
-        path = strchr(p1, '&');
-        if (path)
-            path++;
-    }
-    return 0;
-}
 
 /*
  * Local variables:

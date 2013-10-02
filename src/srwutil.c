@@ -141,13 +141,6 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
     }
 }
 
-void yaz_uri_val_int(const char *path, const char *name, ODR o, Odr_int **intp)
-{
-    const char *v = yaz_uri_val(path, name, o);
-    if (v)
-        *intp = odr_intdup(o, atoi(v));
-}
-
 void yaz_mk_srw_diagnostic(ODR o, Z_SRW_diagnostic *d,
                            const char *uri, const char *message,
                            const char *details)
