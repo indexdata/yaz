@@ -219,11 +219,10 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                 "http://docs.oasis-open.org/ns/search-ws/facetedResults";
             xmlNode *p1 = xmlNewChild(n, 0, BAD_CAST "facetedResults", 0);
             xmlNsPtr ns_fr = xmlNewNs(p1, BAD_CAST ns, BAD_CAST "fr");
-            xmlSetNs(p1, ns_fr);
             for (i = 0; i < fl->num; i++)
             {
                 Z_FacetField *ff = fl->elements[i];
-                xmlNode *p2 = xmlNewChild(p1, 0, BAD_CAST "facet", 0);
+                xmlNode *p2 = xmlNewChild(p1, ns_fr, BAD_CAST "facet", 0);
                 int j;
                 xmlNode *p3;
                 struct yaz_facet_attr av;
