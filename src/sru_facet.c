@@ -66,66 +66,66 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
         if (fl)
         {
             WRBUF w_limit = wrbuf_alloc();
-            WRBUF w_start = wrbuf_alloc();
-            WRBUF w_sort = wrbuf_alloc();
+            int general_start = -1;
+            int general_sortorder = -1;
+            int general_limit = -1;
             int i;
             for (i = 0; i < fl->num; i++)
             {
                 struct yaz_facet_attr av;
                 yaz_facet_attr_init(&av);
+                av.start = -1;
+                av.sortorder = -1;
+                av.limit = -1;
                 yaz_facet_attr_get_z_attributes(fl->elements[i]->attributes,
                                                 &av);
                 if (av.errcode == 0)
                 {
-                    if (av.limit)
+                    if (av.limit != -1)
                     {
-                        wrbuf_printf(w_limit, "%d", av.limit);
                         if (av.useattr)
-                            wrbuf_printf(w_limit, ":%s", av.useattr);
-                        wrbuf_puts(w_limit, ",");
+                        {
+                            wrbuf_printf(w_limit, "%d:%s", av.limit,
+                                         av.useattr);
+                            wrbuf_puts(w_limit, ",");
+                        }
+                        else
+                            general_limit = av.limit;
                     }
-                    if (av.start || av.useattr)
-                    {
-                        wrbuf_printf(w_start, "%d",
-                                     av.start == 0 ? 1 : av.start);
-                        if (av.useattr)
-                            wrbuf_printf(w_start, ":%s", av.useattr);
-                        wrbuf_puts(w_start, ",");
-                    }
-                    if (av.sortorder == 1)
-                    {
-                        /* allow sorting per field */
-                        /* not really according to spec */
-                        wrbuf_printf(w_sort, "alphanumeric");
-                        if (av.useattr)
-                            wrbuf_printf(w_sort, ":%s", av.useattr);
-                        wrbuf_puts(w_sort, ",");
-                    }
+                    if (av.start != -1)
+                        general_start = av.start;
+                    if (av.sortorder != -1)
+                        general_sortorder = av.sortorder;
                 }
+            }
+            if (general_limit != -1)
+            {
+                char tmp[32];
+                sprintf(tmp, "%d,", general_limit);
+                wrbuf_insert(w_limit, 0, tmp, strlen(tmp));
             }
             if (wrbuf_len(w_limit) > 1)
             {
-                wrbuf_cut_right(w_limit, 1); /* remove , */
+                wrbuf_cut_right(w_limit, 1);
                 *limit = odr_strdup(o, wrbuf_cstr(w_limit));
             }
-            if (wrbuf_len(w_start) > 1)
+            if (general_start != -1)
             {
-                wrbuf_cut_right(w_start, 1); /* remove , */
-                *start = odr_strdup(o, wrbuf_cstr(w_start));
+                char tmp[32];
+                sprintf(tmp, "%d", general_start);
+                *start = odr_strdup(o, tmp);
             }
-            if (wrbuf_len(w_sort) > 1)
+            if (general_sortorder == 1)
             {
-                wrbuf_cut_right(w_sort, 1); /* remove , */
-                *sort = odr_strdup(o, wrbuf_cstr(w_sort));
+                *sort = odr_strdup(o, "alphanumeric");
             }
             wrbuf_destroy(w_limit);
-            wrbuf_destroy(w_start);
-            wrbuf_destroy(w_sort);
         }
     }
     else if (o->direction == ODR_DECODE)
     {
         WRBUF w = wrbuf_alloc();
+        int general_limit = -1;
 
         if (*limit)
         {
@@ -143,61 +143,40 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
                         cp++;
                     sprintf(tmp, "@attr 3=%d", val);
                     insert_field(w, cp0, cp - cp0, tmp);
-                }
-                if (*cp != ',')
-                    break;
-                cp++;
-            }
-        }
-        if (*start)
-        {
-            const char *cp = *start;
-            int nor = 0;
-            int val = 0;
-            while (sscanf(cp, "%d%n", &val, &nor) >= 1 && nor > 0)
-            {
-                cp += nor;
-                if (*cp == ':') /* field name follows */
-                {
-                    char tmp[40];
-                    const char *cp0 = ++cp;
-                    while (*cp && *cp != ',')
-                        cp++;
-                    sprintf(tmp, "@attr 4=%d", val);
-                    insert_field(w, cp0, cp - cp0, tmp);
-                }
-                if (*cp != ',')
-                    break;
-                cp++;
-            }
-        }
 
-        if (*sort)
-        {
-            const char *cp = *sort;
-            while (1)
-            {
-                int val = 0;
-                const char *cp0 = cp;
-                while (*cp && *cp != ':' && *cp != ',')
-                    cp++;
-                if (!strncmp(cp0, "alphanumeric", cp - cp0))
-                    val = 1;
-                if (*cp == ':') /* field name follows */
-                {
-                    char tmp[40];
-                    cp0 = ++cp;
-                    while (*cp && *cp != ',')
-                        cp++;
-                    sprintf(tmp, "@attr 2=%d", val);
-                    insert_field(w, cp0, cp - cp0, tmp);
+                    if (*start && strlen(*start) < 20)
+                    {
+                        sprintf(tmp, "@attr 4=%s", *start);
+                        insert_field(w, cp0, cp - cp0, tmp);
+                    }
+                    if (*sort && !strcmp(*sort, "alphanumeric"))
+                        insert_field(w, cp0, cp - cp0, "@attr 2=1");
+                    else
+                        insert_field(w, cp0, cp - cp0, "@attr 2=0");
                 }
+                else
+                    general_limit = val;
+
                 if (*cp != ',')
                     break;
                 cp++;
             }
         }
-
+        if (*sort || *start || general_limit != -1)
+        {
+            if (wrbuf_len(w))
+                wrbuf_puts(w, ",");
+            if (*sort && !strcmp(*sort, "alphanumeric"))
+                wrbuf_printf(w, " @attr 2=1");
+            else
+                wrbuf_printf(w, " @attr 2=0");
+            if (general_limit != -1)
+                wrbuf_printf(w, " @attr 3=%d", general_limit);
+            if (*start)
+            {
+                wrbuf_printf(w, " @attr 4=%s", *start);
+            }
+        }
         if (wrbuf_len(w))
             *facetList = yaz_pqf_parse_facet_list(o, wrbuf_cstr(w));
         else

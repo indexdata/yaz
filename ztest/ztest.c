@@ -278,7 +278,7 @@ Z_OtherInformation *build_facet_response(ODR odr, Z_FacetList *facet_list) {
         yaz_facet_attr_get_z_attributes(facet_list->elements[index]->attributes,
                                         &attrvalues);
         yaz_log(YLOG_LOG, "Attributes: %s limit=%d start=%d sort=%d",
-                attrvalues.useattr,
+                attrvalues.useattr ? attrvalues.useattr : "NONE",
                 attrvalues.limit,
                 attrvalues.start,
                 attrvalues.sortorder);
