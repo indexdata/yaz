@@ -1,3 +1,16 @@
+--- 5.0.1 2013/10/04
+
+Various fixes for how SRU 2.0 is encoded. Fix NS for SRU 2.0 diagnostics
+and facets. Ensure recordData and recordSchema are always present in
+record element, because they are required.
+
+Remove deprecated functions yaz_uri_val .. and yaz_uri_val_int. Never used
+outside YAZ.
+
+Simplify in a lot of places using odr_strdupn.
+
+odr_create_Odr_oct: null terminate the buffer. Some applications rely on it.
+
 --- 5.0.0 2013/10/01
 
 Increase various buffers in GFS's statserv_options_block
