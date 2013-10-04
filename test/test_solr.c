@@ -330,6 +330,28 @@ void tst_decoding(void)
     odr_destroy(odr);
 #endif
 }
+
+void tst_yaz_700(void)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    int r;
+    const char *url =
+        "http://localhost:9036/XXX/cproxydebug-7/node102/p/105/c=content_connector"
+        "a=usr/pw#&? r=cfusr/cfpw p=1.2.3.4:80/www.indexdata.com/staff/";
+    int use_full_host = 0;
+    Z_GDU *gdu_req = z_get_HTTP_Request_uri(odr, url, 0, use_full_host);
+    Z_HTTP_Request *hreq = gdu_req->u.HTTP_Request;
+    hreq->method = "GET";
+
+    hreq->content_buf = odr_strdup(odr, "");
+    hreq->content_len = 0;
+
+    r = z_GDU(odr, &gdu_req, 0, 0);
+    YAZ_CHECK(r);
+    odr_destroy(odr);
+}
+
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -338,6 +360,7 @@ int main(int argc, char **argv)
 #endif
     tst_encoding();
     tst_decoding();
+    tst_yaz_700();
     YAZ_CHECK_TERM;
 }
 
