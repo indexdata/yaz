@@ -507,9 +507,9 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
     Z_HTTP_Request *hr = (Z_HTTP_Request *) odr_malloc(o, sizeof(*hr));
     const char *buf = o->op->buf;
     int size = o->op->size;
+    int lspace = 0;
 
     *hr_p = hr;
-
     /* method .. */
     for (i = 0; buf[i] != ' '; i++)
         if (i >= size-5 || i > 30)
@@ -518,28 +518,21 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
             return 0;
         }
     hr->method = odr_strdupn(o, buf, i);
-    /* path */
-    po = i+1;
-    for (i = po; buf[i] != ' '; i++)
-        if (i >= size-5)
-        {
-            o->error = OHTTP;
-            return 0;
-        }
-    hr->path = odr_strdupn(o, buf + po, i - po);
-    /* HTTP version */
-    i++;
-    if (i > size-5 || memcmp(buf+i, "HTTP/", 5))
+    po = ++i;
+    while (i < size && !strchr("\r\n", buf[i]))
+    {
+        if (buf[i] == ' ')
+            lspace = i;
+        i++;
+    }
+    if (!lspace || i >= size || lspace >= size - 5 ||
+        memcmp(buf + lspace + 1, "HTTP/", 5))
     {
         o->error = OHTTP;
         return 0;
     }
-    i+= 5;
-    po = i;
-    while (i < size && !strchr("\r\n", buf[i]))
-        i++;
-    hr->version = odr_strdupn(o, buf + po, i - po);
-    /* headers */
+    hr->path = odr_strdupn(o, buf + po, lspace - po);
+    hr->version = odr_strdupn(o, buf + lspace + 6, i - (lspace + 6));
     if (i < size-1 && buf[i] == '\r')
         i++;
     if (buf[i] != '\n')
@@ -547,6 +540,7 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
         o->error = OHTTP;
         return 0;
     }
+    /* headers */
     return decode_headers_content(o, i, &hr->headers,
                                   &hr->content_buf, &hr->content_len);
 }
