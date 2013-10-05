@@ -348,6 +348,20 @@ void tst_yaz_700(void)
 
     r = z_GDU(odr, &gdu_req, 0, 0);
     YAZ_CHECK(r);
+    if (r)
+    {
+        int len;
+        char *buf = odr_getbuf(odr, &len, 0);
+        ODR decode = odr_createmem(ODR_DECODE);
+        YAZ_CHECK(buf);
+        if (buf)
+        {
+            odr_setbuf(decode, buf, len, 0);
+            r = z_GDU(decode, &gdu_req, 0, 0);
+            YAZ_CHECK(r);
+        }
+        odr_destroy(decode);
+    }
     odr_destroy(odr);
 }
 
