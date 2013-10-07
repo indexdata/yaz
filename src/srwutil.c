@@ -241,14 +241,19 @@ static void grab_charset(ODR o, const char *content_type, char **charset)
         const char *charset_p = 0;
         if (content_type && (charset_p = strstr(content_type, "; charset=")))
         {
-            int i = 0;
-            charset_p += 10;
-            while (i < 20 && charset_p[i] &&
-                   !strchr("; \n\r", charset_p[i]))
-                i++;
-            *charset = (char*) odr_malloc(o, i+1);
-            memcpy(*charset, charset_p, i);
-            (*charset)[i] = '\0';
+            int j = 0, i = 0;
+            int sep = 0;
+            charset_p += 10; /* skip ; charset=  */
+            if (charset_p[i] == '"' || charset_p[i] == '\'')
+                sep = charset_p[i++];
+            *charset = odr_strdup(o, charset_p);
+            while (charset_p[i] && charset_p[i] != sep)
+            {
+                if (charset_p[i] == '\\' && charset_p[i+1])
+                    i++;
+                (*charset)[j++] = charset_p[i++];
+            }
+            (*charset)[j] = '\0';
         }
     }
 }
