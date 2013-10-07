@@ -1933,11 +1933,6 @@ static void process_http_request(association *assoc, request *req)
             hres->code = http_code;
 
             strcpy(ctype, "text/xml");
-            if (charset && strlen(charset) < sizeof(ctype)-30)
-            {
-                strcat(ctype, "; charset=");
-                strcat(ctype, charset);
-            }
             z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
         }
         else

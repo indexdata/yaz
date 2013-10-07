@@ -234,12 +234,19 @@ static void grab_charset(ODR o, const char *content_type, char **charset)
         const char *charset_p = 0;
         if (content_type && (charset_p = strstr(content_type, "; charset=")))
         {
-            int i = 0;
-            charset_p += 10;
-            while (i < 20 && charset_p[i] &&
-                   !strchr("; \n\r", charset_p[i]))
-                i++;
-            *charset = odr_strdupn(o, charset_p, i);
+            int j = 0, i = 0;
+            int sep = 0;
+            charset_p += 10; /* skip ; charset=  */
+            if (charset_p[i] == '"' || charset_p[i] == '\'')
+                sep = charset_p[i++];
+            *charset = odr_strdup(o, charset_p);
+            while (charset_p[i] && charset_p[i] != sep)
+            {
+                if (charset_p[i] == '\\' && charset_p[i+1])
+                    i++;
+                (*charset)[j++] = charset_p[i++];
+            }
+            (*charset)[j] = '\0';
         }
     }
 }
@@ -277,7 +284,6 @@ int yaz_srw_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 p1 = p0 + strlen(p0);
             if (p1 != p0)
                 db = yaz_decode_sru_dbpath_odr(decode, p0, p1 - p0);
-            grab_charset(decode, content_type, charset);
 
             ret = z_soap_codec(decode, soap_package,
                                &hreq->content_buf, &hreq->content_len,
@@ -1104,7 +1110,7 @@ int yaz_sru_soap_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                                  srw_pdu->username, srw_pdu->password);
     z_HTTP_header_add_content_type(odr,
                                    &hreq->headers,
-                                   "text/xml", charset);
+                                   "text/xml", 0 /* no charset in MIME */);
 
     z_HTTP_header_add(odr, &hreq->headers,
                       "SOAPAction", "\"\"");
