@@ -249,6 +249,8 @@ static void grab_charset(ODR o, const char *content_type, char **charset)
             *charset = odr_strdup(o, charset_p);
             while (charset_p[i] && charset_p[i] != sep)
             {
+                if (!sep && strchr("; \n\r", charset_p[i]))
+                    break;
                 if (charset_p[i] == '\\' && charset_p[i+1])
                     i++;
                 (*charset)[j++] = charset_p[i++];
