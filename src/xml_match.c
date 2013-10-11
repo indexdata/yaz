@@ -107,7 +107,7 @@ int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
         xmlBufferAddHead(buf, (const xmlChar *) "<yaz_record>", -1);
         xmlBufferAdd(buf, (const xmlChar *) "</yaz_record>", -1);
     }
-    *val = odr_strdupn(o, buf->content, buf->use);
+    *val = odr_strdupn(o, (const char *) buf->content, buf->use);
     if (len)
         *len = buf->use;
 
