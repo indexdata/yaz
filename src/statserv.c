@@ -523,7 +523,6 @@ static void xml_config_read(const char *base_path)
 
 static void xml_config_open(void)
 {
-    WRBUF base_path;
     const char *last_p;
     const char *fname = control_block.xml_config;
     if (!getcwd(gfs_root_dir, FILENAME_MAX))
@@ -563,7 +562,6 @@ static void xml_config_open(void)
             }
         }
     }
-    base_path = wrbuf_alloc();
     last_p = strrchr(fname,
 #ifdef WIN32
                      '\\'
@@ -572,11 +570,14 @@ static void xml_config_open(void)
 #endif
         );
     if (last_p)
+    {
+        WRBUF base_path = wrbuf_alloc();
         wrbuf_write(base_path, fname, last_p - fname);
+        xml_config_read(wrbuf_cstr(base_path));
+        wrbuf_destroy(base_path);
+    }
     else
-        wrbuf_puts(base_path, ".");
-    xml_config_read(wrbuf_cstr(base_path));
-    wrbuf_destroy(base_path);
+        xml_config_read(0);
 #endif
 }
 
