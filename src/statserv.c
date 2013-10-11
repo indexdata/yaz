@@ -23,6 +23,7 @@
 #endif
 
 #include <yaz/sc.h>
+#include <yaz/tpath.h>
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -333,7 +334,7 @@ int control_association(association *assoc, const char *host, int force_open)
 }
 
 #if YAZ_HAVE_XML2
-static void xml_config_read(void)
+static void xml_config_read(const char *base_path)
 {
     struct gfs_server **gfsp = &gfs_server_list;
     struct gfs_listen **gfslp = &gfs_listen_list;
@@ -412,28 +413,40 @@ static void xml_config_read(void)
                 }
                 else if (!strcmp((const char *) ptr->name, "config"))
                 {
+                    char fpath[1024];
                     strcpy(gfs->cb.configname,
                            nmem_dup_xml_content(gfs_nmem, ptr->children));
+
+                    if (yaz_filepath_resolve(gfs->cb.configname,
+                                             base_path, 0, fpath))
+                        strcpy(gfs->cb.configname, fpath);
                 }
                 else if (!strcmp((const char *) ptr->name, "cql2rpn"))
                 {
-                    char *name = nmem_dup_xml_content(gfs_nmem, ptr->children);
-                    gfs->cql_transform = cql_transform_open_fname(name);
+                    char fpath[1024];
+                    char *fname = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    if (yaz_filepath_resolve(fname, base_path, 0, fpath))
+                        fname = fpath;
+
+                    gfs->cql_transform = cql_transform_open_fname(fname);
                     if (!gfs->cql_transform)
                     {
                         yaz_log(YLOG_FATAL|YLOG_ERRNO,
-                                "open CQL transform file '%s'", name);
+                                "open CQL transform file '%s'", fname);
                         exit(1);
                     }
                 }
                 else if (!strcmp((const char *) ptr->name, "ccl2rpn"))
                 {
-                    char *name;
+                    char *fname, fpath[1024];
                     FILE *f;
 
-                    name = nmem_dup_xml_content(gfs_nmem, ptr->children);
-                    if ((f = fopen(name, "r")) == 0) {
-                        yaz_log(YLOG_FATAL, "can't open CCL file '%s'", name);
+                    fname = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    if (yaz_filepath_resolve(fname, base_path, 0, fpath))
+                        fname = fpath;
+
+                    if ((f = fopen(fname, "r")) == 0) {
+                        yaz_log(YLOG_FATAL, "can't open CCL file '%s'", fname);
                         exit(1);
                     }
                     gfs->ccl_transform = ccl_qual_mk();
@@ -468,6 +481,8 @@ static void xml_config_read(void)
                 }
                 else if (!strcmp((const char *) ptr->name, "retrievalinfo"))
                 {
+                    if (base_path)
+                        yaz_retrieval_set_path(gfs->retrieval, base_path);
                     if (yaz_retrieval_configure(gfs->retrieval, ptr))
                     {
                         yaz_log(YLOG_FATAL, "%s in config %s",
@@ -492,6 +507,9 @@ static void xml_config_read(void)
 
 static void xml_config_open(void)
 {
+    WRBUF base_path;
+    const char *last_p;
+    const char *fname = control_block.xml_config;
     if (!getcwd(gfs_root_dir, FILENAME_MAX))
     {
         yaz_log(YLOG_WARN|YLOG_ERRNO, "getcwd failed");
@@ -507,15 +525,15 @@ static void xml_config_open(void)
 
     gfs_nmem = nmem_create();
 #if YAZ_HAVE_XML2
-    if (control_block.xml_config[0] == '\0')
+    if (fname[0] == '\0')
         return;
 
     if (!xml_config_doc)
     {
-        xml_config_doc = xmlParseFile(control_block.xml_config);
+        xml_config_doc = xmlParseFile(fname);
         if (!xml_config_doc)
         {
-            yaz_log(YLOG_FATAL, "Could not parse %s", control_block.xml_config);
+            yaz_log(YLOG_FATAL, "Could not parse %s", fname);
             exit(1);
         }
         else
@@ -524,12 +542,25 @@ static void xml_config_open(void)
             if (noSubstitutions == -1)
             {
                 yaz_log(YLOG_WARN, "XInclude processing failed for config %s",
-                        control_block.xml_config);
+                        fname);
                 exit(1);
             }
         }
     }
-    xml_config_read();
+    base_path = wrbuf_alloc();
+    last_p = strrchr(fname,
+#ifdef WIN32
+                     '\\'
+#else
+                     '/'
+#endif
+        );
+    if (last_p)
+        wrbuf_write(base_path, fname, last_p - fname);
+    else
+        wrbuf_puts(base_path, ".");
+    xml_config_read(wrbuf_cstr(base_path));
+    wrbuf_destroy(base_path);
 #endif
 }
 
