@@ -935,6 +935,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         {
             r->len = strlen(cp);
             r->record = cp;
+            r->schema = "info:srw/schema/1/marcxml-1.1";
         }
         else
         {
