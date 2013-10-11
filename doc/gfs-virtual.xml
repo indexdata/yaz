@@ -84,10 +84,11 @@
   <varlistentry><term>attribute <literal>listenref</literal> (optional)</term>
    <listitem>
     <para>
-     Specifies listener for this server. If this attribute is not
-     given, the server is accessible from all listener. In order
-     for the server to be used for real, howeever, the virtual host
-     must match (if specified in the configuration).
+     Specifies one or more listeners for this server. Each server ID is
+     separated by a comma.
+     If this attribute is not given, the server is accessible from all
+     listeners. In order for the server to be used for real, however, the
+     virtual host must match if specified in the configuration.
     </para>
    </listitem>
   </varlistentry>
@@ -220,7 +221,7 @@
     <directory>/var/www/s1</directory>
     <config>config.cfg</config>
   </server>
-  <server id="server2">
+  <server id="server2" listenref="public,internal">
     <host>server2.mydomain</host>
     <directory>/var/www/s2</directory>
     <config>config.cfg</config>
@@ -243,9 +244,11 @@
 <para>
  There are three configured backend servers. The first two
  servers, <literal>"server1"</literal> and <literal>"server2"</literal>,
- can be reached by both listener addresses - since
- no <literal>listenref</literal> attribute is specified.
- In order to distinguish between the two a virtual host has
+ can be reached by both listener addresses.
+ <literal>"server1"</literal> is reached by all (two) since no
+  <literal>listenref</literal> attribute is specified.
+ <literal>"server2"</literal> is reached by the two listeners specified.
+ In order to distinguish between the two, a virtual host has
  been specified for each of server in the <literal>host</literal>
  elements.
 </para>

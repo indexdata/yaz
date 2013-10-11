@@ -286,9 +286,15 @@ int control_association(association *assoc, const char *host, int force_open)
             int host_match = 0;
             if ( !gfs->host || (host && gfs->host && !strcmp(host, gfs->host)))
                 host_match = 1;
-            if (!gfs->listen_ref ||
-                gfs->listen_ref == assoc->client_chan->chan_id)
+            if (!gfs->listen_ref)
                 listen_match = 1;
+            else
+            {
+                int i;
+                for (i = 0; gfs->listen_ref[i] != -1; i++)
+                    if (gfs->listen_ref[i] == assoc->client_chan->chan_id)
+                        listen_match = 1;
+            }
             if (listen_match && host_match)
             {
                 if (force_open ||
@@ -390,17 +396,27 @@ static void xml_config_read(const char *base_path)
             gfs->server_node_ptr = ptr_server;
             if (listenref)
             {
-                int id_no;
-                struct gfs_listen *gl = gfs_listen_list;
-                for (id_no = 1; gl; gl = gl->next, id_no++)
-                    if (gl->id && !strcmp(gl->id, listenref))
-                    {
-                        gfs->listen_ref = id_no;
-                        break;
-                    }
-                if (!gl)
-                    yaz_log(YLOG_WARN, "Non-existent listenref '%s' in server "
-                            "config element", listenref);
+                char **refs;
+                int num, i;
+                nmem_strsplit(gfs_nmem, ",", listenref, &refs, &num);
+                gfs->listen_ref = (int*) nmem_malloc(gfs_nmem,
+                                                     sizeof(int) * (num + 1));
+                for (i = 0; i < num; i++)
+                {
+                    int id_no;
+                    struct gfs_listen *gl = gfs_listen_list;
+                    gfs->listen_ref[i] = 0;
+                    for (id_no = 1; gl; gl = gl->next, id_no++)
+                        if (gl->id && !strcmp(gl->id, refs[i]))
+                        {
+                            gfs->listen_ref[i] = id_no;
+                            break;
+                        }
+                    if (!gl)
+                        yaz_log(YLOG_WARN, "Non-existent listenref '%s' "
+                                "in server config element", refs[i]);
+                }
+                gfs->listen_ref[i] = -1;
             }
             for (ptr = ptr_server->children; ptr; ptr = ptr->next)
             {
