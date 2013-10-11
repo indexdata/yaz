@@ -1,8 +1,8 @@
 copyright
 files
-libyaz4
-libyaz4-dbg
-libyaz4-dev
+libyaz5
+libyaz5-dbg
+libyaz5-dev
 yaz-icu
 yaz-illclient
 tmp
