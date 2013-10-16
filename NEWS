@@ -1,3 +1,5 @@
+--- 5.0.2 2013/10/16
+
 yaz-ztest returns schema for MARCXML test records. SRU require that
 recordSchema for records.
 
