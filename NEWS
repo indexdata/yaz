@@ -1,3 +1,25 @@
+yaz-ztest returns schema for MARCXML test records. SRU require that
+recordSchema for records.
+
+GFS: make surrogate diagnostic when yaz_record_conv_record fails -
+instead of non-surrogate diagnostic. This is a per-record failure.
+
+GFS: Allow multiple listenrefs YAZ-554. A server in yazgfs configuration
+may refer to multiple listeners now. Attribute listenref is a comma separated
+list of listen IDs.
+
+GFS: Use xmlconfig path as prefix for fnames YAZ-702. When -f
+option is given for GFS, the dirname of filename (for -f) is used
+as prefix for options such as cql2rpn, ccl2rpn, etc.
+
+Content-Type charset fixes YAZ-701 . Do not inspect charset in
+Content-Type header for SOAP when decoding SRU. The payload (XML)
+itself tells what encoding it is. In response, never supply encoding
+in Content-Type. The response payload (XML) tells what it is (with no
+encoding in XML it's UTF-8).
+
+HTTP decoding: allow blanks in URL paths YAZ-700
+
 --- 5.0.1 2013/10/04
 
 Various fixes for how SRU 2.0 is encoded. Fix NS for SRU 2.0 diagnostics
