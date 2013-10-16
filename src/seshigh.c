@@ -688,6 +688,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         if (r)
         {
             rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            rr->surrogate_flag = 1;
             if (details)
                 rr->errstring = odr_strdup(rr->stream, details);
         }
