@@ -1524,8 +1524,7 @@ static int send_SRW_searchRequest(const char *arg)
     sru_maximumRecords = 0;
     sr->u.request->maximumRecords = odr_intdup(out, 0);
     sr->u.request->facetList = facet_list;
-    if (record_schema)
-        sr->u.request->recordSchema = record_schema;
+    sr->u.request->recordSchema = record_schema;
     if (recordsyntax_size == 1 && !yaz_matchstr(recordsyntax_list[0], "xml"))
         sr->u.request->recordPacking = "xml";
     return send_srw(sr);
@@ -3185,8 +3184,7 @@ static int send_SRW_presentRequest(const char *arg)
     sr->u.request->startRecord = odr_intdup(out, setno);
     sru_maximumRecords = nos;
     sr->u.request->maximumRecords = odr_intdup(out, nos);
-    if (record_schema)
-        sr->u.request->recordSchema = record_schema;
+    sr->u.request->recordSchema = record_schema;
     if (recordsyntax_size == 1 && !yaz_matchstr(recordsyntax_list[0], "xml"))
         sr->u.request->recordPacking = "xml";
     return send_srw(sr);
