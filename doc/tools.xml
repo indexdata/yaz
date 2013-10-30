@@ -2511,6 +2511,45 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     </para>
    </sect2>
   </sect1>
+  <sect1><title>Sorting</title>
+   <para>
+    This chapter describes sorting and how it is supported in YAZ.
+    Sorting applies to a result-set.
+    The <ulink url="http://www.loc.gov/z3950/agency/markup/05.html#3.2.7">
+     Z39.50 sorting facility
+    </ulink>
+    takes one or more input result-sets
+    and one result-set as output. The most simple case is that
+    the input-set is the same as the output-set.
+   </para>
+   <para>
+    Z39.50 sorting has a separate APDU (service) that is, thus, performed
+    following a search (two phases).
+   </para>
+   <para>
+    In SRU/Solr, however, the model is different. Here, sorting is specified
+    during the the search operation. Note, however, that SRU might
+    perform sort as separate search, by referring to an existing result-set
+    in the query (result-set reference).
+   </para>
+   <sect2><title>Using the Z39.50 sort service</title>
+    <para>
+     yaz-client and the ZOOM API supports the Z39.50 sort facility. In any
+     case the sort sequence or sort critiera is using a string notation.
+     This notation is a one-line notation suitable for being manually
+     entered or generated and allows for easy logging (one liner).
+     For the ZOOM API, the sort is specified in the call to ZOOM_query_sortby
+     function. For yaz-client the sort is performed and specified using
+     the sort and sort+ commands. For description of the sort criteria notation
+     refer to the <link linkend="sortspec">sort command</link> in the
+     yaz-client manual.
+    </para>
+    <para>
+     The ZOOM API might choose one of several sort strategies for
+     sorting. Refer to <xref linkend="zoom-sort-strategy"/>.
+    </para>
+   </sect2>
+  </sect1>
  </chapter>
 
  <!-- Keep this comment at the end of the file

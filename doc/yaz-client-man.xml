@@ -353,8 +353,8 @@
       the integer before <literal>=</literal> is
       the attribute type and the integer following <literal>=</literal>
       is the attribute value.
-      If no <literal>=</literal> is in the criterion it is treated as a
-      sortfield of type InternationalString.
+      If no <literal>=</literal> character is in the criterion, it is treated
+      as a sortfield of type InternationalString.
       The flags word of each sort specification must consist of
       <literal>s</literal>
       for case sensitive or <literal>i</literal> for case insensitive, and
