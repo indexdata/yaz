@@ -2450,6 +2450,56 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       </itemizedlist>
      </para>
     </example>
+
+    <example id="tools.retrieval.marcxml">
+     <title>MARCXML backend</title>
+     <para>
+      SRW/SRU and Solr backends returns records in XML.
+      If they return MARCXML or MarcXchange, the retrieval module
+      can convert those into ISO2709 formats, most commonly USMARC
+      (AKA MARC21).
+      In this example, the backend returns MARCXML for schema="marcxml".
+     </para>
+     <programlisting><![CDATA[
+     <retrievalinfo>
+       <retrieval syntax="usmarc">
+         <backend syntax="xml" name="marcxml">
+	   <marc inputformat="xml" outputformat="marc"
+		 outputcharset="marc-8"/>
+	 </backend>
+       </retrieval>
+       <retrieval syntax="xml" name="marcxml"
+		  identifier="info:srw/schema/1/marcxml-v1.1"/>
+       <retrieval syntax="xml" name="dc">
+         <backend syntax="xml" name="marcxml">
+           <xslt stylesheet="MARC21slim2DC.xsl"/>
+	 </backend>
+       </retrieval>
+     </retrievalinfo>
+]]>
+     </programlisting>
+     <para>
+      This means that our frontend supports:
+      <itemizedlist>
+       <listitem>
+        <para>
+         MARC21 records (any element set name) in MARC-8 encoding.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         MARCXML records for element-set=marcxml
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         Dublin core records for element-set=dc.
+        </para>
+       </listitem>
+      </itemizedlist>
+     </para>
+    </example>
+
    </sect2>
    <sect2 id="tools.retrieval.api">
     <title>API</title>
