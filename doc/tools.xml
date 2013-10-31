@@ -2549,6 +2549,41 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      sorting. Refer to <xref linkend="zoom-sort-strategy"/>.
     </para>
    </sect2>
+   <sect2><title>Type-7 sort</title>
+    <para>
+     Type-7 sort is an extension to the Bib-1 based RPN query where the
+     sort specification is embedded as an Attribute-Plus-Term.
+    </para>
+    <para>
+     The objectives for introducing Type-7 sorting is that it allows
+     a client to perform sorting even if it does not implement/support
+     Z39.50 sort. Virtually all Z39.50 client software supports
+     RPN queries. It also may improve performance because the sort
+     critieria is specified along with the search query.
+    </para>
+    <para>
+     The sort is triggered by the presence of type 7 and the value of type 7
+     specifies the
+     <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortKeySpec">
+      sortRelation
+     </ulink>
+     The value for type 7 is 1 for ascending and 2 for descending.
+     For the
+     <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortElement">
+      sortElement
+     </ulink>
+     only the generic part is handled. If generic sortKey is of type
+     sortField, then attribute type 1 is present and the value is
+     sortField (InternationalString). If generic sortKey is of type
+     sortAttributes, then the attributes in list is used . generic sortKey
+     of type elementSpec is not supported.
+    </para>
+    <para>
+     The term in the sorting Attribute-Plus-Term combo should hold
+     an integer. The value is 0 for primary sorting criteria, 1 for second
+     criteria, etc.
+    </para>
+   </sect2>
   </sect1>
  </chapter>
 
