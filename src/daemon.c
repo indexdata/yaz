@@ -127,7 +127,7 @@ static void keepalive(void (*work)(void *data), void *data)
         /* enable signalling in kill_child_handler */
         child_pid = p;
 
-        p1 = wait(&status);
+        p1 = waitpid(p, &status, 0);
 
         /* disable signalling in kill_child_handler */
         child_pid = 0;
