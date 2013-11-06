@@ -561,8 +561,6 @@ ZOOM_API(void)
 
 ZOOM_API(void) ZOOM_resultset_release(ZOOM_resultset r)
 {
-#if ZOOM_RESULT_LISTS
-#else
     if (r->connection)
     {
         /* remove ourselves from the resultsets in connection */
@@ -579,36 +577,20 @@ ZOOM_API(void) ZOOM_resultset_release(ZOOM_resultset r)
         }
         r->connection = 0;
     }
-#endif
 }
 
 ZOOM_API(void)
     ZOOM_connection_destroy(ZOOM_connection c)
 {
-#if ZOOM_RESULT_LISTS
-    ZOOM_resultsets list;
-#else
     ZOOM_resultset r;
-#endif
     if (!c)
         return;
     yaz_log(c->log_api, "%p ZOOM_connection_destroy", c);
     if (c->cs)
         cs_close(c->cs);
 
-#if ZOOM_RESULT_LISTS
-    /* Remove the connection's usage of resultsets */
-    list = c->resultsets;
-    while (list) {
-        ZOOM_resultsets removed = list;
-        ZOOM_resultset_destroy(list->resultset);
-        list = list->next;
-        xfree(removed);
-    }
-#else
     for (r = c->resultsets; r; r = r->next)
         r->connection = 0;
-#endif
 
     xfree(c->buf_in);
     xfree(c->addinfo);
@@ -731,9 +713,6 @@ ZOOM_API(ZOOM_resultset)
     const char *cp;
     int start, count;
     const char *syntax, *elementSetName, *schema;
-#if ZOOM_RESULT_LISTS
-    ZOOM_resultsets set;
-#endif
 
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = ZOOM_query_get_sortspec(q);
@@ -758,18 +737,8 @@ ZOOM_API(ZOOM_resultset)
                                          r->odr);
 
     r->connection = c;
-
-#if ZOOM_RESULT_LISTS
-    yaz_log(log_details, "%p ZOOM_connection_search: Adding new resultset (%p) to resultsets (%p) ", c, r, c->resultsets);
-    set = xmalloc(sizeof(*set));
-    ZOOM_resultset_addref(r);
-    set->resultset = r;
-    set->next = c->resultsets;
-    c->resultsets = set;
-#else
     r->next = c->resultsets;
     c->resultsets = r;
-#endif
     if (c->host_port && c->proto == PROTO_HTTP)
     {
         if (!c->cs)

@@ -778,15 +778,6 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
                result sets on the server. */
             for (ord = 1; ; ord++)
             {
-#if ZOOM_RESULT_LISTS
-                ZOOM_resultsets rsp;
-                sprintf(setname, "%d", ord);
-                for (rsp = c->resultsets; rsp; rsp = rsp->next)
-                    if (rsp->resultset->setname && !strcmp(rsp->resultset->setname, setname))
-                        break;
-                if (!rsp)
-                    break;
-#else
                 ZOOM_resultset rp;
                 sprintf(setname, "%d", ord);
                 for (rp = c->resultsets; rp; rp = rp->next)
@@ -794,8 +785,6 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
                         break;
                 if (!rp)
                     break;
-#endif
-
             }
             r->setname = xstrdup(setname);
             yaz_log(c->log_details, "%p ZOOM_connection_send_search: "
