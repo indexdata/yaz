@@ -103,9 +103,9 @@ char *databaseNames[128];
 int num_databaseNames = 0;
 static Z_External *record_last = 0;
 static int setnumber = -1;              /* current result set number */
-static int smallSetUpperBound = 0;
-static int largeSetLowerBound = 1;
-static int mediumSetPresentNumber = 0;
+static Odr_int smallSetUpperBound = 0;
+static Odr_int largeSetLowerBound = 1;
+static Odr_int mediumSetPresentNumber = 0;
 static Z_ElementSetNames *elementSetNames = 0;
 static Z_FacetList *facet_list = 0;
 static ODR facet_odr = 0;
@@ -2949,30 +2949,30 @@ static int cmd_delete(const char *arg)
 
 static int cmd_ssub(const char *arg)
 {
-    if (!(smallSetUpperBound = atoi(arg)))
-        return 0;
+    smallSetUpperBound = odr_strtol(arg, 0, 10);
     return 1;
 }
 
 static int cmd_lslb(const char *arg)
 {
-    if (!(largeSetLowerBound = atoi(arg)))
-        return 0;
+    largeSetLowerBound = odr_strtol(arg, 0, 10);
     return 1;
 }
 
 static int cmd_mspn(const char *arg)
 {
-    if (!(mediumSetPresentNumber = atoi(arg)))
-        return 0;
+    mediumSetPresentNumber = odr_strtol(arg, 0, 10);
     return 1;
 }
 
 static int cmd_status(const char *arg)
 {
-    printf("smallSetUpperBound: %d\n", smallSetUpperBound);
-    printf("largeSetLowerBound: %d\n", largeSetLowerBound);
-    printf("mediumSetPresentNumber: %d\n", mediumSetPresentNumber);
+    printf("smallSetUpperBound: " ODR_INT_PRINTF "\n",
+           smallSetUpperBound);
+    printf("largeSetLowerBound: " ODR_INT_PRINTF "\n",
+           largeSetLowerBound);
+    printf("mediumSetPresentNumber: " ODR_INT_PRINTF "\n",
+           mediumSetPresentNumber);
     return 1;
 }
 
@@ -4897,7 +4897,9 @@ static int cmd_list_all(const char* args)
     printf("Named Result Sets    : %s\n",setnumber==-1?"off":"on");
 
     /* piggy back options */
-    printf("ssub/lslb/mspn       : %d/%d/%d\n",smallSetUpperBound,largeSetLowerBound,mediumSetPresentNumber);
+    printf("ssub/lslb/mspn       : " ODR_INT_PRINTF "/" ODR_INT_PRINTF "/"
+           ODR_INT_PRINTF "\n",
+           smallSetUpperBound, largeSetLowerBound, mediumSetPresentNumber);
 
     /* print present related options */
     if (recordsyntax_size > 0)
