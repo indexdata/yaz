@@ -109,26 +109,6 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     return x;
 }
 
-#if 0
-/* not used */
-static unsigned long read_iso5426s(yaz_iconv_t cd, yaz_iconv_decoder_t d,
-                                 unsigned char *inp,
-                                 size_t inbytesleft, size_t *no_read)
-{
-    struct decoder_data *data = (struct decoder_data *) d->data;
-    unsigned long x = read_iso5426(cd, d, inp, inbytesleft, no_read);
-    if (x && data->comb_size == 1)
-    {
-        if (yaz_iso_8859_1_lookup_x12(x, data->comb_x[0], &x))
-        {
-            *no_read += data->comb_no_read[0];
-            data->comb_size = 0;
-        }
-    }
-    return x;
-}
-#endif
-
 static unsigned long yaz_read_iso5426_comb(yaz_iconv_t cd,
                                          struct decoder_data *data,
                                          unsigned char *inp,
@@ -195,44 +175,13 @@ static unsigned long yaz_read_iso5426_comb(yaz_iconv_t cd,
         {
         case 'B':  /* Basic ASCII */
         case 's':  /* ASCII */
-            x = yaz_iso5426_42_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
+            x = yaz_iso5426_42_conv(inp, inbytesleft, &no_read_sub, comb,
+                                    127, 0);
             break;
         case 'E':  /* ANSEL */
-            x = yaz_iso5426_45_conv(inp, inbytesleft, &no_read_sub, comb, 127, 128);
+            x = yaz_iso5426_45_conv(inp, inbytesleft, &no_read_sub, comb,
+                                    127, 128);
             break;
-
-#if 0
-        case 'g':  /* Greek */
-            x = yaz_iso5426_67_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case 'b':  /* Subscripts */
-            x = yaz_iso5426_62_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case 'p':  /* Superscripts */
-            x = yaz_iso5426_70_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case '2':  /* Basic Hebrew */
-            x = yaz_iso5426_32_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case 'N':  /* Basic Cyrillic */
-            x = yaz_iso5426_4E_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case 'Q':  /* Extended Cyrillic */
-            x = yaz_iso5426_51_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case '3':  /* Basic Arabic */
-            x = yaz_iso5426_33_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case '4':  /* Extended Arabic */
-            x = yaz_iso5426_34_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case 'S':  /* Greek */
-            x = yaz_iso5426_53_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-        case '1':  /* Chinese, Japanese, Korean (EACC) */
-            x = yaz_iso5426_31_conv(inp, inbytesleft, &no_read_sub, comb, 127, 0);
-            break;
-#endif
         default:
             *no_read = 0;
             yaz_iconv_set_errno(cd, YAZ_ICONV_EILSEQ);

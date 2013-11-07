@@ -135,15 +135,6 @@ void odr_FILE_write(ODR o, void *handle, int type,
                     const char *buf, int len)
 {
     int i;
-#if 0
-    if (type  == ODR_OCTETSTRING)
-    {
-        const char **stack_names = odr_get_element_path(o);
-        for (i = 0; stack_names[i]; i++)
-            fprintf((FILE*) handle, "[%s]", stack_names[i]);
-        fputs("\n", (FILE*) handle);
-    }
-#endif
     for (i = 0; i < len; i++)
     {
         unsigned c = ((const unsigned char *) buf)[i];

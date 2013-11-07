@@ -175,7 +175,8 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
             sprintf(av->useattrbuff, ODR_INT_PRINTF,
                         *ae-> attributeType);
             av->errstring = av->useattrbuff;
-            yaz_log(YLOG_WARN, "Unsupported attribute type %s", av->useattrbuff);
+            yaz_log(YLOG_WARN, "Unsupported attribute type %s",
+                    av->useattrbuff);
             /* would like to give a better message, but the standard */
             /* tells me to return the attribute type */
         }
@@ -183,26 +184,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
             return; /* no need to dig deeper, return on first error */
     }
     return;
-} /* facetattrs */
-
-#if 0
-Z_Term *term_create(ODR odr, const char *cstr)
-{
-    Z_Term *term = odr_malloc(odr, sizeof(*term));
-    term->which = Z_Term_characterString;
-    term->u.characterString = odr_strdup(odr, cstr);
-    return term;
 }
-
-Z_FacetTerm* facet_term_create(ODR odr, Z_Term *term, int freq)
-{
-    Z_FacetTerm *facet_term = odr_malloc(odr, sizeof(*facet_term));
-    facet_term->count = odr_malloc(odr, sizeof(*facet_term->count));
-    facet_term->term = term;
-    *facet_term->count = freq;
-    return facet_term;
-}
-#endif
 
 Z_FacetTerm *facet_term_create_cstr(ODR odr, const char *cstr, Odr_int freq)
 {

@@ -307,20 +307,6 @@ solr_transform_t solr_transform_open_fname(const char *fname)
     return ct;
 }
 
-#if 0
-struct Z_AttributeElement {
-	Z_AttributeSetId *attributeSet; /* OPT */
-	int *attributeType;
-	int which;
-	union {
-		int *numeric;
-		Z_ComplexAttribute *complex;
-#define Z_AttributeValue_numeric 1
-#define Z_AttributeValue_complex 2
-	} value;
-};
-#endif
-
 static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
 {
     ODR odr_a = odr_createmem(ODR_ENCODE);

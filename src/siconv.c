@@ -32,12 +32,6 @@
 struct yaz_iconv_struct {
     int my_errno;
     int init_flag;
-#if 0
-    size_t (*init_handle)(yaz_iconv_t cd, unsigned char *inbuf,
-                            size_t inbytesleft, size_t *no_read);
-    unsigned long (*read_handle)(yaz_iconv_t cd, unsigned char *inbuf,
-                                 size_t inbytesleft, size_t *no_read);
-#endif
     size_t no_read_x;
     unsigned long unget_x;
 #if HAVE_ICONV_H
