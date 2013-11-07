@@ -51,16 +51,15 @@ typedef struct yaz_iconv_struct *yaz_iconv_t;
 #define YAZ_ICONV_EINVAL 4
 
 /** \brief just like iconv_open(3) */
-YAZ_EXPORT yaz_iconv_t yaz_iconv_open (const char *tocode,
-                                       const char *fromcode);
+YAZ_EXPORT yaz_iconv_t yaz_iconv_open(const char *tocode, const char *fromcode);
 /** \brief just like iconv(3) */
-YAZ_EXPORT size_t yaz_iconv (yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
-                             char **outbuf, size_t *outbytesleft);
+YAZ_EXPORT size_t yaz_iconv(yaz_iconv_t cd, char **inbuf, size_t *inbytesleft,
+                            char **outbuf, size_t *outbytesleft);
 /** \brief returns last error - like errno for iconv(3) */
-YAZ_EXPORT int yaz_iconv_error (yaz_iconv_t cd);
+YAZ_EXPORT int yaz_iconv_error(yaz_iconv_t cd);
 
 /** \brief just like iconv_close(3) */
-YAZ_EXPORT int yaz_iconv_close (yaz_iconv_t cd);
+YAZ_EXPORT int yaz_iconv_close(yaz_iconv_t cd);
 
 /** \brief tests whether conversion is handled by YAZ' iconv or system iconv */
 YAZ_EXPORT int yaz_iconv_isbuiltin(yaz_iconv_t cd);
