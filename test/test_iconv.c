@@ -156,16 +156,6 @@ static int tst_convert(yaz_iconv_t cd, const char *buf, const char *cmpbuf)
     return tst_convert_x(cd, buf, cmpbuf, 0);
 }
 
-/* some test strings in ISO-8859-1 format */
-static const char *iso_8859_1_a[] = {
-    "ax" ,
-    "\xd8",
-    "eneb\346r",
-    "\xe5" "\xd8",
-    "\xe5" "\xd8" "b",
-    "\xe5" "\xe5",
-    0 };
-
 static void tst_marc8_to_ucs4b(void)
 {
     yaz_iconv_t cd = yaz_iconv_open("UCS4", "MARC8");
@@ -288,6 +278,15 @@ static void tst_ucs4b_to_utf8(void)
 
 static void dconvert(int mandatory, const char *tmpcode)
 {
+    /* some test strings in ISO-8859-1 format */
+    static const char *iso_8859_1_a[] = {
+        "ax" ,
+        "\xd8",
+        "eneb\346r",
+        "\xe5" "\xd8",
+        "\xe5" "\xd8" "b",
+        "\xe5" "\xe5",
+        0 };
     int i;
     int ret;
     yaz_iconv_t cd;
