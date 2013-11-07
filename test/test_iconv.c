@@ -701,6 +701,23 @@ static void tst_danmarc_to_latin1(void)
     yaz_iconv_close(cd);
 }
 
+static void tst_utf8_to_danmarc(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("danmarc", "utf-8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "ax", "ax"));
+    YAZ_CHECK(tst_convert(cd, "@", "@@"));
+    YAZ_CHECK(tst_convert(cd, "a\xc3\xa5" "b", "a\xe5" "b")); /* aring */
+    YAZ_CHECK(tst_convert(cd, "a\xce\xbb" "b", "a@03BBb")); /* lambda */
+
+    yaz_iconv_close(cd);
+}
+
+
 
 int main (int argc, char **argv)
 {
@@ -722,6 +739,7 @@ int main (int argc, char **argv)
     tst_utf8_to_marc8("marc8lossless");
 
     tst_danmarc_to_latin1();
+    tst_utf8_to_danmarc();
 
     tst_latin1_to_marc8();
 

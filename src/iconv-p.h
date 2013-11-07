@@ -63,6 +63,8 @@ yaz_iconv_encoder_t yaz_iso_5428_encoder(const char *name,
                                          yaz_iconv_encoder_t e);
 yaz_iconv_encoder_t yaz_advancegreek_encoder(const char *name,
                                              yaz_iconv_encoder_t e);
+yaz_iconv_encoder_t yaz_danmarc_encoder(const char *name,
+                                        yaz_iconv_encoder_t e);
 yaz_iconv_encoder_t yaz_wchar_encoder(const char *name,
                                       yaz_iconv_encoder_t e);
 typedef unsigned long yaz_conv_func_t(unsigned char *inp, size_t inbytesleft,

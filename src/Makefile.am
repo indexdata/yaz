@@ -104,7 +104,7 @@ libyaz_la_SOURCES=base64.c version.c options.c log.c \
   xmlquery.c xmlerror.c http.c \
   mime.c mime.h oid_util.c tokenizer.c \
   record_conv.c retrieval.c elementset.c snprintf.c query-charset.c \
-  copy_types.c match_glob.c poll.c daemon.c \
+  copy_types.c match_glob.c poll.c daemon.c iconv_encode_danmarc.c \
   iconv_encode_marc8.c iconv_encode_iso_8859_1.c iconv_encode_wchar.c \
   iconv_decode_marc8.c iconv_decode_iso5426.c iconv_decode_danmarc.c sc.c \
   json.c xml_include.c file_glob.c dirent.c mutex-p.h mutex.c condvar.c \

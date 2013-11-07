@@ -535,6 +535,7 @@ MISC_OBJS= \
    $(OBJDIR)\match_glob.obj \
    $(OBJDIR)\poll.obj \
    $(OBJDIR)\daemon.obj \
+   $(OBJDIR)\iconv_encode_danmarc.obj \
    $(OBJDIR)\iconv_encode_iso_8859_1.obj \
    $(OBJDIR)\iconv_encode_marc8.obj \
    $(OBJDIR)\iconv_decode_marc8.obj \

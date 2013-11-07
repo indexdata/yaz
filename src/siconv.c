@@ -64,6 +64,8 @@ static int prepare_encoders(yaz_iconv_t cd, const char *tocode)
         return 1;
     if (yaz_wchar_encoder(tocode, &cd->encoder))
         return 1;
+    if (yaz_danmarc_encoder(tocode, &cd->encoder))
+        return 1;
     return 0;
 }
 
