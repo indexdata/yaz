@@ -1259,6 +1259,17 @@ static void normal_stop_handler(int num)
 }
 #endif
 
+static void show_version(void)
+{
+    char vstr[20], sha1_str[41];
+
+    yaz_version(vstr, sha1_str);
+    printf("YAZ version: %s %s\n", YAZ_VERSION, YAZ_VERSION_SHA1);
+    if (strcmp(sha1_str, YAZ_VERSION_SHA1))
+        printf("YAZ DLL/SO: %s %s\n", vstr, sha1_str);
+    exit(0);
+}
+
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     char sep;
@@ -1338,7 +1349,7 @@ int check_options(int argc, char **argv)
 
     get_logbits(1);
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:V",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1454,11 +1465,14 @@ int check_options(int argc, char **argv)
             }
             yaz_log_init_max_size(r * 1024);
             break;
+        case 'V':
+            show_version();
+            break;
         default:
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
-                    " -zKiDST1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
+                    " -zKiDSTV1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }
     }

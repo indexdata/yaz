@@ -22,7 +22,7 @@
  <arg choice="opt"><option>-w <replaceable>dir</replaceable></option></arg>
  <arg choice="opt"><option>-p <replaceable>pidfile</replaceable></option></arg>
  <arg choice="opt"><option>-r <replaceable>kilobytes</replaceable></option></arg>
- <arg choice="opt"><option>-ziDST1</option></arg>
+ <arg choice="opt"><option>-ziDSTV1</option></arg>
  <arg choice="opt" rep="repeat">listener-spec</arg>
 </cmdsynopsis>
 

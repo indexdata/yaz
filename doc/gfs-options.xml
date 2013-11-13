@@ -196,6 +196,12 @@
    </para></listitem>
  </varlistentry>
 
+ <varlistentry><term><literal>-V </literal></term>
+  <listitem><para>
+   Display YAZ version and exit.
+   </para></listitem>
+ </varlistentry>
+
 </variablelist>
 
 <!-- Keep this comment at the end of the file
