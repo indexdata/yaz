@@ -1,3 +1,16 @@
+--- 5.0.3 2013/11/19
+
+yaz-ztest: -V shows version (like yaz-client -V)
+
+New iconv encoding: danmarc YAZ-692
+
+yaz-client: lslb, ssub, mspn are Odr_ints now YAZ-705
+
+daemon: only wait for immediate child rather than all children. YAZ-704
+
+yaz-client: fix setting of SRU record schema. If scheme was unset, it
+could lead to invalid memory reference.
+
 --- 5.0.2 2013/10/16
 
 yaz-ztest returns schema for MARCXML test records. SRU require that
