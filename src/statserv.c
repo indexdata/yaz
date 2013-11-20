@@ -163,7 +163,6 @@ static xmlNodePtr xml_config_get_root(void)
             yaz_log(YLOG_WARN, "Bad/missing root element for config %s",
                     control_block.xml_config);
             return 0;
-
         }
     }
     return ptr;
@@ -521,7 +520,7 @@ static void xml_config_read(const char *base_path)
 }
 #endif
 
-static void xml_config_open(void)
+static int xml_config_open(void)
 {
     const char *last_p;
     const char *fname = control_block.xml_config;
@@ -541,7 +540,7 @@ static void xml_config_open(void)
     gfs_nmem = nmem_create();
 #if YAZ_HAVE_XML2
     if (fname[0] == '\0')
-        return;
+        return 0;
 
     if (!xml_config_doc)
     {
@@ -549,7 +548,7 @@ static void xml_config_open(void)
         if (!xml_config_doc)
         {
             yaz_log(YLOG_FATAL, "Could not parse %s", fname);
-            exit(1);
+            return -1;
         }
         else
         {
@@ -558,7 +557,7 @@ static void xml_config_open(void)
             {
                 yaz_log(YLOG_WARN, "XInclude processing failed for config %s",
                         fname);
-                exit(1);
+                return -1;
             }
         }
     }
@@ -579,6 +578,7 @@ static void xml_config_open(void)
     else
         xml_config_read(0);
 #endif
+    return 0;
 }
 
 static void xml_config_close(void)
@@ -601,16 +601,18 @@ static void xml_config_close(void)
 #endif
 }
 
-static void xml_config_add_listeners(void)
+static int xml_config_add_listeners(void)
 {
     struct gfs_listen *gfs = gfs_listen_list;
     int id_no;
+    int ret = 0;
 
     for (id_no = 1; gfs; gfs = gfs->next, id_no++)
     {
-        if (gfs->address)
-            add_listener(gfs->address, id_no);
+        if (!ret && gfs->address)
+            ret = add_listener(gfs->address, id_no);
     }
+    return ret;
 }
 
 static void xml_config_bend_start(void)
@@ -1294,7 +1296,8 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
     if (control_block.options_func(argc, argv))
         return 1;
 
-    xml_config_open();
+    if (xml_config_open())
+        return 1;
 
     xml_config_bend_start();
 
@@ -1308,7 +1311,8 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
     }
     else
     {
-        xml_config_add_listeners();
+        if (xml_config_add_listeners())
+            return 1;
 
         if (!pListener)
             add_listener("tcp:@:9999", 0);
