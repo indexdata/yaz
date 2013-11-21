@@ -1386,6 +1386,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                         "ZOOM C generated. Present phase and no records");
                 ZOOM_record_cache_add(resultset, myrec, *start,
                                       syntax, elementSetName, schema, 0);
+                *count = 0;
             }
         }
         else if (present_phase)
@@ -1398,6 +1399,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                     "ZOOM C generated: Present response and no records");
             ZOOM_record_cache_add(resultset, myrec, *start,
                                   syntax, elementSetName, schema, 0);
+            *count = 0;
         }
     }
 }
