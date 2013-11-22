@@ -291,7 +291,7 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
 
         if (!rule && strcmp((const char *) node->name, "display"))
         {
-            yaz_log(YLOG_WARN, "Missing attribute rule for element %s",
+            yaz_log(YLOG_WARN, "Missing attribute 'rule' for element %s",
                     (const char *) node->name);
             no_errors++;
             continue;
@@ -346,6 +346,9 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
         }
         if (step && U_FAILURE(*status))
         {
+            yaz_log(YLOG_WARN, "ICU Error %d %s for element %s, rule %s",
+                    *status, u_errorName(*status), node->name, rule ?
+                    rule : "");
             no_errors++;
             break;
         }

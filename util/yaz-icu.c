@@ -454,8 +454,6 @@ static void process_text_file(struct config_t *p_config)
     {
         printf("Could not set up ICU chain from config file '%s' \n",
                 p_config->conffile);
-        if (!U_SUCCESS(status))
-            printf("ICU Error: %d %s\n", status, u_errorName(status));
         exit(1);
     }
 
