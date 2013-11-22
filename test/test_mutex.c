@@ -84,25 +84,27 @@ static void *my_handler(void *arg)
 static void tst_create_thread(void)
 {
     void *return_data;
-    int mydata = 42;
+    int mydata0 = 42;
+    int mydata1= 42;
     yaz_thread_t t[2];
 
-    t[0] = yaz_thread_create(my_handler, &mydata);
+    t[0] = yaz_thread_create(my_handler, &mydata0);
     YAZ_CHECK(t[0]);
-    t[1] = yaz_thread_create(my_handler, &mydata);
+    t[1] = yaz_thread_create(my_handler, &mydata1);
     YAZ_CHECK(t[1]);
 
     return_data = 0;
     yaz_thread_join(&t[0], &return_data);
     YAZ_CHECK(!t[0]);
-    YAZ_CHECK(return_data == &mydata);
+    YAZ_CHECK(return_data == &mydata0);
 
     return_data = 0;
     yaz_thread_join(&t[1], &return_data);
     YAZ_CHECK(!t[1]);
-    YAZ_CHECK(return_data == &mydata);
+    YAZ_CHECK(return_data == &mydata1);
 
-    YAZ_CHECK_EQ(mydata, 44);
+    YAZ_CHECK_EQ(mydata0, 43);
+    YAZ_CHECK_EQ(mydata1, 43);
 }
 
 int main (int argc, char **argv)
