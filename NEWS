@@ -1,3 +1,17 @@
+--- 5.0.4 2013/11/22
+
+Improve error reporting for ICU chains YAZ-707
+Report config element+rule when ICU status is "failure".
+
+ZOOM: stop fetching if present response has no records YAZ-710
+Some targets return less records than their hit count would suggest.
+This prevents ZOOM from continuing to fetch records if any present
+response has 0 records in the response.
+
+Ensure that GFS calls exit if any listener fails YAZ-710
+Before, if XML config was in use, it would start the default
+listener @:9999!
+
 --- 5.0.3 2013/11/19
 
 yaz-ztest: -V shows version (like yaz-client -V)
