@@ -681,9 +681,9 @@ static void tst_utf8_codes(void)
     YAZ_CHECK(utf8_check(100000000));
 }
 
-static void tst_danmarc_to_latin1(void)
+static void tst_danmarc_to_utf8(void)
 {
-    yaz_iconv_t cd = yaz_iconv_open("iso-8859-1", "danmarc");
+    yaz_iconv_t cd = yaz_iconv_open("utf-8", "danmarc");
 
     YAZ_CHECK(cd);
     if (!cd)
@@ -693,10 +693,17 @@ static void tst_danmarc_to_latin1(void)
 
     YAZ_CHECK(tst_convert(cd, "a@@b", "a@b"));
     YAZ_CHECK(tst_convert(cd, "a@@@@b", "a@@b"));
-    YAZ_CHECK(tst_convert(cd, "@000ab", "\nb"));
 
-    YAZ_CHECK(tst_convert(cd, "@\xe5", "aa"));
-    YAZ_CHECK(tst_convert(cd, "@\xc5.", "Aa."));
+    YAZ_CHECK(tst_convert(cd, "@*",  "*"));
+    YAZ_CHECK(tst_convert(cd, "@@",  "@"));
+    YAZ_CHECK(tst_convert(cd, "@\xa4",  "\xC2\xA4"));
+    YAZ_CHECK(tst_convert(cd, "@\xe5", "\xEA\x9C\xB3"));
+    YAZ_CHECK(tst_convert(cd, "@\xc5.", "\xEA\x9C\xB2" "."));
+
+    YAZ_CHECK(tst_convert(cd, "@a733",  "\xEA\x9C\xB3"));
+    YAZ_CHECK(tst_convert(cd, "@a732.",  "\xEA\x9C\xB2" "."));
+
+    YAZ_CHECK(tst_convert(cd, "a@03BBb", "a\xce\xbb" "b")); /* lambda */
 
     yaz_iconv_close(cd);
 }
@@ -710,9 +717,19 @@ static void tst_utf8_to_danmarc(void)
         return;
 
     YAZ_CHECK(tst_convert(cd, "ax", "ax"));
+
+    YAZ_CHECK(tst_convert(cd, "a@b", "a@@b"));
+    YAZ_CHECK(tst_convert(cd, "a@@b", "a@@@@b"));
+
+    YAZ_CHECK(tst_convert(cd, "*",  "@*"));
     YAZ_CHECK(tst_convert(cd, "@", "@@"));
+    YAZ_CHECK(tst_convert(cd, "\xC2\xA4", "@\xa4"));
+
     YAZ_CHECK(tst_convert(cd, "a\xc3\xa5" "b", "a\xe5" "b")); /* aring */
     YAZ_CHECK(tst_convert(cd, "a\xce\xbb" "b", "a@03BBb")); /* lambda */
+
+    YAZ_CHECK(tst_convert(cd, "\xEA\x9C\xB2" ".", "@\xc5."));
+    YAZ_CHECK(tst_convert(cd, "\xEA\x9C\xB3", "@\xe5"));
 
     yaz_iconv_close(cd);
 }
@@ -738,7 +755,7 @@ int main (int argc, char **argv)
     tst_utf8_to_marc8("marc8lossy");
     tst_utf8_to_marc8("marc8lossless");
 
-    tst_danmarc_to_latin1();
+    tst_danmarc_to_utf8();
     tst_utf8_to_danmarc();
 
     tst_latin1_to_marc8();

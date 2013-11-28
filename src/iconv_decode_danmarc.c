@@ -57,14 +57,12 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
             *no_read = 2;
             break;
         case 0xe5: /* LATIN SMALL LETTER A WITH RING ABOVE */
-            x = 'a';
-            data->x_back = 'a';
-            *no_read = 1;
+            x = 0xa733;
+            *no_read = 2;
             break;
         case 0xc5: /* LATIN CAPITAL LETTER A WITH RING ABOVE */
-            x = 'A';
-            data->x_back = 'a';
-            *no_read = 1;
+            x = 0xa732;
+            *no_read = 2;
             break;
         default:
             if (inbytesleft < 5)

@@ -25,14 +25,14 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
-    if (x == '@')
+    if (x == '@' || x == '*' || x == 0xa4)
     {
         if (*outbytesleft < 2)
         {
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
             return (size_t)(-1);
         }
-        *outp++ = x;
+        *outp++ = '@';
         (*outbytesleft)--;
         *outp++ = x;
         (*outbytesleft)--;
@@ -48,15 +48,31 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t en,
         (*outbytesleft)--;
     }
     else
-    {  /* full unicode, emit @XXXX */
+    {
         if (*outbytesleft < 6)
         {
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
             return (size_t)(-1);
         }
-        sprintf(*outbuf, "@%04lX", x);
-        outp += 5;
-        (*outbytesleft) -= 5;
+        switch (x)
+        {
+        case 0xa733:
+            *outp++ = '@';
+            *outp++ = 0xe5;
+            (*outbytesleft) -= 2;
+            break;
+        case 0xa732:
+            *outp++ = '@';
+            *outp++ = 0xc5;
+            (*outbytesleft) -= 2;
+            break;
+        default:
+            /* full unicode, emit @XXXX */
+            sprintf(*outbuf, "@%04lX", x);
+            outp += 5;
+            (*outbytesleft) -= 5;
+            break;
+        }
     }
     *outbuf = (char *) outp;
     return 0;
