@@ -1580,35 +1580,109 @@ char *dummy_marc_record(int num, ODR odr)
     }
 }
 
+#define PZ_CBEGIN "<pz:cluster xmlns:pz=\"http://www.indexdata.com/pazpar2/1.0\">\n"
+#define PZ_CEND "</pz:cluster>\n"
+#define PZ_BEGIN "<record xmlns=\"http://www.indexdata.com/pazpar2/1.0\">\n"
+#define PZ_END "</record>\n"
+#define PZ_METADATA(x, y) " <metadata type=\"" #x "\">" y "</metadata>\n"
+
+static char *dummy_pz2_record(int num, ODR odr)
+{
+    const char *rec[] = {
+        PZ_CBEGIN
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol1")
+        PZ_END
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol2")
+        PZ_END
+        PZ_CEND
+        ,
+        PZ_CBEGIN
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol3")
+        PZ_END
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol2")
+        PZ_END
+        PZ_CEND
+        ,
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol1")
+        PZ_END
+        ,
+        /* identical to first */
+        PZ_CBEGIN
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol1")
+        PZ_END
+        PZ_BEGIN
+        PZ_METADATA(author,"Jack Collins")
+        PZ_METADATA(medium, "book")
+        PZ_METADATA(date, "1995")
+        PZ_METADATA(title, "How to program a computer vol4")
+        PZ_END
+        PZ_CEND
+    };
+    if (num > 0 && num <= sizeof(rec)/sizeof(*rec))
+        return odr_strdup(odr, rec[num - 1]);
+    return 0;
+}
+
 /* read MARC record and convert to XML */
 char *dummy_xml_record(int num, ODR odr, const char *esn)
 {
-    char *rec = dummy_marc_record(num, odr);
-
-    if (rec)
+    if (esn && !strcmp(esn, "pz2"))
     {
-        WRBUF w = wrbuf_alloc();
-        yaz_marc_t mt = yaz_marc_create();
-
-        yaz_marc_xml(mt, YAZ_MARC_MARCXML);
-        if (esn && !strcmp(esn, "OP"))
-        {
-            /* generate OPACXML (OPAC in XML) */
-            Z_OPACRecord *opac = dummy_opac(num, odr, rec);
-            yaz_opac_decode_wrbuf(mt, opac, w);
-        }
-        else
-        {
-            /* generate MARCXML */
-            yaz_marc_decode_wrbuf(mt, rec, -1, w);
-        }
-        rec = odr_strdup(odr, wrbuf_cstr(w));
-        yaz_marc_destroy(mt);
-        wrbuf_destroy(w);
-
+        return dummy_pz2_record(num, odr);
     }
-    return rec;
+    else if (!esn || !strcmp(esn, "marcxml") || !strcmp(esn, "OP"))
+    {
+        /* MARCXML and OPACXML */
+        char *rec = dummy_marc_record(num, odr);
+        if (rec)
+        {
+            WRBUF w = wrbuf_alloc();
+            yaz_marc_t mt = yaz_marc_create();
+            yaz_marc_xml(mt, YAZ_MARC_MARCXML);
+            if (esn && !strcmp(esn, "OP"))
+            {
+                /* generate OPACXML (OPAC in XML) */
+                Z_OPACRecord *opac = dummy_opac(num, odr, rec);
+                yaz_opac_decode_wrbuf(mt, opac, w);
+            }
+            else
+            {
+                /* generate MARCXML */
+                yaz_marc_decode_wrbuf(mt, rec, -1, w);
+            }
+            rec = odr_strdup(odr, wrbuf_cstr(w));
+            yaz_marc_destroy(mt);
+            wrbuf_destroy(w);
+            return rec;
+        }
+    }
+    return 0;
 }
+
 /*
  * Local variables:
  * c-basic-offset: 4
