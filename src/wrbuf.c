@@ -193,18 +193,33 @@ int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
                     break;
                 }
             }
-            if (cdata)
-                wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
-            else
+            switch (cdata)
+            {
+            case 0:
                 wrbuf_write(b, outbuf, outp - outbuf);
+                break;
+            case 1:
+                wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
+                break;
+            case 2:
+                wrbuf_json_write(b, outbuf, outp - outbuf);
+                break;
+            }
         }
     }
     else
     {
-        if (cdata)
-            wrbuf_xmlputs_n(b, buf, size);
-        else
+        switch (cdata)
+        {
+        case 0:
             wrbuf_write(b, buf, size);
+            break;
+        case 1:
+            wrbuf_xmlputs_n(b, buf, size);
+            break;
+        case 2:
+            wrbuf_json_write(b, buf, size);
+        }
     }
     return ret;
 }
@@ -234,6 +249,17 @@ void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, size_t si
 void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
     wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 1);
+}
+
+void wrbuf_iconv_json_write(WRBUF b, yaz_iconv_t cd,
+                            const char *buf, size_t size)
+{
+    wrbuf_iconv_write_x(b, cd, buf, size, 2);
+}
+
+void wrbuf_iconv_json_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
+{
+    wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 2);
 }
 
 void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
@@ -276,6 +302,46 @@ void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
             wrbuf_printf(b, "\\x%02X", str[i] & 0xff);
         else
             wrbuf_putc(b, str[i]);
+}
+
+void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
+{
+    size_t i;
+    for (i = 0; i < sz; i++)
+    {
+        if (cp[i] > 0 && cp[i] < 32)
+        {
+            wrbuf_putc(b, '\\');
+            switch (cp[i])
+            {
+            case '\b': wrbuf_putc(b, 'b'); break;
+            case '\f': wrbuf_putc(b, 'f'); break;
+            case '\n': wrbuf_putc(b, 'n'); break;
+            case '\r': wrbuf_putc(b, 'r'); break;
+            case '\t': wrbuf_putc(b, 't'); break;
+            default:
+                wrbuf_printf(b, "u%04x", cp[i]);
+            }
+        }
+        else if (cp[i] == '"')
+        {
+            wrbuf_putc(b, '\\'); wrbuf_putc(b, '"');
+        }
+        else if (cp[i] == '\\')
+        {
+            wrbuf_putc(b, '\\'); wrbuf_putc(b, '\\');
+        }
+        else
+        {   /* leave encoding as raw UTF-8 */
+            wrbuf_putc(b, cp[i]);
+        }
+    }
+
+}
+
+void wrbuf_json_puts(WRBUF b, const char *str)
+{
+    wrbuf_json_write(b, str, strlen(str));
 }
 
 /*

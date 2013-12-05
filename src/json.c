@@ -462,46 +462,6 @@ struct json_node *json_parse(const char *json_str, const char **errmsg)
     return json_parse2(json_str, errmsg, 0);
 }
 
-void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
-{
-    size_t i;
-    for (i = 0; i < sz; i++)
-    {
-        if (cp[i] > 0 && cp[i] < 32)
-        {
-            wrbuf_putc(b, '\\');
-            switch (cp[i])
-            {
-            case '\b': wrbuf_putc(b, 'b'); break;
-            case '\f': wrbuf_putc(b, 'f'); break;
-            case '\n': wrbuf_putc(b, 'n'); break;
-            case '\r': wrbuf_putc(b, 'r'); break;
-            case '\t': wrbuf_putc(b, 't'); break;
-            default:
-                wrbuf_printf(b, "u%04x", cp[i]);
-            }
-        }
-        else if (cp[i] == '"')
-        {
-            wrbuf_putc(b, '\\'); wrbuf_putc(b, '"');
-        }
-        else if (cp[i] == '\\')
-        {
-            wrbuf_putc(b, '\\'); wrbuf_putc(b, '\\');
-        }
-        else
-        {   /* leave encoding as raw UTF-8 */
-            wrbuf_putc(b, cp[i]);
-        }
-    }
-
-}
-
-void wrbuf_json_puts(WRBUF b, const char *str)
-{
-    wrbuf_json_write(b, str, strlen(str));
-}
-
 static void json_indent(WRBUF result, int indent)
 {
     size_t l = wrbuf_len(result);

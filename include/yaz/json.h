@@ -194,21 +194,6 @@ void json_write_wrbuf(struct json_node *node, WRBUF result);
 YAZ_EXPORT
 void json_write_wrbuf_pretty(struct json_node *node, WRBUF result);
 
-/** \brief writes JSON text to WRBUF with escaping
-    \param b result
-    \param str input string to be encoded
-*/
-YAZ_EXPORT
-void wrbuf_json_puts(WRBUF b, const char *str);
-
-/** \brief writes JSON text to WRBUF with escaping
-    \param b result
-    \param cp char buffer
-    \param sz size of char buffer
-*/
-YAZ_EXPORT
-void wrbuf_json_write(WRBUF b, const char *cp, size_t sz);
-
 YAZ_END_CDECL
 
 #endif

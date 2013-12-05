@@ -232,6 +232,29 @@ YAZ_EXPORT const char *wrbuf_cstr(WRBUF b);
     ((void) ((b)->pos >= (b)->size ? wrbuf_grow(b, 1) : 0),  \
     (b)->buf[(b)->pos++] = (c), 0)
 
+
+/** \brief writes JSON text to WRBUF with escaping
+    \param b result
+    \param str input string to be encoded
+*/
+YAZ_EXPORT
+void wrbuf_json_puts(WRBUF b, const char *str);
+
+/** \brief writes JSON text to WRBUF with escaping
+    \param b result
+    \param cp char buffer
+    \param sz size of char buffer
+*/
+YAZ_EXPORT
+void wrbuf_json_write(WRBUF b, const char *cp, size_t sz);
+
+YAZ_EXPORT
+void wrbuf_iconv_json_write(WRBUF b, yaz_iconv_t cd,
+                            const char *buf, size_t size);
+
+YAZ_EXPORT
+void wrbuf_iconv_json_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
+
 YAZ_END_CDECL
 
 #endif
