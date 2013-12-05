@@ -462,7 +462,7 @@ struct json_node *json_parse(const char *json_str, const char **errmsg)
     return json_parse2(json_str, errmsg, 0);
 }
 
-static void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
+void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
 {
     size_t i;
     for (i = 0; i < sz; i++)

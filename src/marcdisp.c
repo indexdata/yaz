@@ -632,6 +632,8 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
         return yaz_marc_write_iso2709(mt, wr);
     case YAZ_MARC_CHECK:
         return yaz_marc_write_check(mt, wr);
+    case YAZ_MARC_JSON:
+        return yaz_marc_write_json(mt, wr);
     }
     return -1;
 }
@@ -1238,6 +1240,87 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     return 0;
 }
 
+int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
+{
+    int identifier_length;
+    struct yaz_marc_node *n;
+    const char *leader = 0;
+    int first = 1;
+
+    wrbuf_puts(w, "{\n");
+    for (n = mt->nodes; n; n = n->next)
+        if (n->which == YAZ_MARC_LEADER)
+            leader = n->u.leader;
+
+    if (!leader)
+        return -1;
+
+    if (!atoi_n_check(leader+11, 1, &identifier_length))
+        return -1;
+
+    wrbuf_puts(w, "\t\"leader\":\"");
+    wrbuf_json_puts(w, leader);
+    wrbuf_puts(w, "\",\n");
+    wrbuf_puts(w, "\t\"fields\":\n\t[\n");
+
+    for (n = mt->nodes; n; n = n->next)
+    {
+        struct yaz_marc_subfield *s;
+        int i;
+        const char *sep = "";
+        switch (n->which)
+        {
+        case YAZ_MARC_CONTROLFIELD:
+            if (first)
+                first = 0;
+            else
+                wrbuf_puts(w, ",\n");
+            wrbuf_puts(w, "\t\t{\n\t\t\t\"");
+            wrbuf_json_puts(w, n->u.controlfield.tag);
+            wrbuf_puts(w, "\":\"");
+            wrbuf_json_puts(w, n->u.controlfield.data);
+            wrbuf_puts(w, "\"\n\t\t}");
+            break;
+        case YAZ_MARC_DATAFIELD:
+            if (first)
+                first = 0;
+            else
+                wrbuf_puts(w, ",\n");
+
+            wrbuf_puts(w, "\t\t{\n\t\t\t\"");
+            wrbuf_json_puts(w, n->u.datafield.tag);
+            wrbuf_puts(w, "\":\n\t\t\t{\n\t\t\t\t\"subfields\":\n\t\t\t\t[\n");
+            for (s = n->u.datafield.subfields; s; s = s->next)
+            {
+                size_t using_code_len = get_subfield_len(mt, s->code_data,
+                                                         identifier_length);
+                wrbuf_puts(w, sep);
+                sep = ",\n";
+                wrbuf_puts(w, "\t\t\t\t\t{\n\t\t\t\t\t\t\"");
+                wrbuf_json_write(w, s->code_data, using_code_len);
+                wrbuf_puts(w, "\":\"");
+                wrbuf_json_puts(w, s->code_data + using_code_len);
+                wrbuf_puts(w, "\"\n\t\t\t\t\t}");
+            }
+            wrbuf_puts(w, "\n\t\t\t\t]");
+            if (n->u.datafield.indicator[0])
+            {
+                int i;
+                for (i = 0; n->u.datafield.indicator[i]; i++)
+                {
+                    wrbuf_puts(w, ",\n");
+                    wrbuf_printf(w, "\t\t\t\t\"ind%d\":\"%c\"", i + 1,
+                                 n->u.datafield.indicator[i]);
+                }
+            }
+            wrbuf_puts(w, "\n\t\t\t}\n");
+            wrbuf_puts(w, "\n\t\t}");
+            break;
+        }
+    }
+    wrbuf_puts(w, "\n\t]\n");
+    wrbuf_puts(w, "}\n");
+}
 
 int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 {
@@ -1368,6 +1451,8 @@ int yaz_marc_decode_formatstr(const char *arg)
         mode = YAZ_MARC_XCHANGE;
     if (!strcmp(arg, "line"))
         mode = YAZ_MARC_LINE;
+    if (!strcmp(arg, "json"))
+        mode = YAZ_MARC_JSON;
     return mode;
 }
 

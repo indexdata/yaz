@@ -76,6 +76,8 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_CHECK     6
 /** \brief Output format: Turbo MARC Index Data format (XML based) */
 #define YAZ_MARC_TURBOMARC 7
+/** \brief Output format: JSON */
+#define YAZ_MARC_JSON      8
 
 /** \brief set iconv handle for character set conversion */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
