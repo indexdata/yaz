@@ -1266,19 +1266,21 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
     for (n = mt->nodes; n; n = n->next)
     {
         struct yaz_marc_subfield *s;
-        int i;
         const char *sep = "";
         switch (n->which)
         {
+        case YAZ_MARC_LEADER:
+        case YAZ_MARC_COMMENT:
+            break;
         case YAZ_MARC_CONTROLFIELD:
             if (first)
                 first = 0;
             else
                 wrbuf_puts(w, ",\n");
             wrbuf_puts(w, "\t\t{\n\t\t\t\"");
-            wrbuf_json_puts(w, n->u.controlfield.tag);
+            wrbuf_iconv_json_puts(w, mt->iconv_cd, n->u.controlfield.tag);
             wrbuf_puts(w, "\":\"");
-            wrbuf_json_puts(w, n->u.controlfield.data);
+            wrbuf_iconv_json_puts(w, mt->iconv_cd, n->u.controlfield.data);
             wrbuf_puts(w, "\"\n\t\t}");
             break;
         case YAZ_MARC_DATAFIELD:
@@ -1297,9 +1299,11 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
                 wrbuf_puts(w, sep);
                 sep = ",\n";
                 wrbuf_puts(w, "\t\t\t\t\t{\n\t\t\t\t\t\t\"");
-                wrbuf_json_write(w, s->code_data, using_code_len);
+                wrbuf_iconv_json_write(w, mt->iconv_cd,
+                                       s->code_data, using_code_len);
                 wrbuf_puts(w, "\":\"");
-                wrbuf_json_puts(w, s->code_data + using_code_len);
+                wrbuf_iconv_json_puts(w, mt->iconv_cd,
+                                      s->code_data + using_code_len);
                 wrbuf_puts(w, "\"\n\t\t\t\t\t}");
             }
             wrbuf_puts(w, "\n\t\t\t\t]");
@@ -1320,6 +1324,7 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
     }
     wrbuf_puts(w, "\n\t]\n");
     wrbuf_puts(w, "}\n");
+    return 0;
 }
 
 int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)

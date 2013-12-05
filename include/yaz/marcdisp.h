@@ -262,6 +262,15 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                        const char *type);
 #endif
 
+/** \brief writes MARC record in JSON represenation
+    \param mt handle
+    \param w WRBUF for output
+    \retval 0 Creation successful
+    \retval -1 ERROR
+*/
+YAZ_EXPORT
+int yaz_marc_write_json(yaz_marc_t mt, WRBUF w);
+
 /** \brief sets leader spec (for modifying bytes in 24 byte leader)
     \param mt handle
     \param leader_spec
