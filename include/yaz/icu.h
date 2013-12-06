@@ -112,7 +112,7 @@ YAZ_EXPORT const char * icu_chain_token_sortkey(yaz_icu_chain_t chain);
 /** \brief returns token as it relates to originl text
     \param chain ICU chain
     \param start offset in original text
-    \param size number of uchars in original text
+    \param len number of uchars in original text
 */
 YAZ_EXPORT void icu_chain_get_org_info(yaz_icu_chain_t chain,
                                        size_t *start, size_t *len);
