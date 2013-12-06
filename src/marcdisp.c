@@ -1312,8 +1312,7 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
                 int i;
                 for (i = 0; n->u.datafield.indicator[i]; i++)
                 {
-                    wrbuf_puts(w, ",\n");
-                    wrbuf_printf(w, "\t\t\t\t\"ind%d\":\"%c\"", i + 1,
+                    wrbuf_printf(w, ",\n\t\t\t\t\"ind%d\":\"%c\"", i + 1,
                                  n->u.datafield.indicator[i]);
                 }
             }
