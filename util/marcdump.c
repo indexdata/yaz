@@ -42,6 +42,7 @@
 #endif
 
 #include <yaz/marcdisp.h>
+#include <yaz/json.h>
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/options.h>
@@ -116,6 +117,53 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
     }
     fclose(inf);
 }
+
+static void marcdump_read_json(yaz_marc_t mt, const char *fname)
+{
+    FILE *inf = fopen(fname, "rb");
+    if (!inf)
+    {
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
+        exit(1);
+    }
+    else
+    {
+        const char *errmsg;
+        size_t errpos;
+        WRBUF w = wrbuf_alloc();
+        struct json_node *n;
+        int c;
+
+        while ((c = getc(inf)) != EOF)
+            wrbuf_putc(w, c);
+        n = json_parse2(wrbuf_cstr(w), &errmsg, &errpos);
+        if (n)
+        {
+            int r = yaz_marc_read_json_node(mt, n);
+            if (r == 0)
+            {
+                wrbuf_rewind(w);
+                yaz_marc_write_mode(mt, w);
+                fputs(wrbuf_cstr(w), stdout);
+                wrbuf_rewind(w);
+            }
+            else
+            {
+                fprintf(stderr, "%s: JSON MARC parsing failed ret=%d\n", fname,
+                        r);
+            }
+        }
+        else
+        {
+            fprintf(stderr, "%s: JSON parse error: %s . pos=%ld\n", fname,
+                    errmsg, (long) errpos);
+        }
+        wrbuf_destroy(w);
+        fclose(inf);
+    }
+}
+
 
 #if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
@@ -244,6 +292,10 @@ static void dump(const char *fname, const char *from, const char *to,
     else if (input_format == YAZ_MARC_LINE)
     {
         marcdump_read_line(mt, fname);
+    }
+    else if (input_format == YAZ_MARC_JSON)
+    {
+        marcdump_read_json(mt, fname);
     }
     else if (input_format == YAZ_MARC_ISO2709)
     {

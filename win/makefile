@@ -450,6 +450,7 @@ MISC_OBJS= \
    $(OBJDIR)\atoin.obj \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\marcdisp.obj \
+   $(OBJDIR)\marc_read_json.obj \
    $(OBJDIR)\marc_read_xml.obj \
    $(OBJDIR)\marc_read_iso2709.obj \
    $(OBJDIR)\marc_read_line.obj \

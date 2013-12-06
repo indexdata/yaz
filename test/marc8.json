@@ -1,0 +1,574 @@
+{
+	"leader":"02647nam^^2200469^^^4500",
+	"fields":
+	[
+		{
+			"001":"UCD-002592301"
+		},
+		{
+			"005":"20061209034435.0"
+		},
+		{
+			"006":"m        d        "
+		},
+		{
+			"007":"cr bn |||a|bb|"
+		},
+		{
+			"008":"920330s1583    enk     s     000 0 eng d"
+		},
+		{
+			"035":
+			{
+				"subfields":
+				[
+					{
+						"a":"99851339eo"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"037":
+			{
+				"subfields":
+				[
+					{
+						"a":"CL0036000039"
+					},
+					{
+						"b":"ProQuest Information and Learning. 300 N. Zeeb Rd., Ann Arbor, MI 48106"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"040":
+			{
+				"subfields":
+				[
+					{
+						"a":"Cu-RivES"
+					},
+					{
+						"c":"Cu-RivES"
+					},
+					{
+						"d":"CStRLIN"
+					},
+					{
+						"e":"dcrb"
+					},
+					{
+						"d":"WaOLN"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"100":
+			{
+				"subfields":
+				[
+					{
+						"a":"Clinton, Atkinson."
+					}
+				],
+				"ind1":"1",
+				"ind2":" "
+			}
+
+		},
+		{
+			"245":
+			{
+				"subfields":
+				[
+					{
+						"a":"Clinton, Purser & Arnold, to their countreymen wheresoeuer"
+					},
+					{
+						"h":"[electronic resource] :"
+					},
+					{
+						"b":"Wherein is described by their own hands their vnfeigned penitence for their offences past: their patience in welcoming their death, & their duetiful minds towardes her most excellent Maiestie"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"246":
+			{
+				"subfields":
+				[
+					{
+						"a":"Clinton, Purser & Arnold, to their countreymen wheresoever"
+					}
+				],
+				"ind1":"2",
+				"ind2":" "
+			}
+
+		},
+		{
+			"246":
+			{
+				"subfields":
+				[
+					{
+						"a":"Clinton, Purser & Arnold, to their countreymen wheresoever"
+					}
+				],
+				"ind1":"2",
+				"ind2":" "
+			}
+
+		},
+		{
+			"260":
+			{
+				"subfields":
+				[
+					{
+						"a":"London :"
+					},
+					{
+						"b":"Imprinted by Iohn Wolfe and are to be sold [by W. Wright] at the middle shop in the Poultry, ioyning S. Mildreds Church,"
+					},
+					{
+						"c":"[1583?]"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"300":
+			{
+				"subfields":
+				[
+					{
+						"a":"[12] p"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"In verse"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"The first poem is signed: Thomas Walton alias Purser"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"Clinton's full name and bookseller's name from, and publication date conjectured by, STC"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"Signatures: A⁴ B²"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"Reproduction of the original in the Bodleian Library"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"510":
+			{
+				"subfields":
+				[
+					{
+						"a":"STC (2nd ed.)"
+					},
+					{
+						"c":"5431"
+					}
+				],
+				"ind1":"4",
+				"ind2":" "
+			}
+
+		},
+		{
+			"530":
+			{
+				"subfields":
+				[
+					{
+						"a":"Also issued in print and on microform"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"533":
+			{
+				"subfields":
+				[
+					{
+						"a":"Electronic reproduction."
+					},
+					{
+						"n":"Mode of access: World Wide Web."
+					},
+					{
+						"n":"Restricted to UC campuses"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"655":
+			{
+				"subfields":
+				[
+					{
+						"a":"Electronic texts."
+					},
+					{
+						"2":"local"
+					}
+				],
+				"ind1":" ",
+				"ind2":"7"
+			}
+
+		},
+		{
+			"650":
+			{
+				"subfields":
+				[
+					{
+						"a":"Pirates"
+					},
+					{
+						"z":"England"
+					},
+					{
+						"v":"Early works to 1800."
+					}
+				],
+				"ind1":" ",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"700":
+			{
+				"subfields":
+				[
+					{
+						"a":"Walton, Thomas,"
+					},
+					{
+						"d":"fl. 1583."
+					},
+					{
+						"4":"aut"
+					}
+				],
+				"ind1":"1",
+				"ind2":" "
+			}
+
+		},
+		{
+			"700":
+			{
+				"subfields":
+				[
+					{
+						"a":"Arnold,"
+					},
+					{
+						"d":"fl. 1583."
+					},
+					{
+						"4":"aut"
+					}
+				],
+				"ind1":"1",
+				"ind2":" "
+			}
+
+		},
+		{
+			"793":
+			{
+				"subfields":
+				[
+					{
+						"a":"Early English books online"
+					}
+				],
+				"ind1":"0",
+				"ind2":" "
+			}
+
+		},
+		{
+			"852":
+			{
+				"subfields":
+				[
+					{
+						"a":"MER"
+					},
+					{
+						"b":"kmain"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"852":
+			{
+				"subfields":
+				[
+					{
+						"a":"SCB"
+					},
+					{
+						"b":"nnet"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"856":
+			{
+				"subfields":
+				[
+					{
+						"z":"Restricted to UC campuses"
+					},
+					{
+						"x":"SCP UCSD"
+					},
+					{
+						"u":"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_val_fmt=&rft_id=xri:eebo:image:16610"
+					}
+				],
+				"ind1":"4",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"856":
+			{
+				"subfields":
+				[
+					{
+						"z":"Restricted to UC campuses"
+					},
+					{
+						"x":"SCP UCSD"
+					},
+					{
+						"u":"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_val_fmt=&rft_id=xri:eebo:image:16610"
+					}
+				],
+				"ind1":"4",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"852":
+			{
+				"subfields":
+				[
+					{
+						"a":"DVXL"
+					},
+					{
+						"b":"ELECT-GEN"
+					},
+					{
+						"h":"Internet"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"852":
+			{
+				"subfields":
+				[
+					{
+						"a":"LAGE"
+					},
+					{
+						"b":"in"
+					},
+					{
+						"3":"Online access"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"856":
+			{
+				"subfields":
+				[
+					{
+						"z":"Restricted to UC campuses"
+					},
+					{
+						"x":"SCP UCSD"
+					},
+					{
+						"u":"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_val_fmt=&rft_id=xri:eebo:image:16610"
+					}
+				],
+				"ind1":"4",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"856":
+			{
+				"subfields":
+				[
+					{
+						"z":"Restricted to UC campuses"
+					},
+					{
+						"u":"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_val_fmt=&rft_id=xri:eebo:image:16610"
+					},
+					{
+						"x":"CDL"
+					}
+				],
+				"ind1":"4",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"830":
+			{
+				"subfields":
+				[
+					{
+						"a":"Early English books, 1475-1640 ;"
+					},
+					{
+						"v":"1406:13."
+					}
+				],
+				"ind1":" ",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"901":
+			{
+				"subfields":
+				[
+					{
+						"a":"DVXL"
+					},
+					{
+						"b":"002592301"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		}
+	]
+}

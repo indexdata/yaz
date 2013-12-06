@@ -480,6 +480,10 @@ YAZ_EXPORT int yaz_marc_write_trailer(yaz_marc_t mt, WRBUF wr);
 */
 YAZ_EXPORT void yaz_marc_enable_collection(yaz_marc_t mt);
 
+struct json_node;
+
+YAZ_EXPORT int yaz_marc_read_json_node(yaz_marc_t mt, struct json_node *n);
+
 YAZ_END_CDECL
 
 #endif

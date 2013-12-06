@@ -1,0 +1,390 @@
+{
+	"leader":"01116nam0 32002171  450 ",
+	"fields":
+	[
+		{
+			"001":
+			{
+				"subfields":
+				[
+					{
+						"a":"9 182 502 3"
+					},
+					{
+						"b":"710100"
+					},
+					{
+						"f":"a"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"004":
+			{
+				"subfields":
+				[
+					{
+						"r":"c"
+					},
+					{
+						"a":"e"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"008":
+			{
+				"subfields":
+				[
+					{
+						"t":"s"
+					},
+					{
+						"u":"f"
+					},
+					{
+						"a":"1995"
+					},
+					{
+						"b":"gb"
+					},
+					{
+						"l":"eng"
+					},
+					{
+						"v":"0"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"009":
+			{
+				"subfields":
+				[
+					{
+						"a":"s"
+					},
+					{
+						"g":"xc"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"039":
+			{
+				"subfields":
+				[
+					{
+						"a":"bef"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"100":
+			{
+				"subfields":
+				[
+					{
+						"a":"Mimms"
+					},
+					{
+						"h":"Garnet"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"245":
+			{
+				"subfields":
+				[
+					{
+						"a":"Cry baby"
+					},
+					{
+						"a":"Warm and soulful"
+					},
+					{
+						"e":"Garnet Mimms ... [et al.]"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"260":
+			{
+				"subfields":
+				[
+					{
+						"a":"Bury St. Edmunds"
+					},
+					{
+						"b":"BGO"
+					},
+					{
+						"c":"1995"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"300":
+			{
+				"subfields":
+				[
+					{
+						"n":"1 cd"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"512":
+			{
+				"subfields":
+				[
+					{
+						"a":"Indspilninger publiceret 1963 (Cry baby) og 1965 (Warm and soulful)"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"531":
+			{
+				"subfields":
+				[
+					{
+						"a":"Indhold:"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"538":
+			{
+				"subfields":
+				[
+					{
+						"f":"BGO"
+					},
+					{
+						"g":"BGOCD268"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"652":
+			{
+				"subfields":
+				[
+					{
+						"m":"78.794"
+					},
+					{
+						"v":"4"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"666":
+			{
+				"subfields":
+				[
+					{
+						"m":"soul"
+					},
+					{
+						"m":"rhythm & blues"
+					},
+					{
+						"n":"vokal"
+					},
+					{
+						"p":"1960-1969"
+					},
+					{
+						"l":"USA"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"795":
+			{
+				"subfields":
+				[
+					{
+						"å":"11"
+					},
+					{
+						"a":"Cry baby"
+					},
+					{
+						"a":"Nobody but you"
+					},
+					{
+						"a":"Until you were gone"
+					},
+					{
+						"a":"Anytime you want me"
+					},
+					{
+						"a":"So close"
+					},
+					{
+						"a":"For your precious love"
+					},
+					{
+						"a":"Baby don't you weep"
+					},
+					{
+						"a":"A ¤quiet place"
+					},
+					{
+						"a":"Cry to me"
+					},
+					{
+						"a":"Don't change your heart"
+					},
+					{
+						"a":"Wanting you"
+					},
+					{
+						"a":"The ¤truth hurts"
+					},
+					{
+						"a":"I'll take good care of you"
+					},
+					{
+						"a":"Looking for you"
+					},
+					{
+						"a":"It won't hurt (half as much)"
+					},
+					{
+						"a":"It was easier to hurt her"
+					},
+					{
+						"a":"Thinkin'"
+					},
+					{
+						"a":"Prove it to me"
+					},
+					{
+						"a":"More than a miracle"
+					},
+					{
+						"a":"As long as I have you"
+					},
+					{
+						"a":"One girl"
+					},
+					{
+						"a":"There goes my baby"
+					},
+					{
+						"a":"It's just a matter of time"
+					},
+					{
+						"a":"A ¤little bit of soap"
+					},
+					{
+						"a":"Look away"
+					},
+					{
+						"a":"I'll make it up to you"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		},
+		{
+			"795":
+			{
+				"subfields":
+				[
+					{
+						"å":"40"
+					},
+					{
+						"y":"0"
+					},
+					{
+						"a":"1 girl"
+					}
+				],
+				"ind1":"0",
+				"ind2":"0",
+				"ind3":"0"
+			}
+
+		}
+	]
+}

@@ -46,6 +46,7 @@ dist-hook:
 	cp $(srcdir)/marc?.chr $(distdir)
 	cp $(srcdir)/marc?.marc $(distdir)
 	cp $(srcdir)/marc?.xml $(distdir)
+	cp $(srcdir)/marc?.json $(distdir)
 	cp $(srcdir)/*.xml.marc $(distdir)
 	cp $(srcdir)/xml2marc?.xml $(distdir)
 	cp $(srcdir)/tmarc?.xml $(distdir)
