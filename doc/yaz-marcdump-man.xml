@@ -50,11 +50,18 @@
    <command>yaz-marcdump</command> reads MARC records from one or
    more files.
    It parses each record and supports output in line-format,
-   ISO2709, MARCXML, MarcXchange as well as Hex output.
+   ISO2709,
+   <ulink url="&url.marcxml;">MARCXML</ulink>,
+   <ulink url="http://dilettantes.code4lib.org/blog/2010/09/a-proposal-to-serialize-marc-in-json/">MARC-in-JSON</ulink>,
+   <ulink url="&url.marcxchange;">MarcXchange</ulink>
+   as well as Hex output.
   </para>
   <para>
-   This utility parses records ISO2709(raw MARC) as well as XML
-   if that is structured as MARCXML/MarcXchange.
+   This utility parses records ISO2709(raw MARC), line format, MARC-in-JSON
+   format as well as XML if that is structured as MARCXML/MarcXchange.
+  </para>
+  <para>
+   MARC-in-JSON encoding/decoding is supported in YAZ 5.0.5 and later.
   </para>
   <note>
    <para>
@@ -83,7 +90,8 @@
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
       <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC),
-      or <literal>turbomarc</literal> (Turbo MARC).
+      <literal>turbomarc</literal> (Turbo MARC),
+      or <literal>json</literal> (MARC-in-JSON).
      </para></listitem>
    </varlistentry>
 
@@ -94,7 +102,8 @@
       <literal>marcxml</literal>, <literal>marc</literal> (ISO2709),
       <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC),
-      or <literal>turbomarc</literal> (Turbo MARC).
+      <literal>turbomarc</literal> (Turbo MARC),
+      or <literal>json</literal> (MARC-in-JSON).
      </para></listitem>
    </varlistentry>
 
@@ -228,12 +237,6 @@
     <refentrytitle>yaz-iconv</refentrytitle>
     <manvolnum>1</manvolnum>
    </citerefentry>
-  </para>
-  <para>
-   <ulink url="&url.marcxml;">MARCXML</ulink>.
-  </para>
-  <para>
-   <ulink url="&url.marcxchange;">ISO25577</ulink>.
   </para>
  </refsect1>
 </refentry>
