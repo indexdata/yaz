@@ -445,6 +445,11 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         ret = get_record_format(wrbuf, len, npr, YAZ_MARC_TURBOMARC, charset,
                                 format);
     }
+    else if (!strcmp(type, "json"))
+    {
+        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_JSON, charset,
+                                format);
+    }
     else if (!strcmp(type, "raw"))
     {
         ret = get_record_format(wrbuf, len, npr, YAZ_MARC_ISO2709, charset,
