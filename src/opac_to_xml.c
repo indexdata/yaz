@@ -31,10 +31,11 @@ static void opac_element_str(WRBUF wrbuf, yaz_iconv_t cd1, yaz_iconv_t cd2,
         wrbuf_puts(wrbuf, ">");
 
         pos = wrbuf->pos; /* save position */
-        if (wrbuf_iconv_write_x(wrbuf, cd1, data, strlen(data), 1) && cd2)
+        if (wrbuf_iconv_write2(wrbuf, cd1, data, strlen(data), wrbuf_xmlputs_n)
+            && cd2)
         {
             wrbuf->pos = pos; /* rewind to pos */
-            wrbuf_iconv_write_x(wrbuf, cd2, data, strlen(data), 1);
+            wrbuf_iconv_write2(wrbuf, cd2, data, strlen(data), wrbuf_xmlputs_n);
         }
         wrbuf_puts(wrbuf, "</");
         wrbuf_puts(wrbuf, elem);

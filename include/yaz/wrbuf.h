@@ -139,7 +139,22 @@ YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
 #endif
         ;
 
-/** \brief general writer of string using iconv and cdata
+/** \brief General writer of string using iconv and cdata
+    \param b WRBUF
+    \param cd iconv handle (0 for no conversion)
+    \param buf buffer
+    \param size size of buffer
+    \param wfunc write handler (that takes WRBUF only)
+    \returns -1 if invalid sequence was encountered (truncation in effect)
+    \returns 0 if buffer could be converted and written
+*/
+int wrbuf_iconv_write2(WRBUF b, yaz_iconv_t cd, const char *buf,
+                       size_t size,
+                       void (*wfunc)(WRBUF, const char *, size_t));
+
+/** \brief writer of string using iconv and cdata
+
+    Obsolete: use wrbuf_iconv_write2 instead.
     \param b WRBUF
     \param cd iconv handle (0 for no conversion)
     \param buf buffer
@@ -149,9 +164,13 @@ YAZ_EXPORT void wrbuf_printf(WRBUF b, const char *fmt, ...)
     \returns 0 if buffer could be converted and written
 */
 int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
-                        size_t size, int cdata);
+                        size_t size, int cdata)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
 
-/** \brief iconv converts buffer and appends to WRBUF
+/** \brief Converts buffer using iconv and appends to WRBUF
     \param b WRBUF
     \param cd iconv handle
     \param buf buffer
@@ -160,7 +179,7 @@ int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
 YAZ_EXPORT void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf,
                                  size_t size);
 
-/** \brief iconv converts buffer and appends to WRBUF as XML CDATA
+/** \brief Converts buffer using iconv and appends to WRBUF as XML CDATA
     \param b WRBUF
     \param cd iconv handle
     \param buf buffer

@@ -169,8 +169,9 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     va_end(ap);
 }
 
-int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
-                        size_t size, int cdata)
+int wrbuf_iconv_write2(WRBUF b, yaz_iconv_t cd, const char *buf,
+                       size_t size,
+                       void (*wfunc)(WRBUF, const char *, size_t))
 {
     int ret = 0;
     if (cd)
@@ -193,40 +194,24 @@ int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
                     break;
                 }
             }
-            switch (cdata)
-            {
-            case 0:
-                wrbuf_write(b, outbuf, outp - outbuf);
-                break;
-            case 1:
-                wrbuf_xmlputs_n(b, outbuf, outp - outbuf);
-                break;
-            case 2:
-                wrbuf_json_write(b, outbuf, outp - outbuf);
-                break;
-            }
+            (*wfunc)(b, outbuf, outp - outbuf);
         }
     }
     else
-    {
-        switch (cdata)
-        {
-        case 0:
-            wrbuf_write(b, buf, size);
-            break;
-        case 1:
-            wrbuf_xmlputs_n(b, buf, size);
-            break;
-        case 2:
-            wrbuf_json_write(b, buf, size);
-        }
-    }
+        (*wfunc)(b, buf, size);
     return ret;
+}
+
+int wrbuf_iconv_write_x(WRBUF b, yaz_iconv_t cd, const char *buf,
+                        size_t size, int cdata)
+{
+    return wrbuf_iconv_write2(b, cd, buf, size,
+                              cdata ? wrbuf_xmlputs_n : wrbuf_write);
 }
 
 void wrbuf_iconv_write(WRBUF b, yaz_iconv_t cd, const char *buf, size_t size)
 {
-    wrbuf_iconv_write_x(b, cd, buf, size, 0);
+    wrbuf_iconv_write2(b, cd, buf, size, wrbuf_write);
 }
 
 void wrbuf_iconv_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
@@ -243,23 +228,23 @@ void wrbuf_iconv_putchar(WRBUF b, yaz_iconv_t cd, int ch)
 
 void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, size_t size)
 {
-    wrbuf_iconv_write_x(b, cd, buf, size, 1);
+    wrbuf_iconv_write2(b, cd, buf, size, wrbuf_xmlputs_n);
 }
 
 void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 1);
+    wrbuf_iconv_write2(b, cd, strz, strlen(strz), wrbuf_xmlputs_n);
 }
 
 void wrbuf_iconv_json_write(WRBUF b, yaz_iconv_t cd,
                             const char *buf, size_t size)
 {
-    wrbuf_iconv_write_x(b, cd, buf, size, 2);
+    wrbuf_iconv_write2(b, cd, buf, size, wrbuf_json_write);
 }
 
 void wrbuf_iconv_json_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    wrbuf_iconv_write_x(b, cd, strz, strlen(strz), 2);
+    wrbuf_iconv_write2(b, cd, strz, strlen(strz), wrbuf_json_write);
 }
 
 void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
