@@ -52,7 +52,7 @@
    It parses each record and supports output in line-format,
    ISO2709,
    <ulink url="&url.marcxml;">MARCXML</ulink>,
-   <ulink url="http://dilettantes.code4lib.org/blog/2010/09/a-proposal-to-serialize-marc-in-json/">MARC-in-JSON</ulink>,
+   <ulink url="&url.marc_in_json;">MARC-in-JSON</ulink>,
    <ulink url="&url.marcxchange;">MarcXchange</ulink>
    as well as Hex output.
   </para>

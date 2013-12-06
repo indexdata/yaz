@@ -964,6 +964,12 @@ ZOOM_options_set_int(opt, name, value)
         <literal>*len</literal>.
        </para></listitem>
      </varlistentry>
+     <varlistentry><term><literal>json</literal></term>
+      <listitem><para>Like xml, but MARC records are converted to
+	<ulink url="&url.marc_in_json;">MARC-in-JSON</ulink>.
+       </para></listitem>
+     </varlistentry>
+
     </variablelist>
    </para>
    <para>
