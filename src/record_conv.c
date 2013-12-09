@@ -388,6 +388,10 @@ static void *construct_marc(const xmlNode *ptr,
         if (!info->input_charset && info->output_charset)
             info->input_charset = "utf-8";
     }
+    else if (!strcmp(input_format, "json"))
+    {
+        info->input_format_mode = YAZ_MARC_JSON;
+    }
     else
     {
         wrbuf_printf(wr_error, "Element <marc inputformat='%s'>: "
@@ -428,6 +432,12 @@ static void *construct_marc(const xmlNode *ptr,
     else if (!strcmp(output_format, "marcxchange"))
     {
         info->output_format_mode = YAZ_MARC_XCHANGE;
+        if (info->input_charset && !info->output_charset)
+            info->output_charset = "utf-8";
+    }
+    else if (!strcmp(output_format, "json"))
+    {
+        info->output_format_mode = YAZ_MARC_JSON;
         if (info->input_charset && !info->output_charset)
             info->output_charset = "utf-8";
     }
