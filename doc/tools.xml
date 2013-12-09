@@ -2006,6 +2006,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     #define YAZ_MARC_XCHANGE   5
     #define YAZ_MARC_CHECK     6
     #define YAZ_MARC_TURBOMARC 7
+    #define YAZ_MARC_JSON      8
 
     /* supply iconv handle for character set conversion .. */
     void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
@@ -2095,6 +2096,15 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 	XML format with same semantics as MARCXML but more compact
 	and geared towards fast processing with XSLT. Refer to
 	<xref linkend="tools.turbomarc"/> for more information.
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <varlistentry>
+      <term>YAZ_MARC_JSON</term>
+      <listitem>
+       <para>
+        <ulink url="&url.marc_in_json;">MARC-in_JSON</ulink> format.
        </para>
       </listitem>
      </varlistentry>
@@ -2329,8 +2339,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            <listitem>
             <para>
              Format of input. Supported values are
-            <literal>marc</literal> (for ISO2709); and <literal>xml</literal>
-             for MARCXML/MarcXchange.
+             <literal>marc</literal> (for ISO2709), <literal>xml</literal>
+             (MARCXML/MarcXchange) and <literal>json</literal>
+             (<ulink url="&url.marc_in_json;">MARC-in_JSON</ulink>).
             </para>
            </listitem>
           </varlistentry>
@@ -2339,10 +2350,12 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            <listitem>
             <para>
              Format of output. Supported values are
-            <literal>line</literal> (MARC line format);
-            <literal>marcxml</literal> (for MARCXML),
-            <literal>marc</literal> (ISO2709),
-            <literal>marcxhcange</literal> (for MarcXchange).
+             <literal>line</literal> (MARC line format);
+             <literal>marcxml</literal> (for MARCXML),
+             <literal>marc</literal> (ISO2709),
+             <literal>marcxhcange</literal> (for MarcXchange),
+             or <literal>json</literal>
+             (<ulink url="&url.marc_in_json;">MARC-in_JSON </ulink>).
             </para>
            </listitem>
           </varlistentry>
