@@ -944,6 +944,21 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             return 0;
         }
     }
+    else if (!oid_oidcmp(oid, yaz_oid_recsyn_json))
+    {
+        if ((cp = dummy_json_record(r->number, r->stream, esn)))
+        {
+            r->len = strlen(cp);
+            r->record = cp;
+            r->schema = "info:srw/schema/1/marcxml-1.1";
+        }
+        else
+        {
+            r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+            r->surrogate_flag = 1;
+            return 0;
+        }
+    }
     else
     {
         char buf[OID_STR_MAX];

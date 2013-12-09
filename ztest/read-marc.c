@@ -1683,6 +1683,26 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
     return 0;
 }
 
+char *dummy_json_record(int num, ODR odr, const char *esn)
+{
+    if (!esn || !strcmp(esn, "marcinjson"))
+    {
+        char *rec = dummy_marc_record(num, odr);
+        if (rec)
+        {
+            WRBUF w = wrbuf_alloc();
+            yaz_marc_t mt = yaz_marc_create();
+            yaz_marc_xml(mt, YAZ_MARC_JSON);
+            yaz_marc_decode_wrbuf(mt, rec, -1, w);
+            rec = odr_strdup(odr, wrbuf_cstr(w));
+            yaz_marc_destroy(mt);
+            wrbuf_destroy(w);
+            return rec;
+        }
+    }
+    return 0;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4
