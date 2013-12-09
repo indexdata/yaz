@@ -1,3 +1,12 @@
+--- 5.0.5 2013/12/09
+
+Add support for MARC-in-JSON. yaz-marcdump and the record conversion module
+can read and write this format. For record format JSON, yaz-ztest returns
+MARC-in-JSON records.
+
+iconv: fixes and more tests for danmarc character set encoding. 0xa733 is
+converted to @å , 0xa732 is converted to @Å instead of @a733, @a732 .
+
 --- 5.0.4 2013/11/22
 
 Improve error reporting for ICU chains YAZ-707
