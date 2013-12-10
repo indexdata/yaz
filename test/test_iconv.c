@@ -697,6 +697,7 @@ static void tst_danmarc_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "@*",  "*"));
     YAZ_CHECK(tst_convert(cd, "@@",  "@"));
     YAZ_CHECK(tst_convert(cd, "@\xa4",  "\xC2\xA4"));
+    YAZ_CHECK(tst_convert(cd, "\xa4",  "\xC2\xA4"));
     YAZ_CHECK(tst_convert(cd, "@\xe5", "\xEA\x9C\xB3"));
     YAZ_CHECK(tst_convert(cd, "@\xc5.", "\xEA\x9C\xB2" "."));
 
@@ -723,7 +724,7 @@ static void tst_utf8_to_danmarc(void)
 
     YAZ_CHECK(tst_convert(cd, "*",  "@*"));
     YAZ_CHECK(tst_convert(cd, "@", "@@"));
-    YAZ_CHECK(tst_convert(cd, "\xC2\xA4", "@\xa4"));
+    YAZ_CHECK(tst_convert(cd, "\xC2\xA4", "\xa4"));
 
     YAZ_CHECK(tst_convert(cd, "a\xc3\xa5" "b", "a\xe5" "b")); /* aring */
     YAZ_CHECK(tst_convert(cd, "a\xce\xbb" "b", "a@03BBb")); /* lambda */

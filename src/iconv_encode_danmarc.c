@@ -25,7 +25,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
-    if (x == '@' || x == '*' || x == 0xa4)
+    if (x == '@' || x == '*')
     {
         if (*outbytesleft < 2)
         {
