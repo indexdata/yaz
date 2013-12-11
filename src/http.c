@@ -547,23 +547,24 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
 
 static void dump_http_package(ODR o, const char *buf, size_t len)
 {
-    int i;
+    int i, limit = 8192;
     for (i = 0; ; i++)
     {
         if (i == len)
         {
+            o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, i);
             odr_printf(o, "%.*s\n", i, buf);
             break;
         }
-        else if (i > 8192)
+        else if (i >= limit)
         {
-            odr_printf(o, "%.*s\n", i, buf);
-            odr_printf(o, "(truncated\n", (long) len);
+            o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, i);
+            odr_printf(o, "(truncated from %ld to %d\n", (long) len, i);
             break;
         }
         else if (buf[i] == 0)
         {
-            odr_printf(o, "%.*s\n", i, buf);
+            o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, i);
             odr_printf(o, "(binary data)\n", (long) len);
             break;
         }
