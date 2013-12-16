@@ -72,6 +72,22 @@
     So record at position 1, 25, 49, etc .. are equivalent.
    </para>
    <para>
+    For XML if no element set is given or element has value "marcxml",
+    MARCXML is returned (each of the 24 dummy records converted from
+    ISO2709 to XML). For element set OP, OPAC XML is returned.
+   </para>
+   <para>
+    yaz-ztest may also return predefined XML records (for testing).
+    This is enabled if <literal>YAZ_ZTEST_XML_FETCH</literal> environment
+    variable is defined. A record is fetched form a file (one record per file).
+    The path for the filename is
+    <replaceable>F</replaceable><replaceable>E</replaceable><literal>.</literal><replaceable>d</replaceable><literal>.xml</literal>
+    where <replaceable>F</replaceable> is the YAZ_ZTEST_XML_FETCH value
+    (possibly
+    empty), <replaceable>E</replaceable> is element-set,
+    <replaceable>d</replaceable> is record position (starting from 1).
+   </para>
+   <para>
      The following databases are honored by <command>yaz-ztest</command>:
      <literal>Default</literal>, <literal>slow</literal>
      and <literal>db.*</literal> (all databases with prefix "db"). Any

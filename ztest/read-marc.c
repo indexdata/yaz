@@ -15,6 +15,20 @@
 
 #include "ztest.h"
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef WIN32
+#include <sys/stat.h>
+#endif
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #define NO_MARC_RECORDS 24
 
 char *marc_records[NO_MARC_RECORDS] = {
@@ -1679,6 +1693,28 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
             wrbuf_destroy(w);
             return rec;
         }
+    }
+    else
+    {
+        char *buf = 0;
+        const char *e = getenv("YAZ_ZTEST_XML_FETCH");
+        if (e)
+        {
+            WRBUF w = wrbuf_alloc();
+            struct stat sbuf;
+            FILE *file = 0;
+
+            wrbuf_printf(w, "%s%s.%d.xml", e, esn, num);
+            if (stat(wrbuf_cstr(w), &sbuf) == 0 &&
+                (file = fopen(wrbuf_cstr(w), "rb")))
+            {
+                buf = odr_malloc(odr, sbuf.st_size);
+                fread(buf, 1, sbuf.st_size, file);
+            }
+            if (file)
+                fclose(file);
+        }
+        return buf;
     }
     return 0;
 }
