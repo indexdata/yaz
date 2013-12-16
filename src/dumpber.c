@@ -34,7 +34,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
         return 0;
     if (res > len)
     {
-        fprintf(f, "%5d: %s : Unexpected enf of buffer\n", offset, level_str);
+        fprintf(f, "%5d: %s : Unexpected end of buffer\n", offset, level_str);
         return 0;
     }
     fprintf(f, "%5d: %s", offset, level_str);
