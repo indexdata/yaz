@@ -1,3 +1,13 @@
+--- 5.0.6 2013/12/17
+
+Allow yaz-ztest to return user-defined records (one record per file).
+This is enabled by defining environment variable YAZ_ZTEST_XML_FETCH.
+
+Prevent early truncatin of HTTP log. (ODR_PRINT for HTTP streams).
+Use the stream write instead of odr_printf which has a 4K tmp buffer.
+
+Fix encoding of 0x00a4 (unicode to danmarc) YAZ-713
+
 --- 5.0.5 2013/12/09
 
 Add support for MARC-in-JSON. yaz-marcdump and the record conversion module
