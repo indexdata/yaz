@@ -12,6 +12,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/marcdisp.h>
 #include <yaz/odr.h>
+#include <yaz/log.h>
 
 #include "ztest.h"
 
@@ -1708,8 +1709,9 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
             if (stat(wrbuf_cstr(w), &sbuf) == 0 &&
                 (file = fopen(wrbuf_cstr(w), "rb")))
             {
-                buf = odr_malloc(odr, sbuf.st_size);
+                buf = odr_malloc(odr, 1 + sbuf.st_size);
                 fread(buf, 1, sbuf.st_size, file);
+                buf[sbuf.st_size] = '\0';
             }
             if (file)
                 fclose(file);
