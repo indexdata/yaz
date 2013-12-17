@@ -1,3 +1,7 @@
+--- 5.0.7 2013/12/17
+
+Fix buffer corruption for yaz-ztest record fetch.
+
 --- 5.0.6 2013/12/17
 
 Allow yaz-ztest to return user-defined records (one record per file).
