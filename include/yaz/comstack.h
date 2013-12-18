@@ -133,6 +133,10 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
 YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 
+YAZ_EXPORT int cs_parse_host(const char *uri, const char **host,
+                             CS_TYPE *t, enum oid_proto *proto,
+                             char **connect_host);
+
 /*
  * error management.
  */

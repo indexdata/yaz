@@ -87,9 +87,9 @@ void cs_get_host_args(const char *type_and_host, const char **args)
     }
 }
 
-static int cs_parse_host(const char *uri, const char **host,
-                         CS_TYPE *t, enum oid_proto *proto,
-                         char **connect_host)
+int cs_parse_host(const char *uri, const char **host,
+                  CS_TYPE *t, enum oid_proto *proto,
+                  char **connect_host)
 {
     *connect_host = 0;
 
