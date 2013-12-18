@@ -553,7 +553,6 @@ static void dump_http_package(ODR o, const char *buf, size_t len)
         if (i == len)
         {
             o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, i);
-            odr_printf(o, "%.*s\n", i, buf);
             break;
         }
         else if (i >= limit)
