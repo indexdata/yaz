@@ -124,6 +124,8 @@ int cs_parse_host(const char *uri, const char **host,
             uri = cp + 1;
         }
 #ifdef WIN32
+        xfree(*connect_host);
+        *connect_host = 0;
         return 0;
 #else
         *t = unix_type;
@@ -142,6 +144,8 @@ int cs_parse_host(const char *uri, const char **host,
         *host = uri + 4;
         *proto = PROTO_Z3950;
 #else
+        xfree(*connect_host);
+        *connect_host = 0;
         return 0;
 #endif
     }
@@ -161,6 +165,8 @@ int cs_parse_host(const char *uri, const char **host,
             (*host)++;
         *proto = PROTO_HTTP;
 #else
+        xfree(*connect_host);
+        *connect_host = 0;
         return 0;
 #endif
     }
@@ -187,10 +193,7 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
     char *connect_host = 0;
 
     if (!cs_parse_host(vhost, &host, &t, &proto, &connect_host))
-    {
-        xfree(connect_host);
         return 0;
-    }
 
     if (proxy_host)
     {
@@ -198,10 +201,7 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
 
         xfree(connect_host);
         if (!cs_parse_host(proxy_host, &host, &t, &proto1, &connect_host))
-        {
-            xfree(connect_host);
             return 0;
-        }
     }
 
     if (t == tcpip_type)
