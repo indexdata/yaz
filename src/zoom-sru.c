@@ -435,9 +435,10 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
     {
         Z_SOAP *soap_package = 0;
         ODR o = c->odr_in;
-        Z_SOAP_Handler soap_handlers[3] = {
+        Z_SOAP_Handler soap_handlers[4] = {
             {YAZ_XMLNS_SRU_v1_response, 0, (Z_SOAP_fun) yaz_srw_codec},
             {YAZ_XMLNS_SRU_v2_mask, 0, (Z_SOAP_fun) yaz_srw_codec},
+            {"searchRetrieveResponse", 0, (Z_SOAP_fun) yaz_srw_codec},
             {0, 0, 0}
         };
         ret = z_soap_codec(o, &soap_package,
