@@ -1,3 +1,13 @@
+--- 5.0.8 2013/12/20
+
+ZOOM/yaz-client: allow SRU searchRetrieveResponse with incorrect
+namespace.
+
+Make cs_parse_host public.A
+
+Fix double HTTP dump (-a log would show HTTP packages twice). Bug
+introduced in YAZ 5.0.6.
+
 --- 5.0.7 2013/12/17
 
 Fix buffer corruption for yaz-ztest record fetch.
