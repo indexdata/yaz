@@ -1,7 +1,9 @@
---- 5.0.8 2013/12/20
+--- 5.0.9 2013/12/20
 
 ZOOM/yaz-client: allow SRU searchRetrieveResponse with incorrect
 namespace.
+
+--- 5.0.8 2013/12/20
 
 Make cs_parse_host public.A
 
