@@ -4328,10 +4328,7 @@ struct timeval tv_start;
 static void handle_srw_record(Z_SRW_record *rec)
 {
     if (rec->recordPosition)
-    {
         printf("pos=" ODR_INT_PRINTF, *rec->recordPosition);
-        setno = *rec->recordPosition + 1;
-    }
     if (rec->recordSchema)
         printf(" schema=%s", rec->recordSchema);
     printf("\n");
@@ -4385,6 +4382,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
         }
         handle_srw_record(res->records + i);
     }
+    setno += res->num_records;
 }
 
 static void handle_srw_scan_term(Z_SRW_scanTerm *term)
@@ -4468,6 +4466,7 @@ static void http_response(Z_HTTP_Response *hres)
                 {YAZ_XMLNS_SRU_v2_mask, 0, (Z_SOAP_fun) yaz_srw_codec},
                 {YAZ_XMLNS_UPDATE_v0_9, 0, (Z_SOAP_fun) yaz_ucp_codec},
                 {YAZ_XMLNS_SRU_v1_response, 0, (Z_SOAP_fun) yaz_srw_codec},
+                {"searchRetrieveResponse", 0, (Z_SOAP_fun) yaz_srw_codec},
                 {0, 0, 0}
             };
             ret = z_soap_codec(o, &soap_package,
