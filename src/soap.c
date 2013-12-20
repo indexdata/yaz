@@ -48,17 +48,27 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                                 "Bad XML Document", 0);
 
         ptr = xmlDocGetRootElement(doc);
-        if (!ptr || !ptr->ns)
+        if (!ptr || ptr->type != XML_ELEMENT_NODE || !ptr->ns)
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "No Envelope element", 0);
         }
         /* check for SRU root node match */
-
         for (i = 0; handlers[i].ns; i++)
-            if (yaz_match_glob(handlers[i].ns, (const char *)ptr->ns->href))
-                break;
+        {
+            const char *hns = handlers[i].ns;
+            if (strchr(hns, ':'))
+            {
+                if (yaz_match_glob(hns, (const char *) ptr->ns->href))
+                    break;
+            }
+            else
+            {
+                if (yaz_match_glob(hns, (const char *) ptr->name))
+                    break;
+            }
+        }
         if (handlers[i].ns)
         {
             void *handler_data = 0;
@@ -85,9 +95,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             return ret;
         }
         /* OK: assume SOAP */
-
-        if (!ptr || ptr->type != XML_ELEMENT_NODE ||
-            xmlStrcmp(ptr->name, BAD_CAST "Envelope") || !ptr->ns)
+        if (xmlStrcmp(ptr->name, BAD_CAST "Envelope"))
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
@@ -186,7 +194,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             const char *ns = (const char *) ptr->ns->href;
             for (i = 0; handlers[i].ns; i++)
             {
-                if (yaz_match_glob(handlers[i].ns, ns))
+                if (strchr(handlers[i].ns, ':') &&
+                    yaz_match_glob(handlers[i].ns, ns))
                     break;
             }
             if (handlers[i].ns)
