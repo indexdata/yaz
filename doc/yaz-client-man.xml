@@ -397,7 +397,8 @@
       Must be one of <literal>post</literal>,
       <literal>get</literal>, <literal>soap</literal> (default)
       or <literal>solr</literal>. Version
-      should be either 1.1 or 1.2 for SRU. Other versions are allowed - for testing
+      should be either 1.1, 1.2 or 2.0 for SRU.
+      Other versions are allowed - for testing
       purposes (version negotiation with SRU server).
       The version is currently not used for Solr Web Services
      </para>
