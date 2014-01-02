@@ -1,5 +1,5 @@
 /* This file is part of the YAZ toolkit.
- * Copyright (C) 1995-2013 Index Data
+ * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
 /** \file cclxmlconfig.c

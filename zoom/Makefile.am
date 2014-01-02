@@ -1,5 +1,5 @@
 ## This file is part of the YAZ toolkit.
-## Copyright (C) 1995-2013 Index Data
+## Copyright (C) Index Data
 
 AM_CPPFLAGS = -I$(top_srcdir)/include $(XML2_CFLAGS)
 
