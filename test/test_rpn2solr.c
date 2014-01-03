@@ -78,8 +78,8 @@ static void tst1(void)
 
     /* Truncation */
     YAZ_CHECK(compare(ct, "@attr 5=1 water", "water*"));
-    YAZ_CHECK(compare(ct, "@attr 5=2 water", 0));
-    YAZ_CHECK(compare(ct, "@attr 5=3 water", 0));
+    YAZ_CHECK(compare(ct, "@attr 5=2 water", "*water"));
+    YAZ_CHECK(compare(ct, "@attr 5=3 water", "*water*"));
     YAZ_CHECK(compare(ct, "@attr 5=100 water", "water"));
     YAZ_CHECK(compare(ct, "@attr 5=101 water", 0));
     YAZ_CHECK(compare(ct, "@attr 5=104 w#ter", "w?ter"));

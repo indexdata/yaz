@@ -243,6 +243,8 @@ static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
                 must_quote = 1;
         if (must_quote)
             wrbuf_puts(w, "\"");
+        if (trunc == 2 || trunc == 3)
+            wrbuf_puts(w, "*");
         for (i = 0 ; i < lterm; i++)
         {
             if (sterm[i] == '\\' && i < lterm - 1)
@@ -268,7 +270,7 @@ static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
             else
                 wrbuf_putc(w, sterm[i]);
         }
-        if (trunc == 1)
+        if (trunc == 1 || trunc == 3)
             wrbuf_puts(w, "*");
         if (must_quote)
             wrbuf_puts(w, "\"");
@@ -307,7 +309,7 @@ static int rpn2solr_simple(solr_transform_t ct,
      ret = rpn2solr_attr(ct, apt->attributes, w);
      if (ret)
          return ret;
-     if (trunc == 0 || trunc == 1 || trunc == 100 || trunc == 104)
+     if ((trunc >= 0 && trunc <= 3) || trunc == 100 || trunc == 104)
              ;
      else
      {
