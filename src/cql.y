@@ -49,14 +49,15 @@
 
 #define YYSTYPE token
 
-#define YYPARSE_PARAM parm
-#define YYLEX_PARAM parm
+int yylex(YYSTYPE *lval, void *vp);
+int yyerror(void *lval, char *msg);
 
-    int yylex(YYSTYPE *lval, void *vp);
-    int yyerror(char *s);
 %}
 
-%pure_parser
+
+%lex-param {void *parm}
+%parse-param {void *parm}
+%pure-parser
 %token PREFIX_NAME SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
@@ -229,7 +230,7 @@ searchTerm:
 
 %%
 
-int yyerror(char *s)
+int yyerror(void *locp, char *s)
 {
     return 0;
 }
