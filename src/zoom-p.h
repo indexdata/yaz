@@ -34,6 +34,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/zoom.h>
 #include <yaz/srw.h>
+#include <yaz/cookie.h>
 #include <yaz/mutex.h>
 
 #define SHPTR 1
@@ -102,6 +103,7 @@ struct ZOOM_connection_p {
     ZOOM_Event m_queue_back;
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
+    yaz_cookies_t cookies;
 
     int log_details;
     int log_api;

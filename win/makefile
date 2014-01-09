@@ -515,6 +515,7 @@ MISC_OBJS= \
    $(OBJDIR)\xmlquery.obj \
    $(OBJDIR)\xmlerror.obj \
    $(OBJDIR)\mime.obj \
+   $(OBJDIR)\cookie.obj \
    $(OBJDIR)\cql.obj \
    $(OBJDIR)\cql2ccl.obj \
    $(OBJDIR)\cql_sortkeys.obj \

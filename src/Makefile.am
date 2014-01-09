@@ -73,7 +73,7 @@ GEN_FILES = oid_std.c \
 
 libyaz_la_SOURCES=base64.c version.c options.c log.c \
  $(GEN_FILES) \
-  marcdisp.c \
+  cookie.c marcdisp.c \
   marc_read_json.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
   wrbuf.c oid_db.c errno.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \

@@ -64,6 +64,7 @@
 #include <yaz/cql.h>
 #include <yaz/log.h>
 #include <yaz/facet.h>
+#include <yaz/cookie.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -149,6 +150,7 @@ static char cur_host[200];
 static Odr_int last_hit_count = 0;
 static int pretty_xml = 0;
 static Odr_int sru_maximumRecords = 0;
+static yaz_cookies_t yaz_cookies = 0;
 
 typedef enum {
     QueryType_Prefix,
@@ -741,6 +743,9 @@ static int session_connect(const char *arg)
 {
     int r;
     const char *basep = 0;
+
+    yaz_cookies_destroy(yaz_cookies);
+    yaz_cookies = yaz_cookies_create();
 
     r = session_connect_base(arg, &basep);
     if (basep && *basep)
@@ -1361,43 +1366,17 @@ static int send_srw(Z_SRW_PDU *sr)
     return send_srw_host_path(sr, cur_host, path);
 }
 
-static int send_SRW_redirect(const char *uri, Z_HTTP_Response *cookie_hres)
+static int send_SRW_redirect(const char *uri)
 {
     const char *username = 0;
     const char *password = 0;
-    struct Z_HTTP_Header *h;
-    char *combined_cookies = 0;
-    int combined_cookies_len = 0;
     Z_GDU *gdu = get_HTTP_Request_url(out, uri);
 
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
     z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Accept",
                       "text/xml");
 
-    for (h = cookie_hres->headers; h; h = h->next)
-    {
-        if (!strcmp(h->name, "Set-Cookie"))
-        {
-            char *cp;
-
-            if (!(cp = strchr(h->value, ';')))
-                cp = h->value + strlen(h->value);
-            if (cp - h->value >= 1)
-            {
-                combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
-                memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
-                combined_cookies[combined_cookies_len + cp - h->value] = '\0';
-                strcat(combined_cookies,"; ");
-                combined_cookies_len = strlen(combined_cookies);
-            }
-        }
-    }
-    if (combined_cookies_len)
-    {
-        z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Cookie", combined_cookies);
-        xfree(combined_cookies);
-    }
-
+    yaz_cookies_request(yaz_cookies, out, gdu->u.HTTP_Request);
     if (auth)
     {
         if (auth->which == Z_IdAuthentication_open)
@@ -3265,6 +3244,7 @@ static int cmd_show(const char *arg)
 
 static void exit_client(int code)
 {
+    yaz_cookies_destroy(yaz_cookies);
     file_history_save(file_history);
     file_history_destroy(&file_history);
     nmem_destroy(nmem_auth);
@@ -4529,7 +4509,7 @@ static void http_response(Z_HTTP_Response *hres)
 }
 #endif
 
-#define max_HTTP_redirects 2
+#define max_HTTP_redirects 3
 
 static void wait_and_handle_response(int one_response_only)
 {
@@ -4666,17 +4646,37 @@ static void wait_and_handle_response(int one_response_only)
             Z_HTTP_Response *hres = gdu->u.HTTP_Response;
             int code = hres->code;
             const char *location = 0;
+
+            yaz_cookies_response(yaz_cookies, hres);
             if ((code == 301 || code == 302)
                 && no_redirects < max_HTTP_redirects
                 && !yaz_matchstr(sru_method, "get")
                 && (location = z_HTTP_header_lookup(hres->headers, "Location")))
             {
                 const char *base_tmp;
-                session_connect_base(location, &base_tmp);
+
+                if (*location == '/')
+                {
+                    char *args = 0;
+                    char *nlocation = odr_malloc(in, strlen(location)
+                                                 + strlen(cur_host) + 3);
+                    strcpy(nlocation, cur_host);
+                    cs_get_host_args(nlocation, (const char **) &args);
+                    if (!args || !*args)
+                        args = nlocation + strlen(nlocation);
+                    else
+                        args--;
+                    strcpy(args, location);
+                    location = nlocation;
+                }
+                else
+                {
+                    session_connect_base(location, &base_tmp);
+                }
                 no_redirects++;
                 if (conn)
                 {
-                    if (send_SRW_redirect(location, hres) == 2)
+                    if (send_SRW_redirect(location) == 2)
                         continue;
                 }
                 printf("Redirect failed\n");

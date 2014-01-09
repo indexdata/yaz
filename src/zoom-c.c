@@ -306,6 +306,7 @@ ZOOM_API(ZOOM_connection)
 
     c->sru_version = 0;
     c->no_redirects = 0;
+    c->cookies = 0;
     c->saveAPDU_wrbuf = 0;
     return c;
 }
@@ -542,6 +543,9 @@ ZOOM_API(void)
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
 
+    yaz_cookies_destroy(c->cookies);
+    c->cookies = yaz_cookies_create();
+
     if (c->sru_mode == zoom_sru_error)
     {
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, val);
@@ -619,6 +623,7 @@ ZOOM_API(void)
     xfree(c->group);
     xfree(c->password);
     xfree(c->sru_version);
+    yaz_cookies_destroy(c->cookies);
     wrbuf_destroy(c->saveAPDU_wrbuf);
     xfree(c);
 }
@@ -1478,43 +1483,14 @@ ZOOM_API(int)
 
 #if YAZ_HAVE_XML2
 
-static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri,
-                                  Z_HTTP_Response *cookie_hres)
+static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
 {
-    struct Z_HTTP_Header *h;
-    char *combined_cookies = 0;
-    int combined_cookies_len = 0;
     Z_GDU *gdu = z_get_HTTP_Request_uri(c->odr_out, uri, 0, c->proxy ? 1 : 0);
 
     gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers, "Accept",
                       "text/xml");
-
-    for (h = cookie_hres->headers; h; h = h->next)
-    {
-        if (!strcmp(h->name, "Set-Cookie"))
-        {
-            char *cp;
-
-            if (!(cp = strchr(h->value, ';')))
-                cp = h->value + strlen(h->value);
-            if (cp - h->value >= 1) {
-                combined_cookies = xrealloc(combined_cookies, combined_cookies_len + cp - h->value + 3);
-                memcpy(combined_cookies+combined_cookies_len, h->value, cp - h->value);
-                combined_cookies[combined_cookies_len + cp - h->value] = '\0';
-                strcat(combined_cookies,"; ");
-                combined_cookies_len = strlen(combined_cookies);
-            }
-        }
-    }
-
-    if (combined_cookies_len)
-    {
-        z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers,
-                          "Cookie", combined_cookies);
-        xfree(combined_cookies);
-    }
-
+    yaz_cookies_request(c->cookies, c->odr_out, gdu->u.HTTP_Request);
     if (c->user && c->password)
     {
         z_HTTP_header_add_basic_auth(c->odr_out, &gdu->u.HTTP_Request->headers,
@@ -1564,6 +1540,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     ZOOM_connection_set_mask(c, 0);
     yaz_log(c->log_details, "%p handle_http", c);
 
+    yaz_cookies_response(c->cookies, hres);
     if ((hres->code == 301 || hres->code == 302) && c->sru_mode == zoom_sru_get
         && (location = z_HTTP_header_lookup(hres->headers, "Location")))
     {
@@ -1578,9 +1555,26 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         {
             /* since redirect may change host we just reconnect. A smarter
                implementation might check whether it's the same server */
-            do_connect_host(c, location);
-            send_HTTP_redirect(c, location, hres);
-            /* we're OK for now. Operation is not really complete */
+            if (*location != '/')
+            {
+                /* full header */
+                do_connect_host(c, location);
+                send_HTTP_redirect(c, location);
+            }
+            else
+            {  /* relative header - same host */
+                char *args = 0;
+                char *nlocation = odr_malloc(c->odr_in, strlen(location)
+                                             + strlen(c->host_port) + 3);
+                strcpy(nlocation, c->host_port);
+                cs_get_host_args(nlocation, (const char **) &args);
+                if (!args || !*args)
+                    args = nlocation + strlen(nlocation);
+                else
+                    args--;
+                strcpy(args, location);
+                send_HTTP_redirect(c, nlocation);
+            }
             return;
         }
     }
