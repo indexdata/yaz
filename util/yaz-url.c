@@ -23,6 +23,7 @@ static void usage(void)
     printf(" -p fname            POSTs file at following url\n");
     printf(" -R num              Set maximum number of HTTP redirects\n");
     printf(" -u user/password    Sets Basic HTTP auth\n");
+    printf(" -v                  Verbose\n");
     printf(" -x proxy            Sets HTTP proxy\n");
     exit(1);
 }
@@ -73,7 +74,7 @@ int main(int argc, char **argv)
     int no_urls = 0;
     const char *outfname = 0;
 
-    while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:x:", argv, argc, &arg))
+    while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
@@ -126,6 +127,9 @@ int main(int argc, char **argv)
             }
             else
                 z_HTTP_header_add_basic_auth(odr, &http_headers, arg, 0);
+            break;
+        case 'v':
+            yaz_url_set_verbose(p, 1);
             break;
         case 'x':
             yaz_url_set_proxy(p, arg);

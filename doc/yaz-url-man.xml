@@ -35,6 +35,7 @@
    <arg>-p <replaceable>fname</replaceable></arg>
    <arg>-R <replaceable>num</replaceable></arg>
    <arg>-u <replaceable>user/password</replaceable></arg>
+   <arg>-v</arg>
    <arg>-x <replaceable>proxy</replaceable></arg>
    <arg rep="repeat">url</arg>
   </cmdsynopsis>
@@ -102,6 +103,13 @@
       basic authentication in the following URL fetch. The user
       and password must be separated by a slash (this it is not
       possible to specify a user with a slash in it).
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-v</term>
+    <listitem><para>
+      Makes yaz-url dump each HTTP request/response to stdout.
      </para></listitem>
    </varlistentry>
 
