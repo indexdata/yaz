@@ -34,6 +34,12 @@ yaz_cookies_t yaz_cookies_create(void)
 
 void yaz_cookies_destroy(yaz_cookies_t yc)
 {
+    yaz_cookies_reset(yc);
+    xfree(yc);
+}
+
+void yaz_cookies_reset(yaz_cookies_t yc)
+{
     if (yc)
     {
         struct cookie *c = yc->list;
@@ -47,7 +53,7 @@ void yaz_cookies_destroy(yaz_cookies_t yc)
             xfree(c);
             c = c1;
         }
-        xfree(yc);
+        yc->list = 0;
     }
 }
 

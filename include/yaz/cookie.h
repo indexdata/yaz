@@ -47,6 +47,7 @@ YAZ_EXPORT void yaz_cookies_response(yaz_cookies_t yc, Z_HTTP_Response *res);
 
 YAZ_EXPORT void yaz_cookies_request(yaz_cookies_t yc, ODR odr,
                                     Z_HTTP_Request *req);
+YAZ_EXPORT void yaz_cookies_reset(yaz_cookies_t yc);
 
 YAZ_END_CDECL
 
