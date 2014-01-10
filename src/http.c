@@ -16,6 +16,7 @@
 #include <yaz/matchstr.h>
 #include <yaz/zgdu.h>
 #include <yaz/base64.h>
+#include <yaz/comstack.h>
 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
@@ -643,6 +644,32 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
         odr_printf(o, "--\n");
     }
     return 1;
+}
+
+const char *yaz_check_location(ODR odr, const char *uri, const char *location,
+                               int *host_change)
+{
+    if (*location == '/')
+    {  /* relative location */
+        char *args = 0;
+        char *nlocation = (char *) odr_malloc(odr, strlen(location)
+                                              + strlen(uri) + 3);
+        strcpy(nlocation, uri);
+        cs_get_host_args(nlocation, (const char **) &args);
+        if (!args || !*args)
+            args = nlocation + strlen(nlocation);
+        else
+            args--;
+        strcpy(args, location);
+        *host_change = 0;
+        return nlocation;
+    }
+    else
+    {
+        /* we don't check if host is the same as before - yet */
+        *host_change = 1;
+        return location;
+    }
 }
 
 /*

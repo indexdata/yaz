@@ -110,6 +110,8 @@ YAZ_EXPORT int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p);
 YAZ_EXPORT int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr);
 YAZ_EXPORT int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr);
 
+YAZ_EXPORT const char *yaz_check_location(ODR odr, const char *uri,
+                                    const char *location, int *host_change);
 YAZ_END_CDECL
 
 #endif
