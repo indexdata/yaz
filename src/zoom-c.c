@@ -1555,26 +1555,16 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         {
             /* since redirect may change host we just reconnect. A smarter
                implementation might check whether it's the same server */
-            if (*location != '/')
+
+            int host_change = 0;
+            location = yaz_check_location(c->odr_in, c->host_port,
+                                          location, &host_change);
+            if (host_change)
             {
-                /* full header */
-                do_connect_host(c, location);
-                send_HTTP_redirect(c, location);
+                if (do_connect_host(c, location) == zoom_complete)
+                    return;  /* connect failed.. */
             }
-            else
-            {  /* relative header - same host */
-                char *args = 0;
-                char *nlocation = odr_malloc(c->odr_in, strlen(location)
-                                             + strlen(c->host_port) + 3);
-                strcpy(nlocation, c->host_port);
-                cs_get_host_args(nlocation, (const char **) &args);
-                if (!args || !*args)
-                    args = nlocation + strlen(nlocation);
-                else
-                    args--;
-                strcpy(args, location);
-                send_HTTP_redirect(c, nlocation);
-            }
+            send_HTTP_redirect(c, location);
             return;
         }
     }
