@@ -4654,25 +4654,11 @@ static void wait_and_handle_response(int one_response_only)
                 && (location = z_HTTP_header_lookup(hres->headers, "Location")))
             {
                 const char *base_tmp;
-
-                if (*location == '/')
-                {
-                    char *args = 0;
-                    char *nlocation = odr_malloc(in, strlen(location)
-                                                 + strlen(cur_host) + 3);
-                    strcpy(nlocation, cur_host);
-                    cs_get_host_args(nlocation, (const char **) &args);
-                    if (!args || !*args)
-                        args = nlocation + strlen(nlocation);
-                    else
-                        args--;
-                    strcpy(args, location);
-                    location = nlocation;
-                }
-                else
-                {
+                int host_change = 0;
+                location = yaz_check_location(in, cur_host,
+                                              location, &host_change);
+                if (host_change)
                     session_connect_base(location, &base_tmp);
-                }
                 no_redirects++;
                 if (conn)
                 {
