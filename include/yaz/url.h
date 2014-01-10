@@ -66,6 +66,12 @@ YAZ_EXPORT void yaz_url_set_proxy(yaz_url_t p, const char *proxy);
 */
 YAZ_EXPORT void yaz_url_set_max_redirects(yaz_url_t p, int num);
 
+/** \brief sets verbose level 0=none, >0 verbose
+    \param p handle
+    \param num verbose level
+*/
+YAZ_EXPORT void yaz_url_set_verbose(yaz_url_t p, int num);
+
 /** \brief executes the actual HTTP request (including redirects, etc)
     \param p handle
     \param uri URL

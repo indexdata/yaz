@@ -14,6 +14,7 @@
 #include <yaz/comstack.h>
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
+#include <yaz/cookie.h>
 
 struct yaz_url {
     ODR odr_in;
@@ -21,6 +22,8 @@ struct yaz_url {
     char *proxy;
     int max_redirects;
     WRBUF w_error;
+    int verbose;
+    yaz_cookies_t cookies;
 };
 
 yaz_url_t yaz_url_create(void)
@@ -31,6 +34,8 @@ yaz_url_t yaz_url_create(void)
     p->proxy = 0;
     p->max_redirects = 10;
     p->w_error = wrbuf_alloc();
+    p->verbose = 0;
+    p->cookies = yaz_cookies_create();
     return p;
 }
 
@@ -42,6 +47,7 @@ void yaz_url_destroy(yaz_url_t p)
         odr_destroy(p->odr_out);
         xfree(p->proxy);
         wrbuf_destroy(p->w_error);
+        yaz_cookies_destroy(p->cookies);
         xfree(p);
     }
 }
@@ -57,6 +63,11 @@ void yaz_url_set_proxy(yaz_url_t p, const char *proxy)
 void yaz_url_set_max_redirects(yaz_url_t p, int num)
 {
     p->max_redirects = num;
+}
+
+void yaz_url_set_verbose(yaz_url_t p, int num)
+{
+    p->verbose = num;
 }
 
 static void extract_user_pass(NMEM nmem,
@@ -115,6 +126,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     Z_HTTP_Response *res = 0;
     int number_of_redirects = 0;
 
+    yaz_cookies_reset(p->cookies);
     wrbuf_rewind(p->w_error);
     while (1)
     {
@@ -133,6 +145,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy ? 1 : 0);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
 
+        yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
         for ( ; user_headers; user_headers = user_headers->next)
         {
             /* prefer new Host over user-supplied Host */
@@ -180,6 +193,9 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             int len;
             char *buf = odr_getbuf(p->odr_out, &len, 0);
 
+            if (p->verbose)
+                fwrite(buf, 1, len, stdout);
+
             if (cs_put(conn, buf, len) < 0)
             {
                 wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
@@ -198,6 +214,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                 else
                 {
                     Z_GDU *gdu;
+                    if (p->verbose)
+                        fwrite(netbuffer, 1, cs_res, stdout);
                     odr_setbuf(p->odr_in, netbuffer, cs_res, 0);
                     if (!z_GDU(p->odr_in, &gdu, 0, 0)
                         || gdu->which != Z_GDU_HTTP_Response)
@@ -223,12 +241,17 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         if (++number_of_redirects <= p->max_redirects &&
             location && (code == 301 || code == 302 || code == 307))
         {
+            int host_change = 0;
+            const char *nlocation = yaz_check_location(p->odr_in, uri,
+                                                       location, &host_change);
+
             odr_reset(p->odr_out);
-            uri = odr_strdup(p->odr_out, location);
-            odr_reset(p->odr_in);
+            uri = odr_strdup(p->odr_out, nlocation);
         }
         else
             break;
+        yaz_cookies_response(p->cookies, res);
+        odr_reset(p->odr_in);
     }
     return res;
 }
