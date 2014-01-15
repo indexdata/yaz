@@ -9,6 +9,10 @@
 #include <config.h>
 #endif
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -806,34 +810,40 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
         char buf[100000];
         char *cp;
         const char *bp = buf;
+        char *line_in = 0;
 #if HAVE_READLINE_READLINE_H
-        char* line_in;
-        line_in = readline("ZOOM>");
-        if (!line_in)
+        if (isatty(0))
         {
-            res = -1;
-            break;
-        }
+            line_in = readline("ZOOM>");
+            if (!line_in)
+            {
+                putchar('\n');
+                res = -1;
+                break;
+            }
 #if HAVE_READLINE_HISTORY_H
-        if (*line_in)
-            add_history(line_in);
+            if (*line_in)
+                add_history(line_in);
 #endif
-        if (strlen(line_in) > sizeof(buf)-1)
-        {
-            printf("Input line too long\n");
-            res = 1;
-            break;
-        }
-        strcpy(buf,line_in);
-        free(line_in);
-#else
-        printf("ZOOM>"); fflush(stdout);
-        if (!fgets(buf, sizeof(buf)-1, stdin))
-        {
-            res = -1;
-            break;
+            if (strlen(line_in) > sizeof(buf)-1)
+            {
+                printf("Input line too long\n");
+                res = 1;
+                break;
+            }
+            strcpy(buf,line_in);
+            free(line_in);
         }
 #endif
+        if (!line_in) /* no line buffer via readline or not enabled at all */
+        {
+            printf("ZOOM>"); fflush(stdout);
+            if (!fgets(buf, sizeof(buf)-1, stdin))
+            {
+                res = -1;
+                break;
+            }
+        }
         if ((cp = strchr(buf, '\n')))
             *cp = '\0';
         res = cmd_parse(c, r, options, &bp);
