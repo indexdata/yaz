@@ -1559,11 +1559,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             int host_change = 0;
             location = yaz_check_location(c->odr_in, c->host_port,
                                           location, &host_change);
-            if (host_change)
-            {
-                if (do_connect_host(c, location) == zoom_complete)
-                    return;  /* connect failed.. */
-            }
+            if (do_connect_host(c, location) == zoom_complete)
+                return;  /* connect failed.. */
             send_HTTP_redirect(c, location);
             return;
         }
