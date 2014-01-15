@@ -752,7 +752,7 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
 
     cmd_len = next_token(buf, &cmd_str);
     if (cmd_len < 0)
-        return -1;
+        return 0;
     if (is_command("quit", cmd_str, cmd_len))
         return -1;
     else if (is_command("set", cmd_str, cmd_len))
