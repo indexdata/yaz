@@ -1,3 +1,29 @@
+--- 5.0.11 2014/01/15
+
+ZOOM: fix "lost connection" problem with servers that uses both squid
+and another proxy behind it that returns Location headers with relative
+URIs. YAZ-724
+
+zoomsh: do not use readline for stdin (no tty) YAZ-724
+Just use fgets in that case. If the user hits Ctrl-D a new-line
+is also printed.
+
+zoomsh: empty command ignored YAZ-723
+rather than performing exit of zoomsh.
+
+yaz-url utility offers option -v to enable verbose mode.
+
+yaz_url uses yaz_check_location and offers verbose mode.
+
+Add new function yaz_check_location.
+This function gets an absolute URI from Location (HTTP redirect).
+
+cookie API: introduce yaz_cookies_reset
+
+Update cql.y for newer bison YAZ-720
+The important part is that YYLEX_PARAM and YYPARSE_PARAM are no
+longer supported. Instead one must use %lex-param and %parse-param .
+
 --- 5.0.10 2014/01/09
 
 ZOOM/yaz-client: Cookie handling; deal with relative URI in Location
