@@ -1,7 +1,7 @@
 # This file is part of the YAZ toolkit.
 # Copyright (C) Index Data
 
-# Parameters 
+# Parameters
 
 DEBUG=0   # 0 for release, 1 for debug
 USE_MANIFEST = 1
@@ -59,7 +59,7 @@ dist: yaz.win32.nsi yaz.nsi distclean
 
 dist64: yaz.win64.nsi yaz.nsi distclean
 	nmake make64
-	$(NSIS) yaz.win64.nsi 
+	$(NSIS) yaz.win64.nsi
 
 make64:
 	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64 YAZ4J_DIR=..\..\..\yaz4j all yaz4j
@@ -164,7 +164,7 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
 
 yaz_url: $(YAZ_URL)
 
-utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) 
+utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
 testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
@@ -189,17 +189,13 @@ iconv:
 
 !endif
 
-###TRYING ICU FLAGS HERE WORKS  ####
-## ADAM ARE THESE FLAGS OK and the DLL sufficient ##
-##IT COMPILES AND SEEMS TO WORK
-
 !if $(HAVE_ICU)
-ICU_DEF= \
+ICU_DEF=
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
 icu: $(BINDIR)\icudt42.dll $(BINDIR)\icuin42.dll $(BINDIR)\icuuc42.dll
-yazicu: dirs generate $(YAZ_ICU) 
+yazicu: dirs generate $(YAZ_ICU)
 
 $(BINDIR)\icudt42.dll:
   copy "$(ICU_BIN)\icudt42.dll" $(BINDIR)
@@ -208,14 +204,13 @@ $(BINDIR)\icuin42.dll:
 $(BINDIR)\icuuc42.dll:
   copy "$(ICU_BIN)\icuuc42.dll" $(BINDIR)
 !else
-ICU_DEF= \
-  /D YAZ_HAVE_ICU=0
+ICU_DEF= /D YAZ_HAVE_ICU=0
 ICU_LIBS=
 icu:
 yazicu:
 !endif
 
-### 
+###
 
 !if $(HAVE_LIBXML2)
 LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
@@ -231,7 +226,7 @@ $(BINDIR)\zlib1.dll:
 !else
 LIBXML2_LIB=
 LIBXML2_DEF=/D YAZ_HAVE_XML2=0
-libxml2: 
+libxml2:
 
 !endif
 
@@ -249,7 +244,7 @@ $(BINDIR)\libxslt.dll:
 !else
 LIBXSLT_LIB=
 LIBXSLT_DEF=/D YAZ_HAVE_XSLT=0
-libxslt: 
+libxslt:
 !endif
 
 
@@ -269,7 +264,7 @@ COMMON_C_OPTIONS=          \
   /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
-  /Fd"$(OBJDIR)\\" 
+  /Fd"$(OBJDIR)\\"
 
 COMMON_C_INCLUDES= \
   /I"$(ROOTDIR)\include" \
@@ -306,12 +301,12 @@ LINK_LIBS= kernel32.lib ws2_32.lib advapi32.lib \
 
 COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no
 
-DEBUG_LNK_OPTIONS= /debug 
+DEBUG_LNK_OPTIONS= /debug
 
 RELEASE_LNK_OPTIONS=
 
-DLL_LINK_OPTIONS= /dll  
-CLIENT_LINK_OPTIONS = /subsystem:console  
+DLL_LINK_OPTIONS= /dll
+CLIENT_LINK_OPTIONS = /subsystem:console
 
 COMMON_TCL_OPTIONS= ..\util\yaz-asncomp -I$(INCLDIR) -i yaz
 
@@ -322,7 +317,7 @@ LNKOPT= $(COMMON_LNK_OPTIONS) $(DEBUG_LNK_OPTIONS)   $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 
 !else
-COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES) 
+COPT=   $(COMMON_C_OPTIONS)   $(RELEASE_C_OPTIONS)   $(COMMON_C_INCLUDES)
 LNKOPT= $(COMMON_LNK_OPTIONS) $(RELEASE_LNK_OPTIONS) $(LNK_LIBS)
 TCLOPT= $(COMMON_TCL_OPTIONS)
 !endif
@@ -335,7 +330,7 @@ LINK_DLL = $(LINK) $(LNKOPT) \
 
 # Source and object modules
 
-# Note: Ordinary source files are not specified here at 
+# Note: Ordinary source files are not specified here at
 # all, make finds them in suitable dirs. The object modules
 # need to be specified, though
 
@@ -345,15 +340,15 @@ YAZ_CLIENT_OBJS= \
    $(OBJDIR)\admin.obj \
    $(OBJDIR)\fhistory.obj
 
-YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj 
-YAZ_URL_OBJS= $(OBJDIR)\yaz-url.obj 
+YAZ_ICU_OBJS= $(OBJDIR)\yaz-icu.obj
+YAZ_URL_OBJS= $(OBJDIR)\yaz-url.obj
 COND_DLL_OBJS= $(OBJDIR)\condvar.obj
 
 ZTEST_OBJS= \
     $(OBJDIR)\dummy-opac.obj \
     $(OBJDIR)\read-marc.obj \
     $(OBJDIR)\read-grs.obj \
-    $(OBJDIR)\ztest.obj 
+    $(OBJDIR)\ztest.obj
 
 SC_TEST_OBJS = \
    $(OBJDIR)\sc_test.obj
@@ -605,7 +600,7 @@ DLL_OBJS =\
    $(MISC_OBJS) \
    $(Z3950_OBJS) \
    $(ILL_OBJS)
-   
+
 ICU_DLL_OBJS =\
    $(OBJDIR)\icu_chain.obj \
    $(OBJDIR)\icu_utf16.obj \
@@ -615,11 +610,11 @@ ICU_DLL_OBJS =\
    $(OBJDIR)\icu_tokenizer.obj \
    $(OBJDIR)\icu_sortkey.obj \
    $(OBJDIR)\stemmer.obj \
-   $(STEMMER_OBJS) 
+   $(STEMMER_OBJS)
 
 # Generated C and H files
 
-Z3950_C_DIR=$(SRCDIR)   
+Z3950_C_DIR=$(SRCDIR)
 ILL_C_DIR=$(SRCDIR)
 #!!! Should be moved to OBJ, but that requires too much trickery
 
@@ -743,9 +738,9 @@ generate: \
 	$(SRCDIR)\diagsrw.c \
 	$(SRCDIR)\diagbib1.c \
 	$(SRCDIR)\diagsru_update.c \
-	$(INCLDIR)\yaz\yaz-version.h 
+	$(INCLDIR)\yaz\yaz-version.h
 
-# Compiling 
+# Compiling
 
 # Note: This defines where to look for the necessary
 # source files. Funny way of doing it, but it works.
@@ -760,29 +755,29 @@ generate: \
 
 # Server
 {$(SERVERDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 # Various YAZ source directories
 {$(SRCDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) /D"YAZ_DLL" $< 
+	$(CPP) $(COPT) /D"YAZ_DLL" $<
 
 {$(ZOOMDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 {$(UTILDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 {$(ROOTDIR)\libstemmer_c\libstemmer}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 {$(ROOTDIR)\libstemmer_c\runtime}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 {$(ROOTDIR)\libstemmer_c\src_c}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $< 
+	$(CPP) $(COPT) $<
 
 # ASN-generated files
 
@@ -855,7 +850,7 @@ $(SRCDIR)\iso5426.c: $(SRCDIR)\codetables-iso5426.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
 	$(TCL) charconv.tcl -r -p iso5426 codetables-iso5426.xml -o iso5426.c
 
-$(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv 
+$(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv
 	@cd $(SRCDIR)
 	$(TCL) oidtoc.tcl $(SRCDIR) oid.csv oid_std.c oid_std.h
 
@@ -900,10 +895,10 @@ RSOPT=/d_NDEBUG
 !endif
 
 $(YAZ_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /I"../include" /fo"$(YAZ_RES)" $(YAZ_RC) 
+	$(RSC) $(RSOPT) /I"../include" /fo"$(YAZ_RES)" $(YAZ_RC)
 
 $(YAZ_ICU_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /DICU=1 /I"../include" /fo"$(YAZ_ICU_RES)" $(YAZ_RC) 
+	$(RSC) $(RSOPT) /DICU=1 /I"../include" /fo"$(YAZ_ICU_RES)" $(YAZ_RC)
 
 # Linking
 
@@ -912,7 +907,7 @@ $(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		$(DLL_OBJS) \
 		$(YAZ_RES) \
 		/out:$@ \
-		/implib:"$(YAZ_IMPLIB)" 
+		/implib:"$(YAZ_IMPLIB)"
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
@@ -920,7 +915,7 @@ $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
 		$(ICU_DLL_OBJS) \
 		$(YAZ_ICU_RES) \
 		/out:$@ \
-		/implib:"$(YAZ_ICU_IMPLIB)" 
+		/implib:"$(YAZ_ICU_IMPLIB)"
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(YAZ_COND_DLL) $(YAZ_COND_IMPLIB): "$(BINDIR)" $(COND_DLL_OBJS) $(YAZ_COND_RES)
@@ -928,7 +923,7 @@ $(YAZ_COND_DLL) $(YAZ_COND_IMPLIB): "$(BINDIR)" $(COND_DLL_OBJS) $(YAZ_COND_RES)
 		$(COND_DLL_OBJS) \
 		$(YAZ_COND_RES) \
 		/out:$@ \
-		/implib:"$(YAZ_COND_IMPLIB)" 
+		/implib:"$(YAZ_COND_IMPLIB)"
 	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(YAZ_DLL)
