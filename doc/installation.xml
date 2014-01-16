@@ -691,44 +691,44 @@
      The following files are generated upon successful compilation:
 
      <variablelist>
-      <varlistentry><term><filename>bin/yaz4.dll</filename> /
-	  <filename>bin/yaz4d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz5.dll</filename> /
+	  <filename>bin/yaz5d.dll</filename></term>
        <listitem><para>
          &yaz; Release/Debug DLL.
         </para></listitem></varlistentry>
 
-      <varlistentry><term><filename>lib/yaz4.lib</filename> /
-	  <filename>lib/yaz4d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz5.lib</filename> /
+	  <filename>lib/yaz5d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz4.dll</filename> /
-	 <filename>yaz4d.dll</filename>.
+         Import library for <filename>yaz5.dll</filename> /
+	 <filename>yaz5d.dll</filename>.
         </para></listitem></varlistentry>
 
-      <varlistentry><term><filename>bin/yaz_cond4.dll</filename> /
-	  <filename>bin/yaz_cond4d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz_cond5.dll</filename> /
+	  <filename>bin/yaz_cond5d.dll</filename></term>
        <listitem><para>
 	 Release/Debug DLL for condition variable utilities (condvar.c).
         </para></listitem></varlistentry>
 
-      <varlistentry><term><filename>lib/yaz_cond4.lib</filename> /
-	  <filename>lib/yaz_cond4d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz_cond5.lib</filename> /
+	  <filename>lib/yaz_cond5d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz_cond4.dll</filename> /
-	 <filename>yaz_cond4d.dll</filename>.
+         Import library for <filename>yaz_cond5.dll</filename> /
+	 <filename>yaz_cond5d.dll</filename>.
         </para></listitem></varlistentry>
 
-      <varlistentry><term><filename>bin/yaz_icu4.dll</filename> /
-          <filename>bin/yaz_icu4d.dll</filename></term>
+      <varlistentry><term><filename>bin/yaz_icu5.dll</filename> /
+          <filename>bin/yaz_icu5d.dll</filename></term>
        <listitem><para>
          Release/Debug DLL for the ICU wrapper utility.
 	 Only build if HAVE_ICU is 1.
         </para></listitem></varlistentry>
 
-      <varlistentry><term><filename>lib/yaz_icu4.lib</filename> /
-	  <filename>lib/yaz_icu4d.lib</filename></term>
+      <varlistentry><term><filename>lib/yaz_icu5.lib</filename> /
+	  <filename>lib/yaz_icu5d.lib</filename></term>
        <listitem><para>
-         Import library for <filename>yaz_icu4.dll</filename> /
-	 <filename>yaz_icu4d.dll</filename>.
+         Import library for <filename>yaz_icu5.dll</filename> /
+	 <filename>yaz_icu5d.dll</filename>.
         </para></listitem></varlistentry>
 
       <varlistentry><term><filename>bin/yaz-ztest.exe</filename></term>
@@ -788,14 +788,14 @@
       <varlistentry><term>include path</term><listitem><para>
          Set it to the <filename>include</filename> directory of &yaz;.
         </para></listitem></varlistentry>
-      <varlistentry><term>import library <filename>yaz4.lib</filename>
+      <varlistentry><term>import library <filename>yaz5.lib</filename>
        </term><listitem><para>
          You must link with this library. It's located in the
          sub directory <filename>lib</filename> of &yaz;.
 	 If you want to link with the debug version of &yaz;, you must
-	 link against <filename>yaz4d.lib</filename> instead.
+	 link against <filename>yaz5d.lib</filename> instead.
         </para></listitem></varlistentry>
-      <varlistentry><term>dynamic link library <filename>yaz4.dll</filename>
+      <varlistentry><term>dynamic link library <filename>yaz5.dll</filename>
        </term><listitem><para>
          This DLL must be in your execution path when you invoke
          your application. Specifically, you should distribute this
