@@ -23,7 +23,7 @@ AM_PROG_LIBTOOL
 AC_PATH_PROG([pkgconfigpath],[pkg-config],[NONE])
 dnl
 YAZ_DOC
-dnl 
+dnl
 dnl
 AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/un.h sys/wait.h sys/prctl.h netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h],[],[],[])
 AC_CHECK_HEADERS([net/if.h netinet/in.h netinet/if_ether.h],[],[],[
@@ -324,8 +324,8 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
     ACX_PTHREAD([
 	    OCFLAGS=$CFLAGS
 	    CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-	    dnl unfortunately empty thread lib spec is problematic because 
-            dnl 'yaz-config --cflags' is not always passed to linker in 
+	    dnl unfortunately empty thread lib spec is problematic because
+            dnl 'yaz-config --cflags' is not always passed to linker in
             dnl applications using YAZ (such as Zebra).
 	    if test "x$PTHREAD_LIBS" = "x"; then
 		OLIBS=$LIBS
@@ -363,7 +363,7 @@ if test "$xml_enabled" = "true"; then
 	    AC_DEFINE(YAZ_HAVE_EXSLT,1,[Define to 1 if EXSLT is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_EXSLT=1"
 	])
-    
+
 fi
 YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS $XML2_CFLAGS"
 
@@ -372,7 +372,7 @@ if test "$XML2_LIBS"; then
 fi
 
 dnl
-dnl 
+dnl
 AC_CHECK_ICU([3.4],[
 	if test "$xml_enabled" = "true"; then
 	    ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"
