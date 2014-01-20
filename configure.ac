@@ -59,8 +59,15 @@ if test "$checkBoth" = "1"; then
     AC_CHECK_FUNC([accept], , [LIBS=$oldLibs])
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
-dnl
-
+dnl ------ memcached
+memcached=default
+AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
+if test "$memcached" != "no"; then
+    AC_CHECK_LIB([memcached],[memcached_get])
+    if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
+	AC_CHECK_HEADERS([libmemcached/memcached.h])
+    fi
+fi
 dnl ------ OpenSSL
 AC_SUBST([SSL_CFLAGS])
 AC_SUBST([SSL_LIBS])
