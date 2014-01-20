@@ -1273,6 +1273,24 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
+
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    if (c->mc_st)
+    {
+        uint32_t flags = 0;
+        memcached_return_t rc;
+        time_t expiration = 36000;
+        char str[40];
+
+        sprintf(str, ODR_INT_PRINTF, *sr->resultCount);
+        rc = memcached_set(c->mc_st,
+                           wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
+                           str, strlen(str), expiration, flags);
+        yaz_log(YLOG_LOG, "Key=%s value=%s rc=%u %s",
+                wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
+                memcached_last_error_message(c->mc_st));
+    }
+#endif
     handle_Z3950_records(c, sr->records, 0);
 }
 

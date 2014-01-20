@@ -308,6 +308,10 @@ ZOOM_API(ZOOM_connection)
     c->no_redirects = 0;
     c->cookies = 0;
     c->saveAPDU_wrbuf = 0;
+
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    c->mc_st = 0;
+#endif
     return c;
 }
 
@@ -546,6 +550,29 @@ ZOOM_API(void)
     yaz_cookies_destroy(c->cookies);
     c->cookies = yaz_cookies_create();
 
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    if (c->mc_st)
+    {
+        memcached_free(c->mc_st);
+        c->mc_st = 0;
+    }
+#endif
+    val = ZOOM_options_get(c->options, "memcached");
+    if (val && *val)
+    {
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+        c->mc_st = memcached(val, strlen(val));
+        if (!c->mc_st)
+        {
+            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, val);
+            return;
+        }
+#else
+        ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, "not enabled");
+        return;
+#endif
+    }
+
     if (c->sru_mode == zoom_sru_error)
     {
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, val);
@@ -590,6 +617,11 @@ ZOOM_API(void)
     if (!c)
         return;
     yaz_log(c->log_api, "%p ZOOM_connection_destroy", c);
+
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    if (c->mc_st)
+        memcached_free(c->mc_st);
+#endif
     if (c->cs)
         cs_close(c->cs);
 
@@ -694,6 +726,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     }
 #endif
     resultset_use(1);
+    r->mc_key = 0;
     return r;
 }
 
@@ -714,11 +747,10 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_resultset r = ZOOM_resultset_create();
-    ZOOM_task task;
     const char *cp;
+    ZOOM_task task;
     int start, count;
     const char *syntax, *elementSetName, *schema;
-
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = ZOOM_query_get_sortspec(q);
     r->query = q;
@@ -744,6 +776,31 @@ ZOOM_API(ZOOM_resultset)
     r->connection = c;
     r->next = c->resultsets;
     c->resultsets = r;
+
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    r->mc_key = wrbuf_alloc();
+    wrbuf_puts(r->mc_key, c->host_port);
+    wrbuf_puts(r->mc_key, ";");
+    wrbuf_puts(r->mc_key, ZOOM_query_get_query_string(q));
+    if (c->mc_st)
+    {
+        size_t v_len;
+        uint32_t flags;
+        memcached_return_t rc;
+        char *v = memcached_get(c->mc_st, wrbuf_buf(r->mc_key),
+                                wrbuf_len(r->mc_key), &v_len, &flags, &rc);
+        if (v)
+        {
+            yaz_log(YLOG_LOG, "For key %s got value %.*s",
+                    wrbuf_cstr(r->mc_key), (int) v_len, v);
+        }
+        else
+        {
+            yaz_log(YLOG_LOG, "For key %s got NO value", wrbuf_cstr(r->mc_key));
+        }
+    }
+#endif
+
     if (c->host_port && c->proto == PROTO_HTTP)
     {
         if (!c->cs)
@@ -868,6 +925,7 @@ static void resultset_destroy(ZOOM_resultset r)
 #if SHPTR
         YAZ_SHPTR_DEC(r->record_wrbuf, wrbuf_destroy);
 #endif
+        wrbuf_destroy(r->mc_key);
         resultset_use(-1);
         xfree(r);
     }
@@ -1892,6 +1950,8 @@ ZOOM_API(const char *)
         return "Extended Service. invalid version";
     case ZOOM_ERROR_ES_INVALID_SYNTAX:
         return "Extended Service. invalid syntax";
+    case ZOOM_ERROR_MEMCACHED:
+        return "Memcached";
     default:
         return diagbib1_str(error);
     }

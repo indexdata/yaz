@@ -36,6 +36,9 @@
 #include <yaz/srw.h>
 #include <yaz/cookie.h>
 #include <yaz/mutex.h>
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#include <libmemcached/memcached.h>
+#endif
 
 #define SHPTR 1
 
@@ -108,6 +111,9 @@ struct ZOOM_connection_p {
     int log_details;
     int log_api;
     WRBUF saveAPDU_wrbuf;
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    memcached_st *mc_st;
+#endif
 };
 
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
@@ -136,6 +142,7 @@ struct ZOOM_resultset_p {
     ZOOM_facet_field *facets;
     int num_facets;
     char **facets_names;
+    WRBUF mc_key;
 };
 
 struct facet_term_p {

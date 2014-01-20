@@ -143,6 +143,7 @@ ZOOM_diag_str (int error);
 #define ZOOM_ERROR_ES_INVALID_ACTION 10015
 #define ZOOM_ERROR_ES_INVALID_VERSION 10016
 #define ZOOM_ERROR_ES_INVALID_SYNTAX 10017
+#define ZOOM_ERROR_MEMCACHED 10018
 
 ZOOM_API(int)
 ZOOM_connection_last_event(ZOOM_connection cs);
