@@ -1052,6 +1052,7 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *name[MAX_SRU_PARAMETERS], *value[MAX_SRU_PARAMETERS]; /* definite upper limit for SRU params */
     char *uri_args;
     char *path;
+    char *cp;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
@@ -1060,6 +1061,10 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     yaz_array_to_uri(&uri_args, encode, name, value);
 
     hreq->method = "GET";
+
+    cp = strchr(hreq->path, '#');
+    if (cp)
+        *cp = '\0';
 
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);

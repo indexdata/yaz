@@ -583,6 +583,9 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         odr_malloc(encode, strlen(hreq->path) +
                    strlen(uri_args) + strlen(solr_op) + 5);
 
+    cp = strchr(hreq->path, '#');
+    if (cp)
+        *cp = '\0';
     cp = strchr(hreq->path, '?');
     if (cp)
     {
