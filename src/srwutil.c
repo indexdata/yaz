@@ -1064,7 +1064,8 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
-    sprintf(path, "%s?%s", hreq->path, uri_args);
+    sprintf(path, "%s%c%s", hreq->path, strchr(hreq->path, '?') ? '&' : '?', 
+            uri_args);
     hreq->path = path;
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,

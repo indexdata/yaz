@@ -482,6 +482,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *q;
     char *pos;
     char *cp;
+    const char *path_args = 0;
     int i = 0;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
@@ -580,8 +581,14 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) +
-                   strlen(uri_args) + strlen(solr_op) + 4);
+                   strlen(uri_args) + strlen(solr_op) + 5);
 
+    cp = strchr(hreq->path, '?');
+    if (cp)
+    {
+        *cp = '\0'; /* args in path */
+        path_args = cp + 1;
+    }
     strcpy(path, hreq->path);
     cp = strrchr(path, '/');
     if (cp)
@@ -592,6 +599,11 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     strcat(path, "/");
     strcat(path, solr_op);
     strcat(path, "?");
+    if (path_args)
+    {
+        strcat(path, path_args);
+        strcat(path, "&");
+    }
     strcat(path, uri_args);
     hreq->path = path;
 
