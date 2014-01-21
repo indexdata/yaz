@@ -370,6 +370,7 @@ ZOOM_API(void)
                             const char *host, int portnum)
 {
     const char *val;
+    const char *http_lead;
 
     initlog();
 
@@ -436,17 +437,25 @@ ZOOM_API(void)
     else
         c->lang = 0;
 
+    val = ZOOM_options_get(c->options, "sru");
+    if (val && *val && !strstr(host, "://"))
+        http_lead = "http://";
+    else
+        http_lead = "";
+    c->sru_mode = get_sru_mode_from_string(val);
+
     if (host)
     {
+        char hostn[128];
         xfree(c->host_port);
         if (portnum)
         {
-            char hostn[128];
             sprintf(hostn, "%.80s:%d", host, portnum);
-            c->host_port = xstrdup(hostn);
+            host = hostn;
         }
-        else
-            c->host_port = xstrdup(host);
+        c->host_port = xmalloc(strlen(host) + strlen(http_lead) + 1);
+        strcpy(c->host_port, http_lead);
+        strcat(c->host_port, host);
     }
 
     {
@@ -481,9 +490,6 @@ ZOOM_API(void)
             c->host_port = remainder;
         }
     }
-
-    val = ZOOM_options_get(c->options, "sru");
-    c->sru_mode = get_sru_mode_from_string(val);
 
     xfree(c->sru_version);
     val = ZOOM_options_get(c->options, "sru_version");
