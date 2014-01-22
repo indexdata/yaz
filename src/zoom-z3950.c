@@ -646,9 +646,10 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     const char *mediumSetElementSetName;
     const char *facets;
 
-    assert(c->tasks);
-    assert(c->tasks->which == ZOOM_TASK_SEARCH);
+    if (!c->tasks)
+        return zoom_complete;
 
+    assert(c->tasks->which == ZOOM_TASK_SEARCH);
     r = c->tasks->u.search.resultset;
     if (r->live_set)
         return send_Z3950_present(c);
@@ -1040,12 +1041,12 @@ static int es_response_taskpackage(ZOOM_connection c,
     return 1;
 }
 
-
-static int handle_Z3950_es_response(ZOOM_connection c,
-                                    Z_ExtendedServicesResponse *res)
+static void handle_Z3950_es_response(ZOOM_connection c,
+                                     Z_ExtendedServicesResponse *res)
 {
-    if (!c->tasks || c->tasks->which != ZOOM_TASK_PACKAGE)
-        return 0;
+    if (!c->tasks)
+        return;
+    assert(c->tasks->which == ZOOM_TASK_PACKAGE);
     switch (*res->operationStatus)
     {
     case Z_ExtendedServicesResponse_done:
@@ -1073,7 +1074,6 @@ static int handle_Z3950_es_response(ZOOM_connection c,
         ZOOM_options_setl(c->tasks->u.package->options,
                           "xmlUpdateDoc", (char*) doc->buf, doc->len);
     }
-    return 1;
 }
 
 static char *get_term_cstr(ODR odr, Z_Term *term) {
@@ -1256,7 +1256,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     ZOOM_Event event;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
-        return ;
+        return;
 
     event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
     ZOOM_connection_put_event(c, event);
@@ -1306,13 +1306,13 @@ static void handle_Z3950_sort_response(ZOOM_connection c, Z_SortResponse *res)
         response_diag(c, res->diagnostics[0]);
 }
 
-static int handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
+static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
 {
     NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
-        return 0;
+        return;
     scan = c->tasks->u.scan.scan;
 
     if (res->entries && res->entries->nonsurrogateDiagnostics)
@@ -1330,7 +1330,6 @@ static int handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
         ZOOM_options_set_int(scan->options, "number",
                              *res->numberOfEntriesReturned);
     nmem_destroy(nmem);
-    return 1;
 }
 
 static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
@@ -1340,20 +1339,16 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
     int *start, *count;
     const char *syntax = 0, *elementSetName = 0, *schema = 0;
 
-    if (!c->tasks)
+    if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return ;
-    switch (c->tasks->which)
-    {
-    case ZOOM_TASK_SEARCH:
-        resultset = c->tasks->u.search.resultset;
-        start = &c->tasks->u.search.start;
-        count = &c->tasks->u.search.count;
-        syntax = c->tasks->u.search.syntax;
-        elementSetName = c->tasks->u.search.elementSetName;
-        schema =  c->tasks->u.search.schema;
-        break;
-        return;
-    }
+
+    resultset = c->tasks->u.search.resultset;
+    start = &c->tasks->u.search.start;
+    count = &c->tasks->u.search.count;
+    syntax = c->tasks->u.search.syntax;
+    elementSetName = c->tasks->u.search.elementSetName;
+    schema =  c->tasks->u.search.schema;
+
     if (sr && sr->which == Z_Records_NSD)
         response_default_diag(c, sr->u.nonSurrogateDiagnostic);
     else if (sr && sr->which == Z_Records_multipleNSD)
@@ -1469,24 +1464,15 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
     int *start, *count;
 
     if (!c->tasks)
-    {
-        yaz_log(c->log_details, "%p send_present no tasks", c);
         return zoom_complete;
-    }
+    assert(c->tasks->which == ZOOM_TASK_SEARCH);
+    resultset = c->tasks->u.search.resultset;
+    start = &c->tasks->u.search.start;
+    count = &c->tasks->u.search.count;
+    syntax = c->tasks->u.search.syntax;
+    elementSetName = c->tasks->u.search.elementSetName;
+    schema =  c->tasks->u.search.schema;
 
-    switch (c->tasks->which)
-    {
-    case ZOOM_TASK_SEARCH:
-        resultset = c->tasks->u.search.resultset;
-        start = &c->tasks->u.search.start;
-        count = &c->tasks->u.search.count;
-        syntax = c->tasks->u.search.syntax;
-        elementSetName = c->tasks->u.search.elementSetName;
-        schema =  c->tasks->u.search.schema;
-        break;
-    default:
-        return zoom_complete;
-    }
     yaz_log(c->log_details, "%p send_present start=%d count=%d",
             c, *start, *count);
 
