@@ -639,8 +639,8 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     int lslb, ssub, mspn;
     const char *syntax;
     const char *schema;
-    Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
-    Z_SearchRequest *search_req = apdu->u.searchRequest;
+    Z_APDU *apdu;
+    Z_SearchRequest *search_req;
     const char *elementSetName;
     const char *smallSetElementSetName;
     const char *mediumSetElementSetName;
@@ -650,6 +650,11 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
 
     r = c->tasks->u.search.resultset;
+    if (r->live_set)
+        return send_Z3950_present(c);
+
+    apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
+    search_req = apdu->u.searchRequest;
 
     yaz_log(c->log_details, "%p ZOOM_connection_send_search set=%p", c, r);
 
@@ -1273,6 +1278,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
+    resultset->live_set = 1;
 
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st)
@@ -1346,15 +1352,6 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
         elementSetName = c->tasks->u.search.elementSetName;
         schema =  c->tasks->u.search.schema;
         break;
-    case ZOOM_TASK_RETRIEVE:
-        resultset = c->tasks->u.retrieve.resultset;
-        start = &c->tasks->u.retrieve.start;
-        count = &c->tasks->u.retrieve.count;
-        syntax = c->tasks->u.retrieve.syntax;
-        elementSetName = c->tasks->u.retrieve.elementSetName;
-        schema =  c->tasks->u.retrieve.schema;
-        break;
-    default:
         return;
     }
     if (sr && sr->which == Z_Records_NSD)
@@ -1486,14 +1483,6 @@ zoom_ret send_Z3950_present(ZOOM_connection c)
         syntax = c->tasks->u.search.syntax;
         elementSetName = c->tasks->u.search.elementSetName;
         schema =  c->tasks->u.search.schema;
-        break;
-    case ZOOM_TASK_RETRIEVE:
-        resultset = c->tasks->u.retrieve.resultset;
-        start = &c->tasks->u.retrieve.start;
-        count = &c->tasks->u.retrieve.count;
-        syntax = c->tasks->u.retrieve.syntax;
-        elementSetName = c->tasks->u.retrieve.elementSetName;
-        schema = c->tasks->u.retrieve.schema;
         break;
     default:
         return zoom_complete;

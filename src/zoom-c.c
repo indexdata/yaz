@@ -136,9 +136,6 @@ void ZOOM_connection_show_task(ZOOM_task task)
     case ZOOM_TASK_SEARCH:
         yaz_log(YLOG_LOG, "search p=%p", task);
         break;
-    case ZOOM_TASK_RETRIEVE:
-        yaz_log(YLOG_LOG, "retrieve p=%p", task);
-        break;
     case ZOOM_TASK_CONNECT:
         yaz_log(YLOG_LOG, "connect p=%p", task);
         break;
@@ -200,12 +197,6 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
             xfree(task->u.search.syntax);
             xfree(task->u.search.elementSetName);
             xfree(task->u.search.schema);
-            break;
-        case ZOOM_TASK_RETRIEVE:
-            resultset_destroy(task->u.retrieve.resultset);
-            xfree(task->u.retrieve.syntax);
-            xfree(task->u.retrieve.elementSetName);
-            xfree(task->u.retrieve.schema);
             break;
         case ZOOM_TASK_CONNECT:
             break;
@@ -733,6 +724,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
 #endif
     resultset_use(1);
     r->mc_key = 0;
+    r->live_set = 0;
     return r;
 }
 
@@ -992,19 +984,19 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
             c->reconnect_ok = 1;
         }
     }
-    task = ZOOM_connection_add_task(c, ZOOM_TASK_RETRIEVE);
-    task->u.retrieve.resultset = r;
-    task->u.retrieve.start = start;
-    task->u.retrieve.count = count;
+    task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
+    task->u.search.resultset = r;
+    task->u.search.start = start;
+    task->u.search.count = count;
 
     syntax = ZOOM_options_get(r->options, "preferredRecordSyntax");
-    task->u.retrieve.syntax = syntax ? xstrdup(syntax) : 0;
+    task->u.search.syntax = syntax ? xstrdup(syntax) : 0;
     elementSetName = ZOOM_options_get(r->options, "elementSetName");
-    task->u.retrieve.elementSetName = elementSetName
+    task->u.search.elementSetName = elementSetName
         ? xstrdup(elementSetName) : 0;
 
     cp = ZOOM_options_get(r->options, "schema");
-    task->u.retrieve.schema = cp ? xstrdup(cp) : 0;
+    task->u.search.schema = cp ? xstrdup(cp) : 0;
 
     ZOOM_resultset_addref(r);
 
@@ -1501,12 +1493,6 @@ ZOOM_API(int)
                 ret = ZOOM_connection_srw_send_search(c);
             else
                 ret = ZOOM_connection_Z3950_send_search(c);
-            break;
-        case ZOOM_TASK_RETRIEVE:
-            if (c->proto == PROTO_HTTP)
-                ret = ZOOM_connection_srw_send_search(c);
-            else
-                ret = send_Z3950_present(c);
             break;
         case ZOOM_TASK_CONNECT:
             ret = do_connect(c);

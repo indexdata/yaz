@@ -171,12 +171,6 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
             facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
         schema = c->tasks->u.search.schema;
         break;
-    case ZOOM_TASK_RETRIEVE:
-        resultset = c->tasks->u.retrieve.resultset;
-        schema = c->tasks->u.retrieve.schema;
-
-        start = &c->tasks->u.retrieve.start;
-        count = &c->tasks->u.retrieve.count;
 
         if (*start >= resultset->size)
             return zoom_complete;
@@ -187,8 +181,8 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         {
             ZOOM_record rec =
                 ZOOM_record_cache_lookup(resultset, i + *start,
-                                         c->tasks->u.retrieve.syntax,
-                                         c->tasks->u.retrieve.elementSetName,
+                                         c->tasks->u.search.syntax,
+                                         c->tasks->u.search.elementSetName,
                                          schema);
             if (!rec)
                 break;
@@ -291,14 +285,6 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         }
         if (res->facetList)
             ZOOM_handle_facet_list(resultset, res->facetList);
-        break;
-    case ZOOM_TASK_RETRIEVE:
-        resultset = c->tasks->u.retrieve.resultset;
-        start = &c->tasks->u.retrieve.start;
-        count = &c->tasks->u.retrieve.count;
-        syntax = c->tasks->u.retrieve.syntax;
-        elementSetName = c->tasks->u.retrieve.elementSetName;
-        schema = c->tasks->u.retrieve.schema;
         break;
     default:
         return zoom_complete;
