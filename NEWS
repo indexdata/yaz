@@ -1,3 +1,18 @@
+--- 5.0.12 2014/01/12
+
+Prefix URL with http:// if sru setting hints SRU/Solr mode YAZ-731
+
+SRU GET/Solr base URLs may hold additional ?args YAZ-729
+ZOOM option extraArgs already does this, though. It seems useful
+when dealing with Solr targets to limit by filter, eg.
+   http://lui.indexdata.com:8080/solr4/select?fq=database:3902
+
+Remove #fragment for HTTP request encoding YAZ-730
+
+Doc: Update list of DLLs/LIBs
+
+Doc: update href link to Unix utils and Git.
+
 --- 5.0.11 2014/01/15
 
 ZOOM: fix "lost connection" problem with servers that uses both squid
