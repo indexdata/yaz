@@ -1,4 +1,4 @@
---- 5.0.12 2014/01/12
+--- 5.0.12 2014/01/22
 
 Prefix URL with http:// if sru setting hints SRU/Solr mode YAZ-731
 
