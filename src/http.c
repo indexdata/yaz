@@ -610,11 +610,13 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
 int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 {
     Z_HTTP_Header *h;
+    char *cp;
     int top0 = o->op->top;
 
     odr_write(o, hr->method, strlen(hr->method));
     odr_write(o, " ", 1);
-    odr_write(o, hr->path, strlen(hr->path));
+    cp = strchr(hr->path, '#');
+    odr_write(o, hr->path, cp ? (cp - hr->path) : strlen(hr->path));
     odr_write(o, " HTTP/", 6);
     odr_write(o, hr->version, strlen(hr->version));
     odr_write(o, "\r\n", 2);

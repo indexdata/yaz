@@ -146,7 +146,7 @@ static int z3950_version = 3;
 static int scan_stepSize = 0;
 static char scan_position[64];
 static int scan_size = 20;
-static char cur_host[200];
+static WRBUF cur_host = 0;
 static Odr_int last_hit_count = 0;
 static int pretty_xml = 0;
 static Odr_int sru_maximumRecords = 0;
@@ -739,7 +739,7 @@ static int session_connect_base(const char *arg, const char **basep)
     return 0;
 }
 
-static int session_connect(const char *arg)
+static int session_connect(void)
 {
     int r;
     const char *basep = 0;
@@ -747,7 +747,7 @@ static int session_connect(const char *arg)
     yaz_cookies_destroy(yaz_cookies);
     yaz_cookies = yaz_cookies_create();
 
-    r = session_connect_base(arg, &basep);
+    r = session_connect_base(wrbuf_cstr(cur_host), &basep);
     if (basep && *basep)
         set_base(basep);
     else if (protocol == PROTO_Z3950)
@@ -760,14 +760,15 @@ static int cmd_open(const char *arg)
     int r;
     if (arg)
     {
-        strncpy(cur_host, arg, sizeof(cur_host)-1);
-        cur_host[sizeof(cur_host)-1] = 0;
+        wrbuf_rewind(cur_host);
+        if (!strstr(arg, "://") && strcmp(sru_method, "soap"))
+            wrbuf_puts(cur_host, "http://");
+        wrbuf_puts(cur_host, arg);
     }
     set_base("");
-    r = session_connect(cur_host);
+    r = session_connect();
     if (conn && conn->protocol == PROTO_HTTP)
         queryType = QueryType_CQL;
-
 
     return r;
 }
@@ -1363,7 +1364,7 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
 static int send_srw(Z_SRW_PDU *sr)
 {
     char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
-    return send_srw_host_path(sr, cur_host, path);
+    return send_srw_host_path(sr, wrbuf_cstr(cur_host), path);
 }
 
 static int send_SRW_redirect(const char *uri)
@@ -2387,7 +2388,7 @@ static int send_SRW_update(int action_no, const char *recid,
                            char *rec_buf, int rec_len)
 {
     if (!conn)
-        session_connect(cur_host);
+        session_connect();
     if (!conn)
         return 0;
     else
@@ -2649,7 +2650,7 @@ static int cmd_explain(const char *arg)
         return 0;
 #if YAZ_HAVE_XML2
     if (!conn)
-        session_connect(cur_host);
+        session_connect();
     if (conn)
     {
         Z_SRW_PDU *sr = 0;
@@ -2672,12 +2673,14 @@ static int cmd_init(const char *arg)
 {
     if (*arg)
     {
-        strncpy(cur_host, arg, sizeof(cur_host)-1);
-        cur_host[sizeof(cur_host)-1] = 0;
+        wrbuf_rewind(cur_host);
+        if (!strstr(arg, "://") && strcmp(sru_method, "soap"))
+            wrbuf_puts(cur_host, "http://");
+        wrbuf_puts(cur_host, arg);
     }
     if (only_z3950())
         return 1;
-    send_Z3950_initRequest(cur_host);
+    send_Z3950_initRequest(wrbuf_cstr(cur_host));
     return 2;
 }
 
@@ -2848,7 +2851,7 @@ static int cmd_find(const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            session_connect(cur_host);
+            session_connect();
         if (!conn)
             return 0;
         if (!send_SRW_searchRequest(arg))
@@ -2859,7 +2862,7 @@ static int cmd_find(const char *arg)
     }
     else
     {
-        if (*cur_host && auto_reconnect)
+        if (wrbuf_len(cur_host) && auto_reconnect)
         {
             int i = 0;
             for (;;)
@@ -2877,7 +2880,7 @@ static int cmd_find(const char *arg)
                     printf("Unable to reconnect\n");
                     break;
                 }
-                session_connect(cur_host);
+                session_connect();
                 wait_and_handle_response(0);
             }
             return 0;
@@ -3220,7 +3223,7 @@ static int cmd_show(const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            session_connect(cur_host);
+            session_connect();
         if (!conn)
             return 0;
         if (!send_SRW_presentRequest(arg))
@@ -3244,10 +3247,15 @@ static int cmd_show(const char *arg)
 
 static void exit_client(int code)
 {
+    odr_destroy(in);
+    odr_destroy(out);
+    odr_destroy(print);
+    ccl_qual_rm(&bibset);
     yaz_cookies_destroy(yaz_cookies);
     file_history_save(file_history);
     file_history_destroy(&file_history);
     nmem_destroy(nmem_auth);
+    wrbuf_destroy(cur_host);
     exit(code);
 }
 
@@ -3609,7 +3617,7 @@ static int cmd_scan_common(const char *set, const char *arg)
     {
 #if YAZ_HAVE_XML2
         if (!conn)
-            session_connect(cur_host);
+            session_connect();
         if (!conn)
             return 0;
         if (send_SRW_scanRequest(scan_query, pos_p, scan_size) < 0)
@@ -3621,9 +3629,9 @@ static int cmd_scan_common(const char *set, const char *arg)
     }
     else
     {
-        if (*cur_host && !conn && auto_reconnect)
+        if (wrbuf_len(cur_host) && !conn && auto_reconnect)
         {
-            session_connect(cur_host);
+            session_connect();
             wait_and_handle_response(0);
         }
         if (!conn)
@@ -4254,6 +4262,8 @@ static void initialize(const char *rc_file)
     FILE *inf;
     int i;
 
+    cur_host = wrbuf_alloc();
+
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
         !(print = odr_createmem(ODR_PRINT)))
@@ -4531,7 +4541,7 @@ static void wait_and_handle_response(int one_response_only)
         {
             cs_close(conn);
             conn = 0;
-            session_connect(cur_host);
+            session_connect();
             reconnect_ok = 0;
             if (conn)
             {
@@ -4655,7 +4665,7 @@ static void wait_and_handle_response(int one_response_only)
             {
                 const char *base_tmp;
                 int host_change = 0;
-                location = yaz_check_location(in, cur_host,
+                location = yaz_check_location(in, wrbuf_cstr(cur_host),
                                               location, &host_change);
                 if (host_change)
                     session_connect_base(location, &base_tmp);
@@ -4836,9 +4846,9 @@ static int cmd_list_all(const char* args)
 
     /* connection options */
     if (conn)
-        printf("Connected to         : %s\n", cur_host);
-    else if (*cur_host)
-        printf("Not connected to     : %s\n", cur_host);
+        printf("Connected to         : %s\n", wrbuf_cstr(cur_host));
+    else if (cur_host && wrbuf_len(cur_host))
+        printf("Not connected to     : %s\n", wrbuf_cstr(cur_host));
     else
         printf("Not connected        : \n");
     if (yazProxy) printf("using proxy          : %s\n",yazProxy);

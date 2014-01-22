@@ -190,7 +190,7 @@ iconv:
 !endif
 
 !if $(HAVE_ICU)
-ICU_DEF=
+ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
