@@ -491,9 +491,8 @@
     function <function>cs_create</function>. The third parameter
     <parameter>vp</parameter> is a pointer to &comstack; stack type
     specific values.
-    For SSL (ssl_type) <parameter>vp</parameter> is an already create
-    OpenSSL CTX. For TCP/IP and UNIX <parameter>vp</parameter>
-    is unused (can be set to <literal>NULL</literal>.
+    Parameter <parameter>vp</parameter> is reserved for future use.
+    Set it to <literal>NULL</literal>.
    </para>
 
   </sect1>

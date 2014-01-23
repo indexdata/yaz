@@ -59,6 +59,26 @@ if test "$checkBoth" = "1"; then
     AC_CHECK_FUNC([accept], , [LIBS=$oldLibs])
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
+dnl ------ libgcrypt
+libgcryptpath=NONE
+AC_ARG_WITH(libgcrypt, [ --with-libgcrypt=DIR  use libgcrypt-config in DIR],[libgcryptpath=$withval])
+if test "$libgcryptpath" != "no"; then
+    if test "$libgcryptpath" = "NONE"; then
+	AC_PATH_PROG([libgcrypt],[libgcrypt-config],[NONE])
+    else
+	libgcrypt=$libgcryptpath/libgcrypt-config
+    fi
+    AC_MSG_CHECKING([for libgcrypt])
+    if "$libgcrypt" --version >/dev/null 2>&1; then
+	LIBS="$LIBS `$libgcrypt --libs`"
+	CFLAGS="$CFLAGS `$libgcrypt --cflags`"
+	libgcryptversion=`$libgcrypt --version`
+	AC_MSG_RESULT([$libgcryptversion])
+	AC_DEFINE([HAVE_GCRYPT_H],[1],[Define to 1 if libgcrypt is present])
+    else
+	AC_MSG_RESULT([no])
+    fi
+fi
 dnl ------ memcached
 memcached=default
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
@@ -68,75 +88,12 @@ if test "$memcached" != "no"; then
 	AC_CHECK_HEADERS([libmemcached/memcached.h])
     fi
 fi
-dnl ------ OpenSSL
+dnl ------ GNU TLS
 AC_SUBST([SSL_CFLAGS])
 AC_SUBST([SSL_LIBS])
-openssl=no
-sslver=no
-AC_ARG_WITH([openssl], [  --with-openssl[=PREFIX]   OpenSSL library in PREFIX], [openssl=$withval])
-SSL_CFLAGS=""
-SSL_LIBPATH=""
-if test "$openssl" != "no"; then
-    if test "$openssl" != "yes" -a "$openssl" != "default"; then
-	if test -x $openssl/bin/pkg-config; then
-	    if $openssl/bin/pkg-config --exists openssl; then
-		SSL_CFLAGS=`$openssl/bin/pkg-config --cflags openssl`
-		SSL_LIBS="`$openssl/bin/pkg-config --libs openssl`"
-		sslver=`$openssl/bin/pkg-config --modversion openssl`
-	    fi
-	fi
-	if test "$sslver" = "no"; then
-	    SSL_CFLAGS="-I$openssl/include -I$openssl/include/openssl"
-	    SSL_LIBPATH="-L$openssl/lib"
-	fi
-    else
-	if test "$pkgconfigpath" != "NONE"; then
-	    if $pkgconfigpath --exists openssl; then
-		SSL_CFLAGS=`$pkgconfigpath --cflags openssl`
-		SSL_LIBS="`$pkgconfigpath --libs openssl`"
-		sslver=`$pkgconfigpath --modversion openssl`
-	    fi
-	fi
-	if test "$sslver" = "no"; then
-	    SSL_CFLAGS="-I/usr/include/openssl"
-	fi
-    fi
-    if test "$sslver" = "no"; then
-	xLIBS="$LIBS";
-	xCPPFLAGS="$CPPFLAGS";
-	CPPFLAGS="$CPPFLAGS ${SSL_CFLAGS} ${SSL_LIBPATH}"
-	SSL_LIBS="${SSL_LIBPATH}"
-	AC_CHECK_LIB([crypto],[main])
-	if test "$ac_cv_lib_crypto_main" = "yes"; then
-	    SSL_LIBS="${SSL_LIBS} -lcrypto"
-	fi
-	AC_CHECK_LIB([ssl],[SSL_new])
-	if test "$ac_cv_lib_ssl_SSL_new" = "yes"; then
-	    AC_CHECK_HEADER([openssl/ssl.h],[sslver=yes])
-	    SSL_LIBS="${SSL_LIBS} -lssl"
-	fi
-	if test "$sslver" != "yes"; then
-	    SSL_LIBS=""
-	fi
-        LIBS="$xLIBS"
-	CPPFLAGS="$xCPPFLAGS"
-    fi
-    AC_MSG_CHECKING([for SSL])
-    if test "$sslver" != "no"; then
-	AC_DEFINE([HAVE_OPENSSL_SSL_H],[1],[Define to 1 if OpenSSL is present])
-	AC_MSG_RESULT([$sslver])
-    else
-	SSL_CFLAGS=""
-	AC_MSG_RESULT([None])
-	if test "$openssl" != "default"; then
-	    AC_MSG_ERROR([OpenSSL development libraries missing])
-	fi
-    fi
-fi
-dnl ------ GNU TLS
 gnutls=default
 AC_ARG_WITH([gnutls], [  --with-gnutls[=PREFIX]    GNU TLS library in PREFIX], [gnutls=$withval])
-if test "$gnutls" != "no" -a "$sslver" = "no"; then
+if test "$gnutls" != "no"; then
     gnutlsver=no
     if test "$gnutls" != "yes" -a "$gnutls" != "default"; then
 	if test -x $gnutls/bin/pkg-config; then

@@ -299,15 +299,6 @@
       </varlistentry>
 
       <varlistentry><term>
-        <literal>--with-openssl</literal>[=<replaceable>prefix</replaceable>]
-       </term>
-       <listitem><para>&yaz; will be linked with the OpenSSL libraries and
-         an SSL COMSTACK will be provided. If OpenSSL is enabled, GNU TLS
-         is automatically disabled.
-        </para></listitem>
-      </varlistentry>
-
-      <varlistentry><term>
         <literal>--with-icu</literal>[=<replaceable>prefix</replaceable>]
        </term>
        <listitem><para>&yaz; will be linked the

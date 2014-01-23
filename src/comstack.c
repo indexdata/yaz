@@ -25,10 +25,6 @@
 #define ENABLE_SSL 1
 #endif
 
-#if HAVE_OPENSSL_SSL_H
-#define ENABLE_SSL 1
-#endif
-
 static const char *cs_errlist[] =
 {
     "No error or unspecified error",

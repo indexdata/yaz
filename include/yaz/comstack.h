@@ -126,10 +126,22 @@ YAZ_EXPORT COMSTACK cs_create_host_proxy(const char *vhost,
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);
-YAZ_EXPORT void *cs_get_ssl(COMSTACK cs);
-YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
+YAZ_EXPORT void *cs_get_ssl(COMSTACK cs)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
+YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
-YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
+YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
 YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 
