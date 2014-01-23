@@ -308,6 +308,16 @@
         </para></listitem>
       </varlistentry>
 
+      <varlistentry><term>
+        <literal>--with-libgcrypt</literal>[=<replaceable>prefix</replaceable>]
+       </term>
+       <listitem><para>&yaz; will be linked with
+	<ulink url="&url.libgcrypt;">Libgcrypt</ulink> in the prefix if given.
+	If prefix is not given, the libraries exposed by the script
+	<application>libgcrypt-config</application> will be used if found.
+        </para></listitem>
+      </varlistentry>
+
      </variablelist>
 
     </para>
