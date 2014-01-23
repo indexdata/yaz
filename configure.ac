@@ -61,7 +61,7 @@ fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl ------ libgcrypt
 libgcryptpath=NONE
-AC_ARG_WITH(libgcrypt, [ --with-libgcrypt=DIR  use libgcrypt-config in DIR],[libgcryptpath=$withval])
+AC_ARG_WITH(libgcrypt, [  --with-libgcrypt=DIR    use libgcrypt-config in DIR],[libgcryptpath=$withval])
 if test "$libgcryptpath" != "no"; then
     if test "$libgcryptpath" = "NONE"; then
 	AC_PATH_PROG([libgcrypt],[libgcrypt-config],[NONE])
