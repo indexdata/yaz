@@ -752,6 +752,7 @@ ZOOM_API(ZOOM_resultset)
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = ZOOM_query_get_sortspec(q);
     r->query = q;
+    ZOOM_query_addref(q);
 
     r->options = ZOOM_options_create_with_parent(c->options);
 
@@ -789,8 +790,20 @@ ZOOM_API(ZOOM_resultset)
                                 wrbuf_len(r->mc_key), &v_len, &flags, &rc);
         if (v)
         {
-            yaz_log(YLOG_LOG, "For key %s got value %.*s",
-                    wrbuf_cstr(r->mc_key), (int) v_len, v);
+            ZOOM_Event event;
+            WRBUF w = wrbuf_alloc();
+
+            wrbuf_write(w, v, v_len);
+            free(v);
+            r->size = odr_atoi(wrbuf_cstr(w));
+
+            yaz_log(YLOG_LOG, "For key %s got value %s",
+                    wrbuf_cstr(r->mc_key), wrbuf_cstr(w));
+
+            wrbuf_destroy(w);
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+            ZOOM_connection_put_event(c, event);
+            return r;
         }
         else
         {
@@ -828,8 +841,6 @@ ZOOM_API(ZOOM_resultset)
     task->u.search.schema = schema ? xstrdup(schema) : 0;
 
     ZOOM_resultset_addref(r);
-
-    ZOOM_query_addref(q);
 
     if (!c->async)
     {
