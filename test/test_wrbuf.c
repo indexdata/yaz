@@ -76,6 +76,15 @@ static void tstwrbuf(void)
     wrbuf_insert(wr, 5, "abc", 3);
     YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234"));
 
+#if HAVE_GCRYPT_H
+    {
+        const char *msg = "Hello world\n";
+        wrbuf_rewind(wr);
+        wrbuf_sha1_write(wr, msg, strlen(msg), 1);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(wr), 
+                          "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"));
+    }
+#endif
     wrbuf_destroy(wr);
 }
 

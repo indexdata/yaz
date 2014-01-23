@@ -457,6 +457,7 @@ MISC_OBJS= \
    $(OBJDIR)\readconf.obj \
    $(OBJDIR)\tpath.obj \
    $(OBJDIR)\wrbuf.obj \
+   $(OBJDIR)\wrbuf_sha1.obj \
    $(OBJDIR)\xmalloc.obj \
    $(OBJDIR)\matchstr.obj \
    $(OBJDIR)\siconv.obj \
