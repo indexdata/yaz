@@ -56,11 +56,13 @@ static size_t record_hash(int pos)
     return pos % RECORD_HASH_SIZE;
 }
 
-void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
-                           int pos,
-                           const char *syntax, const char *elementSetName,
-                           const char *schema,
-                           Z_SRW_diagnostic *diag)
+static ZOOM_record record_cache_add(ZOOM_resultset r,
+                                    Z_NamePlusRecord *npr,
+                                    int pos,
+                                    const char *syntax,
+                                    const char *elementSetName,
+                                    const char *schema,
+                                    Z_SRW_diagnostic *diag)
 {
     ZOOM_record_cache rc = 0;
 
@@ -94,7 +96,9 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->pos = pos;
         rc->next = r->record_hash[record_hash(pos)];
         r->record_hash[record_hash(pos)] = rc;
+
     }
+
     rc->rec.npr = npr;
     rc->rec.schema = odr_strdup_null(r->odr, schema);
     rc->rec.diag_set = 0;
@@ -114,7 +118,45 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc->rec.diag_message = odr_strdup_null(r->odr, diag->message);
         rc->rec.diag_details = odr_strdup_null(r->odr, diag->details);
     }
+    return &rc->rec;
 }
+
+void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
+                           int pos,
+                           const char *syntax, const char *elementSetName,
+                           const char *schema,
+                           Z_SRW_diagnostic *diag)
+{
+    record_cache_add(r, npr, pos, syntax, elementSetName, schema, diag);
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    if (r->connection->mc_st &&
+        !diag && npr->which == Z_NamePlusRecord_databaseRecord &&
+        npr->u.databaseRecord->which == Z_External_octet)
+    {
+        WRBUF k = wrbuf_alloc();
+        uint32_t flags = 0;
+        memcached_return_t rc;
+        time_t expiration = 36000;
+
+        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
+        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
+                     syntax ? syntax : "",
+                     elementSetName ? elementSetName : "",
+                     schema ? schema : "");
+        rc = memcached_set(r->connection->mc_st,
+                           wrbuf_buf(k),wrbuf_len(k),
+                           npr->u.databaseRecord->u.octet_aligned->buf,
+                           npr->u.databaseRecord->u.octet_aligned->len,
+                           expiration, flags);
+
+        yaz_log(YLOG_LOG, "Store record key=%s rc=%u %s",
+                wrbuf_cstr(k), (unsigned) rc,
+                memcached_last_error_message(r->connection->mc_st));
+        wrbuf_destroy(k);
+    }
+#endif
+}
+
 
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *syntax,
@@ -136,6 +178,51 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
             return &rc->rec;
         }
     }
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    if (r->connection && r->connection->mc_st)
+    {
+        WRBUF k = wrbuf_alloc();
+        size_t v_len;
+        char *v;
+        uint32_t flags;
+        memcached_return_t rc;
+
+        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
+        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
+                     syntax ? syntax : "",
+                     elementSetName ? elementSetName : "",
+                     schema ? schema : "");
+
+        v = memcached_get(r->connection->mc_st, wrbuf_buf(k), wrbuf_len(k),
+                          &v_len, &flags, &rc);
+        wrbuf_destroy(k);
+        if (v)
+        {
+            yaz_log(YLOG_LOG, "Building record from memcached!! syntax=%s",
+                syntax);
+            Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
+                odr_malloc(r->odr, sizeof(Z_NamePlusRecord));
+            npr->databaseName = 0;
+            npr->which = Z_NamePlusRecord_databaseRecord;
+            npr->u.databaseRecord = (Z_External *)
+                odr_malloc(r->odr, sizeof(Z_External));
+            npr->u.databaseRecord->descriptor = 0;
+            npr->u.databaseRecord->direct_reference =
+                syntax ?
+                yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN,
+                                      syntax, r->odr) : 0;
+            npr->u.databaseRecord->indirect_reference = 0;
+            npr->u.databaseRecord->which = Z_External_octet;
+            npr->u.databaseRecord->u.octet_aligned =
+                odr_create_Odr_oct(r->odr, v, v_len);
+            free(v);
+
+            if (v)
+                return record_cache_add(r, npr, pos, syntax, elementSetName,
+                                        schema, 0);
+        }
+    }
+#endif
     return 0;
 }
 

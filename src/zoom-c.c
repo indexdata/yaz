@@ -778,9 +778,21 @@ ZOOM_API(ZOOM_resultset)
 
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     r->mc_key = wrbuf_alloc();
+    wrbuf_puts(r->mc_key, "0;");
     wrbuf_puts(r->mc_key, c->host_port);
     wrbuf_puts(r->mc_key, ";");
-    wrbuf_puts(r->mc_key, ZOOM_query_get_query_string(q));
+    if (c->user)
+        wrbuf_puts(r->mc_key, c->user);
+    wrbuf_puts(r->mc_key, ";");
+    if (c->group)
+        wrbuf_puts(r->mc_key, c->group);
+    wrbuf_puts(r->mc_key, ";");
+    if (c->password)
+        wrbuf_sha1_puts(r->mc_key, c->password, 1);
+    wrbuf_puts(r->mc_key, ";");
+    wrbuf_sha1_puts(r->mc_key, ZOOM_query_get_query_string(q), 1);
+    wrbuf_puts(r->mc_key, ";");
+    /* TODO: add sorting */
     if (c->mc_st)
     {
         size_t v_len;

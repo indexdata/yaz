@@ -1292,7 +1292,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
         rc = memcached_set(c->mc_st,
                            wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
                            str, strlen(str), expiration, flags);
-        yaz_log(YLOG_LOG, "Key=%s value=%s rc=%u %s",
+        yaz_log(YLOG_LOG, "Store hit count key=%s value=%s rc=%u %s",
                 wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
                 memcached_last_error_message(c->mc_st));
     }
