@@ -82,7 +82,7 @@ fi
 dnl ------ memcached
 memcached=default
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
-if test "$memcached" != "no"; then
+if test "$memcached" != "no" -a -n "$libgcryptversion"; then
     AC_CHECK_LIB([memcached],[memcached_get])
     if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
 	AC_CHECK_HEADERS([libmemcached/memcached.h])
