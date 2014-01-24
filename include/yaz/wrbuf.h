@@ -285,6 +285,16 @@ void wrbuf_iconv_json_puts(WRBUF b, yaz_iconv_t cd, const char *strz);
 YAZ_EXPORT
 int wrbuf_sha1_write(WRBUF b, const char *cp, size_t sz, int hexit);
 
+/** \brief writes SHA1 text to WRBUF
+    \param b result
+    \param cp C-string
+    \param hexit 1=hex mode; 0=binary
+    \returns 0 if successful
+    \returns -1 on error
+*/
+YAZ_EXPORT
+int wrbuf_sha1_puts(WRBUF b, const char *cp, int hexit);
+
 YAZ_END_CDECL
 
 #endif

@@ -50,6 +50,11 @@ int wrbuf_sha1_write(WRBUF b, const char *cp, size_t sz, int hexit)
 #endif
 }
 
+int wrbuf_sha1_puts(WRBUF b, const char *cp, int hexit)
+{
+    return wrbuf_sha1_write(b, cp, strlen(cp), hexit);
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4
