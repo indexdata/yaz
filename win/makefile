@@ -7,8 +7,8 @@ DEBUG=0   # 0 for release, 1 for debug
 USE_MANIFEST = 1
 
 # TCL
-TCL="C:\Tcl\bin\tclsh85.exe"
-#TCL="C:\Program Files\Tcl\bin\tclsh83.exe"
+TCL=tclsh
+#TCL="C:\Tcl\bin\tclsh85.exe"
 HAVE_TCL=1
 
 # iconv charcter conversion utility
