@@ -226,8 +226,7 @@ void ZOOM_set_error(ZOOM_connection c, int error, const char *addinfo);
 ZOOM_Event ZOOM_Event_create(int kind);
 void ZOOM_connection_put_event(ZOOM_connection c, ZOOM_Event event);
 
-zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c);
-zoom_ret send_Z3950_present(ZOOM_connection c);
+zoom_ret ZOOM_connection_Z3950_present(ZOOM_connection c);
 zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c);
 zoom_ret ZOOM_send_buf(ZOOM_connection c);
 zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset);
