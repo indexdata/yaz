@@ -651,7 +651,7 @@ zoom_ret ZOOM_connection_Z3950_send_search(ZOOM_connection c)
 
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
     r = c->tasks->u.search.resultset;
-    if (r->live_set)
+    if (r->live_set == 2)
         return send_Z3950_present(c);
 
     apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
@@ -1258,11 +1258,13 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return;
 
-    event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-    ZOOM_connection_put_event(c, event);
-
     resultset = c->tasks->u.search.resultset;
 
+    if (resultset->live_set == 0)
+    {
+        event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+        ZOOM_connection_put_event(c, event);
+    }
     if (sr->resultSetStatus)
     {
         ZOOM_options_set_int(resultset->options, "resultSetStatus",
@@ -1278,7 +1280,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
-    resultset->live_set = 1;
+    resultset->live_set = 2;
 
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st)
@@ -1292,7 +1294,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
         rc = memcached_set(c->mc_st,
                            wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
                            str, strlen(str), expiration, flags);
-        yaz_log(YLOG_LOG, "Store hit count key=%s value=%s rc=%u %s",
+        yaz_log(YLOG_LOG, "Store Z39.50 hit count key=%s value=%s rc=%u %s",
                 wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
                 memcached_last_error_message(c->mc_st));
     }

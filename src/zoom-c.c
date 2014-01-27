@@ -700,7 +700,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     yaz_log(log_details0, "%p ZOOM_resultset_create", r);
     r->refcount = 1;
     r->size = 0;
-    r->odr = odr_createmem(ODR_ENCODE);
+    r->odr = odr_createmem(ODR_DECODE);
     r->piggyback = 1;
     r->setname = 0;
     r->step = 0;
@@ -815,6 +815,7 @@ ZOOM_API(ZOOM_resultset)
             wrbuf_destroy(w);
             event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
             ZOOM_connection_put_event(c, event);
+            r->live_set = 1;
             return r;
         }
         else
@@ -842,7 +843,6 @@ ZOOM_API(ZOOM_resultset)
     task->u.search.resultset = r;
     task->u.search.start = start;
     task->u.search.count = count;
-    task->u.search.recv_search_fired = 0;
 
     syntax = ZOOM_options_get(r->options, "preferredRecordSyntax");
     task->u.search.syntax = syntax ? xstrdup(syntax) : 0;

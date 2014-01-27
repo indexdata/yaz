@@ -143,7 +143,7 @@ struct ZOOM_resultset_p {
     int num_facets;
     char **facets_names;
     WRBUF mc_key;
-    int live_set;
+    int live_set; /* 0=no hit count, 1=cached hit, 2=hits + real set */
 };
 
 struct facet_term_p {
@@ -191,7 +191,6 @@ struct ZOOM_task_p {
             char *syntax;
             char *elementSetName;
             char *schema;
-            int recv_search_fired;
         } search;
 #define ZOOM_TASK_CONNECT 3
 #define ZOOM_TASK_SCAN 4

@@ -154,53 +154,52 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     const char *schema = 0;
     Z_Query *z_query;
     Z_FacetList *facet_list = 0;
+
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
     assert(c->tasks);
-    switch(c->tasks->which)
-    {
-    case ZOOM_TASK_SEARCH:
-        resultset = c->tasks->u.search.resultset;
-        if (!resultset->setname)
-            resultset->setname = xstrdup("default");
-        ZOOM_options_set(resultset->options, "setname", resultset->setname);
-        start = &c->tasks->u.search.start;
-        count = &c->tasks->u.search.count;
-        facets = ZOOM_options_get(resultset->options, "facets");
-        if (facets)
-            facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
-        schema = c->tasks->u.search.schema;
-        break;
+    if (c->tasks->which != ZOOM_TASK_SEARCH)
+        return zoom_complete;
 
+    resultset = c->tasks->u.search.resultset;
+    if (!resultset->setname)
+        resultset->setname = xstrdup("default");
+    ZOOM_options_set(resultset->options, "setname", resultset->setname);
+    start = &c->tasks->u.search.start;
+    count = &c->tasks->u.search.count;
+    facets = ZOOM_options_get(resultset->options, "facets");
+    if (facets)
+        facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
+    schema = c->tasks->u.search.schema;
+
+    if (resultset->live_set)
+    {
         if (*start >= resultset->size)
             return zoom_complete;
         if (*start + *count > resultset->size)
             *count = resultset->size - *start;
-
-        for (i = 0; i < *count; i++)
-        {
-            ZOOM_record rec =
-                ZOOM_record_cache_lookup(resultset, i + *start,
-                                         c->tasks->u.search.syntax,
-                                         c->tasks->u.search.elementSetName,
-                                         schema);
-            if (!rec)
-                break;
-            else
-            {
-                ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
-                ZOOM_connection_put_event(c, event);
-            }
-        }
-        *start += i;
-        *count -= i;
-
-        if (*count == 0)
-            return zoom_complete;
-        break;
-    default:
-        return zoom_complete;
     }
+    for (i = 0; i < *count; i++)
+    {
+        ZOOM_record rec =
+            ZOOM_record_cache_lookup(resultset, i + *start,
+                                     c->tasks->u.search.syntax,
+                                     c->tasks->u.search.elementSetName,
+                                     schema);
+        if (!rec)
+            break;
+        else
+        {
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+            ZOOM_connection_put_event(c, event);
+        }
+    }
+    *start += i;
+    *count -= i;
+
+    if (*count == 0 && resultset->live_set)
+        return zoom_complete;
+
     assert(resultset->query);
 
     sr = ZOOM_srw_get_pdu(c, Z_SRW_searchRetrieve_request);
@@ -261,34 +260,26 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     int i;
     NMEM nmem;
     ZOOM_Event event;
-    int *start, *count;
     const char *syntax, *elementSetName, *schema;
 
     if (!c->tasks)
         return zoom_complete;
 
-    switch(c->tasks->which)
-    {
-    case ZOOM_TASK_SEARCH:
-        resultset = c->tasks->u.search.resultset;
-        start = &c->tasks->u.search.start;
-        count = &c->tasks->u.search.count;
-        syntax = c->tasks->u.search.syntax;
-        elementSetName = c->tasks->u.search.elementSetName;
-        schema = c->tasks->u.search.schema;
-        /* Required not for reporting client hit count multiple times into session */
-        if (!c->tasks->u.search.recv_search_fired) {
-            yaz_log(YLOG_DEBUG, "posting ZOOM_EVENT_RECV_SEARCH");
-            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-            ZOOM_connection_put_event(c, event);
-            c->tasks->u.search.recv_search_fired = 1;
-        }
-        if (res->facetList)
-            ZOOM_handle_facet_list(resultset, res->facetList);
-        break;
-    default:
+    if (c->tasks->which != ZOOM_TASK_SEARCH)
         return zoom_complete;
+
+    resultset = c->tasks->u.search.resultset;
+    syntax = c->tasks->u.search.syntax;
+    elementSetName = c->tasks->u.search.elementSetName;
+    schema = c->tasks->u.search.schema;
+
+    if (resultset->live_set == 0)
+    {
+        event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+        ZOOM_connection_put_event(c, event);
     }
+    if (res->facetList)
+        ZOOM_handle_facet_list(resultset, res->facetList);
 
     resultset->size = 0;
 
@@ -299,72 +290,89 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
 
     if (res->num_diagnostics > 0)
     {
+        resultset->live_set = 2;
         set_SRU_error(c, &res->diagnostics[0]);
     }
     else
     {
-        if (res->numberOfRecords) {
-            resultset->size = *res->numberOfRecords;
-        }
-        if (res->suggestions) {
-            ZOOM_resultset_option_set(resultset, "suggestions", res->suggestions);
-        }
-        for (i = 0; i<res->num_records; i++)
+        if (res->numberOfRecords)
         {
-            int pos = *start + i;
+            resultset->size = *res->numberOfRecords;
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+            if (c->mc_st && resultset->live_set == 0)
+            {
+                uint32_t flags = 0;
+                memcached_return_t rc;
+                time_t expiration = 36000;
+                char str[40];
+
+                sprintf(str, ODR_INT_PRINTF, resultset->size);
+                rc = memcached_set(c->mc_st,
+                                   wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
+                                   str, strlen(str), expiration, flags);
+                yaz_log(YLOG_LOG, "Store SRU hit count key=%s value=%s rc=%u %s",
+                        wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
+                        memcached_last_error_message(c->mc_st));
+            }
+#endif
+        }
+        resultset->live_set = 2;
+        if (res->suggestions)
+            ZOOM_resultset_option_set(resultset, "suggestions",
+                                      res->suggestions);
+        for (i = 0; i < res->num_records; i++)
+        {
+            int pos = c->tasks->u.search.start + i;
             Z_SRW_record *sru_rec;
             Z_SRW_diagnostic *diag = 0;
             int num_diag;
-
-            Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
-                odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
 
             /* only trust recordPosition if >= calculated position */
             if (res->records[i].recordPosition &&
                 *res->records[i].recordPosition >= pos + 1)
                 pos = *res->records[i].recordPosition - 1;
 
-            sru_rec = &res->records[i];
-
-            npr->databaseName = 0;
-            npr->which = Z_NamePlusRecord_databaseRecord;
-            npr->u.databaseRecord = (Z_External *)
-                odr_malloc(c->odr_in, sizeof(Z_External));
-            npr->u.databaseRecord->descriptor = 0;
-            npr->u.databaseRecord->direct_reference =
-                odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
-            npr->u.databaseRecord->indirect_reference = 0;
-            npr->u.databaseRecord->which = Z_External_octet;
-
-            npr->u.databaseRecord->u.octet_aligned =
-                odr_create_Odr_oct(c->odr_in,
-                                   sru_rec->recordData_buf,
-                                   sru_rec->recordData_len);
-            if (sru_rec->recordSchema
-                && !strcmp(sru_rec->recordSchema,
-                           "info:srw/schema/1/diagnostics-v1.1"))
+            if (!ZOOM_record_cache_lookup(resultset,
+                                          pos,
+                                          syntax, elementSetName, schema))
             {
-                sru_decode_surrogate_diagnostics(sru_rec->recordData_buf,
-                                                 sru_rec->recordData_len,
-                                                 &diag, &num_diag,
-                                                 resultset->odr);
+                Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
+                    odr_malloc(c->odr_in, sizeof(Z_NamePlusRecord));
+                sru_rec = &res->records[i];
+
+                npr->databaseName = 0;
+                npr->which = Z_NamePlusRecord_databaseRecord;
+                npr->u.databaseRecord = (Z_External *)
+                    odr_malloc(c->odr_in, sizeof(Z_External));
+                npr->u.databaseRecord->descriptor = 0;
+                npr->u.databaseRecord->direct_reference =
+                    odr_oiddup(c->odr_in, yaz_oid_recsyn_xml);
+                npr->u.databaseRecord->indirect_reference = 0;
+                npr->u.databaseRecord->which = Z_External_octet;
+
+                npr->u.databaseRecord->u.octet_aligned =
+                    odr_create_Odr_oct(c->odr_in,
+                                       sru_rec->recordData_buf,
+                                   sru_rec->recordData_len);
+                if (sru_rec->recordSchema
+                    && !strcmp(sru_rec->recordSchema,
+                               "info:srw/schema/1/diagnostics-v1.1"))
+                {
+                    sru_decode_surrogate_diagnostics(sru_rec->recordData_buf,
+                                                     sru_rec->recordData_len,
+                                                     &diag, &num_diag,
+                                                     resultset->odr);
+                }
+                ZOOM_record_cache_add(resultset, npr,
+                                      pos, syntax, elementSetName,
+                                      schema, diag);
             }
-            ZOOM_record_cache_add(resultset, npr, pos, syntax, elementSetName,
-                                  schema, diag);
         }
-        *count -= i;
-        *start += i;
-        if (*count + *start > resultset->size)
-            *count = resultset->size - *start;
-        yaz_log(YLOG_DEBUG, "SRU result set size " ODR_INT_PRINTF " start %d count %d", resultset->size, *start, *count);
-        if (*count < 0)
-            *count = 0;
         nmem = odr_extract_mem(c->odr_in);
         nmem_transfer(odr_getmem(resultset->odr), nmem);
         nmem_destroy(nmem);
 
-        if (*count > 0)
-            return ZOOM_connection_srw_send_search(c);
+        return ZOOM_connection_srw_send_search(c);
     }
     return zoom_complete;
 }

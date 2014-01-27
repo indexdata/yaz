@@ -130,13 +130,18 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     record_cache_add(r, npr, pos, syntax, elementSetName, schema, diag);
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (r->connection->mc_st &&
-        !diag && npr->which == Z_NamePlusRecord_databaseRecord &&
-        npr->u.databaseRecord->which == Z_External_octet)
+        !diag && npr->which == Z_NamePlusRecord_databaseRecord)
     {
         WRBUF k = wrbuf_alloc();
         uint32_t flags = 0;
         memcached_return_t rc;
         time_t expiration = 36000;
+        ODR odr = odr_createmem(ODR_ENCODE);
+        char *rec_buf;
+        int rec_len;
+
+        z_NamePlusRecord(odr, &npr, 0, 0);
+        rec_buf = odr_getbuf(odr, &rec_len, 0);
 
         wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
         wrbuf_printf(k, ";%d;%s;%s;%s", pos,
@@ -145,13 +150,13 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                      schema ? schema : "");
         rc = memcached_set(r->connection->mc_st,
                            wrbuf_buf(k),wrbuf_len(k),
-                           npr->u.databaseRecord->u.octet_aligned->buf,
-                           npr->u.databaseRecord->u.octet_aligned->len,
+                           rec_buf, rec_len,
                            expiration, flags);
 
-        yaz_log(YLOG_LOG, "Store record key=%s rc=%u %s",
-                wrbuf_cstr(k), (unsigned) rc,
+        yaz_log(YLOG_LOG, "Store record lkey=%s len=%d rc=%u %s",
+                wrbuf_cstr(k), rec_len, (unsigned) rc,
                 memcached_last_error_message(r->connection->mc_st));
+        odr_destroy(odr);
         wrbuf_destroy(k);
     }
 #endif
@@ -183,7 +188,7 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
     {
         WRBUF k = wrbuf_alloc();
         size_t v_len;
-        char *v;
+        char *v_buf;
         uint32_t flags;
         memcached_return_t rc;
 
@@ -193,33 +198,26 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                      elementSetName ? elementSetName : "",
                      schema ? schema : "");
 
-        v = memcached_get(r->connection->mc_st, wrbuf_buf(k), wrbuf_len(k),
-                          &v_len, &flags, &rc);
+        yaz_log(YLOG_LOG, "Lookup record %s", wrbuf_cstr(k));
+        v_buf = memcached_get(r->connection->mc_st, wrbuf_buf(k), wrbuf_len(k),
+                              &v_len, &flags, &rc);
         wrbuf_destroy(k);
-        if (v)
+        if (v_buf)
         {
-            yaz_log(YLOG_LOG, "Building record from memcached!! syntax=%s",
-                syntax);
-            Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
-                odr_malloc(r->odr, sizeof(Z_NamePlusRecord));
-            npr->databaseName = 0;
-            npr->which = Z_NamePlusRecord_databaseRecord;
-            npr->u.databaseRecord = (Z_External *)
-                odr_malloc(r->odr, sizeof(Z_External));
-            npr->u.databaseRecord->descriptor = 0;
-            npr->u.databaseRecord->direct_reference =
-                syntax ?
-                yaz_string_to_oid_odr(yaz_oid_std(), CLASS_RECSYN,
-                                      syntax, r->odr) : 0;
-            npr->u.databaseRecord->indirect_reference = 0;
-            npr->u.databaseRecord->which = Z_External_octet;
-            npr->u.databaseRecord->u.octet_aligned =
-                odr_create_Odr_oct(r->odr, v, v_len);
-            free(v);
+            Z_NamePlusRecord *npr = 0;
 
-            if (v)
+            odr_setbuf(r->odr, v_buf, v_len, 0);
+
+            z_NamePlusRecord(r->odr, &npr, 0, 0);
+            free(v_buf);
+            if (npr)
+            {
+                yaz_log(YLOG_LOG, "returned memcached copy");
                 return record_cache_add(r, npr, pos, syntax, elementSetName,
                                         schema, 0);
+            }
+            yaz_log(YLOG_WARN, "memcached_get npr failed v_len=%ld",
+                    (long) v_len);
         }
     }
 #endif
