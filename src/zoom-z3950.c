@@ -36,7 +36,8 @@
  * if it could cause failure when a lookup fails, but that's hard.
  */
 static Odr_oid *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
-                                     oid_class oid_class, const char *str) {
+                                     oid_class oid_class, const char *str)
+{
     Odr_oid *res = yaz_string_to_oid_odr(yaz_oid_std(), oid_class, str,
                                      c->odr_out);
     if (res == 0)
@@ -465,7 +466,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
 static void otherInfo_attach(ZOOM_connection c, Z_APDU *a, ODR out)
 {
     int i;
-    for (i = 0; i<200; i++)
+    for (i = 0; i < 200; i++)
     {
         size_t len;
         Odr_oid *oid;
@@ -985,16 +986,21 @@ static int es_response_taskpackage_update(ZOOM_connection c,
     if (utp && utp->targetPart)
     {
         Z_IUTargetPart *targetPart = utp->targetPart;
-        switch ( *targetPart->updateStatus ) {
+        switch (*targetPart->updateStatus)
+        {
         case Z_IUTargetPart_success:
-            ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "success");
+            ZOOM_options_set(c->tasks->u.package->options, 
+                             "updateStatus", "success");
             break;
         case Z_IUTargetPart_partial:
-            ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "partial");
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "updateStatus", "partial");
             break;
         case Z_IUTargetPart_failure:
-            ZOOM_options_set(c->tasks->u.package->options,"updateStatus", "failure");
-            if (targetPart->globalDiagnostics && targetPart->num_globalDiagnostics > 0)
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "updateStatus", "failure");
+            if (targetPart->globalDiagnostics &&
+                targetPart->num_globalDiagnostics > 0)
                 response_diag(c, targetPart->globalDiagnostics[0]);
             break;
         }
@@ -1010,8 +1016,8 @@ static int es_response_taskpackage(ZOOM_connection c,
     if (id)
         ZOOM_options_setl(c->tasks->u.package->options,
                           "targetReference", (char*) id->buf, id->len);
-
-    switch ( *taskPackage->taskStatus ) {
+    switch (*taskPackage->taskStatus)
+    {
     case Z_TaskPackage_pending:
         ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "pending");
         break;
@@ -1023,14 +1029,16 @@ static int es_response_taskpackage(ZOOM_connection c,
         break;
     case Z_TaskPackage_aborted:
         ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "aborted");
-        if ( taskPackage->num_packageDiagnostics && taskPackage->packageDiagnostics )
+        if (taskPackage->num_packageDiagnostics &&
+            taskPackage->packageDiagnostics )
             response_diag(c, taskPackage->packageDiagnostics[0]);
         break;
     }
     /* NOTE: Only Update implemented, no others. */
-    if ( taskPackage->taskSpecificParameters->which == Z_External_update )
+    if (taskPackage->taskSpecificParameters->which == Z_External_update)
     {
-        Z_IUUpdateTaskPackage *utp = taskPackage->taskSpecificParameters->u.update->u.taskPackage;
+        Z_IUUpdateTaskPackage *utp =
+            taskPackage->taskSpecificParameters->u.update->u.taskPackage;
         es_response_taskpackage_update(c, utp);
     }
     return 1;
@@ -1071,11 +1079,12 @@ static void handle_Z3950_es_response(ZOOM_connection c,
     }
 }
 
-static char *get_term_cstr(ODR odr, Z_Term *term) {
-
-    switch (term->which) {
+static char *get_term_cstr(ODR odr, Z_Term *term)
+{
+    switch (term->which)
+    {
     case Z_Term_general:
-            return odr_strdupn(odr, (const char *) term->u.general->buf, (size_t) term->u.general->len);
+        return odr_strdupn(odr, term->u.general->buf, term->u.general->len);
         break;
     case Z_Term_characterString:
         return odr_strdup(odr, term->u.characterString);
@@ -1083,22 +1092,27 @@ static char *get_term_cstr(ODR odr, Z_Term *term) {
     return 0;
 }
 
-static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet) {
-    int term_index;
+static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
+{
+    int i;
     struct yaz_facet_attr attr_values;
     ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
     yaz_facet_attr_init(&attr_values);
     yaz_facet_attr_get_z_attributes(facet->attributes, &attr_values);
     facet_field->facet_name = odr_strdup(odr, attr_values.useattr);
     facet_field->num_terms = facet->num_terms;
-    yaz_log(YLOG_DEBUG, "ZOOM_facet_field %s %d terms %d", attr_values.useattr, attr_values.limit, facet->num_terms);
-    facet_field->facet_terms = odr_malloc(odr, facet_field->num_terms * sizeof(*facet_field->facet_terms));
-    for (term_index = 0 ; term_index < facet->num_terms; term_index++) {
-        Z_FacetTerm *facetTerm = facet->terms[term_index];
-        facet_field->facet_terms[term_index].frequency = *facetTerm->count;
-        facet_field->facet_terms[term_index].term = get_term_cstr(odr, facetTerm->term);
+    yaz_log(YLOG_DEBUG, "ZOOM_facet_field %s %d terms %d",
+            attr_values.useattr, attr_values.limit, facet->num_terms);
+    facet_field->facet_terms =
+        odr_malloc(odr, facet->num_terms * sizeof(*facet_field->facet_terms));
+    for (i = 0 ; i < facet->num_terms; i++)
+    {
+        Z_FacetTerm *facetTerm = facet->terms[i];
+        facet_field->facet_terms[i].frequency = *facetTerm->count;
+        facet_field->facet_terms[i].term = get_term_cstr(odr, facetTerm->term);
         yaz_log(YLOG_DEBUG, "    term[%d] %s %d",
-                term_index, facet_field->facet_terms[term_index].term, facet_field->facet_terms[term_index].frequency);
+                i, facet_field->facet_terms[i].term,
+                facet_field->facet_terms[i].frequency);
     }
     return facet_field;
 }
@@ -1109,8 +1123,8 @@ void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
     int j;
     r->num_facets   = fl->num;
     yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
-    r->facets       =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets));
-    r->facets_names =  odr_malloc(r->odr, r->num_facets * sizeof(*r->facets_names));
+    r->facets       =  odr_malloc(r->odr, fl->num * sizeof(*r->facets));
+    r->facets_names =  odr_malloc(r->odr, fl->num * sizeof(*r->facets_names));
     for (j = 0; j < fl->num; j++)
     {
         r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
@@ -1144,8 +1158,7 @@ static void handle_queryExpressionTerm(ZOOM_options opt, const char *name,
     {
     case Z_Term_general:
         ZOOM_options_setl(opt, name,
-                          (const char *)(term->u.general->buf),
-                          term->u.general->len);
+                          term->u.general->buf, term->u.general->len);
         break;
     case Z_Term_characterString:
         ZOOM_options_set(opt, name, term->u.characterString);
@@ -1367,7 +1380,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
             NMEM nmem = odr_extract_mem(c->odr_in);
             Z_NamePlusRecordList *p =
                 sr->u.databaseOrSurDiagnostics;
-            for (i = 0; i<p->num_records; i++)
+            for (i = 0; i < p->num_records; i++)
             {
                 ZOOM_record_cache_add(resultset, p->records[i], i + *start,
                                       syntax, elementSetName, schema, 0);
@@ -1425,7 +1438,6 @@ static void set_init_option(const char *name, void *clientData)
     sprintf(buf, "init_opt_%.70s", name);
     ZOOM_connection_option_set(c, buf, "1");
 }
-
 
 zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset)
 {
@@ -1555,15 +1567,47 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     yaz_log(c->log_details, "%p send_present start=%d count=%d",
             c, *start, *count);
 
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    /* TODO: add sorting */
+    if (c->mc_st && resultset->live_set == 0)
+    {
+        size_t v_len;
+        uint32_t flags;
+        memcached_return_t rc;
+        char *v = memcached_get(c->mc_st, wrbuf_buf(resultset->mc_key),
+                                wrbuf_len(resultset->mc_key),
+                                &v_len, &flags, &rc);
+        if (v)
+        {
+            ZOOM_Event event;
+            WRBUF w = wrbuf_alloc();
+
+            wrbuf_write(w, v, v_len);
+            free(v);
+            resultset->size = odr_atoi(wrbuf_cstr(w));
+
+            yaz_log(YLOG_LOG, "For key %s got value %s",
+                    wrbuf_cstr(resultset->mc_key), wrbuf_cstr(w));
+
+            wrbuf_destroy(w);
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+            ZOOM_connection_put_event(c, event);
+            resultset->live_set = 1;
+        }
+    }
+#endif
     if (*start < 0 || *count < 0)
     {
         ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
-                       "", 0);
+                       "start/count < 0", 0);
     }
-    if (resultset->live_set && *start + *count > resultset->size)
+
+    if (resultset->live_set)
     {
-        ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
-                       "", 0);
+        if (*start >= resultset->size)
+            return zoom_complete;
+        if (*start + *count > resultset->size)
+            *count = resultset->size - *start;
     }
 
     if (c->error)                  /* don't continue on error */
@@ -1578,11 +1622,6 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
                                      syntax, elementSetName, schema);
         if (!rec)
             break;
-        else
-        {
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
-            ZOOM_connection_put_event(c, event);
-        }
     }
     *start += i;
     *count -= i;

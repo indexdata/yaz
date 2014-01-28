@@ -96,8 +96,6 @@ int ZOOM_uri_to_code(const char *uri)
     return code;
 }
 
-
-
 void ZOOM_set_error(ZOOM_connection c, int error, const char *addinfo)
 {
     ZOOM_set_dset_error(c, error, "ZOOM", addinfo, 0);
@@ -792,37 +790,6 @@ ZOOM_API(ZOOM_resultset)
     wrbuf_puts(r->mc_key, ";");
     wrbuf_sha1_puts(r->mc_key, ZOOM_query_get_query_string(q), 1);
     wrbuf_puts(r->mc_key, ";");
-    /* TODO: add sorting */
-    if (c->mc_st)
-    {
-        size_t v_len;
-        uint32_t flags;
-        memcached_return_t rc;
-        char *v = memcached_get(c->mc_st, wrbuf_buf(r->mc_key),
-                                wrbuf_len(r->mc_key), &v_len, &flags, &rc);
-        if (v)
-        {
-            ZOOM_Event event;
-            WRBUF w = wrbuf_alloc();
-
-            wrbuf_write(w, v, v_len);
-            free(v);
-            r->size = odr_atoi(wrbuf_cstr(w));
-
-            yaz_log(YLOG_LOG, "For key %s got value %s",
-                    wrbuf_cstr(r->mc_key), wrbuf_cstr(w));
-
-            wrbuf_destroy(w);
-            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-            ZOOM_connection_put_event(c, event);
-            r->live_set = 1;
-            return r;
-        }
-        else
-        {
-            yaz_log(YLOG_LOG, "For key %s got NO value", wrbuf_cstr(r->mc_key));
-        }
-    }
 #endif
 
     if (c->host_port && c->proto == PROTO_HTTP)
@@ -1050,30 +1017,30 @@ ZOOM_API(void)
 }
 
 ZOOM_API(size_t)
-    ZOOM_resultset_facets_size(ZOOM_resultset r) {
+    ZOOM_resultset_facets_size(ZOOM_resultset r)
+{
     return r->num_facets;
 }
 
 ZOOM_API(ZOOM_facet_field)
-    ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *name) {
+    ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *name)
+{
     int num = r->num_facets;
     ZOOM_facet_field *facets = r->facets;
-    int index;
-    for (index = 0; index < num; index++) {
-        if (!strcmp(facets[index]->facet_name, name)) {
-            return facets[index];
-        }
-    }
+    int i;
+    for (i = 0; i < num; i++)
+        if (!strcmp(facets[i]->facet_name, name))
+            return facets[i];
     return 0;
 }
 
 ZOOM_API(ZOOM_facet_field)
-    ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int index) {
+    ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int idx)
+{
     int num = r->num_facets;
     ZOOM_facet_field *facets = r->facets;
-    if (index >= 0 && index < num) {
-        return facets[index];
-    }
+    if (idx >= 0 && idx < num)
+        return facets[idx];
     return 0;
 }
 
@@ -1102,7 +1069,8 @@ ZOOM_API(size_t)
 }
 
 ZOOM_API(const char*)
-    ZOOM_facet_field_get_term(ZOOM_facet_field field, size_t idx, int *freq) {
+    ZOOM_facet_field_get_term(ZOOM_facet_field field, size_t idx, int *freq)
+{
     *freq = field->facet_terms[idx].frequency;
     return field->facet_terms[idx].term;
 }

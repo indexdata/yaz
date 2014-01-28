@@ -162,6 +162,36 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         return zoom_complete;
 
     resultset = c->tasks->u.search.resultset;
+
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+    /* TODO: add sorting */
+    if (c->mc_st && resultset->live_set == 0)
+    {
+        size_t v_len;
+        uint32_t flags;
+        memcached_return_t rc;
+        char *v = memcached_get(c->mc_st, wrbuf_buf(resultset->mc_key),
+                                wrbuf_len(resultset->mc_key),
+                                &v_len, &flags, &rc);
+        if (v)
+        {
+            ZOOM_Event event;
+            WRBUF w = wrbuf_alloc();
+
+            wrbuf_write(w, v, v_len);
+            free(v);
+            resultset->size = odr_atoi(wrbuf_cstr(w));
+
+            yaz_log(YLOG_LOG, "For key %s got value %s",
+                    wrbuf_cstr(resultset->mc_key), wrbuf_cstr(w));
+
+            wrbuf_destroy(w);
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+            ZOOM_connection_put_event(c, event);
+            resultset->live_set = 1;
+        }
+    }
+#endif
     if (!resultset->setname)
         resultset->setname = xstrdup("default");
     ZOOM_options_set(resultset->options, "setname", resultset->setname);
@@ -188,11 +218,6 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
                                      schema);
         if (!rec)
             break;
-        else
-        {
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
-            ZOOM_connection_put_event(c, event);
-        }
     }
     *start += i;
     *count -= i;
