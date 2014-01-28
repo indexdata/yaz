@@ -1449,80 +1449,24 @@ zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset)
     return zoom_complete;
 }
 
-zoom_ret ZOOM_connection_Z3950_present(ZOOM_connection c)
+static zoom_ret Z3950_send_present(ZOOM_connection c)
 {
-    Z_APDU *apdu = 0;
-    Z_PresentRequest *req = 0;
-    int i = 0;
-    const char *syntax = 0;
-    const char *elementSetName = 0;
-    const char *schema = 0;
-    ZOOM_resultset resultset;
-    int *start, *count;
+    Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
+    Z_PresentRequest *req = apdu->u.presentRequest;
+    ZOOM_resultset resultset = c->tasks->u.search.resultset;
+    const char *syntax = c->tasks->u.search.syntax;
+    const char *elementSetName = c->tasks->u.search.elementSetName;
+    const char *schema = c->tasks->u.search.schema;
 
-    if (!c->tasks)
-        return zoom_complete;
-    assert(c->tasks->which == ZOOM_TASK_SEARCH);
-    resultset = c->tasks->u.search.resultset;
-    start = &c->tasks->u.search.start;
-    count = &c->tasks->u.search.count;
-    syntax = c->tasks->u.search.syntax;
-    elementSetName = c->tasks->u.search.elementSetName;
-    schema =  c->tasks->u.search.schema;
+    *req->resultSetStartPoint = c->tasks->u.search.start + 1;
 
-    yaz_log(c->log_details, "%p send_present start=%d count=%d",
-            c, *start, *count);
-
-    if (*start < 0 || *count < 0)
-    {
-        ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
-                       "", 0);
-    }
-    if (resultset->live_set && *start + *count > resultset->size)
-    {
-        ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
-                       "", 0);
-    }
-
-    if (c->error)                  /* don't continue on error */
-        return zoom_complete;
-    yaz_log(c->log_details, "send_present resultset=%p start=%d count=%d",
-            resultset, *start, *count);
-
-    for (i = 0; i < *count; i++)
-    {
-        ZOOM_record rec =
-            ZOOM_record_cache_lookup(resultset, i + *start,
-                                     syntax, elementSetName, schema);
-        if (!rec)
-            break;
-        else
-        {
-            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
-            ZOOM_connection_put_event(c, event);
-        }
-    }
-    *start += i;
-    *count -= i;
-
-    if (*count == 0 && resultset->live_set)
-        return zoom_complete;
-
-    if (resultset->live_set != 2)
-        return Z3950_send_search(c);
-
-    apdu = zget_APDU(c->odr_out, Z_APDU_presentRequest);
-    req = apdu->u.presentRequest;
-
-    *req->resultSetStartPoint = *start + 1;
-
-    if (resultset->step > 0 && resultset->step < *count)
+    if (resultset->step > 0 && resultset->step < c->tasks->u.search.count)
         *req->numberOfRecordsRequested = resultset->step;
     else
-        *req->numberOfRecordsRequested = *count;
+        *req->numberOfRecordsRequested = c->tasks->u.search.count;
 
-    if (*req->numberOfRecordsRequested + *start > resultset->size)
-        *req->numberOfRecordsRequested = resultset->size - *start;
+    if (*req->numberOfRecordsRequested + c->tasks->u.search.start > resultset->size)
+        *req->numberOfRecordsRequested = resultset->size - c->tasks->u.search.start;
     assert(*req->numberOfRecordsRequested > 0);
 
     if (syntax && *syntax)
@@ -1589,6 +1533,69 @@ zoom_ret ZOOM_connection_Z3950_present(ZOOM_connection c)
     return send_APDU(c, apdu);
 }
 
+zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
+{
+    int i = 0;
+    const char *syntax = 0;
+    const char *elementSetName = 0;
+    const char *schema = 0;
+    ZOOM_resultset resultset;
+    int *start, *count;
+
+    if (!c->tasks)
+        return zoom_complete;
+    assert(c->tasks->which == ZOOM_TASK_SEARCH);
+    resultset = c->tasks->u.search.resultset;
+    start = &c->tasks->u.search.start;
+    count = &c->tasks->u.search.count;
+    syntax = c->tasks->u.search.syntax;
+    elementSetName = c->tasks->u.search.elementSetName;
+    schema =  c->tasks->u.search.schema;
+
+    yaz_log(c->log_details, "%p send_present start=%d count=%d",
+            c, *start, *count);
+
+    if (*start < 0 || *count < 0)
+    {
+        ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
+                       "", 0);
+    }
+    if (resultset->live_set && *start + *count > resultset->size)
+    {
+        ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
+                       "", 0);
+    }
+
+    if (c->error)                  /* don't continue on error */
+        return zoom_complete;
+    yaz_log(c->log_details, "send_present resultset=%p start=%d count=%d",
+            resultset, *start, *count);
+
+    for (i = 0; i < *count; i++)
+    {
+        ZOOM_record rec =
+            ZOOM_record_cache_lookup(resultset, i + *start,
+                                     syntax, elementSetName, schema);
+        if (!rec)
+            break;
+        else
+        {
+            ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+            ZOOM_connection_put_event(c, event);
+        }
+    }
+    *start += i;
+    *count -= i;
+
+    if (*count == 0 && resultset->live_set)
+        return zoom_complete;
+
+    if (resultset->live_set == 2)
+        return Z3950_send_present(c);
+    else
+        return Z3950_send_search(c);
+}
+
 static zoom_ret send_Z3950_sort_present(ZOOM_connection c)
 {
     zoom_ret r = zoom_complete;
@@ -1596,7 +1603,7 @@ static zoom_ret send_Z3950_sort_present(ZOOM_connection c)
     if (c->tasks && c->tasks->which == ZOOM_TASK_SEARCH)
         r = send_Z3950_sort(c, c->tasks->u.search.resultset);
     if (r == zoom_complete)
-        r = ZOOM_connection_Z3950_present(c);
+        r = ZOOM_connection_Z3950_search(c);
     return r;
 }
 
@@ -1701,7 +1708,7 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
     case Z_APDU_presentResponse:
         yaz_log(c->log_api, "%p handle_Z3950_apdu Present response", c);
         handle_Z3950_present_response(c, apdu->u.presentResponse);
-        if (ZOOM_connection_Z3950_present(c) == zoom_complete)
+        if (ZOOM_connection_Z3950_search(c) == zoom_complete)
             ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_sortResponse:

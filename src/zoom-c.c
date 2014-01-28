@@ -1515,7 +1515,7 @@ ZOOM_API(int)
             if (c->proto == PROTO_HTTP)
                 ret = ZOOM_connection_srw_send_search(c);
             else
-                ret = ZOOM_connection_Z3950_present(c);
+                ret = ZOOM_connection_Z3950_search(c);
             break;
         case ZOOM_TASK_CONNECT:
             ret = do_connect(c);
