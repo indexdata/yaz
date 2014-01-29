@@ -1510,7 +1510,40 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 
 int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 {
-    /* doesn't do anything for GNUTLS */
+
+#if HAVE_GNUTLS_H
+#if USE_GNUTLS_X509_CRT_PRINT
+    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+    if (cs->type == ssl_type && sp->session)
+    {
+        const gnutls_datum_t *cert_list;
+        unsigned cert_list_size;
+        if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
+            return 0;
+        cert_list = gnutls_certificate_get_peers(sp->session, &cert_list_size);
+        if (cert_list_size > 0)
+        {
+            gnutls_x509_crt_t cert;
+            int ret;
+            gnutls_datum_t cinfo;
+
+            gnutls_x509_crt_init(&cert);
+            gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
+
+            ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &cinfo);
+            if (ret == 0)
+            {
+                *buf = xstrdup((char *) cinfo.data);
+                *len = strlen(*buf);
+                gnutls_free(cinfo.data);
+                gnutls_x509_crt_deinit(cert);
+                return 1;
+            }
+            gnutls_x509_crt_deinit(cert);
+        }
+    }
+#endif
+#endif
     return 0;
 }
 
