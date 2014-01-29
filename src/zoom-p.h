@@ -270,6 +270,22 @@ void ZOOM_Event_destroy(ZOOM_Event event);
 zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu);
 void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl);
 
+void ZOOM_memcached_init(ZOOM_connection c);
+int ZOOM_memcached_configure(ZOOM_connection c);
+void ZOOM_memcached_destroy(ZOOM_connection c);
+void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q);
+void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset r);
+void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset result);
+void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
+                        int pos,
+                        const char *syntax, const char *elementSetName,
+                        const char *schema,
+                        Z_SRW_diagnostic *diag);
+Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
+                                        const char *syntax,
+                                        const char *elementSetName,
+                                        const char *schema);
+
 /*
  * Local variables:
  * c-basic-offset: 4

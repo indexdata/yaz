@@ -128,40 +128,8 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                            Z_SRW_diagnostic *diag)
 {
     record_cache_add(r, npr, pos, syntax, elementSetName, schema, diag);
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    if (r->connection->mc_st &&
-        !diag && npr->which == Z_NamePlusRecord_databaseRecord)
-    {
-        WRBUF k = wrbuf_alloc();
-        uint32_t flags = 0;
-        memcached_return_t rc;
-        time_t expiration = 36000;
-        ODR odr = odr_createmem(ODR_ENCODE);
-        char *rec_buf;
-        int rec_len;
-
-        z_NamePlusRecord(odr, &npr, 0, 0);
-        rec_buf = odr_getbuf(odr, &rec_len, 0);
-
-        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
-        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
-                     syntax ? syntax : "",
-                     elementSetName ? elementSetName : "",
-                     schema ? schema : "");
-        rc = memcached_set(r->connection->mc_st,
-                           wrbuf_buf(k),wrbuf_len(k),
-                           rec_buf, rec_len,
-                           expiration, flags);
-
-        yaz_log(YLOG_LOG, "Store record lkey=%s len=%d rc=%u %s",
-                wrbuf_cstr(k), rec_len, (unsigned) rc,
-                memcached_last_error_message(r->connection->mc_st));
-        odr_destroy(odr);
-        wrbuf_destroy(k);
-    }
-#endif
+    ZOOM_memcached_add(r, npr, pos, syntax, elementSetName, schema, diag);
 }
-
 
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *syntax,
@@ -169,6 +137,7 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *schema)
 {
     ZOOM_record_cache rc;
+    Z_NamePlusRecord *npr;
 
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
@@ -183,44 +152,10 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
             return &rc->rec;
         }
     }
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    if (r->connection && r->connection->mc_st)
-    {
-        WRBUF k = wrbuf_alloc();
-        size_t v_len;
-        char *v_buf;
-        uint32_t flags;
-        memcached_return_t rc;
-
-        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
-        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
-                     syntax ? syntax : "",
-                     elementSetName ? elementSetName : "",
-                     schema ? schema : "");
-
-        yaz_log(YLOG_LOG, "Lookup record %s", wrbuf_cstr(k));
-        v_buf = memcached_get(r->connection->mc_st, wrbuf_buf(k), wrbuf_len(k),
-                              &v_len, &flags, &rc);
-        wrbuf_destroy(k);
-        if (v_buf)
-        {
-            Z_NamePlusRecord *npr = 0;
-
-            odr_setbuf(r->odr, v_buf, v_len, 0);
-
-            z_NamePlusRecord(r->odr, &npr, 0, 0);
-            free(v_buf);
-            if (npr)
-            {
-                yaz_log(YLOG_LOG, "returned memcached copy");
-                return record_cache_add(r, npr, pos, syntax, elementSetName,
-                                        schema, 0);
-            }
-            yaz_log(YLOG_WARN, "memcached_get npr failed v_len=%ld",
-                    (long) v_len);
-        }
-    }
-#endif
+    npr = ZOOM_memcached_lookup(r, pos, syntax, elementSetName, schema);
+    if (npr)
+        return record_cache_add(r, npr, pos, syntax, elementSetName,
+                                schema, 0);
     return 0;
 }
 

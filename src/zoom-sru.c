@@ -163,35 +163,8 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 
     resultset = c->tasks->u.search.resultset;
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    /* TODO: add sorting */
-    if (c->mc_st && resultset->live_set == 0)
-    {
-        size_t v_len;
-        uint32_t flags;
-        memcached_return_t rc;
-        char *v = memcached_get(c->mc_st, wrbuf_buf(resultset->mc_key),
-                                wrbuf_len(resultset->mc_key),
-                                &v_len, &flags, &rc);
-        if (v)
-        {
-            ZOOM_Event event;
-            WRBUF w = wrbuf_alloc();
+    ZOOM_memcached_search(c, resultset);
 
-            wrbuf_write(w, v, v_len);
-            free(v);
-            resultset->size = odr_atoi(wrbuf_cstr(w));
-
-            yaz_log(YLOG_LOG, "For key %s got value %s",
-                    wrbuf_cstr(resultset->mc_key), wrbuf_cstr(w));
-
-            wrbuf_destroy(w);
-            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-            ZOOM_connection_put_event(c, event);
-            resultset->live_set = 1;
-        }
-    }
-#endif
     if (!resultset->setname)
         resultset->setname = xstrdup("default");
     ZOOM_options_set(resultset->options, "setname", resultset->setname);
@@ -323,23 +296,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         if (res->numberOfRecords)
         {
             resultset->size = *res->numberOfRecords;
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-            if (c->mc_st && resultset->live_set == 0)
-            {
-                uint32_t flags = 0;
-                memcached_return_t rc;
-                time_t expiration = 36000;
-                char str[40];
-
-                sprintf(str, ODR_INT_PRINTF, resultset->size);
-                rc = memcached_set(c->mc_st,
-                                   wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
-                                   str, strlen(str), expiration, flags);
-                yaz_log(YLOG_LOG, "Store SRU hit count key=%s value=%s rc=%u %s",
-                        wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
-                        memcached_last_error_message(c->mc_st));
-            }
-#endif
+            ZOOM_memcached_hitcount(c, resultset);
         }
         resultset->live_set = 2;
         if (res->suggestions)

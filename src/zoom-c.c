@@ -298,9 +298,7 @@ ZOOM_API(ZOOM_connection)
     c->cookies = 0;
     c->saveAPDU_wrbuf = 0;
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    c->mc_st = 0;
-#endif
+    ZOOM_memcached_init(c);
     return c;
 }
 
@@ -545,29 +543,11 @@ ZOOM_API(void)
     yaz_cookies_destroy(c->cookies);
     c->cookies = yaz_cookies_create();
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    if (c->mc_st)
+    if (ZOOM_memcached_configure(c))
     {
-        memcached_free(c->mc_st);
-        c->mc_st = 0;
-    }
-#endif
-    val = ZOOM_options_get(c->options, "memcached");
-    if (val && *val)
-    {
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-        c->mc_st = memcached(val, strlen(val));
-        if (!c->mc_st)
-        {
-            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, val);
-            return;
-        }
-#else
-        ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, "not enabled");
+        ZOOM_connection_remove_tasks(c);
         return;
-#endif
     }
-
     if (c->sru_mode == zoom_sru_error)
     {
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_PROTOCOL, val);
@@ -613,10 +593,7 @@ ZOOM_API(void)
         return;
     yaz_log(c->log_api, "%p ZOOM_connection_destroy", c);
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    if (c->mc_st)
-        memcached_free(c->mc_st);
-#endif
+    ZOOM_memcached_destroy(c);
     if (c->cs)
         cs_close(c->cs);
 
@@ -774,23 +751,7 @@ ZOOM_API(ZOOM_resultset)
     r->next = c->resultsets;
     c->resultsets = r;
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    r->mc_key = wrbuf_alloc();
-    wrbuf_puts(r->mc_key, "0;");
-    wrbuf_puts(r->mc_key, c->host_port);
-    wrbuf_puts(r->mc_key, ";");
-    if (c->user)
-        wrbuf_puts(r->mc_key, c->user);
-    wrbuf_puts(r->mc_key, ";");
-    if (c->group)
-        wrbuf_puts(r->mc_key, c->group);
-    wrbuf_puts(r->mc_key, ";");
-    if (c->password)
-        wrbuf_sha1_puts(r->mc_key, c->password, 1);
-    wrbuf_puts(r->mc_key, ";");
-    wrbuf_sha1_puts(r->mc_key, ZOOM_query_get_query_string(q), 1);
-    wrbuf_puts(r->mc_key, ";");
-#endif
+    ZOOM_memcached_resultset(r, q);
 
     if (c->host_port && c->proto == PROTO_HTTP)
     {

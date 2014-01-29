@@ -1288,25 +1288,9 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
+
+    ZOOM_memcached_hitcount(c, resultset);
     resultset->live_set = 2;
-
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    if (c->mc_st)
-    {
-        uint32_t flags = 0;
-        memcached_return_t rc;
-        time_t expiration = 36000;
-        char str[40];
-
-        sprintf(str, ODR_INT_PRINTF, *sr->resultCount);
-        rc = memcached_set(c->mc_st,
-                           wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
-                           str, strlen(str), expiration, flags);
-        yaz_log(YLOG_LOG, "Store Z39.50 hit count key=%s value=%s rc=%u %s",
-                wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
-                memcached_last_error_message(c->mc_st));
-    }
-#endif
     handle_Z3950_records(c, sr->records, 0);
 }
 
@@ -1567,35 +1551,8 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     yaz_log(c->log_details, "%p send_present start=%d count=%d",
             c, *start, *count);
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-    /* TODO: add sorting */
-    if (c->mc_st && resultset->live_set == 0)
-    {
-        size_t v_len;
-        uint32_t flags;
-        memcached_return_t rc;
-        char *v = memcached_get(c->mc_st, wrbuf_buf(resultset->mc_key),
-                                wrbuf_len(resultset->mc_key),
-                                &v_len, &flags, &rc);
-        if (v)
-        {
-            ZOOM_Event event;
-            WRBUF w = wrbuf_alloc();
+    ZOOM_memcached_search(c, resultset);
 
-            wrbuf_write(w, v, v_len);
-            free(v);
-            resultset->size = odr_atoi(wrbuf_cstr(w));
-
-            yaz_log(YLOG_LOG, "For key %s got value %s",
-                    wrbuf_cstr(resultset->mc_key), wrbuf_cstr(w));
-
-            wrbuf_destroy(w);
-            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
-            ZOOM_connection_put_event(c, event);
-            resultset->live_set = 1;
-        }
-    }
-#endif
     if (*start < 0 || *count < 0)
     {
         ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",

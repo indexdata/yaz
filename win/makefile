@@ -498,6 +498,7 @@ MISC_OBJS= \
    $(OBJDIR)\srwutil.obj \
    $(OBJDIR)\zoom-c.obj \
    $(OBJDIR)\zoom-event.obj \
+   $(OBJDIR)\zoom-memcached.obj \
    $(OBJDIR)\zoom-record-cache.obj \
    $(OBJDIR)\zoom-z3950.obj \
    $(OBJDIR)\zoom-sru.obj \
