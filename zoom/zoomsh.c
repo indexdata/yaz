@@ -30,14 +30,36 @@
 #include <yaz/log.h>
 #include <yaz/zoom.h>
 
+struct zoom_sh {
+    ZOOM_options options;
+    struct zoom_db *list;
+};
+
+struct zoom_db {
+    ZOOM_connection con;
+    ZOOM_resultset res;
+    struct zoom_db *next;
+};
+
 #define MAX_CON 100
 
-static void process_events(ZOOM_connection *c)
+static void process_events(struct zoom_sh *sh)
 {
-    int i;
+    ZOOM_connection *c;
+    int i, number;
+    struct zoom_db *db;
+
+    for (number = 0, db = sh->list; db; db = db->next)
+        if (db->con)
+            number++;
+    c = xmalloc(sizeof(*c) * number);
+
+    for (i = 0, db = sh->list; db; db = db->next)
+        if (db->con)
+            c[i++] = db->con;
 
     yaz_log(YLOG_DEBUG, "process_events");
-    while ((i = ZOOM_event(MAX_CON, c)) != 0)
+    while ((i = ZOOM_event(number, c)) != 0)
     {
         int peek = ZOOM_connection_peek_event(c[i-1]);
         int event = ZOOM_connection_last_event(c[i-1]);
@@ -46,6 +68,7 @@ static void process_events(ZOOM_connection *c)
                 event,
                 ZOOM_get_event_str(event));
     }
+    xfree(c);
 }
 
 static int next_token_chars(const char **cpp, const char **t_start,
@@ -111,9 +134,7 @@ static int is_command(const char *cmd_str, const char *this_str, int this_len)
     return 1;
 }
 
-static int cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
-                   ZOOM_options options,
-                   const char **args)
+static int cmd_set(struct zoom_sh *sh, const char **args)
 {
     WRBUF key;
     const char *val_buf;
@@ -126,16 +147,14 @@ static int cmd_set(ZOOM_connection *c, ZOOM_resultset *r,
     }
     val_len = next_token_chars(args, &val_buf, "");
     if (val_len != -1)
-        ZOOM_options_setl(options, wrbuf_cstr(key), val_buf, val_len);
+        ZOOM_options_setl(sh->options, wrbuf_cstr(key), val_buf, val_len);
     else
-        ZOOM_options_set(options, wrbuf_cstr(key), 0);
+        ZOOM_options_set(sh->options, wrbuf_cstr(key), 0);
     wrbuf_destroy(key);
     return 0;
 }
 
-static int cmd_get(ZOOM_connection *c, ZOOM_resultset *r,
-                   ZOOM_options options,
-                   const char **args)
+static int cmd_get(struct zoom_sh *sh, const char **args)
 {
     WRBUF key;
     if (!(key = next_token_new_wrbuf(args)))
@@ -145,15 +164,14 @@ static int cmd_get(ZOOM_connection *c, ZOOM_resultset *r,
     }
     else
     {
-        const char *val = ZOOM_options_get(options, wrbuf_cstr(key));
+        const char *val = ZOOM_options_get(sh->options, wrbuf_cstr(key));
         printf("%s = %s\n", wrbuf_cstr(key), val ? val : "<null>");
         wrbuf_destroy(key);
     }
     return 0;
 }
 
-static int cmd_shell(ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options, const char **args)
+static int cmd_shell(struct zoom_sh *sh, const char **args)
 {
     int ret = system(*args);
     if (ret)
@@ -161,9 +179,7 @@ static int cmd_shell(ZOOM_connection *c, ZOOM_resultset *r,
     return 0;
 }
 
-static int cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
-                    ZOOM_options options,
-                     const char **args)
+static int cmd_rget(struct zoom_sh *sh, const char **args)
 {
     WRBUF key;
     if (!(key = next_token_new_wrbuf(args)))
@@ -173,44 +189,42 @@ static int cmd_rget(ZOOM_connection *c, ZOOM_resultset *r,
     }
     else
     {
-        int i;
-        for (i = 0; i<MAX_CON; i++)
+        struct zoom_db *db = sh->list;
+        for (; db; db = db->next)
         {
-            const char *val;
-            if (!r[i])
-                continue;
-
-            val = ZOOM_resultset_option_get(r[i], wrbuf_cstr(key));
-            printf("%s = %s\n", wrbuf_cstr(key), val ? val : "<null>");
+            if (db->res)
+            {
+                const char *val =
+                    ZOOM_resultset_option_get(db->res, wrbuf_cstr(key));
+                printf("%s = %s\n", wrbuf_cstr(key), val ? val : "<null>");
+            }
         }
         wrbuf_destroy(key);
     }
     return 0;
 }
 
-static int cmd_close(ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **args)
+static int cmd_close(struct zoom_sh *sh, const char **args)
 {
+    struct zoom_db **dbp;
     WRBUF host;
-    int i;
     host = next_token_new_wrbuf(args);
-    for (i = 0; i<MAX_CON; i++)
+
+    for (dbp = &sh->list; *dbp; )
     {
         const char *h;
-        if (!c[i])
-            continue;
-        if (!host)
+        struct zoom_db *db = *dbp;
+        if (!db->con || !host ||
+            ((h = ZOOM_connection_option_get(db->con, "host"))
+             && !strcmp(h, wrbuf_cstr(host))))
         {
-            ZOOM_connection_destroy(c[i]);
-            c[i] = 0;
+            *dbp = (*dbp)->next;
+            ZOOM_connection_destroy(db->con);
+            ZOOM_resultset_destroy(db->res);
+            xfree(db);
         }
-        else if ((h = ZOOM_connection_option_get(c[i], "host"))
-                 && !strcmp(h, wrbuf_cstr(host)))
-        {
-            ZOOM_connection_destroy(c[i]);
-            c[i] = 0;
-        }
+        else
+            dbp = &(*dbp)->next;
     }
     if (host)
         wrbuf_destroy(host);
@@ -264,15 +278,13 @@ static void display_records(ZOOM_connection c,
     }
 }
 
-static int cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
-                    ZOOM_options options,
-                    const char **args)
+static int cmd_show(struct zoom_sh *sh, const char **args)
 {
-    int i;
     size_t start = 0, count = 1;
     const char *type = "render";
     WRBUF render_str = 0;
     int ret = 0;
+    struct zoom_db *db;
 
     {
         WRBUF tmp;
@@ -293,28 +305,29 @@ static int cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
     if (render_str)
         type = wrbuf_cstr(render_str);
 
-    for (i = 0; i < MAX_CON; i++)
-        ZOOM_resultset_records(r[i], 0, start, count);
-    process_events(c);
+    for (db = sh->list; db; db = db->next)
+        if (db->res)
+            ZOOM_resultset_records(db->res, 0, start, count);
+    process_events(sh);
 
-    for (i = 0; i < MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!c[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo, &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
-        else if (r[i])
+        else if (db->res)
         {
             /* OK, no major errors. Display records... */
-            display_records(c[i], r[i], start, count, type);
+            display_records(db->con, db->res, start, count, type);
         }
     }
     if (render_str)
@@ -322,49 +335,51 @@ static int cmd_show(ZOOM_connection *c, ZOOM_resultset *r,
     return ret;
 }
 
-static void display_facets(ZOOM_facet_field *facets, int count) {
-    int index;
+static void display_facets(ZOOM_facet_field *facets, int count)
+{
+    int i;
     printf("Facets: \n");
-    for (index = 0; index <  count; index++) {
-        int term_index;
-        const char *facet_name = ZOOM_facet_field_name(facets[index]);
+    for (i = 0; i < count; i++)
+    {
+        int j;
+        const char *facet_name = ZOOM_facet_field_name(facets[i]);
         printf("  %s: \n", facet_name);
-        for (term_index = 0; term_index < ZOOM_facet_field_term_count(facets[index]); term_index++) {
+        for (j = 0; j < ZOOM_facet_field_term_count(facets[i]); j++)
+        {
             int freq = 0;
-            const char *term = ZOOM_facet_field_get_term(facets[index], term_index, &freq);
+            const char *term = ZOOM_facet_field_get_term(facets[i], j, &freq);
             printf("    %s(%d) \n", term,  freq);
         }
     }
 }
 
-static int cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static int cmd_facets(struct zoom_sh *sh, const char **args)
 {
-    int i;
+    struct zoom_db *db;
     int ret = 0;
 
-    process_events(c);
+    process_events(sh);
 
-    for (i = 0; i < MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!c[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo,
+                                             &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
-        else if (r[i])
+        else if (db->res)
         {
-            int num_facets = ZOOM_resultset_facets_size(r[i]);
+            int num_facets = ZOOM_resultset_facets_size(db->res);
             if (num_facets) {
-                ZOOM_facet_field  *facets = ZOOM_resultset_facets(r[i]);
+                ZOOM_facet_field  *facets = ZOOM_resultset_facets(db->res);
                 display_facets(facets, num_facets);
             }
         }
@@ -372,46 +387,45 @@ static int cmd_facets(ZOOM_connection *c, ZOOM_resultset *r,
     return ret;
 }
 
-static int cmd_suggestions(ZOOM_connection *c, ZOOM_resultset *r, ZOOM_options options, const char **args)
+static int cmd_suggestions(struct zoom_sh *sh, const char **args)
 {
-    int i;
+    struct zoom_db *db;
     int ret = 0;
 
-    process_events(c);
+    process_events(sh);
 
-    for (i = 0; i < MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!c[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo,
+                                             &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
-        else if (r[i])
+        else if (db->res)
         {
-            const char *suggestions = ZOOM_resultset_option_get(r[i], "suggestions");
-            if (suggestions) {
+            const char *suggestions =
+                ZOOM_resultset_option_get(db->res, "suggestions");
+            if (suggestions)
                 printf("Suggestions: \n%s\n", suggestions);
-            }
         }
     }
     return ret;
 }
 
-
-static int cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
-                   ZOOM_options options,
-                   const char **args)
+static int cmd_ext(struct zoom_sh *sh, const char **args)
 {
-    ZOOM_package p[MAX_CON];
-    int i;
     int ret = 0;
+    ZOOM_package *p = 0;
+    struct zoom_db *db;
+    int i, number;
     WRBUF ext_type_str = next_token_new_wrbuf(args);
 
     if (!ext_type_str)
@@ -420,30 +434,34 @@ static int cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
                "(itemorder, create, drop, commit, update, xmlupdate)\n");
         return 1;
     }
-    for (i = 0; i<MAX_CON; i++)
-    {
-        if (c[i])
+    for (number = 0, db = sh->list; db; db = db->next)
+        if (db->con)
+            number++;
+
+    p = xmalloc(sizeof(*p) * number);
+
+    for (i = 0, db = sh->list; db; db = db->next)
+        if (db->con)
         {
-            p[i] = ZOOM_connection_package(c[i], 0);
+            p[i] = ZOOM_connection_package(db->con, 0);
             ZOOM_package_send(p[i], ext_type_str ? wrbuf_cstr(ext_type_str):0);
+            i++;
         }
-        else
-            p[i] = 0;
-    }
 
-    process_events(c);
+    process_events(sh);
 
-    for (i = 0; i<MAX_CON; i++)
+    for (i = 0, db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!p[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo,
+                                             &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
@@ -459,28 +477,26 @@ static int cmd_ext(ZOOM_connection *c, ZOOM_resultset *r,
                 printf("xmlUpdateDoc: %s\n", v);
         }
         ZOOM_package_destroy(p[i]);
+        i++;
     }
     if (ext_type_str)
         wrbuf_destroy(ext_type_str);
+    xfree(p);
     return ret;
 }
 
-static int cmd_debug(ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **args)
+static int cmd_debug(struct zoom_sh *sh, const char **args)
 {
     yaz_log_init_level(YLOG_ALL);
     return 0;
 }
 
-static int cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
-                      ZOOM_options options,
-                      const char **args)
+static int cmd_search(struct zoom_sh *sh, const char **args)
 {
     ZOOM_query s;
     const char *query_str = *args;
-    int i;
     int ret = 0;
+    struct zoom_db *db;
 
     s = ZOOM_query_create();
     while (*query_str == ' ')
@@ -495,49 +511,48 @@ static int cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
         ZOOM_query_destroy(s);
         return 1;
     }
-    for (i = 0; i<MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
-
-        if (c[i])
+        if (db->con)
         {
-            ZOOM_resultset_destroy(r[i]);
-            r[i] = 0;
+            ZOOM_resultset_destroy(db->res);
+            db->res = ZOOM_connection_search(db->con, s);
         }
-        if (c[i])
-            r[i] = ZOOM_connection_search(c[i], s);
     }
     ZOOM_query_destroy(s);
 
-    process_events(c);
+    process_events(sh);
 
-    for (i = 0; i<MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!c[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo,
+                                             &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
-        else if (r[i])
+        else if (db->res)
         {
             /* OK, no major errors. Look at the result count */
-            int start = ZOOM_options_get_int(options, "start", 0);
-            int count = ZOOM_options_get_int(options, "count", 0);
+            int start = ZOOM_options_get_int(sh->options, "start", 0);
+            int count = ZOOM_options_get_int(sh->options, "count", 0);
             int facet_num;
 
-            printf("%s: %lld hits\n", ZOOM_connection_option_get(c[i], "host"),
-                   (long long int) ZOOM_resultset_size(r[i]));
+            printf("%s: %lld hits\n", ZOOM_connection_option_get(db->con,
+                                                                 "host"),
+                   (long long int) ZOOM_resultset_size(db->res));
 
-            facet_num = ZOOM_resultset_facets_size(r[i]);
+            facet_num = ZOOM_resultset_facets_size(db->res);
             if (facet_num)
             {
-                ZOOM_facet_field *facets = ZOOM_resultset_facets(r[i]);
+                ZOOM_facet_field *facets = ZOOM_resultset_facets(db->res);
                 int facet_idx;
                 for (facet_idx = 0; facet_idx < facet_num; facet_idx++)
                 {
@@ -555,21 +570,20 @@ static int cmd_search(ZOOM_connection *c, ZOOM_resultset *r,
                 }
             }
             /* and display */
-            display_records(c[i], r[i], start, count, "render");
+            display_records(db->con, db->res, start, count, "render");
         }
     }
     return ret;
 }
 
-static int cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
-                    ZOOM_options options,
-                    const char **args)
+static int cmd_scan(struct zoom_sh *sh, const char **args)
 {
     const char *query_str = *args;
     ZOOM_query query = ZOOM_query_create();
-    int i;
+    int i, number;
     int ret = 0;
-    ZOOM_scanset s[MAX_CON];
+    ZOOM_scanset *s = 0;
+    struct zoom_db *db;
 
     while (*query_str == ' ')
         query_str++;
@@ -585,28 +599,32 @@ static int cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
         return 1;
     }
 
-    for (i = 0; i<MAX_CON; i++)
-    {
-        if (c[i])
-            s[i] = ZOOM_connection_scan1(c[i], query);
-        else
-            s[i] = 0;
-    }
+    for (number = 0, db = sh->list; db; db = db->next)
+        if (db->con)
+            number++;
+
+    s = xmalloc(sizeof(*s) * number);
+
+    for (i = 0, db = sh->list; db; db = db->next)
+        if (db->con)
+            s[i++] = ZOOM_connection_scan1(db->con, query);
+
     ZOOM_query_destroy(query);
 
-    process_events(c);
+    process_events(sh);
 
-    for (i = 0; i<MAX_CON; i++)
+    for (i = 0, db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
         /* display errors if any */
-        if (!c[i])
+        if (!db->con)
             continue;
-        if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+        if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo,
+                                             &dset)))
         {
             printf("%s error: %s (%s:%d) %s\n",
-                   ZOOM_connection_option_get(c[i], "host"), errmsg,
+                   ZOOM_connection_option_get(db->con, "host"), errmsg,
                    dset, error, addinfo);
             ret = 1;
         }
@@ -623,33 +641,29 @@ static int cmd_scan(ZOOM_connection *c, ZOOM_resultset *r,
             }
             ZOOM_scanset_destroy(s[i]);
         }
+        i++;
     }
+    xfree(s);
     return ret;
 }
 
-static int cmd_sort(ZOOM_connection *c, ZOOM_resultset *r,
-                    ZOOM_options options,
-                    const char **args)
+static int cmd_sort(struct zoom_sh *sh, const char **args)
 {
     const char *sort_spec = *args;
-    int i;
     int ret = 0;
+    struct zoom_db *db;
 
     while (*sort_spec == ' ')
         sort_spec++;
 
-    for (i = 0; i<MAX_CON; i++)
-    {
-        if (r[i])
-            ZOOM_resultset_sort(r[i], "yaz", sort_spec);
-    }
-    process_events(c);
+    for (db = sh->list; db; db = db->next)
+        if (db->res)
+            ZOOM_resultset_sort(db->res, "yaz", sort_spec);
+    process_events(sh);
     return ret;
 }
 
-static int cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
-                    ZOOM_options options,
-                    const char **args)
+static int cmd_help(struct zoom_sh *sh, const char **args)
 {
     printf("connect <zurl>\n");
     printf("search <pqf>\n");
@@ -687,49 +701,45 @@ static int cmd_help(ZOOM_connection *c, ZOOM_resultset *r,
     return 0;
 }
 
-static int cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
-                       ZOOM_options options,
-                       const char **args)
+static int cmd_connect(struct zoom_sh *sh, const char **args)
 {
     int ret = 0;
     int error;
     const char *errmsg, *addinfo, *dset;
-    int j, i;
+    struct zoom_db *db;
     WRBUF host = next_token_new_wrbuf(args);
     if (!host)
     {
         printf("missing host after connect\n");
         return 1;
     }
-    for (j = -1, i = 0; i<MAX_CON; i++)
+    for (db = sh->list; db; db = db->next)
     {
         const char *h;
-        if (c[i] && (h = ZOOM_connection_option_get(c[i], "host")) &&
+        if (db->con && (h = ZOOM_connection_option_get(db->con, "host")) &&
             !strcmp(h, wrbuf_cstr(host)))
         {
-            ZOOM_connection_destroy(c[i]);
+            ZOOM_connection_destroy(db->con);
             break;
         }
-        else if (c[i] == 0 && j == -1)
-            j = i;
     }
-    if (i == MAX_CON)  /* no match .. */
+    if (!db)  /* no match .. */
     {
-        if (j == -1)
-        {
-            printf("no more connection available\n");
-            wrbuf_destroy(host);
-            return 1;
-        }
-        i = j;   /* OK, use this one is available */
+        db = xmalloc(sizeof(*db));
+        db->res = 0;
+        db->next = sh->list;
+        sh->list = db;
     }
-    c[i] = ZOOM_connection_create(options);
-    ZOOM_connection_connect(c[i], wrbuf_cstr(host), 0);
+    db->con = ZOOM_connection_create(sh->options);
 
-    if ((error = ZOOM_connection_error_x(c[i], &errmsg, &addinfo, &dset)))
+    ZOOM_connection_connect(db->con, wrbuf_cstr(host), 0);
+
+    process_events(sh);
+
+    if ((error = ZOOM_connection_error_x(db->con, &errmsg, &addinfo, &dset)))
     {
         printf("%s error: %s (%s:%d) %s\n",
-               ZOOM_connection_option_get(c[i], "host"), errmsg,
+               ZOOM_connection_option_get(db->con, "host"), errmsg,
                dset, error, addinfo);
         ret = 1;
     }
@@ -738,17 +748,13 @@ static int cmd_connect(ZOOM_connection *c, ZOOM_resultset *r,
 }
 
 /** \brief parse and execute zoomsh command
-    \param c connections
-    \param r result sets
-    \param options ZOOM options
+    \param sh ZOOM shell
     \param buf command string and arguments
     \retval 0 OK
     \retval 1 failure to execute
     \retval -1 EOF (no more commands or quit seen)
 */
-static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
-                     ZOOM_options options,
-                     const char **buf)
+static int cmd_parse(struct zoom_sh *sh, const char **buf)
 {
     int cmd_len;
     const char *cmd_str;
@@ -760,39 +766,39 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
     if (is_command("quit", cmd_str, cmd_len))
         return -1;
     else if (is_command("set", cmd_str, cmd_len))
-        ret = cmd_set(c, r, options, buf);
+        ret = cmd_set(sh, buf);
     else if (is_command("get", cmd_str, cmd_len))
-        ret = cmd_get(c, r, options, buf);
+        ret = cmd_get(sh, buf);
     else if (is_command("rget", cmd_str, cmd_len))
-        ret = cmd_rget(c, r, options, buf);
+        ret = cmd_rget(sh, buf);
     else if (is_command("connect", cmd_str, cmd_len))
-        ret = cmd_connect(c, r, options, buf);
+        ret = cmd_connect(sh, buf);
     else if (is_command("open", cmd_str, cmd_len))
-        ret = cmd_connect(c, r, options, buf);
+        ret = cmd_connect(sh, buf);
     else if (is_command("search", cmd_str, cmd_len))
-        ret = cmd_search(c, r, options, buf);
+        ret = cmd_search(sh, buf);
     else if (is_command("facets", cmd_str, cmd_len))
-        ret = cmd_facets(c, r, options, buf);
+        ret = cmd_facets(sh, buf);
     else if (is_command("find", cmd_str, cmd_len))
-        ret = cmd_search(c, r, options, buf);
+        ret = cmd_search(sh, buf);
     else if (is_command("show", cmd_str, cmd_len))
-        ret = cmd_show(c, r, options, buf);
+        ret = cmd_show(sh, buf);
     else if (is_command("suggestions", cmd_str, cmd_len))
-        ret = cmd_suggestions(c, r, options, buf);
+        ret = cmd_suggestions(sh, buf);
     else if (is_command("close", cmd_str, cmd_len))
-        ret = cmd_close(c, r, options, buf);
+        ret = cmd_close(sh, buf);
     else if (is_command("help", cmd_str, cmd_len))
-        ret = cmd_help(c, r, options, buf);
+        ret = cmd_help(sh, buf);
     else if (is_command("ext", cmd_str, cmd_len))
-        ret = cmd_ext(c, r, options, buf);
+        ret = cmd_ext(sh, buf);
     else if (is_command("debug", cmd_str, cmd_len))
-        ret = cmd_debug(c, r, options, buf);
+        ret = cmd_debug(sh, buf);
     else if (is_command("scan", cmd_str, cmd_len))
-        ret = cmd_scan(c, r, options, buf);
+        ret = cmd_scan(sh, buf);
     else if (is_command("sort", cmd_str, cmd_len))
-        ret = cmd_sort(c, r, options, buf);
+        ret = cmd_sort(sh, buf);
     else if (is_command("shell", cmd_str, cmd_len))
-        ret = cmd_shell(c, r, options, buf);
+        ret = cmd_shell(sh, buf);
     else
     {
         printf("unknown command %.*s\n", cmd_len, cmd_str);
@@ -801,8 +807,7 @@ static int cmd_parse(ZOOM_connection *c, ZOOM_resultset *r,
     return ret;
 }
 
-static int shell(ZOOM_connection *c, ZOOM_resultset *r,
-                 ZOOM_options options, int exit_on_error)
+static int shell(struct zoom_sh *sh, int exit_on_error)
 {
     int res = 0;
     while (res == 0)
@@ -846,7 +851,7 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
         }
         if ((cp = strchr(buf, '\n')))
             *cp = '\0';
-        res = cmd_parse(c, r, options, &bp);
+        res = cmd_parse(sh, &bp);
         if (res == -1)
             break;
         if (!exit_on_error && res > 0)
@@ -857,17 +862,14 @@ static int shell(ZOOM_connection *c, ZOOM_resultset *r,
 
 static int zoomsh(int argc, char **argv)
 {
-    ZOOM_options zoom_options = ZOOM_options_create();
-    int i, res = 0; /* -1: EOF; 0 = OK, > 0 ERROR */
+    int res = 0; /* -1: EOF; 0 = OK, > 0 ERROR */
     int exit_on_error = 0;
-    ZOOM_connection z39_con[MAX_CON];
-    ZOOM_resultset  z39_res[MAX_CON];
+    struct zoom_db *db;
+    struct zoom_sh sh;
 
-    for (i = 0; i<MAX_CON; i++)
-    {
-        z39_con[i] = 0;
-        z39_res[i] = 0;
-    }
+    sh.list = 0;
+    sh.options = ZOOM_options_create();
+
     while (res == 0)
     {
         int mask;
@@ -877,13 +879,13 @@ static int zoomsh(int argc, char **argv)
         switch (option_ret)
         {
         case 0:
-            res = cmd_parse(z39_con, z39_res, zoom_options, &bp);
+            res = cmd_parse(&sh, &bp);
             /* returns res == -1 on quit */
             if (!exit_on_error && res > 0)
                 res = 0;  /* hide error */
             break;
         case YAZ_OPTIONS_EOF:
-            res = shell(z39_con, z39_res, zoom_options, exit_on_error);
+            res = shell(&sh, exit_on_error);
             break;
         case 'e':
             exit_on_error = 1;
@@ -898,12 +900,15 @@ static int zoomsh(int argc, char **argv)
         }
     }
 
-    for (i = 0; i<MAX_CON; i++)
+    for (db = sh.list; db; )
     {
-        ZOOM_connection_destroy(z39_con[i]);
-        ZOOM_resultset_destroy(z39_res[i]);
+        struct zoom_db *n = db->next;
+        ZOOM_connection_destroy(db->con);
+        ZOOM_resultset_destroy(db->res);
+        xfree(db);
+        db = n;
     }
-    ZOOM_options_destroy(zoom_options);
+    ZOOM_options_destroy(sh.options);
     if (res == -1) /* quit .. which is not an error */
         res = 0;
     return res;
