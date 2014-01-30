@@ -80,7 +80,12 @@ void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
     if (c->password)
         wrbuf_sha1_puts(r->mc_key, c->password, 1);
     wrbuf_puts(r->mc_key, ";");
-    wrbuf_sha1_puts(r->mc_key, ZOOM_query_get_query_string(q), 1);
+    {
+        WRBUF w = wrbuf_alloc();
+        ZOOM_query_get_hash(q, w);
+        wrbuf_sha1_puts(r->mc_key, wrbuf_cstr(w), 1);
+        wrbuf_destroy(w);
+    }
     wrbuf_puts(r->mc_key, ";");
 #endif
 }
@@ -132,7 +137,7 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset)
         rc = memcached_set(c->mc_st,
                            wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
                            str, strlen(str), expiration, flags);
-        yaz_log(YLOG_LOG, "Store SRU hit count key=%s value=%s rc=%u %s",
+        yaz_log(YLOG_LOG, "Store hit count key=%s value=%s rc=%u %s",
                 wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
                 memcached_last_error_message(c->mc_st));
     }

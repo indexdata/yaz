@@ -147,6 +147,16 @@ const char *ZOOM_query_get_query_string(ZOOM_query s)
     return wrbuf_cstr(s->full_query);
 }
 
+void ZOOM_query_get_hash(ZOOM_query s, WRBUF w)
+{
+    wrbuf_printf(w, "%d;", s->query_type);
+    if (s->query_string)
+        wrbuf_puts(w, s->query_string);
+    wrbuf_printf(w, ";%d;", s->sort_strategy);
+    if (s->sort_spec)
+        yaz_sort_spec_to_type7(s->sort_spec, w);
+}
+
 /*
  * Returns an xmalloc()d string containing RPN that corresponds to the
  * CQL passed in.  On error, sets the Connection object's error state
@@ -367,7 +377,7 @@ ZOOM_query_sortby2(ZOOM_query s, const char *strategy, const char *criteria)
     odr_reset(s->odr_sort_spec);
     s->sort_spec = yaz_sort_spec(s->odr_sort_spec, criteria);
     if (!s->sort_spec)
-        return -1;
+        return -2;
     return generate(s);
 }
 

@@ -252,6 +252,7 @@ Z_Query *ZOOM_query_get_Z_Query(ZOOM_query s);
 Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s);
 const char *ZOOM_query_get_query_string(ZOOM_query s);
 const char *ZOOM_query_get_sru11(ZOOM_query s);
+void ZOOM_query_get_hash(ZOOM_query s, WRBUF w);
 
 int ZOOM_uri_to_code(const char *uri);
 
