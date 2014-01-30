@@ -31,6 +31,8 @@
 #include <yaz/zoom.h>
 
 struct zoom_sh {
+    WRBUF strategy;
+    WRBUF criteria;
     ZOOM_options options;
     struct zoom_db *list;
 };
@@ -511,6 +513,21 @@ static int cmd_search(struct zoom_sh *sh, const char **args)
         ZOOM_query_destroy(s);
         return 1;
     }
+    if (sh->strategy && wrbuf_len(sh->strategy) && wrbuf_len(sh->criteria))
+    {
+        int r = ZOOM_query_sortby2(s, wrbuf_cstr(sh->strategy),
+                                   wrbuf_cstr(sh->criteria));
+        if (r)
+        {
+            if (r == -1)
+                printf("Bad sortby strategy: %s\n", wrbuf_cstr(sh->strategy));
+            else
+                printf("Bad sortby criteria: %s\n", wrbuf_cstr(sh->criteria));
+            ZOOM_query_destroy(s);
+            return 1;
+        }
+        printf("sortby added\n");
+    }
     for (db = sh->list; db; db = db->next)
     {
         if (db->con)
@@ -647,6 +664,26 @@ static int cmd_scan(struct zoom_sh *sh, const char **args)
     return ret;
 }
 
+static int cmd_sortby(struct zoom_sh *sh, const char **args)
+{
+    WRBUF strategy;
+    const char *criteria;
+    if (!(strategy = next_token_new_wrbuf(args)))
+    {
+        printf("missing argument argument: strategy and criteria\n");
+        return 1;
+    }
+    criteria = *args;
+    while (*criteria == ' ')
+        criteria++;
+    wrbuf_destroy(sh->strategy);
+    sh->strategy = strategy;
+
+    wrbuf_rewind(sh->criteria);
+    wrbuf_puts(sh->criteria, criteria);
+    return 0;
+}
+
 static int cmd_sort(struct zoom_sh *sh, const char **args)
 {
     const char *sort_spec = *args;
@@ -667,6 +704,7 @@ static int cmd_help(struct zoom_sh *sh, const char **args)
 {
     printf("connect <zurl>\n");
     printf("search <pqf>\n");
+    printf("sortby <strategy> <criteria>\n");
     printf("show [<start> [<count> [<type]]]\n");
     printf("facets\n");
     printf("scan <term>\n");
@@ -777,6 +815,8 @@ static int cmd_parse(struct zoom_sh *sh, const char **buf)
         ret = cmd_connect(sh, buf);
     else if (is_command("search", cmd_str, cmd_len))
         ret = cmd_search(sh, buf);
+    else if (is_command("sortby", cmd_str, cmd_len))
+        ret = cmd_sortby(sh, buf);
     else if (is_command("facets", cmd_str, cmd_len))
         ret = cmd_facets(sh, buf);
     else if (is_command("find", cmd_str, cmd_len))
@@ -869,6 +909,8 @@ static int zoomsh(int argc, char **argv)
 
     sh.list = 0;
     sh.options = ZOOM_options_create();
+    sh.strategy = 0;
+    sh.criteria = wrbuf_alloc();
 
     while (res == 0)
     {
@@ -909,6 +951,8 @@ static int zoomsh(int argc, char **argv)
         db = n;
     }
     ZOOM_options_destroy(sh.options);
+    wrbuf_destroy(sh.strategy);
+    wrbuf_destroy(sh.criteria);
     if (res == -1) /* quit .. which is not an error */
         res = 0;
     return res;
