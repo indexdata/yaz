@@ -721,10 +721,9 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_resultset r = ZOOM_resultset_create();
-    const char *cp;
     ZOOM_task task;
     int start, count;
-    const char *syntax, *elementSetName, *schema, *facets;
+    const char *syntax, *elementSetName, *schema;
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = ZOOM_query_get_sortspec(q);
     r->query = q;
@@ -732,7 +731,7 @@ ZOOM_API(ZOOM_resultset)
 
     r->options = ZOOM_options_create_with_parent(c->options);
 
-    r->req_facets = odr_strdup_null(r->odr, 
+    r->req_facets = odr_strdup_null(r->odr,
                                     ZOOM_options_get(r->options, "facets"));
     start = ZOOM_options_get_int(r->options, "start", 0);
     count = ZOOM_options_get_int(r->options, "count", 0);
@@ -743,13 +742,11 @@ ZOOM_API(ZOOM_resultset)
                                        (cp != 0 ? "presentChunk": "step"), 0);
     }
     r->piggyback = ZOOM_options_get_bool(r->options, "piggyback", 1);
-    cp = ZOOM_options_get(r->options, "setname");
-    if (cp)
-        r->setname = xstrdup(cp);
-
-    r->databaseNames = ZOOM_connection_get_databases(c, c->options, &r->num_databaseNames,
-                                         r->odr);
-
+    r->setname = odr_strdup_null(r->odr,
+                                 ZOOM_options_get(r->options, "setname"));
+    r->databaseNames = ZOOM_connection_get_databases(c, c->options,
+                                                     &r->num_databaseNames,
+                                                     r->odr);
     r->connection = c;
     r->next = c->resultsets;
     c->resultsets = r;
@@ -872,7 +869,6 @@ static void resultset_destroy(ZOOM_resultset r)
         ZOOM_query_destroy(r->query);
         ZOOM_options_destroy(r->options);
         odr_destroy(r->odr);
-        xfree(r->setname);
         yaz_mutex_destroy(&r->mutex);
 #if SHPTR
         YAZ_SHPTR_DEC(r->record_wrbuf, wrbuf_destroy);

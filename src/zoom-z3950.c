@@ -645,7 +645,6 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
     const char *elementSetName;
     const char *smallSetElementSetName;
     const char *mediumSetElementSetName;
-    const char *facets;
 
     assert(c->tasks);
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
@@ -678,7 +677,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
             yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
         else
-            yaz_log(YLOG_WARN, "Unable to parse facets: %s", facets);
+            yaz_log(YLOG_WARN, "Unable to parse facets: %s", r->req_facets);
     }
 
     assert(r);
@@ -790,7 +789,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
                 if (!rp)
                     break;
             }
-            r->setname = xstrdup(setname);
+            r->setname = odr_strdup(r->odr, setname);
             yaz_log(c->log_details, "%p ZOOM_connection_send_search: "
                     "allocating set %s", c, r->setname);
         }
@@ -798,7 +797,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
         {
             yaz_log(c->log_details, "%p ZOOM_connection_send_search: using "
                     "default set", c);
-            r->setname = xstrdup("default");
+            r->setname = odr_strdup(r->odr, "default");
         }
         ZOOM_options_set(r->options, "setname", r->setname);
     }
