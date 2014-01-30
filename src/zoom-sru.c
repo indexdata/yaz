@@ -145,7 +145,6 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
 #if YAZ_HAVE_XML2
 zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
-    const char *facets = 0;
     int i;
     int *start, *count;
     ZOOM_resultset resultset = 0;
@@ -170,9 +169,9 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     ZOOM_options_set(resultset->options, "setname", resultset->setname);
     start = &c->tasks->u.search.start;
     count = &c->tasks->u.search.count;
-    facets = ZOOM_options_get(resultset->options, "facets");
-    if (facets)
-        facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
+    if (resultset->req_facets)
+        facet_list = yaz_pqf_parse_facet_list(c->odr_out,
+                                              resultset->req_facets);
     schema = c->tasks->u.search.schema;
 
     if (resultset->live_set)

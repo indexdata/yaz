@@ -87,6 +87,8 @@ void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
         wrbuf_destroy(w);
     }
     wrbuf_puts(r->mc_key, ";");
+    if (r->req_facets)
+        wrbuf_puts(r->mc_key, r->req_facets);
 #endif
 }
 

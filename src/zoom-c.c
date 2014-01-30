@@ -686,6 +686,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->connection = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
+    r->req_facets = 0;
     r->res_facets = 0;
     r->num_res_facets = 0;
     r->facets_names = 0;
@@ -723,7 +724,7 @@ ZOOM_API(ZOOM_resultset)
     const char *cp;
     ZOOM_task task;
     int start, count;
-    const char *syntax, *elementSetName, *schema;
+    const char *syntax, *elementSetName, *schema, *facets;
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
     r->r_sort_spec = ZOOM_query_get_sortspec(q);
     r->query = q;
@@ -731,6 +732,8 @@ ZOOM_API(ZOOM_resultset)
 
     r->options = ZOOM_options_create_with_parent(c->options);
 
+    r->req_facets = odr_strdup_null(r->odr, 
+                                    ZOOM_options_get(r->options, "facets"));
     start = ZOOM_options_get_int(r->options, "start", 0);
     count = ZOOM_options_get_int(r->options, "count", 0);
     {

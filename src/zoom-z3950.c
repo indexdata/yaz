@@ -668,10 +668,12 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
     if (!mediumSetElementSetName)
         mediumSetElementSetName = elementSetName;
 
-    facets = ZOOM_options_get(r->options, "facets");
-    if (facets) {
-        Z_FacetList *facet_list = yaz_pqf_parse_facet_list(c->odr_out, facets);
-        if (facet_list) {
+    if (r->req_facets)
+    {
+        Z_FacetList *facet_list =
+            yaz_pqf_parse_facet_list(c->odr_out, r->req_facets);
+        if (facet_list)
+        {
             Z_OtherInformation **oi = &search_req->additionalSearchInfo;
             yaz_oi_set_facetlist(oi, c->odr_out, facet_list);
         }
