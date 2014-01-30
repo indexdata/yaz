@@ -229,9 +229,11 @@ ZOOM_resultset_facets(ZOOM_resultset r);
 
 /* retrieve (array of pointers to) facet fields */
 ZOOM_API(const char **)
-ZOOM_resultset_facets_names(ZOOM_resultset r);
-
-
+ZOOM_resultset_facets_names(ZOOM_resultset r)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
 
 /* ----------------------------------------------------------- */
 /* records */

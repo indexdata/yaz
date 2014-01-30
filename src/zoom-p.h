@@ -141,7 +141,7 @@ struct ZOOM_resultset_p {
     ZOOM_resultset next;
     ZOOM_facet_field *facets;
     int num_facets;
-    char **facets_names;
+    char **facets_names; /* redundant. For ZOOM_resultset_facets_names only */
     WRBUF mc_key;
     int live_set; /* 0=no hit count, 1=cached hit, 2=hits + real set */
 };
