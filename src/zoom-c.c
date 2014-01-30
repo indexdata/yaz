@@ -686,8 +686,8 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->connection = 0;
     r->databaseNames = 0;
     r->num_databaseNames = 0;
-    r->facets = 0;
-    r->num_facets = 0;
+    r->res_facets = 0;
+    r->num_res_facets = 0;
     r->facets_names = 0;
     r->mutex = 0;
     yaz_mutex_create(&r->mutex);
@@ -980,14 +980,14 @@ ZOOM_API(void)
 ZOOM_API(size_t)
     ZOOM_resultset_facets_size(ZOOM_resultset r)
 {
-    return r->num_facets;
+    return r->num_res_facets;
 }
 
 ZOOM_API(ZOOM_facet_field)
     ZOOM_resultset_get_facet_field(ZOOM_resultset r, const char *name)
 {
-    int num = r->num_facets;
-    ZOOM_facet_field *facets = r->facets;
+    int num = r->num_res_facets;
+    ZOOM_facet_field *facets = r->res_facets;
     int i;
     for (i = 0; i < num; i++)
         if (!strcmp(facets[i]->facet_name, name))
@@ -998,8 +998,8 @@ ZOOM_API(ZOOM_facet_field)
 ZOOM_API(ZOOM_facet_field)
     ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r, int idx)
 {
-    int num = r->num_facets;
-    ZOOM_facet_field *facets = r->facets;
+    int num = r->num_res_facets;
+    ZOOM_facet_field *facets = r->res_facets;
     if (idx >= 0 && idx < num)
         return facets[idx];
     return 0;
@@ -1008,7 +1008,7 @@ ZOOM_API(ZOOM_facet_field)
 ZOOM_API(ZOOM_facet_field *)
     ZOOM_resultset_facets(ZOOM_resultset r)
 {
-    return r->facets;
+    return r->res_facets;
 }
 
 ZOOM_API(const char**)

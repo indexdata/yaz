@@ -139,8 +139,8 @@ struct ZOOM_resultset_p {
     struct WRBUF_shptr *record_wrbuf;
 #endif
     ZOOM_resultset next;
-    ZOOM_facet_field *facets;
-    int num_facets;
+    ZOOM_facet_field *res_facets;
+    int num_res_facets;
     char **facets_names; /* redundant. For ZOOM_resultset_facets_names only */
     WRBUF mc_key;
     int live_set; /* 0=no hit count, 1=cached hit, 2=hits + real set */

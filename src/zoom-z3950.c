@@ -1121,16 +1121,21 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
 void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
 {
     int j;
-    r->num_facets   = fl->num;
+    r->num_res_facets = fl->num;
     yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
-    r->facets       =  odr_malloc(r->odr, fl->num * sizeof(*r->facets));
+    r->res_facets =  odr_malloc(r->odr, fl->num * sizeof(*r->res_facets));
     r->facets_names =  odr_malloc(r->odr, fl->num * sizeof(*r->facets_names));
     for (j = 0; j < fl->num; j++)
     {
-        r->facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
-        if (!r->facets[j])
+        r->res_facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
+        if (!r->res_facets[j])
+        {
+            r->facets_names[j] = 0;
             yaz_log(YLOG_DEBUG, "Facet field missing on index %d !", j);
-        r->facets_names[j] = (char *) ZOOM_facet_field_name(r->facets[j]);
+        }
+        else
+            r->facets_names[j] = (char *)
+                ZOOM_facet_field_name(r->res_facets[j]);
     }
 }
 
