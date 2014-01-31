@@ -493,6 +493,43 @@ static int cmd_debug(struct zoom_sh *sh, const char **args)
     return 0;
 }
 
+static void display_search_result(struct zoom_db *db)
+{
+    const char *v;
+    int num;
+
+    v = ZOOM_resultset_option_get(db->res, "searchresult.size");
+    if (v && (num = atoi(v)))
+    {
+        int i;
+        printf("SearchResult-1:");
+        for (i = 0; i < num; i++)
+        {
+            const char *v;
+            char str[60];
+
+            if (i)
+                printf(",");
+
+            sprintf(str, "searchresult.%d.id", i);
+            v = ZOOM_resultset_option_get(db->res, str);
+            if (v)
+                printf(" id=%s", v);
+
+            sprintf(str, "searchresult.%d.subquery.term", i);
+            v = ZOOM_resultset_option_get(db->res, str);
+            if (v)
+                printf(" term=%s", v);
+
+            sprintf(str, "searchresult.%d.count", i);
+            v = ZOOM_resultset_option_get(db->res, str);
+            if (v)
+                printf(" cnt=%s", v);
+        }
+        printf("\n");
+    }
+}
+
 static int cmd_search(struct zoom_sh *sh, const char **args)
 {
     ZOOM_query s;
@@ -586,6 +623,7 @@ static int cmd_search(struct zoom_sh *sh, const char **args)
                     }
                 }
             }
+            display_search_result(db);
             /* and display */
             display_records(db->con, db->res, start, count, "render");
         }
