@@ -55,6 +55,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
             ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, val);
             return -1;
         }
+        memcached_behavior_set(c->mc_st, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
 #else
         ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, "not enabled");
         return -1;
