@@ -288,7 +288,10 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                                         const char *syntax,
                                         const char *elementSetName,
                                         const char *schema);
-
+ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, int pos,
+                                       const char *syntax,
+                                       const char *elementSetName,
+                                       const char *schema);
 void ZOOM_handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                               Z_OtherInformation *o);
 void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,

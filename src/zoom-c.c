@@ -1128,7 +1128,7 @@ ZOOM_API(ZOOM_record)
     const char *schema =
         ZOOM_options_get(s->options, "schema");
 
-    return ZOOM_record_cache_lookup(s, pos, syntax, elementSetName, schema);
+    return ZOOM_record_cache_lookup_i(s, pos, syntax, elementSetName, schema);
 }
 
 ZOOM_API(ZOOM_record)

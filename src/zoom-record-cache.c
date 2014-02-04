@@ -131,30 +131,42 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     ZOOM_memcached_add(r, npr, pos, syntax, elementSetName, schema, diag);
 }
 
-ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
-                                     const char *syntax,
-                                     const char *elementSetName,
-                                     const char *schema)
+ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, int pos,
+                                       const char *syntax,
+                                       const char *elementSetName,
+                                       const char *schema)
 {
     ZOOM_record_cache rc;
-    Z_NamePlusRecord *npr;
 
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos)
         {
-            ZOOM_Event event;
             if (yaz_strcmp_null(schema, rc->schema))
                 continue;
             if (yaz_strcmp_null(elementSetName,rc->elementSetName))
                 continue;
             if (yaz_strcmp_null(syntax, rc->syntax))
                 continue;
-            event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
-            ZOOM_connection_put_event(r->connection, event);
-
             return &rc->rec;
         }
+    }
+    return 0;
+}
+
+ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
+                                     const char *syntax,
+                                     const char *elementSetName,
+                                     const char *schema)
+{
+    Z_NamePlusRecord *npr;
+    ZOOM_record rec = ZOOM_record_cache_lookup_i(r, pos, syntax,
+                                                 elementSetName, schema);
+    if (rec)
+    {
+        ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+        ZOOM_connection_put_event(r->connection, event);
+        return rec;
     }
     npr = ZOOM_memcached_lookup(r, pos, syntax, elementSetName, schema);
     if (npr)
