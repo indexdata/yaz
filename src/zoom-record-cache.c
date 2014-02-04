@@ -143,12 +143,16 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
     {
         if (pos == rc->pos)
         {
+            ZOOM_Event event;
             if (yaz_strcmp_null(schema, rc->schema))
                 continue;
             if (yaz_strcmp_null(elementSetName,rc->elementSetName))
                 continue;
             if (yaz_strcmp_null(syntax, rc->syntax))
                 continue;
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
+            ZOOM_connection_put_event(r->connection, event);
+
             return &rc->rec;
         }
     }
