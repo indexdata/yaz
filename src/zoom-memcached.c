@@ -96,7 +96,6 @@ void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
 void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
 {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
-    /* TODO: add sorting */
     if (c->mc_st && resultset->live_set == 0)
     {
         size_t v_len;
@@ -105,19 +104,32 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
         char *v = memcached_get(c->mc_st, wrbuf_buf(resultset->mc_key),
                                 wrbuf_len(resultset->mc_key),
                                 &v_len, &flags, &rc);
+        /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
         if (v)
         {
             ZOOM_Event event;
-            WRBUF w = wrbuf_alloc();
+            size_t lead_len = strlen(v) + 1;
 
-            wrbuf_write(w, v, v_len);
+            resultset->size = odr_atoi(v);
+
+            yaz_log(YLOG_LOG, "For key %s got value %s lead_len=%d len=%d",
+                    wrbuf_cstr(resultset->mc_key), v, (int) lead_len,
+                    (int) v_len);
+            if (v_len > lead_len)
+            {
+                Z_OtherInformation *oi = 0;
+                int oi_len = v_len - lead_len;
+                odr_setbuf(resultset->odr, v + lead_len, oi_len, 0);
+                if (!z_OtherInformation(resultset->odr, &oi, 0, 0))
+                {
+                    yaz_log(YLOG_WARN, "oi decoding failed");
+                    free(v);
+                    return;
+                }
+                ZOOM_handle_search_result(c, resultset, oi);
+                ZOOM_handle_facet_result(c, resultset, oi);
+            }
             free(v);
-            resultset->size = odr_atoi(wrbuf_cstr(w));
-
-            yaz_log(YLOG_LOG, "For key %s got value %s",
-                    wrbuf_cstr(resultset->mc_key), wrbuf_cstr(w));
-
-            wrbuf_destroy(w);
             event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
             ZOOM_connection_put_event(c, event);
             resultset->live_set = 1;
@@ -126,7 +138,8 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
 #endif
 }
 
-void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset)
+void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
+                             Z_OtherInformation *oi, const char *precision)
 {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st && resultset->live_set == 0)
@@ -134,15 +147,33 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset)
         uint32_t flags = 0;
         memcached_return_t rc;
         time_t expiration = 36000;
-        char str[40];
+        char *str;
+        ODR odr = odr_createmem(ODR_ENCODE);
+        char *oi_buf = 0;
+        int oi_len = 0;
+        char *key;
 
-        sprintf(str, ODR_INT_PRINTF, resultset->size);
+        str = odr_malloc(odr, 20 + strlen(precision));
+        /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
+        sprintf(str, ODR_INT_PRINTF ";%s", resultset->size, precision);
+        if (oi)
+        {
+            z_OtherInformation(odr, &oi, 0, 0);
+            oi_buf = odr_getbuf(odr, &oi_len, 0);
+        }
+        key = odr_malloc(odr, strlen(str) + 1 + oi_len);
+        strcpy(key, str);
+        if (oi_len)
+            memcpy(key + strlen(str) + 1, oi_buf, oi_len);
+
         rc = memcached_set(c->mc_st,
-                           wrbuf_buf(resultset->mc_key),wrbuf_len(resultset->mc_key),
-                           str, strlen(str), expiration, flags);
-        yaz_log(YLOG_LOG, "Store hit count key=%s value=%s rc=%u %s",
-                wrbuf_cstr(resultset->mc_key), str, (unsigned) rc,
+                           wrbuf_buf(resultset->mc_key),
+                           wrbuf_len(resultset->mc_key),
+                           key, strlen(str) + 1 + oi_len, expiration, flags);
+        yaz_log(YLOG_LOG, "Store hit count key=%s value=%s oi_len=%d rc=%u %s",
+                wrbuf_cstr(resultset->mc_key), str, oi_len, (unsigned) rc,
                 memcached_last_error_message(c->mc_st));
+        odr_destroy(odr);
     }
 #endif
 }

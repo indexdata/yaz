@@ -294,8 +294,33 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
     {
         if (res->numberOfRecords)
         {
+            Z_OtherInformation *oi = 0;
+            if (res->facetList)
+            {
+                ODR o = c->odr_in;
+                Z_External *ext = (Z_External *)
+                    odr_malloc(o, sizeof(*ext));
+
+                ext->which = Z_External_userFacets;
+                ext->u.facetList = res->facetList;
+                ext->direct_reference =
+                    odr_oiddup(o, yaz_oid_userinfo_facet_1);
+                ext->indirect_reference = 0;
+                ext->descriptor = 0;
+                oi = (Z_OtherInformation *) odr_malloc(o, sizeof(*oi));
+                oi->num_elements = 1;
+                oi->list = (Z_OtherInformationUnit **)
+                    odr_malloc(o, sizeof(*oi->list));
+                oi->list[0] = (Z_OtherInformationUnit *)
+                    odr_malloc(o, sizeof(**oi->list));
+                oi->list[0]->category = 0;
+                oi->list[0]->which = Z_OtherInfo_externallyDefinedInfo;
+                oi->list[0]->information.externallyDefinedInfo = ext;
+            }
             resultset->size = *res->numberOfRecords;
-            ZOOM_memcached_hitcount(c, resultset);
+            ZOOM_memcached_hitcount(c, resultset, oi,
+                                    res->resultCountPrecision ?
+                                    res->resultCountPrecision : "exact");
         }
         resultset->live_set = 2;
         if (res->suggestions)

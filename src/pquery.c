@@ -832,7 +832,7 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet)
 {
     YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
     struct yaz_pqf_parser *li = pqf_parser;
-    Odr_oid *attributeSetId;
+    Odr_oid *attributeSetId = 0;
     Z_FacetField *facet_field = 0;
     Z_AttributeList *attribute_list;
 

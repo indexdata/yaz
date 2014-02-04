@@ -1140,8 +1140,8 @@ void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
     }
 }
 
-static void handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
-                                Z_OtherInformation *o)
+void ZOOM_handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
+                              Z_OtherInformation *o)
 {
     int i;
     for (i = 0; o && i < o->num_elements; i++)
@@ -1195,8 +1195,8 @@ static void handle_queryExpression(ZOOM_options opt, const char *name,
 }
 
 
-static void handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
-                                Z_OtherInformation *o)
+void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
+                               Z_OtherInformation *o)
 {
     int i;
     for (i = 0; o && i < o->num_elements; i++)
@@ -1268,6 +1268,7 @@ static void handle_Z3950_search_response(ZOOM_connection c,
 {
     ZOOM_resultset resultset;
     ZOOM_Event event;
+    const char *resultCountPrecision = "exact";
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return;
@@ -1281,6 +1282,8 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     }
     if (sr->resultSetStatus)
     {
+        if (*sr->resultSetStatus == Z_SearchResponse_estimate)
+            resultCountPrecision = "estimate";
         ZOOM_options_set_int(resultset->options, "resultSetStatus",
                              *sr->resultSetStatus);
     }
@@ -1289,13 +1292,16 @@ static void handle_Z3950_search_response(ZOOM_connection c,
         ZOOM_options_set_int(resultset->options, "presentStatus",
                              *sr->presentStatus);
     }
-    handle_search_result(c, resultset, sr->additionalSearchInfo);
+    ZOOM_options_set(resultset->options, "resultCountPrecision",
+                     resultCountPrecision);
+    ZOOM_handle_search_result(c, resultset, sr->additionalSearchInfo);
 
-    handle_facet_result(c, resultset, sr->additionalSearchInfo);
+    ZOOM_handle_facet_result(c, resultset, sr->additionalSearchInfo);
 
     resultset->size = *sr->resultCount;
 
-    ZOOM_memcached_hitcount(c, resultset);
+    ZOOM_memcached_hitcount(c, resultset, sr->additionalSearchInfo,
+                            resultCountPrecision);
     resultset->live_set = 2;
     handle_Z3950_records(c, sr->records, 0);
 }

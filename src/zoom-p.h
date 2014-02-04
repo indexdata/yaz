@@ -277,7 +277,8 @@ int ZOOM_memcached_configure(ZOOM_connection c);
 void ZOOM_memcached_destroy(ZOOM_connection c);
 void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q);
 void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset r);
-void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset result);
+void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset result,
+                             Z_OtherInformation *oi, const char *precision);
 void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                         int pos,
                         const char *syntax, const char *elementSetName,
@@ -287,6 +288,11 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                                         const char *syntax,
                                         const char *elementSetName,
                                         const char *schema);
+
+void ZOOM_handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
+                              Z_OtherInformation *o);
+void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
+                               Z_OtherInformation *o);
 
 /*
  * Local variables:
