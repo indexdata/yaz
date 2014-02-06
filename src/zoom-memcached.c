@@ -20,9 +20,11 @@
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
 #if HAVE_MEMCACHED_RETURN_T
 #else
 typedef memcached_return memcached_return_t;
+#endif
 #endif
 
 void ZOOM_memcached_init(ZOOM_connection c)
