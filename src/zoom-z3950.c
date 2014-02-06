@@ -1724,7 +1724,8 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
     case Z_APDU_sortResponse:
         yaz_log(c->log_api, "%p handle_Z3950_apdu Sort response", c);
         handle_Z3950_sort_response(c, apdu->u.sortResponse);
-        ZOOM_connection_remove_task(c);
+        if (ZOOM_connection_Z3950_search(c) == zoom_complete)
+            ZOOM_connection_remove_task(c);
         break;
     case Z_APDU_scanResponse:
         yaz_log(c->log_api, "%p handle_Z3950_apdu Scan response", c);
