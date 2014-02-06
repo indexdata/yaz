@@ -20,6 +20,11 @@
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 
+#if HAVE_MEMCACHED_RETURN_T
+#else
+typedef memcached_return memcached_return_t;
+#endif
+
 void ZOOM_memcached_init(ZOOM_connection c)
 {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
@@ -49,10 +54,17 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     if (val && *val)
     {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
-        c->mc_st = memcached(val, strlen(val));
-        if (!c->mc_st)
+        memcached_return_t rc;
+
+        c->mc_st = memcached_create(0);
+        rc = memcached_server_add(c->mc_st, val, 11211);
+        yaz_log(YLOG_LOG, "memcached_server_add host=%s rc=%u %s",
+                val, (unsigned) rc, memcached_strerror(c->mc_st, rc));
+        if (rc != MEMCACHED_SUCCESS)
         {
             ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, val);
+            memcached_free(c->mc_st);
+            c->mc_st = 0;
             return -1;
         }
         memcached_behavior_set(c->mc_st, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
@@ -172,7 +184,7 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
                            key, strlen(str) + 1 + oi_len, expiration, flags);
         yaz_log(YLOG_LOG, "Store hit count key=%s value=%s oi_len=%d rc=%u %s",
                 wrbuf_cstr(resultset->mc_key), str, oi_len, (unsigned) rc,
-                memcached_last_error_message(c->mc_st));
+                memcached_strerror(c->mc_st, rc));
         odr_destroy(odr);
     }
 #endif
@@ -215,7 +227,7 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 
         yaz_log(YLOG_LOG, "Store record key=%s val=%s rc=%u %s",
                 wrbuf_cstr(k), wrbuf_cstr(rec_sha1), (unsigned) rc,
-                memcached_last_error_message(r->connection->mc_st));
+                memcached_strerror(r->connection->mc_st, rc));
 
         rc = memcached_add(r->connection->mc_st,
                            wrbuf_buf(rec_sha1), wrbuf_len(rec_sha1),
@@ -224,7 +236,7 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
 
         yaz_log(YLOG_LOG, "Add record key=%s rec_len=%d rc=%u %s",
                 wrbuf_cstr(rec_sha1), rec_len, (unsigned) rc,
-                memcached_last_error_message(r->connection->mc_st));
+                memcached_strerror(r->connection->mc_st, rc));
 
         odr_destroy(odr);
         wrbuf_destroy(k);

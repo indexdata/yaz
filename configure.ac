@@ -86,6 +86,15 @@ if test "$memcached" != "no" -a -n "$libgcryptversion"; then
     AC_CHECK_LIB([memcached],[memcached_get])
     if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
 	AC_CHECK_HEADERS([libmemcached/memcached.h])
+	if test "$ac_cv_header_libmemcached_memcached_h" = "yes"; then
+	    AC_TRY_COMPILE(
+		[
+#include <libmemcached/memcached.h>
+		    ],[
+		    memcached_return_t x;
+		    ],[AC_DEFINE([HAVE_MEMCACHED_RETURN_T],[1],[Define to 1 if memcached_return_t is defined])]
+		    )
+	fi
     fi
 fi
 dnl ------ GNU TLS
