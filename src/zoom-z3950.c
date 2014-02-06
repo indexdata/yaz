@@ -653,7 +653,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
     apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
     search_req = apdu->u.searchRequest;
 
-    yaz_log(c->log_details, "%p ZOOM_connection_send_search set=%p", c, r);
+    yaz_log(c->log_details, "%p Z3950_send_search set=%p", c, r);
 
     elementSetName = c->tasks->u.search.elementSetName;
     smallSetElementSetName  =
@@ -1444,6 +1444,8 @@ zoom_ret send_Z3950_sort(ZOOM_connection c, ZOOM_resultset resultset)
         Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_sortRequest);
         Z_SortRequest *req = apdu->u.sortRequest;
 
+        yaz_log(c->log_details, "%p send_Z3950_sort set=%p", c, resultset);
+
         req->num_inputResultSetNames = 1;
         req->inputResultSetNames = (Z_InternationalString **)
             odr_malloc(c->odr_out, sizeof(*req->inputResultSetNames));
@@ -1465,6 +1467,8 @@ static zoom_ret Z3950_send_present(ZOOM_connection c)
     const char *syntax = c->tasks->u.search.syntax;
     const char *elementSetName = c->tasks->u.search.elementSetName;
     const char *schema = c->tasks->u.search.schema;
+
+    yaz_log(c->log_details, "%p Z3950_send_present", c);
 
     *req->resultSetStartPoint = c->tasks->u.search.start + 1;
 
@@ -1560,7 +1564,7 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     elementSetName = c->tasks->u.search.elementSetName;
     schema =  c->tasks->u.search.schema;
 
-    yaz_log(c->log_details, "%p send_present start=%d count=%d",
+    yaz_log(c->log_details, "%p ZOOM_connection_Z3950_search start=%d count=%d",
             c, *start, *count);
 
     ZOOM_memcached_search(c, resultset);
@@ -1581,8 +1585,6 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
 
     if (c->error)                  /* don't continue on error */
         return zoom_complete;
-    yaz_log(c->log_details, "send_present resultset=%p start=%d count=%d",
-            resultset, *start, *count);
 
     for (i = 0; i < *count; i++)
     {
