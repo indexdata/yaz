@@ -55,7 +55,6 @@ int yyerror(void *lval, char *msg);
 %}
 
 
-%name-prefix "cql_"
 %lex-param {void *parm}
 %parse-param {void *parm}
 %pure-parser
