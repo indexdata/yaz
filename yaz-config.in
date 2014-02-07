@@ -3,10 +3,10 @@
 # Copyright (C) Index Data
 # See the file LICENSE for details.
 
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+libdir="@libdir@"
+includedir="@includedir@"
 echo_cflags=no
 echo_libs=no
 echo_help=no
@@ -14,8 +14,8 @@ echo_include=no
 echo_source=yes
 echo_lalibs=no
 echo_comp=no
-src_root=@abs_top_srcdir@
-build_root=@abs_top_builddir@
+src_root="@abs_top_srcdir@"
+build_root="@abs_top_builddir@"
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
@@ -144,9 +144,9 @@ if test "$echo_source" = "yes"; then
 
     YAZBINC="-I${src_root}/include"
     YAZINC="$YAZBINC $YAZINC"
-    YAZCOMP=${src_root}/util/yaz-asncomp
+    YAZCOMP="${src_root}/util/yaz-asncomp"
 else
-    YAZBIN=${prefix}/bin
+    YAZBIN="${prefix}/bin"
     YAZCOMP=${prefix}/bin/yaz-asncomp
 
     if test "$prefix" != "/usr"; then
