@@ -42,6 +42,56 @@ void ZOOM_memcached_destroy(ZOOM_connection c)
 #endif
 }
 
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+/* memcached wrapper.. Because memcached function do not exist in older libs */
+static memcached_st *yaz_memcached_wrap(const char *conf)
+{
+#if HAVE_MEMCACHED
+    return memcached(conf, strlen(conf));
+#else
+    char **darray;
+    int i, num;
+    memcached_st *mc = memcached_create(0);
+    NMEM nmem = nmem_create();
+    memcached_return_t rc;
+
+    nmem_strsplit_blank(nmem, conf, &darray, &num);
+    for (i = 0; mc && i < num; i++)
+    {
+        if (!yaz_strncasecmp(darray[i], "--SERVER=", 9))
+        {
+            char *host = darray[i] + 9;
+            char *port = strchr(host, ':');
+            char *weight = strstr(host, "/?");
+            if (port)
+                *port++ = '\0';
+            if (weight)
+            {
+                *weight = '\0';
+                weight += 2;
+            }
+            rc = memcached_server_add(mc, host, port ? atoi(port) : 11211);
+            yaz_log(YLOG_LOG, "memcached_server_add host=%s rc=%u %s",
+                    host, (unsigned) rc, memcached_strerror(mc, rc));
+            if (rc != MEMCACHED_SUCCESS)
+            {
+                memcached_free(mc);
+                mc = 0;
+            }
+        }
+        else
+        {
+            /* bad directive */
+            memcached_free(mc);
+            mc = 0;
+        }
+    }
+    nmem_destroy(nmem);
+    return mc;
+#endif
+}
+#endif
+
 int ZOOM_memcached_configure(ZOOM_connection c)
 {
     const char *val;
@@ -56,17 +106,11 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     if (val && *val)
     {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
-        memcached_return_t rc;
-
-        c->mc_st = memcached_create(0);
-        rc = memcached_server_add(c->mc_st, val, 11211);
-        yaz_log(YLOG_LOG, "memcached_server_add host=%s rc=%u %s",
-                val, (unsigned) rc, memcached_strerror(c->mc_st, rc));
-        if (rc != MEMCACHED_SUCCESS)
+        c->mc_st = yaz_memcached_wrap(val);
+        if (!c->mc_st)
         {
-            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, val);
-            memcached_free(c->mc_st);
-            c->mc_st = 0;
+            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
+                           "could not create memcached");
             return -1;
         }
         memcached_behavior_set(c->mc_st, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);

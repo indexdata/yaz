@@ -99,6 +99,7 @@ if test "$memcached" != "no" -a -n "$libgcryptversion"; then
     if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
 	AC_CHECK_HEADERS([libmemcached/memcached.h])
 	if test "$ac_cv_header_libmemcached_memcached_h" = "yes"; then
+	    AC_CHECK_FUNCS([memcached])
 	    AC_TRY_COMPILE(
 		[
 #include <libmemcached/memcached.h>
