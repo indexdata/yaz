@@ -46,6 +46,8 @@ BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: readline-devel
 BuildRequires: libicu-devel
+BuildRequires: libmemcached-devel
+BuildRequires: libgcrypt-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
@@ -56,7 +58,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz5
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt, gnutls, libicu
+Requires: libxslt, gnutls, libicu, libmemcached, libgcrypt
 
 %description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
