@@ -9,6 +9,8 @@ Build-Depends: debhelper (>= 7),
 	libgnutls-dev,
 	libreadline-dev|libreadline5-dev,
 	libwrap0-dev,
+	libmemcached-dev,
+	libgcrypt11-dev,
 	libicu-dev
 
 Package: libyaz5
