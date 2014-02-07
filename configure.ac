@@ -60,6 +60,7 @@ if test "$checkBoth" = "1"; then
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl ------ libgcrypt
+AC_SUBST([GCRYPT_LIBS])
 libgcryptpath=NONE
 AC_ARG_WITH(libgcrypt, [  --with-libgcrypt=DIR    use libgcrypt-config in DIR],[libgcryptpath=$withval])
 if test "$libgcryptpath" != "no"; then
@@ -76,7 +77,7 @@ if test "$libgcryptpath" != "no"; then
 	libgcryptversion2=`echo "$libgcryptversion" | awk 'BEGIN { FS = "."; } { printf "%d", [$]1 * 1000 + [$]2;}'`
 	AC_MSG_RESULT([$libgcryptversion])
 	if test $libgcryptversion2 -ge 1002; then
-	    LIBS="$LIBS `$libgcrypt --libs`"
+	    GCRYPT_LIBS="`$libgcrypt --libs`"
 	    CFLAGS="$CFLAGS `$libgcrypt --cflags`"
 	    AC_DEFINE([HAVE_GCRYPT_H],[1],[Define to 1 if libgcrypt is present])
 	else
@@ -93,13 +94,15 @@ if test "$libgcryptpath" != "no"; then
 fi
 dnl ------ memcached
 memcached=default
+AC_SUBST([MEMCACHED_LIBS])
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
 if test "$memcached" != "no" -a -n "$libgcryptversion"; then
-    AC_CHECK_LIB([memcached],[memcached_get])
+    AC_CHECK_LIB([memcached],[memcached_get], [MEMCACHED_LIBS="-lmemcached"])
     if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
 	AC_CHECK_HEADERS([libmemcached/memcached.h])
 	if test "$ac_cv_header_libmemcached_memcached_h" = "yes"; then
-	    AC_CHECK_FUNCS([memcached])
+	    AC_CHECK_LIB([memcached],[memcached], [
+		    AC_DEFINE([HAVE_MEMCACHED_FUNC],[1],[Define to 1 if memcached function  is defined])])
 	    AC_TRY_COMPILE(
 		[
 #include <libmemcached/memcached.h>

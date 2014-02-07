@@ -46,7 +46,7 @@ void ZOOM_memcached_destroy(ZOOM_connection c)
 /* memcached wrapper.. Because memcached function do not exist in older libs */
 static memcached_st *yaz_memcached_wrap(const char *conf)
 {
-#if HAVE_MEMCACHED
+#if HAVE_MEMCACHED_FUNC
     return memcached(conf, strlen(conf));
 #else
     char **darray;
