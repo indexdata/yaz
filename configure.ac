@@ -65,16 +65,28 @@ AC_ARG_WITH(libgcrypt, [  --with-libgcrypt=DIR    use libgcrypt-config in DIR],[
 if test "$libgcryptpath" != "no"; then
     if test "$libgcryptpath" = "NONE"; then
 	AC_PATH_PROG([libgcrypt],[libgcrypt-config],[NONE])
-    else
+    elif test -x $libgcryptpath/libgcrypt-config; then
 	libgcrypt=$libgcryptpath/libgcrypt-config
+    else
+	libgcrypt=$libgcryptpath
     fi
     AC_MSG_CHECKING([for libgcrypt])
     if "$libgcrypt" --version >/dev/null 2>&1; then
-	LIBS="$LIBS `$libgcrypt --libs`"
-	CFLAGS="$CFLAGS `$libgcrypt --cflags`"
 	libgcryptversion=`$libgcrypt --version`
+	libgcryptversion2=`echo "$libgcryptversion" | awk 'BEGIN { FS = "."; } { printf "%d", [$]1 * 1000 + [$]2;}'`
 	AC_MSG_RESULT([$libgcryptversion])
-	AC_DEFINE([HAVE_GCRYPT_H],[1],[Define to 1 if libgcrypt is present])
+	if test $libgcryptversion2 -ge 1002; then
+	    LIBS="$LIBS `$libgcrypt --libs`"
+	    CFLAGS="$CFLAGS `$libgcrypt --cflags`"
+	    AC_DEFINE([HAVE_GCRYPT_H],[1],[Define to 1 if libgcrypt is present])
+	else
+	    if test "$libgcryptpath" = "NONE"; then
+		AC_MSG_WARN([Only libgcrypt version 1.2 and later supported])
+	    else
+		AC_MSG_ERROR([Only libgcrypt version 1.2 and later supported])
+	    fi
+	    libgcryptversion=""
+	fi
     else
 	AC_MSG_RESULT([no])
     fi
