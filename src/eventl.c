@@ -78,7 +78,7 @@ int iochan_is_alive(IOCHAN chan)
     return 1;
 }
 
-int iochan_event_loop(IOCHAN *iochans)
+int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
 {
     do /* loop as long as there are active associations to process */
     {
@@ -127,6 +127,8 @@ int iochan_event_loop(IOCHAN *iochans)
             if (yaz_errno() == EINTR)
             {
                 xfree(fds);
+                if (watch_sig && *watch_sig)
+                    break;
                 continue;
             }
             else

@@ -79,7 +79,7 @@ int force_event;
 
 IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port);
 int iochan_is_alive(IOCHAN chan);
-int iochan_event_loop(IOCHAN *iochans);
+int iochan_event_loop(IOCHAN *iochans, int *watch_sig);
 void statserv_remove (IOCHAN pIOChannel);
 #endif
 /*

@@ -832,7 +832,7 @@ static void statserv_closedown()
 
 void __cdecl event_loop_thread(IOCHAN iochan)
 {
-    iochan_event_loop(&iochan);
+    iochan_event_loop(&iochan, 0);
 }
 
 /* WIN32 listener */
@@ -1080,7 +1080,7 @@ static void *new_session(void *vp)
         control_block.one_shot = 1;
     if (control_block.threads)
     {
-        iochan_event_loop(&new_chan);
+        iochan_event_loop(&new_chan, 0);
     }
     else
     {
@@ -1247,19 +1247,20 @@ static void statserv_reset(void)
 {
 }
 
-static void daemon_handler(void *data)
-{
-    IOCHAN *pListener = data;
-    iochan_event_loop(pListener);
-}
+static int sig_received = 0;
 
 #ifndef WIN32
 static void normal_stop_handler(int num)
 {
-    yaz_log(log_server, "Received SIGTERM. PID=%ld", (long) getpid());
-    exit(0);
+    sig_received = num;
 }
 #endif
+
+static void daemon_handler(void *data)
+{
+    IOCHAN *pListener = data;
+    iochan_event_loop(pListener, &sig_received);
+}
 
 static void show_version(void)
 {
@@ -1335,6 +1336,10 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
                daemon_handler, &pListener,
                *control_block.pid_fname ? control_block.pid_fname : 0,
                *control_block.setuid ? control_block.setuid : 0);
+#ifndef WIN32
+    if (sig_received)
+        yaz_log(YLOG_LOG, "Received SIGTERM PID=%ld", (long) getpid());
+#endif
     return 0;
 }
 
