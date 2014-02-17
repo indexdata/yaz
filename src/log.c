@@ -30,6 +30,7 @@
 #include <yaz/errno.h>
 #include <yaz/thread_id.h>
 #include <yaz/log.h>
+#include <yaz/mutex.h>
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
 
@@ -99,6 +100,18 @@ static struct {
 
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
+static YAZ_MUTEX log_mutex = 0;
+
+void yaz_log_lock(void)
+{
+    yaz_mutex_enter(log_mutex);
+}
+
+void yaz_log_unlock(void)
+{
+    yaz_mutex_leave(log_mutex);
+}
+
 static void internal_log_init(void)
 {
     static int mutex_init_flag = 0; /* not yet initialized */
@@ -107,6 +120,9 @@ static void internal_log_init(void)
     if (mutex_init_flag)
         return;
     mutex_init_flag = 1; /* here, 'cause nmem_mutex_create may call yaz_log */
+
+    if (log_mutex == 0)
+        yaz_mutex_create(&log_mutex);
 
     env = getenv("YAZ_LOG");
     if (env)
@@ -342,12 +358,14 @@ static void yaz_log_do_reopen(const char *filemode)
     struct tm *tm;
 #endif
 
+    yaz_log_lock();
 #if HAVE_LOCALTIME_R
     localtime_r(&cur_time, tm);
 #else
     tm = localtime(&cur_time);
 #endif
     yaz_log_open_check(tm, 1, filemode);
+    yaz_log_unlock();
 }
 
 
@@ -379,6 +397,7 @@ static void yaz_log_to_file(int level, const char *log_message)
 
     internal_log_init();
 
+    yaz_log_lock();
 #if HAVE_LOCALTIME_R
     localtime_r(&ti, tm);
 #else
@@ -436,6 +455,7 @@ static void yaz_log_to_file(int level, const char *log_message)
         if (l_level & YLOG_FLUSH)
             fflush(file);
     }
+    yaz_log_unlock();
 }
 
 void yaz_log(int level, const char *fmt, ...)
