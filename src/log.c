@@ -33,6 +33,9 @@
 #include <yaz/mutex.h>
 #include <yaz/snprintf.h>
 #include <yaz/xmalloc.h>
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#endif
 
 static int l_level = YLOG_DEFAULT_LEVEL;
 
@@ -102,12 +105,12 @@ static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
 static YAZ_MUTEX log_mutex = 0;
 
-void yaz_log_lock(void)
+static void yaz_log_lock(void)
 {
     yaz_mutex_enter(log_mutex);
 }
 
-void yaz_log_unlock(void)
+static void yaz_log_unlock(void)
 {
     yaz_mutex_leave(log_mutex);
 }
@@ -123,7 +126,9 @@ static void internal_log_init(void)
 
     if (log_mutex == 0)
         yaz_mutex_create(&log_mutex);
-
+#if YAZ_POSIX_THREADS
+    pthread_atfork(yaz_log_lock, yaz_log_unlock, yaz_log_unlock);
+#endif
     env = getenv("YAZ_LOG");
     if (env)
         l_level = yaz_log_mask_str_x(env, l_level);
