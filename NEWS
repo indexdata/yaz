@@ -1,7 +1,27 @@
-New ZOOM C feature: result-set caching. For this to work, YAZ uses
-libmemcached to interface with memcached. Quick way to get started:
-   
-   zoomsh "set memcached --server=memcachehost" "connect zurl" "search query"
+--- 5.0.13 2014/02/18
+
+yaz_log MUTEX protected and pthread_atfork is used to avoid dead-lock
+with localtime_r when threads + fork is used (such as Metaproxy).
+
+yaz-config: quote some RHS values (that might include blanks)
+
+zoomsh: shows SearchResult-1
+
+zoomsh: sortby command
+
+zoomsh: use proper list of connections and result sets YAZ-725
+
+Avoid yaz_log in sigterm handler for GFS YAZ-737
+Logging is still performed, but outside sig handler.
+
+New ZOOM C feature: result-set caching with memcached. Example:
+ zoomsh "set memcached --server=memcachehost" "connect zurl" "search query"
+
+Remove SSL via OpenSSL support YAZ-732
+Also deprecate two functions from comstack that aren't working with
+GnuTLS: cs_get_ssl, cs_set_ssl_ctx.
+
+Revert "Bison: use %name-prefix directive rather than -p option"
 
 --- 5.0.12 2014/01/22
 
