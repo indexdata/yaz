@@ -318,6 +318,17 @@
         </para></listitem>
       </varlistentry>
 
+      <varlistentry><term>
+        <literal>--with-memcached</literal>
+       </term>
+       <listitem><para>&yaz; will be linked with
+	<ulink url="&url.libmemcached;">libMemcached</ulink> to allow
+	for result-set caching for ZOOM.
+	The prefix can not be given. Note that YAZ will only search
+	for libMemcached if Libgcrypt is also enabled.
+        </para></listitem>
+      </varlistentry>
+
      </variablelist>
 
     </para>
