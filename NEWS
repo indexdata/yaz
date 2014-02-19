@@ -1,3 +1,10 @@
+--- 5.0.14 2014/02/19
+
+Describe memcached option for ZOOM.
+
+ZOOM: throw present request out of range again YAZ-739
+Was removed in YAZ 5.0.13.
+
 --- 5.0.13 2014/02/18
 
 yaz_log MUTEX protected and pthread_atfork is used to avoid dead-lock
