@@ -325,6 +325,25 @@ ZOOM_options_set_int(opt, name, value)
 	in call to <function>ZOOM_connection_option_get</function> or
 	<function>ZOOM_connection_option_getl</function>.
        </entry><entry></entry></row>
+      <row><entry>
+        memcached</entry><entry>
+        If given and non-empty,
+        <ulink url="&url.libmemcached;">libMemcached</ulink>
+        will be configured for the connection.
+        This option is inspected by ZOOM when a connection is  established.
+        If the <literal>memcached</literal> option is given
+        and YAZ is compiled without libMemcached support, an internal
+        diagnostic (10018) will be thrown.
+        libMemcached support is available for YAZ 5.0.13 or later. If this
+        option is supplied for an earlier version of YAZ, it is
+        <emphasis>ignored</emphasis>.
+        The value of this option is a string passed verbatim to
+        the <function>memcached</function> function part of libMemcached.
+        Refer to man page memcached(3). Earlier versions of libMemcached
+        do not offer this function. In this case only the option
+        <literal>--server=</literal><replaceable>host</replaceable> may
+        be given (YAZ emulates that part of libMemcached).
+       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
