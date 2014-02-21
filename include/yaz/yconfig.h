@@ -57,6 +57,8 @@
 #define YAZ_END_CDECL
 #endif
 
+YAZ_EXPORT void yaz_init_globals(void);
+
 #endif
 /*
  * Local variables:

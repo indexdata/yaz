@@ -115,14 +115,9 @@ static void yaz_log_unlock(void)
     yaz_mutex_leave(log_mutex);
 }
 
-static void internal_log_init(void)
+void yaz_log_init_globals(void)
 {
-    static int mutex_init_flag = 0; /* not yet initialized */
     char *env;
-
-    if (mutex_init_flag)
-        return;
-    mutex_init_flag = 1; /* here, 'cause nmem_mutex_create may call yaz_log */
 
     if (log_mutex == 0)
         yaz_mutex_create(&log_mutex);
@@ -133,7 +128,6 @@ static void internal_log_init(void)
     if (env)
         l_level = yaz_log_mask_str_x(env, l_level);
 }
-
 
 FILE *yaz_log_file(void)
 {
@@ -158,7 +152,7 @@ void yaz_log_close(void)
 
 void yaz_log_init_file(const char *fname)
 {
-    internal_log_init();
+    yaz_init_globals();
 
     yaz_log_close();
     if (fname)
@@ -218,7 +212,7 @@ static void rotate_log(const char *cur_fname)
 
 void yaz_log_init_level(int level)
 {
-    internal_log_init();
+    yaz_init_globals();
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
@@ -271,7 +265,7 @@ void yaz_log_init_prefix2(const char *prefix)
 
 void yaz_log_init(int level, const char *prefix, const char *fname)
 {
-    internal_log_init();
+    yaz_init_globals();
     yaz_log_init_level(level);
     yaz_log_init_prefix(prefix);
     if (fname && *fname)
@@ -400,8 +394,6 @@ static void yaz_log_to_file(int level, const char *log_message)
     struct tm *tm;
 #endif
 
-    internal_log_init();
-
     yaz_log_lock();
 #if HAVE_LOCALTIME_R
     localtime_r(&ti, tm);
@@ -470,7 +462,7 @@ void yaz_log(int level, const char *fmt, ...)
     FILE *file;
     int o_level = level;
 
-    internal_log_init();
+    yaz_init_globals();
     if (!(level & l_level))
         return;
     va_start(ap, fmt);
@@ -564,7 +556,7 @@ int yaz_log_module_level(const char *name)
     int i;
     char clean[255];
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
-    internal_log_init();
+    yaz_init_globals();
 
     for (i = 0; mask_names[i].name; i++)
         if (0==strcmp(n, mask_names[i].name))
@@ -581,7 +573,7 @@ int yaz_log_module_level(const char *name)
 
 int yaz_log_mask_str(const char *str)
 {
-    internal_log_init(); /* since l_level may be affected */
+    yaz_init_globals(); /* since l_level may be affected */
     return yaz_log_mask_str_x(str, l_level);
 }
 
@@ -589,7 +581,7 @@ int yaz_log_mask_str_x(const char *str, int level)
 {
     const char *p;
 
-    internal_log_init();
+    yaz_init_globals();
     while (*str)
     {
         int negated = 0;

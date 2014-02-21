@@ -138,6 +138,7 @@ typedef struct tcpip_state
 static int tcpip_init(void)
 {
     static int initialized = 0;
+    yaz_init_globals();
     if (!initialized)
     {
         WORD requested;
@@ -153,6 +154,7 @@ static int tcpip_init(void)
 #else
 static int tcpip_init(void)
 {
+    yaz_init_globals();
     return 1;
 }
 #endif
@@ -572,7 +574,6 @@ int tcpip_rcvconnect(COMSTACK h)
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
-        gnutls_global_init();
         tcpip_create_cred(h);
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         gnutls_set_default_priority(sp->session);

@@ -509,6 +509,7 @@ MISC_OBJS= \
    $(OBJDIR)\zoom-socket.obj \
    $(OBJDIR)\initopt.obj \
    $(OBJDIR)\init_diag.obj \
+   $(OBJDIR)\init_globals.obj \
    $(OBJDIR)\xmlquery.obj \
    $(OBJDIR)\xmlerror.obj \
    $(OBJDIR)\mime.obj \

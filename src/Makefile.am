@@ -89,6 +89,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h \
   logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c init_diag.c \
+  init_globals.c \
   zoom-c.c zoom-memcached.c zoom-z3950.c zoom-sru.c zoom-query.c \
   zoom-record-cache.c zoom-event.c \
   record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru_facet.c sru-p.h \
