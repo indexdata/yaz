@@ -1,3 +1,7 @@
+--- 5.0.15 2014/02/24
+
+Fix gcrypt not properly initialized YAZ-740.
+
 --- 5.0.14 2014/02/19
 
 Describe memcached option for ZOOM.
