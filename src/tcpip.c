@@ -134,11 +134,13 @@ typedef struct tcpip_state
     int connect_response_len;
 } tcpip_state;
 
-#ifdef WIN32
 static int tcpip_init(void)
 {
+#ifdef WIN32
     static int initialized = 0;
+#endif
     yaz_init_globals();
+#ifdef WIN32
     if (!initialized)
     {
         WORD requested;
@@ -149,15 +151,9 @@ static int tcpip_init(void)
             return 0;
         initialized = 1;
     }
-    return 1;
-}
-#else
-static int tcpip_init(void)
-{
-    yaz_init_globals();
-    return 1;
-}
 #endif
+    return 1;
+}
 
 /*
  * This function is always called through the cs_create() macro.
