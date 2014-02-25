@@ -118,7 +118,7 @@ typedef struct tcpip_state
     int (*complete)(const char *buf, int len); /* length/complete. */
 #if HAVE_GETADDRINFO
     struct addrinfo *ai;
-    struct addrinfo *ai_this;
+    struct addrinfo *ai_connect;
 #else
     struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
@@ -442,8 +442,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         }
         if (s == -1)
             return 0;
-        fprintf(stderr, "First socket fd=%d\n", s);
-        sp->ai_this = ai;
+        TRC(fprintf(stderr, "First socket fd=%d\n", s));
         assert(ai);
         h->iofile = s;
         if (ai->ai_family == AF_INET6 && ipv6_only >= 0 &&
@@ -499,22 +498,29 @@ static int cont_connect(COMSTACK h)
 {
 #if HAVE_GETADDRINFO
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-    struct addrinfo *ai = sp->ai_this;
+    struct addrinfo *ai = sp->ai_connect;
     while (ai && (ai = ai->ai_next))
     {
         int s;
         s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (s != -1)
         {
+#if HAVE_GNUTLS_H
+            if (h->type == ssl_type && sp->session)
+            {
+                gnutls_bye(sp->session, GNUTLS_SHUT_WR);
+                gnutls_deinit(sp->session);
+                sp->session = 0;
+            }
+#endif
 #ifdef WIN32
             closesocket(h->iofile);
 #else
             close(h->iofile);
 #endif
-            fprintf(stderr, "Other socket call fd=%d\n", s);
+            TRC(fprintf(stderr, "Other socket call fd=%d\n", s));
             h->state = CS_ST_UNBND;
             h->iofile = s;
-            sp->ai_this = ai;
             tcpip_set_blocking(h, h->flags);
             return tcpip_connect(h, ai);
         }
@@ -534,6 +540,7 @@ int tcpip_connect(COMSTACK h, void *address)
 {
 #if HAVE_GETADDRINFO
     struct addrinfo *ai = (struct addrinfo *) address;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
 #else
     struct sockaddr_in *add = (struct sockaddr_in *) address;
 #endif
@@ -547,6 +554,7 @@ int tcpip_connect(COMSTACK h, void *address)
     }
 #if HAVE_GETADDRINFO
     r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
+    sp->ai_connect = ai;
 #else
     r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
 #endif
@@ -563,7 +571,7 @@ int tcpip_connect(COMSTACK h, void *address)
 #else
         if (yaz_errno() == EINPROGRESS)
         {
-            fprintf(stderr, "Pending fd=%d\n", h->iofile);
+            TRC(fprintf(stderr, "Pending fd=%d\n", h->iofile));
             h->event = CS_CONNECT;
             h->state = CS_ST_CONNECTING;
             h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
@@ -615,7 +623,7 @@ int tcpip_rcvconnect(COMSTACK h)
         {
             if (ssl_check_error(h, sp, res))
                 return 1;
-            return -1;
+            return cont_connect(h);
         }
     }
 #endif
