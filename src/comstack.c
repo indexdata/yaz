@@ -21,10 +21,6 @@
 #include <yaz/odr.h>
 #include <yaz/matchstr.h>
 
-#if HAVE_GNUTLS_H
-#define ENABLE_SSL 1
-#endif
-
 static const char *cs_errlist[] =
 {
     "No error or unspecified error",
@@ -135,7 +131,7 @@ int cs_parse_host(const char *uri, const char **host,
     }
     else if (strncmp (uri, "ssl:", 4) == 0)
     {
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
         *t = ssl_type;
         *host = uri + 4;
         *proto = PROTO_Z3950;
@@ -154,7 +150,7 @@ int cs_parse_host(const char *uri, const char **host,
     }
     else if (strncmp(uri, "https:", 6) == 0)
     {
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
         *t = ssl_type;
         *host = uri + 6;
         while (**host == '/')
