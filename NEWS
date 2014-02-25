@@ -1,3 +1,7 @@
+--- 5.0.16 2014/02/25
+
+tcpip/SSL COMSTACK: connect tries all getaddrinfo addresses YAZ-743
+
 --- 5.0.15 2014/02/24
 
 Fix gcrypt not properly initialized YAZ-740.
