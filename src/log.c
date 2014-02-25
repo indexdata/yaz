@@ -581,7 +581,6 @@ int yaz_log_mask_str_x(const char *str, int level)
 {
     const char *p;
 
-    yaz_init_globals();
     while (*str)
     {
         int negated = 0;
