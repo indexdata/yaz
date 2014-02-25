@@ -60,7 +60,6 @@
 #if HAVE_GNUTLS_H
 #include <gnutls/x509.h>
 #include <gnutls/gnutls.h>
-#define ENABLE_SSL 1
 #endif
 
 #include <yaz/comstack.h>
@@ -81,7 +80,7 @@ static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  void *cd);
 static int tcpip_set_blocking(COMSTACK p, int blocking);
 
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
 static int ssl_get(COMSTACK h, char **buf, int *bufsize);
 static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
@@ -255,9 +254,7 @@ static void tcpip_create_cred(COMSTACK cs)
 
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 {
-#if !ENABLE_SSL
-    return 0;
-#else
+#if HAVE_GNUTLS_H
     tcpip_state *sp;
     COMSTACK p;
 
@@ -269,18 +266,17 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     p->type = ssl_type;
     sp = (tcpip_state *) p->cprivate;
 
-#if HAVE_GNUTLS_H
     sp->session = (gnutls_session_t) vp;
-#endif
     /* note: we don't handle already opened socket in SSL mode - yet */
     return p;
+#else
+    return 0;
 #endif
 }
 
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
 static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 {
-#if HAVE_GNUTLS_H
     TRC(fprintf(stderr, "ssl_check_error error=%d fatal=%d msg=%s\n",
                 res,
                 gnutls_error_is_fatal(res),
@@ -292,7 +288,6 @@ static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
         h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
         return 1;
     }
-#endif
     h->cerrno = CSERRORSSL;
     return 0;
 }
@@ -555,7 +550,7 @@ int tcpip_connect(COMSTACK h, void *address)
  */
 int tcpip_rcvconnect(COMSTACK h)
 {
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 #endif
     TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
@@ -628,6 +623,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
+            fprintf(stderr, "Error 1\n");
             h->cerrno = CSERRORSSL;
             return -1;
         }
@@ -1014,7 +1010,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 }
 
 
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
 /*
  * Return: -1 error, >1 good, len of buffer, ==1 incomplete buffer,
  * 0=connection closed.
@@ -1051,7 +1047,6 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
-#if HAVE_GNUTLS_H
         res = gnutls_record_recv(sp->session, *buf + hasread,
                                  CS_TCPIP_BUFCHUNK);
         if (res == 0)
@@ -1065,16 +1060,6 @@ int ssl_get(COMSTACK h, char **buf, int *bufsize)
                 break;
             return -1;
         }
-#else
-        res = SSL_read(sp->ssl, *buf + hasread, CS_TCPIP_BUFCHUNK);
-        TRC(fprintf(stderr, "  SSL_read res=%d, hasread=%d\n", res, hasread));
-        if (res <= 0)
-        {
-            if (ssl_check_error(h, sp, res))
-                break;
-            return -1;
-        }
-#endif
         hasread += res;
     }
     TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
@@ -1172,7 +1157,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 }
 
 
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
 /*
  * Returns 1, 0 or -1
  * In nonblocking mode, you must call again with same buffer while
@@ -1198,7 +1183,6 @@ int ssl_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-#if HAVE_GNUTLS_H
         res = gnutls_record_send(state->session, buf + state->written,
                                  size - state->written);
         if (res <= 0)
@@ -1207,16 +1191,6 @@ int ssl_put(COMSTACK h, char *buf, int size)
                 return 1;
             return -1;
         }
-#else
-        res = SSL_write(state->ssl, buf + state->written,
-                        size - state->written);
-        if (res <= 0)
-        {
-            if (ssl_check_error(h, state, res))
-                return 1;
-            return -1;
-        }
-#endif
         state->written += res;
         TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
                     res, state->written, size));
@@ -1481,7 +1455,7 @@ void *cs_get_ssl(COMSTACK cs)
 
 int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 {
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
     if (cs && cs->type == ssl_type)
     {
         /* doesn't do anything for GNUTLS */
@@ -1493,7 +1467,7 @@ int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 
 int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
 {
-#if ENABLE_SSL
+#if HAVE_GNUTLS_H
     if (cs && cs->type == ssl_type)
     {
         struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
