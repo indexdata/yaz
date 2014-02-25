@@ -26,6 +26,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <yaz/thread_create.h>
 
 #ifdef WIN32
 /* VS 2003 or later has getaddrinfo; older versions do not */
@@ -65,6 +66,8 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/errno.h>
+
+#define RESOLVER_THREAD 1
 
 static void tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
@@ -132,6 +135,13 @@ typedef struct tcpip_state
     int connect_request_len;
     char *connect_response_buf;
     int connect_response_len;
+    int ipv6_only;
+#if RESOLVER_THREAD
+    int pipefd[2];
+    char *hoststr;
+    const char *port;
+    yaz_thread_t thread_id;
+#endif
 } tcpip_state;
 
 static int tcpip_init(void)
@@ -205,6 +215,11 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
 #endif
 
 #if HAVE_GETADDRINFO
+#if RESOLVER_THREAD
+    sp->hoststr = 0;
+    sp->pipefd[0] = sp->pipefd[1] = -1;
+    sp->port = 0;
+#endif
     sp->ai = 0;
 #endif
     sp->altbuf = 0;
@@ -397,12 +412,110 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
 }
 
 #if HAVE_GETADDRINFO
+static struct addrinfo *create_net_socket(COMSTACK h)
+{
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    int s = -1;
+    struct addrinfo *ai = 0;
+    if (sp->ipv6_only >= 0)
+    {
+        for (ai = sp->ai; ai; ai = ai->ai_next)
+        {
+            if (ai->ai_family == AF_INET6)
+            {
+                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+                if (s != -1)
+                    break;
+            }
+        }
+    }
+    if (s == -1)
+    {
+        for (ai = sp->ai; ai; ai = ai->ai_next)
+        {
+            s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+            if (s != -1)
+                break;
+        }
+    }
+    if (s == -1)
+        return 0;
+    TRC(fprintf(stderr, "First socket fd=%d\n", s));
+    assert(ai);
+    h->iofile = s;
+    if (ai->ai_family == AF_INET6 && sp->ipv6_only >= 0 &&
+        setsockopt(h->iofile,
+                   IPPROTO_IPV6,
+                   IPV6_V6ONLY, &sp->ipv6_only, sizeof(sp->ipv6_only)))
+        return 0;
+    if (!tcpip_set_blocking(h, h->flags))
+        return 0;
+    return ai;
+}
+
+#if RESOLVER_THREAD
+
+void *resolver_thread(void *arg)
+{
+    COMSTACK h = (COMSTACK) arg;
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+
+    sp->ipv6_only = 0;
+    if (sp->ai)
+        freeaddrinfo(sp->ai);
+    sp->ai = tcpip_getaddrinfo(sp->hoststr, sp->port, &sp->ipv6_only);
+    write(sp->pipefd[1], "1", 1);
+    return 0;
+}
+
+static struct addrinfo *wait_resolver_thread(COMSTACK h)
+{
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    char buf;
+
+    read(sp->pipefd[0], &buf, 1);
+    yaz_thread_join(&sp->thread_id, 0);
+    close(sp->pipefd[0]);
+    close(sp->pipefd[1]);
+    sp->pipefd[0] = -1;
+    return create_net_socket(h);
+}
+
+void *tcpip_straddr(COMSTACK h, const char *str)
+{
+    tcpip_state *sp = (tcpip_state *)h->cprivate;
+    const char *port = "210";
+
+    if (!tcpip_init())
+        return 0;
+
+    if (h->protocol == PROTO_HTTP)
+    {
+        if (h->type == ssl_type)
+            port = "443";
+        else
+            port = "80";
+    }
+
+    if (sp->pipefd[0] != -1)
+        return 0;
+    if (pipe(sp->pipefd) == -1)
+        return 0;
+
+    sp->port = port;
+    xfree(sp->hoststr);
+    sp->hoststr = xstrdup(str);
+    sp->thread_id = yaz_thread_create(resolver_thread, h);
+    return sp->hoststr;
+}
+
+#else
+
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     const char *port = "210";
     struct addrinfo *ai = 0;
-    int ipv6_only = 0;
     if (h->protocol == PROTO_HTTP)
     {
         if (h->type == ssl_type)
@@ -415,46 +528,16 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 
     if (sp->ai)
         freeaddrinfo(sp->ai);
-    sp->ai = tcpip_getaddrinfo(str, port, &ipv6_only);
+    sp->ai = tcpip_getaddrinfo(str, port, &sp->ipv6_only);
     if (sp->ai && h->state == CS_ST_UNBND)
     {
-        int s = -1;
-        if (ipv6_only >= 0)
-        {
-            for (ai = sp->ai; ai; ai = ai->ai_next)
-            {
-                if (ai->ai_family == AF_INET6)
-                {
-                    s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-                    if (s != -1)
-                        break;
-                }
-            }
-        }
-        if (s == -1)
-        {
-            for (ai = sp->ai; ai; ai = ai->ai_next)
-            {
-                s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-                if (s != -1)
-                     break;
-            }
-        }
-        if (s == -1)
-            return 0;
-        TRC(fprintf(stderr, "First socket fd=%d\n", s));
-        assert(ai);
-        h->iofile = s;
-        if (ai->ai_family == AF_INET6 && ipv6_only >= 0 &&
-            setsockopt(h->iofile,
-                       IPPROTO_IPV6,
-                       IPV6_V6ONLY, &ipv6_only, sizeof(ipv6_only)))
-                return 0;
-        if (!tcpip_set_blocking(h, h->flags))
-            return 0;
+        return create_net_socket(h);
     }
     return ai;
 }
+
+#endif
+
 #else
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
@@ -552,6 +635,25 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
+#if RESOLVER_THREAD
+    if (sp->pipefd[0] != -1)
+    {
+        if (h->flags & CS_FLAGS_BLOCKING)
+        {
+            ai = wait_resolver_thread(h);
+            if (!ai)
+                return -1;
+        }
+        else
+        {
+            h->event = CS_CONNECT;
+            h->state = CS_ST_CONNECTING;
+            h->io_pending = CS_WANT_READ;
+            h->iofile = sp->pipefd[0];
+            return 1;
+        }
+    }
+#endif
 #if HAVE_GETADDRINFO
     r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     sp->ai_connect = ai;
@@ -598,6 +700,16 @@ int tcpip_rcvconnect(COMSTACK h)
 
     if (h->state == CS_ST_DATAXFER)
         return 0;
+#if RESOLVER_THREAD
+    if (sp->pipefd[0] != -1)
+    {
+        struct addrinfo *ai = wait_resolver_thread(h);
+        if (!ai)
+            return -1;
+        h->state = CS_ST_UNBND;
+        return tcpip_connect(h, ai);
+    }
+#endif
     if (h->state != CS_ST_CONNECTING)
     {
         h->cerrno = CSOUTSTATE;
@@ -650,6 +762,14 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     int one = 1;
 #endif
 
+#if RESOLVER_THREAD
+    if (sp->pipefd[0] != -1)
+    {
+        ai = wait_resolver_thread(h);
+        if (!ai)
+            return -1;
+    }
+#endif
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
@@ -1282,6 +1402,9 @@ void tcpip_close(COMSTACK h)
 #if HAVE_GETADDRINFO
     if (sp->ai)
         freeaddrinfo(sp->ai);
+#if RESOLVER_THREAD
+    xfree(sp->hoststr);
+#endif
 #endif
     xfree(sp->connect_request_buf);
     xfree(sp->connect_response_buf);
