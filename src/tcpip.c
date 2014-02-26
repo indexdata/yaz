@@ -481,6 +481,8 @@ static struct addrinfo *wait_resolver_thread(COMSTACK h)
     return create_net_socket(h);
 }
 
+#endif
+
 void *tcpip_straddr(COMSTACK h, const char *str)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -496,7 +498,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         else
             port = "80";
     }
-
+#if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
         return 0;
     if (pipe(sp->pipefd) == -1)
@@ -507,25 +509,7 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     sp->hoststr = xstrdup(str);
     sp->thread_id = yaz_thread_create(resolver_thread, h);
     return sp->hoststr;
-}
-
 #else
-
-void *tcpip_straddr(COMSTACK h, const char *str)
-{
-    tcpip_state *sp = (tcpip_state *)h->cprivate;
-    const char *port = "210";
-    struct addrinfo *ai = 0;
-    if (h->protocol == PROTO_HTTP)
-    {
-        if (h->type == ssl_type)
-            port = "443";
-        else
-            port = "80";
-    }
-    if (!tcpip_init())
-        return 0;
-
     if (sp->ai)
         freeaddrinfo(sp->ai);
     sp->ai = tcpip_getaddrinfo(str, port, &sp->ipv6_only);
@@ -533,10 +517,9 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     {
         return create_net_socket(h);
     }
-    return ai;
-}
-
+    return sp->ai;
 #endif
+}
 
 #else
 void *tcpip_straddr(COMSTACK h, const char *str)
