@@ -1020,8 +1020,7 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
       </listitem>
       <listitem>
        <para>
-        The parser converts CQL to
-        <ulink url="&url.xcql;">XCQL</ulink>.
+        The parser converts CQL to XCQL.
         XCQL is an XML representation of CQL.
         XCQL is part of the SRU specification. However, since SRU
         supports CQL only, we don't expect XCQL to be widely used.
@@ -1235,8 +1234,8 @@ int cql_transform_buf(cql_transform_t ct,
       If conversion failed, <function>cql_transform_buf</function>
       returns a non-zero SRU error code; otherwise zero is returned
       (conversion successful).  The meanings of the numeric error
-      codes are listed in the SRU specifications at
-      <ulink url="&url.sru.diagnostics.list;"/>
+      codes are listed in the SRU specification somewhere (no
+      direct link anymore).
      </para>
      <para>
       If conversion fails, more information can be obtained by calling
