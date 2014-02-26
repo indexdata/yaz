@@ -24,6 +24,10 @@
 #include <gcrypt.h>
 #endif
 
+#if YAZ_HAVE_EXSLT
+#include <libexslt/exslt.h>
+#endif
+
 static int yaz_init_flag = 0;
 #if YAZ_POSIX_THREADS
 static pthread_mutex_t yaz_init_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -53,6 +57,9 @@ void yaz_init_globals(void)
 #endif
         yaz_init_flag = 1;
     }
+#if YAZ_HAVE_EXSLT
+    exsltRegisterAll();
+#endif
 #if YAZ_POSIX_THREADS
     pthread_mutex_unlock(&yaz_init_mutex);
 #endif
