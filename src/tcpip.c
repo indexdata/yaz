@@ -206,6 +206,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
 
 #if HAVE_GETADDRINFO
     sp->ai = 0;
+    sp->ai_connect = 0;
 #endif
     sp->altbuf = 0;
     sp->altsize = sp->altlen = 0;
