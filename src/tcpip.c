@@ -774,10 +774,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     if (h->type == ssl_type && !sp->session)
     {
         int res;
-        gnutls_global_init();
-
         tcpip_create_cred(h);
-
         res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
                                                    sp->cert_fname,
