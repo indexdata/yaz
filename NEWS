@@ -1,3 +1,13 @@
+--- 5.0.17 2014/02/26
+
+Fix ZOOM_connection_connect SEGVs if host==NULL YAZ-746. Problem
+introduced in 5.0.12.
+
+Fix: Setting env YAZ_LOG makes YAZ hang YAZ-745
+yaz_init_gloabsl calls yaz_log_init_globals calls yaz_log_mask_str_x .
+Do not call yaz_init_globals from log_mask_str_x. Problem introduce
+in 5.0.15.
+
 --- 5.0.16 2014/02/25
 
 tcpip/SSL COMSTACK: connect tries all getaddrinfo addresses YAZ-743
