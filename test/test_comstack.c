@@ -223,15 +223,20 @@ static int comstack_example(const char *server_address_str)
     }
 
     server_address_ip = cs_straddr(stack, server_address_str);
-    if (!server_address_ip)
-    {
+    if (!server_address_ip) {
         fprintf(stderr, "cs_straddr: address could not be resolved\n");
         return -1;
     }
 
     status = cs_connect(stack, server_address_ip);
-    if (status != 0) {
+    if (status) {
         fprintf(stderr, "cs_connect: %s\n", cs_strerror(stack));
+        return -1;
+    }
+
+    status = cs_rcvconnect(stack);
+    if (status) {
+        fprintf(stderr, "cs_rcvconnect: %s\n", cs_strerror(stack));
         return -1;
     }
 
@@ -242,7 +247,6 @@ static int comstack_example(const char *server_address_str)
     }
 
     /* Now get a response */
-
     length_incoming = cs_get(stack, &buf, &size);
     if (!length_incoming) {
         fprintf(stderr, "Connection closed\n");
@@ -258,7 +262,7 @@ static int comstack_example(const char *server_address_str)
     /* clean up */
     cs_close(stack);
     if (buf)
-        free(buf);
+        xfree(buf);
     return 0;
 }
 

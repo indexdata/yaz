@@ -122,19 +122,37 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     return 0;
 }
 
+#if HAVE_LIBMEMCACHED_MEMCACHED_H
+static void wrbuf_vary_puts(WRBUF w, const char *v)
+{
+    if (v)
+    {
+        if (strlen(v) > 40)
+        {
+            wrbuf_sha1_puts(w, v, 1);
+        }
+        else
+        {
+            wrbuf_puts(w, v);
+        }
+    }
+}
+#endif
+
 void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
 {
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     ZOOM_connection c = r->connection;
+
     r->mc_key = wrbuf_alloc();
-    wrbuf_puts(r->mc_key, "0;");
-    wrbuf_puts(r->mc_key, c->host_port);
+    wrbuf_puts(r->mc_key, "1;");
+    wrbuf_vary_puts(r->mc_key, c->host_port);
     wrbuf_puts(r->mc_key, ";");
-    if (c->user)
-        wrbuf_puts(r->mc_key, c->user);
+    wrbuf_vary_puts(r->mc_key, ZOOM_resultset_option_get(r, "extraArgs"));
     wrbuf_puts(r->mc_key, ";");
-    if (c->group)
-        wrbuf_puts(r->mc_key, c->group);
+    wrbuf_vary_puts(r->mc_key, c->user);
+    wrbuf_puts(r->mc_key, ";");
+    wrbuf_vary_puts(r->mc_key, c->group);
     wrbuf_puts(r->mc_key, ";");
     if (c->password)
         wrbuf_sha1_puts(r->mc_key, c->password, 1);
@@ -146,8 +164,7 @@ void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
         wrbuf_destroy(w);
     }
     wrbuf_puts(r->mc_key, ";");
-    if (r->req_facets)
-        wrbuf_puts(r->mc_key, r->req_facets);
+    wrbuf_vary_puts(r->mc_key, r->req_facets);
 #endif
 }
 
