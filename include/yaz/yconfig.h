@@ -57,7 +57,9 @@
 #define YAZ_END_CDECL
 #endif
 
+YAZ_BEGIN_CDECL
 YAZ_EXPORT void yaz_init_globals(void);
+YAZ_END_CDECL
 
 #endif
 /*
