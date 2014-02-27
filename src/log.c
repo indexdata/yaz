@@ -577,6 +577,8 @@ int yaz_log_mask_str(const char *str)
     return yaz_log_mask_str_x(str, l_level);
 }
 
+/* this function is called by yaz_log_init_globals & yaz_init_globals
+   and, thus, may not call any of them indirectly */
 int yaz_log_mask_str_x(const char *str, int level)
 {
     const char *p;
