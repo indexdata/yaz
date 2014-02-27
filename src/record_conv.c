@@ -702,9 +702,6 @@ yaz_record_conv_t yaz_record_conv_create()
     p->wr_error = wrbuf_alloc();
     p->rules = 0;
     p->path = 0;
-#if YAZ_HAVE_EXSLT
-    exsltRegisterAll();
-#endif
     return p;
 }
 
