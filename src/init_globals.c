@@ -55,11 +55,11 @@ void yaz_init_globals(void)
             gcry_control(GCRYCTL_INITIALIZATION_FINISHED, NULL, 0);
         }
 #endif
-        yaz_init_flag = 1;
-    }
 #if YAZ_HAVE_EXSLT
-    exsltRegisterAll();
+        exsltRegisterAll();
 #endif
+        yaz_init_flag = 1; /* must be last, before unlocking */
+    }
 #if YAZ_POSIX_THREADS
     pthread_mutex_unlock(&yaz_init_mutex);
 #endif
