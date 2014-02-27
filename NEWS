@@ -1,3 +1,12 @@
+--- 5.0.18 2014/02/27
+
+Call exsltRegisterAll in yaz_init_globals, so that all applications
+using YAZ will have EXSLT things enabled.
+
+Use extraArgs in key for memcached ZOOM C caching YAZ-747.
+
+Update various URLs to the re-organized SRU pages at LoC.
+
 --- 5.0.17 2014/02/26
 
 Fix ZOOM_connection_connect SEGVs if host==NULL YAZ-746. Problem
