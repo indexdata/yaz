@@ -682,9 +682,7 @@ int tcpip_connect(COMSTACK h, void *address)
  */
 int tcpip_rcvconnect(COMSTACK h)
 {
-#if HAVE_GNUTLS_H
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-#endif
     TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
 
     if (h->state == CS_ST_DATAXFER)
