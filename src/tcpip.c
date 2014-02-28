@@ -67,7 +67,9 @@
 #include <yaz/tcpip.h>
 #include <yaz/errno.h>
 
+#ifndef WIN32
 #define RESOLVER_THREAD 1
+#endif
 
 static void tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
@@ -479,6 +481,7 @@ static struct addrinfo *wait_resolver_thread(COMSTACK h)
     close(sp->pipefd[0]);
     close(sp->pipefd[1]);
     sp->pipefd[0] = -1;
+    h->iofile = -1;
     return create_net_socket(h);
 }
 
@@ -500,17 +503,20 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             port = "80";
     }
 #if RESOLVER_THREAD
-    if (sp->pipefd[0] != -1)
-        return 0;
-    if (pipe(sp->pipefd) == -1)
-        return 0;
+    if (h->flags & CS_FLAGS_DNS_NO_BLOCK)
+    {
+        if (sp->pipefd[0] != -1)
+            return 0;
+        if (pipe(sp->pipefd) == -1)
+            return 0;
 
-    sp->port = port;
-    xfree(sp->hoststr);
-    sp->hoststr = xstrdup(str);
-    sp->thread_id = yaz_thread_create(resolver_thread, h);
-    return sp->hoststr;
-#else
+        sp->port = port;
+        xfree(sp->hoststr);
+        sp->hoststr = xstrdup(str);
+        sp->thread_id = yaz_thread_create(resolver_thread, h);
+        return sp->hoststr;
+    }
+#endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
     sp->ai = tcpip_getaddrinfo(str, port, &sp->ipv6_only);
@@ -519,7 +525,6 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         return create_net_socket(h);
     }
     return sp->ai;
-#endif
 }
 
 #else
@@ -1347,6 +1352,17 @@ void tcpip_close(COMSTACK h)
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_close: h=%p pid=%d\n", h, getpid()));
+#if HAVE_GETADDRINFO
+#if RESOLVER_THREAD
+    if (sp->pipefd[0] != -1)
+    {
+        yaz_thread_join(&sp->thread_id, 0);
+        close(sp->pipefd[0]);
+        close(sp->pipefd[1]);
+        h->iofile = -1;
+    }
+#endif
+#endif
     if (h->iofile != -1)
     {
 #if HAVE_GNUTLS_H
