@@ -945,6 +945,11 @@ COMSTACK tcpip_accept(COMSTACK h)
         state->complete = st->complete;
 #if HAVE_GETADDRINFO
         state->ai = 0;
+#if RESOLVER_THREAD
+        state->hoststr = 0;
+        state->pipefd[0] = state->pipefd[1] = -1;
+        state->port = 0;
+#endif
 #endif
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
