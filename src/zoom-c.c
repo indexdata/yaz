@@ -1064,7 +1064,7 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 
     if (c->cs)
         cs_close(c->cs);
-    c->cs = cs_create_host_proxy(logical_url, 0, &add,
+    c->cs = cs_create_host_proxy(logical_url, CS_FLAGS_DNS_NO_BLOCK, &add,
                                  c->tproxy ? c->tproxy : c->proxy);
 
     if (c->cs && c->cs->protocol == PROTO_HTTP)
