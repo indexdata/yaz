@@ -124,6 +124,13 @@ typedef struct tcpip_state
 #if HAVE_GETADDRINFO
     struct addrinfo *ai;
     struct addrinfo *ai_connect;
+    int ipv6_only;
+#if RESOLVER_THREAD
+    int pipefd[2];
+    char *hoststr;
+    const char *port;
+    yaz_thread_t thread_id;
+#endif
 #else
     struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
@@ -137,13 +144,6 @@ typedef struct tcpip_state
     int connect_request_len;
     char *connect_response_buf;
     int connect_response_len;
-    int ipv6_only;
-#if RESOLVER_THREAD
-    int pipefd[2];
-    char *hoststr;
-    const char *port;
-    yaz_thread_t thread_id;
-#endif
 } tcpip_state;
 
 static int tcpip_init(void)
@@ -167,6 +167,37 @@ static int tcpip_init(void)
     return 1;
 }
 
+static struct tcpip_state *tcpip_state_create(void)
+{
+    tcpip_state *sp = (struct tcpip_state *) xmalloc(sizeof(*sp));
+
+    sp->altbuf = 0;
+    sp->altsize = sp->altlen = 0;
+    sp->towrite = sp->written = -1;
+    sp->complete = cs_complete_auto;
+
+#if HAVE_GETADDRINFO
+    sp->ai = 0;
+    sp->ai_connect = 0;
+#if RESOLVER_THREAD
+    sp->hoststr = 0;
+    sp->pipefd[0] = sp->pipefd[1] = -1;
+    sp->port = 0;
+#endif
+#endif
+
+#if HAVE_GNUTLS_H
+    sp->cred_ptr = 0;
+    sp->session = 0;
+    strcpy(sp->cert_fname, "yaz.pem");
+#endif
+    sp->connect_request_buf = 0;
+    sp->connect_request_len = 0;
+    sp->connect_response_buf = 0;
+    sp->connect_response_len = 0;
+    return sp;
+}
+
 /*
  * This function is always called through the cs_create() macro.
  * s >= 0: socket has already been established for us.
@@ -174,16 +205,13 @@ static int tcpip_init(void)
 COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
 {
     COMSTACK p;
-    tcpip_state *sp;
 
     if (!tcpip_init())
         return 0;
     if (!(p = (struct comstack *)xmalloc(sizeof(struct comstack))))
         return 0;
-    if (!(sp = (struct tcpip_state *)(p->cprivate =
-                                         xmalloc(sizeof(tcpip_state)))))
-        return 0;
 
+    p->cprivate = tcpip_state_create();
     p->flags = flags;
 
     p->io_pending = 0;
@@ -209,31 +237,6 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->user = 0;
-
-#if HAVE_GNUTLS_H
-    sp->cred_ptr = 0;
-    sp->session = 0;
-    strcpy(sp->cert_fname, "yaz.pem");
-#endif
-
-#if HAVE_GETADDRINFO
-#if RESOLVER_THREAD
-    sp->hoststr = 0;
-    sp->pipefd[0] = sp->pipefd[1] = -1;
-    sp->port = 0;
-#endif
-    sp->ai = 0;
-    sp->ai_connect = 0;
-#endif
-    sp->altbuf = 0;
-    sp->altsize = sp->altlen = 0;
-    sp->towrite = sp->written = -1;
-    sp->complete = cs_complete_auto;
-
-    sp->connect_request_buf = 0;
-    sp->connect_request_len = 0;
-    sp->connect_response_buf = 0;
-    sp->connect_response_len = 0;
 
     TRC(fprintf(stderr, "Created new TCPIP comstack h=%p\n", p));
 
@@ -596,8 +599,8 @@ static int cont_connect(COMSTACK h)
             tcpip_set_blocking(h, h->flags);
             return tcpip_connect(h, ai);
         }
-#endif
     }
+#endif
     h->cerrno = CSYSERR;
     return -1;
 }
@@ -624,6 +627,7 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
+#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -643,7 +647,6 @@ int tcpip_connect(COMSTACK h, void *address)
         }
     }
 #endif
-#if HAVE_GETADDRINFO
     r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     sp->ai_connect = ai;
 #else
@@ -687,6 +690,7 @@ int tcpip_rcvconnect(COMSTACK h)
 
     if (h->state == CS_ST_DATAXFER)
         return 0;
+#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -696,6 +700,7 @@ int tcpip_rcvconnect(COMSTACK h)
         h->state = CS_ST_UNBND;
         return tcpip_connect(h, ai);
     }
+#endif
 #endif
     if (h->state != CS_ST_CONNECTING)
     {
@@ -749,6 +754,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     int one = 1;
 #endif
 
+#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -756,6 +762,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (!ai)
             return -1;
     }
+#endif
 #endif
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
@@ -768,7 +775,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
-            fprintf(stderr, "Error 1\n");
             h->cerrno = CSERRORSSL;
             return -1;
         }
@@ -891,37 +897,15 @@ COMSTACK tcpip_accept(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_accept h=%p pid=%d\n", h, getpid()));
     if (h->state == CS_ST_INCON)
     {
-        tcpip_state *state, *st = (tcpip_state *)h->cprivate;
-        if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
-        {
-            h->cerrno = CSYSERR;
-#ifdef WIN32
-            closesocket(h->newfd);
-#else
-            close(h->newfd);
-#endif
-            h->newfd = -1;
-            return 0;
-        }
+        tcpip_state *st = (tcpip_state *)h->cprivate;
+        tcpip_state *state = tcpip_state_create();
+        cnew = (COMSTACK) xmalloc(sizeof(*cnew));
+
         memcpy(cnew, h, sizeof(*h));
         cnew->iofile = h->newfd;
         cnew->io_pending = 0;
+        cnew->cprivate = state;
 
-        if (!(state = (tcpip_state *)
-              (cnew->cprivate = xmalloc(sizeof(tcpip_state)))))
-        {
-            h->cerrno = CSYSERR;
-            if (h->newfd != -1)
-            {
-#ifdef WIN32
-                closesocket(h->newfd);
-#else
-                close(h->newfd);
-#endif
-                h->newfd = -1;
-            }
-            return 0;
-        }
         if (!tcpip_set_blocking(cnew, cnew->flags))
         {
             h->cerrno = CSYSERR;
@@ -934,29 +918,16 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
                 h->newfd = -1;
             }
-            xfree(cnew);
             xfree(state);
+            xfree(cnew);
             return 0;
         }
         h->newfd = -1;
-        state->altbuf = 0;
-        state->altsize = state->altlen = 0;
-        state->towrite = state->written = -1;
-        state->complete = st->complete;
-#if HAVE_GETADDRINFO
-        state->ai = 0;
-#if RESOLVER_THREAD
-        state->hoststr = 0;
-        state->pipefd[0] = state->pipefd[1] = -1;
-        state->port = 0;
-#endif
-#endif
         cnew->state = CS_ST_ACCEPT;
         h->state = CS_ST_IDLE;
 
 #if HAVE_GNUTLS_H
         state->cred_ptr = st->cred_ptr;
-        state->session = 0;
         if (st->cred_ptr)
         {
             int res;
@@ -991,8 +962,6 @@ COMSTACK tcpip_accept(COMSTACK h)
                                      (size_t) cnew->iofile);
         }
 #endif
-        state->connect_request_buf = 0;
-        state->connect_response_buf = 0;
         h = cnew;
     }
     if (h->state == CS_ST_ACCEPT)
