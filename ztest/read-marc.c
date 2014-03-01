@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #endif
 
+#include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
