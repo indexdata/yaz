@@ -376,9 +376,9 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
          !yaz_strcmp_del("application/x-www-form-urlencoded",
                          content_type, "; ")))
     {
-        char *db = "Default";
         const char *p0 = hreq->path, *p1;
 #if YAZ_HAVE_XML2
+        char *db = "Default";
         const char *operation = 0;
         char *version = 0;
         char *query = 0;
