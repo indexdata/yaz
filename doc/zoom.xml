@@ -339,7 +339,9 @@ ZOOM_options_set_int(opt, name, value)
         <emphasis>ignored</emphasis>.
         The value of this option is a string passed verbatim to
         the <function>memcached</function> function part of libMemcached.
-        Refer to man page memcached(3). Earlier versions of libMemcached
+        Refer to man page
+         <ulink url="http://manned.org/memcached.3">memcached(3)</ulink>.
+        Earlier versions of libMemcached
         do not offer this function. In this case only the option
         <literal>--server=</literal><replaceable>host</replaceable> may
         be given (YAZ emulates that part of libMemcached).
