@@ -510,7 +510,7 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
         yaz_oi_set_string_oid(oi, out, yaz_oid_userinfo_cookie,
                               1, c->cookie_out);
     }
-    if (c->client_IP)
+    if (c->client_IP && a->which == Z_APDU_initRequest)
     {
         Z_OtherInformation **oi;
         yaz_oi_APDU(a, &oi);
