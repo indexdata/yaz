@@ -479,8 +479,10 @@ void ir_session(IOCHAN h, int event)
 static int process_z_request(association *assoc, request *req, char **msg);
 
 
-static void assoc_init_reset(association *assoc)
+static void assoc_init_reset(association *assoc, const char *peer_name1)
 {
+    const char *peer_name2 = cs_addrstr(assoc->client_link);
+
     xfree(assoc->init);
     assoc->init = (bend_initrequest *) xmalloc(sizeof(*assoc->init));
 
@@ -510,13 +512,24 @@ static void assoc_init_reset(association *assoc)
     assoc->init->charneg_response = NULL;
 
     assoc->init->decode = assoc->decode;
-    assoc->init->peer_name =
-        odr_strdup(assoc->encode, cs_addrstr(assoc->client_link));
+
+    assoc->init->peer_name = (char *)
+        odr_malloc(assoc->encode,
+                   (peer_name1 ? strlen(peer_name1) : 0)
+                   + 4 + strlen(peer_name2));
+    strcpy(assoc->init->peer_name, "");
+    if (peer_name1)
+    {
+        strcat(assoc->init->peer_name, peer_name1);
+        strcat(assoc->init->peer_name, ", ");
+    }
+    strcat(assoc->init->peer_name, peer_name2);
 
     yaz_log(log_requestdetail, "peer %s", assoc->init->peer_name);
 }
 
-static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_SRW_PDU *sr)
+static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
+                         Z_SRW_diagnostic **d, int *num, Z_SRW_PDU *sr)
 {
     statserv_options_block *cb = statserv_getcontrol();
     if (!assoc->init)
@@ -526,7 +539,7 @@ static int srw_bend_init(association *assoc, Z_SRW_diagnostic **d, int *num, Z_S
         bend_initresult *binitres;
 
         yaz_log(log_requestdetail, "srw_bend_init config=%s", cb->configname);
-        assoc_init_reset(assoc);
+        assoc_init_reset(assoc, z_HTTP_header_lookup(headers, "X-Forwarded-For"));
 
         if (sr->username)
         {
@@ -903,6 +916,7 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
 }
 
 static void srw_bend_search(association *assoc,
+                            Z_HTTP_Header *headers,
                             Z_SRW_PDU *sr,
                             Z_SRW_PDU *res,
                             int *http_code)
@@ -914,7 +928,8 @@ static void srw_bend_search(association *assoc,
 
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
-    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    srw_bend_init(assoc, headers,
+                  &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
         bend_search_rr rr;
@@ -1255,13 +1270,15 @@ static char *srw_bend_explain_default(bend_explain_rr *rr)
 }
 
 static void srw_bend_explain(association *assoc,
+                             Z_HTTP_Header *headers,
                              Z_SRW_PDU *sr,
                              Z_SRW_explainResponse *srw_res,
                              int *http_code)
 {
     Z_SRW_explainRequest *srw_req = sr->u.explain_request;
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
-    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    srw_bend_init(assoc, headers,
+                  &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (!assoc->init && srw_res->num_diagnostics == 0)
         *http_code = 404;
     if (assoc->init)
@@ -1304,6 +1321,7 @@ static void srw_bend_explain(association *assoc,
 }
 
 static void srw_bend_scan(association *assoc,
+                          Z_HTTP_Header *headers,
                           Z_SRW_PDU *sr,
                           Z_SRW_PDU *res,
                           int *http_code)
@@ -1313,7 +1331,8 @@ static void srw_bend_scan(association *assoc,
     yaz_log(log_requestdetail, "Got SRW ScanRequest");
 
     *http_code = 200;
-    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    srw_bend_init(assoc, headers,
+                  &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
         int step_size = 0;
@@ -1482,6 +1501,7 @@ static void srw_bend_scan(association *assoc,
 }
 
 static void srw_bend_update(association *assoc,
+                            Z_HTTP_Header *headers,
 			    Z_SRW_PDU *sr,
 			    Z_SRW_updateResponse *srw_res,
 			    int *http_code)
@@ -1489,7 +1509,8 @@ static void srw_bend_update(association *assoc,
     Z_SRW_updateRequest *srw_req = sr->u.update_request;
     yaz_log(log_session, "SRWUpdate action=%s", srw_req->operation);
     yaz_log(YLOG_DEBUG, "num_diag = %d", srw_res->num_diagnostics );
-    srw_bend_init(assoc, &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    srw_bend_init(assoc, headers,
+                  &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (!assoc->init && srw_res->num_diagnostics == 0)
         *http_code = 404;
     if (assoc->init)
@@ -1851,7 +1872,7 @@ static void process_http_request(association *assoc, request *req)
             }
             else
             {
-                srw_bend_search(assoc, sr, res, &http_code);
+                srw_bend_search(assoc, hreq->headers, sr, res, &http_code);
             }
             if (http_code == 200)
                 soap_package->u.generic->p = res;
@@ -1866,7 +1887,8 @@ static void process_http_request(association *assoc, request *req)
                 res->u.explain_response->diagnostics = diagnostic;
                 res->u.explain_response->num_diagnostics = num_diagnostic;
             }
-            srw_bend_explain(assoc, sr, res->u.explain_response, &http_code);
+            srw_bend_explain(assoc, hreq->headers,
+                             sr, res->u.explain_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -1880,7 +1902,7 @@ static void process_http_request(association *assoc, request *req)
                 res->u.scan_response->diagnostics = diagnostic;
                 res->u.scan_response->num_diagnostics = num_diagnostic;
             }
-            srw_bend_scan(assoc, sr, res, &http_code);
+            srw_bend_scan(assoc, hreq->headers, sr, res, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -1895,7 +1917,8 @@ static void process_http_request(association *assoc, request *req)
                 res->u.update_response->num_diagnostics = num_diagnostic;
             }
             yaz_log(YLOG_DEBUG, "num_diag = %d", res->u.update_response->num_diagnostics );
-            srw_bend_update(assoc, sr, res->u.update_response, &http_code);
+            srw_bend_update(assoc, hreq->headers,
+                            sr, res->u.update_response, &http_code);
             if (http_code == 200)
                 soap_package->u.generic->p = res;
         }
@@ -2188,8 +2211,9 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         yaz_log(log_requestdetail, "Version:   %s",
                 req->implementationVersion);
 
-    assoc_init_reset(assoc);
-
+    assoc_init_reset(assoc, 
+                     yaz_oi_get_string_oid(&req->otherInfo,
+                                           yaz_oid_userinfo_client_ip, 1, 0));
     assoc->init->auth = req->idAuthentication;
     assoc->init->referenceId = req->referenceId;
 
