@@ -2523,7 +2523,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     </para>
    </sect2>
   </sect1>
-  <sect1><title>Sorting</title>
+  <sect1 id="sorting"><title>Sorting</title>
    <para>
     This chapter describes sorting and how it is supported in YAZ.
     Sorting applies to a result-set.
@@ -2596,6 +2596,83 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      criteria, etc.
     </para>
    </sect2>
+  </sect1>
+  <sect1 id="facets"><title>Facets</title>
+  <para>
+   YAZ supports facets for in Solr, SRU 2.0 and Z39.50 protocols.
+  </para>
+  <para>
+   Like Type-1/RPN, YAZ supports a string notation for specifying
+   facets. For the API this is performed by
+   <function>yaz_pqf_parse_facet_list</function>.
+  </para>
+  <para>
+   For ZOOM C the facets are given by option "facets"
+   For yaz-client it is used for the facets command.
+  </para>
+  <para>
+   The grammar of this specification is as follows:
+   <literallayout>
+   facet-spec ::= facet-list
+
+   facet-list ::= facet-list ',' attr-spec | attr-spec
+
+   attr-spec ::= attr-spec '@attr' string | '@attr' string
+
+   </literallayout>
+    The notation is inspired by PQF. The string following '@attr'
+    may not include blanks and is of the form
+    <replaceable>type</replaceable><literal>=</literal><replaceable>value</replaceable>,
+    where <replaceable>type</replaceable> is an integer and
+    <replaceable>value</replaceable> is a string or an integer.
+  </para>
+  <para>
+   The Facets specification is not Bib-1. The following types apply:
+  </para>
+   <table id="facet.attributes">
+     <title>Facet attributes</title>
+	<tgroup cols="2">
+	 <colspec colwidth="2*" colname="type"></colspec>
+	 <colspec colwidth="9*" colname="description"></colspec>
+	 <thead>
+	  <row>
+	   <entry>Type</entry>
+	   <entry>Description</entry>
+	  </row>
+	 </thead>
+	 <tbody>
+	  <row>
+	   <entry>1</entry>
+	   <entry>
+            Field-name. This is often a string, eg "Author", "Year", etc.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry>2</entry>
+	   <entry>
+            Sort order. Value should be an integer.
+            Value 0: count descending (frequency). Value 1: alpha ascending.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry>3</entry>
+	   <entry>
+            Number of terms requested.
+	   </entry>
+	  </row>
+
+	  <row>
+	   <entry>4</entry>
+	   <entry>
+            Start offset.
+	   </entry>
+	  </row>
+
+         </tbody>
+         </tgroup>
+       </table>
   </sect1>
  </chapter>
 

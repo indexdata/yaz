@@ -293,13 +293,12 @@ ZOOM_options_set_int(opt, name, value)
 	first operation), holds the negotiated version with the server
 	(same or lower version).
        </entry><entry>1.2</entry></row>
-      <row><entry>
+      <row id="zoom.facets.option"><entry>
         facets</entry><entry>
-	A FacetList is comma-separated list of facet, which is defined
-	as <literal>AttributeList</literal>  and a optional FacetTerm
-	(a Term and a frequency). On request the terms is missing.
-	On response the the list contains the terms that the target
-	could collect.
+        Requested or recommend facets may be given before a search is sent.
+        The value of this setting is described in <xref linkend="facets"/>
+        For inspection of the facets returned, refer to the functions
+        described in <xref linkend="zoom.facets"/>.
        </entry><entry>none</entry></row>
       <row><entry>
         apdulog</entry><entry>
@@ -1035,18 +1034,18 @@ ZOOM_options_set_int(opt, name, value)
   </sect1>
   <sect1 id="zoom.facets"><title>Facets</title>
    <para>
-    Facets operations is not part of the official ZOOM specification, but
-    is an Index Data extension for YAZ-based Z39.50 targets or
-    <ulink url="&url.solr;">Solr</ulink> targets.
-    In case the target can and is requested to return facets, using a
-    result set the ZOOM client can request one or all facet fields.
-    Using a facet field the client can request the term count and then
-    interate over the terms.
+    Facet operations is not part of the official ZOOM specification, but
+    is an Index Data extension for YAZ-based Z39.50 targets,
+    <ulink url="&url.solr;">Solr</ulink> and SRU 2.0 targets.
+
+    Facets may be requestd by the
+     <link linkend="zoom.facets.option">facets</link> option before a
+    search is sent.
+    For inspection of the returned facets, the following functions are
+    available:
    </para>
    <synopsis>
     ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
-
-    const char ** ZOOM_resultset_facets_names(ZOOM_resultset r);
 
     ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r,
                                                     const char *facet_name);
@@ -1069,7 +1068,6 @@ ZOOM_options_set_int(opt, name, value)
     <function>ZOOM_resultset_get_facet_field</function> or
     <function>ZOOM_resultset_get_facet_field_by_index</function>.
     <function>ZOOM_resultset_facets</function>.
-    <function>ZOOM_resultset_facets_names</function>.
     <function>ZOOM_facet_field_name</function>.
     <function>ZOOM_facet_field_get_term</function>.
     </para>
