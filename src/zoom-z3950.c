@@ -1554,7 +1554,7 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     ZOOM_resultset resultset;
     int *start, *count;
 
-    if (!c->tasks)
+    if (!c->tasks || c->tasks->which == ZOOM_TASK_SORT)
         return zoom_complete;
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
     resultset = c->tasks->u.search.resultset;
