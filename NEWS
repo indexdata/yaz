@@ -1,3 +1,22 @@
+--- 5.0.19 2014/03/10
+
+Fix ZOOM_connection_Z3950_search: Assertion YAZ-750
+The standalone ZOOM sort was completely broken since 5.0.13.
+
+ZOOM: generate event Connect rather than None for partial connect
+(in fact getaddrinfo resolving).
+
+ZOOM: only supply clientIP for InitRequest. Rather than for all
+APDU types.
+
+GFS: peer_name adds X-Forwarded/Client-IP to value YAZ-749
+
+COMSTACK flag CS_FLAGS_DNS_NO_BLOCK. This will enable non-blocking
+getaddrinfo . This flag is passed to cs_create macro and cs_create_host,
+cs_create_host_proxy functions. ZOOM C uses this flag. YAZ-744
+
+New "Facets" section in the documentation.
+
 --- 5.0.18 2014/02/27
 
 Call exsltRegisterAll in yaz_init_globals, so that all applications
