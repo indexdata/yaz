@@ -1960,7 +1960,7 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
             if (c->cs->io_pending & CS_WANT_READ)
                 mask += ZOOM_SELECT_READ;
             ZOOM_connection_set_mask(c, mask);
-            event = ZOOM_Event_create(ZOOM_EVENT_NONE);
+            event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
             ZOOM_connection_put_event(c, event);
         }
         else if (ret == 0)
