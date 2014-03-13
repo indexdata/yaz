@@ -11,7 +11,57 @@
 #include <string.h>
 
 #include <yaz/wrbuf.h>
+#include <yaz/thread_create.h>
 #include <yaz/test.h>
+
+static int sha1_test(WRBUF wr, const char *msg, const char *expect)
+{
+    wrbuf_rewind(wr);
+#if HAVE_GCRYPT_H
+    wrbuf_sha1_write(wr, msg, strlen(msg), 1);
+    if (!strcmp(wrbuf_cstr(wr), expect))
+        return 1;
+    return 0;
+#else
+    return 1;
+#endif
+}
+
+#if YAZ_POSIX_THREADS
+static void *my_handler(void *arg)
+{
+    WRBUF wr = wrbuf_alloc();
+    int i;
+    for (i = 0; i < 1000; i++)
+    {
+        char buf[100];
+        sprintf(buf, "Hello world %d", i);
+#if HAVE_GCRYPT_H
+        wrbuf_sha1_write(wr, buf, strlen(buf), 1);
+#endif
+        wrbuf_rewind(wr);
+    }
+    wrbuf_destroy(wr);
+    return 0;
+}
+
+#define NO_THREADS 10
+static void thread_testing(void)
+{
+    yaz_thread_t tid[NO_THREADS];
+    int i;
+
+    for (i = 0; i < NO_THREADS; i++)
+    {
+        tid[i] = yaz_thread_create(my_handler, 0);
+    }
+    for (i = 0; i < NO_THREADS; i++)
+    {
+        void *return_data;
+        yaz_thread_join(tid + i, &return_data);
+    }
+}
+#endif
 
 static void tstwrbuf(void)
 {
@@ -76,14 +126,12 @@ static void tstwrbuf(void)
     wrbuf_insert(wr, 5, "abc", 3);
     YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234"));
 
-#if HAVE_GCRYPT_H
-    {
-        const char *msg = "Hello world\n";
-        wrbuf_rewind(wr);
-        wrbuf_sha1_write(wr, msg, strlen(msg), 1);
-        YAZ_CHECK(!strcmp(wrbuf_cstr(wr), 
-                          "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"));
-    }
+    YAZ_CHECK(sha1_test(wr, 
+                        "Hello world\n",
+                        "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"));
+
+#if YAZ_POSIX_THREADS
+    thread_testing();
 #endif
     wrbuf_destroy(wr);
 }
