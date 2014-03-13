@@ -51,7 +51,7 @@ void yaz_init_globals(void)
     {
         yaz_log_init_globals();
 #if HAVE_GCRYPT_H
-        /* POSIX threads locking. gnutls_global_init will not override */
+        /* POSIX threads locking. In case gnutls_global_init do not override */
         gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
 #endif
 #if HAVE_GNUTLS_H
