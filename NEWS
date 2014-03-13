@@ -1,3 +1,9 @@
+--- 5.0.20 2014/03/13
+
+Fix gcrypt initialization for threaded mode. On systems were GnuTLS
+did not initialize gcrypt for threaded mode, wrbuf_sha1_write could
+throw an assert.
+
 --- 5.0.19 2014/03/10
 
 Fix ZOOM_connection_Z3950_search: Assertion YAZ-750
