@@ -15,6 +15,7 @@
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
 #endif
+#include <errno.h>
 
 #if HAVE_GNUTLS_H
 #include <gnutls/gnutls.h>
@@ -35,6 +36,10 @@ static pthread_mutex_t yaz_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 extern void yaz_log_init_globals(void);
 
+#if HAVE_GCRYPT_H
+GCRY_THREAD_OPTION_PTHREAD_IMPL;
+#endif
+
 void yaz_init_globals(void)
 {
     if (yaz_init_flag)
@@ -52,6 +57,7 @@ void yaz_init_globals(void)
         /* most likely, GnuTLS has already initialized libgcrypt */
         if (gcry_control(GCRYCTL_ANY_INITIALIZATION_P) == 0)
         {
+            gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
             gcry_control(GCRYCTL_INITIALIZATION_FINISHED, NULL, 0);
         }
 #endif
