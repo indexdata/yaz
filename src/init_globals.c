@@ -50,6 +50,10 @@ void yaz_init_globals(void)
     if (!yaz_init_flag)
     {
         yaz_log_init_globals();
+#if HAVE_GCRYPT_H
+        /* POSIX threads locking. gnutls_global_init will not override */
+        gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
+#endif
 #if HAVE_GNUTLS_H
         gnutls_global_init();
 #endif
@@ -57,7 +61,6 @@ void yaz_init_globals(void)
         /* most likely, GnuTLS has already initialized libgcrypt */
         if (gcry_control(GCRYCTL_ANY_INITIALIZATION_P) == 0)
         {
-            gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
             gcry_control(GCRYCTL_INITIALIZATION_FINISHED, NULL, 0);
         }
 #endif
