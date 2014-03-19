@@ -35,8 +35,6 @@ void yaz_add_name_value_str(ODR o, char **name, char **value,  int *i,
 void yaz_add_name_value_int(ODR o, char **name, char **value, int *i,
                             char *a_name, Odr_int *val);
 
-Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name);
-
 char *yaz_negotiate_sru_version(char *input_ver);
 
 void yaz_sru_facet_request(ODR, Z_FacetList **facetList,

@@ -259,32 +259,8 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                             p_terms = p2;
                     }
                     if (index_name)
-                    {
-                        Z_AttributeList *al =
-                            (Z_AttributeList*) odr_malloc(o, sizeof(*al));
-                        Z_ComplexAttribute *ca =
-                            (Z_ComplexAttribute *) odr_malloc(o, sizeof(*ca));
-                        Z_AttributeElement *ae =
-                            (Z_AttributeElement *) odr_malloc(o, sizeof(*ae));
-                        al->num_attributes = 1;
-                        al->attributes = (Z_AttributeElement **)
-                            odr_malloc(o, sizeof(*al->attributes));
-                        al->attributes[0] = ae;
-                        ae->attributeSet = 0;
-                        ae->attributeType = odr_intdup(o, 1);
-                        ae->which = Z_AttributeValue_complex;
-                        ae->value.complex = ca;
-                        ca->num_semanticAction = 0;
-                        ca->semanticAction = 0;
-                        ca->num_list = 1;
-                        ca->list = (Z_StringOrNumeric **)
-                            odr_malloc(o, sizeof(*ca->list));
-                        ca->list[0] = (Z_StringOrNumeric *)
-                            odr_malloc(o, sizeof(**ca->list));
-                        ca->list[0]->which = Z_StringOrNumeric_string;
-                        ca->list[0]->u.string = index_name;
-                        ff->attributes = al;
-                    }
+                        ff->attributes = yaz_use_attribute_create(o,
+                                                                  index_name);
                     if (p_terms)
                     {
                         xmlNode *p;

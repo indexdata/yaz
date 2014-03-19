@@ -19,6 +19,7 @@
 #include <libxml/tree.h>
 #include <assert.h>
 #include <yaz/facet.h>
+#include <yaz/proto.h>
 #include "sru-p.h"
 
 char *yaz_negotiate_sru_version(char *input_ver)

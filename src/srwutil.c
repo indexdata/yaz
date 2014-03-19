@@ -39,29 +39,37 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
     return dst;
 }
 
+Z_AttributeElement *yaz_string_element_create(ODR o, int type,
+                                              const char *value)
+{
+    Z_AttributeElement *element = (Z_AttributeElement*)
+        odr_malloc(o, sizeof(*element));
+    element->attributeType = odr_intdup(o, type);
+    element->attributeSet = odr_nullval();
+    element->which = Z_AttributeValue_complex;
+    element->value.complex = (Z_ComplexAttribute *)
+        odr_malloc(o, sizeof(Z_ComplexAttribute));
+    element->value.complex->num_list = 1;
+    element->value.complex->list = (Z_StringOrNumeric **)
+        odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
+    element->value.complex->list[0] = (Z_StringOrNumeric *)
+        odr_malloc(o, sizeof(Z_StringOrNumeric));
+    element->value.complex->list[0]->which = Z_StringOrNumeric_string;
+    element->value.complex->list[0]->u.string = odr_strdup(o, value);
+    element->value.complex->semanticAction = 0;
+    element->value.complex->num_semanticAction = 0;
+    return element;
+}
+
 Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
 {
-    Z_AttributeList *attributes= (Z_AttributeList *)
+    Z_AttributeList *attributes = (Z_AttributeList *)
         odr_malloc(o, sizeof(*attributes));
-    Z_AttributeElement ** elements;
-    attributes->num_attributes = 1;
-    elements = (Z_AttributeElement**)
+    Z_AttributeElement **elements = (Z_AttributeElement**)
         odr_malloc(o, attributes->num_attributes * sizeof(*elements));
-    elements[0] = (Z_AttributeElement*) odr_malloc(o,sizeof(**elements));
-    elements[0]->attributeType = odr_intdup(o, 1);
-    elements[0]->attributeSet = odr_nullval();
-    elements[0]->which = Z_AttributeValue_complex;
-    elements[0]->value.complex = (Z_ComplexAttribute *)
-        odr_malloc(o, sizeof(Z_ComplexAttribute));
-    elements[0]->value.complex->num_list = 1;
-    elements[0]->value.complex->list = (Z_StringOrNumeric **)
-        odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
-    elements[0]->value.complex->list[0] = (Z_StringOrNumeric *)
-        odr_malloc(o, sizeof(Z_StringOrNumeric));
-    elements[0]->value.complex->list[0]->which = Z_StringOrNumeric_string;
-    elements[0]->value.complex->list[0]->u.string = odr_strdup(o, name);
-    elements[0]->value.complex->semanticAction = 0;
-    elements[0]->value.complex->num_semanticAction = 0;
+
+    elements[0] = yaz_string_element_create(o, 1, name);
+    attributes->num_attributes = 1;
     attributes->attributes = elements;
     return attributes;
 }
