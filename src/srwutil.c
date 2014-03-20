@@ -45,7 +45,7 @@ Z_AttributeElement *yaz_string_element_create(ODR o, int type,
     Z_AttributeElement *element = (Z_AttributeElement*)
         odr_malloc(o, sizeof(*element));
     element->attributeType = odr_intdup(o, type);
-    element->attributeSet = odr_nullval();
+    element->attributeSet = 0;
     element->which = Z_AttributeValue_complex;
     element->value.complex = (Z_ComplexAttribute *)
         odr_malloc(o, sizeof(Z_ComplexAttribute));
@@ -65,12 +65,11 @@ Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
 {
     Z_AttributeList *attributes = (Z_AttributeList *)
         odr_malloc(o, sizeof(*attributes));
-    Z_AttributeElement **elements = (Z_AttributeElement**)
-        odr_malloc(o, attributes->num_attributes * sizeof(*elements));
 
-    elements[0] = yaz_string_element_create(o, 1, name);
     attributes->num_attributes = 1;
-    attributes->attributes = elements;
+    attributes->attributes = (Z_AttributeElement**)
+        odr_malloc(o, sizeof(*attributes->attributes));
+    attributes->attributes[0] = yaz_string_element_create(o, 1, name);
     return attributes;
 }
 
