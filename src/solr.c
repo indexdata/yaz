@@ -18,6 +18,7 @@
 #include <yaz/log.h>
 #include <yaz/facet.h>
 #include <yaz/wrbuf.h>
+#include <yaz/proto.h>
 
 #include "sru-p.h"
 
