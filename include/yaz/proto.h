@@ -199,7 +199,7 @@ Z_DefaultDiagFormat *yaz_decode_init_diag(int no, Z_InitResponse *initrs);
     \returns attribute list with only one use-attribute
 */
 YAZ_EXPORT
-Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name);
+Z_AttributeList *zget_AttributeList_use_string(ODR o, const char *name);
 
 YAZ_END_CDECL
 

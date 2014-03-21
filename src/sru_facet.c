@@ -259,8 +259,8 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                             p_terms = p2;
                     }
                     if (index_name)
-                        ff->attributes = yaz_use_attribute_create(o,
-                                                                  index_name);
+                        ff->attributes =
+                            zget_AttributeList_use_string(o, index_name);
                     if (p_terms)
                     {
                         xmlNode *p;

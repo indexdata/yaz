@@ -307,10 +307,10 @@ static Z_AttributeList *get_attributeList(ODR o,
     return attributes;
 }
 
-Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
+Z_AttributeList *zget_AttributeList_use_string(ODR o, const char *name)
 {
     Odr_int attr_list[2];
-    const char *attr_clist[1];
+    char *attr_clist[1];
     Odr_oid *attr_set[1];
 
     attr_list[0] = 1;

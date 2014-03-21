@@ -154,7 +154,7 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     xmlNodePtr node;
     // USE attribute
     const char* name = yaz_element_attribute_value_get(ptr, "lst", "name");
-    list = yaz_use_attribute_create(o, name);
+    list = zget_AttributeList_use_string(o, name);
     for (node = ptr->children; node; node = node->next)
         num_terms++;
     facet_field = facet_field_create(o, list, num_terms);

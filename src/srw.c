@@ -308,7 +308,7 @@ static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
     const char* name = yaz_element_attribute_value_get(ptr, "facet", "code");
     yaz_log(YLOG_DEBUG, "sru-proxy facet type: %s", name);
 
-    list = yaz_use_attribute_create(odr, name);
+    list = zget_AttributeList_use_string(odr, name);
     for (node = ptr->children; node; node = node->next) {
         if (yaz_match_xsd_element(node, "facetvalue"))
             num_terms++;
