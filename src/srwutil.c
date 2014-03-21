@@ -39,40 +39,6 @@ char *yaz_encode_sru_dbpath_odr(ODR out, const char *db)
     return dst;
 }
 
-Z_AttributeElement *yaz_string_element_create(ODR o, int type,
-                                              const char *value)
-{
-    Z_AttributeElement *element = (Z_AttributeElement*)
-        odr_malloc(o, sizeof(*element));
-    element->attributeType = odr_intdup(o, type);
-    element->attributeSet = 0;
-    element->which = Z_AttributeValue_complex;
-    element->value.complex = (Z_ComplexAttribute *)
-        odr_malloc(o, sizeof(Z_ComplexAttribute));
-    element->value.complex->num_list = 1;
-    element->value.complex->list = (Z_StringOrNumeric **)
-        odr_malloc(o, 1 * sizeof(Z_StringOrNumeric *));
-    element->value.complex->list[0] = (Z_StringOrNumeric *)
-        odr_malloc(o, sizeof(Z_StringOrNumeric));
-    element->value.complex->list[0]->which = Z_StringOrNumeric_string;
-    element->value.complex->list[0]->u.string = odr_strdup(o, value);
-    element->value.complex->semanticAction = 0;
-    element->value.complex->num_semanticAction = 0;
-    return element;
-}
-
-Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
-{
-    Z_AttributeList *attributes = (Z_AttributeList *)
-        odr_malloc(o, sizeof(*attributes));
-
-    attributes->num_attributes = 1;
-    attributes->attributes = (Z_AttributeElement**)
-        odr_malloc(o, sizeof(*attributes->attributes));
-    attributes->attributes[0] = yaz_string_element_create(o, 1, name);
-    return attributes;
-}
-
 #if YAZ_HAVE_XML2
 const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
                                             const char *node_name,

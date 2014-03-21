@@ -307,6 +307,19 @@ static Z_AttributeList *get_attributeList(ODR o,
     return attributes;
 }
 
+Z_AttributeList *yaz_use_attribute_create(ODR o, const char *name)
+{
+    Odr_int attr_list[2];
+    const char *attr_clist[1];
+    Odr_oid *attr_set[1];
+
+    attr_list[0] = 1;
+    attr_list[1] = 0; /* not used */
+    attr_clist[0] = odr_strdup(o, name);
+    attr_set[0] = 0;
+    return get_attributeList(o, 1, attr_list, attr_clist, attr_set);
+}
+
 Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
 {
     Z_Term *term = (Z_Term *)odr_malloc(o, sizeof(*term));
