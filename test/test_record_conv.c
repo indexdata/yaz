@@ -246,6 +246,13 @@ static void tst_convert1(void)
         "\x1E\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x20\x20"
         "\x1F\x61\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20\x1E\x1D";
 
+    const char *solrmarc_rec =
+        "\x30\x30\x30\x38\x30\x6E\x61\x6D\x20\x61\x32\x32\x30\x30\x30\x34"
+        "\x39\x38\x61\x20\x34\x35\x30\x30\x30\x30\x31\x30\x30\x31\x33\x30"
+        "\x30\x30\x30\x30\x30\x31\x30\x30\x30\x31\x37\x30\x30\x30\x31\x33"
+        "#30;\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20#30;\x20\x20"
+        "#31;\x61\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20#30;#29;";
+
     YAZ_CHECK(conv_configure_test("<backend>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
@@ -271,6 +278,18 @@ static void tst_convert1(void)
     YAZ_CHECK(conv_convert_test(p, iso2709_rec, marcxml_rec));
     yaz_record_conv_destroy(p);
 
+    YAZ_CHECK(conv_configure_test("<backend>"
+                                  "<solrmarc/>"
+                                  "<marc"
+                                  " outputcharset=\"utf-8\""
+                                  " inputcharset=\"marc-8\""
+                                  " outputformat=\"marcxml\""
+                                  " inputformat=\"marc\""
+                                  "/>"
+                                  "</backend>",
+                                  0, &p));
+    YAZ_CHECK(conv_convert_test(p, solrmarc_rec, marcxml_rec));
+    yaz_record_conv_destroy(p);
 
     YAZ_CHECK(conv_configure_test("<backend>"
                                   "<xslt stylesheet=\"test_record_conv.xsl\"/>"

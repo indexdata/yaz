@@ -317,6 +317,38 @@ static void destroy_xslt(void *vinfo)
 /* YAZ_HAVE_XSLT */
 #endif
 
+static void *construct_solrmarc(const xmlNode *ptr,
+                                const char *path, WRBUF wr_error)
+{
+    if (strcmp((const char *) ptr->name, "solrmarc"))
+        return 0;
+    return wr_error; /* any non-null ptr will do; we don't use it later*/
+}
+
+static int convert_solrmarc(void *info, WRBUF record, WRBUF wr_error)
+{
+    WRBUF w = wrbuf_alloc();
+    const char *buf = wrbuf_buf(record);
+    size_t i, sz = wrbuf_len(record);
+    for (i = 0; i < sz; i++)
+    {
+        int ch;
+        if (buf[i] == '#' && i < sz - 3 && buf[i+3] == ';'
+            && atoi_n_check(buf+i+1, 2, &ch))
+            i += 3;
+        else
+            ch = buf[i];
+        wrbuf_putc(w, ch);
+    }
+    wrbuf_rewind(record);
+    wrbuf_write(record, wrbuf_buf(w), wrbuf_len(w));
+    wrbuf_destroy(w);
+    return 0;
+}
+
+static void destroy_solrmarc(void *info)
+{
+}
 
 static void *construct_marc(const xmlNode *ptr,
                             const char *path, WRBUF wr_error)
@@ -332,7 +364,6 @@ static void *construct_marc(const xmlNode *ptr,
         nmem_destroy(nmem);
         return 0;
     }
-
     info->nmem = nmem;
     info->input_charset = 0;
     info->output_charset = 0;
@@ -554,24 +585,28 @@ static void destroy_marc(void *info)
 int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
                                 struct yaz_record_conv_type *types)
 {
-    struct yaz_record_conv_type bt[2];
+    struct yaz_record_conv_type bt[3];
+    size_t i = 0;
 
     /* register marc */
-    bt[0].construct = construct_marc;
-    bt[0].convert = convert_marc;
-    bt[0].destroy = destroy_marc;
+    bt[i].construct = construct_marc;
+    bt[i].convert = convert_marc;
+    bt[i++].destroy = destroy_marc;
+
+    bt[i-1].next = &bt[i];
+    bt[i].construct = construct_solrmarc;
+    bt[i].convert = convert_solrmarc;
+    bt[i++].destroy = destroy_solrmarc;
 
 #if YAZ_HAVE_XSLT
     /* register xslt */
-    bt[0].next = &bt[1];
-    bt[1].next = types;
-    bt[1].construct = construct_xslt;
-    bt[1].convert = convert_xslt;
-    bt[1].destroy = destroy_xslt;
-#else
-    bt[0].next = types;
+    bt[i-1].next = &bt[i];
+    bt[i].construct = construct_xslt;
+    bt[i].convert = convert_xslt;
+    bt[i++].destroy = destroy_xslt;
 #endif
 
+    bt[i-1].next = types;
     yaz_record_conv_reset(p);
 
     /* parsing element children */

@@ -2402,6 +2402,21 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
         </para>
        </listitem>
       </varlistentry>
+
+      <varlistentry><term><literal>solrmarc</literal></term>
+       <listitem>
+        <para>
+         The <literal>solrmarc</literal> decodes solrmarc records.
+         It assumes that the input is pure solrmarc text (no escaping)
+         and will convert all sequences of the form #XX; to a single
+         character of the hexadecimal value as given by XX. The output,
+         presumably, is a valid ISO2709 buffer.
+        </para>
+        <para>
+         This conversion is available in YAZ 5.0.21 and later.
+        </para>
+       </listitem>
+      </varlistentry>
      </variablelist>
     </para>
    </sect2>
