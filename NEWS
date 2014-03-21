@@ -1,3 +1,9 @@
+--- 5.0.21 2014/03/21
+
+Offer new utility function zget_AttributeList_use_string.
+
+New conversion step, solrmarc, for record conversion module.
+
 --- 5.0.20 2014/03/13
 
 Fix gcrypt initialization for threaded mode. On systems were GnuTLS
