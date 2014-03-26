@@ -192,17 +192,20 @@ iconv:
 !if $(HAVE_ICU)
 ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
+ICU_VER=42
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
-icu: $(BINDIR)\icudt42.dll $(BINDIR)\icuin42.dll $(BINDIR)\icuuc42.dll
+icu: $(BINDIR)\icudt$(ICU_VER).dll \
+	$(BINDIR)\icuin$(ICU_VER).dll \
+	$(BINDIR)\icuuc$(ICU_VER).dll
 yazicu: dirs generate $(YAZ_ICU)
 
-$(BINDIR)\icudt42.dll:
-  copy "$(ICU_BIN)\icudt42.dll" $(BINDIR)
-$(BINDIR)\icuin42.dll:
-  copy "$(ICU_BIN)\icuin42.dll" $(BINDIR)
-$(BINDIR)\icuuc42.dll:
-  copy "$(ICU_BIN)\icuuc42.dll" $(BINDIR)
+$(BINDIR)\icudt$(ICU_VER).dll:
+  copy "$(ICU_BIN)\icudt$(ICU_VER).dll" $(BINDIR)
+$(BINDIR)\icuin$(ICU_VER).dll:
+  copy "$(ICU_BIN)\icuin$(ICU_VER).dll" $(BINDIR)
+$(BINDIR)\icuuc$(ICU_VER).dll:
+  copy "$(ICU_BIN)\icuuc$(ICU_VER).dll" $(BINDIR)
 !else
 ICU_DEF= /D YAZ_HAVE_ICU=0
 ICU_LIBS=
