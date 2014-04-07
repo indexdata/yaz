@@ -332,7 +332,10 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
 #ifdef WIN32
         yaz_log_close();
 #endif
-        new_file = fopen(cur_filename, filemode);
+        if (!strncmp(cur_filename, "fd=", 3))
+            new_file = fdopen(atoi(cur_filename + 3), filemode);
+        else
+            new_file = fopen(cur_filename, filemode);
         if (new_file)
         {
             yaz_log_close();
