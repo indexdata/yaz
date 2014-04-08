@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <assert.h>
 
 #include <yaz/wrbuf.h>
 #include <yaz/snprintf.h>
@@ -262,8 +263,9 @@ void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
 
 const char *wrbuf_cstr(WRBUF b)
 {
-    wrbuf_putc(b, '\0');   /* add '\0' */
-    (b->pos)--;           /* don't include '\0' in count */
+    if (b->pos >= b->size)
+        wrbuf_grow(b, 1);
+    b->buf[b->pos] = '\0';
     return b->buf;
 }
 
