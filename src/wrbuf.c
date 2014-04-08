@@ -70,7 +70,7 @@ void wrbuf_write(WRBUF b, const char *buf, size_t size)
     if (size <= 0)
         return;
     if (b->pos + size >= b->size)
-        wrbuf_grow(b, size);
+        wrbuf_grow(b, size + 1);
     memcpy(b->buf + b->pos, buf, size);
     b->pos += size;
 }
@@ -80,7 +80,7 @@ void wrbuf_insert(WRBUF b, size_t pos, const char *buf, size_t size)
     if (size <= 0 || pos > b->pos)
         return;
     if (b->pos + size >= b->size)
-        wrbuf_grow(b, size);
+        wrbuf_grow(b, size + 1);
     memmove(b->buf + pos + size, b->buf + pos, b->pos - pos);
     memcpy(b->buf + pos, buf, size);
     b->pos += size;
@@ -263,8 +263,9 @@ void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
 
 const char *wrbuf_cstr(WRBUF b)
 {
-    if (b->pos >= b->size)
-        wrbuf_grow(b, 1);
+    if (b->pos == 0)
+	return "";
+    assert(b->pos < b->size);
     b->buf[b->pos] = '\0';
     return b->buf;
 }
