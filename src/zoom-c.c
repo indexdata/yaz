@@ -1563,6 +1563,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
                                           location, &host_change);
             if (do_connect_host(c, location) == zoom_complete)
                 return;  /* connect failed.. */
+            cs_rcvconnect(c->cs);
             send_HTTP_redirect(c, location);
             return;
         }
