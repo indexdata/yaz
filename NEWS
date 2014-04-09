@@ -1,3 +1,11 @@
+--- 5.0.22 2014/04/09
+
+ZOOM: Call cs_rcvconnect during HTTP redirect YAZ-754
+
+wrbuf_cstr: make it thread safe YAZ-753
+
+yaz_log_init_file may take fd=<no> to open log file at the FD given.
+
 --- 5.0.21 2014/03/21
 
 Offer new utility function zget_AttributeList_use_string.
