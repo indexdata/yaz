@@ -121,11 +121,7 @@ static int rpn2cql_attr(cql_transform_t ct,
         relation = lookup_relation_index_from_attr(attributes);
 
     if (!index)
-    {
-        cql_transform_set_error(ct,
-                                YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
-        return -1;
-    }
+        return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
     {
@@ -180,12 +176,8 @@ static int rpn2cql_simple(cql_transform_t ct,
                           void *client_data,
                           Z_Operand *q, WRBUF w)
 {
-    int ret = 0;
     if (q->which != Z_Operand_APT)
-    {
-        ret = -1;
-        cql_transform_set_error(ct, YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM, 0);
-    }
+        return YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM;
     else
     {
         Z_AttributesPlusTerm *apt = q->u.attributesPlusTerm;
@@ -194,9 +186,12 @@ static int rpn2cql_simple(cql_transform_t ct,
         size_t lterm = 0;
         Odr_int trunc = lookup_truncation(apt->attributes);
         size_t i;
+        int r;
 
         wrbuf_rewind(w);
-        ret = rpn2cql_attr(ct, apt->attributes, w);
+        r = rpn2cql_attr(ct, apt->attributes, w);
+        if (r)
+            return r;
 
         switch (term->which)
         {
@@ -212,8 +207,7 @@ static int rpn2cql_simple(cql_transform_t ct,
             lterm = strlen(sterm);
             break;
         default:
-            cql_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
-            return -1;
+            return YAZ_BIB1_TERM_TYPE_UNSUPP;
         }
 
         if (trunc <= 3 || trunc == 100 || trunc == 102 || trunc == 104)
@@ -266,14 +260,11 @@ static int rpn2cql_simple(cql_transform_t ct,
         }
         else
         {
-            cql_transform_set_error(
-                ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
-            ret = -1;
+            return YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE;
         }
-        if (ret == 0)
-            pr(wrbuf_cstr(w), client_data);
+        pr(wrbuf_cstr(w), client_data);
     }
-    return ret;
+    return 0;
 }
 
 
@@ -297,7 +288,7 @@ static int rpn2cql_structure(cql_transform_t ct,
         r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
-        switch(op->which)
+        switch (op->which)
         {
         case  Z_Operator_and:
             pr(" and ", client_data);
@@ -318,10 +309,9 @@ static int rpn2cql_structure(cql_transform_t ct,
                 pr("/distance", client_data);
                 if (!prox->relationType ||
                     *prox->relationType < Z_ProximityOperator_Prox_lessThan ||
-                    *prox->relationType > Z_ProximityOperator_Prox_notEqual) {
-                    cql_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH,
-                        "unrecognised proximity relationType");
-                    return -1;
+                    *prox->relationType > Z_ProximityOperator_Prox_notEqual)
+                {
+                    return YAZ_BIB1_UNSUPP_SEARCH;
                 }
                 pr(op2name[*prox->relationType-1], client_data);
                 sprintf(buf, "%ld", (long) *prox->distance);
@@ -357,7 +347,6 @@ int cql_transform_rpn2cql_stream(cql_transform_t ct,
 {
     int r;
     WRBUF w = wrbuf_alloc();
-    cql_transform_set_error(ct, 0, 0);
     r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, w);
     wrbuf_destroy(w);
     return r;
