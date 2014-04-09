@@ -45,7 +45,6 @@ struct cql_transform_t_ {
     yaz_tok_cfg_t tok_cfg;
     int error;
     char *addinfo;
-    WRBUF w;
     NMEM nmem;
 };
 
@@ -54,7 +53,6 @@ cql_transform_t cql_transform_create(void)
 {
     cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
     ct->tok_cfg = yaz_tok_cfg_create();
-    ct->w = wrbuf_alloc();
     ct->error = 0;
     ct->addinfo = 0;
     ct->entry = 0;
@@ -70,6 +68,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
     Z_AttributeElement *ae[20];
     int ret = 0; /* 0=OK, != 0 FAIL */
     int t;
+    WRBUF w = wrbuf_alloc();
+
     t = yaz_tok_move(tp);
 
     while (t == YAZ_TOK_STRING && ae_num < 20)
@@ -83,7 +83,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         elem = (Z_AttributeElement *) nmem_malloc(ct->nmem, sizeof(*elem));
         elem->attributeSet = 0;
         ae[ae_num] = elem;
-        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        wrbuf_puts(w, yaz_tok_parse_string(tp));
         wrbuf_puts(type_str, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
         if (t == YAZ_TOK_EOF)
@@ -95,8 +95,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         }
         if (t == YAZ_TOK_STRING)
         {
-            wrbuf_puts(ct->w, " ");
-            wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+            wrbuf_puts(w, " ");
+            wrbuf_puts(w, yaz_tok_parse_string(tp));
             set_str = type_str;
 
             elem->attributeSet =
@@ -159,10 +159,10 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             ca->num_semanticAction = 0;
             ca->semanticAction = 0;
         }
-        wrbuf_puts(ct->w, "=");
-        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        wrbuf_puts(w, "=");
+        wrbuf_puts(w, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
-        wrbuf_puts(ct->w, " ");
+        wrbuf_puts(w, " ");
         ae_num++;
     }
     if (ret == 0) /* OK? */
@@ -172,7 +172,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             pp = &(*pp)->next;
         *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
         (*pp)->pattern = xstrdup(pattern);
-        (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
+        (*pp)->value = xstrdup(wrbuf_cstr(w));
 
         (*pp)->attr_list.num_attributes = ae_num;
         if (ae_num == 0)
@@ -197,6 +197,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             odr_destroy(pr);
         }
     }
+    wrbuf_destroy(w);
     return ret;
 }
 
@@ -222,7 +223,6 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
     {
         yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, line);
         int t;
-        wrbuf_rewind(ct->w);
         t = yaz_tok_move(tp);
         if (t == YAZ_TOK_STRING)
         {
@@ -269,7 +269,6 @@ void cql_transform_close(cql_transform_t ct)
     }
     xfree(ct->addinfo);
     yaz_tok_cfg_destroy(ct->tok_cfg);
-    wrbuf_destroy(ct->w);
     nmem_destroy(ct->nmem);
     xfree(ct);
 }
