@@ -348,6 +348,22 @@ int cql_transform(cql_transform_t ct,
                   void (*pr)(const char *buf, void *client_data),
                   void *client_data);
 
+/** \brief tranforms PQF given a CQL tree
+    \param ct CQL transform handle
+    \param cn CQL node tree
+    \param addinfo additional information (if error)
+    \param pr print function
+    \param client_data data to be passed to pr
+    \retval 0 success
+    \retval != 0 error code
+
+    The result is written to a user-defined stream.
+*/
+int cql_transform_cql2rpn(cql_transform_t ct, struct cql_node *cn,
+                          char **addinfo,
+                          void (*pr)(const char *buf, void *client_data),
+                          void *client_data);
+
 /** \brief transforms PQF given a CQL tree (from FILE)
     \param ct CQL transform handle
     \param cn CQL tree
