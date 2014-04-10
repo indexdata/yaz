@@ -44,7 +44,7 @@ struct cql_transform_t_ {
     struct cql_prop_entry *entry;
     yaz_tok_cfg_t tok_cfg;
     int error;
-    char *addinfo;
+    WRBUF addinfo;
     NMEM nmem;
 };
 
@@ -54,7 +54,7 @@ cql_transform_t cql_transform_create(void)
     cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
     ct->tok_cfg = yaz_tok_cfg_create();
     ct->error = 0;
-    ct->addinfo = 0;
+    ct->addinfo = wrbuf_alloc();
     ct->entry = 0;
     ct->nmem = nmem_create();
     return ct;
@@ -267,7 +267,7 @@ void cql_transform_close(cql_transform_t ct)
         xfree(pe);
         pe = pe_next;
     }
-    xfree(ct->addinfo);
+    wrbuf_destroy(ct->addinfo);
     yaz_tok_cfg_destroy(ct->tok_cfg);
     nmem_destroy(ct->nmem);
     xfree(ct);
@@ -988,14 +988,15 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
 
 int cql_transform_error(cql_transform_t ct, const char **addinfo)
 {
-    *addinfo = ct->addinfo;
+    *addinfo = wrbuf_len(ct->addinfo) ? wrbuf_cstr(ct->addinfo) : 0;
     return ct->error;
 }
 
 void cql_transform_set_error(cql_transform_t ct, int error, const char *addinfo)
 {
-    xfree(ct->addinfo);
-    ct->addinfo = addinfo ? xstrdup(addinfo) : 0;
+    wrbuf_rewind(ct->addinfo);
+    if (addinfo)
+        wrbuf_puts(ct->addinfo, addinfo);
     ct->error = error;
 }
 
