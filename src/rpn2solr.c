@@ -19,11 +19,6 @@
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
 
-static void wrbuf_vputs(const char *buf, void *client_data)
-{
-    wrbuf_write((WRBUF) client_data, buf, strlen(buf));
-}
-
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
     int j;
@@ -428,7 +423,7 @@ int solr_transform_rpn2solr_wrbuf(solr_transform_t ct,
                                   WRBUF w,
                                   Z_RPNQuery *q)
 {
-    return solr_transform_rpn2solr_stream(ct, wrbuf_vputs, w, q);
+    return solr_transform_rpn2solr_stream(ct, wrbuf_vp_puts, w, q);
 }
 
 /*

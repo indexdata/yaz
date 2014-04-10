@@ -20,11 +20,6 @@
 #include <yaz/wrbuf.h>
 #include <yaz/logrpn.h> /* For yaz_prox_unit_name() */
 
-static void wrbuf_vputs(const char *buf, void *client_data)
-{
-    wrbuf_write((WRBUF) client_data, buf, strlen(buf));
-}
-
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
     int j;
@@ -357,7 +352,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
                                 WRBUF w,
                                 Z_RPNQuery *q)
 {
-    return cql_transform_rpn2cql_stream(ct, wrbuf_vputs, w, q);
+    return cql_transform_rpn2cql_stream(ct, wrbuf_vp_puts, w, q);
 }
 
 /*
