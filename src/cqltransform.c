@@ -382,7 +382,7 @@ static const char *cql_lookup_property(cql_transform_t ct,
     return 0;
 }
 
-int cql_pr_attr_uri(cql_transform_t ct, char **addinfo, const char *category,
+int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
                    const char *uri, const char *val, const char *default_val,
                    void (*pr)(const char *buf, void *client_data),
                    void *client_data,
@@ -464,11 +464,11 @@ int cql_pr_attr_uri(cql_transform_t ct, char **addinfo, const char *category,
     if (errcode == 0)
         return 1; /* signal error, but do not set addinfo */
     if (val)
-        *addinfo = xstrdup(val);
+        wrbuf_puts(addinfo, val);
     return errcode;
 }
 
-int cql_pr_attr(cql_transform_t ct, char **addinfo, const char *category,
+int cql_pr_attr(cql_transform_t ct, WRBUF addinfo, const char *category,
                 const char *val, const char *default_val,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data,
@@ -491,7 +491,7 @@ static void cql_pr_int(int val,
 
 
 static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
-                       char **addinfo,
+                       WRBUF addinfo,
                        void (*pr)(const char *buf, void *client_data),
                        void *client_data)
 {
@@ -523,7 +523,7 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
                 proxrel = 6;
             else
             {
-                *addinfo = xstrdup(relation);
+                wrbuf_puts(addinfo, relation);
                 return YAZ_SRW_UNSUPP_PROX_RELATION;
             }
         }
@@ -543,13 +543,13 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
                 unit = 8;
             else
             {
-                *addinfo = xstrdup(term);
+                wrbuf_puts(addinfo, term);
                 return YAZ_SRW_UNSUPP_PROX_UNIT;
             }
         }
         else
         {
-            *addinfo = xstrdup(name);
+            wrbuf_puts(addinfo, name);
             return YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
         }
         mods = mods->u.st.modifiers;
@@ -580,7 +580,7 @@ static int has_modifier(struct cql_node *cn, const char *name) {
 }
 
 static int emit_term(cql_transform_t ct,
-                     struct cql_node *cn, char **addinfo,
+                     struct cql_node *cn, WRBUF addinfo,
                      const char *term, int length,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data)
@@ -778,7 +778,7 @@ static int emit_term(cql_transform_t ct,
 }
 
 static int emit_terms(cql_transform_t ct, struct cql_node *cn,
-                      char **addinfo,
+                      WRBUF addinfo,
                       void (*pr)(const char *buf, void *client_data),
                       void *client_data,
                       const char *op)
@@ -808,7 +808,7 @@ static int emit_terms(cql_transform_t ct, struct cql_node *cn,
 }
 
 static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
-                         char **addinfo,
+                         WRBUF addinfo,
                          void (*pr)(const char *buf, void *client_data),
                          void *client_data,
                          const char *op)
@@ -843,10 +843,10 @@ static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
     return r;
 }
 
-int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
-                    char **addinfo,
-                    void (*pr)(const char *buf, void *client_data),
-                    void *client_data)
+static int emit_node(cql_transform_t ct, struct cql_node *cn,
+                     WRBUF addinfo,
+                     void (*pr)(const char *buf, void *client_data),
+                     void *client_data)
 {
     const char *ns;
     int r = 0;
@@ -871,7 +871,6 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
         }
         else
         {
-            *addinfo = 0;
             return YAZ_SRW_UNSUPP_CONTEXT_SET;
         }
         cql_pr_attr(ct, addinfo, "always", 0, 0, pr, client_data, 0);
@@ -905,19 +904,19 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
         else if (mods)
         {
             /* Boolean modifiers other than on proximity not supported */
-            *addinfo = xstrdup(mods->u.st.index);
+            wrbuf_puts(addinfo, mods->u.st.index);
             return YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
         }
 
-        r = cql_transform_r(ct, cn->u.boolean.left, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.boolean.left, addinfo, pr, client_data);
         if (r)
             return r;
-        r = cql_transform_r(ct, cn->u.boolean.right, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.boolean.right, addinfo, pr, client_data);
         if (r)
             return r;
         break;
     case CQL_NODE_SORT:
-        r = cql_transform_r(ct, cn->u.sort.search, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.sort.search, addinfo, pr, client_data);
         break;
     default:
         fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
@@ -926,10 +925,10 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
     return r;
 }
 
-int cql_transform_cql2rpn(cql_transform_t ct, struct cql_node *cn,
-                          char **addinfo,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data)
+int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
+                    WRBUF addinfo,
+                    void (*pr)(const char *buf, void *client_data),
+                    void *client_data)
 {
     struct cql_prop_entry *e;
     NMEM nmem = nmem_create();
@@ -942,7 +941,7 @@ int cql_transform_cql2rpn(cql_transform_t ct, struct cql_node *cn,
         else if (!cql_strcmp(e->pattern, "set"))
             cql_apply_prefix(nmem, cn, 0, e->value);
     }
-    r  = cql_transform_r(ct, cn, addinfo, pr, client_data);
+    r  = emit_node(ct, cn, addinfo, pr, client_data);
     nmem_destroy(nmem);
     return r;
 }
@@ -951,10 +950,10 @@ int cql_transform(cql_transform_t ct, struct cql_node *cn,
                   void (*pr)(const char *buf, void *client_data),
                   void *client_data)
 {
-    char *addinfo = 0;
-    int r = cql_transform_cql2rpn(ct, cn, &addinfo, pr, client_data);
-    cql_transform_set_error(ct, r, addinfo);
-    xfree(addinfo);
+    WRBUF addinfo = wrbuf_alloc();
+    int r = cql_transform_r(ct, cn, addinfo, pr, client_data);
+    cql_transform_set_error(ct, r, wrbuf_cstr(addinfo));
+    wrbuf_destroy(addinfo);
     return r;
 }
 

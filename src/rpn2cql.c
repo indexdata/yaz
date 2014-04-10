@@ -116,7 +116,10 @@ static int rpn2cql_attr(cql_transform_t ct,
         relation = lookup_relation_index_from_attr(attributes);
 
     if (!index)
+    {
+        wrbuf_rewind(w);
         return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
+    }
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
     {
@@ -172,7 +175,10 @@ static int rpn2cql_simple(cql_transform_t ct,
                           Z_Operand *q, WRBUF w)
 {
     if (q->which != Z_Operand_APT)
+    {
+        wrbuf_rewind(w);
         return YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM;
+    }
     else
     {
         Z_AttributesPlusTerm *apt = q->u.attributesPlusTerm;
@@ -202,6 +208,8 @@ static int rpn2cql_simple(cql_transform_t ct,
             lterm = strlen(sterm);
             break;
         default:
+            wrbuf_rewind(w);
+            wrbuf_printf(w, "%d", term->which);
             return YAZ_BIB1_TERM_TYPE_UNSUPP;
         }
 
@@ -255,6 +263,8 @@ static int rpn2cql_simple(cql_transform_t ct,
         }
         else
         {
+            wrbuf_rewind(w);
+            wrbuf_printf(w, ODR_INT_PRINTF, trunc);
             return YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE;
         }
         pr(wrbuf_cstr(w), client_data);
@@ -306,6 +316,7 @@ static int rpn2cql_structure(cql_transform_t ct,
                     *prox->relationType < Z_ProximityOperator_Prox_lessThan ||
                     *prox->relationType > Z_ProximityOperator_Prox_notEqual)
                 {
+                    wrbuf_rewind(w);
                     return YAZ_BIB1_UNSUPP_SEARCH;
                 }
                 pr(op2name[*prox->relationType-1], client_data);
@@ -335,16 +346,29 @@ static int rpn2cql_structure(cql_transform_t ct,
     }
 }
 
+int cql_transform_rpn2cql_stream_r(cql_transform_t ct,
+                                   WRBUF addinfo,
+                                   void (*pr)(const char *buf, void *client_data),
+                                   void *client_data,
+                                   Z_RPNQuery *q)
+{
+    /* addinfo (w) is used for both addinfo and house-keeping ! */
+    int r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, addinfo);
+    if (!r)
+        wrbuf_rewind(addinfo); /* no additional info if no error */
+    return r;
+}
+
+
 int cql_transform_rpn2cql_stream(cql_transform_t ct,
                                  void (*pr)(const char *buf, void *client_data),
                                  void *client_data,
                                  Z_RPNQuery *q)
 {
-    int r;
     WRBUF w = wrbuf_alloc();
-    r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    int r = cql_transform_rpn2cql_stream_r(ct, w, pr, client_data, q);
     if (r)
-        cql_transform_set_error(ct, r, 0);
+        cql_transform_set_error(ct, r, wrbuf_len(w) ? wrbuf_cstr(w) : 0);
     wrbuf_destroy(w);
     return r;
 }

@@ -393,20 +393,31 @@ static int rpn2solr_structure(solr_transform_t ct,
     }
 }
 
+int solr_transform_rpn2solr_stream_r(solr_transform_t ct,
+                                     WRBUF addinfo,
+                                     void (*pr)(const char *buf, void *client_data),
+                                     void *client_data,
+                                     Z_RPNQuery *q)
+{
+    int r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure,
+                               /* nested*/ 0, addinfo);
+    if (!r)
+        wrbuf_rewind(addinfo);
+    return r;
+}
+
 int solr_transform_rpn2solr_stream(solr_transform_t ct,
                                    void (*pr)(const char *buf, void *client_data),
                                    void *client_data,
                                    Z_RPNQuery *q)
 {
-    int r;
     WRBUF w = wrbuf_alloc();
-    r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    int r = solr_transform_rpn2solr_stream_r(ct, w, pr, client_data, q);
     if (r)
-        solr_transform_set_error(ct, r, 0);
+        solr_transform_set_error(ct, r, wrbuf_len(w) ? wrbuf_cstr(w) : 0);
     wrbuf_destroy(w);
     return r;
 }
-
 
 int solr_transform_rpn2solr_wrbuf(solr_transform_t ct,
                                   WRBUF w,

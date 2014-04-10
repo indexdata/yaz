@@ -33,6 +33,7 @@
 #define CQL_H_INCLUDED
 #include <stdio.h>
 #include <yaz/nmem.h>
+#include <yaz/wrbuf.h>
 
 YAZ_BEGIN_CDECL
 
@@ -332,7 +333,7 @@ int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
 YAZ_EXPORT
 void cql_transform_close(cql_transform_t ct);
 
-/** \brief tranforms PQF given a CQL tree
+/** \brief tranforms PQF given a CQL tree (NOT re-entrant)
     \param ct CQL transform handle
     \param cn CQL node tree
     \param pr print function
@@ -348,7 +349,7 @@ int cql_transform(cql_transform_t ct,
                   void (*pr)(const char *buf, void *client_data),
                   void *client_data);
 
-/** \brief tranforms PQF given a CQL tree
+/** \brief tranforms PQF given a CQL tree (re-entrant)
     \param ct CQL transform handle
     \param cn CQL node tree
     \param addinfo additional information (if error)
@@ -359,12 +360,12 @@ int cql_transform(cql_transform_t ct,
 
     The result is written to a user-defined stream.
 */
-int cql_transform_cql2rpn(cql_transform_t ct, struct cql_node *cn,
-                          char **addinfo,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data);
+int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
+                    WRBUF addinfo,
+                    void (*pr)(const char *buf, void *client_data),
+                    void *client_data);
 
-/** \brief transforms PQF given a CQL tree (from FILE)
+/** \brief transforms PQF given a CQL tree from FILE (not re-entrant)
     \param ct CQL transform handle
     \param cn CQL tree
     \param f FILE where output is written
@@ -378,7 +379,7 @@ YAZ_EXPORT
 int cql_transform_FILE(cql_transform_t ct,
                        struct cql_node *cn, FILE *f);
 
-/** \brief transforms PQF given a CQL tree (from FILE)
+/** \brief transforms PQF given a CQL tree from buffer (not re-entrant)
     \param ct CQL transform handle
     \param cn CQL tree
     \param out buffer for output

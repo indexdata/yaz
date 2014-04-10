@@ -15,7 +15,8 @@
 #include <yaz/wrbuf.h>
 #include <yaz/pquery.h>
 
-static int compare(cql_transform_t ct, const char *pqf, const char *cql)
+static int compare2(cql_transform_t ct, const char *pqf, const char *cql,
+                    int expected_error)
 {
     int ret = 0;
     ODR odr = odr_createmem(ODR_ENCODE);
@@ -28,15 +29,26 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
 
         if (r != 0)
         {
+            const char *addinfo = 0;
+            int err = cql_transform_error(ct, &addinfo);
             /* transform error */
             yaz_log(YLOG_LOG, "%s -> Error %d", pqf, r);
-            if (!cql) /* also expected error? */
-                ret = 1;
+            if (err == 0)
+                ;
+            else if (err == expected_error)
+            {
+                if (addinfo && cql && !strcmp(addinfo, cql))
+                    ret = 1;
+                else if (!addinfo && !cql)
+                    ret = 1;
+            }
         }
         else if (r == 0)
         {
             yaz_log(YLOG_LOG, "%s -> %s", pqf, wrbuf_cstr(w));
-            if (cql && !strcmp(wrbuf_cstr(w), cql))
+            if (!expected_error)
+                ret = 1;
+            else if (cql && !strcmp(wrbuf_cstr(w), cql))
             {
                 ret = 1;
             }
@@ -52,6 +64,11 @@ static int compare(cql_transform_t ct, const char *pqf, const char *cql)
     return ret;
 }
 
+static int compare(cql_transform_t ct, const char *pqf, const char *cql)
+{
+    return compare2(ct, pqf, cql, 0);
+}
+
 static void tst1(void)
 {
     cql_transform_t ct = cql_transform_create();
@@ -65,7 +82,7 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@and @and a b @and c d", "(a and b) and (c and d)"));
 
     YAZ_CHECK(compare(ct, "@attr 1=field abc", "field=abc"));
-    YAZ_CHECK(compare(ct, "@attr 1=4 abc", 0)); /* should fail */
+    YAZ_CHECK(compare2(ct, "@attr 1=4 abc", 0, 114)); /* should fail */
 
     cql_transform_define_pattern(ct, "index.title", "1=4");
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", "title=abc"));
@@ -151,7 +168,8 @@ static void tst2(void)
 
     /* Other */
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "cql.allRecords=1"));
-    YAZ_CHECK(compare(ct, "@attr 1=500 abc", 0));
+    YAZ_CHECK(compare2(ct, "@attr 1=500 abc", 0, 114));
+    YAZ_CHECK(compare2(ct, "@attr 5=99 x", "99", 120));
     cql_transform_close(ct);
     wrbuf_destroy(w);
 }
