@@ -136,12 +136,6 @@ Z_SortKeySpecList *ZOOM_query_get_sortspec(ZOOM_query s)
     return s->sort_strategy == SORT_STRATEGY_Z3950 ? s->sort_spec : 0;
 }
 
-static void cql2pqf_wrbuf_puts(const char *buf, void *client_data)
-{
-    WRBUF wrbuf = (WRBUF) client_data;
-    wrbuf_puts(wrbuf, buf);
-}
-
 const char *ZOOM_query_get_query_string(ZOOM_query s)
 {
     return wrbuf_cstr(s->full_query);
@@ -194,7 +188,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     {
         WRBUF wrbuf_result = wrbuf_alloc();
         error = cql_transform(trans, cql_parser_result(parser),
-                              cql2pqf_wrbuf_puts, wrbuf_result);
+                              wrbuf_vp_puts, wrbuf_result);
         if (error != 0) {
             char buf[512];
             const char *addinfo;

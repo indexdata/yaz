@@ -44,8 +44,7 @@ struct cql_transform_t_ {
     struct cql_prop_entry *entry;
     yaz_tok_cfg_t tok_cfg;
     int error;
-    char *addinfo;
-    WRBUF w;
+    WRBUF addinfo;
     NMEM nmem;
 };
 
@@ -54,9 +53,8 @@ cql_transform_t cql_transform_create(void)
 {
     cql_transform_t ct = (cql_transform_t) xmalloc(sizeof(*ct));
     ct->tok_cfg = yaz_tok_cfg_create();
-    ct->w = wrbuf_alloc();
     ct->error = 0;
-    ct->addinfo = 0;
+    ct->addinfo = wrbuf_alloc();
     ct->entry = 0;
     ct->nmem = nmem_create();
     return ct;
@@ -70,6 +68,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
     Z_AttributeElement *ae[20];
     int ret = 0; /* 0=OK, != 0 FAIL */
     int t;
+    WRBUF w = wrbuf_alloc();
+
     t = yaz_tok_move(tp);
 
     while (t == YAZ_TOK_STRING && ae_num < 20)
@@ -83,7 +83,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         elem = (Z_AttributeElement *) nmem_malloc(ct->nmem, sizeof(*elem));
         elem->attributeSet = 0;
         ae[ae_num] = elem;
-        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        wrbuf_puts(w, yaz_tok_parse_string(tp));
         wrbuf_puts(type_str, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
         if (t == YAZ_TOK_EOF)
@@ -95,8 +95,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         }
         if (t == YAZ_TOK_STRING)
         {
-            wrbuf_puts(ct->w, " ");
-            wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+            wrbuf_puts(w, " ");
+            wrbuf_puts(w, yaz_tok_parse_string(tp));
             set_str = type_str;
 
             elem->attributeSet =
@@ -159,10 +159,10 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             ca->num_semanticAction = 0;
             ca->semanticAction = 0;
         }
-        wrbuf_puts(ct->w, "=");
-        wrbuf_puts(ct->w, yaz_tok_parse_string(tp));
+        wrbuf_puts(w, "=");
+        wrbuf_puts(w, yaz_tok_parse_string(tp));
         t = yaz_tok_move(tp);
-        wrbuf_puts(ct->w, " ");
+        wrbuf_puts(w, " ");
         ae_num++;
     }
     if (ret == 0) /* OK? */
@@ -172,7 +172,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             pp = &(*pp)->next;
         *pp = (struct cql_prop_entry *) xmalloc(sizeof(**pp));
         (*pp)->pattern = xstrdup(pattern);
-        (*pp)->value = xstrdup(wrbuf_cstr(ct->w));
+        (*pp)->value = xstrdup(wrbuf_cstr(w));
 
         (*pp)->attr_list.num_attributes = ae_num;
         if (ae_num == 0)
@@ -197,6 +197,7 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
             odr_destroy(pr);
         }
     }
+    wrbuf_destroy(w);
     return ret;
 }
 
@@ -222,7 +223,6 @@ cql_transform_t cql_transform_open_FILE(FILE *f)
     {
         yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, line);
         int t;
-        wrbuf_rewind(ct->w);
         t = yaz_tok_move(tp);
         if (t == YAZ_TOK_STRING)
         {
@@ -267,9 +267,8 @@ void cql_transform_close(cql_transform_t ct)
         xfree(pe);
         pe = pe_next;
     }
-    xfree(ct->addinfo);
+    wrbuf_destroy(ct->addinfo);
     yaz_tok_cfg_destroy(ct->tok_cfg);
-    wrbuf_destroy(ct->w);
     nmem_destroy(ct->nmem);
     xfree(ct);
 }
@@ -383,7 +382,7 @@ static const char *cql_lookup_property(cql_transform_t ct,
     return 0;
 }
 
-int cql_pr_attr_uri(cql_transform_t ct, const char *category,
+int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
                    const char *uri, const char *val, const char *default_val,
                    void (*pr)(const char *buf, void *client_data),
                    void *client_data,
@@ -459,27 +458,23 @@ int cql_pr_attr_uri(cql_transform_t ct, const char *category,
             while (*cp0 == ' ')
                 cp0++;
         }
-        return 1;
+        return 0;
     }
     /* error ... */
-    if (errcode && !ct->error)
-    {
-        ct->error = errcode;
-        if (val)
-            ct->addinfo = xstrdup(val);
-        else
-            ct->addinfo = 0;
-    }
-    return 0;
+    if (errcode == 0)
+        return 1; /* signal error, but do not set addinfo */
+    if (val)
+        wrbuf_puts(addinfo, val);
+    return errcode;
 }
 
-int cql_pr_attr(cql_transform_t ct, const char *category,
+int cql_pr_attr(cql_transform_t ct, WRBUF addinfo, const char *category,
                 const char *val, const char *default_val,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data,
                 int errcode)
 {
-    return cql_pr_attr_uri(ct, category, 0 /* uri */,
+    return cql_pr_attr_uri(ct, addinfo, category, 0 /* uri */,
                            val, default_val, pr, client_data, errcode);
 }
 
@@ -496,6 +491,7 @@ static void cql_pr_int(int val,
 
 
 static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
+                       WRBUF addinfo,
                        void (*pr)(const char *buf, void *client_data),
                        void *client_data)
 {
@@ -527,9 +523,8 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
                 proxrel = 6;
             else
             {
-                ct->error = YAZ_SRW_UNSUPP_PROX_RELATION;
-                ct->addinfo = xstrdup(relation);
-                return 0;
+                wrbuf_puts(addinfo, relation);
+                return YAZ_SRW_UNSUPP_PROX_RELATION;
             }
         }
         else if (!strcmp(name, "ordered"))
@@ -548,16 +543,14 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
                 unit = 8;
             else
             {
-                ct->error = YAZ_SRW_UNSUPP_PROX_UNIT;
-                ct->addinfo = xstrdup(term);
-                return 0;
+                wrbuf_puts(addinfo, term);
+                return YAZ_SRW_UNSUPP_PROX_UNIT;
             }
         }
         else
         {
-            ct->error = YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
-            ct->addinfo = xstrdup(name);
-            return 0;
+            wrbuf_puts(addinfo, name);
+            return YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
         }
         mods = mods->u.st.modifiers;
     }
@@ -572,7 +565,7 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
     (*pr)("k ", client_data);
     cql_pr_int(unit, pr, client_data);
 
-    return 1;
+    return 0;
 }
 
 /* ### checks for CQL relation-name rather than Type-1 attribute */
@@ -586,13 +579,13 @@ static int has_modifier(struct cql_node *cn, const char *name) {
     return 0;
 }
 
-static void emit_term(cql_transform_t ct,
-                      struct cql_node *cn,
-                      const char *term, int length,
-                      void (*pr)(const char *buf, void *client_data),
-                      void *client_data)
+static int emit_term(cql_transform_t ct,
+                     struct cql_node *cn, WRBUF addinfo,
+                     const char *term, int length,
+                     void (*pr)(const char *buf, void *client_data),
+                     void *client_data)
 {
-    int i;
+    int i, r;
     const char *ns = cn->u.st.index_uri;
     int z3958_mode = 0;
     int process_term = 1;
@@ -604,8 +597,10 @@ static void emit_term(cql_transform_t ct,
     else if (cql_lookup_property(ct, "truncation", 0, "cql"))
     {
         process_term = 0;
-        cql_pr_attr(ct, "truncation", "cql", 0,
-                    pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
+        r = cql_pr_attr(ct, addinfo, "truncation", "cql", 0,
+                        pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
+        if (r)
+            return r;
     }
     assert(cn->which == CQL_NODE_ST);
 
@@ -643,70 +638,92 @@ static void emit_term(cql_transform_t ct,
         }
         if (anchor == 3)
         {
-            cql_pr_attr(ct, "position", "firstAndLast", 0,
-                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            r = cql_pr_attr(ct, addinfo, "position", "firstAndLast", 0,
+                            pr, client_data,
+                            YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            if (r)
+                return r;
             term++;
             length -= 2;
         }
         else if (anchor == 1)
         {
-            cql_pr_attr(ct, "position", "first", 0,
-                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            r = cql_pr_attr(ct, addinfo, "position", "first", 0,
+                            pr, client_data,
+                            YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            if (r)
+                return r;
             term++;
             length--;
         }
         else if (anchor == 2)
         {
-            cql_pr_attr(ct, "position", "last", 0,
-                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            r = cql_pr_attr(ct, addinfo, "position", "last", 0,
+                            pr, client_data,
+                            YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            if (r)
+                return r;
             length--;
         }
         else
         {
-            cql_pr_attr(ct, "position", "any", 0,
-                        pr, client_data, YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            r = cql_pr_attr(ct, addinfo, "position", "any", 0,
+                        pr, client_data,
+                            YAZ_SRW_ANCHORING_CHAR_IN_UNSUPP_POSITION);
+            if (r)
+                return r;
         }
         if (z3958_mode == 0)
         {
-            if (trunc == 3 && cql_pr_attr(ct, "truncation",
+            if (trunc == 3 && !cql_pr_attr(ct, addinfo, "truncation",
                                           "both", 0, pr, client_data, 0))
             {
                 term++;
                 length -= 2;
             }
-            else if (trunc == 1 && cql_pr_attr(ct, "truncation",
+            else if (trunc == 1 && !cql_pr_attr(ct, addinfo, "truncation",
                                                "left", 0, pr, client_data, 0))
             {
                 term++;
                 length--;
             }
-            else if (trunc == 2 && cql_pr_attr(ct, "truncation", "right", 0,
-                                               pr, client_data, 0))
+            else if (trunc == 2 && !cql_pr_attr(ct, addinfo, "truncation",
+                                                "right", 0, pr, client_data, 0))
             {
                 length--;
             }
             else if (trunc)
                 z3958_mode = 1;
             else
-                cql_pr_attr(ct, "truncation", "none", 0,
+                cql_pr_attr(ct, addinfo, "truncation", "none", 0,
                             pr, client_data, 0);
         }
         if (z3958_mode)
-            cql_pr_attr(ct, "truncation", "z3958", 0,
-                        pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
+        {
+            r = cql_pr_attr(ct, addinfo, "truncation", "z3958", 0,
+                            pr, client_data, YAZ_SRW_MASKING_CHAR_UNSUPP);
+            if (r)
+                return r;
+        }
     }
-    if (ns) {
-        cql_pr_attr_uri(ct, "index", ns,
-                        cn->u.st.index, "serverChoice",
-                        pr, client_data, YAZ_SRW_UNSUPP_INDEX);
+    if (ns)
+    {
+        r = cql_pr_attr_uri(ct, addinfo, "index", ns,
+                            cn->u.st.index, "serverChoice",
+                            pr, client_data, YAZ_SRW_UNSUPP_INDEX);
+        if (r)
+            return r;
     }
     if (cn->u.st.modifiers)
     {
         struct cql_node *mod = cn->u.st.modifiers;
         for (; mod; mod = mod->u.st.modifiers)
         {
-            cql_pr_attr(ct, "relationModifier", mod->u.st.index, 0,
-                        pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
+            r = cql_pr_attr(ct, addinfo,
+                            "relationModifier", mod->u.st.index, 0,
+                            pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
+            if (r)
+                return r;
         }
     }
     (*pr)("\"", client_data);
@@ -757,24 +774,26 @@ static void emit_term(cql_transform_t ct,
         }
     }
     (*pr)("\" ", client_data);
+    return 0;
 }
 
-static void emit_terms(cql_transform_t ct,
-                       struct cql_node *cn,
-                       void (*pr)(const char *buf, void *client_data),
-                       void *client_data,
-                       const char *op)
+static int emit_terms(cql_transform_t ct, struct cql_node *cn,
+                      WRBUF addinfo,
+                      void (*pr)(const char *buf, void *client_data),
+                      void *client_data,
+                      const char *op)
 {
     struct cql_node *ne = cn->u.st.extra_terms;
+    int r;
     if (ne)
     {
         (*pr)("@", client_data);
         (*pr)(op, client_data);
         (*pr)(" ", client_data);
     }
-    emit_term(ct, cn, cn->u.st.term, strlen(cn->u.st.term),
-              pr, client_data);
-    for (; ne; ne = ne->u.st.extra_terms)
+    r = emit_term(ct, cn, addinfo, cn->u.st.term, strlen(cn->u.st.term),
+                  pr, client_data);
+    for (; !r && ne; ne = ne->u.st.extra_terms)
     {
         if (ne->u.st.extra_terms)
         {
@@ -782,22 +801,24 @@ static void emit_terms(cql_transform_t ct,
             (*pr)(op, client_data);
             (*pr)(" ", client_data);
         }
-        emit_term(ct, cn, ne->u.st.term, strlen(ne->u.st.term),
-                  pr, client_data);
+        r = emit_term(ct, cn, addinfo, ne->u.st.term, strlen(ne->u.st.term),
+                      pr, client_data);
     }
+    return r;
 }
 
-static void emit_wordlist(cql_transform_t ct,
-                          struct cql_node *cn,
-                          void (*pr)(const char *buf, void *client_data),
-                          void *client_data,
-                          const char *op)
+static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
+                         WRBUF addinfo,
+                         void (*pr)(const char *buf, void *client_data),
+                         void *client_data,
+                         const char *op)
 {
+    int r = 0;
     const char *cp0 = cn->u.st.term;
     const char *cp1;
     const char *last_term = 0;
     int last_length = 0;
-    while(cp0)
+    while (!r && cp0)
     {
         while (*cp0 == ' ')
             cp0++;
@@ -807,7 +828,8 @@ static void emit_wordlist(cql_transform_t ct,
             (*pr)("@", client_data);
             (*pr)(op, client_data);
             (*pr)(" ", client_data);
-            emit_term(ct, cn, last_term, last_length, pr, client_data);
+            r = emit_term(ct, cn, addinfo, last_term, last_length,
+                          pr, client_data);
         }
         last_term = cp0;
         if (cp1)
@@ -816,20 +838,22 @@ static void emit_wordlist(cql_transform_t ct,
             last_length = strlen(cp0);
         cp0 = cp1;
     }
-    if (last_term)
-        emit_term(ct, cn, last_term, last_length, pr, client_data);
+    if (!r && last_term)
+        r = emit_term(ct, cn, addinfo, last_term, last_length, pr, client_data);
+    return r;
 }
 
-void cql_transform_r(cql_transform_t ct,
-                     struct cql_node *cn,
+static int emit_node(cql_transform_t ct, struct cql_node *cn,
+                     WRBUF addinfo,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data)
 {
     const char *ns;
+    int r = 0;
     struct cql_node *mods;
 
     if (!cn)
-        return;
+        return 0;
     switch (cn->which)
     {
     case CQL_NODE_ST:
@@ -842,28 +866,29 @@ void cql_transform_r(cql_transform_t ct,
                 (*pr)("@set \"", client_data);
                 (*pr)(cn->u.st.term, client_data);
                 (*pr)("\" ", client_data);
-                return ;
+                return 0;
             }
         }
         else
         {
-            if (!ct->error)
-            {
-                ct->error = YAZ_SRW_UNSUPP_CONTEXT_SET;
-                ct->addinfo = 0;
-            }
+            return YAZ_SRW_UNSUPP_CONTEXT_SET;
         }
-        cql_pr_attr(ct, "always", 0, 0, pr, client_data, 0);
-        cql_pr_attr(ct, "relation", cn->u.st.relation, 0, pr, client_data,
-                    YAZ_SRW_UNSUPP_RELATION);
-        cql_pr_attr(ct, "structure", cn->u.st.relation, 0,
-                    pr, client_data, YAZ_SRW_UNSUPP_COMBI_OF_RELATION_AND_TERM);
+        cql_pr_attr(ct, addinfo, "always", 0, 0, pr, client_data, 0);
+        r = cql_pr_attr(ct, addinfo, "relation", cn->u.st.relation, 0,
+                        pr, client_data, YAZ_SRW_UNSUPP_RELATION);
+        if (r)
+            return r;
+        r = cql_pr_attr(ct, addinfo, "structure", cn->u.st.relation, 0,
+                        pr, client_data,
+                        YAZ_SRW_UNSUPP_COMBI_OF_RELATION_AND_TERM);
+        if (r)
+            return r;
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
-            emit_wordlist(ct, cn, pr, client_data, "and");
+            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "and");
         else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "any"))
-            emit_wordlist(ct, cn, pr, client_data, "or");
+            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "or");
         else
-            emit_terms(ct, cn, pr, client_data, "and");
+            r = emit_terms(ct, cn, addinfo, pr, client_data, "and");
         break;
     case CQL_NODE_BOOL:
         (*pr)("@", client_data);
@@ -872,39 +897,42 @@ void cql_transform_r(cql_transform_t ct,
         mods = cn->u.boolean.modifiers;
         if (!strcmp(cn->u.boolean.value, "prox"))
         {
-            if (!cql_pr_prox(ct, mods, pr, client_data))
-                return;
+            r = cql_pr_prox(ct, mods, addinfo, pr, client_data);
+            if (r)
+                return r;
         }
         else if (mods)
         {
             /* Boolean modifiers other than on proximity not supported */
-            ct->error = YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
-            ct->addinfo = xstrdup(mods->u.st.index);
-            return;
+            wrbuf_puts(addinfo, mods->u.st.index);
+            return YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
         }
 
-        cql_transform_r(ct, cn->u.boolean.left, pr, client_data);
-        cql_transform_r(ct, cn->u.boolean.right, pr, client_data);
+        r = emit_node(ct, cn->u.boolean.left, addinfo, pr, client_data);
+        if (r)
+            return r;
+        r = emit_node(ct, cn->u.boolean.right, addinfo, pr, client_data);
+        if (r)
+            return r;
         break;
     case CQL_NODE_SORT:
-        cql_transform_r(ct, cn->u.sort.search, pr, client_data);
+        r = emit_node(ct, cn->u.sort.search, addinfo, pr, client_data);
         break;
     default:
         fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
         abort();
     }
+    return r;
 }
 
-int cql_transform(cql_transform_t ct, struct cql_node *cn,
-                  void (*pr)(const char *buf, void *client_data),
-                  void *client_data)
+int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
+                    WRBUF addinfo,
+                    void (*pr)(const char *buf, void *client_data),
+                    void *client_data)
 {
     struct cql_prop_entry *e;
     NMEM nmem = nmem_create();
-
-    ct->error = 0;
-    xfree(ct->addinfo);
-    ct->addinfo = 0;
+    int r;
 
     for (e = ct->entry; e ; e = e->next)
     {
@@ -913,11 +941,21 @@ int cql_transform(cql_transform_t ct, struct cql_node *cn,
         else if (!cql_strcmp(e->pattern, "set"))
             cql_apply_prefix(nmem, cn, 0, e->value);
     }
-    cql_transform_r(ct, cn, pr, client_data);
+    r  = emit_node(ct, cn, addinfo, pr, client_data);
     nmem_destroy(nmem);
-    return ct->error;
+    return r;
 }
 
+int cql_transform(cql_transform_t ct, struct cql_node *cn,
+                  void (*pr)(const char *buf, void *client_data),
+                  void *client_data)
+{
+    WRBUF addinfo = wrbuf_alloc();
+    int r = cql_transform_r(ct, cn, addinfo, pr, client_data);
+    cql_transform_set_error(ct, r, wrbuf_cstr(addinfo));
+    wrbuf_destroy(addinfo);
+    return r;
+}
 
 int cql_transform_FILE(cql_transform_t ct, struct cql_node *cn, FILE *f)
 {
@@ -939,9 +977,8 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
            SRW diagnostic is deprecated, but it's so perfect for our
            purposes that it would be stupid not to use it. */
         char numbuf[30];
-        ct->error = YAZ_SRW_TOO_MANY_CHARS_IN_QUERY;
         sprintf(numbuf, "%ld", (long) info.max);
-        ct->addinfo = xstrdup(numbuf);
+        cql_transform_set_error(ct, YAZ_SRW_TOO_MANY_CHARS_IN_QUERY, numbuf);
         return -1;
     }
     if (info.off >= 0)
@@ -951,14 +988,15 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
 
 int cql_transform_error(cql_transform_t ct, const char **addinfo)
 {
-    *addinfo = ct->addinfo;
+    *addinfo = wrbuf_len(ct->addinfo) ? wrbuf_cstr(ct->addinfo) : 0;
     return ct->error;
 }
 
 void cql_transform_set_error(cql_transform_t ct, int error, const char *addinfo)
 {
-    xfree(ct->addinfo);
-    ct->addinfo = addinfo ? xstrdup(addinfo) : 0;
+    wrbuf_rewind(ct->addinfo);
+    if (addinfo)
+        wrbuf_puts(ct->addinfo, addinfo);
     ct->error = error;
 }
 

@@ -20,11 +20,6 @@
 #include <yaz/wrbuf.h>
 #include <yaz/logrpn.h> /* For yaz_prox_unit_name() */
 
-static void wrbuf_vputs(const char *buf, void *client_data)
-{
-    wrbuf_write((WRBUF) client_data, buf, strlen(buf));
-}
-
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
     int j;
@@ -122,9 +117,8 @@ static int rpn2cql_attr(cql_transform_t ct,
 
     if (!index)
     {
-        cql_transform_set_error(ct,
-                                YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
-        return -1;
+        wrbuf_rewind(w);
+        return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
     }
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
@@ -180,11 +174,10 @@ static int rpn2cql_simple(cql_transform_t ct,
                           void *client_data,
                           Z_Operand *q, WRBUF w)
 {
-    int ret = 0;
     if (q->which != Z_Operand_APT)
     {
-        ret = -1;
-        cql_transform_set_error(ct, YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM, 0);
+        wrbuf_rewind(w);
+        return YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM;
     }
     else
     {
@@ -194,9 +187,12 @@ static int rpn2cql_simple(cql_transform_t ct,
         size_t lterm = 0;
         Odr_int trunc = lookup_truncation(apt->attributes);
         size_t i;
+        int r;
 
         wrbuf_rewind(w);
-        ret = rpn2cql_attr(ct, apt->attributes, w);
+        r = rpn2cql_attr(ct, apt->attributes, w);
+        if (r)
+            return r;
 
         switch (term->which)
         {
@@ -212,8 +208,9 @@ static int rpn2cql_simple(cql_transform_t ct,
             lterm = strlen(sterm);
             break;
         default:
-            cql_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
-            return -1;
+            wrbuf_rewind(w);
+            wrbuf_printf(w, "%d", term->which);
+            return YAZ_BIB1_TERM_TYPE_UNSUPP;
         }
 
         if (trunc <= 3 || trunc == 100 || trunc == 102 || trunc == 104)
@@ -266,14 +263,13 @@ static int rpn2cql_simple(cql_transform_t ct,
         }
         else
         {
-            cql_transform_set_error(
-                ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
-            ret = -1;
+            wrbuf_rewind(w);
+            wrbuf_printf(w, ODR_INT_PRINTF, trunc);
+            return YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE;
         }
-        if (ret == 0)
-            pr(wrbuf_cstr(w), client_data);
+        pr(wrbuf_cstr(w), client_data);
     }
-    return ret;
+    return 0;
 }
 
 
@@ -297,7 +293,7 @@ static int rpn2cql_structure(cql_transform_t ct,
         r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
-        switch(op->which)
+        switch (op->which)
         {
         case  Z_Operator_and:
             pr(" and ", client_data);
@@ -318,10 +314,10 @@ static int rpn2cql_structure(cql_transform_t ct,
                 pr("/distance", client_data);
                 if (!prox->relationType ||
                     *prox->relationType < Z_ProximityOperator_Prox_lessThan ||
-                    *prox->relationType > Z_ProximityOperator_Prox_notEqual) {
-                    cql_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH,
-                        "unrecognised proximity relationType");
-                    return -1;
+                    *prox->relationType > Z_ProximityOperator_Prox_notEqual)
+                {
+                    wrbuf_rewind(w);
+                    return YAZ_BIB1_UNSUPP_SEARCH;
                 }
                 pr(op2name[*prox->relationType-1], client_data);
                 sprintf(buf, "%ld", (long) *prox->distance);
@@ -350,15 +346,29 @@ static int rpn2cql_structure(cql_transform_t ct,
     }
 }
 
+int cql_transform_rpn2cql_stream_r(cql_transform_t ct,
+                                   WRBUF addinfo,
+                                   void (*pr)(const char *buf, void *client_data),
+                                   void *client_data,
+                                   Z_RPNQuery *q)
+{
+    /* addinfo (w) is used for both addinfo and house-keeping ! */
+    int r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, addinfo);
+    if (!r)
+        wrbuf_rewind(addinfo); /* no additional info if no error */
+    return r;
+}
+
+
 int cql_transform_rpn2cql_stream(cql_transform_t ct,
                                  void (*pr)(const char *buf, void *client_data),
                                  void *client_data,
                                  Z_RPNQuery *q)
 {
-    int r;
     WRBUF w = wrbuf_alloc();
-    cql_transform_set_error(ct, 0, 0);
-    r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    int r = cql_transform_rpn2cql_stream_r(ct, w, pr, client_data, q);
+    if (r)
+        cql_transform_set_error(ct, r, wrbuf_len(w) ? wrbuf_cstr(w) : 0);
     wrbuf_destroy(w);
     return r;
 }
@@ -368,7 +378,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
                                 WRBUF w,
                                 Z_RPNQuery *q)
 {
-    return cql_transform_rpn2cql_stream(ct, wrbuf_vputs, w, q);
+    return cql_transform_rpn2cql_stream(ct, wrbuf_vp_puts, w, q);
 }
 
 /*
