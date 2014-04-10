@@ -153,15 +153,11 @@ static int rpn2solr_attr(solr_transform_t ct,
     const char *index = solr_lookup_reverse(ct, "index.", attributes);
     const char *structure = solr_lookup_reverse(ct, "structure.", attributes);
 
-    /* if transform (properties) do not match, we'll just use a USE string attribute (bug #2978) */
+    /* if no real match, try string attribute */
     if (!index)
         index = lookup_index_from_string_attr(attributes);
     if (!index)
-    {
-        solr_transform_set_error(ct,
-                                 YAZ_BIB1_UNSUPP_USE_ATTRIBUTE, 0);
-        return -1;
-    }
+        return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
     /* for serverChoice we omit index+relation+structure */
     if (strcmp(index, "cql.serverChoice"))
     {
@@ -224,8 +220,7 @@ static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
         lterm = strlen(sterm);
         break;
     default:
-        solr_transform_set_error(ct, YAZ_BIB1_TERM_TYPE_UNSUPP, 0);
-        return -1;
+        return YAZ_BIB1_TERM_TYPE_UNSUPP;
     }
 
     if (sterm)
@@ -290,8 +285,7 @@ static int rpn2solr_simple(solr_transform_t ct,
          relation1 = lookup_relation_index_from_attr(apt->attributes);
      if (!relation1)
      {
-         solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE, 0);
-         return -1;
+         return YAZ_BIB1_UNSUPP_RELATION_ATTRIBUTE;
      }
      if (apt2)
      {
@@ -308,8 +302,7 @@ static int rpn2solr_simple(solr_transform_t ct,
              ;
      else
      {
-         solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE, 0);
-         return -1;
+         return YAZ_BIB1_UNSUPP_TRUNCATION_ATTRIBUTE;
      }
 
      if (!relation1)
@@ -353,18 +346,14 @@ static int rpn2solr_simple(solr_transform_t ct,
 
 static int rpn2solr_structure(solr_transform_t ct,
                               void (*pr)(const char *buf, void *client_data),
-                               void *client_data,
+                              void *client_data,
                               Z_RPNStructure *q, int nested,
                               WRBUF w)
 {
     if (q->which == Z_RPNStructure_simple)
     {
         if (q->u.simple->which != Z_Operand_APT)
-        {
-            solr_transform_set_error(
-                ct, YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM, 0);
-            return -1;
-        }
+            return YAZ_BIB1_RESULT_SET_UNSUPP_AS_A_SEARCH_TERM;
         else
             return rpn2solr_simple(ct, pr, client_data,
                                    q->u.simple->u.attributesPlusTerm, w, 0);
@@ -383,20 +372,19 @@ static int rpn2solr_structure(solr_transform_t ct,
         r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
-        switch(op->which)
+        switch (op->which)
         {
-        case  Z_Operator_and:
+        case Z_Operator_and:
             pr(" AND ", client_data);
             break;
-        case  Z_Operator_or:
+        case Z_Operator_or:
             pr(" OR ", client_data);
             break;
-        case  Z_Operator_and_not:
+        case Z_Operator_and_not:
             pr(" AND NOT ", client_data);
             break;
-        case  Z_Operator_prox:
-            solr_transform_set_error(ct, YAZ_BIB1_UNSUPP_SEARCH, 0);
-            return -1;
+        case Z_Operator_prox:
+            return YAZ_BIB1_UNSUPP_SEARCH;
         }
         r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s2, 1, w);
         if (nested)
@@ -412,8 +400,9 @@ int solr_transform_rpn2solr_stream(solr_transform_t ct,
 {
     int r;
     WRBUF w = wrbuf_alloc();
-    solr_transform_set_error(ct, 0, 0);
     r = rpn2solr_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    if (r)
+        solr_transform_set_error(ct, r, 0);
     wrbuf_destroy(w);
     return r;
 }
