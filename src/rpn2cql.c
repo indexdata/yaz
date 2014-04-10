@@ -343,6 +343,8 @@ int cql_transform_rpn2cql_stream(cql_transform_t ct,
     int r;
     WRBUF w = wrbuf_alloc();
     r = rpn2cql_structure(ct, pr, client_data, q->RPNStructure, 0, w);
+    if (r)
+        cql_transform_set_error(ct, r, 0);
     wrbuf_destroy(w);
     return r;
 }
