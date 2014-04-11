@@ -270,6 +270,15 @@ const char *wrbuf_cstr(WRBUF b)
     return b->buf;
 }
 
+const char *wrbuf_cstr_null(WRBUF b)
+{
+    if (!b || b->pos == 0)
+        return 0;
+    assert(b->pos < b->size);
+    b->buf[b->pos] = '\0';
+    return b->buf;
+}
+
 void wrbuf_cut_right(WRBUF b, size_t no_to_remove)
 {
     if (no_to_remove > b->pos)
