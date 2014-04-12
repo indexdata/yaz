@@ -1974,9 +1974,11 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
             else
             {
                 /* no init request for SRW .. */
-                assert(c->tasks->which == ZOOM_TASK_CONNECT);
-                ZOOM_connection_remove_task(c);
-                ZOOM_connection_set_mask(c, 0);
+                if (c->tasks->which == ZOOM_TASK_CONNECT)
+                {
+                    ZOOM_connection_remove_task(c);
+                    ZOOM_connection_set_mask(c, 0);
+                }
                 ZOOM_connection_exec_task(c);
             }
             c->state = STATE_ESTABLISHED;
