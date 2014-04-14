@@ -1,3 +1,11 @@
+--- 5.0.23 2014/04/14
+
+cql_transform: Use WRBUF for addinfo member
+rather than a xmalloc'ed one. The primary reason for this is make the
+system slightly less vulnerable to threading issues. YAZ-756
+
+Fix assert in ZOOM when http connect fails YAZ-757
+
 --- 5.0.22 2014/04/09
 
 ZOOM: Call cs_rcvconnect during HTTP redirect YAZ-754
