@@ -8,7 +8,7 @@ XMLFILES=bookinfo.xml introduction.xml installation.xml \
  asn.xml tools.xml odr.xml comstack.xml server.xml license.xml \
  future.xml zoom.xml credits.xml gfs-options.xml \
  yaz.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
- std-oid-table.xml manref.xml local.ent
+ std-oid-table.xml  bib1-diag-table.xml srw-diag-table.xml manref.xml local.ent
 
 HTMLFILES = index.html
 
@@ -33,6 +33,12 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 
 std-oid-table.xml: $(srcdir)/../src/oid.csv
 	$(TCLSH) $(srcdir)/../src/oidtoc.tcl $(srcdir) $(srcdir)/../src/oid.csv std-oid-table.xml
+
+bib1-diag-table.xml: $(srcdir)/../src/bib1.csv
+	$(TCLSH) $(srcdir)/../src/csvtodiag.tcl $(srcdir)/../src/bib1.csv bib1-diag-table.xml bib1-diag-table
+
+srw-diag-table.xml: $(srcdir)/../src/srw.csv
+	$(TCLSH) $(srcdir)/../src/csvtodiag.tcl $(srcdir)/../src/srw.csv srw-diag-table.xml srw-diag-table
 
 yaz-client.1: $(srcdir)/yaz-client-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-client-man.xml

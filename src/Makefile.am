@@ -17,7 +17,7 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
- csvtodiag.tcl csvtobib1.tcl csvtosrw.tcl bib1.csv srw.csv \
+ csvtodiag.tcl bib1.csv srw.csv \
  csvtosru_update.tcl sru_update.csv mk_version.tcl \
  oidtoc.tcl oid.csv sc_test.c
 
@@ -50,11 +50,11 @@ oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
 	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir) $(srcdir)/oid.csv oid_std.c oid_std.h
 
 # Generate diagnostics from CSVs
-diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: csvtobib1.tcl bib1.csv
-	$(TCLSH) $(srcdir)/csvtobib1.tcl $(srcdir)
+diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: bib1.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/bib1.csv $(srcdir)/diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h bib1 diagbib1_str
 
-diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: csvtosrw.tcl srw.csv
-	$(TCLSH) $(srcdir)/csvtosrw.tcl $(srcdir)
+diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: srw.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/srw.csv $(srcdir)/diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h srw
 
 diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl sru_update.csv
 	$(TCLSH) $(srcdir)/csvtosru_update.tcl $(srcdir)

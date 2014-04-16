@@ -862,11 +862,11 @@ $(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv
 
 $(SRCDIR)\diagbib1.c: $(SRCDIR)\bib1.csv
 	@cd $(SRCDIR)
-	$(TCL) csvtobib1.tcl $(SRCDIR)
+	$(TCL) csvtodiag.tcl bib1.csv diagbib1.c $(INCLDIR)\yaz\diagbib1.h bib1 diagbib1_str
 
 $(SRCDIR)\diagsrw.c: $(SRCDIR)\srw.csv
 	@cd $(SRCDIR)
-	$(TCL) csvtosrw.tcl $(SRCDIR)
+	$(TCL) csvtodiag.tcl srw.csv diagsrw.c $(INCLDIR)\yaz\diagsrw.h srw
 
 $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)

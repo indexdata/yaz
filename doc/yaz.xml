@@ -40,6 +40,20 @@
  &std-oid-table;
  </appendix>
 
+ <appendix id="bib1-diagnostics"><title>Bib-1 diagnostics</title>
+   <para>
+     List of Bib-1 diagnostics that are known to YAZ.
+   </para>
+   &bib1-diag-table;
+ </appendix>
+
+ <appendix id="sru-diagnostics"><title>SRU diagnostics</title>
+   <para>
+     List of SRU diagnostics that are known to YAZ.
+   </para>
+   &srw-diag-table;
+ </appendix>
+
  &app-license;
  &app-indexdata;
  &app-credits;
