@@ -370,19 +370,6 @@ ZOOM_API(void)
     ZOOM_set_error(c, ZOOM_ERROR_NONE, 0);
     ZOOM_connection_remove_tasks(c);
 
-    if (c->odr_print)
-    {
-        odr_setprint(c->odr_print, 0); /* prevent destroy from fclose'ing */
-        odr_destroy(c->odr_print);
-    }
-    if (ZOOM_options_get_bool(c->options, "apdulog", 0))
-    {
-        c->odr_print = odr_createmem(ODR_PRINT);
-        odr_setprint(c->odr_print, yaz_log_file());
-    }
-    else
-        c->odr_print = 0;
-
     if (c->cs)
     {
         yaz_log(c->log_details, "%p ZOOM_connection_connect reconnect ok", c);
@@ -556,6 +543,33 @@ ZOOM_API(void)
         return;
     }
 
+    if (c->odr_print)
+        odr_destroy(c->odr_print);
+    c->odr_print = 0;
+    val = ZOOM_options_get(c->options, "apdufile");
+    if (val)
+    {
+        c->odr_print = odr_createmem(ODR_PRINT);
+        if (strcmp(val, "-"))
+        {
+            FILE *f = fopen(val, "a");
+            if (!f)
+            {
+                WRBUF w = wrbuf_alloc();
+                wrbuf_printf(w, "fopen: %s", val);
+                ZOOM_set_error(c, ZOOM_ERROR_INTERNAL, wrbuf_cstr(w));
+                wrbuf_destroy(w);
+                return;
+            }
+            odr_setprint(c->odr_print, f);
+        }
+    }
+    else if (ZOOM_options_get_bool(c->options, "apdulog", 0))
+    {
+        c->odr_print = odr_createmem(ODR_PRINT);
+        odr_setprint_noclose(c->odr_print, yaz_log_file());
+    }
+
     yaz_log(c->log_details, "%p ZOOM_connection_connect async=%d", c, c->async);
     ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
 
@@ -609,10 +623,7 @@ ZOOM_API(void)
     if (c->odr_save)
         odr_destroy(c->odr_save);
     if (c->odr_print)
-    {
-        odr_setprint(c->odr_print, 0); /* prevent destroy from fclose'ing */
         odr_destroy(c->odr_print);
-    }
     ZOOM_options_destroy(c->options);
     ZOOM_connection_remove_tasks(c);
     ZOOM_connection_remove_events(c);
