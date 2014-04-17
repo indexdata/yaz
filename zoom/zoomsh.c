@@ -920,7 +920,10 @@ static int shell(struct zoom_sh *sh, int exit_on_error)
 #endif
         if (!line_in) /* no line buffer via readline or not enabled at all */
         {
-            printf("ZOOM>"); fflush(stdout);
+            if (isatty(0))
+            {
+                printf("ZOOM>"); fflush(stdout);
+            }
             if (!fgets(buf, sizeof(buf)-1, stdin))
             {
                 res = -1;
