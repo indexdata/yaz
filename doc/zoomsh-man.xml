@@ -29,6 +29,7 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>zoomsh</command>
+   <arg choice="opt"><option>-a <replaceable>apdufile</replaceable></option></arg>
    <arg choice="opt"><option>-e</option></arg>
    <arg choice="opt"><option>-v <replaceable>loglevel</replaceable></option></arg>
    <arg choice="opt" rep="repeat">commands</arg>
@@ -51,6 +52,12 @@
    <title>OPTIONS</title>
    <variablelist>
     <varlistentry>
+     <term>-a <replaceable>apdufile</replaceable></term>
+     <listitem><para>
+      Logs protocol packages into apdufile (APDU log).
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
      <term>-e</term>
      <listitem><para>
       Makes zoomsh stop processing commands as soon as an error occur.
@@ -60,7 +67,7 @@
     <varlistentry>
      <term>-v <replaceable>loglevel</replaceable></term>
      <listitem><para>
-       Sets YAZ log level.
+       Sets YAZ log level to <replaceable>loglevel</replaceable>.
       </para></listitem>
     </varlistentry>
    </variablelist>

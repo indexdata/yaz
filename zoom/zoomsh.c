@@ -957,7 +957,7 @@ static int zoomsh(int argc, char **argv)
     {
         int mask;
         char *arg = 0;
-        int option_ret = options("ev:", argv, argc, &arg);
+        int option_ret = options("a:ev:", argv, argc, &arg);
         const char *bp = arg;
         switch (option_ret)
         {
@@ -970,6 +970,9 @@ static int zoomsh(int argc, char **argv)
         case YAZ_OPTIONS_EOF:
             res = shell(&sh, exit_on_error);
             break;
+        case 'a':
+            ZOOM_options_set(sh.options, "apdufile", arg);
+            break;
         case 'e':
             exit_on_error = 1;
             break;
@@ -978,7 +981,7 @@ static int zoomsh(int argc, char **argv)
             yaz_log_init_level(mask);
             break;
         default:
-            fprintf(stderr, "zoomsh: [-e] [-v] [commands]\n");
+            fprintf(stderr, "zoomsh: [-a apdulog] [-e] [-v level] [commands]\n");
             res = 1;
         }
     }
