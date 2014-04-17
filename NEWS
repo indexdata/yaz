@@ -1,3 +1,33 @@
+--- 5.1.0 2014/04/17
+
+Doc: move main YAZ manual to book.xml; use nxml YAZ-758
+
+zoomsh: offer option -a apdulog
+As we're used to from yaz-client and GFS based servers.
+
+ZOOM: new setting apdufile. Sets name of APDU file. If not given,
+existing setting apdulog takes effect.
+
+Add odr_setprint_noclose. It's like odr_setprint, but does not fclose at
+odr_destroy.
+
+Add wrbuf_cstr_null.
+
+Add re-entrant CQL/Solr/RPN query conversion functions.
+The re-entrant functions are: cql_transform_r,
+cql_transform_rpn2cql_stream_r, solr_transform_rpn2solr_stream_r.
+These have same functionality as cql_transform,
+cql_transform_rpn2cql_stream, solr_transform_rpn2solr_stream. They
+return the additional infomration as WRBUF to make them re-entrant.
+
+Remove CQL to Solr conversion and base solr_transform_t on
+cql_transform_t. The RPN to Solr is indeed in use. It uses exact same
+data structure as cql_transform_t.
+
+cql2pqf utility allows RPN to Solr conversion
+
+Fix assert in ZOOM when http connect fails YAZ-757
+
 --- 5.0.22 2014/04/09
 
 ZOOM: Call cs_rcvconnect during HTTP redirect YAZ-754
