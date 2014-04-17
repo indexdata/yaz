@@ -166,6 +166,10 @@ void odr_setprint(ODR o, FILE *file)
     odr_set_stream(o, file, odr_FILE_write, odr_FILE_close);
 }
 
+void odr_setprint_noclose(ODR o, FILE *file)
+{
+    odr_set_stream(o, file, odr_FILE_write, 0);
+}
 
 void odr_set_stream(ODR o, void *handle,
                     void (*stream_write)(ODR o,
@@ -213,7 +217,7 @@ ODR odr_createmem(int direction)
     o->op->enable_bias = 1;
     o->op->odr_ber_tag.lclass = -1;
     o->op->iconv_handle = 0;
-    odr_setprint(o, stderr);
+    odr_setprint_noclose(o, stderr);
     odr_reset(o);
     yaz_log(log_level, "odr_createmem dir=%d o=%p", direction, o);
     return o;
