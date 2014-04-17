@@ -3,12 +3,10 @@
 
 SUBDIRS = common
 
-XMLFILES=bookinfo.xml introduction.xml installation.xml \
- indexdata.xml \
- asn.xml tools.xml odr.xml comstack.xml server.xml license.xml \
- future.xml zoom.xml credits.xml gfs-options.xml \
- yaz.xml soap.xml gfs-virtual.xml gfs-synopsis.xml \
- std-oid-table.xml  bib1-diag-table.xml srw-diag-table.xml manref.xml local.ent
+XMLFILES = book.xml \
+ gfs-options.xml gfs-virtual.xml gfs-synopsis.xml \
+ std-oid-table.xml  bib1-diag-table.xml srw-diag-table.xml \
+ manref.xml local.ent
 
 HTMLFILES = index.html
 
@@ -82,20 +80,20 @@ yaz-url.1: yaz-url-man.xml
 yaz-json-parse.1: yaz-json-parse-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-json-parse-man.xml
 
-$(HTMLFILES): $(XMLFILES)
+$(HTMLFILES): $(XMLFILES) book.xml
 	rm -f *.html
-	$(HTML_COMPILE) $(srcdir)/yaz.xml
+	$(HTML_COMPILE) $(srcdir)/book.xml
 
 $(MANFILES): local.ent
 
-yaz.pdf: $(XMLFILES)
-	$(PDF_COMPILE) $(srcdir)/yaz.xml
+yaz.pdf: $(XMLFILES) book.xml
+	$(PDF_COMPILE) $(srcdir)/book.xml && mv book.pdf yaz.pdf
 
 
 yazj.pdf:
-	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(srcdir)/yaz.xml
+	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(srcdir)/book.xml
 	rm -f yazj.pdf
-	cp yaz.tex yazj.tex
+	cp book.tex yazj.tex
 	pdfjadetex yazj.tex
 	pdfjadetex yazj.tex >/dev/null
 	pdfjadetex yazj.tex >/dev/null
