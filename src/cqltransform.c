@@ -191,9 +191,8 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
         {
             ODR pr = odr_createmem(ODR_PRINT);
             Z_AttributeList *alp = &(*pp)->attr_list;
-            odr_setprint(pr, yaz_log_file());
+            odr_setprint_noclose(pr, yaz_log_file());
             z_AttributeList(pr, &alp, 0, 0);
-            odr_setprint(pr, 0);
             odr_destroy(pr);
         }
     }
