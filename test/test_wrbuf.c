@@ -136,10 +136,34 @@ static void tstwrbuf(void)
     wrbuf_destroy(wr);
 }
 
+static void tst_cstr(void)
+{
+    int i;
+    WRBUF w = wrbuf_alloc();
+    for (i = 0; i < 8000; i++)
+    {
+        const char *cp = wrbuf_cstr(w);
+        YAZ_CHECK(strlen(cp) == i);
+        wrbuf_putc(w, 'a');
+    }
+    wrbuf_destroy(w);
+
+    w = wrbuf_alloc();
+    for (i = 0; i < 8000; i++)
+    {
+        const char *cp = wrbuf_cstr(w);
+        YAZ_CHECK(strlen(cp) == i);
+        wrbuf_puts(w, "a");
+    }
+    wrbuf_destroy(w);
+
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tstwrbuf();
+    tst_cstr();
     YAZ_CHECK_TERM;
 }
 
