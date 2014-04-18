@@ -58,9 +58,8 @@ int wrbuf_grow(WRBUF b, size_t minsize)
         togrow = b->size;
     if (togrow < minsize)
         togrow = minsize;
-    if (b->size && !(b->buf =(char *)xrealloc(b->buf, b->size += togrow)))
-        abort();
-    else if (!b->size && !(b->buf = (char *)xmalloc(b->size = togrow)))
+    b->buf = (char *) xrealloc(b->buf, 1 + (b->size += togrow));
+    if (!b->buf)
         abort();
     return 0;
 }
@@ -70,7 +69,7 @@ void wrbuf_write(WRBUF b, const char *buf, size_t size)
     if (size <= 0)
         return;
     if (b->pos + size >= b->size)
-        wrbuf_grow(b, size + 1);
+        wrbuf_grow(b, size);
     memcpy(b->buf + b->pos, buf, size);
     b->pos += size;
 }
@@ -80,7 +79,7 @@ void wrbuf_insert(WRBUF b, size_t pos, const char *buf, size_t size)
     if (size <= 0 || pos > b->pos)
         return;
     if (b->pos + size >= b->size)
-        wrbuf_grow(b, size + 1);
+        wrbuf_grow(b, size);
     memmove(b->buf + pos + size, b->buf + pos, b->pos - pos);
     memcpy(b->buf + pos, buf, size);
     b->pos += size;
@@ -265,7 +264,7 @@ const char *wrbuf_cstr(WRBUF b)
 {
     if (b->pos == 0)
 	return "";
-    assert(b->pos < b->size);
+    assert(b->pos <= b->size);
     b->buf[b->pos] = '\0';
     return b->buf;
 }
@@ -274,7 +273,7 @@ const char *wrbuf_cstr_null(WRBUF b)
 {
     if (!b || b->pos == 0)
         return 0;
-    assert(b->pos < b->size);
+    assert(b->pos <= b->size);
     b->buf[b->pos] = '\0';
     return b->buf;
 }
