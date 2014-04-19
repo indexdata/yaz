@@ -31,6 +31,7 @@ WRBUF wrbuf_alloc(void)
     n->buf = 0;
     n->size = 0;
     n->pos = 0;
+    wrbuf_grow(n, 1);
     return n;
 }
 
@@ -262,9 +263,7 @@ void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)
 
 const char *wrbuf_cstr(WRBUF b)
 {
-    if (b->pos == 0)
-	return "";
-    assert(b->pos <= b->size);
+    assert(b && b->pos <= b->size);
     b->buf[b->pos] = '\0';
     return b->buf;
 }
