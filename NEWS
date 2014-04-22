@@ -1,3 +1,10 @@
+--- 5.0.24 2014/04/22
+
+wrbuf_cstr: fix off by one error.
+
+wrbuf_buf: make it always return non-NULL
+Also, wrbuf_buf will return same buffer as previous call to wrbuf_cstr.
+
 --- 5.0.23 2014/04/14
 
 cql_transform: Use WRBUF for addinfo member
