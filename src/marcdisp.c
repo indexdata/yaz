@@ -257,7 +257,7 @@ static int element_name_append_attribute_value(
     /* TODO Map special codes to something possible for XML ELEMENT names */
 
     int encode = 0;
-    int index = 0;
+    size_t index = 0;
     int success = 0;
     for (index = 0; index < code_len; index++)
     {
