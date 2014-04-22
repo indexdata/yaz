@@ -1,3 +1,12 @@
+--- 5.1.1 2014/04/22
+
+Build packages for Ubuntu Trusty Tahr 14.04 LTS
+
+wrbuf_cstr: fix off by one error.
+
+wrbuf_buf: make it always return non-NULL
+Also, wrbuf_buf will return same buffer as previous call to wrbuf_cstr.
+
 --- 5.1.0 2014/04/17
 
 Doc: move main YAZ manual to book.xml; use nxml YAZ-758
