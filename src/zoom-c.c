@@ -1501,7 +1501,6 @@ ZOOM_API(int)
     return 1;
 }
 
-#if YAZ_HAVE_XML2
 
 static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
 {
@@ -1520,6 +1519,7 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
     c->location = 0;
     return ZOOM_send_GDU(c, gdu);
 }
+
 
 zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
 {
@@ -1541,15 +1541,13 @@ zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
     return ZOOM_send_buf(c);
 }
 
-#if YAZ_HAVE_XML2
 void ZOOM_set_HTTP_error(ZOOM_connection c, int error,
                          const char *addinfo, const char *addinfo2)
 {
     ZOOM_set_dset_error(c, error, "HTTP", addinfo, addinfo2);
 }
-#endif
 
-
+#if YAZ_HAVE_XML2
 static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 {
     zoom_ret cret = zoom_complete;
