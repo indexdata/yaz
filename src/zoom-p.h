@@ -107,6 +107,7 @@ struct ZOOM_connection_p {
     zoom_sru_mode sru_mode;
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
     yaz_cookies_t cookies;
+    char *location;
 
     int log_details;
     int log_api;

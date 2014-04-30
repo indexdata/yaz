@@ -50,6 +50,7 @@ static void initlog(void)
 }
 
 void ZOOM_connection_remove_tasks(ZOOM_connection c);
+static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri);
 
 void ZOOM_set_dset_error(ZOOM_connection c, int error,
                          const char *dset,
@@ -296,6 +297,7 @@ ZOOM_API(ZOOM_connection)
     c->sru_version = 0;
     c->no_redirects = 0;
     c->cookies = 0;
+    c->location = 0;
     c->saveAPDU_wrbuf = 0;
 
     ZOOM_memcached_init(c);
@@ -639,6 +641,7 @@ ZOOM_API(void)
     xfree(c->group);
     xfree(c->password);
     xfree(c->sru_version);
+    xfree(c->location);
     yaz_cookies_destroy(c->cookies);
     wrbuf_destroy(c->saveAPDU_wrbuf);
     xfree(c);
@@ -1104,7 +1107,11 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
                 assert(c->tasks->which == ZOOM_TASK_CONNECT);
                 ZOOM_connection_remove_task(c);
                 ZOOM_connection_set_mask(c, 0);
-                ZOOM_connection_exec_task(c);
+
+                if (c->cs && c->location)
+                    send_HTTP_redirect(c, c->location);
+                else
+                    ZOOM_connection_exec_task(c);
             }
             c->state = STATE_ESTABLISHED;
             return zoom_pending;
@@ -1509,6 +1516,8 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
         z_HTTP_header_add_basic_auth(c->odr_out, &gdu->u.HTTP_Request->headers,
                                      c->user, c->password);
     }
+    xfree(c->location);
+    c->location = 0;
     return ZOOM_send_GDU(c, gdu);
 }
 
@@ -1572,10 +1581,9 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             int host_change = 0;
             location = yaz_check_location(c->odr_in, c->host_port,
                                           location, &host_change);
-            if (do_connect_host(c, location) == zoom_complete)
-                return;  /* connect failed.. */
-            cs_rcvconnect(c->cs);
-            send_HTTP_redirect(c, location);
+            xfree(c->location);
+            c->location = xstrdup(location);
+            do_connect_host(c, location);
             return;
         }
     }
@@ -1990,7 +1998,10 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
                     ZOOM_connection_remove_task(c);
                     ZOOM_connection_set_mask(c, 0);
                 }
-                ZOOM_connection_exec_task(c);
+                if (c->cs && c->location)
+                    send_HTTP_redirect(c, c->location);
+                else
+                    ZOOM_connection_exec_task(c);
             }
             c->state = STATE_ESTABLISHED;
         }
