@@ -287,7 +287,7 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
                                                          &cstr))
                                         ;
                                     else if (yaz_match_xsd_integer(p2, "count", o,
-                                                               &count))
+                                                                   &count))
                                         ;
                                 }
                                 if (cstr && count)

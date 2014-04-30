@@ -657,6 +657,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else if (yaz_match_xsd_string(ptr, "facetSort", o,
                                               (char**) &facetSort))
                     ;
+                else
+                    ;
             }
             if (!req->query)
             {
