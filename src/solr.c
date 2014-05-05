@@ -487,7 +487,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *uri_args;
     char *path;
     char *q;
-    char *pos;
     char *cp;
     const char *path_args = 0;
     int i = 0;
@@ -561,15 +560,15 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         else if (!strcmp(srw_pdu->u.scan_request->queryType, "cql"))
         {
             q = request->scanClause;
-            pos = strchr(q, ':');
-            if (pos != NULL)
+            cp = strchr(q, ':');
+            if (cp != NULL)
             {
                 yaz_add_name_value_str(encode, name, value, &i,
-                                       "terms.lower", odr_strdup(encode, pos + 1));
-                *pos = '\0';
+                                       "terms.lower", odr_strdup(encode, cp + 1));
+                *cp = '\0';
                 yaz_add_name_value_str(encode, name, value, &i,
                                        "terms.fl", odr_strdup(encode, q));
-                *pos = ':';
+                *cp = ':';
             }
             else
                 yaz_add_name_value_str(encode, name, value, &i,
