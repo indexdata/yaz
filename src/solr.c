@@ -327,73 +327,60 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
+    int ret = -1;
 #if YAZ_HAVE_XML2
     const char *content_buf = hres->content_buf;
     int content_len = hres->content_len;
     xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
-    int ret = 0;
-    xmlNodePtr ptr = 0;
-    Z_SRW_PDU *pdu;
-    Z_SRW_searchRetrieveResponse *sr = NULL;
-    Z_SRW_scanResponse *scr = NULL;
+    Z_SRW_PDU *pdu = 0;
 
-    if (!doc)
-    {
-        ret = -1;
-    }
     if (doc)
     {
+        Z_SRW_searchRetrieveResponse *sr = NULL;
+        Z_SRW_scanResponse *scr = NULL;
+        xmlNodePtr ptr;
         xmlNodePtr root = xmlDocGetRootElement(doc);
-        if (!root)
+        if (root && !strcmp((const char *) root->name, "response"))
         {
-            ret = -1;
-        }
-        else if (strcmp((const char *) root->name, "response"))
-        {
-            ret = -1;
-        }
-        else
-        {
-            /** look for result (required) and facets node (optional) */
-            int rc_result = -1;
-            int rc_facets = 0;
-            for (ptr = root->children; ptr; ptr = ptr->next)
+            ret = 0;
+            for (ptr = root->children; ptr && !ret; ptr = ptr->next)
             {
                 if (ptr->type == XML_ELEMENT_NODE &&
-                    !strcmp((const char *) ptr->name, "result")) {
-                        pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
-                        sr = pdu->u.response;
-                        rc_result = yaz_solr_decode_result(o, ptr, sr);
+                    !strcmp((const char *) ptr->name, "result"))
+                {
+                    pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+                    sr = pdu->u.response;
+                    ret = yaz_solr_decode_result(o, ptr, sr);
+
                 }
                 if (ptr->type == XML_ELEMENT_NODE &&
-                    match_xml_node_attribute(ptr, "lst", "name", "terms")) {
-                        pdu = yaz_srw_get(o, Z_SRW_scan_response);
-                        scr = pdu->u.scan_response;
-                        rc_result = yaz_solr_decode_scan_result(o, ptr, scr);
+                    match_xml_node_attribute(ptr, "lst", "name", "terms"))
+                {
+                    pdu = yaz_srw_get(o, Z_SRW_scan_response);
+                    scr = pdu->u.scan_response;
+                    ret = yaz_solr_decode_scan_result(o, ptr, scr);
                 }
-                /* TODO The check on hits is a work-around to avoid garbled facets on zero results from the SOLR server.
-                 * The work-around works because the results is before the facets in the xml. */
-                if (sr) {
-                    if (rc_result == 0 &&  *sr->numberOfRecords > 0 &&
-                        match_xml_node_attribute(ptr, "lst", "name", "facet_counts"))
-                            rc_facets =  yaz_solr_decode_facet_counts(o, ptr, sr);
-                    if (rc_result == 0 &&  *sr->numberOfRecords == 0 &&
-                        match_xml_node_attribute(ptr, "lst", "name", "spellcheck"))
-                            rc_facets =  yaz_solr_decode_spellcheck(o, ptr, sr);
-                }
-
+                /* The check on hits is a work-around to avoid garbled
+                   facets on zero results from the SOLR server.
+                   The work-around works because the results is before
+                   the facets in the xml.
+                */
+                if (sr && *sr->numberOfRecords > 0 &&
+                    match_xml_node_attribute(ptr, "lst", "name",
+                                             "facet_counts"))
+                    ret = yaz_solr_decode_facet_counts(o, ptr, sr);
+                if (sr && *sr->numberOfRecords == 0 &&
+                    match_xml_node_attribute(ptr, "lst", "name",
+                                             "spellcheck"))
+                    ret = yaz_solr_decode_spellcheck(o, ptr, sr);
             }
-            ret = rc_result + rc_facets;
         }
-    }
-    if (doc)
         xmlFreeDoc(doc);
+    }
     if (ret == 0)
         *pdup = pdu;
-    return ret;
-#else
-    return -1;
 #endif
+    return ret;
 }
 
 static int yaz_solr_encode_facet_field(
