@@ -22,8 +22,6 @@
 
 #include "sru-p.h"
 
-#define SOLR_MAX_PARAMETERS  100
-
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -476,8 +474,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                             ODR encode, const char *charset)
 {
     const char *solr_op = 0;
-    //TODO Change. not a nice hard coded, unchecked limit.
-    char *name[SOLR_MAX_PARAMETERS], *value[SOLR_MAX_PARAMETERS];
+    char **name, **value;
     char *uri_args;
     char *path;
     char *q;
@@ -485,6 +482,20 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *cp;
     const char *path_args = 0;
     int i = 0;
+    int no_parms = 20; /* safe upper limit of args without extra_args */
+    Z_SRW_extra_arg *ea;
+
+    for (ea = srw_pdu->extra_args; ea; ea = ea->next)
+        no_parms++;
+    name = (char **) odr_malloc(encode, sizeof(*name) * no_parms);
+    value = (char **) odr_malloc(encode, sizeof(*value) * no_parms);
+
+    for (ea = srw_pdu->extra_args; ea; ea = ea->next)
+    {
+        name[i] = ea->name;
+        value[i] = ea->value;
+        i++;
+    }
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
@@ -562,17 +573,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     }
     else
         return -1;
-
-    if (srw_pdu->extra_args)
-    {
-        Z_SRW_extra_arg *ea = srw_pdu->extra_args;
-        for (; ea && i < SOLR_MAX_PARAMETERS; ea = ea->next)
-        {
-            name[i] = ea->name;
-            value[i] = ea->value;
-            i++;
-        }
-    }
 
     name[i++] = 0;
 
