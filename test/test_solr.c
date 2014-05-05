@@ -69,7 +69,8 @@ void tst_encoding(void)
         sr->u.request->query = "title:solr";
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,
-                      "GET Default/select?q=title%3Asolr HTTP/1.1\r\n"
+                      "GET Default/select?defType=lucene&q=title%3Asolr "
+                      "HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
                       "Host: localhost\r\n"
                       "Content-Type: text/xml\r\n\r\n"));
@@ -81,7 +82,8 @@ void tst_encoding(void)
         sr->u.request->query = "title:solr";
         YAZ_CHECK(compare_solr_req(
                       odr, sr, "utf-8",
-                      "GET Default/select?q=title%3Asolr HTTP/1.1\r\n"
+                      "GET Default/select?defType=lucene&q=title%3Asolr "
+                      "HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
                       "Host: localhost\r\n"
                       "Content-Type: text/xml; charset=utf-8\r\n\r\n"));
@@ -97,7 +99,8 @@ void tst_encoding(void)
 
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,
-                      "GET Default/select?q=title%3Asolr&start=2&rows=10"
+                      "GET Default/select?defType=lucene&q=title%3Asolr&"
+                      "start=2&rows=10"
                       " HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
                       "Host: localhost\r\n"
@@ -116,7 +119,8 @@ void tst_encoding(void)
 
         YAZ_CHECK(compare_solr_req(
                       odr, sr, 0,
-                      "GET Default/select?q=title%3Asolr&start=2&rows=10"
+                      "GET Default/select?defType=lucene&q=title%3Asolr&"
+                      "start=2&rows=10"
                       "&facet=true&facet.mincount=1&facet.field=date"
                       "&facet.field=title_exact&f.title_exact.facet.limit=17"
                       " HTTP/1.1\r\n"
