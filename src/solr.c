@@ -26,7 +26,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-static void extract_text_node(xmlNodePtr node, WRBUF wrbuf) {
+static void extract_text_node(xmlNodePtr node, WRBUF wrbuf)
+{
     xmlNodePtr child;
     for (child = node->children; child ; child = child->next)
     {
@@ -202,28 +203,28 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
 static void yaz_solr_decode_suggestion_values(xmlNodePtr listPptr, WRBUF wrbuf)
 {
     xmlNodePtr node;
-    for (node = listPptr; node; node= node->next) {
-        if (!strcmp((char*) node->name, "lst")) {
+    for (node = listPptr; node; node= node->next)
+        if (!strcmp((char*) node->name, "lst"))
+        {
             xmlNodePtr child;
-            for (child = node->children; child; child= child->next) {
-                if (match_xml_node_attribute(child, "str", "name", "word")) {
+            for (child = node->children; child; child= child->next)
+            {
+                if (match_xml_node_attribute(child, "str", "name", "word"))
+                {
                     wrbuf_puts(wrbuf, "<suggestion>");
                     extract_text_node(child, wrbuf);
                     wrbuf_puts(wrbuf, "</suggestion>\n");
                 }
             }
         }
-    }
 }
 
 static void yaz_solr_decode_suggestion_lst(xmlNodePtr lstPtr, WRBUF wrbuf)
 {
     xmlNodePtr node;
-    for (node = lstPtr; node; node= node->next) {
-        if (match_xml_node_attribute(node, "arr", "name", "suggestion")) {
+    for (node = lstPtr; node; node= node->next)
+        if (match_xml_node_attribute(node, "arr", "name", "suggestion"))
             yaz_solr_decode_suggestion_values(node->children, wrbuf);
-        }
-    }
 }
 
 static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
@@ -231,9 +232,12 @@ static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
     xmlNodePtr node;
     for (node = lstPtr; node; node= node->next)
     {
-        if (!strcmp((const char*) node->name, "lst")) {
-            const char *misspelled = yaz_element_attribute_value_get(node, "lst", "name");
-            if (misspelled) {
+        if (!strcmp((const char*) node->name, "lst"))
+        {
+            const char *misspelled =
+                yaz_element_attribute_value_get(node, "lst", "name");
+            if (misspelled)
+            {
                 wrbuf_printf(wrbuf, "<misspelled term=\"%s\">\n", misspelled);
                 yaz_solr_decode_suggestion_lst(node->children, wrbuf);
                 wrbuf_puts(wrbuf, "</misspelled>\n");
@@ -267,14 +271,16 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 
     /* find the actual list */
     for (node = ptr->children; node; node = node->next)
-        if (node->type == XML_ELEMENT_NODE) {
+        if (node->type == XML_ELEMENT_NODE)
+        {
             ptr = node;
             break;
         }
 
     scr->num_terms = 0;
     for (node = ptr->children; node; node = node->next)
-        if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
+        if (node->type == XML_ELEMENT_NODE &&
+            !strcmp((const char *) node->name, "int"))
             scr->num_terms++;
 
     if (scr->num_terms)
@@ -282,7 +288,8 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 
     for (node = ptr->children; node; node = node->next)
     {
-        if (node->type == XML_ELEMENT_NODE && !strcmp((const char *) node->name, "int"))
+        if (node->type == XML_ELEMENT_NODE &&
+            !strcmp((const char *) node->name, "int"))
         {
             Z_SRW_scanTerm *term = scr->terms + i;
 
@@ -295,17 +302,19 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
              * SOLR not being able to encode them into 2 separate attributes.
              */
             pos = strchr(val, '^');
-            if (pos != NULL) {
+            if (pos != NULL)
+            {
             	term->displayTerm = odr_strdup(o, pos + 1);
             	*pos = '\0';
             	term->value = odr_strdup(o, val);
             	*pos = '^';
-            } else {
+            }
+            else
+            {
             	term->value = odr_strdup(o, val);
             	term->displayTerm = NULL;
             }
             term->whereInList = NULL;
-
             i++;
         }
     }
@@ -536,7 +545,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
                 return -1;
         }
     }
-    else if (srw_pdu->which == Z_SRW_scan_request) {
+    else if (srw_pdu->which == Z_SRW_scan_request)
+    {
         Z_SRW_scanRequest *request = srw_pdu->u.scan_request;
         solr_op = "terms";
         if (!srw_pdu->u.scan_request->scanClause)
@@ -552,17 +562,18 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         {
             q = request->scanClause;
             pos = strchr(q, ':');
-            if (pos != NULL) {
+            if (pos != NULL)
+            {
                 yaz_add_name_value_str(encode, name, value, &i,
                                        "terms.lower", odr_strdup(encode, pos + 1));
                 *pos = '\0';
                 yaz_add_name_value_str(encode, name, value, &i,
                                        "terms.fl", odr_strdup(encode, q));
                 *pos = ':';
-            } else {
+            }
+            else
                 yaz_add_name_value_str(encode, name, value, &i,
                                        "terms.lower", odr_strdup(encode, q));
-            }
         }
         else
             return -1;
