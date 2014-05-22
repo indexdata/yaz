@@ -2500,7 +2500,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
-    int recno, total_length = 0, dumped_records = 0;
+    int recno, dumped_records = 0;
     int toget = odr_int_to_int(*num);
     Z_Records *records =
         (Z_Records *) odr_malloc(a->encode, sizeof(*records));
@@ -2530,13 +2530,13 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     {
         bend_fetch_rr freq;
         Z_NamePlusRecord *thisrec;
-        int this_length = 0;
+        Odr_int this_length = 0;
         /*
          * we get the number of bytes allocated on the stream before any
          * allocation done by the backend - this should give us a reasonable
          * idea of the total size of the data so far.
          */
-        total_length = odr_total(a->encode) - dumped_records;
+        Odr_int total_length = odr_total(a->encode) - dumped_records;
         freq.errcode = 0;
         freq.errstring = 0;
         freq.basename = 0;
@@ -2592,10 +2592,11 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             this_length = freq.len;
         else
             this_length = odr_total(a->encode) - total_length - dumped_records;
-        yaz_log(YLOG_DEBUG, "  fetched record, len=%d, total=%d dumped=%d",
-            this_length, total_length, dumped_records);
+        yaz_log(log_requestdetail, "  fetched record, len=" ODR_INT_PRINTF
+                " total=" ODR_INT_PRINTF " dumped=%d",
+                this_length, total_length, dumped_records);
         if (a->preferredMessageSize > 0 &&
-                this_length + total_length > a->preferredMessageSize)
+            this_length + total_length > a->preferredMessageSize)
         {
             /* record is small enough, really */
             if (this_length <= a->preferredMessageSize && recno > start)
@@ -2625,7 +2626,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             else /* too big entirely */
             {
                 yaz_log(log_requestdetail, "Record > maxrcdsz "
-                        "this=%d max=%d",
+                        "this=" ODR_INT_PRINTF " max=%d",
                         this_length, a->maximumRecordSize);
                 reclist->records[reclist->num_records] =
                     surrogatediagrec(
