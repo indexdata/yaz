@@ -132,6 +132,8 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
                         value = CCL_BIB1_REL_ORDER;
                     else if (!ccl_stricmp (value_str, "r"))
                         value = CCL_BIB1_REL_PORDER;
+                    else if (!ccl_stricmp (value_str, "omiteq"))
+                        value = CCL_BIB1_REL_OMIT_EQUALS;
                     break;
                 case 'p':
                 case 'P':

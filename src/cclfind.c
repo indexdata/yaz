@@ -799,7 +799,9 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
     {
         if (!(p = search_terms(cclp, ap)))
             return NULL;
-        ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, rel);
+        if (rel != 3 ||
+            !qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_OMIT_EQUALS, 0))
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, rel);
         return p;
     }
     return NULL;
