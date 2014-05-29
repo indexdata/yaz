@@ -82,7 +82,7 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "t=x", "reg");
         ccl_qual_fitem(bibset, "t=z", "z");
         ccl_qual_fitem(bibset, "1=/my/title",       "dc.title");
-        ccl_qual_fitem(bibset, "r=r",         "date");
+        ccl_qual_fitem(bibset, "r=r,omiteq",        "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
         ccl_qual_fitem(bibset, "term dc.title", "comb");
@@ -104,7 +104,7 @@ void tst1(int pass)
         strcpy(tstline, "dc.title 1=/my/title");
         ccl_qual_line(bibset, tstline);
 
-        strcpy(tstline, "date r=r # ordered relation");
+        strcpy(tstline, "date r=r,omiteq # ordered relation");
         ccl_qual_line(bibset, tstline);
 
         strcpy(tstline, "x r=o # ordered relation");
@@ -126,7 +126,7 @@ void tst1(int pass)
                      "reg t=x\r\n"
                      "z t=z\r\n"
                      "dc.title 1=/my/title\n"
-                     "date r=r\n"
+                     "date r=r,omiteq\n"
                      "x r=o\n"
                      "title dc.title\n"
                      "comb term dc.title\n"
@@ -162,7 +162,7 @@ void tst1(int pass)
                 "   <attr type=\"1\" value=\"/my/title\"/>\n"
                 " </qual>\n"
                 " <qual name=\"date\">\n"
-                "   <attr type=\"r\" value=\"r\"/>\n"
+                "   <attr type=\"r\" value=\"r,omiteq\"/>\n"
                 " </qual>\n"
                 " <qual name=\"x\">\n"
                 "   <attr type=\"r\" value=\"o\"/>\n"
@@ -271,9 +271,17 @@ void tst1(int pass)
                             "@attr 4=2 @attr 1=1016 c " ));
 
     YAZ_CHECK(tst_ccl_query(bibset, "date=1980",
-                            "@attr 2=3 1980 "));
+                            "1980 "));
     YAZ_CHECK(tst_ccl_query(bibset, "(date=1980)",
-                            "@attr 2=3 1980 "));
+                            "1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date>1980",
+                            "@attr 2=5 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date>=1980",
+                            "@attr 2=4 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date<1980",
+                            "@attr 2=1 1980 "));
+    YAZ_CHECK(tst_ccl_query(bibset, "date<=1980",
+                            "@attr 2=2 1980 "));
     YAZ_CHECK(tst_ccl_query(bibset, "date=234-1990",
                             "@and @attr 2=4 234 @attr 2=2 1990 "));
     YAZ_CHECK(tst_ccl_query(bibset, "date=234- 1990",
