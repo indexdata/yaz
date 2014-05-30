@@ -1,3 +1,23 @@
+--- 5.1.2 2014/05/30
+
+CCL: add new qualifier r=omiteq which will omit relation=equals
+for ordered relations. This should be used in combination with either
+r=r or r=o.  YAZ-766
+
+GFS: prevent truncation/overflow in retrieval phase. YAZ-763
+
+Solr: simplify yaz_solr_decode_response
+
+Solr: use different local var for string manipulation
+
+Solr: Get rid of hardcoded limit of extra_args
+
+Solr: encode lucene query type YAZ-736
+Make sure the queries are treated as traditional "lucene", because that's
+what YAZ generates.
+
+Fix ZOOM HTTP redirect failing on Windows+Solaris YAZ-755
+
 --- 5.1.1 2014/04/22
 
 Build packages for Ubuntu Trusty Tahr 14.04 LTS
