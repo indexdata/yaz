@@ -5693,6 +5693,15 @@ typedef struct {
 	   <literal>r=r</literal> is available in YAZ 2.0.24 or later.
 	  </entry>
 	  </row>
+	  <row><entry><literal>r=omiteq</literal></entry>
+	  <entry>
+	   This will omit relation=equals (@attr 2=3) when r=o / r=r
+	   is used. This is useful for servers that somehow breaks
+	   when an explicit relation=equals is used. Omitting the
+	   relation is usually safe because "equals" is the default
+	   behavior. This tweak was added in YAZ version 5.1.2.
+	  </entry>
+	  </row>
 	  <row><entry><literal>t=l</literal></entry>
 	  <entry>
 	   Allows term to be left-truncated.
