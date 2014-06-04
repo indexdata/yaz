@@ -1,3 +1,9 @@
+--- 5.1.3 2014/06/04
+
+Fix dup ZOOM_EVENT_RECV_RECORD events for SRU/Solr YAZ-768
+
+Fix zoom+memcached: present request out of range YAZ-767
+
 --- 5.1.2 2014/05/30
 
 CCL: add new qualifier r=omiteq which will omit relation=equals
