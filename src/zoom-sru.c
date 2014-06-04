@@ -254,6 +254,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                     Z_SRW_searchRetrieveResponse *res)
 {
     ZOOM_resultset resultset = 0;
+    int *start, *count;
     int i;
     NMEM nmem;
     ZOOM_Event event;
@@ -266,6 +267,8 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         return zoom_complete;
 
     resultset = c->tasks->u.search.resultset;
+    start = &c->tasks->u.search.start;
+    count = &c->tasks->u.search.count;
     syntax = c->tasks->u.search.syntax;
     elementSetName = c->tasks->u.search.elementSetName;
     schema = c->tasks->u.search.schema;
@@ -374,6 +377,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                       schema, diag);
             }
         }
+        *count -= i;
+        if (*count < 0)
+            *count = 0;
+        *start += i;
         nmem = odr_extract_mem(c->odr_in);
         nmem_transfer(odr_getmem(resultset->odr), nmem);
         nmem_destroy(nmem);
