@@ -1577,9 +1577,10 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
 
     if (resultset->live_set)
     {
-        if (*start + *count > resultset->size)
-            ZOOM_set_dset_error(c, YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE, "Bib-1",
-                       0, 0);
+        if (*start >= resultset->size)
+            *count = 0;
+        else if (*start + *count >= resultset->size)
+            *count = resultset->size - *start;
     }
 
     if (c->error)                  /* don't continue on error */
