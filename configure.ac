@@ -103,6 +103,7 @@ if test "$memcached" != "no" -a -n "$libgcryptversion" -a "$pkgconfigpath" != "N
 	    AC_MSG_RESULT([yes])
             CFLAGS="$CFLAGS `$pkgconfigpath --cflags libmemcached`"
             MEMCACHED_LIBS="`$pkgconfigpath --libs libmemcached`"
+	    AC_DEFINE([HAVE_LIBMEMCACHED_MEMCACHED_H],[1],[Define to 1 if memcached header])
 	    AC_DEFINE([HAVE_MEMCACHED_FUNC],[1],[Define to 1 if memcached function  is defined])
 	    AC_DEFINE([HAVE_MEMCACHED_RETURN_T],[1],[Define to 1 if memcached_return_t is defined])
         else
