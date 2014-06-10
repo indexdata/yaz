@@ -46,7 +46,8 @@ BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: readline-devel
 BuildRequires: libicu-devel
-BuildRequires: libmemcached-devel
+BuildRequires: wget
+BuildRequires: cyrus-sasl-devel
 BuildRequires: libgcrypt-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
@@ -96,9 +97,17 @@ chain facility of YAZ.
 %prep
 %setup
 
+wget -q http://ftp.indexdata.dk/pub/support/libmemcached-1.0.18.tar.gz
+tar zxf libmemcached-1.0.18.tar.gz
+
 %build
 
-CFLAGS="$RPM_OPT_FLAGS" \
+YD=`pwd`
+cd libmemcached-1.0.18
+./configure --disable-shared --prefix=${YD}/libmemcached
+make install
+cd ..
+PKG_CONFIG_PATH=${YD}/libmemcached/lib/pkgconfig CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
 	--enable-shared --enable-tcpd --with-xslt --with-gnutls --with-icu
 make CFLAGS="$RPM_OPT_FLAGS"
