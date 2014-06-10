@@ -96,20 +96,25 @@ dnl ------ memcached
 memcached=default
 AC_SUBST([MEMCACHED_LIBS])
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
-if test "$memcached" != "no" -a -n "$libgcryptversion"; then
-    AC_CHECK_LIB([memcached],[memcached_get], [MEMCACHED_LIBS="-lmemcached"])
-    if test "$ac_cv_lib_memcached_memcached_get" = "yes"; then
-	AC_CHECK_HEADERS([libmemcached/memcached.h])
-	if test "$ac_cv_header_libmemcached_memcached_h" = "yes"; then
-	    AC_CHECK_LIB([memcached],[memcached], [
-		    AC_DEFINE([HAVE_MEMCACHED_FUNC],[1],[Define to 1 if memcached function  is defined])])
-	    AC_TRY_COMPILE(
-		[
-#include <libmemcached/memcached.h>
-		    ],[
-		    memcached_return_t x;
-		    ],[AC_DEFINE([HAVE_MEMCACHED_RETURN_T],[1],[Define to 1 if memcached_return_t is defined])]
-		    )
+if test "$memcached" != "no" -a -n "$libgcryptversion" -a "$pkgconfigpath" != "NONE"; then
+    AC_MSG_CHECKING([for libmemcached])
+    if $pkgconfigpath --cflags libmemcached >/dev/null 2>&1 ; then
+	if $pkgconfigpath --atleast-version 1.0 libmemcached; then
+	    AC_MSG_RESULT([yes])
+            CFLAGS="$CFLAGS `$pkgconfigpath --cflags libmemcached`"
+            MEMCACHED_LIBS="`$pkgconfigpath --libs libmemcached`"
+	    AC_DEFINE([HAVE_MEMCACHED_FUNC],[1],[Define to 1 if memcached function  is defined])
+	    AC_DEFINE([HAVE_MEMCACHED_RETURN_T],[1],[Define to 1 if memcached_return_t is defined])
+        else
+	    AC_MSG_RESULT([no. Version 1.0 required])
+            if test "$memcached" != "default"; then
+	        AC_MSG_ERROR([libmemcached  libraries missing])
+            fi
+        fi
+    else
+	AC_MSG_RESULT([no])
+        if test "$memcached" != "default"; then
+	    AC_MSG_ERROR([libmemcached  libraries missing])
 	fi
     fi
 fi
