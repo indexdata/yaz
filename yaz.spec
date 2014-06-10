@@ -59,7 +59,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz5
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt, gnutls, libicu, libmemcached, libgcrypt
+Requires: libxslt, gnutls, libicu, libgcrypt
 
 %description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
