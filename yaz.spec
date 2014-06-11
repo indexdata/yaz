@@ -16,6 +16,7 @@ Release: 1.indexdata
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 Requires: libxslt, gnutls, readline, libyaz5 = %{version}
+Requires: hiredis
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -48,6 +49,7 @@ BuildRequires: readline-devel
 BuildRequires: libicu-devel
 BuildRequires: wget
 BuildRequires: libgcrypt-devel
+BuildRequires: hiredis-devel
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
@@ -101,7 +103,7 @@ chain facility of YAZ.
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
 	--enable-shared --enable-tcpd --with-xslt --with-gnutls --with-icu \
-	--without-memcached
+	--without-memcached --with-redis
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
