@@ -32,6 +32,9 @@ void ZOOM_memcached_init(ZOOM_connection c)
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     c->mc_st = 0;
 #endif
+#if HAVE_HIREDIS
+    c->redis_c = 0;
+#endif
 }
 
 void ZOOM_memcached_destroy(ZOOM_connection c)
@@ -39,6 +42,10 @@ void ZOOM_memcached_destroy(ZOOM_connection c)
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st)
         memcached_free(c->mc_st);
+#endif
+#if HAVE_HIREDIS
+    if (c->redis_c)
+        redisFree(c->redis_c);
 #endif
 }
 
@@ -95,6 +102,13 @@ static memcached_st *yaz_memcached_wrap(const char *conf)
 int ZOOM_memcached_configure(ZOOM_connection c)
 {
     const char *val;
+#if HAVE_HIREDIS
+    if (c->redis_c)
+    {
+        redisFree(c->redis_c);
+        c->redis_c = 0;
+    }
+#endif
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st)
     {
@@ -102,6 +116,26 @@ int ZOOM_memcached_configure(ZOOM_connection c)
         c->mc_st = 0;
     }
 #endif
+
+    val = ZOOM_options_get(c->options, "redis");
+    if (val && *val)
+    {
+#if HAVE_HIREDIS
+        struct timeval timeout = { 1, 500000 }; /* 1.5 seconds */
+
+        c->redis_c = redisConnectWithTimeout(val, 6379, timeout);
+        if (c->redis_c == 0 || c->redis_c->err)
+        {
+            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
+                           "could not create redis");
+            return -1;
+        }
+        return 0; /* don't bother with memcached if redis is enabled */
+#else
+        ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, "not enabled");
+        return -1;
+#endif
+    }
     val = ZOOM_options_get(c->options, "memcached");
     if (val && *val)
     {
@@ -122,7 +156,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     return 0;
 }
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_GCRYPT_H
 static void wrbuf_vary_puts(WRBUF w, const char *v)
 {
     if (v)
@@ -141,7 +175,7 @@ static void wrbuf_vary_puts(WRBUF w, const char *v)
 
 void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
 {
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_GCRYPT_H
     ZOOM_connection c = r->connection;
 
     r->mc_key = wrbuf_alloc();
@@ -170,6 +204,50 @@ void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
 
 void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
 {
+#if HAVE_HIREDIS
+    if (c->redis_c && resultset->live_set == 0)
+    {
+        redisReply *reply;
+        const char *argv[2];
+
+        argv[0] = "GET";
+        argv[1] = wrbuf_cstr(resultset->mc_key);
+
+        reply = redisCommandArgv(c->redis_c, 2, argv, 0);
+        /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
+        if (reply && reply->type == REDIS_REPLY_STRING)
+        {
+            char *v = reply->str;
+            int v_len = reply->len;
+            ZOOM_Event event;
+            size_t lead_len = strlen(v) + 1;
+
+            resultset->size = odr_atoi(v);
+
+            yaz_log(YLOG_LOG, "For key %s got value %s lead_len=%d len=%d",
+                    wrbuf_cstr(resultset->mc_key), v, (int) lead_len,
+                    (int) v_len);
+            if (v_len > lead_len)
+            {
+                Z_OtherInformation *oi = 0;
+                int oi_len = v_len - lead_len;
+                odr_setbuf(resultset->odr, v + lead_len, oi_len, 0);
+                if (!z_OtherInformation(resultset->odr, &oi, 0, 0))
+                {
+                    yaz_log(YLOG_WARN, "oi decoding failed");
+                    freeReplyObject(reply);
+                    return;
+                }
+                ZOOM_handle_search_result(c, resultset, oi);
+                ZOOM_handle_facet_result(c, resultset, oi);
+            }
+            event = ZOOM_Event_create(ZOOM_EVENT_RECV_SEARCH);
+            ZOOM_connection_put_event(c, event);
+            resultset->live_set = 1;
+        }
+        freeReplyObject(reply);
+    }
+#endif
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st && resultset->live_set == 0)
     {
@@ -216,6 +294,44 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
 void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
                              Z_OtherInformation *oi, const char *precision)
 {
+#if HAVE_HIREDIS
+    if (c->redis_c && resultset->live_set == 0)
+    {
+        char *str;
+        ODR odr = odr_createmem(ODR_ENCODE);
+        char *oi_buf = 0;
+        int oi_len = 0;
+        char *key;
+
+        str = odr_malloc(odr, 20 + strlen(precision));
+        /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
+        sprintf(str, ODR_INT_PRINTF ";%s", resultset->size, precision);
+        if (oi)
+        {
+            z_OtherInformation(odr, &oi, 0, 0);
+            oi_buf = odr_getbuf(odr, &oi_len, 0);
+        }
+        key = odr_malloc(odr, strlen(str) + 1 + oi_len);
+        strcpy(key, str);
+        if (oi_len)
+            memcpy(key + strlen(str) + 1, oi_buf, oi_len);
+
+        {
+            redisReply *reply;
+            const char *argv[3];
+            size_t argvlen[3];
+            argv[0] = "SET";
+            argvlen[0] = 3;
+            argv[1] = wrbuf_buf(resultset->mc_key);
+            argvlen[1] = wrbuf_len(resultset->mc_key);
+            argv[2] = key;
+            argvlen[2] = strlen(str) + 1 + oi_len;
+            reply = redisCommandArgv(c->redis_c, 3, argv, argvlen);
+            freeReplyObject(reply);
+        }
+        odr_destroy(odr);
+    }
+#endif
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (c->mc_st && resultset->live_set == 0)
     {
@@ -259,6 +375,57 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                         const char *schema,
                         Z_SRW_diagnostic *diag)
 {
+#if HAVE_HIREDIS
+    if (r->connection->redis_c &&
+        !diag && npr->which == Z_NamePlusRecord_databaseRecord)
+    {
+        WRBUF k = wrbuf_alloc();
+        WRBUF rec_sha1 = wrbuf_alloc();
+        ODR odr = odr_createmem(ODR_ENCODE);
+        char *rec_buf;
+        int rec_len;
+        const char *argv[3];
+        size_t argvlen[3];
+        redisReply *reply;
+
+        z_NamePlusRecord(odr, &npr, 0, 0);
+        rec_buf = odr_getbuf(odr, &rec_len, 0);
+
+        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
+        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
+                     syntax ? syntax : "",
+                     elementSetName ? elementSetName : "",
+                     schema ? schema : "");
+
+        wrbuf_sha1_write(rec_sha1, rec_buf, rec_len, 1);
+
+        argv[0] = "SET";
+        argvlen[0] = 3;
+        argv[1] = wrbuf_buf(k);
+        argvlen[1] = wrbuf_len(k);
+        argv[2] = wrbuf_buf(rec_sha1);
+        argvlen[2] = wrbuf_len(rec_sha1);
+
+        reply = redisCommandArgv(r->connection->redis_c, 3, argv, argvlen);
+        yaz_log(YLOG_LOG, "Store record key=%s val=%s",
+                wrbuf_cstr(k), wrbuf_cstr(rec_sha1));
+        freeReplyObject(reply);
+
+        argv[1] = wrbuf_buf(rec_sha1);
+        argvlen[1] = wrbuf_len(rec_sha1);
+        argv[2] = rec_buf;
+        argvlen[2] = rec_len;
+
+        reply = redisCommandArgv(r->connection->redis_c, 3, argv, argvlen);
+        yaz_log(YLOG_LOG, "Add record key=%s rec_len=%d",
+                wrbuf_cstr(rec_sha1), rec_len);
+        freeReplyObject(reply);
+
+        odr_destroy(odr);
+        wrbuf_destroy(k);
+        wrbuf_destroy(rec_sha1);
+    }
+#endif
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (r->connection->mc_st &&
         !diag && npr->which == Z_NamePlusRecord_databaseRecord)
@@ -313,6 +480,61 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                                         const char *elementSetName,
                                         const char *schema)
 {
+#if HAVE_HIREDIS
+    if (r->connection && r->connection->redis_c)
+    {
+        WRBUF k = wrbuf_alloc();
+        const char *argv[2];
+        size_t argvlen[2];
+        redisReply *reply1;
+
+        wrbuf_write(k, wrbuf_buf(r->mc_key), wrbuf_len(r->mc_key));
+        wrbuf_printf(k, ";%d;%s;%s;%s", pos,
+                     syntax ? syntax : "",
+                     elementSetName ? elementSetName : "",
+                     schema ? schema : "");
+
+        yaz_log(YLOG_LOG, "Lookup record %s", wrbuf_cstr(k));
+        argv[0] = "GET";
+        argvlen[0] = 3;
+        argv[1] = wrbuf_buf(k);
+        argvlen[1] = wrbuf_len(k);
+        reply1 = redisCommandArgv(r->connection->redis_c, 2, argv, argvlen);
+
+        wrbuf_destroy(k);
+        if (reply1 && reply1->type == REDIS_REPLY_STRING)
+        {
+            redisReply *reply2;
+            char *sha1_buf = reply1->str;
+            int sha1_len = reply1->len;
+
+            yaz_log(YLOG_LOG, "Lookup record %.*s", (int) sha1_len, sha1_buf);
+
+            argv[0] = "GET";
+            argvlen[0] = 3;
+            argv[1] = sha1_buf;
+            argvlen[1] = sha1_len;
+
+            reply2 = redisCommandArgv(r->connection->redis_c, 2, argv, argvlen);
+            if (reply2 && reply2->type == REDIS_REPLY_STRING)
+            {
+                Z_NamePlusRecord *npr = 0;
+                char *v_buf = reply2->str;
+                int v_len = reply2->len;
+
+                odr_setbuf(r->odr, v_buf, v_len, 0);
+                z_NamePlusRecord(r->odr, &npr, 0, 0);
+                if (npr)
+                    yaz_log(YLOG_LOG, "returned redis copy");
+                freeReplyObject(reply2);
+                freeReplyObject(reply1);
+                return npr;
+            }
+            freeReplyObject(reply2);
+        }
+        freeReplyObject(reply1);
+    }
+#endif
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     if (r->connection && r->connection->mc_st)
     {

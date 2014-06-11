@@ -39,6 +39,9 @@
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
 #include <libmemcached/memcached.h>
 #endif
+#if HAVE_HIREDIS
+#include <hiredis/hiredis.h>
+#endif
 
 #define SHPTR 1
 
@@ -114,6 +117,9 @@ struct ZOOM_connection_p {
     WRBUF saveAPDU_wrbuf;
 #if HAVE_LIBMEMCACHED_MEMCACHED_H
     memcached_st *mc_st;
+#endif
+#if HAVE_HIREDIS
+    redisContext *redis_c;
 #endif
 };
 

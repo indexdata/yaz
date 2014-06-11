@@ -92,6 +92,31 @@ if test "$libgcryptpath" != "no"; then
 	AC_MSG_RESULT([no])
     fi
 fi
+dnl ------ redis
+hiredis=default
+AC_SUBST([HIREDIS_LIBS])
+AC_ARG_WITH([redis], [  --with-redis        hiredis library], [hiredis=$withval])
+if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE"; then
+    AC_MSG_CHECKING([for redis])
+    if $pkgconfigpath --cflags hiredis >/dev/null 2>&1 ; then
+	if $pkgconfigpath --atleast-version 0.10 hiredis; then
+	    AC_MSG_RESULT([yes])
+            CFLAGS="$CFLAGS `$pkgconfigpath --cflags hiredis`"
+            HIREDIS_LIBS="`$pkgconfigpath --libs hiredis`"
+	    AC_DEFINE([HAVE_HIREDIS],[1],[Define to 1 if hiredis is enabled])
+	else
+	    AC_MSG_RESULT([no. Version 0.10 required])
+            if test "$hiredis" != "default"; then
+	        AC_MSG_ERROR([hiredis libraries missing])
+            fi
+	fi
+    else
+	AC_MSG_RESULT([no])
+        if test "$hiredis" != "default"; then
+	    AC_MSG_ERROR([hiredis libraries missing])
+	fi
+    fi
+fi
 dnl ------ memcached
 memcached=default
 AC_SUBST([MEMCACHED_LIBS])
