@@ -8,7 +8,7 @@
 Name: yaz
 Summary: Z39.50 Programs
 Version: %{idmetaversion}
-Release: 1.indexdata
+Release: 4.redis
 
 # determine system
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
