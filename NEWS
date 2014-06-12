@@ -1,3 +1,5 @@
+--- 5.2.0 2014/06/12
+
 Allow ZOOM caching using redis. New ZOOM option "redis" controls it.
 
 RPM: do not build with libmemcached support. The libmemcached library

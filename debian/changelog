@@ -1,3 +1,9 @@
+yaz (5.2.0-1.indexdata) unstable; urgency=medium
+
+  * Upstream.
+
+ -- Adam Dickmeiss <adam@indexdata.dk>  Thu, 12 Jun 2014 12:56:59 +0200
+
 yaz (5.1.3-1.indexdata) unstable; urgency=medium
 
   * Upstream.
