@@ -15,8 +15,7 @@ Release: 4.redis
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
-Requires: libxslt, gnutls, readline, libyaz5 = %{version}
-Requires: hiredis
+Requires: readline, libyaz5 = %{version}
 License: BSD
 Group: Applications/Internet
 Vendor: Index Data ApS <info@indexdata.dk>
@@ -61,6 +60,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt, gnutls, libicu, libgcrypt
+Requires: hiredis
 
 %description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
