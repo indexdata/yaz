@@ -11,6 +11,7 @@ Version: %{idmetaversion}
 Release: 1.indexdata
 
 # determine system
+%define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
@@ -23,10 +24,10 @@ Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
 
-%define TCPWRAPPER tcp_wrappers
-
-%if %is_fedora
 %define TCPWRAPPER tcp_wrappers-devel
+
+%if %is_redhat5
+%define TCPWRAPPER tcp_wrappers
 %endif
 
 %if %is_suse
@@ -48,7 +49,10 @@ BuildRequires: readline-devel
 BuildRequires: libicu-devel
 BuildRequires: wget
 BuildRequires: libgcrypt-devel
+%if %is_redhat5
+%else
 BuildRequires: hiredis-devel
+%endif
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
@@ -60,7 +64,10 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt, gnutls, libicu, libgcrypt
+%if %is_redhat5
+%else
 Requires: hiredis
+%endif
 
 %description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
@@ -103,7 +110,7 @@ chain facility of YAZ.
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
 	--enable-shared --enable-tcpd --with-xslt --with-gnutls --with-icu \
-	--without-memcached --with-redis
+	--without-memcached
 make CFLAGS="$RPM_OPT_FLAGS"
 
 %install
