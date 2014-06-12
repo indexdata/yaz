@@ -115,15 +115,8 @@ static redisContext *create_redis(const char *conf)
             struct timeval timeout = { 1, 500000 }; /* 1.5 seconds */
             char *host = darray[i] + 9;
             char *port = strchr(host, ':');
-            char *weight = strstr(host, "/?");
             if (port)
                 *port++ = '\0';
-            if (weight)
-            {
-                *weight = '\0';
-                weight += 2;
-            }
-
             context = redisConnectWithTimeout(host,
                                               port ? atoi(port) : 6379,
                                               timeout);
@@ -156,9 +149,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     if (val && *val)
     {
 #if HAVE_HIREDIS
-        struct timeval timeout = { 1, 500000 }; /* 1.5 seconds */
-
-        c->redis_c = redisConnectWithTimeout(val, 6379, timeout);
+        c->redis_c = create_redis(val);
         if (c->redis_c == 0 || c->redis_c->err)
         {
             ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
@@ -184,18 +175,8 @@ int ZOOM_memcached_configure(ZOOM_connection c)
         }
         memcached_behavior_set(c->mc_st, MEMCACHED_BEHAVIOR_BINARY_PROTOCOL, 1);
 #else
-#if HAVE_HIREDIS
-        c->redis_c = create_redis(val);
-        if (c->redis_c == 0 || c->redis_c->err)
-        {
-            ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
-                           "could not create redis");
-            return -1;
-        }
-#else
         ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED, "not enabled");
         return -1;
-#endif
 #endif
     }
     return 0;
