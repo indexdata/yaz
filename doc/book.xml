@@ -705,6 +705,20 @@
        </para>
        </listitem>
       </varlistentry>
+      <varlistentry>
+       <term>
+        <literal>--with-redis</literal>
+       </term>
+       <listitem>
+	<para>&yaz; will be linked with the hiredis C library
+	to allow for result-set caching for ZOOM on a
+	<ulink url="&url.redis;">redis</ulink> server.
+	The prefix can not be given. Note that YAZ will only search
+	for hiredis if Libgcrypt is also enabled.
+       </para>
+       </listitem>
+      </varlistentry>
+
      </variablelist>
     </para>
     <para>
@@ -1542,6 +1556,23 @@
        do not offer this function. In this case only the option
        <literal>--server=</literal><replaceable>host</replaceable> may
        be given (YAZ emulates that part of libMemcached).
+      </entry><entry>none</entry></row>
+      <row><entry>
+       redis</entry><entry>
+       If given and non-empty,
+       a <ulink url="&url.redis;">redis</ulink> context will be created
+       for the connection.
+       This option is inspected by ZOOM when a connection is established.
+       If the <literal>redis</literal> option is given
+       and YAZ is compiled without redis support, an internal
+       diagnostic (10018) will be thrown.
+       redis support is available for YAZ 5.2.0 or later. If this
+       option is supplied for an earlier version of YAZ, it is
+       <emphasis>ignored</emphasis>.
+       The value of this option is a set options, similar to that
+       of the memcached function. At this stage only --server=host[:port]
+       is supported. Later versions of YAZ might honor expiry for various
+       items and other things that tune the redis usage.
       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
