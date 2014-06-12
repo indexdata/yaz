@@ -702,6 +702,7 @@
 	for result-set caching for ZOOM.
 	The prefix can not be given. Note that YAZ will only search
 	for libMemcached if Libgcrypt is also enabled.
+	Note that 0.40 of libmemcached is required.
        </para>
        </listitem>
       </varlistentry>
