@@ -20,16 +20,17 @@
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
-#if HAVE_MEMCACHED_RETURN_T
+#if HAVE_LIBMEMCACHED
+#if LIBMEMCACHED_VERSION_HEX >= 0x01000000
+#define HAVE_MEMCACHED_FUNC 1
 #else
-typedef memcached_return memcached_return_t;
+#define HAVE_MEMCACHED_FUNC 0
 #endif
 #endif
 
 void ZOOM_memcached_init(ZOOM_connection c)
 {
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     c->mc_st = 0;
 #endif
 #if HAVE_HIREDIS
@@ -39,7 +40,7 @@ void ZOOM_memcached_init(ZOOM_connection c)
 
 void ZOOM_memcached_destroy(ZOOM_connection c)
 {
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (c->mc_st)
         memcached_free(c->mc_st);
 #endif
@@ -49,7 +50,7 @@ void ZOOM_memcached_destroy(ZOOM_connection c)
 #endif
 }
 
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
 /* memcached wrapper.. Because memcached function do not exist in older libs */
 static memcached_st *yaz_memcached_wrap(const char *conf)
 {
@@ -137,7 +138,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
         c->redis_c = 0;
     }
 #endif
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (c->mc_st)
     {
         memcached_free(c->mc_st);
@@ -165,7 +166,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     val = ZOOM_options_get(c->options, "memcached");
     if (val && *val)
     {
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
         c->mc_st = yaz_memcached_wrap(val);
         if (!c->mc_st)
         {
@@ -274,7 +275,7 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
         freeReplyObject(reply);
     }
 #endif
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (c->mc_st && resultset->live_set == 0)
     {
         size_t v_len;
@@ -358,7 +359,7 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
         odr_destroy(odr);
     }
 #endif
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (c->mc_st && resultset->live_set == 0)
     {
         uint32_t flags = 0;
@@ -452,7 +453,7 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         wrbuf_destroy(rec_sha1);
     }
 #endif
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (r->connection->mc_st &&
         !diag && npr->which == Z_NamePlusRecord_databaseRecord)
     {
@@ -561,7 +562,7 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
         freeReplyObject(reply1);
     }
 #endif
-#if HAVE_LIBMEMCACHED_MEMCACHED_H
+#if HAVE_LIBMEMCACHED
     if (r->connection && r->connection->mc_st)
     {
         WRBUF k = wrbuf_alloc();
