@@ -11,6 +11,7 @@ Build-Depends: debhelper (>= 7),
 	libwrap0-dev,
 	libmemcached-dev,
 	libgcrypt11-dev,
+	libhiredis-dev,
 	libicu-dev
 
 Package: libyaz5
