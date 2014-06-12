@@ -7,7 +7,7 @@ export DH_VERBOSE=1
 override_dh_auto_configure:
 	dh_auto_configure -- \
 		--enable-tcpd --with-xslt --with-gnutls --with-icu \
-		--with-memcached --with-redis
+		--with-memcached
 
 override_dh_strip:
 	dh_strip --dbg-package=libyaz5-dbg
