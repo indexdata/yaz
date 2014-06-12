@@ -96,7 +96,7 @@ dnl ------ redis
 hiredis=default
 AC_SUBST([HIREDIS_LIBS])
 AC_ARG_WITH([redis], [  --with-redis        hiredis library], [hiredis=$withval])
-if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE"; then
+if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE" -a "$libgcryptversion"; then
     AC_CHECK_LIB([hiredis],[redisCommandArgv],[HIREDIS_LIBS=-lhiredis])
     AC_MSG_CHECKING([for redis])
     if $pkgconfigpath --cflags hiredis >/dev/null 2>&1 ; then
