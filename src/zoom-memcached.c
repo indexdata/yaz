@@ -272,7 +272,8 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
             ZOOM_connection_put_event(c, event);
             resultset->live_set = 1;
         }
-        freeReplyObject(reply);
+        if (reply)
+            freeReplyObject(reply);
     }
 #endif
 #if HAVE_LIBMEMCACHED
