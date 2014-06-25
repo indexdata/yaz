@@ -373,6 +373,8 @@ struct icu_iter {
     int token_count;
     size_t org_start;
     size_t org_len;
+    size_t utf8_base;
+    size_t utf16_base;
     struct icu_chain_step *steps;
 };
 
@@ -504,6 +506,7 @@ void icu_iter_first(yaz_icu_iter_t iter, const char *src8cstr)
     icu_buf_utf16_copy(iter->org, src);
     iter->token_count = 0;
     iter->org_start = 0;
+    iter->utf8_base = iter->utf16_base = 0;
     iter->org_len = src->utf16_len;
     iter->last = icu_iter_invoke(iter, iter->steps, src);
 }
@@ -569,13 +572,29 @@ void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
     int32_t len1 = 0, len2 = 0;
     UErrorCode status = U_ZERO_ERROR;
 
-    u_strToUTF8(0, 0, &len1, iter->org->utf16, iter->org_start,
+    if (iter->org_start < iter->utf16_base)
+    {
+        iter->utf8_base = 0;
+        iter->utf16_base = 0;
+    }
+    u_strToUTF8(0, 0, &len1,
+                iter->org->utf16 + iter->utf16_base,
+                iter->org_start - iter->utf16_base,
                 &status);
+
     status = U_ZERO_ERROR;
-    u_strToUTF8(0, 0, &len2, iter->org->utf16 + iter->org_start, iter->org_len,
+
+    *start = len1 + iter->utf8_base;
+
+    u_strToUTF8(0, 0, &len2,
+                iter->org->utf16 + iter->utf16_base,
+                iter->org_start - iter->utf16_base + iter->org_len,
                 &status);
-    *start = len1;
-    *len = len2;
+
+    *len = len2 - len1;
+
+    iter->utf8_base = *start;
+    iter->utf16_base = iter->org_start;
 }
 
 int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
