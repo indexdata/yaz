@@ -566,26 +566,16 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
 
 void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
 {
-    /* save full length of org since we're gonna cut it */
-    int32_t save_len = iter->org->utf16_len;
-
-    struct icu_buf_utf8 *tmp = icu_buf_utf8_create(0);
+    int32_t len1 = 0, len2 = 0;
     UErrorCode status = U_ZERO_ERROR;
 
-    iter->org->utf16_len = iter->org_start;
-    icu_utf16_to_utf8(tmp, iter->org, &status);
-    if (U_SUCCESS(status))
-        *start = tmp->utf8_len;
-    else
-        *start = 0;
-    iter->org->utf16_len = iter->org_start + iter->org_len;
-    icu_utf16_to_utf8(tmp, iter->org, &status);
-    if (U_SUCCESS(status))
-        *len = tmp->utf8_len - *start;
-    else
-        *len = 0;
-    icu_buf_utf8_destroy(tmp);
-    iter->org->utf16_len = save_len;
+    u_strToUTF8(0, 0, &len1, iter->org->utf16, iter->org_start,
+                &status);
+    status = U_ZERO_ERROR;
+    u_strToUTF8(0, 0, &len2, iter->org->utf16 + iter->org_start, iter->org_len,
+                &status);
+    *start = len1;
+    *len = len2;
 }
 
 int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
