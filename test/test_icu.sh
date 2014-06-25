@@ -19,7 +19,7 @@ for f in ${srcdir}/test_icu.[0-9].input; do
     NEW=${fb}.output.tmp
     OLD=${srcdir}/${fb}.output
     DIFF=`basename ${fb}`.diff
-    ../util/yaz-icu -c $CONFIG <$f > $NEW
+    ../util/yaz-icu -o -c $CONFIG <$f > $NEW
     if test $? != "0"; then
 	echo "$f: yaz-icu returned error"
 	ecode=1
