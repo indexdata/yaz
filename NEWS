@@ -1,3 +1,14 @@
+--- 5.2.1 2014/06/26
+
+No [rest of output is omitted] limit for yaz_log YAZ-774
+
+Optimize icu_iter_get_org_info. Reduce calls to u_strToUTF8.
+
+For ICU testing, pass -o to yaz-icu. This will test the
+icu_iter_get_org_info function.
+
+Fix null ptr reference for freeReplyObject YAZ-773
+
 --- 5.2.0 2014/06/12
 
 Allow ZOOM caching using redis. New ZOOM option "redis" controls it.
