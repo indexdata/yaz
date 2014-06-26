@@ -387,7 +387,8 @@ static void yaz_strftime(char *dst, size_t sz,
     strftime(dst, sz, fmt, tm);
 }
 
-static void yaz_log_to_file(int level, const char *log_message)
+static void yaz_log_to_file(int level, const char *fmt, va_list ap,
+                            const char *error_cp)
 {
     FILE *file;
     time_t ti = time(0);
@@ -449,9 +450,12 @@ static void yaz_log_to_file(int level, const char *log_message)
                 strcat(tid, " ");
         }
 
-        fprintf(file, "%s%s%s%s %s%s\n", tbuf, yaz_log_info.l_prefix,
-                tid, flags, yaz_log_info.l_prefix2,
-                log_message);
+        fprintf(file, "%s%s%s%s %s", tbuf, yaz_log_info.l_prefix,
+                tid, flags, yaz_log_info.l_prefix2);
+        vfprintf(file, fmt, ap);
+        if (error_cp)
+            fprintf(file, " [%s]", error_cp);
+        fputs("\n", file);
         if (l_level & YLOG_FLUSH)
             fflush(file);
     }
@@ -461,40 +465,43 @@ static void yaz_log_to_file(int level, const char *log_message)
 void yaz_log(int level, const char *fmt, ...)
 {
     va_list ap;
-    char buf[4096];
     FILE *file;
     int o_level = level;
+    char *error_cp = 0, error_buf[128];
 
+    if (o_level & YLOG_ERRNO)
+    {
+        yaz_strerror(error_buf, sizeof(error_buf));
+        error_cp = error_buf;
+    }
     yaz_init_globals();
     if (!(level & l_level))
         return;
     va_start(ap, fmt);
 
-    /* 30 is enough for our 'rest of output' message */
-    yaz_vsnprintf(buf, sizeof(buf)-30, fmt, ap);
-    if (strlen(buf) >= sizeof(buf)-31)
-        strcat(buf, " [rest of output omitted]");
-
-    if (o_level & YLOG_ERRNO)
-    {
-        size_t remain = sizeof(buf) - strlen(buf);
-        if (remain > 100) /* reasonable minimum space for error */
-        {
-            strcat(buf, " [");
-            yaz_strerror(buf+strlen(buf), remain-5); /* 5 due to extra [] */
-            strcat(buf, "]");
-        }
-    }
-    va_end (ap);
-    if (start_hook_func)
-        (*start_hook_func)(o_level, buf, start_hook_info);
-    if (hook_func)
-        (*hook_func)(o_level, buf, hook_info);
     file = yaz_log_file();
-    if (file)
-        yaz_log_to_file(level, buf);
-    if (end_hook_func)
-        (*end_hook_func)(o_level, buf, end_hook_info);
+    if (start_hook_func || hook_func || end_hook_func)
+    {
+        char buf[1024];
+        /* 30 is enough for our 'rest of output' message */
+        yaz_vsnprintf(buf, sizeof(buf)-30, fmt, ap);
+        if (strlen(buf) >= sizeof(buf)-31)
+            strcat(buf, " [rest of output omitted]");
+        if (start_hook_func)
+            (*start_hook_func)(o_level, buf, start_hook_info);
+        if (hook_func)
+            (*hook_func)(o_level, buf, hook_info);
+        if (file)
+            yaz_log_to_file(level, fmt, ap, error_cp);
+        if (end_hook_func)
+            (*end_hook_func)(o_level, buf, end_hook_info);
+    }
+    else
+    {
+        if (file)
+            yaz_log_to_file(level, fmt, ap, error_cp);
+    }
+    va_end(ap);
 }
 
 void yaz_log_time_format(const char *fmt)
