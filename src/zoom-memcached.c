@@ -20,14 +20,6 @@
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
 
-#if HAVE_LIBMEMCACHED
-#if LIBMEMCACHED_VERSION_HEX >= 0x01000000
-#define HAVE_MEMCACHED_FUNC 1
-#else
-#define HAVE_MEMCACHED_FUNC 0
-#endif
-#endif
-
 void ZOOM_memcached_init(ZOOM_connection c)
 {
 #if HAVE_LIBMEMCACHED
@@ -36,6 +28,8 @@ void ZOOM_memcached_init(ZOOM_connection c)
 #if HAVE_HIREDIS
     c->redis_c = 0;
 #endif
+    c->expire_search = 600;
+    c->expire_record = 1200;
 }
 
 void ZOOM_memcached_destroy(ZOOM_connection c)
@@ -51,12 +45,9 @@ void ZOOM_memcached_destroy(ZOOM_connection c)
 }
 
 #if HAVE_LIBMEMCACHED
-/* memcached wrapper.. Because memcached function do not exist in older libs */
-static memcached_st *yaz_memcached_wrap(const char *conf)
+static memcached_st *create_memcached(const char *conf,
+                                      int *expire_search, int *expire_record)
 {
-#if HAVE_MEMCACHED_FUNC
-    return memcached(conf, strlen(conf));
-#else
     char **darray;
     int i, num;
     memcached_st *mc = memcached_create(0);
@@ -87,6 +78,11 @@ static memcached_st *yaz_memcached_wrap(const char *conf)
                 mc = 0;
             }
         }
+        else if (!yaz_strncasecmp(darray[i], "--EXPIRE=", 9))
+        {
+            *expire_search = atoi(darray[i] + 9);
+            *expire_record = 600 + *expire_search;
+        }
         else
         {
             /* bad directive */
@@ -96,12 +92,12 @@ static memcached_st *yaz_memcached_wrap(const char *conf)
     }
     nmem_destroy(nmem);
     return mc;
-#endif
 }
 #endif
 
 #if HAVE_HIREDIS
-static redisContext *create_redis(const char *conf)
+static redisContext *create_redis(const char *conf,
+                                  int *expire_search, int *expire_record)
 {
     char **darray;
     int i, num;
@@ -121,6 +117,11 @@ static redisContext *create_redis(const char *conf)
             context = redisConnectWithTimeout(host,
                                               port ? atoi(port) : 6379,
                                               timeout);
+        }
+        else if (!yaz_strncasecmp(darray[i], "--EXPIRE=", 9))
+        {
+            *expire_search = atoi(darray[i] + 9);
+            *expire_record = 600 + *expire_search;
         }
     }
     nmem_destroy(nmem);
@@ -150,7 +151,8 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     if (val && *val)
     {
 #if HAVE_HIREDIS
-        c->redis_c = create_redis(val);
+        c->redis_c = create_redis(val,
+                                  &c->expire_search, &c->expire_record);
         if (c->redis_c == 0 || c->redis_c->err)
         {
             ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
@@ -167,7 +169,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     if (val && *val)
     {
 #if HAVE_LIBMEMCACHED
-        c->mc_st = yaz_memcached_wrap(val);
+        c->mc_st = create_memcached(val, &c->expire_search, &c->expire_record);
         if (!c->mc_st)
         {
             ZOOM_set_error(c, ZOOM_ERROR_MEMCACHED,
@@ -319,6 +321,28 @@ void ZOOM_memcached_search(ZOOM_connection c, ZOOM_resultset resultset)
 #endif
 }
 
+#if HAVE_HIREDIS
+static void expire_redis(redisContext *redis_c,
+                         const char *buf, size_t len, int exp)
+{
+    redisReply *reply;
+    const char *argv[3];
+    size_t argvlen[3];
+    char key_val[20];
+
+    sprintf(key_val, "%d", exp);
+
+    argv[0] = "EXPIRE";
+    argvlen[0] = 6;
+    argv[1] = buf;
+    argvlen[1] = len;
+    argv[2] = key_val;
+    argvlen[2] = strlen(key_val);
+    reply = redisCommandArgv(redis_c, 3, argv, argvlen);
+    freeReplyObject(reply);
+}
+#endif
+
 void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
                              Z_OtherInformation *oi, const char *precision)
 {
@@ -357,6 +381,10 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
             reply = redisCommandArgv(c->redis_c, 3, argv, argvlen);
             freeReplyObject(reply);
         }
+        expire_redis(c->redis_c,
+                     wrbuf_buf(resultset->mc_key),
+                     wrbuf_len(resultset->mc_key),
+                     c->expire_search);
         odr_destroy(odr);
     }
 #endif
@@ -365,7 +393,6 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
     {
         uint32_t flags = 0;
         memcached_return_t rc;
-        time_t expiration = 36000;
         char *str;
         ODR odr = odr_createmem(ODR_ENCODE);
         char *oi_buf = 0;
@@ -388,7 +415,8 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
         rc = memcached_set(c->mc_st,
                            wrbuf_buf(resultset->mc_key),
                            wrbuf_len(resultset->mc_key),
-                           key, strlen(str) + 1 + oi_len, expiration, flags);
+                           key, strlen(str) + 1 + oi_len,
+                           c->expire_search, flags);
         yaz_log(YLOG_LOG, "Store hit count key=%s value=%s oi_len=%d rc=%u %s",
                 wrbuf_cstr(resultset->mc_key), str, oi_len, (unsigned) rc,
                 memcached_strerror(c->mc_st, rc));
@@ -439,6 +467,9 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
                 wrbuf_cstr(k), wrbuf_cstr(rec_sha1));
         freeReplyObject(reply);
 
+        expire_redis(r->connection->redis_c, argv[1], argvlen[1],
+                     r->connection->expire_search);
+
         argv[1] = wrbuf_buf(rec_sha1);
         argvlen[1] = wrbuf_len(rec_sha1);
         argv[2] = rec_buf;
@@ -448,6 +479,9 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         yaz_log(YLOG_LOG, "Add record key=%s rec_len=%d",
                 wrbuf_cstr(rec_sha1), rec_len);
         freeReplyObject(reply);
+
+        expire_redis(r->connection->redis_c, argv[1], argvlen[1],
+                     r->connection->expire_record);
 
         odr_destroy(odr);
         wrbuf_destroy(k);
@@ -462,7 +496,6 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         WRBUF rec_sha1 = wrbuf_alloc();
         uint32_t flags = 0;
         memcached_return_t rc;
-        time_t expiration = 36000;
         ODR odr = odr_createmem(ODR_ENCODE);
         char *rec_buf;
         int rec_len;
@@ -481,7 +514,7 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc = memcached_set(r->connection->mc_st,
                            wrbuf_buf(k), wrbuf_len(k),
                            wrbuf_buf(rec_sha1), wrbuf_len(rec_sha1),
-                           expiration, flags);
+                           r->connection->expire_search, flags);
 
         yaz_log(YLOG_LOG, "Store record key=%s val=%s rc=%u %s",
                 wrbuf_cstr(k), wrbuf_cstr(rec_sha1), (unsigned) rc,
@@ -490,7 +523,7 @@ void ZOOM_memcached_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
         rc = memcached_add(r->connection->mc_st,
                            wrbuf_buf(rec_sha1), wrbuf_len(rec_sha1),
                            rec_buf, rec_len,
-                           expiration, flags);
+                           r->connection->expire_record, flags);
 
         yaz_log(YLOG_LOG, "Add record key=%s rec_len=%d rc=%u %s",
                 wrbuf_cstr(rec_sha1), rec_len, (unsigned) rc,

@@ -121,6 +121,8 @@ struct ZOOM_connection_p {
 #if HAVE_HIREDIS
     redisContext *redis_c;
 #endif
+    int expire_search;
+    int expire_record;
 };
 
 typedef struct ZOOM_record_cache_p *ZOOM_record_cache;
