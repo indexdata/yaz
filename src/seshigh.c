@@ -1862,8 +1862,8 @@ static void process_http_request(association *assoc, request *req)
         if (sr->which == Z_SRW_searchRetrieve_request)
         {
             Z_SRW_PDU *res =
-                yaz_srw_get_pdu(assoc->encode, Z_SRW_searchRetrieve_response,
-                                sr->srw_version);
+                yaz_srw_get_pdu_e(assoc->encode, Z_SRW_searchRetrieve_response,
+                                  sr);
             stylesheet = sr->u.request->stylesheet;
             if (num_diagnostic)
             {

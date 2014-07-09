@@ -20,6 +20,34 @@
 
 #define MAX_SRU_PARAMETERS 30
 
+static Z_SRW_extra_arg **append_extra_arg(ODR odr, Z_SRW_extra_arg **l,
+                                          const char *n, const char *v)
+{
+    if (n && v && *v != '\0')
+    {
+        while (*l)
+            l = &(*l)->next;
+        *l = (Z_SRW_extra_arg *) odr_malloc(odr, sizeof(**l));
+        (*l)->name = odr_strdup(odr, n);
+        (*l)->value = odr_strdup(odr, v);
+        (*l)->next = 0;
+        l = &(*l)->next;
+    }
+    return l;
+}
+
+static Z_SRW_extra_arg **append_extra_arg_int(ODR odr, Z_SRW_extra_arg **l,
+                                              const char *n, Odr_int *v)
+{
+    if (v)
+    {
+        char str[32];
+        sprintf(str, ODR_INT_PRINTF, *v);
+        l = append_extra_arg(odr, l, n, str);
+    }
+    return l;
+}
+
 static char *yaz_decode_sru_dbpath_odr(ODR n, const char *uri, size_t len)
 {
     return odr_strdupn(n, uri, len);
@@ -453,13 +481,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     ; /* ignoring extraRequestData */
                 else if (n[0] == 'x' && n[1] == '-')
                 {
-                    Z_SRW_extra_arg **l = &extra_args;
-                    while (*l)
-                        l = &(*l)->next;
-                    *l = (Z_SRW_extra_arg *) odr_malloc(decode, sizeof(**l));
-                    (*l)->name = odr_strdup(decode, n);
-                    (*l)->value = odr_strdup(decode, v);
-                    (*l)->next = 0;
+                    append_extra_arg(decode, &extra_args, n, v);
                 }
                 else
                 {
@@ -730,6 +752,42 @@ Z_SRW_PDU *yaz_srw_get_core_v_2_0(ODR o)
 Z_SRW_PDU *yaz_srw_get(ODR o, int which)
 {
     return yaz_srw_get_pdu(o, which, "2.0");
+}
+
+Z_SRW_PDU *yaz_srw_get_pdu_e(ODR o, int which, Z_SRW_PDU *req)
+{
+    int version2 = !req->srw_version || strcmp(req->srw_version, "2.") > 0;
+    Z_SRW_PDU *res = yaz_srw_get_pdu(o, which, req->srw_version);
+    if (req->which == Z_SRW_searchRetrieve_request &&
+        which == Z_SRW_searchRetrieve_response)
+    {
+        Z_SRW_extra_arg **l = &res->extra_args;
+        l = append_extra_arg(o, l, "version", req->srw_version);
+        if (req->u.request->queryType &&
+            strcmp(req->u.request->queryType, "cql"))
+            l = append_extra_arg(o, l, "queryType", req->u.request->queryType);
+        l = append_extra_arg(o, l, "query", req->u.request->query);
+        l = append_extra_arg_int(o, l, "startRecord",
+                                 req->u.request->startRecord);
+        l = append_extra_arg_int(o, l, "maximumRecords",
+                                 req->u.request->maximumRecords);
+        if (version2)
+        {
+            l = append_extra_arg(o, l, "recordXMLEscaping",
+                                 req->u.request->recordPacking);
+            l = append_extra_arg(o, l, "recordPacking",
+                                 req->u.request->packing);
+        }
+        else
+            l = append_extra_arg(o, l, "recordPacking",
+                                 req->u.request->recordPacking);
+        l = append_extra_arg(o, l, "recordSchema",
+                             req->u.request->recordSchema);
+        if (req->u.request->sort_type == Z_SRW_sort_type_sort)
+            l = append_extra_arg(o, l, "sortKeys",
+                                 req->u.request->sort.sortKeys);
+    }
+    return res;
 }
 
 Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
@@ -1160,19 +1218,12 @@ void yaz_encode_sru_extra(Z_SRW_PDU *sr, ODR odr, const char *extra_args)
         Z_SRW_extra_arg **ea = &sr->extra_args;
         yaz_uri_to_array(extra_args, odr, &name, &val);
 
-        /** append rather than override */
-        while (*ea)
-            ea = &(*ea)->next;
         while (*name)
         {
-            *ea = (Z_SRW_extra_arg *) odr_malloc(odr, sizeof(**ea));
-            (*ea)->name = *name;
-            (*ea)->value = *val;
-            ea = &(*ea)->next;
+            ea = append_extra_arg(odr, ea, *name, *val);
             val++;
             name++;
         }
-        *ea = 0;
     }
 }
 
