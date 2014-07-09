@@ -497,6 +497,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                 operation = "searchRetrieve";
             else if (scanClause)
                 operation = "scan";
+            else
+                operation = "explain";
         }
         version = yaz_negotiate_sru_version(version);
 
@@ -786,6 +788,16 @@ Z_SRW_PDU *yaz_srw_get_pdu_e(ODR o, int which, Z_SRW_PDU *req)
         if (req->u.request->sort_type == Z_SRW_sort_type_sort)
             l = append_extra_arg(o, l, "sortKeys",
                                  req->u.request->sort.sortKeys);
+        l = append_extra_arg(o, l, "stylesheet", req->u.request->stylesheet);
+
+    }
+    if (req->which == Z_SRW_explain_request &&
+        which == Z_SRW_explain_response)
+    {
+        Z_SRW_extra_arg **l = &res->extra_args;
+        l = append_extra_arg(o, l, "version", req->srw_version);
+        l = append_extra_arg(o, l, "stylesheet",
+                             req->u.explain_request->stylesheet);
     }
     return res;
 }

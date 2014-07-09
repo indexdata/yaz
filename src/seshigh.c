@@ -1879,8 +1879,7 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_explain_request)
         {
-            Z_SRW_PDU *res = yaz_srw_get_pdu(o, Z_SRW_explain_response,
-                                             sr->srw_version);
+            Z_SRW_PDU *res = yaz_srw_get_pdu_e(o, Z_SRW_explain_response, sr);
             stylesheet = sr->u.explain_request->stylesheet;
             if (num_diagnostic)
             {
@@ -1894,8 +1893,7 @@ static void process_http_request(association *assoc, request *req)
         }
         else if (sr->which == Z_SRW_scan_request)
         {
-            Z_SRW_PDU *res = yaz_srw_get_pdu(o, Z_SRW_scan_response,
-                                             sr->srw_version);
+            Z_SRW_PDU *res = yaz_srw_get_pdu_e(o, Z_SRW_scan_response, sr);
             stylesheet = sr->u.scan_request->stylesheet;
             if (num_diagnostic)
             {

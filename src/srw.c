@@ -1053,6 +1053,14 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 yaz_srw_record(o, ptr1, &res->record, &res->extra_record,
                                client_data, version2);
             }
+            if ((*p)->extra_args)
+            {
+                xmlNode *p1 =
+                    xmlNewChild(ptr, 0, BAD_CAST "echoedExplainRequest", 0);
+                Z_SRW_extra_arg *ea = (*p)->extra_args;
+                for (; ea; ea = ea->next)
+                    add_xsd_string(p1, ea->name, ea->value);
+            }
             if (res->num_diagnostics)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "diagnostics",
