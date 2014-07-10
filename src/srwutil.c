@@ -756,15 +756,16 @@ Z_SRW_PDU *yaz_srw_get(ODR o, int which)
     return yaz_srw_get_pdu(o, which, "2.0");
 }
 
+/* http://docs.oasis-open.org/search-ws/searchRetrieve/v1.0/os/schemas/sruResponse.xsd */
 Z_SRW_PDU *yaz_srw_get_pdu_e(ODR o, int which, Z_SRW_PDU *req)
 {
     int version2 = !req->srw_version || strcmp(req->srw_version, "2.") > 0;
     Z_SRW_PDU *res = yaz_srw_get_pdu(o, which, req->srw_version);
+    Z_SRW_extra_arg **l = &res->extra_args, *ea;
+    l = append_extra_arg(o, l, "version", req->srw_version);
     if (req->which == Z_SRW_searchRetrieve_request &&
         which == Z_SRW_searchRetrieve_response)
     {
-        Z_SRW_extra_arg **l = &res->extra_args;
-        l = append_extra_arg(o, l, "version", req->srw_version);
         if (req->u.request->queryType &&
             strcmp(req->u.request->queryType, "cql"))
             l = append_extra_arg(o, l, "queryType", req->u.request->queryType);
@@ -789,16 +790,25 @@ Z_SRW_PDU *yaz_srw_get_pdu_e(ODR o, int which, Z_SRW_PDU *req)
             l = append_extra_arg(o, l, "sortKeys",
                                  req->u.request->sort.sortKeys);
         l = append_extra_arg(o, l, "stylesheet", req->u.request->stylesheet);
-
     }
     if (req->which == Z_SRW_explain_request &&
         which == Z_SRW_explain_response)
     {
-        Z_SRW_extra_arg **l = &res->extra_args;
-        l = append_extra_arg(o, l, "version", req->srw_version);
+        if (version2)
+        {
+            l = append_extra_arg(o, l, "recordXMLEscaping",
+                                 req->u.explain_request->recordPacking);
+            l = append_extra_arg(o, l, "recordPacking",
+                                 req->u.explain_request->packing);
+        }
+        else
+            l = append_extra_arg(o, l, "recordPacking",
+                                 req->u.explain_request->recordPacking);
         l = append_extra_arg(o, l, "stylesheet",
                              req->u.explain_request->stylesheet);
     }
+    for (ea = req->extra_args; ea; ea = ea->next)
+        l = append_extra_arg(o, l, ea->name, ea->value);
     return res;
 }
 
@@ -807,7 +817,7 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
     Z_SRW_PDU *sr = yaz_srw_get_core_ver(o, version);
 
     sr->which = which;
-    switch(which)
+    switch (which)
     {
     case Z_SRW_searchRetrieve_request:
         sr->u.request = (Z_SRW_searchRetrieveRequest *)

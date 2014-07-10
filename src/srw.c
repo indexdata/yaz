@@ -554,6 +554,30 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
     return 0;
 }
 
+static void encode_echoed_args(xmlNodePtr ptr, Z_SRW_PDU *p, const char *name)
+{
+    Z_SRW_extra_arg *ea = p->extra_args;
+    if (ea)
+    {
+        xmlNode *p1 = xmlNewChild(ptr, 0, BAD_CAST name, 0);
+        xmlNode *p2 = 0;
+        for (; ea; ea = ea->next)
+        {
+            if (ea->name && ea->name[0] == 'x' && ea->name[1] == '-')
+            {
+                /* not really according to XSD as of July 2014 */
+                if (!p2)
+                    p2 = xmlNewChild(p1, 0,
+                                     BAD_CAST "extraRequestData", 0);
+                /* skip +2: "x-" in element */
+                add_xsd_string(p2, ea->name + 2, ea->value);
+            }
+            else
+                add_xsd_string(p1, ea->name, ea->value);
+        }
+    }
+}
+
 int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                   void *client_data, const char *ns)
 {
@@ -985,16 +1009,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             }
             add_xsd_integer(ptr, "nextRecordPosition",
                             res->nextRecordPosition);
-            if ((*p)->extra_args)
-            {
-                xmlNode *p1 =
-                    xmlNewChild(ptr, 0, BAD_CAST "echoedSearchRetrieveRequest",
-                                0);
-                Z_SRW_extra_arg *ea = (*p)->extra_args;
-                for (; ea; ea = ea->next)
-                    add_xsd_string(p1, ea->name, ea->value);
-
-            }
+            encode_echoed_args(ptr, *p, "echoedSearchRetrieveRequest");
             if (res->num_diagnostics)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "diagnostics",
@@ -1053,14 +1068,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 yaz_srw_record(o, ptr1, &res->record, &res->extra_record,
                                client_data, version2);
             }
-            if ((*p)->extra_args)
-            {
-                xmlNode *p1 =
-                    xmlNewChild(ptr, 0, BAD_CAST "echoedExplainRequest", 0);
-                Z_SRW_extra_arg *ea = (*p)->extra_args;
-                for (; ea; ea = ea->next)
-                    add_xsd_string(p1, ea->name, ea->value);
-            }
+            encode_echoed_args(ptr, *p, "echoedExplainRequest");
             if (res->num_diagnostics)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "diagnostics",
