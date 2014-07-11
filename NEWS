@@ -1,3 +1,15 @@
+GFS: client_query_charset conversion YAZ-777
+This is a feature for Z39.50 clients that sends queries that are not
+UTF-8 encoded. WIth client_query_charset, GFS will convert from the
+encoding given to UTF-8.
+
+Echoed SRU arguments support YAZ-776
+This is achieved with new function yaz_srw_get_pdu_e.
+
+ZOOM: expire times set for redis/memcached YAZ-772
+For both redis and memcached option --expire=seconds sets expire
+time for a result-set/search. Default time is 600 seconds (10 minutes).
+
 --- 5.2.1 2014/06/26
 
 No [rest of output is omitted] limit for yaz_log YAZ-774
