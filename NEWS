@@ -1,3 +1,5 @@
+--- 5.3.0 2014/07/11
+
 GFS: client_query_charset conversion YAZ-777
 This is a feature for Z39.50 clients that sends queries that are not
 UTF-8 encoded. WIth client_query_charset, GFS will convert from the
