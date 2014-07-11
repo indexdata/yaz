@@ -51,6 +51,7 @@ struct gfs_server {
     char *directory;
     char *docpath;
     char *stylesheet;
+    char *client_query_charset;
     yaz_retrieval_t retrieval;
     struct gfs_server *next;
 };

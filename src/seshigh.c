@@ -74,7 +74,7 @@
 #include <yaz/yaz-util.h>
 #include <yaz/pquery.h>
 #include <yaz/oid_db.h>
-
+#include <yaz/query-charset.h>
 #include <yaz/srw.h>
 #include <yaz/backend.h>
 #include <yaz/yaz-ccl.h>
@@ -2706,6 +2706,19 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
         if (!bsrr->search_input)
             bsrr->search_input = req->otherInfo;
         bsrr->present_number = *req->mediumSetPresentNumber;
+
+        if (assoc->server && assoc->server->client_query_charset &&
+            req->query->which == Z_Query_type_1)
+        {
+            yaz_iconv_t cd =
+                yaz_iconv_open("UTF-8", assoc->server->client_query_charset);
+            if (cd)
+            {
+                yaz_query_charset_convert_rpnquery(req->query->u.type_1,
+                                                   assoc->decode, cd);
+                yaz_iconv_close(cd);
+            }
+        }
 
         if (assoc->server && assoc->server->cql_transform
             && req->query->which == Z_Query_type_104

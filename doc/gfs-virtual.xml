@@ -156,6 +156,16 @@
    </listitem>
   </varlistentry>
 
+  <varlistentry><term>element <literal>client_query_charset</literal> (optional)</term>
+   <listitem>
+    <para>
+     If specified, a conversion from the character set given to UTF-8 is
+     performed by the generic frontend server. It is only executed for
+     Z39.50 search requests (SRU/Solr are assumed to be UTF-8 encoded already).
+    </para>
+   </listitem>
+  </varlistentry>
+
   <varlistentry><term>element <literal>docpath</literal> (optional)</term>
    <listitem>
     <para>

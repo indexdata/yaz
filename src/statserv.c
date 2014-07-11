@@ -226,6 +226,7 @@ static struct gfs_server * gfs_server_new(const char *id)
     n->directory = 0;
     n->docpath = 0;
     n->stylesheet = 0;
+    n->client_query_charset = 0;
     n->id = nmem_strdup_null(gfs_nmem, id);
     n->retrieval = yaz_retrieval_create();
     return n;
@@ -489,6 +490,12 @@ static void xml_config_read(const char *base_path)
                     gfs->stylesheet = (char *)
                         nmem_malloc(gfs_nmem, strlen(s) + 2);
                     sprintf(gfs->stylesheet, "/%s", s);
+                }
+                else if (!strcmp((const char *) ptr->name,
+                                 "client_query_charset"))
+                {
+                    gfs->client_query_charset =
+                        nmem_dup_xml_content(gfs_nmem, ptr->children);
                 }
                 else if (!strcmp((const char *) ptr->name, "explain"))
                 {

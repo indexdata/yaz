@@ -7,6 +7,7 @@
      <config>zebra.cfg</config>
      <cql2rpn>pqf.properties</cql2rpn>
      <docpath>xsl</docpath>
+     <client_query_charset>iso-8859-1</client_query_charset>
      <stylesheet>xsl/default.xsl</stylesheet>
      <maximumrecordsize>2000000</maximumrecordsize>
      <retrievalinfo>
