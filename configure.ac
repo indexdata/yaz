@@ -8,7 +8,7 @@ m4_esyscmd([. ./IDMETA; echo $VERSION|tr -d '\n']),
 AC_CONFIG_HEADERS(include/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
-AM_INIT_AUTOMAKE([1.11.1 subdir-objects])
+AM_INIT_AUTOMAKE([1.9 subdir-objects])
 dnl
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
@@ -20,6 +20,7 @@ test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
 AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])
 AC_PROG_INSTALL
 AM_PROG_LIBTOOL
+AM_PROG_CC_C_O
 AC_PATH_PROG([pkgconfigpath],[pkg-config],[NONE])
 dnl
 YAZ_DOC
