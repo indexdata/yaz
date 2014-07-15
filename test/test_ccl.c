@@ -77,6 +77,7 @@ void tst1(int pass)
     switch(pass)
     {
     case 0:
+        ccl_qual_fitem(bibset, "term dc.title", "comb");
         ccl_qual_fitem(bibset, "u=4    s=pw t=l,r", "ti");
         ccl_qual_fitem(bibset, "1=1016 s=al,pw t=r",    "term");
         ccl_qual_fitem(bibset, "t=x", "reg");
@@ -85,7 +86,6 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "r=r,omiteq",        "date");
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
-        ccl_qual_fitem(bibset, "term dc.title", "comb");
         ccl_qual_fitem(bibset, "s=ag", "ag");
         break;
     case 1:

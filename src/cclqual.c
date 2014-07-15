@@ -104,6 +104,19 @@ void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp)
     yaz_tok_parse_destroy(tp);
 }
 
+static struct ccl_qualifier *ccl_qual_new(CCL_bibset b, const char *name)
+{
+    struct ccl_qualifier *q;
+    q = (struct ccl_qualifier *)xmalloc(sizeof(*q));
+    ccl_assert(q);
+    q->next = b->list;
+    b->list = q;
+    q->name = xstrdup(name);
+    q->attr_list = 0;
+    q->no_sub = 0;
+    q->sub = 0;
+    return q;
+}
 
 /** \brief adds specifies qualifier aliases
 
@@ -131,7 +144,11 @@ void ccl_qual_add_combi(CCL_bibset b, const char *n, const char **names)
     q->sub = (struct ccl_qualifier **)
         xmalloc(sizeof(*q->sub) * (1+q->no_sub));
     for (i = 0; names[i]; i++)
+    {
         q->sub[i] = ccl_qual_lookup(b, names[i], strlen(names[i]));
+        if (!q->sub[i])
+            q->sub[i] = ccl_qual_new(b, names[i]);
+    }
 }
 
 /** \brief adds specifies attributes for qualifier
@@ -157,19 +174,7 @@ void ccl_qual_add_set(CCL_bibset b, const char *name, int no,
         if (!strcmp(name, q->name))
             break;
     if (!q)
-    {
-        q = (struct ccl_qualifier *)xmalloc(sizeof(*q));
-        ccl_assert(q);
-
-        q->next = b->list;
-        b->list = q;
-
-        q->name = xstrdup(name);
-        q->attr_list = 0;
-
-        q->no_sub = 0;
-        q->sub = 0;
-    }
+        q = ccl_qual_new(b, name);
     attrp = &q->attr_list;
     while (*attrp)
         attrp = &(*attrp)->next;
