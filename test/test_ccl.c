@@ -260,10 +260,16 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 b "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a% (b or dc.title=c)",
-                  "@prox 0 1 0 2 k 2 "
-                  "@attr 4=2 @attr 1=1016 a "
-                  "@or @attr 4=2 @attr 1=1016 b "
-                            "@attr 4=2 @attr 1=1016 @attr 1=/my/title c "));
+                            "@prox 0 1 0 2 k 2 "
+                            "@attr 4=2 @attr 1=1016 a "
+                            "@or @attr 4=2 @attr 1=1016 b "
+#if YAZ_781
+                            "@or @attr 4=2 @attr 1=/my/title c "
+                            "@attr 4=2 @attr 1=1016 c "
+#else
+                            "@attr 4=2 @attr 1=1016 @attr 1=/my/title c "
+#endif
+    ));
 
     YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)",
                             "@prox 0 1 0 2 k 2 @and "

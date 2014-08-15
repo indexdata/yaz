@@ -326,6 +326,191 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
     return 0;
 }
 
+
+#if YAZ_781
+static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
+                                             struct ccl_rpn_attr *attr_use,
+                                             ccl_qualifier_t *qa,
+                                             int no, int term_len,
+                                             const char **truncation_aliases,
+                                             const char **mask_aliases,
+                                             int is_phrase,
+                                             int is_ccl_masked,
+                                             int auto_group)
+{
+    struct ccl_rpn_node *p;
+    size_t i;
+    int relation_value = -1;
+    int position_value = -1;
+    int structure_value = -1;
+    int truncation_value = -1;
+    int completeness_value = -1;
+
+    int left_trunc = 0;
+    int right_trunc = 0;
+    int regex_trunc = 0;
+    int z3958_trunc = 0;
+    char *attset;
+    struct ccl_token *lookahead = cclp->look_token;
+
+    p = ccl_rpn_node_create(CCL_RPN_TERM);
+    p->u.t.attr_list = NULL;
+    p->u.t.term = NULL;
+    if (qa && qa[0])
+    {
+        const char *n = ccl_qual_get_name(qa[0]);
+        if (n)
+            p->u.t.qual = xstrdup(n);
+    }
+    /* go through all attributes and add them to the attribute list */
+    for (i = 0; qa && qa[i]; i++)
+    {
+        struct ccl_rpn_attr *attr;
+        for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+            if (attr->type != 1 || attr == attr_use)
+            {
+                switch (attr->kind)
+                {
+                case CCL_RPN_ATTR_STRING:
+                    ccl_add_attr_string(p, attr->set, attr->type,
+                                        attr->value.str);
+                    break;
+                case CCL_RPN_ATTR_NUMERIC:
+                    if (attr->value.numeric > 0)
+                    {   /* deal only with REAL attributes (positive) */
+                        switch (attr->type)
+                        {
+                        case CCL_BIB1_REL:
+                            if (relation_value != -1)
+                                continue;
+                            relation_value = attr->value.numeric;
+                            break;
+                        case CCL_BIB1_POS:
+                            if (position_value != -1)
+                                continue;
+                            position_value = attr->value.numeric;
+                            break;
+                        case CCL_BIB1_STR:
+                            if (structure_value != -1)
+                                continue;
+                            structure_value = attr->value.numeric;
+                            break;
+                        case CCL_BIB1_TRU:
+                            if (truncation_value != -1)
+                                continue;
+                            truncation_value = attr->value.numeric;
+                            break;
+                        case CCL_BIB1_COM:
+                            if (completeness_value != -1)
+                                continue;
+                            completeness_value = attr->value.numeric;
+                            break;
+                        }
+                        ccl_add_attr_numeric(p, attr->set, attr->type,
+                                             attr->value.numeric);
+                    }
+                }
+            }
+    }
+    attset = 0;
+    if (structure_value == -1 && (
+            auto_group ||
+            qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
+        )
+    {
+        if (!is_phrase)
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 2);
+        else
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_STR, 1);
+    }
+    if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_REGEX,
+                      &attset))
+    {
+        if (is_ccl_masked)
+            regex_trunc = 1; /* regex trunc (102) allowed */
+    }
+    else if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_Z3958,
+                           &attset))
+    {
+        if (is_ccl_masked)
+            z3958_trunc = 1; /* Z39.58 trunc (CCL) trunc allowed */
+    }
+    /* make the RPN token */
+    p->u.t.term = (char *)xmalloc(term_len * 2 + 2);
+    ccl_assert(p->u.t.term);
+    p->u.t.term[0] = '\0';
+
+    for (i = 0; i < no; i++)
+    {
+        const char *src_str = lookahead->name;
+        size_t src_len = lookahead->len;
+
+        if (p->u.t.term[0] && lookahead->ws_prefix_len)
+        {
+            strxcat(p->u.t.term, lookahead->ws_prefix_buf,
+                    lookahead->ws_prefix_len);
+        }
+        if (append_term(cclp, src_str, src_len, p->u.t.term, regex_trunc,
+                        z3958_trunc, truncation_aliases, mask_aliases,
+                        i == 0, i == no - 1,
+                        &left_trunc, &right_trunc))
+        {
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        lookahead = lookahead->next;
+    }
+    if (left_trunc && right_trunc)
+    {
+        if (!qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH,
+                           &attset))
+        {
+            cclp->error_code = CCL_ERR_TRUNC_NOT_BOTH;
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 3);
+    }
+    else if (right_trunc)
+    {
+        if (!qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_RIGHT,
+                           &attset))
+        {
+            cclp->error_code = CCL_ERR_TRUNC_NOT_RIGHT;
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 1);
+    }
+    else if (left_trunc)
+    {
+        if (!qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_LEFT,
+                           &attset))
+        {
+            cclp->error_code = CCL_ERR_TRUNC_NOT_LEFT;
+            ccl_rpn_delete(p);
+            return NULL;
+        }
+        ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 2);
+    }
+    else if (regex_trunc)
+    {
+        ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 102);
+    }
+    else if (z3958_trunc)
+    {
+        ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 104);
+    }
+    else
+    {
+        if (qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_NONE,
+                          &attset))
+            ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 100);
+    }
+    return p;
+}
+#endif
+
 /**
  * search_term: Parse CCL search term.
  * cclp:   CCL Parser
@@ -343,7 +528,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
     int and_list = 0;
     int auto_group = 0;
     int or_list = 0;
-    char *attset;
     const char **truncation_aliases;
     const char *t_default[2];
     const char **mask_aliases;
@@ -376,20 +560,24 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         or_list = 1;
     while (1)
     {
-        struct ccl_rpn_node *p;
+        struct ccl_rpn_node *p = 0;
         size_t no, i;
+        int len = 0;
         int is_phrase = 0;
         int is_ccl_masked = 0;
+#if YAZ_781
+#else
+        char *attset;
         int relation_value = -1;
         int position_value = -1;
         int structure_value = -1;
         int truncation_value = -1;
         int completeness_value = -1;
-        int len = 0;
         int left_trunc = 0;
         int right_trunc = 0;
         int regex_trunc = 0;
         int z3958_trunc = 0;
+#endif
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
@@ -428,6 +616,48 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         if (len == 0)
             break;      /* no more terms . stop . */
 
+#if YAZ_781
+        /* go through all attributes and add them to the attribute list */
+        for (i = 0; qa && qa[i]; i++)
+        {
+            struct ccl_rpn_attr *attr;
+
+            for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+                if (attr->type == 1)
+                {
+                    struct ccl_rpn_node *tmp2;
+                    tmp2 = ccl_term_one_use(cclp, attr, qa, no, len,
+                                            truncation_aliases, mask_aliases,
+                                            is_phrase, is_ccl_masked,
+                                            auto_group);
+                    if (!tmp2)
+                    {
+                        ccl_rpn_delete(p);
+                        return 0;
+                    }
+                    if (!p)
+                        p = tmp2;
+                    else
+                    {
+                        struct ccl_rpn_node *tmp1;
+                        tmp1 = ccl_rpn_node_create(CCL_RPN_OR);
+                        tmp1->u.p[0] = p;
+                        tmp1->u.p[1] = tmp2;
+                        p = tmp1;
+                    }
+                }
+        }
+        if (!p)
+        {
+            p = ccl_term_one_use(cclp, 0 /* attr: no use */, qa, no, len,
+                                 truncation_aliases, mask_aliases,
+                                 is_phrase, is_ccl_masked, auto_group);
+            if (!p)
+                return 0;
+        }
+        for (i = 0; i < no; i++)
+            ADVANCE;
+#else
         /* create the term node, but wait a moment before adding the term */
         p = ccl_rpn_node_create(CCL_RPN_TERM);
         p->u.t.attr_list = NULL;
@@ -536,26 +766,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             ADVANCE;
         }
-        /* make the top node point to us.. */
-        if (p_top)
-        {
-            struct ccl_rpn_node *tmp;
-
-            if (or_list)
-                tmp = ccl_rpn_node_create(CCL_RPN_OR);
-            else if (and_list)
-                tmp = ccl_rpn_node_create(CCL_RPN_AND);
-            else
-                tmp = ccl_rpn_node_create(CCL_RPN_AND);
-            tmp->u.p[0] = p_top;
-            tmp->u.p[1] = p;
-
-            p_top = tmp;
-        }
-        else
-            p_top = p;
-
-
         if (left_trunc && right_trunc)
         {
             if (!qual_val_type(qa, CCL_BIB1_TRU, CCL_BIB1_TRU_CAN_BOTH,
@@ -603,6 +813,26 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                                &attset))
                 ccl_add_attr_numeric(p, attset, CCL_BIB1_TRU, 100);
         }
+#endif
+        /* make the top node point to us.. */
+        if (p_top)
+        {
+            struct ccl_rpn_node *tmp;
+
+            if (or_list)
+                tmp = ccl_rpn_node_create(CCL_RPN_OR);
+            else if (and_list)
+                tmp = ccl_rpn_node_create(CCL_RPN_AND);
+            else
+                tmp = ccl_rpn_node_create(CCL_RPN_AND);
+            tmp->u.p[0] = p_top;
+            tmp->u.p[1] = p;
+
+            p_top = tmp;
+        }
+        else
+            p_top = p;
+
         if (!multi)
             break;
     }
