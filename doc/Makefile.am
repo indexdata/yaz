@@ -98,7 +98,7 @@ yazj.pdf:
 	pdfjadetex yazj.tex >/dev/null
 	pdfjadetex yazj.tex >/dev/null
 
-manref.xml: $(REFFILES) $(srcdir)/common/stripref.xsl
+manref.xml: $(REFFILES) $(srcdir)/common/stripref.xsl local.ent
 	rm -f manref.xml
 	for i in $(REFFILES); do \
 		xsltproc $(srcdir)/common/stripref.xsl $(srcdir)/$$i | sed 1d >>manref.xml; \
