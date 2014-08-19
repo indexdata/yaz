@@ -340,8 +340,6 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
         {
             yaz_log_close();
             yaz_log_info.log_file = new_file;
-            if (l_level & YLOG_FLUSH)
-                setvbuf(yaz_log_info.log_file, 0, _IONBF, 0);
         }
         else
         {
