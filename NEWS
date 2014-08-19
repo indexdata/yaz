@@ -1,3 +1,21 @@
+--- 5.4.0 2014/08/19
+
+Stop building debs for Ubuntu raring, quantal, oneiric.
+
+CCL YAZ-781: for multiple use attributes in a specification the
+generated RPN will perform @or on each term.
+For spec: term u=31 u=1016
+the CCL: t  will generate: @or @attr 1=31 t @attr 1=1016 t
+
+log YAZ-780: avoid mixed log files by perform only one write(2) per log entry.
+
+CCL YAZ-779: combo qualifier should allow for forward references
+
+Fix buildconf.sh, automake too old on centos5 YAZ-778
+Achieved by adding AM_PROG_CC_C_O and requiring AM 1.9 instead.
+The AM_PROG_CC_C_O is obsolete for newer AM, but 1.14 (Debian jessie)
+accepts it without a warning.
+
 --- 5.3.0 2014/07/11
 
 GFS: client_query_charset conversion YAZ-777
