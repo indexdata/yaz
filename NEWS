@@ -1,3 +1,8 @@
+--- 5.4.1 2014/08/21
+
+xmalloc: throw assert for clearly invalid calls to malloc and
+improve diagnostics YAZ-783 YAZ-784
+
 --- 5.4.0 2014/08/19
 
 Stop building debs for Ubuntu raring, quantal, oneiric.
