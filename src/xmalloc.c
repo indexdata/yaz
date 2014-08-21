@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
@@ -21,6 +22,9 @@
 #ifndef TRACE_XMALLOC
 #define TRACE_XMALLOC 1
 #endif
+
+/* treat any size >1/4 of max value of size_t to be an error */
+#define MALLOC_SIZE_MAX ((size_t)(-1) / 4)
 
 static int log_level = 0;
 static int log_level_initialized = 0;
@@ -244,8 +248,9 @@ void xmalloc_trav_f(const char *s, const char *file, int line)
     xmalloc_trav_d(file, line);
 }
 
-void xmalloc_fatal(void)
+void xmalloc_fatal(size_t size)
 {
+    assert(size < MALLOC_SIZE_MAX);
     exit(1);
 }
 
@@ -266,7 +271,7 @@ void *xrealloc_f(void *o, size_t size, const char *file, int line)
     {
         yaz_log(YLOG_FATAL|YLOG_ERRNO, "Out of memory, realloc (%ld bytes)",
                 (long) size);
-        xmalloc_fatal();
+        xmalloc_fatal(size);
     }
     return p;
 }
@@ -289,7 +294,7 @@ void *xmalloc_f(size_t size, const char *file, int line)
     {
         yaz_log(YLOG_FATAL, "Out of memory - malloc (%ld bytes)",
                 (long) size);
-        xmalloc_fatal();
+        xmalloc_fatal(size);
     }
     return p;
 }
@@ -311,7 +316,7 @@ void *xcalloc_f(size_t nmemb, size_t size, const char *file, int line)
     {
         yaz_log(YLOG_FATAL, "Out of memory - calloc (%ld, %ld)",
                 (long) nmemb, (long) size);
-        xmalloc_fatal();
+        xmalloc_fatal(size);
     }
     return p;
 }
