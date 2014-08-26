@@ -1,3 +1,7 @@
+--- 5.4.2 2014/08/26
+
+daemon: properly report when receiving SIGUSR2 from child YAZ-785
+
 --- 5.4.1 2014/08/21
 
 xmalloc: throw assert for clearly invalid calls to malloc and
