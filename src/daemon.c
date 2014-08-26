@@ -74,9 +74,8 @@ static void normal_stop_handler(int num)
     }
 }
 
-static void immediate_exit_handler(int num)
+static void sigusr2_handler(int num)
 {
-    _exit(0);
 }
 
 static pid_t keepalive_pid = 0;
@@ -92,7 +91,7 @@ static void keepalive(void (*work)(void *data), void *data)
     void (*old_sighup)(int);
     void (*old_sigterm)(int);
     void (*old_sigusr1)(int);
-    void (*old_sigusr2)(int);
+    struct sigaction sa2, sa1;
 
     keepalive_pid = getpid();
 
@@ -101,7 +100,12 @@ static void keepalive(void (*work)(void *data), void *data)
     old_sighup = signal(SIGHUP, normal_stop_handler);
     old_sigterm = signal(SIGTERM, normal_stop_handler);
     old_sigusr1 = signal(SIGUSR1, normal_stop_handler);
-    old_sigusr2 = signal(SIGUSR2, immediate_exit_handler);
+
+    sigemptyset(&sa2.sa_mask);
+    sa2.sa_handler = sigusr2_handler;
+    sa2.sa_flags = 0;
+    sigaction(SIGUSR2, &sa2, &sa1);
+
     while (cont && !child_got_signal_from_us)
     {
         pid_t p = fork();
@@ -118,7 +122,7 @@ static void keepalive(void (*work)(void *data), void *data)
             signal(SIGHUP, old_sighup);  /* restore */
             signal(SIGTERM, old_sigterm);/* restore */
             signal(SIGUSR1, old_sigusr1);/* restore */
-            signal(SIGUSR2, old_sigusr2);/* restore */
+            sigaction(SIGUSR2, &sa1, NULL);
 
             work(data);
             exit(0);
@@ -132,12 +136,20 @@ static void keepalive(void (*work)(void *data), void *data)
         /* disable signalling in kill_child_handler */
         child_pid = 0;
 
+        if (p1 == (pid_t)(-1))
+        {
+            if (errno != EINTR)
+            {
+                yaz_log(YLOG_FATAL|YLOG_ERRNO, "waitpid");
+                break;
+            }
+            continue;
+        }
         if (p1 != p)
         {
             yaz_log(YLOG_FATAL, "p1=%d != p=%d", p1, p);
-            exit(1);
+            break;
         }
-
         if (WIFSIGNALED(status))
         {
             /*  keep the child alive in case of errors, but _log_ */
