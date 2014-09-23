@@ -140,8 +140,7 @@
  <varlistentry>
   <term><literal>-installa</literal></term>
   <listitem><para>
-   Use this to install and activate the server as an NT service
-   (Windows NT/2000/XP only).
+   Use this to install the server as an NT service and mark it as "auto-start.
    Control the server by going to the Services in the Control Panel.
   </para></listitem>
  </varlistentry>
