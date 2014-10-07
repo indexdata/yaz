@@ -228,9 +228,14 @@ static int emit_term(solr_transform_t ct, WRBUF w, Z_Term *term, Odr_int trunc)
         size_t i;
         int must_quote = 0;
 
-        for (i = 0 ; i < lterm; i++)
-            if (sterm[i] == ' ')
-                must_quote = 1;
+        if (lterm == 0)
+            must_quote = 1;
+        else
+        {
+            for (i = 0 ; i < lterm; i++)
+                if (sterm[i] == ' ')
+                    must_quote = 1;
+        }
         if (must_quote)
             wrbuf_puts(w, "\"");
         if (trunc == 2 || trunc == 3)
