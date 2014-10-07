@@ -57,6 +57,7 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@or a @and b c", "a OR (b AND c)"));
     YAZ_CHECK(compare(ct, "abc", "abc"));
     YAZ_CHECK(compare(ct, "\"a b c\"", "\"a b c\""));
+    YAZ_CHECK(compare(ct, "\"\"", "\"\""));
     YAZ_CHECK(compare(ct, "@not a b", "a AND NOT b"));
     YAZ_CHECK(compare(ct, "@and @or a b c", "(a OR b) AND c"));
     YAZ_CHECK(compare(ct, "@and a b", "a AND b"));
