@@ -328,11 +328,11 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
     int ret = -1;
+    Z_SRW_PDU *pdu = 0;
 #if YAZ_HAVE_XML2
     const char *content_buf = hres->content_buf;
     int content_len = hres->content_len;
     xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
-    Z_SRW_PDU *pdu = 0;
 
     if (doc)
     {
@@ -342,8 +342,7 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
         xmlNodePtr root = xmlDocGetRootElement(doc);
         if (root && !strcmp((const char *) root->name, "response"))
         {
-            ret = 0;
-            for (ptr = root->children; ptr && !ret; ptr = ptr->next)
+            for (ptr = root->children; ptr; ptr = ptr->next)
             {
                 if (ptr->type == XML_ELEMENT_NODE &&
                     !strcmp((const char *) ptr->name, "result"))
@@ -377,9 +376,8 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
         }
         xmlFreeDoc(doc);
     }
-    if (ret == 0)
-        *pdup = pdu;
 #endif
+    *pdup = pdu;
     return ret;
 }
 
