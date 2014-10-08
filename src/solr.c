@@ -478,6 +478,12 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     int no_parms = 20; /* safe upper limit of args without extra_args */
     Z_SRW_extra_arg *ea;
 
+    if (srw_pdu->which == Z_SRW_searchRetrieve_request)
+    {   /* to make room for facets in yaz_solr_encode_facet_list later */
+        Z_SRW_searchRetrieveRequest *request = srw_pdu->u.request;
+        if (request->facetList)
+            no_parms += request->facetList->num;
+    }
     for (ea = srw_pdu->extra_args; ea; ea = ea->next)
         no_parms++;
     name = (char **) odr_malloc(encode, sizeof(*name) * no_parms);
