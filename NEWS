@@ -1,3 +1,15 @@
+--- 5.4.3 2014/10/08
+
+Fix uri array may overflow in yaz_solr_encode_request YAZ-775
+
+Fix PQF to Solr conversion may produce invalid Solr query YAZ-792
+
+0 ptr reference in handling Solr response with error YAZ-791
+
+Fix annoying warning about wrbuf_putc on newer GCC YAZ-789
+
+Fix documentation about --installa option YAZ-788
+
 --- 5.4.2 2014/08/26
 
 daemon: properly report when receiving SIGUSR2 from child YAZ-785
