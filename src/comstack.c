@@ -198,7 +198,13 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
 
     if (t == tcpip_type)
     {
-        cs = yaz_tcpip_create(-1, blocking, proto, connect_host ? host : 0);
+        const char *bind_host = strchr(vhost, ' ');
+        if (bind_host && bind_host[1])
+            bind_host++;
+        else
+            bind_host = 0;
+        cs = yaz_tcpip_create2(-1, blocking, proto, connect_host ? host : 0,
+                               bind_host);
     }
     else
     {

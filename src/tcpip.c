@@ -90,6 +90,12 @@ static int ssl_get(COMSTACK h, char **buf, int *bufsize);
 static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
 
+
+#if HAVE_GETADDRINFO
+struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
+                                   int *ipv6_only);
+#endif
+
 static COMSTACK tcpip_accept(COMSTACK h);
 static const char *tcpip_addrstr(COMSTACK h);
 static void *tcpip_straddr(COMSTACK h, const char *str);
@@ -125,6 +131,7 @@ typedef struct tcpip_state
     struct addrinfo *ai;
     struct addrinfo *ai_connect;
     int ipv6_only;
+    char *bind_host;
 #if RESOLVER_THREAD
     int pipefd[2];
     char *hoststr;
@@ -179,6 +186,7 @@ static struct tcpip_state *tcpip_state_create(void)
 #if HAVE_GETADDRINFO
     sp->ai = 0;
     sp->ai_connect = 0;
+    sp->bind_host = 0;
 #if RESOLVER_THREAD
     sp->hoststr = 0;
     sp->pipefd[0] = sp->pipefd[1] = -1;
@@ -243,12 +251,26 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     return p;
 }
 
-COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
-                          const char *connect_host)
+COMSTACK yaz_tcpip_create2(int s, int flags, int protocol,
+                           const char *connect_host,
+                           const char *bind_host)
 {
     COMSTACK p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
+    if (bind_host)
+    {
+        tcpip_state *sp = (tcpip_state *) p->cprivate;
+        char *cp;
+        sp->bind_host = xmalloc(strlen(bind_host) + 4);
+        strcpy(sp->bind_host, bind_host);
+        cp = strrchr(sp->bind_host, ':');
+
+        if (!cp || cp[1] == '\0')
+            strcat(sp->bind_host, ":0");
+        else
+            strcpy(cp, ":0");
+    }
     if (connect_host)
     {
         tcpip_state *sp = (tcpip_state *) p->cprivate;
@@ -261,6 +283,12 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
         sp->complete = cs_complete_auto_head; /* only want HTTP header */
     }
     return p;
+}
+
+COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
+                          const char *connect_host)
+{
+    return yaz_tcpip_create2(s, flags, protocol, connect_host, 0);
 }
 
 #if HAVE_GNUTLS_H
@@ -335,6 +363,8 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
 
     strncpy(host, str, sizeof(host)-1);
     host[sizeof(host)-1] = 0;
+    if ((p = strrchr(host, ' ')))
+        *p = 0;
     if ((p = strchr(host, '/')))
         *p = 0;
     if ((p = strrchr(host, ':')))
@@ -454,6 +484,41 @@ static struct addrinfo *create_net_socket(COMSTACK h)
                    IPPROTO_IPV6,
                    IPV6_V6ONLY, &sp->ipv6_only, sizeof(sp->ipv6_only)))
         return 0;
+    if (sp->bind_host)
+    {
+        int r = -1;
+        int ipv6_only = 0;
+        struct addrinfo *ai;
+
+#ifndef WIN32
+        int one = 1;
+        if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
+                       &one, sizeof(one)) < 0)
+        {
+            h->cerrno = CSYSERR;
+            return 0;
+        }
+#endif
+        ai = tcpip_getaddrinfo(sp->bind_host, "0", &ipv6_only);
+        if (!ai)
+            return 0;
+        {
+            struct addrinfo *a;
+            for (a = ai; a; a = a->ai_next)
+            {
+                r = bind(h->iofile, a->ai_addr, a->ai_addrlen);
+                if (!r)
+                    break;
+            }
+        }
+        if (r)
+        {
+            h->cerrno = CSYSERR;
+            freeaddrinfo(ai);
+            return 0;
+        }
+        freeaddrinfo(ai);
+    }
     if (!tcpip_set_blocking(h, h->flags))
         return 0;
     return ai;
@@ -1325,6 +1390,7 @@ void tcpip_close(COMSTACK h)
 
     TRC(fprintf(stderr, "tcpip_close: h=%p pid=%d\n", h, getpid()));
 #if HAVE_GETADDRINFO
+    xfree(sp->bind_host);
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
