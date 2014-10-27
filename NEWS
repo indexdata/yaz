@@ -1,3 +1,5 @@
+--- 5.5.0 2014/10/27
+
 Extended comstack with outgoing IP YAZ-795.
 For cs_create_host + cs_create_host_proxy the vhost may be followed
 by a outgoing host/IP. Separator is blank.
