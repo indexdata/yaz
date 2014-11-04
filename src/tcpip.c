@@ -1328,7 +1328,13 @@ int tcpip_put(COMSTACK h, char *buf, int size)
                 h->io_pending = CS_WANT_WRITE;
                 return 1;
             }
-            return cont_connect(h);
+            if (h->flags & CS_FLAGS_BLOCKING)
+            {
+                h->cerrno = CSYSERR;
+                return -1;
+            }
+            else
+                return cont_connect(h);
         }
         state->written += res;
         TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
