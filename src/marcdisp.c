@@ -1465,6 +1465,16 @@ void yaz_marc_write_using_libxml2(yaz_marc_t mt, int enable)
     mt->write_using_libxml2 = enable;
 }
 
+int yaz_marc_check_marc21_coding(const char *charset,
+                                 const char *marc_buf, int sz)
+{
+    if ((!yaz_matchstr(charset, "MARC8?") ||
+         !yaz_matchstr(charset, "MARC8"))  && marc_buf && sz > 25
+        && marc_buf[9] == 'a')
+        return 1;
+    return 0;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

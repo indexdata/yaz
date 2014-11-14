@@ -28,7 +28,9 @@
 #endif
 
 static yaz_iconv_t iconv_create_charset(const char *record_charset,
-                                        yaz_iconv_t *cd2)
+                                        yaz_iconv_t *cd2,
+                                        const char *marc_buf,
+                                        int sz)
 {
     char charset_buf[40];
     yaz_iconv_t cd = 0;
@@ -62,7 +64,11 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset,
     }
 
     if (from_set1)
+    {
+        if (yaz_marc_check_marc21_coding(from_set1, marc_buf, sz))
+            from_set1 = "utf-8";
         cd = yaz_iconv_open(to_set, from_set1);
+    }
     if (cd2)
     {
         if (from_set2)
@@ -79,7 +85,7 @@ static const char *return_marc_record(WRBUF wrbuf,
                                       const char *buf, int sz,
                                       const char *record_charset)
 {
-    yaz_iconv_t cd = iconv_create_charset(record_charset, 0);
+    yaz_iconv_t cd = iconv_create_charset(record_charset, 0, buf, sz);
     yaz_marc_t mt = yaz_marc_create();
     const char *ret_string = 0;
 
@@ -103,9 +109,21 @@ static const char *return_opac_record(WRBUF wrbuf,
                                       Z_OPACRecord *opac_rec,
                                       const char *record_charset)
 {
-    yaz_iconv_t cd2;
-    yaz_iconv_t cd = iconv_create_charset(record_charset, &cd2);
+    yaz_iconv_t cd, cd2;
+    const char *marc_buf = 0;
+    int marc_sz = 0;
     yaz_marc_t mt = yaz_marc_create();
+
+    if (opac_rec->bibliographicRecord)
+    {
+        Z_External *ext = opac_rec->bibliographicRecord;
+        if (ext->which == Z_External_octet)
+        {
+            marc_buf = (const char *) ext->u.octet_aligned->buf;
+            marc_sz = ext->u.octet_aligned->len;
+        }
+    }
+    cd = iconv_create_charset(record_charset, &cd2, marc_buf, marc_sz);
 
     if (cd)
         yaz_marc_iconv(mt, cd);
@@ -131,7 +149,7 @@ static const char *return_string_record(WRBUF wrbuf,
                                         const char *buf, int sz,
                                         const char *record_charset)
 {
-    yaz_iconv_t cd = iconv_create_charset(record_charset, 0);
+    yaz_iconv_t cd = iconv_create_charset(record_charset, 0, 0, 0);
 
     if (cd)
     {

@@ -319,6 +319,7 @@ static void dump(const char *fname, const char *from, const char *to,
             size_t len_result;
             size_t r;
             char buf[100001];
+            yaz_iconv_t cd1 = 0;
 
             r = fread(buf, 1, 5, inf);
             if (r < 5)
@@ -428,7 +429,21 @@ static void dump(const char *fname, const char *from, const char *to,
                 }
             }
             len_result = rlen;
+
+            if (yaz_marc_check_marc21_coding(from, buf, 26))
+            {
+                cd1 = yaz_iconv_open(to, "utf-8");
+                if (cd1)
+                    yaz_marc_iconv(mt, cd);
+            }
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
+
+            if (cd1)
+            {
+                yaz_iconv_close(cd1);
+                yaz_marc_iconv(mt, cd);
+            }
+
             if (r == -1)
                 no_errors++;
             if (r > 0 && result && len_result)

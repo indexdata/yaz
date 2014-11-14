@@ -191,6 +191,22 @@ void yaz_opac_decode_wrbuf(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf)
     yaz_opac_decode_wrbuf2(mt, r, wrbuf, 0);
 }
 
+int yaz_opac_check_marc21_coding(const char *charset, Z_OPACRecord *r)
+{
+    if (r->bibliographicRecord)
+    {
+        Z_External *ext = r->bibliographicRecord;
+        if (ext->which == Z_External_octet)
+        {
+            return yaz_marc_check_marc21_coding(
+                charset,
+                (const char *) ext->u.octet_aligned->buf,
+                ext->u.octet_aligned->len);
+        }
+    }
+    return 0;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

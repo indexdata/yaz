@@ -519,23 +519,25 @@ static void *construct_marc(const xmlNode *ptr,
 static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
 {
     struct marc_info *mi = info;
+    const char *input_charset = mi->input_charset;
     int ret = 0;
-
-    yaz_iconv_t cd = yaz_iconv_open(mi->output_charset, mi->input_charset);
     yaz_marc_t mt = yaz_marc_create();
 
     yaz_marc_xml(mt, mi->output_format_mode);
     if (mi->leader_spec)
         yaz_marc_leader_spec(mt, mi->leader_spec);
 
-    if (cd)
-        yaz_marc_iconv(mt, cd);
     if (mi->input_format_mode == YAZ_MARC_ISO2709)
     {
         int sz = yaz_marc_read_iso2709(mt, wrbuf_buf(record),
                                        wrbuf_len(record));
         if (sz > 0)
+        {
+            if (yaz_marc_check_marc21_coding(input_charset, wrbuf_buf(record),
+                                             wrbuf_len(record)))
+                input_charset = "utf-8";
             ret = 0;
+        }
         else
             ret = -1;
     }
@@ -564,13 +566,18 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
     }
     if (ret == 0)
     {
+        yaz_iconv_t cd = yaz_iconv_open(mi->output_charset, input_charset);
+
+        if (cd)
+            yaz_marc_iconv(mt, cd);
+
         wrbuf_rewind(record);
         ret = yaz_marc_write_mode(mt, record);
         if (ret)
             wrbuf_printf(wr_error, "yaz_marc_write_mode failed");
+        if (cd)
+            yaz_iconv_close(cd);
     }
-    if (cd)
-        yaz_iconv_close(cd);
     yaz_marc_destroy(mt);
     return ret;
 }
@@ -680,11 +687,15 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
     else
     {
         struct marc_info *mi = r->info;
+        const char *input_charset = mi->input_charset;
+        yaz_iconv_t cd;
 
         WRBUF res = wrbuf_alloc();
         yaz_marc_t mt = yaz_marc_create();
-        yaz_iconv_t cd = yaz_iconv_open(mi->output_charset,
-                                        mi->input_charset);
+
+        if (yaz_opac_check_marc21_coding(input_charset, input_record))
+            input_charset = "utf-8";
+        cd = yaz_iconv_open(mi->output_charset, input_charset);
 
         wrbuf_rewind(p->wr_error);
         yaz_marc_xml(mt, mi->output_format_mode);
