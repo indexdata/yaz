@@ -434,7 +434,7 @@ static void dump(const char *fname, const char *from, const char *to,
             {
                 cd1 = yaz_iconv_open(to, "utf-8");
                 if (cd1)
-                    yaz_marc_iconv(mt, cd);
+                    yaz_marc_iconv(mt, cd1);
             }
             r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
 

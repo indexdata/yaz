@@ -31,12 +31,12 @@ for f in ${srcdir}/marccol?.u8.marc; do
     fi
 
     filem=`echo $fb | sed 's/u8/m8/'`.marc
-    ../util/yaz-marcdump -o marc -f utf8 -t marc8lossless $f >$filem
+    ../util/yaz-marcdump -l 9=32 -o marc -f utf8 -t marc8lossless $f >$filem
 
     DIFF=${fb}.2.lst.diff
     NEW=${fb}.2.lst.new
     OLD=${srcdir}/${fb}.2.lst
-    ../util/yaz-marcdump -f marc8 -t utf-8 $filem >$NEW
+    ../util/yaz-marcdump -l 9=97 -f marc8 -t utf-8 $filem >$NEW
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
 	ecode=1
