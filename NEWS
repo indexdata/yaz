@@ -1,3 +1,12 @@
+--- 5.6.0 2014/11/17
+
+When marc-8 charset is specified when decoding MARC records, yaz-marcdump
+and ZOOM record render will inspect leader 9 and switch to UTF-8
+(Unicode) if that holds 'a'.  This changes behavior, but is considered
+safe because only MARC21 with leader 9='a' are Unicode.      YAZ-800
+
+Fix cs_put may reconnect if send fails. YAZ-798
+
 --- 5.5.1 2014/11/03
 
 Fix cannot build YAZ on jessie : libgnutls-dev is gone YAZ-797
