@@ -33,6 +33,7 @@
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
 #include <yaz/facet.h>
+#include <yaz/backtrace.h>
 
 #include "ztest.h"
 
@@ -1158,6 +1159,8 @@ void bend_close(void *handle)
 
 int main(int argc, char **argv)
 {
+    yaz_enable_panic_backtrace(argv[0]);
+
     return statserv_main(argc, argv, bend_init, bend_close);
 }
 /*

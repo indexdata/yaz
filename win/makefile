@@ -555,7 +555,8 @@ MISC_OBJS= \
    $(OBJDIR)\file_glob.obj \
    $(OBJDIR)\thread_id.obj \
    $(OBJDIR)\dirent.obj \
-   $(OBJDIR)\url.obj
+   $(OBJDIR)\url.obj \
+   $(OBJDIR)\backtrace.obj
 
 Z3950_OBJS= \
    $(OBJDIR)\z-date.obj\
