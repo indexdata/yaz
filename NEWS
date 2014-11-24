@@ -1,3 +1,10 @@
+--- 5.7.0 2014/11/24
+
+Dump backtrace in case of SIGABRT, SIGSEGV YAZ-787
+New function yaz_enable_panic_backtrace which enables backtrace
+handler for current process. The handler will call backtrace always,
+then gdb to provide as much detail as possible.
+
 --- 5.6.0 2014/11/17
 
 When marc-8 charset is specified when decoding MARC records, yaz-marcdump
