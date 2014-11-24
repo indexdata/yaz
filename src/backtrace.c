@@ -39,12 +39,12 @@
 #define BACKTRACE_SZ 100
 
 static char static_progname[256];
+#if HAVE_EXECINFO_H
 
 static void yaz_invoke_backtrace(char *buf, int buf_sz)
 {
     FILE *file = yaz_log_file();
     int fd = fileno(file);
-#if HAVE_EXECINFO_H
     pid_t pid;
     int fds[2];
     void *backtrace_info[BACKTRACE_SZ];
@@ -121,10 +121,6 @@ static void yaz_invoke_backtrace(char *buf, int buf_sz)
         }
         close(fds[1]);
     }
-#else
-    strcat(buf, "no backtrace support (execinfo.h not found)\n");
-    write(fd, buf, strlen(buf));
-#endif
 }
 
 static void yaz_panic_sig_handler(int sig)
@@ -156,6 +152,7 @@ static void yaz_panic_sig_handler(int sig)
     yaz_invoke_backtrace(buf, sizeof buf);
     abort();
 }
+#endif
 
 void yaz_enable_panic_backtrace(const char *progname)
 {
