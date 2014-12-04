@@ -105,6 +105,14 @@ binmarc_convert() {
     return $ecode
 }
 
+for f in ${srcdir}/marc[0-9].marc; do
+    ../util/yaz-marcdump $f > /dev/null
+    if test $? != "0"; then
+	echo "$f: yaz-marcdump returned error"
+	ecode=1
+    fi
+done
+
 binmarc_convert "marcxml"  "marcxml" "" xml
 echo "binmarc -> marcxml: $?"
 
