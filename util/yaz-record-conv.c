@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <yaz/options.h>
 #include <yaz/record_conv.h>
+#include <yaz/backtrace.h>
 
 const char *prog = "yaz-record-conv";
 
@@ -24,6 +25,8 @@ int main (int argc, char **argv)
     char *arg;
     yaz_record_conv_t p = 0;
     int no_errors = 0;
+
+    yaz_enable_panic_backtrace(*argv);
     while ((r = options("V", argv, argc, &arg)) != -2)
     {
         switch (r)

@@ -13,6 +13,7 @@
 #include <yaz/url.h>
 #include <yaz/options.h>
 #include <yaz/log.h>
+#include <yaz/backtrace.h>
 
 static void usage(void)
 {
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
     int no_urls = 0;
     const char *outfname = 0;
 
+    yaz_enable_panic_backtrace(*argv);
     while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {

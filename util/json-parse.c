@@ -13,6 +13,7 @@
 #include <yaz/json.h>
 #include <yaz/wrbuf.h>
 #include <yaz/options.h>
+#include <yaz/backtrace.h>
 
 void usage(const char *prog)
 {
@@ -50,6 +51,8 @@ int main(int argc, char **argv)
     int print = 0;
     int ret;
     char *arg;
+
+    yaz_enable_panic_backtrace(*argv);
     while ((ret = options("p", argv, argc, &arg)) != YAZ_OPTIONS_EOF)
     {
         switch (ret)

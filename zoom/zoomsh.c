@@ -18,6 +18,7 @@
 #include <string.h>
 #include <yaz/wrbuf.h>
 #include <yaz/log.h>
+#include <yaz/backtrace.h>
 #include <yaz/options.h>
 
 #if HAVE_READLINE_READLINE_H
@@ -1004,7 +1005,10 @@ static int zoomsh(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    int ret = zoomsh(argc, argv);
+    int ret;
+
+    yaz_enable_panic_backtrace(*argv);
+    ret = zoomsh(argc, argv);
     exit(ret);
 }
 /*

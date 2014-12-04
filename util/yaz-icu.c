@@ -26,6 +26,7 @@
 
 #include <yaz/icu.h>
 #include <yaz/wrbuf.h>
+#include <yaz/backtrace.h>
 
 /* commando line and config parameters */
 struct config_t {
@@ -552,6 +553,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_ICU
     struct config_t config;
 
+    yaz_enable_panic_backtrace(*argv);
     read_params(argc, argv, &config);
 
     if (config.conffile && strlen(config.conffile))

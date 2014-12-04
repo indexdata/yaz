@@ -13,7 +13,7 @@
 #include <yaz/querytowrbuf.h>
 #include <yaz/xmlquery.h>
 #include <yaz/pquery.h>
-#include <yaz/test.h>
+#include <yaz/backtrace.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -183,6 +183,7 @@ int main (int argc, char **argv)
     int r;
     int active = 0;
 
+    yaz_enable_panic_backtrace(*argv);
     while ((r = options("-p:x:", argv, argc, &arg)) != -2)
     {
 	switch(r)

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include <yaz/yaz-util.h>
+#include <yaz/backtrace.h>
 
 #define CHUNK_IN 64
 #define CHUNK_OUT 64
@@ -138,6 +139,7 @@ int main(int argc, char **argv)
     yaz_iconv_t cd;
     FILE *inf = stdin;
 
+    yaz_enable_panic_backtrace(*argv);
     while ((ret = options("vf:t:", argv, argc, &arg)) != -2)
     {
         switch (ret)

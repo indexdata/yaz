@@ -44,7 +44,7 @@
 #endif
 
 #include <yaz/yaz-util.h>
-
+#include <yaz/backtrace.h>
 #include <yaz/comstack.h>
 
 #include <yaz/oid_db.h>
@@ -5400,6 +5400,8 @@ int main(int argc, char **argv)
 #endif
     if (codeset)
         outputCharset = xstrdup(codeset);
+
+    yaz_enable_panic_backtrace(prog);
 
     ODR_MASK_SET(&z3950_options, Z_Options_search);
     ODR_MASK_SET(&z3950_options, Z_Options_present);

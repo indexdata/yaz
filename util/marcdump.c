@@ -46,6 +46,7 @@
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
 #include <yaz/options.h>
+#include <yaz/backtrace.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -522,6 +523,7 @@ int main (int argc, char **argv)
 #endif
 
     prog = *argv;
+    yaz_enable_panic_backtrace(prog);
     while ((r = options("i:o:C:npc:xOeXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
     {
         no++;
