@@ -34,7 +34,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t en,
         }
         *outp++ = '@';
         (*outbytesleft)--;
-        *outp++ = x;
+        *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     }
     else if (x <= 255)
@@ -44,7 +44,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t en,
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
             return (size_t)(-1);
         }
-        *outp++ = x;
+        *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     }
     else

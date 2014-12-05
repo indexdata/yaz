@@ -2498,7 +2498,8 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
-    int recno, dumped_records = 0;
+    int recno;
+    Odr_int dumped_records = 0;
     int toget = odr_int_to_int(*num);
     Z_Records *records =
         (Z_Records *) odr_malloc(a->encode, sizeof(*records));
@@ -2591,7 +2592,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         else
             this_length = odr_total(a->encode) - total_length - dumped_records;
         yaz_log(log_requestdetail, "  fetched record, len=" ODR_INT_PRINTF
-                " total=" ODR_INT_PRINTF " dumped=%d",
+                " total=" ODR_INT_PRINTF " dumped=" ODR_INT_PRINTF,
                 this_length, total_length, dumped_records);
         if (a->preferredMessageSize > 0 &&
             this_length + total_length > a->preferredMessageSize)

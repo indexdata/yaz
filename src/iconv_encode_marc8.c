@@ -322,7 +322,7 @@ static size_t yaz_write_marc8_2(yaz_iconv_t cd, struct encoder_data *w,
             yaz_iconv_set_errno(cd, YAZ_ICONV_E2BIG);
             return (size_t) (-1);
         }
-        *(*outbuf)++ = y;
+        *(*outbuf)++ = (char) y;
         (*outbytesleft)--;
     }
     else

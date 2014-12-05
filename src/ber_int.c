@@ -66,7 +66,7 @@ int ber_encinteger(ODR o, Odr_int val)
     size_t i;
     for (i = sizeof(uval); i > 0; )
     {
-        tmp[--i] = uval;
+        tmp[--i] = (unsigned char ) uval; /* only want lower 8 bits */
         uval >>= 8;
     }
     for (i = 0; i < sizeof(uval)-1; i++)

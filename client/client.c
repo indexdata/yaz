@@ -545,7 +545,7 @@ static void render_diag(Z_DiagnosticFormat *diag)
             Z_DefaultDiagFormat *dd = ds->u.defaultDiagRec;
             /* ### should check `dd->diagnosticSetId' */
             printf("code=" ODR_INT_PRINTF " (%s)", *dd->condition,
-                   diagbib1_str(*dd->condition));
+                   diagbib1_str((int) *dd->condition));
             /* Both types of addinfo are the same, so use type-pun */
             if (dd->u.v2Addinfo != 0)
                 printf(",\n\taddinfo='%s'", dd->u.v2Addinfo);
@@ -1203,7 +1203,7 @@ static void display_diagrecs(Z_DiagRec **pp, int num)
                 printf("Unknown diagset: %s\n", diag_name);
         }
         printf("    [" ODR_INT_PRINTF "] %s",
-               *r->condition, diagbib1_str(*r->condition));
+               *r->condition, diagbib1_str((int) *r->condition));
         switch (r->which)
         {
         case Z_DefaultDiagFormat_v2Addinfo:
@@ -3478,7 +3478,7 @@ static void process_Z3950_scanResponse(Z_ScanResponse *res)
         num_entries = res->entries->num_entries;
     for (i = 0; i < num_entries; i++)
     {
-        int pos_term = res->positionOfTerm ? *res->positionOfTerm : -1;
+        Odr_int pos_term = res->positionOfTerm ? *res->positionOfTerm : -1;
         if (entries[i]->which == Z_Entry_termInfo)
         {
             printf("%c ", i + 1 == pos_term ? '*' : ' ');

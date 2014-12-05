@@ -16,6 +16,10 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+/* avoid that bison stuff defines malloc/free - already in stdlib.h */
+#ifdef _MSC_VER
+#define _STDLIB_H 1
+#endif
 #include <string.h>
 #include <yaz/yaz-iconv.h>
 #include <yaz/xmalloc.h>

@@ -231,7 +231,7 @@ static size_t cmp_operator(const char **aliases, const char *input)
 #define CCL_CHARS "#?\\"
 
 static int has_ccl_masking(const char *src_str,
-                           int src_len,
+                           size_t src_len,
                            const char **truncation_aliases,
                            const char **mask_aliases)
 {
@@ -331,7 +331,7 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
 static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                                              struct ccl_rpn_attr *attr_use,
                                              ccl_qualifier_t *qa,
-                                             int no, int term_len,
+                                             size_t no, int term_len,
                                              const char **truncation_aliases,
                                              const char **mask_aliases,
                                              int is_phrase,
