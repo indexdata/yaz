@@ -1004,20 +1004,11 @@
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
          with SRU support. In this configuration, set
          <literal>LIBXML2_DIR</literal> to the
-         <ulink url="&url.libxml2;">libxml2</ulink> source directory
-	 and
-	 <literal>ZLIB_DIR</literal> to the zlib directory.
-        </para>
-        <para>
-         Windows versions of libxslt, libxml2, zlib and iconv can be found
-	 <ulink url="&url.libxml2.download.win32;">
-	  Igor Zlatkovi&#x0107;' site</ulink>.
-        </para>
-	<note>
-	 <para>
-	  YAZ is not using zlib but libxml2 is depending on it.
-	 </para>
-	</note>
+         <ulink url="&url.libxml2;">libxml2</ulink> source directory.
+	</para>
+	<para>
+	 Refer to <xref linkend="installation.win32.libxml2"/>.
+	</para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -1168,15 +1159,15 @@
    </sect2>
 
    <sect2 id="installation-linking-yaz-win32">
-    <title>How to make apps using YAZ on WIN32</title>
+    <title>How to make apps using YAZ on Windows</title>
     <para>
-     This section will go though the process of linking your WIN32
+     This section will go though the process of linking your Windows
      applications with &yaz;.
     </para>
     <para>
      Some people are confused by the fact that we use the nmake
      tool to build &yaz;. They think they have to do that too - in order
-     to make their WIN32 applications work with &yaz;. The good news is that
+     to make their Windows applications work with &yaz;. The good news is that
      you don't have to. You can use the integrated environment of
      Visual Studio if desired for your own application.
     </para>
@@ -1211,6 +1202,36 @@
      </variablelist>
     </para>
    </sect2>
+
+   <sect2 id="installation.win32.libxml2">
+    <title>Compiling Libxml2 and Libxslt on windows</title>
+    <para>
+     Download libxml2 and Libxslt source and unpack it.
+     In the example below we install  Libxml2 2.9.2 and Libxslt 1.1.28
+     for 32-bit, so we  use the destination directories
+     libxml2.2.9.2.win32 and libxslt-1.1.28.win32 to reflect both
+     version and architecture.
+     <screen>
+      cd win32
+      cscript configure.js prefix=c:\libxml2-2.9.2.win32 iconv=no
+      nmake
+      nmake install
+     </screen>
+    </para>
+    <para>
+     For Libxslt it is similar. We must ensure that compilation of
+     Libxslt links against the already installed libxml2.
+     <screen>
+      cd win32
+      cscript configure.js prefix=c:\libxslt-1.1.28.win32 iconv=no \
+          lib=c:\libxmlt-2.9.2.win32\lib \
+	  include=c:\libxmlt-2.9.2.win32\include\libxml2
+      nmake
+      nmake install
+     </screen>
+    </para>
+   </sect2>
+
   </sect1>
  </chapter>
  <!--
