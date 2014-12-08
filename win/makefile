@@ -12,7 +12,7 @@ TCL=tclsh
 HAVE_TCL=1
 
 # iconv charcter conversion utility
-HAVE_ICONV=1
+HAVE_ICONV=0
 ICONV_DIR = c:\iconv-1.9.2.win32
 
 # icu charcter conversion utility
@@ -24,14 +24,11 @@ ICU_INCLUDE = c:\icu\include
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.26.win32
+LIBXSLT_DIR=c:\libxslt-1.1.28.win32
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.7.6.win32
-
-# zlib compression (used by libxml2)
-ZLIB_DIR = c:\zlib-1.2.3.win32
+LIBXML2_DIR=c:\libxml2-2.9.2.win32
 
 # get WIN32 binaries libxml2 & iconv & zlib from here:
 #  http://www.zlatkovic.com/libxml.en.html
@@ -62,7 +59,7 @@ dist64: yaz.win64.nsi yaz.nsi distclean
 	$(NSIS) yaz.win64.nsi
 
 make64:
-	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.7.8.win64 LIBXSLT_DIR=c:\libxslt-1.1.26.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64 YAZ4J_DIR=..\..\..\yaz4j all yaz4j
+	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64 YAZ4J_DIR=..\..\..\yaz4j all yaz4j
 
 
 distclean:
@@ -192,7 +189,7 @@ iconv:
 !if $(HAVE_ICU)
 ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
-ICU_VER=42
+ICU_VER=54
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
 icu: $(BINDIR)\icudt$(ICU_VER).dll \
@@ -217,15 +214,11 @@ yazicu:
 
 !if $(HAVE_LIBXML2)
 LIBXML2_LIB="$(LIBXML2_DIR)\lib\libxml2.lib"
-LIBXML2_DEF=/D YAZ_HAVE_XML2=1 /I"$(LIBXML2_DIR)\include"
-libxml2: $(BINDIR)\libxml2.dll $(BINDIR)\zlib1.dll
+LIBXML2_DEF=/D YAZ_HAVE_XML2=1 /I"$(LIBXML2_DIR)\include\libxml2"
+libxml2: $(BINDIR)\libxml2.dll
 
 $(BINDIR)\libxml2.dll:
   copy "$(LIBXML2_DIR)\bin\libxml2.dll" $(BINDIR)
-
-$(BINDIR)\zlib1.dll:
-  copy "$(ZLIB_DIR)\bin\zlib1.dll" $(BINDIR)
-
 !else
 LIBXML2_LIB=
 LIBXML2_DEF=/D YAZ_HAVE_XML2=0
@@ -242,7 +235,7 @@ LIBXSLT_DEF= \
 libxslt: $(BINDIR)\libxslt.dll
 
 $(BINDIR)\libxslt.dll:
-  copy "$(LIBXSLT_DIR)\bin\libxslt.dll" $(BINDIR)
+  copy "$(LIBXSLT_DIR)\lib\libxslt.dll" $(BINDIR)
 
 !else
 LIBXSLT_LIB=
