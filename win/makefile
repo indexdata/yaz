@@ -4,7 +4,7 @@
 # Parameters
 
 DEBUG=0   # 0 for release, 1 for debug
-USE_MANIFEST = 1
+USE_MANIFEST = 0
 
 # TCL
 TCL=tclsh
@@ -42,8 +42,10 @@ default: all
 all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
  testprog iconv icu libxml2 libxslt yaz_url
 
-NSIS="c:\program files\nsis\makensis.exe"
-HHC="c:\program files\html help workshop\hhc.exe"
+allj: all
+
+NSIS="c:\program files (x86)\nsis\makensis.exe"
+HHC="c:\program files (x86)\html help workshop\hhc.exe"
 
 YAZ4J_DIR="..\..\yaz4j"
 
@@ -51,7 +53,7 @@ YAZPATH="$(MAKEDIR)\.."
 
 
 dist: yaz.win32.nsi yaz.nsi distclean
-	nmake DEBUG=0 all yaz4j
+	nmake DEBUG=0 allj
 	$(NSIS) yaz.win32.nsi
 
 dist64: yaz.win64.nsi yaz.nsi distclean
@@ -59,7 +61,7 @@ dist64: yaz.win64.nsi yaz.nsi distclean
 	$(NSIS) yaz.win64.nsi
 
 make64:
-	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu64\lib64 ICU_INCLUDE=\icu64\include ICU_BIN=\icu64\bin64 YAZ4J_DIR=..\..\..\yaz4j all yaz4j
+	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu\lib64 ICU_INCLUDE=\icu\include ICU_BIN=\icu\bin64 YAZ4J_DIR=..\..\..\yaz4j allj
 
 
 distclean:
@@ -288,14 +290,16 @@ LINK=link.exe
 
 !if $(USE_MANIFEST)
 MT=mt.exe /nologo
+MTOPT=/manifest
 !else
 MT=echo
+MTOPT=
 !endif
 
 LINK_LIBS= kernel32.lib ws2_32.lib advapi32.lib \
 	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
-COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no /manifest
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no $(MTOPT)
 
 DEBUG_LNK_OPTIONS= /debug
 
@@ -1026,6 +1030,7 @@ clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(BINDIR)\*.pdb
+	-del $(BINDIR)\*.manifest
 	-del $(TMPDIR)\*.
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ

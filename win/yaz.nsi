@@ -22,6 +22,10 @@
 ;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvc*90.dll"
 ;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
 
+; 5: VS 2013
+;!define VS_RUNTIME_DLL      "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvc*.dll"
+;!define VS_RUNTIME_MANIFEST  ""
+
 
 !include "MUI.nsh"
 
@@ -103,7 +107,9 @@ Section "YAZ Runtime" YAZ_Runtime
 Noservice:
 	SetOutPath $INSTDIR\bin
 	File "${VS_RUNTIME_DLL}"
+!if "${VS_RUNTIME_MANIFEST}" != ""
 	File "${VS_RUNTIME_MANIFEST}"
+!endif
 	File ..\bin\*.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
@@ -168,9 +174,9 @@ SectionEnd
 Section "YAZ4J" YAZ4J
 	SectionIn 1 2
 	SetOutPath $INSTDIR\bin
-	File ..\bin\yaz4j.dll
+	File /nonfatal ..\bin\yaz4j.dll
 	SetOutPath $INSTDIR\java
-	File ..\java\yaz4j.jar
+	File /nonfatal ..\java\yaz4j.jar
 SectionEnd
 
 ; begin uninstall settings/section
