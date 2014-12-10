@@ -69,13 +69,13 @@ static void normal_stop_handler(int num)
     if (child_pid)
     {
         /* relay signal to child */
-        child_got_signal_from_us = 1;
         kill(child_pid, num);
     }
 }
 
 static void sigusr2_handler(int num)
 {
+    child_got_signal_from_us = 1;
 }
 
 static pid_t keepalive_pid = 0;
