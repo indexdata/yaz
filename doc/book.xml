@@ -939,7 +939,7 @@
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
      with <ulink url="&url.vstudio;">
      Microsoft Visual Studio</ulink>. It has been tested with
-     Microsoft Visual Studio 2003/2005/2008.
+     Microsoft Visual Studio 2003/2005/2008/2013.
     </para>
     <para>
      Start a command prompt and switch the sub directory
