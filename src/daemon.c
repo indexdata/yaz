@@ -207,6 +207,7 @@ static void keepalive(void (*work)(void *data), void *data)
         yaz_log(YLOG_WARN, "keepalive stop. %d SIGSEGV signal(s)", no_sigsegv);
     if (no_sigbus)
         yaz_log(YLOG_WARN, "keepalive stop. %d SIGBUS signal(s)", no_sigbus);
+    yaz_log(YLOG_LOG, "keepalive stop");
 }
 #endif
 
