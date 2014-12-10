@@ -1007,7 +1007,10 @@
          <ulink url="&url.libxml2;">libxml2</ulink> source directory.
 	</para>
 	<para>
-	 Refer to <xref linkend="installation.win32.libxml2"/>.
+	 You can get pre-compiled Libxml2+Libxslt DLLs and headers from
+	 <ulink url="&url.libxml2.download.windows;">here</ulink>.
+	 Should you with to compile those libraries yourself, refer to
+	 to <xref linkend="installation.windows.libxml2"/>
 	</para>
        </listitem>
       </varlistentry>
@@ -1203,7 +1206,7 @@
     </para>
    </sect2>
 
-   <sect2 id="installation.win32.libxml2">
+   <sect2 id="installation.windows.libxml2">
     <title>Compiling Libxml2 and Libxslt on windows</title>
     <para>
      Download libxml2 and Libxslt source and unpack it.
