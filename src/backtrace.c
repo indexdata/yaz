@@ -54,11 +54,16 @@ static void yaz_invoke_backtrace(char *buf, int buf_sz)
     sz = backtrace(backtrace_info, sz);
     backtrace_symbols_fd(backtrace_info, sz, fd);
 
-    pipe(fds);
+    if (pipe(fds) == -1)
+    {
+        const char *cp = "backtrace: pipe failed\n";
+        write(fd, cp, strlen(cp));
+        return;
+    }
     pid = fork();
     if (pid == (pid_t) (-1))
     {   /* error */
-        const char *cp = "backtrace: fork failure";
+        const char *cp = "backtrace: fork failure\n";
         write(fd, cp, strlen(cp));
     }
     else if (pid == 0)
