@@ -18,6 +18,7 @@ ICONV_DIR = c:\iconv-1.9.2.win32
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
+ICU_VER=54
 ICU_LIB = c:\icu\lib
 ICU_BIN = c:\icu\bin
 ICU_INCLUDE = c:\icu\include
@@ -191,7 +192,6 @@ iconv:
 !if $(HAVE_ICU)
 ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
-ICU_VER=54
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
 icu: $(BINDIR)\icudt$(ICU_VER).dll \
