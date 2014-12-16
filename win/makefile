@@ -43,7 +43,7 @@ default: all
 all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
  testprog iconv icu libxml2 libxslt yaz_url
 
-allj: all
+allj: all yaz4j
 
 NSIS="c:\program files (x86)\nsis\makensis.exe"
 HHC="c:\program files (x86)\html help workshop\hhc.exe"
