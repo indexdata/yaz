@@ -1,3 +1,16 @@
+--- 5.7.2 2014/12/16
+
+Enable YAZ backtrace for programs YAZ-802
+
+Update NMAKE makefile to use Visual Studio 2013 along with ICU 54.1,
+Libxml2 2.9.2, Libxslt 1.1.28.
+
+Fix daemon: parent process stops before child YAZ-806
+Try to fix the situation where parent process stops before
+child has acknowledged it .. SIGUSR2 back!
+
+daemon: log message when keepalive stops.
+
 --- 5.7.1 2014/12/03
 
 Fix yaz-marcdump segfault YAZ-801. Problem in YAZ 5.6.0/5.7.0 and
