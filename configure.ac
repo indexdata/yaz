@@ -16,7 +16,8 @@ dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_CHECK_PROGS([YACC], 'bison -y')
-test -z "$YACC" && AC_MSG_WARN([GNU bison not found])
+test -z "$YACC" -a ! -f src/cql.c && AC_MSG_ERROR([GNU Bison not found])
+test -z "$YACC" && AC_MSG_WARN([GNU Bison not found])
 AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])
 AC_PROG_INSTALL
 AM_PROG_LIBTOOL
