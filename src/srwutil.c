@@ -416,7 +416,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
             p1 = p0 + strlen(p0);
         if (p1 != p0)
             db = yaz_decode_sru_dbpath_odr(decode, p0, p1 - p0);
-        if (!strcmp(hreq->method, "POST"))
+        if (!strcmp(hreq->method, "POST") && hreq->content_buf)
             p1 = hreq->content_buf;
         yaz_uri_to_array(p1, decode, &uri_name, &uri_val);
 #if YAZ_HAVE_XML2
