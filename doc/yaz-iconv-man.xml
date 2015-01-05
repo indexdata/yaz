@@ -187,7 +187,7 @@
    The following command converts from ISO-8859-1 (Latin-1) to
    UTF-8.
    <screen>
-    yaz-iconv -f ISO-8859-1 -t UTF-8 -X &lt;input.lst &gt;output.lst
+    yaz-iconv -f ISO-8859-1 -t UTF-8 &lt;input.lst &gt;output.lst
    </screen>
   </para>
  </refsect1>
