@@ -101,8 +101,7 @@
     <listitem>
      <para>
       The <ulink url="&url.marc8;">MARC8</ulink> encoding as defined by
-      the Library of Congress. Most MARC21/USMARC records usees
-      this encoding.
+      the Library of Congress. Most MARC21/USMARC records use this encoding.
      </para>
     </listitem>
    </varlistentry>
@@ -151,7 +150,7 @@
     <term>iso5426 (decode)</term>
     <listitem>
      <para>
-      ISO 5426. Some MARC records (UNIMARC) uses this encoding.
+      ISO 5426. Some MARC records (UNIMARC) use this encoding.
      </para>
     </listitem>
    </varlistentry>
@@ -167,7 +166,7 @@
     <term>advancegreek (encode, decode)</term>
     <listitem>
      <para>
-      An encoding for Greek used by some vendors (Advance).
+      An encoding for Greek in use by some vendors (Advance).
      </para>
     </listitem>
    </varlistentry>
