@@ -2126,27 +2126,36 @@
     The <parameter>type</parameter> is a string of the format:
    </para>
    <para>
-    <replaceable>format</replaceable>[;charset=<replaceable>from</replaceable>[/<replaceable>opacfrom</replaceable>][,<replaceable>to</replaceable>]][;format=<replaceable>v</replaceable>]
+    <replaceable>format</replaceable>[;charset=<replaceable>from</replaceable>[/<replaceable>opacfrom</replaceable>][,<replaceable>to</replaceable>]][;format=<replaceable>v</replaceable>][;base64=<replaceable>xpath</replaceable>]
    </para>
    <para>
-    where <replaceable>format</replaceable> specifies the format of the
-    returned record, <replaceable>from</replaceable>
+    If <literal>charset</literal> is given, then <replaceable>from</replaceable>
     specifies the character set of the record in its original form
     (as returned by the server), <replaceable>to</replaceable> specifies
-    the output (returned)
-    character set encoding.
-    If <replaceable>to</replaceable> is omitted UTF-8 is assumed.
+    the output (returned) character set encoding.
+    If <replaceable>to</replaceable> is omitted, then UTF-8 is assumed.
     If charset is not given, then no character set conversion takes place.
-   </para>
-
-   <para>OPAC records may be returned in a different
-     set from the bibliographic MARC record. If this is this the case,
+    OPAC records may be returned in a different
+    set from the bibliographic MARC record. If this is this the case,
     <replaceable>opacfrom</replaceable> should be set to the character set
     of the OPAC record part.
+   </para>
+
+   <para>
+    The <literal>format</literal> is generic but can only be used to
+    specify XML indentation when the value <replaceable>v</replaceable>
+    is 1 (<literal>format=1</literal>).
+   </para>
+   <para>
+    The <literal>base64</literal> allows a full record to be extracted
+    from base64-encoded string in an XML document.
    </para>
    <note>
      <para>
        Specifying the OPAC record character set requires YAZ 4.1.5 or later.
+     </para>
+     <para>
+       Specifying the base64 parameter requires YAZ 4.2.35 or later.
      </para>
    </note>
    <para>
