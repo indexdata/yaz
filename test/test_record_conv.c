@@ -252,6 +252,14 @@ static void tst_convert1(void)
         "\x30\x30\x30\x30\x30\x31\x30\x30\x30\x31\x37\x30\x30\x30\x31\x33"
         "#30;\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20#30;\x20\x20"
         "#31;\x61\x20\x20\x20\x31\x31\x32\x32\x34\x34\x36\x36\x20#30;#29;";
+    const char *raw_rec = /* raw is xml-string of marcxml_rec */
+        "<raw>&lt;record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+        "  &lt;leader>00080nam a22000498a 4500&lt;/leader>\n"
+        "  &lt;controlfield tag=\"001\">   11224466 &lt;/controlfield>\n"
+        "  &lt;datafield tag=\"010\" ind1=\" \" ind2=\" \">\n"
+        "    &lt;subfield code=\"a\">   11224466 &lt;/subfield>\n"
+        "  &lt;/datafield>\n"
+        "&lt;/record>\n</raw>\n";
 
     YAZ_CHECK(conv_configure_test("<backend>"
                                   "<marc"
@@ -328,6 +336,13 @@ static void tst_convert1(void)
                                   "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
+
+    YAZ_CHECK(conv_configure_test("<backend>"
+                                  "<select path=\"/raw\"/>"
+                                  "</backend>",
+                                  0, &p));
+    YAZ_CHECK(conv_convert_test(p, raw_rec, marcxml_rec));
+
     yaz_record_conv_destroy(p);
 }
 

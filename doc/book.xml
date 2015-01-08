@@ -7393,20 +7393,24 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term><literal>xslt</literal></term>
+       <term><literal>select</literal></term>
        <listitem>
         <para>
-         The <literal>xslt</literal> element specifies a conversion
-         via &acro.xslt;. The following attributes may be specified:
+         The <literal>select</literal> selects one or more text nodes
+	 and decodes them as XML.
+	 The following attributes may be specified:
          <variablelist>
-          <varlistentry><term><literal>stylesheet</literal> (REQUIRED)</term>
+          <varlistentry><term><literal>path</literal> (REQUIRED)</term>
            <listitem>
             <para>
-             Stylesheet file.
+             X-Path expression for selecting text nodes.
             </para>
            </listitem>
           </varlistentry>
          </variablelist>
+        </para>
+        <para>
+         This conversion is available in YAZ 5.8.0 and later.
         </para>
        </listitem>
       </varlistentry>
@@ -7422,6 +7426,24 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
         </para>
         <para>
          This conversion is available in YAZ 5.0.21 and later.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>xslt</literal></term>
+       <listitem>
+        <para>
+         The <literal>xslt</literal> element specifies a conversion
+         via &acro.xslt;. The following attributes may be specified:
+         <variablelist>
+          <varlistentry><term><literal>stylesheet</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+             Stylesheet file.
+            </para>
+           </listitem>
+          </varlistentry>
+         </variablelist>
         </para>
        </listitem>
       </varlistentry>

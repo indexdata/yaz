@@ -25,6 +25,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 #if YAZ_HAVE_XSLT
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
@@ -317,6 +319,95 @@ static void destroy_xslt(void *vinfo)
 /* YAZ_HAVE_XSLT */
 #endif
 
+struct select_info {
+    NMEM nmem;
+    char *xpath_expr;
+};
+
+static void *construct_select(const xmlNode *ptr,
+                              const char *path, WRBUF wr_error)
+{
+    if (strcmp((const char *) ptr->name, "select"))
+        return 0;
+    else
+    {
+        struct _xmlAttr *attr;
+        NMEM nmem = nmem_create();
+        struct select_info *info = nmem_malloc(nmem, sizeof(*info));
+
+        info->nmem = nmem;
+        info->xpath_expr = 0;
+        for (attr = ptr->properties; attr; attr = attr->next)
+        {
+            if (!xmlStrcmp(attr->name, BAD_CAST "path") &&
+                attr->children && attr->children->type == XML_TEXT_NODE)
+                info->xpath_expr =
+                    nmem_strdup(nmem, (const char *) attr->children->content);
+            else
+            {
+                wrbuf_printf(wr_error, "Bad attribute '%s'"
+                             "Expected xpath.", attr->name);
+                nmem_destroy(nmem);
+                return 0;
+            }
+        }
+        return info;
+    }
+}
+
+static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
+{
+    int ret = 0;
+    struct select_info *info = vinfo;
+
+    xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
+                                   wrbuf_len(record));
+    if (!doc)
+    {
+        wrbuf_printf(wr_error, "xmlParseMemory failed");
+        ret = -1;
+    }
+    else
+    {
+        xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
+        if (xpathCtx && info->xpath_expr)
+        {
+            xmlXPathObjectPtr xpathObj =
+                xmlXPathEvalExpression((const xmlChar *) info->xpath_expr,
+                                       xpathCtx);
+            if (xpathObj)
+            {
+                xmlNodeSetPtr nodes = xpathObj->nodesetval;
+                wrbuf_rewind(record);
+                if (nodes)
+                {
+                    int i;
+                    for (i = 0; i < nodes->nodeNr; i++)
+                    {
+                        xmlNode *ptr = nodes->nodeTab[i];
+                        fprintf(stderr, "xpath result %d type=%d\n", i,
+                            ptr->type);
+                        if (ptr->type == XML_ELEMENT_NODE)
+                            ptr = ptr->children;
+                        if (ptr->type == XML_TEXT_NODE)
+                            for (; ptr; ptr = ptr->next)
+                                wrbuf_puts(record, (const char *) ptr->content);
+                    }
+                }
+                xmlXPathFreeObject(xpathObj);
+            }
+            xmlXPathFreeContext(xpathCtx);
+        }
+        xmlFreeDoc(doc);
+    }
+    return ret;
+}
+
+static void destroy_select(void *info)
+{
+}
+
+
 static void *construct_solrmarc(const xmlNode *ptr,
                                 const char *path, WRBUF wr_error)
 {
@@ -592,7 +683,7 @@ static void destroy_marc(void *info)
 int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
                                 struct yaz_record_conv_type *types)
 {
-    struct yaz_record_conv_type bt[3];
+    struct yaz_record_conv_type bt[4];
     size_t i = 0;
 
     /* register marc */
@@ -604,6 +695,11 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
     bt[i].construct = construct_solrmarc;
     bt[i].convert = convert_solrmarc;
     bt[i++].destroy = destroy_solrmarc;
+
+    bt[i-1].next = &bt[i];
+    bt[i].construct = construct_select;
+    bt[i].convert = convert_select;
+    bt[i++].destroy = destroy_select;
 
 #if YAZ_HAVE_XSLT
     /* register xslt */
