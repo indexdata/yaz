@@ -385,8 +385,6 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
                     for (i = 0; i < nodes->nodeNr; i++)
                     {
                         xmlNode *ptr = nodes->nodeTab[i];
-                        fprintf(stderr, "xpath result %d type=%d\n", i,
-                            ptr->type);
                         if (ptr->type == XML_ELEMENT_NODE)
                             ptr = ptr->children;
                         if (ptr->type == XML_TEXT_NODE)
@@ -403,8 +401,12 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
     return ret;
 }
 
-static void destroy_select(void *info)
+static void destroy_select(void *vinfo)
 {
+    struct select_info *info = vinfo;
+
+    if (info)
+        nmem_destroy(info->nmem);
 }
 
 
