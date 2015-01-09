@@ -336,13 +336,13 @@ static void tst_convert1(void)
                                   "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, marcxml_rec, marcxml_rec));
+    yaz_record_conv_destroy(p);
 
     YAZ_CHECK(conv_configure_test("<backend>"
                                   "<select path=\"/raw\"/>"
                                   "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, raw_rec, marcxml_rec));
-
     yaz_record_conv_destroy(p);
 }
 
