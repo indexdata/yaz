@@ -1,3 +1,11 @@
+--- 5.8.1 2015/01/13
+
+record conv: 'select' return org record if no x-path match YAZ-814
+
+retrieval: pick matched element-set rule YAZ-813
+
+Fix crash in record conv rule 'select' YAZ-812
+
 --- 5.8.0 2015/01/09
 
 record_conv: selection by X-Path YAZ-811
