@@ -297,6 +297,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
     struct yaz_retrieval_elem *el = p->list;
     int syntax_matches = 0;
     int schema_matches = 0;
+    struct yaz_retrieval_elem *el_best = 0;
 
     wrbuf_rewind(p->wr_error);
     if (!el)
@@ -311,9 +312,9 @@ int yaz_retrieval_request(yaz_retrieval_t p,
         else
         {
             if (el->name && yaz_match_glob(el->name, schema))
-                schema_ok = 1;
+                schema_ok = 2;
             if (el->identifier && !strcmp(schema, el->identifier))
-                schema_ok = 1;
+                schema_ok = 2;
             if (!el->name && !el->identifier)
                 schema_ok = 1;
         }
@@ -329,34 +330,40 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             schema_matches++;
         if (syntax_ok && schema_ok)
         {
-            *match_syntax = el->syntax;
-            if (el->identifier)
-                *match_schema = el->identifier;
-            else
-                *match_schema = 0;
-            if (backend_schema)
-            {
-                if (el->backend_name)
-                {
-                    if (*el->backend_name)
-                        *backend_schema = el->backend_name;
-                }
-                else if (el->name)
-                    *backend_schema = el->name;
-                else
-                    *backend_schema = schema;
-            }
-            if (backend_syntax)
-            {
-                if (el->backend_syntax)
-                    *backend_syntax = el->backend_syntax;
-                else
-                    *backend_syntax = el->syntax;
-            }
-            if (rc)
-                *rc = el->record_conv;
-            return 0;
+            if (!el_best || schema_ok == 2)
+                el_best = el;
         }
+    }
+    if (el_best)
+    {
+        el = el_best;
+        *match_syntax = el->syntax;
+        if (el->identifier)
+            *match_schema = el->identifier;
+        else
+            *match_schema = 0;
+        if (backend_schema)
+        {
+            if (el->backend_name)
+            {
+                if (*el->backend_name)
+                    *backend_schema = el->backend_name;
+            }
+            else if (el->name)
+                *backend_schema = el->name;
+            else
+                *backend_schema = schema;
+        }
+        if (backend_syntax)
+        {
+            if (el->backend_syntax)
+                *backend_syntax = el->backend_syntax;
+            else
+                *backend_syntax = el->syntax;
+        }
+        if (rc)
+            *rc = el->record_conv;
+        return 0;
     }
     if (!syntax_matches && syntax)
     {
