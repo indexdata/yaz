@@ -387,8 +387,8 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
                         xmlNode *ptr = nodes->nodeTab[i];
                         if (ptr->type == XML_ELEMENT_NODE)
                             ptr = ptr->children;
-                        if (ptr->type == XML_TEXT_NODE)
-                            for (; ptr; ptr = ptr->next)
+                        for (; ptr; ptr = ptr->next)
+                            if (ptr->type == XML_TEXT_NODE)
                                 wrbuf_puts(record, (const char *) ptr->content);
                     }
                 }
