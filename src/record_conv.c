@@ -378,10 +378,11 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
             if (xpathObj)
             {
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
-                wrbuf_rewind(record);
                 if (nodes)
                 {
                     int i;
+                    if (nodes->nodeNr > 0)
+                        wrbuf_rewind(record);
                     for (i = 0; i < nodes->nodeNr; i++)
                     {
                         xmlNode *ptr = nodes->nodeTab[i];
