@@ -73,6 +73,13 @@ static void normal_stop_handler(int num)
     }
 }
 
+static void log_reopen_handler(int num)
+{
+    yaz_log_reopen();
+    if (child_pid)
+        kill(child_pid, num);
+}
+
 static void sigusr2_handler(int num)
 {
     child_got_signal_from_us = 1;
@@ -88,7 +95,6 @@ static void keepalive(void (*work)(void *data), void *data)
     int no_sigbus = 0;
     int run = 1;
     int cont = 1;
-    void (*old_sighup)(int);
     void (*old_sigterm)(int);
     void (*old_sigusr1)(int);
     struct sigaction sa2, sa1;
@@ -97,7 +103,6 @@ static void keepalive(void (*work)(void *data), void *data)
 
     /* keep signals in their original state and make sure that some signals
        to parent process also gets sent to the child..  */
-    old_sighup = signal(SIGHUP, normal_stop_handler);
     old_sigterm = signal(SIGTERM, normal_stop_handler);
     old_sigusr1 = signal(SIGUSR1, normal_stop_handler);
 
@@ -119,7 +124,6 @@ static void keepalive(void (*work)(void *data), void *data)
         else if (p == 0)
         {
             /* child */
-            signal(SIGHUP, old_sighup);  /* restore */
             signal(SIGTERM, old_sigterm);/* restore */
             signal(SIGUSR1, old_sigusr1);/* restore */
             sigaction(SIGUSR2, &sa1, NULL);
@@ -322,6 +326,10 @@ int yaz_daemon(const char *progname,
 
     write_pidfile(pid_fd);
 
+    if (flags & YAZ_DAEMON_LOG_REOPEN)
+    {
+        signal(SIGHUP, log_reopen_handler);
+    }
     if (flags & YAZ_DAEMON_KEEPALIVE)
     {
         keepalive(work, data);
