@@ -10,6 +10,7 @@
 #include <config.h>
 #endif
 
+#include <limits.h>
 #include <stdlib.h>
 #include "odr-priv.h"
 #include <yaz/xmalloc.h>
@@ -96,6 +97,11 @@ int odr_grow_block(ODR b, int min_bytes)
 
 int odr_write(ODR o, const char *buf, int bytes)
 {
+    if (bytes < 0 || o->op->pos > INT_MAX - bytes)
+    {
+        odr_seterror(o, OSPACE, 40);
+        return -1;
+    }
     if (o->op->pos + bytes >= o->op->size && odr_grow_block(o, bytes))
     {
         odr_seterror(o, OSPACE, 40);
