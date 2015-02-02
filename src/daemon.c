@@ -261,6 +261,15 @@ int yaz_daemon(const char *progname,
             yaz_log(YLOG_FATAL, "%s: Unknown user", uid);
             exit(1);
         }
+        if (flags & YAZ_DAEMON_LOG_REOPEN)
+        {
+            FILE *f = yaz_log_file();
+            if (f)
+            {
+                if (fchown(fileno(f), pw->pw_uid, -1))
+                    yaz_log(YLOG_WARN|YLOG_ERRNO, "fchown logfile");
+            }
+        }
         if (setuid(pw->pw_uid) < 0)
         {
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
