@@ -1,3 +1,7 @@
+--- 5.9.0 2015/02/02
+
+Extend yaz daemon facility to assist int log rotation YAZ-818 YAZ-819
+
 --- 5.8.1 2015/01/13
 
 record conv: 'select' return org record if no x-path match YAZ-814
