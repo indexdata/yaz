@@ -27,7 +27,7 @@ static int match_element_next(xmlNode **ptr, const char *elem, NMEM nmem,
 {
     while (*ptr && (*ptr)->type != XML_ELEMENT_NODE)
         (*ptr) = (*ptr)->next;
-    if (*ptr && yaz_match_xsd_string_n_nmem(*ptr, elem, nmem, val, 0))
+    if (yaz_match_xsd_string_n_nmem(*ptr, elem, nmem, val, 0))
     {
         *ptr = (*ptr)->next;
         return 1;
@@ -42,7 +42,7 @@ static int match_v_next(xmlNode **ptr, const char *elem, NMEM nmem,
     while (*ptr && (*ptr)->type != XML_ELEMENT_NODE)
         (*ptr) = (*ptr)->next;
     *val = nmem_booldup(nmem, 0);
-    if (*ptr && yaz_match_xsd_element(*ptr, elem))
+    if (yaz_match_xsd_element(*ptr, elem))
     {
         struct _xmlAttr *attr = (*ptr)->properties;
 
