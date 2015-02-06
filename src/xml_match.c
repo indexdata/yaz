@@ -16,7 +16,8 @@
 
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem)
 {
-    if (ptr->type == XML_ELEMENT_NODE && !xmlStrcmp(ptr->name, BAD_CAST elem))
+    if (ptr && ptr->type == XML_ELEMENT_NODE &&
+        !xmlStrcmp(ptr->name, BAD_CAST elem))
     {
         return 1;
     }
