@@ -575,6 +575,43 @@ static void tst_convert3(void)
     nmem_destroy(nmem);
 }
 
+static void tst_convert4(void)
+{
+    NMEM nmem = nmem_create();
+    int ret;
+
+    const char *opacxml_rec =
+        "<opacRecord>\n"
+        "  <bibliographicRecord>\n"
+        "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+        "  <leader>00077nam a22000498a 4500</leader>\n"
+        "  <controlfield tag=\"001\">   11224466 </controlfield>\n"
+        "  <datafield tag=\"010\" ind1=\" \" ind2=\" \">\n"
+        "    <subfield code=\"a\">k" "\xc3" "\xb8" /* oslash in UTF_8 */
+        "benhavn</subfield>\n"
+        "  </datafield>\n"
+        "</record>\n"
+        "  </bibliographicRecord>\n"
+        "  <holdings>\n"
+        "   <holding>\n"
+        "    <shelvingLocation>Sprague Library hidden basement</shelvingLocation>\n"
+        "    <callNumber>E98.L7L44 1976 </callNumber>\n"
+        "    <volumes/>\n"
+        "   </holding>\n"
+        "  </holdings>\n"
+        " </opacRecord>\n"
+        ;
+
+    Z_OPACRecord *opac = 0;
+    yaz_marc_t mt =  yaz_marc_create();
+    ret = yaz_xml_to_opac(mt, opacxml_rec, strlen(opacxml_rec),
+                          &opac, 0 /* iconv */, nmem, 0);
+    YAZ_CHECK(ret);
+    YAZ_CHECK(opac);
+    yaz_marc_destroy(mt);
+    nmem_destroy(nmem);
+}
+
 #endif
 
 int main(int argc, char **argv)
@@ -588,6 +625,7 @@ int main(int argc, char **argv)
     tst_convert1();
     tst_convert2();
     tst_convert3();
+    tst_convert4();
     xsltCleanupGlobals();
 #endif
 #if YAZ_HAVE_XML2
