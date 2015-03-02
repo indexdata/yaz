@@ -1320,7 +1320,7 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
     const char *charset = negotiationCharset;
     Z_GDU *gdu;
 
-    gdu = z_get_HTTP_Request_host_path(out, host_port, path);
+    gdu = z_get_HTTP_Request_uri(out, host_port, path, yazProxy ? 1 : 0);
 
     if (auth)
     {
