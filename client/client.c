@@ -1363,8 +1363,7 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
 
 static int send_srw(Z_SRW_PDU *sr)
 {
-    char *path = yaz_encode_sru_dbpath_odr(out, databaseNames[0]);
-    return send_srw_host_path(sr, wrbuf_cstr(cur_host), path);
+    return send_srw_host_path(sr, wrbuf_cstr(cur_host), databaseNames[0]);
 }
 
 static int send_SRW_redirect(const char *uri)
