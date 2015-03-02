@@ -183,28 +183,33 @@ COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
     COMSTACK cs;
     CS_TYPE t;
     char *connect_host = 0;
+    const char *bind_host = strchr(vhost, ' ');
+    if (bind_host && bind_host[1])
+        bind_host++;
+    else
+        bind_host = 0;
 
     if (!cs_parse_host(vhost, &host, &t, &proto, &connect_host))
         return 0;
-
     if (proxy_host)
     {
         enum oid_proto proto1;
+        CS_TYPE t1;
 
         xfree(connect_host);
-        if (!cs_parse_host(proxy_host, &host, &t, &proto1, &connect_host))
+        if (!cs_parse_host(proxy_host, &host, &t1, &proto1, &connect_host))
             return 0;
     }
 
     if (t == tcpip_type)
     {
-        const char *bind_host = strchr(vhost, ' ');
-        if (bind_host && bind_host[1])
-            bind_host++;
-        else
-            bind_host = 0;
-        cs = yaz_tcpip_create2(-1, blocking, proto, connect_host ? host : 0,
-                               bind_host);
+        cs = yaz_tcpip_create3(-1, blocking, proto, connect_host ? host : 0,
+                               0, bind_host);
+    }
+    else if (t == ssl_type)
+    {
+        cs = yaz_ssl_create(-1, blocking, proto, connect_host ? host : 0,
+                            0, bind_host);
     }
     else
     {

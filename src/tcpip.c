@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <yaz/base64.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -74,8 +75,6 @@
 static void tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
 static int tcpip_get(COMSTACK h, char **buf, int *bufsize);
-static int tcpip_put_connect(COMSTACK h, char *buf, int size);
-static int tcpip_get_connect(COMSTACK h, char **buf, int *bufsize);
 static int tcpip_connect(COMSTACK h, void *address);
 static int tcpip_more(COMSTACK h);
 static int tcpip_rcvconnect(COMSTACK h);
@@ -251,13 +250,10 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     return p;
 }
 
-COMSTACK yaz_tcpip_create2(int s, int flags, int protocol,
-                           const char *connect_host,
-                           const char *bind_host)
+static void connect_and_bind(COMSTACK p,
+                             const char *connect_host, const char *connect_auth,
+                             const char *bind_host)
 {
-    COMSTACK p = tcpip_type(s, flags, protocol, 0);
-    if (!p)
-        return 0;
     if (bind_host)
     {
         tcpip_state *sp = (tcpip_state *) p->cprivate;
@@ -274,15 +270,43 @@ COMSTACK yaz_tcpip_create2(int s, int flags, int protocol,
     if (connect_host)
     {
         tcpip_state *sp = (tcpip_state *) p->cprivate;
-        sp->connect_request_buf = (char *) xmalloc(strlen(connect_host) + 30);
-        sprintf(sp->connect_request_buf, "CONNECT %s HTTP/1.0\r\n\r\n",
-                connect_host);
+        char *cp;
+        sp->connect_request_buf = (char *) xmalloc(strlen(connect_host) + 130);
+        strcpy(sp->connect_request_buf, "CONNECT ");
+        strcat(sp->connect_request_buf, connect_host);
+        cp = strchr(sp->connect_request_buf, '/');
+        if (cp)
+            *cp = '\0';
+        strcat(sp->connect_request_buf, " HTTP/1.0\r\n");
+        if (connect_auth && strlen(connect_auth) < 40)
+        {
+            strcat(sp->connect_request_buf, "Proxy-Authorization: Basic ");
+            yaz_base64encode(connect_auth, sp->connect_request_buf +
+                             strlen(sp->connect_request_buf));
+            strcat(sp->connect_request_buf, "\r\n");
+        }
+        strcat(sp->connect_request_buf, "\r\n");
         sp->connect_request_len = strlen(sp->connect_request_buf);
-        p->f_put = tcpip_put_connect;
-        p->f_get = tcpip_get_connect;
-        sp->complete = cs_complete_auto_head; /* only want HTTP header */
     }
+}
+
+COMSTACK yaz_tcpip_create3(int s, int flags, int protocol,
+                           const char *connect_host,
+                           const char *connect_auth,
+                           const char *bind_host)
+{
+    COMSTACK p = tcpip_type(s, flags, protocol, 0);
+    if (!p)
+        return 0;
+    connect_and_bind(p, connect_host, 0, bind_host);
     return p;
+}
+
+COMSTACK yaz_tcpip_create2(int s, int flags, int protocol,
+                           const char *connect_host,
+                           const char *bind_host)
+{
+    return yaz_tcpip_create3(s, flags, protocol, connect_host, 0, bind_host);
 }
 
 COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
@@ -322,6 +346,18 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 #else
     return 0;
 #endif
+}
+
+COMSTACK yaz_ssl_create(int s, int flags, int protocol,
+                        const char *connect_host,
+                        const char *connect_auth,
+                        const char *bind_host)
+{
+    COMSTACK p = ssl_type(s, flags, protocol, 0);
+    if (!p)
+        return 0;
+    connect_and_bind(p, connect_host, connect_auth, bind_host);
+    return p;
 }
 
 #if HAVE_GNUTLS_H
@@ -771,6 +807,34 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         h->cerrno = CSOUTSTATE;
         return -1;
+    }
+    if (sp->connect_request_buf)
+    {
+        int r;
+
+        sp->complete = cs_complete_auto_head;
+        if (sp->connect_request_len > 0)
+        {
+            r = tcpip_put(h, sp->connect_request_buf,
+                          sp->connect_request_len);
+            TRC(fprintf(stderr, "tcpip_put CONNECT r=%d\n", r));
+            if (r) /* < 0 is error, 1 is in-complete */
+                return r;
+            TRC(fprintf(stderr, "tcpip_put CONNECT complete\n"));
+            TRC(fwrite(sp->connect_request_buf, 1, sp->connect_request_len, stderr));
+        }
+        sp->connect_request_len = 0;
+
+        r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
+        TRC(fprintf(stderr, "tcpip_get CONNECT r=%d\n", r));
+        if (r == 1)
+            return r;
+        if (r <= 0)
+            return -1;
+        TRC(fwrite(sp->connect_response_buf, 1, r, stderr));
+        xfree(sp->connect_request_buf);
+        sp->connect_request_buf = 0;
+        sp->complete = cs_complete_auto;
     }
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
@@ -1721,37 +1785,6 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 #endif
     return 0;
 }
-
-static int tcpip_put_connect(COMSTACK h, char *buf, int size)
-{
-    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
-
-    int r = tcpip_put(h, state->connect_request_buf,
-                      state->connect_request_len);
-    if (r == 0)
-    {
-        /* it's sent */
-        h->f_put = tcpip_put; /* switch to normal tcpip put */
-        r = tcpip_put(h, buf, size);
-    }
-    return r;
-}
-
-static int tcpip_get_connect(COMSTACK h, char **buf, int *bufsize)
-{
-    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
-    int r;
-
-    r = tcpip_get(h, &state->connect_response_buf,
-                  &state->connect_response_len);
-    if (r < 1)
-        return r;
-    /* got the connect response completely */
-    state->complete = cs_complete_auto; /* switch to normal tcpip get */
-    h->f_get = tcpip_get;
-    return tcpip_get(h, buf, bufsize);
-}
-
 
 /*
  * Local variables:
