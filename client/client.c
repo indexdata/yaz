@@ -127,6 +127,7 @@ static char ccl_fields[512] = "default.bib";
 static char cql_fields[512] = "/usr/local/share/yaz/etc/pqf.properties";
 static char *esPackageName = 0;
 static char *yazProxy = 0;
+static int proxy_mode = 0;
 static int kilobytes = 64 * 1024;
 static char *negotiationCharset = 0;
 static int  negotiationCharsetRecords = 1;
@@ -349,7 +350,7 @@ static void send_Z3950_initRequest(const char* type_and_host)
 
     req->referenceId = set_refid(out);
 
-    if (yazProxy && type_and_host)
+    if (proxy_mode && type_and_host)
     {
         yaz_oi_set_string_oid(&req->otherInfo, out, yaz_oid_userinfo_proxy,
                               1, type_and_host);
@@ -703,7 +704,7 @@ static int session_connect_base(const char *arg, const char **basep)
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
 
-    conn = cs_create_host_proxy(arg, 1, &add, yazProxy);
+    conn = cs_create_host2(arg, 1, &add, yazProxy, &proxy_mode);
     if (!conn)
     {
         printf("Could not resolve address %s\n", arg);
@@ -1320,7 +1321,7 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
     const char *charset = negotiationCharset;
     Z_GDU *gdu;
 
-    gdu = z_get_HTTP_Request_uri(out, host_port, path, yazProxy ? 1 : 0);
+    gdu = z_get_HTTP_Request_uri(out, host_port, path, proxy_mode);
 
     if (auth)
     {

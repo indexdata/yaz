@@ -20,6 +20,7 @@ struct yaz_url {
     ODR odr_in;
     ODR odr_out;
     char *proxy;
+    int proxy_mode;
     int max_redirects;
     WRBUF w_error;
     int verbose;
@@ -32,6 +33,7 @@ yaz_url_t yaz_url_create(void)
     p->odr_in = odr_createmem(ODR_DECODE);
     p->odr_out = odr_createmem(ODR_ENCODE);
     p->proxy = 0;
+    p->proxy_mode = 0;
     p->max_redirects = 10;
     p->w_error = wrbuf_alloc();
     p->verbose = 0;
@@ -142,7 +144,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         extract_user_pass(p->odr_out->mem, uri, &uri_lean,
                           &http_user, &http_pass);
 
-        gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy ? 1 : 0);
+        gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, p->proxy_mode);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
 
         yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
@@ -177,7 +179,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             log_warn(p);
             return 0;
         }
-        conn = cs_create_host_proxy(uri_lean, 1, &add, p->proxy);
+        conn = cs_create_host2(uri_lean, 1, &add, p->proxy, &p->proxy_mode);
         if (!conn)
         {
             wrbuf_printf(p->w_error, "Can not resolve URL %s", uri);

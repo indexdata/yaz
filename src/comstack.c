@@ -178,38 +178,71 @@ COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
 COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
                               const char *proxy_host)
 {
+    int proxy_mode;
+    return cs_create_host2(vhost, blocking, vp, proxy_host, &proxy_mode);
+}
+
+COMSTACK cs_create_host2(const char *vhost, int blocking, void **vp,
+                         const char *proxy_host, int *proxy_mode)
+{
     enum oid_proto proto = PROTO_Z3950;
     const char *host = 0;
     COMSTACK cs;
     CS_TYPE t;
     char *connect_host = 0;
+
     const char *bind_host = strchr(vhost, ' ');
     if (bind_host && bind_host[1])
         bind_host++;
     else
         bind_host = 0;
 
+    *proxy_mode = 0;
     if (!cs_parse_host(vhost, &host, &t, &proto, &connect_host))
         return 0;
-    if (proxy_host)
+
+    /*  vhost      proxy       proxy method  proxy-flag */
+    /*  TCP+Z3950  TCP+Z3950   TCP+Z3950      1 */
+    /*  TCP+Z3950  TCP+HTTP    CONNECT        0 */
+    /*  TCP+HTTP   TCP+Z3950   TCP+HTTP       1 */
+    /*  TCP+HTTP   TCP+HTTP    TCP+HTTP       1 */
+    /*  SSL+*      TCP+*       CONNECT        0 */
+    /*  ?          SSL         error */
+
+    if (proxy_host && !connect_host)
     {
         enum oid_proto proto1;
         CS_TYPE t1;
+        const char *host1 = 0;
 
-        xfree(connect_host);
-        if (!cs_parse_host(proxy_host, &host, &t1, &proto1, &connect_host))
+        if (!cs_parse_host(proxy_host, &host1, &t1, &proto1, &connect_host))
             return 0;
+        if (connect_host)
+        {
+            xfree(connect_host);
+            return 0;
+        }
+        if (t1 != tcpip_type)
+            return 0;
+
+        if (t == ssl_type || (proto == PROTO_Z3950 && proto1 == PROTO_HTTP))
+            connect_host = xstrdup(host1);
+        else
+        {
+            *proxy_mode = 1;
+            host = host1;
+        }
     }
 
     if (t == tcpip_type)
     {
         cs = yaz_tcpip_create3(-1, blocking, proto, connect_host ? host : 0,
-                               0, bind_host);
+                               0 /* user:pass */, bind_host);
     }
     else if (t == ssl_type)
     {
         cs = yaz_ssl_create(-1, blocking, proto, connect_host ? host : 0,
-                            0, bind_host);
+                            0 /* user:pass */, bind_host);
     }
     else
     {

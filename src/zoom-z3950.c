@@ -609,7 +609,7 @@ zoom_ret ZOOM_connection_Z3950_send_init(ZOOM_connection c)
         auth->u.open = odr_strdup(c->odr_out, c->user);
         ireq->idAuthentication = auth;
     }
-    if (c->proxy)
+    if (c->proxy_mode)
     {
         yaz_oi_set_string_oid(&ireq->otherInfo, c->odr_out,
                               yaz_oid_userinfo_proxy, 1, c->host_port);

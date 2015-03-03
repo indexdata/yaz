@@ -83,6 +83,7 @@ struct ZOOM_connection_p {
     int len_out;
     char *proxy;
     char *tproxy;
+    int proxy_mode;
     char *charset;
     char *lang;
     char *cookie_out;

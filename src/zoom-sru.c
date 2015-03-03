@@ -35,8 +35,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     const char *database =  ZOOM_options_get(c->options, "databaseName");
 
     gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port,
-                                 database,
-                                 c->proxy ? 1 : 0);
+                                 database, c->proxy_mode);
 
     if (c->sru_mode == zoom_sru_get)
     {

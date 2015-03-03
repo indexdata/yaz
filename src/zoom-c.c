@@ -266,6 +266,7 @@ ZOOM_API(ZOOM_connection)
     c->host_port = 0;
     c->proxy = 0;
     c->tproxy = 0;
+    c->proxy_mode = 0;
 
     c->charset = c->lang = 0;
 
@@ -1078,8 +1079,9 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 
     if (c->cs)
         cs_close(c->cs);
-    c->cs = cs_create_host_proxy(logical_url, CS_FLAGS_DNS_NO_BLOCK, &add,
-                                 c->tproxy ? c->tproxy : c->proxy);
+    c->cs = cs_create_host2(logical_url, CS_FLAGS_DNS_NO_BLOCK, &add,
+                            c->tproxy ? c->tproxy : c->proxy,
+                            &c->proxy_mode);
 
     if (c->cs && c->cs->protocol == PROTO_HTTP)
     {
