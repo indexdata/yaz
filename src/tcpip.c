@@ -818,6 +818,7 @@ int tcpip_rcvconnect(COMSTACK h)
             r = tcpip_put(h, sp->connect_request_buf,
                           sp->connect_request_len);
             TRC(fprintf(stderr, "tcpip_put CONNECT r=%d\n", r));
+            h->event = CS_CONNECT; /* because tcpip_put sets it */
             if (r) /* < 0 is error, 1 is in-complete */
                 return r;
             TRC(fprintf(stderr, "tcpip_put CONNECT complete\n"));
