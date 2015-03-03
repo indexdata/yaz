@@ -1,3 +1,9 @@
+--- 5.10.1 2015/03/03
+
+Fix test_sru.sh fails in pazpar2 YAZ-826
+Unfortunately a regression occurred with YAZ 5.10.0 that would make
+Pazpar2 fail for HTTP connections.
+
 --- 5.10.0 2015/03/03
 
 Use CONNECT for SSL backends and for Z39.50 thru HTTP proxy YAZ-825
