@@ -1,3 +1,12 @@
+--- 5.10.0 2015/03/03
+
+Use CONNECT for SSL backends and for Z39.50 thru HTTP proxy YAZ-825
+Introduce cs_create_host2 which returns if connection should be
+proxy aware (HTTP:absoluteUri or Z39.50 proxy:vhost in init).. For CONNECT,
+the connection is NOT proxy aware (no absoluteUri and no Z39.50 vhost).
+
+Fix http proxy fails with yaz-client YAZ-824
+
 --- 5.9.1 2015/02/06
 
 Fix 0 ptr reference for OPAC records from XML YAZ-822
