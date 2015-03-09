@@ -3720,18 +3720,19 @@ static int cmd_format(const char *arg)
 
 static int cmd_elements(const char *arg)
 {
-    static Z_ElementSetNames esn;
-    static char what[100];
-
-    if (!arg || !*arg)
+    if (elementSetNames)
     {
-        elementSetNames = 0;
-        return 1;
+        xfree(elementSetNames->u.generic);
+        xfree(elementSetNames);
     }
-    strcpy(what, arg);
-    esn.which = Z_ElementSetNames_generic;
-    esn.u.generic = what;
-    elementSetNames = &esn;
+    elementSetNames = 0;
+    if (arg && *arg)
+    {
+        elementSetNames = (Z_ElementSetNames *)
+            xmalloc(sizeof(*elementSetNames));
+        elementSetNames->which = Z_ElementSetNames_generic;
+        elementSetNames->u.generic = xstrdup(arg);
+    }
     return 1;
 }
 
