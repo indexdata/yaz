@@ -85,7 +85,6 @@ static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 static int tcpip_set_blocking(COMSTACK p, int blocking);
 
 #if HAVE_GNUTLS_H
-static int ssl_get(COMSTACK h, char **buf, int *bufsize);
 static int ssl_put(COMSTACK h, char *buf, int size);
 #endif
 
@@ -335,7 +334,6 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
-    p->f_get = ssl_get;
     p->f_put = ssl_put;
     p->type = ssl_type;
     sp = (tcpip_state *) p->cprivate;
@@ -1171,56 +1169,78 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 h->cerrno = CSYSERR;
                 return -1;
             }
-#ifdef __sun__
-        yaz_set_errno( 0 );
-        /* unfortunatly, sun sometimes forgets to set errno in recv
-           when EWOULDBLOCK etc. would be required (res = -1) */
-#endif
-        res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
-        TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
-        if (res < 0)
+#if HAVE_GNUTLS_H
+        if (sp->session)
         {
-            TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(),
-                      strerror(yaz_errno())));
-#ifdef WIN32
-            if (WSAGetLastError() == WSAEWOULDBLOCK)
+            res = gnutls_record_recv(sp->session, *buf + hasread,
+                                     CS_TCPIP_BUFCHUNK);
+            if (res == 0)
             {
-                h->io_pending = CS_WANT_READ;
-                break;
+                TRC(fprintf(stderr, "gnutls_record_recv returned 0\n"));
+                return 0;
             }
-            else
+            else if (res < 0)
             {
-                h->cerrno = CSYSERR;
+                if (ssl_check_error(h, sp, res))
+                    break;
                 return -1;
             }
+            hasread += res;
+        }
+        else
+#endif
+        {
+#ifdef __sun__
+            yaz_set_errno( 0 );
+            /* unfortunatly, sun sometimes forgets to set errno in recv
+               when EWOULDBLOCK etc. would be required (res = -1) */
+#endif
+            res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
+            TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
+            if (res < 0)
+            {
+                TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(),
+                            strerror(yaz_errno())));
+#ifdef WIN32
+                if (WSAGetLastError() == WSAEWOULDBLOCK)
+                {
+                    h->io_pending = CS_WANT_READ;
+                    break;
+                }
+                else
+                {
+                    h->cerrno = CSYSERR;
+                    return -1;
+                }
 #else
-            if (yaz_errno() == EWOULDBLOCK
+                if (yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-                || yaz_errno() == EAGAIN
+                    || yaz_errno() == EAGAIN
 #endif
 #endif
-                || yaz_errno() == EINPROGRESS
+                    || yaz_errno() == EINPROGRESS
 #ifdef __sun__
-                || yaz_errno() == ENOENT /* Sun's sometimes set errno to this */
+                    || yaz_errno() == ENOENT /* Sun's sometimes set errno to this */
 #endif
-                )
-            {
-                h->io_pending = CS_WANT_READ;
-                break;
+                    )
+                {
+                    h->io_pending = CS_WANT_READ;
+                    break;
+                }
+                else if (yaz_errno() == 0)
+                    continue;
+                else
+                {
+                    h->cerrno = CSYSERR;
+                    return -1;
+                }
             }
-            else if (yaz_errno() == 0)
-                continue;
-            else
-            {
-                h->cerrno = CSYSERR;
-                return -1;
-            }
+            else if (!res)
+                return hasread;
+            hasread += res;
 #endif
         }
-        else if (!res)
-            return hasread;
-        hasread += res;
         if (hasread > h->max_recv_bytes)
         {
             h->cerrno = CSBUFSIZE;
@@ -1258,84 +1278,6 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     return berlen ? berlen : 1;
 }
 
-
-#if HAVE_GNUTLS_H
-/*
- * Return: -1 error, >1 good, len of buffer, ==1 incomplete buffer,
- * 0=connection closed.
- */
-int ssl_get(COMSTACK h, char **buf, int *bufsize)
-{
-    tcpip_state *sp = (tcpip_state *)h->cprivate;
-    char *tmpc;
-    int tmpi, berlen, rest, req, tomove;
-    int hasread = 0, res;
-
-    TRC(fprintf(stderr, "ssl_get: bufsize=%d\n", *bufsize));
-    if (sp->altlen) /* switch buffers */
-    {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (%p)\n", sp->altlen,
-                    sp->altbuf));
-        tmpc = *buf;
-        tmpi = *bufsize;
-        *buf = sp->altbuf;
-        *bufsize = sp->altsize;
-        hasread = sp->altlen;
-        sp->altlen = 0;
-        sp->altbuf = tmpc;
-        sp->altsize = tmpi;
-    }
-    h->io_pending = 0;
-    while (!(berlen = (*sp->complete)(*buf, hasread)))
-    {
-        if (!*bufsize)
-        {
-            if (!(*buf = (char *)xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
-                return -1;
-        }
-        else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
-                return -1;
-        res = gnutls_record_recv(sp->session, *buf + hasread,
-                                 CS_TCPIP_BUFCHUNK);
-        if (res == 0)
-        {
-            TRC(fprintf(stderr, "gnutls_record_recv returned 0\n"));
-            return 0;
-        }
-        else if (res < 0)
-        {
-            if (ssl_check_error(h, sp, res))
-                break;
-            return -1;
-        }
-        hasread += res;
-    }
-    TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-        hasread, berlen));
-    /* move surplus buffer (or everything if we didn't get a BER rec.) */
-    if (hasread > berlen)
-    {
-        tomove = req = hasread - berlen;
-        rest = tomove % CS_TCPIP_BUFCHUNK;
-        if (rest)
-            req += CS_TCPIP_BUFCHUNK - rest;
-        if (!sp->altbuf)
-        {
-            if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
-                return -1;
-        } else if (sp->altsize < req)
-            if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
-                return -1;
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
-                    sp->altbuf));
-        memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
-    }
-    if (berlen < CS_TCPIP_BUFCHUNK - 1)
-        *(*buf + berlen) = '\0';
-    return berlen ? berlen : 1;
-}
-#endif
 
 /*
  * Returns 1, 0 or -1
