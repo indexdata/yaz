@@ -511,6 +511,12 @@ int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p)
     int lspace = 0;
 
     *hr_p = hr;
+    hr->method = 0;
+    hr->version = 0;
+    hr->path = 0;
+    hr->headers = 0;
+    hr->content_buf = 0;
+    hr->content_len = 0;
     /* method .. */
     for (i = 0; buf[i] != ' '; i++)
         if (i >= size-5 || i > 30)
@@ -613,6 +619,8 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
     char *cp;
     int top0 = o->op->top;
 
+    if (!hr->method || !hr->path)
+        return 0;
     odr_write(o, hr->method, strlen(hr->method));
     odr_write(o, " ", 1);
     cp = strchr(hr->path, '#');
