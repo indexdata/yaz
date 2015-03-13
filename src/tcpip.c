@@ -1185,7 +1185,6 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                     break;
                 return -1;
             }
-            hasread += res;
         }
         else
 #endif
@@ -1238,9 +1237,9 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             }
             else if (!res)
                 return hasread;
-            hasread += res;
 #endif
         }
+        hasread += res;
         if (hasread > h->max_recv_bytes)
         {
             h->cerrno = CSBUFSIZE;
