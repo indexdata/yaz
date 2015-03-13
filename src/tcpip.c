@@ -1289,6 +1289,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     {
         state->towrite = size;
         state->written = 0;
+        state->altlen = 0; /* reset input buf in case of excess bytes YAZ-830 */
     }
     else if (state->towrite != size)
     {
