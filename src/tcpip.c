@@ -84,11 +84,6 @@ static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  void *cd);
 static int tcpip_set_blocking(COMSTACK p, int blocking);
 
-#if HAVE_GNUTLS_H
-static int ssl_put(COMSTACK h, char *buf, int size);
-#endif
-
-
 #if HAVE_GETADDRINFO
 struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
                                    int *ipv6_only);
@@ -334,7 +329,6 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
     p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
-    p->f_put = ssl_put;
     p->type = ssl_type;
     sp = (tcpip_state *) p->cprivate;
 
@@ -1303,44 +1297,60 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     }
     while (state->towrite > state->written)
     {
-        if ((res =
-             send(h->iofile, buf + state->written, size -
-                  state->written,
-#ifdef MSG_NOSIGNAL
-                  MSG_NOSIGNAL
-#else
-                  0
-#endif
-                 )) < 0)
+#if HAVE_GNUTLS_H
+        if (state->session)
         {
-            if (
-#ifdef WIN32
-                WSAGetLastError() == WSAEWOULDBLOCK
+            res = gnutls_record_send(state->session, buf + state->written,
+                                     size - state->written);
+            if (res <= 0)
+            {
+                if (ssl_check_error(h, state, res))
+                    return 1;
+                return -1;
+            }
+        }
+        else
+#endif
+        {
+            if ((res =
+                 send(h->iofile, buf + state->written, size -
+                      state->written,
+#ifdef MSG_NOSIGNAL
+                      MSG_NOSIGNAL
 #else
-                yaz_errno() == EWOULDBLOCK
+                      0
+#endif
+                     )) < 0)
+            {
+                if (
+#ifdef WIN32
+                    WSAGetLastError() == WSAEWOULDBLOCK
+#else
+                    yaz_errno() == EWOULDBLOCK
 #ifdef EAGAIN
 #if EAGAIN != EWOULDBLOCK
-             || yaz_errno() == EAGAIN
+                    || yaz_errno() == EAGAIN
 #endif
 #endif
 #ifdef __sun__
-                || yaz_errno() == ENOENT /* Sun's sometimes set errno to this value! */
+                    || yaz_errno() == ENOENT /* Sun's sometimes set errno to this value! */
 #endif
-                || yaz_errno() == EINPROGRESS
+                    || yaz_errno() == EINPROGRESS
 #endif
-                )
-            {
-                TRC(fprintf(stderr, "  Flow control stop\n"));
-                h->io_pending = CS_WANT_WRITE;
-                return 1;
+                    )
+                {
+                    TRC(fprintf(stderr, "  Flow control stop\n"));
+                    h->io_pending = CS_WANT_WRITE;
+                    return 1;
+                }
+                if (h->flags & CS_FLAGS_BLOCKING)
+                {
+                    h->cerrno = CSYSERR;
+                    return -1;
+                }
+                else
+                    return cont_connect(h);
             }
-            if (h->flags & CS_FLAGS_BLOCKING)
-            {
-                h->cerrno = CSYSERR;
-                return -1;
-            }
-            else
-                return cont_connect(h);
         }
         state->written += res;
         TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
@@ -1350,51 +1360,6 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     TRC(fprintf(stderr, "  Ok\n"));
     return 0;
 }
-
-
-#if HAVE_GNUTLS_H
-/*
- * Returns 1, 0 or -1
- * In nonblocking mode, you must call again with same buffer while
- * return value is 1.
- */
-int ssl_put(COMSTACK h, char *buf, int size)
-{
-    int res;
-    struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
-
-    TRC(fprintf(stderr, "ssl_put: size=%d\n", size));
-    h->io_pending = 0;
-    h->event = CS_DATA;
-    if (state->towrite < 0)
-    {
-        state->towrite = size;
-        state->written = 0;
-    }
-    else if (state->towrite != size)
-    {
-        h->cerrno = CSWRONGBUF;
-        return -1;
-    }
-    while (state->towrite > state->written)
-    {
-        res = gnutls_record_send(state->session, buf + state->written,
-                                 size - state->written);
-        if (res <= 0)
-        {
-            if (ssl_check_error(h, state, res))
-                return 1;
-            return -1;
-        }
-        state->written += res;
-        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-                    res, state->written, size));
-    }
-    state->towrite = state->written = -1;
-    TRC(fprintf(stderr, "  Ok\n"));
-    return 0;
-}
-#endif
 
 void tcpip_close(COMSTACK h)
 {
