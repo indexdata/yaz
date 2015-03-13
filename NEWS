@@ -1,3 +1,15 @@
+--- 5.10.2 2015/03/13
+
+Deal with excess bytes in HTTP response for keepalive YAZ-830
+
+Refactor ssl_put and tcpip_put to one function YAZ-832
+
+Refactor ssl_get and tcpip_get to one function YAZ-831
+
+Fix SEGV yaz-client for HTTP decoding error YAZ-829
+
+Fix buffer overflow in cmd_elements in yaz-client YAZ-828
+
 --- 5.10.1 2015/03/03
 
 Fix test_sru.sh fails in pazpar2 YAZ-826
