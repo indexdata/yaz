@@ -897,6 +897,68 @@ static void check_icu_iter4(void)
 }
 
 
+static void check_norm(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain *chain = 0;
+    xmlNode *xml_node;
+    yaz_icu_iter_t it;
+
+    const char *xml_str =
+        "  <icu_chain id=\"relevance\" locale=\"en\">"
+        "    <transform rule=\"[:Control:] Any-Remove\"/>"
+        "    <tokenize rule=\"l\"/>"
+        "    <transform rule=\"[[:WhiteSpace:][:Punctuation:]`] Remove\"/>"
+        "    <casemap rule=\"l\"/>"
+        "  </icu_chain>";
+
+    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+    chain = icu_chain_xml_config(xml_node, 1, &status);
+
+    it = icu_iter_create(chain);
+    if (it)
+    {
+        icu_iter_first(it, " y😄");
+        while (icu_iter_next(it))
+        {
+            const char *norm_str = icu_iter_get_norm(it);
+            size_t start, len;
+
+            YAZ_CHECK(norm_str);
+            if (norm_str)
+                yaz_log(YLOG_LOG, "norm_str len=%ld=%s",
+                        (long) strlen(norm_str), norm_str);
+            icu_iter_get_org_info(it, &start, &len);
+            YAZ_CHECK(start <= 1000);
+            YAZ_CHECK(len <= 1000);
+        }
+
+        icu_iter_first(it, "\n y😄");
+        while (icu_iter_next(it))
+        {
+            const char *norm_str = icu_iter_get_norm(it);
+            size_t start, len;
+
+            YAZ_CHECK(norm_str);
+            if (norm_str)
+                yaz_log(YLOG_LOG, "norm_str len=%ld=%s",
+                        (long) strlen(norm_str), norm_str);
+            icu_iter_get_org_info(it, &start, &len);
+            YAZ_CHECK(start <= 1000);
+            YAZ_CHECK(len <= 1000);
+        }
+    }
+    icu_iter_destroy(it);
+    icu_chain_destroy(chain);
+    xmlFreeDoc(doc);
+}
 #endif /* YAZ_HAVE_ICU */
 
 int main(int argc, char **argv)
@@ -919,6 +981,7 @@ int main(int argc, char **argv)
     check_icu_iter4();
 
     check_bug_1140();
+    check_norm();
 
     u_cleanup();
 #if YAZ_HAVE_XML2
