@@ -426,6 +426,8 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
                 struct icu_buf_utf16 *src = dst;
 
                 icu_tokenizer_attach(step->u.tokenizer, src, &iter->status);
+                iter->utf8_base = iter->utf16_base = 0;
+                icu_buf_utf16_copy(iter->org, src);
                 icu_buf_utf16_destroy(src);
             }
             dst = icu_buf_utf16_create(0);
