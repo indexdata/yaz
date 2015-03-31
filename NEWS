@@ -1,3 +1,16 @@
+--- 5.11.0 2015/03/31
+
+Extend get_org_info (snippets) to return original string YAZ-836
+Two new functions have appeared: icu_chain_get_org_info2 and
+icu_iter_get_org_info2 with a 4th parameter being a pointer
+to the original string.
+
+Fix tcpip.c compilation failure on VC9 YAZ-835
+
+Fix icu_iter_get_norm returns invalid size for some input YAZ-834
+The icu_iter_get_org_info returns information based on string
+as it appears on tokenize step.
+
 --- 5.10.2 2015/03/13
 
 Deal with excess bytes in HTTP response for keepalive YAZ-830
