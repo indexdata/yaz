@@ -479,9 +479,11 @@ static void process_text_file(struct config_t *p_config)
             else
             {
                 size_t start, len;
+                const char *org_string = 0;
                 const char *sortkey = icu_chain_token_sortkey(p_config->chain);
 
-                icu_chain_get_org_info(p_config->chain, &start, &len);
+                icu_chain_get_org_info2(p_config->chain, &start, &len,
+                                        &org_string);
                 wrbuf_rewind(sw);
                 wrbuf_puts_escaped(sw, sortkey);
                 token_count++;
@@ -525,6 +527,12 @@ static void process_text_file(struct config_t *p_config)
                     {
                         fprintf(p_config->outfile, " %ld+%ld",
                                 (long) start, (long) len);
+                        fputc(' ', p_config->outfile);
+                        fwrite(org_string, 1, start, p_config->outfile);
+                        fputc('*', p_config->outfile);
+                        fwrite(org_string + start, 1, len, p_config->outfile);
+                        fputc('*', p_config->outfile);
+                        fputs(org_string + start + len, p_config->outfile);
                     }
                     fprintf(p_config->outfile, "\n");
                 }

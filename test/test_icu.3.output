@@ -1,4 +1,4 @@
-1 1 'men' '' 0+4
-2 1 'run' '' 4+7
-3 2 'he' '' 0+3
-4 2 'run' '' 3+5
+1 1 'men' '' 0+4 *men *running
+2 1 'run' '' 4+7 men *running*
+3 2 'he' '' 0+3 *he *runs 
+4 2 'run' '' 3+5 he *runs *
