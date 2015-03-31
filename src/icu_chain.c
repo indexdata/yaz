@@ -366,6 +366,7 @@ struct icu_iter {
     struct icu_chain *chain;
     struct icu_buf_utf16 *last;
     struct icu_buf_utf16 *org;
+    struct icu_buf_utf8 *org8;
     UErrorCode status;
     struct icu_buf_utf8 *display;
     struct icu_buf_utf8 *sort8;
@@ -426,8 +427,11 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
                 struct icu_buf_utf16 *src = dst;
 
                 icu_tokenizer_attach(step->u.tokenizer, src, &iter->status);
-                iter->utf8_base = iter->utf16_base = 0;
-                icu_buf_utf16_copy(iter->org, src);
+                if (step->previous)
+                {   /* no need to copy if it's already the same */
+                    iter->utf8_base = iter->utf16_base = 0;
+                    icu_buf_utf16_copy(iter->org, src);
+                }
                 icu_buf_utf16_destroy(src);
             }
             dst = icu_buf_utf16_create(0);
@@ -494,6 +498,7 @@ yaz_icu_iter_t icu_iter_create(struct icu_chain *chain)
     iter->sort8 = icu_buf_utf8_create(0);
     iter->result = icu_buf_utf8_create(0);
     iter->org = icu_buf_utf16_create(0);
+    iter->org8 = 0;
     iter->last = 0; /* no last returned string (yet) */
     iter->steps = icu_chain_step_clone(chain->csteps);
     iter->token_count = 0;
@@ -521,6 +526,7 @@ void icu_iter_destroy(yaz_icu_iter_t iter)
         icu_buf_utf8_destroy(iter->sort8);
         icu_buf_utf8_destroy(iter->result);
         icu_buf_utf16_destroy(iter->org);
+        icu_buf_utf8_destroy(iter->org8);
         icu_chain_step_destroy(iter->steps);
         xfree(iter);
     }
@@ -569,7 +575,8 @@ int icu_iter_get_token_number(yaz_icu_iter_t iter)
 }
 
 
-void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
+void icu_iter_get_org_info2(yaz_icu_iter_t iter, size_t *start, size_t *len,
+                            const char **cstr)
 {
     int32_t len1 = 0, len2 = 0;
     UErrorCode status = U_ZERO_ERROR;
@@ -595,8 +602,21 @@ void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
 
     *len = len2 - len1;
 
+    if (cstr)
+    {
+        if (!iter->org8)
+            iter->org8 = icu_buf_utf8_create(0);
+        status = U_ZERO_ERROR;
+        icu_utf16_to_utf8(iter->org8, iter->org, &status);
+        *cstr = icu_buf_utf8_to_cstr(iter->org8);
+    }
     iter->utf8_base = *start;
     iter->utf16_base = iter->org_start;
+}
+
+void icu_iter_get_org_info(yaz_icu_iter_t iter, size_t *start, size_t *len)
+{
+    icu_iter_get_org_info2(iter, start, len, 0);
 }
 
 int icu_chain_assign_cstr(struct icu_chain *chain, const char *src8cstr,
@@ -647,6 +667,13 @@ void icu_chain_get_org_info(struct icu_chain *chain, size_t *start, size_t *len)
 {
     if (chain->iter)
         icu_iter_get_org_info(chain->iter, start, len);
+}
+
+void icu_chain_get_org_info2(struct icu_chain *chain, size_t *start,
+                             size_t *len, const char **cstr)
+{
+    if (chain->iter)
+        icu_iter_get_org_info2(chain->iter, start, len, cstr);
 }
 
 
