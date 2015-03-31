@@ -1228,10 +1228,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                     h->cerrno = CSYSERR;
                     return -1;
                 }
+#endif
             }
             else if (!res)
                 return hasread;
-#endif
         }
         hasread += res;
         if (hasread > h->max_recv_bytes)
