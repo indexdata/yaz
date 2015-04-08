@@ -2654,10 +2654,116 @@
 	<entry>none</entry>
        </row>
        <row>
+	<entry>itemorder-setname</entry>
+	<entry>Name of result set for record</entry>
+	<entry>default</entry>
+       </row>
+       <row>
 	<entry>itemorder-item</entry>
 	<entry>Position for item (record) requested. An integer</entry>
 	<entry>1</entry>
        </row>
+      </tbody>
+     </tgroup>
+    </table>
+    <para>
+     There are two variants of item order: ILL-variant and
+     XML document variant. In order to use the XML variant the setting
+     <literal>doc</literal> must hold the XML item order document. If that
+     setting is unset, the ILL-variant is used.
+    </para>
+
+    <table frame="top" id="zoom.illrequest.options">
+     <title>ILL Request Options</title>
+     <tgroup cols="1">
+      <colspec colwidth="4*" colname="name"></colspec>
+      <thead>
+       <row>
+	<entry>Option</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row><entry>protocol-version-num</entry></row>
+       <row><entry>transaction-id,initial-requester-id,person-or-institution-symbol,person</entry></row>
+       <row><entry>transaction-id,initial-requester-id,person-or-institution-symbol,institution</entry></row>
+       <row><entry>transaction-id,initial-requester-id,name-of-person-or-institution,name-of-person</entry></row>
+       <row><entry>transaction-id,initial-requester-id,name-of-person-or-institution,name-of-institution</entry></row>
+       <row><entry>transaction-id,transaction-group-qualifier</entry></row>
+       <row><entry>transaction-id,transaction-qualifier</entry></row>
+       <row><entry>transaction-id,sub-transaction-qualifier</entry></row>
+       <row><entry>service-date-time,this,date</entry></row>
+       <row><entry>service-date-time,this,time</entry></row>
+       <row><entry>service-date-time,original,date</entry></row>
+       <row><entry>service-date-time,original,time</entry></row>
+       <row><entry>requester-id,person-or-institution-symbol,person</entry></row>
+       <row><entry>requester-id,person-or-institution-symbol,institution</entry></row>
+       <row><entry>requester-id,name-of-person-or-institution,name-of-person</entry></row>
+       <row><entry>requester-id,name-of-person-or-institution,name-of-institution</entry></row>
+       <row><entry>responder-id,person-or-institution-symbol,person</entry></row>
+       <row><entry>responder-id,person-or-institution-symbol,institution</entry></row>
+       <row><entry>responder-id,name-of-person-or-institution,name-of-person</entry></row>
+       <row><entry>responder-id,name-of-person-or-institution,name-of-institution</entry></row>
+       <row><entry>transaction-type</entry></row>
+       <row><entry>delivery-address,postal-address,name-of-person-or-institution,name-of-person</entry></row>
+       <row><entry>delivery-address,postal-address,name-of-person-or-institution,name-of-institution</entry></row>
+       <row><entry>delivery-address,postal-address,extended-postal-delivery-address</entry></row>
+       <row><entry>delivery-address,postal-address,street-and-number</entry></row>
+       <row><entry>delivery-address,postal-address,post-office-box</entry></row>
+       <row><entry>delivery-address,postal-address,city</entry></row>
+       <row><entry>delivery-address,postal-address,region</entry></row>
+       <row><entry>delivery-address,postal-address,country</entry></row>
+       <row><entry>delivery-address,postal-address,postal-code</entry></row>
+       <row><entry>delivery-address,electronic-address,telecom-service-identifier</entry></row>
+       <row><entry>delivery-address,electronic-address,telecom-service-addreess</entry></row>
+       <row><entry>billing-address,postal-address,name-of-person-or-institution,name-of-person</entry></row>
+       <row><entry>billing-address,postal-address,name-of-person-or-institution,name-of-institution</entry></row>
+       <row><entry>billing-address,postal-address,extended-postal-delivery-address</entry></row>
+       <row><entry>billing-address,postal-address,street-and-number</entry></row>
+       <row><entry>billing-address,postal-address,post-office-box</entry></row>
+       <row><entry>billing-address,postal-address,city</entry></row>
+       <row><entry>billing-address,postal-address,region</entry></row>
+       <row><entry>billing-address,postal-address,country</entry></row>
+       <row><entry>billing-address,postal-address,postal-code</entry></row>
+       <row><entry>billing-address,electronic-address,telecom-service-identifier</entry></row>
+       <row><entry>billing-address,electronic-address,telecom-service-addreess</entry></row>
+       <row><entry>ill-service-type</entry></row>
+       <row><entry>requester-optional-messages,can-send-RECEIVED</entry></row>
+       <row><entry>requester-optional-messages,can-send-RETURNED</entry></row>
+       <row><entry>requester-optional-messages,requester-SHIPPED</entry></row>
+       <row><entry>requester-optional-messages,requester-CHECKED-IN</entry></row>
+       <row><entry>search-type,level-of-service</entry></row>
+       <row><entry>search-type,need-before-date</entry></row>
+       <row><entry>search-type,expiry-date</entry></row>
+       <row><entry>search-type,expiry-flag</entry></row>
+       <row><entry>place-on-hold</entry></row>
+       <row><entry>client-id,client-name</entry></row>
+       <row><entry>client-id,client-status</entry></row>
+       <row><entry>client-id,client-identifier</entry></row>
+       <row><entry>item-id,item-type</entry></row>
+       <row><entry>item-id,call-number</entry></row>
+       <row><entry>item-id,author</entry></row>
+       <row><entry>item-id,title</entry></row>
+       <row><entry>item-id,sub-title</entry></row>
+       <row><entry>item-id,sponsoring-body</entry></row>
+       <row><entry>item-id,place-of-publication</entry></row>
+       <row><entry>item-id,publisher</entry></row>
+       <row><entry>item-id,series-title-number</entry></row>
+       <row><entry>item-id,volume-issue</entry></row>
+       <row><entry>item-id,edition</entry></row>
+       <row><entry>item-id,publication-date</entry></row>
+       <row><entry>item-id,publication-date-of-component</entry></row>
+       <row><entry>item-id,author-of-article</entry></row>
+       <row><entry>item-id,title-of-article</entry></row>
+       <row><entry>item-id,pagination</entry></row>
+       <row><entry>item-id,ISBN</entry></row>
+       <row><entry>item-id,ISSN</entry></row>
+       <row><entry>item-id,additional-no-letters</entry></row>
+       <row><entry>item-id,verification-reference-source</entry></row>
+       <row><entry>copyright-complicance</entry></row>
+       <row><entry>retry-flag</entry></row>
+       <row><entry>forward-flag</entry></row>
+       <row><entry>requester-note</entry></row>
+       <row><entry>forward-note</entry></row>
       </tbody>
      </tgroup>
     </table>
