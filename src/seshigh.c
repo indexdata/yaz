@@ -469,7 +469,8 @@ void ir_session(IOCHAN h, int event)
     }
     if (event & EVENT_EXCEPT)
     {
-        yaz_log(YLOG_WARN, "ir_session (exception)");
+        if (assoc->state != ASSOC_DEAD)
+            yaz_log(YLOG_WARN, "ir_session (exception)");
         cs_close(conn);
         destroy_association(assoc);
         iochan_destroy(h);
