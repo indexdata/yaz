@@ -20,6 +20,7 @@
 #include <yaz/nmem.h>
 #include <yaz/tpath.h>
 #include <yaz/z-opac.h>
+#include <yaz/xml_get.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -331,26 +332,23 @@ static void *construct_select(const xmlNode *ptr,
         return 0;
     else
     {
-        struct _xmlAttr *attr;
         NMEM nmem = nmem_create();
         struct select_info *info = nmem_malloc(nmem, sizeof(*info));
+        const char *attr_str;
+        const char *xpath = 0;
 
         info->nmem = nmem;
         info->xpath_expr = 0;
-        for (attr = ptr->properties; attr; attr = attr->next)
+        attr_str = yaz_xml_get_prop(ptr, "path%s", &xpath);
+        if (attr_str)
         {
-            if (!xmlStrcmp(attr->name, BAD_CAST "path") &&
-                attr->children && attr->children->type == XML_TEXT_NODE)
-                info->xpath_expr =
-                    nmem_strdup(nmem, (const char *) attr->children->content);
-            else
-            {
-                wrbuf_printf(wr_error, "Bad attribute '%s'"
-                             "Expected xpath.", attr->name);
-                nmem_destroy(nmem);
+            wrbuf_printf(wr_error, "Bad attribute '%s'"
+                         "Expected xpath.", attr_str);
+            nmem_destroy(nmem);
                 return 0;
-            }
         }
+        if (xpath)
+            info->xpath_expr = nmem_strdup(nmem, xpath);
         return info;
     }
 }

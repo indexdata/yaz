@@ -12,7 +12,7 @@ pkginclude_HEADERS= backend.h backtrace.h base64.h \
  readconf.h record_conv.h record_render.h retrieval.h statserv.h \
  tcpip.h test.h timing.h unix.h tpath.h wrbuf.h xmalloc.h \
  yaz-ccl.h yaz-iconv.h yaz-util.h yaz-version.h yconfig.h proto.h \
- xmlquery.h xmltypes.h snprintf.h query-charset.h \
+ xml_get.h xmlquery.h xmltypes.h snprintf.h query-charset.h \
  mutex.h oid_db.h oid_util.h oid_std.h tokenizer.h copy_types.h \
  icu.h match_glob.h poll.h daemon.h sc.h xml_include.h \
  \

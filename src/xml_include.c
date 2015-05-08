@@ -131,6 +131,7 @@ static int process_config_includes(yaz_xml_include_t config, xmlNode *n)
                 xmlChar *src = xmlGetProp(n, (xmlChar *) "src");
                 if (src)
                 {
+                    /* src must be preserved, because n is destroyed */
                     int ret = config_include_src(config, &n,
                                                  (const char *) src);
                     xmlFree(src);

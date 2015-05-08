@@ -20,6 +20,7 @@
 #include <yaz/logrpn.h>
 #include <yaz/xmlquery.h>
 #include <yaz/nmem_xml.h>
+#include <yaz/xml_get.h>
 #include <yaz/oid_db.h>
 
 static int check_diagnostic(const xmlNode *ptr, ODR odr,
@@ -362,7 +363,7 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
                                    ODR odr,
                                    int *error_code, const char **addinfo)
 {
-    xmlChar *type = xmlGetProp((xmlNodePtr) ptr, BAD_CAST "type");
+    const char *type = yaz_xml_get_prop((xmlNodePtr) ptr, "type");
     if (!type)
     {
         *error_code = 1;
@@ -370,22 +371,22 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         return;
     }
     *op = (Z_Operator*) odr_malloc(odr, sizeof(Z_Operator));
-    if (!xmlStrcmp(type, BAD_CAST "and"))
+    if (!strcmp(type, "and"))
     {
         (*op)->which = Z_Operator_and;
         (*op)->u.op_and = odr_nullval();
     }
-    else if (!xmlStrcmp(type, BAD_CAST "or"))
+    else if (!strcmp(type, "or"))
     {
         (*op)->which = Z_Operator_or;
         (*op)->u.op_or = odr_nullval();
     }
-    else if (!xmlStrcmp(type, BAD_CAST "not"))
+    else if (!strcmp(type, "not"))
     {
         (*op)->which = Z_Operator_and_not;
         (*op)->u.and_not = odr_nullval();
     }
-    else if (!xmlStrcmp(type, BAD_CAST "prox"))
+    else if (!strcmp(type, "prox"))
     {
         struct _xmlAttr *attr;
         Z_ProximityOperator *pop = (Z_ProximityOperator *)
@@ -437,7 +438,6 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         *error_code = 1;
         *addinfo = "bad operator type";
     }
-    xmlFree(type);
 }
 
 static void yaz_xml2query_attribute_element(const xmlNode *ptr,
@@ -749,15 +749,14 @@ static void yaz_xml2query_rpnstructure(const xmlNode *ptr, Z_RPNStructure **zs,
 static void yaz_xml2query_rpn(const xmlNode *ptr, Z_RPNQuery **query, ODR odr,
                               int *error_code, const char **addinfo)
 {
-    xmlChar *set = xmlGetProp((xmlNodePtr) ptr, BAD_CAST "set");
+    const char  *set = yaz_xml_get_prop((xmlNodePtr) ptr, "set");
 
     *query = (Z_RPNQuery*) odr_malloc(odr, sizeof(Z_RPNQuery));
     if (set)
     {
         (*query)->attributeSetId =
             yaz_string_to_oid_odr(yaz_oid_std(),
-                                  CLASS_ATTSET, (const char *) set, odr);
-        xmlFree(set);
+                                  CLASS_ATTSET, set, odr);
     }
     else
         (*query)->attributeSetId = 0;

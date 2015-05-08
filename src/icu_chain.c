@@ -22,6 +22,7 @@
 #include <yaz/log.h>
 #include <yaz/nmem.h>
 #include <yaz/nmem_xml.h>
+#include <yaz/xml_get.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -250,13 +251,10 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
 
     if (xml_node && xml_node->type == XML_ELEMENT_NODE)
     {
-        xmlChar *xml_locale = xmlGetProp((xmlNode *) xml_node,
-                                         (xmlChar *) "locale");
+        const char *xml_locale = yaz_xml_get_prop((xmlNode *) xml_node,
+                                                  "locale");
         if (xml_locale)
-        {
             chain = icu_chain_create((const char *) xml_locale, sort, status);
-            xmlFree(xml_locale);
-        }
     }
 
     if (!chain)
@@ -267,24 +265,17 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
     {
         char *rule = 0;
         struct icu_chain_step *step = 0;
-        struct _xmlAttr *attr;
+        const char *attr_str;
 
         nmem_reset(nmem);
         if (node->type != XML_ELEMENT_NODE)
             continue;
-
-        for (attr = node->properties; attr; attr = attr->next)
+        attr_str = yaz_xml_get_prop(node, "rule%s", &rule);
+        if (attr_str)
         {
-            if (!strcmp((const char *) attr->name, "rule"))
-            {
-                rule = nmem_text_node_cdata(attr->children, nmem);
-            }
-            else
-            {
-                yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "
-                        "element '%s'", attr->name, node->name);
-                no_errors++;
-            }
+            yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "
+                    "element '%s'", attr_str, node->name);
+            no_errors++;
         }
         if (!rule && node->children)
             rule = nmem_text_node_cdata(node->children, nmem);

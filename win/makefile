@@ -486,6 +486,7 @@ MISC_OBJS= \
    $(OBJDIR)\charneg.obj \
    $(OBJDIR)\grs1disp.obj \
    $(OBJDIR)\opac_to_xml.obj \
+   $(OBJDIR)\xml_get.obj \
    $(OBJDIR)\xml_add.obj \
    $(OBJDIR)\xml_match.obj \
    $(OBJDIR)\xml_to_opac.obj \
