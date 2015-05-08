@@ -1019,7 +1019,9 @@ COMSTACK tcpip_accept(COMSTACK h)
     TRC(fprintf(stderr, "tcpip_accept h=%p pid=%d\n", h, getpid()));
     if (h->state == CS_ST_INCON)
     {
+#if HAVE_GNUTLS_H
         tcpip_state *st = (tcpip_state *)h->cprivate;
+#endif
         tcpip_state *state = tcpip_state_create();
         cnew = (COMSTACK) xmalloc(sizeof(*cnew));
 
