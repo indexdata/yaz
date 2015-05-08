@@ -1,3 +1,13 @@
+--- 5.12.0 2015/05/08
+
+Allow Content-Type application/sru+xml YAZ-840
+
+New yaz_xml_get_prop utility YAZ-839
+
+Fix zebrasrv [warn] ir_session (exception) YAZ-838
+
+Document itemorder-setname and list all ILL options
+
 --- 5.11.0 2015/03/31
 
 Extend get_org_info (snippets) to return original string YAZ-836
