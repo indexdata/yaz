@@ -97,6 +97,8 @@ int yaz_srw_check_content_type(Z_HTTP_Response *hres)
             return 1;
         if (!yaz_strcmp_del("application/xml", content_type, "; "))
             return 1;
+        if (!yaz_strcmp_del("application/sru+xml", content_type, "; "))
+            return 1;
     }
     return 0;
 }
