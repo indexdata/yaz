@@ -2,6 +2,7 @@
 ; Copyright (C) Index Data
 ; See the file LICENSE for details.
 
+!include EnvVarUpdate.nsh
 !include version.nsi
 
 ; Microsoft runtime CRT 
@@ -179,6 +180,11 @@ Section "YAZ4J" YAZ4J
 	File /nonfatal ..\java\yaz4j.jar
 SectionEnd
 
+Section "YAZ Path" YAZ_PATH
+	SectionIn 1 2
+	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\bin"
+SectionEnd
+
 ; begin uninstall settings/section
 UninstallText "This will uninstall YAZ ${VERSION} from your system"
 
@@ -190,6 +196,7 @@ Section Uninstall
 	ExecWait '"$INSTDIR\bin\yaz-ztest" -remove'
 	RMDir /r $SMPROGRAMS\YAZ
 	RMDir /r $INSTDIR
+	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
         IfFileExists $INSTDIR 0 Removed 
 		MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
@@ -205,6 +212,7 @@ LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import librari
 LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML. Describes both YAZ applications and the API."
 LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
 LangString DESC_YAZ4J ${LANG_ENGLISH} "Java wrapper for the ZOOM API of YAZ."
+LangString DESC_YAZ_PATH ${LANG_ENGLISH} "Update PATH to include binaries of YAZ."
 
 ;Assign language strings to sections
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -213,6 +221,7 @@ LangString DESC_YAZ4J ${LANG_ENGLISH} "Java wrapper for the ZOOM API of YAZ."
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Documentation} $(DESC_YAZ_Documentation)
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ_Source} $(DESC_YAZ_Source)
 !insertmacro MUI_DESCRIPTION_TEXT ${YAZ4J} $(DESC_YAZ4J)
+!insertmacro MUI_DESCRIPTION_TEXT ${YAZ_PATH} $(DESC_YAZ_PATH)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; eof
