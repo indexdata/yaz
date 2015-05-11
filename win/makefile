@@ -53,11 +53,11 @@ YAZ4J_DIR="..\..\yaz4j"
 YAZPATH="$(MAKEDIR)\.."
 
 
-dist: yaz.win32.nsi yaz.nsi distclean
+dist: yaz.win32.nsi yaz.nsi version.nsi distclean
 	nmake DEBUG=0 allj
 	$(NSIS) yaz.win32.nsi
 
-dist64: yaz.win64.nsi yaz.nsi distclean
+dist64: yaz.win64.nsi yaz.nsi version.nsi distclean
 	nmake make64
 	$(NSIS) yaz.win64.nsi
 
@@ -69,10 +69,10 @@ distclean:
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
 
-nsis: all yaz.win32.nsi
+nsis: all yaz.win32.nsi version.nsi
 	$(NSIS) yaz.win32.nsi
 
-nsis64: yaz.win64.nsi
+nsis64: yaz.win64.nsi version.nsi
 	$(NSIS) yaz.win64.nsi
 
 nsishelp:
@@ -874,6 +874,9 @@ $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 $(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	@cd $(SRCDIR)
 	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
+
+version.nsi: $(ROOTDIR)/IDMETA
+	$(TCL) $(SRCDIR)/mk_version.tcl $(ROOTDIR)/IDMETA version.nsi
 
 
 !endif

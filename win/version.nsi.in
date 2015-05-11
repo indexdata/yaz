@@ -1,2 +1,2 @@
-!define VERSION "@PACKAGE_VERSION@"
+!define VERSION "@VERSION@"
 
