@@ -4538,39 +4538,37 @@ static void wait_and_handle_response(int one_response_only)
     while(conn)
     {
         res = cs_get(conn, &netbuffer, &netbufferlen);
-        if (reconnect_ok && res <= 0 && protocol == PROTO_HTTP)
+        if (res <= 0)
         {
-            cs_close(conn);
-            conn = 0;
-            session_connect();
-            reconnect_ok = 0;
-            if (conn)
+            if (reconnect_ok && protocol == PROTO_HTTP)
             {
-                char *buf_out;
-                int len_out;
-
-                buf_out = odr_getbuf(out, &len_out, 0);
-
-                do_hex_dump(buf_out, len_out);
-
-                cs_put(conn, buf_out, len_out);
-
-                odr_reset(out);
-                continue;
+                cs_close(conn);
+                conn = 0;
+                session_connect();
+                reconnect_ok = 0;
+                if (conn)
+                {
+                    char *buf_out;
+                    int len_out;
+                    buf_out = odr_getbuf(out, &len_out, 0);
+                    do_hex_dump(buf_out, len_out);
+                    cs_put(conn, buf_out, len_out);
+                    odr_reset(out);
+                    continue;
+                }
             }
-        }
-        else if (res <= 0)
-        {
-            printf("Target closed connection\n");
-            close_session();
-            break;
+            else
+            {
+                printf("Target closed connection\n");
+                close_session();
+                break;
+            }
         }
 #if HAVE_GETTIMEOFDAY
         if (got_tv_end == 0)
             gettimeofday(&tv_end, 0); /* count first one only */
         got_tv_end++;
 #endif
-        odr_reset(out);
         odr_reset(in); /* release APDU from last round */
         record_last = 0;
         do_hex_dump(netbuffer, res);
@@ -4578,21 +4576,43 @@ static void wait_and_handle_response(int one_response_only)
 
         if (!z_GDU(in, &gdu, 0, 0))
         {
-            FILE *f = ber_file ? ber_file : stdout;
-            odr_perror(in, "Decoding incoming APDU");
-            fprintf(f, "[Near %ld]\n", (long) odr_offset(in));
-            fprintf(f, "Packet dump:\n---------\n");
-            odr_dumpBER(f, netbuffer, res);
-            fprintf(f, "---------\n");
-            if (apdu_file)
+            if (reconnect_ok && protocol == PROTO_HTTP)
             {
-                z_GDU(print, &gdu, 0, 0);
-                odr_reset(print);
+                fprintf(stderr, "Decoding error. Reconnecting\n");
+                cs_close(conn);
+                conn = 0;
+                session_connect();
+                reconnect_ok = 0;
+                if (conn)
+                {
+                    char *buf_out;
+                    int len_out;
+                    buf_out = odr_getbuf(out, &len_out, 0);
+                    do_hex_dump(buf_out, len_out);
+                    cs_put(conn, buf_out, len_out);
+                    odr_reset(out);
+                    continue;
+                }
             }
-            if (conn && cs_more(conn))
-                continue;
-            break;
+            else
+            {
+                FILE *f = ber_file ? ber_file : stdout;
+                odr_perror(in, "Decoding incoming APDU");
+                fprintf(f, "[Near %ld]\n", (long) odr_offset(in));
+                fprintf(f, "Packet dump:\n---------\n");
+                odr_dumpBER(f, netbuffer, res);
+                fprintf(f, "---------\n");
+                if (apdu_file)
+                {
+                    z_GDU(print, &gdu, 0, 0);
+                    odr_reset(print);
+                }
+                if (conn && cs_more(conn))
+                    continue;
+                break;
+            }
         }
+        odr_reset(out);
         if (ber_file)
             odr_dumpBER(ber_file, netbuffer, res);
         if (apdu_file && !z_GDU(print, &gdu, 0, 0))
