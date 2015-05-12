@@ -1679,22 +1679,26 @@ static int do_read(ZOOM_connection c)
 
         if (!z_GDU(c->odr_in, &gdu, 0, 0))
         {
-            int x;
-            int err = odr_geterrorx(c->odr_in, &x);
-            char msg[100];
-            const char *element = odr_getelement(c->odr_in);
-            yaz_snprintf(msg, sizeof(msg),
-                    "ODR code %d:%d element=%s offset=%d",
-                    err, x, element ? element : "<unknown>",
-                    odr_offset(c->odr_in));
-            ZOOM_set_error(c, ZOOM_ERROR_DECODE, msg);
-            if (c->log_api)
+            /* even on failures we try to re-connect (HTTP) */
+            if (!ZOOM_test_reconnect(c))
             {
-                FILE *ber_file = yaz_log_file();
-                if (ber_file)
-                    odr_dumpBER(ber_file, c->buf_in, r);
+                int x;
+                int err = odr_geterrorx(c->odr_in, &x);
+                char msg[100];
+                const char *element = odr_getelement(c->odr_in);
+                yaz_snprintf(msg, sizeof(msg),
+                             "ODR code %d:%d element=%s offset=%d",
+                             err, x, element ? element : "<unknown>",
+                             odr_offset(c->odr_in));
+                ZOOM_set_error(c, ZOOM_ERROR_DECODE, msg);
+                if (c->log_api)
+                {
+                    FILE *ber_file = yaz_log_file();
+                    if (ber_file)
+                        odr_dumpBER(ber_file, c->buf_in, r);
+                }
+                ZOOM_connection_close(c);
             }
-            ZOOM_connection_close(c);
         }
         else
         {
