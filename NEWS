@@ -1,3 +1,13 @@
+--- 5.12.1 2015/05/13
+
+yaz-client: deal with excess bytes HTTPS case YAZ-833
+
+ZOOM C: deal with excess bytes HTTPS case YAZ-833
+
+Allow Windows installer for PATH to be updated YAZ-841
+
+Add Ubuntu Vivid 15.04 to list of Deb's to built
+
 --- 5.12.0 2015/05/08
 
 Allow Content-Type application/sru+xml YAZ-840
