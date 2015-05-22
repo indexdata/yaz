@@ -266,6 +266,33 @@ static int comstack_example(const char *server_address_str)
     return 0;
 }
 
+static void tst_cs_get_host_args(void)
+{
+    const char *arg = 0;
+
+    cs_get_host_args("http://localhost:9999", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, ""));
+    cs_get_host_args("http://localhost:9999/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x"));
+    cs_get_host_args("http://localhost:9999?x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, ""));
+    cs_get_host_args("localhost:9999", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, ""));
+    cs_get_host_args("localhost:9999/", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, ""));
+    cs_get_host_args("localhost:9999/x&url=http://some.host", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x&url=http://some.host"));
+    cs_get_host_args("http://localhost:9999/x&url=http://some.host", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x&url=http://some.host"));
+    cs_get_host_args("http:/localhost:9999/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "localhost:9999/x"));
+    cs_get_host_args("http//localhost:9999/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "/localhost:9999/x"));
+    cs_get_host_args("http://y/x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x"));
+    cs_get_host_args("http:///x", &arg);
+    YAZ_CHECK(arg && !strcmp(arg, "x"));
+}
 
 int main (int argc, char **argv)
 {
@@ -275,6 +302,7 @@ int main (int argc, char **argv)
        comstack_example(argv[1]);
     tst_http_request();
     tst_http_response();
+    tst_cs_get_host_args();
     YAZ_CHECK_TERM;
 }
 
