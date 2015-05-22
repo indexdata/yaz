@@ -55,7 +55,6 @@ const char *cs_strerror(COMSTACK h)
 
 void cs_get_host_args(const char *type_and_host, const char **args)
 {
-
     *args = "";
     if (!strncmp(type_and_host, "unix:", 5))
     {
@@ -67,13 +66,12 @@ void cs_get_host_args(const char *type_and_host, const char **args)
     }
     if (*type_and_host)
     {
-        const char *cp;
-        cp = strstr(type_and_host, "://");
+        const char *cp = strchr(type_and_host, '/');
         if (cp)
-            cp = cp+3;
-        else
-            cp = type_and_host;
-        cp = strchr(cp, '/');
+        {
+            if (cp > type_and_host && !memcmp(cp - 1, "://", 3))
+                cp = strchr(cp + 2, '/');
+        }
         if (cp)
             *args = cp+1;
     }
