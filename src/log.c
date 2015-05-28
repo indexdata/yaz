@@ -105,12 +105,12 @@ static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
 static YAZ_MUTEX log_mutex = 0;
 
-static void yaz_log_lock(void)
+void yaz_log_lock(void)
 {
     yaz_mutex_enter(log_mutex);
 }
 
-static void yaz_log_unlock(void)
+void yaz_log_unlock(void)
 {
     yaz_mutex_leave(log_mutex);
 }
