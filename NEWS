@@ -1,3 +1,7 @@
+--- 5.13.0 2015/05/29
+
+Add lock/unlock for YAZ log writes YAZ-843
+
 --- 5.12.2 2015/05/22
 
 Fix incorrect parsing of URLs @:9999/somebase&url=http://some.host YAZ-842
