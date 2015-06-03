@@ -475,6 +475,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *cp;
     const char *path_args = 0;
     int i = 0;
+    int defType_set = 0;
     int no_parms = 20; /* safe upper limit of args without extra_args */
     Z_SRW_extra_arg *ea;
 
@@ -492,6 +493,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     for (ea = srw_pdu->extra_args; ea; ea = ea->next)
     {
         name[i] = ea->name;
+        if (!strcmp(ea->name, "defType"))
+            defType_set = 1;
         value[i] = ea->value;
         i++;
     }
@@ -504,7 +507,9 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         solr_op = "select";
         if (!srw_pdu->u.request->query)
             return -1;
-        /* lucene is the default queryType */
+        if (!defType_set)
+            yaz_add_name_value_str(encode, name, value, &i, "defType",
+                                   "lucene");
         yaz_add_name_value_str(encode, name, value, &i, "q", request->query);
         if (srw_pdu->u.request->startRecord)
         {
