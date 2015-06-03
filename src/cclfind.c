@@ -331,10 +331,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                                              struct ccl_rpn_attr *attr_use,
                                              ccl_qualifier_t *qa,
                                              size_t no, int term_len,
-                                             const char **truncation_aliases,
-                                             const char **mask_aliases,
                                              int is_phrase,
-                                             int is_ccl_masked,
                                              int auto_group)
 {
     struct ccl_rpn_node *p;
@@ -349,8 +346,42 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     int right_trunc = 0;
     int regex_trunc = 0;
     int z3958_trunc = 0;
+    int is_ccl_masked = 0;
     char *attset;
     struct ccl_token *lookahead = cclp->look_token;
+    const char **truncation_aliases;
+    const char *t_default[2];
+    const char **mask_aliases;
+    const char *m_default[2];
+
+    truncation_aliases =
+        ccl_qual_search_special(cclp->bibset, "truncation");
+    if (!truncation_aliases)
+    {
+        truncation_aliases = t_default;
+        t_default[0] = "?";
+        t_default[1] = 0;
+    }
+
+    mask_aliases =
+        ccl_qual_search_special(cclp->bibset, "mask");
+    if (!mask_aliases)
+    {
+        mask_aliases = m_default;
+        m_default[0] = "#";
+        m_default[1] = 0;
+    }
+
+
+    for (i = 0; i < no; i++)
+    {
+        if (has_ccl_masking(lookahead->name, lookahead->len,
+                            truncation_aliases,
+                            mask_aliases))
+            is_ccl_masked = 1;
+        lookahead = lookahead->next;
+    }
+    lookahead = cclp->look_token;
 
     p = ccl_rpn_node_create(CCL_RPN_TERM);
     p->u.t.attr_list = NULL;
@@ -526,29 +557,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
     int and_list = 0;
     int auto_group = 0;
     int or_list = 0;
-    const char **truncation_aliases;
-    const char *t_default[2];
-    const char **mask_aliases;
-    const char *m_default[2];
-
-    truncation_aliases =
-        ccl_qual_search_special(cclp->bibset, "truncation");
-    if (!truncation_aliases)
-    {
-        truncation_aliases = t_default;
-        t_default[0] = "?";
-        t_default[1] = 0;
-    }
-
-    mask_aliases =
-        ccl_qual_search_special(cclp->bibset, "mask");
-    if (!mask_aliases)
-    {
-        mask_aliases = m_default;
-        m_default[0] = "#";
-        m_default[1] = 0;
-    }
-
 
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_AND_LIST, 0))
         and_list = 1;
@@ -562,7 +570,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         size_t no, i;
         int len = 0;
         int is_phrase = 0;
-        int is_ccl_masked = 0;
         size_t max = 200;
         if (and_list || or_list || !multi)
             max = 1;
@@ -580,12 +587,6 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             for (i = 0; i<lookahead->len; i++)
                 if (lookahead->name[i] == ' ')
                     this_is_phrase = 1;
-
-            if (has_ccl_masking(lookahead->name, lookahead->len,
-                                truncation_aliases,
-                                mask_aliases))
-                is_ccl_masked = 1;
-
             if (auto_group)
             {
                 if (no > 0 && (is_phrase || is_phrase != this_is_phrase))
@@ -611,8 +612,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 {
                     struct ccl_rpn_node *tmp2;
                     tmp2 = ccl_term_one_use(cclp, attr, qa, no, len,
-                                            truncation_aliases, mask_aliases,
-                                            is_phrase, is_ccl_masked,
+                                            is_phrase,
                                             auto_group);
                     if (!tmp2)
                     {
@@ -634,8 +634,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         if (!p)
         {
             p = ccl_term_one_use(cclp, 0 /* attr: no use */, qa, no, len,
-                                 truncation_aliases, mask_aliases,
-                                 is_phrase, is_ccl_masked, auto_group);
+                                 is_phrase, auto_group);
             if (!p)
                 return 0;
         }
