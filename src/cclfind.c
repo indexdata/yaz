@@ -632,14 +632,12 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 }
         }
         if (!p)
-        {
             p = ccl_term_one_use(cclp, 0 /* attr: no use */, qa, no, len,
                                  is_phrase, auto_group);
-            if (!p)
-                return 0;
-        }
         for (i = 0; i < no; i++)
             ADVANCE;
+        if (!p)
+            return 0;
         /* make the top node point to us.. */
         if (p_top)
         {
