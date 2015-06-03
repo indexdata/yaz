@@ -100,7 +100,7 @@ struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
     ccl_assert(p);
     p->kind = kind;
 
-    switch(kind)
+    switch (kind)
     {
     case CCL_RPN_TERM:
         p->u.t.attr_list = 0;
@@ -159,7 +159,7 @@ static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa);
 
 static int is_term_ok(int look, int *list)
 {
-    for (;*list >= 0; list++)
+    for (; *list >= 0; list++)
         if (look == *list)
             return 1;
     return 0;
@@ -170,9 +170,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa);
 static struct ccl_rpn_attr *add_attr_node(struct ccl_rpn_node *p,
                                            const char *set, int type)
 {
-    struct ccl_rpn_attr *n;
-
-    n = (struct ccl_rpn_attr *)xmalloc(sizeof(*n));
+    struct ccl_rpn_attr *n = (struct ccl_rpn_attr *) xmalloc(sizeof(*n));
     ccl_assert(n);
     if (set)
         n->set = xstrdup(set);
@@ -181,7 +179,6 @@ static struct ccl_rpn_attr *add_attr_node(struct ccl_rpn_node *p,
     n->type = type;
     n->next = p->u.t.attr_list;
     p->u.t.attr_list = n;
-
     return n;
 }
 
@@ -195,9 +192,7 @@ static struct ccl_rpn_attr *add_attr_node(struct ccl_rpn_node *p,
 void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
                           int type, int value)
 {
-    struct ccl_rpn_attr *n;
-
-    n = add_attr_node(p, set, type);
+    struct ccl_rpn_attr *n = add_attr_node(p, set, type);
     n->kind = CCL_RPN_ATTR_NUMERIC;
     n->value.numeric = value;
 }
@@ -205,9 +200,7 @@ void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
 void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
                          int type, char *value)
 {
-    struct ccl_rpn_attr *n;
-
-    n = add_attr_node(p, set, type);
+    struct ccl_rpn_attr *n = add_attr_node(p, set, type);
     n->kind = CCL_RPN_ATTR_STRING;
     n->value.str = xstrdup(value);
 }
@@ -362,7 +355,6 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
         t_default[0] = "?";
         t_default[1] = 0;
     }
-
     mask_aliases =
         ccl_qual_search_special(cclp->bibset, "mask");
     if (!mask_aliases)
@@ -371,8 +363,6 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
         m_default[0] = "#";
         m_default[1] = 0;
     }
-
-
     for (i = 0; i < no; i++)
     {
         if (has_ccl_masking(lookahead->name, lookahead->len,
@@ -612,8 +602,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 {
                     struct ccl_rpn_node *tmp2;
                     tmp2 = ccl_term_one_use(cclp, attr, qa, no, len,
-                                            is_phrase,
-                                            auto_group);
+                                            is_phrase, auto_group);
                     if (!tmp2)
                     {
                         ccl_rpn_delete(p);
@@ -699,7 +688,6 @@ static struct ccl_rpn_node *search_terms2(CCL_parser cclp,
         return search_term_x(cclp, qa, list, 1);
     }
 }
-
 
 
 static
