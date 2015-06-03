@@ -504,7 +504,7 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
         solr_op = "select";
         if (!srw_pdu->u.request->query)
             return -1;
-        yaz_add_name_value_str(encode, name, value, &i, "defType", "lucene");
+        /* lucene is the default queryType */
         yaz_add_name_value_str(encode, name, value, &i, "q", request->query);
         if (srw_pdu->u.request->startRecord)
         {
