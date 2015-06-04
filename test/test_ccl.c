@@ -87,6 +87,7 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
         ccl_qual_fitem(bibset, "s=ag", "ag");
+        ccl_qual_fitem(bibset, "s=sl", "splitlist");
         break;
     case 1:
         strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -118,6 +119,9 @@ void tst1(int pass)
 
         strcpy(tstline, "ag s=ag");
         ccl_qual_line(bibset, tstline);
+
+        strcpy(tstline, "splitlist s=sl");
+        ccl_qual_line(bibset, tstline);
         break;
     case 2:
         ccl_qual_buf(bibset, "ti u=4    s=pw t=l,r\n"
@@ -131,6 +135,7 @@ void tst1(int pass)
                      "title dc.title\n"
                      "comb term dc.title\n"
                      "ag s=ag\n"
+                     "splitlist s=sl\n"
             );
         break;
     case 3:
@@ -176,6 +181,9 @@ void tst1(int pass)
                 " </qual>\n"
                 " <qual name=\"ag\">\n"
                 "   <attr type=\"s\" value=\"ag\"/>\n"
+                " </qual>\n"
+                " <qual name=\"splitlist\">\n"
+                "   <attr type=\"s\" value=\"sl\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
 
@@ -428,6 +436,15 @@ void tst1(int pass)
 
     YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\" \"d e\"",
                             "@and @attr 4=1 \"a b c\" @attr 4=1 \"d e\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a", "a "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b", "@or "
+                            "@and a b \"a b\" "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c", "@or @or @or "
+                            "@and @and a b c "
+                            "@and a \"b c\" "
+                            "@and \"a b\" c "
+                            "\"a b c\" "));
     ccl_qual_rm(&bibset);
 }
 

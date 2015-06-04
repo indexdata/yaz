@@ -5836,6 +5836,12 @@ typedef struct {
 	   in YAZ 4.2.38.
 	  </entry>
 	  </row>
+	  <row><entry><literal>s=sl</literal></entry>
+	  <entry>
+           Tokens are split into sub-phrases of all combinations - in order.
+	   This facility appeared in YAZ 5.14.0.
+	  </entry>
+	  </row>
 	  <row><entry><literal>r=o</literal></entry>
 	  <entry>
 	   Allows ranges and the operators greather-than, less-than, ...

@@ -113,6 +113,54 @@ struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
     return p;
 }
 
+static struct ccl_rpn_node *ccl_rpn_dup(struct ccl_rpn_node *rpn)
+{
+    struct ccl_rpn_node *n;
+    struct ccl_rpn_attr *attr, **attrp;
+    if (!rpn)
+        return 0;
+    n = ccl_rpn_node_create(rpn->kind);
+    switch (rpn->kind)
+    {
+    case CCL_RPN_AND:
+    case CCL_RPN_OR:
+    case CCL_RPN_NOT:
+        n->u.p[0] = ccl_rpn_dup(rpn->u.p[0]);
+        n->u.p[1] = ccl_rpn_dup(rpn->u.p[1]);
+        break;
+    case CCL_RPN_TERM:
+        n->u.t.term = xstrdup(rpn->u.t.term);
+        n->u.t.qual = rpn->u.t.qual ? xstrdup(rpn->u.t.qual) : 0;
+        attrp = &n->u.t.attr_list;
+        for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
+        {
+            *attrp = (struct ccl_rpn_attr *) xmalloc(sizeof(**attrp));
+            (*attrp)->kind = attr->kind;
+            (*attrp)->type = attr->type;
+            if (attr->kind == CCL_RPN_ATTR_STRING)
+                (*attrp)->value.str = xstrdup(attr->value.str);
+            else
+                (*attrp)->value.numeric = attr->value.numeric;
+            if (attr->set)
+                (*attrp)->set = xstrdup(attr->set);
+            else
+                (*attrp)->set = 0;
+            attrp = &(*attrp)->next;
+        }
+        *attrp = 0;
+        break;
+    case CCL_RPN_SET:
+        n->u.setname = xstrdup(rpn->u.setname);
+        break;
+    case CCL_RPN_PROX:
+        n->u.p[0] = ccl_rpn_dup(rpn->u.p[0]);
+        n->u.p[1] = ccl_rpn_dup(rpn->u.p[1]);
+        n->u.p[2] = ccl_rpn_dup(rpn->u.p[2]);
+        break;
+    }
+    return n;
+}
+
 /**
  * ccl_rpn_delete: Delete RPN tree.
  * rpn:   Pointer to tree.
@@ -321,9 +369,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
 
 
 static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
+                                             struct ccl_token *lookahead0,
                                              struct ccl_rpn_attr *attr_use,
                                              ccl_qualifier_t *qa,
-                                             size_t no, int term_len,
+                                             size_t no,
                                              int is_phrase,
                                              int auto_group)
 {
@@ -341,11 +390,12 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     int z3958_trunc = 0;
     int is_ccl_masked = 0;
     char *attset;
-    struct ccl_token *lookahead = cclp->look_token;
+    struct ccl_token *lookahead = lookahead0;
     const char **truncation_aliases;
     const char *t_default[2];
     const char **mask_aliases;
     const char *m_default[2];
+    int term_len = 0;
 
     truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
@@ -369,9 +419,11 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                             truncation_aliases,
                             mask_aliases))
             is_ccl_masked = 1;
+
+        term_len += 1 + lookahead->len + lookahead->ws_prefix_len;
         lookahead = lookahead->next;
     }
-    lookahead = cclp->look_token;
+    lookahead = lookahead0;
 
     p = ccl_rpn_node_create(CCL_RPN_TERM);
     p->u.t.attr_list = NULL;
@@ -530,6 +582,77 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     return p;
 }
 
+static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
+                                        struct ccl_rpn_node *parent,
+                                        struct ccl_token **ar, size_t sz)
+{
+    size_t l;
+    struct ccl_rpn_node *p_top = 0;
+    assert(sz > 0);
+    for (l = 1; l <= sz; l++)
+    {
+        struct ccl_rpn_node *p1;
+        struct ccl_rpn_node *p2 = ccl_term_one_use(cclp, ar[0],
+                                                   /* attr_use */0,
+                                                   qa, l,
+                                                   l > 1,
+                                                   /* auto_group */0);
+        if (!p2)
+            return 0;
+        if (parent)
+        {
+            struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_AND);
+            tmp->u.p[0] = l > 1 ? ccl_rpn_dup(parent) : parent;
+            tmp->u.p[1] = p2;
+            p2 = tmp;
+        }
+        if (sz > l)
+            p1 = split_recur(cclp, qa, p2, ar + l, sz - l);
+        else
+            p1 = p2;
+        if (p_top)
+        {
+            struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_OR);
+            tmp->u.p[0] = p_top;
+            tmp->u.p[1] = p1;
+            p_top = tmp;
+        }
+        else
+            p_top = p1;
+    }
+    assert(p_top);
+    return p_top;
+}
+
+static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
+                                                   ccl_qualifier_t *qa,
+                                                   int *term_list, int multi)
+{
+    struct ccl_rpn_node *p;
+    struct ccl_token **ar;
+    struct ccl_token *lookahead = cclp->look_token;
+    size_t i, sz;
+    for (sz = 0; is_term_ok(lookahead->kind, term_list); sz++)
+        lookahead = lookahead->next;
+    if (sz == 0)
+    {
+        cclp->error_code = CCL_ERR_TERM_EXPECTED;
+        return 0;
+    }
+    ar = (struct ccl_token **) xmalloc(sizeof(*lookahead) * sz);
+    lookahead = cclp->look_token;
+    for (i = 0; is_term_ok(lookahead->kind, term_list); i++)
+    {
+        ar[i] = lookahead;
+        lookahead = lookahead->next;
+    }
+    p = split_recur(cclp, qa, 0, ar, sz);
+    xfree(ar);
+    for (i = 0; i < sz; i++)
+        ADVANCE;
+    return p;
+}
+
 /**
  * search_term: Parse CCL search term.
  * cclp:   CCL Parser
@@ -554,11 +677,14 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
         auto_group = 1;
     if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_OR_LIST, 0))
         or_list = 1;
+    if (qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_SPLIT_LIST, 0))
+    {
+        return search_term_split_list(cclp, qa, term_list, multi);
+    }
     while (1)
     {
         struct ccl_rpn_node *p = 0;
         size_t no, i;
-        int len = 0;
         int is_phrase = 0;
         size_t max = 200;
         if (and_list || or_list || !multi)
@@ -585,11 +711,10 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             }
             else if (this_is_phrase || no > 0)
                 is_phrase = 1;
-            len += 1+lookahead->len+lookahead->ws_prefix_len;
             lookahead = lookahead->next;
         }
 
-        if (len == 0)
+        if (no == 0)
             break;      /* no more terms . stop . */
 
         /* go through all attributes and add them to the attribute list */
@@ -601,7 +726,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 if (attr->type == 1)
                 {
                     struct ccl_rpn_node *tmp2;
-                    tmp2 = ccl_term_one_use(cclp, attr, qa, no, len,
+                    tmp2 = ccl_term_one_use(cclp, cclp->look_token,
+                                            attr, qa, no,
                                             is_phrase, auto_group);
                     if (!tmp2)
                     {
@@ -621,7 +747,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
                 }
         }
         if (!p)
-            p = ccl_term_one_use(cclp, 0 /* attr: no use */, qa, no, len,
+            p = ccl_term_one_use(cclp, cclp->look_token,
+                                 0 /* attr: no use */, qa, no,
                                  is_phrase, auto_group);
         for (i = 0; i < no; i++)
             ADVANCE;
