@@ -272,8 +272,7 @@ void tst1(int pass)
                             "@prox 0 1 0 2 k 2 "
                             "@attr 4=2 @attr 1=1016 a "
                             "@or @attr 4=2 @attr 1=1016 b "
-                            "@or @attr 4=2 @attr 1=/my/title c "
-                            "@attr 4=2 @attr 1=1016 c "
+                            "@attr 4=2 @attr 1=/my/title c "
     ));
 
     YAZ_CHECK(tst_ccl_query(bibset, "(a b) % (c)",

@@ -723,7 +723,7 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             struct ccl_rpn_attr *attr;
 
             for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-                if (attr->type == 1)
+                if (attr->type == 1 && i == 0)
                 {
                     struct ccl_rpn_node *tmp2;
                     tmp2 = ccl_term_one_use(cclp, cclp->look_token,
