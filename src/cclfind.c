@@ -582,6 +582,49 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     return p;
 }
 
+static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
+                                               struct ccl_token *lookahead0,
+                                               ccl_qualifier_t *qa,
+                                               size_t no,
+                                               int is_phrase,
+                                               int auto_group)
+{
+    struct ccl_rpn_node *p = 0;
+    int i;
+    for (i = 0; qa && qa[i]; i++)
+    {
+        struct ccl_rpn_attr *attr;
+        for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+            if (attr->type == 1 && i == 0)
+            {
+                struct ccl_rpn_node *tmp2;
+                tmp2 = ccl_term_one_use(cclp, lookahead0,
+                                        attr, qa, no,
+                                        is_phrase, auto_group);
+                if (!tmp2)
+                {
+                    ccl_rpn_delete(p);
+                    return 0;
+                }
+                if (!p)
+                    p = tmp2;
+                else
+                {
+                    struct ccl_rpn_node *tmp1;
+                    tmp1 = ccl_rpn_node_create(CCL_RPN_OR);
+                    tmp1->u.p[0] = p;
+                    tmp1->u.p[1] = tmp2;
+                    p = tmp1;
+                }
+            }
+    }
+    if (!p)
+        p = ccl_term_one_use(cclp, lookahead0,
+                             0 /* attr: no use */, qa, no,
+                             is_phrase, auto_group);
+    return p;
+}
+
 static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
                                         struct ccl_rpn_node *parent,
                                         struct ccl_token **ar, size_t sz)
@@ -592,11 +635,10 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
     for (l = 1; l <= sz; l++)
     {
         struct ccl_rpn_node *p1;
-        struct ccl_rpn_node *p2 = ccl_term_one_use(cclp, ar[0],
-                                                   /* attr_use */0,
-                                                   qa, l,
-                                                   l > 1,
-                                                   /* auto_group */0);
+        struct ccl_rpn_node *p2 = ccl_term_multi_use(cclp, ar[0],
+                                                     qa, l,
+                                                     l > 1,
+                                                     /* auto_group */0);
         if (!p2)
             return 0;
         if (parent)
@@ -716,40 +758,8 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
         if (no == 0)
             break;      /* no more terms . stop . */
-
-        /* go through all attributes and add them to the attribute list */
-        for (i = 0; qa && qa[i]; i++)
-        {
-            struct ccl_rpn_attr *attr;
-
-            for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-                if (attr->type == 1 && i == 0)
-                {
-                    struct ccl_rpn_node *tmp2;
-                    tmp2 = ccl_term_one_use(cclp, cclp->look_token,
-                                            attr, qa, no,
-                                            is_phrase, auto_group);
-                    if (!tmp2)
-                    {
-                        ccl_rpn_delete(p);
-                        return 0;
-                    }
-                    if (!p)
-                        p = tmp2;
-                    else
-                    {
-                        struct ccl_rpn_node *tmp1;
-                        tmp1 = ccl_rpn_node_create(CCL_RPN_OR);
-                        tmp1->u.p[0] = p;
-                        tmp1->u.p[1] = tmp2;
-                        p = tmp1;
-                    }
-                }
-        }
-        if (!p)
-            p = ccl_term_one_use(cclp, cclp->look_token,
-                                 0 /* attr: no use */, qa, no,
-                                 is_phrase, auto_group);
+        p = ccl_term_multi_use(cclp, cclp->look_token, qa, no,
+                               is_phrase, auto_group);
         for (i = 0; i < no; i++)
             ADVANCE;
         if (!p)
