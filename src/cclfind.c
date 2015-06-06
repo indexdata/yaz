@@ -439,7 +439,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     {
         struct ccl_rpn_attr *attr;
         for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-            if (attr->type != 1 || attr == attr_use)
+            if (attr->type != 1 || !attr_use || attr == attr_use)
             {
                 switch (attr->kind)
                 {

@@ -87,7 +87,7 @@ void tst1(int pass)
         ccl_qual_fitem(bibset, "r=o",         "x");
         ccl_qual_fitem(bibset, "dc.title", "title");
         ccl_qual_fitem(bibset, "s=ag", "ag");
-        ccl_qual_fitem(bibset, "s=sl", "splitlist");
+        ccl_qual_fitem(bibset, "s=sl u=2", "splitlist");
         break;
     case 1:
         strcpy(tstline, "ti u=4    s=pw t=l,r");
@@ -120,7 +120,7 @@ void tst1(int pass)
         strcpy(tstline, "ag s=ag");
         ccl_qual_line(bibset, tstline);
 
-        strcpy(tstline, "splitlist s=sl");
+        strcpy(tstline, "splitlist s=sl u=2");
         ccl_qual_line(bibset, tstline);
         break;
     case 2:
@@ -135,7 +135,7 @@ void tst1(int pass)
                      "title dc.title\n"
                      "comb term dc.title\n"
                      "ag s=ag\n"
-                     "splitlist s=sl\n"
+                     "splitlist s=sl u=2\n"
             );
         break;
     case 3:
@@ -184,6 +184,7 @@ void tst1(int pass)
                 " </qual>\n"
                 " <qual name=\"splitlist\">\n"
                 "   <attr type=\"s\" value=\"sl\"/>\n"
+                "   <attr type=\"u\" value=\"2\"/>\n"
                 " </qual>\n"
                 "</cclmap>\n";
 
@@ -437,14 +438,14 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "ag=\"a b c\" \"d e\"",
                             "@and @attr 4=1 \"a b c\" @attr 4=1 \"d e\" "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a", "a "));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a", "@attr 1=2 a "));
     YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b", "@or "
-                            "@and a b \"a b\" "));
+                            "@and @attr 1=2 a @attr 1=2 b @attr 1=2 \"a b\" "));
     YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c", "@or @or @or "
-                            "@and @and a b c "
-                            "@and a \"b c\" "
-                            "@and \"a b\" c "
-                            "\"a b c\" "));
+                            "@and @and @attr 1=2 a @attr 1=2 b @attr 1=2 c "
+                            "@and @attr 1=2 a @attr 1=2 \"b c\" "
+                            "@and @attr 1=2 \"a b\" @attr 1=2 c "
+                            "@attr 1=2 \"a b c\" "));
     ccl_qual_rm(&bibset);
 }
 
