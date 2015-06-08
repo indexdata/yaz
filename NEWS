@@ -1,3 +1,14 @@
+--- 5.14.0 2015/06/08
+
+CCL: new feature s=spl (split-list) that splits terms in a search into
+sub-phrases of all sizes (from 1 up to the number of terms) with order
+preserved. For 3 terms the CCL search
+ a b c
+is turned into PQF:
+ @or @or @or @and @and a b c @and "a b" c @and a "b c" "a b c"
+
+Solr: don't set defType=lucene in URLs if extraArgs already defines it.
+
 --- 5.13.0 2015/05/29
 
 Add lock/unlock for YAZ log writes YAZ-843
