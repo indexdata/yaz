@@ -5,4 +5,4 @@ date     1=31 r=r,omiteq
 x        1=x r=o
 title    dc.title
 comb     term dc.title
-splitlist s=sl,pw u=1016
+splitlist s=sl u=1016 u=31
