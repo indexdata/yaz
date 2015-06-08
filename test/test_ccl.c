@@ -463,6 +463,9 @@ void tst1(int pass)
                             "@or @attr 1=2 b @attr 1=3 b "
                             "@or @attr 1=2 \"a b\" @attr 1=3 \"a b\" "));
 
+    YAZ_CHECK(tst_ccl_query(bibset, "s2=a? b", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "s2=a b?", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "s2=a b? c", 0));
 
     ccl_qual_rm(&bibset);
 }

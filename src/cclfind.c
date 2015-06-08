@@ -648,7 +648,10 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
                                                      l > 1,
                                                      /* auto_group */0);
         if (!p2)
+        {
+            ccl_rpn_delete(p_top);
             return 0;
+        }
         if (parent)
         {
             struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_AND);
@@ -660,6 +663,12 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
             p1 = split_recur(cclp, qa, p2, ar + l, sz - l);
         else
             p1 = p2;
+        if (!p1)
+        {
+            ccl_rpn_delete(p2);
+            ccl_rpn_delete(p_top);
+            return 0;
+        }
         p_top = ccl_rpn_node_mkbool(p_top, p1, CCL_RPN_OR);
     }
     assert(p_top);
