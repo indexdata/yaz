@@ -190,8 +190,7 @@ static void *construct_xslt(const xmlNode *ptr,
         info->xsl_parms[2 * no_parms + 1] = qvalue;
         no_parms++;
     }
-
-    info->xsl_parms[2 * no_parms] = '\0';
+    info->xsl_parms[2 * no_parms] = 0;
 
     if (!stylesheet)
     {
