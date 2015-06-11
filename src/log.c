@@ -103,7 +103,11 @@ static struct {
 
 static unsigned int next_log_bit = YLOG_LAST_BIT<<1; /* first dynamic bit */
 
+static int yaz_log_reopen_flag = 0;
+
 static YAZ_MUTEX log_mutex = 0;
+
+static void yaz_log_open(void);
 
 void yaz_log_lock(void)
 {
@@ -169,7 +173,7 @@ void yaz_log_init_file(const char *fname)
         yaz_log_info.type = use_none;  /* NULL name; use no file at all */
         yaz_log_info.l_fname[0] = '\0';
     }
-    yaz_log_reopen();
+    yaz_log_open();
 }
 
 static void rotate_log(const char *cur_fname)
@@ -216,7 +220,7 @@ void yaz_log_init_level(int level)
     if ( (l_level & YLOG_FLUSH) != (level & YLOG_FLUSH) )
     {
         l_level = level;
-        yaz_log_reopen(); /* make sure we set buffering right */
+        yaz_log_open(); /* make sure we set buffering right */
     }
     else
         l_level = level;
@@ -306,6 +310,11 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
     if (yaz_log_info.type != use_file)
         return;
 
+    if (yaz_log_reopen_flag)
+    {
+        force = 1;
+        yaz_log_reopen_flag = 0;
+    }
     if (*yaz_log_info.l_fname)
     {
         strftime(new_filename, sizeof(new_filename)-1, yaz_log_info.l_fname,
@@ -368,8 +377,12 @@ static void yaz_log_do_reopen(const char *filemode)
     yaz_log_unlock();
 }
 
-
 void yaz_log_reopen()
+{
+    yaz_log_reopen_flag = 1;
+}
+
+static void yaz_log_open()
 {
     yaz_log_do_reopen("a");
 }
