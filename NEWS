@@ -1,3 +1,9 @@
+--- 5.14.1 2015/06/11
+
+Make yaz_log_reopen async-signal YAZ-845
+Fixes potential dead-lock issue with YAZ_DAEMON_LOG_REOPEN flags for
+daemon API.
+
 --- 5.14.0 2015/06/08
 
 CCL: new feature s=spl (split-list) that splits terms in a search into
