@@ -113,6 +113,23 @@ struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
     return p;
 }
 
+static struct ccl_rpn_node *ccl_rpn_node_mkbool(struct ccl_rpn_node *l,
+                                                struct ccl_rpn_node *r,
+                                                enum ccl_rpn_kind op)
+{
+    if (l && r)
+    {
+        struct ccl_rpn_node *tmp = ccl_rpn_node_create(op);
+        tmp->u.p[0] = l;
+        tmp->u.p[1] = r;
+        tmp->u.p[2] = 0;
+        return tmp;
+    }
+    else if (r)
+        return r;
+    return l;
+}
+
 static struct ccl_rpn_node *ccl_rpn_dup(struct ccl_rpn_node *rpn)
 {
     struct ccl_rpn_node *n;
@@ -439,7 +456,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     {
         struct ccl_rpn_attr *attr;
         for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-            if (attr->type != 1 || attr == attr_use)
+            if (attr->type != 1 || !attr_use || attr == attr_use)
             {
                 switch (attr->kind)
                 {
@@ -582,6 +599,40 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     return p;
 }
 
+static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
+                                               struct ccl_token *lookahead0,
+                                               ccl_qualifier_t *qa,
+                                               size_t no,
+                                               int is_phrase,
+                                               int auto_group)
+{
+    struct ccl_rpn_node *p = 0;
+    int i;
+    for (i = 0; qa && qa[i]; i++)
+    {
+        struct ccl_rpn_attr *attr;
+        for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+            if (attr->type == 1 && i == 0)
+            {
+                struct ccl_rpn_node *tmp2;
+                tmp2 = ccl_term_one_use(cclp, lookahead0,
+                                        attr, qa, no,
+                                        is_phrase, auto_group);
+                if (!tmp2)
+                {
+                    ccl_rpn_delete(p);
+                    return 0;
+                }
+                p = ccl_rpn_node_mkbool(p, tmp2, CCL_RPN_OR);
+            }
+    }
+    if (!p)
+        p = ccl_term_one_use(cclp, lookahead0,
+                             0 /* attr: no use */, qa, no,
+                             is_phrase, auto_group);
+    return p;
+}
+
 static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
                                         struct ccl_rpn_node *parent,
                                         struct ccl_token **ar, size_t sz)
@@ -592,13 +643,15 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
     for (l = 1; l <= sz; l++)
     {
         struct ccl_rpn_node *p1;
-        struct ccl_rpn_node *p2 = ccl_term_one_use(cclp, ar[0],
-                                                   /* attr_use */0,
-                                                   qa, l,
-                                                   l > 1,
-                                                   /* auto_group */0);
+        struct ccl_rpn_node *p2 = ccl_term_multi_use(cclp, ar[0],
+                                                     qa, l,
+                                                     l > 1,
+                                                     /* auto_group */0);
         if (!p2)
+        {
+            ccl_rpn_delete(p_top);
             return 0;
+        }
         if (parent)
         {
             struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_AND);
@@ -610,15 +663,13 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
             p1 = split_recur(cclp, qa, p2, ar + l, sz - l);
         else
             p1 = p2;
-        if (p_top)
+        if (!p1)
         {
-            struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_OR);
-            tmp->u.p[0] = p_top;
-            tmp->u.p[1] = p1;
-            p_top = tmp;
+            ccl_rpn_delete(p2);
+            ccl_rpn_delete(p_top);
+            return 0;
         }
-        else
-            p_top = p1;
+        p_top = ccl_rpn_node_mkbool(p_top, p1, CCL_RPN_OR);
     }
     assert(p_top);
     return p_top;
@@ -716,63 +767,13 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
 
         if (no == 0)
             break;      /* no more terms . stop . */
-
-        /* go through all attributes and add them to the attribute list */
-        for (i = 0; qa && qa[i]; i++)
-        {
-            struct ccl_rpn_attr *attr;
-
-            for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-                if (attr->type == 1)
-                {
-                    struct ccl_rpn_node *tmp2;
-                    tmp2 = ccl_term_one_use(cclp, cclp->look_token,
-                                            attr, qa, no,
-                                            is_phrase, auto_group);
-                    if (!tmp2)
-                    {
-                        ccl_rpn_delete(p);
-                        return 0;
-                    }
-                    if (!p)
-                        p = tmp2;
-                    else
-                    {
-                        struct ccl_rpn_node *tmp1;
-                        tmp1 = ccl_rpn_node_create(CCL_RPN_OR);
-                        tmp1->u.p[0] = p;
-                        tmp1->u.p[1] = tmp2;
-                        p = tmp1;
-                    }
-                }
-        }
-        if (!p)
-            p = ccl_term_one_use(cclp, cclp->look_token,
-                                 0 /* attr: no use */, qa, no,
-                                 is_phrase, auto_group);
+        p = ccl_term_multi_use(cclp, cclp->look_token, qa, no,
+                               is_phrase, auto_group);
         for (i = 0; i < no; i++)
             ADVANCE;
         if (!p)
             return 0;
-        /* make the top node point to us.. */
-        if (p_top)
-        {
-            struct ccl_rpn_node *tmp;
-
-            if (or_list)
-                tmp = ccl_rpn_node_create(CCL_RPN_OR);
-            else if (and_list)
-                tmp = ccl_rpn_node_create(CCL_RPN_AND);
-            else
-                tmp = ccl_rpn_node_create(CCL_RPN_AND);
-            tmp->u.p[0] = p_top;
-            tmp->u.p[1] = p;
-
-            p_top = tmp;
-        }
-        else
-            p_top = p;
-
+        p_top = ccl_rpn_node_mkbool(p_top, p, or_list ? CCL_RPN_OR : CCL_RPN_AND);
         if (!multi)
             break;
     }
@@ -1060,16 +1061,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
                     xfree(ap);
                     return 0;
                 }
-                if (node)
-                {
-                    struct ccl_rpn_node *node_this =
-                        ccl_rpn_node_create(CCL_RPN_OR);
-                    node_this->u.p[0] = node;
-                    node_this->u.p[1] = node_sub;
-                    node = node_this;
-                }
-                else
-                    node = node_sub;
+                node = ccl_rpn_node_mkbool(node, node_sub, CCL_RPN_OR);
                 seq++;
             }
             if (seq == 0)
@@ -1132,16 +1124,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
                 ccl_rpn_delete(node);
                 break;
             }
-            if (node)
-            {
-                struct ccl_rpn_node *node_this =
-                    ccl_rpn_node_create(CCL_RPN_OR);
-                node_this->u.p[0] = node;
-                node_this->u.p[1] = node_sub;
-                node = node_this;
-            }
-            else
-                node = node_sub;
+            node = ccl_rpn_node_mkbool(node, node_sub, CCL_RPN_OR);
             seq++;
         }
     }
@@ -1274,17 +1257,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
                 ccl_rpn_delete(node);
                 return 0;
             }
-            if (node)
-            {
-                struct ccl_rpn_node *node_this =
-                    ccl_rpn_node_create(CCL_RPN_OR);
-                node_this->u.p[0] = node;
-                node_this->u.p[1] = node_sub;
-                node_this->u.p[2] = 0;
-                node = node_this;
-            }
-            else
-                node = node_sub;
+            node = ccl_rpn_node_mkbool(node, node_sub, CCL_RPN_OR);
         }
         if (!node)
             node = search_terms(cclp, 0);
@@ -1300,7 +1273,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
  */
 static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
 {
-    struct ccl_rpn_node *p1, *p2, *pn;
+    struct ccl_rpn_node *p1, *p2;
     if (!(p1 = search_elements(cclp, qa)))
         return NULL;
     while (1)
@@ -1315,11 +1288,7 @@ static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
                 ccl_rpn_delete(p1);
                 return NULL;
             }
-            pn = ccl_rpn_node_create(CCL_RPN_AND);
-            pn->u.p[0] = p1;
-            pn->u.p[1] = p2;
-            pn->u.p[2] = 0;
-            p1 = pn;
+            p1 = ccl_rpn_node_mkbool(p1, p2, CCL_RPN_AND);
             continue;
         case CCL_TOK_OR:
             ADVANCE;
@@ -1329,11 +1298,7 @@ static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
                 ccl_rpn_delete(p1);
                 return NULL;
             }
-            pn = ccl_rpn_node_create(CCL_RPN_OR);
-            pn->u.p[0] = p1;
-            pn->u.p[1] = p2;
-            pn->u.p[2] = 0;
-            p1 = pn;
+            p1 = ccl_rpn_node_mkbool(p1, p2, CCL_RPN_OR);
             continue;
         case CCL_TOK_NOT:
             ADVANCE;
@@ -1343,11 +1308,7 @@ static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
                 ccl_rpn_delete(p1);
                 return NULL;
             }
-            pn = ccl_rpn_node_create(CCL_RPN_NOT);
-            pn->u.p[0] = p1;
-            pn->u.p[1] = p2;
-            pn->u.p[2] = 0;
-            p1 = pn;
+            p1 = ccl_rpn_node_mkbool(p1, p2, CCL_RPN_NOT);
             continue;
         }
         break;
