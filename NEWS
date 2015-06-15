@@ -1,3 +1,12 @@
+--- 5.14.2 2015/06/15
+
+Document zoom extraArgs YAZ-817
+
+Fix ZOOM: crash extended services diagnostics YAZ-846
+The immediate fix is to prevent ZOOM_set_dset_error from removing
+current task from connection. This, however, has been assumed in a
+number of places so this fix is rather large unfortunately.
+
 --- 5.14.1 2015/06/11
 
 Make yaz_log_reopen async-signal YAZ-845
