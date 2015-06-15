@@ -1530,6 +1530,11 @@
        first operation), holds the negotiated version with the server
        (same or lower version).
       </entry><entry>1.2</entry></row>
+      <row id="zoom.extraArgs.option"><entry>
+       extraArgs</entry><entry>
+       Extra arguments for SRU/Solr URLs. The value must be
+       URL encoded already.
+      </entry><entry></entry></row>
       <row id="zoom.facets.option"><entry>
        facets</entry><entry>
        Requested or recommend facets may be given before a search is sent.
