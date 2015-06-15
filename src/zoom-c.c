@@ -187,8 +187,6 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
     if (task)
     {
         c->tasks = task->next;
-        yaz_log(YLOG_LOG, "remove task p=%d type=%d next=%p",
-                task, (int) task->which, c->tasks);
         switch (task->which)
         {
         case ZOOM_TASK_SEARCH:
