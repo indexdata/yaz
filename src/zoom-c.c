@@ -49,7 +49,6 @@ static void initlog(void)
     }
 }
 
-void ZOOM_connection_remove_tasks(ZOOM_connection c);
 static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri);
 
 void ZOOM_set_dset_error(ZOOM_connection c, int error,
@@ -84,7 +83,6 @@ void ZOOM_set_dset_error(ZOOM_connection c, int error,
                 c, c->host_port ? c->host_port : "<>", dset, error,
                 addinfo ? addinfo : "",
                 addinfo2 ? addinfo2 : "");
-        ZOOM_connection_remove_tasks(c);
     }
 }
 
@@ -189,6 +187,8 @@ void ZOOM_connection_remove_task(ZOOM_connection c)
     if (task)
     {
         c->tasks = task->next;
+        yaz_log(YLOG_LOG, "remove task p=%d type=%d next=%p",
+                task, (int) task->which, c->tasks);
         switch (task->which)
         {
         case ZOOM_TASK_SEARCH:

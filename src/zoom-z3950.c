@@ -1309,7 +1309,10 @@ static void handle_Z3950_search_response(ZOOM_connection c,
 static void handle_Z3950_sort_response(ZOOM_connection c, Z_SortResponse *res)
 {
     if (res->diagnostics && res->num_diagnostics > 0)
+    {
         response_diag(c, res->diagnostics[0]);
+        ZOOM_connection_remove_tasks(c);
+    }
 }
 
 static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
@@ -1356,13 +1359,17 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
     schema =  c->tasks->u.search.schema;
 
     if (sr && sr->which == Z_Records_NSD)
+    {
         response_default_diag(c, sr->u.nonSurrogateDiagnostic);
+        ZOOM_connection_remove_tasks(c);
+    }
     else if (sr && sr->which == Z_Records_multipleNSD)
     {
         if (sr->u.multipleNonSurDiagnostics->num_diagRecs >= 1)
             response_diag(c, sr->u.multipleNonSurDiagnostics->diagRecs[0]);
         else
             ZOOM_set_error(c, ZOOM_ERROR_DECODE, 0);
+        ZOOM_connection_remove_tasks(c);
     }
     else
     {

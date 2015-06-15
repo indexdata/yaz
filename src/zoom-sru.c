@@ -391,14 +391,14 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
 #endif
 
 #if YAZ_HAVE_XML2
-static void handle_srw_scan_response(ZOOM_connection c,
-                                     Z_SRW_scanResponse *res)
+static zoom_ret handle_srw_scan_response(ZOOM_connection c,
+                                         Z_SRW_scanResponse *res)
 {
     NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
-        return;
+        return zoom_complete;
     scan = c->tasks->u.scan.scan;
 
     if (res->num_diagnostics > 0)
@@ -410,6 +410,7 @@ static void handle_srw_scan_response(ZOOM_connection c,
 
     ZOOM_options_set_int(scan->options, "number", res->num_terms);
     nmem_destroy(nmem);
+    return zoom_complete;
 }
 #endif
 
@@ -434,7 +435,7 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
             if (sr->which == Z_SRW_searchRetrieve_response)
                 *cret = handle_srw_response(c, sr->u.response);
             else if (sr->which == Z_SRW_scan_response)
-                handle_srw_scan_response(c, sr->u.scan_response);
+                *cret = handle_srw_scan_response(c, sr->u.scan_response);
         }
     }
     else
@@ -460,7 +461,7 @@ int ZOOM_handle_sru(ZOOM_connection c, Z_HTTP_Response *hres,
             if (sr->which == Z_SRW_searchRetrieve_response)
                 *cret = handle_srw_response(c, sr->u.response);
             else if (sr->which == Z_SRW_scan_response)
-                handle_srw_scan_response(c, sr->u.scan_response);
+                *cret = handle_srw_scan_response(c, sr->u.scan_response);
             else
                 ret = -1;
         }

@@ -247,6 +247,7 @@ zoom_ret ZOOM_connection_Z3950_send_init(ZOOM_connection c);
 
 ZOOM_task ZOOM_connection_add_task(ZOOM_connection c, int which);
 void ZOOM_connection_remove_task(ZOOM_connection c);
+void ZOOM_connection_remove_tasks(ZOOM_connection c);
 int ZOOM_test_reconnect(ZOOM_connection c);
 
 ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
