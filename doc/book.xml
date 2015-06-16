@@ -1221,14 +1221,21 @@
       nmake install
      </screen>
     </para>
+    <note>
+     <para>
+      There's an error in <filename>configure.js</filename> for Libxml2 2.9.2.
+      Line 17 should be assigned to <filename>configure.ac</filename>
+      rather than <filename>configure.in</filename>.
+     </para>
+    </note>
     <para>
      For Libxslt it is similar. We must ensure that compilation of
      Libxslt links against the already installed libxml2.
      <screen>
       cd win32
       cscript configure.js prefix=c:\libxslt-1.1.28.win32 iconv=no \
-          lib=c:\libxmlt-2.9.2.win32\lib \
-	  include=c:\libxmlt-2.9.2.win32\include\libxml2
+          lib=c:\libxml2-2.9.2.win32\lib \
+	  include=c:\libxml2-2.9.2.win32\include\libxml2
       nmake
       nmake install
      </screen>
