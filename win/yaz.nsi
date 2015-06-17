@@ -27,6 +27,10 @@
 ;!define VS_RUNTIME_DLL      "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvc*.dll"
 ;!define VS_RUNTIME_MANIFEST  ""
 
+; 6: VS 2015
+;!define VS_RUNTIME_DLL      "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvc*.dll"
+;!define VS_RUNTIME_MANIFEST  ""
+
 
 !include "MUI.nsh"
 
