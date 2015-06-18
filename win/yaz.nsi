@@ -5,32 +5,9 @@
 !include EnvVarUpdate.nsh
 !include version.nsi
 
-; Microsoft runtime CRT 
-; Uncomment exactly ONE of the sections below
-; 1: MSVC 6
-; !define VS_RUNTIME_DLL ""
-; !define VS_RUNTIME_MANIFEST ""
-
-; 2: VS 2003
-; !define VS_RUNTIME_DLL "c:\Program Files\Microsoft Visual Studio .NET 2003\SDK\v1.1\Bin\msvcr71.dll"
-;!define VS_RUNTIME_MANIFEST ""
-
-; 3: VS 2005
-;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\msvcr80.dll"
-;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 8\VC\redist\x86\Microsoft.VC80.CRT\Microsoft.VC80.CRT.manifest"
-
-; 4: VS 2008
-;!define VS_RUNTIME_DLL      "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvc*90.dll"
-;!define VS_RUNTIME_MANIFEST "c:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
-
-; 5: VS 2013
-;!define VS_RUNTIME_DLL      "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\x86\Microsoft.VC120.CRT\msvc*.dll"
-;!define VS_RUNTIME_MANIFEST  ""
-
-; 6: VS 2015
-;!define VS_RUNTIME_DLL      "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvc*.dll"
-;!define VS_RUNTIME_MANIFEST  ""
-
+; !define VS_REDIST_EXE "vcredist_x86.exe"
+; !define VS_REDIST_FULL "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\1033\${VS_REDIST_EXE}"
+; !define VS_REDIST_KEY "SOFTWARE\Microsoft\VisualStudio\12.0\VC\Runtimes\x86"
 
 !include "MUI.nsh"
 
@@ -107,14 +84,18 @@ SectionEnd ; end of default section
 
 Section "YAZ Runtime" YAZ_Runtime
 	SectionIn 1 2
+	SetOutPath $INSTDIR\bin
+!if "${VS_REDIST_FULL}" != ""
+	File "${VS_REDIST_FULL}"
+	ReadRegStr $1 HKLM "${VS_REDIST_KEY}" "Installed"
+	StrCmp $1 1 installed_redist
+	ExecWait '"$INSTDIR\bin\${VS_REDIST_EXE}" /passive /nostart'
+installed_redist:
+	Delete "$INSTDIR\bin\${VS_REDIST_EXE}"
+!endif
 	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
-	SetOutPath $INSTDIR\bin
-	File "${VS_RUNTIME_DLL}"
-!if "${VS_RUNTIME_MANIFEST}" != ""
-	File "${VS_RUNTIME_MANIFEST}"
-!endif
 	File ..\bin\*.dll
 	File ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
