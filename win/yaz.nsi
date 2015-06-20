@@ -5,10 +5,6 @@
 !include EnvVarUpdate.nsh
 !include version.nsi
 
-; !define VS_REDIST_EXE "vcredist_x86.exe"
-; !define VS_REDIST_FULL "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\redist\1033\${VS_REDIST_EXE}"
-; !define VS_REDIST_KEY "SOFTWARE\Microsoft\VisualStudio\12.0\VC\Runtimes\x86"
-
 !include "MUI.nsh"
 
 SetCompressor bzip2
@@ -87,10 +83,10 @@ Section "YAZ Runtime" YAZ_Runtime
 	SetOutPath $INSTDIR\bin
 !if "${VS_REDIST_FULL}" != ""
 	File "${VS_REDIST_FULL}"
-	ReadRegStr $1 HKLM "${VS_REDIST_KEY}" "Installed"
-	StrCmp $1 1 installed_redist
-	ExecWait '"$INSTDIR\bin\${VS_REDIST_EXE}" /passive /nostart'
-installed_redist:
+	ReadRegDword $1 HKLM "${VS_REDIST_KEY}" "Version"
+	${If} $1 == ""
+	  ExecWait '"$INSTDIR\bin\${VS_REDIST_EXE}" /passive /nostart'
+	${endif}
 	Delete "$INSTDIR\bin\${VS_REDIST_EXE}"
 !endif
 	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
