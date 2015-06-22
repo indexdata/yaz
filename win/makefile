@@ -53,13 +53,13 @@ YAZ4J_DIR="..\..\yaz4j"
 YAZPATH="$(MAKEDIR)\.."
 
 
-dist: yaz.win32.nsi yaz.nsi version.nsi distclean
+dist: yaz.nsi version.nsi distclean
 	nmake DEBUG=0 allj
-	$(NSIS) yaz.win32.nsi
+	nmake nsis
 
-dist64: yaz.win64.nsi yaz.nsi version.nsi distclean
+dist64: yaz.nsi version.nsi distclean
 	nmake make64
-	$(NSIS) yaz.win64.nsi
+	nmake nsis64
 
 make64:
 	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu\lib64 ICU_INCLUDE=\icu\include ICU_BIN=\icu\bin64 allj
@@ -69,11 +69,11 @@ distclean:
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
 
-nsis: all yaz.win32.nsi version.nsi
-	$(NSIS) yaz.win32.nsi
+nsis: version.nsi
+	$(NSIS) /DVSARCH=x86 /DVSVER=12 yaz.nsi
 
-nsis64: yaz.win64.nsi version.nsi
-	$(NSIS) yaz.win64.nsi
+nsis64: version.nsi
+	$(NSIS) /DVSARCH=x64 /DVSVER=12 yaz.nsi
 
 nsishelp:
 	$(NSIS)

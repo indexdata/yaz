@@ -7,6 +7,32 @@
 
 !include "MUI.nsh"
 
+!define VS_REDIST_EXE vcredist_${VSARCH}.exe
+!define VS_REDIST_FULL "c:\Program Files (x86)\Microsoft Visual Studio ${VSVER}.0\VC\redist\1033\${VS_REDIST_EXE}"
+
+; For example can be found with regedit:
+;  Microsoft Visual C++ 2013 x86 Minimum Runtime
+!if "${VSARCH}" = "x64"
+; 64-bit
+!if "${VSVER}" = "12"
+!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\6E8D947A316B3EB3F8F540C548BE2AB9"
+!endif
+!if "${VSVER}" = "14"
+!endif
+
+InstallDir "$PROGRAMFILES64\YAZ"
+!else
+; 32-bit
+!if "${VSVER}" = "12"
+!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\21EE4A31AE32173319EEFE3BD6FDFFE3"
+!endif
+!if "${VSVER}" = "14"
+!endif
+
+InstallDir "$PROGRAMFILES\YAZ"
+!endif
+
+
 SetCompressor bzip2
 
 Name "YAZ"
