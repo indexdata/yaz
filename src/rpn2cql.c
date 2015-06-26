@@ -120,34 +120,30 @@ static int rpn2cql_attr(cql_transform_t ct,
         wrbuf_rewind(w);
         return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
     }
-    /* for serverChoice we omit index+relation+structure */
-    if (strcmp(index, "cql.serverChoice"))
+    if (!relation)
+        relation = "=";
+    else if (!strcmp(relation, "exact"))
+        relation = "==";
+    else if (!strcmp(relation, "eq"))
+        relation = "=";
+    else if (!strcmp(relation, "le"))
+        relation = "<=";
+    else if (!strcmp(relation, "ge"))
+        relation = ">=";
+
+    if (strcmp(index, "cql.serverChoice") || strcmp(relation, "=")
+        || (structure && strcmp(structure, "*")))
     {
         wrbuf_puts(w, index);
-        if (relation)
-        {
-            if (!strcmp(relation, "exact"))
-                relation = "==";
-            else if (!strcmp(relation, "eq"))
-                relation = "=";
-            else if (!strcmp(relation, "le"))
-                relation = "<=";
-            else if (!strcmp(relation, "ge"))
-                relation = ">=";
-            /* Missing mapping of not equal, phonetic, stem and relevance */
-            wrbuf_puts(w, relation);
-        }
-        else
-            wrbuf_puts(w, "=");
+        wrbuf_puts(w, " ");
+        wrbuf_puts(w, relation);
+        wrbuf_puts(w, " ");
 
-        if (structure)
+        if (structure && strcmp(structure, "*"))
         {
-            if (strcmp(structure, "*"))
-            {
-                wrbuf_puts(w, "/");
-                wrbuf_puts(w, structure);
-                wrbuf_puts(w, " ");
-            }
+            wrbuf_puts(w, "/");
+            wrbuf_puts(w, structure);
+            wrbuf_puts(w, " ");
         }
     }
     return 0;
