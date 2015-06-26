@@ -4,7 +4,7 @@
 #
 # spec file for YAZ
 
-%define idmetaversion %(. ./IDMETA; echo $VERSION|tr -d '\n')
+%define idmetaversion %(. ./IDMETA; echo $VERSION)
 Name: yaz
 Summary: Z39.50 Programs
 Version: %{idmetaversion}

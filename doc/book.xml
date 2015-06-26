@@ -2575,6 +2575,37 @@
     The <parameter>type</parameter> specifies the actual extended service
     package type to be sent.
    </para>
+   <table frame="top" id="zoom.extendedservices.type">
+    <title>Extended Service Type</title>
+    <tgroup cols="2">
+     <colspec colwidth="3*" colname="value"></colspec>
+     <colspec colwidth="7*" colname="description"></colspec>
+     <thead>
+      <row>
+       <entry>Type</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>itemorder</entry><entry>Item Order</entry>
+      </row>
+      <row>
+       <entry>update</entry><entry>Record Update</entry>
+      </row>
+      <row>
+       <entry>create</entry><entry>Database Create</entry>
+      </row>
+      <row>
+       <entry>drop</entry><entry>Database Drop</entry>
+      </row>
+      <row>
+       <entry>commit</entry><entry>Commit Operation</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+
    <table frame="top" id="zoom.extendedservices.options">
     <title>Extended Service Common Options</title>
     <tgroup cols="3">
@@ -2632,7 +2663,8 @@
    <sect2 id="zoom.item.order">
     <title>Item Order</title>
     <para>
-     For Item Order, type must be set to <literal>itemorder</literal> in
+     For Item Order, <literal>type</literal> must be set to
+     <literal>itemorder</literal> in
      <function>ZOOM_package_send</function>.
     </para>
 
@@ -2783,7 +2815,8 @@
    <sect2 id="zoom.record.update">
     <title>Record Update</title>
     <para>
-     For Record Update, type must be set to <literal>update</literal> in
+     For Record Update, <literal>type</literal> must be set to
+     <literal>update</literal> in
      <function>ZOOM_package_send</function>.
     </para>
     <table frame="top" id="zoom.record.update.options">
@@ -2889,7 +2922,8 @@
 
    <sect2 id="zoom.database.create"><title>Database Create</title>
     <para>
-     For Database Create, type must be set to <literal>create</literal> in
+     For Database Create, <literal>type</literal> must be set to
+     <literal>create</literal> in
      <function>ZOOM_package_send</function>.
     </para>
 
@@ -2919,7 +2953,8 @@
    <sect2 id="zoom.database.drop">
     <title>Database Drop</title>
     <para>
-     For Database Drop, type must be set to <literal>drop</literal> in
+     For Database Drop, <literal>type</literal> must be set to
+     <literal>drop</literal> in
      <function>ZOOM_package_send</function>.
     </para>
     <table frame="top" id="zoom.database.drop.options">
@@ -2948,7 +2983,8 @@
    <sect2 id="zoom.commit">
     <title>Commit Operation</title>
     <para>
-     For Commit, type must be set to <literal>commit</literal> in
+     For Commit, <literal>type</literal> must be set to
+     <literal>commit</literal> in
      <function>ZOOM_package_send</function>.
     </para>
    </sect2>
