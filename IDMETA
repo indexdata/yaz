@@ -1,4 +1,4 @@
 DEBIAN_DIST="jessie wheezy squeeze"
 UBUNTU_DIST="vivid utopic trusty precise"
-CENTOS_DIST="centos5 centos6"
+CENTOS_DIST="centos5 centos6 centos7"
 VERSION=5.14.2
