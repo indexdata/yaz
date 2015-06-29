@@ -1,3 +1,9 @@
+--- 5.14.3 2015/06/29
+
+Fix rpn2cql: structure, relation problem for serverChoice YAZ-849
+Problem was that for things mapped to cql.serverChoice the relation
+would sometimes be omitted when it should not. Eg for relation "all".
+
 --- 5.14.2 2015/06/15
 
 Document zoom extraArgs YAZ-817
