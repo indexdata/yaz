@@ -616,9 +616,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     }
     strcat(path, uri_args);
     hreq->path = path;
-
-    z_HTTP_header_add_content_type(encode, &hreq->headers,
-                                   "text/xml", charset);
     return 0;
 }
 
