@@ -5190,7 +5190,7 @@ static void process_cmd_line(char* line)
     gettimeofday(&tv_start, 0);
 #endif
 
-    if ((res = sscanf(line, "%31s %10239[^;]", word, arg)) <= 0)
+    if ((res = sscanf(line, "%31s %10239s", word, arg)) <= 0)
     {
         strcpy(word, last_cmd);
         *arg = '\0';
@@ -5290,7 +5290,7 @@ static char **readline_completer(char *text, int start, int end)
     {
         char arg[10240],word[32];
         int i ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %10239[^;]", word, arg)) <= 0)
+        if ((res = sscanf(rl_line_buffer, "%31s %10239s", word, arg)) <= 0)
         {
             rl_attempted_completion_over = 1;
             return NULL;
