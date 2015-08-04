@@ -56,7 +56,7 @@ Description: documentation for the Z39.50 toolkit
  This package includes HTML documentation for YAZ.
 
 Package: libyaz5-dev
-Depends: libyaz5 (= ${Source-Version}),
+Depends: libyaz5 (= ${source:Version}),
 	libxslt1-dev,
 	libicu-dev,
 	tclsh
