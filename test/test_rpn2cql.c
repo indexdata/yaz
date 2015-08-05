@@ -82,7 +82,7 @@ static void tst1(void)
     YAZ_CHECK(compare(ct, "@and @and a b @and c d", "(a and b) and (c and d)"));
 
     YAZ_CHECK(compare(ct, "@attr 1=field abc", "field=abc"));
-    YAZ_CHECK(compare2(ct, "@attr 1=4 abc", 0, 114)); /* should fail */
+    YAZ_CHECK(compare2(ct, "@attr 1=4 abc", "4", 114)); /* should fail */
 
     cql_transform_define_pattern(ct, "index.title", "1=4");
     YAZ_CHECK(compare(ct, "@attr 1=4 abc", "title=abc"));
@@ -168,7 +168,7 @@ static void tst2(void)
 
     /* Other */
     YAZ_CHECK(compare(ct, "@attr 2=103 @attr 1=_ALLRECORDS 1", "cql.allRecords=1"));
-    YAZ_CHECK(compare2(ct, "@attr 1=500 abc", 0, 114));
+    YAZ_CHECK(compare2(ct, "@attr 1=500 abc", "500", 114));
     YAZ_CHECK(compare2(ct, "@attr 5=99 x", "99", 120));
     cql_transform_close(ct);
     wrbuf_destroy(w);

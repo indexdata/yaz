@@ -20,7 +20,8 @@
 #include <yaz/wrbuf.h>
 #include <yaz/logrpn.h> /* For yaz_prox_unit_name() */
 
-static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
+static const char *lookup_index_from_string_attr(Z_AttributeList *attributes,
+                                                 Odr_int *numeric_value)
 {
     int j;
     int server_choice = 1;
@@ -39,6 +40,10 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
                     if (son->which == Z_StringOrNumeric_string)
                         return son->u.string;
                 }
+            }
+            else if (ae->which == Z_AttributeValue_numeric)
+            {
+                *numeric_value = *ae->value.numeric;
             }
             server_choice = 0; /* not serverChoice because we have use attr */
         }
@@ -107,19 +112,23 @@ static int rpn2cql_attr(cql_transform_t ct,
     const char *index = cql_lookup_reverse(ct, "index.", attributes);
     const char *structure = cql_lookup_reverse(ct, "structure.", attributes);
 
-    /* if transform (properties) do not match, we'll just use a USE string attribute (bug #2978) */
+    /* if transform (properties) do not match, we'll fall back
+       to string or report numeric attribute error */
     if (!index)
-        index = lookup_index_from_string_attr(attributes);
-
-    /* Attempt to fix bug #2978: Look for a relation attribute */
+    {
+        Odr_int use_attribute = -1;
+        index = lookup_index_from_string_attr(attributes, &use_attribute);
+        if (!index)
+        {
+            wrbuf_rewind(w);
+            if (use_attribute != -1)
+                wrbuf_printf(w, ODR_INT_PRINTF, use_attribute);
+            return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
+        }
+    }
     if (!relation)
         relation = lookup_relation_index_from_attr(attributes);
 
-    if (!index)
-    {
-        wrbuf_rewind(w);
-        return YAZ_BIB1_UNSUPP_USE_ATTRIBUTE;
-    }
     if (!relation)
         relation = "=";
     else if (!strcmp(relation, "exact"))
