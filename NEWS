@@ -1,3 +1,14 @@
+--- 5.14.5 2015/08/06
+
+Stop building packages for obsolete Debian squeeze and use DH
+version 9. YAZ-854
+
+rpn2cql diagnostics: provide use attribute addinfo YAZ-853
+
+deb: deprecated substitution ${Source-Version} YAZ-852
+
+Fix yaz-client: semicolon terminates arguments YAZ-851
+
 --- 5.14.4 2015/07/29
 
 Windows: Bundle VC runtime exe YAZ-848
