@@ -5184,27 +5184,31 @@ static int cmd_register_tab(const char* arg)
 static void process_cmd_line(char* line)
 {
     int i, res;
-    char word[32], arg[10240];
+    char word[32], *arg;
+    int no_read = 0;
 
 #if HAVE_GETTIMEOFDAY
     gettimeofday(&tv_start, 0);
 #endif
 
-    if ((res = sscanf(line, "%31s %10239s", word, arg)) <= 0)
+    sscanf(line, "%31s%n", word, &no_read);
+    if (no_read == 0)
     {
         strcpy(word, last_cmd);
-        *arg = '\0';
+        arg = line + strlen(line);
     }
-    else if (res == 1)
-        *arg = 0;
+    else
+        arg = line + no_read;
     strcpy(last_cmd, word);
 
-    /* removed tailing spaces from the arg command */
+    /* whitespace chop */
     {
-        char* p = arg;
-        char* lastnonspace=NULL;
+        char *p;
+        char *lastnonspace = 0;
 
-        for (; *p; ++p)
+        while (*arg && yaz_isspace(*arg))
+            arg++;
+        for (p = arg; *p; ++p)
         {
             if (!yaz_isspace(*p))
                 lastnonspace = p;
@@ -5288,9 +5292,9 @@ static char **readline_completer(char *text, int start, int end)
     }
     else
     {
-        char arg[10240],word[32];
-        int i ,res;
-        if ((res = sscanf(rl_line_buffer, "%31s %10239s", word, arg)) <= 0)
+        char word[32];
+        int i;
+        if (sscanf(rl_line_buffer, "%31s", word) <= 0)
         {
             rl_attempted_completion_over = 1;
             return NULL;
