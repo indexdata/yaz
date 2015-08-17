@@ -1,3 +1,8 @@
+--- 5.14.6 2015/08/17
+
+Fix yaz-client command args parsing broken YAZ-855
+Bug introduced in 5be87e7a04c7219b31cefc0a3 - version 5.14.5
+
 --- 5.14.5 2015/08/06
 
 Stop building packages for obsolete Debian squeeze and use DH
