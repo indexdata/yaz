@@ -138,14 +138,14 @@
    <title>Reading this Manual</title>
    <para>
     Most implementors only need to read a fraction of the
-    material in thie manual, so a quick walkthrough of the chapters
+    material in this manual, so a quick walkthrough of the chapters
     is in order.
    </para>
    <itemizedlist>
     <listitem>
      <para>
       <xref linkend="installation"/> contains installation
-      instructions for &yaz;. You don't need reading this
+      instructions for &yaz;. You don't need to read this
       if you expect to download &yaz; binaries.
       However, the chapter contains information about how
       to make <emphasis>your</emphasis> application link
@@ -155,7 +155,7 @@
     <listitem>
      <para>
       <xref linkend="zoom"/> describes the ZOOM API of &yaz;.
-      This is definitely worth a read if you wish to develop a Z39.50/SRU
+      This is definitely worth reading if you wish to develop a Z39.50/SRU
       client.
      </para>
     </listitem>
@@ -169,7 +169,7 @@
     <listitem>
      <para>
       <xref linkend="yaz-client"/> describes how to use the &yaz; Z39.50
-      client. If you're developer and wish to test your server
+      client. If you're a developer and wish to test your server
       or a server from another party, you might find this chapter
       useful.
     </para>
@@ -202,7 +202,7 @@
       <xref linkend="odr"/> goes through the details of the
       ODR module which is the work horse that encodes and decodes
       BER packages. Implementors using ZOOM only, do <emphasis>not</emphasis>
-      need reading this.
+      need to read this.
       Most other Z39.50 implementors only need to read the first two
       sections (<xref linkend="odr.introduction"/> and
       <xref linkend="odr.use"/>).
@@ -244,7 +244,7 @@
     level APIs of &yaz;.
    </para>
    <para>
-    The YAZ toolkit modules is shown in figure <xref linkend="yaz.layer"/>.
+    The YAZ toolkit modules are shown in figure <xref linkend="yaz.layer"/>.
    </para>
    <figure id="yaz.layer">
     <title>YAZ layers</title>
@@ -325,7 +325,7 @@
    <note>
     <para>
      If you are using the premade definitions of the &asn; module, and you
-     are not adding new protocol of your own, the only parts of &odr; that you
+     are not adding a new protocol of your own, the only parts of &odr; that you
      need to worry about are documented in
      <xref linkend="odr.use"/>.
     </para>
@@ -496,7 +496,7 @@
      <ulink url="&url.automake;">Automake</ulink> and
      <ulink url="&url.libtool;">Libtool</ulink>
      are used to generate Makefiles and configure &yaz; for the system.
-     You do <emphasis>not</emphasis> these tools unless you're using the
+     You do <emphasis>not</emphasis> need these tools unless you're using the
      Git version of &yaz;.
     </para>
     <para>
@@ -508,7 +508,7 @@
      &yaz; includes a tiny ASN.1 compiler. This compiler is
      written in <ulink url="&url.tcl;">Tcl</ulink>.
      But as for Bison you do not need it unless you're using Git
-     version of &yaz; or you're using the compiler to built own codecs
+     version of &yaz; or you're using the compiler to build your own codecs
      for private ASN.1.
     </para>
     <para>
@@ -612,7 +612,7 @@
 	<replaceable>prefix</replaceable>. By default configure will
 	search for iconv on the system. Use this option if it
 	doesn't find iconv. Alternatively,
-	<literal>--without-iconv</literal>, can be uset to force &yaz;
+	<literal>--without-iconv</literal>, can be used to force &yaz;
 	not to use iconv.
 	</para>
        </listitem>
@@ -627,7 +627,7 @@
 	<replaceable>prefix</replaceable>.
 	Use this option if you want XSLT and XML support.
 	By default, configure will
-	search for libxslt on the system. Use this option if it
+	search for libxslt on the system. Use this option if
 	libxslt is not found automatically. Alternatively,
 	<literal>--without-xslt</literal>, can be used to force &yaz;
 	not to use libxslt.
@@ -644,7 +644,7 @@
 	<replaceable>prefix</replaceable>.
 	Use this option if you want &yaz; to use XML and support SRU/Solr.
 	By default, configure will
-	search for libxml2 on the system. Use this option if it
+	search for libxml2 on the system. Use this option if
 	libxml2 is not found automatically. Alternatively,
 	<literal>--without-xml2</literal>, can be used to force &yaz;
 	not to use libxml2.
@@ -857,7 +857,7 @@
      This section describes how to compile - and link your own
      applications using the &yaz; toolkit.
      If you're used to Makefiles this shouldn't be hard. As for
-     other libraries you have used before, you have to set a proper include
+     other libraries you have used before, you need to set a proper include
      path for your C/C++ compiler and specify the location of
      &yaz; libraries. You can do it by hand, but generally we suggest
      you use the <filename>yaz-config</filename> that is generated
@@ -1026,7 +1026,7 @@
         </para>
 	<note>
 	 <para>
-	  libxslt depends libxml2.
+	  libxslt depends on libxml2.
 	 </para>
 	</note>
        </listitem>
@@ -1138,7 +1138,7 @@
        <term><filename>bin/yaz-icu.exe</filename></term>
        <listitem><para>This program exposes the ICU wrapper library if that
        is enabled for YAZ. Only if ICU is available this program is
-       build.
+       built.
       </para></listitem>
       </varlistentry>
       <varlistentry>
@@ -1154,7 +1154,7 @@
        <term><filename>bin/zoomtst1.exe</filename>,
        <filename>bin/zoomtst2.exe</filename>, ..</term>
        <listitem><para>
-	Several small applications that demonstrates the ZOOM API.
+	Several small applications that demonstrate the ZOOM API.
       </para></listitem>
       </varlistentry>
      </variablelist>
