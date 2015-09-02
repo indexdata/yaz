@@ -118,7 +118,7 @@
    <varlistentry>
     <term>-V</term>
     <listitem><para>
-      veturns YAZ SHA1 ID (from Git) and version.
+      Returns YAZ SHA1 ID (from Git) and version.
      </para></listitem>
    </varlistentry>
 
