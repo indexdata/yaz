@@ -78,7 +78,7 @@
     <listitem>
      <para>
       Supports
-      <ulink url="&url.solr;">Solr</ulink> Web Service version 1.4.x
+      <ulink url="&url.solr;">Apache Solr</ulink> Web Service version 1.4.x
       (client side only)
      </para>
     </listitem>
