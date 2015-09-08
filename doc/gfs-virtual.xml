@@ -22,8 +22,8 @@
 </para>
 <note>
  <para>
-  Not all Z39.50 clients allows the VHOST information to be set.
-  For those the selection of the backend must rely on the
+  Not all Z39.50 clients allow the VHOST information to be set.
+  For those, the selection of the backend must rely on the
   TCP/IP information alone (port and address).
  </para>
 </note>
@@ -55,7 +55,7 @@
   <varlistentry><term>attribute <literal>id</literal> (optional)</term>
     <listitem>
      <para>
-      identifier for this listener. This may be referred to from
+      Identifier for this listener. This may be referred to from
       server sections.
      </para>
     </listitem>
@@ -107,7 +107,7 @@
    <listitem>
     <para>
      Specifies a working directory for this backend server. If
-     specifid, the YAZ fronend changes current working directory
+     specified, the YAZ frontend changes current working directory
      to this directory whenever a backend of this type is
      started (backend handler bend_start), stopped (backend handler hand_stop)
      and initialized (bend_init).
@@ -129,7 +129,7 @@
    <listitem>
     <para>
      Specifies a filename that includes CQL to RPN conversion for this
-     backend server. See &reference-tools-cql-map;
+     backend server. See &reference-tools-cql-map;.
      If given, the backend server will only "see" a Type-1/RPN query.
     </para>
    </listitem>
@@ -139,7 +139,7 @@
    <listitem>
     <para>
      Specifies a filename that includes CCL to RPN conversion for this
-     backend server. See &reference-tools-ccl-qualifiers;
+     backend server. See &reference-tools-ccl-qualifiers;.
      If given, the backend server will only "see" a Type-1/RPN query.
     </para>
    </listitem>
@@ -149,8 +149,8 @@
    <listitem>
     <para>
      Specifies the stylesheet reference to be part of SRU HTTP responses
-     when the client does not specify one. If neither this is given, nor
-     the client specifies one, no stylesheet reference is part of the
+     when the client does not specify one. If none is given, then if
+     the client does not specify one, then no stylesheet reference is part of the
      SRU HTTP response.
     </para>
    </listitem>
@@ -170,11 +170,11 @@
    <listitem>
     <para>
      Specifies a path for local file access using HTTP. All URLs with
-     a leading prefix (/ exluded) that matches the value of docpath
+     a leading prefix (/ excluded) that matches the value of <literal>docpath</literal>
      are used for file access. For example, if the server is to offer
      access in directory <literal>xsl</literal>, the docpath would be
      <literal>xsl</literal> and all URLs of the form
-     <literal>http://host/exl</literal> will result in a local file access.
+     <literal>http://host/xsl</literal> will result in a local file access.
     </para>
    </listitem>
   </varlistentry>
@@ -184,7 +184,7 @@
     <para>
      Specifies SRW/SRU ZeeRex content for this server. Copied verbatim
      to the client. As things are now, some of the Explain content
-     seeem redundant because host information, etc. is also stored
+     seem redundant because host information, etc. is also stored
      elsewhere.
     </para>
    </listitem>
@@ -194,7 +194,7 @@
    <listitem>
     <para>
      Specifies maximum record size/message size, in bytes. This
-     value also servers as maximum size of <emphasis>incoming</emphasis>
+     value also serves as the maximum size of <emphasis>incoming</emphasis>
      packages (for Record Updates etc). It's the same value as that
      given by the <literal>-k</literal> option.
     </para>
@@ -204,7 +204,7 @@
   <varlistentry><term>element <literal>retrievalinfo</literal> (optional)</term>
    <listitem>
     <para>
-     Enables the retrieval facility supporting conversions and
+     Enables the retrieval facility to support conversions and
      specifications of record formats/types.
      See <xref linkend="tools.retrieval"/> for
      more information.
@@ -259,7 +259,7 @@
   <literal>listenref</literal> attribute is specified.
  <literal>"server2"</literal> is reached by the two listeners specified.
  In order to distinguish between the two, a virtual host has
- been specified for each of server in the <literal>host</literal>
+ been specified for each server in the <literal>host</literal>
  elements.
 </para>
 <para>

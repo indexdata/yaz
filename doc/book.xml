@@ -78,7 +78,7 @@
     <listitem>
      <para>
       Supports
-      <ulink url="&url.solr;">Solr</ulink> Web Service version 1.4.x
+      <ulink url="&url.solr;">Apache Solr</ulink> Web Service version 1.4.x
       (client side only)
      </para>
     </listitem>
@@ -138,14 +138,14 @@
    <title>Reading this Manual</title>
    <para>
     Most implementors only need to read a fraction of the
-    material in thie manual, so a quick walkthrough of the chapters
+    material in this manual, so a quick walkthrough of the chapters
     is in order.
    </para>
    <itemizedlist>
     <listitem>
      <para>
       <xref linkend="installation"/> contains installation
-      instructions for &yaz;. You don't need reading this
+      instructions for &yaz;. You don't need to read this
       if you expect to download &yaz; binaries.
       However, the chapter contains information about how
       to make <emphasis>your</emphasis> application link
@@ -155,7 +155,7 @@
     <listitem>
      <para>
       <xref linkend="zoom"/> describes the ZOOM API of &yaz;.
-      This is definitely worth a read if you wish to develop a Z39.50/SRU
+      This is definitely worth reading if you wish to develop a Z39.50/SRU
       client.
      </para>
     </listitem>
@@ -169,7 +169,7 @@
     <listitem>
      <para>
       <xref linkend="yaz-client"/> describes how to use the &yaz; Z39.50
-      client. If you're developer and wish to test your server
+      client. If you're a developer and wish to test your server
       or a server from another party, you might find this chapter
       useful.
     </para>
@@ -202,7 +202,7 @@
       <xref linkend="odr"/> goes through the details of the
       ODR module which is the work horse that encodes and decodes
       BER packages. Implementors using ZOOM only, do <emphasis>not</emphasis>
-      need reading this.
+      need to read this.
       Most other Z39.50 implementors only need to read the first two
       sections (<xref linkend="odr.introduction"/> and
       <xref linkend="odr.use"/>).
@@ -244,7 +244,7 @@
     level APIs of &yaz;.
    </para>
    <para>
-    The YAZ toolkit modules is shown in figure <xref linkend="yaz.layer"/>.
+    The YAZ toolkit modules are shown in figure <xref linkend="yaz.layer"/>.
    </para>
    <figure id="yaz.layer">
     <title>YAZ layers</title>
@@ -325,7 +325,7 @@
    <note>
     <para>
      If you are using the premade definitions of the &asn; module, and you
-     are not adding new protocol of your own, the only parts of &odr; that you
+     are not adding a new protocol of your own, the only parts of &odr; that you
      need to worry about are documented in
      <xref linkend="odr.use"/>.
     </para>
@@ -496,7 +496,7 @@
      <ulink url="&url.automake;">Automake</ulink> and
      <ulink url="&url.libtool;">Libtool</ulink>
      are used to generate Makefiles and configure &yaz; for the system.
-     You do <emphasis>not</emphasis> these tools unless you're using the
+     You do <emphasis>not</emphasis> need these tools unless you're using the
      Git version of &yaz;.
     </para>
     <para>
@@ -508,7 +508,7 @@
      &yaz; includes a tiny ASN.1 compiler. This compiler is
      written in <ulink url="&url.tcl;">Tcl</ulink>.
      But as for Bison you do not need it unless you're using Git
-     version of &yaz; or you're using the compiler to built own codecs
+     version of &yaz; or you're using the compiler to build your own codecs
      for private ASN.1.
     </para>
     <para>
@@ -612,7 +612,7 @@
 	<replaceable>prefix</replaceable>. By default configure will
 	search for iconv on the system. Use this option if it
 	doesn't find iconv. Alternatively,
-	<literal>--without-iconv</literal>, can be uset to force &yaz;
+	<literal>--without-iconv</literal>, can be used to force &yaz;
 	not to use iconv.
 	</para>
        </listitem>
@@ -627,7 +627,7 @@
 	<replaceable>prefix</replaceable>.
 	Use this option if you want XSLT and XML support.
 	By default, configure will
-	search for libxslt on the system. Use this option if it
+	search for libxslt on the system. Use this option if
 	libxslt is not found automatically. Alternatively,
 	<literal>--without-xslt</literal>, can be used to force &yaz;
 	not to use libxslt.
@@ -644,7 +644,7 @@
 	<replaceable>prefix</replaceable>.
 	Use this option if you want &yaz; to use XML and support SRU/Solr.
 	By default, configure will
-	search for libxml2 on the system. Use this option if it
+	search for libxml2 on the system. Use this option if
 	libxml2 is not found automatically. Alternatively,
 	<literal>--without-xml2</literal>, can be used to force &yaz;
 	not to use libxml2.
@@ -857,7 +857,7 @@
      This section describes how to compile - and link your own
      applications using the &yaz; toolkit.
      If you're used to Makefiles this shouldn't be hard. As for
-     other libraries you have used before, you have to set a proper include
+     other libraries you have used before, you need to set a proper include
      path for your C/C++ compiler and specify the location of
      &yaz; libraries. You can do it by hand, but generally we suggest
      you use the <filename>yaz-config</filename> that is generated
@@ -1026,7 +1026,7 @@
         </para>
 	<note>
 	 <para>
-	  libxslt depends libxml2.
+	  libxslt depends on libxml2.
 	 </para>
 	</note>
        </listitem>
@@ -1138,7 +1138,7 @@
        <term><filename>bin/yaz-icu.exe</filename></term>
        <listitem><para>This program exposes the ICU wrapper library if that
        is enabled for YAZ. Only if ICU is available this program is
-       build.
+       built.
       </para></listitem>
       </varlistentry>
       <varlistentry>
@@ -1154,7 +1154,7 @@
        <term><filename>bin/zoomtst1.exe</filename>,
        <filename>bin/zoomtst2.exe</filename>, ..</term>
        <listitem><para>
-	Several small applications that demonstrates the ZOOM API.
+	Several small applications that demonstrate the ZOOM API.
       </para></listitem>
       </varlistentry>
      </variablelist>
@@ -1297,7 +1297,8 @@
    and more apparent over time. So when the first &zoom; specification
    became available,
    an implementation for &yaz; was quickly developed. For the first time, it is
-   now as easy (or easier!) to develop clients than servers with &yaz;. This
+   now as easy (or easier!) to develop clients as it is to develop
+   servers with &yaz;. This
    chapter describes the &zoom; C binding. Before going further, please
    reconsider whether C is the right programming language for the job.
    There are other language bindings available for &yaz;, and still
@@ -1316,7 +1317,7 @@
    The C language misses features found in object oriented languages
    such as C++, Java, etc. For example, you'll have to manually,
    destroy all objects you create, even though you may think of them as
-   temporary. Most objects has a <literal>_create</literal> - and a
+   temporary. Most objects have a <literal>_create</literal> - and a
    <literal>_destroy</literal> variant.
    All objects are in fact pointers to internal stuff, but you don't see
    that because of typedefs. All destroy methods should gracefully ignore a
@@ -1361,7 +1362,7 @@
     You can prefix the host with a scheme followed by colon. The
     default scheme is <literal>tcp</literal> (Z39.50 protocol).
     The scheme <literal>http</literal> selects SRU/get over HTTP by default,
-    but can overridded to use SRU/post, SRW and the Solr protocol.
+    but can overridden to use SRU/post, SRW, and the Solr protocol.
    </para>
    <para>
     You can prefix the scheme-qualified host-string with one or more
@@ -1449,7 +1450,7 @@
        clientIP</entry><entry>Client IP. If set, is
        encoded in the otherInfo area of a Z39.50 PDU with OID
        1.2.840.10003.10.1000.81.3. Holds the original IP addreses
-       of a client. Is used of ZOOM is used in a gateway of some sort.
+       of a client. Is used if ZOOM is used in a gateway of some sort.
       </entry><entry>none</entry></row>
       <row><entry>
        async</entry><entry>If true (1) the connection operates in
@@ -1488,7 +1489,7 @@
       </entry><entry>none</entry></row>
       <row><entry>
        databaseName</entry><entry>One or more database names
-       separated by character plus (<literal>+</literal>), which to
+       separated by character plus (<literal>+</literal>), which is to
        be used by subsequent search requests on this Connection.
       </entry><entry>Default</entry></row>
       <row><entry>
@@ -1505,7 +1506,7 @@
       </entry><entry>1</entry></row>
       <row><entry>
        mediumSetPresentNumber</entry><entry>This value represents
-       the number of records to be returned as part of a search when when
+       the number of records to be returned as part of a search when
        hits is less than or equal to large set lower bound and if hits
        is greater than small set upper bound.
       </entry><entry>0</entry></row>
@@ -1515,7 +1516,7 @@
       </entry><entry>none</entry></row>
       <row><entry>
        mediumSetElementSetName</entry><entry>
-       The element set name to be for medium-sized result sets.
+       The element set name to be used for medium-sized result sets.
       </entry><entry>none</entry></row>
       <row><entry>
        init_opt_search, init_opt_present, init_opt_delSet, etc.</entry><entry>
@@ -1532,7 +1533,7 @@
       <row><entry>
        sru_version</entry><entry>
        SRU/SRW version. Should be <literal>1.1</literal>, or
-       <literal>1.2</literal>. This is , prior to connect, the version
+       <literal>1.2</literal>. This is, prior to connect, the version
        to offer (highest version). And following connect (in fact
        first operation), holds the negotiated version with the server
        (same or lower version).
@@ -1544,7 +1545,7 @@
       </entry><entry></entry></row>
       <row id="zoom.facets.option"><entry>
        facets</entry><entry>
-       Requested or recommend facets may be given before a search is sent.
+       Requested or recommended facets may be given before a search is sent.
        The value of this setting is described in <xref linkend="facets"/>
        For inspection of the facets returned, refer to the functions
        described in <xref linkend="zoom.facets"/>.
@@ -1604,9 +1605,9 @@
        redis support is available for YAZ 5.2.0 or later. If this
        option is supplied for an earlier version of YAZ, it is
        <emphasis>ignored</emphasis>.
-       The value of this option is a set options, similar to that
+       The value of this option is a set of options, similar to that
        of the memcached setting. At this stage only --server=host[:port]
-       and --expire=seconds is supported.
+       and --expire=seconds are supported.
       </entry><entry>none</entry></row>
      </tbody>
     </tgroup>
@@ -1640,7 +1641,7 @@
      The calls <function>ZOOM_connection_new</function> and
      <function>ZOOM_connection_connect</function> establishes a TCP/IP
      connection and sends an Initialize Request to the target if
-     possible. In addition, the calls waits for an Initialize Response
+     possible. In addition, the calls wait for an Initialize Response
      from the target and the result is inspected (OK or rejected).
     </para>
     <para>
@@ -1676,7 +1677,7 @@
    <sect2 id="zoom.sru.init.behavior">
     <title>SRU/Solr Protocol behavior</title>
     <para>
-     The HTTP based protocols (SRU, SRW, Solr) doesn't feature an
+     The HTTP based protocols (SRU, SRW, Solr) do not feature an
      Inititialize Request, so  the connection phase merely establishes a
      TCP/IP connection with the HTTP server.
     </para>
@@ -1742,7 +1743,7 @@
     <function>ZOOM_query_sortby2</function> is similar to
     <function>ZOOM_query_sortby</function> but allows a strategy for
     sorting. The reason for the strategy parameter is that some
-    protocols offers multiple ways of performing sorting.
+    protocols offer multiple ways of performing sorting.
     For example, Z39.50 has the standard sort, which is performed after
     search on an existing result set.
     It's also possible to use CQL in Z39.50 as the query type and use
@@ -1798,10 +1799,10 @@
    </synopsis>
    <para>
     Function <function>ZOOM_connection_search</function> creates
-    a result set given a connection and query.
+    a result set, given a connection and query.
     Destroy a result set by calling
     <function>ZOOM_resultset_destroy</function>.
-    Simple clients may using PQF only may use function
+    Simple clients using PQF only, may use the function
     <function>ZOOM_connection_search_pqf</function> in which case
     creating query objects is not necessary.
    </para>
@@ -1820,7 +1821,7 @@
     and <function>ZOOM_connection_option_set</function>.
    </para>
    <para>
-    The number of hits also called result-count is returned by
+    The number of hits, also called result-count, is returned by
     function <function>ZOOM_resultset_size</function>.
    </para>
    <table id="zoom.resultset.options"
@@ -1918,7 +1919,7 @@
       <row>
        <entry>searchresult.size</entry>
        <entry>
-	number of search result entries. This option is-nonexistant
+	number of search result entries. This option is non-existent
 	if no entries are returned by the server.
        </entry>
       </row>
@@ -1961,7 +1962,7 @@
     <para>
      <function>ZOOM_resultset_sort</function> and
      <function>ZOOM_resultset_sort1</function> both sort an existing
-     result-set. The sort_type parameter is not use. Set it to "yaz".
+     result-set. The sort_type parameter is not used. Set it to "yaz".
      The sort_spec is same notation as ZOOM_query_sortby and identical
      to that offered by yaz-client's
      <link linkend="sortspec">sort command</link>.
@@ -2004,7 +2005,7 @@
      The high-level mode allows you to fetch a range of records from
      the result set with a given start offset. When you use this mode
      the client will automatically use piggyback if that is possible
-     with the target and perform one or more present requests as needed.
+     with the target, and perform one or more present requests as needed.
      Even if the target returns fewer records as part of a present response
      because of a record size limit, etc. the client will repeat sending
      present requests. As an example, if option <literal>start</literal>
@@ -2030,7 +2031,7 @@
     <para>
      Current version of &yaz; does not take advantage of a result set id
      returned by the SRU server. Future versions might do, however.
-     Since, the ZOOM driver does not save result set IDs any
+     Since the ZOOM driver does not save result set IDs, any
      present (retrieval) is transformed to a SRU SearchRetrieveRequest
      with same query but, possibly, different offsets.
     </para>
@@ -2058,10 +2059,10 @@
      SRU SearchRetrieveRequest.
     </para>
     <para>
-     Solr queries has to be done in Solr query format.
+     Solr queries need to be done in Solr query format.
     </para>
     <para>
-     Unfortunately, SRU or Solr does not define a database setting. Hence,
+     Unfortunately, SRU and Solr do not define a database setting. Hence,
      <literal>databaseName</literal> is unsupported and ignored.
      However, the path part in host parameter for functions
      <function>ZOOM_connecton_new</function> and
@@ -2119,12 +2120,12 @@
     Function <function>ZOOM_resultset_records</function> retrieves
     a number of records from a result set. Parameter <literal>start</literal>
     and <literal>count</literal> specifies the range of records to
-    be returned. Upon completion array
+    be returned. Upon completion, the array
     <literal>recs[0], ..recs[count-1]</literal>
     holds record objects for the records. The array of records
      <literal>recs</literal> should be allocated prior the call
     <function>ZOOM_resultset_records</function>. Note that for those
-    records that couldn't be retrieved from the target
+    records that couldn't be retrieved from the target,
     <literal>recs[ ..]</literal> is set to <literal>NULL</literal>.
    </para>
    <para id="zoom.record.get">
@@ -2185,7 +2186,7 @@
     The following are the supported values for <replaceable>form</replaceable>.
     <variablelist>
      <varlistentry><term><literal>database</literal></term>
-      <listitem><para>Database of record is returned
+      <listitem><para>The Database of the record is returned
         as a C null-terminated string. Return type
         <literal>const char *</literal>.
        </para></listitem>
@@ -2206,7 +2207,7 @@
      </varlistentry>
      <varlistentry><term><literal>render</literal></term>
       <listitem><para>The record is returned in a display friendly
-        format. Upon completion buffer is returned
+        format. Upon completion, buffer is returned
         (type <literal>const char *</literal>) and length is stored in
         <literal>*len</literal>.
        </para></listitem>
@@ -2285,7 +2286,7 @@
      Present.
      The functions may block (and perform network I/O)  - even though option
      <literal>async</literal> is 1, because they return records objects.
-     (and there's no way to return records objects without retrieving them!).
+     (And there's no way to return records objects without retrieving them!)
      </para>
     <para>
      There is a trick, however, in the usage of function
@@ -2356,13 +2357,13 @@
     An array of facets field can be returned by
     <function>ZOOM_resultset_facets</function>. The length of the array is
     given by <function>ZOOM_resultset_facets_size</function>. The array is
-    zero-based and last entry will be at
+    zero-based and the last entry will be at
     <function>ZOOM_resultset_facets_size(result_set)</function>-1.
    </para>
    <para id="zoom.resultset.facets_names">
     It is possible to interate over facets by name, by calling
     <function>ZOOM_resultset_facets_names</function>.
-    This will return an const array of char * where each string can be used
+    This will return a const array of char * where each string can be used
     as parameter for <function>ZOOM_resultset_get_facet_field</function>.
    </para>
    <para>
@@ -2421,7 +2422,7 @@
     <parameter>startpqf</parameter>.
     If the operation was successful, the size of the scan set can be
     retrieved by a call to <function>ZOOM_scanset_size</function>.
-    Like result sets, the items are numbered 0,..size-1.
+    Like result sets, the items are numbered 0..size-1.
     To obtain information about a particular scan term, call function
     <function>ZOOM_scanset_term</function>. This function takes
     a scan set offset <literal>pos</literal> and returns a pointer
@@ -2541,10 +2542,10 @@
     <!-- all the ILL PDU options should go here too -->
    </itemizedlist>
    <para>
-    To create an extended service operation a <literal>ZOOM_package</literal>
+    To create an extended service operation, a <literal>ZOOM_package</literal>
     must be created. The operation is a five step operation. The
     package is created, package is configured by means of options,
-    the package is send, result is inspected (by means of options),
+    the package is sent, result is inspected (by means of options),
     the package is destroyed.
    </para>
    <synopsis>
@@ -2623,12 +2624,12 @@
       <row>
        <entry>package-name</entry>
        <entry>Extended Service Request package name. Must be specified
-       as part of a request</entry>
+       as part of a request.</entry>
        <entry>none</entry>
       </row>
       <row>
        <entry>user-id</entry>
-       <entry>User ID of Extended Service Package. Is a request option</entry>
+       <entry>User ID of Extended Service Package. Is a request option.</entry>
        <entry>none</entry>
       </row>
       <row>
@@ -2868,7 +2869,7 @@
 	  Option <literal>recordOpaque</literal> is an alternative
 	  to record - and <literal>record</literal> option (above) is
 	  ignored if recordOpaque is set. This option is only available in
-	  YAZ 3.0.35 and later and is meant to facilitate Updates with
+	  YAZ 3.0.35 and later, and is meant to facilitate Updates with
 	  servers from OCLC.
 	</entry>
 	<entry>none</entry>
@@ -2995,7 +2996,7 @@
     </para>
     <note>
      <para>
-      The database create, drop and commit services are privately defined
+      The database create, drop, and commit services are privately defined
       operations.
       Refer to <filename>esadmin.asn</filename> in YAZ for the ASN.1
       definitions.
@@ -3007,7 +3008,7 @@
    <title>Options</title>
    <para>
     Most &zoom; objects provide a way to specify options to change behavior.
-    From an implementation point of view a set of options is just like
+    From an implementation point of view, a set of options is just like
     an associative array / hash.
    </para>
    <synopsis>
@@ -3047,12 +3048,12 @@
    <para>
     <function>ZOOM_query_cql2rpn</function> translates the CQL string,
     client-side, into RPN which may be passed to the server.
-    This is useful for server's that don't themselves
+    This is useful for servers that don't themselves
     support CQL, for which <function>ZOOM_query_cql</function> is useless.
     `conn' is used  only as a place to stash diagnostics if compilation
     fails; if this information is not needed, a null pointer may be used.
     The CQL conversion is driven by option <literal>cqlfile</literal> from
-    connection conn. This specifies a conversion file (eg pqf.properties)
+    connection conn. This specifies a conversion file (e.g. pqf.properties)
     which <emphasis>must</emphasis> be present.
    </para>
    <para>
@@ -3060,8 +3061,8 @@
     client-side, into RPN which may be passed to the server.
     The conversion is driven by the specification given by
     <literal>config</literal>. Upon completion 0 is returned on success; -1
-    is returned on on failure. Om failure <literal>error_string</literal> and
-    <literal>error_pos</literal> holds error message and position of
+    is returned on failure. On failure <literal>error_string</literal> and
+    <literal>error_pos</literal> hold the error message and position of
     first error in original CCL string.
    </para>
   </sect1>
@@ -3078,18 +3079,18 @@
     a number of connections. Supply the number of connections in
     <literal>no</literal> and an array of connections in
     <literal>cs</literal> (<literal>cs[0] ... cs[no-1]</literal>).
-    A pending event could be a sending a search, receiving a response,
+    A pending event could be sending a search, receiving a response,
     etc.
     When an event has occurred for one of the connections, this function
     returns a positive integer <literal>n</literal> denoting that an event
     occurred for connection <literal>cs[n-1]</literal>.
     When no events are pending for the connections, a value of zero is
     returned.
-    To ensure that all outstanding requests are performed call this function
+    To ensure that all outstanding requests are performed, call this function
     repeatedly until zero is returned.
    </para>
    <para>
-    If <function>ZOOM_event</function> returns and returns non-zero, the
+    If <function>ZOOM_event</function> returns, and returns non-zero, the
     last event that occurred can be expected.
    </para>
    <synopsis>
@@ -3126,7 +3127,7 @@
       </row>
       <row>
        <entry>ZOOM_EVENT_RECV_DATA</entry>
-       <entry>Data has been received)</entry>
+       <entry>Data has been received</entry>
       </row>
       <row>
        <entry>ZOOM_EVENT_TIMEOUT</entry>
@@ -3150,7 +3151,7 @@
       </row>
       <row>
        <entry>ZOOM_EVENT_RECV_SEARCH</entry>
-       <entry>A search result been received</entry>
+       <entry>A search result has been received</entry>
       </row>
      </tbody>
     </tgroup>
@@ -3170,7 +3171,7 @@
    </para>
    <para>
     If you have a database system that you would like to make available by
-    means of Z39.50 or SRU, &yaz; basically offers your two options. You
+    means of Z39.50 or SRU, &yaz; basically offers two options. You
     can use the APIs provided by the &asn;, &odr;, and &comstack;
     modules to
     create and decode PDUs, and exchange them with a client.
@@ -3315,8 +3316,8 @@ int statserv_main(int argc, char **argv,
       <listitem><para>
        A boolean value, which determines whether the server
        will fork on each incoming request (TRUE), or not (FALSE). Default is
-       TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
-       doesn't fork).
+       TRUE. This flag is only read by UNIX-based servers (WIN32-based servers
+       do not fork).
      </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -3333,7 +3334,7 @@ int statserv_main(int argc, char **argv,
       <term><literal>int inetd</literal></term>
       <listitem><para>
        A boolean value, which determines whether the server
-       will operates under a UNIX INET daemon (inetd). Default is FALSE.
+       will operate under a UNIX INET daemon (inetd). Default is FALSE.
      </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -3398,12 +3399,12 @@ int statserv_main(int argc, char **argv,
       <listitem><para>Pointer to function which is called after the
       command line options have been parsed - but before the server
       starts listening.
-      For forked UNIX servers this handler is called in the mother
-      process; for threaded servers this handler is called in the
+      For forked UNIX servers, this handler is called in the mother
+      process; for threaded servers, this handler is called in the
       main thread.
       The default value of this pointer is NULL in which case it
       isn't invoked by the frontend server.
-      When the server operates as an NT service this handler is called
+      When the server operates as an NT service, this handler is called
       whenever the service is started.
       </para></listitem>
      </varlistentry>
@@ -3414,7 +3415,7 @@ int statserv_main(int argc, char **argv,
       <listitem><para>Pointer to function which is called whenever the server
       has stopped listening for incoming connections. This function pointer
       has a default value of NULL in which case it isn't called.
-      When the server operates as an NT service this handler is called
+      When the server operates as an NT service, this handler is called
       whenever the service is stopped.
       </para></listitem>
      </varlistentry>
@@ -3430,14 +3431,14 @@ int statserv_main(int argc, char **argv,
    <para>
     The pointer returned by <literal>statserv_getcontrol</literal> points to
     a static area. You are allowed to change the contents of the structure,
-    but the changes will not take effect before you call
+    but the changes will not take effect until you call
    </para>
    <synopsis>
 void statserv_setcontrol(statserv_options_block *block);
    </synopsis>
    <note>
     <para>
-     that you should generally update this structure before calling
+     You should generally update this structure before calling
      <function>statserv_main()</function>.
     </para>
    </note>
@@ -3469,7 +3470,7 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     <para>
      Unlike previous versions of YAZ, the <function>bend_init</function> also
      serves as a handler that defines the Z39.50 services that the backend
-     wish to support. Pointers to <emphasis>all</emphasis> service handlers,
+     intends to support. Pointers to <emphasis>all</emphasis> service handlers,
      including search - and fetch must be specified here in this handler.
     </para>
     <para>
@@ -3575,7 +3576,7 @@ typedef struct bend_initresult
     </para>
     <para>
      The <literal>auth</literal> member holds the authentication information
-     part of the Z39.50 Initialize Request. Interpret this if your serves
+     part of the Z39.50 Initialize Request. Interpret this if your server
      requires authentication.
     </para>
     <para>
@@ -3631,7 +3632,7 @@ typedef struct {
     </synopsis>
     <para>
      The <function>bend_search</function> handler is a fairly close
-     approximation of a protocol Z39.50 Search Request - and Response PDUs
+     approximation of a protocol Z39.50 Search Request - and Response PDUs.
      The <literal>setname</literal> is the resultSetName from the protocol.
      You are required to establish a mapping between the set name and whatever
      your backend database likes to use.
@@ -3802,7 +3803,7 @@ typedef struct {
    <sect2 id="server.delete">
     <title>Delete</title>
     <para>
-     For back-ends that supports delete of a result set only one handler
+     For back-ends that supports delete of a result set, only one handler
      must be defined.
     </para>
     <synopsis>
@@ -3869,12 +3870,12 @@ typedef struct bend_scan_rr {
    <para>
     This backend server handles both Z39.50 scan
     and SRU scan. In order for a handler to distinguish between SRU (CQL) scan
-    Z39.50 Scan , it must check for a non-NULL value of
+    Z39.50 Scan, it must check for a non-NULL value of
     <literal>scanClause</literal>.
    </para>
    <note>
     <para>
-     if designed today, it would be a choice using a union or similar,
+     If designed today, it would be a choice using a union or similar,
      but that would break binary compatibility with existing servers.
     </para>
     </note>
@@ -3954,14 +3955,14 @@ typedef struct bend_scan_rr {
      </screen>
     </para>
     <para>
-     The above for the Apache 1.3 series.
+     The above is for the Apache 1.3 series.
     </para>
    </example>
    <example id="server.example.local.access">
     <title>Running a server with local access only</title>
     <para>
-     Servers that is only being accessed from the local host should listen
-     on UNIX file socket rather than a Internet socket. To listen on
+     A server that is only being accessed from the local host should listen
+     on UNIX file socket rather than an Internet socket. To listen on
      <filename>/tmp/mysocket</filename> start the server as follows:
      <screen>
       application unix:/tmp/mysocket

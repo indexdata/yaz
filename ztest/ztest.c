@@ -1145,6 +1145,7 @@ bend_initresult *bend_init(bend_initrequest *q)
 
     q->query_charset = "ISO-8859-1";
     q->records_in_same_charset = 0;
+    q->named_result_sets = 1;
 
     return r;
 }

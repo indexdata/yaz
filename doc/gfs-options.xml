@@ -34,8 +34,8 @@
   <term><literal>-T</literal></term>
   <listitem><para>
    Operate the server in threaded mode. The server creates a thread
-   for each connection rather than a fork a process. Only available
-   on UNIX systems that offers POSIX threads.
+   for each connection rather than fork a process. Only available
+   on UNIX systems that offer POSIX threads.
   </para></listitem>
  </varlistentry>
  <varlistentry>
@@ -99,8 +99,8 @@
  <varlistentry>
   <term><literal>-w </literal><replaceable>dir</replaceable></term>
   <listitem><para>
-   The server changes to this directory during before listening
-   on incoming connections. This option is useful
+   The server changes to this directory before listening
+   to incoming connections. This option is useful
    when the server is operating from the <application>inetd</application>
    daemon (see <literal>-i</literal>).
   </para></listitem>
@@ -109,7 +109,7 @@
   <literal>-p </literal><replaceable>pidfile</replaceable>
  </term>
  <listitem><para>
-  Specifies that the server should write its Process ID to
+  Specifies that the server should write its Process ID to the
   file given by <replaceable>pidfile</replaceable>.
   A typical location would be <filename>/var/run/yaz-ztest.pid</filename>.
  </para></listitem>
