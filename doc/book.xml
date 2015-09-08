@@ -3171,7 +3171,7 @@
    </para>
    <para>
     If you have a database system that you would like to make available by
-    means of Z39.50 or SRU, &yaz; basically offers your two options. You
+    means of Z39.50 or SRU, &yaz; basically offers two options. You
     can use the APIs provided by the &asn;, &odr;, and &comstack;
     modules to
     create and decode PDUs, and exchange them with a client.
@@ -3316,8 +3316,8 @@ int statserv_main(int argc, char **argv,
       <listitem><para>
        A boolean value, which determines whether the server
        will fork on each incoming request (TRUE), or not (FALSE). Default is
-       TRUE. This flag is only read by UNIX-based servers (WIN32 based servers
-       doesn't fork).
+       TRUE. This flag is only read by UNIX-based servers (WIN32-based servers
+       do not fork).
      </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -3334,7 +3334,7 @@ int statserv_main(int argc, char **argv,
       <term><literal>int inetd</literal></term>
       <listitem><para>
        A boolean value, which determines whether the server
-       will operates under a UNIX INET daemon (inetd). Default is FALSE.
+       will operate under a UNIX INET daemon (inetd). Default is FALSE.
      </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -3399,12 +3399,12 @@ int statserv_main(int argc, char **argv,
       <listitem><para>Pointer to function which is called after the
       command line options have been parsed - but before the server
       starts listening.
-      For forked UNIX servers this handler is called in the mother
-      process; for threaded servers this handler is called in the
+      For forked UNIX servers, this handler is called in the mother
+      process; for threaded servers, this handler is called in the
       main thread.
       The default value of this pointer is NULL in which case it
       isn't invoked by the frontend server.
-      When the server operates as an NT service this handler is called
+      When the server operates as an NT service, this handler is called
       whenever the service is started.
       </para></listitem>
      </varlistentry>
@@ -3415,7 +3415,7 @@ int statserv_main(int argc, char **argv,
       <listitem><para>Pointer to function which is called whenever the server
       has stopped listening for incoming connections. This function pointer
       has a default value of NULL in which case it isn't called.
-      When the server operates as an NT service this handler is called
+      When the server operates as an NT service, this handler is called
       whenever the service is stopped.
       </para></listitem>
      </varlistentry>
@@ -3431,14 +3431,14 @@ int statserv_main(int argc, char **argv,
    <para>
     The pointer returned by <literal>statserv_getcontrol</literal> points to
     a static area. You are allowed to change the contents of the structure,
-    but the changes will not take effect before you call
+    but the changes will not take effect until you call
    </para>
    <synopsis>
 void statserv_setcontrol(statserv_options_block *block);
    </synopsis>
    <note>
     <para>
-     that you should generally update this structure before calling
+     You should generally update this structure before calling
      <function>statserv_main()</function>.
     </para>
    </note>
@@ -3470,7 +3470,7 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     <para>
      Unlike previous versions of YAZ, the <function>bend_init</function> also
      serves as a handler that defines the Z39.50 services that the backend
-     wish to support. Pointers to <emphasis>all</emphasis> service handlers,
+     intends to support. Pointers to <emphasis>all</emphasis> service handlers,
      including search - and fetch must be specified here in this handler.
     </para>
     <para>
@@ -3576,7 +3576,7 @@ typedef struct bend_initresult
     </para>
     <para>
      The <literal>auth</literal> member holds the authentication information
-     part of the Z39.50 Initialize Request. Interpret this if your serves
+     part of the Z39.50 Initialize Request. Interpret this if your server
      requires authentication.
     </para>
     <para>
@@ -3632,7 +3632,7 @@ typedef struct {
     </synopsis>
     <para>
      The <function>bend_search</function> handler is a fairly close
-     approximation of a protocol Z39.50 Search Request - and Response PDUs
+     approximation of a protocol Z39.50 Search Request - and Response PDUs.
      The <literal>setname</literal> is the resultSetName from the protocol.
      You are required to establish a mapping between the set name and whatever
      your backend database likes to use.
@@ -3803,7 +3803,7 @@ typedef struct {
    <sect2 id="server.delete">
     <title>Delete</title>
     <para>
-     For back-ends that supports delete of a result set only one handler
+     For back-ends that supports delete of a result set, only one handler
      must be defined.
     </para>
     <synopsis>
@@ -3870,12 +3870,12 @@ typedef struct bend_scan_rr {
    <para>
     This backend server handles both Z39.50 scan
     and SRU scan. In order for a handler to distinguish between SRU (CQL) scan
-    Z39.50 Scan , it must check for a non-NULL value of
+    Z39.50 Scan, it must check for a non-NULL value of
     <literal>scanClause</literal>.
    </para>
    <note>
     <para>
-     if designed today, it would be a choice using a union or similar,
+     If designed today, it would be a choice using a union or similar,
      but that would break binary compatibility with existing servers.
     </para>
     </note>
@@ -3955,14 +3955,14 @@ typedef struct bend_scan_rr {
      </screen>
     </para>
     <para>
-     The above for the Apache 1.3 series.
+     The above is for the Apache 1.3 series.
     </para>
    </example>
    <example id="server.example.local.access">
     <title>Running a server with local access only</title>
     <para>
-     Servers that is only being accessed from the local host should listen
-     on UNIX file socket rather than a Internet socket. To listen on
+     A server that is only being accessed from the local host should listen
+     on UNIX file socket rather than an Internet socket. To listen on
      <filename>/tmp/mysocket</filename> start the server as follows:
      <screen>
       application unix:/tmp/mysocket
