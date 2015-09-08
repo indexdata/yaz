@@ -174,7 +174,7 @@
      are used for file access. For example, if the server is to offer
      access in directory <literal>xsl</literal>, the docpath would be
      <literal>xsl</literal> and all URLs of the form
-     <literal>http://host/exl</literal> will result in a local file access.
+     <literal>http://host/xsl</literal> will result in a local file access.
     </para>
    </listitem>
   </varlistentry>
