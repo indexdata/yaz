@@ -71,7 +71,7 @@ static void yaz_invoke_backtrace(char *buf, int buf_sz)
         char *arg[20];
         int arg_no = 0;
         char pidstr[40];
-        const char *cp = "backtrace: could not exec gdb";
+        const char *cp = "backtrace: could not exec gdb\n";
 
         close(fds[1]);
         close(0);
