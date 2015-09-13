@@ -164,6 +164,9 @@ void yaz_enable_panic_backtrace(const char *progname)
     strncpy(static_progname, progname, sizeof(static_progname) - 1);
     static_progname[sizeof(static_progname) - 1] = '\0';
 #if HAVE_EXECINFO_H
+    void *bt[1];
+    backtrace(bt, 1);
+
     signal(SIGABRT, yaz_panic_sig_handler);
     signal(SIGSEGV, yaz_panic_sig_handler);
     signal(SIGFPE, yaz_panic_sig_handler);
