@@ -1,3 +1,9 @@
+--- 5.14.7 2015/09/13
+
+Fix possible deadlock in backtrace YAZ-856
+
+Various minor text tweaks in documentation
+
 --- 5.14.6 2015/08/17
 
 Fix yaz-client command args parsing broken YAZ-855
