@@ -1,3 +1,7 @@
+--- 5.14.8 2015/09/14
+
+Fix SEGV for s=sl for 3 terms and syntax error YAZ-857
+
 --- 5.14.7 2015/09/13
 
 Fix possible deadlock in backtrace YAZ-856
