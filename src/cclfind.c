@@ -130,54 +130,6 @@ static struct ccl_rpn_node *ccl_rpn_node_mkbool(struct ccl_rpn_node *l,
     return l;
 }
 
-static struct ccl_rpn_node *ccl_rpn_dup(struct ccl_rpn_node *rpn)
-{
-    struct ccl_rpn_node *n;
-    struct ccl_rpn_attr *attr, **attrp;
-    if (!rpn)
-        return 0;
-    n = ccl_rpn_node_create(rpn->kind);
-    switch (rpn->kind)
-    {
-    case CCL_RPN_AND:
-    case CCL_RPN_OR:
-    case CCL_RPN_NOT:
-        n->u.p[0] = ccl_rpn_dup(rpn->u.p[0]);
-        n->u.p[1] = ccl_rpn_dup(rpn->u.p[1]);
-        break;
-    case CCL_RPN_TERM:
-        n->u.t.term = xstrdup(rpn->u.t.term);
-        n->u.t.qual = rpn->u.t.qual ? xstrdup(rpn->u.t.qual) : 0;
-        attrp = &n->u.t.attr_list;
-        for (attr = rpn->u.t.attr_list; attr; attr = attr->next)
-        {
-            *attrp = (struct ccl_rpn_attr *) xmalloc(sizeof(**attrp));
-            (*attrp)->kind = attr->kind;
-            (*attrp)->type = attr->type;
-            if (attr->kind == CCL_RPN_ATTR_STRING)
-                (*attrp)->value.str = xstrdup(attr->value.str);
-            else
-                (*attrp)->value.numeric = attr->value.numeric;
-            if (attr->set)
-                (*attrp)->set = xstrdup(attr->set);
-            else
-                (*attrp)->set = 0;
-            attrp = &(*attrp)->next;
-        }
-        *attrp = 0;
-        break;
-    case CCL_RPN_SET:
-        n->u.setname = xstrdup(rpn->u.setname);
-        break;
-    case CCL_RPN_PROX:
-        n->u.p[0] = ccl_rpn_dup(rpn->u.p[0]);
-        n->u.p[1] = ccl_rpn_dup(rpn->u.p[1]);
-        n->u.p[2] = ccl_rpn_dup(rpn->u.p[2]);
-        break;
-    }
-    return n;
-}
-
 /**
  * ccl_rpn_delete: Delete RPN tree.
  * rpn:   Pointer to tree.
