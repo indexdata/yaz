@@ -634,7 +634,6 @@ static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
 }
 
 static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
-                                        struct ccl_rpn_node *parent,
                                         struct ccl_token **ar, size_t sz)
 {
     size_t l;
@@ -642,7 +641,6 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
     assert(sz > 0);
     for (l = 1; l <= sz; l++)
     {
-        struct ccl_rpn_node *p1;
         struct ccl_rpn_node *p2 = ccl_term_multi_use(cclp, ar[0],
                                                      qa, l,
                                                      l > 1,
@@ -652,24 +650,17 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
             ccl_rpn_delete(p_top);
             return 0;
         }
-        if (parent)
-        {
-            struct ccl_rpn_node *tmp = ccl_rpn_node_create(CCL_RPN_AND);
-            tmp->u.p[0] = l > 1 ? ccl_rpn_dup(parent) : parent;
-            tmp->u.p[1] = p2;
-            p2 = tmp;
-        }
         if (sz > l)
-            p1 = split_recur(cclp, qa, p2, ar + l, sz - l);
-        else
-            p1 = p2;
-        if (!p1)
         {
-            ccl_rpn_delete(p2);
-            ccl_rpn_delete(p_top);
-            return 0;
+            struct ccl_rpn_node *p1 = split_recur(cclp, qa, ar + l, sz - l);
+            if (!p1)
+            {
+                ccl_rpn_delete(p2);
+                return 0;
+            }
+            p2 = ccl_rpn_node_mkbool(p2, p1, CCL_RPN_AND);
         }
-        p_top = ccl_rpn_node_mkbool(p_top, p1, CCL_RPN_OR);
+        p_top = ccl_rpn_node_mkbool(p_top, p2, CCL_RPN_OR);
     }
     assert(p_top);
     return p_top;
@@ -697,7 +688,7 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
         ar[i] = lookahead;
         lookahead = lookahead->next;
     }
-    p = split_recur(cclp, qa, 0, ar, sz);
+    p = split_recur(cclp, qa, ar, sz);
     xfree(ar);
     for (i = 0; i < sz; i++)
         ADVANCE;

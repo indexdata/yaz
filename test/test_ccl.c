@@ -450,11 +450,19 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a", "@attr 1=2 a "));
     YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b", "@or "
                             "@and @attr 1=2 a @attr 1=2 b @attr 1=2 \"a b\" "));
-    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c", "@or @or @or "
-                            "@and @and @attr 1=2 a @attr 1=2 b @attr 1=2 c "
-                            "@and @attr 1=2 a @attr 1=2 \"b c\" "
+
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c", "@or @or "
+                            "@and "
+                            "@attr 1=2 a "
+                            "@or @and @attr 1=2 b @attr 1=2 c "
+                            "@attr 1=2 \"b c\" "
                             "@and @attr 1=2 \"a b\" @attr 1=2 c "
                             "@attr 1=2 \"a b c\" "));
+
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a?", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b?", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c?", 0));
+    YAZ_CHECK(tst_ccl_query(bibset, "splitlist=a b c d?", 0));
 
     YAZ_CHECK(tst_ccl_query(bibset, "s2=a", "@or @attr 1=2 a @attr 1=3 a "));
 
