@@ -1557,11 +1557,23 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
     char *addinfo = 0;
     const char *connection_head = z_HTTP_header_lookup(hres->headers,
                                                        "Connection");
+    int must_close = 0;
     const char *location;
 
     ZOOM_connection_set_mask(c, 0);
     yaz_log(c->log_details, "%p handle_http", c);
-
+    if (!strcmp(hres->version, "1.0"))
+    {
+        /* HTTP 1.0: only if Keep-Alive we stay alive.. */
+        if (!connection_head || strcmp(connection_head, "Keep-Alive"))
+             must_close = 1;
+    }
+    else
+    {
+        /* HTTP 1.1: only if no close we stay alive.. */
+        if (connection_head && !strcmp(connection_head, "close"))
+             must_close = 1;
+    }
     yaz_cookies_response(c->cookies, hres);
     if ((hres->code == 301 || hres->code == 302) && c->sru_mode == zoom_sru_get
         && (location = z_HTTP_header_lookup(hres->headers, "Location")))
@@ -1614,33 +1626,18 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         yaz_log(c->log_details, "removing tasks in handle_http");
         ZOOM_connection_remove_task(c);
     }
+    if (must_close)
     {
-        int must_close = 0;
-        if (!strcmp(hres->version, "1.0"))
+        ZOOM_connection_close(c);
+        if (c->tasks)
         {
-            /* HTTP 1.0: only if Keep-Alive we stay alive.. */
-            if (!connection_head || strcmp(connection_head, "Keep-Alive"))
-                must_close = 1;
+            c->tasks->running = 0;
+            ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
+            c->reconnect_ok = 0;
         }
-        else
-        {
-            /* HTTP 1.1: only if no close we stay alive.. */
-            if (connection_head && !strcmp(connection_head, "close"))
-                must_close = 1;
-        }
-        if (must_close)
-        {
-            ZOOM_connection_close(c);
-            if (c->tasks)
-            {
-                c->tasks->running = 0;
-                ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
-                c->reconnect_ok = 0;
-            }
-        }
-        else
-            c->reconnect_ok = 1; /* if the server closes anyway */
     }
+    else
+        c->reconnect_ok = 1; /* if the server closes anyway */
 }
 #endif
 
