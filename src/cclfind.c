@@ -586,12 +586,13 @@ static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
 }
 
 static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
-                                        struct ccl_token **ar, size_t sz)
+                                        struct ccl_token **ar, size_t sz,
+                                        size_t sub_len)
 {
     size_t l;
     struct ccl_rpn_node *p_top = 0;
     assert(sz > 0);
-    for (l = 1; l <= sz; l++)
+    for (l = 1; l <= sz && l <= sub_len; l++)
     {
         struct ccl_rpn_node *p2 = ccl_term_multi_use(cclp, ar[0],
                                                      qa, l,
@@ -604,7 +605,8 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
         }
         if (sz > l)
         {
-            struct ccl_rpn_node *p1 = split_recur(cclp, qa, ar + l, sz - l);
+            struct ccl_rpn_node *p1 = split_recur(cclp, qa, ar + l, sz - l,
+                sub_len);
             if (!p1)
             {
                 ccl_rpn_delete(p2);
@@ -625,7 +627,7 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
     struct ccl_rpn_node *p;
     struct ccl_token **ar;
     struct ccl_token *lookahead = cclp->look_token;
-    size_t i, sz;
+    size_t i, sz, sub_len;
     for (sz = 0; is_term_ok(lookahead->kind, term_list); sz++)
         lookahead = lookahead->next;
     if (sz == 0)
@@ -640,7 +642,14 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
         ar[i] = lookahead;
         lookahead = lookahead->next;
     }
-    p = split_recur(cclp, qa, ar, sz);
+    /* choose sub phrase carefully to avoid huge expansions */
+    if (sz >= 7)
+        sub_len = 1;
+    else if (sz >= 5)
+        sub_len = 2;
+    else
+        sub_len = 3;
+    p = split_recur(cclp, qa, ar, sz, sub_len);
     xfree(ar);
     for (i = 0; i < sz; i++)
         ADVANCE;
