@@ -1,3 +1,15 @@
+--- 5.14.9 2015/09/15
+
+Fix segv in ZOOM_connection_fire_event_socket YAZ-858
+The odr_in memory taken by handle_srw_response, and, thus if result
+set is destructed before we expect the HTTP response (hres) it may
+be come invalid. Therefore we inspect hres before the call to
+ZOOM_handle_sru.
+
+Fix possible deadlock in backtrace (2nd attempt) YAZ-856
+An alarm is set up so that backtrace is terminated if it hangs.
+Even if backtrace the handler also attempts to spawn gdb.
+
 --- 5.14.8 2015/09/14
 
 Fix SEGV for s=sl for 3 terms and syntax error YAZ-857
