@@ -33,6 +33,8 @@ InstallDir "$PROGRAMFILES\YAZ"
 !endif
 
 
+RequestExecutionLevel admin
+
 SetCompressor bzip2
 
 Name "YAZ"
@@ -196,12 +198,11 @@ SectionEnd
 UninstallText "This will uninstall YAZ ${VERSION} from your system"
 
 Section Uninstall
-; add delete commands to delete whatever files/registry keys/etc you installed here.
+	ExecWait '"$INSTDIR\bin\yaz-ztest" -remove'
+	RMDir /r $SMPROGRAMS\YAZ
 	Delete "$INSTDIR\uninst.exe"
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
-	ExecWait '"$INSTDIR\bin\yaz-ztest" -remove'
-	RMDir /r $SMPROGRAMS\YAZ
 	RMDir /r $INSTDIR
 	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
         IfFileExists $INSTDIR 0 Removed 
