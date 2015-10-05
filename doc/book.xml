@@ -3050,7 +3050,7 @@
     client-side, into RPN which may be passed to the server.
     This is useful for servers that don't themselves
     support CQL, for which <function>ZOOM_query_cql</function> is useless.
-    `conn' is used  only as a place to stash diagnostics if compilation
+    'conn' is used  only as a place to stash diagnostics if compilation
     fails; if this information is not needed, a null pointer may be used.
     The CQL conversion is driven by option <literal>cqlfile</literal> from
     connection conn. This specifies a conversion file (e.g. pqf.properties)
@@ -3992,7 +3992,7 @@ typedef struct bend_scan_rr {
    </para>
    <para>
     The &asn; module is located in sub directory <filename>z39.50</filename>.
-    There you'll find C files that implements encoders and decoders for the
+    There you'll find C files that implement encoders and decoders for the
     Z39.50 types. You'll also find the protocol definitions:
     <filename>z3950v3.asn</filename>, <filename>esupdate.asn</filename>,
     and others.
@@ -4036,8 +4036,8 @@ typedef struct bend_scan_rr {
     <xref linkend="odr.use"/> for details). When you use
     <function>odr_malloc()</function>, you can release all of the
     allocated data in a single operation, independent of any pointers and
-    relations between the data. <function>odr_malloc()</function> is based on a
-    &quot;nibble-memory&quot;
+    relations between the data. The <function>odr_malloc()</function> function
+    is based on a &quot;nibble-memory&quot;
     scheme, in which large portions of memory are allocated, and then
     gradually handed out with each call to <function>odr_malloc()</function>.
     The next time you call <function>odr_reset()</function>, all of the
@@ -4079,7 +4079,7 @@ typedef struct bend_scan_rr {
     Z_&lt;type> *zget_&lt;type>(ODR o);
    </synopsis>
    <para>
-    eg.:
+    e.g.:
    </para>
    <synopsis>
     Z_InitRequest *zget_InitRequest(ODR o);
@@ -4168,7 +4168,7 @@ typedef struct Z_External
     <literal>octet_aligned</literal> arm of the union.
    </para>
    <para>
-    Some servers return ASN.1 structured data values (eg. database
+    Some servers return ASN.1 structured data values (e.g. database
     records) as BER-encoded records placed in the
     <literal>octet-aligned</literal> branch of the EXTERNAL CHOICE.
     The ASN-module will <emphasis>not</emphasis> automatically decode
@@ -4179,8 +4179,8 @@ typedef struct Z_External
    Z_ext_typeent *z_ext_gettypebyref(const oid *oid);
    </screen>
    <para>
-    Can be used to retrieve information about the known, external data
-    types. The function return a pointer to a static area, or NULL, if no
+    can be used to retrieve information about the known, external data
+    types. The function returns a pointer to a static area, or NULL, if no
     match for the given direct reference is found. The
     <literal>Z_ext_typeent</literal>
     is defined as:
@@ -4214,7 +4214,7 @@ typedef struct Z_ext_typeent
    </para>
    <para>
     If you want to <emphasis>send</emphasis> EXTERNALs containing
-    ASN.1-structured values in the occtet-aligned branch of the CHOICE, this
+    ASN.1-structured values in the octet-aligned branch of the CHOICE, this
     is possible too. However, on the encoding phase, it requires a somewhat
     involved juggling around of the various buffers involved.
    </para>
@@ -4938,8 +4938,8 @@ typedef struct Z_ext_typeent
    <title>Introduction</title>
    <para>
     &yaz; uses a very simple implementation of
-    <ulink url="&url.soap;">SOAP</ulink> that only,
-    currenly, supports what is sufficient to offer SRU SOAP functionality.
+    <ulink url="&url.soap;">SOAP</ulink> that only
+    (currently) supports what is sufficient to offer SRU SOAP functionality.
     The implementation uses the
     <ulink url="&url.libxml2.api.tree;">tree API</ulink> of
     libxml2 to encode and decode SOAP packages.
@@ -5018,7 +5018,7 @@ typedef struct {
    </para>
    <para>
     The <literal>fault</literal> and <literal>soap_error</literal>
-    arms represent both a SOAP fault - struct
+    arms both represent a SOAP fault - struct
     <literal>Z_SOAP_Fault</literal>. Any other generic
     (valid) package is represented by <literal>Z_SOAP_Generic</literal>.
    </para>
@@ -5048,18 +5048,18 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     When decoding, the <function>z_soap_codec</function>
     inspects the XML content
     and tries to match one of the services namespaces of the
-    supplied handlers. If there is a match a handler function
+    supplied handlers. If there is a match. a handler function
     is invoked which decodes that particular SOAP package.
     If successful, the returned <literal>Z_SOAP</literal> package will be
     of type <literal>Z_SOAP_Generic</literal>.
     Member <literal>no</literal> is
-    set the offset of handler that matched; <literal>ns</literal>
-    is set to namespace of matching handler; the void pointer
+    set the offset of the handler that matched; <literal>ns</literal>
+    is set to namespace of the matching handler; the void pointer
     <literal>p</literal> is set to the C data structure assocatiated
     with the handler.
    </para>
    <para>
-    When a NULL namespace is met (member <literal>ns</literal> bwlow),
+    When a NULL namespace is met (member <literal>ns</literal> below),
     that specifies end-of-list.
    </para>
    <para>
@@ -5071,9 +5071,9 @@ typedef struct {
     Z_SOAP_fun f;
 } Z_SOAP_Handler;
     </synopsis>
-    The <literal>ns</literal> is namespace of service associated with
-    handler <literal>f</literal>. <literal>client_data</literal>
-    is user-defined data which is passed to handler.
+    The <literal>ns</literal> is the namespace of the service associated with
+    handler <literal>f</literal>. The <literal>client_data</literal>
+    is user-defined data which is passed to the handler.
    </para>
    <para>
     The prototype for a SOAP service handler is:
@@ -5086,10 +5086,10 @@ int handler(ODR o, void * ptr, void **handler_data,
     is a libxml2 tree node pointer (<literal>xmlNodePtr</literal>)
     and is a pointer to the <literal>Body</literal> element
     of the SOAP package. The <parameter>handler_data</parameter>
-    is an opaque pointer to a C definitions associated with the
-    SOAP service. <parameter>client_data</parameter> is the pointer
+    is an opaque pointer to C definitions associated with the
+    SOAP service. The <parameter>client_data</parameter> is the pointer
     which was set as part of the <literal>Z_SOAP_handler</literal>.
-    Finally, <parameter>ns</parameter> the service namespace.
+    Finally, <parameter>ns</parameter> is the service namespace.
    </para>
   </sect1>
   <sect1 id="soap.srw">
@@ -5150,9 +5150,9 @@ typedef struct {
     Please observe that data of type xsd:string is represented
     as a char pointer (<literal>char *</literal>). A null pointer
     means that the element is absent.
-    Data of type xsd:integer is representd as a pointer to
+    Data of type xsd:integer is represented as a pointer to
     an int (<literal>int *</literal>). Again, a null pointer
-    us used for absent elements.
+    is used for absent elements.
    </para>
    <para>
     The SearchRetrieveResponse has the following definition.
@@ -5171,7 +5171,7 @@ typedef struct {
 } Z_SRW_searchRetrieveResponse;
     </synopsis>
     The <literal>num_records</literal> and <literal>num_diagnostics</literal>
-    is number of returned records and diagnostics respectively and also
+    is number of returned records and diagnostics respectively, and also
     correspond to the "size of" arrays <literal>records</literal>
     and <literal>diagnostics</literal>.
    </para>
@@ -5204,7 +5204,7 @@ typedef struct {
   <title>Supporting Tools</title>
   <para>
    In support of the service API - primarily the ASN module, which
-   provides the pro-grammatic interface to the Z39.50 APDUs, &yaz; contains
+   provides the programmatic interface to the Z39.50 APDUs, &yaz; contains
    a collection of tools that support the development of applications.
   </para>
   <sect1 id="tools.query">
@@ -5233,16 +5233,16 @@ typedef struct {
     </para>
     <note>
      <para>
-      The PQF have been adopted by other parties developing Z39.50
+      The PQF has been adopted by other parties developing Z39.50
       software. It is often referred to as Prefix Query Notation
       - PQN.
      </para>
     </note>
     <para>
      The PQF is defined by the pquery module in the YAZ library.
-     There are two sets of function that have similar behavior. First
+     There are two sets of functions that have similar behavior. First
      set operates on a PQF parser handle, second set doesn't. First set
-     set of functions are more flexible than the second set. Second set
+     of functions are more flexible than the second set. Second set
      is obsolete and is only provided to ensure backwards compatibility.
     </para>
     <para>
@@ -5266,7 +5266,7 @@ typedef struct {
      A PQF parser is created and destructed by functions
      <function>yaz_pqf_create</function> and
      <function>yaz_pqf_destroy</function> respectively.
-     Function <function>yaz_pqf_parse</function> parses query given
+     Function <function>yaz_pqf_parse</function> parses the query given
      by string <literal>qbuf</literal>. If parsing was successful,
      a Z39.50 RPN Query is returned which is created using ODR stream
      <literal>o</literal>. If parsing failed, a NULL pointer is
@@ -5280,8 +5280,8 @@ typedef struct {
      Error information for bad queries can be obtained by a call to
      <function>yaz_pqf_error</function> which returns an error code and
      modifies <literal>*msg</literal> to point to an error description,
-     and modifies <literal>*off</literal> to the offset within last
-     query were parsing failed.
+     and modifies <literal>*off</literal> to the offset within the last
+     query where parsing failed.
     </para>
     <para>
      The second set of functions are declared as follows:
@@ -5370,9 +5370,9 @@ typedef struct {
      a sub-query. The attribute type-value pair is packed in one string:
      an attribute type, an equals sign, and an attribute value, like this:
      <literal>@attr 1=1003</literal>.
-     The type is always an integer but the value may be either an
+     The type is always an integer, but the value may be either an
      integer or a string (if it doesn't start with a digit character).
-     A string attribute-value is encoded as a Type-1 ``complex''
+     A string attribute-value is encoded as a Type-1 "complex"
      attribute with the list of values containing the single string
      specified, and including no semantic indicators.
     </para>
@@ -5424,7 +5424,7 @@ typedef struct {
       <screen>
        @prox <replaceable>exclusion</replaceable> <replaceable>distance</replaceable> <replaceable>ordered</replaceable> <replaceable>relation</replaceable> <replaceable>which-code</replaceable> <replaceable>unit-code</replaceable>
       </screen>
-      in which the meanings of the parameters are as described in in
+      in which the meanings of the parameters are as described in
       the standard, and they can take the following values:
       <itemizedlist>
        <listitem>
@@ -5471,11 +5471,11 @@ typedef struct {
 	or
 	<literal>k</literal>
 	(the unit-code parameter is taken from the well-known list
-	of alternatives described in below) or
+	of alternatives described below) or
 	<literal>private</literal>
 	or
 	<literal>p</literal>
-	(the unit-code paramater has semantics specific to an
+	(the unit-code parameter has semantics specific to an
 	out-of-band agreement such as a profile).
        </para>
        </formalpara>
@@ -5585,7 +5585,7 @@ typedef struct {
 	</listitem>
 	<listitem>
 	 <para>
-	  which-code is ``known'', so the standard unit-codes are used
+	  which-code is "known", so the standard unit-codes are used
 	 </para>
 	</listitem>
 	<listitem>
@@ -5596,8 +5596,8 @@ typedef struct {
        <literal>dylan</literal> and <literal>zimmerman</literal> must
        both occur in the record, in that order, differing in position
        by three or fewer words (i.e. with two or fewer words between
-       them.)  The query would find ``Bob Dylan, aka. Robert
-       Zimmerman'', but not ``Bob Dylan, born as Robert Zimmerman''
+       them.)  The query would find "Bob Dylan, aka. Robert
+       Zimmerman", but not "Bob Dylan, born as Robert Zimmerman"
        since the distance in this case is four.
       </para>
      </example>
@@ -5625,8 +5625,8 @@ typedef struct {
        access point
        2038 indicates West Bounding Coordinate and
        2030 indicates East Bounding Coordinate,
-       so the query is for areas extending from -114 degrees
-       to no more than -109 degrees.
+       so the query is for areas extending from -114 degrees longitude
+       to no more than -109 degrees longitude.
       </para>
      </example>
     </sect3>
@@ -5645,7 +5645,7 @@ typedef struct {
      <title>CCL Syntax</title>
      <para>
       The CCL parser obeys the following grammar for the FIND argument.
-      The syntax is annotated by in the lines prefixed by
+      The syntax is annotated using lines prefixed by
       <literal>--</literal>.
      </para>
      <screen>
@@ -5711,9 +5711,9 @@ typedef struct {
        singlechar#mask
       </screen>
       <para>
-       Assuming that the qualifiers <literal>ti</literal>,
-       <literal>au</literal>
-       and <literal>date</literal> are defined we may use:
+       Assuming that the qualifiers <literal>ti</literal>
+       and <literal>au</literal>
+       and <literal>date</literal> are defined, we may use:
       </para>
       <screen>
        ti=self portrait
@@ -5757,15 +5757,15 @@ typedef struct {
       </para>
       <para>
        where <replaceable>qualifier-name</replaceable> is the name of the
-       qualifier to be used (eg. <literal>ti</literal>),
+       qualifier to be used (e.g. <literal>ti</literal>),
        <replaceable>type</replaceable> is attribute type in the attribute
        set (Bib-1 is used if no attribute set is given) and
        <replaceable>val</replaceable> is attribute value.
        The <replaceable>type</replaceable> can be specified as an
-       integer or as it be specified either as a single-letter:
+       integer, or as a single-letter:
        <literal>u</literal> for use,
-       <literal>r</literal> for relation,<literal>p</literal> for position,
-       <literal>s</literal> for structure,<literal>t</literal> for truncation
+       <literal>r</literal> for relation, <literal>p</literal> for position,
+       <literal>s</literal> for structure,<literal>t</literal> for truncation,
        or <literal>c</literal> for completeness.
        The attributes for the special qualifier name <literal>term</literal>
        are used when no CCL qualifier is given in a query.
@@ -5786,7 +5786,7 @@ typedef struct {
 	   <entry>
 	    Use attribute (1). Common use attributes are
 	    1 Personal-name, 4 Title, 7 ISBN, 8 ISSN, 30 Date,
-	    62 Subject, 1003 Author), 1016 Any. Specify value
+	    62 Subject, 1003 Author, 1016 Any. Specify value
 	    as an integer.
 	   </entry>
 	  </row>
@@ -5819,7 +5819,7 @@ typedef struct {
 	   <entry><literal>t=</literal><replaceable>value</replaceable></entry>
 	   <entry>
 	    Truncation attribute (5). Values: 1 right, 2 left,
-	    3 left&amp; right, 100 none, 101 process #, 102 regular-1,
+	    3 left and right, 100 none, 101 process #, 102 regular-1,
 	    103 regular-2, 104 CCL.
 	   </entry>
 	  </row>
@@ -5864,13 +5864,13 @@ typedef struct {
 	  <row>
 	   <entry><literal>s=al</literal></entry>
 	   <entry>
-	    Each token in the term is ANDed. (and-list).
+	    Each token in the term is ANDed (and-list).
 	    This does not set the structure at all.
 	   </entry>
 	  </row>
 	  <row><entry><literal>s=ol</literal></entry>
 	  <entry>
-	   Each token in the term is ORed. (or-list).
+	   Each token in the term is ORed (or-list).
 	   This does not set the structure at all.
 	  </entry>
 	  </row>
@@ -5893,7 +5893,7 @@ typedef struct {
 	  </row>
 	  <row><entry><literal>r=o</literal></entry>
 	  <entry>
-	   Allows ranges and the operators greather-than, less-than, ...
+	   Allows ranges and the operators greater-than, less-than, ...
 	   equals.
 	   This sets Bib-1 relation attribute accordingly (relation
 	   ordered). A query construct is only treated as a range if
@@ -5919,7 +5919,7 @@ typedef struct {
 	  <row><entry><literal>r=omiteq</literal></entry>
 	  <entry>
 	   This will omit relation=equals (@attr 2=3) when r=o / r=r
-	   is used. This is useful for servers that somehow breaks
+	   is used. This is useful for servers that somehow break
 	   when an explicit relation=equals is used. Omitting the
 	   relation is usually safe because "equals" is the default
 	   behavior. This tweak was added in YAZ version 5.1.2.
@@ -5947,17 +5947,17 @@ typedef struct {
 	  </row>
 	  <row><entry><literal>t=b</literal></entry>
 	  <entry>
-	   Allows term to be both left&amp;right truncated.
+	   Allows term to be both left-and-right truncated.
 	   If term is of the form <literal>?x?</literal>, the
 	   resulting term is <literal>x</literal> and trunctation is
-	   set to both left&amp;right.
+	   set to both left and right.
 	  </entry>
 	  </row>
 	  <row><entry><literal>t=x</literal></entry>
 	  <entry>
 	   Allows masking anywhere in a term, thus fully supporting
 	   # (mask one character) and ? (zero or more of any).
-	   If masking is used, trunction is set to 102 (regexp-1 in term)
+	   If masking is used, truncation is set to 102 (regexp-1 in term)
 	   and the term is converted accordingly to a regular expression.
 	  </entry>
 	  </row>
@@ -5965,7 +5965,7 @@ typedef struct {
 	  <entry>
 	   Allows masking anywhere in a term, thus fully supporting
 	   # (mask one character) and ? (zero or more of any).
-	   If masking is used, trunction is set to 104 (Z39.58 in term)
+	   If masking is used, truncation is set to 104 (Z39.58 in term)
 	   and the term is converted accordingly to Z39.58 masking term -
 	   actually the same truncation as CCL itself.
 	  </entry>
@@ -5992,7 +5992,7 @@ typedef struct {
 	<literal>ti</literal>
 	sets the use-attribute to 4. <literal>au</literal> sets the
 	use-attribute to 1.
-	When no qualifiers are used in the query the structure-attribute is
+	When no qualifiers are used in the query, the structure-attribute is
 	set to free-form-text (105) (rule for <literal>term</literal>).
 	The <literal>date</literal> sets the relation attribute to
 	the relation used in the CCL query and sets the use attribute
@@ -6141,7 +6141,7 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
      <para>
       which takes the CCL profile (<literal>bibset</literal>) and query
       (<literal>str</literal>) as input. Upon successful completion the RPN
-      tree is returned. If an error occur, such as a syntax error, the integer
+      tree is returned. If an error occurs, such as a syntax error, the integer
       pointed to by <literal>error</literal> holds the error code and
       <literal>pos</literal> holds the offset inside query string in which
       the parsing failed.
@@ -6261,7 +6261,7 @@ int cql_parser_stream(CQL_parser cp,
 int cql_parser_stdio(CQL_parser cp, FILE *f);
       </synopsis>
       The functions <function>cql_parser_stream</function> and
-      <function>cql_parser_stdio</function> parses a CQL query
+      <function>cql_parser_stdio</function> parse a CQL query
       - just like <function>cql_parser_string</function>.
       The only difference is that the CQL query can be
       fed to the parser in different ways.
@@ -6273,7 +6273,7 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
     <sect3 id="cql.tree">
      <title>CQL tree</title>
      <para>
-      The the query string is valid, the CQL parser
+      If the query string is valid, the CQL parser
       generates a tree representing the structure of the
       CQL query.
      </para>
@@ -6281,7 +6281,7 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
       <synopsis>
 struct cql_node *cql_parser_result(CQL_parser cp);
       </synopsis>
-      <function>cql_parser_result</function> returns the
+      <function>cql_parser_result</function> returns
       a pointer to the root node of the resulting tree.
      </para>
      <para>
@@ -6439,8 +6439,8 @@ int cql_transform_error(cql_transform_t ct, char **addinfop);
       error-code and sets the string-pointer at
       <literal>*addinfop</literal> to point to a string containing
       additional information about the error that occurred: for
-      example, if the error code is 15 (``Illegal or unsupported context
-      set''), the additional information is the name of the requested
+      example, if the error code is 15 ("Illegal or unsupported context
+      set"), the additional information is the name of the requested
       context set that was not recognised.
      </para>
      <para>
@@ -6516,7 +6516,7 @@ int cql_transform_FILE(cql_transform_t ct,
           Typically, the RPN specifies an equivalent use attribute.
          </para>
          <para>
-          For terms not bound by an index the pattern
+          For terms not bound by an index, the pattern
           <literal>index.cql.serverChoice</literal> is used.
           Here, the prefix <literal>cql</literal> is defined as
           <literal>http://www.loc.gov/zing/cql/cql-indexes/v1.0/</literal>.
@@ -6548,7 +6548,7 @@ int cql_transform_FILE(cql_transform_t ct,
         <listitem>
          <para>
           This pattern specifies how a CQL relation is mapped to RPN.
-          <replaceable>pattern</replaceable> is name of relation
+          The <replaceable>pattern</replaceable> is name of relation
           operator. Since <literal>=</literal> is used as
           separator between CQL pattern and RPN, CQL relations
           including <literal>=</literal> cannot be
@@ -6589,7 +6589,7 @@ int cql_transform_FILE(cql_transform_t ct,
         <listitem>
          <para>
           This pattern specifies how a CQL structure is mapped to RPN.
-          Note that this CQL pattern is somewhat to similar to
+          Note that this CQL pattern is somewhat similar to
           CQL pattern <literal>relation</literal>.
           The <replaceable>type</replaceable> is a CQL relation.
          </para>
@@ -6748,7 +6748,7 @@ int cql_transform_FILE(cql_transform_t ct,
      <para>
       Conversion from CQL to XCQL is trivial and does not
       require a mapping to be defined.
-      There three functions to choose from depending on the
+      There are three functions to choose from depending on the
       way you wish to store the resulting output (XML buffer
       containing XCQL).
       <synopsis>
@@ -6759,12 +6759,12 @@ void cql_to_xml(struct cql_node *cn,
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       </synopsis>
       Function <function>cql_to_xml_buf</function> converts
-      to XCQL and stores result in a user supplied buffer of a given
+      to XCQL and stores the result in a user-supplied buffer of a given
       max size.
      </para>
      <para>
       <function>cql_to_xml</function> writes the result in
-      a user defined output stream.
+      a user-defined output stream.
       <function>cql_to_xml_stdio</function> writes to a
       a file.
      </para>
@@ -6805,7 +6805,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <para>
     An OID can either be declared as a automatic variable or it can
-    allocated using the memory utilities or ODR/NMEM. It's
+    be allocated using the memory utilities or ODR/NMEM. It's
     guaranteed that an OID can fit in <literal>OID_SIZE</literal> integers.
    </para>
    <example id="tools.oid.bib1.1"><title>Create OID on stack</title>
@@ -6825,7 +6825,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </example>
    <para>
     And OID may also be filled from a string-based representation using
-    dots (.). This is achieved by function
+    dots (.). This is achieved by the function
     <screen>
      int oid_dotstring_to_oid(const char *name, Odr_oid *oid);
     </screen>
@@ -6833,7 +6833,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <example id="tools.oid.bib1.2"><title>Using oid_oiddotstring_to_oid</title>
     <para>
-     We can fill the Bib-1 attribute set OID easier with:
+     We can fill the Bib-1 attribute set OID more easily with:
      <screen>
       Odr_oid bib1[OID_SIZE];
       oid_oiddotstring_to_oid("1.2.840.10003.3.1", bib1);
@@ -6841,11 +6841,11 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    </example>
    <para>
-    We can also allocate an OID dynamically on a ODR stream with:
+    We can also allocate an OID dynamically on an ODR stream with:
     <screen>
     Odr_oid *odr_getoidbystr(ODR o, const char *str);
     </screen>
-    This creates an OID from string-based representation using dots.
+    This creates an OID from a string-based representation using dots.
     This function take an &odr; stream as parameter. This stream is used to
     allocate memory for the data elements, which is released on a
     subsequent call to <function>odr_reset()</function> on that stream.
@@ -6853,7 +6853,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    <example id="tools.oid.bib1.3">
     <title>Using odr_getoidbystr</title>
     <para>
-     We can create a OID for the Bib-1 attribute set with:
+     We can create an OID for the Bib-1 attribute set with:
      <screen>
       Odr_oid *bib1 = odr_getoidbystr(odr, "1.2.840.10003.3.1");
      </screen>
@@ -6871,8 +6871,8 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <para>
     OIDs can be copied with <function>oid_oidcpy</function> which takes
-    two OID lists as arguments. Alternativly, an OID copy can be allocated
-    on a ODR stream with:
+    two OID lists as arguments. Alternatively, an OID copy can be allocated
+    on an ODR stream with:
     <screen>
      Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
     </screen>
@@ -6906,10 +6906,10 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     </para>
     <para>
      A YAZ database handle is of type <literal>yaz_oid_db_t</literal>.
-     Actually that's a pointer. You need not think deal with that.
+     Actually that's a pointer. You need not deal with that.
      YAZ has a built-in database which can be considered "constant" for
      most purposes.
-     We can get hold that by using function <function>yaz_oid_std</function>.
+     We can get hold of that by using function <function>yaz_oid_std</function>.
     </para>
     <para>
      All functions with prefix <function>yaz_string_to_oid</function>
@@ -6940,7 +6940,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <title>Standard OIDs</title>
     <para>
      All the object identifers in the standard OID database as returned
-     by <function>yaz_oid_std</function> can referenced directly in a
+     by <function>yaz_oid_std</function> can be referenced directly in a
      program as a constant OID.
      Each constant OID is prefixed with <literal>yaz_oid_</literal> -
      followed by OID class (lowercase) - then by OID name (normalized and
@@ -6973,7 +6973,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     Z39.50 PDUs and related structures, it is convenient to use the
     memory-management system of the &odr; subsystem (see
     <xref linkend="odr.use"/>). However, in some circumstances
-    where you might otherwise benefit from using a simple nibble memory
+    where you might otherwise benefit from using a simple nibble-memory
     management system, it may be impractical to use
     <function>odr_malloc()</function> and <function>odr_reset()</function>.
     For this purpose, the memory manager which also supports the &odr;
@@ -7005,10 +7005,10 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     allocated on the handle.
    </para>
    <para>
-    The nibble memory pool is shared amongst threads. POSIX
+    The nibble-memory pool is shared amongst threads. POSIX
     mutex'es and WIN32 Critical sections are introduced to keep the
     module thread safe. Function <function>nmem_init()</function>
-    initializes the nibble memory library and it is called automatically
+    initializes the nibble-memory library and it is called automatically
     the first time the <literal>YAZ.DLL</literal> is loaded. &yaz; uses
     function <function>DllMain</function> to achieve this. You should
     <emphasis>not</emphasis> call <function>nmem_init</function> or
@@ -7029,7 +7029,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     and implemented in <filename>src/log.c</filename>.
     Due to name clash with syslog and some math utilities the logging
     interface has been modified as of YAZ 2.0.29. The obsolete interface
-    is still available if in header file <filename>yaz/log.h</filename>.
+    is still available in header file <filename>yaz/log.h</filename>.
     The key points of the interface are:
    </para>
    <screen>
@@ -7079,9 +7079,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     passed to <function>yaz_log_init_level</function> for it to take effect.
    </para>
    <para>
-    Each module should check what log bits it should be used, by calling
+    Each module should check what log bits should be used, by calling
     <function>yaz_log_module_level</function> with a suitable name for the
-    module. The name is cleared from a preceding path and an extension, if any,
+    module. The name is cleared of a preceding path and an extension, if any,
     so it is quite possible to use <literal>__FILE__</literal> for it. If the
     name has been passed to <function>yaz_log_mask_str</function>, the routine
     returns a non-zero bitmask, which should then be used in consequent calls
@@ -7098,7 +7098,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <literal>malloc, nmem, odr, eventl</literal> for internal
     debugging of yaz itself.
     Of course, any program using yaz is welcome to define as many new
-    ones, as it needs.
+    ones as it needs.
    </para>
    <para>
     By default the log is written to stderr, but this can be changed by a call
@@ -7157,7 +7157,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    <para>
     YAZ provides a fast utility for working with MARC records.
     Early versions of the MARC utility only allowed decoding of ISO2709.
-    Today the utility may both encode - and decode to a varity of formats.
+    Today the utility may both encode - and decode to a variety of formats.
    </para>
    <synopsis><![CDATA[
     #include <yaz/marcdisp.h>
@@ -7209,7 +7209,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     by calling <function>yaz_marc_destroy</function>.
    </para>
    <para>
-    All other function operate on a <literal>yaz_marc_t</literal> handle.
+    All other functions operate on a <literal>yaz_marc_t</literal> handle.
     The output is specified by a call to <function>yaz_marc_xml</function>.
     The <literal>xmlmode</literal> must be one of
     <variablelist>
@@ -7218,7 +7218,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <listitem>
        <para>
 	A simple line-by-line format suitable for display but not
-	recommend for further (machine) processing.
+	recommended for further (machine) processing.
        </para>
       </listitem>
      </varlistentry>
@@ -7269,7 +7269,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <term>YAZ_MARC_JSON</term>
       <listitem>
        <para>
-        <ulink url="&url.marc_in_json;">MARC-in_JSON</ulink> format.
+        <ulink url="&url.marc_in_json;">MARC-in-JSON</ulink> format.
        </para>
       </listitem>
      </varlistentry>
@@ -7279,7 +7279,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     The actual conversion functions are
     <function>yaz_marc_decode_buf</function> and
     <function>yaz_marc_decode_wrbuf</function> which decodes and encodes
-    a MARC record. The former function operates on simple buffers, the
+    a MARC record. The former function operates on simple buffers, and
     stores the resulting record in a WRBUF handle (WRBUF is a simple string
     type).
    </para>
@@ -7313,9 +7313,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <para>
      Applications like
      Pazpar2 uses XSLT to convert an XML encoded MARC record to an internal
-     representation. This conversion mostly check the tag of a MARC field
+     representation. This conversion mostly checks the tag of a MARC field
      to determine the basic rules in the conversion. This check is
-     costly when that is tag is encoded as an attribute in MARCXML.
+     costly when that tag is encoded as an attribute in MARCXML.
      By having the tag value as the element instead, makes processing
      many times faster (at least for Libxslt).
     </para>
@@ -7350,18 +7350,18 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 	A control field is encoded as element <literal>c</literal> concatenated
 	with the tag value of the control field if the tag value
 	matches the regular expression <literal>[a-zA-Z0-9]*</literal>.
-	If the tag value do not match the regular expression
+	If the tag value does not match the regular expression
 	<literal>[a-zA-Z0-9]*</literal> the control field is encoded
 	as element <literal>c</literal> and attribute <literal>code</literal>
 	will hold the tag value.
-	This rule ensure that in the rare cases where a tag value might
-	result in a non-wellformed XML YAZ encode it as a coded	attribute
+	This rule ensures that in the rare cases where a tag value might
+	result in a non-well-formed XML, then YAZ will encode it as a coded attribute
 	(as in MARCXML).
        </para>
        <para>
-	The control field content is the the text value of this element.
+	The control field content is the text value of this element.
 	Indicators are encoded as attribute names
-	<literal>i1</literal>, <literal>i2</literal>, etc.. and
+	<literal>i1</literal>, <literal>i2</literal>, etc. and
 	corresponding values for each indicator.
        </para>
       </listitem>
@@ -7370,11 +7370,11 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 	A data field is encoded as element <literal>d</literal> concatenated
 	with the tag value of the data field or using the attribute
 	<literal>code</literal> as described in the rules for control fields.
-	The children of the data field element is subfield elements.
+	The children of the data field element are subfield elements.
 	Each subfield element is encoded as <literal>s</literal>
 	concatenated with the sub field code.
 	The text of the subfield element is the contents of the subfield.
-	Indicators are encoded as attributes for the data field element similar
+	Indicators are encoded as attributes for the data field element, similar
 	to the encoding for control fields.
       </para>
       </listitem>
@@ -7425,8 +7425,8 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     The Retrieval facility is driven by an XML configuration. The
     configuration is neither Z39.50 ZeeRex or SRU ZeeRex. But it
     should be easy to generate both of them from the XML configuration.
-    (unfortunately the two versions
-    of ZeeRex differ substantially in this regard).
+    (Unfortunately the two versions
+    of ZeeRex differ substantially in this regard.)
    </para>
    <sect2 id="tools.retrieval.format">
     <title>Retrieval XML format</title>
@@ -7458,7 +7458,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
        <listitem>
         <para>
          Defines the name of the retrieval format. This can be
-         any string. For SRU, the value, is equivalent to schema (short-hand);
+         any string. For SRU, the value is equivalent to schema (short-hand);
          for Z39.50 it's equivalent to simple element set name.
          For YAZ 3.0.24 and later this name may be specified as a glob
          expression with operators
@@ -7470,7 +7470,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
        <listitem>
         <para>
          Defines the URI schema name of the retrieval format. This can be
-         any string. For SRU, the value, is equivalent to URI schema.
+         any string. For SRU, the value is equivalent to URI schema.
          For Z39.50, there is no equivalent.
         </para>
        </listitem>
@@ -7486,13 +7486,13 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     </para>
     <para>
      The attributes, <literal>name</literal> and <literal>syntax</literal>
-     may be specified for the <literal>backend</literal> element. These
+     may be specified for the <literal>backend</literal> element. The
      semantics of these attributes is equivalent to those for the
      <literal>retrieval</literal>. However, these values are passed to
      the "backend".
     </para>
     <para>
-     The <literal>backend</literal> element may includes one or more
+     The <literal>backend</literal> element may include one or more
      conversion instructions (as children elements). The supported
      conversions are:
      <variablelist>
@@ -7511,7 +7511,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 	     Format of input. Supported values are
 	     <literal>marc</literal> (for ISO2709), <literal>xml</literal>
 	     (MARCXML/MarcXchange) and <literal>json</literal>
-             (<ulink url="&url.marc_in_json;">MARC-in_JSON</ulink>).
+             (<ulink url="&url.marc_in_json;">MARC-in-JSON</ulink>).
             </para>
            </listitem>
           </varlistentry>
@@ -7525,7 +7525,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
              <literal>marc</literal> (ISO2709),
              <literal>marcxhcange</literal> (for MarcXchange),
              or <literal>json</literal>
-             (<ulink url="&url.marc_in_json;">MARC-in_JSON </ulink>).
+             (<ulink url="&url.marc_in_json;">MARC-in-JSON </ulink>).
             </para>
            </listitem>
           </varlistentry>
@@ -7669,7 +7669,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <example id="tools.retrieval.marcxml">
      <title>MARCXML backend</title>
      <para>
-      SRW/SRU and Solr backends returns records in XML.
+      SRW/SRU and Solr backends return records in XML.
       If they return MARCXML or MarcXchange, the retrieval module
       can convert those into ISO2709 formats, most commonly USMARC
       (AKA MARC21).
@@ -7744,17 +7744,17 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <para>
     In SRU/Solr, however, the model is different. Here, sorting is specified
-    during the the search operation. Note, however, that SRU might
+    during the search operation. Note, however, that SRU might
     perform sort as separate search, by referring to an existing result-set
     in the query (result-set reference).
    </para>
    <sect2>
     <title>Using the Z39.50 sort service</title>
     <para>
-     yaz-client and the ZOOM API supports the Z39.50 sort facility. In any
+     yaz-client and the ZOOM API support the Z39.50 sort facility. In any
      case the sort sequence or sort critiera is using a string notation.
      This notation is a one-line notation suitable for being manually
-     entered or generated and allows for easy logging (one liner).
+     entered or generated, and allows for easy logging (one liner).
      For the ZOOM API, the sort is specified in the call to ZOOM_query_sortby
      function. For yaz-client the sort is performed and specified using
      the sort and sort+ commands. For description of the sort criteria notation
@@ -7780,11 +7780,11 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      critieria is specified along with the search query.
     </para>
     <para>
-     The sort is triggered by the presence of type 7 and the value of type 7
+     The sort is triggered by the presence of type 7, and the value of type 7
      specifies the
      <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortKeySpec">
       sortRelation
-     </ulink>
+     </ulink>.
      The value for type 7 is 1 for ascending and 2 for descending.
      For the
      <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortElement">
@@ -7793,7 +7793,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      only the generic part is handled. If generic sortKey is of type
      sortField, then attribute type 1 is present and the value is
      sortField (InternationalString). If generic sortKey is of type
-     sortAttributes, then the attributes in list is used . generic sortKey
+     sortAttributes, then the attributes in the list are used. Generic sortKey
      of type elementSpec is not supported.
     </para>
     <para>
@@ -7806,7 +7806,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
   <sect1 id="facets">
    <title>Facets</title>
    <para>
-    YAZ supports facets for in Solr, SRU 2.0 and Z39.50 protocols.
+    YAZ supports facets in the Solr, SRU 2.0 and Z39.50 protocols.
    </para>
    <para>
     Like Type-1/RPN, YAZ supports a string notation for specifying
@@ -7814,8 +7814,8 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <function>yaz_pqf_parse_facet_list</function>.
    </para>
    <para>
-    For ZOOM C the facets are given by option "facets"
-    For yaz-client it is used for the facets command.
+    For ZOOM C the facets are given by option "facets".
+    For yaz-client it is used for the 'facets' command.
    </para>
    <para>
     The grammar of this specification is as follows:
@@ -7828,7 +7828,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 
     </literallayout>
     The notation is inspired by PQF. The string following '@attr'
-    may not include blanks and is of the form
+    must not include blanks and is of the form
     <replaceable>type</replaceable><literal>=</literal><replaceable>value</replaceable>,
     where <replaceable>type</replaceable> is an integer and
     <replaceable>value</replaceable> is a string or an integer.
@@ -7851,7 +7851,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <row>
        <entry>1</entry>
        <entry>
-	Field-name. This is often a string, eg "Author", "Year", etc.
+	Field-name. This is often a string, e.g. "Author", "Year", etc.
        </entry>
       </row>
       <row>
@@ -7994,7 +7994,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      releasing little bits of memory. Rather than managing the individual,
      small bits of space, the system maintains a free-list of larger chunks
      of memory, which are handed out in small bits. This scheme is
-     generally known as a <emphasis>nibble memory</emphasis> system.
+     generally known as a <emphasis>nibble-memory</emphasis> system.
      It is very useful for maintaining short-lived constructions such
      as protocol PDUs.
     </para>
@@ -8222,7 +8222,7 @@ void do_nothing_useful(Odr_int value)
      The <replaceable>stream_close</replaceable> handler is optional and
      if NULL for the function is provided, it will not be invoked.
      The <replaceable>stream_write</replaceable> takes the ODR handle
-     as parameter, the user defined handle, a type
+     as parameter, the user-defined handle, a type
      <literal>ODR_OCTETSTRING</literal>, <literal>ODR_VISIBLESTRING</literal>
      which indicates the type of contents is being written.
     </para>
@@ -8488,7 +8488,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
      </para>
      <para>
       To make things a little easier, an alternative is given for string
-      types that are not expected to contain embedded NULL characters (eg.
+      types that are not expected to contain embedded NULL characters (e.g.
       VisibleString):
      </para>
      <synopsis>
@@ -8499,7 +8499,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
       null-terminates C strings.
      </para>
      <para>
-      Functions are provided for the derived string types, eg:
+      Functions are provided for the derived string types, e.g.:
      </para>
      <synopsis>
 int odr_visiblestring(ODR o, char **p, int optional,
@@ -8514,7 +8514,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int optional,
      </synopsis>
      <para>
       The opaque type <literal>Odr_bitmask</literal> is only suitable for
-      holding relatively brief bit strings, eg. for options fields, etc.
+      holding relatively brief bit strings, e.g. for options fields, etc.
       The constant <literal>ODR_BITMASK_SIZE</literal> multiplied by 8
       gives the maximum possible number of bits.
      </para>
