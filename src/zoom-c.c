@@ -2004,7 +2004,8 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
                 else
                     ZOOM_connection_exec_task(c);
             }
-            c->state = STATE_ESTABLISHED;
+            if (c->cs && cs_look(c->cs) == CS_DATA)
+                c->state = STATE_ESTABLISHED;
         }
         else
         {
