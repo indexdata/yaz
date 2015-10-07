@@ -35,16 +35,8 @@ static const char *cs_errlist[] =
 
 const char *cs_errmsg(int n)
 {
-    static char buf[250];
-
-    if (n < CSNONE || n > CSLASTERROR) {
-        sprintf(buf, "unknown comstack error %d", n);
-        return buf;
-    }
-    if (n == CSYSERR) {
-        sprintf(buf, "%s: %s", cs_errlist[n], strerror(errno));
-        return buf;
-    }
+    if (n < CSNONE || n > CSLASTERROR)
+        n = CSNONE;
     return cs_errlist[n];
 }
 
