@@ -34,8 +34,8 @@
 
  <refsect1><title>TYPES</title>
   <para>
-   The Bib-1 attribute defines six attribute types: Use (1), Relation (2),
-   Position (3), Structure (4), Truncation (5) and completeness (6).
+   The Bib-1 attribute set defines six attribute types: Use (1), Relation (2),
+   Position (3), Structure (4), Truncation (5) and Completeness (6).
   </para>
  </refsect1>
 
@@ -218,7 +218,7 @@
   </para>
  </refsect1>
 
- <refsect1><title>COMPLETENSS (6)</title>
+ <refsect1><title>COMPLETENESS (6)</title>
   <para>
    <screen>
     1 Incomplete subfield

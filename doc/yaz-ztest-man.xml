@@ -53,7 +53,7 @@
    </screen>
   </para>
   <para>
-   For UNIX local socket the address is the filename of the local socket.
+   For UNIX local socket, the address is the filename of the local socket.
   </para>
  </refsect1>
  <refsect1>
@@ -68,18 +68,18 @@
     integer value of that term is used as hit count. This allows testers
     to return any number of hits. <command>yaz-ztest</command> includes
     24 MARC records for testing. Hit counts exceeding 24 will make
-    <command>yaz-ztest</command> return the same record batch over and over..
-    So record at position 1, 25, 49, etc .. are equivalent.
+    <command>yaz-ztest</command> return the same record batch over and over.
+    So record at position 1, 25, 49, etc. are equivalent.
    </para>
    <para>
-    For XML if no element set is given or element has value "marcxml",
+    For XML, if no element set is given or element has value "marcxml",
     MARCXML is returned (each of the 24 dummy records converted from
-    ISO2709 to XML). For element set OP, OPAC XML is returned.
+    ISO2709 to XML). For element set OP, then OPAC XML is returned.
    </para>
    <para>
     yaz-ztest may also return predefined XML records (for testing).
     This is enabled if <literal>YAZ_ZTEST_XML_FETCH</literal> environment
-    variable is defined. A record is fetched form a file (one record per file).
+    variable is defined. A record is fetched from a file (one record per file).
     The path for the filename is
     <replaceable>F</replaceable><replaceable>E</replaceable><literal>.</literal><replaceable>d</replaceable><literal>.xml</literal>
     where <replaceable>F</replaceable> is the YAZ_ZTEST_XML_FETCH value
@@ -108,7 +108,7 @@
      The value of the delay may either be a fixed floating point
      value which specifies the delay in seconds.
      Alternatively the value may be given as two floating point numbers
-     separated by colon, which wil make <command>yaz-ztest</command> perform
+     separated by colon, which will make <command>yaz-ztest</command> perform
      a random sleep between the first and second number.
    </para>
    <para>

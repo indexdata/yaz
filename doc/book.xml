@@ -7883,7 +7883,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
   <sect1 id="odr.introduction">
    <title>Introduction</title>
    <para>
-    &odr; is the BER-encoding/decoding subsystem of &yaz;. Care as been taken
+    &odr; is the BER-encoding/decoding subsystem of &yaz;. Care has been taken
     to isolate &odr; from the rest of the package - specifically from the
     transport interface. &odr; may be used in any context where basic
     ASN.1/BER representations are used.
@@ -8207,7 +8207,7 @@ void do_nothing_useful(Odr_int value)
       odr_setprint(ODR o, FILE *file);
      </synopsis>
      before encoders or decoders are being invoked.
-     It is also possible to direct the output to a buffer (of indeed
+     It is also possible to direct the output to a buffer (or indeed
      another file), by using the more generic mechanism:
      <synopsis>
       void odr_set_stream(ODR o, void *handle,
@@ -8224,7 +8224,7 @@ void do_nothing_useful(Odr_int value)
      The <replaceable>stream_write</replaceable> takes the ODR handle
      as parameter, the user-defined handle, a type
      <literal>ODR_OCTETSTRING</literal>, <literal>ODR_VISIBLESTRING</literal>
-     which indicates the type of contents is being written.
+     which indicates the type of contents being written.
     </para>
     <para>
      Another utility useful for diagnostics (error handling) or as
@@ -8234,7 +8234,7 @@ void do_nothing_useful(Odr_int value)
      </synopsis>
      which returns a list of current elements that ODR deals with at the
      moment. For the returned array, say <literal>ar</literal>,
-     <literal>ar[0]</literal> is the top level element,
+     then <literal>ar[0]</literal> is the top level element,
      <literal>ar[n]</literal> is the last. The last element has the
      property that <literal>ar[n+1] == NULL</literal>.
     </para>
@@ -8484,7 +8484,7 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
       The <literal>buf</literal> field should point to the character array
       that holds the octetstring. The <literal>len</literal> field holds the
       actual length.
-      The character array need not be null terminated.
+      The character array need not be null-terminated.
      </para>
      <para>
       To make things a little easier, an alternative is given for string
@@ -8495,8 +8495,8 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
       int odr_cstring(ODR o, char **p, int optional, const char *name);
      </synopsis>
      <para>
-      Which encoded or decodes between OCTETSTRING representations and
-      null-terminates C strings.
+      which encodes or decodes between OCTETSTRING representations and
+      null-terminated C strings.
      </para>
      <para>
       Functions are provided for the derived string types, e.g.:
@@ -8626,7 +8626,7 @@ int odr_sequence_end(ODR o);
      parameter is ignored. On decoding, it returns 1 if the type is found in
      the data stream. <literal>size</literal> bytes of memory are allocated,
      and <literal>*p</literal> is set to point to this space.
-     <function>odr_sequence_end()</function> is called at the end of the
+     The <function>odr_sequence_end()</function> is called at the end of the
      complex function. Assume that a type is defined like this:
     </para>
     <screen>
@@ -8752,7 +8752,7 @@ int odr_constructed_end(ODR o);
      </synopsis>
      <para>
       Assume that the IMPLICIT in the type definition above were replaced
-      with EXPLICIT (or that the IMPLICIT keyword were simply deleted, which
+      with EXPLICIT (or that the IMPLICIT keyword was simply deleted, which
       would be equivalent). The structure definition would look the same,
       but the function would look like this:
      </para>
@@ -8779,7 +8779,7 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
       Notice that the interface here gets kind of nasty. The reason is
       simple: Explicitly tagged, constructed types are fairly rare in
       the protocols that we care about, so the
-      esthetic annoyance (not to mention the dangers of a cluttered
+      aesthetic annoyance (not to mention the dangers of a cluttered
       interface) is less than the time that would be required to develop a
       better interface. Nevertheless, it is far from satisfying, and it's a
       point that will be worked on in the future. One option for you would
@@ -8976,7 +8976,7 @@ int myChoice(ODR o, MyChoice **p, int optional, const char *name)
      declaring sequence elements (including CHOICEs) optional.
     </para>
     <para>
-     The ASN.1 specifications naturally requires that each member of a
+     The ASN.1 specifications naturally require that each member of a
      CHOICE have a distinct tag, so they can be told apart on decoding.
      Sometimes it can be useful to define a CHOICE that has multiple types
      that share the same tag. You'll need some other mechanism, perhaps
@@ -8993,7 +8993,7 @@ void odr_choice_bias(ODR o, int what);
     <para>
      provides this functionality. When called, it leaves a notice for the next
      call to <function>odr_choice()</function> to be called on the decoding
-     stream <literal>o</literal> that only the <literal>arm</literal> entry with
+     stream <literal>o</literal>, that only the <literal>arm</literal> entry with
      a <literal>which</literal> field equal to <literal>what</literal>
      should be tried.
     </para>
@@ -9163,8 +9163,8 @@ void odr_choice_bias(ODR o, int what);
     <para>
      The <function>cs_create</function> function returns a null-pointer
      if a system error occurs.
-     The <literal>blocking</literal> parameter should be one if
-     you wish the association to operate in blocking mode, zero otherwise.
+     The <literal>blocking</literal> parameter should be '1' if
+     you wish the association to operate in blocking mode, and '0' otherwise.
      The <literal>protocol</literal> field should be
      <literal>PROTO_Z3950</literal> or <literal>PROTO_HTTP</literal>.
      Protocol <literal>PROTO_SR</literal> is no longer supported.
@@ -9201,7 +9201,7 @@ void odr_choice_bias(ODR o, int what);
      should call it repeatedly with the same values of <literal>buf</literal>
      and <literal>len</literal>, until the buffer has been transmitted.
      When a full buffer has been sent, the function will return 0 for
-     success. -1 indicates an error condition (see below).
+     success. The return value -1 indicates an error condition (see below).
     </para>
     <synopsis>
      int cs_get(COMSTACK handle, char **buf, int *size);
@@ -9217,12 +9217,12 @@ void odr_choice_bias(ODR o, int what);
      around internally by the subsystem when partial packages are read. Before
      calling
      <function>cs_get</function>
-     for the fist time, the buffer can be initialized to the null pointer,
-     and the length should also be set to 0 - cs_get will perform a
+     for the first time, the buffer can be initialized to the null pointer,
+     and the length should also be set to 0 (cs_get will perform a
      <function>malloc(2)</function>
-     on the buffer for you. When a full buffer has been read, the size of
-     the package is returned (which will always be greater than 1). -1
-     indicates an error condition.
+     on the buffer for you). When a full buffer has been read, the size of
+     the package is returned (which will always be greater than 1).
+     The return value -1 indicates an error condition.
     </para>
     <para>
      See also the <function>cs_more()</function> function below.
@@ -9325,7 +9325,7 @@ void odr_choice_bias(ODR o, int what);
      int cs_fileno(COMSTACK h);
     </synopsis>
     <para>
-     Returns the file descriptor of the association. Use this when
+     returns the file descriptor of the association. Use this when
      file-level operations on the endpoint are required
      (<function>select(2)</function> operations, specifically).
     </para>
@@ -9411,7 +9411,7 @@ void odr_choice_bias(ODR o, int what);
    <note>
     <para>
      You may need to use this function with some care if your
-     name server service is slow or unreliable
+     name server service is slow or unreliable.
     </para>
    </note>
   </sect1>
@@ -9471,8 +9471,8 @@ void odr_choice_bias(ODR o, int what);
     <function>cs_straddr</function>. The <parameter>str</parameter>
     is similar to that described for <function>cs_straddr</function>
     but with a prefix denoting the &comstack; type. Prefixes supported
-    are <literal>tcp:</literal>, <literal>unix:</literal> and
-    <literal>ssl:</literal> for TCP/IP, UNIX and SSL respectively.
+    are <literal>tcp:</literal> and <literal>unix:</literal> and
+    <literal>ssl:</literal> for TCP/IP and UNIX and SSL respectively.
     If no prefix is given, then TCP/IP is used.
     The <parameter>blocking</parameter> is passed to
     function <function>cs_create</function>. The third parameter
@@ -9489,7 +9489,7 @@ void odr_choice_bias(ODR o, int what);
      void *cs_get_ssl(COMSTACK cs);
     </synopsis>
     Returns the SSL handle, <literal>SSL *</literal> for comstack. If comstack
-    is not of type SSL, NULL is returned.
+    is not of type SSL, then NULL is returned.
    </para>
    <para>
     <synopsis>
@@ -9539,15 +9539,15 @@ void odr_choice_bias(ODR o, int what);
    </synopsis>
    <para>
     You can the textual representation of the error code
-    by using <function>cs_errmsg</function> - which
-    works like <function>strerror(3)</function>
+    by using <function>cs_errmsg</function>, which
+    works like <function>strerror(3)</function>.
    </para>
    <synopsis>
     const char *cs_errmsg(int n);
    </synopsis>
    <para>
-    It is also possible to get straight to the textual represenataion
-    without the error code by using
+    It is also possible to get straight to the textual representation
+    without the error code, by using
     <function>cs_strerror</function>.
    </para>
    <synopsis>

@@ -168,14 +168,14 @@
   </para>
   <para>
    <literal>request</literal> logs a one-liner for each request (init, search,
-   etc).
+   etc.).
   </para>
   <para>
    <literal>requestdetail</literal> logs the details of every request, before
    it is passed to the back-end, and the results received from it.
   </para>
   <para>
-   Each server program (zebra, etc) is supposed to define its own log levels
+   Each server program (zebra, etc.) is supposed to define its own log levels
    in addition to these. As they depend on the server in question, they can
    not be described here. See above how to find out about them.
   </para>
@@ -237,10 +237,10 @@
 
  <refsect1><title>LOG FILENAME EXAMPLES</title>
   <para>
-   A file with format my_YYYYMMDD.log is where Y, M, D is year, month, and day
-   digits is given as follows
+   A file with format my_YYYYMMDD.log (where Y, M, D is year, month, and day
+   digits) is given as follows:
    <literal>-l my_%Y%m%d.log</literal> . And since the filename
-   is depending on day, rotaion will occur on midnight.
+   is depending on day, rotation will occur on midnight.
   </para>
   <para>
    A weekly log could be specified as

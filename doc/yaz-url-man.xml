@@ -47,7 +47,7 @@
    limited in functionality compared to programs such as curl, wget.
   </para>
   <para>
-   The options must be precede the URL given on the command line to take
+   The options must precede the URL given on the command line, to take
    effect.
   </para>
   <para>
@@ -101,7 +101,7 @@
     <listitem><para>
       Specifies a user and a password to be uesd in HTTP
       basic authentication in the following URL fetch. The user
-      and password must be separated by a slash (this it is not
+      and password must be separated by a slash (thus it is not
       possible to specify a user with a slash in it).
      </para></listitem>
    </varlistentry>

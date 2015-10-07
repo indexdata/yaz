@@ -90,7 +90,7 @@
      <term>-a <replaceable>filename</replaceable></term>
      <listitem><para>
        If specified, logging of protocol packages will be appended
-       file given. If <replaceable>filename</replaceable> is
+       to the file given. If <replaceable>filename</replaceable> is
        specified as <literal>-</literal>, the output is written
        to <literal>stdout</literal>.
       </para></listitem>
@@ -150,7 +150,7 @@
        given. YAZ client will
        connect to a proxy on the address and port given.
        The actual target will be specified as part of the InitRequest
-       to inform the proxy about actual target.
+       to inform the proxy about the actual target.
       </para></listitem>
     </varlistentry>
     <varlistentry>
@@ -256,7 +256,7 @@
     </term>
     <listitem>
      <para>Sets the name(s) of the database(s) to search. One or more
-      databases may be specified separated by blanks. This commands overrides
+      databases may be specified, separated by blanks. This command overrides
       the database given in <replaceable>zurl</replaceable>.
      </para>
     </listitem>
@@ -269,9 +269,9 @@
      <para>Fetches records by sending a Present Request from the start
       position given by
       <replaceable>start</replaceable>
-      a number of records given by <replaceable>number</replaceable>. If
+      and a number of records given by <replaceable>number</replaceable>. If
       <replaceable>start</replaceable> is not given, then the client
-      will fetch from position of the last retrieved record plus 1. If
+      will fetch from the position of the last retrieved record plus 1. If
       <replaceable>number</replaceable> is not given, then one record will
       be fetched at a time.
      </para>
@@ -313,7 +313,7 @@
     <listitem>
      <simpara>
       Sets preferred position for scan. This value
-      is used in next scan. By default position is 1.
+      is used in the next scan. By default, position is 1.
      </simpara>
     </listitem>
    </varlistentry>
@@ -332,7 +332,7 @@
     </term>
     <listitem>
      <simpara>
-      Set step-size for scan. This value is used in next scan
+      Set step-size for scan. This value is used in the next scan
       sent to the target. By default step-size is 0.
      </simpara>
     </listitem>
@@ -376,7 +376,7 @@
      <literal>authentication</literal> <replaceable>openauth</replaceable>
     </term>
     <listitem>
-     <para>Sets up a authentication string if a server requires
+     <para>Sets up an authentication string if a server requires
       authentication (v2 OpenStyle). The authentication string is first
       sent to the server when the
       <link linkend="command-open"><literal>open</literal></link> command is
@@ -449,7 +449,7 @@
      <literal>mspn</literal> <replaceable>n</replaceable>
     </term>
     <listitem>
-     <para>Sets the number of records should be returned if the
+     <para>Sets the number of records that should be returned if the
       number of records in the result set is between the values of
       <literal>lslb</literal> and <literal>ssub</literal>.
       See the
@@ -507,7 +507,7 @@
     </term>
     <listitem>
      <para>Sets the element set name for the records. Many targets support
-      element sets are B (for brief) and F (for full).
+      element sets B (for brief) and F (for full).
      </para>
     </listitem>
    </varlistentry>
@@ -531,7 +531,7 @@
       <literal>ccl</literal> for CCL search (Type-2 Query),
       <literal>cql</literal> for CQL (Type-104 search with CQL OID),
       <literal>ccl2rpn</literal> for
-      <link linkend="CCL">CCL</link> to RPN conversion (Type-1 Query).
+      <link linkend="CCL">CCL</link> to RPN conversion (Type-1 Query),
       <literal>cql2rpn</literal> for
       CQL to RPN conversion (Type-1 Query).
      </para>
@@ -582,7 +582,7 @@
       the record document for the request. If doc is preceded with
       "&lt;", then the following characters are treated as a filename
       with the records to be updated. Otherwise doc is treated as
-      a document itself. The doc may also be quited in double quotes.
+      a document itself. The doc may also be quoted in double quotes.
       If doc is omitted, the last received record (as part of present
       response or piggybacked search response) is used for the update.
      </para>
@@ -595,7 +595,7 @@
     </term>
     <listitem>
      <para>Executes list of commands from
-      file <replaceable>filename</replaceable>, just like source on
+      file <replaceable>filename</replaceable>, just like 'source' on
       most UNIX shells. A single dot (<literal>.</literal>) can be used
       as an alternative.
      </para>
@@ -644,7 +644,7 @@
      <replaceable>flag</replaceable>
     </term>
     <listitem>
-     <para>Specifies whether YAZ client automatically reconnect if
+     <para>Specifies whether YAZ client automatically reconnects if the
       target closes connection (Z39.50 only).
      </para>
      <para>
@@ -661,7 +661,7 @@
     <listitem>
      <para>Specifies whether YAZ client should wait for
       response protocol packages after a request.
-      By default YAZ client waits (on) for response packages immediately
+      By default YAZ client waits (<literal>on</literal>) for response packages immediately
       after a command (find, show) has been issued. If <literal>off</literal>
       is used, YAZ client does not attempt to receive packages automatically.
       These will have to be manually received when command
@@ -727,9 +727,9 @@
       terminal as returned by <function>nl_langinfo</function> call.
      </para>
      <para>
-      If <replaceable>marcharset</replaceable> is given, it specifies name
+      If <replaceable>marccharset</replaceable> is given, it specifies name
       of the character set of retrieved MARC records from server. See
-      also <literal>marcharset</literal> command.
+      also <literal>marccharset</literal> command.
      </para>
      <note>
       <para>
@@ -840,7 +840,7 @@
       The <replaceable>name</replaceable> is your
       name for the OID, <replaceable>class</replaceable> is the
       class, and <replaceable>OID</replaceable> is the raw OID in
-      dot notation. Class is one <literal>appctx</literal>,
+      dot notation. Class is one of: <literal>appctx</literal>,
       <literal>absyn</literal>, <literal>attet</literal>,
       <literal>transyn</literal>, <literal>diagset</literal>,
       <literal>recsyn</literal>, <literal>resform</literal>,
@@ -966,9 +966,9 @@
    <screen>
     f "donald knuth"
    </screen>
-   In those queries no attributes was specified.
+   In those queries, no attributes were specified.
    This leaves it up to the server what fields to search but
-   most servers will search in all fields. Some servers does not
+   most servers will search in all fields. Some servers do not
    support this feature though, and require that some attributes
    are defined. To add one attribute you could do:
    <screen>

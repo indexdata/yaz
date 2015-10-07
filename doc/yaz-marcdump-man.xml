@@ -110,7 +110,7 @@
    <varlistentry>
     <term>-f <replaceable>from</replaceable></term>
     <listitem><para>
-      Specify the character set <replaceable>from</replaceable>
+      Specify the character set
       of the input MARC record.
       Should be used in conjunction with option <literal>-t</literal>.
       Refer to the yaz-iconv man page for supported character sets.
@@ -120,7 +120,7 @@
    <varlistentry>
     <term>-t <replaceable>to</replaceable></term>
     <listitem><para>
-      Specify the character set <replaceable>of</replaceable>
+      Specify the character set
       of the output.
       Should be used in conjunction with option <literal>-f</literal>.
       Refer to the yaz-iconv man page for supported character sets.
@@ -144,7 +144,7 @@
     <listitem><para>
       Writes a chunk of records to a separate file with prefix given,
       i.e. splits a record batch into files with only at most
-      "chunk" ISO2709 record per file. By default chunk is 1 (one record
+      "chunk" ISO2709 records per file. By default chunk is 1 (one record
       per file). See option <literal>-C</literal>.
      </para></listitem>
    </varlistentry>
@@ -160,7 +160,7 @@
    <varlistentry>
     <term>-p</term>
     <listitem><para>
-      Makes yaz-marcdump prints record number and input file offset
+      Makes yaz-marcdump print record number and input file offset
       of each record read.
      </para></listitem>
    </varlistentry>
@@ -168,7 +168,7 @@
    <varlistentry>
     <term>-n</term>
     <listitem><para>
-      MARC output is omitted so that MARC input is only checkecd.
+      MARC output is omitted so that MARC input is only checked.
      </para></listitem>
    </varlistentry>
 

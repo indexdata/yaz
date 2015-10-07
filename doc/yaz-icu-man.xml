@@ -39,13 +39,13 @@
 
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-icu</command> is utility which demonstrates
+   <command>yaz-icu</command> is a utility which demonstrates
    the ICU chain module of yaz. (<filename>yaz/icu.h</filename>).
   </para>
   <para>
     The utility can be used in two ways. It may read some text
     using an XML configuration for configuring ICU and show text analysis.
-    This mode is triggered by option <literal>-c</literal> which specififies
+    This mode is triggered by option <literal>-c</literal> which specifies
     the configuration to be used. The input file is read from standard
     input or from a file if <literal>infile</literal> is specified.
   </para>
@@ -71,10 +71,10 @@
       Specifies extra information to be printed about the ICU system.
       If <replaceable>type</replaceable> is <literal>c</literal>
       then ICU converters are printed.
-      If <replaceable>type</replaceable> is <literal>l</literal>
-      available locales are printed.
-      If <replaceable>type</replaceable> is <literal>t</literal>
-      available transliterators are printed.
+      If <replaceable>type</replaceable> is <literal>l</literal>,
+      then available locales are printed.
+      If <replaceable>type</replaceable> is <literal>t</literal>,
+      then available transliterators are printed.
      </para></listitem>
    </varlistentry>
 
@@ -98,7 +98,7 @@
  </refsect1>
  <refsect1><title>ICU chain configuration</title>
   <para>
-   The ICU chain configuration speicifies one or more rules to convert
+   The ICU chain configuration specifies one or more rules to convert
    text data into tokens. The configuration format is XML based.
   </para>
   <para>
@@ -121,13 +121,13 @@
     <varlistentry>
      <term>casemap</term>
      <listitem><para>
-       Converts case and rule specifies how:
+       Converts case (and rule specifies how):
 
        <variablelist>
 	<varlistentry>
 	 <term>l</term>
 	 <listitem>
-	  <para>Lowercase using ICU function u_strToLower. </para>
+	  <para>Lower case using ICU function u_strToLower. </para>
 	 </listitem>
 	</varlistentry>
 
@@ -141,7 +141,7 @@
 	<varlistentry>
 	 <term>t</term>
 	 <listitem>
-	  <para>To title using UCU function u_strToTitle.</para>
+	  <para>To title using ICU function u_strToTitle.</para>
 	 </listitem>
 	</varlistentry>
 

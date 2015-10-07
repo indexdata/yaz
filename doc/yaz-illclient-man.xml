@@ -42,7 +42,7 @@
 
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-illclient</command> is an client which sends an ISO
+   <command>yaz-illclient</command> is a client which sends an ISO
    ILL request to a remote server and decodes the response from it.
    Exactly one server address ( <replaceable>server-addr</replaceable> )
    must be specified.
@@ -62,7 +62,7 @@
    <varlistentry>
     <term>-v <replaceable>loglevel</replaceable>]</term>
     <listitem><para>
-      Specify the log level
+      Specify the log level.
      </para></listitem>
    </varlistentry>
 

@@ -38,12 +38,12 @@
 
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-iconv</command> converts data in file in character
+   <command>yaz-iconv</command> converts data in the character
    set specified by <replaceable>from</replaceable> to output in
-   character set as specified by <replaceable>to</replaceable>.
+   the character set as specified by <replaceable>to</replaceable>.
   </para>
   <para>
-   This <command>yaz-iconv</command> utility similar to the
+   This <command>yaz-iconv</command> utility is similar to the
    <command>iconv</command> found on many POSIX systems (Glibc, Solaris, etc).
   </para>
   <para>
@@ -88,11 +88,11 @@
    The yaz-iconv command and the API as defined in
    <filename>yaz/yaz-iconv.h</filename> is a wrapper for the
    library system call iconv. But YAZ' iconv utility also implements
-   conversions on its own. The table below lists characters sets (or encodings).
+   conversions on its own. The table below lists characters sets (or encodings)
    that are supported by YAZ. Each character set is marked with either
    <emphasis>encode</emphasis> or <emphasis>decode</emphasis>. If
-   an encoding is encode-enabled YAZ may convert <emphasis>to</emphasis>
-   to the designated encoding. If an encoding is decode-enabled, YAZ
+   an encoding is encode-enabled, YAZ may convert <emphasis>to</emphasis>
+   the designated encoding. If an encoding is decode-enabled, YAZ
    may convert <emphasis>from</emphasis> the designated encoding.
   </para>
   <variablelist>
@@ -109,7 +109,7 @@
     <term>marc8s (encode, decode)</term>
     <listitem>
      <para>
-      Like MARC8 but with conversion prefers non-combined characters
+      Like MARC8 but conversion prefers non-combined characters
       in the Latin-1 plane over combined characters.
      </para>
     </listitem>

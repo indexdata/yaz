@@ -52,7 +52,7 @@
    which is a library that encodes/decodes/prints BER packages.
    <command>yaz-asncomp</command> allows you to specify name of
    resulting source via options. Alternatively, you can specify
-   a DEFINISIONS file, which provides customized output to
+   a DEFINITIONS file, which provides customized output to
    many output files - if the ASN.1 specification file consists
    of many modules.
   </para>
@@ -135,7 +135,7 @@
    The definitions file is really a Tcl script but follows
    traditional rules for Shell like configuration files.
    That is # denotes the beginning of a comment. Definitions
-   are line oriented. The definitions files usually consists of
+   are line oriented. The definitions files usually consist of
    a series of variable assignments of the form:
   </para>
   <para>
@@ -221,7 +221,7 @@
        Maps member <replaceable>member</replaceable> in CHOICE of
        <replaceable>name</replaceable> in module
        <replaceable>module</replaceable> to value.
-       Value consists of to or three tokens. The first token
+       Value consists of two or three tokens. The first token
        is name of the integer in the <literal>union</literal> that
        is used as selector for the <literal>union</literal> itself.
        The second token is name of the <literal>union</literal>.

@@ -35,14 +35,14 @@
 
  <refsect1><title>DESCRIPTION</title>
   <para>
-   <command>yaz-json-parse</command> is utility which demonstrates
+   <command>yaz-json-parse</command> is a utility which demonstrates
    the JSON API of YAZ. (<filename>yaz/json.h</filename>).
   </para>
   <para>
    The program attempts to parse a JSON from standard input (stdin).
    It will return exit code 1 if parsing fails and the parsing error message
    will be printed to standard error (stderr). The program returns exit code
-   0 parsing succeeds and return no output, unless -p is given (see below).
+   0 if parsing succeeds, and returns no output unless -p is given (see below).
   </para>
  </refsect1>
 
@@ -51,9 +51,9 @@
    <varlistentry>
     <term>-p</term>
     <listitem><para>
-      Makes the JSON parser echo the JSON result string to standard output -
-      if parsing from stdin was successful. If -p is given twice the
-      output is a multi line output with indentation (pretty print).
+      Makes the JSON parser echo the JSON result string to standard output,
+      if parsing from stdin was successful. If -p is given twice, then the
+      output is a multi-line output with indentation (pretty print).
      </para></listitem>
    </varlistentry>
 
