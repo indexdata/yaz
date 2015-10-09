@@ -339,9 +339,11 @@ const char *cql_lookup_reverse(cql_transform_t ct,
                 for (j = 0; j < attributes->num_attributes; j++)
                 {
                     /* actual attribute */
-                    Z_AttributeElement *a_ae = attributes->attributes[j];
-                    int r = compare_attr(e_ae, a_ae);
-                    if (r == 0)
+                    Z_AttributeElement a_ae = *attributes->attributes[j];
+                    if (a_ae.attributeSet && &e_ae->attributeSet &&
+                        !oid_oidcmp(a_ae.attributeSet, yaz_oid_attset_bib_1))
+                        a_ae.attributeSet = 0;
+                    if (!compare_attr(e_ae, &a_ae))
                         break;
                 }
                 if (j == attributes->num_attributes)
