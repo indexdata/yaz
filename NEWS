@@ -1,3 +1,16 @@
+--- 5.14.11 2015/10/09
+
+Fix RPN to CQL rejects local Bib-1 attribute set YAZ-861
+
+ZOOM C: tweak when connection failed is returned
+For cases with multiple socket addresses for some hostname, eg
+localhost IPV4+IPV6, the code now properly returns "connection
+failed" rather than "connection lost".
+
+Various minor documenation tweaks from David Crossley. Thanks.
+
+Fix windows uninstall does not remove start menu shortcuts YAZ-860
+
 --- 5.14.10 2015/09/16
 
 Prevent huge expansions in CCL s=sl YAZ-859
