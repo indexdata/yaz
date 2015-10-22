@@ -158,6 +158,7 @@ void yaz_check_term1(void)
     }
     if (test_fout)
         fclose(test_fout);
+    yaz_deinit_globals();
     if (test_failed)
         exit(1);
     exit(0);

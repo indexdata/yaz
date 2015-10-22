@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
 #endif
@@ -23,6 +25,14 @@
 
 #if HAVE_GCRYPT_H
 #include <gcrypt.h>
+#endif
+
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
+
+#if YAZ_HAVE_XSLT
+#include <libxslt/xslt.h>
 #endif
 
 #if YAZ_HAVE_EXSLT
@@ -64,10 +74,41 @@ void yaz_init_globals(void)
             gcry_control(GCRYCTL_INITIALIZATION_FINISHED, NULL, 0);
         }
 #endif
+#if YAZ_HAVE_XML2
+        xmlInitParser();
+#endif
+#if YAZ_HAVE_XSLT
+        xsltInit();
+#endif
 #if YAZ_HAVE_EXSLT
         exsltRegisterAll();
 #endif
         yaz_init_flag = 1; /* must be last, before unlocking */
+    }
+#if YAZ_POSIX_THREADS
+    pthread_mutex_unlock(&yaz_init_mutex);
+#endif
+}
+
+void yaz_deinit_globals(void)
+{
+    if (!yaz_init_flag)
+        return;
+#if YAZ_POSIX_THREADS
+    pthread_mutex_lock(&yaz_init_mutex);
+#endif
+    if (yaz_init_flag)
+    {
+#if HAVE_GNUTLS_H
+        gnutls_global_deinit();
+#endif
+#if YAZ_HAVE_XSLT
+        xsltCleanupGlobals();
+#endif
+#if YAZ_HAVE_XML2
+        xmlCleanupParser();
+#endif
+        yaz_init_flag = 0;
     }
 #if YAZ_POSIX_THREADS
     pthread_mutex_unlock(&yaz_init_mutex);

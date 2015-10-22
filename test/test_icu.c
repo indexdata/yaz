@@ -984,10 +984,6 @@ int main(int argc, char **argv)
     check_norm();
 
     u_cleanup();
-#if YAZ_HAVE_XML2
-    xmlCleanupParser();
-#endif
-
 #else /* YAZ_HAVE_ICU */
 
     yaz_log(YLOG_LOG, "ICU unit tests omitted");

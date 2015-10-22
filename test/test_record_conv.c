@@ -626,10 +626,6 @@ int main(int argc, char **argv)
     tst_convert2();
     tst_convert3();
     tst_convert4();
-    xsltCleanupGlobals();
-#endif
-#if YAZ_HAVE_XML2
-    xmlCleanupParser();
 #endif
     YAZ_CHECK_TERM;
 }
