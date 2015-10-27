@@ -18,7 +18,7 @@ ICONV_DIR = c:\iconv-1.9.2.win32
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=54
+ICU_VER=56
 ICU_LIB = c:\icu\lib
 ICU_BIN = c:\icu\bin
 ICU_INCLUDE = c:\icu\include
@@ -43,8 +43,6 @@ default: all
 all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
  testprog iconv icu libxml2 libxslt yaz_url
 
-allj: all yaz4j
-
 NSIS="c:\program files (x86)\nsis\makensis.exe"
 HHC="c:\program files (x86)\html help workshop\hhc.exe"
 
@@ -54,15 +52,15 @@ YAZPATH="$(MAKEDIR)\.."
 
 
 dist: yaz.nsi version.nsi distclean
-	nmake DEBUG=0 allj
+	nmake DEBUG=0 all yaz4j
 	nmake nsis
 
 dist64: yaz.nsi version.nsi distclean
-	nmake make64
+	nmake make64 yaz4j
 	nmake nsis64
 
 make64:
-	nmake DEBUG=0 HAVE_LIBXSLT=1 HAVE_LIBXML2=1 HAVE_ICONV=0 HAVE_ICU=1 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu\lib64 ICU_INCLUDE=\icu\include ICU_BIN=\icu\bin64 allj
+	nmake DEBUG=0 HAVE_ICONV=0 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu\lib64 ICU_BIN=\icu\bin64 all
 
 
 distclean:
