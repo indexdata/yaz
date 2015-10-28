@@ -17,8 +17,8 @@
 !define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\6E8D947A316B3EB3F8F540C548BE2AB9"
 !endif
 !if "${VSVER}" = "14"
-; Microsoft Visual C++ 2015 x86 Minimum Runtime - 14.0.23026
-!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\55E3652ACEB38283D8765E8E9B8E6B57"
+; Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026
+!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\51E9E3D0A7EDB003691F4BFA219B4688"
 !endif
 
 InstallDir "$PROGRAMFILES64\YAZ"
@@ -28,8 +28,8 @@ InstallDir "$PROGRAMFILES64\YAZ"
 !define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\21EE4A31AE32173319EEFE3BD6FDFFE3"
 !endif
 !if "${VSVER}" = "14"
-; Microsoft Visual C++ 2015 x64 Minimum Runtime - 14.0.23026
-!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\51E9E3D0A7EDB003691F4BFA219B4688"
+; Microsoft Visual C++ 2015 x86 Minimum Runtime - 14.0.23026
+!define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\55E3652ACEB38283D8765E8E9B8E6B57"
 !endif
 
 !if "${VSVER}" = "14"
