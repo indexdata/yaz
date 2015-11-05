@@ -51,10 +51,14 @@ void cs_get_host_args(const char *type_and_host, const char **args)
     if (!strncmp(type_and_host, "unix:", 5))
     {
         const char *cp = strchr(type_and_host + 5, ':');
-        if (cp)
-            type_and_host = cp + 1;
-        else
-            type_and_host += strlen(type_and_host); /* empty string */
+        if (!cp)
+            return;
+        type_and_host = cp + 1;
+        if (!strchr(type_and_host, ':'))
+        {
+            *args = type_and_host;  /* unix:path:args */
+            return;
+        }
     }
     if (*type_and_host)
     {
@@ -65,7 +69,7 @@ void cs_get_host_args(const char *type_and_host, const char **args)
                 cp = strchr(cp + 2, '/');
         }
         if (cp)
-            *args = cp+1;
+            *args = cp + 1;
     }
 }
 
