@@ -50,16 +50,15 @@ See the file LICENSE.
 
 #define YYSTYPE token
     
-#define YYPARSE_PARAM parm
-#define YYLEX_PARAM parm
-    
-    int yylex(YYSTYPE *lval, void *vp);
-    int yyerror(char *s);
+int yylex(YYSTYPE *lval, void *vp);
+int yyerror(char *lval, char *msg);
 %}
 
-%pure_parser
-%token TERM AND OR NOT PROX GE LE NE
 %expect 9
+%lex-param {void *parm}
+%parse-param {void *parm}
+%pure-parser
+%token TERM AND OR NOT PROX GE LE NE
 
 %%
 
@@ -192,7 +191,7 @@ searchTerm:
 
 %%
 
-int yyerror(char *s)
+int yyerror(char *locp, char *s)
 {
     return 0;
 }
