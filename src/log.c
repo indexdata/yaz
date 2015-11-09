@@ -154,6 +154,15 @@ void yaz_log_close(void)
     }
 }
 
+void yaz_log_deinit_globals(void)
+{
+    if (log_mutex)
+    {
+        yaz_mutex_destroy(&log_mutex);
+        yaz_log_close();
+    }
+}
+
 void yaz_log_init_file(const char *fname)
 {
     yaz_init_globals();

@@ -45,6 +45,7 @@ static pthread_mutex_t yaz_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 extern void yaz_log_init_globals(void);
+extern void yaz_log_deinit_globals(void);
 
 #if HAVE_GCRYPT_H
 GCRY_THREAD_OPTION_PTHREAD_IMPL;
@@ -99,7 +100,7 @@ void yaz_deinit_globals(void)
 #endif
     if (yaz_init_flag)
     {
-        yaz_log_init_file(0);
+        yaz_log_deinit_globals();
 #if HAVE_GNUTLS_H
         gnutls_global_deinit();
 #endif
