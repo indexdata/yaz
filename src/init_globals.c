@@ -12,7 +12,7 @@
 #include <config.h>
 #endif
 
-#include <yaz/yconfig.h>
+#include <yaz/log.h>
 
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
@@ -99,6 +99,7 @@ void yaz_deinit_globals(void)
 #endif
     if (yaz_init_flag)
     {
+        yaz_log_init_file(0);
 #if HAVE_GNUTLS_H
         gnutls_global_deinit();
 #endif
