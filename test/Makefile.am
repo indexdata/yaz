@@ -57,7 +57,7 @@ dist-hook:
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
 	cd $(srcdir); $(YAZCOMP) tstodr.asn
 
-LDADD = ../src/libyaz.la 
+LDADD = ../src/libyaz.la
 test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 test_libstemmer_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 

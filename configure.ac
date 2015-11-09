@@ -61,11 +61,40 @@ if test "$checkBoth" = "1"; then
     AC_CHECK_FUNC([accept], , [LIBS=$oldLibs])
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
+dnl
+dnl ------ nettle
+nettle=default
+AC_SUBST([NETTLE_LIBS])
+AC_ARG_WITH([nettle], [  --with-nettle           Nettle library], [nettle=$withval])
+if test "$nettle" != "no"; then
+    AC_MSG_CHECKING([for nettle])
+    if $pkgconfigpath --cflags nettle >/dev/null 2>&1 ; then
+	if $pkgconfigpath --atleast-version 2.0 nettle; then
+	    AC_MSG_RESULT([yes])
+            CFLAGS="$CFLAGS `$pkgconfigpath --cflags nettle`"
+            NETTLE_LIBS="`$pkgconfigpath --libs nettle`"
+	    libgcryptversion=2enable
+	    AC_DEFINE([HAVE_NETTLE],[1],[Define to 1 if nettle is enabled])
+        else
+	    AC_MSG_RESULT([no. Version 2.0 required])
+            if test "$nettle" != "default"; then
+	        AC_MSG_ERROR([nettle libraries missing])
+            fi
+        fi
+    else
+	AC_MSG_RESULT([no])
+        if test "$nettle" != "default"; then
+	    AC_MSG_ERROR([nettle libraries missing])
+	fi
+    fi
+fi
+dnl
+dnl
 dnl ------ libgcrypt
 AC_SUBST([GCRYPT_LIBS])
 libgcryptpath=NONE
 AC_ARG_WITH(libgcrypt, [  --with-libgcrypt=DIR    use libgcrypt-config in DIR],[libgcryptpath=$withval])
-if test "$libgcryptpath" != "no"; then
+if test "$libgcryptpath" != "no" -a -z "$libgcryptversion"; then
     if test "$libgcryptpath" = "NONE"; then
 	AC_PATH_PROG([libgcrypt],[libgcrypt-config],[NONE])
     elif test -x $libgcryptpath/libgcrypt-config; then
@@ -150,6 +179,9 @@ if test "$memcached" != "no" -a -n "$libgcryptversion" -a "$pkgconfigpath" != "N
 	fi
     fi
 fi
+dnl
+dnl
+dnl
 dnl ------ GNU TLS
 AC_SUBST([SSL_CFLAGS])
 AC_SUBST([SSL_LIBS])

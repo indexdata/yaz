@@ -185,7 +185,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     return 0;
 }
 
-#if HAVE_GCRYPT_H
+#if HAVE_GCRYPT_H || HAVE_NETTLE
 static void wrbuf_vary_puts(WRBUF w, const char *v)
 {
     if (v)
@@ -204,7 +204,7 @@ static void wrbuf_vary_puts(WRBUF w, const char *v)
 
 void ZOOM_memcached_resultset(ZOOM_resultset r, ZOOM_query q)
 {
-#if HAVE_GCRYPT_H
+#if HAVE_GCRYPT_H || HAVE_NETTLE
     ZOOM_connection c = r->connection;
 
     r->mc_key = wrbuf_alloc();

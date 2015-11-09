@@ -17,7 +17,7 @@
 static int sha1_test(WRBUF wr, const char *msg, const char *expect)
 {
     wrbuf_rewind(wr);
-#if HAVE_GCRYPT_H
+#if HAVE_GCRYPT_H || HAVE_NETTLE
     wrbuf_sha1_write(wr, msg, strlen(msg), 1);
     if (!strcmp(wrbuf_cstr(wr), expect))
         return 1;
@@ -36,7 +36,7 @@ static void *my_handler(void *arg)
     {
         char buf[100];
         sprintf(buf, "Hello world %d", i);
-#if HAVE_GCRYPT_H
+#if HAVE_GCRYPT_H || HAVE_NETTLE
         wrbuf_sha1_write(wr, buf, strlen(buf), 1);
 #endif
         wrbuf_rewind(wr);
@@ -126,7 +126,7 @@ static void tstwrbuf(void)
     wrbuf_insert(wr, 5, "abc", 3);
     YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234"));
 
-    YAZ_CHECK(sha1_test(wr, 
+    YAZ_CHECK(sha1_test(wr,
                         "Hello world\n",
                         "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"));
 

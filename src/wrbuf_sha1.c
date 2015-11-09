@@ -20,10 +20,30 @@
 #if HAVE_GCRYPT_H
 #include <gcrypt.h>
 #endif
+#if HAVE_NETTLE
+#include <nettle/sha.h>
+#endif
 
 int wrbuf_sha1_write(WRBUF b, const char *cp, size_t sz, int hexit)
 {
-#if HAVE_GCRYPT_H
+#if HAVE_NETTLE
+    struct sha1_ctx ctx;
+    uint8_t digest[SHA1_DIGEST_SIZE];
+
+    sha1_init(&ctx);
+    sha1_update(&ctx, sz, (uint8_t *) cp);
+    sha1_digest(&ctx, SHA1_DIGEST_SIZE, digest);
+
+    if (hexit)
+    {
+        int i;
+        for (i = 0; i < SHA1_DIGEST_SIZE; i++)
+            wrbuf_printf(b, "%02x", digest[i]);
+    }
+    else
+        wrbuf_write(b, (const char *) digest, SHA1_DIGEST_SIZE);
+    return 0;
+#elif HAVE_GCRYPT_H
     gcry_error_t e;
     gcry_md_hd_t hd;
     const unsigned char *digest_buf;
