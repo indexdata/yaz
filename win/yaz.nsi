@@ -32,16 +32,14 @@ InstallDir "$PROGRAMFILES64\YAZ"
 !define VS_REDIST_KEY "SOFTWARE\Classes\Installer\Products\55E3652ACEB38283D8765E8E9B8E6B57"
 !endif
 
+InstallDir "$PROGRAMFILES\YAZ"
+!endif
+
 !if "${VSVER}" = "14"
 !define VS_REDIST_EXE vc_redist.${VSARCH}.exe
 !else
 !define VS_REDIST_EXE vcredist_${VSARCH}.exe
 !endif
-
-
-InstallDir "$PROGRAMFILES\YAZ"
-!endif
-
 
 RequestExecutionLevel admin
 
