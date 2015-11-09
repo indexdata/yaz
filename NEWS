@@ -1,3 +1,14 @@
+--- 5.14.12 2015/11/09
+
+Build with nettle on Debian/Ubuntu
+
+test system calls yaz_deinit_globals for better memory leak detection
+
+cs_get_host_args: allow unix:path:args notation
+
+Windows: build YAZ with VC 2015 and bundle it with runtime
+version 14.0.23026.
+
 --- 5.14.11 2015/10/09
 
 Fix RPN to CQL rejects local Bib-1 attribute set YAZ-861
