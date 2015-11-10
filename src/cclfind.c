@@ -214,6 +214,24 @@ void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
     n->value.numeric = value;
 }
 
+void ccl_set_attr_numeric(struct ccl_rpn_node *p, const char *set,
+                          int type, int value)
+{
+    struct ccl_rpn_attr *n;
+    for (n = p->u.t.attr_list; n; n = n->next)
+        if (n->type == type)
+        {
+            xfree(n->set);
+            n->set = set ? xstrdup(set) : 0;
+            if (n->kind == CCL_RPN_ATTR_STRING)
+                xfree(n->value.str);
+            n->kind = CCL_RPN_ATTR_NUMERIC;
+            n->value.numeric = value;
+            return;
+        }
+    ccl_add_attr_numeric(p, set, type, value);
+}
+
 void ccl_add_attr_string(struct ccl_rpn_node *p, const char *set,
                          int type, char *value)
 {
@@ -896,14 +914,14 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
             }
             p = ccl_rpn_node_create(CCL_RPN_AND);
             p->u.p[0] = p1;
-            ccl_add_attr_numeric(p1, attset, CCL_BIB1_REL, 4);
+            ccl_set_attr_numeric(p1, attset, CCL_BIB1_REL, 4);
             p->u.p[1] = p2;
-            ccl_add_attr_numeric(p2, attset, CCL_BIB1_REL, 2);
+            ccl_set_attr_numeric(p2, attset, CCL_BIB1_REL, 2);
             return p;
         }
         else                       /* = term -    */
         {
-            ccl_add_attr_numeric(p1, attset, CCL_BIB1_REL, 4);
+            ccl_set_attr_numeric(p1, attset, CCL_BIB1_REL, 4);
             return p1;
         }
     }
@@ -914,7 +932,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         ADVANCE;
         if (!(p = search_term(cclp, ap)))
             return NULL;
-        ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, 2);
+        ccl_set_attr_numeric(p, attset, CCL_BIB1_REL, 2);
         return p;
     }
     else
@@ -923,7 +941,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
             return NULL;
         if (rel != 3 ||
             !qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_OMIT_EQUALS, 0))
-            ccl_add_attr_numeric(p, attset, CCL_BIB1_REL, rel);
+            ccl_set_attr_numeric(p, attset, CCL_BIB1_REL, rel);
         return p;
     }
     return NULL;

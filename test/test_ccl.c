@@ -531,6 +531,31 @@ void tst2(void)
 }
 
 
+void tst3(void)
+{
+    CCL_bibset b = ccl_qual_mk();
+
+    YAZ_CHECK(b);
+    if (!b)
+        return;
+
+    ccl_qual_fitem(b, "2=102", "rk");
+    ccl_qual_fitem(b, "1=9903 r=r", "lex");
+    ccl_qual_fitem(b, "4=109 r=o", "st-numeric");
+
+    YAZ_CHECK(tst_ccl_query(b, "rk=(lex=9)", "@attr 2=3 @attr 1=9903 9 "));
+    YAZ_CHECK(tst_ccl_query(b, "rk=(lex>9)", "@attr 2=5 @attr 1=9903 9 "));
+    YAZ_CHECK(tst_ccl_query(b, "rk=(lex,st-numeric=300-600)",
+                            "@and "
+                            "@attr 2=4 @attr 4=109 @attr 1=9903 300 "
+                            "@attr 2=2 @attr 4=109 @attr 1=9903 600 "));
+    YAZ_CHECK(tst_ccl_query(b, "rk=(lex=9) and b",
+                            "@and @attr 2=3 @attr 1=9903 9 b "));
+    YAZ_CHECK(tst_ccl_query(b, "rk=(lex=9 and b)",
+                            "@and @attr 2=3 @attr 1=9903 9 @attr 2=102 b "));
+    ccl_qual_rm(&b);
+}
+
 void tst_addinfo(void)
 {
     const char *addinfo;
@@ -570,6 +595,7 @@ int main(int argc, char **argv)
     tst1(2);
     tst1(3);
     tst2();
+    tst3();
     tst_addinfo();
     YAZ_CHECK_TERM;
 }
