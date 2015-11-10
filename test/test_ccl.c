@@ -475,6 +475,15 @@ void tst1(int pass)
     YAZ_CHECK(tst_ccl_query(bibset, "s2=a b?", 0));
     YAZ_CHECK(tst_ccl_query(bibset, "s2=a b? c", 0));
 
+    YAZ_CHECK(tst_ccl_query(bibset, "z=(ti=b)", "@attr 4=2 @attr 1=4 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=(ti=b?)",
+                            "@attr 5=1 @attr 4=2 @attr 1=4 b "));
+    YAZ_CHECK(tst_ccl_query(bibset, "z=(a? and ti=b? and c?)",
+                            "@and @and "
+                            "@attr 5=104 a? "
+                            "@attr 5=1 @attr 4=2 @attr 1=4 b "
+                            "@attr 5=104 c? "));
+
     ccl_qual_rm(&bibset);
 }
 

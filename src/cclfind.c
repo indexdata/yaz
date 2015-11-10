@@ -38,23 +38,27 @@ static int qual_val_type(ccl_qualifier_t *qa, int type, int value,
                          char **attset)
 {
     int i;
-
     if (!qa)
         return 0;
     for (i = 0; qa[i]; i++)
     {
+        int got_type = 0;
         struct ccl_rpn_attr *q = ccl_qual_get_attr(qa[i]);
-        while (q)
+        for (; q; q = q->next)
         {
-            if (q->type == type && q->kind == CCL_RPN_ATTR_NUMERIC &&
-                q->value.numeric == value)
+            if (q->type == type && q->kind == CCL_RPN_ATTR_NUMERIC)
             {
-                if (attset)
-                    *attset = q->set;
-                return 1;
+                got_type = 1;
+                if (q->value.numeric == value)
+                {
+                    if (attset)
+                        *attset = q->set;
+                    return 1;
+                }
             }
-            q = q->next;
         }
+        if (got_type)
+            return 0;
     }
     return 0;
 }
@@ -365,11 +369,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
 {
     struct ccl_rpn_node *p;
     size_t i;
-    int relation_value = -1;
-    int position_value = -1;
     int structure_value = -1;
-    int truncation_value = -1;
-    int completeness_value = -1;
 
     int left_trunc = 0;
     int right_trunc = 0;
@@ -426,7 +426,9 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     {
         struct ccl_rpn_attr *attr;
         for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
-            if (attr->type != 1 || !attr_use || attr == attr_use)
+            if (attr->type == 1 && attr_use && attr != attr_use)
+                continue;
+            else
             {
                 switch (attr->kind)
                 {
@@ -439,30 +441,10 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                     {   /* deal only with REAL attributes (positive) */
                         switch (attr->type)
                         {
-                        case CCL_BIB1_REL:
-                            if (relation_value != -1)
-                                continue;
-                            relation_value = attr->value.numeric;
-                            break;
-                        case CCL_BIB1_POS:
-                            if (position_value != -1)
-                                continue;
-                            position_value = attr->value.numeric;
-                            break;
                         case CCL_BIB1_STR:
                             if (structure_value != -1)
                                 continue;
                             structure_value = attr->value.numeric;
-                            break;
-                        case CCL_BIB1_TRU:
-                            if (truncation_value != -1)
-                                continue;
-                            truncation_value = attr->value.numeric;
-                            break;
-                        case CCL_BIB1_COM:
-                            if (completeness_value != -1)
-                                continue;
-                            completeness_value = attr->value.numeric;
                             break;
                         }
                         ccl_add_attr_numeric(p, attr->set, attr->type,
