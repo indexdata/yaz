@@ -340,6 +340,8 @@ const char *cql_lookup_reverse(cql_transform_t ct,
                 {
                     /* actual attribute */
                     Z_AttributeElement a_ae = *attributes->attributes[j];
+                    if (!compare_attr(e_ae, &a_ae))
+                        break;
                     if (a_ae.attributeSet && &e_ae->attributeSet &&
                         !oid_oidcmp(a_ae.attributeSet, yaz_oid_attset_bib_1))
                         a_ae.attributeSet = 0;
