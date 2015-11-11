@@ -24,13 +24,11 @@ By Steve Reid <steve@edmweb.com>
 100% Public Domain
 */
 
-/* #define LITTLE_ENDIAN * This should be #define'd already, if true. */
 /* #define SHA1HANDSOFF * Copies data before messing with it. */
 
 #define SHA1HANDSOFF
 
 #include <stdint.h>
-#include <endian.h>
 
 typedef struct {
     uint32_t state[5];
@@ -42,13 +40,11 @@ typedef struct {
 
 /* blk0() and blk() perform the initial expand. */
 /* I got the idea of expanding during the round function from SSLeay */
-#if BYTE_ORDER == LITTLE_ENDIAN
-#define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
-#elif BYTE_ORDER == BIG_ENDIAN
+#if WORDS_BIGENDIAN
 #define blk0(i) block->l[i]
 #else
-#error "Endianness not defined!"
+#define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
+    |(rol(block->l[i],8)&0x00FF00FF))
 #endif
 #define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
     ^block->l[(i+2)&15]^block->l[i&15],1))
