@@ -10,7 +10,6 @@ Build-Depends: debhelper (>= 7),
 	libreadline-dev|libreadline5-dev,
 	libwrap0-dev,
 	libmemcached-dev,
-	nettle-dev,
 	libhiredis-dev,
 	libicu-dev
 

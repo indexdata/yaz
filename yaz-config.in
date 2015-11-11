@@ -19,8 +19,6 @@ build_root="@abs_top_builddir@"
 ICU_LIBS="@ICU_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
-GCRYPT_LIBS="@GCRYPT_LIBS@"
-NETTLE_LIBS="@NETTLE_LIBS@"
 MEMCACHED_LIBS="@MEMCACHED_LIBS@"
 HIREDIS_LIBS="@HIREDIS_LIBS@"
 LIBS="@LIBS@"
@@ -134,7 +132,7 @@ if test "$echo_source" = "yes"; then
     else
         YAZLIB="-L${build_root}/src/.libs $YAZLIB"
     fi
-    LIBS="${SSL_LIBS} ${GCRYPT_LIBS} ${NETTLE_LIBS} ${MEMCACHED_LIBS} ${HIREDIS_LIBS} $LIBS"
+    LIBS="${SSL_LIBS} ${MEMCACHED_LIBS} ${HIREDIS_LIBS} $LIBS"
     YAZLIB="$YAZLIB $LIBS"
 
     YAZLALIB="${build_root}/src/libyaz.la"

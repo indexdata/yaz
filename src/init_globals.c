@@ -23,10 +23,6 @@
 #include <gnutls/gnutls.h>
 #endif
 
-#if HAVE_GCRYPT_H
-#include <gcrypt.h>
-#endif
-
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
@@ -47,10 +43,6 @@ static pthread_mutex_t yaz_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 extern void yaz_log_init_globals(void);
 extern void yaz_log_deinit_globals(void);
 
-#if HAVE_GCRYPT_H
-GCRY_THREAD_OPTION_PTHREAD_IMPL;
-#endif
-
 void yaz_init_globals(void)
 {
     if (yaz_init_flag)
@@ -61,19 +53,8 @@ void yaz_init_globals(void)
     if (!yaz_init_flag)
     {
         yaz_log_init_globals();
-#if HAVE_GCRYPT_H
-        /* POSIX threads locking. In case gnutls_global_init do not override */
-        gcry_control(GCRYCTL_SET_THREAD_CBS, &gcry_threads_pthread);
-#endif
 #if HAVE_GNUTLS_H
         gnutls_global_init();
-#endif
-#if HAVE_GCRYPT_H
-        /* most likely, GnuTLS has already initialized libgcrypt */
-        if (gcry_control(GCRYCTL_ANY_INITIALIZATION_P) == 0)
-        {
-            gcry_control(GCRYCTL_INITIALIZATION_FINISHED, NULL, 0);
-        }
 #endif
 #if YAZ_HAVE_XML2
         xmlInitParser();

@@ -62,72 +62,11 @@ if test "$checkBoth" = "1"; then
 fi
 AC_CHECK_FUNC([gethostbyname], ,[AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"])])
 dnl
-dnl ------ nettle
-nettle=default
-AC_SUBST([NETTLE_LIBS])
-AC_ARG_WITH([nettle], [  --with-nettle           Nettle library], [nettle=$withval])
-if test "$nettle" != "no"; then
-    AC_MSG_CHECKING([for nettle])
-    if $pkgconfigpath --cflags nettle >/dev/null 2>&1 ; then
-	if $pkgconfigpath --atleast-version 2.0 nettle; then
-	    AC_MSG_RESULT([yes])
-            CFLAGS="$CFLAGS `$pkgconfigpath --cflags nettle`"
-            NETTLE_LIBS="`$pkgconfigpath --libs nettle`"
-	    libgcryptversion=2enable
-	    AC_DEFINE([HAVE_NETTLE],[1],[Define to 1 if nettle is enabled])
-        else
-	    AC_MSG_RESULT([no. Version 2.0 required])
-            if test "$nettle" != "default"; then
-	        AC_MSG_ERROR([nettle libraries missing])
-            fi
-        fi
-    else
-	AC_MSG_RESULT([no])
-        if test "$nettle" != "default"; then
-	    AC_MSG_ERROR([nettle libraries missing])
-	fi
-    fi
-fi
-dnl
-dnl
-dnl ------ libgcrypt
-AC_SUBST([GCRYPT_LIBS])
-libgcryptpath=NONE
-AC_ARG_WITH(libgcrypt, [  --with-libgcrypt=DIR    use libgcrypt-config in DIR],[libgcryptpath=$withval])
-if test "$libgcryptpath" != "no" -a -z "$libgcryptversion"; then
-    if test "$libgcryptpath" = "NONE"; then
-	AC_PATH_PROG([libgcrypt],[libgcrypt-config],[NONE])
-    elif test -x $libgcryptpath/libgcrypt-config; then
-	libgcrypt=$libgcryptpath/libgcrypt-config
-    else
-	libgcrypt=$libgcryptpath
-    fi
-    AC_MSG_CHECKING([for libgcrypt])
-    if "$libgcrypt" --version >/dev/null 2>&1; then
-	libgcryptversion=`$libgcrypt --version`
-	libgcryptversion2=`echo "$libgcryptversion" | awk 'BEGIN { FS = "."; } { printf "%d", [$]1 * 1000 + [$]2;}'`
-	AC_MSG_RESULT([$libgcryptversion])
-	if test $libgcryptversion2 -ge 1002; then
-	    GCRYPT_LIBS="`$libgcrypt --libs`"
-	    CFLAGS="$CFLAGS `$libgcrypt --cflags`"
-	    AC_DEFINE([HAVE_GCRYPT_H],[1],[Define to 1 if libgcrypt is present])
-	else
-	    if test "$libgcryptpath" = "NONE"; then
-		AC_MSG_WARN([Only libgcrypt version 1.2 and later supported])
-	    else
-		AC_MSG_ERROR([Only libgcrypt version 1.2 and later supported])
-	    fi
-	    libgcryptversion=""
-	fi
-    else
-	AC_MSG_RESULT([no])
-    fi
-fi
 dnl ------ redis
 hiredis=default
 AC_SUBST([HIREDIS_LIBS])
 AC_ARG_WITH([redis], [  --with-redis            hiredis library], [hiredis=$withval])
-if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE" -a "$libgcryptversion"; then
+if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE"; then
     AC_CHECK_LIB([hiredis],[redisCommandArgv],[HIREDIS_LIBS=-lhiredis])
     AC_MSG_CHECKING([for redis])
     if $pkgconfigpath --cflags hiredis >/dev/null 2>&1 ; then
@@ -158,7 +97,7 @@ dnl ------ memcached
 memcached=default
 AC_SUBST([MEMCACHED_LIBS])
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
-if test "$memcached" != "no" -a -n "$libgcryptversion" -a "$pkgconfigpath" != "NONE"; then
+if test "$memcached" != "no" -a "$pkgconfigpath" != "NONE"; then
     AC_MSG_CHECKING([for libmemcached])
     if $pkgconfigpath --cflags libmemcached >/dev/null 2>&1 ; then
 	if $pkgconfigpath --atleast-version 0.40 libmemcached; then

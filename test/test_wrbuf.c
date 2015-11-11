@@ -17,14 +17,10 @@
 static int sha1_test(WRBUF wr, const char *msg, const char *expect)
 {
     wrbuf_rewind(wr);
-#if HAVE_GCRYPT_H || HAVE_NETTLE
     wrbuf_sha1_write(wr, msg, strlen(msg), 1);
     if (!strcmp(wrbuf_cstr(wr), expect))
         return 1;
     return 0;
-#else
-    return 1;
-#endif
 }
 
 #if YAZ_POSIX_THREADS
@@ -36,9 +32,7 @@ static void *my_handler(void *arg)
     {
         char buf[100];
         sprintf(buf, "Hello world %d", i);
-#if HAVE_GCRYPT_H || HAVE_NETTLE
         wrbuf_sha1_write(wr, buf, strlen(buf), 1);
-#endif
         wrbuf_rewind(wr);
     }
     wrbuf_destroy(wr);

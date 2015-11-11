@@ -48,7 +48,6 @@ BuildRequires: libxslt-devel
 BuildRequires: readline-devel
 BuildRequires: libicu-devel
 BuildRequires: wget
-BuildRequires: libgcrypt-devel
 %if %is_redhat5
 %else
 BuildRequires: hiredis-devel
@@ -63,7 +62,7 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 %package -n libyaz5
 Summary: Z39.50 Library
 Group: Libraries
-Requires: libxslt, gnutls, libicu, libgcrypt
+Requires: libxslt, gnutls, libicu
 %if %is_redhat5
 %else
 Requires: hiredis

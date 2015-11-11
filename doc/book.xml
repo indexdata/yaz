@@ -682,26 +682,13 @@
 
       <varlistentry>
        <term>
-        <literal>--with-libgcrypt</literal>[=<replaceable>prefix</replaceable>]
-       </term>
-       <listitem>
-	<para>&yaz; will be linked with
-	<ulink url="&url.libgcrypt;">Libgcrypt</ulink> in the prefix if given.
-	If prefix is not given, the libraries exposed by the script
-	<application>libgcrypt-config</application> will be used if found.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>
         <literal>--with-memcached</literal>
        </term>
        <listitem>
 	<para>&yaz; will be linked with
 	<ulink url="&url.libmemcached;">libMemcached</ulink> to allow
 	for result-set caching for ZOOM.
-	The prefix can not be given. Note that YAZ will only search
-	for libMemcached if Libgcrypt is also enabled.
+	The prefix can not be given. 
 	Note that 0.40 of libmemcached is required.
        </para>
        </listitem>
@@ -714,8 +701,7 @@
 	<para>&yaz; will be linked with the hiredis C library
 	to allow for result-set caching for ZOOM on a
 	<ulink url="&url.redis;">redis</ulink> server.
-	The prefix can not be given. Note that YAZ will only search
-	for hiredis if Libgcrypt is also enabled.
+	The prefix can not be given.
        </para>
        </listitem>
       </varlistentry>
