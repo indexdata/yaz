@@ -89,6 +89,10 @@ static void tst1(void)
 
     cql_transform_define_pattern(ct, "index.foo", "1=bar");
     YAZ_CHECK(compare(ct, "@attr 1=bar abc", "foo=abc"));
+    YAZ_CHECK(compare(ct, "@attr bib1 1=bar abc", "foo=abc"));
+
+    cql_transform_define_pattern(ct, "index.author", "bib1 1=1003 4=2");
+    YAZ_CHECK(compare(ct, "@attr 4=2 @attr bib1 1=1003 abc", "author=abc"));
 
     cql_transform_close(ct);
 }
