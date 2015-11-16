@@ -969,8 +969,8 @@
 	(<filename>cql.y</filename>).
        </para>
        <para>
-	A Windows version of GNU Bison is part of
-	<ulink url="&url.gitwindows;">Git for Windows</ulink>.
+	A Windows version of GNU Bison can be fetched from here:
+	<ulink url="http://ftp.indexdata.dk/pub/support/windows/bison-2.4.1-setup.exe"/>.
        </para></listitem>
       </varlistentry>
       <varlistentry>
