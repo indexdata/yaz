@@ -925,7 +925,7 @@
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
      with <ulink url="&url.vstudio;">
      Microsoft Visual Studio</ulink>. It has been tested with
-     Microsoft Visual Studio 2013.
+     Microsoft Visual Studio 2015.
     </para>
     <para>
      Start a command prompt and switch the sub directory
@@ -969,8 +969,8 @@
 	(<filename>cql.y</filename>).
        </para>
        <para>
-	A Windows version of GNU Bison is part of
-	<ulink url="&url.gitwindows;">Git for Windows</ulink>.
+	A Windows version of GNU Bison can be fetched from here:
+	<ulink url="http://ftp.indexdata.dk/pub/support/windows/bison-2.4.1-setup.exe"/>.
        </para></listitem>
       </varlistentry>
       <varlistentry>

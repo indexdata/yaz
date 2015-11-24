@@ -28,7 +28,12 @@ By Steve Reid <steve@edmweb.com>
 
 #define SHA1HANDSOFF
 
+/* VS 2010 and later have stdint.h */
+#if defined(_MSC_VER) && _MSC_VER < 1600
+typedef unsigned int uint32_t;
+#else
 #include <stdint.h>
+#endif
 
 typedef struct {
     uint32_t state[5];

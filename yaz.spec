@@ -122,7 +122,7 @@ rm -fr ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc README LICENSE NEWS
+%doc README.md LICENSE NEWS
 %{_bindir}/yaz-client
 %{_bindir}/yaz-ztest
 %{_bindir}/zoomsh

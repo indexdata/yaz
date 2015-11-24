@@ -1,3 +1,10 @@
+--- 5.15.1 2015/11/12
+
+Bundle sha1 rather than use libgcrypt/nettle. This means that
+configure no longer accepts --with-gcrypt and --with-nettle.
+
+Fix rpn2cql fails for Bib-1 set in qry+conf YAZ-865
+
 --- 5.15.0 2015/11/11
 
 CCL: fix r=o, r=r WRT inherited attributes YAZ-864

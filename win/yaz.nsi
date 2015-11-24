@@ -101,7 +101,7 @@ Section "" ; (default section)
 		"$INSTDIR\uninst.exe"
 	SetOutPath $INSTDIR
 	File LICENSE.txt
-	File ..\README
+	File ..\README.md
 	File ..\NEWS
 	SetOutPath $INSTDIR
 	SetOutPath $INSTDIR\ztest
