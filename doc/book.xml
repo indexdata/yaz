@@ -383,11 +383,10 @@
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
-    <ulink url="&url.solaris;">Solaris</ulink>,
-    Windows 7, Windows XP.
+    Windows 10.
    </para>
    <para>
-    Some versions have be known to work on HP/UX,
+    Some versions have be known to work on Windows XP, Solaris, HP/UX,
     DEC Unix, <ulink url="&url.netbsd;">NetBSD</ulink>,
     <ulink url="&url.openbsd;">OpenBSD</ulink>,
     IBM AIX,
