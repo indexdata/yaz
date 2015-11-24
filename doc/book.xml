@@ -913,7 +913,9 @@
    <title>Windows</title>
    <para>The easiest way to install YAZ on Windows is by downloading
    an installer from
-   <ulink url="&url.yaz.download.win32;">here</ulink>.
+   <ulink url="&url.yaz.download.win32;">
+    Index Data's Windows support area
+   </ulink>.
    The installer comes with source too - in case you wish to
    compile YAZ with different compiler options, etc.
    </para>
@@ -969,7 +971,10 @@
        </para>
        <para>
 	A Windows version of GNU Bison can be fetched from here:
-	<ulink url="http://ftp.indexdata.dk/pub/support/windows/bison-2.4.1-setup.exe"/>.
+	<ulink
+          url="&url.indexdata.support.windows;bison-2.4.1-setup.exe">
+          Index Data's Windows support area
+        </ulink>.
        </para></listitem>
       </varlistentry>
       <varlistentry>
@@ -1026,6 +1031,14 @@
 	 In this configuration, set
          <literal>ICU_DIR</literal> to the
          <ulink url="&url.icu;">ICU</ulink> source directory.
+        </para>
+        <para>
+         Pre-compiled ICU libraries for various versions of Visual Studio
+         can be found
+         <ulink url="http://www.npcglib.org/~stathis/blog/precompiled-icu/">
+          here
+         </ulink> or from Index Data's <ulink
+          url="&url.indexdata.support.windows;">Windows support site</ulink>.
         </para>
        </listitem>
       </varlistentry>
