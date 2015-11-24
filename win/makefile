@@ -5,6 +5,7 @@
 
 DEBUG=0   # 0 for release, 1 for debug
 USE_MANIFEST = 0
+BARCH = 32 # 32=win32/x86 or 64=x64
 
 # TCL
 TCL=tclsh
@@ -13,23 +14,31 @@ HAVE_TCL=1
 
 # iconv charcter conversion utility
 HAVE_ICONV=0
-ICONV_DIR = c:\iconv-1.9.2.win32
+ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
 ICU_VER=56
-ICU_LIB = c:\icu\lib
-ICU_BIN = c:\icu\bin
-ICU_INCLUDE = c:\icu\include
+ICU_BASE = c:\icu-56.1-vs2015
+!if $(BARCH) == 32
+ICU_LIB = $(ICU_BASE)\lib
+ICU_BIN = $(ICU_BASE)\bin
+!elseif $(BARCH) == 64
+ICU_LIB = $(ICU_BASE)\lib64
+ICU_BIN = $(ICU_BASE)\bin64
+!else
+!error BARCH must be 32 or 64
+!endif
+ICU_INCLUDE = $(ICU_BASE)\include
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.28.win32
+LIBXSLT_DIR=c:\libxslt-1.1.28.win$(BARCH)
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.9.2.win32
+LIBXML2_DIR=c:\libxml2-2.9.2.win$(BARCH)
 
 # get WIN32 binaries libxml2 & iconv & zlib from here:
 #  http://www.zlatkovic.com/libxml.en.html
@@ -60,8 +69,7 @@ dist64: yaz.nsi version.nsi distclean
 	nmake nsis64
 
 make64:
-	nmake DEBUG=0 HAVE_ICONV=0 LIBXML2_DIR=c:\libxml2-2.9.2.win64 LIBXSLT_DIR=c:\libxslt-1.1.28.win64 ICU_LIB=\icu\lib64 ICU_BIN=\icu\bin64 all
-
+	nmake DEBUG=0 BARCH=64 all
 
 distclean:
 	nmake DEBUG=1 clean
