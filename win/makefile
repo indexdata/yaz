@@ -4,7 +4,6 @@
 # Parameters
 
 DEBUG=0   # 0 for release, 1 for debug
-USE_MANIFEST = 0
 BARCH = 32 # 32=win32/x86 or 64=x64
 
 # TCL
@@ -294,18 +293,10 @@ yaz4j: $(JAVADIR)
 ### Linker options
 LINK=link.exe
 
-!if $(USE_MANIFEST)
-MT=mt.exe /nologo
-MTOPT=/manifest
-!else
-MT=echo
-MTOPT=
-!endif
-
 LINK_LIBS= kernel32.lib ws2_32.lib advapi32.lib \
 	   $(ICONV_LIB) $(LIBXML2_LIB) $(LIBXSLT_LIB)
 
-COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no $(MTOPT)
+COMMON_LNK_OPTIONS= /nologo /subsystem:windows /incremental:no
 
 DEBUG_LNK_OPTIONS= /debug
 
@@ -922,7 +913,6 @@ $(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		$(YAZ_RES) \
 		/out:$@ \
 		/implib:"$(YAZ_IMPLIB)"
-	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
 	$(LINK_DLL) $(ICU_LIBS) $(YAZ_IMPLIB)\
@@ -930,7 +920,6 @@ $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
 		$(YAZ_ICU_RES) \
 		/out:$@ \
 		/implib:"$(YAZ_ICU_IMPLIB)"
-	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(YAZ_COND_DLL) $(YAZ_COND_IMPLIB): "$(BINDIR)" $(COND_DLL_OBJS) $(YAZ_COND_RES)
 	$(LINK_DLL) $(COND_LIB) $(YAZ_IMPLIB)\
@@ -938,96 +927,72 @@ $(YAZ_COND_DLL) $(YAZ_COND_IMPLIB): "$(BINDIR)" $(COND_DLL_OBJS) $(YAZ_COND_RES)
 		$(YAZ_COND_RES) \
 		/out:$@ \
 		/implib:"$(YAZ_COND_IMPLIB)"
-	$(MT) -manifest $@.manifest -outputresource:$@;2
 
 $(CLIENT) : "$(BINDIR)" $(YAZ_CLIENT_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CLIENT_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
 	$(LINK_PROGRAM) $(ICU_LIBS) $(YAZ_ICU_IMPLIB) $(YAZ_ICU_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(YAZ_URL) : "$(BINDIR)" $(YAZ_URL_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_URL_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(SC_TEST) : "$(BINDIR)" $(SC_TEST_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(SC_TEST_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST1) : "$(BINDIR)" $(YAZ_ZOOMTST1_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST1_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST2) : "$(BINDIR)" $(YAZ_ZOOMTST2_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST2_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST3) : "$(BINDIR)" $(YAZ_ZOOMTST3_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST3_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST4) : "$(BINDIR)" $(YAZ_ZOOMTST4_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST4_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST5) : "$(BINDIR)" $(YAZ_ZOOMTST5_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST5_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST6) : "$(BINDIR)" $(YAZ_ZOOMTST6_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST6_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST7) : "$(BINDIR)" $(YAZ_ZOOMTST7_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST7_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST8) : "$(BINDIR)" $(YAZ_ZOOMTST8_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST8_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST9) : "$(BINDIR)" $(YAZ_ZOOMTST9_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST9_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZOOMTST10) : "$(BINDIR)" $(YAZ_ZOOMTST10_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMTST10_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(CQL2PQF) : "$(BINDIR)" $(YAZ_CQL2PQF_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CQL2PQF_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(CQL2XCQL) : "$(BINDIR)" $(YAZ_CQL2XCQL_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_CQL2XCQL_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM)	$(ZTEST_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_MARCDUMP_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
-
 
 $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TST_TIMING_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 $(TEST_MUTEX) : "$(BINDIR)" $(TEST_MUTEX_OBJS) $(YAZ_COND_DLL)
 	$(LINK_PROGRAM) $(YAZ_COND_IMPLIB) $(TEST_MUTEX_OBJS) /out:$@
-	$(MT) -manifest $@.manifest -outputresource:$@;1
 
 # Other rules
 
@@ -1040,7 +1005,6 @@ clean:
 	-del $(BINDIR)\*.exe
 	-del $(BINDIR)\*.dll
 	-del $(BINDIR)\*.pdb
-	-del $(BINDIR)\*.manifest
 	-del $(TMPDIR)\*.
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
