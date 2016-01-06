@@ -1,6 +1,8 @@
 #!/bin/sh
-# $Id: buildconf.sh,v 1.46.2.1 2007-04-11 13:35:37 adam Exp $
-
+if [ -d .git ]; then
+    git submodule init
+    git submodule update
+fi
 automake=automake
 aclocal=aclocal
 autoconf=autoconf
