@@ -1,6 +1,6 @@
 [submodule "m4"]
 	path = m4
-	url = git://git.indexdata.com/m4
+	url = https://github.com/indexdata/m4
 [submodule "doc/common"]
 	path = doc/common
-	url = git://git.indexdata.com/id-docbook-common
+	url = https://github.com/indexdata/id-docbook-common
