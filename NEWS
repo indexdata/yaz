@@ -1,3 +1,10 @@
+--- 5.15.2 2016/01/11
+
+Re-organize Windows build. Use ICU compiled with VS 2015 to use
+same runtime as rest of components (YAZ, Libxml2, etc).
+
+Move YAZ and many other software components to GitHub.
+
 --- 5.15.1 2015/11/12
 
 Bundle sha1 rather than use libgcrypt/nettle. This means that
