@@ -462,9 +462,10 @@
    <sect2 id="installation.source.unix">
     <title>Compiling from source on Unix</title>
     <para>
-     Note that if your system doesn't have a native ANSI C compiler, you may
-     have to acquire one separately. We recommend
-     <ulink url="&url.gcc;">GCC</ulink>.
+     You can choose to compile YAZ from official tar releases from
+     <ulink url="&url.yaz.download;"/>
+     or clone it via Github
+     <ulink url="https://github.com/indexdata/yaz.git"/>.
     </para>
     <para>
      If you wish to use character set conversion facilities in &yaz; or if you
@@ -511,8 +512,14 @@
      for private ASN.1.
     </para>
     <para>
-     Generally it should be sufficient to run configure without options,
-     like this:
+     If you are checking out from Git, run:
+     <screen>
+      ./buildconf.sh
+     </screen>
+     This will create configure and Makefiles.
+    </para>
+    <para>
+     The next step is always:
     </para>
     <screen>
      ./configure
