@@ -516,7 +516,7 @@
      <screen>
       ./buildconf.sh
      </screen>
-     This will create configure and Makefiles.
+     This will create the <filename>configure</filename> script and Makefiles.
     </para>
     <para>
      The next step is always:
