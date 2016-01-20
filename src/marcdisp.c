@@ -1110,7 +1110,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
 {
-    struct yaz_marc_node *n;
+    struct yaz_marc_node *n, *cap_node = 0;
     int indicator_length;
     int identifier_length;
     int length_data_entry;
@@ -1143,12 +1143,13 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     for (n = mt->nodes; n; n = n->next)
     {
         int data_length = 0;
+        const char *tag = 0;
         struct yaz_marc_subfield *s;
 
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-            wrbuf_printf(wr_dir, "%.3s", n->u.datafield.tag);
+            tag = n->u.datafield.tag;
             data_length += indicator_length;
             wrbuf_rewind(wr_data_tmp);
             for (s = n->u.datafield.subfields; s; s = s->next)
@@ -1164,8 +1165,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
             data_length += wrbuf_len(wr_data_tmp);
             break;
         case YAZ_MARC_CONTROLFIELD:
-            wrbuf_printf(wr_dir, "%.3s", n->u.controlfield.tag);
-
+            tag = n->u.controlfield.tag;
             wrbuf_rewind(wr_data_tmp);
             wrbuf_iconv_puts(wr_data_tmp, mt->iconv_cd,
                              n->u.controlfield.data);
@@ -1179,8 +1179,14 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         case YAZ_MARC_LEADER:
             break;
         }
-        if (data_length)
+        if (data_length && tag)
         {
+            if (wrbuf_len(wr_dir) + 40 + data_offset + data_length > 99999)
+            {
+                cap_node = n;
+                break;
+            }
+            wrbuf_printf(wr_dir, "%.3s", tag);
             wrbuf_printf(wr_dir, "%0*d", length_data_entry, data_length);
             wrbuf_printf(wr_dir, "%0*d", length_starting, data_offset);
             data_offset += data_length;
@@ -1209,7 +1215,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     wrbuf_destroy(wr_dir);
     wrbuf_destroy(wr_data_tmp);
 
-    for (n = mt->nodes; n; n = n->next)
+    for (n = mt->nodes; n != cap_node; n = n->next)
     {
         struct yaz_marc_subfield *s;
 
