@@ -1,9 +1,12 @@
 language: c
-os:
- - linux
 compiler:
- - clang
- - gcc 
+ - gcc
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: linux
+      dist: precise
 addons:
  apt:
   packages:
@@ -30,4 +33,3 @@ before_script:
  - ./buildconf.sh
 script:
  - ./configure && make && make check
-
