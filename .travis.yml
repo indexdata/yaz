@@ -4,10 +4,12 @@ sudo: required
 # - gcc
 matrix:
   include:
-    - os: linux
-      dist: trusty
-    - os: linux
-      dist: precise
+#    - os: linux
+#      dist: trusty
+#    - os: linux
+#      dist: precise
+    - os: osx
+      osx_image: xcode7.2
 addons:
  apt:
   packages:
@@ -30,6 +32,9 @@ addons:
    - pkg-config
    - tcl8.5
    - xsltproc
+before install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install pkg-config icu4c; fi
 before_script:
  - ./buildconf.sh
 script:
