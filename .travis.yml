@@ -1,7 +1,8 @@
 language: c
 sudo: required
-#compiler:
-# - gcc
+compiler:
+ - gcc
+ - clang
 matrix:
   include:
     - os: linux
