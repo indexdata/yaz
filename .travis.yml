@@ -5,7 +5,7 @@ compiler:
 install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq pkg-config libxslt1-dev libgnutls-dev libreadline-dev libwrap0-dev libmemcached-dev libhiredis-dev libicu-dev
- - sudo apt-get install -qq autoconf automake libtool gcc bison tclsh xsltproc docbook docbook-xml docbook-xsl 
+ - sudo apt-get install -qq autoconf automake libtool gcc bison tcl8.5 xsltproc docbook docbook-xml docbook-xsl 
  - sudo apt-get install -qq libxslt1-dev libgnutls-dev libreadline-dev libwrap0-dev pkg-config libicu-dev make
 before_script:
  - ./buildconf.sh
