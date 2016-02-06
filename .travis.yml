@@ -1,0 +1,12 @@
+language: c
+compiler:
+ - clang
+ - gcc 
+install:
+ - sudo apt-get update
+ - sudo apt-get install pkg-config libxslt1-dev libgnutls-dev libreadline-dev libwrap0-dev libmemcached-dev libhiredis-dev libicu-dev
+before_script:
+ - ./buildconf.sh
+script:
+ - ./configure && make && make check
+
