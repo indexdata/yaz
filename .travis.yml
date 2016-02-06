@@ -4,11 +4,28 @@ os:
 compiler:
  - clang
  - gcc 
-install:
- - sudo apt-get update -qq
- - sudo apt-get install -qq pkg-config libxslt1-dev libgnutls-dev libreadline-dev libwrap0-dev libmemcached-dev libhiredis-dev libicu-dev
- - sudo apt-get install -qq autoconf automake libtool gcc bison tcl8.5 xsltproc docbook docbook-xml docbook-xsl 
- - sudo apt-get install -qq libxslt1-dev libgnutls-dev libreadline-dev libwrap0-dev pkg-config libicu-dev make
+addons:
+ apt:
+  packages:
+   - autoconf
+   - automake
+   - bison
+   - docbook
+   - docbook-xml
+   - docbook-xsl
+   - gcc
+   - libgnutls-dev
+   - libhiredis-dev
+   - libicu-dev
+   - libmemcached-dev
+   - libreadline-dev
+   - libtool
+   - libwrap0-dev
+   - libxslt1-dev
+   - make
+   - pkg-config
+   - tcl8.5
+   - xsltproc
 before_script:
  - ./buildconf.sh
 script:
