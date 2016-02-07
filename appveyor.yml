@@ -1,0 +1,12 @@
+branches:
+  except:
+    - /travisXXX/
+skip_tags: true
+shallow_clone: true
+
+#install:
+#  - cd C:\projects\%APPVEYOR_PROJECT_NAME%
+
+build_script:
+  - cd win
+  - nmake
