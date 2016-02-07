@@ -6,6 +6,8 @@ shallow_clone: true
 
 #install:
 #  - cd C:\projects\%APPVEYOR_PROJECT_NAME%
+install:
+  - cinst vcredist2013
 
 build_script:
   - cd win
