@@ -8,7 +8,8 @@ shallow_clone: true
 #  - cd C:\projects\%APPVEYOR_PROJECT_NAME%
 install:
   - cinst vcredist2013
+  - cinst nmake
 
 build_script:
   - cd win
-  - cmake
+  - nmake
