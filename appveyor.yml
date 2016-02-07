@@ -11,4 +11,4 @@ install:
 
 build_script:
   - cd win
-  - nmake
+  - cmake
