@@ -63,7 +63,7 @@ struct marc_info {
     const char *leader_spec;
 };
 
-/** \brief tranformation info (rule info) */
+/** \brief transformation info (rule info) */
 struct yaz_record_conv_rule {
     struct yaz_record_conv_type *type;
     void *info;

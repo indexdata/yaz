@@ -46,7 +46,7 @@ enum YAZ_MARC_NODE_TYPE
     YAZ_MARC_LEADER
 };
 
-/** \brief represets a data field */
+/** \brief represents a data field */
 struct yaz_marc_datafield {
     char *tag;
     char *indicator;

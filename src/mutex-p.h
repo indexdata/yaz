@@ -27,7 +27,7 @@
 
 /**
  * \file mutex-p.h
- * \brief Declares internal definitinos of for Mutex functions
+ * \brief Declares internal definitions of for Mutex functions
  */
 
 struct yaz_mutex {

@@ -5,7 +5,7 @@
 
 /**
  * \file timing.c
- * \brief Timing Utilities
+ * \brief Timing utilities
  */
 
 #if HAVE_CONFIG_H
