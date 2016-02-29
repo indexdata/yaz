@@ -26,7 +26,7 @@
  */
 /**
  * \file session.h
- * \brief Internal Header for GFS.
+ * \brief Internal header for GFS.
  */
 #ifndef SESSION_H
 #define SESSION_H
