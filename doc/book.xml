@@ -6408,7 +6408,7 @@ cql_transform_t cql_transform_open_FILE (FILE *f);
 cql_transform_t cql_transform_open_fname(const char *fname);
 void cql_transform_close(cql_transform_t ct);
      </synopsis>
-     The first two functions create a tranformation handle from
+     The first two functions create a transformation handle from
      either an already open FILE or from a filename respectively.
      </para>
      <para>
