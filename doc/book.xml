@@ -6438,11 +6438,11 @@ int cql_transform_buf(cql_transform_t ct,
      <para>
       If conversion fails, more information can be obtained by calling
       <synopsis>
-int cql_transform_error(cql_transform_t ct, char **addinfo);
+int cql_transform_error(cql_transform_t ct, char **addinfop);
       </synopsis>
       This function returns the most recently returned numeric
       error-code and sets the string-pointer at
-      <literal>*addinfo</literal> to point to a string containing
+      <literal>*addinfop</literal> to point to a string containing
       additional information about the error that occurred: for
       example, if the error code is 15 ("Illegal or unsupported context
       set"), the additional information is the name of the requested
