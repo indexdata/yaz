@@ -240,7 +240,7 @@
    <para>
     If you're using 'exotic' functionality (meaning anything not included in
     the high-level APIs), developing non-standard extensions to Z39.50 or
-    you're going to develop an ILL application you'll have to learn the lower
+    you're going to develop an ILL application, you'll have to learn the lower
     level APIs of &yaz;.
    </para>
    <para>
@@ -267,7 +267,7 @@
      </listitem>
      <listitem>
       <para>
-       The second layer provides a C represenation of the
+       The second layer provides a C representation of the
        protocol units (packages) for Z39.50 ASN.1, ILL ASN.1,
        SRU.
       </para>
@@ -277,7 +277,7 @@
        The third layer encodes and decodes protocol data units to
        simple packages (buffer with certain length). The &odr; module
        encodes and decodes BER whereas the HTTP modules encodes and
-       decodes HTTP ruquests/responses.
+       decodes HTTP requests/responses.
       </para>
      </listitem>
      <listitem>
@@ -469,7 +469,7 @@
     </para>
     <para>
      If you wish to use character set conversion facilities in &yaz; or if you
-     are compiling &yaz; for use with Zebra it is a good idea to ensure that
+     are compiling &yaz; for use with Zebra, it is a good idea to ensure that
      the iconv library is installed. Some Unixes today already have it
      - if not, we suggest
      <ulink url="&url.libiconv;">GNU libiconv</ulink>.
@@ -529,7 +529,7 @@
      the <literal>CC</literal> environment variable. If not set, GNU C will be
      used if it is available. The <literal>CFLAGS</literal> environment
      variable holds options to be passed to the C compiler. If you're using
-     Bourne-compatible shell you may pass something like this to use a
+     Bourne-compatible shell, you may pass something like this to use a
      particular C compiler with optimization enabled:
     </para>
     <screen>
@@ -811,7 +811,7 @@
        <term><filename>zoom/zoomtst1</filename>,
        <filename>zoom/zoomtst2</filename>, ..</term>
        <listitem><para>
-	Several small applications that demonstrates the ZOOM API.
+	Several small applications that demonstrate the ZOOM API.
        </para></listitem>
       </varlistentry>
      </variablelist>
@@ -1428,7 +1428,7 @@
      </thead>
      <tbody>
       <row><entry>
-       implementationName</entry><entry>Name of Your client
+       implementationName</entry><entry>Name of your client
       </entry><entry>none</entry></row>
       <row><entry>
        user</entry><entry>Authentication user name
@@ -1454,7 +1454,7 @@
       <row><entry>
        clientIP</entry><entry>Client IP. If set, is
        encoded in the otherInfo area of a Z39.50 PDU with OID
-       1.2.840.10003.10.1000.81.3. Holds the original IP addreses
+       1.2.840.10003.10.1000.81.3. Holds the original IP addresses
        of a client. Is used if ZOOM is used in a gateway of some sort.
       </entry><entry>none</entry></row>
       <row><entry>
@@ -1488,7 +1488,7 @@
       </entry><entry>none</entry></row>
       <row><entry>
        serverImplementationVersion</entry><entry>
-       Implementation Version of server.  (the old
+       Implementation Version of server.  (The old
        targetImplementationVersion option is also supported for the
        benefit of old applications.)
       </entry><entry>none</entry></row>
@@ -1654,7 +1654,7 @@
      a TCP/IP connection with the peer as specified by the
      <literal>proxy</literal> host and the hostname as part of the
      connect calls will be set as part of the Initialize Request.
-     The proxy server will then "forward" the PDU's transparently
+     The proxy server will then "forward" the PDUs transparently
      to the target behind the proxy.
     </para>
     <para>
@@ -2317,7 +2317,7 @@
     is an Index Data extension for YAZ-based Z39.50 targets,
     <ulink url="&url.solr;">Solr</ulink> and SRU 2.0 targets.
 
-    Facets may be requestd by the
+    Facets may be requested by the
      <link linkend="zoom.facets.option">facets</link> option before a
     search is sent.
     For inspection of the returned facets, the following functions are
@@ -2366,7 +2366,7 @@
     <function>ZOOM_resultset_facets_size(result_set)</function>-1.
    </para>
    <para id="zoom.resultset.facets_names">
-    It is possible to interate over facets by name, by calling
+    It is possible to iterate over facets by name, by calling
     <function>ZOOM_resultset_facets_names</function>.
     This will return a const array of char * where each string can be used
     as parameter for <function>ZOOM_resultset_get_facet_field</function>.
@@ -2869,7 +2869,7 @@
        <row>
 	<entry>recordOpaque</entry>
 	<entry>Specifies an opaque record which is
-	  encoded as an ASN.1 ANY type with the OID as tiven by option
+	  encoded as an ASN.1 ANY type with the OID as given by option
 	  <literal>syntax</literal> (see below).
 	  Option <literal>recordOpaque</literal> is an alternative
 	  to record - and <literal>record</literal> option (above) is
@@ -3512,7 +3512,7 @@ typedef struct bend_initrequest
     set that the backend assumes for query terms */
     char *query_charset;
 
-    /** \brief whehter query_charset also applies to recors
+    /** \brief whether query_charset also applies to records
 
     Is 0 (No) by default. Set to 1 (yes) if records is in the same
     character set as queries. If in doubt, use 0 (No).
@@ -3689,7 +3689,7 @@ typedef struct bend_fetch_rr {
     char *setname;             /* set name */
     int number;                /* record number */
     Z_ReferenceId *referenceId;/* reference ID */
-    Odr_oid *request_format;        /* format, transfer syntax (OID) */
+    Odr_oid *request_format;   /* format, transfer syntax (OID) */
     Z_RecordComposition *comp; /* Formatting instructions */
     ODR stream;                /* encoding stream - memory source if req */
     ODR print;                 /* printing stream */
@@ -3698,7 +3698,7 @@ typedef struct bend_fetch_rr {
     int len;                   /* length of record or -1 if structured */
     char *record;              /* record */
     int last_in_set;           /* is it?  */
-    Odr_oid *output_format;        /* response format/syntax (OID) */
+    Odr_oid *output_format;    /* response format/syntax (OID) */
     int errcode;               /* 0==success */
     char *errstring;           /* system error string or NULL */
     int surrogate_flag;        /* surrogate diagnostic */
@@ -4026,7 +4026,7 @@ typedef struct bend_scan_rr {
     You can use static or automatic local variables in the function that
     prepares the PDU. This is a simple approach, and it provides the most
     efficient form of memory management. While it works well for flat
-    PDUs like the InitReqest, it will generally not be sufficient for say,
+    PDUs like the InitRequest, it will generally not be sufficient for say,
     the generation of an arbitrarily complex RPN query structure.
    </para>
    <para>
@@ -4228,7 +4228,7 @@ typedef struct Z_ext_typeent
     the struct above, in the source file <filename>prt-ext.h</filename>, as
     well as the encoder/decoder in the file <filename>prt-ext.c</filename>.
     When changing the latter, remember to update both the
-    <literal>arm</literal> arrary and the list
+    <literal>arm</literal> array and the list
     <literal>type_table</literal>, which drives the CHOICE biasing that
     is necessary to tell the different, structured types apart
     on decoding.
@@ -4612,8 +4612,8 @@ typedef struct Z_ext_typeent
 	num_bulkStatuses</entry><entry>Odr_int</entry><entry>0
        </entry></row>
       <row><entry>
-	bulkStatuses</entry><entry>Z_ListStatus</entry><entry>NUL
-	L</entry></row>
+	bulkStatuses</entry><entry>Z_ListStatus</entry><entry>NULL
+	</entry></row>
       <row><entry>
 	deleteMessage</entry><entry>char*</entry><entry>NULL
        </entry></row>
@@ -4697,7 +4697,7 @@ typedef struct Z_ext_typeent
        positionOfTerm</entry><entry>Odr_int</entry><entry>NULL
       </entry></row>
       <row><entry>
-       entries</entry><entry>Z_ListEntris</entry><entry>NULL
+       entries</entry><entry>Z_ListEntries</entry><entry>NULL
       </entry></row>
       <row><entry>
        attributeSet</entry><entry>Odr_oid</entry><entry>NULL
@@ -5060,7 +5060,7 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
     Member <literal>no</literal> is
     set the offset of the handler that matched; <literal>ns</literal>
     is set to namespace of the matching handler; the void pointer
-    <literal>p</literal> is set to the C data structure assocatiated
+    <literal>p</literal> is set to the C data structure associated
     with the handler.
    </para>
    <para>
@@ -5191,7 +5191,7 @@ typedef struct {
 } Z_SRW_record;
     </synopsis>
     The record data is defined as a buffer of some length so that
-    data can be of any type. SRW 1.0 currenly doesn't allow for this
+    data can be of any type. SRW 1.0 currently doesn't allow for this
     (only XML), but future versions might do.
    </para>
    <para>
@@ -5439,7 +5439,7 @@ typedef struct {
 	 remaining parameters must be satisfied) or
 	 1 = true (the proximity condition specified by the
 	 remaining parameters must <emphasis>not</emphasis> be
-	 satisifed).
+	 satisfied).
 	</para>
        </formalpara>
        </listitem>
@@ -5954,7 +5954,7 @@ typedef struct {
 	  <entry>
 	   Allows term to be both left-and-right truncated.
 	   If term is of the form <literal>?x?</literal>, the
-	   resulting term is <literal>x</literal> and trunctation is
+	   resulting term is <literal>x</literal> and truncation is
 	   set to both left and right.
 	  </entry>
 	  </row>
@@ -6339,7 +6339,7 @@ struct cql_node {
        </listitem>
        <listitem>
         <para>
-         <literal>index_uri</literal>: index URi for search term
+         <literal>index_uri</literal>: index URI for search term
 	 or NULL if none could be resolved for the index.
         </para>
        </listitem>
@@ -6438,11 +6438,11 @@ int cql_transform_buf(cql_transform_t ct,
      <para>
       If conversion fails, more information can be obtained by calling
       <synopsis>
-int cql_transform_error(cql_transform_t ct, char **addinfop);
+int cql_transform_error(cql_transform_t ct, char **addinfo);
       </synopsis>
       This function returns the most recently returned numeric
       error-code and sets the string-pointer at
-      <literal>*addinfop</literal> to point to a string containing
+      <literal>*addinfo</literal> to point to a string containing
       additional information about the error that occurred: for
       example, if the error code is 15 ("Illegal or unsupported context
       set"), the additional information is the name of the requested
@@ -6944,7 +6944,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    <sect2 id="tools.oid.std">
     <title>Standard OIDs</title>
     <para>
-     All the object identifers in the standard OID database as returned
+     All the object identifiers in the standard OID database as returned
      by <function>yaz_oid_std</function> can be referenced directly in a
      program as a constant OID.
      Each constant OID is prefixed with <literal>yaz_oid_</literal> -
@@ -7011,7 +7011,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <para>
     The nibble-memory pool is shared amongst threads. POSIX
-    mutex'es and WIN32 Critical sections are introduced to keep the
+    mutexes and WIN32 Critical sections are introduced to keep the
     module thread safe. Function <function>nmem_init()</function>
     initializes the nibble-memory library and it is called automatically
     the first time the <literal>YAZ.DLL</literal> is loaded. &yaz; uses
@@ -7098,7 +7098,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     Yaz uses the following dynamic log levels:
     <literal>server, session, request, requestdetail</literal> for the server
     functionality.
-    <literal>zoom</literal> for the zoom client api.
+    <literal>zoom</literal> for the zoom client API.
     <literal>ztest</literal> for the simple test server.
     <literal>malloc, nmem, odr, eventl</literal> for internal
     debugging of yaz itself.
@@ -7528,7 +7528,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
              <literal>line</literal> (MARC line format);
              <literal>marcxml</literal> (for MARCXML),
              <literal>marc</literal> (ISO2709),
-             <literal>marcxhcange</literal> (for MarcXchange),
+             <literal>marcxchange</literal> (for MarcXchange),
              or <literal>json</literal>
              (<ulink url="&url.marc_in_json;">MARC-in-JSON </ulink>).
             </para>
@@ -7539,7 +7539,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            <listitem>
             <para>
              Encoding of input. For XML input formats, this need not
-             be given, but for ISO2709 based inputformats, this should
+             be given, but for ISO2709 based input formats, this should
              be set to the encoding used. For MARC21 records, a common
              inputcharset value  would be <literal>marc-8</literal>.
             </para>
@@ -7550,7 +7550,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            <listitem>
             <para>
              Encoding of output. If outputformat is XML based, it is
-             strongly recommened to use <literal>utf-8</literal>.
+             strongly recommended to use <literal>utf-8</literal>.
             </para>
            </listitem>
           </varlistentry>
@@ -7757,7 +7757,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <title>Using the Z39.50 sort service</title>
     <para>
      yaz-client and the ZOOM API support the Z39.50 sort facility. In any
-     case the sort sequence or sort critiera is using a string notation.
+     case the sort sequence or sort criteria is using a string notation.
      This notation is a one-line notation suitable for being manually
      entered or generated, and allows for easy logging (one liner).
      For the ZOOM API, the sort is specified in the call to ZOOM_query_sortby
@@ -7782,7 +7782,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      a client to perform sorting even if it does not implement/support
      Z39.50 sort. Virtually all Z39.50 client software supports
      RPN queries. It also may improve performance because the sort
-     critieria is specified along with the search query.
+     criteria is specified along with the search query.
     </para>
     <para>
      The sort is triggered by the presence of type 7, and the value of type 7
@@ -8105,7 +8105,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      where to find the encoded data, and how long the buffer is
      (the <literal>can_grow</literal> parameter is ignored by a decoding
      stream). After this, you can call the function corresponding to the
-     data you wish to decode (eg, <function>odr_integer()</function> odr
+     data you wish to decode (e.g. <function>odr_integer()</function> odr
      <function>z_APDU()</function>).
     </para>
     <example id="example.odr.encoding.and.decoding.functions">
@@ -9620,7 +9620,7 @@ void odr_choice_bias(ODR o, int what);
   <para>
    The SOAP implementation is incomplete. In the future we hope
    to add more features to it. Perhaps make a WSDL/XML Schema compiler.
-   The authors of libxml2 are already working on XML Schema / RelaxNG
+   The authors of libxml2 are already working on XML Schema and RELAX NG
    compilers so this may not be too hard.
   </para>
   <para>
