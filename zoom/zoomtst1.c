@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     if (argc != 3)
     {
         fprintf (stderr, "usage:\n%s target query\n", *argv);
-        fprintf (stderr, " eg.  bagel.indexdata.dk/gils computer\n");
+        fprintf (stderr, " e.g.  z3950.indexdata.com/gils computer\n");
         exit (1);
     }
     z = ZOOM_connection_new (argv[1], 0);
