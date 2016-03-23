@@ -353,7 +353,7 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
 #endif
 
 /**
-   http://www.loc.gov/z3950/agency/zing/srw/service.html
+   http://www.loc.gov/standards/sru/companionSpecs/srw.html
 */
 int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                    Z_SOAP **soap_package, ODR decode, char **charset,
@@ -590,7 +590,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         else if (!strcmp(operation, "explain"))
         {
             /* Transfer SRU explain parameters to common struct */
-            /* http://www.loc.gov/z3950/agency/zing/srw/explain.html */
+            /* http://www.loc.gov/standards/sru/explain/ */
+            /* http://zeerex.z3950.org/overview/ */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_explain_request);
 
             sr->srw_version = version;
@@ -621,7 +622,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         else if (!strcmp(operation, "scan"))
         {
             /* Transfer SRU scan parameters to common struct */
-            /* http://www.loc.gov/z3950/agency/zing/srw/scan.html */
+            /* http://www.loc.gov/standards/sru/companionSpecs/scan.html */
             Z_SRW_PDU *sr = yaz_srw_get(decode, Z_SRW_scan_request);
 
             sr->srw_version = version;

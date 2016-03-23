@@ -15,7 +15,7 @@
 /*
  * The error-messages associated with these codes are taken from
  * the SRW diagnostic specifications at
- *      http://www.loc.gov/standards/sru/diagnostics-list.html
+ *      http://www.loc.gov/standards/sru/diagnostics/diagnosticsList.html
  */
 const char *cql_strerror(int code) {
     static char buf[80];

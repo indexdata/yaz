@@ -6,7 +6,7 @@ BEGIN
 -- This format is returned from the server at
 --	fsz3950test.oclc.org:210
 -- I found the definition at
---	http://www.oclc.org/firstsearch/documentation/z3950/config_guide.htm
+--	http://www.oclc.org/support/services/firstsearch/documentation/z3950/fs_z39_config_guide.en.html
 --
 -- I have added OPTIONAL modifiers to the `dblist' and and `code'
 -- elements because they appear to be admitted from the APDU returned
