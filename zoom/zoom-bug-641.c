@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
     if (argc < 3) {
         fprintf(stderr, "Usage:\n%s <target> <file> [<file> ...]\n", argv[0]);
-        fprintf(stderr, " eg.  bagel.indexdata.dk/gils foo.xml bar.xml\n");
+        fprintf(stderr, " e.g.  z3950.indexdata.com/gils foo.xml bar.xml\n");
         return 1;
     }
 

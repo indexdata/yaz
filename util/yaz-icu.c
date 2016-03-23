@@ -200,7 +200,7 @@ static void print_icu_transliterators(const struct config_t *p_config)
                 "   Set Complement  [[:Greek:] - [:letter:]]\n"
                 "   Complement      [^[:Greek:] [:letter:]]\n"
                 "\n"
-             "see: http://icu.sourceforge.net/userguide/unicodeSet.html\n"
+             "see: http://userguide.icu-project.org/strings/unicodeset\n"
                 "\n"
                 "Examples:\n"
                 "   [:Punctuation:] Any-Remove\n"

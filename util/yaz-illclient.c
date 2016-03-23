@@ -10,7 +10,7 @@
  *
  *  This is a test client for handling ISO 10161-1 ILL requests.
  *  Those are not directly Z39.50, but the protocol is quite similar
- *  and yaz already provides the APDUS for it.
+ *  and yaz already provides the APDUs for it.
  *
  *  This is not an interactive client like yaz-client, but driven by command-
  *  line arguments. Its output is a return code, and possibly some text on
@@ -266,7 +266,7 @@ void parseargs( int argc, char * argv[],  struct prog_args *args) {
 void validateargs( struct prog_args *args) {
     if (!args->host) {
         fprintf(stderr, "Specify a connection address, "
-                        "as in 'bagel.indexdata.dk:210' \n");
+                        "as in 'z3950.indexdata.com:210' \n");
         exit(1);
     }
     if (args->oclc_auth && ((!args->auth_userid) || (!args->auth_passwd))){

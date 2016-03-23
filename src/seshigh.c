@@ -2456,7 +2456,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
  * Set the specified `errcode' and `errstring' into a UserInfo-1
  * external to be returned to the client in accordance with Z35.90
  * Implementor Agreement 5 (Returning diagnostics in an InitResponse):
- *      http://lcweb.loc.gov/z3950/agency/agree/initdiag.html
+ *      http://www.loc.gov/z3950/agency/agree/initdiag.html
  */
 static Z_External *init_diagnostics(ODR odr, int error, const char *addinfo)
 {

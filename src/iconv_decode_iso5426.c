@@ -7,7 +7,7 @@
  * \brief ISO 5426 decoding
  *
  * MARC-8 reference:
- *  http://www.loc.gov/marc/specifications/specchariso8.html
+ *  http://www.loc.gov/marc/specifications/speccharmarc8.html
  *
  * ISO 5426 reference (in German)
  * Zeichenkonkordanz MAB2-Zeichensatz - ISO/IEC 10646 / Unicode
