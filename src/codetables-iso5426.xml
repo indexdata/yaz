@@ -610,8 +610,8 @@ BRACKET</name>
 		</characterSet>
 		<characterSet name="MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983" date="1-Feb-2005, Updated Nov 2008" ISOcode="45">
 			<note>See also Zeichentabelle MAB2 (ISO 5426-1983), http://www.gymel.com/charsets/MAB2.html</note>
-			<note>See also MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983, http://www.d-nb.de/standardisierung/pdf/mab_unic.pdf</note>
-			<note>See also Zeichenkonkordanz MAB2-Zeichensatz - MARC-8, http://www.d-nb.de/standardisierung/pdf/mab_marc.pdf</note>
+			<note>See also MAB2-Zeichensatz ISO 646 (IRV) + ISO 5426-1983, http://www.dnb.de/standardisierung/pdf/mab_unic.pdf</note>
+			<note>See also Zeichenkonkordanz MAB2-Zeichensatz - MARC-8, http://www.dnb.de/standardisierung/pdf/mab_marc.pdf</note>
 			<!-- 80 - 87 -->
 			<code>
 				<marc>88</marc>
