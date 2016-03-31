@@ -14,7 +14,6 @@ matrix:
       env:
        - MY_OS=precise
     - os: osx
-      osx_image: xcode7.3
       env:
        - MY_OS=macos
 
