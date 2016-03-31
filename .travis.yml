@@ -50,6 +50,6 @@ before_script:
 
 script:
  - ./configure
- - make
+ - make -j3
  - make check
 
