@@ -140,6 +140,7 @@ static void yaz_invoke_backtrace(void)
     alarm(1);
     sz = backtrace(backtrace_info, sz);
     backtrace_symbols_fd(backtrace_info, sz, fd);
+    alarm(0);
 }
 
 static void yaz_panic_sig_handler(int sig)
