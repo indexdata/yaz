@@ -121,21 +121,23 @@ static void yaz_invoke_gdb(void)
     }
 }
 
+static int yaz_panic_signal = 0;
 static void yaz_panic_alarm(int sig)
 {
     const char *cp = "backtrace: backtrace hangs\n";
 
     write(yaz_panic_fd, cp, strlen(cp));
     yaz_invoke_gdb();
-    abort();
+    kill(getpid(), yaz_panic_signal);
 }
 
-static void yaz_invoke_backtrace(void)
+static void yaz_invoke_backtrace(int sig)
 {
     int fd = yaz_panic_fd;
     void *backtrace_info[BACKTRACE_SZ];
     int sz = BACKTRACE_SZ;
 
+    yaz_panic_signal = sig;
     signal(SIGALRM, yaz_panic_alarm);
     alarm(1);
     sz = backtrace(backtrace_info, sz);
@@ -179,9 +181,9 @@ static void yaz_panic_sig_handler(int sig)
     yaz_panic_fd = fileno(file);
 
     write(yaz_panic_fd, buf, strlen(buf));
-    yaz_invoke_backtrace();
+    yaz_invoke_backtrace(sig);
     yaz_invoke_gdb();
-    abort();
+    kill(getpid(), sig);
 }
 #endif
 
