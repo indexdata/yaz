@@ -231,6 +231,16 @@ static void tst(void)
                      "</rpn></query>\n",
                      "RPN @attrset GILS @attr 4=2 x"
                      ), XML_MATCH);
+
+    YAZ_CHECK_EQ(pqf2xml_text(
+                     "@attrset Bib-1 @attr 0=1016 \" AILSA\"",
+                     "<?xml version=\"1.0\"?>\n"
+                     "<query><rpn set=\"Bib-1\">"
+                     "<apt><attr type=\"0\" value=\"1016\"/>"
+                     "<term type=\"general\"> AILSA</term></apt>"
+                     "</rpn></query>\n", 0
+                     ), XML_MATCH);
+
 #endif
 }
 

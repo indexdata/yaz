@@ -82,7 +82,6 @@ static void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
         if (setname)
             xmlNewProp(node, BAD_CAST "set", BAD_CAST setname);
 
-        assert(*element->attributeType > 0 && *element->attributeType < 20);
         sprintf(formstr, ODR_INT_PRINTF, *element->attributeType);
         xmlNewProp(node, BAD_CAST "type", BAD_CAST formstr);
 
