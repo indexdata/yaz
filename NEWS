@@ -1,3 +1,18 @@
+--- 5.15.3 2016/04/06
+
+Fix yaz_query2xml aborts for attribute type 0. Github #9.
+
+backtrace: exit with same signal as original fired
+Until now with backtrace any signal would end up being an SIGABRT.
+
+backtrace: cancel alarm if backtrace succeeds
+This is to avoid "backtrace hangs" message that should not be
+printed and gdb be invoked twice.
+
+Fix some broken URLs in documentation and code.
+
+yaz_marc_write_iso2709: truncate if 99,999 limit is reached.
+
 --- 5.15.2 2016/01/11
 
 Re-organize Windows build. Use ICU compiled with VS 2015 to use
