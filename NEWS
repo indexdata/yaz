@@ -932,7 +932,7 @@ Solr scan support for ZOOM and yaz-client. Patch from Simon Jacob.
 New function, yaz_xml_to_opac, to convert from OPACXML to Z39.50 OPAC.
 
 OPACXML: sync spelling of availabilityDate in XML to that of Schema
-opaxxml.xsd. The schema had the correct spelling of this member always.
+opacxml.xsd. The schema had the correct spelling of this member always.
 The ASN.1 was mis-spelled and still is (API change) - we are
 not changing this. However, the OPAC to XML conversion had yet
 *another* typo.
