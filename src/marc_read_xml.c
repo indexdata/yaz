@@ -241,13 +241,11 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
             }
             else if (!strcmp((const char *) ptr->name, "datafield"))
             {
-                char indstr[11]; /* 0(unused), 1,....9, + zero term */
+                char indstr[48];
                 const xmlNode *ptr_tag = 0;
                 struct _xmlAttr *attr;
-                int i;
-                for (i = 0; i < indicator_length; i++)
-                    indstr[i] = ' ';
-                indstr[i] = '\0';
+
+                indstr[0] = '\0';
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (!strcmp((const char *)attr->name, "tag"))
                         ptr_tag = attr->children;
@@ -260,7 +258,9 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                             no <= indicator_length && no > 0 &&
                             attr->children->content[0])
                         {
-                            indstr[no - 1] = attr->children->content[0];
+                            if (xmlStrlen(attr->children->content) < 5)
+                                strcat(indstr,
+                                       (const char *) attr->children->content);
                         }
                         else
                         {

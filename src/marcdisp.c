@@ -287,8 +287,8 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_DATAFIELD;
     n->u.datafield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
-    n->u.datafield.indicator =
-        nmem_strdupn(mt->nmem, indicator, indicator_len);
+    n->u.datafield.indicator = nmem_strdup(mt->nmem, indicator);
+    yaz_log(YLOG_LOG, "yaz_marc_add_datafield_xml indicator=%s", indicator);
     n->u.datafield.subfields = 0;
 
     /* make subfield_pp the current (last one) */
@@ -713,11 +713,16 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
     	    if (n->u.datafield.indicator)
     	    {
     	    	int i;
-    	    	for (i = 0; n->u.datafield.indicator[i]; i++)
+                size_t off = 0;
+                for (i = 0; n->u.datafield.indicator[off]; i++)
     	    	{
+                    size_t ilen =
+                        cdata_one_character(mt, n->u.datafield.indicator + off);
                     wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
                     wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                            n->u.datafield.indicator+i, 1);
+                                            n->u.datafield.indicator + off,
+                                            ilen);
+                    off += ilen;
                     wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
                 }
             }
@@ -1150,7 +1155,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         {
         case YAZ_MARC_DATAFIELD:
             tag = n->u.datafield.tag;
-            data_length += indicator_length;
+            data_length += strlen(n->u.datafield.indicator);
             wrbuf_rewind(wr_data_tmp);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
@@ -1222,7 +1227,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-            wrbuf_write(wr, n->u.datafield.indicator, indicator_length);
+            wrbuf_puts(wr, n->u.datafield.indicator);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 wrbuf_putc(wr, ISO2709_IDFS);
