@@ -90,9 +90,9 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 }
 
 // Given a xmlNode ptr,  extract a value from either a element name or from a given attribute
-char *element_attribute_value_extract(const xmlNode *ptr,
-                                      const char *attribute_name,
-                                      NMEM nmem)
+static char *element_attribute_value_extract(const xmlNode *ptr,
+                                             const char *attribute_name,
+                                             NMEM nmem)
 {
     const char *name = (const char *) ptr->name;
     size_t length = strlen(name);
