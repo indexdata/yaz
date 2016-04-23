@@ -476,6 +476,11 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
     return 1; /* we don't know */
 }
 
+size_t yaz_marc_sizeof_char(yaz_marc_t mt, const char *buf)
+{
+    return cdata_one_character(mt, buf);
+}
+
 void yaz_marc_reset(yaz_marc_t mt)
 {
     nmem_reset(mt->nmem);
