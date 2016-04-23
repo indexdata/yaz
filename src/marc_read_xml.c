@@ -89,17 +89,6 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
     return 0;
 }
 
-const char *tag_value_extract(const char *name, char tag_buffer[5])
-{
-    size_t length = strlen(name);
-    if (length == 3)
-    {
-        strcpy(tag_buffer, name);
-        return tag_buffer;
-    }
-    return 0;
-}
-
 // Given a xmlNode ptr,  extract a value from either a element name or from a given attribute
 char *element_attribute_value_extract(const xmlNode *ptr,
                                       const char *attribute_name,
