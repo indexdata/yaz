@@ -1055,15 +1055,22 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             if (n->u.datafield.indicator)
             {
                 int i;
-                for (i = 0; n->u.datafield.indicator[i]; i++)
+                size_t off = 0;
+                for (i = 0; n->u.datafield.indicator[off]; i++)
                 {
-                    char ind_str[6];
-                    char ind_val[2];
-
-                    sprintf(ind_str, "ind%d", i+1);
-                    ind_val[0] = n->u.datafield.indicator[i];
-                    ind_val[1] = '\0';
-                    xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+                    size_t ilen =
+                        cdata_one_character(mt, n->u.datafield.indicator + off);
+                    char ind_val[10];
+                    if (ilen < sizeof(ind_val) - 1)
+                    {
+                        char ind_str[6];
+                        sprintf(ind_str, "ind%d", i+1);
+                        memcpy(ind_val, n->u.datafield.indicator + off,
+                               ilen);
+                        ind_val[ilen] = '\0';
+                        xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+                    }
+                    off += ilen;
                 }
             }
             for (s = n->u.datafield.subfields; s; s = s->next)
