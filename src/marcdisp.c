@@ -879,6 +879,30 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
 }
 
 #if YAZ_HAVE_XML2
+static void write_xml_indicator(yaz_marc_t mt, struct yaz_marc_node *n,
+                                xmlNode *ptr, int turbo)
+{
+    if (n->u.datafield.indicator)
+    {
+        int i;
+        size_t off = 0;
+        for (i = 0; n->u.datafield.indicator[off]; i++)
+        {
+            size_t ilen =
+                cdata_one_character(mt, n->u.datafield.indicator + off);
+            char ind_val[10];
+            if (ilen < sizeof(ind_val) - 1)
+            {
+                char ind_str[6];
+                sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
+                memcpy(ind_val, n->u.datafield.indicator + off, ilen);
+                ind_val[ilen] = '\0';
+                xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+            }
+            off += ilen;
+        }
+    }
+}
 
 static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
                                   struct yaz_marc_node *n,
@@ -897,20 +921,7 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
     field[4] = '\0';
     ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST field, 0);
 
-    if (n->u.datafield.indicator)
-    {
-        int i;
-        for (i = 0; n->u.datafield.indicator[i]; i++)
-        {
-            char ind_str[6];
-            char ind_val[2];
-
-            ind_val[0] = n->u.datafield.indicator[i];
-            ind_val[1] = '\0';
-            sprintf(ind_str, "%s%d", indicator_name[1], i+1);
-            xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
-        }
-    }
+    write_xml_indicator(mt, n, ptr, 1);
     for (s = n->u.datafield.subfields; s; s = s->next)
     {
         int not_written;
@@ -1058,27 +1069,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
         case YAZ_MARC_DATAFIELD:
             ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST "datafield", 0);
             xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.datafield.tag);
-            if (n->u.datafield.indicator)
-            {
-                int i;
-                size_t off = 0;
-                for (i = 0; n->u.datafield.indicator[off]; i++)
-                {
-                    size_t ilen =
-                        cdata_one_character(mt, n->u.datafield.indicator + off);
-                    char ind_val[10];
-                    if (ilen < sizeof(ind_val) - 1)
-                    {
-                        char ind_str[6];
-                        sprintf(ind_str, "ind%d", i+1);
-                        memcpy(ind_val, n->u.datafield.indicator + off,
-                               ilen);
-                        ind_val[ilen] = '\0';
-                        xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
-                    }
-                    off += ilen;
-                }
-            }
+            write_xml_indicator(mt, n, ptr, 0);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 xmlNode *ptr_subfield;
