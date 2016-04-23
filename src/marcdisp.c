@@ -880,7 +880,8 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
 
 #if YAZ_HAVE_XML2
 
-void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
+static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
+                                  struct yaz_marc_node *n,
                                   xmlNode *record_ptr,
                                   xmlNsPtr ns_record, WRBUF wr_cdata,
                                   int identifier_length)
