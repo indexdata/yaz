@@ -288,7 +288,6 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     n->which = YAZ_MARC_DATAFIELD;
     n->u.datafield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
     n->u.datafield.indicator = nmem_strdup(mt->nmem, indicator);
-    yaz_log(YLOG_LOG, "yaz_marc_add_datafield_xml indicator=%s", indicator);
     n->u.datafield.subfields = 0;
 
     /* make subfield_pp the current (last one) */
@@ -1322,14 +1321,18 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
                 wrbuf_puts(w, "\"\n\t\t\t\t\t}");
             }
             wrbuf_puts(w, "\n\t\t\t\t]");
-            if (n->u.datafield.indicator[0])
+            if (n->u.datafield.indicator)
             {
                 int i;
-                for (i = 0; n->u.datafield.indicator[i]; i++)
+                size_t off = 0;
+                for (i = 0; n->u.datafield.indicator[off]; i++)
                 {
+                    size_t ilen =
+                        cdata_one_character(mt, n->u.datafield.indicator + off);
                     wrbuf_printf(w, ",\n\t\t\t\t\"ind%d\":\"", i + 1);
-                    wrbuf_json_write(w, &n->u.datafield.indicator[i], 1);
+                    wrbuf_json_write(w, &n->u.datafield.indicator[off], ilen);
                     wrbuf_printf(w, "\"");
+                    off += ilen;
                 }
             }
             wrbuf_puts(w, "\n\t\t\t}\n");
