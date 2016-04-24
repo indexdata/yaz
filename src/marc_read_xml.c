@@ -28,7 +28,7 @@
 #endif
 
 #if YAZ_HAVE_XML2
-int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     NMEM nmem = yaz_marc_get_nmem(mt);
     for (; ptr; ptr = ptr->next)
@@ -89,21 +89,9 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
     return 0;
 }
 
-const char *tag_value_extract(const char *name, char tag_buffer[5])
-{
-    size_t length = strlen(name);
-    if (length == 3)
-    {
-        strcpy(tag_buffer, name);
-        return tag_buffer;
-    }
-    return 0;
-}
-
-// Given a xmlNode ptr,  extract a value from either a element name or from a given attribute
-char *element_attribute_value_extract(const xmlNode *ptr,
-                                      const char *attribute_name,
-                                      NMEM nmem)
+static char *element_attribute_value_extract(const xmlNode *ptr,
+                                             const char *attribute_name,
+                                             NMEM nmem)
 {
     const char *name = (const char *) ptr->name;
     size_t length = strlen(name);
@@ -117,8 +105,30 @@ char *element_attribute_value_extract(const xmlNode *ptr,
     return 0;
 }
 
+static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
+                                char *res, int turbo, int indicator_length)
+{
+    int i;
+    res[0] = '\0';
+    for (i = 1; i <= indicator_length; i++)
+    {
+        struct _xmlAttr *attr;
+        char attrname[12];
+        sprintf(attrname, "%s%d", turbo ? "i" : "ind", i);
+        for (attr = ptr->properties; attr; attr = attr->next)
+        {
+            if (!strcmp((const char *)attr->name, attrname) &&
+                attr->children && attr->children->type == XML_TEXT_NODE &&
+                attr->children->content &&
+                strlen((const char *) attr->children->content) < 5)
+            {
+                strcat(res, (const char *)attr->children->content);
+            }
+        }
+    }
+}
 
-int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     for (; ptr; ptr = ptr->next)
     {
@@ -241,34 +251,16 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
             }
             else if (!strcmp((const char *) ptr->name, "datafield"))
             {
-                char indstr[11]; /* 0(unused), 1,....9, + zero term */
+                char indstr[48];
                 const xmlNode *ptr_tag = 0;
                 struct _xmlAttr *attr;
-                int i;
-                for (i = 0; i < indicator_length; i++)
-                    indstr[i] = ' ';
-                indstr[i] = '\0';
+
+                get_indicator_value(mt, ptr, indstr, 0, indicator_length);
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (!strcmp((const char *)attr->name, "tag"))
                         ptr_tag = attr->children;
-                    else if (strlen((const char *)attr->name) == 4 &&
-                             !memcmp(attr->name, "ind", 3))
-                    {
-                        int no = atoi((const char *)attr->name + 3);
-                        if (attr->children &&
-                            attr->children->type == XML_TEXT_NODE &&
-                            no <= indicator_length && no > 0 &&
-                            attr->children->content[0])
-                        {
-                            indstr[no - 1] = attr->children->content[0];
-                        }
-                        else
-                        {
-                            yaz_marc_cprintf(
-                                mt, "Bad attribute '%.80s' for 'datafield'",
-                                attr->name);
-                        }
-                    }
+                    else if (!strncmp((const char *)attr->name, "ind", 3))
+                        ;
                     else
                     {
                         yaz_marc_cprintf(
@@ -321,11 +313,7 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                 struct _xmlAttr *attr;
                 NMEM nmem = yaz_marc_get_nmem(mt);
                 char *tag_value;
-                char *indstr = nmem_malloc(nmem, indicator_length + 1);
-                int i = 0;
-                for (i = 0; i < indicator_length; i++)
-                    indstr[i] = ' ';
-                indstr[i] = '\0';
+                char *indstr = nmem_malloc(nmem, indicator_length * 5);
                 tag_value = element_attribute_value_extract(ptr, "tag", nmem);
                 if (!tag_value)
                 {
@@ -333,25 +321,11 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                         mt, "Missing attribute 'tag' for 'datafield'" );
                     return -1;
                 }
+                get_indicator_value(mt, ptr, indstr, 1, indicator_length);
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (strlen((const char *)attr->name) == 2 &&
                         attr->name[0] == 'i')
-                    {
-                    	//extract indicator attribute from i#="Y" pattern
-                        int no = atoi((const char *)attr->name + 1);
-                        if (attr->children &&
-                            attr->children->type == XML_TEXT_NODE &&
-                            no <= indicator_length && no > 0 &&
-                            attr->children->content[0])
-                        {
-                            indstr[no - 1] = attr->children->content[0];
-                        }
-                        else
-                        {
-                            yaz_marc_cprintf(
-                                mt, "Bad attribute '%.80s' for 'd'",attr->name);
-                        }
-                    }
+                        ;
                     else
                     {
                         yaz_marc_cprintf(

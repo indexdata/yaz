@@ -287,8 +287,7 @@ void yaz_marc_add_datafield_xml(yaz_marc_t mt, const xmlNode *ptr_tag,
     struct yaz_marc_node *n = yaz_marc_add_node(mt);
     n->which = YAZ_MARC_DATAFIELD;
     n->u.datafield.tag = nmem_text_node_cdata(ptr_tag, mt->nmem);
-    n->u.datafield.indicator =
-        nmem_strdupn(mt->nmem, indicator, indicator_len);
+    n->u.datafield.indicator = nmem_strdup(mt->nmem, indicator);
     n->u.datafield.subfields = 0;
 
     /* make subfield_pp the current (last one) */
@@ -474,6 +473,11 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
             return no_read;
     }
     return 1; /* we don't know */
+}
+
+size_t yaz_marc_sizeof_char(yaz_marc_t mt, const char *buf)
+{
+    return cdata_one_character(mt, buf);
 }
 
 void yaz_marc_reset(yaz_marc_t mt)
@@ -713,11 +717,16 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
     	    if (n->u.datafield.indicator)
     	    {
     	    	int i;
-    	    	for (i = 0; n->u.datafield.indicator[i]; i++)
+                size_t off = 0;
+                for (i = 0; n->u.datafield.indicator[off]; i++)
     	    	{
+                    size_t ilen =
+                        cdata_one_character(mt, n->u.datafield.indicator + off);
                     wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
                     wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
-                                            n->u.datafield.indicator+i, 1);
+                                            n->u.datafield.indicator + off,
+                                            ilen);
+                    off += ilen;
                     wrbuf_iconv_puts(wr, mt->iconv_cd, "\"");
                 }
             }
@@ -869,8 +878,33 @@ int yaz_marc_write_marcxchange(yaz_marc_t mt, WRBUF wr,
 }
 
 #if YAZ_HAVE_XML2
+static void write_xml_indicator(yaz_marc_t mt, struct yaz_marc_node *n,
+                                xmlNode *ptr, int turbo)
+{
+    if (n->u.datafield.indicator)
+    {
+        int i;
+        size_t off = 0;
+        for (i = 0; n->u.datafield.indicator[off]; i++)
+        {
+            size_t ilen =
+                cdata_one_character(mt, n->u.datafield.indicator + off);
+            char ind_val[10];
+            if (ilen < sizeof(ind_val) - 1)
+            {
+                char ind_str[6];
+                sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
+                memcpy(ind_val, n->u.datafield.indicator + off, ilen);
+                ind_val[ilen] = '\0';
+                xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
+            }
+            off += ilen;
+        }
+    }
+}
 
-void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
+static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
+                                  struct yaz_marc_node *n,
                                   xmlNode *record_ptr,
                                   xmlNsPtr ns_record, WRBUF wr_cdata,
                                   int identifier_length)
@@ -886,20 +920,7 @@ void add_marc_datafield_turbo_xml(yaz_marc_t mt, struct yaz_marc_node *n,
     field[4] = '\0';
     ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST field, 0);
 
-    if (n->u.datafield.indicator)
-    {
-        int i;
-        for (i = 0; n->u.datafield.indicator[i]; i++)
-        {
-            char ind_str[6];
-            char ind_val[2];
-
-            ind_val[0] = n->u.datafield.indicator[i];
-            ind_val[1] = '\0';
-            sprintf(ind_str, "%s%d", indicator_name[1], i+1);
-            xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
-        }
-    }
+    write_xml_indicator(mt, n, ptr, 1);
     for (s = n->u.datafield.subfields; s; s = s->next)
     {
         int not_written;
@@ -1047,20 +1068,7 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
         case YAZ_MARC_DATAFIELD:
             ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST "datafield", 0);
             xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.datafield.tag);
-            if (n->u.datafield.indicator)
-            {
-                int i;
-                for (i = 0; n->u.datafield.indicator[i]; i++)
-                {
-                    char ind_str[6];
-                    char ind_val[2];
-
-                    sprintf(ind_str, "ind%d", i+1);
-                    ind_val[0] = n->u.datafield.indicator[i];
-                    ind_val[1] = '\0';
-                    xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);
-                }
-            }
+            write_xml_indicator(mt, n, ptr, 0);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 xmlNode *ptr_subfield;
@@ -1150,7 +1158,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         {
         case YAZ_MARC_DATAFIELD:
             tag = n->u.datafield.tag;
-            data_length += indicator_length;
+            data_length += strlen(n->u.datafield.indicator);
             wrbuf_rewind(wr_data_tmp);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
@@ -1222,7 +1230,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
         switch(n->which)
         {
         case YAZ_MARC_DATAFIELD:
-            wrbuf_write(wr, n->u.datafield.indicator, indicator_length);
+            wrbuf_puts(wr, n->u.datafield.indicator);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 wrbuf_putc(wr, ISO2709_IDFS);
@@ -1313,14 +1321,18 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
                 wrbuf_puts(w, "\"\n\t\t\t\t\t}");
             }
             wrbuf_puts(w, "\n\t\t\t\t]");
-            if (n->u.datafield.indicator[0])
+            if (n->u.datafield.indicator)
             {
                 int i;
-                for (i = 0; n->u.datafield.indicator[i]; i++)
+                size_t off = 0;
+                for (i = 0; n->u.datafield.indicator[off]; i++)
                 {
+                    size_t ilen =
+                        cdata_one_character(mt, n->u.datafield.indicator + off);
                     wrbuf_printf(w, ",\n\t\t\t\t\"ind%d\":\"", i + 1);
-                    wrbuf_json_write(w, &n->u.datafield.indicator[i], 1);
+                    wrbuf_json_write(w, &n->u.datafield.indicator[off], ilen);
                     wrbuf_printf(w, "\"");
+                    off += ilen;
                 }
             }
             wrbuf_puts(w, "\n\t\t\t}\n");

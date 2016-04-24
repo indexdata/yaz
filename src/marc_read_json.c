@@ -60,26 +60,27 @@ static void parse_field(yaz_marc_t mt, struct json_node *p,
                  l->u.link[0]->type == json_node_list)
         {
             struct json_node *m;
-            char indicator[10];
-
-            memset(indicator, ' ', sizeof(indicator));
-            for (m = l->u.link[0]; m; m = m->u.link[1])
+            int j;
+            wrbuf_rewind(wtmp);
+            for (j = 1; j <= indicator_length; j++)
             {
-                struct json_node *s = m->u.link[0];
-                if (s->type == json_node_pair)
+                for (m = l->u.link[0]; m; m = m->u.link[1])
                 {
-                    if (s->u.link[0]->type == json_node_string
-                        && !strncmp(s->u.link[0]->u.string, "ind", 3)
-                        && s->u.link[1]->type == json_node_string)
+                    struct json_node *s = m->u.link[0];
+                    if (s->type == json_node_pair)
                     {
-                        int ch = s->u.link[0]->u.string[3];
-                        if (ch >= '1' && ch < '9')
-                            indicator[ch - '1'] = s->u.link[1]->u.string[0];
+                        if (s->u.link[0]->type == json_node_string
+                            && !strncmp(s->u.link[0]->u.string, "ind", 3)
+                            && s->u.link[0]->u.string[3] == '0' + j
+                            && s->u.link[1]->type == json_node_string)
+                        {
+                            wrbuf_puts(wtmp, s->u.link[1]->u.string);
+                        }
                     }
                 }
             }
             yaz_marc_add_datafield(mt, p->u.link[0]->u.string,
-                                   indicator, indicator_length);
+                                   wrbuf_cstr(wtmp), wrbuf_len(wtmp));
             for (m = l->u.link[0]; m; m = m->u.link[1])
             {
                 struct json_node *s = m->u.link[0];

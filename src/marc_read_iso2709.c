@@ -170,22 +170,12 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
             i += identifier_flag-1;
             if (indicator_length)
             {
-                /* skip RS/FS bytes in indicator. They are not allowed there */
-                int j;
-                for (j = indicator_length; --j >= 0; )
-                    if (buf[j+i] < ' ')
-                    {
-                        j++;
-                        i += j;
-                        end_offset += j;
-                        yaz_marc_cprintf(mt, "Bad indicator data. "
-                                         "Skipping %d bytes", j);
-                        break;
-                    }
-                yaz_marc_add_datafield(mt, tag, buf+i, indicator_length);
-                i += indicator_length;
+                int j, i_start = i;
+                for (j = 0; j < indicator_length; j++)
+                    i += yaz_marc_sizeof_char(mt, buf + i);
+                yaz_marc_add_datafield(mt, tag, buf + i_start,
+                                       i - i_start);
             }
-
             while (i < end_offset &&
                     buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
             {
