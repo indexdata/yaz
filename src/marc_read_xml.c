@@ -28,7 +28,7 @@
 #endif
 
 #if YAZ_HAVE_XML2
-int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     NMEM nmem = yaz_marc_get_nmem(mt);
     for (; ptr; ptr = ptr->next)
@@ -89,7 +89,6 @@ int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
     return 0;
 }
 
-// Given a xmlNode ptr,  extract a value from either a element name or from a given attribute
 static char *element_attribute_value_extract(const xmlNode *ptr,
                                              const char *attribute_name,
                                              NMEM nmem)
@@ -129,7 +128,7 @@ static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
     }
 }
 
-int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
+static int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
     for (; ptr; ptr = ptr->next)
     {
