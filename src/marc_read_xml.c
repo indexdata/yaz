@@ -106,6 +106,28 @@ static char *element_attribute_value_extract(const xmlNode *ptr,
     return 0;
 }
 
+static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
+                                char *res, int turbo, int indicator_length)
+{
+    int i;
+    res[0] = '\0';
+    for (i = 1; i <= indicator_length; i++)
+    {
+        struct _xmlAttr *attr;
+        char attrname[12];
+        sprintf(attrname, "%s%d", turbo ? "i" : "ind", i);
+        for (attr = ptr->properties; attr; attr = attr->next)
+        {
+            if (!strcmp((const char *)attr->name, attrname) &&
+                attr->children && attr->children->type == XML_TEXT_NODE &&
+                attr->children->content &&
+                strlen((const char *) attr->children->content) < 5)
+            {
+                strcat(res, (const char *)attr->children->content);
+            }
+        }
+    }
+}
 
 int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
 {
@@ -234,30 +256,12 @@ static int yaz_marc_read_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                 const xmlNode *ptr_tag = 0;
                 struct _xmlAttr *attr;
 
-                indstr[0] = '\0';
+                get_indicator_value(mt, ptr, indstr, 0, indicator_length);
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (!strcmp((const char *)attr->name, "tag"))
                         ptr_tag = attr->children;
-                    else if (strlen((const char *)attr->name) == 4 &&
-                             !memcmp(attr->name, "ind", 3))
-                    {
-                        int no = atoi((const char *)attr->name + 3);
-                        if (attr->children &&
-                            attr->children->type == XML_TEXT_NODE &&
-                            no <= indicator_length && no > 0 &&
-                            attr->children->content[0])
-                        {
-                            if (xmlStrlen(attr->children->content) < 5)
-                                strcat(indstr,
-                                       (const char *) attr->children->content);
-                        }
-                        else
-                        {
-                            yaz_marc_cprintf(
-                                mt, "Bad attribute '%.80s' for 'datafield'",
-                                attr->name);
-                        }
-                    }
+                    else if (!strncmp((const char *)attr->name, "ind", 3))
+                        ;
                     else
                     {
                         yaz_marc_cprintf(
@@ -310,11 +314,7 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                 struct _xmlAttr *attr;
                 NMEM nmem = yaz_marc_get_nmem(mt);
                 char *tag_value;
-                char *indstr = nmem_malloc(nmem, indicator_length + 1);
-                int i = 0;
-                for (i = 0; i < indicator_length; i++)
-                    indstr[i] = ' ';
-                indstr[i] = '\0';
+                char *indstr = nmem_malloc(nmem, indicator_length * 5);
                 tag_value = element_attribute_value_extract(ptr, "tag", nmem);
                 if (!tag_value)
                 {
@@ -322,25 +322,11 @@ static int yaz_marc_read_turbo_xml_fields(yaz_marc_t mt, const xmlNode *ptr,
                         mt, "Missing attribute 'tag' for 'datafield'" );
                     return -1;
                 }
+                get_indicator_value(mt, ptr, indstr, 1, indicator_length);
                 for (attr = ptr->properties; attr; attr = attr->next)
                     if (strlen((const char *)attr->name) == 2 &&
                         attr->name[0] == 'i')
-                    {
-                    	//extract indicator attribute from i#="Y" pattern
-                        int no = atoi((const char *)attr->name + 1);
-                        if (attr->children &&
-                            attr->children->type == XML_TEXT_NODE &&
-                            no <= indicator_length && no > 0 &&
-                            attr->children->content[0])
-                        {
-                            indstr[no - 1] = attr->children->content[0];
-                        }
-                        else
-                        {
-                            yaz_marc_cprintf(
-                                mt, "Bad attribute '%.80s' for 'd'",attr->name);
-                        }
-                    }
+                        ;
                     else
                     {
                         yaz_marc_cprintf(
