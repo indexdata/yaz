@@ -1,6 +1,10 @@
+--- 5.16.0 2016/04/29
+
+Allow multi-byte indicators for MARC subsystem. GitHub #11.
+
 --- 5.15.3 2016/04/06
 
-Fix yaz_query2xml aborts for attribute type 0. Github #9.
+Fix yaz_query2xml aborts for attribute type 0. GitHub #9.
 
 backtrace: exit with same signal as original fired
 Until now with backtrace any signal would end up being an SIGABRT.

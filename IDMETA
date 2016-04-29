@@ -1,4 +1,4 @@
 DEBIAN_DIST="jessie wheezy"
 UBUNTU_DIST="xenial wily trusty precise"
 CENTOS_DIST="centos5 centos6 centos7"
-VERSION=5.15.3
+VERSION=5.16.0
