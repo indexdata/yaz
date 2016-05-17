@@ -732,9 +732,8 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *ptr,
         if (!info)
         {
             if (wrbuf_len(p->wr_error) == 0)
-                wrbuf_printf(p->wr_error, "Element <backend>: expected "
-                             "<marc> or <xslt> element, got <%s>"
-                             , ptr->name);
+                wrbuf_printf(p->wr_error, "Element <backend>: "
+                             "unsupported element <%s>", ptr->name);
             return -1;
         }
         r = (struct yaz_record_conv_rule *) nmem_malloc(p->nmem, sizeof(*r));
