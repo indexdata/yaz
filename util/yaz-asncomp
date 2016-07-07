@@ -29,8 +29,8 @@ set yc_version 0.4
 #         | name
 # sqlist -> sqlist , name tmt opt
 #         | name tmt opt
-# chlist -> chlist , name tmt 
-#         | name tmt 
+# chlist -> chlist , name tmt
+#         | name tmt
 # enlist -> enlist , name (n)
 #         | name (n)
 # imlist -> nlist FROM name
@@ -41,8 +41,8 @@ set yc_version 0.4
 # tag   -> [tagtype n] | [n] | e
 # opt   -> OPTIONAL | e
 #
-# name    identifier/token 
-# e       epsilon/empty 
+# name    identifier/token
+# e       epsilon/empty
 # skip    one token skipped
 # n       number
 # tagtype APPLICATION, CONTEXT, etc.
@@ -52,7 +52,7 @@ set yc_version 0.4
 # is normal identifier name.
 # sets global var type to one of:
 #     {}     eof-of-file
-#     \{     left curly brace 
+#     \{     left curly brace
 #     \}     right curly brace
 #     ,      comma
 #     ;      semicolon
@@ -123,7 +123,7 @@ proc lex-name-move {name} {
 # asnError: Report error and die
 proc asnError {msg} {
     global inf
-   
+
     puts "Error in line $inf(lineno) in module $inf(module)"
     puts " $msg"
     error
@@ -133,7 +133,7 @@ proc asnError {msg} {
 # asnWarning: Report warning and return
 proc asnWarning {msg} {
     global inf
-   
+
     puts "Warning in line $inf(lineno) in module $inf(module)"
     puts " $msg"
 }
@@ -173,11 +173,11 @@ proc asnMod {xtag ximplicit xtagtype} {
     upvar $ximplicit implicit
     upvar $xtagtype tagtype
 
-    set tag {} 
+    set tag {}
     set tagtype {}
     if {![string compare $type \[]} {
         if {[regexp {^([a-zA-Z]+)[ ]+([0-9]+)$} $val x tagtype tag]} {
-            set tagtype ODR_$tagtype 
+            set tagtype ODR_$tagtype
         } elseif {[regexp {^([0-9]+)$} $val x tag]} {
             set tagtype ODR_CONTEXT
         } else {
@@ -218,7 +218,7 @@ proc asnName {name} {
     return [join [split $nval -] _]
 }
 
-# asnOptional: parses optional modifier. Returns 1 if OPTIONAL was 
+# asnOptional: parses optional modifier. Returns 1 if OPTIONAL was
 # specified; 0 otherwise.
 proc asnOptional {} {
     global type val
@@ -247,7 +247,7 @@ proc asnSubtypeSpec {} {
     global type val
 
     if {[string compare $type "("]} {
-	return 
+	return
     }
     lex
     set level 1
@@ -265,7 +265,7 @@ proc asnSubtypeSpec {} {
 # On entry $name should hold the name we are currently defining.
 # Returns type indicator:
 #   SequenceOf     SEQUENCE OF
-#   Sequence       SEQUENCE 
+#   Sequence       SEQUENCE
 #   SetOf          SET OF
 #   Set            SET
 #   Choice         CHOICE
@@ -378,7 +378,7 @@ proc asnDef {name} {
 #   $implicit is the implicit indicator as returned by asnMod
 proc asnSub {name t tname tag implicit tagtype} {
     global file inf
-   
+
     set ignore 0
     set defname defined,$inf(fprefix)$name
     if {[info exist inf($defname)]} {
@@ -476,10 +476,10 @@ proc asnSimple {name tname tag implicit tagtype} {
 
     asnEnum $uName jj
     if {![string length $tag]} {
-        set l "\treturn [lindex $tname 0] (o, p, opt, name);" 
+        set l "\treturn [lindex $tname 0] (o, p, opt, name);"
     } elseif {$implicit} {
         set l \
-  "\treturn odr_implicit_tag(o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" 
+  "\treturn odr_implicit_tag(o, [lindex $tname 0], p, $tagtype, $tag, opt, name);"
     } else {
         set l \
   "\treturn odr_explicit_tag(o, [lindex $tname 0], p, $tagtype, $tag, opt, name);" \
@@ -494,7 +494,7 @@ proc asnSimple {name tname tag implicit tagtype} {
 # asnSequence: parses "SEQUENCE { s-list }" and generates C code.
 # On entry,
 #   $name is the type we are defining
-#   $tag tag 
+#   $tag tag
 #   $implicit
 # Returns,
 #   {c-code, h-code}
@@ -556,7 +556,7 @@ proc asnSequence {name tag implicit tagtype} {
         } elseif {![string compare $t SequenceOf] && [string length $uName] &&\
 		      (![string length $ltag] || $limplicit)} {
             set u [asnType $p]
-           
+
 	    if {[llength $uName] < 2} {
 		set uName [list num_$p $p]
 	    }
@@ -577,7 +577,7 @@ proc asnSequence {name tag implicit tagtype} {
                 default {
                     set subName [mapName ${name}_$level]
                     asnSub $subName $u {} {} 0 {}
-                    
+
                     set tmpa "odr_sequence_of(o, (Odr_fun) $inf(fprefix)$subName, &(*p)->$p,"
                     set tmpb "&(*p)->[lindex $uName 0], \"$p\")"
                     lappend j "\tint [lindex $uName 0];"
@@ -626,7 +626,7 @@ proc asnSequence {name tag implicit tagtype} {
             } else {
                 if {$opt} {
                     set oa "("
-                    set ob " || odr_ok(o))" 
+                    set ob " || odr_ok(o))"
                 }
             }
             lappend l "\t\t${oa}odr_choice(o, arm, &(*p)->[lindex $uName 1], &(*p)->[lindex $uName 0], 0)${ob} &&"
@@ -638,7 +638,7 @@ proc asnSequence {name tag implicit tagtype} {
                         set lb ""
                     }
                     lappend l "\t\todr_constructed_end(o)${lb} &&"
-                } 
+                }
             }
         } else {
 	    set subName [mapName ${name}_$level]
@@ -683,11 +683,11 @@ proc asnSequence {name tag implicit tagtype} {
 # asnOf: parses "SEQUENCE/SET OF type" and generates C code.
 # On entry,
 #   $name is the type we are defining
-#   $tag tag 
+#   $tag tag
 #   $implicit
 # Returns,
 #   {c-code, h-code}
-proc asnOf {name tag implicit tagtype isset} { 
+proc asnOf {name tag implicit tagtype isset} {
     global inf
 
     if {$isset} {
@@ -807,7 +807,7 @@ proc asnArm {name defname lx jx} {
 # asnChoice: parses "CHOICE {c-list}" and generates C code.
 # On entry,
 #   $name is the type we are defining
-#   $tag tag 
+#   $tag tag
 #   $implicit
 # Returns,
 #   {c-code, h-code}
@@ -854,7 +854,7 @@ proc asnChoice {name tag implicit tagtype} {
     return [list [join $l \n] [join $j \n]]
 }
 
-# asnImports: parses i-list in "IMPORTS {i-list}" 
+# asnImports: parses i-list in "IMPORTS {i-list}"
 # On return inf(import,..)-array is updated.
 # inf(import,"module") is a list of {C-handler, C-type} elements.
 # The {C-handler, C-type} is compatible with the $tname as is used by the
@@ -870,7 +870,7 @@ proc asnImports {} {
         lex
         if {![string compare $type n] && ![string compare $val FROM]} {
             lex
-	    
+
 	    if {[info exists inf(filename,$val)]} {
 		set fname $inf(filename,$val)
 	    } else {
@@ -906,7 +906,7 @@ proc asnImports {} {
     lex
 }
 
-# asnExports: parses e-list in "EXPORTS {e-list}" 
+# asnExports: parses e-list in "EXPORTS {e-list}"
 # This function does nothing with elements in the list.
 proc asnExports {} {
     global type val inf
@@ -1020,7 +1020,7 @@ proc asnModuleBody {} {
 # asnTagDefault: parses TagDefault section
 proc asnTagDefault {} {
     global type val inf file
-    
+
     set inf(implicit-tags) 0
     while {[string length $type]} {
 	if {[lex-name-move EXPLICIT]} {
@@ -1124,19 +1124,19 @@ proc asnModules {} {
 	    puts $file(outh) "\#define ${ppname}_H"
 	    puts $file(outh) {}
 	    puts $file(outh) "\#include <yaz/odr.h>"
-	   
-            if {[info exists file(outp)]} { 
+
+            if {[info exists file(outp)]} {
 	        puts $file(outp) "\#ifndef ${ppname}_P_H"
 	        puts $file(outp) "\#define ${ppname}_P_H"
 	        puts $file(outp) {}
 	        puts $file(outp) "\#include <$inf(h-dir)$inf(h-file)>"
 
             }
-	    
+
 	    asnTagDefault
 	    if {[string compare $type :]} {
 		asnError "::= expected got $type '$val'"
-	    } 
+	    }
 	    lex
 	    if {![lex-name-move BEGIN]} {
 		asnError "BEGIN expected"
@@ -1206,12 +1206,12 @@ proc asnFile {} {
     set inf(str) {}
     set inf(lineno) 0
     set inf(inf) [open $inf(iname) r]
-    
+
     asnModules
-    
+
 }
 
-# The following procedures are invoked by the asnType function. 
+# The following procedures are invoked by the asnType function.
 # Each procedure takes the form: asnBasic<TYPE> and they must return
 # two elements: the C function handler and the C type.
 # On entry upvar $name is the type we are defining and global, $inf(module), is
@@ -1323,7 +1323,7 @@ while {$i < $l} {
     set arg [lindex $argv $i]
     switch -glob -- $arg {
         -v {
-	    incr inf(verbose) 
+	    incr inf(verbose)
         }
         -c {
 	    set p [string range $arg 2 end]
@@ -1388,7 +1388,7 @@ while {$i < $l} {
 		puts [llength $p]
 		exit 1
 	    }
-	}	    
+	}
         default {
 	    set inf(iname) $arg
         }
@@ -1398,7 +1398,7 @@ while {$i < $l} {
 
 if {![info exists inf(iname)]} {
     puts "YAZ ASN.1 Compiler ${yc_version}"
-    puts "Usage:"	
+    puts "Usage:"
     puts -nonewline ${argv0}
     puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I iout]}
     puts {    [-i idir] [-m module] file}

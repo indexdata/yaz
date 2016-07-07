@@ -1,7 +1,7 @@
 # YC Sample Config File for Z39.50
 # ----------------------------------------------------------
 # Prefix Specifications
-#  
+#
 #    1: C function prefix
 #    2: C type prefix
 #    3: C preprocessor prefix
@@ -246,7 +246,7 @@ set map($m,Estimate) Estimate2
 # ----
 set m AccessControlFormat-prompt-1
 set filename($m) z-accform1
-set membermap($m,PromptId,enummeratedPrompt) enumeratedPrompt 
+set membermap($m,PromptId,enummeratedPrompt) enumeratedPrompt
 set map($m,PromptObject) PromptObject1
 set map($m,Challenge) Challenge1
 set map($m,Challenge1_s) ChallengeUnit1
@@ -266,7 +266,7 @@ set filename($m) zes-pset
 set m ESFormat-PersistentQuery
 set filename($m) zes-pquery
 # ----
-set m ESFormat-PeriodicQuerySchedule 
+set m ESFormat-PeriodicQuerySchedule
 set filename($m) zes-psched
 # ----
 set m ESFormat-ItemOrder
@@ -324,7 +324,7 @@ set unionmap($m,DateFlags,era) {}
 set m UserInfoFormat-multipleSearchTerms-2
 set filename($m) z-mterm2
 # ----
-set m ResourceReport-Format-Universe-1 
+set m ResourceReport-Format-Universe-1
 set filename($m) z-univ
 # ----
 set m UserInfoFormat-oclcUserInformation

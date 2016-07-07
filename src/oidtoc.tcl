@@ -7,7 +7,7 @@
 
 proc readoids {input} {
     set csv [open $input r]
-    set lineno 0 
+    set lineno 0
 
     while {1} {
 	incr lineno
@@ -37,7 +37,7 @@ proc constant_var {oid} {
     set lname [string tolower [lindex $oid 2]]
     set lname [string map {- _ . _ { } _ ( {} ) {}} $lname]
     set prefix [string tolower [lindex $oid 0]]
-	
+
     return yaz_oid_${prefix}_${lname}
 }
 
@@ -126,7 +126,7 @@ proc oid_to_c {srcdir input cname hname} {
     foreach oid $oids {
 
 	set v [constant_var $oid]
-	
+
 	puts -nonewline $cfile "YAZ_EXPORT const Odr_oid $v\[\] = \{"
 	puts -nonewline $cfile [string map {. ,} [lindex $oid 1]]
 	puts $cfile ",-1\};"
@@ -138,7 +138,7 @@ proc oid_to_c {srcdir input cname hname} {
     puts $cfile "\{"
     foreach oid $oids {
 	set v [constant_var $oid]
-	
+
 	puts -nonewline $cfile "\t\{CLASS_[lindex $oid 0], "
 	puts -nonewline $cfile "$v, "
 	puts -nonewline $cfile \"[lindex $oid 2]\"

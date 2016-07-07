@@ -32,7 +32,7 @@ proc preamble_trie {ofilehandle ifiles ofile} {
             unsigned combining : 1;
             $totype to : 24;
         };
-        
+
         struct yaz_iconv_trie {
             struct yaz_iconv_trie_flat *flat;
             struct yaz_iconv_trie_dir *dir;
@@ -131,10 +131,10 @@ proc split_trie {this} {
         set to [lindex $e 1]
 	set combining [lindex $e 2]
 	set codename [lindex $e 3]
-        
+
         set ch [lindex $from 0]
         set rest [lrange $from 1 end]
-        
+
         if {[llength $rest]} {
             if {![info exist trie($this,ptr,$ch)]} {
                 set trie($this,ptr,$ch) $trie(no)
@@ -169,7 +169,7 @@ proc ins_trie_r {from to combining codename this} {
 	if { $dup == 0 } {
 	    lappend trie($this,content) [list $from $to $combining $codename]
 	}
-        
+
         # split ?
         if {[llength $trie($this,content)] > $trie(split)} {
             split_trie $this
@@ -272,7 +272,7 @@ proc dump_trie {ofilehandle} {
             (unsigned char *inp, size_t inbytesleft, size_t *no_read, int *combining, unsigned mask, unsigned int boffset)
         {
             unsigned long code;
-            
+
             code = lookup($trie(prefix)ptrs, 1, inp, inbytesleft, no_read, combining, mask, boffset);
             if (!code)
             {

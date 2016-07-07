@@ -56,7 +56,7 @@ set maps(VERSION_SHA1) {}
 foreach x [array names maps] {
     puts "$x=$maps($x)"
 }
-	
+
 foreach ifile $infiles {
     set if [open "${ifile}.in" r]
     set of [open "${ifile}" w]

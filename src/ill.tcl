@@ -1,7 +1,7 @@
 # Config File for ILL
 # ----------------------------------------------------------
 # Prefix Specifications
-#  
+#
 #    1: C function prefix
 #    2: C type prefix
 #    3: C preprocessor prefix
