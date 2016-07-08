@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<!-- Switched <marc>212320</marc> and <marc>212320</marc> -->
 <codeTables>
 	<codeTable name="Basic and Extended Latin" date="January 2000" number="1">
 		<note>The first column in this table contains the MARC-8 code (in hex) for
@@ -7,11 +6,11 @@
      contains the MARC-8 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
-     UCS name, only the UCS name is given.  For some tables alternate encodings 
-	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and 
+     UCS name, only the UCS name is given.  For some tables alternate encodings
+	 in Unicode and UTF-8 are given.  When that occurs the alternate Unicode and
 	 alternate UTF-8 columns follow the character name. </note>
 		<characterSet name="Basic Latin (ASCII)" ISOcode="42">
 			<code>
@@ -614,7 +613,7 @@ BRACKET</name>
 			</code>
 		</characterSet>
 		<characterSet name="Extended Latin (ANSEL)" date="January 2000, Updated September 2004" ISOcode="45">
-			<note>Revised June 2004 to add the Eszett (M+C7) and the 
+			<note>Revised June 2004 to add the Eszett (M+C7) and the
 	 Euro Sign (M+C8) to the MARC-8 set.</note>
 
 			<note>Revised September 2004 to change the mapping from
@@ -623,7 +622,7 @@ BRACKET</name>
 			<note>Revised September 2004 to change the mapping from
 	 MARC-8 to Unicode for the Double Tilde (M+FA and M+FB) from U+FE22 and U+FE23
 	 to U+0360.</note>
-	 		<note>Revised March 2005 to change the mapping from MARC-8 to Unicode 
+	 		<note>Revised March 2005 to change the mapping from MARC-8 to Unicode
 	 for the Alif (M+2E) from U+02BE to U+02BC.</note>
 			<code>
 				<marc>88</marc>
@@ -973,7 +972,7 @@ ABOVE</name>
 				<utf-8>CDA1</utf-8>
 				<alt>FE20</alt>
 				<altutf-8>EFB8A0</altutf-8>
-				<name>LIGATURE, FIRST HALF / COMBINING DOUBLE 
+				<name>LIGATURE, FIRST HALF / COMBINING DOUBLE
 				INVERTED BREVE</name>
 			</code>
 			<code>
@@ -984,18 +983,18 @@ ABOVE</name>
 				<alt>FE21</alt>
 				<altutf-8>EFB8A1</altutf-8>
 				<name>LIGATURE, SECOND HALF / COMBINING LIGATURE RIGHT HALF</name>
-				<note>The Ligature that spans two characters 
-				is constructed of two halves in MARC-8: EB 
-				(Ligature, first half) and EC (Ligature, second 
-				half).  The preferred Unicode/UTF-8 mapping is to 
+				<note>The Ligature that spans two characters
+				is constructed of two halves in MARC-8: EB
+				(Ligature, first half) and EC (Ligature, second
+				half).  The preferred Unicode/UTF-8 mapping is to
 				the single character Ligature that spans two characters,
 				U+0361.  The single character Ligature is encoded
-				following the second of the two characters to be spanned.  
-				The two half Ligatures in Unicode, to which the 
-				Ligature has been mapped since 1996, are indicted 
-				in the mapping as alternatives, but their use is not 
-				recommended.  It is expected that font support for 
-				the single character Ligature mark will be more 
+				between the two characters to be spanned.
+				The two half Ligatures in Unicode, to which the
+				Ligature has been mapped since 1996, are indicated
+				in the mapping as alternatives, but their use is not
+				recommended.  It is expected that font support for
+				the single character Ligature mark will be more
 				easily obtained than for the two halves.</note>
 			</code>
 			<code>
@@ -1112,20 +1111,19 @@ BELOW</name>
 				<alt>FE23</alt>
 				<altutf-8>EFB8A3</altutf-8>
 				<name>DOUBLE TILDE, SECOND HALF / COMBINING DOUBLE TILDE RIGHT HALF</name>
-				<note>The Double Tilde that spans two characters is 
-				constructed of two halves in MARC-8: FA (Double 
-				Tilde, first half) and FB (Double Tilde, second 
-				half).  The preferred Unicode/UTF-8 mapping 
-				is to the single character Double Tilde that 
-				spans two characters, U+0360.  The single 
-				character Double Tilde is encoded following 
-				the second of the two characters to be spanned.  
-				The two half Double Tildes in Unicode, to 
-				which the MARC8 Double Tilde has been 
-				mapped since 1996, are indicted in the 
-				mapping as alternatives, but their use is not 
-				recommended.  It is expected that font support 
-				for the single character Double Tilde mark will 
+				<note>The Double Tilde that spans two characters is
+				constructed of two halves in MARC-8: FA (Double
+				Tilde, first half) and FB (Double Tilde, second
+				half).  The preferred Unicode/UTF-8 mapping
+				is to the single character Double Tilde that
+				spans two characters, U+0360.  The single
+				character Double Tilde is encoded between the two characters to be spanned.
+				The two half Double Tildes in Unicode, to
+				which the MARC8 Double Tilde has been
+				mapped since 1996, are indicated in the
+				mapping as alternatives, but their use is not
+				recommended.  It is expected that font support
+				for the single character Double Tilde mark will
 				be more easily obtained than for the two halves.</note>
 			</code>
 			<code>
@@ -1142,20 +1140,20 @@ BELOW</name>
 		<note>The first column in this table contains the MARC-8 code (in hex) for
      the character, the second column contains the UCS/Unicode 16-bit code (in
      hex), the third column contains the UTF-8 code (in hex) for the UCS
-     character, the fourth column contains a representation of the character (where possible), 
+     character, the fourth column contains a representation of the character (where possible),
 	 the fifth column contains the MARC character name, followed by
      the UCS name. If the MARC name is the same as or very similar to the UCS
      name, only the UCS name is given.</note>
-		<note>Note added September 2004: The alpha, beta and gamma symbols that have been part of a 
-		special extension of the MARC8 character set since 1970 do not 
-		have reversible mappings to Unicode since they duplicate 
-		characters in the Greek script set.  These special characters 
-		map to the Greek set in Unicode, thus when being remapped to 
-		MARC-8 they go to the MARC-8 Greek set, not the special 
-		extension to the Latin set.   It is recommended that the 
-		spelling out of the characters be used when the Latin 
-		extension Greek characters would formerly have been used, 
-		i.e., when they occur in Latin text.  The following 
+		<note>Note added September 2004: The alpha, beta and gamma symbols that have been part of a
+		special extension of the MARC8 character set since 1970 do not
+		have reversible mappings to Unicode since they duplicate
+		characters in the Greek script set.  These special characters
+		map to the Greek set in Unicode, thus when being remapped to
+		MARC-8 they go to the MARC-8 Greek set, not the special
+		extension to the Latin set.   It is recommended that the
+		spelling out of the characters be used when the Latin
+		extension Greek characters would formerly have been used,
+		i.e., when they occur in Latin text.  The following
 		substitutions would be made: [alpha], [beta], and [gamma].</note>
 		<characterSet name="Greek Symbols" ISOcode="67">
 			<code>
@@ -1379,7 +1377,7 @@ MINUS</name>
      contains the MARC-8 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
      UCS name, only the UCS name is given.</note>
@@ -1884,7 +1882,7 @@ YUDN</name>
      contains the MARC-8 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
      UCS name, only the UCS name is given.</note>
@@ -2736,7 +2734,7 @@ U (Byelorussian)</name>
      contains the MARC-8 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
      UCS name, only the UCS name is given.</note>
@@ -3813,7 +3811,7 @@ ABOVE</name>
      contains the MARC-8 code (in hex) for the character as coming from the G1
      graphic set, the third column contains the UCS/Unicode 16-bit code (in
      hex), the fourth column contains the UTF-8 code (in hex) for the UCS
-     characters, the fifth column contains a representation of the character (where possible), 
+     characters, the fifth column contains a representation of the character (where possible),
 	 the sixth column contains the MARC character name, followed
      by the UCS name. If the MARC name is the same as or very similar to the
      UCS name, only the UCS name is given.</note>
@@ -4287,7 +4285,7 @@ SIGMA END OF WORD</name>
 					<p>The first column contains the MARC-8 EACC 24-bit code (in hex), the
      second column contains the corresponding UCS/Unicode 16-bit code (in hex),
      the third column contains the UTF-8 code (in hex) for the UCS character,
-     the fourth column contains a representation of the character (where possible), 
+     the fourth column contains a representation of the character (where possible),
 	 the fifth column
 	 contains a character name or
      description.  Most East Asian ideographs are not given unique names in the
@@ -86226,14 +86224,14 @@ SIGMA END OF WORD</name>
 					<p>The first column contains the MARC-8 EACC 24-bit code (in hex), the
      second column contains the corresponding UCS/Unicode 16-bit code (in hex),
      the third column contains the UTF-8 code (in hex) for the UCS character,
-     the fourth column contains a representation of the character (where 
+     the fourth column contains a representation of the character (where
 	 possible), the fifth column contains a character
      name or description.  Most East Asian ideographs are not given unique
-     names in the MARC-8 or UCS/Unicode.</p> 
-	 <p>For some characters alternate encodings 
-	 in UCS/Unicode and UTF-8 are given.  When that occurs the alternate 
-	 UCS/Unicode 16-bit code column and 
-	 alternate UTF-8 code column follow the character name. 
+     names in the MARC-8 or UCS/Unicode.</p>
+	 <p>For some characters alternate encodings
+	 in UCS/Unicode and UTF-8 are given.  When that occurs the alternate
+	 UCS/Unicode 16-bit code column and
+	 alternate UTF-8 code column follow the character name.
 	 The alternative UCS/Unicode character
      codes are provided for cases where MARC-8 characters were mapped to
      UCS/Unicode characters in the Private Use Area (PUA). The alternative
@@ -98642,14 +98640,14 @@ SIGMA END OF WORD</name>
 					<p>The first column contains the MARC-8 EACC 24-bit code (in hex), the
      second column contains the corresponding UCS/Unicode 16-bit code (in hex),
      the third column contains the UTF-8 code (in hex) for the UCS character,
-     the fourth column contains a representation of the character (where possible), 
+     the fourth column contains a representation of the character (where possible),
 	 the fifth column contains a character
      name or description.  Most East Asian ideographs are not given unique
-     names in the MARC-8 or UCS/Unicode.</p> 
-	 <p>For some characters alternate encodings 
-	 in UCS/Unicode and UTF-8 are given.  When that occurs the alternate 
-	 UCS/Unicode 16-bit code column and 
-	 alternate UTF-8 code column follow the character name. 
+     names in the MARC-8 or UCS/Unicode.</p>
+	 <p>For some characters alternate encodings
+	 in UCS/Unicode and UTF-8 are given.  When that occurs the alternate
+	 UCS/Unicode 16-bit code column and
+	 alternate UTF-8 code column follow the character name.
 	 The alternative UCS/Unicode character
      codes are provided for cases where MARC-8 characters were mapped to
      UCS/Unicode characters in the Private Use Area (PUA). The alternative
@@ -98657,8 +98655,8 @@ SIGMA END OF WORD</name>
      supported by applications that claim to support the full repertoire of
      defined Unicode characters. </p><p>The characters in this table are sorted in
      EACC character code order.</p>
-	 
-	 
+
+
 				</note>
 				<code>
 					<marc>212A21</marc>
