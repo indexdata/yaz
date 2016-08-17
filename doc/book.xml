@@ -2311,28 +2311,30 @@
     </para>
    </sect2>
   </sect1>
-  <sect1 id="zoom.facets"><title>Facets</title>
+  <sect1 id="zoom.facets"><title>ZOOM Facets</title>
    <para>
-    Facet operations is not part of the official ZOOM specification, but
-    is an Index Data extension for YAZ-based Z39.50 targets,
+    Facets are only supported for a few Z39.50 targets. It is a relatively
+    new non-standard Z39.50 extension (see facets.asn in the YAZ source).
+    However, facets are usually supported for
     <ulink url="&url.solr;">Solr</ulink> and SRU 2.0 targets.
-
-    Facets may be requested by the
+   </para>
+   <para>
+    Facets may be specified by the
      <link linkend="zoom.facets.option">facets</link> option before a
-    search is sent.
+    search is sent. See <xref linkend="facets"/> for the notation.
     For inspection of the returned facets, the following functions are
     available:
    </para>
    <synopsis>
     ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
 
+    size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
+
     ZOOM_facet_field ZOOM_resultset_get_facet_field(ZOOM_resultset r,
                                                     const char *facet_name);
 
     ZOOM_facet_field ZOOM_resultset_get_facet_field_by_index(ZOOM_resultset r,
                                                              int pos);
-
-    size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
 
     const char *ZOOM_facet_field_name(ZOOM_facet_field facet_field);
 
@@ -2344,32 +2346,21 @@
    <para>
     References to temporary structures are returned by all functions.
     They are only valid as long the Result set is valid.
-    <function>ZOOM_resultset_get_facet_field</function> or
-    <function>ZOOM_resultset_get_facet_field_by_index</function>.
-    <function>ZOOM_resultset_facets</function>.
-    <function>ZOOM_facet_field_name</function>.
-    <function>ZOOM_facet_field_get_term</function>.
-    </para>
-   <para id="zoom.resultset.get_facet_field">
-    A single Facet field  is returned by function
-    <function>ZOOM_resultset_get_facet_field</function> or
-    <function>ZOOM_resultset_get_facet_field_by_index</function> that takes
-    a  result set and facet name or positive index respectively. First
-    facet has position zero. If no facet could be obtained (invalid name
-    or index out of bounds) <literal>NULL</literal> is returned.
    </para>
    <para id="zoom.resultset.facets">
-    An array of facets field can be returned by
+    All facet fields may be returned by a call to
     <function>ZOOM_resultset_facets</function>. The length of the array is
     given by <function>ZOOM_resultset_facets_size</function>. The array is
     zero-based and the last entry will be at
     <function>ZOOM_resultset_facets_size(result_set)</function>-1.
    </para>
-   <para id="zoom.resultset.facets_names">
-    It is possible to iterate over facets by name, by calling
-    <function>ZOOM_resultset_facets_names</function>.
-    This will return a const array of char * where each string can be used
-    as parameter for <function>ZOOM_resultset_get_facet_field</function>.
+   <para id="zoom.resultset.get_facet_field">
+    Facet fields can also be fetched via its name using
+    <function>ZOOM_resultset_get_facet_field</function>.
+    Or by its index (starting from 0) by a call to
+    <function>ZOOM_resultset_get_facet_field_by_index</function>.
+    Both of these functions return NULL if name is not found or index is
+    out of bounds.
    </para>
    <para>
    Function <function>ZOOM_facet_field_name</function> gets the request
@@ -7815,12 +7806,14 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
    </para>
    <para>
     Like Type-1/RPN, YAZ supports a string notation for specifying
-    facets. For the API this is performed by
-    <function>yaz_pqf_parse_facet_list</function>.
+    facets. This notataion maps straight to facets.asn.
+    The notation is parsed by function
+    <function>yaz_pqf_parse_facet_list</function> defined in header
+    <filename>yaz/pquery.h</filename>.
    </para>
    <para>
-    For ZOOM C the facets are given by option "facets".
-    For yaz-client it is used for the 'facets' command.
+    For ZOOM C the facets are specified by option "facets".
+    For yaz-client, the 'facets' command is used.
    </para>
    <para>
     The grammar of this specification is as follows:
@@ -7839,7 +7832,8 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <replaceable>value</replaceable> is a string or an integer.
    </para>
    <para>
-    The Facets specification is not Bib-1. The following types apply:
+    There is no formal facets attribute set (it is not given in the
+    protocol by the facets, although it could). The following types apply:
    </para>
    <table id="facet.attributes">
     <title>Facet attributes</title>
@@ -7850,8 +7844,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <row>
        <entry>Type</entry>
        <entry>Description</entry>
-      </row>
-     </thead>
+      </row> </thead>
      <tbody>
       <row>
        <entry>1</entry>
@@ -7875,7 +7868,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <row>
        <entry>4</entry>
        <entry>
-	Start offset.
+	Start offset (starting from 1)
        </entry>
       </row>
      </tbody>

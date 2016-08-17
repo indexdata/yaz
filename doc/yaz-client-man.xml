@@ -487,6 +487,16 @@
     </listitem>
    </varlistentry>
    <varlistentry><term>
+     <literal>facets</literal> <replaceable>spec</replaceable>
+    </term>
+    <listitem>
+     <para>
+       Specifies requested facets to be used in search. The notation
+       is specified in <xref linkend="facets"/>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry><term>
      <literal>format</literal> <replaceable>oid</replaceable>
     </term>
     <listitem>
