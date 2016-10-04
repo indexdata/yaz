@@ -219,7 +219,7 @@ if test "$with_iconv" != "no"; then
     ])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS([getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64])
+AC_CHECK_FUNCS([getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64 open_memstream malloc_info])
 case $host in
     *-*-darwin*)
 	trypoll="no";

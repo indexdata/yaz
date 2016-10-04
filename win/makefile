@@ -441,6 +441,7 @@ MISC_OBJS= \
    $(OBJDIR)\odr_util.obj \
    $(OBJDIR)\atoin.obj \
    $(OBJDIR)\log.obj \
+   $(OBJDIR)\malloc_info.obj \
    $(OBJDIR)\marcdisp.obj \
    $(OBJDIR)\marc_read_json.obj \
    $(OBJDIR)\marc_read_xml.obj \

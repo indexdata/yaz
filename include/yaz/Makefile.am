@@ -6,7 +6,8 @@ noinst_HEADERS = icu_I18N.h
 pkginclude_HEADERS= backend.h backtrace.h base64.h \
  ccl.h ccl_xml.h cookie.h cql.h rpn2cql.h rpn2solr.h \
  solr.h comstack.h \
- diagbib1.h diagsrw.h diagsru_update.h sortspec.h log.h logrpn.h marcdisp.h \
+ diagbib1.h diagsrw.h diagsru_update.h sortspec.h log.h logrpn.h \
+ malloc_info.h marcdisp.h \
  nmem.h nmem_xml.h odr.h errno.h facet.h \
  options.h otherinfo.h pquery.h prt-ext.h querytowrbuf.h \
  readconf.h record_conv.h record_render.h retrieval.h statserv.h \

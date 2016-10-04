@@ -76,7 +76,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   base64.c version.c options.c log.c \
   cookie.c marcdisp.c \
   marc_read_json.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
-  wrbuf.c wrbuf_sha1.c oid_db.c errno.c \
+  wrbuf.c wrbuf_sha1.c malloc_info.c oid_db.c errno.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c iconv-p.h utf8.c ucs4.c iso5428.c advancegreek.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c facet.c \
