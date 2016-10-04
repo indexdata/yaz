@@ -1,3 +1,14 @@
+Add wrbuf_malloc_info - a wrapper for malloc_info(3)
+
+Beef up documentation on facets
+
+record_conv: change error for unsupported backend element
+Also fixes regression in the case where Libxslt is disabled and
+Libxml2 is enabled.
+
+Avoid strlen on MARC buffer. Close YAZ-872
+MARC buffer memory is not 0-terminated.
+
 --- 5.16.0 2016/04/29
 
 Allow multi-byte indicators for MARC subsystem. GitHub #11.
