@@ -42,6 +42,7 @@ static pthread_mutex_t yaz_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 extern void yaz_log_init_globals(void);
 extern void yaz_log_deinit_globals(void);
+extern void nmem_init_globals(void);
 
 void yaz_init_globals(void)
 {
@@ -53,6 +54,7 @@ void yaz_init_globals(void)
     if (!yaz_init_flag)
     {
         yaz_log_init_globals();
+        nmem_init_globals();
 #if HAVE_GNUTLS_H
         gnutls_global_init();
 #endif

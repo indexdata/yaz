@@ -23,6 +23,18 @@
 #include <yaz/xmalloc.h>
 #include <yaz/nmem.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
+
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#endif
+
+#if YAZ_POSIX_THREADS
+static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
+static size_t no_nmem_handles = 0;
+static size_t no_nmem_blocks = 0;
+static size_t nmem_allocated = 0;
+#endif
 
 #define NMEM_CHUNK (4*1024)
 
@@ -61,8 +73,26 @@ struct align {
 static int log_level = 0;
 static int log_level_initialized = 0;
 
+#if YAZ_POSIX_THREADS
+static void nmem_lock(void)
+{
+    pthread_mutex_lock(&nmem_mutex);
+}
+
+static void nmem_unlock(void)
+{
+    pthread_mutex_unlock(&nmem_mutex);
+}
+#endif
+
 static void free_block(struct nmem_block *p)
 {
+#if YAZ_POSIX_THREADS
+    nmem_lock();
+    no_nmem_blocks--;
+    nmem_allocated -= p->size;
+    nmem_unlock();
+#endif
     xfree(p->buf);
     xfree(p);
     if (log_level)
@@ -89,6 +119,12 @@ static struct nmem_block *get_block(size_t size)
     r = (struct nmem_block *) xmalloc(sizeof(*r));
     r->buf = (char *)xmalloc(r->size = get);
     r->top = 0;
+#if YAZ_POSIX_THREADS
+    nmem_lock();
+    no_nmem_blocks++;
+    nmem_allocated += r->size;
+    nmem_unlock();
+#endif
     return r;
 }
 
@@ -137,11 +173,25 @@ size_t nmem_total(NMEM n)
     return n->total;
 }
 
+void nmem_init_globals(void)
+{
+#if YAZ_POSIX_THREADS
+    pthread_atfork(nmem_lock, nmem_unlock, nmem_unlock);
+#endif
+}
+
 NMEM nmem_create(void)
 {
     NMEM r;
+
+#if YAZ_POSIX_THREADS
+    nmem_lock();
+    no_nmem_handles++;
+    nmem_unlock();
+#endif
     if (!log_level_initialized)
     {
+        /* below will call nmem_init_globals once */
         log_level = yaz_log_module_level("nmem");
         log_level_initialized = 1;
     }
@@ -162,6 +212,11 @@ void nmem_destroy(NMEM n)
 
     nmem_reset(n);
     xfree(n);
+#if YAZ_POSIX_THREADS
+    nmem_lock();
+    no_nmem_handles--;
+    nmem_unlock();
+#endif
 }
 
 void nmem_transfer(NMEM dst, NMEM src)
@@ -177,6 +232,27 @@ void nmem_transfer(NMEM dst, NMEM src)
     src->total = 0;
 }
 
+int nmem_get_status(char *dst, size_t l)
+{
+#if YAZ_POSIX_THREADS
+    size_t handles, blocks, allocated;
+
+    nmem_lock();
+    handles = no_nmem_handles;
+    blocks = no_nmem_blocks;
+    allocated = nmem_allocated;
+    nmem_unlock();
+    yaz_snprintf(dst, l,
+                 "<nmem>\n"
+                 "  <handles>%zd</handles>\n"
+                 "  <blocks>%zd</blocks>\n"
+                 "  <allocated>%zd</allocated>\n"
+                 "</nmem>\n", handles, blocks, allocated);
+    return 0;
+#else
+    return -1;
+#endif
+}
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -20,7 +20,29 @@ void tst_nmem_malloc(void)
     int j;
     char *cp;
 
+    {
+        char stat_buf[200];
+        const char *exp = "<nmem>\n"
+            "  <handles>0</handles>\n"
+            "  <blocks>0</blocks>\n"
+            "  <allocated>0</allocated>\n"
+            "</nmem>\n";
+
+        nmem_get_status(stat_buf, sizeof stat_buf);
+        YAZ_CHECK(strcmp(exp, stat_buf) == 0);
+    }
     n = nmem_create();
+    {
+        char stat_buf[200];
+        const char *exp = "<nmem>\n"
+            "  <handles>1</handles>\n"
+            "  <blocks>0</blocks>\n"
+            "  <allocated>0</allocated>\n"
+            "</nmem>\n";
+
+        nmem_get_status(stat_buf, sizeof stat_buf);
+        YAZ_CHECK(strcmp(exp, stat_buf) == 0);
+    }
     YAZ_CHECK(n);
 
     for (j = 1; j<500; j++)
@@ -42,7 +64,31 @@ void tst_nmem_malloc(void)
         cp = (char *) nmem_malloc(n, j);
         YAZ_CHECK(cp);
     }
+
+    {
+        char stat_buf[200];
+        const char *exp = "<nmem>\n"
+            "  <handles>1</handles>\n"
+            "  <blocks>41</blocks>\n"
+            "  <allocated>223264</allocated>\n"
+            "</nmem>\n";
+
+        nmem_get_status(stat_buf, sizeof stat_buf);
+        YAZ_CHECK(strcmp(exp, stat_buf) == 0);
+    }
     nmem_destroy(n);
+
+    {
+        char stat_buf[200];
+        const char *exp = "<nmem>\n"
+            "  <handles>0</handles>\n"
+            "  <blocks>0</blocks>\n"
+            "  <allocated>0</allocated>\n"
+            "</nmem>\n";
+
+        nmem_get_status(stat_buf, sizeof stat_buf);
+        YAZ_CHECK(strcmp(exp, stat_buf) == 0);
+    }
 }
 
 void tst_nmem_strsplit(void)
