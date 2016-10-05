@@ -31,10 +31,10 @@
 
 #if YAZ_POSIX_THREADS
 static pthread_mutex_t nmem_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 static size_t no_nmem_handles = 0;
 static size_t no_nmem_blocks = 0;
 static size_t nmem_allocated = 0;
-#endif
 
 #define NMEM_CHUNK (4*1024)
 
@@ -73,26 +73,26 @@ struct align {
 static int log_level = 0;
 static int log_level_initialized = 0;
 
-#if YAZ_POSIX_THREADS
 static void nmem_lock(void)
 {
+#if YAZ_POSIX_THREADS
     pthread_mutex_lock(&nmem_mutex);
+#endif
 }
 
 static void nmem_unlock(void)
 {
+#if YAZ_POSIX_THREADS
     pthread_mutex_unlock(&nmem_mutex);
-}
 #endif
+}
 
 static void free_block(struct nmem_block *p)
 {
-#if YAZ_POSIX_THREADS
     nmem_lock();
     no_nmem_blocks--;
     nmem_allocated -= p->size;
     nmem_unlock();
-#endif
     xfree(p->buf);
     xfree(p);
     if (log_level)
@@ -119,12 +119,10 @@ static struct nmem_block *get_block(size_t size)
     r = (struct nmem_block *) xmalloc(sizeof(*r));
     r->buf = (char *)xmalloc(r->size = get);
     r->top = 0;
-#if YAZ_POSIX_THREADS
     nmem_lock();
     no_nmem_blocks++;
     nmem_allocated += r->size;
     nmem_unlock();
-#endif
     return r;
 }
 
@@ -184,11 +182,9 @@ NMEM nmem_create(void)
 {
     NMEM r;
 
-#if YAZ_POSIX_THREADS
     nmem_lock();
     no_nmem_handles++;
     nmem_unlock();
-#endif
     if (!log_level_initialized)
     {
         /* below will call nmem_init_globals once */
@@ -212,11 +208,9 @@ void nmem_destroy(NMEM n)
 
     nmem_reset(n);
     xfree(n);
-#if YAZ_POSIX_THREADS
     nmem_lock();
     no_nmem_handles--;
     nmem_unlock();
-#endif
 }
 
 void nmem_transfer(NMEM dst, NMEM src)
@@ -234,7 +228,6 @@ void nmem_transfer(NMEM dst, NMEM src)
 
 int nmem_get_status(char *dst, size_t l)
 {
-#if YAZ_POSIX_THREADS
     size_t handles, blocks, allocated;
 
     nmem_lock();
@@ -249,9 +242,6 @@ int nmem_get_status(char *dst, size_t l)
                  "  <allocated>%zd</allocated>\n"
                  "</nmem>\n", handles, blocks, allocated);
     return 0;
-#else
-    return -1;
-#endif
 }
 /*
  * Local variables:
