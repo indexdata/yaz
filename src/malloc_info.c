@@ -12,7 +12,9 @@
 #include <config.h>
 #endif
 
+#if HAVE_MALLOC_INFO
 #include <malloc.h>
+#endif
 #include <stdio.h>
 
 #include <yaz/wrbuf.h>
