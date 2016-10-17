@@ -1,3 +1,14 @@
+--- 5.18.0 2016/10/17
+
+Omitted MARXML indicator defaults to " " again
+This was the behavior until 5.16.0 which added multi-byte indicator
+support.
+
+Only include malloc.h if malloc_info is present. Closes #13
+Fixes compilation on macOS
+
+Add nmem_get_status which returns memory status for NMEM
+
 --- 5.17.0 2016/10/04
 
 Add wrbuf_malloc_info - a wrapper for malloc_info(3)
