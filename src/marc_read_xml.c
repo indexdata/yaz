@@ -123,8 +123,11 @@ static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
                 strlen((const char *) attr->children->content) < 5)
             {
                 strcat(res, (const char *)attr->children->content);
+                break;
             }
         }
+        if (!attr)
+            strcat(res, " ");
     }
 }
 
