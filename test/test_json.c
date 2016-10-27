@@ -61,6 +61,8 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "[ 1234 ]", "[1234]"));
 
+    YAZ_CHECK(expect(p, "[ fals ]", 0));
+
     YAZ_CHECK(expect(p, "{\"k\":tru}", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":null", 0));

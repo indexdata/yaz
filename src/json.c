@@ -39,7 +39,6 @@ json_parser_t json_parser_create(void)
 
     p->buf = 0;
     p->cp = 0;
-    p->err_msg = 0;
     p->subst = 0;
     return p;
 }
@@ -260,6 +259,10 @@ static struct json_node *json_parse_value(json_parser_t p)
             if (sb->idx == idx)
                 return sb->node;
     }
+    else if (c == 0)
+    {
+        return 0;
+    }
     else
     {
         char tok[8];
@@ -421,10 +424,16 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
     struct json_node *n;
     p->buf = json_str;
     p->cp = p->buf;
+    p->err_msg = 0;
 
     n = json_parse_value(p);
     if (!n)
         return 0;
+    if (p->err_msg)
+    {
+        json_remove_node(n);
+        return 0;
+    }
     c = look_ch(p);
     if (c != 0)
     {
