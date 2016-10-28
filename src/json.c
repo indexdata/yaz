@@ -145,13 +145,16 @@ static int json_one_char(const char **p, char *out)
         case 't':
             *out = '\t'; break;
         case 'u':
-            if (p[0][1])
+            if (p[0][1] > 0 && p[0][2] > 0 && p[0][3] > 0 && p[0][4] > 0)
             {
                 unsigned code;
                 char *outp = out;
                 int error;
                 size_t outbytesleft = 6;
-                sscanf(*p + 1, "%4x", &code);
+                int no_read = 0;
+                sscanf(*p + 1, "%4x%n", &code, &no_read);
+                if (no_read != 4)
+                    return 0;
                 if (!yaz_write_UTF8_char(code, &outp, &outbytesleft, &error))
                 {
                     *p += 5;
@@ -159,8 +162,7 @@ static int json_one_char(const char **p, char *out)
                 }
             }
         default:
-            *out = '_'; break;
-            break;
+            return 0;
         }
         (*p)++;
         return 1;
@@ -190,7 +192,13 @@ static struct json_node *json_parse_string(json_parser_t p)
     while (*cp && *cp != '"')
     {
         char out[6];
-        l += json_one_char(&cp, out);
+        int r = json_one_char(&cp, out);
+        if (r == 0)
+        {
+            p->err_msg = "invalid character";
+            return 0;
+        }
+        l += r;
     }
     if (!*cp)
     {

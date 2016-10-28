@@ -59,6 +59,12 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "1234", "1234"));
 
+    YAZ_CHECK(expect(p, "\"\\a\"", 0));
+
+    YAZ_CHECK(expect(p, "\"\\u0061\"", "\"a\""));
+
+    YAZ_CHECK(expect(p, "\"\\u61\"", 0));
+
     YAZ_CHECK(expect(p, "[ 1234 ]", "[1234]"));
 
     YAZ_CHECK(expect(p, "[ fals ]", 0));
