@@ -30,6 +30,8 @@ struct json_parser_s {
     const char *buf;
     const char *cp;
     const char *err_msg;
+    int parse_level;
+    int max_level;
     struct json_subst_info *subst;
 };
 
@@ -321,13 +323,21 @@ static struct json_node *json_parse_array(json_parser_t p)
         return 0;
     }
     move_ch(p);
+    if (p->parse_level >= p->max_level)
+    {
+        p->err_msg = "Too much nesting";
+        return 0;
+    }
+    p->parse_level++;
     n = json_new_node(p, json_node_array);
     if (look_ch(p) != ']')
         n->u.link[0] = json_parse_elements(p);
 
+    p->parse_level--;
     if (look_ch(p) != ']')
     {
-        p->err_msg = "expecting ]";
+        if (!p->err_msg)
+            p->err_msg = "expecting ]";
         json_remove_node(n);
         return 0;
     }
@@ -400,7 +410,16 @@ static struct json_node *json_parse_object(json_parser_t p)
     n = json_new_node(p, json_node_object);
     if (look_ch(p) != '}')
     {
-        struct json_node *m = json_parse_members(p);
+        struct json_node *m;
+        if (p->parse_level >= p->max_level)
+        {
+            p->err_msg = "Too much nesting";
+            json_remove_node(n);
+            return 0;
+        }
+        p->parse_level++;
+        m = json_parse_members(p);
+        p->parse_level--;
         if (!m)
         {
             json_remove_node(n);
@@ -425,6 +444,8 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
     p->buf = json_str;
     p->cp = p->buf;
     p->err_msg = 0;
+    p->parse_level = 0;
+    p->max_level = 1000;
 
     n = json_parse_value(p);
     if (!n)
