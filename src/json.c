@@ -74,7 +74,7 @@ void json_parser_destroy(json_parser_t p)
 
 static int look_ch(json_parser_t p)
 {
-    while (*p->cp && strchr(" \t\r\n\f", *p->cp))
+    while (*p->cp && strchr(" \t\r\n", *p->cp))
         (p->cp)++;
     return *p->cp;
 }
@@ -167,6 +167,10 @@ static int json_one_char(const char **p, char *out)
         (*p)++;
         return 1;
     }
+    else if (**p > 0 && **p <= 31)
+    {
+        return 0;
+    }
     else
     {
         *out = **p;
@@ -226,12 +230,63 @@ static struct json_node *json_parse_number(json_parser_t p)
 {
     struct json_node *n;
     char *endptr;
+    const char *cp;
     double v;
 
-    look_ch(p); // skip spaces
+    cp = p->cp;
+    if (*cp == '-')
+        cp++;
+    if (*cp == '0')
+        cp++;
+    else if (*cp >= '1' && *cp <= '9')
+    {
+        cp++;
+        while (*cp >= '0' && *cp <= '9')
+            cp++;
+    }
+    else
+    {
+        p->err_msg = "bad number";
+        return 0;
+    }
+    if (*cp == '.')
+    {
+        cp++;
+        if (*cp >= '0' && *cp <= '9')
+        {
+            while (*cp >= '0' && *cp <= '9')
+                cp++;
+        }
+        else
+        {
+            p->err_msg = "bad number";
+            return 0;
+        }
+    }
+    if (*cp == 'e' || *cp == 'E')
+    {
+        cp++;
+        if (*cp == '+' || *cp == '-')
+            cp++;
+        if (*cp >= '0' && *cp <= '9')
+        {
+            while (*cp >= '0' && *cp <= '9')
+                cp++;
+        }
+        else
+        {
+            p->err_msg = "bad number";
+            return 0;
+        }
+    }
     v = strtod(p->cp, &endptr);
 
     if (endptr == p->cp)
+    {
+        p->err_msg = "bad number";
+        return 0;
+    }
+    if (endptr != cp)
     {
         p->err_msg = "bad number";
         return 0;
@@ -247,7 +302,7 @@ static struct json_node *json_parse_value(json_parser_t p)
     int c = look_ch(p);
     if (c == '\"')
         return json_parse_string(p);
-    else if (strchr("0123456789-+", c))
+    else if (strchr("0123456789-", c))
         return json_parse_number(p);
     else if (c == '{')
         return json_parse_object(p);

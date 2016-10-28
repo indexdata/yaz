@@ -67,6 +67,24 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "[ 1234 ]", "[1234]"));
 
+    YAZ_CHECK(expect(p, "[ -12e2 ]", "[-1200]"));
+
+    YAZ_CHECK(expect(p, "[ 12.34e2 ]", "[1234]"));
+
+    YAZ_CHECK(expect(p, "[ 12.34e+2 ]", "[1234]"));
+
+    YAZ_CHECK(expect(p, "[ 12.34E+2 ]", "[1234]"));
+
+    YAZ_CHECK(expect(p, "[ .12 ]", 0));
+
+    YAZ_CHECK(expect(p, "[ 01 ]", 0));
+
+    YAZ_CHECK(expect(p, "[ -01 ]", 0));
+
+    YAZ_CHECK(expect(p, "[ +7 ]", 0));
+
+    YAZ_CHECK(expect(p, "[ 7. ]", 0));
+
     YAZ_CHECK(expect(p, "[ fals ]", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":tru}", 0));
@@ -127,19 +145,19 @@ static void tst1(void)
     YAZ_CHECK(expect(p, "{\"a\":[1,2,3]}", "{\"a\":[1,2,3]}"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\t\"}", "{\"k\":\"\\t\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\t\"}", "{\"k\":\"\\t\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\t\"}", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\n\"}", "{\"k\":\"\\n\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\n\"}", "{\"k\":\"\\n\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\n\"}", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\r\"}", "{\"k\":\"\\r\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\r\"}", "{\"k\":\"\\r\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\r\"}", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\f\"}", "{\"k\":\"\\f\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\f\"}", "{\"k\":\"\\f\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\f\"}", 0));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\b\"}", "{\"k\":\"\\b\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\b\"}", "{\"k\":\"\\b\"}"));
+    YAZ_CHECK(expect(p, "{\"k\":\"\b\"}", 0));
 
     YAZ_CHECK(expect(p,
                      "{\"k\":\"\\u0001\\u0002\"}",
