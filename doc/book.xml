@@ -1062,7 +1062,7 @@
       If the <filename>nmake</filename> command is not found on your system
       you probably haven't defined the environment variables required to
       use that tool. To fix that, find and run the batch file
-      <filename>vcvars32.bat</filename>. You need to run it from within
+      <filename>vcvarsall.bat</filename>. You need to run it from within
       the command prompt or set the environment variables "globally";
       otherwise it doesn't work.
      </para>
