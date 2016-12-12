@@ -7604,6 +7604,32 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
         </para>
        </listitem>
       </varlistentry>
+      <varlistentry>
+       <term><literal>rdf-lookup</literal></term>
+       <listitem>
+        <para>
+         The <literal>rdf-lookup</literal> element looks up BIBFRAME elements
+         in some suitable service, for example http://id.loc.gov/authorities/names
+         and replaces the URIs for specified elements with URIs it finds at that
+         service. Its configuration consists of one or more 
+         <literal>lookup</literal> tags, each with a <literal>xpath</literal>
+         attribute that specifies the path of the element to be looked up. Each
+         <literal>lookup</literal> section must contain at least one 
+         <literal>key</literal> element with a <literal>field</literal>
+         attribute with the name of the tag to be looked up. There can also
+         be a <literal>server</literal> tag with a <literal>url</literal>
+         attribute to define URL for the lookup. Any <literal>%s</literal>
+         in the string will be replaced by the term to be looked up. If no
+         <literal>server</literal> is specified, the previous one is used, and
+         in the first <literal>lookup</literal> section, the default is
+         <literal>http://id.loc.gov/authorities/names/label/%s</literal>.
+         See the example below.
+        </para>
+        <para>
+         This conversion is available in YAZ 5.19.0 and later.
+        </para>
+       </listitem>
+      </varlistentry>
      </variablelist>
     </para>
    </sect2>
@@ -7708,6 +7734,37 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
         </para>
        </listitem>
       </itemizedlist>
+     </para>
+    </example>
+    <example id="tools.retrieval.rdf-lookup">
+     <title>RDF-lookup backend</title>
+     <para>
+       This is a minimal example of the <literal>backend</literal> configuration
+       for the rdf-lookup. It could well be used with some heavy xslt transforms
+       that make BIBFRAME records out of MarxXml.
+     </para>
+     <programlisting><![CDATA[
+        <backend syntax="xml" name="rdf-lookup">
+          <rdf-lookup>
+            <lookup xpath="//bf:contribution/bf:Contribution/bf:agent/bf:Agent">
+              <key field="bflc:name00MatchKey"/>
+              <key field="bflc:name01MatchKey"/>
+              <key field="bflc:name11MatchKey"/>
+              <server url="http://id.loc.gov/authorities/names/label/%s"/>
+            </lookup>
+          </rdf-lookup>
+        </backend>
+]]>
+     </programlisting>
+     <para>
+      This means that any tags that match the xpath (.../bf:Agent) are considered
+      for lookup. Within those tags, the lookup key is in a one of the nameXXMatchKey
+      fields. If one is found, a lookup is made to the id.loc.gov server, and if
+      that returns a redirect to the proper entry with a X-URI header, that URI
+      is taken to be the canonical URI for that name, and will be replaced in the
+      Agent tag. Of course there could be more lookup tags, for subject keywords,
+      and various other things. They would not need to repeat the 
+      <literal>server</literal> tag, if they used the same one.
      </para>
     </example>
    </sect2>
