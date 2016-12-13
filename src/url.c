@@ -126,6 +126,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     Z_HTTP_Response *res = 0;
     int number_of_redirects = 0;
 
+    odr_reset(p->odr_out);
     yaz_cookies_reset(p->cookies);
     wrbuf_rewind(p->w_error);
     while (1)
