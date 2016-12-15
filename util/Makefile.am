@@ -10,9 +10,9 @@ DISTCLEANFILES = yaz-config
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 
 bin_PROGRAMS = yaz-marcdump yaz-iconv yaz-illclient yaz-icu yaz-json-parse \
- yaz-url
+ yaz-url yaz-record-conv
 noinst_PROGRAMS = cclsh cql2pqf cql2xcql srwtst yaz-benchmark \
- yaz-xmlquery yaz-record-conv
+ yaz-xmlquery
 
 # MARC dumper utility
 yaz_marcdump_SOURCES = marcdump.c

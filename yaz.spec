@@ -129,6 +129,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_bindir}/yaz-iconv
 %{_bindir}/yaz-json-parse
 %{_bindir}/yaz-url
+%{_bindir}/yaz-record-conv
 %{_mandir}/man1/yaz-client.*
 %{_mandir}/man1/yaz-json-parse.*
 %{_mandir}/man1/yaz-url.*
@@ -136,6 +137,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_mandir}/man1/zoomsh.*
 %{_mandir}/man1/yaz-marcdump.*
 %{_mandir}/man1/yaz-iconv.*
+%{_mandir}/man1/yaz-record-conv.*
 %{_mandir}/man7/yaz-log.*
 %{_mandir}/man7/bib1-attr.*
 
