@@ -40,8 +40,9 @@ addons:
    - tcl8.5
    - xsltproc
 
-before install:
+before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install docbook-xsl; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install pkg-config icu4c; fi
 
 before_script:
