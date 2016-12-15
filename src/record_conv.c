@@ -684,13 +684,16 @@ static void destroy_marc(void *info)
 
 
 
-/* each info covers one lookup xpath. They all share the nmem */
+/* each info covers one lookup xpath. They all share the nmem and namespaces*/
+#define RDF_LOOKUP_MAX_KEYS 20
+#define RDF_LOOKUP_MAX_NAMESPACES 20
 struct rdf_lookup_info {
     NMEM nmem;
     struct rdf_lookup_info *next;
     char *xpath;
     char *server;
-    char **keys;
+    char *keys[RDF_LOOKUP_MAX_KEYS];
+    char **namespacelist;
 };
 
 static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
@@ -699,12 +702,10 @@ static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
     struct _xmlAttr *attr;
     struct rdf_lookup_info *info = nmem_malloc(nmem, sizeof(*info));
     int nkeys = 0;
-    int maxkeys = 20;
     info->nmem = nmem;
     info->next = 0;
     info->xpath = 0;
     info->server = 0;
-    info->keys = nmem_malloc(nmem, (maxkeys + 1) * sizeof(*info->keys));
     for (attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "xpath") &&
@@ -731,9 +732,9 @@ static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
                     {
                         info->keys[nkeys++] =
                             nmem_strdup(nmem, (const char *) attr->children->content);
-                        if (nkeys >= maxkeys)
+                        if (nkeys >= RDF_LOOKUP_MAX_KEYS)
                         {
-                            wrbuf_printf(wr_error, "Too many keys, max %d", maxkeys);
+                            wrbuf_printf(wr_error, "Too many keys, max %d", RDF_LOOKUP_MAX_KEYS);
                             return 0;
                         }
                         info->keys[nkeys] = 0;
@@ -760,7 +761,7 @@ static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
                                       "Expected url.", attr->name);
                         return 0;
                     }
-              }
+                }
             }
             else
             {
@@ -780,11 +781,16 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
     struct rdf_lookup_info *info = 0;
     struct rdf_lookup_info **next = &info;
     const char *defserver = "http://id.loc.gov/authorities/names/label/%s";
+    char ** namespaces = 0;
     if (strcmp((const char *) ptr->name, "rdf-lookup"))
         return 0;
     yaz_log(YLOG_DEBUG,"Constructing rdf_lookup.");
-
+    
     nmem = nmem_create();
+    namespaces = nmem_malloc(nmem,RDF_LOOKUP_MAX_NAMESPACES * 2 * sizeof(char *) );
+    int nns = 0;
+    namespaces[0] = 0;
+    
     ptr = ptr->children;
     for ( ; ptr ; ptr = ptr->next) {
         if (ptr->type == XML_ELEMENT_NODE )
@@ -793,9 +799,10 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             {
                 struct rdf_lookup_info *i = construct_one_rdf_lookup(nmem, ptr, wr_error);
                 if ( !i )
-                    return 0;
+                    return 0; /* error already in wr_error */
                 else
                 {
+                    i->namespacelist = namespaces;
                     *next = i;
                     next = &((*next)->next);
                     if ( ! i->server )
@@ -806,9 +813,45 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                       i->xpath, i->keys[0], i->server);
                 }
             }
-            else
+            else if ( !strcmp((const char *)ptr->name, "namespace") ) 
             {
-                wrbuf_printf(wr_error, "Expected a <lookup> tag under rdf-lookup, not %s",
+                char * prefix = 0;
+                char * href = 0;
+                struct _xmlAttr *attr;
+                for (attr = ptr->properties; attr; attr = attr->next)
+                {
+                    if (!xmlStrcmp(attr->name, BAD_CAST "prefix") &&
+                        attr->children && attr->children->type == XML_TEXT_NODE)
+                    {
+                        prefix = nmem_strdup(nmem, (const char *) attr->children->content);
+                    }
+                    else if (!xmlStrcmp(attr->name, BAD_CAST "href") &&
+                        attr->children && attr->children->type == XML_TEXT_NODE)
+                    {
+                        href = nmem_strdup(nmem, (const char *) attr->children->content);
+                    }
+                    else 
+                    {
+                        wrbuf_printf(wr_error, "Bad attribute '%s'. "
+                                      "Expected 'prefix' or 'href'", attr->name);
+                        return 0;
+                    }
+                }
+                if ( prefix && href )
+                {
+                    namespaces[nns++] = prefix;
+                    namespaces[nns++] = href;
+                    namespaces[nns] = 0 ; /* signal end */
+                }
+                else 
+                {
+                    wrbuf_printf(wr_error, "Bad namespace, need both 'prefix' and 'href'");
+                    return 0;
+                }
+            }
+            else 
+            {
+                wrbuf_printf(wr_error, "Expected a <lookup> tag under rdf-lookup, not <%s>",
                   ptr->name );
                 return 0;
             }
@@ -921,10 +964,13 @@ static int convert_rdf_lookup(void *rinfo, WRBUF record, WRBUF wr_error)
         xmlChar *out_buf = 0;
         int out_len;
         xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-        xmlXPathRegisterNs(xpathCtx, (const xmlChar *)"bf",
-                           (const xmlChar *)"http://id.loc.gov/ontologies/bibframe/");
-        xmlXPathRegisterNs(xpathCtx, (const xmlChar *)"bflc",
-                           (const xmlChar *)"http://id.loc.gov/ontologies/bibframe/lc-extensions/");
+        char **ns = info->namespacelist;
+        while ( *ns )
+        {
+            xmlXPathRegisterNs(xpathCtx, (const xmlChar *)*ns,
+                           (const xmlChar *)*(ns+1));
+            ns += 2;
+        }
         if (xpathCtx)
         {
             while (info)
