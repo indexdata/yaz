@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+         xmlns:bf="http://id.loc.gov/ontologies/bibframe/" 
+         xmlns:bflc="http://id.loc.gov/ontologies/bibframe/lc-extensions/">
+  <bf:Work rdf:about="http://example.org/13600108#Work">
+    <bf:adminMetadata>
+      <bf:AdminMetadata>
+        <bf:status>
+          <bf:Status>
+            <bf:code>c</bf:code>
+          </bf:Status>
+        </bf:status>
+        <bflc:encodingLevel>
+          <bflc:EncodingLevel>
+            <bf:code>f</bf:code>
+          </bflc:EncodingLevel>
+        </bflc:encodingLevel>
+        <bf:descriptionConventions>
+          <bf:DescriptionConventions>
+            <bf:code>aacr</bf:code>
+          </bf:DescriptionConventions>
+        </bf:descriptionConventions>
+        <bf:identifiedBy>
+          <bf:Local>
+            <rdf:value>13600108</rdf:value>
+          </bf:Local>
+        </bf:identifiedBy>
+        <bf:changeDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2004-09-15T14:13:53</bf:changeDate>
+        <bf:creationDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2004-05-20</bf:creationDate>
+      </bf:AdminMetadata>
+    </bf:adminMetadata>
+    <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Text"/>
+    <bf:language>
+      <bf:Language rdf:about="http://id.loc.gov/vocabulary/languages/dan"/>
+    </bf:language>
+    <bf:intendedAudience>
+      <bf:IntendedAudience rdf:about="http://id.loc.gov/vocabulary/maudience/juv">
+        <rdfs:label>juvenile</rdfs:label>
+      </bf:IntendedAudience>
+    </bf:intendedAudience>
+    <bf:genreForm>
+      <bf:GenreForm rdf:about="http://id.loc.gov/vocabulary/marcgt/fic">
+        <rdfs:label>fiction</rdfs:label>
+      </bf:GenreForm>
+    </bf:genreForm>
+    <bf:contribution>
+      <bf:Contribution>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/lc-extensions/PrimaryContribution"/>
+        <bf:agent>
+          <bf:Agent rdf:about="http://example.org/13600108#Agent100-12">
+            <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Person"/>
+            <bflc:name00MatchKey>Andersen, H. C. (Hans Christian), 1805-1875</bflc:name00MatchKey>
+            <bflc:primaryContributorName00MatchKey>Andersen, H. C. (Hans Christian), 1805-1875</bflc:primaryContributorName00MatchKey>
+            <bflc:name00MarcKey>1001 $aAndersen, H. C.$q(Hans Christian),$d1805-1875.</bflc:name00MarcKey>
+            <rdfs:label>Andersen, H. C. (Hans Christian), 1805-1875.</rdfs:label>
+          </bf:Agent>
+        </bf:agent>
+        <bf:role>
+          <bf:Role rdf:about="http://id.loc.gov/vocabulary/relators/ctb"/>
+        </bf:role>
+      </bf:Contribution>
+    </bf:contribution>
+    <rdfs:label>Ole Lukøie /</rdfs:label>
+    <bf:title>
+      <bf:Title>
+        <rdfs:label>Ole Lukøie /</rdfs:label>
+        <bflc:titleSortKey>Ole Lukøie /</bflc:titleSortKey>
+        <bf:mainTitle>Ole Lukøie</bf:mainTitle>
+      </bf:Title>
+    </bf:title>
+    <bf:contribution>
+      <bf:Contribution>
+        <bf:agent>
+          <bf:Agent rdf:about="http://example.org/13600108#Agent700-17">
+            <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Person"/>
+            <bflc:name00MatchKey>Dickmeiss, OttoXXX</bflc:name00MatchKey>
+            <bflc:name10MatchKey>Dickmeiss, Otto,</bflc:name10MatchKey>
+            <bflc:name00MarcKey>7001 $aDickmeiss, Otto,$eill.</bflc:name00MarcKey>
+            <rdfs:label>Dickmeiss, Otto,</rdfs:label>
+          </bf:Agent>
+        </bf:agent>
+        <bf:role>
+          <bf:Role>
+            <rdfs:label>ill.</rdfs:label>
+          </bf:Role>
+        </bf:role>
+      </bf:Contribution>
+    </bf:contribution>
+    <bf:hasInstance rdf:resource="http://example.org/13600108#Instance"/>
+  </bf:Work>
+  <bf:Instance rdf:about="http://example.org/13600108#Instance">
+    <bf:issuance>
+      <bf:Issuance rdf:about="http://id.lc.gov/vocabulary/issuance/mono"/>
+    </bf:issuance>
+    <bf:provisionActivity>
+      <bf:ProvisionActivity>
+        <rdf:type rdf:resource="http://id.loc.gov/ontologies/bibframe/Publication"/>
+        <bf:date rdf:datatype="http://id.loc.gov/datatypes/edtf">2001</bf:date>
+        <bf:place>
+          <bf:Place rdf:about="http://id.loc.gov/vocabulary/countries/dk"/>
+        </bf:place>
+      </bf:ProvisionActivity>
+    </bf:provisionActivity>
+    <bf:illustrativeContent>
+      <bf:Illustration rdf:about="http://id.loc.gov/vocabulary/millus/ill">
+        <rdfs:label>illustrations</rdfs:label>
+      </bf:Illustration>
+    </bf:illustrativeContent>
+    <bf:identifiedBy>
+      <bf:Lccn>
+        <rdf:value>  2004436018</rdf:value>
+      </bf:Lccn>
+    </bf:identifiedBy>
+    <bf:identifiedBy>
+      <bf:Isbn>
+        <rdf:value>8759517352</rdf:value>
+      </bf:Isbn>
+    </bf:identifiedBy>
+    <rdfs:label>Ole Lukøie /</rdfs:label>
+    <bf:title>
+      <bf:Title>
+        <rdfs:label>Ole Lukøie /</rdfs:label>
+        <bflc:titleSortKey>Ole Lukøie /</bflc:titleSortKey>
+        <bf:mainTitle>Ole Lukøie</bf:mainTitle>
+      </bf:Title>
+    </bf:title>
+    <bf:responsibilityStatement>H.C. Andersen ; illustrationer af Otto Dickmeiss</bf:responsibilityStatement>
+    <bf:instanceOf rdf:resource="http://example.org/13600108#Work"/>
+  </bf:Instance>
+</rdf:RDF>

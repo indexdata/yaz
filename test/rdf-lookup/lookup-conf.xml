@@ -1,0 +1,12 @@
+        <backend syntax="xml" name="rdf-lookup">
+          <rdf-lookup debug="1">
+            <namespace prefix="bf" href="http://id.loc.gov/ontologies/bibframe/" />
+            <namespace prefix="bflc" href="http://id.loc.gov/ontologies/bibframe/lc-extensions/"/>
+            <lookup xpath="//bf:contribution/bf:Contribution/bf:agent/bf:Agent">
+              <key field="bflc:name11MatchKey"/>
+              <key field="bflc:name00MatchKey"/>
+              <key field="bflc:name10MatchKey"/>
+              <server url="http://id.loc.gov/authorities/names/label/%s"/>
+            </lookup>
+          </rdf-lookup>
+        </backend>
