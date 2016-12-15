@@ -14,12 +14,12 @@ MANFILES=yaz-client.1 yaz-ztest.8 \
 	yaz-config.1 yaz.7 zoomsh.1 yaz-asncomp.1 \
 	yaz-marcdump.1 yaz-iconv.1 yaz-log.7 \
 	yaz-illclient.1 yaz-icu.1 yaz-url.1 bib1-attr.7 \
-	yaz-json-parse.1
+	yaz-json-parse.1 yaz-record-conv.1
 REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 	yaz-man.xml zoomsh-man.xml yaz-asncomp-man.xml \
 	yaz-marcdump-man.xml yaz-iconv-man.xml yaz-log-man.xml \
 	yaz-illclient-man.xml yaz-icu-man.xml yaz-url-man.xml \
-	bib1-attr-man.xml yaz-json-parse-man.xml
+	bib1-attr-man.xml yaz-json-parse-man.xml yaz-record-conv-man.xml
 
 SUPPORTFILES=entities.ent apilayer.obj
 
@@ -79,6 +79,9 @@ yaz-url.1: yaz-url-man.xml
 
 yaz-json-parse.1: yaz-json-parse-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-json-parse-man.xml
+
+yaz-record-conv.1: yaz-record-conv-man.xml
+	$(MAN_COMPILE) $(srcdir)/yaz-record-conv-man.xml
 
 $(HTMLFILES): $(XMLFILES) book.xml
 	rm -f *.html
