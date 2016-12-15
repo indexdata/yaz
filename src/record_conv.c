@@ -24,6 +24,7 @@
 #include <yaz/xml_get.h>
 #include <yaz/url.h>
 #include <yaz/srw.h>
+#include <yaz/timing.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -690,6 +691,7 @@ static void destroy_marc(void *info)
 struct rdf_lookup_info {
     NMEM nmem;
     struct rdf_lookup_info *next;
+    int debug;
     char *xpath;
     char *server;
     char *keys[RDF_LOOKUP_MAX_KEYS];
@@ -706,6 +708,8 @@ static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
     info->next = 0;
     info->xpath = 0;
     info->server = 0;
+    info->debug = 0;
+    info->namespacelist = 0;
     for (attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "xpath") &&
@@ -782,15 +786,32 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
     struct rdf_lookup_info **next = &info;
     const char *defserver = "http://id.loc.gov/authorities/names/label/%s";
     char ** namespaces = 0;
+    int debug = 0;
     if (strcmp((const char *) ptr->name, "rdf-lookup"))
         return 0;
     yaz_log(YLOG_DEBUG,"Constructing rdf_lookup.");
-    
+
     nmem = nmem_create();
     namespaces = nmem_malloc(nmem,RDF_LOOKUP_MAX_NAMESPACES * 2 * sizeof(char *) );
     int nns = 0;
     namespaces[0] = 0;
-    
+
+    struct _xmlAttr *attr;
+    for (attr = ptr->properties; attr; attr = attr->next)
+    {
+        if (!xmlStrcmp(attr->name, BAD_CAST "debug") &&
+            attr->children && attr->children->type == XML_TEXT_NODE)
+        {
+            debug = atoi((const char *) attr->children->content);
+        }
+        else
+        {
+            wrbuf_printf(wr_error, "Bad attribute '%s' for <rdf-lookup>. "
+                          "Expected 'debug'", attr->name);
+            return 0;
+        }
+    }
+
     ptr = ptr->children;
     for ( ; ptr ; ptr = ptr->next) {
         if (ptr->type == XML_ELEMENT_NODE )
@@ -803,6 +824,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                 else
                 {
                     i->namespacelist = namespaces;
+                    i->debug = debug;
                     *next = i;
                     next = &((*next)->next);
                     if ( ! i->server )
@@ -830,7 +852,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                     {
                         href = nmem_strdup(nmem, (const char *) attr->children->content);
                     }
-                    else 
+                    else
                     {
                         wrbuf_printf(wr_error, "Bad attribute '%s'. "
                                       "Expected 'prefix' or 'href'", attr->name);
@@ -843,13 +865,13 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                     namespaces[nns++] = href;
                     namespaces[nns] = 0 ; /* signal end */
                 }
-                else 
+                else
                 {
                     wrbuf_printf(wr_error, "Bad namespace, need both 'prefix' and 'href'");
                     return 0;
                 }
             }
-            else 
+            else
             {
                 wrbuf_printf(wr_error, "Expected a <lookup> tag under rdf-lookup, not <%s>",
                   ptr->name );
@@ -865,6 +887,30 @@ static void destroy_rdf_lookup(void *info)
     struct rdf_lookup_info *inf = info;
     yaz_log(YLOG_DEBUG,"Destroying rdf_lookup");
     nmem_destroy(inf->nmem);
+}
+
+/* Little helper to add a XML comment */
+static void rdf_lookup_debug_comment(xmlNode *n,
+             WRBUF uri,
+             Z_HTTP_Response *resp,
+             struct rdf_lookup_info *info,
+             yaz_timing_t tim,
+             const char *msg,
+             int yloglevel)
+{
+    WRBUF com;
+    if ( ! info->debug )
+      return;
+    com = wrbuf_alloc();
+    int res = -1;
+    if (resp)
+      res = resp->code;
+    wrbuf_printf(com," rdf-lookup %s took %g sec and resulted in %d %s ",
+                 wrbuf_cstr(uri), yaz_timing_get_real(tim), res, msg );
+    yaz_log(yloglevel,"xml comment: %s", wrbuf_cstr(com));
+    xmlNodePtr comnode = xmlNewComment((const xmlChar *)wrbuf_cstr(com));
+    xmlAddNextSibling(n, comnode);
+    wrbuf_destroy(com);
 }
 
 static void rdf_lookup_node(xmlNode *n,xmlXPathContextPtr xpathCtx, struct rdf_lookup_info *info )
@@ -898,29 +944,38 @@ static void rdf_lookup_node(xmlNode *n,xmlXPathContextPtr xpathCtx, struct rdf_l
                         wrbuf_printf(uri,info->server,keybuf );
                         xfree(keybuf);
                         yaz_log(YLOG_DEBUG,"Fetching '%s'", wrbuf_cstr(uri));
+                        yaz_timing_t tim = yaz_timing_create();
+                        yaz_timing_start(tim);
                         Z_HTTP_Response *resp = yaz_url_exec(url, wrbuf_cstr(uri),
                                           "HEAD", 0, 0, 0 ); /* no hdrs, no body */
+                        yaz_timing_stop(tim);
                         if (resp)
                         {
                             yaz_log(YLOG_DEBUG,"resp code %d, headers %p", resp->code, resp->headers);
-                            if ( resp->code == 302 && resp->headers )
+                            if ( (resp->code == 302 || resp->code == 200) && resp->headers )
                             {
                                 const char *newuri = z_HTTP_header_lookup(resp->headers, "X-Uri");
                                 if ( newuri && *newuri )
                                 {
                                     xmlSetProp(n, (const xmlChar *)"rdf:about",
                                           (const xmlChar *)newuri );
-                                    yaz_log(YLOG_DEBUG,"rdf-lookup: %s -> %s",
-                                            wrbuf_cstr(uri), newuri);
                                     done = 1;
+                                    rdf_lookup_debug_comment(f->parent, uri,
+                                         resp, info, tim, newuri, YLOG_DEBUG);
                                 }
                               else
-                                yaz_log(YLOG_LOG,"rdf-lookup: Got no X-Uri for %s",
-                                          wrbuf_cstr(uri));
+                              {
+                                  yaz_log(YLOG_LOG,"rdf-lookup: Got no X-Uri for %s",
+                                            wrbuf_cstr(uri));
+                                  rdf_lookup_debug_comment(f->parent, uri, resp, info, tim,
+                                    "No X-URI Header in response!", YLOG_LOG );
+                              }
                             }
                             else
-                                yaz_log(YLOG_LOG,"rdf-lookup failed with %d for %s",
-                                      resp->code, wrbuf_cstr(uri));
+                            {
+                                rdf_lookup_debug_comment(f->parent, uri, resp,
+                                            info, tim, "", YLOG_LOG );
+                            }
                             if (!done)
                             { /* something went wrong, dump headers and message */
                                 const char *err = yaz_url_get_error(url);
@@ -934,9 +989,11 @@ static void rdf_lookup_node(xmlNode *n,xmlXPathContextPtr xpathCtx, struct rdf_l
                                     yaz_log(YLOG_LOG, "Error: %s", err);
                             }
                         }
-                        else
-                            yaz_log(YLOG_LOG,"rdf-lookup: Got no response for %s. %s",
-                                wrbuf_cstr(uri), yaz_url_get_error(url) );
+                        else 
+                        {
+                            rdf_lookup_debug_comment(f->parent, uri, resp, info, tim,
+                                  "NO RESPONSE", YLOG_LOG );
+                        }
                         yaz_url_destroy(url);
                     }
             }
