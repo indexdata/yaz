@@ -1,0 +1,92 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.4//EN"
+ "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+     <!ENTITY % local SYSTEM "local.ent">
+     %local;
+     <!ENTITY % entities SYSTEM "entities.ent">
+     %entities;
+     <!ENTITY % idcommon SYSTEM "common/common.ent">
+     %idcommon;
+]>
+<refentry id="yaz-record-iconv">
+ <refentryinfo>
+  <productname>YAZ</productname>
+  <productnumber>&version;</productnumber>
+  <orgname>Index Data</orgname>
+ </refentryinfo>
+
+ <refmeta>
+  <refentrytitle>yaz-record-iconv</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="manual">Commands</refmiscinfo>
+ </refmeta>
+
+ <refnamediv>
+  <refname>yaz-record-conv</refname>
+  <refpurpose>YAZ Record Conversion Utility</refpurpose>
+ </refnamediv>
+
+ <refsynopsisdiv>
+  <cmdsynopsis>
+   <command>yaz-iconv</command>
+   <arg choice="opt">
+    <option>-v <replaceable>loglevel</replaceable></option>
+   </arg>
+   <arg><replaceable>config</replaceable></arg>
+   <arg choice="opt" rep="repeat"><replaceable>fname</replaceable></arg>
+  </cmdsynopsis>
+ </refsynopsisdiv>
+
+ <refsect1>
+  <title>DESCRIPTION</title>
+  <para>
+   <command>yaz-record-conv</command> is a program that exercises the
+   record conversion sub system. Refer to record_conv.h header.
+  </para>
+ </refsect1>
+
+ <refsect1>
+  <title>OPTIONS</title>
+  <variablelist>
+   <varlistentry><term>
+    <literal>-v</literal> <replaceable>level</replaceable>
+    </term><listitem>
+    <simpara>Sets the LOG level to <replaceable>level</replaceable>.
+    Level is a sequence of tokens separated by comma. Each token
+    is a integer or a named LOG item - one of
+    <literal>fatal</literal>,
+    <literal>debug</literal>,
+    <literal>warn</literal>,
+    <literal>log</literal>,
+    <literal>malloc</literal>,
+    <literal>all</literal>,
+    <literal>none</literal>.
+   </simpara></listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+
+ <refsect1><title>EXAMPLES</title>
+  <para/>
+ </refsect1>
+
+ <refsect1>
+  <title>FILES</title>
+  <para>
+   <filename>record_conv.h</filename>
+  </para>
+ </refsect1>
+ <refsect1>
+  <title>SEE ALSO</title>
+  <para>
+   yaz(7)
+  </para>
+ </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: nxml
+nxml-child-indent: 1
+End:
+-->
