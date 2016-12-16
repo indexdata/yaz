@@ -16,7 +16,7 @@ const char *prog = "yaz-record-conv";
 
 static void usage(void)
 {
-    fprintf(stderr, "%s: usage\nyaz-record-conf config file ..\n", prog);
+    fprintf(stderr, "%s: usage\nyaz-record-conv config file ..\n", prog);
     exit(1);
 }
 int main (int argc, char **argv)
@@ -27,10 +27,13 @@ int main (int argc, char **argv)
     int no_errors = 0;
 
     yaz_enable_panic_backtrace(*argv);
-    while ((r = options("V", argv, argc, &arg)) != -2)
+    while ((r = options("v:V", argv, argc, &arg)) != -2)
     {
         switch (r)
         {
+        case 'v':
+            yaz_log_init(yaz_log_mask_str(arg), "", 0);
+            break;
         case 'V':
             break;
         case 0:
