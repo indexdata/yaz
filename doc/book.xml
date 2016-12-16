@@ -7628,7 +7628,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            <listitem>
             <para>
              A <literal>namespace</literal> tag declares a namespace to be 
-             used in the <literal>xpath</literal> below.
+             used in the <literal>xpath</literal> below. The tag requires
+             two attributes: <literal>prefix</literal> and 
+             <literal>href</literal>.
             </para>
            </listitem>
           </varlistentry>
