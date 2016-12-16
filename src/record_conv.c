@@ -793,10 +793,6 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
         return 0;
     yaz_log(YLOG_DEBUG,"Constructing rdf_lookup.");
 
-    nmem = nmem_create();
-    namespaces = nmem_malloc(nmem,RDF_LOOKUP_MAX_NAMESPACES * 2 * sizeof(char *) );
-    namespaces[0] = 0;
-
     for (attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "debug") &&
@@ -811,6 +807,10 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             return 0;
         }
     }
+    nmem = nmem_create();
+    namespaces = nmem_malloc(nmem, RDF_LOOKUP_MAX_NAMESPACES *
+                             2 * sizeof(char *) );
+    namespaces[0] = 0;
 
     ptr = ptr->children;
     for ( ; ptr ; ptr = ptr->next) {
@@ -820,7 +820,10 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             {
                 struct rdf_lookup_info *i = construct_one_rdf_lookup(nmem, ptr, wr_error);
                 if ( !i )
+                {
+                    nmem_destroy(nmem);
                     return 0; /* error already in wr_error */
+                }
                 else
                 {
                     i->namespacelist = namespaces;
@@ -835,7 +838,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                       i->xpath, i->keys[0], i->server);
                 }
             }
-            else if ( !strcmp((const char *)ptr->name, "namespace") ) 
+            else if ( !strcmp((const char *)ptr->name, "namespace") )
             {
                 char * prefix = 0;
                 char * href = 0;
@@ -856,6 +859,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                     {
                         wrbuf_printf(wr_error, "Bad attribute '%s'. "
                                       "Expected 'prefix' or 'href'", attr->name);
+                        nmem_destroy(nmem);
                         return 0;
                     }
                 }
@@ -868,6 +872,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
                 else
                 {
                     wrbuf_printf(wr_error, "Bad namespace, need both 'prefix' and 'href'");
+                    nmem_destroy(nmem);
                     return 0;
                 }
             }
@@ -875,6 +880,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             {
                 wrbuf_printf(wr_error, "Expected a <lookup> tag under rdf-lookup, not <%s>",
                   ptr->name );
+                nmem_destroy(nmem);
                 return 0;
             }
         }
@@ -992,11 +998,12 @@ static void rdf_lookup_node(xmlNode *n,xmlXPathContextPtr xpathCtx, struct rdf_l
                                     yaz_log(YLOG_LOG, "Error: %s", err);
                             }
                         }
-                        else 
+                        else
                         {
                             rdf_lookup_debug_comment(f->parent, uri, resp, info, tim,
                                   "NO RESPONSE", YLOG_LOG );
                         }
+                        yaz_timing_destroy(&tim);
                         yaz_url_destroy(url);
                     }
             }
