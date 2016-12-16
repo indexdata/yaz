@@ -7611,18 +7611,62 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
          The <literal>rdf-lookup</literal> element looks up BIBFRAME elements
          in some suitable service, for example http://id.loc.gov/authorities/names
          and replaces the URIs for specified elements with URIs it finds at that
-         service. Its configuration consists of one or more 
-         <literal>lookup</literal> tags, each with a <literal>xpath</literal>
-         attribute that specifies the path of the element to be looked up. Each
-         <literal>lookup</literal> section must contain at least one 
-         <literal>key</literal> element with a <literal>field</literal>
-         attribute with the name of the tag to be looked up. There can also
-         be a <literal>server</literal> tag with a <literal>url</literal>
-         attribute to define URL for the lookup. Any <literal>%s</literal>
-         in the string will be replaced by the term to be looked up. If no
-         <literal>server</literal> is specified, the previous one is used, and
-         in the first <literal>lookup</literal> section, the default is
-         <literal>http://id.loc.gov/authorities/names/label/%s</literal>.
+         service. Its configuration consists of 
+         <variablelist>
+          <varlistentry><term><literal>debug</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             Attribute to the <literal>rdf-lookup</literal> tag to enable debug 
+             output. A value of "1" makes the filter to add a XML comment
+             next to each key it tried to look up, showing the URL, the result,
+             and timing. This is useful for debugging the configuration. The
+             default is not to add any comments.
+            </para>
+           </listitem>
+          </varlistentry>
+          <varlistentry><term><literal>namespace</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             A <literal>namespace</literal> tag declares a namespace to be 
+             used in the <literal>xpath</literal> below.
+            </para>
+           </listitem>
+          </varlistentry>
+          <varlistentry><term><literal>lookup</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+              A section that defines one tag to be looked up, for example
+              an author.The <literal>
+              xpath</literal> attribute (REQUIRED) specifies the path to
+              the element(s).
+            </para>
+           </listitem>
+          </varlistentry>
+          
+          <varlistentry><term><literal>key</literal> (REQUIRED)</term>
+           <listitem>
+            <para>
+              A tag withing the <literal>lookup</literal> tag specifies the
+              value to be used in the lookup, for example a name or an ID. It
+              is a relative Xpath starting from the tag specified in the
+              <literal>lookup</literal>.
+            </para>
+           </listitem>
+          </varlistentry>
+          <varlistentry><term><literal>server</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             Specifies the URL for server to use for the lookup. 
+             A <literal>%s</literal> is replaced by the key value to be looked
+             up. If not specified, defaults to the same as the previous
+             <literal>lookup</literal> section, or lacking one, to 
+             <ulink url="http://id.loc.gov/authorities/names/label/%s"/>
+            </para>
+           </listitem>
+          </varlistentry>
+          </variablelist>
+        </para>
+        <para>
          See the example below.
         </para>
         <para>
@@ -7745,7 +7789,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      </para>
      <programlisting><![CDATA[
         <backend syntax="xml" name="rdf-lookup">
-          <rdf-lookup>
+          <rdf-lookup debug=1>
+            <namespace prefix="bf" href="http://id.loc.gov/ontologies/bibframe/" />
+            <namespace prefix="bflc" href="http://id.loc.gov/ontologies/bibframe/lc-extensions/"/>
             <lookup xpath="//bf:contribution/bf:Contribution/bf:agent/bf:Agent">
               <key field="bflc:name00MatchKey"/>
               <key field="bflc:name01MatchKey"/>
@@ -7757,14 +7803,26 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
 ]]>
      </programlisting>
      <para>
-      This means that any tags that match the xpath (.../bf:Agent) are considered
-      for lookup. Within those tags, the lookup key is in a one of the nameXXMatchKey
-      fields. If one is found, a lookup is made to the id.loc.gov server, and if
-      that returns a redirect to the proper entry with a X-URI header, that URI
-      is taken to be the canonical URI for that name, and will be replaced in the
-      Agent tag. Of course there could be more lookup tags, for subject keywords,
-      and various other things. They would not need to repeat the 
-      <literal>server</literal> tag, if they used the same one.
+       The <literal>debug=1</literal> attribute tells the filter to add XML
+       comments to the key nodes that indicate what lookup it tried to do,
+       how it went, and how long it took.
+     </para>
+     <para>
+      The namespace prefix <literal>bf:</literal> is defined in the
+      <literal>namespace</literal> tags. These namespaces are used in the
+      xpath expressions in the lookup sections.
+     </para>
+     <para>
+      The <literal>lookup</literal> tag specifies one tag to be looked up.
+      The <literal>xpath</literal> attribute defines which node to modify. It
+      may make use of the <literal>namespace</literal> definitions above.
+     </para>
+     <para>
+      The <literal>server</literal> tag gives the URL to be used for the lookup.
+      A <literal>%s</literal> in the string will get replaced by the key value.
+      If there is no <literal>server</literal> tag, the one from the preceding
+      <literal>lookup</literal> section is used, and if there is no previous 
+      section, the id.loc.gov address is used as a default.
      </para>
     </example>
    </sect2>
