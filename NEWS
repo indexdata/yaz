@@ -1,3 +1,20 @@
+--- 5.19.0 2016/12/16
+
+New type, rdf-lookup, for record conversion system (retrieval)
+
+yaz-record-conv now installed and packaged
+
+Fix yaz_url_exec sending same uri for 2nd call
+
+JSON: to the spec check of number
+
+JSON: strict \uxxxx sequence
+
+JSON: fail for nesting more than 1000 levels
+The parser is recursive - so this is better than stack overflow.
+
+JSON: distinguish between EOF and error
+
 --- 5.18.0 2016/10/17
 
 Omitted MARXML indicator defaults to " " again
