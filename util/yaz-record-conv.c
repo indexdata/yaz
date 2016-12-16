@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <yaz/options.h>
+#include <yaz/log.h>
 #include <yaz/record_conv.h>
 #include <yaz/backtrace.h>
 
