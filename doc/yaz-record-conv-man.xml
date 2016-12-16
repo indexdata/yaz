@@ -67,7 +67,35 @@
  </refsect1>
 
  <refsect1><title>EXAMPLES</title>
-  <para/>
+ <para>
+  The following backend configuration converts MARC records (ISO2709) to
+  Dublin-Core XML.
+ </para>
+ <programlisting><![CDATA[
+
+   <backend name="F" syntax="usmarc">
+      <marc inputcharset="marc-8" inputformat="marc" outputformat="marcxml"/>
+      <xslt stylesheet="../etc/MARC21slim2DC.xsl"/>
+    </backend>
+    ]]>
+ </programlisting>
+ <para>
+  We can convert one of the sample records from YAZ' test directory with:
+  <programlisting><![CDATA[
+$ ../util/yaz-record-conv record-conv-conf.xml marc6.marc
+<?xml version="1.0"?>
+<dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <dc:title>How to program a computer</dc:title>
+  <dc:creator>
+    Jack Collins
+  </dc:creator>
+  <dc:type>text</dc:type>
+  <dc:publisher>Penguin</dc:publisher>
+  <dc:language>eng</dc:language>
+</dc:dc>
+]]>
+ </programlisting>
+ </para>
  </refsect1>
 
  <refsect1>
