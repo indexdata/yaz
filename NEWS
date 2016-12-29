@@ -1,3 +1,7 @@
+--- 5.19.1 2016/12/29
+
+Declare API 5.18.0.
+
 --- 5.19.0 2016/12/16
 
 New type, rdf-lookup, for record conversion system (retrieval)
