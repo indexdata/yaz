@@ -6,7 +6,7 @@
               <key field="bflc:name11MatchKey"/>
               <key field="bflc:name00MatchKey"/>
               <key field="bflc:name10MatchKey"/>
-              <server url="http://id.loc.gov/authorities/names/label/%s"/>
+              <server url="http://id.loc.gov/authorities/names/label/%s" method="HEAD"/>
             </lookup>
           </rdf-lookup>
         </backend>
