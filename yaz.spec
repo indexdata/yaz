@@ -12,7 +12,6 @@ Release: 1.indexdata
 
 # determine system
 %define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
-%define is_redhat7 %(grep 'release 7' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
@@ -49,9 +48,6 @@ BuildRequires: libxslt-devel
 BuildRequires: readline-devel
 BuildRequires: libicu-devel
 BuildRequires: wget
-%if %is_redhat7
-BuildRequires: hiredis-devel
-%endif
 Packager: Adam Dickmeiss <adam@indexdata.dk>
 URL: http://www.indexdata.com/yaz
 
@@ -63,9 +59,6 @@ for the ANSI/NISO Z39.50 protocol for Information Retrieval.
 Summary: Z39.50 Library
 Group: Libraries
 Requires: libxslt, gnutls, libicu
-%if %is_redhat7
-Requires: hiredis
-%endif
 
 %description -n libyaz5
 YAZ is a library for the ANSI/NISO Z39.50 protocol for Information
