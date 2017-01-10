@@ -1,3 +1,8 @@
+retrieval: fix incorrect backend schema YAZ-877. Should fix
+https://bugs.koha-community.org/bugzilla3/show_bug.cgi?id=17871
+
+record_conv: allow HTTP method to be set for authority lookup
+
 --- 5.19.2 2016/12/29
 
 Do not use hiredis anymore on CentOS 6&7.
