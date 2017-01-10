@@ -376,13 +376,11 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             {
                 ++j;
                 if (buf[j] == '1') /* 1XX */
-                    ;
+                    head_only = 1;
                 else if (!memcmp(buf + j, "204", 3))
-                    ;
+                    head_only = 1;
                 else if (!memcmp(buf + j, "304", 3))
-                    ;
-                else
-                    content_len = -1;
+                    head_only = 1;
                 break;
             }
     }
@@ -402,13 +400,13 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             if (skip_crlf(buf, len, &i))
             {
                 /* inside content */
-                if (chunked)
+                if (head_only)
+                    return i;
+                else if (chunked)
                     return cs_read_chunk(buf, i, len);
                 else
                 {   /* not chunked ; inside body */
-                    if (content_len == -1)
-                        return 0;   /* no content length */
-                    else if (len >= i + content_len)
+                    if (len >= i + content_len)
                     {
                         return i + content_len;
                     }
