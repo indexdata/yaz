@@ -195,6 +195,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                 char *buf = odr_getbuf(p->odr_out, &len, 0);
                 if (p->verbose)
                     fwrite(buf, 1, len, stdout);
+                if (!strcmp(gdu->u.HTTP_Request->method, "HEAD"))
+                    cs_set_head_only(conn, 1);
                 if (cs_put(conn, buf, len) < 0)
                 {
                     wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
