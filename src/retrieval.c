@@ -349,8 +349,6 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                 if (*el->backend_name)
                     *backend_schema = el->backend_name;
             }
-            else if (el->name)
-                *backend_schema = el->name;
             else
                 *backend_schema = schema;
         }
