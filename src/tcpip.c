@@ -1695,6 +1695,21 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     return 0;
 }
 
+int cs_set_head_only(COMSTACK cs, int head_only)
+{
+    if (cs->type == tcpip_type || cs->type == ssl_type)
+    {
+        tcpip_state *sp = (tcpip_state *)cs->cprivate;
+        if (head_only)
+            sp->complete = cs_complete_auto_head;
+        else
+            sp->complete = cs_complete_auto;
+        return 0;
+    }
+    cs->cerrno = CS_ST_INCON;
+    return -1;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4
