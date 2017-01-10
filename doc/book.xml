@@ -7662,7 +7662,10 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
              A <literal>%s</literal> is replaced by the key value to be looked
              up. If not specified, defaults to the same as the previous
              <literal>lookup</literal> section, or lacking one, to 
-             <ulink url="http://id.loc.gov/authorities/names/label/%s"/>
+             <ulink url="http://id.loc.gov/authorities/names/label/%s"/> .
+             The <literal>method</literal> attribute can be used to specify
+             the HTTP method to be used in this lookup. The default is GET,
+             and the useful alternative is HEAD.
             </para>
            </listitem>
           </varlistentry>
@@ -7798,7 +7801,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
               <key field="bflc:name00MatchKey"/>
               <key field="bflc:name01MatchKey"/>
               <key field="bflc:name11MatchKey"/>
-              <server url="http://id.loc.gov/authorities/names/label/%s"/>
+              <server url="http://id.loc.gov/authorities/names/label/%s" method="HEAD"/>
             </lookup>
           </rdf-lookup>
         </backend>
@@ -7824,7 +7827,8 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       A <literal>%s</literal> in the string will get replaced by the key value.
       If there is no <literal>server</literal> tag, the one from the preceding
       <literal>lookup</literal> section is used, and if there is no previous 
-      section, the id.loc.gov address is used as a default.
+      section, the id.loc.gov address is used as a default. The default is to
+      make a GET request, this example uses HEAD
      </para>
     </example>
    </sect2>
