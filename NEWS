@@ -1,3 +1,7 @@
+--- 5.20.0 2017/01/10
+
+yaz-url: ignore content-length for HTTP method HEAD YAZ-878
+
 retrieval: fix incorrect backend schema YAZ-877. Should fix
 https://bugs.koha-community.org/bugzilla3/show_bug.cgi?id=17871
 
