@@ -28,7 +28,7 @@
 
  <refsynopsisdiv>
   <cmdsynopsis>
-   <command>yaz-iconv</command>
+   <command>yaz-record-conv</command>
    <arg choice="opt">
     <option>-v <replaceable>loglevel</replaceable></option>
    </arg>
