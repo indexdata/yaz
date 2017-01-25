@@ -694,7 +694,7 @@
 	<para>&yaz; will be linked with
 	<ulink url="&url.libmemcached;">libMemcached</ulink> to allow
 	for result-set caching for ZOOM.
-	The prefix can not be given. 
+	The prefix can not be given.
 	Note that 0.40 of libmemcached is required.
        </para>
        </listitem>
@@ -7611,12 +7611,12 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
          The <literal>rdf-lookup</literal> element looks up BIBFRAME elements
          in some suitable service, for example http://id.loc.gov/authorities/names
          and replaces the URIs for specified elements with URIs it finds at that
-         service. Its configuration consists of 
+         service. Its configuration consists of
          <variablelist>
           <varlistentry><term><literal>debug</literal> (OPTIONAL)</term>
            <listitem>
             <para>
-             Attribute to the <literal>rdf-lookup</literal> tag to enable debug 
+             Attribute to the <literal>rdf-lookup</literal> tag to enable debug
              output. A value of "1" makes the filter to add a XML comment
              next to each key it tried to look up, showing the URL, the result,
              and timing. This is useful for debugging the configuration. The
@@ -7627,9 +7627,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
           <varlistentry><term><literal>namespace</literal> (OPTIONAL)</term>
            <listitem>
             <para>
-             A <literal>namespace</literal> tag declares a namespace to be 
+             A <literal>namespace</literal> tag declares a namespace to be
              used in the <literal>xpath</literal> below. The tag requires
-             two attributes: <literal>prefix</literal> and 
+             two attributes: <literal>prefix</literal> and
              <literal>href</literal>.
             </para>
            </listitem>
@@ -7644,7 +7644,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
             </para>
            </listitem>
           </varlistentry>
-          
+
           <varlistentry><term><literal>key</literal> (REQUIRED)</term>
            <listitem>
             <para>
@@ -7658,10 +7658,10 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
           <varlistentry><term><literal>server</literal> (OPTIONAL)</term>
            <listitem>
             <para>
-             Specifies the URL for server to use for the lookup. 
+             Specifies the URL for server to use for the lookup.
              A <literal>%s</literal> is replaced by the key value to be looked
              up. If not specified, defaults to the same as the previous
-             <literal>lookup</literal> section, or lacking one, to 
+             <literal>lookup</literal> section, or lacking one, to
              <ulink url="http://id.loc.gov/authorities/names/label/%s"/> .
              The <literal>method</literal> attribute can be used to specify
              the HTTP method to be used in this lookup. The default is GET,
@@ -7826,7 +7826,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       The <literal>server</literal> tag gives the URL to be used for the lookup.
       A <literal>%s</literal> in the string will get replaced by the key value.
       If there is no <literal>server</literal> tag, the one from the preceding
-      <literal>lookup</literal> section is used, and if there is no previous 
+      <literal>lookup</literal> section is used, and if there is no previous
       section, the id.loc.gov address is used as a default. The default is to
       make a GET request, this example uses HEAD
      </para>
