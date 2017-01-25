@@ -72,8 +72,7 @@
   Dublin-Core XML.
  </para>
  <programlisting><![CDATA[
-
-   <backend name="F" syntax="usmarc">
+    <backend name="F" syntax="usmarc">
       <marc inputcharset="marc-8" inputformat="marc" outputformat="marcxml"/>
       <xslt stylesheet="../etc/MARC21slim2DC.xsl"/>
     </backend>
