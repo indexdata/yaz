@@ -7519,6 +7519,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
              <literal>line</literal> (MARC line format);
              <literal>marcxml</literal> (for MARCXML),
              <literal>marc</literal> (ISO2709),
+             <literal>turbomarc</literal>,
              <literal>marcxchange</literal> (for MarcXchange),
              or <literal>json</literal>
              (<ulink url="&url.marc_in_json;">MARC-in-JSON </ulink>).
