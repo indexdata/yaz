@@ -266,7 +266,7 @@ static void add_otherInfos(Z_APDU *a)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
-                                     1, extraOtherInfos[i].value);
+                                  1, extraOtherInfos[i].value);
     }
 }
 
@@ -465,7 +465,7 @@ static int process_Z3950_initResponse(Z_InitResponse *res)
     if (ODR_MASK_GET(res->options, Z_Options_negotiationModel))
     {
         Z_CharSetandLanguageNegotiation *p =
-                yaz_get_charneg_record(res->otherInfo);
+            yaz_get_charneg_record(res->otherInfo);
 
         if (p)
         {
@@ -947,7 +947,7 @@ static void display_record(Z_External *r)
              * Call the given decoder to process the record.
              */
             odr_setbuf(in, (char*)r->u.octet_aligned->buf,
-                r->u.octet_aligned->len, 0);
+                       r->u.octet_aligned->len, 0);
             if (!(*type->fun)(in, &rr, 0, 0))
             {
                 odr_perror(in, "Decoding constructed record.");
@@ -1029,7 +1029,7 @@ static void display_record(Z_External *r)
             else
             {
                 if (yaz_oid_is_iso2709(oid))
-                     printf("bad MARC. Dumping as it is:\n");
+                    printf("bad MARC. Dumping as it is:\n");
                 print_record(octet_buf, octet_len);
             }
             yaz_marc_destroy(mt);
@@ -1118,47 +1118,47 @@ static void display_record(Z_External *r)
                     printf("volume %d\n", j);
                     if (data->volumes[j]->enumeration)
                         printf(" enumeration: %s\n",
-                                data->volumes[j]->enumeration);
+                               data->volumes[j]->enumeration);
                     if (data->volumes[j]->chronology)
                         printf(" chronology: %s\n",
-                                data->volumes[j]->chronology);
+                               data->volumes[j]->chronology);
                     if (data->volumes[j]->enumAndChron)
                         printf(" enumAndChron: %s\n",
-                                data->volumes[j]->enumAndChron);
+                               data->volumes[j]->enumAndChron);
                 }
                 for (j = 0; j<data->num_circulationData; j++)
                 {
                     printf("circulation %d\n", j);
                     if (data->circulationData[j]->availableNow)
                         printf(" availableNow: %d\n",
-                                *data->circulationData[j]->availableNow);
+                               *data->circulationData[j]->availableNow);
                     if (data->circulationData[j]->availablityDate)
                         printf(" availabiltyDate: %s\n",
-                                data->circulationData[j]->availablityDate);
+                               data->circulationData[j]->availablityDate);
                     if (data->circulationData[j]->availableThru)
                         printf(" availableThru: %s\n",
-                                data->circulationData[j]->availableThru);
+                               data->circulationData[j]->availableThru);
                     if (data->circulationData[j]->restrictions)
                         printf(" restrictions: %s\n",
-                                data->circulationData[j]->restrictions);
+                               data->circulationData[j]->restrictions);
                     if (data->circulationData[j]->itemId)
                         printf(" itemId: %s\n",
-                                data->circulationData[j]->itemId);
+                               data->circulationData[j]->itemId);
                     if (data->circulationData[j]->renewable)
                         printf(" renewable: %d\n",
-                                *data->circulationData[j]->renewable);
+                               *data->circulationData[j]->renewable);
                     if (data->circulationData[j]->onHold)
                         printf(" onHold: %d\n",
-                                *data->circulationData[j]->onHold);
+                               *data->circulationData[j]->onHold);
                     if (data->circulationData[j]->enumAndChron)
                         printf(" enumAndChron: %s\n",
-                                data->circulationData[j]->enumAndChron);
+                               data->circulationData[j]->enumAndChron);
                     if (data->circulationData[j]->midspine)
                         printf(" midspine: %s\n",
-                                data->circulationData[j]->midspine);
+                               data->circulationData[j]->midspine);
                     if (data->circulationData[j]->temporaryLocation)
                         printf(" temporaryLocation: %s\n",
-                                data->circulationData[j]->temporaryLocation);
+                               data->circulationData[j]->temporaryLocation);
                 }
             }
         }
@@ -1241,7 +1241,7 @@ static void display_records(Z_Records *p)
     }
     else if (p->which == Z_Records_multipleNSD)
         display_diagrecs(p->u.multipleNonSurDiagnostics->diagRecs,
-                          p->u.multipleNonSurDiagnostics->num_diagRecs);
+                         p->u.multipleNonSurDiagnostics->num_diagRecs);
     else
     {
         printf("Records: %d\n", p->u.databaseOrSurDiagnostics->num_records);
@@ -1271,7 +1271,7 @@ static int send_Z3950_deleteResultSetRequest(const char *arg)
         *req->deleteFunction = Z_DeleteResultSetRequest_list;
         req->resultSetList = (char **)
             odr_malloc(out, sizeof(*req->resultSetList)*
-                        req->num_resultSetList);
+                       req->num_resultSetList);
         for (i = 0; i<req->num_resultSetList; i++)
             req->resultSetList[i] = names[i];
     }
@@ -1574,7 +1574,7 @@ static int send_Z3950_searchRequest(const char *arg)
         {
             error = cql_transform_error(cqltrans, &addinfo);
             printf("Can't convert CQL to PQF: %s (addinfo=%s)\n",
-                    cql_strerror(error), addinfo);
+                   cql_strerror(error), addinfo);
             return 0;
         }
         arg = pqfbuf;
@@ -1603,7 +1603,7 @@ static int send_Z3950_searchRequest(const char *arg)
     *req->largeSetLowerBound = largeSetLowerBound;
     *req->mediumSetPresentNumber = mediumSetPresentNumber;
     if (smallSetUpperBound > 0 || (largeSetLowerBound > 1 &&
-        mediumSetPresentNumber > 0))
+                                   mediumSetPresentNumber > 0))
     {
         if (recordsyntax_size)
             req->preferredRecordSyntax =
@@ -1760,11 +1760,11 @@ void display_searchResult1(Z_SearchInfoReport *sr)
         if (!sr->elements[j]->subqueryExpression)
             printf("%d", j);
         display_queryExpression("term",
-            sr->elements[j]->subqueryExpression);
+                                sr->elements[j]->subqueryExpression);
         display_queryExpression("interpretation",
-            sr->elements[j]->subqueryInterpretation);
+                                sr->elements[j]->subqueryInterpretation);
         display_queryExpression("recommendation",
-            sr->elements[j]->subqueryRecommendation);
+                                sr->elements[j]->subqueryRecommendation);
         if (sr->elements[j]->subqueryCount)
             printf(" cnt=" ODR_INT_PRINTF,
                    *sr->elements[j]->subqueryCount);
@@ -2032,7 +2032,7 @@ static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
         printf("unknown\n");
     }
     if ( (*res->operationStatus != Z_ExtendedServicesResponse_failure) &&
-        (res->num_diagnostics != 0) )
+         (res->num_diagnostics != 0) )
     {
         display_diagrecs(res->diagnostics, res->num_diagnostics);
     }
@@ -2320,11 +2320,11 @@ static int cmd_update0(const char *arg)
 }
 
 static int send_Z3950_update(int version, int action_no, const char *recid,
-                            char *rec_buf, int rec_len);
+                             char *rec_buf, int rec_len);
 
 #if YAZ_HAVE_XML2
 static int send_SRW_update(int action_no, const char *recid,
-                          char *rec_buf, int rec_len);
+                           char *rec_buf, int rec_len);
 #endif
 
 static int cmd_update_common(const char *arg, int version)
@@ -2423,7 +2423,7 @@ static int send_SRW_update(int action_no, const char *recid,
 #endif
 
 static int send_Z3950_update(int version, int action_no, const char *recid,
-                            char *rec_buf, int rec_len)
+                             char *rec_buf, int rec_len)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2443,8 +2443,8 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
     }
 
     req->packageType = odr_oiddup(out, (version == 0 ?
-       yaz_oid_extserv_database_update_first_version :
-       yaz_oid_extserv_database_update));
+                                        yaz_oid_extserv_database_update_first_version :
+                                        yaz_oid_extserv_database_update));
 
     req->packageName = esPackageName;
 
@@ -2818,7 +2818,7 @@ static int cmd_sru(const char *arg)
     else
     {
         int r = sscanf(arg, "%9s %9s %9s", sru_method, sru_version,
-            sru_recordPacking);
+                       sru_recordPacking);
         if (r >= 1)
         {
             if (!yaz_matchstr(sru_method, "post"))
@@ -3133,9 +3133,9 @@ static int send_Z3950_presentRequest(const char *arg)
             compo.u.complex->recordSyntax = (Odr_oid **)
                 odr_malloc(out, recordsyntax_size * sizeof(Odr_oid*));
             for (i = 0; i < recordsyntax_size; i++)
-            compo.u.complex->recordSyntax[i] =
-                yaz_string_to_oid_odr(yaz_oid_std(),
-                                      CLASS_RECSYN, recordsyntax_list[i], out);
+                compo.u.complex->recordSyntax[i] =
+                    yaz_string_to_oid_odr(yaz_oid_std(),
+                                          CLASS_RECSYN, recordsyntax_list[i], out);
         }
     }
     else if (elementSetNames)
@@ -3191,21 +3191,21 @@ static void process_Z3950_close(Z_Close *req)
     Z_Close *res = apdu->u.close;
 
     static char *reasons[] =
-    {
-        "finished",
-        "shutdown",
-        "system problem",
-        "cost limit reached",
-        "resources",
-        "security violation",
-        "protocolError",
-        "lack of activity",
-        "peer abort",
-        "unspecified"
-    };
+        {
+            "finished",
+            "shutdown",
+            "system problem",
+            "cost limit reached",
+            "resources",
+            "security violation",
+            "protocolError",
+            "lack of activity",
+            "peer abort",
+            "unspecified"
+        };
 
     printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
-        req->diagnosticInformation ? req->diagnosticInformation : "NULL");
+           req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
         close_session();
     else
@@ -3450,7 +3450,7 @@ static void display_term_info(Z_TermInfo *t)
         printf("Term (not general)");
     if (t->term->which == Z_Term_general)
         sprintf(last_scan_line, "%.*s", t->term->u.general->len,
-            t->term->u.general->buf);
+                t->term->u.general->buf);
 
     if (t->globalOccurrences)
         printf(" (" ODR_INT_PRINTF ")\n", *t->globalOccurrences);
@@ -3489,7 +3489,7 @@ static void process_Z3950_scanResponse(Z_ScanResponse *res)
     }
     if (res->entries->nonsurrogateDiagnostics)
         display_diagrecs(res->entries->nonsurrogateDiagnostics,
-                          res->entries->num_nonsurrogateDiagnostics);
+                         res->entries->num_nonsurrogateDiagnostics);
 }
 
 static void process_Z3950_sortResponse(Z_SortResponse *res)
@@ -4139,7 +4139,7 @@ static void marc_file_write(const char *buf, size_t sz)
     }
 }
 /*
-   this command takes 3 arge {name class oid}
+  this command takes 3 arge {name class oid}
 */
 static int cmd_register_oid(const char* args)
 {
@@ -4170,7 +4170,7 @@ static int cmd_register_oid(const char* args)
     Odr_oid oid[OID_SIZE];
 
     if (sscanf(args, "%100[^ ] %100[^ ] %100s",
-                oname_str,oclass_str, oid_str) < 1)
+               oname_str,oclass_str, oid_str) < 1)
     {
         printf("Error in register command \n");
         return 0;
@@ -4348,7 +4348,7 @@ static void handle_srw_response(Z_SRW_searchRetrieveResponse *res)
     {
         if (res->diagnostics[i].uri)
             printf("SRW diagnostic %s\n",
-                    res->diagnostics[i].uri);
+                   res->diagnostics[i].uri);
         else
             printf("SRW diagnostic missing or could not be decoded\n");
         if (res->diagnostics[i].message)
@@ -4405,7 +4405,7 @@ static void handle_srw_scan_response(Z_SRW_scanResponse *res)
     {
         if (res->diagnostics[i].uri)
             printf("SRW diagnostic %s\n",
-                    res->diagnostics[i].uri);
+                   res->diagnostics[i].uri);
         else
             printf("SRW diagnostic missing or could not be decoded\n");
         if (res->diagnostics[i].message)
@@ -4619,7 +4619,7 @@ static void wait_and_handle_response(int one_response_only)
         {
             odr_perror(print, "Failed to print incoming APDU");
             odr_reset(print);
-                continue;
+            continue;
         }
         if (gdu->which == Z_GDU_Z3950)
         {
@@ -4644,7 +4644,7 @@ static void wait_and_handle_response(int one_response_only)
                 else
                     printf("No records.\n");
                 printf("nextResultSetPosition = " ODR_INT_PRINTF "\n",
-                        *apdu->u.presentResponse->nextResultSetPosition);
+                       *apdu->u.presentResponse->nextResultSetPosition);
                 break;
             case Z_APDU_sortResponse:
                 process_Z3950_sortResponse(apdu->u.sortResponse);
@@ -4712,14 +4712,14 @@ static void wait_and_handle_response(int one_response_only)
     {
 #if 0
         printf("S/U S/U=%ld/%ld %ld/%ld",
-                (long) tv_start.tv_sec,
-                (long) tv_start.tv_usec,
-                (long) tv_end.tv_sec,
-                (long) tv_end.tv_usec);
+               (long) tv_start.tv_sec,
+               (long) tv_start.tv_usec,
+               (long) tv_end.tv_sec,
+               (long) tv_end.tv_usec);
 #endif
         printf("Elapsed: %.6f\n",
-                (double) tv_end.tv_usec / 1e6 + tv_end.tv_sec -
-                ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
+               (double) tv_end.tv_usec / 1e6 + tv_end.tv_sec -
+               ((double) tv_start.tv_usec / 1e6 + tv_start.tv_sec));
     }
 #endif
     xfree(netbuffer);
@@ -4761,7 +4761,7 @@ static int cmd_set_otherinfo(const char* args)
     int sscan_res;
 
     sscan_res = sscanf(args, "%d %100[^ ] %100s",
-                        &otherinfoNo, oidstr, otherinfoString);
+                       &otherinfoNo, oidstr, otherinfoString);
 
     if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported)
     {
@@ -4991,7 +4991,7 @@ static struct {
     char *cmd;
     int (*fun)(const char *arg);
     char *ad;
-        completerFunctionType rl_completerfunction;
+    completerFunctionType rl_completerfunction;
     int complete_filenames;
     const char **local_tabcompletes;
 } cmd_array[] = {
@@ -5273,7 +5273,7 @@ static char* default_completer(const char* text, int state)
 #if HAVE_READLINE_READLINE_H
 
 /*
-   This function only known how to complete on the first word
+  This function only known how to complete on the first word
 */
 static char **readline_completer(char *text, int start, int end)
 {
@@ -5518,22 +5518,22 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf(stderr, "Usage: %s "
-                     " [-a apdulog]"
-                     " [-b berdump]"
-                     " [-c cclfile]"
-                     " [-d dump]"
-                     " [-f cmdfile]"
-                     " [-k size]"
-                     " [-m marclog]"
-                     " [-p proxy-addr]"
-                     " [-q cqlfile]"
-                     " [-t dispcharset]"
-                     " [-u auth]"
-                     " [-v loglevel]"
-                     " [-V]"
-                     " [-x]"
-                     " [server-addr]\n",
-                     prog);
+                    " [-a apdulog]"
+                    " [-b berdump]"
+                    " [-c cclfile]"
+                    " [-d dump]"
+                    " [-f cmdfile]"
+                    " [-k size]"
+                    " [-m marclog]"
+                    " [-p proxy-addr]"
+                    " [-q cqlfile]"
+                    " [-t dispcharset]"
+                    " [-u auth]"
+                    " [-v loglevel]"
+                    " [-V]"
+                    " [-x]"
+                    " [server-addr]\n",
+                    prog);
             exit(1);
         }
     }
