@@ -43,7 +43,7 @@ YAZ_BEGIN_CDECL
     \returns -1 on error
     \returns -2 if not supported
 */
-int wrbuf_malloc_info(WRBUF b);
+YAZ_EXPORT int wrbuf_malloc_info(WRBUF b);
 
 YAZ_END_CDECL
 
