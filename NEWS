@@ -1,3 +1,11 @@
+--- 5.20.1 2017/01/13
+
+DLL export wrbuf_malloc_info
+
+Fix typo in yaz-record-conv man page
+
+Describe "method" attribute for rdf-lookup
+
 --- 5.20.0 2017/01/10
 
 yaz-url: ignore content-length for HTTP method HEAD YAZ-878
