@@ -120,11 +120,11 @@ typedef struct tcpip_state
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
     int (*complete)(const char *buf, int len); /* length/complete. */
+    char *bind_host;
 #if HAVE_GETADDRINFO
     struct addrinfo *ai;
     struct addrinfo *ai_connect;
     int ipv6_only;
-    char *bind_host;
 #if RESOLVER_THREAD
     int pipefd[2];
     char *hoststr;
@@ -175,11 +175,10 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->altsize = sp->altlen = 0;
     sp->towrite = sp->written = -1;
     sp->complete = cs_complete_auto;
-
+    sp->bind_host = 0;
 #if HAVE_GETADDRINFO
     sp->ai = 0;
     sp->ai_connect = 0;
-    sp->bind_host = 0;
 #if RESOLVER_THREAD
     sp->hoststr = 0;
     sp->pipefd[0] = sp->pipefd[1] = -1;
@@ -1368,8 +1367,8 @@ void tcpip_close(COMSTACK h)
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
     TRC(fprintf(stderr, "tcpip_close: h=%p pid=%d\n", h, getpid()));
-#if HAVE_GETADDRINFO
     xfree(sp->bind_host);
+#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
