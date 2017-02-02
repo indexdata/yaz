@@ -62,6 +62,10 @@
 #include <netinet/tcp.h>
 #endif
 
+#ifndef YAZ_SOCKLEN_T
+#define YAZ_SOCKLEN_T int
+#endif
+
 struct yaz_spipe {
     int m_fd[2];
     int m_socket;
@@ -118,11 +122,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
         struct sockaddr *addr = 0;
         unsigned int tmpadd;
         struct sockaddr caddr;
-#ifdef WIN32
-        int caddr_len = sizeof(caddr);
-#else
-        socklen_t caddr_len = sizeof(caddr);
-#endif
+        YAZ_SOCKLEN_T caddr_len = sizeof(caddr);
         fd_set write_set;
 
         /* create server socket */
