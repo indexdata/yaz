@@ -431,9 +431,9 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
     return res;
 }
 
-#endif
+#else
 /* gethostbyname .. old systems */
-int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
+static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
                        int default_port)
 {
     struct hostent *hp;
@@ -473,6 +473,7 @@ int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
         return 0;
     return 1;
 }
+#endif
 
 #if HAVE_GETADDRINFO
 static struct addrinfo *create_net_socket(COMSTACK h)
