@@ -974,11 +974,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
             h->cerrno = CSNODATA;
         else
         {
-#ifdef WIN32
-            shutdown(h->iofile, SD_RECEIVE);
-#else
-            shutdown(h->iofile, SHUT_RD);
-#endif
+            shutdown(h->iofile, 0); /* SHUT_RD/SHUT_RECEIVE */
             listen(h->iofile, SOMAXCONN);
             h->cerrno = CSYSERR;
         }
