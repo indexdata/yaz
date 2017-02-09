@@ -3,7 +3,7 @@ dnl Copyright (C) Index Data
 dnl See the file LICENSE for details.
 AC_PREREQ([2.60])
 AC_INIT([yaz],
-m4_esyscmd([. ./IDMETA; echo -n $VERSION]),
+m4_esyscmd([. ./IDMETA; printf $VERSION]),
 [yaz-help@indexdata.dk])
 AC_CONFIG_HEADERS(include/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
