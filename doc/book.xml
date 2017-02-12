@@ -7603,6 +7603,20 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
           </varlistentry>
          </variablelist>
         </para>
+        <para>
+         In addition, the element can be configured as follows:
+         <variablelist>
+          <varlistentry><term><literal>param</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             A <literal>param</literal> tag configures a parameter to be passed
+             to the &acro.xslt; stylesheet. Multiple <literal>param</literal>
+             tags may be defined.
+            </para>
+           </listitem>
+          </varlistentry>
+         </variablelist>
+        </para>   
        </listitem>
       </varlistentry>
       <varlistentry>
