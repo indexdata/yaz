@@ -7616,7 +7616,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
            </listitem>
           </varlistentry>
          </variablelist>
-        </para>   
+        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
