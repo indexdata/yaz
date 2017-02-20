@@ -2,7 +2,7 @@
 export DH_VERBOSE=1
 
 %:
-	dh $@ --without python-support
+	dh $@ --parallel --without python-support
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
