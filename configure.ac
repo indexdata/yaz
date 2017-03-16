@@ -7,7 +7,7 @@ m4_esyscmd([. ./IDMETA; echo $VERSION|tr -d '\n']),
 AC_CONFIG_HEADERS(include/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
-AM_INIT_AUTOMAKE([1.9])
+AM_INIT_AUTOMAKE([1.9 subdir-objects])
 dnl
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
