@@ -913,19 +913,23 @@ static void rdf_lookup_debug_comment(xmlNode *n,
                                      const char *msg,
                                      int yloglevel)
 {
-    WRBUF com;
-    int res = -1;
-    xmlNodePtr comnode;
-    if ( ! info->debug )
-        return;
-    com = wrbuf_alloc();
+    WRBUF com = wrbuf_alloc();
+    wrbuf_printf(com, " rdf-lookup %s %s took %g sec",
+                 info->method, wrbuf_cstr(uri), yaz_timing_get_real(tim));
     if (resp)
-        res = resp->code;
-    wrbuf_printf(com, " rdf-lookup %s %s took %g sec and resulted in %d %s ",
-                 info->method, wrbuf_cstr(uri), yaz_timing_get_real(tim), res, msg );
-    yaz_log(yloglevel, "xml comment: %s", wrbuf_cstr(com));
-    comnode = xmlNewComment((const xmlChar *)wrbuf_cstr(com));
-    xmlAddNextSibling(n, comnode);
+        wrbuf_printf(com, " and resulted in %d", resp->code);
+    if (msg)
+    {
+        wrbuf_puts(com, " ");
+        wrbuf_puts(com, msg);
+    }
+    yaz_log(yloglevel, "%s", wrbuf_cstr(com) + 1); /* no leading space here */
+    wrbuf_puts(com, " "); /* lead+suffix space in XML comment */
+    if (info->debug)
+    {
+        xmlNodePtr comnode = xmlNewComment((const xmlChar *)wrbuf_cstr(com));
+        xmlAddNextSibling(n, comnode);
+    }
     wrbuf_destroy(com);
 }
 
@@ -992,7 +996,7 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx, struct rdf_
                             else
                             {
                                 rdf_lookup_debug_comment(f->parent, uri, resp,
-                                                         info, tim, "", YLOG_LOG );
+                                                         info, tim, NULL, YLOG_LOG );
                             }
                             if (!done)
                             { /* something went wrong, dump headers and message */
@@ -1000,9 +1004,19 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx, struct rdf_
                                 Z_HTTP_Header *r = resp->headers;
                                 for( ; r; r = r->next)
                                     yaz_log(YLOG_DEBUG, "  %s: %s", r->name, r->value);
-                                if ( resp->content_len > 0 )
-                                    yaz_log(YLOG_LOG, "Response: %*.s",
-                                            resp->content_len, resp->content_buf );
+                                if (resp->content_len > 0)
+                                {
+                                    int i = 0;
+                                    for (i = 0; i < resp->content_len; i++)
+                                    {
+                                        if (strchr(" \r\n", resp->content_buf[i]))
+                                            i++;
+                                    }
+                                    if (i < resp->content_len)
+                                        yaz_log(YLOG_LOG, "Response: %*.s",
+                                                resp->content_len - i,
+                                                resp->content_buf + i);
+                                }
                                 if ( err && *err )
                                     yaz_log(YLOG_LOG, "Error: %s", err);
                             }
