@@ -1,3 +1,11 @@
+--- 5.20.3 2017/03/27
+
+rdf-lookup: fix misleading log on rdf-failures YAZ-884
+The HTTP response is only logged if - after removing leading
+whitespace - it is non-empty. rdf-lookup failures are always
+logged via yaz_log at level YLOG_LOG. As before XML comments
+are controlled by the debug property.
+
 --- 5.20.2 2017/02/20
 
 Add documentation for <param> tag in xslt retrieval facility doc
