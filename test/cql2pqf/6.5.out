@@ -1,0 +1,2 @@
+Parsing CQL dc.title=/dc.language=dk/regexp a.*b
+@prox 0 0 0 0 k 8 @attr 6=1 @attr 2=3 @attr 4=1 @attr 1=4 @attr 5=102 "a.*b" @attr 1=54 dk 
