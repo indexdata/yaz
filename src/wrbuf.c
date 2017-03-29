@@ -110,6 +110,23 @@ void wrbuf_puts_replace_char(WRBUF b, const char *buf,
     }
 }
 
+void wrbuf_puts_replace_str(WRBUF b, const char *buf,
+                            const char *from, const char *to)
+{
+    const char *cp0 = buf;
+    for (;;)
+    {
+        const char *cp1 = strstr(cp0, from);
+        if (!cp1)
+            break;
+        if (cp1 != cp0)
+            wrbuf_write(b, cp0, cp1 - cp0);
+        wrbuf_puts(b, to);
+        cp0 = cp1 + strlen(from);
+    }
+    wrbuf_puts(b, cp0);
+}
+
 void wrbuf_chop_right(WRBUF b)
 {
     while (b->pos && b->buf[b->pos-1] == ' ')
