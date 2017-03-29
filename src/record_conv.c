@@ -914,8 +914,9 @@ static void rdf_lookup_debug_comment(xmlNode *n,
                                      int yloglevel)
 {
     WRBUF com = wrbuf_alloc();
-    wrbuf_printf(com, " rdf-lookup %s %s took %g sec",
-                 info->method, wrbuf_cstr(uri), yaz_timing_get_real(tim));
+    wrbuf_printf(com, " rdf-lookup %s ", info->method);
+    wrbuf_puts_replace_str(com, wrbuf_cstr(uri), "--", "%2D%2D");
+    wrbuf_printf(com, " took %g sec", yaz_timing_get_real(tim));
     if (resp)
         wrbuf_printf(com, " and resulted in %d", resp->code);
     if (msg)
