@@ -880,8 +880,14 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
             struct cql_node *mod = cn->u.st.modifiers;
             for (; mod; mod = mod->u.st.modifiers)
             {
-                if (mod->u.st.term)
+                if (mod->u.st.term) /* only modifiers with name+value */
                 {
+                    /* only relation = supported at the moment */
+                    if (mod->u.st.relation && strcmp(mod->u.st.relation, "="))
+                    {
+                        wrbuf_puts(addinfo, mod->u.st.relation);
+                        return YAZ_SRW_UNSUPP_RELATION;
+                    }
                     pr("@prox 0 0 0 0 k 8 ", client_data);
                 }
             }
