@@ -32,6 +32,7 @@
 #include <yaz/matchstr.h>
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
+#include <yaz/proxunit.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -536,15 +537,8 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
             ordered = 0;
         else if (!strcmp(name, "unit"))
         {
-            if (!strcmp(term, "word"))
-                unit = 2;
-            else if (!strcmp(term, "sentence"))
-                unit = 3;
-            else if (!strcmp(term, "paragraph"))
-                unit = 4;
-            else if (!strcmp(term, "element"))
-                unit = 8;
-            else
+            unit = z_str_to_ProxUnit(term);
+            if (unit == 0)
             {
                 wrbuf_puts(addinfo, term);
                 return YAZ_SRW_UNSUPP_PROX_UNIT;
@@ -575,7 +569,7 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
 static int has_modifier(struct cql_node *cn, const char *name) {
     struct cql_node *mod;
     for (mod = cn->u.st.modifiers; mod != 0; mod = mod->u.st.modifiers) {
-        if (!strcmp(mod->u.st.index, name))
+        if (!mod->u.st.term && !strcmp(mod->u.st.index, name))
             return 1;
     }
 
@@ -592,6 +586,7 @@ static int emit_term(cql_transform_t ct,
     const char *ns = cn->u.st.index_uri;
     int z3958_mode = 0;
     int process_term = 1;
+
 
     if (has_modifier(cn, "regexp"))
         process_term = 0;
@@ -722,11 +717,15 @@ static int emit_term(cql_transform_t ct,
         struct cql_node *mod = cn->u.st.modifiers;
         for (; mod; mod = mod->u.st.modifiers)
         {
-            r = cql_pr_attr(ct, addinfo,
-                            "relationModifier", mod->u.st.index, 0,
-                            pr, client_data, YAZ_SRW_UNSUPP_RELATION_MODIFIER);
-            if (r)
-                return r;
+            if (!mod->u.st.term)
+            {
+                r = cql_pr_attr(ct, addinfo,
+                                "relationModifier", mod->u.st.index, 0,
+                                pr, client_data,
+                                YAZ_SRW_UNSUPP_RELATION_MODIFIER);
+                if (r)
+                    return r;
+            }
         }
     }
     (*pr)("\"", client_data);
@@ -876,6 +875,17 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
         {
             return YAZ_SRW_UNSUPP_CONTEXT_SET;
         }
+        if (cn->u.st.modifiers)
+        {
+            struct cql_node *mod = cn->u.st.modifiers;
+            for (; mod; mod = mod->u.st.modifiers)
+            {
+                if (mod->u.st.term)
+                {
+                    pr("@prox 0 0 0 0 k 8 ", client_data);
+                }
+            }
+        }
         cql_pr_attr(ct, addinfo, "always", 0, 0, pr, client_data, 0);
         r = cql_pr_attr(ct, addinfo, "relation", cn->u.st.relation, 0,
                         pr, client_data, YAZ_SRW_UNSUPP_RELATION);
@@ -892,6 +902,25 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
             r = emit_wordlist(ct, cn, addinfo, pr, client_data, "or");
         else
             r = emit_terms(ct, cn, addinfo, pr, client_data, "and");
+
+        if (cn->u.st.modifiers)
+        {
+            struct cql_node *mod = cn->u.st.modifiers;
+            for (; mod; mod = mod->u.st.modifiers)
+            {
+                if (mod->u.st.term)
+                {
+                    r = cql_pr_attr_uri(ct, addinfo, "index",
+                                        mod->u.st.index_uri,
+                                        mod->u.st.index, "serverChoice",
+                                        pr, client_data, YAZ_SRW_UNSUPP_INDEX);
+                    if (r)
+                        return r;
+                    pr(mod->u.st.term, client_data);
+                    pr(" ", client_data);
+                }
+            }
+        }
         break;
     case CQL_NODE_BOOL:
         (*pr)("@", client_data);

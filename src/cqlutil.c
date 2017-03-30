@@ -141,6 +141,22 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
                 n->u.st.relation = nval;
             }
         }
+        struct cql_node *mod;
+        for (mod = n->u.st.modifiers; mod; mod = mod->u.st.modifiers)
+        {
+            if (!mod->u.st.index_uri && mod->u.st.index)
+            {
+                const char *cp = strchr(mod->u.st.index, '.');
+                if (prefix && cp &&
+                    strlen(prefix) == (size_t) (cp - mod->u.st.index) &&
+                    !cql_strncmp(mod->u.st.index, prefix, strlen(prefix)))
+                {
+                    char *nval = nmem_strdup(nmem, cp+1);
+                    mod->u.st.index_uri = nmem_strdup(nmem, uri);
+                    mod->u.st.index = nval;
+                }
+            }
+        }
     }
     else if (n->which == CQL_NODE_BOOL)
     {

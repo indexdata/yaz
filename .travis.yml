@@ -42,7 +42,7 @@ addons:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install docbook-xsl pkg-config icu4c; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install docbook-xsl icu4c; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then XML_CATALOG_FILES=/usr/local/etc/xml/catalog; export XML_CATALOG_FILES; fi
 
 before_script:

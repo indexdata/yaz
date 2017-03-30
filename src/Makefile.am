@@ -86,6 +86,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   dumpber.c odr_enum.c odr-priv.h \
   comstack.c tcpip.c unix.c \
   prt-ext.c \
+  proxunit.c \
   ill-get.c \
   zget.c yaz-ccl.c diag-entry.c diag-entry.h \
   logrpn.c \
