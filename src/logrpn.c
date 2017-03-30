@@ -253,21 +253,10 @@ char *yaz_prox_unit_name(Z_ProximityOperator *op)
 {
     if (op->which!=Z_ProximityOperator_known)
          return "private";
-    switch(*op->u.known)
-    {
-        case Z_ProxUnit_character: return "character";
-        case Z_ProxUnit_word: return "word";
-        case Z_ProxUnit_sentence: return "sentence";
-        case Z_ProxUnit_paragraph: return "paragraph";
-        case Z_ProxUnit_section: return "section";
-        case Z_ProxUnit_chapter: return "chapter";
-        case Z_ProxUnit_document: return "document";
-        case Z_ProxUnit_element: return "element";
-        case Z_ProxUnit_subelement: return "subelement";
-        case Z_ProxUnit_elementType: return "elementType";
-        case Z_ProxUnit_byte: return "byte";
-        default: return "unknown";
-    }
+    char *n = z_ProxUnit_to_str(*op->u.known);
+    if (n)
+        return n;
+    return "unknown";
 }
 
 static void zlog_structure(Z_RPNStructure *zs, int depth,
