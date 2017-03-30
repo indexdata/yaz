@@ -120,6 +120,14 @@ static void tstwrbuf(void)
     wrbuf_insert(wr, 5, "abc", 3);
     YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "1234"));
 
+    wrbuf_rewind(wr);
+    wrbuf_puts_replace_str(wr, "x---x", "--", "%2D%2D");
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "x%2D%2D-x"));
+
+    wrbuf_rewind(wr);
+    wrbuf_puts_replace_str(wr, "x----", "--", "%2D%2D");
+    YAZ_CHECK(!strcmp(wrbuf_cstr(wr), "x%2D%2D%2D%2D"));
+
     YAZ_CHECK(sha1_test(wr,
                         "Hello world\n",
                         "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"));
