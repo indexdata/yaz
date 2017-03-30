@@ -32,6 +32,7 @@
 #include <yaz/matchstr.h>
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
+#include <yaz/proxunit.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -536,15 +537,8 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
             ordered = 0;
         else if (!strcmp(name, "unit"))
         {
-            if (!strcmp(term, "word"))
-                unit = 2;
-            else if (!strcmp(term, "sentence"))
-                unit = 3;
-            else if (!strcmp(term, "paragraph"))
-                unit = 4;
-            else if (!strcmp(term, "element"))
-                unit = 8;
-            else
+            unit = z_str_to_ProxUnit(term);
+            if (unit == 0)
             {
                 wrbuf_puts(addinfo, term);
                 return YAZ_SRW_UNSUPP_PROX_UNIT;
