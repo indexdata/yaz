@@ -552,6 +552,7 @@ MISC_OBJS= \
    $(OBJDIR)\thread_id.obj \
    $(OBJDIR)\dirent.obj \
    $(OBJDIR)\url.obj \
+   $(OBJDIR)\proxunit.obj \
    $(OBJDIR)\backtrace.obj
 
 Z3950_OBJS= \
