@@ -1,0 +1,2 @@
+Parsing CQL a prox/distance < 3 b
+@prox 0 3 0 1 k 2 @attr 6=1 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 @attr 5=100 @attr 1=1016 "a" @attr 6=1 @attr 2=3 @attr 4=1 @attr 3=3 @attr 6=1 @attr 5=100 @attr 1=1016 "b" 

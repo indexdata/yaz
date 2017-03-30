@@ -50,3 +50,10 @@ dc.title=/regexp a.*b
 dc.title=/dc.language=dk a
 dc.title=/dc.language=dk/regexp a.*b
 dc.title=/language=dk/regexp a.*b
+# proximity
+a prox b
+a prox/unordered b
+a prox/ordered b
+a prox/distance < 3 b
+a prox/distance<3/ordered b
+a prox/unit=paragraph b
