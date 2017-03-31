@@ -400,7 +400,7 @@ static void tst_marc8_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
     /* COMBINING ACUTE ACCENT */
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "e",
                           "Cours de mathe\xcc\x81"));
 
     YAZ_CHECK(tst_convert(cd, "\xea" "a", "a\xcc\x8a"));
@@ -435,7 +435,7 @@ static void tst_marc8s_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
     /* E9: LATIN SMALL LETTER E WITH ACUTE */
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "e",
                           "Cours de math\xc3\xa9"));
 
     yaz_iconv_close(cd);
@@ -466,20 +466,20 @@ static void tst_marc8_to_latin1(void)
 
     YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâe",
-                          "Cours de mathé"));
-    YAZ_CHECK(tst_convert(cd, "12345678âe",
-                          "12345678é"));
-    YAZ_CHECK(tst_convert(cd, "123456789âe",
-                          "123456789é"));
-    YAZ_CHECK(tst_convert(cd, "1234567890âe",
-                          "1234567890é"));
-    YAZ_CHECK(tst_convert(cd, "12345678901âe",
-                          "12345678901é"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâem",
-                          "Cours de mathém"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathâematiques",
-                          "Cours de mathématiques"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "e",
+                          "Cours de math\xe9"));
+    YAZ_CHECK(tst_convert(cd, "12345678\xe2" "e",
+                          "12345678\xe9"));
+    YAZ_CHECK(tst_convert(cd, "123456789\xe2" "e",
+                          "123456789\xe9"));
+    YAZ_CHECK(tst_convert(cd, "1234567890\xe2" "e",
+                          "1234567890\xe9"));
+    YAZ_CHECK(tst_convert(cd, "12345678901\xe2" "e",
+                          "12345678901\xe9"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "em",
+                          "Cours de math\xe9m"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "ematiques",
+                          "Cours de math\xe9matiques"));
 
     yaz_iconv_close(cd);
 }
@@ -651,17 +651,17 @@ static void tst_latin1_to_marc8(void)
     YAZ_CHECK(tst_convert(cd, "S\xd8", "S\xa2"));
 
     /** E9: LATIN SMALL LETTER E WITH ACUTE */
-    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9", "Cours de mathâe"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9", "Cours de math\xe2" "e"));
     YAZ_CHECK(tst_convert(cd, "Cours de math", "Cours de math"
                   ));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathé", "Cours de mathâe" ));
-    YAZ_CHECK(tst_convert(cd, "12345678é","12345678âe"));
-    YAZ_CHECK(tst_convert(cd, "123456789é", "123456789âe"));
-    YAZ_CHECK(tst_convert(cd, "1234567890é","1234567890âe"));
-    YAZ_CHECK(tst_convert(cd, "12345678901é", "12345678901âe"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathém", "Cours de mathâem"));
-    YAZ_CHECK(tst_convert(cd, "Cours de mathématiques",
-                          "Cours de mathâematiques"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9", "Cours de math\xe2" "e" ));
+    YAZ_CHECK(tst_convert(cd, "12345678\xe9","12345678\xe2" "e"));
+    YAZ_CHECK(tst_convert(cd, "123456789\xe9", "123456789\xe2" "e"));
+    YAZ_CHECK(tst_convert(cd, "1234567890\xe9","1234567890\xe2" "e"));
+    YAZ_CHECK(tst_convert(cd, "12345678901\xe9", "12345678901\xe2" "e"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9m", "Cours de math\xe2" "em"));
+    YAZ_CHECK(tst_convert(cd, "Cours de math\xe9matiques",
+                          "Cours de math\xe2" "ematiques"));
     yaz_iconv_close(cd);
 }
 

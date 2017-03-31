@@ -264,10 +264,10 @@ void tst1(int pass)
                   "@attr 4=2 @attr 1=1016 a "
                   "@attr 4=2 @attr 1=1016 b "));
 
-    YAZ_CHECK(tst_ccl_query(bibset, "spid%æserne",
+    YAZ_CHECK(tst_ccl_query(bibset, "spid%\xe6serne",
                   "@prox 0 1 0 2 k 2 "
                   "@attr 4=2 @attr 1=1016 spid "
-                  "@attr 4=2 @attr 1=1016 æserne "));
+                  "@attr 4=2 @attr 1=1016 \xe6serne "));
 
     YAZ_CHECK(tst_ccl_query(bibset, "a!b",
                   "@prox 0 1 1 2 k 2 "
