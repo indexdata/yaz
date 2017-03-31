@@ -1,10 +1,12 @@
+--- 5.21.0 2017/03/31
+
 cql2pqf: relation modifiers with name and value are converted
 to proximity with unit=element. Left operand is the the primary
 index and term. Right operand is attribute index-name mapping of name
 and value being the relation modifier value. For example,
  dc.title =/dc.language=dk kirke
 could be mapped to
- @prox 0 0 0 0 k 8 @attr 1=4 "kirke" @attr 1=54 dk 
+ @prox 0 0 0 0 k 8 @attr 1=4 "kirke" @attr 1=54 dk
 
 rdf-lookup: avoid double dash in generated XML comments
 
