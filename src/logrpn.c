@@ -254,7 +254,7 @@ char *yaz_prox_unit_name(Z_ProximityOperator *op)
 {
     if (op->which!=Z_ProximityOperator_known)
          return "private";
-    char *n = z_ProxUnit_to_str(*op->u.known);
+    char *n = (char *) z_ProxUnit_to_str(*op->u.known);
     if (n)
         return n;
     return "unknown";
