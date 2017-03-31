@@ -16,6 +16,7 @@
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
 #include <yaz/oid_db.h>
+#include <yaz/proxunit.h>
 
 static const char *relToStr(Odr_int v)
 {
