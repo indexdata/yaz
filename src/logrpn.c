@@ -250,11 +250,11 @@ static char *complex_op_name(Z_Operator *op)
     }
 }
 
-char *yaz_prox_unit_name(Z_ProximityOperator *op)
+const char *yaz_prox_unit_name(Z_ProximityOperator *op)
 {
     if (op->which!=Z_ProximityOperator_known)
          return "private";
-    char *n = (char *) z_ProxUnit_to_str(*op->u.known);
+    const char *n = z_ProxUnit_to_str(*op->u.known);
     if (n)
         return n;
     return "unknown";
