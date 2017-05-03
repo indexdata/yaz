@@ -1296,8 +1296,6 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
     cclp->error_pos = cclp->look_token->name;
     if (p)
         cclp->error_code = CCL_ERR_OK;
-    else
-        cclp->error_code = cclp->error_code;
     return p;
 }
 
