@@ -1970,7 +1970,7 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
     }
     else if (r == CS_CONNECT)
     {
-        int ret = ret = cs_rcvconnect(c->cs);
+        int ret = cs_rcvconnect(c->cs);
         yaz_log(c->log_details, "%p ZOOM_connection_do_io "
                 "cs_rcvconnect returned %d", c, ret);
         if (ret == 1)
