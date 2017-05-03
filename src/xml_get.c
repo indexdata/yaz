@@ -36,6 +36,7 @@ const char *yaz_xml_get_prop(const xmlNode *n, const char *fmt, ...)
             const char **s = va_arg(ap, const char **);
             ar[i] = s;
         }
+        va_end(ap);
         for (attr = n->properties; attr; attr = attr->next)
         {
             const char *cp1 = fmt;
@@ -70,13 +71,13 @@ const char *yaz_xml_get_prop(const xmlNode *n, const char *fmt, ...)
     }
     else
     {
+        va_end(ap);
         for (attr = n->properties; attr; attr = attr->next)
         {
             if (!strcmp((const char *) attr->name, fmt))
                 return (const char *) attr->children->content;
         }
     }
-    va_end(ap);
     return 0; /* failure for simple mode; successful for %mode */
 }
 
