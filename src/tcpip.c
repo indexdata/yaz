@@ -1601,7 +1601,7 @@ void cs_print_session_info(COMSTACK cs)
 #endif
             gnutls_x509_crt_init(&cert);
             gnutls_x509_crt_import(cert, &cert_list[i], GNUTLS_X509_FMT_DER);
-            printf("Certificate info %d:\n", i + 1);
+            printf("Certificate info %u:\n", i + 1);
 #if USE_GNUTLS_X509_CRT_PRINT
             ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL,
                                         &cinfo);
