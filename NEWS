@@ -1,3 +1,11 @@
+--- 5.21.1 2017/05/08
+
+Fix a number of minor issues #24, #25, #26, #27
+
+Package for Debian Stretch. Stop support for CentOS 5.
+
+yaz_prox_unit_name returns const char
+
 --- 5.21.0 2017/03/31
 
 cql2pqf: relation modifiers with name and value are converted
