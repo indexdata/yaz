@@ -35,6 +35,9 @@ static void xml_error_handler(void *ctx, const char *fmt, ...)
     va_start(ap, fmt);
 
     yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
+    size_t l = strlen(buf);
+    if (l > 0 && buf[l-1] == '\n')
+        buf[l-1] = '\0';
     yaz_log(xml_error_log_level, "%s: %s", prefix, buf);
 
     va_end (ap);

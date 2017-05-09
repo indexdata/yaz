@@ -1059,15 +1059,15 @@ static int convert_rdf_lookup(void *rinfo, WRBUF record, WRBUF wr_error)
         xmlChar *out_buf = 0;
         int out_len;
         xmlXPathContextPtr xpathCtx = xmlXPathNewContext(doc);
-        char **ns = info->namespacelist;
-        while (*ns)
-        {
-            xmlXPathRegisterNs(xpathCtx, (const xmlChar *)*ns,
-                               (const xmlChar *)*(ns+1));
-            ns += 2;
-        }
         if (xpathCtx)
         {
+            char **ns = info->namespacelist;
+            while (*ns)
+            {
+                xmlXPathRegisterNs(xpathCtx, (const xmlChar *)ns[0],
+                                   (const xmlChar *)ns[1]);
+                ns += 2;
+            }
             while (info)
             {
                 xmlXPathObjectPtr xpathObj =
@@ -1089,6 +1089,13 @@ static int convert_rdf_lookup(void *rinfo, WRBUF record, WRBUF wr_error)
                         }
                     }
                     xmlXPathFreeObject(xpathObj);
+                }
+                else
+                {
+                    wrbuf_printf(wr_error,
+                                 "Cannot compile X-Path expr: %s",
+                                 info->xpath);
+                    ret = -1;
                 }
                 info = info->next;
             }
