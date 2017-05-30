@@ -38,14 +38,14 @@ YAZ_BEGIN_CDECL
 
 /** \brief converts prox unit integer to string
     \param u unit
-    \param result name or NULL if not-found
+    \returns result name or NULL if not-found
 */
 YAZ_EXPORT
 const char *z_ProxUnit_to_str(int u);
 
 /** \brief converts unit name string to unit integer
     \param str unit name
-    \param unit code (positive integer) or 0 if unknown name
+    \returns unit code (positive integer) or 0 if unknown name
 */
 YAZ_EXPORT
 int z_str_to_ProxUnit(const char *str);
