@@ -7639,6 +7639,14 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
             </para>
            </listitem>
           </varlistentry>
+          <varlistentry><term><literal>timeout</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+	      Attribute of the <literal>rdf-lookup</literal> tag which
+	      defines timeout in seconds for the HTTP based rdf-lookup.
+            </para>
+           </listitem>
+          </varlistentry>
           <varlistentry><term><literal>namespace</literal> (OPTIONAL)</term>
            <listitem>
             <para>
@@ -7809,7 +7817,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      </para>
      <programlisting><![CDATA[
         <backend syntax="xml" name="rdf-lookup">
-          <rdf-lookup debug=1>
+          <rdf-lookup debug="1" timeout="10">
             <namespace prefix="bf" href="http://id.loc.gov/ontologies/bibframe/" />
             <namespace prefix="bflc" href="http://id.loc.gov/ontologies/bibframe/lc-extensions/"/>
             <lookup xpath="//bf:contribution/bf:Contribution/bf:agent/bf:Agent">
