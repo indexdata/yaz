@@ -1,3 +1,11 @@
+--- 5.22.0 2017/05/30
+
+rdf-lookup: Add timeout configuration option YAZ-891
+
+Add yaz_url_set_timeout
+
+rdf-lookup: report error if X-Path cannot be compiled YAZ-890
+
 --- 5.21.1 2017/05/08
 
 Fix a number of minor issues #24, #25, #26, #27
