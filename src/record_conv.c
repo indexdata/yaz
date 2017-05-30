@@ -692,6 +692,7 @@ struct rdf_lookup_info {
     NMEM nmem;
     struct rdf_lookup_info *next;
     int debug;
+    int timeout;
     char *xpath;
     char *server;
     char *method;
@@ -700,7 +701,9 @@ struct rdf_lookup_info {
 };
 
 static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
-                                                        const xmlNode *ptr, WRBUF wr_error)
+                                                        const xmlNode *ptr,
+                                                        WRBUF wr_error,
+                                                        int timeout)
 {
     struct _xmlAttr *attr;
     struct rdf_lookup_info *info = nmem_malloc(nmem, sizeof(*info));
@@ -711,6 +714,7 @@ static struct rdf_lookup_info *construct_one_rdf_lookup(NMEM nmem,
     info->server = 0;
     info->method = 0;
     info->debug = 0;
+    info->timeout = timeout;
     info->namespacelist = 0;
     for (attr = ptr->properties; attr; attr = attr->next)
     {
@@ -796,6 +800,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
     char ** namespaces = 0;
     int debug = 0;
     int nns = 0;
+    int timeout = 0;
     struct _xmlAttr *attr;
     if (strcmp((const char *) ptr->name, "rdf-lookup"))
         return 0;
@@ -807,6 +812,11 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             attr->children && attr->children->type == XML_TEXT_NODE)
         {
             debug = atoi((const char *) attr->children->content);
+        }
+        else if (!xmlStrcmp(attr->name, BAD_CAST "timeout") &&
+            attr->children && attr->children->type == XML_TEXT_NODE)
+        {
+            timeout = atoi((const char *) attr->children->content);
         }
         else
         {
@@ -826,7 +836,7 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
         {
             if (!strcmp((const char *)ptr->name, "lookup"))
             {
-                struct rdf_lookup_info *i = construct_one_rdf_lookup(nmem, ptr, wr_error);
+                struct rdf_lookup_info *i = construct_one_rdf_lookup(nmem, ptr, wr_error, timeout);
                 if (!i)
                 {
                     nmem_destroy(nmem);
@@ -964,6 +974,8 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx,
                         char *keybuf = xmalloc(3*strlen((const char*) f->content)+1);
                         yaz_url_t url = yaz_url_create();
                         yaz_url_set_max_redirects(url, 0); /* we just want the first redirect */
+                        if (info->timeout)
+                            yaz_url_set_timeout(url, info->timeout, 0);
                         yaz_log(YLOG_DEBUG, "Found key '%s'", (const char*) f->content);
                         yaz_encode_uri_component(keybuf, (const char*) f->content);
                         wrbuf_rewind(uri);
