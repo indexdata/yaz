@@ -19,3 +19,5 @@ config.sub
 Default
 *~
 .settings
+build
+deb-src
