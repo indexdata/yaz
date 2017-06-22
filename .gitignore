@@ -3,7 +3,6 @@ Makefile.in
 aclocal.m4
 config
 config.cache
-config.log
 config.status
 configure
 libtool
@@ -21,3 +20,10 @@ Default
 .settings
 build
 deb-src
+*.o
+*.lo
+*.la
+*.a
+*.log
+.deps
+.libs

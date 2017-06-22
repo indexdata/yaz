@@ -1,7 +1,2 @@
-.deps
-.libs
-Makefile
-Makefile.in
 yaz-ztest
 gfs-example
-*.o

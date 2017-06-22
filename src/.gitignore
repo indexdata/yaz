@@ -1,11 +1,3 @@
-Makefile.in
-Makefile
-.deps
-.libs
-*.o
-*.lo
-*.la
-*~
 zes-*.c
 z-*.c
 item-req.c

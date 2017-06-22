@@ -1,9 +1,5 @@
-.deps
-Makefile
-Makefile.in
 test_odrcodec.c
 test_odrcodec.h
-.libs
 test_cql2ccl
 test_ccl
 test_embed_record
@@ -43,9 +39,6 @@ test_rpn2solr
 test_shared_ptr
 test_solr
 test_zgdu
-*.log
-*.o
-*~
 *.diff
 *.hex*
 *.revert*
