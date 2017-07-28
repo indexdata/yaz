@@ -473,7 +473,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     char *path;
     char *q;
     char *cp;
-    const char *path_args = 0;
     int i = 0;
     int defType_set = 0;
     int no_parms = 20; /* safe upper limit of args without extra_args */
@@ -593,26 +592,26 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     cp = strchr(hreq->path, '#');
     if (cp)
         *cp = '\0';
-    cp = strchr(hreq->path, '?');
-    if (cp)
-    {
-        *cp = '\0'; /* args in path */
-        path_args = cp + 1;
-    }
     strcpy(path, hreq->path);
-    cp = strrchr(path, '/');
-    if (cp)
-    {
-        if (!strcmp(cp, "/select") || !strcmp(cp, "/"))
-            *cp = '\0';
+    cp = strchr(path, '?');
+    if (cp && strcmp(solr_op, "terms"))
+    {   /* complete path with requestHandler */
+        int last = path[strlen(path)-1];
+        if (last != '?' && last != '&')
+            strcat(path, "&");
     }
-    strcat(path, "/");
-    strcat(path, solr_op);
-    strcat(path, "?");
-    if (path_args)
+    else
     {
-        strcat(path, path_args);
-        strcat(path, "&");
+        /* add requestHandler ourselves */
+        cp = strrchr(path, '/');
+        if (cp)
+        {
+            if (!strcmp(cp, "/select") || !strcmp(cp, "/"))
+                *cp = '\0';
+        }
+        strcat(path, "/");
+        strcat(path, solr_op);
+        strcat(path, "?");
     }
     strcat(path, uri_args);
     hreq->path = path;
