@@ -1,3 +1,11 @@
+--- 5.23.0 2017/08/04
+
+Allow for more Solr URL schemas YAZ-893
+If the Solr URL contains ? it will be treated as a URL that
+includes request handler rather than hard-coded /select. For example
+/solr/search? . You can also pass own arguments. For example
+/solr/search?foo=bar .
+
 --- 5.22.0 2017/05/30
 
 rdf-lookup: Add timeout configuration option YAZ-891
