@@ -1,7 +1,7 @@
 --- 5.23.1 2017/09/04
 
 Fix Omitted Content-Length not handled anymore YAZ-894
-This issue was introduced by work in YAZ-878 YAZ Version 5.20.1.
+This issue was introduced by work in YAZ-878 YAZ Version 5.20.0.
 
 --- 5.23.0 2017/08/04
 
