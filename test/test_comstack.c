@@ -170,7 +170,7 @@ static void tst_http_response(void)
 
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
-        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 24), 19);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 24), 0);
     }
     {
         /* no content, no headers */
