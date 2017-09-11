@@ -324,7 +324,6 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
         return 0;
     return -1;
 }
-#endif
 
 static int yaz_solr_decode_error(ODR o, xmlNode *ptr,
                                  Z_SRW_searchRetrieveResponse *sr)
@@ -339,6 +338,8 @@ static int yaz_solr_decode_error(ODR o, xmlNode *ptr,
         }
     return 0;
 }
+
+#endif
 
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
