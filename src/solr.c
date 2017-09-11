@@ -19,6 +19,7 @@
 #include <yaz/facet.h>
 #include <yaz/wrbuf.h>
 #include <yaz/proto.h>
+#include <yaz/nmem_xml.h>
 
 #include "sru-p.h"
 
@@ -325,6 +326,20 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
 }
 #endif
 
+static int yaz_solr_decode_error(ODR o, xmlNode *ptr,
+                                 Z_SRW_searchRetrieveResponse *sr)
+{
+    for (ptr = ptr->children; ptr; ptr = ptr->next)
+        if (ptr->type == XML_ELEMENT_NODE &&
+            match_xml_node_attribute(ptr, "str", "name", "msg"))
+        {
+            char *msg = nmem_text_node_cdata(ptr->children, odr_getmem(o));
+            yaz_add_srw_diagnostic(o, &sr->diagnostics, &sr->num_diagnostics,
+                                   YAZ_SRW_UNSUPP_PARAMETER_VALUE, msg);
+        }
+    return 0;
+}
+
 int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 {
     int ret = -1;
@@ -344,13 +359,19 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
         {
             for (ptr = root->children; ptr; ptr = ptr->next)
             {
+                if (!pdu && ptr->type == XML_ELEMENT_NODE &&
+                    match_xml_node_attribute(ptr, "lst", "name", "error"))
+                {
+                    pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+                    sr = pdu->u.response;
+                    ret = yaz_solr_decode_error(o, ptr, sr);
+                }
                 if (ptr->type == XML_ELEMENT_NODE &&
                     !strcmp((const char *) ptr->name, "result"))
                 {
                     pdu = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
                     sr = pdu->u.response;
                     ret = yaz_solr_decode_result(o, ptr, sr);
-
                 }
                 if (ptr->type == XML_ELEMENT_NODE &&
                     match_xml_node_attribute(ptr, "lst", "name", "terms"))
@@ -364,14 +385,17 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
                    The work-around works because the results is before
                    the facets in the xml.
                 */
-                if (sr && *sr->numberOfRecords > 0 &&
-                    match_xml_node_attribute(ptr, "lst", "name",
-                                             "facet_counts"))
-                    ret = yaz_solr_decode_facet_counts(o, ptr, sr);
-                if (sr && *sr->numberOfRecords == 0 &&
-                    match_xml_node_attribute(ptr, "lst", "name",
-                                             "spellcheck"))
-                    ret = yaz_solr_decode_spellcheck(o, ptr, sr);
+                if (sr && sr->numberOfRecords)
+                {
+                    if (*sr->numberOfRecords > 0 &&
+                        match_xml_node_attribute(ptr, "lst", "name",
+                                                 "facet_counts"))
+                        ret = yaz_solr_decode_facet_counts(o, ptr, sr);
+                    if (*sr->numberOfRecords == 0 &&
+                        match_xml_node_attribute(ptr, "lst", "name",
+                                                 "spellcheck"))
+                        ret = yaz_solr_decode_spellcheck(o, ptr, sr);
+                }
             }
         }
         xmlFreeDoc(doc);
