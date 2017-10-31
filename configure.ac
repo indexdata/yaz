@@ -22,7 +22,9 @@ AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])
 AC_PROG_INSTALL
 AM_PROG_LIBTOOL
 AM_PROG_CC_C_O
-AC_PATH_PROG([pkgconfigpath],[pkg-config],[NONE])
+PKG_PROG_PKG_CONFIG
+pkgconfigpath="$PKG_CONFIG"
+test -z "$pkgconfigpath" && pkgconfigpath=NONE
 dnl
 YAZ_DOC
 dnl
