@@ -72,8 +72,7 @@ void tst_encoding(void)
                       "GET Default/select?defType=lucene&q=title%3Asolr "
                       "HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
-                      "Host: localhost\r\n"
-                      "Content-Type: text/xml\r\n\r\n"));
+                      "Host: localhost\r\n\r\n"));
     }
 
     {
@@ -85,8 +84,7 @@ void tst_encoding(void)
                       "GET Default/select?defType=lucene&q=title%3Asolr "
                       "HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
-                      "Host: localhost\r\n"
-                      "Content-Type: text/xml; charset=utf-8\r\n\r\n"));
+                      "Host: localhost\r\n\r\n"));
     }
 
     {
@@ -103,8 +101,7 @@ void tst_encoding(void)
                       "start=2&rows=10"
                       " HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
-                      "Host: localhost\r\n"
-                      "Content-Type: text/xml\r\n\r\n"));
+                      "Host: localhost\r\n\r\n"));
     }
 
     {
@@ -125,8 +122,7 @@ void tst_encoding(void)
                       "&facet.field=title_exact&f.title_exact.facet.limit=17"
                       " HTTP/1.1\r\n"
                       "User-Agent: YAZ/" YAZ_VERSION "\r\n"
-                      "Host: localhost\r\n"
-                      "Content-Type: text/xml\r\n\r\n"));
+                      "Host: localhost\r\n\r\n"));
     }
 
     odr_destroy(odr);
@@ -384,7 +380,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     LIBXML_TEST_VERSION;
 #endif
-//    tst_encoding();
+    tst_encoding();
     tst_decoding();
     tst_yaz_700();
     YAZ_CHECK_TERM;
