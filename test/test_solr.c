@@ -397,7 +397,7 @@ void tst_decoding(void)
 "  <numberOfRecords>1698</numberOfRecords>\n"
 "  <records>\n"
 "  </records>\n"
-"  <zs xmlns=\"nextRecordPosition\">22</zs>\n"
+"  <nextRecordPosition>22</nextRecordPosition>\n"
 "  <echoedSearchRetrieveRequest>\n"
 "    <version>1.1</version>\n"
 "    <query>stvo</query>\n"
@@ -437,7 +437,7 @@ void tst_decoding(void)
         YAZ_CHECK(response->records == 0);
         YAZ_CHECK_EQ(response->num_diagnostics, 0);
         YAZ_CHECK(response->diagnostics == 0);
-        YAZ_CHECK(response->nextRecordPosition == 0);
+        YAZ_CHECK(response->nextRecordPosition != 0);
         YAZ_CHECK(response->facetList != 0);
     }
     odr_reset(odr);
