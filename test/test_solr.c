@@ -130,8 +130,8 @@ void tst_encoding(void)
 #endif
 }
 
-
-int check_response(ODR o, const char *content, Z_SRW_searchRetrieveResponse **p)
+static int check_response(ODR o, const char *content,
+                          Z_SRW_searchRetrieveResponse **p)
 {
     int r;
     Z_GDU *gdu;
@@ -161,6 +161,62 @@ int check_response(ODR o, const char *content, Z_SRW_searchRetrieveResponse **p)
     *p = sr_p->u.response;
     return 1;
 }
+
+static int check_srw_response(ODR o, const char *content,
+                              Z_SRW_searchRetrieveResponse **p)
+{
+    int r;
+    char *http_response = odr_malloc(o, strlen(content) + 300);
+
+    strcpy(http_response,
+           "HTTP/1.1 200 OK\r\n"
+           "Last-Modified: Wed, 13 Apr 2011 08:30:59 GMT\r\n"
+           "ETag: \"MjcyMWE5M2JiNDgwMDAwMFNvbHI=\"\r\n"
+           "Content-Type: text/xml; charset=utf-8\r\n");
+    sprintf(http_response + strlen(http_response),
+            "Content-Length: %d\r\n\r\n", (int) strlen(content));
+    strcat(http_response, content);
+
+    odr_setbuf(o, http_response, strlen(http_response), 0);
+
+    *p = 0;
+    Z_GDU *gdu = 0;
+    r = z_GDU(o, &gdu, 0, 0);
+    if (!r || gdu->which != Z_GDU_HTTP_Response)
+        return 0;
+#if YAZ_HAVE_XML2
+    Z_HTTP_Response *hres = gdu->u.HTTP_Response;
+    Z_SOAP_Handler soap_handlers[4] = {
+        {YAZ_XMLNS_SRU_v1_response, 0, (Z_SOAP_fun) yaz_srw_codec},
+        {YAZ_XMLNS_SRU_v2_mask, 0, (Z_SOAP_fun) yaz_srw_codec},
+        {"searchRetrieveResponse", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    Z_SOAP *soap_package = 0;
+    int ret;
+    ret = z_soap_codec(o, &soap_package,
+                       &hres->content_buf, &hres->content_len,
+                       soap_handlers);
+    if (ret == 0 && soap_package->which == Z_SOAP_generic)
+    {
+        Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
+        if (sr->which == Z_SRW_searchRetrieve_response)
+            *p = sr->u.response;
+        else
+        {
+            yaz_log(YLOG_WARN, "sr->which=%d", sr->which);
+            return 0;
+        }
+    }
+    else
+    {
+        yaz_log(YLOG_WARN, "z_soap_codec returned ret=%d", ret);
+        return 0;
+    }
+#endif
+    return 1;
+}
+
 
 void tst_decoding(void)
 {
@@ -332,7 +388,58 @@ void tst_decoding(void)
             }
         }
     }
+    odr_reset(odr);
 
+    YAZ_CHECK(check_srw_response(
+                  odr,
+"<zs:searchRetrieveResponse xmlns:zs=\"http://www.loc.gov/zing/srw/\">\n"
+"  <version>1.1</version>\n"
+"  <numberOfRecords>1698</numberOfRecords>\n"
+"  <records>\n"
+"  </records>\n"
+"  <zs xmlns=\"nextRecordPosition\">22</zs>\n"
+"  <echoedSearchRetrieveRequest>\n"
+"    <version>1.1</version>\n"
+"    <query>stvo</query>\n"
+"    <startRecord>1</startRecord>\n"
+"    <maximumRecords>20</maximumRecords>\n"
+"    <recordPacking>xml</recordPacking>\n"
+"    <recordSchema>dc</recordSchema>\n"
+"  </echoedSearchRetrieveRequest>\n"
+"  <zs:facetedResults xmlns:fr=\"http://docs.oasis-open.org/ns/search-ws/sru-facetedResults\">\n"
+"      <fr:facet>\n"
+"        <fr:displayLabel>category</fr:displayLabel>\n"
+"        <fr:description>category</fr:description>\n"
+"        <fr:index>source</fr:index>\n"
+"        <fr:relation>=</fr:relation>\n"
+"        <fr:terms>\n"
+"          <fr:term>\n"
+"            <fr:actualTerm>Zivilrecht</fr:actualTerm>\n"
+"            <fr:query>stvo</fr:query>\n"
+"            <fr:requestUrl>http://somewhere.de/rest/anwalt/search.ashx?mode=v2&amp;itemsPerPage=20&amp;format=rss+opensearch+mylex-facets&amp;sortOption=relevance&amp;qid=H4sIAAAAAAAEAO29B2AcSZYlJi9tynt%2fSvVK1%2bB0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcplVmVdZhZAzO2dvPfee%2b%2b999577733ujudTif33%2f8%2fXGZkAWz2zkrayZ4hgKrIHz9%2bfB8%2fIrLlVVa2j5bVLypm%2fw%2bGbBtBDAAAAA%3d%3d&amp;pageNr=0&amp;refine=anwalt:rg_v2.1,,,&amp;search=stvo&amp;useSynonyms=0&amp;useVariations=0</fr:requestUrl>\n"
+"            <fr:count>5</fr:count>\n"
+"          </fr:term>\n"
+"          <fr:term>\n"
+"            <fr:actualTerm>Arbeits- und Sozialrecht</fr:actualTerm>\n"
+"            <fr:query>stvo</fr:query>\n"
+"            <fr:requestUrl>http://somewhere.de/rest/anwalt/search.ashx?mode=v2&amp;itemsPerPage=20&amp;format=rss+opensearch+mylex-facets&amp;sortOption=relevance&amp;qid=H4sIAAAAAAAEAO29B2AcSZYlJi9tynt%2fSvVK1%2bB0oQiAYBMk2JBAEOzBiM3mkuwdaUcjKasqgcplVmVdZhZAzO2dvPfee%2b%2b999577733ujudTif33%2f8%2fXGZkAWz2zkrayZ4hgKrIHz9%2bfB8%2fIrLlVVa2j5bVLypm%2fw%2bGbBtBDAAAAA%3d%3d&amp;pageNr=0&amp;refine=anwalt:rg_v2.8,,,&amp;search=stvo&amp;useSynonyms=0&amp;useVariations=0</fr:requestUrl>\n"
+"            <fr:count>4</fr:count>\n"
+"          </fr:term>\n"
+"        </fr:terms>\n"
+"      </fr:facet>\n"
+"  </zs:facetedResults>\n"
+"</zs:searchRetrieveResponse>"
+                  , &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(*response->numberOfRecords, 1698);
+        YAZ_CHECK_EQ(response->num_records, 0);
+        YAZ_CHECK(response->records == 0);
+        YAZ_CHECK_EQ(response->num_diagnostics, 0);
+        YAZ_CHECK(response->diagnostics == 0);
+        YAZ_CHECK(response->nextRecordPosition == 0);
+        YAZ_CHECK(response->facetList != 0);
+    }
     odr_reset(odr);
 
     odr_destroy(odr);
