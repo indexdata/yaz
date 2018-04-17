@@ -7,13 +7,14 @@
 
 !include "MUI.nsh"
 
+Name "YAZ"
+
 !include "..\m4\common.nsi"
 
 RequestExecutionLevel admin
 
 SetCompressor bzip2
 
-Name "YAZ"
 Caption "Index Data YAZ ${VERSION} Setup"
 OutFile "yaz_${VERSION}.exe"
 
