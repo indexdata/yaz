@@ -75,10 +75,10 @@ distclean:
 	nmake DEBUG=0 clean
 
 nsis: version.nsi
-	$(NSIS) /DVSARCH=x86 /DVSVER=14 yaz.nsi
+	$(NSIS) /DVSARCH=x86 yaz.nsi
 
 nsis64: version.nsi
-	$(NSIS) /DVSARCH=x64 /DVSVER=14 yaz.nsi
+	$(NSIS) /DVSARCH=x64 yaz.nsi
 
 nsishelp:
 	$(NSIS)
