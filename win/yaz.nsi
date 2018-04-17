@@ -153,6 +153,10 @@ Section "YAZ Source" YAZ_Source
 	File makefile
 	File *.nsi
 	File *.rc
+	SetOutPath $INSTDIR\m4
+	File ..\m4\*.m4
+	File ..\m4\*.tcl
+	File ..\m4\*.nsi
 SectionEnd
 
 Section "YAZ4J" YAZ4J
