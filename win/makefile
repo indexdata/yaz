@@ -95,6 +95,7 @@ WINDIR=$(ROOTDIR)\win       # all these Win make things
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
 DOCDIR=$(ROOTDIR)\doc       # where the doc is
 JAVADIR=$(ROOTDIR)\java
+M4DIR=$(ROOTDIR)\m4
 
 # where we store intermediate files
 !if $(DEBUG)
@@ -871,7 +872,7 @@ $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	$(TCL) csvtosru_update.tcl $(SRCDIR)
 
 $(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
-	@cd $(SRCDIR)
+	@cd $(M4DIR)
 	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
 
 version.nsi: $(ROOTDIR)/IDMETA
