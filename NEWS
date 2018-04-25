@@ -1,3 +1,13 @@
+--- 5.24.0 2018/04/25
+
+New option for ZOOM C' record update: recordIdString (the string
+variant of recordId). Until now only recordIdNumber and recordIdOpaque
+was possible. YAZ-907
+
+Update for Visual Studio 2017. Bundle runtime from that compiler. YAZ-905
+
+yaz FTCBFS: uses the build architecture pkg-config YAZ-897
+
 --- 5.23.1 2017/09/04
 
 Fix Omitted Content-Length not handled anymore YAZ-894
