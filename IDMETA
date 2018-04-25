@@ -1,4 +1,4 @@
 DEBIAN_DIST="stretch jessie wheezy"
-UBUNTU_DIST="yakkety xenial trusty precise"
+UBUNTU_DIST="xenial trusty"
 CENTOS_DIST="centos6 centos7"
 VERSION=5.24.0
