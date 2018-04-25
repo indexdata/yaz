@@ -2853,6 +2853,11 @@
 	<entry>none</entry>
        </row>
        <row>
+	<entry>recordIdString</entry>
+	<entry>Record ID string</entry>
+	<entry>none</entry>
+       </row>
+       <row>
 	<entry>record</entry>
 	<entry>The record itself</entry>
 	<entry>none</entry>

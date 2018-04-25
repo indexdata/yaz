@@ -287,6 +287,7 @@ static Z_APDU *create_update_package(ZOOM_package p)
     const char *recordIdOpaque = ZOOM_options_getl(p->options, "recordIdOpaque",
         &recordIdOpaque_len);
     const char *recordIdNumber = ZOOM_options_get(p->options, "recordIdNumber");
+    const char *recordIdString = ZOOM_options_get(p->options, "recordIdString");
     int record_len;
     const char *record_buf = ZOOM_options_getl(p->options, "record",
         &record_len);
@@ -424,6 +425,12 @@ static Z_APDU *create_update_package(ZOOM_package p)
 
             notToKeep->elements[0]->u.number =
                 odr_intdup(p->odr_out, atoi(recordIdNumber));
+        }
+        else if (recordIdString)
+        {
+            notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_string;
+            notToKeep->elements[0]->u.string = odr_strdup(p->odr_out,
+                                                          recordIdString);
         }
         else
             notToKeep->elements[0]->u.opaque = 0;
