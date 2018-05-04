@@ -2647,16 +2647,47 @@
        <entry><literal>waitIfPossible</literal></entry>
       </row>
       <row>
+       <entry>operationStatus</entry>
+       <entry>
+	Read after response. One of: done, accepted or failure.
+	Inspect with <function>ZOOM_pacakage_option_get</function>.
+       </entry>
+       <entry>none</entry>
+      </row>
+      <row>
        <entry>targetReference</entry>
        <entry>
 	Target Reference. This is part of the response as returned
-	by the server. Read it after a successful operation.
+	by the target. Read it after a successful operation.
+	Inspect with <function>ZOOM_pacakage_option_get</function>.
        </entry>
-       <entry><literal>none</literal></entry>
+       <entry>none</entry>
+      </row>
+      <row>
+       <entry>taskStatus</entry>
+       <entry>
+	Read after response: One of: pending, active, complete, aborted.
+       </entry>
+       <entry>none</entry>
+      </row>
+      <row>
+       <entry>esError</entry>
+       <entry>
+	Read after response: is set to diagnostic code for response.
+       </entry>
+       <entry>none</entry>
+      </row>
+      <row>
+       <entry>esAddinfo</entry>
+       <entry>
+	Read after response: is set to additional info for response.
+       </entry>
+       <entry>none</entry>
       </row>
      </tbody>
     </tgroup>
    </table>
+
    <sect2 id="zoom.item.order">
     <title>Item Order</title>
     <para>
