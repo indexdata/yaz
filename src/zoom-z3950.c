@@ -997,7 +997,7 @@ static int es_response_taskpackage_update(ZOOM_connection c,
         switch (*targetPart->updateStatus)
         {
         case Z_IUTargetPart_success:
-            ZOOM_options_set(c->tasks->u.package->options, 
+            ZOOM_options_set(c->tasks->u.package->options,
                              "updateStatus", "success");
             break;
         case Z_IUTargetPart_partial:
@@ -1005,6 +1005,35 @@ static int es_response_taskpackage_update(ZOOM_connection c,
                              "updateStatus", "partial");
             break;
         case Z_IUTargetPart_failure:
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "updateStatus", "failure");
+            if (targetPart->globalDiagnostics &&
+                targetPart->num_globalDiagnostics > 0)
+                response_diag(c, targetPart->globalDiagnostics[0]);
+            break;
+        }
+        /* NOTE: Individual record status, surrogate diagnostics, and supplemental diagnostics ARE NOT REPORTED. */
+    }
+    return 1;
+}
+
+static int es_response_taskpackage_update0(ZOOM_connection c,
+                                           Z_IU0UpdateTaskPackage *utp)
+{
+    if (utp && utp->targetPart)
+    {
+        Z_IU0TargetPart *targetPart = utp->targetPart;
+        switch (*targetPart->updateStatus)
+        {
+        case Z_IU0TargetPart_success:
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "updateStatus", "success");
+            break;
+        case Z_IU0TargetPart_partial:
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "updateStatus", "partial");
+            break;
+        case Z_IU0TargetPart_failure:
             ZOOM_options_set(c->tasks->u.package->options,
                              "updateStatus", "failure");
             if (targetPart->globalDiagnostics &&
@@ -1027,51 +1056,79 @@ static int es_response_taskpackage(ZOOM_connection c,
     switch (*taskPackage->taskStatus)
     {
     case Z_TaskPackage_pending:
-        ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "pending");
+        ZOOM_options_set(c->tasks->u.package->options,
+                         "taskStatus", "pending");
         break;
     case Z_TaskPackage_active:
-        ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "active");
+        ZOOM_options_set(c->tasks->u.package->options,
+                         "taskStatus", "active");
         break;
     case Z_TaskPackage_complete:
-        ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "complete");
+        ZOOM_options_set(c->tasks->u.package->options,
+                         "taskStatus", "complete");
         break;
     case Z_TaskPackage_aborted:
-        ZOOM_options_set(c->tasks->u.package->options,"taskStatus", "aborted");
+        ZOOM_options_set(c->tasks->u.package->options,
+                         "taskStatus", "aborted");
         if (taskPackage->num_packageDiagnostics &&
             taskPackage->packageDiagnostics )
             response_diag(c, taskPackage->packageDiagnostics[0]);
         break;
     }
-    /* NOTE: Only Update implemented, no others. */
+    /* NOTE: Only Update/Update0 implemented, no others. */
     if (taskPackage->taskSpecificParameters->which == Z_External_update)
     {
         Z_IUUpdateTaskPackage *utp =
             taskPackage->taskSpecificParameters->u.update->u.taskPackage;
         es_response_taskpackage_update(c, utp);
     }
-    return 1;
+    if (taskPackage->taskSpecificParameters->which == Z_External_update0)
+    {
+        Z_IU0UpdateTaskPackage *utp =
+            taskPackage->taskSpecificParameters->u.update0->u.taskPackage;
+        es_response_taskpackage_update0(c, utp);
+    }
+   return 1;
 }
 
 static void handle_Z3950_es_response(ZOOM_connection c,
                                      Z_ExtendedServicesResponse *res)
 {
+    const char *opStatus = 0;
     if (!c->tasks)
         return;
     assert(c->tasks->which == ZOOM_TASK_PACKAGE);
+
+    /* store any diagnostics in esError / esAddinfo */
+    if (res->diagnostics && res->num_diagnostics > 0)
+    {
+        response_diag(c, res->diagnostics[0]);
+        if (c->error)
+        {
+            ZOOM_options_set_int(c->tasks->u.package->options,
+                                 "esError", c->error);
+            ZOOM_options_set(c->tasks->u.package->options,
+                             "esAddinfo", c->addinfo);
+            /* treat only diagnostics as error when operationStatus = failure */
+            if (*res->operationStatus != Z_ExtendedServicesResponse_failure)
+                ZOOM_set_error(c, ZOOM_ERROR_NONE, 0);
+        }
+    }
     switch (*res->operationStatus)
     {
     case Z_ExtendedServicesResponse_done:
-        ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "done");
+        opStatus = "done";
         break;
     case Z_ExtendedServicesResponse_accepted:
-        ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "accepted");
+        opStatus = "accepted";
         break;
     case Z_ExtendedServicesResponse_failure:
-        ZOOM_options_set(c->tasks->u.package->options,"operationStatus", "failure");
-        if (res->diagnostics && res->num_diagnostics > 0)
-            response_diag(c, res->diagnostics[0]);
+        opStatus = "failure";
         break;
     }
+    if (opStatus)
+        ZOOM_options_set(c->tasks->u.package->options, "operationStatus",
+                         opStatus);
     if (res->taskPackage &&
         res->taskPackage->which == Z_External_extendedService)
     {
