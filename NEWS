@@ -1,3 +1,9 @@
+--- 5.25.0 2018/05/04
+
+ZOOM C: return extended services diagnostics separately YAZ-908
+The diagnostic code and additional info is saved in options
+esError and esAddinfo respectively - as part of the ZOOM package.
+
 --- 5.24.0 2018/04/25
 
 New option for ZOOM C' record update: recordIdString (the string
