@@ -2412,7 +2412,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                 len = slash - open;
             else
                 len = strlen(open);
-                yaz_log(log_request, "Auth open %.*s", len, open);
+            yaz_log(log_request, "Auth open %.*s", len, open);
         }
         else if (req->idAuthentication->which == Z_IdAuthentication_idPass)
         {
