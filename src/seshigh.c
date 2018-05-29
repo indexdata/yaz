@@ -3481,6 +3481,22 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
         yaz_log(log_request, "Extended Service: %s (done)", ext_name);
         *resp->operationStatus = Z_ExtendedServicesResponse_done;
     }
+    else if (esrequest.errcode == -2)
+    {
+        Z_DiagRecs *diagRecs =
+            zget_DiagRecs(assoc->encode, 401, esrequest.errstring);
+        yaz_log(log_request, "Extended Service: %s (401)", ext_name);
+        *resp->operationStatus = Z_ExtendedServicesResponse_done;
+        resp->num_diagnostics = diagRecs->num_diagRecs;
+        resp->diagnostics = diagRecs->diagRecs;
+        if (log_request)
+        {
+            WRBUF wr = wrbuf_alloc();
+            wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
+            yaz_log(log_request, "EsRequest %s", wrbuf_cstr(wr) );
+            wrbuf_destroy(wr);
+        }
+    }
     else
     {
         Z_DiagRecs *diagRecs =

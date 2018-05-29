@@ -625,6 +625,19 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             }
         }
     }
+    else if (rr->esr->taskSpecificParameters->which == Z_External_update0)
+    {
+        Z_IU0Update *up = rr->esr->taskSpecificParameters->u.update0;
+        yaz_log(log_level, "Received DB Update0");
+        Z_IU0UpdateEsRequest *esRequest = up->u.esRequest;
+        Z_IU0OriginPartToKeep *toKeep = esRequest->toKeep;
+        if (toKeep->action)
+        {
+            yaz_log(log_level, "action " ODR_INT_PRINTF, *toKeep->action);
+        }
+        rr->errcode = -2;
+        rr->errstring= "xxxxxxxxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyyyy";
+    }
     else if (rr->esr->taskSpecificParameters->which == Z_External_update)
     {
         Z_IUUpdate *up = rr->esr->taskSpecificParameters->u.update;
