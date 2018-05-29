@@ -478,6 +478,18 @@ static int cmd_ext(struct zoom_sh *sh, const char **args)
             v = ZOOM_package_option_get(p[i], "xmlUpdateDoc");
             if (v)
                 printf("xmlUpdateDoc: %s\n", v);
+            v = ZOOM_package_option_get(p[i], "operationStatus");
+            if (v)
+                printf("operationStatus: %s\n", v);
+            v = ZOOM_package_option_get(p[i], "taskStatus");
+            if (v)
+                printf("taskStatus: %s\n", v);
+            v = ZOOM_package_option_get(p[i], "esError");
+            if (v)
+                printf("esError: %s\n", v);
+            v = ZOOM_package_option_get(p[i], "esAddinfo");
+            if (v)
+                printf("esAddinfo: %s\n", v);
         }
         ZOOM_package_destroy(p[i]);
         i++;
