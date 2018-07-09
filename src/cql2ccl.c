@@ -92,8 +92,8 @@ static int node(struct cql_node *cn,
     const char *ccl_rel = 0;
     const char *rel = cn->u.st.relation;
 
-    if (cn->u.st.index && strcmp(cn->u.st.index,
-                                 "cql.serverChoice"))
+    if (cn->u.st.index && cql_strcmp(cn->u.st.index,
+                                     "cql.serverChoice"))
         ccl_field = cn->u.st.index;
 
     if (!rel)
@@ -102,17 +102,17 @@ static int node(struct cql_node *cn,
              || !strcmp(rel, ">") || !strcmp(rel, ">=")
              || !strcmp(rel, "<>") || !strcmp(rel, "="))
         ccl_rel = rel;
-    else if (!strcmp(rel, "all"))
+    else if (!cql_strcmp(rel, "all"))
     {
         ccl_rel = "=";
         split_op = "and";
     }
-    else if (!strcmp(rel, "any"))
+    else if (!cql_strcmp(rel, "any"))
     {
         ccl_rel = "=";
         split_op = "or";
     }
-    else if (!strcmp(rel, "==") || !strcmp(rel, "adj"))
+    else if (!strcmp(rel, "==") || !cql_strcmp(rel, "adj"))
     {
         ccl_rel = "=";
     }
@@ -173,7 +173,7 @@ static int bool(struct cql_node *cn,
 
     pr(") ", client_data);
 
-    if (strcmp(value, "prox"))
+    if (cql_strcmp(value, "prox"))
     {   /* not proximity. assuming boolean */
         pr(value, client_data);
     }
@@ -185,14 +185,14 @@ static int bool(struct cql_node *cn,
         for (; n ; n = n->u.st.modifiers)
             if (n->which == CQL_NODE_ST)
             {
-                if (!strcmp(n->u.st.index, "unit"))
+                if (!cql_strcmp(n->u.st.index, "unit"))
                 {
-                    if (!strcmp(n->u.st.term, "word"))
+                    if (!cql_strcmp(n->u.st.term, "word"))
                         ;
                     else
                         return -1;
                 }
-                else if (!strcmp(n->u.st.index, "distance"))
+                else if (!cql_strcmp(n->u.st.index, "distance"))
                 {
                     if (!strcmp(n->u.st.relation, "<="))
                         distance = atoi(n->u.st.term);
@@ -201,11 +201,11 @@ static int bool(struct cql_node *cn,
                     else
                         return -1;
                 }
-                else if (!strcmp(n->u.st.index, "unordered"))
+                else if (!cql_strcmp(n->u.st.index, "unordered"))
                 {
                     ordered = 0;
                 }
-                else if (!strcmp(n->u.st.index, "ordered"))
+                else if (!cql_strcmp(n->u.st.index, "ordered"))
                 {
                     ordered = 1;
                 }
