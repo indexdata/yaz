@@ -55,6 +55,8 @@ struct yaz_retrieval_elem {
     const char *name;
     /** \brief record syntax */
     Odr_oid *syntax;
+    /** \brief split name for some separator */
+    const char *split;
 
     /** \brief backend name */
     const char *backend_name;
@@ -118,6 +120,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
     el->syntax = 0;
     el->identifier = 0;
     el->name = 0;
+    el->split = 0;
     el->backend_name = 0;
     el->backend_syntax = 0;
 
@@ -148,6 +151,10 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
         else if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
                  attr->children && attr->children->type == XML_TEXT_NODE)
             el->name =
+                nmem_strdup(p->nmem, (const char *) attr->children->content);
+        else if (!xmlStrcmp(attr->name, BAD_CAST "split") &&
+                 attr->children && attr->children->type == XML_TEXT_NODE)
+            el->split =
                 nmem_strdup(p->nmem, (const char *) attr->children->content);
         else
         {
@@ -288,7 +295,7 @@ int yaz_retrieval_configure(yaz_retrieval_t p, const xmlNode *ptr)
 }
 
 int yaz_retrieval_request(yaz_retrieval_t p,
-                          const char *schema, Odr_oid *syntax,
+                          const char *schema, const Odr_oid *syntax,
                           const char **match_schema, Odr_oid **match_syntax,
                           yaz_record_conv_t *rc,
                           const char **backend_schema,
@@ -298,20 +305,26 @@ int yaz_retrieval_request(yaz_retrieval_t p,
     int syntax_matches = 0;
     int schema_matches = 0;
     struct yaz_retrieval_elem *el_best = 0;
+    WRBUF w = p->wr_error;
 
-    wrbuf_rewind(p->wr_error);
     if (!el)
         return 0;
-    for(; el; el = el->next)
+    w = wrbuf_alloc();
+    for (; el; el = el->next)
     {
         int schema_ok = 0;
         int syntax_ok = 0;
-
         if (!schema)
             schema_ok = 1;
         else
         {
-            if (el->name && yaz_match_glob(el->name, schema))
+            char *cp = 0;
+            wrbuf_rewind(w);
+            if (el->split && *el->split && (cp = strchr(schema, *el->split)))
+                wrbuf_write(w, schema, cp - schema);
+            else
+                wrbuf_puts(w, schema);
+            if (el->name && yaz_match_glob(el->name, wrbuf_cstr(w)))
                 schema_ok = 2;
             if (el->identifier && !strcmp(schema, el->identifier))
                 schema_ok = 2;
@@ -347,7 +360,17 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             if (el->backend_name)
             {
                 if (*el->backend_name)
-                    *backend_schema = el->backend_name;
+                {
+                    char *cp;
+                    wrbuf_rewind(w);
+                    wrbuf_puts(w, el->backend_name);
+                    if (el->split && *el->split
+                        && (cp = strchr(schema, *el->split)))
+                    {
+                        wrbuf_puts(w, cp);
+                    }
+                    *backend_schema = wrbuf_cstr(w);
+                }
             }
             else
                 *backend_schema = schema;
