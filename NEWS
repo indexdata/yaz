@@ -1,6 +1,11 @@
+--- 5.26.1 2018/07/11
+
+Fix segv with element-set=null and split YAZ-913
+
 --- 5.26.0 2018/07/09
 
 Allow suffix split for retrieval element-set names YAZ-912
+
 cql2ccl: case sensitive comparisons for ops etc YAZ-911
 
 --- 5.25.0 2018/05/04
