@@ -263,17 +263,20 @@
    </varlistentry>
    <varlistentry><term>
      <literal>show </literal>
-     [<replaceable>start</replaceable>[+<replaceable>number</replaceable>]]
+     [<replaceable>start</replaceable>[+<replaceable>number</replaceable>
+     [+<replaceable>resultset</replaceable>]]]
     </term>
     <listitem>
      <para>Fetches records by sending a Present Request from the start
       position given by
       <replaceable>start</replaceable>
-      and a number of records given by <replaceable>number</replaceable>. If
+      and a number of records given by <replaceable>number</replaceable>,
+      from the result set <replaceable>resultset</replaceable>.  If
       <replaceable>start</replaceable> is not given, then the client
       will fetch from the position of the last retrieved record plus 1. If
       <replaceable>number</replaceable> is not given, then one record will
-      be fetched at a time.
+      be fetched at a time. If <replaceable>resultset</replaceable> is not
+      given, the most recently retrieved result set is used.
      </para>
     </listitem>
    </varlistentry>
