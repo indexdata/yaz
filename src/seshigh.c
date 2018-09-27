@@ -3431,10 +3431,13 @@ static Z_APDU *process_segmentRequest(association *assoc, request *reqb)
 static Z_APDU *process_ESRequest(association *assoc, request *reqb)
 {
     bend_esrequest_rr esrequest;
+    char oidname_buf[OID_STR_MAX];
     const char *ext_name = "unknown";
 
     Z_ExtendedServicesRequest *req =
         reqb->apdu_request->u.extendedServicesRequest;
+    Z_External *ext =
+        reqb->apdu_request->u.extendedServicesRequest->taskSpecificParameters;
     Z_APDU *apdu = zget_APDU(assoc->encode, Z_APDU_extendedServicesResponse);
 
     Z_ExtendedServicesResponse *resp = apdu->u.extendedServicesResponse;
@@ -3449,20 +3452,11 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
     esrequest.taskPackage = 0;
     esrequest.referenceId = req->referenceId;
 
-    if (esrequest.esr && esrequest.esr->taskSpecificParameters)
+    if (ext)
     {
-        switch(esrequest.esr->taskSpecificParameters->which)
-        {
-        case Z_External_itemOrder:
-            ext_name = "ItemOrder"; break;
-        case Z_External_update:
-            ext_name = "Update"; break;
-        case Z_External_update0:
-            ext_name = "Update0"; break;
-        case Z_External_ESAdmin:
-            ext_name = "Admin"; break;
-
-        }
+        oid_class oclass;
+        ext_name = yaz_oid_to_string_buf(ext->direct_reference, &oclass,
+                                         oidname_buf);
     }
 
     (*assoc->init->bend_esrequest)(assoc->backend, &esrequest);
