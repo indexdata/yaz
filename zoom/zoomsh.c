@@ -137,6 +137,60 @@ static int is_command(const char *cmd_str, const char *this_str, int this_len)
     return 1;
 }
 
+static int cmd_fset(struct zoom_sh *sh, const char **args)
+{
+    WRBUF key, fname = 0;
+    FILE *inf =  0;
+    int ret = -1;
+    long fsize = 0;
+    char *b = 0;
+
+    if (!(key = next_token_new_wrbuf(args)))
+    {
+        printf("missing argument for set\n");
+        return 1;
+    }
+    fname = next_token_new_wrbuf(args);
+    if (!fname)
+    {
+        printf("Missing arg for fset %s\n", wrbuf_cstr(key));
+    }
+    else if ((inf = fopen(wrbuf_cstr(fname), "rb")) == 0)
+    {
+        printf("Could not open %s\n", wrbuf_cstr(fname));
+    }
+    else if (fseek(inf, 0L, SEEK_END) == -1 || (fsize = ftell(inf)) == -1L)
+    {
+        printf("Couldn't seek in %s\n", wrbuf_cstr(fname));
+    }
+    else if (fseek(inf, 0L, SEEK_SET) == -1)
+    {
+        printf("Couldn't seek in %s\n", wrbuf_cstr(fname));
+    }
+    else if ((b = malloc(fsize + 1)) == 0)
+    {
+        printf("Couldn't allocate %ld bytes for %s\n",
+               fsize, wrbuf_cstr(fname));
+    }
+    else if (fsize > 0 && fread(b, 1, fsize, inf) != fsize)
+    {
+        printf("Couldn't read %ld bytes for %s\n",
+               fsize, wrbuf_cstr(fname));
+    }
+    else
+    {
+        ZOOM_options_setl(sh->options, wrbuf_cstr(key), b, fsize);
+        ret = 0;
+    }
+    if (inf)
+        fclose(inf);
+    if (fname)
+        wrbuf_destroy(fname);
+    wrbuf_destroy(key);
+    free(b);
+    return ret;
+}
+
 static int cmd_set(struct zoom_sh *sh, const char **args)
 {
     WRBUF key;
@@ -156,6 +210,7 @@ static int cmd_set(struct zoom_sh *sh, const char **args)
     wrbuf_destroy(key);
     return 0;
 }
+
 
 static int cmd_get(struct zoom_sh *sh, const char **args)
 {
@@ -856,6 +911,8 @@ static int cmd_parse(struct zoom_sh *sh, const char **buf)
         return -1;
     else if (is_command("set", cmd_str, cmd_len))
         ret = cmd_set(sh, buf);
+    else if (is_command("fset", cmd_str, cmd_len))
+        ret = cmd_fset(sh, buf);
     else if (is_command("get", cmd_str, cmd_len))
         ret = cmd_get(sh, buf);
     else if (is_command("rget", cmd_str, cmd_len))
