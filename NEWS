@@ -1,3 +1,13 @@
+--- 5.27.0 2018/10/08
+
+GFS: Allow External type TaskPackage response YAZ-915
+
+zoomsh: fset command YAZ-916
+
+Improve logging of extended service task type YAZ-914
+
+yaz-client: document the third arg to the show command #37
+
 --- 5.26.1 2018/07/11
 
 Fix segv with element-set=null and split YAZ-913
