@@ -3450,6 +3450,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
     esrequest.errstring = NULL;
     esrequest.association = assoc;
     esrequest.taskPackage = 0;
+    esrequest.taskPackageExt = 0;
     esrequest.referenceId = req->referenceId;
 
     if (ext)
@@ -3511,6 +3512,7 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
 
     }
     /* Do something with the members of bend_extendedservice */
+    resp->taskPackage = esrequest.taskPackageExt;
     if (esrequest.taskPackage)
     {
         resp->taskPackage = z_ext_record_oid(
