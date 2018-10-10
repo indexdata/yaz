@@ -76,8 +76,8 @@
      </para></listitem>
     <listitem><para>
       <filename>.yazclientrc</filename> in the user's home directory.
-      The value of the <literal>HOME</literal> is used to determine
-      the home directory. Normally, <literal>HOME</literal> is only set
+      The value of the <literal>$HOME</literal> environment variable is used to determine
+      the home directory. Normally, <literal>$HOME</literal> is only set
       on POSIX systems such as Linux, FreeBSD, Solaris.
      </para></listitem>
    </itemizedlist>
@@ -117,7 +117,7 @@
        If specified, YAZ will dump BER data for all PDUs sent and received
        to individual files, named
        <replaceable>dump</replaceable>.DDD.<literal>raw</literal>,
-       where DDD is 001, 002, 003, ..
+       where DDD is 001, 002, 003, ...
       </para></listitem>
     </varlistentry>
 
@@ -125,7 +125,7 @@
      <term>-f <replaceable>cmdfile</replaceable></term>
      <listitem><para>
       Reads commands from <replaceable>cmdfile</replaceable>. When
-      this option is used, YAZ client does not read .yazclientrc
+      this option is used, YAZ client does not read <filename>.yazclientrc</filename>
       from current directory or home directory.
       </para></listitem>
     </varlistentry>
@@ -696,7 +696,7 @@
     <listitem>
      <para>Specifies that all retrieved records should be appended to
       file <replaceable>filename</replaceable>. This command does the
-      thing as option <literal>-m</literal>.
+      same thing as option <literal>-m</literal>.
      </para>
     </listitem>
    </varlistentry>
@@ -823,7 +823,7 @@
     <listitem>
      <para>Specifies that CCL fields should be read from file
       file <replaceable>filename</replaceable>. This command does the
-      thing as option <literal>-c</literal>.
+      same thing as option <literal>-c</literal>.
      </para>
     </listitem>
    </varlistentry>
@@ -835,7 +835,7 @@
     <listitem>
      <para>Specifies that CQL fields should be read from file
       file <replaceable>filename</replaceable>. This command does the
-      thing as option <literal>-q</literal>.
+      same thing as option <literal>-q</literal>.
      </para>
     </listitem>
    </varlistentry>
