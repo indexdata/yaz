@@ -1458,6 +1458,14 @@
        of a client. Is used if ZOOM is used in a gateway of some sort.
       </entry><entry>none</entry></row>
       <row><entry>
+       timeout</entry><entry>Idle timeout which specifies how long
+       ZOOM will wait for network I/O before giving up. Thus, the actual
+       waiting time might be longer than this value if the target makes
+       a chunked response and the time between each chunk arrive is
+       less this value. For the connect+init, this is the time
+       ZOOM will wait until receiving first byte from Init response.
+      </entry><entry>30</entry></row>
+      <row><entry>
        async</entry><entry>If true (1) the connection operates in
        asynchronous operation which means that all calls are non-blocking
        except
