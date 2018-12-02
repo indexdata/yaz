@@ -17,7 +17,7 @@ override_dh_auto_install:
 	mv debian/tmp/usr/share/doc/yaz debian/tmp/usr/share/doc/yaz-doc
 
 override_dh_makeshlibs:
-	dh_makeshlibs -V 'libyaz5 (>= 5.24.0)'
+	dh_makeshlibs -V 'libyaz5 (>= 5.27.0)'
 
 override_dh_installchangelogs:
 	dh_installchangelogs NEWS
