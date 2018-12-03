@@ -1,3 +1,11 @@
+--- 5.27.1 2018/12/03
+
+Use pkg-config to detect ICU . Closes #41
+
+Describe ZOOM option timeout
+
+Fix typos in yaz-client man page and other typos
+
 --- 5.27.0 2018/10/08
 
 GFS: Allow External type TaskPackage response YAZ-915
