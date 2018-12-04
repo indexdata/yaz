@@ -162,6 +162,10 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
         odr_strdup_null(p->odr_out, str);
 
     req->u.esRequest->toKeep->addlBilling = 0;
+    if (req->u.esRequest->toKeep->contact->name == 0
+      && req->u.esRequest->toKeep->contact->phone == 0
+      && req->u.esRequest->toKeep->contact->email == 0)
+        req->u.esRequest->toKeep = 0;
 
     /* not to keep part ... */
     req->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
