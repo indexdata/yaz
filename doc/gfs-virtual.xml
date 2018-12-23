@@ -6,7 +6,7 @@
 <para>
  The Virtual hosts mechanism allows a YAZ frontend server to
  support multiple backends. A backend is selected on the basis of
- the TCP/IP binding (port+listening adddress) and/or the virtual host.
+ the TCP/IP binding (port+listening address) and/or the virtual host.
 </para>
 <para>
  A backend can be configured to execute in a particular working

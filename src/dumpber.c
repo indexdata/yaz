@@ -43,7 +43,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
         static char *nl[] =
         {
             "[Univ 0]", "BOOLEAN", "INTEGER", "BIT STRING", "OCTET STRING",
-            "NULL", "OID", "OBJECT DESCIPTOR", "EXTERNAL", "REAL",
+            "NULL", "OID", "OBJECT DESCRIPTOR", "EXTERNAL", "REAL",
             "ENUM", "[UNIV 11]", "[UNIV 12]", "[UNIV 13]", "[UNIV 14]",
             "[UNIV 15]", "SEQUENCE", "SET", "NUMERICSTRING", "PRINTABLESTRING",
             "[UNIV 20]", "[UNIV 21]", "[UNIV 22]", "[UNIV 23]", "[UNIV 24]",
