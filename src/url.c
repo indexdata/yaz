@@ -260,6 +260,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                         {
                             wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
                             log_warn(p);
+                            break;
                         }
                         else if (ret == 0)
                         {
