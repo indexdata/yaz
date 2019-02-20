@@ -944,11 +944,6 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #endif
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
-    if (h->state != CS_ST_IDLE)
-    {
-        h->cerrno = CSOUTSTATE;
-        return -1;
-    }
 #ifdef WIN32
     h->newfd = accept(h->iofile, 0, 0);
 #else

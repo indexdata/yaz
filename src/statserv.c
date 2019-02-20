@@ -964,18 +964,8 @@ static void listener(IOCHAN h, int event)
             yaz_log(YLOG_WARN, "cs_listen incomplete");
             return;
         }
-        new_line = cs_accept(line);
-        if (!new_line)
-        {
-            yaz_log(YLOG_FATAL, "Accept failed.");
-            iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
-            return;
-        }
-
         if (control_block.one_shot)
             remove_listeners();
-
-        yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
 
         no_sessions++;
         if (control_block.dynamic)
@@ -986,11 +976,14 @@ static void listener(IOCHAN h, int event)
                 iochan_destroy(h);
                 return;
             }
-            else if (res == 0) /* child */
+            else if (res != 0) /* parent */
+                return;
+            else /* child */
             {
                 char nbuf[100];
                 IOCHAN pp;
 
+                new_line = cs_accept(line);
                 for (pp = pListener; pp; pp = iochan_getnext(pp))
                 {
                     COMSTACK l = (COMSTACK)iochan_getdata(pp);
@@ -1003,13 +996,16 @@ static void listener(IOCHAN h, int event)
                    only for the main process ..  */
                 control_block.bend_stop = 0;
             }
-            else /* parent */
-            {
-                cs_close(new_line);
-                return;
-            }
         }
-
+        else
+            new_line = cs_accept(line);
+        if (!new_line)
+        {
+            yaz_log(YLOG_FATAL, "Accept failed.");
+            iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
+            return;
+        }
+        yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
         if (control_block.threads)
         {
 #if YAZ_POSIX_THREADS
