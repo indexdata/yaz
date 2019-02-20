@@ -837,10 +837,7 @@ int tcpip_rcvconnect(COMSTACK h)
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-        /* cast to intermediate size_t to avoid GCC warning. */
-        gnutls_transport_set_ptr(sp->session,
-                                 (gnutls_transport_ptr_t)
-                                 (size_t) h->iofile);
+        gnutls_transport_set_int(sp->session, h->iofile);
     }
     if (sp->session)
     {
@@ -1076,10 +1073,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 xfree(state);
                 return 0;
             }
-            /* cast to intermediate size_t to avoid GCC warning. */
-            gnutls_transport_set_ptr(state->session,
-                                     (gnutls_transport_ptr_t)
-                                     (size_t) cnew->iofile);
+            gnutls_transport_set_int(state->session, cnew->iofile);
         }
 #endif
         h = cnew;
