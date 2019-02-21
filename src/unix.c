@@ -42,6 +42,7 @@
 
 #include <yaz/unix.h>
 #include <yaz/errno.h>
+#include <yaz/log.h>
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
@@ -75,11 +76,6 @@ static void *unix_straddr(COMSTACK h, const char *str);
 #define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) \
                       + strlen ((ptr)->sun_path))
 #endif
-#if 0
-#define TRC(x) x
-#else
-#define TRC(X)
-#endif
 
 /* this state is used for both SSL and straight TCP/IP */
 typedef struct unix_state
@@ -98,9 +94,16 @@ typedef struct unix_state
     char buf[128]; /* returned by cs_addrstr */
 } unix_state;
 
-static int unix_init (void)
+static int log_level = 0;
+
+static void unix_init (void)
 {
-    return 1;
+    static int log_level_set = 0;
+    if (!log_level_set)
+    {
+        log_level = yaz_log_module_level("comstack");
+        log_level_set = 1;
+    }
 }
 
 /*
@@ -113,8 +116,7 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     unix_state *state;
     int new_socket;
 
-    if (!unix_init ())
-        return 0;
+    unix_init();
     if (s < 0)
     {
         if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
@@ -167,7 +169,7 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     state->towrite = state->written = -1;
     state->complete = cs_complete_auto;
 
-    TRC(fprintf(stderr, "Created new UNIX comstack\n"));
+    yaz_log(log_level, "Created UNIX comstack h=%p", p);
 
     return p;
 }
@@ -176,9 +178,9 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
 static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
     char *cp;
-    if (!unix_init ())
-        return 0;
-    TRC(fprintf(stderr, "unix_strtoaddress: %s\n", str ? str : "NULL"));
+
+    unix_init();
+    yaz_log(log_level, "unix_strtoaddr_ex %s", str ? str : "NULL");
     add->sun_family = AF_UNIX;
     strncpy(add->sun_path, str, sizeof(add->sun_path)-1);
     add->sun_path[sizeof(add->sun_path)-1] = 0;
@@ -213,9 +215,10 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
                 else
                 {
                     struct passwd * pw = getpwnam(arg);
-                    if(pw == NULL)
+                    if (pw == NULL)
                     {
-                        printf("No such user\n");
+                        yaz_log(log_level, "unix_strtoaddr1 No such user %s",
+                            arg);
                         return 0;
                     }
                     sp->uid = pw->pw_uid;
@@ -233,7 +236,8 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
                     struct group * gr = getgrnam(arg);
                     if (gr == NULL)
                     {
-                        printf("No such group\n");
+                        yaz_log(log_level, "unix_strtoaddr1 No such group %s",
+                            arg);
                         return 0;
                     }
                     sp->gid = gr->gr_gid;
@@ -248,7 +252,8 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
                 if (errno == EINVAL ||
                     *end)
                 {
-                    printf("Invalid umask\n");
+                    yaz_log(log_level, "unix_strtoaddr1 Invalid umask %s",
+                        arg);
                     return 0;
                 }
             }
@@ -259,22 +264,23 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
             }
             else
             {
-                printf("invalid or double argument: %s\n", s);
+                yaz_log(log_level, "unix_strtoaddr1 "
+                        "invalid or double argument %s", s);
                 return 0;
             }
-        } while((s = eol));
+        } while ((s = eol));
     }
     else
     {
         file = str;
     }
-    if(! file)
+    if (!file)
     {
         errno = EINVAL;
         return 0;
     }
 
-    TRC(fprintf(stderr, "unix_straddr: %s\n", str ? str : "NULL"));
+    yaz_log(log_level, "unix_straddr1: %s", str ? str : "NULL");
 
     if (!unix_strtoaddr_ex (file, &sp->addr))
         return 0;
@@ -293,7 +299,7 @@ struct sockaddr_un *unix_strtoaddr(const char *str)
 {
     static struct sockaddr_un add;
 
-    TRC(fprintf(stderr, "unix_strtoaddr: %s\n", str ? str : "NULL"));
+    yaz_log(log_level, "unix_strtoaddr %s", str ? str : "NULL");
 
     if (!unix_strtoaddr_ex (str, &add))
         return 0;
@@ -318,7 +324,7 @@ static int unix_connect(COMSTACK h, void *address)
     int r;
     int i;
 
-    TRC(fprintf(stderr, "unix_connect\n"));
+    yaz_log(log_level, "unix_connect h=%p", h);
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
@@ -363,7 +369,7 @@ static int unix_connect(COMSTACK h, void *address)
  */
 static int unix_rcvconnect(COMSTACK h)
 {
-    TRC(fprintf(stderr, "unix_rcvconnect\n"));
+    yaz_log(log_level, "unix_rcvconnect h=%p", h);
 
     if (h->state == CS_ST_DATAXFER)
         return 0;
@@ -384,7 +390,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
     const char * path = ((struct sockaddr_un *)addr)->sun_path;
     struct stat stat_buf;
 
-    TRC (fprintf (stderr, "unix_bind\n"));
+    yaz_log(log_level, "unix_bind h=%p", h);
 
     if(stat(path, &stat_buf) != -1) {
         struct sockaddr_un socket_unix;
@@ -404,7 +410,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
         socket_unix.sun_path[sizeof(socket_unix.sun_path)-1] = 0;
         if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
             if(yaz_errno() == ECONNREFUSED) {
-                TRC (fprintf (stderr, "Socket exists but nobody is listening\n"));
+                yaz_log(log_level, "unix_bind socket exists but nobody is listening");
             } else {
                 h->cerrno = CSYSERR;
                 return -1;
@@ -450,7 +456,7 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
     struct sockaddr_un addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
 
-    TRC(fprintf(stderr, "unix_listen pid=%d\n", getpid()));
+    yaz_log(log_level, "unix_listen h=%p", h);
     if (h->state != CS_ST_IDLE)
     {
         h->cerrno = CSOUTSTATE;
@@ -485,7 +491,7 @@ static COMSTACK unix_accept(COMSTACK h)
     COMSTACK cnew;
     unix_state *state, *st = (unix_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "unix_accept\n"));
+    yaz_log(log_level, "unix_accept h=%p", h);
     if (h->state == CS_ST_INCON)
     {
         if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
@@ -562,11 +568,11 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0, res;
 
-    TRC(fprintf(stderr, "unix_get: bufsize=%d\n", *bufsize));
+    yaz_log(log_level, "unix_get h=%p bufsize=%d", h, *bufsize);
     if (sp->altlen) /* switch buffers */
     {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (%p )\n", sp->altlen,
-                    sp->altbuf));
+        yaz_log(log_level, "  %d bytes in altbuf (%p )", sp->altlen,
+                sp->altbuf);
         tmpc = *buf;
         tmpi = *bufsize;
         *buf = sp->altbuf;
@@ -588,7 +594,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
             if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
                 return -1;
         res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
-        TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
+        yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
         if (res < 0)
         {
             if (yaz_errno() == EWOULDBLOCK
@@ -612,8 +618,8 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
             return hasread;
         hasread += res;
     }
-    TRC (fprintf (stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-                  hasread, berlen));
+    yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
+                  hasread, berlen);
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
@@ -628,8 +634,8 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         } else if (sp->altsize < req)
             if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
                 return -1;
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
-                    sp->altbuf));
+        yaz_log(log_level, "  Moving %d bytes to altbuf(%p)", tomove,
+                sp->altbuf);
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_UNIX_BUFCHUNK - 1)
@@ -649,7 +655,7 @@ static int unix_put(COMSTACK h, char *buf, int size)
     int res;
     struct unix_state *state = (struct unix_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "unix_put: size=%d\n", size));
+    yaz_log(log_level, "unix_put h=%p size=%d", h, size);
     h->io_pending = 0;
     h->event = CS_DATA;
     if (state->towrite < 0)
@@ -683,7 +689,7 @@ static int unix_put(COMSTACK h, char *buf, int size)
 #endif
                 )
             {
-                TRC(fprintf(stderr, "  Flow control stop\n"));
+                yaz_log(log_level, "  Flow control stop");
                 h->io_pending = CS_WANT_WRITE;
                 return 1;
             }
@@ -691,11 +697,11 @@ static int unix_put(COMSTACK h, char *buf, int size)
             return -1;
         }
         state->written += res;
-        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-                    res, state->written, size));
+        yaz_log(log_level, "  Wrote %d, written=%d, nbytes=%d",
+                res, state->written, size);
     }
     state->towrite = state->written = -1;
-    TRC(fprintf(stderr, "  Ok\n"));
+    yaz_log(log_level, "  Ok");
     return 0;
 }
 
@@ -703,7 +709,7 @@ static void unix_close(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "unix_close\n"));
+    yaz_log(log_level, "unix_close h=%p", h);
     if (h->iofile != -1)
     {
         close(h->iofile);
