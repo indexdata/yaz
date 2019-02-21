@@ -28,6 +28,7 @@
 #include <unistd.h>
 #endif
 #include <yaz/thread_create.h>
+#include <yaz/log.h>
 
 #ifdef WIN32
 /* VS 2003 or later has getaddrinfo; older versions do not */
@@ -93,12 +94,6 @@ static COMSTACK tcpip_accept(COMSTACK h);
 static const char *tcpip_addrstr(COMSTACK h);
 static void *tcpip_straddr(COMSTACK h, const char *str);
 
-#if 0
-#define TRC(x) x
-#else
-#define TRC(X)
-#endif
-
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
 #endif
@@ -147,8 +142,11 @@ typedef struct tcpip_state
     int connect_response_len;
 } tcpip_state;
 
+static int log_level = 0;
+
 static int tcpip_init(void)
 {
+    static int log_level_set = 0;
 #ifdef WIN32
     static int initialized = 0;
 #endif
@@ -165,6 +163,11 @@ static int tcpip_init(void)
         initialized = 1;
     }
 #endif
+    if (!log_level_set)
+    {
+        log_level = yaz_log_module_level("comstack");
+        log_level_set = 1;
+    }
     return 1;
 }
 
@@ -240,7 +243,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->cerrno = 0;
     p->user = 0;
 
-    TRC(fprintf(stderr, "Created new TCPIP comstack h=%p\n", p));
+    yaz_log(log_level, "Created TCP/SSL comstack h=%p", p);
 
     return p;
 }
@@ -335,6 +338,7 @@ COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 
     sp->session = (gnutls_session_t) vp;
     /* note: we don't handle already opened socket in SSL mode - yet */
+
     return p;
 #else
     return 0;
@@ -356,14 +360,14 @@ COMSTACK yaz_ssl_create(int s, int flags, int protocol,
 #if HAVE_GNUTLS_H
 static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 {
-    TRC(fprintf(stderr, "ssl_check_error error=%d fatal=%d msg=%s\n",
-                res,
-                gnutls_error_is_fatal(res),
-                gnutls_strerror(res)));
+    yaz_log(log_level, "ssl_check_error error=%d fatal=%d msg=%s",
+            res,
+            gnutls_error_is_fatal(res),
+            gnutls_strerror(res));
     if (res == GNUTLS_E_AGAIN || res == GNUTLS_E_INTERRUPTED)
     {
         int dir = gnutls_record_get_direction(sp->session);
-        TRC(fprintf(stderr, " -> incomplete dir=%d\n", dir));
+        yaz_log(log_level, " -> incomplete dir=%d", dir);
         h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
         return 1;
     }
@@ -506,7 +510,7 @@ static struct addrinfo *create_net_socket(COMSTACK h)
     }
     if (s == -1)
         return 0;
-    TRC(fprintf(stderr, "First socket fd=%d\n", s));
+    yaz_log(log_level, "First socket fd=%d", s);
     assert(ai);
     h->iofile = s;
     if (ai->ai_family == AF_INET6 && sp->ipv6_only >= 0 &&
@@ -688,7 +692,7 @@ static int cont_connect(COMSTACK h)
 #else
             close(h->iofile);
 #endif
-            TRC(fprintf(stderr, "Other socket call fd=%d\n", s));
+            yaz_log(log_level, "Other socket call fd=%d", s);
             h->state = CS_ST_UNBND;
             h->iofile = s;
             tcpip_set_blocking(h, h->flags);
@@ -715,7 +719,7 @@ int tcpip_connect(COMSTACK h, void *address)
     struct sockaddr_in *add = (struct sockaddr_in *) address;
 #endif
     int r;
-    TRC(fprintf(stderr, "tcpip_connect h=%p\n", h));
+    yaz_log(log_level, "tcpip_connect h=%p", h);
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
@@ -760,7 +764,7 @@ int tcpip_connect(COMSTACK h, void *address)
 #else
         if (yaz_errno() == EINPROGRESS)
         {
-            TRC(fprintf(stderr, "Pending fd=%d\n", h->iofile));
+            yaz_log(log_level, "Pending fd=%d", h->iofile);
             h->event = CS_CONNECT;
             h->state = CS_ST_CONNECTING;
             h->io_pending = CS_WANT_WRITE|CS_WANT_READ;
@@ -781,7 +785,7 @@ int tcpip_connect(COMSTACK h, void *address)
 int tcpip_rcvconnect(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-    TRC(fprintf(stderr, "tcpip_rcvconnect\n"));
+    yaz_log(log_level, "tcpip_rcvconnect h=%p", h);
 
     if (h->state == CS_ST_DATAXFER)
         return 0;
@@ -811,22 +815,20 @@ int tcpip_rcvconnect(COMSTACK h)
         {
             r = tcpip_put(h, sp->connect_request_buf,
                           sp->connect_request_len);
-            TRC(fprintf(stderr, "tcpip_put CONNECT r=%d\n", r));
+            yaz_log(log_level, "tcpip_rcvconnect connect put r=%d", r);
             h->event = CS_CONNECT; /* because tcpip_put sets it */
             if (r) /* < 0 is error, 1 is in-complete */
                 return r;
-            TRC(fprintf(stderr, "tcpip_put CONNECT complete\n"));
-            TRC(fwrite(sp->connect_request_buf, 1, sp->connect_request_len, stderr));
+            yaz_log(log_level, "tcpip_rcvconnect connect complete");
         }
         sp->connect_request_len = 0;
 
         r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
-        TRC(fprintf(stderr, "tcpip_get CONNECT r=%d\n", r));
+        yaz_log(log_level, "tcpip_rcvconnect connect get r=%d", r);
         if (r == 1)
             return r;
         if (r <= 0)
             return -1;
-        TRC(fwrite(sp->connect_response_buf, 1, r, stderr));
         xfree(sp->connect_request_buf);
         sp->connect_request_buf = 0;
         sp->complete = cs_complete_auto;
@@ -894,10 +896,10 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
-            TRC(fprintf(stderr, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s\n",
+            yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
                         res,
                         gnutls_error_is_fatal(res),
-                        gnutls_strerror(res)));
+                        gnutls_strerror(res));
             h->cerrno = CSERRORSSL;
             return -1;
         }
@@ -947,7 +949,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     YAZ_SOCKLEN_T len = sizeof(addr);
 #endif
 
-    TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
+    yaz_log(log_level, "tcpip_listen h=%p", h);
     if (h->state != CS_ST_IDLE)
     {
         h->cerrno = CSOUTSTATE;
@@ -1013,7 +1015,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     unsigned long tru = 1;
 #endif
 
-    TRC(fprintf(stderr, "tcpip_accept h=%p pid=%d\n", h, getpid()));
+    yaz_log(log_level, "tcpip_accept h=%p", h);
     if (h->state == CS_ST_INCON)
     {
 #if HAVE_GNUTLS_H
@@ -1093,14 +1095,13 @@ COMSTACK tcpip_accept(COMSTACK h)
             {
                 if (ssl_check_error(h, state, res))
                 {
-                    TRC(fprintf(stderr, "gnutls_handshake int in tcpip_accept\n"));
+                    yaz_log(log_level, "tcpip_accept gnutls_handshake interrupted");
                     return h;
                 }
-                TRC(fprintf(stderr, "gnutls_handshake failed in tcpip_accept\n"));
+                yaz_log(log_level, "tcpip_accept gnutls_handshake failed");
                 cs_close(h);
                 return 0;
             }
-            TRC(fprintf(stderr, "SSL_accept complete. gnutls\n"));
         }
 #endif
     }
@@ -1128,11 +1129,10 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0, res;
 
-    TRC(fprintf(stderr, "tcpip_get: h=%p bufsize=%d\n", h, *bufsize));
+    yaz_log(log_level, "tcpip_get h=%p bufsize=%d", h, *bufsize);
     if (sp->altlen) /* switch buffers */
     {
-        TRC(fprintf(stderr, "  %d bytes in altbuf (%p)\n", sp->altlen,
-                    sp->altbuf));
+        yaz_log(log_level, "  %d bytes in altbuf (%p)", sp->altlen, sp->altbuf);
         tmpc = *buf;
         tmpi = *bufsize;
         *buf = sp->altbuf;
@@ -1166,7 +1166,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                                      CS_TCPIP_BUFCHUNK);
             if (res == 0)
             {
-                TRC(fprintf(stderr, "gnutls_record_recv returned 0\n"));
+                yaz_log(log_level, "gnutls_record_recv returned 0");
                 return 0;
             }
             else if (res < 0)
@@ -1185,11 +1185,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                when EWOULDBLOCK etc. would be required (res = -1) */
 #endif
             res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
-            TRC(fprintf(stderr, "  recv res=%d, hasread=%d\n", res, hasread));
+            yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
             if (res < 0)
             {
-                TRC(fprintf(stderr, "  recv errno=%d, (%s)\n", yaz_errno(),
-                            strerror(yaz_errno())));
+                yaz_log(log_level, "  recv errno=%d, (%s)", yaz_errno(),
+                            strerror(yaz_errno()));
 #ifdef WIN32
                 if (WSAGetLastError() == WSAEWOULDBLOCK)
                 {
@@ -1236,8 +1236,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             return -1;
         }
     }
-    TRC(fprintf(stderr, "  Out of read loop with hasread=%d, berlen=%d\n",
-                hasread, berlen));
+    yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
+                hasread, berlen);
     /* move surplus buffer (or everything if we didn't get a BER rec.) */
     if (hasread > berlen)
     {
@@ -1258,8 +1258,8 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 h->cerrno = CSYSERR;
                 return -1;
             }
-        TRC(fprintf(stderr, "  Moving %d bytes to altbuf(%p)\n", tomove,
-                    sp->altbuf));
+        yaz_log(log_level, "  Moving %d bytes to altbuf(%p)", tomove,
+                sp->altbuf);
         memcpy(sp->altbuf, *buf + berlen, sp->altlen = tomove);
     }
     if (berlen < CS_TCPIP_BUFCHUNK - 1)
@@ -1278,7 +1278,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     int res;
     struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "tcpip_put: h=%p size=%d\n", h, size));
+    yaz_log(log_level, "tcpip_put h=%p size=%d", h, size);
     h->io_pending = 0;
     h->event = CS_DATA;
     if (state->towrite < 0)
@@ -1335,7 +1335,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
 #endif
                     )
                 {
-                    TRC(fprintf(stderr, "  Flow control stop\n"));
+                    yaz_log(log_level, "  Flow control stop");
                     h->io_pending = CS_WANT_WRITE;
                     return 1;
                 }
@@ -1349,11 +1349,11 @@ int tcpip_put(COMSTACK h, char *buf, int size)
             }
         }
         state->written += res;
-        TRC(fprintf(stderr, "  Wrote %d, written=%d, nbytes=%d\n",
-                    res, state->written, size));
+        yaz_log(log_level, "  Wrote %d, written=%d, nbytes=%d",
+                res, state->written, size);
     }
     state->towrite = state->written = -1;
-    TRC(fprintf(stderr, "  Ok\n"));
+    yaz_log(log_level, "  Ok");
     return 0;
 }
 
@@ -1361,7 +1361,7 @@ void tcpip_close(COMSTACK h)
 {
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
-    TRC(fprintf(stderr, "tcpip_close: h=%p pid=%d\n", h, getpid()));
+    yaz_log(log_level, "tcpip_close: h=%p", h);
     xfree(sp->bind_host);
 #if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
@@ -1379,7 +1379,7 @@ void tcpip_close(COMSTACK h)
 #if HAVE_GNUTLS_H
         if (sp->session && sp->use_bye)
         {
-            TRC(fprintf(stderr, "tcpip_close: gnutls_bye\n"));
+            yaz_log(log_level, "tcpip_close: gnutls_bye");
             gnutls_bye(sp->session, GNUTLS_SHUT_WR);
         }
 #endif
@@ -1402,8 +1402,8 @@ void tcpip_close(COMSTACK h)
 
         if (--(sp->cred_ptr->ref) == 0)
         {
-            TRC(fprintf(stderr, "Removed credentials %p pid=%d\n",
-                        sp->cred_ptr->xcred, getpid()));
+            yaz_log(log_level, "tcpip_close: removed credentials h=%p",
+                    sp->cred_ptr->xcred);
             gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
             xfree(sp->cred_ptr);
         }
