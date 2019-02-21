@@ -858,9 +858,6 @@ int tcpip_rcvconnect(COMSTACK h)
     return 0;
 }
 
-#define CERTF "ztest.pem"
-#define KEYF "ztest.pem"
-
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
