@@ -139,6 +139,7 @@ typedef struct tcpip_state
     struct tcpip_cred_ptr *cred_ptr;
     gnutls_session_t session;
     char cert_fname[256];
+    int use_bye;
 #endif
     char *connect_request_buf;
     int connect_request_len;
@@ -190,6 +191,7 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->cred_ptr = 0;
     sp->session = 0;
     strcpy(sp->cert_fname, "yaz.pem");
+    sp->use_bye = 0;
 #endif
     sp->connect_request_buf = 0;
     sp->connect_request_len = 0;
@@ -834,6 +836,7 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         tcpip_create_cred(h);
         gnutls_init(&sp->session, GNUTLS_CLIENT);
+        sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
@@ -944,6 +947,11 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #endif
 
     TRC(fprintf(stderr, "tcpip_listen pid=%d\n", getpid()));
+    if (h->state != CS_ST_IDLE)
+    {
+        h->cerrno = CSOUTSTATE;
+        return -1;
+    }
 #ifdef WIN32
     h->newfd = accept(h->iofile, 0, 0);
 #else
@@ -1368,8 +1376,11 @@ void tcpip_close(COMSTACK h)
     if (h->iofile != -1)
     {
 #if HAVE_GNUTLS_H
-        if (sp->session)
+        if (sp->session && sp->use_bye)
+        {
+            TRC(fprintf(stderr, "tcpip_close: gnutls_bye\n"));
             gnutls_bye(sp->session, GNUTLS_SHUT_WR);
+        }
 #endif
 #ifdef WIN32
         closesocket(h->iofile);
