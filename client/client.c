@@ -3256,6 +3256,8 @@ static void exit_client(int code)
     file_history_destroy(&file_history);
     nmem_destroy(nmem_auth);
     wrbuf_destroy(cur_host);
+    if (conn)
+        cs_close(conn);
     exit(code);
 }
 
