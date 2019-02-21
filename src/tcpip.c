@@ -894,6 +894,10 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
+            TRC(fprintf(stderr, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s\n",
+                        res,
+                        gnutls_error_is_fatal(res),
+                        gnutls_strerror(res)));
             h->cerrno = CSERRORSSL;
             return -1;
         }
