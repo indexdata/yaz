@@ -1565,22 +1565,22 @@ static void x509_crt_print(gnutls_x509_crt_t cert)
     /* Print the serial number of the certificate. */
     size = sizeof(serial);
     gnutls_x509_crt_get_serial(cert, serial, &size);
-    
+
     printf("\tCertificate serial number: %s\n", bin2hex(serial, size));
-    
+
     /* Extract some of the public key algorithm's parameters
      */
     algo = gnutls_x509_crt_get_pk_algorithm(cert, &bits);
-    
+
     printf("Certificate public key: %s", gnutls_pk_algorithm_get_name(algo));
-    
+
     /* Print the version of the X.509 certificate. */
     printf("\tCertificate version: #%d\n", gnutls_x509_crt_get_version(cert));
-    
+
     size = sizeof(dn);
     gnutls_x509_crt_get_dn(cert, dn, &size);
     printf("\tDN: %s\n", dn);
-    
+
     size = sizeof(dn);
     gnutls_x509_crt_get_issuer_dn(cert, dn, &size);
     printf("\tIssuer's DN: %s\n", dn);
