@@ -73,6 +73,15 @@
 #define RESOLVER_THREAD 1
 #endif
 
+#if HAVE_GNUTLS_H
+#if GNUTLS_VERSION_NUMBER >= 0x030109
+#define SET_GNUTLS_SOCKET(ses, socket) gnutls_transport_set_int(ses, socket)
+#else
+#define SET_GNUTLS_SOCKET(ses, socket) \
+    gnutls_transport_set_ptr(ses, (gnutls_transport_ptr_t) (size_t)  socket)
+#endif
+#endif
+
 static void tcpip_close(COMSTACK h);
 static int tcpip_put(COMSTACK h, char *buf, int size);
 static int tcpip_get(COMSTACK h, char **buf, int *bufsize);
@@ -842,7 +851,7 @@ int tcpip_rcvconnect(COMSTACK h)
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-        gnutls_transport_set_int(sp->session, h->iofile);
+        SET_GNUTLS_SOCKET(sp->session, h->iofile);
     }
     if (sp->session)
     {
@@ -1079,7 +1088,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 xfree(state);
                 return 0;
             }
-            gnutls_transport_set_int(state->session, cnew->iofile);
+            SET_GNUTLS_SOCKET(state->session, cnew->iofile);
         }
 #endif
         h = cnew;
