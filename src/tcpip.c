@@ -459,7 +459,7 @@ static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
 #else
     in_addr_t tmpadd;
 #endif
-    TRC(fprintf(stderr, "tcpip_strtoaddress: %s\n", str ? str : "NULL"));
+    yaz_log(log_level, "tcpip_strtoaddr_ex %s", str ? str : "NULL");
     add->sin_family = AF_INET;
     strncpy(buf, str, sizeof(buf)-1);
     buf[sizeof(buf)-1] = 0;
@@ -884,6 +884,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     int one = 1;
 #endif
 
+    yaz_log(log_level, "tcpip_bind h=%p", h);
 #if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
@@ -913,8 +914,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
             return -1;
         }
     }
-#else
-    TRC(fprintf(stderr, "tcpip_bind\n"));
 #endif
 #ifndef WIN32
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
