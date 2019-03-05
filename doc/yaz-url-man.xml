@@ -84,7 +84,7 @@
    <varlistentry>
     <term>-p <replaceable>fname</replaceable></term>
     <listitem><para>
-      Sets a file to be POSTed in the folloing URL.
+      Sets a file to be POSTed in the following URL.
      </para></listitem>
    </varlistentry>
 
@@ -99,7 +99,7 @@
    <varlistentry>
     <term>-u <replaceable>user/password</replaceable></term>
     <listitem><para>
-      Specifies a user and a password to be uesd in HTTP
+      Specifies a user and a password to be used in HTTP
       basic authentication in the following URL fetch. The user
       and password must be separated by a slash (thus it is not
       possible to specify a user with a slash in it).
