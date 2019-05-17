@@ -9925,15 +9925,6 @@ void odr_choice_bias(ODR o, int what);
    in general.
   </para>
   <para>
-   <address>
-    Index Data ApS
-    <street>Amagerf&#xe6;lledvej 56</street>
-    <postcode>2300 Copenhagen S</postcode>
-    <country>Denmark</country>
-    Email <email>info@indexdata.dk</email>
-   </address>
-  </para>
-  <para>
    The Hacker's Jargon File has the following to say about the
    use of the
    prefix &quot;YA&quot; in the name of a software product.
