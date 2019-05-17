@@ -4,6 +4,11 @@ sudo: required
 matrix:
   include:
     - os: linux
+      dist: xenial
+      compiler: clang
+      env:
+       - MY_OS=xenial
+    - os: linux
       dist: trusty
       compiler: clang
       env:
