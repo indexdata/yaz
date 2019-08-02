@@ -413,7 +413,7 @@
      this document.
    </para>
   </sect1>
-  <sect1 id="installation.unix"><title>UNIX</title>
+  <sect1 id="installation.unix"><title>UNIX/MacOS</title>
    <para>
     We provide
     <ulink url="&url.debian;">Debian GNU/Linux</ulink> (i386 and amd64),
@@ -843,7 +843,26 @@
      <filename>/usr/local/include/yaz</filename>.
     </para>
    </sect2>
-   <sect2 id="installation-linking-yaz-unix">
+   <sect2 id="installation.source.macos">
+     <title>Compiling from source on MacOS</title>
+     <para>
+       Compiling from source on MacOSX requires libxml2. This can be installed
+       with Homebrew, for instance:
+       <screen>
+         brew install libxml2
+       </screen>
+     </para>
+     <para> Review the Caveats section (<code>brew info libxml2</code>) for the <code>LDFLAGS</code>, <code>CPPFLAGS</code>, and <code>PKG_CONFIG_PATH</code> environment variables before executing the <code>./compile</code> command. For instance:
+       <screen>
+         export LDFLAGS="-L/usr/local/opt/libxml2/lib"
+         export CPPFLAGS="-I/usr/local/opt/libxml2/include"
+         export PKG_CONFIG_PATH="/usr/local/opt/libxml2/lib/pkgconfig"
+         ./configure
+         make
+       </screen>
+     </para>
+   </sect2>
+    <sect2 id="installation-linking-yaz-unix">
     <title>How to make apps using YAZ on UNIX</title>
     <para>
      This section describes how to compile - and link your own
