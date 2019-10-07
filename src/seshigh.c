@@ -40,9 +40,9 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-
 #ifdef WIN32
 #include <io.h>
+#include <sys/stat.h>
 #define S_ISREG(x) (x & _S_IFREG)
 #include <process.h>
 #endif
@@ -1747,19 +1747,39 @@ static int check_path(const char *path)
     return 1;
 }
 
-static char *read_file(const char *fname, ODR o, size_t *sz)
+static char *read_file(const char *fname, ODR o, long *sz)
 {
-    char *buf;
-    FILE *inf = fopen(fname, "rb");
-    if (!inf)
-        return 0;
+    struct stat stat_buf;
+    FILE *inf;
+    char *buf = 0;
 
-    fseek(inf, 0L, SEEK_END);
-    *sz = ftell(inf);
-    rewind(inf);
-    buf = (char *) odr_malloc(o, *sz);
-    if (fread(buf, 1, *sz, inf) != *sz)
-        yaz_log(YLOG_WARN|YLOG_ERRNO, "short read %s", fname);
+    if (stat(fname, &stat_buf) == -1)
+    {
+        yaz_log(YLOG_LOG|YLOG_ERRNO, "stat %s", fname);
+        return 0;
+    }
+    if (!S_ISREG(stat_buf.st_mode))
+    {
+        yaz_log(YLOG_LOG, "Is not a regular file: %s", fname);
+        return 0;
+    }
+    inf = fopen(fname, "rb");
+    if (!inf)
+    {
+        yaz_log(YLOG_LOG|YLOG_ERRNO, "fopen %s", fname);
+        return 0;
+    }
+    if (fseek(inf, 0L, SEEK_END) < 0)
+        yaz_log(YLOG_LOG|YLOG_ERRNO, "fseek %s", fname);
+    else if ((*sz = ftell(inf))  == -1L)
+        yaz_log(YLOG_LOG|YLOG_ERRNO, "ftell %s", fname);
+    else
+    {
+        rewind(inf);
+        buf = (char *) odr_malloc(o, *sz);
+        if (fread(buf, 1, *sz, inf) != *sz)
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "short read %s", fname);
+    }
     fclose(inf);
     return buf;
 }
@@ -1797,15 +1817,14 @@ static void process_http_request(association *assoc, request *req)
         if (!check_path(hreq->path))
         {
             yaz_log(YLOG_LOG, "File %s access forbidden", hreq->path+1);
-            p = z_get_HTTP_Response(o, 404);
+            p = z_get_HTTP_Response(o, 403);
         }
         else
         {
-            size_t content_size = 0;
+            long content_size = 0;
             char *content_buf = read_file(hreq->path+1, o, &content_size);
             if (!content_buf)
             {
-                yaz_log(YLOG_LOG, "File %s not found", hreq->path+1);
                 p = z_get_HTTP_Response(o, 404);
             }
             else
