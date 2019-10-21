@@ -31,7 +31,7 @@ const char *cql_strerror(int code) {
     case 18: return "Illegal or unsupported combination of indexes";
     case 19: return "Illegal or unsupported relation";
     case 20: return "Illegal or unsupported relation modifier";
-    case 21: return "Illegal or unsupported combination of relation modifers";
+    case 21: return "Illegal or unsupported combination of relation modifiers";
     case 22: return "Illegal or unsupported combination of relation and index";
     case 23: return "Too many characters in term";
     case 24: return "Illegal combination of relation and term";
