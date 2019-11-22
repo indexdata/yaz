@@ -305,7 +305,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
     int syntax_matches = 0;
     int schema_matches = 0;
     struct yaz_retrieval_elem *el_best = 0;
-    WRBUF w = p->wr_error;
+    WRBUF w = 0;
 
     if (!el)
         return 0;
@@ -324,7 +324,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                 wrbuf_write(w, schema, cp - schema);
             else
                 wrbuf_puts(w, schema);
-            if (el->name && yaz_match_glob(el->name, wrbuf_cstr(w)))
+            if (el->name && yaz_match_glob2(el->name, wrbuf_cstr(w), 1))
                 schema_ok = 2;
             if (el->identifier && !strcmp(schema, el->identifier))
                 schema_ok = 2;

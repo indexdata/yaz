@@ -40,6 +40,11 @@ void tst1(void)
     YAZ_CHECK_EQ(yaz_match_glob("*:w", "title:w"), 1);
     YAZ_CHECK_EQ(yaz_match_glob("title:w", "title:w"), 1);
     YAZ_CHECK_EQ(yaz_match_glob("title:*", "title:w"), 1);
+
+    YAZ_CHECK_EQ(yaz_match_glob2("*:W", "title:w", 0), 0);
+    YAZ_CHECK_EQ(yaz_match_glob2("title:w", "title:W", 0), 0);
+    YAZ_CHECK_EQ(yaz_match_glob2("*:W", "title:w", 1), 1);
+    YAZ_CHECK_EQ(yaz_match_glob2("title:w", "title:W", 1), 1);
 }
 
 int main(int argc, char **argv)

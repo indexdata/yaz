@@ -351,11 +351,24 @@ static void tst_configure(void)
     const char *backend_schema = 0;
     Odr_oid *backend_syntax = 0;
     int r;
+
+    r = yaz_retrieval_request(p, "e", yaz_oid_recsyn_usmarc,
+                              &match_schema, &match_syntax,
+                              0, &backend_schema, &backend_syntax);
+    YAZ_CHECK(r != 0);
+
     r = yaz_retrieval_request(p, "F", yaz_oid_recsyn_usmarc,
                               &match_schema, &match_syntax,
                               0, &backend_schema, &backend_syntax);
     YAZ_CHECK(r == 0);
     YAZ_CHECK(backend_schema && !strcmp(backend_schema, "F"));
+    YAZ_CHECK(!oid_oidcmp(backend_syntax, yaz_oid_recsyn_usmarc));
+
+    r = yaz_retrieval_request(p, "f", yaz_oid_recsyn_usmarc,
+                              &match_schema, &match_syntax,
+                              0, &backend_schema, &backend_syntax);
+    YAZ_CHECK(r == 0);
+    YAZ_CHECK(backend_schema && !strcmp(backend_schema, "f"));
     YAZ_CHECK(!oid_oidcmp(backend_syntax, yaz_oid_recsyn_usmarc));
 
     r = yaz_retrieval_request(p, 0, yaz_oid_recsyn_usmarc,
@@ -380,6 +393,13 @@ static void tst_configure(void)
     YAZ_CHECK(!oid_oidcmp(backend_syntax, yaz_oid_recsyn_usmarc));
 
     r = yaz_retrieval_request(p, "f1:9988", yaz_oid_recsyn_danmarc,
+                              &match_schema, &match_syntax,
+                              0, &backend_schema, &backend_syntax);
+    YAZ_CHECK(r == 0);
+    YAZ_CHECK(backend_schema && !strcmp(backend_schema, "F:9988"));
+    YAZ_CHECK(!oid_oidcmp(backend_syntax, yaz_oid_recsyn_usmarc));
+
+    r = yaz_retrieval_request(p, "F1:9988", yaz_oid_recsyn_danmarc,
                               &match_schema, &match_syntax,
                               0, &backend_schema, &backend_syntax);
     YAZ_CHECK(r == 0);
