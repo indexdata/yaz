@@ -1,3 +1,9 @@
+--- 5.28.0 2019/11/28
+
+Element-set is case sensitive for yaz_retrieval. The element-set
+name should be case insensitive, and thus, the name property
+is matched in a case-insensive mannner. YAZ-922
+
 --- 5.27.2 2019/10/07
 
 Fix hitting directory for docpath results in malloc failure YAZ-921
