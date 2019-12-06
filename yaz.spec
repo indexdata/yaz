@@ -12,6 +12,7 @@ Release: 1.indexdata
 
 # determine system
 %define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_redhat8 %(grep 'release 8' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
@@ -34,7 +35,12 @@ Prefix: %{_prefix}
 %define TCPWRAPPER tcpd-devel
 %endif
 
+%if is_redhat8
+%define TCPDFLAGS --disable-tcpd
+%else
+%define TCPDFLAGS --enable-tcpd
 BuildRequires: %{TCPWRAPPER}
+%endif
 
 %if %is_suse11
 BuildRequires: libgnutls-devel
@@ -100,7 +106,7 @@ chain facility of YAZ.
 
 CFLAGS="$RPM_OPT_FLAGS" \
  ./configure --prefix=%{_prefix} --libdir=%{_libdir} --mandir=%{_mandir} \
-	--enable-shared --enable-tcpd --with-xslt --with-gnutls --with-icu \
+	--enable-shared ${TCPDFLAGS} --with-xslt --with-gnutls --with-icu \
 	--without-memcached
 %if %{?make_build:1}%{!?make_build:0}
 %make_build
