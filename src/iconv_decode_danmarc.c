@@ -33,8 +33,15 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
                                   unsigned char *inp,
                                   size_t inbytesleft, size_t *no_read)
 {
-    unsigned long x = inp[0];
+    unsigned long x;
 
+    if (inbytesleft < 1)
+    {
+        yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL);
+        *no_read = 0;
+        return 0;
+    }
+    x = inp[0];
     if (x != '@')
     {
         *no_read = 1;

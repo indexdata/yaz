@@ -29,7 +29,7 @@ struct encoder_data
 };
 
 static size_t write1(yaz_iconv_t cd, unsigned long x,
-                   char **outbuf, size_t *outbytesleft)
+                     char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
     if (x == '@' || x == '*')
@@ -44,7 +44,7 @@ static size_t write1(yaz_iconv_t cd, unsigned long x,
         *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     }
-    else if (x <= 255)
+    else if (x <= 0xff)
     {  /* latin-1 range */
         if (*outbytesleft < 1)
         {
@@ -54,7 +54,7 @@ static size_t write1(yaz_iconv_t cd, unsigned long x,
         *outp++ = (unsigned char) x;
         (*outbytesleft)--;
     }
-    else
+    else if (x <= 0xffff)
     {
         if (*outbytesleft < 6)
         {
@@ -80,6 +80,11 @@ static size_t write1(yaz_iconv_t cd, unsigned long x,
             (*outbytesleft) -= 5;
             break;
         }
+    }
+    else
+    { /* can not be encoded in Danmarc2 */
+        yaz_iconv_set_errno(cd, YAZ_ICONV_EILSEQ);
+        return (size_t)(-1);
     }
     *outbuf = (char *) outp;
     return 0;

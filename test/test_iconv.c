@@ -725,14 +725,19 @@ static void tst_danmarc_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "0@0302@0301ab",
                           "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b"));
 
-    /** TILDE (none) */
-    YAZ_CHECK(tst_convert(cd, "@0303", UTF8_TILDE));
+    /** Incomplete Circumflex */
+    YAZ_CHECK(tst_convert_x(cd, "@0301", "", YAZ_ICONV_EINVAL));
+    yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
 
-    /** TILDE a - maps into Latin-1 range */
-    YAZ_CHECK(tst_convert(cd, "a@0303", "a" UTF8_TILDE));
+    /** p + Incomplete Circumflex */
+    YAZ_CHECK(tst_convert_x(cd, "p" "@0301", "p", YAZ_ICONV_EINVAL));
+    yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
 
-    /** TILDE Y (no reverse here) */
-    YAZ_CHECK(tst_convert(cd, "Y@0303", "Y" UTF8_TILDE));
+    /** TILDE a */
+    YAZ_CHECK(tst_convert(cd, "a" "@0303", "a" UTF8_TILDE));
+
+    /** TILDE Y */
+    YAZ_CHECK(tst_convert(cd, "Y" "@0303", "Y" UTF8_TILDE));
 
     /** ARING (NFC) */
     YAZ_CHECK(tst_convert(cd, "\xC5", UTF8_ARING));
@@ -775,8 +780,8 @@ static void tst_utf8_to_danmarc(void)
     /** TILDE a - maps into Latin-1 range */
     YAZ_CHECK(tst_convert(cd, "a" UTF8_TILDE, "\xE3"));
 
-    /** TILDE Y (no reverse here) */
-    YAZ_CHECK(tst_convert(cd, "Y" UTF8_TILDE, "Y@0303"));
+    /** TILDE Y */
+    YAZ_CHECK(tst_convert(cd, UTF8_TILDE "Y", "@0303" "Y"));
 
     /** ARING (NFD) */
     YAZ_CHECK(tst_convert(cd, "A" UTF8_RING_ABOVE, "\xC5"));
