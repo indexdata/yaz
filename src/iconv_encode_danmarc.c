@@ -89,6 +89,23 @@ static size_t flush_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
                             char **outbuf, size_t *outbytesleft)
 {
     struct encoder_data *w = (struct encoder_data *) e->data;
+    /* see if this is a combining thing that can be mapped to Latin-1 */
+    if (w->base_char && w->sz == 1)
+    {
+        unsigned long y;
+        if (yaz_iso_8859_1_lookup_x12(w->base_char, w->comp[0], &y))
+        {
+            w->base_char = y;
+            w->sz = 0;
+        }
+    }
+    if (w->base_char && w->sz == 1 && w->comp[0] == 0x303)
+    {  /* don't swap tilde, so write base_char in this special case */
+        size_t r = write1(cd, w->base_char, outbuf, outbytesleft);
+        if (r)
+            return r; /* if we fail base_char is still there.. */
+        w->base_char = 0;
+    }
     /* combining characters in reverse */
     while (w->sz > 0)
     {
@@ -114,6 +131,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
 {
     struct encoder_data *w = (struct encoder_data *) e->data;
 
+    /* check for combining characters */
     if (x >= 0x300 && x <= 0x36F)
     {
         w->comp[w->sz++] = x;
@@ -157,7 +175,6 @@ yaz_iconv_encoder_t yaz_danmarc_encoder(const char *tocode,
     }
     return 0;
 }
-
 
 /*
  * Local variables:

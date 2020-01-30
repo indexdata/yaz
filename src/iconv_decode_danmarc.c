@@ -20,8 +20,12 @@
 #include <yaz/xmalloc.h>
 #include "iconv-p.h"
 
+#define MAX_COMP 4
+
 struct decoder_data {
-    unsigned long x_back;
+    unsigned long comp[MAX_COMP];
+    size_t no_read[MAX_COMP];
+    size_t sz;
 };
 
 static unsigned long read_danmarc(yaz_iconv_t cd,
@@ -29,69 +33,80 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
                                   unsigned char *inp,
                                   size_t inbytesleft, size_t *no_read)
 {
-    struct decoder_data *data = (struct decoder_data *) d->data;
     unsigned long x = inp[0];
 
-    if (data->x_back)
+    if (x != '@')
     {
         *no_read = 1;
-        x = data->x_back;
-        data->x_back = 0;
         return x;
     }
-
-    if (x == '@')
+    if (inbytesleft < 2)
     {
-        if (inbytesleft < 2)
+        yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL);
+        *no_read = 0;
+        return 0;
+    }
+    switch (inp[1])
+    {
+    case '@':
+    case '*':
+    case 0xa4: /* CURRENCY SIGN */
+        x = inp[1];
+        *no_read = 2;
+        break;
+    case 0xe5: /* LATIN SMALL LETTER A WITH RING ABOVE */
+        x = 0xa733;
+        *no_read = 2;
+        break;
+    case 0xc5: /* LATIN CAPITAL LETTER A WITH RING ABOVE */
+        x = 0xa732;
+        *no_read = 2;
+        break;
+    default:
+        if (inbytesleft < 5)
         {
             yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL);
             *no_read = 0;
             return 0;
         }
-        switch(inp[1])
-        {
-        case '@':
-        case '*':
-        case 0xa4: /* CURRENCY SIGN */
-            x = inp[1];
-            *no_read = 2;
-            break;
-        case 0xe5: /* LATIN SMALL LETTER A WITH RING ABOVE */
-            x = 0xa733;
-            *no_read = 2;
-            break;
-        case 0xc5: /* LATIN CAPITAL LETTER A WITH RING ABOVE */
-            x = 0xa732;
-            *no_read = 2;
-            break;
-        default:
-            if (inbytesleft < 5)
-            {
-                yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL);
-                *no_read = 0;
-                return 0;
-            }
-            else
-            {
-                unsigned long v;
-                sscanf((const char *) inp+1, "%4lx", &v);
-                *no_read = 5;
-                x = v;
-            }
-        }
+        sscanf((const char *) inp+1, "%4lx", &x);
+        *no_read = 5;
     }
-    else
-        *no_read = 1;
     return x;
 }
 
+
+static unsigned long read_danmarc_comb(yaz_iconv_t cd,
+                                       yaz_iconv_decoder_t d,
+                                       unsigned char *inp,
+                                       size_t inbytesleft, size_t *no_read)
+{
+    struct decoder_data *data = (struct decoder_data *) d->data;
+    unsigned long x;
+
+    if (data->sz)
+    {
+        *no_read = data->no_read[--data->sz];
+        return data->comp[data->sz];
+    }
+    while (1)
+    {
+        x = read_danmarc(cd, d, inp, inbytesleft, no_read);
+        if (x < 0x300 || x > 0x36F || x == 0x303 || data->sz >= MAX_COMP)
+            break;
+        data->no_read[data->sz] = *no_read;
+        data->comp[data->sz++] = x;
+        inp += *no_read;
+    }
+    return x;
+}
 
 static size_t init_danmarc(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                            unsigned char *inp,
                            size_t inbytesleft, size_t *no_read)
 {
     struct decoder_data *data = (struct decoder_data *) d->data;
-    data->x_back = 0;
+    data->sz = 0;
     return 0;
 }
 
@@ -110,8 +125,7 @@ yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
         struct decoder_data *data = (struct decoder_data *)
             xmalloc(sizeof(*data));
         d->data = data;
-        data->x_back = 0;
-        d->read_handle = read_danmarc;
+        d->read_handle = read_danmarc_comb;
         d->init_handle = init_danmarc;
         d->destroy_handle = destroy_danmarc;
         return d;

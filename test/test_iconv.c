@@ -14,6 +14,21 @@
 #include <yaz/test.h>
 
 #define ESC "\x1b"
+#define UTF8_ACUTE "\xCC\x81"
+#define UTF8_CIRCUMFLEX "\xCC\x82"
+#define UTF8_TILDE "\xCC\x83"
+#define UTF8_MACRON "\xCC\x84"
+#define UTF8_DIAERESIS "\xCC\x88"
+#define UTF8_RING_ABOVE "\xCC\x8A"
+
+#define UTF8_ARING "\xC3\x85"
+#define UTF8_aRING "\xC3\xA5"
+#define UTF8_OSLASH "\xC3\x98"
+#define UTF8_CURRENCY_SIGN "\xC2\xA4"
+#define UTF8_LATIN_AA "\xEA\x9C\xB2"
+#define UTF8_LATIN_Aa "\xEA\x9C\xB3"
+#define UTF8_LOWERCASE_LAMBDA "\xCE\xBB"
+#define UTF8_eACUTE "\xC3\xA9"
 
 static int compare_buffers(char *msg, int no,
                            int expect_len, const char *expect_buf,
@@ -23,7 +38,7 @@ static int compare_buffers(char *msg, int no,
         && !memcmp(expect_buf, got_buf, expect_len))
         return 1;
 
-    if (0) /* use 1 see how the buffers differ (for debug purposes) */
+    if (1) /* use 1 see how the buffers differ (for debug purposes) */
     {
         int i;
         printf("tsticonv test=%s i=%d failed\n", msg, no);
@@ -403,12 +418,12 @@ static void tst_marc8_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "e",
                           "Cours de mathe\xcc\x81"));
 
-    YAZ_CHECK(tst_convert(cd, "\xea" "a", "a\xcc\x8a"));
-    YAZ_CHECK(tst_convert(cd, "a" "\xea" "\x1e", "a" "\x1e\xcc\x8a"));
-    YAZ_CHECK(tst_convert(cd, "a" "\xea" "p", "a" "p\xcc\x8a"));
+    YAZ_CHECK(tst_convert(cd, "\xea" "a", "a" UTF8_RING_ABOVE));
+    YAZ_CHECK(tst_convert(cd, "a" "\xea" "\x1e", "a" "\x1e" UTF8_RING_ABOVE));
+    YAZ_CHECK(tst_convert(cd, "a" "\xea" "p", "ap" UTF8_RING_ABOVE));
 
     YAZ_CHECK(tst_convert_x(cd, "a\xea", "a", YAZ_ICONV_EINVAL));
-    YAZ_CHECK(tst_convert(cd, "p", "\xcc\x8a")); /* note: missing p */
+    YAZ_CHECK(tst_convert(cd, "p", UTF8_RING_ABOVE)); /* note: missing p */
     yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
 
     /* bug #2115 */
@@ -434,9 +449,8 @@ static void tst_marc8s_to_utf8(void)
 
     YAZ_CHECK(tst_convert(cd, "Cours de math",
                           "Cours de math"));
-    /* E9: LATIN SMALL LETTER E WITH ACUTE */
     YAZ_CHECK(tst_convert(cd, "Cours de math\xe2" "e",
-                          "Cours de math\xc3\xa9"));
+                          "Cours de math" UTF8_eACUTE));
 
     yaz_iconv_close(cd);
 }
@@ -504,16 +518,16 @@ static void tst_utf8_to_marc8(const char *marc8_type)
     YAZ_CHECK(tst_convert(cd, "Cours de math.", "Cours de math."));
 
     /** UPPERCASE SCANDINAVIAN O */
-    YAZ_CHECK(tst_convert(cd, "S\xc3\x98", "S\xa2"));
+    YAZ_CHECK(tst_convert(cd, "S" UTF8_OSLASH, "S\xa2"));
 
     /** ARING (NFD) */
-    YAZ_CHECK(tst_convert(cd, "A" "\xCC\x8A", "\xEA" "A"));
+    YAZ_CHECK(tst_convert(cd, "A" UTF8_RING_ABOVE, "\xEA" "A"));
 
     /** ARING (NFC) */
-    YAZ_CHECK(tst_convert(cd, "\xC3\x85", "\xEA" "A"));
+    YAZ_CHECK(tst_convert(cd, UTF8_ARING, "\xEA" "A"));
 
     /** A MACRON + UMLAUT, DIAERESIS */
-    YAZ_CHECK(tst_convert(cd, "A" "\xCC\x84" "\xCC\x88",
+    YAZ_CHECK(tst_convert(cd, "A" UTF8_MACRON UTF8_DIAERESIS,
                           "\xE5\xE8\x41"));
 
     /* Ligature spanning two characters */
@@ -696,18 +710,32 @@ static void tst_danmarc_to_utf8(void)
 
     YAZ_CHECK(tst_convert(cd, "@*",  "*"));
     YAZ_CHECK(tst_convert(cd, "@@",  "@"));
-    YAZ_CHECK(tst_convert(cd, "@\xa4",  "\xC2\xA4"));
-    YAZ_CHECK(tst_convert(cd, "\xa4",  "\xC2\xA4"));
-    YAZ_CHECK(tst_convert(cd, "@\xe5", "\xEA\x9C\xB3"));
-    YAZ_CHECK(tst_convert(cd, "@\xc5.", "\xEA\x9C\xB2" "."));
+    YAZ_CHECK(tst_convert(cd, "@\xa4",  UTF8_CURRENCY_SIGN));
+    YAZ_CHECK(tst_convert(cd, "\xa4",  UTF8_CURRENCY_SIGN));
+    YAZ_CHECK(tst_convert(cd, "@\xe5", UTF8_LATIN_Aa));
+    YAZ_CHECK(tst_convert(cd, "@\xc5.", UTF8_LATIN_AA "."));
 
-    YAZ_CHECK(tst_convert(cd, "@a733",  "\xEA\x9C\xB3"));
-    YAZ_CHECK(tst_convert(cd, "@a732.",  "\xEA\x9C\xB2" "."));
+    YAZ_CHECK(tst_convert(cd, "@a733",  UTF8_LATIN_Aa));
+    YAZ_CHECK(tst_convert(cd, "@a732.",  UTF8_LATIN_AA "."));
 
-    YAZ_CHECK(tst_convert(cd, "a@03BBb", "a\xce\xbb" "b")); /* lambda */
+    YAZ_CHECK(tst_convert(cd, "a@03BBb", "a" UTF8_LOWERCASE_LAMBDA "b"));
 
-    /* result SHOULD be:  "a\xCC\x82\xCC\x81" */
-    YAZ_CHECK(tst_convert(cd,  "@0301@0302a", "\xCC\x81\xCC\x82" "a"));
+    YAZ_CHECK(tst_convert(cd,  "@0301@0302a", "a" UTF8_CIRCUMFLEX UTF8_ACUTE));
+    YAZ_CHECK(tst_convert(cd,  "@0302@0301a", "a" UTF8_ACUTE UTF8_CIRCUMFLEX));
+    YAZ_CHECK(tst_convert(cd, "0@0302@0301ab",
+                          "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b"));
+
+    /** TILDE (none) */
+    YAZ_CHECK(tst_convert(cd, "@0303", UTF8_TILDE));
+
+    /** TILDE a - maps into Latin-1 range */
+    YAZ_CHECK(tst_convert(cd, "a@0303", "a" UTF8_TILDE));
+
+    /** TILDE Y (no reverse here) */
+    YAZ_CHECK(tst_convert(cd, "Y@0303", "Y" UTF8_TILDE));
+
+    /** ARING (NFC) */
+    YAZ_CHECK(tst_convert(cd, "\xC5", UTF8_ARING));
 
     yaz_iconv_close(cd);
 }
@@ -727,22 +755,37 @@ static void tst_utf8_to_danmarc(void)
 
     YAZ_CHECK(tst_convert(cd, "*",  "@*"));
     YAZ_CHECK(tst_convert(cd, "@", "@@"));
-    YAZ_CHECK(tst_convert(cd, "\xC2\xA4", "\xa4"));
+    YAZ_CHECK(tst_convert(cd, UTF8_CURRENCY_SIGN, "\xa4"));
 
-    YAZ_CHECK(tst_convert(cd, "a\xc3\xa5" "b", "a\xe5" "b")); /* aring */
-    YAZ_CHECK(tst_convert(cd, "a\xce\xbb" "b", "a@03BBb")); /* lambda */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_aRING "b", "a\xe5" "b")); /* aring */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_LOWERCASE_LAMBDA "b", "a@03BBb"));
 
-    YAZ_CHECK(tst_convert(cd, "\xEA\x9C\xB2" ".", "@\xc5."));
-    YAZ_CHECK(tst_convert(cd, "\xEA\x9C\xB3", "@\xe5"));
+    YAZ_CHECK(tst_convert(cd, UTF8_LATIN_AA ".", "@\xc5."));
+    YAZ_CHECK(tst_convert(cd, UTF8_LATIN_Aa, "@\xe5"));
 
-    YAZ_CHECK(tst_convert(cd, "a\xCC\x82\xCC\x81", "@0301@0302a"));
-    YAZ_CHECK(tst_convert(cd, "a\xCC\x81\xCC\x82", "@0302@0301a"));
-    YAZ_CHECK(tst_convert(cd, "0a\xCC\x81\xCC\x82" "b", "0@0302@0301ab"));
+    /** combining chars.. that should be reversed */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "@0301@0302a"));
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_ACUTE UTF8_CIRCUMFLEX, "@0302@0301a"));
+    YAZ_CHECK(tst_convert(cd, "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b",
+                          "0@0302@0301ab"));
+
+    /** TILDE (none) */
+    YAZ_CHECK(tst_convert(cd, UTF8_TILDE, "@0303"));
+
+    /** TILDE a - maps into Latin-1 range */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_TILDE, "\xE3"));
+
+    /** TILDE Y (no reverse here) */
+    YAZ_CHECK(tst_convert(cd, "Y" UTF8_TILDE, "Y@0303"));
+
+    /** ARING (NFD) */
+    YAZ_CHECK(tst_convert(cd, "A" UTF8_RING_ABOVE, "\xC5"));
+
+    /** ARING (NFC) */
+    YAZ_CHECK(tst_convert(cd, UTF8_ARING, "\xC5"));
 
     yaz_iconv_close(cd);
 }
-
-
 
 int main (int argc, char **argv)
 {
