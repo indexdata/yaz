@@ -97,6 +97,7 @@ static unsigned long read_danmarc_comb(yaz_iconv_t cd,
         data->no_read[data->sz] = *no_read;
         data->comp[data->sz++] = x;
         inp += *no_read;
+        inbytesleft -= *no_read;
     }
     return x;
 }
