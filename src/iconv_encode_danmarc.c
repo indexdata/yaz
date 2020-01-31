@@ -104,13 +104,6 @@ static size_t flush_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
             w->sz = 0;
         }
     }
-    if (w->base_char && w->sz == 1 && w->comp[0] == 0x303)
-    {  /* don't swap tilde, so write base_char in this special case */
-        size_t r = write1(cd, w->base_char, outbuf, outbytesleft);
-        if (r)
-            return r; /* if we fail base_char is still there.. */
-        w->base_char = 0;
-    }
     /* combining characters in reverse */
     while (w->sz > 0)
     {
@@ -137,7 +130,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
     struct encoder_data *w = (struct encoder_data *) e->data;
 
     /* check for combining characters */
-    if (x >= 0x300 && x <= 0x36F)
+    if ((x >= 0x300 && x <= 0x36F) || (x >= 0xFE20 && x <= 0xFE26))
     {
         w->comp[w->sz++] = x;
         if (w->sz < MAX_COMP)
