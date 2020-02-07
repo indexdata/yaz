@@ -34,17 +34,25 @@ static unsigned long read_useq(yaz_iconv_t cd,
                                size_t inbytesleft, size_t *no_read)
 {
     static unsigned long u_seq[] = {
-        0xd9, 0x332,
-        0xeb, 0xfe20,
-        0xec, 0xfe21,
-        0xf7, 0x326,
-        0xf8, 0x31c,
-        0xf9, 0x32e,
-        0xfa, 0xfe22,
-        0xfc, 0x308,
-        0xfd, 0xf0fd,
-        0xfe, 0xf0fe,
-        0xff, 0xf0ff,
+        0xA7, 0x2b9,
+        0xAE, 0x2bc,
+        0xB0, 0x2bb,
+        0xB7, 0x2ba,
+        0xD8, 0x2014, /* Note 13 */
+        0xD9, 0x2191, /* Note 14 */
+        0xDA, 0x2193, /* Note 15 */
+        0xE0, 0x309,
+        0xEB, 0xfe20, /* Note 20 */
+        0xEC, 0xfe21, /* Note 21 */
+        0xF7, 0x326,
+        0xF8, 0x31c,
+        0xF9, 0x32e,
+        0xFA, 0xfe22, /* Note 26 */
+        /* 0xFB Note 27 */
+        0xFC, 0x308,
+        0xFD, 0xf0fd,
+        0xFE, 0xf0fe,
+        0xFF, 0xf0ff,
         0};
     int i;
     unsigned long x;
@@ -162,7 +170,7 @@ static unsigned long read_danmarc_comb(yaz_iconv_t cd,
             x = perform_swap(x);
         if (data->sz >= MAX_COMP)
             break;
-        if (!((x >= 0x300 && x <= 0x36F) || (x >= 0xFE20 && x <= 0xFE26)))
+        if (!yaz_danmarc_is_combining(x))
             break;
         data->no_read[data->sz] = *no_read;
         data->comp[data->sz++] = x;
@@ -204,6 +212,25 @@ yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
     return 0;
 }
 
+int yaz_danmarc_is_combining(unsigned long x)
+{
+    /* https://en.wikipedia.org/wiki/Combining_character */
+    int ranges[] = {
+        0x300, 0x36F,
+        0x1AB0, 0x1AFF,
+        0x1DC0, 0x1DFF,
+        0x20D0, 0x20FF,
+        0xFE20, 0xFE2F,
+        0};
+    int i = 0;
+    while (ranges[i] != 0 && x >= ranges[i])
+    {
+        if (x <= ranges[i+1])
+            return 1;
+        i += 2;
+    }
+    return 0;
+}
 
 /*
  * Local variables:

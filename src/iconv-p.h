@@ -108,6 +108,8 @@ yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
 yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
                                         yaz_iconv_decoder_t d);
 
+int yaz_danmarc_is_combining(unsigned long ch);
+
 #endif
 /*
  * Local variables:

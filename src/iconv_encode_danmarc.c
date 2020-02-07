@@ -130,7 +130,7 @@ static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
     struct encoder_data *w = (struct encoder_data *) e->data;
 
     /* check for combining characters */
-    if ((x >= 0x300 && x <= 0x36F) || (x >= 0xFE20 && x <= 0xFE26))
+    if (yaz_danmarc_is_combining(x))
     {
         w->comp[w->sz++] = x;
         if (w->sz < MAX_COMP)
