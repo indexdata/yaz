@@ -1,0 +1,44 @@
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
+  <leader>00689nam a22002054  450 </leader>
+  <controlfield tag="001">20285389</controlfield>
+  <controlfield tag="005">20180924145927.0</controlfield>
+  <controlfield tag="008">000000s1992    dk ||||       00| | dan d</controlfield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">tegnsæt test, diakritiske tegn.</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="b">[S.n.].</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">:;̲;̀;́;̂~;;̄;̆;̇;̈;̌;̊;︠;︡;̕;̋;̧;̨;̣;̳;̦;̈</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">aigu: á;Á;é;É;í;Í;ó;Ó;ú;Ú;ý;Ý;ń;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">grave: à;À;è;È;ì;Ì;ò;Ò;ù;Ù;ǹ;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">circonflex: â;Â;ê;Ê;î;Î;ô;Ô;û;Û;n̂;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">tilde: ã;Ã;ñ;Ñ;õ;Õ;~m;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">trema: ë;Ë;ı̈;Ï;ÿ;n̈;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">cedille: ç;Ç;ņ;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">omlyd: ä;ë;n̈;</subfield>
+  </datafield>
+  <datafield tag="505" ind1="0" ind2=" ">
+    <subfield code="a">snabel a: @</subfield>
+  </datafield>
+  <datafield tag="740" ind1="0" ind2=" ">
+    <subfield code="a">snabel @ snabel.</subfield>
+  </datafield>
+</record>
+</collection>

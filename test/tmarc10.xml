@@ -1,0 +1,39 @@
+<collection xmlns="http://www.indexdata.com/turbomarc">
+<r>
+  <l>02924nam a22001810  450 </l>
+  <c001>21528773</c001>
+  <c005>20180924151503.0</c005>
+  <c008>000000s1996    dk ||||       00| | dan d</c008>
+  <d084 i1=" " i2=" ">
+    <sa>08.0000</sa>
+    <s2>z</s2>
+  </d084>
+  <d245 i1="0" i2="0">
+    <sa>Tegnsæt-test til Indvandrerbiblioteket.</sa>
+  </d245>
+  <d260 i1=" " i2=" ">
+    <sb>[S.n.].</sb>
+  </d260>
+  <d500 i1=" " i2=" ">
+    <sa>, ơ, Ơ, ư, Ư, slavisk bødt tegn: ʹt, ʹ, ʹd, ʹT, ʹD,nyt:skema 7: ↑. ↓, \, skema 1: Γ, Δ, Θ, Λ, Ξ, Π, Σ, Φ, Ω, α, β, γ, δ, ε, ζ , η, θ, ι, κ, λ, μ, ν, ξ, ο, π, ρ, σ, τ, υ, φ, χ, Ψ, ω, ς.</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>(under stjerne) eller à (ved aigu)?, aigu: á, â, ñ, dobbelt tilde: ~%Tn, ā NYT: slavisk hårdt tegn: ʺ, ʺo, ʺa, ʺO. ayn: ta%Ya. dobbelt tilde: ã%Ta, ~%T, ñ%Tn. ligatur: a︠a︡. aigu: med tegn (nederste) á, &apos;A, ú, í, &apos;I, ó, Ó, ý, Ý, é, É aigu med  ̈á, ú, í, é. grave med tegn: à, À, ù, Ù, ỳ ò, Ò, ì, Ì,è, È med .̈</sa>
+  </d500>
+  <d500 i1=" " i2=" ">
+    <sa>ğ, ȧ, ä, hacek: ǎ, å, ligatur: a︠ a︡, k̕, ő, ç Ç, s̜, a̐, NYT skema 7: ↑, ↓, \, dobbelt understreg: k̳.</sa>
+  </d500>
+  <d504 i1=" " i2=" ">
+    <sa>skema 4: á, &apos;A, é, É, í, &apos;I, ó, ý, Ý, Á, Í, Ú, grave: à, À, è, È, ì, Ì, ò,NYT: aigu: Á, Ú el &apos;A, &apos;U. hård blank: a a. promille: ‰. højrepil: →. 0303: ù, Ù, \ (backslash), promille: ‰,  obb. aigu: ő, Ő, ű, Ű, ợ, ự, ở, ớ.</sa>
+  </d504>
+  <d505 i1="0" i2=" ">
+    <sa>a̮, højrekrog: ų ǫ, ṭ, t̤, t̥, k̳, Ë (trema), ḁ, a̳, a̦, ë</sa>
+  </d505>
+  <d520 i1="8" i2=" ">
+    <sa>a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r ,s, t, u, v, w, x, y, z, æ ,ø, å, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Æ, Ø, Å, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, +, !, &quot;a&quot;, #, , %, &amp;, /, (, ), =. ?, á, à, ü, £, $, [, ], {, }, â, ñ, &lt;, &gt;, \, ., -, ;, :, ,̲ ꜳ, Ꜳ, ü, Ü, ä, Ä, ö, Ö, ß, ĸ, ð, đ, Ð, þ, Þ, œ, Œ, ł, Ł, ı % a̮, ą, ạ, a̤, ḁ, a̳, a̦, ë, , Ò, &apos;u, Ù, ỳ, circonflex: â, Â, ê, Ê, î, Î, ô, Ô, û, Û, tilde: ã, Ã, ñ, Ñ, õ, Õ, ë, Ë, Ï, ı̈, ÿ, Ë, Ï, ä, ç Ç, ş, blank: a a, !, &quot;, &apos;, (, ), ,, -, ., /, :, ;, ?, », «, [, ], {, }, ¿, ¡, —,  ̉ủ, a a, skema 6: #, $, %, &amp;, *, +, &lt;, &gt;, =, ≠, ·, ♭, ®, ±, £, aragraf kan ikke °, †, ‰, ∫, ∞, √, ÷, →, ×, skema 7: ↑. ↓, \, skema 1: Γ, Δ, Θ, Λ, Ξ, Π, Σ, Φ, Ω, α, β, γ, δ, ε, ζ, η, θ, ι, κ, λ, μ, ν, ξ, ο, π, ρ, σ, τ, υ, φ, χ, Ψ, ω, ς vietn: Ả, ơ, ư, ỏ, ờ, ừ, ớ, ứ, Ð, đ.</sa>
+  </d520>
+  <d546 i1=" " i2=" ">
+    <sa>slavisk hårdt tegn: #2, ʺo, ʺO, alif: ʼ, ayn: ʻa, taʻa,  ̲, grave: &apos;a NYT: vietn: Ả, ơ, ư, ỏ, ờ, ừ, ớ, ứ, Ð, đ.</sa>
+  </d546>
+</r>
+</collection>

@@ -23,7 +23,7 @@ binmarc_convert() {
     REVERT_FORMAT="$2"
     PREFIX="$3"
     SUFFIX="$4"
-    for f in ${srcdir}/marc[0-9].marc; do
+    for f in ${srcdir}/marc[0-9].marc ${srcdir}/marc[1-9][0-9].marc; do
         fb=`basename ${f} .marc`
         CHR=`cat ${srcdir}/${fb}.chr`
         NEW=${PREFIX}${fb}.new.${SUFFIX}

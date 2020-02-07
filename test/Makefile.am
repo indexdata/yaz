@@ -43,15 +43,16 @@ dist-hook:
 	cp $(srcdir)/cql/*.err $(srcdir)/cql/*.out $(distdir)/cql
 	mkdir -p $(distdir)/cql2pqf
 	cp $(srcdir)/cql2pqf/*.err $(srcdir)/cql2pqf/*.out $(distdir)/cql2pqf
-	cp $(srcdir)/marc?.chr $(distdir)
-	cp $(srcdir)/marc?.marc $(distdir)
-	cp $(srcdir)/marc?.xml $(distdir)
-	cp $(srcdir)/marc?.json $(distdir)
-	cp $(srcdir)/marc?.json.marc $(distdir)
+	cp $(srcdir)/marc[0-9]*.chr $(distdir)
+	cp $(srcdir)/marc[0-9]*.marc $(distdir)
+	cp $(srcdir)/marc[0-9]*.marc $(distdir)
+	cp $(srcdir)/marc[0-9]*.xml $(distdir)
+	cp $(srcdir)/marc[0-9]*.json $(distdir)
+	cp $(srcdir)/marc[0-9]*.json.marc $(distdir)
 	cp $(srcdir)/*.xml.marc $(distdir)
-	cp $(srcdir)/xml2marc?.xml $(distdir)
-	cp $(srcdir)/tmarc?.xml $(distdir)
-	cp $(srcdir)/xml2tmarc?.xml $(distdir)
+	cp $(srcdir)/xml2marc[0-9]*.xml $(distdir)
+	cp $(srcdir)/tmarc[0-9]*.xml $(distdir)
+	cp $(srcdir)/xml2tmarc[0-9]*.xml $(distdir)
 
 # Rule for generating codecs for our small ASN.1 spec
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)

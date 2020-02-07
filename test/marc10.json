@@ -1,0 +1,158 @@
+{
+	"leader":"02924nam  22001810  450 ",
+	"fields":
+	[
+		{
+			"001":"21528773"
+		},
+		{
+			"005":"20180924151503.0"
+		},
+		{
+			"008":"000000s1996    dk ||||       00| | dan d"
+		},
+		{
+			"084":
+			{
+				"subfields":
+				[
+					{
+						"a":"08.0000"
+					},
+					{
+						"2":"z"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"245":
+			{
+				"subfields":
+				[
+					{
+						"a":"Tegnsæt-test til Indvandrerbiblioteket."
+					}
+				],
+				"ind1":"0",
+				"ind2":"0"
+			}
+
+		},
+		{
+			"260":
+			{
+				"subfields":
+				[
+					{
+						"b":"[S.n.]."
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":", ơ, Ơ, ư, Ư, slavisk bødt tegn: ʹt, ʹ, ʹd, ʹT, ʹD,nyt:skema 7: ↑. ↓, \\, skema 1: Γ, Δ, Θ, Λ, Ξ, Π, Σ, Φ, Ω, α, β, γ, δ, ε, ζ , η, θ, ι, κ, λ, μ, ν, ξ, ο, π, ρ, σ, τ, υ, φ, χ, Ψ, ω, ς."
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"(under stjerne) eller à (ved aigu)?, aigu: á, â, ñ, dobbelt tilde: ~%Tn, ā NYT: slavisk hårdt tegn: ʺ, ʺo, ʺa, ʺO. ayn: ta%Ya. dobbelt tilde: ã%Ta, ~%T, ñ%Tn. ligatur: a︠a︡. aigu: med tegn (nederste) á, 'A, ú, í, 'I, ó, Ó, ý, Ý, é, É aigu med  ̈á, ú, í, é. grave med tegn: à, À, ù, Ù, ỳ ò, Ò, ì, Ì,è, È med .̈"
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"500":
+			{
+				"subfields":
+				[
+					{
+						"a":"ğ, ȧ, ä, hacek: ǎ, å, ligatur: a︠ a︡, k̕, ő, ç Ç, s̜, a̐, NYT skema 7: ↑, ↓, \\, dobbelt understreg: k̳."
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"504":
+			{
+				"subfields":
+				[
+					{
+						"a":"skema 4: á, 'A, é, É, í, 'I, ó, ý, Ý, Á, Í, Ú, grave: à, À, è, È, ì, Ì, ò,NYT: aigu: Á, Ú el 'A, 'U. hård blank: a a. promille: ‰. højrepil: →. 0303: ù, Ù, \\ (backslash), promille: ‰,  obb. aigu: ő, Ő, ű, Ű, ợ, ự, ở, ớ."
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		},
+		{
+			"505":
+			{
+				"subfields":
+				[
+					{
+						"a":"a̮, højrekrog: ų ǫ, ṭ, t̤, t̥, k̳, Ë (trema), ḁ, a̳, a̦, ë"
+					}
+				],
+				"ind1":"0",
+				"ind2":" "
+			}
+
+		},
+		{
+			"520":
+			{
+				"subfields":
+				[
+					{
+						"a":"a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r ,s, t, u, v, w, x, y, z, æ ,ø, å, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Æ, Ø, Å, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, +, !, \"a\", #, , %, &, /, (, ), =. ?, á, à, ü, £, $, [, ], {, }, â, ñ, <, >, \\, ., -, ;, :, ,̲ ꜳ, Ꜳ, ü, Ü, ä, Ä, ö, Ö, ß, ĸ, ð, đ, Ð, þ, Þ, œ, Œ, ł, Ł, ı % a̮, ą, ạ, a̤, ḁ, a̳, a̦, ë, , Ò, 'u, Ù, ỳ, circonflex: â, Â, ê, Ê, î, Î, ô, Ô, û, Û, tilde: ã, Ã, ñ, Ñ, õ, Õ, ë, Ë, Ï, ı̈, ÿ, Ë, Ï, ä, ç Ç, ş, blank: a a, !, \", ', (, ), ,, -, ., /, :, ;, ?, », «, [, ], {, }, ¿, ¡, —,  ̉ủ, a a, skema 6: #, $, %, &, *, +, <, >, =, ≠, ·, ♭, ®, ±, £, aragraf kan ikke °, †, ‰, ∫, ∞, √, ÷, →, ×, skema 7: ↑. ↓, \\, skema 1: Γ, Δ, Θ, Λ, Ξ, Π, Σ, Φ, Ω, α, β, γ, δ, ε, ζ, η, θ, ι, κ, λ, μ, ν, ξ, ο, π, ρ, σ, τ, υ, φ, χ, Ψ, ω, ς vietn: Ả, ơ, ư, ỏ, ờ, ừ, ớ, ứ, Ð, đ."
+					}
+				],
+				"ind1":"8",
+				"ind2":" "
+			}
+
+		},
+		{
+			"546":
+			{
+				"subfields":
+				[
+					{
+						"a":"slavisk hårdt tegn: #2, ʺo, ʺO, alif: ʼ, ayn: ʻa, taʻa,  ̲, grave: 'a NYT: vietn: Ả, ơ, ư, ỏ, ờ, ừ, ớ, ứ, Ð, đ."
+					}
+				],
+				"ind1":" ",
+				"ind2":" "
+			}
+
+		}
+	]
+}
