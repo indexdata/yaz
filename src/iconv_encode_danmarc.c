@@ -26,6 +26,7 @@ struct encoder_data
     unsigned long comp[MAX_COMP];
     size_t sz;
     unsigned long base_char;
+    int dia;
 };
 
 static size_t write1(yaz_iconv_t cd, unsigned long x,
@@ -107,7 +108,10 @@ static size_t flush_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
     /* combining characters in reverse */
     while (w->sz > 0)
     {
-        size_t r = write1(cd, w->comp[w->sz - 1], outbuf, outbytesleft);
+        unsigned long x = w->comp[w->sz - 1];
+        if (w->dia)
+            x = yaz_danmarc_swap_to_danmarc(x);
+        size_t r = write1(cd, x, outbuf, outbytesleft);
         if (r)
             return r;
         w->sz--;
@@ -164,6 +168,19 @@ yaz_iconv_encoder_t yaz_danmarc_encoder(const char *tocode,
     {
         struct encoder_data *data = (struct encoder_data *)
             xmalloc(sizeof(*data));
+        data->dia = 0;
+        e->data = data;
+        e->write_handle = write_danmarc;
+        e->flush_handle = flush_danmarc;
+        e->init_handle = init_danmarc;
+        e->destroy_handle = destroy_danmarc;
+        return e;
+    }
+    if (!yaz_matchstr(tocode, "danmarc2dia"))
+    {
+        struct encoder_data *data = (struct encoder_data *)
+            xmalloc(sizeof(*data));
+        data->dia = 1;
         e->data = data;
         e->write_handle = write_danmarc;
         e->flush_handle = flush_danmarc;

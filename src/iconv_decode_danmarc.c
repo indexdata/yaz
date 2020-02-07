@@ -127,22 +127,33 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
     return x;
 }
 
-static unsigned long perform_swap(unsigned long x)
+static unsigned long swap_seq[] = {
+    0x5e, 0x302,
+    0x5f, 0x332,
+    0x60, 0x300,
+    0xa8, 0x308,
+    0xaf, 0x304,
+    0xb4, 0x301,
+    0xb8, 0x327,
+    0x02c7, 0x30c,
+    0x02d8, 0x306,
+    0x02da, 0x30a,
+    0x02db, 0x328,
+    0x02dd, 0x30b,
+    0
+};
+
+unsigned long yaz_danmarc_swap_to_danmarc(unsigned long x)
 {
-    static unsigned long swap_seq[] = {
-        0x5e, 0x302,
-        0x5f, 0x332,
-        0x60, 0x300,
-        0xa8, 0x308,
-        0xaf, 0x304,
-        0xb4, 0x301,
-        0xb8, 0x327,
-        0x02c7, 0x30c,
-        0x02d8, 0x306,
-        0x02da, 0x30a,
-        0x02db, 0x328,
-        0x02dd, 0x30b,
-        0};
+    int i;
+    for (i = 0; swap_seq[i]; i += 2)
+        if (swap_seq[i+1] == x)
+            return swap_seq[i];
+    return x;
+}
+
+static unsigned long yaz_danmarc_swap_to_utf8(unsigned long x)
+{
     int i;
     for (i = 0; swap_seq[i]; i += 2)
         if (swap_seq[i] == x)
@@ -167,7 +178,7 @@ static unsigned long read_danmarc_comb(yaz_iconv_t cd,
     {
         x = read_danmarc(cd, d, inp, inbytesleft, no_read);
         if (x)
-            x = perform_swap(x);
+            x = yaz_danmarc_swap_to_utf8(x);
         if (data->sz >= MAX_COMP)
             break;
         if (!yaz_danmarc_is_combining(x))

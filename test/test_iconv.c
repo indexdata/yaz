@@ -748,14 +748,8 @@ static void tst_danmarc_to_utf8(void)
     yaz_iconv_close(cd);
 }
 
-static void tst_utf8_to_danmarc(void)
+static void tst_utf8_to_danmarc_common(yaz_iconv_t cd)
 {
-    yaz_iconv_t cd = yaz_iconv_open("danmarc", "utf-8");
-
-    YAZ_CHECK(cd);
-    if (!cd)
-        return;
-
     YAZ_CHECK(tst_convert(cd, "ax", "ax"));
 
     YAZ_CHECK(tst_convert(cd, "a@b", "a@@b"));
@@ -770,12 +764,6 @@ static void tst_utf8_to_danmarc(void)
 
     YAZ_CHECK(tst_convert(cd, UTF8_LATIN_AA ".", "@\xc5."));
     YAZ_CHECK(tst_convert(cd, UTF8_LATIN_Aa, "@\xe5"));
-
-    /** combining chars.. that should be reversed */
-    YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "@0301@0302a"));
-    YAZ_CHECK(tst_convert(cd, "a" UTF8_ACUTE UTF8_CIRCUMFLEX, "@0302@0301a"));
-    YAZ_CHECK(tst_convert(cd, "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b",
-                          "0@0302@0301ab"));
 
     /** TILDE (none) */
     YAZ_CHECK(tst_convert(cd, UTF8_TILDE, "@0303"));
@@ -792,8 +780,51 @@ static void tst_utf8_to_danmarc(void)
     /** ARING (NFC) */
     YAZ_CHECK(tst_convert(cd, UTF8_ARING, "\xC5"));
 
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX, "\xE2"));
+}
+
+
+static void tst_utf8_to_danmarc(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("danmarc", "utf-8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    tst_utf8_to_danmarc_common(cd);
+
+    YAZ_CHECK(tst_convert(cd, "y" UTF8_CIRCUMFLEX, "@0302y"));
+
+    /** combining chars.. that should be reversed */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "@0301@0302a"));
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_ACUTE UTF8_CIRCUMFLEX, "@0302@0301a"));
+    YAZ_CHECK(tst_convert(cd, "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b",
+                          "0@0302@0301ab"));
+
     yaz_iconv_close(cd);
 }
+
+static void tst_utf8_to_danmarc2(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("danmarc2dia", "utf-8");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    tst_utf8_to_danmarc_common(cd);
+
+    YAZ_CHECK(tst_convert(cd, "y" UTF8_CIRCUMFLEX, "^y"));
+
+    /** combining chars.. that should be reversed */
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "\xB4^a"));
+    YAZ_CHECK(tst_convert(cd, "a" UTF8_ACUTE UTF8_CIRCUMFLEX, "^\xB4" "a"));
+    YAZ_CHECK(tst_convert(cd, "0a" UTF8_ACUTE UTF8_CIRCUMFLEX "b" , "0^\xB4" "ab"));
+
+    yaz_iconv_close(cd);
+}
+
 
 int main (int argc, char **argv)
 {
@@ -816,6 +847,7 @@ int main (int argc, char **argv)
 
     tst_danmarc_to_utf8();
     tst_utf8_to_danmarc();
+    tst_utf8_to_danmarc2();
 
     tst_latin1_to_marc8();
 
