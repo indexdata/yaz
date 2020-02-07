@@ -113,7 +113,7 @@ static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
     for (i = 1; i <= indicator_length; i++)
     {
         struct _xmlAttr *attr;
-        char attrname[12];
+        char attrname[16];
         sprintf(attrname, "%s%d", turbo ? "i" : "ind", i);
         for (attr = ptr->properties; attr; attr = attr->next)
         {
