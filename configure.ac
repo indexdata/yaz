@@ -413,6 +413,7 @@ doc/common/print.dsl
 etc/Makefile
 yaz-config
 yaz.pc
+yaz-icu.pc
 yaz-server.pc
 Doxyfile
 win/version.nsi
