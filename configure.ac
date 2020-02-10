@@ -375,7 +375,7 @@ dnl
 dnl
 AC_CHECK_ICU([3.4],[
 	if test "$xml_enabled" = "true"; then
-	    ICU_CPPFLAGS="$ICU_CPPFLAGS -D YAZ_HAVE_ICU=1"
+	    ICU_CPPFLAGS="$ICU_CPPFLAGS -DYAZ_HAVE_ICU=1"
 	else
 	    ICU_CPPFLAGS=""
 	    AC_MSG_WARN([ICU support disabled because XML support is unavailable])
