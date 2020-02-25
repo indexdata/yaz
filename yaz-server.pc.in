@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: YAZ server
+Version: @VERSION@
+Description: YAZ server library for building Z39.50 applications
+Requires: yaz libexslt
+Libs: -L${libdir} -lyaz_server @PTHREAD_LIBS@
