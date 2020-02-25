@@ -1,5 +1,5 @@
 debian/tmp/usr/include/yaz
-debian/tmp/usr/lib/*/pkgconfig/yaz.pc
+debian/tmp/usr/lib/*/pkgconfig/*.pc
 debian/tmp/usr/lib/*/libyaz*.a
 debian/tmp/usr/lib/*/libyaz*.so
 debian/tmp/usr/bin/yaz-config
