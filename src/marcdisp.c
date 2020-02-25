@@ -1194,7 +1194,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                 cap_node = n;
                 break;
             }
-            wrbuf_printf(wr_dir, "%.3s", tag);
+            wrbuf_printf(wr_dir, "%3.3s", tag);
             wrbuf_printf(wr_dir, "%0*d", length_data_entry, data_length);
             wrbuf_printf(wr_dir, "%0*d", length_starting, data_offset);
             data_offset += data_length;
