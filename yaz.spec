@@ -153,7 +153,7 @@ rm -fr ${RPM_BUILD_ROOT}
 %{_bindir}/yaz-config
 %{_bindir}/yaz-asncomp
 %{_includedir}/yaz
-%{_libdir}/pkgconfig/yaz.pc
+%{_libdir}/pkgconfig/*.pc
 %{_libdir}/*.so
 %{_libdir}/*.a
 %{_datadir}/aclocal/yaz.m4
