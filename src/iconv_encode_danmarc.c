@@ -176,7 +176,7 @@ yaz_iconv_encoder_t yaz_danmarc_encoder(const char *tocode,
         e->destroy_handle = destroy_danmarc;
         return e;
     }
-    if (!yaz_matchstr(tocode, "danmarc2dia"))
+    if (!yaz_matchstr(tocode, "danmarc2"))
     {
         struct encoder_data *data = (struct encoder_data *)
             xmalloc(sizeof(*data));

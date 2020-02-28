@@ -210,7 +210,8 @@ yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
                                         yaz_iconv_decoder_t d)
 
 {
-    if (!yaz_matchstr(fromcode, "danmarc"))
+    if (!yaz_matchstr(fromcode, "danmarc")
+        || !yaz_matchstr(fromcode, "danmarc2"))
     {
         struct decoder_data *data = (struct decoder_data *)
             xmalloc(sizeof(*data));
