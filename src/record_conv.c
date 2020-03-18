@@ -1226,6 +1226,17 @@ static int yaz_record_conv_record_rule(yaz_record_conv_t p,
     return ret;
 }
 
+const char *yaz_record_get_output_charset(yaz_record_conv_t p)
+{
+    struct yaz_record_conv_rule *r = p->rules;
+    if (r && r->type->construct == construct_marc)
+    {
+        struct marc_info *mi = r->info;
+        return mi->output_charset;
+    }
+    return 0;
+}
+
 int yaz_record_conv_opac_record(yaz_record_conv_t p,
                                 Z_OPACRecord *input_record,
                                 WRBUF output_record)
@@ -1248,10 +1259,13 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
 
         if (yaz_opac_check_marc21_coding(input_charset, input_record))
             input_charset = "utf-8";
-        cd = yaz_iconv_open(mi->output_charset, input_charset);
+        cd = yaz_iconv_open("utf-8", input_charset);
 
         wrbuf_rewind(p->wr_error);
         yaz_marc_xml(mt, mi->output_format_mode);
+
+        if (mi->leader_spec)
+            yaz_marc_leader_spec(mt, mi->leader_spec);
 
         yaz_marc_iconv(mt, cd);
 
