@@ -7631,7 +7631,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
             <para>
              Specifies a modification to the leader for the resulting output
              record. The <replaceable>leaderspec</replaceable> is a comma
-             sepaated list of pos=value pairs, where pos is an integer offset
+             separated list of pos=value pairs, where pos is an integer offset
              (0 - 23) for leader. Value is either a quoted string or an integer
              (character value in decimal).
              For example, to set leader at offset 9 to a,
