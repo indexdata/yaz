@@ -1,3 +1,18 @@
+--- 5.30.0 2020/03/18
+
+Extend the record conversion routines to handle OPAC encoding
+with outputcharset and leaderspec. Example rule:
+```
+  <retrieval syntax="opac" name="OP2">
+   <backend syntax="opac" name="F">
+      <marc leaderspec="9=' '" inputformat="marc" outputformat="marcxml"
+     inputcharset="utf-8" outputcharset="marc-8"/>
+   </backend>
+ </retrieval>
+```
+
+For this to `work yaz_record_get_output_charset` is defined. YAZ-927
+
 --- 5.29.0 2020/02/28
 
 Several fixes for danmarc(2) charset encoding and decoding.
