@@ -31,7 +31,7 @@
 #include <unistd.h>
 #endif
 
-#define NO_MARC_RECORDS 24
+#define NO_MARC_RECORDS 25
 
 char *marc_records[NO_MARC_RECORDS] = {
 
@@ -1549,7 +1549,30 @@ char *marc_records[NO_MARC_RECORDS] = {
   "\x1F\x61\x31\x2E\x20\x75\x64\x67\x61\x76\x65\x2C\x20\x34\x2E\x20"
   "\x6F\x70\x6C\x61\x67\x1E\x30\x30\x1F\x63\x31\x39\x38\x38\x1E\x30"
   "\x30\x1F\x62\x30\x35\x36\x37\x35\x30\x33\x30\x1E\x30\x30\x1F\x63"
-  "\x44\x42\x46\x38\x38\x34\x32\x1E\x1D"
+  "\x44\x42\x46\x38\x38\x34\x32\x1E\x1D",
+  "00366nam a220016"
+  "98a 450000100130"
+  "0000003000400013"
+  "0050017000170080"
+  "0410003401000170"
+  "0179040001300075"
+  "0500012000881000"
+  "0170010024500300"
+  "0117260001200147"
+  "2630009001593000"
+  "01100168" "\x1E" "   1122"
+  "4466 " "\x1E" "DLC" "\x1E" "000000"
+  "00000000.0" "\x1E" "91071"
+  "0c19910701nju   "
+  "        00010 en"
+  "g  " "\x1E" "  " "\x1F" "aDLC" "\x1F" "cDLC"
+  "" "\x1E" "00" "\x1F" "a123-xyz" "\x1E" "10" "\x1F" ""
+  "aJack Collins" "\x1E" "10"
+  "" "\x1F" "aHow to program"
+  " a c\xC3\x98" "mpute" "\x1E" "1 " "\x1F" "a"
+  "Penguin" "\x1E" "  " "\x1F" "a8710"
+  "" "\x1E" "  " "\x1F" "ap. cm." "\x1E" "  " "\x1F" "a"
+  "   11224466 " "\x1E" "" "\x1D" ""
 };
 
 static char *marc_record0 =
@@ -1583,7 +1606,7 @@ char *dummy_marc_record(int num, ODR odr)
 {
     if (num < 1)
         return 0;
-    if (num >= NO_MARC_RECORDS)
+    if (num > NO_MARC_RECORDS)
     {
         char *p = odr_strdup(odr, marc_record0);
         sprintf(p + 279, "%-5d", num);
