@@ -15,7 +15,7 @@
 
 const char *cql_strerror(int code)
 {
-    return yaz_diag_to_str(code);
+    return yaz_diag_srw_str(code);
 }
 /*
  * Local variables:
