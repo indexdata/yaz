@@ -20,7 +20,7 @@
 #define UTF8_MACRON "\xCC\x84"
 #define UTF8_DIAERESIS "\xCC\x88"
 #define UTF8_RING_ABOVE "\xCC\x8A"
-
+#define UTF8_LOWLINE "\xCC\xB2"
 #define UTF8_ARING "\xC3\x85"
 #define UTF8_aRING "\xC3\xA5"
 #define UTF8_OSLASH "\xC3\x98"
@@ -720,6 +720,12 @@ static void tst_danmarc_to_utf8(void)
 
     YAZ_CHECK(tst_convert(cd, "a@03BBb", "a" UTF8_LOWERCASE_LAMBDA "b"));
 
+    YAZ_CHECK(tst_convert(cd, "@0302y", "y" UTF8_CIRCUMFLEX));
+    YAZ_CHECK(tst_convert(cd, "^y", "y" UTF8_CIRCUMFLEX));
+
+    YAZ_CHECK(tst_convert(cd, "@0332y", "y" UTF8_LOWLINE));
+    YAZ_CHECK(tst_convert(cd, "_y", "y" UTF8_LOWLINE));
+
     YAZ_CHECK(tst_convert(cd,  "@0301@0302a", "a" UTF8_CIRCUMFLEX UTF8_ACUTE));
     YAZ_CHECK(tst_convert(cd,  "@0302@0301a", "a" UTF8_ACUTE UTF8_CIRCUMFLEX));
     YAZ_CHECK(tst_convert(cd, "0@0302@0301ab",
@@ -795,6 +801,7 @@ static void tst_utf8_to_danmarc(void)
     tst_utf8_to_danmarc_common(cd);
 
     YAZ_CHECK(tst_convert(cd, "y" UTF8_CIRCUMFLEX, "@0302y"));
+    YAZ_CHECK(tst_convert(cd, "y" UTF8_LOWLINE, "@0332y"));
 
     /** combining chars.. that should be reversed */
     YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "@0301@0302a"));
@@ -807,7 +814,7 @@ static void tst_utf8_to_danmarc(void)
 
 static void tst_utf8_to_danmarc2(void)
 {
-    yaz_iconv_t cd = yaz_iconv_open("danmarc2dia", "utf-8");
+    yaz_iconv_t cd = yaz_iconv_open("danmarc2", "utf-8");
 
     YAZ_CHECK(cd);
     if (!cd)
@@ -816,6 +823,7 @@ static void tst_utf8_to_danmarc2(void)
     tst_utf8_to_danmarc_common(cd);
 
     YAZ_CHECK(tst_convert(cd, "y" UTF8_CIRCUMFLEX, "^y"));
+    YAZ_CHECK(tst_convert(cd, "y" UTF8_LOWLINE, "_y"));
 
     /** combining chars.. that should be reversed */
     YAZ_CHECK(tst_convert(cd, "a" UTF8_CIRCUMFLEX UTF8_ACUTE, "\xB4^a"));

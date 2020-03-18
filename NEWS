@@ -1,3 +1,13 @@
+--- 5.29.0 2020/02/28
+
+Several fixes for danmarc(2) charset encoding and decoding.
+ YAZ-923 YAZ-924
+
+Fix yaz-marcdump silently creates MARC-records with an invalid directory
+ YAZ-926
+
+Add pkg-config templates for YAZ ICU and YAZ server YAZ-925
+
 --- 5.28.0 2019/11/28
 
 Element-set is case sensitive for yaz_retrieval. The element-set
