@@ -676,11 +676,16 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         if (r == 0 && match_syntax &&
             !oid_oidcmp(match_syntax, yaz_oid_recsyn_opac))
         {
+            yaz_iconv_t cd = 0;
             yaz_marc_t mt = yaz_marc_create();
             Z_OPACRecord *opac = 0;
+
+            const char *output_charset = yaz_record_get_output_charset(rc);
+            if (output_charset)
+                cd = yaz_iconv_open(output_charset, "utf-8");
             if (yaz_xml_to_opac(mt, wrbuf_buf(output_record),
                                 wrbuf_len(output_record),
-                                &opac, 0 /* iconv */, rr->stream->mem, 0)
+                                &opac, cd, rr->stream->mem, 0)
                 && opac)
             {
                 rr->len = -1;
