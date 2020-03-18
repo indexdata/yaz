@@ -7605,8 +7605,15 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
              Encoding of input. For XML input formats, this need not
              be given, but for ISO2709 based input formats, this should
              be set to the encoding used. For MARC21 records, a common
-             inputcharset value  would be <literal>marc-8</literal>.
+             inputcharset value would be <literal>marc-8</literal>.
             </para>
+            <note>
+             <para>
+              If inputformat is <literal>marc</literal> and inputcharset
+              is <literal>marc-8</literal>, then effective inputcharset is
+              UTF-8 if leader position has value 'a' (MARC21 rule).
+             </para>
+            </note>
            </listitem>
           </varlistentry>
           <varlistentry>
@@ -7615,6 +7622,22 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
             <para>
              Encoding of output. If outputformat is XML based, it is
              strongly recommended to use <literal>utf-8</literal>.
+            </para>
+           </listitem>
+          </varlistentry>
+          <varlistentry>
+	   <term><literal>leaderspec</literal> (OPTIONAL)</term>
+           <listitem>
+            <para>
+             Specifies a modification to the leader for the resulting output
+             record. The <replaceable>leaderspec</replaceable> is a comma
+             sepaated list of pos=value pairs, where pos is an integer offset
+             (0 - 23) for leader. Value is either a quoted string or an integer
+             (character value in decimal).
+             For example, to set leader at offset 9 to a,
+             use <literal>9='a'</literal>.
+             This has same effect as <literal>-l</literal> for
+             <xref linkend="yaz-marcdump"/>.
             </para>
            </listitem>
           </varlistentry>
