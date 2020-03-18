@@ -68,7 +68,7 @@ static int match_v_next(xmlNode **ptr, const char *elem, NMEM nmem,
 }
 
 static int bibliographicRecord(yaz_marc_t mt, xmlNode *ptr, Z_External **ext,
-                               yaz_iconv_t cd, NMEM nmem, const Odr_oid *syntax)
+                               NMEM nmem, const Odr_oid *syntax)
 {
     int ret = 0;
     if (yaz_marc_read_xml(mt, ptr) == 0)
@@ -234,7 +234,7 @@ static int holdingsRecord(xmlNode *ptr, Z_HoldingsRecord **r, NMEM nmem)
 
 static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
                                Z_OPACRecord **dst,
-                               yaz_iconv_t cd, NMEM nmem,
+                               NMEM nmem,
                                const Odr_oid *syntax)
 {
     int i;
@@ -251,7 +251,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
         ptr = ptr->next;
     if (!yaz_match_xsd_element(ptr, "bibliographicRecord"))
         return 0;
-    if (!bibliographicRecord(mt, ptr->children, &ext, cd, nmem, syntax))
+    if (!bibliographicRecord(mt, ptr->children, &ext, nmem, syntax))
         return 0;
     *dst = opac = (Z_OPACRecord *) nmem_malloc(nmem, sizeof(*opac));
     opac->num_holdingsData = 0;
@@ -304,7 +304,8 @@ int yaz_xml_to_opac(yaz_marc_t mt, const char *buf_in, size_t size_in,
     int r = 0;
     if (doc)
     {
-        r = yaz_xml_to_opac_ptr(mt, xmlDocGetRootElement(doc), dst, cd, nmem,
+        yaz_marc_iconv(mt, cd);
+        r = yaz_xml_to_opac_ptr(mt, xmlDocGetRootElement(doc), dst, nmem,
                                 syntax);
         xmlFreeDoc(doc);
     }
