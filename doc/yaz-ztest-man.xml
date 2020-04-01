@@ -35,7 +35,7 @@
  <refsect1><title>DESCRIPTION</title>
   <para>
    <command>yaz-ztest</command> is a Z39.50/SRU test server that uses
-   the YAZ generic frontend server (GFS) API.
+   the YAZ generic front-end server (GFS) API.
    The server acts as a real Z39.50/SRU server but does not use a database.
    It returns a random hit count and returns a subset of a few built-in
    records.

@@ -71,7 +71,7 @@
   </note>
   <para>
    By default, each record is written to standard output in a line
-   format with newline for each field, $x for each subfield x.
+   format with newline for each field, $x for each sub-field x.
    The output format may be changed with option <literal>-o</literal>,
   </para>
   <para>

@@ -86,7 +86,7 @@
      <para>
       Supports the following transports: BER over TCP/IP
       (<ulink url="&url.ber.over.tcpip;">RFC1729</ulink>),
-      BER over unix local socket, and
+      BER over Unix local socket, and
       <ulink url="&url.http.1.1;">HTTP 1.1</ulink>.
     </para>
     </listitem>
@@ -138,7 +138,7 @@
    <title>Reading this Manual</title>
    <para>
     Most implementors only need to read a fraction of the
-    material in this manual, so a quick walkthrough of the chapters
+    material in this manual, so a quick walk-through of the chapters
     is in order.
    </para>
    <itemizedlist>
@@ -161,7 +161,7 @@
     </listitem>
     <listitem>
      <para>
-      <xref linkend="server"/> describes the generic frontend server
+      <xref linkend="server"/> describes the generic front-end server
       and explains how to develop server Z39.50/SRU applications for &yaz;.
       Obviously worth reading if you're to develop a server.
     </para>
@@ -211,7 +211,7 @@
     <listitem>
      <para>
       <xref linkend="comstack"/> describes the network layer module
-      COMSTACK. Implementors using ZOOM or the generic frontend server
+      COMSTACK. Implementors using ZOOM or the generic front-end server
       may skip this. Others, presumably, handling client/server
      communication on their own should read this.
      </para>
@@ -232,8 +232,8 @@
     If you're developing a client application you should consider the
     <link linkend="zoom">ZOOM</link> API.
     It is, by far, the easiest way to develop clients in C.
-    Server implementers should consider the
-    <link linkend="server">generic frontend server</link>.
+    Server implementors should consider the
+    <link linkend="server">generic front-end server</link>.
     None of those high-level APIs support the whole protocol, but
     they do include most facilities used in existing Z39.50 applications.
    </para>
@@ -262,7 +262,7 @@
     <itemizedlist>
      <listitem>
       <para>A client or server application (or both).
-       This layer includes ZOOM and the generic frontend server.
+       This layer includes ZOOM and the generic front-end server.
       </para>
      </listitem>
      <listitem>
@@ -350,7 +350,7 @@
    </para>
    <para>
     The reason that the &yaz; service-level API is a conglomerate of the
-    APIs from three different submodules is twofold. First, we wanted to allow
+    APIs from three different sub-modules is twofold. First, we wanted to allow
     the user a choice of different options for each major task. For instance,
     if you don't like the protocol API provided by &odr;/&asn;, you
     can use SNACC or BERUtils instead, and still have the benefits of the
@@ -464,7 +464,7 @@
     <para>
      You can choose to compile YAZ from official tar releases from
      <ulink url="&url.yaz.download;"/>
-     or clone it via Github
+     or clone it via GitHub
      <ulink url="https://github.com/indexdata/yaz.git"/>.
     </para>
     <para>
@@ -484,7 +484,7 @@
     </para>
     <para>
      The <ulink url="&url.libxslt;">libxslt</ulink>,
-     <ulink url="&url.libxml2;">libxml2</ulink> librararies are required
+     <ulink url="&url.libxml2;">libxml2</ulink> libraries are required
      if &yaz; is to support SRU/Solr.
      These libraries are very portable and should compile out-of-the
      box on virtually all Unix platforms. It is available in binary

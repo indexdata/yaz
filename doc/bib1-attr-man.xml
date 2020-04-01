@@ -209,7 +209,7 @@
    </screen>
    </para>
   <para>
-    Thw 105-106 truncation attributes below are only supported by
+    The 105-106 truncation attributes below are only supported by
     Index Data's Zebra server.
     <screen>
     105 Process * ! regular: *=.*, !=. and right truncate
