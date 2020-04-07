@@ -24,7 +24,7 @@
 #include <yaz/yaz-util.h>
 
 #include <yaz/tcpip.h>
-
+#include <yaz/snprintf.h>
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
 #include <yaz/diagbib1.h>
@@ -213,7 +213,8 @@ int cmd_adm_import(const char *arg)
             struct stat status;
             FILE *inf;
 
-            sprintf (fname, "%s%s%s", dir_str, sep, ent->d_name);
+            yaz_snprintf (fname, sizeof(fname), "%s%s%s",
+                          dir_str, sep, ent->d_name);
             stat (fname, &status);
 
             if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))

@@ -1293,35 +1293,39 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                     if (ent->subqueryId)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.id", pref);
+                        yaz_snprintf(opt_name, sizeof(opt_name), "%s.id", pref);
                         ZOOM_options_set(resultset->options, opt_name,
                                          ent->subqueryId);
                     }
                     if (ent->subqueryExpression)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.subquery", pref);
+                        yaz_snprintf(opt_name, sizeof(opt_name),
+                                     "%s.subquery", pref);
                         handle_queryExpression(resultset->options, opt_name,
                                                ent->subqueryExpression);
                     }
                     if (ent->subqueryInterpretation)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.interpretation", pref);
+                        yaz_snprintf(opt_name, sizeof(opt_name),
+                                     "%s.interpretation", pref);
                         handle_queryExpression(resultset->options, opt_name,
                                                ent->subqueryInterpretation);
                     }
                     if (ent->subqueryRecommendation)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.recommendation", pref);
+                        yaz_snprintf(opt_name, sizeof(opt_name),
+                                     "%s.recommendation", pref);
                         handle_queryExpression(resultset->options, opt_name,
                                                ent->subqueryRecommendation);
                     }
                     if (ent->subqueryCount)
                     {
                         char opt_name[80];
-                        sprintf(opt_name, "%s.count", pref);
+                        yaz_snprintf(opt_name, sizeof(opt_name),
+                                     "%s.count", pref);
                         ZOOM_options_set_int(resultset->options, opt_name,
                                              *ent->subqueryCount);
                     }
