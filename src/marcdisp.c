@@ -892,7 +892,7 @@ static void write_xml_indicator(yaz_marc_t mt, struct yaz_marc_node *n,
             char ind_val[10];
             if (ilen < sizeof(ind_val) - 1)
             {
-                char ind_str[6];
+                char ind_str[12];
                 sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
                 memcpy(ind_val, n->u.datafield.indicator + off, ilen);
                 ind_val[ilen] = '\0';

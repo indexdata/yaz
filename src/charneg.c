@@ -77,7 +77,7 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
 
     if (form > 0)
     {   /* ISO 10646 (UNICODE) */
-        char oidname[20];
+        char oidname[28];
 
         Z_Iso10646 *is = (Z_Iso10646 *) odr_malloc(o, sizeof(*is));
         p0->which = Z_OriginProposal_0_iso10646;
@@ -207,7 +207,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
     memset(p, 0, sizeof(*p));
     if (form > 0)
     {
-        char oidname[20];
+        char oidname[28];
 
         Z_Iso10646 *is = (Z_Iso10646 *) odr_malloc (o, sizeof(*is));
         p->which = Z_TargetResponse_iso10646;
