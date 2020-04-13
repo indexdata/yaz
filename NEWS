@@ -1,3 +1,16 @@
+--- 5.30.2 2020/04/13
+
+Partly revert UTF-8 records returned by yaz-ztest (introduced in 5.30.0)
+Fixes pazpar2 tests that relies on specific records being returned.
+
+Increase a few buffers due to compiler warning
+Buffers are involving %d-conversions.
+
+No build directories in installed yaz-config
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=955501
+
+Various spell fixes for documentation.
+
 --- 5.30.1 2020/03/18
 
 Document leader_spec for retrieval facility.
