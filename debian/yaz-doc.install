@@ -1,2 +1,2 @@
-debian/tmp/usr/share/doc/yaz-doc
-debian/tmp/usr/share/doc/yaz-doc/common
+usr/share/doc/yaz-doc
+usr/share/doc/yaz-doc/common

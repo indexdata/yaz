@@ -1,8 +1,8 @@
-debian/tmp/usr/include/yaz
-debian/tmp/usr/lib/*/pkgconfig/*.pc
-debian/tmp/usr/lib/*/libyaz*.a
-debian/tmp/usr/lib/*/libyaz*.so
-debian/tmp/usr/bin/yaz-config
-debian/tmp/usr/bin/yaz-asncomp
-debian/tmp/usr/share/aclocal/yaz.m4
-debian/tmp/usr/share/yaz
+usr/include/yaz
+usr/lib/*/pkgconfig/*.pc
+usr/lib/*/libyaz*.a
+usr/lib/*/libyaz*.so
+usr/bin/yaz-config
+usr/bin/yaz-asncomp
+usr/share/aclocal/yaz.m4
+usr/share/yaz

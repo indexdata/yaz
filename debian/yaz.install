@@ -1,8 +1,8 @@
-debian/tmp/usr/bin/yaz-client
-debian/tmp/usr/bin/yaz-ztest
-debian/tmp/usr/bin/zoomsh
-debian/tmp/usr/bin/yaz-marcdump
-debian/tmp/usr/bin/yaz-iconv
-debian/tmp/usr/bin/yaz-json-parse
-debian/tmp/usr/bin/yaz-url
-debian/tmp/usr/bin/yaz-record-conv
+usr/bin/yaz-client
+usr/bin/yaz-ztest
+usr/bin/zoomsh
+usr/bin/yaz-marcdump
+usr/bin/yaz-iconv
+usr/bin/yaz-json-parse
+usr/bin/yaz-url
+usr/bin/yaz-record-conv
