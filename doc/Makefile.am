@@ -83,13 +83,13 @@ yaz-json-parse.1: yaz-json-parse-man.xml
 yaz-record-conv.1: yaz-record-conv-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-record-conv-man.xml
 
-$(HTMLFILES): $(XMLFILES) book.xml
+$(HTMLFILES): $(XMLFILES)
 	rm -f *.html
 	$(HTML_COMPILE) $(srcdir)/book.xml
 
 $(MANFILES): local.ent
 
-yaz.pdf: $(XMLFILES) book.xml
+yaz.pdf: $(XMLFILES)
 	$(PDF_COMPILE) $(srcdir)/book.xml && mv book.pdf yaz.pdf
 
 
