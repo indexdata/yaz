@@ -6,7 +6,7 @@ SUBDIRS = common
 XMLFILES = book.xml \
  gfs-options.xml gfs-virtual.xml gfs-synopsis.xml \
  std-oid-table.xml  bib1-diag-table.xml srw-diag-table.xml \
- manref.xml local.ent
+ manref.xml
 
 HTMLFILES = index.html
 
@@ -83,13 +83,13 @@ yaz-json-parse.1: yaz-json-parse-man.xml
 yaz-record-conv.1: yaz-record-conv-man.xml
 	$(MAN_COMPILE) $(srcdir)/yaz-record-conv-man.xml
 
-$(HTMLFILES): $(XMLFILES)
+$(HTMLFILES): $(XMLFILES) local.ent
 	rm -f *.html
 	$(HTML_COMPILE) $(srcdir)/book.xml
 
 $(MANFILES): local.ent
 
-yaz.pdf: $(XMLFILES)
+yaz.pdf: $(XMLFILES) local.ent
 	$(PDF_COMPILE) $(srcdir)/book.xml && mv book.pdf yaz.pdf
 
 
