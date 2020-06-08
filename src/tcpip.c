@@ -877,12 +877,21 @@ int tcpip_rcvconnect(COMSTACK h)
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
+        const char *host = 0;
+        const char *port = 0;
+        char tmp[512];
+
         tcpip_create_cred(h);
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
+        parse_host_port(sp->host_port, tmp, sizeof tmp, &host, &port);
+        /* raw IPV6 seems to be rejected on the server */
+        if (!strchr(host, ':'))
+            gnutls_server_name_set(sp->session, GNUTLS_NAME_DNS,
+                                   host, strlen(host));
         SET_GNUTLS_SOCKET(sp->session, h->iofile);
     }
     if (sp->session)
