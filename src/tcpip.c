@@ -125,13 +125,13 @@ typedef struct tcpip_state
     int towrite;  /* to verify against user input */
     int (*complete)(const char *buf, int len); /* length/complete. */
     char *bind_host;
+    char *host_port;
 #if HAVE_GETADDRINFO
     struct addrinfo *ai;
     struct addrinfo *ai_connect;
     int ipv6_only;
 #if RESOLVER_THREAD
     int pipefd[2];
-    char *hoststr;
     const char *port;
     yaz_thread_t thread_id;
 #endif
@@ -189,11 +189,11 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->towrite = sp->written = -1;
     sp->complete = cs_complete_auto;
     sp->bind_host = 0;
+    sp->host_port = 0;
 #if HAVE_GETADDRINFO
     sp->ai = 0;
     sp->ai_connect = 0;
 #if RESOLVER_THREAD
-    sp->hoststr = 0;
     sp->pipefd[0] = sp->pipefd[1] = -1;
     sp->port = 0;
 #endif
@@ -385,14 +385,55 @@ static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
 }
 #endif
 
+static void parse_host_port(const char *host_port, char *tmp, size_t tmp_sz,
+                            const char **host, const char **port)
+{
+    char *cp = tmp;
+    char *cp1;
+
+    *host = 0;
+    strncpy(tmp, host_port, tmp_sz-1);
+    tmp[tmp_sz-1] = 0;
+
+    if (*cp != '[')
+        *host = cp;
+    else
+    {
+        *host = ++cp;
+        while (*cp)
+        {
+            if (*cp == ']')
+            {
+                *cp++ = '\0';
+                break;
+            }
+            cp++;
+        }
+    }
+    cp1 = strchr(cp, '/');
+    if (cp1)
+        *cp1 = '\0';
+    cp1 = strchr(cp, '?');
+    if (cp1)
+        *cp1 = '\0';
+    cp1 = strrchr(cp, ':');
+    if (cp1)
+    {
+        *port = cp1 + 1;
+        *cp1 = '\0';
+    }
+}
+
 #if HAVE_GETADDRINFO
 /* resolve using getaddrinfo */
-struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
+struct addrinfo *tcpip_getaddrinfo(const char *host_and_port,
+                                   const char *port,
                                    int *ipv6_only)
 {
     struct addrinfo hints, *res;
     int error;
-    char host[512], *p;
+    char tmp[512];
+    const char *host;
 
     hints.ai_flags = 0;
     hints.ai_family = AF_UNSPEC;
@@ -403,17 +444,8 @@ struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
     hints.ai_canonname      = NULL;
     hints.ai_next           = NULL;
 
-    strncpy(host, str, sizeof(host)-1);
-    host[sizeof(host)-1] = 0;
-    if ((p = strrchr(host, ' ')))
-        *p = 0;
-    if ((p = strchr(host, '/')))
-        *p = 0;
-    if ((p = strrchr(host, ':')))
-    {
-        *p = '\0';
-        port = p+1;
-    }
+    /* default port, might be changed below */
+    parse_host_port(host_and_port, tmp, sizeof tmp, &host, &port);
 
     if (!strcmp("@", host))
     {
@@ -452,7 +484,9 @@ static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
                        int default_port)
 {
     struct hostent *hp;
-    char *p, buf[512];
+    const char *host = 0;
+    const char *port_str = 0;
+    char buf[512];
     short int port = default_port;
 #ifdef WIN32
     unsigned long tmpadd;
@@ -461,25 +495,21 @@ static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
 #endif
     yaz_log(log_level, "tcpip_strtoaddr_ex %s", str ? str : "NULL");
     add->sin_family = AF_INET;
-    strncpy(buf, str, sizeof(buf)-1);
-    buf[sizeof(buf)-1] = 0;
-    if ((p = strchr(buf, '/')))
-        *p = 0;
-    if ((p = strrchr(buf, ':')))
-    {
-        *p = 0;
-        port = atoi(p + 1);
-    }
+
+    parse_host_port(str, buf, sizeof buf, &host, &port_str);
+
+    if (port_str)
+        port = atoi(port_str);
     add->sin_port = htons(port);
-    if (!strcmp("@", buf))
+    if (!strcmp("@", host))
     {
         add->sin_addr.s_addr = INADDR_ANY;
     }
-    else if ((tmpadd = inet_addr(buf)) != -1)
+    else if ((tmpadd = inet_addr(host)) != -1)
     {
         memcpy(&add->sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
     }
-    else if ((hp = gethostbyname(buf)))
+    else if ((hp = gethostbyname(host)))
     {
         memcpy(&add->sin_addr.s_addr, *hp->h_addr_list,
                sizeof(struct in_addr));
@@ -577,7 +607,7 @@ void *resolver_thread(void *arg)
     sp->ipv6_only = 0;
     if (sp->ai)
         freeaddrinfo(sp->ai);
-    sp->ai = tcpip_getaddrinfo(sp->hoststr, sp->port, &sp->ipv6_only);
+    sp->ai = tcpip_getaddrinfo(sp->host_port, sp->port, &sp->ipv6_only);
     write(sp->pipefd[1], "1", 1);
     return 0;
 }
@@ -613,6 +643,8 @@ void *tcpip_straddr(COMSTACK h, const char *str)
         else
             port = "80";
     }
+    xfree(sp->host_port);
+    sp->host_port = xstrdup(str);
 #if RESOLVER_THREAD
     if (h->flags & CS_FLAGS_DNS_NO_BLOCK)
     {
@@ -622,15 +654,13 @@ void *tcpip_straddr(COMSTACK h, const char *str)
             return 0;
 
         sp->port = port;
-        xfree(sp->hoststr);
-        sp->hoststr = xstrdup(str);
         sp->thread_id = yaz_thread_create(resolver_thread, h);
-        return sp->hoststr;
+        return sp->host_port;
     }
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
-    sp->ai = tcpip_getaddrinfo(str, port, &sp->ipv6_only);
+    sp->ai = tcpip_getaddrinfo(sp->host_port, port, &sp->ipv6_only);
     if (sp->ai && h->state == CS_ST_UNBND)
     {
         return create_net_socket(h);
@@ -653,6 +683,8 @@ void *tcpip_straddr(COMSTACK h, const char *str)
 
     if (!tcpip_init())
         return 0;
+    xfree(sp->host_port);
+    sp->host_port = xstrdup(str);
     if (!tcpip_strtoaddr_ex(str, &sp->addr, port))
         return 0;
     if (h->state == CS_ST_UNBND)
@@ -1421,10 +1453,8 @@ void tcpip_close(COMSTACK h)
 #if HAVE_GETADDRINFO
     if (sp->ai)
         freeaddrinfo(sp->ai);
-#if RESOLVER_THREAD
-    xfree(sp->hoststr);
 #endif
-#endif
+    xfree(sp->host_port);
     xfree(sp->connect_request_buf);
     xfree(sp->connect_response_buf);
     xfree(sp);
