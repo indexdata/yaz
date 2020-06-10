@@ -17,7 +17,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <yaz/base64.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -31,14 +30,8 @@
 #include <yaz/log.h>
 
 #ifdef WIN32
-/* VS 2003 or later has getaddrinfo; older versions do not */
 #include <winsock2.h>
-#if _MSC_VER >= 1300
 #include <ws2tcpip.h>
-#define HAVE_GETADDRINFO 1
-#else
-#define HAVE_GETADDRINFO 0
-#endif
 #endif
 
 #if HAVE_NETINET_IN_H
@@ -65,9 +58,10 @@
 #include <gnutls/gnutls.h>
 #endif
 
+#include <yaz/base64.h>
 #include <yaz/comstack.h>
-#include <yaz/tcpip.h>
 #include <yaz/errno.h>
+#include <yaz/tcpip.h>
 
 #ifndef WIN32
 #define RESOLVER_THREAD 1
@@ -94,10 +88,8 @@ static int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  void *cd);
 static int tcpip_set_blocking(COMSTACK p, int blocking);
 
-#if HAVE_GETADDRINFO
 struct addrinfo *tcpip_getaddrinfo(const char *str, const char *port,
                                    int *ipv6_only);
-#endif
 
 static COMSTACK tcpip_accept(COMSTACK h);
 static const char *tcpip_addrstr(COMSTACK h);
@@ -126,7 +118,6 @@ typedef struct tcpip_state
     int (*complete)(const char *buf, int len); /* length/complete. */
     char *bind_host;
     char *host_port;
-#if HAVE_GETADDRINFO
     struct addrinfo *ai;
     struct addrinfo *ai_connect;
     int ipv6_only;
@@ -134,9 +125,6 @@ typedef struct tcpip_state
     int pipefd[2];
     const char *port;
     yaz_thread_t thread_id;
-#endif
-#else
-    struct sockaddr_in addr;  /* returned by cs_straddr */
 #endif
     char buf[128]; /* returned by cs_addrstr */
 #if HAVE_GNUTLS_H
@@ -190,13 +178,11 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->complete = cs_complete_auto;
     sp->bind_host = 0;
     sp->host_port = 0;
-#if HAVE_GETADDRINFO
     sp->ai = 0;
     sp->ai_connect = 0;
 #if RESOLVER_THREAD
     sp->pipefd[0] = sp->pipefd[1] = -1;
     sp->port = 0;
-#endif
 #endif
 
 #if HAVE_GNUTLS_H
@@ -424,8 +410,6 @@ static void parse_host_port(const char *host_port, char *tmp, size_t tmp_sz,
     }
 }
 
-#if HAVE_GETADDRINFO
-/* resolve using getaddrinfo */
 struct addrinfo *tcpip_getaddrinfo(const char *host_and_port,
                                    const char *port,
                                    int *ipv6_only)
@@ -478,49 +462,6 @@ struct addrinfo *tcpip_getaddrinfo(const char *host_and_port,
     return res;
 }
 
-#else
-/* gethostbyname .. old systems */
-static int tcpip_strtoaddr_ex(const char *str, struct sockaddr_in *add,
-                       int default_port)
-{
-    struct hostent *hp;
-    const char *host = 0;
-    const char *port_str = 0;
-    char buf[512];
-    short int port = default_port;
-#ifdef WIN32
-    unsigned long tmpadd;
-#else
-    in_addr_t tmpadd;
-#endif
-    yaz_log(log_level, "tcpip_strtoaddr_ex %s", str ? str : "NULL");
-    add->sin_family = AF_INET;
-
-    parse_host_port(str, buf, sizeof buf, &host, &port_str);
-
-    if (port_str)
-        port = atoi(port_str);
-    add->sin_port = htons(port);
-    if (!strcmp("@", host))
-    {
-        add->sin_addr.s_addr = INADDR_ANY;
-    }
-    else if ((tmpadd = inet_addr(host)) != -1)
-    {
-        memcpy(&add->sin_addr.s_addr, &tmpadd, sizeof(struct in_addr));
-    }
-    else if ((hp = gethostbyname(host)))
-    {
-        memcpy(&add->sin_addr.s_addr, *hp->h_addr_list,
-               sizeof(struct in_addr));
-    }
-    else
-        return 0;
-    return 1;
-}
-#endif
-
-#if HAVE_GETADDRINFO
 static struct addrinfo *create_net_socket(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -668,40 +609,6 @@ void *tcpip_straddr(COMSTACK h, const char *str)
     return sp->ai;
 }
 
-#else
-void *tcpip_straddr(COMSTACK h, const char *str)
-{
-    tcpip_state *sp = (tcpip_state *)h->cprivate;
-    int port = 210;
-    if (h->protocol == PROTO_HTTP)
-    {
-        if (h->type == ssl_type)
-            port = 443;
-        else
-            port = 80;
-    }
-
-    if (!tcpip_init())
-        return 0;
-    xfree(sp->host_port);
-    sp->host_port = xstrdup(str);
-    if (!tcpip_strtoaddr_ex(str, &sp->addr, port))
-        return 0;
-    if (h->state == CS_ST_UNBND)
-    {
-        int s;
-        s = socket(AF_INET, SOCK_STREAM, 0);
-        if (s < 0)
-            return 0;
-        h->iofile = s;
-
-        if (!tcpip_set_blocking(h, h->flags))
-            return 0;
-    }
-    return &sp->addr;
-}
-#endif
-
 int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -711,7 +618,6 @@ int tcpip_more(COMSTACK h)
 
 static int cont_connect(COMSTACK h)
 {
-#if HAVE_GETADDRINFO
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     struct addrinfo *ai = sp->ai_connect;
     while (ai && (ai = ai->ai_next))
@@ -740,7 +646,6 @@ static int cont_connect(COMSTACK h)
             return tcpip_connect(h, ai);
         }
     }
-#endif
     h->cerrno = CSYSERR;
     return -1;
 }
@@ -753,12 +658,8 @@ static int cont_connect(COMSTACK h)
  */
 int tcpip_connect(COMSTACK h, void *address)
 {
-#if HAVE_GETADDRINFO
     struct addrinfo *ai = (struct addrinfo *) address;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-#else
-    struct sockaddr_in *add = (struct sockaddr_in *) address;
-#endif
     int r;
     yaz_log(log_level, "tcpip_connect h=%p", h);
     h->io_pending = 0;
@@ -767,7 +668,6 @@ int tcpip_connect(COMSTACK h, void *address)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -789,9 +689,6 @@ int tcpip_connect(COMSTACK h, void *address)
 #endif
     r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     sp->ai_connect = ai;
-#else
-    r = connect(h->iofile, (struct sockaddr *) add, sizeof(*add));
-#endif
     if (r < 0)
     {
 #ifdef WIN32
@@ -830,7 +727,6 @@ int tcpip_rcvconnect(COMSTACK h)
 
     if (h->state == CS_ST_DATAXFER)
         return 0;
-#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -840,7 +736,6 @@ int tcpip_rcvconnect(COMSTACK h)
         h->state = CS_ST_UNBND;
         return tcpip_connect(h, ai);
     }
-#endif
 #endif
     if (h->state != CS_ST_CONNECTING)
     {
@@ -914,11 +809,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     int r;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-#if HAVE_GETADDRINFO
     struct addrinfo *ai = (struct addrinfo *) address;
-#else
-    struct sockaddr *addr = (struct sockaddr *)address;
-#endif
 #ifdef WIN32
     BOOL one = 1;
 #else
@@ -926,7 +817,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 #endif
 
     yaz_log(log_level, "tcpip_bind h=%p", h);
-#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -934,7 +824,6 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (!ai)
             return -1;
     }
-#endif
 #endif
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
@@ -964,13 +853,9 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         return -1;
     }
 #endif
-#if HAVE_GETADDRINFO
     r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
     sp->ai = 0;
-#else
-    r = bind(h->iofile, addr, sizeof(struct sockaddr_in));
-#endif
     if (r)
     {
         h->cerrno = CSYSERR;
@@ -1412,7 +1297,6 @@ void tcpip_close(COMSTACK h)
 
     yaz_log(log_level, "tcpip_close: h=%p", h);
     xfree(sp->bind_host);
-#if HAVE_GETADDRINFO
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -1421,7 +1305,6 @@ void tcpip_close(COMSTACK h)
         close(sp->pipefd[1]);
         h->iofile = -1;
     }
-#endif
 #endif
     if (h->iofile != -1)
     {
@@ -1459,10 +1342,8 @@ void tcpip_close(COMSTACK h)
         sp->cred_ptr = 0;
     }
 #endif
-#if HAVE_GETADDRINFO
     if (sp->ai)
         freeaddrinfo(sp->ai);
-#endif
     xfree(sp->host_port);
     xfree(sp->connect_request_buf);
     xfree(sp->connect_response_buf);
@@ -1475,7 +1356,6 @@ const char *tcpip_addrstr(COMSTACK h)
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
     char *r = 0, *buf = sp->buf;
 
-#if HAVE_GETADDRINFO
     char host[120];
     struct sockaddr_storage addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
@@ -1493,28 +1373,6 @@ const char *tcpip_addrstr(COMSTACK h)
     }
     else
         r = host;
-
-#else
-
-    struct sockaddr_in addr;
-    YAZ_SOCKLEN_T len = sizeof(addr);
-    struct hostent *host;
-
-    if (getpeername(h->iofile, (struct sockaddr*) &addr, &len) < 0)
-    {
-        h->cerrno = CSYSERR;
-        return 0;
-    }
-    if (!(h->flags & CS_FLAGS_NUMERICHOST))
-    {
-        if ((host = gethostbyaddr((char*)&addr.sin_addr,
-                                  sizeof(addr.sin_addr),
-                                  AF_INET)))
-            r = (char*) host->h_name;
-    }
-    if (!r)
-        r = inet_ntoa(addr.sin_addr);
-#endif
 
     if (h->protocol == PROTO_HTTP)
         sprintf(buf, "http:%s", r);
