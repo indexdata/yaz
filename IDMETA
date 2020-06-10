@@ -1,4 +1,4 @@
 DEBIAN_DIST="buster stretch jessie"
 UBUNTU_DIST="focal bionic xenial trusty"
 CENTOS_DIST="centos8 centos7 centos6"
-VERSION=5.30.2
+VERSION=5.30.3

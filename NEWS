@@ -1,3 +1,15 @@
+--- 5.30.3 2020/06/10
+
+Require getaddrinfo which has been available since 2003.
+
+Provide server host for SSL by using gnutls_server_name_set(3).
+Thx to Guillaume Jactat.
+
+Obey [host]:port notation for IPV6
+https://tools.ietf.org/html/rfc3986#section-3.2.2
+
+Minor fixes to 'make dist' handling. Thx to Hugh McMaster.
+
 --- 5.30.2 2020/04/13
 
 Partly revert UTF-8 records returned by yaz-ztest (introduced in 5.30.0)
