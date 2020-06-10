@@ -2,7 +2,9 @@
 ; Copyright (C) Index Data
 ; See the file LICENSE for details.
 
-!include EnvVarUpdate.nsh
+; Using https://nsis.sourceforge.io/EnVar_plug-in
+; for path manipulation
+
 !include version.nsi
 
 !include "MUI.nsh"
@@ -170,7 +172,9 @@ SectionEnd
 
 Section "YAZ Path" YAZ_PATH
 	SectionIn 1 2
-	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR\bin"
+	EnVar::SetHKLM
+	EnVar::AddValue "PATH" "$INSTDIR\bin"
+	Pop $0
 SectionEnd
 
 ; begin uninstall settings/section
@@ -183,7 +187,9 @@ Section Uninstall
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
 	RMDir /r $INSTDIR
-	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR\bin"
+	EnVar::setHKLM
+	EnVar::DeleteValue "PATH" "$INSTDIR\bin"
+	Pop $0
         IfFileExists $INSTDIR 0 Removed 
 		MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
