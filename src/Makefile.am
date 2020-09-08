@@ -139,97 +139,55 @@ libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
 	$(STEMMER_SOURCES)
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-# Rules for Z39.50 V3
-z-accdes1.c \
-z-accform1.c \
-z-acckrb1.c \
-z-diag1.c \
-z-espec1.c \
-z-estask.c \
-z-exp.c \
-z-grs.c \
-z-opac.c \
-z-uifr1.c \
-z-rrf1.c \
-z-rrf2.c \
-z-sum.c \
-z-sutrs.c \
-zes-expi.c \
-zes-exps.c \
-zes-order.c \
-zes-pquery.c \
-zes-psched.c \
-zes-pset.c \
-zes-update0.c \
-$(top_srcdir)/include/yaz/z-accdes1.h \
-$(top_srcdir)/include/yaz/z-core.h: z-core.c
+BUILT_SOURCES = z-core.c z-date.c z-univ.c zes-update.c zes-admin.c z-charneg.c \
+ z-mterm2.c z-oclcui.c z-facet-1.c ill-core.c oclc-ill-req-ext.c item-req.c
 
 z-core.c: $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/z3950v3.asn
 
 # Date extension
-z-date.c \
-$(top_srcdir)/include/yaz/z-date.h: $(srcdir)/z.tcl $(srcdir)/datetime.asn $(YAZCOMP)
+z-date.c: $(srcdir)/z.tcl $(srcdir)/datetime.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/datetime.asn
 
 # UNIverse extension
-z-univ.c \
-$(top_srcdir)/include/yaz/z-univ.h: \
-$(srcdir)/z.tcl $(srcdir)/univres.asn $(YAZCOMP)
+z-univ.c: $(srcdir)/z.tcl $(srcdir)/univres.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/univres.asn
 
 # New Update extended service
-zes-update.c \
-$(top_srcdir)/include/yaz/zes-update.h: \
-$(srcdir)/z.tcl $(srcdir)/esupdate.asn $(YAZCOMP)
+zes-update.c: $(srcdir)/z.tcl $(srcdir)/esupdate.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/esupdate.asn
 
 # Admin extended service
-zes-admin.c \
-$(top_srcdir)/include/yaz/zes-admin.h: \
-$(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
+zes-admin.c: $(srcdir)/z.tcl $(srcdir)/esadmin.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/esadmin.asn
 
 # Charset negotiation
-z-charneg.c \
-$(top_srcdir)/include/yaz/z-charneg.h: \
-$(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
+z-charneg.c: $(srcdir)/z.tcl $(srcdir)/charneg-3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/charneg-3.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-z-mterm2.c \
-$(top_srcdir)/include/yaz/z-mterm2.h: \
-$(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
+z-mterm2.c: $(srcdir)/z.tcl $(srcdir)/mterm2.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/mterm2.asn
 
 # UserInfoFormat-multipleSearchTerms-2
-z-oclcui.c \
-$(top_srcdir)/include/yaz/z-oclcui.h: \
-$(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
+z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/oclcui.asn
 
 # UserInfoFormat-facet-1
-z-facet-1.c \
-$(top_srcdir)/include/yaz/z-facet-1.h: $(srcdir)/facet.asn $(YAZCOMP)
+z-facet-1.c: $(srcdir)/facet.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/facet.asn
 
 
 # ILL protocol
-ill-core.c \
-$(top_srcdir)/include/yaz/ill-core.h: \
-$(srcdir)/ill.tcl $(srcdir)/ill9702.asn $(YAZCOMP)
+ill-core.c: $(srcdir)/ill.tcl $(srcdir)/ill9702.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/ill9702.asn
 
 # OCLC ILL Request Extension
-oclc-ill-req-ext.c \
-$(top_srcdir)/include/yaz/oclc-ill-req-ext.h: \
-$(srcdir)/ill.tcl $(srcdir)/oclc-ill-req-ext.asn $(YAZCOMP)
+oclc-ill-req-ext.c: $(srcdir)/ill.tcl $(srcdir)/oclc-ill-req-ext.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/oclc-ill-req-ext.asn
 
 # Item Request
-item-req.c \
-$(top_srcdir)/include/yaz/item-req.h: \
-$(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
+item-req.c: $(srcdir)/ill.tcl $(srcdir)/item-req.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_I) $(srcdir)/item-req.asn
 
 
