@@ -10088,6 +10088,12 @@ void odr_choice_bias(ODR o, int what);
    <listitem><para>
     Tom Andr&#xe9; &#xd8;verland
    </para></listitem>
+   <listitem><para>
+    Hugh McMaster
+   </para></listitem>
+   <listitem><para>
+    Guillaume Jactat
+   </para></listitem>
   </itemizedlist>
  </appendix>
 </book>
