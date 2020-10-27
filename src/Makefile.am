@@ -18,8 +18,7 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
  csvtodiag.tcl bib1.csv srw.csv \
- csvtosru_update.tcl sru_update.csv \
- oidtoc.tcl oid.csv
+ sru_update.csv oidtoc.tcl oid.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
@@ -57,8 +56,8 @@ diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: bib1.csv
 diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: srw.csv
 	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/srw.csv $(srcdir)/diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h srw
 
-diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: csvtosru_update.tcl sru_update.csv
-	$(TCLSH) $(srcdir)/csvtosru_update.tcl $(srcdir)
+diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: sru_update.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h sru_update
 
 # Auto-generated C-files
 GEN_FILES = oid_std.c \
