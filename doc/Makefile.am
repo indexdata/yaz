@@ -30,7 +30,7 @@ EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
 	$(doc_DATA)
 
 std-oid-table.xml: $(srcdir)/../src/oid.csv
-	$(TCLSH) $(srcdir)/../src/oidtoc.tcl $(srcdir) $(srcdir)/../src/oid.csv std-oid-table.xml
+	$(TCLSH) $(top_srcdir)/src/oidtoc.tcl  $(top_srcdir)/src/oid.csv std-oid-table.xml
 
 bib1-diag-table.xml: $(srcdir)/../src/bib1.csv
 	$(TCLSH) $(srcdir)/../src/csvtodiag.tcl $(srcdir)/../src/bib1.csv bib1-diag-table.xml bib1-diag-table
