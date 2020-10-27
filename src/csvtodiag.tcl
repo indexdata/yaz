@@ -25,7 +25,7 @@ proc csvtodiag {ifiles name alias} {
     puts $cfile "\#endif"
 
     puts $cfile "
-#include \"diag-entry.h\"
+#include <diag-entry.h>
 \#include \"[lindex $ifiles 2]\"
 struct yaz_diag_entry yaz_diag_${name}_tab\[\] = \{
 "
