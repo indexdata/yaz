@@ -12,8 +12,32 @@ genrule(
     name = "oidtoc",
     srcs = [ "src/oid.csv" ],
     outs = [ "src/oid_std.c", "include/yaz/oid_std.h" ],
-    cmd = "tclsh $(location src/oidtoc.tcl) / $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
+    cmd = "tclsh $(location src/oidtoc.tcl) $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
     tools = [ "src/oidtoc.tcl" ],
+)
+
+genrule(
+    name = "marc8",
+    srcs = [ "src/codetables.xml" ],
+    outs = [ "src/marc8.c" ],
+    cmd = "tclsh $(location src/charconv.tcl)  -p marc8 $(location src/codetables.xml) -o $(location src/marc8.c)",
+    tools = [ "src/charconv.tcl" ],
+)
+
+genrule(
+    name = "marc8r",
+    srcs = [ "src/codetables.xml" ],
+    outs = [ "src/marc8r.c" ],
+    cmd = "tclsh $(location src/charconv.tcl) -r -p marc8r $(location src/codetables.xml) -o $(location src/marc8r.c)",
+    tools = [ "src/charconv.tcl" ],
+)
+
+genrule(
+    name = "iso5426",
+    srcs = [ "src/codetables-iso5426.xml" ],
+    outs = [ "src/iso5426.c" ],
+    cmd = "tclsh $(location src/charconv.tcl) -p iso5426 $(location src/codetables-iso5426.xml) -o $(location src/iso5426.c)",
+    tools = [ "src/charconv.tcl" ],
 )
 
 cc_library(
