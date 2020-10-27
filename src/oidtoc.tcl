@@ -41,7 +41,7 @@ proc constant_var {oid} {
     return yaz_oid_${prefix}_${lname}
 }
 
-proc oid_to_xml {srcdir input xname} {
+proc oid_to_xml {input xname} {
     set oids [readoids "${input}"]
     set xfile [open "${xname}" w]
 
@@ -95,27 +95,14 @@ proc oid_to_xml {srcdir input xname} {
     close $xfile
 }
 
-proc filename {fullname} {
-    set idx [string last $fullname /]
-    if {$idx == -1} {
-        return $fullname
-    }
-    return [string range $fullname [expr $idx + 1] 1000]
-}
-
-proc oid_to_c {srcdir input cname hname} {
+proc oid_to_c {input cname hname} {
     set oids [readoids "${input}"]
 
-    if {[string eq $srcdir ""]} {
-       set cfile [open ${cname} w]
-       set hfile [open ${hname} w]
-    } else {
-       set cfile [open "${srcdir}/${cname}" w]
-       set hfile [open "${srcdir}/../include/yaz/${hname}" w]
-    }
+    set cfile [open ${cname} w]
+    set hfile [open ${hname} w]
 
-    puts $cfile "/** \\file [filename $cname]"
-    puts $hfile "/** \\file [filename $hname]"
+    puts $cfile "/** \\file [file tail $cname]"
+    puts $hfile "/** \\file [file tail $hname]"
     set preamble "    \\brief Standard Object Identifiers: Generated from $input */"
     puts $cfile $preamble
     puts $hfile $preamble
@@ -168,11 +155,11 @@ proc oid_to_c {srcdir input cname hname} {
     close $hfile
 }
 
-if {[llength $argv] == 4} {
-    oid_to_c [lindex $argv 0] [lindex $argv 1] [lindex $argv 2] [lindex $argv 3]
-} elseif {[llength $argv] == 3} {
-    oid_to_xml [lindex $argv 0] [lindex $argv 1] [lindex $argv 2]
+if {[llength $argv] == 3} {
+    oid_to_c [lindex $argv 0] [lindex $argv 1] [lindex $argv 2]
+} elseif {[llength $argv] == 2} {
+    oid_to_xml [lindex $argv 0] [lindex $argv 1]
 } else {
-    puts "oidtoc.tcl srcdir csv cfile hfile"
+    puts "oidtoc.tcl csv cfile hfile"
     exit 1
 }

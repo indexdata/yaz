@@ -48,7 +48,7 @@ iso5426.c: charconv.tcl codetables-iso5426.xml
 
 # Generate OID database from CSV
 oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
-	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir) $(srcdir)/oid.csv oid_std.c oid_std.h
+	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir)/oid.csv $(srcdir)/oid_std.c $(top_srcdir)/include/yaz/oid_std.h
 
 # Generate diagnostics from CSVs
 diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: bib1.csv
