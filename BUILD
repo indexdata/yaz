@@ -78,7 +78,7 @@ cc_library(
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
     srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
-    hdrs = ["include/yaz/diagsrw.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 
