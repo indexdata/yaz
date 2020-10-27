@@ -14,6 +14,7 @@ genrule(
     outs = [ "src/oid_std.c", "include/yaz/oid_std.h" ],
     cmd = "tclsh $(location src/oidtoc.tcl) $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
     tools = [ "src/oidtoc.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -22,6 +23,7 @@ genrule(
     outs = [ "src/marc8.c" ],
     cmd = "tclsh $(location src/charconv.tcl)  -p marc8 $(location src/codetables.xml) -o $(location src/marc8.c)",
     tools = [ "src/charconv.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -30,6 +32,7 @@ genrule(
     outs = [ "src/marc8r.c" ],
     cmd = "tclsh $(location src/charconv.tcl) -r -p marc8r $(location src/codetables.xml) -o $(location src/marc8r.c)",
     tools = [ "src/charconv.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -38,6 +41,7 @@ genrule(
     outs = [ "src/iso5426.c" ],
     cmd = "tclsh $(location src/charconv.tcl) -p iso5426 $(location src/codetables-iso5426.xml) -o $(location src/iso5426.c)",
     tools = [ "src/charconv.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -46,6 +50,7 @@ genrule(
     outs = [ "src/diagbib1.c", "include/yaz/diagbib1.h" ],
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/bib1.csv) $(location src/diagbib1.c) $(location include/yaz/diagbib1.h) bib1 diagbib1_str",
     tools = [ "src/csvtodiag.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -54,6 +59,7 @@ genrule(
     outs = [ "src/diagsrw.c", "include/yaz/diagsrw.h" ],
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/srw.csv) $(location src/diagsrw.c) $(location include/yaz/diagsrw.h) srw",
     tools = [ "src/csvtodiag.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 genrule(
@@ -62,6 +68,7 @@ genrule(
     outs = [ "src/diagsru_update.c", "include/yaz/diagsru_update.h" ],
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/sru_update.csv) $(location src/diagsru_update.c) $(location include/yaz/diagsru_update.h) sru_update",
     tools = [ "src/csvtodiag.tcl" ],
+    visibility = [ "//visibility:public" ],
 )
 
 cc_library(
@@ -70,8 +77,8 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["src/*.c"]),
-    hdrs = glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
+    hdrs = ["include/yaz/diagsrw.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 

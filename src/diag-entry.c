@@ -12,7 +12,7 @@
 #include <config.h>
 #endif
 
-#include "diag-entry.h"
+#include <diag-entry.h>
 
 const char *yaz_diag_to_str(struct yaz_diag_entry *tab, int code)
 {

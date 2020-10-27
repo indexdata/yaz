@@ -87,7 +87,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   prt-ext.c \
   proxunit.c \
   ill-get.c \
-  zget.c yaz-ccl.c diag-entry.c diag-entry.h \
+  zget.c yaz-ccl.c diag-entry.c \
   logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c init_diag.c \
   init_globals.c \
