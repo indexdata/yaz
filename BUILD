@@ -40,6 +40,30 @@ genrule(
     tools = [ "src/charconv.tcl" ],
 )
 
+genrule(
+    name = "diagbib1",
+    srcs = [ "src/bib1.csv" ],
+    outs = [ "src/diagbib1.c", "include/yaz/diagbib1.h" ],
+    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/bib1.csv) $(location src/diagbib1.c) $(location include/yaz/diagbib1.h) bib1 diagbib1_str",
+    tools = [ "src/csvtodiag.tcl" ],
+)
+
+genrule(
+    name = "diagsrw",
+    srcs = [ "src/srw.csv" ],
+    outs = [ "src/diagsrw.c", "include/yaz/diagsrw.h" ],
+    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/srw.csv) $(location src/diagsrw.c) $(location include/yaz/diagsrw.h) srw",
+    tools = [ "src/csvtodiag.tcl" ],
+)
+
+genrule(
+    name = "diagsru_update",
+    srcs = [ "src/sru_update.csv" ],
+    outs = [ "src/diagsru_update.c", "include/yaz/diagsru_update.h" ],
+    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/sru_update.csv) $(location src/diagsru_update.c) $(location include/yaz/diagsru_update.h) sru_update",
+    tools = [ "src/csvtodiag.tcl" ],
+)
+
 cc_library(
     name = "yaz",
     includes = [ "include" ],
