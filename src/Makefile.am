@@ -19,7 +19,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
  csvtodiag.tcl bib1.csv srw.csv \
  csvtosru_update.tcl sru_update.csv \
- oidtoc.tcl oid.csv sc_test.c
+ oidtoc.tcl oid.csv
 
 YAZCOMP=$(top_srcdir)/util/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
