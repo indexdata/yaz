@@ -8,6 +8,14 @@ LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 
+genrule(
+    name = "oidtoc",
+    srcs = [ "src/oid.csv" ],
+    outs = [ "src/oid_std.c", "include/yaz/oid_std.h" ],
+    cmd = "tclsh $(location src/oidtoc.tcl) / $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
+    tools = [ "src/oidtoc.tcl" ],
+)
+
 cc_library(
     name = "yaz",
     includes = [ "include" ],

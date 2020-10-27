@@ -95,14 +95,27 @@ proc oid_to_xml {srcdir input xname} {
     close $xfile
 }
 
+proc filename {fullname} {
+    set idx [string last $fullname /]
+    if {$idx == -1} {
+        return $fullname
+    }
+    return [string range $fullname [expr $idx + 1] 1000]
+}
+
 proc oid_to_c {srcdir input cname hname} {
     set oids [readoids "${input}"]
 
-    set cfile [open "${srcdir}/${cname}" w]
-    set hfile [open "${srcdir}/../include/yaz/${hname}" w]
+    if {[string eq $srcdir ""]} {
+       set cfile [open ${cname} w]
+       set hfile [open ${hname} w]
+    } else {
+       set cfile [open "${srcdir}/${cname}" w]
+       set hfile [open "${srcdir}/../include/yaz/${hname}" w]
+    }
 
-    puts $cfile "/** \\file $cname"
-    puts $hfile "/** \\file $hname"
+    puts $cfile "/** \\file [filename $cname]"
+    puts $hfile "/** \\file [filename $hname]"
     set preamble "    \\brief Standard Object Identifiers: Generated from $input */"
     puts $cfile $preamble
     puts $hfile $preamble
