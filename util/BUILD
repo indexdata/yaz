@@ -1,6 +1,6 @@
 # Bazel BUILD file for YAZ
 #
-# bazel  build //:all
+# bazel  build //util:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 

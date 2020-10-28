@@ -274,19 +274,3 @@ cc_library(
         ":yaz",
     ],
 )
-
-cc_binary(
-    name = "yaz-ztest",
-    includes = [ "include" ],
-    copts = [ "-pthread" ] + INCLUDES_EXT,
-    linkopts = LIBS_EXT,
-    local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = [
-	 "ztest/dummy-opac.c", "ztest/read-grs.c",
-	 "ztest/read-marc.c", "ztest/ztest.c", "ztest/ztest.h",
-	 ],
-    deps = [
-        ":yaz_server",
-    ],
-)
-
