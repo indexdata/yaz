@@ -1,4 +1,4 @@
-# Bazel BUILD file for YAZ
+# Bazel BUILD file for YAZ utilities
 #
 # bazel  build //util:all
 

@@ -240,6 +240,8 @@ cc_library(
     visibility = [ "//visibility:public" ],
 )
 
+exports_files(glob(["src/*.csv", "src/*.tcl"]))
+
 cc_library(
     name = "yaz_server",
     includes = [ "include" ],

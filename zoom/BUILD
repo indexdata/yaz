@@ -1,4 +1,4 @@
-# Bazel BUILD file for YAZ
+# Bazel BUILD file for ZOOM
 #
 # bazel  build //zoom:all
 
