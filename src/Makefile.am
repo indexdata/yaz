@@ -22,7 +22,7 @@ EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  csvtodiag.tcl bib1.csv srw.csv \
  sru_update.csv oidtoc.tcl oid.csv yaz-asncomp
 
-YAZCOMP=$(tsrcdir)/yaz-asncomp
+YAZCOMP=$(srcdir)/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
 YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 
