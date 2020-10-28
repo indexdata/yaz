@@ -11,3 +11,9 @@ def plush(names):
     for name in names:
         l.append("include/yaz/" + name + ".h")
     return l
+
+def plusc(names):
+    l = []
+    for name in names:
+        l.append("src/" + name + ".c")
+    return l

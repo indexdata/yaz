@@ -3,7 +3,7 @@
 # bazel  build //:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("util.bzl", "cplush", "plush")
+load("util.bzl", "cplush", "plush", "plusc")
 
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 
@@ -14,7 +14,7 @@ Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac", "z-sum", "z-gr
 genrule(
     name = "oidtoc",
     srcs = [ "src/oid.csv" ],
-    outs = [ "src/oid_std.c", "include/yaz/oid_std.h" ],
+    outs = cplush([ "oid_std"]),
     cmd = "tclsh $(location src/oidtoc.tcl) $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
     tools = [ "src/oidtoc.tcl" ],
     visibility = [ "//visibility:public" ],
@@ -50,7 +50,7 @@ genrule(
 genrule(
     name = "diagbib1",
     srcs = [ "src/bib1.csv" ],
-    outs = [ "src/diagbib1.c", "include/yaz/diagbib1.h" ],
+    outs = cplush([ "diagbib1" ]),
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/bib1.csv) $(location src/diagbib1.c) $(location include/yaz/diagbib1.h) bib1 diagbib1_str",
     tools = [ "src/csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
@@ -59,7 +59,7 @@ genrule(
 genrule(
     name = "diagsrw",
     srcs = [ "src/srw.csv" ],
-    outs = [ "src/diagsrw.c", "include/yaz/diagsrw.h" ],
+    outs = cplush([ "diagsrw" ]),
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/srw.csv) $(location src/diagsrw.c) $(location include/yaz/diagsrw.h) srw",
     tools = [ "src/csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
@@ -68,7 +68,7 @@ genrule(
 genrule(
     name = "diagsru_update",
     srcs = [ "src/sru_update.csv" ],
-    outs = [ "src/diagsru_update.c", "include/yaz/diagsru_update.h" ],
+    outs = cplush([ "diagsru_update" ]),
     cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/sru_update.csv) $(location src/diagsru_update.c) $(location include/yaz/diagsru_update.h) sru_update",
     tools = [ "src/csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
@@ -183,8 +183,8 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c", "src/cql.c" ] + glob(["src/*.c"]),
-    hdrs = plush(Z3950_FILES) + ["include/yaz/oid_std.h", "include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h", "include/yaz/z-mterm2.h", "include/yaz/z-oclcui.h", "include/yaz/z-facet-1.h", "include/yaz/ill-core.h", "include/yaz/oclc-ill-req-ext.h", "include/yaz/item-req.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    srcs = plusc(Z3950_FILES) + plusc(["oid_std", "marc8", "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update", "cql", "z-date", "z-univ", "zes-update", "zes-admin", "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core", "oclc-ill-req-ext", "item-req" ]) + glob(["src/*.c"]),
+    hdrs = plush(Z3950_FILES) + plush(["oid_std", "diagbib1", "diagsrw", "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin", "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core", "oclc-ill-req-ext", "item-req" ]) + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 
