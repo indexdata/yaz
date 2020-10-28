@@ -229,7 +229,7 @@ cc_library(
 	 "oclc-ill-req-ext", "item-req"
 	 ])
 	 + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
-    visibility = ["//main:__pkg__"],
+    visibility = [ "//visibility:public" ],
 )
 
 cc_library(
@@ -240,7 +240,7 @@ cc_library(
     local_defines = [ "HAVE_CONFIG_H" ],
     srcs = c_dir("src", ["statserv", "seshigh", "eventl", "requestq"]),
     hdrs = ["src/eventl.h", "src/session.h"],
-    visibility = ["//main:__pkg__"],
+    visibility = [ "//visibility:public" ],
     deps = [
         ":yaz",
     ],
@@ -269,23 +269,7 @@ cc_library(
 	 "libstemmer_c/src_c/stem_UTF_8_english.h",
     ],
     hdrs = [],
-    visibility = ["//main:__pkg__"],
-    deps = [
-        ":yaz",
-    ],
-)
-
-cc_binary(
-    name = "yaz-client",
-    includes = [ "include" ],
-    copts = [ "-pthread" ] + INCLUDES_EXT,
-    linkopts = LIBS_EXT + [ "-lreadline" ],
-    local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = [
-	 "client/admin.h", "client/admin.c", "client/tabcomplete.h",
-	 "client/tabcomplete.c", "client/client.c", "client/fhistory.c",
-	 "client/fhistory.h",
-	 ],
+    visibility = [ "//visibility:public" ],
     deps = [
         ":yaz",
     ],
