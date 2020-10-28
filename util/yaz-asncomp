@@ -1080,7 +1080,6 @@ proc asnModules {} {
 	    if {![info exists inf(h-file)]} {
 		set inf(h-file) ${fname}.h
 	    }
-	    puts "Opening header $inf(h-path)/$inf(h-dir)$inf(h-file)"
 	    set file(outh) [open $inf(h-path)/$inf(h-dir)$inf(h-file) w]
 
 	    if {0} {
