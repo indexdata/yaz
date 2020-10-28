@@ -61,7 +61,7 @@ int yyerror(void *lval, char *msg);
 
 %lex-param {void *parm}
 %parse-param {void *parm}
-%pure-parser
+%define api.pure
 %token PREFIX_NAME SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
