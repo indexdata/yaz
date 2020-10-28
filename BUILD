@@ -3,6 +3,7 @@
 # bazel  build //:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("util.bzl", "cplush")
 
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 
@@ -71,6 +72,54 @@ genrule(
     visibility = [ "//visibility:public" ],
 )
 
+genrule(
+    name = "z3950",
+    srcs = [ "src/z3950v3.asn", "src/z.tcl" ],
+    outs = cplush(["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac", "z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-core.c)\" -I \"2 $(location include/yaz/z-core.h)\" $(location src/z3950v3.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "datetime",
+    srcs = [ "src/datetime.asn", "src/z.tcl" ],
+    outs = cplush(["z-date"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-date.c)\" -I \"2 $(location include/yaz/z-date.h)\" $(location src/datetime.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "univres",
+    srcs = [ "src/univres.asn", "src/z.tcl" ],
+    outs = cplush(["z-univ"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-univ.c)\" -I \"2 $(location include/yaz/z-univ.h)\" $(location src/univres.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "esupdate",
+    srcs = [ "src/esupdate.asn", "src/z.tcl" ],
+    outs = cplush(["zes-update"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/zes-update.c)\" -I \"2 $(location include/yaz/zes-update.h)\" $(location src/esupdate.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "esadmin",
+    srcs = [ "src/esadmin.asn", "src/z.tcl" ],
+    outs = cplush(["zes-admin"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/zes-admin.c)\" -I \"2 $(location include/yaz/zes-admin.h)\" $(location src/esadmin.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "charneg",
+    srcs = [ "src/charneg-3.asn", "src/z.tcl" ],
+    outs = cplush(["z-charneg"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-charneg.c)\" -I \"2 $(location include/yaz/z-charneg.h)\" $(location src/charneg-3.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
 cc_library(
     name = "yaz",
     includes = [ "include" ],
@@ -78,7 +127,7 @@ cc_library(
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
     srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
-    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-core.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 
