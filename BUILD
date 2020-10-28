@@ -120,6 +120,54 @@ genrule(
     tools = [ "util/yaz-asncomp" ],
 )
 
+genrule(
+    name = "mterm2",
+    srcs = [ "src/mterm2.asn", "src/z.tcl" ],
+    outs = cplush(["z-mterm2"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-mterm2.c)\" -I \"2 $(location include/yaz/z-mterm2.h)\" $(location src/mterm2.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "oclcui",
+    srcs = [ "src/oclcui.asn", "src/z.tcl" ],
+    outs = cplush(["z-oclcui"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-oclcui.c)\" -I \"2 $(location include/yaz/z-oclcui.h)\" $(location src/oclcui.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "facet",
+    srcs = [ "src/facet.asn", "src/z.tcl" ],
+    outs = cplush(["z-facet-1"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-facet-1.c)\" -I \"2 $(location include/yaz/z-facet-1.h)\" $(location src/facet.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "ill-core",
+    srcs = [ "src/ill9702.asn", "src/ill.tcl" ],
+    outs = cplush(["ill-core"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/ill-core.c)\" -I \"2 $(location include/yaz/ill-core.h)\" $(location src/ill9702.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "oclc-ill-req-ext",
+    srcs = [ "src/oclc-ill-req-ext.asn", "src/ill.tcl" ],
+    outs = cplush(["oclc-ill-req-ext"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/oclc-ill-req-ext.c)\" -I \"2 $(location include/yaz/oclc-ill-req-ext.h)\" $(location src/oclc-ill-req-ext.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
+genrule(
+    name = "item-req",
+    srcs = [ "src/item-req.asn", "src/ill.tcl" ],
+    outs = cplush(["item-req"]),
+    cmd = "$(location util/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/item-req.c)\" -I \"2 $(location include/yaz/item-req.h)\" $(location src/item-req.asn)",
+    tools = [ "util/yaz-asncomp" ],
+)
+
 cc_library(
     name = "yaz",
     includes = [ "include" ],
@@ -127,7 +175,7 @@ cc_library(
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
     srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
-    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-core.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-core.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h", "include/yaz/z-mterm2.h", "include/yaz/z-oclcui.h", "include/yaz/z-facet-1.h", "include/yaz/ill-core.h", "include/yaz/oclc-ill-req-ext.h", "include/yaz/item-req.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 
