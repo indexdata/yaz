@@ -3,6 +3,8 @@
 
 YAZ_VERSION_INFO=5:0:0
 
+bin_SCRIPTS = yaz-asncomp
+
 lib_LTLIBRARIES = libyaz.la libyaz_server.la libyaz_icu.la
 
 dist-hook:
@@ -18,9 +20,9 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
  csvtodiag.tcl bib1.csv srw.csv \
- sru_update.csv oidtoc.tcl oid.csv
+ sru_update.csv oidtoc.tcl oid.csv yaz-asncomp
 
-YAZCOMP=$(top_srcdir)/util/yaz-asncomp
+YAZCOMP=$(tsrcdir)/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
 YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
 

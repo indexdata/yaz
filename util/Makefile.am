@@ -1,9 +1,9 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-bin_SCRIPTS = yaz-asncomp yaz-config 
+bin_SCRIPTS = yaz-config
 
-EXTRA_DIST = yaz-asncomp yaz-icu-example.xml
+EXTRA_DIST = yaz-icu-example.xml
 
 DISTCLEANFILES = yaz-config
 

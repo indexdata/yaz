@@ -306,7 +306,7 @@ RELEASE_LNK_OPTIONS=
 DLL_LINK_OPTIONS= /dll
 CLIENT_LINK_OPTIONS = /subsystem:console
 
-COMMON_TCL_OPTIONS= ..\util\yaz-asncomp -I$(INCLDIR) -i yaz
+COMMON_TCL_OPTIONS= yaz-asncomp -I$(INCLDIR) -i yaz
 
 # Final opt variables
 !if $(DEBUG)
