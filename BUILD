@@ -224,14 +224,19 @@ cc_library(
 	 "iconv_decode_danmarc", "sc", "json", "xml_include", "file_glob",
 	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
 	 "thread_create", "spipe", "url", "backtrace"
-	 ]),
+	 ])
+	 + h_dir("include", [ "config", "diag-entry" ])
+	 + h_dir("src", ["cclp", "iconv-p", "mime", "mutex-p",
+	   "odr-priv", "sru-p", "zoom-p"
+	 ])
+	 ,
     hdrs = h_dir("include/yaz", Z3950_FILES + [
 	 "oid_std", "diagbib1", "diagsrw",
 	 "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
 	 "oclc-ill-req-ext", "item-req"
 	 ])
-	 + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+	 + glob(["include/yaz/*.h"]),
     visibility = [ "//visibility:public" ],
 )
 
@@ -241,8 +246,9 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = c_dir("src", ["statserv", "seshigh", "eventl", "requestq"]),
-    hdrs = ["src/eventl.h", "src/session.h"],
+    srcs = c_dir("src", ["statserv", "seshigh", "eventl", "requestq"])
+         + h_dir("src", ["eventl", "session"]),
+    hdrs = [],
     visibility = [ "//visibility:public" ],
     deps = [
         ":yaz",
