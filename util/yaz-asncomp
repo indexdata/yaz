@@ -1071,11 +1071,16 @@ proc asnModules {} {
 	    if {![info exists inf(c-file)]} {
 		set inf(c-file) ${fname}.c
 	    }
-	    set file(outc) [open $inf(c-file) w]
+	    if {[info exists inf(c-path)]} {
+		set file(outc) [open $inf(c-path)/$inf(c-file) w]
+	    } else {
+		set file(outc) [open $inf(c-file) w]
+	    }
 
 	    if {![info exists inf(h-file)]} {
 		set inf(h-file) ${fname}.h
 	    }
+	    puts "Opening header $inf(h-path)/$inf(h-dir)$inf(h-file)"
 	    set file(outh) [open $inf(h-path)/$inf(h-dir)$inf(h-file) w]
 
 	    if {0} {
@@ -1311,6 +1316,18 @@ proc userDef {name} {
     }
 }
 
+proc parsePath {p} {
+    if {[llength $p] == 2} {
+	set i [lindex $p 0]
+	set p [lindex $p 1]
+	while {$i > 0} {
+	    set p [file dirname $p]
+	    incr i -1
+	}
+    }
+    return $p
+}
+
 set inf(verbose) 0
 set inf(prefix) {yc_ Yc_ YC_}
 set inf(h-path) .
@@ -1332,12 +1349,19 @@ while {$i < $l} {
              }
 	    set inf(c-file) $p
         }
+        -C* {
+	    set p [string range $arg 2 end]
+	    if {![string length $p]} {
+                 set p [lindex $argv [incr i]]
+	    }
+	    set inf(c-path) [parsePath $p]
+        }
         -I* {
 	    set p [string range $arg 2 end]
 	    if {![string length $p]} {
                  set p [lindex $argv [incr i]]
-             }
-	    set inf(h-path) $p
+	    }
+	    set inf(h-path) [parsePath $p]
         }
 	-i* {
 	    set p [string range $arg 2 end]
@@ -1400,7 +1424,7 @@ if {![info exists inf(iname)]} {
     puts "YAZ ASN.1 Compiler ${yc_version}"
     puts "Usage:"
     puts -nonewline ${argv0}
-    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-I iout]}
+    puts { [-v] [-c cfile] [-h hfile] [-p hfile] [-d dfile] [-C cout] [-I iout]}
     puts {    [-i idir] [-m module] file}
     exit 1
 }
