@@ -170,13 +170,20 @@ genrule(
     tools = [ "util/yaz-asncomp" ],
 )
 
+genrule(
+    name = "cql",
+    srcs = [ "src/cql.y" ],
+    outs = [ "src/cql.c" ],
+    cmd = "bison -p cql_ $(location src/cql.y) -o $(location src/cql.c)",
+)
+
 cc_library(
     name = "yaz",
     includes = [ "include" ],
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
+    srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c", "src/cql.c" ] + glob(["src/*.c"]),
     hdrs = plush(Z3950_FILES) + ["include/yaz/oid_std.h", "include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h", "include/yaz/z-mterm2.h", "include/yaz/z-oclcui.h", "include/yaz/z-facet-1.h", "include/yaz/ill-core.h", "include/yaz/oclc-ill-req-ext.h", "include/yaz/item-req.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
