@@ -3,11 +3,13 @@
 # bazel  build //:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("util.bzl", "cplush")
+load("util.bzl", "cplush", "plush")
 
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
+
+Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac", "z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]
 
 genrule(
     name = "oidtoc",
@@ -75,7 +77,7 @@ genrule(
 genrule(
     name = "z3950",
     srcs = [ "src/z3950v3.asn", "src/z.tcl" ],
-    outs = cplush(["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac", "z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]),
+    outs = cplush(Z3950_FILES),
     cmd = "$(location util/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-core.c)\" -I \"2 $(location include/yaz/z-core.h)\" $(location src/z3950v3.asn)",
     tools = [ "util/yaz-asncomp" ],
 )
@@ -175,7 +177,7 @@ cc_library(
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
     srcs = ["src/oid_std.c", "src/marc8.c", "src/marc8r.c", "src/iso5426.c", "src/diagbib1.c", "src/diagsrw.c", "src/diagsru_update.c" ] + glob(["src/*.c"]),
-    hdrs = ["include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-core.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h", "include/yaz/z-mterm2.h", "include/yaz/z-oclcui.h", "include/yaz/z-facet-1.h", "include/yaz/ill-core.h", "include/yaz/oclc-ill-req-ext.h", "include/yaz/item-req.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    hdrs = plush(Z3950_FILES) + ["include/yaz/oid_std.h", "include/yaz/diagbib1.h", "include/yaz/diagsrw.h", "include/yaz/diagsru_update.h", "include/yaz/z-date.h", "include/yaz/z-univ.h", "include/yaz/zes-update.h", "include/yaz/zes-admin.h", "include/yaz/z-charneg.h", "include/yaz/z-mterm2.h", "include/yaz/z-oclcui.h", "include/yaz/z-facet-1.h", "include/yaz/ill-core.h", "include/yaz/oclc-ill-req-ext.h", "include/yaz/item-req.h" ] + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
 )
 

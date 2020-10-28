@@ -5,3 +5,9 @@ def cplush(names):
         l.append("src/" + name + ".c")
         l.append("include/yaz/" + name + ".h")
     return l
+
+def plush(names):
+    l = []
+    for name in names:
+        l.append("include/yaz/" + name + ".h")
+    return l
