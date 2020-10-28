@@ -9,7 +9,7 @@ LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 
-Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac", "z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]
+Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac","z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]
 
 genrule(
     name = "oidtoc",
@@ -183,9 +183,82 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = plusc(Z3950_FILES) + plusc(["oid_std", "marc8", "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update", "cql", "z-date", "z-univ", "zes-update", "zes-admin", "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core", "oclc-ill-req-ext", "item-req" ]) + glob(["src/*.c"]),
-    hdrs = plush(Z3950_FILES) + plush(["oid_std", "diagbib1", "diagsrw", "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin", "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core", "oclc-ill-req-ext", "item-req" ]) + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
+    srcs = plusc(Z3950_FILES) + plusc(["oid_std", "marc8",
+	 "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update",
+	 "cql", "z-date", "z-univ", "zes-update", "zes-admin",
+	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
+	 "oclc-ill-req-ext", "item-req", "base64", "version", "options",
+	 "log", "cookie", "marcdisp", "marc_read_json", "marc_read_xml",
+	 "marc_read_iso2709",  "marc_read_line", "wrbuf", "wrbuf_sha1",
+	 "malloc_info", "oid_db", "errno", "nmemsdup", "xmalloc", "readconf",
+	 "tpath", "nmem", "matchstr", "atoin", "siconv", "utf8", "ucs4",
+	 "iso5428", "advancegreek", "odr_bool", "ber_bool", "ber_len",
+	 "ber_tag", "odr_util", "facet", "odr_null", "ber_null", "odr_int",
+	 "ber_int", "odr_tag", "odr_cons", "odr_seq", "odr_oct", "ber_oct",
+	 "odr_bit", "ber_bit", "odr_oid", "ber_oid", "odr_use", "odr_choice",
+	 "odr_any", "ber_any", "odr", "odr_mem", "dumpber", "odr_enum",
+	 "comstack", "tcpip", "unix", "prt-ext", "proxunit",
+	 "ill-get", "zget", "yaz-ccl", "diag-entry", "logrpn", "otherinfo",
+	 "pquery", "sortspec", "charneg", "initopt", "init_diag",
+	 "init_globals", "zoom-c", "zoom-memcached", "zoom-z3950", "zoom-sru",
+	 "zoom-query", "zoom-record-cache", "zoom-event", "record_render",
+	 "zoom-socket", "zoom-opt", "sru_facet",
+	 "grs1disp", "zgdu", "soap", "srw", "srwutil", "uri", "solr",
+	 "diag_map", "opac_to_xml", "xml_add", "xml_match", "xml_to_opac",
+	 "cclfind", "ccltoken", "cclerrms", "cclqual", "cclptree", "cclqfile",
+	 "cclstr", "cclxmlconfig", "ccl_stop_words", "cqlstdio",
+	 "cqltransform", "cqlutil", "xcqlutil", "cqlstring", "cql_sortkeys",
+	 "cql2ccl", "rpn2cql", "rpn2solr", "solrtransform", "cqlstrer",
+	 "querytowrbuf", "tcpdchk", "test", "timing", "xml_get", "xmlquery",
+	 "xmlerror", "http", "mime", "oid_util", "tokenizer",
+	 "record_conv", "retrieval", "elementset", "snprintf",
+	 "query-charset", "copy_types", "match_glob", "poll", "daemon",
+	 "iconv_encode_danmarc", "iconv_encode_marc8",
+	 "iconv_encode_iso_8859_1", "iconv_encode_wchar",
+	 "iconv_decode_marc8", "iconv_decode_iso5426",
+	 "iconv_decode_danmarc", "sc", "json", "xml_include", "file_glob",
+	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
+	 "thread_create", "spipe", "url", "backtrace"
+	 ]),
+    hdrs = plush(Z3950_FILES) + plush([
+	 "oid_std", "diagbib1", "diagsrw",
+	 "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin",
+	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
+	 "oclc-ill-req-ext", "item-req"
+	 ])
+	 + glob(["src/*.h", "include/*.h", "include/yaz/*.h"]),
     visibility = ["//main:__pkg__"],
+)
+
+cc_library(
+    name = "yaz_server",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = plusc(["statserv", "seshigh", "eventl", "requestq"]),
+    hdrs = ["src/eventl.h", "src/session.h"],
+    visibility = ["//main:__pkg__"],
+    deps = [
+        ":yaz",
+    ],
+)
+
+cc_library(
+    name = "yaz_icu",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = plusc([
+	 "icu_chain", "icu_utf16", "icu_utf8", "stemmer",
+	 "icu_transform", "icu_casemap", "icu_tokenizer", "icu_sortkey"
+	 ]),
+    hdrs = [],
+    visibility = ["//main:__pkg__"],
+    deps = [
+        ":yaz",
+    ],
 )
 
 cc_binary(
@@ -194,7 +267,11 @@ cc_binary(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT + [ "-lreadline" ],
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["client/admin.h", "client/admin.c", "client/tabcomplete.h", "client/tabcomplete.c", "client/client.c", "client/fhistory.c", "client/fhistory.h"]),
+    srcs = [
+	 "client/admin.h", "client/admin.c", "client/tabcomplete.h",
+	 "client/tabcomplete.c", "client/client.c", "client/fhistory.c",
+	 "client/fhistory.h",
+	 ],
     deps = [
         ":yaz",
     ],
@@ -206,9 +283,12 @@ cc_binary(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["ztest/dummy-opac.c", "ztest/read-grs.c", "ztest/read-marc.c", "ztest/ztest.c", "ztest/ztest.h"]),
+    srcs = [
+	 "ztest/dummy-opac.c", "ztest/read-grs.c",
+	 "ztest/read-marc.c", "ztest/ztest.c", "ztest/ztest.h",
+	 ],
     deps = [
-        ":yaz",
+        ":yaz_server",
     ],
 )
 
@@ -218,7 +298,7 @@ cc_binary(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT + [ "-lreadline" ],
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["util/cclsh.c"]),
+    srcs = ["util/cclsh.c"],
     deps = [
         ":yaz",
     ],
@@ -230,7 +310,7 @@ cc_binary(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["util/cql2pqf.c"]),
+    srcs = ["util/cql2pqf.c"],
     deps = [
         ":yaz",
     ],
@@ -242,9 +322,69 @@ cc_binary(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = glob(["util/cql2xcql.c"]),
+    srcs = ["util/cql2xcql.c"],
     deps = [
         ":yaz",
+    ],
+)
+
+cc_binary(
+    name = "yaz-marcdump",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = ["util/marcdump.c"],
+    deps = [
+        ":yaz",
+    ],
+)
+
+cc_binary(
+    name = "yaz-json-parse",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = ["util/json-parse.c"],
+    deps = [
+        ":yaz",
+    ],
+)
+
+cc_binary(
+    name = "yaz-illclient",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = ["util/yaz-illclient.c"],
+    deps = [
+        ":yaz",
+    ],
+)
+
+cc_binary(
+    name = "yaz-record-conv",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = ["util/yaz-record-conv.c"],
+    deps = [
+        ":yaz",
+    ],
+)
+
+cc_binary(
+    name = "yaz-icu",
+    includes = [ "include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT,
+    linkopts = LIBS_EXT,
+    local_defines = [ "HAVE_CONFIG_H" ],
+    srcs = ["util/yaz-icu.c"],
+    deps = [
+        ":yaz_icu",
     ],
 )
 
