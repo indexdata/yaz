@@ -3,11 +3,13 @@
 # bazel  build //:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("util.bzl", "cplush", "plush", "plusc")
+load("util.bzl", "cplush", "c_dir", "h_dir")
 
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
-
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
+
+LIBS_ICU = [ "-licui18n", "-licuuc", "-licudata" ]
+INCLUDES_ICU = []
 
 Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac","z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]
 
@@ -183,7 +185,7 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = plusc(Z3950_FILES) + plusc(["oid_std", "marc8",
+    srcs = c_dir("src", Z3950_FILES) + c_dir("src", ["oid_std", "marc8",
 	 "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update",
 	 "cql", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
@@ -220,7 +222,7 @@ cc_library(
 	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
 	 "thread_create", "spipe", "url", "backtrace"
 	 ]),
-    hdrs = plush(Z3950_FILES) + plush([
+    hdrs = h_dir("include/yaz", Z3950_FILES + [
 	 "oid_std", "diagbib1", "diagsrw",
 	 "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
@@ -236,7 +238,7 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = plusc(["statserv", "seshigh", "eventl", "requestq"]),
+    srcs = c_dir("src", ["statserv", "seshigh", "eventl", "requestq"]),
     hdrs = ["src/eventl.h", "src/session.h"],
     visibility = ["//main:__pkg__"],
     deps = [
@@ -246,14 +248,26 @@ cc_library(
 
 cc_library(
     name = "yaz_icu",
-    includes = [ "include" ],
-    copts = [ "-pthread" ] + INCLUDES_EXT,
-    linkopts = LIBS_EXT,
-    local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = plusc([
+    includes = [ "include", "libstemmer_c/include" ],
+    copts = [ "-pthread" ] + INCLUDES_EXT + INCLUDES_ICU,
+    linkopts = LIBS_EXT + LIBS_ICU,
+    local_defines = [ "HAVE_CONFIG_H", "YAZ_HAVE_ICU=1" ],
+    srcs = c_dir("src", [
 	 "icu_chain", "icu_utf16", "icu_utf8", "stemmer",
 	 "icu_transform", "icu_casemap", "icu_tokenizer", "icu_sortkey"
-	 ]),
+	 ]) + [
+	 "libstemmer_c/include/libstemmer.h",
+	 "libstemmer_c/libstemmer/libstemmer.c",
+	 "libstemmer_c/libstemmer/modules.h",
+	 "libstemmer_c/runtime/api.c",
+	 "libstemmer_c/runtime/api.h",
+	 "libstemmer_c/runtime/header.h",
+	 "libstemmer_c/runtime/utilities.c",
+	 "libstemmer_c/src_c/stem_UTF_8_porter.c",
+	 "libstemmer_c/src_c/stem_UTF_8_porter.h",
+	 "libstemmer_c/src_c/stem_UTF_8_english.c",
+	 "libstemmer_c/src_c/stem_UTF_8_english.h",
+    ],
     hdrs = [],
     visibility = ["//main:__pkg__"],
     deps = [
@@ -381,7 +395,7 @@ cc_binary(
     includes = [ "include" ],
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
-    local_defines = [ "HAVE_CONFIG_H" ],
+    local_defines = [ "HAVE_CONFIG_H", "YAZ_HAVE_ICU=1" ],
     srcs = ["util/yaz-icu.c"],
     deps = [
         ":yaz_icu",

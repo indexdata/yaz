@@ -6,14 +6,14 @@ def cplush(names):
         l.append("include/yaz/" + name + ".h")
     return l
 
-def plush(names):
+def c_dir(dir, names):
     l = []
     for name in names:
-        l.append("include/yaz/" + name + ".h")
+        l.append(dir + "/" + name + ".c")
     return l
 
-def plusc(names):
+def h_dir(dir, names):
     l = []
     for name in names:
-        l.append("src/" + name + ".c")
+        l.append(dir + "/" + name + ".h")
     return l
