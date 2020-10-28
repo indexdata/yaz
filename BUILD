@@ -1,6 +1,9 @@
-# Bazel BUILD file for YAZ
+# Bazel BUILD file for YAZ library
 #
-# bazel  build //:all
+# Build library:
+#  bazel  build //:all
+# Build everything:
+#  bazel build //...
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("util.bzl", "cplush", "c_dir", "h_dir")
