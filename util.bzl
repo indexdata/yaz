@@ -17,3 +17,12 @@ def h_dir(dir, names):
     for name in names:
         l.append(dir + "/" + name + ".h")
     return l
+
+def listToString(list, sep):
+    r = ""
+    for elem in list:
+        if r == "":
+            r = elem
+        else:
+            r = r + sep + elem
+    return r

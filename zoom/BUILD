@@ -3,7 +3,6 @@
 # bazel  build //zoom:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//:util.bzl", "cplush", "c_dir", "h_dir")
 
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]

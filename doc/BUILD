@@ -4,6 +4,7 @@
 #  bazel  build //doc:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//:util.bzl", "listToString")
 
 REFFILES = ["yaz-client-man.xml", "yaz-ztest-man.xml", "yaz-config-man.xml",
         "yaz-man.xml", "zoomsh-man.xml", "yaz-asncomp-man.xml", 
@@ -41,5 +42,32 @@ genrule(
     srcs = [ "yaz-client-man.xml" ],
     outs = [ "yaz-client.1" ],
     cmd = "xsltproc -o $(location yaz-client.1) $(location common/id.man.xsl) $(location yaz-client-man.xml) 2>/dev/null",
-    tools = [ "//:src/csvtodiag.tcl", "common/id.man.xsl"],
+    tools = [ "common/id.man.xsl"],
+)
+
+genrule(
+    name = "manref",
+    srcs = REFFILES + [
+       "gfs-options.xml", "gfs-synopsis.xml", "gfs-virtual.xml",
+       "local.ent", "entities.ent"
+    ],
+    outs = [ "manref.xml" ],
+    cmd = "rm -f $(location manref.xml);"
+    + "for i in " + listToString(REFFILES, " ") + "; do"
+    + " xsltproc --path .:doc $(location common/stripref.xsl) $$i |"
+    +"    sed 1d >>$@;"
+    + "done",
+    tools = [ "common/stripref.xsl", "common/common.ent"],
+)
+
+genrule(
+    name = "html",
+    srcs = REFFILES + [
+       "gfs-options.xml", "gfs-synopsis.xml", "gfs-virtual.xml",
+       "manref.xml", "book.xml", "local.ent", "entities.ent",
+       "std-oid-table.xml", "bib1-diag-table.xml", "srw-diag-table.xml"
+    ],
+    outs = [ "index.html", "docbook.css" ],
+    cmd = "xsltproc --path $(RULEDIR) --output $(location index.html) $(location id.html5.xsl) $(location book.xml)",
+    tools = [ "id.html5.xsl", "common/common.ent"],
 )
