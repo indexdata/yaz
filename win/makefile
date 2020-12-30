@@ -288,8 +288,8 @@ yaz4j: $(JAVADIR)
 	cd $(YAZ4J_DIR)
 	mvn clean
 	mvn $(MVN_ARGS) -DskipTests install >log
-	copy /Y win32\target\yaz4j.dll "$(MAKEDIR)\..\bin"
-	copy /Y any\target\yaz4j.jar "$(MAKEDIR)\..\java"
+	copy /Y target\native\yaz4j*.dll "$(MAKEDIR)\..\bin"
+	copy /Y target\yaz4j*.jar "$(MAKEDIR)\..\java"
 
 ### Linker options
 LINK=link.exe
