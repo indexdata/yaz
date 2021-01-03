@@ -48,7 +48,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
+all: dirs generate dll client ztest yazicu zoomsh utilprog \
  testprog iconv icu libxml2 libxslt yaz_url
 
 NSIS="c:\program files (x86)\nsis\makensis.exe"
@@ -136,7 +136,6 @@ YAZ_ICU=$(BINDIR)\yaz-icu.exe
 YAZ_URL=$(BINDIR)\yaz-url.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
-SC_TEST=$(BINDIR)\sc_test.exe
 
 ZOOMTST1=$(BINDIR)\zoomtst1.exe
 ZOOMTST2=$(BINDIR)\zoomtst2.exe
@@ -164,8 +163,6 @@ TEST_MUTEX=$(BINDIR)\test_mutex.exe
 dll: dirs generate $(YAZ_DLL) $(YAZ_COND_DLL)
 client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
-
-sc_test: $(SC_TEST)
 
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
@@ -349,9 +346,6 @@ ZTEST_OBJS= \
     $(OBJDIR)\read-marc.obj \
     $(OBJDIR)\read-grs.obj \
     $(OBJDIR)\ztest.obj
-
-SC_TEST_OBJS = \
-   $(OBJDIR)\sc_test.obj
 
 YAZ_ZOOMSH_OBJS = \
    $(OBJDIR)\zoomsh.obj
@@ -946,9 +940,6 @@ $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
 
 $(YAZ_URL) : "$(BINDIR)" $(YAZ_URL_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_URL_OBJS) /out:$@
-
-$(SC_TEST) : "$(BINDIR)" $(SC_TEST_OBJS) $(YAZ_DLL)
-	$(LINK_PROGRAM) $(SC_TEST_OBJS) /out:$@
 
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@
