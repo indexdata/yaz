@@ -20,8 +20,15 @@ ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 HAVE_ICU=1
 ICU_VER=64
 ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2017
+!if $(BARCH) == 32
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
+!elseif $(BARCH) == 64
+ICU_LIB = $(ICU_BASE)\lib64
+ICU_BIN = $(ICU_BASE)\bin64
+!else
+!error BARCH must be 32 or 64
+!endif
 ICU_INCLUDE = $(ICU_BASE)\include
 
 # libxslt
