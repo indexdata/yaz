@@ -53,7 +53,7 @@ YAZPATH="$(MAKEDIR)\.."
 
 
 dist: yaz.nsi version.nsi distclean
-	nmake DEBUG=0 all yaz4j
+	nmake DEBUG=0 all
 	nmake nsis
 
 dist64: yaz.nsi version.nsi distclean
