@@ -882,7 +882,7 @@ $(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
 
 version.nsi: $(ROOTDIR)/IDMETA
-	$(TCL) $(SRCDIR)/mk_version.tcl $(ROOTDIR)/IDMETA version.nsi
+	$(TCL) $(M4DIR)/mk_version.tcl $(ROOTDIR)/IDMETA version.nsi
 
 
 !endif
