@@ -165,9 +165,9 @@ SectionEnd
 Section "YAZ4J" YAZ4J
 	SectionIn 1 2
 	SetOutPath $INSTDIR\bin
-	File /nonfatal ..\bin\yaz4j.dll
+	File /nonfatal ..\bin\yaz4j*.dll
 	SetOutPath $INSTDIR\java
-	File /nonfatal ..\java\yaz4j.jar
+	File /nonfatal ..\java\yaz4j*.jar
 SectionEnd
 
 Section "YAZ Path" YAZ_PATH
