@@ -273,6 +273,7 @@ COMMON_C_OPTIONS=          \
 
 COMMON_C_INCLUDES= \
   /I"$(ROOTDIR)\include" \
+  /I"$(ROOTDIR)\src" \
   /I"$(ROOTDIR)\libstemmer_c\include"
 
 DEBUG_C_OPTIONS=  \
