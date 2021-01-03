@@ -18,17 +18,10 @@ ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=56
-ICU_BASE = c:\icu-56.1-vs2015
-!if $(BARCH) == 32
+ICU_VER=64
+ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2017
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
-!elseif $(BARCH) == 64
-ICU_LIB = $(ICU_BASE)\lib64
-ICU_BIN = $(ICU_BASE)\bin64
-!else
-!error BARCH must be 32 or 64
-!endif
 ICU_INCLUDE = $(ICU_BASE)\include
 
 # libxslt
@@ -152,6 +145,9 @@ ZOOMTST10=$(BINDIR)\zoomtst10.exe
 CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
 YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
+YAZ_ICONV=$(BINDIR)\yaz-iconv.exe
+YAZ_RECORD_CONV=$(BINDIR)\yaz-record-conv.exe
+YAZ_JSON_PARSE=$(BINDIR)\yaz-json-parse.exe
 
 TSTLOG=$(BINDIR)\test_log.exe
 TST_TIMING=$(BINDIR)\test_timing.exe
@@ -170,7 +166,7 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
 
 yaz_url: $(YAZ_URL)
 
-utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
+utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) $(YAZ_ICONV) $(YAZ_RECORD_CONV) $(YAZ_JSON_PARSE)
 testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
@@ -200,9 +196,7 @@ ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
-icu: $(BINDIR)\icudt$(ICU_VER).dll \
-	$(BINDIR)\icuin$(ICU_VER).dll \
-	$(BINDIR)\icuuc$(ICU_VER).dll
+icu: $(BINDIR)\icudt$(ICU_VER).dll $(BINDIR)\icuin$(ICU_VER).dll $(BINDIR)\icuuc$(ICU_VER).dll
 yazicu: dirs generate $(YAZ_ICU)
 
 $(BINDIR)\icudt$(ICU_VER).dll:
@@ -381,7 +375,12 @@ YAZ_CQL2XCQL_OBJS = \
    $(OBJDIR)\cql2xcql.obj
 YAZ_MARCDUMP_OBJS = \
    $(OBJDIR)\marcdump.obj
-
+YAZ_ICONV_OBJS = \
+   $(OBJDIR)\yaziconv.obj
+YAZ_RECORD_CONV_OBJS = \
+   $(OBJDIR)\yaz-record-conv.obj
+YAZ_JSON_PARSE_OBJS = \
+   $(OBJDIR)\json-parse.obj
 
 TSTLOG_OBJS = \
    $(OBJDIR)\test_log.obj
@@ -987,6 +986,15 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(YAZ_DLL)
 
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_MARCDUMP_OBJS) /out:$@
+
+$(YAZ_ICONV) : "$(BINDIR)" $(YAZ_ICONV_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_ICONV_OBJS) /out:$@
+
+$(YAZ_RECORD_CONV) : "$(BINDIR)" $(YAZ_RECORD_CONV_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_RECORD_CONV_OBJS) /out:$@
+
+$(YAZ_JSON_PARSE) : "$(BINDIR)" $(YAZ_JSON_PARSE_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_JSON_PARSE_OBJS) /out:$@
 
 $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@
