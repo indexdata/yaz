@@ -285,8 +285,7 @@ MVN_ARGS=-Dyaz.path=$(YAZPATH)
 # without >log below, mvn install does NOT work
 yaz4j: $(JAVADIR)
 	cd $(YAZ4J_DIR)
-	mvn clean
-	mvn $(MVN_ARGS) -DskipTests install >log
+	cmd /C mvn $(MVN_ARGS) clean package
 	copy /Y target\native\yaz4j*.dll "$(MAKEDIR)\..\bin"
 	copy /Y target\yaz4j*.jar "$(MAKEDIR)\..\java"
 
