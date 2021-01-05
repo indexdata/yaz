@@ -5,6 +5,8 @@
 ; Using https://nsis.sourceforge.io/EnVar_plug-in
 ; for path manipulation
 
+Unicode True
+
 !include version.nsi
 
 !include "MUI.nsh"
