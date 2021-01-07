@@ -189,7 +189,7 @@ Section Uninstall
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
 	RMDir /r $INSTDIR
-	EnVar::setHKLM
+	EnVar::SetHKLM
 	EnVar::DeleteValue "PATH" "$INSTDIR\bin"
 	Pop $0
         IfFileExists $INSTDIR 0 Removed 
