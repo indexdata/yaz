@@ -18,8 +18,8 @@ ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=64
-ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2017
+ICU_VER=68
+ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2019
 !if $(BARCH) == 32
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
