@@ -18,7 +18,7 @@ VS_VERSION_INFO VERSIONINFO
  {
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "http://www.indexdata.com/yaz/\0"
+            VALUE "Comments", "https://www.indexdata.com/yaz/\0"
             VALUE "CompanyName", "Index Data\0"
 #ifdef ICU
             VALUE "FileDescription", "YAZ ICU DLL\0"
