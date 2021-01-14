@@ -24,6 +24,7 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xinclude.h>
 
 struct yaz_xml_include_s {
     const char *confdir;
@@ -58,7 +59,18 @@ static int config_include_one(yaz_xml_include_t config, xmlNode **sib,
     {
         if ((st.st_mode & S_IFMT) == S_IFREG)
         {
-            xmlDoc *doc = xmlParseFile(path);
+            xmlDoc *doc = xmlReadFile(path,
+                              NULL,
+                              XML_PARSE_XINCLUDE
+                              + XML_PARSE_NSCLEAN + XML_PARSE_NONET);
+            // Perform XInclude.
+            int r = xmlXIncludeProcess(doc);
+            if (r == -1)
+            {
+                yaz_log(YLOG_FATAL, "XInclude processing failed");
+                return -1;
+            }
+
             if (doc)
             {
                 xmlNodePtr t = xmlDocGetRootElement(doc);
