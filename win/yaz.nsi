@@ -5,6 +5,8 @@
 ; Using https://nsis.sourceforge.io/EnVar_plug-in
 ; for path manipulation
 
+Unicode True
+
 !include version.nsi
 
 !include "MUI.nsh"
@@ -165,9 +167,9 @@ SectionEnd
 Section "YAZ4J" YAZ4J
 	SectionIn 1 2
 	SetOutPath $INSTDIR\bin
-	File /nonfatal ..\bin\yaz4j.dll
+	File /nonfatal ..\bin\yaz4j*.dll
 	SetOutPath $INSTDIR\java
-	File /nonfatal ..\java\yaz4j.jar
+	File /nonfatal ..\java\yaz4j*.jar
 SectionEnd
 
 Section "YAZ Path" YAZ_PATH
@@ -187,7 +189,7 @@ Section Uninstall
 	DeleteRegKey HKLM "SOFTWARE\Index Data\YAZ"
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\YAZ"
 	RMDir /r $INSTDIR
-	EnVar::setHKLM
+	EnVar::SetHKLM
 	EnVar::DeleteValue "PATH" "$INSTDIR\bin"
 	Pop $0
         IfFileExists $INSTDIR 0 Removed 

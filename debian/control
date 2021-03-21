@@ -6,6 +6,7 @@ Priority: extra
 Build-Depends: debhelper (>= 7),
 	pkg-config,
 	libxslt1-dev,
+	xsltproc,
 	libgnutls28-dev|libgnutls-dev,
 	libreadline-dev|libreadline5-dev,
 	libwrap0-dev,

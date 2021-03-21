@@ -18,8 +18,8 @@ ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=56
-ICU_BASE = c:\icu-56.1-vs2015
+ICU_VER=68
+ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2019
 !if $(BARCH) == 32
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
@@ -48,7 +48,7 @@ BISON=bison
 
 default: all
 
-all: dirs generate dll sc_test client ztest yazicu zoomsh utilprog \
+all: dirs generate dll client ztest yazicu zoomsh utilprog \
  testprog iconv icu libxml2 libxslt yaz_url
 
 NSIS="c:\program files (x86)\nsis\makensis.exe"
@@ -60,7 +60,7 @@ YAZPATH="$(MAKEDIR)\.."
 
 
 dist: yaz.nsi version.nsi distclean
-	nmake DEBUG=0 all yaz4j
+	nmake DEBUG=0 all
 	nmake nsis
 
 dist64: yaz.nsi version.nsi distclean
@@ -136,7 +136,6 @@ YAZ_ICU=$(BINDIR)\yaz-icu.exe
 YAZ_URL=$(BINDIR)\yaz-url.exe
 ZOOMSH=$(BINDIR)\zoomsh.exe
 ZTEST=$(BINDIR)\yaz-ztest.exe
-SC_TEST=$(BINDIR)\sc_test.exe
 
 ZOOMTST1=$(BINDIR)\zoomtst1.exe
 ZOOMTST2=$(BINDIR)\zoomtst2.exe
@@ -152,6 +151,9 @@ ZOOMTST10=$(BINDIR)\zoomtst10.exe
 CQL2PQF=$(BINDIR)\cql2pqf.exe
 CQL2XCQL=$(BINDIR)\cql2xcql.exe
 YAZ_MARCDUMP=$(BINDIR)\yaz-marcdump.exe
+YAZ_ICONV=$(BINDIR)\yaz-iconv.exe
+YAZ_RECORD_CONV=$(BINDIR)\yaz-record-conv.exe
+YAZ_JSON_PARSE=$(BINDIR)\yaz-json-parse.exe
 
 TSTLOG=$(BINDIR)\test_log.exe
 TST_TIMING=$(BINDIR)\test_timing.exe
@@ -162,15 +164,13 @@ dll: dirs generate $(YAZ_DLL) $(YAZ_COND_DLL)
 client: dirs generate $(CLIENT)
 ztest: dirs generate $(ZTEST)
 
-sc_test: $(SC_TEST)
-
 zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
  $(ZOOMTST4) $(ZOOMTST5) $(ZOOMTST6) $(ZOOMTST7) $(ZOOMTST8) $(ZOOMTST9) \
  $(ZOOMTST10)
 
 yaz_url: $(YAZ_URL)
 
-utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP)
+utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) $(YAZ_ICONV) $(YAZ_RECORD_CONV) $(YAZ_JSON_PARSE)
 testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
@@ -200,9 +200,7 @@ ICU_DEF= \
   /D YAZ_HAVE_ICU=1 /D HAVE_ICU_H=1 /I"$(ICU_INCLUDE)"
 ICU_LIBS= \
   $(ICU_LIB)\icudt.lib $(ICU_LIB)\icuin.lib $(ICU_LIB)\icuuc.lib
-icu: $(BINDIR)\icudt$(ICU_VER).dll \
-	$(BINDIR)\icuin$(ICU_VER).dll \
-	$(BINDIR)\icuuc$(ICU_VER).dll
+icu: $(BINDIR)\icudt$(ICU_VER).dll $(BINDIR)\icuin$(ICU_VER).dll $(BINDIR)\icuuc$(ICU_VER).dll
 yazicu: dirs generate $(YAZ_ICU)
 
 $(BINDIR)\icudt$(ICU_VER).dll:
@@ -272,6 +270,7 @@ COMMON_C_OPTIONS=          \
 
 COMMON_C_INCLUDES= \
   /I"$(ROOTDIR)\include" \
+  /I"$(ROOTDIR)\src" \
   /I"$(ROOTDIR)\libstemmer_c\include"
 
 DEBUG_C_OPTIONS=  \
@@ -286,10 +285,9 @@ MVN_ARGS=-Dyaz.path=$(YAZPATH)
 # without >log below, mvn install does NOT work
 yaz4j: $(JAVADIR)
 	cd $(YAZ4J_DIR)
-	mvn clean
-	mvn $(MVN_ARGS) -DskipTests install >log
-	copy /Y win32\target\yaz4j.dll "$(MAKEDIR)\..\bin"
-	copy /Y any\target\yaz4j.jar "$(MAKEDIR)\..\java"
+	cmd /C mvn $(MVN_ARGS) clean package
+	copy /Y target\native\yaz4j*.dll "$(MAKEDIR)\..\bin"
+	copy /Y target\yaz4j*.jar "$(MAKEDIR)\..\java"
 
 ### Linker options
 LINK=link.exe
@@ -348,9 +346,6 @@ ZTEST_OBJS= \
     $(OBJDIR)\read-grs.obj \
     $(OBJDIR)\ztest.obj
 
-SC_TEST_OBJS = \
-   $(OBJDIR)\sc_test.obj
-
 YAZ_ZOOMSH_OBJS = \
    $(OBJDIR)\zoomsh.obj
 
@@ -381,7 +376,12 @@ YAZ_CQL2XCQL_OBJS = \
    $(OBJDIR)\cql2xcql.obj
 YAZ_MARCDUMP_OBJS = \
    $(OBJDIR)\marcdump.obj
-
+YAZ_ICONV_OBJS = \
+   $(OBJDIR)\yaziconv.obj
+YAZ_RECORD_CONV_OBJS = \
+   $(OBJDIR)\yaz-record-conv.obj
+YAZ_JSON_PARSE_OBJS = \
+   $(OBJDIR)\json-parse.obj
 
 TSTLOG_OBJS = \
    $(OBJDIR)\test_log.obj
@@ -875,7 +875,7 @@ $(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	$(TCL) mk_version.tcl $(ROOTDIR)/IDMETA $(INCLDIR)\yaz\yaz-version.h
 
 version.nsi: $(ROOTDIR)/IDMETA
-	$(TCL) $(SRCDIR)/mk_version.tcl $(ROOTDIR)/IDMETA version.nsi
+	$(TCL) $(M4DIR)/mk_version.tcl $(ROOTDIR)/IDMETA version.nsi
 
 
 !endif
@@ -939,9 +939,6 @@ $(YAZ_ICU) : "$(BINDIR)" $(YAZ_ICU_OBJS) $(YAZ_ICU_DLL)
 $(YAZ_URL) : "$(BINDIR)" $(YAZ_URL_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_URL_OBJS) /out:$@
 
-$(SC_TEST) : "$(BINDIR)" $(SC_TEST_OBJS) $(YAZ_DLL)
-	$(LINK_PROGRAM) $(SC_TEST_OBJS) /out:$@
-
 $(ZOOMSH) : "$(BINDIR)" $(YAZ_ZOOMSH_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_ZOOMSH_OBJS) /out:$@
 
@@ -986,6 +983,15 @@ $(ZTEST) : "$(BINDIR)" $(ZTEST_OBJS) $(YAZ_DLL)
 
 $(YAZ_MARCDUMP) : "$(BINDIR)" $(YAZ_MARCDUMP_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_MARCDUMP_OBJS) /out:$@
+
+$(YAZ_ICONV) : "$(BINDIR)" $(YAZ_ICONV_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_ICONV_OBJS) /out:$@
+
+$(YAZ_RECORD_CONV) : "$(BINDIR)" $(YAZ_RECORD_CONV_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_RECORD_CONV_OBJS) /out:$@
+
+$(YAZ_JSON_PARSE) : "$(BINDIR)" $(YAZ_JSON_PARSE_OBJS) $(YAZ_DLL)
+	$(LINK_PROGRAM) $(YAZ_JSON_PARSE_OBJS) /out:$@
 
 $(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@

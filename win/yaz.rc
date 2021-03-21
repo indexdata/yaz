@@ -18,7 +18,7 @@ VS_VERSION_INFO VERSIONINFO
  {
         BLOCK "000004b0"
         BEGIN
-            VALUE "Comments", "http://www.indexdata.com/yaz/\0"
+            VALUE "Comments", "https://www.indexdata.com/yaz/\0"
             VALUE "CompanyName", "Index Data\0"
 #ifdef ICU
             VALUE "FileDescription", "YAZ ICU DLL\0"
@@ -27,7 +27,7 @@ VS_VERSION_INFO VERSIONINFO
 #endif
             VALUE "FileVersion", YAZ_VERSION "\0"
             VALUE "InternalName", "YAZ\0"
-            VALUE "LegalCopyright", "Copyright © 1995-2015 Index Data\0"
+            VALUE "LegalCopyright", "Copyright © 1995-2021 Index Data\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "yaz.res\0"
             VALUE "PrivateBuild", "\0"
