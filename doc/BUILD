@@ -65,9 +65,14 @@ genrule(
     srcs = REFFILES + [
        "gfs-options.xml", "gfs-synopsis.xml", "gfs-virtual.xml",
        "manref.xml", "book.xml", "local.ent", "entities.ent",
-       "std-oid-table.xml", "bib1-diag-table.xml", "srw-diag-table.xml"
+       "std-oid-table.xml", "bib1-diag-table.xml", "srw-diag-table.xml",
+       "common/id.png", "common/style1.css"
     ],
-    outs = [ "index.html", "docbook.css" ],
-    cmd = "xsltproc --path $(RULEDIR) --output $(location index.html) $(location id.html5.xsl) $(location book.xml)",
-    tools = [ "id.html5.xsl", "common/common.ent"],
+    outs = [ "html.tar.gz" ],
+    cmd = "xsltproc --path $(RULEDIR) $(location common/id.htmlhelp.xsl) $(location book.xml);"
+    + "mkdir common;"
+    + "cp $(location common/id.png) common;"
+    + "cp $(location common/style1.css) common;"
+    + "tar czf $(location html.tar.gz) *.html common",
+    tools = [ "common/id.htmlhelp.xsl", "common/common.ent"],
 )
