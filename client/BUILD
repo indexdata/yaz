@@ -18,7 +18,7 @@ cc_binary(
 	 "client.c", "fhistory.c", "fhistory.h",
 	 ],
     deps = [
-        "//:yaz",
+        "//src:yaz",
     ],
 )
 

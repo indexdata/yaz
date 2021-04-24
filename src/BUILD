@@ -1,7 +1,7 @@
 # Bazel BUILD file for YAZ library
 #
 # Build library:
-#  bazel  build //:all
+#  bazel build //src:all
 # Build everything:
 #  bazel build //...
 
@@ -18,177 +18,177 @@ Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac","z-sum", "z-grs
 
 genrule(
     name = "oidtoc",
-    srcs = [ "src/oid.csv" ],
+    srcs = [ "oid.csv" ],
     outs = cplush([ "oid_std"]),
-    cmd = "tclsh $(location src/oidtoc.tcl) $(location src/oid.csv) $(location src/oid_std.c) $(location include/yaz/oid_std.h)",
-    tools = [ "src/oidtoc.tcl" ],
+    cmd = "tclsh $(location oidtoc.tcl) $(location oid.csv) $(location oid_std.c) $(location yaz/oid_std.h)",
+    tools = [ "oidtoc.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "marc8",
-    srcs = [ "src/codetables.xml" ],
-    outs = [ "src/marc8.c" ],
-    cmd = "tclsh $(location src/charconv.tcl)  -p marc8 $(location src/codetables.xml) -o $(location src/marc8.c)",
-    tools = [ "src/charconv.tcl" ],
+    srcs = [ "codetables.xml" ],
+    outs = [ "marc8.c" ],
+    cmd = "tclsh $(location charconv.tcl)  -p marc8 $(location codetables.xml) -o $(location marc8.c)",
+    tools = [ "charconv.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "marc8r",
-    srcs = [ "src/codetables.xml" ],
-    outs = [ "src/marc8r.c" ],
-    cmd = "tclsh $(location src/charconv.tcl) -r -p marc8r $(location src/codetables.xml) -o $(location src/marc8r.c)",
-    tools = [ "src/charconv.tcl" ],
+    srcs = [ "codetables.xml" ],
+    outs = [ "marc8r.c" ],
+    cmd = "tclsh $(location charconv.tcl) -r -p marc8r $(location codetables.xml) -o $(location marc8r.c)",
+    tools = [ "charconv.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "iso5426",
-    srcs = [ "src/codetables-iso5426.xml" ],
-    outs = [ "src/iso5426.c" ],
-    cmd = "tclsh $(location src/charconv.tcl) -p iso5426 $(location src/codetables-iso5426.xml) -o $(location src/iso5426.c)",
-    tools = [ "src/charconv.tcl" ],
+    srcs = [ "codetables-iso5426.xml" ],
+    outs = [ "iso5426.c" ],
+    cmd = "tclsh $(location charconv.tcl) -p iso5426 $(location codetables-iso5426.xml) -o $(location iso5426.c)",
+    tools = [ "charconv.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "diagbib1",
-    srcs = [ "src/bib1.csv" ],
+    srcs = [ "bib1.csv" ],
     outs = cplush([ "diagbib1" ]),
-    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/bib1.csv) $(location src/diagbib1.c) $(location include/yaz/diagbib1.h) bib1 diagbib1_str",
-    tools = [ "src/csvtodiag.tcl" ],
+    cmd = "tclsh $(location csvtodiag.tcl) $(location bib1.csv) $(location diagbib1.c) $(location yaz/diagbib1.h) bib1 diagbib1_str",
+    tools = [ "csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "diagsrw",
-    srcs = [ "src/srw.csv" ],
+    srcs = [ "srw.csv" ],
     outs = cplush([ "diagsrw" ]),
-    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/srw.csv) $(location src/diagsrw.c) $(location include/yaz/diagsrw.h) srw",
-    tools = [ "src/csvtodiag.tcl" ],
+    cmd = "tclsh $(location csvtodiag.tcl) $(location srw.csv) $(location diagsrw.c) $(location yaz/diagsrw.h) srw",
+    tools = [ "csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "diagsru_update",
-    srcs = [ "src/sru_update.csv" ],
+    srcs = [ "sru_update.csv" ],
     outs = cplush([ "diagsru_update" ]),
-    cmd = "tclsh $(location src/csvtodiag.tcl) $(location src/sru_update.csv) $(location src/diagsru_update.c) $(location include/yaz/diagsru_update.h) sru_update",
-    tools = [ "src/csvtodiag.tcl" ],
+    cmd = "tclsh $(location csvtodiag.tcl) $(location sru_update.csv) $(location diagsru_update.c) $(location yaz/diagsru_update.h) sru_update",
+    tools = [ "csvtodiag.tcl" ],
     visibility = [ "//visibility:public" ],
 )
 
 genrule(
     name = "z3950",
-    srcs = [ "src/z3950v3.asn", "src/z.tcl" ],
+    srcs = [ "z3950v3.asn", "z.tcl" ],
     outs = cplush(Z3950_FILES),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-core.c)\" -I \"2 $(location include/yaz/z-core.h)\" $(location src/z3950v3.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-core.c)\" -I \"2 $(location yaz/z-core.h)\" $(location z3950v3.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "datetime",
-    srcs = [ "src/datetime.asn", "src/z.tcl" ],
+    srcs = [ "datetime.asn", "z.tcl" ],
     outs = cplush(["z-date"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-date.c)\" -I \"2 $(location include/yaz/z-date.h)\" $(location src/datetime.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-date.c)\" -I \"2 $(location yaz/z-date.h)\" $(location datetime.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "univres",
-    srcs = [ "src/univres.asn", "src/z.tcl" ],
+    srcs = [ "univres.asn", "z.tcl" ],
     outs = cplush(["z-univ"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-univ.c)\" -I \"2 $(location include/yaz/z-univ.h)\" $(location src/univres.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-univ.c)\" -I \"2 $(location yaz/z-univ.h)\" $(location univres.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "esupdate",
-    srcs = [ "src/esupdate.asn", "src/z.tcl" ],
+    srcs = [ "esupdate.asn", "z.tcl" ],
     outs = cplush(["zes-update"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/zes-update.c)\" -I \"2 $(location include/yaz/zes-update.h)\" $(location src/esupdate.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location zes-update.c)\" -I \"2 $(location yaz/zes-update.h)\" $(location esupdate.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "esadmin",
-    srcs = [ "src/esadmin.asn", "src/z.tcl" ],
+    srcs = [ "esadmin.asn", "z.tcl" ],
     outs = cplush(["zes-admin"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/zes-admin.c)\" -I \"2 $(location include/yaz/zes-admin.h)\" $(location src/esadmin.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location zes-admin.c)\" -I \"2 $(location yaz/zes-admin.h)\" $(location esadmin.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "charneg",
-    srcs = [ "src/charneg-3.asn", "src/z.tcl" ],
+    srcs = [ "charneg-3.asn", "z.tcl" ],
     outs = cplush(["z-charneg"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-charneg.c)\" -I \"2 $(location include/yaz/z-charneg.h)\" $(location src/charneg-3.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-charneg.c)\" -I \"2 $(location yaz/z-charneg.h)\" $(location charneg-3.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "mterm2",
-    srcs = [ "src/mterm2.asn", "src/z.tcl" ],
+    srcs = [ "mterm2.asn", "z.tcl" ],
     outs = cplush(["z-mterm2"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-mterm2.c)\" -I \"2 $(location include/yaz/z-mterm2.h)\" $(location src/mterm2.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-mterm2.c)\" -I \"2 $(location yaz/z-mterm2.h)\" $(location mterm2.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "oclcui",
-    srcs = [ "src/oclcui.asn", "src/z.tcl" ],
+    srcs = [ "oclcui.asn", "z.tcl" ],
     outs = cplush(["z-oclcui"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-oclcui.c)\" -I \"2 $(location include/yaz/z-oclcui.h)\" $(location src/oclcui.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-oclcui.c)\" -I \"2 $(location yaz/z-oclcui.h)\" $(location oclcui.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "facet",
-    srcs = [ "src/facet.asn", "src/z.tcl" ],
+    srcs = [ "facet.asn", "z.tcl" ],
     outs = cplush(["z-facet-1"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/z.tcl) -i yaz -C \"1 $(location src/z-facet-1.c)\" -I \"2 $(location include/yaz/z-facet-1.h)\" $(location src/facet.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location z.tcl) -i yaz -C \"1 $(location z-facet-1.c)\" -I \"2 $(location yaz/z-facet-1.h)\" $(location facet.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "ill-core",
-    srcs = [ "src/ill9702.asn", "src/ill.tcl" ],
+    srcs = [ "ill9702.asn", "ill.tcl" ],
     outs = cplush(["ill-core"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/ill-core.c)\" -I \"2 $(location include/yaz/ill-core.h)\" $(location src/ill9702.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location ill.tcl) -i yaz -C \"1 $(location ill-core.c)\" -I \"2 $(location yaz/ill-core.h)\" $(location ill9702.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "oclc-ill-req-ext",
-    srcs = [ "src/oclc-ill-req-ext.asn", "src/ill.tcl" ],
+    srcs = [ "oclc-ill-req-ext.asn", "ill.tcl" ],
     outs = cplush(["oclc-ill-req-ext"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/oclc-ill-req-ext.c)\" -I \"2 $(location include/yaz/oclc-ill-req-ext.h)\" $(location src/oclc-ill-req-ext.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location ill.tcl) -i yaz -C \"1 $(location oclc-ill-req-ext.c)\" -I \"2 $(location yaz/oclc-ill-req-ext.h)\" $(location oclc-ill-req-ext.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "item-req",
-    srcs = [ "src/item-req.asn", "src/ill.tcl" ],
+    srcs = [ "item-req.asn", "ill.tcl" ],
     outs = cplush(["item-req"]),
-    cmd = "$(location src/yaz-asncomp) -d $(location src/ill.tcl) -i yaz -C \"1 $(location src/item-req.c)\" -I \"2 $(location include/yaz/item-req.h)\" $(location src/item-req.asn)",
-    tools = [ "src/yaz-asncomp" ],
+    cmd = "$(location yaz-asncomp) -d $(location ill.tcl) -i yaz -C \"1 $(location item-req.c)\" -I \"2 $(location yaz/item-req.h)\" $(location item-req.asn)",
+    tools = [ "yaz-asncomp" ],
 )
 
 genrule(
     name = "cql",
-    srcs = [ "src/cql.y" ],
-    outs = [ "src/cql.c" ],
-    cmd = "bison -p cql_ $(location src/cql.y) -o $(location src/cql.c)",
+    srcs = [ "cql.y" ],
+    outs = [ "cql.c" ],
+    cmd = "bison -p cql_ $(location cql.y) -o $(location cql.c)",
 )
 
 cc_library(
     name = "yaz",
-    includes = [ "include" ],
+    includes = [ "." ],
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = c_dir("src", Z3950_FILES) + c_dir("src", ["oid_std", "marc8",
+    srcs = c_dir(".", Z3950_FILES) + c_dir(".", ["oid_std", "marc8",
 	 "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update",
 	 "cql", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
@@ -225,22 +225,22 @@ cc_library(
 	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
 	 "thread_create", "spipe", "url", "backtrace"
 	 ])
-	 + h_dir("include", [ "config", "diag-entry" ])
-	 + h_dir("src", ["cclp", "iconv-p", "mime", "mutex-p",
+	 + h_dir(".", [ "config", "diag-entry" ])
+	 + h_dir(".", ["cclp", "iconv-p", "mime", "mutex-p",
 	   "odr-priv", "sru-p", "zoom-p"
 	 ])
 	 ,
-    hdrs = h_dir("include/yaz", Z3950_FILES + [
+    hdrs = h_dir("yaz", Z3950_FILES + [
 	 "oid_std", "diagbib1", "diagsrw",
 	 "diagsru_update", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
 	 "oclc-ill-req-ext", "item-req"
 	 ])
-	 + glob(["include/yaz/*.h"]),
+	 + glob(["yaz/*.h"]),
     visibility = [ "//visibility:public" ],
 )
 
-exports_files(glob(["src/*.csv", "src/*.tcl"]))
+exports_files(glob(["*.csv", "*.tcl"]))
 
 cc_library(
     name = "yaz_server",
@@ -248,8 +248,8 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = c_dir("src", ["statserv", "seshigh", "eventl", "requestq"])
-         + h_dir("src", ["eventl", "session"]),
+    srcs = c_dir(".", ["statserv", "seshigh", "eventl", "requestq"])
+         + h_dir(".", ["eventl", "session"]),
     hdrs = [],
     visibility = [ "//visibility:public" ],
     deps = [
@@ -263,7 +263,7 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT + INCLUDES_ICU,
     linkopts = LIBS_EXT + LIBS_ICU,
     local_defines = [ "HAVE_CONFIG_H", "YAZ_HAVE_ICU=1" ],
-    srcs = c_dir("src", [
+    srcs = c_dir(".", [
 	 "icu_chain", "icu_utf16", "icu_utf8", "stemmer",
 	 "icu_transform", "icu_casemap", "icu_tokenizer", "icu_sortkey"
 	 ]) + [

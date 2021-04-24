@@ -9,7 +9,7 @@ INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 
 cc_binary(
     name = "yaz-ztest",
-    includes = [ "include" ],
+    includes = [ "src" ],
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
@@ -17,7 +17,7 @@ cc_binary(
 	 "dummy-opac.c", "read-grs.c", "read-marc.c", "ztest.c", "ztest.h",
 	 ],
     deps = [
-        "//:yaz_server",
+        "//src:yaz_server",
     ],
 )
 
