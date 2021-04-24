@@ -14,7 +14,11 @@ INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 LIBS_ICU = [ "-licui18n", "-licuuc", "-licudata" ]
 INCLUDES_ICU = []
 
-Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac","z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1", "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched", "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1", "z-espec1"]
+Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac",
+    "z-sum", "z-grs", "z-estask", "z-rrf1", "z-rrf2", "z-accform1",
+    "z-accdes1", "z-acckrb1", "zes-pset", "zes-pquery", "zes-psched",
+    "zes-order", "zes-update0", "zes-exps", "zes-expi", "z-uifr1",
+    "z-espec1"]
 
 genrule(
     name = "oidtoc",
@@ -188,7 +192,7 @@ cc_library(
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
-    srcs = c_dir(".", Z3950_FILES) + c_dir(".", ["oid_std", "marc8",
+    srcs = c_dir(".", Z3950_FILES + ["oid_std", "marc8",
 	 "marc8r", "iso5426", "diagbib1", "diagsrw", "diagsru_update",
 	 "cql", "z-date", "z-univ", "zes-update", "zes-admin",
 	 "z-charneg", "z-mterm2", "z-oclcui", "z-facet-1", "ill-core",
@@ -225,9 +229,8 @@ cc_library(
 	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
 	 "thread_create", "spipe", "url", "backtrace"
 	 ])
-	 + h_dir(".", [ "config", "diag-entry" ])
 	 + h_dir(".", ["cclp", "iconv-p", "mime", "mutex-p",
-	   "odr-priv", "sru-p", "zoom-p"
+	   "odr-priv", "sru-p", "zoom-p", "config", "diag-entry"
 	 ])
 	 ,
     hdrs = h_dir("yaz", Z3950_FILES + [
