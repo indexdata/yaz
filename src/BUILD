@@ -247,7 +247,7 @@ exports_files(glob(["*.csv", "*.tcl"]))
 
 cc_library(
     name = "yaz_server",
-    includes = [ "include" ],
+    includes = [ "." ],
     copts = [ "-pthread" ] + INCLUDES_EXT,
     linkopts = LIBS_EXT,
     local_defines = [ "HAVE_CONFIG_H" ],
@@ -262,7 +262,7 @@ cc_library(
 
 cc_library(
     name = "yaz_icu",
-    includes = [ "include", "libstemmer_c/include" ],
+    includes = [ ".", "libstemmer_c/include" ],
     copts = [ "-pthread" ] + INCLUDES_EXT + INCLUDES_ICU,
     linkopts = LIBS_EXT + LIBS_ICU,
     local_defines = [ "HAVE_CONFIG_H", "YAZ_HAVE_ICU=1" ],
