@@ -88,11 +88,11 @@ nsishelp:
 # ..../yaz/win, everything is relative to that
 ROOTDIR=..   # The home of yaz
 
-INCLDIR=$(ROOTDIR)\include  # our includes
 LIBDIR=$(ROOTDIR)\lib       # We produce .lib, .exp etc there
 BINDIR=$(ROOTDIR)\bin       # We produce exes and dlls there
 WINDIR=$(ROOTDIR)\win       # all these Win make things
 SRCDIR=$(ROOTDIR)\src       # for the case we move them under src
+INCLDIR=$(SRCDIR)           # our includes
 DOCDIR=$(ROOTDIR)\doc       # where the doc is
 JAVADIR=$(ROOTDIR)\java
 M4DIR=$(ROOTDIR)\m4

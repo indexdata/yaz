@@ -144,7 +144,7 @@ if test "$echo_source" = "yes"; then
     fi
     YAZLALIB="$YAZLALIB $LIBS"
 
-    YAZBINC="-I${src_root}/include"
+    YAZBINC="-I${src_root}/src"
     YAZINC="$YAZBINC $YAZINC"
     YAZCOMP="${src_root}/util/yaz-asncomp"
 else

@@ -4,6 +4,6 @@
 [submodule "doc/common"]
 	path = doc/common
 	url = https://github.com/indexdata/id-docbook-common
-[submodule "libstemmer_c"]
-	path = libstemmer_c
+[submodule "src/libstemmer_c"]
+	path = src/libstemmer_c
 	url = https://github.com/indexdata/libstemmer_c

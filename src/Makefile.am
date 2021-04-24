@@ -19,18 +19,18 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
- csvtodiag.tcl bib1.csv srw.csv \
+ csvtodiag.tcl bib1.csv srw.csv yaz\version.h.in \
  sru_update.csv oidtoc.tcl oid.csv yaz-asncomp
 
 YAZCOMP=$(srcdir)/yaz-asncomp
-YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(top_srcdir)/include
-YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(top_srcdir)/include
+YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(srcdir)
+YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(srcdir)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(SSL_CFLAGS)
+AM_CPPFLAGS=$(XML2_CFLAGS) $(SSL_CFLAGS)
 libyaz_la_LIBADD = $(SSL_LIBS) $(TCPD_LIBS) \
 	$(MEMCACHED_LIBS) $(HIREDIS_LIBS)
 libyaz_server_la_LIBADD = libyaz.la
-libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -I$(top_srcdir)/libstemmer_c/include
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -Ilibstemmer_c/include
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
 
 AM_YFLAGS=-p cql_
@@ -48,18 +48,50 @@ iso5426.c: charconv.tcl codetables-iso5426.xml
 	$(TCLSH) $(srcdir)/charconv.tcl -p iso5426 $(srcdir)/codetables-iso5426.xml -o $@
 
 # Generate OID database from CSV
-oid_std.c $(top_srcdir)/include/yaz/oid_std.h: oidtoc.tcl oid.csv
-	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir)/oid.csv $(srcdir)/oid_std.c $(top_srcdir)/include/yaz/oid_std.h
+oid_std.c yaz/oid_std.h: oidtoc.tcl oid.csv
+	$(TCLSH) $(srcdir)/oidtoc.tcl $(srcdir)/oid.csv $(srcdir)/oid_std.c $(srcdir)/yaz/oid_std.h
 
 # Generate diagnostics from CSVs
-diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h: bib1.csv
-	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/bib1.csv $(srcdir)/diagbib1.c $(top_srcdir)/include/yaz/diagbib1.h bib1 diagbib1_str
+diagbib1.c yaz/diagbib1.h: bib1.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/bib1.csv $(srcdir)/diagbib1.c $(srcdir)/yaz/diagbib1.h bib1 diagbib1_str
 
-diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h: srw.csv
-	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/srw.csv $(srcdir)/diagsrw.c $(top_srcdir)/include/yaz/diagsrw.h srw
+diagsrw.c yaz/diagsrw.h: srw.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/srw.csv $(srcdir)/diagsrw.c $(srcdir)/yaz/diagsrw.h srw
 
-diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h: sru_update.csv
-	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(top_srcdir)/include/yaz/diagsru_update.h sru_update
+diagsru_update.c yaz/diagsru_update.h: sru_update.csv
+	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(srcdir)/yaz/diagsru_update.h sru_update
+
+
+noinst_HEADERS = yaz/icu_I18N.h
+
+pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
+ yaz/ccl.h yaz/ccl_xml.h yaz/cookie.h yaz/cql.h yaz/rpn2cql.h \
+ yaz/rpn2solr.h yaz/solr.h yaz/comstack.h \
+ yaz/diagbib1.h yaz/diagsrw.h yaz/diagsru_update.h yaz/sortspec.h \
+ yaz/log.h yaz/logrpn.h yaz/malloc_info.h yaz/marcdisp.h yaz/proxunit.h \
+ yaz/nmem.h yaz/nmem_xml.h yaz/odr.h yaz/errno.h yaz/facet.h \
+ yaz/options.h yaz/otherinfo.h yaz/pquery.h yaz/prt-ext.h \
+ yaz/querytowrbuf.h yaz/readconf.h yaz/record_conv.h yaz/record_render.h \
+ yaz/retrieval.h yaz/statserv.h \
+ yaz/tcpip.h yaz/test.h yaz/timing.h yaz/unix.h yaz/tpath.h yaz/wrbuf.h \
+ yaz/xmalloc.h yaz/yaz-ccl.h yaz/yaz-iconv.h yaz/yaz-util.h \
+ yaz/yaz-version.h yaz/yconfig.h yaz/proto.h \
+ yaz/xml_get.h yaz/xmlquery.h yaz/xmltypes.h yaz/snprintf.h \
+ yaz/query-charset.h yaz/mutex.h yaz/oid_db.h yaz/oid_util.h \
+ yaz/oid_std.h yaz/tokenizer.h yaz/copy_types.h \
+ yaz/icu.h yaz/match_glob.h yaz/poll.h yaz/daemon.h yaz/sc.h \
+ yaz/xml_include.h yaz/ill.h yaz/ill-core.h yaz/item-req.h \
+ yaz/oclc-ill-req-ext.h yaz/z-accdes1.h yaz/z-accform1.h \
+ yaz/z-acckrb1.h yaz/z-core.h yaz/z-date.h yaz/z-diag1.h yaz/z-espec1.h \
+ yaz/z-estask.h yaz/z-exp.h yaz/z-grs.h yaz/z-mterm2.h yaz/z-opac.h \
+ yaz/z-rrf1.h yaz/z-rrf2.h yaz/z-sum.h yaz/z-sutrs.h yaz/z-uifr1.h \
+ yaz/z-univ.h yaz/z-oclcui.h yaz/z-facet-1.h yaz/zes-expi.h yaz/zes-exps.h \
+ yaz/zes-order.h yaz/zes-pquery.h yaz/zes-psched.h yaz/zes-admin.h \
+ yaz/zes-pset.h yaz/zes-update.h yaz/zes-update0.h \
+ yaz/zoom.h yaz/z-charneg.h yaz/charneg.h yaz/soap.h yaz/srw.h \
+ yaz/zgdu.h yaz/matchstr.h yaz/json.h yaz/file_glob.h yaz/dirent.h \
+ yaz/thread_id.h yaz/gettimeofday.h yaz/shptr.h yaz/thread_create.h \
+ yaz/spipe.h yaz/stemmer.h yaz/url.h
 
 # Auto-generated C-files
 GEN_FILES = oid_std.c \
@@ -123,17 +155,17 @@ libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 STEMMER_SOURCES = \
-	../libstemmer_c/include/libstemmer.h \
-	../libstemmer_c/libstemmer/libstemmer.c \
-	../libstemmer_c/libstemmer/modules.h \
-	../libstemmer_c/runtime/api.c \
-	../libstemmer_c/runtime/api.h \
-	../libstemmer_c/runtime/header.h \
-	../libstemmer_c/runtime/utilities.c \
-	../libstemmer_c/src_c/stem_UTF_8_porter.c \
-	../libstemmer_c/src_c/stem_UTF_8_porter.h \
-	../libstemmer_c/src_c/stem_UTF_8_english.c \
-	../libstemmer_c/src_c/stem_UTF_8_english.h
+	libstemmer_c/include/libstemmer.h \
+	libstemmer_c/libstemmer/libstemmer.c \
+	libstemmer_c/libstemmer/modules.h \
+	libstemmer_c/runtime/api.c \
+	libstemmer_c/runtime/api.h \
+	libstemmer_c/runtime/header.h \
+	libstemmer_c/runtime/utilities.c \
+	libstemmer_c/src_c/stem_UTF_8_porter.c \
+	libstemmer_c/src_c/stem_UTF_8_porter.h \
+	libstemmer_c/src_c/stem_UTF_8_english.c \
+	libstemmer_c/src_c/stem_UTF_8_english.h
 
 libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
 	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c \

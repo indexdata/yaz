@@ -6,7 +6,7 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src include util test client ztest zoom doc etc
+SUBDIRS = src util test client ztest zoom doc etc
 
 aclocaldir=$(datadir)/aclocal
 

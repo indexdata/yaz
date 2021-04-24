@@ -5,7 +5,7 @@ AC_PREREQ([2.60])
 AC_INIT([yaz],
 m4_esyscmd([. ./IDMETA; printf $VERSION]),
 [yaz-help@indexdata.dk])
-AC_CONFIG_HEADERS(include/config.h)
+AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9 subdir-objects])
@@ -404,8 +404,6 @@ Makefile
 src/Makefile
 test/Makefile
 util/Makefile
-include/Makefile
-include/yaz/Makefile
 client/Makefile
 ztest/Makefile
 zoom/Makefile
@@ -420,7 +418,7 @@ yaz-icu.pc
 yaz-server.pc
 Doxyfile
 win/version.nsi
-include/yaz/yaz-version.h
+src/yaz/yaz-version.h
 ],[
 	sed -e 's%echo_source=yes%echo_source=no%g; s%src_root=.*$%%g; s%build_root=.*%%g' \
 		< yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
