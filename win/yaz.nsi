@@ -116,7 +116,7 @@ SectionEnd
 Section "YAZ Development" YAZ_Development
 	SectionIn 1 2
 	SetOutPath $INSTDIR\include\yaz
-	File ..\include\yaz\*.h
+	File ..\src\yaz\*.h
 	SetOutPath $INSTDIR\lib
 	File ..\lib\yaz*.lib
 SectionEnd
@@ -142,7 +142,7 @@ Section "YAZ Source" YAZ_Source
 	File /r ..\*.c
 	File /r /x yaz ..\*.h
 	SetOutPath $INSTDIR\util
-	File ..\util\yaz-asncomp
+	File ..\src\yaz-asncomp
 	SetOutPath $INSTDIR\src
 	File ..\src\*.y
 	File ..\src\*.tcl
