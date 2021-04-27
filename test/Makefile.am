@@ -33,7 +33,7 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  test_icu.4.xml test_icu.4.input test_icu.4.output \
  test_record_conv.xsl test_xml_include.xml
 
-YAZCOMP = ../util/yaz-asncomp
+YAZCOMP = ../src/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
