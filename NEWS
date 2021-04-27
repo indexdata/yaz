@@ -1,3 +1,16 @@
+--- 5.31.0 2021/04/27
+
+Windows: nmake and NSIS updated for Visual Studio 2019, ICU 68.
+yaz-iconv and yaz-json-parse.
+
+Fixed #59 yaz-marcdump - json input and leader at end -
+undefined behavior.
+
+Enable xi:include processing for yaz_xml_include_glob
+and yaz_xml_include_simple (used by Pazpar2).
+
+makefile: Fix compilation for parallel builds.
+
 --- 5.30.3 2020/06/10
 
 Require getaddrinfo which has been available since 2003.
