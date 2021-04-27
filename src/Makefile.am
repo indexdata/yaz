@@ -3,7 +3,9 @@
 
 YAZ_VERSION_INFO=5:0:0
 
-bin_SCRIPTS = yaz-asncomp
+bin_SCRIPTS = yaz-asncomp yaz-config
+
+DISTCLEANFILES = yaz-config
 
 lib_LTLIBRARIES = libyaz.la libyaz_server.la libyaz_icu.la
 

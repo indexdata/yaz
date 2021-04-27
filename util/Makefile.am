@@ -1,11 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-bin_SCRIPTS = yaz-config
-
 EXTRA_DIST = yaz-icu-example.xml
-
-DISTCLEANFILES = yaz-config
 
 AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 

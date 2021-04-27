@@ -421,7 +421,7 @@ win/version.nsi
 src/yaz/yaz-version.h
 ],[
 	sed -e 's%echo_source=yes%echo_source=no%g; s%src_root=.*$%%g; s%build_root=.*%%g' \
-		< yaz-config > util/yaz-config && chmod +x yaz-config util/yaz-config
+		< yaz-config > src/yaz-config && chmod +x yaz-config src/yaz-config
 	diff doc/local.ent doc/local0.ent >/dev/null 2>/dev/null \
 		|| cp doc/local0.ent doc/local.ent
     ]
