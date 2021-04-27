@@ -110,6 +110,7 @@ int yaz_marc_read_json_node(yaz_marc_t mt, struct json_node *n)
         int length_implementation;
         struct json_node *l;
         WRBUF wtmp = wrbuf_alloc();
+        const char *leader = 0;
         for (l = n->u.link[0]; l; l = l->u.link[1])
         {
             if (l->u.link[0]->type == json_node_pair &&
@@ -120,14 +121,28 @@ int yaz_marc_read_json_node(yaz_marc_t mt, struct json_node *n)
                     p->u.link[1]->type == json_node_string &&
                     strlen(p->u.link[1]->u.string) == 24)
                 {
-                    yaz_marc_set_leader(mt, p->u.link[1]->u.string,
-                                        &indicator_length,
-                                        &identifier_length,
-                                        &base_address,
-                                        &length_data_entry,
-                                        &length_starting,
-                                        &length_implementation);
+                    leader = p->u.link[1]->u.string;
                 }
+            }
+        }
+        if (!leader)
+        {
+            yaz_marc_cprintf(mt, "Missing leader. Inserting fake leader");
+            leader = "00000nam a22000000a 4500";
+        }
+        yaz_marc_set_leader(mt, leader,
+                            &indicator_length,
+                            &identifier_length,
+                            &base_address,
+                            &length_data_entry,
+                            &length_starting,
+                            &length_implementation);
+        for (l = n->u.link[0]; l; l = l->u.link[1])
+        {
+            if (l->u.link[0]->type == json_node_pair &&
+                l->u.link[0]->u.link[0]->type == json_node_string)
+            {
+                struct json_node *p = l->u.link[0];
                 if (!strcmp(p->u.link[0]->u.string, "fields") &&
                     p->u.link[1]->type == json_node_array &&
                     p->u.link[1]->u.link[0] &&
