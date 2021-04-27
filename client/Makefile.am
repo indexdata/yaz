@@ -9,7 +9,7 @@ EXTRA_DIST = default.bib
 COMMON=admin.c admin.h tabcomplete.c tabcomplete.h fhistory.c fhistory.h
 yaz_client_SOURCES=client.c $(COMMON)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS)
 
 yaz_client_LDADD = ../src/libyaz.la $(READLINE_LIBS) 
 bertorture_LDADD = ../src/libyaz.la 

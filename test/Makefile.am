@@ -21,38 +21,32 @@ TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  cql2pqf-order.txt cql2pqfsample \
  $(check_SCRIPTS) \
- marccol1.u8.marc marccol1.u8.1.lst marccol1.u8.2.lst \
- marccol2.u8.marc marccol2.u8.1.lst marccol2.u8.2.lst \
- marccol3.u8.marc marccol3.u8.1.lst marccol3.u8.2.lst \
- marccol4.u8.marc marccol4.u8.1.lst marccol4.u8.2.lst \
- marccol5.u8.marc marccol5.u8.1.lst marccol5.u8.2.lst \
- test_icu.0.xml test_icu.0.input test_icu.0.output \
- test_icu.1.xml test_icu.1.input test_icu.1.output \
- test_icu.2.xml test_icu.2.input test_icu.2.output \
- test_icu.3.xml test_icu.3.input test_icu.3.output \
- test_icu.4.xml test_icu.4.input test_icu.4.output \
- test_record_conv.xsl test_xml_include.xml
+ marccol1.u8.1.lst marccol1.u8.2.lst \
+ marccol2.u8.1.lst marccol2.u8.2.lst \
+ marccol3.u8.1.lst marccol3.u8.2.lst \
+ marccol4.u8.1.lst marccol4.u8.2.lst \
+ marccol5.u8.1.lst marccol5.u8.2.lst \
+ test_icu.0.input test_icu.0.output \
+ test_icu.1.input test_icu.1.output \
+ test_icu.2.input test_icu.2.output \
+ test_icu.3.input test_icu.3.output \
+ test_icu.4.input test_icu.4.output \
+ test_record_conv.xsl
 
 YAZCOMP = ../src/yaz-asncomp
-YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../include $(YCFLAGS)
+YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../src $(YCFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 
 dist-hook:
 	mkdir -p $(distdir)/cql
 	cp $(srcdir)/cql/*.err $(srcdir)/cql/*.out $(distdir)/cql
 	mkdir -p $(distdir)/cql2pqf
 	cp $(srcdir)/cql2pqf/*.err $(srcdir)/cql2pqf/*.out $(distdir)/cql2pqf
-	cp $(srcdir)/marc[0-9]*.chr $(distdir)
-	cp $(srcdir)/marc[0-9]*.marc $(distdir)
-	cp $(srcdir)/marc[0-9]*.marc $(distdir)
-	cp $(srcdir)/marc[0-9]*.xml $(distdir)
-	cp $(srcdir)/marc[0-9]*.json $(distdir)
-	cp $(srcdir)/marc[0-9]*.json.marc $(distdir)
-	cp $(srcdir)/*.xml.marc $(distdir)
-	cp $(srcdir)/xml2marc[0-9]*.xml $(distdir)
-	cp $(srcdir)/tmarc[0-9]*.xml $(distdir)
-	cp $(srcdir)/xml2tmarc[0-9]*.xml $(distdir)
+	cp $(srcdir)/*.chr $(distdir)
+	cp $(srcdir)/*.marc $(distdir)
+	cp $(srcdir)/*.xml $(distdir)
+	cp $(srcdir)/*.json $(distdir)
 
 # Rule for generating codecs for our small ASN.1 spec
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)

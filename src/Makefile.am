@@ -21,7 +21,7 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
- csvtodiag.tcl bib1.csv srw.csv yaz\version.h.in \
+ csvtodiag.tcl bib1.csv srw.csv \
  sru_update.csv oidtoc.tcl oid.csv yaz-asncomp
 
 YAZCOMP=$(srcdir)/yaz-asncomp
@@ -32,7 +32,7 @@ AM_CPPFLAGS=$(XML2_CFLAGS) $(SSL_CFLAGS)
 libyaz_la_LIBADD = $(SSL_LIBS) $(TCPD_LIBS) \
 	$(MEMCACHED_LIBS) $(HIREDIS_LIBS)
 libyaz_server_la_LIBADD = libyaz.la
-libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -Ilibstemmer_c/include
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -I$(srcdir)/libstemmer_c/include
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
 
 AM_YFLAGS=-p cql_
@@ -64,7 +64,7 @@ diagsru_update.c yaz/diagsru_update.h: sru_update.csv
 	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(srcdir)/yaz/diagsru_update.h sru_update
 
 
-noinst_HEADERS = yaz/icu_I18N.h
+noinst_HEADERS = yaz/icu_I18N.h diag-entry.h
 
 pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
  yaz/ccl.h yaz/ccl_xml.h yaz/cookie.h yaz/cql.h yaz/rpn2cql.h \

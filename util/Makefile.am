@@ -3,7 +3,7 @@
 
 EXTRA_DIST = yaz-icu-example.xml
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS) $(ICU_CPPFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS) $(ICU_CPPFLAGS)
 
 bin_PROGRAMS = yaz-marcdump yaz-iconv yaz-illclient yaz-icu yaz-json-parse \
  yaz-url yaz-record-conv

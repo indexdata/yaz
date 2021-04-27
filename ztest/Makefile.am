@@ -11,7 +11,7 @@ EXTRA_DIST=dummy-words dummy-grs ztest.pem config1.xml
 
 LDADD=../src/libyaz_server.la ../src/libyaz.la
 
-AM_CPPFLAGS=-I$(top_srcdir)/include $(XML2_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS)
 
 clean-local:
 	rm -f socket

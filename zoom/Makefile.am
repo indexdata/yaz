@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-AM_CPPFLAGS = -I$(top_srcdir)/include $(XML2_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(XML2_CFLAGS)
 
 bin_PROGRAMS = zoomsh
 noinst_PROGRAMS = zoomtst1 zoomtst2 zoomtst3 zoomtst4 zoomtst5 zoomtst6 zoomtst7 zoomtst8 zoomtst9 zoomtst10 zoomtst11 zoom-benchmark zoom-ka zoom-bug-641
