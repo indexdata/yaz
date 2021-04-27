@@ -269,8 +269,7 @@ COMMON_C_OPTIONS=          \
   /Fd"$(OBJDIR)\\"
 
 COMMON_C_INCLUDES= \
-  /I"$(ROOTDIR)\include" \
-  /I"$(ROOTDIR)\src" \
+  /I"$(INCLDIR)" \
   /I"$(ROOTDIR)\libstemmer_c\include"
 
 DEBUG_C_OPTIONS=  \
@@ -868,7 +867,7 @@ $(SRCDIR)\diagsrw.c: $(SRCDIR)\srw.csv
 
 $(SRCDIR)\diagsru_update.c: $(SRCDIR)\sru_update.csv
 	@cd $(SRCDIR)
-	$(TCL) csvtosru_update.tcl $(SRCDIR)
+	$(TCL) csvtodiag.tcl sru_update.csv diagsru_update.c $(INCLDIR)\yaz\diagsru_update.h sru_update
 
 $(INCLDIR)\yaz\yaz-version.h: $(ROOTDIR)/IDMETA
 	@cd $(M4DIR)
@@ -902,10 +901,10 @@ RSOPT=/d_NDEBUG
 !endif
 
 $(YAZ_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /I"../include" /fo"$(YAZ_RES)" $(YAZ_RC)
+	$(RSC) $(RSOPT) /I$(INCLDIR) /fo"$(YAZ_RES)" $(YAZ_RC)
 
 $(YAZ_ICU_RES): $(YAZ_RC)
-	$(RSC) $(RSOPT) /DICU=1 /I"../include" /fo"$(YAZ_ICU_RES)" $(YAZ_RC)
+	$(RSC) $(RSOPT) /I$(INCLDIR) /DICU=1 /fo"$(YAZ_ICU_RES)" $(YAZ_RC)
 
 # Linking
 

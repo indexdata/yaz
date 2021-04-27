@@ -1,5 +1,5 @@
 #include "winver.h"
-#include "..\include\yaz\yaz-version.h"
+#include "yaz\yaz-version.h"
 
 VS_VERSION_INFO VERSIONINFO 
   FILEVERSION YAZ_FILEVERSION
