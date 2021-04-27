@@ -11,3 +11,6 @@ diagsrw.c
 diagsru_update.c
 oid_std.c
 oclc-ill-req-ext.c
+config.h
+config.h.in
+stamp-h1
