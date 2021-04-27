@@ -270,7 +270,7 @@ COMMON_C_OPTIONS=          \
 
 COMMON_C_INCLUDES= \
   /I"$(INCLDIR)" \
-  /I"$(ROOTDIR)\libstemmer_c\include"
+  /I"$(SRCDIR)\libstemmer_c\include"
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
@@ -774,13 +774,13 @@ generate: \
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $<
 
-{$(ROOTDIR)\libstemmer_c\libstemmer}.c{$(OBJDIR)}.obj:
+{$(SRCDIR)\libstemmer_c\libstemmer}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $<
 
-{$(ROOTDIR)\libstemmer_c\runtime}.c{$(OBJDIR)}.obj:
+{$(SRCDIR)\libstemmer_c\runtime}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $<
 
-{$(ROOTDIR)\libstemmer_c\src_c}.c{$(OBJDIR)}.obj:
+{$(SRCDIR)\libstemmer_c\src_c}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $<
 
 # ASN-generated files
