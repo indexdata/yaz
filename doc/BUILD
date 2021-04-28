@@ -4,7 +4,7 @@
 #  bazel  build //doc:all
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//src:util.bzl", "listToString")
+load("//src:util.bzl", "listToString", "man_page")
 
 REFFILES = ["yaz-client-man.xml", "yaz-ztest-man.xml", "yaz-config-man.xml",
         "yaz-man.xml", "zoomsh-man.xml", "yaz-asncomp-man.xml", 
@@ -37,12 +37,21 @@ genrule(
     tools = [ "//src:csvtodiag.tcl" ],
 )
 
-genrule(
+man_page(
     name = "yaz-client-1",
-    srcs = [ "yaz-client-man.xml" ],
-    outs = [ "yaz-client.1" ],
-    cmd = "xsltproc -o $(location yaz-client.1) $(location common/id.man.xsl) $(location yaz-client-man.xml) 2>/dev/null",
-    tools = [ "common/id.man.xsl"],
+    manname = "yaz-client.1",
+    srcs = [ "yaz-client-man.xml" ]
+)
+
+man_page(
+    name = "yaz-ztest-8",
+    manname = "yaz-ztest.8",
+    srcs = [
+        "yaz-ztest-man.xml",
+	"gfs-options.xml",
+	"gfs-synopsis.xml",
+	"gfs-virtual.xml"
+    ]
 )
 
 genrule(
@@ -64,7 +73,7 @@ genrule(
     name = "html",
     srcs = REFFILES + [
        "gfs-options.xml", "gfs-synopsis.xml", "gfs-virtual.xml",
-       "manref.xml", "book.xml", "local.ent", "entities.ent",
+       "manref.xml", "book.xml",
        "std-oid-table.xml", "bib1-diag-table.xml", "srw-diag-table.xml",
        "common/id.png", "common/style1.css"
     ],
@@ -74,5 +83,5 @@ genrule(
     + "cp $(location common/id.png) common;"
     + "cp $(location common/style1.css) common;"
     + "tar czf $(location html.tar.gz) *.html common",
-    tools = [ "common/id.htmlhelp.xsl", "common/common.ent"],
+    tools = [ "common/id.htmlhelp.xsl", "common/common.ent", "local.ent", "entities.ent"],
 )
