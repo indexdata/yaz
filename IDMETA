@@ -1,4 +1,4 @@
-DEBIAN_DIST="buster stretch jessie"
-UBUNTU_DIST="focal bionic xenial trusty"
+DEBIAN_DIST="bullseye buster stretch jessie"
+UBUNTU_DIST="hirsute focal bionic xenial trusty"
 CENTOS_DIST="centos8 centos7"
 VERSION=5.31.0
