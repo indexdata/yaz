@@ -134,7 +134,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                               Z_HTTP_Header *user_headers,
                               const char *buf, size_t len)
 {
-    Z_HTTP_Response *res = 0;
+    Z_HTTP_Response *res;
     int number_of_redirects = 0;
 
     odr_reset(p->odr_out);
@@ -150,7 +150,10 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         char *http_pass = 0;
         char *uri_lean = 0;
         int proxy_mode = 0;
+        int ret;
+        Z_GDU *gdu;
 
+        res = 0;
         extract_user_pass(p->odr_out->mem, uri, &uri_lean,
                           &http_user, &http_pass);
         conn = cs_create_host2(uri_lean, 0, &add, p->proxy, &proxy_mode);
@@ -158,149 +161,141 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         {
             wrbuf_printf(p->w_error, "Can not resolve URL %s", uri);
             log_warn(p);
+            return res;
+        }
+        gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, proxy_mode);
+        gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
+        yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
+        for ( ; user_headers; user_headers = user_headers->next)
+        {
+            /* prefer new Host over user-supplied Host */
+            if (!strcmp(user_headers->name, "Host"))
+                ;
+            /* prefer user-supplied User-Agent over YAZ' own */
+            else if (!strcmp(user_headers->name, "User-Agent"))
+                z_HTTP_header_set(p->odr_out, &gdu->u.HTTP_Request->headers,
+                                  user_headers->name, user_headers->value);
+            else
+                z_HTTP_header_add(p->odr_out, &gdu->u.HTTP_Request->headers,
+                                  user_headers->name, user_headers->value);
+        }
+        if (http_user && http_pass)
+            z_HTTP_header_add_basic_auth(p->odr_out,
+                                         &gdu->u.HTTP_Request->headers,
+                                         http_user, http_pass);
+        if (buf && len)
+        {
+            gdu->u.HTTP_Request->content_buf = (char *) buf;
+            gdu->u.HTTP_Request->content_len = len;
+        }
+        if (!z_GDU(p->odr_out, &gdu, 0, 0))
+        {
+            wrbuf_printf(p->w_error, "Can not encode HTTP request for URL %s",
+                         uri);
+            log_warn(p);
+        }
+        else if (ret = cs_connect(conn, add) < 0)
+        {
+            wrbuf_printf(p->w_error, "Can not connect to URL %s", uri);
+            log_warn(p);
         }
         else
         {
-            int ret;
-            Z_GDU *gdu =
-                z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, proxy_mode);
-            gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
-            yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
-            for ( ; user_headers; user_headers = user_headers->next)
+            char *netbuffer = 0;
+            int netlen = 0;
+            int len_out;
+            char *buf_out = odr_getbuf(p->odr_out, &len_out, 0);
+            int state = 0; /* 0=connect phase, 1=send, 2=recv */
+            if (p->verbose)
+                fwrite(buf_out, 1, len_out, stdout);
+            if (!strcmp(gdu->u.HTTP_Request->method, "HEAD"))
+                cs_set_head_only(conn, 1);
+            if (ret == 0)
+                state = 1; /* connect complete, so send phase */
+            while (1)
             {
-                /* prefer new Host over user-supplied Host */
-                if (!strcmp(user_headers->name, "Host"))
-                    ;
-                /* prefer user-supplied User-Agent over YAZ' own */
-                else if (!strcmp(user_headers->name, "User-Agent"))
-                    z_HTTP_header_set(p->odr_out, &gdu->u.HTTP_Request->headers,
-                                      user_headers->name, user_headers->value);
-                else
-                    z_HTTP_header_add(p->odr_out, &gdu->u.HTTP_Request->headers,
-                                      user_headers->name, user_headers->value);
-            }
-            if (http_user && http_pass)
-                z_HTTP_header_add_basic_auth(p->odr_out,
-                                             &gdu->u.HTTP_Request->headers,
-                                             http_user, http_pass);
-            res = 0;
-            if (buf && len)
-            {
-                gdu->u.HTTP_Request->content_buf = (char *) buf;
-                gdu->u.HTTP_Request->content_len = len;
-            }
-            if (!z_GDU(p->odr_out, &gdu, 0, 0))
-            {
-                wrbuf_printf(p->w_error, "Can not encode HTTP request for URL %s",
-                             uri);
-                log_warn(p);
-                return 0;
-            }
-            ret = cs_connect(conn, add);
-            if (ret < 0) /* error */
-            {
-                wrbuf_printf(p->w_error, "Can not connect to URL %s", uri);
-                log_warn(p);
-            }
-            else
-            {
-                char *netbuffer = 0;
-                int netlen = 0;
-                int len_out;
-                char *buf_out = odr_getbuf(p->odr_out, &len_out, 0);
-                int state = 0; /* 0=connect phase, 1=send, 2=recv */
-
-                if (p->verbose)
-                    fwrite(buf_out, 1, len_out, stdout);
-                if (!strcmp(gdu->u.HTTP_Request->method, "HEAD"))
-                    cs_set_head_only(conn, 1);
-                if (ret == 0)
-                    state = 1; /* connect complete, so send phase */
-                while (1)
+                if (ret == 1) /* incomplete , wait */
                 {
-                    if (ret == 1) /* incomplete , wait */
+                    struct yaz_poll_fd yp;
+                    enum yaz_poll_mask input_mask = yaz_poll_none;
+                    yaz_poll_add(input_mask, yaz_poll_except);
+                    if (conn->io_pending & CS_WANT_WRITE)
+                        yaz_poll_add(input_mask, yaz_poll_write);
+                    if (conn->io_pending & CS_WANT_READ)
+                        yaz_poll_add(input_mask, yaz_poll_read);
+                    yp.fd = cs_fileno(conn);
+                    yp.input_mask = input_mask;
+                    ret = yaz_poll(&yp, 1, p->timeout_sec, p->timeout_ns);
+                    if (ret == 0)
                     {
-                        struct yaz_poll_fd yp;
-                        enum yaz_poll_mask input_mask = yaz_poll_none;
-                        yaz_poll_add(input_mask, yaz_poll_except);
-                        if (conn->io_pending & CS_WANT_WRITE)
-                            yaz_poll_add(input_mask, yaz_poll_write);
-                        if (conn->io_pending & CS_WANT_READ)
-                            yaz_poll_add(input_mask, yaz_poll_read);
-                        yp.fd = cs_fileno(conn);
-                        yp.input_mask = input_mask;
-                        ret = yaz_poll(&yp, 1, p->timeout_sec, p->timeout_ns);
-                        if (ret == 0)
-                        {
-                            wrbuf_printf(p->w_error, "timeout URL %s", uri);
-                            break;
-                        }
-                        else if (ret < 0)
-                        {
-                            wrbuf_printf(p->w_error, "poll error URL %s", uri);
-                            break;
-                        }
+                        wrbuf_printf(p->w_error, "timeout URL %s", uri);
+                        break;
                     }
-                    if (state == 0) /* connect phase */
+                    else if (ret < 0)
                     {
-                        ret = cs_rcvconnect(conn);
-                        if (ret < 0)
-                        {
-                            wrbuf_printf(p->w_error, "cs_rcvconnect failed for URL %s", uri);
-                            log_warn(p);
-                            break;
-                        }
-                        else if (ret == 0)
-                            state = 1;
+                        wrbuf_printf(p->w_error, "poll error URL %s", uri);
+                        break;
                     }
-                    else if (state == 1) /* write request phase */
+                }
+                if (state == 0) /* connect phase */
+                {
+                    ret = cs_rcvconnect(conn);
+                    if (ret < 0)
                     {
-                        ret = cs_put(conn, buf_out, len_out);
-                        if (ret < 0)
-                        {
-                            wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
-                            log_warn(p);
-                            break;
-                        }
-                        else if (ret == 0)
-                        {
-                            state = 2;
-                        }
+                        wrbuf_printf(p->w_error, "cs_rcvconnect failed for URL %s", uri);
+                        log_warn(p);
+                        break;
                     }
-                    else if (state == 2) /* read response phase */
+                    else if (ret == 0)
+                        state = 1;
+                }
+                else if (state == 1) /* write request phase */
+                {
+                    ret = cs_put(conn, buf_out, len_out);
+                    if (ret < 0)
                     {
-                        ret = cs_get(conn, &netbuffer, &netlen);
-                        if (ret  <= 0)
+                        wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
+                        log_warn(p);
+                        break;
+                    }
+                    else if (ret == 0)
+                    {
+                        state = 2;
+                    }
+                }
+                else if (state == 2) /* read response phase */
+                {
+                    ret = cs_get(conn, &netbuffer, &netlen);
+                    if (ret  <= 0)
+                    {
+                        wrbuf_printf(p->w_error, "cs_get failed for URL %s", uri);
+                        log_warn(p);
+                        break;
+                    }
+                    else if (ret > 1)
+                    {
+                        Z_GDU *gdu;
+                        if (p->verbose)
+                            fwrite(netbuffer, 1, ret, stdout);
+                        odr_setbuf(p->odr_in, netbuffer, ret, 0);
+                        if (!z_GDU(p->odr_in, &gdu, 0, 0)
+                            || gdu->which != Z_GDU_HTTP_Response)
                         {
-                            wrbuf_printf(p->w_error, "cs_get failed for URL %s", uri);
+                            wrbuf_printf(p->w_error, "HTTP decoding fail for "
+                                         "URL %s", uri);
                             log_warn(p);
-                            break;
                         }
-                        else if (ret > 1)
+                        else
                         {
-                            Z_GDU *gdu;
-                            if (p->verbose)
-                                fwrite(netbuffer, 1, ret, stdout);
-                            odr_setbuf(p->odr_in, netbuffer, ret, 0);
-                            if (!z_GDU(p->odr_in, &gdu, 0, 0)
-                                || gdu->which != Z_GDU_HTTP_Response)
-                            {
-                                wrbuf_printf(p->w_error, "HTTP decoding fail for "
-                                             "URL %s", uri);
-                                log_warn(p);
-                            }
-                            else
-                            {
-                                res = gdu->u.HTTP_Response;
-                                break;
-                            }
+                            res = gdu->u.HTTP_Response;
+                            break;
                         }
                     }
                 }
-                xfree(netbuffer);
             }
-            cs_close(conn);
+            xfree(netbuffer);
         }
+        cs_close(conn);
         if (!res)
             break;
         code = res->code;
