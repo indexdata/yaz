@@ -194,7 +194,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                          uri);
             log_warn(p);
         }
-        else if (ret = cs_connect(conn, add) < 0)
+        else if ((ret = cs_connect(conn, add)) < 0)
         {
             wrbuf_printf(p->w_error, "Can not connect to URL %s", uri);
             log_warn(p);
