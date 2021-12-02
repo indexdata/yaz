@@ -242,7 +242,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                     ret = cs_rcvconnect(conn);
                     if (ret < 0)
                     {
-                        wrbuf_printf(p->w_error, "cs_rcvconnect failed for URL %s", uri);
+                        wrbuf_printf(p->w_error,
+                                     "cs_rcvconnect failed for URL %s", uri);
                         log_warn(p);
                         break;
                     }
@@ -268,7 +269,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                     ret = cs_get(conn, &netbuffer, &netlen);
                     if (ret  <= 0)
                     {
-                        wrbuf_printf(p->w_error, "cs_get failed for URL %s", uri);
+                        wrbuf_printf(p->w_error, "cs_get failed for URL %s",
+                                     uri);
                         log_warn(p);
                         break;
                     }
