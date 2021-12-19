@@ -56,7 +56,7 @@ HHC="c:\program files (x86)\html help workshop\hhc.exe"
 
 YAZ4J_DIR="..\..\yaz4j"
 
-YAZPATH="$(MAKEDIR)\.."
+YAZPATH=$(MAKEDIR)\..
 
 
 dist: yaz.nsi version.nsi distclean
@@ -280,7 +280,7 @@ RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
   /MD /O2
 
-MVN_ARGS=-Dyaz.path=$(YAZPATH)
+MVN_ARGS=-Dyaz.path="$(YAZPATH)" -Dyaz.include="$(YAZPATH)\src"
 # without >log below, mvn install does NOT work
 yaz4j: $(JAVADIR)
 	cd $(YAZ4J_DIR)
