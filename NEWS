@@ -1,3 +1,10 @@
+--- 5.31.1 2021/12/19
+
+Fixed #61: yaz-url redirect segfault in case of redirect host failure.
+
+Update yaz_encode_uri_component for RFC3986. Previous implementation based
+on RFC2396.
+
 --- 5.31.0 2021/04/27
 
 Windows: nmake and NSIS updated for Visual Studio 2019, ICU 68.
