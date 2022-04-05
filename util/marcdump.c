@@ -97,7 +97,6 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
                 prog, fname, strerror(errno));
         exit(1);
     }
-
     while (yaz_marc_read_line(mt, getbyte_stream,
                               ungetbyte_stream, inf) == 0)
     {
@@ -111,6 +110,11 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
 
 static void marcdump_read_json(yaz_marc_t mt, const char *fname)
 {
+    const char *errmsg;
+    size_t errpos;
+    WRBUF w = wrbuf_alloc();
+    struct json_node *n;
+    int c;
     FILE *inf = fopen(fname, "rb");
     if (!inf)
     {
@@ -118,41 +122,32 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
                 prog, fname, strerror(errno));
         exit(1);
     }
-    else
+    while ((c = getc(inf)) != EOF)
+        wrbuf_putc(w, c);
+    n = json_parse2(wrbuf_cstr(w), &errmsg, &errpos);
+    if (n)
     {
-        const char *errmsg;
-        size_t errpos;
-        WRBUF w = wrbuf_alloc();
-        struct json_node *n;
-        int c;
-
-        while ((c = getc(inf)) != EOF)
-            wrbuf_putc(w, c);
-        n = json_parse2(wrbuf_cstr(w), &errmsg, &errpos);
-        if (n)
+        int r = yaz_marc_read_json_node(mt, n);
+        if (r == 0)
         {
-            int r = yaz_marc_read_json_node(mt, n);
-            if (r == 0)
-            {
-                wrbuf_rewind(w);
-                yaz_marc_write_mode(mt, w);
-                fputs(wrbuf_cstr(w), stdout);
-                wrbuf_rewind(w);
-            }
-            else
-            {
-                fprintf(stderr, "%s: JSON MARC parsing failed ret=%d\n", fname,
-                        r);
-            }
+            wrbuf_rewind(w);
+            yaz_marc_write_mode(mt, w);
+            fputs(wrbuf_cstr(w), stdout);
+            wrbuf_rewind(w);
         }
         else
         {
-            fprintf(stderr, "%s: JSON parse error: %s . pos=%ld\n", fname,
-                    errmsg, (long) errpos);
+            fprintf(stderr, "%s: JSON MARC parsing failed ret=%d\n", fname,
+                    r);
         }
-        wrbuf_destroy(w);
-        fclose(inf);
     }
+    else
+    {
+        fprintf(stderr, "%s: JSON parse error: %s . pos=%ld\n", fname,
+                errmsg, (long) errpos);
+    }
+    wrbuf_destroy(w);
+    fclose(inf);
 }
 
 
@@ -163,47 +158,49 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
     WRBUF wrbuf = wrbuf_alloc();
     xmlTextReaderPtr reader = xmlReaderForFile(fname, 0 /* encoding */,
                                                0 /* options */);
-
-    if (reader)
+    int ret;
+    long no = 0;
+    if (reader == 0)
     {
-        int ret;
-        long no = 0;
-        while ((ret = xmlTextReaderRead(reader)) == 1)
-        {
-            int type = xmlTextReaderNodeType(reader);
-            if (type == XML_READER_TYPE_ELEMENT)
-            {
-                char *name = (char *) xmlTextReaderLocalName(reader);
-                if (!strcmp(name, "record") || !strcmp(name, "r"))
-                {
-                    xmlNodePtr ptr = xmlTextReaderExpand(reader);
-                    int r = yaz_marc_read_xml(mt, ptr);
-                    if (r)
-                    {
-                        no_errors++;
-                        fprintf(stderr, "yaz_marc_read_xml failed\n");
-                    }
-                    else if (no >= offset)
-                    {
-                        int write_rc = yaz_marc_write_mode(mt, wrbuf);
-                        if (write_rc)
-                        {
-                            yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
-                                    "write error: %d", write_rc);
-                            no_errors++;
-                        }
-                        fputs(wrbuf_cstr(wrbuf), stdout);
-                        wrbuf_rewind(wrbuf);
-                    }
-                    no++;
-                }
-                xmlFree(name);
-            }
-            if (no - offset >= limit)
-                break;
-        }
-        xmlFreeTextReader(reader);
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
+        exit(1);
     }
+    while ((ret = xmlTextReaderRead(reader)) == 1)
+    {
+        int type = xmlTextReaderNodeType(reader);
+        if (type == XML_READER_TYPE_ELEMENT)
+        {
+            char *name = (char *) xmlTextReaderLocalName(reader);
+            if (!strcmp(name, "record") || !strcmp(name, "r"))
+            {
+                xmlNodePtr ptr = xmlTextReaderExpand(reader);
+                int r = yaz_marc_read_xml(mt, ptr);
+                if (r)
+                {
+                    no_errors++;
+                    fprintf(stderr, "yaz_marc_read_xml failed\n");
+                }
+                else if (no >= offset)
+                {
+                    int write_rc = yaz_marc_write_mode(mt, wrbuf);
+                    if (write_rc)
+                    {
+                        yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
+                                "write error: %d", write_rc);
+                        no_errors++;
+                    }
+                    fputs(wrbuf_cstr(wrbuf), stdout);
+                    wrbuf_rewind(wrbuf);
+                }
+                no++;
+            }
+            xmlFree(name);
+        }
+        if (no - offset >= limit)
+            break;
+    }
+    xmlFreeTextReader(reader);
     fputs(wrbuf_cstr(wrbuf), stdout);
     wrbuf_destroy(wrbuf);
 }
