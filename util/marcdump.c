@@ -14,18 +14,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
-
-/* Libxml2 version < 2.6.15. xmlreader not reliable/present */
-#if LIBXML_VERSION < 20615
-#define USE_XMLREADER 0
-#else
-#define USE_XMLREADER 1
-#endif
-
-#if USE_XMLREADER
 #include <libxml/xmlreader.h>
-#endif
-
 #endif
 
 #include <stdio.h>
@@ -64,7 +53,7 @@ static void usage(const char *prog)
 {
     fprintf(stderr, "Usage: %s [-i format] [-o format] [-f from] [-t to] "
             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
-            "[-p] [-v] [-V] file...\n",
+            "[-p] [-v] [-V] [-O offset] [-L limit] file...\n",
             prog);
 }
 
@@ -167,16 +156,17 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
 
 
 #if YAZ_HAVE_XML2
-static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
+static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
+                              long offset, long limit)
 {
     WRBUF wrbuf = wrbuf_alloc();
-#if USE_XMLREADER
     xmlTextReaderPtr reader = xmlReaderForFile(fname, 0 /* encoding */,
                                                0 /* options */);
 
     if (reader)
     {
         int ret;
+        long no = 0;
         while ((ret = xmlTextReaderRead(reader)) == 1)
         {
             int type = xmlTextReaderNodeType(reader);
@@ -186,14 +176,13 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                 if (!strcmp(name, "record") || !strcmp(name, "r"))
                 {
                     xmlNodePtr ptr = xmlTextReaderExpand(reader);
-
                     int r = yaz_marc_read_xml(mt, ptr);
                     if (r)
                     {
                         no_errors++;
                         fprintf(stderr, "yaz_marc_read_xml failed\n");
                     }
-                    else
+                    else if (no >= offset)
                     {
                         int write_rc = yaz_marc_write_mode(mt, wrbuf);
                         if (write_rc)
@@ -205,48 +194,15 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname)
                         fputs(wrbuf_cstr(wrbuf), stdout);
                         wrbuf_rewind(wrbuf);
                     }
+                    no++;
                 }
                 xmlFree(name);
             }
+            if (no - offset >= limit)
+                break;
         }
         xmlFreeTextReader(reader);
     }
-#else
-    xmlDocPtr doc = xmlParseFile(fname);
-    if (doc)
-    {
-        xmlNodePtr ptr = xmlDocGetRootElement(doc);
-        for (; ptr; ptr = ptr->next)
-        {
-            if (ptr->type == XML_ELEMENT_NODE)
-            {
-                if (!strcmp((const char *) ptr->name, "collection"))
-                {
-                    ptr = ptr->children;
-                    continue;
-                }
-                if (!strcmp((const char *) ptr->name, "record") ||
-                    !strcmp((const char *) ptr->name, "r"))
-                {
-                    int r = yaz_marc_read_xml(mt, ptr);
-                    if (r)
-                    {
-                        no_errors++;
-                        fprintf(stderr, "yaz_marc_read_xml failed\n");
-                    }
-                    else
-                    {
-                        yaz_marc_write_mode(mt, wrbuf);
-
-                        fputs(wrbuf_cstr(wrbuf), stdout);
-                        wrbuf_rewind(wrbuf);
-                    }
-                }
-            }
-        }
-        xmlFreeDoc(doc);
-    }
-#endif
     fputs(wrbuf_cstr(wrbuf), stdout);
     wrbuf_destroy(wrbuf);
 }
@@ -256,7 +212,8 @@ static void dump(const char *fname, const char *from, const char *to,
                  int input_format, int output_format,
                  int write_using_libxml2,
                  int print_offset, const char *split_fname, int split_chunk,
-                 int verbose, FILE *cfile, const char *leader_spec)
+                 int verbose, FILE *cfile, const char *leader_spec,
+                 long offset, long limit)
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
@@ -287,7 +244,7 @@ static void dump(const char *fname, const char *from, const char *to,
     if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_xml(mt, fname);
+        marcdump_read_xml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_LINE)
@@ -302,7 +259,7 @@ static void dump(const char *fname, const char *from, const char *to,
     {
         FILE *inf = fopen(fname, "rb");
         int num = 1;
-        int marc_no = 0;
+        long marc_no;
         int split_file_no = -1;
         if (!inf)
         {
@@ -312,7 +269,7 @@ static void dump(const char *fname, const char *from, const char *to,
         }
         if (cfile)
             fprintf(cfile, "char *marc_records[] = {\n");
-        for(;; marc_no++)
+        for (marc_no = 0L; marc_no - offset < limit; marc_no++)
         {
             const char *result = 0;
             size_t len;
@@ -447,7 +404,7 @@ static void dump(const char *fname, const char *from, const char *to,
 
             if (r == -1)
                 no_errors++;
-            if (r > 0 && result && len_result)
+            if (r > 0 && result && len_result && marc_no >= offset)
             {
                 if (fwrite(result, len_result, 1, stdout) != 1)
                 {
@@ -512,6 +469,8 @@ int main (int argc, char **argv)
     const char *split_fname = 0;
     const char *leader_spec = 0;
     int write_using_libxml2 = 0;
+    long offset = 0L;
+    long limit = LONG_MAX;
 
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -524,7 +483,7 @@ int main (int argc, char **argv)
 
     prog = *argv;
     yaz_enable_panic_backtrace(prog);
-    while ((r = options("i:o:C:npc:xOeXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
+    while ((r = options("i:o:C:npc:xL:O:eXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
@@ -586,10 +545,11 @@ int main (int argc, char **argv)
                     "Use -i marcxml instead\n", prog);
             exit(1);
             break;
+        case 'L':
+            limit = atol(arg);
+            break;
         case 'O':
-            fprintf(stderr, "%s: OAI MARC no longer supported."
-                    " Use MARCXML instead.\n", prog);
-            exit(1);
+            offset = atol(arg);
             break;
         case 'e':
             fprintf(stderr, "%s: -e no longer supported. "
@@ -622,7 +582,7 @@ int main (int argc, char **argv)
             dump(arg, from, to, input_format, output_format,
                  write_using_libxml2,
                  print_offset, split_fname, split_chunk,
-                 verbose, cfile, leader_spec);
+                 verbose, cfile, leader_spec, offset, limit);
             break;
         case 'v':
             verbose++;

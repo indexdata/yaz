@@ -37,6 +37,8 @@
    <arg choice="opt"><option>-c <replaceable>cfile</replaceable></option></arg>
    <arg choice="opt"><option>-s <replaceable>prefix</replaceable></option></arg>
    <arg choice="opt"><option>-C <replaceable>size</replaceable></option></arg>
+   <arg choice="opt"><option>-O <replaceable>offset</replaceable></option></arg>
+   <arg choice="opt"><option>-L <replaceable>limit</replaceable></option></arg>
    <arg choice="opt"><option>-n</option></arg>
    <arg choice="opt"><option>-p</option></arg>
    <arg choice="opt"><option>-v</option></arg>
@@ -154,6 +156,24 @@
     <listitem><para>
       Specifies chunk size; to be used conjunction with option
       <literal>-s</literal>.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-O <replaceable>offset</replaceable></term>
+    <listitem><para>
+     Integer offset for at what position records whould be
+     written. 0=first record, 1=second, .. With -L option, this
+     allows a specific range of records to be processed.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-L <replaceable>limit</replaceable></term>
+    <listitem><para>
+     Integer limit for how many records should at most be written.
+     With -O option, this allows a specific range of records to be
+     processed.
      </para></listitem>
    </varlistentry>
 
