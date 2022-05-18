@@ -32,6 +32,10 @@
 #include <sys/types.h>
 #endif
 
+#if HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif
+
 #if HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
@@ -98,6 +102,9 @@ static void yaz_invoke_gdb(void)
     {  /* parent */
         int sec = 0;
 
+#ifdef PR_SET_PTRACER
+        prctl(PR_SET_PTRACER, pid, 0, 0, 0);
+#endif
         close(fds[0]);
         write(fds[1], "quit\n", 5);
         while (1)
