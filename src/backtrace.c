@@ -127,8 +127,7 @@ static void yaz_panic_alarm(int sig)
     const char *cp = "backtrace: backtrace hangs\n";
 
     write(yaz_panic_fd, cp, strlen(cp));
-    yaz_invoke_gdb();
-    kill(getpid(), yaz_panic_signal);
+    _exit(1);
 }
 
 static void yaz_invoke_backtrace(int sig)
