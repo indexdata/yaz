@@ -4,7 +4,7 @@ dnl See the file LICENSE for details.
 AC_PREREQ([2.60])
 AC_INIT([yaz],
 m4_esyscmd([. ./IDMETA; printf $VERSION]),
-[yaz-help@indexdata.dk])
+[info@indexdata.com])
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
