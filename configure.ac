@@ -1,10 +1,8 @@
 dnl This file is part of the YAZ toolkit.
 dnl Copyright (C) Index Data
 dnl See the file LICENSE for details.
-AC_PREREQ([2.60])
-AC_INIT([yaz],
-m4_esyscmd([. ./IDMETA; printf $VERSION]),
-[info@indexdata.com])
+AC_PREREQ([2.71])
+AC_INIT([yaz],[m4_esyscmd(. ./IDMETA; printf $VERSION)],[info@indexdata.com])
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
@@ -20,7 +18,7 @@ test -z "$YACC" -a ! -f src/cql.c && AC_MSG_ERROR([GNU Bison not found])
 test -z "$YACC" && AC_MSG_WARN([GNU Bison not found])
 AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])
 AC_PROG_INSTALL
-AM_PROG_LIBTOOL
+LT_INIT
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 pkgconfigpath="$PKG_CONFIG"
@@ -45,10 +43,6 @@ AC_CHECK_HEADERS([net/if.h netinet/in.h netinet/if_ether.h],[],[],[
  #include <netinet/in.h>
  #endif
 ])
-AC_HEADER_STDC
-if test "$ac_cv_header_stdc" = "no"; then
-    AC_MSG_WARN([Your system doesn not seem to support ANSI C])
-fi
 dnl ----- Types
 AC_CHECK_TYPES([long long])
 dnl
@@ -173,18 +167,18 @@ if test "$ac_cv_lib_readline_readline" = "yes"; then
     AC_CHECK_HEADERS([readline/readline.h readline/history.h])
     xLIBS=$LIBS
     LIBS="$LIBS $READLINE_LIBS"
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	#include <stdio.h>
 	#include <readline/readline.h>
-	    ],[
+	    ]], [[
 	    rl_attempted_completion_over = 0;
-	    ],AC_DEFINE([HAVE_READLINE_COMPLETION_OVER],1,[Define to 1 if rl_attempted_completion_over is defined]))
-    AC_TRY_LINK([
+	    ]])],[AC_DEFINE(HAVE_READLINE_COMPLETION_OVER,1,Define to 1 if rl_attempted_completion_over is defined)],[])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	#include <stdio.h>
 	#include <readline/readline.h>
-	    ],[
+	    ]], [[
 	    rl_completion_matches (0, 0);
-	    ],[AC_DEFINE([HAVE_READLINE_RL_COMPLETION_MATCHES],1,[Define to 1 if rl_completion_matches is defined])])
+	    ]])],[AC_DEFINE([HAVE_READLINE_RL_COMPLETION_MATCHES],1,[Define to 1 if rl_completion_matches is defined])],[])
     LIBS=$xLIBS
 fi
 dnl ------ iconv
@@ -197,11 +191,11 @@ if test "$with_iconv" != "no"; then
 	LIBS="$LIBS -L${with_iconv}/lib"
 	CPPFLAGS="${CPPFLAGS} -I${with_iconv}/include"
     fi
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#include <iconv.h>
-	    ],[
+	    ]], [[
 	    iconv_t t = iconv_open("", "");
-	    ],[
+	    ]])],[
 	    AC_DEFINE([HAVE_ICONV_H],1,[Define to 1 if iconv.h is present])
 	    AC_MSG_RESULT([yes])
 	    ],[
@@ -244,7 +238,7 @@ dnl If the prototype succeeds, we are probably safe.
 dnl That works if accept is not preprocessor defined (such sa AIX)
 AC_MSG_CHECKING([for socklen_t])
 AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
-	AC_TRY_COMPILE([
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #ifdef __cplusplus
@@ -262,7 +256,7 @@ extern int accept(int, struct sockaddr *, socklen_t *);
 #ifdef __cplusplus
 }
 #endif
-	],,[ac_cv_check_socklen_t=socklen_t],[
+	]], [[]])],[ac_cv_check_socklen_t=socklen_t],[
 		AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -298,13 +292,11 @@ if test "$enable_tcpd" -a "$enable_tcpd" != "no"; then
     fi
     AC_MSG_CHECKING([for working tcpd.h])
     LIBS="$LIBS -lwrap"
-    AC_TRY_LINK([#include <syslog.h>
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <syslog.h>
 #include <tcpd.h>
 	    int allow_severity = LOG_INFO;
-	    int deny_severity = LOG_WARNING;],
-	[struct request_info request_info; int i;
-	    i = hosts_access(&request_info);],
-	tcpd_ok=1, tcpd_ok=0)
+	    int deny_severity = LOG_WARNING;]], [[struct request_info request_info; int i;
+	    i = hosts_access(&request_info);]])],[tcpd_ok=1],[tcpd_ok=0])
     LIBS=$oldLibs
     if test "$tcpd_ok" = "0"; then
 	AC_MSG_RESULT([no])
@@ -334,10 +326,10 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		OLIBS=$LIBS
 	        for lib in -lpthread -lpthreads -lc_r; do
 		    LIBS="$lib $OLIBS"
-		    AC_TRY_LINK([ #include <pthread.h> ],
-			    [ pthread_t id; pthread_join(id, 0); ],
-			    [ PTHREAD_LIBS=$lib; break ]
-			)
+		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[ #include <pthread.h> ]],
+				   [[ pthread_t id; pthread_join(id, 0); ]])],
+				   [ PTHREAD_LIBS=$lib; break 
+			],[])
 		done
 		LIBS=$OLIBS
 	    fi
@@ -399,7 +391,7 @@ AC_SUBST([VERSION_SHA1])
 dnl
 dnl ------ Makefiles
 dnl
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 src/Makefile
 test/Makefile
@@ -419,13 +411,14 @@ yaz-server.pc
 Doxyfile
 win/version.nsi
 src/yaz/yaz-version.h
-],[
+])
+AC_CONFIG_COMMANDS([default],[
 	sed -e 's%echo_source=yes%echo_source=no%g; s%src_root=.*$%%g; s%build_root=.*%%g' \
 		< yaz-config > src/yaz-config && chmod +x yaz-config src/yaz-config
 	diff doc/local.ent doc/local0.ent >/dev/null 2>/dev/null \
 		|| cp doc/local0.ent doc/local.ent
-    ]
-)
+],[])
+AC_OUTPUT
 
 
 echo \
