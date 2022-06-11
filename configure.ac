@@ -20,7 +20,7 @@ AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])
 AC_PROG_INSTALL
 LT_INIT
 AM_PROG_CC_C_O
-AC_PATH_TOOL([pkgconfigpath],[pkg-config],[NONE])
+AC_PATH_TOOL([PKG_CONFIG],[pkg-config],[NONE])
 dnl
 YAZ_DOC
 dnl
@@ -66,14 +66,14 @@ hiredis=default
 AC_SUBST([HIREDIS_LIBS])
 AC_ARG_WITH([redis], [  --with-redis            hiredis library],
 	    [hiredis=$withval])
-if test "$hiredis" != "no" -a "$pkgconfigpath" != "NONE"; then
+if test "$hiredis" != "no" -a "$PKG_CONFIG" != "NONE"; then
     AC_CHECK_LIB([hiredis],[redisCommandArgv],[HIREDIS_LIBS=-lhiredis])
     AC_MSG_CHECKING([for redis])
-    if $pkgconfigpath --cflags hiredis >/dev/null 2>&1 ; then
-	if $pkgconfigpath --atleast-version 0.10 hiredis; then
+    if $PKG_CONFIG --cflags hiredis >/dev/null 2>&1 ; then
+	if $PKG_CONFIG --atleast-version 0.10 hiredis; then
 	    AC_MSG_RESULT([yes])
-            CFLAGS="$CFLAGS `$pkgconfigpath --cflags hiredis`"
-            HIREDIS_LIBS="`$pkgconfigpath --libs hiredis`"
+            CFLAGS="$CFLAGS `$PKG_CONFIG --cflags hiredis`"
+            HIREDIS_LIBS="`$PKG_CONFIG --libs hiredis`"
 	    AC_DEFINE([HAVE_HIREDIS],[1],[Define to 1 if hiredis is enabled])
 	else
 	    AC_MSG_RESULT([no. Version 0.10 required])
@@ -97,13 +97,13 @@ dnl ------ memcached
 memcached=default
 AC_SUBST([MEMCACHED_LIBS])
 AC_ARG_WITH([memcached], [  --with-memcached        Memcached library], [memcached=$withval])
-if test "$memcached" != "no" -a "$pkgconfigpath" != "NONE"; then
+if test "$memcached" != "no" -a "$PKG_CONFIG" != "NONE"; then
     AC_MSG_CHECKING([for libmemcached])
-    if $pkgconfigpath --cflags libmemcached >/dev/null 2>&1 ; then
-	if $pkgconfigpath --atleast-version 0.40 libmemcached; then
+    if $PKG_CONFIG --cflags libmemcached >/dev/null 2>&1 ; then
+	if $PKG_CONFIG --atleast-version 0.40 libmemcached; then
 	    AC_MSG_RESULT([yes])
-            CFLAGS="$CFLAGS `$pkgconfigpath --cflags libmemcached`"
-            MEMCACHED_LIBS="`$pkgconfigpath --libs libmemcached`"
+            CFLAGS="$CFLAGS `$PKG_CONFIG --cflags libmemcached`"
+            MEMCACHED_LIBS="`$PKG_CONFIG --libs libmemcached`"
 	    AC_DEFINE([HAVE_LIBMEMCACHED],[1],[Define to 1 if memcached is enabled])
         else
 	    AC_MSG_RESULT([no. Version 0.40 required])
@@ -138,11 +138,11 @@ if test "$gnutls" != "no"; then
 	    fi
 	fi
     else
-	if test "$pkgconfigpath" != "NONE"; then
-	    if $pkgconfigpath --exists gnutls; then
-		SSL_CFLAGS=`$pkgconfigpath --cflags gnutls`
-		SSL_LIBS="`$pkgconfigpath --libs gnutls`"
-		gnutlsver=`$pkgconfigpath --modversion gnutls`
+	if test "$PKG_CONFIG" != "NONE"; then
+	    if $PKG_CONFIG --exists gnutls; then
+		SSL_CFLAGS=`$PKG_CONFIG --cflags gnutls`
+		SSL_LIBS="`$PKG_CONFIG --libs gnutls`"
+		gnutlsver=`$PKG_CONFIG --modversion gnutls`
 	    fi
 	fi
     fi
