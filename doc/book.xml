@@ -1502,6 +1502,9 @@
       <row><entry>
        charset</entry><entry> Character set for negotiation.
       </entry><entry>none</entry></row>
+      <row><entry>rpnCharset</entry><entry> Client-side character conversion for RPN queries and scan terms.
+      The input terms are converted from UTF-8 to the character set of rpnCharset.
+      </entry><entry>none (no conversion)</entry></row>
       <row><entry>
        serverImplementationId</entry><entry>
        Implementation ID of server.  (The old targetImplementationId
