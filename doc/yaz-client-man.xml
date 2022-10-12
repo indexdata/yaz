@@ -364,6 +364,15 @@
       <literal>&lt;</literal> for ascending order or <literal>&gt;</literal>
       for descending order.
      </para>
+     <para>
+      Example using sort criterion with attributes use=local-number
+      and structure=numeric and ascending flag:
+      <literal>1=12,4=109 &lt;</literal>
+     </para>
+     <para>
+      Another example with "Title" sort field and descending flag:
+      <literal>Title &gt;</literal>
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry><term>
