@@ -30,9 +30,6 @@ Verify distribution tarball with
 EOF
     if [ -f /etc/debian_version ]; then
         cat <<EOF
-Or just build the Debian packages without configuring
-  dpkg-buildpackage -rfakeroot
-
 When building from Git, you need these Debian packages:
   autoconf automake libtool gcc bison tclsh
   xsltproc docbook docbook-xml docbook-xsl
