@@ -1,6 +1,6 @@
-# Build yaz from source
-name: Build YAZ
-on: [push, pull_request]
+# Build minimal yaz from source
+name: Build minimal YAZ
+on: [pull_request]
 jobs:
  build-yaz:
   runs-on: ubuntu-latest
@@ -12,15 +12,9 @@ jobs:
      run: >
        sudo apt install autoconf automake libtool gcc make bison
        tclsh xsltproc docbook docbook-xml docbook-xsl
-       pkg-config libxslt1-dev libgnutls28-dev
-       libreadline-dev libwrap0-dev libicu-dev
-   - name: Run buildconf
+   - name: Run buildconf without xml, icu, ...
      run: ./buildconf.sh
-   - name: Run configure
-     run: ./configure
+   - name: Run configure without xml, icu, ...
+     run: ./configure --without-xml2 --without-icu --disable-tcpd
    - name: Run Make check
      run: make -j4 check
-   - name: Run Make dist
-     run: make -j4 dist
-   - name: Run Make clean
-     run: make clean
