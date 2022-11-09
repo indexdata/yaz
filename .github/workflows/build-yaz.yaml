@@ -1,0 +1,26 @@
+# Build yaz from source
+name: Build YAZ
+on: [push, pull_request]
+jobs:
+ build-yaz:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v3
+     with:
+       fetch-depth: 1
+   - name: Install required dependencies
+     run: >
+       sudo apt install autoconf automake libtool gcc make bison
+       tclsh xsltproc docbook docbook-xml docbook-xsl
+       pkg-config libxslt1-dev libgnutls28-dev
+       libreadline-dev libwrap0-dev libicu-dev
+   - name: Run buildconf
+     run: ./buildconf.sh
+   - name: Run configure
+     run: ./configure
+   - name: Run Make check
+     run: make -j4 check
+   - name: Run Make dist
+     run: make -j4 dist
+   - name: Run Make clean
+     run: make clean
