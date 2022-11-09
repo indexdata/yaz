@@ -10,9 +10,9 @@ jobs:
        fetch-depth: 1
    - name: Install deps
      run: >
-       sudo apt install autoconf automake libtool gcc bison tclsh
+       apt install autoconf automake libtool gcc bison tclsh
        xsltproc docbook docbook-xml docbook-xsl libxslt1-dev
-       libgnutls-dev libreadline-dev libwrap0-dev pkg-config libicu-dev make
+       libgnutls28-dev libreadline-dev libwrap0-dev pkg-config libicu-dev make
    - name: Run buildconf
      run: ./buildconf.sh
    - name: Run configure
