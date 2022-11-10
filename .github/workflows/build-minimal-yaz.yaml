@@ -7,16 +7,16 @@ jobs:
   steps:
    - uses: actions/checkout@v3
      with:
-       fetch-depth: 1
+      fetch-depth: 1
    - name: Install required dependencies
      run: >
-       sudo apt install autoconf automake libtool gcc make bison
-       tclsh xsltproc docbook docbook-xml docbook-xsl
+      sudo apt install autoconf automake libtool gcc make bison
+      tclsh xsltproc docbook docbook-xml docbook-xsl
    - name: Run buildconf without xml, icu, ...
      run: ./buildconf.sh
    - name: Run configure without xml, icu, ...
      run: >
-       ./configure --without-xml2 --without-icu --disable-tcpd
-       --without-memcached --without-redis
+      ./configure --without-xml2 --without-icu --disable-tcpd
+      --without-memcached --without-redis
    - name: Run Make check
      run: make -j4 check
