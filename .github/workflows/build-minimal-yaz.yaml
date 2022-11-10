@@ -2,7 +2,7 @@
 name: Build minimal YAZ
 on: [pull_request]
 jobs:
- build-yaz:
+ build-minimal-yaz:
   runs-on: ubuntu-latest
   steps:
    - uses: actions/checkout@v3
@@ -15,6 +15,8 @@ jobs:
    - name: Run buildconf without xml, icu, ...
      run: ./buildconf.sh
    - name: Run configure without xml, icu, ...
-     run: ./configure --without-xml2 --without-icu --disable-tcpd
+     run: >
+       ./configure --without-xml2 --without-icu --disable-tcpd
+       --without-memcached --without-redis
    - name: Run Make check
      run: make -j4 check

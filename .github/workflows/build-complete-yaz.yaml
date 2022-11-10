@@ -1,23 +1,26 @@
 # Build yaz from source
-name: Build YAZ
+name: Build complete YAZ
 on: [push, pull_request]
 jobs:
- build-yaz:
+ build-complete-yaz:
   runs-on: ubuntu-latest
   steps:
    - uses: actions/checkout@v3
      with:
        fetch-depth: 1
-   - name: Install required dependencies
+   - name: Install required and optional dependencies
      run: >
        sudo apt install autoconf automake libtool gcc make bison
        tclsh xsltproc docbook docbook-xml docbook-xsl
        pkg-config libxslt1-dev libgnutls28-dev
        libreadline-dev libwrap0-dev libicu-dev
+       libhiredis-dev libmemcached-dev
    - name: Run buildconf
      run: ./buildconf.sh
    - name: Run configure
-     run: ./configure
+     run: >
+       ./configure --enable-tcpd --with-xslt --with-gnutls --with-icu
+       --with-memcached --with-redis
    - name: Run Make check
      run: make -j4 check
    - name: Run Make dist
