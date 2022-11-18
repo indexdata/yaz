@@ -27,7 +27,7 @@
 
 /**
  * \file marc_sax.h
- * \brief MARCXML conversion via Libxml2's SAX
+ * \brief Parsing MARCXML collection using Libxml2's SAX parser.
  */
 
 #ifndef MARC_SAX_H
@@ -46,14 +46,23 @@ typedef struct yaz_marc_sax_t_ *yaz_marc_sax_t;
 
 #if YAZ_HAVE_XML2
 
-YAZ_EXPORT
-yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t mt, void *), void *cb_data);
+/** \brief construct marc SAX parser
+    \param mt marc handle
+    \param cb function called for each record
+    \param cb_data data to be passed to each cb call
+  */
+YAZ_EXPORT yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt,
+    void (*cb)(yaz_marc_t mt, void *), void *cb_data);
 
-YAZ_EXPORT
-xmlSAXHandlerPtr yaz_marc_sax_get(yaz_marc_sax_t ctx);
+/** \brief return Libxml SAX handler pointer
+    \returns pointer
+  */
+YAZ_EXPORT xmlSAXHandlerPtr yaz_marc_sax_get(yaz_marc_sax_t ctx);
 
-YAZ_EXPORT
-void yaz_marc_sax_destroy(yaz_marc_sax_t ctx);
+/** \brief destroys marc SAX parser
+    \param ctx
+  */
+YAZ_EXPORT void yaz_marc_sax_destroy(yaz_marc_sax_t ctx);
 
 #endif
 
