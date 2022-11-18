@@ -49,7 +49,7 @@ typedef struct yaz_marc_sax_t_ *yaz_marc_sax_t;
 #if YAZ_HAVE_XML2
 
 YAZ_EXPORT
-yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(void *), void *cb_data);
+yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t mt, void *), void *cb_data);
 
 YAZ_EXPORT
 xmlSAXHandler *yaz_marc_sax_get(yaz_marc_sax_t ctx);

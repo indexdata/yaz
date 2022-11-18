@@ -30,7 +30,7 @@ struct yaz_marc_sax_t_
         xmlSAXHandler saxHandler;
         WRBUF cdata;
         WRBUF tag;
-        void (*cb_func)(void *);
+        void (*cb_func)(yaz_marc_t, void *);
         void *cb_data;
         yaz_marc_t mt;
         char indicators[MAX_IND];
@@ -136,7 +136,7 @@ static void endElementNs(void *vp,
         }
         else if (strcmp((const char *)localname, "record") == 0)
         {
-                ctx->cb_func(ctx->cb_data);
+                ctx->cb_func(ctx->mt, ctx->cb_data);
         }
         wrbuf_rewind(ctx->cdata);
 }
@@ -147,7 +147,7 @@ static void characters(void *vp, const xmlChar *text, int len)
         wrbuf_write(ctx->cdata, (const char *)text, len);
 }
 
-yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(void *), void *cb_data)
+yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t, void *), void *cb_data)
 {
         yaz_marc_sax_t ctx = xmalloc(sizeof(*ctx));
 

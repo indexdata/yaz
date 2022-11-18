@@ -31,7 +31,7 @@
 #include <langinfo.h>
 #endif
 
-#include <yaz/marcdisp.h>
+#include <yaz/marc_sax.h>
 #include <yaz/json.h>
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
@@ -150,6 +150,45 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
     fclose(inf);
 }
 
+struct context
+{
+    WRBUF wrbuf;
+    long offset;
+    long limit;
+    long no;
+};
+
+static void context_handle(yaz_marc_t mt, void *vp)
+{
+    struct context *ctx = vp;
+    if (ctx->no >= ctx->offset && ctx->no < ctx->offset + ctx->limit)
+    {
+        int write_rc = yaz_marc_write_mode(mt, ctx->wrbuf);
+        if (write_rc)
+        {
+            yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
+                               "write error: %d", write_rc);
+            no_errors++;
+        }
+        fputs(wrbuf_cstr(ctx->wrbuf), stdout);
+        wrbuf_rewind(ctx->wrbuf);
+    }
+    ctx->no++;
+}
+
+static void marcdump_read_xml2(yaz_marc_t mt, const char *fname,
+                              long offset, long limit)
+{
+    struct context ctx;
+    ctx.wrbuf = wrbuf_alloc();
+    ctx.offset = offset;
+    ctx.limit = limit;
+    ctx.no = 0;
+    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &ctx);
+    xmlSAXUserParseFile(yaz_marc_sax_get(yt), yt, fname);
+    wrbuf_destroy(ctx.wrbuf);
+    yaz_marc_sax_destroy(yt);
+}
 
 #if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
@@ -242,7 +281,7 @@ static void dump(const char *fname, const char *from, const char *to,
     if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_xml(mt, fname, offset, limit);
+        marcdump_read_xml2(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_LINE)
