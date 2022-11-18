@@ -176,17 +176,45 @@ static void context_handle(yaz_marc_t mt, void *vp)
     ctx->no++;
 }
 
-static void marcdump_read_xml2(yaz_marc_t mt, const char *fname,
-                              long offset, long limit)
+static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
+                                  long offset, long limit)
 {
-    struct context ctx;
-    ctx.wrbuf = wrbuf_alloc();
-    ctx.offset = offset;
-    ctx.limit = limit;
-    ctx.no = 0;
-    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &ctx);
-    xmlSAXUserParseFile(yaz_marc_sax_get(yt), yt, fname);
-    wrbuf_destroy(ctx.wrbuf);
+    FILE *inf = fopen(fname, "rb");
+    if (inf == 0)
+    {
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
+        exit(1);
+    }
+    struct context context;
+    context.wrbuf = wrbuf_alloc();
+    context.offset = offset;
+    context.limit = limit;
+    context.no = 0;
+    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &context);
+    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get(yt);
+
+    size_t bufsz = 8192;
+    char *buf = xmalloc(bufsz);
+    int res = fread(buf, 1, 4, inf);
+    if (res > 0)
+    {
+        xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(sax_ptr, yt, buf, res, fname);
+        ctxt->replaceEntities = 1;
+        while ((res = fread(buf, 1, bufsz, inf)) > 0)
+        {
+            if (xmlParseChunk(ctxt, buf, res, 0))
+            {
+                xmlParserError(ctxt, "xmlParseChunk");
+                break;
+            }
+        }
+        xmlParseChunk(ctxt, buf, 0, 1);
+        xmlFreeParserCtxt(ctxt);
+    }
+    fclose(inf);
+    xfree(buf);
+    wrbuf_destroy(context.wrbuf);
     yaz_marc_sax_destroy(yt);
 }
 
@@ -278,10 +306,16 @@ static void dump(const char *fname, const char *from, const char *to,
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 
-    if (input_format == YAZ_MARC_MARCXML || input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
+    if (input_format == YAZ_MARC_MARCXML)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_xml2(mt, fname, offset, limit);
+        marcdump_read_marcxml(mt, fname, offset, limit);
+#endif
+    }
+    else if (input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
+    {
+#if YAZ_HAVE_XML2
+        marcdump_read_xml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_LINE)
