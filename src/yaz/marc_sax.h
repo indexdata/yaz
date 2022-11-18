@@ -36,8 +36,6 @@
 #include <yaz/yconfig.h>
 #include <yaz/marcdisp.h>
 
-#define YAZ_HAVE_XML2 1
-
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
@@ -52,7 +50,7 @@ YAZ_EXPORT
 yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t mt, void *), void *cb_data);
 
 YAZ_EXPORT
-xmlSAXHandler *yaz_marc_sax_get(yaz_marc_sax_t ctx);
+xmlSAXHandlerPtr yaz_marc_sax_get(yaz_marc_sax_t ctx);
 
 YAZ_EXPORT
 void yaz_marc_sax_destroy(yaz_marc_sax_t ctx);

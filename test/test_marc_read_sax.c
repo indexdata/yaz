@@ -11,20 +11,19 @@
 #include <yaz/log.h>
 #include <yaz/marc_sax.h>
 
-struct ctx
+struct user_data
 {
     WRBUF wrbuf;
 };
 
 static void handler(yaz_marc_t mt, void *cb)
 {
-    struct ctx *ctx = cb;
+    struct user_data *ctx = cb;
     yaz_marc_write_marcxml(mt, ctx->wrbuf);
 }
 
 static void tst1(void)
 {
-
     char *marcxml = "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                     "<record>\n"
                     "  <leader>00062cgm a2200037Ia 4500</leader>\n"
@@ -35,10 +34,10 @@ static void tst1(void)
                     "</record>\n"
                     "</collection>\n";
 
-    struct ctx ctx;
-    ctx.wrbuf = wrbuf_alloc();
+    struct user_data user_data;
+    user_data.wrbuf = wrbuf_alloc();
     yaz_marc_t mt = yaz_marc_create();
-    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &ctx);
+    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &user_data);
     xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get(yt);
 
     size_t lead = 10;
@@ -46,7 +45,7 @@ static void tst1(void)
     ctxt->replaceEntities = 1;
     xmlParseChunk(ctxt, marcxml + lead, strlen(marcxml) - lead, 1);
 
-    YAZ_CHECK(strcmp(wrbuf_cstr(ctx.wrbuf),
+    YAZ_CHECK(strcmp(wrbuf_cstr(user_data.wrbuf),
                      "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                      "  <leader>00062cgm a2200037Ia 4500</leader>\n"
                      "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"

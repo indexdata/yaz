@@ -176,6 +176,7 @@ static void context_handle(yaz_marc_t mt, void *vp)
     ctx->no++;
 }
 
+#if YAZ_HAVE_XML2
 static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
                                   long offset, long limit)
 {
@@ -218,7 +219,6 @@ static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
     yaz_marc_sax_destroy(yt);
 }
 
-#if YAZ_HAVE_XML2
 static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
                               long offset, long limit)
 {
