@@ -443,6 +443,7 @@ MISC_OBJS= \
    $(OBJDIR)\log.obj \
    $(OBJDIR)\malloc_info.obj \
    $(OBJDIR)\marcdisp.obj \
+   $(OBJDIR)\marc_read_sax.obj \
    $(OBJDIR)\marc_read_json.obj \
    $(OBJDIR)\marc_read_xml.obj \
    $(OBJDIR)\marc_read_iso2709.obj \

@@ -71,6 +71,7 @@ pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
  yaz/rpn2solr.h yaz/solr.h yaz/comstack.h \
  yaz/diagbib1.h yaz/diagsrw.h yaz/diagsru_update.h yaz/sortspec.h \
  yaz/log.h yaz/logrpn.h yaz/malloc_info.h yaz/marcdisp.h yaz/proxunit.h \
+ yaz/marc_sax.h \
  yaz/nmem.h yaz/nmem_xml.h yaz/odr.h yaz/errno.h yaz/facet.h \
  yaz/options.h yaz/otherinfo.h yaz/pquery.h yaz/prt-ext.h \
  yaz/querytowrbuf.h yaz/readconf.h yaz/record_conv.h yaz/record_render.h \
@@ -111,6 +112,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   base64.c version.c options.c log.c \
   cookie.c marcdisp.c \
   marc_read_json.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
+  marc_read_sax.c \
   wrbuf.c wrbuf_sha1.c malloc_info.c oid_db.c errno.c \
   nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c iconv-p.h utf8.c ucs4.c iso5428.c advancegreek.c \
