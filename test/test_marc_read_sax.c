@@ -2,17 +2,17 @@
  * Copyright (C) Index Data
  * See the file LICENSE for details.
  */
-#include <yaz/tpath.h>
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <yaz/test.h>
 #include <string.h>
 #include <yaz/log.h>
 #include <yaz/marc_sax.h>
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-struct ctx {
+struct ctx
+{
     WRBUF wrbuf;
 };
 
@@ -24,22 +24,37 @@ static void handler(yaz_marc_t mt, void *cb)
 
 static void tst1(void)
 {
+
     char *marcxml = "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
-     "<record>\n"
-     "  <leader>00062cgm a2200037Ia 4500</leader>\n"
-     "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"
-     "    <subfield code=\"a\">DVD CHI 791.43</subfield>\n"
-     "    <subfield code=\"b\">QI</subfield>\n"
-     "  </datafield>\n"
-     "</record>\n"
-     "</collection>\n"
-    ;
+                    "<record>\n"
+                    "  <leader>00062cgm a2200037Ia 4500</leader>\n"
+                    "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"
+                    "    <subfield code=\"a\">DVD CHI 791.43</subfield>\n"
+                    "    <subfield code=\"&amp;\">Q&amp;A</subfield>\n"
+                    "  </datafield>\n"
+                    "</record>\n"
+                    "</collection>\n";
 
     struct ctx ctx;
     ctx.wrbuf = wrbuf_alloc();
     yaz_marc_t mt = yaz_marc_create();
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &ctx);
-    xmlSAXUserParseMemory(yaz_marc_sax_get(yt), yt, marcxml, strlen(marcxml));
+    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get(yt);
+
+    size_t lead = 10;
+    xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(sax_ptr, yt, marcxml, lead, 0);
+    ctxt->replaceEntities = 1;
+    xmlParseChunk(ctxt, marcxml + lead, strlen(marcxml) - lead, 1);
+
+    YAZ_CHECK(strcmp(wrbuf_cstr(ctx.wrbuf),
+                     "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+                     "  <leader>00062cgm a2200037Ia 4500</leader>\n"
+                     "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"
+                     "    <subfield code=\"a\">DVD CHI 791.43</subfield>\n"
+                     "    <subfield code=\"&amp;\">Q&amp;A</subfield>\n"
+                     "  </datafield>\n"
+                     "</record>\n") == 0);
+    xmlFreeParserCtxt(ctxt);
     yaz_marc_sax_destroy(yt);
     yaz_marc_destroy(mt);
 }
@@ -59,4 +74,3 @@ int main(int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

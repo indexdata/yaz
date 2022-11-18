@@ -104,7 +104,6 @@ static void startElementNs(void *vp,
         {
                 size_t code_len;
                 const char *code_buf = get_attribute("code", nb_attributes, attributes, &code_len);
-                yaz_log(YLOG_LOG, "code=%.*s", (int) code_len, code_buf);
                 if (code_buf) 
                         wrbuf_write(ctx->cdata, code_buf, code_len);
         }
