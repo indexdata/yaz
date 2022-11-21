@@ -150,7 +150,8 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
     fclose(inf);
 }
 
-struct context
+#if YAZ_HAVE_XML2
+struct record_context
 {
     WRBUF wrbuf;
     long offset;
@@ -160,7 +161,7 @@ struct context
 
 static void context_handle(yaz_marc_t mt, void *vp)
 {
-    struct context *ctx = vp;
+    struct record_context *ctx = vp;
     if (ctx->no >= ctx->offset && ctx->no < ctx->offset + ctx->limit)
     {
         int write_rc = yaz_marc_write_mode(mt, ctx->wrbuf);
@@ -176,11 +177,10 @@ static void context_handle(yaz_marc_t mt, void *vp)
     ctx->no++;
 }
 
-#if YAZ_HAVE_XML2
 static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
                                   long offset, long limit)
 {
-    struct context context;
+    struct record_context context;
     context.wrbuf = wrbuf_alloc();
     context.offset = offset;
     context.limit = limit;
