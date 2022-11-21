@@ -33,17 +33,22 @@ struct yaz_marc_sax_t_
     int indicator_length;
 };
 
-static const char *get_attribute(const char *name, int nb_attributes, const xmlChar **attributes,
-                                 size_t *len)
+static int get_attribute(const char *name, int nb_attributes, const xmlChar **attributes, WRBUF result)
 {
     for (int i = 0; i < nb_attributes; i++)
     {
         if (strcmp(name, (const char *)attributes[5 * i]) == 0)
         {
-            const char *start = (const char *)attributes[5 * i + 3];
+            const char *buf = (const char *)attributes[5 * i + 3];
             const char *end = (const char *)attributes[5 * i + 4];
-            *len = end - start;
-            return start;
+            size_t len = end - buf;
+            for (size_t i = 0; i < len; i++) {
+                wrbuf_putc(result, buf[i]);
+                if (i < len - 4 && buf[i] == '&'
+                     && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
+                    i += 4;
+            }
+            return 1;
         }
     }
     return 0;
@@ -56,35 +61,9 @@ static void get_indicators(yaz_marc_sax_t ctx, int nb_attributes, const xmlChar 
     wrbuf_rewind(ctx->indicators);
     for (int i = 0; i < ctx->indicator_length; i++)
     {
-        size_t len;
-        const char *buf;
         ind_cstr[3] = '1' + i;
-        buf = get_attribute(ind_cstr, nb_attributes, attributes, &len);
-        if (len == 0)
-        {
+        if (!get_attribute(ind_cstr, nb_attributes, attributes, ctx->indicators))
             wrbuf_putc(ctx->indicators, ' ');
-        }
-        else if (len == 5 && buf[0] == '&'
-            && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
-        {
-            wrbuf_putc(ctx->indicators, '&');
-        }
-        else
-        {
-            wrbuf_write(ctx->indicators, buf, len);
-        }
-    }
-}
-
-static void write_attribute(WRBUF wrbuf, const char *buf, int len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        wrbuf_putc(wrbuf, buf[i]);
-
-        if (i < len - 4 && buf[i] == '&'
-            && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
-            i += 4;
     }
 }
 
@@ -99,29 +78,20 @@ static void startElementNs(void *vp,
     wrbuf_rewind(ctx->cdata);
     if (strcmp((const char *)localname, "controlfield") == 0)
     {
-        size_t tag_len;
-        const char *tag_buf = get_attribute("tag", nb_attributes, attributes, &tag_len);
         wrbuf_rewind(ctx->tag);
-        if (tag_buf)
-            write_attribute(ctx->tag, tag_buf, tag_len);
+        get_attribute("tag", nb_attributes, attributes, ctx->tag);
     }
     else if (strcmp((const char *)localname, "datafield") == 0)
     {
-        size_t tag_len;
-        const char *tag_buf = get_attribute("tag", nb_attributes, attributes, &tag_len);
         wrbuf_rewind(ctx->tag);
-        if (tag_buf)
-            write_attribute(ctx->tag, tag_buf, tag_len);
+        get_attribute("tag", nb_attributes, attributes, ctx->tag);
         get_indicators(ctx, nb_attributes, attributes);
         yaz_marc_add_datafield(ctx->mt, wrbuf_cstr(ctx->tag),
                                wrbuf_buf(ctx->indicators), wrbuf_len(ctx->indicators));
     }
     else if (strcmp((const char *)localname, "subfield") == 0)
     {
-        size_t code_len;
-        const char *code_buf = get_attribute("code", nb_attributes, attributes, &code_len);
-        if (code_buf)
-            write_attribute(ctx->cdata, code_buf, code_len);
+        get_attribute("code", nb_attributes, attributes, ctx->cdata);
     }
     else if (strcmp((const char *)localname, "record") == 0)
     {
