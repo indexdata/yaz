@@ -180,13 +180,6 @@ static void context_handle(yaz_marc_t mt, void *vp)
 static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
                                   long offset, long limit)
 {
-    FILE *inf = fopen(fname, "rb");
-    if (inf == 0)
-    {
-        fprintf(stderr, "%s: cannot open %s:%s\n",
-                prog, fname, strerror(errno));
-        exit(1);
-    }
     struct context context;
     context.wrbuf = wrbuf_alloc();
     context.offset = offset;
@@ -195,26 +188,7 @@ static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &context);
     xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
 
-    size_t bufsz = 8192;
-    char *buf = xmalloc(bufsz);
-    int res = fread(buf, 1, 4, inf);
-    if (res > 0)
-    {
-        xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(sax_ptr, yt, buf, res, fname);
-        ctxt->replaceEntities = 1;
-        while ((res = fread(buf, 1, bufsz, inf)) > 0)
-        {
-            if (xmlParseChunk(ctxt, buf, res, 0))
-            {
-                xmlParserError(ctxt, "xmlParseChunk");
-                break;
-            }
-        }
-        xmlParseChunk(ctxt, buf, 0, 1);
-        xmlFreeParserCtxt(ctxt);
-    }
-    fclose(inf);
-    xfree(buf);
+    xmlSAXUserParseFile(sax_ptr, yt, fname);
     wrbuf_destroy(context.wrbuf);
     yaz_marc_sax_destroy(yt);
 }

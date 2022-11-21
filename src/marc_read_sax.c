@@ -40,8 +40,8 @@ static const char *get_attribute(const char *name, int nb_attributes, const xmlC
     {
         if (strcmp(name, (const char *)attributes[5 * i]) == 0)
         {
-            const char *start = (const char *) attributes[5 * i + 3];
-            const char *end = (const char *) attributes[5 * i + 4];
+            const char *start = (const char *)attributes[5 * i + 3];
+            const char *end = (const char *)attributes[5 * i + 4];
             *len = end - start;
             return start;
         }
@@ -49,21 +49,42 @@ static const char *get_attribute(const char *name, int nb_attributes, const xmlC
     return 0;
 }
 
-static void get_indicators(yaz_marc_sax_t ctx, int nb_attributes, const xmlChar **attributes) {
+static void get_indicators(yaz_marc_sax_t ctx, int nb_attributes, const xmlChar **attributes)
+{
     char ind_cstr[5];
     strcpy(ind_cstr, "indX");
     wrbuf_rewind(ctx->indicators);
     for (int i = 0; i < ctx->indicator_length; i++)
     {
-        size_t ind_len;
-        const char *ind_value;
+        size_t len;
+        const char *buf;
         ind_cstr[3] = '1' + i;
-        ind_value = get_attribute(ind_cstr, nb_attributes, attributes, &ind_len);
-        if (ind_len == 0) {
+        buf = get_attribute(ind_cstr, nb_attributes, attributes, &len);
+        if (len == 0)
+        {
             wrbuf_putc(ctx->indicators, ' ');
-        } else {
-            wrbuf_write(ctx->indicators, ind_value, ind_len);
         }
+        else if (len == 5 && buf[0] == '&'
+            && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
+        {
+            wrbuf_putc(ctx->indicators, '&');
+        }
+        else
+        {
+            wrbuf_write(ctx->indicators, buf, len);
+        }
+    }
+}
+
+static void write_attribute(WRBUF wrbuf, const char *buf, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        wrbuf_putc(wrbuf, buf[i]);
+
+        if (i < len - 4 && buf[i] == '&'
+            && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
+            i += 4;
     }
 }
 
@@ -82,7 +103,7 @@ static void startElementNs(void *vp,
         const char *tag_buf = get_attribute("tag", nb_attributes, attributes, &tag_len);
         wrbuf_rewind(ctx->tag);
         if (tag_buf)
-            wrbuf_write(ctx->tag, tag_buf, tag_len);
+            write_attribute(ctx->tag, tag_buf, tag_len);
     }
     else if (strcmp((const char *)localname, "datafield") == 0)
     {
@@ -90,7 +111,7 @@ static void startElementNs(void *vp,
         const char *tag_buf = get_attribute("tag", nb_attributes, attributes, &tag_len);
         wrbuf_rewind(ctx->tag);
         if (tag_buf)
-            wrbuf_write(ctx->tag, tag_buf, tag_len);
+            write_attribute(ctx->tag, tag_buf, tag_len);
         get_indicators(ctx, nb_attributes, attributes);
         yaz_marc_add_datafield(ctx->mt, wrbuf_cstr(ctx->tag),
                                wrbuf_buf(ctx->indicators), wrbuf_len(ctx->indicators));
@@ -100,7 +121,7 @@ static void startElementNs(void *vp,
         size_t code_len;
         const char *code_buf = get_attribute("code", nb_attributes, attributes, &code_len);
         if (code_buf)
-            wrbuf_write(ctx->cdata, code_buf, code_len);
+            write_attribute(ctx->cdata, code_buf, code_len);
     }
     else if (strcmp((const char *)localname, "record") == 0)
     {

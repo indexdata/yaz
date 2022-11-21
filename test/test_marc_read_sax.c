@@ -27,8 +27,8 @@ static void tst1(void)
     char *marcxml = "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                     "<record>\n"
                     "  <leader>00062cgm a2200037Ia 4500</leader>\n"
-                    "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"
-                    "    <subfield code=\"a\">DVD CHI 791.43</subfield>\n"
+                    "  <datafield tag=\"02&amp;\" ind1=\" \" ind2=\"á\">\n"
+                    "    <subfield code=\"&#197;\">DVD CHI 791.43</subfield>\n"
                     "    <subfield code=\"&amp;\">Q&amp;A</subfield>\n"
                     "  </datafield>\n"
                     "</record>\n"
@@ -40,20 +40,17 @@ static void tst1(void)
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &user_data);
     xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
 
-    size_t lead = 10;
-    xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(sax_ptr, yt, marcxml, lead, 0);
-    ctxt->replaceEntities = 1;
-    xmlParseChunk(ctxt, marcxml + lead, strlen(marcxml) - lead, 1);
+    xmlSAXUserParseMemory(sax_ptr, yt, marcxml, strlen(marcxml));
 
-    YAZ_CHECK(strcmp(wrbuf_cstr(user_data.wrbuf),
-                     "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
+    const char *expect = "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                      "  <leader>00062cgm a2200037Ia 4500</leader>\n"
-                     "  <datafield tag=\"092\" ind1=\" \" ind2=\"á\">\n"
-                     "    <subfield code=\"a\">DVD CHI 791.43</subfield>\n"
+                     "  <datafield tag=\"02&amp;\" ind1=\" \" ind2=\"á\">\n"
+                     "    <subfield code=\"Å\">DVD CHI 791.43</subfield>\n"
                      "    <subfield code=\"&amp;\">Q&amp;A</subfield>\n"
                      "  </datafield>\n"
-                     "</record>\n") == 0);
-    xmlFreeParserCtxt(ctxt);
+                     "</record>\n";
+
+    YAZ_CHECK(strcmp(wrbuf_cstr(user_data.wrbuf), expect) == 0);
     yaz_marc_sax_destroy(yt);
     yaz_marc_destroy(mt);
 }
