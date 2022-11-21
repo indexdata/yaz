@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #if HAVE_MALLOC_INFO
 #include <malloc.h>
 #endif

@@ -9,8 +9,10 @@
  */
 
 #if HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
+
+#include <yaz/yconfig.h>
 
 #include <signal.h>
 #include <string.h>

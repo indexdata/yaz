@@ -73,10 +73,8 @@ const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
                                             const char *attribute_name)
 {
     struct _xmlAttr *attr;
-    // check if the node name matches
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
-    // check if the attribute name and return the value
     for (attr = ptr->properties; attr; attr = attr->next)
         if (attr->children && attr->children->type == XML_TEXT_NODE)
         {
@@ -1125,7 +1123,7 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     path = (char *)
         odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
 
-    sprintf(path, "%s%c%s", hreq->path, strchr(hreq->path, '?') ? '&' : '?', 
+    sprintf(path, "%s%c%s", hreq->path, strchr(hreq->path, '?') ? '&' : '?',
             uri_args);
     hreq->path = path;
 

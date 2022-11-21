@@ -30,7 +30,6 @@ enum stemmer_implementation {
 struct yaz_stemmer_t
 {
     int implementation;
-    // Required for cloning.
     char *locale;
     char *rule;
     struct sb_stemmer *sb_stemmer;
@@ -68,7 +67,6 @@ yaz_stemmer_p yaz_stemmer_snowball_create(const char *locale, const char *rule, 
 
 yaz_stemmer_p yaz_stemmer_create(const char *locale, const char *rule, UErrorCode *status) {
     *status = U_ZERO_ERROR;
-    // dispatch logic required if more algorithms is implemented.
     yaz_log(YLOG_DEBUG, "create stemmer: locale %s rule %s ", locale, rule);
     return yaz_stemmer_snowball_create(locale, rule, status);
 }
@@ -108,7 +106,6 @@ void yaz_stemmer_stem(yaz_stemmer_p stemmer, struct icu_buf_utf16 *dst, struct i
     case yaz_no_operation:
       yaz_log(YLOG_DEBUG, "Stemmer (No operation) called");
     default: {
-            // Default return the same as given.
             icu_buf_utf16_copy(dst, src);
         }
     }

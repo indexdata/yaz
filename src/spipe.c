@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,8 +47,8 @@
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
 #endif
 
 #if HAVE_NETINET_IN_H

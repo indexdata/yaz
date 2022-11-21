@@ -13,6 +13,8 @@
 #include "config.h"
 #endif
 
+#include <yaz/yconfig.h>
+
 #include <signal.h>
 #include <string.h>
 #include <errno.h>

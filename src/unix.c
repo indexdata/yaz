@@ -10,6 +10,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #ifndef WIN32
 
 #include <stdio.h>

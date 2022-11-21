@@ -35,14 +35,16 @@ struct yaz_marc_sax_t_
 
 static int get_attribute(const char *name, int nb_attributes, const xmlChar **attributes, WRBUF result)
 {
-    for (int i = 0; i < nb_attributes; i++)
+    int i;
+    for (i = 0; i < nb_attributes; i++)
     {
         if (strcmp(name, (const char *)attributes[5 * i]) == 0)
         {
             const char *buf = (const char *)attributes[5 * i + 3];
             const char *end = (const char *)attributes[5 * i + 4];
             size_t len = end - buf;
-            for (size_t i = 0; i < len; i++) {
+            size_t i;
+            for (i = 0; i < len; i++) {
                 wrbuf_putc(result, buf[i]);
                 if (i < len - 4 && buf[i] == '&'
                      && buf[i+1] == '#' && buf[i+2] == '3' && buf[i+3] == '8' && buf[i+4] == ';')
@@ -59,7 +61,8 @@ static void get_indicators(yaz_marc_sax_t ctx, int nb_attributes, const xmlChar 
     char ind_cstr[5];
     strcpy(ind_cstr, "indX");
     wrbuf_rewind(ctx->indicators);
-    for (int i = 0; i < ctx->indicator_length; i++)
+    int i;
+    for (i = 0; i < ctx->indicator_length; i++)
     {
         ind_cstr[3] = '1' + i;
         if (!get_attribute(ind_cstr, nb_attributes, attributes, ctx->indicators))

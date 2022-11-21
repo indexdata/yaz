@@ -41,7 +41,7 @@ int test_stemmer_stem(yaz_stemmer_p stemmer, const char* to_stem, const char *ex
 static void tst(void)
 {
     UErrorCode status;
-    //== U_ZERO_ERROR;
+
     yaz_stemmer_p stemmer = yaz_stemmer_create("en", "porter", &status);
     YAZ_CHECK(stemmer);
 

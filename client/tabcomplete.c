@@ -6,6 +6,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +40,7 @@ char *complete_from_list(const char** completions,
 #endif
            (completions[idx],text,strlen(text))) {
             ++idx; /* skip this entry on the next run */
-            return (char*)strdup(completions[idx-1]);
+            return xstrdup(completions[idx-1]);
         };
     };
 #endif

@@ -98,7 +98,7 @@ static char *element_attribute_value_extract(const xmlNode *ptr,
     xmlAttr *attr;
     if (length > 1 )
         return nmem_strdup(nmem, name+1);
-    // TODO Extract from attribute where matches attribute_name
+    /* TODO Extract from attribute where matches attribute_name */
     for (attr = ptr->properties; attr; attr = attr->next)
         if (!strcmp((const char *)attr->name, attribute_name))
             return nmem_text_node_cdata(attr->children, nmem);
@@ -152,13 +152,13 @@ static int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                 }
 
                 ctrl_data_len = strlen((const char *) tag_value);
-                // Extract (length) from CDATA
+                /* Extract (length) from CDATA */
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)
                         ctrl_data_len += strlen((const char *)p->content);
-                // Allocate memory for code value (1 character (can be multi-byte) and data
+                /* Allocate memory for code value (1 character (can be multi-byte) and data */
                 ctrl_data_buf = (char *) nmem_malloc(nmem, ctrl_data_len+1);
-                // Build a string with "<Code><data>"
+                /* Build a string with "<Code><data>" */
                 strcpy(ctrl_data_buf, (const char *) tag_value);
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)

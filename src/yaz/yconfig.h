@@ -49,6 +49,10 @@
 # endif
 #endif
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #ifdef __cplusplus
 #define YAZ_BEGIN_CDECL extern "C" {
 #define YAZ_END_CDECL }

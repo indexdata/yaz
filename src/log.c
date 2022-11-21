@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #ifdef WIN32
 #include <windows.h>
 #include <sys/stat.h>

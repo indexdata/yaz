@@ -355,22 +355,18 @@ int main(int argc, char **argv)
             const char *errmsg;
             const char *addinfo;
             int error = 0;
-            //int progress = zoom_progress[event];
 
             if (event == ZOOM_EVENT_SEND_DATA || event == ZOOM_EVENT_RECV_DATA)
                 continue;
 
             time_stamp(&time);
 
-            /* updating events and event list */
             error = ZOOM_connection_error(z[i-1] , &errmsg, &addinfo);
             if (error)
                 parameters.progress[i] = zoom_progress[ZOOM_EVENT_UNKNOWN];
-            //parameters.progress[i] = zoom_progress[ZOOM_EVENT_NONE];
             else if (event == ZOOM_EVENT_CONNECT)
                 parameters.progress[i] = zoom_progress[event];
             else
-                //parameters.progress[i] = zoom_progress[event];
                 parameters.progress[i] += 1;
 
             update_events(elc, els,
