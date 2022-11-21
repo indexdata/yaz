@@ -57,7 +57,7 @@ YAZ_EXPORT yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt,
 /** \brief return Libxml SAX handler pointer
     \returns pointer
   */
-YAZ_EXPORT xmlSAXHandlerPtr yaz_marc_sax_get(yaz_marc_sax_t ctx);
+YAZ_EXPORT xmlSAXHandlerPtr yaz_marc_sax_get_handler(yaz_marc_sax_t ctx);
 
 /** \brief destroys marc SAX parser
     \param ctx

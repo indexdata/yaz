@@ -38,7 +38,7 @@ static void tst1(void)
     user_data.wrbuf = wrbuf_alloc();
     yaz_marc_t mt = yaz_marc_create();
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &user_data);
-    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get(yt);
+    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
 
     size_t lead = 10;
     xmlParserCtxtPtr ctxt = xmlCreatePushParserCtxt(sax_ptr, yt, marcxml, lead, 0);

@@ -163,7 +163,7 @@ yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t, void *), v
     return ctx;
 }
 
-xmlSAXHandlerPtr yaz_marc_sax_get(yaz_marc_sax_t ctx)
+xmlSAXHandlerPtr yaz_marc_sax_get_handler(yaz_marc_sax_t ctx)
 {
     return &ctx->saxHandler;
 }

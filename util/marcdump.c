@@ -193,7 +193,7 @@ static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
     context.limit = limit;
     context.no = 0;
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &context);
-    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get(yt);
+    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
 
     size_t bufsz = 8192;
     char *buf = xmalloc(bufsz);
