@@ -18,7 +18,7 @@ jobs:
      run: ./buildconf.sh
    - name: Run configure without xml, icu, ...
      run: >
-      ./configure --without-xml2 --without-icu --disable-tcpd
-      --without-memcached --without-redis
+      CFLAGS="-g -Wall -std=c89 -D_POSIX_C_SOURCE= 200112L" ./configure
+      --without-xml2 --without-icu --disable-tcpd --without-memcached --without-redis
    - name: Run Make check
      run: make -j4 check
