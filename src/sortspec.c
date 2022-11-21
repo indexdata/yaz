@@ -425,7 +425,6 @@ int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
         wrbuf_puts(w, " ");
 
         wrbuf_putc(w, order);
-        // Always in-sensitive
         wrbuf_puts(w, case_sensitive ? "s" : "i");
     }
     nmem_destroy(nmem);

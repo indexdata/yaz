@@ -10,8 +10,15 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <sys/stat.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -57,13 +64,12 @@ static int config_include_one(yaz_xml_include_t config, xmlNode **sib,
     }
     else
     {
-        if ((st.st_mode & S_IFMT) == S_IFREG)
+        if (S_ISREG(st.st_mode))
         {
             xmlDoc *doc = xmlReadFile(path,
                               NULL,
                               XML_PARSE_XINCLUDE
                               + XML_PARSE_NSCLEAN + XML_PARSE_NONET);
-            // Perform XInclude.
             int r = xmlXIncludeProcess(doc);
             if (r == -1)
             {

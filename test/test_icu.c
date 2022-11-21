@@ -891,8 +891,6 @@ static void check_icu_iter4(void)
     YAZ_CHECK(test_iter(chain, "Νόταρης, Γιάννης Σωτ",
                         "[νόταρηςγιάννηςσωτ]"));
 
-    // check_iter_threads(chain);
-
     icu_chain_destroy(chain);
 }
 

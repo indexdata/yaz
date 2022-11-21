@@ -12,6 +12,8 @@
 #include <config.h>
 #endif
 
+#include <yaz/yconfig.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +63,8 @@ void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name)
     p->log_level = 0;
     if (name)
     {
-        p->name = strdup(name);
+        p->name = malloc(strlen(name)+1);
+	strcpy(p->name, name);
         p->log_level = log_level;
     }
 }

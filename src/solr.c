@@ -42,7 +42,6 @@ static int match_xml_node_attribute(
     const char *node_name, const char *attribute_name, const char *value)
 {
     const char *attribute_value;
-    // check if the node name matches
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
     if (attribute_name)
@@ -152,7 +151,6 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     int num_terms = 0;
     int index = 0;
     xmlNodePtr node;
-    // USE attribute
     const char* name = yaz_element_attribute_value_get(ptr, "lst", "name");
     list = zget_AttributeList_use_string(o, name);
     for (node = ptr->children; node; node = node->next)

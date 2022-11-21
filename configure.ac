@@ -222,7 +222,7 @@ if test "$with_iconv" != "no"; then
     ])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS([getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r usleep fopen64 open_memstream malloc_info])
+AC_CHECK_FUNCS([getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r nanosleep fopen64 open_memstream malloc_info])
 if test "$ac_cv_func_getaddrinfo" = "no"; then
 	AC_MSG_ERROR([getaddrinfo required])
 fi

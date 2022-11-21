@@ -850,39 +850,39 @@ static void print_record(const char *buf, size_t len)
 
 static void print_mab_record(const char *buf, size_t len)
 {
-    size_t i;
     size_t last_linebreak = 0;
     size_t last_subfield  = 0;
+    size_t i;
     for (i = 0; i < len; i++)
     {
-        // line break after header
-        if ( i == 24 )
+        /* line break after header */
+        if (i == 24)
         {
             printf("\n");
             last_linebreak = i - 1;
         }
 
-        // space between field and content
-        if ( i > 24 && i - last_linebreak == 5 )
+        /* space between field and content */
+        if (i > 24 && i - last_linebreak == 5)
             printf(" ");
 
-        // space after subfield
-        if ( last_subfield != 0 && i - last_subfield == 2 )
+        /* space after subfield */
+        if (last_subfield != 0 && i - last_subfield == 2)
             printf(" ");
 
         if ((buf[i] <= 126 && buf[i] >= 32) || strchr("\n\r\t\f", buf[i]))
             printf("%c", buf[i]);
-        else if ( buf[i] == 29 ) // record separator
+        else if (buf[i] == 29) /* record separator */
             printf("\n");
-        else if ( buf[i] == 30 ) // field separator
+        else if (buf[i] == 30) /* field separator */
         {
             printf("\n");
             last_linebreak = i;
         }
-        else if ( buf[i] == 31 ) // subfield
+        else if (buf[i] == 31) /* subfield */
         {
-            // space before subfields; except first one
-            if ( i > 24 && i - last_linebreak > 5 )
+            /* space before subfields; except first one */
+            if (i > 24 && i - last_linebreak > 5)
                 printf(" ");
             printf("$");
             last_subfield = i;
@@ -5165,7 +5165,7 @@ static int cmd_register_tab(const char* arg)
 
 
     if (!cmd_array[i].local_tabcompletes)
-        cmd_array[i].local_tabcompletes = (const char **) calloc(1,sizeof(char**));
+        cmd_array[i].local_tabcompletes = (const char **) xcalloc(1, sizeof(char**));
 
     num_of_tabs=0;
 
@@ -5177,7 +5177,7 @@ static int cmd_register_tab(const char* arg)
         realloc(cmd_array[i].local_tabcompletes,
                 (num_of_tabs+2)*sizeof(char**));
     tabslist = cmd_array[i].local_tabcompletes;
-    tabslist[num_of_tabs] = strdup(tabargument);
+    tabslist[num_of_tabs] = xstrdup(tabargument);
     tabslist[num_of_tabs+1] = NULL;
 #endif
     return 1;
@@ -5256,7 +5256,7 @@ static char *command_generator(const char *text, int state)
         if (!strncmp(cmd_array[idx].cmd, text, strlen(text)))
         {
             ++idx;  /* skip this entry on the next run */
-            return strdup(cmd_array[idx-1].cmd);
+            return xstrdup(cmd_array[idx-1].cmd);
         }
     }
 #endif

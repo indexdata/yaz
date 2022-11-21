@@ -191,7 +191,6 @@ static Odr_int get_truncation(Z_AttributesPlusTerm *apt)
             }
             else if (ae->which == Z_AttributeValue_complex) {
                 ;
-                //yaz_log(YLOG_DEBUG, "Z_Attribute_complex");
                 /* Complex: Shouldn't happen */
             }
         }
