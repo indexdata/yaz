@@ -22,8 +22,10 @@ static void handler(yaz_marc_t mt, void *cb)
     yaz_marc_write_marcxml(mt, ctx->wrbuf);
 }
 
+
 static void tst1(void)
 {
+#if YAZ_HAVE_XML2
     char *marcxml = "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                     "<record>\n"
                     "  <leader>00062cgm a2200037Ia 4500</leader>\n"
@@ -53,7 +55,9 @@ static void tst1(void)
     YAZ_CHECK(strcmp(wrbuf_cstr(user_data.wrbuf), expect) == 0);
     yaz_marc_sax_destroy(yt);
     yaz_marc_destroy(mt);
+#endif
 }
+
 
 int main(int argc, char **argv)
 {
