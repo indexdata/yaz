@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -48,14 +49,6 @@
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
-#endif
-
-/* stat(2) masks: S_IFMT and S_IFSOCK may not be defined in gcc -ansi mode */
-#if __STRICT_ANSI__
-#ifndef S_IFSOCK
-#define S_IFMT   0170000
-#define S_IFSOCK 0140000
-#endif
 #endif
 
 static void unix_close(COMSTACK h);
@@ -338,8 +331,11 @@ static int unix_connect(COMSTACK h, void *address)
         r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
         if (r < 0 && yaz_errno() == EAGAIN)
         {
-#if HAVE_USLEEP
-            usleep(i*10000+1000); /* 1ms, 11ms, 21ms */
+#if HAVE_NANOSLEEP
+            struct timespec v;
+            v.tv_sec = 0L;
+            v.tv_nsec = i*10000000L + 1000000L; /* 1ms, 11ms, 21ms */
+            nanosleep(&v, 0);
 #else
             sleep(1);
 #endif
@@ -394,24 +390,24 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 
     yaz_log(log_level, "unix_bind h=%p", h);
 
-    if(stat(path, &stat_buf) != -1) {
+    if (stat(path, &stat_buf) != -1) {
         struct sockaddr_un socket_unix;
         int socket_out = -1;
 
-        if((stat_buf.st_mode&S_IFMT) != S_IFSOCK) { /* used to be S_ISSOCK */
+        if (S_ISSOCK(stat_buf.st_mode)) {
             h->cerrno = CSYSERR;
             yaz_set_errno(EEXIST); /* Not a socket (File exists) */
             return -1;
         }
-        if((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+        if ((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
             h->cerrno = CSYSERR;
             return -1;
         }
         socket_unix.sun_family = AF_UNIX;
         strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path)-1);
         socket_unix.sun_path[sizeof(socket_unix.sun_path)-1] = 0;
-        if(connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
-            if(yaz_errno() == ECONNREFUSED) {
+        if (connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
+            if (yaz_errno() == ECONNREFUSED) {
                 yaz_log(log_level, "unix_bind socket exists but nobody is listening");
             } else {
                 h->cerrno = CSYSERR;
