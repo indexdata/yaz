@@ -70,11 +70,10 @@ static void get_indicators(yaz_marc_sax_t ctx, int nb_attributes, const xmlChar 
     }
 }
 
-static void startElementNs(void *vp,
-                           const xmlChar *localname, const xmlChar *prefix,
-                           const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces,
-                           int nb_attributes, int nb_defaulted,
-                           const xmlChar **attributes)
+static void yaz_start_element_ns(void *vp,
+              const xmlChar *localname, const xmlChar *prefix,
+              const xmlChar *URI, int nb_namespaces, const xmlChar **namespaces,
+              int nb_attributes, int nb_defaulted, const xmlChar **attributes)
 {
     yaz_marc_sax_t ctx = vp;
 
@@ -102,8 +101,8 @@ static void startElementNs(void *vp,
     }
 }
 
-static void endElementNs(void *vp,
-                         const xmlChar *localname, const xmlChar *prefix, const xmlChar *URI)
+static void yaz_end_element_ns(void *vp, const xmlChar *localname,
+                               const xmlChar *prefix, const xmlChar *URI)
 {
     yaz_marc_sax_t ctx = vp;
     if (strcmp((const char *)localname, "leader") == 0)
@@ -133,7 +132,7 @@ static void endElementNs(void *vp,
     wrbuf_rewind(ctx->cdata);
 }
 
-static void characters(void *vp, const xmlChar *text, int len)
+static void yaz_characters(void *vp, const xmlChar *text, int len)
 {
     yaz_marc_sax_t ctx = vp;
     wrbuf_write(ctx->cdata, (const char *)text, len);
@@ -151,9 +150,9 @@ yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t, void *), v
     ctx->indicators = wrbuf_alloc();
     memset(&ctx->saxHandler, 0, sizeof(ctx->saxHandler));
     ctx->saxHandler.initialized = XML_SAX2_MAGIC;
-    ctx->saxHandler.startElementNs = startElementNs;
-    ctx->saxHandler.endElementNs = endElementNs;
-    ctx->saxHandler.characters = characters;
+    ctx->saxHandler.startElementNs = yaz_start_element_ns;
+    ctx->saxHandler.endElementNs = yaz_end_element_ns;
+    ctx->saxHandler.characters = yaz_characters;
     return ctx;
 }
 
