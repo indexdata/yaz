@@ -14,10 +14,6 @@
 
 #ifndef WIN32
 
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200112L
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -398,7 +394,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
         struct sockaddr_un socket_unix;
         int socket_out = -1;
 
-        if (S_ISSOCK(stat_buf.st_mode)) {
+        if (!S_ISSOCK(stat_buf.st_mode)) {
             h->cerrno = CSYSERR;
             yaz_set_errno(EEXIST); /* Not a socket (File exists) */
             return -1;
