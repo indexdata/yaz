@@ -64,7 +64,7 @@ void yaz_mutex_set_name(YAZ_MUTEX p, int log_level, const char *name)
     if (name)
     {
         p->name = malloc(strlen(name)+1);
-	strcpy(p->name, name);
+        strcpy(p->name, name);
         p->log_level = log_level;
     }
 }
