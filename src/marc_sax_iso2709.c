@@ -1,0 +1,136 @@
+#include <yaz/marcdisp.h>
+
+typedef struct sax *yaz_marc_sax_iso2709_t;
+
+/**
+ * @brief private structure for sax handling.
+ *
+ * 0...tail.....(remain)......front......sz
+ */
+struct sax
+{
+    char *buf;
+    size_t sz;
+    size_t front;
+    size_t tail;
+    short ended;
+    short error;
+};
+
+yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new()
+{
+    yaz_marc_sax_iso2709_t p = xmalloc(sizeof(*p));
+    p->sz = 1024;
+    p->front = 0;
+    p->tail = 0;
+    p->buf = xmalloc(p->sz);
+    p->ended = 0;
+    p->error = 0;
+    return p;
+}
+
+void yaz_marc_sax_iso2709_destroy(struct sax *p)
+{
+    xfree(p->buf);
+    xfree(p);
+}
+
+void yaz_marc_sax_iso2709_end(struct sax *p)
+{
+    p->ended = 1;
+}
+
+void yaz_marc_sax_iso2709_push(struct sax *p, const char *buf, size_t bufsz)
+{
+    if (p->tail != 0)
+    {
+        p->error = 1;
+        return;
+    }
+    if (bufsz == 0)
+        return;
+    if (p->front + bufsz > p->sz)
+    {
+        size_t add = bufsz - p->sz;
+        if (add < 1024)
+        {
+            add += 1024;
+        }
+        p->sz += add;
+        p->buf = xrealloc(p->buf, p->sz);
+    }
+    memcpy(p->buf + p->front, buf, bufsz);
+    p->front += bufsz;
+}
+
+/**
+ * @brief reset buffer and throw away already parsed content.
+ *
+ * before:
+ *
+ * 0...tail........(remain)......front......sz
+ *
+ * after:
+ *
+ * 0........(remain)......front.............sz
+ *
+ * @param p
+ * @return int
+ */
+static void reset(struct sax *p)
+{
+    size_t remain = p->front - p->tail;
+    if (p->tail != 0 && remain != 0)
+    {
+        memcpy(p->buf, p->buf + p->tail, remain);
+    }
+    p->front -= p->tail;
+    p->tail = 0;
+}
+
+/**
+ * @brief get next MARC record.
+ *
+ * @param p MARC sax handler.
+ * @param mt MARC data where record is stored if avaiable.
+ * @return int 0: EOF, -1: incomplete, -2: ERROR, >0 record length.
+ */
+int yaz_marc_sax_iso2709_next(struct sax *p, yaz_marc_t mt)
+{
+    size_t remain = p->front - p->tail;
+    int record_length, record_size;
+
+    if (p->error) /* earlier error*/
+        return -2; /* ERROR */
+    if (remain < 25)
+    {
+        reset(p);
+        if (!p->ended)
+            return -1;
+        if (remain <= 1)
+            return 0;
+        p->error = 1;
+        return -2; /* ERROR: extra garbage (allow one bogus extra byte that we ignore)*/
+    }
+    if (!atoi_n_check(p->buf + p->tail, 5, &record_length))
+    {
+        p->error = 1;
+        return -2; /* ERROR: not leading digits */
+    }
+    if (remain < record_length)
+    {
+        reset(p);
+        if (!p->ended)
+           return -1;
+        p->error = 1;
+        return -2; /* ERROR: incomplete record */
+    }
+    record_size = yaz_marc_read_iso2709(mt, p->buf + p->tail, record_length);
+    if (record_size < 1)
+    {
+        p->error = 1;
+        return -2; /* ERROR */
+    }
+    p->tail += record_size;
+    return record_size;
+}
