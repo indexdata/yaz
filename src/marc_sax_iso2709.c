@@ -29,18 +29,18 @@ yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new()
     return p;
 }
 
-void yaz_marc_sax_iso2709_destroy(struct sax *p)
+void yaz_marc_sax_iso2709_destroy(yaz_marc_sax_iso2709_t p)
 {
     xfree(p->buf);
     xfree(p);
 }
 
-void yaz_marc_sax_iso2709_end(struct sax *p)
+void yaz_marc_sax_iso2709_end(yaz_marc_sax_iso2709_t p)
 {
     p->ended = 1;
 }
 
-void yaz_marc_sax_iso2709_push(struct sax *p, const char *buf, size_t bufsz)
+void yaz_marc_sax_iso2709_push(yaz_marc_sax_iso2709_t p, const char *buf, size_t bufsz)
 {
     if (p->tail != 0)
     {
@@ -74,10 +74,10 @@ void yaz_marc_sax_iso2709_push(struct sax *p, const char *buf, size_t bufsz)
  *
  * 0........(remain)......front.............sz
  *
- * @param p
+ * @param p MARC SAX handler.
  * @return int
  */
-static void reset(struct sax *p)
+static void reset(yaz_marc_sax_iso2709_t p)
 {
     size_t remain = p->front - p->tail;
     if (p->tail != 0 && remain != 0)
@@ -95,7 +95,7 @@ static void reset(struct sax *p)
  * @param mt MARC data where record is stored if avaiable.
  * @return int 0: EOF, -1: incomplete, -2: ERROR, >0 record length.
  */
-int yaz_marc_sax_iso2709_next(struct sax *p, yaz_marc_t mt)
+int yaz_marc_sax_iso2709_next(yaz_marc_sax_iso2709_t p, yaz_marc_t mt)
 {
     size_t remain = p->front - p->tail;
     int record_length, record_size;
