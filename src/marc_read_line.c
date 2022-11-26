@@ -203,8 +203,15 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
             static const char *mappings =
                 "{dollar}$"
                 "{copy}\xc2\xa9"
+                "{cedil}\xcc\xa7"
                 "{acute}\xcc\x81"
-                "{cedil}\xcc\xa7";
+                "{grave}\xcc\x80"
+                "{uml}\xcc\x88"
+                "{circ}??"
+                "{lcub}??"
+                "{rcub}??"
+                "{oelig}??"
+                ;
             while (cp[i] != '\0' && cp[i] != '}')
                 i++;
             if (cp[i] == '\0')
