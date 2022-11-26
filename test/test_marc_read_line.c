@@ -38,6 +38,7 @@ struct buf *create_buf(const char *str)
     b->wrbuf = wrbuf_alloc();
     wrbuf_puts(b->wrbuf, str);
     b->pos = 0;
+    return b;
 }
 
 void destroy_buf(struct buf *b)
@@ -103,10 +104,15 @@ static void tst1(void)
         "01000cam  2200265 i 4500\n"
         "008 750228s1936  nyua 000 1 eng\n\n"
         ,
-        "=245  13$aLa conversation fran{cedil}caise.\n"
+        "=245  13$a{dollar}{copy} La conversation fran{cedil}caise.\n"
         ,
         "01000cam  2200265 i 4500\n"
-        "245 13 $a La conversation francedil?caise.\n\n"
+        "245 13 $a $\xc2\xa9 La conversation fran" "c\xcc\xa7" "aise.\n\n"
+        ,
+        "=245  13$a{dollar\n"
+        ,
+        "01000cam  2200265 i 4500\n"
+        "245 13 $a {dollar\n\n"
         ,
         0
     };

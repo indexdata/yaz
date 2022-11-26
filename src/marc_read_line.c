@@ -115,7 +115,8 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
                                   const char *tag, const char *rest, int indicator_length)
 {
     char *cp = (char *)rest;
-    size_t i, j, i_curly, i_begin;
+    char *str_result = 0;
+    size_t i, j, j_begin;
     for (i = 0; cp[i] && i < indicator_length; i++)
         if (cp[i] == '\\')
             cp[i] = ' ';
@@ -127,44 +128,60 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
     yaz_marc_add_datafield(mt, tag, cp, indicator_length);
     cp = cp + i;
     i = j = 0;
-    i_curly = 0;
-    i_begin = 0;
+    j_begin = 0;
     while (1)
     {
         if (cp[i] == '$' || cp[i] == '\0')
         {
-            if (i_begin > 0)
+            if (j > j_begin)
             {
-                yaz_marc_add_subfield(mt, cp + i_begin, j - i_begin);
+                yaz_marc_add_subfield(mt, cp + j_begin, j - j_begin);
             }
-            j = i_begin = i + 1;
             if (cp[i] == '\0')
                 break;
+            j_begin = j;
         }
         else if (cp[i] == '{')
         {
-            i_curly = i;
-        }
-        else if (cp[i] == '}' && i_curly > 0)
-        {
-            const char *str_result;
-            const char *rules =
+            int i_curly = i;
+            /* using Unicode here for mappings */
+            static const char *mappings =
                 "{dollar}$"
                 "{copy}\xc2\xa9"
                 "{acute}\xcc\x81"
                 "{cedil}\xcc\xa7";
+            while (cp[i] != '\0' && cp[i] != '}')
+                i++;
+            if (cp[i] == '\0')
+            {
+                i = i_curly;
+                cp[j++] = cp[i++];
+                continue;
+            }
             cp[i] = '\0';
-            yaz_log(YLOG_LOG, "lookup i=%d j=%d %s", (int) i, (int) j, cp + i_curly);
-            str_result = strstr(rules, cp + i_curly);
+            str_result = strstr(mappings, cp + i_curly);
             if (str_result == 0)
-                str_result = "}?";
-            str_result++; /* skip } */
-            while (*str_result && *str_result != '{')
-                cp[j++] = *str_result++;
-            i_curly = 0;
+                str_result = "?";
+            else
+                str_result += (i - i_curly) + 1;
+            /* write now unless Unicode combining */
+            if (str_result[0] != '\xcc')
+            {
+                while (*str_result != '\0' && *str_result != '{')
+                    cp[j++] = *str_result++;
+                str_result = 0;
+            }
         }
         else
+        {
             cp[j++] = cp[i];
+            if (str_result != 0)
+            {   /* Write Unicode combining */
+                while (*str_result != '\0' && *str_result != '{')
+                    cp[j++] = *str_result++;
+                str_result = 0;
+            }
+        }
         i++;
     }
 }
@@ -230,7 +247,6 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     yaz_marc_cprintf(mt, "Ignoring line: %s", line);
                     continue;
                 }
-                yaz_log(YLOG_LOG, "adding leader %s", rest);
                 yaz_marc_set_leader(mt, rest,
                                     &indicator_length,
                                     &identifier_length,
@@ -247,7 +263,6 @@ int yaz_marc_read_line(yaz_marc_t mt,
                 for (; *cp; cp++)
                     if (*cp == '\\')
                         *cp = ' ';
-                yaz_log(YLOG_LOG, "adding control tag %s", tag);
                 create_header(mt, &header_created,
                               &indicator_length,
                               &identifier_length,
