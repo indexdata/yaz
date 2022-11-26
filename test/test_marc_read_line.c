@@ -77,11 +77,37 @@ static void tst1(void)
     const char *cases[] = {
         /*23456789012345678901234*/
 
+        "00366nam  22001698a 4500\n"
+        "001    11224466 \n"
+        "003 DLC\n"
+        "040    $a DLC $c DLC\n"
+        "245 10 $a How to program a computer\n\n"
+        ,
+        "00366nam  22001698a 4500\n"
+        "001    11224466 \n"
+        "003 DLC\n"
+        "040    $a DLC $c DLC\n"
+        "245 10 $a How to program a computer\n\n"
+        ,
+        "00366nam  22001698a 4500\n"
+        "001    11224466 \n"
+        "003 DLC\n"
+        "040   _aDLC_cDLC\n"
+        "245 10*a How to program a computer\n\n"
+        ,
+        "00366nam  22001698a 4500\n"
+        "001    11224466 \n"
+        "003 DLC\n"
+        "040    $a DLC $c DLC\n"
+        "245 10 $a How to program a computer\n\n"
+        ,
         "00988nam0 32003011  450 \n"
+        "001 321\n"
         "001 000 $a 9 181 423 4 $b 710100 $f a\n"
         "004 000 $r n $a e\n"
         ,
         "00988nam0 32003011  450 \n"
+        "001 321\n"
         "001 000 $a 9 181 423 4 $b 710100 $f a\n"
         "004 000 $r n $a e\n\n"
         ,
