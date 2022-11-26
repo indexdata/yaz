@@ -12,7 +12,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec \
  test_timing test_tpath test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
- test_marc_read_sax
+ test_marc_read_sax test_marc_read_line
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
@@ -98,3 +98,4 @@ test_libstemmer_SOURCES = test_libstemmer.c
 test_embed_record_SOURCES = test_embed_record.c
 test_zgdu_SOURCES = test_zgdu.c
 test_marc_read_sax_SOURCES = test_marc_read_sax.c
+test_marc_read_line_SOURCES = test_marc_read_line.c

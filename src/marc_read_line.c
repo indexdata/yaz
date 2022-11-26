@@ -69,10 +69,12 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
     if (!more)
         return 0;
 
+    if (*wrbuf_buf(w) == '=')
+        return 2;
     while (more)
     {
         int i;
-        for (i = 0; i<4; i++)
+        for (i = 0; i < 4; i++)
         {
             int ch = getbyte(client_data);
             if (ch != ' ')
@@ -82,7 +84,7 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
                 return 1;
             }
         }
-        if (wrbuf_len(w) > 60 && wrbuf_buf(w)[wrbuf_len(w)-1] == '=')
+        if (wrbuf_len(w) > 60 && wrbuf_buf(w)[wrbuf_len(w) - 1] == '=')
             wrbuf_cut_right(w, 1);
         else
             wrbuf_puts(w, " ");
@@ -91,6 +93,81 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
     return 1;
 }
 
+static void create_header(yaz_marc_t mt, int *header_created,
+                          int *indicator_length, int *identifier_length, int *base_address,
+                          int *length_data_entry, int *length_starting, int *length_implementation)
+{
+    if (!*header_created)
+    {
+        const char *leader = "01000cam  2200265 i 4500";
+        *header_created = 1;
+        yaz_marc_set_leader(mt, leader,
+                            indicator_length,
+                            identifier_length,
+                            base_address,
+                            length_data_entry,
+                            length_starting,
+                            length_implementation);
+    }
+}
+
+static void read_data_field_curly(yaz_marc_t mt, const char *line,
+                                  const char *tag, const char *rest, int indicator_length)
+{
+    char *cp = (char *)rest;
+    size_t i, j, i_curly, i_begin;
+    for (i = 0; cp[i] && i < indicator_length; i++)
+        if (cp[i] == '\\')
+            cp[i] = ' ';
+    if (cp[i] == '\0')
+    {
+        yaz_marc_cprintf(mt, "Premature end of line %s", line);
+        return;
+    }
+    yaz_marc_add_datafield(mt, tag, cp, indicator_length);
+    cp = cp + i;
+    i = j = 0;
+    i_curly = 0;
+    i_begin = 0;
+    while (1)
+    {
+        if (cp[i] == '$' || cp[i] == '\0')
+        {
+            if (i_begin > 0)
+            {
+                yaz_marc_add_subfield(mt, cp + i_begin, j - i_begin);
+            }
+            j = i_begin = i + 1;
+            if (cp[i] == '\0')
+                break;
+        }
+        else if (cp[i] == '{')
+        {
+            i_curly = i;
+        }
+        else if (cp[i] == '}' && i_curly > 0)
+        {
+            const char *str_result;
+            const char *rules =
+                "{dollar}$"
+                "{copy}\xc2\xa9"
+                "{acute}\xcc\x81"
+                "{cedil}\xcc\xa7";
+            cp[i] = '\0';
+            yaz_log(YLOG_LOG, "lookup i=%d j=%d %s", (int) i, (int) j, cp + i_curly);
+            str_result = strstr(rules, cp + i_curly);
+            if (str_result == 0)
+                str_result = "}?";
+            str_result++; /* skip } */
+            while (*str_result && *str_result != '{')
+                cp[j++] = *str_result++;
+            i_curly = 0;
+        }
+        else
+            cp[j++] = cp[i];
+        i++;
+    }
+}
 
 int yaz_marc_read_line(yaz_marc_t mt,
                        int (*getbyte)(void *client_data),
@@ -107,15 +184,16 @@ int yaz_marc_read_line(yaz_marc_t mt,
     int marker_skip = 0;
     int header_created = 0;
     WRBUF wrbuf_line = wrbuf_alloc();
+    int more;
 
     yaz_marc_reset(mt);
 
-    while (yaz_marc_line_gets(getbyte, ungetbyte, client_data, wrbuf_line))
+    while ((more = yaz_marc_line_gets(getbyte, ungetbyte, client_data, wrbuf_line)))
     {
         const char *line = wrbuf_cstr(wrbuf_line);
         int val;
         size_t line_len = strlen(line);
-        if (line_len == 0)       /* empty line indicates end of record */
+        if (line_len == 0) /* empty line indicates end of record */
         {
             if (header_created)
                 break;
@@ -127,11 +205,74 @@ int yaz_marc_read_line(yaz_marc_t mt,
         }
         else if (line[0] == '(') /* annotation, skip it */
             ;
+        else if (more == 2)
+        {
+            char tag[4];
+            const char *rest;
+            size_t rest_offset = 4;
+            /* have only seen two blanks so far */
+            while (rest_offset < line_len && line[rest_offset] == ' ')
+                rest_offset++;
+            if (rest_offset >= line_len)
+            {
+                yaz_marc_cprintf(mt, "Ignoring line: %s", line);
+                continue;
+            }
+            rest = line + rest_offset;
+            memcpy(tag, line + 1, 3);
+            tag[3] = '\0';
+            if (strcmp(tag, "LDR") == 0)
+            {
+                if (header_created)
+                    break;
+                if (strlen(rest) < 24)
+                {
+                    yaz_marc_cprintf(mt, "Ignoring line: %s", line);
+                    continue;
+                }
+                yaz_log(YLOG_LOG, "adding leader %s", rest);
+                yaz_marc_set_leader(mt, rest,
+                                    &indicator_length,
+                                    &identifier_length,
+                                    &base_address,
+                                    &length_data_entry,
+                                    &length_starting,
+                                    &length_implementation);
+                header_created = 1;
+            }
+            else if (tag[0] == '0' && tag[1] == '0')
+            {
+                /* quite a hack to modify the WRBUF owned data */
+                char *cp = (char *)rest;
+                for (; *cp; cp++)
+                    if (*cp == '\\')
+                        *cp = ' ';
+                yaz_log(YLOG_LOG, "adding control tag %s", tag);
+                create_header(mt, &header_created,
+                              &indicator_length,
+                              &identifier_length,
+                              &base_address,
+                              &length_data_entry,
+                              &length_starting,
+                              &length_implementation);
+                yaz_marc_add_controlfield(mt, tag, rest, strlen(rest));
+            }
+            else
+            {
+                create_header(mt, &header_created,
+                              &indicator_length,
+                              &identifier_length,
+                              &base_address,
+                              &length_data_entry,
+                              &length_starting,
+                              &length_implementation);
+
+                read_data_field_curly(mt, line, tag, rest, indicator_length);
+            }
+        }
         else if (line_len == 24 && atoi_n_check(line, 5, &val))
         {
-            /* deal with header lines:  00366nam  22001698a 4500
-            */
-
+            /* deal with header lines:  00366nam  22001698a 4500 */
             if (header_created)
                 break;
             yaz_marc_set_leader(mt, line,
@@ -143,12 +284,11 @@ int yaz_marc_read_line(yaz_marc_t mt,
                                 &length_implementation);
             header_created = 1;
         }
-        else if (line_len > 4 && line[0] != ' ' && line[1] != ' '
-                 && line[2] != ' ' && line[3] == ' ' )
+        else if (line_len > 4 && line[0] != ' ' && line[1] != ' ' && line[2] != ' ' && line[3] == ' ')
         {
             /* deal with data/control lines: 245 12 ........ */
             char tag[4];
-            const char *datafield_start = line+6;
+            const char *datafield_start = line + 6;
             marker_ch = 0;
             marker_skip = 0;
 
@@ -157,7 +297,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
             if (line_len >= 8) /* control - or datafield ? */
             {
                 if (*datafield_start == ' ')
-                    datafield_start++;  /* skip blank after indicator */
+                    datafield_start++; /* skip blank after indicator */
 
                 if (strchr("$_*", *datafield_start))
                 {
@@ -166,27 +306,21 @@ int yaz_marc_read_line(yaz_marc_t mt,
                         marker_skip = 1; /* subfields has blank before data */
                 }
             }
-            if (!header_created)
-            {
-                const char *leader = "01000cam  2200265 i 4500";
-
-                yaz_marc_set_leader(mt, leader,
-                                    &indicator_length,
-                                    &identifier_length,
-                                    &base_address,
-                                    &length_data_entry,
-                                    &length_starting,
-                                    &length_implementation);
-                header_created = 1;
-            }
+            create_header(mt, &header_created,
+                          &indicator_length,
+                          &identifier_length,
+                          &base_address,
+                          &length_data_entry,
+                          &length_starting,
+                          &length_implementation);
 
             if (marker_ch == 0)
-            {   /* control field */
-                yaz_marc_add_controlfield(mt, tag, line+4, strlen(line+4));
+            { /* control field */
+                yaz_marc_add_controlfield(mt, tag, line + 4, strlen(line + 4));
             }
             else
-            {   /* data field */
-                const char *indicator = line+4;
+            { /* data field */
+                const char *indicator = line + 4;
                 int indicator_len = 2;
                 const char *cp = datafield_start;
 
@@ -201,9 +335,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     next = cp;
                     while ((next = strchr(next, marker_ch)))
                     {
-                        if ((next[1] >= 'A' && next[1] <= 'Z')
-                            ||(next[1] >= 'a' && next[1] <= 'z')
-                            ||(next[1] >= '0' && next[1] <= '9'))
+                        if ((next[1] >= 'A' && next[1] <= 'Z') || (next[1] >= 'a' && next[1] <= 'z') || (next[1] >= '0' && next[1] <= '9'))
                         {
                             if (!marker_skip)
                                 break;
@@ -257,4 +389,3 @@ int yaz_marc_read_line(yaz_marc_t mt,
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
