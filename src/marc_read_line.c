@@ -111,11 +111,66 @@ static void create_header(yaz_marc_t mt, int *header_created,
     }
 }
 
+static void read_data_field_normal(yaz_marc_t mt, const char *line,
+                                   const char *tag,
+                                   const char *datafield_start,
+                                   int marker_skip, int marker_ch)
+{
+    const char *indicator = line + 4;
+    int indicator_len = 2;
+    const char *cp = datafield_start;
+
+    yaz_marc_add_datafield(mt, tag, indicator, indicator_len);
+    for (;;)
+    {
+        const char *next;
+        size_t len;
+
+        assert(cp[0] == marker_ch);
+        cp++;
+        next = cp;
+        while ((next = strchr(next, marker_ch)))
+        {
+            if ((next[1] >= 'A' && next[1] <= 'Z') || (next[1] >= 'a' && next[1] <= 'z') || (next[1] >= '0' && next[1] <= '9'))
+            {
+                if (!marker_skip)
+                    break;
+                else if (next[2] == ' ')
+                    break;
+            }
+            next++;
+        }
+        len = strlen(cp);
+        if (next)
+            len = next - cp - marker_skip;
+
+        if (marker_skip)
+        {
+            /* remove ' ' after subfield marker */
+            char *cp_blank = strchr(cp, ' ');
+            if (cp_blank)
+            {
+                len--;
+                while (cp_blank != cp)
+                {
+                    cp_blank[0] = cp_blank[-1];
+                    cp_blank--;
+                }
+                cp++;
+            }
+        }
+        yaz_marc_add_subfield(mt, cp, len);
+        if (!next)
+            break;
+        cp = next;
+    }
+}
+
 static void read_data_field_curly(yaz_marc_t mt, const char *line,
                                   const char *tag, const char *rest, int indicator_length)
 {
-    char *cp = (char *)rest;
     char *str_result = 0;
+    char *cp = (char *)rest;
     size_t i, j, j_begin;
     for (i = 0; cp[i] && i < indicator_length; i++)
         if (cp[i] == '\\')
@@ -256,22 +311,6 @@ int yaz_marc_read_line(yaz_marc_t mt,
                                     &length_implementation);
                 header_created = 1;
             }
-            else if (tag[0] == '0' && tag[1] == '0')
-            {
-                /* quite a hack to modify the WRBUF owned data */
-                char *cp = (char *)rest;
-                for (; *cp; cp++)
-                    if (*cp == '\\')
-                        *cp = ' ';
-                create_header(mt, &header_created,
-                              &indicator_length,
-                              &identifier_length,
-                              &base_address,
-                              &length_data_entry,
-                              &length_starting,
-                              &length_implementation);
-                yaz_marc_add_controlfield(mt, tag, rest, strlen(rest));
-            }
             else
             {
                 create_header(mt, &header_created,
@@ -281,8 +320,19 @@ int yaz_marc_read_line(yaz_marc_t mt,
                               &length_data_entry,
                               &length_starting,
                               &length_implementation);
-
-                read_data_field_curly(mt, line, tag, rest, indicator_length);
+                if (tag[0] == '0' && tag[1] == '0')
+                {
+                    /* quite a hack to modify the WRBUF owned data */
+                    char *cp = (char *)rest;
+                    for (; *cp; cp++)
+                        if (*cp == '\\')
+                            *cp = ' ';
+                    yaz_marc_add_controlfield(mt, tag, rest, strlen(rest));
+                }
+                else
+                {
+                    read_data_field_curly(mt, line, tag, rest, indicator_length);
+                }
             }
         }
         else if (line_len == 24 && atoi_n_check(line, 5, &val))
@@ -335,54 +385,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
             }
             else
             { /* data field */
-                const char *indicator = line + 4;
-                int indicator_len = 2;
-                const char *cp = datafield_start;
-
-                yaz_marc_add_datafield(mt, tag, indicator, indicator_len);
-                for (;;)
-                {
-                    const char *next;
-                    size_t len;
-
-                    assert(cp[0] == marker_ch);
-                    cp++;
-                    next = cp;
-                    while ((next = strchr(next, marker_ch)))
-                    {
-                        if ((next[1] >= 'A' && next[1] <= 'Z') || (next[1] >= 'a' && next[1] <= 'z') || (next[1] >= '0' && next[1] <= '9'))
-                        {
-                            if (!marker_skip)
-                                break;
-                            else if (next[2] == ' ')
-                                break;
-                        }
-                        next++;
-                    }
-                    len = strlen(cp);
-                    if (next)
-                        len = next - cp - marker_skip;
-
-                    if (marker_skip)
-                    {
-                        /* remove ' ' after subfield marker */
-                        char *cp_blank = strchr(cp, ' ');
-                        if (cp_blank)
-                        {
-                            len--;
-                            while (cp_blank != cp)
-                            {
-                                cp_blank[0] = cp_blank[-1];
-                                cp_blank--;
-                            }
-                            cp++;
-                        }
-                    }
-                    yaz_marc_add_subfield(mt, cp, len);
-                    if (!next)
-                        break;
-                    cp = next;
-                }
+                read_data_field_normal(mt, line, tag, datafield_start, marker_skip, marker_ch);
             }
         }
         else
