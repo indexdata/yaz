@@ -201,17 +201,41 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
         {
             int i_curly = i;
             /* using Unicode here for mappings */
+
             static const char *mappings =
-                "{dollar}$"
-                "{copy}\xc2\xa9"
-                "{cedil}\xcc\xa7"
                 "{acute}\xcc\x81"
-                "{grave}\xcc\x80"
-                "{uml}\xcc\x88"
+                "{aelig}??"
+                "{breve}??"
+                "{C7}??"
+                "{caron}??"
+                "{cedil}\xcc\xa7"
                 "{circ}??"
+                "{commab}??"
+                "{copy}\xc2\xa9"
+                "{dollar}$"
+                "{dotb}??"
+                "{esc}??"
+                "{flat}??"
+                "{grave}\xcc\x80"
+                "{inodot}??"
                 "{lcub}??"
-                "{rcub}??"
+                "{lstrok}??"
+                "{macr}??"
+                "{mllhring}??"
                 "{oelig}??"
+                "{ostrok}??"
+                "{phono}??"
+                "{pound}??"
+                "{rcedil}??"
+                "{rcommaa}??"
+                "{rcub}??"
+                "{ring}??"
+                "{reg}??"
+                "{sharp}??"
+                "{softsign}??"
+                "{tilde}??"
+                "{under}??"
+                "{uml}\xcc\x88"
                 ;
             while (cp[i] != '\0' && cp[i] != '}')
                 i++;
@@ -224,7 +248,9 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
             cp[i] = '\0';
             str_result = strstr(mappings, cp + i_curly);
             if (str_result == 0)
+            {
                 str_result = "?";
+            }
             else
                 str_result += (i - i_curly) + 1;
             /* write now unless Unicode combining */
