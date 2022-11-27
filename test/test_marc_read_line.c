@@ -61,7 +61,7 @@ static void run(yaz_marc_t mt, const char *input, const char *expected) {
     eq = strcmp(expected, result) == 0;
     if (!eq)
     {
-        yaz_log(YLOG_LOG, "no equal input/expected/got\n%s\n-len=%d-\n%s\n-len=%d-\n%s",
+        yaz_log(YLOG_LOG, "no equal input\n%s\n-exp len=%d-\n%s\n-got len=%d-\n%s",
             input,
             (int) strlen(expected), expected,
             (int) strlen(result), result);
@@ -80,13 +80,13 @@ static void tst1(void)
         "00366nam  22001698a 4500\n"
         "001    11224466 \n"
         "003 DLC\n"
-        "040    $a DLC $c DLC\n"
+        "040    $a DLA  $b  DLB $c DLC\n"
         "245 10 $a How to program a computer\n\n"
         ,
         "00366nam  22001698a 4500\n"
         "001    11224466 \n"
         "003 DLC\n"
-        "040    $a DLC $c DLC\n"
+        "040    $a DLA  $b  DLB $c DLC\n"
         "245 10 $a How to program a computer\n\n"
         ,
         "00366nam  22001698a 4500\n"
