@@ -101,6 +101,13 @@ static void tst1(void)
         "040    $a DLC $c DLC\n"
         "245 10 $a How to program a computer\n\n"
         ,
+        "00366nam  22001698a 4500\n"
+        "245 10 $a How to program a computer\n"
+        "    $b Other\n"
+        ,
+        "00366nam  22001698a 4500\n"
+        "245 10 $a How to program a computer $b Other\n\n"
+        ,
         "00988nam0 32003011  450 \n"
         "001 321\n"
         "001 000 $a 9 181 423 4 $b 710100 $f a\n"
@@ -139,6 +146,14 @@ static void tst1(void)
         ,
         "01000cam  2200265 i 4500\n"
         "245 13 $a {dollar\n\n"
+        ,
+        "=245  13$afirst/\n"
+        " $bsecond\n"
+        "  $cthird$\n"
+        " dfourth\n"
+        ,
+        "01000cam  2200265 i 4500\n"
+        "245 13 $a first/ $b second  $c third $d fourth\n\n"
         ,
         0
     };

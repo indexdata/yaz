@@ -62,35 +62,36 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
                               void *client_data,
                               WRBUF w)
 {
-    int more;
+    int ret;
 
     wrbuf_rewind(w);
-    more = yaz_gets(getbyte, ungetbyte, client_data, w);
-    if (!more)
+    if (!yaz_gets(getbyte, ungetbyte, client_data, w))
         return 0;
 
-    if (*wrbuf_buf(w) == '=')
-        return 2;
-    while (more)
+    ret = *wrbuf_buf(w) == '=' ? 2 : 1;
+    do
     {
+        int lead = ret == 1 ? 4 : 1;
         int i;
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < lead; i++)
         {
             int ch = getbyte(client_data);
             if (ch != ' ')
             {
                 if (ch)
                     ungetbyte(ch, client_data);
-                return 1;
+                return ret;
             }
         }
-        if (wrbuf_len(w) > 60 && wrbuf_buf(w)[wrbuf_len(w) - 1] == '=')
-            wrbuf_cut_right(w, 1);
-        else
-            wrbuf_puts(w, " ");
-        more = yaz_gets(getbyte, ungetbyte, client_data, w);
-    }
-    return 1;
+        if (ret == 1)
+        {
+            if (wrbuf_len(w) > 60 && wrbuf_buf(w)[wrbuf_len(w) - 1] == '=')
+                wrbuf_cut_right(w, 1);
+            else
+                wrbuf_puts(w, " ");
+        }
+    } while (yaz_gets(getbyte, ungetbyte, client_data, w));
+    return ret;
 }
 
 static void create_header(yaz_marc_t mt, int *header_created,
