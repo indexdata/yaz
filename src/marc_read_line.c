@@ -71,16 +71,27 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
     ret = *wrbuf_buf(w) == '=' ? 2 : 1;
     do
     {
-        int lead = ret == 1 ? 4 : 1;
-        int i;
-        for (i = 0; i < lead; i++)
-        {
+        if (ret == 2)
+        {   /* mrk: anything not starting with "=" is a contination line */
             int ch = getbyte(client_data);
-            if (ch != ' ')
-            {
-                if (ch)
-                    ungetbyte(ch, client_data);
+            if (ch)
+                ungetbyte(ch, client_data);
+            if (ch == '=')
                 return ret;
+        }
+        else
+        {
+            /* line: continuation is 4 blanks */
+            int i;
+            for (i = 0; i < 4; i++)
+            {
+                int ch = getbyte(client_data);
+                if (ch != ' ')
+                {
+                    if (ch)
+                        ungetbyte(ch, client_data);
+                    return ret;
+                }
             }
         }
         if (ret == 1)
@@ -329,6 +340,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
             tag[3] = '\0';
             if (strcmp(tag, "LDR") == 0)
             {
+                char *cp;
                 if (header_created)
                     break;
                 if (strlen(rest) < 24)
@@ -336,6 +348,10 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     yaz_marc_cprintf(mt, "Ignoring line: %s", line);
                     continue;
                 }
+                cp = (char *)rest;
+                for (; *cp; cp++)
+                    if (*cp == '\\')
+                        *cp = ' ';
                 yaz_marc_set_leader(mt, rest,
                                     &indicator_length,
                                     &identifier_length,

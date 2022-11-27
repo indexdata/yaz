@@ -108,6 +108,14 @@ static void tst1(void)
         "00366nam  22001698a 4500\n"
         "245 10 $a How to program a computer $b Other\n\n"
         ,
+        "00366nam  22001698a 4500\n"
+        "245 10 $a How to program a computer\n"
+        " ignored\n"
+        ,
+        "00366nam  22001698a 4500\n"
+        "245 10 $a How to program a computer\n"
+        "(Ignoring line: ignored)\n\n"
+        ,
         "00988nam0 32003011  450 \n"
         "001 321\n"
         "001 000 $a 9 181 423 4 $b 710100 $f a\n"
@@ -124,7 +132,7 @@ static void tst1(void)
         "01416cam  2200361   4500\n"
         "008 750228s1936  nyua 000 1 eng\n\n"
         ,
-        "=LDR  01416cam  2200361   4500\n"
+        "=LDR  01416cam\\\\2200361\\\\\\4500\n"
         "=008  750228s1936\\\\nyua\\000\\1\\eng\n"
         "=245  14$aThe man without a country / $cWith an introduction by Carl Van Doren.\n"
         ,
@@ -149,11 +157,18 @@ static void tst1(void)
         ,
         "=245  13$afirst/\n"
         " $bsecond\n"
-        "  $cthird$\n"
-        " dfourth\n"
+        " $cthird\n"
+        " $dfourth\n"
         ,
         "01000cam  2200265 i 4500\n"
-        "245 13 $a first/ $b second  $c third $d fourth\n\n"
+        "245 13 $a first/  $b second  $c third  $d fourth\n\n"
+        ,
+        "=245  13$afirst/c\n"
+        "{pound}ur\n"
+        " here"
+        ,
+        "01000cam  2200265 i 4500\n"
+        "245 13 $a first/c??ur here\n\n"
         ,
         0
     };
