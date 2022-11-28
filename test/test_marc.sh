@@ -23,12 +23,12 @@ binmarc_convert() {
     REVERT_FORMAT="$2"
     PREFIX="$3"
     SUFFIX="$4"
-    for f in ${srcdir}/marc[0-9].marc ${srcdir}/marc[1-9][0-9].marc; do
+    for f in ${srcdir}/marc-files/marc[0-9].marc ${srcdir}/marc-files/marc[1-9][0-9].marc; do
         fb=`basename ${f} .marc`
-        CHR=`cat ${srcdir}/${fb}.chr`
-        NEW=${PREFIX}${fb}.new.${SUFFIX}
-        OLD=${srcdir}/${PREFIX}${fb}.${SUFFIX}
-        DIFF=`basename ${f}`.diff
+        CHR=`cat ${srcdir}/marc-files/${fb}.chr`
+        NEW=marc-files/${PREFIX}${fb}.new.${SUFFIX}
+        OLD=${srcdir}/marc-files/${PREFIX}${fb}.${SUFFIX}
+        DIFF=marc-files/`basename ${f}`.diff
         ../util/yaz-marcdump -f $CHR -t utf-8 -i marc -o ${OUTPUT_FORMAT} $f > $NEW
         if test $? != "0"; then
        	    echo "$f: yaz-marcdump returned error"
@@ -105,7 +105,7 @@ binmarc_convert() {
     return $ecode
 }
 
-for f in ${srcdir}/marc[0-9].marc; do
+for f in ${srcdir}/marc-files/marc[0-9].marc; do
     ../util/yaz-marcdump $f > /dev/null
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
