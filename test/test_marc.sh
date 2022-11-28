@@ -75,8 +75,8 @@ binmarc_convert() {
     	    f=$OLD
 	    # compare with original (binary) marc record.
     	    OLD=${f}.marc
-    	    NEW=`basename ${f}`.new.marc
-    	    DIFF=`basename ${f}`.diff
+            NEW=marc-files/`basename ${f}`.new.marc
+            DIFF=marc-files/`basename ${f}`.diff
    	    # echo "../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW"
     	    ../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW
     	    if test $? != "0"; then
