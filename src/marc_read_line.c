@@ -24,7 +24,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
-extern const char *yaz_mrk_mappings;
+extern const char *yaz_mrk_lookup(const char *pattern);
 
 static int yaz_gets(int (*getbyte)(void *client_data),
                     void (*ungetbyte)(int b, void *client_data),
@@ -211,7 +211,7 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
         }
         else if (cp[i] == '{')
         {
-            char *str_result;
+            const char *str_result;
             size_t i_curly = i;
             int ch_save;
             while (cp[i] != '\0' && cp[i] != '}')
@@ -224,7 +224,7 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
             }
             ch_save = cp[i + 1];
             cp[i + 1] = '\0';
-            str_result = strstr(yaz_mrk_mappings, cp + i_curly);
+            str_result = yaz_mrk_lookup(cp + i_curly);
             if (str_result == 0)
             {
                 yaz_marc_cprintf(mt, "MRK pattern %s not found", cp + i_curly);

@@ -190,17 +190,9 @@ static void tst1(void)
     yaz_marc_destroy(mt);
 }
 
-extern const char *yaz_mrk_mappings;
-
-static void tst_mrkconv(void)
-{
-    YAZ_CHECK(strstr(yaz_mrk_mappings, "{dollar}"));
-}
-
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
-    tst_mrkconv();
     tst1();
     YAZ_CHECK_TERM;
 }
