@@ -18,17 +18,19 @@ if test $? = "4"; then
     noxmlwrite=1
 fi
 
+test -d marc-files || mkdir marc-files
+
 binmarc_convert() {
     OUTPUT_FORMAT="$1"
     REVERT_FORMAT="$2"
     PREFIX="$3"
     SUFFIX="$4"
-    for f in ${srcdir}/marc[0-9].marc ${srcdir}/marc[1-9][0-9].marc; do
+    for f in ${srcdir}/marc-files/marc[0-9].marc ${srcdir}/marc-files/marc[1-9][0-9].marc; do
         fb=`basename ${f} .marc`
-        CHR=`cat ${srcdir}/${fb}.chr`
-        NEW=${PREFIX}${fb}.new.${SUFFIX}
-        OLD=${srcdir}/${PREFIX}${fb}.${SUFFIX}
-        DIFF=`basename ${f}`.diff
+        CHR=`cat ${srcdir}/marc-files/${fb}.chr`
+        NEW=marc-files/${PREFIX}${fb}.new.${SUFFIX}
+        OLD=${srcdir}/marc-files/${PREFIX}${fb}.${SUFFIX}
+        DIFF=marc-files/`basename ${f}`.diff
         ../util/yaz-marcdump -f $CHR -t utf-8 -i marc -o ${OUTPUT_FORMAT} $f > $NEW
         if test $? != "0"; then
        	    echo "$f: yaz-marcdump returned error"
@@ -75,8 +77,8 @@ binmarc_convert() {
     	    f=$OLD
 	    # compare with original (binary) marc record.
     	    OLD=${f}.marc
-    	    NEW=`basename ${f}`.new.marc
-    	    DIFF=`basename ${f}`.diff
+            NEW=marc-files/`basename ${f}`.new.marc
+            DIFF=marc-files/`basename ${f}`.diff
    	    # echo "../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW"
     	    ../util/yaz-marcdump -f utf-8 -t utf-8 -i ${REVERT_FORMAT} -o marc $f > $NEW
     	    if test $? != "0"; then
@@ -105,7 +107,7 @@ binmarc_convert() {
     return $ecode
 }
 
-for f in ${srcdir}/marc[0-9].marc; do
+for f in ${srcdir}/marc-files/marc[0-9].marc; do
     ../util/yaz-marcdump $f > /dev/null
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
