@@ -1,0 +1,728 @@
+********************************************************************
+*  TEXT-TO-MARC 21                      Date: October 7, 2003      *
+*  CHARACTER CONVERSION TABLE FOR MARCMaker Version 2.5            *
+*  Includes mnemonics for all Latin-1 (Windows 1252) and Latin-2   *
+*  (Windows 1250 with letter-with-diacritic characters used in     *
+*  Eastern and Western European languages. Also includes mnemonics *
+*  used for the ALA-LC romanization tables for Russian and         *
+*  Ukrainian                                                       *
+*                                                                  *
+*  Source: Randall K. BARRY                                        *
+*          U.S. Library of Congress                                *
+*          Network Development and MARC Standards Office           *
+*          101 Independence Ave., S.E.                             *
+*          Washington, D.C. 20540-4402  U.S.A.                     *
+*          TEL: +1-202-707-5118                                    *
+*          FAX: +1-202-707-0115                                    *
+*          NET: rbar@loc.gov                                       *
+*                                                                  *
+* Converts any listed mnemonic to its hexadecimal equivalent.      *
+*                                                                  *
+* The curly braces "{" (7Bx/123d) and "}" (7Dx/125d) are used      *
+* in MARCMaker to delimit mnemonics converted according to this    *
+* table.  Any characters not delimited by the curly braces are     *
+* passed unchanged into the MARC output record.                    *
+*                                                                  *
+* Mnemonics encountered that are not listed in this table are      *
+* passed to the output record preceded by an ampersand (&) and     *
+* followed by a semicolon (;).  Thus "{zilch}" would be come       *
+* "&zilch;" in the output record.                                  *
+*                                                                  *
+* Mnemonics in this table are enclosed in curly braces "{...}".    *
+* When a mnemonic is mapped to more than one character, the        *
+* character codes are separated by a space in this table.          *
+*                                                                  *
+* Columns in this table are delimited by a comma ","               *
+*                                                                  *
+********************************************************************
+* Mnemonic, hex value, decimal value, name/comment                 *
+* {**},     ??,        ???,           *[character name (FORMAT)]   *
+*__________________________________________________________________*
+{0},30x,048d,*zero
+{00},00x,000d,*hex value 00
+{01},01x,001d,*hex value 01
+{02},02x,002d,*hex value 02
+{03},03x,003d,*hex value 03
+{04},04x,004d,*hex value 04
+{05},05x,005d,*hex value 05
+{06},06x,006d,*hex value 06
+{07},07x,007d,*hex value 07
+{08},08x,008d,*hex value 08
+{09},09x,009d,*hex value 09
+{0A},0Ax,010d,*hex value 0A
+{0B},0Bx,011d,*hex value 0B
+{0C},0Cx,012d,*hex value 0C
+{0D},0Dx,013d,*hex value 0D
+{0E},0Ex,014d,*hex value 0E
+{0F},0Fx,015d,*hex value 0F
+{1},31x,049d,*digit one
+{10},10x,016d,*hex value 10
+{11},11x,017d,*hex value 11
+{12},12x,018d,*hex value 12
+{13},13x,019d,*hex value 13
+{14},14x,020d,*hex value 14
+{15},15x,021d,*hex value 15
+{16},16x,022d,*hex value 16
+{17},17x,023d,*hex value 17
+{18},18x,024d,*hex value 18
+{19},19x,025d,*hex value 19
+{1A},1Ax,026d,*hex value 1A
+{1B},1Bx,027d,*escape
+{1C},1Cx,028d,*hex value 1C
+{1D},1Dx,029d,*end of record
+{1E},1Ex,030d,*end of field
+{1F},1Fx,031d,*subfield delimiter
+{2},32x,050d,*digit two
+{20},20x,032d,*space (blank)
+{21},21x,033d,*exclamation point
+{22},22x,034d,*quotation mark
+{23},23x,035d,*number sign
+{24},24x,036d,*dollar sign
+{25},25x,037d,*percent sign
+{26},26x,038d,*ampersand
+{27},27x,039d,*apostrophe
+{28},28x,040d,*left parenthesis
+{29},29x,041d,*right parenthesis
+{2A},2Ax,042d,*asterisk
+{2B},2Bx,043d,*plus
+{2C},2Cx,044d,*comma
+{2D},2Dx,045d,*hyphen-minus
+{2E},2Ex,046d,*period/decimal point
+{2F},2Fx,047d,*solidus (slash)
+{3},33x,051d,*digit three
+{30},30x,048d,*digit zero
+{31},31x,049d,*digit one
+{32},32x,050d,*digit two
+{33},33x,051d,*digit three
+{34},34x,052d,*digit four
+{35},35x,053d,*digit five
+{36},36x,054d,*digit six
+{37},37x,055d,*digit seven
+{38},38x,056d,*digit eight
+{39},39x,057d,*digit nine
+{3A},3Ax,058d,*colon
+{3B},3Bx,059d,*semicolon
+{3C},3Cx,060d,*less than
+{3D},3Dx,061d,*equals sign
+{3E},3Ex,062d,*greater than
+{3F},3Fx,063d,*question mark
+{4},34x,052d,*digit four
+{40},40x,064d,*commercial at sign
+{41},41x,065d,*latin large letter a
+{42},42x,066d,*latin large letter b
+{43},43x,067d,*latin large letter c
+{44},44x,068d,*latin large letter d
+{45},45x,069d,*latin large letter e
+{46},46x,070d,*latin large letter f
+{47},47x,071d,*latin large letter g
+{48},48x,072d,*latin large letter h
+{49},49x,073d,*latin large letter i
+{4A},4Ax,074d,*latin large letter j
+{4B},4Bx,075d,*latin large letter k
+{4C},4Cx,076d,*latin large letter l
+{4D},4Dx,077d,*latin large letter m
+{4E},4Ex,078d,*latin large letter n
+{4F},4Fx,079d,*latin large letter o
+{5},35x,053d,*digit five
+{50},50x,080d,*latin large letter p
+{51},51x,081d,*latin large letter q
+{52},52x,082d,*latin large letter r
+{53},53x,083d,*latin large letter s
+{54},54x,084d,*latin large letter t
+{55},55x,085d,*latin large letter u
+{56},56x,086d,*latin large letter v
+{57},57x,087d,*latin large letter w
+{58},58x,088d,*latin large letter x
+{59},59x,089d,*latin large letter y
+{5A},5Ax,090d,*latin large letter z
+{5B},5Bx,091d,*left bracket
+{5C},5Cx,092d,*back slash (reverse solidus)
+{5D},5Dx,093d,*right bracket
+{5E},5Ex,094d,*spacing circumflex
+{5F},5Fx,095d,*spacing underscore
+{6},36x,054d,*digit six
+{60},60x,096d,*spacing grave
+{61},61x,097d,*latin small letter a
+{62},62x,098d,*latin small letter b
+{63},63x,099d,*latin small letter c
+{64},64x,100d,*latin small letter d
+{65},65x,101d,*latin small letter e
+{66},66x,102d,*latin small letter f
+{67},67x,103d,*latin small letter g
+{68},68x,104d,*latin small letter h
+{69},69x,105d,*latin small letter i
+{6A},6Ax,106d,*latin small letter j
+{6B},6Bx,107d,*latin small letter k
+{6C},6Cx,108d,*latin small letter l
+{6D},6Dx,109d,*latin small letter m
+{6E},6Ex,110d,*latin small letter n
+{6F},6Fx,111d,*latin small letter o
+{7},37x,055d,*digit seven
+{70},70x,112d,*latin small letter p
+{71},71x,113d,*latin small letter q
+{72},72x,114d,*latin small letter r
+{73},73x,115d,*latin small letter s
+{74},74x,116d,*latin small letter t
+{75},75x,117d,*latin small letter u
+{76},76x,118d,*latin small letter v
+{77},77x,119d,*latin small letter w
+{78},78x,120d,*latin small letter x
+{79},79x,121d,*latin small letter y
+{7A},7Ax,122d,*latin small letter z
+{7B},7Bx,123d,*opening curly brace
+{7C},7Cx,124d,*fill/bar over bar/pipe
+{7D},7Dx,125d,*closing curly brace
+{7E},7Ex,126d,*spacing tilde
+{7F},7Fx,127d,*hex value 7F
+{8},38x,056d,*digit eight
+{80},80x,128d,*hex value 80
+{81},81x,129d,*hex value 81
+{82},82x,130d,*hex value 82
+{83},83x,131d,*hex value 83
+{84},84x,132d,*hex value 84
+{85},85x,133d,*hex value 85
+{86},86x,134d,*hex value 86
+{87},87x,135d,*hex value 87
+{88},88x,136d,*hex value 88
+{89},89x,137d,*hex value 89
+{8A},8Ax,138d,*hex value 8A
+{8B},8Bx,139d,*hex value 8B
+{8C},8Cx,140d,*hex value 8C
+{8D},8Dx,141d,*zero width joiner
+{8E},8Ex,142d,*zero width non-joiner
+{8F},8Fx,143d,*hex value 8F
+{9},39x,057d,*digit nine
+{90},90x,144d,*hex value 90
+{91},91x,145d,*hex value 91
+{92},92x,146d,*hex value 92
+{93},93x,147d,*hex value 93
+{94},94x,148d,*hex value 94
+{95},95x,149d,*hex value 95
+{96},96x,150d,*hex value 96
+{97},97x,151d,*hex value 97
+{98},98x,152d,*hex value 98
+{99},99x,153d,*hex value 99
+{9A},9Ax,154d,*hex value 9A
+{9B},9Bx,155d,*hex value 9B
+{9C},9Cx,156d,*hex value 9C
+{9D},9Dx,157d,*hex value 9D
+{9E},9Ex,158d,*hex value 9E
+{9F},9Fx,159d,*hex value 9F
+{A},41x,065d,*latin large letter a
+{a},61x,097d,*latin small letter a
+{A0},A0x,160d,*no-break space
+{A1},A1x,161d,*latin large letter l with stroke
+{A2},A2x,162d,*latin large letter o with stroke
+{A3},A3x,163d,*latin large letter d with stroke
+{A4},A4x,164d,*latin large letter thorn
+{A5},A5x,165d,*latin large letter AE
+{A6},A6x,166d,*latin large letter OE
+{A7},A7x,167d,*modifier letter prime/soft sign
+{A8},A8x,168d,*middle dot
+{A9},A9x,169d,*musical flat sign
+{AA},AAx,170d,*registered sign
+{Aacute},E2x 41x,226d 065d,*latin large letter a with acute
+{aacute},E2x 61x,226d 097d,*latin small letter a with acute
+{AB},ABx,171d,*plus-minus sign
+{Abreve},E6x 41x,230d 065d,*latin large letter a with breve
+{abreve},E6x 61x,230d 097d,*latin small letter a with breve
+{AC},ACx,172d,*latin large letter o with horn
+{Acirc},E3x 41x,227d 065d,*latin large letter a with circumflex
+{acirc},E3x 61x,227d 097d,*latin small letter a with circumflex
+{acute},E2x,226d,*combining acute
+{Acy},41x,065d,*cyrillic large letter a
+{acy},61x,097d,*cyrillic small letter a
+{AD},ADx,173d,*latin large letter u with horn
+{AE},AEx,174d,*modifier letter right half ring/alif
+{AElig},A5x,165d,*latin large letter AE
+{aelig},B5x,181d,*latin small letter ae
+{AF},AFx,175d,*hex value AF
+{agr},61x,098d,*greek small letter alpha
+{Agrave},E1x 41x,225d 065d,*latin large letter a with grave
+{agrave},E1x 61x,225d 097d,*latin small letter a with grave
+{alif},AEx,174d,*modifier letter right half ring (alif)
+{amp},26x,038d,*ampersand
+{Aogon},F1x 41x,241d 065d,*latin large letter a with ogon (hook right)
+{aogon},F1x 61x,241d 097d,*latin small letter a with ogon (hook right)
+{apos},27x,039d,*apostrophe
+{arab},28x 33x,040d 051d,*begin arabic script
+{Aring},EAx 41x,234d 065d,*latin large letter a with ring
+{aring},EAx 61x,234d 097d,*latin small letter a with ring
+{ast},2Ax,042d,*asterisk
+{asuper},61x,097d,*superscript a
+{Atilde},E4x 41x,228d 065d,*latin large letter A with tilde
+{atilde},E4x 61x,228d 097d,*latin small letter a with tilde
+{Auml},E8x 41x,232d 065d,*latin large letter A with umlaut
+{auml},E8x 61x,232d 097d,*latin small letter a with umlaut
+{ayn},B0x,176d,*modifier letter left half ring (ayn)
+{B},42x,066d,*latin large letter b
+{b},62x,098d,*latin small letter b
+{B0},B0x,176d,*modifier letter left half ring/ayn
+{B1},B1x,177d,*latin small letter l with stroke
+{B2},B2x,178d,*latin small letter o with stroke
+{B3},B3x,179d,*latin small letter d with stroke
+{B4},B4x,180d,*latin small letter thorn
+{B5},B5x,181d,*latin small letter ae
+{B6},B6x,182d,*latin small letter oe
+{B7},B7x,183d,*modifier letter double prime/hard sign
+{B8},B8x,184d,*latin small letter dotless i
+{B9},B9x,185d,*pound sign
+{BA},BAx,186d,*latin small letter eth
+{BB},BBx,187d,*hex value BB
+{BC},BCx,188d,*latin small letter o with horn
+{bcy},62x,098d,*cyrillic small letter be
+{Bcy},42x,066d,*cyrillic large letter be
+{BD},BDx,189d,*latin small letter u with horn
+{BE},BEx,190d,*hex value BE
+{BF},BFx,191d,*hex value BF
+{bgr},62x,099d,*greek small letter beta
+{breve},E6x,230d,*combining breve
+{breveb},F9x,249d,*combining breve below
+{brvbar},7Cx,124d,*broken vertical bar
+{bsol},5Cx,092d,*reverse solidus (back slash)
+{bull},2Ax,042d,*bullet
+{C},43x,067d,*latin large letter c
+{c},63x,099d,*latin small letter c
+{C0},C0x,192d,*degree sign
+{C1},C1x,193d,*latin small letter script l
+{C2},C2x,194d,*sound recording copyright
+{C3},C3x,195d,*copyright sign
+{C4},C4x,196d,*sharp
+{C5},C5x,197d,*inverted question mark
+{C6},C6x,198d,*inverted exclamation mark
+{C7},C7x,199d,*hex value C7
+{C8},C8x,200d,*hex value C8
+{C9},C9x,201d,*hex value C9
+{CA},CAx,202d,*hex value CA
+{Cacute},E2x 43x,226d 067d,*latin large letter c with acute
+{cacute},E2x 63x,226d 099d,*latin small letter c with acute
+{candra},EFx,239d,*combining candrabindu
+{caron},E9x,233d,*combining hacek
+{CB},CBx,203d,*hex value CB
+{CC},CCx,204d,*hex value CC
+{Ccaron},E9x 43x,233d 067d,*latin large letter c with caron
+{ccaron},E9x 63x,233d 099d,*latin small letter c with caron
+{Ccedil},F0x 43x,240d 067d,*latin large letter c with cedilla
+{ccedil},F0x 63x,240d 099d,*latin small letter c with cedilla
+{CD},CDx,205d,*hex value CD
+{CE},CEx,206d,*hex value CE
+{cedil},F0x,240d,*combining cedilla
+{cent},63x,099d,*cent sign
+{CF},CFx,207d,*hex value CF
+{CHcy},43x 68x,067d 104d,*cyrillic large letter cha
+{chcy},63x 68x,099d 104d,*cyrillic small letter cha
+{circ},E3x,227d,*combining circumflex
+{circb},F4x,244d,*combining circumflex below
+{cjk},24x 31x,036d 049d,*begin chinese japanese korean script
+{colon},3Ax,058d,*colon
+{comma},2Cx,044d,*comma
+{commaa},FEx,254d,*combining comma above
+{commab},F7x,247d,*combining comma below (hook left)
+{commat},40x,064d,*commercial at sign
+{copy},C3x,195d,*copyright sign
+{curren},2Ax,042d,*currency sign
+{cyril},28x 4Ex,040d 078d,*begin cyrillic script
+{D},44x,068d,*latin large letter d
+{d},64x,100d,*latin small letter d
+{D0},D0x,208d,*hex value D0
+{D1},D1x,209d,*hex value D1
+{D2},D2x,210d,*hex value D2
+{D3},D3x,211d,*hex value D3
+{D4},D4x,212d,*hex value D4
+{D5},D5x,213d,*hex value D5
+{D6},D6x,214d,*hex value D6
+{D7},D7x,215d,*hex value D7
+{D8},D8x,216d,*hex value D8
+{D9},D9x,217d,*hex value D9
+{DA},DAx,218d,*hex value DA
+{Dagger},7Cx,124d,*double dagger
+{dagger},7Cx,124d,*dagger
+{DB},DBx,219d,*hex value DB
+{dblac},EEx,238d,*combining double acute
+{dbldotb},F3x,243d,*combining double dot below
+{dblunder},F5x,245d,*combining double underscore
+{DC},DCx,220d,*hex value DC
+{Dcaron},E9x 44x,233d 068d,*latin large letter d with caron
+{dcaron},E9x 64x,233d 100d,*latin small letter d with caron
+{Dcy},44x,068d,*cyrillic large letter de
+{dcy},64x,100d,*cyrillic small letter de
+{DD},DDx,221d,*hex value DD
+{DE},DEx,222d,*hex value DE
+{deg},C0x,192d,*degree sign
+{DF},DFx,223d,*hex value DF
+{diaer},E8x,232d,*combining diaeresis
+{divide},2Fx,047d,*divide sign
+{djecy},B3x,179d,*cyrillic small letter dje
+{DJEcy},A3x,163d,*cyrillic large letter dje
+{dollar},24x,036d,*dollar sign
+{dot},E7x,231d,*combining dot above
+{dotb},F2x,242d,*combining dot below
+{Dstrok},A3x,163d,*latin large letter d with stroke
+{dstrok},B3x,179d,*latin small letter d with stroke
+{DZEcy},44x 7Ax,068d 122d,*cyrillic large letter dze
+{dzecy},64x 7Ax,100d 122d,*cyrillic small letter dze
+{DZHEcy},44x E9x 7Ax,068d 233d 122d,*cyrillic large letter dzhe
+{dzhecy},64x E9x 7Ax,100d 233d 122d,*cyrillic small letter dzhe
+{E},45x,069d,*latin large letter e
+{e},65x,101d,*latin small letter e
+{E0},E0x,224d,*combining hook above
+{E1},E1x,225d,*combining grave
+{E2},E2x,226d,*combining acute
+{E3},E3x,227d,*combining circumflex
+{E4},E4x,228d,*combining tilde
+{E5},E5x,229d,*combining macron
+{E6},E6x,230d,*combining breve
+{E7},E7x,231d,*combining dot above
+{E8},E8x,232d,*combining diaeresis
+{E9},E9x,233d,*combining hacek
+{EA},EAx,234d,*combining ring above
+{ea},eax,234d,*combining ring above
+{Eacute},E2x 45x,226d 069d,*latin large letter e with acute
+{eacute},E2x 65x,226d 101d,*latin small letter e with acute
+{EB},EBx,235d,*combining ligature left half
+{EC},ECx,236d,*combining ligature right half
+{Ecaron},E9x 45x,233d 069d,*latin large letter e with caron
+{ecaron},E9x 65x,233d 101d,*latin small letter e with caron
+{Ecirc},E3x 45x,227d 069d,*latin large letter e with circumflex
+{ecirc},E3x 65x,227d 101d,*latin small letter e with circumflex
+{Ecy},E7x 44x,231d 069d,*cyrillic large letter reversed e
+{ecy},E7x 65x,231d 101d,*cyrillic small letter reversed e
+{ED},EDx,237d,*combining comma above right
+{EE},EEx,238d,*combining double acute
+{EF},EFx,239d,*combining candrabindu
+{Egrave},E1x 45x,225d 069d,*latin large letter e with grave
+{egrave},E1x 65x,225d 101d,*latin small letter e with grave
+{Ehookr},F1x 45x,241d 069d,*latin large letter e with right hook (ogonek)
+{ehookr},F1x 65x,241d 101d,*latin small letter e with right hook (ogonek)
+{Eogon},F1x 45x,241d 069d,*latin large letter e with ogonek (right hook)
+{eogon},F1x 65x,241d 101d,*latin small letter e with ogonek (right hook)
+{equals},3Dx,061d,*equals sign
+{esc},1Bx,027d,*escape
+{eth},BAx,186d,*latin small letter eth
+{ETH},A3x,163d,*latin capital letter eth
+{Euml},E8x 45x,232d 069d,*latin large letter e with umlaut
+{euml},E8x 65x,232d 101d,*latin small letter e with umlaut
+{excl},21x,033d,*exclamation point
+{F},46x,070d,*latin large letter f
+{f},66x,102d,*latin small letter f
+{F0},F0x,240d,*combining cedilla
+{F1},F1x,241d,*combining ogonek
+{F2},F2x,242d,*combining dot below
+{F3},F3x,243d,*combining double dot below
+{F4},F4x,244d,*combining ring below
+{F5},F5x,245d,*combining double underscore
+{F6},F6x,246d,*combining underscore
+{F7},F7x,247d,*combining comma below
+{F8},F8x,248d,*combining right cedilla
+{F9},F9x,249d,*combining breve below
+{FA},FAx,250d,*combining double tilde left half
+{FB},FBx,251d,*combining double tilde right half
+{FC},FCx,252d,*hex value FC
+{Fcy},46x,070d,*cyrillic large letter ef
+{fcy},66x,102d,*cyrillic small letter ef
+{FD},FDx,253d,*hex value FD
+{FE},FEx,254d,*combining comma above
+{FF},FFx,255d,*hex value FF
+{flat},A9x,169d,*musical flat sign
+{fnof},66x,102d,*curvy f (CP850)
+{frac12},31x 2Fx 32x, 049d 047d 050d,*fraction 1/2
+{frac14},31x 2Fx 34x, 049d 047d 052d,*fraction 1/4
+{frac34},33x 2Fx 34x, 051d 047d 052d,*fraction 3/4
+{G},47x,071d,*latin large letter g
+{g},67x,103d,*latin small letter g
+{Gcy},47x,071d,*cyrillic large letter ge
+{gcy},67x,103d,*cyrillic small letter ge
+{GEcy},47x,071d,*cyrillic large letter ge
+{gecy},67x,103d,*cyrillic small letter ge
+{ggr},67x,103d,*greek small letter gamma
+{GHcy},47x,071d,*ukrainian/belorussian large letter ghe
+{ghcy},67x,103d,*ukrainian/belorussian small letter ghe
+{GJEcy},E2x 47x,226d 071d,*cyrillic large letter gje
+{gjecy},E2x 67x,226d 103d,*cyrillic small letter gje
+{grave},E1x,225d,*combining grave
+{greek},67x,103d,*begin greek script
+{gs},1Dx,029d,*group separator (end of record)
+{gt},3Ex,062d,*greater than
+{H},48x,072d,*latin large letter h
+{h},68x,104d,*latin small letter h
+{HARDcy},B7x,183d,*cyrillic large letter hardsign
+{hardcy},B7x,183d,*cyrillic small letter hardsign
+{hardsign},B7x,183d,*modifier letter hard sign
+{Hcy},48x,072d,*cyrillic large letter he
+{hcy},68x,104d,*cyrillic small letter he
+{hebrew},28x 32x,040d 050d,*begin hebrew script
+{hellip},2Ex 2Ex 2Ex,046d 046d 046d,*ellipsis
+{hooka},E0x,224d,*combining hook above
+{hookl},F7x,247d,*combining hook left (comma below)
+{hookr},F1x,241d,*combining hook right (ogonek)
+{hyphen},2Dx,045d,*hyphen (minus)
+{I},49x,073d,*latin large letter i
+{i},69x,105d,*latin small letter i
+{Iacute},E2x 49x,226d 073d,*latin large letter i with acute
+{iacute},E2x 69x,226d 105d,*latin small letter i with acute
+{Icaron},E9x 49x,233d 073d,*latin large letter i with caron
+{icaron},E9x 69x,233d 105d,*latin small letter i with caron
+{Icirc},E3x 49x,227d 073d,*latin large letter i with circumflex
+{icirc},E3x 69x,227d 105d,*latin small letter i with circumflex
+{Icy},49x,073d,*cyrillic large letter ii
+{icy},69x,105d,*cyrillic small letter ii
+{Idot},E7x 49x, 231d 073d,*latin small letter i with dot
+{IEcy},EBx 49x ECx 45x,235d 073d 236d 069d,*cyrillic large letter ie
+{iecy},EBx 69x ECx 65x,235d 105d 236d 101d,*cyrillic large letter ie
+{iexcl},C6x,198d,*inverted exclamation mark
+{Igrave},E1x 49x,225d 073d,*latin large letter i with grave
+{igrave},E1x 69x,225d 105d,*latin small letter i with grave
+{IJlig},49x 4Ax,073d 074d,*latin large letter ij
+{ijlig},69x 6Ax,105d 106d,*latin small letter ij
+{inodot},B8x,184d,*latin small letter dotless i
+{IOcy},EBx 49x ECx 4Fx,235d 073d 236d 079d,*cyrillic large letter io
+{iocy},EBx 69x ECx 6Fx,235d 105d 236d 111d,*cyrillic small letter io
+{iquest},C5x,197d,*inverted question mark
+{Iuml},E8x 49x,232d 073d,*latin large letter i with umlaut
+{iuml},E8x 69x,232d 105d,*latin small letter i with umlaut
+{Iumlcy},E8x 49x,232d 073d,*cyrillic large letter i with umlaut
+{iumlcy},E8x 69x,232d 105d,*cyrillic small letter i with umlaut
+{IYcy},59x,089d,*cyrillic large letter ukrainian y
+{iycy},79x,121d,*cyrillic small small letter ukrainian y
+{J},4Ax,074d,*latin large letter j
+{j},6Ax,106d,*latin small letter j
+{Jcy},E6x 49x,230d 073d,*cyrillic large letter short ii
+{jcy},E6x 69x,230d 105d,*cyrillic small letter short ii
+{JEcy},4Ax,074d,*cyrillic large letter je
+{jecy},6Ax,106d,*cyrillic small letter je
+{JIcy},E8x 49x,232d 073d,*cyrillic large letter ji
+{jicy},E8x 69x,232d 105d,*cyrillic small letter ji
+{joiner},8Dx,141d,*zero width joiner
+{K},4Bx,075d,*latin large letter k
+{k},6Bx,107d,*latin small letter k
+{Kcy},4Bx,075d,*cyrillic large letter ka
+{kcy},6Bx,107d,*cyrillic small letter ka
+{KHcy},4Bx 68x,075d 104d,*cyrillic large letter kha
+{khcy},6Bx 68x,107d 104d,*cyrillic small letter kha
+{KJEcy},E2x 4Bx,226d 075d,*cyrillic large letter kje
+{kjecy},E2x 6Bx,226d 107d,*cyrillic small letter kje
+{L},4Cx,076d,*latin large letter l
+{l},6Cx,108d,*latin small letter l
+{Lacute},E2x 4Cx,226d 076d,*latin large letter l with acute
+{lacute},E2x 6Cx,226d 108d,*latin small letter l with acute
+{laquo},22x,034d,*left-pointing double angle quote mark
+{latin},28x 42x,040d 066d,*begin latin script
+{lcub},7Bx,123d,*opening curly brace
+{Lcy},4Cx,076d,*cyrillic large letter el
+{lcy},6Cx,108d,*cyrillic small letter el
+{ldbltil},FAx,250d,*combining double tilde left half
+{ldquo},22x,034d,*left double quote mark
+{LJEcy},4Cx 6Ax,076d 106d,*cyrillic large letter lje
+{ljecy},6Cx 6Ax,108d 106d,*cyrillic small letter lje
+{llig},EBx,235d,*combining ligature left half
+{lpar},28x,040d,*left parenthesis
+{lsqb},5Bx,091d,*left bracket
+{lsquo},27x,039d,*left single quotation mark
+{lsquor},27x,039d,*rising single quotation left (low)
+{Lstrok},A1x,161d,*latin large letter l with stroke
+{lstrok},B1x,177d,*latin small letter l with stroke
+{lt},3Cx,060d,*less than
+{M},4Dx,077d,*latin large letter m
+{m},6Dx,109d,*latin small letter m
+{macr},E5x,229d,*combining macron
+{Mcy},4Dx,077d,*cyrillic large letter em
+{mcy},6Dx,109d,*cyrillic small letter em
+{mdash},2Dx 2Dx,045d 045d,*m dash
+{middot},A8x,168d,*middle dot
+{mllhring},B0x,176d,*modifier letter left half ring (ayn)
+{mlprime},A7x,167d,*modifier letter prime (soft sign)
+{mlPrime},B7x,183d,*modifier letter double prime (hard sign)
+{mlrhring},AEx,174d,*modifier letter right half ring (alif)
+{N},4Ex,078d,*latin large letter n
+{n},6Ex,110d,*latin small letter n
+{Nacute},E2x 4Ex,226d 078d,*latin large letter n with acute
+{nacute},E2x 6Ex,226d 110d,*latin small letter n with acute
+{Ncaron},E9x 4Ex,233d 078d,*latin large letter n with caron
+{ncaron},E9x 6Ex,233d 110d,*latin small letter n with caron
+{Ncy},4Ex,078d,*cyrillic large letter en
+{ncy},6Ex,110d,*cyrillic small letter en
+{ndash},2Dx 2Dx,045d 045d,*m dash
+{NJEcy},4Ex 6Ax,078d 106d,*cyrillic large letter nj
+{njecy},6Ex 6Ax,110d 106d,*cyrillic small letter nj
+{No},4Ex 6Fx 2Ex,078d 111d 046d,*cyrillic abbr. for "nomer"
+{nonjoin},8Ex,142d,*zero width non-joiner
+{Ntilde},E4x 4Ex,180d 078d,*latin large letter n with tilde
+{ntilde},E4x 6Ex,180d 110d,*latin small letter n with tilde
+{num},23x,035d,*number sign
+{O},4Fx,079d,*latin large letter o
+{o},6Fx,111d,*latin small letter o
+{Oacute},E2x 4Fx,226d 079d,*latin large letter o with acute
+{oacute},E2x 6Fx,226d 111d,*latin small letter o with acute
+{Ocirc},E3x 4Fx,227d 079d,*latin large letter o with circ
+{ocirc},E3x 6Fx,227d 111d,*latin small letter o with circ
+{Ocy},4Fx,079d,*cyrillic large letter o
+{ocy},6Fx,111d,*cyrillic small letter o
+{Odblac},EEx 4Fx,238d 079d,*latin large letter o double acute
+{odblac},EEx 6Fx,238d 111d,*latin small letter o double acute
+{OElig},A6x,166d,*latin large letter OE
+{oelig},B6x,182d,*latin small letter oe
+{ogon},F1x,241d,*combining ogonek (hook right)
+{Ograve},E1x 4Fx,225d 079d,*latin large letter o with grave
+{ograve},E1x 6Fx,225d 111d,*latin small letter o with grave
+{Ohorn},ACx,172d,*latin large letter o with horn
+{ohorn},BCx,188d,*latin small letter o with horn
+{ordf},61x,097d,*feminine ordinal indicator
+{ordm},6Fx,111d,*masculine ordinal indicator
+{Ostrok},A2x,162d,*latin large letter o with stroke
+{ostrok},B2x,178d,*latin small letter o with stroke
+{osuper},6Fx,111d,*latin small letter superscript o
+{Otilde},E4x 4Fx,228d 079d,*latin large letter o with tilde
+{otilde},E4x 6Fx,228d 111d,*latin small letter o with tilde
+{Ouml},E8x 4Fx,232d 079d,*latin large letter o with uml
+{ouml},E8x 6Fx,232d 111d,*latin small letter o with uml
+{P},50x,080d,*latin large letter p
+{p},70x,112d,*latin small letter p
+{para},7Cx,124d,*pilcrow (paragraph)
+{Pcy},50x,080d,*cyrillic large letter pe
+{pcy},70x,112d,*cyrillic small letter pe
+{percnt},25x,037d,*percent sign
+{period},2Ex,046d,*period (decimal point)
+{phono},C2x,194d,*sound recording copyright
+{pipe},7Cx,124d,*pipe
+{plus},2Bx,043d,*plus
+{plusmn},ABx,171d,*plus-minus sign
+{pound},B9x,185d,*pound sign
+{Q},51x,081d,*latin large letter q
+{q},71x,113d,*latin small letter q
+{quest},3Fx,063d,*question mark
+{quot},22x,034d,*quotation mark
+{R},52x,082d,*latin large letter r
+{r},72x,114d,*latin small letter r
+{Racute},E2x 52x,226d 082d,*latin large letter r with acute
+{racute},E2x 72x,226d 114d,*latin small letter r with acute
+{raquo},22x,034d,*right-pointing double angle quotation mark
+{Rcaron},E9x 52x,233d 082d,*latin large letter r with caron
+{rcaron},E9x 72x,233d 114d,*latin small letter r with caron
+{rcedil},F8x,248d,*combining right cedilla
+{rcommaa},EDx,237d,*combining comma above right
+{rcub},7Dx,125d,*closing curly brace
+{Rcy},52x,082d,*cyrillic large letter er
+{rcy},72x,114d,*cyrillic small letter er
+{rdbltil},FBx,251d,*combining double tilde right half
+{rdquofh},22x,034d,*falling double quotation right (high)
+{rdquor},22x,034d,*rising double quotation right (high)
+{reg},AAx,170d,*registered sign
+{ring},EAx,234d,*combining ring above
+{ringb},F4x,244d,*combining ring below
+{rlig},ECx,236d,*combining ligature right half
+{rpar},29x,041d,*right parenthesis
+{rs},1Ex,030d,*record separator (end of field)
+{rsqb},5Dx,093d,*right bracket
+{rsquo},27x,039d,*right single quotation mark
+{rsquor},27x,039d,*rising single quotation right (high)
+{S},53x,083d,*latin large letter s
+{s},73x,115d,*latin small letter s
+{Sacute},E2x 53x,226d 083d,*latin capital s with acute
+{sacute},E2x 73x,226d 115d,*latin small s with acute
+{Scommab},F7x 53x,247d 083d,*latin large letter s with comma below
+{scommab},F7x 73x,247d 115d,*latin small letter s with comma below
+{scriptl},C1x,193d,*latin small letter script l
+{Scy},53x,083d,*cyrillic large letter es
+{scy},73x,115d,*cyrillic small letter es
+{sect},7Cx,124d,*section sign
+{semi},3Bx,059d,*semicolon
+{sharp},C4x,196d,*sharp
+{SHCHcy},53x 68x 63x 68x,083d 104d 099d 104d,*cyrillic large letter shcha
+{shchcy},73x 68x 63x 68x,115d 104d 099d 104d,*cyrillic small letter shcha
+{SHcy},53x 68x,083d 104d,*cyrillic large letter sha
+{shcy},73x 68x,115d 104d,*cyrillic small letter sha
+{shy},2Dx,045d,*soft hyphen (CP850)
+{SOFTcy},A7x,167d,*cyrillic large letter softsign
+{softcy},A7x,167d,*cyrillic smalll letter softsign
+{softsign},A7x,167d,*modifier letter soft sign
+{sol},2Fx,047d,*slash (solidus)
+{space},20x,032d,*space (blank)
+{spcirc},5Ex,094d,*spacing circumflex
+{spgrave},60x,096d,*spacing grave
+{sptilde},7Ex,126d,*spacing tilde
+{spundscr},5Fx,095d,*spacing underscore
+{squf},7Cx,124d,*fill character
+{sub},62x,098d,*begin subscript
+{sup1},1Bx 70x 31x 1Bx 73x, 027d 112d 049d 027d 115d
+{sup2},1Bx 70x 32x 1Bx 73x, 027d 112d 050d 027d 115d
+{sup3},1Bx 70x 33x 1Bx 73x, 027d 112d 051d 027d 115d
+{super},70x,112d,*begin superscript
+{szlig},73x 73x,115d 115d,*latin small letter sharp s (german)
+{T},54x,084d,*latin large letter t
+{t},74x,116d,*latin small letter t
+{Tcaron},E9x 54x,233d 084d,*latin large letter t with caron
+{tcaron},E9x 74x,233d 116d,*latin small letter t with caron
+{Tcommab},F7x 54x,247d 084d,*latin large letter t with comma below (hook left)
+{tcommab},F7x 74x,247d 116d,*latin small letter t with comma below (hook left)
+{Tcy},54x,084d,*cyrillic large letter te
+{tcy},74x,116d,*cyrillic small letter te
+{THORN},A4x,164d,*latin large letter thorn (icelandic)
+{thorn},B4x,180d,*latin small letter thorn (icelandic)
+{tilde},E4x,228d,*combining tilde
+{times},78x,120d,*times sign
+{trade},28x 54x 6Dx 29x,040d 084d 109d 041d,*trade mark sign
+{TScy},EBx 54x ECx 53x,235d 084d 236d 083d,*cyrillic large letter tse
+{tscy},EBx 74x ECx 73x,235d 116d 236d 115d,*cyrillic small letter tse
+{TSHEcy},E2x 43x,226d 067d,*latin large letter tshe
+{tshecy},E2x 63x,226d 099d,*latin small letter tshe
+{U},55x,085d,*latin large letter u
+{u},75x,117d,*latin small letter u
+{Uacute},E2x 55x,226d 085d,*latin large letter u with acute
+{uacute},E2x 75x,226d 117d,*latin small letter u with acute
+{Ubrevecy},E6x 55x,230d 085d,*cyrillic large letter u with breve
+{ubrevecy},E6x 75x,230d 117d,*cyrillic small letter u with breve
+{Ucirc},E3x 55x,227d 085d,*latin large letter u with circ
+{ucirc},E3x 75x,227d 117d,*latin small letter u with circ
+{Ucy},55x,085d,*cyrillic large letter u
+{ucy},75x,117d,*cyrillic small letter u
+{Udblac},EEx 55x,238d 085d,*latin large letter u with double acute
+{udblac},EEx 75x,238d 117d,*latin small letter u with double acute
+{Ugrave},E1x 55x,225d 085d,*latin large letter u with grave
+{ugrave},E1x 75x,225d 117d,*latin small letter u with grave
+{Uhorn},ADx,173d,*latin large letter u with horn
+{uhorn},BDx,189d,*latin small letter u with horn
+{uml},E8x,232d,*combining umlaut
+{under},F6x,246d,*combining underscore
+{Uring},EAx 55x,234d 085d,*latin large letter u with ring
+{uring},EAx 75x,234d 117d,*latin small letter u with ring
+{us},1Fx,031d,*unit separator (subfield delimiter)
+{Uuml},E8x 55x,232d 085d,*latin large letter u with uml
+{uuml},E8x 75x,232d 117d,*latin small letter u with uml
+{V},56x,086d,*latin large letter v
+{v},76x,118d,*latin small letter v
+{Vcy},56x,086d,*cyrillic large letter ve
+{vcy},76x,118d,*cyrillic small letter ve
+{verbar},7Cx,124d,*vertical bar (fill character)
+{vlineb},F2x,242d,*combining vertical line below
+{W},57x,087d,*latin large letter w
+{w},77x,119d,*latin small letter w
+{X},58x,088d,*latin large letter x
+{x},78x,120d,*latin small letter x
+{Y},59x,089d,*latin large letter y
+{y},79x,121d,*latin small letter y
+{Yacute},E2x 59x,226d 089d,*latin large letter y
+{yacute},E2x 79x,226d 121d,*latin small letter y
+{YAcy},EBx 49x ECx 41x,235d 073d 236d 065d,*cyrillic large letter ia
+{yacy},EBx 69x ECx 61x,235d 105d 236d 097d,*cyrillic small letter ia
+{Ycy},59x,089d,*cyrillic large letter yeri
+{ycy},79x,121d,*cyrillic small letter yeri
+{YEcy},45x,069d,*cyrillic large letter ye
+{yecy},65x,101d,*cyrillic small letter ye
+{yen},59x,089d,*yen (CP850)
+{YIcy},49x,073d,*cyrillic large letter yi
+{yicy},69x,105d,*cyrillic small letter yi
+{YUcy},EBx 49x ECx 55x,235d 073d 236d 085d,*cyrillic large letter iu
+{yucy},EBx 69x ECx 75x,235d 105d 236d 117d,*cyrillic small letter iu
+{Z},5Ax,090d,*latin large letter z
+{z},7Ax,122d,*latin small letter z
+{Zacute},E2x 5Ax,226d 090d,*latin large letter z with acute
+{zacute},E2x 7Ax,226d 122d,*latin small letter z with acute
+{Zcy},5Ax,090d,*cyrillic large letter ze
+{zcy},7Ax,122d,*cyrillic small letter ze
+{Zdot},E7x 5Ax,231d 090d,*latin large letter z with dot above
+{zdot},E7x 7Ax,231d 122d,*latin small letter z with dot above
+{ZHcy},5Ax 68x,090d 104d,*cyrillic large letter zhe
+{zhcy},7Ax 68x,122d 104d,*cyrillic small letter zhe
+{ZHuacy},EBx 5Ax ECx 68x,235d 090d 236d 104d,*ukrainian large letter zhe
+{zhuacy},EBx 7Ax ECx 68x,235d 122d 236d 104d,*ukrainian small letter zhe
+

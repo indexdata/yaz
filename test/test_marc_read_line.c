@@ -148,7 +148,7 @@ static void tst1(void)
         "=245  13$a{dollar}{copy} La conversation fran{cedil}caise.\n"
         ,
         "01000cam  2200265 i 4500\n"
-        "245 13 $a $\xc2\xa9 La conversation fran" "c\xcc\xa7" "aise.\n\n"
+        "245 13 $a $\xc3" " La conversation fran\xF0" "caise.\n\n"
         ,
         "=245  13$a{dollar\n"
         ,
@@ -168,7 +168,13 @@ static void tst1(void)
         " here"
         ,
         "01000cam  2200265 i 4500\n"
-        "245 13 $a first/c??ur here\n\n"
+        "245 13 $a first/c\xb9" "ur here\n\n"
+        ,
+        "=245  13$a{yaznotfound}\n"
+        ,
+        "01000cam  2200265 i 4500\n"
+        "245 13 $a ?\n"
+        "(MRK pattern {yaznotfound} not found)\n\n"
         ,
         0
     };
@@ -184,10 +190,17 @@ static void tst1(void)
     yaz_marc_destroy(mt);
 }
 
+extern const char *yaz_mrk_mappings;
+
+static void tst_mrkconv(void)
+{
+    YAZ_CHECK(strstr(yaz_mrk_mappings, "{dollar}"));
+}
 
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+    tst_mrkconv();
     tst1();
     YAZ_CHECK_TERM;
 }

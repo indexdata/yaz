@@ -22,7 +22,8 @@ illdata_DATA=ill9702.asn item-req.asn ill.tcl oclc-ill-req-ext.asn
 EXTRA_DIST=$(tabdata_DATA) $(illdata_DATA) \
  charconv.tcl codetables.xml codetables-iso5426.xml \
  csvtodiag.tcl bib1.csv srw.csv \
- sru_update.csv oidtoc.tcl oid.csv yaz-asncomp
+ sru_update.csv oidtoc.tcl oid.csv yaz-asncomp \
+ marc21.txt mrkconv.tcl
 
 YAZCOMP=$(srcdir)/yaz-asncomp
 YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(srcdir)
@@ -63,6 +64,8 @@ diagsrw.c yaz/diagsrw.h: srw.csv
 diagsru_update.c yaz/diagsru_update.h: sru_update.csv
 	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(srcdir)/yaz/diagsru_update.h sru_update
 
+mrkconv.c: mrkconv.tcl marc21.txt
+	$(TCLSH) $(srcdir)/mrkconv.tcl $(srcdir)/marc21.txt $(srcdir)/mrkconv.c
 
 noinst_HEADERS = yaz/icu_I18N.h diag-entry.h
 
@@ -98,7 +101,7 @@ pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
 
 # Auto-generated C-files
 GEN_FILES = oid_std.c \
-  marc8.c marc8r.c iso5426.c \
+  marc8.c marc8r.c iso5426.c mrkconv.c \
   diagbib1.c diagsrw.c diagsru_update.c \
   z-accdes1.c z-accform1.c z-acckrb1.c z-core.c z-facet-1.c \
   z-diag1.c z-espec1.c z-estask.c z-exp.c z-grs.c z-mterm2.c z-opac.c \
@@ -176,8 +179,9 @@ libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
 	$(STEMMER_SOURCES)
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-BUILT_SOURCES = z-core.c z-date.c z-univ.c zes-update.c zes-admin.c z-charneg.c \
- z-mterm2.c z-oclcui.c z-facet-1.c ill-core.c oclc-ill-req-ext.c item-req.c
+BUILT_SOURCES = z-core.c z-date.c z-univ.c zes-update.c zes-admin.c \
+ z-charneg.c z-mterm2.c z-oclcui.c z-facet-1.c ill-core.c oclc-ill-req-ext.c \
+ item-req.c
 
 z-core.c: $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/z3950v3.asn

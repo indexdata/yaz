@@ -24,6 +24,8 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 
+extern const char *yaz_mrk_mappings;
+
 static int yaz_gets(int (*getbyte)(void *client_data),
                     void (*ungetbyte)(int b, void *client_data),
                     void *client_data,
@@ -181,7 +183,6 @@ static void read_data_field_normal(yaz_marc_t mt, const char *line,
 static void read_data_field_curly(yaz_marc_t mt, const char *line,
                                   const char *tag, const char *rest, int indicator_length)
 {
-    char *str_result = 0;
     char *cp = (char *)rest;
     size_t i, j, j_begin;
     for (i = 0; cp[i] && i < indicator_length; i++)
@@ -210,44 +211,9 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
         }
         else if (cp[i] == '{')
         {
-            int i_curly = i;
-            /* using Unicode here for mappings */
-
-            static const char *mappings =
-                "{acute}\xcc\x81"
-                "{aelig}??"
-                "{breve}??"
-                "{C7}??"
-                "{caron}??"
-                "{cedil}\xcc\xa7"
-                "{circ}??"
-                "{commab}??"
-                "{copy}\xc2\xa9"
-                "{dollar}$"
-                "{dotb}??"
-                "{esc}??"
-                "{flat}??"
-                "{grave}\xcc\x80"
-                "{inodot}??"
-                "{lcub}??"
-                "{lstrok}??"
-                "{macr}??"
-                "{mllhring}??"
-                "{oelig}??"
-                "{ostrok}??"
-                "{phono}??"
-                "{pound}??"
-                "{rcedil}??"
-                "{rcommaa}??"
-                "{rcub}??"
-                "{ring}??"
-                "{reg}??"
-                "{sharp}??"
-                "{softsign}??"
-                "{tilde}??"
-                "{under}??"
-                "{uml}\xcc\x88"
-                ;
+            char *str_result;
+            size_t i_curly = i;
+            int ch_save;
             while (cp[i] != '\0' && cp[i] != '}')
                 i++;
             if (cp[i] == '\0')
@@ -256,31 +222,26 @@ static void read_data_field_curly(yaz_marc_t mt, const char *line,
                 cp[j++] = cp[i++];
                 continue;
             }
-            cp[i] = '\0';
-            str_result = strstr(mappings, cp + i_curly);
+            ch_save = cp[i + 1];
+            cp[i + 1] = '\0';
+            str_result = strstr(yaz_mrk_mappings, cp + i_curly);
             if (str_result == 0)
             {
+                yaz_marc_cprintf(mt, "MRK pattern %s not found", cp + i_curly);
                 str_result = "?";
             }
             else
-                str_result += (i - i_curly) + 1;
-            /* write now unless Unicode combining */
-            if (str_result[0] != '\xcc')
             {
-                while (*str_result != '\0' && *str_result != '{')
-                    cp[j++] = *str_result++;
-                str_result = 0;
+                str_result += (i - i_curly) + 1;
             }
+            cp[i + 1] = ch_save;
+            cp[j++] = *str_result++;
+            while (*str_result != '\0' && *str_result != '{')
+                cp[j++] = *str_result++;
         }
         else
         {
             cp[j++] = cp[i];
-            if (str_result != 0)
-            {   /* Write Unicode combining */
-                while (*str_result != '\0' && *str_result != '{')
-                    cp[j++] = *str_result++;
-                str_result = 0;
-            }
         }
         i++;
     }
