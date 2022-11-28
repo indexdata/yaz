@@ -5,6 +5,9 @@
 # Reads marccol?.u8.marc files , Generates marccol?.u8.{1,2}.lst
 srcdir=${srcdir:-.}
 ecode=0
+
+test -d marc-files || mkdir marc-file
+
 for f in ${srcdir}/marc-files/marccol?.u8.marc; do
 
     fb=`basename ${f} .marc`

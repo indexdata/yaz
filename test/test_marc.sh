@@ -18,6 +18,8 @@ if test $? = "4"; then
     noxmlwrite=1
 fi
 
+test -d marc-files || mkdir marc-files
+
 binmarc_convert() {
     OUTPUT_FORMAT="$1"
     REVERT_FORMAT="$2"
