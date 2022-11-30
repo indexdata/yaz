@@ -88,8 +88,9 @@ static void ungetbyte_stream(int c, void *client_data)
     ungetc(c, f);
 }
 
-static void marcdump_read_line(yaz_marc_t mt, const char *fname)
+static long marcdump_read_line(yaz_marc_t mt, const char *fname)
 {
+    long no = 0;
     FILE *inf = fopen(fname, "rb");
     if (!inf)
     {
@@ -104,11 +105,13 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
         yaz_marc_write_mode(mt, wrbuf);
         fputs(wrbuf_cstr(wrbuf), stdout);
         wrbuf_destroy(wrbuf);
+        no++;
     }
     fclose(inf);
+    return no;
 }
 
-static void marcdump_read_json(yaz_marc_t mt, const char *fname)
+static long marcdump_read_json(yaz_marc_t mt, const char *fname)
 {
     const char *errmsg;
     size_t errpos;
@@ -148,6 +151,7 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
     }
     wrbuf_destroy(w);
     fclose(inf);
+    return 1L;
 }
 
 #if YAZ_HAVE_XML2
@@ -177,7 +181,7 @@ static void context_handle(yaz_marc_t mt, void *vp)
     ctx->no++;
 }
 
-static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
+static long marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
                                   long offset, long limit)
 {
     struct record_context context;
@@ -191,9 +195,10 @@ static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
     xmlSAXUserParseFile(sax_ptr, yt, fname);
     wrbuf_destroy(context.wrbuf);
     yaz_marc_sax_destroy(yt);
+    return context.no;
 }
 
-static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
+static long marcdump_read_xml(yaz_marc_t mt, const char *fname,
                               long offset, long limit)
 {
     WRBUF wrbuf = wrbuf_alloc();
@@ -244,16 +249,16 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
     xmlFreeTextReader(reader);
     fputs(wrbuf_cstr(wrbuf), stdout);
     wrbuf_destroy(wrbuf);
+    return no;
 }
 #endif
 
-static void marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *to,
+static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *to,
     int print_offset, int verbose,
     FILE *cfile, const char *split_fname, int split_chunk,
     const char *fname, long offset, long limit)
 {
     FILE *inf = fopen(fname, "rb");
-    int num = 1;
     long marc_no;
     int split_file_no = -1;
     yaz_iconv_t cd = yaz_marc_get_iconv(mt);
@@ -311,8 +316,8 @@ static void marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
         if (print_offset)
         {
             long off = ftell(inf) - 5;
-            printf("<!-- Record %d offset %ld (0x%lx) -->\n",
-                   num, off, off);
+            printf("<!-- Record %ld offset %ld (0x%lx) -->\n",
+                   marc_no + 1, off, off);
         }
         len = atoi_n(buf, 5);
         if (len < 25 || len > 100000)
@@ -374,7 +379,7 @@ static void marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             {
                 if (fwrite(buf, 1, len, sf) != len)
                 {
-                    fprintf(stderr, "Could write content to %s\n",
+                    fprintf(stderr, "Could not write content to %s\n",
                             fname);
                     split_fname = 0;
                     no_errors++;
@@ -431,16 +436,16 @@ static void marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             }
             fprintf(cfile, "\"\n");
         }
-        num++;
         if (verbose)
             printf("\n");
     }
     if (cfile)
         fprintf(cfile, "};\n");
     fclose(inf);
+    return marc_no;
 }
 
-static void dump(const char *fname, const char *from, const char *to,
+static long dump(const char *fname, const char *from, const char *to,
                  int input_format, int output_format,
                  int write_using_libxml2,
                  int print_offset, const char *split_fname, int split_chunk,
@@ -449,6 +454,7 @@ static void dump(const char *fname, const char *from, const char *to,
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
+    long total;
 
     if (yaz_marc_leader_spec(mt, leader_spec))
     {
@@ -476,26 +482,26 @@ static void dump(const char *fname, const char *from, const char *to,
     if (input_format == YAZ_MARC_MARCXML)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_marcxml(mt, fname, offset, limit);
+        total = marcdump_read_marcxml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_xml(mt, fname, offset, limit);
+        total = marcdump_read_xml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_LINE)
     {
-        marcdump_read_line(mt, fname);
+        total = marcdump_read_line(mt, fname);
     }
     else if (input_format == YAZ_MARC_JSON)
     {
-        marcdump_read_json(mt, fname);
+        total = marcdump_read_json(mt, fname);
     }
     else if (input_format == YAZ_MARC_ISO2709)
     {
-        marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
+        total = marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
             split_fname, split_chunk, fname, offset, limit);
     }
     {
@@ -507,10 +513,12 @@ static void dump(const char *fname, const char *from, const char *to,
     if (cd)
         yaz_iconv_close(cd);
     yaz_marc_destroy(mt);
+    return total;
 }
 
 int main (int argc, char **argv)
 {
+    int report = 0;
     int r;
     int print_offset = 0;
     char *arg;
@@ -526,6 +534,7 @@ int main (int argc, char **argv)
     int write_using_libxml2 = 0;
     long offset = 0L;
     long limit = LONG_MAX;
+    long total = 0L;
 
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -538,7 +547,7 @@ int main (int argc, char **argv)
 
     prog = *argv;
     yaz_enable_panic_backtrace(prog);
-    while ((r = options("i:o:C:npc:xL:O:eXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
+    while ((r = options("i:o:C:npc:xL:O:eXIf:t:s:l:Vrv", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
@@ -634,13 +643,16 @@ int main (int argc, char **argv)
             split_chunk = atoi(arg);
             break;
         case 0:
-            dump(arg, from, to, input_format, output_format,
-                 write_using_libxml2,
-                 print_offset, split_fname, split_chunk,
-                 verbose, cfile, leader_spec, offset, limit);
+            total += dump(arg, from, to,
+                input_format, output_format, write_using_libxml2,
+                print_offset, split_fname, split_chunk,
+                verbose, cfile, leader_spec, offset, limit);
             break;
         case 'v':
             verbose++;
+            break;
+        case 'r':
+            report = 1;
             break;
         case 'V':
             show_version();
@@ -657,6 +669,9 @@ int main (int argc, char **argv)
         usage(prog);
         exit(1);
     }
+    /* for now only a single report line. Might be added in the future */
+    if (report)
+        fprintf(stderr, "records read: %ld\n", total);
     if (no_errors)
         exit(5);
     exit(0);

@@ -41,6 +41,7 @@
    <arg choice="opt"><option>-L <replaceable>limit</replaceable></option></arg>
    <arg choice="opt"><option>-n</option></arg>
    <arg choice="opt"><option>-p</option></arg>
+   <arg choice="opt"><option>-r</option></arg>
    <arg choice="opt"><option>-v</option></arg>
    <arg choice="opt"><option>-V</option></arg>
    <arg choice="opt" rep="repeat">file</arg>
@@ -189,6 +190,14 @@
     <term>-n</term>
     <listitem><para>
       MARC output is omitted so that MARC input is only checked.
+     </para></listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>-r</term>
+    <listitem><para>
+      Writes to stderr a summary about number of records read by
+      yaz-marcdump.
      </para></listitem>
    </varlistentry>
 
