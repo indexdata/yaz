@@ -88,8 +88,9 @@ static void ungetbyte_stream(int c, void *client_data)
     ungetc(c, f);
 }
 
-static void marcdump_read_line(yaz_marc_t mt, const char *fname)
+static long marcdump_read_line(yaz_marc_t mt, const char *fname)
 {
+    long no = 0;
     FILE *inf = fopen(fname, "rb");
     if (!inf)
     {
@@ -104,11 +105,13 @@ static void marcdump_read_line(yaz_marc_t mt, const char *fname)
         yaz_marc_write_mode(mt, wrbuf);
         fputs(wrbuf_cstr(wrbuf), stdout);
         wrbuf_destroy(wrbuf);
+        no++;
     }
     fclose(inf);
+    return no;
 }
 
-static void marcdump_read_json(yaz_marc_t mt, const char *fname)
+static long marcdump_read_json(yaz_marc_t mt, const char *fname)
 {
     const char *errmsg;
     size_t errpos;
@@ -148,6 +151,7 @@ static void marcdump_read_json(yaz_marc_t mt, const char *fname)
     }
     wrbuf_destroy(w);
     fclose(inf);
+    return 1L;
 }
 
 #if YAZ_HAVE_XML2
@@ -177,7 +181,7 @@ static void context_handle(yaz_marc_t mt, void *vp)
     ctx->no++;
 }
 
-static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
+static long marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
                                   long offset, long limit)
 {
     struct record_context context;
@@ -191,9 +195,10 @@ static void marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
     xmlSAXUserParseFile(sax_ptr, yt, fname);
     wrbuf_destroy(context.wrbuf);
     yaz_marc_sax_destroy(yt);
+    return context.no;
 }
 
-static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
+static long marcdump_read_xml(yaz_marc_t mt, const char *fname,
                               long offset, long limit)
 {
     WRBUF wrbuf = wrbuf_alloc();
@@ -244,10 +249,203 @@ static void marcdump_read_xml(yaz_marc_t mt, const char *fname,
     xmlFreeTextReader(reader);
     fputs(wrbuf_cstr(wrbuf), stdout);
     wrbuf_destroy(wrbuf);
+    return no;
 }
 #endif
 
-static void dump(const char *fname, const char *from, const char *to,
+static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *to,
+    int print_offset, int verbose,
+    FILE *cfile, const char *split_fname, int split_chunk,
+    const char *fname, long offset, long limit)
+{
+    FILE *inf = fopen(fname, "rb");
+    long marc_no;
+    int split_file_no = -1;
+    yaz_iconv_t cd = yaz_marc_get_iconv(mt);
+    if (!inf)
+    {
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
+        exit(1);
+    }
+    if (cfile)
+        fprintf(cfile, "char *marc_records[] = {\n");
+    for (marc_no = 0L; marc_no - offset < limit; marc_no++)
+    {
+        const char *result = 0;
+        size_t len;
+        size_t rlen;
+        size_t len_result;
+        size_t r;
+        char buf[100001];
+        yaz_iconv_t cd1 = 0;
+
+        r = fread(buf, 1, 5, inf);
+        if (r < 5)
+        {
+            if (r == 0) /* normal EOF, all good */
+                break;
+            if (print_offset && verbose)
+            {
+                printf("<!-- Extra %ld bytes at end of file -->\n",
+                       (long)r);
+            }
+            break;
+        }
+        while (*buf < '0' || *buf > '9')
+        {
+            int i;
+            long off = ftell(inf) - 5;
+            printf("<!-- Skipping bad byte %d (0x%02X) at offset "
+                   "%ld (0x%lx) -->\n",
+                   *buf & 0xff, *buf & 0xff,
+                   off, off);
+            for (i = 0; i < 4; i++)
+                buf[i] = buf[i + 1];
+            r = fread(buf + 4, 1, 1, inf);
+            no_errors++;
+            if (r < 1)
+                break;
+        }
+        if (r < 1)
+        {
+            if (verbose || print_offset)
+                printf("<!-- End of file with data -->\n");
+            break;
+        }
+        if (print_offset)
+        {
+            long off = ftell(inf) - 5;
+            printf("<!-- Record %ld offset %ld (0x%lx) -->\n",
+                   marc_no + 1, off, off);
+        }
+        len = atoi_n(buf, 5);
+        if (len < 25 || len > 100000)
+        {
+            long off = ftell(inf) - 5;
+            printf("<!-- Bad Length %ld read at offset %ld (%lx) -->\n",
+                   (long)len, (long)off, (long)off);
+            no_errors++;
+            break;
+        }
+        rlen = len - 5;
+        r = fread(buf + 5, 1, rlen, inf);
+        if (r < rlen)
+        {
+            long off = ftell(inf);
+            printf("<!-- Premature EOF at offset %ld (%lx) -->\n",
+                   (long)off, (long)off);
+            no_errors++;
+            break;
+        }
+        while (buf[len - 1] != ISO2709_RS)
+        {
+            if (len > sizeof(buf) - 2)
+            {
+                r = 0;
+                break;
+            }
+            r = fread(buf + len, 1, 1, inf);
+            if (r != 1)
+                break;
+            len++;
+        }
+        if (r < 1)
+        {
+            printf("<!-- EOF while searching for RS -->\n");
+            no_errors++;
+            break;
+        }
+        if (split_fname)
+        {
+            char fname[256];
+            const char *mode = 0;
+            FILE *sf;
+            if ((marc_no % split_chunk) == 0)
+            {
+                mode = "wb";
+                split_file_no++;
+            }
+            else
+                mode = "ab";
+            sprintf(fname, "%.200s%07d", split_fname, split_file_no);
+            sf = fopen(fname, mode);
+            if (!sf)
+            {
+                fprintf(stderr, "Could not open %s\n", fname);
+                split_fname = 0;
+            }
+            else
+            {
+                if (fwrite(buf, 1, len, sf) != len)
+                {
+                    fprintf(stderr, "Could not write content to %s\n",
+                            fname);
+                    split_fname = 0;
+                    no_errors++;
+                }
+                fclose(sf);
+            }
+        }
+        len_result = rlen;
+
+        if (yaz_marc_check_marc21_coding(from, buf, 26))
+        {
+            cd1 = yaz_iconv_open(to, "utf-8");
+            if (cd1)
+                yaz_marc_iconv(mt, cd1);
+        }
+        r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
+
+        if (cd1)
+        {
+            yaz_iconv_close(cd1);
+            yaz_marc_iconv(mt, cd);
+            cd1 = 0;
+        }
+
+        if (r == -1)
+            no_errors++;
+        if (r > 0 && result && len_result && marc_no >= offset)
+        {
+            if (fwrite(result, len_result, 1, stdout) != 1)
+            {
+                fprintf(stderr, "Write to stdout failed\n");
+                no_errors++;
+                break;
+            }
+        }
+        if (r > 0 && cfile)
+        {
+            char *p = buf;
+            size_t i;
+            if (marc_no)
+                fprintf(cfile, ",");
+            fprintf(cfile, "\n");
+            for (i = 0; i < r; i++)
+            {
+                if ((i & 15) == 0)
+                    fprintf(cfile, "  \"");
+                if (p[i] < 32 || p[i] > 126)
+                    fprintf(cfile, "\" \"\\x%02X\" \"", p[i] & 255);
+                else
+                    fputc(p[i], cfile);
+
+                if (i < r - 1 && (i & 15) == 15)
+                    fprintf(cfile, "\"\n");
+            }
+            fprintf(cfile, "\"\n");
+        }
+        if (verbose)
+            printf("\n");
+    }
+    if (cfile)
+        fprintf(cfile, "};\n");
+    fclose(inf);
+    return marc_no;
+}
+
+static long dump(const char *fname, const char *from, const char *to,
                  int input_format, int output_format,
                  int write_using_libxml2,
                  int print_offset, const char *split_fname, int split_chunk,
@@ -256,6 +454,7 @@ static void dump(const char *fname, const char *from, const char *to,
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
+    long total;
 
     if (yaz_marc_leader_spec(mt, leader_spec))
     {
@@ -283,210 +482,27 @@ static void dump(const char *fname, const char *from, const char *to,
     if (input_format == YAZ_MARC_MARCXML)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_marcxml(mt, fname, offset, limit);
+        total = marcdump_read_marcxml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
     {
 #if YAZ_HAVE_XML2
-        marcdump_read_xml(mt, fname, offset, limit);
+        total = marcdump_read_xml(mt, fname, offset, limit);
 #endif
     }
     else if (input_format == YAZ_MARC_LINE)
     {
-        marcdump_read_line(mt, fname);
+        total = marcdump_read_line(mt, fname);
     }
     else if (input_format == YAZ_MARC_JSON)
     {
-        marcdump_read_json(mt, fname);
+        total = marcdump_read_json(mt, fname);
     }
     else if (input_format == YAZ_MARC_ISO2709)
     {
-        FILE *inf = fopen(fname, "rb");
-        int num = 1;
-        long marc_no;
-        int split_file_no = -1;
-        if (!inf)
-        {
-            fprintf(stderr, "%s: cannot open %s:%s\n",
-                    prog, fname, strerror(errno));
-            exit(1);
-        }
-        if (cfile)
-            fprintf(cfile, "char *marc_records[] = {\n");
-        for (marc_no = 0L; marc_no - offset < limit; marc_no++)
-        {
-            const char *result = 0;
-            size_t len;
-            size_t rlen;
-            size_t len_result;
-            size_t r;
-            char buf[100001];
-            yaz_iconv_t cd1 = 0;
-
-            r = fread(buf, 1, 5, inf);
-            if (r < 5)
-            {
-                if (r == 0) /* normal EOF, all good */
-                    break;
-                if (print_offset && verbose)
-                {
-                    printf("<!-- Extra %ld bytes at end of file -->\n",
-                           (long) r);
-                }
-                break;
-            }
-            while (*buf < '0' || *buf > '9')
-            {
-                int i;
-                long off = ftell(inf) - 5;
-                printf("<!-- Skipping bad byte %d (0x%02X) at offset "
-                       "%ld (0x%lx) -->\n",
-                       *buf & 0xff, *buf & 0xff,
-                       off, off);
-                for (i = 0; i<4; i++)
-                    buf[i] = buf[i+1];
-                r = fread(buf+4, 1, 1, inf);
-                no_errors++;
-                if (r < 1)
-                    break;
-            }
-            if (r < 1)
-            {
-                if (verbose || print_offset)
-                    printf("<!-- End of file with data -->\n");
-                break;
-            }
-            if (print_offset)
-            {
-                long off = ftell(inf) - 5;
-                printf("<!-- Record %d offset %ld (0x%lx) -->\n",
-                       num, off, off);
-            }
-            len = atoi_n(buf, 5);
-            if (len < 25 || len > 100000)
-            {
-                long off = ftell(inf) - 5;
-                printf("<!-- Bad Length %ld read at offset %ld (%lx) -->\n",
-                       (long)len, (long) off, (long) off);
-                no_errors++;
-                break;
-            }
-            rlen = len - 5;
-            r = fread(buf + 5, 1, rlen, inf);
-            if (r < rlen)
-            {
-                long off = ftell(inf);
-                printf("<!-- Premature EOF at offset %ld (%lx) -->\n",
-                       (long) off, (long) off);
-                no_errors++;
-                break;
-            }
-            while (buf[len-1] != ISO2709_RS)
-            {
-                if (len > sizeof(buf)-2)
-                {
-                    r = 0;
-                    break;
-                }
-                r = fread(buf + len, 1, 1, inf);
-                if (r != 1)
-                    break;
-                len++;
-            }
-            if (r < 1)
-            {
-                printf("<!-- EOF while searching for RS -->\n");
-                no_errors++;
-                break;
-            }
-            if (split_fname)
-            {
-                char fname[256];
-                const char *mode = 0;
-                FILE *sf;
-                if ((marc_no % split_chunk) == 0)
-                {
-                    mode = "wb";
-                    split_file_no++;
-                }
-                else
-                    mode = "ab";
-                sprintf(fname, "%.200s%07d", split_fname, split_file_no);
-                sf = fopen(fname, mode);
-                if (!sf)
-                {
-                    fprintf(stderr, "Could not open %s\n", fname);
-                    split_fname = 0;
-                }
-                else
-                {
-                    if (fwrite(buf, 1, len, sf) != len)
-                    {
-                        fprintf(stderr, "Could write content to %s\n",
-                                fname);
-                        split_fname = 0;
-                        no_errors++;
-                    }
-                    fclose(sf);
-                }
-            }
-            len_result = rlen;
-
-            if (yaz_marc_check_marc21_coding(from, buf, 26))
-            {
-                cd1 = yaz_iconv_open(to, "utf-8");
-                if (cd1)
-                    yaz_marc_iconv(mt, cd1);
-            }
-            r = yaz_marc_decode_buf(mt, buf, -1, &result, &len_result);
-
-            if (cd1)
-            {
-                yaz_iconv_close(cd1);
-                yaz_marc_iconv(mt, cd);
-            }
-
-            if (r == -1)
-                no_errors++;
-            if (r > 0 && result && len_result && marc_no >= offset)
-            {
-                if (fwrite(result, len_result, 1, stdout) != 1)
-                {
-                    fprintf(stderr, "Write to stdout failed\n");
-                    no_errors++;
-                    break;
-                }
-            }
-            if (r > 0 && cfile)
-            {
-                char *p = buf;
-                size_t i;
-                if (marc_no)
-                    fprintf(cfile, ",");
-                fprintf(cfile, "\n");
-                for (i = 0; i < r; i++)
-                {
-                    if ((i & 15) == 0)
-                        fprintf(cfile, "  \"");
-                    if (p[i] < 32 || p[i] > 126)
-                        fprintf(cfile, "\" \"\\x%02X\" \"", p[i] & 255);
-                    else
-                        fputc(p[i], cfile);
-
-                    if (i < r - 1 && (i & 15) == 15)
-                        fprintf(cfile, "\"\n");
-
-                }
-                fprintf(cfile, "\"\n");
-            }
-            num++;
-            if (verbose)
-                printf("\n");
-        }
-        if (cfile)
-            fprintf(cfile, "};\n");
-        fclose(inf);
+        total = marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
+            split_fname, split_chunk, fname, offset, limit);
     }
     {
         WRBUF wrbuf = wrbuf_alloc();
@@ -497,10 +513,12 @@ static void dump(const char *fname, const char *from, const char *to,
     if (cd)
         yaz_iconv_close(cd);
     yaz_marc_destroy(mt);
+    return total;
 }
 
 int main (int argc, char **argv)
 {
+    int report = 0;
     int r;
     int print_offset = 0;
     char *arg;
@@ -516,6 +534,7 @@ int main (int argc, char **argv)
     int write_using_libxml2 = 0;
     long offset = 0L;
     long limit = LONG_MAX;
+    long total = 0L;
 
 #if HAVE_LOCALE_H
     setlocale(LC_CTYPE, "");
@@ -528,7 +547,7 @@ int main (int argc, char **argv)
 
     prog = *argv;
     yaz_enable_panic_backtrace(prog);
-    while ((r = options("i:o:C:npc:xL:O:eXIf:t:s:l:Vv", argv, argc, &arg)) != -2)
+    while ((r = options("i:o:C:npc:xL:O:eXIf:t:s:l:Vrv", argv, argc, &arg)) != -2)
     {
         no++;
         switch (r)
@@ -624,13 +643,16 @@ int main (int argc, char **argv)
             split_chunk = atoi(arg);
             break;
         case 0:
-            dump(arg, from, to, input_format, output_format,
-                 write_using_libxml2,
-                 print_offset, split_fname, split_chunk,
-                 verbose, cfile, leader_spec, offset, limit);
+            total += dump(arg, from, to,
+                input_format, output_format, write_using_libxml2,
+                print_offset, split_fname, split_chunk,
+                verbose, cfile, leader_spec, offset, limit);
             break;
         case 'v':
             verbose++;
+            break;
+        case 'r':
+            report = 1;
             break;
         case 'V':
             show_version();
@@ -647,6 +669,9 @@ int main (int argc, char **argv)
         usage(prog);
         exit(1);
     }
+    /* for now only a single report line. Might be added in the future */
+    if (report)
+        fprintf(stderr, "records read: %ld\n", total);
     if (no_errors)
         exit(5);
     exit(0);

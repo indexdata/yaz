@@ -1356,8 +1356,8 @@ int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
     return r; /* OK, return length > 0 */
 }
 
-int yaz_marc_decode_buf (yaz_marc_t mt, const char *buf, int bsize,
-                         const char **result, size_t *rsize)
+int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
+                        const char **result, size_t *rsize)
 {
     int r;
 

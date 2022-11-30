@@ -5,13 +5,16 @@
 # Reads marccol?.u8.marc files , Generates marccol?.u8.{1,2}.lst
 srcdir=${srcdir:-.}
 ecode=0
-for f in ${srcdir}/marccol?.u8.marc; do
+
+test -d marc-files || mkdir marc-file
+
+for f in ${srcdir}/marc-files/marccol?.u8.marc; do
 
     fb=`basename ${f} .marc`
 
-    DIFF=${fb}.1.lst.diff
-    NEW=${fb}.1.lst.new
-    OLD=${srcdir}/${fb}.1.lst
+    DIFF=marc-files/${fb}.1.lst.diff
+    NEW=marc-files/${fb}.1.lst.new
+    OLD=${srcdir}/marc-files/${fb}.1.lst
     ../util/yaz-marcdump -f utf-8 -t utf-8 $f >$NEW
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
@@ -35,7 +38,7 @@ for f in ${srcdir}/marccol?.u8.marc; do
 
     DIFF=${fb}.2.lst.diff
     NEW=${fb}.2.lst.new
-    OLD=${srcdir}/${fb}.2.lst
+    OLD=${srcdir}/marc-files/${fb}.2.lst
     ../util/yaz-marcdump -l 9=97 -f marc8 -t utf-8 $filem >$NEW
     if test $? != "0"; then
 	echo "$f: yaz-marcdump returned error"
