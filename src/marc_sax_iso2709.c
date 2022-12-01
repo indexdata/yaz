@@ -1,6 +1,21 @@
-#include <yaz/marcdisp.h>
+/* This file is part of the YAZ toolkit.
+ * Copyright (C) Index Data
+ * See the file LICENSE for details.
+ */
 
-typedef struct sax *yaz_marc_sax_iso2709_t;
+/**
+ * \file marc_read_sax_iso2709.c
+ * \brief Implements reading of MARC with push buffer.
+ */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <string.h>
+#include <yaz/marc_sax_iso2709.h>
+#include <yaz/xmalloc.h>
+
 
 /**
  * @brief private structure for sax handling.
@@ -17,7 +32,7 @@ struct sax
     short error;
 };
 
-yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new()
+yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new(void)
 {
     yaz_marc_sax_iso2709_t p = xmalloc(sizeof(*p));
     p->sz = 1024;

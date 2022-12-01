@@ -71,7 +71,7 @@ pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
  yaz/rpn2solr.h yaz/solr.h yaz/comstack.h \
  yaz/diagbib1.h yaz/diagsrw.h yaz/diagsru_update.h yaz/sortspec.h \
  yaz/log.h yaz/logrpn.h yaz/malloc_info.h yaz/marcdisp.h yaz/proxunit.h \
- yaz/marc_sax.h \
+ yaz/marc_sax.h yaz/marc_sax_iso2709.h \
  yaz/nmem.h yaz/nmem_xml.h yaz/odr.h yaz/errno.h yaz/facet.h \
  yaz/options.h yaz/otherinfo.h yaz/pquery.h yaz/prt-ext.h \
  yaz/querytowrbuf.h yaz/readconf.h yaz/record_conv.h yaz/record_render.h \
