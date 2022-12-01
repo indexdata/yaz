@@ -9,6 +9,14 @@
 #include <config.h>
 #endif
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -49,6 +57,8 @@
 static char *prog;
 
 static int no_errors = 0;
+
+static int read_new_marc = 0;
 
 static void usage(const char *prog)
 {
@@ -445,6 +455,20 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
     return marc_no;
 }
 
+long marcdump_read_new_marc(yaz_marc_t mt, const char *fname, long offset,
+    long limit, int verbose)
+{
+    long total = 0L;
+    int fd = open(fname, O_RDONLY);
+    if (fd == -1) {
+        fprintf(stderr, "can not open %s\n", fname);
+        yaz_marc_destroy(mt);
+        exit(2);
+    }
+    close(fd);
+    return total;
+}
+
 static long dump(const char *fname, const char *from, const char *to,
                  int input_format, int output_format,
                  int write_using_libxml2,
@@ -501,8 +525,11 @@ static long dump(const char *fname, const char *from, const char *to,
     }
     else if (input_format == YAZ_MARC_ISO2709)
     {
-        total = marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
-            split_fname, split_chunk, fname, offset, limit);
+        if (read_new_marc)
+            total = marcdump_read_new_marc(mt, fname, offset, limit, verbose);
+        else
+            total = marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
+                split_fname, split_chunk, fname, offset, limit);
     }
     {
         WRBUF wrbuf = wrbuf_alloc();
@@ -553,6 +580,11 @@ int main (int argc, char **argv)
         switch (r)
         {
         case 'i':
+            if (strcmp("nmarc", arg) == 0)
+            {
+                arg = "marc";
+                read_new_marc = 1;
+            }
             input_format = yaz_marc_decode_formatstr(arg);
             if (input_format == -1)
             {
