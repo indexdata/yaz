@@ -16,7 +16,6 @@
 #include <yaz/marc_sax_iso2709.h>
 #include <yaz/xmalloc.h>
 
-
 /**
  * @brief private structure for sax handling.
  *
@@ -31,52 +30,6 @@ struct sax
     short ended;
     short error;
 };
-
-yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new(void)
-{
-    yaz_marc_sax_iso2709_t p = xmalloc(sizeof(*p));
-    p->sz = 1024;
-    p->front = 0;
-    p->tail = 0;
-    p->buf = xmalloc(p->sz);
-    p->ended = 0;
-    p->error = 0;
-    return p;
-}
-
-void yaz_marc_sax_iso2709_destroy(yaz_marc_sax_iso2709_t p)
-{
-    xfree(p->buf);
-    xfree(p);
-}
-
-void yaz_marc_sax_iso2709_end(yaz_marc_sax_iso2709_t p)
-{
-    p->ended = 1;
-}
-
-void yaz_marc_sax_iso2709_push(yaz_marc_sax_iso2709_t p, const char *buf, size_t bufsz)
-{
-    if (p->tail != 0)
-    {
-        p->error = 1;
-        return;
-    }
-    if (bufsz == 0)
-        return;
-    if (p->front + bufsz > p->sz)
-    {
-        size_t add = bufsz - p->sz;
-        if (add < 1024)
-        {
-            add += 1024;
-        }
-        p->sz += add;
-        p->buf = xrealloc(p->buf, p->sz);
-    }
-    memcpy(p->buf + p->front, buf, bufsz);
-    p->front += bufsz;
-}
 
 /**
  * @brief reset buffer and throw away already parsed content.
@@ -97,10 +50,76 @@ static void reset(yaz_marc_sax_iso2709_t p)
     size_t remain = p->front - p->tail;
     if (p->tail != 0 && remain != 0)
     {
-        memcpy(p->buf, p->buf + p->tail, remain);
+        memmove(p->buf, p->buf + p->tail, remain);
     }
     p->front -= p->tail;
     p->tail = 0;
+}
+
+/**
+ * @brief Create MARC sax handle.
+ *
+ * @return yaz_marc_sax_iso2709_t handler
+ */
+yaz_marc_sax_iso2709_t yaz_marc_sax_iso2709_new(void)
+{
+    yaz_marc_sax_iso2709_t p = xmalloc(sizeof(*p));
+    p->sz = 1024;
+    p->front = 0;
+    p->tail = 0;
+    p->buf = xmalloc(p->sz);
+    p->ended = 0;
+    p->error = 0;
+    return p;
+}
+
+/**
+ * @brief Destroy MARC sax handle.
+ *
+ * @param p handle created with yaz_marc_sax_iso2709_new
+ */
+void yaz_marc_sax_iso2709_destroy(yaz_marc_sax_iso2709_t p)
+{
+    xfree(p->buf);
+    xfree(p);
+}
+
+/**
+ * @brief Signal end of buffers.
+ *
+ * @param p MARC sax handler.
+ */
+void yaz_marc_sax_iso2709_end(yaz_marc_sax_iso2709_t p)
+{
+    p->ended = 1;
+}
+
+/**
+ * @brief Add buffer.
+ *
+ * @param p MARC sax handler.
+ * @param buf buffer bytes
+ * @param sz size of buffer
+ */
+void yaz_marc_sax_iso2709_push(yaz_marc_sax_iso2709_t p, const char *buf, size_t sz)
+{
+    if (p->tail != 0)
+    {
+        p->error = 1;
+        return;
+    }
+    if (sz == 0)
+        return;
+    if (p->front + sz > p->sz)
+    {
+        size_t add = p->front + sz - p->sz;
+        if (add < 1024)
+            add = 1024;
+        p->sz += add;
+        p->buf = xrealloc(p->buf, p->sz);
+    }
+    memcpy(p->buf + p->front, buf, sz);
+    p->front += sz;
 }
 
 /**
@@ -108,7 +127,7 @@ static void reset(yaz_marc_sax_iso2709_t p)
  *
  * @param p MARC sax handler.
  * @param mt MARC data where record is stored if avaiable.
- * @return int 0: EOF, -1: incomplete, -2: ERROR, >0 record length.
+ * @return int 0: incomplete, -1: EOF, -2: ERROR, >0 record length.
  */
 int yaz_marc_sax_iso2709_next(yaz_marc_sax_iso2709_t p, yaz_marc_t mt)
 {
@@ -121,9 +140,9 @@ int yaz_marc_sax_iso2709_next(yaz_marc_sax_iso2709_t p, yaz_marc_t mt)
     {
         reset(p);
         if (!p->ended)
-            return -1;
-        if (remain <= 1)
             return 0;
+        if (remain <= 1)
+            return -1;
         p->error = 1;
         return -2; /* ERROR: extra garbage (allow one bogus extra byte that we ignore)*/
     }
@@ -136,7 +155,7 @@ int yaz_marc_sax_iso2709_next(yaz_marc_sax_iso2709_t p, yaz_marc_t mt)
     {
         reset(p);
         if (!p->ended)
-           return -1;
+           return 0;
         p->error = 1;
         return -2; /* ERROR: incomplete record */
     }

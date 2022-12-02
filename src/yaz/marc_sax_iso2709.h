@@ -49,6 +49,13 @@ YAZ_EXPORT void yaz_marc_sax_iso2709_end(yaz_marc_sax_iso2709_t p);
 YAZ_EXPORT void yaz_marc_sax_iso2709_push(yaz_marc_sax_iso2709_t p,
     const char *buf, size_t bufsz);
 
+/**
+ * @brief get next MARC record.
+ *
+ * @param p MARC sax handler.
+ * @param mt MARC data where record is stored if avaiable.
+ * @return int 0: incomplete, -1: EOF, -2: ERROR, >0 record length.
+ */
 YAZ_EXPORT int yaz_marc_sax_iso2709_next(yaz_marc_sax_iso2709_t p, yaz_marc_t mt);
 
 

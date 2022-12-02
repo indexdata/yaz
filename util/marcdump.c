@@ -13,10 +13,6 @@
 #include <unistd.h>
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -40,6 +36,7 @@
 #endif
 
 #include <yaz/marc_sax.h>
+#include <yaz/marc_sax_iso2709.h>
 #include <yaz/json.h>
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
@@ -66,6 +63,22 @@ static void usage(const char *prog)
             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
             "[-p] [-v] [-V] [-O offset] [-L limit] file...\n",
             prog);
+}
+
+static void write_marc(yaz_marc_t mt)
+{
+    WRBUF wrbuf = wrbuf_alloc();
+
+    int write_rc = yaz_marc_write_mode(mt, wrbuf);
+    if (write_rc)
+    {
+        yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
+                           "write error: %d",
+                write_rc);
+        no_errors++;
+    }
+    fputs(wrbuf_cstr(wrbuf), stdout);
+    wrbuf_rewind(wrbuf);
 }
 
 static void show_version(void)
@@ -458,14 +471,45 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
 long marcdump_read_new_marc(yaz_marc_t mt, const char *fname, long offset,
     long limit, int verbose)
 {
+    size_t bufz = 65536;
+    char *buf;
     long total = 0L;
-    int fd = open(fname, O_RDONLY);
-    if (fd == -1) {
-        fprintf(stderr, "can not open %s\n", fname);
-        yaz_marc_destroy(mt);
+    yaz_marc_sax_iso2709_t si;
+    FILE *inf = fopen(fname, "rb");
+    if (inf == 0) {
+        fprintf(stderr, "can not open %s errno=%d\n", fname, errno);
         exit(2);
     }
-    close(fd);
+    buf = xmalloc(bufz);
+    si = yaz_marc_sax_iso2709_new();
+    while (1)
+    {
+        int marc_ret;
+        size_t rd = fread(buf, 1, bufz, inf);
+        if (ferror(inf))
+        {
+            fprintf(stderr, "read error for open %s errno=%d\n", fname, errno);
+            exit(2);
+        }
+        yaz_marc_sax_iso2709_push(si, buf, rd);
+        if (rd < bufz)
+            yaz_marc_sax_iso2709_end(si);
+        while ((marc_ret = yaz_marc_sax_iso2709_next(si, mt)) > 0)
+        {
+            total++;
+            write_marc(mt);
+        }
+        if (marc_ret == -1)
+            break; /* EOF */
+        else if (marc_ret == -2)
+        {
+            fprintf(stderr, "yaz: yaz_marc_sax_iso2709_next returned error");
+            break;
+        }
+    }
+    fclose(inf);
+    xfree(buf);
+    yaz_marc_sax_iso2709_destroy(si);
     return total;
 }
 
