@@ -1,3 +1,14 @@
+--- 5.33.0 2022/12/14
+
+yaz-marcdump: SAX based MARCXML parsing. This is about 3 times faster
+than before.
+
+yaz-marcdump: new option -r prints summary of number of records processed.
+
+Document ZOOM option 'rpnCharset'.
+
+Fix cross-compiling with pkg-config.
+
 --- 5.32.0 2022/05/30
 
 Upgrade configure.ac to version 2.69. Avoid obsolete macros.
