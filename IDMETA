@@ -1,4 +1,4 @@
-DEBIAN_DIST="bullseye buster stretch jessie"
+DEBIAN_DIST="bullseye buster stretch"
 UBUNTU_DIST="jammy focal bionic xenial trusty"
 CENTOS_DIST=""
-VERSION=5.32.0
+VERSION=5.33.0
