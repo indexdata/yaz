@@ -1272,10 +1272,10 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
     if (!atoi_n_check(leader+11, 1, &identifier_length))
         return -1;
 
-    wrbuf_puts(w, "\t\"leader\":\"");
+    wrbuf_puts(w, "  \"leader\": \"");
     wrbuf_json_puts(w, leader);
     wrbuf_puts(w, "\",\n");
-    wrbuf_puts(w, "\t\"fields\":\n\t[\n");
+    wrbuf_puts(w, "  \"fields\": [");
 
     for (n = mt->nodes; n; n = n->next)
     {
@@ -1290,37 +1290,37 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
             if (first)
                 first = 0;
             else
-                wrbuf_puts(w, ",\n");
-            wrbuf_puts(w, "\t\t{\n\t\t\t\"");
+                wrbuf_puts(w, ",");
+            wrbuf_puts(w, "\n    {\n      \"");
             wrbuf_iconv_json_puts(w, mt->iconv_cd, n->u.controlfield.tag);
-            wrbuf_puts(w, "\":\"");
+            wrbuf_puts(w, "\": \"");
             wrbuf_iconv_json_puts(w, mt->iconv_cd, n->u.controlfield.data);
-            wrbuf_puts(w, "\"\n\t\t}");
+            wrbuf_puts(w, "\"\n    }");
             break;
         case YAZ_MARC_DATAFIELD:
             if (first)
                 first = 0;
             else
-                wrbuf_puts(w, ",\n");
+                wrbuf_puts(w, ",");
 
-            wrbuf_puts(w, "\t\t{\n\t\t\t\"");
+            wrbuf_puts(w, "\n    {\n      \"");
             wrbuf_json_puts(w, n->u.datafield.tag);
-            wrbuf_puts(w, "\":\n\t\t\t{\n\t\t\t\t\"subfields\":\n\t\t\t\t[\n");
+            wrbuf_puts(w, "\": {\n        \"subfields\": [\n");
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                          identifier_length);
                 wrbuf_puts(w, sep);
                 sep = ",\n";
-                wrbuf_puts(w, "\t\t\t\t\t{\n\t\t\t\t\t\t\"");
+                wrbuf_puts(w, "          {\n            \"");
                 wrbuf_iconv_json_write(w, mt->iconv_cd,
                                        s->code_data, using_code_len);
-                wrbuf_puts(w, "\":\"");
+                wrbuf_puts(w, "\": \"");
                 wrbuf_iconv_json_puts(w, mt->iconv_cd,
                                       s->code_data + using_code_len);
-                wrbuf_puts(w, "\"\n\t\t\t\t\t}");
+                wrbuf_puts(w, "\"\n          }");
             }
-            wrbuf_puts(w, "\n\t\t\t\t]");
+            wrbuf_puts(w, "\n        ]");
             if (n->u.datafield.indicator)
             {
                 int i;
@@ -1329,18 +1329,21 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
                 {
                     size_t ilen =
                         cdata_one_character(mt, n->u.datafield.indicator + off);
-                    wrbuf_printf(w, ",\n\t\t\t\t\"ind%d\":\"", i + 1);
+                    wrbuf_printf(w, ",\n        \"ind%d\": \"", i + 1);
                     wrbuf_json_write(w, &n->u.datafield.indicator[off], ilen);
                     wrbuf_printf(w, "\"");
                     off += ilen;
                 }
             }
-            wrbuf_puts(w, "\n\t\t\t}\n");
-            wrbuf_puts(w, "\n\t\t}");
+            wrbuf_puts(w, "\n      }");
+            wrbuf_puts(w, "\n    }");
             break;
         }
     }
-    wrbuf_puts(w, "\n\t]\n");
+    if (first == 0) {
+        wrbuf_puts(w, "\n  ");
+    }
+    wrbuf_puts(w, "]\n");
     wrbuf_puts(w, "}\n");
     return 0;
 }
