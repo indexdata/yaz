@@ -589,15 +589,17 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         break;
     case json_node_array:
         json_indent(result, indent);
-        wrbuf_puts(result, "[\n");
+        wrbuf_puts(result, "[");
         if (node->u.link[0])
         {
+            if (indent >= 0)
+                wrbuf_puts(result, "\n");
             json_write_wrbuf_r(node->u.link[0], result, sub_indent);
-        }
-        if (indent >= 0)
-        {
-            wrbuf_puts(result, "\n");
-            json_indent(result, indent);
+            if (indent >= 0)
+            {
+                wrbuf_puts(result, "\n");
+                json_indent(result, indent);
+            }
         }
         wrbuf_puts(result, "]");
         break;
