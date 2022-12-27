@@ -575,9 +575,12 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
     {
     case json_node_object:
         json_indent(result, indent);
-        wrbuf_puts(result, "{\n");
+        wrbuf_puts(result, "{");
         if (indent >= 0)
+        {
+            wrbuf_puts(result, "\n");
             json_indent(result, sub_indent);
+        }
         if (node->u.link[0])
             json_write_wrbuf_r(node->u.link[0], result, sub_indent);
         if (indent >= 0)
@@ -607,7 +610,10 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         json_write_wrbuf_r(node->u.link[0], result, indent);
         if (node->u.link[1])
         {
-            wrbuf_puts(result, ",\n");
+            wrbuf_puts(result, ",");
+            if (indent >= 0) {
+                wrbuf_puts(result, "\n");
+            }
             json_write_wrbuf_r(node->u.link[1], result, indent);
         }
         break;
