@@ -570,17 +570,14 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
 {
     int sub_indent = -1;
     if (indent >= 0)
-        sub_indent = indent + 1;
+        sub_indent = indent + 2;
     switch (node->type)
     {
     case json_node_object:
         json_indent(result, indent);
-        wrbuf_puts(result, "{");
+        wrbuf_puts(result, "{\n");
         if (indent >= 0)
-        {
-            wrbuf_puts(result, "\n");
             json_indent(result, sub_indent);
-        }
         if (node->u.link[0])
             json_write_wrbuf_r(node->u.link[0], result, sub_indent);
         if (indent >= 0)
@@ -592,12 +589,7 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         break;
     case json_node_array:
         json_indent(result, indent);
-        wrbuf_puts(result, "[");
-        if (indent >= 0)
-        {
-            wrbuf_puts(result, "\n");
-            json_indent(result, sub_indent);
-        }
+        wrbuf_puts(result, "[\n");
         if (node->u.link[0])
         {
             json_write_wrbuf_r(node->u.link[0], result, sub_indent);
@@ -613,13 +605,13 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         json_write_wrbuf_r(node->u.link[0], result, indent);
         if (node->u.link[1])
         {
-            wrbuf_puts(result, ",");
-            if (indent >= 0)
-                wrbuf_puts(result, " ");
+            wrbuf_puts(result, ",\n");
             json_write_wrbuf_r(node->u.link[1], result, indent);
         }
         break;
     case json_node_pair:
+        if (indent >= 0)
+            json_indent(result, indent);
         json_write_wrbuf_r(node->u.link[0], result, indent);
         wrbuf_puts(result, ":");
         if (indent >= 0)
@@ -648,7 +640,7 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
 
 void json_write_wrbuf_pretty(struct json_node *node, WRBUF result)
 {
-    json_write_wrbuf_r(node, result, 1);
+    json_write_wrbuf_r(node, result, 0);
 }
 
 void json_write_wrbuf(struct json_node *node, WRBUF result)
