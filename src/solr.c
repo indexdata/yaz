@@ -346,7 +346,7 @@ int yaz_solr_decode_response(ODR o, Z_HTTP_Response *hres, Z_SRW_PDU **pdup)
 #if YAZ_HAVE_XML2
     const char *content_buf = hres->content_buf;
     int content_len = hres->content_len;
-    xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
+    xmlDocPtr doc = xmlReadMemory(content_buf, content_len, NULL, NULL, XML_PARSE_NOBLANKS);
 
     if (doc)
     {
