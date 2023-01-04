@@ -793,7 +793,14 @@ int tcpip_rcvconnect(COMSTACK h)
     }
     if (sp->session)
     {
-        int res = gnutls_handshake(sp->session);
+        // TLS Handshake retry
+        // (see https://www.gnu.org/software/gnutls/reference/gnutls-gnutls.html#gnutls-handshake)
+        int res = GNUTLS_E_AGAIN;
+        int retryCount = 0;
+        while(retryCount++ < 10 && (res == GNUTLS_E_AGAIN || res == GNUTLS_E_INTERRUPTED)) {
+            res = gnutls_handshake(sp->session);
+        }
+
         if (res < 0)
         {
             if (ssl_check_error(h, sp, res))
