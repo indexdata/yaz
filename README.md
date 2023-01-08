@@ -1,6 +1,6 @@
 ## YAZ toolkit
 
-Copyright (C) 1995-2022 Index Data.
+Copyright (C) 1995-2023 Index Data.
 See the file LICENSE for details.
 
 The primary output of the source here is the
