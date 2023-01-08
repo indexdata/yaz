@@ -27,6 +27,10 @@
 #include <yaz/log.h>
 #include <yaz/xml_include.h>
 
+#ifdef WIN32
+#define S_ISREG(x) (x & _S_IFREG)
+#endif
+
 #if YAZ_HAVE_XML2
 
 #include <libxml/parser.h>
