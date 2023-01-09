@@ -14,6 +14,7 @@
 
 #include <yaz/srw.h>
 #include <yaz/wrbuf.h>
+#include <yaz/nmem_xml.h>
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -277,8 +278,6 @@ static int yaz_srw_versions(ODR o, xmlNodePtr pptr,
 Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
 {
     Odr_int freq;
-    xmlNodePtr child;
-    WRBUF wrbuf = wrbuf_alloc();
     Z_FacetTerm *facet_term;
     const char *freq_string = yaz_element_attribute_value_get(
         node, "facetvalue", "est_representation");
@@ -287,13 +286,8 @@ Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
     else
         freq = -1;
 
-    for (child = node->children; child ; child = child->next)
-    {
-        if (child->type == XML_TEXT_NODE)
-            wrbuf_puts(wrbuf, (const char *) child->content);
-    }
-    facet_term = facet_term_create_cstr(odr, wrbuf_cstr(wrbuf), freq);
-    wrbuf_destroy(wrbuf);
+    facet_term = facet_term_create_cstr(odr,
+        nmem_text_node_cdata(node->children, odr_getmem(odr)), freq);
     return facet_term;
 }
 
