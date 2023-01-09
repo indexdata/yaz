@@ -246,6 +246,69 @@ void tst_decoding(void)
     }
     odr_reset(odr);
 
+
+    YAZ_CHECK(check_response(
+                  odr,
+                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                  "<response>\n"
+                  "  <lst name=\"responseHeader\">\n"
+                  "    <int name=\"status\">0</int>\n"
+                  "    <int name=\"QTime\">1</int>\n"
+                  "    <lst name=\"params\">"
+                  "       <str name=\"start\">0</str>\n"
+                  "       <str name=\"q\">@attr 1=title solr</str>\n"
+                  "       <str name=\"rows\">0</str>\n"
+                  "    </lst>"
+                  "  </lst>\n"
+                  "  <result name=\"response\" numFound=\"0\" start=\"0\"/>\n"
+                  "  <lst name=\"spellcheck\">\n"
+                  "     <lst name=\"suggestions\">\n"
+                  "       <lst name=\"author\">\n"
+                  "         <int name=\"numFound\">1</int>\n"
+                  "         <arr name=\"suggestion\">\n"
+                  "           <lst>\n"
+                  "              <str name=\"word\">w1</str>\n"
+                  "              <int name=\"freq\">1</int>\n"
+                  "           </lst>\n"
+                  "           <foo/>\n"
+                  "           <lst>\n"
+                  "              <str name=\"word\">w2</str>\n"
+                  "           </lst>\n"
+                  "         </arr>\n"
+                  "       </lst>\n"
+                  "       <lst name=\"The &lt; title\">\n"
+                  "         <arr name=\"suggestion\">\n"
+                  "           <lst>\n"
+                  "              <str name=\"word\">a&amp;b</str>\n"
+                  "           </lst>\n"
+                  "         </arr>\n"
+                  "       </lst>\n"
+                  "     </lst>\n"
+                  "  </lst>"
+                  "</response>\n", &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(*response->numberOfRecords, 0);
+        YAZ_CHECK_EQ(response->num_records, 0);
+        YAZ_CHECK(response->records == 0);
+        YAZ_CHECK_EQ(response->num_diagnostics, 0);
+        YAZ_CHECK(response->diagnostics == 0);
+        YAZ_CHECK(response->nextRecordPosition == 0);
+        YAZ_CHECK(response->facetList == 0);
+        YAZ_CHECK(strcmp(response->suggestions,
+                         "<misspelled term=\"author\">\n"
+                         "<suggestion>w1</suggestion>\n"
+                         "<suggestion>w2</suggestion>\n"
+                         "</misspelled>\n"
+                         "<misspelled term=\"The &lt; title\">\n"
+                         "<suggestion>a&amp;b</suggestion>\n"
+                         "</misspelled>\n") == 0);
+    }
+    odr_reset(odr);
+
+
+
+
     YAZ_CHECK(
         check_response(
             odr,
@@ -299,6 +362,10 @@ void tst_decoding(void)
             "    <lst name=\"keyword\">\n"
             "      <int name=\"Soleil\">37</int>\n"
             "      <int name=\"Sun\">26</int>\n"
+            "    <lst>\n"
+            "      <int name=\"no name property , ignored\">3</int>\n"
+            "    </lst>\n"
+            "    <foreign>x</foreign>\n"
             "    </lst>\n"
             "    <lst name=\"empty1\">\n"
             "    </lst>\n"
