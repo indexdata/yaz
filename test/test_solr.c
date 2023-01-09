@@ -259,7 +259,7 @@ void tst_decoding(void)
             "<str name=\"facet.field\">date</str>"
             "<str name=\"rows\">1</str></lst>"
             "</lst><result name=\"response\" numFound=\"91000000000\" start=\"0\">"
-            "<doc><str name=\"author\">Alenius, Hans,</str>"
+            "<doc><str name=\"author\">Alenius, Hans,</str>\n"
             "<str name=\"author-date\">1937-</str>"
             "<str name=\"author-title\"/>"
             "<arr name=\"date\"><str>1969</str></arr>"
@@ -285,13 +285,28 @@ void tst_decoding(void)
             "<str name=\"title-dates\"/><str name=\"title-medium\"/>"
             "<str name=\"title-number-section\"/><str name=\"title-remainder\"/>"
             "<str name=\"title-responsibility\"/><str name=\"title_exact\">Solring.</str>"
-            "</doc></result><lst name=\"facet_counts\">"
-            "<lst name=\"facet_queries\"/>"
-            "<lst name=\"facet_fields\">"
-            "<lst name=\"date\"><int name=\"1978\">5000000000</int><int name=\"1983\">4</int>"
-            "<int name=\"1987\">4</int><int name=\"1988\">4</int>"
-            "<int name=\"2003\">3</int></lst></lst><lst name=\"facet_dates\"/>"
-            "</lst></response>", &response));
+            "</doc></result>\n"
+            "<lst name=\"facet_counts\">\n"
+            "  <lst name=\"facet_queries\"/>\n"
+            "  <lst name=\"facet_fields\">\n"
+            "    <lst name=\"date\">\n"
+            "      <int name=\"1978\">5000000000</int>\n"
+            "      <int name=\"1983\">4</int>\n"
+            "      <int name=\"1987\">4</int>\n"
+            "      <int name=\"1988\">4</int>\n"
+            "      <int name=\"2003\">3</int>\n"
+            "    </lst>\n"
+            "    <lst name=\"keyword\">\n"
+            "      <int name=\"Soleil\">37</int>\n"
+            "      <int name=\"Sun\">26</int>\n"
+            "    </lst>\n"
+            "    <lst name=\"empty1\">\n"
+            "    </lst>\n"
+            "    <lst name=\"empty2\"/>"
+            "  </lst>\n"
+            "<lst name=\"facet_dates\"/>\n"
+            "</lst>\n"
+            "</response>", &response));
     if (response)
     {
 #if HAVE_LONG_LONG
@@ -303,7 +318,7 @@ void tst_decoding(void)
     if (response && response->records)
     {
         const char *doc =
-            "<doc><str name=\"author\">Alenius, Hans,</str>"
+            "<doc><str name=\"author\">Alenius, Hans,</str>\n"
             "<str name=\"author-date\">1937-</str>"
             "<str name=\"author-title\"/>"
             "<arr name=\"date\"><str>1969</str></arr>"
@@ -347,12 +362,13 @@ void tst_decoding(void)
     {
         Z_FacetList *facetList = response->facetList;
 
-        YAZ_CHECK(facetList->num == 1);
-        if (facetList->num == 1)
+        YAZ_CHECK(facetList->num == 4);
+        if (facetList->num >= 1)
         {
             Z_FacetField *facetField = facetList->elements[0];
             int i;
-
+            YAZ_CHECK(strcmp("date",
+                facetField->attributes->attributes[0]->value.complex->list[0]->u.string) == 0);
             YAZ_CHECK(facetField->num_terms == 5);
             if (facetField->num_terms == 5)
             {
@@ -386,6 +402,49 @@ void tst_decoding(void)
                           && !memcmp(facetField->terms[4]->term->u.general->buf,
                                      "2003", 4));
             }
+        }
+        if (facetList->num >= 2)
+        {
+            Z_FacetField *facetField = facetList->elements[1];
+            int i;
+
+            YAZ_CHECK(strcmp("keyword",
+                facetField->attributes->attributes[0]->value.complex->list[0]->u.string) == 0);
+            YAZ_CHECK(facetField->num_terms == 2);
+            if (facetField->num_terms == 2)
+            {
+                for (i = 0; i < facetField->num_terms; i++)
+                {
+                    YAZ_CHECK(
+                        facetField->terms[i] &&
+                        facetField->terms[i]->term &&
+                        facetField->terms[i]->term->which == Z_Term_general);
+                }
+                YAZ_CHECK(*facetField->terms[0]->count == 37);
+                YAZ_CHECK(facetField->terms[0]->term->u.general->len == 6
+                          && !memcmp(facetField->terms[0]->term->u.general->buf,
+                                     "Soleil", 6));
+                YAZ_CHECK(*facetField->terms[1]->count == 26);
+                YAZ_CHECK(facetField->terms[1]->term->u.general->len == 3
+                          && !memcmp(facetField->terms[1]->term->u.general->buf,
+                                     "Sun", 3));
+            }
+        }
+        if (facetList->num >= 3)
+        {
+            Z_FacetField *facetField = facetList->elements[2];
+
+            YAZ_CHECK(strcmp("empty1",
+                facetField->attributes->attributes[0]->value.complex->list[0]->u.string) == 0);
+            YAZ_CHECK(facetField->num_terms == 0);
+        }
+        if (facetList->num >= 4)
+        {
+            Z_FacetField *facetField = facetList->elements[3];
+
+            YAZ_CHECK(strcmp("empty2",
+                facetField->attributes->attributes[0]->value.complex->list[0]->u.string) == 0);
+            YAZ_CHECK(facetField->num_terms == 0);
         }
     }
     odr_reset(odr);

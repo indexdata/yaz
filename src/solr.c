@@ -124,21 +124,13 @@ static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
     return -1;
 }
 
-static const char *get_facet_term_count(xmlNodePtr node, Odr_int *freq)
+static const char *get_facet_term_count(ODR o, xmlNodePtr node, Odr_int *freq)
 {
     const char *term = yaz_element_attribute_value_get(node, "int", "name");
-    xmlNodePtr child;
-    WRBUF wrbuf = wrbuf_alloc();
     if (!term)
         return term;
 
-    for (child = node->children; child ; child = child->next)
-    {
-        if (child->type == XML_TEXT_NODE)
-            wrbuf_puts(wrbuf, (const char *) child->content);
-    }
-    *freq = odr_atoi(wrbuf_cstr(wrbuf));
-    wrbuf_destroy(wrbuf);
+    *freq = odr_atoi(nmem_text_node_cdata(node->children, odr_getmem(o)));
     return term;
 }
 
@@ -152,6 +144,9 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     int index = 0;
     xmlNodePtr node;
     const char* name = yaz_element_attribute_value_get(ptr, "lst", "name");
+
+    if (name == 0)
+        return 0;
     list = zget_AttributeList_use_string(o, name);
     for (node = ptr->children; node; node = node->next)
         num_terms++;
@@ -160,11 +155,15 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
     for (node = ptr->children; node; node = node->next)
     {
         Odr_int count = 0;
-        const char *term = get_facet_term_count(node, &count);
-        facet_field_term_set(o, facet_field,
+        const char *term = get_facet_term_count(o, node, &count);
+        if (term)
+        {
+            facet_field_term_set(o, facet_field,
                              facet_term_create_cstr(o, term, count), index);
-        index++;
+            index++;
+        }
     }
+    facet_field->num_terms = index;
     return facet_field;
 }
 
@@ -180,19 +179,20 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
             Z_FacetList *facet_list;
             int num_facets = 0;
             for (node = ptr->children; node; node= node->next)
-            {
                 num_facets++;
-            }
             facet_list = facet_list_create(o, num_facets);
             num_facets = 0;
-            for (node = ptr->children; node; node= node->next)
+            for (node = ptr->children; node; node = node->next)
             {
-                facet_list_field_set(o, facet_list,
-                                     yaz_solr_decode_facet_field(o, node, sr),
-                                     num_facets);
-                num_facets++;
+                Z_FacetField *ff = yaz_solr_decode_facet_field(o, node, sr);
+                if (ff)
+                {
+                    facet_list_field_set(o, facet_list, ff, num_facets);
+                    num_facets++;
+                }
             }
             sr->facetList = facet_list;
+            sr->facetList->num = num_facets;
             break;
         }
     }
@@ -245,11 +245,11 @@ static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
     }
 }
 
-static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr, Z_SRW_searchRetrieveResponse *sr)
+static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr,
+    Z_SRW_searchRetrieveResponse *sr)
 {
     xmlNodePtr ptr;
     WRBUF wrbuf = wrbuf_alloc();
-    wrbuf_puts(wrbuf, "");
     for (ptr = spellcheckPtr->children; ptr; ptr = ptr->next)
     {
         if (match_xml_node_attribute(ptr, "lst", "name", "suggestions"))
@@ -293,12 +293,12 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
             Z_SRW_scanTerm *term = scr->terms + i;
 
             Odr_int count = 0;
-            const char *val = get_facet_term_count(node, &count);
+            const char *val = get_facet_term_count(o, node, &count);
 
             term->numberOfRecords = odr_intdup(o, count);
 
-            /* if val contains a ^ then it is probably term<^>display term so separate them. This is due to
-             * SOLR not being able to encode them into 2 separate attributes.
+            /* if val contains a ^ then it is probably term<^>display term so separate them.
+             * This is due to SOLR not being able to encode them into 2 separate attributes.
              */
             pos = strchr(val, '^');
             if (pos != NULL)
