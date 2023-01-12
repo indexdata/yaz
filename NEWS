@@ -1,3 +1,12 @@
+--- 5.34.0 2023/01/12
+
+Fixes to Solr response decoding.
+
+Fix compilation with Visual Studio Failed for YAZ 5.33.0.
+
+JSON pretty-printed same way as jq for yaz-json-parse and yaz-marcdump
+utilities.
+
 --- 5.33.0 2022/12/14
 
 yaz-marcdump: SAX based MARCXML parsing. This is about 3 times faster
