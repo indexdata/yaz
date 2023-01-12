@@ -150,10 +150,11 @@ Section "YAZ Source" YAZ_Source
 	File ..\src\*.asn
 	File ..\src\codetables*.xml
 	SetOutPath $INSTDIR\test
-	File ..\test\marc*.*
 	File ..\test\*.sh
 	File ..\test\*.xml
 	File ..\test\*.asn
+	SetOutPath $INSTDIR\test
+	File /r ..\test\marc-files
 	SetOutPath $INSTDIR\win
 	File makefile
 	File *.nsi
