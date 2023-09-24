@@ -11,11 +11,10 @@ Version: %{idmetaversion}
 Release: 1.indexdata
 
 # determine system
-%define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
-%define is_redhat8 %(grep 'release 8' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_redhat67 %(grep 'release [67]' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
-%define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_suse11 %(grep 'VERSION = 1[1-9]' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 Requires: readline, libyaz5 = %{version}
 License: BSD
@@ -25,21 +24,11 @@ Source: yaz-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Prefix: %{_prefix}
 
-%define TCPWRAPPER tcp_wrappers-devel
-
-%if %is_redhat5
-%define TCPWRAPPER tcp_wrappers
-%endif
-
-%if %is_suse
-%define TCPWRAPPER tcpd-devel
-%endif
-
-%if is_redhat8
-%define TCPDFLAGS --disable-tcpd
-%else
+%if %is_redhat67
 %define TCPDFLAGS --enable-tcpd
-BuildRequires: %{TCPWRAPPER}
+BuildRequires: tcp_wrappers-devel
+%else
+%define TCPDFLAGS --disable-tcpd
 %endif
 
 %if %is_suse11
