@@ -11,6 +11,9 @@
 #include <yaz/log.h>
 #include <yaz/test.h>
 
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
 
 static int tst_ccl_query(CCL_bibset bibset,
                          const char *query,

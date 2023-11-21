@@ -20,6 +20,9 @@
 #include <readline/history.h>
 #endif
 
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
 
 static int debug = 0;
 static char *prog;

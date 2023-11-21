@@ -73,6 +73,10 @@
 #include <readline/history.h>
 #endif
 
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
+
 
 #include "admin.h"
 #include "tabcomplete.h"
