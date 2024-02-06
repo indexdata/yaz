@@ -12,6 +12,9 @@
 
 #include <yaz/xml_include.h>
 #include <yaz/test.h>
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
 
 static void tst_xml_include1(void)
 {

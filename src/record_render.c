@@ -23,6 +23,7 @@
 #include <yaz/base64.h>
 
 #if YAZ_HAVE_XML2
+#include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #endif
