@@ -9,6 +9,7 @@
 #include <yaz/retrieval.h>
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
+#include <stdlib.h>
 #include <string.h>
 #include <yaz/log.h>
 #include <yaz/oid_db.h>

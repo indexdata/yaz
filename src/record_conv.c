@@ -11,6 +11,7 @@
 #include <config.h>
 #endif
 
+#include <stdlib.h>
 #include <string.h>
 #include <yaz/log.h>
 #include <yaz/yaz-iconv.h>
