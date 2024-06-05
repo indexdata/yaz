@@ -9,6 +9,7 @@
 #include <yaz/record_conv.h>
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
+#include <stdlib.h>
 #include <string.h>
 #include <yaz/log.h>
 #include <yaz/proto.h>
