@@ -564,10 +564,10 @@ int main(int argc, char **argv)
     yaz_enable_panic_backtrace(*argv);
     read_params(argc, argv, &config);
 
-    if (config.conffile && strlen(config.conffile))
+    if (strlen(config.conffile))
         process_text_file(&config);
 
-    if (config.print && strlen(config.print))
+    if (strlen(config.print))
         print_info(&config);
 
     u_cleanup();
@@ -593,4 +593,3 @@ int main(int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
