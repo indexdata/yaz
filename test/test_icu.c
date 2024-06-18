@@ -28,6 +28,7 @@
 #endif
 
 #if YAZ_HAVE_XML2
+#include <libxml/parser.h>
 #include <libxml/xmlmemory.h>
 #endif
 

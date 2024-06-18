@@ -13,6 +13,10 @@
 #include <yaz/record_conv.h>
 #include <yaz/backtrace.h>
 
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#endif
+
 const char *prog = "yaz-record-conv";
 
 static void usage(void)

@@ -17,6 +17,8 @@
 
 #if YAZ_HAVE_ICU
 
+#include <libxml/parser.h>
+
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 #include <unicode/ucol.h>
