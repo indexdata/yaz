@@ -1,4 +1,3 @@
 DEBIAN_DIST="bullseye buster"
-UBUNTU_DIST="jammy focal bionic xenial"
 CENTOS_DIST="centos7 centos8"
 VERSION=5.34.1

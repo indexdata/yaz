@@ -18,6 +18,7 @@
    <author><firstname>Mike</firstname><surname>Taylor</surname></author>
    <author><firstname>Heikki</firstname><surname>Levanto</surname></author>
    <author><firstname>Dennis</firstname><surname>Schafroth</surname></author>
+   <author><firstname>Jakub</firstname><surname>Skoczen</surname></author>
   </authorgroup>
   <releaseinfo>&version;</releaseinfo>
   <copyright>
@@ -413,7 +414,7 @@
      this document.
    </para>
   </sect1>
-  <sect1 id="installation.unix"><title>UNIX/MacOS</title>
+  <sect1 id="installation.unix"><title>UNIX/macOS</title>
    <para>
     We provide
     <ulink url="&url.debian;">Debian GNU/Linux</ulink> (i386 and amd64),
@@ -844,19 +845,52 @@
     </para>
    </sect2>
    <sect2 id="installation.source.macos">
-     <title>Compiling from source on MacOS</title>
+     <title>Compiling from source on macOS</title>
      <para>
-       Compiling from source on MacOSX requires libxml2. This can be installed
-       with Homebrew, for instance:
-       <screen>
-         brew install libxml2
-       </screen>
+       Install Apple's Xcode Command Line Tools package from <ulink url="https://developer.apple.com/">Apple Developer</ulink>
+       which provides necessary tools for building C/C++ programs on macOS.
+       This is sufficient for compiling &yaz; from a source distribution tarball
+       as macOS already includes libxml and libxslt development libraries.
      </para>
-     <para> Review the Caveats section (<code>brew info libxml2</code>) for the <code>LDFLAGS</code>, <code>CPPFLAGS</code>, and <code>PKG_CONFIG_PATH</code> environment variables before executing the <code>./compile</code> command. For instance:
+     <para>
+       If you are compiling &yaz; from a Git checkout, at the time of writing the latest
+       version of XCLT is 15.4 and includes a very old GNU Bison which is insufficient
+       to generate &yaz; sources. You can use e.g. <ulink url="https://brew.sh">Homebrew</ulink> to install a more recent version:
        <screen>
-         export LDFLAGS="-L/usr/local/opt/libxml2/lib"
-         export CPPFLAGS="-I/usr/local/opt/libxml2/include"
-         export PKG_CONFIG_PATH="/usr/local/opt/libxml2/lib/pkgconfig"
+         brew install bison
+       </screen>
+       After installation make sure to put it on the path:
+       <screen>
+         export PATH="/opt/homebrew/opt/bison/bin:$PATH"
+       </screen>
+       Note: XCLT 15.4 fails to make  <code>gm4</code> available as <code>m4</code> which can cause a silent Bison failure, one
+       way to fix it is:
+       <screen>
+         sudo ln -s /Library/Developer/CommandLineTools/usr/bin/gm4 /Library/Developer/CommandLineTools/usr/bin/m4
+       </screen>
+       If you want to compile &yaz; with ICU you must install it with Homebrew as macOS does not ship ICU headers:
+       <screen>
+         brew install icu4c
+       </screen>
+       and make sure to add compiler flags per the caveats section (<code>brew info icu4c</code>):
+       <screen>
+         export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
+         export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include
+         export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c/lib/pkgconfig""
+       </screen>
+       If you want to also compile with more recent version of libxml2 and libxslt,
+       install them with Homebrew:
+       <screen>
+         brew install libxml2 libxslt
+       </screen> 
+       and again make sure to add compiler flags before the configure stage, per the caveats section (<code>brew info libxml2</code>):
+       <screen>
+        export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib -L/opt/homebrew/opt/libxslt/lib -L/opt/homebrew/opt/icu4c/lib"
+        export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include -I/opt/homebrew/opt/libxslt/include -I/opt/homebrew/opt/icu4c/include"
+        export PKG_CONFIG_PATH="/opt/homebrew/opt/libxml2/lib/pkgconfig:/opt/homebrew/opt/libxslt/lib/pkgconfig:/opt/homebrew/opt/icu4c/lib/pkgconfig"
+       </screen>
+       Then configure and conpile with:
+       <screen>
          ./configure
          make
        </screen>
