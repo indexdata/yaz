@@ -868,11 +868,19 @@
        <screen>
          sudo ln -s /Library/Developer/CommandLineTools/usr/bin/gm4 /Library/Developer/CommandLineTools/usr/bin/m4
        </screen>
+       Additionally, you will need to install DocBook stylesheets to generate documentation:
+       <screen>
+         brew install docbook docbook-xsl
+       </screen>
+       per the caveats section (<code>brew info docbook</code>), for the compilation to find them, add:
+       <screen>
+         export XML_CATALOG_FILES="/opt/homebrew/etc/xml/catalog"
+       </screen>
        If you want to compile &yaz; with ICU you must install it with Homebrew as macOS does not ship ICU headers:
        <screen>
          brew install icu4c
        </screen>
-       and make sure to add compiler flags per the caveats section (<code>brew info icu4c</code>):
+       and make sure to add compiler flags before the configure stage, per the caveats section (<code>brew info icu4c</code>):
        <screen>
          export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
          export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include
@@ -883,7 +891,7 @@
        <screen>
          brew install libxml2 libxslt
        </screen> 
-       and again make sure to add compiler flags before the configure stage, per the caveats section (<code>brew info libxml2</code>):
+       and again make sure to add compiler flags, per the caveats section (<code>brew info libxml2</code>):
        <screen>
         export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib -L/opt/homebrew/opt/libxslt/lib -L/opt/homebrew/opt/icu4c/lib"
         export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include -I/opt/homebrew/opt/libxslt/include -I/opt/homebrew/opt/icu4c/include"
