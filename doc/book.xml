@@ -1398,7 +1398,7 @@
    <title>Connections</title>
    <para>The Connection object is a session with a target.
    </para>
-   <synopsis>
+   <screen>
     #include &lt;yaz/zoom.h>
 
     ZOOM_connection ZOOM_connection_new(const char *host, int portnum);
@@ -1408,7 +1408,7 @@
     void ZOOM_connection_connect(ZOOM_connection c, const char *host,
                                  int portnum);
     void ZOOM_connection_destroy(ZOOM_connection c);
-   </synopsis>
+   </screen>
    <para>
     Connection objects are created with either function
     <function>ZOOM_connection_new</function> or
@@ -1445,7 +1445,7 @@
     Connection objects should be destroyed using the function
     <function>ZOOM_connection_destroy</function>.
    </para>
-   <synopsis>
+   <screen>
     void ZOOM_connection_option_set(ZOOM_connection c,
                                     const char *key, const char *val);
 
@@ -1458,7 +1458,7 @@
     const char *ZOOM_connection_option_getl(ZOOM_connection c,
                                             const char *key,
                                             int *lenp);
-   </synopsis>
+   </screen>
    <para>
     The functions <function>ZOOM_connection_option_set</function> and
     <function>ZOOM_connection_option_setl</function> allows you to
@@ -1704,12 +1704,12 @@
     <ulink url="&url.z39.50.charneg;">
      Character Set and Language Negotiation</ulink> is in effect.
    </para>
-   <synopsis>
+   <screen>
      int ZOOM_connection_error(ZOOM_connection c, const char **cp,
                                const char **addinfo);
      int ZOOM_connection_error_x(ZOOM_connection c, const char **cp,
                                  const char **addinfo, const char **dset);
-   </synopsis>
+   </screen>
    <para>
     Function <function>ZOOM_connection_error</function> checks for
     errors for the last operation(s) performed. The function returns
@@ -1796,7 +1796,7 @@
    <para>
     Query objects represents queries.
    </para>
-   <synopsis>
+   <screen>
      ZOOM_query ZOOM_query_create(void);
 
      void ZOOM_query_destroy(ZOOM_query q);
@@ -1809,7 +1809,7 @@
 
      int ZOOM_query_sortby2(ZOOM_query q, const char *strategy,
                             const char *criteria);
-   </synopsis>
+   </screen>
    <para>
     Create query objects using <function>ZOOM_query_create</function>
     and destroy them by calling <function>ZOOM_query_destroy</function>.
@@ -1876,13 +1876,13 @@
     The result set object is a container for records returned from
     a target.
    </para>
-   <synopsis>
+   <screen>
      ZOOM_resultset ZOOM_connection_search(ZOOM_connection, ZOOM_query q);
 
      ZOOM_resultset ZOOM_connection_search_pqf(ZOOM_connection c,
                                                const char *q);
      void ZOOM_resultset_destroy(ZOOM_resultset r);
-   </synopsis>
+   </screen>
    <para>
     Function <function>ZOOM_connection_search</function> creates
     a result set, given a connection and query.
@@ -1892,14 +1892,14 @@
     <function>ZOOM_connection_search_pqf</function> in which case
     creating query objects is not necessary.
    </para>
-   <synopsis>
+   <screen>
      void ZOOM_resultset_option_set(ZOOM_resultset r,
                                     const char *key, const char *val);
 
      const char *ZOOM_resultset_option_get(ZOOM_resultset r, const char *key);
 
      size_t ZOOM_resultset_size(ZOOM_resultset r);
-   </synopsis>
+   </screen>
    <para>
     Functions <function>ZOOM_resultset_options_set</function> and
     <function>ZOOM_resultset_get</function> sets and gets an option
@@ -2038,13 +2038,13 @@
    </table>
    <sect2 id="zoom.z3950.resultset.sort">
     <title>Z39.50 Result-set Sort</title>
-    <synopsis>
+    <screen>
      void ZOOM_resultset_sort(ZOOM_resultset r,
                               const char *sort_type, const char *sort_spec);
 
      int ZOOM_resultset_sort1(ZOOM_resultset r,
                               const char *sort_type, const char *sort_spec);
-    </synopsis>
+    </screen>
     <para>
      <function>ZOOM_resultset_sort</function> and
      <function>ZOOM_resultset_sort1</function> both sort an existing
@@ -2163,7 +2163,7 @@
     A record object is a retrieval record on the client side -
     created from result sets.
    </para>
-   <synopsis>
+   <screen>
      void ZOOM_resultset_records(ZOOM_resultset r,
                                  ZOOM_record *recs,
                                  size_t start, size_t count);
@@ -2178,7 +2178,7 @@
      ZOOM_record ZOOM_record_clone(ZOOM_record rec);
 
      void ZOOM_record_destroy(ZOOM_record rec);
-   </synopsis>
+   </screen>
    <para>
     References to temporary records are returned by functions
     <function>ZOOM_resultset_records</function> or
@@ -2406,7 +2406,7 @@
     For inspection of the returned facets, the following functions are
     available:
    </para>
-   <synopsis>
+   <screen>
     ZOOM_facet_field *ZOOM_resultset_facets(ZOOM_resultset r);
 
     size_t ZOOM_resultset_facets_size(ZOOM_resultset r);
@@ -2423,7 +2423,7 @@
 
     const char *ZOOM_facet_field_get_term(ZOOM_facet_field facet_field,
                                           size_t idx, int *freq);
-   </synopsis>
+   </screen>
    <para>
     References to temporary structures are returned by all functions.
     They are only valid as long the Result set is valid.
@@ -2469,7 +2469,7 @@
     The Scan interface is supported for both Z39.50, SRU and Solr.
    </para>
 
-   <synopsis>
+   <screen>
     ZOOM_scanset ZOOM_connection_scan(ZOOM_connection c,
                                       const char *startpqf);
 
@@ -2491,7 +2491,7 @@
 
     void ZOOM_scanset_option_set(ZOOM_scanset scan, const char *key,
                                  const char *val);
-    </synopsis>
+    </screen>
    <para>
     The scan set is created by function
     <function>ZOOM_connection_scan</function> which performs a scan
@@ -2625,7 +2625,7 @@
     the package is sent, result is inspected (by means of options),
     the package is destroyed.
    </para>
-   <synopsis>
+   <screen>
     ZOOM_package ZOOM_connection_package(ZOOM_connection c,
                                          ZOOM_options options);
 
@@ -2636,7 +2636,7 @@
     void ZOOM_package_send(ZOOM_package p, const char *type);
 
     void ZOOM_package_destroy(ZOOM_package p);
-   </synopsis>
+   </screen>
    <para>
     The <function>ZOOM_connection_package</function> creates a
     package for the connection given using the options specified.
@@ -3124,20 +3124,20 @@
     From an implementation point of view, a set of options is just like
     an associative array / hash.
    </para>
-   <synopsis>
+   <screen>
      ZOOM_options ZOOM_options_create(void);
 
      ZOOM_options ZOOM_options_create_with_parent(ZOOM_options parent);
 
      void ZOOM_options_destroy(ZOOM_options opt);
-   </synopsis>
-   <synopsis>
+   </screen>
+   <screen>
      const char *ZOOM_options_get(ZOOM_options opt, const char *name);
 
      void ZOOM_options_set(ZOOM_options opt, const char *name,
                            const char *v);
-   </synopsis>
-   <synopsis>
+   </screen>
+   <screen>
      typedef const char *(*ZOOM_options_callback)
                             (void *handle, const char *name);
 
@@ -3145,11 +3145,11 @@
              ZOOM_options_set_callback(ZOOM_options opt,
                                        ZOOM_options_callback c,
                                        void *handle);
-   </synopsis>
+   </screen>
   </sect1>
   <sect1 id="zoom.queryconversions">
    <title>Query conversions</title>
-   <synopsis>
+   <screen>
     int ZOOM_query_cql2rpn(ZOOM_query s, const char *cql_str,
                            ZOOM_connection conn);
 
@@ -3157,7 +3157,7 @@
                            const char *config,
                            int *ccl_error, const char **error_string,
                            int *error_pos);
-   </synopsis>
+   </screen>
    <para>
     <function>ZOOM_query_cql2rpn</function> translates the CQL string,
     client-side, into RPN which may be passed to the server.
@@ -3184,9 +3184,9 @@
     If you're developing non-blocking applications, you have to deal
     with events.
    </para>
-   <synopsis>
+   <screen>
     int ZOOM_event(int no, ZOOM_connection *cs);
-   </synopsis>
+   </screen>
    <para>
     The <function>ZOOM_event</function> executes pending events for
     a number of connections. Supply the number of connections in
@@ -3206,9 +3206,9 @@
     If <function>ZOOM_event</function> returns, and returns non-zero, the
     last event that occurred can be expected.
    </para>
-   <synopsis>
+   <screen>
     int ZOOM_connection_last_event(ZOOM_connection cs);
-   </synopsis>
+   </screen>
    <para>
     <function>ZOOM_connection_last_event</function> returns an event type
     (integer) for the last event.
@@ -3389,11 +3389,11 @@
     tables, this is the place to do it. At the end of the routine, you should
     call the function
    </para>
-   <synopsis>
+   <screen>
 int statserv_main(int argc, char **argv,
                   bend_initresult *(*bend_init)(bend_initrequest *r),
                   void (*bend_close)(void *handle));
-   </synopsis>
+   </screen>
    <para>
     The third and fourth arguments are pointers to handlers. Handler
     <function>bend_init</function> is called whenever the server receives
@@ -3416,9 +3416,9 @@ int statserv_main(int argc, char **argv,
     The server provides a mechanism for controlling some of its behavior
     without using command-line options. The function
    </para>
-   <synopsis>
+   <screen>
     statserv_options_block *statserv_getcontrol(void);
-   </synopsis>
+   </screen>
    <para>
     will return a pointer to a <literal>struct statserv_options_block</literal>
     describing the current default settings of the server. The structure
@@ -3546,9 +3546,9 @@ int statserv_main(int argc, char **argv,
     a static area. You are allowed to change the contents of the structure,
     but the changes will not take effect until you call
    </para>
-   <synopsis>
+   <screen>
 void statserv_setcontrol(statserv_options_block *block);
-   </synopsis>
+   </screen>
    <note>
     <para>
      You should generally update this structure before calling
@@ -3565,9 +3565,9 @@ void statserv_setcontrol(statserv_options_block *block);
    </para>
    <sect2 id="server.init">
     <title>Init</title>
-    <synopsis>
+    <screen>
 bend_initresult (*bend_init)(bend_initrequest *r);
-    </synopsis>
+    </screen>
     <para>
      This handler is called once for each new connection request, after
      a new process/thread has been created, and an Initialize Request has
@@ -3589,7 +3589,7 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     <para>
      The request - and result structures are defined as
     </para>
-    <synopsis>
+    <screen>
 typedef struct bend_initrequest
 {
     /** \brief user/name/password to be read */
@@ -3664,7 +3664,7 @@ typedef struct bend_initresult
     char *errstring;           /* system error string or NULL */
     void *handle;              /* private handle to the backend module */
 } bend_initresult;
-    </synopsis>
+    </screen>
     <para>
      In general, the server frontend expects that the
      <literal>bend_*result</literal> pointer that you return is valid at
@@ -3715,7 +3715,7 @@ typedef struct bend_initresult
      third handler which is called when a present request is received which
      allows you to optimize retrieval of multiple-records.
     </para>
-    <synopsis>
+    <screen>
 int (*bend_search) (void *handle, bend_search_rr *rr);
 
 typedef struct {
@@ -3742,7 +3742,7 @@ typedef struct {
     int estimated_hit_count;   /* if hit count is estimated */
     int partial_resultset;     /* if result set is partial */
 } bend_search_rr;
-    </synopsis>
+    </screen>
     <para>
      The <function>bend_search</function> handler is a fairly close
      approximation of a protocol Z39.50 Search Request - and Response PDUs.
@@ -3790,7 +3790,7 @@ typedef struct {
      For SRU operation, a Bib-1 diagnostic code is mapped to
      SRU diagnostic.
     </para>
-    <synopsis>
+    <screen>
 int (*bend_fetch) (void *handle, bend_fetch_rr *rr);
 
 typedef struct bend_fetch_rr {
@@ -3812,7 +3812,7 @@ typedef struct bend_fetch_rr {
     int surrogate_flag;        /* surrogate diagnostic */
     char *schema;              /* string record schema input/output */
 } bend_fetch_rr;
-    </synopsis>
+    </screen>
     <para>
      The frontend server calls the <function>bend_fetch</function> handler
      when it needs database records to fulfill a Z39.50 Search Request, a
@@ -3877,7 +3877,7 @@ typedef struct bend_fetch_rr {
       The current version of &yaz; only supports the direct reference mode.
      </para>
     </note>
-    <synopsis>
+    <screen>
 int (*bend_present) (void *handle, bend_present_rr *rr);
 
 typedef struct {
@@ -3896,7 +3896,7 @@ typedef struct {
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
 } bend_present_rr;
-    </synopsis>
+    </screen>
     <para>
      The <function>bend_present</function> handler is called when
      the server receives a Z39.50 Present Request.
@@ -3919,7 +3919,7 @@ typedef struct {
      For back-ends that supports delete of a result set, only one handler
      must be defined.
     </para>
-    <synopsis>
+    <screen>
 int (*bend_delete)(void *handle, bend_delete_rr *rr);
 
 typedef struct bend_delete_rr {
@@ -3932,7 +3932,7 @@ typedef struct bend_delete_rr {
     ODR stream;
     ODR print;
 } bend_delete_rr;
-    </synopsis>
+    </screen>
     <note>
      <para>
       The delete set function definition is rather primitive, mostly because
@@ -3949,7 +3949,7 @@ typedef struct bend_delete_rr {
      For servers that wish to offer the scan service one handler
      must be defined.
     </para>
-    <synopsis>
+    <screen>
 int (*bend_scan)(void *handle, bend_scan_rr *rr);
 
 typedef enum {
@@ -3979,7 +3979,7 @@ typedef struct bend_scan_rr {
     char *scanClause;   /* CQL scan clause */
     char *setname;      /* Scan in result set (NULL if omitted) */
 } bend_scan_rr;
-    </synopsis>
+    </screen>
    <para>
     This backend server handles both Z39.50 scan
     and SRU scan. In order for a handler to distinguish between SRU (CQL) scan
@@ -4014,9 +4014,9 @@ typedef struct bend_scan_rr {
    <para>
     For TCP and SSL, an address has the form
    </para>
-   <synopsis>
+   <screen>
     hostname | IP-number [: portnumber]
-   </synopsis>
+   </screen>
    <para>
     The port number defaults to 210 (standard Z39.50 port).
    </para>
@@ -4188,15 +4188,15 @@ typedef struct bend_scan_rr {
    <para>
    The prototype for the individual PDU types generally look like this:
    </para>
-   <synopsis>
+   <screen>
     Z_&lt;type> *zget_&lt;type>(ODR o);
-   </synopsis>
+   </screen>
    <para>
     e.g.:
    </para>
-   <synopsis>
+   <screen>
     Z_InitRequest *zget_InitRequest(ODR o);
-   </synopsis>
+   </screen>
    <para>
    The &odr; handle should generally be your encoding stream, but it
     needn't be.
@@ -4206,9 +4206,9 @@ typedef struct bend_scan_rr {
     <function>zget_APDU()</function> is provided, which allocates
     a top-level Z-APDU of the type requested:
    </para>
-   <synopsis>
+   <screen>
     Z_APDU *zget_APDU(ODR o, int which);
-   </synopsis>
+   </screen>
    <para>
     The <varname>which</varname> parameter is (of course) the discriminator
     belonging to the <varname>Z_APDU</varname> <literal>CHOICE</literal> type.
@@ -5073,7 +5073,7 @@ typedef struct Z_ext_typeent
     The following definition of <literal>Z_GDU</literal> (Generic Data
     Unit) allows for both HTTP and Z39.50 in one packet.
    </para>
-   <synopsis>
+   <screen>
 #include &lt;yaz/zgdu.h&gt;
 
 #define Z_GDU_Z3950         1
@@ -5087,7 +5087,7 @@ typedef struct {
     Z_HTTP_Response *HTTP_Response;
   } u;
 } Z_GDU ;
-   </synopsis>
+   </screen>
    <para>
     The corresponding Z_GDU encoder/decoder is <function>z_GDU</function>.
     The <literal>z3950</literal> is any of the known BER encoded Z39.50
@@ -5100,7 +5100,7 @@ typedef struct {
    <title>SOAP Packages</title>
    <para>
     Every SOAP package in &yaz; is represented as follows:
-    <synopsis>
+    <screen>
 #include &lt;yaz/soap.h&gt;
 
 typedef struct {
@@ -5127,7 +5127,7 @@ typedef struct {
     } u;
     const char *ns;
 } Z_SOAP;
-    </synopsis>
+    </screen>
    </para>
    <para>
     The <literal>fault</literal> and <literal>soap_error</literal>
@@ -5143,11 +5143,11 @@ typedef struct {
     for version 1.2 it is
     <literal>http://www.w3.org/2001/06/soap-envelope</literal>.
    </para>
-   <synopsis>
+   <screen>
 int z_soap_codec(ODR o, Z_SOAP **pp,
                  char **content_buf, int *content_len,
                  Z_SOAP_Handler *handlers);
-   </synopsis>
+   </screen>
    <para>
     The <literal>content_buf</literal> and <literal>content_len</literal>
     is XML buffer and length of buffer respectively.
@@ -5177,23 +5177,23 @@ int z_soap_codec(ODR o, Z_SOAP **pp,
    </para>
    <para>
     Each handler is defined as follows:
-    <synopsis>
+    <screen>
 typedef struct {
     char *ns;
     void *client_data;
     Z_SOAP_fun f;
 } Z_SOAP_Handler;
-    </synopsis>
+    </screen>
     The <literal>ns</literal> is the namespace of the service associated with
     handler <literal>f</literal>. The <literal>client_data</literal>
     is user-defined data which is passed to the handler.
    </para>
    <para>
     The prototype for a SOAP service handler is:
-    <synopsis>
+    <screen>
 int handler(ODR o, void * ptr, void **handler_data,
             void *client_data, const char *ns);
-    </synopsis>
+    </screen>
     The <parameter>o</parameter> specifies the mode (decode/encode)
     as usual. The second argument, <parameter>ptr</parameter>,
     is a libxml2 tree node pointer (<literal>xmlNodePtr</literal>)
@@ -5212,13 +5212,13 @@ int handler(ODR o, void * ptr, void **handler_data,
     in the previous section.
     The encoder/decoder handler for SRU is defined as
     follows:
-    <synopsis>
+    <screen>
 #include &lt;yaz/srw.h&gt;
 
 int yaz_srw_codec(ODR o, void * pptr,
                   Z_SRW_GDU **handler_data,
                   void *client_data, const char *ns);
-    </synopsis>
+    </screen>
     Here, <literal>Z_SRW_GDU</literal> is either
     searchRetrieveRequest or a searchRetrieveResponse.
    </para>
@@ -5231,7 +5231,7 @@ int yaz_srw_codec(ODR o, void * pptr,
    </note>
    <para>
     The definition of searchRetrieveRequest is:
-    <synopsis>
+    <screen>
 typedef struct {
 
 #define Z_SRW_query_type_cql  1
@@ -5259,7 +5259,7 @@ typedef struct {
     char *recordPacking;
     char *database;
 } Z_SRW_searchRetrieveRequest;
-    </synopsis>
+    </screen>
     Please observe that data of type xsd:string is represented
     as a char pointer (<literal>char *</literal>). A null pointer
     means that the element is absent.
@@ -5269,7 +5269,7 @@ typedef struct {
    </para>
    <para>
     The SearchRetrieveResponse has the following definition.
-    <synopsis>
+    <screen>
 typedef struct {
     int * numberOfRecords;
     char * resultSetId;
@@ -5282,7 +5282,7 @@ typedef struct {
     int num_diagnostics;
     int *nextRecordPosition;
 } Z_SRW_searchRetrieveResponse;
-    </synopsis>
+    </screen>
     The <literal>num_records</literal> and <literal>num_diagnostics</literal>
     is number of returned records and diagnostics respectively, and also
     correspond to the "size of" arrays <literal>records</literal>
@@ -5290,26 +5290,26 @@ typedef struct {
    </para>
    <para>
     A retrieval record is defined as follows:
-    <synopsis>
+    <screen>
 typedef struct {
     char *recordSchema;
     char *recordData_buf;
     int recordData_len;
     int *recordPosition;
 } Z_SRW_record;
-    </synopsis>
+    </screen>
     The record data is defined as a buffer of some length so that
     data can be of any type. SRW 1.0 currently doesn't allow for this
     (only XML), but future versions might do.
    </para>
    <para>
     And, a diagnostic as:
-    <synopsis>
+    <screen>
 typedef struct {
     int  *code;
     char *details;
 } Z_SRW_diagnostic;
-    </synopsis>
+    </screen>
    </para>
   </sect1>
  </chapter>
@@ -5361,7 +5361,7 @@ typedef struct {
     <para>
      First set of functions all operate on a PQF parser handle:
     </para>
-    <synopsis>
+    <screen>
      #include &lt;yaz/pquery.h&gt;
 
      YAZ_PQF_Parser yaz_pqf_create(void);
@@ -5374,7 +5374,7 @@ typedef struct {
                           Odr_oid **attributeSetId, const char *qbuf);
 
      int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
-    </synopsis>
+    </screen>
     <para>
      A PQF parser is created and destructed by functions
      <function>yaz_pqf_create</function> and
@@ -5399,7 +5399,7 @@ typedef struct {
     <para>
      The second set of functions are declared as follows:
     </para>
-    <synopsis>
+    <screen>
      #include &lt;yaz/pquery.h&gt;
 
      Z_RPNQuery *p_query_rpn(ODR o, oid_proto proto, const char *qbuf);
@@ -5408,7 +5408,7 @@ typedef struct {
                              Odr_oid **attributeSetP, const char *qbuf);
 
      int p_query_attset(const char *arg);
-    </synopsis>
+    </screen>
     <para>
      The function <function>p_query_rpn()</function> takes as arguments an
      &odr; stream (see section <link linkend="odr">The ODR Module</link>)
@@ -6342,37 +6342,37 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
      <para>
       A CQL parser is represented by the <literal>CQL_parser</literal>
       handle. Its contents should be considered &yaz; internal (private).
-      <synopsis>
+      <screen>
 #include &lt;yaz/cql.h&gt;
 
 typedef struct cql_parser *CQL_parser;
 
 CQL_parser cql_parser_create(void);
 void cql_parser_destroy(CQL_parser cp);
-      </synopsis>
+      </screen>
      A parser is created by <function>cql_parser_create</function> and
      is destroyed by <function>cql_parser_destroy</function>.
      </para>
      <para>
       To parse a CQL query string, the following function
       is provided:
-      <synopsis>
+      <screen>
 int cql_parser_string(CQL_parser cp, const char *str);
-      </synopsis>
+      </screen>
       A CQL query is parsed by the <function>cql_parser_string</function>
       which takes a query <parameter>str</parameter>.
       If the query was valid (no syntax errors), then zero is returned;
       otherwise -1 is returned to indicate a syntax error.
      </para>
      <para>
-      <synopsis>
+      <screen>
 int cql_parser_stream(CQL_parser cp,
                       int (*getbyte)(void *client_data),
                       void (*ungetbyte)(int b, void *client_data),
                       void *client_data);
 
 int cql_parser_stdio(CQL_parser cp, FILE *f);
-      </synopsis>
+      </screen>
       The functions <function>cql_parser_stream</function> and
       <function>cql_parser_stdio</function> parse a CQL query
       - just like <function>cql_parser_string</function>.
@@ -6391,9 +6391,9 @@ int cql_parser_stdio(CQL_parser cp, FILE *f);
       CQL query.
      </para>
      <para>
-      <synopsis>
+      <screen>
 struct cql_node *cql_parser_result(CQL_parser cp);
-      </synopsis>
+      </screen>
       <function>cql_parser_result</function> returns
       a pointer to the root node of the resulting tree.
      </para>
@@ -6401,7 +6401,7 @@ struct cql_node *cql_parser_result(CQL_parser cp);
       Each node in a CQL tree is represented by a
       <literal>struct cql_node</literal>.
       It is defined as follows:
-      <synopsis>
+      <screen>
 #define CQL_NODE_ST 1
 #define CQL_NODE_BOOL 2
 #define CQL_NODE_SORT 3
@@ -6430,7 +6430,7 @@ struct cql_node {
         } sort;
     } u;
 };
-      </synopsis>
+      </screen>
       There are three node types: search term (ST), boolean (BOOL)
       and sortby (SORT).
       A modifier is treated as a search term too.
@@ -6511,11 +6511,11 @@ struct cql_node {
       The CQL library of &yaz; defines a <literal>cql_transform_t</literal>
       type. It represents a particular mapping between CQL and RPN.
       This handle is created and destroyed by the functions:
-     <synopsis>
+     <screen>
 cql_transform_t cql_transform_open_FILE (FILE *f);
 cql_transform_t cql_transform_open_fname(const char *fname);
 void cql_transform_close(cql_transform_t ct);
-     </synopsis>
+     </screen>
      The first two functions create a transformation handle from
      either an already open FILE or from a filename respectively.
      </para>
@@ -6526,10 +6526,10 @@ void cql_transform_close(cql_transform_t ct);
      <para>
       When a <literal>cql_transform_t</literal> handle has been created
       you can convert to RPN.
-      <synopsis>
+      <screen>
 int cql_transform_buf(cql_transform_t ct,
                       struct cql_node *cn, char *out, int max);
-      </synopsis>
+      </screen>
       This function converts the CQL tree <literal>cn</literal>
       using handle <literal>ct</literal>.
       For the resulting PQF, you supply a buffer <literal>out</literal>
@@ -6545,9 +6545,9 @@ int cql_transform_buf(cql_transform_t ct,
      </para>
      <para>
       If conversion fails, more information can be obtained by calling
-      <synopsis>
+      <screen>
 int cql_transform_error(cql_transform_t ct, char **addinfop);
-      </synopsis>
+      </screen>
       This function returns the most recently returned numeric
       error-code and sets the string-pointer at
       <literal>*addinfop</literal> to point to a string containing
@@ -6559,14 +6559,14 @@ int cql_transform_error(cql_transform_t ct, char **addinfop);
      <para>
       The SRU error-codes may be translated into brief human-readable
       error messages using
-      <synopsis>
+      <screen>
 const char *cql_strerror(int code);
-      </synopsis>
+      </screen>
      </para>
      <para>
       If you wish to be able to produce a PQF result in a different
       way, there are two alternatives.
-      <synopsis>
+      <screen>
 void cql_transform_pr(cql_transform_t ct,
                       struct cql_node *cn,
                       void (*pr)(const char *buf, void *client_data),
@@ -6574,7 +6574,7 @@ void cql_transform_pr(cql_transform_t ct,
 
 int cql_transform_FILE(cql_transform_t ct,
                        struct cql_node *cn, FILE *f);
-      </synopsis>
+      </screen>
       The former function produces output to a user-defined
       output stream. The latter writes the result to an already
       open <literal>FILE</literal>.
@@ -6864,13 +6864,13 @@ int cql_transform_FILE(cql_transform_t ct,
       There are three functions to choose from depending on the
       way you wish to store the resulting output (XML buffer
       containing XCQL).
-      <synopsis>
+      <screen>
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
 void cql_to_xml(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data);
 void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
-      </synopsis>
+      </screen>
       Function <function>cql_to_xml_buf</function> converts
       to XCQL and stores the result in a user-supplied buffer of a given
       max size.
@@ -6888,7 +6888,7 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       Conversion from PQF to CQL is offered by the two functions shown
       below. The former uses a generic stream for result. The latter
       puts result in a WRBUF (string container).
-      <synopsis>
+      <screen>
 #include &lt;yaz/rpn2cql.h>
 
 int cql_transform_rpn2cql_stream(cql_transform_t ct,
@@ -6899,7 +6899,7 @@ int cql_transform_rpn2cql_stream(cql_transform_t ct,
 int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
                                 WRBUF w,
                                 Z_RPNQuery *q);
-      </synopsis>
+      </screen>
       The configuration is the same as used in CQL to PQF conversions.
      </para>
     </sect3>
@@ -7272,7 +7272,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     Early versions of the MARC utility only allowed decoding of ISO2709.
     Today the utility may both encode - and decode to a variety of formats.
    </para>
-   <synopsis><![CDATA[
+   <screen><![CDATA[
     #include <yaz/marcdisp.h>
 
     /* create handler */
@@ -7308,7 +7308,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf,
                               int bsize, WRBUF wrbuf);
 ]]>
-   </synopsis>
+   </screen>
    <note>
     <para>
      The synopsis is just a basic subset of all functionality. Refer
@@ -8204,9 +8204,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      data. Before you can use an ODR stream it must be allocated. This is
      done with the function
     </para>
-    <synopsis>
+    <screen>
      ODR odr_createmem(int direction);
-    </synopsis>
+    </screen>
     <para>
      The <function>odr_createmem()</function> function takes as argument one
      of three manifest constants: <literal>ODR_ENCODE</literal>,
@@ -8218,9 +8218,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <para>
      When you're done with the stream, you can use
     </para>
-    <synopsis>
+    <screen>
      void odr_destroy(ODR o);
-    </synopsis>
+    </screen>
     <para>
      to release the resources allocated for the stream.
     </para>
@@ -8243,17 +8243,17 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      space for data when decoding incoming PDUs. You can use the memory
      system for your own purposes, by using the function
     </para>
-    <synopsis>
+    <screen>
      void *odr_malloc(ODR o, size_t size);
-    </synopsis>
+    </screen>
     <para>
      You can't use the normal <function>free(2)</function> routine to free
      memory allocated by this function, and &odr; doesn't provide a parallel
      function. Instead, you can call
     </para>
-    <synopsis>
+    <screen>
      void odr_reset(ODR o);
-    </synopsis>
+    </screen>
     <para>
      when you are done with the
      memory: Everything allocated since the last call to
@@ -8264,9 +8264,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <para>
      The function
     </para>
-    <synopsis>
+    <screen>
      size_t odr_total(ODR o);
-    </synopsis>
+    </screen>
     <para>
      returns the number of bytes allocated on the stream since the last call to
      <function>odr_reset()</function>.
@@ -8284,17 +8284,17 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      If you want to retain a bit of memory beyond the next call to
      <function>odr_reset()</function>, you can use the function
     </para>
-    <synopsis>
+    <screen>
      ODR_MEM odr_extract_mem(ODR o);
-    </synopsis>
+    </screen>
     <para>
      This function will give you control of the memory recently allocated
      on the ODR stream. The memory will live (past calls to
      <function>odr_reset()</function>), until you call the function
     </para>
-    <synopsis>
+    <screen>
      void odr_release_mem(ODR_MEM p);
-    </synopsis>
+    </screen>
     <para>
      The opaque <literal>ODR_MEM</literal> handle has no other purpose than
      referencing the memory block for you until you want to release it.
@@ -8310,9 +8310,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      When encoding data, the ODR stream will write the encoded octet string
      in an internal buffer. To retrieve the data, use the function
     </para>
-    <synopsis>
+    <screen>
      char *odr_getbuf(ODR o, int *len, int *size);
-    </synopsis>
+    </screen>
     <para>
      The integer pointed to by len is set to the length of the encoded
      data, and a pointer to that data is returned. <literal>*size</literal>
@@ -8321,9 +8321,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      a primitive function using the same &odr; stream will overwrite the
      data, unless a different buffer has been supplied using the call
     </para>
-    <synopsis>
+    <screen>
      void odr_setbuf(ODR o, char *buf, int len, int can_grow);
-    </synopsis>
+    </screen>
     <para>
      which sets the encoding (or decoding) buffer used by
      <literal>o</literal> to <literal>buf</literal>, using the length
@@ -8336,9 +8336,9 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
      necessary. The default condition of a new encoding stream is equivalent
      to the results of calling
     </para>
-    <synopsis>
+    <screen>
      odr_setbuf(stream, 0, 0, 1);
-    </synopsis>
+    </screen>
     <para>
      In this case, the stream will allocate and reallocate memory as
      necessary. The stream reallocates memory by repeatedly doubling the
@@ -8387,11 +8387,11 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     </para>
     <example id="example.odr.encoding.and.decoding.functions">
      <title>Encoding and decoding functions</title>
-     <synopsis>
+     <screen>
       int odr_integer(ODR o, Odr_int **p, int optional, const char *name);
 
       int z_APDU(ODR o, Z_APDU **p, int optional, const char *name);
-     </synopsis>
+     </screen>
     </example>
     <para>
      If the data is absent (or doesn't match the tag corresponding to
@@ -8485,18 +8485,18 @@ void do_nothing_useful(Odr_int value)
      the ODR module will print the contents of a PDU in a readable format.
      By default output is written to the <literal>stderr</literal> stream.
      This behavior can be changed, however, by calling the function
-     <synopsis>
+     <screen>
       odr_setprint(ODR o, FILE *file);
-     </synopsis>
+     </screen>
      before encoders or decoders are being invoked.
      It is also possible to direct the output to a buffer (or indeed
      another file), by using the more generic mechanism:
-     <synopsis>
+     <screen>
       void odr_set_stream(ODR o, void *handle,
                          void (*stream_write)(ODR o, void *handle, int type,
                                               const char *buf, int len),
                          void (*stream_close)(void *handle));
-     </synopsis>
+     </screen>
      Here the user provides an opaque handle and two handlers,
      <replaceable>stream_write</replaceable> for writing,
      and <replaceable>stream_close</replaceable> which is supposed
@@ -8511,9 +8511,9 @@ void do_nothing_useful(Odr_int value)
     <para>
      Another utility useful for diagnostics (error handling) or as
      part of the printing facilities is:
-     <synopsis>
+     <screen>
       const char **odr_get_element_path(ODR o);
-     </synopsis>
+     </screen>
      which returns a list of current elements that ODR deals with at the
      moment. For the returned array, say <literal>ar</literal>,
      then <literal>ar[0]</literal> is the top level element,
@@ -8540,9 +8540,9 @@ void do_nothing_useful(Odr_int value)
     <para>
      To provide information to the programmer or administrator, the function
     </para>
-    <synopsis>
+    <screen>
      void odr_perror(ODR o, char *message);
-    </synopsis>
+    </screen>
     <para>
      is provided, which prints the <literal>message</literal> argument to
      <literal>stderr</literal> along with an error message from the stream.
@@ -8550,9 +8550,9 @@ void do_nothing_useful(Odr_int value)
     <para>
      You can also use the function
     </para>
-    <synopsis>
+    <screen>
      int odr_geterror(ODR o);
-    </synopsis>
+    </screen>
     <para>
      to get the current error number from the screen. The number will be
      one of these constants:
@@ -8600,17 +8600,17 @@ void do_nothing_useful(Odr_int value)
     <para>
      The character string array
     </para>
-    <synopsis>
+    <screen>
      char *odr_errlist[]
-    </synopsis>
+    </screen>
     <para>
      can be indexed by the error code to obtain a human-readable
      representation of the problem.
     </para>
    </sect2>
-   <sect2 id="odr.summary.and.synopsis">
+   <sect2 id="odr.summary.and.screen">
     <title>Summary and Synopsis</title>
-    <synopsis>
+    <screen>
      #include &lt;yaz/odr.h>
 
      ODR odr_createmem(int direction);
@@ -8632,7 +8632,7 @@ void do_nothing_useful(Odr_int value)
      void odr_perror(ODR o, const char *message);
 
      extern char *odr_errlist[];
-    </synopsis>
+    </screen>
    </sect2>
   </sect1>
   <sect1 id="odr.programming">
@@ -8682,9 +8682,9 @@ void do_nothing_useful(Odr_int value)
       The &odr; function for encoding or decoding (or printing) the ASN.1
       INTEGER type looks like this:
      </para>
-     <synopsis>
+     <screen>
       int odr_integer(ODR o, Odr_int **p, int optional, const char *name);
-     </synopsis>
+     </screen>
      <para>
       The <literal>Odr_int</literal> is just a simple integer.
      </para>
@@ -8729,9 +8729,9 @@ void do_nothing_useful(Odr_int value)
     </sect3>
     <sect3 id="odr.boolean">
      <title>BOOLEAN</title>
-     <synopsis>
+     <screen>
 int odr_bool(ODR o, Odr_bool **p, int optional, const char *name);
-     </synopsis>
+     </screen>
     </sect3>
     <sect3 id="odr.real">
      <title>REAL</title>
@@ -8741,9 +8741,9 @@ int odr_bool(ODR o, Odr_bool **p, int optional, const char *name);
     </sect3>
     <sect3 id="odr.null">
      <title>NULL</title>
-     <synopsis>
+     <screen>
 int odr_null(ODR o, Odr_null **p, int optional, const char *name);
-     </synopsis>
+     </screen>
      <para>
       In this case, the value of **p is not important. If <literal>*p</literal>
       is different from the null pointer, the null value is present, otherwise
@@ -8752,7 +8752,7 @@ int odr_null(ODR o, Odr_null **p, int optional, const char *name);
     </sect3>
     <sect3 id="odr.octet.string">
      <title>OCTET STRING</title>
-     <synopsis>
+     <screen>
 typedef struct odr_oct
 {
     unsigned char *buf;
@@ -8761,7 +8761,7 @@ typedef struct odr_oct
 
 int odr_octetstring(ODR o, Odr_oct **p, int optional,
                     const char *name);
-     </synopsis>
+     </screen>
      <para>
       The <literal>buf</literal> field should point to the character array
       that holds the octetstring. The <literal>len</literal> field holds the
@@ -8773,9 +8773,9 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
       types that are not expected to contain embedded NULL characters (e.g.
       VisibleString):
      </para>
-     <synopsis>
+     <screen>
       int odr_cstring(ODR o, char **p, int optional, const char *name);
-     </synopsis>
+     </screen>
      <para>
       which encodes or decodes between OCTETSTRING representations and
       null-terminated C strings.
@@ -8783,17 +8783,17 @@ int odr_octetstring(ODR o, Odr_oct **p, int optional,
      <para>
       Functions are provided for the derived string types, e.g.:
      </para>
-     <synopsis>
+     <screen>
 int odr_visiblestring(ODR o, char **p, int optional,
                       const char *name);
-     </synopsis>
+     </screen>
     </sect3>
     <sect3 id="odr.bit.string">
      <title>BIT STRING</title>
-     <synopsis>
+     <screen>
 int odr_bitstring(ODR o, Odr_bitmask **p, int optional,
                   const char *name);
-     </synopsis>
+     </screen>
      <para>
       The opaque type <literal>Odr_bitmask</literal> is only suitable for
       holding relatively brief bit strings, e.g. for options fields, etc.
@@ -8804,7 +8804,7 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int optional,
       A set of macros are provided for manipulating the
       <literal>Odr_bitmask</literal> type:
      </para>
-     <synopsis>
+     <screen>
 void ODR_MASK_ZERO(Odr_bitmask *b);
 
 void ODR_MASK_SET(Odr_bitmask *b, int bitno);
@@ -8812,7 +8812,7 @@ void ODR_MASK_SET(Odr_bitmask *b, int bitno);
 void ODR_MASK_CLEAR(Odr_bitmask *b, int bitno);
 
 int ODR_MASK_GET(Odr_bitmask *b, int bitno);
-     </synopsis>
+     </screen>
      <para>
       The functions are modeled after the manipulation functions that
       accompany the <literal>fd_set</literal> type used by the
@@ -8823,9 +8823,9 @@ int ODR_MASK_GET(Odr_bitmask *b, int bitno);
     </sect3>
     <sect3 id="odr.object.identifier">
      <title>OBJECT IDENTIFIER</title>
-     <synopsis>
+     <screen>
 int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
-     </synopsis>
+     </screen>
      <para>
       The C OID representation is simply an array of integers, terminated by
       the value -1 (the <literal>Odr_oid</literal> type is synonymous with
@@ -8843,13 +8843,13 @@ int odr_oid(ODR o, Odr_oid **p, int optional, const char *name);
      <function>odr_implicit_tag()</function> or
      <function>odr_explicit_tag()</function> macros:
     </para>
-    <synopsis>
+    <screen>
 int odr_implicit_tag(ODR o, Odr_fun fun, int class, int tag,
                      int optional, const char *name);
 
 int odr_explicit_tag(ODR o, Odr_fun fun, int class, int tag,
                      int optional, const char *name);
-    </synopsis>
+    </screen>
     <para>
      To create a type derived from the integer type by implicit tagging, you
      might write:
@@ -8891,10 +8891,10 @@ int myInt(ODR o, Odr_int **p, int optional, const char *name)
     <para>
      For implementing SEQUENCEs, the functions
     </para>
-    <synopsis>
+    <screen>
 int odr_sequence_begin(ODR o, void *p, int size, const char *name);
 int odr_sequence_end(ODR o);
-    </synopsis>
+    </screen>
     <para>
      are provided.
     </para>
@@ -8980,9 +8980,9 @@ MySequence ::= [10] IMPLICIT SEQUENCE {
      <para>
       You would implement this in &odr; by calling the function
      </para>
-     <synopsis>
+     <screen>
 int odr_implicit_settag(ODR o, int class, int tag);
-     </synopsis>
+     </screen>
      <para>
       which overrides the tag of the type immediately following it. The
       macro <function>odr_implicit_tag()</function> works by calling
@@ -9026,12 +9026,12 @@ MySequence ::= [10] IMPLICIT SEQUENCE {
       Since the new type has an extra level of construction, two new functions
       are needed to encapsulate the base type:
      </para>
-     <synopsis>
+     <screen>
 int odr_constructed_begin(ODR o, void *p, int class, int tag,
                           const char *name);
 
 int odr_constructed_end(ODR o);
-     </synopsis>
+     </screen>
      <para>
       Assume that the IMPLICIT in the type definition above were replaced
       with EXPLICIT (or that the IMPLICIT keyword was simply deleted, which
@@ -9079,10 +9079,10 @@ int mySequence(ODR o, MySequence **p, int optional, const char *name)
     <para>
      To handle sequences (arrays) of a specific type, the function
     </para>
-    <synopsis>
+    <screen>
 int odr_sequence_of(ODR o, int (*fun)(ODR o, void *p, int optional),
                     void *p, int *num, const char *name);
-    </synopsis>
+    </screen>
     <para>
      The <literal>fun</literal> parameter is a pointer to the decoder/encoder
      function of the type. <literal>p</literal> is a pointer to an array of
@@ -9130,10 +9130,10 @@ int myArray(ODR o, MyArray **p, int optional, const char *name)
     <para>
      CHOICE types are handled by the function:
     </para>
-    <synopsis>
+    <screen>
 int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
                const char *name);
-    </synopsis>
+    </screen>
     <para>
      The <literal>arm</literal> array is used to describe each of the possible
      types that the CHOICE type may assume. Internally in your application,
@@ -9269,9 +9269,9 @@ int myChoice(ODR o, MyChoice **p, int optional, const char *name)
      decoding, we need a way to tell the choice function to look for a
      specific arm of the table. The function
     </para>
-    <synopsis>
+    <screen>
 void odr_choice_bias(ODR o, int what);
-    </synopsis>
+    </screen>
     <para>
      provides this functionality. When called, it leaves a notice for the next
      call to <function>odr_choice()</function> to be called on the decoding
@@ -9304,7 +9304,7 @@ void odr_choice_bias(ODR o, int what);
  </chapter>
  <chapter id="comstack">
   <title>The COMSTACK Module</title>
-  <sect1 id="comstack.synopsis">
+  <sect1 id="comstack.screen">
    <title>Synopsis (blocking mode)</title>
    <programlisting><![CDATA[
     COMSTACK stack;
@@ -9413,9 +9413,9 @@ void odr_choice_bias(ODR o, int what);
    <title>Common Functions</title>
    <sect2 id="comstack.managing.endpoints">
     <title>Managing Endpoints</title>
-    <synopsis>
+    <screen>
      COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
-    </synopsis>
+    </screen>
     <para>
      Creates an instance of the protocol stack - a communications endpoint.
      The <literal>type</literal> parameter determines the mode
@@ -9451,9 +9451,9 @@ void odr_choice_bias(ODR o, int what);
      <literal>PROTO_Z3950</literal> or <literal>PROTO_HTTP</literal>.
      Protocol <literal>PROTO_SR</literal> is no longer supported.
     </para>
-    <synopsis>
+    <screen>
      void cs_close(COMSTACK handle);
-    </synopsis>
+    </screen>
     <para>
      Closes the connection (as elegantly as the lower layers will permit),
      and releases the resources pointed to by the
@@ -9470,9 +9470,9 @@ void odr_choice_bias(ODR o, int what);
    </sect2>
    <sect2 id="comstack.data.exchange">
     <title>Data Exchange</title>
-    <synopsis>
+    <screen>
      int cs_put(COMSTACK handle, char *buf, int len);
-    </synopsis>
+    </screen>
     <para>
      Sends <literal>buf</literal> down the wire.
      In blocking mode, this function will return only when a full buffer has
@@ -9485,9 +9485,9 @@ void odr_choice_bias(ODR o, int what);
      When a full buffer has been sent, the function will return 0 for
      success. The return value -1 indicates an error condition (see below).
     </para>
-    <synopsis>
+    <screen>
      int cs_get(COMSTACK handle, char **buf, int *size);
-    </synopsis>
+    </screen>
     <para>
      Receives a PDU or HTTP Response from the peer. Returns the number of
      bytes read.
@@ -9509,9 +9509,9 @@ void odr_choice_bias(ODR o, int what);
     <para>
      See also the <function>cs_more()</function> function below.
     </para>
-    <synopsis>
+    <screen>
      int cs_more(COMSTACK handle);
-    </synopsis>
+    </screen>
     <para>
      The <function>cs_more()</function> function should be used in conjunction
      with <function>cs_get</function> and
@@ -9543,9 +9543,9 @@ void odr_choice_bias(ODR o, int what);
       clumsy) - hence the call for this extra function.
      </para>
     </note>
-    <synopsis>
+    <screen>
      int cs_look(COMSTACK handle);
-    </synopsis>
+    </screen>
     <para>
      This function is useful when you're operating in nonblocking
      mode. Call it when
@@ -9603,9 +9603,9 @@ void odr_choice_bias(ODR o, int what);
       same event will show up again, when more data has arrived.
      </para>
     </note>
-    <synopsis>
+    <screen>
      int cs_fileno(COMSTACK h);
-    </synopsis>
+    </screen>
     <para>
      returns the file descriptor of the association. Use this when
      file-level operations on the endpoint are required
@@ -9615,9 +9615,9 @@ void odr_choice_bias(ODR o, int what);
   </sect1>
   <sect1 id="comstack.client">
    <title>Client Side</title>
-   <synopsis>
+   <screen>
     int cs_connect(COMSTACK handle, void *address);
-   </synopsis>
+   </screen>
    <para>
     Initiate a connection with the target at <literal>address</literal>
     (more on addresses below). The function will return 0 on success, and 1 if
@@ -9627,9 +9627,9 @@ void odr_choice_bias(ODR o, int what);
     when <function>select(2)</function> or <function>poll(2)</function>
     reports input pending on the association.
    </para>
-   <synopsis>
+   <screen>
     int cs_rcvconnect(COMSTACK handle);
-   </synopsis>
+   </screen>
    <para>
     Complete a connect operation initiated by <function>cs_connect()</function>.
     It will return 0 on success; 1 if the operation has not yet completed (in
@@ -9642,10 +9642,10 @@ void odr_choice_bias(ODR o, int what);
     To establish a server under the <application>inetd</application>
     server, you can use
    </para>
-   <synopsis>
+   <screen>
     COMSTACK cs_createbysocket(int socket, CS_TYPE type, int blocking,
                                int protocol);
-   </synopsis>
+   </screen>
    <para>
     The <literal>socket</literal> parameter is an established socket (when
     your application is invoked from <application>inetd</application>, the
@@ -9653,26 +9653,26 @@ void odr_choice_bias(ODR o, int what);
     The following parameters are identical to the ones for
     <function>cs_create</function>.
    </para>
-   <synopsis>
+   <screen>
     int cs_bind(COMSTACK handle, void *address, int mode)
-   </synopsis>
+   </screen>
    <para>
     Binds a local address to the endpoint. Read about addresses below. The
     <literal>mode</literal> parameter should be either
     <literal>CS_CLIENT</literal> or <literal>CS_SERVER</literal>.
    </para>
-   <synopsis>
+   <screen>
     int cs_listen(COMSTACK handle, char *addr, int *addrlen);
-   </synopsis>
+   </screen>
    <para>
     Call this to process incoming events on an endpoint that has been
     bound in listening mode. It will return 0 to indicate that the connect
     request has been received, 1 to signal a partial reception, and -1 to
     indicate an error condition.
    </para>
-   <synopsis>
+   <screen>
     COMSTACK cs_accept(COMSTACK handle);
-   </synopsis>
+   </screen>
    <para>
     This finalizes the server-side association establishment, after
     cs_listen has completed successfully. It returns a new connection
@@ -9684,9 +9684,9 @@ void odr_choice_bias(ODR o, int what);
    <para>
     You can use the call
    </para>
-   <synopsis>
+   <screen>
     const char *cs_addrstr(COMSTACK);
-   </synopsis>
+   </screen>
    <para>
     on an established connection to retrieve the host-name of the remote host.
    </para>
@@ -9705,15 +9705,15 @@ void odr_choice_bias(ODR o, int what);
     of the lower layers to map a user-friendly string-form address to the
     binary form required by the lower layers.
    </para>
-   <synopsis>
+   <screen>
     void *cs_straddr(COMSTACK handle, const char *str);
-   </synopsis>
+   </screen>
    <para>
     The format for TCP/IP and SSL addresses is:
    </para>
-   <synopsis>
+   <screen>
     &lt;host> [ ':' &lt;portnum> ]
-   </synopsis>
+   </screen>
    <para>
     The <literal>hostname</literal> can be either a domain name or an
     IP address. The port number, if omitted, defaults to 210.
@@ -9733,9 +9733,9 @@ void odr_choice_bias(ODR o, int what);
    <para>
     When a connection has been established, you can use
    </para>
-   <synopsis>
+   <screen>
     const char *cs_addrstr(COMSTACK h);
-   </synopsis>
+   </screen>
    <para>
     to retrieve the host name of the peer system. The function returns
     a pointer to a static area, which is overwritten on the next call
@@ -9745,9 +9745,9 @@ void odr_choice_bias(ODR o, int what);
     A fairly recent addition to the &comstack; module is the utility
     function
    </para>
-   <synopsis>
+   <screen>
     COMSTACK cs_create_host (const char *str, int blocking, void **vp);
-   </synopsis>
+   </screen>
    <para>
     which is just a wrapper for <function>cs_create</function> and
     <function>cs_straddr</function>. The <parameter>str</parameter>
@@ -9767,32 +9767,32 @@ void odr_choice_bias(ODR o, int what);
   <sect1 id="comstack.ssl">
    <title>SSL</title>
    <para>
-    <synopsis>
+    <screen>
      void *cs_get_ssl(COMSTACK cs);
-    </synopsis>
+    </screen>
     Returns the SSL handle, <literal>SSL *</literal> for comstack. If comstack
     is not of type SSL, then NULL is returned.
    </para>
    <para>
-    <synopsis>
+    <screen>
      int cs_set_ssl_ctx(COMSTACK cs, void *ctx);
-    </synopsis>
+    </screen>
     Sets SSL context for comstack. The parameter is expected to be of type
     <literal>SSL_CTX *</literal>. This function should be called just
     after comstack has been created (before connect, bind, etc).
     This function returns 1 for success; 0 for failure.
    </para>
    <para>
-    <synopsis>
+    <screen>
      int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
-    </synopsis>
+    </screen>
     Sets SSL certificate for comstack as a PEM file. This function
     returns 1 for success; 0 for failure.
    </para>
    <para>
-    <synopsis>
+    <screen>
      int cs_get_ssl_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
-    </synopsis>
+    </screen>
     This function returns the peer certificate. If successful,
     <literal>*buf</literal> and <literal>*len</literal> holds
     X509 buffer and length respectively. Buffer should be freed
@@ -9816,29 +9816,29 @@ void odr_choice_bias(ODR o, int what);
     <literal>CSOUTSTATE</literal>,
     <literal>CSNODATA</literal>, ...
    </para>
-   <synopsis>
+   <screen>
     int cs_errno(COMSTACK handle);
-   </synopsis>
+   </screen>
    <para>
     You can the textual representation of the error code
     by using <function>cs_errmsg</function>, which
     works like <function>strerror(3)</function>.
    </para>
-   <synopsis>
+   <screen>
     const char *cs_errmsg(int n);
-   </synopsis>
+   </screen>
    <para>
     It is also possible to get straight to the textual representation
     without the error code, by using
     <function>cs_strerror</function>.
    </para>
-   <synopsis>
+   <screen>
     const char *cs_strerror(COMSTACK h);
-   </synopsis>
+   </screen>
   </sect1>
   <sect1 id="comstack.summary">
    <title>Summary and Synopsis</title>
-   <synopsis><![CDATA[
+   <screen><![CDATA[
     #include <yaz/comstack.h>
 
     #include <yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
@@ -9875,7 +9875,7 @@ void odr_choice_bias(ODR o, int what);
 
     const char *cs_addrstr(COMSTACK h);
 ]]>
-   </synopsis>
+   </screen>
   </sect1>
  </chapter>
  <chapter id="future">

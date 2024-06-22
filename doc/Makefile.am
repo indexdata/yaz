@@ -90,7 +90,7 @@ $(HTMLFILES): $(XMLFILES)
 $(MANFILES): local.ent
 
 yaz.pdf: $(XMLFILES)
-	$(PDF_COMPILE) $(srcdir)/book.xml && mv book.pdf yaz.pdf
+	xmllint --noent $(srcdir)/book.xml | $(PDF_COMPILE) --listings -H listings-setup.tex -f docbook -o yaz.pdf
 
 
 yazj.pdf:
