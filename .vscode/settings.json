@@ -4,5 +4,7 @@
         "sonarlint.pathToCompileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
         "files.associations": {
                 "__locale": "c"
-        }
+        },
+        "xml.symbols.maxItemsComputed": 10000,
+        "xml.validation.resolveExternalEntities": true
 }
