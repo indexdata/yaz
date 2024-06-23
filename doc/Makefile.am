@@ -90,8 +90,7 @@ $(HTMLFILES): $(XMLFILES)
 $(MANFILES): local.ent
 
 yaz.pdf: $(XMLFILES)
-	xmllint --noent $(srcdir)/book.xml | $(PDF_COMPILE) --listings -H listings-setup.tex -f docbook -o yaz.pdf
-
+	xmllint --noent $(srcdir)/book.xml | $(PDF_COMPILE) -o yaz.pdf
 
 yazj.pdf:
 	jade -E14 -D $(srcdir) -d common/print.dsl -t tex $(srcdir)/common/xml.dcl $(srcdir)/book.xml
