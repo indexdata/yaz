@@ -1,4 +1,4 @@
-DEBIAN_DIST="bookworm bullseye buster"
+DEBIAN_DIST="bookworm bullseye"
 UBUNTU_DIST="jammy focal bionic xenial"
 CENTOS_DIST="centos7 centos8"
 VERSION=5.34.1
