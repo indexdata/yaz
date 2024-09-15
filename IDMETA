@@ -1,4 +1,4 @@
 DEBIAN_DIST="bookworm bullseye"
 UBUNTU_DIST="noble jammy focal"
 CENTOS_DIST="centos9"
-VERSION=5.34.1
+VERSION=5.34.2~pre
