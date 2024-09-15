@@ -4,6 +4,9 @@
 #
 # spec file for YAZ
 
+# disable LTO otherwise libstemmer compilation fails
+%global _lto_cflags %nil
+
 %define idmetaversion %(. ./IDMETA; echo $VERSION)
 Name: yaz
 Summary: Z39.50 Programs
@@ -13,6 +16,7 @@ Release: 1.indexdata
 # determine system
 %define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_redhat8 %(grep 'release 8' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_redhat9 %(grep 'release 9' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
@@ -27,25 +31,33 @@ Prefix: %{_prefix}
 
 %define TCPWRAPPER tcp_wrappers-devel
 
-%if %is_redhat5
-%define TCPWRAPPER tcp_wrappers
-%endif
-
 %if %is_suse
 %define TCPWRAPPER tcpd-devel
-%endif
-
-%if is_redhat8
-%define TCPDFLAGS --disable-tcpd
-%else
-%define TCPDFLAGS --enable-tcpd
-BuildRequires: %{TCPWRAPPER}
 %endif
 
 %if %is_suse11
 BuildRequires: libgnutls-devel
 %else
 BuildRequires: gnutls-devel
+%endif
+
+%if %is_redhat5
+%define TCPWRAPPER tcp_wrappers
+%endif
+
+%if %is_redhat8
+%define TCPWRAPPER 0
+%endif
+
+%if %is_redhat9
+%define TCPWRAPPER 0
+%endif
+
+%if %TCPWRAPPER
+%define TCPDFLAGS --enable-tcpd
+BuildRequires: %{TCPWRAPPER}
+%else
+%define TCPDFLAGS --disable-tcpd
 %endif
 
 BuildRequires: pkgconfig
