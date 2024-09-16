@@ -46,14 +46,14 @@ BuildRequires: gnutls-devel
 %endif
 
 %if %is_redhat8
-%define TCPWRAPPER 0
+%undefine TCPWRAPPER
 %endif
 
 %if %is_redhat9
-%define TCPWRAPPER 0
+%undefine TCPWRAPPER
 %endif
 
-%if %TCPWRAPPER
+%if 0%{?TCPWRAPPER:1}
 %define TCPDFLAGS --enable-tcpd
 BuildRequires: %{TCPWRAPPER}
 %else
