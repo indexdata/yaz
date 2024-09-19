@@ -1,3 +1,9 @@
+--- 5.34.2 2024/09/19
+
+Fix search regression with OCLC's "Sisis InfoGuide" origin #127
+
+Packaging: add Debian Bookworm, Ubuntu Noble and CentOS Stream 9
+
 --- 5.34.1 2024/06/18
 
 Build: fix implicit atoi/stdlib includes (libxml >2.12) #104
