@@ -1,3 +1,7 @@
+--- 5.34.3 2025/01/07
+
+Build fix: yaz-icu 5.34.2 fails to compile with icu 76.1 #131
+
 --- 5.34.2 2024/09/19
 
 Fix search regression with OCLC's "Sisis InfoGuide" origin #127
