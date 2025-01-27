@@ -83,7 +83,7 @@ static void pr_term(const char **cpp, int stop_at_space,
     *cpp = cp;
 }
 
-static int node(struct cql_node *cn,
+static int node_st(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
@@ -159,7 +159,7 @@ static int node(struct cql_node *cn,
 }
 
 
-static int bool(struct cql_node *cn,
+static int node_bool(struct cql_node *cn,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data)
 {
@@ -237,9 +237,9 @@ static int cql_to_ccl_r(struct cql_node *cn,
     switch (cn->which)
     {
     case CQL_NODE_ST:
-        return node(cn, pr, client_data);
+        return node_st(cn, pr, client_data);
     case CQL_NODE_BOOL:
-        return bool(cn, pr, client_data);
+        return node_bool(cn, pr, client_data);
     case CQL_NODE_SORT:
         return cql_to_ccl_r(cn->u.sort.search, pr, client_data);
     }
