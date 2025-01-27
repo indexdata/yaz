@@ -32,6 +32,7 @@
 #ifndef YAZ_ERRNO_H
 #define YAZ_ERRNO_H
 
+#include <stddef.h>
 #include <yaz/yconfig.h>
 
 YAZ_BEGIN_CDECL

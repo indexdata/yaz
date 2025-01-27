@@ -47,6 +47,7 @@
 # ifndef O_BINARY
 #  define O_BINARY 0
 # endif
+#define _POSIX_C_SOURCE 200809L
 #endif
 
 #ifdef __cplusplus

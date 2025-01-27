@@ -6,8 +6,7 @@
 #include <config.h>
 #endif
 
-#include <yaz/yconfig.h>
-
+#include <yaz/matchstr.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,12 +32,7 @@ char *complete_from_list(const char** completions,
         idx = 0;
     for(; completions[idx]; ++ idx) {
         if(!
-#ifdef WIN32
-           _strnicmp
-#else
-           strncasecmp
-#endif
-           (completions[idx],text,strlen(text))) {
+           yaz_strncasecmp(completions[idx],text,strlen(text))) {
             ++idx; /* skip this entry on the next run */
             return xstrdup(completions[idx-1]);
         };
