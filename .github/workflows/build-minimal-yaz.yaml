@@ -1,4 +1,4 @@
-# Build minimal yaz from source
+# Build minimal yaz from source with gcc c89
 name: Build minimal YAZ
 on: [pull_request]
 jobs:
