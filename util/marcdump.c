@@ -454,7 +454,7 @@ static long dump(const char *fname, const char *from, const char *to,
 {
     yaz_marc_t mt = yaz_marc_create();
     yaz_iconv_t cd = 0;
-    long total;
+    long total = 0L;
 
     if (yaz_marc_leader_spec(mt, leader_spec))
     {
