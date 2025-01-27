@@ -1,8 +1,8 @@
-# Build yaz from source with gcc default + dist check
-name: Build complete YAZ
-on: [push, pull_request]
+# Build yaz from source with clang c23
+name: Build complete YAZ, clang, c23
+on: [pull_request]
 jobs:
- build-complete:
+ build-clang-c23-complete:
   runs-on: ubuntu-latest
   steps:
    - uses: actions/checkout@v4
@@ -12,7 +12,7 @@ jobs:
      run: sudo apt update
    - name: Install required and optional dependencies
      run: >
-      sudo apt install autoconf automake libtool gcc make bison
+      sudo apt install autoconf automake libtool clang make bison
       tclsh xsltproc docbook docbook-xml docbook-xsl
       pkg-config libxslt1-dev libgnutls28-dev
       libreadline-dev libwrap0-dev libicu-dev
@@ -21,11 +21,7 @@ jobs:
      run: ./buildconf.sh
    - name: Run configure
      run: >
-      ./configure --enable-tcpd --with-xslt --with-gnutls --with-icu
+      CC=clang CFLAGS="-std=c23" ./configure --enable-tcpd --with-xslt --with-gnutls --with-icu
       --with-memcached --with-redis
    - name: Run Make check
      run: make -j4 check
-   - name: Run Make dist
-     run: make -j4 dist
-   - name: Run Make clean
-     run: make clean

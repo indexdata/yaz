@@ -1,4 +1,4 @@
-# Build minimal yaz from source
+# Build minimal yaz from source with gcc c89
 name: Build minimal YAZ
 on: [pull_request]
 jobs:
@@ -18,7 +18,7 @@ jobs:
      run: ./buildconf.sh
    - name: Run configure without xml, icu, ...
      run: >
-      CFLAGS="-g -Wall -std=c89 -D_POSIX_C_SOURCE=200112L" ./configure
+      CFLAGS="-g -Wall -std=c89" ./configure
       --without-xml2 --without-icu --disable-tcpd --without-memcached --without-redis
    - name: Run Make check
      run: make -j4 check

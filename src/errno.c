@@ -18,11 +18,11 @@
 #define _REENTRANT
 #endif
 
+#include <yaz/errno.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stddef.h>
-#include <yaz/errno.h>
 
 #ifdef WIN32
 #include <windows.h>

@@ -8,6 +8,7 @@ AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9 subdir-objects])
 dnl
+AC_DEFINE([_POSIX_C_SOURCE],[200809L],[Enable POSIX])
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
 dnl ------ Checking programs
