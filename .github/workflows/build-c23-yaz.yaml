@@ -1,8 +1,8 @@
 # Build yaz from source with clang c23
 name: Build complete YAZ, clang, c23
-on: [push, pull_request]
+on: [pull_request]
 jobs:
- build-complete:
+ build-clang-c23-complete:
   runs-on: ubuntu-latest
   steps:
    - uses: actions/checkout@v4
