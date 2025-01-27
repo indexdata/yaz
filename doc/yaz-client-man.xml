@@ -385,7 +385,7 @@
     </listitem>
    </varlistentry>
    <varlistentry><term>
-     <literal>authentication</literal> [<replaceable>auth1</replaceable> [<replaceable>auth2</replaceable> [<replaceable>auth2</replaceable>]]]
+     <literal>authentication</literal> [<replaceable>auth1</replaceable> [<replaceable>auth2</replaceable> [<replaceable>auth3</replaceable>]]]
     </term>
     <listitem>
      <para>Configures authentication strings to be sent to server. Zero, 1, 2 or 3 arguments may follow the
