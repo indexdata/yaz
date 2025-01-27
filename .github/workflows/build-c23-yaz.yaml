@@ -1,5 +1,5 @@
 # Build yaz from source with clang c23
-name: Build complete YAZ
+name: Build complete YAZ, clang, c23
 on: [push, pull_request]
 jobs:
  build-complete:
