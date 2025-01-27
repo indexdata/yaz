@@ -385,18 +385,34 @@
     </listitem>
    </varlistentry>
    <varlistentry><term>
-     <literal>authentication</literal> <replaceable>openauth</replaceable>
+     <literal>authentication</literal> [<replaceable>auth1</replaceable> [<replaceable>auth2</replaceable> [<replaceable>auth3</replaceable>]]]
     </term>
     <listitem>
-     <para>Sets up an authentication string if a server requires
-      authentication (v2 OpenStyle). The authentication string is first
+     <para>Configures authentication strings to be sent to server. Zero, 1, 2 or 3 arguments may follow the
+     auth command.
+     </para>
+     <para>If no (0) arguments are given, no authentication string is sent.</para>
+     <para>If one argument is given, the Z39.50 v2 OpenStyle authentication is used.
+      A common convention for the <replaceable>auth1</replaceable> string
+      is that the username and password is separated by a slash, e.g.
+      <literal>myusername/mysecret</literal>.
+     </para>
+     <para>
+      If two or more arguments is given Z39.50 v3 authentication is used, in which cased the
+      first argument is used, second argument is group and third argument is password. If only two arguments are given
+      the group is assumed to be empty.
+     </para>
+     <para>
+      As for other commands in yaz-client, the arguments are separated by whitespace. A backslash character can be used to include
+      a character verbatim. For example, <literal>auth myuser a\ b</literal> is a two argument auth command where user is
+      <literal>myuser</literal> and password is <literal>a b</literal>.
+     </para>
+     <para>
+     The authentication string is first
       sent to the server when the
       <link linkend="command-open"><literal>open</literal></link> command is
       issued and the Z39.50 Initialize Request is sent, so this command
       must be used before <literal>open</literal> in order to be effective.
-      A common convention for the <replaceable>authopen</replaceable> string
-      is that the username - and password is separated by a slash, e.g.
-      <literal>myusername/mysecret</literal>.
      </para>
     </listitem>
    </varlistentry>

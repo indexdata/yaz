@@ -784,7 +784,7 @@ static int cmd_authentication(const char *arg)
     int r;
 
     nmem_reset(nmem_auth);
-    nmem_strsplit_blank(nmem_auth, arg, &args, &r);
+    nmem_strsplit_escape2(nmem_auth, " ", arg, &args, &r, 1, '\\', 1);
 
     if (r == 0)
     {
