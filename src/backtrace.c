@@ -48,6 +48,22 @@ static char static_progname[256];
 #if HAVE_EXECINFO_H
 static int yaz_panic_fd = -1;
 
+static void iwrite(int fd, const char *buf, size_t len)
+{
+    while (len)
+    {
+        ssize_t r = write(fd, buf, len);
+        if (r == -1)
+        {
+            if (errno == EINTR)
+                continue;
+            break;
+        }
+        buf += r;
+        len -= r;
+    }
+}
+
 static void yaz_invoke_gdb(void)
 {
     int fd = yaz_panic_fd;
@@ -56,14 +72,14 @@ static void yaz_invoke_gdb(void)
     if (pipe(fds) == -1)
     {
         const char *cp = "backtrace: pipe failed\n";
-        write(fd, cp, strlen(cp));
+        iwrite(fd, cp, strlen(cp));
         return;
     }
     pid = fork();
     if (pid == (pid_t) (-1))
     {   /* error */
         const char *cp = "backtrace: fork failure\n";
-        write(fd, cp, strlen(cp));
+        iwrite(fd, cp, strlen(cp));
     }
     else if (pid == 0)
     {   /* child */
@@ -74,16 +90,19 @@ static void yaz_invoke_gdb(void)
 
         close(fds[1]);
         close(0);
-        dup(fds[0]);
+        if (dup(fds[0]) != 0)
+            _exit(1);
         if (fd != 1)
         {
             close(1);
-            dup(fd);
+            if (dup(fd) != 1)
+                _exit(1);
         }
         if (fd != 2)
         {
             close(2);
-            dup(fd);
+            if (dup(fd) != 2)
+                _exit(1);
         }
         arg[arg_no++] = "/usr/bin/gdb";
         arg[arg_no++] = "-n";
@@ -97,7 +116,7 @@ static void yaz_invoke_gdb(void)
         arg[arg_no++] = pidstr;
         arg[arg_no] = 0;
         execv(arg[0], arg);
-        write(2, cp, strlen(cp)); /* exec failure if we make it this far */
+        iwrite(2, cp, strlen(cp)); /* exec failure if we make it this far */
         _exit(1);
     }
     else
@@ -108,7 +127,7 @@ static void yaz_invoke_gdb(void)
         prctl(PR_SET_PTRACER, pid, 0, 0, 0);
 #endif
         close(fds[0]);
-        write(fds[1], "quit\n", 5);
+        iwrite(fds[1], "quit\n", 5);
         while (1)
         {
             int status;
@@ -122,7 +141,7 @@ static void yaz_invoke_gdb(void)
             if (sec == 11)
                 break;
             if (sec > 3)
-                write(fds[1], "quit\n", 5);
+                iwrite(fds[1], "quit\n", 5);
             sleep(1);
             sec++;
         }
@@ -135,7 +154,7 @@ static void yaz_panic_alarm(int sig)
 {
     const char *cp = "backtrace: backtrace hangs\n";
 
-    write(yaz_panic_fd, cp, strlen(cp));
+    iwrite(yaz_panic_fd, cp, strlen(cp));
     _exit(1);
 }
 
@@ -188,7 +207,7 @@ static void yaz_panic_sig_handler(int sig)
     /* static variable to be used in the following + handlers */
     yaz_panic_fd = fileno(file);
 
-    write(yaz_panic_fd, buf, strlen(buf));
+    iwrite(yaz_panic_fd, buf, strlen(buf));
     yaz_invoke_backtrace(sig);
     yaz_invoke_gdb();
     kill(getpid(), sig);
