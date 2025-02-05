@@ -551,7 +551,9 @@ void *resolver_thread(void *arg)
     if (sp->ai)
         freeaddrinfo(sp->ai);
     sp->ai = tcpip_getaddrinfo(sp->host_port, sp->port, &sp->ipv6_only);
-    write(sp->pipefd[1], "1", 1);
+    if (write(sp->pipefd[1], "1", 1) != 1)
+        yaz_log(YLOG_WARN, "tcpip.c: resolver_thread: write error");
+
     return 0;
 }
 
@@ -560,7 +562,8 @@ static struct addrinfo *wait_resolver_thread(COMSTACK h)
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     char buf;
 
-    read(sp->pipefd[0], &buf, 1);
+    if (read(sp->pipefd[0], &buf, 1) == (ssize_t) -1)
+        return 0;
     yaz_thread_join(&sp->thread_id, 0);
     close(sp->pipefd[0]);
     close(sp->pipefd[1]);
