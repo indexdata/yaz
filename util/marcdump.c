@@ -155,49 +155,6 @@ static long marcdump_read_json(yaz_marc_t mt, const char *fname)
 }
 
 #if YAZ_HAVE_XML2
-struct record_context
-{
-    WRBUF wrbuf;
-    long offset;
-    long limit;
-    long no;
-};
-
-static void context_handle(yaz_marc_t mt, void *vp)
-{
-    struct record_context *ctx = vp;
-    if (ctx->no >= ctx->offset && ctx->no < ctx->offset + ctx->limit)
-    {
-        int write_rc = yaz_marc_write_mode(mt, ctx->wrbuf);
-        if (write_rc)
-        {
-            yaz_log(YLOG_WARN, "yaz_marc_write_mode: "
-                               "write error: %d", write_rc);
-            no_errors++;
-        }
-        fputs(wrbuf_cstr(ctx->wrbuf), stdout);
-        wrbuf_rewind(ctx->wrbuf);
-    }
-    ctx->no++;
-}
-
-static long marcdump_read_marcxml(yaz_marc_t mt, const char *fname,
-                                  long offset, long limit)
-{
-    struct record_context context;
-    context.wrbuf = wrbuf_alloc();
-    context.offset = offset;
-    context.limit = limit;
-    context.no = 0;
-    yaz_marc_sax_t yt = yaz_marc_sax_new(mt, context_handle, &context);
-    xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
-
-    xmlSAXUserParseFile(sax_ptr, yt, fname);
-    wrbuf_destroy(context.wrbuf);
-    yaz_marc_sax_destroy(yt);
-    return context.no;
-}
-
 static long marcdump_read_xml(yaz_marc_t mt, const char *fname,
                               long offset, long limit)
 {
@@ -479,13 +436,7 @@ static long dump(const char *fname, const char *from, const char *to,
     yaz_marc_write_using_libxml2(mt, write_using_libxml2);
     yaz_marc_debug(mt, verbose);
 
-    if (input_format == YAZ_MARC_MARCXML)
-    {
-#if YAZ_HAVE_XML2
-        total = marcdump_read_marcxml(mt, fname, offset, limit);
-#endif
-    }
-    else if (input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE)
+    if (input_format == YAZ_MARC_TURBOMARC || input_format == YAZ_MARC_XCHANGE || input_format == YAZ_MARC_MARCXML)
     {
 #if YAZ_HAVE_XML2
         total = marcdump_read_xml(mt, fname, offset, limit);
