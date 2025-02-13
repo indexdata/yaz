@@ -928,7 +928,7 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
         size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                  identifier_length);
         wrbuf_rewind(wr_cdata);
-        wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, s->code_data + using_code_len);
+        wrbuf_iconv_puts2(wr_cdata, mt->iconv_cd, s->code_data + using_code_len, wrbuf_xml_strip);
         marc_iconv_reset(mt, wr_cdata);
 
         wrbuf_rewind(subfield_name);
@@ -941,7 +941,7 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
         {
             /* Generate code attribute value and add */
             wrbuf_rewind(wr_cdata);
-            wrbuf_iconv_write(wr_cdata, mt->iconv_cd,s->code_data, using_code_len);
+            wrbuf_iconv_write2(wr_cdata, mt->iconv_cd, s->code_data, using_code_len, wrbuf_xml_strip);
             xmlNewProp(ptr_subfield, BAD_CAST "code",  BAD_CAST wrbuf_cstr(wr_cdata));
         }
     }
@@ -999,7 +999,7 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_rewind(wr_cdata);
-            wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_iconv_puts2(wr_cdata, mt->iconv_cd, n->u.controlfield.data, wrbuf_xml_strip);
             marc_iconv_reset(mt, wr_cdata);
 
             strncpy(field + 1, n->u.controlfield.tag, 3);
@@ -1075,23 +1075,23 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                          identifier_length);
                 wrbuf_rewind(wr_cdata);
-                wrbuf_iconv_puts(wr_cdata, mt->iconv_cd,
-                                 s->code_data + using_code_len);
+                wrbuf_iconv_puts2(wr_cdata, mt->iconv_cd,
+                                  s->code_data + using_code_len, wrbuf_xml_strip);
                 marc_iconv_reset(mt, wr_cdata);
                 ptr_subfield = xmlNewTextChild(
                     ptr, ns_record,
                     BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
 
                 wrbuf_rewind(wr_cdata);
-                wrbuf_iconv_write(wr_cdata, mt->iconv_cd,
-                                  s->code_data, using_code_len);
+                wrbuf_iconv_write2(wr_cdata, mt->iconv_cd,
+                                  s->code_data, using_code_len, wrbuf_xml_strip);
                 xmlNewProp(ptr_subfield, BAD_CAST "code",
                            BAD_CAST wrbuf_cstr(wr_cdata));
             }
             break;
         case YAZ_MARC_CONTROLFIELD:
             wrbuf_rewind(wr_cdata);
-            wrbuf_iconv_puts(wr_cdata, mt->iconv_cd, n->u.controlfield.data);
+            wrbuf_iconv_puts2(wr_cdata, mt->iconv_cd, n->u.controlfield.data, wrbuf_xml_strip);
             marc_iconv_reset(mt, wr_cdata);
 
             ptr = xmlNewTextChild(record_ptr, ns_record,
