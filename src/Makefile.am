@@ -63,7 +63,6 @@ diagsrw.c yaz/diagsrw.h: srw.csv
 diagsru_update.c yaz/diagsru_update.h: sru_update.csv
 	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(srcdir)/yaz/diagsru_update.h sru_update
 
-
 noinst_HEADERS = yaz/icu_I18N.h diag-entry.h
 
 pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
@@ -176,8 +175,10 @@ libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
 	$(STEMMER_SOURCES)
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-BUILT_SOURCES = z-core.c z-date.c z-univ.c zes-update.c zes-admin.c z-charneg.c \
- z-mterm2.c z-oclcui.c z-facet-1.c ill-core.c oclc-ill-req-ext.c item-req.c
+BUILT_SOURCES = marc8r.c marc8.c iso5426.c z-core.c z-date.c z-univ.c \
+ zes-update.c zes-admin.c z-charneg.c z-mterm2.c z-oclcui.c z-facet-1.c \
+ ill-core.c oclc-ill-req-ext.c item-req.c oid_std.c \
+ diagbib1.c diagsrw.c diagsru_update.c diagsrw.c
 
 z-core.c: $(srcdir)/z.tcl $(srcdir)/z3950v3.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/z3950v3.asn
@@ -213,7 +214,6 @@ z-oclcui.c: $(srcdir)/z.tcl $(srcdir)/oclcui.asn $(YAZCOMP)
 # UserInfoFormat-facet-1
 z-facet-1.c: $(srcdir)/facet.asn $(YAZCOMP)
 	$(TCLSH) $(YAZCOMP_Z) $(srcdir)/facet.asn
-
 
 # ILL protocol
 ill-core.c: $(srcdir)/ill.tcl $(srcdir)/ill9702.asn $(YAZCOMP)
