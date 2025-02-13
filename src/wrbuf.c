@@ -175,6 +175,17 @@ void wrbuf_xmlputs_n(WRBUF b, const char *cp, size_t size)
     }
 }
 
+void wrbuf_xml_strip(WRBUF b, const char *cp, size_t size)
+{
+    for (; size; size--)
+    {
+        /* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
+        if (!(*cp >= 0 && *cp <= 31 && *cp != 9 && *cp != 10 && *cp != 13))
+            wrbuf_putc(b, *cp);
+        cp++;
+    }
+}
+
 void wrbuf_printf(WRBUF b, const char *fmt, ...)
 {
     va_list ap;
@@ -185,6 +196,13 @@ void wrbuf_printf(WRBUF b, const char *fmt, ...)
     wrbuf_puts (b, buf);
 
     va_end(ap);
+}
+
+
+int wrbuf_iconv_puts2(WRBUF b, yaz_iconv_t cd, const char *buf,
+                      void (*wfunc)(WRBUF, const char *, size_t))
+{
+    return wrbuf_iconv_write2(b, cd, buf, strlen(buf), wfunc);
 }
 
 int wrbuf_iconv_write2(WRBUF b, yaz_iconv_t cd, const char *buf,
@@ -251,7 +269,7 @@ void wrbuf_iconv_write_cdata(WRBUF b, yaz_iconv_t cd, const char *buf, size_t si
 
 void wrbuf_iconv_puts_cdata(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    wrbuf_iconv_write2(b, cd, strz, strlen(strz), wrbuf_xmlputs_n);
+    wrbuf_iconv_puts2(b, cd, strz, wrbuf_xmlputs_n);
 }
 
 void wrbuf_iconv_json_write(WRBUF b, yaz_iconv_t cd,
@@ -262,7 +280,7 @@ void wrbuf_iconv_json_write(WRBUF b, yaz_iconv_t cd,
 
 void wrbuf_iconv_json_puts(WRBUF b, yaz_iconv_t cd, const char *strz)
 {
-    wrbuf_iconv_write2(b, cd, strz, strlen(strz), wrbuf_json_write);
+    wrbuf_iconv_puts2(b, cd, strz, wrbuf_json_write);
 }
 
 void wrbuf_iconv_reset(WRBUF b, yaz_iconv_t cd)

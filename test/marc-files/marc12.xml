@@ -1,0 +1,199 @@
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
+  <leader>03839cam a2200529 i 4500</leader>
+  <controlfield tag="001">on1183349983</controlfield>
+  <controlfield tag="003">OCoLC</controlfield>
+  <controlfield tag="005">20210423132000.0</controlfield>
+  <controlfield tag="008">200810s2020    cc a   a      000 1 chi  </controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">9787572101014</subfield>
+    <subfield code="q">(hardcover)</subfield>
+  </datafield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">7572101011</subfield>
+    <subfield code="q">(hardcover)</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(OCoLC)1183349983</subfield>
+  </datafield>
+  <datafield tag="040" ind1=" " ind2=" ">
+    <subfield code="a">SINLB</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">SINLB</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">SINLB</subfield>
+    <subfield code="d">JQW</subfield>
+    <subfield code="d">OCLCF</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">OTP</subfield>
+    <subfield code="d">HCO</subfield>
+  </datafield>
+  <datafield tag="049" ind1=" " ind2=" ">
+    <subfield code="a">HCOA</subfield>
+  </datafield>
+  <datafield tag="066" ind1=" " ind2=" ">
+    <subfield code="c">$1</subfield>
+    <subfield code="c">Zsym</subfield>
+  </datafield>
+  <datafield tag="099" ind1=" " ind2=" ">
+    <subfield code="b">LIU</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="6">880-01</subfield>
+    <subfield code="a">Liu, Xugong,</subfield>
+    <subfield code="e">author,</subfield>
+    <subfield code="e">illustrator.</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="6">880-02</subfield>
+    <subfield code="a">Che piao qu na er le /</subfield>
+    <subfield code="c">Liu Xugong zhu hui.</subfield>
+  </datafield>
+  <datafield tag="250" ind1=" " ind2=" ">
+    <subfield code="6">880-03</subfield>
+    <subfield code="a">Di 1 ban.</subfield>
+  </datafield>
+  <datafield tag="264" ind1=" " ind2="1">
+    <subfield code="6">880-04</subfield>
+    <subfield code="a">[Wuhan] :</subfield>
+    <subfield code="b">Chang Jiang shao nian er tong chu ban she,</subfield>
+    <subfield code="c">2020.</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">1 volume (unpaged) :</subfield>
+    <subfield code="b">color illustrations ;</subfield>
+    <subfield code="c">22 x 29 cm.</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="336" ind1=" " ind2=" ">
+    <subfield code="a">still image</subfield>
+    <subfield code="b">sti</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield tag="337" ind1=" " ind2=" ">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield tag="338" ind1=" " ind2=" ">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield tag="490" ind1="1" ind2=" ">
+    <subfield code="6">880-05</subfield>
+    <subfield code="a">Hai tun hui ben hua yuan =</subfield>
+    <subfield code="a">Dolphinmedia picture book garden ;</subfield>
+    <subfield code="v">585</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="6">880-06</subfield>
+    <subfield code="a">&quot;The bus is about to take off as the bus driver asked the passengers to show their tickets. Suddenly, a gust of wind blows off everyone&apos;s tickets. The driver decided that he must retrieve everyone&apos;s tickets.&quot;--Bookswindows.com.</subfield>
+  </datafield>
+  <datafield tag="546" ind1=" " ind2=" ">
+    <subfield code="a">Text in simplified Chinese.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Bus drivers</subfield>
+    <subfield code="v">Juvenile fiction.</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="0">
+    <subfield code="a">Bus occupants</subfield>
+    <subfield code="v">Juvenile fiction.</subfield>
+  </datafield>
+  <datafield tag="655" ind1=" " ind2="7">
+    <subfield code="a">Chinese language materials.</subfield>
+    <subfield code="2">lcshac</subfield>
+  </datafield>
+  <datafield tag="830" ind1=" " ind2="0">
+    <subfield code="6">880-07</subfield>
+    <subfield code="a">Hai tun hui ben hua yuan ;</subfield>
+    <subfield code="v">585.</subfield>
+  </datafield>
+  <datafield tag="880" ind1="1" ind2=" ">
+    <subfield code="6">100-01/$1</subfield>
+    <subfield code="a">刘旭恭,</subfield>
+    <subfield code="e">author,</subfield>
+    <subfield code="e">illustrator.</subfield>
+  </datafield>
+  <datafield tag="880" ind1="1" ind2="0">
+    <subfield code="6">245-02/$1</subfield>
+    <subfield code="a">车票去哪儿了 /</subfield>
+    <subfield code="c">刘旭恭著绘.</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2=" ">
+    <subfield code="6">250-03/$1</subfield>
+    <subfield code="a">第1版.</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2="1">
+    <subfield code="6">264-04/$1</subfield>
+    <subfield code="a">[武汉] :</subfield>
+    <subfield code="b">长江少年儿童出版社,</subfield>
+    <subfield code="c">2020.</subfield>
+  </datafield>
+  <datafield tag="880" ind1="1" ind2=" ">
+    <subfield code="6">490-05/$1</subfield>
+    <subfield code="a">海豚绘本花园 =</subfield>
+    <subfield code="a">Dolphinmedia picture book garden ;</subfield>
+    <subfield code="v">585</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2=" ">
+    <subfield code="6">520-06/$1</subfield>
+    <subfield code="a">&quot;这是一本充满想象力的儿童绘本。公车即将开车司机先生要乘客们把车票拿出来哪知一阵风吹来把大家的车票吹得好远好远司机立刻决定一定要把车票追回来α于是公车上的乘客跟着司机先生一起踏上旅程他们偏离了原本的道路从城市开往不可思议的地方α一路上他们越过高山、悬崖、海边、雪地遇见了神仙、海龙王、雪怪竟然还闯进赛车场&amp;&amp;最后终于在太阳落下的地方一棵又高又大的树上发现了车票的踪影他们可以顺利追回车票吗树上又有什么让人惊讶的景象呢 绘本作家刘旭恭以橘色和蓝色为主色调描绘用带有童趣的质朴笔触勾勒活泼的线条和大面积的色块表现出活力满满的氛围。他独特的幽默感让这个看似天马行空的故事多了一点哲思与温度。司机先生为了追回被风吹走的车票不管前方有多危险丝毫不受影响坚持信念一路往前追乘客不分彼此团结一致帮助司机先生让人感受到司机与乘客之间的情谊。对了别忘了在图中找找小狗的身影可是司机先生的好帮手喔!&quot;--Bookswindows.com.</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2=" ">
+    <subfield code="6">500-00/$1</subfield>
+    <subfield code="a">&quot;本书荣获2018年金鼎奖图书画奖&quot;--page [4] of cover.</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2=" ">
+    <subfield code="6">500-00/$1</subfield>
+    <subfield code="a">&quot;2019年第六届丰子恺儿童图画书奖佳作奖&quot;--page [4] of cover.</subfield>
+  </datafield>
+  <datafield tag="880" ind1=" " ind2="0">
+    <subfield code="6">830-07/$1</subfield>
+    <subfield code="a">海豚绘本花园 ;</subfield>
+    <subfield code="v">585.</subfield>
+  </datafield>
+  <datafield tag="948" ind1=" " ind2=" ">
+    <subfield code="a">jac</subfield>
+    <subfield code="b">20210423</subfield>
+    <subfield code="c">HCL 4/21</subfield>
+  </datafield>
+  <datafield tag="994" ind1=" " ind2=" ">
+    <subfield code="a">C0</subfield>
+    <subfield code="b">HCO</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="b">31972208755424</subfield>
+    <subfield code="c">epbf--c</subfield>
+    <subfield code="d">LIU</subfield>
+    <subfield code="m">ep</subfield>
+    <subfield code="n">14265091</subfield>
+    <subfield code="t">j21</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="b">31972208755440</subfield>
+    <subfield code="c">epbf--c</subfield>
+    <subfield code="d">LIU</subfield>
+    <subfield code="m">py</subfield>
+    <subfield code="n">14265093</subfield>
+    <subfield code="t">j21</subfield>
+  </datafield>
+  <datafield tag="949" ind1=" " ind2=" ">
+    <subfield code="b">31972208755457</subfield>
+    <subfield code="c">epbf--c</subfield>
+    <subfield code="d">LIU</subfield>
+    <subfield code="m">sd</subfield>
+    <subfield code="n">14265094</subfield>
+    <subfield code="t">j21</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="a">6060345</subfield>
+  </datafield>
+</record>
+</collection>
