@@ -1,0 +1,199 @@
+<collection xmlns="http://www.indexdata.com/turbomarc">
+<r>
+  <l>03839cam a2200529 i 4500</l>
+  <c001>on1183349983</c001>
+  <c003>OCoLC</c003>
+  <c005>20210423132000.0</c005>
+  <c008>200810s2020    cc a   a      000 1 chi  </c008>
+  <d020 i1=" " i2=" ">
+    <sa>9787572101014</sa>
+    <sq>(hardcover)</sq>
+  </d020>
+  <d020 i1=" " i2=" ">
+    <sa>7572101011</sa>
+    <sq>(hardcover)</sq>
+  </d020>
+  <d035 i1=" " i2=" ">
+    <sa>(OCoLC)1183349983</sa>
+  </d035>
+  <d040 i1=" " i2=" ">
+    <sa>SINLB</sa>
+    <sb>eng</sb>
+    <se>rda</se>
+    <sc>SINLB</sc>
+    <sd>OCLCO</sd>
+    <sd>SINLB</sd>
+    <sd>JQW</sd>
+    <sd>OCLCF</sd>
+    <sd>OCLCO</sd>
+    <sd>OTP</sd>
+    <sd>HCO</sd>
+  </d040>
+  <d049 i1=" " i2=" ">
+    <sa>HCOA</sa>
+  </d049>
+  <d066 i1=" " i2=" ">
+    <sc>$1</sc>
+    <sc>Zsym</sc>
+  </d066>
+  <d099 i1=" " i2=" ">
+    <sb>LIU</sb>
+  </d099>
+  <d100 i1="1" i2=" ">
+    <s6>880-01</s6>
+    <sa>Liu, Xugong,</sa>
+    <se>author,</se>
+    <se>illustrator.</se>
+  </d100>
+  <d245 i1="1" i2="0">
+    <s6>880-02</s6>
+    <sa>Che piao qu na er le /</sa>
+    <sc>Liu Xugong zhu hui.</sc>
+  </d245>
+  <d250 i1=" " i2=" ">
+    <s6>880-03</s6>
+    <sa>Di 1 ban.</sa>
+  </d250>
+  <d264 i1=" " i2="1">
+    <s6>880-04</s6>
+    <sa>[Wuhan] :</sa>
+    <sb>Chang Jiang shao nian er tong chu ban she,</sb>
+    <sc>2020.</sc>
+  </d264>
+  <d300 i1=" " i2=" ">
+    <sa>1 volume (unpaged) :</sa>
+    <sb>color illustrations ;</sb>
+    <sc>22 x 29 cm.</sc>
+  </d300>
+  <d336 i1=" " i2=" ">
+    <sa>text</sa>
+    <sb>txt</sb>
+    <s2>rdacontent</s2>
+  </d336>
+  <d336 i1=" " i2=" ">
+    <sa>still image</sa>
+    <sb>sti</sb>
+    <s2>rdacontent</s2>
+  </d336>
+  <d337 i1=" " i2=" ">
+    <sa>unmediated</sa>
+    <sb>n</sb>
+    <s2>rdamedia</s2>
+  </d337>
+  <d338 i1=" " i2=" ">
+    <sa>volume</sa>
+    <sb>nc</sb>
+    <s2>rdacarrier</s2>
+  </d338>
+  <d490 i1="1" i2=" ">
+    <s6>880-05</s6>
+    <sa>Hai tun hui ben hua yuan =</sa>
+    <sa>Dolphinmedia picture book garden ;</sa>
+    <sv>585</sv>
+  </d490>
+  <d520 i1=" " i2=" ">
+    <s6>880-06</s6>
+    <sa>&quot;The bus is about to take off as the bus driver asked the passengers to show their tickets. Suddenly, a gust of wind blows off everyone&apos;s tickets. The driver decided that he must retrieve everyone&apos;s tickets.&quot;--Bookswindows.com.</sa>
+  </d520>
+  <d546 i1=" " i2=" ">
+    <sa>Text in simplified Chinese.</sa>
+  </d546>
+  <d650 i1=" " i2="0">
+    <sa>Bus drivers</sa>
+    <sv>Juvenile fiction.</sv>
+  </d650>
+  <d650 i1=" " i2="0">
+    <sa>Bus occupants</sa>
+    <sv>Juvenile fiction.</sv>
+  </d650>
+  <d655 i1=" " i2="7">
+    <sa>Chinese language materials.</sa>
+    <s2>lcshac</s2>
+  </d655>
+  <d830 i1=" " i2="0">
+    <s6>880-07</s6>
+    <sa>Hai tun hui ben hua yuan ;</sa>
+    <sv>585.</sv>
+  </d830>
+  <d880 i1="1" i2=" ">
+    <s6>100-01/$1</s6>
+    <sa>刘旭恭,</sa>
+    <se>author,</se>
+    <se>illustrator.</se>
+  </d880>
+  <d880 i1="1" i2="0">
+    <s6>245-02/$1</s6>
+    <sa>车票去哪儿了 /</sa>
+    <sc>刘旭恭著绘.</sc>
+  </d880>
+  <d880 i1=" " i2=" ">
+    <s6>250-03/$1</s6>
+    <sa>第1版.</sa>
+  </d880>
+  <d880 i1=" " i2="1">
+    <s6>264-04/$1</s6>
+    <sa>[武汉] :</sa>
+    <sb>长江少年儿童出版社,</sb>
+    <sc>2020.</sc>
+  </d880>
+  <d880 i1="1" i2=" ">
+    <s6>490-05/$1</s6>
+    <sa>海豚绘本花园 =</sa>
+    <sa>Dolphinmedia picture book garden ;</sa>
+    <sv>585</sv>
+  </d880>
+  <d880 i1=" " i2=" ">
+    <s6>520-06/$1</s6>
+    <sa>&quot;这是一本充满想象力的儿童绘本。公车即将开车司机先生要乘客们把车票拿出来哪知一阵风吹来把大家的车票吹得好远好远司机立刻决定一定要把车票追回来α于是公车上的乘客跟着司机先生一起踏上旅程他们偏离了原本的道路从城市开往不可思议的地方α一路上他们越过高山、悬崖、海边、雪地遇见了神仙、海龙王、雪怪竟然还闯进赛车场&amp;&amp;最后终于在太阳落下的地方一棵又高又大的树上发现了车票的踪影他们可以顺利追回车票吗树上又有什么让人惊讶的景象呢 绘本作家刘旭恭以橘色和蓝色为主色调描绘用带有童趣的质朴笔触勾勒活泼的线条和大面积的色块表现出活力满满的氛围。他独特的幽默感让这个看似天马行空的故事多了一点哲思与温度。司机先生为了追回被风吹走的车票不管前方有多危险丝毫不受影响坚持信念一路往前追乘客不分彼此团结一致帮助司机先生让人感受到司机与乘客之间的情谊。对了别忘了在图中找找小狗的身影可是司机先生的好帮手喔!&quot;--Bookswindows.com.</sa>
+  </d880>
+  <d880 i1=" " i2=" ">
+    <s6>500-00/$1</s6>
+    <sa>&quot;本书荣获2018年金鼎奖图书画奖&quot;--page [4] of cover.</sa>
+  </d880>
+  <d880 i1=" " i2=" ">
+    <s6>500-00/$1</s6>
+    <sa>&quot;2019年第六届丰子恺儿童图画书奖佳作奖&quot;--page [4] of cover.</sa>
+  </d880>
+  <d880 i1=" " i2="0">
+    <s6>830-07/$1</s6>
+    <sa>海豚绘本花园 ;</sa>
+    <sv>585.</sv>
+  </d880>
+  <d948 i1=" " i2=" ">
+    <sa>jac</sa>
+    <sb>20210423</sb>
+    <sc>HCL 4/21</sc>
+  </d948>
+  <d994 i1=" " i2=" ">
+    <sa>C0</sa>
+    <sb>HCO</sb>
+  </d994>
+  <d949 i1=" " i2=" ">
+    <sb>31972208755424</sb>
+    <sc>epbf--c</sc>
+    <sd>LIU</sd>
+    <sm>ep</sm>
+    <sn>14265091</sn>
+    <st>j21</st>
+  </d949>
+  <d949 i1=" " i2=" ">
+    <sb>31972208755440</sb>
+    <sc>epbf--c</sc>
+    <sd>LIU</sd>
+    <sm>py</sm>
+    <sn>14265093</sn>
+    <st>j21</st>
+  </d949>
+  <d949 i1=" " i2=" ">
+    <sb>31972208755457</sb>
+    <sc>epbf--c</sc>
+    <sd>LIU</sd>
+    <sm>sd</sm>
+    <sn>14265094</sn>
+    <st>j21</st>
+  </d949>
+  <d999 i1=" " i2=" ">
+    <sa>6060345</sa>
+  </d999>
+</r>
+</collection>
