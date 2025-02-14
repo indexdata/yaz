@@ -176,7 +176,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                 yaz_marc_add_datafield(mt, tag, buf + i_start,
                                        i - i_start);
             }
-            size_t code_offset = i + 1;
+            int code_offset = i + 1;
             while (i < end_offset && buf[i] != ISO2709_RS && buf[i] != ISO2709_FS)
             {
                 if (buf[i] == ISO2709_IDFS && i < end_offset -1 && !(buf[i+1] >= 0 && buf[i+1] <= ' '))
