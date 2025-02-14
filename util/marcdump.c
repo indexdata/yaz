@@ -361,7 +361,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             cd1 = 0;
         }
 
-        if (r == -1)
+        if (r == (size_t)-1)
             no_errors++;
         if (r > 0 && result && len_result && marc_no >= offset)
         {
