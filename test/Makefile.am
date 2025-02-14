@@ -51,6 +51,8 @@ LDADD = ../src/libyaz.la
 test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 test_libstemmer_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
 
+BUILT_SOURCES = test_odrcodec.c test_odrcodec.h
+
 CONFIG_CLEAN_FILES=*.log
 
 test_cql2ccl_SOURCES = test_cql2ccl.c
