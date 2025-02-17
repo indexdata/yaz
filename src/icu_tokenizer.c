@@ -64,14 +64,17 @@ struct icu_tokenizer *icu_tokenizer_clone(struct icu_tokenizer *old)
     UErrorCode status = U_ZERO_ERROR;
     struct icu_tokenizer * tokenizer
         = (struct icu_tokenizer *) xmalloc(sizeof(struct icu_tokenizer));
+#if U_ICU_VERSION_MAJOR_NUM < 69
+    int32_t bufferSize = U_BRK_SAFECLONE_BUFFERSIZE;
+#endif
 
     assert(old);
     icu_tokenizer_reset(tokenizer, old->action);
     assert(old->bi);
-#if U_ICU_VERSION_MAJOR_NUM >= 69
-    tokenizer->bi = ubrk_clone(old->bi, &status);
-#else
+#if U_ICU_VERSION_MAJOR_NUM < 69
     tokenizer->bi = ubrk_safeClone(old->bi, NULL, &bufferSize, &status);
+#else
+    tokenizer->bi = ubrk_clone(old->bi, &status);
 #endif
     if (U_SUCCESS(status))
         return tokenizer;
