@@ -1,3 +1,21 @@
+--- 5.34.4 2025/02/17
+
+Fix warn_unused_result warnings produced by gcc/clang #142
+
+Avoid xmlSAXUserParseFile #140
+
+Fix compilation with c17 c23 #133
+Most importanty set _POSIX_C_SOURCE to ensure certain
+calls, fdopen, strerror_r are available.
+C23 now regards `bool` as keyword, so avoid using
+`bool` for function name.
+
+Allow spaces for auth strings in yaz-client #101
+
+Fix malformed XML generated from malformed marc #100
+
+Avoid urbk_safeClone; Use ubrk_clone instead #98
+
 --- 5.34.3 2025/01/07
 
 Build fix: yaz-icu 5.34.2 fails to compile with icu 76.1 #131
