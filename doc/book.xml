@@ -862,7 +862,7 @@
        </screen>
        and compile &yaz; with:
        <screen>
-         export ICU_CPPFLAGS="-DYAZ_HAVE_ICU=1 -I../ICU/icu/icu4c/source/common -I../ICU/icu/icu4c/source/i18n"
+         export ICU_CPPFLAGS="-DYAZ_HAVE_ICU=1 -I../../ICU/icu/icu4c/source/common -I../../ICU/icu/icu4c/source/i18n"
          export ICU_LIBS=" -licucore"
          ./configure
          make
