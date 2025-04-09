@@ -235,7 +235,7 @@ int cql_transform_define_FILE(cql_transform_t ct, FILE *f)
         int t = yaz_tok_move(tp);
         if (t == YAZ_TOK_STRING)
         {
-            const char *pattern = yaz_tok_parse_string(tp);
+            char *pattern = xstrdup(yaz_tok_parse_string(tp)); /* copy as it's yaz_tok_move resets */
             t = yaz_tok_move(tp);
             if (t != '=')
                 ret = -1;
@@ -244,6 +244,7 @@ int cql_transform_define_FILE(cql_transform_t ct, FILE *f)
                 if (cql_transform_parse_tok_line(ct, pattern, tp))
                     ret = -1;
             }
+            xfree(pattern);
         }
         else if (t != YAZ_TOK_EOF)
         {
