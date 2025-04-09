@@ -3,7 +3,9 @@
         "makefile.compileCommandsPath": ".vscode/compile_commands.json",
         "sonarlint.pathToCompileCommands": "${workspaceFolder}/.vscode/compile_commands.json",
         "files.associations": {
-                "__locale": "c"
+                "__locale": "c",
+                "rpn2cql.h": "c",
+                "cql.h": "c"
         },
         "xml.symbols.maxItemsComputed": 10000,
         "xml.validation.resolveExternalEntities": true

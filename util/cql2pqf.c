@@ -67,17 +67,17 @@ int main(int argc, char **argv)
             usage();
         }
     }
+
+    ct = cql_transform_create();
     if (fname)
     {
-        ct = cql_transform_open_fname(fname);
-        if (!ct)
+        if (cql_transform_define_fname(ct, fname))
         {
             fprintf(stderr, "failed to read properties %s\n", fname);
+            cql_transform_close(ct);
             exit(1);
         }
     }
-    else
-        ct = cql_transform_create();
 
     if (reverse)
     {
