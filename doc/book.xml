@@ -6541,20 +6541,29 @@ struct cql_node {
      </para>
      <para>
       The CQL library of &yaz; defines a <literal>cql_transform_t</literal>
-      type. It represents a particular mapping between CQL and RPN.
+      handle. It represents a particular mapping between CQL and RPN.
       This handle is created and destroyed by the functions:
+     </para>
+     <synopsis>
+cql_transform_t cql_transform_create(void);
+int cql_transform_define_fname(cql_transform_t *ct, const char *fname);
+int cql_transform_define_FILE(cql_trasnform_t *ct, FILE *f);
+void cql_transform_close(cql_transform_t ct);
+     </synopsis>
+     <para>
+      The first method constructs a handle. The second and third functon extends
+      the configuration by reading from a file or an open FILE handle.
+      The transform handle is destroyed by <function>cql_transform_close</function>
+      in which case no further reference of the handle is allowed.
+     </para>
+     <para>
+      There are also two methods which creates and reads configuration
+      from a file combined:
+     </para>
      <synopsis>
 cql_transform_t cql_transform_open_FILE (FILE *f);
 cql_transform_t cql_transform_open_fname(const char *fname);
-void cql_transform_close(cql_transform_t ct);
      </synopsis>
-     The first two functions create a transformation handle from
-     either an already open FILE or from a filename respectively.
-     </para>
-     <para>
-      The handle is destroyed by <function>cql_transform_close</function>
-      in which case no further reference of the handle is allowed.
-     </para>
      <para>
       When a <literal>cql_transform_t</literal> handle has been created
       you can convert to RPN.
