@@ -215,42 +215,44 @@ int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
 cql_transform_t cql_transform_open_FILE(FILE *f)
 {
     cql_transform_t ct = cql_transform_create();
+    if (cql_transform_define_FILE(ct, f))
+    {
+        cql_transform_close(ct);
+        return 0;
+    }
+    return ct;
+}
+
+int cql_transform_define_FILE(cql_transform_t ct, FILE *f)
+{
     char line[1024];
+    int ret = 0;
 
     yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
-
-    while (fgets(line, sizeof(line)-1, f))
+    while (ret == 0 && fgets(line, sizeof(line)-1, f))
     {
         yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, line);
-        int t;
-        t = yaz_tok_move(tp);
+        int t = yaz_tok_move(tp);
         if (t == YAZ_TOK_STRING)
         {
-            char * pattern = xstrdup(yaz_tok_parse_string(tp));
+            char *pattern = xstrdup(yaz_tok_parse_string(tp)); /* copy as it's yaz_tok_move resets */
             t = yaz_tok_move(tp);
             if (t != '=')
+                ret = -1;
+            else
             {
-                yaz_tok_parse_destroy(tp);
-                cql_transform_close(ct);
-                return 0;
-            }
-            if (cql_transform_parse_tok_line(ct, pattern, tp))
-            {
-                yaz_tok_parse_destroy(tp);
-                cql_transform_close(ct);
-                return 0;
+                if (cql_transform_parse_tok_line(ct, pattern, tp))
+                    ret = -1;
             }
             xfree(pattern);
         }
         else if (t != YAZ_TOK_EOF)
         {
-            yaz_tok_parse_destroy(tp);
-            cql_transform_close(ct);
-            return 0;
+            ret = -1;
         }
         yaz_tok_parse_destroy(tp);
     }
-    return ct;
+    return ret;
 }
 
 void cql_transform_close(cql_transform_t ct)
@@ -275,13 +277,24 @@ void cql_transform_close(cql_transform_t ct)
 
 cql_transform_t cql_transform_open_fname(const char *fname)
 {
-    cql_transform_t ct;
+    cql_transform_t ct = cql_transform_create();
+    if (cql_transform_define_fname(ct, fname))
+    {
+        cql_transform_close(ct);
+        return 0;
+    }
+    return ct;
+}
+
+int cql_transform_define_fname(cql_transform_t ct, const char *fname)
+{
+    int ret;
     FILE *f = fopen(fname, "r");
     if (!f)
-        return 0;
-    ct = cql_transform_open_FILE(f);
+        return -2;
+    ret = cql_transform_define_FILE(ct, f);
     fclose(f);
-    return ct;
+    return ret;
 }
 
 #if 0
