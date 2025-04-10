@@ -847,14 +847,30 @@
    <sect2 id="installation.source.macos">
      <title>Compiling from source on macOS</title>
      <para>
-       Install Apple's Xcode Command Line Tools package from <ulink url="https://developer.apple.com/">Apple Developer</ulink>
-       which provides necessary tools for building C/C++ programs on macOS.
-       This is sufficient for compiling basic &yaz; (e.g no ICU) from a source distribution tarball
-       as XCLT includes libxml2 and libxslt development headers.
+       Install Apple's Xcode Command Line Tools (XCLT) package from <ulink url="https://developer.apple.com/">Apple Developer</ulink>
+       which provides necessary tools for building C/C++ programs on macOS. You can also try to install it from the command line with:
+       <screen>
+         xcode-select --install
+       </screen>
+       Out of the box, XCLT is sufficient for compiling basic &yaz; from the source distribution tarball
+       with XML support as it includes libxml2 and libxslt development headers.
      </para>
      <para>
-       If you are compiling &yaz; from a Git checkout, at the time of writing the latest
-       version of XCLT is 15.4 and includes a very old GNU Bison which is insufficient
+       For ICU support, you can fetch Apple's source distribution from GitHub:
+       <screen>
+         git clone https://github.com/apple-oss-distributions/ICU.git
+       </screen>
+       and compile &yaz; with:
+       <screen>
+         export ICU_CPPFLAGS="-DYAZ_HAVE_ICU=1 -I../../ICU/icu/icu4c/source/common -I../../ICU/icu/icu4c/source/i18n"
+         export ICU_LIBS=" -licucore"
+         ./configure
+         make
+       </screen>
+       For SSL support, &yaz; requires GnuTLS and cannot be compiled with LibreSSL/OpenSSL shipped with macOS (see below).
+     </para>
+     <para>
+       If you are compiling &yaz; from a Git checkout, at the time of writing XCLT includes GNU Bison v2.3 which is too old
        to generate &yaz; sources. You can use e.g. <ulink url="https://brew.sh">Homebrew</ulink> to install a more recent version:
        <screen>
          brew install bison
@@ -877,22 +893,27 @@
        <screen>
          export XML_CATALOG_FILES="/opt/homebrew/etc/xml/catalog"
        </screen>
-       If you want to compile &yaz; with ICU you must install it with Homebrew as XCLT does not ship with ICU headers:
+       To compile &yaz; with SSL support, install GnuTLS with:
+       <screen>
+         brew install gnutls
+       </screen>
+       Homebrew makes GnuTLS discoverable by pkg-config, so no additional flags are needed when configuring &yaz;.
+       You may also want to compile &yaz; with Homebrew's ICU:
        <screen>
          brew install icu4c
        </screen>
-       and make sure to add compiler flags before the configure stage, per the caveats section (<code>brew info icu4c</code>):
+       but make sure to add compiler flags before the configure stage, per the caveats section (<code>brew info icu4c</code>):
        <screen>
          export LDFLAGS="-L/opt/homebrew/opt/icu4c/lib"
          export CPPFLAGS="-I/opt/homebrew/opt/icu4c/include"
          export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c/lib/pkgconfig"
        </screen>
-       If you want to also compile with more recent version of libxml2 and libxslt,
-       install them with Homebrew:
+       Additionally, if you want to compile &yaz; with a more recent version of libxml2 and libxslt,
+       you can install them with Homebrew:
        <screen>
          brew install libxml2 libxslt
        </screen>
-       and again make sure to add compiler flags, per the caveats section (<code>brew info libxml2</code>):
+       and, again, make sure to add compiler flags, per the caveats section (<code>brew info libxml2</code>):
        <screen>
          export PATH="/opt/homebrew/opt/bison/bin:\
          /opt/homebrew/opt/libxml2/bin:\
