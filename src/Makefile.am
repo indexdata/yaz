@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-YAZ_VERSION_INFO=5:0:0
+YAZ_VERSION_INFO=6:0:1
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
