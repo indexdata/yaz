@@ -18,8 +18,8 @@ ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=68
-ICU_BASE = c:\icu4c-$(ICU_VER)_2-Win$(BARCH)-MSVC2019
+ICU_VER=76
+ICU_BASE = c:\icu4c-$(ICU_VER)_1-Win$(BARCH)-MSVC2022
 !if $(BARCH) == 32
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
@@ -280,9 +280,10 @@ RELEASE_C_OPTIONS=  \
   /D "NDEBUG"        \
   /MD /O2
 
-MVN_ARGS=-Dyaz.path="$(YAZPATH)" -Dyaz.include="$(YAZPATH)\src"
+MVN_ARGS=-Dyaz.path="$(YAZPATH)" -Dyaz.cflags="-I$(YAZPATH)\src"
 # without >log below, mvn install does NOT work
 yaz4j: $(JAVADIR)
+	copy $(BINDIR)\*.dll $(YAZ4J_DIR)
 	cd $(YAZ4J_DIR)
 	cmd /C mvn $(MVN_ARGS) clean package
 	copy /Y target\native\yaz4j*.dll "$(MAKEDIR)\..\bin"
