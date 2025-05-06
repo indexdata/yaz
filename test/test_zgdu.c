@@ -60,12 +60,56 @@ static void tst_http_response(void)
     odr_destroy(dec);
 }
 
+static void tst_double_encoding(const char *buf_in, const char *buf_out, int request_type)
+{
+    Z_GDU *zgdu;
+    int r;
+    ODR enc = odr_createmem(ODR_ENCODE);
+    ODR dec = odr_createmem(ODR_DECODE);
+    odr_setbuf(dec, (char *) buf_in, strlen(buf_in), 0);
+    r = z_GDU(dec, &zgdu, 0, 0);
+    YAZ_CHECK(r);
+    if (r)
+    {
+        char *http_buf1;
+        int http_len1;
+        YAZ_CHECK_EQ(zgdu->which, request_type);
+
+        z_GDU(enc, &zgdu, 0, 0);
+        http_buf1 = odr_getbuf(enc, &http_len1, 0);
+        YAZ_CHECK(http_buf1);
+        if (http_buf1)
+        {
+            YAZ_CHECK_EQ(http_len1, strlen(buf_out));
+            YAZ_CHECK(http_len1 == strlen(buf_out) &&
+                 memcmp(http_buf1, buf_out, http_len1) == 0);
+        }
+    }
+    odr_destroy(enc);
+    odr_destroy(dec);
+}
+
 
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_http_response();
+    tst_double_encoding("POST / HTTP/1.1\r\n"
+                        "Transfer-Encoding: chunked\r\n"
+                        "\r\n"
+                        "0\r\n",
+                        "POST / HTTP/1.1\r\n"
+                        "\r\n", Z_GDU_HTTP_Request);
+    tst_double_encoding("POST / HTTP/1.1\r\n"
+                       "Transfer-Encoding: chunked\r\n"
+                       "\r\n"
+                       "3\r\nhej\r\n"
+                       "0\r\n",
+                       "POST / HTTP/1.1\r\n"
+                       "Content-Length: 3\r\n"
+                       "\r\n"
+                       "hej", Z_GDU_HTTP_Request);
     YAZ_CHECK_TERM;
 }
 
