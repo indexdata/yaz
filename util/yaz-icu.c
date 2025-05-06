@@ -190,7 +190,7 @@ static void print_icu_transliterators(const struct config_t *p_config)
     {
         fprintf(p_config->outfile, "\n\nUnicode Set Patterns:\n"
                 "   Pattern         Description\n"
-                "   Ranges          [a-z] 	The lower case letters a through z\n"
+                "   Ranges          [a-z]       The lower case letters a through z\n"
                 "   Named Chars     [abc123] The six characters a,b,c,1,2 and 3\n"
                 "   String          [abc{def}] chars a, b and c, and string 'def'\n"
                 "   Categories      [\\p{Letter}] Perl General Category 'Letter'.\n"

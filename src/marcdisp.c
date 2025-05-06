@@ -642,12 +642,12 @@ int yaz_marc_write_mode(yaz_marc_t mt, WRBUF wr)
     return -1;
 }
 
-static const char *record_name[2]  	= { "record", "r"};
-static const char *leader_name[2]  	= { "leader", "l"};
+static const char *record_name[2]       = { "record", "r"};
+static const char *leader_name[2]       = { "leader", "l"};
 static const char *controlfield_name[2] = { "controlfield", "c"};
-static const char *datafield_name[2]  	= { "datafield", "d"};
-static const char *indicator_name[2]  	= { "ind", "i"};
-static const char *subfield_name[2]  	= { "subfield", "s"};
+static const char *datafield_name[2]    = { "datafield", "d"};
+static const char *indicator_name[2]    = { "ind", "i"};
+static const char *subfield_name[2]     = { "subfield", "s"};
 
 /** \brief common MARC XML/Xchange/turbomarc writer
     \param mt handle
@@ -709,17 +709,17 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
 
             wrbuf_printf(wr, "  <%s", datafield_name[turbo]);
             if (!turbo)
-            	wrbuf_printf(wr, " tag=\"");
+                wrbuf_printf(wr, " tag=\"");
             wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
                                     strlen(n->u.datafield.tag));
             if (!turbo)
                 wrbuf_printf(wr, "\"");
-    	    if (n->u.datafield.indicator)
-    	    {
-    	    	int i;
+            if (n->u.datafield.indicator)
+            {
+                int i;
                 size_t off = 0;
                 for (i = 0; n->u.datafield.indicator[off]; i++)
-    	    	{
+                {
                     size_t ilen =
                         cdata_one_character(mt, n->u.datafield.indicator + off);
                     wrbuf_printf(wr, " %s%d=\"", indicator_name[turbo], i+1);
@@ -760,7 +760,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, "  </%s", datafield_name[turbo]);
             /* TODO Not CDATA */
             if (turbo)
-            	wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
+                wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.datafield.tag,
                                         strlen(n->u.datafield.tag));
             wrbuf_printf(wr, ">\n");
             break;
@@ -768,16 +768,16 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             wrbuf_printf(wr, "  <%s", controlfield_name[turbo]);
             if (!turbo)
             {
-            	wrbuf_printf(wr, " tag=\"");
+                wrbuf_printf(wr, " tag=\"");
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
-        				strlen(n->u.controlfield.tag));
+                                        strlen(n->u.controlfield.tag));
                 wrbuf_iconv_puts(wr, mt->iconv_cd, "\">");
             }
             else
             {
                 /* TODO convert special */
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
-        				strlen(n->u.controlfield.tag));
+                                        strlen(n->u.controlfield.tag));
                 wrbuf_iconv_puts(wr, mt->iconv_cd, ">");
             }
             wrbuf_iconv_write_cdata(wr, mt->iconv_cd,
@@ -788,7 +788,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             /* TODO convert special */
             if (turbo)
                 wrbuf_iconv_write_cdata(wr, mt->iconv_cd, n->u.controlfield.tag,
-    					strlen(n->u.controlfield.tag));
+                                        strlen(n->u.controlfield.tag));
             wrbuf_puts(wr, ">\n");
             break;
         case YAZ_MARC_COMMENT:

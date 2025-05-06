@@ -195,14 +195,14 @@ int cql_strcmp(const char *s1, const char *s2)
 {
     while (*s1 && *s2)
     {
-	int c1 = *s1++;
-	int c2 = *s2++;
-	if (c1 >= 'A' && c1 <= 'Z')
-	    c1 = c1 + ('a' - 'A');
-	if (c2 >= 'A' && c2 <= 'Z')
-	    c2 = c2 + ('a' - 'A');
-	if (c1 != c2)
-	    return c1 - c2;
+        int c1 = *s1++;
+        int c2 = *s2++;
+        if (c1 >= 'A' && c1 <= 'Z')
+            c1 = c1 + ('a' - 'A');
+        if (c2 >= 'A' && c2 <= 'Z')
+            c2 = c2 + ('a' - 'A');
+        if (c1 != c2)
+            return c1 - c2;
     }
     return *s1 - *s2;
 }
@@ -211,14 +211,14 @@ int cql_strncmp(const char *s1, const char *s2, size_t n)
 {
     while (*s1 && *s2 && n)
     {
-	int c1 = *s1++;
-	int c2 = *s2++;
-	if (c1 >= 'A' && c1 <= 'Z')
-	    c1 = c1 + ('a' - 'A');
-	if (c2 >= 'A' && c2 <= 'Z')
-	    c2 = c2 + ('a' - 'A');
-	if (c1 != c2)
-	    return c1 - c2;
+        int c1 = *s1++;
+        int c2 = *s2++;
+        if (c1 >= 'A' && c1 <= 'Z')
+            c1 = c1 + ('a' - 'A');
+        if (c2 >= 'A' && c2 <= 'Z')
+            c2 = c2 + ('a' - 'A');
+        if (c1 != c2)
+            return c1 - c2;
         --n;
     }
     if (!n)

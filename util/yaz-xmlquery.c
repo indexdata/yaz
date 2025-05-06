@@ -30,14 +30,14 @@ void pqftoxmlquery(const char *pqf)
 
     if (!parser)
     {
-	fprintf(stderr, "%s: cannot create parser\n", prog);
-	exit(1);
+        fprintf(stderr, "%s: cannot create parser\n", prog);
+        exit(1);
     }
 
     if (!odr)
     {
-	fprintf(stderr, "%s: cannot create parser\n", prog);
-	exit(1);
+        fprintf(stderr, "%s: cannot create parser\n", prog);
+        exit(1);
     }
 
     rpn = yaz_pqf_parse(parser, odr, pqf);
@@ -46,21 +46,21 @@ void pqftoxmlquery(const char *pqf)
 
     if (!rpn)
     {
-	fprintf(stderr, "%s: pqf parse error for query %s\n", prog, pqf);
-	exit(2);
+        fprintf(stderr, "%s: pqf parse error for query %s\n", prog, pqf);
+        exit(2);
     }
     else
     {
-	xmlDocPtr doc = 0;
+        xmlDocPtr doc = 0;
 
         yaz_rpnquery2xml(rpn, &doc);
 
         if (!doc)
-	{
-	    fprintf(stderr, "%s: yaz_rpnquery2xml failed for query %s\n",
-		    prog, pqf);
-	    exit(3);
-	}
+        {
+            fprintf(stderr, "%s: yaz_rpnquery2xml failed for query %s\n",
+                    prog, pqf);
+            exit(3);
+        }
         else
         {
             xmlChar *buf_out = 0;
@@ -69,21 +69,21 @@ void pqftoxmlquery(const char *pqf)
             xmlDocDumpMemory(doc, &buf_out, &len_out);
 
             if (!len_out || !buf_out)
-	    {
-		fprintf(stderr, "%s: xmlDocDumpMemory failed for query %s\n",
-			prog, pqf);
-		exit(4);
-	    }
-	    else
-	    {
-		if (fwrite(buf_out, len_out, 1, stdout) != 1)
-		{
-		    fprintf(stderr, "%s: write failed\n", prog);
-		    exit(5);
-		}
-	    }
+            {
+                fprintf(stderr, "%s: xmlDocDumpMemory failed for query %s\n",
+                        prog, pqf);
+                exit(4);
+            }
+            else
+            {
+                if (fwrite(buf_out, len_out, 1, stdout) != 1)
+                {
+                    fprintf(stderr, "%s: write failed\n", prog);
+                    exit(5);
+                }
+            }
             xmlFreeDoc(doc);
-	}
+        }
     }
     odr_destroy(odr);
 }
@@ -96,39 +96,39 @@ void xmlquerytopqf(const char *xmlstr)
     doc = xmlParseMemory(xmlstr, strlen(xmlstr));
     if (!doc)
     {
-	fprintf(stderr, "%s: xml parse error for XML:\n%s\n", prog, xmlstr);
-	exit(1);
+        fprintf(stderr, "%s: xml parse error for XML:\n%s\n", prog, xmlstr);
+        exit(1);
     }
     else
     {
-	int error_code = 0;
-	const char *addinfo = 0;
-	Z_Query *query = 0;
-	ODR odr = odr_createmem(ODR_ENCODE);
+        int error_code = 0;
+        const char *addinfo = 0;
+        Z_Query *query = 0;
+        ODR odr = odr_createmem(ODR_ENCODE);
 
-	const xmlNode *root_element = xmlDocGetRootElement(doc);
-	yaz_xml2query(root_element, &query, odr, &error_code, &addinfo);
-	if (error_code)
-	{
-	    fprintf(stderr, "%s: yaz_xml2query failed code=%d addinfo=%s\n",
-		    prog, error_code, addinfo);
-	    exit(1);
-	}
-	else if (!query)
-	{
-	    fprintf(stderr, "%s: yaz_xml2query no query result\n",
-		    prog);
-	    exit(1);
-	}
-	else
-	{
-	    WRBUF w = wrbuf_alloc();
-	    yaz_query_to_wrbuf(w, query);
-	    printf("%s\n", wrbuf_cstr(w));
-	    wrbuf_destroy(w);
-	}
-	odr_destroy(odr);
-	xmlFreeDoc(doc);
+        const xmlNode *root_element = xmlDocGetRootElement(doc);
+        yaz_xml2query(root_element, &query, odr, &error_code, &addinfo);
+        if (error_code)
+        {
+            fprintf(stderr, "%s: yaz_xml2query failed code=%d addinfo=%s\n",
+                    prog, error_code, addinfo);
+            exit(1);
+        }
+        else if (!query)
+        {
+            fprintf(stderr, "%s: yaz_xml2query no query result\n",
+                    prog);
+            exit(1);
+        }
+        else
+        {
+            WRBUF w = wrbuf_alloc();
+            yaz_query_to_wrbuf(w, query);
+            printf("%s\n", wrbuf_cstr(w));
+            wrbuf_destroy(w);
+        }
+        odr_destroy(odr);
+        xmlFreeDoc(doc);
     }
 }
 
@@ -139,28 +139,28 @@ void xmlfiletopqf(const char *xmlfile)
     FILE *f = fopen(xmlfile, "rb");
     if (!f)
     {
-	fprintf(stderr, "%s: cannot open %s\n", prog, xmlfile);
-	exit(1);
+        fprintf(stderr, "%s: cannot open %s\n", prog, xmlfile);
+        exit(1);
     }
     fseek(f, 0, SEEK_END);
     sz = ftell(f);
     if (sz <= 0 || sz >= 1<<18)
     {
-	fprintf(stderr, "%s: bad size for file %s\n", prog, xmlfile);
-	exit(1);
+        fprintf(stderr, "%s: bad size for file %s\n", prog, xmlfile);
+        exit(1);
     }
     rewind(f);
     xmlstr = (char *) xmalloc(sz+1);
     xmlstr[sz] = '\0';
     if (fread(xmlstr, sz, 1, f) != 1)
     {
-	fprintf(stderr, "%s: read failed for file %s\n", prog, xmlfile);
-	exit(1);
+        fprintf(stderr, "%s: read failed for file %s\n", prog, xmlfile);
+        exit(1);
     }
     if (fclose(f))
     {
-	fprintf(stderr, "%s: close failed for file %s\n", prog, xmlfile);
-	exit(1);
+        fprintf(stderr, "%s: close failed for file %s\n", prog, xmlfile);
+        exit(1);
     }
 
     xmlquerytopqf(xmlstr);
@@ -186,24 +186,24 @@ int main (int argc, char **argv)
     yaz_enable_panic_backtrace(*argv);
     while ((r = options("-p:x:", argv, argc, &arg)) != -2)
     {
-	switch(r)
-	{
-	case 'p':
-	    pqftoxmlquery(arg);
-	    active = 1;
-	    break;
-	case 'x':
-	    xmlfiletopqf(arg);
-	    active = 1;
-	    break;
-	case 0:
-	    break;
-	}
+        switch(r)
+        {
+        case 'p':
+            pqftoxmlquery(arg);
+            active = 1;
+            break;
+        case 'x':
+            xmlfiletopqf(arg);
+            active = 1;
+            break;
+        case 0:
+            break;
+        }
     }
     if (!active)
     {
-	fprintf(stderr, "%s: nothing to do\n", prog);
-	usage();
+        fprintf(stderr, "%s: nothing to do\n", prog);
+        usage();
     }
 #else
     fprintf(stderr, "%s: XML support not enabled.\n", prog);

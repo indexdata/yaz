@@ -299,15 +299,15 @@ int cql_transform_define_fname(cql_transform_t ct, const char *fname)
 
 #if 0
 struct Z_AttributeElement {
-	Z_AttributeSetId *attributeSet; /* OPT */
-	int *attributeType;
-	int which;
-	union {
-		int *numeric;
-		Z_ComplexAttribute *complex;
+        Z_AttributeSetId *attributeSet; /* OPT */
+        int *attributeType;
+        int which;
+        union {
+                int *numeric;
+                Z_ComplexAttribute *complex;
 #define Z_AttributeValue_numeric 1
 #define Z_AttributeValue_complex 2
-	} value;
+        } value;
 };
 #endif
 

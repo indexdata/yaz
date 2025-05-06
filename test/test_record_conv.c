@@ -150,7 +150,7 @@ static void tst_configure(void)
 #else
                                   "Element <backend>: unsupported element <xslt>"
 #endif
-				  , 0));
+                                  , 0));
 }
 
 static int conv_convert_test(yaz_record_conv_t p,

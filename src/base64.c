@@ -22,38 +22,38 @@ void yaz_base64encode(const char *in, char *out)
 
     while (*in != 0)
     {
-	const char *pad = 0;
+        const char *pad = 0;
         buf[0] = in[0];
-	buf[1] = in[1];
-	if (in[1] == 0)
+        buf[1] = in[1];
+        if (in[1] == 0)
         {
-	    buf[2] = 0;
-	    pad = "==";
-	}
+            buf[2] = 0;
+            pad = "==";
+        }
         else
         {
-	    buf[2] = in[2];
-	    if (in[2] == 0)
-		pad = "=";
-	}
+            buf[2] = in[2];
+            if (in[2] == 0)
+                pad = "=";
+        }
 
-	/* Treat three eight-bit numbers as on 24-bit number */
-	n = (buf[0] << 16) + (buf[1] << 8) + buf[2];
+        /* Treat three eight-bit numbers as on 24-bit number */
+        n = (buf[0] << 16) + (buf[1] << 8) + buf[2];
 
-	/* Write the six-bit chunks out as four encoded characters */
-	*out++ = encoding[(n >> 18) & 63];
-	*out++ = encoding[(n >> 12) & 63];
-	if (in[1] != 0)
-	    *out++ = encoding[(n >> 6) & 63];
-	if (in[1] != 0 && in[2] != 0)
-	    *out++ = encoding[n & 63];
+        /* Write the six-bit chunks out as four encoded characters */
+        *out++ = encoding[(n >> 18) & 63];
+        *out++ = encoding[(n >> 12) & 63];
+        if (in[1] != 0)
+            *out++ = encoding[(n >> 6) & 63];
+        if (in[1] != 0 && in[2] != 0)
+            *out++ = encoding[n & 63];
 
-	if (pad != 0) {
-	    while (*pad != 0)
-		*out++ = *pad++;
-	    break;
-	}
-	in += 3;
+        if (pad != 0) {
+            while (*pad != 0)
+                *out++ = *pad++;
+            break;
+        }
+        in += 3;
     }
     *out++ = 0;
 }
@@ -61,7 +61,7 @@ void yaz_base64encode(const char *in, char *out)
 static int next_char(const char **in, size_t *len)
 {
     const char *map = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	"abcdefghijklmnopqrstuvwxyz0123456789+/";
+        "abcdefghijklmnopqrstuvwxyz0123456789+/";
     const char *p;
     while (*len > 0 && strchr("\r\n\t\f ", **in))
     {
@@ -85,27 +85,27 @@ int yaz_base64decode(const char *in, char *out)
 
     while (len >= 4)
     {
-	int i0, i1, i2, i3;
+        int i0, i1, i2, i3;
 
-	i0 = next_char(&in, &len);
+        i0 = next_char(&in, &len);
         if (i0 < 0)
             return -1;
-	i1 = next_char(&in, &len);
+        i1 = next_char(&in, &len);
         if (i1 < 0)
             return -1;
-	*(out++) = i0 << 2 | i1 >> 4;
+        *(out++) = i0 << 2 | i1 >> 4;
         i2 = next_char(&in, &len);
         if (i2 == -2)
             break;
         if (i2 == -1)
             return -1;
-	*(out++) = i1 << 4 | i2 >> 2;
+        *(out++) = i1 << 4 | i2 >> 2;
         i3 = next_char(&in, &len);
         if (i3 == -2)
             break;
         if (i3 == -1)
             return -1;
-	*(out++) = i2 << 6 | i3;
+        *(out++) = i2 << 6 | i3;
     }
     *out = '\0';
     return 0;

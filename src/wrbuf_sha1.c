@@ -146,7 +146,7 @@ static void SHA1Update(SHA1_CTX* context, const unsigned char* data, uint32_t le
 
     j = context->count[0];
     if ((context->count[0] += len << 3) < j)
-	context->count[1]++;
+        context->count[1]++;
     context->count[1] += (len>>29);
     j = (j >> 3) & 63;
     if ((j + len) > 63) {
@@ -177,7 +177,7 @@ static void SHA1Final(unsigned char digest[20], SHA1_CTX* context)
     c = 0200;
     SHA1Update(context, &c, 1);
     while ((context->count[0] & 504) != 448) {
-	c = 0000;
+        c = 0000;
         SHA1Update(context, &c, 1);
     }
     SHA1Update(context, finalcount, 8);  /* Should cause a SHA1Transform() */

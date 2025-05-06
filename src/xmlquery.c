@@ -131,16 +131,16 @@ static xmlNodePtr yaz_query2xml_term(const Z_Term *term, xmlNodePtr parent)
     {
     case Z_Term_general:
         type = "general";
-	t = xmlNewTextLen(BAD_CAST term->u.general->buf, term->u.general->len);
+        t = xmlNewTextLen(BAD_CAST term->u.general->buf, term->u.general->len);
         break;
     case Z_Term_numeric:
         type = "numeric";
-	sprintf(formstr, ODR_INT_PRINTF, *term->u.numeric);
-	t = xmlNewText(BAD_CAST formstr);
+        sprintf(formstr, ODR_INT_PRINTF, *term->u.numeric);
+        t = xmlNewText(BAD_CAST formstr);
         break;
     case Z_Term_characterString:
         type = "string";
-	t = xmlNewText(BAD_CAST term->u.characterString);
+        t = xmlNewText(BAD_CAST term->u.characterString);
         break;
     case Z_Term_oid:
         type = "oid";
@@ -158,10 +158,10 @@ static xmlNodePtr yaz_query2xml_term(const Z_Term *term, xmlNodePtr parent)
         type = "null";
         break;
     default:
-	break;
+        break;
     }
     if (t) /* got a term node ? */
-	xmlAddChild(node, t);
+        xmlAddChild(node, t);
     if (type)
         xmlNewProp(node, BAD_CAST "type", BAD_CAST type);
     return node;
@@ -259,7 +259,7 @@ static xmlNodePtr yaz_query2xml_rpnstructure(const Z_RPNStructure *zs,
     {
         if (zs->u.simple->which == Z_Operand_APT)
             return yaz_query2xml_apt(zs->u.simple->u.attributesPlusTerm,
-				     parent);
+                                     parent);
         else if (zs->u.simple->which == Z_Operand_resultSetId)
             return xmlNewChild(parent, /* NS */ 0, BAD_CAST "rset",
                                BAD_CAST zs->u.simple->u.resultSetId);
@@ -318,32 +318,32 @@ void yaz_query2xml(const Z_Query *q, xmlDocPtr *docp)
     case Z_Query_type_1:
     case Z_Query_type_101:
         q_node = xmlNewChild(top_node, 0, BAD_CAST "rpn", 0);
-	child_node = yaz_query2xml_rpn(q->u.type_1, q_node);
+        child_node = yaz_query2xml_rpn(q->u.type_1, q_node);
         break;
     case Z_Query_type_2:
         q_node = xmlNewChild(top_node, 0, BAD_CAST "ccl", 0);
-	child_node = yaz_query2xml_ccl(q->u.type_2, q_node);
+        child_node = yaz_query2xml_ccl(q->u.type_2, q_node);
         break;
     case Z_Query_type_100:
         q_node = xmlNewChild(top_node, 0, BAD_CAST "z39.58", 0);
-	child_node = yaz_query2xml_z3958(q->u.type_100, q_node);
+        child_node = yaz_query2xml_z3958(q->u.type_100, q_node);
         break;
     case Z_Query_type_104:
         if (q->u.type_104->which == Z_External_CQL)
-	{
+        {
             q_node = xmlNewChild(top_node, 0, BAD_CAST "cql", 0);
-	    child_node = yaz_query2xml_cql(q->u.type_104->u.cql, q_node);
-	}
+            child_node = yaz_query2xml_cql(q->u.type_104->u.cql, q_node);
+        }
     }
     if (child_node && q_node)
     {
-	*docp = xmlNewDoc(BAD_CAST "1.0");
-	xmlDocSetRootElement(*docp, top_node); /* make it top node in doc */
+        *docp = xmlNewDoc(BAD_CAST "1.0");
+        xmlDocSetRootElement(*docp, top_node); /* make it top node in doc */
     }
     else
     {
-	*docp = 0;
-	xmlFreeNode(top_node);
+        *docp = 0;
+        xmlFreeNode(top_node);
     }
 }
 

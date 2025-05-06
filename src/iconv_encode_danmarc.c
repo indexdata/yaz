@@ -128,8 +128,8 @@ static size_t flush_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
 }
 
 static size_t write_danmarc(yaz_iconv_t cd, yaz_iconv_encoder_t e,
-			    unsigned long x,
-			    char **outbuf, size_t *outbytesleft)
+                            unsigned long x,
+                            char **outbuf, size_t *outbytesleft)
 {
     struct encoder_data *w = (struct encoder_data *) e->data;
 

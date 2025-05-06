@@ -888,38 +888,38 @@ Z_SRW_PDU *yaz_srw_get_pdu(ODR o, int which, const char *version)
     case Z_SRW_scan_response:
         sr->u.scan_response = (Z_SRW_scanResponse *)
             odr_malloc(o, sizeof(*sr->u.scan_response));
-	sr->u.scan_response->terms = 0;
-	sr->u.scan_response->num_terms = 0;
-	sr->u.scan_response->diagnostics = 0;
-	sr->u.scan_response->num_diagnostics = 0;
+        sr->u.scan_response->terms = 0;
+        sr->u.scan_response->num_terms = 0;
+        sr->u.scan_response->diagnostics = 0;
+        sr->u.scan_response->num_diagnostics = 0;
         break;
     case Z_SRW_update_request:
         sr->u.update_request = (Z_SRW_updateRequest *)
             odr_malloc(o, sizeof(*sr->u.update_request));
-	sr->u.update_request->database = 0;
-	sr->u.update_request->stylesheet = 0;
+        sr->u.update_request->database = 0;
+        sr->u.update_request->stylesheet = 0;
         sr->u.update_request->record = 0;
-	sr->u.update_request->recordId = 0;
-	sr->u.update_request->recordVersions = 0;
-	sr->u.update_request->num_recordVersions = 0;
+        sr->u.update_request->recordId = 0;
+        sr->u.update_request->recordVersions = 0;
+        sr->u.update_request->num_recordVersions = 0;
         sr->u.update_request->extra_record = 0;
         sr->u.update_request->extraRequestData_buf = 0;
         sr->u.update_request->extraRequestData_len = 0;
-	sr->u.request->database = 0;
+        sr->u.request->database = 0;
         break;
     case Z_SRW_update_response:
         sr->u.update_response = (Z_SRW_updateResponse *)
             odr_malloc(o, sizeof(*sr->u.update_response));
-	sr->u.update_response->operationStatus = 0;
-	sr->u.update_response->recordId = 0;
-	sr->u.update_response->recordVersions = 0;
-	sr->u.update_response->num_recordVersions = 0;
-	sr->u.update_response->record = 0;
+        sr->u.update_response->operationStatus = 0;
+        sr->u.update_response->recordId = 0;
+        sr->u.update_response->recordVersions = 0;
+        sr->u.update_response->num_recordVersions = 0;
+        sr->u.update_response->record = 0;
         sr->u.update_response->extra_record = 0;
         sr->u.update_response->extraResponseData_buf = 0;
         sr->u.update_response->extraResponseData_len = 0;
-	sr->u.update_response->diagnostics = 0;
-	sr->u.update_response->num_diagnostics = 0;
+        sr->u.update_response->diagnostics = 0;
+        sr->u.update_response->num_diagnostics = 0;
     }
     return sr;
 }

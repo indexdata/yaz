@@ -27,8 +27,8 @@ boolean : AND | OR | NOT | PROX ;
 
 searchClause : '(' cqlQuery ')'
              | index relation searchTerm
-	     | searchTerm
-	     ;
+             | searchTerm
+             ;
 
 relation : comparitor | comparitor modifierList;
 
@@ -42,7 +42,7 @@ modifierList : modifierList modifier  | modifier;
 
 modifier : '/' modifierName
          | '/' modifierName comparitorSymbol modifierValue
-	 ;
+         ;
 
 
 prefix : term;

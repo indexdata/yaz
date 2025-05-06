@@ -28,8 +28,8 @@ struct encoder_data
 
 #if HAVE_WCHAR_H
 static size_t write_wchar_t(yaz_iconv_t cd, yaz_iconv_encoder_t en,
-			    unsigned long x,
-			    char **outbuf, size_t *outbytesleft)
+                            unsigned long x,
+                            char **outbuf, size_t *outbytesleft)
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
@@ -51,7 +51,7 @@ static size_t write_wchar_t(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 #endif
 
 yaz_iconv_encoder_t yaz_wchar_encoder(const char *tocode,
-				      yaz_iconv_encoder_t e)
+                                      yaz_iconv_encoder_t e)
 
 {
 #if HAVE_WCHAR_H
@@ -88,7 +88,7 @@ static unsigned long read_wchar_t(yaz_iconv_t cd, yaz_iconv_decoder_t d,
 #endif
 
 yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
-				      yaz_iconv_decoder_t d)
+                                      yaz_iconv_decoder_t d)
 
 {
 #if HAVE_WCHAR_H

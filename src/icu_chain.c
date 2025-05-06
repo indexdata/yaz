@@ -47,9 +47,9 @@ struct icu_chain_step
     /* type and action object */
     enum icu_chain_step_type type;
     union {
-	struct icu_casemap   *casemap;
-	struct icu_transform *transform;
-	struct icu_tokenizer *tokenizer;
+        struct icu_casemap   *casemap;
+        struct icu_transform *transform;
+        struct icu_tokenizer *tokenizer;
         yaz_stemmer_p         stemmer;
         struct icu_buf_utf16 *join;
     } u;

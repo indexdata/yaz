@@ -301,15 +301,15 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
             pos = strchr(val, '^');
             if (pos != NULL)
             {
-            	term->displayTerm = odr_strdup(o, pos + 1);
-            	*pos = '\0';
-            	term->value = odr_strdup(o, val);
-            	*pos = '^';
+                term->displayTerm = odr_strdup(o, pos + 1);
+                *pos = '\0';
+                term->value = odr_strdup(o, val);
+                *pos = '^';
             }
             else
             {
-            	term->value = odr_strdup(o, val);
-            	term->displayTerm = NULL;
+                term->value = odr_strdup(o, val);
+                term->displayTerm = NULL;
             }
             term->whereInList = NULL;
             i++;

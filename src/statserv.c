@@ -865,7 +865,7 @@ static void listener(IOCHAN h, int event)
             return; /* incomplete */
         yaz_log(YLOG_DEBUG, "listen ok");
         new_line = cs_accept(line);
-	if (!new_line)
+        if (!new_line)
         {
             yaz_log(YLOG_FATAL, "Accept failed.");
             return;

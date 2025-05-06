@@ -104,7 +104,7 @@ yaz_iconv_decoder_t yaz_iso_5428_decoder(const char *name,
 yaz_iconv_decoder_t yaz_advancegreek_decoder(const char *name,
                                              yaz_iconv_decoder_t d);
 yaz_iconv_decoder_t yaz_wchar_decoder(const char *fromcode,
-				      yaz_iconv_decoder_t d);
+                                      yaz_iconv_decoder_t d);
 yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
                                         yaz_iconv_decoder_t d);
 

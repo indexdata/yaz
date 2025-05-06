@@ -1066,13 +1066,13 @@ static void srw_bend_search(association *assoc,
                         start, number, rr.hits);
 
                 srw_res->numberOfRecords = odr_intdup(assoc->encode, rr.hits);
-		if (rr.srw_setname)
+                if (rr.srw_setname)
                 {
                     srw_res->resultSetId =
                         odr_strdup(assoc->encode, rr.srw_setname );
                     srw_res->resultSetIdleTime =
                         odr_intdup(assoc->encode, *rr.srw_setnameIdleTime );
-		}
+                }
 
                 srw_res->facetList = yaz_oi_get_facetlist(&rr.search_info);
                 if (start > rr.hits || start < 1)
@@ -1508,9 +1508,9 @@ static void srw_bend_scan(association *assoc,
 
 static void srw_bend_update(association *assoc,
                             Z_HTTP_Header *headers,
-			    Z_SRW_PDU *sr,
-			    Z_SRW_updateResponse *srw_res,
-			    int *http_code)
+                            Z_SRW_PDU *sr,
+                            Z_SRW_updateResponse *srw_res,
+                            int *http_code)
 {
     Z_SRW_updateRequest *srw_req = sr->u.update_request;
     yaz_log(log_session, "SRWUpdate action=%s", srw_req->operation);
@@ -1521,20 +1521,20 @@ static void srw_bend_update(association *assoc,
         *http_code = 404;
     if (assoc->init)
     {
-	bend_update_rr rr;
+        bend_update_rr rr;
         Z_SRW_extra_record *extra = srw_req->extra_record;
 
-	rr.stream = assoc->encode;
-	rr.print = assoc->print;
+        rr.stream = assoc->encode;
+        rr.print = assoc->print;
         rr.num_bases = 1;
         rr.basenames = &srw_req->database;
-	rr.operation = srw_req->operation;
-	rr.operation_status = "failed";
-	rr.record_id = 0;
+        rr.operation = srw_req->operation;
+        rr.operation_status = "failed";
+        rr.record_id = 0;
         rr.record_versions = 0;
         rr.num_versions = 0;
         rr.record_packing = "string";
-	rr.record_schema = 0;
+        rr.record_schema = 0;
         rr.record_data = 0;
         rr.extra_record_data = 0;
         rr.extra_request_data = 0;
@@ -1543,7 +1543,7 @@ static void srw_bend_update(association *assoc,
         rr.message = 0;
         rr.details = 0;
 
-	*http_code = 200;
+        *http_code = 200;
         if (rr.operation == 0)
         {
             yaz_add_sru_update_diagnostic(
@@ -1555,7 +1555,7 @@ static void srw_bend_update(association *assoc,
         }
         yaz_log(YLOG_DEBUG, "basename = %s", rr.basenames[0] );
         yaz_log(YLOG_DEBUG, "Operation = %s", rr.operation );
-	if (!strcmp( rr.operation, "delete"))
+        if (!strcmp( rr.operation, "delete"))
         {
             if (srw_req->record && !srw_req->record->recordSchema)
             {
@@ -1581,8 +1581,8 @@ static void srw_bend_update(association *assoc,
                 rr.record_id = srw_req->recordId;
             else if (extra && extra->recordIdentifier)
                 rr.record_id = extra->recordIdentifier;
-	}
-	else if (!strcmp(rr.operation, "replace"))
+        }
+        else if (!strcmp(rr.operation, "replace"))
         {
             if (srw_req->recordId)
                 rr.record_id = srw_req->recordId;
@@ -1631,8 +1631,8 @@ static void srw_bend_update(association *assoc,
                     extra->extraRecordData_buf,
                     extra->extraRecordData_len );
             }
-	}
-	else if (!strcmp(rr.operation, "insert"))
+        }
+        else if (!strcmp(rr.operation, "insert"))
         {
             if (srw_req->recordId)
                 rr.record_id = srw_req->recordId;
@@ -1658,8 +1658,8 @@ static void srw_bend_update(association *assoc,
                     extra->extraRecordData_buf,
                     extra->extraRecordData_len );
             }
-	}
-	else
+        }
+        else
             yaz_add_sru_update_diagnostic(assoc->encode, &srw_res->diagnostics,
                                           &srw_res->num_diagnostics,
                                           YAZ_SRU_UPDATE_INVALID_ACTION,
@@ -1703,16 +1703,16 @@ static void srw_bend_update(association *assoc,
                                        rr.uri,
                                        rr.message,
                                        rr.details);
-	srw_res->recordId = rr.record_id;
-	srw_res->operationStatus = rr.operation_status;
-	srw_res->recordVersions = rr.record_versions;
-	srw_res->num_recordVersions = rr.num_versions;
+        srw_res->recordId = rr.record_id;
+        srw_res->operationStatus = rr.operation_status;
+        srw_res->recordVersions = rr.record_versions;
+        srw_res->num_recordVersions = rr.num_versions;
         if (srw_res->extraResponseData_len)
         {
             srw_res->extraResponseData_buf = rr.extra_response_data;
             srw_res->extraResponseData_len = strlen(rr.extra_response_data);
         }
-	if (srw_res->num_diagnostics == 0 && rr.record_data)
+        if (srw_res->num_diagnostics == 0 && rr.record_data)
         {
             srw_res->record = yaz_srw_get_record(assoc->encode);
             srw_res->record->recordSchema = rr.record_schema;

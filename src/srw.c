@@ -1286,31 +1286,31 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
         {
             Z_SRW_updateRequest *req = (*p)->u.update_request;
             xmlNodePtr ptr = xmlNewChild(pptr, 0, BAD_CAST "updateRequest", 0);
-	    ns_ucp = xmlNewNs(ptr, BAD_CAST ns_ucp_str, BAD_CAST "zu");
-	    xmlSetNs(ptr, ns_ucp);
+            ns_ucp = xmlNewNs(ptr, BAD_CAST ns_ucp_str, BAD_CAST "zu");
+            xmlSetNs(ptr, ns_ucp);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns_srw_str, BAD_CAST "zs");
 
-	    add_xsd_string_ns(ptr, "version", (*p)->srw_version, ns_srw);
-	    add_xsd_string(ptr, "action", req->operation);
+            add_xsd_string_ns(ptr, "version", (*p)->srw_version, ns_srw);
+            add_xsd_string(ptr, "action", req->operation);
             add_xsd_string(ptr, "recordIdentifier", req->recordId );
-	    if (req->recordVersions)
+            if (req->recordVersions)
                 yaz_srw_versions( o, ptr, &req->recordVersions,
                                   &req->num_recordVersions,
                                   client_data, ns_ucp_str);
-	    if (req->record && req->record->recordData_len)
+            if (req->record && req->record->recordData_len)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 xmlSetNs(rptr, ns_srw);
                 yaz_srw_record(o, rptr, req->record, &req->extra_record,
                                client_data, 0);
-	    }
-	    if (req->extraRequestData_len)
+            }
+            if (req->extraRequestData_len)
             {
                 add_XML_n(ptr, "extraRequestData",
                           req->extraRequestData_buf,
                           req->extraRequestData_len, ns_srw);
             }
-	    add_xsd_string(ptr, "stylesheet", req->stylesheet);
+            add_xsd_string(ptr, "stylesheet", req->stylesheet);
             add_xsd_string(ptr, "database", req->database);
         }
         else if ((*p)->which == Z_SRW_update_response)
@@ -1318,36 +1318,36 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             Z_SRW_updateResponse *res = (*p)->u.update_response;
             xmlNodePtr ptr = xmlNewChild(pptr, 0, (xmlChar *)
                                          "updateResponse", 0);
-	    ns_ucp = xmlNewNs(ptr, BAD_CAST ns_ucp_str, BAD_CAST "zu");
-	    xmlSetNs(ptr, ns_ucp);
+            ns_ucp = xmlNewNs(ptr, BAD_CAST ns_ucp_str, BAD_CAST "zu");
+            xmlSetNs(ptr, ns_ucp);
             ns_srw = xmlNewNs(ptr, BAD_CAST ns_srw_str, BAD_CAST "zs");
 
-	    add_xsd_string_ns(ptr, "version", (*p)->srw_version, ns_srw);
+            add_xsd_string_ns(ptr, "version", (*p)->srw_version, ns_srw);
             add_xsd_string(ptr, "operationStatus", res->operationStatus );
             add_xsd_string(ptr, "recordIdentifier", res->recordId );
-	    if (res->recordVersions)
+            if (res->recordVersions)
                 yaz_srw_versions(o, ptr, &res->recordVersions,
                                  &res->num_recordVersions,
                                  client_data, ns_ucp_str);
-	    if (res->record && res->record->recordData_len)
+            if (res->record && res->record->recordData_len)
             {
                 xmlNodePtr rptr = xmlNewChild(ptr, 0, BAD_CAST "record", 0);
                 xmlSetNs(rptr, ns_srw);
                 yaz_srw_record(o, rptr, res->record, &res->extra_record,
                                client_data, 0);
-	    }
-	    if (res->num_diagnostics)
-	    {
+            }
+            if (res->num_diagnostics)
+            {
                 xmlNsPtr ns_diag =
                     xmlNewNs(pptr, BAD_CAST YAZ_XMLNS_DIAG_v1_1,
                              BAD_CAST "diag" );
 
-		xmlNodePtr rptr = xmlNewChild(ptr, ns_diag, BAD_CAST "diagnostics", 0);
-		yaz_srw_diagnostics(o, rptr, &res->diagnostics,
+                xmlNodePtr rptr = xmlNewChild(ptr, ns_diag, BAD_CAST "diagnostics", 0);
+                yaz_srw_diagnostics(o, rptr, &res->diagnostics,
                                     &res->num_diagnostics, client_data,
                                     ns_ucp_str, 0);
             }
-	    if (res->extraResponseData_len)
+            if (res->extraResponseData_len)
                 add_XML_n(ptr, "extraResponseData",
                           res->extraResponseData_buf,
                           res->extraResponseData_len, ns_srw);
