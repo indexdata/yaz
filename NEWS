@@ -1,3 +1,13 @@
+--- 5.35.0 2025/05/06
+
+Disable HTTP chunked when encoding HTTP messages.
+YAZ always sets Content-Length for encoded messages;
+therefore, the Transfer-Encoding should be skipped.
+
+Windows build: ICU 76.1, VS 2022
+
+New CQL utilities: cql_transform_define_{fname, FILE}
+
 --- 5.34.4 2025/02/17
 
 Fix warn_unused_result warnings produced by gcc/clang #142
@@ -1084,7 +1094,7 @@ Debian: do not depend on obs tcl8.3.
 
 Debian: do not depend on obs libicu36-dev.
 
---- 4.2.68 2013/09/23 
+--- 4.2.68 2013/09/23
 
 GFS: pass additionalSearchInfo to search memeber search_input if
 given. Otherwise pass otherInfo. Request for facets and other search
@@ -1099,7 +1109,7 @@ rpn2solr: fix nested AND/OR handling. YAZ-685
 Add comparison routines for some Z-types, such as NamePlusRecord,
 RPNQuery, Query, RecordComposition and OtherInformation.
 
---- 4.2.67 2013/09/19 
+--- 4.2.67 2013/09/19
 
 Don't decode MAB as MARC. Just like we don't attempt to decode
 HTML/XML as MARC. Fixes MAB display problem that was introduced in 4.2.64.
@@ -1387,8 +1397,8 @@ from being used in retrieval.
 
 --- 4.2.40 2012/10/04
 
-Implement Solr sort strategy "solr", similar to sru11 sorting. 
-This will implement the correct parameters on Solr requst to do 
+Implement Solr sort strategy "solr", similar to sru11 sorting.
+This will implement the correct parameters on Solr requst to do
 native sorting.
 
 --- 4.2.39 2012/09/28
@@ -1525,7 +1535,7 @@ truncation.cql . The assumption being that the term is already CQL.
 --- 4.2.29 2012/03/20
 
 record_conv: leader spec may be given for marc element.
-The leader spec is given as attribute leaderspec for element marc. 
+The leader spec is given as attribute leaderspec for element marc.
 For example to convert a MARC21 record from MARC-8 to UTF-8:
      <marc inputformat="marc" outputformat="marc"
       inputcharset="marc-8" outputcharset="utf-8 "leaderspec="9='a'"/>
@@ -1557,7 +1567,7 @@ Update SRU to Bib-1 diagnostic maps accordingly.
 
 CCL: add two new diagnostics for unsupported masking. The new
 diagnostics are: "Embedded truncation not supported" and
-"Single charcacter mask not supported".  
+"Single charcacter mask not supported".
 
 --- 4.2.26 2012/02/23
 
@@ -1626,8 +1636,8 @@ concatenated.
 --- 4.2.18 2011/10/28
 
 Add support for Solr spell-checking/suggestions through ZOOM.
-If a Solr target has been configured correctly for spelling-checking 
-and suggestions, these will now be returned on the ResultSet option 
+If a Solr target has been configured correctly for spelling-checking
+and suggestions, these will now be returned on the ResultSet option
 "suggestions". zoomsh has been extended to show this with the cmd suggestions.
 
 --- 4.2.17 2011/09/28
@@ -2267,7 +2277,7 @@ Added support for Danmarc2 to UTF-8 conversion.
 
 Added support for ISO5426 to UTF-8 conversion.
 
-zget_InitRequest/zget_InitResponse returns GIT SHA1 hash as part of 
+zget_InitRequest/zget_InitResponse returns GIT SHA1 hash as part of
 implementation version.
 
 Function yaz_version returns GIT SHA1 hash for parameter sha1_str.
@@ -2361,7 +2371,7 @@ Document --with-xml2 option.
 
 Added OPAC XML XSD (etc/opacxml.xsd).
 
-Allow glob mask for name attribute in retrieval element for the 
+Allow glob mask for name attribute in retrieval element for the
 generic frontend server's retrieval facility.
 
 Changed yaz_poll_poll to return yaz_poll_except for all returned events
@@ -2440,7 +2450,7 @@ Z39.50 traffic. This facility is "transparent" to must applications
 using YAZ. It's enabled by using pseudo transport connect: followed by
 the proxy address, followed by command, then follwed by he regular
 "virtual" addresss. For example,
-connect:webproxy.com:3128,tcp:z3950.loc.gov:7090/voyager . 
+connect:webproxy.com:3128,tcp:z3950.loc.gov:7090/voyager .
 
 More MARC-8/UTF-8 conversion fixes. Bugs #1666, #1667, #1778.
 
@@ -2502,7 +2512,7 @@ Z39.50 authentication).
 
 Fixed bug #1208: SSL appears to be broken in ZOOM.
 
-Fixed bug #1206: Libxml2 include path weirdness. 
+Fixed bug #1206: Libxml2 include path weirdness.
 
 Added oid_name_to_dotstring.
 
@@ -2585,7 +2595,7 @@ tree. This is handled by functions with prefix ccl_stop_words_ .
 New ZOOM C option, "rpnCharset", which allows client-side conversion of
 terms in RPN queries.
 
-Clean-up the CCL API. Moved some internal structures from ccl.h to 
+Clean-up the CCL API. Moved some internal structures from ccl.h to
 private header cclp.h. Changed ccl_parser_create so that a Bibset must
 be supplied. Removed tokenize API from ccl.h - including ccl_parser_find.
 This is replaced by ccl_parser_find_str which takes a string instead.
@@ -2665,15 +2675,15 @@ Using ACX_PTHREAD macro to check for POSIX threads.
 Fixed have-vsnprintf check.
 
 --- 2.1.50 2007/02/23
- 
+
 Fixes for configure on BSD. Bug #900.
 
-Added snprintf/vsnprintf wrappers for systems that don't have 
+Added snprintf/vsnprintf wrappers for systems that don't have
 limits (heavens forbid).
 
 Fixed bug in ZOOM-C's event and task handling. If a ZOOM task was
 created before all previous tasks were completed and removed from the
-task queue, the new task could be removed by a mistake. 
+task queue, the new task could be removed by a mistake.
 
 Fixed bug #615: Document retrievalInfo facilities for Frontend Server.
 
@@ -2700,7 +2710,7 @@ Implemented alternative Item Order package for ZOOM. If option "doc" is set,
 that is treated as an ItemOrder with itemRequest being an XML document
 external. The value of "doc" is the content.
 
-Extended the GFS search facility. New member of bend_search_rr 
+Extended the GFS search facility. New member of bend_search_rr
 'estimated_hit_count' signals that hits is known to be an estmate
 (higher or lower than real hit count). New member 'partial_resultset'
 signals that the search was partial (hit count is lower or equal than
@@ -2717,10 +2727,10 @@ Implemented bug #806: Deal with HTTP clients sending LF in HTTP headers.
 
 Added ZOOM_connection_peek_event.
 
-Implemented Generic select hook for ZOOM (bug #803). This is achieved with 
+Implemented Generic select hook for ZOOM (bug #803). This is achieved with
 the following new functions:
  ZOOM_event_nonblock, ZOOM_connection_process,
- ZOOM_connection_get_{socket,mask,timeout}, 
+ ZOOM_connection_get_{socket,mask,timeout},
  ZOOM_connection_fire_event_{timeout,socket}.
 The existing blocking event handler, ZOOM_event, is a wrapper for the
 + blocking ZOOM_event_sys_{poll,select}.
@@ -2854,7 +2864,7 @@ Fixed bug in Generic Frontend Server that could cause a server to stop
 accepting new connections. Bug only seen on dual CPU Windows 2003 server.
 
 For the generic frontend server, the maximum record size is used as maximum
-size of incoming packages (SRU + Z39.50). The value until was previously 
+size of incoming packages (SRU + Z39.50). The value until was previously
 only used in Z39.50 Init negotiation and, later, in a session controlled
 sizes of records returned. This is controlled using -k option. It can be
 specified, per server, with element maximumrecordsize in YAZ' GFS XML config.
@@ -2883,7 +2893,7 @@ Fixed problem another problem with ZOOM_EVENT_RECV_RECORD . Bug #626.
 
 --- 2.1.24 2006/08/08
 
-Fixed MARC ISO2709 encoding routines to deal with character set 
+Fixed MARC ISO2709 encoding routines to deal with character set
 conversion.
 
 Minor changes to GFS logging. Database included in search request log
@@ -2936,7 +2946,7 @@ for more info. Thanks to Ko van der Sloot.
 Bug #600: SRU GET, POST support for yaz-client. Introduced
 command 'sru' which selects method SOAP/GET/POST.
 
-Allow missingValueAction to be specified for the sortspec string - 
+Allow missingValueAction to be specified for the sortspec string -
 function yaz_sort_spec. By default, the missing value action is null.
 Use ! to specify "abort". Use = followed by stringvalue to specify default
 value.
@@ -2965,8 +2975,8 @@ Latin-1 range (when possible).
 
 --- 2.1.18 2006/04/24
 
-ASN.1 compiler 0.4: generates brief Doxygen file header for 
-generated .h/.c files. 
+ASN.1 compiler 0.4: generates brief Doxygen file header for
+generated .h/.c files.
 
 Utility yaz_iconv now supports conversion to MARC-8.
 
@@ -3006,7 +3016,7 @@ For GFS in SRU mode, an empty stylesheet in SRU URL (&stylesheet=&)
 produces NO stylesheet reference even if a default stylesheet is specified
 in GFS XML config.
 
---- 2.1.14 2006/03/14 
+--- 2.1.14 2006/03/14
 
 Updated Windows package to include yazd.dll + yazd.lib for the
 Development component.
@@ -3043,7 +3053,7 @@ sequences where not read correctly. Fix by Rustam Usmanov.
 Updated win/makefile to use options, settings which makes things
 compile with VS C 2005.
 
---- 2.1.12 2006/02/01 
+--- 2.1.12 2006/02/01
 
 Fixed bug in yaz_oi_update which used incorrect value for categoryValue.
 
@@ -3061,7 +3071,7 @@ function, which takes as its start-term parameter a ZOOM_query object
 (which may have had either CQL or RPN set into it).
 
 
---- 2.1.10 2005/11/29 
+--- 2.1.10 2005/11/29
 
 Added ZiNG Update Support. New codecs are defined in srw.h. Extended the
 GFS to support this as well. Backend handler, bend_srw_update, does the
@@ -3087,7 +3097,7 @@ application/x-www-form-urlencoded only. Patch by Ko van der Sloot.
 
 Do not build the separate Multi-threaded (MT) library libyazthread.la.
 Instead make the library libyaz.la multi-threaded. Threading as a whole
-can still be disabled by configure option --disable-threads. Previosly, 
+can still be disabled by configure option --disable-threads. Previosly,
 with older GLIBCs there were problems with MT libs under Apache. This
 has now been fixed a long time ago.
 
@@ -3119,7 +3129,7 @@ MS-Windows that use BSD-derived TCP/IP stacks.  The behaviour of
 YAZ-based servers should now be uniform across operating systems in
 this respect.
 
-yaz-marcdump uses 64-bit file access on some systems. This is enabled 
+yaz-marcdump uses 64-bit file access on some systems. This is enabled
 on Linux and other Unix variants where _FILE_OFSET_BITS=64 is supported.
 This allows yaz-marcdump to read large MARC batches (>2 GB).
 
@@ -3136,7 +3146,7 @@ ZOOM_resultset_sort() in new applications.  Its behaviour is identical
 except that it returns an indicator of whether or not the sort
 criterion was accepted (0 for OK, -1 for invalid).
 
---- 2.1.8 2005/06/07 
+--- 2.1.8 2005/06/07
 
 Fixed bug in yaz_marc_decode_buf. By mistake the routine appended
 MARC output rather than returning "new" buffer.
@@ -3145,7 +3155,7 @@ yaz-client warns about unknown init options.
 
 Fixed bug #371: "options concurrentOperations ignores concurrentOperations"
 
---- 2.1.6 2005/05/24 
+--- 2.1.6 2005/05/24
 
 Added support for SRW sort in Generic Frontend Server. Patch
 by Ko van der Sloot. Member srw_sortKeys in bend_search_rr holds
@@ -3158,7 +3168,7 @@ for ZOOM_event. Special timeout value -1 now means indefinite timeout
 Added support for multiple languages and charsets to be specified in
 ZOOM. Each charset/language is separated by a blank. If negotiation is
 in effect in init-response, Option
-"negotiation-charset-in-effect-for-records" set to 1(true) or 0(false). 
+"negotiation-charset-in-effect-for-records" set to 1(true) or 0(false).
 Code based on patch by Vasiliy Osadchuk.
 
 Fixed bug #306: infinite recursion that occurred when calling
@@ -3168,7 +3178,7 @@ nmem_init calls)
 Fixed bug in scan handling in front end server: if preferred-Position-In-
 Response was non-present, a NULL pointer referece was performed.
 
---- 2.1.4 2005/04/26 
+--- 2.1.4 2005/04/26
 
 Changed include/yaz/diagbib1.h and added include/yaz/diagsrw.h with
 diagnostic messages+codes for Bib-1 and SRW. Preprocessor defines are
@@ -3188,13 +3198,13 @@ only).
 Program yaz-marcdump skips garbage bytes between ISO2709 records rather
 than abort.
 
---- 2.1.2 2005/03/16 
+--- 2.1.2 2005/03/16
 
-Fixed bug #273: Update for recent MARC-8 -> UNICODE changes. 
+Fixed bug #273: Update for recent MARC-8 -> UNICODE changes.
 
 Fixed bug #272: Preserve spacing for CCL terms.
 
---- 2.1.0 2005/03/14 
+--- 2.1.0 2005/03/14
 
 Added support for virtual hosts and multiple backend servers for
 the YAZ frontend server. The configution is XML based and
@@ -3209,7 +3219,7 @@ Fixed a bug in MARC decoder that could caused it to crash for some
 invalid MARC records. More diagnostics and warnings where added in
 XML output (warnings, etc are stored in comments).
 
---- 2.0.34 2005/02/08 
+--- 2.0.34 2005/02/08
 
 Fixes for UNIX domain sockets. Bug #261.
 
@@ -3228,7 +3238,7 @@ by yaz-marcdump and is implemented in yaz_marc_decode - functions.
 Added yaz-client commands scansize that sets maximum number of
 entries to be returned by scan.
 
---- 2.0.32 2005/01/11 
+--- 2.0.32 2005/01/11
 
 Added support for SRW scan in yaz-client and Generic Frontend Server.
 
@@ -3240,7 +3250,7 @@ Fixed NMEM system to return aligned blocks on the smallest boundaries
 that are suitably aligned for all possible types on the particular
 architecture YAZ is being built for.
 
---- 2.0.30 2005/01/04 
+--- 2.0.30 2005/01/04
 
 Fixed numerious warnings that was issued with newer versions of GCC.
 
@@ -3260,7 +3270,7 @@ instead of LOG_, due to name clash with syslog(3). LOG_ are still
 present. New applications should define YAZ_USE_NEW_LOG=1 - this
 will effectively disable old definitions.
 
---- 2.0.28 2004/11/09 
+--- 2.0.28 2004/11/09
 
 Added yaz_log_time_format which specifies log format using
 strftime(3).
@@ -3279,7 +3289,7 @@ Fixed bug #172: RPM builds does not enable SSL.
 
 Doxyfile.in part of dist. Doxyfile generated by configure.
 
-Configure aborts if any of --with-xml2, --with-openssl, --enable-tcpd 
+Configure aborts if any of --with-xml2, --with-openssl, --enable-tcpd
 are given and the corresponding component does not exist.
 
 Extend CCL documentation in YAZ reference. Describe r=r.
@@ -3321,7 +3331,7 @@ position and step-size for scan.
 
 Macro YAZ_INIT in yaz.m4: option --with-yazconfig renamed to --with-yaz.
 
-Added CCL utility ccl_qual_buf which parses one or more CCL 
+Added CCL utility ccl_qual_buf which parses one or more CCL
 spec lines in a buffer.
 
 Added CCL utility ccl_qual_line which adds CCL qualifier line consisting
@@ -3364,7 +3374,7 @@ Yet another small fix for configure of SSL.
 
 --- 2.0.21 2004/05/14
 
-Fix SSL libs for configure when --with-openssl=DIR is given.  
+Fix SSL libs for configure when --with-openssl=DIR is given.
 
 --- 2.0.20 2004/05/10
 
@@ -3472,7 +3482,7 @@ Make ZOOM error code for "invalid query".
 
 Fixed compilation for SSL which wasn't properly enabled for all platforms.
 
---- 2.0.10 2004/02/05 
+--- 2.0.10 2004/02/05
 
 For yaz.m4, allow second argument for YAZ_INIT to hold minimal version of
 YAZ required.
@@ -3568,7 +3578,7 @@ Frontend server now transfers memory from decoded packages to stream
 ODR for search.
 
 NMEM now clears freed blocks with 'Y' (hex 59) to force bad memory
-references to show up. 
+references to show up.
 
 ZOOM-C now supports standard ZOOM option names as described in v1.4 of
 the ZOOM Abstract API.  The older names for the same options are still
@@ -3591,7 +3601,7 @@ Add function ZOOM_scanset_display_term.
 
 yaz-client shows scan displayTerm if present.
 
-Utility yaz-iconv is now installed by default along with the man page 
+Utility yaz-iconv is now installed by default along with the man page
 yaz-iconv.1.
 
 Extend configure check for OpenSSL to use pkg-config where available (such
@@ -3606,7 +3616,7 @@ in which case the mask is 0666 (rw for everybody).
 
 Major restructure of YAZ source. All source in libyaz is in src directory.
 Programs in client (yaz-client), ztest (yaz-ztest), zoom (zoom programs),
-util (utility programs such as ASN.1 compiler, yaz-marcdump). 
+util (utility programs such as ASN.1 compiler, yaz-marcdump).
 
 Added man page for utility yaz-marcdump (used to be called marcdump).
 yaz-marcdump is installed by 'make install'.
@@ -3666,7 +3676,7 @@ arrays and dotted strings such as "1.2.840.10003.9.5.1":
  char *oid_to_dotstring(const int *oid, char *oidbuf);
  char *oid_name_to_dotstring(oid_class oclass, const char *name, char *oidbuf);
 
-Reverted modifications for ES Update definition for z_IU0Update 
+Reverted modifications for ES Update definition for z_IU0Update
 (OID 1.2.840.10003.9.5.1 and 1.2.840.10003.9.5). The definition
 is back to YAZ 2.0.2.
 
@@ -3683,7 +3693,7 @@ their servers.
 Support for anonymous authentication in yaz-client.  Use the command
 "auth -".
 
-* Fix the OID of the Index Data-local "admin" Extended Service from 
+* Fix the OID of the Index Data-local "admin" Extended Service from
   1.2.840.10003.9.81.1 to 1.2.840.10003.9.1000.81.1.  The omission of
   the 1000, which indicates a locally-defined OID, was a mistake.
 
@@ -3697,7 +3707,7 @@ both CCL keywords and qualifiers.
 Decoder has been updated with ASN.1 changes as listed in
 http://lcweb.loc.gov/z3950/agency/defns/updateES.html
 Note that the "latest" DB Update, OID 1.2.840.10003.9.5.1.1 , handler
-z_IUUpdate, remains unchanged. 
+z_IUUpdate, remains unchanged.
 
 ZOOM_record_get may now return a record in a specific character set.
 For type use "form; charset=from[,to]" where form (render, xml, ..) ,
@@ -3723,7 +3733,7 @@ SRW support for yaz-client. Use scheme http: to use it, e.g.
 yaz-client no longer does (un)intelligent character set conversions
 by default. Can be enabled with charset and marc_charset commands.
 
-xmalloc trace fix for 64-bit systems such as DEC alpha. 
+xmalloc trace fix for 64-bit systems such as DEC alpha.
 
 Solaris 2.6 compile fix.
 
@@ -3797,7 +3807,7 @@ for configure.
 
 Generic frontend server supports HTTP/SOAP/SRW and Z39.50/BER
 on the same port.  SRW SearchRetrieveRequests are mapped
-to bend_init,bend_search,bend_fetch,bend_close. 
+to bend_init,bend_search,bend_fetch,bend_close.
 
 Z39.50 Query Type-104 added - to facilitate CQL within Z39.50.
 
@@ -3828,7 +3838,7 @@ include/yaz/marcdisp.h.
 YAZ Iconv utility now supports MARC8 decoding (marc8.c). Converts
 to UTF-8, UCS-32, wchar_t or Latin-1.
 
-* Prototypes for yaz_iconv_-functions moved to separate header 
+* Prototypes for yaz_iconv_-functions moved to separate header
 include/yaz/yaz-iconv.h.
 
 Make a few private functions 'static' in unix.c. This prevents
@@ -3905,7 +3915,7 @@ Added three members in bend_initrequest structure to facilitate
 character set negotiation.
 
 Fixed a bug in frontend server that could cause indefinite
-loops under rare conditions. 
+loops under rare conditions.
 
 Revised character set utilities (charneg.h) so that encoding
 UCS-4, UCSA-4, UTF-16 and UTF-8 are encoded non-privately.
@@ -3917,7 +3927,7 @@ is inherited - just like @attr.
 New call odr_set_charset that sets character set conversion for
 international-strings on a ODR stream. Prototype is:
  int odr_set_charset(ODR o, const char *to, const char *from);
-The InternationalString is still represented as C string in YAZ 
+The InternationalString is still represented as C string in YAZ
 so native strings of type UTF-8, ASCII, etc. will work (UTF-16
 won't). On the protocol level, you can use any encoding.
 
@@ -3938,7 +3948,7 @@ your windows APP if you're using ZOOM.
 Character Set and Language Negotiation(3) for ZOOM API and YAZ client.
 Commands "lang" and "charset" sets language and character set respectively.
 Options "lang" and "charset" is interpreted by the ZOOM API. Note, these
-are not part of the official ZOOM spec) All is due to Oleg Kolobov. 
+are not part of the official ZOOM spec) All is due to Oleg Kolobov.
 
 Attributes from multiple CCL fields may be OR'ed rather than merged
 using directive "@field or". Fields are still merged by default -
@@ -4079,7 +4089,7 @@ Fix bug: local attribute set wasn't set correctly in PQF strings.
 
 --- 1.8 2001/10/25
 
-* Old Z39.50 codecs no longer supported. 
+* Old Z39.50 codecs no longer supported.
 
 Added ZOOM C binding. See http://zoom.z3950.org/
 
@@ -4212,11 +4222,11 @@ files are referred to as include <yaz/log.h> rather than <log.h>.
 The YAZ include path (-I ..) is therefore the same as before. Programmers
 should update their #include statements or use -Ipath/include/yaz
 instead. The main motivation for doing this change is that YAZ header files
-can be installed in "standard" locations /usr/include,/usr/local/include 
+can be installed in "standard" locations /usr/include,/usr/local/include
 without introducing conflicts, since ALL YAZ header files are stored
 in subdirectory yaz (under /usr/include for example).
 
-Compilation of YAZ for WIN32 is now handled by an nmake-style makefile 
+Compilation of YAZ for WIN32 is now handled by an nmake-style makefile
 rather than project/workspace files. We switched because project files
 are incompatible between Visual C++ 5 and 6. Refer to windows.txt for
 details.
@@ -4403,7 +4413,7 @@ Added sort facility in client and backend server interface.
 
 Fixed problem with dependencies in Makefile(s).
 
-Fixed bugs for encoders/decoders of extended services and 
+Fixed bugs for encoders/decoders of extended services and
 SearchInfoReport.
 
 Implemented sub-tree feature for schemas. Sub-trees are
@@ -4441,7 +4451,7 @@ Fixed nmem_exit so that memory is freed.
 
 Revised the CCL parser utility to be thread safe.
 
-Added function, oid_ent_to_oid, to replace the function 
+Added function, oid_ent_to_oid, to replace the function
 oid_getoidbyent, which is not thread safe.
 
 * Added nmem_init and nmem_exit to initialize and release
@@ -4452,7 +4462,7 @@ NMEM thread safe. The NMEM memory pool is shared amongst threads
 in a process. Unix-based applications will still work fine without
 calling this.
 
-Added NT Services interface for the the Z39.50 (statserv) Server. 
+Added NT Services interface for the the Z39.50 (statserv) Server.
 Refer to the ztest.c source on the usage.
 
 Windows 95/NT port using MSVC5.0. Project files are included in the
@@ -4504,7 +4514,7 @@ Added initializers (zget_ routines) for a number of PDUs. Thanks to RVDM.
 
 Added support for private extensions to the OID database
 (oid_setprivateoids()). Thanks to RVDM.
-    
+
 Added optional, physical ANY (key replication)
 
 Fixed null-reference problem in GRS-1 output filter.
