@@ -639,6 +639,8 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
     }
     for (h = hr->headers; h; h = h->next)
     {
+        if (yaz_strcasecmp(h->name, "Transfer-Encoding") == 0)
+            continue;
         odr_write(o, h->name, strlen(h->name));
         odr_write(o, ": ", 2);
         odr_write(o, h->value, strlen(h->value));
