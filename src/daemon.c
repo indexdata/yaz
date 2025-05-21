@@ -137,20 +137,19 @@ static void keepalive(void (*work)(void *data), void *data)
         /* enable signalling in kill_child_handler */
         child_pid = p;
 
-        p1 = waitpid(p, &status, 0);
+        // wait for child to finish and check status
+        while ((p1 = waitpid(p, &status, 0) == (pid_t ) (-1)) && errno == EINTR)
+            ;
+
+        if (p1 == (pid_t) (-1))
+        {
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "waitpid");
+            break;
+        }
 
         /* disable signalling in kill_child_handler */
         child_pid = 0;
 
-        if (p1 == (pid_t)(-1))
-        {
-            if (errno != EINTR)
-            {
-                yaz_log(YLOG_FATAL|YLOG_ERRNO, "waitpid");
-                break;
-            }
-            continue;
-        }
         if (p1 != p)
         {
             yaz_log(YLOG_FATAL, "p1=%d != p=%d", p1, p);
