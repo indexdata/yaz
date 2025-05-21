@@ -137,7 +137,7 @@ static void keepalive(void (*work)(void *data), void *data)
         /* enable signalling in kill_child_handler */
         child_pid = p;
 
-        // wait for child to finish and check status
+        /* wait for child to finish and check status */
         while ((p1 = waitpid(p, &status, 0) == (pid_t ) (-1)) && errno == EINTR)
             ;
 

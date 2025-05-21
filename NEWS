@@ -1,3 +1,8 @@
+--- 5.35.1 2025/05/21
+
+daemon keepalive: fix waitpid EINTR handling. This is an old error,
+but only seen recently when waitpid started to return EINTR.
+
 --- 5.35.0 2025/05/06
 
 Disable HTTP chunked when encoding HTTP messages.
