@@ -5,6 +5,7 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/src",
+                "${workspaceFolder}/build/src",
                 "/usr/include/libxml2"
             ],
             "defines": [
