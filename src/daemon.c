@@ -162,22 +162,18 @@ static void keepalive(void (*work)(void *data), void *data)
             {
             case SIGILL:
                 yaz_log(YLOG_WARN, "Received SIGILL from child %ld", (long) p);
-                cont = 1;
                 no_sigill++;
                 break;
             case SIGABRT:
                 yaz_log(YLOG_WARN, "Received SIGABRT from child %ld", (long) p);
-                cont = 1;
                 no_sigabrt++;
                 break ;
             case SIGSEGV:
                 yaz_log(YLOG_WARN, "Received SIGSEGV from child %ld", (long) p);
-                cont = 1;
                 ++no_sigsegv;
                 break;
             case SIGBUS:
                 yaz_log(YLOG_WARN, "Received SIGBUS from child %ld", (long) p);
-                cont = 1;
                 no_sigbus++;
                 break;
             case SIGTERM:
