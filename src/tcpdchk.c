@@ -36,6 +36,8 @@
 #endif
 
 #if HAVE_NETDB_H
+/* _GNU_SOURCE: for musl's netdb.h to expose gethostbyaddr */
+#define _GNU_SOURCE
 #include <netdb.h>
 #endif
 
