@@ -405,13 +405,10 @@
     like to keep it that way as far as it makes sense.
    </para>
    <para>
-    We maintain a mailing-list for the purpose of announcing new releases and
-    bug-fixes, as well as general discussion. Subscribe by
-    filling-in the form
-    <ulink url="&url.yaz.mailinglist;">here</ulink>.
-    General questions and problems can be directed at
-    <ulink url="&url.yaz.mail;"/>, or the address given at the top of
-     this document.
+    Use <ulink url="https://github.com/indexdata/yaz/discussions">
+    GitHub Discussions</ulink> for questions and discussions about &yaz;.
+    General questions and problems can be directed to
+    <ulink url="&url.yaz.mail;"/>.
    </para>
   </sect1>
   <sect1 id="installation.unix"><title>UNIX/macOS</title>
