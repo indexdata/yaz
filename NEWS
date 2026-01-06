@@ -1,3 +1,11 @@
+--- 5.36.0 2026/01/06
+
+Add `nmem_from_xml_buffer` defined in `nmem_xml.h`.
+
+Avoid using deprecated Libxml2 xmlBuffer members `use` and `content`.
+
+Fix musl - expose `gethostbyaddr` with _GNU_SOURCE
+
 --- 5.35.1 2025/05/21
 
 daemon keepalive: fix waitpid EINTR handling. This is an old error,
