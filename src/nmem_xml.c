@@ -36,9 +36,9 @@ char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
 char *nmem_from_xml_buffer(NMEM nmem, const xmlBufferPtr buf, int *len)
 {
     if (len)
-        *len = xmlStrlen(xmlBufferContent(buf));
+        *len = xmlBufferLength(buf);
     return nmem_strdupn(nmem, (const char *) xmlBufferContent(buf),
-                        xmlStrlen(xmlBufferContent(buf)));
+                        xmlBufferLength(buf));
 }
 #endif
 
