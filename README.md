@@ -34,9 +34,8 @@ what's listed in `Build-Depends`. For RPM based systems, read
     $ ./configure
     $ make
 
-### Mailing list
+### Help
 
-To get more information or assistance, send mail to info@indexdata.com.
-Even better, sign on to the
-[YAZ mailing list](http://lists.indexdata.dk/cgi-bin/mailman/listinfo/yazlist)
+To get more information or assistance, send mail to info@indexdata.com
+Or use the [YAZ discussions](http://github.com/indexdata/yaz/discussions)
 
