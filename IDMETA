@@ -1,4 +1,4 @@
-DEBIAN_DIST="bookworm bullseye"
-UBUNTU_DIST="noble jammy focal"
+DEBIAN_DIST="bullseye bookworm trixie"
+UBUNTU_DIST="focal jammy noble"
 CENTOS_DIST="centos7 centos8 centos9"
 VERSION=5.35.1
