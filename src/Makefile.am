@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-YAZ_VERSION_INFO=6:1:1
+YAZ_VERSION_INFO=7:0:2
 
 bin_SCRIPTS = yaz-asncomp yaz-config
 
@@ -113,7 +113,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   marc_read_json.c marc_read_xml.c marc_read_iso2709.c marc_read_line.c \
   marc_read_sax.c \
   wrbuf.c wrbuf_sha1.c malloc_info.c oid_db.c errno.c \
-  nmemsdup.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
+  nmemsdup.c nmem_xml.c xmalloc.c readconf.c tpath.c nmem.c matchstr.c atoin.c \
   siconv.c iconv-p.h utf8.c ucs4.c iso5428.c advancegreek.c \
   odr_bool.c ber_bool.c ber_len.c ber_tag.c odr_util.c facet.c \
   odr_null.c ber_null.c odr_int.c ber_int.c odr_tag.c odr_cons.c \
@@ -153,7 +153,7 @@ libyaz_la_SOURCES= $(GEN_FILES) \
 libyaz_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
-  requestq.c eventl.h session.h 
+  requestq.c eventl.h session.h
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 

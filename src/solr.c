@@ -84,9 +84,7 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
 
             record->recordSchema = 0;
             record->recordPacking = Z_SRW_recordPacking_XML;
-            record->recordData_len = xmlBufferLength(buf);
-            record->recordData_buf =
-                odr_strdupn(o, (const char *) xmlBufferContent(buf), xmlBufferLength(buf));
+            record->recordData_buf = nmem_from_xml_buffer(odr_getmem(o), buf, &record->recordData_len);
             record->recordPosition = odr_intdup(o, start + offset + 1);
 
             xmlBufferFree(buf);
