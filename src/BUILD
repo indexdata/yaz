@@ -200,7 +200,7 @@ cc_library(
 	 "log", "cookie", "marcdisp", "marc_read_json", "marc_read_xml",
 	 "marc_read_iso2709",  "marc_read_line", "marc_read_sax",
 	 "wrbuf", "wrbuf_sha1",
-	 "malloc_info", "oid_db", "errno", "nmemsdup", "xmalloc", "readconf",
+	 "malloc_info", "oid_db", "errno", "nmemsdup", "nmem_xml", "xmalloc", "readconf",
 	 "tpath", "nmem", "matchstr", "atoin", "siconv", "utf8", "ucs4",
 	 "iso5428", "advancegreek", "odr_bool", "ber_bool", "ber_len",
 	 "ber_tag", "odr_util", "facet", "odr_null", "ber_null", "odr_int",
