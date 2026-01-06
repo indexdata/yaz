@@ -454,6 +454,7 @@ MISC_OBJS= \
    $(OBJDIR)\marc_read_line.obj \
    $(OBJDIR)\nmem.obj \
    $(OBJDIR)\nmemsdup.obj \
+   $(OBJDIR)\nmem_xml.obj \
    $(OBJDIR)\oid_db.obj \
    $(OBJDIR)\oid_util.obj \
    $(OBJDIR)\options.obj \

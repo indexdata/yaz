@@ -12,6 +12,7 @@
 
 #include <yaz/srw.h>
 #if YAZ_HAVE_XML2
+#include <yaz/nmem_xml.h>
 #include "sru-p.h"
 
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem)
@@ -108,10 +109,7 @@ int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
         xmlBufferAddHead(buf, (const xmlChar *) "<yaz_record>", -1);
         xmlBufferAdd(buf, (const xmlChar *) "</yaz_record>", -1);
     }
-    *val = odr_strdupn(o, (const char *) xmlBufferContent(buf), xmlBufferLength(buf));
-    if (len)
-        *len = xmlBufferLength(buf);
-
+    *val = nmem_from_xml_buffer(odr_getmem(o), buf, len);
     xmlBufferFree(buf);
 
     return 1;
