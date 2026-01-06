@@ -33,12 +33,12 @@ char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
     return cdata;
 }
 
-char *nmem_from_xml_buffer(NMEM nmem, const xmlBufferPtr buf, int *len)
+char *nmem_from_xml_buffer(NMEM nmem, const xmlBufferPtr buf, int *ret_len)
 {
-    if (len)
-        *len = xmlBufferLength(buf);
-    return nmem_strdupn(nmem, (const char *) xmlBufferContent(buf),
-                        xmlBufferLength(buf));
+    int len = xmlBufferLength(buf);
+    if (ret_len)
+        *ret_len = len;
+    return nmem_strdupn(nmem, (const char *) xmlBufferContent(buf), len);
 }
 #endif
 
