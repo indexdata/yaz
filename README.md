@@ -1,6 +1,6 @@
 ## YAZ toolkit
 
-Copyright (C) 1995-2025 Index Data.
+Copyright (C) 1995-2026 Index Data.
 See the file LICENSE for details.
 
 The primary output of the source here is the
@@ -10,7 +10,7 @@ functions for implementing the server or client role of Z39.50 and SRU.
 ### Documentation
 
 For more information about YAZ refer to the documentation in sub
-directory `doc` or 
+directory `doc` or
 [online](http://www.indexdata.com/yaz/doc).
 
 ### Cloning
