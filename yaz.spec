@@ -17,6 +17,7 @@ Release: 1.indexdata
 %define is_redhat5 %(grep 'release 5' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_redhat8 %(grep 'release 8' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_redhat9 %(grep 'release 9' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
+%define is_redhat10 %(grep 'release 10' /etc/redhat-release >/dev/null 2>&1 && echo 1 || echo 0)
 %define is_mandrake %(test -e /etc/mandrake-release && echo 1 || echo 0)
 %define is_suse %(test -e /etc/SuSE-release >/dev/null && echo 1 || echo 0)
 %define is_suse11 %(grep 'VERSION = 11' /etc/SuSE-release >/dev/null 2>&1 && echo 1 || echo 0)
@@ -50,6 +51,10 @@ BuildRequires: gnutls-devel
 %endif
 
 %if %is_redhat9
+%undefine TCPWRAPPER
+%endif
+
+%if %is_redhat10
 %undefine TCPWRAPPER
 %endif
 
