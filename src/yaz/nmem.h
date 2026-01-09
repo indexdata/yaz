@@ -209,7 +209,7 @@ YAZ_EXPORT void *nmem_malloc(NMEM n, size_t size);
  */
 YAZ_EXPORT int nmem_get_status(char *dst, size_t l);
 
-/** \brief printfs formatting string into NMEM allocated memory
+/** \brief formats and prints a string into NMEM allocated memory
     \param nmem NMEM handle
     \param fmt printf format string
     \returns allocated formatted string
