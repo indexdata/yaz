@@ -1541,8 +1541,11 @@ char *dummy_marc_record(int num, ODR odr)
     if (num > NO_MARC_RECORDS)
     {
         char *p = odr_strdup(odr, marc_record0);
-        yaz_snprintf(p + 279, 6, "%-5d", num);
-        p[284] = ' ';
+        if (strlen(p) > 284)
+        {   /* always the case as marc_record0 is fixed length */
+            yaz_snprintf(p + 279, 6, "%-5d", num);
+            p[284] = ' ';
+        }
         return p;
     }
     else
