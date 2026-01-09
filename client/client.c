@@ -3000,7 +3000,7 @@ size_t check_token(const char *haystack, const char *token)
     return extra + len;
 }
 
-static int parse_show_args(const char *arg_c, char *setstring,
+static int parse_show_args(const char *arg_c, char *setstring, size_t len,
                            Odr_int *start, Odr_int *number)
 {
     char *end_ptr;
@@ -3008,7 +3008,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     size_t token_len;
 
     if (setnumber >= 0)
-        yaz_snprintf(setstring, sizeof(setstring), "%d", setnumber);
+        yaz_snprintf(setstring, len, "%d", setnumber);
     else
         *setstring = '\0';
 
@@ -3058,7 +3058,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
         printf("Bad show arg: + expected. Got %s\n", end_ptr);
         return 0;
     }
-    strcpy(setstring, end_ptr+1);
+    yaz_snprintf(setstring, len, "%s", end_ptr+1);
     return 1;
 }
 
@@ -3072,7 +3072,7 @@ static int send_Z3950_presentRequest(const char *arg)
 
     req->referenceId = set_refid(out);
 
-    if (!parse_show_args(arg, setstring, &setno, &nos))
+    if (!parse_show_args(arg, setstring, sizeof setstring, &setno, &nos))
         return 0;
     if (*setstring)
         req->resultSetId = setstring;
@@ -3164,7 +3164,7 @@ static int send_SRW_presentRequest(const char *arg)
 
     if (!sr)
         return 0;
-    if (!parse_show_args(arg, setstring, &setno, &nos))
+    if (!parse_show_args(arg, setstring, sizeof setstring, &setno, &nos))
         return 0;
     if (*sru_recordPacking)
         sr->u.request->recordPacking = sru_recordPacking;
