@@ -34,6 +34,7 @@
 #include <yaz/otherinfo.h>
 #include <yaz/facet.h>
 #include <yaz/backtrace.h>
+#include <yaz/snprintf.h>
 
 #include "ztest.h"
 
@@ -259,7 +260,7 @@ static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
     for (index = 0; index < facet_field->num_terms; index++)
     {
         Z_FacetTerm *facet_term;
-        sprintf(key, "%s%d", facet_name, index);
+        yaz_snprintf(key, length, "%s%d", facet_name, index);
         yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
 
         facet_term = facet_term_create_cstr(odr, key, freq);
@@ -895,7 +896,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         /* this section returns a small record */
         char buf[100];
 
-        sprintf(buf, "This is dummy SUTRS record number %d\n", r->number);
+        yaz_snprintf(buf, sizeof(buf), "This is dummy SUTRS record number %d\n", r->number);
 
         r->len = strlen(buf);
         r->record = (char *) odr_malloc(r->stream, r->len+1);
@@ -918,7 +919,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         FILE *f;
         long size;
 
-        sprintf(fname, "part.%d.ps", r->number);
+        yaz_snprintf(fname, sizeof(fname), "part.%d.ps", r->number);
         f = fopen(fname, "rb");
         if (!f)
         {

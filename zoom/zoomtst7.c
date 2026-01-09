@@ -11,6 +11,7 @@
 #include <yaz/nmem.h>
 #include <yaz/log.h>
 #include <yaz/zoom.h>
+#include <yaz/snprintf.h>
 
 int main(int argc, char **argv)
 {
@@ -47,14 +48,14 @@ int main(int argc, char **argv)
         }
         if (block > 1)
             ZOOM_options_set (o, "async", "1");
-        for (i = 0; i<10; i++)
+        for (i = 0; i < 10; i++)
         {
             char host[40];
 
-            printf ("session %2d", i);
-            sprintf (host, "localhost:9999/%d", i);
-            z = ZOOM_connection_create (o);
-            ZOOM_connection_connect (z, host, 0);
+            printf("session %2d", i);
+            yaz_snprintf(host, sizeof(host), "localhost:9999/%d", i);
+            z = ZOOM_connection_create(o);
+            ZOOM_connection_connect(z, host, 0);
 
             for (j = 0; j < 10; j++)
             {
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
                 char query[40];
                 ZOOM_query s = ZOOM_query_create ();
 
-                sprintf (query, "i%dr%d", i, j);
+                yaz_snprintf(query, sizeof(query), "i%dr%d", i, j);
 
                 if (ZOOM_query_prefix (s, query))
                 {
@@ -110,24 +111,24 @@ int main(int argc, char **argv)
             ZOOM_query q = ZOOM_query_create ();
             char host[40];
 
-            printf ("session %2d", i+10);
-            sprintf (host, "localhost:9999/%d", i);
-            z = ZOOM_connection_create (o);
-            ZOOM_connection_connect (z, host, 0);
+            printf("session %2d", i+10);
+            yaz_snprintf(host, sizeof(host), "localhost:9999/%d", i);
+            z = ZOOM_connection_create(o);
+            ZOOM_connection_connect(z, host, 0);
 
             for (j = 0; j < 10; j++)
             {
                 char query[40];
 
-                sprintf (query, "i%dr%d", i, j);
+                yaz_snprintf(query, sizeof(query), "i%dr%d", i, j);
 
-                ZOOM_options_set (o, "count", "0");
+                ZOOM_options_set(o, "count", "0");
 
-                r[j] = ZOOM_connection_search_pqf (z, query);
+                r[j] = ZOOM_connection_search_pqf(z, query);
 
                 printf (".");
                 if (block > 0)
-                    while (ZOOM_event (1, &z))
+                    while (ZOOM_event(1, &z))
                         ;
             }
 
@@ -149,22 +150,22 @@ int main(int argc, char **argv)
             char host[40];
             ZOOM_scanset scan = 0;
 
-            printf ("session %2d", i);
-            sprintf (host, "localhost:9999/%d", i);
-            z = ZOOM_connection_create (o);
-            ZOOM_connection_connect (z, host, 0);
+            printf("session %2d", i);
+            yaz_snprintf(host, sizeof(host), "localhost:9999/%d", i);
+            z = ZOOM_connection_create(o);
+            ZOOM_connection_connect(z, host, 0);
 
             scan = ZOOM_connection_scan(z, "@attr 1=4 a");
             if (block > 0)
-                while (ZOOM_event (1, &z))
+                while (ZOOM_event(1, &z))
                     ;
-            printf (" scan size = %ld\n", (long) ZOOM_scanset_size(scan));
-            for (j = 0; j < (int) ZOOM_scanset_size (scan); j++)
+            printf(" scan size = %ld\n", (long) ZOOM_scanset_size(scan));
+            for (j = 0; j < (int) ZOOM_scanset_size(scan); j++)
             {
                 size_t len;
                 size_t occur;
                 const char *term;
-                term = ZOOM_scanset_term (scan, j, &occur, &len);
+                term = ZOOM_scanset_term(scan, j, &occur, &len);
                 if (term)
                     printf ("%d %.*s %d\n", j, (int) len, term, (int) occur);
 

@@ -13,6 +13,7 @@
 #endif
 
 #include <stdio.h>
+#include <yaz/snprintf.h>
 #include "odr-priv.h"
 
 static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
@@ -22,9 +23,9 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     char level_str[80];
 
     if (level >= 15)
-        sprintf(level_str, "level=%-6d%*s", level, 18, "");
+        yaz_snprintf(level_str, sizeof level_str, "level=%-6d%*s", level, 18, "");
     else
-        sprintf(level_str, "%*s", level * 2, "");
+        yaz_snprintf(level_str, sizeof level_str, "%*s", level * 2, "");
 
     if (!len)
         return 0;

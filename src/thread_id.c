@@ -28,6 +28,7 @@
 #endif
 
 #include <yaz/thread_id.h>
+#include <yaz/snprintf.h>
 
 void yaz_thread_id_cstr(char *buf, size_t buf_max)
 {
@@ -41,7 +42,7 @@ void yaz_thread_id_cstr(char *buf, size_t buf_max)
     {
         if (strlen(buf) >= buf_max-2)
             break;
-        sprintf(buf + strlen(buf), "%02x", ((const unsigned char *) &t)[i]);
+        yaz_snprintf(buf + strlen(buf), 3, "%02x", ((const unsigned char *) &t)[i]);
     }
 #else
     *buf = '\0';

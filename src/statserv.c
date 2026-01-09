@@ -65,6 +65,7 @@
 #include <yaz/statserv.h>
 #include <yaz/daemon.h>
 #include <yaz/yaz-iconv.h>
+#include <yaz/snprintf.h>
 
 static IOCHAN pListener = NULL;
 
@@ -487,9 +488,7 @@ static void xml_config_read(const char *base_path)
                 else if (!strcmp((const char *) ptr->name, "stylesheet"))
                 {
                     char *s = nmem_dup_xml_content(gfs_nmem, ptr->children);
-                    gfs->stylesheet = (char *)
-                        nmem_malloc(gfs_nmem, strlen(s) + 2);
-                    sprintf(gfs->stylesheet, "/%s", s);
+                    gfs->stylesheet = nmem_printf(gfs_nmem, "/%s", s);
                 }
                 else if (!strcmp((const char *) ptr->name,
                                  "client_query_charset"))
@@ -997,7 +996,7 @@ static void listener(IOCHAN h, int event)
                     cs_close(l);
                     iochan_destroy(pp);
                 }
-                sprintf(nbuf, "%s(%d)", me, no_sessions);
+                yaz_snprintf(nbuf, sizeof(nbuf), "%s(%d)", me, no_sessions);
                 yaz_log_init_prefix(nbuf);
                 /* ensure that bend_stop is not called when each child exits -
                    only for the main process ..  */

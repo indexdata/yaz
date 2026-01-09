@@ -19,6 +19,7 @@
 #include <yaz/z-core.h>
 #include <yaz/wrbuf.h>
 #include <yaz/logrpn.h> /* For yaz_prox_unit_name() */
+#include <yaz/snprintf.h>
 
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes,
                                                  Odr_int *numeric_value)
@@ -325,7 +326,7 @@ static int rpn2cql_structure(cql_transform_t ct,
                     return YAZ_BIB1_UNSUPP_SEARCH;
                 }
                 pr(op2name[*prox->relationType-1], client_data);
-                sprintf(buf, "%ld", (long) *prox->distance);
+                yaz_snprintf(buf, sizeof buf, "%ld", (long) *prox->distance);
                 pr(buf, client_data);
             }
             if (prox->ordered) {

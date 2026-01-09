@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include <yaz/zoom.h>
+#include <yaz/snprintf.h>
 
 void probe_package(ZOOM_connection z)
 {
@@ -29,7 +30,7 @@ void probe_search(ZOOM_connection z, int start, int error)
     if (error)
         ZOOM_connection_option_set(z, "databaseName", "x");
 
-    sprintf(pqf_str, "@attr 1=%d water", start);
+    yaz_snprintf(pqf_str, sizeof(pqf_str), "@attr 1=%d water", start);
     printf("sending search %s\n", pqf_str);
     set = ZOOM_connection_search_pqf (z, pqf_str);
     ZOOM_resultset_destroy(set);

@@ -22,6 +22,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yaz-util.h>
 #include <yaz/nmem_xml.h>
+#include <yaz/snprintf.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/tree.h>
@@ -114,7 +115,7 @@ static void get_indicator_value(yaz_marc_t mt, const xmlNode *ptr,
     {
         struct _xmlAttr *attr;
         char attrname[16];
-        sprintf(attrname, "%s%d", turbo ? "i" : "ind", i);
+        yaz_snprintf(attrname, sizeof attrname, "%s%d", turbo ? "i" : "ind", i);
         for (attr = ptr->properties; attr; attr = attr->next)
         {
             if (!strcmp((const char *)attr->name, attrname) &&

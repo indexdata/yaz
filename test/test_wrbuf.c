@@ -13,6 +13,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/thread_create.h>
 #include <yaz/test.h>
+#include <yaz/snprintf.h>
 
 static int sha1_test(WRBUF wr, const char *msg, const char *expect)
 {
@@ -31,7 +32,7 @@ static void *my_handler(void *arg)
     for (i = 0; i < 1000; i++)
     {
         char buf[100];
-        sprintf(buf, "Hello world %d", i);
+        yaz_snprintf(buf, sizeof(buf), "Hello world %d", i);
         wrbuf_sha1_write(wr, buf, strlen(buf), 1);
         wrbuf_rewind(wr);
     }

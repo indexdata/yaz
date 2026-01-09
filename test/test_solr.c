@@ -15,6 +15,7 @@
 #include <yaz/test.h>
 #include <yaz/yaz-version.h>
 #include <yaz/pquery.h>
+#include <yaz/snprintf.h>
 
 #if YAZ_HAVE_XML2
 int compare_solr_req(ODR odr, Z_SRW_PDU *sr,
@@ -137,16 +138,13 @@ static int check_response(ODR o, const char *content,
     Z_GDU *gdu;
     Z_SRW_PDU *sr_p;
     char *http_response = odr_malloc(o, strlen(content) + 300);
-
-    strcpy(http_response,
+    const char *start =
            "HTTP/1.1 200 OK\r\n"
            "Last-Modified: Wed, 13 Apr 2011 08:30:59 GMT\r\n"
            "ETag: \"MjcyMWE5M2JiNDgwMDAwMFNvbHI=\"\r\n"
-           "Content-Type: text/xml; charset=utf-8\r\n");
-    sprintf(http_response + strlen(http_response),
-            "Content-Length: %d\r\n\r\n", (int) strlen(content));
-    strcat(http_response, content);
-
+           "Content-Type: text/xml; charset=utf-8\r\n";
+    yaz_snprintf(http_response, strlen(content) + 300,
+            "%sContent-Length: %d\r\n\r\n%s", start, (int) strlen(content), content);
     odr_setbuf(o, http_response, strlen(http_response), 0);
 
     *p = 0;
@@ -168,14 +166,13 @@ static int check_srw_response(ODR o, const char *content,
     int r;
     char *http_response = odr_malloc(o, strlen(content) + 300);
 
-    strcpy(http_response,
+    const char *start =
            "HTTP/1.1 200 OK\r\n"
            "Last-Modified: Wed, 13 Apr 2011 08:30:59 GMT\r\n"
            "ETag: \"MjcyMWE5M2JiNDgwMDAwMFNvbHI=\"\r\n"
-           "Content-Type: text/xml; charset=utf-8\r\n");
-    sprintf(http_response + strlen(http_response),
-            "Content-Length: %d\r\n\r\n", (int) strlen(content));
-    strcat(http_response, content);
+           "Content-Type: text/xml; charset=utf-8\r\n";
+    yaz_snprintf(http_response, strlen(content) + 300,
+            "%sContent-Length: %d\r\n\r\n%s", start, (int) strlen(content), content);
 
     odr_setbuf(o, http_response, strlen(http_response), 0);
 

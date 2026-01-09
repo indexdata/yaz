@@ -19,6 +19,7 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <yaz/snprintf.h>
 
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
@@ -277,11 +278,11 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         if (stylesheet)
         {
             char *content = (char *) odr_malloc(o, strlen(stylesheet) + 40);
-
             xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
-            sprintf(content, "type=\"text/xsl\" href=\"%s\"", stylesheet);
-            pi = xmlNewPI(BAD_CAST "xml-stylesheet",
-                          BAD_CAST content);
+
+            yaz_snprintf(content, strlen(stylesheet) + 40,
+                "type=\"text/xsl\" href=\"%s\"", stylesheet);
+            pi = xmlNewPI(BAD_CAST "xml-stylesheet", BAD_CAST content);
             xmlAddPrevSibling(ptr, pi);
         }
         if (1)

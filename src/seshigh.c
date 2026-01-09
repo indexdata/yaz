@@ -78,6 +78,7 @@
 #include <yaz/srw.h>
 #include <yaz/backend.h>
 #include <yaz/yaz-ccl.h>
+#include <yaz/snprintf.h>
 
 static void process_gdu_request(association *assoc, request *req);
 static int process_z_request(association *assoc, request *req, char **msg);
@@ -178,7 +179,8 @@ association *create_association(IOCHAN channel, COMSTACK link,
         else if (*apdufile != '-')
         {
             char filename[256];
-            sprintf(filename, "%.200s.%ld", apdufile, (long)getpid());
+            yaz_snprintf(filename, sizeof filename, "%s.%ld", apdufile,
+                (long)getpid());
             if (!(f = fopen(filename, "w")))
             {
                 yaz_log(YLOG_WARN|YLOG_ERRNO, "%s", filename);
@@ -2234,7 +2236,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         yaz_log(log_requestdetail, "Version:   %s",
                 req->implementationVersion);
 
-    assoc_init_reset(assoc, 
+    assoc_init_reset(assoc,
                      yaz_oi_get_string_oid(&req->otherInfo,
                                            yaz_oid_userinfo_client_ip, 1, 0));
     assoc->init->auth = req->idAuthentication;
@@ -2593,7 +2595,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                 if (freq.errcode == YAZ_BIB1_PRESENT_REQUEST_OUT_OF_RANGE  &&
                                 freq.errstring == 0)
                 {
-                    sprintf(s, "%d", recno);
+                    yaz_snprintf(s, sizeof s, "%d", recno);
                     freq.errstring = s;
                 }
                 if (errcode)

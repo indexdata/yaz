@@ -12,6 +12,7 @@
 
 #include <yaz/yaz-util.h>
 #include <yaz/test.h>
+#include <yaz/snprintf.h>
 
 #define ESC "\x1b"
 #define UTF8_ACUTE "\xCC\x81"
@@ -49,14 +50,14 @@ static int compare_buffers(char *msg, int no,
             char expect_char[10];
 
             if (i < got_len)
-                sprintf(got_char, "%02X", got_buf[i]);
+                yaz_snprintf(got_char, sizeof(got_char), "%02X", (unsigned char)got_buf[i]);
             else
-                sprintf(got_char, "?  ");
+                yaz_snprintf(got_char, sizeof(got_char), "?  ");
 
             if (i < expect_len)
-                sprintf(expect_char, "%02X", expect_buf[i]);
+                yaz_snprintf(expect_char, sizeof(expect_char), "%02X", (unsigned char)expect_buf[i]);
             else
-                sprintf(expect_char, "?  ");
+                yaz_snprintf(expect_char, sizeof(expect_char), "?  ");
 
             printf("%02d  %s  %s %c\n",
                    i, got_char, expect_char, got_buf[i] == expect_buf[i] ?

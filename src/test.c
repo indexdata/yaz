@@ -20,6 +20,7 @@
 
 #include <yaz/test.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 
 static FILE *test_fout = 0; /* can't use '= stdout' on some systems */
 static int test_total = 0;
@@ -118,7 +119,7 @@ void yaz_check_init_log(const char *argv0)
 {
     char logfilename[2048];
     log_tests = 1;
-    sprintf(logfilename,"%s.log", progname(argv0) );
+    yaz_snprintf(logfilename, sizeof(logfilename), "%s.log", progname(argv0));
     yaz_log_init_file(logfilename);
     yaz_log_trunc();
 
@@ -170,9 +171,9 @@ void yaz_check_eq1(int type, const char *file, int line,
     char formstr[2048];
 
     if (type == YAZ_TEST_TYPE_OK)
-        sprintf(formstr, "%.500s == %.500s ", left, right);
+        yaz_snprintf(formstr, sizeof(formstr), "%s == %s ", left, right);
     else
-        sprintf(formstr, "%.500s != %.500s\n %d != %d", left, right, lval,rval);
+        yaz_snprintf(formstr, sizeof(formstr), "%s != %s\n %d != %d", left, right, lval,rval);
     yaz_check_print1(type, file, line, formstr);
 }
 

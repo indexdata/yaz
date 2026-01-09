@@ -430,7 +430,7 @@ ZOOM_API(void)
         xfree(c->host_port);
         if (portnum)
         {
-            sprintf(hostn, "%.80s:%d", host, portnum);
+            yaz_snprintf(hostn, sizeof(hostn), "%s:%d", host, portnum);
             host = hostn;
         }
         c->host_port = xmalloc(strlen(host) + strlen(http_lead) + 1);

@@ -58,7 +58,7 @@
 #include <yaz/log.h>
 #include <yaz/ill.h>
 #include <yaz/oclc-ill-req-ext.h>
-
+#include <yaz/snprintf.h>
 
 /* A structure for holding name-value pairs in a linked list */
 struct nameval {
@@ -547,7 +547,7 @@ ILL_APDU *getresponse( COMSTACK stack, ODR in_odr ){
         int err = odr_geterrorx(in_odr, &x);
         char msg[60];
         const char *element = odr_getelement(in_odr);
-        sprintf(msg, "ODR code %d:%d element=%-20s",
+        yaz_snprintf(msg, sizeof(msg), "ODR code %d:%d element=%-20s",
                 err, x, element ? element : "<unknown>");
         yaz_log(YLOG_FATAL,"Error decoding incoming packet: %s",msg);
         yaz_log(YLOG_DEBUG,"%02x %02x %02x %02x %02x %02x %02x %02x ...",

@@ -19,6 +19,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/log.h>
 #include <yaz/diagbib1.h>
+#include <yaz/snprintf.h>
 
 void ZOOM_memcached_init(ZOOM_connection c)
 {
@@ -326,7 +327,7 @@ static void expire_redis(redisContext *redis_c,
     size_t argvlen[3];
     char key_val[20];
 
-    sprintf(key_val, "%d", exp);
+    yaz_snprintf(key_val, sizeof(key_val), "%d", exp);
 
     argv[0] = "EXPIRE";
     argvlen[0] = 6;
@@ -353,7 +354,7 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
 
         str = odr_malloc(odr, 20 + strlen(precision));
         /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
-        sprintf(str, ODR_INT_PRINTF ";%s", resultset->size, precision);
+        yaz_snprintf(str, 20 + strlen(precision), ODR_INT_PRINTF ";%s", resultset->size, precision);
         if (oi)
         {
             z_OtherInformation(odr, &oi, 0, 0);
@@ -397,7 +398,7 @@ void ZOOM_memcached_hitcount(ZOOM_connection c, ZOOM_resultset resultset,
 
         str = odr_malloc(odr, 20 + strlen(precision));
         /* count;precision (ASCII) + '\0' + BER buffer for otherInformation */
-        sprintf(str, ODR_INT_PRINTF ";%s", resultset->size, precision);
+        yaz_snprintf(str, 20 + strlen(precision), ODR_INT_PRINTF ";%s", resultset->size, precision);
         if (oi)
         {
             z_OtherInformation(odr, &oi, 0, 0);

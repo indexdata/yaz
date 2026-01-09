@@ -13,6 +13,7 @@
 #include <yaz/marcdisp.h>
 #include <yaz/odr.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 
 #include "ztest.h"
 
@@ -1535,12 +1536,12 @@ static char *marc_record0 =
 /* read MARC record from offset 'num' */
 char *dummy_marc_record(int num, ODR odr)
 {
-    if (num < 1)
+    if (num < 1 || num >= 100000)
         return 0;
     if (num > NO_MARC_RECORDS)
     {
         char *p = odr_strdup(odr, marc_record0);
-        sprintf(p + 279, "%-5d", num);
+        yaz_snprintf(p + 279, 6, "%-5d", num);
         p[284] = ' ';
         return p;
     }

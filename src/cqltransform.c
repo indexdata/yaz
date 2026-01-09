@@ -33,6 +33,7 @@
 #include <yaz/oid_db.h>
 #include <yaz/log.h>
 #include <yaz/proxunit.h>
+#include <yaz/snprintf.h>
 
 struct cql_prop_entry {
     char *pattern;
@@ -381,13 +382,13 @@ static const char *cql_lookup_property(cql_transform_t ct,
     struct cql_prop_entry *e;
 
     if (pat1 && pat2 && pat3)
-        sprintf(pattern, "%.39s.%.39s.%.39s", pat1, pat2, pat3);
+        yaz_snprintf(pattern, sizeof pattern, "%s.%s.%s", pat1, pat2, pat3);
     else if (pat1 && pat2)
-        sprintf(pattern, "%.39s.%.39s", pat1, pat2);
+        yaz_snprintf(pattern, sizeof pattern, "%s.%s", pat1, pat2);
     else if (pat1 && pat3)
-        sprintf(pattern, "%.39s.%.39s", pat1, pat3);
+        yaz_snprintf(pattern, sizeof pattern, "%s.%s", pat1, pat3);
     else if (pat1)
-        sprintf(pattern, "%.39s", pat1);
+        yaz_snprintf(pattern, sizeof pattern, "%s", pat1);
     else
         return 0;
 
@@ -501,7 +502,7 @@ static void cql_pr_int(int val,
                        void *client_data)
 {
     char buf[21];              /* enough characters to 2^64 */
-    sprintf(buf, "%d", val);
+    yaz_snprintf(buf, sizeof buf, "%d", val);
     (*pr)(buf, client_data);
     (*pr)(" ", client_data);
 }
@@ -1028,7 +1029,7 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
            SRW diagnostic is deprecated, but it's so perfect for our
            purposes that it would be stupid not to use it. */
         char numbuf[30];
-        sprintf(numbuf, "%ld", (long) info.max);
+        yaz_snprintf(numbuf, sizeof numbuf, "%ld", (long) info.max);
         cql_transform_set_error(ct, YAZ_SRW_TOO_MANY_CHARS_IN_QUERY, numbuf);
         return -1;
     }

@@ -64,6 +64,7 @@
 #include <yaz/comstack.h>
 #include <yaz/errno.h>
 #include <yaz/tcpip.h>
+#include <yaz/snprintf.h>
 
 #ifndef WIN32
 #define RESOLVER_THREAD 1
@@ -1359,7 +1360,7 @@ void tcpip_close(COMSTACK h)
 const char *tcpip_addrstr(COMSTACK h)
 {
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
-    char *r = 0, *buf = sp->buf;
+    char *r = 0;
 
     char host[120];
     struct sockaddr_storage addr;
@@ -1380,19 +1381,19 @@ const char *tcpip_addrstr(COMSTACK h)
         r = host;
 
     if (h->protocol == PROTO_HTTP)
-        sprintf(buf, "http:%s", r);
+        yaz_snprintf(sp->buf, sizeof(sp->buf), "http:%s", r);
     else
-        sprintf(buf, "tcp:%s", r);
+        yaz_snprintf(sp->buf, sizeof(sp->buf), "tcp:%s", r);
 #if HAVE_GNUTLS_H
     if (sp->session)
     {
         if (h->protocol == PROTO_HTTP)
-            sprintf(buf, "https:%s", r);
+            yaz_snprintf(sp->buf, sizeof(sp->buf), "https:%s", r);
         else
-            sprintf(buf, "ssl:%s", r);
+            yaz_snprintf(sp->buf, sizeof(sp->buf), "ssl:%s", r);
     }
 #endif
-    return buf;
+    return sp->buf;
 }
 
 static int tcpip_set_blocking(COMSTACK p, int flags)
@@ -1443,7 +1444,7 @@ static const char *bin2hex(const void *bin, size_t bin_size)
     print = printable;
     for (i = 0; i < bin_size; i++)
     {
-        sprintf(print, "%.2x ", _bin[i]);
+        yaz_snprintf(print, 3, "%2X", _bin[i]);
         print += 2;
     }
     return printable;

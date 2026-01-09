@@ -17,6 +17,7 @@
 #include <yaz/logrpn.h>
 #include <yaz/oid_db.h>
 #include <yaz/proxunit.h>
+#include <yaz/snprintf.h>
 
 static const char *relToStr(Odr_int v)
 {
@@ -37,146 +38,146 @@ static const char *relToStr(Odr_int v)
     return str;
 }
 
-static void attrStr(Odr_int type, Odr_int value, char *str)
+static void attrStr(Odr_int type, Odr_int value, char *str, size_t sz)
 {
     const char *rstr;
     *str = '\0';
     switch (type)
     {
     case 1:
-        sprintf(str, "use");
+        yaz_snprintf(str, sz, "use");
         break;
     case 2:
         rstr = relToStr(value);
         if (rstr)
-            sprintf(str, "relation=%s", rstr);
+            yaz_snprintf(str, sz, "relation=%s", rstr);
         else
-            sprintf(str, "relation=" ODR_INT_PRINTF, value);
+            yaz_snprintf(str, sz, "relation=" ODR_INT_PRINTF, value);
         break;
     case 3:
         switch (value)
         {
         case 1:
-            sprintf(str, "position=First in field");
+            yaz_snprintf(str, sz, "position=First in field");
             break;
         case 2:
-            sprintf(str, "position=First in any subfield");
+            yaz_snprintf(str, sz, "position=First in any subfield");
             break;
         case 3:
-            sprintf(str, "position=Any position in field");
+            yaz_snprintf(str, sz, "position=Any position in field");
             break;
         default:
-            sprintf(str, "position");
+            yaz_snprintf(str, sz, "position");
         }
         break;
     case 4:
         switch (value)
         {
         case 1:
-            sprintf(str, "structure=Phrase");
+            yaz_snprintf(str, sz, "structure=Phrase");
             break;
         case 2:
-            sprintf(str, "structure=Word");
+            yaz_snprintf(str, sz, "structure=Word");
             break;
         case 3:
-            sprintf(str, "structure=Key");
+            yaz_snprintf(str, sz, "structure=Key");
             break;
         case 4:
-            sprintf(str, "structure=Year");
+            yaz_snprintf(str, sz, "structure=Year");
             break;
         case 5:
-            sprintf(str, "structure=Date");
+            yaz_snprintf(str, sz, "structure=Date");
             break;
         case 6:
-            sprintf(str, "structure=Word list");
+            yaz_snprintf(str, sz, "structure=Word list");
             break;
         case 100:
-            sprintf(str, "structure=Date (un)");
+            yaz_snprintf(str, sz, "structure=Date (un)");
             break;
         case 101:
-            sprintf(str, "structure=Name (norm)");
+            yaz_snprintf(str, sz, "structure=Name (norm)");
             break;
         case 102:
-            sprintf(str, "structure=Name (un)");
+            yaz_snprintf(str, sz, "structure=Name (un)");
             break;
         case 103:
-            sprintf(str, "structure=Structure");
+            yaz_snprintf(str, sz, "structure=Structure");
             break;
         case 104:
-            sprintf(str, "structure=urx");
+            yaz_snprintf(str, sz, "structure=urx");
             break;
         case 105:
-            sprintf(str, "structure=free-form-text");
+            yaz_snprintf(str, sz, "structure=free-form-text");
             break;
         case 106:
-            sprintf(str, "structure=document-text");
+            yaz_snprintf(str, sz, "structure=document-text");
             break;
         case 107:
-            sprintf(str, "structure=local-number");
+            yaz_snprintf(str, sz, "structure=local-number");
             break;
         case 108:
-            sprintf(str, "structure=string");
+            yaz_snprintf(str, sz, "structure=string");
             break;
         case 109:
-            sprintf(str, "structure=numeric string");
+            yaz_snprintf(str, sz, "structure=numeric string");
             break;
         default:
-            sprintf(str, "structure");
+            yaz_snprintf(str, sz, "structure");
         }
         break;
     case 5:
         switch (value)
         {
         case 1:
-            sprintf(str, "truncation=Right");
+            yaz_snprintf(str, sz, "truncation=Right");
             break;
         case 2:
-            sprintf(str, "truncation=Left");
+            yaz_snprintf(str, sz, "truncation=Left");
             break;
         case 3:
-            sprintf(str, "truncation=Left&right");
+            yaz_snprintf(str, sz, "truncation=Left&right");
             break;
         case 100:
-            sprintf(str, "truncation=Do not truncate");
+            yaz_snprintf(str, sz, "truncation=Do not truncate");
             break;
         case 101:
-            sprintf(str, "truncation=Process #");
+            yaz_snprintf(str, sz, "truncation=Process #");
             break;
         case 102:
-            sprintf(str, "truncation=re-1");
+            yaz_snprintf(str, sz, "truncation=re-1");
             break;
         case 103:
-            sprintf(str, "truncation=re-2");
+            yaz_snprintf(str, sz, "truncation=re-2");
             break;
         case 104:
-            sprintf(str, "truncation=CCL");
+            yaz_snprintf(str, sz, "truncation=CCL");
             break;
         default:
-            sprintf(str, "truncation");
+            yaz_snprintf(str, sz, "truncation");
         }
         break;
     case 6:
         switch(value)
         {
         case 1:
-            sprintf(str, "completeness=Incomplete subfield");
+            yaz_snprintf(str, sz, "completeness=Incomplete subfield");
             break;
         case 2:
-            sprintf(str, "completeness=Complete subfield");
+            yaz_snprintf(str, sz, "completeness=Complete subfield");
             break;
         case 3:
-            sprintf(str, "completeness=Complete field");
+            yaz_snprintf(str, sz, "completeness=Complete field");
             break;
         default:
-            sprintf(str, "completeness");
+            yaz_snprintf(str, sz, "completeness");
         }
         break;
     }
     if (*str)
-        sprintf(str + strlen(str), " (" ODR_INT_PRINTF "=" ODR_INT_PRINTF")",
+        yaz_snprintf(str + strlen(str), sz - strlen(str), " (" ODR_INT_PRINTF "=" ODR_INT_PRINTF")",
                 type, value);
     else
-        sprintf(str, ODR_INT_PRINTF "=" ODR_INT_PRINTF, type, value);
+        yaz_snprintf(str, sz, ODR_INT_PRINTF "=" ODR_INT_PRINTF, type, value);
 }
 
 /*
@@ -206,7 +207,7 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
         {
         case Z_AttributeValue_numeric:
             attrStr(*element->attributeType,
-                     *element->value.numeric, str);
+                     *element->value.numeric, str, sizeof str);
             yaz_log(loglevel, "%*.0s%s %s", depth, "", attset_name, str);
             break;
         case Z_AttributeValue_complex:

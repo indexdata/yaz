@@ -221,11 +221,11 @@ void yaz_marc_add_controlfield(yaz_marc_t mt, const char *tag,
         size_t i;
         char msg[80];
 
-        sprintf(msg, "controlfield:");
+        yaz_snprintf(msg, sizeof msg, "controlfield:");
         for (i = 0; i < 16 && i < data_len; i++)
-            sprintf(msg + strlen(msg), " %02X", data[i] & 0xff);
+            yaz_snprintf(msg + strlen(msg), sizeof msg - strlen(msg), " %02X", data[i] & 0xff);
         if (i < data_len)
-            sprintf(msg + strlen(msg), " ..");
+            yaz_snprintf(msg + strlen(msg), sizeof msg - strlen(msg), " ..");
         yaz_marc_add_comment(mt, msg);
     }
 }
@@ -321,11 +321,11 @@ void yaz_marc_add_subfield(yaz_marc_t mt,
         size_t i;
         char msg[80];
 
-        sprintf(msg, "subfield:");
+        yaz_snprintf(msg, sizeof msg, "subfield:");
         for (i = 0; i < 16 && i < code_data_len; i++)
-            sprintf(msg + strlen(msg), " %02X", code_data[i] & 0xff);
+            yaz_snprintf(msg + strlen(msg), sizeof msg - strlen(msg), " %02X", code_data[i] & 0xff);
         if (i < code_data_len)
-            sprintf(msg + strlen(msg), " ..");
+            yaz_snprintf(msg + strlen(msg), sizeof msg - strlen(msg), " ..");
         yaz_marc_add_comment(mt, msg);
     }
 
@@ -893,7 +893,7 @@ static void write_xml_indicator(yaz_marc_t mt, struct yaz_marc_node *n,
             if (ilen < sizeof(ind_val) - 1)
             {
                 char ind_str[12];
-                sprintf(ind_str, "%s%d", indicator_name[turbo], i+1);
+                yaz_snprintf(ind_str, sizeof ind_str, "%s%d", indicator_name[turbo], i+1);
                 memcpy(ind_val, n->u.datafield.indicator + off, ilen);
                 ind_val[ilen] = '\0';
                 xmlNewProp(ptr, BAD_CAST ind_str, BAD_CAST ind_val);

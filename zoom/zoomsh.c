@@ -20,6 +20,7 @@
 #include <yaz/log.h>
 #include <yaz/backtrace.h>
 #include <yaz/options.h>
+#include <yaz/snprintf.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -579,17 +580,17 @@ static void display_search_result(struct zoom_db *db)
             if (i)
                 printf(",");
 
-            sprintf(str, "searchresult.%d.id", i);
+            yaz_snprintf(str, sizeof str, "searchresult.%d.id", i);
             v = ZOOM_resultset_option_get(db->res, str);
             if (v)
                 printf(" id=%s", v);
 
-            sprintf(str, "searchresult.%d.subquery.term", i);
+            yaz_snprintf(str, sizeof str, "searchresult.%d.subquery.term", i);
             v = ZOOM_resultset_option_get(db->res, str);
             if (v)
                 printf(" term=%s", v);
 
-            sprintf(str, "searchresult.%d.count", i);
+            yaz_snprintf(str, sizeof str, "searchresult.%d.count", i);
             v = ZOOM_resultset_option_get(db->res, str);
             if (v)
                 printf(" cnt=%s", v);

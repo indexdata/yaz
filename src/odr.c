@@ -147,9 +147,7 @@ void odr_FILE_write(ODR o, void *handle, int type,
             putc(c, (FILE*) handle);
         else
         {
-            char x[5];
-            sprintf(x, "\\X%02X", c);
-            fputs(x, (FILE*) handle);
+            fprintf((FILE*) handle, "\\X%02X", c);
         }
     }
 }
