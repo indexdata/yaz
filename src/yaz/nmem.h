@@ -213,7 +213,12 @@ YAZ_EXPORT int nmem_get_status(char *dst, size_t l);
     \param nmem NMEM handle
     \param fmt printf format string
     \returns allocated formatted string
-*/
+ *
+ * The implementation uses an internal buffer of 4096 bytes. This limits
+ * the formatted output to at most 4095 characters, plus a terminating
+ * null byte. If the formatted output would exceed this size, it is
+ * truncated to fit within the buffer.
+ */
 YAZ_EXPORT char *nmem_printf(NMEM nmem, const char *fmt, ...);
 
 YAZ_END_CDECL
