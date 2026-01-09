@@ -14,6 +14,7 @@
 
 #include <string.h>
 #include <yaz/nmem.h>
+#include <yaz/snprintf.h>
 
 char *nmem_strdup(NMEM mem, const char *src)
 {
@@ -139,6 +140,19 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
             break; /* second pass, stop */
         *darray = (char **) nmem_malloc(nmem, *num * sizeof(**darray));
     }
+}
+
+char *nmem_printf(NMEM nmem, const char *fmt, ...)
+{
+    va_list ap;
+    char buf[4096];
+    char *dst;
+
+    va_start(ap, fmt);
+    yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
+    dst = nmem_strdup(nmem, buf);
+    va_end(ap);
+    return dst;
 }
 
 /*

@@ -164,12 +164,30 @@ void tst_nmem_strsplit(void)
     nmem_destroy(nmem);
 }
 
+void tst_nmem_printf(void)
+{
+    NMEM nmem = nmem_create();
+    char *s;
+
+    s = nmem_printf(nmem, "This is a test: %d %.2f %s", 42, 3.14, "hello");
+    YAZ_CHECK(s);
+    YAZ_CHECK(strcmp(s, "This is a test: 42 3.14 hello") == 0);
+
+    /* see cap in effect */
+    s = nmem_printf(nmem, "This is a test: %5000s", "x");
+    YAZ_CHECK(s);
+    YAZ_CHECK_EQ(4095, (int)strlen(s));
+
+    nmem_destroy(nmem);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_nmem_malloc();
     tst_nmem_strsplit();
+    tst_nmem_printf();
     YAZ_CHECK_TERM;
 }
 /*
