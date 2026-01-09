@@ -1444,7 +1444,7 @@ static const char *bin2hex(const void *bin, size_t bin_size)
     print = printable;
     for (i = 0; i < bin_size; i++)
     {
-        yaz_snprintf(print, 3, "%2X", _bin[i]);
+        yaz_snprintf(print, 3, "%.2x", _bin[i]);
         print += 2;
     }
     return printable;
