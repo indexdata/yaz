@@ -13,6 +13,8 @@
 #include <stdio.h>
 
 #include <yaz/srw.h>
+#include <yaz/snprintf.h>
+
 #if YAZ_HAVE_XML2
 #include "sru-p.h"
 
@@ -69,7 +71,7 @@ void add_xsd_integer(xmlNodePtr ptr, const char *elem,
     if (val)
     {
         char str[40];
-        sprintf(str, ODR_INT_PRINTF, *val);
+        yaz_snprintf(str, sizeof str, ODR_INT_PRINTF, *val);
         xmlNewTextChild(ptr, 0, BAD_CAST elem, BAD_CAST str);
     }
 }

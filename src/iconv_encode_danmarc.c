@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include <yaz/xmalloc.h>
+#include <yaz/snprintf.h>
 #include "iconv-p.h"
 
 #define MAX_COMP 4
@@ -76,7 +77,7 @@ static size_t write1(yaz_iconv_t cd, unsigned long x,
             break;
         default:
             /* full unicode, emit @XXXX */
-            sprintf(*outbuf, "@%04lX", x);
+            yaz_snprintf(*outbuf, 6, "@%04lX", x);
             outp += 5;
             (*outbytesleft) -= 5;
             break;

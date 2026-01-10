@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #endif
 
+#include <yaz/snprintf.h>
 #include "fhistory.h"
 
 
@@ -56,7 +57,7 @@ int file_history_load(file_history_t fh)
     int ret = 0;
 
     wrbuf_rewind(fh->wr);
-    sprintf(fname, "%.500s%s%s", homedir ? homedir : "",
+    yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
     f = fopen(fname, "r");
@@ -82,7 +83,7 @@ int file_history_save(file_history_t fh)
 
     if (!sz)
         return 0;
-    sprintf(fname, "%.500s%s%s", homedir ? homedir : "",
+    yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
     f = fopen(fname, "w");

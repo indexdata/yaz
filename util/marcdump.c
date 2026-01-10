@@ -37,6 +37,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/options.h>
 #include <yaz/backtrace.h>
+#include <yaz/snprintf.h>
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
@@ -325,7 +326,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             }
             else
                 mode = "ab";
-            sprintf(fname, "%.200s%07d", split_fname, split_file_no);
+            yaz_snprintf(fname, sizeof(fname), "%s%07d", split_fname, split_file_no);
             sf = fopen(fname, mode);
             if (!sf)
             {

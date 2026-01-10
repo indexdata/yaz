@@ -14,6 +14,7 @@
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/yaz-iconv.h>
+#include <yaz/snprintf.h>
 
 static int hex_digit (int ch)
 {
@@ -38,7 +39,7 @@ static void encode_uri_char(char *dst, char ch)
     else
     {
         dst[0] = '%';
-        sprintf(dst+1, "%02X", (unsigned char ) ch);
+        yaz_snprintf(dst+1, 3, "%02X", (unsigned char ) ch);
     }
 }
 

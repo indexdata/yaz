@@ -23,6 +23,7 @@
 #include "sru-p.h"
 #include <yaz/pquery.h>
 #include <yaz/facet.h>
+#include <yaz/snprintf.h>
 
 static void insert_field(WRBUF w, const char *field, size_t length,
                          const char *attr)
@@ -101,7 +102,7 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
             if (general_limit != -1)
             {
                 char tmp[32];
-                sprintf(tmp, "%d,", general_limit);
+                yaz_snprintf(tmp, sizeof tmp, "%d,", general_limit);
                 wrbuf_insert(w_limit, 0, tmp, strlen(tmp));
             }
             if (wrbuf_len(w_limit) > 1)
@@ -112,7 +113,7 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
             if (general_start != -1)
             {
                 char tmp[32];
-                sprintf(tmp, "%d", general_start);
+                yaz_snprintf(tmp, sizeof tmp, "%d", general_start);
                 *start = odr_strdup(o, tmp);
             }
             if (general_sortorder == 1)
@@ -141,12 +142,12 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
                     const char *cp0 = ++cp;
                     while (*cp && *cp != ',')
                         cp++;
-                    sprintf(tmp, "@attr 3=%d", val);
+                    yaz_snprintf(tmp, sizeof tmp, "@attr 3=%d", val);
                     insert_field(w, cp0, cp - cp0, tmp);
 
                     if (*start && strlen(*start) < 20)
                     {
-                        sprintf(tmp, "@attr 4=%s", *start);
+                        yaz_snprintf(tmp, sizeof tmp, "@attr 4=%s", *start);
                         insert_field(w, cp0, cp - cp0, tmp);
                     }
                     if (*sort && !strcmp(*sort, "alphanumeric"))

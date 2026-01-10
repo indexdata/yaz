@@ -18,6 +18,7 @@
 #include <yaz/charneg.h>
 #include <yaz/yaz-util.h>
 #include <yaz/oid_db.h>
+#include <yaz/snprintf.h>
 
 static Z_External* z_ext_record2(ODR o, const char *buf)
 {
@@ -83,7 +84,7 @@ static Z_OriginProposal_0 *z_get_OriginProposal_0(ODR o, const char *charset)
         p0->which = Z_OriginProposal_0_iso10646;
         p0->u.iso10646 = is;
         is->collections = 0;
-        sprintf(oidname, "1.0.10646.1.0.%d", form);
+        yaz_snprintf(oidname, sizeof(oidname), "1.0.10646.1.0.%d", form);
         is->encodingLevel = odr_getoidbystr(o, oidname);
     }
     else
@@ -213,7 +214,7 @@ static Z_TargetResponse *z_get_TargetResponse(ODR o, const char *charset,
         p->which = Z_TargetResponse_iso10646;
         p->u.iso10646 = is;
         is->collections = 0;
-        sprintf(oidname, "1.0.10646.1.0.%d", form);
+        yaz_snprintf(oidname, sizeof oidname, "1.0.10646.1.0.%d", form);
         is->encodingLevel = odr_getoidbystr (o, oidname);
     }
     else

@@ -16,6 +16,7 @@
 #include <yaz/matchstr.h>
 #include <yaz/base64.h>
 #include <yaz/yaz-iconv.h>
+#include <yaz/snprintf.h>
 #include "sru-p.h"
 
 #define MAX_SRU_PARAMETERS 30
@@ -42,7 +43,7 @@ static Z_SRW_extra_arg **append_extra_arg_int(ODR odr, Z_SRW_extra_arg **l,
     if (v)
     {
         char str[32];
-        sprintf(str, ODR_INT_PRINTF, *v);
+        yaz_snprintf(str, sizeof str, ODR_INT_PRINTF, *v);
         l = append_extra_arg(odr, l, n, str);
     }
     return l;
@@ -162,7 +163,7 @@ void yaz_mk_std_diagnostic(ODR o, Z_SRW_diagnostic *d,
 {
     char uri[40];
 
-    sprintf(uri, "info:srw/diagnostic/1/%d", code);
+    yaz_snprintf(uri, sizeof uri, "info:srw/diagnostic/1/%d", code);
     yaz_mk_srw_diagnostic(o, d, uri, 0, details);
 }
 
@@ -185,7 +186,7 @@ void yaz_add_srw_diagnostic(ODR o, Z_SRW_diagnostic **d,
 {
     char uri[40];
 
-    sprintf(uri, "info:srw/diagnostic/1/%d", code);
+    yaz_snprintf(uri, sizeof uri, "info:srw/diagnostic/1/%d", code);
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
 
@@ -195,7 +196,7 @@ void yaz_add_sru_update_diagnostic(ODR o, Z_SRW_diagnostic **d,
 {
     char uri[40];
 
-    sprintf(uri, "info:srw/diagnostic/12/%d", code);
+    yaz_snprintf(uri, sizeof uri, "info:srw/diagnostic/12/%d", code);
     yaz_add_srw_diagnostic_uri(o, d, num, uri, 0, addinfo);
 }
 
@@ -212,17 +213,17 @@ void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
 
     record->recordData_buf = (char *) odr_malloc(o, len);
 
-    sprintf(record->recordData_buf, "<diagnostic "
+    yaz_snprintf(record->recordData_buf, len, "<diagnostic "
             "xmlns=\"http://www.loc.gov/zing/srw/diagnostic/\">\n"
             " <uri>info:srw/diagnostic/1/%d</uri>\n", code);
     if (details)
-        sprintf(record->recordData_buf + strlen(record->recordData_buf),
-                " <details>%s</details>\n", details);
+        yaz_snprintf(record->recordData_buf + strlen(record->recordData_buf),
+                len - strlen(record->recordData_buf), " <details>%s</details>\n", details);
     if (message)
-        sprintf(record->recordData_buf + strlen(record->recordData_buf),
-                " <message>%s</message>\n", message);
-    sprintf(record->recordData_buf + strlen(record->recordData_buf),
-            "</diagnostic>\n");
+        yaz_snprintf(record->recordData_buf + strlen(record->recordData_buf),
+                len - strlen(record->recordData_buf), " <message>%s</message>\n", message);
+    yaz_snprintf(record->recordData_buf + strlen(record->recordData_buf),
+            len - strlen(record->recordData_buf), "</diagnostic>\n");
     record->recordData_len = strlen(record->recordData_buf);
     record->recordPosition = odr_intdup(o, pos);
     record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
@@ -930,8 +931,7 @@ void yaz_add_name_value_int(ODR o, char **name, char **value, int *i,
     if (val)
     {
         name[*i] = a_name;
-        value[*i] = (char *) odr_malloc(o, 40);
-        sprintf(value[*i], ODR_INT_PRINTF, *val);
+        value[*i] = nmem_printf(odr_getmem(o), ODR_INT_PRINTF, *val);
         (*i)++;
     }
 }
@@ -1120,11 +1120,9 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     if (cp)
         *cp = '\0';
 
-    path = (char *)
-        odr_malloc(encode, strlen(hreq->path) + strlen(uri_args) + 4);
+    path = nmem_printf(odr_getmem(encode), "%s%c%s",
+        hreq->path, strchr(hreq->path, '?') ? '&' : '?', uri_args);
 
-    sprintf(path, "%s%c%s", hreq->path, strchr(hreq->path, '?') ? '&' : '?',
-            uri_args);
     hreq->path = path;
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,

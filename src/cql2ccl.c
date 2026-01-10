@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include <yaz/cql.h>
+#include <yaz/snprintf.h>
 
 static int cql_to_ccl_r(struct cql_node *cn,
                         void (*pr)(const char *buf, void *client_data),
@@ -216,7 +217,7 @@ static int node_bool(struct cql_node *cn,
         if (distance != 1)
         {
             char x[40];
-            sprintf(x, "%d", distance);
+            yaz_snprintf(x, sizeof x, "%d", distance);
             pr(x, client_data);
         }
     }

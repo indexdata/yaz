@@ -46,6 +46,7 @@
 #include <yaz/unix.h>
 #include <yaz/errno.h>
 #include <yaz/log.h>
+#include <yaz/snprintf.h>
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
@@ -721,9 +722,8 @@ static void unix_close(COMSTACK h)
 static const char *unix_addrstr(COMSTACK h)
 {
     unix_state *sp = (struct unix_state *)h->cprivate;
-    char *buf = sp->buf;
-    sprintf(buf, "unix:%s", sp->addr.sun_path);
-    return buf;
+    yaz_snprintf(sp->buf, sizeof(sp->buf), "unix:%s", sp->addr.sun_path);
+    return sp->buf;
 }
 
 static int unix_set_blocking(COMSTACK p, int flags)

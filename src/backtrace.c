@@ -112,7 +112,7 @@ static void yaz_invoke_gdb(void)
         arg[arg_no++] = "-ex";
         arg[arg_no++] = "thread apply all bt";
         arg[arg_no++] = static_progname;
-        sprintf(pidstr, NMEM_INT_PRINTF, (nmem_int_t) getppid());
+        yaz_snprintf(pidstr, sizeof pidstr, NMEM_INT_PRINTF, (nmem_int_t) getppid());
         arg[arg_no++] = pidstr;
         arg[arg_no] = 0;
         execv(arg[0], arg);
@@ -197,10 +197,10 @@ static void yaz_panic_sig_handler(int sig)
         strcat(buf, "SIGBUS");
         break;
     default:
-        yaz_snprintf(buf + strlen(buf), sizeof buf, "signo=%d", sig);
+        yaz_snprintf(buf + strlen(buf), sizeof buf - strlen(buf), "signo=%d", sig);
         break;
     }
-    yaz_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf) - 1,
+    yaz_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
                  " PID=" NMEM_INT_PRINTF "\n", (nmem_int_t) getpid());
 
     file = yaz_log_file();

@@ -22,6 +22,7 @@
 #include <yaz/cql.h>
 #include <yaz/ccl.h>
 #include <yaz/sortspec.h>
+#include <yaz/snprintf.h>
 
 #define SORT_STRATEGY_Z3950 0
 #define SORT_STRATEGY_TYPE7 1
@@ -180,7 +181,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
     else if ((trans = cql_transform_open_fname(cqlfile)) == 0)
     {
         char buf[512];
-        sprintf(buf, "can't open CQL transform file '%.200s': %.200s",
+        yaz_snprintf(buf, sizeof(buf), "can't open CQL transform file '%s': %s",
                 cqlfile, strerror(errno));
         ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
     }
@@ -193,7 +194,7 @@ static char *cql2pqf(ZOOM_connection c, const char *cql)
             char buf[512];
             const char *addinfo;
             error = cql_transform_error(trans, &addinfo);
-            sprintf(buf, "%.200s (addinfo=%.200s)",
+            yaz_snprintf(buf, sizeof(buf), "%s (addinfo=%s)",
                     cql_strerror(error), addinfo);
             ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, buf);
         }

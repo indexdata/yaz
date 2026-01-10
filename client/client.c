@@ -65,6 +65,7 @@
 #include <yaz/log.h>
 #include <yaz/facet.h>
 #include <yaz/cookie.h>
+#include <yaz/snprintf.h>
 
 #if HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -240,7 +241,7 @@ static void do_hex_dump(const char* buf, size_t len)
         {
             char fname[1024];
             FILE *of;
-            sprintf(fname, "%s.%03d.raw", dump_file_prefix, no);
+            yaz_snprintf(fname, sizeof(fname), "%s.%03d.raw", dump_file_prefix, no);
             of = fopen(fname, "wb");
 
             if (fwrite(buf, 1, len, of) != len)
@@ -1600,7 +1601,7 @@ static int send_Z3950_searchRequest(const char *arg)
 
     if (setnumber >= 0)
     {
-        sprintf(setstring, "%d", ++setnumber);
+        yaz_snprintf(setstring, sizeof(setstring), "%d", ++setnumber);
         req->resultSetName = setstring;
     }
     *req->smallSetUpperBound = smallSetUpperBound;
@@ -2999,7 +3000,7 @@ size_t check_token(const char *haystack, const char *token)
     return extra + len;
 }
 
-static int parse_show_args(const char *arg_c, char *setstring,
+static int parse_show_args(const char *arg_c, char *setstring, size_t len,
                            Odr_int *start, Odr_int *number)
 {
     char *end_ptr;
@@ -3007,7 +3008,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
     size_t token_len;
 
     if (setnumber >= 0)
-        sprintf(setstring, "%d", setnumber);
+        yaz_snprintf(setstring, len, "%d", setnumber);
     else
         *setstring = '\0';
 
@@ -3057,7 +3058,7 @@ static int parse_show_args(const char *arg_c, char *setstring,
         printf("Bad show arg: + expected. Got %s\n", end_ptr);
         return 0;
     }
-    strcpy(setstring, end_ptr+1);
+    yaz_snprintf(setstring, len, "%s", end_ptr+1);
     return 1;
 }
 
@@ -3071,7 +3072,7 @@ static int send_Z3950_presentRequest(const char *arg)
 
     req->referenceId = set_refid(out);
 
-    if (!parse_show_args(arg, setstring, &setno, &nos))
+    if (!parse_show_args(arg, setstring, sizeof setstring, &setno, &nos))
         return 0;
     if (*setstring)
         req->resultSetId = setstring;
@@ -3163,7 +3164,7 @@ static int send_SRW_presentRequest(const char *arg)
 
     if (!sr)
         return 0;
-    if (!parse_show_args(arg, setstring, &setno, &nos))
+    if (!parse_show_args(arg, setstring, sizeof setstring, &setno, &nos))
         return 0;
     if (*sru_recordPacking)
         sr->u.request->recordPacking = sru_recordPacking;
@@ -3420,9 +3421,9 @@ static int send_sortrequest(const char *arg, int newset)
     if (only_z3950())
         return 0;
     if (setnumber >= 0)
-        sprintf(setstring, "%d", setnumber);
+        yaz_snprintf(setstring, sizeof(setstring), "%d", setnumber);
     else
-        sprintf(setstring, "default");
+        yaz_snprintf(setstring, sizeof(setstring), "default");
 
     req->referenceId = set_refid(out);
 
@@ -3432,7 +3433,7 @@ static int send_sortrequest(const char *arg, int newset)
     req->inputResultSetNames[0] = odr_strdup(out, setstring);
 
     if (newset && setnumber >= 0)
-        sprintf(setstring, "%d", ++setnumber);
+        yaz_snprintf(setstring, sizeof(setstring), "%d", ++setnumber);
 
     req->sortedResultSetName = odr_strdup(out, setstring);
 
@@ -3455,8 +3456,8 @@ static void display_term_info(Z_TermInfo *t)
     else
         printf("Term (not general)");
     if (t->term->which == Z_Term_general)
-        sprintf(last_scan_line, "%.*s", t->term->u.general->len,
-                t->term->u.general->buf);
+        yaz_snprintf(last_scan_line, sizeof(last_scan_line),
+             "%.*s", t->term->u.general->len, t->term->u.general->buf);
 
     if (t->globalOccurrences)
         printf(" (" ODR_INT_PRINTF ")\n", *t->globalOccurrences);
@@ -4248,7 +4249,7 @@ void source_rc_file(const char *rc_file)
             const char* homedir = getenv("HOME");
             if (homedir)
             {
-                sprintf(fname, "%.800s/%s", homedir, ".yazclientrc");
+                yaz_snprintf(fname, sizeof(fname), "%s/%s", homedir, ".yazclientrc");
                 if (stat(fname, &statbuf)==0)
                     cmd_source(fname, 0);
             }

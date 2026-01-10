@@ -104,7 +104,6 @@ static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)
     case CCL_RPN_TERM:
         for (att = p->u.t.attr_list; att; att = att->next)
         {
-            char tmpattr[128];
             wrbuf_puts(w, "@attr ");
             if (att->set)
             {
@@ -114,12 +113,10 @@ static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)
             switch(att->kind)
             {
             case CCL_RPN_ATTR_NUMERIC:
-                sprintf(tmpattr, "%d=%d ", att->type, att->value.numeric);
-                wrbuf_puts(w, tmpattr);
+                wrbuf_printf(w, "%d=%d ", att->type, att->value.numeric);
                 break;
             case CCL_RPN_ATTR_STRING:
-                sprintf(tmpattr, "%d=", att->type);
-                wrbuf_puts(w, tmpattr);
+                wrbuf_printf(w, "%d=", att->type);
                 wrbuf_puts(w, att->value.str);
                 wrbuf_puts(w, " ");
                 break;

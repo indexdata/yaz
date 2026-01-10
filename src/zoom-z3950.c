@@ -486,7 +486,7 @@ static void otherInfo_attach(ZOOM_connection c, Z_APDU *a, ODR out)
         const char *val;
         const char *cp;
 
-        sprintf(buf, "otherInfo%d", i);
+        yaz_snprintf(buf, sizeof(buf), "otherInfo%d", i);
         val = ZOOM_options_get(c->options, buf);
         if (!val)
             break;
@@ -793,7 +793,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
             for (ord = 1; ; ord++)
             {
                 ZOOM_resultset rp;
-                sprintf(setname, "%d", ord);
+                yaz_snprintf(setname, sizeof(setname), "%d", ord);
                 for (rp = c->resultsets; rp; rp = rp->next)
                     if (rp->setname && !strcmp(rp->setname, setname))
                         break;
@@ -1253,7 +1253,7 @@ static void handle_queryExpression(ZOOM_options opt, const char *name,
     case Z_QueryExpression_term:
         if (exp->u.term && exp->u.term->queryTerm)
         {
-            sprintf(opt_name, "%s.term", name);
+            yaz_snprintf(opt_name, sizeof(opt_name), "%s.term", name);
             handle_queryExpressionTerm(opt, opt_name, exp->u.term->queryTerm);
         }
         break;
@@ -1288,7 +1288,7 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                         ext->u.searchResult1->elements[j];
                     char pref[80];
 
-                    sprintf(pref, "searchresult.%d", j);
+                    yaz_snprintf(pref, sizeof(pref), "searchresult.%d", j);
 
                     if (ent->subqueryId)
                     {
@@ -1510,7 +1510,7 @@ static void set_init_option(const char *name, void *clientData)
     ZOOM_connection c = (ZOOM_connection) clientData;
     char buf[80];
 
-    sprintf(buf, "init_opt_%.70s", name);
+    yaz_snprintf(buf, sizeof(buf), "init_opt_%s", name);
     ZOOM_connection_option_set(c, buf, "1");
 }
 

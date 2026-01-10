@@ -14,6 +14,7 @@
 #include "zoom-p.h"
 
 #include <yaz/xmalloc.h>
+#include <yaz/snprintf.h>
 
 struct ZOOM_options_entry {
     char *name;
@@ -246,7 +247,7 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
 {
     char s[40];
 
-    sprintf(s, "%d", value);
+    yaz_snprintf(s, sizeof(s), "%d", value);
     ZOOM_options_set(opt, name, s);
 }
 /*

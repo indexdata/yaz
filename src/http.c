@@ -17,6 +17,7 @@
 #include <yaz/zgdu.h>
 #include <yaz/base64.h>
 #include <yaz/comstack.h>
+#include <yaz/snprintf.h>
 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
@@ -151,9 +152,8 @@ void z_HTTP_header_add_content_type(ODR o, Z_HTTP_Header **hp,
     const char *l = "Content-Type";
     if (charset)
     {
-        char *ctype = (char *)
-            odr_malloc(o, strlen(content_type)+strlen(charset) + 15);
-        sprintf(ctype, "%s; charset=%s", content_type, charset);
+        char *ctype = nmem_printf(odr_getmem(o), "%s; charset=%s",
+                                  content_type, charset);
         z_HTTP_header_add(o, hp, l, ctype);
     }
     else
@@ -169,22 +169,18 @@ void z_HTTP_header_add_basic_auth(ODR o, Z_HTTP_Header **hp,
                                   const char *username, const char *password)
 {
     char *tmp, *buf;
-    int len;
 
     if (username == 0)
         return;
     if (password == 0)
         password = "";
 
-    len = strlen(username) + strlen(password);
-    tmp = (char *) odr_malloc(o, len+2);
-    sprintf(tmp, "%s:%s", username, password);
-    buf = (char *) odr_malloc(o, (len+1) * 8/6 + 12);
+    tmp = nmem_printf(odr_getmem(o), "%s:%s", username, password);
+    buf = (char *) odr_malloc(o, strlen(tmp) * 8/6 + 12);
     strcpy(buf, "Basic ");
     yaz_base64encode(tmp, &buf[strlen(buf)]);
     z_HTTP_header_set(o, hp, "Authorization", buf);
 }
-
 
 void z_HTTP_header_add(ODR o, Z_HTTP_Header **hp, const char *n,
                        const char *v)
@@ -349,7 +345,7 @@ Z_GDU *z_get_HTTP_Response_server(ODR o, int code, const char *details,
         size_t sz = 400 + strlen(http_err) + (details ?
                                               strlen(details) : 0);
         hres->content_buf = (char*) odr_malloc(o, sz);
-        sprintf(hres->content_buf,
+        yaz_snprintf(hres->content_buf, sz,
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
                 " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
                 "<HTML>\n"
@@ -363,10 +359,12 @@ Z_GDU *z_get_HTTP_Response_server(ODR o, int code, const char *details,
                 code, http_err);
         if (details)
         {
-            sprintf(hres->content_buf + strlen(hres->content_buf),
+            yaz_snprintf(hres->content_buf + strlen(hres->content_buf),
+                    sz - strlen(hres->content_buf),
                     "<P>Details: %s</P>\n", details);
         }
-        sprintf(hres->content_buf + strlen(hres->content_buf),
+        yaz_snprintf(hres->content_buf + strlen(hres->content_buf),
+                sz - strlen(hres->content_buf),
                 " </BODY>\n"
                 "</HTML>\n");
         hres->content_len = strlen(hres->content_buf);
@@ -583,12 +581,12 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     Z_HTTP_Header *h;
     int top0 = o->op->top;
 
-    sprintf(sbuf, "HTTP/%s %d %s\r\n", hr->version,
+    yaz_snprintf(sbuf, sizeof(sbuf), "HTTP/%s %d %s\r\n", hr->version,
             hr->code,
             z_HTTP_errmsg(hr->code));
     odr_write(o, sbuf, strlen(sbuf));
     /* use content_len for Content-Length */
-    sprintf(sbuf, "Content-Length: %d\r\n", hr->content_len);
+    yaz_snprintf(sbuf, sizeof(sbuf), "Content-Length: %d\r\n", hr->content_len);
     odr_write(o, sbuf, strlen(sbuf));
     for (h = hr->headers; h; h = h->next)
     {
@@ -633,7 +631,7 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
                               "Content-Length"))
     {
         char lstr[60];
-        sprintf(lstr, "Content-Length: %d\r\n",
+        yaz_snprintf(lstr, sizeof(lstr), "Content-Length: %d\r\n",
                 hr->content_len);
         odr_write(o, lstr, strlen(lstr));
     }

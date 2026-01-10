@@ -18,6 +18,7 @@
 #include <yaz/oid_std.h>
 #include <yaz/otherinfo.h>
 #include <yaz/pquery.h>
+#include <yaz/snprintf.h>
 #include <assert.h>
 
 void yaz_oi_set_facetlist(
@@ -114,7 +115,7 @@ static void useattr(Z_AttributeElement *ae, struct yaz_facet_attr *av)
     }
     else
     { /* numeric - could translate 4 to 'title' etc */
-        sprintf(av->useattrbuff, ODR_INT_PRINTF, *ae->value.numeric);
+        yaz_snprintf(av->useattrbuff, sizeof av->useattrbuff, ODR_INT_PRINTF, *ae->value.numeric);
         av->useattr = av->useattrbuff;
     }
 }
@@ -172,7 +173,7 @@ void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
         else
         { /* unknown attribute */
             av->errcode = YAZ_BIB1_UNSUPP_ATTRIBUTE_TYPE;
-            sprintf(av->useattrbuff, ODR_INT_PRINTF,
+            yaz_snprintf(av->useattrbuff, sizeof av->useattrbuff,  ODR_INT_PRINTF,
                         *ae-> attributeType);
             av->errstring = av->useattrbuff;
             yaz_log(YLOG_WARN, "Unsupported attribute type %s",
