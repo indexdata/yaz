@@ -1,4 +1,4 @@
 DEBIAN_DIST="bullseye bookworm trixie"
 UBUNTU_DIST="focal jammy noble"
 CENTOS_DIST="centos7 centos8 centos9 centos10"
-VERSION=5.36.0
+VERSION=5.37.0
