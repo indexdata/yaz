@@ -77,6 +77,7 @@ static void normal_stop_handler(int num)
 
 static void log_reopen_handler(int num)
 {
+    yaz_log(YLOG_LOG, "SIGHUP received, reopening log file");
     yaz_log_reopen();
     if (child_pid)
         kill(child_pid, num);
@@ -334,7 +335,11 @@ int yaz_daemon(const char *progname,
 
     if (flags & YAZ_DAEMON_LOG_REOPEN)
     {
-        signal(SIGHUP, log_reopen_handler);
+        struct sigaction sa;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_handler  = log_reopen_handler;
+        sa.sa_flags = 0;
+        sigaction(SIGHUP, &sa, 0);
     }
     if (flags & YAZ_DAEMON_KEEPALIVE)
     {
