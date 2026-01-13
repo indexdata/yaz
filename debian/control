@@ -3,7 +3,7 @@ Section: devel
 Standards-Version: 3.6.2
 Maintainer: Adam Dickmeiss <adam@indexdata.dk>
 Priority: extra
-Build-Depends: debhelper (>= 7),
+Build-Depends: debhelper-compat (= 13),
 	pkg-config,
 	libxslt1-dev,
 	xsltproc,
