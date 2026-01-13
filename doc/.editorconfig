@@ -1,0 +1,5 @@
+# http://editorconfig.org/
+# For Docbook material @ Index Data
+
+[*.xml]
+indent_size = 1
