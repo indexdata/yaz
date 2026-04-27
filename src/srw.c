@@ -452,7 +452,6 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
             xmlNodePtr rptr = xmlNewChild(pptr, ns_diag,
                                           BAD_CAST "diagnostic", 0);
             add_xsd_string(rptr, "uri", (*recs)[i].uri);
-            add_xsd_string(rptr, "details", (*recs)[i].details);
             if ((*recs)[i].message)
                 add_xsd_string(rptr, "message", (*recs)[i].message);
             else if ((*recs)[i].uri )
@@ -472,6 +471,7 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
                         add_xsd_string(rptr, "message", message);
                 }
             }
+            add_xsd_string(rptr, "details", (*recs)[i].details);
         }
     }
     return 0;
