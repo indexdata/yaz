@@ -247,8 +247,7 @@
    <ulink url="&url.z39.50.attset.bib1;">Bib-1 Attribute Set</ulink>
   </para>
   <para>
-   <ulink url="http://www.loc.gov/z3950/agency/bib1.html">Attribute
-    Set Bib-1 Semantics</ulink>.
+   <ulink url="&url.z39.50.bib1.semantics;">Attribute Set Bib-1 Semantics</ulink>.
   </para>
  </refsect1>
 </refentry>
