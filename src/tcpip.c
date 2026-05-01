@@ -356,9 +356,9 @@ COMSTACK yaz_ssl_create(int s, int flags, int protocol,
 }
 
 #if HAVE_GNUTLS_H
-static int ssl_check_error(COMSTACK h, tcpip_state *sp, int res)
+static int ssl_check_again(COMSTACK h, tcpip_state *sp, int res)
 {
-    yaz_log(log_level, "ssl_check_error error=%d fatal=%d msg=%s",
+    yaz_log(log_level, "ssl_check_again error=%d fatal=%d msg=%s",
             res,
             gnutls_error_is_fatal(res),
             gnutls_strerror(res));
@@ -795,13 +795,18 @@ int tcpip_rcvconnect(COMSTACK h)
                                    host, strlen(host));
         SET_GNUTLS_SOCKET(sp->session, h->iofile);
     }
-    if (sp->session)
+    while (sp->session)
     {
         int res = gnutls_handshake(sp->session);
-        if (res < 0)
+        if (res == GNUTLS_E_SUCCESS)
+            break;
+        if (ssl_check_again(h, sp, res))
         {
-            if (ssl_check_error(h, sp, res))
+            if (!(h->flags & CS_FLAGS_BLOCKING))
                 return 1;
+        }
+        else
+        {
             return cont_connect(h);
         }
     }
@@ -1031,9 +1036,9 @@ COMSTACK tcpip_accept(COMSTACK h)
         if (state->session)
         {
             int res = gnutls_handshake(state->session);
-            if (res < 0)
+            if (res != GNUTLS_E_SUCCESS)
             {
-                if (ssl_check_error(h, state, res))
+                if (ssl_check_again(h, state, res))
                 {
                     yaz_log(log_level, "tcpip_accept gnutls_handshake interrupted");
                     return h;
@@ -1111,8 +1116,12 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             }
             else if (res < 0)
             {
-                if (ssl_check_error(h, sp, res))
+                if (ssl_check_again(h, sp, res))
+                {
+                    if (h->flags & CS_FLAGS_BLOCKING)
+                        continue;
                     break;
+                }
                 return -1;
             }
         }
@@ -1238,10 +1247,14 @@ int tcpip_put(COMSTACK h, char *buf, int size)
         {
             res = gnutls_record_send(state->session, buf + state->written,
                                      size - state->written);
-            if (res <= 0)
+            if (res < 0)
             {
-                if (ssl_check_error(h, state, res))
+                if (ssl_check_again(h, state, res))
+                {
+                    if (h->flags & CS_FLAGS_BLOCKING)
+                        continue;
                     return 1;
+                }
                 return -1;
             }
         }
