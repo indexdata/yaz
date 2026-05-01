@@ -1,3 +1,10 @@
+--- 5.37.1 2026/05/01
+
+Fix GNUTLS_E_AGAIN handling for blocking sockets (SSL) (#181).
+
+Include config.h first in charconv gen files (#177).
+Fixes _POSIX_C_SOURCE being redefined.
+
 --- 5.37.0 2026/01/10
 
 Fix SIGUSR handling in daemon.
