@@ -8049,7 +8049,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     This chapter describes sorting and how it is supported in YAZ.
     Sorting applies to a result-set.
     The
-    <ulink url="http://www.loc.gov/z3950/agency/markup/05.html#3.2.7">
+    <ulink url="https://loc.gov/standards/z3950/agency/markup/05.html#3.2.7">
      Z39.50 sorting facility
     </ulink>
     takes one or more input result-sets
@@ -8100,12 +8100,12 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     <para>
      The sort is triggered by the presence of type 7, and the value of type 7
      specifies the
-     <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortKeySpec">
+     <ulink url="https://loc.gov/standards/z3950/agency/asn1.html#SortKeySpec">
       sortRelation
      </ulink>.
      The value for type 7 is 1 for ascending and 2 for descending.
      For the
-     <ulink url="http://www.loc.gov/z3950/agency/asn1.html#SortElement">
+     <ulink url="https://loc.gov/standards/z3950/agency/asn1.html#SortElement">
       sortElement
      </ulink>
      only the generic part is handled. If generic sortKey is of type
