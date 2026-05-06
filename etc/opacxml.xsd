@@ -14,14 +14,13 @@ records.
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element ref="holdings"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-  <xs:element name="holdings">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element maxOccurs="unbounded" minOccurs="0" ref="holding"/>
+        <xs:element name="holdings">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" ref="holding"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
