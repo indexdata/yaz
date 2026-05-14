@@ -23,7 +23,7 @@ REFFILES=yaz-client-man.xml yaz-ztest-man.xml yaz-config-man.xml \
 
 SUPPORTFILES=entities.ent apilayer.obj
 
-doc_DATA = $(HTMLFILES) apilayer.png 
+doc_DATA = $(HTMLFILES) apilayer.png
 man_MANS = $(MANFILES)
 
 EXTRA_DIST = $(XMLFILES) $(SUPPORTFILES) $(man_MANS) $(REFFILES) \
@@ -104,10 +104,10 @@ yazj.pdf:
 manref.xml: $(REFFILES) $(srcdir)/common/stripref.xsl local.ent
 	rm -f manref.xml
 	for i in $(REFFILES); do \
-		xsltproc $(srcdir)/common/stripref.xsl $(srcdir)/$$i | sed 1d >>manref.xml; \
+		$(XSLTPROC_COMPILE) $(srcdir)/common/stripref.xsl $(srcdir)/$$i | sed 1d >>manref.xml; \
 	done
 
-apilayer.png: 
+apilayer.png:
 	tgif -print -xbm apilayer.obj
 	xbmtopbm <apilayer.xbm|pnmtopng >apilayer.png
 
