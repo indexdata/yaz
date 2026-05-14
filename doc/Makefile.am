@@ -104,7 +104,7 @@ yazj.pdf:
 manref.xml: $(REFFILES) $(srcdir)/common/stripref.xsl local.ent
 	rm -f manref.xml
 	for i in $(REFFILES); do \
-		$(XSLT_COMPILE) $(srcdir)/common/stripref.xsl $(srcdir)/$$i | sed 1d >>manref.xml; \
+		$(XSLTPROC_COMPILE) $(srcdir)/common/stripref.xsl $(srcdir)/$$i | sed 1d >>manref.xml; \
 	done
 
 apilayer.png:
