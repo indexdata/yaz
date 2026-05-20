@@ -1,3 +1,11 @@
+--- 5.37.2 2026/05/20
+
+Update CSS for documentation.
+
+Minor fixes to OPACXML schema (opacxml.xsd)
+
+Make packages for Ubuntu 26.04 LTS (Resolute Raccoon).
+
 --- 5.37.1 2026/05/01
 
 Fix GNUTLS_E_AGAIN handling for blocking sockets (SSL) (#181).
