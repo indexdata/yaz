@@ -41,8 +41,16 @@ static void tst1(void)
     yaz_marc_t mt = yaz_marc_create();
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &user_data);
     xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
+    xmlParserCtxtPtr parser_ctxt = xmlCreatePushParserCtxt(sax_ptr, yt,
+                                                           marcxml,
+                                                           strlen(marcxml), 0);
 
-    xmlSAXUserParseMemory(sax_ptr, yt, marcxml, strlen(marcxml));
+    YAZ_CHECK(parser_ctxt);
+    if (parser_ctxt)
+    {
+        YAZ_CHECK_EQ(xmlParseChunk(parser_ctxt, 0, 0, 1), 0);
+        xmlFreeParserCtxt(parser_ctxt);
+    }
 
     const char *expect = "<record xmlns=\"http://www.loc.gov/MARC21/slim\">\n"
                      "  <leader>00062cgm a2200037Ia 4500</leader>\n"
