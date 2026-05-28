@@ -201,13 +201,14 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     next = cp;
                     while ((next = strchr(next, marker_ch)))
                     {
+                        /* allow only alphanumeric characters */
                         if ((next[1] >= 'A' && next[1] <= 'Z')
                             ||(next[1] >= 'a' && next[1] <= 'z')
                             ||(next[1] >= '0' && next[1] <= '9'))
                         {
                             if (!marker_skip)
                                 break;
-                            else if (next[2] == ' ')
+                            else if (next[-1] == ' ')
                                 break;
                         }
                         next++;
@@ -216,12 +217,11 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     if (next)
                         len = next - cp - marker_skip;
 
-                    if (marker_skip && len > 2 && cp[2] == ' ')
+                    if (marker_skip && len > 1 && cp[1] == ' ')
                     {
                         /* remove ' ' after subfield marker */
                         char *cp_mod = (char *) cp; /* line is allocated locally, so we can modify it */
-                        cp_mod[2] = cp_mod[1];
-                        cp_mod[1] = cp_mod[0];
+                        cp_mod[1] = cp_mod[0]; /* does not deal with multi-byte subfields */
                         len--;
                         cp++;
                     }
