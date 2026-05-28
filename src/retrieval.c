@@ -318,7 +318,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             schema_ok = 1;
         else
         {
-            char *cp = 0;
+            const char *cp = 0;
             wrbuf_rewind(w);
             if (el->split && *el->split && (cp = strchr(schema, *el->split)))
                 wrbuf_write(w, schema, cp - schema);
@@ -361,7 +361,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
             {
                 if (*el->backend_name)
                 {
-                    char *cp;
+                    const char *cp;
                     wrbuf_rewind(w);
                     wrbuf_puts(w, el->backend_name);
                     if (el->split && *el->split && schema
