@@ -216,20 +216,14 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     if (next)
                         len = next - cp - marker_skip;
 
-                    if (marker_skip)
+                    if (marker_skip && len > 2 && cp[2] == ' ')
                     {
                         /* remove ' ' after subfield marker */
-                        char *cp_blank = strchr(cp, ' ');
-                        if (cp_blank)
-                        {
-                            len--;
-                            while (cp_blank != cp)
-                            {
-                                cp_blank[0] = cp_blank[-1];
-                                cp_blank--;
-                            }
-                            cp++;
-                        }
+                        char *cp_mod = (char *) cp; /* line is allocated locally, so we can modify it */
+                        cp_mod[2] = cp_mod[1];
+                        cp_mod[1] = cp_mod[0];
+                        len--;
+                        cp++;
                     }
                     yaz_marc_add_subfield(mt, cp, len);
                     if (!next)
