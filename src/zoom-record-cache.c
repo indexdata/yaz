@@ -109,11 +109,12 @@ static ZOOM_record record_cache_add(ZOOM_resultset r,
     {
         if (diag->uri)
         {
-            const char *cp = strrchr(rc->rec.diag_set, '/');
+            const char *cp = strrchr(diag->uri, '/');
             if (cp)
                 rc->rec.diag_set = odr_strdupn(r->odr, diag->uri, cp - diag->uri);
             else
-                rc->rec.diag_uri = odr_strdup(r->odr, diag->uri);
+                rc->rec.diag_set = odr_strdup(r->odr, diag->uri);
+            rc->rec.diag_uri = odr_strdup(r->odr, diag->uri);
         }
         rc->rec.diag_message = odr_strdup_null(r->odr, diag->message);
         rc->rec.diag_details = odr_strdup_null(r->odr, diag->details);
