@@ -261,7 +261,7 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
                                        Z_SRW_scanResponse *scr)
 {
     xmlNodePtr node;
-    char *pos;
+    const char *pos;
     int i = 0;
 
     /* find the actual list */
@@ -297,19 +297,17 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
              * This is due to SOLR not being able to encode them into 2 separate attributes.
              */
             pos = strchr(val, '^');
-            if (pos != NULL)
+            if (pos)
             {
                 term->displayTerm = odr_strdup(o, pos + 1);
-                *pos = '\0';
-                term->value = odr_strdup(o, val);
-                *pos = '^';
+                term->value = odr_strdupn(o, val, pos - val);
             }
             else
             {
                 term->value = odr_strdup(o, val);
-                term->displayTerm = NULL;
+                term->displayTerm = 0;
             }
-            term->whereInList = NULL;
+            term->whereInList = 0;
             i++;
         }
     }
