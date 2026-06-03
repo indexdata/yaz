@@ -55,17 +55,18 @@ int completeBER_n(const char *buf, int len, int level)
 #if BER_ANY_DEBUG
         yaz_log(YLOG_LOG, "completeBER lev=%d len=%d", level, len);
 #endif
-        return -2;
+        return -1;
     }
     if (len < 2)
         return 0;
-    if (!buf[0] && !buf[1])
-        return -2;
+    if (buf[0] == 0 && buf[1] == 0)
+        return -1;
     if ((res = ber_dectag(b, &zclass, &tag, &cons, len)) <= 0)
         return 0;
     b += res;
     len -= res;
-    assert (len >= 0);
+    if (len < 0)
+        return -1;
     res = ber_declen(b, &ll, len);
     if (res == -2)
     {
