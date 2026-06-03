@@ -126,7 +126,9 @@ YAZ_EXPORT COMSTACK cs_create_host_proxy(const char *vhost,
 YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int blocking, void **vp,
                                     const char *proxy_host, int *proxy_mode);
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
+/** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
+/** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);
 YAZ_EXPORT void *cs_get_ssl(COMSTACK cs)
 #ifdef __GNUC__
@@ -160,7 +162,8 @@ YAZ_EXPORT int cs_set_head_only(COMSTACK cs, int head_only);
 #define CSDENY     5
 #define CSERRORSSL 6
 #define CSBUFSIZE  7
-#define CSLASTERROR CSBUFSIZE  /* must be the value of last CS error */
+#define CSPROTERR  8
+#define CSLASTERROR CSPROTERR  /* must be the value of last CS error */
 
 #define CS_FLAGS_BLOCKING 1
 #define CS_FLAGS_NUMERICHOST 2

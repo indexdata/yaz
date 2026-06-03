@@ -30,7 +30,8 @@ static const char *cs_errlist[] =
     "New data while half of old buffer is on the line (flow control)",
     "Permission denied",
     "SSL error",
-    "Too large incoming buffer"
+    "Too large incoming buffer",
+    "Protocol error in incoming data"
 };
 
 const char *cs_errmsg(int n)
@@ -395,7 +396,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     {
         if (i > 8192)
         {
-            return i;  /* do not allow more than 8K HTTP header */
+            return -1;  /* header exceeds 8K: protocol error */
         }
         if (skip_crlf(buf, len, &i))
         {
@@ -454,7 +455,8 @@ static int cs_complete_auto_x(const char *buf, int len, int head_only)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
                 && buf[1] >= 0x20 && buf[1] < 0x7f
-                && buf[2] >= 0x20 && buf[2] < 0x7f)
+                && buf[2] >= 0x20 && buf[2] < 0x7f
+                && buf[3] >= 0x20 && buf[3] < 0x7f)
     {
         int r = cs_complete_http(buf, len, head_only);
         return r;

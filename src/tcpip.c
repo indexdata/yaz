@@ -619,7 +619,7 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) > 0;
 }
 
 static int cont_connect(COMSTACK h)
@@ -1088,7 +1088,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)(*buf, hasread)))
+    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
     {
         if (!*bufsize)
         {
@@ -1184,6 +1184,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             h->cerrno = CSBUFSIZE;
             return -1;
         }
+    }
+    if (berlen < 0)
+    {
+        h->cerrno = CSPROTERR;
+        return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                 hasread, berlen);

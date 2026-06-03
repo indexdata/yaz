@@ -306,7 +306,7 @@ static int unix_more(COMSTACK h)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) > 0;
 }
 
 /*
@@ -582,7 +582,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)(*buf, hasread)))
+    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
     {
         if (!*bufsize)
         {
@@ -616,6 +616,11 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         else if (!res)
             return hasread;
         hasread += res;
+    }
+    if (berlen < 0)
+    {
+        h->cerrno = CSPROTERR;
+        return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                   hasread, berlen);

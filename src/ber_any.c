@@ -127,7 +127,7 @@ int completeBER(const char *buf, int len)
     yaz_log(YLOG_LOG, "completeBER len=%d res=%d", len, res);
 #endif
     if (res < 0)
-        return len;
+        return -1;  /* protocol error: malformed BER */
     return res;
 }
 /*

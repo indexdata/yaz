@@ -9,7 +9,7 @@
                 "/usr/include/libxml2"
             ],
             "defines": [
-                 "HAVE_CONFIG_H=1"
+                "HAVE_CONFIG_H=1"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c89",

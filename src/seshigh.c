@@ -288,13 +288,13 @@ int ir_read(IOCHAN h, int event)
         {
             int res = cs_get(conn, &assoc->input_buffer,
                              &assoc->input_buffer_len);
-            if (res < 0 && cs_errno(conn) == CSBUFSIZE)
+            if (res < 0 && (cs_errno(conn) == CSBUFSIZE ||
+                             cs_errno(conn) == CSPROTERR))
             {
-                yaz_log(log_session, "Connection error: %s res=%d",
-                        cs_errmsg(cs_errno(conn)), res);
+                const char *reason = cs_errmsg(cs_errno(conn));
+                yaz_log(log_session, "Connection error: %s res=%d", reason, res);
                 req = request_get(&assoc->incoming); /* get a new request */
-                do_close_req(assoc, Z_Close_protocolError,
-                             "Incoming package too large", req);
+                do_close_req(assoc, Z_Close_protocolError, reason, req);
                 return 0;
             }
             else if (res <= 0)
