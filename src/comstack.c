@@ -298,27 +298,32 @@ static int cs_read_chunk(const char *buf, int i, int len)
 #endif
         /* read chunk length */
         while (1)
+        {
+            int new_value;
             if (i >= len-2) {
 #if CHUNK_DEBUG
                 printf ("returning incomplete read at 1\n");
                 printf ("i=%d len=%d\n", i, len);
 #endif
                 return 0;
-            } else if (yaz_isdigit(buf[i]))
-                chunk_len = chunk_len * 16 +
+            }
+            if (yaz_isdigit(buf[i]))
+                new_value = chunk_len * 16 +
                     (buf[i++] - '0');
             else if (yaz_isupper(buf[i]))
-                chunk_len = chunk_len * 16 +
+                new_value  = chunk_len * 16 +
                     (buf[i++] - ('A'-10));
             else if (yaz_islower(buf[i]))
-                chunk_len = chunk_len * 16 +
+                new_value = chunk_len * 16 +
                     (buf[i++] - ('a'-10));
             else
                 break;
+            if (new_value < chunk_len) /* overflow */
+                return -1;
+            chunk_len = new_value;
+        }
         if (chunk_len == 0)
             break;
-        if (chunk_len < 0)
-            return i;
 
         while (1)
         {
@@ -438,9 +443,13 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                     i++;
                 content_len = 0;
                 while (i <= len-4 && yaz_isdigit(buf[i]))
-                    content_len = content_len*10 + (buf[i++] - '0');
-                if (content_len < 0) /* prevent negative offsets */
-                    content_len = 0;
+                {
+                    int new_value = content_len*10 + (buf[i] - '0');
+                    if (new_value < content_len) /* overflow */
+                        return -1;
+                    content_len = new_value;
+                    i++;
+                }
             }
             else
                 i++;
