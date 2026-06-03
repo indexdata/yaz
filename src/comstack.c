@@ -397,62 +397,50 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     fwrite (buf, 1, len, stdout);
     printf("----------\n");
 #endif
-    for (i = 2; i <= len-2; )
+    for (i = 2; i <= len - 2; )
     {
         if (i > 8192)
-        {
             return -1;  /* header exceeds 8K: protocol error */
+        if (!skip_crlf(buf, len, &i))
+        {
+            i++;
+            continue;
         }
         if (skip_crlf(buf, len, &i))
         {
-            if (skip_crlf(buf, len, &i))
-            {
-                /* inside content */
-                if (head_only)
-                    return i;
-                else if (chunked)
-                    return cs_read_chunk(buf, i, len);
-                else
-                {   /* not chunked ; inside body */
-                    if (content_len == -1)
-                        return 0;   /* no content length */
-                    else if (len >= i + content_len)
-                    {
-                        return i + content_len;
-                    }
-                }
-                break;
-            }
-            else if (i < len - 20 &&
-                     !yaz_strncasecmp((const char *) buf+i,
-                                      "Transfer-Encoding:", 18))
-            {
-                i+=18;
-                while (buf[i] == ' ')
-                    i++;
-                if (i < len - 8)
-                    if (!yaz_strncasecmp((const char *) buf+i, "chunked", 7))
-                        chunked = 1;
-            }
-            else if (i < len - 17 &&
-                     !yaz_strncasecmp((const char *)buf+i,
-                                      "Content-Length:", 15))
-            {
-                i+= 15;
-                while (buf[i] == ' ')
-                    i++;
-                content_len = 0;
-                while (i <= len-4 && yaz_isdigit(buf[i]))
-                {
-                    int new_value = content_len*10 + (buf[i] - '0');
-                    if (new_value < content_len) /* overflow */
-                        return -1;
-                    content_len = new_value;
-                    i++;
-                }
-            }
-            else
+            /* inside content */
+            if (head_only)
+                return i;
+            if (chunked)
+                return cs_read_chunk(buf, i, len);
+            if (content_len == -1)
+                return 0;   /* no content length */
+            if (len >= i + content_len)
+                return i + content_len;
+            break;
+        }
+        if (i < len - 20 && !yaz_strncasecmp(buf+i, "Transfer-Encoding:", 18))
+        {
+            i += 18;
+            while (i < len && buf[i] == ' ')
                 i++;
+            if (i < len - 8 && !yaz_strncasecmp(buf+i, "chunked", 7))
+                chunked = 1;
+        }
+        else if (i < len - 17 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
+        {
+            i += 15;
+            while (i < len && buf[i] == ' ')
+                i++;
+            content_len = 0;
+            while (i <= len-4 && yaz_isdigit(buf[i]))
+            {
+                int new_value = content_len*10 + (buf[i] - '0');
+                if (new_value < content_len) /* overflow */
+                    return -1;
+                content_len = new_value;
+                i++;
+            }
         }
         else
             i++;
