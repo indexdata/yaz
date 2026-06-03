@@ -51,13 +51,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
     else if (o->op->stack_top && !o->op->stack_top->next)
     {
         /* must allocate new entry (not first) */
-        int sz = 0;
-        struct odr_constack *st;
-        /* check size first */
-        for (st = o->op->stack_top; st; st = st->prev)
-            sz++;
-
-        if (sz >= ODR_MAX_STACK)
+        if (o->op->stack_depth >= ODR_MAX_STACK)
         {
             odr_seterror(o, OSTACK, 30);
             return 0;
@@ -83,6 +77,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
         o->op->stack_top = o->op->stack_first;
         assert(o->op->stack_top->prev == 0);
     }
+    o->op->stack_depth++;
     o->op->stack_top->lenb = o->op->bp;
     o->op->stack_top->len_offset = odr_tell(o);
     o->op->stack_top->name = name ? name : "?";

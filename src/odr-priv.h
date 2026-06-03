@@ -90,6 +90,7 @@ struct Odr_private {
     /* stack for constructed types (we above) */
     struct odr_constack *stack_first; /** first member of allocated stack */
     struct odr_constack *stack_top;   /** top of stack */
+    int stack_depth;                  /** current stack depth */
 
     const char **tmp_names_buf;   /** array returned by odr_get_element_path */
     int tmp_names_sz;                 /** size of tmp_names_buf */
@@ -114,7 +115,7 @@ struct Odr_private {
     int indent;          /* current indent level for printing */
 };
 
-#define ODR_STACK_POP(x) (x)->op->stack_top = (x)->op->stack_top->prev
+#define ODR_STACK_POP(x) ((x)->op->stack_top = (x)->op->stack_top->prev, (x)->op->stack_depth--)
 #define ODR_STACK_EMPTY(x) (!(x)->op->stack_top)
 #define ODR_STACK_NOT_EMPTY(x) ((x)->op->stack_top)
 
