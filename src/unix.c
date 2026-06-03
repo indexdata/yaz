@@ -155,6 +155,8 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     p->f_straddr = unix_straddr;
     p->f_set_blocking = unix_set_blocking;
 
+    p->max_recv_bytes = 16 * 1024 * 1024;
+
     p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
