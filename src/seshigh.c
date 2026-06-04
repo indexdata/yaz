@@ -81,7 +81,7 @@
 #include <yaz/snprintf.h>
 
 static void process_gdu_request(association *assoc, request *req);
-static int process_z_request(association *assoc, request *req, char **msg);
+static int process_z_request(association *assoc, request *req, const char **msg);
 static int process_gdu_response(association *assoc, request *req, Z_GDU *res);
 static int process_z_response(association *assoc, request *req, Z_APDU *res);
 static Z_APDU *process_initRequest(association *assoc, request *reqb);
@@ -230,7 +230,7 @@ void destroy_association(association *h)
     xmalloc_trav("session closed");
 }
 
-static void do_close_req(association *a, int reason, char *message,
+static void do_close_req(association *a, int reason, const char *message,
                          request *req)
 {
     Z_APDU *apdu = zget_APDU(a->encode, Z_APDU_close);
@@ -244,7 +244,7 @@ static void do_close_req(association *a, int reason, char *message,
         yaz_log(log_requestdetail, "Sending Close PDU, reason=%d, message=%s",
             reason, message ? message : "none");
         *cls->closeReason = reason;
-        cls->diagnosticInformation = message;
+        cls->diagnosticInformation = odr_strdup(a->encode, message);
         process_z_response(a, req, apdu);
         iochan_settimeout(a->client_chan, 20);
     }
@@ -258,7 +258,7 @@ static void do_close_req(association *a, int reason, char *message,
     a->state = ASSOC_DEAD;
 }
 
-static void do_close(association *a, int reason, char *message)
+static void do_close(association *a, int reason, const char *message)
 {
     request *req = request_get(&a->outgoing);
     do_close_req(a, reason, message, req);
@@ -292,7 +292,7 @@ int ir_read(IOCHAN h, int event)
                              cs_errno(conn) == CSPROTERR))
             {
                 const char *reason = cs_errmsg(cs_errno(conn));
-                yaz_log(log_session, "Connection error: %s res=%d", reason, res);
+                yaz_log(log_session, "Connection error: %s", reason);
                 req = request_get(&assoc->incoming); /* get a new request */
                 do_close_req(assoc, Z_Close_protocolError, reason, req);
                 return 0;
@@ -478,9 +478,6 @@ void ir_session(IOCHAN h, int event)
         iochan_destroy(h);
     }
 }
-
-static int process_z_request(association *assoc, request *req, char **msg);
-
 
 static void assoc_init_reset(association *assoc, const char *peer_name1)
 {
@@ -2036,7 +2033,7 @@ static void process_gdu_request(association *assoc, request *req)
 {
     if (req->gdu_request->which == Z_GDU_Z3950)
     {
-        char *msg = 0;
+        const char *msg = 0;
         req->apdu_request = req->gdu_request->u.z3950;
         if (process_z_request(assoc, req, &msg) < 0)
             do_close_req(assoc, Z_Close_systemProblem, msg, req);
@@ -2052,7 +2049,7 @@ static void process_gdu_request(association *assoc, request *req)
 /*
  * Initiate request processing.
  */
-static int process_z_request(association *assoc, request *req, char **msg)
+static int process_z_request(association *assoc, request *req, const char **msg)
 {
     Z_APDU *res;
     int retval;
