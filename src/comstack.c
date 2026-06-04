@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
@@ -299,7 +300,6 @@ static int cs_read_chunk(const char *buf, int i, int len)
         /* read chunk length */
         while (1)
         {
-            int new_value;
             if (i >= len-2) {
 #if CHUNK_DEBUG
                 printf ("returning incomplete read at 1\n");
@@ -307,20 +307,18 @@ static int cs_read_chunk(const char *buf, int i, int len)
 #endif
                 return 0;
             }
+            int digit;
             if (yaz_isdigit(buf[i]))
-                new_value = chunk_len * 16 +
-                    (buf[i++] - '0');
+                digit = buf[i++] - '0';
             else if (yaz_isupper(buf[i]))
-                new_value  = chunk_len * 16 +
-                    (buf[i++] - ('A'-10));
+                digit = buf[i++] - ('A' - 10);
             else if (yaz_islower(buf[i]))
-                new_value = chunk_len * 16 +
-                    (buf[i++] - ('a'-10));
+                digit = buf[i++] - ('a' - 10);
             else
                 break;
-            if (new_value < chunk_len) /* overflow */
+            if (chunk_len > (INT_MAX - digit) / 16) /* overflow */
                 return -1;
-            chunk_len = new_value;
+            chunk_len = chunk_len * 16 + digit;
         }
         if (chunk_len == 0)
             break;
@@ -337,6 +335,8 @@ static int cs_read_chunk(const char *buf, int i, int len)
 #if CHUNK_DEBUG
         printf ("chunk_len=%d\n", chunk_len);
 #endif
+        if (chunk_len > (INT_MAX - i))
+            return -1;
         i += chunk_len;
         if (i >= len-2)
             return 0;
@@ -415,6 +415,8 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 return cs_read_chunk(buf, i, len);
             if (content_len == -1)
                 return 0;   /* no content length */
+            if (content_len > (unsigned)(INT_MAX - i))
+                return -1;
             if (len >= i + content_len)
                 return i + content_len;
             break;
@@ -435,10 +437,10 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             content_len = 0;
             while (i <= len-4 && yaz_isdigit(buf[i]))
             {
-                int new_value = content_len*10 + (buf[i] - '0');
-                if (new_value < content_len) /* overflow */
+                int digit = buf[i] - '0';
+                if (content_len > (INT_MAX - digit) / 10) /* overflow */
                     return -1;
-                content_len = new_value;
+                content_len = content_len * 10 + digit;
                 i++;
             }
         }
