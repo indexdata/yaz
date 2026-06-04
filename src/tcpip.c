@@ -1099,11 +1099,22 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             }
         }
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+        {
+            int new_size = *bufsize * 2;
+            if (new_size > h->max_recv_bytes)
+                new_size = h->max_recv_bytes;
+            if (new_size <= hasread)
+            {
+                h->cerrno = CSBUFSIZE;
+                return -1;
+            }
+            if (!(*buf = (char *)xrealloc(*buf, new_size)))
             {
                 h->cerrno = CSYSERR;
                 return -1;
             }
+            *bufsize = new_size;
+        }
 #if HAVE_GNUTLS_H
         if (sp->session)
         {
