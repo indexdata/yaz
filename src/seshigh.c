@@ -244,7 +244,7 @@ static void do_close_req(association *a, int reason, const char *message,
         yaz_log(log_requestdetail, "Sending Close PDU, reason=%d, message=%s",
             reason, message ? message : "none");
         *cls->closeReason = reason;
-        cls->diagnosticInformation = odr_strdup(a->encode, message);
+        cls->diagnosticInformation = odr_strdup_null(a->encode, message);
         process_z_response(a, req, apdu);
         iochan_settimeout(a->client_chan, 20);
     }
