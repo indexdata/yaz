@@ -602,7 +602,10 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
                 return -1;
             }
             if (!(*buf = (char *)xrealloc(*buf, new_size)))
+            {
+                h->cerrno = CSYSERR;
                 return -1;
+            }
             *bufsize = new_size;
         }
         res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
