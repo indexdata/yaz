@@ -65,7 +65,7 @@ diagsru_update.c yaz/diagsru_update.h: sru_update.csv
 
 noinst_HEADERS = yaz/icu_I18N.h diag-entry.h
 
-pkginclude_HEADERS= yaz/backend.h yaz/backtrace.h yaz/base64.h \
+pkginclude_HEADERS = yaz/atoi.h yaz/backend.h yaz/backtrace.h yaz/base64.h \
  yaz/ccl.h yaz/ccl_xml.h yaz/cookie.h yaz/cql.h yaz/rpn2cql.h \
  yaz/rpn2solr.h yaz/solr.h yaz/comstack.h \
  yaz/diagbib1.h yaz/diagsrw.h yaz/diagsru_update.h yaz/sortspec.h \

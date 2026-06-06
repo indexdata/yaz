@@ -21,6 +21,7 @@
 #include <yaz/unix.h>
 #include <yaz/odr.h>
 #include <yaz/matchstr.h>
+#include <yaz/atoi.h>
 
 static const char *cs_errlist[] =
 {
@@ -431,18 +432,16 @@ static int cs_complete_http(const char *buf, int len, int head_only)
         }
         else if (i < len - 17 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
         {
+            int no_read;
+
             i += 15;
             while (i < len && buf[i] == ' ')
                 i++;
-            content_len = 0;
-            while (i <= len-4 && yaz_isdigit(buf[i]))
-            {
-                int digit = buf[i] - '0';
-                if (content_len > (INT_MAX - digit) / 10) /* overflow */
-                    return -1;
-                content_len = content_len * 10 + digit;
-                i++;
-            }
+
+            no_read = yaz_atoi(buf + i, len - i, &content_len);
+            if (no_read <= 0)
+                return -1;  /* overflow or no digits */
+            i += no_read;
         }
         else
             i++;

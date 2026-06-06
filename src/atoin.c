@@ -18,25 +18,44 @@
 
 int atoi_n(const char *buf, int len)
 {
-    int val = 0;
-
-    while (--len >= 0)
-    {
-        if (yaz_isdigit(*buf))
-            val = val*10 + (*buf - '0');
-        buf++;
-    }
-    return val;
+    int val, ret;
+    ret = yaz_atoi(buf, len, &val);
+    return ret < 1 ? 0 : val;
 }
 
 int atoi_n_check(const char *buf, int size, int *val)
 {
+    int ret = yaz_atoi(buf, size, val);
+    return ret != size ? 0 : 1;
+}
+
+int yaz_atoi(const char *ptr, int len, int *val)
+{
+    unsigned long uval;
+    int ret = yaz_atoul(ptr, len, &uval);
+    if (ret == -1)
+        return -1;
+    if (uval > (unsigned)INT_MAX)
+        return -1;
+    *val = (int) uval;
+    return ret;
+}
+
+int yaz_atoul(const char *ptr, int len, unsigned long *val)
+{
     int i;
-    for (i = 0; i < size; i++)
-        if (!yaz_isdigit(buf[i]))
-            return 0;
-    *val = atoi_n(buf, size);
-    return 1;
+
+    *val = 0;
+    for (i = 0; i < len; i++)
+    {
+        if (!yaz_isdigit(ptr[i]))
+            break;
+        int digit = ptr[i] - '0';
+        if (*val > (ULONG_MAX - digit) / 10) /* overflow */
+            return -1;
+        *val = *val * 10 + digit;
+    }
+    return i;
 }
 
 /*

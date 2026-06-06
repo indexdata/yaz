@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include <yaz/test.h>
 #include <yaz/comstack.h>
@@ -76,6 +77,56 @@ static void tst_http_request(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 41), 0);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), 42);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 43), 42);
+    }
+    {
+        /* one content-length header, negative length */
+        const char *http_buf =
+            /*123456789012345678 */
+            "GET / HTTP/1.1\r\n"
+            "Content-Length: -5\r\n"
+            "\r\n"
+            "ABCDE"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 33), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 34), -1);
+    }
+    if (INT_MAX == 2147483647)
+    {
+        /* one content-length header, INT_MAX-1 length */
+        const char *http_buf =
+            /*123456789012345678 */
+            "GET / HTTP/1.1\r\n"
+            "Content-Length: 2147483647\r\n"
+            "\r\n"
+            "ABCDE"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 33), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 34), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 50), -1);
+    }
+    if (INT_MAX == 2147483647)
+    {
+        /* one content-length header, INT_MAX+1 length */
+        const char *http_buf =
+            /*123456789012345678 */
+            "GET / HTTP/1.1\r\n"
+            "Content-Length: 2147483648\r\n"
+            "\r\n"
+            "ABCDE"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 33), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 34), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), -1);
     }
     {
         /* LF only in GET, one content-length header, length 5 */

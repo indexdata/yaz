@@ -40,6 +40,7 @@
 #include <yaz/nmem.h>
 #include <yaz/xmltypes.h>
 #include <yaz/z-opac.h>
+#include <yaz/atoi.h>
 
 YAZ_BEGIN_CDECL
 
@@ -124,23 +125,6 @@ YAZ_EXPORT void yaz_marc_endline_str(yaz_marc_t mt, const char *s);
 /** \brief modifies part of the MARC leader */
 YAZ_EXPORT void yaz_marc_modify_leader(yaz_marc_t mt, size_t off,
                                        const char *str);
-
-/** \brief like atoi(3) except that it reads exactly len characters
-    \param buf buffer to read
-    \param len number of bytes to consider (being digits)
-    \returns value
- */
-YAZ_EXPORT int atoi_n(const char *buf, int len);
-
-/** \brief like atoi_n but checks for proper formatting
-    \param buf buffer to read values from
-    \param size size of buffer
-    \param val value of decimal number (if successful)
-    \retval 0 no value found (non-digits found)
-    \retval 1 value found and *val holds value
-*/
-YAZ_EXPORT
-int atoi_n_check(const char *buf, int size, int *val);
 
 /** \brief MARC control char: record separator (29 Dec, 1D Hex) */
 #define ISO2709_RS 035
