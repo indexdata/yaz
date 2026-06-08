@@ -62,7 +62,8 @@ static void tst_http_request(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 37), 37);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 38), 37);
     }
-    if (INT_MAX == 2147483647){
+    if (INT_MAX == 2147483647)
+    {
         /* one content-length header, overflow length */
         const char *http_buf =
             /*123456789012345678 */
