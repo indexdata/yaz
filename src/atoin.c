@@ -20,8 +20,8 @@
 int atoi_n(const char *buf, int len)
 {
     int val, ret;
-    ret = yaz_atoi(10, buf, len, &val);
-    return ret < 1 ? 0 : val;
+    ret = atoi_n_check(buf, len, &val);
+    return ret ? val : 0;
 }
 
 int atoi_n_check(const char *buf, int size, int *val)
