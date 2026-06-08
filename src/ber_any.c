@@ -25,7 +25,7 @@ int ber_any(ODR o, Odr_any **p)
     switch (o->direction)
     {
     case ODR_DECODE:
-        if ((res = completeBER(o->op->bp, odr_max(o))) <= 0)        /* FIX THIS */
+        if ((res = completeBER_n(o->op->bp, odr_max(o), 0)) <= 0)
         {
             odr_seterror(o, OPROTO, 2);
             return 0;
@@ -128,7 +128,7 @@ int completeBER(const char *buf, int len)
     yaz_log(YLOG_LOG, "completeBER len=%d res=%d", len, res);
 #endif
     if (res < 0)
-        return -1;  /* protocol error: malformed BER */
+        return len;
     return res;
 }
 /*
