@@ -54,23 +54,29 @@ YAZ_EXPORT int atoi_n(const char *buf, int len);
 YAZ_EXPORT
 int atoi_n_check(const char *buf, int size, int *val);
 
-/** \brief like atoi_n but returns -1 on error, and value in *val on success
+/** \brief string to int conversion, with base
+    \param base numerical base (2-36)
     \param ptr buffer to read
     \param len number of bytes to consider (being digits)
     \param val value of decimal number (if successful)
-    \returns number of bytes read, or -1 on overflow
+    \returns number of bytes read if successful, or -1 on error (overflow or invalid base)
+    The function stops at first digit not valid for base.
+    In particular, if no digits are found, 0 is returned and *val is set to 0.
  */
 YAZ_EXPORT
-int yaz_atoi(const char *ptr, int len, int *val);
+int yaz_atoi(int base, const char *ptr, int len, int *val);
 
-/** \brief like yaz_atoi but for unsigned long
+/** \brief string to unsigned long conversion, with base
+    \param base numerical base (2-36)
     \param ptr buffer to read
-    \param len number of bytes to consider (being digits)
-    \param val value of decimal number (if successful)
-    \returns number of bytes read, or -1 on overflow
+    \param len maximum number of bytes to read
+    \param val value of number (if successful)
+    \returns number of bytes read if successful, or -1 on error (overflow or invalid base)
+    The function stops at first digit not valid for base.
+    In particular, if no digits are found, 0 is returned and *val is set to 0.
  */
 YAZ_EXPORT
-int yaz_atoul(const char *ptr, int len, unsigned long *val);
+int yaz_atoul(int base, const char *ptr, int len, unsigned long *val);
 
 YAZ_END_CDECL
 

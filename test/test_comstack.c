@@ -207,6 +207,23 @@ static void tst_http_request(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 64), 0);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 65), 65);
     }
+
+    {
+        /* one header, one chunk with extra material */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "GET / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "3; foo\r\n"
+            "123\r\n"
+            "0; bar\r\n\r\n"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 68), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 69), 69);
+    }
+
 }
 
 static void tst_http_response(void)

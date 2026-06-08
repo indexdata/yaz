@@ -280,50 +280,19 @@ static int skip_crlf(const char *buf, int len, int *i)
     return 0;
 }
 
-#define CHUNK_DEBUG 0
-
-static int cs_read_chunk(const char *buf, int i, int len)
+static int cs_read_chunks(const char *buf, int i, int len)
 {
     /* inside chunked body .. */
     while (1)
     {
         int chunk_len = 0;
-#if CHUNK_DEBUG
-        if (i < len-2)
-        {
-            int j;
-            printf ("\n<<<");
-            for (j = i; j <= i+3; j++)
-                printf ("%c", buf[j]);
-            printf (">>>\n");
-        }
-#endif
         /* read chunk length */
-        while (1)
-        {
-            if (i >= len-2) {
-#if CHUNK_DEBUG
-                printf ("returning incomplete read at 1\n");
-                printf ("i=%d len=%d\n", i, len);
-#endif
-                return 0;
-            }
-            int digit;
-            if (yaz_isdigit(buf[i]))
-                digit = buf[i++] - '0';
-            else if (yaz_isupper(buf[i]))
-                digit = buf[i++] - ('A' - 10);
-            else if (yaz_islower(buf[i]))
-                digit = buf[i++] - ('a' - 10);
-            else
-                break;
-            if (chunk_len > (INT_MAX - digit) / 16) /* overflow */
-                return -1;
-            chunk_len = chunk_len * 16 + digit;
-        }
+        int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
+        if (ret <= 0)
+            return -1;
+        i += ret;
         if (chunk_len == 0)
             break;
-
         while (1)
         {
             if (i >= len -1)
@@ -333,9 +302,6 @@ static int cs_read_chunk(const char *buf, int i, int len)
             i++;
         }
         /* got CRLF */
-#if CHUNK_DEBUG
-        printf ("chunk_len=%d\n", chunk_len);
-#endif
         if (chunk_len > (INT_MAX - i))
             return -1;
         i += chunk_len;
@@ -355,10 +321,6 @@ static int cs_read_chunk(const char *buf, int i, int len)
         else
             i++;
     }
-#if CHUNK_DEBUG
-    printf ("returning incomplete read at 2\n");
-    printf ("i=%d len=%d\n", i, len);
-#endif
     return 0;
 }
 
@@ -393,11 +355,6 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 break;
             }
     }
-#if 0
-    printf("len = %d\n", len);
-    fwrite (buf, 1, len, stdout);
-    printf("----------\n");
-#endif
     for (i = 2; i <= len - 2; )
     {
         if (i > 8192)
@@ -413,7 +370,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             if (head_only)
                 return i;
             if (chunked)
-                return cs_read_chunk(buf, i, len);
+                return cs_read_chunks(buf, i, len);
             if (content_len == -1)
                 return 0;   /* no content length */
             if (content_len > (unsigned)(INT_MAX - i))
@@ -438,7 +395,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             while (i < len && buf[i] == ' ')
                 i++;
 
-            no_read = yaz_atoi(buf + i, len - i, &content_len);
+            no_read = yaz_atoi(10, buf + i, len - i, &content_len);
             if (no_read <= 0)
                 return -1;  /* overflow or no digits */
             i += no_read;
