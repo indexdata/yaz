@@ -593,20 +593,21 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         }
         else if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
         {
-            int new_size = *bufsize * 2;
-            if (new_size > h->max_recv_bytes)
-                new_size = h->max_recv_bytes;
-            if (new_size <= hasread)
+            if (*bufsize > h->max_recv_bytes / 2)
+                *bufsize = h->max_recv_bytes;
+            else
+                *bufsize = *bufsize * 2;
+
+            if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
             {
                 h->cerrno = CSBUFSIZE;
                 return -1;
             }
-            if (!(*buf = (char *)xrealloc(*buf, new_size)))
+            if (!(*buf = (char *)xrealloc(*buf, *bufsize)))
             {
                 h->cerrno = CSYSERR;
                 return -1;
             }
-            *bufsize = new_size;
         }
         res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
         yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
