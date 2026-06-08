@@ -266,7 +266,7 @@ YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
     \param len length of buffer
     \retval 0 package is incomplete
     \retval >0 package is complete and length is return value
-    deprecated as it it ignores decoding errors and, use completeBER_n instead
+    Obsolete: completeBER ignores decoding errors; use completeBER_n instead.
 */
 YAZ_EXPORT int completeBER(const char *buf, int len)
 #ifdef __GNUC__
