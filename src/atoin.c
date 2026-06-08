@@ -13,6 +13,7 @@
 #endif
 
 #include <string.h>
+#include <limits.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-iconv.h>
 
