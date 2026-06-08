@@ -30,8 +30,8 @@
  * \brief ASCII to integer conversion
  */
 
-#ifndef ATIO_H
-#define ATIO_H
+#ifndef YAZ_ATOI_H
+#define YAZ_ATOI_H
 
 #include <yaz/yconfig.h>
 
