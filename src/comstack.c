@@ -286,6 +286,8 @@ static int cs_read_chunks(const char *buf, int i, int len)
     while (1)
     {
         int chunk_len = 0;
+        if (i >= len)
+            return 0;
         /* read chunk length */
         int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
         if (ret <= 0)
@@ -379,22 +381,35 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 return i + content_len;
             break;
         }
-        if (i < len - 20 && !yaz_strncasecmp(buf+i, "Transfer-Encoding:", 18))
+        if (i < len - 19 && !yaz_strncasecmp(buf+i, "Transfer-Encoding:", 18))
         {
+            int token_start;
             i += 18;
             while (i < len && buf[i] == ' ')
                 i++;
-            if (i < len - 8 && !yaz_strncasecmp(buf+i, "chunked", 7))
-                chunked = 1;
+            token_start = i;
+            for (;;)
+            {
+                int j;
+                if (i >= len - 2)
+                    return 0;
+                if (i == token_start + 7 && !yaz_strncasecmp(buf + token_start, "chunked", 7))
+                    chunked = 1;
+                j = i;
+                if (skip_crlf(buf, len, &j))
+                    break;
+                i++;
+            }
         }
-        else if (i < len - 17 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
+        else if (i < len - 16 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
         {
             int no_read;
 
             i += 15;
             while (i < len && buf[i] == ' ')
                 i++;
-
+            if (i == len)
+                return 0;
             no_read = yaz_atoi(10, buf + i, len - i, &content_len);
             if (no_read <= 0)
                 return -1;  /* overflow or no digits */
