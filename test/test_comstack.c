@@ -62,6 +62,18 @@ static void tst_http_request(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 37), 37);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 38), 37);
     }
+    if (INT_MAX == 2147483647){
+        /* one content-length header, overflow length */
+        const char *http_buf =
+            /*123456789012345678 */
+            "GET / HTTP/1.1\r\n"
+            "Content-Length: 2147483648\r\n"
+            "\r\n"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 41), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 42), -1);
+    }
     {
         /* one content-length header, length 5 */
         const char *http_buf =
@@ -151,8 +163,7 @@ static void tst_http_request(void)
             "GET / HTTP/1.1\n"
             "Content-Length: 5\n"
             "\n"
-            "ABCDE"
-            "GET / HTTP/1.0\r\n";
+            "ABCDE";
 
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 1), 0);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 2), 0);
@@ -191,6 +202,21 @@ static void tst_http_request(void)
     }
 
     {
+        /* one header, one chunk LF only */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "GET / HTTP/1.1\n"
+            "Transfer-Encoding: chunked\n"
+            "\n"
+            "3\n"
+            "123\n"
+            "0\n\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 51), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 52), 52);
+    }
+
+    {
         /* one header, two chunks */
         const char *http_buf =
             /*12345678901234567890123456789 */
@@ -222,6 +248,32 @@ static void tst_http_request(void)
 
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 68), 0);
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 69), 69);
+    }
+
+    if (INT_MAX == 2147483647){
+        /* one header, overflow value */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "GET / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "80000000\r\n"
+            "123\r\n"
+            "0\r\n\r\n"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 53), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 54), -1);
+    }
+
+    {
+        char http_buf[8300];
+        strcpy(http_buf,"GET / HTTP/1.1\r\nContent-Type: ");
+        strcpy(http_buf+strlen(http_buf)+8200, "\r\n\r\nGET / HTTP/1.0\r\n");
+        memset(http_buf+strlen(http_buf), 'x', 8200);
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 8194), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 8195), -1);
     }
 
 }
