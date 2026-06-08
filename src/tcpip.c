@@ -619,7 +619,7 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) > 0;
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) != 0;
 }
 
 static int cont_connect(COMSTACK h)
