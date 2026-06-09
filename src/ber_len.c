@@ -113,6 +113,8 @@ int ber_declen(const char *buf, int *len, int max)
     n = *b & 0X7F;
     if (n >= max)
         return -1;
+    if (n > (int) sizeof(int) - 1)
+        return -2;  /* length too large to represent */
     *len = 0;
     b++;
     while (--n >= 0)
@@ -120,8 +122,6 @@ int ber_declen(const char *buf, int *len, int max)
         *len <<= 8;
         *len |= *(b++);
     }
-    if (*len < 0)
-        return -2;
     return ((const char *) b - buf);
 }
 /*

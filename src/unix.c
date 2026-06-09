@@ -155,6 +155,8 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     p->f_straddr = unix_straddr;
     p->f_set_blocking = unix_set_blocking;
 
+    p->max_recv_bytes = 16777216;
+
     p->state = new_socket ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
     p->cerrno = 0;
@@ -306,7 +308,7 @@ static int unix_more(COMSTACK h)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) != 0;
 }
 
 /*
@@ -582,7 +584,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)(*buf, hasread)))
+    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
     {
         if (!*bufsize)
         {
@@ -590,8 +592,23 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
                 return -1;
         }
         else if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
-            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+        {
+            if (*bufsize > h->max_recv_bytes / 2)
+                *bufsize = h->max_recv_bytes;
+            else
+                *bufsize = *bufsize * 2;
+
+            if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
+            {
+                h->cerrno = CSBUFSIZE;
                 return -1;
+            }
+            if (!(*buf = (char *)xrealloc(*buf, *bufsize)))
+            {
+                h->cerrno = CSYSERR;
+                return -1;
+            }
+        }
         res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
         yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
         if (res < 0)
@@ -616,6 +633,16 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         else if (!res)
             return hasread;
         hasread += res;
+        if (hasread > h->max_recv_bytes)
+        {
+            h->cerrno = CSBUFSIZE;
+            return -1;
+        }
+    }
+    if (berlen < 0)
+    {
+        h->cerrno = CSPROTERR;
+        return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                   hasread, berlen);

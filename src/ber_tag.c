@@ -160,7 +160,7 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
 /**
  * \brief Decodes BER identifier octets.
  *
- * Returns number of bytes read or -1 for error.
+ * Returns number of bytes read or -1 for incomplete buffer
  */
 int ber_dectag(const char *cp, int *zclass, int *tag,
                int *constructed, int max)

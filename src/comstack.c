@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
@@ -20,6 +21,7 @@
 #include <yaz/unix.h>
 #include <yaz/odr.h>
 #include <yaz/matchstr.h>
+#include <yaz/atoi.h>
 
 static const char *cs_errlist[] =
 {
@@ -30,7 +32,8 @@ static const char *cs_errlist[] =
     "New data while half of old buffer is on the line (flow control)",
     "Permission denied",
     "SSL error",
-    "Too large incoming buffer"
+    "Too large incoming buffer",
+    "Protocol error in incoming data"
 };
 
 const char *cs_errmsg(int n)
@@ -277,48 +280,21 @@ static int skip_crlf(const char *buf, int len, int *i)
     return 0;
 }
 
-#define CHUNK_DEBUG 0
-
-static int cs_read_chunk(const char *buf, int i, int len)
+static int cs_read_chunks(const char *buf, int i, int len)
 {
     /* inside chunked body .. */
     while (1)
     {
         int chunk_len = 0;
-#if CHUNK_DEBUG
-        if (i < len-2)
-        {
-            int j;
-            printf ("\n<<<");
-            for (j = i; j <= i+3; j++)
-                printf ("%c", buf[j]);
-            printf (">>>\n");
-        }
-#endif
+        if (i >= len)
+            return 0;
         /* read chunk length */
-        while (1)
-            if (i >= len-2) {
-#if CHUNK_DEBUG
-                printf ("returning incomplete read at 1\n");
-                printf ("i=%d len=%d\n", i, len);
-#endif
-                return 0;
-            } else if (yaz_isdigit(buf[i]))
-                chunk_len = chunk_len * 16 +
-                    (buf[i++] - '0');
-            else if (yaz_isupper(buf[i]))
-                chunk_len = chunk_len * 16 +
-                    (buf[i++] - ('A'-10));
-            else if (yaz_islower(buf[i]))
-                chunk_len = chunk_len * 16 +
-                    (buf[i++] - ('a'-10));
-            else
-                break;
+        int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
+        if (ret <= 0)
+            return -1;
+        i += ret;
         if (chunk_len == 0)
             break;
-        if (chunk_len < 0)
-            return i;
-
         while (1)
         {
             if (i >= len -1)
@@ -328,9 +304,8 @@ static int cs_read_chunk(const char *buf, int i, int len)
             i++;
         }
         /* got CRLF */
-#if CHUNK_DEBUG
-        printf ("chunk_len=%d\n", chunk_len);
-#endif
+        if (chunk_len > (INT_MAX - i))
+            return -1;
         i += chunk_len;
         if (i >= len-2)
             return 0;
@@ -348,10 +323,6 @@ static int cs_read_chunk(const char *buf, int i, int len)
         else
             i++;
     }
-#if CHUNK_DEBUG
-    printf ("returning incomplete read at 2\n");
-    printf ("i=%d len=%d\n", i, len);
-#endif
     return 0;
 }
 
@@ -386,63 +357,63 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 break;
             }
     }
-#if 0
-    printf("len = %d\n", len);
-    fwrite (buf, 1, len, stdout);
-    printf("----------\n");
-#endif
-    for (i = 2; i <= len-2; )
+    for (i = 2; i <= len - 2; )
     {
         if (i > 8192)
+            return -1;  /* header exceeds 8K: protocol error */
+        if (!skip_crlf(buf, len, &i))
         {
-            return i;  /* do not allow more than 8K HTTP header */
+            i++;
+            continue;
         }
         if (skip_crlf(buf, len, &i))
         {
-            if (skip_crlf(buf, len, &i))
-            {
-                /* inside content */
-                if (head_only)
-                    return i;
-                else if (chunked)
-                    return cs_read_chunk(buf, i, len);
-                else
-                {   /* not chunked ; inside body */
-                    if (content_len == -1)
-                        return 0;   /* no content length */
-                    else if (len >= i + content_len)
-                    {
-                        return i + content_len;
-                    }
-                }
-                break;
-            }
-            else if (i < len - 20 &&
-                     !yaz_strncasecmp((const char *) buf+i,
-                                      "Transfer-Encoding:", 18))
-            {
-                i+=18;
-                while (buf[i] == ' ')
-                    i++;
-                if (i < len - 8)
-                    if (!yaz_strncasecmp((const char *) buf+i, "chunked", 7))
-                        chunked = 1;
-            }
-            else if (i < len - 17 &&
-                     !yaz_strncasecmp((const char *)buf+i,
-                                      "Content-Length:", 15))
-            {
-                i+= 15;
-                while (buf[i] == ' ')
-                    i++;
-                content_len = 0;
-                while (i <= len-4 && yaz_isdigit(buf[i]))
-                    content_len = content_len*10 + (buf[i++] - '0');
-                if (content_len < 0) /* prevent negative offsets */
-                    content_len = 0;
-            }
-            else
+            /* inside content */
+            if (head_only)
+                return i;
+            if (chunked)
+                return cs_read_chunks(buf, i, len);
+            if (content_len == -1)
+                return 0;   /* no content length */
+            if (content_len > (unsigned)(INT_MAX - i))
+                return -1;
+            if (len >= i + content_len)
+                return i + content_len;
+            break;
+        }
+        if (i < len - 19 && !yaz_strncasecmp(buf+i, "Transfer-Encoding:", 18))
+        {
+            int token_start;
+            i += 18;
+            while (i < len && buf[i] == ' ')
                 i++;
+            token_start = i;
+            for (;;)
+            {
+                int j;
+                if (i >= len - 2)
+                    return 0;
+                if (i == token_start + 7 && !yaz_strncasecmp(buf + token_start, "chunked", 7))
+                    chunked = 1;
+                j = i;
+                if (skip_crlf(buf, len, &j))
+                    break;
+                i++;
+            }
+        }
+        else if (i < len - 16 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
+        {
+            int no_read;
+
+            i += 15;
+            while (i < len && buf[i] == ' ')
+                i++;
+            if (i == len)
+                return 0;
+            no_read = yaz_atoi(10, buf + i, len - i, &content_len);
+            if (no_read <= 0)
+                return -1;  /* overflow or no digits */
+            i += no_read;
         }
         else
             i++;
@@ -454,12 +425,13 @@ static int cs_complete_auto_x(const char *buf, int len, int head_only)
 {
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
                 && buf[1] >= 0x20 && buf[1] < 0x7f
-                && buf[2] >= 0x20 && buf[2] < 0x7f)
+                && buf[2] >= 0x20 && buf[2] < 0x7f
+                && buf[3] >= 0x20 && buf[3] < 0x7f)
     {
         int r = cs_complete_http(buf, len, head_only);
         return r;
     }
-    return completeBER(buf, len);
+    return completeBER_n(buf, len, 0);
 }
 
 

@@ -266,8 +266,23 @@ YAZ_EXPORT int ber_any(ODR o, Odr_any **p);
     \param len length of buffer
     \retval 0 package is incomplete
     \retval >0 package is complete and length is return value
+    Obsolete: completeBER ignores decoding errors; use completeBER_n instead.
 */
-YAZ_EXPORT int completeBER(const char *buf, int len);
+YAZ_EXPORT int completeBER(const char *buf, int len)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
+
+/** \brief determine whether a buffer is a complete BER buffer
+    \param buf BER buffer
+    \param len length of buffer
+    \param level recursion level
+    \retval 0 package is incomplete
+    \retval >0 package is complete and length is return value
+    \retval <0 package is invalid
+*/
+YAZ_EXPORT int completeBER_n(const char *buf, int len, int level);
 
 YAZ_EXPORT void odr_begin(ODR o);
 YAZ_EXPORT void odr_end(ODR o);

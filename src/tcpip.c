@@ -234,7 +234,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->f_addrstr = tcpip_addrstr;
     p->f_straddr = tcpip_straddr;
     p->f_set_blocking = tcpip_set_blocking;
-    p->max_recv_bytes = 128 * 1024 * 1024;
+    p->max_recv_bytes = 16777216;
 
     p->state = s < 0 ? CS_ST_UNBND : CS_ST_IDLE; /* state of line */
     p->event = CS_NONE;
@@ -619,7 +619,7 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen);
+    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) != 0;
 }
 
 static int cont_connect(COMSTACK h)
@@ -1088,7 +1088,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altsize = tmpi;
     }
     h->io_pending = 0;
-    while (!(berlen = (*sp->complete)(*buf, hasread)))
+    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
     {
         if (!*bufsize)
         {
@@ -1099,11 +1099,22 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             }
         }
         else if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
-            if (!(*buf =(char *)xrealloc(*buf, *bufsize *= 2)))
+        {
+            if (*bufsize > h->max_recv_bytes / 2)
+                *bufsize = h->max_recv_bytes;
+            else
+                *bufsize = *bufsize * 2;
+            if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
+            {
+                h->cerrno = CSBUFSIZE;
+                return -1;
+            }
+            if (!(*buf = (char *)xrealloc(*buf, *bufsize)))
             {
                 h->cerrno = CSYSERR;
                 return -1;
             }
+        }
 #if HAVE_GNUTLS_H
         if (sp->session)
         {
@@ -1184,6 +1195,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             h->cerrno = CSBUFSIZE;
             return -1;
         }
+    }
+    if (berlen < 0)
+    {
+        h->cerrno = CSPROTERR;
+        return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                 hasread, berlen);

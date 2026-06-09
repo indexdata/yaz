@@ -240,6 +240,7 @@ void odr_reset(ODR o)
     o->op->stack_top = 0;
     o->op->tmp_names_sz = 0;
     o->op->tmp_names_buf = 0;
+    o->op->stack_depth = 0;
     nmem_reset(o->mem);
     o->op->choice_bias = -1;
     o->op->lenlen = 1;

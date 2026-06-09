@@ -1643,18 +1643,25 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
 static int do_read(ZOOM_connection c)
 {
-    int r, more;
+    int r;
     ZOOM_Event event;
 
     event = ZOOM_Event_create(ZOOM_EVENT_RECV_DATA);
     ZOOM_connection_put_event(c, event);
 
     r = cs_get(c->cs, &c->buf_in, &c->len_in);
-    more = cs_more(c->cs);
-    yaz_log(c->log_details, "%p do_read len=%d more=%d", c, r, more);
+    yaz_log(c->log_details, "%p do_read r=%d", c, r);
     if (r == 1)
         return 0;
-    if (r <= 0)
+    if (r < 0)
+    {
+        char msg[100];
+        yaz_snprintf(msg, sizeof(msg), "%s: %s",
+                     c->host_port, cs_errmsg(cs_errno(c->cs)));
+        ZOOM_set_error(c, ZOOM_ERROR_DECODE, msg);
+        ZOOM_connection_close(c);
+    }
+    else if (r == 0)
     {
         if (!ZOOM_test_reconnect(c))
         {
