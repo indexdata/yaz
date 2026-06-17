@@ -826,6 +826,7 @@ int tcpip_rcvconnect(COMSTACK h)
     return 0;
 }
 
+#if HAVE_GNUTLS_H
 static int check_cert(COMSTACK h, tcpip_state *sp)
 {
     if (h->flags & CS_FLAGS_CHECK_CERT)
@@ -855,6 +856,7 @@ static int check_cert(COMSTACK h, tcpip_state *sp)
     }
     return 0;
 }
+#endif
 
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
