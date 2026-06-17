@@ -29,15 +29,15 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-url</command>
-   <arg>-C</arg>
-   <arg>-H <replaceable>name:value</replaceable></arg>
-   <arg>-m <replaceable>method</replaceable></arg>
-   <arg>-O <replaceable>fname</replaceable></arg>
-   <arg>-p <replaceable>fname</replaceable></arg>
-   <arg>-R <replaceable>num</replaceable></arg>
-   <arg>-u <replaceable>user/password</replaceable></arg>
-   <arg>-v</arg>
-   <arg>-x <replaceable>proxy</replaceable></arg>
+   <arg choice="opt">-C</arg>
+   <arg choice="opt">-H <replaceable>name:value</replaceable></arg>
+   <arg choice="opt">-m <replaceable>method</replaceable></arg>
+   <arg choice="opt">-O <replaceable>fname</replaceable></arg>
+   <arg choice="opt">-p <replaceable>fname</replaceable></arg>
+   <arg choice="opt">-R <replaceable>num</replaceable></arg>
+   <arg choice="opt">-u <replaceable>user/password</replaceable></arg>
+   <arg choice="opt">-v</arg>
+   <arg choice="opt">-x <replaceable>proxy</replaceable></arg>
    <arg rep="repeat">url</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -68,8 +68,7 @@
     <term>-H <replaceable>name:value</replaceable></term>
     <listitem><para>
       Specifies HTTP header content with name and value. This
-      option can be given multiple times (for different names,
-      of course).
+      option can be given multiple times.
      </para></listitem>
    </varlistentry>
 
