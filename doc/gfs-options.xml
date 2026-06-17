@@ -77,8 +77,12 @@
  </varlistentry>
  <varlistentry>
   <term><literal>-C </literal><replaceable>fname</replaceable></term>
-  <listitem><para>Sets SSL certificate file name for server (PEM).
- </para></listitem>
+  <listitem><para>
+    Sets SSL certificate file name for server (PEM).
+    This option is used for SSL connections. If fname has a comma, the first part specifies
+    the certificate file and the second part specifies the private key file.
+    If there is no comma, the certificate and private key are expected to be in the same file.
+  </para></listitem>
  </varlistentry>
  <varlistentry>
   <term><literal>-v </literal><replaceable>level</replaceable></term>

@@ -29,6 +29,7 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-url</command>
+   <arg>-C</arg>
    <arg>-H <replaceable>name:value</replaceable></arg>
    <arg>-m <replaceable>method</replaceable></arg>
    <arg>-O <replaceable>fname</replaceable></arg>
@@ -57,6 +58,12 @@
 
  <refsect1><title>OPTIONS</title>
   <variablelist>
+   <varlistentry>
+    <term>-C</term>
+    <listitem><para>
+      Makes yaz-url check SSL certificates when fetching HTTPS URLs.
+     </para></listitem>
+   </varlistentry>
    <varlistentry>
     <term>-H <replaceable>name:value</replaceable></term>
     <listitem><para>

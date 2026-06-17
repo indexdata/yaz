@@ -27,6 +27,7 @@ struct yaz_url {
     int timeout_sec;
     int timeout_ns;
     yaz_cookies_t cookies;
+    int check_cert;
 };
 
 yaz_url_t yaz_url_create(void)
@@ -41,6 +42,7 @@ yaz_url_t yaz_url_create(void)
     p->timeout_sec = 30;
     p->timeout_ns = 0;
     p->cookies = yaz_cookies_create();
+    p->check_cert = 0;
     return p;
 }
 
@@ -79,6 +81,11 @@ void yaz_url_set_timeout(yaz_url_t p, int sec, int ns)
 {
     p->timeout_sec = sec;
     p->timeout_ns = ns;
+}
+
+void yaz_url_set_check_cert(yaz_url_t p, int check_cert)
+{
+    p->check_cert = check_cert;
 }
 
 static void extract_user_pass(NMEM nmem,
@@ -152,11 +159,12 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         int proxy_mode = 0;
         int ret;
         Z_GDU *gdu;
+        int cs_flags = p->check_cert ? CS_FLAGS_CHECK_CERT : 0;
 
         res = 0;
         extract_user_pass(p->odr_out->mem, uri, &uri_lean,
                           &http_user, &http_pass);
-        conn = cs_create_host2(uri_lean, 0, &add, p->proxy, &proxy_mode);
+        conn = cs_create_host2(uri_lean, cs_flags, &add, p->proxy, &proxy_mode);
         if (!conn)
         {
             wrbuf_printf(p->w_error, "Can not resolve URL %s", uri);

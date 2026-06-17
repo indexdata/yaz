@@ -134,6 +134,7 @@ typedef struct tcpip_state
     struct tcpip_cred_ptr *cred_ptr;
     gnutls_session_t session;
     char cert_fname[256];
+    char key_fname[256];
     int use_bye;
 #endif
     char *connect_request_buf;
@@ -141,6 +142,8 @@ typedef struct tcpip_state
     char *connect_response_buf;
     int connect_response_len;
 } tcpip_state;
+
+static int check_cert(COMSTACK h, tcpip_state *sp);
 
 static int log_level = 0;
 
@@ -192,6 +195,7 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->cred_ptr = 0;
     sp->session = 0;
     strcpy(sp->cert_fname, "yaz.pem");
+    sp->key_fname[0] = '\0';
     sp->use_bye = 0;
 #endif
     sp->connect_request_buf = 0;
@@ -783,6 +787,7 @@ int tcpip_rcvconnect(COMSTACK h)
         char tmp[512];
 
         tcpip_create_cred(h);
+        gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
@@ -799,7 +804,12 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         int res = gnutls_handshake(sp->session);
         if (res == GNUTLS_E_SUCCESS)
-            break;
+        {
+            int ret = check_cert(h, sp);
+            if (ret == 0)
+                break;
+            return ret;
+        }
         if (ssl_check_again(h, sp, res))
         {
             if (!(h->flags & CS_FLAGS_BLOCKING))
@@ -813,6 +823,36 @@ int tcpip_rcvconnect(COMSTACK h)
 #endif
     h->event = CS_DATA;
     h->state = CS_ST_DATAXFER;
+    return 0;
+}
+
+static int check_cert(COMSTACK h, tcpip_state *sp)
+{
+    if (h->flags & CS_FLAGS_CHECK_CERT)
+    {
+        unsigned int status = 0;
+        const char *vhost = 0;
+        const char *vport = 0;
+        char vtmp[512];
+        int vr;
+        parse_host_port(sp->host_port, vtmp, sizeof vtmp, &vhost, &vport);
+        vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
+        if (vr < 0)
+        {
+            yaz_log(YLOG_WARN, "TLS certificate verification error: %s",
+                    gnutls_strerror(vr));
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+        if (status != 0)
+        {
+            yaz_log(YLOG_WARN, "TLS certificate verification failed:"
+                               " status=%u host=%s",
+                    status, vhost ? vhost : "");
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -843,7 +883,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         tcpip_create_cred(h);
         res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
-                                                   sp->cert_fname,
+                                                   sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
@@ -1585,8 +1625,23 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
     if (cs && cs->type == ssl_type)
     {
         struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-        strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
-        sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+        const char *comma = strchr(fname, ',');
+        if (comma)
+        {
+            size_t clen = comma - fname;
+            if (clen >= sizeof(sp->cert_fname))
+                clen = sizeof(sp->cert_fname) - 1;
+            memcpy(sp->cert_fname, fname, clen);
+            sp->cert_fname[clen] = '\0';
+            strncpy(sp->key_fname, comma + 1, sizeof(sp->key_fname) - 1);
+            sp->key_fname[sizeof(sp->key_fname) - 1] = '\0';
+        }
+        else
+        {
+            strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
+            sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+            sp->key_fname[0] = '\0';
+        }
         return 1;
     }
 #endif

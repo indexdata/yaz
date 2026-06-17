@@ -434,7 +434,6 @@ static int cs_complete_auto_x(const char *buf, int len, int head_only)
     return completeBER_n(buf, len, 0);
 }
 
-
 int cs_complete_auto(const char *buf, int len)
 {
     return cs_complete_auto_x(buf, len, 0);

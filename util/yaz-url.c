@@ -76,11 +76,14 @@ int main(int argc, char **argv)
     const char *outfname = 0;
 
     yaz_enable_panic_backtrace(*argv);
-    while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
+    while ((ret = options("Ch{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
+        case 'C':
+            yaz_url_set_check_cert(p, 1);
+            break;
         case 'h':
             usage();
             break;

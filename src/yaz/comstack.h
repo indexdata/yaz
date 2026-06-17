@@ -168,6 +168,7 @@ YAZ_EXPORT int cs_set_head_only(COMSTACK cs, int head_only);
 #define CS_FLAGS_BLOCKING 1
 #define CS_FLAGS_NUMERICHOST 2
 #define CS_FLAGS_DNS_NO_BLOCK 4
+#define CS_FLAGS_CHECK_CERT 8
 
 YAZ_END_CDECL
 

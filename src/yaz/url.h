@@ -101,6 +101,12 @@ YAZ_EXPORT Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
 */
 YAZ_EXPORT const char *yaz_url_get_error(yaz_url_t p);
 
+/** \brief sets whether to check SSL certificates
+    \param p handle
+    \param check_cert 1 to check certificates, 0 to ignore
+*/
+YAZ_EXPORT void yaz_url_set_check_cert(yaz_url_t p, int check_cert);
+
 YAZ_END_CDECL
 
 #endif
