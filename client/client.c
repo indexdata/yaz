@@ -692,7 +692,7 @@ static int cmd_base(const char *arg)
 
 static int session_connect_base(const char *arg, const char **basep)
 {
-    int cs_flags = CS_FLAGS_BLOCKING + check_cert * CS_FLAGS_CHECK_CERT;
+    int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
     void *add;
     char type_and_host[101];
     if (conn)
@@ -2741,7 +2741,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
     else
     {
         void *add;
-        int cs_flags = CS_FLAGS_BLOCKING + check_cert * CS_FLAGS_CHECK_CERT;
+        int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
         COMSTACK conn = cs_create_host(uri, cs_flags, &add);
         if (cs_connect(conn, add) < 0)
             yaz_log(YLOG_WARN, "Can not connect to URL:%s", uri);
