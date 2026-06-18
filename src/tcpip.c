@@ -789,6 +789,7 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         const char *host = 0;
         const char *port = 0;
+        const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
         char tmp[512];
 
         tcpip_create_cred(h);
@@ -798,7 +799,7 @@ int tcpip_rcvconnect(COMSTACK h)
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-        parse_host_port(sp->host_port, tmp, sizeof tmp, &host, &port);
+        parse_host_port(check_host, tmp, sizeof tmp, &host, &port);
         /* raw IPV6 seems to be rejected on the server */
         if (!strchr(host, ':'))
             gnutls_server_name_set(sp->session, GNUTLS_NAME_DNS,
