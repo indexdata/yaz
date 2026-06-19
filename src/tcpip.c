@@ -30,6 +30,7 @@
 #endif
 #include <yaz/thread_create.h>
 #include <yaz/log.h>
+#include <yaz/wrbuf.h>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -139,7 +140,7 @@ typedef struct tcpip_state
 #endif
     char *connect_host;
     int connect_phase;
-    char *connect_auth;
+    char *basic_auth;
     char *connect_response_buf;
     int connect_response_len;
 } tcpip_state;
@@ -201,7 +202,7 @@ static struct tcpip_state *tcpip_state_create(void)
 #endif
     sp->connect_host = 0;
     sp->connect_phase = 0;
-    sp->connect_auth = 0;
+    sp->basic_auth = 0;
     sp->connect_response_buf = 0;
     sp->connect_response_len = 0;
     return sp;
@@ -278,7 +279,11 @@ static void connect_and_bind(COMSTACK p,
         if (cp)
             *cp = '\0';
         if (connect_auth)
-            sp->connect_auth = xstrdup(connect_auth);
+        {
+            sp->basic_auth = xmalloc(strlen(connect_auth) * 8/6 + 12);
+            strcpy(sp->basic_auth, "Basic ");
+            yaz_base64encode(connect_auth, sp->basic_auth + strlen(sp->basic_auth));
+        }
     }
 }
 
@@ -750,23 +755,16 @@ int tcpip_rcvconnect(COMSTACK h)
 
         if (sp->connect_phase == 0)
         {
-            size_t sz = 80 + strlen(sp->connect_host) + (sp->connect_auth ? strlen(sp->connect_auth) * 2 : 0);
-            char *connect_buf = (char *)xmalloc(sz);
+            WRBUF w = wrbuf_alloc();
             sp->complete = cs_complete_auto_head;
-            strcpy(connect_buf, "CONNECT ");
-            strcat(connect_buf, sp->connect_host);
-            strcat(connect_buf, " HTTP/1.0\r\n");
-            if (sp->connect_auth)
-            {
-                strcat(connect_buf, "Proxy-Authorization: Basic ");
-                yaz_base64encode(sp->connect_auth, connect_buf + strlen(connect_buf));
-                strcat(connect_buf, "\r\n");
-            }
-            strcat(connect_buf, "\r\n");
-            r = tcpip_put(h, connect_buf, strlen(connect_buf));
+            wrbuf_printf(w, "CONNECT %s HTTP/1.0\r\n", sp->connect_host);
+            if (sp->basic_auth)
+                wrbuf_printf(w, "Proxy-Authorization: %s\r\n", sp->basic_auth);
+            wrbuf_printf(w, "\r\n");
+            r = tcpip_put(h, wrbuf_buf(w), wrbuf_len(w));
             yaz_log(log_level, "tcpip_rcvconnect connect put r=%d", r);
+            wrbuf_destroy(w);
             h->event = CS_CONNECT; /* because tcpip_put sets it */
-            xfree(connect_buf);
             if (r) /* < 0 is error, 1 is in-complete */
                 return r;
             yaz_log(log_level, "tcpip_rcvconnect connect complete");
@@ -1430,6 +1428,7 @@ void tcpip_close(COMSTACK h)
         freeaddrinfo(sp->ai);
     xfree(sp->host_port);
     xfree(sp->connect_host);
+    xfree(sp->basic_auth);
     xfree(sp->connect_response_buf);
     xfree(sp);
     xfree(h);
