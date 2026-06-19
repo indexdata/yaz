@@ -17,7 +17,7 @@
 
 static void usage(void)
 {
-    printf("yaz-icu [options] url ..\n");
+    printf("yaz-url [options] url ..\n");
     printf(" -C                  Enables certificate checking\n");
     printf(" -H name:value       Sets HTTP header (repeat if necessary)\n");
     printf(" -m method           Sets HTTP method\n");
