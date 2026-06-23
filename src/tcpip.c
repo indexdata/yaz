@@ -321,6 +321,23 @@ static void tcpip_create_cred(COMSTACK cs)
     gnutls_certificate_allocate_credentials(&sp->cred_ptr->xcred);
 }
 
+static void tcpip_release_cred(COMSTACK cs)
+{
+    tcpip_state *sp = (tcpip_state *) cs->cprivate;
+    if (sp->cred_ptr)
+    {
+        assert(sp->cred_ptr->ref > 0);
+
+        if (--(sp->cred_ptr->ref) == 0)
+        {
+            yaz_log(log_level, "tcpip_release_cred: removed credentials h=%p",
+                    sp->cred_ptr->xcred);
+            gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
+            xfree(sp->cred_ptr);
+            sp->cred_ptr = 0;
+        }
+    }
+}
 #endif
 
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
@@ -789,9 +806,17 @@ int tcpip_rcvconnect(COMSTACK h)
         const char *port = 0;
         const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
         char tmp[512];
+        int r;
 
         tcpip_create_cred(h);
-        gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
+        r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
+        if (r < 0)
+        {
+            yaz_log(YLOG_FATAL, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
+            h->cerrno = CSERRORSSL;
+            tcpip_release_cred(h);
+            return -1;
+        }
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
@@ -1410,19 +1435,7 @@ void tcpip_close(COMSTACK h)
     {
         gnutls_deinit(sp->session);
     }
-    if (sp->cred_ptr)
-    {
-        assert(sp->cred_ptr->ref > 0);
-
-        if (--(sp->cred_ptr->ref) == 0)
-        {
-            yaz_log(log_level, "tcpip_close: removed credentials h=%p",
-                    sp->cred_ptr->xcred);
-            gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
-            xfree(sp->cred_ptr);
-        }
-        sp->cred_ptr = 0;
-    }
+    tcpip_release_cred(h);
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
