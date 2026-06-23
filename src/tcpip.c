@@ -754,14 +754,14 @@ static int check_cert(COMSTACK h, tcpip_state *sp)
         vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
         if (vr < 0)
         {
-            yaz_log(YLOG_WARN, "TLS certificate verification error: %s",
+            yaz_log(log_level, "TLS certificate verification error: %s",
                     gnutls_strerror(vr));
             h->cerrno = CSERRORSSL;
             return -1;
         }
         if (status != 0)
         {
-            yaz_log(YLOG_WARN, "TLS certificate verification failed:"
+            yaz_log(log_level, "TLS certificate verification failed:"
                                " status=%u host=%s",
                     status, vhost ? vhost : "");
             h->cerrno = CSERRORSSL;
@@ -823,6 +823,18 @@ int tcpip_rcvconnect(COMSTACK h)
                 return r;
             if (r <= 0)
                 return -1;
+            if (sp->connect_response_len < 10 || memcmp(sp->connect_response_buf, "HTTP/", 5) != 0)
+            {
+                yaz_log(log_level, "tcpip_rcvconnect connect failed: bad response");
+                h->cerrno = CSPROTERR;
+                return -1;
+            }
+            if (memcmp(sp->connect_response_buf + 5, "200", 3) != 0)
+            {
+                yaz_log(log_level, "tcpip_rcvconnect connect failed: status %.*s", 3, sp->connect_response_buf + 5);
+                h->cerrno = CSDENY;
+                return -1;
+            }
             sp->complete = cs_complete_auto;
             sp->connect_phase = 2;
         }
@@ -840,7 +852,7 @@ int tcpip_rcvconnect(COMSTACK h)
         r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
         if (r < 0)
         {
-            yaz_log(YLOG_FATAL, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
+            yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
             h->cerrno = CSERRORSSL;
             tcpip_release_cred(h);
             return -1;
