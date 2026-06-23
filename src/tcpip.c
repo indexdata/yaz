@@ -145,8 +145,6 @@ typedef struct tcpip_state
     int connect_response_len;
 } tcpip_state;
 
-static int check_cert(COMSTACK h, tcpip_state *sp);
-
 static int log_level = 0;
 
 static int tcpip_init(void)
@@ -741,9 +739,39 @@ int tcpip_connect(COMSTACK h, void *address)
     return tcpip_rcvconnect(h);
 }
 
-/*
- * nop
- */
+#if HAVE_GNUTLS_H
+static int check_cert(COMSTACK h, tcpip_state *sp)
+{
+    if (h->flags & CS_FLAGS_CHECK_CERT)
+    {
+        unsigned int status = 0;
+        const char *vhost = 0;
+        const char *vport = 0;
+        char vtmp[512];
+        int vr;
+        const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
+        parse_host_port(check_host, vtmp, sizeof vtmp, &vhost, &vport);
+        vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
+        if (vr < 0)
+        {
+            yaz_log(YLOG_WARN, "TLS certificate verification error: %s",
+                    gnutls_strerror(vr));
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+        if (status != 0)
+        {
+            yaz_log(YLOG_WARN, "TLS certificate verification failed:"
+                               " status=%u host=%s",
+                    status, vhost ? vhost : "");
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+    }
+    return 0;
+}
+#endif
+
 int tcpip_rcvconnect(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -854,39 +882,6 @@ int tcpip_rcvconnect(COMSTACK h)
     h->state = CS_ST_DATAXFER;
     return 0;
 }
-
-#if HAVE_GNUTLS_H
-static int check_cert(COMSTACK h, tcpip_state *sp)
-{
-    if (h->flags & CS_FLAGS_CHECK_CERT)
-    {
-        unsigned int status = 0;
-        const char *vhost = 0;
-        const char *vport = 0;
-        char vtmp[512];
-        int vr;
-        const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
-        parse_host_port(check_host, vtmp, sizeof vtmp, &vhost, &vport);
-        vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
-        if (vr < 0)
-        {
-            yaz_log(YLOG_WARN, "TLS certificate verification error: %s",
-                    gnutls_strerror(vr));
-            h->cerrno = CSERRORSSL;
-            return -1;
-        }
-        if (status != 0)
-        {
-            yaz_log(YLOG_WARN, "TLS certificate verification failed:"
-                               " status=%u host=%s",
-                    status, vhost ? vhost : "");
-            h->cerrno = CSERRORSSL;
-            return -1;
-        }
-    }
-    return 0;
-}
-#endif
 
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
