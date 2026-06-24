@@ -66,6 +66,7 @@
 #include <yaz/errno.h>
 #include <yaz/tcpip.h>
 #include <yaz/snprintf.h>
+#include <yaz/zgdu.h>
 
 #ifndef WIN32
 #define RESOLVER_THREAD 1
@@ -817,21 +818,22 @@ int tcpip_rcvconnect(COMSTACK h)
         }
         if (sp->connect_phase == 1)
         {
+            int code;
             r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
             yaz_log(log_level, "tcpip_rcvconnect connect get r=%d", r);
             if (r == 1)
                 return r;
             if (r <= 0)
                 return -1;
-            if (sp->connect_response_len < 10 || memcmp(sp->connect_response_buf, "HTTP/", 5) != 0)
+            if (!yaz_decode_http_response_first(sp->connect_response_buf, sp->connect_response_len, &code, 0, 0, 0, 0))
             {
                 yaz_log(log_level, "tcpip_rcvconnect connect failed: bad response");
                 h->cerrno = CSPROTERR;
                 return -1;
             }
-            if (memcmp(sp->connect_response_buf + 5, "200", 3) != 0)
+            if (code != 200)
             {
-                yaz_log(log_level, "tcpip_rcvconnect connect failed: status %.*s", 3, sp->connect_response_buf + 5);
+                yaz_log(log_level, "tcpip_rcvconnect connect failed: status %d", code);
                 h->cerrno = CSDENY;
                 return -1;
             }
