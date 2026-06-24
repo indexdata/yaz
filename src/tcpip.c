@@ -851,13 +851,16 @@ int tcpip_rcvconnect(COMSTACK h)
         int r;
 
         tcpip_create_cred(h);
-        r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
-        if (r < 0)
+        if (h->flags & CS_FLAGS_CHECK_CERT)
         {
-            yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
-            h->cerrno = CSERRORSSL;
-            tcpip_release_cred(h);
-            return -1;
+            r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
+            if (r < 0)
+            {
+                yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
+                h->cerrno = CSERRORSSL;
+                tcpip_release_cred(h);
+                return -1;
+            }
         }
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
