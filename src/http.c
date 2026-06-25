@@ -522,15 +522,18 @@ int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
     int version_len;
     const char *buf = o->op->buf;
     int size = o->op->size;
-    Z_HTTP_Response *hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
-    int i = yaz_decode_http_response_first(buf, size, &hr->code, &version, &version_len, 0, 0);
+    int code;
+    int i = yaz_decode_http_response_first(buf, size, &code, &version, &version_len, 0, 0);
+    Z_HTTP_Response *hr;
+    *hr_p = 0;
     if (i == 0)
     {
         o->error = OHTTP;
         return 0;
     }
-    *hr_p = hr;
+    *hr_p = hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
     hr->version = odr_strdupn(o, version, version_len);
+    hr->code = code;
     return decode_headers_content(o, i, &hr->headers,
                                   &hr->content_buf, &hr->content_len);
 }
