@@ -473,7 +473,7 @@ int yaz_decode_http_response_first(const char *buf, int sz, int *code, const cha
     if (sz < 10 || memcmp(buf, "HTTP/", 5))
         return 0;
     for (i = 5; ; i++)
-        if (i > sz-2)
+        if (i >= sz-1)
             return 0;
         else if (strchr(" \r\n", buf[i]))
             break;
@@ -487,7 +487,7 @@ int yaz_decode_http_response_first(const char *buf, int sz, int *code, const cha
     *code = 0;
     for (j = i; ; i++)
     {
-        if (i > sz-2)
+        if (i >= sz-1)
             return 0;
         if (i > j+3)
             return 0;
@@ -500,7 +500,7 @@ int yaz_decode_http_response_first(const char *buf, int sz, int *code, const cha
     i++;
     for (j = i; ; i++)
     {
-        if (i > sz-2)
+        if (i >= sz)
             return 0;
         if (strchr("\r\n", buf[i]))
             break;
@@ -509,7 +509,7 @@ int yaz_decode_http_response_first(const char *buf, int sz, int *code, const cha
         *msg = buf + j;
     if (msg_len)
         *msg_len = i - j;
-    if (buf[i] == '\r')
+    if (i < sz - 1 && buf[i] == '\r')
         i++;
     if (buf[i] != '\n')
         return 0;
