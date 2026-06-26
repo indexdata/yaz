@@ -15,8 +15,8 @@
 #include <yaz/tcpip.h>
 #include <yaz/zgdu.h>
 
-
-int yaz_decode_http_response_first_wrapper(const char *buf, int *code, const char **version, int *version_len, const char **msg, int *msg_len)
+static int yaz_decode_http_response_first_wrapper(const char *buf, int *code,
+    const char **version, int *version_len, const char **msg, int *msg_len)
 {
     return yaz_decode_http_response_first(buf, strlen(buf), code, version, version_len, msg, msg_len);
 }
