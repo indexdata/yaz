@@ -5530,7 +5530,7 @@ int main(int argc, char **argv)
             hex_dump = 1;
             break;
         default:
-            fprintf(stderr, "Usage: %s "
+            fprintf(stderr, "Usage: %s"
                     " [-a apdulog]"
                     " [-b berdump]"
                     " [-c cclfile]"
