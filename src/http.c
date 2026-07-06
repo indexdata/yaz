@@ -467,35 +467,73 @@ const char *z_HTTP_errmsg(int code)
     }
 }
 
+int yaz_decode_http_response_first(const char *buf, int sz, int *code, const char **version, int *version_len, const char **msg, int *msg_len)
+{
+    int i, j;
+    if (sz < 10 || memcmp(buf, "HTTP/", 5))
+        return 0;
+    for (i = 5; ; i++)
+        if (i >= sz-1)
+            return 0;
+        else if (strchr(" \r\n", buf[i]))
+            break;
+    if (buf[i] != ' ')
+        return 0;
+    if (version)
+        *version = buf + 5;
+    if (version_len)
+        *version_len = i - 5;
+    i++;
+    *code = 0;
+    for (j = i; ; i++)
+    {
+        if (i >= sz-1)
+            return 0;
+        if (i > j+3)
+            return 0;
+        if (buf[i] < '0' || buf[i] > '9')
+            break;
+        *code = *code*10 + (buf[i] - '0');
+    }
+    if (buf[i] != ' ')
+        return 0;
+    i++;
+    for (j = i; ; i++)
+    {
+        if (i >= sz)
+            return 0;
+        if (strchr("\r\n", buf[i]))
+            break;
+    }
+    if (msg)
+        *msg = buf + j;
+    if (msg_len)
+        *msg_len = i - j;
+    if (i < sz - 1 && buf[i] == '\r')
+        i++;
+    if (buf[i] != '\n')
+        return 0;
+    return i;
+}
+
 int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p)
 {
-    int i, po;
-    Z_HTTP_Response *hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
+    const char *version;
+    int version_len;
     const char *buf = o->op->buf;
     int size = o->op->size;
-
-    *hr_p = hr;
-    hr->content_buf = 0;
-    hr->content_len = 0;
-
-    po = i = 5;
-    while (i < size-2 && !strchr(" \r\n", buf[i]))
-        i++;
-    hr->version = odr_strdupn(o, buf + po, i - po);
-    if (buf[i] != ' ')
+    int code;
+    int i = yaz_decode_http_response_first(buf, size, &code, &version, &version_len, 0, 0);
+    Z_HTTP_Response *hr;
+    *hr_p = 0;
+    if (i == 0)
     {
         o->error = OHTTP;
         return 0;
     }
-    i++;
-    hr->code = 0;
-    while (i < size-2 && buf[i] >= '0' && buf[i] <= '9')
-    {
-        hr->code = hr->code*10 + (buf[i] - '0');
-        i++;
-    }
-    while (i < size-1 && buf[i] != '\n')
-        i++;
+    *hr_p = hr = (Z_HTTP_Response *) odr_malloc(o, sizeof(*hr));
+    hr->version = odr_strdupn(o, version, version_len);
+    hr->code = code;
     return decode_headers_content(o, i, &hr->headers,
                                   &hr->content_buf, &hr->content_len);
 }

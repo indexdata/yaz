@@ -30,6 +30,7 @@
 #endif
 #include <yaz/thread_create.h>
 #include <yaz/log.h>
+#include <yaz/wrbuf.h>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -65,6 +66,7 @@
 #include <yaz/errno.h>
 #include <yaz/tcpip.h>
 #include <yaz/snprintf.h>
+#include <yaz/zgdu.h>
 
 #ifndef WIN32
 #define RESOLVER_THREAD 1
@@ -134,10 +136,12 @@ typedef struct tcpip_state
     struct tcpip_cred_ptr *cred_ptr;
     gnutls_session_t session;
     char cert_fname[256];
+    char key_fname[256];
     int use_bye;
 #endif
-    char *connect_request_buf;
-    int connect_request_len;
+    char *connect_host;
+    int connect_phase;
+    WRBUF connect_request;
     char *connect_response_buf;
     int connect_response_len;
 } tcpip_state;
@@ -192,10 +196,12 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->cred_ptr = 0;
     sp->session = 0;
     strcpy(sp->cert_fname, "yaz.pem");
+    sp->key_fname[0] = '\0';
     sp->use_bye = 0;
 #endif
-    sp->connect_request_buf = 0;
-    sp->connect_request_len = 0;
+    sp->connect_host = 0;
+    sp->connect_phase = 0;
+    sp->connect_request = 0;
     sp->connect_response_buf = 0;
     sp->connect_response_len = 0;
     return sp;
@@ -265,24 +271,23 @@ static void connect_and_bind(COMSTACK p,
     }
     if (connect_host)
     {
-        tcpip_state *sp = (tcpip_state *) p->cprivate;
         char *cp;
-        sp->connect_request_buf = (char *) xmalloc(strlen(connect_host) + 130);
-        strcpy(sp->connect_request_buf, "CONNECT ");
-        strcat(sp->connect_request_buf, connect_host);
-        cp = strchr(sp->connect_request_buf, '/');
+        tcpip_state *sp = (tcpip_state *) p->cprivate;
+        sp->connect_host = xstrdup(connect_host);
+        cp = strchr(sp->connect_host, '/');
         if (cp)
             *cp = '\0';
-        strcat(sp->connect_request_buf, " HTTP/1.0\r\n");
-        if (connect_auth && strlen(connect_auth) < 40)
+        sp->connect_request = wrbuf_alloc();
+        wrbuf_printf(sp->connect_request, "CONNECT %s HTTP/1.0\r\n", sp->connect_host);
+        if (connect_auth)
         {
-            strcat(sp->connect_request_buf, "Proxy-Authorization: Basic ");
-            yaz_base64encode(connect_auth, sp->connect_request_buf +
-                             strlen(sp->connect_request_buf));
-            strcat(sp->connect_request_buf, "\r\n");
+            char *basic_auth = xmalloc(strlen(connect_auth) * 8/6 + 12);
+            strcpy(basic_auth, "Basic ");
+            yaz_base64encode(connect_auth, basic_auth + strlen(basic_auth));
+            wrbuf_printf(sp->connect_request, "Proxy-Authorization: %s\r\n", basic_auth);
+            xfree(basic_auth);
         }
-        strcat(sp->connect_request_buf, "\r\n");
-        sp->connect_request_len = strlen(sp->connect_request_buf);
+        wrbuf_printf(sp->connect_request, "\r\n");
     }
 }
 
@@ -294,7 +299,7 @@ COMSTACK yaz_tcpip_create3(int s, int flags, int protocol,
     COMSTACK p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
-    connect_and_bind(p, connect_host, 0, bind_host);
+    connect_and_bind(p, connect_host, connect_auth, bind_host);
     return p;
 }
 
@@ -320,6 +325,23 @@ static void tcpip_create_cred(COMSTACK cs)
     gnutls_certificate_allocate_credentials(&sp->cred_ptr->xcred);
 }
 
+static void tcpip_release_cred(COMSTACK cs)
+{
+    tcpip_state *sp = (tcpip_state *) cs->cprivate;
+    if (sp->cred_ptr)
+    {
+        assert(sp->cred_ptr->ref > 0);
+
+        if (--(sp->cred_ptr->ref) == 0)
+        {
+            yaz_log(log_level, "tcpip_release_cred: removed credentials h=%p",
+                    sp->cred_ptr->xcred);
+            gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
+            xfree(sp->cred_ptr);
+            sp->cred_ptr = 0;
+        }
+    }
+}
 #endif
 
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
@@ -723,9 +745,39 @@ int tcpip_connect(COMSTACK h, void *address)
     return tcpip_rcvconnect(h);
 }
 
-/*
- * nop
- */
+#if HAVE_GNUTLS_H
+static int check_cert(COMSTACK h, tcpip_state *sp)
+{
+    if (h->flags & CS_FLAGS_CHECK_CERT)
+    {
+        unsigned int status = 0;
+        const char *vhost = 0;
+        const char *vport = 0;
+        char vtmp[512];
+        int vr;
+        const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
+        parse_host_port(check_host, vtmp, sizeof vtmp, &vhost, &vport);
+        vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
+        if (vr < 0)
+        {
+            yaz_log(log_level, "TLS certificate verification error: %s",
+                    gnutls_strerror(vr));
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+        if (status != 0)
+        {
+            yaz_log(log_level, "TLS certificate verification failed:"
+                               " status=%u host=%s",
+                    status, vhost ? vhost : "");
+            h->cerrno = CSERRORSSL;
+            return -1;
+        }
+    }
+    return 0;
+}
+#endif
+
 int tcpip_rcvconnect(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
@@ -748,47 +800,73 @@ int tcpip_rcvconnect(COMSTACK h)
         h->cerrno = CSOUTSTATE;
         return -1;
     }
-    if (sp->connect_request_buf)
+    if (sp->connect_host)
     {
         int r;
 
-        sp->complete = cs_complete_auto_head;
-        if (sp->connect_request_len > 0)
+        if (sp->connect_phase == 0)
         {
-            r = tcpip_put(h, sp->connect_request_buf,
-                          sp->connect_request_len);
+            sp->complete = cs_complete_auto_head;
+            r = tcpip_put(h, wrbuf_buf(sp->connect_request), wrbuf_len(sp->connect_request));
             yaz_log(log_level, "tcpip_rcvconnect connect put r=%d", r);
             h->event = CS_CONNECT; /* because tcpip_put sets it */
             if (r) /* < 0 is error, 1 is in-complete */
                 return r;
             yaz_log(log_level, "tcpip_rcvconnect connect complete");
+            sp->connect_phase = 1;
         }
-        sp->connect_request_len = 0;
-
-        r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
-        yaz_log(log_level, "tcpip_rcvconnect connect get r=%d", r);
-        if (r == 1)
-            return r;
-        if (r <= 0)
-            return -1;
-        xfree(sp->connect_request_buf);
-        sp->connect_request_buf = 0;
-        sp->complete = cs_complete_auto;
+        if (sp->connect_phase == 1)
+        {
+            int code;
+            r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
+            yaz_log(log_level, "tcpip_rcvconnect connect get r=%d", r);
+            if (r == 1)
+                return r;
+            if (r <= 0)
+                return -1;
+            if (!yaz_decode_http_response_first(sp->connect_response_buf, sp->connect_response_len, &code, 0, 0, 0, 0))
+            {
+                yaz_log(log_level, "tcpip_rcvconnect connect failed: bad response");
+                h->cerrno = CSPROTERR;
+                return -1;
+            }
+            if (code != 200)
+            {
+                yaz_log(log_level, "tcpip_rcvconnect connect failed: status %d", code);
+                h->cerrno = CSDENY;
+                return -1;
+            }
+            sp->complete = cs_complete_auto;
+            sp->connect_phase = 2;
+        }
     }
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
         const char *host = 0;
         const char *port = 0;
+        const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
         char tmp[512];
+        int r;
 
         tcpip_create_cred(h);
+        if (h->flags & CS_FLAGS_CHECK_CERT)
+        {
+            r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
+            if (r < 0)
+            {
+                yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
+                h->cerrno = CSERRORSSL;
+                tcpip_release_cred(h);
+                return -1;
+            }
+        }
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
         gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
                                 sp->cred_ptr->xcred);
-        parse_host_port(sp->host_port, tmp, sizeof tmp, &host, &port);
+        parse_host_port(check_host, tmp, sizeof tmp, &host, &port);
         /* raw IPV6 seems to be rejected on the server */
         if (!strchr(host, ':'))
             gnutls_server_name_set(sp->session, GNUTLS_NAME_DNS,
@@ -799,7 +877,12 @@ int tcpip_rcvconnect(COMSTACK h)
     {
         int res = gnutls_handshake(sp->session);
         if (res == GNUTLS_E_SUCCESS)
-            break;
+        {
+            int ret = check_cert(h, sp);
+            if (ret == 0)
+                break;
+            return ret;
+        }
         if (ssl_check_again(h, sp, res))
         {
             if (!(h->flags & CS_FLAGS_BLOCKING))
@@ -843,7 +926,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         tcpip_create_cred(h);
         res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
-                                                   sp->cert_fname,
+                                                   sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
                                                    GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
@@ -1363,24 +1446,13 @@ void tcpip_close(COMSTACK h)
     {
         gnutls_deinit(sp->session);
     }
-    if (sp->cred_ptr)
-    {
-        assert(sp->cred_ptr->ref > 0);
-
-        if (--(sp->cred_ptr->ref) == 0)
-        {
-            yaz_log(log_level, "tcpip_close: removed credentials h=%p",
-                    sp->cred_ptr->xcred);
-            gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
-            xfree(sp->cred_ptr);
-        }
-        sp->cred_ptr = 0;
-    }
+    tcpip_release_cred(h);
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
     xfree(sp->host_port);
-    xfree(sp->connect_request_buf);
+    xfree(sp->connect_host);
+    wrbuf_destroy(sp->connect_request);
     xfree(sp->connect_response_buf);
     xfree(sp);
     xfree(h);
@@ -1585,8 +1657,23 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
     if (cs && cs->type == ssl_type)
     {
         struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-        strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
-        sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+        const char *comma = strchr(fname, ',');
+        if (comma)
+        {
+            size_t clen = comma - fname;
+            if (clen >= sizeof(sp->cert_fname))
+                clen = sizeof(sp->cert_fname) - 1;
+            memcpy(sp->cert_fname, fname, clen);
+            sp->cert_fname[clen] = '\0';
+            strncpy(sp->key_fname, comma + 1, sizeof(sp->key_fname) - 1);
+            sp->key_fname[sizeof(sp->key_fname) - 1] = '\0';
+        }
+        else
+        {
+            strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
+            sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+            sp->key_fname[0] = '\0';
+        }
         return 1;
     }
 #endif

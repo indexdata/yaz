@@ -104,6 +104,7 @@ static COMSTACK conn = 0;               /* our z-association */
 
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 static NMEM nmem_auth = NULL;
+static int check_cert = 0;
 
 char *databaseNames[128];
 int num_databaseNames = 0;
@@ -691,6 +692,7 @@ static int cmd_base(const char *arg)
 
 static int session_connect_base(const char *arg, const char **basep)
 {
+    int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
     void *add;
     char type_and_host[101];
     if (conn)
@@ -709,7 +711,7 @@ static int session_connect_base(const char *arg, const char **basep)
     strncpy(type_and_host, arg, sizeof(type_and_host)-1);
     type_and_host[sizeof(type_and_host)-1] = '\0';
 
-    conn = cs_create_host2(arg, 1, &add, yazProxy, &proxy_mode);
+    conn = cs_create_host2(arg, cs_flags, &add, yazProxy, &proxy_mode);
     if (!conn)
     {
         printf("Could not resolve address %s\n", arg);
@@ -2739,7 +2741,8 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
     else
     {
         void *add;
-        COMSTACK conn = cs_create_host(uri, 1, &add);
+        int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
+        COMSTACK conn = cs_create_host(uri, cs_flags, &add);
         if (cs_connect(conn, add) < 0)
             yaz_log(YLOG_WARN, "Can not connect to URL:%s", uri);
         else
@@ -5446,7 +5449,7 @@ int main(int argc, char **argv)
 
     nmem_auth = nmem_create();
 
-    while ((ret = options("k:c:q:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:Cq:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -5475,6 +5478,9 @@ int main(int argc, char **argv)
                 ber_file=stderr;
             else
                 ber_file=fopen(arg, "a");
+            break;
+        case 'C':
+            check_cert = 1;
             break;
         case 'c':
             strncpy(ccl_fields, arg, sizeof(ccl_fields)-1);
@@ -5524,10 +5530,11 @@ int main(int argc, char **argv)
             hex_dump = 1;
             break;
         default:
-            fprintf(stderr, "Usage: %s "
+            fprintf(stderr, "Usage: %s"
                     " [-a apdulog]"
                     " [-b berdump]"
                     " [-c cclfile]"
+                    " [-C]"
                     " [-d dump]"
                     " [-f cmdfile]"
                     " [-k size]"

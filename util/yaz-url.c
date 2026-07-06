@@ -17,7 +17,8 @@
 
 static void usage(void)
 {
-    printf("yaz-icu [options] url ..\n");
+    printf("yaz-url [options] url ..\n");
+    printf(" -C                  Enables SSL certificate checking\n");
     printf(" -H name:value       Sets HTTP header (repeat if necessary)\n");
     printf(" -m method           Sets HTTP method\n");
     printf(" -O fname            Writes HTTP content to file\n");
@@ -76,11 +77,14 @@ int main(int argc, char **argv)
     const char *outfname = 0;
 
     yaz_enable_panic_backtrace(*argv);
-    while ((ret = options("h{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
+    while ((ret = options("Ch{help}H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
+        case 'C':
+            yaz_url_set_check_cert(p, 1);
+            break;
         case 'h':
             usage();
             break;

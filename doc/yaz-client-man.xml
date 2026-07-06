@@ -32,6 +32,7 @@
    <arg choice="opt"><option>-a <replaceable>apdulog</replaceable></option></arg>
    <arg choice="opt"><option>-b <replaceable>berdump</replaceable></option></arg>
    <arg choice="opt"><option>-c <replaceable>cclfile</replaceable></option></arg>
+   <arg choice="opt"><option>-C</option></arg>
    <arg choice="opt"><option>-d <replaceable>dump</replaceable></option></arg>
    <arg choice="opt"><option>-f <replaceable>cmdfile</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
@@ -109,6 +110,12 @@
      <listitem><para>
        If specified, CCL configuration will be read from
        the file given.
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>-C</term>
+     <listitem><para>
+       Makes yaz-client check SSL certificates when using HTTPS or SSL over Z39.50.
       </para></listitem>
     </varlistentry>
     <varlistentry>
