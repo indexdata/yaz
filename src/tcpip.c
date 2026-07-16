@@ -195,7 +195,7 @@ static struct tcpip_state *tcpip_state_create(void)
 #if HAVE_GNUTLS_H
     sp->cred_ptr = 0;
     sp->session = 0;
-    strcpy(sp->cert_fname, "yaz.pem");
+    sp->cert_fname[0] = '\0';
     sp->key_fname[0] = '\0';
     sp->use_bye = 0;
 #endif
@@ -317,28 +317,28 @@ COMSTACK yaz_tcpip_create(int s, int flags, int protocol,
 }
 
 #if HAVE_GNUTLS_H
-static void tcpip_create_cred(COMSTACK cs)
+static struct tcpip_cred_ptr *tcpip_create_cred(void)
 {
-    tcpip_state *sp = (tcpip_state *) cs->cprivate;
-    sp->cred_ptr = (struct tcpip_cred_ptr *) xmalloc(sizeof(*sp->cred_ptr));
-    sp->cred_ptr->ref = 1;
-    gnutls_certificate_allocate_credentials(&sp->cred_ptr->xcred);
+    struct tcpip_cred_ptr *cred_ptr;
+    cred_ptr = (struct tcpip_cred_ptr *) xmalloc(sizeof(*cred_ptr));
+    cred_ptr->ref = 1;
+    gnutls_certificate_allocate_credentials(&cred_ptr->xcred);
+    return cred_ptr;
 }
 
-static void tcpip_release_cred(COMSTACK cs)
+static void tcpip_release_cred(struct tcpip_cred_ptr **ptr)
 {
-    tcpip_state *sp = (tcpip_state *) cs->cprivate;
-    if (sp->cred_ptr)
+    if (*ptr)
     {
-        assert(sp->cred_ptr->ref > 0);
+        assert((*ptr)->ref > 0);
 
-        if (--(sp->cred_ptr->ref) == 0)
+        if (--((*ptr)->ref) == 0)
         {
             yaz_log(log_level, "tcpip_release_cred: removed credentials h=%p",
-                    sp->cred_ptr->xcred);
-            gnutls_certificate_free_credentials(sp->cred_ptr->xcred);
-            xfree(sp->cred_ptr);
-            sp->cred_ptr = 0;
+                    (*ptr)->xcred);
+            gnutls_certificate_free_credentials((*ptr)->xcred);
+            xfree(*ptr);
+            *ptr = 0;
         }
     }
 }
@@ -841,6 +841,9 @@ int tcpip_rcvconnect(COMSTACK h)
         }
     }
 #if HAVE_GNUTLS_H
+    if (h->type == ssl_type) {
+        yaz_log(log_level, "tcpip_rcvconnect SSL handshake");
+    }
     if (h->type == ssl_type && !sp->session)
     {
         const char *host = 0;
@@ -849,7 +852,7 @@ int tcpip_rcvconnect(COMSTACK h)
         char tmp[512];
         int r;
 
-        tcpip_create_cred(h);
+        sp->cred_ptr = tcpip_create_cred();
         if (h->flags & CS_FLAGS_CHECK_CERT)
         {
             r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
@@ -857,15 +860,31 @@ int tcpip_rcvconnect(COMSTACK h)
             {
                 yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
                 h->cerrno = CSERRORSSL;
-                tcpip_release_cred(h);
+                tcpip_release_cred(&sp->cred_ptr);
+                return -1;
+            }
+        }
+        if (sp->cert_fname[0])
+        {
+            int res;
+            res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
+                                                    sp->cert_fname,
+                                                    sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
+                                                    GNUTLS_X509_FMT_PEM);
+            if (res != GNUTLS_E_SUCCESS)
+            {
+                yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
+                            res,
+                            gnutls_error_is_fatal(res),
+                            gnutls_strerror(res));
+                h->cerrno = CSERRORSSL;
                 return -1;
             }
         }
         gnutls_init(&sp->session, GNUTLS_CLIENT);
         sp->use_bye = 1; /* only say goodbye in client */
         gnutls_set_default_priority(sp->session);
-        gnutls_credentials_set (sp->session, GNUTLS_CRD_CERTIFICATE,
-                                sp->cred_ptr->xcred);
+        gnutls_credentials_set(sp->session, GNUTLS_CRD_CERTIFICATE, sp->cred_ptr->xcred);
         parse_host_port(check_host, tmp, sizeof tmp, &host, &port);
         /* raw IPV6 seems to be rejected on the server */
         if (!strchr(host, ':'))
@@ -923,7 +942,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     if (h->type == ssl_type && !sp->session)
     {
         int res;
-        tcpip_create_cred(h);
+        sp->cred_ptr = tcpip_create_cred();
         res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
                                                    sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
@@ -1223,7 +1242,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
 #endif
         {
 #ifdef __sun__
-            yaz_set_errno( 0 );
+            yaz_set_errno(0);
             /* unfortunatly, sun sometimes forgets to set errno in recv
                when EWOULDBLOCK etc. would be required (res = -1) */
 #endif
@@ -1446,7 +1465,7 @@ void tcpip_close(COMSTACK h)
     {
         gnutls_deinit(sp->session);
     }
-    tcpip_release_cred(h);
+    tcpip_release_cred(&sp->cred_ptr);
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
