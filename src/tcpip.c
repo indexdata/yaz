@@ -135,6 +135,7 @@ typedef struct tcpip_state
 #if HAVE_GNUTLS_H
     struct tcpip_cred_ptr *cred_ptr;
     gnutls_session_t session;
+    int yaz_pem_default;
     char cert_fname[256];
     char key_fname[256];
     int use_bye;
@@ -198,6 +199,7 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->cert_fname[0] = '\0';
     sp->key_fname[0] = '\0';
     sp->use_bye = 0;
+    sp->yaz_pem_default = 1;
 #endif
     sp->connect_host = 0;
     sp->connect_phase = 0;
@@ -942,6 +944,11 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     if (h->type == ssl_type && !sp->session)
     {
         int res;
+
+        /* yaz.pem is the default for server */
+        if (sp->yaz_pem_default)
+            strcpy(sp->cert_fname, "yaz.pem");
+
         sp->cred_ptr = tcpip_create_cred();
         res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
                                                    sp->cert_fname,
@@ -1676,22 +1683,28 @@ int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname)
     if (cs && cs->type == ssl_type)
     {
         struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
-        const char *comma = strchr(fname, ',');
-        if (comma)
-        {
-            size_t clen = comma - fname;
-            if (clen >= sizeof(sp->cert_fname))
-                clen = sizeof(sp->cert_fname) - 1;
-            memcpy(sp->cert_fname, fname, clen);
-            sp->cert_fname[clen] = '\0';
-            strncpy(sp->key_fname, comma + 1, sizeof(sp->key_fname) - 1);
-            sp->key_fname[sizeof(sp->key_fname) - 1] = '\0';
-        }
+        sp->yaz_pem_default = 0;
+        if (fname == 0 || *fname == '\0')
+            sp->cert_fname[0] = '\0';
         else
         {
-            strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
-            sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
-            sp->key_fname[0] = '\0';
+            const char *comma = strchr(fname, ',');
+            if (comma)
+            {
+                size_t clen = comma - fname;
+                if (clen >= sizeof(sp->cert_fname))
+                    clen = sizeof(sp->cert_fname) - 1;
+                memcpy(sp->cert_fname, fname, clen);
+                sp->cert_fname[clen] = '\0';
+                strncpy(sp->key_fname, comma + 1, sizeof(sp->key_fname) - 1);
+                sp->key_fname[sizeof(sp->key_fname) - 1] = '\0';
+            }
+            else
+            {
+                strncpy(sp->cert_fname, fname, sizeof(sp->cert_fname)-1);
+                sp->cert_fname[sizeof(sp->cert_fname)-1] = '\0';
+                sp->key_fname[0] = '\0';
+            }
         }
         return 1;
     }
