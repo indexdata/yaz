@@ -338,8 +338,8 @@ static void tcpip_release_cred(struct tcpip_cred_ptr **ptr)
                     (*ptr)->xcred);
             gnutls_certificate_free_credentials((*ptr)->xcred);
             xfree(*ptr);
-            *ptr = 0;
         }
+        *ptr = 0;
     }
 }
 #endif
