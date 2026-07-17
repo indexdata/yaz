@@ -868,15 +868,15 @@ int tcpip_rcvconnect(COMSTACK h)
         {
             int res;
             res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
-                                                    sp->cert_fname,
-                                                    sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
-                                                    GNUTLS_X509_FMT_PEM);
+                                                       sp->cert_fname,
+                                                       sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
+                                                       GNUTLS_X509_FMT_PEM);
             if (res != GNUTLS_E_SUCCESS)
             {
                 yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
-                            res,
-                            gnutls_error_is_fatal(res),
-                            gnutls_strerror(res));
+                        res,
+                        gnutls_error_is_fatal(res),
+                        gnutls_strerror(res));
                 h->cerrno = CSERRORSSL;
                 return -1;
             }
@@ -950,9 +950,9 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (res != GNUTLS_E_SUCCESS)
         {
             yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
-                        res,
-                        gnutls_error_is_fatal(res),
-                        gnutls_strerror(res));
+                    res,
+                    gnutls_error_is_fatal(res),
+                    gnutls_strerror(res));
             h->cerrno = CSERRORSSL;
             return -1;
         }
