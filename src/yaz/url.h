@@ -107,6 +107,12 @@ YAZ_EXPORT const char *yaz_url_get_error(yaz_url_t p);
 */
 YAZ_EXPORT void yaz_url_set_check_cert(yaz_url_t p, int check_cert);
 
+/** \brief sets file with client-side certificate
+    \param p handle
+    \param fname file name
+*/
+YAZ_EXPORT void yaz_url_set_cert_fname(yaz_url_t p, const char *fname);
+
 YAZ_END_CDECL
 
 #endif

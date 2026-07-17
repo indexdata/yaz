@@ -34,6 +34,7 @@
    <arg choice="opt"><option>-c <replaceable>cclfile</replaceable></option></arg>
    <arg choice="opt"><option>-C</option></arg>
    <arg choice="opt"><option>-d <replaceable>dump</replaceable></option></arg>
+   <arg choice="opt"><option>-E <replaceable>certfname</replaceable></option></arg>
    <arg choice="opt"><option>-f <replaceable>cmdfile</replaceable></option></arg>
    <arg choice="opt"><option>-k <replaceable>size</replaceable></option></arg>
    <arg choice="opt"><option>-m <replaceable>marclog</replaceable></option></arg>
@@ -125,6 +126,13 @@
        to individual files, named
        <replaceable>dump</replaceable>.DDD.<literal>raw</literal>,
        where DDD is 001, 002, 003, ...
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>-E <replaceable>certfname</replaceable></term>
+     <listitem><para>
+       Specifies a PEM file containing the client certificate and private key.
+       Alternatively, specify certificate-file,key-file when they are separate.
       </para></listitem>
     </varlistentry>
 

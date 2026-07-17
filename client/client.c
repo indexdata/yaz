@@ -142,6 +142,7 @@ static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char *queryCharset = 0;
 static char* yazLang = 0;
+static char *cert_fname = 0;
 
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
@@ -717,6 +718,9 @@ static int session_connect_base(const char *arg, const char **basep)
         printf("Could not resolve address %s\n", arg);
         return 0;
     }
+    if (cert_fname)
+        cs_set_ssl_certificate_file(conn, cert_fname);
+
 #if YAZ_HAVE_XML2
 #else
     if (conn->protocol == PROTO_HTTP)
@@ -5449,7 +5453,7 @@ int main(int argc, char **argv)
 
     nmem_auth = nmem_create();
 
-    while ((ret = options("k:c:Cq:a:b:m:v:p:u:t:Vxd:f:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:Cq:a:b:m:v:p:u:t:Vxd:f:E:", argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -5488,6 +5492,9 @@ int main(int argc, char **argv)
             break;
         case 'd':
             dump_file_prefix = arg;
+            break;
+        case 'E':
+            cert_fname = arg;
             break;
         case 'f':
             rc_file = arg;
@@ -5536,6 +5543,7 @@ int main(int argc, char **argv)
                     " [-c cclfile]"
                     " [-C]"
                     " [-d dump]"
+                    " [-E certfile]"
                     " [-f cmdfile]"
                     " [-k size]"
                     " [-m marclog]"
