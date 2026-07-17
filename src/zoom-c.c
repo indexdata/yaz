@@ -1095,7 +1095,13 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
     }
     if (c->cs)
     {
-        int ret = cs_connect(c->cs, add);
+        const char *cert_fname = ZOOM_options_get(c->options, "cert_fname");
+        int ret;
+
+        if (cert_fname)
+            cs_set_ssl_certificate_file(c->cs, cert_fname);
+
+        ret = cs_connect(c->cs, add);
         if (ret == 0)
         {
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);

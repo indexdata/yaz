@@ -28,6 +28,7 @@ struct yaz_url {
     int timeout_ns;
     yaz_cookies_t cookies;
     int check_cert;
+    char *cert_fname;
 };
 
 yaz_url_t yaz_url_create(void)
@@ -43,6 +44,7 @@ yaz_url_t yaz_url_create(void)
     p->timeout_ns = 0;
     p->cookies = yaz_cookies_create();
     p->check_cert = 0;
+    p->cert_fname = 0;
     return p;
 }
 
@@ -55,6 +57,7 @@ void yaz_url_destroy(yaz_url_t p)
         xfree(p->proxy);
         wrbuf_destroy(p->w_error);
         yaz_cookies_destroy(p->cookies);
+        xfree(p->cert_fname);
         xfree(p);
     }
 }
@@ -86,6 +89,14 @@ void yaz_url_set_timeout(yaz_url_t p, int sec, int ns)
 void yaz_url_set_check_cert(yaz_url_t p, int check_cert)
 {
     p->check_cert = check_cert;
+}
+
+void yaz_url_set_cert_fname(yaz_url_t p, const char *fname)
+{
+    xfree(p->cert_fname);
+    p->cert_fname = 0;
+    if (fname && *fname)
+        p->cert_fname = xstrdup(fname);
 }
 
 static void extract_user_pass(NMEM nmem,
@@ -171,6 +182,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             log_warn(p);
             return res;
         }
+        if (p->cert_fname)
+            cs_set_ssl_certificate_file(conn, p->cert_fname);
         gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, proxy_mode);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
         yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);

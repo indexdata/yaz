@@ -142,7 +142,7 @@ static char *outputCharset = 0;
 static char *marcCharset = 0;
 static char *queryCharset = 0;
 static char* yazLang = 0;
-static char *certificateFile = 0;
+static char *cert_fname = 0;
 
 static char last_cmd[32] = "?";
 static FILE *marc_file = 0;
@@ -718,8 +718,8 @@ static int session_connect_base(const char *arg, const char **basep)
         printf("Could not resolve address %s\n", arg);
         return 0;
     }
-    if (certificateFile)
-        cs_set_ssl_certificate_file(conn, certificateFile);
+    if (cert_fname)
+        cs_set_ssl_certificate_file(conn, cert_fname);
 
 #if YAZ_HAVE_XML2
 #else
@@ -5494,7 +5494,7 @@ int main(int argc, char **argv)
             dump_file_prefix = arg;
             break;
         case 'E':
-            certificateFile = arg;
+            cert_fname = arg;
             break;
         case 'f':
             rc_file = arg;
@@ -5543,6 +5543,7 @@ int main(int argc, char **argv)
                     " [-c cclfile]"
                     " [-C]"
                     " [-d dump]"
+                    " [-E certfile]"
                     " [-f cmdfile]"
                     " [-k size]"
                     " [-m marclog]"

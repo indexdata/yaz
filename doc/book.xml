@@ -1724,6 +1724,13 @@
        and --expire=seconds are supported.
        </entry><entry>none</entry>
       </row>
+      <row>
+       <entry>cert_fname</entry>
+       <entry>
+        Specifies a PEM file containing the client certificate and private key.
+  +     Alternatively, specify certificate-file,key-file when they are separate.
+       </entry>
+       <entry>none</entry></row>
      </tbody>
     </tgroup>
    </table>
