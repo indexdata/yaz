@@ -2776,7 +2776,10 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
         if (!conn)
             yaz_log(YLOG_WARN, "Can not create connection for URL:%s", uri);
         else if (cs_connect(conn, add) < 0)
+        {
             log_comstack_error("Can not connect to", uri, conn);
+            cs_close(conn);
+        }
         else
         {
             int len;
