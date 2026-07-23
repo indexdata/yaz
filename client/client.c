@@ -5453,7 +5453,8 @@ int main(int argc, char **argv)
 
     nmem_auth = nmem_create();
 
-    while ((ret = options("k:c:Cq:a:b:m:v:p:u:t:Vxd:f:E:", argv, argc, &arg)) != -2)
+    while ((ret = options("k:c:C:e{check-cert}q:a:b:m:v:p:u:t:Vxd:f:",
+                          argv, argc, &arg)) != -2)
     {
         switch (ret)
         {
@@ -5484,7 +5485,7 @@ int main(int argc, char **argv)
                 ber_file=fopen(arg, "a");
             break;
         case 'C':
-            check_cert = 1;
+            cert_fname = arg;
             break;
         case 'c':
             strncpy(ccl_fields, arg, sizeof(ccl_fields)-1);
@@ -5493,8 +5494,8 @@ int main(int argc, char **argv)
         case 'd':
             dump_file_prefix = arg;
             break;
-        case 'E':
-            cert_fname = arg;
+        case 'e':
+            check_cert = 1;
             break;
         case 'f':
             rc_file = arg;
@@ -5541,9 +5542,9 @@ int main(int argc, char **argv)
                     " [-a apdulog]"
                     " [-b berdump]"
                     " [-c cclfile]"
-                    " [-C]"
+                    " [-C certfile]"
                     " [-d dump]"
-                    " [-E certfile]"
+                    " [-e|--check-cert]"
                     " [-f cmdfile]"
                     " [-k size]"
                     " [-m marclog]"
@@ -5594,4 +5595,3 @@ int main(int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

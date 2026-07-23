@@ -18,8 +18,8 @@
 static void usage(void)
 {
     printf("yaz-url [options] url ..\n");
-    printf(" -C                  Enables SSL certificate checking\n");
-    printf(" -E certfile         Client-side certificate\n");
+    printf(" -C certfile         Client-side certificate\n");
+    printf(" -e, --check-cert    Enables SSL certificate checking\n");
     printf(" -H name:value       Sets HTTP header (repeat if necessary)\n");
     printf(" -m method           Sets HTTP method\n");
     printf(" -O fname            Writes HTTP content to file\n");
@@ -78,19 +78,20 @@ int main(int argc, char **argv)
     const char *outfname = 0;
 
     yaz_enable_panic_backtrace(*argv);
-    while ((ret = options("Ch{help}E:H:m:O:p:R{max-redirs}:u:vx:", argv, argc, &arg))
+    while ((ret = options("C:e{check-cert}h{help}H:m:O:p:R{max-redirs}:u:vx:",
+                          argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
         case 'C':
+            yaz_url_set_cert_fname(p, arg);
+            break;
+        case 'e':
             yaz_url_set_check_cert(p, 1);
             break;
         case 'h':
             usage();
-            break;
-        case 'E':
-            yaz_url_set_cert_fname(p, arg);
             break;
         case 'H':
             if (!strchr(arg, ':'))
@@ -188,4 +189,3 @@ int main(int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

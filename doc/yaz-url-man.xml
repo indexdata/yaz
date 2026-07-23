@@ -29,8 +29,8 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-url</command>
-   <arg choice="opt">-C</arg>
-   <arg choice="opt">-E <replaceable>certfname</replaceable></arg>
+   <arg choice="opt">-C <replaceable>certfname</replaceable></arg>
+   <arg choice="opt">-e | --check-cert</arg>
    <arg choice="opt">-H <replaceable>name:value</replaceable></arg>
    <arg choice="opt">-m <replaceable>method</replaceable></arg>
    <arg choice="opt">-O <replaceable>fname</replaceable></arg>
@@ -60,17 +60,18 @@
  <refsect1><title>OPTIONS</title>
   <variablelist>
    <varlistentry>
-    <term>-C</term>
+    <term>-C <replaceable>certfname</replaceable></term>
     <listitem><para>
-      Makes yaz-url check SSL certificates when fetching HTTPS URLs.
+      Specifies a PEM file containing the client certificate and private key.
+      Alternatively, specify certificate-file,key-file when they are separate.
      </para></listitem>
    </varlistentry>
 
    <varlistentry>
-    <term>-E <replaceable>certfname</replaceable></term>
+    <term>-e | --check-cert</term>
     <listitem><para>
-      Specifies a PEM file containing the client certificate and private key.
-      Alternatively, specify certificate-file,key-file when they are separate.
+      Makes yaz-url verify the server certificate and hostname when fetching
+      HTTPS URLs.
      </para></listitem>
    </varlistentry>
 
