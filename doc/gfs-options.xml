@@ -78,10 +78,15 @@
  <varlistentry>
   <term><literal>-C </literal><replaceable>fname</replaceable></term>
   <listitem><para>
-    Sets SSL certificate file name for server (PEM).
-    This option is used for SSL connections. If fname has a comma, the first part specifies
-    the certificate file and the second part specifies the private key file.
-    If there is no comma, the certificate and private key are expected to be in the same file.
+    Specifies the PEM-encoded certificate chain and private key presented
+    by the server for SSL connections. If the certificate chain and private
+    key are stored in the same file, specify
+    <replaceable>certificate-file</replaceable>. If they are stored in
+    separate files, specify
+    <replaceable>certificate-file</replaceable>,<replaceable>key-file</replaceable>.
+    If this option is not specified, a server operating in SSL mode uses
+    <filename>yaz.pem</filename> as the default certificate and private key
+    file.
   </para></listitem>
  </varlistentry>
  <varlistentry>
