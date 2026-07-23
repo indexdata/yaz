@@ -248,6 +248,7 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->user = 0;
+    p->error_details = wrbuf_alloc();
 
     yaz_log(log_level, "Created TCP/SSL comstack h=%p", p);
 
@@ -393,7 +394,7 @@ static int ssl_check_again(COMSTACK h, tcpip_state *sp, int res)
         h->io_pending = dir ? CS_WANT_WRITE : CS_WANT_READ;
         return 1;
     }
-    h->cerrno = CSERRORSSL;
+    cs_set_error(h, CSERRORSSL, gnutls_strerror(res));
     return 0;
 }
 #endif
@@ -764,15 +765,21 @@ static int check_cert(COMSTACK h, tcpip_state *sp)
         {
             yaz_log(log_level, "TLS certificate verification error: %s",
                     gnutls_strerror(vr));
-            h->cerrno = CSERRORSSL;
+            cs_set_error(h, CSERRORSSL, gnutls_strerror(vr));
             return -1;
         }
         if (status != 0)
         {
+            char details[600];
+
             yaz_log(log_level, "TLS certificate verification failed:"
                                " status=%u host=%s",
                     status, vhost ? vhost : "");
-            h->cerrno = CSERRORSSL;
+            yaz_snprintf(details, sizeof(details),
+                         "TLS certificate verification failed:"
+                         " status=%u host=%s",
+                         status, vhost ? vhost : "");
+            cs_set_error(h, CSERRORSSL, details);
             return -1;
         }
     }
@@ -861,7 +868,7 @@ int tcpip_rcvconnect(COMSTACK h)
             if (r < 0)
             {
                 yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
-                h->cerrno = CSERRORSSL;
+                cs_set_error(h, CSERRORSSL, gnutls_strerror(r));
                 tcpip_release_cred(&sp->cred_ptr);
                 return -1;
             }
@@ -879,7 +886,7 @@ int tcpip_rcvconnect(COMSTACK h)
                         res,
                         gnutls_error_is_fatal(res),
                         gnutls_strerror(res));
-                h->cerrno = CSERRORSSL;
+                cs_set_error(h, CSERRORSSL, gnutls_strerror(res));
                 return -1;
             }
         }
@@ -960,7 +967,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
                     res,
                     gnutls_error_is_fatal(res),
                     gnutls_strerror(res));
-            h->cerrno = CSERRORSSL;
+            cs_set_error(h, CSERRORSSL, gnutls_strerror(res));
             return -1;
         }
     }
@@ -1079,6 +1086,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         cnew = (COMSTACK) xmalloc(sizeof(*cnew));
 
         memcpy(cnew, h, sizeof(*h));
+        cnew->error_details = wrbuf_alloc();
         cnew->iofile = h->newfd;
         cnew->io_pending = 0;
         cnew->cprivate = state;
@@ -1096,6 +1104,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 h->newfd = -1;
             }
             xfree(state);
+            wrbuf_destroy(cnew->error_details);
             xfree(cnew);
             return 0;
         }
@@ -1113,6 +1122,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             gnutls_init(&state->session, GNUTLS_SERVER);
             if (!state->session)
             {
+                wrbuf_destroy(cnew->error_details);
                 xfree(cnew);
                 xfree(state);
                 return 0;
@@ -1120,6 +1130,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             res = gnutls_set_default_priority(state->session);
             if (res != GNUTLS_E_SUCCESS)
             {
+                wrbuf_destroy(cnew->error_details);
                 xfree(cnew);
                 xfree(state);
                 return 0;
@@ -1129,6 +1140,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                                          st->cred_ptr->xcred);
             if (res != GNUTLS_E_SUCCESS)
             {
+                wrbuf_destroy(cnew->error_details);
                 xfree(cnew);
                 xfree(state);
                 return 0;
@@ -1481,6 +1493,7 @@ void tcpip_close(COMSTACK h)
     wrbuf_destroy(sp->connect_request);
     xfree(sp->connect_response_buf);
     xfree(sp);
+    wrbuf_destroy(h->error_details);
     xfree(h);
 }
 
@@ -1774,4 +1787,3 @@ int cs_set_head_only(COMSTACK cs, int head_only)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

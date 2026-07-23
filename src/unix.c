@@ -161,6 +161,7 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->user = 0;
+    p->error_details = wrbuf_alloc();
 
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
@@ -503,6 +504,7 @@ static COMSTACK unix_accept(COMSTACK h)
             return 0;
         }
         memcpy(cnew, h, sizeof(*h));
+        cnew->error_details = wrbuf_alloc();
         cnew->iofile = h->newfd;
         cnew->io_pending = 0;
         if (!(state = (unix_state *)
@@ -514,6 +516,8 @@ static COMSTACK unix_accept(COMSTACK h)
                 close(h->newfd);
                 h->newfd = -1;
             }
+            wrbuf_destroy(cnew->error_details);
+            xfree(cnew);
             return 0;
         }
         if (!(cnew->flags&CS_FLAGS_BLOCKING) &&
@@ -526,6 +530,7 @@ static COMSTACK unix_accept(COMSTACK h)
                 close(h->newfd);
                 h->newfd = -1;
             }
+            wrbuf_destroy(cnew->error_details);
             xfree (cnew);
             xfree (state);
             return 0;
@@ -743,6 +748,7 @@ static void unix_close(COMSTACK h)
     if (sp->altbuf)
         xfree(sp->altbuf);
     xfree(sp);
+    wrbuf_destroy(h->error_details);
     xfree(h);
 }
 
@@ -778,4 +784,3 @@ static int unix_set_blocking(COMSTACK p, int flags)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

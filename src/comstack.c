@@ -48,6 +48,22 @@ const char *cs_strerror(COMSTACK h)
     return cs_errmsg(h->cerrno);
 }
 
+int cs_get_error(COMSTACK cs, const char **details)
+{
+    if (details)
+        *details = wrbuf_len(cs->error_details) ?
+            wrbuf_cstr(cs->error_details) : 0;
+    return cs->cerrno;
+}
+
+void cs_set_error(COMSTACK cs, int error, const char *details)
+{
+    wrbuf_rewind(cs->error_details);
+    if (details)
+        wrbuf_puts(cs->error_details, details);
+    cs->cerrno = error;
+}
+
 void cs_get_host_args(const char *type_and_host, const char **args)
 {
     *args = "";
@@ -470,4 +486,3 @@ void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

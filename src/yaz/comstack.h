@@ -35,6 +35,7 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/oid_util.h>
+#include <yaz/wrbuf.h>
 #include <yaz/xmalloc.h>
 
 YAZ_BEGIN_CDECL
@@ -85,6 +86,7 @@ struct comstack
     void *(*f_straddr)(COMSTACK handle, const char *str);
     int (*f_set_blocking)(COMSTACK handle, int blocking);
     void *user;       /* user defined data associated with COMSTACK */
+    WRBUF error_details; /* additional information for the current error */
 };
 
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))
@@ -117,6 +119,18 @@ struct comstack
 YAZ_EXPORT int cs_look (COMSTACK);
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
+/** \brief returns COMSTACK error and additional information
+    \param cs COMSTACK handle
+    \param details additional error information (result), or NULL
+    \returns error code
+ */
+YAZ_EXPORT int cs_get_error(COMSTACK cs, const char **details);
+/** \brief sets COMSTACK error and additional information
+    \param cs COMSTACK handle
+    \param error error code
+    \param details additional error information, or NULL
+ */
+YAZ_EXPORT void cs_set_error(COMSTACK cs, int error, const char *details);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host,
                                    int blocking, void **vp);
 
@@ -181,4 +195,3 @@ YAZ_END_CDECL
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
