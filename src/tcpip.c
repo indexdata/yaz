@@ -537,7 +537,7 @@ static struct addrinfo *create_net_socket(COMSTACK h)
         if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
                        &one, sizeof(one)) < 0)
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             return 0;
         }
 #endif
@@ -555,7 +555,7 @@ static struct addrinfo *create_net_socket(COMSTACK h)
         }
         if (r)
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             freeaddrinfo(ai);
             return 0;
         }
@@ -677,7 +677,7 @@ static int cont_connect(COMSTACK h)
             return tcpip_connect(h, ai);
         }
     }
-    h->cerrno = CSYSERR;
+    cs_set_error(h, CSYSERR, 0);
     return -1;
 }
 
@@ -696,7 +696,7 @@ int tcpip_connect(COMSTACK h, void *address)
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
 #if RESOLVER_THREAD
@@ -806,7 +806,7 @@ int tcpip_rcvconnect(COMSTACK h)
 #endif
     if (h->state != CS_ST_CONNECTING)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
     if (sp->connect_host)
@@ -836,13 +836,13 @@ int tcpip_rcvconnect(COMSTACK h)
             if (!yaz_decode_http_response_first(sp->connect_response_buf, sp->connect_response_len, &code, 0, 0, 0, 0))
             {
                 yaz_log(log_level, "tcpip_rcvconnect connect failed: bad response");
-                h->cerrno = CSPROTERR;
+                cs_set_error(h, CSPROTERR, 0);
                 return -1;
             }
             if (code != 200)
             {
                 yaz_log(log_level, "tcpip_rcvconnect connect failed: status %d", code);
-                h->cerrno = CSDENY;
+                cs_set_error(h, CSDENY, 0);
                 return -1;
             }
             sp->complete = cs_complete_auto;
@@ -976,7 +976,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
         &one, sizeof(one)) < 0)
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
 #endif
@@ -985,13 +985,13 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
     sp->ai = 0;
     if (r)
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     /* Allow a maximum-sized backlog of waiting-to-connect clients */
     if (mode == CS_SERVER && listen(h->iofile, SOMAXCONN) < 0)
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     h->state = CS_ST_IDLE;
@@ -1013,7 +1013,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     yaz_log(log_level, "tcpip_listen h=%p", h);
     if (h->state != CS_ST_IDLE)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
 #ifdef WIN32
@@ -1035,12 +1035,12 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #endif
 #endif
             )
-            h->cerrno = CSNODATA;
+            cs_set_error(h, CSNODATA, 0);
         else
         {
             shutdown(h->iofile, 0); /* SHUT_RD/SHUT_RECEIVE */
             listen(h->iofile, SOMAXCONN);
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
         }
         return -1;
     }
@@ -1055,7 +1055,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     if (check_ip && (*check_ip)(cd, (const char *) &addr,
         sizeof(addr), AF_INET))
     {
-        h->cerrno = CSDENY;
+        cs_set_error(h, CSDENY, 0);
 #ifdef WIN32
         closesocket(h->newfd);
 #else
@@ -1093,7 +1093,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 
         if (!tcpip_set_blocking(cnew, cnew->flags))
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             if (h->newfd != -1)
             {
 #ifdef WIN32
@@ -1173,7 +1173,7 @@ COMSTACK tcpip_accept(COMSTACK h)
     }
     else
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return 0;
     }
     h->io_pending = 0;
@@ -1215,7 +1215,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         {
             if (!(*buf = (char *)xmalloc(*bufsize = CS_TCPIP_BUFCHUNK)))
             {
-                h->cerrno = CSYSERR;
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
         }
@@ -1227,12 +1227,12 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 *bufsize = *bufsize * 2;
             if (*bufsize - hasread < CS_TCPIP_BUFCHUNK)
             {
-                h->cerrno = CSBUFSIZE;
+                cs_set_error(h, CSBUFSIZE, 0);
                 return -1;
             }
             if (!(*buf = (char *)xrealloc(*buf, *bufsize)))
             {
-                h->cerrno = CSYSERR;
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
         }
@@ -1279,7 +1279,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                 }
                 else
                 {
-                    h->cerrno = CSYSERR;
+                    cs_set_error(h, CSYSERR, 0);
                     return -1;
                 }
 #else
@@ -1302,7 +1302,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                     continue;
                 else
                 {
-                    h->cerrno = CSYSERR;
+                    cs_set_error(h, CSYSERR, 0);
                     return -1;
                 }
 #endif
@@ -1313,13 +1313,13 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         hasread += res;
         if (hasread > h->max_recv_bytes)
         {
-            h->cerrno = CSBUFSIZE;
+            cs_set_error(h, CSBUFSIZE, 0);
             return -1;
         }
     }
     if (berlen < 0)
     {
-        h->cerrno = CSPROTERR;
+        cs_set_error(h, CSPROTERR, 0);
         return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
@@ -1335,13 +1335,13 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         {
             if (!(sp->altbuf = (char *)xmalloc(sp->altsize = req)))
             {
-                h->cerrno = CSYSERR;
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
         } else if (sp->altsize < req)
             if (!(sp->altbuf =(char *)xrealloc(sp->altbuf, sp->altsize = req)))
             {
-                h->cerrno = CSYSERR;
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
         yaz_log(log_level, "  Moving %d bytes to altbuf(%p)", tomove,
@@ -1374,7 +1374,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
     }
     else if (state->towrite != size)
     {
-        h->cerrno = CSWRONGBUF;
+        cs_set_error(h, CSWRONGBUF, 0);
         return -1;
     }
     while (state->towrite > state->written)
@@ -1431,7 +1431,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
                 }
                 if (h->flags & CS_FLAGS_BLOCKING)
                 {
-                    h->cerrno = CSYSERR;
+                    cs_set_error(h, CSYSERR, 0);
                     return -1;
                 }
                 else
@@ -1508,7 +1508,7 @@ const char *tcpip_addrstr(COMSTACK h)
 
     if (getpeername(h->iofile, (struct sockaddr *)&addr, &len) < 0)
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return 0;
     }
     if (getnameinfo((struct sockaddr *) &addr, len, host, sizeof(host)-1,
@@ -1775,7 +1775,7 @@ int cs_set_head_only(COMSTACK cs, int head_only)
             sp->complete = cs_complete_auto;
         return 0;
     }
-    cs->cerrno = CS_ST_INCON;
+    cs_set_error(cs, CS_ST_INCON, 0);
     return -1;
 }
 

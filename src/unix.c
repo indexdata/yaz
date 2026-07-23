@@ -327,7 +327,7 @@ static int unix_connect(COMSTACK h, void *address)
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
     for (i = 0; i<3; i++)
@@ -357,7 +357,7 @@ static int unix_connect(COMSTACK h, void *address)
             h->io_pending = CS_WANT_WRITE;
             return 1;
         }
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     h->event = CS_CONNECT;
@@ -377,7 +377,7 @@ static int unix_rcvconnect(COMSTACK h)
         return 0;
     if (h->state != CS_ST_CONNECTING)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
     h->event = CS_DATA;
@@ -394,32 +394,39 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 
     yaz_log(log_level, "unix_bind h=%p", h);
 
-    if (stat(path, &stat_buf) != -1) {
+    if (stat(path, &stat_buf) != -1)
+    {
         struct sockaddr_un socket_unix;
         int socket_out = -1;
 
-        if (!S_ISSOCK(stat_buf.st_mode)) {
-            h->cerrno = CSYSERR;
+        if (!S_ISSOCK(stat_buf.st_mode))
+        {
+            cs_set_error(h, CSYSERR, 0);
             yaz_set_errno(EEXIST); /* Not a socket (File exists) */
             return -1;
         }
-        if ((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-            h->cerrno = CSYSERR;
+        if ((socket_out = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+        {
+            cs_set_error(h, CSYSERR, 0);
             return -1;
         }
         socket_unix.sun_family = AF_UNIX;
         strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path)-1);
         socket_unix.sun_path[sizeof(socket_unix.sun_path)-1] = 0;
-        if (connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0) {
-            if (yaz_errno() == ECONNREFUSED) {
+        if (connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0)
+        {
+            if (yaz_errno() == ECONNREFUSED)
                 yaz_log(log_level, "unix_bind socket exists but nobody is listening");
-            } else {
-                h->cerrno = CSYSERR;
+            else
+            {
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
-        } else {
+        }
+        else
+        {
             close(socket_out);
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             yaz_set_errno(EADDRINUSE);
             return -1;
         }
@@ -428,22 +435,22 @@ static int unix_bind(COMSTACK h, void *address, int mode)
 
     if (bind(h->iofile, (struct sockaddr *) addr, SUN_LEN((struct sockaddr_un *)addr)))
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     if (chown(path, sp->uid, sp->gid))
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     if (chmod(path, sp->umask != -1 ? sp->umask : 0666))
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     if (mode == CS_SERVER && listen(h->iofile, 100) < 0)
     {
-        h->cerrno = CSYSERR;
+        cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     h->state = CS_ST_IDLE;
@@ -461,7 +468,7 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
     yaz_log(log_level, "unix_listen h=%p", h);
     if (h->state != CS_ST_IDLE)
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
     h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len);
@@ -475,9 +482,9 @@ static int unix_listen(COMSTACK h, char *raddr, int *addrlen,
 #endif
 #endif
             )
-            h->cerrno = CSNODATA;
+            cs_set_error(h, CSNODATA, 0);
         else
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
         return -1;
     }
     if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_un))
@@ -498,7 +505,7 @@ static COMSTACK unix_accept(COMSTACK h)
     {
         if (!(cnew = (COMSTACK)xmalloc(sizeof(*cnew))))
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             close(h->newfd);
             h->newfd = -1;
             return 0;
@@ -510,7 +517,7 @@ static COMSTACK unix_accept(COMSTACK h)
         if (!(state = (unix_state *)
               (cnew->cprivate = xmalloc(sizeof(unix_state)))))
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             if (h->newfd != -1)
             {
                 close(h->newfd);
@@ -524,7 +531,7 @@ static COMSTACK unix_accept(COMSTACK h)
             (fcntl(cnew->iofile, F_SETFL, O_NONBLOCK) < 0)
             )
         {
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             if (h->newfd != -1)
             {
                 close(h->newfd);
@@ -552,7 +559,7 @@ static COMSTACK unix_accept(COMSTACK h)
     }
     else
     {
-        h->cerrno = CSOUTSTATE;
+        cs_set_error(h, CSOUTSTATE, 0);
         return 0;
     }
     h->io_pending = 0;
@@ -605,12 +612,12 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
 
             if (*bufsize - hasread < CS_UNIX_BUFCHUNK)
             {
-                h->cerrno = CSBUFSIZE;
+                cs_set_error(h, CSBUFSIZE, 0);
                 return -1;
             }
             if (!(*buf = (char *)xrealloc(*buf, *bufsize)))
             {
-                h->cerrno = CSYSERR;
+                cs_set_error(h, CSYSERR, 0);
                 return -1;
             }
         }
@@ -640,13 +647,13 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         hasread += res;
         if (hasread > h->max_recv_bytes)
         {
-            h->cerrno = CSBUFSIZE;
+            cs_set_error(h, CSBUFSIZE, 0);
             return -1;
         }
     }
     if (berlen < 0)
     {
-        h->cerrno = CSPROTERR;
+        cs_set_error(h, CSPROTERR, 0);
         return -1;
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
@@ -696,7 +703,7 @@ static int unix_put(COMSTACK h, char *buf, int size)
     }
     else if (state->towrite != size)
     {
-        h->cerrno = CSWRONGBUF;
+        cs_set_error(h, CSWRONGBUF, 0);
         return -1;
     }
     while (state->towrite > state->written)
@@ -724,7 +731,7 @@ static int unix_put(COMSTACK h, char *buf, int size)
                 h->io_pending = CS_WANT_WRITE;
                 return 1;
             }
-            h->cerrno = CSYSERR;
+            cs_set_error(h, CSYSERR, 0);
             return -1;
         }
         state->written += res;
