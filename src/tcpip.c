@@ -215,10 +215,14 @@ static struct tcpip_state *tcpip_state_create(void)
 static void tcpip_state_destroy(tcpip_state *sp)
 {
 #if HAVE_GNUTLS_H
+    if (sp->session)
+        gnutls_deinit(sp->session);
     tcpip_release_cred(&sp->cred_ptr);
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
+    xfree(sp->altbuf);
+    xfree(sp->bind_host);
     xfree(sp->host_port);
     xfree(sp->connect_host);
     wrbuf_destroy(sp->connect_request);
@@ -1146,15 +1150,13 @@ COMSTACK tcpip_accept(COMSTACK h)
             gnutls_init(&state->session, GNUTLS_SERVER);
             if (!state->session)
             {
-                tcpip_state_destroy(state);
-                xfree(cnew);
+                tcpip_close(cnew);
                 return 0;
             }
             res = gnutls_set_default_priority(state->session);
             if (res != GNUTLS_E_SUCCESS)
             {
-                tcpip_state_destroy(state);
-                xfree(cnew);
+                tcpip_close(cnew);
                 return 0;
             }
             res = gnutls_credentials_set(state->session,
@@ -1162,8 +1164,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                                          st->cred_ptr->xcred);
             if (res != GNUTLS_E_SUCCESS)
             {
-                tcpip_state_destroy(state);
-                xfree(cnew);
+                tcpip_close(cnew);
                 return 0;
             }
             SET_GNUTLS_SOCKET(state->session, cnew->iofile);
@@ -1473,7 +1474,6 @@ void tcpip_close(COMSTACK h)
     tcpip_state *sp = (struct tcpip_state *)h->cprivate;
 
     yaz_log(log_level, "tcpip_close: h=%p", h);
-    xfree(sp->bind_host);
 #if RESOLVER_THREAD
     if (sp->pipefd[0] != -1)
     {
@@ -1498,14 +1498,6 @@ void tcpip_close(COMSTACK h)
         close(h->iofile);
 #endif
     }
-    if (sp->altbuf)
-        xfree(sp->altbuf);
-#if HAVE_GNUTLS_H
-    if (sp->session)
-    {
-        gnutls_deinit(sp->session);
-    }
-#endif
     tcpip_state_destroy(sp);
     xfree(h);
 }
