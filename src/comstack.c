@@ -16,7 +16,7 @@
 
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
-#include <yaz/comstack.h>
+#include "comstack-p.h"
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
 #include <yaz/odr.h>
@@ -46,6 +46,13 @@ const char *cs_errmsg(int n)
 const char *cs_strerror(COMSTACK h)
 {
     return cs_errmsg(h->cerrno);
+}
+
+int cs_get_error(COMSTACK cs, const char **details)
+{
+    if (details)
+        *details = yaz_tcpip_get_error_details(cs);
+    return cs->cerrno;
 }
 
 void cs_get_host_args(const char *type_and_host, const char **args)
@@ -470,4 +477,3 @@ void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

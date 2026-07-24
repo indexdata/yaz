@@ -462,6 +462,43 @@ static void tst_cs_get_host_args(void)
     YAZ_CHECK(arg && !strcmp(arg, "x"));
 }
 
+static void tst_cs_get_error(void)
+{
+    COMSTACK cs = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_Z3950);
+    const char *details = "not set";
+
+    YAZ_CHECK(cs);
+    if (!cs)
+        return;
+
+    YAZ_CHECK_EQ(cs_get_error(cs, &details), CSNONE);
+    YAZ_CHECK(!details);
+
+#if HAVE_GNUTLS_H
+    {
+        COMSTACK ssl_cs =
+            cs_create(ssl_type, CS_FLAGS_BLOCKING, PROTO_Z3950);
+
+        YAZ_CHECK(ssl_cs);
+        if (ssl_cs)
+        {
+            void *ad = cs_straddr(ssl_cs, "localhost:0");
+            YAZ_CHECK(ad);
+            YAZ_CHECK(cs_set_ssl_certificate_file(ssl_cs, ""));
+            if (ad)
+            {
+                YAZ_CHECK_EQ(cs_bind(ssl_cs, ad, CS_SERVER), -1);
+                YAZ_CHECK_EQ(cs_get_error(ssl_cs, &details), CSERRORSSL);
+                YAZ_CHECK(details && *details);
+            }
+            cs_close(ssl_cs);
+        }
+    }
+#endif
+
+    cs_close(cs);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -471,6 +508,7 @@ int main (int argc, char **argv)
     tst_http_request();
     tst_http_response();
     tst_cs_get_host_args();
+    tst_cs_get_error();
     YAZ_CHECK_TERM;
 }
 
@@ -482,4 +520,3 @@ int main (int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

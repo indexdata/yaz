@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifdef WIN32
 #include <process.h>
@@ -131,6 +132,25 @@ static int logbits_set = 0;
 static int log_session = 0; /* one-line logs for session */
 static int log_sessiondetail = 0; /* more detailed stuff */
 static int log_server = 0;
+
+static void log_comstack_error(int level, COMSTACK cs, const char *fmt, ...)
+{
+    char message[512];
+    const char *details = 0;
+    int code = cs_get_error(cs, &details);
+    va_list ap;
+
+    va_start(ap, fmt);
+    yaz_vsnprintf(message, sizeof(message), fmt, ap);
+    va_end(ap);
+
+    if (details)
+        yaz_log(level, "%s: cs=%d msg=%s details=%s",
+                message, code, cs_errmsg(code), details);
+    else
+        yaz_log(level, "%s: cs=%d msg=%s",
+                message, code, cs_errmsg(code));
+}
 
 /** get_logbits sets global loglevel bits */
 static void get_logbits(int force)
@@ -857,7 +877,8 @@ static void listener(IOCHAN h, int event)
 
         if ((res = cs_listen(line, 0, 0)) < 0)
         {
-            yaz_log(YLOG_FATAL|YLOG_ERRNO, "cs_listen failed");
+            log_comstack_error(YLOG_FATAL|YLOG_ERRNO, line,
+                               "cs_listen failed");
             return;
         }
         else if (res == 1)
@@ -866,7 +887,7 @@ static void listener(IOCHAN h, int event)
         new_line = cs_accept(line);
         if (!new_line)
         {
-            yaz_log(YLOG_FATAL, "Accept failed.");
+            log_comstack_error(YLOG_FATAL, line, "Accept failed");
             return;
         }
         yaz_log(YLOG_DEBUG, "Accept ok");
@@ -955,7 +976,8 @@ static void listener(IOCHAN h, int event)
         if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
                                    control_block.daemon_name)) < 0)
         {
-            yaz_log(YLOG_WARN|YLOG_ERRNO, "cs_listen failed");
+            log_comstack_error(YLOG_WARN|YLOG_ERRNO, line,
+                               "cs_listen failed");
             return;
         }
         else if (res == 1)
@@ -966,7 +988,7 @@ static void listener(IOCHAN h, int event)
         new_line = cs_accept(line);
         if (!new_line)
         {
-            yaz_log(YLOG_FATAL, "Accept failed.");
+            log_comstack_error(YLOG_FATAL, line, "Accept failed");
             iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
             return;
         }
@@ -1170,11 +1192,11 @@ static int add_listener(char *where, int listen_id)
 
     if (cs_bind(l, ap, CS_SERVER) < 0)
     {
+        int level = YLOG_FATAL;
+
         if (cs_errno(l) == CSYSERR)
-            yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to bind to %s", where);
-        else
-            yaz_log(YLOG_FATAL, "Failed to bind to %s: %s", where,
-                    cs_strerror(l));
+            level |= YLOG_ERRNO;
+        log_comstack_error(level, l, "Failed to bind to %s", where);
         cs_close(l);
         return -1;
     }
@@ -1532,4 +1554,3 @@ int statserv_main(int argc, char **argv,
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

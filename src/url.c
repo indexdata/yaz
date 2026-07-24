@@ -147,6 +147,15 @@ static void log_warn(yaz_url_t p)
     yaz_log(YLOG_WARN, "yaz_url: %s", wrbuf_cstr(p->w_error));
 }
 
+static void add_comstack_details(yaz_url_t p, COMSTACK conn)
+{
+    const char *details;
+    int code = cs_get_error(conn, &details);
+    wrbuf_printf(p->w_error, ": cs=%d msg=%s", code, cs_errmsg(code));
+    if (details)
+        wrbuf_printf(p->w_error, " details=%s", details);
+}
+
 Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                               const char *method,
                               Z_HTTP_Header *user_headers,
@@ -218,6 +227,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         else if ((ret = cs_connect(conn, add)) < 0)
         {
             wrbuf_printf(p->w_error, "Can not connect to URL %s", uri);
+            add_comstack_details(p, conn);
             log_warn(p);
         }
         else
@@ -263,8 +273,8 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                     ret = cs_rcvconnect(conn);
                     if (ret < 0)
                     {
-                        wrbuf_printf(p->w_error,
-                                     "cs_rcvconnect failed for URL %s", uri);
+                        wrbuf_printf(p->w_error, "cs_rcvconnect failed for URL %s", uri);
+                        add_comstack_details(p, conn);
                         log_warn(p);
                         break;
                     }
@@ -277,6 +287,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                     if (ret < 0)
                     {
                         wrbuf_printf(p->w_error, "cs_put fail for URL %s", uri);
+                        add_comstack_details(p, conn);
                         log_warn(p);
                         break;
                     }
@@ -288,10 +299,18 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                 else if (state == 2) /* read response phase */
                 {
                     ret = cs_get(conn, &netbuffer, &netlen);
-                    if (ret  <= 0)
+                    if (ret <= 0)
                     {
-                        wrbuf_printf(p->w_error, "cs_get failed for URL %s",
-                                     uri);
+                        if (ret < 0)
+                        {
+                            wrbuf_printf(p->w_error,
+                                         "cs_get failed for URL %s", uri);
+                            add_comstack_details(p, conn);
+                        }
+                        else
+                            wrbuf_printf(p->w_error,
+                                         "Connection closed while reading"
+                                         " URL %s", uri);
                         log_warn(p);
                         break;
                     }
@@ -349,4 +368,3 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

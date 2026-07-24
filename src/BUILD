@@ -230,7 +230,7 @@ cc_library(
 	 "dirent", "mutex", "condvar", "thread_id", "gettimeofday",
 	 "thread_create", "spipe", "url", "backtrace"
 	 ])
-	 + h_dir(".", ["cclp", "iconv-p", "mime", "mutex-p",
+	 + h_dir(".", ["cclp", "comstack-p", "iconv-p", "mime", "mutex-p",
 	   "odr-priv", "sru-p", "zoom-p", "config", "diag-entry"
 	 ])
 	 ,

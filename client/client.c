@@ -277,6 +277,17 @@ static void add_otherInfos(Z_APDU *a)
     }
 }
 
+static void print_comstack_error(const char *operation, COMSTACK cs)
+{
+    const char *details = 0;
+    int code = cs_get_error(cs, &details);
+
+    fprintf(stderr, "%s: cs=%d msg=%s", operation, code, cs_errmsg(code));
+    if (details)
+        fprintf(stderr, " details=%s", details);
+    fprintf(stderr, "\n");
+}
+
 int send_apdu(Z_APDU *a)
 {
     char *buf;
@@ -301,7 +312,7 @@ int send_apdu(Z_APDU *a)
     do_hex_dump(buf, len);
     if (cs_put(conn, buf, len) < 0)
     {
-        fprintf(stderr, "cs_put: %s\n", cs_errmsg(cs_errno(conn)));
+        print_comstack_error("cs_put", conn);
         close_session();
         return 0;
     }
@@ -736,7 +747,7 @@ static int session_connect_base(const char *arg, const char **basep)
     fflush(stdout);
     if (cs_connect(conn, add) < 0)
     {
-        printf("error = %s\n", cs_strerror(conn));
+        print_comstack_error("connect failed", conn);
         cs_close(conn);
         conn = 0;
         return 0;
@@ -1322,6 +1333,7 @@ static int send_gdu(Z_GDU *gdu)
 
         if (r >= 0)
             return 2;
+        print_comstack_error("cs_put", conn);
     }
     return 0;
 }
@@ -2740,22 +2752,27 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                       "text/xml");
     if (!z_GDU(out, &gdu, 0, 0))
     {
-        yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);
+        fprintf(stderr, "Can not encode HTTP request URL:%s\n", uri);
     }
     else
     {
         void *add;
         int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
         COMSTACK conn = cs_create_host(uri, cs_flags, &add);
-        if (cs_connect(conn, add) < 0)
-            yaz_log(YLOG_WARN, "Can not connect to URL:%s", uri);
+        if (!conn)
+            fprintf(stderr, "Can not create connection for URL:%s\n", uri);
+        else if (cs_connect(conn, add) < 0)
+        {
+            print_comstack_error("Can not connect", conn);
+            cs_close(conn);
+        }
         else
         {
             int len;
             char *buf = odr_getbuf(out, &len, 0);
 
             if (cs_put(conn, buf, len) < 0)
-                yaz_log(YLOG_WARN, "cs_put failed URL:%s", uri);
+                print_comstack_error("cs_put failed", conn);
             else
             {
                 char *netbuffer = 0;
@@ -2763,7 +2780,12 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                 int res = cs_get(conn, &netbuffer, &netlen);
                 if (res <= 0)
                 {
-                    yaz_log(YLOG_WARN, "cs_get failed URL:%s", uri);
+                    if (res < 0)
+                        print_comstack_error("cs_get failed", conn);
+                    else
+                        fprintf(stderr,
+                                "Connection closed while reading URL:%s\n",
+                                uri);
                 }
                 else
                 {
@@ -2772,7 +2794,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                     if (!z_GDU(in, &gdu, 0, 0)
                         || gdu->which != Z_GDU_HTTP_Response)
                     {
-                        yaz_log(YLOG_WARN, "decode failed URL: %s", uri);
+                        fprintf(stderr, "decode failed URL: %s\n", uri);
                     }
                     else
                     {
@@ -4554,6 +4576,8 @@ static void wait_and_handle_response(int one_response_only)
         res = cs_get(conn, &netbuffer, &netbufferlen);
         if (res <= 0)
         {
+            if (res < 0)
+                print_comstack_error("cs_get", conn);
             if (reconnect_ok && protocol == PROTO_HTTP)
             {
                 cs_close(conn);
@@ -4566,7 +4590,12 @@ static void wait_and_handle_response(int one_response_only)
                     int len_out;
                     buf_out = odr_getbuf(out, &len_out, 0);
                     do_hex_dump(buf_out, len_out);
-                    cs_put(conn, buf_out, len_out);
+                    if (cs_put(conn, buf_out, len_out) < 0)
+                    {
+                        print_comstack_error("cs_put", conn);
+                        close_session();
+                        break;
+                    }
                     odr_reset(out);
                     continue;
                 }
@@ -4603,7 +4632,12 @@ static void wait_and_handle_response(int one_response_only)
                     int len_out;
                     buf_out = odr_getbuf(out, &len_out, 0);
                     do_hex_dump(buf_out, len_out);
-                    cs_put(conn, buf_out, len_out);
+                    if (cs_put(conn, buf_out, len_out) < 0)
+                    {
+                        print_comstack_error("cs_put", conn);
+                        close_session();
+                        break;
+                    }
                     odr_reset(out);
                     continue;
                 }

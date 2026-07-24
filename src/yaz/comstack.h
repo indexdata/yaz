@@ -117,6 +117,12 @@ struct comstack
 YAZ_EXPORT int cs_look (COMSTACK);
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
 YAZ_EXPORT const char *cs_errmsg(int n);
+/** \brief returns COMSTACK error and additional information
+    \param cs COMSTACK handle
+    \param details additional error information (result), or NULL
+    \returns error code
+ */
+YAZ_EXPORT int cs_get_error(COMSTACK cs, const char **details);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host,
                                    int blocking, void **vp);
 
@@ -181,4 +187,3 @@ YAZ_END_CDECL
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
