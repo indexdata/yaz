@@ -109,6 +109,7 @@ struct tcpip_cred_ptr {
     gnutls_certificate_credentials_t xcred;
     int ref;
 };
+static void tcpip_release_cred(struct tcpip_cred_ptr **ptr);
 
 #endif
 /* this state is used for both SSL and straight TCP/IP */
@@ -213,6 +214,9 @@ static struct tcpip_state *tcpip_state_create(void)
 
 static void tcpip_state_destroy(tcpip_state *sp)
 {
+#if HAVE_GNUTLS_H
+    tcpip_release_cred(&sp->cred_ptr);
+#endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
     xfree(sp->host_port);
@@ -1501,7 +1505,6 @@ void tcpip_close(COMSTACK h)
     {
         gnutls_deinit(sp->session);
     }
-    tcpip_release_cred(&sp->cred_ptr);
 #endif
     tcpip_state_destroy(sp);
     xfree(h);

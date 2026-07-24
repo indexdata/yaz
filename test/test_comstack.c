@@ -482,8 +482,11 @@ static void tst_cs_get_error(void)
         YAZ_CHECK(ssl_cs);
         if (ssl_cs)
         {
+            void *ad = cs_straddr(ssl_cs, "localhost:0");
+            YAZ_CHECK(ad);
             YAZ_CHECK(cs_set_ssl_certificate_file(ssl_cs, ""));
-            YAZ_CHECK_EQ(cs_bind(ssl_cs, 0, CS_SERVER), -1);
+            if (ad)
+                 YAZ_CHECK_EQ(cs_bind(ssl_cs, ad, CS_SERVER), -1);
             YAZ_CHECK_EQ(cs_get_error(ssl_cs, &details), CSERRORSSL);
             YAZ_CHECK(details && *details);
             cs_close(ssl_cs);
