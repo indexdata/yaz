@@ -462,7 +462,7 @@ static void tst_cs_get_host_args(void)
     YAZ_CHECK(arg && !strcmp(arg, "x"));
 }
 
-static void tst_cs_error(void)
+static void tst_cs_get_error(void)
 {
     COMSTACK cs = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_Z3950);
     const char *details = "not set";
