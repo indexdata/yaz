@@ -288,20 +288,6 @@ static void print_comstack_error(const char *operation, COMSTACK cs)
     fprintf(stderr, "\n");
 }
 
-static void log_comstack_error(const char *operation, const char *uri,
-                               COMSTACK cs)
-{
-    const char *details = 0;
-    int code = cs_get_error(cs, &details);
-
-    if (details)
-        yaz_log(YLOG_WARN, "%s URL:%s: cs=%d msg=%s details=%s",
-                operation, uri, code, cs_errmsg(code), details);
-    else
-        yaz_log(YLOG_WARN, "%s URL:%s: cs=%d msg=%s",
-                operation, uri, code, cs_errmsg(code));
-}
-
 int send_apdu(Z_APDU *a)
 {
     char *buf;
@@ -2766,7 +2752,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                       "text/xml");
     if (!z_GDU(out, &gdu, 0, 0))
     {
-        yaz_log(YLOG_WARN, "Can not encode HTTP request URL:%s", uri);
+        fprintf(stderr, "Can not encode HTTP request URL:%s\n", uri);
     }
     else
     {
@@ -2774,10 +2760,10 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
         int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
         COMSTACK conn = cs_create_host(uri, cs_flags, &add);
         if (!conn)
-            yaz_log(YLOG_WARN, "Can not create connection for URL:%s", uri);
+            fprintf(stderr, "Can not create connection for URL:%s\n", uri);
         else if (cs_connect(conn, add) < 0)
         {
-            log_comstack_error("Can not connect to", uri, conn);
+            print_comstack_error("Can not connect", conn);
             cs_close(conn);
         }
         else
@@ -2786,7 +2772,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
             char *buf = odr_getbuf(out, &len, 0);
 
             if (cs_put(conn, buf, len) < 0)
-                log_comstack_error("cs_put failed", uri, conn);
+                print_comstack_error("cs_put failed", conn);
             else
             {
                 char *netbuffer = 0;
@@ -2795,10 +2781,10 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                 if (res <= 0)
                 {
                     if (res < 0)
-                        log_comstack_error("cs_get failed", uri, conn);
+                        print_comstack_error("cs_get failed", conn);
                     else
-                        yaz_log(YLOG_WARN,
-                                "Connection closed while reading URL:%s",
+                        fprintf(stderr,
+                                "Connection closed while reading URL:%s\n",
                                 uri);
                 }
                 else
@@ -2808,7 +2794,7 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                     if (!z_GDU(in, &gdu, 0, 0)
                         || gdu->which != Z_GDU_HTTP_Response)
                     {
-                        yaz_log(YLOG_WARN, "decode failed URL: %s", uri);
+                        fprintf(stderr, "decode failed URL: %s\n", uri);
                     }
                     else
                     {
