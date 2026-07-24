@@ -9891,13 +9891,6 @@ void odr_choice_bias(ODR o, int what);
    <synopsis>
     int cs_get_error(COMSTACK h, const char **details);
    </synopsis>
-   <para>
-    COMSTACK implementations can set both the error code and its additional
-    information with <function>cs_set_error</function>.
-   </para>
-   <synopsis>
-    void cs_set_error(COMSTACK h, int error, const char *details);
-   </synopsis>
   </sect1>
   <sect1 id="comstack.summary">
    <title>Summary and Synopsis</title>
@@ -9935,8 +9928,6 @@ void odr_choice_bias(ODR o, int what);
     int cs_look(COMSTACK handle);
 
     int cs_get_error(COMSTACK handle, const char **details);
-
-    void cs_set_error(COMSTACK handle, int error, const char *details);
 
     void *cs_straddr(COMSTACK handle, const char *str);
 

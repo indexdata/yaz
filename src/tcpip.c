@@ -62,7 +62,7 @@
 #endif
 
 #include <yaz/base64.h>
-#include <yaz/comstack.h>
+#include "comstack-p.h"
 #include <yaz/errno.h>
 #include <yaz/tcpip.h>
 #include <yaz/snprintf.h>
@@ -145,6 +145,7 @@ typedef struct tcpip_state
     WRBUF connect_request;
     char *connect_response_buf;
     int connect_response_len;
+    WRBUF error_details; /* additional information for the current error */
 } tcpip_state;
 
 static int log_level = 0;
@@ -206,7 +207,20 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->connect_request = 0;
     sp->connect_response_buf = 0;
     sp->connect_response_len = 0;
+    sp->error_details = wrbuf_alloc();
     return sp;
+}
+
+static void tcpip_state_destroy(tcpip_state *sp)
+{
+    if (sp->ai)
+        freeaddrinfo(sp->ai);
+    xfree(sp->host_port);
+    xfree(sp->connect_host);
+    wrbuf_destroy(sp->connect_request);
+    xfree(sp->connect_response_buf);
+    wrbuf_destroy(sp->error_details);
+    xfree(sp);
 }
 
 /*
@@ -248,11 +262,19 @@ COMSTACK tcpip_type(int s, int flags, int protocol, void *vp)
     p->event = CS_NONE;
     p->cerrno = 0;
     p->user = 0;
-    p->error_details = wrbuf_alloc();
 
     yaz_log(log_level, "Created TCP/SSL comstack h=%p", p);
 
     return p;
+}
+
+static void cs_set_error(COMSTACK cs, int error, const char *details)
+{
+    struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
+    wrbuf_rewind(sp->error_details);
+    if (details)
+        wrbuf_puts(sp->error_details, details);
+    cs->cerrno = error;
 }
 
 static void connect_and_bind(COMSTACK p,
@@ -1086,7 +1108,6 @@ COMSTACK tcpip_accept(COMSTACK h)
         cnew = (COMSTACK) xmalloc(sizeof(*cnew));
 
         memcpy(cnew, h, sizeof(*h));
-        cnew->error_details = wrbuf_alloc();
         cnew->iofile = h->newfd;
         cnew->io_pending = 0;
         cnew->cprivate = state;
@@ -1103,8 +1124,7 @@ COMSTACK tcpip_accept(COMSTACK h)
 #endif
                 h->newfd = -1;
             }
-            xfree(state);
-            wrbuf_destroy(cnew->error_details);
+            tcpip_state_destroy(state);
             xfree(cnew);
             return 0;
         }
@@ -1122,17 +1142,15 @@ COMSTACK tcpip_accept(COMSTACK h)
             gnutls_init(&state->session, GNUTLS_SERVER);
             if (!state->session)
             {
-                wrbuf_destroy(cnew->error_details);
+                tcpip_state_destroy(state);
                 xfree(cnew);
-                xfree(state);
                 return 0;
             }
             res = gnutls_set_default_priority(state->session);
             if (res != GNUTLS_E_SUCCESS)
             {
-                wrbuf_destroy(cnew->error_details);
+                tcpip_state_destroy(state);
                 xfree(cnew);
-                xfree(state);
                 return 0;
             }
             res = gnutls_credentials_set(state->session,
@@ -1140,9 +1158,8 @@ COMSTACK tcpip_accept(COMSTACK h)
                                          st->cred_ptr->xcred);
             if (res != GNUTLS_E_SUCCESS)
             {
-                wrbuf_destroy(cnew->error_details);
+                tcpip_state_destroy(state);
                 xfree(cnew);
-                xfree(state);
                 return 0;
             }
             SET_GNUTLS_SOCKET(state->session, cnew->iofile);
@@ -1486,14 +1503,7 @@ void tcpip_close(COMSTACK h)
     }
     tcpip_release_cred(&sp->cred_ptr);
 #endif
-    if (sp->ai)
-        freeaddrinfo(sp->ai);
-    xfree(sp->host_port);
-    xfree(sp->connect_host);
-    wrbuf_destroy(sp->connect_request);
-    xfree(sp->connect_response_buf);
-    xfree(sp);
-    wrbuf_destroy(h->error_details);
+    tcpip_state_destroy(sp);
     xfree(h);
 }
 
@@ -1778,6 +1788,18 @@ int cs_set_head_only(COMSTACK cs, int head_only)
     cs_set_error(cs, CS_ST_INCON, 0);
     return -1;
 }
+
+const char *yaz_tcpip_get_error_details(COMSTACK cs)
+{
+    if (cs->type == tcpip_type || cs->type == ssl_type)
+    {
+        tcpip_state *sp = (tcpip_state *)cs->cprivate;
+        if (wrbuf_len(sp->error_details))
+            return wrbuf_cstr(sp->error_details);
+    }
+    return 0;
+}
+
 
 /*
  * Local variables:

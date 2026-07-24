@@ -474,14 +474,22 @@ static void tst_cs_error(void)
     YAZ_CHECK_EQ(cs_get_error(cs, &details), CSNONE);
     YAZ_CHECK(!details);
 
-    cs_set_error(cs, CSERRORSSL, "certificate verification failed");
-    YAZ_CHECK_EQ(cs_get_error(cs, 0), CSERRORSSL);
-    YAZ_CHECK_EQ(cs_get_error(cs, &details), CSERRORSSL);
-    YAZ_CHECK(details && !strcmp(details, "certificate verification failed"));
+#if HAVE_GNUTLS_H
+    {
+        COMSTACK ssl_cs =
+            cs_create(ssl_type, CS_FLAGS_BLOCKING, PROTO_Z3950);
 
-    cs_set_error(cs, CSNONE, 0);
-    YAZ_CHECK_EQ(cs_get_error(cs, &details), CSNONE);
-    YAZ_CHECK(!details);
+        YAZ_CHECK(ssl_cs);
+        if (ssl_cs)
+        {
+            YAZ_CHECK(cs_set_ssl_certificate_file(ssl_cs, ""));
+            YAZ_CHECK_EQ(cs_bind(ssl_cs, 0, CS_SERVER), -1);
+            YAZ_CHECK_EQ(cs_get_error(ssl_cs, &details), CSERRORSSL);
+            YAZ_CHECK(details && *details);
+            cs_close(ssl_cs);
+        }
+    }
+#endif
 
     cs_close(cs);
 }
@@ -495,7 +503,7 @@ int main (int argc, char **argv)
     tst_http_request();
     tst_http_response();
     tst_cs_get_host_args();
-    tst_cs_error();
+    tst_cs_get_error();
     YAZ_CHECK_TERM;
 }
 

@@ -16,7 +16,7 @@
 
 #include <yaz/yaz-iconv.h>
 #include <yaz/log.h>
-#include <yaz/comstack.h>
+#include "comstack-p.h"
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
 #include <yaz/odr.h>
@@ -51,17 +51,8 @@ const char *cs_strerror(COMSTACK h)
 int cs_get_error(COMSTACK cs, const char **details)
 {
     if (details)
-        *details = wrbuf_len(cs->error_details) ?
-            wrbuf_cstr(cs->error_details) : 0;
+        *details = yaz_tcpip_get_error_details(cs);
     return cs->cerrno;
-}
-
-void cs_set_error(COMSTACK cs, int error, const char *details)
-{
-    wrbuf_rewind(cs->error_details);
-    if (details)
-        wrbuf_puts(cs->error_details, details);
-    cs->cerrno = error;
 }
 
 void cs_get_host_args(const char *type_and_host, const char **args)
