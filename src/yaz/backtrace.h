@@ -37,7 +37,7 @@
 
 YAZ_BEGIN_CDECL
 
-/** \brief enables backtrace when SIGSEGV/SIGABRT/.. signal is received 
+/** \brief enables backtrace when SIGSEGV/SIGABRT/.. signal is received
     \param progname name of executable that we run
 */
 
