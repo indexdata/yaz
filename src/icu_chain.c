@@ -466,7 +466,7 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
                         icu_iter_invoke(iter, step->previous, 0);
 
                     if (!dst1)
-                        break; 
+                        break;
                     dst = icu_buf_utf16_append(dst, step->u.join);
                     dst = icu_buf_utf16_append(dst, dst1);
                     icu_buf_utf16_destroy(dst1);
