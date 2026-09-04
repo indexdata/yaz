@@ -323,8 +323,14 @@ static struct json_node *json_parse_value(json_parser_t p)
         for (sb = p->subst; sb; sb = sb->next)
             if (sb->idx == idx)
             {
-                sb->idx = -1;
-                return sb->node;
+                struct json_node *ret = sb->node;
+                if (!ret)
+                {
+                    p->err_msg = "subst id used more than once";
+                    return 0;
+                }
+                sb->node = 0;
+                return ret;
             }
     }
     else if (c == 0)

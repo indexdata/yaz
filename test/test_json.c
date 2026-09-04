@@ -22,13 +22,31 @@ static int expect(json_parser_t p, const char *input,
     int ret = 0;
     struct json_node *n;
 
+    if (output == 0)
+    {
+        yaz_log(YLOG_WARN, "output must not be NULL");
+        return ret;
+    }
     n = json_parser_parse(p, input);
-    if (n == 0 && output == 0)
-        ret = 1;
-    else if (n && output)
+    if (n == 0)
+    {
+        if (strncmp(output, "error:", 6) == 0)
+        {
+            if (strcmp(output + 6, json_parser_get_errmsg(p)))
+                yaz_log(YLOG_WARN, "expected error '%s' but got error '%s'",
+                output + 6, json_parser_get_errmsg(p));
+            else
+                ret = 1;
+        }
+        else
+        {
+            yaz_log(YLOG_WARN, "expected '%s' but got error '%s'",
+                output, json_parser_get_errmsg(p));
+        }
+    }
+    else
     {
         WRBUF result = wrbuf_alloc();
-
         json_write_wrbuf(n, result);
         if (strcmp(wrbuf_cstr(result), output) == 0)
             ret = 1;
@@ -38,13 +56,8 @@ static int expect(json_parser_t p, const char *input,
                     output, wrbuf_cstr(result));
         }
         wrbuf_destroy(result);
+        json_remove_node(n);
     }
-    else if (!n)
-    {
-        yaz_log(YLOG_WARN, "expected '%s' but got error '%s'",
-                output, json_parser_get_errmsg(p));
-    }
-    json_remove_node(n);
     return ret;
 }
 
@@ -56,15 +69,15 @@ static void tst1(void)
     if (!p)
         return;
 
-    YAZ_CHECK(expect(p, "", 0));
+    YAZ_CHECK(expect(p, "", "error:bad number"));
 
     YAZ_CHECK(expect(p, "1234", "1234"));
 
-    YAZ_CHECK(expect(p, "\"\\a\"", 0));
+    YAZ_CHECK(expect(p, "\"\\a\"", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "\"\\u0061\"", "\"a\""));
 
-    YAZ_CHECK(expect(p, "\"\\u61\"", 0));
+    YAZ_CHECK(expect(p, "\"\\u61\"", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "[ 1234 ]", "[1234]"));
 
@@ -76,43 +89,43 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "[ 12.34E+2 ]", "[1234]"));
 
-    YAZ_CHECK(expect(p, "[ .12 ]", 0));
+    YAZ_CHECK(expect(p, "[ .12 ]", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "[ 01 ]", 0));
+    YAZ_CHECK(expect(p, "[ 01 ]", "error:bad number"));
 
-    YAZ_CHECK(expect(p, "[ -01 ]", 0));
+    YAZ_CHECK(expect(p, "[ -01 ]", "error:bad number"));
 
-    YAZ_CHECK(expect(p, "[ +7 ]", 0));
+    YAZ_CHECK(expect(p, "[ +7 ]", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "[ 7. ]", 0));
+    YAZ_CHECK(expect(p, "[ 7. ]", "error:bad number"));
 
-    YAZ_CHECK(expect(p, "[ fals ]", 0));
+    YAZ_CHECK(expect(p, "[ fals ]", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "{\"k\":tru}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":tru}", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "{\"k\":null", 0));
+    YAZ_CHECK(expect(p, "{\"k\":null", "error:Missing }"));
 
-    YAZ_CHECK(expect(p, "{\"k\":nullx}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":nullx}", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "{\"k\":-", 0));
+    YAZ_CHECK(expect(p, "{\"k\":-", "error:bad number"));
 
-    YAZ_CHECK(expect(p, "{\"k\":+", 0));
+    YAZ_CHECK(expect(p, "{\"k\":+", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "{\"k\":\"a}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"a}", "error:missing \""));
 
-    YAZ_CHECK(expect(p, "{\"k\":\"a", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"a", "error:missing \""));
 
-    YAZ_CHECK(expect(p, "{\"k\":\"", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"", "error:missing \""));
 
-    YAZ_CHECK(expect(p, "{", 0));
+    YAZ_CHECK(expect(p, "{", "error:string expected"));
 
     YAZ_CHECK(expect(p, "{}", "{}"));
 
-    YAZ_CHECK(expect(p, "{}  extra", 0));
+    YAZ_CHECK(expect(p, "{}  extra", "error:extra characters"));
 
-    YAZ_CHECK(expect(p, "{\"a\":[1,2,3}", 0));
+    YAZ_CHECK(expect(p, "{\"a\":[1,2,3}", "error:expecting ]"));
 
-    YAZ_CHECK(expect(p, "{\"a\":[1,2,", 0));
+    YAZ_CHECK(expect(p, "{\"a\":[1,2,", "error:bad number"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"wa\"}", "{\"k\":\"wa\"}"));
 
@@ -146,19 +159,19 @@ static void tst1(void)
     YAZ_CHECK(expect(p, "{\"a\":[1,2,3]}", "{\"a\":[1,2,3]}"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\t\"}", "{\"k\":\"\\t\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\t\"}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"\t\"}", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\n\"}", "{\"k\":\"\\n\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\n\"}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"\n\"}", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\r\"}", "{\"k\":\"\\r\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\r\"}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"\r\"}", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\f\"}", "{\"k\":\"\\f\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\f\"}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"\f\"}", "error:invalid character"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"\\b\"}", "{\"k\":\"\\b\"}"));
-    YAZ_CHECK(expect(p, "{\"k\":\"\b\"}", 0));
+    YAZ_CHECK(expect(p, "{\"k\":\"\b\"}", "error:invalid character"));
 
     YAZ_CHECK(expect(p,
                      "{\"k\":\"\\u0001\\u0002\"}",
@@ -290,7 +303,7 @@ static int tst_subst_twice(void)
     struct json_node *value = json_parse("{\"x\":true}", 0);
     YAZ_CHECK(value);
     json_parser_subst(parser, 1, value);
-    YAZ_CHECK(expect(parser, "[%1,%1]", 0));
+    YAZ_CHECK(expect(parser, "[%1,%1]", "error:subst id used more than once"));
     json_parser_destroy(parser);
     return 0;
 }
