@@ -12,8 +12,9 @@
 
 #include <yaz/test.h>
 #include <yaz/json.h>
-#include <string.h>
 #include <yaz/log.h>
+#include <string.h>
+#include <stdlib.h>
 
 static int expect(json_parser_t p, const char *input,
                   const char *output)
@@ -241,12 +242,69 @@ static void tst3(void)
                            "{\"a\":[1,2,3]}"));
 }
 
+static void tst_flat_array(size_t count, int malformed)
+{
+    size_t i;
+    char *s = malloc(count * 2 + 3);
+    char *p = s;
+    struct json_node *n;
+    YAZ_CHECK(s);
+    if (!s)
+        return;
+    *p++ = '[';
+    for (i = 0; i < count; i++) {
+        *p++ = '0';
+        *p++ = ',';
+    }
+    if (!malformed && count)
+       p--;
+    *p++ = ']';
+    *p = 0;
+    n = json_parse(s, 0);
+    free(s);
+    if (malformed)
+    {
+        YAZ_CHECK(n == 0);
+    }
+    else
+    {
+        YAZ_CHECK(n);
+        json_remove_node(n);
+    }
+}
+
+static int tst_subst_once(void)
+{
+    json_parser_t parser = json_parser_create();
+    struct json_node *value = json_parse("{\"x\":true}", 0);
+    YAZ_CHECK(value);
+    json_parser_subst(parser, 1, value);
+    YAZ_CHECK(expect(parser, "[%1]", "[{\"x\":true}]"));
+    json_parser_destroy(parser);
+    return 0;
+}
+
+static int tst_subst_twice(void)
+{
+    json_parser_t parser = json_parser_create();
+    struct json_node *value = json_parse("{\"x\":true}", 0);
+    YAZ_CHECK(value);
+    json_parser_subst(parser, 1, value);
+    YAZ_CHECK(expect(parser, "[%1,%1]", 0));
+    json_parser_destroy(parser);
+    return 0;
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst1();
     tst2();
     tst3();
+    tst_subst_once();
+    tst_subst_twice();
+    tst_flat_array(10000, 0);
+    tst_flat_array(10000, 1);
     YAZ_CHECK_TERM;
 }
 

@@ -176,6 +176,8 @@ int json_append_array(struct json_node *dst, struct json_node *src);
     \param p JSON parser
     \param idx (%id)
     \param n node to be substituted for idx (%idx)
+
+    Each id number can occur only once in the json input.
 */
 YAZ_EXPORT
 void json_parser_subst(json_parser_t p, int idx, struct json_node *n);

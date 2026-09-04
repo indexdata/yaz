@@ -322,7 +322,10 @@ static struct json_node *json_parse_value(json_parser_t p)
         }
         for (sb = p->subst; sb; sb = sb->next)
             if (sb->idx == idx)
+            {
+                sb->idx = -1;
                 return sb->node;
+            }
     }
     else if (c == 0)
     {
