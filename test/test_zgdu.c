@@ -200,6 +200,21 @@ int main (int argc, char **argv)
                          "Transfer-Encoding: chunked\r\n"
                          "\r\n"
                          "0\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "0\r\n"
+                         "GET /next HTTP/1.1\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "0\r\n"
+                         "Bad Trailer: value\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "0\r\n"
+                         ": value\r\n\r\n");
     YAZ_CHECK_TERM;
 }
 
