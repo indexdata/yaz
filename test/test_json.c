@@ -279,16 +279,27 @@ static void tst_flat_array(size_t count, int malformed)
     *p++ = ']';
     *p = 0;
     n = json_parse(s, 0);
-    free(s);
     if (malformed)
     {
         YAZ_CHECK(n == 0);
     }
     else
     {
+        struct json_node *n2 = json_clone_node(n);
+        WRBUF result = wrbuf_alloc();
+
         YAZ_CHECK(n);
+        YAZ_CHECK(n2);
+        if (n2)
+        {
+            json_write_wrbuf(n2, result);
+            YAZ_CHECK(!strcmp(wrbuf_cstr(result), s));
+        }
+        wrbuf_destroy(result);
+        json_remove_node(n2);
     }
     json_remove_node(n);
+    free(s);
 }
 
 static int tst_subst_once(void)

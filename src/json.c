@@ -104,11 +104,19 @@ void json_remove_node(struct json_node *n)
     {
     case json_node_object:
     case json_node_array:
-    case json_node_list:
     case json_node_pair:
         json_remove_node(n->u.link[0]);
         json_remove_node(n->u.link[1]);
         break;
+    case json_node_list:
+        while (n)
+        {
+            struct json_node *next = n->u.link[1];
+            json_remove_node(n->u.link[0]);
+            xfree(n);
+            n = next;
+        }
+        return;
     case json_node_string:
         xfree(n->u.string);
         break;
@@ -132,10 +140,24 @@ struct json_node *json_clone_node(const struct json_node *n)
     {
     case json_node_object:
     case json_node_array:
-    case json_node_list:
     case json_node_pair:
         n2->u.link[0] = json_clone_node(n->u.link[0]);
         n2->u.link[1] = json_clone_node(n->u.link[1]);
+        break;
+    case json_node_list:
+        {
+            struct json_node *tail = n2;
+            while (n)
+            {
+                tail->u.link[0] = json_clone_node(n->u.link[0]);
+                n = n->u.link[1];
+                if (n)
+                {
+                    tail->u.link[1] = json_new_node(0, json_node_list);
+                    tail = tail->u.link[1];
+                }
+            }
+        }
         break;
     case json_node_string:
         n2->u.string = xstrdup(n->u.string);
@@ -651,14 +673,16 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         wrbuf_puts(result, "]");
         break;
     case json_node_list:
-        json_write_wrbuf_r(node->u.link[0], result, indent);
-        if (node->u.link[1])
+        while (node)
         {
-            wrbuf_puts(result, ",");
-            if (indent >= 0) {
-                wrbuf_puts(result, "\n");
+            json_write_wrbuf_r(node->u.link[0], result, indent);
+            node = node->u.link[1];
+            if (node)
+            {
+                wrbuf_puts(result, ",");
+                if (indent >= 0)
+                    wrbuf_puts(result, "\n");
             }
-            json_write_wrbuf_r(node->u.link[1], result, indent);
         }
         break;
     case json_node_pair:
