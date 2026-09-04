@@ -363,12 +363,43 @@ static int tst_clone(void)
     return 0;
 }
 
+static void tst_pretty(void)
+{
+    const char *json = "[1,\"x\",true,false,null,{\"a\":2},[3]]";
+    const char *expected =
+        "[\n"
+        "  1,\n"
+        "  \"x\",\n"
+        "  true,\n"
+        "  false,\n"
+        "  null,\n"
+        "  {\n"
+        "    \"a\": 2\n"
+        "  },\n"
+        "  [\n"
+        "    3\n"
+        "  ]\n"
+        "]";
+    struct json_node *n = json_parse(json, 0);
+    WRBUF result = wrbuf_alloc();
+
+    YAZ_CHECK(n);
+    if (n)
+    {
+        json_write_wrbuf_pretty(n, result);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(result), expected));
+    }
+    wrbuf_destroy(result);
+    json_remove_node(n);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst1();
     tst2();
     tst3();
+    tst_pretty();
     tst_clone();
     tst_subst_once();
     tst_subst_twice();

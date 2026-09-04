@@ -675,6 +675,8 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
     case json_node_list:
         while (node)
         {
+            if (indent >= 0)
+                json_indent(result, indent);
             json_write_wrbuf_r(node->u.link[0], result, indent);
             node = node->u.link[1];
             if (node)
