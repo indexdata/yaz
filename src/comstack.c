@@ -300,6 +300,13 @@ static int skip_crlf(const char *buf, int len, int *i)
     return 0;
 }
 
+static int http_token_char(char c)
+{
+    /* RFC 9110, Section 5.6.2: tchar */
+    return yaz_isdigit(c) || yaz_isupper(c) || yaz_islower(c)
+        || (c && strchr("!#$%&'*+-.^_`|~", c));
+}
+
 int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
                           int *content_len)
 {
@@ -351,6 +358,8 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
     {
         if (i >= len)
             return 0;
+        if (buf[i] == '\r' && i == len - 1)
+            return 0;
         if (skip_crlf(buf, len, &i))
         {
             if (content_len)
@@ -358,7 +367,28 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
             return i;
         }
 
-        /* skip one trailing header */
+        /* validate the trailer field name */
+        {
+            int field_start = i;
+
+            while (1)
+            {
+                if (i >= len)
+                    return 0;
+                if (buf[i] == ':')
+                {
+                    if (i == field_start)
+                        return -1;
+                    i++;
+                    break;
+                }
+                if (!http_token_char(buf[i]))
+                    return -1;
+                i++;
+            }
+        }
+
+        /* skip the trailer field value */
         while (1)
         {
             if (i >= len)

@@ -298,6 +298,19 @@ static void tst_http_request(void)
         YAZ_CHECK_EQ(cs_complete_auto(http_buf, 69), 69);
     }
 
+    {
+        /* a pipelined request is not a trailer field */
+        const char *http_buf =
+            "POST / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "0\r\n"
+            "GET /next HTTP/1.1\r\n"
+            "\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, strlen(http_buf)), -1);
+    }
+
     if (INT_MAX == 2147483647){
         /* one header, overflow value */
         const char *http_buf =
