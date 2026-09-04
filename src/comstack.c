@@ -300,50 +300,74 @@ static int skip_crlf(const char *buf, int len, int *i)
     return 0;
 }
 
-static int cs_read_chunks(const char *buf, int i, int len)
+int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
+                          int *content_len)
 {
+    int i = 0;
+    int off = 0;
+
     /* inside chunked body .. */
     while (1)
     {
         int chunk_len = 0;
+        int ret;
+
         if (i >= len)
             return 0;
         /* read chunk length */
-        int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
+        ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
         if (ret <= 0)
             return -1;
         i += ret;
-        if (chunk_len == 0)
-            break;
+        /* skip chunk extension and consume the line ending */
         while (1)
         {
-            if (i >= len -1)
+            if (i >= len)
                 return 0;
             if (skip_crlf(buf, len, &i))
                 break;
             i++;
         }
-        /* got CRLF */
-        if (chunk_len > (INT_MAX - i))
-            return -1;
+
+        if (chunk_len == 0)
+            break;
+        if (chunk_len > len - i)
+            return 0;
+        if (content_buf)
+            memcpy(content_buf + off, buf + i, chunk_len);
         i += chunk_len;
-        if (i >= len-2)
+        off += chunk_len;
+        if (i >= len)
             return 0;
         if (!skip_crlf(buf, len, &i))
-            return 0;
+        {
+            if (buf[i] == '\r' && i == len - 1)
+                return 0;
+            return -1;
+        }
     }
     /* consider trailing headers .. */
-    while (i < len)
+    while (1)
     {
+        if (i >= len)
+            return 0;
         if (skip_crlf(buf, len, &i))
         {
-            if (skip_crlf(buf, len, &i))
-                return i;
+            if (content_len)
+                *content_len = off;
+            return i;
         }
-        else
+
+        /* skip one trailing header */
+        while (1)
+        {
+            if (i >= len)
+                return 0;
+            if (skip_crlf(buf, len, &i))
+                break;
             i++;
+        }
     }
-    return 0;
 }
 
 static int cs_complete_http(const char *buf, int len, int head_only)
@@ -392,7 +416,10 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             if (head_only)
                 return i;
             if (chunked)
-                return cs_read_chunks(buf, i, len);
+            {
+                int r = yaz_http_parse_chunks(buf + i, len - i, 0, 0);
+                return r > 0 ? i + r : r;
+            }
             if (content_len == -1)
                 return 0;   /* no content length */
             if (content_len > (unsigned)(INT_MAX - i))

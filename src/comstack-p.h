@@ -39,6 +39,17 @@ YAZ_BEGIN_CDECL
 
 const char *yaz_tcpip_get_error_details(COMSTACK cs);
 
+/*
+ * Parses an HTTP chunked body.
+ *
+ * Returns the number of bytes consumed, 0 if the body is incomplete, or -1
+ * if it is malformed.  If content_buf is non-NULL, it must have room for len
+ * bytes and the chunk payload is copied to it.  content_len, when non-NULL,
+ * receives the payload length on success.
+ */
+int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
+                          int *content_len);
+
 YAZ_END_CDECL
 
 #endif

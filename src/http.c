@@ -18,6 +18,7 @@
 #include <yaz/base64.h>
 #include <yaz/comstack.h>
 #include <yaz/snprintf.h>
+#include "comstack-p.h"
 
 static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
@@ -76,53 +77,19 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
 
     if (chunked)
     {
-        int off = 0;
+        int r;
 
         /* we know buffer will be smaller than o->size - i*/
         *content_buf = (char*) odr_malloc(o, size - i);
-
-        while (1)
+        r = yaz_http_parse_chunks(buf + i, size - i, *content_buf,
+                                  content_len);
+        if (r <= 0)
         {
-            /* chunk length .. */
-            int chunk_len = 0;
-            for (; i  < size-2; i++)
-                if (yaz_isdigit(buf[i]))
-                    chunk_len = chunk_len * 16 +
-                        (buf[i] - '0');
-                else if (yaz_isupper(buf[i]))
-                    chunk_len = chunk_len * 16 +
-                        (buf[i] - ('A'-10));
-                else if (yaz_islower(buf[i]))
-                    chunk_len = chunk_len * 16 +
-                        (buf[i] - ('a'-10));
-                else
-                    break;
-            /* chunk extension ... */
-            while (buf[i] != '\r' && buf[i+1] != '\n')
-            {
-                if (i >= size-2)
-                {
-                    o->error = OHTTP;
-                    return 0;
-                }
-                i++;
-            }
-            i += 2;  /* skip CRLF */
-            if (chunk_len == 0)
-                break;
-            if (chunk_len < 0 || off + chunk_len > size)
-            {
-                o->error = OHTTP;
-                return 0;
-            }
-            /* copy chunk .. */
-            memcpy (*content_buf + off, buf + i, chunk_len);
-            i += chunk_len + 2; /* skip chunk+CRLF */
-            off += chunk_len;
+            o->error = OHTTP;
+            return 0;
         }
-        if (!off)
+        if (!*content_len)
             *content_buf = 0;
-        *content_len = off;
     }
     else
     {
@@ -728,4 +695,3 @@ const char *yaz_check_location(ODR odr, const char *uri, const char *location,
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
