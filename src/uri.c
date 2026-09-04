@@ -30,8 +30,8 @@ static int hex_digit (int ch)
 static void encode_uri_char(char *dst, char ch)
 {
     /* https://datatracker.ietf.org/doc/html/rfc3986#section-2.3 */
-    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') ||
-        (ch >= '0' && ch <= '9') || strchr("-._~", ch))
+    if (yaz_isupper(ch) || yaz_islower(ch) || yaz_isdigit(ch)
+        || strchr("-._~", ch))
     {
         dst[0] = ch;
         dst[1] = '\0';

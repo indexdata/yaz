@@ -202,9 +202,8 @@ int yaz_marc_read_line(yaz_marc_t mt,
                     while ((next = strchr(next, marker_ch)))
                     {
                         /* allow only alphanumeric characters */
-                        if ((next[1] >= 'A' && next[1] <= 'Z')
-                            ||(next[1] >= 'a' && next[1] <= 'z')
-                            ||(next[1] >= '0' && next[1] <= '9'))
+                        if (yaz_isupper(next[1]) || yaz_islower(next[1])
+                            || yaz_isdigit(next[1]))
                         {
                             if (!marker_skip)
                                 break;
