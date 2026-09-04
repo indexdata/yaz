@@ -298,6 +298,7 @@ static int tst_subst_once(void)
     YAZ_CHECK(value);
     json_parser_subst(parser, 1, value);
     YAZ_CHECK(expect(parser, "[%1]", "[{\"x\":true}]"));
+    YAZ_CHECK(expect(parser, "%1", "{\"x\":true}"));
     json_parser_destroy(parser);
     return 0;
 }
@@ -308,8 +309,46 @@ static int tst_subst_twice(void)
     struct json_node *value = json_parse("{\"x\":true}", 0);
     YAZ_CHECK(value);
     json_parser_subst(parser, 1, value);
-    YAZ_CHECK(expect(parser, "[%1,%1]", "error:subst id used more than once"));
+    YAZ_CHECK(expect(parser, "[%1,%1]",
+                     "[{\"x\":true},{\"x\":true}]"));
     json_parser_destroy(parser);
+    return 0;
+}
+
+static int tst_subst_replace(void)
+{
+    json_parser_t parser = json_parser_create();
+    struct json_node *value1 = json_parse("true", 0);
+    struct json_node *value2 = json_parse("false", 0);
+
+    YAZ_CHECK(value1);
+    YAZ_CHECK(value2);
+    json_parser_subst(parser, 1, value1);
+    json_parser_subst(parser, 1, value2);
+    YAZ_CHECK(expect(parser, "%1", "false"));
+    json_parser_destroy(parser);
+    return 0;
+}
+
+static int tst_clone(void)
+{
+    const char *json = "{\"a\":[1,\"x\",null],\"b\":true}";
+    struct json_node *n = json_parse(json, 0);
+    struct json_node *n2;
+    WRBUF result = wrbuf_alloc();
+
+    YAZ_CHECK(n);
+    n2 = json_clone_node(n);
+    YAZ_CHECK(n2);
+    json_remove_node(n);
+    if (n2)
+    {
+        json_write_wrbuf(n2, result);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(result), json));
+    }
+    json_remove_node(n2);
+    wrbuf_destroy(result);
+    YAZ_CHECK(!json_clone_node(0));
     return 0;
 }
 
@@ -319,8 +358,10 @@ int main (int argc, char **argv)
     tst1();
     tst2();
     tst3();
+    tst_clone();
     tst_subst_once();
     tst_subst_twice();
+    tst_subst_replace();
     tst_flat_array(10000, 0);
     tst_flat_array(10000, 1);
     YAZ_CHECK_TERM;
@@ -334,5 +375,3 @@ int main (int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
-

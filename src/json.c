@@ -51,6 +51,8 @@ void json_parser_subst(json_parser_t p, int idx, struct json_node *n)
     for (; *sb; sb = &(*sb)->next)
         if ((*sb)->idx == idx)
         {
+            if ((*sb)->node != n)
+                json_remove_node((*sb)->node);
             (*sb)->node = n;
             return;
         }
@@ -66,6 +68,7 @@ void json_parser_destroy(json_parser_t p)
     while (sb)
     {
         struct json_subst_info *sb_next = sb->next;
+        json_remove_node(sb->node);
         xfree(sb);
         sb = sb_next;
     }
@@ -116,6 +119,36 @@ void json_remove_node(struct json_node *n)
         break;
     }
     xfree(n);
+}
+
+struct json_node *json_clone_node(const struct json_node *n)
+{
+    struct json_node *n2;
+
+    if (!n)
+        return 0;
+    n2 = json_new_node(0, n->type);
+    switch (n->type)
+    {
+    case json_node_object:
+    case json_node_array:
+    case json_node_list:
+    case json_node_pair:
+        n2->u.link[0] = json_clone_node(n->u.link[0]);
+        n2->u.link[1] = json_clone_node(n->u.link[1]);
+        break;
+    case json_node_string:
+        n2->u.string = xstrdup(n->u.string);
+        break;
+    case json_node_number:
+        n2->u.number = n->u.number;
+        break;
+    case json_node_true:
+    case json_node_false:
+    case json_node_null:
+        break;
+    }
+    return n2;
 }
 
 static struct json_node *json_parse_object(json_parser_t p);
@@ -328,13 +361,12 @@ static struct json_node *json_parse_value(json_parser_t p)
         for (sb = p->subst; sb; sb = sb->next)
             if (sb->idx == idx)
             {
-                struct json_node *ret = sb->node;
+                struct json_node *ret = json_clone_node(sb->node);
                 if (!ret)
                 {
-                    p->err_msg = "subst id used more than once";
+                    p->err_msg = "missing subst value";
                     return 0;
                 }
-                sb->node = 0;
                 return ret;
             }
     }
