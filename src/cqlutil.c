@@ -197,10 +197,10 @@ int cql_strcmp(const char *s1, const char *s2)
     {
         int c1 = *s1++;
         int c2 = *s2++;
-        if (c1 >= 'A' && c1 <= 'Z')
-            c1 = c1 + ('a' - 'A');
-        if (c2 >= 'A' && c2 <= 'Z')
-            c2 = c2 + ('a' - 'A');
+        if (yaz_isupper(c1))
+            c1 = yaz_tolower(c1);
+        if (yaz_isupper(c2))
+            c2 = yaz_tolower(c2);
         if (c1 != c2)
             return c1 - c2;
     }
@@ -213,10 +213,10 @@ int cql_strncmp(const char *s1, const char *s2, size_t n)
     {
         int c1 = *s1++;
         int c2 = *s2++;
-        if (c1 >= 'A' && c1 <= 'Z')
-            c1 = c1 + ('a' - 'A');
-        if (c2 >= 'A' && c2 <= 'Z')
-            c2 = c2 + ('a' - 'A');
+        if (yaz_isupper(c1))
+            c1 = yaz_tolower(c1);
+        if (yaz_isupper(c2))
+            c2 = yaz_tolower(c2);
         if (c1 != c2)
             return c1 - c2;
         --n;

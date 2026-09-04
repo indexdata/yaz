@@ -332,7 +332,7 @@ static struct json_node *json_parse_value(json_parser_t p)
     {
         char tok[8];
         int i = 0;
-        while (c >= 'a' && c <= 'z' && i < 7)
+        while (yaz_islower(c) && i < 7)
         {
             tok[i++] = c;
             p->cp++;

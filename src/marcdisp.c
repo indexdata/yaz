@@ -261,9 +261,9 @@ static int element_name_append_attribute_value(
     int success = 0;
     for (index = 0; index < code_len; index++)
     {
-        if (!((code_data[index] >= '0' && code_data[index] <= '9') ||
-              (code_data[index] >= 'a' && code_data[index] <= 'z') ||
-              (code_data[index] >= 'A' && code_data[index] <= 'Z')))
+        if (!(yaz_isdigit(code_data[index]) ||
+              yaz_islower(code_data[index]) ||
+              yaz_isupper(code_data[index])))
             encode = 1;
     }
     /* Add as attribute */
