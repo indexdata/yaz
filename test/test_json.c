@@ -270,7 +270,7 @@ static void tst_flat_array(size_t count, int malformed)
         *p++ = ',';
     }
     if (!malformed && count)
-       p--;
+        p--;
     *p++ = ']';
     *p = 0;
     n = json_parse(s, 0);
@@ -282,8 +282,8 @@ static void tst_flat_array(size_t count, int malformed)
     else
     {
         YAZ_CHECK(n);
-        json_remove_node(n);
     }
+    json_remove_node(n);
 }
 
 static int tst_subst_once(void)
