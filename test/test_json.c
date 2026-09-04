@@ -302,7 +302,7 @@ static void tst_flat_array(size_t count, int malformed)
     free(s);
 }
 
-static int tst_subst_once(void)
+static void tst_subst_once(void)
 {
     json_parser_t parser = json_parser_create();
     struct json_node *value = json_parse("{\"x\":true}", 0);
@@ -311,10 +311,9 @@ static int tst_subst_once(void)
     YAZ_CHECK(expect(parser, "[%1]", "[{\"x\":true}]"));
     YAZ_CHECK(expect(parser, "%1", "{\"x\":true}"));
     json_parser_destroy(parser);
-    return 0;
 }
 
-static int tst_subst_twice(void)
+static void tst_subst_twice(void)
 {
     json_parser_t parser = json_parser_create();
     struct json_node *value = json_parse("{\"x\":true}", 0);
@@ -323,10 +322,9 @@ static int tst_subst_twice(void)
     YAZ_CHECK(expect(parser, "[%1,%1]",
                      "[{\"x\":true},{\"x\":true}]"));
     json_parser_destroy(parser);
-    return 0;
 }
 
-static int tst_subst_replace(void)
+static void tst_subst_replace(void)
 {
     json_parser_t parser = json_parser_create();
     struct json_node *value1 = json_parse("true", 0);
@@ -338,10 +336,9 @@ static int tst_subst_replace(void)
     json_parser_subst(parser, 1, value2);
     YAZ_CHECK(expect(parser, "%1", "false"));
     json_parser_destroy(parser);
-    return 0;
 }
 
-static int tst_clone(void)
+static void tst_clone(void)
 {
     const char *json = "{\"a\":[1,\"x\",null],\"b\":true}";
     struct json_node *n = json_parse(json, 0);
@@ -360,7 +357,6 @@ static int tst_clone(void)
     json_remove_node(n2);
     wrbuf_destroy(result);
     YAZ_CHECK(!json_clone_node(0));
-    return 0;
 }
 
 static void tst_pretty(void)

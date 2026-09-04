@@ -183,7 +183,7 @@ int json_append_array(struct json_node *dst, struct json_node *src);
 
 /** \brief configure subst rule
     \param p JSON parser
-    \param idx (%id)
+    \param idx (%idx)
     \param n node to be substituted for idx (%idx)
 
     Ownership of n is transferred to the parser. The parser releases it when
