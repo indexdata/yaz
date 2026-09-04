@@ -51,6 +51,8 @@ void json_parser_subst(json_parser_t p, int idx, struct json_node *n)
     for (; *sb; sb = &(*sb)->next)
         if ((*sb)->idx == idx)
         {
+            if ((*sb)->node != n)
+                json_remove_node((*sb)->node);
             (*sb)->node = n;
             return;
         }
@@ -66,6 +68,7 @@ void json_parser_destroy(json_parser_t p)
     while (sb)
     {
         struct json_subst_info *sb_next = sb->next;
+        json_remove_node(sb->node);
         xfree(sb);
         sb = sb_next;
     }
@@ -101,11 +104,19 @@ void json_remove_node(struct json_node *n)
     {
     case json_node_object:
     case json_node_array:
-    case json_node_list:
     case json_node_pair:
         json_remove_node(n->u.link[0]);
         json_remove_node(n->u.link[1]);
         break;
+    case json_node_list:
+        while (n)
+        {
+            struct json_node *next = n->u.link[1];
+            json_remove_node(n->u.link[0]);
+            xfree(n);
+            n = next;
+        }
+        return;
     case json_node_string:
         xfree(n->u.string);
         break;
@@ -116,6 +127,50 @@ void json_remove_node(struct json_node *n)
         break;
     }
     xfree(n);
+}
+
+struct json_node *json_clone_node(const struct json_node *n)
+{
+    struct json_node *n2;
+
+    if (!n)
+        return 0;
+    n2 = json_new_node(0, n->type);
+    switch (n->type)
+    {
+    case json_node_object:
+    case json_node_array:
+    case json_node_pair:
+        n2->u.link[0] = json_clone_node(n->u.link[0]);
+        n2->u.link[1] = json_clone_node(n->u.link[1]);
+        break;
+    case json_node_list:
+        {
+            struct json_node *tail = n2;
+            while (n)
+            {
+                tail->u.link[0] = json_clone_node(n->u.link[0]);
+                n = n->u.link[1];
+                if (n)
+                {
+                    tail->u.link[1] = json_new_node(0, json_node_list);
+                    tail = tail->u.link[1];
+                }
+            }
+        }
+        break;
+    case json_node_string:
+        n2->u.string = xstrdup(n->u.string);
+        break;
+    case json_node_number:
+        n2->u.number = n->u.number;
+        break;
+    case json_node_true:
+    case json_node_false:
+    case json_node_null:
+        break;
+    }
+    return n2;
 }
 
 static struct json_node *json_parse_object(json_parser_t p);
@@ -302,6 +357,11 @@ static struct json_node *json_parse_value(json_parser_t p)
     int c = look_ch(p);
     if (c == '\"')
         return json_parse_string(p);
+    else if (c == 0)
+    {
+        p->err_msg = "expecting value";
+        return 0;
+    }
     else if (strchr("0123456789-", c))
         return json_parse_number(p);
     else if (c == '{')
@@ -322,11 +382,15 @@ static struct json_node *json_parse_value(json_parser_t p)
         }
         for (sb = p->subst; sb; sb = sb->next)
             if (sb->idx == idx)
-                return sb->node;
-    }
-    else if (c == 0)
-    {
-        return 0;
+            {
+                struct json_node *ret = json_clone_node(sb->node);
+                if (!ret)
+                {
+                    p->err_msg = "missing subst value";
+                    return 0;
+                }
+                return ret;
+            }
     }
     else
     {
@@ -492,7 +556,7 @@ static struct json_node *json_parse_object(json_parser_t p)
     }
     if (look_ch(p) != '}')
     {
-        p->err_msg = "Missing }";
+        p->err_msg = "missing }";
         json_remove_node(n);
         return 0;
     }
@@ -609,14 +673,18 @@ static void json_write_wrbuf_r(struct json_node *node, WRBUF result, int indent)
         wrbuf_puts(result, "]");
         break;
     case json_node_list:
-        json_write_wrbuf_r(node->u.link[0], result, indent);
-        if (node->u.link[1])
+        while (node)
         {
-            wrbuf_puts(result, ",");
-            if (indent >= 0) {
-                wrbuf_puts(result, "\n");
+            if (indent >= 0)
+                json_indent(result, indent);
+            json_write_wrbuf_r(node->u.link[0], result, indent);
+            node = node->u.link[1];
+            if (node)
+            {
+                wrbuf_puts(result, ",");
+                if (indent >= 0)
+                    wrbuf_puts(result, "\n");
             }
-            json_write_wrbuf_r(node->u.link[1], result, indent);
         }
         break;
     case json_node_pair:

@@ -132,6 +132,15 @@ struct json_node *json_parse2(const char *json_str, const char **errmsg,
 YAZ_EXPORT
 void json_remove_node(struct json_node *n);
 
+/** \brief clones JSON tree node and its children
+    \param n JSON node
+    \returns cloned JSON tree or NULL if n is NULL
+
+    The resulting tree should be removed with a call to json_remove_node.
+*/
+YAZ_EXPORT
+struct json_node *json_clone_node(const struct json_node *n);
+
 /** \brief gets object pair value for some name
     \param n JSON node (presumably object node)
     \param name name to match
@@ -174,8 +183,12 @@ int json_append_array(struct json_node *dst, struct json_node *src);
 
 /** \brief configure subst rule
     \param p JSON parser
-    \param idx (%id)
+    \param idx (%idx)
     \param n node to be substituted for idx (%idx)
+
+    Ownership of n is transferred to the parser. The parser releases it when
+    the rule is replaced or the parser is destroyed. Each occurrence of %idx
+    in the JSON input is replaced by a clone of n.
 */
 YAZ_EXPORT
 void json_parser_subst(json_parser_t p, int idx, struct json_node *n);
@@ -206,4 +219,3 @@ YAZ_END_CDECL
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
