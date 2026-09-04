@@ -103,7 +103,7 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "{\"k\":tru}", "error:bad token"));
 
-    YAZ_CHECK(expect(p, "{\"k\":null", "error:Missing }"));
+    YAZ_CHECK(expect(p, "{\"k\":null", "error:missing }"));
 
     YAZ_CHECK(expect(p, "{\"k\":nullx}", "error:bad token"));
 

@@ -501,7 +501,7 @@ static struct json_node *json_parse_object(json_parser_t p)
     }
     if (look_ch(p) != '}')
     {
-        p->err_msg = "Missing }";
+        p->err_msg = "missing }";
         json_remove_node(n);
         return 0;
     }
