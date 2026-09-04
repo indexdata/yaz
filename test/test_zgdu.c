@@ -137,6 +137,17 @@ static void tst_double_encoding(const char *buf_in, const char *buf_out, int req
     odr_destroy(dec);
 }
 
+static void tst_invalid_encoding(const char *buf)
+{
+    Z_GDU *zgdu;
+    ODR dec = odr_createmem(ODR_DECODE);
+
+    odr_setbuf(dec, (char *) buf, strlen(buf), 0);
+    YAZ_CHECK(!z_GDU(dec, &zgdu, 0, 0));
+    YAZ_CHECK_EQ(odr_geterror(dec), OHTTP);
+    odr_destroy(dec);
+}
+
 
 int main (int argc, char **argv)
 {
@@ -147,18 +158,48 @@ int main (int argc, char **argv)
     tst_double_encoding("POST / HTTP/1.1\r\n"
                         "Transfer-Encoding: chunked\r\n"
                         "\r\n"
-                        "0\r\n",
+                        "0\r\n\r\n",
                         "POST / HTTP/1.1\r\n"
                         "\r\n", Z_GDU_HTTP_Request);
     tst_double_encoding("POST / HTTP/1.1\r\n"
                        "Transfer-Encoding: chunked\r\n"
                        "\r\n"
                        "3\r\nhej\r\n"
-                       "0\r\n",
+                       "0\r\n\r\n",
                        "POST / HTTP/1.1\r\n"
                        "Content-Length: 3\r\n"
                        "\r\n"
                        "hej", Z_GDU_HTTP_Request);
+    tst_double_encoding("POST / HTTP/1.1\r\n"
+                        "Transfer-Encoding: chunked\r\n"
+                        "\r\n"
+                        "3; foo\r\nhej\r\n"
+                        "2\r\nho\r\n"
+                        "0\r\nX-Trailer: value\r\n\r\n",
+                        "POST / HTTP/1.1\r\n"
+                        "Content-Length: 5\r\n"
+                        "\r\n"
+                        "hejho", Z_GDU_HTTP_Request);
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "g\r\nhej\r\n0\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "80000000\r\nhej\r\n0\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "3\r\nhe");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "3\r\nhejX0\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "0\r\n");
     YAZ_CHECK_TERM;
 }
 
@@ -170,4 +211,3 @@ int main (int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
