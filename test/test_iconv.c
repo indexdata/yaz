@@ -682,6 +682,15 @@ static void tst_latin1_to_marc8(void)
 
 static void tst_utf8_codes(void)
 {
+    static const unsigned char surrogate[] = { 0xed, 0xa0, 0x80 };
+    static const unsigned char out_of_range[] = { 0xf4, 0x90, 0x80, 0x80 };
+    static const unsigned char five_bytes[] = { 0xf8, 0x88, 0x80, 0x80, 0x80 };
+    static const unsigned char six_bytes[] = {
+        0xfc, 0x84, 0x80, 0x80, 0x80, 0x80
+    };
+    size_t no_read;
+    int error;
+
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));
     YAZ_CHECK(utf8_check(128));
@@ -692,8 +701,38 @@ static void tst_utf8_codes(void)
     YAZ_CHECK(utf8_check(10000));
     YAZ_CHECK(utf8_check(100000));
     YAZ_CHECK(utf8_check(1000000));
-    YAZ_CHECK(utf8_check(10000000));
-    YAZ_CHECK(utf8_check(100000000));
+    YAZ_CHECK(utf8_check(0xd7ff));
+    YAZ_CHECK(utf8_check(0xe000));
+    YAZ_CHECK(utf8_check(0x10ffff));
+    YAZ_CHECK(!utf8_check(0xd800));
+    YAZ_CHECK(!utf8_check(0xdfff));
+    YAZ_CHECK(!utf8_check(0x110000));
+    YAZ_CHECK(!utf8_check(10000000));
+
+    error = 0;
+    yaz_read_UTF8_char(surrogate, sizeof(surrogate), &no_read, &error);
+    YAZ_CHECK_EQ(error, YAZ_ICONV_EILSEQ);
+    YAZ_CHECK_EQ(no_read, 0);
+
+    error = 0;
+    yaz_read_UTF8_char(out_of_range, sizeof(out_of_range), &no_read, &error);
+    YAZ_CHECK_EQ(error, YAZ_ICONV_EILSEQ);
+    YAZ_CHECK_EQ(no_read, 0);
+
+    error = 0;
+    yaz_read_UTF8_char(five_bytes, sizeof(five_bytes), &no_read, &error);
+    YAZ_CHECK_EQ(error, YAZ_ICONV_EILSEQ);
+    YAZ_CHECK_EQ(no_read, 0);
+
+    error = 0;
+    yaz_read_UTF8_char(six_bytes, sizeof(six_bytes), &no_read, &error);
+    YAZ_CHECK_EQ(error, YAZ_ICONV_EILSEQ);
+    YAZ_CHECK_EQ(no_read, 0);
+
+    error = 0;
+    yaz_read_UTF8_char(0, 0, &no_read, &error);
+    YAZ_CHECK_EQ(error, YAZ_ICONV_EINVAL);
+    YAZ_CHECK_EQ(no_read, 0);
 }
 
 static void tst_danmarc_to_utf8(void)
@@ -879,4 +918,3 @@ int main (int argc, char **argv)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-

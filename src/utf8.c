@@ -45,12 +45,16 @@ unsigned long yaz_read_UTF8_char(const unsigned char *inp,
     unsigned long x = 0;
 
     *no_read = 0; /* by default */
-    if (inp[0] <= 0x7f)
+    if (!inbytesleft)
+    {
+        *error = YAZ_ICONV_EINVAL;
+    }
+    else if (inp[0] <= 0x7f)
     {
         x = inp[0];
         *no_read = 1;
     }
-    else if (inp[0] <= 0xbf || inp[0] >= 0xfe)
+    else if (inp[0] < 0xc2 || inp[0] > 0xf4)
     {
         *error = YAZ_ICONV_EILSEQ;
     }
@@ -59,10 +63,7 @@ unsigned long yaz_read_UTF8_char(const unsigned char *inp,
         if ((inp[1] & 0xc0) == 0x80)
         {
             x = ((inp[0] & 0x1f) << 6) | (inp[1] & 0x3f);
-            if (x >= 0x80)
-                *no_read = 2;
-            else
-                *error = YAZ_ICONV_EILSEQ;
+            *no_read = 2;
         }
         else
             *error = YAZ_ICONV_EILSEQ;
@@ -73,7 +74,7 @@ unsigned long yaz_read_UTF8_char(const unsigned char *inp,
         {
             x = ((inp[0] & 0x0f) << 12) | ((inp[1] & 0x3f) << 6) |
                 (inp[2] & 0x3f);
-            if (x >= 0x800)
+            if (x >= 0x800 && (x < 0xd800 || x > 0xdfff))
                 *no_read = 3;
             else
                 *error = YAZ_ICONV_EILSEQ;
@@ -81,48 +82,15 @@ unsigned long yaz_read_UTF8_char(const unsigned char *inp,
         else
             *error = YAZ_ICONV_EILSEQ;
     }
-    else if (inp[0] <= 0xf7 && inbytesleft >= 4)
+    else if (inp[0] <= 0xf4 && inbytesleft >= 4)
     {
         if ((inp[1] & 0xc0) == 0x80 && (inp[2] & 0xc0) == 0x80
             && (inp[3] & 0xc0) == 0x80)
         {
             x = ((inp[0] & 0x07) << 18) | ((inp[1] & 0x3f) << 12) |
                 ((inp[2] & 0x3f) << 6) | (inp[3] & 0x3f);
-            if (x >= 0x10000)
+            if (x >= 0x10000 && x <= 0x10ffff)
                 *no_read = 4;
-            else
-                *error = YAZ_ICONV_EILSEQ;
-        }
-        else
-            *error = YAZ_ICONV_EILSEQ;
-    }
-    else if (inp[0] <= 0xfb && inbytesleft >= 5)
-    {
-        if ((inp[1] & 0xc0) == 0x80 && (inp[2] & 0xc0) == 0x80
-            && (inp[3] & 0xc0) == 0x80 && (inp[4] & 0xc0) == 0x80)
-        {
-            x = ((inp[0] & 0x03) << 24) | ((inp[1] & 0x3f) << 18) |
-                ((inp[2] & 0x3f) << 12) | ((inp[3] & 0x3f) << 6) |
-                (inp[4] & 0x3f);
-            if (x >= 0x200000)
-                *no_read = 5;
-            else
-                *error = YAZ_ICONV_EILSEQ;
-        }
-        else
-            *error = YAZ_ICONV_EILSEQ;
-    }
-    else if (inp[0] <= 0xfd && inbytesleft >= 6)
-    {
-        if ((inp[1] & 0xc0) == 0x80 && (inp[2] & 0xc0) == 0x80
-            && (inp[3] & 0xc0) == 0x80 && (inp[4] & 0xc0) == 0x80
-            && (inp[5] & 0xc0) == 0x80)
-        {
-            x = ((inp[0] & 0x01) << 30) | ((inp[1] & 0x3f) << 24) |
-                ((inp[2] & 0x3f) << 18) | ((inp[3] & 0x3f) << 12) |
-                ((inp[4] & 0x3f) << 6) | (inp[5] & 0x3f);
-            if (x >= 0x4000000)
-                *no_read = 6;
             else
                 *error = YAZ_ICONV_EILSEQ;
         }
@@ -162,6 +130,11 @@ size_t yaz_write_UTF8_char(unsigned long x,
 {
     unsigned char *outp = (unsigned char *) *outbuf;
 
+    if ((x >= 0xd800 && x <= 0xdfff) || x > 0x10ffff)
+    {
+        *error = YAZ_ICONV_EILSEQ;
+        return (size_t)(-1);
+    }
     if (x <= 0x7f && *outbytesleft >= 1)
     {
         *outp++ = (unsigned char) x;
@@ -180,32 +153,13 @@ size_t yaz_write_UTF8_char(unsigned long x,
         *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 3;
     }
-    else if (x <= 0x1fffff && *outbytesleft >= 4)
+    else if (x <= 0x10ffff && *outbytesleft >= 4)
     {
         *outp++ = (unsigned char) ((x >> 18) | 0xf0);
         *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
         *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
         *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
         (*outbytesleft) -= 4;
-    }
-    else if (x <= 0x3ffffff && *outbytesleft >= 5)
-    {
-        *outp++ = (unsigned char) ((x >> 24) | 0xf8);
-        *outp++ = (unsigned char) (((x >> 18) & 0x3f) | 0x80);
-        *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
-        *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
-        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
-        (*outbytesleft) -= 5;
-    }
-    else if (*outbytesleft >= 6)
-    {
-        *outp++ = (unsigned char) ((x >> 30) | 0xfc);
-        *outp++ = (unsigned char) (((x >> 24) & 0x3f) | 0x80);
-        *outp++ = (unsigned char) (((x >> 18) & 0x3f) | 0x80);
-        *outp++ = (unsigned char) (((x >> 12) & 0x3f) | 0x80);
-        *outp++ = (unsigned char) (((x >> 6)  & 0x3f) | 0x80);
-        *outp++ = (unsigned char) ((x & 0x3f) | 0x80);
-        (*outbytesleft) -= 6;
     }
     else
     {
@@ -267,4 +221,3 @@ int yaz_utf8_check(const char *str)
  * End:
  * vim: shiftwidth=4 tabstop=8 expandtab
  */
-
