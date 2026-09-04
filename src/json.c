@@ -302,6 +302,11 @@ static struct json_node *json_parse_value(json_parser_t p)
     int c = look_ch(p);
     if (c == '\"')
         return json_parse_string(p);
+    else if (c == 0)
+    {
+        p->err_msg = "expecting value";
+        return 0;
+    }
     else if (strchr("0123456789-", c))
         return json_parse_number(p);
     else if (c == '{')
@@ -332,10 +337,6 @@ static struct json_node *json_parse_value(json_parser_t p)
                 sb->node = 0;
                 return ret;
             }
-    }
-    else if (c == 0)
-    {
-        return 0;
     }
     else
     {

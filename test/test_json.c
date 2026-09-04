@@ -30,18 +30,21 @@ static int expect(json_parser_t p, const char *input,
     n = json_parser_parse(p, input);
     if (n == 0)
     {
+        const char *errmsg = json_parser_get_errmsg(p);
+        if (errmsg == 0)
+            errmsg = "null";
         if (strncmp(output, "error:", 6) == 0)
         {
-            if (strcmp(output + 6, json_parser_get_errmsg(p)))
+            if (strcmp(output + 6, errmsg))
                 yaz_log(YLOG_WARN, "expected error '%s' but got error '%s'",
-                output + 6, json_parser_get_errmsg(p));
+                    output + 6, errmsg);
             else
                 ret = 1;
         }
         else
         {
             yaz_log(YLOG_WARN, "expected '%s' but got error '%s'",
-                output, json_parser_get_errmsg(p));
+                output, errmsg);
         }
     }
     else
@@ -69,7 +72,9 @@ static void tst1(void)
     if (!p)
         return;
 
-    YAZ_CHECK(expect(p, "", "error:bad number"));
+    YAZ_CHECK(expect(p, "", "error:expecting value"));
+
+    YAZ_CHECK(expect(p, " \t\r\n", "error:expecting value"));
 
     YAZ_CHECK(expect(p, "1234", "1234"));
 
@@ -125,7 +130,7 @@ static void tst1(void)
 
     YAZ_CHECK(expect(p, "{\"a\":[1,2,3}", "error:expecting ]"));
 
-    YAZ_CHECK(expect(p, "{\"a\":[1,2,", "error:bad number"));
+    YAZ_CHECK(expect(p, "{\"a\":[1,2,", "error:expecting value"));
 
     YAZ_CHECK(expect(p, "{\"k\":\"wa\"}", "{\"k\":\"wa\"}"));
 
