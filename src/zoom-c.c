@@ -287,6 +287,7 @@ ZOOM_API(ZOOM_connection)
     c->odr_save = 0;
 
     c->async = 0;
+    c->check_cert = 0;
     c->support_named_resultsets = 0;
     c->last_event = ZOOM_EVENT_NONE;
 

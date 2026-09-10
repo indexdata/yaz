@@ -1735,7 +1735,7 @@
        <entry>check_cert</entry>
        <entry>
         If value is <literal>1</literal> or <literal>T</literal>, SSL certificate
-        server verification (system trust and server hostname)
+        server verification (system trust and server hostname) is enabled.
        </entry>
        <entry>false</entry></row>
      </tbody>
