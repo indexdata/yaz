@@ -124,12 +124,12 @@ YAZ_EXPORT const char *cs_errmsg(int n);
  */
 YAZ_EXPORT int cs_get_error(COMSTACK cs, const char **details);
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host,
-                                   int blocking, void **vp);
+                                   int flags, void **vp);
 
 YAZ_EXPORT COMSTACK cs_create_host_proxy(const char *vhost,
-                                         int blocking, void **vp,
+                                         int flags, void **vp,
                                          const char *proxy_host);
-YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int blocking, void **vp,
+YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
                                     const char *proxy_host, int *proxy_mode);
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 /** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */

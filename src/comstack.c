@@ -174,19 +174,19 @@ int cs_parse_host(const char *uri, const char **host,
     return 1;
 }
 
-COMSTACK cs_create_host(const char *vhost, int blocking, void **vp)
+COMSTACK cs_create_host(const char *vhost, int flags, void **vp)
 {
-    return cs_create_host_proxy(vhost, blocking, vp, 0);
+    return cs_create_host_proxy(vhost, flags, vp, 0);
 }
 
-COMSTACK cs_create_host_proxy(const char *vhost, int blocking, void **vp,
+COMSTACK cs_create_host_proxy(const char *vhost, int flags, void **vp,
                               const char *proxy_host)
 {
     int proxy_mode;
-    return cs_create_host2(vhost, blocking, vp, proxy_host, &proxy_mode);
+    return cs_create_host2(vhost, flags, vp, proxy_host, &proxy_mode);
 }
 
-COMSTACK cs_create_host2(const char *vhost, int blocking, void **vp,
+COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
                          const char *proxy_host, int *proxy_mode)
 {
     enum oid_proto proto = PROTO_Z3950;
@@ -253,17 +253,17 @@ COMSTACK cs_create_host2(const char *vhost, int blocking, void **vp,
     }
     if (t == tcpip_type)
     {
-        cs = yaz_tcpip_create3(-1, blocking, proto, connect_host ? host : 0,
+        cs = yaz_tcpip_create3(-1, flags, proto, connect_host ? host : 0,
                                connect_auth, bind_host);
     }
     else if (t == ssl_type)
     {
-        cs = yaz_ssl_create(-1, blocking, proto, connect_host ? host : 0,
+        cs = yaz_ssl_create(-1, flags, proto, connect_host ? host : 0,
                             connect_auth, bind_host);
     }
     else
     {
-        cs = cs_create(t, blocking, proto);
+        cs = cs_create(t, flags, proto);
     }
     if (cs)
     {
