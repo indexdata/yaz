@@ -1,3 +1,27 @@
+--- 5.38.0 2026/09/10
+
+JSON: fixes for `json_parser_subst`. Add `json_clone_node`
+
+yaz-iconv: UTF-8 handling according to RFC 3629
+
+HTTP: tighten validation of incoming HTTP chunked messages
+
+comstack: add `cs_get_error` for providing error details about SSL failures.
+
+SSL client side certificate: for `yaz-client` and `yaz-url` this is achieved with
+option -C. In API, by cs_set_ssl_certificate_file. With ZOOM, the filename
+is specified by option `cert_fname`.
+
+SSL certificate checking: enabled with `-e` for `yaz-client` and `yaz-url`. With
+ZOOM, controlled by option `check_cert`; value `"T"` or `"1"` enables this.
+
+comstack: tighten decoding of packages. Function `cs_complete_auto` may
+return -1 for malformed input; the transport sets `CSPROTERR`.
+Lower `max_recv_bytes` default from 128 MB to 16 MB.
+Proper overflow in YAZ atoi functions.
+New header yaz/atoi.h . Proper overflow handling in functions `yaz_atoi` and `yaz_atoul`.
+unix/tcpip checks for overflow before allocation.
+
 --- 5.37.3 2026/05/20
 
 Update CSS for documentation.
