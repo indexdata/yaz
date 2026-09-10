@@ -1731,6 +1731,13 @@
   +     Alternatively, specify certificate-file,key-file when they are separate.
        </entry>
        <entry>none</entry></row>
+      <row>
+       <entry>check_cert</entry>
+       <entry>
+        If value is <literal>1</literal> or <literal>T</literal>, SSL certificate
+        server verification (system trust and server hostname)
+       </entry>
+       <entry>false</entry></row>
      </tbody>
     </tgroup>
    </table>
@@ -9459,7 +9466,7 @@ void odr_choice_bias(ODR o, int what);
    <sect2 id="comstack.managing.endpoints">
     <title>Managing Endpoints</title>
     <synopsis>
-     COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
+     COMSTACK cs_create(CS_TYPE type, int flags, int protocol);
     </synopsis>
     <para>
      Creates an instance of the protocol stack - a communications endpoint.
@@ -9474,9 +9481,8 @@ void odr_choice_bias(ODR o, int what);
      </varlistentry>
      <varlistentry>
       <term><literal>ssl_type</literal></term>
-      <listitem><para>Secure Socket Layer (SSL). This COMSTACK
-      is experimental and is not fully implemented. If
-      HTTP is used, this effectively is HTTPS.
+      <listitem><para>Secure Socket Layer (SSL). This is HTTPS if
+      protocol is HTTP; encrypted BER channel if protocol is Z39.50.
       </para></listitem>
      </varlistentry>
      <varlistentry>
@@ -9490,8 +9496,9 @@ void odr_choice_bias(ODR o, int what);
     <para>
      The <function>cs_create</function> function returns a null-pointer
      if a system error occurs.
-     The <literal>blocking</literal> parameter should be '1' if
-     you wish the association to operate in blocking mode, and '0' otherwise.
+     The <literal>flags</literal> parameter should be a combination of
+     <literal>CS_FLAGS</literal>bits,
+     for example <literal>CS_FLAGS_BLOCKING|CS_FLAGS_CHECK_CERT</literal>.
      The <literal>protocol</literal> field should be
      <literal>PROTO_Z3950</literal> or <literal>PROTO_HTTP</literal>.
      Protocol <literal>PROTO_SR</literal> is no longer supported.
@@ -9520,13 +9527,14 @@ void odr_choice_bias(ODR o, int what);
     </synopsis>
     <para>
      Sends <literal>buf</literal> down the wire.
-     In blocking mode, this function will return only when a full buffer has
-     been written, or an error has occurred. In nonblocking mode, it's
-     possible that the function will be unable to send the full buffer
-     at once, which will be indicated by a return value of 1.
-     The function will keep track of the number of octets already written; you
-     should call it repeatedly with the same values of <literal>buf</literal>
-     and <literal>len</literal>, until the buffer has been transmitted.
+     In blocking mode <literal>CS_FLAGS_BLOCKING</literal>, this function will
+     return only when a full buffer has been written, or an error has occurred.
+     In nonblocking mode, it's possible that the function will be unable to
+     send the full buffer at once, which will be indicated by a return value of
+     1. The function will keep track of the number of octets already written;
+     you should call it repeatedly with the same values of
+     <literal>buf</literal> and <literal>len</literal>, until the buffer has
+     been transmitted.
      When a full buffer has been sent, the function will return 0 for
      success. The return value -1 indicates an error condition (see below).
     </para>

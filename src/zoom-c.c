@@ -528,6 +528,7 @@ ZOOM_API(void)
         ZOOM_options_get_int(c->options, "preferredMessageSize", 64*1024*1024);
 
     c->async = ZOOM_options_get_bool(c->options, "async", 0);
+    c->check_cert = ZOOM_options_get_bool(c->options, "check_cert", 0);
 
     yaz_cookies_destroy(c->cookies);
     c->cookies = yaz_cookies_create();
@@ -1074,10 +1075,14 @@ static zoom_ret do_connect(ZOOM_connection c)
 static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 {
     void *add;
+    int flags = CS_FLAGS_DNS_NO_BLOCK;
 
     if (c->cs)
         cs_close(c->cs);
-    c->cs = cs_create_host2(logical_url, CS_FLAGS_DNS_NO_BLOCK, &add,
+
+    if (c->check_cert)
+        flags |= CS_FLAGS_CHECK_CERT;
+    c->cs = cs_create_host2(logical_url, flags, &add,
                             c->tproxy ? c->tproxy : c->proxy,
                             &c->proxy_mode);
     if (!c->proxy)
