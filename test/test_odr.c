@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 #include <yaz/oid_util.h>
 #include "test_odrcodec.h"
 

@@ -1780,7 +1780,7 @@ int cs_set_head_only(COMSTACK cs, int head_only)
         sp->complete = completer;
         return 0;
     }
-    cs->cerrno = CS_ST_INCON;
+    cs->cerrno = CSOUTSTATE;
     return -1;
 }
 
