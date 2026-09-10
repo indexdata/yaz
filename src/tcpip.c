@@ -1771,16 +1771,16 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 
 int cs_set_head_only(COMSTACK cs, int head_only)
 {
+    int (*completer)(const char *buf, int len) =
+        head_only ? cs_complete_auto_head : cs_complete_auto;
+
     if (cs->type == tcpip_type || cs->type == ssl_type)
     {
         tcpip_state *sp = (tcpip_state *)cs->cprivate;
-        if (head_only)
-            sp->complete = cs_complete_auto_head;
-        else
-            sp->complete = cs_complete_auto;
+        sp->complete = completer;
         return 0;
     }
-    cs_set_error(cs, CS_ST_INCON, 0);
+    cs->cerrno = CS_ST_INCON;
     return -1;
 }
 
