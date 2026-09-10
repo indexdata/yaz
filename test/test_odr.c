@@ -7,6 +7,8 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
+#include <string.h>
 #include <yaz/oid_util.h>
 #include "test_odrcodec.h"
 
@@ -369,10 +371,51 @@ void do_nothing_useful(Odr_int value)
     odr_destroy(decode);
 }
 
+static void tst_ber_length(void)
+{
+    ODR encode = odr_createmem(ODR_ENCODE);
+    const int values[] = { 0, 127, 128, 65535, INT_MAX };
+    size_t i;
+    int exact, len;
+    unsigned char overflow[sizeof(int) + 1];
+    unsigned int value = (unsigned int) INT_MAX + 1U;
+
+    for (i = 0; i < sizeof(values) / sizeof(*values); i++)
+        for (exact = 0; exact <= 1; exact++)
+        {
+            int size;
+            char *buf;
+            odr_reset(encode);
+            YAZ_CHECK(ber_enclen(encode, values[i], sizeof(int) + 2,
+                                exact) > 0);
+            buf = odr_getbuf(encode, &size, 0);
+            YAZ_CHECK_EQ(ber_declen(buf, &len, size), size);
+            YAZ_CHECK_EQ(len, values[i]);
+            YAZ_CHECK_EQ(ber_declen(buf, &len, size - 1), -1);
+        }
+
+    overflow[0] = 0x80 | sizeof(int);
+    for (i = sizeof(int); i > 0; i--)
+    {
+        overflow[i] = value & 0xff;
+        value >>= 8;
+    }
+    YAZ_CHECK_EQ(ber_declen((const char *) overflow, &len,
+                           sizeof(overflow)), -2);
+    memset(overflow + 1, 0xff, sizeof(int));
+    YAZ_CHECK_EQ(ber_declen((const char *) overflow, &len,
+                           sizeof(overflow)), -2);
+    YAZ_CHECK_EQ(ber_declen("\x80", &len, 1), 1);
+    YAZ_CHECK_EQ(len, -1);
+    YAZ_CHECK_EQ(ber_declen("\xff", &len, 1), -2);
+    odr_destroy(encode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
+    tst_ber_length();
     YAZ_CHECK_TERM;
 }
 

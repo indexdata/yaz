@@ -1665,7 +1665,7 @@ static int do_read(ZOOM_connection c)
     yaz_log(c->log_details, "%p do_read r=%d", c, r);
     if (r == 1)
         return 0;
-    if (r < 0)
+    if (r < 0 && (c->cs->cerrno == CSPROTERR || c->cs->cerrno == CSBUFSIZE))
     {
         char msg[100];
         yaz_snprintf(msg, sizeof(msg), "%s: %s",
@@ -1673,7 +1673,7 @@ static int do_read(ZOOM_connection c)
         ZOOM_set_error(c, ZOOM_ERROR_DECODE, msg);
         ZOOM_connection_close(c);
     }
-    else if (r == 0)
+    else if (r <= 0)
     {
         if (!ZOOM_test_reconnect(c))
         {
