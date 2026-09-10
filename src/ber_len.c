@@ -16,6 +16,7 @@
 #endif
 
 #include <stdio.h>
+#include <limits.h>
 #include "odr-priv.h"
 
 /**
@@ -109,18 +110,17 @@ int ber_declen(const char *buf, int *len, int max)
     }
     if (*b == 0XFF)     /* reserved value */
         return -2;
-    /* indefinite long form */
+    /* definite long form */
     n = *b & 0X7F;
     if (n >= max)
         return -1;
-    if (n > (int) sizeof(int) - 1)
-        return -2;  /* length too large to represent */
     *len = 0;
     b++;
     while (--n >= 0)
     {
-        *len <<= 8;
-        *len |= *(b++);
+        if (*len > (INT_MAX - *b) / 256)
+            return -2;  /* length too large to represent */
+        *len = *len * 256 + *b++;
     }
     return ((const char *) b - buf);
 }
