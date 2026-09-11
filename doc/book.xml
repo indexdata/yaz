@@ -9369,7 +9369,7 @@ void odr_choice_bias(ODR o, int what);
     char *protocol_package = "GET / HTTP/1.0\r\n\r\n";
     int protocol_package_length = strlen(protocol_package);
 
-    stack = cs_create(tcpip_type, 1, PROTO_HTTP);
+    stack = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
     if (!stack) {
         perror("cs_create");  /* use perror() here since we have no stack yet */
         return -1;
@@ -9414,8 +9414,7 @@ void odr_choice_bias(ODR o, int what);
 
     /* clean up */
     cs_close(stack);
-    if (buf)
-        xfree(buf);
+    xfree(buf);
     return 0;
 ]]>
    </programlisting>
@@ -9696,7 +9695,7 @@ void odr_choice_bias(ODR o, int what);
     server, you can use
    </para>
    <synopsis>
-    COMSTACK cs_createbysocket(int socket, CS_TYPE type, int blocking,
+    COMSTACK cs_createbysocket(int socket, CS_TYPE type, int flags,
                                int protocol);
    </synopsis>
    <para>
@@ -9799,7 +9798,7 @@ void odr_choice_bias(ODR o, int what);
     function
    </para>
    <synopsis>
-    COMSTACK cs_create_host (const char *str, int blocking, void **vp);
+    COMSTACK cs_create_host (const char *str, int flags, void **vp);
    </synopsis>
    <para>
     which is just a wrapper for <function>cs_create</function> and
@@ -9809,7 +9808,7 @@ void odr_choice_bias(ODR o, int what);
     are <literal>tcp:</literal> and <literal>unix:</literal> and
     <literal>ssl:</literal> for TCP/IP and UNIX and SSL respectively.
     If no prefix is given, then TCP/IP is used.
-    The <parameter>blocking</parameter> is passed to
+    The <parameter>flags</parameter> is passed to
     function <function>cs_create</function>. The third parameter
     <parameter>vp</parameter> is a pointer to &comstack; stack type
     specific values.
@@ -9908,11 +9907,11 @@ void odr_choice_bias(ODR o, int what);
     #include <yaz/tcpip.h>  /* this is for TCP/IP and SSL support */
     #include <yaz/unix.h>   /* this is for UNIX socket support */
 
-    COMSTACK cs_create(CS_TYPE type, int blocking, int protocol);
+    COMSTACK cs_create(CS_TYPE type, int flags, int protocol);
 
-    COMSTACK cs_createbysocket(int s, CS_TYPE type, int blocking,
+    COMSTACK cs_createbysocket(int s, CS_TYPE type, int flags,
                                int protocol);
-    COMSTACK cs_create_host(const char *str, int blocking,
+    COMSTACK cs_create_host(const char *str, int flags,
                             void **vp);
 
     int cs_bind(COMSTACK handle, int mode);
