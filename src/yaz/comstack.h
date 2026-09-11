@@ -97,9 +97,9 @@ struct comstack
 #define cs_listen_check(handle, ap, al, cf, cd) ((*(handle)->f_listen)(handle, ap, al, cf, cd))
 #define cs_accept(handle) ((*(handle)->f_accept)(handle))
 #define cs_close(handle) ((*(handle)->f_close)(handle))
-#define cs_create(type, blocking, proto) ((*type)(-1, blocking, proto, 0))
-#define cs_createbysocket(sock, type, blocking, proto) \
-        ((*type)(sock, blocking, proto, 0))
+#define cs_create(type, flags, proto) ((*type)(-1, flags, proto, 0))
+#define cs_createbysocket(sock, type, flags, proto) \
+        ((*type)(sock, flags, proto, 0))
 #define cs_type(handle) ((handle)->type)
 #define cs_fileno(handle) ((handle)->iofile)
 #define cs_getstate(handle) ((handle)->getstate)
