@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: YAZ
 Version: @VERSION@
 Description: YAZ library for building Z39.50 applications
-Requires: libexslt
+Requires: @PKGCONFIG_XML@
 Libs: -L${libdir} -lyaz
 Libs.private: @LIBS@
 Cflags: -I${includedir} @YAZ_CONFIG_CFLAGS@

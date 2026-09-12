@@ -11,6 +11,7 @@ dnl
 AC_DEFINE([_POSIX_C_SOURCE],[200809L],[Enable POSIX])
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
+AC_SUBST([PKGCONFIG_XML])
 dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
@@ -338,7 +339,7 @@ if test "$enable_threads" = "yes" -a "$HAVETHREADS" = "0"; then
 		    LIBS="$lib $OLIBS"
 		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[ #include <pthread.h> ]],
 				   [[ pthread_t id; pthread_join(id, 0); ]])],
-				   [ PTHREAD_LIBS=$lib; break 
+				   [ PTHREAD_LIBS=$lib; break
 			],[])
 		done
 		LIBS=$OLIBS
@@ -357,16 +358,19 @@ YAZ_LIBXML2([
 	AC_DEFINE([YAZ_HAVE_XML2], [1], [Define to 1 if Libxml2 is present])
 	YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_XML2=1"
 	xml_enabled=true
+        PKGCONFIG_XML=libxml-2.0
     ])
 
 if test "$xml_enabled" = "true"; then
     YAZ_LIBXSLT([
 	    AC_DEFINE([YAZ_HAVE_XSLT], [1], [Define to 1 if Libxslt is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_XSLT=1"
+            PKGCONFIG_XML=libxslt
 	])
     YAZ_LIBEXSLT([
 	    AC_DEFINE([YAZ_HAVE_EXSLT], [1], [Define to 1 if EXSLT is present])
 	    YAZ_CONFIG_CFLAGS="$YAZ_CONFIG_CFLAGS -DYAZ_HAVE_EXSLT=1"
+            PKGCONFIG_XML=libexslt
 	])
 
 fi
