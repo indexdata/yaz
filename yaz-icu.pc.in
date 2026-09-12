@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: YAZ ICU
 Version: @VERSION@
 Description: YAZ ICU library for building Z39.50 applications
-Requires: yaz libexslt icu-i18n
+Requires: yaz icu-i18n
 Libs: -L${libdir} -lyaz_icu @PTHREAD_LIBS@
 Cflags: @ICU_CPPFLAGS@

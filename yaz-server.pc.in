@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: YAZ server
 Version: @VERSION@
 Description: YAZ server library for building Z39.50 applications
-Requires: yaz libexslt
+Requires: yaz
 Libs: -L${libdir} -lyaz_server @PTHREAD_LIBS@
