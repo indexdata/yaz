@@ -3,6 +3,7 @@
  * See the file LICENSE for details.
  */
 /* bison parser for CQL grammar. */
+%require "2.4"
 %{
 /**
  * \file cql.c
