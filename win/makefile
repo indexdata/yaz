@@ -888,7 +888,7 @@ version.nsi: $(ROOTDIR)/IDMETA
 !if $(HAVE_BISON)
 $(SRCDIR)\cql.c: $(SRCDIR)\cql.y
 	@cd $(SRCDIR)
-	$(BISON) -y -p cql_ -o cql.c cql.y
+	$(BISON) -p cql_ -o cql.c cql.y
 
 !endif
 
