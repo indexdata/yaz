@@ -35,7 +35,8 @@ libyaz_server_la_LIBADD = libyaz.la
 libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) -I$(srcdir)/libstemmer_c/include
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS)
 
-AM_YFLAGS=-p cql_
+# Automake's ylwrap expects this output name even without Bison's -y mode.
+AM_YFLAGS=-p cql_ -o y.tab.c
 
 # MARC8->UTF8 conversion is generated from codetables.xml
 marc8.c: charconv.tcl codetables.xml

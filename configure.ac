@@ -15,7 +15,7 @@ AC_SUBST([PKGCONFIG_XML])
 dnl ------ Checking programs
 AC_PROG_CC
 AC_PROG_CPP
-AC_CHECK_PROGS([YACC], ['bison -y'])
+AC_CHECK_PROGS([YACC], [bison])
 test -z "$YACC" -a ! -f src/cql.c && AC_MSG_ERROR([GNU Bison not found])
 test -z "$YACC" && AC_MSG_WARN([GNU Bison not found])
 AC_CHECK_PROGS([TCLSH], [tclsh tclsh8.5 tclsh8.4 tclsh8.3 tclsh8.2], [tclsh])

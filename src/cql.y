@@ -8,7 +8,7 @@
  * \file cql.c
  * \brief Implements CQL parser.
  *
- * This is a YACC parser, but since it must be reentrant, Bison is required.
+ * This is a reentrant Bison parser.
  * The original source file is cql.y.
  */
 #if HAVE_CONFIG_H
@@ -62,6 +62,10 @@ int yyerror(void *lval, char *msg);
 %lex-param {void *parm}
 %parse-param {void *parm}
 %define api.pure
+%initial-action {
+    /* Bison 3.8.2 sets this counter without otherwise using it. */
+    (void) yynerrs;
+}
 %token PREFIX_NAME SIMPLE_STRING AND OR NOT PROX GE LE NE EXACT SORTBY
 
 %%
