@@ -164,7 +164,7 @@ dnl
 dnl ------ GNU Readline
 READLINE_SHARED_LIBADD=""
 AC_CHECK_LIB([ncurses],[tgetent],[READLINE_SHARED_LIBADD="-lncurses"],
-	AC_CHECK_LIB([termcap],[tgetent],[READLINE_SHARED_LIBADD="-ltermcap"])
+	[AC_CHECK_LIB([termcap],[tgetent],[READLINE_SHARED_LIBADD="-ltermcap"])]
 )
 READLINE_LIBS=""
 AC_CHECK_LIB([readline],[readline],
@@ -246,7 +246,7 @@ dnl various types. First socklen_t, then size_t, finally int.
 dnl If the prototype succeeds, we are probably safe.
 dnl That works if accept is not preprocessor defined (such sa AIX)
 AC_MSG_CHECKING([for socklen_t])
-AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
+AC_CACHE_VAL([ac_cv_check_socklen_t],[ac_cv_check_socklen_t=''
 	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
