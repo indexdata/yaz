@@ -284,7 +284,7 @@ COMSTACK connect_to( char *hostaddr ){
     int status;
 
     yaz_log(YLOG_DEBUG,"Connecting to '%s'", hostaddr);
-    stack = cs_create_host(hostaddr, 1, &server_address_ip );
+    stack = cs_create_host(hostaddr, CS_FLAGS_BLOCKING, &server_address_ip );
     if (!stack) {
         yaz_log(YLOG_FATAL,"Error in creating the comstack '%s' ",
                  hostaddr );
