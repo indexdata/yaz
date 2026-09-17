@@ -123,14 +123,109 @@ YAZ_EXPORT const char *cs_errmsg(int n);
     \returns error code
  */
 YAZ_EXPORT int cs_get_error(COMSTACK cs, const char **details);
+/** \brief Creates an endpoint from a host or URI specification
+    \param type_and_host host or URI; see cs_create_host2 for syntax
+    \param flags combination of CS_FLAGS_* bits; zero for nonblocking I/O
+    \param vp required address output pointer; owned by the returned COMSTACK
+    \returns new COMSTACK, or NULL on failure
+
+    Equivalent to cs_create_host2 with no proxy_host and with the proxy mode
+    output discarded. This creates an endpoint but does not connect it.
+    Pass the address of a void * variable as vp, then use *vp with cs_connect
+    or cs_bind. Do not free *vp; cs_straddr may replace it and cs_close
+    releases it. Do not use *vp on failure. Close the endpoint with cs_close.
+    \see cs_create_host2
+ */
 YAZ_EXPORT COMSTACK cs_create_host(const char *type_and_host,
                                    int flags, void **vp);
 
+/** \brief Creates an endpoint with an optional proxy
+    \param vhost target host or URI; see cs_create_host2 for syntax
+    \param flags combination of CS_FLAGS_* bits; zero for nonblocking I/O
+    \param vp required address output pointer; owned by the returned COMSTACK
+    \param proxy_host proxy host or URI, or NULL for no separate proxy
+    \returns new COMSTACK, or NULL on failure
+
+    Equivalent to cs_create_host2 with the proxy mode output discarded.
+    Address ownership and connection handling are as for cs_create_host.
+    \see cs_create_host2
+ */
 YAZ_EXPORT COMSTACK cs_create_host_proxy(const char *vhost,
                                          int flags, void **vp,
                                          const char *proxy_host);
+/** \brief Creates an endpoint and selects direct or proxy connection handling
+    \param vhost target host or URI specification (required)
+    \param flags combination of CS_FLAGS_* bits; zero for nonblocking I/O
+    \param vp required address output pointer; owned by the returned COMSTACK
+    \param proxy_host proxy host or URI, or NULL for no separate proxy
+    \param proxy_mode required output pointer: 0 for direct/CONNECT, 1 for
+           application-level proxying; only use this value on success
+    \returns new COMSTACK, or NULL on failure
+
+    Supported case-sensitive target forms are:
+    - host[:port] or tcp:host[:port] for Z39.50 over TCP/IP (default port 210).
+    - ssl:host[:port] for Z39.50 over TLS (default port 210).
+    - http://host[:port][/path] for HTTP (default port 80).
+    - https://host[:port][/path] for HTTPS (default port 443).
+    - unix:path for Z39.50 over a UNIX socket.
+    - unix:path:target to use a UNIX socket with the protocol and arguments
+      from target, for example unix:/tmp/yaz.sock:http://localhost/sru.
+      Use an unencrypted target to retain the UNIX transport.
+    - connect:[user:password@]proxy-host:proxy-port,target for an explicit
+      HTTP CONNECT tunnel to a TCP/IP or TLS target.
+
+    Bracket IPv6 addresses, for example tcp:[::1]:210. Only HTTP/HTTPS
+    prefixes strip leading slashes; tcp://host is not the TCP syntax.
+    Network address resolution ignores suffixes starting with / or ?;
+    the application interprets paths, queries, and database names.
+    These specifications are not percent-decoded. Direct URI user information
+    and fragments are not interpreted. TLS requires GnuTLS support, and UNIX
+    sockets are unavailable on Windows. UNIX addresses also accept
+    file=path,user=name-or-id,group=name-or-id,umask=mode, with file required
+    and the other keys optional. The octal umask value sets socket permissions
+    directly when binding; it is not a mask to subtract.
+
+    A local source address may follow the first space in vhost for TCP/IP or
+    TLS. Put a path slash before the space, for example
+    "tcp:server.example:210/ 192.0.2.10", so resolution excludes the suffix.
+    The source port is forced to zero; for an IPv6 source include a port
+    placeholder, for example "http://[::1]/ [::1]:0".
+
+    A separate proxy_host must select TCP/IP, not TLS or UNIX sockets, and
+    must not contain another proxy specification. TLS targets always use
+    CONNECT. A Z39.50 target with an HTTP proxy also uses CONNECT. Other
+    TCP/IP target/proxy combinations use application-level proxying.
+    In that case *proxy_mode is 1 and the caller must supply the proxy
+    protocol messages (for example absolute HTTP request URIs). With CONNECT,
+    *proxy_mode is 0 and cs_connect/cs_rcvconnect perform the tunnel handshake.
+    Explicit connect: and unix:path:target forms override proxy_host.
+
+    Specify both proxy and target ports explicitly for CONNECT: the target
+    authority is sent without adding a default port, and an omitted proxy
+    port defaults according to the target transport/protocol. Credentials
+    before @ generate a Basic Proxy-Authorization header for CONNECT only;
+    they may also appear in proxy_host when CONNECT is selected.
+
+    This function does not establish a connection. On success, pass *vp to
+    cs_connect or cs_bind and eventually release the endpoint with cs_close.
+    Do not free *vp; cs_straddr may replace it. Do not use *vp on failure.
+    With CS_FLAGS_DNS_NO_BLOCK and resolver thread support, resolution errors
+    may be reported later during connection establishment.
+    \see cs_create_host, cs_create_host_proxy, cs_parse_host, cs_get_host_args
+ */
 YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
                                     const char *proxy_host, int *proxy_mode);
+/** \brief Extracts application arguments from a host or URI specification
+    \param type_and_host host or URI specification (required)
+    \param args required output pointer to borrowed arguments, or an empty string
+
+    Returns the portion after the first path slash, skipping a :// separator.
+    For unix:path:args, returns args directly if that part contains no colon;
+    otherwise extracts the target path. For example tcp:localhost:210/books
+    yields books, and http://localhost/sru?version=1.2 yields sru?version=1.2.
+    No decoding is performed. Do not free *args; a nonempty result points
+    into type_and_host and is valid only while that input remains valid.
+ */
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
 /** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
@@ -151,6 +246,23 @@ YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
 YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 
+/** \brief Parses transport and protocol prefixes without resolving an address
+    \param uri host or URI specification (required); see cs_create_host2
+    \param host required output pointer into uri after recognized prefixes
+    \param t required transport output pointer
+    \param proto required protocol output pointer: PROTO_Z3950 or PROTO_HTTP
+    \param connect_host required output pointer to an allocated proxy/socket
+           address, or NULL when no such address is specified
+    \returns 1 on success, 0 for an unavailable transport
+
+    Recognizes connect: and unix: wrappers followed by tcp:, ssl:, http:,
+    or https:. With no recognized protocol prefix, selects Z39.50.
+    The default transport is TCP/IP. This function only parses prefixes;
+    success does not imply that the address is valid or resolvable.
+    On success, free a non-NULL *connect_host with xfree. Do not free *host;
+    it is valid only while uri remains valid. On failure, *connect_host is
+    NULL and the other outputs must not be used.
+ */
 YAZ_EXPORT int cs_parse_host(const char *uri, const char **host,
                              CS_TYPE *t, enum oid_proto *proto,
                              char **connect_host);

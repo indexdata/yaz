@@ -9799,7 +9799,13 @@ void odr_choice_bias(ODR o, int what);
    </synopsis>
    <para>
     The <literal>hostname</literal> can be either a domain name or an
-    IP address. The port number, if omitted, defaults to 210.
+    IPv4 address, or an IPv6 address enclosed in square brackets, for
+    example <literal>[::1]:210</literal>. The port, if omitted, defaults
+    to 210 for Z39.50, 80 for HTTP, and 443 for HTTPS. A service name
+    accepted by the system resolver may also be used instead of a port
+    number. A suffix beginning with <literal>/</literal> or
+    <literal>?</literal> is ignored when resolving the network address;
+    the application interprets database names, HTTP paths, and queries.
    </para>
    <para>
     For TCP/IP and SSL, the special hostnames <literal>@</literal>,
@@ -9824,28 +9830,249 @@ void odr_choice_bias(ODR o, int what);
     a pointer to a static area, which is overwritten on the next call
     to the function.
    </para>
-   <para>
-    A fairly recent addition to the &comstack; module is the utility
-    function
-   </para>
-   <synopsis>
-    COMSTACK cs_create_host (const char *str, int flags, void **vp);
-   </synopsis>
-   <para>
-    which is just a wrapper for <function>cs_create</function> and
-    <function>cs_straddr</function>. The <parameter>str</parameter>
-    is similar to that described for <function>cs_straddr</function>
-    but with a prefix denoting the &comstack; type. Prefixes supported
-    are <literal>tcp:</literal> and <literal>unix:</literal> and
-    <literal>ssl:</literal> for TCP/IP and UNIX and SSL respectively.
-    If no prefix is given, then TCP/IP is used.
-    The <parameter>flags</parameter> is passed to
-    function <function>cs_create</function>. The third parameter
-    <parameter>vp</parameter> is a pointer to &comstack; stack type
-    specific values.
-    Parameter <parameter>vp</parameter> is reserved for future use.
-    Set it to <literal>NULL</literal>.
-   </para>
+   <sect2 id="comstack.host-uri">
+    <title>Host and URI syntax</title>
+    <synopsis>
+     COMSTACK cs_create_host(const char *vhost, int flags, void **vp);
+    </synopsis>
+    <para>
+     This function creates an endpoint and converts its address, combining
+     <function>cs_create</function> and <function>cs_straddr</function>.
+     It does not establish a connection. The <parameter>vhost</parameter>
+     selects the transport, protocol, and address using the following
+     case-sensitive prefixes.
+    </para>
+    <informaltable>
+     <tgroup cols="4">
+      <thead><row><entry>Form</entry><entry>Transport</entry>
+       <entry>Protocol</entry><entry>Default port</entry></row></thead>
+      <tbody>
+       <row><entry><literal>host[:port]</literal></entry>
+        <entry>TCP/IP</entry><entry>Z39.50</entry><entry>210</entry></row>
+       <row><entry><literal>tcp:host[:port]</literal></entry>
+        <entry>TCP/IP</entry><entry>Z39.50</entry><entry>210</entry></row>
+       <row><entry><literal>ssl:host[:port]</literal></entry>
+        <entry>TLS</entry><entry>Z39.50</entry><entry>210</entry></row>
+       <row><entry><literal>http://host[:port][/path]</literal></entry>
+        <entry>TCP/IP</entry><entry>HTTP</entry><entry>80</entry></row>
+       <row><entry><literal>https://host[:port][/path]</literal></entry>
+        <entry>TLS</entry><entry>HTTP</entry><entry>443</entry></row>
+       <row><entry><literal>unix:path</literal></entry>
+        <entry>UNIX socket</entry><entry>Z39.50</entry>
+        <entry>Not applicable</entry></row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+    <para>
+     Square brackets above denote optional parts, except for the literal
+     brackets required around IPv6 addresses. For example,
+     <literal>tcp:[2001:db8::1]:9999/database</literal> selects Z39.50
+     over TCP/IP, and <literal>https://[::1]/sru</literal> selects HTTPS.
+     Only <literal>http:</literal> and <literal>https:</literal> strip
+     leading slashes from the host part, so <literal>http:localhost</literal>
+     is also accepted, but <literal>tcp://localhost</literal> is not the
+     TCP form. An unrecognized prefix is treated as part of an unprefixed
+     Z39.50 address, not as a new URI scheme. TLS forms require a build
+     with GnuTLS support; UNIX sockets are unavailable on Windows.
+    </para>
+    <para>
+     These strings are COMSTACK address specifications, not a general URI
+     parser. Host names and paths are not percent-decoded, and URI user
+     information and fragments are not interpreted. In particular,
+     <literal>user:password@host</literal> is not supported for a direct
+     connection. Proxy authentication has a separate syntax described below.
+    </para>
+    <para>
+     For a UNIX socket, <literal>unix:/tmp/yaz.sock</literal> names the
+     socket directly. The extended form
+     <literal>unix:path:target</literal> uses <literal>path</literal> as
+     the socket address and obtains the protocol and application arguments
+     from <literal>target</literal>. For example,
+     <literal>unix:/tmp/yaz.sock:http://localhost/sru</literal> selects
+     HTTP over a UNIX socket, and
+     <literal>unix:/tmp/yaz.sock:database</literal> selects Z39.50.
+     Use an unencrypted target: <literal>ssl:</literal> and
+     <literal>https:</literal> select the TLS transport instead of the
+     UNIX transport. The first colon after <literal>unix:</literal>
+     separates the socket address from the target, so it cannot be part
+     of the socket filename.
+    </para>
+    <para>
+     A UNIX socket address may also be a comma-separated list containing
+     <literal>file=path</literal> and optional <literal>user=name-or-id</literal>,
+     <literal>group=name-or-id</literal>, and <literal>umask=mode</literal>.
+     For example, <literal>unix:file=/tmp/yaz.sock,umask=0660</literal>.
+     The file is required in this form; unknown or repeated keys are errors.
+     User and group IDs are decimal, and the mode is octal. These options
+     control ownership and permissions when binding a server socket.
+     Despite its name, <literal>umask</literal> specifies the mode passed
+     to <function>chmod</function>, not a mask to subtract; the default
+     mode is <literal>0666</literal>.
+    </para>
+    <para>
+     For TCP/IP and TLS, a local source address can follow the first space
+     in <parameter>vhost</parameter>, for example
+     <literal>tcp:server.example:210/ 192.0.2.10</literal>. Include a
+     <literal>/</literal> before the space (or use an existing path or
+     query suffix), so the network address parser does not include the
+     source address in the destination host or port. The source port is
+     forced to zero, allowing the operating system to choose it. For an
+     IPv6 source, include an explicit port placeholder, for example
+     <literal>http://[::1]/ [::1]:0</literal>.
+    </para>
+    <para>
+     The <parameter>flags</parameter> are the same as for
+     <function>cs_create</function>; use zero for nonblocking operation
+     or <literal>CS_FLAGS_BLOCKING</literal> for blocking operation.
+     <literal>CS_FLAGS_CHECK_CERT</literal> enables TLS peer certificate
+     checking. <literal>CS_FLAGS_DNS_NO_BLOCK</literal> requests asynchronous
+     name resolution when resolver thread support is available, so resolution
+     errors may occur during connection establishment.
+     <literal>CS_FLAGS_NUMERICHOST</literal> requests numeric peer addresses
+     from <function>cs_addrstr</function>.
+    </para>
+    <para>
+     On success the return value is a COMSTACK and
+     <literal>*vp</literal> is its transport-specific address, suitable
+     for <function>cs_connect</function> or <function>cs_bind</function>.
+     Pass the address of a <type>void *</type> variable; the
+     <parameter>vp</parameter> argument must not be <literal>NULL</literal>.
+     The address is owned by the COMSTACK and must not be freed by the
+     caller. A later <function>cs_straddr</function> call may replace it.
+     On failure the function returns <literal>NULL</literal>; do not use
+     the address output. Release a successful endpoint with
+     <function>cs_close</function>.
+    </para>
+    <programlisting><![CDATA[
+     void *address = 0;
+     COMSTACK cs = cs_create_host("tcp:localhost:9999", CS_FLAGS_BLOCKING,
+                                  &address);
+     if (cs) {
+         int result = cs_connect(cs, address);
+         /* Check result before exchanging protocol messages. */
+         cs_close(cs);
+     }
+]]></programlisting>
+   </sect2>
+   <sect2 id="comstack.proxy">
+    <title>Proxies and cs_create_host2</title>
+    <synopsis>
+     COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
+                             const char *proxy_host, int *proxy_mode);
+     COMSTACK cs_create_host_proxy(const char *vhost, int flags, void **vp,
+                                  const char *proxy_host);
+    </synopsis>
+    <para>
+     <function>cs_create_host2</function> is the general form of
+     <function>cs_create_host</function>. Its first three arguments and
+     return value have the same meaning. <parameter>vhost</parameter>
+     describes the target; <parameter>proxy_host</parameter> is either
+     <literal>NULL</literal> for a direct connection or a proxy address
+     using the same host syntax. <parameter>proxy_mode</parameter> must
+     point to an integer. On success it is zero for a direct connection
+     or an HTTP CONNECT tunnel, and one for application-level proxying.
+     <function>cs_create_host</function> supplies no proxy;
+     <function>cs_create_host_proxy</function> accepts a proxy but discards
+     the mode output.
+    </para>
+    <informaltable>
+     <tgroup cols="3">
+      <thead><row><entry>Target</entry><entry>Proxy</entry>
+       <entry>Behavior</entry></row></thead>
+      <tbody>
+       <row><entry>TCP/IP Z39.50</entry><entry>Unprefixed or tcp:</entry>
+        <entry>Z39.50 proxy; mode 1</entry></row>
+       <row><entry>TCP/IP Z39.50</entry><entry>http:</entry>
+        <entry>HTTP CONNECT tunnel; mode 0</entry></row>
+       <row><entry>HTTP</entry><entry>Unprefixed, tcp:, or http:</entry>
+        <entry>HTTP proxy; mode 1</entry></row>
+       <row><entry>TLS (ssl: or https:)</entry>
+        <entry>Unprefixed, tcp:, or http:</entry>
+        <entry>HTTP CONNECT tunnel, then TLS to target; mode 0</entry></row>
+      </tbody>
+     </tgroup>
+    </informaltable>
+    <para>
+     The proxy must use TCP/IP; TLS and UNIX socket proxies, and nested
+     proxy specifications, are rejected. In mode one the application must
+     implement the proxy protocol, for example by sending an absolute
+     request URI to an HTTP proxy or supplying the target to a Z39.50
+     proxy. COMSTACK does not rewrite application messages. In mode zero,
+     COMSTACK performs any CONNECT exchange during
+     <function>cs_connect</function>/<function>cs_rcvconnect</function>.
+    </para>
+    <para>
+     A tunnel can also be specified directly in <parameter>vhost</parameter>:
+    </para>
+    <synopsis>
+     connect:[user:password@]proxy-host:proxy-port,target
+    </synopsis>
+    <para>
+     For example,
+     <literal>connect:proxy.example:8080,tcp:target.example:210/database</literal>
+     tunnels Z39.50, and
+     <literal>connect:user:password@proxy.example:8080,https://target.example:443/sru</literal>
+     tunnels HTTPS. The proxy part is a host and port, without a scheme;
+     the target uses the normal TCP/IP or TLS syntax. The first comma
+     separates proxy and target. Credentials before the first
+     <literal>@</literal> generate a Basic
+     <literal>Proxy-Authorization</literal> header; they are not
+     percent-decoded. This authentication is supported for CONNECT, not
+     automatically for mode-one proxy requests.
+    </para>
+    <para>
+     Always give explicit proxy and target ports for CONNECT. The CONNECT
+     request uses the target authority as supplied, removing the suffix
+     starting at <literal>/</literal>, but does not add a default target
+     port. When a proxy port is omitted, address resolution uses the
+     target transport and protocol's default port, not the proxy scheme's
+     default. This also applies to <parameter>proxy_host</parameter>.
+     For example, use <literal>http://proxy.example:8080</literal> to
+     avoid ambiguity. CONNECT credentials may also be supplied in
+     <parameter>proxy_host</parameter>, for example
+     <literal>http://user:password@proxy.example:8080</literal>, when the
+     selected behavior is a tunnel.
+    </para>
+    <para>
+     An explicit <literal>connect:</literal> specification takes precedence
+     over <parameter>proxy_host</parameter>. The extended
+     <literal>unix:path:target</literal> form likewise supplies its own
+     connection address and ignores <parameter>proxy_host</parameter>.
+    </para>
+   </sect2>
+   <sect2 id="comstack.host-helpers">
+    <title>Host parsing helpers</title>
+    <synopsis>
+     int cs_parse_host(const char *uri, const char **host, CS_TYPE *t,
+                       enum oid_proto *proto, char **connect_host);
+     void cs_get_host_args(const char *type_and_host, const char **args);
+    </synopsis>
+    <para>
+     <function>cs_parse_host</function> performs prefix parsing without
+     creating an endpoint or resolving a host. It returns one on success
+     and zero for an unavailable transport. All output pointer arguments
+     are required. <literal>*host</literal> points into the input after
+     the recognized prefixes, <literal>*t</literal> is the transport,
+     and <literal>*proto</literal> is <literal>PROTO_Z3950</literal> or
+     <literal>PROTO_HTTP</literal>. <literal>*connect_host</literal> is
+     either <literal>NULL</literal> or an allocated proxy/socket address
+     from <literal>connect:</literal> or <literal>unix:path:target</literal>;
+     free this value with <function>xfree</function>.
+    </para>
+    <para>
+     <function>cs_get_host_args</function> returns the portion after the
+     first path slash, skipping a leading <literal>://</literal> separator.
+     For <literal>unix:path:args</literal> it returns <literal>args</literal>
+     directly if that part contains no colon; otherwise it extracts the
+     path from the target. For example,
+     <literal>tcp:localhost:210/books</literal> yields <literal>books</literal>,
+     and <literal>http://localhost/sru?version=1.2</literal> yields
+     <literal>sru?version=1.2</literal>. If there are no arguments it
+     returns an empty string through <parameter>args</parameter>.
+     The result is borrowed storage and must not be freed. This helper
+     does not decode or interpret the arguments.
+    </para>
+   </sect2>
   </sect1>
   <sect1 id="comstack.ssl">
    <title>SSL</title>
@@ -9942,8 +10169,18 @@ void odr_choice_bias(ODR o, int what);
 
     COMSTACK cs_createbysocket(int s, CS_TYPE type, int flags,
                                int protocol);
-    COMSTACK cs_create_host(const char *str, int flags,
-                            void **vp);
+    COMSTACK cs_create_host(const char *vhost, int flags, void **vp);
+
+    COMSTACK cs_create_host_proxy(const char *vhost, int flags, void **vp,
+                                  const char *proxy_host);
+
+    COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
+                             const char *proxy_host, int *proxy_mode);
+
+    int cs_parse_host(const char *uri, const char **host, CS_TYPE *t,
+                      enum oid_proto *proto, char **connect_host);
+
+    void cs_get_host_args(const char *type_and_host, const char **args);
 
     int cs_bind(COMSTACK handle, int mode);
 
