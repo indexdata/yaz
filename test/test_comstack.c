@@ -397,7 +397,7 @@ static int comstack_example(const char *server_address_str)
     char *protocol_package = "GET / HTTP/1.0\r\n\r\n";
     int protocol_package_length = strlen(protocol_package);
 
-    stack = cs_create(tcpip_type, 1, PROTO_HTTP);
+    stack = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
     if (!stack) {
         perror("cs_create");  /* use perror() here since we have no stack yet */
         return -1;

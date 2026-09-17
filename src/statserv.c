@@ -1181,7 +1181,7 @@ static int add_listener(char *where, int listen_id)
     yaz_log(log_server, "Adding %s listener on %s id=%d PID=%ld", mode, where,
             listen_id, (long) getpid());
 
-    l = cs_create_host(where, 2, &ap);
+    l = cs_create_host(where, CS_FLAGS_NUMERICHOST, &ap);
     if (!l)
     {
         yaz_log(YLOG_FATAL, "Failed to listen on %s", where);
