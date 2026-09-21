@@ -1,7 +1,7 @@
 UserInfoFormat-dateTime
 {Z39-50-userInfoFormat dateTime (6)} DEFINITIONS ::=
 BEGIN
-IMPORTS IntUnit FROM Z39-50-APDU-1995;
+IMPORTS IntUnit FROM Z39-50-APDU-2001;
 
 DateTime ::= SEQUENCE{
      date [1]  Z3950Date OPTIONAL,

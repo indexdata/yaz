@@ -22,7 +22,7 @@ set prefix(ESFormat-ExportInvocation) {z_EI Z_EI Z_EI}
 
 # ----------------------------------------------------------
 # Settings for core of the protocol
-set m Z39-50-APDU-1995
+set m Z39-50-APDU-2001
 
 # Filename
 set filename($m) z-core
