@@ -1,7 +1,7 @@
 UserInfoFormat-facet-1
 {Z39-50-userInfoFormat facet-1 (1)} DEFINITIONS ::=
 BEGIN
-IMPORTS AttributeList, Term FROM Z39-50-APDU-1995;
+IMPORTS AttributeList, Term FROM Z39-50-APDU-2001;
 FacetList ::= SEQUENCE OF FacetField;
 
 FacetField ::= SEQUENCE {

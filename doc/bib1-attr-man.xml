@@ -28,7 +28,12 @@
 
  <refsect1><title>DESCRIPTION</title>
   <para>
-   This reference entry lists the Bib-1 attribute set types and values.
+   This reference entry lists the Bib-1 attribute set types and values,
+   including registered extensions through Use attribute 1225 (Provider,
+   approved in 2014). Bib-1 is maintained separately from the Z39.50-2003
+   standard in the
+   <ulink url="&url.z39.50.attset.bib1;">Maintenance Agency's registry</ulink>.
+   Index Data extensions are identified below.
   </para>
  </refsect1>
 
@@ -141,6 +146,195 @@
     1034  Content-type
     1035  Anywhere
     1036  Author-Title-Subject
+    1037  SICI
+    1038  Abstract-language
+    1039  Application-kind
+    1040  Classification
+    1041  Classification-basic
+    1042  Classification-local-record
+    1043  Enzyme
+    1044  Possessing-institution
+    1045  Record-linking
+    1046  Record-status
+    1047  Treatment
+    1048  Control-number-GKD
+    1049  Control-number-linking
+    1050  Control-number-PND
+    1051  Control-number-SWD
+    1052  Control-number-ZDB
+    1053  Country-publication
+    1054  Date-conference
+    1055  Date-record-status
+    1056  Dissertation-information
+    1057  Meeting-organizer
+    1058  Note-availability
+    1059  Number-CAS-registry
+    1060  Number-document
+    1061  Number-local-accounting
+    1062  Number-local-acquisition
+    1063  Number-local-call-copy-specific
+    1064  Number-of-reference
+    1065  Number-norm
+    1066  Number-volume
+    1067  Place-conference
+    1068  Reference
+    1069  Referenced-journal
+    1070  Section-code
+    1071  Section-heading
+    1072  Subject-GOO
+    1073  Subject-name-conference
+    1074  Subject-name-corporate
+    1075  Subject-genre/form
+    1076  Subject-name-geographical
+    1077  Subject--chronological
+    1078  Subject--title
+    1079  Subject--topical
+    1080  Subject-uncontrolled
+    1081  Terminology-chemical
+    1082  Title-translated
+    1083  Year-of-beginning
+    1084  Year-of-ending
+    1085  Subject-AGROVOC
+    1086  Subject-COMPASS
+    1087  Subject-EPT
+    1088  Subject-NAL
+    1089  Classification-BCM
+    1090  Classification-DB
+    1091  Identifier-ISRC
+    1092  Identifier-ISMN
+    1093  Identifier-ISRN
+    1094  Identifier-DOI
+    1095  Code-language-original
+    1096  Title-later
+    1097  DC-Title
+    1098  DC-Creator
+    1099  DC-Subject
+    1100  DC-Description
+    1101  DC-Publisher
+    1102  DC-Date
+    1103  DC-ResourceType
+    1104  DC-ResourceIdentifier
+    1105  DC-Language
+    1106  DC-OtherContributor
+    1107  DC-Format
+    1108  DC-Source
+    1109  DC-Relation
+    1110  DC-Coverage
+    1111  DC-RightsManagement
+    1112  Controlled Subject Index
+    1113  Subject Thesaurus
+    1114  Index Terms -- Controlled
+    1115  Controlled Term
+    1116  Spatial Domain
+    1117  Bounding Coordinates
+    1118  West Bounding Coordinate
+    1119  East Bounding Coordinate
+    1120  North Bounding Coordinate
+    1121  South Bounding Coordinate
+    1122  Place
+    1123  Place Keyword Thesaurus
+    1124  Place Keyword
+    1125  Time Period
+    1126  Time Period Textual
+    1127  Time Period Structured
+    1128  Beginning Date
+    1129  Ending Date
+    1130  Availability
+    1131  Distributor
+    1132  Distributor Name
+    1133  Distributor Organization
+    1134  Distributor Street Address
+    1135  Distributor City
+    1136  Distributor State or Province
+    1137  Distributor Zip or Postal Code
+    1138  Distributor Country
+    1139  Distributor Network Address
+    1140  Distributor Hours of Service
+    1141  Distributor Telephone
+    1142  Distributor Fax
+    1143  Resource Description
+    1144  Order Process
+    1145  Order Information
+    1146  Cost
+    1147  Cost Information
+    1148  Technical Prerequisites
+    1149  Available Time Period
+    1150  Available Time Textual
+    1151  Available Time Structured
+    1152  Available Linkage
+    1153  Linkage Type
+    1154  Linkage
+    1155  Sources of Data
+    1156  Methodology
+    1157  Access Constraints
+    1158  General Access Constraints
+    1159  Originator Dissemination Control
+    1160  Security Classification Control
+    1161  Use Constraints
+    1162  Point of Contact
+    1163  Contact Name
+    1164  Contact Organization
+    1165  Contact Street Address
+    1166  Contact City
+    1167  Contact State or Province
+    1168  Contact Zip or Postal Code
+    1169  Contact Country
+    1170  Contact Network Address
+    1171  Contact Hours of Service
+    1172  Contact Telephone
+    1173  Contact Fax
+    1174  Supplemental Information
+    1175  Purpose
+    1176  Agency Program
+    1177  Cross Reference
+    1178  Cross Reference Title
+    1179  Cross Reference Relationship
+    1180  Cross Reference Linkage
+    1181  Schedule Number
+    1182  Original Control Identifier
+    1183  Language of Record
+    1184  Record Review Date
+    1185  Performer
+    1186  Performer-Individual
+    1187  Performer-Group
+    1188  Instrumentation
+    1189  Instrumentation-Original
+    1190  Instrumentation-Current
+    1191  Arrangement
+    1192  Arrangement-Original
+    1193  Arrangement-Current
+    1194  Musical Key-Original
+    1195  Musical Key-Current
+    1196  Date-Composition
+    1197  Date-Recording
+    1198  Place-Recording
+    1199  Country-Recording
+    1200  Number-ISWC
+    1201  Number-Matrix
+    1202  Number-Plate
+    1203  Classification-McColvin
+    1204  Duration
+    1205  Number-Copies
+    1206  Musical Theme
+    1207  Instruments - total number
+    1208  Instruments - distinct number
+    1209  Identifier - URN
+    1210  Sears Subject Heading
+    1211  OCLC Number
+    1212  Composition
+    1213  Intellectual level
+    1214  EAN
+    1215  NLC
+    1216  CRCS
+    1217  Nationality
+    1218  Equinox
+    1219  Compression
+    1220  Format
+    1221  Subject - occupation
+    1222  Subject - function
+    1223  Edition
+    1224  GPO Item Number
+    1225  Provider
    </screen>
   </para>
  </refsect1>
@@ -158,6 +352,7 @@
     101 Stem
     102 Relevance
     103 AlwaysMatches
+    104 Within
    </screen>
   </para>
  </refsect1>

@@ -1,6 +1,12 @@
-Z39-50-APDU-1995 -- OID for this definition, assigned in OID.3.1, is {Z39-50 2 1} 
+Z39-50-APDU-2001 -- OID for this definition, assigned in OID.3.1, is {Z39-50 2 1}
 DEFINITIONS ::=  
-BEGIN   -- Z39.50 Maintenance Agency Official Text for ANSI/NISO Z39.50-1995 - July 1995
+BEGIN
+-- Tracks ANSI/NISO Z39.50-2003 Appendix 18, with YAZ compatibility extensions.
+-- https://www.loc.gov/z3950/agency/Z39-50-2003.pdf
+-- This is not a verbatim copy: legacy modules and C identifiers are retained.
+-- YAZ keeps typed IdAuthentication, resultSetStatus estimate(4), and OPTIONAL
+-- Permissions.userId. PeriodicQuerySchedule retains its pre-2003 form for the
+-- YAZ 5 ABI; see the compatibility notes at the corresponding definitions.
 --
 EXPORTS OtherInformation, Term, AttributeSetId, AttributeList, AttributeElement, ElementSetName, SortElement, DatabaseName,
 CompSpec, Specification, Permissions, InternationalString, IntUnit, Unit, StringOrNumeric, Query, Records, ResultSetId,
@@ -32,6 +38,8 @@ PDU ::= CHOICE{
  extendedServicesRequest    [46] IMPLICIT ExtendedServicesRequest,
  extendedServicesResponse    [47] IMPLICIT ExtendedServicesResponse,
  close          [48] IMPLICIT Close,
+ -- The complete 2003 standard and Duplicate Detection amendment use this type.
+ -- ExtendedServicesRequest in the standalone Appendix ASN.1 is a typo.
  duplicateDetectionRequest      [49] IMPLICIT DuplicateDetectionRequest,
  duplicateDetectionResponse     [50] IMPLICIT DuplicateDetectionResponse}
 
@@ -51,8 +59,9 @@ PDU ::= CHOICE{
   userInformationField  [11]  EXTERNAL OPTIONAL,
   otherInfo        OtherInformation OPTIONAL}
 --Note:
--- For idAuthentication, the type ANY is retained for compatibility with earlier versions. 
--- For interoperability, the following is recommended:
+-- The standard declares idAuthentication as ANY and recommends the structured
+-- form below. YAZ uses this typed CHOICE directly; retain it for API/ABI
+-- compatibility rather than replacing it with ANY.
 IdAuthentication ::=
    CHOICE{
       open   VisibleString,
@@ -250,7 +259,7 @@ SearchResponse ::= SEQUENCE{
               subset    (1),
                  interim  (2), 
                none    (3),
-	       estimate(4)
+	       estimate(4) -- YAZ extension added in 2007; retained for compatibility.
 	       } OPTIONAL,
   presentStatus        PresentStatus  OPTIONAL,
     records        Records OPTIONAL,
@@ -651,6 +660,8 @@ ExtendedServicesResponse ::= SEQUENCE{
                 -- 'taskPackage'.
   otherInfo          OtherInformation OPTIONAL}
 
+-- YAZ permits an absent userId, unlike the mandatory field in the 2003 ASN.1.
+-- Retain OPTIONAL for compatibility with existing YAZ encoders and decoders.
  Permissions ::= SEQUENCE OF SEQUENCE{
   userId      [1] IMPLICIT InternationalString OPTIONAL,
   allowableFunctions  [2] IMPLICIT SEQUENCE OF INTEGER{
@@ -805,7 +816,7 @@ DiagnosticFormatDiag1
 {Z39-50-diagnosticFormat diag-1 (2)} DEFINITIONS ::=
 BEGIN
 IMPORTS Term, Specification, AttributeList, SortElement, DatabaseName, 
-DefaultDiagFormat, InternationalString FROM Z39-50-APDU-1995;
+DefaultDiagFormat, InternationalString FROM Z39-50-APDU-2001;
 
 
 DiagnosticFormat ::=  SEQUENCE OF SEQUENCE{ 
@@ -1017,7 +1028,7 @@ RecordSyntax-explain
 
 BEGIN 
 IMPORTS AttributeSetId, Term, OtherInformation, DatabaseName, ElementSetName, IntUnit, Unit,
- StringOrNumeric, Specification, InternationalString, AttributeList, AttributeElement FROM Z39-50-APDU-1995;
+ StringOrNumeric, Specification, InternationalString, AttributeList, AttributeElement FROM Z39-50-APDU-2001;
 EXPORTS LanguageCode;
 
 Explain-Record ::= CHOICE{
@@ -1757,7 +1768,7 @@ END
 RecordSyntax-SUTRS
 {Z39-50-recordSyntax SUTRS (101)} DEFINITIONS ::=
 BEGIN 
-IMPORTS InternationalString  FROM Z39-50-APDU-1995;
+IMPORTS InternationalString  FROM Z39-50-APDU-2001;
         SutrsRecord ::=  InternationalString
 -- Line terminator is ASCII LF (X'0A').
 -- Recommended maximum line length is 72 characters.
@@ -1770,7 +1781,7 @@ END
 RecordSyntax-opac
 {Z39-50-recordSyntax opac (102)} DEFINITIONS ::=
 BEGIN 
-IMPORTS InternationalString  FROM Z39-50-APDU-1995;
+IMPORTS InternationalString  FROM Z39-50-APDU-2001;
 OPACRecord ::= SEQUENCE {
   bibliographicRecord   [1]   IMPLICIT EXTERNAL OPTIONAL,
   holdingsData     [2]   IMPLICIT SEQUENCE OF HoldingsRecord OPTIONAL}
@@ -1824,7 +1835,7 @@ RecordSyntax-summary
 
 {Z39-50-recordSyntax summary (103)} DEFINITIONS ::=
 BEGIN 
-IMPORTS OtherInformation, InternationalString  FROM Z39-50-APDU-1995;
+IMPORTS OtherInformation, InternationalString  FROM Z39-50-APDU-2001;
 BriefBib ::= SEQUENCE {
   title           [1]   IMPLICIT InternationalString,
   author            [2]   IMPLICIT InternationalString OPTIONAL,
@@ -1860,7 +1871,7 @@ RecordSyntax-generic  -- For detailed semantics, see Appendix RET.
 {Z39-50-recordSyntax GRS-1 (105)} DEFINITIONS ::=
 BEGIN 
 EXPORTS Variant;
-IMPORTS IntUnit, Unit, InternationalString, StringOrNumeric, Term FROM Z39-50-APDU-1995;
+IMPORTS IntUnit, Unit, InternationalString, StringOrNumeric, Term FROM Z39-50-APDU-2001;
 
 GenericRecord ::= SEQUENCE OF TaggedElement  
 TaggedElement ::= SEQUENCE {
@@ -1982,7 +1993,7 @@ END
 RecordSyntax-ESTaskPackage
 {Z39-50-recordSyntax ESTaskPackage (106)} DEFINITIONS ::=
 BEGIN 
-IMPORTS Permissions, InternationalString, IntUnit, DiagRec FROM Z39-50-APDU-1995;
+IMPORTS Permissions, InternationalString, IntUnit, DiagRec FROM Z39-50-APDU-2001;
 
 TaskPackage ::= SEQUENCE{
   packageType      [1]   IMPLICIT OBJECT IDENTIFIER,
@@ -2013,7 +2024,7 @@ END
 ResourceReport-Format-Resource-1
 {Z39-50-resourceReport resource-1 (1)} DEFINITIONS ::=
 BEGIN 
-IMPORTS InternationalString FROM Z39-50-APDU-1995;  
+IMPORTS InternationalString FROM Z39-50-APDU-2001;
 --
 ResourceReport ::= SEQUENCE{
 estimates    [1]   IMPLICIT SEQUENCE OF Estimate,
@@ -2064,7 +2075,7 @@ END
 ResourceReport-Format-Resource-2
 {Z39-50-resourceReport resource-2 (2)} DEFINITIONS ::=
 BEGIN 
-IMPORTS InternationalString, StringOrNumeric, IntUnit FROM Z39-50-APDU-1995;  
+IMPORTS InternationalString, StringOrNumeric, IntUnit FROM Z39-50-APDU-2001;
 --
 ResourceReport ::= SEQUENCE{
 estimates    [1]   IMPLICIT SEQUENCE OF Estimate OPTIONAL,
@@ -2088,7 +2099,7 @@ END
 AccessControlFormat-prompt-1
 {Z39-50-accessControl prompt-1 (1)} DEFINITIONS ::=
 BEGIN
-IMPORTS InternationalString, DiagRec FROM Z39-50-APDU-1995;
+IMPORTS InternationalString, DiagRec FROM Z39-50-APDU-2001;
 --
 PromptObject ::= CHOICE{
   challenge      [1] IMPLICIT Challenge,
@@ -2191,7 +2202,7 @@ END
 AccessControlFormat-krb-1
 {Z39-50-accessControlFormat  krb-1 (3)} DEFINITIONS ::=
 BEGIN
-IMPORTS InternationalString FROM Z39-50-APDU-1995;
+IMPORTS InternationalString FROM Z39-50-APDU-2001;
 
      KRBObject ::= CHOICE {
        challenge   [1]    IMPLICIT KRBRequest,
@@ -2218,7 +2229,7 @@ END
 ESFormat-PersistentResultSet
 {Z39-50-extendedService PersistentResultSet (1)} DEFINITIONS ::=
 BEGIN
-IMPORTS InternationalString FROM Z39-50-APDU-1995;
+IMPORTS InternationalString FROM Z39-50-APDU-2001;
 PersistentResultSet ::= CHOICE{
     esRequest    [1] IMPLICIT SEQUENCE{
         toKeep    [1] IMPLICIT NULL,
@@ -2243,7 +2254,7 @@ END
 ESFormat-PersistentQuery
 {Z39-50-extendedService PersistentQuery (2)} DEFINITIONS ::=
 BEGIN
-IMPORTS Query, InternationalString, OtherInformation FROM Z39-50-APDU-1995;
+IMPORTS Query, InternationalString, OtherInformation FROM Z39-50-APDU-2001;
 PersistentQuery ::= CHOICE{
     esRequest      [1] IMPLICIT SEQUENCE{
         toKeep    [1] OriginPartToKeep OPTIONAL,
@@ -2260,10 +2271,16 @@ OriginPartNotToKeep ::= CHOICE{
 TargetPart ::= Query          
 END
 
+-- YAZ 5 ABI compatibility: intentionally retain the pre-2003 schedule below.
+-- The corrected 2001/2003 form adds databaseNames and additionalSearchInfo
+-- to OriginPartNotToKeep and TargetPart, and makes lastQueryTime and
+-- lastResultNumber OPTIONAL. Adding members changes the exported Z_PQS*
+-- C struct layouts.
+-- Defer these corrections to YAZ 6 / a SONAME-major transition.
 ESFormat-PeriodicQuerySchedule
 {Z39-50-extendedService PeriodicQuerySchedule (3)} DEFINITIONS ::=
 BEGIN
-IMPORTS Query, InternationalString, IntUnit FROM Z39-50-APDU-1995 
+IMPORTS Query, InternationalString, IntUnit FROM Z39-50-APDU-2001
 ExportSpecification, Destination FROM ESFormat-ExportSpecification;
 
 PeriodicQuerySchedule ::= CHOICE{
@@ -2328,7 +2345,7 @@ END
 ESFormat-ItemOrder
 {Z39-50-extendedService ItemOrder (4)} DEFINITIONS ::=
 BEGIN
-IMPORTS InternationalString FROM Z39-50-APDU-1995;
+IMPORTS InternationalString FROM Z39-50-APDU-2001;
 ItemOrder ::= CHOICE{
     esRequest  [1] IMPLICIT SEQUENCE{
               toKeep    [1] OriginPartToKeep OPTIONAL,
@@ -2388,7 +2405,7 @@ END
 ESFormat-Update0
 {Z39-50-extendedService Update (5)} DEFINITIONS ::=
 BEGIN
-IMPORTS DiagRec, InternationalString FROM Z39-50-APDU-1995; 
+IMPORTS DiagRec, InternationalString FROM Z39-50-APDU-2001;
 Update ::= CHOICE{
     esRequest  [1] IMPLICIT SEQUENCE{
               toKeep    [1] OriginPartToKeep,
@@ -2470,7 +2487,7 @@ END
 ESFormat-ExportSpecification
 {Z39-50-extendedService ExportSpecification (6)} DEFINITIONS ::=
 BEGIN
-EXPORTS ExportSpecification, Destination; IMPORTS CompSpec, InternationalString FROM Z39-50-APDU-1995;
+EXPORTS ExportSpecification, Destination; IMPORTS CompSpec, InternationalString FROM Z39-50-APDU-2001;
 ExportSpecification ::= CHOICE{
     esRequest    [1] IMPLICIT SEQUENCE{
         toKeep    [1] OriginPartToKeep,
@@ -2502,7 +2519,7 @@ END
 ESFormat-ExportInvocation
 {Z39-50-extendedService ExportInvocation (7)} DEFINITIONS ::=
 BEGIN
-IMPORTS InternationalString, IntUnit FROM Z39-50-APDU-1995 
+IMPORTS InternationalString, IntUnit FROM Z39-50-APDU-2001
 ExportSpecification FROM ESFormat-ExportSpecification;
 ExportInvocation ::= CHOICE{
     esRequest    [1] IMPLICIT SEQUENCE{
@@ -2545,7 +2562,7 @@ END
 UserInfoFormat-searchResult-1
 {Z39-50-userInfoFormat searchResult-1 (1)} DEFINITIONS ::=
 BEGIN
-IMPORTS DatabaseName, Term, Query, IntUnit, InternationalString FROM Z39-50-APDU-1995;
+IMPORTS DatabaseName, Term, Query, IntUnit, InternationalString FROM Z39-50-APDU-2001;
 SearchInfoReport ::= SEQUENCE OF SEQUENCE{
   subqueryId      [1] IMPLICIT InternationalString OPTIONAL, 
                            -- shorthand identifier of subquery
@@ -2593,7 +2610,7 @@ ElementSpecificationFormat-eSpec-1
 {Z39-50-elementSpec eSpec-1 (1)} DEFINITIONS ::=
 BEGIN
 IMPORTS Variant FROM RecordSyntax-generic
-StringOrNumeric, InternationalString FROM Z39-50-APDU-1995;
+StringOrNumeric, InternationalString FROM Z39-50-APDU-2001;
 --
 Espec-1 ::= SEQUENCE{
   elementSetNames    [1] IMPLICIT SEQUENCE OF InternationalString OPTIONAL,

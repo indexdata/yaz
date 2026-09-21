@@ -3,7 +3,7 @@ ESFormat-Admin
   -- oid is 1.2.840.10003.9.81.1
 BEGIN
 IMPORTS DiagRec, InternationalString, Segment
-FROM Z39-50-APDU-1995;
+FROM Z39-50-APDU-2001;
 Admin ::= CHOICE{
     esRequest      [1] IMPLICIT SEQUENCE{
        toKeep         [1] OriginPartToKeep,
