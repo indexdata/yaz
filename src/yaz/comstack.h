@@ -266,6 +266,12 @@ YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 YAZ_EXPORT int cs_parse_host(const char *uri, const char **host,
                              CS_TYPE *t, enum oid_proto *proto,
                              char **connect_host);
+/** \brief Selects HTTP header-only framing for TCP/IP, SSL or UNIX transports
+    \param cs COMSTACK handle
+    \param head_only nonzero to stop at the end of HTTP headers; zero to
+           restore normal message framing
+    \returns 0 on success, -1 with CSOUTSTATE for unsupported transports
+ */
 YAZ_EXPORT int cs_set_head_only(COMSTACK cs, int head_only);
 
 /*

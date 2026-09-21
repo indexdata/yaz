@@ -1769,7 +1769,7 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     return 0;
 }
 
-int cs_set_head_only(COMSTACK cs, int head_only)
+int yaz_tcpip_set_head_only(COMSTACK cs, int head_only)
 {
     int (*completer)(const char *buf, int len) =
         head_only ? cs_complete_auto_head : cs_complete_auto;
