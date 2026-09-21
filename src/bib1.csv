@@ -1,3 +1,10 @@
+# Bib-1 (general) diagnostics: includes the Maintenance Agency's approved
+# extensions through December 2002, covering the 2001/2003 revision period.
+# https://loc.gov/standards/z3950/agency/defns/bib1diag.html
+# Preserve existing codes and public macro names for YAZ 5 compatibility.
+# csvtodiag.tcl derives public macro names as well as lookup strings from
+# these messages; verify that message corrections leave the macros unchanged.
+# Code 1074 is a YAZ addition beyond the list linked above.
 1, "Permanent system error"
 2, "Temporary system error"
 3, "Unsupported search"
@@ -110,7 +117,7 @@
 245, "Type-1 query: restriction ('resultAttr') operand not supported"
 246, "Type-1 query: 'complex' attributeValue not supported"
 247, "Type-1 query: 'attributeSet' as part of AttributeElement not supported"
-1001, "Malformed APDU" 
+1001, "Malformed APDU"
 1002, "ES: EXTERNAL form of Item Order request not supported"
 1003, "ES: Result set item form of Item Order request not supported"
 1004, "ES: Extended services not supported unless access control is in effect"
@@ -157,14 +164,13 @@
 1055, "Init: negotiation option required"
 1056, "Attribute not supported for database"
 1057, "ES: Unsupported value of task package parameter"
-1058, "Duplicate Detection: Cannot dedup on requested record portion"  
+1058, "Duplicate Detection: Cannot dedup on requested record portion"
 1059, "Duplicate Detection: Requested detection criterion not supported"
 1060, "Duplicate Detection: Requested level of match not supported"
 1061, "Duplicate Detection: Requested regular expression not supported"
 1062, "Duplicate Detection: Cannot do clustering"
 1063, "Duplicate Detection: Retention criterion not supported"
-1064, "Duplicate Detection: Requested number (or percentage) of entries "
-      "for retention too large"
+1064, "Duplicate Detection: Requested number (or percentage) of entries for retention too large"
 1065, "Duplicate Detection: Requested sort criterion not supported"
 1066, "CompSpec: Unknown schema, or schema not supported."
 1067, "Encapsulation: Encapsulated sequence of PDUs not supported"

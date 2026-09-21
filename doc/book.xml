@@ -57,9 +57,10 @@
    <itemizedlist>
     <listitem>
      <para>
-      Complete
       <ulink url="&url.z39.50;">Z39.50</ulink> version 3 support.
-      Amendments and Z39.50-2002 revision is supported.
+      The ASN.1 definitions track ANSI/NISO Z39.50-2003 Appendix 18,
+      with <link linkend="asn-compatibility">YAZ compatibility extensions
+      and exceptions</link>.
     </para>
     </listitem>
     <listitem>
@@ -298,13 +299,28 @@
     standard itself (such as the EXTERNAL type), the C representation is
     provided by the &odr; (Open Data Representation) subsystem.
   </para>
+   <para id="asn-compatibility">
+    The definitions in <filename>z3950v3.asn</filename> track
+    <ulink url="https://www.loc.gov/z3950/agency/Z39-50-2003.pdf">ANSI/NISO
+     Z39.50-2003 Appendix 18</ulink>. The main module is named
+    <literal>Z39-50-APDU-2001</literal> and retains the OID
+    <literal>{Z39-50 2 1}</literal>. YAZ preserves legacy modules and C
+    identifiers, the typed <literal>IdAuthentication</literal> choice,
+    the <literal>estimate(4)</literal> result-set status extension, and
+    optional <literal>Permissions.userId</literal>.
+    <literal>PeriodicQuerySchedule</literal> intentionally retains its
+    pre-2003 form in YAZ 5: the corrected definition adds members to
+    exported C structures and is deferred to YAZ 6, when the library
+    SONAME major version can change.
+   </para>
    <para>
      &odr; is a basic mechanism for representing an
     ASN.1 type in the C programming language, and for implementing BER
     encoders and decoders for values of that type. The types defined in
     the &asn; module generally have the prefix <literal>Z_</literal>, and
     a suffix corresponding to the name of the type in the ASN.1
-    specification of the protocol (generally Z39.50-1995). In the case of
+    specification of the protocol. Existing C names, including names
+    derived from Z39.50-1995, are retained for compatibility. In the case of
     base types (those originating in the ASN.1 standard itself), the prefix
     <literal>Odr_</literal> is sometimes seen. Either way, look for
     the actual definition in either <filename>z-core.h</filename> (for the types
@@ -3436,10 +3452,6 @@
      Return Explain for SRU (optional).
     </para></listitem>
    </itemizedlist>
-   <para>
-    (more functions will be added in time to support as much of
-    Z39.50-1995 as possible).
-   </para>
   </sect1>
   <sect1 id="server.backend">
    <title>The Backend API</title>
@@ -10266,6 +10278,14 @@ void odr_choice_bias(ODR o, int what);
   <title>Bib-1 diagnostics</title>
   <para>
    List of Bib-1 diagnostics that are known to YAZ.
+   The table includes all codes in the Maintenance Agency's
+   <ulink url="https://loc.gov/standards/z3950/agency/defns/bib1diag.html">Bib-1
+    diagnostic list</ulink>, including the approved extensions through
+   December 2002, plus YAZ's diagnostic 1074 (Proxy failure).
+   YAZ retains historical message wording that may differ
+   from the standard's wording. The messages in <filename>bib1.csv</filename>
+   also determine the public macro names in <filename>diagbib1.h</filename>.
+   Message corrections must preserve the existing macro names and codes.
   </para>
   &bib1-diag-table;
  </appendix>

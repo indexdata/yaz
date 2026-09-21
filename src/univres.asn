@@ -1,7 +1,7 @@
 ResourceReport-Format-Universe-1
 {Z39-50-resourceReport universe-1 (1000)} DEFINITIONS ::=
 BEGIN
-IMPORTS StringOrNumeric FROM Z39-50-APDU-1995;
+IMPORTS StringOrNumeric FROM Z39-50-APDU-2001;
 --
 
 UniverseReportHits ::= SEQUENCE {

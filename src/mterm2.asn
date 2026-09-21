@@ -1,7 +1,7 @@
 UserInfoFormat-multipleSearchTerms-2
 {Z39-50-userInfoFormat MultipleSearchTerms-2 (5)} DEFINITIONS ::=
 BEGIN
-IMPORTS Term FROM Z39-50-APDU-1995;
+IMPORTS Term FROM Z39-50-APDU-2001;
 
 MultipleSearchTerms-2 ::= SEQUENCE OF SEQUENCE{
                              term  [1]   Term,
