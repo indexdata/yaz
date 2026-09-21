@@ -47,6 +47,7 @@
 #include <yaz/errno.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
+#include "comstack-p.h"
 
 #ifndef YAZ_SOCKLEN_T
 #define YAZ_SOCKLEN_T int
@@ -307,6 +308,18 @@ struct sockaddr_un *unix_strtoaddr(const char *str)
     if (!unix_strtoaddr_ex (str, &add))
         return 0;
     return &add;
+}
+
+int yaz_unix_set_head_only(COMSTACK cs, int head_only)
+{
+    if (cs->type == unix_type)
+    {
+        unix_state *sp = (unix_state *)cs->cprivate;
+        sp->complete = head_only ? cs_complete_auto_head : cs_complete_auto;
+        return 0;
+    }
+    cs->cerrno = CSOUTSTATE;
+    return -1;
 }
 
 static int unix_more(COMSTACK h)

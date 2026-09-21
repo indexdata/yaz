@@ -14,6 +14,14 @@
 #include <yaz/test.h>
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
+#include <yaz/unix.h>
+#include <yaz/xmalloc.h>
+
+#ifndef WIN32
+#include <errno.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
 
 static void tst_http_request(void)
 {
@@ -489,9 +497,9 @@ static void tst_cs_get_error_tcp(void)
     cs_close(cs);
 }
 
+#if HAVE_GNUTLS_H
 static void tst_cs_get_error_ssl(void)
 {
-#if HAVE_GNUTLS_H
     const char *details = NULL;
     COMSTACK ssl_cs =
         cs_create(ssl_type, CS_FLAGS_BLOCKING, PROTO_Z3950);
@@ -507,6 +515,75 @@ static void tst_cs_get_error_ssl(void)
     YAZ_CHECK_EQ(cs_get_error(ssl_cs, &details), CSERRORSSL);
     YAZ_CHECK(details && *details);
     cs_close(ssl_cs);
+}
+#endif
+
+#ifndef WIN32
+static void tst_head_only_transport(CS_TYPE type)
+{
+    static const char head[] =
+        "HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\n";
+    static const char response[] =
+        "HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\ndata";
+    int fd[2], r, saved_errno;
+    COMSTACK cs;
+    char *buf = 0;
+    int bufsize = 0;
+
+    r = socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+    {
+        fprintf(stderr, "Skipping head-only framing: socketpair denied\n");
+        return;
+    }
+    YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+        return;
+    cs = cs_createbysocket(fd[0], type, CS_FLAGS_BLOCKING, PROTO_HTTP);
+    YAZ_CHECK(cs);
+    if (!cs)
+    {
+        close(fd[0]);
+        close(fd[1]);
+        return;
+    }
+
+    /* A HEAD response has no body despite Content-Length. Follow it with
+       a normal response to verify switching back, including buffered data.
+       The SSL transport has no TLS session here; only framing is tested. */
+    YAZ_CHECK_EQ(write(fd[1], head, sizeof(head) - 1), sizeof(head) - 1);
+    YAZ_CHECK_EQ(write(fd[1], response, sizeof(response) - 1),
+                 sizeof(response) - 1);
+    close(fd[1]);
+    YAZ_CHECK_EQ(cs_set_head_only(cs, 1), 0);
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, sizeof(head) - 1);
+    if (r == sizeof(head) - 1)
+        YAZ_CHECK(!memcmp(buf, head, r));
+    YAZ_CHECK_EQ(cs_set_head_only(cs, 0), 0);
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, sizeof(response) - 1);
+    if (r == sizeof(response) - 1)
+        YAZ_CHECK(!memcmp(buf, response, r));
+    cs_close(cs);
+    xfree(buf);
+}
+#endif
+
+static void tst_cs_set_head_only(void)
+{
+    struct comstack unsupported;
+
+    memset(&unsupported, 0, sizeof(unsupported));
+    YAZ_CHECK_EQ(cs_set_head_only(&unsupported, 1), -1);
+    YAZ_CHECK_EQ(cs_errno(&unsupported), CSOUTSTATE);
+#ifndef WIN32
+    tst_head_only_transport(tcpip_type);
+    tst_head_only_transport(unix_type);
+#if HAVE_GNUTLS_H
+    tst_head_only_transport(ssl_type);
+#endif
 #endif
 }
 
@@ -520,7 +597,10 @@ int main (int argc, char **argv)
     tst_http_response();
     tst_cs_get_host_args();
     tst_cs_get_error_tcp();
+#if HAVE_GNUTLS_H
     tst_cs_get_error_ssl();
+#endif
+    tst_cs_set_head_only();
     YAZ_CHECK_TERM;
 }
 

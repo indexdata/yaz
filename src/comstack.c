@@ -521,6 +521,18 @@ int cs_complete_auto_head(const char *buf, int len)
     return cs_complete_auto_x(buf, len, 1);
 }
 
+int cs_set_head_only(COMSTACK cs, int head_only)
+{
+    if (cs->type == tcpip_type || cs->type == ssl_type)
+        return yaz_tcpip_set_head_only(cs, head_only);
+#ifndef WIN32
+    if (cs->type == unix_type)
+        return yaz_unix_set_head_only(cs, head_only);
+#endif
+    cs->cerrno = CSOUTSTATE;
+    return -1;
+}
+
 void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes)
 {
     cs->max_recv_bytes = max_recv_bytes;
