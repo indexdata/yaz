@@ -97,6 +97,21 @@
 
     Z39.50 sort: \ref sortspec.h
 
+    \section comstack_api Communication stack (COMSTACK)
+
+    Transport-independent connections and BER/HTTP message framing:
+    \ref comstack.h. COMSTACK supports blocking and nonblocking I/O over
+    TCP/IP, TLS, and UNIX domain sockets.
+
+    Create an endpoint with \ref cs_create_host, connect with \ref cs_connect,
+    exchange messages with \ref cs_put and \ref cs_get, and release it with
+    \ref cs_close. For servers, use \ref cs_bind, \ref cs_listen, and
+    \ref cs_accept.
+
+    TCP/IP and TLS transport constructors: \ref tcpip.h
+
+    UNIX domain socket transport constructor: \ref unix.h
+
     \section ber BER handling
 
     BER utilities (ODR): \ref odr.h

@@ -27,7 +27,11 @@
 
 /**
  * \file comstack.h
- * \brief Header for COMSTACK
+ * \brief Transport-independent communication endpoints for BER and HTTP
+ *
+ * Most operations dispatch through transport callbacks. Unless stated otherwise,
+ * handles and output pointers must be non-NULL. Macro arguments must not have
+ * side effects: a handle expression can be evaluated more than once.
  */
 
 #ifndef COMSTACK_H
@@ -40,87 +44,287 @@
 YAZ_BEGIN_CDECL
 
 struct comstack;
+/** \brief Communication endpoint; release with cs_close. */
 typedef struct comstack *COMSTACK;
+/** \brief Transport constructor and transport identity
+    \param s existing socket, or -1 to create a new endpoint
+    \param flags combination of CS_FLAGS_* bits
+    \param protocol application protocol (enum oid_proto)
+    \param vp transport-specific initialization data, or NULL
+    \returns new endpoint, or NULL on failure
+ */
 typedef COMSTACK (*CS_TYPE)(int s, int flags, int protocol, void *vp);
 
+/** \brief Public endpoint state and transport dispatch table
+
+    Transport implementations maintain these members. Applications may use user
+    for their own data; use the API operations to change transport state.
+    cprivate must only be interpreted after checking type.
+ */
 struct comstack
 {
-    CS_TYPE type;
-    int cerrno;     /* current error code of this stack */
-    int iofile;    /* UNIX file descriptor for iochannel */
-    void *cprivate;/* state info for lower stack */
-    int max_recv_bytes;      /* max size of incoming package */
-    int state;     /* current state */
+    CS_TYPE type; /**< Transport constructor, identifying the implementation (CS_TYPE). */
+    int cerrno; /**< Last COMSTACK error code; see cs_get_error. */
+    int iofile; /**< Socket descriptor, or -1 when no socket has been created. */
+    void *cprivate; /**< Opaque transport-owned state; its layout depends on type. */
+    int max_recv_bytes; /**< Maximum receive size in bytes; see cs_set_max_recv_bytes. */
+    int state; /**< Current connection state (CS_ST_*). */
+/** Unbound endpoint. */
 #define CS_ST_UNBND      0
+/** Bound endpoint ready to listen. */
 #define CS_ST_IDLE       1
+/** Incoming connection awaiting cs_accept. */
 #define CS_ST_INCON      2
+/** Outgoing connection state (legacy). */
 #define CS_ST_OUTCON     3
+/** Established connection ready for data transfer. */
 #define CS_ST_DATAXFER   4
+/** Accepted connection with a pending TLS handshake. */
 #define CS_ST_ACCEPT     5
+/** Outgoing connection establishment in progress. */
 #define CS_ST_CONNECTING 6
-    int newfd;     /* storing new descriptor between listen and accept */
-    int flags;     /* flags, blocking etc.. CS_FLAGS_..  */
-    unsigned io_pending; /* flag to signal read / write op is incomplete */
-    int event;     /* current event */
+    int newfd; /**< Accepted socket held between cs_listen and cs_accept. */
+    int flags; /**< Endpoint options, a combination of CS_FLAGS_* bits. */
+    unsigned io_pending; /**< Pending I/O directions, a combination of CS_WANT_* bits. */
+    int event; /**< Last recorded event (CS_NONE, CS_CONNECT, etc.); see cs_look. */
+/** No event recorded. */
 #define CS_NONE       0
+/** Connection establishment event. */
 #define CS_CONNECT    1
+/** Disconnection event. */
 #define CS_DISCON     2
+/** Listen event. */
 #define CS_LISTEN     3
+/** Data transfer event. */
 #define CS_DATA       4
-    enum oid_proto protocol;  /* what application protocol are we talking? */
+    enum oid_proto protocol; /**< Application protocol, such as PROTO_Z3950 or PROTO_HTTP. */
+    /** Transport implementation of cs_put. */
     int (*f_put)(COMSTACK handle, char *buf, int size);
+    /** Transport implementation of cs_get. */
     int (*f_get)(COMSTACK handle, char **buf, int *bufsize);
+    /** Transport implementation of cs_more. */
     int (*f_more)(COMSTACK handle);
+    /** Transport implementation of cs_connect. */
     int (*f_connect)(COMSTACK handle, void *address);
+    /** Transport implementation of cs_rcvconnect. */
     int (*f_rcvconnect)(COMSTACK handle);
+    /** Transport implementation of cs_bind. */
     int (*f_bind)(COMSTACK handle, void *address, int mode);
+/** Bind a local address without listening. */
 #define CS_CLIENT 0
+/** Bind a local address and listen for connections. */
 #define CS_SERVER 1
+    /** Transport implementation of cs_listen. */
     int (*f_listen)(COMSTACK h, char *raddr, int *addrlen,
                    int (*check_ip)(void *cd, const char *a, int len, int type),
                    void *cd);
+    /** Transport implementation of cs_accept. */
     COMSTACK (*f_accept)(COMSTACK handle);
+    /** Transport implementation of cs_close. */
     void (*f_close)(COMSTACK handle);
+    /** Transport implementation of cs_addrstr. */
     const char *(*f_addrstr)(COMSTACK handle);
+    /** Transport implementation of cs_straddr. */
     void *(*f_straddr)(COMSTACK handle, const char *str);
+    /** Transport implementation of cs_set_blocking. */
     int (*f_set_blocking)(COMSTACK handle, int blocking);
-    void *user;       /* user defined data associated with COMSTACK */
+    void *user; /**< Application-owned data; cs_close does not free it. */
 };
 
+/** \brief Sends a complete message
+    \param handle endpoint
+    \param buf message bytes; keep valid until the write completes
+    \param size number of bytes to send
+    \returns 0 when complete, 1 when pending, -1 on error
+
+    Retry pending writes with the same buffer and size after waiting for the
+    directions indicated by cs_want_read and cs_want_write.
+ */
 #define cs_put(handle, buf, size) ((*(handle)->f_put)(handle, buf, size))
+/** \brief Receives a BER or HTTP message
+    \param handle endpoint
+    \param buf address of a receive buffer pointer; initialize *buf to NULL
+    \param size address of its allocated capacity; initialize *size to zero
+    \returns message length (>1), 1 when incomplete, 0 on EOF, -1 on error
+
+    The transport allocates, resizes, or replaces *buf and updates *size.
+    Retain both values for subsequent calls and eventually free *buf with
+    xfree. A pending read may need either readability or writability; consult
+    cs_want_read and cs_want_write.
+ */
 #define cs_get(handle, buf, size) ((*(handle)->f_get)(handle, buf, size))
+/** \brief Tests whether buffered input can be processed without another read
+    \param handle endpoint
+    \returns nonzero if a complete message or framing error is buffered
+
+    Does not poll the socket. Call before waiting for socket readability.
+ */
 #define cs_more(handle) ((*(handle)->f_more)(handle))
+/** \brief Starts an outgoing connection
+    \param handle endpoint
+    \param address transport address returned by cs_straddr or cs_create_host
+    \returns 0 when connected, 1 when pending, -1 on error
+
+    For a pending connection, wait as indicated by cs_want_read/cs_want_write
+    and continue with cs_rcvconnect.
+ */
 #define cs_connect(handle, address) ((*(handle)->f_connect)(handle, address))
+/** \brief Continues a pending outgoing connection, including TLS or CONNECT
+    \param handle endpoint
+    \returns 0 when connected, 1 when pending, -1 on error
+ */
 #define cs_rcvconnect(handle) ((*(handle)->f_rcvconnect)(handle))
+/** \brief Binds an endpoint to a local address
+    \param handle endpoint
+    \param ad transport address returned by cs_straddr or cs_create_host
+    \param mo CS_SERVER to bind and listen, CS_CLIENT to bind only
+    \returns 0 on success, -1 on error
+ */
 #define cs_bind(handle, ad, mo) ((*(handle)->f_bind)(handle, ad, mo))
+/** \brief Receives an incoming connection for subsequent cs_accept
+    \param handle listening endpoint
+    \param ap optional buffer for the transport's binary peer address
+    \param al address buffer capacity on input, copied length on output;
+           NULL to discard the address (ap may then be NULL)
+    \returns 0 when a connection is ready, -1 on error (including CSNODATA
+             when a nonblocking listener has no connection available)
+
+    An insufficient address buffer produces an output length of zero.
+ */
 #define cs_listen(handle, ap, al) ((*(handle)->f_listen)(handle, ap, al, 0, 0))
+/** \brief Receives an incoming connection with an optional access check
+    \param handle listening endpoint
+    \param ap optional peer address buffer, as for cs_listen
+    \param al address buffer capacity/result length, as for cs_listen
+    \param cf callback or NULL; nonzero rejects the connection with CSDENY
+    \param cd application data passed to cf
+    \returns 0 when a connection is ready, -1 on error
+
+    The callback receives cd, a binary peer address, its byte length, and its
+    address family. The check is supported by TCP/IP and TLS on non-Windows
+    systems; the UNIX transport ignores it.
+ */
 #define cs_listen_check(handle, ap, al, cf, cd) ((*(handle)->f_listen)(handle, ap, al, cf, cd))
+/** \brief Creates an endpoint for a connection received by cs_listen
+    \param handle listener, or an accepted endpoint with a pending TLS handshake
+    \returns connected or pending endpoint, or NULL on failure
+
+    The original listener remains usable. If the returned endpoint has pending
+    I/O, wait for the indicated directions and call cs_accept on that endpoint
+    again to continue its TLS handshake. A failed TLS handshake releases the
+    pending endpoint. Close a successfully accepted endpoint with cs_close.
+ */
 #define cs_accept(handle) ((*(handle)->f_accept)(handle))
+/** \brief Closes the socket and frees the endpoint and its transport state
+    \param handle endpoint, which must not be used after this call
+
+    Does not free application data in user or the caller's cs_get buffer.
+ */
 #define cs_close(handle) ((*(handle)->f_close)(handle))
+/** \brief Creates an endpoint using a transport constructor
+    \param type CS_TYPE constructor, such as tcpip_type or unix_type
+    \param flags combination of CS_FLAGS_* bits
+    \param proto application protocol (enum oid_proto)
+    \returns new endpoint, or NULL on failure; release with cs_close
+ */
 #define cs_create(type, flags, proto) ((*type)(-1, flags, proto, 0))
+/** \brief Creates an endpoint around an existing socket
+    \param sock socket descriptor; ownership transfers on success
+    \param type CS_TYPE transport constructor
+    \param flags combination of CS_FLAGS_* bits
+    \param proto application protocol (enum oid_proto)
+    \returns new endpoint, or NULL on failure; cs_close closes the socket
+ */
 #define cs_createbysocket(sock, type, flags, proto) \
         ((*type)(sock, flags, proto, 0))
+/** \brief Returns the endpoint's CS_TYPE transport constructor
+    \param handle endpoint
+ */
 #define cs_type(handle) ((handle)->type)
+/** \brief Returns the socket descriptor, or -1 if none has been created
+    \param handle endpoint
+ */
 #define cs_fileno(handle) ((handle)->iofile)
+/** \brief Legacy accessor intended to return the connection state
+    \param handle endpoint
+    \warning This macro refers to a nonexistent getstate member. Read the
+             public comstack::state member instead.
+ */
 #define cs_getstate(handle) ((handle)->getstate)
+/** \brief Returns the last COMSTACK error code
+    \param handle endpoint
+    \see cs_get_error, cs_errmsg
+ */
 #define cs_errno(handle) ((handle)->cerrno)
+/** \brief Returns the application protocol (enum oid_proto)
+    \param handle endpoint
+ */
 #define cs_getproto(handle) ((handle)->protocol)
+/** \brief Formats the peer address as text
+    \param handle endpoint
+    \returns borrowed transport-owned string; do not free it
+
+    Subsequent calls may overwrite the result. Network transports may perform
+    reverse DNS unless CS_FLAGS_NUMERICHOST is set.
+ */
 #define cs_addrstr(handle) ((*(handle)->f_addrstr)(handle))
+/** \brief Parses a transport-specific address and prepares the endpoint
+    \param handle endpoint
+    \param str address without a transport prefix; see cs_create_host2 for
+           the higher-level host/URI interface
+    \returns transport-owned address, or NULL on failure
+
+    May resolve names and create a socket. Do not free the result; another
+    cs_straddr call may replace it, and cs_close releases it.
+ */
 #define cs_straddr(handle, str) ((*(handle)->f_straddr)(handle, str))
+/** \brief Tests whether a pending operation needs socket readability
+    \param handle endpoint
+    \returns nonzero if readability is needed
+ */
 #define cs_want_read(handle) ((handle)->io_pending & CS_WANT_READ)
+/** \brief Tests whether a pending operation needs socket writability
+    \param handle endpoint
+    \returns nonzero if writability is needed
+ */
 #define cs_want_write(handle) ((handle)->io_pending & CS_WANT_WRITE)
+/** \brief Updates endpoint flags and socket blocking mode
+    \param handle endpoint
+    \param blocking complete set of CS_FLAGS_* bits, despite the parameter name
+    \returns 1 on success, 0 on failure
+
+    Preserve other desired flag bits when setting or clearing CS_FLAGS_BLOCKING;
+    this operation replaces the stored flags.
+ */
 #define cs_set_blocking(handle,blocking) ((handle)->f_set_blocking(handle, blocking))
 
+/** Pending operation needs socket readability. */
 #define CS_WANT_READ 1
+/** Pending operation needs socket writability. */
 #define CS_WANT_WRITE 2
 
+/** \brief Returns the last recorded event (CS_NONE, CS_CONNECT, etc.)
+
+    The argument is the endpoint. This function does not poll for new events.
+ */
 YAZ_EXPORT int cs_look (COMSTACK);
+/** \brief Returns a static message for the endpoint's last error
+    \param h endpoint
+    \returns borrowed error string; do not free it
+ */
 YAZ_EXPORT const char *cs_strerror(COMSTACK h);
+/** \brief Returns a static message for a COMSTACK error code
+    \param n error code (CSNONE through CSLASTERROR)
+    \returns borrowed string; unknown codes use the CSNONE message
+ */
 YAZ_EXPORT const char *cs_errmsg(int n);
-/** \brief returns COMSTACK error and additional information
-    \param cs COMSTACK handle
-    \param details additional error information (result), or NULL
-    \returns error code
+/** \brief Returns the last COMSTACK error and optional transport details
+    \param cs endpoint
+    \param details optional output pointer; set to borrowed text or NULL
+    \returns error code (CSNONE through CSLASTERROR)
+
+    Details are currently available for TCP/IP and TLS. Do not free the text;
+    it can be overwritten by a later error and is released by cs_close.
  */
 YAZ_EXPORT int cs_get_error(COMSTACK cs, const char **details);
 /** \brief Creates an endpoint from a host or URI specification
@@ -227,23 +431,76 @@ YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
     into type_and_host and is valid only while that input remains valid.
  */
 YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
-/** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */
+/** \brief Finds the length of a BER message or HTTP headers
+    \param buf input bytes
+    \param len number of available bytes
+    \returns message length, 0 if incomplete, -1 on protocol error
+
+    Examines the first message only; does not modify the input.
+ */
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
-/** Returns number of bytes for complete PDU, 0 if incomplete, -1 on protocol error */
+/** \brief Finds the length of a complete BER or HTTP message
+    \param buf input bytes
+    \param len number of available bytes
+    \returns message length, 0 if incomplete, -1 on protocol error
+
+    Examines the first message only; does not modify the input.
+ */
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);
+/** \brief Legacy OpenSSL session accessor
+    \param cs endpoint
+    \returns NULL
+    \deprecated OpenSSL support has been removed; this function is a no-op.
+ */
 YAZ_EXPORT void *cs_get_ssl(COMSTACK cs)
 #ifdef __GNUC__
     __attribute__ ((deprecated))
 #endif
     ;
+/** \brief Legacy OpenSSL context setter
+    \param cs endpoint, or NULL
+    \param ctx ignored legacy context pointer
+    \returns 1 for a TLS endpoint with GnuTLS support, otherwise 0
+    \deprecated OpenSSL support has been removed; no context is installed.
+ */
 YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
 #ifdef __GNUC__
     __attribute__ ((deprecated))
 #endif
     ;
+/** \brief Selects certificate and private key files for a TLS endpoint
+    \param cs endpoint, or NULL
+    \param fname filename containing both certificate and key, or
+           "certificate-file,key-file"; NULL or empty disables the default file
+    \returns 1 if filenames were stored, 0 for an unsupported endpoint
+
+    Call before binding or connecting. Filenames are copied; success does not
+    mean the files have been loaded or validated. This overrides the default
+    server certificate filename yaz.pem.
+ */
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
+/** \brief Gets a human-readable description of the first peer X.509 certificate
+    \param cs endpoint with an established TLS session
+    \param buf required output pointer to allocated, NUL-terminated text
+    \param len required output pointer to text length, excluding the terminator
+    \returns 1 on success, 0 if unavailable; outputs are unchanged on failure
+
+    Requires GnuTLS certificate printing support. Free *buf with xfree after
+    success. The result is descriptive text, not a PEM-encoded certificate.
+ */
 YAZ_EXPORT int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
+/** \brief Sets the maximum incoming message size
+    \param cs endpoint
+    \param max_recv_bytes receive limit in bytes (default 16777216)
+
+    Oversized input is reported as CSBUFSIZE by cs_get.
+ */
 YAZ_EXPORT void cs_set_max_recv_bytes(COMSTACK cs, int max_recv_bytes);
+/** \brief Prints TLS peer certificate information to standard output
+    \param cs endpoint
+
+    Does nothing for other transports or when no TLS session is available.
+ */
 YAZ_EXPORT void cs_print_session_info(COMSTACK cs);
 
 /** \brief Parses transport and protocol prefixes without resolving an address
@@ -278,20 +535,34 @@ YAZ_EXPORT int cs_set_head_only(COMSTACK cs, int head_only);
  * error management.
  */
 
+/** No error, or an unspecified error. */
 #define CSNONE     0
+/** System call failed; consult the platform error information. */
 #define CSYSERR    1
+/** Operation is invalid for this state or transport. */
 #define CSOUTSTATE 2
+/** No incoming connection is available yet. */
 #define CSNODATA   3
+/** A pending write was retried with a different buffer or size. */
 #define CSWRONGBUF 4
+/** Incoming connection was rejected by the access callback. */
 #define CSDENY     5
+/** TLS operation failed; cs_get_error may provide details. */
 #define CSERRORSSL 6
+/** Incoming data exceeds the configured receive limit. */
 #define CSBUFSIZE  7
+/** Malformed protocol data. */
 #define CSPROTERR  8
-#define CSLASTERROR CSPROTERR  /* must be the value of last CS error */
+/** Highest COMSTACK error code; keep equal to the last error. */
+#define CSLASTERROR CSPROTERR
 
+/** Use blocking I/O; without this bit operations may remain pending. */
 #define CS_FLAGS_BLOCKING 1
+/** Use numeric peer addresses instead of reverse DNS in cs_addrstr. */
 #define CS_FLAGS_NUMERICHOST 2
+/** Resolve asynchronously when resolver thread support is available. */
 #define CS_FLAGS_DNS_NO_BLOCK 4
+/** Verify the TLS server certificate and hostname when connecting. */
 #define CS_FLAGS_CHECK_CERT 8
 
 YAZ_END_CDECL
