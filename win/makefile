@@ -12,32 +12,25 @@ TCL=tclsh
 HAVE_TCL=1
 
 # iconv charcter conversion utility
-HAVE_ICONV=0
-ICONV_DIR = c:\iconv-1.9.2.win$(BARCH)
+HAVE_ICONV=1
+ICONV_DIR = c:\vcpkg\installed\x$(BARCH)-windows
 
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
-ICU_VER=77
-ICU_BASE = c:\icu4c-$(ICU_VER)_1-Win$(BARCH)-MSVC2022
-!if $(BARCH) == 32
+ICU_VER=78
+ICU_BASE = c:\vcpkg\installed\x$(BARCH)-windows
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
-!elseif $(BARCH) == 64
-ICU_LIB = $(ICU_BASE)\lib64
-ICU_BIN = $(ICU_BASE)\bin64
-!else
-!error BARCH must be 32 or 64
-!endif
 ICU_INCLUDE = $(ICU_BASE)\include
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\libxslt-1.1.28.win$(BARCH)
+LIBXSLT_DIR=c:\vcpkg\installed\x$(BARCH)-windows
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\libxml2-2.9.2.win$(BARCH)
+LIBXML2_DIR=c:\vcpkg\installed\x$(BARCH)-windows
 
 # get WIN32 binaries libxml2 & iconv & zlib from here:
 #  http://www.zlatkovic.com/libxml.en.html
@@ -186,10 +179,10 @@ ICONV_DEF= \
   /I"$(ICONV_DIR)\include"
 ICONV_LIB= \
   "$(ICONV_DIR)\lib\iconv.lib"
-iconv: $(BINDIR)\iconv.dll
+iconv: $(BINDIR)\iconv-2.dll
 
-$(BINDIR)\iconv.dll:
-  copy "$(ICONV_DIR)\bin\iconv.dll" $(BINDIR)
+$(BINDIR)\iconv-2.dll:
+  copy "$(ICONV_DIR)\bin\iconv-2.dll" $(BINDIR)
 !else
 ICONV_DEF= \
   /D HAVE_ICONV_H=0
@@ -227,6 +220,8 @@ LIBXML2_DEF=/D YAZ_HAVE_XML2=1 /I"$(LIBXML2_DIR)\include\libxml2"
 libxml2: $(BINDIR)\libxml2.dll
 
 $(BINDIR)\libxml2.dll:
+  copy "$(LIBXML2_DIR)\bin\z.dll" $(BINDIR)
+  copy "$(LIBXML2_DIR)\bin\iconv-2.dll" $(BINDIR)
   copy "$(LIBXML2_DIR)\bin\libxml2.dll" $(BINDIR)
 !else
 LIBXML2_LIB=
@@ -244,7 +239,7 @@ LIBXSLT_DEF= \
 libxslt: $(BINDIR)\libxslt.dll
 
 $(BINDIR)\libxslt.dll:
-  copy "$(LIBXSLT_DIR)\lib\libxslt.dll" $(BINDIR)
+  copy "$(LIBXSLT_DIR)\bin\libxslt.dll" $(BINDIR)
 
 !else
 LIBXSLT_LIB=
