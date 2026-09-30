@@ -1127,11 +1127,25 @@
 	(<filename>cql.y</filename>).
        </para>
        <para>
-	A Windows version of GNU Bison can be fetched from here:
-	<ulink
-          url="&url.indexdata.support.windows;bison-2.4.1-setup.exe">
-          Index Data's Windows support area
-        </ulink>.
+        On Windows, download the binary ZIP archive from the
+        <ulink url="https://github.com/lexxmark/winflexbison/releases">winflexbison
+        releases</ulink> and extract it, for example to
+        <filename>C:\winflexbison</filename>. Add the extracted directory
+        to <literal>PATH</literal>; <filename>win\makefile</filename>
+        defaults to <literal>HAVE_BISON=1</literal> and
+        <literal>BISON=win_bison</literal>.
+        Alternatively, set <literal>BISON</literal> to the full executable
+        path in the makefile:
+        <screen>
+         BISON=C:\winflexbison\win_bison.exe
+        </screen>
+        Quote the executable path if it contains spaces.
+       </para>
+       <para>
+        When building a source release with the generated CQL parser
+        already included, set <literal>HAVE_BISON=0</literal> if Bison
+        is not installed and you have not modified
+        <filename>cql.y</filename>.
        </para></listitem>
       </varlistentry>
       <varlistentry>

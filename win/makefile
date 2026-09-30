@@ -42,7 +42,7 @@ LIBXML2_DIR=c:\vcpkg\installed\$(BARCH)-windows
 
 # bison
 HAVE_BISON=1
-BISON=bison
+BISON=win_bison
 
 default: all
 
