@@ -4,7 +4,8 @@
 # Parameters
 
 DEBUG=0   # 0 for release, 1 for debug
-BARCH = 64 # 32=win32/x86 or 64=x64
+# Target architecture: x86 or x64
+BARCH = x64
 
 # TCL
 TCL=tclsh
@@ -13,27 +14,24 @@ HAVE_TCL=1
 
 # iconv charcter conversion utility
 HAVE_ICONV=1
-ICONV_DIR = c:\vcpkg\installed\x$(BARCH)-windows
+ICONV_DIR = c:\vcpkg\installed\$(BARCH)-windows
 
 # icu charcter conversion utility
 # get icu libraries from http://www.icu-project.org
 HAVE_ICU=1
 ICU_VER=78
-ICU_BASE = c:\vcpkg\installed\x$(BARCH)-windows
+ICU_BASE = c:\vcpkg\installed\$(BARCH)-windows
 ICU_LIB = $(ICU_BASE)\lib
 ICU_BIN = $(ICU_BASE)\bin
 ICU_INCLUDE = $(ICU_BASE)\include
 
 # libxslt
 HAVE_LIBXSLT=1
-LIBXSLT_DIR=c:\vcpkg\installed\x$(BARCH)-windows
+LIBXSLT_DIR=c:\vcpkg\installed\$(BARCH)-windows
 
 # libxml2
 HAVE_LIBXML2=1
-LIBXML2_DIR=c:\vcpkg\installed\x$(BARCH)-windows
-
-# get WIN32 binaries libxml2 & iconv & zlib from here:
-#  http://www.zlatkovic.com/libxml.en.html
+LIBXML2_DIR=c:\vcpkg\installed\$(BARCH)-windows
 
 # bison
 HAVE_BISON=1
@@ -61,10 +59,10 @@ dist64: yaz.nsi version.nsi distclean
 	nmake nsis64
 
 make32:
-	nmake DEBUG=0 BARCH=32 all
+	nmake DEBUG=0 BARCH=x86 all
 
 make64:
-	nmake DEBUG=0 BARCH=64 all
+	nmake DEBUG=0 BARCH=x64 all
 
 distclean:
 	nmake DEBUG=1 clean

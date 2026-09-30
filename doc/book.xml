@@ -1073,12 +1073,25 @@
      Microsoft Visual Studio 2019 and 2022.
     </para>
     <para>
-     Start a command prompt and switch the sub directory
-     <filename>WIN</filename> where the file <filename>makefile</filename>
+     Install the external libraries with vcpkg as described in
+     <xref linkend="installation.windows.libxml2"/>. Then open a Visual
+     Studio Native Tools Command Prompt for the target architecture
+     (x64 for the default build) and switch to the subdirectory
+     <filename>win</filename> where the file <filename>makefile</filename>
      is located. Customize the installation by editing the
      <filename>makefile</filename> file (for example by using notepad).
      The following summarizes the most important settings in that file:
      <variablelist>
+      <varlistentry>
+       <term><literal>BARCH</literal></term>
+       <listitem><para>
+        Set to <literal>x64</literal> for a 64-bit build (the default),
+        or <literal>x86</literal> for a 32-bit build. The compiler
+        environment and dependency libraries must match this architecture.
+        The default dependency paths use
+        <literal>$(BARCH)-windows</literal> to select the vcpkg triplet.
+       </para></listitem>
+      </varlistentry>
       <varlistentry>
        <term><literal>DEBUG</literal></term>
        <listitem><para>
@@ -1127,7 +1140,8 @@
        <listitem><para>
 	If <literal>HAVE_ICONV</literal> is set to 1, YAZ is compiled
 	with iconv support. In this configuration, set
-	<literal>ICONV_DIR</literal> to the iconv source directory.
+	<literal>ICONV_DIR</literal> to the vcpkg installation prefix,
+        for example <filename>C:\vcpkg\installed\x64-windows</filename>.
        </para></listitem>
       </varlistentry>
       <varlistentry>
@@ -1138,14 +1152,10 @@
          If <literal>HAVE_LIBXML2</literal> is set to 1, YAZ is compiled
          with SRU support. In this configuration, set
          <literal>LIBXML2_DIR</literal> to the
-         <ulink url="&url.libxml2;">libxml2</ulink> source directory.
-	</para>
-	<para>
-	 You can get pre-compiled Libxml2+Libxslt DLLs and headers from
-	 <ulink url="&url.libxml2.download.windows;">here</ulink>.
-	 Should you with to compile those libraries yourself, refer to
-	 to <xref linkend="installation.windows.libxml2"/>
-	</para>
+         vcpkg installation prefix containing
+         <ulink url="&url.libxml2;">libxml2</ulink>, for example
+         <filename>C:\vcpkg\installed\x64-windows</filename>.
+        </para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -1156,7 +1166,9 @@
          If <literal>HAVE_LIBXSLT</literal> is set to 1, YAZ is compiled
          with XSLT support. In this configuration, set
          <literal>LIBXSLT_DIR</literal> to the
-         <ulink url="&url.libxslt;">libxslt</ulink> source directory.
+         vcpkg installation prefix containing
+         <ulink url="&url.libxslt;">libxslt</ulink>, for example
+         <filename>C:\vcpkg\installed\x64-windows</filename>.
         </para>
 	<note>
 	 <para>
@@ -1167,22 +1179,23 @@
       </varlistentry>
       <varlistentry>
        <term><literal>HAVE_ICU</literal>,
-       <literal>ICU_DIR</literal></term>
+       <literal>ICU_BASE</literal>, <literal>ICU_VER</literal></term>
        <listitem>
         <para>
          If <literal>HAVE_ICU</literal> is set to 1, YAZ is compiled
          with <ulink url="&url.icu;">ICU</ulink> support.
-	 In this configuration, set
-         <literal>ICU_DIR</literal> to the
-         <ulink url="&url.icu;">ICU</ulink> source directory.
+         Set <literal>ICU_BASE</literal> to the vcpkg installation prefix,
+         for example <filename>C:\vcpkg\installed\x64-windows</filename>.
+         <literal>ICU_INCLUDE</literal>, <literal>ICU_LIB</literal> and
+         <literal>ICU_BIN</literal> default to its
+         <filename>include</filename>, <filename>lib</filename> and
+         <filename>bin</filename> subdirectories.
         </para>
         <para>
-         Pre-compiled ICU libraries for various versions of Visual Studio
-         can be found
-         <ulink url="http://www.npcglib.org/~stathis/blog/precompiled-icu/">
-          here
-         </ulink> or from Index Data's <ulink
-          url="&url.indexdata.support.windows;">Windows support site</ulink>.
+         Set <literal>ICU_VER</literal> to the version suffix of the
+         installed ICU DLLs. For example, <filename>icuuc78.dll</filename>
+         requires <literal>ICU_VER=78</literal>. Check this setting when
+         installing or updating ICU with vcpkg.
         </para>
        </listitem>
       </varlistentry>
@@ -1349,38 +1362,66 @@
    </sect2>
 
    <sect2 id="installation.windows.libxml2">
-    <title>Compiling Libxml2 and Libxslt on windows</title>
+    <title>Installing Windows dependencies with vcpkg</title>
     <para>
-     Download libxml2 and Libxslt source and unpack it.
-     In the example below we install  Libxml2 2.9.2 and Libxslt 1.1.28
-     for 32-bit, so we  use the destination directories
-     libxml2.2.9.2.win32 and libxslt-1.1.28.win32 to reflect both
-     version and architecture.
+     The Windows makefile uses libraries installed with
+     <ulink url="https://learn.microsoft.com/en-us/vcpkg/consume/classic-mode">vcpkg
+     in classic mode</ulink>. Install Visual Studio with the
+     <literal>Desktop development with C++</literal> workload (including
+     the Windows SDK), and install
+     <ulink url="&url.gitwindows;">Git for Windows</ulink>.
+     The following commands are for a Windows command prompt and install
+     vcpkg in <filename>C:\vcpkg</filename>, matching the makefile defaults:
      <screen>
-      cd win32
-      cscript configure.js prefix=c:\libxml2-2.9.2.win32 iconv=no
-      nmake
-      nmake install
+      git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+      cd /d C:\vcpkg
+      bootstrap-vcpkg.bat
      </screen>
     </para>
-    <note>
-     <para>
-      There's an error in <filename>configure.js</filename> for Libxml2 2.9.2.
-      Line 17 should be assigned to <filename>configure.ac</filename>
-      rather than <filename>configure.in</filename>.
-     </para>
-    </note>
     <para>
-     For Libxslt it is similar. We must ensure that compilation of
-     Libxslt links against the already installed libxml2.
+     Install libxml2, libxslt, iconv and ICU for the default 64-bit build:
      <screen>
-      cd win32
-      cscript configure.js prefix=c:\libxslt-1.1.28.win32 iconv=no \
-          lib=c:\libxml2-2.9.2.win32\lib \
-	  include=c:\libxml2-2.9.2.win32\include\libxml2
-      nmake
-      nmake install
+      vcpkg install libxml2:x64-windows libxslt:x64-windows libiconv:x64-windows icu:x64-windows
      </screen>
+     vcpkg builds and installs these libraries and their dependencies.
+     The <literal>x64-windows</literal> triplet selects 64-bit DLLs,
+     as required by the makefile. Headers, import libraries and runtime
+     DLLs are installed under
+     <filename>C:\vcpkg\installed\x64-windows</filename>.
+    </para>
+    <para>
+     In <filename>win\makefile</filename>, keep
+     <literal>HAVE_LIBXML2</literal>, <literal>HAVE_LIBXSLT</literal>,
+     <literal>HAVE_ICONV</literal> and <literal>HAVE_ICU</literal> set to 1
+     to enable these libraries. If you installed vcpkg elsewhere, adjust
+     <literal>LIBXML2_DIR</literal>, <literal>LIBXSLT_DIR</literal>,
+     <literal>ICONV_DIR</literal> and <literal>ICU_BASE</literal> to the
+     corresponding installed triplet directory. Check that
+     <literal>ICU_VER</literal> matches the installed ICU DLL names.
+     The makefile reads these paths directly; running
+     <command>vcpkg integrate install</command> is not required for NMAKE.
+    </para>
+    <para>
+     Open an x64 Native Tools Command Prompt for Visual Studio, change to
+     the <filename>win</filename> directory in the &yaz; source tree,
+     and build with:
+     <screen>
+      nmake DEBUG=0 BARCH=x64
+     </screen>
+     The makefile copies the dependency DLLs it names from the vcpkg
+     <filename>bin</filename> directory to &yaz;'s
+     <filename>bin</filename> directory.
+    </para>
+    <para>
+     For a 32-bit build, install the same packages with
+     <literal>:x86-windows</literal> instead of
+     <literal>:x64-windows</literal>, use an x86 Native Tools Command
+     Prompt, and build with:
+     <screen>
+      nmake DEBUG=0 BARCH=x86
+     </screen>
+     The default dependency paths then select
+     <filename>C:\vcpkg\installed\x86-windows</filename>.
     </para>
    </sect2>
 
