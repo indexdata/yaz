@@ -59,11 +59,11 @@ YAZPATH=$(MAKEDIR)\..
 
 dist32: yaz.nsi version.nsi distclean
 	nmake make32
-	nmake nsis32
+	nmake BARCH=x86 nsis
 
 dist64: yaz.nsi version.nsi distclean
 	nmake make64 yaz4j
-	nmake nsis64
+	nmake BARCH=x64 nsis
 
 make32:
 	nmake DEBUG=0 BARCH=x86 all
@@ -75,11 +75,8 @@ distclean:
 	nmake DEBUG=1 clean
 	nmake DEBUG=0 clean
 
-nsis32: version.nsi
-	$(NSIS) /DVSARCH=x86 yaz.nsi
-
-nsis64: version.nsi
-	$(NSIS) /DVSARCH=x64 yaz.nsi
+nsis: version.nsi
+	$(NSIS) /DVSARCH=$(BARCH) yaz.nsi
 
 nsishelp:
 	$(NSIS)
