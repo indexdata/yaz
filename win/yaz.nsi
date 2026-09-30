@@ -19,13 +19,13 @@ RequestExecutionLevel admin
 
 SetCompressor bzip2
 
-Caption "Index Data YAZ ${VERSION} Setup"
+Caption "Index Data YAZ ${VERSION} (${VSARCH}) Setup"
 OutFile "yaz_${VERSION}.exe"
 
 LicenseText "You must read the following license before installing:"
 LicenseData license.txt
 
-ComponentText "This will install the YAZ Toolkit on your computer:"
+ComponentText "This will install the YAZ Toolkit (${VSARCH}) on your computer:"
 InstType "Full (w/ Source)"
 InstType "Lite (w/o Source)"
 
@@ -61,7 +61,7 @@ Section "" ; (default section)
 	SetOutPath "$INSTDIR"
 	; add files / whatever that need to be installed here.
 	WriteRegStr HKLM "SOFTWARE\Index Data\YAZ" "" "$INSTDIR"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "DisplayName" "YAZ ${VERSION} (remove only)"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "DisplayName" "YAZ ${VERSION} (${VSARCH}) (remove only)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YAZ" "UninstallString" '"$INSTDIR\uninst.exe"'
 	; write out uninstaller
 	WriteUninstaller "$INSTDIR\uninst.exe"
@@ -181,7 +181,8 @@ Section "YAZ Path" YAZ_PATH
 SectionEnd
 
 ; begin uninstall settings/section
-UninstallText "This will uninstall YAZ ${VERSION} from your system"
+UninstallCaption "Index Data YAZ ${VERSION} (${VSARCH}) Uninstall"
+UninstallText "This will uninstall YAZ ${VERSION} (${VSARCH}) from your system"
 
 Section Uninstall
 	ExecWait '"$INSTDIR\bin\yaz-ztest" -remove'
@@ -203,7 +204,7 @@ SectionEnd
 ;Descriptions
 
   ;Language strings
-LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files needed in order for YAZ to run, such as DLLs."
+LangString DESC_YAZ_Runtime ${LANG_ENGLISH} "YAZ runtime files for ${VSARCH} needed in order for YAZ to run, such as DLLs."
 LangString DESC_YAZ_Development ${LANG_ENGLISH} "Header files and import libraries required for developing software using YAZ."
 LangString DESC_YAZ_Documentation ${LANG_ENGLISH} "YAZ Users' guide and reference in HTML. Describes both YAZ applications and the API."
 LangString DESC_YAZ_Source ${LANG_ENGLISH} "Source code of YAZ. Required if you need to rebuild YAZ (for debugging purposes)."
