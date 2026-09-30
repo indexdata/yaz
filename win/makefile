@@ -4,8 +4,15 @@
 # Parameters
 
 DEBUG=0   # 0 for release, 1 for debug
+
 # Target architecture: x86 or x64
+!IFNDEF BARCH
+!IFDEF VSCMD_ARG_TGT_ARCH
+BARCH = $(VSCMD_ARG_TGT_ARCH)
+!ELSE
 BARCH = x64
+!ENDIF
+!ENDIF
 
 # TCL
 TCL=tclsh
