@@ -330,6 +330,7 @@
     defined using &odr; primitives) for encoding and decoding data values.
     Their general form is
     <funcsynopsis>
+     <?dbhtml funcsynopsis-style="ansi"?>
      <funcprototype><funcdef>int <function>z_<replaceable>xxx</replaceable></function></funcdef>
       <paramdef>ODR <parameter>o</parameter></paramdef>
       <paramdef>Z_<replaceable>xxx</replaceable> **<parameter>p</parameter></paramdef>
