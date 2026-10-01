@@ -1085,9 +1085,15 @@
       <varlistentry>
        <term><literal>BARCH</literal></term>
        <listitem><para>
-        Set to <literal>x64</literal> for a 64-bit build (the default),
-        or <literal>x86</literal> for a 32-bit build. The compiler
-        environment and dependency libraries must match this architecture.
+        Target architecture: <literal>x64</literal> for a 64-bit build,
+        or <literal>x86</literal> for a 32-bit build. Unless explicitly
+        set, this is taken from the Visual Studio environment variable
+        <literal>VSCMD_ARG_TGT_ARCH</literal>, falling back to
+        <literal>x64</literal> if that variable is not defined.
+        There is normally no need to set <literal>BARCH</literal> when
+        using a Native Tools Command Prompt for the target architecture.
+        The compiler environment and dependency libraries must match
+        this architecture.
         The default dependency paths use
         <literal>$(BARCH)-windows</literal> to select the vcpkg triplet.
        </para></listitem>
@@ -1420,21 +1426,21 @@
      the <filename>win</filename> directory in the &yaz; source tree,
      and build with:
      <screen>
-      nmake DEBUG=0 BARCH=x64
+      nmake
      </screen>
-     The makefile copies the dependency DLLs it names from the vcpkg
+     The makefile selects <literal>BARCH=x64</literal> from the Visual
+     Studio environment and builds in release mode by default.
+     It copies the dependency DLLs it names from the vcpkg
      <filename>bin</filename> directory to &yaz;'s
      <filename>bin</filename> directory.
     </para>
     <para>
      For a 32-bit build, install the same packages with
      <literal>:x86-windows</literal> instead of
-     <literal>:x64-windows</literal>, use an x86 Native Tools Command
-     Prompt, and build with:
-     <screen>
-      nmake DEBUG=0 BARCH=x86
-     </screen>
-     The default dependency paths then select
+     <literal>:x64-windows</literal>, and run the same build command from
+     an x86 Native Tools Command Prompt. The makefile selects
+     <literal>BARCH=x86</literal> from that environment, and the default
+     dependency paths then select
      <filename>C:\vcpkg\installed\x86-windows</filename>.
     </para>
    </sect2>
