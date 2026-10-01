@@ -396,12 +396,13 @@
    </para>
    <para>
     The software is regularly tested on
+    <ulink url="&url.archlinux;">Arch Linux</ulink>,
     <ulink url="&url.debian;">Debian GNU/Linux</ulink>,
     <ulink url="&url.centos;">CentOS</ulink>,
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
     <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
-    Windows 10.
+    Windows 11.
    </para>
    <para>
     Some versions have be known to work on Windows XP, Solaris, HP/UX,
