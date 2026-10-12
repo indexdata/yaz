@@ -1078,7 +1078,43 @@
      Install the external libraries with vcpkg as described in
      <xref linkend="installation.windows.libxml2"/>. Then open a Visual
      Studio Native Tools Command Prompt for the target architecture
-     (x64 for the default build) and switch to the subdirectory
+     (x64 for the default build).
+    </para>
+    <para>
+     For Visual Studio 2022, you can create Windows shortcuts with the
+     following <literal>Target</literal> values (each on a single line).
+     These examples use the default Community edition installation path;
+     adjust the path to <filename>VsDevCmd.bat</filename> for your edition
+     and installation location.
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term>VS 2022 x64</term>
+      <listitem>
+       <para>Use this shortcut for <literal>BARCH=x64</literal>:</para>
+       <screen>%comspec% /k ""C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" -arch=amd64 -host_arch=amd64"</screen>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>VS 2022 x86</term>
+      <listitem>
+       <para>Use this shortcut for <literal>BARCH=x86</literal>:</para>
+       <screen>%comspec% /k ""C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat" -arch=x86 -host_arch=x86"</screen>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+    <para>
+     <literal>%comspec%</literal> starts the Windows command interpreter,
+     and <literal>/k</literal> keeps it open after initializing the build
+     environment. The <literal>-arch</literal> option selects the target
+     architecture (<literal>amd64</literal> means x64), while
+     <literal>-host_arch</literal> selects the architecture of the compiler
+     tools. See Microsoft's
+     <ulink url="https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell?view=vs-2022">Developer Command Prompt documentation</ulink>
+     for more details.
+    </para>
+    <para>
+     In the chosen command prompt, switch to the subdirectory
      <filename>win</filename> where the file <filename>makefile</filename>
      is located. Customize the installation by editing the
      <filename>makefile</filename> file (for example by using notepad).
@@ -1233,10 +1269,10 @@
      <para>
       If the <filename>nmake</filename> command is not found on your system
       you probably haven't defined the environment variables required to
-      use that tool. To fix that, find and run the batch file
-      <filename>vcvarsall.bat</filename>. You need to run it from within
-      the command prompt or set the environment variables "globally";
-      otherwise it doesn't work.
+      use that tool. Open a Native Tools Command Prompt or one of the
+      shortcuts above for the target architecture, then run
+      <command>nmake</command> from the <filename>win</filename>
+      subdirectory in that prompt.
      </para>
     </note>
     <para>
