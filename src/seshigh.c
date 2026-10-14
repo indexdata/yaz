@@ -1238,6 +1238,24 @@ static void srw_bend_search(association *assoc,
     }
 }
 
+#if YAZ_HAVE_XML2
+static void explain_remove_comments(xmlNodePtr ptr)
+{
+    while (ptr)
+    {
+        xmlNodePtr next = ptr->next;
+        if (ptr->type == XML_COMMENT_NODE)
+        {
+            xmlUnlinkNode(ptr);
+            xmlFreeNode(ptr);
+        }
+        else
+            explain_remove_comments(ptr->children);
+        ptr = next;
+    }
+}
+#endif
+
 static char *srw_bend_explain_default(bend_explain_rr *rr)
 {
 #if YAZ_HAVE_XML2
@@ -1256,6 +1274,8 @@ static char *srw_bend_explain_default(bend_explain_rr *rr)
             char *content;
 
             ptr = xmlCopyNode(ptr, 1);
+            /* Comments may contain private configuration or credentials. */
+            explain_remove_comments(ptr->children);
 
             xmlDocSetRootElement(doc, ptr);
 
