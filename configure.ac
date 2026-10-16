@@ -290,6 +290,43 @@ extern int accept(int, struct sockaddr *, size_t t *);
 AC_MSG_RESULT([$ac_cv_check_socklen_t])
 AC_DEFINE_UNQUOTED([YAZ_SOCKLEN_T],[$ac_cv_check_socklen_t],[socklen_t type])
 dnl
+dnl ------ stemmer
+AC_ARG_WITH([stemmer],
+	      [  --with-stemmer[=PREFIX]  use system stemmer if available],
+	      [],
+	      [with_stemmer=no])
+use_system_stemmer=no
+if test "$with_stemmer" != "no" -a "$with_stemmer" != "yes"; then
+    oldLibs=$LIBS
+    oldCPPFLAGS=$CPPFLAGS
+    if test ! -f "$with_stemmer/include/libstemmer.h"; then
+	AC_MSG_ERROR([libstemmer.h not found])
+    fi
+    LIBS="-L$with_stemmer/lib"
+    CPPFLAGS="-I$with_stemmer/include"
+    AC_MSG_CHECKING([for working stemmer])
+    LIBS="$LIBS -lstemmer"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libstemmer.h>]], [[struct sb_stemmer *stemmer;
+	    stemmer = sb_stemmer_new("english", "UTF_8");
+	    if (stemmer)
+	        sb_stemmer_delete(stemmer);]])],
+	    [stemmer_ok=1],[stemmer_ok=0])
+    LIBS=$oldLibs
+    CPPFLAGS=$oldCPPFLAGS
+    if test "$stemmer_ok" = "0"; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([system stemmer requested but not usable])
+    else
+	AC_MSG_RESULT([yes])
+	use_system_stemmer=yes
+	STEMMER_LIBS="-lstemmer"
+	STEMMER_CFLAGS="-I$with_stemmer/include"
+    fi
+fi
+AC_SUBST([STEMMER_LIBS])
+AC_SUBST([STEMMER_CFLAGS])
+AM_CONDITIONAL([USE_SYSTEM_STEMMER],[test "$use_system_stemmer" = "yes"])
+dnl
 dnl ------ tcpd
 AC_ARG_ENABLE([tcpd],
 	[  --enable-tcpd[=PREFIX]  enable TCP wrapper for server if available])
