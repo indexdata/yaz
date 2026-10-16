@@ -292,20 +292,26 @@ AC_DEFINE_UNQUOTED([YAZ_SOCKLEN_T],[$ac_cv_check_socklen_t],[socklen_t type])
 dnl
 dnl ------ stemmer
 AC_ARG_WITH([stemmer],
-	      [  --with-stemmer[=PREFIX]  use system stemmer if available],
+	      [  --with-stemmer[=PREFIX]   use system stemmer if available],
 	      [],
 	      [with_stemmer=no])
 use_system_stemmer=no
-if test "$with_stemmer" != "no" -a "$with_stemmer" != "yes"; then
+STEMMER_LIBS=
+STEMMER_CFLAGS=
+if test "$with_stemmer" != "no"; then
     oldLibs=$LIBS
     oldCPPFLAGS=$CPPFLAGS
-    if test ! -f "$with_stemmer/include/libstemmer.h"; then
-	AC_MSG_ERROR([libstemmer.h not found])
+    STEMMER_LIBS="-lstemmer"
+    if test "$with_stemmer" != "yes"; then
+	if test ! -f "$with_stemmer/include/libstemmer.h"; then
+	    AC_MSG_ERROR([libstemmer.h not found])
+	fi
+	STEMMER_LIBS="-L$with_stemmer/lib -lstemmer"
+	STEMMER_CFLAGS="-I$with_stemmer/include"
     fi
-    LIBS="-L$with_stemmer/lib"
-    CPPFLAGS="-I$with_stemmer/include"
+    LIBS="$STEMMER_LIBS $LIBS"
+    CPPFLAGS="$CPPFLAGS $STEMMER_CFLAGS"
     AC_MSG_CHECKING([for working stemmer])
-    LIBS="$LIBS -lstemmer"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libstemmer.h>]], [[struct sb_stemmer *stemmer;
 	    stemmer = sb_stemmer_new("english", "UTF_8");
 	    if (stemmer)
@@ -319,8 +325,6 @@ if test "$with_stemmer" != "no" -a "$with_stemmer" != "yes"; then
     else
 	AC_MSG_RESULT([yes])
 	use_system_stemmer=yes
-	STEMMER_LIBS="-lstemmer"
-	STEMMER_CFLAGS="-I$with_stemmer/include"
     fi
 fi
 AC_SUBST([STEMMER_LIBS])

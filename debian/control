@@ -13,6 +13,7 @@ Build-Depends: debhelper-compat (= 13),
 	libmemcached-dev,
 	libhiredis-dev,
 	libicu-dev,
+	libstemmer-dev,
 	libssl-dev
 
 Package: libyaz5
@@ -60,6 +61,7 @@ Package: libyaz5-dev
 Depends: libyaz5 (= ${source:Version}),
 	libxslt1-dev,
 	libicu-dev,
+	libstemmer-dev,
 	tclsh
 Provides: libyaz-dev
 Replaces: libyaz-dev
