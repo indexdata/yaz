@@ -1,3 +1,27 @@
+--- 5.38.1 2026/10/16
+
+Windows build: use vcpkg for libraries such as libxml2, libxslt, icu.
+
+Remove XML comments from default SRU Explain responses, as comments
+may contain credentials or private configuration.
+Related to: https://github.com/indexdata/idzebra/issues/56
+
+Align Z39.50 definitions and documentation with the 2003 standard
+  - Rename the ASN.1 module and imports to Z39-50-APDU-2001, preserving the
+    OID and generated C API/ABI.
+  - Document YAZ compatibility extensions and defer PeriodicQuerySchedule
+    corrections to YAZ 6.
+  - Update standards documentation and clarify Bib-1 diagnostic compatibility;
+    restore the complete diagnostic 1064 message without changing its macro.
+  - Remove the unused attribute CSV and expand the bib1-attr.7 source with
+    registered Use and Relation attributes.
+
+Require Bison 2.4 (for %pure)
+
+Documentation updates for: pkg-config, COMSTACK.
+
+Debian/Ubuntu packages: use libstemmer package rather than bundled stemmer.
+
 --- 5.38.0 2026/09/10
 
 JSON: fixes for `json_parser_subst`. Add `json_clone_node`
