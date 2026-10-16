@@ -8,4 +8,5 @@ Version: @VERSION@
 Description: YAZ ICU library for building Z39.50 applications
 Requires: yaz icu-i18n
 Libs: -L${libdir} -lyaz_icu @PTHREAD_LIBS@
+Libs.private: @STEMMER_LIBS@
 Cflags: @ICU_CPPFLAGS@

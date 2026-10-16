@@ -15,6 +15,7 @@ echo_source=yes
 echo_lalibs=no
 echo_comp=no
 ICU_LIBS="@ICU_LIBS@"
+STEMMER_LIBS="@STEMMER_LIBS@"
 ICU_CPPFLAGS="@ICU_CPPFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
 MEMCACHED_LIBS="@MEMCACHED_LIBS@"
@@ -171,8 +172,8 @@ fi
 
 if test "$lib_icu" = "yes"; then
     YAZINC="$YAZINC $ICU_CPPFLAGS"
-    YAZLIB="$YAZLIB $ICU_LIBS"
-    YAZLALIB="$YAZLALIB $ICU_LIBS"
+    YAZLIB="$YAZLIB $ICU_LIBS $STEMMER_LIBS"
+    YAZLALIB="$YAZLALIB $ICU_LIBS $STEMMER_LIBS"
 fi
 
 if test "$echo_help" = "yes"; then
