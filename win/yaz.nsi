@@ -90,12 +90,7 @@ SectionEnd ; end of default section
 Section "YAZ Runtime" YAZ_Runtime
 	SectionIn 1 2
 	SetOutPath $INSTDIR\bin
-	File "${VS_REDIST_FULL}"
-	ReadRegDword $1 HKLM "${VS_REDIST_KEY}" "Version"
-	${If} $1 == ""
-	  ExecWait '"$INSTDIR\bin\${VS_REDIST_EXE}" /passive /nostart'
-	${endif}
-	Delete "$INSTDIR\bin\${VS_REDIST_EXE}"
+	!insertmacro InstallVSRedist
 	IfFileExists "$INSTDIR\bin\yaz-ztest.exe" 0 Noservice
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
