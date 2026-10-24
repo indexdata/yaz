@@ -324,9 +324,7 @@
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>
     <manvolnum>7</manvolnum>
-   </citerefentry>
-  </para>
-  <para>
+   </citerefentry>,
    <citerefentry>
     <refentrytitle>yaz-iconv</refentrytitle>
     <manvolnum>1</manvolnum>
