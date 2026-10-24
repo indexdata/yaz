@@ -219,6 +219,71 @@
   </variablelist>
  </refsect1>
 
+ <refsect1 id="yaz-marcdump.marc-in-json"><title>MARC-IN-JSON</title>
+  <para>
+   The <literal>json</literal> format follows Ross Singer's
+   <ulink url="&url.marc_in_json;">MARC-in-JSON proposal</ulink>.
+   Each record is a JSON object with a <literal>leader</literal> string
+   containing the 24-character MARC leader and a <literal>fields</literal>
+   array containing the fields in record order.
+  </para>
+  <para>
+   Each field is an object with one member whose name is the field tag.
+   Tags are strings, so leading zeroes are retained. For a control field,
+   the value is a string containing the field data. For a data field,
+   the value is an object containing indicator members named
+   <literal>ind1</literal>, <literal>ind2</literal>, etc., each holding a
+   one-character string, and a <literal>subfields</literal> array.
+   YAZ supports the indicator count specified at leader offset 10
+   (counting from zero), as defined by ISO2709. MARC21 uses two indicators;
+   a record with three indicators uses <literal>ind1</literal>,
+   <literal>ind2</literal>, and <literal>ind3</literal>, with
+   <literal>3</literal> at leader offset 10. A blank indicator is
+   represented by a space (<literal>" "</literal>).
+  </para>
+  <para>
+   Each subfield is an object with one member: the subfield code is the
+   name and the subfield data is the string value. Field and subfield
+   arrays preserve order and allow repeated tags and codes as separate
+   objects. JSON object member order has no significance. For example:
+  </para>
+  <programlisting>{
+  "leader": "00000nam a2200000 a 4500",
+  "fields": [
+    {"001": "12345"},
+    {"245": {
+      "ind1": "0",
+      "ind2": "0",
+      "subfields": [
+        {"a": "An example title :"},
+        {"b": "a subtitle."}
+      ]
+    }},
+    {"650": {
+      "ind1": " ",
+      "ind2": "0",
+      "subfields": [
+        {"a": "Libraries"},
+        {"x": "Automation"},
+        {"x": "Standards."}
+      ]
+    }},
+    {"650": {
+      "ind1": " ",
+      "ind2": "0",
+      "subfields": [{"a": "Cataloging."}]
+    }}
+  ]
+}</programlisting>
+  <para>
+   With <literal>-i json</literal>, <command>yaz-marcdump</command>
+   expects one record object per input file. With <literal>-o json</literal>,
+   it writes successive record objects without an enclosing array.
+   Use <literal>-f</literal> and <literal>-t UTF-8</literal> to convert
+   records from another character encoding for JSON output.
+  </para>
+ </refsect1>
+
  <refsect1><title>EXAMPLES</title>
   <para>
    The following command converts MARC21/USMARC in MARC-8 encoding to
