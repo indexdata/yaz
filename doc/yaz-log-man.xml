@@ -259,18 +259,15 @@
    <citerefentry>
     <refentrytitle>yaz</refentrytitle>
     <manvolnum>7</manvolnum>
-   </citerefentry>
-
+   </citerefentry>,
    <citerefentry>
     <refentrytitle>yaz-ztest</refentrytitle>
     <manvolnum>8</manvolnum>
-   </citerefentry>
-
+   </citerefentry>,
    <citerefentry>
     <refentrytitle>yaz-client</refentrytitle>
     <manvolnum>1</manvolnum>
-   </citerefentry>
-
+   </citerefentry>,
    <citerefentry>
     <refentrytitle>strftime</refentrytitle>
     <manvolnum>3</manvolnum>
