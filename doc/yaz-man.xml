@@ -37,6 +37,39 @@
   </para>
  </refsect1>
 
+ <refsect1><title>FILES</title>
+  <para>
+   The following <command>pkg-config</command> files are installed in
+   <filename>${libdir}/pkgconfig</filename> (by default,
+   <filename>/usr/local/lib/pkgconfig</filename>), where
+   <literal>libdir</literal> is the configured library installation directory.
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term><filename>yaz.pc</filename></term>
+    <listitem><para>
+      Compiler and linker flags for the main YAZ library.
+     </para></listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><filename>yaz-server.pc</filename></term>
+    <listitem><para>
+      Compiler and linker flags for the Generic Frontend (GFS) server library.
+     </para></listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><filename>yaz-icu.pc</filename></term>
+    <listitem><para>
+      Compiler and linker flags for the YAZ ICU wrapper library.
+     </para></listitem>
+   </varlistentry>
+  </variablelist>
+  <para>
+   For example, <command>pkg-config --cflags --libs yaz</command> prints
+   the compiler and linker flags needed to build an application using YAZ.
+  </para>
+ </refsect1>
+
  <refsect1><title>COPYRIGHT</title>
   <para>
    Copyright &copy; &copyright-year; Index Data.
