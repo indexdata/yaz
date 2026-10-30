@@ -227,14 +227,14 @@ yaz_iconv_decoder_t yaz_danmarc_decoder(const char *fromcode,
 int yaz_danmarc_is_combining(unsigned long x)
 {
     /* https://en.wikipedia.org/wiki/Combining_character */
-    int ranges[] = {
+    unsigned ranges[] = {
         0x300, 0x36F,
         0x1AB0, 0x1AFF,
         0x1DC0, 0x1DFF,
         0x20D0, 0x20FF,
         0xFE20, 0xFE2F,
         0};
-    int i = 0;
+    size_t i = 0;
     while (ranges[i] != 0 && x >= ranges[i])
     {
         if (x <= ranges[i+1])
