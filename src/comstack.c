@@ -452,7 +452,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
             }
             if (content_len == -1)
                 return 0;   /* no content length */
-            if (content_len > (unsigned)(INT_MAX - i))
+            if (content_len > INT_MAX - i)
                 return -1;
             if (len >= i + content_len)
                 return i + content_len;
