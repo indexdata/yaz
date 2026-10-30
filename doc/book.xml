@@ -478,6 +478,7 @@
    <sect2 id="installation.source.unix">
     <title>Compiling from source on Unix</title>
     <para>
+     Compiling YAZ requires a C99-compatible compiler and C library.
      You can choose to compile YAZ from official tar releases from
      <ulink url="&url.yaz.download;"/>
      or clone it via GitHub

@@ -247,7 +247,6 @@ static void tst_berint32(ODR encode, ODR decode)
 
 static void tst_berint64(ODR encode, ODR decode)
 {
-#if NMEM_64
     char *buf = 0;
     int len = 0;
     Odr_int val;
@@ -311,7 +310,6 @@ static void tst_berint64(ODR encode, ODR decode)
     odr_setbuf(decode, buf, len, 0);
     ber_integer(decode, &ret_val);
     YAZ_CHECK_EQ(ret_val, val);
-#endif
 }
 
 static void tst(void)

@@ -43,28 +43,17 @@ YAZ_BEGIN_CDECL
 /** \brief NMEM handle (an opaque pointer to memory) */
 typedef struct nmem_control *NMEM;
 
-/** \brief Set to 1 if YAZ BER integer is 64-bit ; 0 otherwise */
-#ifndef NMEM_64
+/** \brief Retained for source compatibility; always 1 */
 #define NMEM_64 1
-#endif
-
-#if NMEM_64
 
 #ifdef _MSC_VER
-/* Visual Studio. 6.0 and later supports this */
+/* Visual Studio. 6.0 did not support long long int */
 typedef __int64 nmem_int_t;
 #define NMEM_INT_PRINTF "%I64d"
 #else
 /* C99 */
 typedef long long int nmem_int_t;
 #define NMEM_INT_PRINTF "%lld"
-#endif
-
-#else
-/** \brief BER/utility integer (32-bit on most platforms) */
-typedef int nmem_int_t;
-/** \brief printf format for nmem_int_t type */
-#define NMEM_INT_PRINTF "%d"
 #endif
 
 /** \brief BER/utility boolean */

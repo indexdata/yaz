@@ -51,10 +51,8 @@ void tst_nmem_malloc(void)
         YAZ_CHECK(cp);
         if ((int) sizeof(long) >= j)
             *(long*) cp = 123L;
-#if HAVE_LONG_LONG
-        if ((int) sizeof(long long) >= j)
-            *(long long*) cp = 123L;
-#endif
+        if ((int) sizeof(nmem_int_t) >= j)
+            *(nmem_int_t*) cp = 123L;
         if ((int) sizeof(double) >= j)
             *(double*) cp = 12.2;
     }

@@ -47,8 +47,6 @@ AC_CHECK_HEADERS([net/if.h netinet/in.h netinet/if_ether.h],[],[],[
 #include <netinet/in.h>
 #endif
 ])
-dnl ----- Types
-AC_CHECK_TYPES([long long])
 dnl
 dnl ----- Sockets
 checkBoth=0
