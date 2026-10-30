@@ -1116,6 +1116,14 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
 #endif
 
+static size_t pow10i(int n)
+{
+    size_t res = 1;
+    while (--n >= 0)
+        res *= 10;
+    return res;
+}
+
 int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
 {
     struct yaz_marc_node *n, *cap_node = 0;
@@ -1124,10 +1132,10 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     int length_data_entry;
     int length_starting;
     int length_implementation;
-    int data_offset = 0;
+    size_t data_offset = 0;
     const char *leader = 0;
     WRBUF wr_dir, wr_head, wr_data_tmp;
-    int base_address;
+    size_t base_address;
 
     for (n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
@@ -1150,7 +1158,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     wr_dir = wrbuf_alloc();
     for (n = mt->nodes; n; n = n->next)
     {
-        int data_length = 0;
+        size_t data_length = 0;
         const char *tag = 0;
         struct yaz_marc_subfield *s;
 
@@ -1194,9 +1202,15 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
                 cap_node = n;
                 break;
             }
+            if (data_length >= pow10i(length_data_entry) || data_offset >= pow10i(length_starting))
+            {
+                wrbuf_destroy(wr_dir);
+                wrbuf_destroy(wr_data_tmp);
+                return -1;
+            }
             wrbuf_printf(wr_dir, "%3.3s", tag);
-            wrbuf_printf(wr_dir, "%0*d", length_data_entry, data_length);
-            wrbuf_printf(wr_dir, "%0*d", length_starting, data_offset);
+            wrbuf_printf(wr_dir, "%0*ld", length_data_entry, (long) data_length);
+            wrbuf_printf(wr_dir, "%0*ld", length_starting, (long) data_offset);
             data_offset += data_length;
         }
     }
@@ -1205,15 +1219,21 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
 
     /* base address of data (comes after leader+directory) */
     base_address = 24 + wrbuf_len(wr_dir);
+    if (base_address >= 100000)
+    {
+        wrbuf_destroy(wr_dir);
+        wrbuf_destroy(wr_data_tmp);
+        return -1;
+    }
 
     wr_head = wrbuf_alloc();
 
     /* write record length */
-    wrbuf_printf(wr_head, "%05d", base_address + data_offset + 1);
+    wrbuf_printf(wr_head, "%05ld", (long) (base_address + data_offset + 1));
     /* from "original" leader */
     wrbuf_write(wr_head, leader+5, 7);
     /* base address of data */
-    wrbuf_printf(wr_head, "%05d", base_address);
+    wrbuf_printf(wr_head, "%05d", (int) base_address);
     /* from "original" leader */
     wrbuf_write(wr_head, leader+17, 7);
 

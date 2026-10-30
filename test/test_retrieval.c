@@ -18,10 +18,11 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include "xml_util.h"
 
 yaz_retrieval_t conv_configure(const char *xmlstring, WRBUF w)
 {
-    xmlDocPtr doc = xmlParseMemory(xmlstring, strlen(xmlstring));
+    xmlDocPtr doc = yaz_xml_parse_memory(xmlstring, strlen(xmlstring));
     if (!doc)
     {
         wrbuf_printf(w, "xmlParseMemory");

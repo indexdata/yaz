@@ -15,7 +15,7 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/log.h>
 

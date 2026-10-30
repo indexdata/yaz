@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
 #include <time.h>
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44,6 +45,7 @@
 #endif
 
 #include <yaz/unix.h>
+#include <yaz/atoi.h>
 #include <yaz/errno.h>
 #include <yaz/log.h>
 #include <yaz/snprintf.h>
@@ -249,17 +251,19 @@ static void *unix_straddr1(COMSTACK h, const char *str, char *f)
             }
             else if (sp->umask == -1 && strncmp(s, "umask=", 6) == 0)
             {
-                char * end;
                 char * arg = s + 6;
+                size_t arg_len = strlen(arg);
+                int mask;
 
-                sp->umask = strtol(arg, &end, 8);
-                if (errno == EINVAL ||
-                    *end)
+                if (!arg_len || arg_len > INT_MAX ||
+                    yaz_atoi(8, arg, (int) arg_len, &mask) != (int) arg_len ||
+                    mask > 0777)
                 {
                     yaz_log(log_level, "unix_strtoaddr1 Invalid umask %s",
                         arg);
                     return 0;
                 }
+                sp->umask = mask;
             }
             else if (file == NULL && strncmp(s, "file=", 5) == 0)
             {
@@ -349,7 +353,7 @@ static int unix_connect(COMSTACK h, void *address)
     }
     for (i = 0; i<3; i++)
     {
-        r = connect(h->iofile, (struct sockaddr *) add, SUN_LEN(add));
+        r = connect(h->iofile, (struct sockaddr *) add, (YAZ_SOCKLEN_T) SUN_LEN(add));
         if (r < 0 && yaz_errno() == EAGAIN)
         {
 #if HAVE_NANOSLEEP
@@ -430,7 +434,8 @@ static int unix_bind(COMSTACK h, void *address, int mode)
         socket_unix.sun_family = AF_UNIX;
         strncpy(socket_unix.sun_path, path, sizeof(socket_unix.sun_path)-1);
         socket_unix.sun_path[sizeof(socket_unix.sun_path)-1] = 0;
-        if (connect(socket_out, (struct sockaddr *) &socket_unix, SUN_LEN(&socket_unix)) < 0)
+        if (connect(socket_out, (struct sockaddr *) &socket_unix,
+            (YAZ_SOCKLEN_T) SUN_LEN(&socket_unix)) < 0)
         {
             if (yaz_errno() == ECONNREFUSED)
                 yaz_log(log_level, "unix_bind socket exists but nobody is listening");
@@ -450,7 +455,7 @@ static int unix_bind(COMSTACK h, void *address, int mode)
         unlink(path);
     }
 
-    if (bind(h->iofile, (struct sockaddr *) addr, SUN_LEN((struct sockaddr_un *)addr)))
+    if (bind(h->iofile, (struct sockaddr *) addr, (YAZ_SOCKLEN_T) SUN_LEN((struct sockaddr_un *)addr)))
     {
         cs_set_error(h, CSYSERR);
         return -1;
@@ -593,7 +598,8 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     unix_state *sp = (unix_state *)h->cprivate;
     char *tmpc;
     int tmpi, berlen, rest, req, tomove;
-    int hasread = 0, res;
+    int hasread = 0;
+    ssize_t res;
 
     yaz_log(log_level, "unix_get h=%p bufsize=%d", h, *bufsize);
     if (sp->altlen) /* switch buffers */
@@ -636,7 +642,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
             }
         }
         res = recv(h->iofile, *buf + hasread, CS_UNIX_BUFCHUNK, 0);
-        yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
+        yaz_log(log_level, "  recv res=%ld, hasread=%d", (long) res, hasread);
         if (res < 0)
         {
             if (yaz_errno() == EWOULDBLOCK
@@ -704,7 +710,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
  */
 static int unix_put(COMSTACK h, char *buf, int size)
 {
-    int res;
+    ssize_t res;
     struct unix_state *state = (struct unix_state *)h->cprivate;
 
     yaz_log(log_level, "unix_put h=%p size=%d", h, size);
@@ -749,8 +755,8 @@ static int unix_put(COMSTACK h, char *buf, int size)
             return -1;
         }
         state->written += res;
-        yaz_log(log_level, "  Wrote %d, written=%d, nbytes=%d",
-                res, state->written, size);
+        yaz_log(log_level, "  Wrote %ld, written=%d, nbytes=%d",
+                (long) res, state->written, size);
     }
     state->towrite = state->written = -1;
     yaz_log(log_level, "  Ok");

@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <yaz/yaz-iconv.h>
 #include "cclp.h"
+#include <limits.h>
 
 /*
  * token_cmp: Compare token with keyword(s)
@@ -282,7 +283,10 @@ void ccl_parser_set_case(CCL_parser p, int case_sensitivity_flag)
 int ccl_parser_get_error(CCL_parser cclp, int *pos)
 {
     if (pos && cclp->error_code)
-        *pos = cclp->error_pos - cclp->start_pos;
+    {
+        size_t pos1 = cclp->error_pos - cclp->start_pos;
+        *pos = pos1 > INT_MAX ? INT_MAX : (int) pos1;
+    }
     return cclp->error_code;
 }
 

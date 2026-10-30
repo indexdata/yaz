@@ -248,17 +248,19 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f)
     cql_to_xml(cn, cql_fputs, f);
 }
 
-void cql_buf_write_handler (const char *b, void *client_data)
+void cql_buf_write_handler(const char *b, void *client_data)
 {
     struct cql_buf_write_info *info = (struct cql_buf_write_info *)client_data;
-    int l = strlen(b);
-    if (info->off < 0 || (info->off + l >= info->max))
+    size_t l = strlen(b);
+    if (info->off < 0 || info->max < 0 ||
+        info->off >= info->max ||
+        l >= (size_t) (info->max - info->off))
     {
         info->off = -1;
         return;
     }
     memcpy (info->buf + info->off, b, l);
-    info->off += l;
+    info->off += (int) l;
 }
 
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max)

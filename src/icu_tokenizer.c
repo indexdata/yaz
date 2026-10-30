@@ -15,7 +15,7 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/log.h>
 
@@ -162,7 +162,7 @@ int icu_tokenizer_attach(struct icu_tokenizer *tokenizer,
 int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
                                  struct icu_buf_utf16 *tkn16,
                                  UErrorCode *status,
-                                 size_t *start, size_t *len)
+                                 int32_t *start, int32_t *len)
 {
     int32_t tkn_start = 0;
     int32_t tkn_end = 0;
@@ -195,9 +195,18 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
     if (U_FAILURE(*status))
         return 0;
 
-    /* everything OK, now update internal state */
     tkn_len = tkn_end - tkn_start;
+    if (tkn16 && tkn16->utf16_cap < tkn_len &&
+        !icu_buf_utf16_resize(tkn16, (size_t) tkn_len))
+    {
+        *status = U_BUFFER_OVERFLOW_ERROR;
+        *start = tkn_start;
+        *len = 0;
+        icu_buf_utf16_clear(tkn16);
+        return 0;
+    }
 
+    /* everything OK, now update internal state */
     if (0 < tkn_len)
     {
         tokenizer->token_count++;
@@ -215,9 +224,6 @@ int32_t icu_tokenizer_next_token(struct icu_tokenizer *tokenizer,
     /* copying into token buffer if it exists */
     if (tkn16)
     {
-        if (tkn16->utf16_cap < tkn_len)
-            icu_buf_utf16_resize(tkn16, (size_t) tkn_len * 2);
-
         u_strncpy(tkn16->utf16, &(tokenizer->buf16->utf16)[tkn_start],
                   tkn_len);
 

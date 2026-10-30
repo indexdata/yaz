@@ -15,7 +15,7 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/stemmer.h>
 
@@ -363,10 +363,10 @@ struct icu_iter {
     struct icu_buf_utf8 *sort8;
     struct icu_buf_utf8 *result;
     int token_count;
-    size_t org_start;
-    size_t org_len;
+    int32_t org_start;
+    int32_t org_len;
     size_t utf8_base;
-    size_t utf16_base;
+    int32_t utf16_base;
     struct icu_chain_step *steps;
 };
 
@@ -467,8 +467,15 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
 
                     if (!dst1)
                         break;
-                    dst = icu_buf_utf16_append(dst, step->u.join);
-                    dst = icu_buf_utf16_append(dst, dst1);
+                    if (!icu_buf_utf16_append(dst, step->u.join)
+                        || !icu_buf_utf16_append(dst, dst1))
+                    {
+                        icu_buf_utf16_destroy(dst1);
+                        icu_buf_utf16_destroy(dst);
+                        dst = 0;
+                        iter->status = U_BUFFER_OVERFLOW_ERROR;
+                        break;
+                    }
                     icu_buf_utf16_destroy(dst1);
                 }
             }
@@ -584,7 +591,8 @@ void icu_iter_get_org_info2(yaz_icu_iter_t iter, size_t *start, size_t *len,
 
     status = U_ZERO_ERROR;
 
-    *start = len1 + iter->utf8_base;
+    iter->utf8_base = len1 + iter->utf8_base;
+    *start = iter->utf8_base;
 
     u_strToUTF8(0, 0, &len2,
                 iter->org->utf16 + iter->utf16_base,
@@ -601,7 +609,6 @@ void icu_iter_get_org_info2(yaz_icu_iter_t iter, size_t *start, size_t *len,
         icu_utf16_to_utf8(iter->org8, iter->org, &status);
         *cstr = icu_buf_utf8_to_cstr(iter->org8);
     }
-    iter->utf8_base = *start;
     iter->utf16_base = iter->org_start;
 }
 

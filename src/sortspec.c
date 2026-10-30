@@ -120,9 +120,9 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
                 sks->u.missingValueData = (Odr_oct*)
                     odr_malloc(out, sizeof(Odr_oct));
                 i++;
-                sks->u.missingValueData->len = strlen(sort_flags+i);
-                sks->u.missingValueData->buf = odr_strdup(out, sort_flags+i);
-                i += strlen(sort_flags+i) - 1;
+                sks->u.missingValueData->len = (int) strlen(sort_flags + i);
+                sks->u.missingValueData->buf = odr_strdup(out, sort_flags + i);
+                i += sks->u.missingValueData->len - 1;
                 break;
             }
         }

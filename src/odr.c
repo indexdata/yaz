@@ -283,7 +283,7 @@ char *odr_getbuf(ODR o, int *len, int *size)
 
 int odr_offset(ODR o)
 {
-    return o->op->bp - o->op->buf;
+    return (int) (o->op->bp - o->op->buf);
 }
 
 void odr_printf(ODR o, const char *fmt, ...)
@@ -293,7 +293,7 @@ void odr_printf(ODR o, const char *fmt, ...)
 
     va_start(ap, fmt);
     yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
-    o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, strlen(buf));
+    o->op->stream_write(o, o->op->print, ODR_VISIBLESTRING, buf, (int) strlen(buf));
     va_end(ap);
 }
 /*

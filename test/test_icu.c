@@ -20,7 +20,7 @@
 #include <yaz/wrbuf.h>
 
 #if YAZ_HAVE_ICU
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 #include <unicode/uclean.h>
 
 #if YAZ_POSIX_THREADS
@@ -31,6 +31,8 @@
 #include <libxml/parser.h>
 #include <libxml/xmlmemory.h>
 #endif
+
+#include "xml_util.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -68,8 +70,8 @@ static int test_icu_casemap(const char *locale, char action,
     struct icu_buf_utf16 *dest16 = icu_buf_utf16_create(0);
 
 
-    int src8cstr_len = strlen(src8cstr);
-    int chk8cstr_len = strlen(chk8cstr);
+    int src8cstr_len = (int) strlen(src8cstr);
+    int chk8cstr_len = (int) strlen(chk8cstr);
 
     /* converting to UTF16 */
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
@@ -170,7 +172,7 @@ static void check_icu_casemap(void)
 
 }
 
-static int test_icu_sortmap(const char *locale, int src_list_len,
+static int test_icu_sortmap(const char *locale, size_t src_list_len,
                             const char **src_list, const char **chk_list)
 {
     int success = 1;
@@ -369,7 +371,8 @@ static int test_icu_tokenizer(const char *locale, char action,
     struct icu_buf_utf16 *tkn16 = icu_buf_utf16_create(0);
     struct icu_buf_utf8 *tkn8 = icu_buf_utf8_create(0);
     struct icu_tokenizer *tokenizer = 0;
-    size_t org_start, org_len;
+    int32_t org_start;
+    int32_t org_len;
 
     /* transforming to UTF16 */
     icu_utf16_from_utf8_cstr(src16, src8cstr, &status);
@@ -450,7 +453,7 @@ static void check_icu_chain(void)
         "</icu>";
 
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
@@ -509,7 +512,7 @@ static void check_bug_1140(void)
         "</icu>";
 
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
@@ -564,7 +567,7 @@ static void check_chain_empty_token(void)
         "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
@@ -602,7 +605,7 @@ static void check_chain_empty_chain(void)
     const char *src8 = "some 5487 weired !¤%&(/& sTuFf";
     char *dest8 = 0;
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
 
@@ -644,7 +647,7 @@ static void check_icu_iter1(void)
         "<transform rule=\"[[:WhiteSpace:][:Punctuation:]] Remove\"/>"
         "</icu>";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -786,7 +789,7 @@ static void check_icu_iter2(void)
         "<casemap rule=\"l\"/>"
         "</icu>";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -828,7 +831,7 @@ static void check_icu_iter3(void)
         "<display/>\n"
         "</icu_chain>\n";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -870,7 +873,7 @@ static void check_icu_iter4(void)
         "<join rule=\"\"/>"
         "</icu>";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -911,7 +914,7 @@ static void check_norm(void)
         "    <casemap rule=\"l\"/>"
         "  </icu_chain>";
 
-    xmlDoc *doc = xmlParseMemory(xml_str, strlen(xml_str));
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
     YAZ_CHECK(doc);
     if (!doc)
         return;

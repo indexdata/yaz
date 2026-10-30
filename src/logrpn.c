@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 
 #include <yaz/log.h>
 #include <yaz/logrpn.h>
@@ -255,9 +256,12 @@ const char *yaz_prox_unit_name(Z_ProximityOperator *op)
 {
     if (op->which!=Z_ProximityOperator_known)
          return "private";
-    const char *n = z_ProxUnit_to_str(*op->u.known);
-    if (n)
-        return n;
+    if (*op->u.known >= INT_MIN && *op->u.known <= INT_MAX)
+    {
+        const char *n = z_ProxUnit_to_str((int) *op->u.known);
+        if (n)
+            return n;
+    }
     return "unknown";
 }
 

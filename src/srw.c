@@ -22,6 +22,7 @@
 #include <yaz/facet.h>
 #include <yaz/proto.h>
 #include "sru-p.h"
+#include "xml_util.h"
 
 char *yaz_negotiate_sru_version(char *input_ver)
 {
@@ -413,7 +414,7 @@ int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
                                      int *num, ODR odr)
 {
     int ret = 0;
-    xmlDocPtr doc = xmlParseMemory(buf, len);
+    xmlDocPtr doc = yaz_xml_parse_memory(buf, len);
     if (doc)
     {
         xmlNodePtr ptr = xmlDocGetRootElement(doc);

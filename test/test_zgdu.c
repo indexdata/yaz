@@ -18,7 +18,7 @@
 static int yaz_decode_http_response_first_wrapper(const char *buf, int *code,
     const char **version, int *version_len, const char **msg, int *msg_len)
 {
-    return yaz_decode_http_response_first(buf, strlen(buf), code, version, version_len, msg, msg_len);
+    return yaz_decode_http_response_first(buf, (int) strlen(buf), code, version, version_len, msg, msg_len);
 }
 
 static void tst_yaz_decode_http_response_first(void)
@@ -71,7 +71,7 @@ static void tst_http_response(void)
     Z_GDU *zgdu;
     ODR enc = odr_createmem(ODR_ENCODE);
     ODR dec = odr_createmem(ODR_DECODE);
-    odr_setbuf(dec, (char *) http_buf, strlen(http_buf), 0);
+    odr_setbuf(dec, (char *) http_buf, (int) strlen(http_buf), 0);
     r = z_GDU(dec, &zgdu, 0, 0);
     YAZ_CHECK(r);
     if (r)
@@ -114,7 +114,7 @@ static void tst_double_encoding(const char *buf_in, const char *buf_out, int req
     int r;
     ODR enc = odr_createmem(ODR_ENCODE);
     ODR dec = odr_createmem(ODR_DECODE);
-    odr_setbuf(dec, (char *) buf_in, strlen(buf_in), 0);
+    odr_setbuf(dec, (char *) buf_in, (int) strlen(buf_in), 0);
     r = z_GDU(dec, &zgdu, 0, 0);
     YAZ_CHECK(r);
     if (r)
@@ -142,7 +142,7 @@ static void tst_invalid_encoding(const char *buf)
     Z_GDU *zgdu;
     ODR dec = odr_createmem(ODR_DECODE);
 
-    odr_setbuf(dec, (char *) buf, strlen(buf), 0);
+    odr_setbuf(dec, (char *) buf, (int) strlen(buf), 0);
     YAZ_CHECK(!z_GDU(dec, &zgdu, 0, 0));
     YAZ_CHECK_EQ(odr_geterror(dec), OHTTP);
     odr_destroy(dec);

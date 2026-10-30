@@ -102,9 +102,9 @@ int odr_missing(ODR o, int opt, const char *name)
  */
 char *odr_prepend(ODR o, const char *prefix, const char *old)
 {
-    int plen = (prefix == 0) ? 0 : strlen(prefix);
-    int olen = (old == 0) ? 0 : strlen(old);
-    char *res = (char*) odr_malloc (o, olen + plen + 2);
+    size_t plen = (prefix == 0) ? 0 : strlen(prefix);
+    size_t olen = (old == 0) ? 0 : strlen(old);
+    char *res = (char*) odr_malloc(o, olen + plen + 2);
 
     *res = '\0';
     if (plen > 0)

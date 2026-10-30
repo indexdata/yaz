@@ -74,7 +74,7 @@ static int next_char(const char **in, size_t *len)
     {
         (*len)--;
         (*in)++;
-        return p - map;
+        return (int) (p - map);
     }
     return -1;
 }

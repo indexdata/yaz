@@ -36,6 +36,7 @@
 #include <yaz/srw.h>
 #include <yaz/cookie.h>
 #include <yaz/mutex.h>
+#include <yaz/odr.h>
 #if HAVE_LIBMEMCACHED
 #include <libmemcached/memcached.h>
 #endif
@@ -160,7 +161,7 @@ struct ZOOM_resultset_p {
 
 struct facet_term_p {
     char *term;
-    int frequency;
+    Odr_int frequency;
 };
 
 struct ZOOM_facet_field_p {
@@ -197,8 +198,8 @@ struct ZOOM_task_p {
     union {
 #define ZOOM_TASK_SEARCH 1
         struct {
-            int count;
-            int start;
+            Odr_int count;
+            Odr_int start;
             ZOOM_resultset resultset;
             char *syntax;
             char *elementSetName;
@@ -233,6 +234,9 @@ void ZOOM_set_dset_error(ZOOM_connection c, int error,
                          const char *dset,
                          const char *addinfo, const char *addinfo2);
 
+void ZOOM_set_dset_error2(ZOOM_connection c, Odr_int error, int error2,
+                          const char *dset,
+                          const char *addinfo, const char *addinfo2);
 void ZOOM_set_error(ZOOM_connection c, int error, const char *addinfo);
 
 ZOOM_Event ZOOM_Event_create(int kind);
@@ -300,7 +304,7 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                                         const char *syntax,
                                         const char *elementSetName,
                                         const char *schema);
-ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, int pos,
+ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, Odr_int pos,
                                        const char *syntax,
                                        const char *elementSetName,
                                        const char *schema);
@@ -308,6 +312,9 @@ void ZOOM_handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                               Z_OtherInformation *o);
 void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                                Z_OtherInformation *o);
+
+void ZOOM_options_set_odr_int(ZOOM_options opt, const char *name, Odr_int value);
+
 
 /*
  * Local variables:

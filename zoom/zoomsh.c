@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <yaz/wrbuf.h>
 #include <yaz/log.h>
 #include <yaz/backtrace.h>
@@ -27,6 +28,10 @@
 #endif
 #if HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
+#endif
+
+#ifdef WIN32
+#include <io.h>
 #endif
 
 #include <yaz/log.h>
@@ -130,7 +135,7 @@ static WRBUF next_token_new_wrbuf(const char **cpp)
 
 static int is_command(const char *cmd_str, const char *this_str, int this_len)
 {
-    int cmd_len = strlen(cmd_str);
+    size_t cmd_len = strlen(cmd_str);
     if (cmd_len != this_len)
         return 0;
     if (memcmp(cmd_str, this_str, cmd_len))
@@ -164,6 +169,10 @@ static int cmd_fset(struct zoom_sh *sh, const char **args)
     {
         printf("Couldn't seek in %s\n", wrbuf_cstr(fname));
     }
+    else if (fsize > INT_MAX)
+    {
+        printf("File %s too big\n", wrbuf_cstr(fname));
+    }
     else if (fseek(inf, 0L, SEEK_SET) == -1)
     {
         printf("Couldn't seek in %s\n", wrbuf_cstr(fname));
@@ -180,7 +189,7 @@ static int cmd_fset(struct zoom_sh *sh, const char **args)
     }
     else
     {
-        ZOOM_options_setl(sh->options, wrbuf_cstr(key), b, fsize);
+        ZOOM_options_setl(sh->options, wrbuf_cstr(key), b, (int) fsize);
         ret = 0;
     }
     if (inf)
@@ -394,9 +403,9 @@ static int cmd_show(struct zoom_sh *sh, const char **args)
     return ret;
 }
 
-static void display_facets(ZOOM_facet_field *facets, int count)
+static void display_facets(ZOOM_facet_field *facets, size_t count)
 {
-    int i;
+    size_t i;
     printf("Facets: \n");
     for (i = 0; i < count; i++)
     {
@@ -436,7 +445,7 @@ static int cmd_facets(struct zoom_sh *sh, const char **args)
         }
         else if (db->res)
         {
-            int num_facets = ZOOM_resultset_facets_size(db->res);
+            size_t num_facets = ZOOM_resultset_facets_size(db->res);
             if (num_facets) {
                 ZOOM_facet_field  *facets = ZOOM_resultset_facets(db->res);
                 display_facets(facets, num_facets);
@@ -666,7 +675,7 @@ static int cmd_search(struct zoom_sh *sh, const char **args)
             /* OK, no major errors. Look at the result count */
             int start = ZOOM_options_get_int(sh->options, "start", 0);
             int count = ZOOM_options_get_int(sh->options, "count", 0);
-            int facet_num;
+            size_t facet_num;
 
             printf("%s: %lld hits\n", ZOOM_connection_option_get(db->con,
                                                                  "host"),

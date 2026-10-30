@@ -61,6 +61,8 @@
 #include <gnutls/gnutls.h>
 #endif
 
+#include <limits.h>
+
 #include <yaz/base64.h>
 #include "comstack-p.h"
 #include <yaz/errno.h>
@@ -845,9 +847,15 @@ int tcpip_rcvconnect(COMSTACK h)
 
         if (sp->connect_phase == 0)
         {
+            size_t connect_request_len = wrbuf_len(sp->connect_request);
             sp->complete = cs_complete_auto_head;
-            r = tcpip_put(h, wrbuf_buf(sp->connect_request), wrbuf_len(sp->connect_request));
-            yaz_log(log_level, "tcpip_rcvconnect connect put r=%d", r);
+            if (connect_request_len > INT_MAX)
+            {
+                cs_set_error(h, CSBUFSIZE, 0);
+                return -1;
+            }
+            r = tcpip_put(h, wrbuf_buf(sp->connect_request), (int) connect_request_len);
+            yaz_log(log_level, "tcpip_rcvconnect connect put r=%ld", (long) r);
             h->event = CS_CONNECT; /* because tcpip_put sets it */
             if (r) /* < 0 is error, 1 is in-complete */
                 return r;
@@ -858,7 +866,7 @@ int tcpip_rcvconnect(COMSTACK h)
         {
             int code;
             r = tcpip_get(h, &sp->connect_response_buf, &sp->connect_response_len);
-            yaz_log(log_level, "tcpip_rcvconnect connect get r=%d", r);
+            yaz_log(log_level, "tcpip_rcvconnect connect get r=%ld", (long) r);
             if (r == 1)
                 return r;
             if (r <= 0)
@@ -1215,7 +1223,12 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     char *tmpc;
     int tmpi, berlen, rest, req, tomove;
-    int hasread = 0, res;
+    int hasread = 0;
+#ifdef WIN32
+    int res;
+#else
+    ssize_t res;
+#endif
 
     yaz_log(log_level, "tcpip_get h=%p bufsize=%d", h, *bufsize);
     if (sp->altlen) /* switch buffers */
@@ -1270,7 +1283,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             }
             else if (res < 0)
             {
-                if (ssl_check_again(h, sp, res))
+                if (ssl_check_again(h, sp, (int) res))
                 {
                     if (h->flags & CS_FLAGS_BLOCKING)
                         continue;
@@ -1288,7 +1301,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
                when EWOULDBLOCK etc. would be required (res = -1) */
 #endif
             res = recv(h->iofile, *buf + hasread, CS_TCPIP_BUFCHUNK, 0);
-            yaz_log(log_level, "  recv res=%d, hasread=%d", res, hasread);
+            yaz_log(log_level, "  recv res=%ld, hasread=%d", (long) res, hasread);
             if (res < 0)
             {
                 yaz_log(log_level, "  recv errno=%d, (%s)", yaz_errno(),
@@ -1383,7 +1396,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
  */
 int tcpip_put(COMSTACK h, char *buf, int size)
 {
+#ifdef WIN32
     int res;
+#else
+    ssize_t res;
+#endif
     struct tcpip_state *state = (struct tcpip_state *)h->cprivate;
 
     yaz_log(log_level, "tcpip_put h=%p size=%d", h, size);
@@ -1408,7 +1425,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
                                      size - state->written);
             if (res < 0)
             {
-                if (ssl_check_again(h, state, res))
+                if (ssl_check_again(h, state, (int) res))
                 {
                     if (h->flags & CS_FLAGS_BLOCKING)
                         continue;
@@ -1461,8 +1478,8 @@ int tcpip_put(COMSTACK h, char *buf, int size)
             }
         }
         state->written += res;
-        yaz_log(log_level, "  Wrote %d, written=%d, nbytes=%d",
-                res, state->written, size);
+        yaz_log(log_level, "  Wrote %ld, written=%d, nbytes=%d",
+                (long) res, state->written, size);
     }
     state->towrite = state->written = -1;
     yaz_log(log_level, "  Ok");
@@ -1755,8 +1772,15 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
             ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &cinfo);
             if (ret == 0)
             {
+                size_t clen = strlen((char*) cinfo.data);
+                if (clen > INT_MAX)
+                {
+                    gnutls_free(cinfo.data);
+                    gnutls_x509_crt_deinit(cert);
+                    return 0;
+                }
                 *buf = xstrdup((char *) cinfo.data);
-                *len = strlen(*buf);
+                *len = (int) clen;
                 gnutls_free(cinfo.data);
                 gnutls_x509_crt_deinit(cert);
                 return 1;

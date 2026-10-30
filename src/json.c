@@ -176,7 +176,7 @@ struct json_node *json_clone_node(const struct json_node *n)
 static struct json_node *json_parse_object(json_parser_t p);
 static struct json_node *json_parse_array(json_parser_t p);
 
-static int json_one_char(const char **p, char *out)
+static size_t json_one_char(const char **p, char *out)
 {
     if (**p == '\\' && p[0][1])
     {
@@ -239,7 +239,7 @@ static struct json_node *json_parse_string(json_parser_t p)
     struct json_node *n;
     const char *cp;
     char *dst;
-    int l = 0;
+    size_t l = 0;
     if (look_ch(p) != '\"')
     {
         p->err_msg = "string expected";
@@ -251,7 +251,7 @@ static struct json_node *json_parse_string(json_parser_t p)
     while (*cp && *cp != '"')
     {
         char out[6];
-        int r = json_one_char(&cp, out);
+        size_t r = json_one_char(&cp, out);
         if (r == 0)
         {
             p->err_msg = "invalid character";

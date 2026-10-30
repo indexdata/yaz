@@ -94,7 +94,7 @@ int ber_enclen(ODR o, int len, int lenlen, int exact)
 int ber_declen(const char *buf, int *len, int max)
 {
     const unsigned char *b = (const unsigned char *) buf;
-    int n;
+    int i, n;
 
     if (max < 1)
         return -1;
@@ -115,14 +115,13 @@ int ber_declen(const char *buf, int *len, int max)
     if (n >= max)
         return -1;
     *len = 0;
-    b++;
-    while (--n >= 0)
+    for (i = 1; i <= n; i++)
     {
-        if (*len > (INT_MAX - *b) / 256)
+        if (*len > (INT_MAX - b[i]) / 256)
             return -2;  /* length too large to represent */
-        *len = *len * 256 + *b++;
+        *len = *len * 256 + b[i];
     }
-    return ((const char *) b - buf);
+    return n + 1;
 }
 /*
  * Local variables:

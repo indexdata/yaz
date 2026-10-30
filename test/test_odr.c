@@ -411,11 +411,70 @@ static void tst_ber_length(void)
     odr_destroy(encode);
 }
 
+static void tst_odr_create_Odr_oct2(void)
+{
+    ODR o = odr_createmem(ODR_ENCODE);
+    const char data[] = { 'a', '\0', 'b' };
+    Odr_oct *oct = odr_create_Odr_oct2(o, data, sizeof(data));
+    size_t total;
+
+    YAZ_CHECK(oct);
+    YAZ_CHECK_EQ(oct->len, sizeof(data));
+    YAZ_CHECK(memcmp(oct->buf, data, sizeof(data)) == 0);
+    YAZ_CHECK_EQ(oct->buf[sizeof(data)], '\0');
+    oct = odr_create_Odr_oct2(o, "", 0);
+    YAZ_CHECK(oct);
+    YAZ_CHECK_EQ(oct->len, 0);
+    YAZ_CHECK_EQ(oct->buf[0], '\0');
+
+    total = odr_total(o);
+    YAZ_CHECK(!odr_create_Odr_oct2(o, "", (size_t) INT_MAX + 1));
+    YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
+    YAZ_CHECK_EQ(odr_total(o), total);
+    odr_reset(o);
+    YAZ_CHECK(!odr_create_Odr_oct2(o, "", (size_t) -1));
+    YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
+    odr_reset(o);
+    YAZ_CHECK(!odr_create_Odr_oct(o, "", -1));
+    YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
+    odr_destroy(o);
+}
+
+static void tst_odr_write2(void)
+{
+    ODR encode = odr_createmem(ODR_ENCODE);
+    int len;
+    char *buf;
+
+    YAZ_CHECK_EQ(odr_write2(encode, "abc", 3), 0);
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK_EQ(len, 3);
+    YAZ_CHECK(memcmp(buf, "abc", 3) == 0);
+    YAZ_CHECK_EQ(odr_write2(encode, "", 0), 0);
+
+    /* Reject before reading the source or allocating a huge buffer. */
+    YAZ_CHECK_EQ(odr_write2(encode, "", (size_t) INT_MAX + 1), -1);
+    YAZ_CHECK_EQ(odr_geterror(encode), OSPACE);
+    odr_getbuf(encode, &len, 0);
+    YAZ_CHECK_EQ(len, 3);
+
+    odr_reset(encode);
+    YAZ_CHECK_EQ(odr_write2(encode, "x", 1), 0);
+    /* An int-sized write can still overflow the combined position. */
+    YAZ_CHECK_EQ(odr_write2(encode, "", INT_MAX), -1);
+    YAZ_CHECK_EQ(odr_geterror(encode), OSPACE);
+    odr_getbuf(encode, &len, 0);
+    YAZ_CHECK_EQ(len, 1);
+    odr_destroy(encode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
     tst_ber_length();
+    tst_odr_write2();
+    tst_odr_create_Odr_oct2();
     YAZ_CHECK_TERM;
 }
 

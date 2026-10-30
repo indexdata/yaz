@@ -69,8 +69,6 @@ diagsrw.c yaz/diagsrw.h: srw.csv
 diagsru_update.c yaz/diagsru_update.h: sru_update.csv
 	$(TCLSH) $(srcdir)/csvtodiag.tcl $(srcdir)/sru_update.csv $(srcdir)/diagsru_update.c $(srcdir)/yaz/diagsru_update.h sru_update
 
-noinst_HEADERS = yaz/icu_I18N.h diag-entry.h
-
 pkginclude_HEADERS = yaz/atoi.h yaz/backend.h yaz/backtrace.h yaz/base64.h \
  yaz/ccl.h yaz/ccl_xml.h yaz/cookie.h yaz/cql.h yaz/rpn2cql.h \
  yaz/rpn2solr.h yaz/solr.h yaz/comstack.h \
@@ -130,13 +128,13 @@ libyaz_la_SOURCES= $(GEN_FILES) \
   prt-ext.c \
   proxunit.c \
   ill-get.c \
-  zget.c yaz-ccl.c diag-entry.c \
+  zget.c yaz-ccl.c diag-entry.c diag-entry.h \
   logrpn.c \
   otherinfo.c pquery.c sortspec.c charneg.c initopt.c init_diag.c \
   init_globals.c \
   zoom-c.c zoom-memcached.c zoom-z3950.c zoom-sru.c zoom-query.c \
   zoom-record-cache.c zoom-event.c \
-  record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru_facet.c sru-p.h \
+  xml_util.c xml_util.h record_render.c zoom-socket.c zoom-opt.c zoom-p.h sru_facet.c sru-p.h \
   grs1disp.c zgdu.c soap.c srw.c srwutil.c uri.c solr.c diag_map.c \
   opac_to_xml.c xml_add.c xml_match.c xml_to_opac.c \
   cclfind.c ccltoken.c cclerrms.c cclqual.c cclptree.c cclp.h \
@@ -180,7 +178,7 @@ STEMMER_SOURCES = \
 	libstemmer_c/src_c/stem_UTF_8_english.h
 endif
 
-libyaz_icu_la_SOURCES = icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
+libyaz_icu_la_SOURCES = icu_I18N.h icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
 	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c \
 	$(STEMMER_SOURCES)
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)

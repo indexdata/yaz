@@ -33,7 +33,8 @@ int main(int argc, char **argv)
         char *buf, *fn = argv[i];
         struct stat statbuf;
         size_t size, offset = 0;
-        int fd, n;
+        int fd;
+        ssize_t n;
 
         ZOOM_connection_connect(z, argv[1], 0);
         if ((error = ZOOM_connection_error(z, &errmsg, &addinfo))) {

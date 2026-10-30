@@ -74,7 +74,7 @@ int ber_encinteger(ODR o, Odr_int val)
               ||
               (tmp[i] == 0xFF && (tmp[i+1] & 0x80))))
             break;
-    len = sizeof(uval) - i;
+    len = (int) (sizeof(uval) - i);
     if (ber_enclen(o, len, 1, 1) != 1)
         return -1;
     if (odr_write(o, (const char *) tmp + i, len) < 0)
@@ -94,7 +94,7 @@ int ber_decinteger(const char *buf, Odr_int *val, int max)
 
     if ((res = ber_declen((const char *) b, &len, max)) < 0)
         return -1;
-    if (len+res > max || len < 0) /* out of bounds or indefinite encoding */
+    if (len < 0 || len > max - res) /* out of bounds or indefinite encoding */
         return -1;
     if (len > (int) sizeof(uval))  /* let's be reasonable, here */
         return -1;
@@ -106,8 +106,7 @@ int ber_decinteger(const char *buf, Odr_int *val, int max)
     for (i = 0; i < len; i++)
         uval = (uval << 8) + b[i];
     *val = uval;
-    b += len;
-    return (const char *) b - buf;
+    return res + len;
 }
 /*
  * Local variables:

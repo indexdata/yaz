@@ -108,7 +108,7 @@ static unsigned long read_utf8(yaz_iconv_t cd, yaz_iconv_decoder_t d,
                                size_t inbytesleft, size_t *no_read)
 {
     int err = 0;
-    int r = yaz_read_UTF8_char(inp, inbytesleft, no_read, &err);
+    unsigned long r = yaz_read_UTF8_char(inp, inbytesleft, no_read, &err);
     yaz_iconv_set_errno(cd, err);
     return r;
 }
@@ -119,7 +119,7 @@ static size_t write_UTF8(yaz_iconv_t cd, yaz_iconv_encoder_t en,
                              char **outbuf, size_t *outbytesleft)
 {
     int err = 0;
-    int r = yaz_write_UTF8_char(x, outbuf, outbytesleft, &err);
+    size_t r = yaz_write_UTF8_char(x, outbuf, outbytesleft, &err);
     yaz_iconv_set_errno(cd, err);
     return r;
 }

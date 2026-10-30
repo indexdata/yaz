@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include <yaz/xml_include.h>
+#include "xml_util.h"
 #include <yaz/test.h>
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -27,7 +28,7 @@ static void tst_xml_include1(void)
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = xmlParseMemory(xml_in, strlen(xml_in));
+    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -77,7 +78,7 @@ static void tst_xml_include2(void)
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = xmlParseMemory(xml_in, strlen(xml_in));
+    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;
@@ -110,7 +111,7 @@ static void tst_xml_include3(void)
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = xmlParseMemory(xml_in, strlen(xml_in));
+    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;

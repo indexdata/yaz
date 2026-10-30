@@ -69,11 +69,11 @@ static int qual_val_type(ccl_qualifier_t *qa, int type, int value,
  * src:    Source string to be appended (not null-terminated)
  * len:    Length of source string.
  */
-static void strxcat(char *n, const char *src, int len)
+static void strxcat(char *n, const char *src, size_t len)
 {
     while (*n)
         n++;
-    while (--len >= 0)
+    while (len-- > 0)
         *n++ = *src++;
     *n = '\0';
 }
@@ -382,7 +382,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     const char *t_default[2];
     const char **mask_aliases;
     const char *m_default[2];
-    int term_len = 0;
+    size_t term_len = 0;
 
     truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
@@ -1319,7 +1319,7 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
 
     *error = cclp->error_code;
     if (*error)
-        *pos = cclp->error_pos - str;
+        *pos = (int) (cclp->error_pos - str);
     ccl_parser_destroy(cclp);
     ccl_token_del(list);
     return p;

@@ -64,7 +64,7 @@ static int my_fetch(void *handle, bend_fetch_rr *r)
 
         r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_xml);
         r->record = odr_strdup(r->stream, buf);
-        r->len = strlen(r->record);
+        r->len = (int) strlen(r->record); /* bound by sizeof(buf) */
     }
     else
     {   /* only xml syntax supported . Return diagnostic */

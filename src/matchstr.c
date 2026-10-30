@@ -85,11 +85,24 @@ int yaz_strcmp_del(const char *a, const char *b, const char *b_del)
 
 int yaz_memcmp(const void *a, const void *b, size_t len_a, size_t len_b)
 {
-    size_t m_len = len_a < len_b ? len_a : len_b;
-    int r = memcmp(a, b, m_len);
-    if (r)
-        return r;
-    return len_a - len_b;
+    if (len_a < len_b)
+    {
+        int r = memcmp(a, b, len_a);
+        if (r)
+            return r;
+        return -1;
+    }
+    else if (len_a > len_b)
+    {
+        int r = memcmp(a, b, len_b);
+        if (r)
+            return r;
+        return 1;
+    }
+    else
+    {
+        return memcmp(a, b, len_a);
+    }
 }
 
 int yaz_strcmp_null(const char *v1, const char *v2)

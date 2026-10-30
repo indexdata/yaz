@@ -15,7 +15,7 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/log.h>
 
@@ -42,10 +42,19 @@ void icu_sortkey8_from_utf16(UCollator *coll,
     /* check for buffer overflow, resize and retry */
     if (sortkey_len > cap)
     {
-        icu_buf_utf8_resize(dest8, sortkey_len * 2);
+        if (!icu_buf_utf8_resize(dest8, (size_t) sortkey_len + 1))
+        {
+            *status = U_BUFFER_OVERFLOW_ERROR;
+            icu_buf_utf8_clear(dest8);
+            return;
+        }
+        cap = dest8->utf8_cap - 1;
         sortkey_len = ucol_getSortKey(coll, src16->utf16, src16->utf16_len,
-                                      dest8->utf8, dest8->utf8_cap);
+                                      dest8->utf8, cap);
     }
+
+    if (sortkey_len > cap)
+        *status = U_BUFFER_OVERFLOW_ERROR;
 
     if (U_SUCCESS(*status)
         && sortkey_len > 0)

@@ -172,7 +172,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
             {
                 int j, i_start = i;
                 for (j = 0; j < indicator_length; j++)
-                    i += yaz_marc_sizeof_char(mt, buf + i);
+                    i += (int) yaz_marc_sizeof_char(mt, buf + i);
                 yaz_marc_add_datafield(mt, tag, buf + i_start,
                                        i - i_start);
             }

@@ -11,6 +11,7 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 #include "zoom-p.h"
 
 #include <yaz/xmalloc.h>
@@ -39,7 +40,7 @@ static void set_value(struct ZOOM_options_entry **e,
     (*e)->len = 0;
     if (value)
     {
-        (*e)->value = (char *) xmalloc(len+1);
+        (*e)->value = (char *) xmalloc((size_t) len + 1);
         memcpy((*e)->value, value, len);
         (*e)->value[len] = '\0';
         (*e)->len = len;
@@ -180,7 +181,14 @@ ZOOM_API(void)
 ZOOM_API(void)
     ZOOM_options_set(ZOOM_options opt, const char *name, const char *value)
 {
-    ZOOM_options_setl(opt, name, value, value ? strlen(value): 0);
+    size_t len = 0;
+    if (value)
+    {
+        len = strlen(value);
+        if (len > INT_MAX)
+            len = INT_MAX;
+    }
+    ZOOM_options_setl(opt, name, value, (int) len);
 }
 
 ZOOM_API(const char *)
@@ -193,7 +201,12 @@ ZOOM_API(const char *)
     {
         v = (*opt->callback_func)(opt->callback_handle, name);
         if (v)
-            *lenp = strlen(v);
+        {
+            size_t len = strlen(v);
+            if (len > INT_MAX)
+                len = INT_MAX;
+            *lenp = (int) len;
+        }
     }
     if (!v)
     {
@@ -250,6 +263,16 @@ ZOOM_options_set_int(ZOOM_options opt, const char *name, int value)
     yaz_snprintf(s, sizeof(s), "%d", value);
     ZOOM_options_set(opt, name, s);
 }
+
+void ZOOM_options_set_odr_int(ZOOM_options opt, const char *name, Odr_int value)
+{
+    char s[40];
+
+    yaz_snprintf(s, sizeof(s), ODR_INT_PRINTF, value);
+    ZOOM_options_set(opt, name, s);
+}
+
+
 /*
  * Local variables:
  * c-basic-offset: 4

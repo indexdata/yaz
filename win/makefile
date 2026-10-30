@@ -505,6 +505,7 @@ MISC_OBJS= \
    $(OBJDIR)\zoom-z3950.obj \
    $(OBJDIR)\zoom-sru.obj \
    $(OBJDIR)\zoom-query.obj \
+   $(OBJDIR)\xml_util.obj \
    $(OBJDIR)\record_render.obj \
    $(OBJDIR)\facet.obj \
    $(OBJDIR)\zoom-opt.obj \

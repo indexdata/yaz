@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     }
     decode = odr_createmem(ODR_DECODE);
     encode = odr_createmem(ODR_ENCODE);
-    content_len = no;
+    content_len = (int) no; /* size bounded by sizeof(buf) */
     z_soap_codec(decode, &soap_package,
                  &content_buf, &content_len, h);
     if (!soap_package)

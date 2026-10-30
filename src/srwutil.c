@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/base64.h>
@@ -118,7 +119,7 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
 
     if (basic)
     {
-        int len;
+        size_t len;
         char out[256];
         char ubuf[256] = "", pbuf[256] = "", *p;
         if (strncmp(basic, "Basic ", 6))
@@ -205,7 +206,7 @@ void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
                           int code, const char *details)
 {
     const char *message = yaz_diag_srw_str(code);
-    int len = 200;
+    size_t len = 200;
     if (message)
         len += strlen(message);
     if (details)
@@ -224,7 +225,9 @@ void yaz_mk_sru_surrogate(ODR o, Z_SRW_record *record, int pos,
                 len - strlen(record->recordData_buf), " <message>%s</message>\n", message);
     yaz_snprintf(record->recordData_buf + strlen(record->recordData_buf),
             len - strlen(record->recordData_buf), "</diagnostic>\n");
-    record->recordData_len = strlen(record->recordData_buf);
+
+    len = strlen(record->recordData_buf);
+    record->recordData_len = len > INT_MAX ? INT_MAX : (int) len;
     record->recordPosition = odr_intdup(o, pos);
     record->recordSchema = "info:srw/schema/1/diagnostics-v1.1";
 }
@@ -1145,8 +1148,10 @@ int yaz_sru_post_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     hreq->method = "POST";
 
+    if (strlen(uri_args) > INT_MAX)
+        return -1;
+    hreq->content_len = (int) strlen(uri_args);
     hreq->content_buf = uri_args;
-    hreq->content_len = strlen(uri_args);
 
     z_HTTP_header_add_content_type(encode, &hreq->headers,
                                    "application/x-www-form-urlencoded",

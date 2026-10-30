@@ -15,7 +15,7 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/log.h>
 
@@ -140,10 +140,11 @@ int icu_utf16_casemap(struct icu_buf_utf16 *dest16,
     if (*status == U_BUFFER_OVERFLOW_ERROR
         && dest16 != src16)      /* do not resize if in-place conversion */
     {
-        icu_buf_utf16_resize(dest16, dest16_len * 2);
-        *status = U_ZERO_ERROR;
-
-        icu_utf16_sub(dest16, src16, locale, action, status);
+        if (icu_buf_utf16_resize(dest16, (size_t) dest16_len))
+        {
+            *status = U_ZERO_ERROR;
+            icu_utf16_sub(dest16, src16, locale, action, status);
+        }
     }
 
     if (U_SUCCESS(*status) && dest16_len <= dest16->utf16_cap)

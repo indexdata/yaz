@@ -13,7 +13,9 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include "zoom-p.h"
+#include "odr-priv.h"
 
 #include <yaz/diagbib1.h>
 #include <yaz/record_render.h>
@@ -49,7 +51,7 @@ struct ZOOM_record_cache_p {
     ZOOM_record_cache next;
 };
 
-static size_t record_hash(int pos)
+static size_t record_hash(Odr_int pos)
 {
     if (pos < 0)
         pos = 0;
@@ -132,13 +134,15 @@ void ZOOM_record_cache_add(ZOOM_resultset r, Z_NamePlusRecord *npr,
     ZOOM_memcached_add(r, npr, pos, syntax, elementSetName, schema, diag);
 }
 
-ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, int pos,
+ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, Odr_int pos,
                                        const char *syntax,
                                        const char *elementSetName,
                                        const char *schema)
 {
     ZOOM_record_cache rc;
 
+    if (pos > INT_MAX)
+        return 0;
     for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
     {
         if (pos == rc->pos)
@@ -298,7 +302,7 @@ ZOOM_API(int)
             Z_DefaultDiagFormat *ddf = diag_rec->u.defaultFormat;
             oid_class oclass;
 
-            error = *ddf->condition;
+            error = odr_int_to_int(*ddf->condition);
             switch (ddf->which)
             {
             case Z_DefaultDiagFormat_v2Addinfo:

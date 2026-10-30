@@ -309,9 +309,11 @@ Z_GDU *z_get_HTTP_Response_server(ODR o, int code, const char *details,
     if (code != 200)
     {
         const char *http_err = z_HTTP_errmsg(code);
-        size_t sz = 400 + strlen(http_err) + (details ?
-                                              strlen(details) : 0);
+        const char trailer[] = " </BODY>\n</HTML>\n";
+        size_t sz = 8192;
         hres->content_buf = (char*) odr_malloc(o, sz);
+        /* Reserve space for the closing tags even if the message is truncated. */
+        sz -= sizeof(trailer) - 1;
         yaz_snprintf(hres->content_buf, sz,
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
                 " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
@@ -330,11 +332,9 @@ Z_GDU *z_get_HTTP_Response_server(ODR o, int code, const char *details,
                     sz - strlen(hres->content_buf),
                     "<P>Details: %s</P>\n", details);
         }
-        yaz_snprintf(hres->content_buf + strlen(hres->content_buf),
-                sz - strlen(hres->content_buf),
-                " </BODY>\n"
-                "</HTML>\n");
-        hres->content_len = strlen(hres->content_buf);
+        strcat(hres->content_buf, trailer);
+        /* The complete page, including its terminator, fits in 8192 bytes. */
+        hres->content_len = (int) strlen(hres->content_buf);
         z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/html");
     }
     return p;
@@ -589,24 +589,32 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     yaz_snprintf(sbuf, sizeof(sbuf), "HTTP/%s %d %s\r\n", hr->version,
             hr->code,
             z_HTTP_errmsg(hr->code));
-    odr_write(o, sbuf, strlen(sbuf));
+    if (odr_write2(o, sbuf, strlen(sbuf)) < 0)
+        return 0;
     /* use content_len for Content-Length */
     yaz_snprintf(sbuf, sizeof(sbuf), "Content-Length: %d\r\n", hr->content_len);
-    odr_write(o, sbuf, strlen(sbuf));
+    if (odr_write2(o, sbuf, strlen(sbuf)) < 0)
+        return 0;
     for (h = hr->headers; h; h = h->next)
     {
         if (yaz_strcasecmp(h->name, "Content-Length")
             && yaz_strcasecmp(h->name, "Transfer-Encoding"))
         {   /* skip Content-Length if given. content_len rules */
-            odr_write(o, h->name, strlen(h->name));
-            odr_write(o, ": ", 2);
-            odr_write(o, h->value, strlen(h->value));
-            odr_write(o, "\r\n", 2);
+            if (odr_write2(o, h->name, strlen(h->name)) < 0)
+                return 0;
+            if (odr_write(o, ": ", 2) < 0)
+                return 0;
+            if (odr_write2(o, h->value, strlen(h->value)) < 0)
+                return 0;
+            if (odr_write(o, "\r\n", 2) < 0)
+                return 0;
         }
     }
-    odr_write(o, "\r\n", 2);
-    if (hr->content_buf)
-        odr_write(o, hr->content_buf, hr->content_len);
+    if (odr_write(o, "\r\n", 2) < 0)
+        return 0;
+    if (hr->content_buf &&
+        odr_write(o, hr->content_buf, hr->content_len) < 0)
+        return 0;
     if (o->direction == ODR_PRINT)
     {
         odr_printf(o, "-- HTTP response:\n");
@@ -624,13 +632,19 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 
     if (!hr->method || !hr->path)
         return 0;
-    odr_write(o, hr->method, strlen(hr->method));
-    odr_write(o, " ", 1);
+    if (odr_write2(o, hr->method, strlen(hr->method)) < 0)
+        return 0;
+    if (odr_write(o, " ", 1) < 0)
+        return 0;
     cp = strchr(hr->path, '#');
-    odr_write(o, hr->path, cp ? (cp - hr->path) : strlen(hr->path));
-    odr_write(o, " HTTP/", 6);
-    odr_write(o, hr->version, strlen(hr->version));
-    odr_write(o, "\r\n", 2);
+    if (odr_write2(o, hr->path, cp ? (cp - hr->path) : strlen(hr->path)) < 0)
+        return 0;
+    if (odr_write(o, " HTTP/", 6) < 0)
+        return 0;
+    if (odr_write2(o, hr->version, strlen(hr->version)) < 0)
+        return 0;
+    if (odr_write(o, "\r\n", 2) < 0)
+        return 0;
     if (hr->content_len &&
         !z_HTTP_header_lookup(hr->headers,
                               "Content-Length"))
@@ -638,20 +652,27 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
         char lstr[60];
         yaz_snprintf(lstr, sizeof(lstr), "Content-Length: %d\r\n",
                 hr->content_len);
-        odr_write(o, lstr, strlen(lstr));
+        if (odr_write2(o, lstr, strlen(lstr)) < 0)
+            return 0;
     }
     for (h = hr->headers; h; h = h->next)
     {
         if (yaz_strcasecmp(h->name, "Transfer-Encoding") == 0)
             continue;
-        odr_write(o, h->name, strlen(h->name));
-        odr_write(o, ": ", 2);
-        odr_write(o, h->value, strlen(h->value));
-        odr_write(o, "\r\n", 2);
+        if (odr_write2(o, h->name, strlen(h->name)) < 0)
+            return 0;
+        if (odr_write(o, ": ", 2) < 0)
+            return 0;
+        if (odr_write2(o, h->value, strlen(h->value)) < 0)
+            return 0;
+        if (odr_write(o, "\r\n", 2) < 0)
+            return 0;
     }
-    odr_write(o, "\r\n", 2);
-    if (hr->content_buf)
-        odr_write(o, hr->content_buf, hr->content_len);
+    if (odr_write(o, "\r\n", 2) < 0)
+        return 0;
+    if (hr->content_buf &&
+        odr_write(o, hr->content_buf, hr->content_len) < 0)
+        return 0;
     if (o->direction == ODR_PRINT)
     {
         odr_printf(o, "-- HTTP request:\n");

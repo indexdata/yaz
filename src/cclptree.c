@@ -72,7 +72,7 @@ static void ccl_pquery_complex(WRBUF w, struct ccl_rpn_node *p, int indent)
 
 static void ccl_prterm(WRBUF w, const char *term)
 {
-    yaz_encode_pqf_term(w, term, strlen(term));
+    yaz_encode_pqf_term2(w, term, strlen(term));
 }
 
 static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)

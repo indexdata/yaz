@@ -211,7 +211,7 @@ cc_library(
 	 "ill-get", "zget", "yaz-ccl", "diag-entry", "logrpn", "otherinfo",
 	 "pquery", "sortspec", "charneg", "initopt", "init_diag",
 	 "init_globals", "zoom-c", "zoom-memcached", "zoom-z3950", "zoom-sru",
-	 "zoom-query", "zoom-record-cache", "zoom-event", "record_render",
+	 "zoom-query", "zoom-record-cache", "zoom-event", "record_render", "xml_util",
 	 "zoom-socket", "zoom-opt", "sru_facet",
 	 "grs1disp", "zgdu", "soap", "srw", "srwutil", "uri", "solr",
 	 "diag_map", "opac_to_xml", "xml_add", "xml_match", "xml_to_opac",
@@ -231,7 +231,7 @@ cc_library(
 	 "thread_create", "spipe", "url", "backtrace"
 	 ])
 	 + h_dir(".", ["cclp", "comstack-p", "iconv-p", "mime", "mutex-p",
-	   "odr-priv", "sru-p", "zoom-p", "config", "diag-entry"
+	   "odr-priv", "sru-p", "zoom-p", "config", "diag-entry", "xml_util"
 	 ])
 	 ,
     hdrs = h_dir("yaz", Z3950_FILES + [
@@ -271,6 +271,7 @@ cc_library(
 	 "icu_chain", "icu_utf16", "icu_utf8", "stemmer",
 	 "icu_transform", "icu_casemap", "icu_tokenizer", "icu_sortkey"
 	 ]) + [
+	 "icu_I18N.h",
 	 "libstemmer_c/include/libstemmer.h",
 	 "libstemmer_c/libstemmer/libstemmer.c",
 	 "libstemmer_c/libstemmer/modules.h",

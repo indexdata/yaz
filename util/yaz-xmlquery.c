@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include <yaz/options.h>
 #include <yaz/querytowrbuf.h>
@@ -89,14 +90,14 @@ void pqftoxmlquery(const char *pqf)
 }
 
 
-void xmlquerytopqf(const char *xmlstr)
+static void xmlquerytopqf(const char *xmlstr, int len)
 {
     xmlDocPtr doc;
 
-    doc = xmlParseMemory(xmlstr, strlen(xmlstr));
+    doc = xmlParseMemory(xmlstr, len);
     if (!doc)
     {
-        fprintf(stderr, "%s: xml parse error for XML:\n%s\n", prog, xmlstr);
+        fprintf(stderr, "%s: xml parse error for XML:\n%.*s\n", prog, len, xmlstr);
         exit(1);
     }
     else
@@ -149,9 +150,13 @@ void xmlfiletopqf(const char *xmlfile)
         fprintf(stderr, "%s: bad size for file %s\n", prog, xmlfile);
         exit(1);
     }
+    if (sz > INT_MAX )
+    {
+        fprintf(stderr, "%s: file too big %s\n", prog, xmlfile);
+        exit(1);
+    }
     rewind(f);
-    xmlstr = (char *) xmalloc(sz+1);
-    xmlstr[sz] = '\0';
+    xmlstr = (char *) xmalloc(sz);
     if (fread(xmlstr, sz, 1, f) != 1)
     {
         fprintf(stderr, "%s: read failed for file %s\n", prog, xmlfile);
@@ -163,7 +168,7 @@ void xmlfiletopqf(const char *xmlfile)
         exit(1);
     }
 
-    xmlquerytopqf(xmlstr);
+    xmlquerytopqf(xmlstr, (int) sz);
     xfree(xmlstr);
 }
 #endif

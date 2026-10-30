@@ -140,6 +140,14 @@ static int odr_int_to_int(Odr_int v)
         return (int) v;
 }
 
+static int validate_len(size_t len, int *dst)
+{
+    if (len > INT_MAX)
+        return 0;
+    *dst = (int) len;
+    return 1;
+}
+
 /*
  * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
@@ -699,9 +707,16 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         }
         else if (r == 0)
         {
-            rr->len = wrbuf_len(output_record);
-            rr->record = (char *) odr_malloc(rr->stream, rr->len);
-            memcpy(rr->record, wrbuf_buf(output_record), rr->len);
+            if (!validate_len(wrbuf_len(output_record), &rr->len))
+            {
+                rr->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+                rr->surrogate_flag = 1;
+            }
+            else
+            {
+                rr->record = (char *) odr_malloc(rr->stream, rr->len);
+                memcpy(rr->record, wrbuf_buf(output_record), rr->len);
+            }
         }
         if (r)
         {
@@ -1185,8 +1200,17 @@ static void srw_bend_search(association *assoc,
                 }
                 if (rr.extra_response_data)
                 {
-                    res->extraResponseData_buf = rr.extra_response_data;
-                    res->extraResponseData_len = strlen(rr.extra_response_data);
+                    if (!validate_len(strlen(rr.extra_response_data), &res->extraResponseData_len))
+                    {
+                        yaz_add_srw_diagnostic(
+                            assoc->encode,
+                            &srw_res->diagnostics,
+                            &srw_res->num_diagnostics,
+                            YAZ_SRW_RECORD_TOO_LARGE_TO_SEND,
+                            0);
+                    }
+                    else
+                        res->extraResponseData_buf = rr.extra_response_data;
                 }
                 if (strcmp(res->srw_version, "2.") > 0)
                 {
@@ -1337,8 +1361,12 @@ static void srw_bend_explain(association *assoc,
             }
             srw_res->record.recordSchema = rr.schema;
             srw_res->record.recordPacking = packing;
+            if (!validate_len(strlen(rr.explain_buf), &srw_res->record.recordData_len))
+            {
+                *http_code = 500;
+                return;
+            }
             srw_res->record.recordData_buf = rr.explain_buf;
-            srw_res->record.recordData_len = strlen(rr.explain_buf);
             srw_res->record.recordPosition = 0;
             *http_code = 200;
         }
@@ -1454,8 +1482,14 @@ static void srw_bend_scan(association *assoc,
         }
         if (bsrr->extra_response_data)
         {
-            res->extraResponseData_buf = bsrr->extra_response_data;
-            res->extraResponseData_len = strlen(bsrr->extra_response_data);
+            if (!validate_len(strlen(bsrr->extra_response_data), &res->extraResponseData_len))
+            {
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                    &srw_res->num_diagnostics,
+                    YAZ_SRW_RECORD_TOO_LARGE_TO_SEND, 0);
+            }
+            else
+                res->extraResponseData_buf = bsrr->extra_response_data;
         }
         if (bsrr->errcode)
         {
@@ -1728,8 +1762,16 @@ static void srw_bend_update(association *assoc,
         srw_res->num_recordVersions = rr.num_versions;
         if (srw_res->extraResponseData_len)
         {
-            srw_res->extraResponseData_buf = rr.extra_response_data;
-            srw_res->extraResponseData_len = strlen(rr.extra_response_data);
+            if (!validate_len(strlen(rr.extra_response_data), &srw_res->extraResponseData_len))
+            {
+                yaz_add_srw_diagnostic(
+                    assoc->encode, &srw_res->diagnostics,
+                    &srw_res->num_diagnostics,
+                    YAZ_SRW_RECORD_TOO_LARGE_TO_SEND,
+                    0);
+            }
+            else
+                srw_res->extraResponseData_buf = rr.extra_response_data;
         }
         if (srw_res->num_diagnostics == 0 && rr.record_data)
         {
@@ -1747,15 +1789,35 @@ static void srw_bend_update(association *assoc,
                 }
                 srw_res->record->recordPacking = pack;
             }
-            srw_res->record->recordData_buf = rr.record_data;
-            srw_res->record->recordData_len = strlen(rr.record_data);
+            if (!validate_len(strlen(rr.record_data), &srw_res->record->recordData_len))
+            {
+                yaz_add_srw_diagnostic(
+                    assoc->encode, &srw_res->diagnostics,
+                    &srw_res->num_diagnostics,
+                    YAZ_SRW_RECORD_TOO_LARGE_TO_SEND,
+                    0);
+            }
+            else
+                srw_res->record->recordData_buf = rr.record_data;
+
             if (rr.extra_record_data)
             {
                 Z_SRW_extra_record *ex =
                     yaz_srw_get_extra_record(assoc->encode);
-                srw_res->extra_record = ex;
-                ex->extraRecordData_buf = rr.extra_record_data;
-                ex->extraRecordData_len = strlen(rr.extra_record_data);
+
+                if (!validate_len(strlen(rr.extra_record_data), &ex->extraRecordData_len))
+                {
+                    yaz_add_srw_diagnostic(
+                        assoc->encode, &srw_res->diagnostics,
+                        &srw_res->num_diagnostics,
+                        YAZ_SRW_RECORD_TOO_LARGE_TO_SEND,
+                        0);
+                }
+                else
+                {
+                    srw_res->extra_record = ex;
+                    ex->extraRecordData_buf = rr.extra_record_data;
+                }
             }
         }
     }
@@ -1855,6 +1917,7 @@ static void process_http_request(association *assoc, request *req)
             {
                 const char *ctype = 0;
                 yaz_mime_types types = yaz_mime_types_create();
+                int content_len;
 
                 yaz_mime_types_add(types, "xsl", "application/xml");
                 yaz_mime_types_add(types, "xml", "application/xml");
@@ -1875,12 +1938,20 @@ static void process_http_request(association *assoc, request *req)
                     yaz_log(YLOG_LOG, "No mime type for %s", hreq->path+1);
                     p = z_get_HTTP_Response(o, 404);
                 }
+                else if (!validate_len(content_size, &content_len))
+                {
+                    p = z_get_HTTP_Response(o, 500);
+                    hres = p->u.HTTP_Response;
+                    hres->content_buf = "Content too large (2 GB)";
+                    hres->content_len = (int) strlen(hres->content_buf);
+                    z_HTTP_header_add(o, &hres->headers, "Content-Type", "text/plain");
+                }
                 else
                 {
                     p = z_get_HTTP_Response(o, 200);
                     hres = p->u.HTTP_Response;
+                    hres->content_len = content_len;
                     hres->content_buf = content_buf;
-                    hres->content_len = content_size;
                     z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
                 }
                 yaz_mime_types_destroy(types);
@@ -2450,12 +2521,14 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
         {
             const char *open = req->idAuthentication->u.open;
             const char *slash = strchr(open, '/');
-            int len;
+            size_t len;
             if (slash)
                 len = slash - open;
             else
                 len = strlen(open);
-            yaz_log(log_request, "Auth open %.*s", len, open);
+            if (len > 100)
+                len = 100;
+            yaz_log(log_request, "Auth open %.*s", (int) len, open);
         }
         else if (req->idAuthentication->which == Z_IdAuthentication_idPass)
         {
@@ -3206,9 +3279,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
                     odr_malloc(assoc->encode, sizeof(*t->term));
                 t->term->which = Z_Term_general;
                 t->term->u.general =
-                    odr_create_Odr_oct(assoc->encode,
-                                       bsrr->entries[i].term,
-                                       strlen(bsrr->entries[i].term));
+                    odr_create_Odr_oct2(assoc->encode,
+                                        bsrr->entries[i].term,
+                                        strlen(bsrr->entries[i].term));
                 yaz_log(YLOG_DEBUG, "  term #%d: '%s' (" ODR_INT_PRINTF ")", i,
                          bsrr->entries[i].term, bsrr->entries[i].occurrences);
             }

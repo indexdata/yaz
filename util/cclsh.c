@@ -24,7 +24,6 @@
 #include <libxml/parser.h>
 #endif
 
-static int debug = 0;
 static char *prog;
 
 void usage(const char *prog)
@@ -54,7 +53,6 @@ int main(int argc, char **argv)
         switch(ret)
         {
         case 'd':
-            debug = 1;
             break;
         case 'b':
             bib_fname = arg;

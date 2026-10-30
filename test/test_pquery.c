@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
+#include <string.h>
 
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
@@ -76,10 +78,29 @@ static void tst(void)
     YAZ_CHECK(expect_pqf("@attr 1=1234567890.1 x", "@attrset Bib-1 @attr 1=1234567890.1 x", YAZ_PQF_ERROR_NONE));
 }
 
+static void tst_term_create(void)
+{
+    ODR o = odr_createmem(ODR_ENCODE);
+    const char data[] = { 'a', '\0', 'b' };
+    Z_Term *term = z_Term_create(o, Z_Term_general, data, sizeof(data));
+
+    YAZ_CHECK(term);
+    YAZ_CHECK_EQ(term->which, Z_Term_general);
+    YAZ_CHECK_EQ(term->u.general->len, sizeof(data));
+    YAZ_CHECK(memcmp(term->u.general->buf, data, sizeof(data)) == 0);
+    YAZ_CHECK(!z_Term_create(o, Z_Term_general, "", (size_t) INT_MAX + 1));
+    YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
+    odr_reset(o);
+    YAZ_CHECK(!z_Term_create(o, Z_Term_general, "", (size_t) -1));
+    YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
+    odr_destroy(o);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
+    tst_term_create();
     YAZ_CHECK_TERM;
 }
 

@@ -197,7 +197,13 @@ int wrbuf_sha1_write(WRBUF b, const char *cp, size_t sz, int hexit)
     SHA1_CTX ctx;
 
     SHA1Init(&ctx);
-    SHA1Update(&ctx, (unsigned char *) cp, sz);
+    while (sz > 1048576)
+    {
+        SHA1Update(&ctx, (const unsigned char *) cp, 1048576);
+        cp += 1048576;
+        sz -= 1048576;
+    }
+    SHA1Update(&ctx, (const unsigned char *) cp, (uint32_t) sz);
     SHA1Final(digest, &ctx);
 
     if (hexit)

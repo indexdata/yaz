@@ -13,7 +13,9 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include "zoom-p.h"
+#include "odr-priv.h"
 
 #include <yaz/yaz-util.h>
 #include <yaz/xmalloc.h>
@@ -50,6 +52,15 @@ static void initlog(void)
 }
 
 static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri);
+
+void ZOOM_set_dset_error2(ZOOM_connection c, Odr_int error, int error2,
+                          const char *dset,
+                          const char *addinfo, const char *addinfo2)
+{
+    if (error < INT_MIN || error > INT_MAX)
+        error = error2;
+    ZOOM_set_dset_error(c, (int) error, dset, addinfo, addinfo2);
+}
 
 void ZOOM_set_dset_error(ZOOM_connection c, int error,
                          const char *dset,
@@ -921,7 +932,7 @@ int ZOOM_test_reconnect(ZOOM_connection c)
 }
 
 static void ZOOM_resultset_retrieve(ZOOM_resultset r,
-                                    int force_sync, int start, int count)
+                                    int force_sync, Odr_int start, Odr_int count)
 {
     ZOOM_task task;
     ZOOM_connection c;
@@ -930,8 +941,8 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
 
     if (!r)
         return;
-    yaz_log(log_details0, "%p ZOOM_resultset_retrieve force_sync=%d start=%d"
-            " count=%d", r, force_sync, start, count);
+    yaz_log(log_details0, "%p ZOOM_resultset_retrieve force_sync=%d start=" ODR_INT_PRINTF
+            " count=" ODR_INT_PRINTF, r, force_sync, start, count);
     c = r->connection;
     if (!c)
         return;
@@ -1044,13 +1055,13 @@ ZOOM_API(size_t)
     return field->num_terms;
 }
 
+
 ZOOM_API(const char*)
     ZOOM_facet_field_get_term(ZOOM_facet_field field, size_t idx, int *freq)
 {
-    *freq = field->facet_terms[idx].frequency;
+    *freq = odr_int_to_int(field->facet_terms[idx].frequency);
     return field->facet_terms[idx].term;
 }
-
 
 static void get_cert(ZOOM_connection c)
 {
@@ -1803,7 +1814,8 @@ ZOOM_API(const char *)
     {
         if (c->saveAPDU_wrbuf)
         {
-            *lenp = wrbuf_len(c->saveAPDU_wrbuf);
+            size_t len = wrbuf_len(c->saveAPDU_wrbuf);
+            *lenp = len > INT_MAX ? INT_MAX : (int) len;
             return wrbuf_cstr(c->saveAPDU_wrbuf);
         }
         else

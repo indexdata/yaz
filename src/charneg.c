@@ -23,7 +23,7 @@
 static Z_External* z_ext_record2(ODR o, const char *buf)
 {
     Z_External *p;
-    int len = strlen(buf);
+    size_t len = strlen(buf);
 
     if (!(p = (Z_External *)odr_malloc(o, sizeof(*p))))
         return 0;
@@ -31,8 +31,9 @@ static Z_External* z_ext_record2(ODR o, const char *buf)
     p->indirect_reference = 0;
     p->direct_reference = odr_oiddup(o, yaz_oid_negot_charset_id);
     p->which = Z_External_octet;
-    p->u.octet_aligned =
-        odr_create_Odr_oct(o, buf, len);
+    p->u.octet_aligned = odr_create_Odr_oct2(o, buf, len);
+    if (p->u.octet_aligned == 0)
+        return 0;
     return p;
 }
 
