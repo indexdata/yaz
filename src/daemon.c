@@ -303,8 +303,8 @@ int yaz_daemon(const char *progname,
             while(1)
             {
                 char dummy[1];
-                int res = read(hand[0], dummy, 1);
-                if (res < 0 && errno != EINTR)
+                ssize_t res = read(hand[0], dummy, 1);
+                if (res == (ssize_t) -1 && errno != EINTR)
                 {
                     yaz_log(YLOG_FATAL|YLOG_ERRNO, "read fork handshake");
                     break;

@@ -566,7 +566,7 @@ static void yaz_xml2query_term(const xmlNode *ptr, Z_Term **term, ODR odr,
     {
         (*term)->which = Z_Term_general;
         (*term)->u.general =
-            odr_create_Odr_oct(odr, cdata, strlen(cdata));
+            odr_create_Odr_oct2(odr, cdata, strlen(cdata));
     }
     else if (!xmlStrcmp(type, BAD_CAST "numeric"))
     {

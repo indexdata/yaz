@@ -122,11 +122,10 @@ static int lex(struct yaz_pqf_parser *li)
     return li->query_look = query_token(li);
 }
 
-static int escape_string(char *out_buf, const char *in, int len)
+static size_t escape_string(char *out_buf, const char *in, size_t len)
 {
-
     char *out = out_buf;
-    while (--len >= 0)
+    while (len-- > 0)
         if (*in == '\\' && len > 0)
         {
             --len;
@@ -231,7 +230,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
     for (i = cp - li->lex_buf; i < li->lex_len; i++)
         if (li->lex_buf[i] < '0' || li->lex_buf[i] > '9')
         {
-            int len = li->lex_len - (cp - li->lex_buf);
+            size_t len = li->lex_len - (cp - li->lex_buf);
             attr_list[2*num_attr+1] = 0;
             attr_clist[num_attr] = (char *) odr_malloc(o, len+1);
             len = escape_string(attr_clist[num_attr], cp, len);
@@ -327,7 +326,9 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len)
     {
     case Z_Term_general:
         term->which = Z_Term_general;
-        term->u.general = odr_create_Odr_oct(o, buf, len);
+        term->u.general = odr_create_Odr_oct2(o, buf, len);
+        if (!term->u.general)
+            return 0;
         break;
     case Z_Term_characterString:
         term->which = Z_Term_characterString;
@@ -357,11 +358,12 @@ static Z_AttributesPlusTerm *rpn_term_attributes(
     struct yaz_pqf_parser *li, ODR o, Z_AttributeList *attributes)
 {
     char *es_str = odr_malloc(o, li->lex_len+1);
-    int es_len = escape_string(es_str, li->lex_buf, li->lex_len);
-    Z_Term *term = z_Term_create(o, li->term_type, es_str, es_len);
+    size_t es_len = escape_string(es_str, li->lex_buf, li->lex_len);
     Z_AttributesPlusTerm *zapt = (Z_AttributesPlusTerm *)
         odr_malloc(o, sizeof(*zapt));
-
+    Z_Term *term = z_Term_create(o, li->term_type, es_str, es_len);
+    if (term == 0)
+        return 0;
     zapt->term = term;
     zapt->attributes = attributes;
     return zapt;
@@ -862,9 +864,13 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet)
             if (facet_field->num_terms < 10)
             {
                 char *es_str = odr_malloc(odr, li->lex_len+1);
-                int es_len = escape_string(es_str, li->lex_buf, li->lex_len);
+                size_t es_len = escape_string(es_str, li->lex_buf, li->lex_len);
                 Z_Term *term = z_Term_create(odr, li->term_type, es_str, es_len);
-
+                if (term == 0)
+                {
+                    yaz_pqf_destroy(pqf_parser);
+                    return 0;
+                }
                 facet_field->terms[facet_field->num_terms] =
                     (Z_FacetTerm *) odr_malloc(odr, sizeof(Z_FacetTerm));
                 facet_field->terms[facet_field->num_terms]->term = term;

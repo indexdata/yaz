@@ -149,7 +149,6 @@ static void yaz_invoke_gdb(void)
     }
 }
 
-static int yaz_panic_signal = 0;
 static void yaz_panic_alarm(int sig)
 {
     const char *cp = "backtrace: backtrace hangs\n";
@@ -164,7 +163,6 @@ static void yaz_invoke_backtrace(int sig)
     void *backtrace_info[BACKTRACE_SZ];
     int sz = BACKTRACE_SZ;
 
-    yaz_panic_signal = sig;
     signal(SIGALRM, yaz_panic_alarm);
     alarm(1);
     sz = backtrace(backtrace_info, sz);

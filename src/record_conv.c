@@ -13,6 +13,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+
 #include <yaz/log.h>
 #include <yaz/yaz-iconv.h>
 #include <yaz/marcdisp.h>
@@ -26,6 +28,7 @@
 #include <yaz/url.h>
 #include <yaz/srw.h>
 #include <yaz/timing.h>
+#include "xml_util.h"
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -262,8 +265,8 @@ static int convert_xslt(void *vinfo, WRBUF record, WRBUF wr_error)
     int ret = 0;
     struct xslt_info *info = vinfo;
 
-    xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
-                                   wrbuf_len(record));
+    xmlDocPtr doc = yaz_xml_parse_memory(wrbuf_buf(record),
+        wrbuf_len(record));
     if (!doc)
     {
         wrbuf_printf(wr_error, "xmlParseMemory failed");
@@ -362,8 +365,8 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
     int ret = 0;
     struct select_info *info = vinfo;
 
-    xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
-                                   wrbuf_len(record));
+    xmlDocPtr doc = yaz_xml_parse_memory(wrbuf_buf(record),
+        wrbuf_len(record));
     if (!doc)
     {
         wrbuf_printf(wr_error, "xmlParseMemory failed");
@@ -625,12 +628,13 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
 
     if (mi->input_format_mode == YAZ_MARC_ISO2709)
     {
-        int sz = yaz_marc_read_iso2709(mt, wrbuf_buf(record),
-                                       wrbuf_len(record));
+        int sz = wrbuf_len(record) > INT_MAX ? -1 :
+            yaz_marc_read_iso2709(mt, wrbuf_buf(record),
+                (int) wrbuf_len(record));
         if (sz > 0)
         {
             if (yaz_marc_check_marc21_coding(input_charset, wrbuf_buf(record),
-                                             wrbuf_len(record)))
+                    (int) wrbuf_len(record)))
                 input_charset = "utf-8";
             ret = 0;
         }
@@ -640,8 +644,8 @@ static int convert_marc(void *info, WRBUF record, WRBUF wr_error)
     else if (mi->input_format_mode == YAZ_MARC_MARCXML ||
              mi->input_format_mode == YAZ_MARC_TURBOMARC)
     {
-        xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
-                                       wrbuf_len(record));
+        xmlDocPtr doc = yaz_xml_parse_memory(wrbuf_buf(record),
+            wrbuf_len(record));
         if (!doc)
         {
             wrbuf_printf(wr_error, "xmlParseMemory failed");
@@ -1059,8 +1063,8 @@ static int convert_rdf_lookup(void *rinfo, WRBUF record, WRBUF wr_error)
     int ret = 0;
     struct rdf_lookup_info *info = rinfo;
 
-    xmlDocPtr doc = xmlParseMemory(wrbuf_buf(record),
-                                   wrbuf_len(record));
+    xmlDocPtr doc = yaz_xml_parse_memory(wrbuf_buf(record),
+        wrbuf_len(record));
     yaz_log(YLOG_DEBUG, "rdf_lookup convert starting");
     if (!doc)
     {

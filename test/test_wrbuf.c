@@ -76,8 +76,8 @@ static void tstwrbuf(void)
 
     for (step = 1; step < 65; step++)
     {
-        int i, j, k;
-        int len;
+        size_t i, j, k;
+        size_t len;
         char buf[64];
         char *cp;
         for (j = 1; j<step; j++)

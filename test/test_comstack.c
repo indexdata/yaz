@@ -316,7 +316,7 @@ static void tst_http_request(void)
             "GET /next HTTP/1.1\r\n"
             "\r\n";
 
-        YAZ_CHECK_EQ(cs_complete_auto(http_buf, strlen(http_buf)), -1);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, (int) strlen(http_buf)), -1);
     }
 
     if (INT_MAX == 2147483647){
@@ -403,7 +403,7 @@ static int comstack_example(const char *server_address_str)
     int status;
 
     char *protocol_package = "GET / HTTP/1.0\r\n\r\n";
-    int protocol_package_length = strlen(protocol_package);
+    int protocol_package_length = (int) strlen(protocol_package);
 
     stack = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
     if (!stack) {

@@ -84,7 +84,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
                     level_str, ll, len);
             return 0;
         }
-        return ll + (b - buf);
+        return (int) (ll + (b - buf));
     }
     if (ll >= 0)
     {
@@ -101,7 +101,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     {
         if (ll == -1 && *b == 0 && *(b + 1) == 0)
             break;
-        if (!(res = do_dumpBER(f, b, len, level + 1, offset + (b - buf))))
+        if (!(res = do_dumpBER(f, b, len, level + 1, offset + (int) (b - buf))))
         {
             fprintf(f, "%s Dump of content element failed\n", level_str);
             return 0;
@@ -122,9 +122,9 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
                     level_str);
             return 0;
         }
-        return (b - buf) + 2;
+        return (int) ((b - buf) + 2);
     }
-    return b - buf;
+    return (int) (b - buf);
 }
 
 int odr_dumpBER(FILE *f, const char *buf, int len)

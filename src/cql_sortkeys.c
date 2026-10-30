@@ -18,10 +18,10 @@
 #include <yaz/cql.h>
 
 static void pr_n(void (*pr)(const char *buf, void *client_data),
-                 const char *buf, int len, void *client_data)
+                 const char *buf, size_t len, void *client_data)
 {
     char tmp[4];
-    int left = len;
+    size_t left = len;
 
     while (left > 0)
     {

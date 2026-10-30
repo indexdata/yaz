@@ -168,12 +168,19 @@ void yaz_check_term1(void)
 void yaz_check_eq1(int type, const char *file, int line,
                    const char *left, const char *right, int lval, int rval)
 {
+    yaz_check_eq2(type, file, line, left, right, lval, rval);
+}
+
+void yaz_check_eq2(int type, const char *file, int line,
+                   const char *left, const char *right, nmem_int_t lval, nmem_int_t rval)
+{
     char formstr[2048];
 
     if (type == YAZ_TEST_TYPE_OK)
         yaz_snprintf(formstr, sizeof(formstr), "%s == %s ", left, right);
     else
-        yaz_snprintf(formstr, sizeof(formstr), "%s != %s\n %d != %d", left, right, lval,rval);
+        yaz_snprintf(formstr, sizeof(formstr),
+            "%s != %s\n " NMEM_INT_PRINTF " != " NMEM_INT_PRINTF, left, right, lval, rval);
     yaz_check_print1(type, file, line, formstr);
 }
 

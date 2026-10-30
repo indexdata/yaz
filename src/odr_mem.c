@@ -65,10 +65,26 @@ size_t odr_total(ODR o)
 
 Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz)
 {
-    Odr_oct *p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
+    Odr_oct *p;
+    if (sz < 0)
+    {
+        odr_seterror(o, OLENOV, 58);
+        return 0;
+    }
+    p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
     p->buf = odr_strdupn(o, buf, sz);
     p->len = sz;
     return p;
+}
+
+Odr_oct *odr_create_Odr_oct2(ODR o, const char *buf, size_t sz)
+{
+    if (sz > INT_MAX)
+    {
+        odr_seterror(o, OLENOV, 58);
+        return 0;
+    }
+    return odr_create_Odr_oct(o, buf, (int) sz);
 }
 
 /* ---------- memory management for data encoding ----------*/
@@ -93,6 +109,16 @@ int odr_grow_block(ODR b, int min_bytes)
                                xmalloc(b->op->size = togrow)))
         abort();
     return 0;
+}
+
+int odr_write2(ODR o, const char *buf, size_t bytes)
+{
+    if (bytes > INT_MAX)
+    {
+        odr_seterror(o, OSPACE, 40);
+        return -1;
+    }
+    return odr_write(o, buf, (int) bytes);
 }
 
 int odr_write(ODR o, const char *buf, int bytes)
@@ -149,6 +175,15 @@ Odr_int odr_atoi(const char *s)
     return odr_strtol(s, &endptr, 10);
 }
 
+int odr_int_to_int(Odr_int v)
+{
+    if (v > INT_MAX)
+        return INT_MAX;
+    else if (v < INT_MIN)
+        return INT_MIN;
+    else
+        return (int) v;
+}
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -20,6 +20,7 @@
 #include <yaz/pquery.h>
 #include <yaz/snprintf.h>
 #include <assert.h>
+#include <limits.h>
 
 void yaz_oi_set_facetlist(
     Z_OtherInformation **otherInformation, ODR odr,
@@ -126,7 +127,13 @@ static void numattr(Z_AttributeElement *ae, struct yaz_facet_attr *av,
 {
     if (ae->which == Z_AttributeValue_numeric)
     {
-        *v = *ae->value.numeric;
+        if (*ae->value.numeric > INT_MAX || *ae->value.numeric < INT_MIN)
+        {
+            av->errcode = YAZ_BIB1_UNSUPP_ATTRIBUTE;
+            av->errstring = "limit/sort/start attribute outside int range";
+            return;
+        }
+        *v = (int) *ae->value.numeric;
     }
     else
     {

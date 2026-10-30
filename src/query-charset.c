@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 
 #include <yaz/query-charset.h>
 #include <yaz/wrbuf.h>
@@ -19,25 +20,23 @@ static int yaz_query_charset_convert_buf(char *buf_in, int len_in,
                                          char **buf_out, int *len_out,
                                          ODR o, WRBUF wrbuf, yaz_iconv_t cd)
 {
-    int r = 0;
+    size_t len;
     wrbuf_rewind(wrbuf);
     wrbuf_iconv_write(wrbuf, cd, buf_in, len_in);
     wrbuf_iconv_reset(wrbuf, cd);
 
-    *len_out = wrbuf_len(wrbuf);
-    if (*len_out == 0)
-    {   /* we assume conversion failed */
+    len = wrbuf_len(wrbuf);
+    if (len == 0 || len > INT_MAX)
+    {   /* conversion failed or result too large */
         *buf_out = buf_in;
         *len_out = len_in;
-        r = -1;
+        return -1;
     }
-    else
-    {
-        /* conversion OK */
-        *buf_out = (char*) odr_malloc(o, *len_out);
-        memcpy(*buf_out, wrbuf_buf(wrbuf), *len_out);
-    }
-    return r;
+    /* conversion OK */
+    *len_out = (int) len;
+    *buf_out = (char*) odr_malloc(o, len);
+    memcpy(*buf_out, wrbuf_buf(wrbuf), len);
+    return 0;
 }
 
 static int yaz_query_charset_convert_term(Z_Term *q,

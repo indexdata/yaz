@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <limits.h>
 
 #if HAVE_DIRENT_H
 #include <dirent.h>
@@ -213,48 +214,55 @@ int cmd_adm_import(const char *arg)
             struct stat status;
             FILE *inf;
 
-            yaz_snprintf (fname, sizeof(fname), "%s%s%s",
-                          dir_str, sep, ent->d_name);
-            stat (fname, &status);
-
+            yaz_snprintf(fname, sizeof(fname), "%s%s%s",
+                         dir_str, sep, ent->d_name);
+            stat(fname, &status);
             if (S_ISREG(status.st_mode) && (inf = fopen(fname, "r")))
             {
                 Z_NamePlusRecord *rec;
                 Odr_oct *oct = (Odr_oct *) odr_malloc (out, sizeof(*oct));
 
-                if (!apdu)
+                if (status.st_size > INT_MAX)
                 {
-                    apdu = zget_APDU(out, Z_APDU_segmentRequest);
-                    segment = apdu->u.segmentRequest;
-                    segment->segmentRecords = (Z_NamePlusRecord **)
-                        odr_malloc (out, chunk * sizeof(*segment->segmentRecords));
+                    printf("File %s larger than %d. Ignored\n", fname, INT_MAX);
+                    oct->buf = 0;
                 }
-                rec = (Z_NamePlusRecord *) odr_malloc (out, sizeof(*rec));
-                rec->databaseName = 0;
-                rec->which = Z_NamePlusRecord_intermediateFragment;
-                rec->u.intermediateFragment = (Z_FragmentSyntax *)
-                    odr_malloc (out, sizeof(*rec->u.intermediateFragment));
-                rec->u.intermediateFragment->which =
-                    Z_FragmentSyntax_notExternallyTagged;
-                rec->u.intermediateFragment->u.notExternallyTagged = oct;
-
-                oct->len = status.st_size;
-                oct->buf = (char *) odr_malloc (out, oct->len);
-                if (fread(oct->buf, 1, oct->len, inf) != (size_t) oct->len)
+                else
                 {
-                    printf("Incomplete read of file %s\n", fname);
+                    oct->len = (int) status.st_size;
+                    oct->buf = (char *) odr_malloc (out, oct->len);
+                    if (fread(oct->buf, 1, oct->len, inf) != (size_t) oct->len)
+                    {
+                        printf("Incomplete read of file %s\n", fname);
+                    }
                 }
                 if (fclose(inf))
                 {
                     printf("Close failed for file %s\n", fname);
                 }
-
-                segment->segmentRecords[segment->num_segmentRecords++] = rec;
-
-                if (segment->num_segmentRecords == chunk)
+                if (oct->buf)
                 {
-                    send_apdu (apdu);
-                    apdu = 0;
+                    if (!apdu)
+                    {
+                        apdu = zget_APDU(out, Z_APDU_segmentRequest);
+                        segment = apdu->u.segmentRequest;
+                        segment->segmentRecords = (Z_NamePlusRecord **)
+                            odr_malloc (out, chunk * sizeof(*segment->segmentRecords));
+                    }
+                    rec = (Z_NamePlusRecord *) odr_malloc (out, sizeof(*rec));
+                    rec->databaseName = 0;
+                    rec->which = Z_NamePlusRecord_intermediateFragment;
+                    rec->u.intermediateFragment = (Z_FragmentSyntax *)
+                        odr_malloc (out, sizeof(*rec->u.intermediateFragment));
+                    rec->u.intermediateFragment->which =
+                        Z_FragmentSyntax_notExternallyTagged;
+                    rec->u.intermediateFragment->u.notExternallyTagged = oct;
+                    segment->segmentRecords[segment->num_segmentRecords++] = rec;
+                    if (segment->num_segmentRecords == chunk)
+                    {
+                        send_apdu (apdu);
+                        apdu = 0;
+                    }
                 }
             }
         }

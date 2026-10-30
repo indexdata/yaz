@@ -16,6 +16,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/cookie.h>
 #include <yaz/poll.h>
+#include <limits.h>
 
 struct yaz_url {
     ODR odr_in;
@@ -164,9 +165,15 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     Z_HTTP_Response *res;
     int number_of_redirects = 0;
 
+    wrbuf_rewind(p->w_error);
+    if (buf && len > INT_MAX)
+    {
+        wrbuf_printf(p->w_error, "HTTP request too large for URL %s", uri);
+        log_warn(p);
+        return 0;
+    }
     odr_reset(p->odr_out);
     yaz_cookies_reset(p->cookies);
-    wrbuf_rewind(p->w_error);
     while (1)
     {
         void *add;
@@ -216,7 +223,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         if (buf && len)
         {
             gdu->u.HTTP_Request->content_buf = (char *) buf;
-            gdu->u.HTTP_Request->content_len = len;
+            gdu->u.HTTP_Request->content_len = (int) len;
         }
         if (!z_GDU(p->odr_out, &gdu, 0, 0))
         {

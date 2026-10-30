@@ -16,6 +16,8 @@
 #include "odr-priv.h"
 #define PRT_EXT_DEBUG 0
 
+#include <limits.h>
+
 #if PRT_EXT_DEBUG
 #include <yaz/log.h>
 #endif
@@ -259,6 +261,15 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         odr_sequence_end(o);
 }
 
+
+Z_External *z_ext_record_oid_nmem2(NMEM nmem, const Odr_oid *oid,
+                                  const char *buf, size_t len)
+{
+    if (len > INT_MAX)
+        return 0;
+    return z_ext_record_oid_nmem(nmem, oid, buf, (int) len);
+}
+
 Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
                                   const char *buf, int len)
 {
@@ -317,7 +328,7 @@ Z_External *z_ext_record_oid_nmem(NMEM nmem, const Odr_oid *oid,
         thisext->which = Z_External_sutrs;
         thisext->u.sutrs = sutrs;
         sutrs->buf = (char *)nmem_malloc(nmem, len);
-        sutrs->len = len;
+        sutrs->len = (int) len;
         memcpy(sutrs->buf, buf, len);
     }
     else

@@ -105,7 +105,7 @@ const char *get_ill_element(void *clientData, const char *element) {
 struct nameval *parse_nameval( char *arg ) {
     struct nameval *nv = (struct nameval *) xmalloc(sizeof(*nv));
     char *p=arg;
-    int len;
+    size_t len;
     if (!p || !*p)
         return 0; /* yeah, leaks a bit of memory. so what */
     while ( *p && ( *p != '=' ) )
@@ -147,7 +147,7 @@ void parse_paramfile(char *arg, struct prog_args *args) {
     FILE *f=fopen(arg,"r");
 #define BUFSIZE 4096
     char buf[BUFSIZE];
-    int len;
+    size_t len;
     struct nameval *nv;
     if (!f) {
         yaz_log(YLOG_FATAL,"Could not open param file '%s' ", arg);

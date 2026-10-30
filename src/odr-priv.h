@@ -44,7 +44,7 @@ struct Odr_ber_tag {
     int lcons;
 };
 
-#define odr_max(o) ((o)->op->size - ((o)->op->bp - (o)->op->buf))
+#define odr_max(o) ((o)->op->size - (int) ((o)->op->bp - (o)->op->buf))
 
 /**
  * \brief stack for BER constructed items
@@ -159,6 +159,9 @@ struct Odr_private {
 )
 
 #endif
+
+int odr_int_to_int(Odr_int v);
+
 /*
  * Local variables:
  * c-basic-offset: 4

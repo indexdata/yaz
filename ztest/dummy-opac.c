@@ -21,7 +21,8 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
     int i;
     rec = (Z_OPACRecord *) odr_malloc(odr, sizeof(*rec));
     rec->bibliographicRecord =
-        z_ext_record_usmarc(odr, marc_input, strlen(marc_input));
+        z_ext_record_usmarc(odr, marc_input,
+            (int) strlen(marc_input)); /* internal MARC records and limit of 99999 bytes */
     rec->num_holdingsData = 1;
     rec->holdingsData = (Z_HoldingsRecord **)
         odr_malloc(odr, sizeof(*rec->holdingsData));

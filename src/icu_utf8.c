@@ -15,10 +15,11 @@
 #if YAZ_HAVE_ICU
 #include <yaz/xmalloc.h>
 
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 
 #include <yaz/log.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,13 +28,18 @@
 #include <unicode/ustring.h>  /* some more string fcns*/
 #include <unicode/uchar.h>    /* char names           */
 
-struct icu_buf_utf8 *icu_buf_utf8_create(size_t capacity)
+struct icu_buf_utf8 *icu_buf_utf8_create(size_t required)
 {
-    struct icu_buf_utf8 *buf8
-        = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
+    struct icu_buf_utf8 *buf8;
+    size_t capacity;
 
+    if (required > INT32_MAX)
+        return NULL;
+
+    capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
+    buf8 = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
     buf8->utf8_len = 0;
-    buf8->utf8_cap = capacity;
+    buf8->utf8_cap = (int32_t) capacity;
     if (capacity > 0)
     {
         buf8->utf8 = (uint8_t *) xmalloc(sizeof(uint8_t) * capacity);
@@ -54,9 +60,14 @@ struct icu_buf_utf8 *icu_buf_utf8_clear(struct icu_buf_utf8 *buf8)
 }
 
 struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
-                                         size_t capacity)
+                                         size_t required)
 {
+    size_t capacity;
+
     assert(buf8);
+    if (required > INT32_MAX)
+        return NULL;
+    capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
     if (capacity > 0)
     {
         if (0 == buf8->utf8)
@@ -65,7 +76,7 @@ struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
             buf8->utf8
                 = (uint8_t *) xrealloc(buf8->utf8, sizeof(uint8_t) * capacity);
 
-        buf8->utf8_cap = capacity;
+        buf8->utf8_cap = (int32_t) capacity;
     }
     return buf8;
 }
@@ -76,8 +87,9 @@ const char *icu_buf_utf8_to_cstr(struct icu_buf_utf8 *src8)
     if (src8->utf8_len == 0)
         return "";
 
-    if (src8->utf8_len == src8->utf8_cap)
-        src8 = icu_buf_utf8_resize(src8, src8->utf8_len * 2 + 1);
+    if (src8->utf8_len == src8->utf8_cap &&
+        !icu_buf_utf8_resize(src8, (size_t) src8->utf8_len + 1))
+        return NULL;
 
     src8->utf8[src8->utf8_len] = '\0';
 
@@ -100,19 +112,27 @@ UErrorCode icu_utf16_from_utf8_cstr(struct icu_buf_utf16 *dest16,
 
     *status = U_ZERO_ERROR;
     src8cstr_len = strlen(src8cstr);
+    if (src8cstr_len > INT32_MAX)
+    {
+        icu_buf_utf16_clear(dest16);
+        *status = U_INDEX_OUTOFBOUNDS_ERROR;
+        return *status;
+    }
 
     u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
                   &utf16_len,
-                  src8cstr, src8cstr_len, status);
+                  src8cstr, (int32_t) src8cstr_len, status);
 
     /* check for buffer overflow, resize and retry */
     if (*status == U_BUFFER_OVERFLOW_ERROR)
     {
-        icu_buf_utf16_resize(dest16, utf16_len * 2);
-        *status = U_ZERO_ERROR;
-        u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
-                      &utf16_len,
-                      src8cstr, src8cstr_len, status);
+        if (icu_buf_utf16_resize(dest16, (size_t) utf16_len))
+        {
+            *status = U_ZERO_ERROR;
+            u_strFromUTF8(dest16->utf16, dest16->utf16_cap,
+                          &utf16_len,
+                          src8cstr, (int32_t) src8cstr_len, status);
+        }
     }
 
     if (U_SUCCESS(*status) && utf16_len <= dest16->utf16_cap)
@@ -136,11 +156,13 @@ UErrorCode icu_utf16_to_utf8(struct icu_buf_utf8 *dest8,
     /* check for buffer overflow, resize and retry */
     if (*status == U_BUFFER_OVERFLOW_ERROR)
     {
-        icu_buf_utf8_resize(dest8, utf8_len * 2);
-        *status = U_ZERO_ERROR;
-        u_strToUTF8((char *) dest8->utf8, dest8->utf8_cap,
-                    &utf8_len,
-                    src16->utf16, src16->utf16_len, status);
+        if (icu_buf_utf8_resize(dest8, (size_t) utf8_len))
+        {
+            *status = U_ZERO_ERROR;
+            u_strToUTF8((char *) dest8->utf8, dest8->utf8_cap,
+                        &utf8_len,
+                        src16->utf16, src16->utf16_len, status);
+        }
     }
 
     if (U_SUCCESS(*status) && utf8_len <= dest8->utf8_cap)

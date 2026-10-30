@@ -184,6 +184,13 @@ YAZ_EXPORT char *odr_strdup_null(ODR o, const char *str);
 YAZ_EXPORT Odr_int *odr_intdup(ODR o, Odr_int v);
 YAZ_EXPORT Odr_bool *odr_booldup(ODR o, Odr_bool v);
 YAZ_EXPORT Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz);
+/** \brief create an octet string with a checked size conversion
+    \param o ODR memory pool and error state
+    \param buf source buffer
+    \param sz number of bytes to copy
+    \return octet string, or NULL with OLENOV set if sz exceeds INT_MAX
+*/
+YAZ_EXPORT Odr_oct *odr_create_Odr_oct2(ODR o, const char *buf, size_t sz);
 YAZ_EXPORT NMEM odr_extract_mem(ODR o);
 YAZ_EXPORT Odr_null *odr_nullval(void);
 #define odr_release_mem(m) nmem_destroy(m)
@@ -290,6 +297,14 @@ YAZ_EXPORT Odr_oid *odr_oiddup(ODR odr, const Odr_oid *o);
 YAZ_EXPORT Odr_oid *odr_oiddup_nmem(NMEM nmem, const Odr_oid *o);
 YAZ_EXPORT int odr_grow_block(ODR b, int min_bytes);
 YAZ_EXPORT int odr_write(ODR o, const char *buf, int bytes);
+/** \brief write bytes to the encoding buffer with a checked size conversion
+    \param o ODR stream
+    \param buf source buffer
+    \param bytes number of bytes to write
+    \retval 0 success
+    \retval -1 insufficient buffer space or length exceeds the int buffer limit
+*/
+YAZ_EXPORT int odr_write2(ODR o, const char *buf, size_t bytes);
 YAZ_EXPORT int odr_seek(ODR o, int whence, int offset);
 YAZ_EXPORT int odr_dumpBER(FILE *f, const char *buf, int len);
 YAZ_EXPORT void odr_choice_bias(ODR o, int what);

@@ -7,6 +7,9 @@
 #endif
 
 #include <yaz/record_conv.h>
+
+#include <limits.h>
+
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
 #include <string.h>
@@ -67,7 +70,7 @@ void test2(void)
     char bin_marc[] =
       "00766nam  22002658a 4500001001200000003000600012005001700018008004100035010001700076020001500093035001800108040001800126049000900144050002600153082001700179100001800196245006700214260005200281263000900333300002700342500002700369504005100396650004400447999000900491\036ocm28339863\036OCoLC\03619940105074522.0\036930609s1994    cou      b    001 0 eng  \036  \037a   93009047 \036  \037a0130305529\036  \037a(ocm)28339863\036  \037aDLC\037cDLC\037dKKU\036  \037aKKUJ\03600\037aQA76.73.C28\037bG73 1994\03600\037a005.13/3\037220\0361 \037aGraham, Paul.\03610\037aOn Lisp :\037badvanced techniques for common Lisp /\037cPaul Graham.\036  \037aEnglewood Cliffs, N.J. :\037bPrentice Hall,\037c1994.\036  \037a9410\036  \037axiii, 413 p. ;\037c23 cm.\036  \037a\"An Alan R. Apt book.\"\036  \037aIncludes bibliographical references and index.\036 0\037aCOMMON LISP (Computer program language)\036\037lUAHILL\036\035";
 
-    int marc_size = strlen(bin_marc);
+    int marc_size = (int) strlen(bin_marc); /* < 100K */
     char out_rec[1000];
     yaz_marc_t marc = yaz_marc_create();
     WRBUF buf = wrbuf_alloc();
@@ -85,7 +88,7 @@ void test2(void)
 }
 
 static int test_render(const char *type_spec, int is_marc, const char *input,
-                    const char *expected_output)
+                       const char *expected_output)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     const char *actual_output;
@@ -96,9 +99,9 @@ static int test_render(const char *type_spec, int is_marc, const char *input,
     Z_NamePlusRecord *npr = odr_malloc(odr, sizeof(*npr));
     npr->which = Z_NamePlusRecord_databaseRecord;
     if (is_marc)
-        npr->u.databaseRecord = z_ext_record_usmarc(odr, input, strlen(input));
+        npr->u.databaseRecord = z_ext_record_usmarc(odr, input, (int) strlen(input));
     else
-        npr->u.databaseRecord = z_ext_record_xml(odr, input, strlen(input));
+        npr->u.databaseRecord = z_ext_record_xml(odr, input, (int) strlen(input));
 
     actual_output = yaz_record_render(npr, 0, wrbuf, type_spec, &actual_len);
 

@@ -13,8 +13,9 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
-#include "zoom-p.h"
+#include <limits.h>
 
+#include "zoom-p.h"
 #include <yaz/log.h>
 #include <yaz/pquery.h>
 
@@ -32,6 +33,7 @@ static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
 static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 {
     Z_GDU *gdu;
+    int ret = -1;
     const char *database =  ZOOM_options_get(c->options, "databaseName");
 
     gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port,
@@ -39,19 +41,24 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 
     if (c->sru_mode == zoom_sru_get)
     {
-        yaz_sru_get_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+        ret = yaz_sru_get_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
     else if (c->sru_mode == zoom_sru_post)
     {
-        yaz_sru_post_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+        ret = yaz_sru_post_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
     else if (c->sru_mode == zoom_sru_soap)
     {
-        yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+        ret = yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
     }
     else if (c->sru_mode == zoom_sru_solr)
     {
-        yaz_solr_encode_request(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+        ret = yaz_solr_encode_request(gdu->u.HTTP_Request, sr, c->odr_out, c->charset);
+    }
+    if (ret)
+    {
+        ZOOM_set_error(c, ZOOM_ERROR_ENCODE, 0);
+        return zoom_complete;
     }
     return ZOOM_send_GDU(c, gdu);
 }
@@ -144,8 +151,7 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
 #if YAZ_HAVE_XML2
 zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 {
-    int i;
-    int *start, *count;
+    Odr_int i, *start, *count;
     ZOOM_resultset resultset = 0;
     Z_SRW_PDU *sr = 0;
     const char *option_val = 0;
@@ -182,12 +188,12 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     for (i = 0; i < *count; i++)
     {
-        ZOOM_record rec =
-            ZOOM_record_cache_lookup(resultset, i + *start,
+        Odr_int pos = i + *start;
+        if (pos >= INT_MAX ||
+            !ZOOM_record_cache_lookup(resultset, (int) pos,
                                      c->tasks->u.search.syntax,
                                      c->tasks->u.search.elementSetName,
-                                     schema);
-        if (!rec)
+                                     schema))
             break;
     }
     *start += i;
@@ -253,7 +259,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                     Z_SRW_searchRetrieveResponse *res)
 {
     ZOOM_resultset resultset = 0;
-    int *start, *count;
+    Odr_int *start, *count;
     int i;
     NMEM nmem;
     ZOOM_Event event;
@@ -330,7 +336,7 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                       res->suggestions);
         for (i = 0; i < res->num_records; i++)
         {
-            int pos = c->tasks->u.search.start + i;
+            Odr_int pos = c->tasks->u.search.start + i;
             Z_SRW_record *sru_rec;
             Z_SRW_diagnostic *diag = 0;
             int num_diag;
@@ -340,8 +346,8 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                 *res->records[i].recordPosition >= pos + 1)
                 pos = *res->records[i].recordPosition - 1;
 
-            if (!ZOOM_record_cache_lookup(resultset,
-                                          pos,
+            if (pos >= INT_MAX ||
+                !ZOOM_record_cache_lookup(resultset, (int) pos,
                                           syntax, elementSetName, schema))
             {
                 Z_NamePlusRecord *npr = (Z_NamePlusRecord *)
@@ -371,9 +377,9 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
                                                      &diag, &num_diag,
                                                      resultset->odr);
                 }
-                ZOOM_record_cache_add(resultset, npr,
-                                      pos, syntax, elementSetName,
-                                      schema, diag);
+                if (pos <= INT_MAX)
+                    ZOOM_record_cache_add(resultset, npr, (int) pos, syntax,
+                        elementSetName, schema, diag);
             }
         }
         *count -= i;

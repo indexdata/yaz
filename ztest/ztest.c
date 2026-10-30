@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -254,7 +255,7 @@ static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
 {
     int index;
     int freq = 100;
-    int length = strlen(facet_name) + 10;
+    size_t length = strlen(facet_name) + 10;
     char *key = odr_malloc(odr, length);
     key[0] = '\0';
     for (index = 0; index < facet_field->num_terms; index++)
@@ -614,10 +615,10 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                 ext->u.itemOrder->u.taskPackage->originPart = k;
                 ext->u.itemOrder->u.taskPackage->targetPart = targetPart;
 
-                if (xml_in_response)
+                if (xml_in_response && strlen(xml_in_response) < INT_MAX)
                     targetPart->itemRequest =
                         z_ext_record_xml(rr->stream, xml_in_response,
-                                         strlen(xml_in_response));
+                                         (int) strlen(xml_in_response));
                 else
                     targetPart->itemRequest = 0;
 
@@ -866,7 +867,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     if (!oid || yaz_oid_is_iso2709(oid))
     {
         cp = dummy_marc_record(r->number, r->stream);
-        if (!cp)
+        if (!cp || strlen(cp) > INT_MAX)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             r->surrogate_flag = 1;
@@ -874,7 +875,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         }
         else
         {
-            r->len = strlen(cp);
+            r->len = (int) strlen(cp);
             r->record = cp;
             r->output_format = odr_oiddup(r->stream, yaz_oid_recsyn_usmarc);
         }
@@ -898,9 +899,8 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
 
         yaz_snprintf(buf, sizeof(buf), "This is dummy SUTRS record number %d\n", r->number);
 
-        r->len = strlen(buf);
-        r->record = (char *) odr_malloc(r->stream, r->len+1);
-        strcpy(r->record, buf);
+        r->len = (int) strlen(buf); /* no more than sizeof(buf) */
+        r->record = odr_strdup(r->stream, buf);
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
@@ -933,22 +933,26 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             r->surrogate_flag = 1;
+            fclose(f);
+            return 0;
         }
+        r->len = (int) size;
         fseek(f, 0L, SEEK_SET);
         r->record = (char*) odr_malloc(r->stream, size);
-        r->len = size;
         if (fread(r->record, size, 1, f) != 1)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
             r->surrogate_flag = 1;
+            fclose(f);
+            return 0;
         }
         fclose(f);
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_xml))
     {
-        if ((cp = dummy_xml_record(r->number, r->stream, esn)))
+        if ((cp = dummy_xml_record(r->number, r->stream, esn)) && strlen(cp) < INT_MAX)
         {
-            r->len = strlen(cp);
+            r->len = (int) strlen(cp);
             r->record = cp;
             r->schema = "info:srw/schema/1/marcxml-1.1";
         }
@@ -961,9 +965,9 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     }
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_json))
     {
-        if ((cp = dummy_json_record(r->number, r->stream, esn)))
+        if ((cp = dummy_json_record(r->number, r->stream, esn)) && strlen(cp) < INT_MAX)
         {
-            r->len = strlen(cp);
+            r->len = (int) strlen(cp);
             r->record = cp;
             r->schema = "info:srw/schema/1/marcxml-1.1";
         }

@@ -37,7 +37,7 @@
 
 #include <yaz/yconfig.h>
 #include <yaz/xmltypes.h>
-#include <yaz/icu_I18N.h>
+#include "icu_I18N.h"
 #include <yaz/log.h>
 
 #include <unicode/ustring.h>  /* some more string fcns*/

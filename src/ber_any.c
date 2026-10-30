@@ -94,7 +94,7 @@ int completeBER_n(const char *buf, int len, int level)
 #endif
             return 0;
         }
-        return ll + (b-buf);
+        return (int) (ll + (b - buf));
     }
     /* indefinite length */
     if (!cons)
@@ -118,7 +118,7 @@ int completeBER_n(const char *buf, int len, int level)
     }
     if (len < 2)
         return 0;
-    return (b - buf) + 2;
+    return (int) ((b - buf) + 2);
 }
 
 int completeBER(const char *buf, int len)

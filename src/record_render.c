@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <yaz/marcdisp.h>
 #include <yaz/record_render.h>
@@ -21,6 +22,7 @@
 #include <yaz/oid_db.h>
 #include <yaz/nmem_xml.h>
 #include <yaz/base64.h>
+#include "xml_util.h"
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
@@ -82,7 +84,7 @@ static yaz_iconv_t iconv_create_charset(const char *record_charset,
 
 static const char *return_marc_record(WRBUF wrbuf,
                                       int marc_type,
-                                      int *len,
+                                      size_t *len,
                                       const char *buf, int sz,
                                       const char *record_charset)
 {
@@ -106,7 +108,7 @@ static const char *return_marc_record(WRBUF wrbuf,
 
 static const char *return_opac_record(WRBUF wrbuf,
                                       int marc_type,
-                                      int *len,
+                                      size_t *len,
                                       Z_OPACRecord *opac_rec,
                                       const char *record_charset)
 {
@@ -146,8 +148,8 @@ static const char *return_opac_record(WRBUF wrbuf,
 }
 
 static const char *return_string_record(WRBUF wrbuf,
-                                        int *len,
-                                        const char *buf, int sz,
+                                        size_t *len,
+                                        const char *buf, size_t sz,
                                         const char *record_charset)
 {
     yaz_iconv_t cd = iconv_create_charset(record_charset, 0, 0, 0);
@@ -165,7 +167,7 @@ static const char *return_string_record(WRBUF wrbuf,
     return buf;
 }
 
-static const char *return_record_wrbuf(WRBUF wrbuf, int *len,
+static const char *return_record_wrbuf(WRBUF wrbuf, size_t *len,
                                        Z_NamePlusRecord *npr,
                                        int marctype, const char *charset)
 {
@@ -218,7 +220,7 @@ static const char *return_record_wrbuf(WRBUF wrbuf, int *len,
     return 0;
 }
 
-static const char *get_record_format(WRBUF wrbuf, int *len,
+static const char *get_record_format(WRBUF wrbuf, size_t *len,
                                      Z_NamePlusRecord *npr,
                                      int marctype, const char *charset,
                                      const char *format)
@@ -230,7 +232,7 @@ static const char *get_record_format(WRBUF wrbuf, int *len,
         /* try to XML format res */
         xmlDocPtr doc;
         xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
-        doc = xmlParseMemory(res, *len);
+        doc = yaz_xml_parse_memory(res, *len);
         if (doc)
         {
             xmlChar *xml_mem;
@@ -256,21 +258,27 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
     const char *res;
     int len;
     int m_len;
-    WRBUF wrbuf = wrbuf_alloc();
-    ODR odr = odr_createmem(ODR_ENCODE);
-    Z_NamePlusRecord *npr = odr_malloc(odr, sizeof(*npr));
-    npr->which = Z_NamePlusRecord_databaseRecord;
+    WRBUF wrbuf;
+    ODR odr;
+    Z_NamePlusRecord *npr;
+    size_t rec_len = strlen(record_buf);
+    if (rec_len > INT_MAX)
+        return ret;
 
+    wrbuf = wrbuf_alloc();
+    odr = odr_createmem(ODR_ENCODE);
+    npr = odr_malloc(odr, sizeof(*npr));
+    npr->which = Z_NamePlusRecord_databaseRecord;
     if (atoi_n_check(record_buf, 5, &m_len))
         npr->u.databaseRecord =
-            z_ext_record_usmarc(odr, record_buf, strlen(record_buf));
+            z_ext_record_usmarc(odr, record_buf, (int) rec_len);
     else
         npr->u.databaseRecord =
-            z_ext_record_xml(odr, record_buf, strlen(record_buf));
+            z_ext_record_xml(odr, record_buf, (int) rec_len);
     res = yaz_record_render(npr, 0, wrbuf, type_spec, &len);
-    if (res)
+    if (res && strlen(res) <= INT_MAX)
     {
-        xmlDoc *doc = xmlParseMemory(res, strlen(res));
+        xmlDoc *doc = yaz_xml_parse_memory(res, strlen(res));
         if (doc)
         {
             xmlNode *nptr = xmlCopyNode(xmlDocGetRootElement(doc), 1);
@@ -295,7 +303,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
                                  const char *expr, const char *type_spec)
 {
 #if YAZ_HAVE_XML2
-    xmlDocPtr doc = xmlParseMemory(buf, *len);
+    xmlDocPtr doc = yaz_xml_parse_memory(buf, *len);
     if (doc)
     {
         xmlChar *buf_out;
@@ -365,10 +373,7 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     char charset[40];
     char format[3];
     const char *cp = type_spec;
-    int len0;
-
-    if (!len)
-        len = &len0;
+    size_t len0 = -1;
 
     for (i = 0; cp[i] && cp[i] != ';' && cp[i] != ' ' && i < sizeof(type)-1;
          i++)
@@ -427,12 +432,12 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     }
     if (!strcmp(type, "database"))
     {
-        *len = (npr->databaseName ? strlen(npr->databaseName) : 0);
+        len0 = (npr->databaseName ? strlen(npr->databaseName) : 0);
         ret = npr->databaseName;
     }
     else if (!strcmp(type, "schema"))
     {
-        *len = schema ? strlen(schema) : 0;
+        len0 = schema ? strlen(schema) : 0;
         ret = schema;
     }
     else if (!strcmp(type, "syntax"))
@@ -445,49 +450,49 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         }
         if (!desc)
             desc = "none";
-        *len = strlen(desc);
+        len0 = strlen(desc);
         ret = desc;
     }
     if (npr->which != Z_NamePlusRecord_databaseRecord)
         ;
     else if (!strcmp(type, "render"))
     {
-        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_LINE, charset, format);
+        ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_LINE, charset, format);
     }
     else if (!strcmp(type, "xml"))
     {
-        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
+        ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_MARCXML, charset,
                                 format);
     }
     else if (!strcmp(type, "txml"))
     {
-        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_TURBOMARC, charset,
+        ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_TURBOMARC, charset,
                                 format);
     }
     else if (!strcmp(type, "json"))
     {
-        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_JSON, charset,
+        ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_JSON, charset,
                                 format);
     }
     else if (!strcmp(type, "raw"))
     {
-        ret = get_record_format(wrbuf, len, npr, YAZ_MARC_ISO2709, charset,
+        ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_ISO2709, charset,
                                 format);
     }
     else if (!strcmp(type, "ext"))
     {
-        *len = -1;
         ret = (const char *) npr->u.databaseRecord;
     }
     else if (!strcmp(type, "opac"))
     {
         if (npr->u.databaseRecord->which == Z_External_OPAC)
-            ret = get_record_format(wrbuf, len, npr, YAZ_MARC_MARCXML, charset,
+            ret = get_record_format(wrbuf, &len0, npr, YAZ_MARC_MARCXML, charset,
                                     format);
     }
 
-    if (base64_xpath && *len != -1)
+    if (base64_xpath && len0 != -1 && len0 <= INT_MAX)
     {
+        int blen = (int) len0;
         char *type_spec = nmem_malloc(nmem,
                                       strlen(type) + strlen(charset) + 11);
         strcpy(type_spec, type);
@@ -496,9 +501,19 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
             strcat(type_spec, "; charset=");
             strcat(type_spec, charset);
         }
-        ret = base64_render(nmem, wrbuf, ret, len, base64_xpath, type_spec);
+        ret = base64_render(nmem, wrbuf, ret, &blen, base64_xpath, type_spec);
+        len0 = blen;
     }
     nmem_destroy(nmem);
+    if (len)
+    {
+        if (len0 == (size_t) (-1))
+            *len = -1;
+        else if (len0 < INT_MAX)
+            *len = (int) len0;
+        else
+            *len = INT_MAX;
+    }
     return ret;
 }
 

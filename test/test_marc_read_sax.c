@@ -41,9 +41,8 @@ static void tst1(void)
     yaz_marc_t mt = yaz_marc_create();
     yaz_marc_sax_t yt = yaz_marc_sax_new(mt, handler, &user_data);
     xmlSAXHandlerPtr sax_ptr = yaz_marc_sax_get_handler(yt);
-    xmlParserCtxtPtr parser_ctxt = xmlCreatePushParserCtxt(sax_ptr, yt,
-                                                           marcxml,
-                                                           strlen(marcxml), 0);
+    xmlParserCtxtPtr parser_ctxt =
+        xmlCreatePushParserCtxt(sax_ptr, yt, marcxml, (int) strlen(marcxml), 0);
 
     YAZ_CHECK(parser_ctxt);
     if (parser_ctxt)

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#include <limits.h>
 #ifndef WIN32
 #include <signal.h>
 #endif
@@ -344,7 +345,7 @@ static Z_ReferenceId *set_refid(ODR out)
 {
     if (!refid)
         return 0;
-    return odr_create_Odr_oct(out, refid, strlen(refid));
+    return odr_create_Odr_oct2(out, refid, strlen(refid));
 }
 
 /* INIT SERVICE ------------------------------- */
@@ -661,7 +662,13 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
             fclose(inf);
             return 0;
         }
-        *len = fsize;
+        if (fsize > INT_MAX)
+        {
+            printf("File %s larger than %d\n", fname, INT_MAX);
+            fclose(inf);
+            return 0;
+        }
+        *len = (int) fsize;
         *buf = (char *) odr_malloc(out, fsize+1);
         (*buf)[fsize] = '\0';
         if (fread(*buf, 1, fsize, inf) != fsize)
@@ -675,7 +682,12 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
     else if ((*arg)[0] == '\"' && (sep=strchr(*arg+1, '"')))
     {
         (*arg)++;
-        *len = sep - *arg;
+        if (sep - *arg > INT_MAX)
+        {
+            printf("Out of bounds for argument\n");
+            return 0;
+        }
+        *len = (int) (sep - *arg);
         *buf = odr_strdupn(out, *arg, *len);
         (*arg) = sep+1;
     }
@@ -686,7 +698,12 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
         while (**arg != '\0' && **arg != ' ')
             (*arg)++;
 
-        *len = *arg - arg_start;
+        if (*arg - arg_start > INT_MAX)
+        {
+            printf("Out of bounds for argument\n");
+            return 0;
+        }
+        *len = (int) (*arg - arg_start);
         *buf = odr_strdupn(out, arg_start, *len);
     }
     return 1;
@@ -914,7 +931,7 @@ static void print_mab_record(const char *buf, size_t len)
     }
 }
 
-static void print_xml_record(const char *buf, size_t len)
+static void print_xml_record(const char *buf, int len)
 {
     int has_printed = 0;
 #if YAZ_HAVE_XML2
@@ -993,7 +1010,7 @@ static void display_record(Z_External *r)
     if (oid && r->which == Z_External_octet)
     {
         const char *octet_buf = (const char*)r->u.octet_aligned->buf;
-        size_t octet_len = r->u.octet_aligned->len;
+        int octet_len = r->u.octet_aligned->len;
         if (!oid_oidcmp(oid, yaz_oid_recsyn_xml)
             || !oid_oidcmp(oid, yaz_oid_recsyn_application_xml)
             || !oid_oidcmp(oid, yaz_oid_recsyn_html))
@@ -1040,7 +1057,11 @@ static void display_record(Z_External *r)
                 }
             }
 
-            if (yaz_marc_decode_buf(mt, octet_buf, octet_len,
+            if (octet_len > INT_MAX)
+            {
+                printf("Record too large to be MARC. %ld bytes\n", (long) octet_len);
+            }
+            else if (yaz_marc_decode_buf(mt, octet_buf, (int) octet_len,
                                     &result, &rlen)> 0)
             {
                 if (fwrite(result, rlen, 1, stdout) != 1)
@@ -1652,7 +1673,7 @@ static int send_Z3950_searchRequest(const char *arg)
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error(pqf_parser, &pqf_msg, &off);
-            int ioff = off;
+            int ioff = off > INT_MAX ? 0 : (int) off;
             printf("%*s^\n", ioff+4, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
 
@@ -1666,8 +1687,13 @@ static int send_Z3950_searchRequest(const char *arg)
     case QueryType_CCL:
         query.which = Z_Query_type_2;
         query.u.type_2 = &ccl_query;
+        if (strlen(arg) > INT_MAX)
+        {
+            printf("Size of CCL query beyond %d", INT_MAX);
+            return 0;
+        }
+        ccl_query.len = (int) strlen(arg);
         ccl_query.buf = (char *) arg;
-        ccl_query.len = strlen(arg);
         break;
     case QueryType_CCL2RPN:
         query.which = Z_Query_type_1;
@@ -2512,7 +2538,7 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
         notToKeep->elements[0]->u.opaque = recid ?
-            odr_create_Odr_oct(out, recid, strlen(recid)) : 0;
+            odr_create_Odr_oct2(out, recid, strlen(recid)) : 0;
         notToKeep->elements[0]->supplementalId = 0;
         notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record = record_this;
@@ -2551,7 +2577,7 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
             odr_malloc(out, sizeof(**notToKeep->elements));
         notToKeep->elements[0]->which = Z_IUSuppliedRecords_elem_opaque;
         notToKeep->elements[0]->u.opaque = recid ?
-            odr_create_Odr_oct(out, recid, strlen(recid)) : 0;
+            odr_create_Odr_oct2(out, recid, strlen(recid)) : 0;
         notToKeep->elements[0]->supplementalId = 0;
         notToKeep->elements[0]->correlationInfo = 0;
         notToKeep->elements[0]->record = record_this;
@@ -3393,7 +3419,7 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
             const char *pqf_msg;
             size_t off;
             int code = yaz_pqf_error(pqf_parser, &pqf_msg, &off);
-            int ioff = off;
+            int ioff = off > INT_MAX ? 0 : (int) off;
             printf("%*s^\n", ioff+7, "");
             printf("Prefix query error: %s (code %d)\n", pqf_msg, code);
             yaz_pqf_destroy(pqf_parser);
@@ -3421,7 +3447,8 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
         {
             req->termListAndStartPoint->term->u.general->buf =
                 odr_strdup(out, term);
-            req->termListAndStartPoint->term->u.general->len = strlen(term);
+            req->termListAndStartPoint->term->u.general->len =
+                (int) strlen(term); /* limit is 512 last_scan_line */
         }
     }
     req->referenceId = set_refid(out);
@@ -4427,7 +4454,6 @@ static void handle_srw_scan_term(Z_SRW_scanTerm *term)
     if (term->value && term->displayTerm)
         printf(" %s", term->value);
 
-    strcpy(last_scan_line, term->value);
     printf("\n");
 }
 
@@ -4783,7 +4809,8 @@ static int cmd_cclparse(const char* arg)
 
     if (error)
     {
-        int ioff = 3+strlen(last_cmd)+1+pos;
+        size_t off = 3 + strlen(last_cmd) + 1 + pos;
+        int ioff = off > INT_MAX ? 0 : (int) off;
         printf("%*s^ - ", ioff, " ");
         printf("%s\n", ccl_err_msg(error));
     }

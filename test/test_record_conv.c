@@ -24,9 +24,11 @@
 #include <libxslt/xslt.h>
 #endif
 
+#include "xml_util.h"
+
 yaz_record_conv_t conv_configure(const char *xmlstring, WRBUF w)
 {
-    xmlDocPtr doc = xmlParseMemory(xmlstring, strlen(xmlstring));
+    xmlDocPtr doc = yaz_xml_parse_memory(xmlstring, strlen(xmlstring));
     if (!doc)
     {
         wrbuf_printf(w, "xmlParseMemory");
@@ -444,7 +446,7 @@ static void tst_convert3(void)
 
     z_opac->bibliographicRecord =
         z_ext_record_oid_nmem(nmem, yaz_oid_recsyn_usmarc,
-                              iso2709_rec, strlen(iso2709_rec));
+                              iso2709_rec, (int) strlen(iso2709_rec));
     z_opac->num_holdingsData = 1;
     z_opac->holdingsData = (Z_HoldingsRecord **)
         nmem_malloc(nmem, sizeof(Z_HoldingsRecord *) * 1);

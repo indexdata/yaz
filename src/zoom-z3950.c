@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include "zoom-p.h"
 
 #include <yaz/yaz-util.h>
@@ -981,7 +982,7 @@ static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
     }
     xfree(c->addinfo);
     c->addinfo = 0;
-    ZOOM_set_dset_error(c, *r->condition, oid_name, addinfo, 0);
+    ZOOM_set_dset_error2(c, *r->condition, YAZ_BIB1_UNSPECIFIED_ERROR, oid_name, addinfo, 0);
 }
 
 static void response_diag(ZOOM_connection c, Z_DiagRec *p)
@@ -1179,7 +1180,7 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
         Z_FacetTerm *facetTerm = facet->terms[i];
         facet_field->facet_terms[i].frequency = *facetTerm->count;
         facet_field->facet_terms[i].term = get_term_cstr(odr, facetTerm->term);
-        yaz_log(YLOG_DEBUG, "    term[%d] %s %d",
+        yaz_log(YLOG_DEBUG, "    term[%d] %s " ODR_INT_PRINTF,
                 i, facet_field->facet_terms[i].term,
                 facet_field->facet_terms[i].frequency);
     }
@@ -1238,7 +1239,7 @@ static void handle_queryExpressionTerm(ZOOM_options opt, const char *name,
         ZOOM_options_set(opt, name, term->u.characterString);
         break;
     case Z_Term_numeric:
-        ZOOM_options_set_int(opt, name, *term->u.numeric);
+        ZOOM_options_set_odr_int(opt, name, *term->u.numeric);
         break;
     }
 }
@@ -1326,8 +1327,8 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                         char opt_name[80];
                         yaz_snprintf(opt_name, sizeof(opt_name),
                                      "%s.count", pref);
-                        ZOOM_options_set_int(resultset->options, opt_name,
-                                             *ent->subqueryCount);
+                        ZOOM_options_set_odr_int(resultset->options, opt_name,
+                                                 *ent->subqueryCount);
                     }
                 }
             }
@@ -1356,13 +1357,13 @@ static void handle_Z3950_search_response(ZOOM_connection c,
     {
         if (*sr->resultSetStatus == Z_SearchResponse_estimate)
             resultCountPrecision = "estimate";
-        ZOOM_options_set_int(resultset->options, "resultSetStatus",
-                             *sr->resultSetStatus);
+        ZOOM_options_set_odr_int(resultset->options, "resultSetStatus",
+                                 *sr->resultSetStatus);
     }
     if (sr->presentStatus)
     {
-        ZOOM_options_set_int(resultset->options, "presentStatus",
-                             *sr->presentStatus);
+        ZOOM_options_set_odr_int(resultset->options, "presentStatus",
+                                 *sr->presentStatus);
     }
     ZOOM_options_set(resultset->options, "resultCountPrecision",
                      resultCountPrecision);
@@ -1402,13 +1403,13 @@ static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
     scan->srw_scan_response = 0;
     nmem_transfer(odr_getmem(scan->odr), nmem);
     if (res->stepSize)
-        ZOOM_options_set_int(scan->options, "stepSize", *res->stepSize);
+        ZOOM_options_set_odr_int(scan->options, "stepSize", *res->stepSize);
     if (res->positionOfTerm)
-        ZOOM_options_set_int(scan->options, "position", *res->positionOfTerm);
+        ZOOM_options_set_odr_int(scan->options, "position", *res->positionOfTerm);
     if (res->scanStatus)
-        ZOOM_options_set_int(scan->options, "scanStatus", *res->scanStatus);
+        ZOOM_options_set_odr_int(scan->options, "scanStatus", *res->scanStatus);
     if (res->numberOfEntriesReturned)
-        ZOOM_options_set_int(scan->options, "number",
+        ZOOM_options_set_odr_int(scan->options, "number",
                              *res->numberOfEntriesReturned);
     nmem_destroy(nmem);
 }
@@ -1417,7 +1418,7 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                                  int present_phase)
 {
     ZOOM_resultset resultset;
-    int *start, *count;
+    Odr_int *start, *count;
     const char *syntax = 0, *elementSetName = 0, *schema = 0;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
@@ -1457,15 +1458,17 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                 sr->u.databaseOrSurDiagnostics;
             for (i = 0; i < p->num_records; i++)
             {
-                ZOOM_record_cache_add(resultset, p->records[i], i + *start,
-                                      syntax, elementSetName, schema, 0);
+                Odr_int pos = i + *start;
+                if (pos <= INT_MAX)
+                    ZOOM_record_cache_add(resultset, p->records[i], (int) pos,
+                                          syntax, elementSetName, schema, 0);
             }
             *count -= i;
             if (*count < 0)
                 *count = 0;
             *start += i;
             yaz_log(c->log_details,
-                    "handle_records resultset=%p start=%d count=%d",
+                    "handle_records resultset=%p start=" ODR_INT_PRINTF " count=" ODR_INT_PRINTF,
                     resultset, *start, *count);
 
             /* transfer our response to search_nmem .. we need it later */
@@ -1479,8 +1482,9 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                         resultset->odr, 0,
                         YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
                         "ZOOM C generated. Present phase and no records");
-                ZOOM_record_cache_add(resultset, myrec, *start,
-                                      syntax, elementSetName, schema, 0);
+                if (*start <= INT_MAX)
+                    ZOOM_record_cache_add(resultset, myrec, (int) *start,
+                                          syntax, elementSetName, schema, 0);
                 *count = 0;
             }
         }
@@ -1492,7 +1496,8 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                     resultset->odr, 0,
                     YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS,
                     "ZOOM C generated: Present response and no records");
-            ZOOM_record_cache_add(resultset, myrec, *start,
+            if (*start <= INT_MAX)
+                ZOOM_record_cache_add(resultset, myrec, (int) *start,
                                   syntax, elementSetName, schema, 0);
             *count = 0;
         }
@@ -1631,7 +1636,7 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     const char *elementSetName = 0;
     const char *schema = 0;
     ZOOM_resultset resultset;
-    int *start, *count;
+    Odr_int *start, *count;
 
     if (!c->tasks || c->tasks->which == ZOOM_TASK_SORT)
         return zoom_complete;
@@ -1643,8 +1648,8 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     elementSetName = c->tasks->u.search.elementSetName;
     schema =  c->tasks->u.search.schema;
 
-    yaz_log(c->log_details, "%p ZOOM_connection_Z3950_search start=%d count=%d",
-            c, *start, *count);
+    yaz_log(c->log_details, "%p ZOOM_connection_Z3950_search start=" ODR_INT_PRINTF
+        " count=" ODR_INT_PRINTF, c, *start, *count);
 
     ZOOM_memcached_search(c, resultset);
 
@@ -1667,10 +1672,10 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
 
     for (i = 0; i < *count; i++)
     {
-        ZOOM_record rec =
-            ZOOM_record_cache_lookup(resultset, i + *start,
-                                     syntax, elementSetName, schema);
-        if (!rec)
+        Odr_int pos = i + *start;
+        if (pos > INT_MAX ||
+            !ZOOM_record_cache_lookup(resultset, (int) pos,
+                syntax, elementSetName, schema))
             break;
     }
     *start += i;

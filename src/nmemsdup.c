@@ -12,6 +12,7 @@
 #include <config.h>
 #endif
 
+#include <limits.h>
 #include <string.h>
 #include <yaz/nmem.h>
 #include <yaz/snprintf.h>
@@ -87,7 +88,7 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
     /* two passes over the input string.. */
     while (1)
     {
-        size_t i = 0;
+        int i = 0;
         const char *cp = dstr;
         while (1)
         {
@@ -124,6 +125,12 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
                     }
                     *dst = '\0';
                 }
+            }
+            if (i == INT_MAX)
+            {
+                *num = 0;
+                *darray = 0;
+                return;
             }
             i++;
             if (!collapse)

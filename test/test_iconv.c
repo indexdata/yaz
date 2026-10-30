@@ -32,8 +32,8 @@
 #define UTF8_eACUTE "\xC3\xA9"
 
 static int compare_buffers(char *msg, int no,
-                           int expect_len, const char *expect_buf,
-                           int got_len, const char *got_buf)
+                           size_t expect_len, const char *expect_buf,
+                           size_t got_len, const char *got_buf)
 {
     if (expect_len == got_len
         && !memcmp(expect_buf, got_buf, expect_len))

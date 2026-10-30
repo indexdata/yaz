@@ -21,6 +21,7 @@
 
 #if YAZ_HAVE_XML2
 #include "sru-p.h"
+#include "xml_util.h"
 
 static int match_element_next(xmlNode **ptr, const char *elem, NMEM nmem,
                               char **val)
@@ -76,7 +77,7 @@ static int bibliographicRecord(yaz_marc_t mt, xmlNode *ptr, Z_External **ext,
         WRBUF wr = wrbuf_alloc();
         if (yaz_marc_write_iso2709(mt, wr) == 0)
         {
-            *ext = z_ext_record_oid_nmem(
+            *ext = z_ext_record_oid_nmem2(
                 nmem, syntax ? syntax : yaz_oid_recsyn_usmarc,
                 wrbuf_buf(wr), wrbuf_len(wr));
             ret = 1;
@@ -300,7 +301,7 @@ int yaz_xml_to_opac(yaz_marc_t mt, const char *buf_in, size_t size_in,
                     Z_OPACRecord **dst, yaz_iconv_t cd, NMEM nmem,
                     const Odr_oid *syntax)
 {
-    xmlDocPtr doc = xmlParseMemory(buf_in, size_in);
+    xmlDocPtr doc = yaz_xml_parse_memory(buf_in, size_in);
     int r = 0;
     if (doc)
     {

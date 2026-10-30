@@ -60,6 +60,13 @@ YAZ_EXPORT void yaz_pqf_destroy(YAZ_PQF_Parser p);
 
 YAZ_EXPORT int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off);
 
+/** \brief create a term from a buffer
+    \param o ODR memory pool and error state
+    \param term_type term representation
+    \param buf source buffer
+    \param len length of source buffer
+    \return term, or NULL with OLENOV set for an oversized general term
+*/
 YAZ_EXPORT
 Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len);
 

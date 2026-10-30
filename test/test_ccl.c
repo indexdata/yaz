@@ -11,6 +11,7 @@
 #include <yaz/log.h>
 #include <yaz/test.h>
 
+#include "xml_util.h"
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
@@ -201,7 +202,7 @@ void tst1(int pass)
                 " </qual>\n"
                 "</cclmap>\n";
 
-            doc = xmlParseMemory(xml_str, strlen(xml_str));
+            doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
             YAZ_CHECK(doc);
 
             r = ccl_xml_config(bibset, xmlDocGetRootElement(doc), &addinfo);

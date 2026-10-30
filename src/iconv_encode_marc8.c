@@ -360,7 +360,7 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, struct encoder_data *w,
         /* save the output pointers .. */
         char *outbuf0 = *outbuf;
         size_t outbytesleft0 = *outbytesleft;
-        int last_ch = w->write_marc8_last;
+        unsigned long last_ch = w->write_marc8_last;
         int ncr = w->write_marc8_ncr;
         const char *lpage = w->write_marc8_lpage;
         size_t r;

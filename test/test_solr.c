@@ -145,7 +145,7 @@ static int check_response(ODR o, const char *content,
            "Content-Type: text/xml; charset=utf-8\r\n";
     yaz_snprintf(http_response, strlen(content) + 300,
             "%sContent-Length: %d\r\n\r\n%s", start, (int) strlen(content), content);
-    odr_setbuf(o, http_response, strlen(http_response), 0);
+    odr_setbuf(o, http_response, (int) strlen(http_response), 0);
 
     *p = 0;
     r = z_GDU(o, &gdu, 0, 0);
@@ -174,7 +174,7 @@ static int check_srw_response(ODR o, const char *content,
     yaz_snprintf(http_response, strlen(content) + 300,
             "%sContent-Length: %d\r\n\r\n%s", start, (int) strlen(content), content);
 
-    odr_setbuf(o, http_response, strlen(http_response), 0);
+    odr_setbuf(o, http_response, (int) strlen(http_response), 0);
 
     *p = 0;
     Z_GDU *gdu = 0;

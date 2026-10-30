@@ -11,6 +11,7 @@
 #endif
 
 #include "odr-priv.h"
+#include <limits.h>
 
 /*
  * Top level octet string en/decoder.
@@ -83,8 +84,15 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
     t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
     if (o->direction == ODR_ENCODE)
     {
+        size_t len = strlen(*p);
+        if (len > INT_MAX)
+        {
+            odr_seterror(o, OLENOV, 55);
+            odr_setelement(o, name);
+            return 0;
+        }
         t->buf = *p;
-        t->len = strlen(*p);
+        t->len = (int) len;
     }
     else
     {
@@ -139,6 +147,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             size_t outleft = 4 * inleft + 2;
             char *outbuf = (char *) odr_malloc (o, outleft);
             size_t ret;
+            ptrdiff_t len;
 
             t->buf = outbuf;
 
@@ -154,15 +163,30 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
 
             if (ret == (size_t)(-1))
             {
+                odr_setelement(o, name);
                 odr_seterror(o, ODATA, 44);
                 return 0;
             }
-            t->len = outbuf - (char*) t->buf;
+            len = outbuf - (char *) t->buf;
+            if (len > INT_MAX)
+            {
+                odr_seterror(o, OLENOV, 56);
+                odr_setelement(o, name);
+                return 0;
+            }
+            t->len = (int) len;
         }
         if (!t->buf)
         {
+            size_t len = strlen(*p);
+            if (len > INT_MAX)
+            {
+                odr_seterror(o, OLENOV, 57);
+                odr_setelement(o, name);
+                return 0;
+            }
+            t->len = (int) len;
             t->buf = *p;
-            t->len = strlen(*p);
         }
     }
     else

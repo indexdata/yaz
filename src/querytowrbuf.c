@@ -18,7 +18,12 @@
 
 void yaz_encode_pqf_term(WRBUF b, const char *term, int len)
 {
-    int i;
+    yaz_encode_pqf_term2(b, term, len < 0 ? 0 : len);
+}
+
+void yaz_encode_pqf_term2(WRBUF b, const char *term, size_t len)
+{
+    size_t i;
     for (i = 0; i < len; i++)
         if (strchr(" \"{", term[i]))
             break;
@@ -125,7 +130,7 @@ static void yaz_apt_to_wrbuf(WRBUF b, const Z_AttributesPlusTerm *zapt)
         break;
     case Z_Term_characterString:
         wrbuf_puts(b, "@term string ");
-        yaz_encode_pqf_term(b, zapt->term->u.characterString,
+        yaz_encode_pqf_term2(b, zapt->term->u.characterString,
                             strlen(zapt->term->u.characterString));
         break;
     case Z_Term_numeric:
@@ -186,8 +191,8 @@ static void yaz_rpnstructure_to_wrbuf(WRBUF b, const Z_RPNStructure *zs)
         else if (zs->u.simple->which == Z_Operand_resultSetId)
         {
             wrbuf_printf(b, "@set ");
-            yaz_encode_pqf_term(b, zs->u.simple->u.resultSetId,
-                                strlen(zs->u.simple->u.resultSetId));
+            yaz_encode_pqf_term2(b, zs->u.simple->u.resultSetId,
+                                 strlen(zs->u.simple->u.resultSetId));
         }
         else
             wrbuf_puts(b, "(unknown simple structure)");

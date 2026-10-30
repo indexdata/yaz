@@ -34,6 +34,7 @@
 
 #include <yaz/yconfig.h>
 #include <stdio.h>
+#include <yaz/nmem.h>
 
 /** \brief Get the verbosity level */
 int yaz_test_get_verbosity(void);
@@ -70,13 +71,13 @@ int yaz_test_get_verbosity(void);
 
 /** \brief equality test. left, right only evaluated once */
 #define YAZ_CHECK_EQ(left, right) { \
-  int lval = left; \
-  int rval = right; \
+  nmem_int_t lval = left; \
+  nmem_int_t rval = right; \
   if (lval == rval) { \
-    yaz_check_eq1(YAZ_TEST_TYPE_OK, __FILE__, __LINE__, \
+    yaz_check_eq2(YAZ_TEST_TYPE_OK, __FILE__, __LINE__, \
      #left, #right, lval, rval); \
   } else { \
-    yaz_check_eq1(YAZ_TEST_TYPE_FAIL, __FILE__, __LINE__, \
+    yaz_check_eq2(YAZ_TEST_TYPE_FAIL, __FILE__, __LINE__, \
      #left, #right, lval, rval); \
   } \
 }
@@ -107,6 +108,10 @@ YAZ_EXPORT void yaz_check_print1(int type, const char *file, int line,
 YAZ_EXPORT void yaz_check_eq1(int type, const char *file, int line,
                               const char *left, const char *right,
                               int lval, int rval);
+/** \brief used by macro. Should not be called directly */
+YAZ_EXPORT void yaz_check_eq2(int type, const char *file, int line,
+                              const char *left, const char *right,
+                              nmem_int_t lval, nmem_int_t rval);
 /** \brief used by macro. Should not be called directly */
 YAZ_EXPORT void  yaz_check_inc_todo(void);
 YAZ_END_CDECL

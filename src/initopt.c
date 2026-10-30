@@ -13,6 +13,7 @@
 #endif
 
 #include <yaz/proto.h>
+#include <limits.h>
 
 static struct {
     char *name;
@@ -72,7 +73,11 @@ int yaz_init_opt_encode(Z_Options *opt, const char *opt_str, int *error_pos)
         {
             if (error_pos)
             {
-                *error_pos = cp - opt_str;
+                size_t pos = cp - opt_str;
+                if (pos >= 0 && pos < INT_MAX)
+                    *error_pos = (int) pos;
+                else
+                    *error_pos = 0;
                 return -1;
             }
         }

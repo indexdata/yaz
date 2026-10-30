@@ -21,9 +21,11 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <yaz/rpn2cql.h>
+#include <yaz/atoi.h>
 #include <yaz/xmalloc.h>
 #include <yaz/diagsrw.h>
 #include <yaz/tokenizer.h>
@@ -526,7 +528,13 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
         const char *relation = mods->u.st.relation;
 
         if (!strcmp(name, "distance")) {
-            distance = strtol(term, (char**) 0, 0);
+            size_t len = term ? strlen(term) : 0;
+            if (!len || len > INT_MAX ||
+                yaz_atoi(10, term, (int) len, &distance) != (int) len)
+            {
+                wrbuf_puts(addinfo, term ? term : "distance");
+                return YAZ_SRW_UNSUPP_PROX_DISTANCE;
+            }
             if (!strcmp(relation, "="))
                 proxrel = 3;
             else if (!strcmp(relation, ">"))
@@ -592,11 +600,12 @@ static int has_modifier(struct cql_node *cn, const char *name) {
 
 static int emit_term(cql_transform_t ct,
                      struct cql_node *cn, WRBUF addinfo,
-                     const char *term, int length,
+                     const char *term, size_t length,
                      void (*pr)(const char *buf, void *client_data),
                      void *client_data)
 {
-    int i, r;
+    size_t i;
+    int r;
     const char *ns = cn->u.st.index_uri;
     int z3958_mode = 0;
     int process_term = 1;
@@ -833,7 +842,7 @@ static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
     const char *cp0 = cn->u.st.term;
     const char *cp1;
     const char *last_term = 0;
-    int last_length = 0;
+    size_t last_length = 0;
     while (!r && cp0)
     {
         while (*cp0 == ' ')
