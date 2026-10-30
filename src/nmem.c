@@ -60,9 +60,7 @@ struct align {
         short s;
         int i;
         long l;
-#if HAVE_LONG_LONG
-        long long ll;
-#endif
+        nmem_int_t ll;
         float f;
         double d;
     } u;
