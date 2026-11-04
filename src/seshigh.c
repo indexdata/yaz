@@ -953,6 +953,15 @@ static void srw_bend_search(association *assoc,
 
     *http_code = 200;
     yaz_log(log_requestdetail, "Got SRW SearchRetrieveRequest");
+    if (srw_req->maximumRecords && *srw_req->maximumRecords < 0)
+        yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                               &srw_res->num_diagnostics,
+                               YAZ_SRW_UNSUPP_PARAMETER_VALUE, "maximumRecords");
+    if (srw_req->startRecord
+        && (*srw_req->startRecord < 1 || *srw_req->startRecord > INT_MAX))
+        yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                               &srw_res->num_diagnostics,
+                               YAZ_SRW_FIRST_RECORD_POSITION_OUT_OF_RANGE, 0);
     srw_bend_init(assoc, headers,
                   &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (srw_res->num_diagnostics == 0 && assoc->init)
@@ -973,7 +982,7 @@ static void srw_bend_search(association *assoc,
         rr.extra_args = sr->extra_args;
         rr.extra_response_data = 0;
         rr.present_number = srw_req->maximumRecords ?
-            *srw_req->maximumRecords : 0;
+            odr_int_to_int(*srw_req->maximumRecords) : 0;
 
         if (!srw_req->queryType || !strcmp(srw_req->queryType, "cql"))
         {
@@ -1107,11 +1116,27 @@ static void srw_bend_search(association *assoc,
                 {
                     int i;
                     int ok = 1;
-                    if (start + number > rr.hits)
-                        number = odr_int_to_int(rr.hits) - start + 1;
+                    /* Subtract only after validating start. Adding start
+                       and number can overflow before the hit-count clamp. */
+                    if (number - 1 > rr.hits - start)
+                        number = (int) (rr.hits - start + 1);
+                    /* bend_present and bend_fetch use int positions. */
+                    if (number - 1 > INT_MAX - start)
+                        number = INT_MAX - start + 1;
+
+                    if ((size_t) number > (size_t) -1 / sizeof(*srw_res->records)
+                        || (size_t) number >
+                        (size_t) -1 / sizeof(*srw_res->extra_records))
+                    {
+                        yaz_add_srw_diagnostic(
+                            assoc->encode, &srw_res->diagnostics,
+                            &srw_res->num_diagnostics,
+                            YAZ_SRW_SYSTEM_ERROR_IN_RETRIEVING_RECORDS, 0);
+                        ok = 0;
+                    }
 
                     /* Call bend_present if defined */
-                    if (assoc->init->bend_present)
+                    if (ok && assoc->init->bend_present)
                     {
                         bend_present_rr *bprr = (bend_present_rr*)
                             odr_malloc(assoc->decode, sizeof(*bprr));

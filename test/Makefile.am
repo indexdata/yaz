@@ -9,7 +9,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_nmem test_odr test_odrstack test_oid test_options \
  test_pquery test_query_charset \
  test_record_conv test_rpn2cql test_rpn2solr test_retrieval \
- test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec \
+ test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec test_sru_limits \
  test_timing test_tpath test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
  test_marc_read_sax
@@ -94,5 +94,7 @@ test_libstemmer_SOURCES = test_libstemmer.c
 test_embed_record_SOURCES = test_embed_record.c
 test_eventl_SOURCES = test_eventl.c
 test_eventl_LDADD = ../src/libyaz_server.la ../src/libyaz.la
+test_sru_limits_SOURCES = test_sru_limits.c
+test_sru_limits_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_zgdu_SOURCES = test_zgdu.c
 test_marc_read_sax_SOURCES = test_marc_read_sax.c
