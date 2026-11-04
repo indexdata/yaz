@@ -25,10 +25,12 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
     char sort_string_buf[64], sort_flags[64];
     Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
         odr_malloc(out, sizeof(*sksl));
+    const int max_specs = 20;
     int off;
 
     sksl->num_specs = 0;
-    sksl->specs = (Z_SortKeySpec **)odr_malloc(out, sizeof(sksl->specs) * 20);
+    sksl->specs = (Z_SortKeySpec **)
+        odr_malloc(out, sizeof(*sksl->specs) * max_specs);
 
     while ((sscanf(arg, "%63s %63s%n", sort_string_buf,
                    sort_flags, &off)) == 2  && off > 1)
@@ -36,8 +38,13 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
         int i;
         char *sort_string_sep;
         char *sort_string = sort_string_buf;
-        Z_SortKeySpec *sks = (Z_SortKeySpec *) odr_malloc(out, sizeof(*sks));
-        Z_SortKey *sk = (Z_SortKey *) odr_malloc(out, sizeof(*sk));
+        Z_SortKeySpec *sks;
+        Z_SortKey *sk;
+
+        if (sksl->num_specs == max_specs)
+            return 0;
+        sks = (Z_SortKeySpec *) odr_malloc(out, sizeof(*sks));
+        sk = (Z_SortKey *) odr_malloc(out, sizeof(*sk));
 
         arg += off;
         sksl->specs[sksl->num_specs++] = sks;
