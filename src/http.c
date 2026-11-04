@@ -682,6 +682,77 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
     return 1;
 }
 
+/* Parse only HTTP(S) origins. Reject ambiguous authorities rather than
+   treating them as safe destinations for authentication. */
+static int http_origin(const char *uri, const char **host, size_t *host_len,
+                       int *port, int *secure)
+{
+    const char *end, *p;
+    if (!yaz_strncasecmp(uri, "http://", 7))
+    {
+        *secure = 0;
+        uri += 7;
+    }
+    else if (!yaz_strncasecmp(uri, "https://", 8))
+    {
+        *secure = 1;
+        uri += 8;
+    }
+    else
+        return 0;
+    end = uri + strcspn(uri, "/?#");
+    for (p = uri; p != end; p++)
+        if ((unsigned char) *p <= 32 || (unsigned char) *p >= 127
+            || *p == '@' || *p == '\\')
+            return 0;
+    *host = uri;
+    if (*uri == '[')
+    {
+        p = memchr(uri, ']', end - uri);
+        if (!p || p == uri + 1)
+            return 0;
+        p++;
+    }
+    else
+    {
+        p = uri;
+        while (p != end && *p != ':')
+            p++;
+    }
+    *host_len = p - uri;
+    if (!*host_len)
+        return 0;
+    *port = *secure ? 443 : 80;
+    if (p != end)
+    {
+        if (*p++ != ':' || p == end)
+            return 0;
+        *port = 0;
+        for (; p != end; p++)
+        {
+            if (*p < '0' || *p > '9')
+                return 0;
+            *port = *port * 10 + (*p - '0');
+            if (*port > 65535)
+                return 0;
+        }
+        if (!*port)
+            return 0;
+    }
+    return 1;
+}
+
+int yaz_http_same_origin(const char *uri, const char *other)
+{
+    const char *host1, *host2;
+    size_t len1, len2;
+    int port1, port2, secure1, secure2;
+    return http_origin(uri, &host1, &len1, &port1, &secure1)
+        && http_origin(other, &host2, &len2, &port2, &secure2)
+        && secure1 == secure2 && port1 == port2 && len1 == len2
+        && !yaz_strncasecmp(host1, host2, len1);
+}
+
 const char *yaz_check_location(ODR odr, const char *uri, const char *location,
                                int *host_change)
 {
