@@ -1979,6 +1979,12 @@
      <literal>x-username</literal> and <literal>x-password</literal> as
      given by the SRU standard.
     </para>
+    <para>
+     SRU GET redirects with a configured user, password, or client certificate
+     are followed only within the original origin (the same scheme, hostname,
+     and effective port). Cross-origin redirects, including HTTPS to HTTP
+     redirects, return an HTTP error before connecting to the new target.
+    </para>
    </sect2>
   </sect1>
   <sect1 id="zoom.query">

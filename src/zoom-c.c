@@ -1616,6 +1616,18 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
             int host_change = 0;
             location = yaz_check_location(c->odr_in, c->host_port,
                                           location, &host_change);
+            if ((c->user || c->password
+                 || ZOOM_options_get(c->options, "cert_fname"))
+                && !yaz_http_same_origin(c->host_port, location))
+            {
+                ZOOM_set_HTTP_error(c, hres->code,
+                                   "Cross-origin authenticated redirect refused",
+                                   0);
+                c->no_redirects = 0;
+                ZOOM_connection_close(c);
+                ZOOM_connection_remove_task(c);
+                return;
+            }
             xfree(c->location);
             c->location = xstrdup(location);
             do_connect_host(c, location);

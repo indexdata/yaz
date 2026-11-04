@@ -149,10 +149,62 @@ static void tst_invalid_encoding(const char *buf)
 }
 
 
+static void tst_http_same_origin(void)
+{
+    static const struct {
+        const char *uri;
+        const char *other;
+        int same;
+    } cases[] = {
+        { "http://example.org/a", "http://example.org/b?x=1", 1 },
+        { "https://example.org/a", "https://EXAMPLE.org:443/b", 1 },
+        { "http://example.org:80", "HTTP://EXAMPLE.ORG/", 1 },
+        { "http://example.org:8080/a", "http://example.org:8080/b", 1 },
+        { "https://[::1]/a", "https://[::1]:443/b", 1 },
+        { "https://example.org", "http://example.org", 0 },
+        { "http://example.org", "https://example.org", 0 },
+        { "http://example.org", "http://example.org:8080", 0 },
+        { "http://example.org", "http://other.example.org", 0 },
+        { "http://example.org", "http://example.org.evil", 0 },
+        { "http://example.org", "http://example.org@evil/", 0 },
+        { "http://example.org", "http://user:pass@example.org/", 0 },
+        { "http://example.org", "http://example.org\\@evil/", 0 },
+        { "http://example.org", "http://example.org\r\n/", 0 },
+        { "http://example.org", "unix:/tmp/socket", 0 },
+        { "http://example.org", "tcp:example.org:80", 0 },
+        { "http://example.org", "http://example.org:", 0 },
+        { "http://example.org", "http://example.org:80extra", 0 },
+        { "http://example.org", "http://example.org:65536", 0 },
+        { "http://example.org", "http://example.org:9999999999999", 0 },
+        { "http://example.org", "http://example.org:0", 0 },
+        { "http://example.org", "http:///", 0 },
+        { "http://example.org", "//example.org/", 0 },
+        { "http://example.org", "/next", 0 },
+        { "http://example.org", "", 0 },
+        { "http://[::1]", "http://[::1", 0 },
+        { "http://[]", "http://[]", 0 }
+    };
+    size_t i;
+    ODR odr = odr_createmem(ODR_ENCODE);
+    int host_change = 0;
+    const char *location = yaz_check_location(odr, "https://example.org/a",
+                                               "/next", &host_change);
+    YAZ_CHECK(yaz_http_same_origin("https://example.org/a", location));
+    for (i = 0; i < sizeof(cases) / sizeof(*cases); i++)
+    {
+        YAZ_CHECK_EQ(yaz_http_same_origin(cases[i].uri, cases[i].other),
+                     cases[i].same);
+        YAZ_CHECK_EQ(yaz_http_same_origin(cases[i].other, cases[i].uri),
+                     cases[i].same);
+    }
+    odr_destroy(odr);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_http_same_origin();
     tst_yaz_decode_http_response_first();
     tst_http_response();
     tst_double_encoding("POST / HTTP/1.1\r\n"

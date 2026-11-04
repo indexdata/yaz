@@ -67,6 +67,12 @@
    a connection to the Z39.50/SRU target at the address given.
   </para>
   <para>
+   When authentication or a client certificate is configured, SRU GET
+   redirects are followed only within the original origin (the same scheme,
+   hostname, and effective port). Cross-origin redirects, including HTTPS to
+   HTTP redirects, are refused before connecting to the new target.
+  </para>
+  <para>
    When <command>yaz-client</command> is started it tries to read
    commands from one of the following files:
    <itemizedlist>
