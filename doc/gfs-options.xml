@@ -163,8 +163,28 @@
  <varlistentry>
   <term><literal>-t </literal><replaceable>minutes</replaceable></term>
   <listitem><para>
-   Idle session timeout, in minutes.
+   Idle session timeout, in minutes (or seconds with an <literal>s</literal>
+   suffix). This is separate from the request completion deadline.
  </para></listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><literal>-R </literal><replaceable>seconds</replaceable></term>
+  <listitem><para>
+   Maximum time to complete a request or the initial TLS handshake, in
+   seconds. Default is 60. The initial deadline starts when the association
+   is created; subsequent request deadlines start on the first incomplete
+   read. Receiving more bytes does not extend the deadline. An expired
+   deadline closes the connection. The value must be positive.
+  </para></listitem>
+ </varlistentry>
+ <varlistentry>
+  <term><literal>-N </literal><replaceable>children</replaceable></term>
+  <listitem><para>
+   Maximum number of live session children in UNIX fork mode. Default is
+   100. Connections accepted at the limit are closed without forking.
+   Exited children release their slots. The value must be positive.
+   This option does not limit threaded, single-process, or inetd mode.
+  </para></listitem>
  </varlistentry>
  <varlistentry>
   <term><literal>-k </literal><replaceable>size</replaceable></term>

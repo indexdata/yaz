@@ -56,6 +56,7 @@ int force_event;
     int destroyed;
     time_t last_event;
     time_t max_idle;
+    time_t deadline; /* absolute request/handshake deadline, 0 if inactive */
 
     struct iochan *next;
     int chan_id; /* listening port (0 if none ) */
@@ -81,6 +82,8 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int port);
 int iochan_is_alive(IOCHAN chan);
 int iochan_event_loop(IOCHAN *iochans, int *watch_sig);
 void statserv_remove (IOCHAN pIOChannel);
+void statserv_reap_children(void);
+int statserv_request_timeout(void);
 #endif
 /*
  * Local variables:

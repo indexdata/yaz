@@ -167,6 +167,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     anew->version = 0;
     anew->last_control = 0;
     anew->client_chan = channel;
+    channel->deadline = time(0) + statserv_request_timeout();
     anew->client_link = link;
     anew->cs_get_mask = 0;
     anew->cs_put_mask = 0;
@@ -313,12 +314,15 @@ int ir_read(IOCHAN h, int event)
             }
             else if (res == 1) /* incomplete read - wait for more  */
             {
+                if (!h->deadline)
+                    h->deadline = time(0) + statserv_request_timeout();
                 if (conn->io_pending & CS_WANT_WRITE)
                     assoc->cs_get_mask |= EVENT_OUTPUT;
                 iochan_setflag(h, assoc->cs_get_mask);
                 return 0;
             }
             /* we got a complete PDU. Let's decode it */
+            h->deadline = 0;
             yaz_log(YLOG_DEBUG, "Got PDU, %d bytes: lead=%02X %02X %02X", res,
                     assoc->input_buffer[0] & 0xff,
                     assoc->input_buffer[1] & 0xff,
@@ -382,7 +386,8 @@ void ir_session(IOCHAN h, int event)
     assert(h && conn && assoc);
     if (event == EVENT_TIMEOUT)
     {
-        if (assoc->state != ASSOC_UP)
+        if (assoc->state != ASSOC_UP
+            || (h->deadline && time(0) >= h->deadline))
         {
             yaz_log(log_session, "Timeout. Closing connection");
             /* do we need to lod this at all */

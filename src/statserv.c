@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #ifdef WIN32
 #include <process.h>
@@ -127,6 +128,13 @@ statserv_options_block control_block = {
 };
 
 static int max_sessions = 0;
+static int max_children = 100;
+static int request_timeout = 60;
+
+int statserv_request_timeout(void)
+{
+    return request_timeout;
+}
 
 static int logbits_set = 0;
 static int log_session = 0; /* one-line logs for session */
@@ -861,6 +869,10 @@ void __cdecl event_loop_thread(IOCHAN iochan)
     iochan_event_loop(&iochan, 0);
 }
 
+void statserv_reap_children(void)
+{
+}
+
 /* WIN32 listener */
 static void listener(IOCHAN h, int event)
 {
@@ -963,6 +975,34 @@ static void statserv_closedown(void)
 
 static void *new_session(void *vp);
 static int no_sessions = 0;
+static int active_children = 0;
+static struct child_process {
+    pid_t pid;
+    struct child_process *next;
+} *children = 0;
+
+void statserv_reap_children(void)
+{
+    pid_t pid;
+    int saved_errno = errno;
+    if (control_block.dynamic)
+    {
+        while ((pid = waitpid(-1, 0, WNOHANG)) > 0)
+        {
+            struct child_process **p = &children;
+            while (*p && (*p)->pid != pid)
+                p = &(*p)->next;
+            if (*p)
+            {
+                struct child_process *child = *p;
+                *p = child->next;
+                xfree(child);
+                active_children--;
+            }
+        }
+    }
+    errno = saved_errno;
+}
 
 /* UNIX listener */
 static void listener(IOCHAN h, int event)
@@ -1001,8 +1041,18 @@ static void listener(IOCHAN h, int event)
         no_sessions++;
         if (control_block.dynamic)
         {
+            struct child_process *child;
+            statserv_reap_children();
+            if (active_children >= max_children)
+            {
+                cs_close(new_line);
+                return;
+            }
+            child = xmalloc(sizeof(*child));
             if ((res = fork()) < 0)
             {
+                xfree(child);
+                cs_close(new_line);
                 yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
                 iochan_destroy(h);
                 return;
@@ -1012,6 +1062,14 @@ static void listener(IOCHAN h, int event)
                 char nbuf[100];
                 IOCHAN pp;
 
+                xfree(child);
+                while (children)
+                {
+                    child = children;
+                    children = child->next;
+                    xfree(child);
+                }
+                active_children = 0;
                 for (pp = pListener; pp; pp = iochan_getnext(pp))
                 {
                     COMSTACK l = (COMSTACK)iochan_getdata(pp);
@@ -1026,6 +1084,10 @@ static void listener(IOCHAN h, int event)
             }
             else /* parent */
             {
+                child->pid = res;
+                child->next = children;
+                children = child;
+                active_children++;
                 cs_close(new_line);
                 return;
             }
@@ -1227,8 +1289,7 @@ static void remove_listeners(void)
 /* UNIX only (for windows we don't need to catch the signals) */
 static void catchchld(int num)
 {
-    while (waitpid(-1, 0, WNOHANG) > 0)
-        ;
+    /* Interrupt the event loop; reap and update the child list there. */
     signal(SIGCHLD, catchchld);
 }
 #endif
@@ -1377,6 +1438,20 @@ static void option_copy(char *dst, const char *src)
     dst[BEND_NAME_MAX-1] = '\0';
 }
 
+static int positive_int_option(const char *arg, int *value)
+{
+    char *end;
+    long n;
+    if (!arg)
+        return 0;
+    errno = 0;
+    n = strtol(arg, &end, 10);
+    if (errno || !*arg || *end || n <= 0 || n > INT_MAX)
+        return 0;
+    *value = (int) n;
+    return 1;
+}
+
 int check_options(int argc, char **argv)
 {
     int ret = 0, r;
@@ -1386,7 +1461,7 @@ int check_options(int argc, char **argv)
 
     get_logbits(1);
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:V",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:VN:R:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1480,6 +1555,20 @@ int check_options(int argc, char **argv)
         case 'A':
             max_sessions = atoi(arg);
             break;
+        case 'N':
+            if (!positive_int_option(arg, &max_children))
+            {
+                fprintf(stderr, "%s: Specify positive child limit for -N.\n", me);
+                return 1;
+            }
+            break;
+        case 'R':
+            if (!positive_int_option(arg, &request_timeout))
+            {
+                fprintf(stderr, "%s: Specify positive request timeout for -R.\n", me);
+                return 1;
+            }
+            break;
         case 'p':
             option_copy(control_block.pid_fname, arg);
             break;
@@ -1509,6 +1598,7 @@ int check_options(int argc, char **argv)
             fprintf(stderr, "Usage: %s [ -a <pdufile> -v <loglevel>"
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
+                    " -N <max-children> -R <request-seconds>"
                     " -zKiDSTV1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }

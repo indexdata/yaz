@@ -3,6 +3,7 @@ test_odrcodec.h
 test_cql2ccl
 test_ccl
 test_embed_record
+test_eventl
 test_iconv
 test_matchstr
 test_nmem
