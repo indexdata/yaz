@@ -6,11 +6,13 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include <string.h>
 #include <yaz/wrbuf.h>
 #include <yaz/sortspec.h>
 #include <yaz/log.h>
 #include <yaz/test.h>
+#include <yaz/zoom.h>
 
 static int cql(const char *arg, const char *expected_result)
 {
@@ -207,6 +209,49 @@ static int check_solr_sortkeys_to_sort_spec(const char *arg, const char *expecte
     return check_sortkeys_to_sort_spec(arg, expected_result, yaz_solr_sortkeys_to_sort_spec);
 }
 
+static void tst_limits(void)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    WRBUF w = wrbuf_alloc();
+    ZOOM_query query = ZOOM_query_create();
+    int i;
+
+    YAZ_CHECK(yaz_sort_spec(odr, "") == 0);
+    for (i = 1; i <= 1000; i++)
+    {
+        wrbuf_printf(w, "field%d a ", i);
+        if (i == 19 || i == 20 || i == 21 || i == 1000)
+        {
+            Z_SortKeySpecList *spec = yaz_sort_spec(odr, wrbuf_cstr(w));
+            if (i <= 20)
+            {
+                YAZ_CHECK(spec != 0);
+                if (spec)
+                {
+                    int j;
+                    YAZ_CHECK_EQ(spec->num_specs, i);
+                    for (j = 0; j < spec->num_specs; j++)
+                    {
+                        char field[32];
+                        sprintf(field, "field%d", j + 1);
+                        YAZ_CHECK(!strcmp(spec->specs[j]->sortElement->
+                                          u.generic->u.sortField, field));
+                    }
+                }
+            }
+            else
+                YAZ_CHECK(spec == 0);
+            YAZ_CHECK_EQ(ZOOM_query_sortby(query, wrbuf_cstr(w)),
+                         i <= 20 ? 0 : -2);
+            odr_reset(odr);
+        }
+    }
+    YAZ_CHECK_EQ(ZOOM_query_sortby(query, "title a"), 0);
+    ZOOM_query_destroy(query);
+    wrbuf_destroy(w);
+    odr_destroy(odr);
+}
+
 static void tst(void)
 {
     YAZ_CHECK(cql("title a",
@@ -258,6 +303,7 @@ int main(int argc, char **argv)
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst();
+    tst_limits();
     YAZ_CHECK_TERM;
 }
 /*

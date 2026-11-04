@@ -55,6 +55,8 @@ YAZ_BEGIN_CDECL
     !      : abort of key is omitted in result
     =value : missing value
 
+    At most 20 sort keys are accepted. Longer lists return NULL.
+
     Examples:
 
       title a
