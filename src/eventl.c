@@ -57,6 +57,7 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int chan_id)
     new_iochan->fun = cb;
     new_iochan->force_event = 0;
     new_iochan->last_event = new_iochan->max_idle = 0;
+    new_iochan->deadline = 0;
     new_iochan->next = NULL;
     new_iochan->chan_id = chan_id;
     return new_iochan;
@@ -90,6 +91,7 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
         int res;
         time_t now = time(0);
 
+        statserv_reap_children();
         for (p = *iochans; p; p = p->next)
             no_fds++;
         fds = (struct yaz_poll_fd *) xmalloc(no_fds * sizeof(*fds));
@@ -111,12 +113,18 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
             {
                 ftime = p->last_event + p->max_idle;
                 if (ftime < now)
-                    w = p->max_idle;
+                    w = 0;
                 else
                     w = ftime - now;
                 /* tv_sec will be minimum wait.. */
                 if (w < tv_sec)
                     tv_sec = (int) w; /* can hold it because w < tv_sec */
+            }
+            if (p->deadline)
+            {
+                w = p->deadline > now ? p->deadline - now : 0;
+                if (w < tv_sec)
+                    tv_sec = (int) w;
             }
             fds[i].fd = p->fd;
             fds[i].input_mask = input_mask;
@@ -145,6 +153,11 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
             enum yaz_poll_mask output_mask = fds[i].output_mask;
 
             p->force_event = 0;
+            if (!p->destroyed && p->deadline && now >= p->deadline)
+            {
+                (*p->fun)(p, EVENT_TIMEOUT);
+                continue;
+            }
             if (!p->destroyed && ((output_mask & yaz_poll_read) ||
                                   force_event == EVENT_INPUT))
             {
