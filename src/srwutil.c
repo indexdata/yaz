@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
+#include <ctype.h>
 #include <yaz/srw.h>
 #include <yaz/matchstr.h>
 #include <yaz/base64.h>
@@ -334,16 +336,18 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
                                   Z_SRW_diagnostic **diag, int *num_diag,
                                   int min_value)
 {
-    int ival;
+    long ival;
+    char *end;
     if (!valstr)
         return 0;
-    if (sscanf(valstr, "%d", &ival) != 1)
-    {
-        yaz_add_srw_diagnostic(odr, diag, num_diag,
-                               YAZ_SRW_UNSUPP_PARAMETER_VALUE, pname);
-        return 0;
-    }
-    if (min_value >= 0 && ival < min_value)
+    errno = 0;
+    ival = strtol(valstr, &end, 10);
+    if (end != valstr)
+        while (isspace((unsigned char) *end))
+            end++;
+    if (errno == ERANGE || end == valstr || *end
+        || ival < INT_MIN || ival > INT_MAX
+        || (min_value >= 0 && ival < min_value))
     {
         yaz_add_srw_diagnostic(odr, diag, num_diag,
                                YAZ_SRW_UNSUPP_PARAMETER_VALUE, pname);

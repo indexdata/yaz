@@ -23,6 +23,7 @@ test_record_conv
 test_retrieval
 test_tpath
 test_sortspec
+test_sru_limits
 test_timing
 test_comstack
 test_query_charset
