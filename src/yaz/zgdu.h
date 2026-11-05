@@ -117,6 +117,21 @@ YAZ_EXPORT int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr);
 YAZ_EXPORT const char *yaz_check_location(ODR odr, const char *uri,
                                     const char *location, int *host_change);
 
+/** \brief Resolve an HTTP redirect, preserving a trusted CONNECT wrapper.
+    \param odr memory for the resolved address
+    \param uri original HTTP(S) address, optionally prefixed by connect:proxy,
+    \param location untrusted Location header (HTTP(S) URI or absolute path)
+    \param host_change set to 0 for an absolute path, 1 otherwise
+    \param same_origin set to 1 if the logical HTTP(S) origins match
+    \returns resolved connection address, or NULL for an invalid target.
+    Redirects cannot supply COMSTACK transport wrappers. Any CONNECT prefix
+    comes exclusively from uri and is retained for absolute redirects too.
+*/
+YAZ_EXPORT const char *yaz_check_http_redirect(ODR odr, const char *uri,
+                                              const char *location,
+                                              int *host_change,
+                                              int *same_origin);
+
 /** \brief Compare origins of absolute HTTP(S) URIs.
     \returns 1 for equal scheme, hostname and effective port, otherwise 0.
     Invalid authorities and URIs containing user information return 0.
