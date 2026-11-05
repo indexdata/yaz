@@ -701,6 +701,9 @@ static int http_origin(const char *uri, const char **host, size_t *host_len,
     else
         return 0;
     end = uri + strcspn(uri, "/?#");
+    /* Truncating a padded port in the transport can change its value. */
+    if (end - uri >= YAZ_TCPIP_HOST_PORT_BUFSIZE)
+        return 0;
     /* The connection parser can mistake a colon in a fragment immediately
        after the authority for a port. Do not trust that origin. */
     if (*end == '#')

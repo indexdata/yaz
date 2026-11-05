@@ -14,6 +14,7 @@
 #include <yaz/comstack.h>
 #include <yaz/tcpip.h>
 #include <yaz/zgdu.h>
+#include <yaz/wrbuf.h>
 
 static int yaz_decode_http_response_first_wrapper(const char *buf, int *code,
     const char **version, int *version_len, const char **msg, int *msg_len)
@@ -274,12 +275,69 @@ static void tst_http_redirect(void)
                          "connect:evil:8080,https://target/next", 0, 1, 0);
 }
 
+static void tst_http_origin_length(void)
+{
+    const char *hosts[] = { "127.0.0.1", "[::1]" };
+    const char *schemes[] = { "http", "https" };
+    WRBUF base = wrbuf_alloc();
+    WRBUF uri = wrbuf_alloc();
+    WRBUF tunnel_base = wrbuf_alloc();
+    WRBUF tunnel_uri = wrbuf_alloc();
+    size_t h, s, len;
+
+    for (s = 0; s < sizeof(schemes) / sizeof(*schemes); s++)
+        for (h = 0; h < sizeof(hosts) / sizeof(*hosts); h++)
+        {
+            wrbuf_rewind(base);
+            wrbuf_printf(base, "%s://%s:8000/", schemes[s], hosts[h]);
+            wrbuf_rewind(tunnel_base);
+            wrbuf_printf(tunnel_base, "connect:proxy:8080,%s", wrbuf_cstr(base));
+            /* The transport has room for 511 authority bytes plus NUL.
+               For IPv4, 513 bytes reproduces the reported 499-zero port. */
+            for (len = 510; len <= 514; len++)
+            {
+                size_t i;
+                int valid = len < 512;
+                wrbuf_rewind(uri);
+                wrbuf_printf(uri, "%s://%s:", schemes[s], hosts[h]);
+                for (i = strlen(hosts[h]) + 1 + 4; i < len; i++)
+                    wrbuf_putc(uri, '0');
+                wrbuf_puts(uri, "8000/next");
+                YAZ_CHECK_EQ(yaz_http_same_origin(wrbuf_cstr(base),
+                                                 wrbuf_cstr(uri)), valid);
+                YAZ_CHECK_EQ(yaz_http_same_origin(wrbuf_cstr(uri),
+                                                 wrbuf_cstr(base)), valid);
+                check_http_redirect(wrbuf_cstr(base), wrbuf_cstr(uri),
+                                     valid ? wrbuf_cstr(uri) : 0, 1, valid);
+                check_http_redirect(wrbuf_cstr(uri), "/next",
+                                     valid ? wrbuf_cstr(uri) : 0, 0, valid);
+                wrbuf_rewind(tunnel_uri);
+                wrbuf_printf(tunnel_uri, "connect:proxy:8080,%s", wrbuf_cstr(uri));
+                check_http_redirect(wrbuf_cstr(tunnel_base), wrbuf_cstr(uri),
+                                     valid ? wrbuf_cstr(tunnel_uri) : 0, 1, valid);
+            }
+        }
+    /* Long paths are safe: the complete authority fits in the buffer. */
+    wrbuf_rewind(uri);
+    wrbuf_puts(uri, "http://127.0.0.1:8000/");
+    for (len = 0; len < 600; len++)
+        wrbuf_putc(uri, 'x');
+    YAZ_CHECK(yaz_http_same_origin("http://127.0.0.1:8000/", wrbuf_cstr(uri)));
+    check_http_redirect("http://127.0.0.1:8000/", wrbuf_cstr(uri),
+                         wrbuf_cstr(uri), 1, 1);
+    wrbuf_destroy(tunnel_uri);
+    wrbuf_destroy(tunnel_base);
+    wrbuf_destroy(uri);
+    wrbuf_destroy(base);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_http_same_origin();
     tst_http_redirect();
+    tst_http_origin_length();
     tst_yaz_decode_http_response_first();
     tst_http_response();
     tst_double_encoding("POST / HTTP/1.1\r\n"

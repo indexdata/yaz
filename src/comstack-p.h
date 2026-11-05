@@ -35,6 +35,9 @@
 
 #include <yaz/comstack.h>
 
+/* Host/port parsing buffer size, including the terminating NUL. */
+#define YAZ_TCPIP_HOST_PORT_BUFSIZE 512
+
 YAZ_BEGIN_CDECL
 
 const char *yaz_tcpip_get_error_details(COMSTACK cs);
