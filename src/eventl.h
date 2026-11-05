@@ -84,6 +84,7 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig);
 void statserv_remove (IOCHAN pIOChannel);
 void statserv_reap_children(void);
 int statserv_request_timeout(void);
+int statserv_max_scan_terms(void);
 #endif
 /*
  * Local variables:

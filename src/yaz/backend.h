@@ -141,7 +141,8 @@ typedef struct bend_scan_rr {
 
     int *step_size;     /**< step size */
     int term_position;  /**< desired index of term in result list/returned */
-    int num_entries;    /**< number of entries requested/returned */
+    int num_entries;    /**< number requested/returned; handler must return
+                            a value between 0 and the requested count */
 
     /* scan term entries. The called handler does not have
        to allocate this. Size of entries is num_entries (see above) */
