@@ -1458,6 +1458,25 @@ static int positive_int_option(const char *arg, int *value)
     return 1;
 }
 
+static int handle_idle_timeout_option(const char *arg)
+{
+    char *end = 0;
+    long timeout;
+    int factor;
+
+    errno = 0;
+    timeout = arg ? strtol(arg, &end, 10) : 0;
+    factor = end && !strcmp(end, "s") ? 1 : 60;
+    if (errno || !end || end == arg || (*end && strcmp(end, "s"))
+        || timeout <= 0 || timeout > INT_MAX / factor)
+    {
+        fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
+        return 1;
+    }
+    control_block.idle_timeout = (int) timeout * factor;
+    return 0;
+}
+
 int check_options(int argc, char **argv)
 {
     int ret = 0, r;
@@ -1506,7 +1525,7 @@ int check_options(int argc, char **argv)
         case 'm':
             if (!arg) {
                 fprintf(stderr, "%s: Specify time format for log file.\n", me);
-                return(1);
+                return 1;
             }
             yaz_log_time_format(arg);
             break;
@@ -1530,18 +1549,14 @@ int check_options(int argc, char **argv)
             option_copy(control_block.daemon_name, arg);
             break;
         case 't':
-            if (!arg || !(r = atoi(arg)))
-            {
-                fprintf(stderr, "%s: Specify positive timeout for -t.\n", me);
-                return(1);
-            }
-            control_block.idle_timeout = strchr(arg, 's') ? r : 60 * r;
+            if (handle_idle_timeout_option(arg))
+                return 1;
             break;
         case  'k':
-            if (!arg || !(r = atoi(arg)))
+            if (!positive_int_option(arg, &r) || r > INT_MAX / 1024)
             {
                 fprintf(stderr, "%s: Specify positive size for -k.\n", me);
-                return(1);
+                return 1;
             }
             control_block.maxrecordsize = r * 1024;
             break;
@@ -1597,10 +1612,10 @@ int check_options(int argc, char **argv)
             control_block.background = 1;
             break;
         case 'r':
-            if (!arg || !(r = atoi(arg)))
+            if (!positive_int_option(arg, &r) || r > INT_MAX / 1024)
             {
                 fprintf(stderr, "%s: Specify positive size for -r.\n", me);
-                return(1);
+                return 1;
             }
             yaz_log_init_max_size(r * 1024);
             break;
