@@ -830,6 +830,18 @@ const char *yaz_check_http_redirect(ODR odr, const char *uri,
         strcpy(target + authority_len + port_len, location + authority_len);
         location = target;
     }
+    /* Origin validation accepts mixed-case schemes, but cs_parse_host
+       requires lowercase schemes to select HTTP and TLS. */
+    {
+        const char *scheme = secure ? "https" : "http";
+        size_t scheme_len = secure ? 5 : 4;
+        if (strncmp(location, scheme, scheme_len))
+        {
+            char *target = odr_strdup(odr, location);
+            memcpy(target, scheme, scheme_len);
+            location = target;
+        }
+    }
     *same_origin = yaz_http_same_origin(base, location);
     if (comma)
     {

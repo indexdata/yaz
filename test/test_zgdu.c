@@ -254,8 +254,28 @@ static void check_http_redirect(const char *base, const char *location,
     YAZ_CHECK((target != 0) == (expected != 0));
     if (target && expected)
     {
+        const char *http_uri = !strncmp(expected, "connect:", 8)
+            ? strchr(expected, ',') + 1 : expected;
+        int secure = !strncmp(http_uri, "https:", 6);
         YAZ_CHECK(!strcmp(target, expected));
         YAZ_CHECK_EQ(changed, host_change);
+#if !HAVE_GNUTLS_H
+        if (!secure)
+#endif
+        {
+            const char *host;
+            char *proxy = 0;
+            CS_TYPE type;
+            enum oid_proto proto;
+            int r = cs_parse_host(target, &host, &type, &proto, &proxy);
+            YAZ_CHECK(r);
+            if (r)
+            {
+                YAZ_CHECK_EQ(proto, PROTO_HTTP);
+                YAZ_CHECK(type == (secure ? ssl_type : tcpip_type));
+            }
+            xfree(proxy);
+        }
     }
     odr_destroy(odr);
 }
@@ -271,6 +291,12 @@ static void tst_http_redirect(void)
         { "/next", "connect:proxy.example:8080,https://target.example:443/next", 0, 1 },
         { "https://target.example/next",
           "connect:proxy.example:8080,https://target.example:443/next", 1, 1 },
+        { "HTTPS://TARGET.EXAMPLE/Next?Query=Value#Fragment",
+          "connect:proxy.example:8080,https://TARGET.EXAMPLE:443/Next?Query=Value#Fragment", 1, 1 },
+        { "hTtPs://target.example:443/Next",
+          "connect:proxy.example:8080,https://target.example:443/Next", 1, 1 },
+        { "HTTP://target.example/Next",
+          "connect:proxy.example:8080,http://target.example:80/Next", 1, 0 },
         { "https://TARGET.EXAMPLE:443/next",
           "connect:proxy.example:8080,https://TARGET.EXAMPLE:443/next", 1, 1 },
         { "https://other.example/next",
@@ -308,6 +334,16 @@ static void tst_http_redirect(void)
                          "https://target.example/next", 0, 1);
     check_http_redirect("https://target.example/sru", "https://target.example/next",
                          "https://target.example/next", 1, 1);
+    check_http_redirect("https://example.org/sru", "HTTPS://EXAMPLE.ORG/Next?Q=Value#Frag",
+                         "https://EXAMPLE.ORG/Next?Q=Value#Frag", 1, 1);
+    check_http_redirect("http://example.org/sru", "hTtP://EXAMPLE.ORG/Next",
+                         "http://EXAMPLE.ORG/Next", 1, 1);
+    check_http_redirect("HTTPS://EXAMPLE.ORG/sru", "/Next",
+                         "https://EXAMPLE.ORG/Next", 0, 1);
+    check_http_redirect("HTTP://EXAMPLE.ORG/sru", "/Next",
+                         "http://EXAMPLE.ORG/Next", 0, 1);
+    check_http_redirect("connect:proxy:8080,HTTPS://EXAMPLE.ORG/sru", "/Next",
+                         "connect:proxy:8080,https://EXAMPLE.ORG:443/Next", 0, 1);
     check_http_redirect("connect:proxy:8080,https://target.example/sru", "/next",
                          "connect:proxy:8080,https://target.example:443/next", 0, 1);
     check_http_redirect("connect:user:secret@proxy:8080,http://target:80/sru",
