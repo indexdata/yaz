@@ -1620,7 +1620,8 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
                                                &same_origin);
             if (!location
                 || ((c->user || c->password
-                     || ZOOM_options_get(c->options, "cert_fname"))
+                     || ZOOM_options_get(c->options, "cert_fname")
+                     || !yaz_cookies_is_empty(c->cookies))
                     && !same_origin))
             {
                 ZOOM_set_HTTP_error(c, hres->code,

@@ -49,6 +49,9 @@ YAZ_EXPORT void yaz_cookies_request(yaz_cookies_t yc, ODR odr,
                                     Z_HTTP_Request *req);
 YAZ_EXPORT void yaz_cookies_reset(yaz_cookies_t yc);
 
+/** Return nonzero if no cookies are stored. */
+YAZ_EXPORT int yaz_cookies_is_empty(yaz_cookies_t yc);
+
 YAZ_END_CDECL
 
 #endif

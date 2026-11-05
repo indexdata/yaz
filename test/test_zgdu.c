@@ -15,6 +15,40 @@
 #include <yaz/tcpip.h>
 #include <yaz/zgdu.h>
 #include <yaz/wrbuf.h>
+#include <yaz/cookie.h>
+
+static void tst_cookies(void)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    yaz_cookies_t cookies = yaz_cookies_create();
+    Z_HTTP_Response *res = z_get_HTTP_Response(odr, 302)->u.HTTP_Response;
+    Z_HTTP_Request *req;
+
+    YAZ_CHECK(yaz_cookies_is_empty(0));
+    YAZ_CHECK(yaz_cookies_is_empty(cookies));
+    z_HTTP_header_add(odr, &res->headers, "Set-Cookie", "invalid");
+    yaz_cookies_response(cookies, res);
+    YAZ_CHECK(yaz_cookies_is_empty(cookies));
+    z_HTTP_header_add(odr, &res->headers, "Set-Cookie",
+                      "session=secret; Secure; Path=/");
+    yaz_cookies_response(cookies, res);
+    YAZ_CHECK(!yaz_cookies_is_empty(cookies));
+    req = z_get_HTTP_Request_uri(odr, "https://example.org/", 0, 0)
+        ->u.HTTP_Request;
+    yaz_cookies_request(cookies, odr, req);
+    YAZ_CHECK(z_HTTP_header_lookup(req->headers, "Cookie")
+              && !strcmp(z_HTTP_header_lookup(req->headers, "Cookie"),
+                         "session=secret"));
+    yaz_cookies_reset(cookies);
+    YAZ_CHECK(yaz_cookies_is_empty(cookies));
+    /* An empty value still produces a Cookie header. */
+    res->headers = 0;
+    z_HTTP_header_add(odr, &res->headers, "Set-Cookie", "session=");
+    yaz_cookies_response(cookies, res);
+    YAZ_CHECK(!yaz_cookies_is_empty(cookies));
+    yaz_cookies_destroy(cookies);
+    odr_destroy(odr);
+}
 
 static int yaz_decode_http_response_first_wrapper(const char *buf, int *code,
     const char **version, int *version_len, const char **msg, int *msg_len)
@@ -335,6 +369,7 @@ int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_cookies();
     tst_http_same_origin();
     tst_http_redirect();
     tst_http_origin_length();

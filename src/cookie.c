@@ -57,6 +57,11 @@ void yaz_cookies_reset(yaz_cookies_t yc)
     }
 }
 
+int yaz_cookies_is_empty(yaz_cookies_t yc)
+{
+    return !yc || !yc->list;
+}
+
 void yaz_cookies_response(yaz_cookies_t yc, Z_HTTP_Response *res)
 {
     struct Z_HTTP_Header *h;

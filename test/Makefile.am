@@ -27,7 +27,7 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
  test_icu.2.input test_icu.2.output \
  test_icu.3.input test_icu.3.output \
  test_icu.4.input test_icu.4.output \
- test_record_conv.xsl
+ test_record_conv.xsl test_redirect_cookies.py
 
 YAZCOMP = ../src/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../src $(YCFLAGS)
