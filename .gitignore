@@ -28,4 +28,5 @@ deb-src
 *.a
 *.log
 .deps
+.dirstamp
 .libs
