@@ -4764,7 +4764,10 @@ static void wait_and_handle_response(int one_response_only)
                 location = yaz_check_http_redirect(in, wrbuf_cstr(cur_host),
                                                    location, &host_change,
                                                    &same_origin);
-                if (!location || ((auth || cert_fname) && !same_origin))
+                if (!location
+                    || ((auth || cert_fname
+                         || !yaz_cookies_is_empty(yaz_cookies))
+                        && !same_origin))
                 {
                     printf("%s\n", location ?
                            "Cross-origin authenticated redirect refused" :
