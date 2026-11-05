@@ -701,6 +701,10 @@ static int http_origin(const char *uri, const char **host, size_t *host_len,
     else
         return 0;
     end = uri + strcspn(uri, "/?#");
+    /* The connection parser can mistake a colon in a fragment immediately
+       after the authority for a port. Do not trust that origin. */
+    if (*end == '#')
+        return 0;
     for (p = uri; p != end; p++)
         if ((unsigned char) *p <= 32 || (unsigned char) *p >= 127
             || *p == '@' || *p == '\\')
