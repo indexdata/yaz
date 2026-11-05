@@ -811,6 +811,25 @@ const char *yaz_check_http_redirect(ODR odr, const char *uri,
     location = yaz_check_location(odr, base, location, host_change);
     if (!http_origin(location, &host, &host_len, &port, &secure))
         return 0;
+    if (comma && host[host_len] != ':')
+    {
+        char port_buf[8];
+        size_t authority_len = host + host_len - location;
+        size_t port_len;
+        char *target;
+
+        /* CONNECT requires a host:port authority, including for default
+           ports. Keep the inserted port within the transport's limit. */
+        yaz_snprintf(port_buf, sizeof(port_buf), ":%d", port);
+        port_len = strlen(port_buf);
+        if (host_len + port_len >= YAZ_TCPIP_HOST_PORT_BUFSIZE)
+            return 0;
+        target = odr_malloc(odr, strlen(location) + port_len + 1);
+        memcpy(target, location, authority_len);
+        memcpy(target + authority_len, port_buf, port_len);
+        strcpy(target + authority_len + port_len, location + authority_len);
+        location = target;
+    }
     *same_origin = yaz_http_same_origin(base, location);
     if (comma)
     {
