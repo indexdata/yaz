@@ -21,6 +21,12 @@ static Odr_int hits;
 static int expected_number;
 static int fetched;
 static int presented;
+static int initialize_backend;
+static int backend_handle;
+static int backend_closes;
+static int connection_closes;
+static int responses_sent;
+static statserv_options_block *backend_control;
 
 static int search(void *handle, bend_search_rr *rr)
 {
@@ -52,10 +58,29 @@ static int fetch(void *handle, bend_fetch_rr *rr)
 static bend_initresult *init(bend_initrequest *rr)
 {
     static bend_initresult result;
+    result.handle = initialize_backend ? &backend_handle : 0;
     rr->bend_search = search;
     rr->bend_present = present;
     rr->bend_fetch = fetch;
     return &result;
+}
+
+static void close_backend(void *handle)
+{
+    YAZ_CHECK(handle == &backend_handle);
+    YAZ_CHECK(statserv_getcontrol() == backend_control);
+    backend_closes++;
+}
+
+static void close_connection(COMSTACK cs)
+{
+    connection_closes++;
+}
+
+static int put(COMSTACK cs, char *buf, int size)
+{
+    responses_sent++;
+    return 0;
 }
 
 /* Exercise the real frontend using an in-memory COMSTACK, without sockets. */
@@ -88,6 +113,9 @@ static void check_unknown_host(const char *version, const char *connection,
     request *response;
     Z_GDU *gdu = 0;
 
+    backend_closes = connection_closes = responses_sent = 0;
+    backend_control = cb;
+    cb->bend_close = close_backend;
     wrbuf_printf(input, "GET / HTTP/%s\r\n", version);
     if (with_host)
         wrbuf_puts(input, "Host: unknown.example\r\n");
@@ -99,20 +127,59 @@ static void check_unknown_host(const char *version, const char *connection,
     cs.f_get = get;
     cs.f_more = more;
     cs.f_addrstr = addrstr;
+    cs.f_put = put;
+    cs.f_close = close_connection;
     cs.user = (void *) wrbuf_cstr(input);
     assoc = create_association(chan, &cs, 0);
     iochan_setdata(chan, assoc);
     assoc->cs_get_mask = EVENT_INPUT;
-    if (previous_control)
+    if (previous_control == 2)
+    {
+        /* Initialize a real SRU backend and deliver its response before
+           the next request selects an unknown virtual host. */
+        cs.user = "GET /?version=1.2&operation=searchRetrieve&query=test"
+            "&maximumRecords=0 HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        hits = 0;
+        expected_number = 0;
+        initialize_backend = 1;
+        ir_session(chan, EVENT_INPUT);
+        initialize_backend = 0;
+        YAZ_CHECK(assoc->backend == &backend_handle);
+        YAZ_CHECK(assoc->init);
+        YAZ_CHECK(assoc->last_control == cb);
+        response = request_head(&assoc->outgoing);
+        YAZ_CHECK(response);
+        if (response)
+        {
+            odr_setbuf(dec, response->response, response->len_response, 0);
+            YAZ_CHECK(z_GDU(dec, &gdu, 0, 0));
+            if (gdu && gdu->which == Z_GDU_HTTP_Response)
+            {
+                YAZ_CHECK_EQ(gdu->u.HTTP_Response->code, 200);
+            }
+            else
+            {
+                YAZ_CHECK(0);
+            }
+        }
+        ir_session(chan, EVENT_OUTPUT);
+        YAZ_CHECK(!request_head(&assoc->outgoing));
+        YAZ_CHECK_EQ(backend_closes, 0);
+        cs.user = (void *) wrbuf_cstr(input);
+        odr_reset(dec);
+        gdu = 0;
+    }
+    else if (previous_control)
         assoc->last_control = cb;
     /* An enabled XML configuration with an empty server list takes the
        same no-matching-vhost branch as an unrecognized Host header. */
     strcpy(cb->xml_config, "test-no-matching-vhost");
     ir_session(chan, EVENT_INPUT);
-    cb->xml_config[0] = '\0';
-    statserv_setcontrol(cb);
 
     YAZ_CHECK(!assoc->last_control);
+    YAZ_CHECK(!assoc->backend);
+    YAZ_CHECK(!assoc->init);
+    YAZ_CHECK_EQ(backend_closes, previous_control == 2 ? 1 : 0);
     YAZ_CHECK_EQ(assoc->state, ASSOC_DEAD);
     YAZ_CHECK_EQ(assoc->cs_get_mask, 0);
     response = request_head(&assoc->outgoing);
@@ -132,7 +199,16 @@ static void check_unknown_host(const char *version, const char *connection,
         else
             YAZ_CHECK(0);
     }
-    destroy_association(assoc);
+    /* Leave the control cleared through response delivery and teardown.
+       Restoring it here would hide a null TLS control during cleanup. */
+    ir_session(chan, EVENT_OUTPUT);
+    YAZ_CHECK(!request_head(&assoc->outgoing));
+    YAZ_CHECK_EQ(responses_sent, previous_control == 2 ? 2 : 1);
+    ir_session(chan, EVENT_TIMEOUT);
+    YAZ_CHECK_EQ(connection_closes, 1);
+    YAZ_CHECK_EQ(backend_closes, previous_control == 2 ? 1 : 0);
+    cb->xml_config[0] = '\0';
+    statserv_setcontrol(cb);
     xfree(chan);
     wrbuf_destroy(input);
     odr_destroy(dec);
@@ -228,7 +304,7 @@ int main(int argc, char **argv)
         char int_max[32], above_int_max[32];
         Odr_int large_hits = (Odr_int) INT_MAX + 10;
         statserv_getcontrol()->bend_init = init;
-        for (mode = 0; mode < 2; mode++)
+        for (mode = 0; mode < 3; mode++)
         {
             check_unknown_host("1.1", 0, 1, mode);
             check_unknown_host("1.1", "Keep-Alive", 1, mode);

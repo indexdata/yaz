@@ -301,6 +301,7 @@ static void gfs_server_chdir(struct gfs_server *gfs)
 
 int control_association(association *assoc, const char *host, int force_open)
 {
+    struct gfs_server *previous_server = assoc->server;
     char vhost[128], *cp;
     if (host)
     {
@@ -355,6 +356,18 @@ int control_association(association *assoc, const char *host, int force_open)
         }
         if (!gfs)
         {
+            /* The previous backend belongs to its selected control block.
+               Release it before clearing that control (including TLS). */
+            if (assoc->backend && assoc->init)
+            {
+                statserv_setcontrol(assoc->last_control);
+                if (previous_server)
+                    gfs_server_chdir(previous_server);
+                (assoc->last_control->bend_close)(assoc->backend);
+            }
+            assoc->backend = 0;
+            xfree(assoc->init);
+            assoc->init = 0;
             statserv_setcontrol(0);
             assoc->last_control = 0;
             return 0;
