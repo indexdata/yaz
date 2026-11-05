@@ -16,7 +16,7 @@ echo_lalibs=no
 echo_comp=no
 ICU_LIBS="@ICU_LIBS@"
 STEMMER_LIBS="@STEMMER_LIBS@"
-ICU_CPPFLAGS="@ICU_CPPFLAGS@"
+ICU_CFLAGS="@ICU_CFLAGS@"
 SSL_LIBS="@SSL_LIBS@"
 MEMCACHED_LIBS="@MEMCACHED_LIBS@"
 HIREDIS_LIBS="@HIREDIS_LIBS@"
@@ -85,7 +85,7 @@ while test $# -gt 0; do
 	    lib_thread=yes
 	    ;;
 	icu)
-	    if test "$ICU_CPPFLAGS"; then
+	    if test "$ICU_CFLAGS"; then
 		lib_icu=yes
 	    fi
 	    ;;
@@ -171,7 +171,7 @@ if test "$lib_thread" = "yes"; then
 fi
 
 if test "$lib_icu" = "yes"; then
-    YAZINC="$YAZINC $ICU_CPPFLAGS"
+    YAZINC="$YAZINC $ICU_CFLAGS"
     YAZLIB="$YAZLIB $ICU_LIBS $STEMMER_LIBS"
     YAZLALIB="$YAZLALIB $ICU_LIBS $STEMMER_LIBS"
 fi
