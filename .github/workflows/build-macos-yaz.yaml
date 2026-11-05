@@ -1,0 +1,64 @@
+# Build and test shared libraries on Apple Silicon and Intel macOS.
+name: Build YAZ on macOS
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Install dependencies
+        run: >
+          brew install autoconf automake libtool bison pkgconf tcl-tk@8
+          libxml2 libxslt gnutls icu4c readline docbook docbook-xsl
+
+      - name: Set dependency paths
+        run: |
+          echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
+          echo "$(brew --prefix tcl-tk@8)/bin" >> "$GITHUB_PATH"
+          echo "$(brew --prefix libxslt)/bin" >> "$GITHUB_PATH"
+          {
+            echo "PKG_CONFIG_PATH=$(brew --prefix libxml2)/lib/pkgconfig:$(brew --prefix libxslt)/lib/pkgconfig:$(brew --prefix icu4c)/lib/pkgconfig"
+            echo "CPPFLAGS=-I$(brew --prefix readline)/include"
+            echo "LDFLAGS=-L$(brew --prefix readline)/lib"
+            echo "XML_CATALOG_FILES=$(brew --prefix)/etc/xml/catalog"
+            echo "TCLSH=$(brew --prefix tcl-tk@8)/bin/tclsh8.6"
+            echo "YACC=$(brew --prefix bison)/bin/bison"
+          } >> "$GITHUB_ENV"
+
+      - name: Run buildconf
+        run: ./buildconf.sh
+
+      - name: Configure shared libraries
+        env:
+          CC: clang
+          CFLAGS: -g -O2 -Wall
+        run: >
+          ./configure --enable-shared --disable-static
+          --with-xslt --with-gnutls --with-icu
+          --disable-tcpd --without-memcached --without-redis
+          --with-docbook-dtd="$(brew --prefix docbook)/docbook/xml/4.5"
+          --with-docbook-xsl="$(brew --prefix docbook-xsl)/docbook-xsl"
+
+      - name: Build and test
+        run: make -j3 check
+
+      - name: Show test failures
+        if: failure()
+        run: |
+          if test -f test/test-suite.log; then
+            cat test/test-suite.log
+          fi
