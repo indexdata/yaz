@@ -16,6 +16,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/cookie.h>
 #include <yaz/poll.h>
+#include <yaz/matchstr.h>
 #include <limits.h>
 
 struct yaz_url {
@@ -164,6 +165,11 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
 {
     Z_HTTP_Response *res;
     int number_of_redirects = 0;
+    ODR uri_odr;
+    char *uri_lean, *http_user, *http_pass;
+    int has_credentials =
+        z_HTTP_header_lookup(user_headers, "Authorization") != 0
+        || z_HTTP_header_lookup(user_headers, "Cookie") != 0;
 
     wrbuf_rewind(p->w_error);
     if (buf && len > INT_MAX)
@@ -174,47 +180,49 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     }
     odr_reset(p->odr_out);
     yaz_cookies_reset(p->cookies);
+    /* Keep URL credentials alive across same-origin redirects and output
+       arena resets. Validate destinations against the credential-free URI. */
+    uri_odr = odr_createmem(ODR_ENCODE);
+    extract_user_pass(uri_odr->mem, uri, &uri_lean, &http_user, &http_pass);
+    uri = uri_lean;
+    has_credentials = has_credentials || http_user || http_pass || p->cert_fname;
     while (1)
     {
         void *add;
         COMSTACK conn = 0;
         int code;
         const char *location = 0;
-        char *http_user = 0;
-        char *http_pass = 0;
-        char *uri_lean = 0;
+        Z_HTTP_Header *h;
         int proxy_mode = 0;
         int ret;
         Z_GDU *gdu;
         int cs_flags = p->check_cert ? CS_FLAGS_CHECK_CERT : 0;
 
         res = 0;
-        extract_user_pass(p->odr_out->mem, uri, &uri_lean,
-                          &http_user, &http_pass);
-        conn = cs_create_host2(uri_lean, cs_flags, &add, p->proxy, &proxy_mode);
+        conn = cs_create_host2(uri, cs_flags, &add, p->proxy, &proxy_mode);
         if (!conn)
         {
             wrbuf_printf(p->w_error, "Can not resolve URL %s", uri);
             log_warn(p);
-            return res;
+            break;
         }
         if (p->cert_fname)
             cs_set_ssl_certificate_file(conn, p->cert_fname);
-        gdu = z_get_HTTP_Request_uri(p->odr_out, uri_lean, 0, proxy_mode);
+        gdu = z_get_HTTP_Request_uri(p->odr_out, uri, 0, proxy_mode);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
         yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
-        for ( ; user_headers; user_headers = user_headers->next)
+        for (h = user_headers; h; h = h->next)
         {
             /* prefer new Host over user-supplied Host */
-            if (!strcmp(user_headers->name, "Host"))
+            if (!yaz_strcasecmp(h->name, "Host"))
                 ;
             /* prefer user-supplied User-Agent over YAZ' own */
-            else if (!strcmp(user_headers->name, "User-Agent"))
+            else if (!yaz_strcasecmp(h->name, "User-Agent"))
                 z_HTTP_header_set(p->odr_out, &gdu->u.HTTP_Request->headers,
-                                  user_headers->name, user_headers->value);
+                                  h->name, h->value);
             else
                 z_HTTP_header_add(p->odr_out, &gdu->u.HTTP_Request->headers,
-                                  user_headers->name, user_headers->value);
+                                  h->name, h->value);
         }
         if (http_user && http_pass)
             z_HTTP_header_add_basic_auth(p->odr_out,
@@ -353,17 +361,33 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             location && (code == 301 || code == 302 || code == 307))
         {
             int host_change = 0;
-            const char *nlocation = yaz_check_location(p->odr_in, uri,
-                                                       location, &host_change);
+            int same_origin = 0;
+            const char *nlocation = yaz_check_http_redirect(p->odr_in, uri,
+                                                           location,
+                                                           &host_change,
+                                                           &same_origin);
+
+            yaz_cookies_response(p->cookies, res);
+            if (!nlocation
+                || ((has_credentials || !yaz_cookies_is_empty(p->cookies))
+                    && !same_origin))
+            {
+                wrbuf_puts(p->w_error, nlocation ?
+                           "Cross-origin authenticated redirect refused" :
+                           "Invalid HTTP redirect target");
+                log_warn(p);
+                res = 0;
+                break;
+            }
 
             odr_reset(p->odr_out);
-            uri = odr_strdup(p->odr_out, nlocation);
+            uri = odr_strdup(uri_odr, nlocation);
         }
         else
             break;
-        yaz_cookies_response(p->cookies, res);
         odr_reset(p->odr_in);
     }
+    odr_destroy(uri_odr);
     return res;
 }
 

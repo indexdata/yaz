@@ -89,6 +89,9 @@ YAZ_EXPORT void yaz_url_set_timeout(yaz_url_t p, int sec, int ns);
     \returns HTTP response; NULL on ERROR.
 
     Use yaz_url_get_error to get details if NULL is returned.
+    Redirects must resolve to HTTP(S) URLs. Cross-origin redirects are
+    refused when URL credentials, Authorization or Cookie headers,
+    stored cookies, or a client certificate are present.
 */
 YAZ_EXPORT Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
                                          const char *method,
