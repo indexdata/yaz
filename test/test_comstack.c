@@ -16,6 +16,7 @@
 #include <yaz/tcpip.h>
 #include <yaz/unix.h>
 #include <yaz/xmalloc.h>
+#include <yaz/zgdu.h>
 
 #ifndef WIN32
 #include <errno.h>
@@ -519,6 +520,119 @@ static void tst_cs_get_error_ssl(void)
 #endif
 
 #ifndef WIN32
+static void check_redirect_connect(const char *base, const char *location,
+                                   const char *expected)
+{
+    static const char denied[] =
+        "HTTP/1.0 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
+    ODR odr = odr_createmem(ODR_ENCODE);
+    const char *target, *host = 0;
+    char *proxy = 0;
+    char request[256];
+    CS_TYPE type;
+    enum oid_proto proto;
+    COMSTACK cs;
+    int changed, same, fd[2], r, saved_errno;
+
+    target = yaz_check_http_redirect(odr, base, location, &changed, &same);
+    YAZ_CHECK(target);
+    if (!target)
+    {
+        odr_destroy(odr);
+        return;
+    }
+    r = cs_parse_host(target, &host, &type, &proto, &proxy);
+    YAZ_CHECK(r);
+    YAZ_CHECK(proxy && !strcmp(proxy, "proxy:8080"));
+    if (!r)
+    {
+        odr_destroy(odr);
+        return;
+    }
+    r = socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+        fprintf(stderr, "Skipping CONNECT request: socketpair denied\n");
+    else
+        YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+    {
+        xfree(proxy);
+        odr_destroy(odr);
+        return;
+    }
+#if HAVE_GNUTLS_H
+    if (type == ssl_type)
+        cs = yaz_ssl_create(fd[0], CS_FLAGS_BLOCKING, proto, host, 0, 0);
+    else
+#endif
+        cs = yaz_tcpip_create3(fd[0], CS_FLAGS_BLOCKING, proto, host, 0, 0);
+    YAZ_CHECK(cs);
+    if (cs)
+    {
+        /* Supply the proxy reply in advance. A refusal stops before TLS,
+           so the real CONNECT request can be tested without a TLS server. */
+        YAZ_CHECK_EQ(write(fd[1], denied, sizeof(denied) - 1), sizeof(denied) - 1);
+        cs->state = CS_ST_CONNECTING;
+        r = cs_rcvconnect(cs);
+        saved_errno = errno;
+        /* Some sandboxes permit socketpair but deny send. */
+        if (r == -1 && cs_errno(cs) == CSYSERR
+            && (saved_errno == EPERM || saved_errno == EACCES))
+        {
+            fprintf(stderr, "Skipping CONNECT request: send denied\n");
+            cs_close(cs);
+        }
+        else
+        {
+            YAZ_CHECK_EQ(r, -1);
+            YAZ_CHECK_EQ(cs_errno(cs), CSDENY);
+            cs_close(cs);
+            r = read(fd[1], request, sizeof(request) - 1);
+            YAZ_CHECK_EQ(r, strlen(expected));
+            if (r >= 0)
+            {
+                request[r] = '\0';
+                YAZ_CHECK(!strcmp(request, expected));
+            }
+        }
+    }
+    else
+        close(fd[0]);
+    close(fd[1]);
+    xfree(proxy);
+    odr_destroy(odr);
+}
+
+static void tst_redirect_connect(void)
+{
+    check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
+                           "http://target.example/next",
+                           "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,http://target.example/sru",
+                           "/next", "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
+                           "http://[::1]/next",
+                           "CONNECT [::1]:80 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
+                           "http://target.example:8081/next",
+                           "CONNECT target.example:8081 HTTP/1.0\r\n\r\n");
+#if HAVE_GNUTLS_H
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "https://target.example/next",
+                           "CONNECT target.example:443 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "https://[::1]/next",
+                           "CONNECT [::1]:443 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "https://target.example",
+                           "CONNECT target.example:443 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "https://target.example:8443/next",
+                           "CONNECT target.example:8443 HTTP/1.0\r\n\r\n");
+#endif
+}
+
 static void tst_head_only_transport(CS_TYPE type)
 {
     static const char head[] =
@@ -601,6 +715,9 @@ int main (int argc, char **argv)
     tst_cs_get_error_ssl();
 #endif
     tst_cs_set_head_only();
+#ifndef WIN32
+    tst_redirect_connect();
+#endif
     YAZ_CHECK_TERM;
 }
 

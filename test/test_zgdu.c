@@ -270,11 +270,21 @@ static void tst_http_redirect(void)
     } cases[] = {
         { "/next", "connect:proxy.example:8080,https://target.example:443/next", 0, 1 },
         { "https://target.example/next",
-          "connect:proxy.example:8080,https://target.example/next", 1, 1 },
+          "connect:proxy.example:8080,https://target.example:443/next", 1, 1 },
         { "https://TARGET.EXAMPLE:443/next",
           "connect:proxy.example:8080,https://TARGET.EXAMPLE:443/next", 1, 1 },
         { "https://other.example/next",
-          "connect:proxy.example:8080,https://other.example/next", 1, 0 },
+          "connect:proxy.example:8080,https://other.example:443/next", 1, 0 },
+        { "http://target.example/next",
+          "connect:proxy.example:8080,http://target.example:80/next", 1, 0 },
+        { "https://[::1]/next",
+          "connect:proxy.example:8080,https://[::1]:443/next", 1, 0 },
+        { "http://[::1]/next",
+          "connect:proxy.example:8080,http://[::1]:80/next", 1, 0 },
+        { "https://target.example",
+          "connect:proxy.example:8080,https://target.example:443", 1, 1 },
+        { "https://target.example?query",
+          "connect:proxy.example:8080,https://target.example:443?query", 1, 1 },
         { "http://target.example:443/next",
           "connect:proxy.example:8080,http://target.example:443/next", 1, 0 },
         { "https://target.example:8443/next",
@@ -296,11 +306,18 @@ static void tst_http_redirect(void)
                             cases[i].changed, cases[i].same);
     check_http_redirect("https://target.example/sru", "/next",
                          "https://target.example/next", 0, 1);
+    check_http_redirect("https://target.example/sru", "https://target.example/next",
+                         "https://target.example/next", 1, 1);
+    check_http_redirect("connect:proxy:8080,https://target.example/sru", "/next",
+                         "connect:proxy:8080,https://target.example:443/next", 0, 1);
     check_http_redirect("connect:user:secret@proxy:8080,http://target:80/sru",
                          "/next", "connect:user:secret@proxy:8080,http://target:80/next",
                          0, 1);
     check_http_redirect("connect:proxy:8080,https://[::1]:443/sru", "/next",
                          "connect:proxy:8080,https://[::1]:443/next", 0, 1);
+    check_http_redirect("connect:user:secret@proxy:8080,http://target/sru",
+                         "http://target/next",
+                         "connect:user:secret@proxy:8080,http://target:80/next", 1, 1);
     check_http_redirect("connect:proxy:8080", "/next", 0, 1, 0);
     check_http_redirect("connect:,https://target/sru", "/next", 0, 1, 0);
     check_http_redirect("connect:proxy:8080,connect:evil:8080,https://target/sru",
@@ -350,6 +367,25 @@ static void tst_http_origin_length(void)
                 check_http_redirect(wrbuf_cstr(tunnel_base), wrbuf_cstr(uri),
                                      valid ? wrbuf_cstr(tunnel_uri) : 0, 1, valid);
             }
+        }
+    /* Inserting a default port must not exceed the transport's limit. */
+    for (s = 0; s < sizeof(schemes) / sizeof(*schemes); s++)
+        for (len = 506; len <= 512; len++)
+        {
+            size_t i;
+            int port = s ? 443 : 80;
+            int valid = len + (s ? 4 : 3) < 512;
+            wrbuf_rewind(uri);
+            wrbuf_printf(uri, "%s://", schemes[s]);
+            for (i = 0; i < len; i++)
+                wrbuf_putc(uri, 'a');
+            wrbuf_rewind(tunnel_uri);
+            wrbuf_printf(tunnel_uri, "connect:proxy:8080,%s:%d/next",
+                          wrbuf_cstr(uri), port);
+            wrbuf_puts(uri, "/next");
+            check_http_redirect("connect:proxy:8080,https://target.example/sru",
+                                 wrbuf_cstr(uri),
+                                 valid ? wrbuf_cstr(tunnel_uri) : 0, 1, 0);
         }
     /* Long paths are safe: the complete authority fits in the buffer. */
     wrbuf_rewind(uri);
