@@ -32,7 +32,7 @@ EXTRA_DIST = tstodr.asn test_odrcodec.c test_odrcodec.h cql2xcqlsample \
 YAZCOMP = ../src/yaz-asncomp
 YAZCOMPLINE = $(YAZCOMP) -d z.tcl -i yaz -I../src $(YCFLAGS)
 
-AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS) $(ICU_CPPFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(XML2_CFLAGS) $(ICU_CFLAGS)
 
 dist-hook:
 	mkdir -p $(distdir)/cql

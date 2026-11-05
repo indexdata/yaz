@@ -37,7 +37,7 @@ endif
 libyaz_la_LIBADD = $(SSL_LIBS) $(TCPD_LIBS) \
 	$(MEMCACHED_LIBS) $(HIREDIS_LIBS)
 libyaz_server_la_LIBADD = libyaz.la
-libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CPPFLAGS) $(STEMMER_CPPFLAGS)
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CFLAGS) $(STEMMER_CPPFLAGS)
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS) $(STEMMER_LIBS)
 
 # Automake's ylwrap expects this output name even without Bison's -y mode.

@@ -1,7 +1,7 @@
 # Build and test shared libraries on Apple Silicon and Intel macOS.
 name: Build YAZ on macOS
 
-on: [push, pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 
 permissions:
   contents: read
