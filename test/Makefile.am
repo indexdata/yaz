@@ -10,7 +10,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_pquery test_query_charset \
  test_record_conv test_rpn2cql test_rpn2solr test_retrieval test_scan_limits \
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec test_sru_limits \
- test_timing test_tpath test_wrbuf \
+ test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
  test_marc_read_sax
 
@@ -81,6 +81,8 @@ test_record_conv_SOURCES = test_record_conv.c
 test_retrieval_SOURCES = test_retrieval.c
 test_tpath_SOURCES = test_tpath.c
 test_timing_SOURCES = test_timing.c
+test_url_SOURCES = test_url.c ../src/url.c
+test_url_CPPFLAGS = $(AM_CPPFLAGS) -Dcs_create_host2=test_url_create_host2
 test_query_charset_SOURCES = test_query_charset.c
 test_icu_SOURCES = test_icu.c
 test_match_glob_SOURCES = test_match_glob.c

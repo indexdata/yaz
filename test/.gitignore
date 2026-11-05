@@ -22,6 +22,7 @@ test_filepath
 test_record_conv
 test_retrieval
 test_tpath
+test_url
 test_sortspec
 test_sru_limits
 test_scan_limits
