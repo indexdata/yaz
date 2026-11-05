@@ -187,6 +187,16 @@
   </para></listitem>
  </varlistentry>
  <varlistentry>
+  <term><literal>-M </literal><replaceable>terms</replaceable></term>
+  <listitem><para>
+   Maximum number of terms requested in an SRU or Z39.50 scan. Default is
+   1000. Larger requests receive a "too many terms requested" diagnostic
+   before scan entries are allocated or the scan handler is called.
+   The value must be positive. An SRU request without maximumTerms defaults
+   to 10 terms, or this limit if it is smaller than 10.
+  </para></listitem>
+ </varlistentry>
+ <varlistentry>
   <term><literal>-k </literal><replaceable>size</replaceable></term>
   <listitem><para>
    Maximum record size/message size, in kilobytes.

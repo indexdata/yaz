@@ -1411,14 +1411,31 @@ static void srw_bend_scan(association *assoc,
 {
     Z_SRW_scanRequest *srw_req = sr->u.scan_request;
     Z_SRW_scanResponse *srw_res = res->u.scan_response;
+    int max_terms = statserv_max_scan_terms();
     yaz_log(log_requestdetail, "Got SRW ScanRequest");
 
     *http_code = 200;
+    if (srw_req->maximumTerms && *srw_req->maximumTerms < 0)
+    {
+        yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                               &srw_res->num_diagnostics,
+                               YAZ_SRW_UNSUPP_PARAMETER_VALUE, "maximumTerms");
+        return;
+    }
+    if (srw_req->maximumTerms && *srw_req->maximumTerms > max_terms)
+    {
+        yaz_add_srw_diagnostic(
+            assoc->encode, &srw_res->diagnostics, &srw_res->num_diagnostics,
+            YAZ_SRW_TOO_MANY_TERMS_REQUESTED,
+            nmem_printf(odr_getmem(assoc->encode), "%d", max_terms));
+        return;
+    }
     srw_bend_init(assoc, headers,
                   &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
         int step_size = 0;
+        int requested_entries;
         struct scan_entry *save_entries;
 
         bend_scan_rr *bsrr = (bend_scan_rr *)
@@ -1427,7 +1444,8 @@ static void srw_bend_scan(association *assoc,
         bsrr->basenames = &srw_req->database;
 
         bsrr->num_entries = srw_req->maximumTerms ?
-            odr_int_to_int(*srw_req->maximumTerms) : 10;
+            (int) *srw_req->maximumTerms : (max_terms < 10 ? max_terms : 10);
+        requested_entries = bsrr->num_entries;
         bsrr->term_position = srw_req->responsePosition ?
             odr_int_to_int(*srw_req->responsePosition) : 1;
 
@@ -1509,6 +1527,13 @@ static void srw_bend_scan(association *assoc,
             yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                    &srw_res->num_diagnostics,
                                    YAZ_SRW_UNSUPP_OPERATION, "scan");
+        }
+        if (!bsrr->errcode
+            && (bsrr->num_entries < 0 || bsrr->num_entries > requested_entries
+                || (bsrr->num_entries && !bsrr->entries)))
+        {
+            bsrr->errcode = YAZ_BIB1_PERMANENT_SYSTEM_ERROR;
+            bsrr->errstring = "Invalid scan result count";
         }
         if (bsrr->extra_response_data)
         {
@@ -3181,6 +3206,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
         odr_malloc(assoc->encode, sizeof(*bsrr));
     struct scan_entry *save_entries;
     int step_size = 0;
+    int max_terms = statserv_max_scan_terms();
+    int requested_entries;
 
     yaz_log(log_requestdetail, "Got ScanRequest");
 
@@ -3204,6 +3231,19 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     res->attributeSet = 0;
     res->otherInfo = 0;
 
+    if (*req->numberOfTermsRequested < 0
+        || *req->numberOfTermsRequested > max_terms)
+    {
+        Z_DiagRecs *dr = zget_DiagRecs(
+            assoc->encode,
+            *req->numberOfTermsRequested < 0 ? YAZ_BIB1_SCAN_MALFORMED_SCAN :
+            YAZ_BIB1_SCAN_TOO_MANY_TERMS_REQUESTED_ADDINFO_MAX_TERMS_,
+            nmem_printf(odr_getmem(assoc->encode), "%d", max_terms));
+        ents->num_nonsurrogateDiagnostics = dr->num_diagRecs;
+        ents->nonsurrogateDiagnostics = dr->diagRecs;
+        return apdu;
+    }
+
     if (req->databaseNames)
     {
         int i;
@@ -3216,6 +3256,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->num_bases = req->num_databaseNames;
     bsrr->basenames = req->databaseNames;
     bsrr->num_entries = odr_int_to_int(*req->numberOfTermsRequested);
+    requested_entries = bsrr->num_entries;
     bsrr->term = req->termListAndStartPoint;
     bsrr->referenceId = req->referenceId;
     bsrr->stream = assoc->encode;
@@ -3259,6 +3300,13 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     ((int (*)(void *, bend_scan_rr *))
      (*assoc->init->bend_scan))(assoc->backend, bsrr);
 
+    if (!bsrr->errcode
+        && (bsrr->num_entries < 0 || bsrr->num_entries > requested_entries
+            || (bsrr->num_entries && !bsrr->entries)))
+    {
+        bsrr->errcode = YAZ_BIB1_PERMANENT_SYSTEM_ERROR;
+        bsrr->errstring = "Invalid scan result count";
+    }
     if (bsrr->errcode)
         diagrecs_p = zget_DiagRecs(assoc->encode,
                                    bsrr->errcode, bsrr->errstring);

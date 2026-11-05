@@ -130,6 +130,12 @@ statserv_options_block control_block = {
 static int max_sessions = 0;
 static int max_children = 100;
 static int request_timeout = 60;
+static int max_scan_terms = 1000;
+
+int statserv_max_scan_terms(void)
+{
+    return max_scan_terms;
+}
 
 int statserv_request_timeout(void)
 {
@@ -1461,7 +1467,7 @@ int check_options(int argc, char **argv)
 
     get_logbits(1);
 
-    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:VN:R:",
+    while ((ret = options("1a:iszSTl:v:u:c:w:t:k:Kd:A:p:DC:f:m:r:VN:R:M:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -1569,6 +1575,13 @@ int check_options(int argc, char **argv)
                 return 1;
             }
             break;
+        case 'M':
+            if (!positive_int_option(arg, &max_scan_terms))
+            {
+                fprintf(stderr, "%s: Specify positive scan term limit for -M.\n", me);
+                return 1;
+            }
+            break;
         case 'p':
             option_copy(control_block.pid_fname, arg);
             break;
@@ -1599,6 +1612,7 @@ int check_options(int argc, char **argv)
                     " -l <logfile> -u <user> -c <config> -t <minutes>"
                     " -k <kilobytes> -d <daemon> -p <pidfile> -C certfile"
                     " -N <max-children> -R <request-seconds>"
+                    " -M <max-scan-terms>"
                     " -zKiDSTV1 -m <time-format> -w <directory> <listener-addr>... ]\n", me);
             return 1;
         }
