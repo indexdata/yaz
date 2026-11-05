@@ -76,6 +76,68 @@ static const char *addrstr(COMSTACK cs)
     return "127.0.0.1";
 }
 
+static void check_unknown_host(const char *version, const char *connection,
+                               int with_host, int previous_control)
+{
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    ODR dec = odr_createmem(ODR_DECODE);
+    WRBUF input = wrbuf_alloc();
+    statserv_options_block *cb = statserv_getcontrol();
+    association *assoc;
+    request *response;
+    Z_GDU *gdu = 0;
+
+    wrbuf_printf(input, "GET / HTTP/%s\r\n", version);
+    if (with_host)
+        wrbuf_puts(input, "Host: unknown.example\r\n");
+    if (connection)
+        wrbuf_printf(input, "Connection: %s\r\n", connection);
+    wrbuf_puts(input, "\r\n");
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_HTTP;
+    cs.f_get = get;
+    cs.f_more = more;
+    cs.f_addrstr = addrstr;
+    cs.user = (void *) wrbuf_cstr(input);
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+    assoc->cs_get_mask = EVENT_INPUT;
+    if (previous_control)
+        assoc->last_control = cb;
+    /* An enabled XML configuration with an empty server list takes the
+       same no-matching-vhost branch as an unrecognized Host header. */
+    strcpy(cb->xml_config, "test-no-matching-vhost");
+    ir_session(chan, EVENT_INPUT);
+    cb->xml_config[0] = '\0';
+    statserv_setcontrol(cb);
+
+    YAZ_CHECK(!assoc->last_control);
+    YAZ_CHECK_EQ(assoc->state, ASSOC_DEAD);
+    YAZ_CHECK_EQ(assoc->cs_get_mask, 0);
+    response = request_head(&assoc->outgoing);
+    YAZ_CHECK(response);
+    if (response)
+    {
+        odr_setbuf(dec, response->response, response->len_response, 0);
+        YAZ_CHECK(z_GDU(dec, &gdu, 0, 0));
+        if (gdu && gdu->which == Z_GDU_HTTP_Response)
+        {
+            const char *value = z_HTTP_header_lookup(gdu->u.HTTP_Response->headers,
+                                                     "Connection");
+            YAZ_CHECK_EQ(gdu->u.HTTP_Response->code, 404);
+            YAZ_CHECK(!strcmp(gdu->u.HTTP_Response->version, version));
+            YAZ_CHECK(value && !strcmp(value, "close"));
+        }
+        else
+            YAZ_CHECK(0);
+    }
+    destroy_association(assoc);
+    xfree(chan);
+    wrbuf_destroy(input);
+    odr_destroy(dec);
+}
+
 static void check(int mode, const char *maximum, const char *start,
                   Odr_int hit_count, int count, int diagnostic)
 {
@@ -166,6 +228,15 @@ int main(int argc, char **argv)
         char int_max[32], above_int_max[32];
         Odr_int large_hits = (Odr_int) INT_MAX + 10;
         statserv_getcontrol()->bend_init = init;
+        for (mode = 0; mode < 2; mode++)
+        {
+            check_unknown_host("1.1", 0, 1, mode);
+            check_unknown_host("1.1", "Keep-Alive", 1, mode);
+            check_unknown_host("1.1", "close", 1, mode);
+            check_unknown_host("1.1", 0, 0, mode);
+            check_unknown_host("1.0", "Keep-Alive", 1, mode);
+            check_unknown_host("1.0", 0, 1, mode);
+        }
         sprintf(int_max, "%d", INT_MAX);
         sprintf(above_int_max, ODR_INT_PRINTF, (Odr_int) INT_MAX + 1);
         for (mode = 0; mode < 3; mode++)
