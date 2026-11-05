@@ -92,7 +92,9 @@ test_file_glob_SOURCES = test_file_glob.c
 test_shared_ptr_SOURCES = test_shared_ptr.c
 test_libstemmer_SOURCES = test_libstemmer.c
 test_embed_record_SOURCES = test_embed_record.c
-test_eventl_SOURCES = test_eventl.c
+test_eventl_SOURCES = test_eventl.c ../src/eventl.c
+test_eventl_CPPFLAGS = $(AM_CPPFLAGS) \
+ -Dtime=test_eventl_time -Dyaz_poll=test_eventl_poll
 test_eventl_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_sru_limits_SOURCES = test_sru_limits.c
 test_sru_limits_LDADD = ../src/libyaz_server.la ../src/libyaz.la

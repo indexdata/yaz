@@ -11,8 +11,9 @@
 #include <yaz/poll.h>
 #include "../src/eventl.h"
 
-/* A simulated clock and continuously ready socket make timeout tests
-   deterministic, without sleeping or opening a network listener. */
+/* eventl.c is compiled into this test with its clock and poll calls renamed.
+   This avoids relying on shared-library symbol interposition on macOS.
+   The simulated clock and socket make the tests deterministic without sleep. */
 static time_t clock_now;
 static int ready;
 static int scenario;
@@ -21,14 +22,14 @@ static int outputs;
 static int timeouts;
 static int first_wait;
 
-time_t time(time_t *result)
+time_t test_eventl_time(time_t *result)
 {
     if (result)
         *result = clock_now;
     return clock_now;
 }
 
-int yaz_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
+int test_eventl_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 {
     int i;
     if (first_wait == -1)
