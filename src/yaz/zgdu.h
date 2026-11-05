@@ -136,6 +136,7 @@ YAZ_EXPORT const char *yaz_check_http_redirect(ODR odr, const char *uri,
     \returns 1 for equal scheme, hostname and effective port, otherwise 0.
     Invalid authorities and URIs containing user information return 0.
     A fragment immediately following the authority also returns 0.
+    Authorities exceeding the transport parser's buffer are rejected.
 */
 YAZ_EXPORT int yaz_http_same_origin(const char *uri, const char *other);
 YAZ_END_CDECL

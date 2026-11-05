@@ -476,7 +476,7 @@ struct addrinfo *tcpip_getaddrinfo(const char *host_and_port,
 {
     struct addrinfo hints, *res;
     int error;
-    char tmp[512];
+    char tmp[YAZ_TCPIP_HOST_PORT_BUFSIZE];
     const char *host;
 
     hints.ai_flags = 0;
@@ -788,7 +788,7 @@ static int check_cert(COMSTACK h, tcpip_state *sp)
         unsigned int status = 0;
         const char *vhost = 0;
         const char *vport = 0;
-        char vtmp[512];
+        char vtmp[YAZ_TCPIP_HOST_PORT_BUFSIZE];
         int vr;
         const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
         parse_host_port(check_host, vtmp, sizeof vtmp, &vhost, &vport);
@@ -896,7 +896,7 @@ int tcpip_rcvconnect(COMSTACK h)
         const char *host = 0;
         const char *port = 0;
         const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
-        char tmp[512];
+        char tmp[YAZ_TCPIP_HOST_PORT_BUFSIZE];
         int r;
 
         sp->cred_ptr = tcpip_create_cred();
