@@ -185,6 +185,25 @@ int main(int argc, char **argv)
                   mode == 2 ? 0 : 6);
             check(mode, "-1", "1", 10, 0, 6);
             check(mode, "1", "0", 10, 0, mode == 2 ? 61 : 6);
+            /* On 32-bit targets these products can fit in size_t but exceed
+               the allocator's quarter-size limit. Reject before present. */
+            {
+                size_t limits[2];
+                int i;
+                limits[0] = ((size_t) -1 / 4) / sizeof(Z_SRW_record);
+                limits[1] = ((size_t) -1 / 4) / sizeof(Z_SRW_extra_record *);
+                for (i = 0; i < 2; i++)
+                {
+                    if (limits[i] < INT_MAX)
+                    {
+                        char maximum[32];
+                        sprintf(maximum, "%d", (int) limits[i] + 1);
+                        check(mode, maximum, "1", INT_MAX, 0, 63);
+                    }
+                }
+                if (sizeof(size_t) == 4)
+                    check(mode, "214748364", "1", INT_MAX, 0, 63);
+            }
             if (mode != 2)
             {
                 check(mode, "12junk", "1", 10, 0, 6);

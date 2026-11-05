@@ -1116,6 +1116,7 @@ static void srw_bend_search(association *assoc,
                 {
                     int i;
                     int ok = 1;
+                    const size_t max_alloc_size = (size_t) -1 / 4;
                     /* Subtract only after validating start. Adding start
                        and number can overflow before the hit-count clamp. */
                     if (number - 1 > rr.hits - start)
@@ -1124,9 +1125,11 @@ static void srw_bend_search(association *assoc,
                     if (number - 1 > INT_MAX - start)
                         number = INT_MAX - start + 1;
 
-                    if ((size_t) number > (size_t) -1 / sizeof(*srw_res->records)
+                    /* Match xmalloc's size limit, leaving headroom for
+                       pool bookkeeping and alignment in nmem_malloc. */
+                    if ((size_t) number > max_alloc_size / sizeof(*srw_res->records)
                         || (size_t) number >
-                        (size_t) -1 / sizeof(*srw_res->extra_records))
+                        max_alloc_size / sizeof(*srw_res->extra_records))
                     {
                         yaz_add_srw_diagnostic(
                             assoc->encode, &srw_res->diagnostics,
