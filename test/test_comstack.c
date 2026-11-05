@@ -609,6 +609,9 @@ static void tst_redirect_connect(void)
     check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
                            "http://target.example/next",
                            "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
+                           "hTtP://TARGET.EXAMPLE/Next",
+                           "CONNECT TARGET.EXAMPLE:80 HTTP/1.0\r\n\r\n");
     check_redirect_connect("connect:proxy:8080,http://target.example/sru",
                            "/next", "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
     check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
@@ -621,6 +624,9 @@ static void tst_redirect_connect(void)
     check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
                            "https://target.example/next",
                            "CONNECT target.example:443 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "HTTPS://TARGET.EXAMPLE/Next",
+                           "CONNECT TARGET.EXAMPLE:443 HTTP/1.0\r\n\r\n");
     check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
                            "https://[::1]/next",
                            "CONNECT [::1]:443 HTTP/1.0\r\n\r\n");
