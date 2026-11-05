@@ -783,6 +783,43 @@ const char *yaz_check_location(ODR odr, const char *uri, const char *location,
     }
 }
 
+const char *yaz_check_http_redirect(ODR odr, const char *uri,
+                                    const char *location, int *host_change,
+                                    int *same_origin)
+{
+    const char *base = uri;
+    const char *comma = 0;
+    const char *host;
+    size_t host_len;
+    int port, secure;
+
+    *host_change = 1;
+    *same_origin = 0;
+    /* Only the original, trusted address may supply a CONNECT wrapper. */
+    if (!strncmp(uri, "connect:", 8))
+    {
+        comma = strchr(uri + 8, ',');
+        if (!comma || comma == uri + 8)
+            return 0;
+        base = comma + 1;
+    }
+    if (!http_origin(base, &host, &host_len, &port, &secure))
+        return 0;
+    location = yaz_check_location(odr, base, location, host_change);
+    if (!http_origin(location, &host, &host_len, &port, &secure))
+        return 0;
+    *same_origin = yaz_http_same_origin(base, location);
+    if (comma)
+    {
+        size_t prefix_len = comma + 1 - uri;
+        char *target = odr_malloc(odr, prefix_len + strlen(location) + 1);
+        memcpy(target, uri, prefix_len);
+        strcpy(target + prefix_len, location);
+        return target;
+    }
+    return location;
+}
+
 /*
  * Local variables:
  * c-basic-offset: 4

@@ -1984,6 +1984,9 @@
      are followed only within the original origin (the same scheme, hostname,
      and effective port). Cross-origin redirects, including HTTPS to HTTP
      redirects, return an HTTP error before connecting to the new target.
+     An explicit <literal>connect:proxy,target</literal> address retains its
+     configured tunnel across redirects; origins are compared using the
+     logical HTTP(S) targets. Redirects cannot override transport configuration.
     </para>
    </sect2>
   </sect1>

@@ -4760,12 +4760,15 @@ static void wait_and_handle_response(int one_response_only)
             {
                 const char *base_tmp;
                 int host_change = 0;
-                location = yaz_check_location(in, wrbuf_cstr(cur_host),
-                                              location, &host_change);
-                if ((auth || cert_fname)
-                    && !yaz_http_same_origin(wrbuf_cstr(cur_host), location))
+                int same_origin = 0;
+                location = yaz_check_http_redirect(in, wrbuf_cstr(cur_host),
+                                                   location, &host_change,
+                                                   &same_origin);
+                if (!location || ((auth || cert_fname) && !same_origin))
                 {
-                    printf("Cross-origin authenticated redirect refused\n");
+                    printf("%s\n", location ?
+                           "Cross-origin authenticated redirect refused" :
+                           "Invalid HTTP redirect target");
                     close_session();
                     break;
                 }

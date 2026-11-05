@@ -71,6 +71,9 @@
    redirects are followed only within the original origin (the same scheme,
    hostname, and effective port). Cross-origin redirects, including HTTPS to
    HTTP redirects, are refused before connecting to the new target.
+   An explicit <literal>connect:proxy,target</literal> address retains its
+   configured tunnel across redirects. Origins are compared using the logical
+   HTTP(S) targets, and redirects cannot override transport configuration.
   </para>
   <para>
    When <command>yaz-client</command> is started it tries to read

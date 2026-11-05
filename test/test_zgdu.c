@@ -207,11 +207,79 @@ static void tst_http_same_origin(void)
     odr_destroy(odr);
 }
 
+static void check_http_redirect(const char *base, const char *location,
+                                 const char *expected, int host_change,
+                                 int same_origin)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    int changed = -1, same = -1;
+    const char *target = yaz_check_http_redirect(odr, base, location,
+                                                 &changed, &same);
+    YAZ_CHECK_EQ(same, same_origin);
+    YAZ_CHECK((target != 0) == (expected != 0));
+    if (target && expected)
+    {
+        YAZ_CHECK(!strcmp(target, expected));
+        YAZ_CHECK_EQ(changed, host_change);
+    }
+    odr_destroy(odr);
+}
+
+static void tst_http_redirect(void)
+{
+    static const struct {
+        const char *location;
+        const char *target;
+        int changed;
+        int same;
+    } cases[] = {
+        { "/next", "connect:proxy.example:8080,https://target.example:443/next", 0, 1 },
+        { "https://target.example/next",
+          "connect:proxy.example:8080,https://target.example/next", 1, 1 },
+        { "https://TARGET.EXAMPLE:443/next",
+          "connect:proxy.example:8080,https://TARGET.EXAMPLE:443/next", 1, 1 },
+        { "https://other.example/next",
+          "connect:proxy.example:8080,https://other.example/next", 1, 0 },
+        { "http://target.example:443/next",
+          "connect:proxy.example:8080,http://target.example:443/next", 1, 0 },
+        { "https://target.example:8443/next",
+          "connect:proxy.example:8080,https://target.example:8443/next", 1, 0 },
+        { "/connect:evil:8080,https://other.example/",
+          "connect:proxy.example:8080,https://target.example:443/"
+          "connect:evil:8080,https://other.example/", 0, 1 },
+        { "connect:proxy.example:8080,https://target.example:443/next", 0, 1, 0 },
+        { "connect:evil:8080,https://target.example:443/next", 0, 1, 0 },
+        { "unix:/tmp/socket:https://target.example/next", 0, 1, 0 },
+        { "tcp:target.example:443", 0, 1, 0 },
+        { "ssl:target.example:443", 0, 1, 0 },
+        { "https://[::1]#ignored:8080", 0, 1, 0 }
+    };
+    size_t i;
+    for (i = 0; i < sizeof(cases) / sizeof(*cases); i++)
+        check_http_redirect("connect:proxy.example:8080,https://target.example:443/sru",
+                            cases[i].location, cases[i].target,
+                            cases[i].changed, cases[i].same);
+    check_http_redirect("https://target.example/sru", "/next",
+                         "https://target.example/next", 0, 1);
+    check_http_redirect("connect:user:secret@proxy:8080,http://target:80/sru",
+                         "/next", "connect:user:secret@proxy:8080,http://target:80/next",
+                         0, 1);
+    check_http_redirect("connect:proxy:8080,https://[::1]:443/sru", "/next",
+                         "connect:proxy:8080,https://[::1]:443/next", 0, 1);
+    check_http_redirect("connect:proxy:8080", "/next", 0, 1, 0);
+    check_http_redirect("connect:,https://target/sru", "/next", 0, 1, 0);
+    check_http_redirect("connect:proxy:8080,connect:evil:8080,https://target/sru",
+                         "/next", 0, 1, 0);
+    check_http_redirect("https://target/sru",
+                         "connect:evil:8080,https://target/next", 0, 1, 0);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_http_same_origin();
+    tst_http_redirect();
     tst_yaz_decode_http_response_first();
     tst_http_response();
     tst_double_encoding("POST / HTTP/1.1\r\n"

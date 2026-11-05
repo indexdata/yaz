@@ -1529,7 +1529,7 @@ ZOOM_API(int)
 
 static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
 {
-    Z_GDU *gdu = z_get_HTTP_Request_uri(c->odr_out, uri, 0, c->proxy ? 1 : 0);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(c->odr_out, uri, 0, c->proxy_mode);
 
     gdu->u.HTTP_Request->method = odr_strdup(c->odr_out, "GET");
     z_HTTP_header_add(c->odr_out, &gdu->u.HTTP_Request->headers, "Accept",
@@ -1614,14 +1614,19 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
                implementation might check whether it's the same server */
 
             int host_change = 0;
-            location = yaz_check_location(c->odr_in, c->host_port,
-                                          location, &host_change);
-            if ((c->user || c->password
-                 || ZOOM_options_get(c->options, "cert_fname"))
-                && !yaz_http_same_origin(c->host_port, location))
+            int same_origin = 0;
+            location = yaz_check_http_redirect(c->odr_in, c->host_port,
+                                               location, &host_change,
+                                               &same_origin);
+            if (!location
+                || ((c->user || c->password
+                     || ZOOM_options_get(c->options, "cert_fname"))
+                    && !same_origin))
             {
                 ZOOM_set_HTTP_error(c, hres->code,
-                                   "Cross-origin authenticated redirect refused",
+                                   location ?
+                                   "Cross-origin authenticated redirect refused" :
+                                   "Invalid HTTP redirect target",
                                    0);
                 c->no_redirects = 0;
                 ZOOM_connection_close(c);
