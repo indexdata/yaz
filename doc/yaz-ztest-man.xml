@@ -86,6 +86,11 @@
     (possibly
     empty), <replaceable>E</replaceable> is element-set,
     <replaceable>d</replaceable> is record position (starting from 1).
+    For file-backed records, the element-set must be nonempty and contain
+    only ASCII letters, digits, dots, underscores, or hyphens. Paths and
+    schema URIs are not accepted as file-backed element-set names.
+    The configured prefix and record files, including any symbolic links,
+    must be controlled by the administrator.
    </para>
    <para>
      The following databases are honored by <command>yaz-ztest</command>:

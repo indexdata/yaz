@@ -3,6 +3,12 @@
 
 bin_PROGRAMS=yaz-ztest
 noinst_PROGRAMS=gfs-example
+check_PROGRAMS=test_xml_fetch
+TESTS=$(check_PROGRAMS)
+
+test_xml_fetch_SOURCES=test_xml_fetch.c read-marc.c dummy-opac.c
+test_xml_fetch_CPPFLAGS=$(AM_CPPFLAGS) \
+ -Dgetenv=test_xml_getenv -Dstat=test_xml_stat -Dfopen=test_xml_fopen
 
 yaz_ztest_SOURCES=ztest.c read-grs.c read-marc.c dummy-opac.c ztest.h
 gfs_example_SOURCES=gfs-example.c
