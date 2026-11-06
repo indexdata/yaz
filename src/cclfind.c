@@ -176,6 +176,30 @@ void ccl_rpn_delete(struct ccl_rpn_node *rpn)
     xfree(rpn);
 }
 
+static int ccl_parse_step(CCL_parser cclp)
+{
+    if (cclp->steps >= CCL_MAX_STEPS)
+    {
+        cclp->error_code = CCL_ERR_COMPLEXITY;
+        return 0;
+    }
+    cclp->steps++;
+    return 1;
+}
+
+static int ccl_parse_enter(CCL_parser cclp)
+{
+    if (cclp->depth >= CCL_MAX_DEPTH)
+    {
+        cclp->error_code = CCL_ERR_COMPLEXITY;
+        return 0;
+    }
+    if (!ccl_parse_step(cclp))
+        return 0;
+    cclp->depth++;
+    return 1;
+}
+
 static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa);
 
 static int is_term_ok(int look, int *list)
@@ -384,6 +408,9 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     const char *m_default[2];
     size_t term_len = 0;
 
+    if (!ccl_parse_step(cclp))
+        return 0;
+
     truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
     if (!truncation_aliases)
@@ -585,7 +612,23 @@ static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
     return p;
 }
 
+static struct ccl_rpn_node *split_recur_impl(CCL_parser cclp, ccl_qualifier_t *qa,
+                                        struct ccl_token **ar, size_t sz,
+                                        size_t sub_len);
+
 static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
+                                        struct ccl_token **ar, size_t sz,
+                                        size_t sub_len)
+{
+    struct ccl_rpn_node *p;
+    if (!ccl_parse_enter(cclp))
+        return 0;
+    p = split_recur_impl(cclp, qa, ar, sz, sub_len);
+    cclp->depth--;
+    return p;
+}
+
+static struct ccl_rpn_node *split_recur_impl(CCL_parser cclp, ccl_qualifier_t *qa,
                                         struct ccl_token **ar, size_t sz,
                                         size_t sub_len)
 {
@@ -610,6 +653,7 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
             if (!p1)
             {
                 ccl_rpn_delete(p2);
+                ccl_rpn_delete(p_top);
                 return 0;
             }
             p2 = ccl_rpn_node_mkbool(p2, p1, CCL_RPN_AND);
@@ -721,10 +765,13 @@ static struct ccl_rpn_node *search_term_x(CCL_parser cclp,
             break;      /* no more terms . stop . */
         p = ccl_term_multi_use(cclp, cclp->look_token, qa, no,
                                is_phrase, auto_group);
+        if (!p)
+        {
+            ccl_rpn_delete(p_top);
+            return 0;
+        }
         for (i = 0; i < no; i++)
             ADVANCE;
-        if (!p)
-            return 0;
         p_top = ccl_rpn_node_mkbool(p_top, p, or_list ? CCL_RPN_OR : CCL_RPN_AND);
         if (!multi)
             break;
@@ -805,7 +852,8 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
         qual_val_type(ap, CCL_BIB1_REL, CCL_BIB1_REL_PORDER, 0))
     {
         /* allow - inside term and treat it as range _always_ */
-        /* relation is =. Extract "embedded" - to separate terms */
+        /* relation is =. Extract "embedded" - to separate terms.
+         * Keep token names within the input for error-position reporting. */
         if (KIND == CCL_TOK_TERM)
         {
             size_t i;
@@ -829,14 +877,13 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                 ntoken->len = cclp->look_token->len - 1;
 
                 cclp->look_token->len = 1;
-                cclp->look_token->name = "-";
             }
             else if (cclp->look_token->len > 1 && i == cclp->look_token->len-1)
             {   /* xx- */
                 struct ccl_token *ntoken = ccl_token_add(cclp->look_token);
 
                 ntoken->kind = CCL_TOK_TERM;
-                ntoken->name = "-";
+                ntoken->name = cclp->look_token->name + i;
                 ntoken->len = 1;
 
                 (cclp->look_token->len)--;
@@ -847,7 +894,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                 struct ccl_token *ntoken2 = ccl_token_add(ntoken1);
 
                 ntoken1->kind = CCL_TOK_TERM;  /* generate - */
-                ntoken1->name = "-";
+                ntoken1->name = cclp->look_token->name + i;
                 ntoken1->len = 1;
 
                 ntoken2->kind = CCL_TOK_TERM;  /* generate yy */
@@ -867,7 +914,7 @@ struct ccl_rpn_node *qualifiers_order(CCL_parser cclp,
                 struct ccl_token *ntoken = ccl_token_add(cclp->look_token);
 
                 ntoken->kind = CCL_TOK_TERM;    /* generate - */
-                ntoken->name = "-";
+                ntoken->name = ntoken->next->name;
                 ntoken->len = 1;
 
                 (ntoken->next->name)++;        /* adjust yy */
@@ -1074,6 +1121,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             if (!node_sub)
             {
                 ccl_rpn_delete(node);
+                node = 0;
                 break;
             }
             node = ccl_rpn_node_mkbool(node, node_sub, CCL_RPN_OR);
@@ -1119,6 +1167,7 @@ static struct ccl_rpn_node *search_terms(CCL_parser cclp, ccl_qualifier_t *qa)
             if (!p2)
             {
                 ccl_rpn_delete(p1);
+                ccl_rpn_delete(p_prox);
                 return NULL;
             }
             pn = ccl_rpn_node_create(CCL_RPN_PROX);
@@ -1158,6 +1207,8 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
 {
     struct ccl_rpn_node *p1;
     struct ccl_token *lookahead;
+    if (!ccl_parse_step(cclp))
+        return 0;
     if (KIND == CCL_TOK_SET)
     {
         ADVANCE;
@@ -1223,7 +1274,19 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
  * qa:     Qualifier attributes already applied.
  * return: pointer to node(s); NULL on error.
  */
+static struct ccl_rpn_node *find_spec_impl(CCL_parser cclp, ccl_qualifier_t *qa);
+
 static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
+{
+    struct ccl_rpn_node *p;
+    if (!ccl_parse_enter(cclp))
+        return 0;
+    p = find_spec_impl(cclp, qa);
+    cclp->depth--;
+    return p;
+}
+
+static struct ccl_rpn_node *find_spec_impl(CCL_parser cclp, ccl_qualifier_t *qa)
 {
     struct ccl_rpn_node *p1, *p2;
     if (!(p1 = search_elements(cclp, qa)))
@@ -1282,6 +1345,9 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
 {
     struct ccl_rpn_node *p;
 
+    cclp->depth = 0;
+    cclp->steps = 0;
+    cclp->error_code = CCL_ERR_OK;
     cclp->look_token = list;
     p = find_spec(cclp, NULL);
     if (p && KIND != CCL_TOK_EOL)

@@ -30,7 +30,8 @@ static char *err_msg_array[] = {
     "Both left - and right truncation not supported",
     "Right truncation not supported",
     "Embedded truncation not supported",
-    "Single character mask not supported"
+    "Single character mask not supported",
+    "Query complexity limit exceeded"
 };
 
 const char *ccl_err_msg(int ccl_errno)

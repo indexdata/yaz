@@ -69,6 +69,10 @@ struct ccl_parser {
     /** if error occurs, this holds position (starting from 0). */
     const char *error_pos;
 
+    /** Per-query parsing limits. */
+    unsigned depth;
+    unsigned steps;
+
     /** current bibset */
     CCL_bibset bibset;
 

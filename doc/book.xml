@@ -5960,6 +5960,14 @@ typedef struct {
      applications where you for some reason or other need to provide a
      symbolic language for expressing boolean query structures.
     </para>
+    <para>
+     CCL parsing is limited to 256 simultaneous expression or split-list
+     calls and 4096 total parsing steps. Steps include expression and
+     operand visits, term expansions, and split-list branches. Excessive
+     complexity returns <literal>CCL_ERR_COMPLEXITY</literal> and no parse
+     tree. These limits apply to both CCL parsing APIs and
+     <function>ZOOM_query_ccl2rpn</function>, and reset for each query.
+    </para>
     <sect3 id="ccl.syntax">
      <title>CCL Syntax</title>
      <para>

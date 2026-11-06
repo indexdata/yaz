@@ -10,6 +10,7 @@
 #include <yaz/ccl_xml.h>
 #include <yaz/log.h>
 #include <yaz/test.h>
+#include <yaz/zoom.h>
 
 #include "xml_util.h"
 #if YAZ_HAVE_XML2
@@ -599,10 +600,155 @@ void tst_addinfo(void)
     ccl_qual_rm(&bibset);
 }
 
+static void check_complexity(CCL_parser parser, const char *query, int error)
+{
+    int pos = -1;
+    struct ccl_rpn_node *rpn = ccl_parser_find_str(parser, query);
+    YAZ_CHECK_EQ(ccl_parser_get_error(parser, &pos), error);
+    YAZ_CHECK(error ? rpn == 0 : rpn != 0);
+    if (error)
+        YAZ_CHECK(pos >= 0 && pos <= (int) strlen(query));
+    if (rpn)
+    {
+        WRBUF out = wrbuf_alloc();
+        ccl_pquery(out, rpn);
+        YAZ_CHECK(wrbuf_len(out) > 0);
+        wrbuf_destroy(out);
+    }
+    ccl_rpn_delete(rpn);
+}
+
+static void tst_complexity(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+    CCL_parser parser;
+    WRBUF query = wrbuf_alloc();
+    int i, j, error, pos;
+    const char *error_string = 0;
+    struct ccl_rpn_node *rpn;
+    ZOOM_query zoom = ZOOM_query_create();
+    const char *prefix[] = { "(", "a and (", "a or (", "a not (", "ti=(" };
+
+    ccl_qual_fitem(bibset, "u=4", "ti");
+    ccl_qual_fitem(bibset, "s=sl u=2", "splitlist");
+    ccl_qual_fitem(bibset, "s=al", "words");
+    ccl_qual_fitem(bibset, "words words", "both");
+    parser = ccl_parser_create(bibset);
+    for (j = 0; j < (int) (sizeof(prefix) / sizeof(*prefix)); j++)
+    {
+        int depth;
+        for (depth = CCL_MAX_DEPTH - 1; depth <= CCL_MAX_DEPTH; depth++)
+        {
+            wrbuf_rewind(query);
+            for (i = 0; i < depth; i++)
+                wrbuf_puts(query, prefix[j]);
+            wrbuf_puts(query, "a");
+            for (i = 0; i < depth; i++)
+                wrbuf_puts(query, ")");
+            check_complexity(parser, wrbuf_cstr(query),
+                             depth < CCL_MAX_DEPTH ? 0 : CCL_ERR_COMPLEXITY);
+            check_complexity(parser, "a", 0);
+        }
+    }
+    /* A large malformed input must hit the limit before stack exhaustion. */
+    wrbuf_rewind(query);
+    for (i = 0; i < 20000; i++)
+        wrbuf_puts(query, "(");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+    rpn = ccl_find_str(bibset, wrbuf_cstr(query), &error, &pos);
+    YAZ_CHECK(!rpn);
+    YAZ_CHECK_EQ(error, CCL_ERR_COMPLEXITY);
+    ccl_rpn_delete(rpn);
+    YAZ_CHECK_EQ(ZOOM_query_ccl2rpn(zoom, wrbuf_cstr(query), 0,
+                                  &error, &error_string, &pos), -1);
+    YAZ_CHECK_EQ(error, CCL_ERR_COMPLEXITY);
+    YAZ_CHECK(error_string &&
+              !strcmp(error_string, "Query complexity limit exceeded"));
+    YAZ_CHECK_EQ(ZOOM_query_ccl2rpn(zoom, "a", 0,
+                                  &error, &error_string, &pos), 0);
+
+    /* One expression step, two per term, one per result-set operand. */
+    wrbuf_rewind(query);
+    for (i = 0; i < (CCL_MAX_STEPS - 2) / 2; i++)
+        wrbuf_puts(query, i ? " and a" : "a");
+    wrbuf_puts(query, " and set=s");
+    check_complexity(parser, wrbuf_cstr(query), 0); /* exactly 4096 */
+    wrbuf_puts(query, " and set=s");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+    check_complexity(parser, "a", 0);
+
+    /* Split-list recursion shares the expression depth budget. */
+    wrbuf_rewind(query);
+    wrbuf_puts(query, "splitlist=");
+    for (i = 0; i < CCL_MAX_DEPTH - 1; i++)
+        wrbuf_puts(query, "a ");
+    check_complexity(parser, wrbuf_cstr(query), 0);
+    wrbuf_puts(query, "a");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+
+    /* Term-list expansion must obey the work limit too. */
+    wrbuf_rewind(query);
+    wrbuf_puts(query, "words=");
+    for (i = 0; i < CCL_MAX_STEPS; i++)
+        wrbuf_puts(query, "a ");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+    /* Fail in the second qualifier expansion after the first built a tree. */
+    wrbuf_rewind(query);
+    wrbuf_puts(query, "both=");
+    for (i = 0; i < CCL_MAX_STEPS / 2 + 1; i++)
+        wrbuf_puts(query, "a ");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+    check_complexity(parser, "a ! (", CCL_ERR_TERM_EXPECTED);
+    check_complexity(parser, "a", 0);
+
+    ZOOM_query_destroy(zoom);
+    ccl_parser_destroy(parser);
+    ccl_qual_rm(&bibset);
+    wrbuf_destroy(query);
+}
+
+static void tst_range_error_position(void)
+{
+    const char *ranges[] = { "abc-", "abc-def", "-abc", "abc -def" };
+    CCL_bibset bibset = ccl_qual_mk();
+    CCL_parser parser;
+    WRBUF query = wrbuf_alloc();
+    size_t j;
+    int i, error, pos, expected;
+    struct ccl_rpn_node *rpn;
+
+    ccl_qual_fitem(bibset, "r=r", "date");
+    parser = ccl_parser_create(bibset);
+    for (j = 0; j < sizeof(ranges) / sizeof(*ranges); j++)
+    {
+        wrbuf_rewind(query);
+        for (i = 0; i < (CCL_MAX_STEPS - 2) / 2; i++)
+            wrbuf_puts(query, i ? " and a" : "a");
+        wrbuf_printf(query, " and date=%s", ranges[j]);
+        expected = strstr(wrbuf_cstr(query), "abc") - wrbuf_cstr(query);
+        rpn = ccl_parser_find_str(parser, wrbuf_cstr(query));
+        YAZ_CHECK(!rpn);
+        YAZ_CHECK_EQ(ccl_parser_get_error(parser, &pos), CCL_ERR_COMPLEXITY);
+        YAZ_CHECK_EQ(pos, expected);
+        ccl_rpn_delete(rpn);
+        rpn = ccl_find_str(bibset, wrbuf_cstr(query), &error, &pos);
+        YAZ_CHECK(!rpn);
+        YAZ_CHECK_EQ(error, CCL_ERR_COMPLEXITY);
+        YAZ_CHECK_EQ(pos, expected);
+        ccl_rpn_delete(rpn);
+        check_complexity(parser, "date=abc-", 0);
+    }
+    ccl_parser_destroy(parser);
+    ccl_qual_rm(&bibset);
+    wrbuf_destroy(query);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_range_error_position();
+    tst_complexity();
     tst1(0);
     tst1(1);
     tst1(2);
