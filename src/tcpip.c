@@ -326,12 +326,29 @@ static void connect_and_bind(COMSTACK p,
     }
 }
 
+static int valid_connect_host(const char *host)
+{
+    if (!host)
+        return 1;
+    if (!*host || *host == '/')
+        return 0;
+    /* Match connect_and_bind: only the authority is sent in CONNECT.
+       The HTTP encoder separately validates the request target. */
+    for (; *host && *host != '/'; host++)
+        if ((unsigned char) *host <= 32 || (unsigned char) *host == 127)
+            return 0;
+    return 1;
+}
+
 COMSTACK yaz_tcpip_create3(int s, int flags, int protocol,
                            const char *connect_host,
                            const char *connect_auth,
                            const char *bind_host)
 {
-    COMSTACK p = tcpip_type(s, flags, protocol, 0);
+    COMSTACK p;
+    if (!valid_connect_host(connect_host))
+        return 0;
+    p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     connect_and_bind(p, connect_host, connect_auth, bind_host);
@@ -405,7 +422,10 @@ COMSTACK yaz_ssl_create(int s, int flags, int protocol,
                         const char *connect_auth,
                         const char *bind_host)
 {
-    COMSTACK p = ssl_type(s, flags, protocol, 0);
+    COMSTACK p;
+    if (!valid_connect_host(connect_host))
+        return 0;
+    p = ssl_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     connect_and_bind(p, connect_host, connect_auth, bind_host);

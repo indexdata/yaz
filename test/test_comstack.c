@@ -607,6 +607,9 @@ static void check_redirect_connect(const char *base, const char *location,
 static void tst_redirect_connect(void)
 {
     check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
+                           "http://target.example:80/path#ignored\tfragment\r\n",
+                           "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
+    check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
                            "http://target.example/next",
                            "CONNECT target.example:80 HTTP/1.0\r\n\r\n");
     check_redirect_connect("connect:proxy:8080,http://target.example:80/sru",
@@ -621,6 +624,9 @@ static void tst_redirect_connect(void)
                            "http://target.example:8081/next",
                            "CONNECT target.example:8081 HTTP/1.0\r\n\r\n");
 #if HAVE_GNUTLS_H
+    check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
+                           "https://target.example:443/path#ignored\tfragment\r\n",
+                           "CONNECT target.example:443 HTTP/1.0\r\n\r\n");
     check_redirect_connect("connect:proxy:8080,https://target.example:443/sru",
                            "https://target.example/next",
                            "CONNECT target.example:443 HTTP/1.0\r\n\r\n");
@@ -707,6 +713,29 @@ static void tst_cs_set_head_only(void)
 #endif
 }
 
+static void tst_invalid_connect_targets(void)
+{
+    int c;
+    for (c = 1; c <= 127; c++)
+    {
+        char host[] = "target.example:80 X/path";
+        COMSTACK cs;
+        if (c > 32 && c != 127)
+            continue;
+        host[17] = c;
+        cs = yaz_tcpip_create3(-1, CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
+        YAZ_CHECK(cs == 0);
+        if (cs)
+            cs_close(cs);
+#if HAVE_GNUTLS_H
+        cs = yaz_ssl_create(-1, CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
+        YAZ_CHECK(cs == 0);
+        if (cs)
+            cs_close(cs);
+#endif
+    }
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -720,6 +749,7 @@ int main (int argc, char **argv)
 #if HAVE_GNUTLS_H
     tst_cs_get_error_ssl();
 #endif
+    tst_invalid_connect_targets();
     tst_cs_set_head_only();
 #ifndef WIN32
     tst_redirect_connect();

@@ -53,3 +53,4 @@ test_daemon_no_groups
 test_errno
 test_statserv_startup
 test_daemon_no_passwd
+test_zoom_send
