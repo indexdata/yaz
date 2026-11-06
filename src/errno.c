@@ -19,6 +19,7 @@
 #endif
 
 #include <yaz/errno.h>
+#include <yaz/snprintf.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -42,8 +43,13 @@ void yaz_strerror(char *buf, size_t bufsz)
 {
 #ifdef WIN32
     DWORD err;
+#else
+    int error = errno;
 #endif
     char *cp;
+    if (!bufsz)
+        return;
+    *buf = '\0';
 #ifdef WIN32
     err = GetLastError();
     if (err)
@@ -62,16 +68,22 @@ void yaz_strerror(char *buf, size_t bufsz)
 #else
 /* UNIX */
 #if HAVE_STRERROR_R
-    *buf = '\0';
-    strerror_r(errno, buf, bufsz);
-    /* if buffer is unset - use strerror anyway (GLIBC bug) */
-    if (*buf == '\0')
-        strcpy(buf, strerror(yaz_errno()));
+#if STRERROR_R_CHAR_P
+    /* GNU strerror_r may return static storage instead of filling buf. */
+    const char *message = strerror_r(error, buf, bufsz);
+    if (message && message != buf)
+        yaz_snprintf(buf, bufsz, "%s", message);
 #else
-    strcpy(buf, strerror(yaz_errno()));
+    strerror_r(error, buf, bufsz);
+#endif
+    if (*buf == '\0')
+        yaz_snprintf(buf, bufsz, "%s", strerror(error));
+#else
+    yaz_snprintf(buf, bufsz, "%s", strerror(error));
 #endif
 /* UNIX */
 #endif
+    buf[bufsz - 1] = '\0';
     if ((cp = strrchr(buf, '\n')))
         *cp = '\0';
     if ((cp = strrchr(buf, '\r')))

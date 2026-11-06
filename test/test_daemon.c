@@ -6,6 +6,11 @@
 #include <config.h>
 #endif
 
+#ifdef TEST_DAEMON_NO_PASSWD
+#undef HAVE_PWD_H
+#define HAVE_PWD_H 0
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -23,11 +28,13 @@ static int calls;
 static int fail_at;
 static int work_calls;
 
+#if HAVE_PWD_H
 static void daemon_test_exit(int status)
 {
     exit_status = status;
     longjmp(exit_env, 1);
 }
+#endif
 
 #if HAVE_PWD_H && HAVE_GRP_H && HAVE_INITGROUPS && HAVE_SETGID && HAVE_SETUID \
     && !defined(TEST_DAEMON_NO_GROUPS)

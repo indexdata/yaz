@@ -224,7 +224,8 @@ iconv_t t = iconv_open("", "");
 	])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS([initgroups setgid setuid getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r nanosleep fopen64 open_memstream malloc_info])
+AC_CHECK_FUNCS([initgroups setgid setuid getaddrinfo vsnprintf gettimeofday poll localtime_r nanosleep fopen64 open_memstream malloc_info])
+AC_FUNC_STRERROR_R
 if test "$ac_cv_func_getaddrinfo" = "no"; then
 	AC_MSG_ERROR([getaddrinfo required])
 fi
