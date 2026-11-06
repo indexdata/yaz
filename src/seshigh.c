@@ -1668,13 +1668,13 @@ static void srw_bend_update(association *assoc,
         yaz_log(YLOG_DEBUG, "Operation = %s", rr.operation );
         if (!strcmp( rr.operation, "delete"))
         {
-            if (srw_req->record && !srw_req->record->recordSchema)
+            if (srw_req->record && srw_req->record->recordSchema)
             {
                 rr.record_schema = odr_strdup(
                     assoc->encode,
                     srw_req->record->recordSchema);
             }
-            if (srw_req->record)
+            if (srw_req->record && srw_req->record->recordData_buf)
             {
                 rr.record_data = odr_strdupn(
                     assoc->encode,
