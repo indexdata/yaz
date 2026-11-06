@@ -30,6 +30,8 @@ struct yaz_pqf_parser {
     int term_type;
     int external_type;
     int error;
+    unsigned int depth;
+    unsigned int nodes;
 };
 
 static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
@@ -585,7 +587,7 @@ static void rpn_term_type(struct yaz_pqf_parser *li)
     lex(li);
 }
 
-static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
+static Z_RPNStructure *rpn_structure_impl(struct yaz_pqf_parser *li, ODR o,
                                      int num_attr, int max_attr,
                                      Odr_int *attr_list,
                                      char **attr_clist,
@@ -647,6 +649,27 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
     return sz;
 }
 
+/* Count every structural descent, including attribute and term modifiers.
+   Unwind depth on all exits; the total work budget lasts for the whole parse. */
+static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
+                                     int num_attr, int max_attr,
+                                     Odr_int *attr_list, char **attr_clist,
+                                     Odr_oid **attr_set)
+{
+    Z_RPNStructure *result;
+    if (li->depth >= YAZ_PQF_MAX_DEPTH || li->nodes >= YAZ_PQF_MAX_NODES)
+    {
+        li->error = YAZ_PQF_ERROR_COMPLEXITY;
+        return 0;
+    }
+    li->depth++;
+    li->nodes++;
+    result = rpn_structure_impl(li, o, num_attr, max_attr, attr_list,
+                               attr_clist, attr_set);
+    li->depth--;
+    return result;
+}
+
 static Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li)
 {
     Z_RPNQuery *zq;
@@ -694,6 +717,9 @@ static Z_RPNQuery *p_query_rpn_mk(ODR o, struct yaz_pqf_parser *li)
 
 static void pqf_parser_begin(struct yaz_pqf_parser *li, const char *buf)
 {
+    li->error = 0;
+    li->depth = 0;
+    li->nodes = 0;
     li->query_buf = li->query_ptr = buf;
     li->lex_buf = 0;
 }
@@ -930,6 +956,8 @@ int yaz_pqf_error(YAZ_PQF_Parser p, const char **msg, size_t *off)
         *msg = "internal error"; break;
     case YAZ_PQF_ERROR_PROXIMITY:
         *msg = "proximity error"; break;
+    case YAZ_PQF_ERROR_COMPLEXITY:
+        *msg = "query complexity limit exceeded"; break;
     case YAZ_PQF_ERROR_BAD_INTEGER:
         *msg = "bad integer"; break;
     default:

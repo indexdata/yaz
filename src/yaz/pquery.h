@@ -40,9 +40,24 @@ YAZ_BEGIN_CDECL
 
 typedef struct yaz_pqf_parser *YAZ_PQF_Parser;
 
+/** Maximum simultaneous PQF parsing steps, including modifiers and leaves. */
+#define YAZ_PQF_MAX_DEPTH 256
+/** Maximum total PQF parsing steps in one query, including modifiers. */
+#define YAZ_PQF_MAX_NODES 4096
+
+/** Parse PQF with the same complexity limits as yaz_pqf_parse.
+    Returns an ODR-owned query on success, or NULL on failure. */
 YAZ_EXPORT Z_RPNQuery *p_query_rpn(ODR o, const char *qbuf);
 
 YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create(void);
+/** Parse PQF into an ODR-owned RPN query, or return NULL on failure.
+    Nesting and total structural parsing steps are bounded by
+    YAZ_PQF_MAX_DEPTH and YAZ_PQF_MAX_NODES. Boolean operators, operands,
+    and each \@attr or \@term modifier count as steps. Exceeding either
+    limit reports YAZ_PQF_ERROR_COMPLEXITY through yaz_pqf_error.
+    Error state and complexity counters are reset for each parse.
+    On failure, partial allocations remain in o until it is reset or freed.
+*/
 YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o,
                                      const char *qbuf);
 YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
@@ -97,6 +112,9 @@ Z_Term *z_Term_create(ODR o, int term_type, const char *buf, size_t len);
 
 /* bad unsigned integer */
 #define YAZ_PQF_ERROR_BAD_INTEGER 8
+
+/* query nesting or total structural parsing work exceeds its limit */
+#define YAZ_PQF_ERROR_COMPLEXITY 9
 
 YAZ_END_CDECL
 

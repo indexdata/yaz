@@ -1032,6 +1032,10 @@ static void srw_bend_search(association *assoc,
                 yaz_log(log_requestdetail, "Parse error %d %s near offset %ld",
                         code, pqf_msg, (long) off);
                 srw_error = YAZ_SRW_QUERY_SYNTAX_ERROR;
+                yaz_add_srw_diagnostic(assoc->encode,
+                                       &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       srw_error, pqf_msg);
             }
 
             rr.query->which = Z_Query_type_1;
