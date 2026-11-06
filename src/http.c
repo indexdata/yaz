@@ -624,19 +624,60 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     return 1;
 }
 
+static int http_request_token(const char *s)
+{
+    if (!s || !*s)
+        return 0;
+    for (; *s; s++)
+        if (!((*s >= 'A' && *s <= 'Z') || (*s >= 'a' && *s <= 'z')
+              || (*s >= '0' && *s <= '9')
+              || strchr("!#$%&'*+-.^_`|~", *s)))
+            return 0;
+    return 1;
+}
+
+/* Field values allow horizontal tabs; request targets and Host do not. */
+static int http_request_text(const char *s, const char *end, int field_value)
+{
+    if (!s)
+        return 0;
+    for (; s != end && *s; s++)
+    {
+        unsigned char c = (unsigned char) *s;
+        if (c == 127 || (c < 32 && !(field_value && c == '\t'))
+            || (!field_value && c == ' '))
+            return 0;
+    }
+    return 1;
+}
+
 int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 {
     Z_HTTP_Header *h;
     char *cp;
     int top0 = o->op->top;
 
-    if (!hr->method || !hr->path)
+    /* Validate everything before emitting even a partial request. */
+    cp = hr->path ? strchr(hr->path, '#') : 0;
+    if (!http_request_token(hr->method) || !http_request_token(hr->version)
+        || !http_request_text(hr->path, cp, 0) || !*hr->path
+        || cp == hr->path)
+    {
+        o->error = OHTTP;
         return 0;
+    }
+    for (h = hr->headers; h; h = h->next)
+        if (!http_request_token(h->name)
+            || !http_request_text(h->value, 0,
+                                  yaz_strcasecmp(h->name, "Host") != 0))
+        {
+            o->error = OHTTP;
+            return 0;
+        }
     if (odr_write2(o, hr->method, strlen(hr->method)) < 0)
         return 0;
     if (odr_write(o, " ", 1) < 0)
         return 0;
-    cp = strchr(hr->path, '#');
     if (odr_write2(o, hr->path, cp ? (cp - hr->path) : strlen(hr->path)) < 0)
         return 0;
     if (odr_write(o, " HTTP/", 6) < 0)

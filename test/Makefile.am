@@ -13,7 +13,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec test_sru_limits \
  test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
- test_marc_read_sax
+ test_marc_read_sax test_zoom_send
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
@@ -115,3 +115,5 @@ test_statserv_startup_SOURCES = test_statserv_startup.c
 test_statserv_startup_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_daemon_no_passwd_SOURCES = test_daemon.c
 test_daemon_no_passwd_CPPFLAGS = $(AM_CPPFLAGS) -DTEST_DAEMON_NO_PASSWD
+
+test_zoom_send_SOURCES = test_zoom_send.c

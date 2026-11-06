@@ -1552,7 +1552,11 @@ zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
 
     int r = z_GDU(c->odr_out, &gdu, 0, 0);
     if (!r)
+    {
+        ZOOM_set_error(c, ZOOM_ERROR_ENCODE, 0);
+        odr_reset(c->odr_out);
         return zoom_complete;
+    }
     if (c->odr_print)
         z_GDU(c->odr_print, &gdu, 0, 0);
     if (c->odr_save)

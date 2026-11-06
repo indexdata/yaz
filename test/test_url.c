@@ -17,6 +17,7 @@
 /* Compile url.c with its transport constructor renamed. Exercise the actual
    fetch and redirect loop without sockets or library symbol interposition. */
 static int connections;
+static int connect_calls;
 static int response_code;
 static const char *redirect_location;
 static const char *set_cookie;
@@ -26,6 +27,7 @@ static char *requests[3];
 
 static int connect_stub(COMSTACK cs, void *address)
 {
+    connect_calls++;
     return 0;
 }
 
@@ -177,10 +179,35 @@ static void tst_redirects(void)
                    0, 0, 1, "connect:proxy:8080,https://example.org:443/Next", 0);
 }
 
+static void tst_invalid_requests(void)
+{
+    static const char *uris[] = {
+        "http://example.org/path\r\nX-Injection: yes",
+        "http://example.org\r\nX-Injection: yes/path",
+        "http://example.org/a b", "http://example.org/a\tb",
+        "http://example.org/a\177b"
+    };
+    size_t i;
+    for (i = 0; i <= sizeof(uris) / sizeof(*uris); i++)
+    {
+        yaz_url_t url = yaz_url_create();
+        int method_test = i == sizeof(uris) / sizeof(*uris);
+        connections = connect_calls = 0;
+        YAZ_CHECK(!yaz_url_exec(url,
+            method_test ? "http://example.org/" : uris[i],
+            method_test ? "GET\r\nX-Injection: yes" : "GET", 0, 0, 0));
+        YAZ_CHECK_EQ(connect_calls, 0);
+        YAZ_CHECK(requests[0] == 0);
+        YAZ_CHECK(strstr(yaz_url_get_error(url), "Can not encode HTTP request"));
+        yaz_url_destroy(url);
+    }
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_invalid_requests();
     for (response_code = 301; response_code <= 307; response_code++)
         if (response_code == 301 || response_code == 302 || response_code == 307)
             tst_redirects();

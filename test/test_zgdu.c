@@ -17,6 +17,110 @@
 #include <yaz/wrbuf.h>
 #include <yaz/cookie.h>
 
+static void check_request_encoding(Z_GDU *gdu, ODR odr, int allowed)
+{
+    int len = -1;
+    YAZ_CHECK_EQ(z_GDU(odr, &gdu, 0, 0), allowed);
+    odr_getbuf(odr, &len, 0);
+    if (!allowed)
+    {
+        YAZ_CHECK_EQ(odr_geterror(odr), OHTTP);
+        YAZ_CHECK_EQ(len, 0);
+    }
+    else
+    {
+        YAZ_CHECK(len > 0);
+    }
+}
+
+static void tst_request_validation(void)
+{
+    int c, field, proxy;
+    for (c = 1; c <= 127; c++)
+    {
+        char text[] = "X Y";
+        if (c > 32 && c != 127)
+            continue;
+        text[1] = c;
+        for (field = 0; field < 6; field++)
+        {
+            ODR odr = odr_createmem(ODR_ENCODE);
+            Z_GDU *gdu = z_get_HTTP_Request(odr);
+            Z_HTTP_Request *req = gdu->u.HTTP_Request;
+            switch (field)
+            {
+            case 0: req->method = text; break;
+            case 1: req->path = text; break;
+            case 2: req->version = text; break;
+            case 3: z_HTTP_header_add(odr, &req->headers, "Host", text); break;
+            case 4: z_HTTP_header_add(odr, &req->headers, text, "value"); break;
+            case 5: z_HTTP_header_add(odr, &req->headers, "X-Test", text); break;
+            }
+            check_request_encoding(gdu, odr, field == 5 && (c == 9 || c == 32));
+            odr_destroy(odr);
+        }
+        for (proxy = 0; proxy <= 1; proxy++)
+        {
+            ODR odr = odr_createmem(ODR_ENCODE);
+            char uri[] = "http://exa mple.org/path";
+            Z_GDU *gdu;
+            uri[10] = c;
+            gdu = z_get_HTTP_Request_uri(odr, uri, 0, proxy);
+            check_request_encoding(gdu, odr, 0);
+            odr_destroy(odr);
+        }
+    }
+    for (proxy = 0; proxy <= 1; proxy++)
+    {
+        ODR odr = odr_createmem(ODR_ENCODE);
+        Z_GDU *gdu = z_get_HTTP_Request_uri(odr,
+            "http://example.org/a%20b?q=%0D%0A#fragment", 0, proxy);
+        char body[] = "\r\n\0\177";
+        int len;
+        char *encoded;
+        gdu->u.HTTP_Request->method = "M-SEARCH";
+        gdu->u.HTTP_Request->content_buf = body;
+        gdu->u.HTTP_Request->content_len = sizeof(body) - 1;
+        check_request_encoding(gdu, odr, 1);
+        encoded = odr_getbuf(odr, &len, 0);
+        YAZ_CHECK(len >= sizeof(body) - 1);
+        if (len >= sizeof(body) - 1)
+        {
+            YAZ_CHECK(!memcmp(encoded + len - (sizeof(body) - 1),
+                              body, sizeof(body) - 1));
+        }
+        odr_destroy(odr);
+    }
+    {
+        ODR odr = odr_createmem(ODR_ENCODE);
+        Z_GDU *gdu = z_get_HTTP_Request_uri(odr,
+            "http://example.org/path#ignored \r\nX-Injected: yes", 0, 0);
+        const char prefix[] = "POST /path HTTP/1.1\r\n";
+        int len;
+        char *encoded;
+        check_request_encoding(gdu, odr, 1);
+        encoded = odr_getbuf(odr, &len, 0);
+        YAZ_CHECK(len >= sizeof(prefix) - 1);
+        if (len >= sizeof(prefix) - 1)
+        {
+            YAZ_CHECK(!memcmp(encoded, prefix, sizeof(prefix) - 1));
+        }
+        odr_destroy(odr);
+    }
+    {
+        static const char *invalid[] = { "", "BAD METHOD", "GET\r\nX: injected", "G(ET" };
+        size_t i;
+        for (i = 0; i < sizeof(invalid) / sizeof(*invalid); i++)
+        {
+            ODR odr = odr_createmem(ODR_ENCODE);
+            Z_GDU *gdu = z_get_HTTP_Request(odr);
+            gdu->u.HTTP_Request->method = (char *) invalid[i];
+            check_request_encoding(gdu, odr, 0);
+            odr_destroy(odr);
+        }
+    }
+}
+
 static void tst_cookies(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
@@ -441,6 +545,7 @@ int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_request_validation();
     tst_cookies();
     tst_http_same_origin();
     tst_http_redirect();

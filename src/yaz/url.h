@@ -89,6 +89,10 @@ YAZ_EXPORT void yaz_url_set_timeout(yaz_url_t p, int sec, int ns);
     \returns HTTP response; NULL on ERROR.
 
     Use yaz_url_get_error to get details if NULL is returned.
+    Request targets and Host values cannot contain raw spaces or control
+    characters; encode URI data with percent escapes. Methods and header
+    names must be HTTP tokens. Header values cannot contain control
+    characters other than horizontal tabs.
     Redirects must resolve to HTTP(S) URLs. Cross-origin redirects are
     refused when URL credentials, Authorization or Cookie headers,
     stored cookies, or a client certificate are present.
