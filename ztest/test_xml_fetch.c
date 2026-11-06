@@ -11,6 +11,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <yaz/test.h>
+#include <yaz/wrbuf.h>
+#include <yaz/marcdisp.h>
+#include <yaz/log.h>
+#include <yaz/snprintf.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "ztest.h"
 
 /* read-marc.c uses these replacements so every filesystem lookup is
@@ -20,13 +27,13 @@ static const char *expected_path;
 static const char record[] = "<record>fixture</record>";
 static int stat_calls, open_calls, fail_stat, fail_open;
 
-char *test_xml_getenv(const char *name)
+static char *test_xml_getenv(const char *name)
 {
     YAZ_CHECK(!strcmp(name, "YAZ_ZTEST_XML_FETCH"));
     return (char *) prefix;
 }
 
-int test_xml_stat(const char *path, struct stat *st)
+static int test_xml_stat(const char *path, struct stat *st)
 {
     stat_calls++;
     YAZ_CHECK(expected_path && !strcmp(path, expected_path));
@@ -35,7 +42,7 @@ int test_xml_stat(const char *path, struct stat *st)
     return fail_stat ? -1 : 0;
 }
 
-FILE *test_xml_fopen(const char *path, const char *mode)
+static FILE *test_xml_fopen(const char *path, const char *mode)
 {
     FILE *f;
     open_calls++;
@@ -53,6 +60,20 @@ FILE *test_xml_fopen(const char *path, const char *mode)
     }
     return f;
 }
+
+/* Include system headers before replacing calls. With large-file support,
+   renaming declarations can otherwise export the mocks as fopen64/stat64
+   and intercept calls from the logger, causing recursive logging to hang.
+   Function-like macros also leave the struct stat type unchanged. */
+#undef HAVE_CONFIG_H
+#define HAVE_CONFIG_H 0
+#define getenv(name) test_xml_getenv(name)
+#define stat(path, st) test_xml_stat(path, st)
+#define fopen(path, mode) test_xml_fopen(path, mode)
+#include "read-marc.c"
+#undef getenv
+#undef stat
+#undef fopen
 
 static void check_fetch(const char *base, const char *name, const char *path)
 {
