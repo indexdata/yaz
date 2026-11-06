@@ -288,6 +288,87 @@ static void tst_invalid_encoding(const char *buf)
 }
 
 
+static void tst_http_framing(void)
+{
+    const char *invalid[] = {
+        "Content-Length: 0\r\nContent-Length: 4\r\n",
+        "Content-Length: 4\r\ncontent-length: 0\r\n",
+        "Content-Length: 4\r\nContent-Length: 4\r\n",
+        "Transfer-Encoding: chunked\r\nContent-Length: 0\r\n",
+        "Content-Length: 0\r\nTransfer-Encoding: chunked\r\n",
+        "Transfer-Encoding: chunkedjunk\r\n",
+        "Transfer-Encoding: gzip, chunked\r\n",
+        "Transfer-Encoding: chunked, gzip\r\n",
+        "Transfer-Encoding: identity\r\n",
+        "Transfer-Encoding: chunked\r\nTransfer-Encoding: chunked\r\n",
+        "Transfer-Encoding: \r\n",
+        "Content-Length: 4junk\r\n",
+        "Content-Length: 4, 4\r\n",
+        "Content-Length: +4\r\n",
+        "Content-Length: -4\r\n",
+        "Content-Length: 2147483648\r\n",
+        "Content-Length: \r\n",
+        "Content-Length : 4\r\n",
+        " Transfer-Encoding: chunked\r\n",
+        "Transfer-Encoding: chu\rnked\r\n",
+        "X-Header: value\r\n Content-Length: 4\r\n"
+    };
+    const char *valid[] = {
+        "Content-Length: 1\r\n\r\nX",
+        "cOnTeNt-LeNgTh:\t001 \t\r\n\r\nX",
+        "Transfer-Encoding: chunked\r\n\r\n1\r\nX\r\n0\r\n\r\n",
+        "transfer-encoding:\tChUnKeD \t\r\n\r\n1\r\nX\r\n0\r\n\r\n",
+        "Content-Length: 1\n\nX"
+    };
+    const char *start[] = { "POST / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" };
+    size_t i, j;
+    for (j = 0; j < sizeof(start) / sizeof(*start); j++)
+    {
+        for (i = 0; i < sizeof(invalid) / sizeof(*invalid); i++)
+        {
+            int k;
+            WRBUF b = wrbuf_alloc();
+            wrbuf_printf(b, "%s%s\r\n1\r\nX\r\n0\r\n\r\n"
+                         "GET /next HTTP/1.1\r\n\r\n", start[j], invalid[i]);
+            YAZ_CHECK_EQ(cs_complete_auto(wrbuf_buf(b), wrbuf_len(b)), -1);
+            YAZ_CHECK_EQ(cs_complete_auto_head(wrbuf_buf(b), wrbuf_len(b)), -1);
+            /* Fragmentation must never turn an invalid request into a frame. */
+            for (k = 0; k < (int) wrbuf_len(b); k++)
+                YAZ_CHECK(cs_complete_auto(wrbuf_buf(b), k) <= 0);
+            tst_invalid_encoding(wrbuf_cstr(b));
+            wrbuf_destroy(b);
+        }
+        for (i = 0; i < sizeof(valid) / sizeof(*valid); i++)
+        {
+            int k, len, ok;
+            Z_GDU *g = 0;
+            ODR dec = odr_createmem(ODR_DECODE);
+            WRBUF b = wrbuf_alloc();
+            wrbuf_printf(b, "%s%s", start[j], valid[i]);
+            len = wrbuf_len(b);
+            for (k = 0; k < len; k++)
+                YAZ_CHECK_EQ(cs_complete_auto(wrbuf_buf(b), k), 0);
+            /* Only consume the first message in a persistent connection. */
+            wrbuf_puts(b, "GET /next HTTP/1.1\r\n\r\n");
+            YAZ_CHECK_EQ(cs_complete_auto(wrbuf_buf(b), wrbuf_len(b)), len);
+            odr_setbuf(dec, wrbuf_buf(b), len, 0);
+            ok = z_GDU(dec, &g, 0, 0);
+            YAZ_CHECK(ok);
+            if (ok)
+            {
+                int n = j ? g->u.HTTP_Response->content_len :
+                    g->u.HTTP_Request->content_len;
+                const char *body = j ? g->u.HTTP_Response->content_buf :
+                    g->u.HTTP_Request->content_buf;
+                YAZ_CHECK_EQ(n, 1);
+                YAZ_CHECK(n == 1 && body[0] == 'X');
+            }
+            odr_destroy(dec);
+            wrbuf_destroy(b);
+        }
+    }
+}
+
 static void tst_http_same_origin(void)
 {
     static const struct {
@@ -545,6 +626,7 @@ int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
+    tst_http_framing();
     tst_request_validation();
     tst_cookies();
     tst_http_same_origin();

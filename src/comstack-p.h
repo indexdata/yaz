@@ -57,6 +57,11 @@ int yaz_unix_set_head_only(COMSTACK cs, int head_only);
 int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
                           int *content_len);
 
+/* Return the body offset, 0 for incomplete headers, or -1 for malformed
+ * headers. content_len retains its caller-supplied default if absent. */
+int yaz_http_parse_headers(const char *buf, int len, int off,
+                           int *content_len, int *chunked);
+
 YAZ_END_CDECL
 
 #endif

@@ -24,10 +24,16 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
                                   char **content_buf, int *content_len)
 {
     int i = off;
-    int chunked = 0;
+    int chunked = 0, framing_length = 0;
     const char *buf = o->op->buf;
     int size = o->op->size;
 
+    if (yaz_http_parse_headers(buf, size, off + 1,
+                               &framing_length, &chunked) <= 0)
+    {
+        o->error = OHTTP;
+        return 0;
+    }
     *headers = 0;
     while (i < size-1 && buf[i] == '\n')
     {
@@ -59,10 +65,6 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
             ;
 
         (*headers)->value = odr_strdupn(o, buf + po, i - po);
-        if (!yaz_strcasecmp((*headers)->name, "Transfer-Encoding")
-            &&
-            !yaz_strcasecmp((*headers)->value, "chunked"))
-            chunked = 1;
         headers = &(*headers)->next;
         if (i < size-1 && buf[i] == '\r')
             i++;
