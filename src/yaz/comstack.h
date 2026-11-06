@@ -437,6 +437,7 @@ YAZ_EXPORT void cs_get_host_args(const char *type_and_host, const char **args);
     \returns message length, 0 if incomplete, -1 on protocol error
 
     Examines the first message only; does not modify the input.
+    HTTP header validation follows cs_complete_auto.
  */
 YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
 /** \brief Finds the length of a complete BER or HTTP message
@@ -445,6 +446,10 @@ YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
     \returns message length, 0 if incomplete, -1 on protocol error
 
     Examines the first message only; does not modify the input.
+    HTTP rejects duplicate Content-Length fields (even equal values),
+    Transfer-Encoding combined with Content-Length, and transfer codings
+    other than a single chunked token. Field names must be HTTP tokens;
+    folded fields and control characters other than value tabs are rejected.
  */
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);
 /** \brief Legacy OpenSSL session accessor

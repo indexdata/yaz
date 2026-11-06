@@ -263,6 +263,7 @@ YAZ_EXPORT int yaz_decode_http_response_first(const char *buf, int sz, int *code
     it is reset or destroyed. Chunked bodies are decoded. On failure the
     output may point to a partially decoded request; check the return value
     before using it. Malformed input sets OHTTP.
+    Framing headers are validated using the same rules as cs_complete_auto.
 */
 YAZ_EXPORT int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p);
 /** \brief Decode an HTTP response from an ODR input buffer.
@@ -274,6 +275,7 @@ YAZ_EXPORT int yaz_decode_http_request(ODR o, Z_HTTP_Request **hr_p);
     it is reset or destroyed. Chunked bodies are decoded. On failure the
     output may be NULL or partially decoded; check the return value before
     using it. Malformed input sets OHTTP.
+    Framing headers are validated using the same rules as cs_complete_auto.
 */
 YAZ_EXPORT int yaz_decode_http_response(ODR o, Z_HTTP_Response **hr_p);
 /** \brief Encode or print an HTTP response.

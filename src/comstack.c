@@ -400,17 +400,80 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
     }
 }
 
+/* Parse complete header lines, starting immediately after the start line.
+ * Use the same framing grammar for completion and HTTP decoding. */
+int yaz_http_parse_headers(const char *buf, int len, int off,
+                           int *content_len, int *chunked)
+{
+    int have_length = 0;
+    *chunked = 0;
+    while (off < len)
+    {
+        int end = off, colon, value, value_end, i;
+        while (end < len && buf[end] != '\n')
+        {
+            if (end >= 8192)
+                return -1;
+            end++;
+        }
+        if (end >= 8192)
+            return -1;
+        if (end == len)
+            return 0;
+        value_end = end;
+        if (value_end > off && buf[value_end - 1] == '\r')
+            value_end--;
+        if (value_end == off)
+            return end + 1;
+        for (colon = off; colon < value_end && buf[colon] != ':'; colon++)
+            if (!http_token_char(buf[colon]))
+                return -1;
+        if (colon == off || colon == value_end)
+            return -1;
+        value = colon + 1;
+        for (i = value; i < value_end; i++)
+            if (((unsigned char) buf[i] < 32 && buf[i] != '\t')
+                || (unsigned char) buf[i] == 127)
+                return -1;
+        while (value < value_end && (buf[value] == ' ' || buf[value] == '\t'))
+            value++;
+        while (value_end > value &&
+               (buf[value_end - 1] == ' ' || buf[value_end - 1] == '\t'))
+            value_end--;
+        if (colon - off == 14 &&
+            !yaz_strncasecmp(buf + off, "Content-Length", 14))
+        {
+            int n;
+            if (have_length || *chunked || value == value_end)
+                return -1;
+            n = yaz_atoi(10, buf + value, value_end - value, content_len);
+            if (n <= 0 || n != value_end - value)
+                return -1;
+            have_length = 1;
+        }
+        else if (colon - off == 17 &&
+                 !yaz_strncasecmp(buf + off, "Transfer-Encoding", 17))
+        {
+            /* YAZ only supports a single chunked transfer coding. */
+            if (*chunked || have_length || value_end - value != 7 ||
+                yaz_strncasecmp(buf + value, "chunked", 7))
+                return -1;
+            *chunked = 1;
+        }
+        off = end + 1;
+    }
+    return 0;
+}
+
 static int cs_complete_http(const char *buf, int len, int head_only)
 {
-    /* deal with HTTP request/response */
     int i, content_len = 0, chunked = 0;
 
-    /* need at least one line followed by \n or \r .. */
-    for (i = 0; ; i++)
-        if (i == len)
-            return 0; /* incomplete */
-        else if (buf[i] == '\n' || buf[i] == '\r')
-            break;
+    for (i = 0; i < len && buf[i] != '\n'; i++)
+        if (i >= 8192)
+            return -1;
+    if (i == len)
+        return 0;
 
     /* check to see if it's a response with content */
     if (!head_only && !memcmp(buf, "HTTP/", 5))
@@ -431,71 +494,21 @@ static int cs_complete_http(const char *buf, int len, int head_only)
                 break;
             }
     }
-    for (i = 2; i <= len - 2; )
+    i = yaz_http_parse_headers(buf, len, i + 1, &content_len, &chunked);
+    if (i <= 0)
+        return i;
+    if (head_only)
+        return i;
+    if (chunked)
     {
-        if (i > 8192)
-            return -1;  /* header exceeds 8K: protocol error */
-        if (!skip_crlf(buf, len, &i))
-        {
-            i++;
-            continue;
-        }
-        if (skip_crlf(buf, len, &i))
-        {
-            /* inside content */
-            if (head_only)
-                return i;
-            if (chunked)
-            {
-                int r = yaz_http_parse_chunks(buf + i, len - i, 0, 0);
-                return r > 0 ? i + r : r;
-            }
-            if (content_len == -1)
-                return 0;   /* no content length */
-            if (content_len > INT_MAX - i)
-                return -1;
-            if (len >= i + content_len)
-                return i + content_len;
-            break;
-        }
-        if (i < len - 19 && !yaz_strncasecmp(buf+i, "Transfer-Encoding:", 18))
-        {
-            int token_start;
-            i += 18;
-            while (i < len && buf[i] == ' ')
-                i++;
-            token_start = i;
-            for (;;)
-            {
-                int j;
-                if (i >= len - 2)
-                    return 0;
-                if (i == token_start + 7 && !yaz_strncasecmp(buf + token_start, "chunked", 7))
-                    chunked = 1;
-                j = i;
-                if (skip_crlf(buf, len, &j))
-                    break;
-                i++;
-            }
-        }
-        else if (i < len - 16 && !yaz_strncasecmp(buf+i, "Content-Length:", 15))
-        {
-            int no_read;
-
-            i += 15;
-            while (i < len && buf[i] == ' ')
-                i++;
-            if (i == len)
-                return 0;
-            no_read = yaz_atoi(10, buf + i, len - i, &content_len);
-            if (no_read <= 0)
-                return -1;  /* overflow or no digits */
-            i += no_read;
-        }
-        else
-            i++;
+        int r = yaz_http_parse_chunks(buf + i, len - i, 0, 0);
+        return r > 0 ? i + r : r;
     }
-    return 0;
+    if (content_len == -1)
+        return 0; /* response delimited by connection close */
+    if (content_len > INT_MAX - i)
+        return -1;
+    return len >= i + content_len ? i + content_len : 0;
 }
 
 static int cs_complete_auto_x(const char *buf, int len, int head_only)
