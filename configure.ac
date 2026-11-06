@@ -8,6 +8,8 @@ AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9 subdir-objects])
 dnl
+dnl initgroups is a system extension, not a POSIX interface.
+AC_USE_SYSTEM_EXTENSIONS
 AC_DEFINE([_POSIX_C_SOURCE],[200809L],[Enable POSIX])
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
@@ -28,7 +30,7 @@ YAZ_DOC
 dnl
 dnl
 AC_C_BIGENDIAN
-AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h \
+AC_CHECK_HEADERS([dirent.h fnmatch.h wchar.h locale.h langinfo.h pwd.h grp.h \
 	unistd.h sys/select.h sys/socket.h sys/stat.h sys/time.h \
 	sys/times.h sys/types.h sys/un.h sys/wait.h sys/prctl.h \
 	netdb.h arpa/inet.h netinet/tcp.h netinet/in_systm.h \
@@ -222,7 +224,7 @@ iconv_t t = iconv_open("", "");
 	])
 fi
 dnl ------ various functions
-AC_CHECK_FUNCS([getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r nanosleep fopen64 open_memstream malloc_info])
+AC_CHECK_FUNCS([initgroups setgid setuid getaddrinfo vsnprintf gettimeofday poll strerror_r localtime_r nanosleep fopen64 open_memstream malloc_info])
 if test "$ac_cv_func_getaddrinfo" = "no"; then
 	AC_MSG_ERROR([getaddrinfo required])
 fi

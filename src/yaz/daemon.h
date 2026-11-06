@@ -49,16 +49,22 @@ YAZ_BEGIN_CDECL
     \param work working handler (which may be running in different process)
     \param data opaque data to be passed to work handler
     \param pidfile filename with Process-ID (NULL for no file)
-    \param uid effective user ID for handler (NULL for no same as caller)
+    \param uid account name for handler (NULL to keep the caller identity)
     \returns 0 for success, non-zero for failure.
 
     This function puts calls work handler which is supposed to carry
     out a daemon service with a possible changed User ID and in a
-    child process.
+    child process. When uid is supplied outside debug mode, supplementary
+    groups are initialized for that account, then its primary group ID and
+    user ID are set, before invoking work. This normally requires root
+    privileges, even when naming the current account. Failure to resolve
+    the account or set any part of its identity prevents service startup.
+    Platforms without the required APIs reject identity switching.
 
     Flag YAZ_DAEMON_FORK: Puts the service in the background on Unix.
 
     Flag YAZ_DAEMON_DEBUG: Puts the service in debug mode (no fork at all).
+    The uid parameter is ignored in this mode; the caller identity is kept.
 
     Flag YAZ_DAEMON_KEEPALIVE: Repeatedly calls work handler if it makes a
     "fatal" error.

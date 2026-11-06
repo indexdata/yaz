@@ -35,6 +35,10 @@
 #include <pwd.h>
 #endif
 
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
+
 #if HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
 #endif
@@ -252,23 +256,40 @@ int yaz_daemon(const char *progname,
     /* running in production mode. */
     if (uid)
     {
+#if HAVE_GRP_H && HAVE_INITGROUPS && HAVE_SETGID && HAVE_SETUID
         /* OK to use the non-thread version here */
         struct passwd *pw = getpwnam(uid);
+        uid_t target_uid;
+        gid_t target_gid;
         if (!pw)
         {
             yaz_log(YLOG_FATAL, "%s: Unknown user", uid);
             exit(1);
         }
+        /* Account lookups during initgroups may reuse passwd storage. */
+        target_uid = pw->pw_uid;
+        target_gid = pw->pw_gid;
         if (flags & YAZ_DAEMON_LOG_REOPEN)
         {
             FILE *f = yaz_log_file();
             if (f)
             {
-                if (fchown(fileno(f), pw->pw_uid, -1))
+                if (fchown(fileno(f), target_uid, -1))
                     yaz_log(YLOG_WARN|YLOG_ERRNO, "fchown logfile");
             }
         }
-        if (setuid(pw->pw_uid) < 0)
+        /* Reset all groups while we still have permission to do so. */
+        if (initgroups(uid, target_gid) < 0)
+        {
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "initgroups");
+            exit(1);
+        }
+        if (setgid(target_gid) < 0)
+        {
+            yaz_log(YLOG_FATAL|YLOG_ERRNO, "setgid");
+            exit(1);
+        }
+        if (setuid(target_uid) < 0)
         {
             yaz_log(YLOG_FATAL|YLOG_ERRNO, "setuid");
             exit(1);
@@ -279,6 +300,10 @@ int yaz_daemon(const char *progname,
 #ifdef PR_SET_DUMPABLE
         prctl(PR_SET_DUMPABLE, 1, 0, 0);
 #endif
+#endif
+#else
+        yaz_log(YLOG_FATAL, "User and group switching is not supported");
+        exit(1);
 #endif
     }
 
@@ -351,6 +376,11 @@ int yaz_daemon(const char *progname,
     }
     return 0;
 #else
+    if (uid && !(flags & YAZ_DAEMON_DEBUG))
+    {
+        yaz_log(YLOG_FATAL, "User and group switching is not supported");
+        return 1;
+    }
     work(data);
     return 0;
 #endif
