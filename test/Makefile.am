@@ -2,8 +2,8 @@
 ## Copyright (C) Index Data
 
 check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
- test_daemon test_daemon_no_groups \
- test_embed_record test_eventl test_filepath test_file_glob \
+ test_daemon test_daemon_no_groups test_daemon_no_passwd \
+ test_errno test_statserv_startup test_embed_record test_eventl test_filepath test_file_glob \
  test_iconv test_icu test_json \
  test_libstemmer test_log test_log_thread \
  test_match_glob test_matchstr test_mutex \
@@ -109,3 +109,9 @@ test_marc_read_sax_SOURCES = test_marc_read_sax.c
 test_daemon_SOURCES = test_daemon.c
 test_daemon_no_groups_SOURCES = test_daemon.c
 test_daemon_no_groups_CPPFLAGS = $(AM_CPPFLAGS) -DTEST_DAEMON_NO_GROUPS
+
+test_errno_SOURCES = test_errno.c
+test_statserv_startup_SOURCES = test_statserv_startup.c
+test_statserv_startup_LDADD = ../src/libyaz_server.la ../src/libyaz.la
+test_daemon_no_passwd_SOURCES = test_daemon.c
+test_daemon_no_passwd_CPPFLAGS = $(AM_CPPFLAGS) -DTEST_DAEMON_NO_PASSWD

@@ -1384,6 +1384,7 @@ static void show_version(void)
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
     char sep;
+    int ret;
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
@@ -1439,16 +1440,16 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 #ifndef WIN32
     signal(SIGTERM, normal_stop_handler);
 #endif
-    yaz_daemon(programname,
-               (control_block.background ? YAZ_DAEMON_FORK : 0),
-               daemon_handler, &pListener,
-               *control_block.pid_fname ? control_block.pid_fname : 0,
-               *control_block.setuid ? control_block.setuid : 0);
+    ret = yaz_daemon(programname,
+                     (control_block.background ? YAZ_DAEMON_FORK : 0),
+                     daemon_handler, &pListener,
+                     *control_block.pid_fname ? control_block.pid_fname : 0,
+                     *control_block.setuid ? control_block.setuid : 0);
 #ifndef WIN32
     if (sig_received)
         yaz_log(YLOG_LOG, "Received SIGTERM PID=%ld", (long) getpid());
 #endif
-    return 0;
+    return ret;
 }
 
 static void option_copy(char *dst, const char *src)

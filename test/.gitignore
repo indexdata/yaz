@@ -50,3 +50,6 @@ test_marc_read_sax
 *.trs
 test_daemon
 test_daemon_no_groups
+test_errno
+test_statserv_startup
+test_daemon_no_passwd
