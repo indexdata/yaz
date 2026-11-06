@@ -2,6 +2,7 @@
 ## Copyright (C) Index Data
 
 check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
+ test_daemon test_daemon_no_groups \
  test_embed_record test_eventl test_filepath test_file_glob \
  test_iconv test_icu test_json \
  test_libstemmer test_log test_log_thread \
@@ -104,3 +105,7 @@ test_scan_limits_SOURCES = test_scan_limits.c
 test_scan_limits_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_zgdu_SOURCES = test_zgdu.c
 test_marc_read_sax_SOURCES = test_marc_read_sax.c
+
+test_daemon_SOURCES = test_daemon.c
+test_daemon_no_groups_SOURCES = test_daemon.c
+test_daemon_no_groups_CPPFLAGS = $(AM_CPPFLAGS) -DTEST_DAEMON_NO_GROUPS

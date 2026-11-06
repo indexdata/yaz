@@ -48,3 +48,5 @@ test_marc_read_sax
 *.hex*
 *.revert*
 *.trs
+test_daemon
+test_daemon_no_groups

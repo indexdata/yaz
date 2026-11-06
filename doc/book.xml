@@ -3696,8 +3696,10 @@ int statserv_main(int argc, char **argv,
      </varlistentry>
      <varlistentry>
       <term><literal>char setuid[ODR_MAXNAME+1]</literal></term>
-      <listitem><para>Set user id to the user specified, after binding
-      the listener addresses.
+      <listitem><para>Set supplementary groups, primary group id, and user id to those of
+      the specified account, after binding the listener addresses. This
+      normally requires root privileges. Failure to set any part of the
+      identity prevents server startup.
      </para></listitem>
      </varlistentry>
      <varlistentry>

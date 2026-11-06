@@ -99,10 +99,11 @@
  <varlistentry>
   <term><literal>-u </literal><replaceable>uid</replaceable></term>
   <listitem><para>
-   Set user ID. Sets the real UID of the server process to that of the
-   given user. It's useful if you aren't comfortable with having the
-   server run as root, but you need to start it as such to bind a
-   privileged port.
+   Set the server's supplementary groups, primary group ID, and user ID
+   to those of the given account. This normally requires starting as root,
+   for example to bind a privileged port before dropping privileges.
+   Failure to resolve the account or change any part of its identity
+   prevents server startup.
   </para></listitem>
  </varlistentry>
  <varlistentry>
