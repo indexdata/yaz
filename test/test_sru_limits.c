@@ -20,6 +20,7 @@
 static Odr_int hits;
 static int expected_number;
 static int fetched;
+static int searched;
 static int presented;
 static int initialize_backend;
 static int backend_handle;
@@ -31,6 +32,7 @@ static statserv_options_block *backend_control;
 static int search(void *handle, bend_search_rr *rr)
 {
     YAZ_CHECK(rr->present_number >= 0 && rr->present_number <= INT_MAX);
+    searched++;
     rr->hits = hits;
     return 0;
 }
@@ -229,11 +231,22 @@ static void check(int mode, const char *maximum, const char *start,
 
     hits = hit_count;
     expected_number = count;
-    fetched = presented = 0;
-    if (mode == 2)
+    fetched = presented = searched = 0;
+    if (mode >= 2)
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(enc, Z_SRW_searchRetrieve_request, "1.2");
         sr->u.request->query = "test";
+        if (mode >= 3)
+        {
+            int i;
+            if (mode == 3)
+                for (i = 0; i < 20000; i++)
+                    wrbuf_puts(args, "@and ");
+            else
+                wrbuf_puts(args, mode == 4 ? "@and a" : "@and a b");
+            sr->u.request->queryType = "pqf";
+            sr->u.request->query = (char *) wrbuf_cstr(args);
+        }
         sr->u.request->maximumRecords = odr_intdup(enc, odr_atoi(maximum));
         sr->u.request->startRecord = odr_intdup(enc, odr_atoi(start));
         YAZ_CHECK_EQ(yaz_sru_soap_encode(gdu->u.HTTP_Request, sr, enc, 0), 0);
@@ -271,6 +284,10 @@ static void check(int mode, const char *maximum, const char *start,
     iochan_setdata(chan, assoc);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(chan, EVENT_INPUT);
+    if (mode >= 3)
+    {
+        YAZ_CHECK_EQ(searched, mode == 5 ? 1 : 0);
+    }
     YAZ_CHECK_EQ(fetched, count);
     YAZ_CHECK_EQ(presented, count ? 1 : 0);
     response = request_head(&assoc->outgoing);
@@ -313,6 +330,10 @@ int main(int argc, char **argv)
             check_unknown_host("1.0", "Keep-Alive", 1, mode);
             check_unknown_host("1.0", 0, 1, mode);
         }
+        /* Untrusted SRU PQF must return a diagnostic without backend work. */
+        check(3, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
+        check(4, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
+        check(5, "0", "1", 10, 0, 0);
         sprintf(int_max, "%d", INT_MAX);
         sprintf(above_int_max, ODR_INT_PRINTF, (Odr_int) INT_MAX + 1);
         for (mode = 0; mode < 3; mode++)

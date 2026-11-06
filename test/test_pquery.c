@@ -96,11 +96,105 @@ static void tst_term_create(void)
     odr_destroy(o);
 }
 
+static void check_complexity(YAZ_PQF_Parser parser, ODR odr,
+                             WRBUF query, int allowed)
+{
+    Z_RPNQuery *rpn = yaz_pqf_parse(parser, odr, wrbuf_cstr(query));
+    const char *msg;
+    size_t offset;
+    int error = yaz_pqf_error(parser, &msg, &offset);
+    YAZ_CHECK_EQ(rpn != 0, allowed);
+    YAZ_CHECK_EQ(error, allowed ? YAZ_PQF_ERROR_NONE : YAZ_PQF_ERROR_COMPLEXITY);
+    YAZ_CHECK(offset <= wrbuf_len(query));
+    if (!allowed)
+    {
+        YAZ_CHECK(!strcmp(msg, "query complexity limit exceeded"));
+        YAZ_CHECK(offset > 0);
+    }
+    odr_reset(odr);
+    /* Both parser entry points must apply the same bounds. */
+    YAZ_CHECK_EQ(p_query_rpn(odr, wrbuf_cstr(query)) != 0, allowed);
+    odr_reset(odr);
+    /* A rejected query must not poison later uses of the same parser. */
+    YAZ_CHECK(yaz_pqf_parse(parser, odr, "@and a b") != 0);
+    YAZ_CHECK_EQ(yaz_pqf_error(parser, &msg, &offset), YAZ_PQF_ERROR_NONE);
+    odr_reset(odr);
+}
+
+static void balanced_query(WRBUF query, unsigned int nodes)
+{
+    if (nodes == 1)
+        wrbuf_puts(query, "x ");
+    else
+    {
+        unsigned int left = (nodes - 1) / 2;
+        if (!(left & 1))
+            left--;
+        wrbuf_puts(query, "@and ");
+        balanced_query(query, left);
+        balanced_query(query, nodes - 1 - left);
+    }
+}
+
+static void tst_complexity(void)
+{
+    static const char *prefix[] = {
+        "@and ", "@or ", "@not ", "@prox 0 0 0 0 k 0 ",
+        "@term general ", "@attr 1=4 "
+    };
+    YAZ_PQF_Parser parser = yaz_pqf_create();
+    ODR odr = odr_createmem(ODR_ENCODE);
+    WRBUF query = wrbuf_alloc();
+    size_t kind;
+    int extra, right;
+    unsigned int i;
+    for (kind = 0; kind < sizeof(prefix) / sizeof(*prefix); kind++)
+        for (right = 0; right <= (kind < 4); right++)
+            for (extra = 0; extra <= 1; extra++)
+            {
+                unsigned int nesting = YAZ_PQF_MAX_DEPTH - 1 + extra;
+                wrbuf_rewind(query);
+                for (i = 0; i < nesting; i++)
+                {
+                    wrbuf_puts(query, prefix[kind]);
+                    if (right)
+                        wrbuf_puts(query, "x ");
+                }
+                wrbuf_puts(query, "x ");
+                if (kind < 4 && !right)
+                    for (i = 0; i < nesting; i++)
+                        wrbuf_puts(query, "x ");
+                check_complexity(parser, odr, query, !extra);
+            }
+    /* A very deep, incomplete remote query must fail at the bound. */
+    wrbuf_rewind(query);
+    for (i = 0; i < 20000; i++)
+        wrbuf_puts(query, "@and ");
+    check_complexity(parser, odr, query, 0);
+
+    /* Shallow balanced trees exercise the independent total-work bound. */
+    wrbuf_rewind(query);
+    balanced_query(query, YAZ_PQF_MAX_NODES - 1);
+    check_complexity(parser, odr, query, 1);
+    for (extra = 0; extra <= 1; extra++)
+    {
+        wrbuf_rewind(query);
+        for (i = 0; i <= (unsigned int) extra; i++)
+            wrbuf_puts(query, "@term general ");
+        balanced_query(query, YAZ_PQF_MAX_NODES - 1);
+        check_complexity(parser, odr, query, !extra);
+    }
+    wrbuf_destroy(query);
+    odr_destroy(odr);
+    yaz_pqf_destroy(parser);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
     tst_term_create();
+    tst_complexity();
     YAZ_CHECK_TERM;
 }
 

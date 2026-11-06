@@ -5532,6 +5532,15 @@ typedef struct {
    <sect2 id="PQF">
     <title>Prefix Query Format</title>
     <para>
+     PQF query parsing permits at most 256 simultaneously nested parsing
+     steps and 4096 total steps per query. Boolean operators, operands,
+     and each <literal>@attr</literal> or <literal>@term</literal> modifier
+     count as steps. Queries exceeding either limit are rejected with
+     <literal>YAZ_PQF_ERROR_COMPLEXITY</literal>. The same limits apply to
+     the legacy <function>p_query_rpn</function> entry point. SRU requests
+     with excessive PQF complexity receive a query syntax diagnostic.
+    </para>
+    <para>
      Since RPN or reverse polish notation is really just a fancy way of
      describing a suffix notation format (operator follows operands), it
      would seem that the confusion is total when we now introduce a prefix
