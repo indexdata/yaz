@@ -1656,7 +1656,11 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
     {
         char *buf = 0;
         const char *e = getenv("YAZ_ZTEST_XML_FETCH");
-        if (e)
+        /* The client supplies a filename component, never a path. Keep
+           separators and Windows drive/stream syntax out of file lookups. */
+        if (e && *esn &&
+            esn[strspn(esn, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                       "abcdefghijklmnopqrstuvwxyz0123456789._-")] == '\0')
         {
             WRBUF w = wrbuf_alloc();
             struct stat sbuf;
@@ -1673,6 +1677,7 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
             }
             if (file)
                 fclose(file);
+            wrbuf_destroy(w);
         }
         return buf;
     }
