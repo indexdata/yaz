@@ -323,7 +323,10 @@ typedef struct bend_initresult
 {
     int errcode;               /* 0==OK */
     char *errstring;           /* system error string or NULL */
-    void *handle;              /* private handle to the backend module */
+    /** Private backend handle, passed to operation callbacks. May be NULL
+        after successful initialization for a stateless backend. The
+        frontend still resets its callbacks when changing virtual hosts. */
+    void *handle;
 } bend_initresult;
 
 #define BEND_NAME_MAX 1024
@@ -350,6 +353,7 @@ typedef struct statserv_options_block
 
     void *handle;                 /**< Handle */
     bend_initresult *(*bend_init)(bend_initrequest *r);
+    /** Releases a non-NULL backend handle; not called for NULL handles. */
     void (*bend_close)(void *handle);
 #ifdef WIN32
     /* We only have these members for the windows version */

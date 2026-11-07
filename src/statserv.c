@@ -333,8 +333,10 @@ int control_association(association *assoc, const char *host, int force_open)
             }
             if (listen_match && host_match)
             {
+                /* A successful backend may have no private handle. Its
+                 * callbacks still belong to the previously selected host. */
                 if (force_open ||
-                    (assoc->last_control != &gfs->cb && assoc->backend))
+                    (assoc->last_control != &gfs->cb && assoc->init))
                 {
                     statserv_setcontrol(assoc->last_control);
                     if (assoc->backend && assoc->init)
