@@ -31,6 +31,8 @@ struct yaz_marc_sax_t_
     WRBUF tag;
     WRBUF indicators;
     int indicator_length;
+    int have_leader;
+    int invalid_record;
 };
 
 static int get_attribute(const char *name, int nb_attributes, const xmlChar **attributes, WRBUF result)
@@ -78,6 +80,21 @@ static void yaz_start_element_ns(void *vp,
     yaz_marc_sax_t ctx = vp;
 
     wrbuf_rewind(ctx->cdata);
+    if (strcmp((const char *)localname, "record") == 0)
+    {
+        yaz_marc_reset(ctx->mt);
+        ctx->indicator_length = 0;
+        ctx->have_leader = 0;
+        ctx->invalid_record = 0;
+        return;
+    }
+    if (!ctx->have_leader &&
+        (!strcmp((const char *)localname, "controlfield") ||
+         !strcmp((const char *)localname, "datafield") ||
+         !strcmp((const char *)localname, "subfield")))
+        ctx->invalid_record = 1;
+    if (ctx->invalid_record)
+        return;
     if (strcmp((const char *)localname, "controlfield") == 0)
     {
         wrbuf_rewind(ctx->tag);
@@ -95,16 +112,24 @@ static void yaz_start_element_ns(void *vp,
     {
         get_attribute("code", nb_attributes, attributes, ctx->cdata);
     }
-    else if (strcmp((const char *)localname, "record") == 0)
-    {
-        yaz_marc_reset(ctx->mt);
-    }
 }
 
 static void yaz_end_element_ns(void *vp, const xmlChar *localname,
                                const xmlChar *prefix, const xmlChar *URI)
 {
     yaz_marc_sax_t ctx = vp;
+    if (strcmp((const char *)localname, "record") == 0)
+    {
+        if (ctx->have_leader && !ctx->invalid_record)
+            ctx->cb_func(ctx->mt, ctx->cb_data);
+        wrbuf_rewind(ctx->cdata);
+        return;
+    }
+    if (ctx->invalid_record)
+    {
+        wrbuf_rewind(ctx->cdata);
+        return;
+    }
     if (strcmp((const char *)localname, "leader") == 0)
     {
         int identifier_length;
@@ -112,9 +137,16 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
         int length_data_entry;
         int length_starting;
         int length_implementation;
+        if (wrbuf_len(ctx->cdata) != 24)
+        {
+            ctx->invalid_record = 1;
+            wrbuf_rewind(ctx->cdata);
+            return;
+        }
         yaz_marc_set_leader(ctx->mt, wrbuf_cstr(ctx->cdata),
                             &ctx->indicator_length, &identifier_length, &base_address,
                             &length_data_entry, &length_starting, &length_implementation);
+        ctx->have_leader = 1;
     }
     else if (strcmp((const char *)localname, "controlfield") == 0)
     {
@@ -124,10 +156,6 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
     else if (strcmp((const char *)localname, "subfield") == 0)
     {
         yaz_marc_add_subfield(ctx->mt, wrbuf_buf(ctx->cdata), wrbuf_len(ctx->cdata));
-    }
-    else if (strcmp((const char *)localname, "record") == 0)
-    {
-        ctx->cb_func(ctx->mt, ctx->cb_data);
     }
     wrbuf_rewind(ctx->cdata);
 }
@@ -143,6 +171,9 @@ yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt, void (*cb)(yaz_marc_t, void *), v
     yaz_marc_sax_t ctx = xmalloc(sizeof(*ctx));
 
     ctx->mt = mt;
+    ctx->indicator_length = 0;
+    ctx->have_leader = 0;
+    ctx->invalid_record = 0;
     ctx->cb_data = cb_data;
     ctx->cb_func = cb;
     ctx->cdata = wrbuf_alloc();
