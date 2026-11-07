@@ -44,6 +44,7 @@ test_shared_ptr
 test_solr
 test_zgdu
 test_marc_read_sax
+test_marc_read_iso2709
 *.diff
 *.hex*
 *.revert*

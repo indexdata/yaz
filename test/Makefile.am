@@ -13,7 +13,7 @@ check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
  test_shared_ptr test_soap1 test_soap2 test_solr test_sortspec test_sru_limits \
  test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
- test_marc_read_sax test_sru_update test_zoom_send
+ test_marc_read_iso2709 test_marc_read_sax test_sru_update test_zoom_send
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
@@ -120,3 +120,5 @@ test_zoom_send_SOURCES = test_zoom_send.c
 
 test_sru_update_SOURCES = test_sru_update.c
 test_sru_update_LDADD = ../src/libyaz_server.la ../src/libyaz.la
+
+test_marc_read_iso2709_SOURCES = test_marc_read_iso2709.c

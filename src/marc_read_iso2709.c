@@ -36,6 +36,11 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
 
     yaz_marc_reset(mt);
 
+    if (!buf || (bsize != -1 && bsize < 24))
+    {
+        yaz_marc_cprintf(mt, "Buffer too short for leader");
+        return -1;
+    }
     if (!atoi_n_check(buf, 5, &record_length))
     {
         yaz_marc_cprintf(mt, "Bad leader");
@@ -43,14 +48,14 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
     }
     if (record_length < 25)
     {
-        yaz_marc_cprintf(mt, "Record length %d < 24", record_length);
+        yaz_marc_cprintf(mt, "Record length %d < 25", record_length);
         return -1;
     }
-    /* ballout if bsize is known and record_length is less than that */
+    /* Reject a declared record larger than the supplied buffer. */
     if (bsize != -1 && record_length > bsize)
     {
         yaz_marc_cprintf(mt, "Record appears to be larger than buffer %d < %d",
-                         record_length, bsize);
+                         bsize, record_length);
         return -1;
     }
     if (yaz_marc_get_debug(mt))
@@ -134,11 +139,18 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         entry_p += length_data_entry;
         data_offset = atoi_n(buf+entry_p, length_starting);
         entry_p += length_starting;
+        /* Validate before computing offsets or inspecting field bytes. */
+        if (base_address < 25 || base_address >= record_length ||
+            data_length <= 0 || data_offset < 0 ||
+            data_offset >= record_length - base_address ||
+            data_length > record_length - base_address - data_offset)
+        {
+            yaz_marc_cprintf(mt, "Directory offset %d: Data out of bounds",
+                             entry_p0);
+            return -1;
+        }
         i = data_offset + base_address;
-        end_offset = i+data_length-1;
-
-        if (data_length <= 0 || data_offset < 0)
-            break;
+        end_offset = i + data_length - 1;
 
         if (yaz_marc_get_debug(mt))
         {
@@ -146,21 +158,16 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                              " data-offset %d",
                              tag, entry_p0, data_length, data_offset);
         }
-        if (end_offset >= record_length)
-        {
-            yaz_marc_cprintf(mt, "Directory offset %d: Data out of bounds %d >= %d",
-                             entry_p0, end_offset, record_length);
-            break;
-        }
-
         if (memcmp (tag, "00", 2))
             identifier_flag = 1;  /* if not 00X assume subfields */
         else if (indicator_length < 4 && indicator_length > 0)
         {
             /* Danmarc 00X have subfields */
-            if (buf[i + indicator_length] == ISO2709_IDFS)
+            if (indicator_length < end_offset - i &&
+                buf[i + indicator_length] == ISO2709_IDFS)
                 identifier_flag = 1;
-            else if (buf[i + indicator_length + 1] == ISO2709_IDFS)
+            else if (indicator_length + 1 < end_offset - i &&
+                     buf[i + indicator_length + 1] == ISO2709_IDFS)
                 identifier_flag = 2;
         }
 
@@ -172,7 +179,30 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
             {
                 int j, i_start = i;
                 for (j = 0; j < indicator_length; j++)
-                    i += (int) yaz_marc_sizeof_char(mt, buf + i);
+                {
+                    /* The character-width helper probes up to four bytes.
+                     * Isolate those probes from the field terminator and
+                     * any following field or record. */
+                    char probe[4] = { 0, 0, 0, 0 };
+                    int available = end_offset - i;
+                    size_t width;
+                    if (available <= 0 || buf[i] == ISO2709_FS ||
+                        buf[i] == ISO2709_RS || buf[i] == ISO2709_IDFS)
+                    {
+                        yaz_marc_cprintf(mt, "Truncated indicators in tag %s", tag);
+                        return -1;
+                    }
+                    if (available > (int) sizeof(probe))
+                        available = sizeof(probe);
+                    memcpy(probe, buf + i, available);
+                    width = yaz_marc_sizeof_char(mt, probe);
+                    if (!width || width > (size_t) available)
+                    {
+                        yaz_marc_cprintf(mt, "Truncated indicator in tag %s", tag);
+                        return -1;
+                    }
+                    i += width;
+                }
                 yaz_marc_add_datafield(mt, tag, buf + i_start,
                                        i - i_start);
             }

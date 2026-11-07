@@ -136,9 +136,10 @@ YAZ_EXPORT void yaz_marc_modify_leader(yaz_marc_t mt, size_t off,
 /** \brief read ISO2709/MARC record from buffer
     \param mt handle
     \param buf ISO2709 buffer of size bsize
-    \param bsize size of buffer (-1 for unlimited size)
+    \param bsize size of buffer (-1 if the caller guarantees a complete record)
 
-    Parses ISO2709 record from supplied buffer
+    Parses ISO2709 record from supplied buffer. With bsize == -1, buf must
+    contain the full record length declared in its leader.
     \retval -1 ERROR
     \retval >0 OK (length)
 */
