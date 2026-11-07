@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-check_PROGRAMS = test_ccl test_comstack test_cql2ccl \
+check_PROGRAMS = test_client_record test_ccl test_comstack test_cql2ccl \
  test_daemon test_daemon_no_groups test_daemon_no_passwd \
  test_errno test_statserv_startup test_embed_record test_eventl test_filepath test_file_glob \
  test_iconv test_icu test_json \
@@ -127,3 +127,7 @@ test_marc_read_iso2709_SOURCES = test_marc_read_iso2709.c
 # libraries on macOS bind their internal calls to their own server state.
 test_gfs_vhosts_SOURCES = test_gfs_vhosts.c ../src/seshigh.c
 test_gfs_vhosts_LDADD = ../src/libyaz_server.la ../src/libyaz.la
+
+test_client_record_SOURCES = test_client_record.c ../client/admin.c \
+ ../client/tabcomplete.c ../client/fhistory.c
+test_client_record_LDADD = ../src/libyaz.la $(READLINE_LIBS)

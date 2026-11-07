@@ -1033,7 +1033,7 @@ static void display_record(Z_External *r)
             {
                 if (!oid_oidcmp(oid, yaz_oid_recsyn_usmarc))
                 {
-                    if (octet_buf[9] == 'a')
+                    if (octet_len > 9 && octet_buf[9] == 'a')
                         from = "UTF-8";
                     else
                         from = "MARC-8";
