@@ -1,27 +1,57 @@
-# Build yaz from source with clang c23
+# Build full-featured static libraries with Clang in C23 mode.
 name: Build complete YAZ, clang, c23
-on: [pull_request]
+
+on: [pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
- build-clang-c23-complete:
-  runs-on: ubuntu-latest
-  steps:
-   - uses: actions/checkout@v6
-     with:
-      fetch-depth: 1
-   - name: Update packages
-     run: sudo apt update
-   - name: Install required and optional dependencies
-     run: >
-      sudo apt install autoconf automake libtool clang make bison
-      tclsh xsltproc docbook docbook-xml docbook-xsl
-      pkg-config libxslt1-dev libgnutls28-dev
-      libreadline-dev libwrap0-dev libicu-dev
-      libhiredis-dev libmemcached-dev
-   - name: Run buildconf
-     run: ./buildconf.sh
-   - name: Run configure
-     run: >
-      CC=clang CFLAGS="-std=c23" ./configure --enable-tcpd --with-xslt --with-gnutls --with-icu
-      --with-memcached --with-redis
-   - name: Run Make check
-     run: make -j4 check
+  build-clang-c23-complete:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            autoconf automake libtool clang make bison \
+            tclsh xsltproc docbook docbook-xml docbook-xsl \
+            pkg-config libxslt1-dev libgnutls28-dev \
+            libreadline-dev libwrap0-dev libicu-dev \
+            libhiredis-dev libmemcached-dev
+
+      - name: Run buildconf
+        run: ./buildconf.sh
+
+      - name: Configure static libraries
+        env:
+          CC: clang
+          CFLAGS: -g -O2 -Wall -std=c23
+        run: >
+          ./configure --disable-shared --enable-static
+          --enable-tcpd --with-xslt --with-gnutls --with-icu
+          --with-memcached --with-redis
+
+      - name: Build and test
+        run: make -j4 check
+
+      - name: Show build and test failures
+        if: failure()
+        run: |
+          for log in config.log test/test-suite.log ztest/test-suite.log; do
+            if test -f "$log"; then
+              echo "::group::$log"
+              cat "$log"
+              echo "::endgroup::"
+            fi
+          done

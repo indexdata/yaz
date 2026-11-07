@@ -6,6 +6,10 @@ on: [pull_request, workflow_dispatch]
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-macos:
     strategy:
@@ -27,9 +31,11 @@ jobs:
 
       - name: Set dependency paths
         run: |
-          echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
-          echo "$(brew --prefix tcl-tk@8)/bin" >> "$GITHUB_PATH"
-          echo "$(brew --prefix libxslt)/bin" >> "$GITHUB_PATH"
+          {
+            echo "$(brew --prefix bison)/bin"
+            echo "$(brew --prefix tcl-tk@8)/bin"
+            echo "$(brew --prefix libxslt)/bin"
+          } >> "$GITHUB_PATH"
           {
             echo "PKG_CONFIG_PATH=$(brew --prefix libxml2)/lib/pkgconfig:$(brew --prefix libxslt)/lib/pkgconfig:$(brew --prefix icu4c)/lib/pkgconfig"
             echo "CPPFLAGS=-I$(brew --prefix readline)/include"
@@ -56,9 +62,13 @@ jobs:
       - name: Build and test
         run: make -j3 check
 
-      - name: Show test failures
+      - name: Show build and test failures
         if: failure()
         run: |
-          if test -f test/test-suite.log; then
-            cat test/test-suite.log
-          fi
+          for log in config.log test/test-suite.log ztest/test-suite.log; do
+            if test -f "$log"; then
+              echo "::group::$log"
+              cat "$log"
+              echo "::endgroup::"
+            fi
+          done
