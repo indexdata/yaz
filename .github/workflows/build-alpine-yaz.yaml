@@ -1,0 +1,57 @@
+# Build and test shared libraries against musl and the system stemmer.
+name: Build YAZ on Alpine Linux
+
+on: [pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  build-alpine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Keep JavaScript actions on the host; build and test inside Alpine.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Build and test with musl
+        run: |
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/work" \
+            --workdir /work \
+            --env CC=gcc \
+            --env CFLAGS="-g -O2 -Wall" \
+            --env XML_CATALOG_FILES=/etc/xml/catalog \
+            alpine:3.24 sh -ec '
+              apk add --no-cache \
+                build-base autoconf automake libtool bison git tcl pkgconf \
+                libxml2-dev libxslt-dev gnutls-dev icu-dev icu-data-full \
+                readline-dev libstemmer-dev docbook-xml docbook-xsl-nons
+
+              # The mounted checkout belongs to the runner, not container root.
+              for repo in /work /work/m4 /work/doc/common /work/src/libstemmer_c; do
+                git config --global --add safe.directory "$repo"
+              done
+
+              ./buildconf.sh
+              ./configure --enable-shared --disable-static \
+                --with-xslt --with-gnutls --with-icu --with-stemmer \
+                --disable-tcpd --without-memcached --without-redis \
+                --with-docbook-dtd=/usr/share/xml/docbook/xml-dtd-4.5 \
+                --with-docbook-xsl=/usr/share/xml/docbook/xsl-stylesheets-nons
+              make -j3 check
+            '
+
+      - name: Show build and test failures
+        if: failure()
+        run: |
+          for log in config.log test/test-suite.log ztest/test-suite.log; do
+            if test -f "$log"; then
+              echo "::group::$log"
+              cat "$log"
+              echo "::endgroup::"
+            fi
+          done
