@@ -56,3 +56,4 @@ test_statserv_startup
 test_daemon_no_passwd
 test_zoom_send
 test_sru_update
+test_gfs_vhosts
