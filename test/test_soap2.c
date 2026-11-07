@@ -10,9 +10,100 @@
 #include <yaz/test.h>
 #include <yaz/srw.h>
 #include <yaz/soap.h>
+#include <yaz/wrbuf.h>
 
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
+
+static void check_soap_namespace(const char *xml, const char *error)
+{
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler handlers[] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    char *buf = (char *) xml;
+    int len = strlen(xml);
+    Z_SRW_PDU *sr = 0;
+    char *charset = 0;
+    Z_HTTP_Request *request;
+
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), error ? -1 : 0);
+    YAZ_CHECK(soap != 0);
+    if (soap)
+    {
+        YAZ_CHECK_EQ(soap->which, error ? Z_SOAP_error : Z_SOAP_generic);
+        if (error && soap->which == Z_SOAP_error)
+        {
+            YAZ_CHECK(!strcmp(soap->u.soap_error->fault_code, "SOAP-ENV:Client"));
+            YAZ_CHECK(!strcmp(soap->u.soap_error->fault_string, error));
+        }
+    }
+    odr_reset(o);
+    soap = 0;
+    request = z_get_HTTP_Request(o)->u.HTTP_Request;
+    request->method = "POST";
+    request->content_buf = (char *) xml;
+    request->content_len = strlen(xml);
+    z_HTTP_header_add(o, &request->headers, "Content-Type", "text/xml");
+    YAZ_CHECK_EQ(yaz_srw_decode(request, &sr, &soap, o, &charset), error ? 1 : 0);
+    YAZ_CHECK(error ? sr == 0 : sr != 0);
+    YAZ_CHECK(soap && soap->which == (error ? Z_SOAP_error : Z_SOAP_generic));
+    odr_destroy(o);
+}
+
+static void tst_soap_namespaces(void)
+{
+    const char *ns[] = {
+        "http://schemas.xmlsoap.org/soap/envelope/",
+        "http://www.w3.org/2001/06/soap-envelope"
+    };
+    const char *payload = "<searchRetrieveRequest xmlns=\""
+        YAZ_XMLNS_SRU_v1_1 "\"><version>1.1</version>"
+        "<query>test</query></searchRetrieveRequest>";
+    const struct {
+        const char *header;
+        const char *body;
+        const char *error;
+    } cases[] = {
+        { "<Header/>", "s:Body", "SOAP Body element not found" },
+        { "", "Body", "SOAP bad NS for Body element" },
+        { "<s:Header/>", "Body", "SOAP bad NS for Body element" },
+        { "<x:Header xmlns:x=\"urn:wrong\"/>", "s:Body",
+          "SOAP Body element not found" },
+        { "", "x:Body", "SOAP bad NS for Body element" },
+        { "", "s:Body", 0 },
+        { "<s:Header/>", "s:Body", 0 }
+    };
+    size_t i, j;
+    WRBUF xml = wrbuf_alloc();
+    for (i = 0; i < sizeof(ns) / sizeof(*ns); i++)
+    {
+        for (j = 0; j < sizeof(cases) / sizeof(*cases); j++)
+        {
+            wrbuf_rewind(xml);
+            wrbuf_printf(xml, "<s:Envelope xmlns:s=\"%s\" xmlns:x=\"urn:wrong\">"
+                         "%s<%s>%s</%s></s:Envelope>", ns[i], cases[j].header,
+                         cases[j].body, payload, cases[j].body);
+            check_soap_namespace(wrbuf_cstr(xml), cases[j].error);
+        }
+        /* Default namespaces qualify elements; xmlns="" removes them. */
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<Envelope xmlns=\"%s\"><Header/><Body>%s</Body>"
+                     "</Envelope>", ns[i], payload);
+        check_soap_namespace(wrbuf_cstr(xml), 0);
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<Envelope xmlns=\"%s\"><Header xmlns=\"\"/>"
+                     "<Body>%s</Body></Envelope>", ns[i], payload);
+        check_soap_namespace(wrbuf_cstr(xml), "SOAP Body element not found");
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<Envelope xmlns=\"%s\"><Header/>"
+                     "<Body xmlns=\"\">%s</Body></Envelope>", ns[i], payload);
+        check_soap_namespace(wrbuf_cstr(xml), "SOAP bad NS for Body element");
+    }
+    wrbuf_destroy(xml);
+}
 
 static void tst_srw(void)
 {
@@ -160,6 +251,7 @@ int main(int argc, char **argv)
 #if YAZ_HAVE_XML2
     LIBXML_TEST_VERSION;
     tst_srw();
+    tst_soap_namespaces();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
