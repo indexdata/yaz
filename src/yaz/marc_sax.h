@@ -48,8 +48,13 @@ typedef struct yaz_marc_sax_t_ *yaz_marc_sax_t;
 
 /** \brief construct marc SAX parser
     \param mt marc handle
-    \param cb function called for each record
+    \param cb function called for each accepted record
     \param cb_data data to be passed to each cb call
+
+    A record must have a 24-byte leader before its fields. Records with
+    missing or incorrectly sized leaders, or fields before the leader,
+    are skipped without calling cb. Parsing continues with the next record.
+    This handler does not perform full MARCXML schema validation.
   */
 YAZ_EXPORT yaz_marc_sax_t yaz_marc_sax_new(yaz_marc_t mt,
     void (*cb)(yaz_marc_t mt, void *), void *cb_data);
