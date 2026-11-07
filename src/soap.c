@@ -120,7 +120,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         ptr = ptr->children;
         while(ptr && ptr->type == XML_TEXT_NODE)
             ptr = ptr->next;
-        if (ptr && ptr->type == XML_ELEMENT_NODE &&
+        if (ptr && ptr->type == XML_ELEMENT_NODE && ptr->ns &&
             !xmlStrcmp(ptr->ns->href, BAD_CAST p->ns) &&
             !xmlStrcmp(ptr->name, BAD_CAST "Header"))
         {
@@ -136,7 +136,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "SOAP Body element not found", 0);
         }
-        if (xmlStrcmp(ptr->ns->href, BAD_CAST p->ns))
+        if (!ptr->ns || xmlStrcmp(ptr->ns->href, BAD_CAST p->ns))
         {
             xmlFreeDoc(doc);
             return z_soap_error(o, p, "SOAP-ENV:Client",
