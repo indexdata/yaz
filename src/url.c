@@ -172,12 +172,6 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         || z_HTTP_header_lookup(user_headers, "Cookie") != 0;
 
     wrbuf_rewind(p->w_error);
-    if (buf && len > INT_MAX)
-    {
-        wrbuf_printf(p->w_error, "HTTP request too large for URL %s", uri);
-        log_warn(p);
-        return 0;
-    }
     odr_reset(p->odr_out);
     yaz_cookies_reset(p->cookies);
     /* Keep URL credentials alive across same-origin redirects and output
@@ -185,6 +179,14 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     uri_odr = odr_createmem(ODR_ENCODE);
     extract_user_pass(uri_odr->mem, uri, &uri_lean, &http_user, &http_pass);
     uri = uri_lean;
+    /* Even failures before transport creation must use the stripped URI. */
+    if (buf && len > INT_MAX)
+    {
+        wrbuf_printf(p->w_error, "HTTP request too large for URL %s", uri);
+        log_warn(p);
+        odr_destroy(uri_odr);
+        return 0;
+    }
     has_credentials = has_credentials || http_user || http_pass || p->cert_fname;
     while (1)
     {
