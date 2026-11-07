@@ -1,2 +1,4 @@
 *.raw
+*.trs
 yaz-client
+test_client_history

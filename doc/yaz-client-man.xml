@@ -439,6 +439,23 @@
       issued and the Z39.50 Initialize Request is sent, so this command
       must be used before <literal>open</literal> in order to be effective.
      </para>
+     <para>
+      Authentication commands remain available for recall with the up arrow
+      during the current session when readline is enabled, but are not saved
+      in <filename>$HOME/.yazclient.history</filename>. This also applies to
+      abbreviated commands and authentication commands inside
+      <literal>push_command</literal>. Entries containing embedded newlines
+      are likewise kept only in session history. Previously saved authentication
+      commands are discarded when history is loaded and removed from the
+      history file when the client exits normally.
+     </para>
+     <para>
+      Passwords and OpenStyle authentication strings are displayed as
+      <literal>***</literal> in confirmations and settings output. Credentials
+      remain visible when typing or recalling a command. This does not redact
+      authentication from explicitly enabled protocol logs or existing copies
+      of history files.
+     </para>
     </listitem>
    </varlistentry>
 

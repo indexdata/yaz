@@ -188,6 +188,7 @@ struct eoi {
 } extraOtherInfos[maxOtherInfosSupported];
 
 static void process_cmd_line(char* line);
+static int history_may_persist(const char *line);
 #if HAVE_READLINE_READLINE_H
 static char **readline_completer(char *text, int start, int end);
 #endif
@@ -839,7 +840,7 @@ static int cmd_authentication(const char *arg)
         {
             auth->which = Z_IdAuthentication_open;
             auth->u.open = args[0];
-            printf("Authentication set to Open (%s)\n", args[0]);
+            printf("Authentication set to Open (***)\n");
         }
     }
     else if (r == 2)
@@ -852,7 +853,7 @@ static int cmd_authentication(const char *arg)
         auth->u.idPass->userId = !strcmp(args[0], "-") ? 0 : args[0];
         auth->u.idPass->password = !strcmp(args[1], "-") ? 0 : args[1];
         printf("Authentication set to User (%s), Pass (%s)\n",
-               args[0], args[1]);
+               args[0], auth->u.idPass->password ? "***" : "");
     }
     else if (r == 3)
     {
@@ -864,7 +865,7 @@ static int cmd_authentication(const char *arg)
         auth->u.idPass->userId = args[0];
         auth->u.idPass->password = args[2];
         printf("Authentication set to User (%s), Group (%s), Pass (%s)\n",
-               args[0], args[1], args[2]);
+               args[0], args[1], "***");
     }
     else
     {
@@ -4365,7 +4366,7 @@ static void initialize(const char *rc_file)
 
     cmd_format("usmarc");
 
-    file_history = file_history_new();
+    file_history = file_history_new(history_may_persist);
 
     source_rc_file(rc_file);
 
@@ -4975,11 +4976,11 @@ static int cmd_list_all(const char* args)
             printf("Authentication       : IdPass\n");
             printf("    Login User       : %s\n",auth->u.idPass->userId?auth->u.idPass->userId:"");
             printf("    Login Group      : %s\n",auth->u.idPass->groupId?auth->u.idPass->groupId:"");
-            printf("    Password         : %s\n",auth->u.idPass->password?auth->u.idPass->password:"");
+            printf("    Password         : %s\n",auth->u.idPass->password?"***":"");
             break;
         case Z_IdAuthentication_open:
             printf("Authentication       : psOpen\n");
-            printf("    Open string      : %s\n",auth->u.open);
+            printf("    Open string      : ***\n");
             break;
         default:
             printf("Authentication       : Unknown\n");
@@ -5267,6 +5268,33 @@ static int cmd_register_tab(const char* arg)
     tabslist[num_of_tabs+1] = NULL;
 #endif
     return 1;
+}
+
+/* Match the command dispatcher, including abbreviations. Inspect nested
+ * push_command arguments iteratively so they cannot persist credentials. */
+static int history_may_persist(const char *line)
+{
+    /* One readline entry must not become multiple on-disk history records. */
+    if (strchr(line, '\n'))
+        return 0;
+    while (1)
+    {
+        char word[32];
+        int i, no_read = 0;
+        sscanf(line, "%31s%n", word, &no_read);
+        if (!no_read)
+            return 1;
+        for (i = 0; cmd_array[i].cmd; i++)
+            if (!strncmp(cmd_array[i].cmd, word, strlen(word)))
+                break;
+        if (!cmd_array[i].cmd)
+            return 1;
+        if (cmd_array[i].fun == cmd_authentication)
+            return 0;
+        if (cmd_array[i].fun != cmd_push_command)
+            return 1;
+        line += no_read;
+    }
 }
 
 static void process_cmd_line(char* line)

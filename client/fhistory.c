@@ -24,12 +24,16 @@
 
 struct file_history {
     WRBUF wr;
+    int (*keep)(const char *line);
+    int loaded;
 };
 
-file_history_t file_history_new()
+file_history_t file_history_new(int (*keep)(const char *line))
 {
     file_history_t fh = (file_history_t) xmalloc(sizeof(*fh));
     fh->wr = wrbuf_alloc();
+    fh->keep = keep;
+    fh->loaded = 0;
     return fh;
 }
 
@@ -45,6 +49,8 @@ void file_history_destroy(file_history_t *fhp)
 
 void file_history_add_line(file_history_t fh, const char *line)
 {
+    if (fh->keep && !fh->keep(line))
+        return;
     wrbuf_puts(fh->wr, line);
     wrbuf_puts(fh->wr, "\n");
 }
@@ -57,6 +63,7 @@ int file_history_load(file_history_t fh)
     int ret = 0;
 
     wrbuf_rewind(fh->wr);
+    fh->loaded = 0;
     yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
@@ -64,8 +71,21 @@ int file_history_load(file_history_t fh)
     if (f)
     {
         int c;
+        WRBUF line = wrbuf_alloc();
+        fh->loaded = 1;
         while ((c = fgetc(f)) != EOF)
-            wrbuf_putc(fh->wr, c);
+        {
+            if (c == '\n')
+            {
+                file_history_add_line(fh, wrbuf_cstr(line));
+                wrbuf_rewind(line);
+            }
+            else
+                wrbuf_putc(line, c);
+        }
+        if (wrbuf_len(line))
+            file_history_add_line(fh, wrbuf_cstr(line));
+        wrbuf_destroy(line);
         fclose(f);
     }
     return ret;
@@ -81,7 +101,8 @@ int file_history_save(file_history_t fh)
     int ret = 0;
     size_t sz = wrbuf_len(fh->wr);
 
-    if (!sz)
+    /* Also overwrite a history file containing only filtered lines. */
+    if (!sz && !fh->loaded)
         return 0;
     yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
@@ -94,7 +115,7 @@ int file_history_save(file_history_t fh)
     else
     {
         size_t w;
-        const char *start = wrbuf_buf(fh->wr);
+        const char *start = wrbuf_cstr(fh->wr);
         if (sz > FILE_SAVE_HISTORY_MAX)
         {
             const char *nl = strchr(
