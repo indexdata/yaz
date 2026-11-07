@@ -52,7 +52,7 @@ jobs:
       - name: Show build and test failures
         if: failure()
         run: |
-          for log in config.log test/test-suite.log ztest/test-suite.log; do
+          for log in config.log test/test-suite.log client/test-suite.log ztest/test-suite.log; do
             if test -f "$log"; then
               echo "::group::$log"
               cat "$log"

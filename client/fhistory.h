@@ -38,7 +38,8 @@ YAZ_BEGIN_CDECL
 
 typedef struct file_history *file_history_t;
 
-file_history_t file_history_new(void);
+/* The optional predicate returns nonzero for lines safe to persist. */
+file_history_t file_history_new(int (*keep)(const char *line));
 void file_history_destroy(file_history_t *fhp);
 void file_history_add_line(file_history_t fh, const char *line);
 int file_history_save(file_history_t fh);
