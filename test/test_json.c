@@ -12,6 +12,7 @@
 
 #include <yaz/test.h>
 #include <yaz/json.h>
+#include <yaz/marcdisp.h>
 #include <yaz/log.h>
 #include <string.h>
 #include <stdlib.h>
@@ -389,9 +390,60 @@ static void tst_pretty(void)
     json_remove_node(n);
 }
 
+static void check_marc_json(const char *fields, const char *expected_fields)
+{
+    const char *inputs[] = { fields, expected_fields };
+    WRBUF outputs[2];
+    WRBUF input = wrbuf_alloc();
+    yaz_marc_t mt = yaz_marc_create();
+    int i;
+    for (i = 0; i < 2; i++)
+    {
+        struct json_node *n;
+        outputs[i] = wrbuf_alloc();
+        wrbuf_rewind(input);
+        wrbuf_printf(input, "{\"leader\":\"00000nam a22000000a 4500\","
+                     "\"fields\":%s}", inputs[i]);
+        n = json_parse(wrbuf_cstr(input), 0);
+        YAZ_CHECK(n != 0);
+        yaz_marc_reset(mt);
+        if (n)
+        {
+            YAZ_CHECK_EQ(yaz_marc_read_json_node(mt, n), 0);
+            YAZ_CHECK_EQ(yaz_marc_write_json(mt, outputs[i]), 0);
+            json_remove_node(n);
+        }
+    }
+    YAZ_CHECK(!strcmp(wrbuf_cstr(outputs[0]), wrbuf_cstr(outputs[1])));
+    wrbuf_destroy(outputs[0]);
+    wrbuf_destroy(outputs[1]);
+    wrbuf_destroy(input);
+    yaz_marc_destroy(mt);
+}
+
+static void tst_marc_empty_containers(void)
+{
+    check_marc_json("[{\"245\":{\"ind1\":\"1\",\"ind2\":\"0\","
+                    "\"subfields\":[{}]}}]",
+                    "[{\"245\":{\"ind1\":\"1\",\"ind2\":\"0\"}}]");
+    check_marc_json("[{\"245\":{\"subfields\":[]}}]", "[{\"245\":{\"subfields\":null}}]");
+    check_marc_json("[{\"245\":{}}]", "[]");
+    check_marc_json("[{}, {\"245\":{}}, {\"001\":\"id\"}]", "[{\"001\":\"id\"}]");
+    check_marc_json("[{\"245\":{\"ind1\":\"1\",\"ind2\":\"0\","
+                    "\"subfields\":[{}, {\"a\":\"title\"}, {}, {\"b\":\"subtitle\"}, {}]}},"
+                    "{\"001\":\"id\"}]",
+                    "[{\"245\":{\"ind1\":\"1\",\"ind2\":\"0\","
+                    "\"subfields\":[{\"a\":\"title\"}, {\"b\":\"subtitle\"}]}},"
+                    "{\"001\":\"id\"}]");
+    check_marc_json("[{\"245\":{\"subfields\":[{}, null, [], 1, \"x\", {\"a\":42}]}}]",
+                    "[{\"245\":{\"subfields\":null}}]");
+    check_marc_json("[]", "[]");
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+    tst_marc_empty_containers();
     tst1();
     tst2();
     tst3();

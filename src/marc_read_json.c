@@ -22,10 +22,11 @@
 
 static void parse_subfields(yaz_marc_t mt, struct json_node *sf, WRBUF wtmp)
 {
-    assert(sf->type == json_node_list);
+    assert(!sf || sf->type == json_node_list);
     for (; sf; sf = sf->u.link[1])
     {
         if (sf->u.link[0]->type == json_node_object &&
+            sf->u.link[0]->u.link[0] &&
             sf->u.link[0]->u.link[0]->type == json_node_list)
         {
             struct json_node *se = sf->u.link[0]->u.link[0];
@@ -56,7 +57,7 @@ static void parse_field(yaz_marc_t mt, struct json_node *p,
             yaz_marc_add_controlfield(mt, p->u.link[0]->u.string,
                                       l->u.string, strlen(l->u.string));
         }
-        else if (l->type == json_node_object &&
+        else if (l->type == json_node_object && l->u.link[0] &&
                  l->u.link[0]->type == json_node_list)
         {
             struct json_node *m;

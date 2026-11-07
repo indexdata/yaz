@@ -467,6 +467,15 @@ YAZ_EXPORT void yaz_marc_enable_collection(yaz_marc_t mt);
 
 struct json_node;
 
+/** \brief Read a MARC record from a parsed JSON object.
+    \param mt MARC handle
+    \param n parsed JSON node
+    \retval 0 object processed
+    \retval -1 NULL node or non-object root
+
+    Empty field and subfield objects are ignored. Empty subfield arrays
+    add no subfields; valid neighboring entries are still processed.
+*/
 YAZ_EXPORT int yaz_marc_read_json_node(yaz_marc_t mt, struct json_node *n);
 
 /** \brief check if MARC21 is UTF-8 encoded
