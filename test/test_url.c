@@ -8,6 +8,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
+#include <yaz/log.h>
 #include <yaz/test.h>
 #include <yaz/url.h>
 #include <yaz/comstack.h>
@@ -22,24 +24,30 @@ static int response_code;
 static const char *redirect_location;
 static const char *set_cookie;
 static int chain;
+static int failure_mode;
 static char destinations[3][512];
 static char *requests[3];
 
 static int connect_stub(COMSTACK cs, void *address)
 {
     connect_calls++;
-    return 0;
+    return failure_mode == 3 ? -1 : 0;
 }
 
 static int put_stub(COMSTACK cs, char *buf, int size)
 {
-    requests[connections - 1] = xstrndup(buf, size);
+    requests[connections - 1] = xmalloc(size + 1);
+    memcpy(requests[connections - 1], buf, size);
+    requests[connections - 1][size] = 0;
     return 0;
 }
 
 static int get_stub(COMSTACK cs, char **buf, int *size)
 {
-    WRBUF response = wrbuf_alloc();
+    WRBUF response;
+    if (failure_mode == 4)
+        return 0;
+    response = wrbuf_alloc();
     if (connections == 1 || (chain && connections == 2))
     {
         wrbuf_printf(response, "HTTP/1.1 %d Redirect\r\nLocation: %s\r\n",
@@ -71,6 +79,8 @@ COMSTACK test_url_create_host2(const char *uri, int flags, void **address,
         return 0;
     yaz_snprintf(destinations[connections], sizeof(destinations[0]), "%s", uri);
     connections++;
+    if (failure_mode == 1)
+        return 0;
     cs = xmalloc(sizeof(*cs));
     memset(cs, 0, sizeof(*cs));
     cs->protocol = PROTO_HTTP;
@@ -203,9 +213,72 @@ static void tst_invalid_requests(void)
     }
 }
 
+static void capture_warning(int level, const char *message, void *info)
+{
+    if (level & YLOG_WARN)
+    {
+        wrbuf_puts((WRBUF) info, message);
+        wrbuf_putc((WRBUF) info, '\n');
+    }
+}
+
+static void tst_credential_errors(void)
+{
+    const char *uris[] = {
+        "http://private-user:private-pass@example.org/path",
+        "https://private-user:private-pass@example.org/path"
+    };
+    const char *errors[] = {
+        "HTTP request too large", "Can not resolve URL",
+        "Can not encode HTTP request", "Can not connect to URL",
+        "Connection closed while reading"
+    };
+    size_t i;
+    int mode;
+    WRBUF warnings = wrbuf_alloc();
+    /* Capture warnings through the handler only. */
+    yaz_log_init_file(0);
+    for (i = 0; i < sizeof(uris) / sizeof(*uris); i++)
+        for (mode = 0; mode < 5; mode++)
+        {
+            yaz_url_t url = yaz_url_create();
+            const char *error;
+            connections = connect_calls = 0;
+            failure_mode = mode;
+            wrbuf_rewind(warnings);
+            yaz_log_set_handler(capture_warning, warnings);
+            YAZ_CHECK(!yaz_url_exec(url, uris[i], mode == 2 ? "BAD METHOD" : "GET",
+                                  0, mode == 0 ? "x" : 0,
+                                  mode == 0 ? (size_t) INT_MAX + 1 : 0));
+            yaz_log_set_handler(0, 0);
+            error = yaz_url_get_error(url);
+            YAZ_CHECK(strstr(error, errors[mode]) != 0);
+            YAZ_CHECK(strstr(error, "example.org/path") != 0);
+            YAZ_CHECK(strstr(error, "private-user") == 0);
+            YAZ_CHECK(strstr(error, "private-pass") == 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(warnings), errors[mode]) != 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(warnings), "example.org/path") != 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(warnings), "private-user") == 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(warnings), "private-pass") == 0);
+            YAZ_CHECK_EQ(connections, mode == 0 ? 0 : 1);
+            if (mode == 4)
+            {
+                /* Redacting diagnostics must not remove request credentials. */
+                YAZ_CHECK(requests[0] && strstr(requests[0], "Authorization: Basic "));
+            }
+            xfree(requests[0]);
+            requests[0] = 0;
+            yaz_url_destroy(url);
+        }
+    failure_mode = 0;
+    wrbuf_destroy(warnings);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
+    YAZ_CHECK_LOG();
+    tst_credential_errors();
     YAZ_CHECK_LOG();
     tst_invalid_requests();
     for (response_code = 301; response_code <= 307; response_code++)

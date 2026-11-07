@@ -105,6 +105,9 @@ YAZ_EXPORT Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
 /** \brief get last error from yaz_url_exec
     \param p handle
     \returns message (possibly empty string no error occurred)
+
+    Supported user:password@ URL credentials are omitted from URL failure
+    diagnostics, including the corresponding warning log messages.
 */
 YAZ_EXPORT const char *yaz_url_get_error(yaz_url_t p);
 
