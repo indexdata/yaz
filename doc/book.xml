@@ -495,9 +495,23 @@
      YAZ 3.0.16 and later includes a wrapper for the
      <ulink url="&url.icu;">ICU</ulink>
      (International Components for Unicode).
-     In order to use this, the developer version of the ICU library
-     must be available. ICU support is recommended for applications
+     In order to use this, the development files for both ICU and
+     libstemmer must be available. libstemmer is required only when
+     &yaz; is built with ICU support. ICU support is recommended for applications
      such as Pazpar2 and Zebra.
+    </para>
+    <para>
+     On Debian-based systems, install <literal>libicu-dev</literal> and
+     <literal>libstemmer-dev</literal>. On RPM-based systems, install
+     <literal>libicu-devel</literal> and <literal>libstemmer-devel</literal>.
+     When ICU support is enabled, <command>configure</command> requires
+     libstemmer by default. Use
+     <literal>--with-stemmer=<replaceable>prefix</replaceable></literal>
+     to search for it in a non-standard installation directory.
+     <literal>--with-stemmer</literal> and <literal>--with-stemmer=yes</literal>
+     require libstemmer even without ICU support.
+     <literal>--without-stemmer</literal> and <literal>--with-stemmer=no</literal>
+     disable it, but cause an error if ICU support is enabled.
     </para>
     <para>
      The <ulink url="&url.libxslt;">libxslt</ulink>,
@@ -1243,6 +1257,8 @@
         <para>
          If <literal>HAVE_ICU</literal> is set to 1, YAZ is compiled
          with <ulink url="&url.icu;">ICU</ulink> support.
+         This also requires libstemmer (see <literal>LIBSTEMMER_DIR</literal>
+         below).
          Set <literal>ICU_BASE</literal> to the vcpkg installation prefix,
          for example <filename>C:\vcpkg\installed\x64-windows</filename>.
          <literal>ICU_INCLUDE</literal>, <literal>ICU_LIB</literal> and
@@ -1255,6 +1271,21 @@
          installed ICU DLLs. For example, <filename>icuuc78.dll</filename>
          requires <literal>ICU_VER=78</literal>. Check this setting when
          installing or updating ICU with vcpkg.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>LIBSTEMMER_DIR</literal></term>
+       <listitem>
+        <para>
+         When ICU support is enabled, set <literal>LIBSTEMMER_DIR</literal>
+         to the vcpkg installation prefix containing
+         <filename>include\libstemmer.h</filename> and
+         <filename>lib\stemmer.lib</filename>, for example
+         <filename>C:\vcpkg\installed\x64-windows</filename>.
+         Debug builds use <filename>debug\lib\stemmer.lib</filename>.
+         libstemmer can be installed with vcpkg as described in
+         <xref linkend="installation.windows.libxml2"/>.
         </para>
        </listitem>
       </varlistentry>
@@ -1438,13 +1469,15 @@
      </screen>
     </para>
     <para>
-     Install libxml2, libxslt, iconv and ICU for the default 64-bit build:
+     Install libxml2, libxslt, iconv, ICU and libstemmer for the default
+     64-bit build. libstemmer is required when ICU support is enabled:
      <screen>
-      vcpkg install libxml2:x64-windows libxslt:x64-windows libiconv:x64-windows icu:x64-windows
+      vcpkg install libxml2:x64-windows libxslt:x64-windows libiconv:x64-windows icu:x64-windows libstemmer:x64-windows
      </screen>
      vcpkg builds and installs these libraries and their dependencies.
-     The <literal>x64-windows</literal> triplet selects 64-bit DLLs,
-     as required by the makefile. Headers, import libraries and runtime
+     The <literal>x64-windows</literal> triplet selects 64-bit libraries,
+     as required by the makefile. libstemmer is linked statically.
+     Headers, libraries and runtime
      DLLs are installed under
      <filename>C:\vcpkg\installed\x64-windows</filename>.
     </para>
@@ -1454,7 +1487,8 @@
      <literal>HAVE_ICONV</literal> and <literal>HAVE_ICU</literal> set to 1
      to enable these libraries. If you installed vcpkg elsewhere, adjust
      <literal>LIBXML2_DIR</literal>, <literal>LIBXSLT_DIR</literal>,
-     <literal>ICONV_DIR</literal> and <literal>ICU_BASE</literal> to the
+     <literal>ICONV_DIR</literal>, <literal>ICU_BASE</literal> and
+     <literal>LIBSTEMMER_DIR</literal> to the
      corresponding installed triplet directory. Check that
      <literal>ICU_VER</literal> matches the installed ICU DLL names.
      The makefile reads these paths directly; running

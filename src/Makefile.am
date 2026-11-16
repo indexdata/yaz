@@ -29,15 +29,10 @@ YAZCOMP_Z = $(YAZCOMP) -d $(srcdir)/z.tcl -i yaz -I$(srcdir)
 YAZCOMP_I = $(YAZCOMP) -d $(srcdir)/ill.tcl -i yaz -I$(srcdir)
 
 AM_CPPFLAGS=$(XML2_CFLAGS) $(SSL_CFLAGS)
-if USE_SYSTEM_STEMMER
-STEMMER_CPPFLAGS = $(STEMMER_CFLAGS)
-else
-STEMMER_CPPFLAGS = -I$(srcdir)/libstemmer_c/include
-endif
 libyaz_la_LIBADD = $(SSL_LIBS) $(TCPD_LIBS) \
 	$(MEMCACHED_LIBS) $(HIREDIS_LIBS)
 libyaz_server_la_LIBADD = libyaz.la
-libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CFLAGS) $(STEMMER_CPPFLAGS)
+libyaz_icu_la_CPPFLAGS = $(AM_CPPFLAGS) $(ICU_CFLAGS) $(STEMMER_CFLAGS)
 libyaz_icu_la_LIBADD = libyaz.la $(ICU_LIBS) $(STEMMER_LIBS)
 
 # Automake's ylwrap expects this output name even without Bison's -y mode.
@@ -161,26 +156,8 @@ libyaz_server_la_SOURCES = statserv.c seshigh.c eventl.c \
 
 libyaz_server_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
-if USE_SYSTEM_STEMMER
-STEMMER_SOURCES =
-else
-STEMMER_SOURCES = \
-	libstemmer_c/include/libstemmer.h \
-	libstemmer_c/libstemmer/libstemmer.c \
-	libstemmer_c/libstemmer/modules.h \
-	libstemmer_c/runtime/api.c \
-	libstemmer_c/runtime/api.h \
-	libstemmer_c/runtime/header.h \
-	libstemmer_c/runtime/utilities.c \
-	libstemmer_c/src_c/stem_UTF_8_porter.c \
-	libstemmer_c/src_c/stem_UTF_8_porter.h \
-	libstemmer_c/src_c/stem_UTF_8_english.c \
-	libstemmer_c/src_c/stem_UTF_8_english.h
-endif
-
 libyaz_icu_la_SOURCES = icu_I18N.h icu_chain.c icu_utf16.c icu_utf8.c stemmer.c \
-	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c \
-	$(STEMMER_SOURCES)
+	icu_transform.c icu_casemap.c icu_tokenizer.c icu_sortkey.c
 libyaz_icu_la_LDFLAGS=-version-info $(YAZ_VERSION_INFO)
 
 BUILT_SOURCES = marc8r.c marc8.c iso5426.c z-core.c z-date.c z-univ.c \
