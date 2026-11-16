@@ -40,6 +40,9 @@ LIBXSLT_DIR=c:\vcpkg\installed\$(BARCH)-windows
 HAVE_LIBXML2=1
 LIBXML2_DIR=c:\vcpkg\installed\$(BARCH)-windows
 
+# libstemmer (static library; used by ICU stemming)
+LIBSTEMMER_DIR=c:\vcpkg\installed\$(BARCH)-windows
+
 # bison
 HAVE_BISON=1
 BISON=win_bison
@@ -268,9 +271,16 @@ COMMON_C_OPTIONS=          \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\"
 
+!if $(DEBUG)
+LIBSTEMMER_LIB="$(LIBSTEMMER_DIR)\debug\lib\stemmer.lib"
+!else
+LIBSTEMMER_LIB="$(LIBSTEMMER_DIR)\lib\stemmer.lib"
+!endif
+LIBSTEMMER_DEF=/I"$(LIBSTEMMER_DIR)\include"
+
 COMMON_C_INCLUDES= \
   /I"$(INCLDIR)" \
-  /I"$(SRCDIR)\libstemmer_c\include"
+  $(LIBSTEMMER_DEF)
 
 DEBUG_C_OPTIONS=  \
   /D "_DEBUG"      \
@@ -597,13 +607,6 @@ ILL_OBJS= \
    $(OBJDIR)\ill-core.obj\
    $(OBJDIR)\item-req.obj
 
-STEMMER_OBJS = \
-   $(OBJDIR)\libstemmer.obj \
-   $(OBJDIR)\api.obj \
-   $(OBJDIR)\utilities.obj \
-   $(OBJDIR)\stem_UTF_8_porter.obj \
-   $(OBJDIR)\stem_UTF_8_english.obj
-
 DLL_OBJS =\
    $(MISC_OBJS) \
    $(Z3950_OBJS) \
@@ -617,8 +620,7 @@ ICU_DLL_OBJS =\
    $(OBJDIR)\icu_casemap.obj \
    $(OBJDIR)\icu_tokenizer.obj \
    $(OBJDIR)\icu_sortkey.obj \
-   $(OBJDIR)\stemmer.obj \
-   $(STEMMER_OBJS)
+   $(OBJDIR)\stemmer.obj
 
 # Generated C and H files
 
@@ -778,15 +780,6 @@ generate: \
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
 	$(CPP) $(COPT) $<
 
-{$(SRCDIR)\libstemmer_c\libstemmer}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $<
-
-{$(SRCDIR)\libstemmer_c\runtime}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $<
-
-{$(SRCDIR)\libstemmer_c\src_c}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $<
-
 # ASN-generated files
 
 !if $(HAVE_TCL)
@@ -920,7 +913,7 @@ $(YAZ_DLL) $(YAZ_IMPLIB): "$(BINDIR)" $(DLL_OBJS) $(YAZ_RES)
 		/implib:"$(YAZ_IMPLIB)"
 
 $(YAZ_ICU_DLL) $(YAZ_ICU_IMPLIB): "$(BINDIR)" $(ICU_DLL_OBJS) $(YAZ_ICU_RES)
-	$(LINK_DLL) $(ICU_LIBS) $(YAZ_IMPLIB)\
+	$(LINK_DLL) $(ICU_LIBS) $(LIBSTEMMER_LIB) $(YAZ_IMPLIB)\
 		$(ICU_DLL_OBJS) \
 		$(YAZ_ICU_RES) \
 		/out:$@ \
