@@ -11,7 +11,7 @@ load("util.bzl", "cplush", "c_dir", "h_dir")
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 
-LIBS_ICU = [ "-licui18n", "-licuuc", "-licudata" ]
+LIBS_ICU = [ "-licui18n", "-licuuc", "-licudata", "-lstemmer" ]
 INCLUDES_ICU = []
 
 Z3950_FILES = ["z-core", "z-diag1", "z-exp", "z-sutrs", "z-opac",
@@ -263,7 +263,7 @@ cc_library(
 
 cc_library(
     name = "yaz_icu",
-    includes = [ ".", "libstemmer_c/include" ],
+    includes = [ "." ],
     copts = [ "-pthread" ] + INCLUDES_EXT + INCLUDES_ICU,
     linkopts = LIBS_EXT + LIBS_ICU,
     local_defines = [ "HAVE_CONFIG_H", "YAZ_HAVE_ICU=1" ],
@@ -271,18 +271,7 @@ cc_library(
 	 "icu_chain", "icu_utf16", "icu_utf8", "stemmer",
 	 "icu_transform", "icu_casemap", "icu_tokenizer", "icu_sortkey"
 	 ]) + [
-	 "icu_I18N.h",
-	 "libstemmer_c/include/libstemmer.h",
-	 "libstemmer_c/libstemmer/libstemmer.c",
-	 "libstemmer_c/libstemmer/modules.h",
-	 "libstemmer_c/runtime/api.c",
-	 "libstemmer_c/runtime/api.h",
-	 "libstemmer_c/runtime/header.h",
-	 "libstemmer_c/runtime/utilities.c",
-	 "libstemmer_c/src_c/stem_UTF_8_porter.c",
-	 "libstemmer_c/src_c/stem_UTF_8_porter.h",
-	 "libstemmer_c/src_c/stem_UTF_8_english.c",
-	 "libstemmer_c/src_c/stem_UTF_8_english.h",
+	 "icu_I18N.h"
     ],
     hdrs = [],
     visibility = [ "//visibility:public" ],
