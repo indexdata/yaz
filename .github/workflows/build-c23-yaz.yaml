@@ -27,7 +27,7 @@ jobs:
             autoconf automake libtool clang make bison \
             tclsh xsltproc docbook docbook-xml docbook-xsl \
             pkg-config libxslt1-dev libgnutls28-dev \
-            libreadline-dev libwrap0-dev libicu-dev \
+            libreadline-dev libwrap0-dev libicu-dev libstemmer-dev \
             libhiredis-dev libmemcached-dev
 
       - name: Run buildconf

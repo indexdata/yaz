@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: >
           brew install autoconf automake libtool bison pkgconf tcl-tk@8
-          libxml2 libxslt gnutls icu4c readline docbook docbook-xsl
+          libxml2 libxslt gnutls icu4c snowball readline docbook docbook-xsl
 
       - name: Set dependency paths
         run: |
@@ -55,6 +55,7 @@ jobs:
         run: >
           ./configure --enable-shared --disable-static
           --with-xslt --with-gnutls --with-icu
+          --with-stemmer="$(brew --prefix snowball)"
           --disable-tcpd --without-memcached --without-redis
           --with-docbook-dtd="$(brew --prefix docbook)/docbook/xml/4.5"
           --with-docbook-xsl="$(brew --prefix docbook-xsl)/docbook-xsl"
