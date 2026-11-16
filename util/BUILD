@@ -7,10 +7,6 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 LIBS_EXT = [ "-pthread", "-lgnutls", "-lexslt", "-lxslt", "-lxml2" ]
 INCLUDES_EXT = [ "-I/usr/include/libxml2" ]
 
-LIBS_ICU = [ "-licui18n", "-licuuc", "-licudata" ]
-INCLUDES_ICU = []
-
-
 cc_binary(
     name = "cclsh",
     includes = [ "src" ],
