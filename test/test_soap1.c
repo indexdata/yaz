@@ -17,17 +17,15 @@ void tst(void)
 #if YAZ_HAVE_XML2
     xmlChar *buf_out;
     int len_out;
-    xmlDocPtr doc;
-    xmlNodePtr top;
 #if 0
     const char *val = "jordb" "\xe6" "r"; /* makes xmlDocDumpMemory hang .. */
 #else
     const char *val = "jordbaer"; /* OK */
 #endif
-    doc = xmlNewDoc(BAD_CAST "1.0");
+    xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
     YAZ_CHECK(doc);
 
-    top = xmlNewNode(0, BAD_CAST "top");
+    xmlNodePtr top = xmlNewNode(0, BAD_CAST "top");
     YAZ_CHECK(top);
 
     xmlNewTextChild(top, 0, BAD_CAST "sub", BAD_CAST val);

@@ -80,15 +80,14 @@ static unsigned long lookup_marc8(yaz_iconv_t cd,
     }
     else
     {
-        unsigned char *inp;
         size_t inbytesleft, no_read_sub = 0;
-        unsigned long x;
 
         *utf8_outbuf = '\0';
-        inp = (unsigned char *) utf8_buf;
+        unsigned char *inp = (unsigned char *) utf8_buf;
         inbytesleft = strlen(utf8_buf);
 
-        x = yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
+        unsigned long x =
+            yaz_marc8r_42_conv(inp, inbytesleft, &no_read_sub, comb, 255, 0);
         if (x)
         {
             *page_chr = ESC "(B";
@@ -191,9 +190,8 @@ static size_t flush_combos(yaz_iconv_t cd,
     else
     {
         size_t out_no = 0;
-        unsigned char byte;
 
-        byte = (unsigned char )((y>>16) & 0xff);
+        unsigned char byte = (unsigned char )((y>>16) & 0xff);
         if (byte)
             (*outbuf)[out_no++] = byte;
         byte = (unsigned char)((y>>8) & 0xff);
@@ -363,10 +361,9 @@ static size_t yaz_write_marc8_generic(yaz_iconv_t cd, struct encoder_data *w,
         unsigned long last_ch = w->write_marc8_last;
         int ncr = w->write_marc8_ncr;
         const char *lpage = w->write_marc8_lpage;
-        size_t r;
 
-        r = yaz_write_marc8_2(cd, w, x1,
-                              outbuf, outbytesleft, loss_mode);
+        size_t r =
+            yaz_write_marc8_2(cd, w, x1, outbuf, outbytesleft, loss_mode);
         if (r)
             return r;
         r = yaz_write_marc8_2(cd, w, x2,

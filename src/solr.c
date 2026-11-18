@@ -29,8 +29,7 @@
 
 static void extract_text_node(xmlNodePtr node, WRBUF wrbuf)
 {
-    xmlNodePtr child;
-    for (child = node->children; child ; child = child->next)
+    for (xmlNodePtr child = node->children; child ; child = child->next)
         if (child->type == XML_TEXT_NODE)
             wrbuf_xmlputs(wrbuf, (const char *) child->content);
 }
@@ -99,8 +98,7 @@ static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
                                   Z_SRW_searchRetrieveResponse *sr)
 {
     Odr_int start = 0;
-    struct _xmlAttr *attr;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
         if (attr->children && attr->children->type == XML_TEXT_NODE)
         {
             if (!strcmp((const char *) attr->name, "numFound"))
@@ -134,8 +132,6 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
                                           Z_SRW_searchRetrieveResponse *sr)
 
 {
-    Z_AttributeList *list;
-    Z_FacetField *facet_field;
     int num_terms = 0;
     int index = 0;
     xmlNodePtr node;
@@ -143,10 +139,10 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
 
     if (name == 0)
         return 0;
-    list = zget_AttributeList_use_string(o, name);
+    Z_AttributeList *list = zget_AttributeList_use_string(o, name);
     for (node = ptr->children; node; node = node->next)
         num_terms++;
-    facet_field = facet_field_create(o, list, num_terms);
+    Z_FacetField *facet_field = facet_field_create(o, list, num_terms);
     index = 0;
     for (node = ptr->children; node; node = node->next)
     {
@@ -166,17 +162,15 @@ Z_FacetField *yaz_solr_decode_facet_field(ODR o, xmlNodePtr ptr,
 static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
                                         Z_SRW_searchRetrieveResponse *sr)
 {
-    xmlNodePtr ptr;
-    for (ptr = root->children; ptr; ptr = ptr->next)
+    for (xmlNodePtr ptr = root->children; ptr; ptr = ptr->next)
     {
         if (match_xml_node_attribute(ptr, "lst", "name", "facet_fields"))
         {
             xmlNodePtr node;
-            Z_FacetList *facet_list;
             int num_facets = 0;
             for (node = ptr->children; node; node= node->next)
                 num_facets++;
-            facet_list = facet_list_create(o, num_facets);
+            Z_FacetList *facet_list = facet_list_create(o, num_facets);
             num_facets = 0;
             for (node = ptr->children; node; node = node->next)
             {
@@ -197,13 +191,11 @@ static int yaz_solr_decode_facet_counts(ODR o, xmlNodePtr root,
 
 static void yaz_solr_decode_suggestion_values(xmlNodePtr listPptr, WRBUF wrbuf)
 {
-    xmlNodePtr node;
-    for (node = listPptr; node; node = node->next)
+    for (xmlNodePtr node = listPptr; node; node = node->next)
         if (node->type == XML_ELEMENT_NODE
             && !strcmp((const char*) node->name, "lst"))
         {
-            xmlNodePtr child;
-            for (child = node->children; child; child= child->next)
+            for (xmlNodePtr child = node->children; child; child= child->next)
             {
                 if (match_xml_node_attribute(child, "str", "name", "word"))
                 {
@@ -217,16 +209,14 @@ static void yaz_solr_decode_suggestion_values(xmlNodePtr listPptr, WRBUF wrbuf)
 
 static void yaz_solr_decode_suggestion_lst(xmlNodePtr lstPtr, WRBUF wrbuf)
 {
-    xmlNodePtr node;
-    for (node = lstPtr; node; node = node->next)
+    for (xmlNodePtr node = lstPtr; node; node = node->next)
         if (match_xml_node_attribute(node, "arr", "name", "suggestion"))
             yaz_solr_decode_suggestion_values(node->children, wrbuf);
 }
 
 static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
 {
-    xmlNodePtr node;
-    for (node = lstPtr; node; node= node->next)
+    for (xmlNodePtr node = lstPtr; node; node= node->next)
     {
         if (node->type == XML_ELEMENT_NODE)
         {
@@ -247,9 +237,8 @@ static void yaz_solr_decode_misspelled(xmlNodePtr lstPtr, WRBUF wrbuf)
 static int yaz_solr_decode_spellcheck(ODR o, xmlNodePtr spellcheckPtr,
     Z_SRW_searchRetrieveResponse *sr)
 {
-    xmlNodePtr ptr;
     WRBUF wrbuf = wrbuf_alloc();
-    for (ptr = spellcheckPtr->children; ptr; ptr = ptr->next)
+    for (xmlNodePtr ptr = spellcheckPtr->children; ptr; ptr = ptr->next)
         if (match_xml_node_attribute(ptr, "lst", "name", "suggestions"))
             yaz_solr_decode_misspelled(ptr->children, wrbuf);
     sr->suggestions = odr_strdup(o, wrbuf_cstr(wrbuf));
@@ -469,8 +458,7 @@ static int yaz_solr_encode_facet_list(
     ODR encode, char **name, char **value,
     int *i, Z_FacetList *facet_list)
 {
-    int index;
-    for (index = 0; index < facet_list->num; index++)
+    for (int index = 0; index < facet_list->num; index++)
     {
         int r = yaz_solr_encode_facet_field(encode, name, value, i,
                                             facet_list->elements[index]);
@@ -487,7 +475,6 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
     const char *solr_op = 0;
     char **name, **value;
     char *uri_args;
-    char *path;
     char *q;
     char *cp;
     int i = 0;
@@ -602,9 +589,8 @@ int yaz_solr_encode_request(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     hreq->method = "GET";
 
-    path = (char *)
-        odr_malloc(encode, strlen(hreq->path) +
-                   strlen(uri_args) + strlen(solr_op) + 5);
+    char *path = (char *) odr_malloc(
+        encode, strlen(hreq->path) + strlen(uri_args) + strlen(solr_op) + 5);
 
     cp = strchr(hreq->path, '#');
     if (cp)

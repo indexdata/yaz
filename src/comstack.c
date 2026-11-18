@@ -95,10 +95,8 @@ int cs_parse_host(const char *uri, const char **host,
         const char *cp = strchr(uri, ',');
         if (cp)
         {
-            size_t len;
-
             uri += 8;
-            len = cp - uri;
+            size_t len = cp - uri;
             *connect_host = (char *) xmalloc(len + 1);
             memcpy(*connect_host, uri, len);
             (*connect_host)[len] = '\0';
@@ -107,10 +105,8 @@ int cs_parse_host(const char *uri, const char **host,
     }
     else if (strncmp(uri, "unix:", 5) == 0)
     {
-        const char *cp;
-
         uri += 5;
-        cp = strchr(uri, ':');
+        const char *cp = strchr(uri, ':');
         if (cp)
         {
             size_t len = cp - uri;
@@ -317,12 +313,11 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
     while (1)
     {
         int chunk_len = 0;
-        int ret;
 
         if (i >= len)
             return 0;
         /* read chunk length */
-        ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
+        int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
         if (ret <= 0)
             return -1;
         i += ret;
@@ -443,10 +438,9 @@ int yaz_http_parse_headers(const char *buf, int len, int off,
         if (colon - off == 14 &&
             !yaz_strncasecmp(buf + off, "Content-Length", 14))
         {
-            int n;
             if (have_length || *chunked || value == value_end)
                 return -1;
-            n = yaz_atoi(10, buf + value, value_end - value, content_len);
+            int n = yaz_atoi(10, buf + value, value_end - value, content_len);
             if (n <= 0 || n != value_end - value)
                 return -1;
             have_length = 1;
@@ -478,8 +472,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     /* check to see if it's a response with content */
     if (!head_only && !memcmp(buf, "HTTP/", 5))
     {
-        int j;
-        for (j = 5; j < i; j++)
+        for (int j = 5; j < i; j++)
             if (buf[j] == ' ')
             {
                 ++j;

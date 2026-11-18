@@ -98,9 +98,7 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_event(int no, ZOOM_connection *cs)
 {
-    int r;
-
-    r = ZOOM_event_nonblock(no, cs);
+    int r = ZOOM_event_nonblock(no, cs);
     if (r)
         return r;
     while (ZOOM_event_sys_yaz_poll(no, cs) < 0 && errno == EINTR)

@@ -70,8 +70,7 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
             int general_start = -1;
             int general_sortorder = -1;
             int general_limit = -1;
-            int i;
-            for (i = 0; i < fl->num; i++)
+            for (int i = 0; i < fl->num; i++)
             {
                 struct yaz_facet_attr av;
                 yaz_facet_attr_init(&av);
@@ -194,23 +193,20 @@ void yaz_sru_facet_response(ODR o, Z_FacetList **facetList, xmlNodePtr n)
         Z_FacetList *fl = *facetList;
         if (fl)
         {
-            int i;
             const char *ns =
                 "http://docs.oasis-open.org/ns/search-ws/facetedResults";
             xmlNode *p1 = xmlNewChild(n, 0, BAD_CAST "facetedResults", 0);
             xmlNsPtr ns_fr = xmlNewNs(p1, BAD_CAST ns, BAD_CAST "fr");
-            for (i = 0; i < fl->num; i++)
+            for (int i = 0; i < fl->num; i++)
             {
                 Z_FacetField *ff = fl->elements[i];
                 xmlNode *p2 = xmlNewChild(p1, ns_fr, BAD_CAST "facet", 0);
-                int j;
-                xmlNode *p3;
                 struct yaz_facet_attr av;
                 yaz_facet_attr_init(&av);
                 yaz_facet_attr_get_z_attributes(ff->attributes, &av);
                 add_xsd_string(p2, "index", av.useattr);
-                p3 = xmlNewChild(p2, 0, BAD_CAST "terms", 0);
-                for (j = 0; j < ff->num_terms; j++)
+                xmlNode *p3 = xmlNewChild(p2, 0, BAD_CAST "terms", 0);
+                for (int j = 0; j < ff->num_terms; j++)
                 {
                     Z_FacetTerm *ft = ff->terms[j];
                     Z_Term *zt = ft->term;

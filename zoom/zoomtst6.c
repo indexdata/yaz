@@ -12,10 +12,9 @@
 static void display_records (const char *tname, ZOOM_resultset r)
 {
     /* OK, no major errors. Look at the result count */
-    int pos;
     printf ("%s: %ld hits\n", tname, (long) ZOOM_resultset_size(r));
     /* go through all records at target */
-    for (pos = 0; pos < 4; pos++)
+    for (int pos = 0; pos < 4; pos++)
     {
         ZOOM_record rec = ZOOM_resultset_record (r, pos);
         if (rec)
@@ -46,10 +45,8 @@ int main(int argc, char **argv)
     ZOOM_connection z[500];  /* allow at most 500 connections */
     ZOOM_resultset r1[500];  /* and result sets .. */
     ZOOM_resultset r2[500];  /* and result sets .. */
-    ZOOM_query q;
-    ZOOM_options o;
 
-    o = ZOOM_options_create ();
+    ZOOM_options o = ZOOM_options_create ();
     if (argc < 4)
     {
         fprintf (stderr, "usage:\n%s target1 .. targetN query1 query2\n",
@@ -68,7 +65,7 @@ int main(int argc, char **argv)
     ZOOM_options_set (o, "elementSetName", "B");
 
     /* create query */
-    q = ZOOM_query_create ();
+    ZOOM_query q = ZOOM_query_create ();
     if (ZOOM_query_prefix (q, argv[argc-2]))
     {
         printf ("bad PQF: %s\n", argv[argc-2]);

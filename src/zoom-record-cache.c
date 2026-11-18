@@ -139,11 +139,10 @@ ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, Odr_int pos,
                                        const char *elementSetName,
                                        const char *schema)
 {
-    ZOOM_record_cache rc;
-
     if (pos > INT_MAX)
         return 0;
-    for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
+    for (ZOOM_record_cache rc = r->record_hash[record_hash(pos)];
+         rc; rc = rc->next)
     {
         if (pos == rc->pos)
         {
@@ -164,7 +163,6 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
                                      const char *elementSetName,
                                      const char *schema)
 {
-    Z_NamePlusRecord *npr;
     ZOOM_record rec = ZOOM_record_cache_lookup_i(r, pos, syntax,
                                                  elementSetName, schema);
     if (rec)
@@ -173,7 +171,8 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
         ZOOM_connection_put_event(r->connection, event);
         return rec;
     }
-    npr = ZOOM_memcached_lookup(r, pos, syntax, elementSetName, schema);
+    Z_NamePlusRecord *npr =
+        ZOOM_memcached_lookup(r, pos, syntax, elementSetName, schema);
     if (npr)
         return record_cache_add(r, npr, pos, syntax, elementSetName,
                                 schema, 0);
@@ -183,15 +182,13 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
 ZOOM_API(ZOOM_record)
     ZOOM_record_clone(ZOOM_record srec)
 {
-    char *buf;
     int size;
-    ODR odr_enc;
     ZOOM_record nrec;
 
-    odr_enc = odr_createmem(ODR_ENCODE);
+    ODR odr_enc = odr_createmem(ODR_ENCODE);
     if (!z_NamePlusRecord(odr_enc, &srec->npr, 0, 0))
         return 0;
-    buf = odr_getbuf(odr_enc, &size, 0);
+    char *buf = odr_getbuf(odr_enc, &size, 0);
 
     nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
@@ -232,11 +229,9 @@ static void ZOOM_record_release(ZOOM_record rec)
 ZOOM_API(void)
     ZOOM_resultset_cache_reset(ZOOM_resultset r)
 {
-    int i;
-    for (i = 0; i<RECORD_HASH_SIZE; i++)
+    for (int i = 0; i<RECORD_HASH_SIZE; i++)
     {
-        ZOOM_record_cache rc;
-        for (rc = r->record_hash[i]; rc; rc = rc->next)
+        for (ZOOM_record_cache rc = r->record_hash[i]; rc; rc = rc->next)
         {
             ZOOM_record_release(&rc->rec);
         }
@@ -248,8 +243,6 @@ ZOOM_API(void)
 ZOOM_API(const char *)
     ZOOM_record_get(ZOOM_record rec, const char *type_spec, int *len)
 {
-    WRBUF wrbuf;
-
     if (len)
         *len = 0; /* default return */
 
@@ -262,11 +255,11 @@ ZOOM_API(const char *)
         WRBUF w = wrbuf_alloc();
         YAZ_SHPTR_INIT(rec->record_wrbuf, w);
     }
-    wrbuf = rec->record_wrbuf->ptr;
+    WRBUF wrbuf = rec->record_wrbuf->ptr;
 #else
     if (!rec->wrbuf)
         rec->wrbuf = wrbuf_alloc();
-    wrbuf = rec->wrbuf;
+    WRBUF wrbuf = rec->wrbuf;
 #endif
     return yaz_record_render(rec->npr, rec->schema, wrbuf, type_spec, len);
 }
@@ -275,12 +268,10 @@ ZOOM_API(int)
     ZOOM_record_error(ZOOM_record rec, const char **cp,
                       const char **addinfo, const char **diagset)
 {
-    Z_NamePlusRecord *npr;
-
     if (!rec)
         return 0;
 
-    npr = rec->npr;
+    Z_NamePlusRecord *npr = rec->npr;
     if (rec->diag_uri)
     {
         if (cp)

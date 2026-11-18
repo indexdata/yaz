@@ -62,8 +62,7 @@ void ccl_qual_add_special_ar(CCL_bibset bibset, const char *n,
     {
         if (p->values)
         {
-            int i;
-            for (i = 0; p->values[i]; i++)
+            for (int i = 0; p->values[i]; i++)
                 xfree((char *) p->values[i]);
             xfree((char **)p->values);
         }
@@ -83,14 +82,13 @@ void ccl_qual_add_special(CCL_bibset bibset, const char *n, const char *cp)
     size_t no = 2;
     char **vlist = (char **) xmalloc(no * sizeof(*vlist));
     yaz_tok_cfg_t yt = yaz_tok_cfg_create();
-    int t;
     size_t i = 0;
 
     yaz_tok_parse_t tp = yaz_tok_parse_buf(yt, cp);
 
     yaz_tok_cfg_destroy(yt);
 
-    t = yaz_tok_move(tp);
+    int t = yaz_tok_move(tp);
     while (t == YAZ_TOK_STRING)
     {
         if (i >= no-1)
@@ -167,7 +165,6 @@ void ccl_qual_add_set(CCL_bibset b, const char *name, int no,
                        char **attsets)
 {
     struct ccl_qualifier *q;
-    struct ccl_rpn_attr **attrp;
 
     ccl_assert(b);
     for (q = b->list; q; q = q->next)
@@ -175,7 +172,7 @@ void ccl_qual_add_set(CCL_bibset b, const char *name, int no,
             break;
     if (!q)
         q = ccl_qual_new(b, name);
-    attrp = &q->attr_list;
+    struct ccl_rpn_attr **attrp = &q->attr_list;
     while (*attrp)
         attrp = &(*attrp)->next;
     while (--no >= 0)
@@ -253,8 +250,7 @@ void ccl_qual_rm(CCL_bibset *b)
         xfree(sp->name);
         if (sp->values)
         {
-            int i;
-            for (i = 0; sp->values[i]; i++)
+            for (int i = 0; sp->values[i]; i++)
                 xfree((char*) sp->values[i]);
             xfree((char **)sp->values);
         }
@@ -300,9 +296,8 @@ CCL_bibset ccl_qual_dup(CCL_bibset b)
         else
         {
             /* fix up the sub qualifiers.. */
-            int i;
             (*qp)->sub = xmalloc(sizeof(*q->sub) * (q->no_sub + 1));
-            for (i = 0; i < q->no_sub; i++)
+            for (int i = 0; i < q->no_sub; i++)
             {
                 struct ccl_qualifier *q1, *q2;
 
@@ -339,14 +334,13 @@ ccl_qualifier_t ccl_qual_search(CCL_parser cclp, const char *name,
                                 size_t name_len, int seq)
 {
     struct ccl_qualifier *q = 0;
-    const char **aliases;
     int case_sensitive = cclp->ccl_case_sensitive;
 
     ccl_assert(cclp);
     if (!cclp->bibset)
         return 0;
 
-    aliases = ccl_qual_search_special(cclp->bibset, "case");
+    const char **aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
         case_sensitive = atoi(aliases[0]);
 
@@ -425,8 +419,7 @@ int ccl_search_stop(CCL_bibset bibset, const char *qname,
         slist = ccl_qual_search_special(bibset, "stop.*");
     if (slist)
     {
-        int i;
-        for (i = 0; slist[i]; i++)
+        for (int i = 0; slist[i]; i++)
             if (src_len == strlen(slist[i])
                 && ccl_memicmp(slist[i], src_str, src_len) == 0)
                 return 1;

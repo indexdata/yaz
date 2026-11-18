@@ -117,7 +117,6 @@ static long marcdump_read_json(yaz_marc_t mt, const char *fname)
     const char *errmsg;
     size_t errpos;
     WRBUF w = wrbuf_alloc();
-    struct json_node *n;
     int c;
     FILE *inf = fopen(fname, "rb");
     if (!inf)
@@ -128,7 +127,7 @@ static long marcdump_read_json(yaz_marc_t mt, const char *fname)
     }
     while ((c = getc(inf)) != EOF)
         wrbuf_putc(w, c);
-    n = json_parse2(wrbuf_cstr(w), &errmsg, &errpos);
+    struct json_node *n = json_parse2(wrbuf_cstr(w), &errmsg, &errpos);
     if (n)
     {
         int r = yaz_marc_read_json_node(mt, n);
@@ -231,14 +230,10 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
     for (marc_no = 0L; marc_no - offset < limit; marc_no++)
     {
         const char *result = 0;
-        size_t len;
-        size_t rlen;
-        size_t len_result;
-        size_t r;
         char buf[100001];
         yaz_iconv_t cd1 = 0;
 
-        r = fread(buf, 1, 5, inf);
+        size_t r = fread(buf, 1, 5, inf);
         if (r < 5)
         {
             if (r == 0) /* normal EOF, all good */
@@ -252,13 +247,12 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
         }
         while (*buf < '0' || *buf > '9')
         {
-            int i;
             long off = ftell(inf) - 5;
             printf("<!-- Skipping bad byte %d (0x%02X) at offset "
                    "%ld (0x%lx) -->\n",
                    *buf & 0xff, *buf & 0xff,
                    off, off);
-            for (i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
                 buf[i] = buf[i + 1];
             r = fread(buf + 4, 1, 1, inf);
             no_errors++;
@@ -277,7 +271,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             printf("<!-- Record %ld offset %ld (0x%lx) -->\n",
                    marc_no + 1, off, off);
         }
-        len = atoi_n(buf, 5);
+        size_t len = atoi_n(buf, 5);
         if (len < 25 || len > 100000)
         {
             long off = ftell(inf) - 5;
@@ -286,7 +280,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             no_errors++;
             break;
         }
-        rlen = len - 5;
+        size_t rlen = len - 5;
         r = fread(buf + 5, 1, rlen, inf);
         if (r < rlen)
         {
@@ -318,7 +312,6 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
         {
             char fname[256];
             const char *mode = 0;
-            FILE *sf;
             if ((marc_no % split_chunk) == 0)
             {
                 mode = "wb";
@@ -327,7 +320,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
             else
                 mode = "ab";
             yaz_snprintf(fname, sizeof(fname), "%s%07d", split_fname, split_file_no);
-            sf = fopen(fname, mode);
+            FILE *sf = fopen(fname, mode);
             if (!sf)
             {
                 fprintf(stderr, "Could not open %s\n", fname);
@@ -345,7 +338,7 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
                 fclose(sf);
             }
         }
-        len_result = rlen;
+        size_t len_result = rlen;
 
         if (yaz_marc_check_marc21_coding(from, buf, 26))
         {
@@ -376,11 +369,10 @@ static long marcdump_read_iso2709(yaz_marc_t mt, const char *from, const char *t
         if (r > 0 && cfile)
         {
             char *p = buf;
-            size_t i;
             if (marc_no)
                 fprintf(cfile, ",");
             fprintf(cfile, "\n");
-            for (i = 0; i < r; i++)
+            for (size_t i = 0; i < r; i++)
             {
                 if ((i & 15) == 0)
                     fprintf(cfile, "  \"");

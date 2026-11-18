@@ -20,12 +20,11 @@ static int yaz_query_charset_convert_buf(char *buf_in, int len_in,
                                          char **buf_out, int *len_out,
                                          ODR o, WRBUF wrbuf, yaz_iconv_t cd)
 {
-    size_t len;
     wrbuf_rewind(wrbuf);
     wrbuf_iconv_write(wrbuf, cd, buf_in, len_in);
     wrbuf_iconv_reset(wrbuf, cd);
 
-    len = wrbuf_len(wrbuf);
+    size_t len = wrbuf_len(wrbuf);
     if (len == 0 || len > INT_MAX)
     {   /* conversion failed or result too large */
         *buf_out = buf_in;

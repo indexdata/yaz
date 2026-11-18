@@ -352,11 +352,10 @@ static void tst_configure(void)
     Odr_oid *match_syntax = 0;
     const char *backend_schema = 0;
     Odr_oid *backend_syntax = 0;
-    int r;
 
-    r = yaz_retrieval_request(p, "e", yaz_oid_recsyn_usmarc,
-                              &match_schema, &match_syntax,
-                              0, &backend_schema, &backend_syntax);
+    int r = yaz_retrieval_request(p, "e", yaz_oid_recsyn_usmarc, &match_schema,
+                                  &match_syntax, 0, &backend_schema,
+                                  &backend_syntax);
     YAZ_CHECK(r != 0);
 
     r = yaz_retrieval_request(p, "F", yaz_oid_recsyn_usmarc,

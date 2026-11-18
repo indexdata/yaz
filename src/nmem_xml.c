@@ -18,14 +18,13 @@
 #if YAZ_HAVE_XML2
 char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
 {
-    char *cdata;
     int len = 0;
     const xmlNode *ptr;
 
     for (ptr = ptr_cdata; ptr; ptr = ptr->next)
         if (ptr->type == XML_TEXT_NODE)
             len += xmlStrlen(ptr->content);
-    cdata = (char *) nmem_malloc(nmem, len+1);
+    char *cdata = (char *) nmem_malloc(nmem, len+1);
     *cdata = '\0';
     for (ptr = ptr_cdata; ptr; ptr = ptr->next)
         if (ptr->type == XML_TEXT_NODE)

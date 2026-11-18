@@ -44,13 +44,12 @@ static int test_xml_stat(const char *path, struct stat *st)
 
 static FILE *test_xml_fopen(const char *path, const char *mode)
 {
-    FILE *f;
     open_calls++;
     YAZ_CHECK(expected_path && !strcmp(path, expected_path));
     YAZ_CHECK(!strcmp(mode, "rb"));
     if (fail_open)
         return 0;
-    f = tmpfile();
+    FILE *f = tmpfile();
     YAZ_CHECK(f != 0);
     if (f)
     {
@@ -78,11 +77,10 @@ static FILE *test_xml_fopen(const char *path, const char *mode)
 static void check_fetch(const char *base, const char *name, const char *path)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
-    char *result;
     prefix = base;
     expected_path = path;
     stat_calls = open_calls = 0;
-    result = dummy_xml_record(1, odr, name);
+    char *result = dummy_xml_record(1, odr, name);
     YAZ_CHECK_EQ(stat_calls, path ? 1 : 0);
     YAZ_CHECK_EQ(open_calls, path && !fail_stat ? 1 : 0);
     if (path && !fail_stat && !fail_open)

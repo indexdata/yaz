@@ -91,11 +91,10 @@ void  print_events(int *elc,  struct event_line_t *els,
                    int connections){
     int i;
     int j;
-    int k;
     int ielc;
     int iels;
 
-    for (k=0; k < parameters.repeat; k++){
+    for (int k=0; k < parameters.repeat; k++){
         for (i=0; i < connections; i++){
             ielc = k * parameters.concurrent + i;
             for (j=0; j < elc[ielc]; j++){
@@ -112,7 +111,6 @@ void  print_events(int *elc,  struct event_line_t *els,
 
 void init_statics(void)
 {
-    int i;
     char nullstring[1] = "";
 
     /* naming events */
@@ -150,7 +148,7 @@ void init_statics(void)
     parameters.piggypack = 0;
 
     /* progress initializing */
-    for (i = 0; i < 4096; i++){
+    for (int i = 0; i < 4096; i++){
         parameters.progress[i] = 0;
     }
 
@@ -292,9 +290,7 @@ int main(int argc, char **argv)
     ZOOM_resultset *r;
     int *elc;
     struct event_line_t *els;
-    ZOOM_options o;
     int i;
-    int k;
 
     init_statics();
 
@@ -305,7 +301,7 @@ int main(int argc, char **argv)
     elc = (int *) xmalloc(sizeof(*elc) * parameters.concurrent * parameters.repeat);
     els = (struct event_line_t *) xmalloc(
         sizeof(*els) * parameters.concurrent * parameters.repeat * 10);
-    o = ZOOM_options_create();
+    ZOOM_options o = ZOOM_options_create();
 
     /* async mode */
     ZOOM_options_set (o, "async", "1");
@@ -327,7 +323,7 @@ int main(int argc, char **argv)
 
     time_init(&time);
     /* repeat loop */
-    for (k = 0; k < parameters.repeat; k++){
+    for (int k = 0; k < parameters.repeat; k++){
 
         /* progress zeroing */
         for (i = 0; i < 4096; i++){

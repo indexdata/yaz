@@ -134,8 +134,7 @@ void odr_setelement(ODR o, const char *element)
 void odr_FILE_write(ODR o, void *handle, int type,
                     const char *buf, int len)
 {
-    int i;
-    for (i = 0; i < len; i++)
+    for (int i = 0; i < len; i++)
     {
         unsigned c = ((const unsigned char *) buf)[i];
         if (i == 20000 && len > 31000)

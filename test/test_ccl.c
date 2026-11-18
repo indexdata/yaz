@@ -26,9 +26,7 @@ static int tst_ccl_query(CCL_bibset bibset,
 
     if (parser && bibset)
     {
-        struct ccl_rpn_node *rpn;
-
-        rpn = ccl_parser_find_str(parser, query);
+        struct ccl_rpn_node *rpn = ccl_parser_find_str(parser, query);
         if (rpn)
         {
             /* parse ok. check that result is there and match */
@@ -152,8 +150,6 @@ void tst1(int pass)
 #if YAZ_HAVE_XML2
         if (1)
         {
-            xmlDocPtr doc;
-            int r;
             const char *addinfo = 0;
             const char *xml_str =
                 "<cclmap>\n"
@@ -203,10 +199,10 @@ void tst1(int pass)
                 " </qual>\n"
                 "</cclmap>\n";
 
-            doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
+            xmlDocPtr doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
             YAZ_CHECK(doc);
 
-            r = ccl_xml_config(bibset, xmlDocGetRootElement(doc), &addinfo);
+            int r = ccl_xml_config(bibset, xmlDocGetRootElement(doc), &addinfo);
             YAZ_CHECK_EQ(r, 0);
 
             xmlFreeDoc(doc);
@@ -573,10 +569,9 @@ void tst3(void)
 void tst_addinfo(void)
 {
     const char *addinfo;
-    int r;
     CCL_bibset bibset = ccl_qual_mk();
 
-    r = ccl_qual_fitem2(bibset, "u=4    s=pw t=l,r", "ti", &addinfo);
+    int r = ccl_qual_fitem2(bibset, "u=4    s=pw t=l,r", "ti", &addinfo);
     YAZ_CHECK(r == 0 && addinfo == 0);
 
     r = ccl_qual_fitem2(bibset, "1=1016 s=al,pw t=z", "term", &addinfo);
@@ -621,11 +616,9 @@ static void check_complexity(CCL_parser parser, const char *query, int error)
 static void tst_complexity(void)
 {
     CCL_bibset bibset = ccl_qual_mk();
-    CCL_parser parser;
     WRBUF query = wrbuf_alloc();
     int i, j, error, pos;
     const char *error_string = 0;
-    struct ccl_rpn_node *rpn;
     ZOOM_query zoom = ZOOM_query_create();
     const char *prefix[] = { "(", "a and (", "a or (", "a not (", "ti=(" };
 
@@ -633,11 +626,10 @@ static void tst_complexity(void)
     ccl_qual_fitem(bibset, "s=sl u=2", "splitlist");
     ccl_qual_fitem(bibset, "s=al", "words");
     ccl_qual_fitem(bibset, "words words", "both");
-    parser = ccl_parser_create(bibset);
+    CCL_parser parser = ccl_parser_create(bibset);
     for (j = 0; j < (int) (sizeof(prefix) / sizeof(*prefix)); j++)
     {
-        int depth;
-        for (depth = CCL_MAX_DEPTH - 1; depth <= CCL_MAX_DEPTH; depth++)
+        for (int depth = CCL_MAX_DEPTH - 1; depth <= CCL_MAX_DEPTH; depth++)
         {
             wrbuf_rewind(query);
             for (i = 0; i < depth; i++)
@@ -655,7 +647,8 @@ static void tst_complexity(void)
     for (i = 0; i < 20000; i++)
         wrbuf_puts(query, "(");
     check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
-    rpn = ccl_find_str(bibset, wrbuf_cstr(query), &error, &pos);
+    struct ccl_rpn_node *rpn =
+        ccl_find_str(bibset, wrbuf_cstr(query), &error, &pos);
     YAZ_CHECK(!rpn);
     YAZ_CHECK_EQ(error, CCL_ERR_COMPLEXITY);
     ccl_rpn_delete(rpn);
@@ -711,15 +704,13 @@ static void tst_range_error_position(void)
 {
     const char *ranges[] = { "abc-", "abc-def", "-abc", "abc -def" };
     CCL_bibset bibset = ccl_qual_mk();
-    CCL_parser parser;
     WRBUF query = wrbuf_alloc();
-    size_t j;
     int i, error, pos, expected;
     struct ccl_rpn_node *rpn;
 
     ccl_qual_fitem(bibset, "r=r", "date");
-    parser = ccl_parser_create(bibset);
-    for (j = 0; j < sizeof(ranges) / sizeof(*ranges); j++)
+    CCL_parser parser = ccl_parser_create(bibset);
+    for (size_t j = 0; j < sizeof(ranges) / sizeof(*ranges); j++)
     {
         wrbuf_rewind(query);
         for (i = 0; i < (CCL_MAX_STEPS - 2) / 2; i++)

@@ -83,7 +83,6 @@ static void *my_handler(void *arg)
 
 static void tst_create_thread(void)
 {
-    void *return_data;
     int mydata0 = 42;
     int mydata1= 42;
     yaz_thread_t t[2];
@@ -93,7 +92,7 @@ static void tst_create_thread(void)
     t[1] = yaz_thread_create(my_handler, &mydata1);
     YAZ_CHECK(t[1]);
 
-    return_data = 0;
+    void *return_data = 0;
     yaz_thread_join(&t[0], &return_data);
     YAZ_CHECK(!t[0]);
     YAZ_CHECK(return_data == &mydata0);

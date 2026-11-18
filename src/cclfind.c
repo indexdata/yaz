@@ -37,10 +37,9 @@
 static int qual_val_type(ccl_qualifier_t *qa, int type, int value,
                          char **attset)
 {
-    int i;
     if (!qa)
         return 0;
-    for (i = 0; qa[i]; i++)
+    for (int i = 0; qa[i]; i++)
     {
         int got_type = 0;
         struct ccl_rpn_attr *q = ccl_qual_get_attr(qa[i]);
@@ -245,8 +244,7 @@ void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
 void ccl_set_attr_numeric(struct ccl_rpn_node *p, const char *set,
                           int type, int value)
 {
-    struct ccl_rpn_attr *n;
-    for (n = p->u.t.attr_list; n; n = n->next)
+    for (struct ccl_rpn_attr *n = p->u.t.attr_list; n; n = n->next)
         if (n->type == type)
         {
             xfree(n->set);
@@ -291,10 +289,9 @@ static int has_ccl_masking(const char *src_str,
                            const char **truncation_aliases,
                            const char **mask_aliases)
 {
-    size_t j;
     int quote_mode = 0;
 
-    for (j = 0; j < src_len; j++)
+    for (size_t j = 0; j < src_len; j++)
     {
         size_t op_size;
         if (j > 0 && src_str[j-1] == '\\')
@@ -320,10 +317,9 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
                        int is_first, int is_last,
                        int *left_trunc, int *right_trunc)
 {
-    size_t j;
     int quote_mode = 0;
 
-    for (j = 0; j < src_len; j++)
+    for (size_t j = 0; j < src_len; j++)
     {
         size_t op_size;
         if (j > 0 && src_str[j-1] == '\\')
@@ -391,7 +387,6 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                                              int is_phrase,
                                              int auto_group)
 {
-    struct ccl_rpn_node *p;
     size_t i;
     int structure_value = -1;
 
@@ -400,18 +395,15 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     int regex_trunc = 0;
     int z3958_trunc = 0;
     int is_ccl_masked = 0;
-    char *attset;
     struct ccl_token *lookahead = lookahead0;
-    const char **truncation_aliases;
     const char *t_default[2];
-    const char **mask_aliases;
     const char *m_default[2];
     size_t term_len = 0;
 
     if (!ccl_parse_step(cclp))
         return 0;
 
-    truncation_aliases =
+    const char **truncation_aliases =
         ccl_qual_search_special(cclp->bibset, "truncation");
     if (!truncation_aliases)
     {
@@ -419,8 +411,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
         t_default[0] = "?";
         t_default[1] = 0;
     }
-    mask_aliases =
-        ccl_qual_search_special(cclp->bibset, "mask");
+    const char **mask_aliases = ccl_qual_search_special(cclp->bibset, "mask");
     if (!mask_aliases)
     {
         mask_aliases = m_default;
@@ -439,7 +430,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     }
     lookahead = lookahead0;
 
-    p = ccl_rpn_node_create(CCL_RPN_TERM);
+    struct ccl_rpn_node *p = ccl_rpn_node_create(CCL_RPN_TERM);
     p->u.t.attr_list = NULL;
     p->u.t.term = NULL;
     if (qa && qa[0])
@@ -451,8 +442,8 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     /* go through all attributes and add them to the attribute list */
     for (i = 0; qa && qa[i]; i++)
     {
-        struct ccl_rpn_attr *attr;
-        for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+        for (struct ccl_rpn_attr *attr = ccl_qual_get_attr(qa[i]);
+             attr; attr = attr->next)
             if (attr->type == 1 && attr_use && attr != attr_use)
                 continue;
             else
@@ -480,7 +471,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
                 }
             }
     }
-    attset = 0;
+    char *attset = 0;
     if (structure_value == -1 && (
             auto_group ||
             qual_val_type(qa, CCL_BIB1_STR, CCL_BIB1_STR_WP, &attset))
@@ -586,17 +577,14 @@ static struct ccl_rpn_node *ccl_term_multi_use(CCL_parser cclp,
                                                int auto_group)
 {
     struct ccl_rpn_node *p = 0;
-    int i;
-    for (i = 0; qa && qa[i]; i++)
+    for (int i = 0; qa && qa[i]; i++)
     {
-        struct ccl_rpn_attr *attr;
-        for (attr = ccl_qual_get_attr(qa[i]); attr; attr = attr->next)
+        for (struct ccl_rpn_attr *attr = ccl_qual_get_attr(qa[i]);
+             attr; attr = attr->next)
             if (attr->type == 1 && i == 0)
             {
-                struct ccl_rpn_node *tmp2;
-                tmp2 = ccl_term_one_use(cclp, lookahead0,
-                                        attr, qa, no,
-                                        is_phrase, auto_group);
+                struct ccl_rpn_node *tmp2 = ccl_term_one_use(
+                    cclp, lookahead0, attr, qa, no, is_phrase, auto_group);
                 if (!tmp2)
                 {
                     ccl_rpn_delete(p);
@@ -620,10 +608,9 @@ static struct ccl_rpn_node *split_recur(CCL_parser cclp, ccl_qualifier_t *qa,
                                         struct ccl_token **ar, size_t sz,
                                         size_t sub_len)
 {
-    struct ccl_rpn_node *p;
     if (!ccl_parse_enter(cclp))
         return 0;
-    p = split_recur_impl(cclp, qa, ar, sz, sub_len);
+    struct ccl_rpn_node *p = split_recur_impl(cclp, qa, ar, sz, sub_len);
     cclp->depth--;
     return p;
 }
@@ -632,10 +619,9 @@ static struct ccl_rpn_node *split_recur_impl(CCL_parser cclp, ccl_qualifier_t *q
                                         struct ccl_token **ar, size_t sz,
                                         size_t sub_len)
 {
-    size_t l;
     struct ccl_rpn_node *p_top = 0;
     assert(sz > 0);
-    for (l = 1; l <= sz && l <= sub_len; l++)
+    for (size_t l = 1; l <= sz && l <= sub_len; l++)
     {
         struct ccl_rpn_node *p2 = ccl_term_multi_use(cclp, ar[0],
                                                      qa, l,
@@ -668,8 +654,6 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
                                                    ccl_qualifier_t *qa,
                                                    int *term_list, int multi)
 {
-    struct ccl_rpn_node *p;
-    struct ccl_token **ar;
     struct ccl_token *lookahead = cclp->look_token;
     size_t i, sz, sub_len;
     for (sz = 0; is_term_ok(lookahead->kind, term_list); sz++)
@@ -679,7 +663,8 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
         cclp->error_code = CCL_ERR_TERM_EXPECTED;
         return 0;
     }
-    ar = (struct ccl_token **) xmalloc(sizeof(*lookahead) * sz);
+    struct ccl_token **ar =
+        (struct ccl_token **) xmalloc(sizeof(*lookahead) * sz);
     lookahead = cclp->look_token;
     for (i = 0; is_term_ok(lookahead->kind, term_list); i++)
     {
@@ -693,7 +678,7 @@ static struct ccl_rpn_node *search_term_split_list(CCL_parser cclp,
         sub_len = 2;
     else
         sub_len = 3;
-    p = split_recur(cclp, qa, ar, sz, sub_len);
+    struct ccl_rpn_node *p = split_recur(cclp, qa, ar, sz, sub_len);
     xfree(ar);
     for (i = 0; i < sz; i++)
         ADVANCE;
@@ -1010,7 +995,6 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
     struct ccl_token *look_start = cclp->look_token;
     ccl_qualifier_t *ap;
     struct ccl_rpn_node *node = 0;
-    const char **field_str;
     int no = 0;
     int seq = 0;
     int i;
@@ -1031,7 +1015,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
     ap = (ccl_qualifier_t *)xmalloc((no ? (no+1) : 2) * sizeof(*ap));
     ccl_assert(ap);
 
-    field_str = ccl_qual_search_special(cclp->bibset, "field");
+    const char **field_str = ccl_qual_search_special(cclp->bibset, "field");
     if (field_str)
     {
         if (!strcmp(field_str[0], "or"))
@@ -1050,10 +1034,9 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             while ((ap[0] = ccl_qual_search(cclp, lookahead->name,
                                             lookahead->len, seq)) != 0)
             {
-                struct ccl_rpn_node *node_sub;
                 cclp->look_token = la;
 
-                node_sub = qualifier_relation(cclp, ap);
+                struct ccl_rpn_node *node_sub = qualifier_relation(cclp, ap);
                 if (!node_sub)
                 {
                     ccl_rpn_delete(node);
@@ -1080,7 +1063,6 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
         /* merge attributes from ALL fields - including inherited ones */
         while (1)
         {
-            struct ccl_rpn_node *node_sub;
             int found = 0;
             lookahead = look_start;
             for (i = 0; lookahead != la; i++)
@@ -1117,7 +1099,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
 
             cclp->look_token = lookahead;
 
-            node_sub = qualifier_relation(cclp, ap);
+            struct ccl_rpn_node *node_sub = qualifier_relation(cclp, ap);
             if (!node_sub)
             {
                 ccl_rpn_delete(node);
@@ -1206,7 +1188,6 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
                                             ccl_qualifier_t *qa)
 {
     struct ccl_rpn_node *p1;
-    struct ccl_token *lookahead;
     if (!ccl_parse_step(cclp))
         return 0;
     if (KIND == CCL_TOK_SET)
@@ -1224,7 +1205,7 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
         ADVANCE;
         return p1;
     }
-    lookahead = cclp->look_token;
+    struct ccl_token *lookahead = cclp->look_token;
 
     while (lookahead->kind==CCL_TOK_TERM)
     {
@@ -1241,20 +1222,18 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
     {
         ccl_qualifier_t qa[2];
         struct ccl_rpn_node *node = 0;
-        int seq;
         lookahead = cclp->look_token;
 
         qa[1] = 0;
-        for(seq = 0; ;seq++)
+        for(int seq = 0; ;seq++)
         {
-            struct ccl_rpn_node *node_sub;
             qa[0] = ccl_qual_search(cclp, "term", 4, seq);
             if (!qa[0])
                 break;
 
             cclp->look_token = lookahead;
 
-            node_sub = search_terms(cclp, qa);
+            struct ccl_rpn_node *node_sub = search_terms(cclp, qa);
             if (!node_sub)
             {
                 ccl_rpn_delete(node);
@@ -1278,10 +1257,9 @@ static struct ccl_rpn_node *find_spec_impl(CCL_parser cclp, ccl_qualifier_t *qa)
 
 static struct ccl_rpn_node *find_spec(CCL_parser cclp, ccl_qualifier_t *qa)
 {
-    struct ccl_rpn_node *p;
     if (!ccl_parse_enter(cclp))
         return 0;
-    p = find_spec_impl(cclp, qa);
+    struct ccl_rpn_node *p = find_spec_impl(cclp, qa);
     cclp->depth--;
     return p;
 }
@@ -1333,9 +1311,8 @@ static struct ccl_rpn_node *find_spec_impl(CCL_parser cclp, ccl_qualifier_t *qa)
 
 struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str)
 {
-    struct ccl_rpn_node *p;
     struct ccl_token *list = ccl_parser_tokenize(cclp, str);
-    p = ccl_parser_find_token(cclp, list);
+    struct ccl_rpn_node *p = ccl_parser_find_token(cclp, list);
     ccl_token_del(list);
     return p;
 }
@@ -1343,13 +1320,11 @@ struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str)
 struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
                                            struct ccl_token *list)
 {
-    struct ccl_rpn_node *p;
-
     cclp->depth = 0;
     cclp->steps = 0;
     cclp->error_code = CCL_ERR_OK;
     cclp->look_token = list;
-    p = find_spec(cclp, NULL);
+    struct ccl_rpn_node *p = find_spec(cclp, NULL);
     if (p && KIND != CCL_TOK_EOL)
     {
         if (KIND == CCL_TOK_RP)
@@ -1377,11 +1352,9 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset, const char *str,
                                   int *error, int *pos)
 {
     CCL_parser cclp = ccl_parser_create(bibset);
-    struct ccl_token *list;
-    struct ccl_rpn_node *p;
 
-    list = ccl_parser_tokenize(cclp, str);
-    p = ccl_parser_find_token(cclp, list);
+    struct ccl_token *list = ccl_parser_tokenize(cclp, str);
+    struct ccl_rpn_node *p = ccl_parser_find_token(cclp, list);
 
     *error = cclp->error_code;
     if (*error)

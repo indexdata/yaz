@@ -36,9 +36,8 @@ void yaz_thread_id_cstr(char *buf, size_t buf_max)
     *buf = '\0';
 #elif YAZ_POSIX_THREADS
     pthread_t t = pthread_self();
-    size_t i;
     *buf = '\0';
-    for (i = 0; i < sizeof(t); i++)
+    for (size_t i = 0; i < sizeof(t); i++)
     {
         if (strlen(buf) >= buf_max-2)
             break;

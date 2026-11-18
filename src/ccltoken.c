@@ -25,15 +25,13 @@
  */
 static int token_cmp(CCL_parser cclp, const char **kw, struct ccl_token *token)
 {
-    const char **aliases;
     int case_sensitive = cclp->ccl_case_sensitive;
-    int i;
 
-    aliases = ccl_qual_search_special(cclp->bibset, "case");
+    const char **aliases = ccl_qual_search_special(cclp->bibset, "case");
     if (aliases)
         case_sensitive = atoi(aliases[0]);
 
-    for (i = 0; kw[i]; i++)
+    for (int i = 0; kw[i]; i++)
     {
         if (token->len == strlen(kw[i]))
         {
@@ -237,8 +235,7 @@ static void destroy_ar(const char **a)
 {
     if (a)
     {
-        int i;
-        for (i = 0; a[i]; i++)
+        for (int i = 0; a[i]; i++)
             xfree((char *) a[i]);
         xfree((char **)a);
     }

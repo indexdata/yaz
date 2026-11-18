@@ -211,9 +211,8 @@ static int conv_convert_test_iter(yaz_record_conv_t p,
                                   const char *output_expect_record,
                                   int num_iter)
 {
-    int i;
     int ret;
-    for (i = 0; i < num_iter; i++)
+    for (int i = 0; i < num_iter; i++)
     {
         ret = conv_convert_test(p, input_record, output_expect_record);
         if (!ret)
@@ -442,7 +441,6 @@ static void tst_convert3(void)
 
     Z_OPACRecord *z_opac = nmem_malloc(nmem, sizeof(*z_opac));
     Z_HoldingsAndCircData *h;
-    Z_CircRecord *circ;
 
     z_opac->bibliographicRecord =
         z_ext_record_oid_nmem(nmem, yaz_oid_recsyn_usmarc,
@@ -491,8 +489,8 @@ static void tst_convert3(void)
     h->num_circulationData = 1;
     h->circulationData = (Z_CircRecord **)
         nmem_malloc(nmem, 1 * sizeof(Z_CircRecord *));
-    circ = h->circulationData[0] = (Z_CircRecord *)
-        nmem_malloc(nmem, sizeof(Z_CircRecord));
+    Z_CircRecord *circ = h->circulationData[0] =
+        (Z_CircRecord *) nmem_malloc(nmem, sizeof(Z_CircRecord));
     circ->availableNow = nmem_booldup(nmem, 1);
     circ->availablityDate = nmem_strdup(nmem, "20130129");
     circ->availableThru = 0;
@@ -547,14 +545,13 @@ static void tst_convert3(void)
         if (opac)
         {
             WRBUF output_record = wrbuf_alloc();
-            char *p;
 
             yaz_marc_xml(mt, YAZ_MARC_MARCXML);
             yaz_opac_decode_wrbuf(mt, opac, output_record);
 
             /* change MARC size to 00077 from 00078, due to
                encoding of the aring (two bytes in UTF-8) */
-            p = strstr(wrbuf_buf(output_record), "00078");
+            char *p = strstr(wrbuf_buf(output_record), "00078");
             YAZ_CHECK(p);
             if (p)
                 p[4] = '7';
@@ -580,7 +577,6 @@ static void tst_convert3(void)
 static void tst_convert4(void)
 {
     NMEM nmem = nmem_create();
-    int ret;
 
     const char *opacxml_rec =
         "<opacRecord>\n"
@@ -606,8 +602,8 @@ static void tst_convert4(void)
 
     Z_OPACRecord *opac = 0;
     yaz_marc_t mt =  yaz_marc_create();
-    ret = yaz_xml_to_opac(mt, opacxml_rec, strlen(opacxml_rec),
-                          &opac, 0 /* iconv */, nmem, 0);
+    int ret = yaz_xml_to_opac(mt, opacxml_rec, strlen(opacxml_rec), &opac,
+                              0 /* iconv */, nmem, 0);
     YAZ_CHECK(ret);
     YAZ_CHECK(opac);
     yaz_marc_destroy(mt);

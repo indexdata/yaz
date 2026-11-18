@@ -76,10 +76,9 @@ const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
                                             const char *node_name,
                                             const char *attribute_name)
 {
-    struct _xmlAttr *attr;
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
         if (attr->children && attr->children->type == XML_TEXT_NODE)
         {
             if (!strcmp((const char *) attr->name, attribute_name))
@@ -121,13 +120,12 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
 
     if (basic)
     {
-        size_t len;
         char out[256];
         char ubuf[256] = "", pbuf[256] = "", *p;
         if (strncmp(basic, "Basic ", 6))
             return;
         basic += 6;
-        len = strlen(basic);
+        size_t len = strlen(basic);
         if (!len || len > 256)
             return;
         yaz_base64decode(basic, out);
@@ -174,8 +172,8 @@ void yaz_add_srw_diagnostic_uri(ODR o, Z_SRW_diagnostic **d,
                                 int *num, const char *uri,
                                 const char *message, const char *details)
 {
-    Z_SRW_diagnostic *d_new;
-    d_new = (Z_SRW_diagnostic *) odr_malloc(o, (*num + 1)* sizeof(**d));
+    Z_SRW_diagnostic *d_new =
+        (Z_SRW_diagnostic *) odr_malloc(o, (*num + 1) * sizeof(**d));
     if (*num)
         memcpy(d_new, *d, *num *sizeof(**d));
     *d = d_new;
@@ -336,12 +334,11 @@ static int yaz_sru_decode_integer(ODR odr, const char *pname,
                                   Z_SRW_diagnostic **diag, int *num_diag,
                                   int min_value)
 {
-    long ival;
     char *end;
     if (!valstr)
         return 0;
     errno = 0;
-    ival = strtol(valstr, &end, 10);
+    long ival = strtol(valstr, &end, 10);
     if (end != valstr)
         while (isspace((unsigned char) *end))
             end++;
@@ -430,8 +427,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
 #if YAZ_HAVE_XML2
         if (uri_name)
         {
-            int i;
-            for (i = 0; uri_name[i]; i++)
+            for (int i = 0; uri_name[i]; i++)
             {
                 char *n = uri_name[i];
                 char *v = uri_val[i];
@@ -725,9 +721,8 @@ Z_SRW_extra_record *yaz_srw_get_extra_record(ODR o)
 Z_SRW_record *yaz_srw_get_records(ODR o, int n)
 {
     Z_SRW_record *res = (Z_SRW_record *) odr_malloc(o, n * sizeof(*res));
-    int i;
 
-    for (i = 0; i<n; i++)
+    for (int i = 0; i<n; i++)
     {
         res[i].recordSchema = 0;
         res[i].recordPacking = Z_SRW_recordPacking_string;
@@ -1112,8 +1107,6 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 {
     char *name[MAX_SRU_PARAMETERS], *value[MAX_SRU_PARAMETERS]; /* definite upper limit for SRU params */
     char *uri_args;
-    char *path;
-    char *cp;
 
     z_HTTP_header_add_basic_auth(encode, &hreq->headers,
                                  srw_pdu->username, srw_pdu->password);
@@ -1123,12 +1116,12 @@ int yaz_sru_get_encode(Z_HTTP_Request *hreq, Z_SRW_PDU *srw_pdu,
 
     hreq->method = "GET";
 
-    cp = strchr(hreq->path, '#');
+    char *cp = strchr(hreq->path, '#');
     if (cp)
         *cp = '\0';
 
-    path = nmem_printf(odr_getmem(encode), "%s%c%s",
-        hreq->path, strchr(hreq->path, '?') ? '&' : '?', uri_args);
+    char *path = nmem_printf(odr_getmem(encode), "%s%c%s", hreq->path,
+                             strchr(hreq->path, '?') ? '&' : '?', uri_args);
 
     hreq->path = path;
 
@@ -1205,8 +1198,7 @@ Z_SRW_recordVersion *yaz_srw_get_record_versions(ODR odr, int num)
 {
     Z_SRW_recordVersion *ver
         = (Z_SRW_recordVersion *) odr_malloc(odr,num * sizeof(*ver));
-    int i;
-    for (i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i)
     {
         ver[i].versionType = 0;
         ver[i].versionValue = 0;

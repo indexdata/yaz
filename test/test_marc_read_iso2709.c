@@ -22,9 +22,8 @@ static void put_number(char *p, int width, int value)
 /* Allocate exactly the advertised size: no NUL or spare trailing bytes. */
 static char *record(const char *tag, const char *body, int body_len, int *len)
 {
-    char *buf;
     *len = 38 + body_len;
-    buf = xmalloc(*len);
+    char *buf = xmalloc(*len);
     memcpy(buf, "00000nam a2200037   4500", 24);
     put_number(buf, 5, *len);
     memcpy(buf + 24, tag, 3);
@@ -50,7 +49,6 @@ static void tst_bounds(void)
 {
     yaz_marc_t mt = yaz_marc_create();
     const char valid[] = "  \037aX\036";
-    char *buf;
     int len, i, mode;
     yaz_marc_xml(mt, YAZ_MARC_LINE);
     for (i = 0; i < 24; i++)
@@ -64,7 +62,7 @@ static void tst_bounds(void)
     YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, 0, -1), -1);
     YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, "", -2), -1);
 
-    buf = record("245", valid, sizeof(valid) - 1, &len);
+    char *buf = record("245", valid, sizeof(valid) - 1, &len);
     check_record(mt, buf, len, 1);
     YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, buf, -1), len);
     for (i = 24; i < len; i++)

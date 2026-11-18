@@ -21,11 +21,10 @@ Z_RPNQuery *ccl_rpn_query (ODR o, struct ccl_rpn_node *p)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     WRBUF wr = wrbuf_alloc();
-    Z_RPNQuery *q;
 
     ccl_pquery(wr, p);
 
-    q = yaz_pqf_parse(parser, o, wrbuf_cstr(wr));
+    Z_RPNQuery *q = yaz_pqf_parse(parser, o, wrbuf_cstr(wr));
 
     wrbuf_destroy(wr);
     yaz_pqf_destroy(parser);
@@ -36,12 +35,11 @@ Z_AttributesPlusTerm *ccl_scan_query (ODR o, struct ccl_rpn_node *p)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     WRBUF wr = wrbuf_alloc();
-    Z_AttributesPlusTerm *q;
     Odr_oid *setp;
 
     ccl_pquery(wr, p);
 
-    q = yaz_pqf_scan(parser, o, &setp, wrbuf_cstr(wr));
+    Z_AttributesPlusTerm *q = yaz_pqf_scan(parser, o, &setp, wrbuf_cstr(wr));
 
     wrbuf_destroy(wr);
     yaz_pqf_destroy(parser);

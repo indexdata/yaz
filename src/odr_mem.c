@@ -65,13 +65,12 @@ size_t odr_total(ODR o)
 
 Odr_oct *odr_create_Odr_oct(ODR o, const char *buf, int sz)
 {
-    Odr_oct *p;
     if (sz < 0)
     {
         odr_seterror(o, OLENOV, 58);
         return 0;
     }
-    p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
+    Odr_oct *p = (Odr_oct *) odr_malloc(o, sizeof(Odr_oct));
     p->buf = odr_strdupn(o, buf, sz);
     p->len = sz;
     return p;

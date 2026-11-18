@@ -20,8 +20,7 @@ static void pr_n(const char *buf,
                 void (*pr)(const char *buf, void *client_data),
                 void *client_data, int n)
 {
-    int i;
-    for (i = 0; i<n; i++)
+    for (int i = 0; i<n; i++)
         (*pr)(" ", client_data);
     (*pr)(buf, client_data);
 }

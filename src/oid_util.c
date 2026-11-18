@@ -59,10 +59,9 @@ int oid_oidlen(const Odr_oid *o)
 char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf)
 {
     char tmpbuf[20];
-    int i;
 
     oidbuf[0] = '\0';
-    for (i = 0; oid[i] != -1 && i < OID_SIZE; i++)
+    for (int i = 0; oid[i] != -1 && i < OID_SIZE; i++)
     {
         yaz_snprintf(tmpbuf, sizeof(tmpbuf)-1, "%d", oid[i]);
         if (i > 0)

@@ -162,13 +162,11 @@ struct ccl_rpn_node *ccl_remove_stop_r(ccl_stop_words_t csw,
 int ccl_stop_words_tree(ccl_stop_words_t csw,
                         CCL_bibset bibset, struct ccl_rpn_node **t)
 {
-    struct ccl_rpn_node *r;
-
     /* remove list items */
     nmem_reset(csw->nmem);
     csw->removed_items = 0;
 
-    r = ccl_remove_stop_r(csw, bibset, *t);
+    struct ccl_rpn_node *r = ccl_remove_stop_r(csw, bibset, *t);
     *t = r;
     if (csw->removed_items)
         return 1;

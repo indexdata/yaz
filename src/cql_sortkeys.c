@@ -120,12 +120,11 @@ int cql_sortby_to_sortkeys(struct cql_node *cn,
 int cql_sortby_to_sortkeys_buf(struct cql_node *cn, char *out, int max)
 {
     struct cql_buf_write_info info;
-    int r;
 
     info.off = 0;
     info.max = max;
     info.buf = out;
-    r = cql_sortby_to_sortkeys(cn, cql_buf_write_handler, &info);
+    int r = cql_sortby_to_sortkeys(cn, cql_buf_write_handler, &info);
     if (info.off >= 0)
         info.buf[info.off] = '\0';
     return r;

@@ -15,7 +15,6 @@
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
     ZOOM_options o = ZOOM_options_create ();
     const char *errmsg, *addinfo;
 
@@ -27,14 +26,13 @@ int main(int argc, char **argv)
     /* async mode */
     ZOOM_options_set (o, "async", "1");
 
-    z = ZOOM_connection_create(o);
+    ZOOM_connection z = ZOOM_connection_create(o);
 
     while(1)
     {
         int i, error;
-        ZOOM_resultset rset;
         ZOOM_connection_connect (z, argv[2], 0);
-        rset = ZOOM_connection_search_pqf(z, argv[3]);
+        ZOOM_resultset rset = ZOOM_connection_search_pqf(z, argv[3]);
 
         while ((i = ZOOM_event(1, &z)))
         {

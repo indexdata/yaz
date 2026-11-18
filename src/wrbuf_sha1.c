@@ -142,9 +142,8 @@ static void SHA1Init(SHA1_CTX* context)
 static void SHA1Update(SHA1_CTX* context, const unsigned char* data, uint32_t len)
 {
     uint32_t i;
-    uint32_t j;
 
-    j = context->count[0];
+    uint32_t j = context->count[0];
     if ((context->count[0] += len << 3) < j)
         context->count[1]++;
     context->count[1] += (len>>29);
@@ -168,13 +167,12 @@ static void SHA1Final(unsigned char digest[20], SHA1_CTX* context)
 {
     unsigned i;
     unsigned char finalcount[8];
-    unsigned char c;
 
     for (i = 0; i < 8; i++) {
         finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)]
          >> ((3-(i & 3)) * 8) ) & 255);  /* Endian independent */
     }
-    c = 0200;
+    unsigned char c = 0200;
     SHA1Update(context, &c, 1);
     while ((context->count[0] & 504) != 448) {
         c = 0000;
@@ -208,8 +206,7 @@ int wrbuf_sha1_write(WRBUF b, const char *cp, size_t sz, int hexit)
 
     if (hexit)
     {
-        int i;
-        for (i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++)
             wrbuf_printf(b, "%02x", digest[i]);
     }
     else

@@ -34,7 +34,6 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
     {
         Z_SOAP *p;
         xmlNodePtr ptr, pptr;
-        xmlDocPtr doc;
         int i, ret;
 
         if (!content_buf || !*content_buf || !content_len)
@@ -43,7 +42,7 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         *pp = p = (Z_SOAP *) odr_malloc(o, sizeof(*p));
         p->ns = soap_v1_1;
 
-        doc = xmlParseMemory(*content_buf, *content_len);
+        xmlDocPtr doc = xmlParseMemory(*content_buf, *content_len);
         if (!doc)
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "Bad XML Document", 0);
@@ -229,14 +228,13 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
     else if (o->direction == ODR_ENCODE)
     {
         Z_SOAP *p = *pp;
-        xmlNsPtr ns_env;
         xmlNodePtr envelope_ptr, body_ptr;
 
         xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
 
         envelope_ptr = xmlNewNode(0, BAD_CAST "Envelope");
-        ns_env = xmlNewNs(envelope_ptr, BAD_CAST p->ns,
-                          BAD_CAST "SOAP-ENV");
+        xmlNsPtr ns_env =
+            xmlNewNs(envelope_ptr, BAD_CAST p->ns, BAD_CAST "SOAP-ENV");
         xmlSetNs(envelope_ptr, ns_env);
 
         body_ptr = xmlNewChild(envelope_ptr, ns_env, BAD_CAST "Body",

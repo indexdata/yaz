@@ -10,8 +10,6 @@
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
-    ZOOM_resultset r;
     int error;
     const char *errmsg, *addinfo;
 
@@ -21,7 +19,7 @@ int main(int argc, char **argv)
         fprintf (stderr, " e.g.  z3950.indexdata.com/gils computer\n");
         exit (1);
     }
-    z = ZOOM_connection_new (argv[1], 0);
+    ZOOM_connection z = ZOOM_connection_new (argv[1], 0);
 
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
     {
@@ -30,7 +28,7 @@ int main(int argc, char **argv)
     }
 
     ZOOM_connection_option_set(z, "saveAPDU", "1");
-    r = ZOOM_connection_search_pqf (z, argv[2]);
+    ZOOM_resultset r = ZOOM_connection_search_pqf (z, argv[2]);
     if ((error = ZOOM_connection_error(z, &errmsg, &addinfo)))
         fprintf (stderr, "Error: %s (%d) %s\n", errmsg, error, addinfo);
     else

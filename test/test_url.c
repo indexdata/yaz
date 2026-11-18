@@ -44,10 +44,9 @@ static int put_stub(COMSTACK cs, char *buf, int size)
 
 static int get_stub(COMSTACK cs, char **buf, int *size)
 {
-    WRBUF response;
     if (failure_mode == 4)
         return 0;
-    response = wrbuf_alloc();
+    WRBUF response = wrbuf_alloc();
     if (connections == 1 || (chain && connections == 2))
     {
         wrbuf_printf(response, "HTTP/1.1 %d Redirect\r\nLocation: %s\r\n",
@@ -102,8 +101,6 @@ static void check_redirect(const char *uri, const char *location,
     yaz_url_t url = yaz_url_create();
     ODR odr = odr_createmem(ODR_ENCODE);
     Z_HTTP_Header *headers = 0;
-    Z_HTTP_Response *res;
-    int i;
 
     connections = 0;
     redirect_location = location;
@@ -113,7 +110,7 @@ static void check_redirect(const char *uri, const char *location,
         z_HTTP_header_add(odr, &headers, header, "secret");
     if (certificate)
         yaz_url_set_cert_fname(url, "client.pem");
-    res = yaz_url_exec(url, uri, "GET", headers, 0, 0);
+    Z_HTTP_Response *res = yaz_url_exec(url, uri, "GET", headers, 0, 0);
     if (allowed)
     {
         YAZ_CHECK(res);
@@ -132,7 +129,7 @@ static void check_redirect(const char *uri, const char *location,
         YAZ_CHECK_EQ(connections, chained ? 2 : 1);
         YAZ_CHECK(strstr(yaz_url_get_error(url), expected_target));
     }
-    for (i = 0; i < connections; i++)
+    for (int i = 0; i < connections; i++)
     {
         xfree(requests[i]);
         requests[i] = 0;
@@ -197,8 +194,7 @@ static void tst_invalid_requests(void)
         "http://example.org/a b", "http://example.org/a\tb",
         "http://example.org/a\177b"
     };
-    size_t i;
-    for (i = 0; i <= sizeof(uris) / sizeof(*uris); i++)
+    for (size_t i = 0; i <= sizeof(uris) / sizeof(*uris); i++)
     {
         yaz_url_t url = yaz_url_create();
         int method_test = i == sizeof(uris) / sizeof(*uris);
@@ -233,16 +229,14 @@ static void tst_credential_errors(void)
         "Can not encode HTTP request", "Can not connect to URL",
         "Connection closed while reading"
     };
-    size_t i;
     int mode;
     WRBUF warnings = wrbuf_alloc();
     /* Capture warnings through the handler only. */
     yaz_log_init_file(0);
-    for (i = 0; i < sizeof(uris) / sizeof(*uris); i++)
+    for (size_t i = 0; i < sizeof(uris) / sizeof(*uris); i++)
         for (mode = 0; mode < 5; mode++)
         {
             yaz_url_t url = yaz_url_create();
-            const char *error;
             connections = connect_calls = 0;
             failure_mode = mode;
             wrbuf_rewind(warnings);
@@ -251,7 +245,7 @@ static void tst_credential_errors(void)
                                   0, mode == 0 ? "x" : 0,
                                   mode == 0 ? (size_t) INT_MAX + 1 : 0));
             yaz_log_set_handler(0, 0);
-            error = yaz_url_get_error(url);
+            const char *error = yaz_url_get_error(url);
             YAZ_CHECK(strstr(error, errors[mode]) != 0);
             YAZ_CHECK(strstr(error, "example.org/path") != 0);
             YAZ_CHECK(strstr(error, "private-user") == 0);

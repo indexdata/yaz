@@ -102,16 +102,14 @@ static void keepalive(void (*work)(void *data), void *data)
     int no_sigbus = 0;
     int run = 1;
     int cont = 1;
-    void (*old_sigterm)(int);
-    void (*old_sigusr1)(int);
     struct sigaction sa2, sa1;
 
     keepalive_pid = getpid();
 
     /* keep signals in their original state and make sure that some signals
        to parent process also gets sent to the child..  */
-    old_sigterm = signal(SIGTERM, normal_stop_handler);
-    old_sigusr1 = signal(SIGUSR1, normal_stop_handler);
+    void (*old_sigterm)(int) = signal(SIGTERM, normal_stop_handler);
+    void (*old_sigusr1)(int) = signal(SIGUSR1, normal_stop_handler);
 
     sigemptyset(&sa2.sa_mask);
     sa2.sa_handler = sigusr2_handler;
@@ -259,16 +257,14 @@ int yaz_daemon(const char *progname,
 #if HAVE_GRP_H && HAVE_INITGROUPS && HAVE_SETGID && HAVE_SETUID
         /* OK to use the non-thread version here */
         struct passwd *pw = getpwnam(uid);
-        uid_t target_uid;
-        gid_t target_gid;
         if (!pw)
         {
             yaz_log(YLOG_FATAL, "%s: Unknown user", uid);
             exit(1);
         }
         /* Account lookups during initgroups may reuse passwd storage. */
-        target_uid = pw->pw_uid;
-        target_gid = pw->pw_gid;
+        uid_t target_uid = pw->pw_uid;
+        gid_t target_gid = pw->pw_gid;
         if (flags & YAZ_DAEMON_LOG_REOPEN)
         {
             FILE *f = yaz_log_file();

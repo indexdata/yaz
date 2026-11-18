@@ -205,14 +205,13 @@ static int cmd_set(struct zoom_sh *sh, const char **args)
 {
     WRBUF key;
     const char *val_buf;
-    int val_len;
 
     if (!(key = next_token_new_wrbuf(args)))
     {
         printf("missing argument for set\n");
         return 1;
     }
-    val_len = next_token_chars(args, &val_buf, "");
+    int val_len = next_token_chars(args, &val_buf, "");
     if (val_len != -1)
         ZOOM_options_setl(sh->options, wrbuf_cstr(key), val_buf, val_len);
     else
@@ -274,11 +273,9 @@ static int cmd_rget(struct zoom_sh *sh, const char **args)
 
 static int cmd_close(struct zoom_sh *sh, const char **args)
 {
-    struct zoom_db **dbp;
-    WRBUF host;
-    host = next_token_new_wrbuf(args);
+    WRBUF host = next_token_new_wrbuf(args);
 
-    for (dbp = &sh->list; *dbp; )
+    for (struct zoom_db **dbp = &sh->list; *dbp; )
     {
         const char *h;
         struct zoom_db *db = *dbp;
@@ -303,8 +300,7 @@ static void display_records(ZOOM_connection c,
                             ZOOM_resultset r,
                             size_t start, size_t count, const char *type)
 {
-    size_t i;
-    for (i = 0; i < count; i++)
+    for (size_t i = 0; i < count; i++)
     {
         size_t pos = i + start;
         ZOOM_record rec = ZOOM_resultset_record(r, pos);
@@ -405,14 +401,12 @@ static int cmd_show(struct zoom_sh *sh, const char **args)
 
 static void display_facets(ZOOM_facet_field *facets, size_t count)
 {
-    size_t i;
     printf("Facets: \n");
-    for (i = 0; i < count; i++)
+    for (size_t i = 0; i < count; i++)
     {
-        int j;
         const char *facet_name = ZOOM_facet_field_name(facets[i]);
         printf("  %s: \n", facet_name);
-        for (j = 0; j < ZOOM_facet_field_term_count(facets[i]); j++)
+        for (int j = 0; j < ZOOM_facet_field_term_count(facets[i]); j++)
         {
             int freq = 0;
             const char *term = ZOOM_facet_field_get_term(facets[i], j, &freq);
@@ -423,12 +417,11 @@ static void display_facets(ZOOM_facet_field *facets, size_t count)
 
 static int cmd_facets(struct zoom_sh *sh, const char **args)
 {
-    struct zoom_db *db;
     int ret = 0;
 
     process_events(sh);
 
-    for (db = sh->list; db; db = db->next)
+    for (struct zoom_db *db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
@@ -457,12 +450,11 @@ static int cmd_facets(struct zoom_sh *sh, const char **args)
 
 static int cmd_suggestions(struct zoom_sh *sh, const char **args)
 {
-    struct zoom_db *db;
     int ret = 0;
 
     process_events(sh);
 
-    for (db = sh->list; db; db = db->next)
+    for (struct zoom_db *db = sh->list; db; db = db->next)
     {
         int error;
         const char *errmsg, *addinfo, *dset;
@@ -535,9 +527,8 @@ static int cmd_ext(struct zoom_sh *sh, const char **args)
         }
         else if (p[i])
         {
-            const char *v;
             printf("ok\n");
-            v = ZOOM_package_option_get(p[i], "targetReference");
+            const char *v = ZOOM_package_option_get(p[i], "targetReference");
             if (v)
                 printf("targetReference: %s\n", v);
             v = ZOOM_package_option_get(p[i], "xmlUpdateDoc");
@@ -573,24 +564,21 @@ static int cmd_debug(struct zoom_sh *sh, const char **args)
 
 static void display_search_result(struct zoom_db *db)
 {
-    const char *v;
     int num;
 
-    v = ZOOM_resultset_option_get(db->res, "searchresult.size");
+    const char *v = ZOOM_resultset_option_get(db->res, "searchresult.size");
     if (v && (num = atoi(v)))
     {
-        int i;
         printf("SearchResult-1:");
-        for (i = 0; i < num; i++)
+        for (int i = 0; i < num; i++)
         {
-            const char *v;
             char str[60];
 
             if (i)
                 printf(",");
 
             yaz_snprintf(str, sizeof str, "searchresult.%d.id", i);
-            v = ZOOM_resultset_option_get(db->res, str);
+            const char *v = ZOOM_resultset_option_get(db->res, str);
             if (v)
                 printf(" id=%s", v);
 
@@ -610,12 +598,11 @@ static void display_search_result(struct zoom_db *db)
 
 static int cmd_search(struct zoom_sh *sh, const char **args)
 {
-    ZOOM_query s;
     const char *query_str = *args;
     int ret = 0;
     struct zoom_db *db;
 
-    s = ZOOM_query_create();
+    ZOOM_query s = ZOOM_query_create();
     while (*query_str == ' ')
         query_str++;
     if (memcmp(query_str, "cql:", 4) == 0)
@@ -675,24 +662,21 @@ static int cmd_search(struct zoom_sh *sh, const char **args)
             /* OK, no major errors. Look at the result count */
             int start = ZOOM_options_get_int(sh->options, "start", 0);
             int count = ZOOM_options_get_int(sh->options, "count", 0);
-            size_t facet_num;
 
             printf("%s: %lld hits\n", ZOOM_connection_option_get(db->con,
                                                                  "host"),
                    (long long int) ZOOM_resultset_size(db->res));
 
-            facet_num = ZOOM_resultset_facets_size(db->res);
+            size_t facet_num = ZOOM_resultset_facets_size(db->res);
             if (facet_num)
             {
                 ZOOM_facet_field *facets = ZOOM_resultset_facets(db->res);
-                int facet_idx;
-                for (facet_idx = 0; facet_idx < facet_num; facet_idx++)
+                for (int facet_idx = 0; facet_idx < facet_num; facet_idx++)
                 {
                     const char *name = ZOOM_facet_field_name(facets[facet_idx]);
-                    size_t term_idx;
                     size_t term_num = ZOOM_facet_field_term_count(facets[facet_idx]);
                     printf("facet: %s\n", name);
-                    for (term_idx = 0; term_idx < term_num; term_idx++ )
+                    for (size_t term_idx = 0; term_idx < term_num; term_idx++ )
                     {
                         int freq;
                         const char *term =
@@ -783,13 +767,12 @@ static int cmd_scan(struct zoom_sh *sh, const char **args)
 static int cmd_sortby(struct zoom_sh *sh, const char **args)
 {
     WRBUF strategy;
-    const char *criteria;
     if (!(strategy = next_token_new_wrbuf(args)))
     {
         printf("missing argument argument: strategy and criteria\n");
         return 1;
     }
-    criteria = *args;
+    const char *criteria = *args;
     while (*criteria == ' ')
         criteria++;
     wrbuf_destroy(sh->strategy);
@@ -804,12 +787,11 @@ static int cmd_sort(struct zoom_sh *sh, const char **args)
 {
     const char *sort_spec = *args;
     int ret = 0;
-    struct zoom_db *db;
 
     while (*sort_spec == ' ')
         sort_spec++;
 
-    for (db = sh->list; db; db = db->next)
+    for (struct zoom_db *db = sh->list; db; db = db->next)
         if (db->res)
             ZOOM_resultset_sort(db->res, "yaz", sort_spec);
     process_events(sh);
@@ -910,11 +892,10 @@ static int cmd_connect(struct zoom_sh *sh, const char **args)
 */
 static int cmd_parse(struct zoom_sh *sh, const char **buf)
 {
-    int cmd_len;
     const char *cmd_str;
     int ret = 0;
 
-    cmd_len = next_token(buf, &cmd_str);
+    int cmd_len = next_token(buf, &cmd_str);
     if (cmd_len < 0)
         return 0;
     if (is_command("quit", cmd_str, cmd_len))
@@ -1025,7 +1006,6 @@ static int zoomsh(int argc, char **argv)
 {
     int res = 0; /* -1: EOF; 0 = OK, > 0 ERROR */
     int exit_on_error = 0;
-    struct zoom_db *db;
     struct zoom_sh sh;
 
     sh.list = 0;
@@ -1066,7 +1046,7 @@ static int zoomsh(int argc, char **argv)
         }
     }
 
-    for (db = sh.list; db; )
+    for (struct zoom_db *db = sh.list; db; )
     {
         struct zoom_db *n = db->next;
         ZOOM_connection_destroy(db->con);
@@ -1084,10 +1064,8 @@ static int zoomsh(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    int ret;
-
     yaz_enable_panic_backtrace(*argv);
-    ret = zoomsh(argc, argv);
+    int ret = zoomsh(argc, argv);
     exit(ret);
 }
 /*

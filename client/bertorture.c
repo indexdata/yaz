@@ -115,10 +115,8 @@ static void test_random(int run, const char *fname, const char *fname2,
     for (j = 0; j<sizeof(buf)-1; j++)
     {
         Z_GDU *req;
-        char *mbuf;
-        ODR odr;
 
-        odr = odr_createmem(ODR_DECODE);
+        ODR odr = odr_createmem(ODR_DECODE);
         if (fname)
         {
             int off = 0;
@@ -130,8 +128,7 @@ static void test_random(int run, const char *fname, const char *fname2,
             }
             while (sizeof(buf)-j-off > 0)
             {
-                ssize_t wrote;
-                wrote = write(fd, buf+off+j, sizeof(buf)-j-off);
+                ssize_t wrote = write(fd, buf+off+j, sizeof(buf)-j-off);
                 if (wrote <= 0) {
                     yaz_log(YLOG_ERRNO|YLOG_FATAL, "write %s", fname);
                     exit (1);
@@ -144,7 +141,7 @@ static void test_random(int run, const char *fname, const char *fname2,
                 exit (1);
             }
         }
-        mbuf = malloc(sizeof(buf)-j);
+        char *mbuf = malloc(sizeof(buf)-j);
         memcpy(mbuf, buf+j, sizeof(buf)-j);
         odr_setbuf(odr, mbuf, sizeof(buf)-j, 0);
         if (z_GDU(odr, &req, 0, 0))

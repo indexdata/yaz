@@ -67,9 +67,7 @@ static Z_ext_typeent type_table[] =
 
 Z_ext_typeent *z_ext_getentbyref(const Odr_oid *oid)
 {
-    Z_ext_typeent *p;
-
-    for (p = type_table; p->oid[0] != -1; p++)
+    for (Z_ext_typeent *p = type_table; p->oid[0] != -1; p++)
         if (!oid_oidcmp(oid, p->oid))
             return p;
     return 0;
@@ -219,27 +217,23 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         if (zclass == ODR_CONTEXT && tag == 1 && cons == 0)
         {
             /* we have an OCTET STRING. decode BER contents from it */
-            const char *o_bp;
-            char *o_buf;
-            int o_size;
             char *voidp = 0;
             Odr_oct *oct;
-            int r;
             if (!odr_implicit_tag(o, odr_octetstring, &oct,
                                   ODR_CONTEXT, 1, 0, "octetaligned"))
                 return 0;
 
             /* Save our decoding ODR members */
-            o_bp = o->op->bp;
-            o_buf = o->op->buf;
-            o_size = o->op->size;
+            const char *o_bp = o->op->bp;
+            char *o_buf = o->op->buf;
+            int o_size = o->op->size;
 
             /* Set up the OCTET STRING buffer */
             o->op->bp = o->op->buf = oct->buf;
             o->op->size = oct->len;
 
             /* and decode that */
-            r = (*type->fun)(o, &voidp, 0, 0);
+            int r = (*type->fun)(o, &voidp, 0, 0);
             (*p)->which = type->what;
             (*p)->u.single_ASN1_type = (Odr_any*) voidp;
 

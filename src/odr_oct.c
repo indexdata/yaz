@@ -61,7 +61,6 @@ int odr_octetstring(ODR o, Odr_oct **p, int opt, const char *name)
 int odr_cstring(ODR o, char **p, int opt, const char *name)
 {
     int cons = 0, res;
-    Odr_oct *t;
 
     if (o->error)
         return 0;
@@ -81,7 +80,8 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
         odr_printf(o, "'%s'\n", *p);
         return 1;
     }
-    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
+    /* wrapper for octstring */
+    Odr_oct *t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));
     if (o->direction == ODR_ENCODE)
     {
         size_t len = strlen(*p);
@@ -115,7 +115,6 @@ int odr_cstring(ODR o, char **p, int opt, const char *name)
 int odr_iconv_string(ODR o, char **p, int opt, const char *name)
 {
     int cons = 0, res;
-    Odr_oct *t;
 
     if (o->error)
         return 0;
@@ -135,7 +134,8 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
         odr_printf(o, "'%s'\n", *p);
         return 1;
     }
-    t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct)); /* wrapper for octstring */
+    /* wrapper for octstring */
+    Odr_oct *t = (Odr_oct *)odr_malloc(o, sizeof(Odr_oct));
     if (o->direction == ODR_ENCODE)
     {
         t->buf = 0;
@@ -146,13 +146,11 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             char *inbuf = *p;
             size_t outleft = 4 * inleft + 2;
             char *outbuf = (char *) odr_malloc (o, outleft);
-            size_t ret;
-            ptrdiff_t len;
 
             t->buf = outbuf;
 
-            ret = yaz_iconv(o->op->iconv_handle, &inbuf, &inleft,
-                            &outbuf, &outleft);
+            size_t ret = yaz_iconv(o->op->iconv_handle, &inbuf, &inleft,
+                                   &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
                 odr_seterror(o, ODATA, 44);
@@ -167,7 +165,7 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
                 odr_seterror(o, ODATA, 44);
                 return 0;
             }
-            len = outbuf - (char *) t->buf;
+            ptrdiff_t len = outbuf - (char *) t->buf;
             if (len > INT_MAX)
             {
                 odr_seterror(o, OLENOV, 56);
@@ -206,12 +204,11 @@ int odr_iconv_string(ODR o, char **p, int opt, const char *name)
             char *inbuf = (char *) t->buf;
             size_t outleft = 4 * inleft + 2;
             char *outbuf = (char *) odr_malloc (o, outleft);
-            size_t ret;
 
             *p = outbuf;
 
-            ret = yaz_iconv (o->op->iconv_handle, &inbuf, &inleft,
-                             &outbuf, &outleft);
+            size_t ret = yaz_iconv(o->op->iconv_handle, &inbuf, &inleft,
+                                   &outbuf, &outleft);
             if (ret == (size_t)(-1))
             {
                 odr_seterror(o, ODATA, 45);

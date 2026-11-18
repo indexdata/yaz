@@ -46,7 +46,6 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         Z_SRW_extra_record ex;
 
         char *spack = 0;
-        xmlNodePtr ptr;
 #ifdef Z_SRW_packed
         rec->packing = 0;
 #endif
@@ -60,7 +59,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         ex.extraRecordData_len = 0;
         ex.recordIdentifier = 0;
 
-        for (ptr = pptr->children; ptr; ptr = ptr->next)
+        for (xmlNodePtr ptr = pptr->children; ptr; ptr = ptr->next)
         {
 
             if (yaz_match_xsd_string(ptr, "recordSchema", o,
@@ -195,8 +194,7 @@ static int yaz_srw_records(ODR o, xmlNodePtr pptr, Z_SRW_record **recs,
     }
     else if (o->direction == ODR_ENCODE)
     {
-        int i;
-        for (i = 0; i < *num; i++)
+        for (int i = 0; i < *num; i++)
         {
             xmlNodePtr rptr = xmlNewChild(pptr, 0, BAD_CAST "record",
                                           0);
@@ -212,10 +210,9 @@ static int yaz_srw_version(ODR o, xmlNodePtr pptr, Z_SRW_recordVersion *rec,
 {
     if (o->direction == ODR_DECODE)
     {
-        xmlNodePtr ptr;
         rec->versionType = 0;
         rec->versionValue = 0;
-        for (ptr = pptr->children; ptr; ptr = ptr->next)
+        for (xmlNodePtr ptr = pptr->children; ptr; ptr = ptr->next)
         {
 
             if (yaz_match_xsd_string(ptr, "versionType", o,
@@ -265,8 +262,7 @@ static int yaz_srw_versions(ODR o, xmlNodePtr pptr,
     }
     else if (o->direction == ODR_ENCODE)
     {
-        int i;
-        for (i = 0; i < *num; i++)
+        for (int i = 0; i < *num; i++)
         {
             xmlNodePtr rptr = xmlNewChild(pptr, 0, BAD_CAST "version",
                                           0);
@@ -279,7 +275,6 @@ static int yaz_srw_versions(ODR o, xmlNodePtr pptr,
 Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
 {
     Odr_int freq;
-    Z_FacetTerm *facet_term;
     const char *freq_string = yaz_element_attribute_value_get(
         node, "facetvalue", "est_representation");
     if (freq_string)
@@ -287,15 +282,13 @@ Z_FacetTerm *yaz_sru_proxy_get_facet_term_count(ODR odr, xmlNodePtr node)
     else
         freq = -1;
 
-    facet_term = facet_term_create_cstr(odr,
-        nmem_text_node_cdata(node->children, odr_getmem(odr)), freq);
+    Z_FacetTerm *facet_term = facet_term_create_cstr(
+        odr, nmem_text_node_cdata(node->children, odr_getmem(odr)), freq);
     return facet_term;
 }
 
 static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
 {
-    Z_AttributeList *list;
-    Z_FacetField *facet_field;
     int num_terms = 0;
     int index = 0;
     xmlNodePtr node;
@@ -303,12 +296,12 @@ static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
     const char* name = yaz_element_attribute_value_get(ptr, "facet", "code");
     yaz_log(YLOG_DEBUG, "sru-proxy facet type: %s", name);
 
-    list = zget_AttributeList_use_string(odr, name);
+    Z_AttributeList *list = zget_AttributeList_use_string(odr, name);
     for (node = ptr->children; node; node = node->next) {
         if (yaz_match_xsd_element(node, "facetvalue"))
             num_terms++;
     }
-    facet_field = facet_field_create(odr, list, num_terms);
+    Z_FacetField *facet_field = facet_field_create(odr, list, num_terms);
     index = 0;
     for (node = ptr->children; node; node = node->next)
     {
@@ -326,21 +319,18 @@ static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
 static int yaz_sru_proxy_decode_facets(ODR o, xmlNodePtr root,
                                        Z_FacetList **facetList)
 {
-    xmlNodePtr ptr;
-
-    for (ptr = root->children; ptr; ptr = ptr->next)
+    for (xmlNodePtr ptr = root->children; ptr; ptr = ptr->next)
     {
         if (yaz_match_xsd_element(ptr, "facets"))
         {
             xmlNodePtr node;
-            Z_FacetList *facet_list;
             int num_facets = 0;
             for (node = ptr->children; node; node= node->next)
             {
                 if (node->type == XML_ELEMENT_NODE)
                     num_facets++;
             }
-            facet_list = facet_list_create(o, num_facets);
+            Z_FacetList *facet_list = facet_list_create(o, num_facets);
             num_facets = 0;
             for (node = ptr->children; node; node= node->next)
             {
@@ -388,11 +378,10 @@ static int yaz_srw_decode_diagnostics(ODR o, xmlNodePtr pptr,
         if (ptr->type == XML_ELEMENT_NODE &&
             !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
         {
-            xmlNodePtr rptr;
             (*recs)[i].uri = 0;
             (*recs)[i].details = 0;
             (*recs)[i].message = 0;
-            for (rptr = ptr->children; rptr; rptr = rptr->next)
+            for (xmlNodePtr rptr = ptr->children; rptr; rptr = rptr->next)
             {
                 if (yaz_match_xsd_string(rptr, "uri", o, &(*recs)[i].uri))
                     ;
@@ -441,12 +430,11 @@ static int yaz_srw_diagnostics(ODR o, xmlNodePtr pptr, Z_SRW_diagnostic **recs,
     }
     else if (o->direction == ODR_ENCODE)
     {
-        int i;
         xmlNsPtr ns_diag =
             xmlNewNs(pptr, BAD_CAST (version2 ?
                                      YAZ_XMLNS_DIAG_v2 : YAZ_XMLNS_DIAG_v1_1),
                      BAD_CAST "diag" );
-        for (i = 0; i < *num; i++)
+        for (int i = 0; i < *num; i++)
         {
             const char *std_diag = "info:srw/diagnostic/1/";
             const char *ucp_diag = "info:srw/diagnostic/12/";
@@ -483,12 +471,11 @@ static int yaz_srw_term(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm *term,
 {
     if (o->direction == ODR_DECODE)
     {
-        xmlNodePtr ptr;
         term->value = 0;
         term->numberOfRecords = 0;
         term->displayTerm = 0;
         term->whereInList = 0;
-        for (ptr = pptr->children; ptr; ptr = ptr->next)
+        for (xmlNodePtr ptr = pptr->children; ptr; ptr = ptr->next)
         {
             if (yaz_match_xsd_string(ptr, "value", o,  &term->value))
                 ;
@@ -539,8 +526,7 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
     }
     else if (o->direction == ODR_ENCODE)
     {
-        int i;
-        for (i = 0; i < *num; i++)
+        for (int i = 0; i < *num; i++)
         {
             xmlNodePtr rptr = xmlNewChild(pptr, 0, BAD_CAST "term", 0);
             yaz_srw_term(o, rptr, (*terms)+i, client_data, ns);
@@ -581,7 +567,6 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
     {
         Z_SRW_PDU **p = handler_data;
         xmlNodePtr method = pptr->children;
-        char *neg_version;
 
         while (method && method->type == XML_TEXT_NODE)
             method = method->next;
@@ -905,7 +890,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             *p = 0;
             return -1;
         }
-        neg_version = yaz_negotiate_sru_version((*p)->srw_version);
+        char *neg_version = yaz_negotiate_sru_version((*p)->srw_version);
         if (neg_version)
             (*p)->srw_version = neg_version;
     }

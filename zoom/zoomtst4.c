@@ -22,7 +22,6 @@ int main(int argc, char **argv)
     int no = argc-3;
     ZOOM_connection z[500]; /* allow at most 500 connections */
     ZOOM_resultset r[500];  /* and result sets .. */
-    ZOOM_query q;
     ZOOM_options o = ZOOM_options_create ();
 
     if (argc < 4)
@@ -47,7 +46,7 @@ int main(int argc, char **argv)
     ZOOM_options_set (o, "proxy", argv[1]);
 
     /* create query */
-    q = ZOOM_query_create ();
+    ZOOM_query q = ZOOM_query_create ();
     if (ZOOM_query_prefix (q, argv[argc-1]))
     {
         printf ("bad PQF: %s\n", argv[argc-1]);

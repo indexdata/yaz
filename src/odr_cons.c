@@ -24,7 +24,6 @@ void odr_setlenlen(ODR o, int len)
 int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
                           const char *name)
 {
-    int res;
     int cons = 1;
     int lenlen = o->op->lenlen;
 
@@ -36,7 +35,7 @@ int odr_constructed_begin(ODR o, void *xxp, int zclass, int tag,
         o->op->t_class = zclass;
         o->op->t_tag = tag;
     }
-    res = ber_tag(o, xxp, o->op->t_class, o->op->t_tag, &cons, 1, name);
+    int res = ber_tag(o, xxp, o->op->t_class, o->op->t_tag, &cons, 1, name);
     if (res < 0)
         return 0;
     if (!res || !cons)

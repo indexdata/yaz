@@ -22,7 +22,6 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
     YAZ_PQF_Parser parser = yaz_pqf_create();
     int res = 0;
     ODR odr = odr_createmem(ODR_ENCODE);
-    Z_RPNQuery *rpn;
 
     if (!parser)
         return 0;
@@ -30,7 +29,7 @@ int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
     if (!odr)
         return 0;
 
-    rpn = yaz_pqf_parse(parser, odr, pqf);
+    Z_RPNQuery *rpn = yaz_pqf_parse(parser, odr, pqf);
 
     if (!rpn)
     {
@@ -145,10 +144,9 @@ static void tst_complexity(void)
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
     WRBUF query = wrbuf_alloc();
-    size_t kind;
     int extra, right;
     unsigned int i;
-    for (kind = 0; kind < sizeof(prefix) / sizeof(*prefix); kind++)
+    for (size_t kind = 0; kind < sizeof(prefix) / sizeof(*prefix); kind++)
         for (right = 0; right <= (kind < 4); right++)
             for (extra = 0; extra <= 1; extra++)
             {

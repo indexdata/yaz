@@ -41,10 +41,9 @@ static int compare_buffers(char *msg, int no,
 
     if (1) /* use 1 see how the buffers differ (for debug purposes) */
     {
-        int i;
         printf("tsticonv test=%s i=%d failed\n", msg, no);
         printf("off got exp\n");
-        for (i = 0; i<got_len || i<expect_len; i++)
+        for (int i = 0; i<got_len || i<expect_len; i++)
         {
             char got_char[10];
             char expect_char[10];
@@ -303,12 +302,10 @@ static void dconvert(int mandatory, const char *tmpcode)
         "\xe5" "\xd8" "b",
         "\xe5" "\xe5",
         0 };
-    int i;
     int ret;
     yaz_iconv_t cd;
-    for (i = 0; iso_8859_1_a[i]; i++)
+    for (int i = 0; iso_8859_1_a[i]; i++)
     {
-        size_t r;
         char *inbuf = (char*) iso_8859_1_a[i];
         size_t inbytesleft = strlen(inbuf);
         char outbuf0[24];
@@ -320,7 +317,7 @@ static void dconvert(int mandatory, const char *tmpcode)
         YAZ_CHECK(cd || !mandatory);
         if (!cd)
             return;
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        size_t r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         YAZ_CHECK(r != (size_t) (-1));
 
         r = yaz_iconv(cd, 0, 0, &outbuf, &outbytesleft);
@@ -363,7 +360,6 @@ int utf8_check(unsigned c)
 {
     if (sizeof(c) >= 4)
     {
-        size_t r;
         char src[4];
         char dst[4];
         char utf8buf[6];
@@ -371,14 +367,13 @@ int utf8_check(unsigned c)
         size_t inbytesleft = 4;
         char *outbuf = utf8buf;
         size_t outbytesleft = sizeof(utf8buf);
-        int i;
         yaz_iconv_t cd = yaz_iconv_open("UTF-8", "UCS4LE");
         if (!cd)
             return 0;
-        for (i = 0; i<4; i++)
+        for (int i = 0; i<4; i++)
             src[i] = c >> (i*8);
 
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        size_t r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         yaz_iconv_close(cd);
 
         if (r == (size_t)(-1))
@@ -587,11 +582,10 @@ static void tst_utf8_to_marc8(const char *marc8_type)
         char outbuf0[64];
         char *outbuf = outbuf0;
         size_t outbytesleft = sizeof(outbuf0)-1;
-        size_t r;
 #if 0
         int i;
 #endif
-        r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        size_t r = yaz_iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
         YAZ_CHECK(r != (size_t) (-1));
 
 #if 0
@@ -689,7 +683,6 @@ static void tst_utf8_codes(void)
         0xfc, 0x84, 0x80, 0x80, 0x80, 0x80
     };
     size_t no_read;
-    int error;
 
     YAZ_CHECK(utf8_check(3));
     YAZ_CHECK(utf8_check(127));
@@ -709,7 +702,7 @@ static void tst_utf8_codes(void)
     YAZ_CHECK(!utf8_check(0x110000));
     YAZ_CHECK(!utf8_check(10000000));
 
-    error = 0;
+    int error = 0;
     yaz_read_UTF8_char(surrogate, sizeof(surrogate), &no_read, &error);
     YAZ_CHECK_EQ(error, YAZ_ICONV_EILSEQ);
     YAZ_CHECK_EQ(no_read, 0);

@@ -30,14 +30,12 @@
 
 struct icu_buf_utf8 *icu_buf_utf8_create(size_t required)
 {
-    struct icu_buf_utf8 *buf8;
-    size_t capacity;
-
     if (required > INT32_MAX)
         return NULL;
 
-    capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
-    buf8 = (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
+    size_t capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
+    struct icu_buf_utf8 *buf8 =
+        (struct icu_buf_utf8 *) xmalloc(sizeof(struct icu_buf_utf8));
     buf8->utf8_len = 0;
     buf8->utf8_cap = (int32_t) capacity;
     if (capacity > 0)
@@ -62,12 +60,10 @@ struct icu_buf_utf8 *icu_buf_utf8_clear(struct icu_buf_utf8 *buf8)
 struct icu_buf_utf8 *icu_buf_utf8_resize(struct icu_buf_utf8 *buf8,
                                          size_t required)
 {
-    size_t capacity;
-
     assert(buf8);
     if (required > INT32_MAX)
         return NULL;
-    capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
+    size_t capacity = required > INT32_MAX / 2 ? INT32_MAX : required * 2;
     if (capacity > 0)
     {
         if (0 == buf8->utf8)

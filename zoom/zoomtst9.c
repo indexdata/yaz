@@ -28,7 +28,6 @@ static void usage(void)
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
     ZOOM_options o = ZOOM_options_create ();
     int error;
     const char *errmsg, *addinfo;
@@ -36,7 +35,7 @@ int main(int argc, char **argv)
     if (argc < 3)
         usage();
 
-    z = ZOOM_connection_create (o);
+    ZOOM_connection z = ZOOM_connection_create (o);
 
     /* connect and init */
     ZOOM_connection_connect (z, argv[1], 0);
@@ -51,7 +50,6 @@ int main(int argc, char **argv)
     {
         ZOOM_package pkg = ZOOM_connection_package(z, 0);
         const char *cmd = argv[2];
-        int i;
 
         if (!strcmp(cmd, "insert"))
             ZOOM_package_option_set(pkg, "action", "recordInsert");
@@ -67,7 +65,7 @@ int main(int argc, char **argv)
             usage();
         }
 
-        i = 3;
+        int i = 3;
         while (i < argc-1)
         {
             ZOOM_package_option_set(pkg, "recordIdOpaque",

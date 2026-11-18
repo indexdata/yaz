@@ -35,13 +35,12 @@ static size_t write_wchar_t(yaz_iconv_t cd, yaz_iconv_encoder_t en,
 
     if (*outbytesleft >= sizeof(wchar_t))
     {
-        wchar_t wch;
         if (x > WCHAR_MAX)
         {
             yaz_iconv_set_errno(cd, YAZ_ICONV_EILSEQ);
             return (size_t)(-1);
         }
-        wch = (wchar_t) x;
+        wchar_t wch = (wchar_t) x;
         memcpy(outp, &wch, sizeof(wch));
         outp += sizeof(wch);
         (*outbytesleft) -= sizeof(wch);

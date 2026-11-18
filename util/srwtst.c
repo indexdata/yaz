@@ -19,15 +19,13 @@ int main(int argc, char **argv)
 {
     char buf[163840];
     char *content_buf = buf;
-    int content_len;
-    size_t no;
     Z_SOAP *soap_package = 0;
     ODR decode, encode;
     int debug = 0;
 
     if (argc == 2 && !strcmp(argv[1], "debug"))
         debug = 1;
-    no = fread(buf, 1, sizeof(buf), stdin);
+    size_t no = fread(buf, 1, sizeof(buf), stdin);
     if (no < 1 || no == sizeof(buf))
     {
         fprintf(stderr, "Bad file or too big\n");
@@ -35,7 +33,7 @@ int main(int argc, char **argv)
     }
     decode = odr_createmem(ODR_DECODE);
     encode = odr_createmem(ODR_ENCODE);
-    content_len = (int) no; /* size bounded by sizeof(buf) */
+    int content_len = (int) no; /* size bounded by sizeof(buf) */
     z_soap_codec(decode, &soap_package,
                  &content_buf, &content_len, h);
     if (!soap_package)
@@ -60,8 +58,7 @@ int main(int argc, char **argv)
                 Z_SRW_searchRetrieveResponse *res = sr->u.response;
                 if (res->records && res->num_records)
                 {
-                    int i;
-                    for (i = 0; i<res->num_records; i++)
+                    for (int i = 0; i<res->num_records; i++)
                     {
                         fprintf (stderr, "%d\n", i);
                         if (res->records[i].recordData_buf)

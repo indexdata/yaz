@@ -132,7 +132,6 @@ static redisContext *create_redis(const char *conf,
 
 int ZOOM_memcached_configure(ZOOM_connection c)
 {
-    const char *val;
 #if HAVE_HIREDIS
     if (c->redis_c)
     {
@@ -148,7 +147,7 @@ int ZOOM_memcached_configure(ZOOM_connection c)
     }
 #endif
 
-    val = ZOOM_options_get(c->options, "redis");
+    const char *val = ZOOM_options_get(c->options, "redis");
     if (val && *val)
     {
 #if HAVE_HIREDIS

@@ -31,17 +31,15 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
     char *attsets[MAX_QUAL];
     int pair_no = 0;
     char *type_str = 0;
-    int t;
-    yaz_tok_parse_t tp;
 
     yaz_tok_cfg_single_tokens(yt, ",=");
 
-    tp = yaz_tok_parse_buf(yt, cp);
+    yaz_tok_parse_t tp = yaz_tok_parse_buf(yt, cp);
 
     yaz_tok_cfg_destroy(yt);
     *addinfo = 0;
 
-    t = yaz_tok_move(tp);
+    int t = yaz_tok_move(tp);
     while (t == YAZ_TOK_STRING)
     {
         /* we don't know what lead is yet */
@@ -217,8 +215,7 @@ int ccl_qual_field2(CCL_bibset bibset, const char *cp, const char *qual_name,
 
     if (*addinfo)
     {
-        int i;
-        for (i = 0; i<pair_no; i++)
+        for (int i = 0; i<pair_no; i++)
         {
             xfree(attsets[i]);
             xfree(svalue_ar[i]);
@@ -265,10 +262,9 @@ void ccl_qual_buf(CCL_bibset bibset, const char *buf)
     while (1)
     {
         const char *cp2 = cp1;
-        size_t len;
         while (*cp2 && !strchr("\r\n", *cp2))
             cp2++;
-        len = cp2 - cp1;
+        size_t len = cp2 - cp1;
         if (len > 0)
         {
             if (len >= (sizeof(line)-1))
@@ -323,8 +319,7 @@ void ccl_qual_file (CCL_bibset bibset, FILE *inf)
 
 int ccl_qual_fname (CCL_bibset bibset, const char *fname)
 {
-    FILE *inf;
-    inf = fopen (fname, "r");
+    FILE *inf = fopen (fname, "r");
     if (!inf)
         return -1;
     ccl_qual_file (bibset, inf);

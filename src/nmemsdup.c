@@ -92,7 +92,6 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
         const char *cp = dstr;
         while (1)
         {
-            const char *cp0;
             if (collapse)
             {
                 if (!*cp)
@@ -103,7 +102,7 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
                     break;
             }
 
-            cp0 = cp;
+            const char *cp0 = cp;
             while (*cp && !strchr(delim, *cp))
             {
                 if (*cp == escape_char)
@@ -153,11 +152,10 @@ char *nmem_printf(NMEM nmem, const char *fmt, ...)
 {
     va_list ap;
     char buf[4096];
-    char *dst;
 
     va_start(ap, fmt);
     yaz_vsnprintf(buf, sizeof(buf), fmt, ap);
-    dst = nmem_strdup(nmem, buf);
+    char *dst = nmem_strdup(nmem, buf);
     va_end(ap);
     return dst;
 }

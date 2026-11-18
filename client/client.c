@@ -227,9 +227,8 @@ static void do_hex_dump(const char* buf, size_t len)
 {
     if (hex_dump)
     {
-        size_t i;
         int x;
-        for (i = 0; i < len ; i = i+16 )
+        for (size_t i = 0; i < len ; i = i+16 )
         {
             printf(" %4.4ld ", (long) i);
             for (x = 0 ; i+x < len && x < 16; ++x)
@@ -245,9 +244,8 @@ static void do_hex_dump(const char* buf, size_t len)
         if (++no < 1000 && strlen(dump_file_prefix) < 500)
         {
             char fname[1024];
-            FILE *of;
             yaz_snprintf(fname, sizeof(fname), "%s.%03d.raw", dump_file_prefix, no);
-            of = fopen(fname, "wb");
+            FILE *of = fopen(fname, "wb");
 
             if (fwrite(buf, 1, len, of) != len)
             {
@@ -264,7 +262,6 @@ static void do_hex_dump(const char* buf, size_t len)
 static void add_otherInfos(Z_APDU *a)
 {
     Z_OtherInformation **oi;
-    int i;
 
     if (facet_list && a->which == Z_APDU_searchRequest)
     {
@@ -272,7 +269,7 @@ static void add_otherInfos(Z_APDU *a)
         yaz_oi_set_facetlist(oi, out, facet_list);
     }
     yaz_oi_APDU(a, &oi);
-    for (i = 0; i < maxOtherInfosSupported; ++i)
+    for (int i = 0; i < maxOtherInfosSupported; ++i)
     {
         if (oid_oidlen(extraOtherInfos[i].oid) > 0)
             yaz_oi_set_string_oid(oi, out, extraOtherInfos[i].oid,
@@ -293,7 +290,6 @@ static void print_comstack_error(const char *operation, COMSTACK cs)
 
 int send_apdu(Z_APDU *a)
 {
-    char *buf;
     int len;
 
     add_otherInfos(a);
@@ -309,7 +305,7 @@ int send_apdu(Z_APDU *a)
         close_session();
         return 0;
     }
-    buf = odr_getbuf(out, &len, 0);
+    char *buf = odr_getbuf(out, &len, 0);
     if (ber_file)
         odr_dumpBER(ber_file, buf, len);
     do_hex_dump(buf, len);
@@ -325,8 +321,7 @@ int send_apdu(Z_APDU *a)
 
 static void print_stringn(const char *buf, size_t len)
 {
-    size_t i;
-    for (i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
         if ((buf[i] <= 126 && buf[i] >= 32) || strchr("\n\r\t\f", buf[i]))
             printf("%c", buf[i]);
         else
@@ -356,12 +351,11 @@ static void send_Z3950_initRequest(const char* type_and_host)
 {
     Z_APDU *apdu = zget_APDU(out, Z_APDU_initRequest);
     Z_InitRequest *req = apdu->u.initRequest;
-    int i;
 
     req->options = &z3950_options;
 
     ODR_MASK_ZERO(req->protocolVersion);
-    for (i = 0; i<z3950_version; i++)
+    for (int i = 0; i<z3950_version; i++)
         ODR_MASK_SET(req->protocolVersion, i);
 
     *req->maximumRecordSize = 1024*kilobytes;
@@ -522,11 +516,10 @@ static int process_Z3950_initResponse(Z_InitResponse *res)
 
 static void render_initUserInfo(Z_OtherInformation *ui1)
 {
-    int i;
     printf("Init response contains %d otherInfo unit%s:\n",
            ui1->num_elements, ui1->num_elements == 1 ? "" : "s");
 
-    for (i = 0; i < ui1->num_elements; i++)
+    for (int i = 0; i < ui1->num_elements; i++)
     {
         Z_OtherInformationUnit *unit = ui1->list[i];
         printf("  %d: otherInfo unit contains ", i+1);
@@ -554,10 +547,8 @@ static void render_initUserInfo(Z_OtherInformation *ui1)
 /* ### should this share code with display_diagrecs()? */
 static void render_diag(Z_DiagnosticFormat *diag)
 {
-    int i;
-
     printf("%d diagnostic%s:\n", diag->num, diag->num == 1 ? "" : "s");
-    for (i = 0; i < diag->num; i++)
+    for (int i = 0; i < diag->num; i++)
     {
         Z_DiagnosticFormat_s *ds = diag->elements[i];
         printf("    %d: ", i+1);
@@ -590,15 +581,13 @@ static void render_diag(Z_DiagnosticFormat *diag)
 
 static int set_base(const char *arg)
 {
-    int i;
     const char *cp;
 
-    for (i = 0; i<num_databaseNames; i++)
+    for (int i = 0; i<num_databaseNames; i++)
         xfree(databaseNames[i]);
     num_databaseNames = 0;
     while (1)
     {
-        char *cp1;
         if (!(cp = strchr(arg, ' ')))
             cp = arg + strlen(arg);
         if (cp - arg < 1)
@@ -607,7 +596,7 @@ static int set_base(const char *arg)
         memcpy(databaseNames[num_databaseNames], arg, cp - arg);
         databaseNames[num_databaseNames][cp - arg] = '\0';
 
-        for (cp1 = databaseNames[num_databaseNames]; *cp1 ; cp1++)
+        for (char *cp1 = databaseNames[num_databaseNames]; *cp1 ; cp1++)
             if (*cp1 == '+')
                 *cp1 = ' ';
         num_databaseNames++;
@@ -635,17 +624,14 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
     }
     else if ((*arg)[0] == '<')
     {
-        size_t fsize;
-        FILE *inf;
-        const char *fname;
         const char *arg_start = ++(*arg);
 
         while (**arg != '\0' && **arg != ' ')
             (*arg)++;
 
-        fname = odr_strdupn(out, arg_start, *arg - arg_start);
+        const char *fname = odr_strdupn(out, arg_start, *arg - arg_start);
 
-        inf = fopen(fname, "rb");
+        FILE *inf = fopen(fname, "rb");
         if (!inf)
         {
             printf("Couldn't open %s\n", fname);
@@ -657,7 +643,7 @@ static int parse_cmd_doc(const char **arg, ODR out, char **buf, int *len)
             fclose(inf);
             return 0;
         }
-        fsize = ftell(inf);
+        size_t fsize = ftell(inf);
         if (fseek(inf, 0L, SEEK_SET) == -1)
         {
             printf("Couldn't seek in %s\n", fname);
@@ -785,13 +771,12 @@ static int session_connect_base(const char *arg, const char **basep)
 
 static int session_connect(void)
 {
-    int r;
     const char *basep = 0;
 
     yaz_cookies_destroy(yaz_cookies);
     yaz_cookies = yaz_cookies_create();
 
-    r = session_connect_base(wrbuf_cstr(cur_host), &basep);
+    int r = session_connect_base(wrbuf_cstr(cur_host), &basep);
     if (basep && *basep)
         set_base(basep);
     else if (protocol == PROTO_Z3950)
@@ -801,7 +786,6 @@ static int session_connect(void)
 
 static int cmd_open(const char *arg)
 {
-    int r;
     if (arg)
     {
         wrbuf_rewind(cur_host);
@@ -810,7 +794,7 @@ static int cmd_open(const char *arg)
         wrbuf_puts(cur_host, arg);
     }
     set_base("");
-    r = session_connect();
+    int r = session_connect();
     if (conn && conn->protocol == PROTO_HTTP)
         queryType = QueryType_CQL;
 
@@ -895,8 +879,7 @@ static void print_mab_record(const char *buf, size_t len)
 {
     size_t last_linebreak = 0;
     size_t last_subfield  = 0;
-    size_t i;
-    for (i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         /* line break after header */
         if (i == 24)
@@ -941,9 +924,8 @@ static void print_xml_record(const char *buf, int len)
 #if YAZ_HAVE_XML2
     if (pretty_xml)
     {
-        xmlDocPtr doc;
         xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
-        doc = xmlParseMemory(buf, len);
+        xmlDocPtr doc = xmlParseMemory(buf, len);
         if (doc)
         {
             xmlChar *xml_mem;
@@ -1097,23 +1079,21 @@ static void display_record(Z_External *r)
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_grs_1))
     {
-        WRBUF w;
         if (r->which != Z_External_grs1)
         {
             printf("Expecting single GRS type for GRS.\n");
             return;
         }
-        w = wrbuf_alloc();
+        WRBUF w = wrbuf_alloc();
         yaz_display_grs1(w, r->u.grs1, 0);
         puts(wrbuf_cstr(w));
         wrbuf_destroy(w);
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_opac))
     {
-        int i;
         if (r->u.opac->bibliographicRecord)
             display_record(r->u.opac->bibliographicRecord);
-        for (i = 0; i<r->u.opac->num_holdingsData; i++)
+        for (int i = 0; i<r->u.opac->num_holdingsData; i++)
         {
             Z_HoldingsRecord *h = r->u.opac->holdingsData[i];
             if (h->which == Z_HoldingsRecord_marcHoldingsRecord)
@@ -1223,11 +1203,10 @@ static void display_record(Z_External *r)
 
 static void display_diagrecs(Z_DiagRec **pp, int num)
 {
-    int i;
     Z_DefaultDiagFormat *r;
 
     printf("Diagnostic message(s) from database:\n");
-    for (i = 0; i<num; i++)
+    for (int i = 0; i<num; i++)
     {
         Z_DiagRec *p = pp[i];
         if (p->which != Z_DiagRec_defaultFormat)
@@ -1339,22 +1318,20 @@ static int send_gdu(Z_GDU *gdu)
     if (z_GDU(out, &gdu, 0, 0))
     {
         /* encode OK */
-        char *buf_out;
         int len_out;
-        int r;
         if (apdu_file)
         {
             if (!z_GDU(print, &gdu, 0, 0))
                 printf("Failed to print outgoing SRU package\n");
             odr_reset(print);
         }
-        buf_out = odr_getbuf(out, &len_out, 0);
+        char *buf_out = odr_getbuf(out, &len_out, 0);
 
         /* we don't odr_reset(out), since we may need the buffer again */
 
         do_hex_dump(buf_out, len_out);
 
-        r = cs_put(conn, buf_out, len_out);
+        int r = cs_put(conn, buf_out, len_out);
 
         if (r >= 0)
             return 2;
@@ -1367,9 +1344,8 @@ static int send_srw_host_path(Z_SRW_PDU *sr, const char *host_port,
                               char *path)
 {
     const char *charset = negotiationCharset;
-    Z_GDU *gdu;
 
-    gdu = z_get_HTTP_Request_uri(out, host_port, path, proxy_mode);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(out, host_port, path, proxy_mode);
 
     if (auth)
     {
@@ -1460,11 +1436,10 @@ static char *encode_SRW_term(ODR o, const char *q)
 {
     const char *in_charset = "ISO-8859-1";
     WRBUF w = wrbuf_alloc();
-    yaz_iconv_t cd;
     char *res;
     if (outputCharset)
         in_charset = outputCharset;
-    cd = yaz_iconv_open("UTF-8", in_charset);
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", in_charset);
     if (!cd)
     {
         wrbuf_destroy(w);
@@ -1602,21 +1577,19 @@ static int send_Z3950_searchRequest(const char *arg)
     else if (myQueryType == QueryType_CQL2RPN)
     {
         /* ### All this code should be wrapped in a utility function */
-        CQL_parser parser;
-        struct cql_node *node;
         const char *addinfo;
         if (cqltrans == 0)
         {
             printf("Can't use CQL: no translation file.  Try set_cqlfile\n");
             return 0;
         }
-        parser = cql_parser_create();
+        CQL_parser parser = cql_parser_create();
         if ((error = cql_parser_string(parser, arg)) != 0)
         {
             printf("Can't parse CQL: must be a syntax error\n");
             return 0;
         }
-        node = cql_parser_result(parser);
+        struct cql_node *node = cql_parser_result(parser);
         if ((error = cql_transform_buf(cqltrans, node, pqfbuf,
                                        sizeof pqfbuf)) != 0)
         {
@@ -1776,9 +1749,9 @@ static void display_facet(Z_FacetField *facet)
         yaz_facet_attr_get_z_attributes(al, &attr_values);
         if (!attr_values.errcode)
         {
-            int term_index;
             printf("  %s (%d): \n", attr_values.useattr, facet->num_terms);
-            for (term_index = 0 ; term_index < facet->num_terms; term_index++)
+            for (int term_index = 0 ;
+                 term_index < facet->num_terms; term_index++)
             {
                 Z_FacetTerm *facetTerm = facet->terms[term_index];
                 printf("    ");
@@ -1792,10 +1765,9 @@ static void display_facet(Z_FacetField *facet)
 
 static void* display_facets(Z_FacetList *fl)
 {
-    int index;
     printf("Facets(%d): \n", fl->num);
 
-    for (index = 0; index < fl->num ; index++)
+    for (int index = 0; index < fl->num ; index++)
     {
         display_facet(fl->elements[index]);
     }
@@ -1804,9 +1776,8 @@ static void* display_facets(Z_FacetList *fl)
 
 void display_searchResult1(Z_SearchInfoReport *sr)
 {
-    int j;
     printf("SearchResult-1:");
-    for (j = 0; j < sr->num; j++)
+    for (int j = 0; j < sr->num; j++)
     {
         if (j)
             printf(",");
@@ -1832,10 +1803,9 @@ void display_searchResult1(Z_SearchInfoReport *sr)
 /* see if we can find USR:SearchResult-1 */
 static void display_searchResult(Z_OtherInformation *o)
 {
-    int i;
     if (!o)
         return ;
-    for (i = 0; i < o->num_elements; i++)
+    for (int i = 0; i < o->num_elements; i++)
     {
         if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
         {
@@ -1891,8 +1861,7 @@ static int process_Z3950_searchResponse(Z_SearchResponse *res)
 
 static void print_level(int iLevel)
 {
-    int i;
-    for (i = 0; i < iLevel * 4; i++)
+    for (int i = 0; i < iLevel * 4; i++)
         printf(" ");
 }
 
@@ -1941,11 +1910,9 @@ static void print_referenceId(int iLevel, Z_ReferenceId *referenceId)
 {
     if (referenceId != NULL)
     {
-        int i;
-
         print_level(iLevel);
         printf("Ref Id (%d): ", referenceId->len);
-        for (i = 0; i < referenceId->len; i++)
+        for (int i = 0; i < referenceId->len; i++)
             printf("%c", referenceId->buf[i]);
         printf("\n");
     }
@@ -2109,9 +2076,8 @@ static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
             if (utp && utp->targetPart)
             {
                 Z_IUTargetPart *targetPart = utp->targetPart;
-                int i;
 
-                for (i = 0; i<targetPart->num_taskPackageRecords;  i++)
+                for (int i = 0; i<targetPart->num_taskPackageRecords;  i++)
                 {
 
                     Z_IUTaskPackageRecordStructure *tpr =
@@ -2172,7 +2138,6 @@ static const char *get_ill_element(void *clientData, const char *element)
 static Z_External *create_external_itemRequest(void)
 {
     struct ill_get_ctl ctl;
-    ILL_ItemRequest *req;
     Z_External *r = 0;
     int item_request_size = 0;
     char *item_request_buf = 0;
@@ -2181,7 +2146,7 @@ static Z_External *create_external_itemRequest(void)
     ctl.clientData = 0;
     ctl.f = get_ill_element;
 
-    req = ill_get_ItemRequest(&ctl, "ill", 0);
+    ILL_ItemRequest *req = ill_get_ItemRequest(&ctl, "ill", 0);
     if (!req)
         printf("ill_get_ItemRequest failed\n");
 
@@ -2216,7 +2181,6 @@ static Z_External *create_external_itemRequest(void)
 static Z_External *create_external_ILL_APDU(void)
 {
     struct ill_get_ctl ctl;
-    ILL_APDU *ill_apdu;
     Z_External *r = 0;
     int ill_request_size = 0;
     char *ill_request_buf = 0;
@@ -2225,7 +2189,7 @@ static Z_External *create_external_ILL_APDU(void)
     ctl.clientData = 0;
     ctl.f = get_ill_element;
 
-    ill_apdu = ill_get_APDU(&ctl, "ill", 0);
+    ILL_APDU *ill_apdu = ill_get_APDU(&ctl, "ill", 0);
 
     if (!ill_APDU (out, &ill_apdu, 0, 0))
     {
@@ -2510,16 +2474,14 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
     r->descriptor = 0;
     if (version == 0)
     {
-        Z_IU0OriginPartToKeep *toKeep;
-        Z_IU0SuppliedRecords *notToKeep;
-
         r->which = Z_External_update0;
         r->u.update0 = (Z_IU0Update *) odr_malloc(out, sizeof(*r->u.update0));
         r->u.update0->which = Z_IUUpdate_esRequest;
         r->u.update0->u.esRequest = (Z_IU0UpdateEsRequest *)
             odr_malloc(out, sizeof(*r->u.update0->u.esRequest));
-        toKeep = r->u.update0->u.esRequest->toKeep = (Z_IU0OriginPartToKeep *)
-            odr_malloc(out, sizeof(*r->u.update0->u.esRequest->toKeep));
+        Z_IU0OriginPartToKeep *toKeep = r->u.update0->u.esRequest->toKeep =
+            (Z_IU0OriginPartToKeep *) odr_malloc(
+                out, sizeof(*r->u.update0->u.esRequest->toKeep));
 
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
@@ -2533,8 +2495,9 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
 
         toKeep->action = odr_intdup(out, action_no);
 
-        notToKeep = r->u.update0->u.esRequest->notToKeep = (Z_IU0SuppliedRecords *)
-            odr_malloc(out, sizeof(*r->u.update0->u.esRequest->notToKeep));
+        Z_IU0SuppliedRecords *notToKeep = r->u.update0->u.esRequest->notToKeep =
+            (Z_IU0SuppliedRecords *) odr_malloc(
+                out, sizeof(*r->u.update0->u.esRequest->notToKeep));
         notToKeep->num = 1;
         notToKeep->elements = (Z_IU0SuppliedRecords_elem **)
             odr_malloc(out, sizeof(*notToKeep->elements));
@@ -2549,16 +2512,14 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
     }
     else
     {
-        Z_IUOriginPartToKeep *toKeep;
-        Z_IUSuppliedRecords *notToKeep;
-
         r->which = Z_External_update;
         r->u.update = (Z_IUUpdate *) odr_malloc(out, sizeof(*r->u.update));
         r->u.update->which = Z_IUUpdate_esRequest;
         r->u.update->u.esRequest = (Z_IUUpdateEsRequest *)
             odr_malloc(out, sizeof(*r->u.update->u.esRequest));
-        toKeep = r->u.update->u.esRequest->toKeep = (Z_IUOriginPartToKeep *)
-            odr_malloc(out, sizeof(*r->u.update->u.esRequest->toKeep));
+        Z_IUOriginPartToKeep *toKeep = r->u.update->u.esRequest->toKeep =
+            (Z_IUOriginPartToKeep *) odr_malloc(
+                out, sizeof(*r->u.update->u.esRequest->toKeep));
 
         toKeep->databaseName = databaseNames[0];
         toKeep->schema = 0;
@@ -2572,8 +2533,9 @@ static int send_Z3950_update(int version, int action_no, const char *recid,
         toKeep->actionQualifier = 0;
         toKeep->action = odr_intdup(out, action_no);
 
-        notToKeep = r->u.update->u.esRequest->notToKeep = (Z_IUSuppliedRecords *)
-            odr_malloc(out, sizeof(*r->u.update->u.esRequest->notToKeep));
+        Z_IUSuppliedRecords *notToKeep = r->u.update->u.esRequest->notToKeep =
+            (Z_IUSuppliedRecords *) odr_malloc(
+                out, sizeof(*r->u.update->u.esRequest->notToKeep));
         notToKeep->num = 1;
         notToKeep->elements = (Z_IUSuppliedRecords_elem **)
             odr_malloc(out, sizeof(*notToKeep->elements));
@@ -2600,7 +2562,6 @@ static int cmd_xmles(const char *arg)
     {
         char *asn_buf = 0;
         int noread = 0;
-        Odr_oid *oid;
         char oid_str[51];
         Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest);
         Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
@@ -2627,8 +2588,8 @@ static int cmd_xmles(const char *arg)
 
         ext->u.single_ASN1_type->buf = asn_buf;
 
-        oid = yaz_string_to_oid_odr(yaz_oid_std(),
-                                    CLASS_EXTSERV, oid_str, out);
+        Odr_oid *oid =
+            yaz_string_to_oid_odr(yaz_oid_std(), CLASS_EXTSERV, oid_str, out);
         if (!oid)
         {
             printf("Bad OID: %s\n", oid_str);
@@ -2683,9 +2644,8 @@ static int cmd_options(const char *arg)
 {
     if (*arg)
     {
-        int r;
         int pos;
-        r = yaz_init_opt_encode(&z3950_options, arg, &pos);
+        int r = yaz_init_opt_encode(&z3950_options, arg, &pos);
         if (r == -1)
             printf("Unknown option(s) near %s\n", arg+pos);
     }
@@ -3065,15 +3025,13 @@ static int parse_show_args(const char *arg_c, char *setstring, size_t len,
                            Odr_int *start, Odr_int *number)
 {
     char *end_ptr;
-    Odr_int start_position;
-    size_t token_len;
 
     if (setnumber >= 0)
         yaz_snprintf(setstring, len, "%d", setnumber);
     else
         *setstring = '\0';
 
-    token_len = check_token(arg_c, "format");
+    size_t token_len = check_token(arg_c, "format");
     if (token_len)
     {
         pretty_xml = 1;
@@ -3089,7 +3047,7 @@ static int parse_show_args(const char *arg_c, char *setstring, size_t len,
         *start = 1;
         return 1;
     }
-    start_position = odr_strtol(arg_c, &end_ptr, 10);
+    Odr_int start_position = odr_strtol(arg_c, &end_ptr, 10);
     if (end_ptr == arg_c)
         return 1;
     *start = start_position;
@@ -3194,11 +3152,10 @@ static int send_Z3950_presentRequest(const char *arg)
         compo.u.complex->recordSyntax = 0;
         if (recordsyntax_size >= 2)
         {
-            int i;
             compo.u.complex->num_recordSyntax = recordsyntax_size;
             compo.u.complex->recordSyntax = (Odr_oid **)
                 odr_malloc(out, recordsyntax_size * sizeof(Odr_oid*));
-            for (i = 0; i < recordsyntax_size; i++)
+            for (int i = 0; i < recordsyntax_size; i++)
                 compo.u.complex->recordSyntax[i] =
                     yaz_string_to_oid_odr(yaz_oid_std(),
                                           CLASS_RECSYN, recordsyntax_list[i], out);
@@ -3373,10 +3330,9 @@ static int cmd_cancel(const char *arg)
 
 static int cmd_cancel_find(const char *arg)
 {
-    int fres;
     if (only_z3950())
         return 0;
-    fres = cmd_find(arg);
+    int fres = cmd_find(arg);
     if (fres > 0)
     {
         return cmd_cancel("");
@@ -3396,9 +3352,8 @@ static int send_Z3950_scanrequest(const char *set,  const char *query,
     if (queryType == QueryType_CCL2RPN)
     {
         int error, pos;
-        struct ccl_rpn_node *rpn;
 
-        rpn = ccl_find_str(bibset,  query, &error, &pos);
+        struct ccl_rpn_node *rpn = ccl_find_str(bibset,  query, &error, &pos);
         if (error)
         {
             printf("CCL ERROR: %s\n", ccl_err_msg(error));
@@ -3529,7 +3484,6 @@ static void display_term_info(Z_TermInfo *t)
 
 static void process_Z3950_scanResponse(Z_ScanResponse *res)
 {
-    int i;
     Z_Entry **entries = NULL;
     int num_entries = 0;
 
@@ -3545,7 +3499,7 @@ static void process_Z3950_scanResponse(Z_ScanResponse *res)
         return;
     if ((entries = res->entries->entries))
         num_entries = res->entries->num_entries;
-    for (i = 0; i < num_entries; i++)
+    for (int i = 0; i < num_entries; i++)
     {
         Odr_int pos_term = res->positionOfTerm ? *res->positionOfTerm : -1;
         if (entries[i]->which == Z_Entry_termInfo)
@@ -3589,8 +3543,7 @@ static void process_Z3950_deleteResultSetResponse(
            *res->deleteOperationStatus);
     if (res->deleteListStatuses)
     {
-        int i;
-        for (i = 0; i < res->deleteListStatuses->num; i++)
+        for (int i = 0; i < res->deleteListStatuses->num; i++)
         {
             printf("%s status=" ODR_INT_PRINTF "\n",
                    res->deleteListStatuses->elements[i]->id,
@@ -3749,7 +3702,6 @@ static int cmd_format(const char *arg)
     const char *cp = arg;
     int nor;
     int idx = 0;
-    int i;
     char form_str[41];
     if (!arg || !*arg)
     {
@@ -3767,7 +3719,7 @@ static int cmd_format(const char *arg)
         }
         cp += nor;
     }
-    for (i = 0; i < recordsyntax_size; i++)
+    for (int i = 0; i < recordsyntax_size; i++)
     {
         xfree(recordsyntax_list[i]);
         recordsyntax_list[i] = 0;
@@ -3841,12 +3793,10 @@ static int cmd_refid(const char *arg)
 
 static int cmd_close(const char *arg)
 {
-    Z_APDU *apdu;
-    Z_Close *req;
     if (only_z3950())
         return 0;
-    apdu = zget_APDU(out, Z_APDU_close);
-    req = apdu->u.close;
+    Z_APDU *apdu = zget_APDU(out, Z_APDU_close);
+    Z_Close *req = apdu->u.close;
     *req->closeReason = Z_Close_finished;
     send_apdu(apdu);
     printf("Sent close request.\n");
@@ -4010,7 +3960,6 @@ static int cmd_lang(const char* arg)
 static int cmd_source(const char* arg, int echo )
 {
     /* first should open the file and read one line at a time.. */
-    FILE* includeFile;
     char line[102400], *cp;
 
     if (strlen(arg) < 1)
@@ -4019,7 +3968,7 @@ static int cmd_source(const char* arg, int echo )
         return -1;
     }
 
-    includeFile = fopen(arg, "r");
+    FILE* includeFile = fopen(arg, "r");
 
     if (!includeFile)
     {
@@ -4101,10 +4050,8 @@ static int cmd_set_apdufile(const char *arg)
 
 static int cmd_set_cclfile(const char* arg)
 {
-    FILE *inf;
-
     bibset = ccl_qual_mk();
-    inf = fopen(arg, "r");
+    FILE *inf = fopen(arg, "r");
     if (!inf)
         perror("unable to open CCL file");
     else
@@ -4329,9 +4276,6 @@ static void add_to_readline_history(void *client_data, const char *line)
 
 static void initialize(const char *rc_file)
 {
-    FILE *inf;
-    int i;
-
     cur_host = wrbuf_alloc();
 
     if (!(out = odr_createmem(ODR_ENCODE)) ||
@@ -4349,7 +4293,7 @@ static void initialize(const char *rc_file)
         odr_setprint(print, apdu_file);
 
     bibset = ccl_qual_mk();
-    inf = fopen(ccl_fields, "r");
+    FILE *inf = fopen(ccl_fields, "r");
     if (inf)
     {
         ccl_qual_file(bibset, inf);
@@ -4363,7 +4307,7 @@ static void initialize(const char *rc_file)
     rl_attempted_completion_function =
         (char **(*)(const char *, int, int)) readline_completer;
 #endif
-    for (i = 0; i < maxOtherInfosSupported; ++i)
+    for (int i = 0; i < maxOtherInfosSupported; ++i)
     {
         extraOtherInfos[i].oid[0] = -1;
         extraOtherInfos[i].value = 0;
@@ -4618,9 +4562,8 @@ static void wait_and_handle_response(int one_response_only)
                 reconnect_ok = 0;
                 if (conn)
                 {
-                    char *buf_out;
                     int len_out;
-                    buf_out = odr_getbuf(out, &len_out, 0);
+                    char *buf_out = odr_getbuf(out, &len_out, 0);
                     do_hex_dump(buf_out, len_out);
                     if (cs_put(conn, buf_out, len_out) < 0)
                     {
@@ -4660,9 +4603,8 @@ static void wait_and_handle_response(int one_response_only)
                 reconnect_ok = 0;
                 if (conn)
                 {
-                    char *buf_out;
                     int len_out;
-                    buf_out = odr_getbuf(out, &len_out, 0);
+                    char *buf_out = odr_getbuf(out, &len_out, 0);
                     do_hex_dump(buf_out, len_out);
                     if (cs_put(conn, buf_out, len_out) < 0)
                     {
@@ -4852,10 +4794,9 @@ static int cmd_set_otherinfo(const char* args)
 {
     char oidstr[101], otherinfoString[101];
     int otherinfoNo;
-    int sscan_res;
 
-    sscan_res = sscanf(args, "%d %100[^ ] %100s",
-                       &otherinfoNo, oidstr, otherinfoString);
+    int sscan_res = sscanf(args, "%d %100[^ ] %100s", &otherinfoNo, oidstr,
+                           otherinfoString);
 
     if (sscan_res > 0 && otherinfoNo >= maxOtherInfosSupported)
     {
@@ -4957,8 +4898,6 @@ static int cmd_list_otherinfo(const char* args)
 
 static int cmd_list_all(const char* args)
 {
-    int i;
-
     /* connection options */
     if (conn)
         printf("Connected to         : %s\n", wrbuf_cstr(cur_host));
@@ -4996,7 +4935,7 @@ static int cmd_list_all(const char* args)
 
     /* bases */
     printf("Bases                : ");
-    for (i = 0; i<num_databaseNames; i++) printf("%s ",databaseNames[i]);
+    for (int i = 0; i<num_databaseNames; i++) printf("%s ",databaseNames[i]);
     printf("\n");
 
     /* Query options */
@@ -5051,8 +4990,7 @@ static int cmd_clear_otherinfo(const char* args)
     }
     else
     {
-        int i;
-        for (i = 0; i < maxOtherInfosSupported; ++i)
+        for (int i = 0; i < maxOtherInfosSupported; ++i)
         {
             if (extraOtherInfos[i].value)
             {
@@ -5067,12 +5005,11 @@ static int cmd_clear_otherinfo(const char* args)
 
 static int cmd_wait_response(const char *arg)
 {
-    int i;
     int wait_for = atoi(arg);
     if (wait_for < 1)
         wait_for = 1;
 
-    for (i = 0 ; i < wait_for; ++i )
+    for (int i = 0 ; i < wait_for; ++i )
         wait_and_handle_response(1);
     return 0;
 }
@@ -5172,7 +5109,6 @@ static struct {
 
 static int cmd_help(const char *line)
 {
-    int i;
     char topic[21];
 
     *topic = 0;
@@ -5180,7 +5116,7 @@ static int cmd_help(const char *line)
 
     if (*topic == 0)
         printf("Commands:\n");
-    for (i = 0; cmd_array[i].cmd; i++)
+    for (int i = 0; cmd_array[i].cmd; i++)
         if (*topic == 0 || strcmp(topic, cmd_array[i].cmd) == 0)
             printf("   %s %s\n", cmd_array[i].cmd, cmd_array[i].ad);
     if (!strcmp(topic, "find"))
@@ -5234,8 +5170,6 @@ static int cmd_register_tab(const char* arg)
 #if HAVE_READLINE_READLINE_H
     char command[101], tabargument[101];
     int i;
-    int num_of_tabs;
-    const char** tabslist;
 
     if (sscanf(arg, "%100s %100s", command, tabargument) < 1)
     {
@@ -5259,9 +5193,9 @@ static int cmd_register_tab(const char* arg)
     if (!cmd_array[i].local_tabcompletes)
         cmd_array[i].local_tabcompletes = (const char **) xcalloc(1, sizeof(char**));
 
-    num_of_tabs=0;
+    int num_of_tabs=0;
 
-    tabslist = cmd_array[i].local_tabcompletes;
+    const char** tabslist = cmd_array[i].local_tabcompletes;
     for (; tabslist && *tabslist; tabslist++)
         num_of_tabs++;
 
@@ -5324,12 +5258,11 @@ static void process_cmd_line(char* line)
 
     /* whitespace chop */
     {
-        char *p;
         char *lastnonspace = 0;
 
         while (*arg && yaz_isspace(*arg))
             arg++;
-        for (p = arg; *p; ++p)
+        for (char *p = arg; *p; ++p)
         {
             if (!yaz_isspace(*p))
                 lastnonspace = p;

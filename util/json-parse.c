@@ -25,16 +25,14 @@ static struct json_node *do_parse_from_stdin(void)
 {
     FILE *f = stdin;
     WRBUF w = wrbuf_alloc();
-    struct json_node *n;
     size_t pos;
-    const char *json_str;
     const char *err_msg;
     int c;
 
     while ((c = getc(f)) != EOF)
         wrbuf_putc(w, c);
-    json_str = wrbuf_cstr(w);
-    n = json_parse2(json_str, &err_msg, &pos);
+    const char *json_str = wrbuf_cstr(w);
+    struct json_node *n = json_parse2(json_str, &err_msg, &pos);
     if (!n)
     {
         fprintf(stderr, "JSON parse error: %s\nLeading text was:\n", err_msg);
@@ -47,7 +45,6 @@ static struct json_node *do_parse_from_stdin(void)
 
 int main(int argc, char **argv)
 {
-    struct json_node *n;
     int print = 0;
     int ret;
     char *arg;
@@ -64,7 +61,7 @@ int main(int argc, char **argv)
             usage(argv[0]);
         }
     }
-    n = do_parse_from_stdin();
+    struct json_node *n = do_parse_from_stdin();
     if (!n)
         exit(1);
     if (print)

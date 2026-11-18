@@ -548,7 +548,6 @@ static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
     if (!assoc->init)
     {
         const char *encoding = "UTF-8";
-        Z_External *ce;
         bend_initresult *binitres;
 
         yaz_log(log_requestdetail, "srw_bend_init config=%s", cb->configname);
@@ -558,9 +557,8 @@ static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
         {
             Z_IdAuthentication *auth = (Z_IdAuthentication *)
                 odr_malloc(assoc->decode, sizeof(*auth));
-            size_t len;
 
-            len = strlen(sr->username) + 1;
+            size_t len = strlen(sr->username) + 1;
             if (sr->password)
                 len += strlen(sr->password) + 2;
             yaz_log(log_requestdetail, "username=%s password-len=%ld",
@@ -578,7 +576,8 @@ static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
         }
 
 #if 1
-        ce = yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
+        Z_External *ce =
+            yaz_set_proposal_charneg(assoc->decode, &encoding, 1, 0, 0, 1);
         assoc->init->charneg_request = ce->u.charNeg3;
 #endif
         assoc->backend = 0;
@@ -613,21 +612,16 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
 
     if (assoc->server)
     {
-        int r;
         const char *input_schema = yaz_get_esn(rr->comp);
         Odr_oid *input_syntax_raw = rr->request_format;
 
         const char *backend_schema = 0;
         Odr_oid *backend_syntax = 0;
 
-        r = yaz_retrieval_request(assoc->server->retrieval,
-                                  input_schema,
-                                  input_syntax_raw,
-                                  &match_schema,
-                                  &match_syntax,
-                                  &rc,
-                                  &backend_schema,
-                                  &backend_syntax);
+        int r = yaz_retrieval_request(assoc->server->retrieval, input_schema,
+                                      input_syntax_raw, &match_schema,
+                                      &match_syntax, &rc, &backend_schema,
+                                      &backend_syntax);
         if (r == -1) /* error ? */
         {
             const char *details = yaz_retrieval_get_error(
@@ -833,13 +827,12 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
 {
     /* have a CQL query and  CQL to PQF transform .. */
     CQL_parser cp = cql_parser_create();
-    int r;
     int srw_errcode = 0;
     const char *add = 0;
     WRBUF rpn_buf = wrbuf_alloc();
 
     *sortkeys_p = 0;
-    r = cql_parser_string(cp, cql);
+    int r = cql_parser_string(cp, cql);
     if (r)
     {
         srw_errcode = YAZ_SRW_QUERY_SYNTAX_ERROR;
@@ -901,14 +894,13 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
                         Z_AttributesPlusTerm *result)
 {
     Z_Query query;
-    Z_RPNQuery *rpn;
     char *sortkeys = 0;
     int srw_error = cql2pqf(odr, cql, ct, &query, &sortkeys);
     if (srw_error)
         return srw_error;
     if (query.which != Z_Query_type_1 && query.which != Z_Query_type_101)
         return YAZ_SRW_QUERY_SYNTAX_ERROR; /* bad query type */
-    rpn = query.u.type_1;
+    Z_RPNQuery *rpn = query.u.type_1;
     if (!rpn->RPNStructure)
         return YAZ_SRW_QUERY_SYNTAX_ERROR; /* must be structure */
     if (rpn->RPNStructure->which != Z_RPNStructure_simple)
@@ -924,11 +916,10 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
 static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
                    bend_search_rr *bsrr)
 {
-    char *ccl0;
     struct ccl_rpn_node *node;
     int errcode, pos;
 
-    ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
+    char *ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
     if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0)
     {
         bsrr->errstring = (char*) ccl_err_msg(errcode);
@@ -1018,12 +1009,10 @@ static void srw_bend_search(association *assoc,
         }
         else if (!strcmp(srw_req->queryType, "pqf"))
         {
-            Z_RPNQuery *RPNquery;
-            YAZ_PQF_Parser pqf_parser;
+            YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
 
-            pqf_parser = yaz_pqf_create();
-
-            RPNquery = yaz_pqf_parse(pqf_parser, assoc->decode, srw_req->query);
+            Z_RPNQuery *RPNquery =
+                yaz_pqf_parse(pqf_parser, assoc->decode, srw_req->query);
             if (!RPNquery)
             {
                 const char *pqf_msg;
@@ -1204,7 +1193,6 @@ static void srw_bend_search(association *assoc,
 
                         for (i = 0; i<number; i++)
                         {
-                            int errcode;
                             int last_in_set = 0;
                             const char *addinfo = 0;
 
@@ -1212,9 +1200,9 @@ static void srw_bend_search(association *assoc,
                             srw_res->records[j].recordData_buf = 0;
                             srw_res->extra_records[j] = 0;
                             yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
-                            errcode = srw_bend_fetch(assoc, i+start, srw_req,
-                                                     srw_res->records + j,
-                                                     &addinfo, &last_in_set);
+                            int errcode = srw_bend_fetch(
+                                assoc, i + start, srw_req, srw_res->records + j,
+                                &addinfo, &last_in_set);
                             if (errcode)
                             {
                                 yaz_add_srw_diagnostic(assoc->encode,
@@ -1332,7 +1320,6 @@ static char *srw_bend_explain_default(bend_explain_rr *rr)
             int len;
             xmlDocPtr doc = xmlNewDoc(BAD_CAST "1.0");
             xmlChar *buf_out;
-            char *content;
 
             ptr = xmlCopyNode(ptr, 1);
             /* Comments may contain private configuration or credentials. */
@@ -1341,7 +1328,7 @@ static char *srw_bend_explain_default(bend_explain_rr *rr)
             xmlDocSetRootElement(doc, ptr);
 
             xmlDocDumpMemory(doc, &buf_out, &len);
-            content = (char*) odr_malloc(rr->stream, 1+len);
+            char *content = (char*) odr_malloc(rr->stream, 1+len);
             memcpy(content, buf_out, len);
             content[len] = '\0';
 
@@ -1442,8 +1429,6 @@ static void srw_bend_scan(association *assoc,
     if (srw_res->num_diagnostics == 0 && assoc->init)
     {
         int step_size = 0;
-        int requested_entries;
-        struct scan_entry *save_entries;
 
         bend_scan_rr *bsrr = (bend_scan_rr *)
             odr_malloc(assoc->encode, sizeof(*bsrr));
@@ -1452,7 +1437,7 @@ static void srw_bend_scan(association *assoc,
 
         bsrr->num_entries = srw_req->maximumTerms ?
             (int) *srw_req->maximumTerms : (max_terms < 10 ? max_terms : 10);
-        requested_entries = bsrr->num_entries;
+        int requested_entries = bsrr->num_entries;
         bsrr->term_position = srw_req->responsePosition ?
             odr_int_to_int(*srw_req->responsePosition) : 1;
 
@@ -1469,11 +1454,10 @@ static void srw_bend_scan(association *assoc,
 
         if (bsrr->num_entries > 0)
         {
-            int i;
             bsrr->entries = (struct scan_entry *)
                 odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
                            bsrr->num_entries);
-            for (i = 0; i<bsrr->num_entries; i++)
+            for (int i = 0; i<bsrr->num_entries; i++)
             {
                 bsrr->entries[i].term = 0;
                 bsrr->entries[i].occurrences = 0;
@@ -1482,7 +1466,8 @@ static void srw_bend_scan(association *assoc,
                 bsrr->entries[i].display_term = 0;
             }
         }
-        save_entries = bsrr->entries;  /* save it so we can compare later */
+        /* save it so we can compare later */
+        struct scan_entry *save_entries = bsrr->entries;
 
         if (srw_req->queryType && !strcmp(srw_req->queryType, "pqf") &&
             assoc->init->bend_scan)
@@ -1501,15 +1486,13 @@ static void srw_bend_scan(association *assoc,
                  && assoc->init->bend_scan && assoc->server
                  && assoc->server->cql_transform)
         {
-            int srw_error;
             bsrr->scanClause = 0;
             bsrr->attributeset = 0;
             bsrr->term = (Z_AttributesPlusTerm *)
                 odr_malloc(assoc->decode, sizeof(*bsrr->term));
-            srw_error = cql2pqf_scan(assoc->encode,
-                                     srw_req->scanClause,
-                                     assoc->server->cql_transform,
-                                     bsrr->term);
+            int srw_error =
+                cql2pqf_scan(assoc->encode, srw_req->scanClause,
+                             assoc->server->cql_transform, bsrr->term);
             if (srw_error)
                 yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                        &srw_res->num_diagnostics,
@@ -1555,13 +1538,12 @@ static void srw_bend_scan(association *assoc,
         }
         if (bsrr->errcode)
         {
-            int srw_error;
             if (bsrr->errcode == YAZ_BIB1_DATABASE_UNAVAILABLE)
             {
                 *http_code = 404;
                 return;
             }
-            srw_error = yaz_diag_bib1_to_srw(bsrr->errcode);
+            int srw_error = yaz_diag_bib1_to_srw(bsrr->errcode);
 
             yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
                                    &srw_res->num_diagnostics,
@@ -1569,13 +1551,12 @@ static void srw_bend_scan(association *assoc,
         }
         else if (srw_res->num_diagnostics == 0 && bsrr->num_entries)
         {
-            int i;
             srw_res->terms = (Z_SRW_scanTerm*)
                 odr_malloc(assoc->encode, sizeof(*srw_res->terms) *
                            bsrr->num_entries);
 
             srw_res->num_terms =  bsrr->num_entries;
-            for (i = 0; i<bsrr->num_entries; i++)
+            for (int i = 0; i<bsrr->num_entries; i++)
             {
                 Z_SRW_scanTerm *t = srw_res->terms + i;
                 t->value = odr_strdup(assoc->encode, bsrr->entries[i].term);
@@ -1898,7 +1879,6 @@ static int check_path(const char *path)
 static char *read_file(const char *fname, ODR o, long *sz)
 {
     struct stat stat_buf;
-    FILE *inf;
     char *buf = 0;
 
     if (stat(fname, &stat_buf) == -1)
@@ -1911,7 +1891,7 @@ static char *read_file(const char *fname, ODR o, long *sz)
         yaz_log(YLOG_LOG, "Is not a regular file: %s", fname);
         return 0;
     }
-    inf = fopen(fname, "rb");
+    FILE *inf = fopen(fname, "rb");
     if (!inf)
     {
         yaz_log(YLOG_LOG|YLOG_ERRNO, "fopen %s", fname);
@@ -2677,7 +2657,6 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
                                Z_ReferenceId *referenceId,
                                Odr_oid *oid, int *errcode)
 {
-    int recno;
     Odr_int dumped_records = 0;
     int toget = odr_int_to_int(*num);
     Z_Records *records =
@@ -2704,7 +2683,8 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     yaz_log(log_requestdetail, "Request to pack " ODR_INT_PRINTF "+%d %s", start, toget, setname);
     yaz_log(log_requestdetail, "pms=%d, mrs=%d", a->preferredMessageSize,
         a->maximumRecordSize);
-    for (recno = odr_int_to_int(start); reclist->num_records < toget; recno++)
+    for (int recno = odr_int_to_int(start);
+         reclist->num_records < toget; recno++)
     {
         bend_fetch_rr freq;
         Z_NamePlusRecord *thisrec;
@@ -2860,8 +2840,7 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
     yaz_log(log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
     {
-        int i;
-        for (i = 0; i < req->num_databaseNames; i++)
+        for (int i = 0; i < req->num_databaseNames; i++)
             yaz_log(log_requestdetail, "Database '%s'", req->databaseNames[i]);
     }
 
@@ -3070,10 +3049,9 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
 
     if (log_request)
     {
-        int i;
         WRBUF wr = wrbuf_alloc();
 
-        for (i = 0 ; i < req->num_databaseNames; i++)
+        for (int i = 0 ; i < req->num_databaseNames; i++)
         {
             if (i)
                 wrbuf_printf(wr, "+");
@@ -3115,8 +3093,6 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
     Z_PresentRequest *req = reqb->apdu_request->u.presentRequest;
     Z_APDU *apdu;
     Z_PresentResponse *resp;
-    Odr_int *next;
-    Odr_int *num;
     int errcode = 0;
 
     yaz_log(log_requestdetail, "Got PresentRequest.");
@@ -3149,8 +3125,8 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
         }
     }
     apdu = (Z_APDU *)odr_malloc(assoc->encode, sizeof(*apdu));
-    next = odr_intdup(assoc->encode, 0);
-    num = odr_intdup(assoc->encode, 0);
+    Odr_int *next = odr_intdup(assoc->encode, 0);
+    Odr_int *num = odr_intdup(assoc->encode, 0);
 
     apdu->which = Z_APDU_presentResponse;
     apdu->u.presentResponse = resp;
@@ -3211,10 +3187,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     Z_DiagRecs *diagrecs_p = NULL;
     bend_scan_rr *bsrr = (bend_scan_rr *)
         odr_malloc(assoc->encode, sizeof(*bsrr));
-    struct scan_entry *save_entries;
     int step_size = 0;
     int max_terms = statserv_max_scan_terms();
-    int requested_entries;
 
     yaz_log(log_requestdetail, "Got ScanRequest");
 
@@ -3253,8 +3227,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
 
     if (req->databaseNames)
     {
-        int i;
-        for (i = 0; i < req->num_databaseNames; i++)
+        for (int i = 0; i < req->num_databaseNames; i++)
             yaz_log(log_requestdetail, "Database '%s'", req->databaseNames[i]);
     }
     bsrr->scanClause = 0;
@@ -3263,7 +3236,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     bsrr->num_bases = req->num_databaseNames;
     bsrr->basenames = req->databaseNames;
     bsrr->num_entries = odr_int_to_int(*req->numberOfTermsRequested);
-    requested_entries = bsrr->num_entries;
+    int requested_entries = bsrr->num_entries;
     bsrr->term = req->termListAndStartPoint;
     bsrr->referenceId = req->referenceId;
     bsrr->stream = assoc->encode;
@@ -3283,11 +3256,10 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     */
     if (bsrr->num_entries > 0)
     {
-        int i;
         bsrr->entries = (struct scan_entry *)
             odr_malloc(assoc->decode, sizeof(*bsrr->entries) *
                        bsrr->num_entries);
-        for (i = 0; i<bsrr->num_entries; i++)
+        for (int i = 0; i<bsrr->num_entries; i++)
         {
             bsrr->entries[i].term = 0;
             bsrr->entries[i].occurrences = 0;
@@ -3296,7 +3268,8 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
             bsrr->entries[i].display_term = 0;
         }
     }
-    save_entries = bsrr->entries;  /* save it so we can compare later */
+    /* save it so we can compare later */
+    struct scan_entry *save_entries = bsrr->entries;
 
     bsrr->attributeset = req->attributeSet;
     log_scan_term_level(log_requestdetail, req->termListAndStartPoint,
@@ -3319,7 +3292,6 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
                                    bsrr->errcode, bsrr->errstring);
     else
     {
-        int i;
         Z_Entry **tab = (Z_Entry **)
             odr_malloc(assoc->encode, sizeof(*tab) * bsrr->num_entries);
 
@@ -3333,7 +3305,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
         res->numberOfEntriesReturned = odr_intdup(assoc->encode,
                                                    ents->num_entries);
         res->positionOfTerm = odr_intdup(assoc->encode, bsrr->term_position);
-        for (i = 0; i < bsrr->num_entries; i++)
+        for (int i = 0; i < bsrr->num_entries; i++)
         {
             Z_Entry *e;
             Z_TermInfo *t;
@@ -3389,10 +3361,9 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
     }
     if (log_request)
     {
-        int i;
         WRBUF wr = wrbuf_alloc();
         wrbuf_printf(wr, "Scan ");
-        for (i = 0 ; i < req->num_databaseNames; i++)
+        for (int i = 0 ; i < req->num_databaseNames; i++)
         {
             if (i)
                 wrbuf_printf(wr, "+");
@@ -3543,7 +3514,6 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
     res->deleteListStatuses = 0;
     if (bdrr->num_setnames > 0)
     {
-        int i;
         res->deleteListStatuses = (Z_ListStatuses *)
             odr_malloc(assoc->encode, sizeof(*res->deleteListStatuses));
         res->deleteListStatuses->num = bdrr->num_setnames;
@@ -3552,7 +3522,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
             odr_malloc(assoc->encode,
                         sizeof(*res->deleteListStatuses->elements) *
                         bdrr->num_setnames);
-        for (i = 0; i<bdrr->num_setnames; i++)
+        for (int i = 0; i<bdrr->num_setnames; i++)
         {
             res->deleteListStatuses->elements[i] =
                 (Z_ListStatus *)

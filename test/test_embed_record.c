@@ -29,8 +29,7 @@
 
 void test1(void)
 {
-    int buflen;
-    for (buflen = 0; buflen < 256; buflen++)
+    for (int buflen = 0; buflen < 256; buflen++)
     {
         char buf[256];
         char buf_a[1024];
@@ -91,7 +90,6 @@ static int test_render(const char *type_spec, int is_marc, const char *input,
                        const char *expected_output)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
-    const char *actual_output;
     int actual_len;
     int res = 0;
     WRBUF wrbuf = wrbuf_alloc();
@@ -103,7 +101,8 @@ static int test_render(const char *type_spec, int is_marc, const char *input,
     else
         npr->u.databaseRecord = z_ext_record_xml(odr, input, (int) strlen(input));
 
-    actual_output = yaz_record_render(npr, 0, wrbuf, type_spec, &actual_len);
+    const char *actual_output =
+        yaz_record_render(npr, 0, wrbuf, type_spec, &actual_len);
 
     if (actual_output && expected_output)
     {

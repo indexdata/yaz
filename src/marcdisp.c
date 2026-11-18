@@ -446,8 +446,7 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
 {
     if (mt->iconv_cd)
     {
-        size_t i;
-        for (i = 1; i<5; i++)
+        for (size_t i = 1; i<5; i++)
         {
             char outbuf[12];
             size_t outbytesleft = sizeof(outbuf);
@@ -716,9 +715,8 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
                 wrbuf_printf(wr, "\"");
             if (n->u.datafield.indicator)
             {
-                int i;
                 size_t off = 0;
-                for (i = 0; n->u.datafield.indicator[off]; i++)
+                for (int i = 0; n->u.datafield.indicator[off]; i++)
                 {
                     size_t ilen =
                         cdata_one_character(mt, n->u.datafield.indicator + off);
@@ -883,9 +881,8 @@ static void write_xml_indicator(yaz_marc_t mt, struct yaz_marc_node *n,
 {
     if (n->u.datafield.indicator)
     {
-        int i;
         size_t off = 0;
-        for (i = 0; n->u.datafield.indicator[off]; i++)
+        for (int i = 0; n->u.datafield.indicator[off]; i++)
         {
             size_t ilen =
                 cdata_one_character(mt, n->u.datafield.indicator + off);
@@ -909,8 +906,6 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
                                   xmlNsPtr ns_record, WRBUF wr_cdata,
                                   int identifier_length)
 {
-    xmlNode *ptr;
-    struct yaz_marc_subfield *s;
     WRBUF subfield_name = wrbuf_alloc();
 
     /* TODO consider if safe */
@@ -918,13 +913,11 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
     field[0] = 'd';
     strncpy(field + 1, n->u.datafield.tag, 3);
     field[4] = '\0';
-    ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST field, 0);
+    xmlNode *ptr = xmlNewChild(record_ptr, ns_record, BAD_CAST field, 0);
 
     write_xml_indicator(mt, n, ptr, 1);
-    for (s = n->u.datafield.subfields; s; s = s->next)
+    for (struct yaz_marc_subfield *s = n->u.datafield.subfields; s; s = s->next)
     {
-        int not_written;
-        xmlNode *ptr_subfield;
         size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                  identifier_length);
         wrbuf_rewind(wr_cdata);
@@ -933,10 +926,12 @@ static void add_marc_datafield_turbo_xml(yaz_marc_t mt,
 
         wrbuf_rewind(subfield_name);
         wrbuf_puts(subfield_name, "s");
-        not_written = element_name_append_attribute_value(mt, subfield_name, 0, s->code_data, using_code_len) != 0;
-        ptr_subfield = xmlNewTextChild(ptr, ns_record,
-                                       BAD_CAST wrbuf_cstr(subfield_name),
-                                       BAD_CAST wrbuf_cstr(wr_cdata));
+        int not_written =
+            element_name_append_attribute_value(
+                mt, subfield_name, 0, s->code_data, using_code_len) != 0;
+        xmlNode *ptr_subfield =
+            xmlNewTextChild(ptr, ns_record, BAD_CAST wrbuf_cstr(subfield_name),
+                            BAD_CAST wrbuf_cstr(wr_cdata));
         if (not_written)
         {
             /* Generate code attribute value and add */
@@ -956,8 +951,6 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
     struct yaz_marc_node *n;
     int identifier_length;
     const char *leader = 0;
-    xmlNode *record_ptr;
-    xmlNsPtr ns_record;
     WRBUF wr_cdata = 0;
 
     for (n = mt->nodes; n; n = n->next)
@@ -974,10 +967,10 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
     wr_cdata = wrbuf_alloc();
 
-    record_ptr = xmlNewNode(0, BAD_CAST "r");
+    xmlNode *record_ptr = xmlNewNode(0, BAD_CAST "r");
     *root_ptr = record_ptr;
 
-    ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
+    xmlNsPtr ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
     xmlSetNs(record_ptr, ns_record);
 
     if (format)
@@ -1030,8 +1023,6 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
     struct yaz_marc_node *n;
     int identifier_length;
     const char *leader = 0;
-    xmlNode *record_ptr;
-    xmlNsPtr ns_record;
     WRBUF wr_cdata = 0;
 
     for (n = mt->nodes; n; n = n->next)
@@ -1048,10 +1039,10 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
 
     wr_cdata = wrbuf_alloc();
 
-    record_ptr = xmlNewNode(0, BAD_CAST "record");
+    xmlNode *record_ptr = xmlNewNode(0, BAD_CAST "record");
     *root_ptr = record_ptr;
 
-    ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
+    xmlNsPtr ns_record = xmlNewNs(record_ptr, BAD_CAST ns, 0);
     xmlSetNs(record_ptr, ns_record);
 
     if (format)
@@ -1071,16 +1062,15 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             write_xml_indicator(mt, n, ptr, 0);
             for (s = n->u.datafield.subfields; s; s = s->next)
             {
-                xmlNode *ptr_subfield;
                 size_t using_code_len = get_subfield_len(mt, s->code_data,
                                                          identifier_length);
                 wrbuf_rewind(wr_cdata);
                 wrbuf_iconv_puts2(wr_cdata, mt->iconv_cd,
                                   s->code_data + using_code_len, wrbuf_xml_strip);
                 marc_iconv_reset(mt, wr_cdata);
-                ptr_subfield = xmlNewTextChild(
-                    ptr, ns_record,
-                    BAD_CAST "subfield",  BAD_CAST wrbuf_cstr(wr_cdata));
+                xmlNode *ptr_subfield =
+                    xmlNewTextChild(ptr, ns_record, BAD_CAST "subfield",
+                                    BAD_CAST wrbuf_cstr(wr_cdata));
 
                 wrbuf_rewind(wr_cdata);
                 wrbuf_iconv_write2(wr_cdata, mt->iconv_cd,
@@ -1135,7 +1125,6 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     size_t data_offset = 0;
     const char *leader = 0;
     WRBUF wr_dir, wr_head, wr_data_tmp;
-    size_t base_address;
 
     for (n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
@@ -1218,7 +1207,7 @@ int yaz_marc_write_iso2709(yaz_marc_t mt, WRBUF wr)
     wrbuf_putc(wr_dir, ISO2709_FS);
 
     /* base address of data (comes after leader+directory) */
-    base_address = 24 + wrbuf_len(wr_dir);
+    size_t base_address = 24 + wrbuf_len(wr_dir);
     if (base_address >= 100000)
     {
         wrbuf_destroy(wr_dir);
@@ -1343,9 +1332,8 @@ int yaz_marc_write_json(yaz_marc_t mt, WRBUF w)
             wrbuf_puts(w, "\n        ]");
             if (n->u.datafield.indicator)
             {
-                int i;
                 size_t off = 0;
-                for (i = 0; n->u.datafield.indicator[off]; i++)
+                for (int i = 0; n->u.datafield.indicator[off]; i++)
                 {
                     size_t ilen =
                         cdata_one_character(mt, n->u.datafield.indicator + off);
@@ -1382,10 +1370,8 @@ int yaz_marc_decode_wrbuf(yaz_marc_t mt, const char *buf, int bsize, WRBUF wr)
 int yaz_marc_decode_buf(yaz_marc_t mt, const char *buf, int bsize,
                         const char **result, size_t *rsize)
 {
-    int r;
-
     wrbuf_rewind(mt->m_wr);
-    r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
+    int r = yaz_marc_decode_wrbuf(mt, buf, bsize, mt->m_wr);
     if (result)
         *result = wrbuf_cstr(mt->m_wr);
     if (rsize)
@@ -1416,9 +1402,8 @@ yaz_iconv_t yaz_marc_get_iconv(yaz_marc_t mt)
 
 void yaz_marc_modify_leader(yaz_marc_t mt, size_t off, const char *str)
 {
-    struct yaz_marc_node *n;
     char *leader = 0;
-    for (n = mt->nodes; n; n = n->next)
+    for (struct yaz_marc_node *n = mt->nodes; n; n = n->next)
         if (n->which == YAZ_MARC_LEADER)
         {
             leader = n->u.leader;
@@ -1459,11 +1444,10 @@ static int marc_exec_leader(const char *leader_spec, char *leader, size_t size)
         if (*val == '\'')
         {
             const char *vp = strchr(val+1, '\'');
-            size_t len;
 
             if (!vp)
                 return -1;
-            len = vp-val-1;
+            size_t len = vp-val-1;
             if (len + pos > size)
                 return -1;
             memcpy(leader + pos, val+1, len);

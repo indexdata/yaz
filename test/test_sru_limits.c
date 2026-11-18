@@ -111,7 +111,6 @@ static void check_unknown_host(const char *version, const char *connection,
     ODR dec = odr_createmem(ODR_DECODE);
     WRBUF input = wrbuf_alloc();
     statserv_options_block *cb = statserv_getcontrol();
-    association *assoc;
     request *response;
     Z_GDU *gdu = 0;
 
@@ -132,7 +131,7 @@ static void check_unknown_host(const char *version, const char *connection,
     cs.f_put = put;
     cs.f_close = close_connection;
     cs.user = (void *) wrbuf_cstr(input);
-    assoc = create_association(chan, &cs, 0);
+    association *assoc = create_association(chan, &cs, 0);
     iochan_setdata(chan, assoc);
     assoc->cs_get_mask = EVENT_INPUT;
     if (previous_control == 2)
@@ -224,9 +223,6 @@ static void check(int mode, const char *maximum, const char *start,
     ODR enc = odr_createmem(ODR_ENCODE);
     WRBUF args = wrbuf_alloc();
     Z_GDU *gdu = z_get_HTTP_Request_uri(enc, "http://localhost/Default", 0, 0);
-    association *assoc;
-    request *response;
-    char *buf;
     int len;
 
     hits = hit_count;
@@ -273,14 +269,14 @@ static void check(int mode, const char *maximum, const char *start,
         }
     }
     YAZ_CHECK(z_GDU(enc, &gdu, 0, 0));
-    buf = odr_getbuf(enc, &len, 0);
+    char *buf = odr_getbuf(enc, &len, 0);
     memset(&cs, 0, sizeof(cs));
     cs.protocol = PROTO_HTTP;
     cs.f_get = get;
     cs.f_more = more;
     cs.f_addrstr = addrstr;
     cs.user = odr_strdupn(enc, buf, len);
-    assoc = create_association(chan, &cs, 0);
+    association *assoc = create_association(chan, &cs, 0);
     iochan_setdata(chan, assoc);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(chan, EVENT_INPUT);
@@ -290,7 +286,7 @@ static void check(int mode, const char *maximum, const char *start,
     }
     YAZ_CHECK_EQ(fetched, count);
     YAZ_CHECK_EQ(presented, count ? 1 : 0);
-    response = request_head(&assoc->outgoing);
+    request *response = request_head(&assoc->outgoing);
     YAZ_CHECK(response != 0);
     if (response)
     {
@@ -357,10 +353,9 @@ int main(int argc, char **argv)
                the allocator's quarter-size limit. Reject before present. */
             {
                 size_t limits[2];
-                int i;
                 limits[0] = ((size_t) -1 / 4) / sizeof(Z_SRW_record);
                 limits[1] = ((size_t) -1 / 4) / sizeof(Z_SRW_extra_record *);
-                for (i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     if (limits[i] < INT_MAX)
                     {

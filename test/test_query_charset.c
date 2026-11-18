@@ -28,14 +28,13 @@ enum query_charset_status t(yaz_iconv_t cd,
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
-    Z_RPNQuery *rpn;
     enum query_charset_status status = NO_ERROR;
 
     YAZ_CHECK(parser);
 
     YAZ_CHECK(odr);
 
-    rpn = yaz_pqf_parse(parser, odr, pqf);
+    Z_RPNQuery *rpn = yaz_pqf_parse(parser, odr, pqf);
 
     yaz_pqf_destroy(parser);
 

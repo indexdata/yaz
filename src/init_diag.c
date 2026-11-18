@@ -15,8 +15,7 @@
 static Z_DefaultDiagFormat *interpret_init_diag2(int *no,
                                                  Z_DiagnosticFormat *diag)
 {
-    int i;
-    for (i = 0; i < diag->num; i++)
+    for (int i = 0; i < diag->num; i++)
     {
         Z_DiagnosticFormat_s *ds = diag->elements[i];
         if (ds->which == Z_DiagnosticFormat_s_defaultDiagRec)
@@ -34,9 +33,8 @@ Z_DefaultDiagFormat *yaz_decode_init_diag(int no, Z_InitResponse *initrs)
     Z_External *uif = initrs->userInformationField;
     if (uif && uif->which == Z_External_userInfo1)
     {
-        int i;
         Z_OtherInformation *ui = uif->u.userInfo1;
-        for (i = 0; i < ui->num_elements; i++)
+        for (int i = 0; i < ui->num_elements; i++)
         {
             Z_OtherInformationUnit *unit = ui->list[i];
             if (unit->which == Z_OtherInfo_externallyDefinedInfo &&

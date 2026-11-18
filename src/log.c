@@ -123,14 +123,12 @@ void yaz_log_unlock(void)
 
 void yaz_log_init_globals(void)
 {
-    char *env;
-
     if (log_mutex == 0)
         yaz_mutex_create(&log_mutex);
 #if YAZ_POSIX_THREADS
     pthread_atfork(yaz_log_lock, yaz_log_unlock, yaz_log_unlock);
 #endif
-    env = getenv("YAZ_LOG");
+    char *env = getenv("YAZ_LOG");
     if (env)
         l_level = yaz_log_mask_str_x(env, l_level);
 }
@@ -412,7 +410,6 @@ static void yaz_strftime(char *dst, size_t sz,
 static void yaz_log_to_file(int level, const char *fmt, va_list ap,
                             const char *error_cp)
 {
-    FILE *file;
     time_t ti = time(0);
 #if HAVE_LOCALTIME_R
     struct tm tm0, *tm = &tm0;
@@ -428,17 +425,16 @@ static void yaz_log_to_file(int level, const char *fmt, va_list ap,
 #endif
 
     yaz_log_open_check(tm, 0, "a");
-    file = yaz_log_file(); /* file may change in yaz_log_open_check */
+    FILE *file = yaz_log_file(); /* file may change in yaz_log_open_check */
 
     if (file)
     {
         char tbuf[TIMEFORMAT_LEN];
         char tid[TID_LEN];
         char flags[1024];
-        int i;
 
         *flags = '\0';
-        for (i = 0; level && mask_names[i].name; i++)
+        for (int i = 0; level && mask_names[i].name; i++)
             if ( mask_names[i].mask & level)
             {
                 if (*mask_names[i].name && mask_names[i].mask &&
@@ -487,7 +483,6 @@ static void yaz_log_to_file(int level, const char *fmt, va_list ap,
 void yaz_log(int level, const char *fmt, ...)
 {
     va_list ap;
-    FILE *file;
     int o_level = level;
     char *error_cp = 0, error_buf[128];
 
@@ -501,7 +496,7 @@ void yaz_log(int level, const char *fmt, ...)
         return;
     va_start(ap, fmt);
 
-    file = yaz_log_file();
+    FILE *file = yaz_log_file();
     if (start_hook_func || hook_func || end_hook_func)
     {
         char buf[1024];
@@ -585,12 +580,11 @@ static int define_module_bit(const char *name)
 
 int yaz_log_module_level(const char *name)
 {
-    int i;
     char clean[255];
     char *n = clean_name(name, strlen(name), clean, sizeof(clean));
     yaz_init_globals();
 
-    for (i = 0; mask_names[i].name; i++)
+    for (int i = 0; mask_names[i].name; i++)
         if (0==strcmp(n, mask_names[i].name))
         {
             yaz_log(YLOG_LOGLVL, "returning log bit 0x%x for '%s' %s",

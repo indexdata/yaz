@@ -62,17 +62,14 @@ static int yaz_marc_line_gets(int (*getbyte)(void *client_data),
                               void *client_data,
                               WRBUF w)
 {
-    int more;
-
     wrbuf_rewind(w);
-    more = yaz_gets(getbyte, ungetbyte, client_data, w);
+    int more = yaz_gets(getbyte, ungetbyte, client_data, w);
     if (!more)
         return 0;
 
     while (more)
     {
-        int i;
-        for (i = 0; i<4; i++)
+        for (int i = 0; i<4; i++)
         {
             int ch = getbyte(client_data);
             if (ch != ' ')
@@ -193,12 +190,9 @@ int yaz_marc_read_line(yaz_marc_t mt,
                 yaz_marc_add_datafield(mt, tag, indicator, indicator_len);
                 for (;;)
                 {
-                    const char *next;
-                    size_t len;
-
                     assert(cp[0] == marker_ch);
                     cp++;
-                    next = cp;
+                    const char *next = cp;
                     while ((next = strchr(next, marker_ch)))
                     {
                         /* allow only alphanumeric characters */
@@ -212,7 +206,7 @@ int yaz_marc_read_line(yaz_marc_t mt,
                         }
                         next++;
                     }
-                    len = strlen(cp);
+                    size_t len = strlen(cp);
                     if (next)
                         len = next - cp - marker_skip;
 

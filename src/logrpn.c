@@ -195,8 +195,7 @@ static void zlog_attributes(Z_AttributesPlusTerm *t, int depth,
     {
         char attset_name_buf[OID_STR_MAX];
         const char *attset_name = 0;
-        Z_AttributeElement *element;
-        element = t->attributes->attributes[of];
+        Z_AttributeElement *element = t->attributes->attributes[of];
         if (element->attributeSet)
         {
             attset_name = yaz_oid_to_string_buf(element->attributeSet,

@@ -136,7 +136,6 @@ int main(int argc, char **argv)
     char *from = 0;
     char *to = 0;
     char *arg;
-    yaz_iconv_t cd;
     FILE *inf = stdin;
 
     yaz_enable_panic_backtrace(*argv);
@@ -177,7 +176,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "yaz-iconv: -f encoding missing\n");
         exit(4);
     }
-    cd = yaz_iconv_open(to, from);
+    yaz_iconv_t cd = yaz_iconv_open(to, from);
     if (!cd)
     {
         fprintf(stderr, "yaz-iconv: unsupported encoding\n");

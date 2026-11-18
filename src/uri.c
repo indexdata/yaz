@@ -105,10 +105,9 @@ void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
 
     for(i = 0; name[i]; i++)
     {
-        size_t ilen;
         if (i)
             (*path)[szp++] = '&';
-        ilen = strlen(name[i]);
+        size_t ilen = strlen(name[i]);
         memcpy(*path+szp, name[i], ilen);
         szp += ilen;
         (*path)[szp++] = '=';
@@ -122,13 +121,12 @@ void yaz_array_to_uri(char **path, ODR o, char **name, char **value)
 int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
 {
     int no = 2;
-    const char *cp;
     *name = 0;
     if (*path == '?')
         path++;
     if (!*path)
         return 0;
-    cp = path;
+    const char *cp = path;
     while ((cp = strchr(cp, '&')))
     {
         cp++;

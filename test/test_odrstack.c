@@ -16,23 +16,20 @@ void test1(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     YAZ_PQF_Parser parser = yaz_pqf_create();
-    Z_RPNQuery *rpn_query;
     char qstr[10000];
-    int i;
-    int ret;
 
     YAZ_CHECK(odr);
     YAZ_CHECK(parser);
 
     *qstr = '\0';
-    for (i = 0; i<100; i++)
+    for (int i = 0; i<100; i++)
         strcat(qstr, "@and 1 ");
     strcat(qstr, "1");
 
-    rpn_query = yaz_pqf_parse (parser, odr, qstr);
+    Z_RPNQuery *rpn_query = yaz_pqf_parse (parser, odr, qstr);
     YAZ_CHECK(rpn_query);
 
-    ret = z_RPNQuery(odr, &rpn_query, 0, 0);
+    int ret = z_RPNQuery(odr, &rpn_query, 0, 0);
     YAZ_CHECK(ret);
 
     yaz_pqf_destroy(parser);
@@ -44,18 +41,16 @@ void test2(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
     YAZ_PQF_Parser parser = yaz_pqf_create();
-    Z_RPNQuery *rpn_query;
-    int ret;
 
     YAZ_CHECK(odr);
 
-    rpn_query = yaz_pqf_parse (parser, odr, "@and @and a b c");
+    Z_RPNQuery *rpn_query = yaz_pqf_parse (parser, odr, "@and @and a b c");
     YAZ_CHECK(rpn_query);
 
     /* make the circular reference */
     rpn_query->RPNStructure->u.complex->s1 = rpn_query->RPNStructure;
 
-    ret = z_RPNQuery(odr, &rpn_query, 0, 0);  /* should fail */
+    int ret = z_RPNQuery(odr, &rpn_query, 0, 0);  /* should fail */
     YAZ_CHECK(!ret);
 
     yaz_pqf_destroy(parser);

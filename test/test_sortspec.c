@@ -73,10 +73,9 @@ static int type7(const char *arg, const char *expected_result)
     else
     {
         WRBUF w = wrbuf_alloc();
-        int r;
 
         wrbuf_puts(w, "q");
-        r = yaz_sort_spec_to_type7(sort_spec, w);
+        int r = yaz_sort_spec_to_type7(sort_spec, w);
 
         if (!expected_result && r)
             ret = 1;
@@ -214,10 +213,9 @@ static void tst_limits(void)
     ODR odr = odr_createmem(ODR_ENCODE);
     WRBUF w = wrbuf_alloc();
     ZOOM_query query = ZOOM_query_create();
-    int i;
 
     YAZ_CHECK(yaz_sort_spec(odr, "") == 0);
-    for (i = 1; i <= 1000; i++)
+    for (int i = 1; i <= 1000; i++)
     {
         wrbuf_printf(w, "field%d a ", i);
         if (i == 19 || i == 20 || i == 21 || i == 1000)
@@ -228,9 +226,8 @@ static void tst_limits(void)
                 YAZ_CHECK(spec != 0);
                 if (spec)
                 {
-                    int j;
                     YAZ_CHECK_EQ(spec->num_specs, i);
-                    for (j = 0; j < spec->num_specs; j++)
+                    for (int j = 0; j < spec->num_specs; j++)
                     {
                         char field[32];
                         sprintf(field, "field%d", j + 1);

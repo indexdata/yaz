@@ -33,14 +33,13 @@ enum pqf2xml_status pqf2xml_text(const char *pqf, const char *expect_xml,
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
-    Z_RPNQuery *rpn;
     enum pqf2xml_status status = XML_NO_ERROR;
 
     YAZ_CHECK(parser);
 
     YAZ_CHECK(odr);
 
-    rpn = yaz_pqf_parse(parser, odr, pqf);
+    Z_RPNQuery *rpn = yaz_pqf_parse(parser, odr, pqf);
 
     yaz_pqf_destroy(parser);
 

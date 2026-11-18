@@ -141,8 +141,8 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
                 n->u.st.relation = nval;
             }
         }
-        struct cql_node *mod;
-        for (mod = n->u.st.modifiers; mod; mod = mod->u.st.modifiers)
+        for (struct cql_node *mod = n->u.st.modifiers;
+             mod; mod = mod->u.st.modifiers)
         {
             if (!mod->u.st.index_uri && mod->u.st.index)
             {

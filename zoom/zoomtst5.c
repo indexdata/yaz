@@ -23,10 +23,8 @@ int main(int argc, char **argv)
     int no = argc - 4;
     ZOOM_connection z[500]; /* allow at most 500 connections */
     ZOOM_resultset r[500];  /* and result sets .. */
-    ZOOM_query q;
-    ZOOM_options o;
 
-    o = ZOOM_options_create();
+    ZOOM_options o = ZOOM_options_create();
     if (argc < 5)
     {
         fprintf(stderr, "usage:\n%s target1 .. targetN query strategy sort\n",
@@ -47,7 +45,7 @@ int main(int argc, char **argv)
     ZOOM_options_set(o, "elementSetName", "B");
 
     /* create query */
-    q = ZOOM_query_create();
+    ZOOM_query q = ZOOM_query_create();
     if (strncmp("cql:", argv[argc-3], 4) == 0)
     {
         if (ZOOM_query_cql(q, argv[argc-3] + 4))
@@ -90,17 +88,15 @@ int main(int argc, char **argv)
         else
         {
             /* OK, no major errors. Look at the result count */
-            int pos;
             printf("%s: %ld hits\n", ZOOM_connection_option_get(z[i], "host"),
                    (long) ZOOM_resultset_size(r[i]));
             /* go through first 20 records at target */
-            for (pos = 0; pos < 20; pos++)
+            for (int pos = 0; pos < 20; pos++)
             {
-                ZOOM_record rec;
                 const char *db, *syntax, *str;
                 int record_len, syntax_len;
 
-                rec = ZOOM_resultset_record(r[i], pos);
+                ZOOM_record rec = ZOOM_resultset_record(r[i], pos);
                 /* get database for record and record itself at pos */
 
                 db = ZOOM_record_get(rec,  "database", 0);

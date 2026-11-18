@@ -27,7 +27,6 @@ static void check_soap_namespace(const char *xml, const char *error)
     int len = strlen(xml);
     Z_SRW_PDU *sr = 0;
     char *charset = 0;
-    Z_HTTP_Request *request;
 
     YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), error ? -1 : 0);
     YAZ_CHECK(soap != 0);
@@ -42,7 +41,7 @@ static void check_soap_namespace(const char *xml, const char *error)
     }
     odr_reset(o);
     soap = 0;
-    request = z_get_HTTP_Request(o)->u.HTTP_Request;
+    Z_HTTP_Request *request = z_get_HTTP_Request(o)->u.HTTP_Request;
     request->method = "POST";
     request->content_buf = (char *) xml;
     request->content_len = strlen(xml);
@@ -110,7 +109,6 @@ static void tst_srw(void)
     const char *charset = 0;
     char *content_buf = 0;
     int content_len;
-    int ret;
     ODR o = odr_createmem(ODR_ENCODE);
     Z_SOAP_Handler h[2] = {
         {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
@@ -135,7 +133,7 @@ static void tst_srw(void)
     p->u.generic->p = sr;
     p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
 
-    ret = z_soap_codec_enc(o, &p, &content_buf, &content_len, h, charset);
+    int ret = z_soap_codec_enc(o, &p, &content_buf, &content_len, h, charset);
     odr_destroy(o);
     YAZ_CHECK(ret == 0);  /* codec failed ? */
 }
@@ -147,9 +145,8 @@ static void tst_array_to_uri(void)
     char **names;
     char **values;
     char *query_string;
-    int r;
 
-    r = yaz_uri_to_array("&", odr, &names, &values);
+    int r = yaz_uri_to_array("&", odr, &names, &values);
     YAZ_CHECK_EQ(r, 0);
     if (r == 0)
     {

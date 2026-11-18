@@ -87,10 +87,9 @@ int main(int argc, char **argv)
         else
         {
             /* OK, no major errors. Look at the result count */
-            int pos;
             printf ("%s: %ld hits\n", tname, (long) ZOOM_resultset_size(r[i]));
             /* go through all records at target */
-            for (pos = 0; pos < 10; pos++)
+            for (int pos = 0; pos < 10; pos++)
             {
                 int len; /* length of buffer rec */
                 const char *rec =

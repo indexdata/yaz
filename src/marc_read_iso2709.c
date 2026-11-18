@@ -28,7 +28,6 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
     int record_length;
     int indicator_length;
     int identifier_length;
-    int end_of_directory;
     int base_address;
     int length_data_entry;
     int length_starting;
@@ -114,7 +113,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         }
         entry_p += 3 + length_data_entry + length_starting;
     }
-    end_of_directory = entry_p;
+    int end_of_directory = entry_p;
     if (base_address != entry_p+1)
     {
         yaz_marc_cprintf(mt, "Base address not at end of directory,"
@@ -124,10 +123,6 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
     /* Second pass. parse control - and datafields */
     for (entry_p = 24; entry_p != end_of_directory; )
     {
-        int data_length;
-        int data_offset;
-        int end_offset;
-        int i;
         char tag[4];
         int identifier_flag = 0;
         int entry_p0 = entry_p;
@@ -135,9 +130,9 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         memcpy (tag, buf+entry_p, 3);
         entry_p += 3;
         tag[3] = '\0';
-        data_length = atoi_n(buf+entry_p, length_data_entry);
+        int data_length = atoi_n(buf+entry_p, length_data_entry);
         entry_p += length_data_entry;
-        data_offset = atoi_n(buf+entry_p, length_starting);
+        int data_offset = atoi_n(buf+entry_p, length_starting);
         entry_p += length_starting;
         /* Validate before computing offsets or inspecting field bytes. */
         if (base_address < 25 || base_address >= record_length ||
@@ -149,8 +144,8 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                              entry_p0);
             return -1;
         }
-        i = data_offset + base_address;
-        end_offset = i + data_length - 1;
+        int i = data_offset + base_address;
+        int end_offset = i + data_length - 1;
 
         if (yaz_marc_get_debug(mt))
         {
@@ -185,7 +180,6 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                      * any following field or record. */
                     char probe[4] = { 0, 0, 0, 0 };
                     int available = end_offset - i;
-                    size_t width;
                     if (available <= 0 || buf[i] == ISO2709_FS ||
                         buf[i] == ISO2709_RS || buf[i] == ISO2709_IDFS)
                     {
@@ -195,7 +189,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
                     if (available > (int) sizeof(probe))
                         available = sizeof(probe);
                     memcpy(probe, buf + i, available);
-                    width = yaz_marc_sizeof_char(mt, probe);
+                    size_t width = yaz_marc_sizeof_char(mt, probe);
                     if (!width || width > (size_t) available)
                     {
                         yaz_marc_cprintf(mt, "Truncated indicator in tag %s", tag);

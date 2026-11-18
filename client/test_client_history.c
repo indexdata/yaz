@@ -16,10 +16,9 @@ static WRBUF captured;
 static int capture_printf(const char *fmt, ...)
 {
     char buf[4096];
-    int ret;
     va_list ap;
     va_start(ap, fmt);
-    ret = vsnprintf(buf, sizeof(buf), fmt, ap);
+    int ret = vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
     wrbuf_puts(captured, buf);
     return ret;

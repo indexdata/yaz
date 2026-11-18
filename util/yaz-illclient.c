@@ -105,12 +105,11 @@ const char *get_ill_element(void *clientData, const char *element) {
 struct nameval *parse_nameval( char *arg ) {
     struct nameval *nv = (struct nameval *) xmalloc(sizeof(*nv));
     char *p=arg;
-    size_t len;
     if (!p || !*p)
         return 0; /* yeah, leaks a bit of memory. so what */
     while ( *p && ( *p != '=' ) )
         p++;
-    len = p - arg;
+    size_t len = p - arg;
     if (!len)
         return 0;
     nv->name = (char *) xmalloc(len+1);
@@ -279,12 +278,11 @@ void validateargs( struct prog_args *args) {
 /* * * * * * * * * * * * * * * */
 /** \brief  Connect to the target */
 COMSTACK connect_to( char *hostaddr ){
-    COMSTACK stack;
     void *server_address_ip;
-    int status;
 
     yaz_log(YLOG_DEBUG,"Connecting to '%s'", hostaddr);
-    stack = cs_create_host(hostaddr, CS_FLAGS_BLOCKING, &server_address_ip );
+    COMSTACK stack =
+        cs_create_host(hostaddr, CS_FLAGS_BLOCKING, &server_address_ip);
     if (!stack) {
         yaz_log(YLOG_FATAL,"Error in creating the comstack '%s' ",
                  hostaddr );
@@ -293,7 +291,7 @@ COMSTACK connect_to( char *hostaddr ){
 
     yaz_log(YLOG_DEBUG,"Created stack ok ");
 
-    status = cs_connect(stack, server_address_ip);
+    int status = cs_connect(stack, server_address_ip);
     if (status != 0) {
         yaz_log(YLOG_FATAL|YLOG_ERRNO,"Can not connect '%s' ",
                  hostaddr );
@@ -346,7 +344,6 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     ODR odr_prt = odr_createmem(ODR_PRINT);
     ILL_Extension *e = (ILL_Extension *) odr_malloc(odr, sizeof(*e));
     Z_PromptObject1 *p = makeprompt(args,odr_ext);
-    char * buf;
     int siz;
     Z_External *ext = (Z_External *) odr_malloc(odr, sizeof(*ext));
     ext->direct_reference = odr_getoidbystr(odr,"1.2.840.10003.8.1");
@@ -361,7 +358,7 @@ ILL_Extension *makepromptextension(struct prog_args *args, ODR odr) {
     printf ("Prompt: \n"); /*!*/
     z_PromptObject1(odr_prt, &p, 0,0 ); /*!*/
 
-    buf= odr_getbuf(odr_ext,&siz,0);
+    char * buf= odr_getbuf(odr_ext,&siz,0);
     ext->u.single_ASN1_type=(Odr_any *)
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
     ext->u.single_ASN1_type->buf= (char *) odr_malloc(odr, siz);
@@ -397,7 +394,6 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     ILL_Extension *e = (ILL_Extension *) odr_malloc(odr, sizeof(*e));
     ILL_OCLCILLRequestExtension *oc = (ILL_OCLCILLRequestExtension *)
         odr_malloc(odr_ext, sizeof(*oc));
-    char * buf;
     int siz;
     Z_External *ext = (Z_External *) odr_malloc(odr, sizeof(*ext));
     oc->clientDepartment = 0;
@@ -420,7 +416,7 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
     printf ("OCLC: \n"); /*!*/
     ill_OCLCILLRequestExtension(odr_prt, &oc, 0,0 ); /*!*/
 
-    buf= odr_getbuf(odr_ext,&siz,0);
+    char * buf= odr_getbuf(odr_ext,&siz,0);
     ext->u.single_ASN1_type = (Odr_any*)
         odr_malloc(odr,sizeof(*ext->u.single_ASN1_type));
     ext->u.single_ASN1_type->buf = (char *) odr_malloc(odr, siz);
@@ -452,14 +448,13 @@ ILL_Extension *makeoclcextension(struct prog_args *args, ODR odr) {
 ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
     struct ill_get_ctl ctl;
     ILL_APDU *apdu;
-    ILL_Request *req;
 
     ctl.odr = odr;
     ctl.clientData = args;
     ctl.f = get_ill_element;
     apdu = (ILL_APDU *) odr_malloc( odr, sizeof(*apdu) );
     apdu->which=ILL_APDU_ILL_Request;
-    req = ill_get_ILLRequest(&ctl, "ill", 0);
+    ILL_Request *req = ill_get_ILLRequest(&ctl, "ill", 0);
     apdu->u.illRequest=req;
     if (args->oclc_auth) {
         req->num_iLL_request_extensions=2;
@@ -481,14 +476,12 @@ ILL_APDU *createrequest( struct prog_args *args, ODR odr) {
 /* * * * * * * * * * * * * * * */
 /** \brief Send the request */
 void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
-    char *buf_out;
     int len_out;
-    int res;
     if (!ill_APDU  (odr, &apdu, 0, 0)) {
         yaz_log(YLOG_FATAL,"ill_Apdu failed");
         exit(2);
     }
-    buf_out = odr_getbuf(odr, &len_out, 0);
+    char *buf_out = odr_getbuf(odr, &len_out, 0);
     if (0) {
         yaz_log(YLOG_DEBUG,"Request PDU Dump");
         odr_dumpBER(yaz_log_file(), buf_out, len_out);
@@ -499,7 +492,7 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
         exit(2);
     }
     yaz_log(YLOG_DEBUG,"About to send the request. Len=%d", len_out);
-    res = cs_put(stack, buf_out, len_out);
+    int res = cs_put(stack, buf_out, len_out);
     if ( res<0 ) {
         yaz_log(YLOG_FATAL,"Could not send packet. code %d",res );
         exit (4);
@@ -525,11 +518,10 @@ void sendrequest(ILL_APDU *apdu, ODR odr, COMSTACK stack ) {
 /** \brief  Get a response */
 ILL_APDU *getresponse( COMSTACK stack, ODR in_odr ){
     ILL_APDU *resp;
-    int res;
     char *buf_in=0;
     int len_in=0;
     yaz_log(YLOG_DEBUG,"About to wait for a response");
-    res = cs_get(stack, &buf_in, &len_in);
+    int res = cs_get(stack, &buf_in, &len_in);
     yaz_log(YLOG_DEBUG,"Got a response of %d bytes at %p. res=%d", len_in,buf_in, res);
     if (res<0) {
         yaz_log(YLOG_FATAL,"Could not receive packet. code %d",res );
@@ -672,24 +664,20 @@ void checkerr( ILL_Status_Or_Error_Report *staterr ) {
 
 int main (int argc, char * argv[]) {
     struct prog_args args;
-    COMSTACK stack;
     ODR out_odr = odr_createmem(ODR_ENCODE);
     ODR in_odr = odr_createmem(ODR_DECODE);
-    ILL_APDU *apdu;
-    ILL_APDU *resp;
-    ILL_Status_Or_Error_Report *staterr;
 
     parseargs( argc, argv,  &args);
     validateargs(&args);
-    stack = connect_to(args.host);
-    apdu = createrequest(&args, out_odr);
+    COMSTACK stack = connect_to(args.host);
+    ILL_APDU *apdu = createrequest(&args, out_odr);
     if (1)
         dumpapdu(apdu);
     sendrequest(apdu, out_odr, stack );
-    resp = getresponse(stack, in_odr );
+    ILL_APDU *resp = getresponse(stack, in_odr );
     if (1)
         dumpapdu(resp);
-    staterr=getstaterr(resp, in_odr);
+    ILL_Status_Or_Error_Report *staterr=getstaterr(resp, in_odr);
     checkerr(staterr);
 
 

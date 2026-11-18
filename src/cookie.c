@@ -64,19 +64,15 @@ int yaz_cookies_is_empty(yaz_cookies_t yc)
 
 void yaz_cookies_response(yaz_cookies_t yc, Z_HTTP_Response *res)
 {
-    struct Z_HTTP_Header *h;
-    for (h = res->headers; h; h = h->next)
+    for (struct Z_HTTP_Header *h = res->headers; h; h = h->next)
     {
         if (!strcmp(h->name, "Set-Cookie"))
         {
-            const char *cp;
-            const char *cp1;
-            size_t len;
             struct cookie *c;
-            cp = strchr(h->value, '=');
+            const char *cp = strchr(h->value, '=');
             if (!cp)
                 continue;
-            len = cp - h->value;
+            size_t len = cp - h->value;
             for (c = yc->list; c; c = c->next)
                 if (!strncmp(h->value, c->name, len) && c->name[len] == '\0')
                     break;
@@ -91,7 +87,7 @@ void yaz_cookies_response(yaz_cookies_t yc, Z_HTTP_Response *res)
                 yc->list = c;
             }
             cp++; /* skip = */
-            cp1 = strchr(cp, ';');
+            const char *cp1 = strchr(cp, ';');
             if (!cp1)
                 cp1 = cp + strlen(cp);
             xfree(c->value);

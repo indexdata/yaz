@@ -26,7 +26,6 @@ static void usage(void)
 
 int main(int argc, char **argv)
 {
-    cql_transform_t ct;
     int i, iterations = 1;
     char *query = 0;
     char *fname = 0;
@@ -68,7 +67,7 @@ int main(int argc, char **argv)
         }
     }
 
-    ct = cql_transform_create();
+    cql_transform_t ct = cql_transform_create();
     if (fname)
     {
         if (cql_transform_define_fname(ct, fname))

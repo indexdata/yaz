@@ -53,12 +53,11 @@ static void check_record(const Odr_oid *oid, const char *data, int len,
 int main(int argc, char **argv)
 {
     const char *short_record = "00000nam a22000000a 4500";
-    int len;
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     marcCharset = "auto";
     outputCharset = "UTF-8";
-    for (len = 0; len < 24; len++)
+    for (int len = 0; len < 24; len++)
         check_record(yaz_oid_recsyn_usmarc, short_record, len,
                      len > 9 ? "UTF-8" : "MARC-8");
     check_record(yaz_oid_recsyn_usmarc, "00000nam  22000000a 4500", 10, "MARC-8");

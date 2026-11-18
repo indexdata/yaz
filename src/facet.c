@@ -48,8 +48,7 @@ Z_FacetList *yaz_oi_get_facetlist(Z_OtherInformation **otherInformation)
     Z_OtherInformation *oi = *otherInformation;
     if (oi)
     {
-        int i;
-        for (i = 0; i < oi->num_elements; i++)
+        for (int i = 0; i < oi->num_elements; i++)
         {
             Z_OtherInformationUnit *oiu = oi->list[i];
             if (oiu->which == Z_OtherInfo_externallyDefinedInfo
@@ -80,9 +79,8 @@ void yaz_facet_attr_init(struct yaz_facet_attr *attr_values)
 
 static const char *stringattr(Z_ComplexAttribute *c)
 {
-    int i;
      Z_StringOrNumeric *son;
-    for (i = 0; i < c->num_list; i++)
+    for (int i = 0; i < c->num_list; i++)
     {
         son = c->list[i];
         if ( son->which == Z_StringOrNumeric_string)
@@ -155,9 +153,8 @@ static void numattr(Z_AttributeElement *ae, struct yaz_facet_attr *av,
 void yaz_facet_attr_get_z_attributes(const Z_AttributeList *attributes,
                                      struct yaz_facet_attr *av)
 {
-    int i;
     Z_AttributeElement *ae;
-    for (i = 0; i < attributes->num_attributes; i++)
+    for (int i = 0; i < attributes->num_attributes; i++)
     {
         ae = attributes->attributes[i];
         /* ignoring the attributeSet here */

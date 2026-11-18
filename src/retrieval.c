@@ -113,7 +113,6 @@ void yaz_retrieval_reset(yaz_retrieval_t p)
 static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
                           struct yaz_record_conv_type *types)
 {
-    struct _xmlAttr *attr;
     struct yaz_retrieval_elem *el = (struct yaz_retrieval_elem *)
         nmem_malloc(p->nmem, sizeof(*el));
 
@@ -126,7 +125,7 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
 
     el->next = 0;
 
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "syntax") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -187,7 +186,6 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
         }
         else
         {
-            struct _xmlAttr *attr;
             if (el->record_conv)
             {
                 wrbuf_printf(p->wr_error, "Element <retrieval>: "
@@ -196,7 +194,8 @@ static int conf_retrieval(yaz_retrieval_t p, const xmlNode *ptr,
                 return -1;
             }
             /* parsing attributees */
-            for (attr = ptr->properties; attr; attr = attr->next)
+            for (struct _xmlAttr *attr = ptr->properties;
+                 attr; attr = attr->next)
             {
                 if (!xmlStrcmp(attr->name, BAD_CAST "name")
                          && attr->children

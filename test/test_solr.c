@@ -21,7 +21,6 @@
 int compare_solr_req(ODR odr, Z_SRW_PDU *sr,
                      const char *charset, const char *expect)
 {
-    int r;
     Z_GDU *gdu = 0;
     YAZ_CHECK(sr);
 
@@ -35,7 +34,7 @@ int compare_solr_req(ODR odr, Z_SRW_PDU *sr,
 
     yaz_solr_encode_request(gdu->u.HTTP_Request, sr, odr, charset);
 
-    r = z_GDU(odr, &gdu, 0, 0);
+    int r = z_GDU(odr, &gdu, 0, 0);
     YAZ_CHECK(r);
     if (r)
     {
@@ -134,7 +133,6 @@ void tst_encoding(void)
 static int check_response(ODR o, const char *content,
                           Z_SRW_searchRetrieveResponse **p)
 {
-    int r;
     Z_GDU *gdu;
     Z_SRW_PDU *sr_p;
     char *http_response = odr_malloc(o, strlen(content) + 300);
@@ -148,7 +146,7 @@ static int check_response(ODR o, const char *content,
     odr_setbuf(o, http_response, (int) strlen(http_response), 0);
 
     *p = 0;
-    r = z_GDU(o, &gdu, 0, 0);
+    int r = z_GDU(o, &gdu, 0, 0);
     if (!r || gdu->which != Z_GDU_HTTP_Response)
         return 0;
     r = yaz_solr_decode_response(o, gdu->u.HTTP_Response, &sr_p);
@@ -163,7 +161,6 @@ static int check_response(ODR o, const char *content,
 static int check_srw_response(ODR o, const char *content,
                               Z_SRW_searchRetrieveResponse **p)
 {
-    int r;
     char *http_response = odr_malloc(o, strlen(content) + 300);
 
     const char *start =
@@ -178,7 +175,7 @@ static int check_srw_response(ODR o, const char *content,
 
     *p = 0;
     Z_GDU *gdu = 0;
-    r = z_GDU(o, &gdu, 0, 0);
+    int r = z_GDU(o, &gdu, 0, 0);
     if (!r || gdu->which != Z_GDU_HTTP_Response)
         return 0;
 #if YAZ_HAVE_XML2
@@ -190,10 +187,8 @@ static int check_srw_response(ODR o, const char *content,
         {0, 0, 0}
     };
     Z_SOAP *soap_package = 0;
-    int ret;
-    ret = z_soap_codec(o, &soap_package,
-                       &hres->content_buf, &hres->content_len,
-                       soap_handlers);
+    int ret = z_soap_codec(o, &soap_package, &hres->content_buf,
+                           &hres->content_len, soap_handlers);
     if (ret == 0 && soap_package->which == Z_SOAP_generic)
     {
         Z_SRW_PDU *sr = (Z_SRW_PDU*) soap_package->u.generic->p;
@@ -572,7 +567,6 @@ void tst_decoding(void)
 void tst_yaz_700(void)
 {
     ODR odr = odr_createmem(ODR_ENCODE);
-    int r;
     const char *url =
         "http://localhost:9036/XXX/cproxydebug-7/node102/p/105/c=content_connector"
         "a=usr/pw#&? r=cfusr/cfpw p=1.2.3.4:80/www.indexdata.com/staff/";
@@ -584,7 +578,7 @@ void tst_yaz_700(void)
     hreq->content_buf = odr_strdup(odr, "");
     hreq->content_len = 0;
 
-    r = z_GDU(odr, &gdu_req, 0, 0);
+    int r = z_GDU(odr, &gdu_req, 0, 0);
     YAZ_CHECK(r);
     if (r)
     {

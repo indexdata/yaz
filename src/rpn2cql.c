@@ -24,9 +24,8 @@
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes,
                                                  Odr_int *numeric_value)
 {
-    int j;
     int server_choice = 1;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 1) /* use attribute */
@@ -34,8 +33,7 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes,
             if (ae->which == Z_AttributeValue_complex)
             {
                 Z_ComplexAttribute *ca = ae->value.complex;
-                int i;
-                for (i = 0; i < ca->num_list; i++)
+                for (int i = 0; i < ca->num_list; i++)
                 {
                     Z_StringOrNumeric *son = ca->list[i];
                     if (son->which == Z_StringOrNumeric_string)
@@ -56,8 +54,7 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes,
 
 static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
 {
-    int j;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 2) /* relation attribute */
@@ -161,8 +158,7 @@ static int rpn2cql_attr(cql_transform_t ct,
 
 static Odr_int lookup_truncation(Z_AttributeList *attributes)
 {
-    int j;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 5) /* truncation attribute */
@@ -193,10 +189,9 @@ static int rpn2cql_simple(cql_transform_t ct,
         size_t lterm = 0;
         Odr_int trunc = lookup_truncation(apt->attributes);
         size_t i;
-        int r;
 
         wrbuf_rewind(w);
-        r = rpn2cql_attr(ct, apt->attributes, w);
+        int r = rpn2cql_attr(ct, apt->attributes, w);
         if (r)
             return r;
 
@@ -291,12 +286,11 @@ static int rpn2cql_structure(cql_transform_t ct,
     {
         Z_Operator *op = q->u.complex->roperator;
         Z_ProximityOperator *prox;
-        int r;
 
         if (nested)
             pr("(", client_data);
 
-        r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
+        int r = rpn2cql_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
         switch (op->which)

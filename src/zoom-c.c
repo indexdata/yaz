@@ -155,9 +155,8 @@ void ZOOM_connection_show_task(ZOOM_task task)
 
 void ZOOM_connection_show_tasks(ZOOM_connection c)
 {
-    ZOOM_task task;
     yaz_log(YLOG_LOG, "connection p=%p tasks", c);
-    for (task = c->tasks; task; task = task->next)
+    for (ZOOM_task task = c->tasks; task; task = task->next)
         ZOOM_connection_show_task(task);
 }
 
@@ -373,8 +372,6 @@ ZOOM_API(void)
     ZOOM_connection_connect(ZOOM_connection c,
                             const char *host, int portnum)
 {
-    const char *val;
-
     initlog();
 
     yaz_log(c->log_api, "%p ZOOM_connection_connect host=%s portnum=%d",
@@ -392,7 +389,7 @@ ZOOM_API(void)
     yaz_log(c->log_details, "%p ZOOM_connection_connect connect", c);
     xfree(c->proxy);
     c->proxy = 0;
-    val = ZOOM_options_get(c->options, "proxy");
+    const char *val = ZOOM_options_get(c->options, "proxy");
     if (val && *val)
     {
         yaz_log(c->log_details, "%p ZOOM_connection_connect proxy=%s", c, val);
@@ -617,7 +614,6 @@ ZOOM_API(void) ZOOM_resultset_release(ZOOM_resultset r)
 ZOOM_API(void)
     ZOOM_connection_destroy(ZOOM_connection c)
 {
-    ZOOM_resultset r;
     if (!c)
         return;
     yaz_log(c->log_api, "%p ZOOM_connection_destroy", c);
@@ -626,7 +622,7 @@ ZOOM_API(void)
     if (c->cs)
         cs_close(c->cs);
 
-    for (r = c->resultsets; r; r = r->next)
+    for (ZOOM_resultset r = c->resultsets; r; r = r->next)
         r->connection = 0;
 
     xfree(c->buf_in);
@@ -678,12 +674,11 @@ static YAZ_MUTEX g_resultset_mutex = 0;
  * call resultset_use(0)  */
 
 static int resultset_use(int delta) {
-    int resultset_count;
     if (g_resultset_mutex == 0)
         yaz_mutex_create(&g_resultset_mutex);
     yaz_mutex_enter(g_resultset_mutex);
     g_resultsets += delta;
-    resultset_count = g_resultsets;
+    int resultset_count = g_resultsets;
     yaz_mutex_leave(g_resultset_mutex);
     return resultset_count;
 }
@@ -694,7 +689,6 @@ int resultsets_count(void) {
 
 ZOOM_resultset ZOOM_resultset_create(void)
 {
-    int i;
     ZOOM_resultset r = (ZOOM_resultset) xmalloc(sizeof(*r));
 
     initlog();
@@ -706,7 +700,7 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->piggyback = 1;
     r->setname = 0;
     r->step = 0;
-    for (i = 0; i<RECORD_HASH_SIZE; i++)
+    for (int i = 0; i<RECORD_HASH_SIZE; i++)
         r->record_hash[i] = 0;
     r->r_sort_spec = 0;
     r->query = 0;
@@ -734,12 +728,11 @@ ZOOM_resultset ZOOM_resultset_create(void)
 ZOOM_API(ZOOM_resultset)
     ZOOM_connection_search_pqf(ZOOM_connection c, const char *q)
 {
-    ZOOM_resultset r;
     ZOOM_query s = ZOOM_query_create();
 
     ZOOM_query_prefix(s, q);
 
-    r = ZOOM_connection_search(c, s);
+    ZOOM_resultset r = ZOOM_connection_search(c, s);
     ZOOM_query_destroy(s);
     return r;
 }
@@ -748,7 +741,6 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_connection_search(ZOOM_connection c, ZOOM_query q)
 {
     ZOOM_resultset r = ZOOM_resultset_create();
-    ZOOM_task task;
     int start, count;
     const char *syntax, *elementSetName, *schema;
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
@@ -794,7 +786,7 @@ ZOOM_API(ZOOM_resultset)
         }
     }
 
-    task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
+    ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
     task->u.search.resultset = r;
     task->u.search.start = start;
     task->u.search.count = count;
@@ -829,10 +821,8 @@ ZOOM_API(int)
                          const char *sort_type, const char *sort_spec)
 {
     ZOOM_connection c = r->connection;
-    ZOOM_task task;
-    ZOOM_query newq;
 
-    newq = ZOOM_query_create();
+    ZOOM_query newq = ZOOM_query_create();
     if (ZOOM_query_sortby(newq, sort_spec) < 0)
         return -1;
 
@@ -857,7 +847,7 @@ ZOOM_API(int)
     }
 
     ZOOM_resultset_cache_reset(r);
-    task = ZOOM_connection_add_task(c, ZOOM_TASK_SORT);
+    ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SORT);
     task->u.sort.resultset = r;
     task->u.sort.q = newq;
 
@@ -916,8 +906,6 @@ ZOOM_API(size_t)
 
 int ZOOM_test_reconnect(ZOOM_connection c)
 {
-    ZOOM_Event event;
-
     if (!c->reconnect_ok)
         return 0;
     ZOOM_connection_close(c);
@@ -925,7 +913,7 @@ int ZOOM_test_reconnect(ZOOM_connection c)
     c->tasks->running = 0;
     ZOOM_connection_insert_task(c, ZOOM_TASK_CONNECT);
 
-    event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
     ZOOM_connection_put_event(c, event);
 
     return 1;
@@ -934,16 +922,13 @@ int ZOOM_test_reconnect(ZOOM_connection c)
 static void ZOOM_resultset_retrieve(ZOOM_resultset r,
                                     int force_sync, Odr_int start, Odr_int count)
 {
-    ZOOM_task task;
-    ZOOM_connection c;
-    const char *cp;
     const char *syntax, *elementSetName;
 
     if (!r)
         return;
     yaz_log(log_details0, "%p ZOOM_resultset_retrieve force_sync=%d start=" ODR_INT_PRINTF
             " count=" ODR_INT_PRINTF, r, force_sync, start, count);
-    c = r->connection;
+    ZOOM_connection c = r->connection;
     if (!c)
         return;
 
@@ -961,7 +946,7 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
             c->reconnect_ok = 1;
         }
     }
-    task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
+    ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
     task->u.search.resultset = r;
     task->u.search.start = start;
     task->u.search.count = count;
@@ -972,7 +957,7 @@ static void ZOOM_resultset_retrieve(ZOOM_resultset r,
     task->u.search.elementSetName = elementSetName
         ? xstrdup(elementSetName) : 0;
 
-    cp = ZOOM_options_get(r->options, "schema");
+    const char *cp = ZOOM_options_get(r->options, "schema");
     task->u.search.schema = cp ? xstrdup(cp) : 0;
 
     ZOOM_resultset_addref(r);
@@ -997,8 +982,7 @@ ZOOM_API(void)
     ZOOM_resultset_retrieve(r, force_present, start, count);
     if (force_present)
     {
-        size_t i;
-        for (i = 0; i< count; i++)
+        for (size_t i = 0; i< count; i++)
             recs[i] = ZOOM_resultset_record_immediate(r, i+start);
     }
 }
@@ -1014,8 +998,7 @@ ZOOM_API(ZOOM_facet_field)
 {
     int num = r->num_res_facets;
     ZOOM_facet_field *facets = r->res_facets;
-    int i;
-    for (i = 0; i < num; i++)
+    for (int i = 0; i < num; i++)
         if (!strcmp(facets[i]->facet_name, name))
             return facets[i];
     return 0;
@@ -1114,14 +1097,13 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
     {
         const char *cert_fname = ZOOM_options_get(c->options, "cert_fname");
         const char *cafile = ZOOM_options_get(c->options, "cafile");
-        int ret;
 
         if (cert_fname)
             cs_set_ssl_certificate_file(c->cs, cert_fname);
         if (cafile && *cafile)
             cs_set_ssl_cafile(c->cs, cafile);
 
-        ret = cs_connect(c->cs, add);
+        int ret = cs_connect(c->cs, add);
         if (ret == 0)
         {
             ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_CONNECT);
@@ -1202,12 +1184,11 @@ ZOOM_API(ZOOM_record)
 ZOOM_API(ZOOM_scanset)
     ZOOM_connection_scan(ZOOM_connection c, const char *start)
 {
-    ZOOM_scanset s;
     ZOOM_query q = ZOOM_query_create();
 
     ZOOM_query_prefix(q, start);
 
-    s = ZOOM_connection_scan1(c, q);
+    ZOOM_scanset s = ZOOM_connection_scan1(c, q);
     ZOOM_query_destroy(q);
     return s;
 
@@ -1269,14 +1250,12 @@ ZOOM_API(void)
 
 static zoom_ret send_package(ZOOM_connection c)
 {
-    ZOOM_Event event;
-
     yaz_log(c->log_details, "%p send_package", c);
     if (!c->tasks)
         return zoom_complete;
     assert (c->tasks->which == ZOOM_TASK_PACKAGE);
 
-    event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
 
     c->buf_out = c->tasks->u.package->buf_out;
@@ -1551,8 +1530,6 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
 
 zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
 {
-    ZOOM_Event event;
-
     int r = z_GDU(c->odr_out, &gdu, 0, 0);
     if (!r)
     {
@@ -1567,7 +1544,7 @@ zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
     odr_reset(c->odr_out);
 
-    event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
 
     return ZOOM_send_buf(c);
@@ -1691,13 +1668,10 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
 static int do_read(ZOOM_connection c)
 {
-    int r;
-    ZOOM_Event event;
-
-    event = ZOOM_Event_create(ZOOM_EVENT_RECV_DATA);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_DATA);
     ZOOM_connection_put_event(c, event);
 
-    r = cs_get(c->cs, &c->buf_in, &c->len_in);
+    int r = cs_get(c->cs, &c->buf_in, &c->len_in);
     yaz_log(c->log_details, "%p do_read r=%d", c, r);
     if (r == 1)
         return 0;
@@ -1720,11 +1694,10 @@ static int do_read(ZOOM_connection c)
     else
     {
         Z_GDU *gdu;
-        ZOOM_Event event;
 
         odr_reset(c->odr_in);
         odr_setbuf(c->odr_in, c->buf_in, r, 0);
-        event = ZOOM_Event_create(ZOOM_EVENT_RECV_APDU);
+        ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_APDU);
         ZOOM_connection_put_event(c, event);
 
         if (!z_GDU(c->odr_in, &gdu, 0, 0))
@@ -1775,9 +1748,8 @@ static int do_read(ZOOM_connection c)
 static zoom_ret do_write_ex(ZOOM_connection c, char *buf_out, int len_out)
 {
     int r;
-    ZOOM_Event event;
 
-    event = ZOOM_Event_create(ZOOM_EVENT_SEND_DATA);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_DATA);
     ZOOM_connection_put_event(c, event);
 
     yaz_log(c->log_details, "%p do_write_ex len=%d", c, len_out);
@@ -2112,11 +2084,10 @@ ZOOM_API(int) ZOOM_connection_fire_event_timeout(ZOOM_connection c)
 ZOOM_API(int)
     ZOOM_connection_process(ZOOM_connection c)
 {
-    ZOOM_Event event;
     if (!c)
         return 0;
 
-    event = ZOOM_connection_get_event(c);
+    ZOOM_Event event = ZOOM_connection_get_event(c);
     if (event)
     {
         ZOOM_Event_destroy(event);
@@ -2135,11 +2106,9 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_event_nonblock(int no, ZOOM_connection *cs)
 {
-    int i;
-
     yaz_log(log_details0, "ZOOM_process_event(no=%d,cs=%p)", no, cs);
 
-    for (i = 0; i<no; i++)
+    for (int i = 0; i<no; i++)
     {
         ZOOM_connection c = cs[i];
 
