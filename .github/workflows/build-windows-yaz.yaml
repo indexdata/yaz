@@ -1,0 +1,90 @@
+# Compile the Windows libraries, tools and test programs with MSVC x64.
+name: Build YAZ on Windows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Set up build tools
+        run: |
+          choco install winflexbison3 --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Git ships a versioned Tcl executable, and its runtime directory
+          # can be mingw64 or ucrt64. Derive it from Git rather than guessing.
+          $gitExecPath = git --exec-path
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $gitRuntime = Split-Path (Split-Path $gitExecPath -Parent) -Parent
+          $tclBin = Join-Path $gitRuntime 'bin'
+          $tcl = Get-ChildItem -LiteralPath $tclBin -Filter 'tclsh*.exe' -File |
+            Sort-Object Name | Select-Object -First 1
+          if (!$tcl) {
+            throw "Git for Windows Tcl interpreter not found in $tclBin"
+          }
+          'puts [info patchlevel]; exit 0' | & $tcl.FullName
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $tclBin >> $env:GITHUB_PATH
+          "YAZ_TCL=$($tcl.Name)" >> $env:GITHUB_ENV
+
+      - name: Set up MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure dependency cache
+        id: vcpkg
+        run: |
+          $revision = git -C $env:VCPKG_INSTALLATION_ROOT rev-parse HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "revision=$revision" >> $env:GITHUB_OUTPUT
+          $cache = Join-Path $env:RUNNER_TEMP 'vcpkg-cache'
+          New-Item -ItemType Directory -Force $cache | Out-Null
+          "VCPKG_BINARY_SOURCES=clear;files,$cache,readwrite" >> $env:GITHUB_ENV
+
+      - name: Cache dependency builds
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: windows-2022-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-${{ hashFiles('.github/workflows/build-windows-yaz.yaml') }}
+          restore-keys: |
+            windows-2022-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-
+
+      - name: Install libraries
+        run: |
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --triplet x64-windows libxml2 libxslt libiconv icu libstemmer
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build with NMAKE
+        working-directory: win
+        run: |
+          $prefix = Join-Path $env:VCPKG_INSTALLATION_ROOT 'installed\x64-windows'
+          $icuHeader = Get-Content "$prefix\include\unicode\uvernum.h" -Raw
+          if ($icuHeader -notmatch '(?m)^#define\s+U_ICU_VERSION_SHORT\s+"(\d+)"') {
+            throw 'Cannot determine the ICU DLL version'
+          }
+          $icuVersion = $Matches[1]
+          & nmake /nologo /f makefile BARCH=x64 DEBUG=0 CPP=cl "TCL=$env:YAZ_TCL" `
+            "ICONV_DIR=$prefix" "LIBXML2_DIR=$prefix" "LIBXSLT_DIR=$prefix" `
+            "ICU_BASE=$prefix" "ICU_VER=$icuVersion" "LIBSTEMMER_DIR=$prefix" all
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
