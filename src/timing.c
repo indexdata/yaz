@@ -12,7 +12,7 @@
 #include <config.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include <stdlib.h>
@@ -35,7 +35,7 @@ struct yaz_timing {
 #if HAVE_SYS_TIME_H
     struct timeval start_time, end_time;
 #else
-#ifdef WIN32
+#ifdef _WIN32
     LONGLONG start_time, end_time;
     LONGLONG start_time_sys, start_time_user;
     LONGLONG end_time_sys, end_time_user;
@@ -51,7 +51,7 @@ yaz_timing_t yaz_timing_create(void)
     return t;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 static void get_process_time(ULONGLONG *lp_user, ULONGLONG *lp_sys)
 {
     FILETIME create_t, exit_t, sys_t, user_t;
@@ -93,7 +93,7 @@ void yaz_timing_start(yaz_timing_t t)
     gettimeofday(&t->start_time, 0);
     t->real_sec = 0.0;
 #else
-#ifdef WIN32
+#ifdef _WIN32
     t->real_sec = 0.0;
     t->user_sec = 0.0;
     t->sys_sec = 0.0;
@@ -116,7 +116,7 @@ void yaz_timing_stop(yaz_timing_t t)
     t->real_sec = ((t->end_time.tv_sec - t->start_time.tv_sec) * 1000000.0 +
                    t->end_time.tv_usec - t->start_time.tv_usec) / 1000000;
 #else
-#ifdef WIN32
+#ifdef _WIN32
     get_date_as_largeinteger(&t->end_time);
     t->real_sec = (t->end_time - t->start_time) / 10000000.0;
 

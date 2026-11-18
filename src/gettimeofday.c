@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <sys/timeb.h>
 #endif
@@ -27,7 +27,7 @@
 
 int yaz_gettimeofday(struct timeval *tval)
 {
-#ifdef WIN32
+#ifdef _WIN32
     struct _timeb timeb;
     _ftime(&timeb);
     tval->tv_sec = timeb.time;

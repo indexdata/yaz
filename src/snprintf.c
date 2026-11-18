@@ -19,7 +19,7 @@ void yaz_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 #if HAVE_VSNPRINTF
     vsnprintf(buf, size, fmt, ap);
 #else
-#ifdef WIN32
+#ifdef _WIN32
     _vsnprintf(buf, size-1, fmt, ap);
     buf[size-1] = '\0';
 #else

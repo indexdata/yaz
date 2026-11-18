@@ -368,7 +368,7 @@ void tst_decoding(void)
             "</response>", &response));
     if (response)
     {
-#ifndef WIN32
+#ifndef _WIN32
         YAZ_CHECK(*response->numberOfRecords == 91000000000LL);
 #endif
         YAZ_CHECK_EQ(response->num_records, 1);
@@ -438,7 +438,7 @@ void tst_decoding(void)
                         facetField->terms[i]->term &&
                         facetField->terms[i]->term->which == Z_Term_general);
                 }
-#ifndef WIN32
+#ifndef _WIN32
                 YAZ_CHECK(*facetField->terms[0]->count == 5000000000LL);
 #endif
                 YAZ_CHECK(facetField->terms[0]->term->u.general->len == 4

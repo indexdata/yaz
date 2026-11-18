@@ -9,7 +9,7 @@
 #include <string.h>
 #include <yaz/errno.h>
 #include <yaz/test.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -19,7 +19,7 @@ static void check_error(int error)
     unsigned char storage[512];
     size_t size, i;
     yaz_set_errno(error);
-#ifdef WIN32
+#ifdef _WIN32
     SetLastError(ERROR_ACCESS_DENIED);
 #endif
     yaz_strerror(full, sizeof(full));
@@ -29,7 +29,7 @@ static void check_error(int error)
         char *buf = (char *) storage + 1;
         memset(storage, 0xa5, sizeof(storage));
         yaz_set_errno(error);
-#ifdef WIN32
+#ifdef _WIN32
         SetLastError(ERROR_ACCESS_DENIED);
 #endif
         yaz_strerror(buf, size);
@@ -40,7 +40,7 @@ static void check_error(int error)
         YAZ_CHECK_EQ(i, sizeof(storage));
         if (size)
             YAZ_CHECK(memchr(buf, '\0', size) != 0);
-#ifdef WIN32
+#ifdef _WIN32
         /* FormatMessage needs room for CR/LF before yaz_strerror trims it. */
         if (size == sizeof(full))
 #else

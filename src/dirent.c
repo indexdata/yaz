@@ -12,7 +12,7 @@
 #endif
 
 #include <assert.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #endif
 #include <string.h>
@@ -20,7 +20,7 @@
 
 #include <yaz/dirent.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 
 struct DIR {
     HANDLE handle;

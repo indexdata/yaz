@@ -18,7 +18,7 @@
 #include <yaz/xmalloc.h>
 #include <yaz/zgdu.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <errno.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -521,7 +521,7 @@ static void tst_cs_get_error_ssl(void)
 }
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 static void check_redirect_connect(const char *base, const char *location,
                                    const char *expected)
 {
@@ -705,7 +705,7 @@ static void tst_cs_set_head_only(void)
     memset(&unsupported, 0, sizeof(unsupported));
     YAZ_CHECK_EQ(cs_set_head_only(&unsupported, 1), -1);
     YAZ_CHECK_EQ(cs_errno(&unsupported), CSOUTSTATE);
-#ifndef WIN32
+#ifndef _WIN32
     tst_head_only_transport(tcpip_type);
     tst_head_only_transport(unix_type);
 #if HAVE_GNUTLS_H
@@ -776,7 +776,7 @@ int main (int argc, char **argv)
     tst_ssl_cafile();
     tst_invalid_connect_targets();
     tst_cs_set_head_only();
-#ifndef WIN32
+#ifndef _WIN32
     tst_redirect_connect();
 #endif
     YAZ_CHECK_TERM;

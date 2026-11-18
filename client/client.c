@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <time.h>
 #include <limits.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <signal.h>
 #endif
 #if HAVE_SYS_TYPES_H
@@ -36,7 +36,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <sys/stat.h>
 #include <io.h>
 #include <windows.h>
@@ -4841,7 +4841,7 @@ static int cmd_sleep(const char* args )
     int sec = atoi(args);
     if (sec > 0)
     {
-#ifdef WIN32
+#ifdef _WIN32
         Sleep(sec*1000);
 #else
         sleep(sec);
@@ -5391,7 +5391,7 @@ static char **readline_completer(char *text, int start, int end)
 }
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 static void ctrl_c_handler(int x)
 {
     exit_client(0);
@@ -5404,7 +5404,7 @@ static void client(void)
 
     line[10239] = '\0';
 
-#ifndef WIN32
+#ifndef _WIN32
     signal(SIGINT, ctrl_c_handler);
 #endif
 

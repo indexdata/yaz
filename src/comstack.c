@@ -115,7 +115,7 @@ int cs_parse_host(const char *uri, const char **host,
             (*connect_host)[len] = '\0';
             uri = cp + 1;
         }
-#ifdef WIN32
+#ifdef _WIN32
         xfree(*connect_host);
         *connect_host = 0;
         return 0;
@@ -531,7 +531,7 @@ int cs_set_head_only(COMSTACK cs, int head_only)
 {
     if (cs->type == tcpip_type || cs->type == ssl_type)
         return yaz_tcpip_set_head_only(cs, head_only);
-#ifndef WIN32
+#ifndef _WIN32
     if (cs->type == unix_type)
         return yaz_unix_set_head_only(cs, head_only);
 #endif

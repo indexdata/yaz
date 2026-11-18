@@ -355,14 +355,14 @@ typedef struct statserv_options_block
     bend_initresult *(*bend_init)(bend_initrequest *r);
     /** Releases a non-NULL backend handle; not called for NULL handles. */
     void (*bend_close)(void *handle);
-#ifdef WIN32
+#ifdef _WIN32
     /* We only have these members for the windows version */
     /* They seemed a bit large to have them there in general */
     char service_name[BEND_NAME_MAX];/**< NT Service Name */
     char app_name[BEND_NAME_MAX];  /**< Application Name */
     char service_dependencies[BEND_NAME_MAX];
     char service_display_name[BEND_NAME_MAX];
-#endif /* WIN32 */
+#endif /* _WIN32 */
     char pid_fname[BEND_NAME_MAX]; /**< pid fname */
     int background;                /**< auto daemon */
     char cert_fname[BEND_NAME_MAX];/**< SSL certificate fname */

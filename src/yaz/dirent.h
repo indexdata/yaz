@@ -29,7 +29,7 @@
     \brief wrapper for dirent.h or our own for Windows
 */
 
-#ifdef WIN32
+#ifdef _WIN32
 /* make WIN32 version of dirent */
 #include <windows.h>
 

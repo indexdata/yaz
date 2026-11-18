@@ -11,7 +11,7 @@
 #include <yaz/zoom.h>
 #include <yaz/xmalloc.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #error Unix only
 #endif
 

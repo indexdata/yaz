@@ -23,7 +23,7 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <sys/stat.h>
 #endif
 

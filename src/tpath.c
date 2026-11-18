@@ -22,7 +22,7 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <sys/stat.h>
 #endif
 
@@ -128,7 +128,7 @@ int yaz_is_abspath(const char *p)
 {
     if (*p == '/')
         return 1;
-#ifdef WIN32
+#ifdef _WIN32
     if (*p == '\\')
         return 1;
     if (*p && p[1] == ':' &&

@@ -32,7 +32,7 @@
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
@@ -70,7 +70,7 @@
 #include <yaz/snprintf.h>
 #include <yaz/zgdu.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 #define RESOLVER_THREAD 1
 #endif
 
@@ -157,11 +157,11 @@ static int log_level = 0;
 static int tcpip_init(void)
 {
     static int log_level_set = 0;
-#ifdef WIN32
+#ifdef _WIN32
     static int initialized = 0;
 #endif
     yaz_init_globals();
-#ifdef WIN32
+#ifdef _WIN32
     if (!initialized)
     {
         WORD requested;
@@ -579,7 +579,7 @@ static struct addrinfo *create_net_socket(COMSTACK h)
         int r = -1;
         int ipv6_only = 0;
 
-#ifndef WIN32
+#ifndef _WIN32
         int one = 1;
         if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
                        &one, sizeof(one)) < 0)
@@ -710,7 +710,7 @@ static int cont_connect(COMSTACK h)
                 sp->session = 0;
             }
 #endif
-#ifdef WIN32
+#ifdef _WIN32
             closesocket(h->iofile);
 #else
             close(h->iofile);
@@ -766,7 +766,7 @@ int tcpip_connect(COMSTACK h, void *address)
     sp->ai_connect = ai;
     if (r < 0)
     {
-#ifdef WIN32
+#ifdef _WIN32
         if (WSAGetLastError() == WSAEWOULDBLOCK)
         {
             h->event = CS_CONNECT;
@@ -989,7 +989,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     struct addrinfo *ai = (struct addrinfo *) address;
-#ifdef WIN32
+#ifdef _WIN32
     BOOL one = 1;
 #else
     int one = 1;
@@ -1027,7 +1027,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         }
     }
 #endif
-#ifndef WIN32
+#ifndef _WIN32
     if (setsockopt(h->iofile, SOL_SOCKET, SO_REUSEADDR, (char*)
         &one, sizeof(one)) < 0)
     {
@@ -1058,7 +1058,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
                  int (*check_ip)(void *cd, const char *a, int len, int t),
                  void *cd)
 {
-#ifdef WIN32
+#ifdef _WIN32
     /* we don't get peer address on Windows (via accept) */
 #else
     struct sockaddr_in addr;
@@ -1071,7 +1071,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         cs_set_error(h, CSOUTSTATE, 0);
         return -1;
     }
-#ifdef WIN32
+#ifdef _WIN32
     h->newfd = accept(h->iofile, 0, 0);
 #else
     h->newfd = accept(h->iofile, (struct sockaddr*)&addr, &len);
@@ -1079,7 +1079,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     if (h->newfd < 0)
     {
         if (
-#ifdef WIN32
+#ifdef _WIN32
             WSAGetLastError() == WSAEWOULDBLOCK
 #else
             yaz_errno() == EWOULDBLOCK
@@ -1099,7 +1099,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         }
         return -1;
     }
-#ifdef WIN32
+#ifdef _WIN32
     if (addrlen)
         *addrlen = 0;
 #else
@@ -1111,7 +1111,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
         sizeof(addr), AF_INET))
     {
         cs_set_error(h, CSDENY, 0);
-#ifdef WIN32
+#ifdef _WIN32
         closesocket(h->newfd);
 #else
         close(h->newfd);
@@ -1127,7 +1127,7 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 COMSTACK tcpip_accept(COMSTACK h)
 {
     COMSTACK cnew;
-#ifdef WIN32
+#ifdef _WIN32
     unsigned long tru = 1;
 #endif
 
@@ -1150,7 +1150,7 @@ COMSTACK tcpip_accept(COMSTACK h)
             cs_set_error(h, CSYSERR, 0);
             if (h->newfd != -1)
             {
-#ifdef WIN32
+#ifdef _WIN32
                 closesocket(h->newfd);
 #else
                 close(h->newfd);
@@ -1239,7 +1239,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     char *tmpc;
     int tmpi, berlen, rest, req, tomove;
     int hasread = 0;
-#ifdef WIN32
+#ifdef _WIN32
     int res;
 #else
     ssize_t res;
@@ -1321,7 +1321,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
             {
                 yaz_log(log_level, "  recv errno=%d, (%s)", yaz_errno(),
                             strerror(yaz_errno()));
-#ifdef WIN32
+#ifdef _WIN32
                 if (WSAGetLastError() == WSAEWOULDBLOCK)
                 {
                     h->io_pending = CS_WANT_READ;
@@ -1411,7 +1411,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
  */
 int tcpip_put(COMSTACK h, char *buf, int size)
 {
-#ifdef WIN32
+#ifdef _WIN32
     int res;
 #else
     ssize_t res;
@@ -1463,7 +1463,7 @@ int tcpip_put(COMSTACK h, char *buf, int size)
                      )) < 0)
             {
                 if (
-#ifdef WIN32
+#ifdef _WIN32
                     WSAGetLastError() == WSAEWOULDBLOCK
 #else
                     yaz_errno() == EWOULDBLOCK
@@ -1524,7 +1524,7 @@ void tcpip_close(COMSTACK h)
             gnutls_bye(sp->session, GNUTLS_SHUT_WR);
         }
 #endif
-#ifdef WIN32
+#ifdef _WIN32
         closesocket(h->iofile);
 #else
         close(h->iofile);
@@ -1575,7 +1575,7 @@ const char *tcpip_addrstr(COMSTACK h)
 
 static int tcpip_set_blocking(COMSTACK p, int flags)
 {
-#ifdef WIN32
+#ifdef _WIN32
     unsigned long flag = (flags & CS_FLAGS_BLOCKING) ? 0 : 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
         return 0;

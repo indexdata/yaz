@@ -12,7 +12,7 @@
 
 #include <yaz/yconfig.h>
 
-#ifndef WIN32
+#ifndef _WIN32
 
 #include <stdio.h>
 #include <string.h>
@@ -796,7 +796,7 @@ static int unix_set_blocking(COMSTACK p, int flags)
     p->flags = flags;
     return 1;
 }
-#endif /* WIN32 */
+#endif /* _WIN32 */
 /*
  * Local variables:
  * c-basic-offset: 4
