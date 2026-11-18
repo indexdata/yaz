@@ -23,8 +23,7 @@ void tst_with_path(const char *tpath)
     if (ret == 0)
     {
         size_t n = yaz_file_glob_get_num(glob_res);
-        size_t i;
-        for (i = 0; i < n; i++)
+        for (size_t i = 0; i < n; i++)
         {
             yaz_log(YLOG_LOG, "match %s", yaz_file_glob_get_file(glob_res, i));
         }
@@ -45,7 +44,6 @@ static int check_file(const char *got, const char *expect)
 void tst(void)
 {
     yaz_glob_res_t glob_res;
-    int ret;
     WRBUF tpath = wrbuf_alloc();
     const char *srcdir = getenv("srcdir");
 
@@ -55,7 +53,7 @@ void tst(void)
         wrbuf_puts(tpath, "/");
     }
     wrbuf_puts(tpath, "test_file*.c");
-    ret = yaz_file_glob(wrbuf_cstr(tpath), &glob_res);
+    int ret = yaz_file_glob(wrbuf_cstr(tpath), &glob_res);
     YAZ_CHECK_EQ(ret, 0);
 
     YAZ_CHECK_EQ(2, yaz_file_glob_get_num(glob_res));

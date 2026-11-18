@@ -241,7 +241,6 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
     int i;
     Z_External *ext = 0;
     Z_OPACRecord *opac;
-    xmlNode *ptr0;
 
     if (!nmem)
         nmem = yaz_marc_get_nmem(mt);
@@ -266,7 +265,7 @@ static int yaz_xml_to_opac_ptr(yaz_marc_t mt, xmlNode *ptr,
         return 0;
 
     ptr = ptr->children;
-    ptr0 = ptr;
+    xmlNode *ptr0 = ptr;
 
     for (i = 0; ptr; i++)
     {

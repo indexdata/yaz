@@ -265,12 +265,11 @@ struct icu_chain *icu_chain_xml_config(const xmlNode *xml_node,
     {
         char *rule = 0;
         struct icu_chain_step *step = 0;
-        const char *attr_str;
 
         nmem_reset(nmem);
         if (node->type != XML_ELEMENT_NODE)
             continue;
-        attr_str = yaz_xml_get_prop(node, "rule%s", &rule);
+        const char *attr_str = yaz_xml_get_prop(node, "rule%s", &rule);
         if (attr_str)
         {
             yaz_log(YLOG_WARN, "Unsupported attribute '%s' for "

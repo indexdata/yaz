@@ -25,11 +25,10 @@ static int input_len;
 
 static int scan(void *handle, bend_scan_rr *rr)
 {
-    int i;
     calls++;
     requested = rr->num_entries;
     YAZ_CHECK(requested >= 0 && requested <= statserv_max_scan_terms());
-    for (i = 0; i < requested; i++)
+    for (int i = 0; i < requested; i++)
     {
         rr->entries[i].term = "term";
         rr->entries[i].occurrences = 1;
@@ -76,12 +75,11 @@ static Z_GDU *exchange(IOCHAN chan, association *assoc, Z_GDU *gdu,
                        ODR enc, ODR dec)
 {
     Z_GDU *response = 0;
-    request *req;
     YAZ_CHECK(z_GDU(enc, &gdu, 0, 0));
     input = odr_getbuf(enc, &input_len, 0);
     ir_session(chan, EVENT_INPUT);
     YAZ_CHECK(odr_total(assoc->decode) < 1024 * 1024);
-    req = request_deq(&assoc->outgoing);
+    request *req = request_deq(&assoc->outgoing);
     YAZ_CHECK(req != 0);
     if (req)
     {
@@ -118,7 +116,6 @@ static void check(int mode, const char *maximum, int expected,
     ODR enc = odr_createmem(ODR_ENCODE);
     ODR dec = odr_createmem(ODR_DECODE);
     IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
-    association *assoc;
     Z_GDU *gdu;
 
     memset(&cs, 0, sizeof(cs));
@@ -126,7 +123,7 @@ static void check(int mode, const char *maximum, int expected,
     cs.f_get = get;
     cs.f_more = more;
     cs.f_addrstr = addrstr;
-    assoc = create_association(chan, &cs, 0);
+    association *assoc = create_association(chan, &cs, 0);
     assoc->cs_get_mask = EVENT_INPUT;
     iochan_setdata(chan, assoc);
     calls = 0;
@@ -134,8 +131,6 @@ static void check(int mode, const char *maximum, int expected,
     bad_result = bad;
     if (mode == 3)
     {
-        Z_ScanRequest *req;
-        YAZ_PQF_Parser parser;
         gdu = odr_malloc(enc, sizeof(*gdu));
         gdu->which = Z_GDU_Z3950;
         gdu->u.z3950 = zget_APDU(enc, Z_APDU_initRequest);
@@ -145,12 +140,12 @@ static void check(int mode, const char *maximum, int expected,
         gdu = odr_malloc(enc, sizeof(*gdu));
         gdu->which = Z_GDU_Z3950;
         gdu->u.z3950 = zget_APDU(enc, Z_APDU_scanRequest);
-        req = gdu->u.z3950->u.scanRequest;
+        Z_ScanRequest *req = gdu->u.z3950->u.scanRequest;
         req->num_databaseNames = 1;
         req->databaseNames = odr_malloc(enc, sizeof(*req->databaseNames));
         req->databaseNames[0] = "Default";
         req->numberOfTermsRequested = odr_intdup(enc, odr_atoi(maximum));
-        parser = yaz_pqf_create();
+        YAZ_PQF_Parser parser = yaz_pqf_create();
         req->termListAndStartPoint = yaz_pqf_scan(parser, enc,
                                                  &req->attributeSet,
                                                  "@attr 1=4 term");

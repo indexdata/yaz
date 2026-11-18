@@ -102,8 +102,7 @@ int yaz_iso_8859_1_lookup_y(unsigned long v,
 {
     if (v >= 0xc0 && v <= 0xff) /* optimization. min and max .y values */
     {
-        int i;
-        for (i = 0; latin1_comb[i].x1; i++)
+        for (int i = 0; latin1_comb[i].x1; i++)
         {
             if (v == latin1_comb[i].y)
             {
@@ -120,8 +119,7 @@ int yaz_iso_8859_1_lookup_x12(unsigned long x1, unsigned long x2,
                               unsigned long *y)
 {
     /* For MARC8s we try to get a Latin-1 page code out of it */
-    int i;
-    for (i = 0; latin1_comb[i].x1; i++)
+    for (int i = 0; latin1_comb[i].x1; i++)
         if (x2 == latin1_comb[i].x2 && x1 == latin1_comb[i].x1)
         {
             *y = latin1_comb[i].y;

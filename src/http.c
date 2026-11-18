@@ -79,12 +79,10 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
 
     if (chunked)
     {
-        int r;
-
         /* we know buffer will be smaller than o->size - i*/
         *content_buf = (char*) odr_malloc(o, size - i);
-        r = yaz_http_parse_chunks(buf + i, size - i, *content_buf,
-                                  content_len);
+        int r =
+            yaz_http_parse_chunks(buf + i, size - i, *content_buf, content_len);
         if (r <= 0)
         {
             o->error = OHTTP;
@@ -585,7 +583,6 @@ static void dump_http_package(ODR o, const char *buf, size_t len)
 int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
 {
     char sbuf[80];
-    Z_HTTP_Header *h;
     int top0 = o->op->top;
 
     yaz_snprintf(sbuf, sizeof(sbuf), "HTTP/%s %d %s\r\n", hr->version,
@@ -597,7 +594,7 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
     yaz_snprintf(sbuf, sizeof(sbuf), "Content-Length: %d\r\n", hr->content_len);
     if (odr_write2(o, sbuf, strlen(sbuf)) < 0)
         return 0;
-    for (h = hr->headers; h; h = h->next)
+    for (Z_HTTP_Header *h = hr->headers; h; h = h->next)
     {
         if (yaz_strcasecmp(h->name, "Content-Length")
             && yaz_strcasecmp(h->name, "Transfer-Encoding"))
@@ -656,11 +653,10 @@ static int http_request_text(const char *s, const char *end, int field_value)
 int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
 {
     Z_HTTP_Header *h;
-    char *cp;
     int top0 = o->op->top;
 
     /* Validate everything before emitting even a partial request. */
-    cp = hr->path ? strchr(hr->path, '#') : 0;
+    char *cp = hr->path ? strchr(hr->path, '#') : 0;
     if (!http_request_token(hr->method) || !http_request_token(hr->version)
         || !http_request_text(hr->path, cp, 0) || !*hr->path
         || cp == hr->path)
@@ -858,16 +854,14 @@ const char *yaz_check_http_redirect(ODR odr, const char *uri,
     {
         char port_buf[8];
         size_t authority_len = host + host_len - location;
-        size_t port_len;
-        char *target;
 
         /* CONNECT requires a host:port authority, including for default
            ports. Keep the inserted port within the transport's limit. */
         yaz_snprintf(port_buf, sizeof(port_buf), ":%d", port);
-        port_len = strlen(port_buf);
+        size_t port_len = strlen(port_buf);
         if (host_len + port_len >= YAZ_TCPIP_HOST_PORT_BUFSIZE)
             return 0;
-        target = odr_malloc(odr, strlen(location) + port_len + 1);
+        char *target = odr_malloc(odr, strlen(location) + port_len + 1);
         memcpy(target, location, authority_len);
         memcpy(target + authority_len, port_buf, port_len);
         strcpy(target + authority_len + port_len, location + authority_len);

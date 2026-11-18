@@ -85,14 +85,12 @@ static void check_leaders(const char *xml, int records, const char *expected)
 {
     struct leader_test_data data;
     yaz_marc_t mt = yaz_marc_create();
-    yaz_marc_sax_t sax;
-    xmlParserCtxtPtr parser;
     size_t i;
     data.records = 0;
     data.output = wrbuf_alloc();
-    sax = yaz_marc_sax_new(mt, leader_handler, &data);
-    parser = xmlCreatePushParserCtxt(yaz_marc_sax_get_handler(sax), sax,
-                                     0, 0, 0);
+    yaz_marc_sax_t sax = yaz_marc_sax_new(mt, leader_handler, &data);
+    xmlParserCtxtPtr parser =
+        xmlCreatePushParserCtxt(yaz_marc_sax_get_handler(sax), sax, 0, 0, 0);
     YAZ_CHECK(parser != 0);
     if (parser)
     {
@@ -118,8 +116,7 @@ static void tst_leader_lengths(void)
     const char *fields = "<datafield tag=\"245\" ind1=\"1\" ind2=\"2\">"
         "<subfield code=\"a\">title</subfield></datafield>";
     WRBUF xml = wrbuf_alloc();
-    int len;
-    for (len = 0; len <= 25; len++)
+    for (int len = 0; len <= 25; len++)
     {
         wrbuf_rewind(xml);
         wrbuf_puts(xml, "<record><leader>");

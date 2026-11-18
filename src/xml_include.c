@@ -119,15 +119,15 @@ static int config_include_src(yaz_xml_include_t config, xmlNode **np,
     wrbuf_rewind(w);
     conf_dir_path(config, w, src);
     {
-        int glob_ret;
         yaz_glob_res_t glob_res;
 
-        glob_ret = yaz_file_glob2(wrbuf_cstr(w), &glob_res, config->glob_flags);
+        int glob_ret =
+            yaz_file_glob2(wrbuf_cstr(w), &glob_res, config->glob_flags);
         if (glob_ret == 0)
         {
-            size_t i;
             const char *path;
-            for (i = 0; (path = yaz_file_glob_get_file(glob_res, i)); i++)
+            for (size_t i = 0;
+                 (path = yaz_file_glob_get_file(glob_res, i)); i++)
                 ret = config_include_one(config, &sib, path);
             yaz_file_globfree(&glob_res);
         }

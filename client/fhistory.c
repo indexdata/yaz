@@ -57,7 +57,6 @@ void file_history_add_line(file_history_t fh, const char *line)
 
 int file_history_load(file_history_t fh)
 {
-    FILE *f;
     char* homedir = getenv("HOME");
     char fname[1024];
     int ret = 0;
@@ -67,7 +66,7 @@ int file_history_load(file_history_t fh)
     yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
-    f = fopen(fname, "r");
+    FILE *f = fopen(fname, "r");
     if (f)
     {
         int c;
@@ -95,7 +94,6 @@ int file_history_load(file_history_t fh)
 
 int file_history_save(file_history_t fh)
 {
-    FILE *f;
     char* homedir = getenv("HOME");
     char fname[1024];
     int ret = 0;
@@ -107,14 +105,13 @@ int file_history_save(file_history_t fh)
     yaz_snprintf(fname, sizeof(fname), "%s%s%s", homedir ? homedir : "",
             homedir ? "/" : "", ".yazclient.history");
 
-    f = fopen(fname, "w");
+    FILE *f = fopen(fname, "w");
     if (!f)
     {
         ret = -1;
     }
     else
     {
-        size_t w;
         const char *start = wrbuf_cstr(fh->wr);
         if (sz > FILE_SAVE_HISTORY_MAX)
         {
@@ -128,7 +125,7 @@ int file_history_save(file_history_t fh)
                 start = nl;
             }
         }
-        w = fwrite(start, 1, sz, f);
+        size_t w = fwrite(start, 1, sz, f);
         if (w != sz)
             ret = -1;
         if (fclose(f))

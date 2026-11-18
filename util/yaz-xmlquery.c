@@ -27,7 +27,6 @@ void pqftoxmlquery(const char *pqf)
 {
     YAZ_PQF_Parser parser = yaz_pqf_create();
     ODR odr = odr_createmem(ODR_ENCODE);
-    Z_RPNQuery *rpn;
 
     if (!parser)
     {
@@ -41,7 +40,7 @@ void pqftoxmlquery(const char *pqf)
         exit(1);
     }
 
-    rpn = yaz_pqf_parse(parser, odr, pqf);
+    Z_RPNQuery *rpn = yaz_pqf_parse(parser, odr, pqf);
 
     yaz_pqf_destroy(parser);
 
@@ -92,9 +91,7 @@ void pqftoxmlquery(const char *pqf)
 
 static void xmlquerytopqf(const char *xmlstr, int len)
 {
-    xmlDocPtr doc;
-
-    doc = xmlParseMemory(xmlstr, len);
+    xmlDocPtr doc = xmlParseMemory(xmlstr, len);
     if (!doc)
     {
         fprintf(stderr, "%s: xml parse error for XML:\n%.*s\n", prog, len, xmlstr);
@@ -135,8 +132,6 @@ static void xmlquerytopqf(const char *xmlstr, int len)
 
 void xmlfiletopqf(const char *xmlfile)
 {
-    long sz;
-    char *xmlstr;
     FILE *f = fopen(xmlfile, "rb");
     if (!f)
     {
@@ -144,7 +139,7 @@ void xmlfiletopqf(const char *xmlfile)
         exit(1);
     }
     fseek(f, 0, SEEK_END);
-    sz = ftell(f);
+    long sz = ftell(f);
     if (sz <= 0 || sz >= 1<<18)
     {
         fprintf(stderr, "%s: bad size for file %s\n", prog, xmlfile);
@@ -156,7 +151,7 @@ void xmlfiletopqf(const char *xmlfile)
         exit(1);
     }
     rewind(f);
-    xmlstr = (char *) xmalloc(sz);
+    char *xmlstr = (char *) xmalloc(sz);
     if (fread(xmlstr, sz, 1, f) != 1)
     {
         fprintf(stderr, "%s: read failed for file %s\n", prog, xmlfile);

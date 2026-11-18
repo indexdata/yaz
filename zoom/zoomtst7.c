@@ -15,15 +15,12 @@
 
 int main(int argc, char **argv)
 {
-    int block;
     int i, j;
-    ZOOM_connection z;
     ZOOM_resultset r[10];  /* and result sets .. */
-    ZOOM_options o;
 
-    o = ZOOM_options_create ();
+    ZOOM_options o = ZOOM_options_create ();
 
-    z = ZOOM_connection_new ("localhost", 9999);
+    ZOOM_connection z = ZOOM_connection_new ("localhost", 9999);
     if (ZOOM_connection_error (z, 0, 0))
     {
         printf ("error - couldn't connect?\n");
@@ -32,7 +29,7 @@ int main(int argc, char **argv)
 
     ZOOM_connection_destroy (z);
 
-    for (block = 0; block < 3; block++)
+    for (int block = 0; block < 3; block++)
     {
         switch (block)
         {
@@ -164,8 +161,7 @@ int main(int argc, char **argv)
             {
                 size_t len;
                 size_t occur;
-                const char *term;
-                term = ZOOM_scanset_term(scan, j, &occur, &len);
+                const char *term = ZOOM_scanset_term(scan, j, &occur, &len);
                 if (term)
                     printf ("%d %.*s %d\n", j, (int) len, term, (int) occur);
 

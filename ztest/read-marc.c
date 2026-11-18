@@ -1670,9 +1670,8 @@ char *dummy_xml_record(int num, ODR odr, const char *esn)
             if (stat(wrbuf_cstr(w), &sbuf) == 0 &&
                 (file = fopen(wrbuf_cstr(w), "rb")))
             {
-                size_t r;
                 buf = odr_malloc(odr, 1 + sbuf.st_size);
-                r = fread(buf, 1, sbuf.st_size, file);
+                size_t r = fread(buf, 1, sbuf.st_size, file);
                 buf[r] = '\0';
             }
             if (file)

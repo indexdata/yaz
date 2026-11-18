@@ -297,10 +297,9 @@ static void connect_and_bind(COMSTACK p,
     if (bind_host)
     {
         tcpip_state *sp = (tcpip_state *) p->cprivate;
-        char *cp;
         sp->bind_host = xmalloc(strlen(bind_host) + 4);
         strcpy(sp->bind_host, bind_host);
-        cp = strrchr(sp->bind_host, ':');
+        char *cp = strrchr(sp->bind_host, ':');
 
         if (!cp || cp[1] == '\0')
             strcat(sp->bind_host, ":0");
@@ -309,10 +308,9 @@ static void connect_and_bind(COMSTACK p,
     }
     if (connect_host)
     {
-        char *cp;
         tcpip_state *sp = (tcpip_state *) p->cprivate;
         sp->connect_host = xstrdup(connect_host);
-        cp = strchr(sp->connect_host, '/');
+        char *cp = strchr(sp->connect_host, '/');
         if (cp)
             *cp = '\0';
         sp->connect_request = wrbuf_alloc();
@@ -348,10 +346,9 @@ COMSTACK yaz_tcpip_create3(int s, int flags, int protocol,
                            const char *connect_auth,
                            const char *bind_host)
 {
-    COMSTACK p;
     if (!valid_connect_host(connect_host))
         return 0;
-    p = tcpip_type(s, flags, protocol, 0);
+    COMSTACK p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     connect_and_bind(p, connect_host, connect_auth, bind_host);
@@ -402,14 +399,12 @@ static void tcpip_release_cred(struct tcpip_cred_ptr **ptr)
 COMSTACK ssl_type(int s, int flags, int protocol, void *vp)
 {
 #if HAVE_GNUTLS_H
-    tcpip_state *sp;
-    COMSTACK p;
 
-    p = tcpip_type(s, flags, protocol, 0);
+    COMSTACK p = tcpip_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     p->type = ssl_type;
-    sp = (tcpip_state *) p->cprivate;
+    tcpip_state *sp = (tcpip_state *) p->cprivate;
 
     sp->session = (gnutls_session_t) vp;
     /* note: we don't handle already opened socket in SSL mode - yet */
@@ -425,10 +420,9 @@ COMSTACK yaz_ssl_create(int s, int flags, int protocol,
                         const char *connect_auth,
                         const char *bind_host)
 {
-    COMSTACK p;
     if (!valid_connect_host(connect_host))
         return 0;
-    p = ssl_type(s, flags, protocol, 0);
+    COMSTACK p = ssl_type(s, flags, protocol, 0);
     if (!p)
         return 0;
     connect_and_bind(p, connect_host, connect_auth, bind_host);
@@ -458,7 +452,6 @@ static void parse_host_port(const char *host_port, char *tmp, size_t tmp_sz,
                             const char **host, const char **port)
 {
     char *cp = tmp;
-    char *cp1;
 
     *host = 0;
     strncpy(tmp, host_port, tmp_sz-1);
@@ -479,7 +472,7 @@ static void parse_host_port(const char *host_port, char *tmp, size_t tmp_sz,
             cp++;
         }
     }
-    cp1 = strchr(cp, '/');
+    char *cp1 = strchr(cp, '/');
     if (cp1)
         *cp1 = '\0';
     cp1 = strchr(cp, '?');
@@ -585,7 +578,6 @@ static struct addrinfo *create_net_socket(COMSTACK h)
     {
         int r = -1;
         int ipv6_only = 0;
-        struct addrinfo *ai;
 
 #ifndef WIN32
         int one = 1;
@@ -596,12 +588,11 @@ static struct addrinfo *create_net_socket(COMSTACK h)
             return 0;
         }
 #endif
-        ai = tcpip_getaddrinfo(sp->bind_host, "0", &ipv6_only);
+        struct addrinfo *ai = tcpip_getaddrinfo(sp->bind_host, "0", &ipv6_only);
         if (!ai)
             return 0;
         {
-            struct addrinfo *a;
-            for (a = ai; a; a = a->ai_next)
+            for (struct addrinfo *a = ai; a; a = a->ai_next)
             {
                 r = bind(h->iofile, a->ai_addr, a->ai_addrlen);
                 if (!r)
@@ -708,8 +699,7 @@ static int cont_connect(COMSTACK h)
     struct addrinfo *ai = sp->ai_connect;
     while (ai && (ai = ai->ai_next))
     {
-        int s;
-        s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        int s = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (s != -1)
         {
 #if HAVE_GNUTLS_H
@@ -746,7 +736,6 @@ int tcpip_connect(COMSTACK h, void *address)
 {
     struct addrinfo *ai = (struct addrinfo *) address;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
-    int r;
     yaz_log(log_level, "tcpip_connect h=%p", h);
     h->io_pending = 0;
     if (h->state != CS_ST_UNBND)
@@ -773,7 +762,7 @@ int tcpip_connect(COMSTACK h, void *address)
         }
     }
 #endif
-    r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
+    int r = connect(h->iofile, ai->ai_addr, ai->ai_addrlen);
     sp->ai_connect = ai;
     if (r < 0)
     {
@@ -812,10 +801,9 @@ static int check_cert(COMSTACK h, tcpip_state *sp)
         const char *vhost = 0;
         const char *vport = 0;
         char vtmp[YAZ_TCPIP_HOST_PORT_BUFSIZE];
-        int vr;
         const char *check_host = sp->connect_host ? sp->connect_host : sp->host_port;
         parse_host_port(check_host, vtmp, sizeof vtmp, &vhost, &vport);
-        vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
+        int vr = gnutls_certificate_verify_peers3(sp->session, vhost, &status);
         if (vr < 0)
         {
             yaz_log(log_level, "TLS certificate verification error: %s",
@@ -946,11 +934,10 @@ int tcpip_rcvconnect(COMSTACK h)
         }
         if (sp->cert_fname[0])
         {
-            int res;
-            res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
-                                                       sp->cert_fname,
-                                                       sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
-                                                       GNUTLS_X509_FMT_PEM);
+            int res = gnutls_certificate_set_x509_key_file(
+                sp->cred_ptr->xcred, sp->cert_fname,
+                sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
+                GNUTLS_X509_FMT_PEM);
             if (res != GNUTLS_E_SUCCESS)
             {
                 yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
@@ -1000,7 +987,6 @@ int tcpip_rcvconnect(COMSTACK h)
 
 static int tcpip_bind(COMSTACK h, void *address, int mode)
 {
-    int r;
     tcpip_state *sp = (tcpip_state *)h->cprivate;
     struct addrinfo *ai = (struct addrinfo *) address;
 #ifdef WIN32
@@ -1021,17 +1007,15 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
 #if HAVE_GNUTLS_H
     if (h->type == ssl_type && !sp->session)
     {
-        int res;
-
         /* yaz.pem is the default for server */
         if (sp->yaz_pem_default)
             strcpy(sp->cert_fname, "yaz.pem");
 
         sp->cred_ptr = tcpip_create_cred();
-        res = gnutls_certificate_set_x509_key_file(sp->cred_ptr->xcred,
-                                                   sp->cert_fname,
-                                                   sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
-                                                   GNUTLS_X509_FMT_PEM);
+        int res = gnutls_certificate_set_x509_key_file(
+            sp->cred_ptr->xcred, sp->cert_fname,
+            sp->key_fname[0] ? sp->key_fname : sp->cert_fname,
+            GNUTLS_X509_FMT_PEM);
         if (res != GNUTLS_E_SUCCESS)
         {
             yaz_log(log_level, "gnutls_certificate_set_x509_key_file r=%d fatal=%d msg=%s",
@@ -1051,7 +1035,7 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         return -1;
     }
 #endif
-    r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
+    int r = bind(h->iofile, ai->ai_addr, ai->ai_addrlen);
     freeaddrinfo(sp->ai);
     sp->ai = 0;
     if (r)
@@ -1185,8 +1169,6 @@ COMSTACK tcpip_accept(COMSTACK h)
         state->cred_ptr = st->cred_ptr;
         if (st->cred_ptr)
         {
-            int res;
-
             (state->cred_ptr->ref)++;
             gnutls_init(&state->session, GNUTLS_SERVER);
             if (!state->session)
@@ -1194,7 +1176,7 @@ COMSTACK tcpip_accept(COMSTACK h)
                 tcpip_close(cnew);
                 return 0;
             }
-            res = gnutls_set_default_priority(state->session);
+            int res = gnutls_set_default_priority(state->session);
             if (res != GNUTLS_E_SUCCESS)
             {
                 tcpip_close(cnew);
@@ -1593,14 +1575,12 @@ const char *tcpip_addrstr(COMSTACK h)
 
 static int tcpip_set_blocking(COMSTACK p, int flags)
 {
-    unsigned long flag;
-
 #ifdef WIN32
-    flag = (flags & CS_FLAGS_BLOCKING) ? 0 : 1;
+    unsigned long flag = (flags & CS_FLAGS_BLOCKING) ? 0 : 1;
     if (ioctlsocket(p->iofile, FIONBIO, &flag) < 0)
         return 0;
 #else
-    flag = fcntl(p->iofile, F_GETFL, 0);
+    unsigned long flag = fcntl(p->iofile, F_GETFL, 0);
     if (flags & CS_FLAGS_BLOCKING)
         flag = flag & ~O_NONBLOCK;  /* blocking */
     else
@@ -1691,27 +1671,25 @@ void cs_print_session_info(COMSTACK cs)
     struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
     if (cs->type == ssl_type && sp->session)
     {
-        const gnutls_datum_t *cert_list;
         unsigned i, cert_list_size;
         if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
             return;
         printf("X509 certificate\n");
-        cert_list = gnutls_certificate_get_peers(sp->session,
-                                                 &cert_list_size);
+        const gnutls_datum_t *cert_list =
+            gnutls_certificate_get_peers(sp->session, &cert_list_size);
         printf("Peer provided %u certificates\n", cert_list_size);
         for (i = 0; i < cert_list_size; i++)
         {
             gnutls_x509_crt_t cert;
 #if USE_GNUTLS_X509_CRT_PRINT
-            int ret;
             gnutls_datum_t cinfo;
 #endif
             gnutls_x509_crt_init(&cert);
             gnutls_x509_crt_import(cert, &cert_list[i], GNUTLS_X509_FMT_DER);
             printf("Certificate info %u:\n", i + 1);
 #if USE_GNUTLS_X509_CRT_PRINT
-            ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL,
-                                        &cinfo);
+            int ret =
+                gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &cinfo);
             if (ret == 0)
             {
                 printf("\t%s\n", cinfo.data);
@@ -1807,21 +1785,21 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
     struct tcpip_state *sp = (struct tcpip_state *) cs->cprivate;
     if (cs->type == ssl_type && sp->session)
     {
-        const gnutls_datum_t *cert_list;
         unsigned cert_list_size;
         if (gnutls_certificate_type_get(sp->session) != GNUTLS_CRT_X509)
             return 0;
-        cert_list = gnutls_certificate_get_peers(sp->session, &cert_list_size);
+        const gnutls_datum_t *cert_list =
+            gnutls_certificate_get_peers(sp->session, &cert_list_size);
         if (cert_list_size > 0)
         {
             gnutls_x509_crt_t cert;
-            int ret;
             gnutls_datum_t cinfo;
 
             gnutls_x509_crt_init(&cert);
             gnutls_x509_crt_import(cert, &cert_list[0], GNUTLS_X509_FMT_DER);
 
-            ret = gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &cinfo);
+            int ret =
+                gnutls_x509_crt_print(cert, GNUTLS_CRT_PRINT_FULL, &cinfo);
             if (ret == 0)
             {
                 size_t clen = strlen((char*) cinfo.data);

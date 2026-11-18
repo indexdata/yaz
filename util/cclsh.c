@@ -34,7 +34,6 @@ void usage(const char *prog)
 
 int main(int argc, char **argv)
 {
-    CCL_bibset bibset;
     FILE *bib_inf;
     char *bib_fname;
     int ret;
@@ -46,7 +45,7 @@ int main(int argc, char **argv)
     WRBUF q_wrbuf = 0;
 
     prog = *argv;
-    bibset = ccl_qual_mk();
+    CCL_bibset bibset = ccl_qual_mk();
 
     while ((ret = options("db:x:", argv, argc, &arg)) != -2)
     {
@@ -96,12 +95,11 @@ int main(int argc, char **argv)
     if (q_wrbuf)
     {
         CCL_parser cclp = ccl_parser_create(bibset);
-        int error;
-        struct ccl_rpn_node *rpn;
 
-        rpn = ccl_parser_find_str(cclp, wrbuf_cstr(q_wrbuf));
+        struct ccl_rpn_node *rpn =
+            ccl_parser_find_str(cclp, wrbuf_cstr(q_wrbuf));
 
-        error = ccl_parser_get_error(cclp, 0);
+        int error = ccl_parser_get_error(cclp, 0);
 
         if (error)
         {
@@ -128,8 +126,7 @@ int main(int argc, char **argv)
         struct ccl_rpn_node *rpn;
 
 #if HAVE_READLINE_READLINE_H
-            char* line_in;
-            line_in=readline("CCLSH>");
+            char* line_in=readline("CCLSH>");
             if (!line_in)
                 break;
 #if HAVE_READLINE_HISTORY_H

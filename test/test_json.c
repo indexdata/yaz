@@ -21,14 +21,13 @@ static int expect(json_parser_t p, const char *input,
                   const char *output)
 {
     int ret = 0;
-    struct json_node *n;
 
     if (output == 0)
     {
         yaz_log(YLOG_WARN, "output must not be NULL");
         return ret;
     }
-    n = json_parser_parse(p, input);
+    struct json_node *n = json_parser_parse(p, input);
     if (n == 0)
     {
         const char *errmsg = json_parser_get_errmsg(p);
@@ -263,15 +262,13 @@ static void tst3(void)
 
 static void tst_flat_array(size_t count, int malformed)
 {
-    size_t i;
     char *s = malloc(count * 2 + 3);
     char *p = s;
-    struct json_node *n;
     YAZ_CHECK(s);
     if (!s)
         return;
     *p++ = '[';
-    for (i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
         *p++ = '0';
         *p++ = ',';
     }
@@ -279,7 +276,7 @@ static void tst_flat_array(size_t count, int malformed)
         p--;
     *p++ = ']';
     *p = 0;
-    n = json_parse(s, 0);
+    struct json_node *n = json_parse(s, 0);
     if (malformed)
     {
         YAZ_CHECK(n == 0);
@@ -343,11 +340,10 @@ static void tst_clone(void)
 {
     const char *json = "{\"a\":[1,\"x\",null],\"b\":true}";
     struct json_node *n = json_parse(json, 0);
-    struct json_node *n2;
     WRBUF result = wrbuf_alloc();
 
     YAZ_CHECK(n);
-    n2 = json_clone_node(n);
+    struct json_node *n2 = json_clone_node(n);
     YAZ_CHECK(n2);
     json_remove_node(n);
     if (n2)
@@ -396,15 +392,13 @@ static void check_marc_json(const char *fields, const char *expected_fields)
     WRBUF outputs[2];
     WRBUF input = wrbuf_alloc();
     yaz_marc_t mt = yaz_marc_create();
-    int i;
-    for (i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++)
     {
-        struct json_node *n;
         outputs[i] = wrbuf_alloc();
         wrbuf_rewind(input);
         wrbuf_printf(input, "{\"leader\":\"00000nam a22000000a 4500\","
                      "\"fields\":%s}", inputs[i]);
-        n = json_parse(wrbuf_cstr(input), 0);
+        struct json_node *n = json_parse(wrbuf_cstr(input), 0);
         YAZ_CHECK(n != 0);
         yaz_marc_reset(mt);
         if (n)

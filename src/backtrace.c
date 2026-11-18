@@ -67,7 +67,6 @@ static void iwrite(int fd, const char *buf, size_t len)
 static void yaz_invoke_gdb(void)
 {
     int fd = yaz_panic_fd;
-    pid_t pid;
     int fds[2];
     if (pipe(fds) == -1)
     {
@@ -75,7 +74,7 @@ static void yaz_invoke_gdb(void)
         iwrite(fd, cp, strlen(cp));
         return;
     }
-    pid = fork();
+    pid_t pid = fork();
     if (pid == (pid_t) (-1))
     {   /* error */
         const char *cp = "backtrace: fork failure\n";
@@ -173,7 +172,6 @@ static void yaz_invoke_backtrace(int sig)
 static void yaz_panic_sig_handler(int sig)
 {
     char buf[512];
-    FILE *file;
 
     signal(SIGABRT, SIG_DFL);
     signal(SIGSEGV, SIG_DFL);
@@ -201,7 +199,7 @@ static void yaz_panic_sig_handler(int sig)
     yaz_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
                  " PID=" NMEM_INT_PRINTF "\n", (nmem_int_t) getpid());
 
-    file = yaz_log_file();
+    FILE *file = yaz_log_file();
     /* static variable to be used in the following + handlers */
     yaz_panic_fd = fileno(file);
 

@@ -64,9 +64,6 @@ static void check_delete(const char *record, const char *schema, const char *dat
     ODR dec = odr_createmem(ODR_DECODE);
     WRBUF body = wrbuf_alloc();
     Z_GDU *gdu = z_get_HTTP_Request_uri(enc, "http://localhost/Default", 0, 0);
-    association *assoc;
-    request *response;
-    char *buf;
     int len;
 
     updates = 0;
@@ -82,19 +79,19 @@ static void check_delete(const char *record, const char *schema, const char *dat
     gdu->u.HTTP_Request->content_len = (int) wrbuf_len(body);
     z_HTTP_header_add(enc, &gdu->u.HTTP_Request->headers, "Content-Type", "text/xml");
     YAZ_CHECK(z_GDU(enc, &gdu, 0, 0));
-    buf = odr_getbuf(enc, &len, 0);
+    char *buf = odr_getbuf(enc, &len, 0);
     memset(&cs, 0, sizeof(cs));
     cs.protocol = PROTO_HTTP;
     cs.f_get = get;
     cs.f_more = more;
     cs.f_addrstr = addrstr;
     cs.user = odr_strdupn(enc, buf, len);
-    assoc = create_association(chan, &cs, 0);
+    association *assoc = create_association(chan, &cs, 0);
     iochan_setdata(chan, assoc);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(chan, EVENT_INPUT);
     YAZ_CHECK_EQ(updates, 1);
-    response = request_head(&assoc->outgoing);
+    request *response = request_head(&assoc->outgoing);
     YAZ_CHECK(response != 0);
     if (response)
     {

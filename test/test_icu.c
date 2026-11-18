@@ -639,8 +639,6 @@ static void check_icu_iter1(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain *chain = 0;
-    xmlNode *xml_node;
-    yaz_icu_iter_t iter;
 
     const char *xml_str = "<icu locale=\"en\">"
         "<tokenize rule=\"w\"/>"
@@ -651,7 +649,7 @@ static void check_icu_iter1(void)
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    xml_node = xmlDocGetRootElement(doc);
+    xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
     if (!xml_node)
         return ;
@@ -661,7 +659,7 @@ static void check_icu_iter1(void)
     xmlFreeDoc(doc);
     YAZ_CHECK(chain);
 
-    iter = icu_iter_create(chain);
+    yaz_icu_iter_t iter = icu_iter_create(chain);
     icu_iter_first(iter, "a string with 15 tokens and 8 displays");
     YAZ_CHECK(iter);
     if (!iter)
@@ -748,9 +746,8 @@ static int test_iter(struct icu_chain *chain, const char *input,
 static void *iter_thread(void *p)
 {
     struct icu_chain *chain = (struct icu_chain *) p;
-    int i;
 
-    for (i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         YAZ_CHECK(test_iter(chain, "Adobe Acrobat Reader, 1991-1999.",
                             "[adobe][acrobat][reader][1991][][1999][]"));
@@ -778,7 +775,6 @@ static void check_icu_iter2(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain *chain = 0;
-    xmlNode *xml_node;
 
     const char *xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
@@ -793,7 +789,7 @@ static void check_icu_iter2(void)
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    xml_node = xmlDocGetRootElement(doc);
+    xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
     if (!xml_node)
         return ;
@@ -820,7 +816,6 @@ static void check_icu_iter3(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain *chain = 0;
-    xmlNode *xml_node;
 
     const char *xml_str =
         "<icu_chain id=\"sort\" locale=\"el\">\n"
@@ -835,7 +830,7 @@ static void check_icu_iter3(void)
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    xml_node = xmlDocGetRootElement(doc);
+    xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
     if (!xml_node)
         return ;
@@ -861,7 +856,6 @@ static void check_icu_iter4(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain *chain = 0;
-    xmlNode *xml_node;
 
     const char *xml_str = "<icu locale=\"en\">"
         "<transform rule=\"[:Control:] Any-Remove\"/>"
@@ -877,7 +871,7 @@ static void check_icu_iter4(void)
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    xml_node = xmlDocGetRootElement(doc);
+    xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
     if (!xml_node)
         return ;
@@ -903,8 +897,6 @@ static void check_norm(void)
 {
     UErrorCode status = U_ZERO_ERROR;
     struct icu_chain *chain = 0;
-    xmlNode *xml_node;
-    yaz_icu_iter_t it;
 
     const char *xml_str =
         "  <icu_chain id=\"relevance\" locale=\"en\">"
@@ -918,13 +910,13 @@ static void check_norm(void)
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    xml_node = xmlDocGetRootElement(doc);
+    xmlNode *xml_node = xmlDocGetRootElement(doc);
     YAZ_CHECK(xml_node);
     if (!xml_node)
         return ;
     chain = icu_chain_xml_config(xml_node, 1, &status);
 
-    it = icu_iter_create(chain);
+    yaz_icu_iter_t it = icu_iter_create(chain);
     if (it)
     {
         icu_iter_first(it, " y😄");

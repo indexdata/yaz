@@ -43,7 +43,6 @@ int main(int argc, char **argv)
     char *host = 0;
     int port = 0;
     int c;
-    int i;
     int ok;
     int nok = 0;
     char *arg;
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
     if (!host || !port)
         usage(*argv);
 
-    for (i = 0; i < boptions.nconnect; i++) {
+    for (int i = 0; i < boptions.nconnect; i++) {
         db_printf(2, "iteration %d of %d", i+1, boptions.nconnect);
         ok = test(host, port);
         if (ok) nok++;
@@ -104,11 +103,10 @@ static void usage(const char *prog)
 
 static int test(char *host, int port)
 {
-    ZOOM_connection conn;
     int error;
     const char *errmsg, *addinfo;
 
-    conn = ZOOM_connection_new(host, port);
+    ZOOM_connection conn = ZOOM_connection_new(host, port);
     if ((error = ZOOM_connection_error(conn, &errmsg, &addinfo))) {
         fprintf(stderr, "ZOOM error: %s (%d): %s\n", errmsg, error, addinfo);
         return 0;

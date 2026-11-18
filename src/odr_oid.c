@@ -40,11 +40,9 @@ int odr_oid(ODR o, Odr_oid **p, int opt, const char *name)
     }
     if (o->direction == ODR_PRINT)
     {
-        int i;
-
         odr_prname(o, name);
         odr_printf(o, "OID:");
-        for (i = 0; (*p)[i] > -1; i++)
+        for (int i = 0; (*p)[i] > -1; i++)
             odr_printf(o, " %d", (*p)[i]);
         odr_printf(o, "\n");
         return 1;

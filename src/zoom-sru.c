@@ -32,12 +32,11 @@ static void set_SRU_error(ZOOM_connection c, Z_SRW_diagnostic *d)
 #if YAZ_HAVE_XML2
 static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
 {
-    Z_GDU *gdu;
     int ret = -1;
     const char *database =  ZOOM_options_get(c->options, "databaseName");
 
-    gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port,
-                                 database, c->proxy_mode);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(c->odr_out, c->host_port, database,
+                                        c->proxy_mode);
 
     if (c->sru_mode == zoom_sru_get)
     {
@@ -98,19 +97,17 @@ static Z_SRW_PDU *ZOOM_srw_get_pdu(ZOOM_connection c, int type)
 #if YAZ_HAVE_XML2
 zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
 {
-    ZOOM_scanset scan;
     Z_SRW_PDU *sr = 0;
     const char *option_val = 0;
-    Z_Query *z_query;
 
     if (!c->tasks)
         return zoom_complete;
     assert (c->tasks->which == ZOOM_TASK_SCAN);
-    scan = c->tasks->u.scan.scan;
+    ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     sr = ZOOM_srw_get_pdu(c, Z_SRW_scan_request);
 
-    z_query = ZOOM_query_get_Z_Query(scan->query);
+    Z_Query *z_query = ZOOM_query_get_Z_Query(scan->query);
     /* SRU scan can only carry CQL and PQF */
     if (z_query->which == Z_Query_type_104)
     {
@@ -156,7 +153,6 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     Z_SRW_PDU *sr = 0;
     const char *option_val = 0;
     const char *schema = 0;
-    Z_Query *z_query;
     Z_FacetList *facet_list = 0;
 
     if (c->error)                  /* don't continue on error */
@@ -205,7 +201,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     assert(resultset->query);
 
     sr = ZOOM_srw_get_pdu(c, Z_SRW_searchRetrieve_request);
-    z_query = ZOOM_query_get_Z_Query(resultset->query);
+    Z_Query *z_query = ZOOM_query_get_Z_Query(resultset->query);
 
     if (z_query->which == Z_Query_type_104
         && z_query->u.type_104->which == Z_External_CQL)
@@ -401,11 +397,10 @@ static zoom_ret handle_srw_scan_response(ZOOM_connection c,
                                          Z_SRW_scanResponse *res)
 {
     NMEM nmem = odr_extract_mem(c->odr_in);
-    ZOOM_scanset scan;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
         return zoom_complete;
-    scan = c->tasks->u.scan.scan;
+    ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     if (res->num_diagnostics > 0)
         set_SRU_error(c, &res->diagnostics[0]);

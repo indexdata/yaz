@@ -49,11 +49,10 @@ static Odr_oid *zoom_yaz_str_to_z3950oid(ZOOM_connection c,
 
 static Z_APDU *create_es_package(ZOOM_package p, const Odr_oid *oid)
 {
-    const char *str;
     Z_APDU *apdu = zget_APDU(p->odr_out, Z_APDU_extendedServicesRequest);
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
 
-    str = ZOOM_options_get(p->options, "package-name");
+    const char *str = ZOOM_options_get(p->options, "package-name");
     if (str && *str)
         req->packageName = odr_strdup(p->odr_out, str);
 
@@ -98,7 +97,6 @@ static const char *ill_array_lookup(void *clientData, const char *idx)
 static Z_External *encode_ill_request(ZOOM_package p)
 {
     ODR out = p->odr_out;
-    ILL_Request *req;
     Z_External *r = 0;
     struct ill_get_ctl ctl;
 
@@ -106,7 +104,7 @@ static Z_External *encode_ill_request(ZOOM_package p)
     ctl.clientData = p;
     ctl.f = ill_array_lookup;
 
-    req = ill_get_ILLRequest(&ctl, "ill", 0);
+    ILL_Request *req = ill_get_ILLRequest(&ctl, "ill", 0);
 
     if (!ill_Request(out, &req, 0, 0))
     {
@@ -136,7 +134,6 @@ static Z_External *encode_ill_request(ZOOM_package p)
 static Z_ItemOrder *encode_item_order(ZOOM_package p)
 {
     Z_ItemOrder *req = (Z_ItemOrder *) odr_malloc(p->odr_out, sizeof(*req));
-    const char *str;
     int len;
 
     req->which = Z_IOItemOrder_esRequest;
@@ -150,7 +147,7 @@ static Z_ItemOrder *encode_item_order(ZOOM_package p)
     req->u.esRequest->toKeep->contact = (Z_IOContact *)
         odr_malloc(p->odr_out, sizeof(*req->u.esRequest->toKeep->contact));
 
-    str = ZOOM_options_get(p->options, "contact-name");
+    const char *str = ZOOM_options_get(p->options, "contact-name");
     req->u.esRequest->toKeep->contact->name =
         odr_strdup_null(p->odr_out, str);
 
@@ -212,7 +209,6 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
     Z_APDU *apdu = create_es_package(p, yaz_oid_extserv_admin);
     if (apdu)
     {
-        Z_ESAdminOriginPartToKeep  *toKeep;
         Z_ESAdminOriginPartNotToKeep  *notToKeep;
         Z_External *r = (Z_External *) odr_malloc(p->odr_out, sizeof(*r));
         const char *first_db = "Default";
@@ -234,9 +230,11 @@ Z_APDU *create_admin_package(ZOOM_package p, int type,
         r->u.adminService->u.esRequest = (Z_AdminEsRequest *)
             odr_malloc(p->odr_out, sizeof(*r->u.adminService->u.esRequest));
 
-        toKeep = r->u.adminService->u.esRequest->toKeep =
-            (Z_ESAdminOriginPartToKeep *)
-            odr_malloc(p->odr_out, sizeof(*r->u.adminService->u.esRequest->toKeep));
+        Z_ESAdminOriginPartToKeep *toKeep =
+            r->u.adminService->u.esRequest->toKeep =
+                (Z_ESAdminOriginPartToKeep *) odr_malloc(
+                    p->odr_out,
+                    sizeof(*r->u.adminService->u.esRequest->toKeep));
         toKeep->which = type;
         toKeep->databaseName = odr_strdup(p->odr_out, first_db);
         toKeep->u.create = odr_nullval();
@@ -477,31 +475,26 @@ static Z_APDU *create_update_package(ZOOM_package p)
 
 static void otherInfo_attach(ZOOM_connection c, Z_APDU *a, ODR out)
 {
-    int i;
-    for (i = 0; i < 200; i++)
+    for (int i = 0; i < 200; i++)
     {
-        size_t len;
-        Odr_oid *oid;
         Z_OtherInformation **oi;
         char buf[80];
-        const char *val;
-        const char *cp;
 
         yaz_snprintf(buf, sizeof(buf), "otherInfo%d", i);
-        val = ZOOM_options_get(c->options, buf);
+        const char *val = ZOOM_options_get(c->options, buf);
         if (!val)
             break;
-        cp = strchr(val, ':');
+        const char *cp = strchr(val, ':');
         if (!cp)
             continue;
-        len = cp - val;
+        size_t len = cp - val;
         if (len >= sizeof(buf))
             len = sizeof(buf)-1;
         memcpy(buf, val, len);
         buf[len] = '\0';
 
-        oid = yaz_string_to_oid_odr(yaz_oid_std(), CLASS_USERINFO,
-                                    buf, out);
+        Odr_oid *oid =
+            yaz_string_to_oid_odr(yaz_oid_std(), CLASS_USERINFO, buf, out);
         if (!oid)
             continue;
 
@@ -556,13 +549,12 @@ static int encode_APDU(ZOOM_connection c, Z_APDU *a, ODR out)
 
 static zoom_ret send_APDU(ZOOM_connection c, Z_APDU *a)
 {
-    ZOOM_Event event;
     assert(a);
     if (encode_APDU(c, a, c->odr_out))
         return zoom_complete;
     yaz_log(c->log_details, "%p send APDU type=%d", c, a->which);
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
-    event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
+    ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
     odr_reset(c->odr_out);
     return ZOOM_send_buf(c);
@@ -648,29 +640,21 @@ zoom_ret ZOOM_connection_Z3950_send_init(ZOOM_connection c)
 
 static zoom_ret Z3950_send_search(ZOOM_connection c)
 {
-    ZOOM_resultset r;
     int lslb, ssub, mspn;
-    const char *syntax;
-    const char *schema;
-    Z_APDU *apdu;
-    Z_SearchRequest *search_req;
-    const char *elementSetName;
-    const char *smallSetElementSetName;
-    const char *mediumSetElementSetName;
 
     assert(c->tasks);
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
-    r = c->tasks->u.search.resultset;
+    ZOOM_resultset r = c->tasks->u.search.resultset;
 
-    apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
-    search_req = apdu->u.searchRequest;
+    Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_searchRequest);
+    Z_SearchRequest *search_req = apdu->u.searchRequest;
 
     yaz_log(c->log_details, "%p Z3950_send_search set=%p", c, r);
 
-    elementSetName = c->tasks->u.search.elementSetName;
-    smallSetElementSetName  =
+    const char *elementSetName = c->tasks->u.search.elementSetName;
+    const char *smallSetElementSetName =
         ZOOM_options_get(r->options, "smallSetElementSetName");
-    mediumSetElementSetName =
+    const char *mediumSetElementSetName =
         ZOOM_options_get(r->options, "mediumSetElementSetName");
 
     if (!smallSetElementSetName)
@@ -711,13 +695,11 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
             yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
             if (cd)
             {
-                int r;
                 search_req->query = yaz_copy_Z_Query(search_req->query,
                                                      c->odr_out);
 
-                r = yaz_query_charset_convert_rpnquery_check(
-                    search_req->query->u.type_1,
-                    c->odr_out, cd);
+                int r = yaz_query_charset_convert_rpnquery_check(
+                    search_req->query->u.type_1, c->odr_out, cd);
                 yaz_iconv_close(cd);
                 if (r)
                 {  /* query could not be char converted */
@@ -731,9 +713,9 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
     search_req->num_databaseNames = r->num_databaseNames;
 
     /* get syntax (no need to provide unless piggyback is in effect) */
-    syntax = c->tasks->u.search.syntax;
+    const char *syntax = c->tasks->u.search.syntax;
 
-    schema = c->tasks->u.search.schema;
+    const char *schema = c->tasks->u.search.schema;
 
     lslb = ZOOM_options_get_int(r->options, "largeSetLowerBound", -1);
     ssub = ZOOM_options_get_int(r->options, "smallSetUpperBound", -1);
@@ -788,10 +770,9 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
         if (c->support_named_resultsets)
         {
             char setname[14];
-            int ord;
             /* find the lowest unused ordinal so that we re-use
                result sets on the server. */
-            for (ord = 1; ; ord++)
+            for (int ord = 1; ; ord++)
             {
                 ZOOM_resultset rp;
                 yaz_snprintf(setname, sizeof(setname), "%d", ord);
@@ -819,18 +800,16 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
 
 zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
 {
-    ZOOM_scanset scan;
     Z_APDU *apdu = zget_APDU(c->odr_out, Z_APDU_scanRequest);
     Z_ScanRequest *req = apdu->u.scanRequest;
-    Z_Query *z_query;
 
     yaz_log(c->log_details, "%p send_scan", c);
     if (!c->tasks)
         return zoom_complete;
     assert (c->tasks->which == ZOOM_TASK_SCAN);
-    scan = c->tasks->u.scan.scan;
+    ZOOM_scanset scan = c->tasks->u.scan.scan;
 
-    z_query = ZOOM_query_get_Z_Query(scan->query);
+    Z_Query *z_query = ZOOM_query_get_Z_Query(scan->query);
 
     /* Z39.50 scan can only carry RPN */
     if (z_query->which == Z_Query_type_1 ||
@@ -892,10 +871,9 @@ ZOOM_API(void)
     ZOOM_package_send(ZOOM_package p, const char *type)
 {
     Z_APDU *apdu = 0;
-    ZOOM_connection c;
     if (!p)
         return;
-    c = p->connection;
+    ZOOM_connection c = p->connection;
     odr_reset(p->odr_out);
     xfree(p->buf_out);
     p->buf_out = 0;
@@ -943,11 +921,9 @@ ZOOM_API(void)
     {
         if (encode_APDU(p->connection, apdu, p->odr_out) == 0)
         {
-            char *buf;
-
             ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_PACKAGE);
             task->u.package = p;
-            buf = odr_getbuf(p->odr_out, &p->len_out, 0);
+            char *buf = odr_getbuf(p->odr_out, &p->len_out, 0);
             p->buf_out = (char *) xmalloc(p->len_out);
             memcpy(p->buf_out, buf, p->len_out);
 
@@ -967,10 +943,10 @@ static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
 static void response_default_diag(ZOOM_connection c, Z_DefaultDiagFormat *r)
 {
     char oid_name_buf[OID_STR_MAX];
-    const char *oid_name;
     char *addinfo = 0;
 
-    oid_name = yaz_oid_to_string_buf(r->diagnosticSetId, 0, oid_name_buf);
+    const char *oid_name =
+        yaz_oid_to_string_buf(r->diagnosticSetId, 0, oid_name_buf);
     switch (r->which)
     {
     case Z_DefaultDiagFormat_v2Addinfo:
@@ -1164,7 +1140,6 @@ static char *get_term_cstr(ODR odr, Z_Term *term)
 
 static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
 {
-    int i;
     struct yaz_facet_attr attr_values;
     ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
     yaz_facet_attr_init(&attr_values);
@@ -1175,7 +1150,7 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
             attr_values.useattr, attr_values.limit, facet->num_terms);
     facet_field->facet_terms =
         odr_malloc(odr, facet->num_terms * sizeof(*facet_field->facet_terms));
-    for (i = 0 ; i < facet->num_terms; i++)
+    for (int i = 0 ; i < facet->num_terms; i++)
     {
         Z_FacetTerm *facetTerm = facet->terms[i];
         facet_field->facet_terms[i].frequency = *facetTerm->count;
@@ -1190,12 +1165,11 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
 /* Can be share with SOLR/SRU/SRW requests */
 void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
 {
-    int j;
     r->num_res_facets = fl->num;
     yaz_log(YLOG_DEBUG, "Facets found: %d", fl->num);
     r->res_facets =  odr_malloc(r->odr, fl->num * sizeof(*r->res_facets));
     r->facets_names =  odr_malloc(r->odr, fl->num * sizeof(*r->facets_names));
-    for (j = 0; j < fl->num; j++)
+    for (int j = 0; j < fl->num; j++)
     {
         r->res_facets[j] = get_zoom_facet_field(r->odr, fl->elements[j]);
         if (!r->res_facets[j])
@@ -1212,8 +1186,7 @@ void ZOOM_handle_facet_list(ZOOM_resultset r, Z_FacetList *fl)
 void ZOOM_handle_facet_result(ZOOM_connection c, ZOOM_resultset r,
                               Z_OtherInformation *o)
 {
-    int i;
-    for (i = 0; o && i < o->num_elements; i++)
+    for (int i = 0; o && i < o->num_elements; i++)
     {
         if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
         {
@@ -1267,8 +1240,7 @@ static void handle_queryExpression(ZOOM_options opt, const char *name,
 void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                                Z_OtherInformation *o)
 {
-    int i;
-    for (i = 0; o && i < o->num_elements; i++)
+    for (int i = 0; o && i < o->num_elements; i++)
     {
         if (o->list[i]->which == Z_OtherInfo_externallyDefinedInfo)
         {
@@ -1276,14 +1248,13 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
 
             if (ext->which == Z_External_searchResult1)
             {
-                int j;
                 Z_SearchInfoReport *sr = ext->u.searchResult1;
 
                 if (sr->num)
                     ZOOM_options_set_int(
                         resultset->options, "searchresult.size", sr->num);
 
-                for (j = 0; j < sr->num; j++)
+                for (int j = 0; j < sr->num; j++)
                 {
                     Z_SearchInfoReport_s *ent =
                         ext->u.searchResult1->elements[j];
@@ -1339,14 +1310,13 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
 static void handle_Z3950_search_response(ZOOM_connection c,
                                          Z_SearchResponse *sr)
 {
-    ZOOM_resultset resultset;
     ZOOM_Event event;
     const char *resultCountPrecision = "exact";
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return;
 
-    resultset = c->tasks->u.search.resultset;
+    ZOOM_resultset resultset = c->tasks->u.search.resultset;
 
     if (resultset->live_set == 0)
     {
@@ -1391,11 +1361,10 @@ static void handle_Z3950_sort_response(ZOOM_connection c, Z_SortResponse *res)
 static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
 {
     NMEM nmem = odr_extract_mem(c->odr_in);
-    ZOOM_scanset scan;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
         return;
-    scan = c->tasks->u.scan.scan;
+    ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     if (res->entries && res->entries->nonsurrogateDiagnostics)
         response_diag(c, res->entries->nonsurrogateDiagnostics[0]);
@@ -1417,14 +1386,13 @@ static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
 static void handle_Z3950_records(ZOOM_connection c, Z_Records *sr,
                                  int present_phase)
 {
-    ZOOM_resultset resultset;
     Odr_int *start, *count;
     const char *syntax = 0, *elementSetName = 0, *schema = 0;
 
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SEARCH)
         return ;
 
-    resultset = c->tasks->u.search.resultset;
+    ZOOM_resultset resultset = c->tasks->u.search.resultset;
     start = &c->tasks->u.search.start;
     count = &c->tasks->u.search.count;
     syntax = c->tasks->u.search.syntax;
@@ -1635,13 +1603,12 @@ zoom_ret ZOOM_connection_Z3950_search(ZOOM_connection c)
     const char *syntax = 0;
     const char *elementSetName = 0;
     const char *schema = 0;
-    ZOOM_resultset resultset;
     Odr_int *start, *count;
 
     if (!c->tasks || c->tasks->which == ZOOM_TASK_SORT)
         return zoom_complete;
     assert(c->tasks->which == ZOOM_TASK_SEARCH);
-    resultset = c->tasks->u.search.resultset;
+    ZOOM_resultset resultset = c->tasks->u.search.resultset;
     start = &c->tasks->u.search.start;
     count = &c->tasks->u.search.count;
     syntax = c->tasks->u.search.syntax;

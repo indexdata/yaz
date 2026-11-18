@@ -326,8 +326,7 @@ void wrbuf_puts_escaped(WRBUF b, const char *str)
 
 void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
 {
-    size_t i;
-    for (i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
         if (str[i] < ' ' || str[i] > 126)
             wrbuf_printf(b, "\\x%02X", str[i] & 0xff);
         else
@@ -336,8 +335,7 @@ void wrbuf_write_escaped(WRBUF b, const char *str, size_t len)
 
 void wrbuf_json_write(WRBUF b, const char *cp, size_t sz)
 {
-    size_t i;
-    for (i = 0; i < sz; i++)
+    for (size_t i = 0; i < sz; i++)
     {
         if (cp[i] > 0 && cp[i] < 32)
         {

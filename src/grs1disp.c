@@ -19,9 +19,7 @@
 
 static void display_variant(WRBUF w, Z_Variant *v, int level)
 {
-    int i;
-
-    for (i = 0; i < v->num_triples; i++)
+    for (int i = 0; i < v->num_triples; i++)
     {
         wrbuf_printf(w, "%*sclass=" ODR_INT_PRINTF ",type=" ODR_INT_PRINTF,
                      level * 4, "", *v->triples[i]->zclass,
@@ -36,18 +34,14 @@ static void display_variant(WRBUF w, Z_Variant *v, int level)
 
 static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
 {
-    int i;
-
     if (!r)
     {
         return;
     }
-    for (i = 0; i < r->num_elements; i++)
+    for (int i = 0; i < r->num_elements; i++)
     {
-        Z_TaggedElement *t;
-
         wrbuf_printf(w, "%*s", level * 4, "");
-        t = r->elements[i];
+        Z_TaggedElement *t = r->elements[i];
         wrbuf_printf(w, "(");
         if (t->tagType)
             wrbuf_printf(w, ODR_INT_PRINTF ",", *t->tagType);
@@ -110,10 +104,8 @@ static void display_grs1(WRBUF w, Z_GenericRecord *r, int level)
             display_variant(w, t->appliedVariant, level+1);
         if (t->metaData && t->metaData->supportedVariants)
         {
-            int c;
-
             wrbuf_printf(w, "%*s---- variant list\n", (level+1)*4, "");
-            for (c = 0; c < t->metaData->num_supportedVariants; c++)
+            for (int c = 0; c < t->metaData->num_supportedVariants; c++)
             {
                 wrbuf_printf(w, "%*svariant #%d\n", (level+1)*4, "", c);
                 display_variant(w, t->metaData->supportedVariants[c], level+2);

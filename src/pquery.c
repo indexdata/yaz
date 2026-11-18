@@ -191,7 +191,6 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
                               char **attr_clist, Odr_oid **attr_set)
 {
     const char *cp;
-    size_t i;
 
     if (!(cp = strchr(li->lex_buf, '=')) ||
         (size_t) (cp-li->lex_buf) > li->lex_len)
@@ -229,7 +228,7 @@ static int p_query_parse_attr(struct yaz_pqf_parser *li, ODR o,
     cp++;
 
     /* inspect value .. and make it a integer if it appears to be */
-    for (i = cp - li->lex_buf; i < li->lex_len; i++)
+    for (size_t i = cp - li->lex_buf; i < li->lex_len; i++)
         if (li->lex_buf[i] < '0' || li->lex_buf[i] > '9')
         {
             size_t len = li->lex_len - (cp - li->lex_buf);
@@ -656,7 +655,6 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
                                      Odr_int *attr_list, char **attr_clist,
                                      Odr_oid **attr_set)
 {
-    Z_RPNStructure *result;
     if (li->depth >= YAZ_PQF_MAX_DEPTH || li->nodes >= YAZ_PQF_MAX_NODES)
     {
         li->error = YAZ_PQF_ERROR_COMPLEXITY;
@@ -664,8 +662,8 @@ static Z_RPNStructure *rpn_structure(struct yaz_pqf_parser *li, ODR o,
     }
     li->depth++;
     li->nodes++;
-    result = rpn_structure_impl(li, o, num_attr, max_attr, attr_list,
-                               attr_clist, attr_set);
+    Z_RPNStructure *result = rpn_structure_impl(
+        li, o, num_attr, max_attr, attr_list, attr_clist, attr_set);
     li->depth--;
     return result;
 }
@@ -804,14 +802,13 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
                                              Odr_oid **attributeSetP)
 {
     Z_AttributeList *attr_list = p_query_scan_attributes_mk(li, o, attributeSetP);
-    Z_AttributesPlusTerm *apt;
 
     if (!li->query_look)
     {
         li->error = YAZ_PQF_ERROR_MISSING;
         return 0;
     }
-    apt = rpn_term_attributes(li, o, attr_list);
+    Z_AttributesPlusTerm *apt = rpn_term_attributes(li, o, attr_list);
 
     lex(li);
 
@@ -875,10 +872,10 @@ static Z_FacetField* parse_facet(ODR odr, const char *facet)
     struct yaz_pqf_parser *li = pqf_parser;
     Odr_oid *attributeSetId = 0;
     Z_FacetField *facet_field = 0;
-    Z_AttributeList *attribute_list;
 
     pqf_parser_begin(pqf_parser, facet);
-    attribute_list = p_query_scan_attributes_mk(li, odr, &attributeSetId);
+    Z_AttributeList *attribute_list =
+        p_query_scan_attributes_mk(li, odr, &attributeSetId);
     if (attribute_list)
     {
         facet_field = (Z_FacetField *) odr_malloc(odr, sizeof(*facet_field));
@@ -919,12 +916,11 @@ Z_FacetList *yaz_pqf_parse_facet_list(ODR o, const char *qbuf)
     nmem_strsplit(odr_getmem(o), ",", qbuf, &darray, &num);
     if (num > 0)
     {
-        int i;
         Z_FacetList *fl = (Z_FacetList*) odr_malloc(o, sizeof(*fl));
         fl->num = num;
         fl->elements = (Z_FacetField **)
             odr_malloc(o, num * sizeof(*fl->elements));
-        for (i = 0; i < num; i++)
+        for (int i = 0; i < num; i++)
         {
             fl->elements[i] = parse_facet(o, darray[i]);
             if (!fl->elements[i])

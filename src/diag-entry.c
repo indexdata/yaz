@@ -16,8 +16,7 @@
 
 const char *yaz_diag_to_str(struct yaz_diag_entry *tab, int code)
 {
-    int i;
-    for (i=0; tab[i].msg; i++)
+    for (int i=0; tab[i].msg; i++)
         if (tab[i].code == code)
             return tab[i].msg;
     return "Unknown error";

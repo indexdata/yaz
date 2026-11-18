@@ -28,8 +28,7 @@ static int sha1_test(WRBUF wr, const char *msg, const char *expect)
 static void *my_handler(void *arg)
 {
     WRBUF wr = wrbuf_alloc();
-    int i;
-    for (i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         char buf[100];
         yaz_snprintf(buf, sizeof(buf), "Hello world %d", i);
@@ -60,10 +59,7 @@ static void thread_testing(void)
 
 static void tstwrbuf(void)
 {
-    int step;
-    WRBUF wr;
-
-    wr = 0;
+    WRBUF wr = 0;
     wrbuf_destroy(wr);
 
     wr = wrbuf_alloc();
@@ -74,12 +70,10 @@ static void tstwrbuf(void)
 
     YAZ_CHECK(wr);
 
-    for (step = 1; step < 65; step++)
+    for (int step = 1; step < 65; step++)
     {
         size_t i, j, k;
-        size_t len;
         char buf[64];
-        char *cp;
         for (j = 1; j<step; j++)
         {
             for (i = 0; i<j; i++)
@@ -88,8 +82,8 @@ static void tstwrbuf(void)
             wrbuf_puts(wr, buf);
         }
 
-        cp = wrbuf_buf(wr);
-        len = wrbuf_len(wr);
+        char *cp = wrbuf_buf(wr);
+        size_t len = wrbuf_len(wr);
         YAZ_CHECK(len == step * (step-1) / 2);
         k = 0;
         for (j = 1; j<step; j++)

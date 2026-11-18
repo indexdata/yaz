@@ -547,9 +547,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
 {
     Z_External *x, *x2;
     Z_OtherInformation *u;
-    Z_OtherInformationUnit *l;
     Z_DiagnosticFormat *d;
-    Z_DiagnosticFormat_s *e;
 
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;
@@ -562,7 +560,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     u->num_elements = 1;
     u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
     u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
-    l = u->list[0];
+    Z_OtherInformationUnit *l = u->list[0];
     l->category = 0;
     l->which = Z_OtherInfo_externallyDefinedInfo;
 
@@ -578,7 +576,7 @@ Z_External *zget_init_diagnostics(ODR odr, int error, const char *addinfo)
     d->num = 1;
     d->elements = (Z_DiagnosticFormat_s**) odr_malloc(odr, sizeof *d->elements);
     d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc(odr, sizeof *d->elements[0]);
-    e = d->elements[0];
+    Z_DiagnosticFormat_s *e = d->elements[0];
 
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;
     e->u.defaultDiagRec = zget_DefaultDiagFormat(odr, error, addinfo);
@@ -591,18 +589,14 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
 {
     Z_External *x, *x2;
     Z_OtherInformation *u;
-    Z_OtherInformationUnit *l;
     Z_DiagnosticFormat *d;
-    Z_DiagnosticFormat_s *e;
-    char *octet_buf;
     int octet_len;
-    ODR encode;
 
     u = (Z_OtherInformation *) odr_malloc(odr, sizeof *u);
     u->num_elements = 1;
     u->list = (Z_OtherInformationUnit**) odr_malloc(odr, sizeof *u->list);
     u->list[0] = (Z_OtherInformationUnit*) odr_malloc(odr, sizeof *u->list[0]);
-    l = u->list[0];
+    Z_OtherInformationUnit *l = u->list[0];
     l->category = 0;
     l->which = Z_OtherInfo_externallyDefinedInfo;
 
@@ -619,17 +613,17 @@ Z_External *zget_init_diagnostics_octet(ODR odr, int error,
     d->num = 1;
     d->elements = (Z_DiagnosticFormat_s**) odr_malloc(odr, sizeof *d->elements);
     d->elements[0] = (Z_DiagnosticFormat_s*) odr_malloc(odr, sizeof *d->elements[0]);
-    e = d->elements[0];
+    Z_DiagnosticFormat_s *e = d->elements[0];
 
     e->which = Z_DiagnosticFormat_s_defaultDiagRec;
     e->u.defaultDiagRec = zget_DefaultDiagFormat(odr, error, addinfo);
     e->message = 0;
 
-    encode = odr_createmem(ODR_ENCODE);
+    ODR encode = odr_createmem(ODR_ENCODE);
 
     z_OtherInformation(encode, &u, 0, 0);
 
-    octet_buf = odr_getbuf(encode, &octet_len, 0);
+    char *octet_buf = odr_getbuf(encode, &octet_len, 0);
 
     x = (Z_External*) odr_malloc(odr, sizeof *x);
     x->descriptor = 0;

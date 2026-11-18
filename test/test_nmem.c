@@ -16,7 +16,6 @@
 
 void tst_nmem_malloc(void)
 {
-    NMEM n;
     int j;
     char *cp;
 
@@ -31,7 +30,7 @@ void tst_nmem_malloc(void)
         nmem_get_status(stat_buf, sizeof stat_buf);
         YAZ_CHECK(strcmp(exp, stat_buf) == 0);
     }
-    n = nmem_create();
+    NMEM n = nmem_create();
     {
         char stat_buf[200];
         const char *exp = "<nmem>\n"
@@ -165,9 +164,9 @@ void tst_nmem_strsplit(void)
 void tst_nmem_printf(void)
 {
     NMEM nmem = nmem_create();
-    char *s;
 
-    s = nmem_printf(nmem, "This is a test: %d %.2f %s", 42, 3.14, "hello");
+    char *s =
+        nmem_printf(nmem, "This is a test: %d %.2f %s", 42, 3.14, "hello");
     YAZ_CHECK(s);
     YAZ_CHECK(strcmp(s, "This is a test: 42 3.14 hello") == 0);
 

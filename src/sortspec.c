@@ -35,7 +35,6 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
     while ((sscanf(arg, "%63s %63s%n", sort_string_buf,
                    sort_flags, &off)) == 2  && off > 1)
     {
-        int i;
         char *sort_string_sep;
         char *sort_string = sort_string_buf;
         Z_SortKeySpec *sks;
@@ -96,7 +95,7 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
         sks->which = Z_SortKeySpec_null;
         sks->u.null = odr_nullval ();
 
-        for (i = 0; sort_flags[i]; i++)
+        for (int i = 0; sort_flags[i]; i++)
         {
             switch (sort_flags[i])
             {
@@ -141,16 +140,14 @@ Z_SortKeySpecList *yaz_sort_spec(ODR out, const char *arg)
 
 int yaz_sort_spec_to_cql(Z_SortKeySpecList *sksl, WRBUF w)
 {
-    int i;
-    for (i = 0; i < sksl->num_specs; i++)
+    for (int i = 0; i < sksl->num_specs; i++)
     {
         Z_SortKeySpec *sks = sksl->specs[i];
-        Z_SortKey *sk;
 
         if (sks->sortElement->which != Z_SortElement_generic)
             return -1;
 
-        sk = sks->sortElement->u.generic;
+        Z_SortKey *sk = sks->sortElement->u.generic;
         if (i)
             wrbuf_puts(w, " ");
         else
@@ -196,23 +193,20 @@ int yaz_sort_spec_to_cql(Z_SortKeySpecList *sksl, WRBUF w)
 
 int yaz_sort_spec_to_type7(Z_SortKeySpecList *sksl, WRBUF pqf)
 {
-    int i;
-    for (i = 0; i < sksl->num_specs; i++)
+    for (int i = 0; i < sksl->num_specs; i++)
     {
         Z_SortKeySpec *sks = sksl->specs[i];
-        Z_SortKey *sk;
 
         if (sks->sortElement->which != Z_SortElement_generic)
             return -1;
 
-        sk = sks->sortElement->u.generic;
+        Z_SortKey *sk = sks->sortElement->u.generic;
 
         wrbuf_insert(pqf, 0, "@or ", 4);
 
         if (sk->which == Z_SortKey_sortAttributes)
         {
-            int j;
-            for (j = 0; j < sk->u.sortAttributes->list->num_attributes; j++)
+            for (int j = 0; j < sk->u.sortAttributes->list->num_attributes; j++)
             {
                 Z_AttributeElement *el =
                     sk->u.sortAttributes->list->attributes[j];
@@ -243,16 +237,14 @@ int yaz_sort_spec_to_type7(Z_SortKeySpecList *sksl, WRBUF pqf)
 
 int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
 {
-    int i;
-    for (i = 0; i < sksl->num_specs; i++)
+    for (int i = 0; i < sksl->num_specs; i++)
     {
         Z_SortKeySpec *sks = sksl->specs[i];
-        Z_SortKey *sk;
 
         if (sks->sortElement->which != Z_SortElement_generic)
             return -1;
 
-        sk = sks->sortElement->u.generic;
+        Z_SortKey *sk = sks->sortElement->u.generic;
 
         if (i)
             wrbuf_puts(w, " ");
@@ -303,16 +295,14 @@ int yaz_sort_spec_to_srw_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
 
 int yaz_sort_spec_to_solr_sortkeys(Z_SortKeySpecList *sksl, WRBUF w)
 {
-    int i;
-    for (i = 0; i < sksl->num_specs; i++)
+    for (int i = 0; i < sksl->num_specs; i++)
     {
         Z_SortKeySpec *sks = sksl->specs[i];
-        Z_SortKey *sk;
 
         if (sks->sortElement->which != Z_SortElement_generic)
             return -1;
 
-        sk = sks->sortElement->u.generic;
+        Z_SortKey *sk = sks->sortElement->u.generic;
 
         if (i)
             wrbuf_puts(w, ",");
@@ -343,12 +333,11 @@ int yaz_srw_sortkeys_to_sort_spec(const char *srw_sortkeys, WRBUF w)
     /* see cql_sortby_to_sortkeys of YAZ. */
     char **sortspec;
     int num_sortspec = 0;
-    int i;
     NMEM nmem = nmem_create();
 
     if (srw_sortkeys)
         nmem_strsplit_blank(nmem, srw_sortkeys, &sortspec, &num_sortspec);
-    for (i = 0; i < num_sortspec; i++)
+    for (int i = 0; i < num_sortspec; i++)
     {
         char **arg;
         int num_arg;
@@ -402,12 +391,11 @@ int yaz_solr_sortkeys_to_sort_spec(const char *solr_sortkeys, WRBUF w)
     /* see cql_sortby_to_sortkeys of YAZ. */
     char **sortspec;
     int num_sortspec = 0;
-    int i;
     NMEM nmem = nmem_create();
 
     if (solr_sortkeys)
         nmem_strsplit(nmem, ",", solr_sortkeys, &sortspec, &num_sortspec);
-    for (i = 0; i < num_sortspec; i++)
+    for (int i = 0; i < num_sortspec; i++)
     {
         char **arg;
         int num_arg;

@@ -61,9 +61,8 @@ static void parse_field(yaz_marc_t mt, struct json_node *p,
                  l->u.link[0]->type == json_node_list)
         {
             struct json_node *m;
-            int j;
             wrbuf_rewind(wtmp);
-            for (j = 1; j <= indicator_length; j++)
+            for (int j = 1; j <= indicator_length; j++)
             {
                 for (m = l->u.link[0]; m; m = m->u.link[1])
                 {
@@ -149,8 +148,8 @@ int yaz_marc_read_json_node(yaz_marc_t mt, struct json_node *n)
                     p->u.link[1]->u.link[0] &&
                     p->u.link[1]->u.link[0]->type == json_node_list)
                 {
-                    struct json_node *l;
-                    for (l = p->u.link[1]->u.link[0]; l; l = l->u.link[1])
+                    for (struct json_node *l = p->u.link[1]->u.link[0];
+                         l; l = l->u.link[1])
                     {
                         if (l->u.link[0]->type == json_node_object)
                         {

@@ -177,7 +177,6 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
 {
     Z_HTTP_Response *res;
     int number_of_redirects = 0;
-    ODR uri_odr;
     char *uri_lean, *http_user, *http_pass;
     int has_credentials =
         z_HTTP_header_lookup(user_headers, "Authorization") != 0
@@ -188,7 +187,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     yaz_cookies_reset(p->cookies);
     /* Keep URL credentials alive across same-origin redirects and output
        arena resets. Validate destinations against the credential-free URI. */
-    uri_odr = odr_createmem(ODR_ENCODE);
+    ODR uri_odr = odr_createmem(ODR_ENCODE);
     extract_user_pass(uri_odr->mem, uri, &uri_lean, &http_user, &http_pass);
     uri = uri_lean;
     /* Even failures before transport creation must use the stripped URI. */
@@ -204,12 +203,9 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
     {
         void *add;
         COMSTACK conn = 0;
-        int code;
         const char *location = 0;
-        Z_HTTP_Header *h;
         int proxy_mode = 0;
         int ret;
-        Z_GDU *gdu;
         int cs_flags = p->check_cert ? CS_FLAGS_CHECK_CERT : 0;
 
         res = 0;
@@ -224,10 +220,10 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
             cs_set_ssl_certificate_file(conn, p->cert_fname);
         if (p->cafile)
             cs_set_ssl_cafile(conn, p->cafile);
-        gdu = z_get_HTTP_Request_uri(p->odr_out, uri, 0, proxy_mode);
+        Z_GDU *gdu = z_get_HTTP_Request_uri(p->odr_out, uri, 0, proxy_mode);
         gdu->u.HTTP_Request->method = odr_strdup(p->odr_out, method);
         yaz_cookies_request(p->cookies, p->odr_out, gdu->u.HTTP_Request);
-        for (h = user_headers; h; h = h->next)
+        for (Z_HTTP_Header *h = user_headers; h; h = h->next)
         {
             /* prefer new Host over user-supplied Host */
             if (!yaz_strcasecmp(h->name, "Host"))
@@ -371,7 +367,7 @@ Z_HTTP_Response *yaz_url_exec(yaz_url_t p, const char *uri,
         cs_close(conn);
         if (!res)
             break;
-        code = res->code;
+        int code = res->code;
         location = z_HTTP_header_lookup(res->headers, "Location");
         if (++number_of_redirects <= p->max_redirects &&
             location && (code == 301 || code == 302 || code == 307))

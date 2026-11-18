@@ -31,10 +31,9 @@ static int check_diagnostic(const xmlNode *ptr, ODR odr,
     if (ptr && ptr->type == XML_ELEMENT_NODE &&
         !xmlStrcmp(ptr->name, BAD_CAST "diagnostic"))
     {
-        struct _xmlAttr *attr;
         const char *code_str = 0;
         const char *addinfo_str = 0;
-        for (attr = ptr->properties; attr; attr = attr->next)
+        for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
         {
             if (!xmlStrcmp(attr->name, BAD_CAST "code") &&
                 attr->children && attr->children->type == XML_TEXT_NODE)
@@ -92,8 +91,7 @@ static void yaz_query2xml_attribute_element(const Z_AttributeElement *element,
     }
     else if (element->which == Z_AttributeValue_complex)
     {
-        int i;
-        for (i = 0; i<element->value.complex->num_list; i++)
+        for (int i = 0; i<element->value.complex->num_list; i++)
         {
             xmlNodePtr node = xmlNewChild(parent, 0, BAD_CAST "attr", 0);
 
@@ -173,8 +171,7 @@ static xmlNodePtr yaz_query2xml_apt(const Z_AttributesPlusTerm *zapt,
 {
     xmlNodePtr node = xmlNewChild(parent, /* NS */ 0, BAD_CAST "apt", 0);
     int num_attributes = zapt->attributes->num_attributes;
-    int i;
-    for (i = 0; i<num_attributes; i++)
+    for (int i = 0; i<num_attributes; i++)
         yaz_query2xml_attribute_element(zapt->attributes->attributes[i], node);
     yaz_query2xml_term(zapt->term, node);
 
@@ -389,7 +386,6 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
     }
     else if (!strcmp(type, "prox"))
     {
-        struct _xmlAttr *attr;
         Z_ProximityOperator *pop = (Z_ProximityOperator *)
             odr_malloc(odr, sizeof(*pop));
         (*op)->which = Z_Operator_prox;
@@ -403,7 +399,7 @@ static void yaz_xml2query_operator(const xmlNode *ptr, Z_Operator **op,
         pop->u.known = odr_intdup(odr, Z_ProxUnit_word);
         pop->distance = odr_intdup(odr, 1);
 
-        for (attr = ptr->properties; attr; attr = attr->next)
+        for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
         {
             const char *value = (const char *) attr->children->content;
             if (!xmlStrcmp(attr->name, BAD_CAST "type"))
@@ -545,10 +541,9 @@ static void yaz_xml2query_term(const xmlNode *ptr, Z_Term **term, ODR odr,
                                int *error_code, const char **addinfo)
 {
     xmlChar *type = 0;
-    struct _xmlAttr *attr;
     char *cdata = strVal(ptr->children, odr);
 
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "type") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -773,7 +768,6 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
     if (ptr && ptr->type == XML_ELEMENT_NODE &&
         !xmlStrcmp(ptr->name, BAD_CAST "query"))
     {
-        const char *type;
         ptr = ptr->children;
         while (ptr && ptr->type != XML_ELEMENT_NODE)
             ptr = ptr->next;
@@ -783,7 +777,7 @@ static void yaz_xml2query_(const xmlNode *ptr, Z_Query **query, ODR odr,
             *addinfo = "missing query content";
             return;
         }
-        type = (const char *) ptr->name;
+        const char *type = (const char *) ptr->name;
 
         *query = (Z_Query*) odr_malloc(odr, sizeof(Z_Query));
         if (!type || !strcmp(type, "rpn"))

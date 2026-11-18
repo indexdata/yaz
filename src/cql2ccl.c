@@ -165,10 +165,9 @@ static int node_bool(struct cql_node *cn,
                 void *client_data)
 {
     char *value = cn->u.boolean.value;
-    int r;
 
     pr("(", client_data);
-    r = cql_to_ccl_r(cn->u.boolean.left, pr, client_data);
+    int r = cql_to_ccl_r(cn->u.boolean.left, pr, client_data);
     if (r)
         return r;
 
@@ -262,11 +261,10 @@ void cql_to_ccl_stdio(struct cql_node *cn, FILE *f)
 int cql_to_ccl_buf(struct cql_node *cn, char *out, int max)
 {
     struct cql_buf_write_info info;
-    int r;
     info.off = 0;
     info.max = max;
     info.buf = out;
-    r = cql_to_ccl(cn, cql_buf_write_handler, &info);
+    int r = cql_to_ccl(cn, cql_buf_write_handler, &info);
     if (info.off >= 0)
         info.buf[info.off] = '\0';
     else

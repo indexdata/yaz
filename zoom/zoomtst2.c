@@ -10,8 +10,6 @@
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
-    ZOOM_resultset r;
     int error;
     const char *errmsg, *addinfo, *diagset;
 
@@ -24,7 +22,7 @@ int main(int argc, char **argv)
     }
 
     /* create connection (don't connect yet) */
-    z = ZOOM_connection_create(0);
+    ZOOM_connection z = ZOOM_connection_create(0);
 
     /* option: set sru/get operation (only applicable if http: is used) */
     ZOOM_connection_option_set (z, "sru", "post");
@@ -36,7 +34,7 @@ int main(int argc, char **argv)
     ZOOM_connection_connect (z, argv[1], 0);
 
     /* search using prefix query format */
-    r = ZOOM_connection_search_pqf (z, argv[2]);
+    ZOOM_resultset r = ZOOM_connection_search_pqf (z, argv[2]);
 
     /* block here: only one connection */
     while (ZOOM_event (1, &z))

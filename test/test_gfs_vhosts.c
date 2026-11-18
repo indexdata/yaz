@@ -70,13 +70,12 @@ static void send_search(association *assoc, const char *host, int status)
 {
     WRBUF wire = wrbuf_alloc();
     ODR dec = odr_createmem(ODR_DECODE);
-    request *response;
     wrbuf_printf(wire, "GET /db?version=1.2&operation=searchRetrieve&"
                  "query=cql.allRecords%%3D1 HTTP/1.1\r\nHost: %s\r\n\r\n", host);
     assoc->client_link->user = (void *) wrbuf_cstr(wire);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(assoc->client_chan, EVENT_INPUT);
-    response = request_deq(&assoc->outgoing);
+    request *response = request_deq(&assoc->outgoing);
     YAZ_CHECK(response != 0);
     if (response)
     {
@@ -97,14 +96,12 @@ static void tst_switch(int nonnull)
 {
     struct comstack cs;
     IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
-    association *assoc;
-    int i;
     memset(servers, 0, sizeof(servers));
     memset(inits, 0, sizeof(inits));
     memset(searches, 0, sizeof(searches));
     memset(closes, 0, sizeof(closes));
     use_handle = nonnull;
-    for (i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++)
     {
         servers[i].cb = control_block;
         servers[i].cb.bend_init = init;
@@ -120,7 +117,7 @@ static void tst_switch(int nonnull)
     cs.f_get = get;
     cs.f_more = more;
     cs.f_addrstr = addrstr;
-    assoc = create_association(chan, &cs, 0);
+    association *assoc = create_association(chan, &cs, 0);
     iochan_setdata(chan, assoc);
 
     send_search(assoc, "a.example", 200);

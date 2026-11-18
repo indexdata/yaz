@@ -18,8 +18,6 @@
 
 void tst_MySequence1(ODR encode, ODR decode)
 {
-    int ret;
-    char *ber_buf;
     int ber_len;
     Yc_MySequence *s = (Yc_MySequence *) odr_malloc(encode, sizeof(*s));
     Yc_MySequence *t;
@@ -35,12 +33,12 @@ void tst_MySequence1(ODR encode, ODR decode)
 
     s->myoid = odr_getoidbystr(decode, MYOID);
 
-    ret = yc_MySequence(encode, &s, 0, 0);
+    int ret = yc_MySequence(encode, &s, 0, 0);
     YAZ_CHECK(ret);
     if (!ret)
         return;
 
-    ber_buf = odr_getbuf(encode, &ber_len, 0);
+    char *ber_buf = odr_getbuf(encode, &ber_len, 0);
 
     odr_setbuf(decode, ber_buf, ber_len, 0);
 
@@ -75,7 +73,6 @@ void tst_MySequence1(ODR encode, ODR decode)
 
 void tst_MySequence2(ODR encode, ODR decode)
 {
-    int ret;
     Yc_MySequence *s = (Yc_MySequence *) odr_malloc(encode, sizeof(*s));
 
     YAZ_CHECK(s);
@@ -88,7 +85,7 @@ void tst_MySequence2(ODR encode, ODR decode)
     s->fifth = odr_intdup(encode, YC_MySequence_enum1);
     s->myoid = odr_getoidbystr(encode, MYOID);
 
-    ret = yc_MySequence(encode, &s, 0, 0); /* should fail */
+    int ret = yc_MySequence(encode, &s, 0, 0); /* should fail */
     YAZ_CHECK(!ret);
 
     YAZ_CHECK(odr_geterror(encode) == OREQUIRED);
@@ -104,11 +101,10 @@ void tst_MySequence2(ODR encode, ODR decode)
 void tst_MySequence3(ODR encode, ODR decode)
 {
     char buf[40];
-    int i;
     Yc_MySequence *t;
 
     srand(123);
-    for (i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++)
     {
         int j;
         for (j = 0; j < (int) sizeof(buf); j++)
@@ -127,13 +123,11 @@ static void tst_berint32(ODR encode, ODR decode)
 {
     char *buf = 0;
     int len = 0;
-    Odr_int val;
     Odr_int ret_val;
-    int r;
 
-    val = 0;
+    Odr_int val = 0;
     odr_reset(encode);
-    r = ber_integer(encode, &val);
+    int r = ber_integer(encode, &val);
     YAZ_CHECK_EQ(r, 1);
     buf = odr_getbuf(encode, &len, 0);
     YAZ_CHECK(buf);
@@ -249,13 +243,11 @@ static void tst_berint64(ODR encode, ODR decode)
 {
     char *buf = 0;
     int len = 0;
-    Odr_int val;
     Odr_int ret_val;
-    int r;
 
-    val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
+    Odr_int val = (Odr_int) 2 * 2147483648UL; /* 2^32 */
     odr_reset(encode);
-    r = ber_integer(encode, &val);
+    int r = ber_integer(encode, &val);
     YAZ_CHECK_EQ(r, 1);
     buf = odr_getbuf(encode, &len, 0);
     YAZ_CHECK(buf);
@@ -336,7 +328,6 @@ void do_nothing_useful(Odr_int value)
 {
     ODR encode, decode;
     Odr_int *valp, *resvalp;
-    char *bufferp;
     int len;
 
     /* allocate streams */
@@ -351,7 +342,7 @@ void do_nothing_useful(Odr_int value)
         printf("encoding went bad\n");
         return;
     }
-    bufferp = odr_getbuf(encode, &len, 0);
+    char *bufferp = odr_getbuf(encode, &len, 0);
     printf("length of encoded data is %d\n", len);
 
     /* now let's decode the thing again */
@@ -382,11 +373,10 @@ static void tst_ber_length(void)
         for (exact = 0; exact <= 1; exact++)
         {
             int size;
-            char *buf;
             odr_reset(encode);
             YAZ_CHECK(ber_enclen(encode, values[i], sizeof(int) + 2,
                                 exact) > 0);
-            buf = odr_getbuf(encode, &size, 0);
+            char *buf = odr_getbuf(encode, &size, 0);
             YAZ_CHECK_EQ(ber_declen(buf, &len, size), size);
             YAZ_CHECK_EQ(len, values[i]);
             YAZ_CHECK_EQ(ber_declen(buf, &len, size - 1), -1);
@@ -414,7 +404,6 @@ static void tst_odr_create_Odr_oct2(void)
     ODR o = odr_createmem(ODR_ENCODE);
     const char data[] = { 'a', '\0', 'b' };
     Odr_oct *oct = odr_create_Odr_oct2(o, data, sizeof(data));
-    size_t total;
 
     YAZ_CHECK(oct);
     YAZ_CHECK_EQ(oct->len, sizeof(data));
@@ -425,7 +414,7 @@ static void tst_odr_create_Odr_oct2(void)
     YAZ_CHECK_EQ(oct->len, 0);
     YAZ_CHECK_EQ(oct->buf[0], '\0');
 
-    total = odr_total(o);
+    size_t total = odr_total(o);
     YAZ_CHECK(!odr_create_Odr_oct2(o, "", (size_t) INT_MAX + 1));
     YAZ_CHECK_EQ(odr_geterror(o), OLENOV);
     YAZ_CHECK_EQ(odr_total(o), total);
@@ -442,10 +431,9 @@ static void tst_odr_write2(void)
 {
     ODR encode = odr_createmem(ODR_ENCODE);
     int len;
-    char *buf;
 
     YAZ_CHECK_EQ(odr_write2(encode, "abc", 3), 0);
-    buf = odr_getbuf(encode, &len, 0);
+    char *buf = odr_getbuf(encode, &len, 0);
     YAZ_CHECK_EQ(len, 3);
     YAZ_CHECK(memcmp(buf, "abc", 3) == 0);
     YAZ_CHECK_EQ(odr_write2(encode, "", 0), 0);

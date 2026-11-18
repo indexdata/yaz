@@ -63,9 +63,8 @@ static void tst_request_validation(void)
         {
             ODR odr = odr_createmem(ODR_ENCODE);
             char uri[] = "http://exa mple.org/path";
-            Z_GDU *gdu;
             uri[10] = c;
-            gdu = z_get_HTTP_Request_uri(odr, uri, 0, proxy);
+            Z_GDU *gdu = z_get_HTTP_Request_uri(odr, uri, 0, proxy);
             check_request_encoding(gdu, odr, 0);
             odr_destroy(odr);
         }
@@ -77,12 +76,11 @@ static void tst_request_validation(void)
             "http://example.org/a%20b?q=%0D%0A#fragment", 0, proxy);
         char body[] = "\r\n\0\177";
         int len;
-        char *encoded;
         gdu->u.HTTP_Request->method = "M-SEARCH";
         gdu->u.HTTP_Request->content_buf = body;
         gdu->u.HTTP_Request->content_len = sizeof(body) - 1;
         check_request_encoding(gdu, odr, 1);
-        encoded = odr_getbuf(odr, &len, 0);
+        char *encoded = odr_getbuf(odr, &len, 0);
         YAZ_CHECK(len >= sizeof(body) - 1);
         if (len >= sizeof(body) - 1)
         {
@@ -97,9 +95,8 @@ static void tst_request_validation(void)
             "http://example.org/path#ignored \r\nX-Injected: yes", 0, 0);
         const char prefix[] = "POST /path HTTP/1.1\r\n";
         int len;
-        char *encoded;
         check_request_encoding(gdu, odr, 1);
-        encoded = odr_getbuf(odr, &len, 0);
+        char *encoded = odr_getbuf(odr, &len, 0);
         YAZ_CHECK(len >= sizeof(prefix) - 1);
         if (len >= sizeof(prefix) - 1)
         {
@@ -109,8 +106,7 @@ static void tst_request_validation(void)
     }
     {
         static const char *invalid[] = { "", "BAD METHOD", "GET\r\nX: injected", "G(ET" };
-        size_t i;
-        for (i = 0; i < sizeof(invalid) / sizeof(*invalid); i++)
+        for (size_t i = 0; i < sizeof(invalid) / sizeof(*invalid); i++)
         {
             ODR odr = odr_createmem(ODR_ENCODE);
             Z_GDU *gdu = z_get_HTTP_Request(odr);
@@ -126,7 +122,6 @@ static void tst_cookies(void)
     ODR odr = odr_createmem(ODR_ENCODE);
     yaz_cookies_t cookies = yaz_cookies_create();
     Z_HTTP_Response *res = z_get_HTTP_Response(odr, 302)->u.HTTP_Response;
-    Z_HTTP_Request *req;
 
     YAZ_CHECK(yaz_cookies_is_empty(0));
     YAZ_CHECK(yaz_cookies_is_empty(cookies));
@@ -137,8 +132,9 @@ static void tst_cookies(void)
                       "session=secret; Secure; Path=/");
     yaz_cookies_response(cookies, res);
     YAZ_CHECK(!yaz_cookies_is_empty(cookies));
-    req = z_get_HTTP_Request_uri(odr, "https://example.org/", 0, 0)
-        ->u.HTTP_Request;
+    Z_HTTP_Request *req =
+        z_get_HTTP_Request_uri(odr, "https://example.org/", 0, 0)
+            ->u.HTTP_Request;
     yaz_cookies_request(cookies, odr, req);
     YAZ_CHECK(z_HTTP_header_lookup(req->headers, "Cookie")
               && !strcmp(z_HTTP_header_lookup(req->headers, "Cookie"),
@@ -206,16 +202,14 @@ static void tst_http_response(void)
         "\r\n"
         "12";
 
-    int r;
     Z_GDU *zgdu;
     ODR enc = odr_createmem(ODR_ENCODE);
     ODR dec = odr_createmem(ODR_DECODE);
     odr_setbuf(dec, (char *) http_buf, (int) strlen(http_buf), 0);
-    r = z_GDU(dec, &zgdu, 0, 0);
+    int r = z_GDU(dec, &zgdu, 0, 0);
     YAZ_CHECK(r);
     if (r)
     {
-        char *http_buf1;
         int http_len1;
         YAZ_CHECK_EQ(zgdu->which, Z_GDU_HTTP_Response);
         YAZ_CHECK_EQ(zgdu->u.HTTP_Response->code, 200);
@@ -228,7 +222,7 @@ static void tst_http_response(void)
         zgdu->u.HTTP_Response->content_len = 1;
         /* we now have Content-Length=2, but content_len=1 */
         z_GDU(enc, &zgdu, 0, 0);
-        http_buf1 = odr_getbuf(enc, &http_len1, 0);
+        char *http_buf1 = odr_getbuf(enc, &http_len1, 0);
         YAZ_CHECK(http_buf1);
         if (http_buf1)
         {
@@ -250,20 +244,18 @@ static void tst_http_response(void)
 static void tst_double_encoding(const char *buf_in, const char *buf_out, int request_type)
 {
     Z_GDU *zgdu;
-    int r;
     ODR enc = odr_createmem(ODR_ENCODE);
     ODR dec = odr_createmem(ODR_DECODE);
     odr_setbuf(dec, (char *) buf_in, (int) strlen(buf_in), 0);
-    r = z_GDU(dec, &zgdu, 0, 0);
+    int r = z_GDU(dec, &zgdu, 0, 0);
     YAZ_CHECK(r);
     if (r)
     {
-        char *http_buf1;
         int http_len1;
         YAZ_CHECK_EQ(zgdu->which, request_type);
 
         z_GDU(enc, &zgdu, 0, 0);
-        http_buf1 = odr_getbuf(enc, &http_len1, 0);
+        char *http_buf1 = odr_getbuf(enc, &http_len1, 0);
         YAZ_CHECK(http_buf1);
         if (http_buf1)
         {
@@ -326,14 +318,13 @@ static void tst_http_framing(void)
     {
         for (i = 0; i < sizeof(invalid) / sizeof(*invalid); i++)
         {
-            int k;
             WRBUF b = wrbuf_alloc();
             wrbuf_printf(b, "%s%s\r\n1\r\nX\r\n0\r\n\r\n"
                          "GET /next HTTP/1.1\r\n\r\n", start[j], invalid[i]);
             YAZ_CHECK_EQ(cs_complete_auto(wrbuf_buf(b), wrbuf_len(b)), -1);
             YAZ_CHECK_EQ(cs_complete_auto_head(wrbuf_buf(b), wrbuf_len(b)), -1);
             /* Fragmentation must never turn an invalid request into a frame. */
-            for (k = 0; k < (int) wrbuf_len(b); k++)
+            for (int k = 0; k < (int) wrbuf_len(b); k++)
                 YAZ_CHECK(cs_complete_auto(wrbuf_buf(b), k) <= 0);
             tst_invalid_encoding(wrbuf_cstr(b));
             wrbuf_destroy(b);
@@ -411,13 +402,12 @@ static void tst_http_same_origin(void)
         { "http://[::1]", "http://[::1", 0 },
         { "http://[]", "http://[]", 0 }
     };
-    size_t i;
     ODR odr = odr_createmem(ODR_ENCODE);
     int host_change = 0;
     const char *location = yaz_check_location(odr, "https://example.org/a",
                                                "/next", &host_change);
     YAZ_CHECK(yaz_http_same_origin("https://example.org/a", location));
-    for (i = 0; i < sizeof(cases) / sizeof(*cases); i++)
+    for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++)
     {
         YAZ_CHECK_EQ(yaz_http_same_origin(cases[i].uri, cases[i].other),
                      cases[i].same);
@@ -510,8 +500,7 @@ static void tst_http_redirect(void)
         { "ssl:target.example:443", 0, 1, 0 },
         { "https://[::1]#ignored:8080", 0, 1, 0 }
     };
-    size_t i;
-    for (i = 0; i < sizeof(cases) / sizeof(*cases); i++)
+    for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++)
         check_http_redirect("connect:proxy.example:8080,https://target.example:443/sru",
                             cases[i].location, cases[i].target,
                             cases[i].changed, cases[i].same);
@@ -568,11 +557,10 @@ static void tst_http_origin_length(void)
                For IPv4, 513 bytes reproduces the reported 499-zero port. */
             for (len = 510; len <= 514; len++)
             {
-                size_t i;
                 int valid = len < 512;
                 wrbuf_rewind(uri);
                 wrbuf_printf(uri, "%s://%s:", schemes[s], hosts[h]);
-                for (i = strlen(hosts[h]) + 1 + 4; i < len; i++)
+                for (size_t i = strlen(hosts[h]) + 1 + 4; i < len; i++)
                     wrbuf_putc(uri, '0');
                 wrbuf_puts(uri, "8000/next");
                 YAZ_CHECK_EQ(yaz_http_same_origin(wrbuf_cstr(base),
@@ -593,12 +581,11 @@ static void tst_http_origin_length(void)
     for (s = 0; s < sizeof(schemes) / sizeof(*schemes); s++)
         for (len = 506; len <= 512; len++)
         {
-            size_t i;
             int port = s ? 443 : 80;
             int valid = len + (s ? 4 : 3) < 512;
             wrbuf_rewind(uri);
             wrbuf_printf(uri, "%s://", schemes[s]);
-            for (i = 0; i < len; i++)
+            for (size_t i = 0; i < len; i++)
                 wrbuf_putc(uri, 'a');
             wrbuf_rewind(tunnel_uri);
             wrbuf_printf(tunnel_uri, "connect:proxy:8080,%s:%d/next",

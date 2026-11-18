@@ -18,7 +18,6 @@ bool_t *ill_get_bool(struct ill_get_ctl *gc, const char *name,
 {
     ODR o = gc->odr;
     char element[128];
-    const char *v;
     bool_t *r = (bool_t *) odr_malloc(o, sizeof(*r));
 
     strcpy(element, name);
@@ -28,7 +27,7 @@ bool_t *ill_get_bool(struct ill_get_ctl *gc, const char *name,
         strcat(element, sub);
     }
 
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (v)
         val = atoi(v);
     else if (val < 0)
@@ -42,7 +41,6 @@ Odr_int *ill_get_int(struct ill_get_ctl *gc, const char *name,
 {
     ODR o = gc->odr;
     char element[128];
-    const char *v;
 
     strcpy(element, name);
     if (sub)
@@ -50,7 +48,7 @@ Odr_int *ill_get_int(struct ill_get_ctl *gc, const char *name,
         strcat(element, ",");
         strcat(element, sub);
     }
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (v)
         val = atoi(v);
     return odr_intdup(o, val);
@@ -67,7 +65,6 @@ ILL_String *ill_get_ILL_String_x(struct ill_get_ctl *gc, const char *name,
 {
     ILL_String *r = (ILL_String *) odr_malloc(gc->odr, sizeof(*r));
     char element[128];
-    const char *v;
 
     strcpy(element, name);
     if (sub)
@@ -75,7 +72,7 @@ ILL_String *ill_get_ILL_String_x(struct ill_get_ctl *gc, const char *name,
         strcat(element, ",");
         strcat(element, sub);
     }
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (!v)
         v = vdefault;
     if (!v)
@@ -95,7 +92,6 @@ ILL_ISO_Date *ill_get_ILL_ISO_Date(struct ill_get_ctl *gc, const char *name,
                                    const char *sub, const char *val)
 {
     char element[128];
-    const char *v;
 
     strcpy(element, name);
     if (sub)
@@ -103,7 +99,7 @@ ILL_ISO_Date *ill_get_ILL_ISO_Date(struct ill_get_ctl *gc, const char *name,
         strcat(element, ",");
         strcat(element, sub);
     }
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (!v)
         v = val;
     if (!v)
@@ -115,7 +111,6 @@ ILL_ISO_Time *ill_get_ILL_ISO_Time(struct ill_get_ctl *gc, const char *name,
                                    const char *sub, const char *val)
 {
     char element[128];
-    const char *v;
 
     strcpy(element, name);
     if (sub)
@@ -123,7 +118,7 @@ ILL_ISO_Time *ill_get_ILL_ISO_Time(struct ill_get_ctl *gc, const char *name,
         strcat(element, ",");
         strcat(element, sub);
     }
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (!v)
         v = val;
     if (!v)
@@ -643,12 +638,11 @@ ILL_APDU *ill_get_APDU(
     ODR o = gc->odr;
     ILL_APDU *r = (ILL_APDU *)odr_malloc(o, sizeof(*r));
     char element[128];
-    const char *v;
 
     strcpy(element, name);
     strcat(element, ",which");
 
-    v = (gc->f)(gc->clientData, element);
+    const char *v = (gc->f)(gc->clientData, element);
     if (!v)
         v = "request";
     if (!strcmp(v, "request"))

@@ -49,13 +49,10 @@ static int sendAdminES(int type, char* param1)
     Z_APDU *apdu = zget_APDU(out, Z_APDU_extendedServicesRequest );
     Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
     Z_External *r;
-    Odr_oid *oid;
-    Z_ESAdminOriginPartToKeep  *toKeep;
-    Z_ESAdminOriginPartNotToKeep  *notToKeep;
     printf ("Admin request\n");
     fflush(stdout);
 
-    oid = odr_oiddup(out, yaz_oid_extserv_admin);
+    Odr_oid *oid = odr_oiddup(out, yaz_oid_extserv_admin);
 
     req->packageType = oid;
     req->packageName = "1.Extendedserveq";
@@ -73,9 +70,9 @@ static int sendAdminES(int type, char* param1)
     r->u.adminService->u.esRequest = (Z_AdminEsRequest *)
         odr_malloc(out, sizeof(*r->u.adminService->u.esRequest));
 
-    toKeep = r->u.adminService->u.esRequest->toKeep =
-        (Z_ESAdminOriginPartToKeep *)
-        odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->toKeep));
+    Z_ESAdminOriginPartToKeep *toKeep = r->u.adminService->u.esRequest->toKeep =
+        (Z_ESAdminOriginPartToKeep *) odr_malloc(
+            out, sizeof(*r->u.adminService->u.esRequest->toKeep));
 
     toKeep->which=type;
     toKeep->databaseName = dbname;
@@ -117,9 +114,10 @@ static int sendAdminES(int type, char* param1)
         break;
     }
 
-    notToKeep = r->u.adminService->u.esRequest->notToKeep =
-        (Z_ESAdminOriginPartNotToKeep *)
-        odr_malloc(out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
+    Z_ESAdminOriginPartNotToKeep *notToKeep =
+        r->u.adminService->u.esRequest->notToKeep =
+            (Z_ESAdminOriginPartNotToKeep *) odr_malloc(
+                out, sizeof(*r->u.adminService->u.esRequest->notToKeep));
     notToKeep->which=Z_ESAdminOriginPartNotToKeep_recordsWillFollow;
     notToKeep->u.recordsWillFollow=odr_nullval();
 
@@ -184,7 +182,6 @@ int cmd_adm_import(const char *arg)
     char type_str[20], dir_str[1024], pattern_str[1024];
     char *cp;
     char *sep = "/";
-    DIR *dir;
     struct dirent *ent;
     int chunk = 10;
     Z_APDU *apdu = 0;
@@ -196,7 +193,7 @@ int cmd_adm_import(const char *arg)
         return 0;
     if (num_databaseNames != 1)
         return 0;
-    dir = opendir(dir_str);
+    DIR *dir = opendir(dir_str);
     if (!dir)
         return 0;
 

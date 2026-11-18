@@ -122,7 +122,6 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
     {
         struct sockaddr_in add;
         struct sockaddr *addr = 0;
-        unsigned int tmpadd;
         struct sockaddr caddr;
         YAZ_SOCKLEN_T caddr_len = sizeof(caddr);
         fd_set write_set;
@@ -172,7 +171,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
         }
 
         /* client socket */
-        tmpadd = (unsigned) inet_addr("127.0.0.1");
+        unsigned int tmpadd = (unsigned) inet_addr("127.0.0.1");
         if (!tmpadd)
         {
             if (err_msg)

@@ -21,7 +21,6 @@ static void usage(const char *prog)
 
 int main(int argc, char **argv)
 {
-    CQL_parser cp;
     int r = 0;
     const char *fname = 0;
     int iterations = 1;
@@ -56,12 +55,11 @@ int main(int argc, char **argv)
         }
     }
 
-    cp = cql_parser_create();
+    CQL_parser cp = cql_parser_create();
     cql_parser_strict(cp, do_strict);
     if (fname)
     {
-        int i;
-        for (i = 0; i<iterations; i++)
+        for (int i = 0; i<iterations; i++)
             r = cql_parser_string(cp, fname);
     }
     else

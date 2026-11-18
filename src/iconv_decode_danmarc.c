@@ -54,7 +54,6 @@ static unsigned long read_useq(yaz_iconv_t cd,
         0xFE, 0xf0fe,
         0xFF, 0xf0ff,
         0};
-    int i;
     unsigned long x;
 
     if (inbytesleft < 4)
@@ -65,7 +64,7 @@ static unsigned long read_useq(yaz_iconv_t cd,
     }
     sscanf((const char *) inp+2, "%2lx", &x);
     *no_read = 4;
-    for (i = 0; u_seq[i]; i += 2)
+    for (int i = 0; u_seq[i]; i += 2)
         if (x == u_seq[i])
             return u_seq[i+1];
     return x;
@@ -76,15 +75,13 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
                                   unsigned char *inp,
                                   size_t inbytesleft, size_t *no_read)
 {
-    unsigned long x;
-
     if (inbytesleft < 1)
     {
         yaz_iconv_set_errno(cd, YAZ_ICONV_EINVAL);
         *no_read = 0;
         return 0;
     }
-    x = inp[0];
+    unsigned long x = inp[0];
     if (x != '@')
     {
         *no_read = 1;
@@ -145,8 +142,7 @@ static unsigned long swap_seq[] = {
 
 unsigned long yaz_danmarc_swap_to_danmarc(unsigned long x)
 {
-    int i;
-    for (i = 0; swap_seq[i]; i += 2)
+    for (int i = 0; swap_seq[i]; i += 2)
         if (swap_seq[i+1] == x)
             return swap_seq[i];
     return x;
@@ -154,8 +150,7 @@ unsigned long yaz_danmarc_swap_to_danmarc(unsigned long x)
 
 static unsigned long yaz_danmarc_swap_to_utf8(unsigned long x)
 {
-    int i;
-    for (i = 0; swap_seq[i]; i += 2)
+    for (int i = 0; swap_seq[i]; i += 2)
         if (swap_seq[i] == x)
             return swap_seq[i+1];
     return x;

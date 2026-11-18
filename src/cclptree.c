@@ -83,8 +83,7 @@ static void ccl_pquery_indent(WRBUF w, struct ccl_rpn_node *p, int indent)
         return;
     if (indent != -1)
     {
-        int i;
-        for (i = 0; i < indent; i++)
+        for (int i = 0; i < indent; i++)
             wrbuf_putc(w, ' ');
     }
     switch (p->kind)

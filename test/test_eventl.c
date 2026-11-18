@@ -31,12 +31,11 @@ time_t test_eventl_time(time_t *result)
 
 int test_eventl_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
 {
-    int i;
     if (first_wait == -1)
         first_wait = sec;
     if (sec > 0)
         clock_now++;
-    for (i = 0; i < num_fds; i++)
+    for (int i = 0; i < num_fds; i++)
         fds[i].output_mask = ready ? fds[i].input_mask : yaz_poll_none;
     return ready ? num_fds : 0;
 }
@@ -63,13 +62,12 @@ static void callback(IOCHAN chan, int event)
 static void run(int which, time_t deadline, int idle, int activity,
                 time_t expected_time, int expected_inputs, int expected_wait)
 {
-    IOCHAN chan;
     scenario = which;
     ready = activity;
     clock_now = 100;
     inputs = outputs = timeouts = 0;
     first_wait = -1;
-    chan = iochan_create(-1, callback, EVENT_INPUT | EVENT_OUTPUT, 0);
+    IOCHAN chan = iochan_create(-1, callback, EVENT_INPUT | EVENT_OUTPUT, 0);
     iochan_settimeout(chan, idle);
     chan->deadline = deadline;
     iochan_event_loop(&chan, 0);

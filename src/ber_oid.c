@@ -112,9 +112,7 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
             while (id);
             while (n--)
             {
-                unsigned char p;
-
-                p = octs[n] | ((n > 0) << 7);
+                unsigned char p = octs[n] | ((n > 0) << 7);
                 if (odr_putc(o, p) < 0)
                     return 0;
             }

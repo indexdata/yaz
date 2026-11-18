@@ -27,16 +27,17 @@ static void check_encoding_failure(int invalid_method)
 {
     ZOOM_connection c = ZOOM_connection_create(0);
     struct comstack cs;
-    Z_GDU *gdu;
     const char *message = 0;
     int len;
     memset(&cs, 0, sizeof(cs));
     cs.f_put = put_request;
     c->cs = &cs;
     writes = 0;
-    gdu = z_get_HTTP_Request_uri(c->odr_out,
-        invalid_method ? "http://example.org/valid" :
-        "http://example.org/database name", 0, 0);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(
+        c->odr_out,
+        invalid_method ? "http://example.org/valid"
+                       : "http://example.org/database name",
+        0, 0);
     if (invalid_method)
         gdu->u.HTTP_Request->method = "GET\r\nInjected: yes";
     YAZ_CHECK_EQ(ZOOM_send_GDU(c, gdu), zoom_complete);

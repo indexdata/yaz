@@ -21,9 +21,8 @@ static int ccl_xml_config_combqual(WRBUF wrbuf,
                                    const xmlNode *ptr,
                                    const char **addinfo)
 {
-    struct _xmlAttr *attr;
     const char *name = 0;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -51,11 +50,10 @@ static int ccl_xml_config_attr(const char *default_set,
                                const xmlNode *ptr,
                                const char **addinfo)
 {
-    struct _xmlAttr *attr;
     const char *type = 0;
     const char *value = 0;
     const char *attrset = default_set;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "type") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -95,10 +93,9 @@ static int ccl_xml_config_qual(CCL_bibset bibset, const char *default_set,
                                const xmlNode *ptr,
                                const char **addinfo)
 {
-    struct _xmlAttr *attr;
     const char *name = 0;
     const xmlNode *a_ptr = ptr->children;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -147,10 +144,9 @@ static int ccl_xml_config_qual(CCL_bibset bibset, const char *default_set,
 int ccl_xml_config_directive(CCL_bibset bibset, const xmlNode *ptr,
                              const char **addinfo)
 {
-    struct _xmlAttr *attr;
     const char *name = 0;
     const char *value = 0;
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "name") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -184,10 +180,8 @@ int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr, const char **addinfo)
     if (ptr && ptr->type == XML_ELEMENT_NODE &&
         !xmlStrcmp(ptr->name, BAD_CAST "cclmap"))
     {
-        const xmlNode *c_ptr;
         const char *set = 0;
-        struct _xmlAttr *attr;
-        for (attr = ptr->properties; attr; attr = attr->next)
+        for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
         {
             if (!xmlStrcmp(attr->name, BAD_CAST "defaultattrset") &&
                 attr->children && attr->children->type == XML_TEXT_NODE)
@@ -199,7 +193,7 @@ int ccl_xml_config(CCL_bibset bibset, const xmlNode *ptr, const char **addinfo)
                 return 1;
             }
         }
-        for (c_ptr = ptr->children; c_ptr; c_ptr = c_ptr->next)
+        for (const xmlNode *c_ptr = ptr->children; c_ptr; c_ptr = c_ptr->next)
         {
             if (c_ptr->type == XML_ELEMENT_NODE)
             {

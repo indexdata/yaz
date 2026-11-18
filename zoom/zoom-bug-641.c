@@ -17,7 +17,6 @@
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
     int i, error;
     const char *errmsg, *addinfo;
 
@@ -27,7 +26,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    z = ZOOM_connection_create(0);
+    ZOOM_connection z = ZOOM_connection_create(0);
 
     for (i = 2; i < argc; i++) {
         char *buf, *fn = argv[i];

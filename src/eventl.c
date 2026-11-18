@@ -67,11 +67,10 @@ IOCHAN iochan_create(int fd, IOC_CALLBACK cb, int flags, int chan_id)
 int iochan_is_alive(IOCHAN chan)
 {
     struct yaz_poll_fd fds;
-    int res;
 
     fds.fd = chan->fd;
     fds.input_mask = yaz_poll_read;
-    res = yaz_poll(&fds, 1, 0, 0);
+    int res = yaz_poll(&fds, 1, 0, 0);
     if (res == 0)
         return 1;
     if (!ir_read(chan, EVENT_INPUT))
@@ -88,7 +87,6 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
         int tv_sec = 3600;
         int no_fds = 0;
         struct yaz_poll_fd *fds = 0;
-        int res;
         time_t now = time(0);
 
         statserv_reap_children();
@@ -129,7 +127,7 @@ int iochan_event_loop(IOCHAN *iochans, int *watch_sig)
             fds[i].fd = p->fd;
             fds[i].input_mask = input_mask;
         }
-        res = yaz_poll(fds, no_fds, tv_sec, 0);
+        int res = yaz_poll(fds, no_fds, tv_sec, 0);
         if (res < 0)
         {
             if (yaz_errno() == EINTR)

@@ -11,8 +11,7 @@
 
 void probe_package(ZOOM_connection z)
 {
-    int i;
-    for (i = 1; i<10; i++)
+    for (int i = 1; i<10; i++)
     {
         ZOOM_package pkg = ZOOM_connection_package(z, 0);
         ZOOM_package_option_set(pkg, "action", "recordInsert");
@@ -24,7 +23,6 @@ void probe_package(ZOOM_connection z)
 void probe_search(ZOOM_connection z, int start, int error)
 {
     char pqf_str[100];
-    ZOOM_resultset set;
 
     /* provoke error with yaz-ztest */
     if (error)
@@ -32,7 +30,7 @@ void probe_search(ZOOM_connection z, int start, int error)
 
     yaz_snprintf(pqf_str, sizeof(pqf_str), "@attr 1=%d water", start);
     printf("sending search %s\n", pqf_str);
-    set = ZOOM_connection_search_pqf (z, pqf_str);
+    ZOOM_resultset set = ZOOM_connection_search_pqf (z, pqf_str);
     ZOOM_resultset_destroy(set);
 
     /* restore database */
@@ -42,7 +40,6 @@ void probe_search(ZOOM_connection z, int start, int error)
 
 int main(int argc, char **argv)
 {
-    ZOOM_connection z;
     int error;
     int use = 0;
     const char *errmsg, *addinfo, *diagset;
@@ -56,7 +53,7 @@ int main(int argc, char **argv)
     }
 
     /* create connection (don't connect yet) */
-    z = ZOOM_connection_create(0);
+    ZOOM_connection z = ZOOM_connection_create(0);
 
     /* option: set sru/get operation (only applicable if http: is used) */
     ZOOM_connection_option_set (z, "sru", "post");

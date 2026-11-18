@@ -77,13 +77,12 @@ int yaz_match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o, char **val)
 int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
                          char **val, int *len, int fixup_root)
 {
-    xmlBufferPtr buf;
     int no_root_nodes = 0;
 
     if (!yaz_match_xsd_element(ptr, elem))
         return 0;
 
-    buf = xmlBufferCreate();
+    xmlBufferPtr buf = xmlBufferCreate();
 
     /* Copy each element nodes at top.
        In most cases there is only one root node.. At least one server

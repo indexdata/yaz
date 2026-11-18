@@ -18,7 +18,6 @@
 Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
 {
     Z_OPACRecord *rec;
-    int i;
     rec = (Z_OPACRecord *) odr_malloc(odr, sizeof(*rec));
     rec->bibliographicRecord =
         z_ext_record_usmarc(odr, marc_input,
@@ -26,7 +25,7 @@ Z_OPACRecord *dummy_opac(int num, ODR odr, const char *marc_input)
     rec->num_holdingsData = 1;
     rec->holdingsData = (Z_HoldingsRecord **)
         odr_malloc(odr, sizeof(*rec->holdingsData));
-    for (i = 0; i < rec->num_holdingsData; i++)
+    for (int i = 0; i < rec->num_holdingsData; i++)
     {
         Z_HoldingsRecord *hr = (Z_HoldingsRecord *)
             odr_malloc(odr, sizeof(*hr));

@@ -160,20 +160,18 @@ void ZOOM_query_get_hash(ZOOM_query s, WRBUF w)
  */
 static char *cql2pqf(ZOOM_connection c, const char *cql)
 {
-    CQL_parser parser;
     int error;
-    const char *cqlfile;
     cql_transform_t trans;
     char *result = 0;
 
-    parser = cql_parser_create();
+    CQL_parser parser = cql_parser_create();
     if ((error = cql_parser_string(parser, cql)) != 0) {
         cql_parser_destroy(parser);
         ZOOM_set_error(c, ZOOM_ERROR_CQL_PARSE, cql);
         return 0;
     }
 
-    cqlfile = ZOOM_connection_option_get(c, "cqlfile");
+    const char *cqlfile = ZOOM_connection_option_get(c, "cqlfile");
     if (cqlfile == 0)
     {
         ZOOM_set_error(c, ZOOM_ERROR_CQL_TRANSFORM, "no CQL transform file");
@@ -280,20 +278,18 @@ ZOOM_API(int)
 ZOOM_API(int)
     ZOOM_query_cql2rpn(ZOOM_query s, const char *str, ZOOM_connection conn)
 {
-    char *rpn;
-    int ret;
     ZOOM_connection freeme = 0;
 
     if (conn == 0)
         conn = freeme = ZOOM_connection_create(0);
 
-    rpn = cql2pqf(conn, str);
+    char *rpn = cql2pqf(conn, str);
     if (freeme != 0)
         ZOOM_connection_destroy(freeme);
     if (rpn == 0)
         return -1;
 
-    ret = ZOOM_query_prefix(s, rpn);
+    int ret = ZOOM_query_prefix(s, rpn);
     xfree(rpn);
     return ret;
 }
@@ -309,13 +305,12 @@ ZOOM_API(int)
                        int *error_pos)
 {
     int ret;
-    struct ccl_rpn_node *rpn;
     CCL_bibset bibset = ccl_qual_mk();
 
     if (config)
         ccl_qual_buf(bibset, config);
 
-    rpn = ccl_find_str(bibset, str, ccl_error, error_pos);
+    struct ccl_rpn_node *rpn = ccl_find_str(bibset, str, ccl_error, error_pos);
     if (!rpn)
     {
         *error_string = ccl_err_msg(*ccl_error);

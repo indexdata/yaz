@@ -21,18 +21,16 @@ static void tst_xml_include1(void)
 {
 #if YAZ_HAVE_XML2
     const char *srcdir = getenv("srcdir");
-    xmlDocPtr doc;
-    xmlNodePtr node;
     const char *xml_in = "<x><include src=\"test_xml_inc*.xml\"/></x>";
 
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
+    xmlDocPtr doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    node = xmlDocGetRootElement(doc);
+    xmlNodePtr node = xmlDocGetRootElement(doc);
     YAZ_CHECK(node);
     if (node)
     {
@@ -71,18 +69,16 @@ static void tst_xml_include2(void)
 {
 #if YAZ_HAVE_XML2
     const char *srcdir = getenv("srcdir");
-    xmlDocPtr doc;
-    xmlNodePtr node;
     const char *xml_in = "<x><include src=\"test_xml_no.xml\"/></x>";
 
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
+    xmlDocPtr doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    node = xmlDocGetRootElement(doc);
+    xmlNodePtr node = xmlDocGetRootElement(doc);
     YAZ_CHECK(node);
     if (node)
     {
@@ -104,18 +100,16 @@ static void tst_xml_include3(void)
 {
 #if YAZ_HAVE_XML2
     const char *srcdir = getenv("srcdir");
-    xmlDocPtr doc;
-    xmlNodePtr node;
     const char *xml_in = "<x><include src=\"test_xml_no*.xml\"/></x>";
 
     if (srcdir == 0)
         srcdir = ".";
 
-    doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
+    xmlDocPtr doc = yaz_xml_parse_memory(xml_in, strlen(xml_in));
     YAZ_CHECK(doc);
     if (!doc)
         return;
-    node = xmlDocGetRootElement(doc);
+    xmlNodePtr node = xmlDocGetRootElement(doc);
     YAZ_CHECK(node);
     if (node)
     {

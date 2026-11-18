@@ -134,10 +134,7 @@ void read_params(int argc, char **argv, struct config_t *p_config)
 
 static void print_icu_converters(const struct config_t *p_config)
 {
-    int32_t count;
-    int32_t i;
-
-    count = ucnv_countAvailable();
+    int32_t count = ucnv_countAvailable();
     if (p_config->xmloutput)
         fprintf(p_config->outfile, "<converters count=\"%d\" default=\"%s\">\n",
                 count, ucnv_getDefaultName());
@@ -148,7 +145,7 @@ static void print_icu_converters(const struct config_t *p_config)
                 ucnv_getDefaultName());
     }
 
-    for (i = 0; i < count; i++)
+    for (int32_t i = 0; i < count; i++)
     {
         if (p_config->xmloutput)
             fprintf(p_config->outfile, "<converter id=\"%s\"/>\n",
@@ -237,8 +234,6 @@ static void print_icu_transliterators(const struct config_t *p_config)
 
 static void print_icu_xml_locales(const struct config_t *p_config)
 {
-    int32_t count;
-    int32_t i;
     UErrorCode status = U_ZERO_ERROR;
 
     UChar keyword[64];
@@ -276,7 +271,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
     char localname_str[128];
     int32_t localname_str_len = 0;
 
-    count = uloc_countAvailable() ;
+    int32_t count = uloc_countAvailable() ;
 
     if (p_config->xmloutput)
     {
@@ -289,7 +284,7 @@ static void print_icu_xml_locales(const struct config_t *p_config)
         fprintf(p_config->outfile, "Default locale is: %s\n",  uloc_getDefault());
     }
 
-    for (i = 0; i < count; i++)
+    for (int32_t i = 0; i < count; i++)
     {
 
         keyword_len

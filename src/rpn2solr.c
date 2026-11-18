@@ -21,9 +21,8 @@
 
 static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 {
-    int j;
     int server_choice = 1;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 1) /* use attribute */
@@ -31,8 +30,7 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
             if (ae->which == Z_AttributeValue_complex)
             {
                 Z_ComplexAttribute *ca = ae->value.complex;
-                int i;
-                for (i = 0; i < ca->num_list; i++)
+                for (int i = 0; i < ca->num_list; i++)
                 {
                     Z_StringOrNumeric *son = ca->list[i];
                     if (son->which == Z_StringOrNumeric_string)
@@ -49,8 +47,7 @@ static const char *lookup_index_from_string_attr(Z_AttributeList *attributes)
 
 static const char *lookup_relation_index_from_attr(Z_AttributeList *attributes)
 {
-    int j;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 2) /* relation attribute */
@@ -178,9 +175,8 @@ static int rpn2solr_attr(solr_transform_t ct,
 
 static Odr_int get_truncation(Z_AttributesPlusTerm *apt)
 {
-    int j;
     Z_AttributeList *attributes = apt->attributes;
-    for (j = 0; j < attributes->num_attributes; j++)
+    for (int j = 0; j < attributes->num_attributes; j++)
     {
         Z_AttributeElement *ae = attributes->attributes[j];
         if (*ae->attributeType == 5) /* truncation attribute */
@@ -366,14 +362,13 @@ static int rpn2solr_structure(solr_transform_t ct,
     {
         Z_Operator *op = q->u.complex->roperator;
         Z_AttributesPlusTerm *apt1, *apt2;
-        int r;
 
         if (check_range(ct, q->u.complex, &apt1, &apt2))
             return rpn2solr_simple(ct, pr, client_data, apt1, w, apt2);
         if (nested)
             pr("(", client_data);
 
-        r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
+        int r = rpn2solr_structure(ct, pr, client_data, q->u.complex->s1, 1, w);
         if (r)
             return r;
         switch (op->which)

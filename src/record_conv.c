@@ -82,8 +82,7 @@ struct yaz_record_conv_rule {
 static void yaz_record_conv_reset(yaz_record_conv_t p)
 {
 
-    struct yaz_record_conv_rule *r;
-    for (r = p->rules; r; r = r->next)
+    for (struct yaz_record_conv_rule *r = p->rules; r; r = r->next)
     {
         r->type->destroy(r->info);
     }
@@ -209,7 +208,6 @@ static void *construct_xslt(const xmlNode *ptr,
     else
     {
         char fullpath[1024];
-        xsltStylesheetPtr xsp;
         if (!yaz_filepath_resolve(stylesheet, path, 0, fullpath))
         {
             wrbuf_printf(wr_error, "Element <xslt stylesheet=\"%s\"/>:"
@@ -233,7 +231,8 @@ static void *construct_xslt(const xmlNode *ptr,
         }
         /* need to copy this before passing it to the processor. It will
            be encapsulated in the xsp and destroyed by xsltFreeStylesheet */
-        xsp = xsltParseStylesheetDoc(xmlCopyDoc(info->xsp_doc, 1));
+        xsltStylesheetPtr xsp =
+            xsltParseStylesheetDoc(xmlCopyDoc(info->xsp_doc, 1));
         if (!xsp)
         {
             wrbuf_printf(wr_error, "Element: <xslt stylesheet=\"%s\"/>:"
@@ -341,12 +340,11 @@ static void *construct_select(const xmlNode *ptr,
     {
         NMEM nmem = nmem_create();
         struct select_info *info = nmem_malloc(nmem, sizeof(*info));
-        const char *attr_str;
         const char *xpath = 0;
 
         info->nmem = nmem;
         info->xpath_expr = 0;
-        attr_str = yaz_xml_get_prop(ptr, "path%s", &xpath);
+        const char *attr_str = yaz_xml_get_prop(ptr, "path%s", &xpath);
         if (attr_str)
         {
             wrbuf_printf(wr_error, "Bad attribute '%s'"
@@ -385,10 +383,9 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 if (nodes)
                 {
-                    int i;
                     if (nodes->nodeNr > 0)
                         wrbuf_rewind(record);
-                    for (i = 0; i < nodes->nodeNr; i++)
+                    for (int i = 0; i < nodes->nodeNr; i++)
                     {
                         xmlNode *ptr = nodes->nodeTab[i];
                         if (ptr->type == XML_ELEMENT_NODE)
@@ -454,7 +451,6 @@ static void *construct_marc(const xmlNode *ptr,
 {
     NMEM nmem = nmem_create();
     struct marc_info *info = nmem_malloc(nmem, sizeof(*info));
-    struct _xmlAttr *attr;
     const char *input_format = 0;
     const char *output_format = 0;
 
@@ -470,7 +466,7 @@ static void *construct_marc(const xmlNode *ptr,
     info->output_format_mode = 0;
     info->leader_spec = 0;
 
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "inputcharset") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -806,12 +802,11 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
     int debug = 0;
     int nns = 0;
     int timeout = 0;
-    struct _xmlAttr *attr;
     if (strcmp((const char *) ptr->name, "rdf-lookup"))
         return 0;
     yaz_log(YLOG_DEBUG, "Constructing rdf_lookup.");
 
-    for (attr = ptr->properties; attr; attr = attr->next)
+    for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
     {
         if (!xmlStrcmp(attr->name, BAD_CAST "debug") &&
             attr->children && attr->children->type == XML_TEXT_NODE)
@@ -867,8 +862,8 @@ static void *construct_rdf_lookup(const xmlNode *ptr,
             {
                 char * prefix = 0;
                 char * href = 0;
-                struct _xmlAttr *attr;
-                for (attr = ptr->properties; attr; attr = attr->next)
+                for (struct _xmlAttr *attr = ptr->properties;
+                     attr; attr = attr->next)
                 {
                     if (!xmlStrcmp(attr->name, BAD_CAST "prefix") &&
                         attr->children && attr->children->type == XML_TEXT_NODE)
@@ -954,11 +949,10 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx,
                             struct rdf_lookup_info *info)
 {
     int i;
-    int nkey;
     int done = 0;
     WRBUF uri = wrbuf_alloc();
     xpathCtx->node = n;
-    for (nkey = 0; !done && info->keys[nkey]; nkey++)
+    for (int nkey = 0; !done && info->keys[nkey]; nkey++)
     {
         xmlXPathObjectPtr xpo =
             xmlXPathEvalExpression((const xmlChar *)info->keys[nkey], xpathCtx);
@@ -975,7 +969,6 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx,
                     if (f->type == XML_TEXT_NODE)
                     {
                         yaz_timing_t tim = yaz_timing_create();
-                        Z_HTTP_Response *resp;
                         char *keybuf = xmalloc(3*strlen((const char*) f->content)+1);
                         yaz_url_t url = yaz_url_create();
                         yaz_url_set_max_redirects(url, 0); /* we just want the first redirect */
@@ -989,8 +982,8 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx,
                         yaz_log(YLOG_DEBUG, "Fetching '%s'", wrbuf_cstr(uri));
                         yaz_timing_start(tim);
                         /* no hdrs, no body */
-                        resp = yaz_url_exec(url, wrbuf_cstr(uri),
-                                            info->method, 0, 0, 0);
+                        Z_HTTP_Response *resp = yaz_url_exec(
+                            url, wrbuf_cstr(uri), info->method, 0, 0, 0);
                         yaz_timing_stop(tim);
                         if (resp)
                         {
@@ -1096,8 +1089,7 @@ static int convert_rdf_lookup(void *rinfo, WRBUF record, WRBUF wr_error)
                     yaz_log(YLOG_DEBUG, "nodeset: %p", nodes);
                     if (nodes)
                     {
-                        int i;
-                        for (i = 0; i < nodes->nodeNr; i++)
+                        for (int i = 0; i < nodes->nodeNr; i++)
                         {
                             xmlNode *ptr = nodes->nodeTab[i];
                             yaz_log(YLOG_DEBUG, " node %d: t=%d n='%s' c='%s'", i, ptr->type,
@@ -1257,14 +1249,13 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
     {
         struct marc_info *mi = r->info;
         const char *input_charset = mi->input_charset;
-        yaz_iconv_t cd;
 
         WRBUF res = wrbuf_alloc();
         yaz_marc_t mt = yaz_marc_create();
 
         if (yaz_opac_check_marc21_coding(input_charset, input_record))
             input_charset = "utf-8";
-        cd = yaz_iconv_open("utf-8", input_charset);
+        yaz_iconv_t cd = yaz_iconv_open("utf-8", input_charset);
 
         wrbuf_rewind(p->wr_error);
         yaz_marc_xml(mt, mi->output_format_mode);

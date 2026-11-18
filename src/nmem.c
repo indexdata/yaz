@@ -142,22 +142,19 @@ void nmem_reset(NMEM n)
 
 void *nmem_malloc(NMEM n, size_t size)
 {
-    struct nmem_block *p;
-    char *r;
-
     if (!n)
     {
         yaz_log(YLOG_FATAL, "calling nmem_malloc with an null pointer");
         abort();
     }
-    p = n->blocks;
+    struct nmem_block *p = n->blocks;
     if (!p || p->size < size + p->top)
     {
         p = get_block(size);
         p->next = n->blocks;
         n->blocks = p;
     }
-    r = p->buf + p->top;
+    char *r = p->buf + p->top;
     /* align size */
     p->top += (size + (NMEM_ALIGN - 1)) & ~(NMEM_ALIGN - 1);
     n->total += size;

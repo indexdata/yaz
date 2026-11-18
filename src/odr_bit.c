@@ -38,13 +38,12 @@ int odr_bitstring(ODR o, Odr_bitmask **p, int opt, const char *name)
     if (o->direction == ODR_PRINT)
     {
         int i = ODR_BITMASK_SIZE;
-        int j;
         odr_prname(o, name);
         odr_printf(o, "BITSTRING(len=%d) ",(*p)->top + 1);
         while (--i > 0)
             if (ODR_MASK_GET(*p, i))
                 break;
-        for (j = 0; j <= i; j++)
+        for (int j = 0; j <= i; j++)
         {
             odr_printf(o, "%c", ODR_MASK_GET(*p, j) ? '1' : '0');
             if (j && ((j+1)&7) == 0)

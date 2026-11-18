@@ -230,9 +230,8 @@ static const char *get_record_format(WRBUF wrbuf, size_t *len,
     if (*format == '1')
     {
         /* try to XML format res */
-        xmlDocPtr doc;
         xmlKeepBlanksDefault(0); /* get get xmlDocFormatMemory to work! */
-        doc = yaz_xml_parse_memory(res, *len);
+        xmlDocPtr doc = yaz_xml_parse_memory(res, *len);
         if (doc)
         {
             xmlChar *xml_mem;
@@ -255,18 +254,15 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
                         const char *type_spec, char *record_buf)
 {
     int ret = -1;
-    const char *res;
     int len;
     int m_len;
-    WRBUF wrbuf;
-    ODR odr;
     Z_NamePlusRecord *npr;
     size_t rec_len = strlen(record_buf);
     if (rec_len > INT_MAX)
         return ret;
 
-    wrbuf = wrbuf_alloc();
-    odr = odr_createmem(ODR_ENCODE);
+    WRBUF wrbuf = wrbuf_alloc();
+    ODR odr = odr_createmem(ODR_ENCODE);
     npr = odr_malloc(odr, sizeof(*npr));
     npr->which = Z_NamePlusRecord_databaseRecord;
     if (atoi_n_check(record_buf, 5, &m_len))
@@ -275,7 +271,7 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
     else
         npr->u.databaseRecord =
             z_ext_record_xml(odr, record_buf, (int) rec_len);
-    res = yaz_record_render(npr, 0, wrbuf, type_spec, &len);
+    const char *res = yaz_record_render(npr, 0, wrbuf, type_spec, &len);
     if (res && strlen(res) <= INT_MAX)
     {
         xmlDoc *doc = yaz_xml_parse_memory(res, strlen(res));
@@ -318,8 +314,7 @@ static const char *base64_render(NMEM nmem, WRBUF wrbuf,
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 if (nodes)
                 {
-                    int i;
-                    for (i = 0; i < nodes->nodeNr; i++)
+                    for (int i = 0; i < nodes->nodeNr; i++)
                     {
                         xmlNode *ptr = nodes->nodeTab[i];
                         if (ptr->type == XML_TEXT_NODE)
@@ -418,11 +413,10 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
         }
         else if (!strncmp(cp + i, "base64=", 7))
         {
-            size_t i0;
             i = i + 7;
             while (cp[i] == ' ')
                 i++;
-            i0 = i;
+            size_t i0 = i;
             while (cp[i] && cp[i] != ';')
                 i++;
 

@@ -131,11 +131,9 @@ void json_remove_node(struct json_node *n)
 
 struct json_node *json_clone_node(const struct json_node *n)
 {
-    struct json_node *n2;
-
     if (!n)
         return 0;
-    n2 = json_new_node(0, n->type);
+    struct json_node *n2 = json_new_node(0, n->type);
     switch (n->type)
     {
     case json_node_object:
@@ -236,9 +234,6 @@ static size_t json_one_char(const char **p, char *out)
 
 static struct json_node *json_parse_string(json_parser_t p)
 {
-    struct json_node *n;
-    const char *cp;
-    char *dst;
     size_t l = 0;
     if (look_ch(p) != '\"')
     {
@@ -247,7 +242,7 @@ static struct json_node *json_parse_string(json_parser_t p)
     }
     move_ch(p);
 
-    cp = p->cp;
+    const char *cp = p->cp;
     while (*cp && *cp != '"')
     {
         char out[6];
@@ -264,8 +259,8 @@ static struct json_node *json_parse_string(json_parser_t p)
         p->err_msg = "missing \"";
         return 0;
     }
-    n = json_new_node(p, json_node_string);
-    dst = n->u.string = (char *) xmalloc(l + 1);
+    struct json_node *n = json_new_node(p, json_node_string);
+    char *dst = n->u.string = (char *) xmalloc(l + 1);
 
     cp = p->cp;
     while (*cp && *cp != '"')
@@ -283,12 +278,9 @@ static struct json_node *json_parse_string(json_parser_t p)
 
 static struct json_node *json_parse_number(json_parser_t p)
 {
-    struct json_node *n;
     char *endptr;
-    const char *cp;
-    double v;
 
-    cp = p->cp;
+    const char *cp = p->cp;
     if (*cp == '-')
         cp++;
     if (*cp == '0')
@@ -334,7 +326,7 @@ static struct json_node *json_parse_number(json_parser_t p)
             return 0;
         }
     }
-    v = strtod(p->cp, &endptr);
+    double v = strtod(p->cp, &endptr);
 
     if (endptr == p->cp)
     {
@@ -347,7 +339,7 @@ static struct json_node *json_parse_number(json_parser_t p)
         return 0;
     }
     p->cp = endptr;
-    n = json_new_node(p, json_node_number);
+    struct json_node *n = json_new_node(p, json_node_number);
     n->u.number = v;
     return n;
 }
@@ -370,7 +362,6 @@ static struct json_node *json_parse_value(json_parser_t p)
         return json_parse_array(p);
     else if (c == '%')
     {
-        struct json_subst_info *sb;
         int idx = 0;
         p->cp++;
         c = *p->cp;
@@ -380,7 +371,7 @@ static struct json_node *json_parse_value(json_parser_t p)
             p->cp++;
             c = *p->cp;
         }
-        for (sb = p->subst; sb; sb = sb->next)
+        for (struct json_subst_info *sb = p->subst; sb; sb = sb->next)
             if (sb->idx == idx)
             {
                 struct json_node *ret = json_clone_node(sb->node);
@@ -443,7 +434,6 @@ static struct json_node *json_parse_elements(json_parser_t p)
 
 static struct json_node *json_parse_array(json_parser_t p)
 {
-    struct json_node *n;
     if (look_ch(p) != '[')
     {
         p->err_msg = "expecting [";
@@ -456,7 +446,7 @@ static struct json_node *json_parse_array(json_parser_t p)
         return 0;
     }
     p->parse_level++;
-    n = json_new_node(p, json_node_array);
+    struct json_node *n = json_new_node(p, json_node_array);
     if (look_ch(p) != ']')
         n->u.link[0] = json_parse_elements(p);
 
@@ -526,7 +516,6 @@ static struct json_node *json_parse_members(json_parser_t p)
 
 static struct json_node *json_parse_object(json_parser_t p)
 {
-    struct json_node *n;
     if (look_ch(p) != '{')
     {
         p->err_msg = "{ expected";
@@ -534,10 +523,9 @@ static struct json_node *json_parse_object(json_parser_t p)
     }
     move_ch(p);
 
-    n = json_new_node(p, json_node_object);
+    struct json_node *n = json_new_node(p, json_node_object);
     if (look_ch(p) != '}')
     {
-        struct json_node *m;
         if (p->parse_level >= p->max_level)
         {
             p->err_msg = "Too much nesting";
@@ -545,7 +533,7 @@ static struct json_node *json_parse_object(json_parser_t p)
             return 0;
         }
         p->parse_level++;
-        m = json_parse_members(p);
+        struct json_node *m = json_parse_members(p);
         p->parse_level--;
         if (!m)
         {
@@ -566,15 +554,13 @@ static struct json_node *json_parse_object(json_parser_t p)
 
 struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
 {
-    int c;
-    struct json_node *n;
     p->buf = json_str;
     p->cp = p->buf;
     p->err_msg = 0;
     p->parse_level = 0;
     p->max_level = 1000;
 
-    n = json_parse_value(p);
+    struct json_node *n = json_parse_value(p);
     if (!n)
         return 0;
     if (p->err_msg)
@@ -582,7 +568,7 @@ struct json_node *json_parser_parse(json_parser_t p, const char *json_str)
         json_remove_node(n);
         return 0;
     }
-    c = look_ch(p);
+    int c = look_ch(p);
     if (c != 0)
     {
         p->err_msg = "extra characters";
@@ -624,8 +610,7 @@ static void json_indent(WRBUF result, int indent)
     size_t l = wrbuf_len(result);
     if (l == 0 || wrbuf_buf(result)[l-1] == '\n')
     {
-        int i;
-        for (i = 0; i < indent; i++)
+        for (int i = 0; i < indent; i++)
             wrbuf_putc(result, ' ');
     }
 }

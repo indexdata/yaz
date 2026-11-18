@@ -120,8 +120,7 @@ static Odr_int get_term_hit(Z_RPNStructure *s, unsigned *hash)
                 }
                 else
                 {
-                    int i;
-                    for (i = 0; i < oct->len; i++)
+                    for (int i = 0; i < oct->len; i++)
                         *hash = *hash * 65509 + oct->buf[i];
                 }
             }
@@ -161,8 +160,7 @@ static Odr_int get_hit_count(Z_Query *q)
     {
         unsigned hash = 0;
         const char *cql = q->u.type_104->u.cql;
-        int i;
-        for (i = 0; cql[i]; i++)
+        for (int i = 0; cql[i]; i++)
             hash = hash * 65509 + cql[i];
         return hash % 24;
     }
@@ -253,18 +251,16 @@ static void do_delay(const struct delay *delayp)
 
 static void addterms(ODR odr, Z_FacetField *facet_field, const char *facet_name)
 {
-    int index;
     int freq = 100;
     size_t length = strlen(facet_name) + 10;
     char *key = odr_malloc(odr, length);
     key[0] = '\0';
-    for (index = 0; index < facet_field->num_terms; index++)
+    for (int index = 0; index < facet_field->num_terms; index++)
     {
-        Z_FacetTerm *facet_term;
         yaz_snprintf(key, length, "%s%d", facet_name, index);
         yaz_log(YLOG_DEBUG, "facet add term %s %d %s", facet_name, index, key);
 
-        facet_term = facet_term_create_cstr(odr, key, freq);
+        Z_FacetTerm *facet_term = facet_term_create_cstr(odr, key, freq);
         freq = freq - 10 ;
         facet_field_term_set(odr, facet_field, facet_term, index);
     }
@@ -322,10 +318,9 @@ static void echo_extra_args(ODR stream,
 {
     if (extra_args)
     {
-        Z_SRW_extra_arg *a;
         WRBUF response_xml = wrbuf_alloc();
         wrbuf_puts(response_xml, "<extra>");
-        for (a = extra_args; a; a = a->next)
+        for (Z_SRW_extra_arg *a = extra_args; a; a = a->next)
         {
             wrbuf_puts(response_xml, "<extra name=\"");
             wrbuf_xmlputs(response_xml, a->name);
@@ -348,7 +343,6 @@ static void echo_extra_args(ODR stream,
 int ztest_search(void *handle, bend_search_rr *rr)
 {
     struct session_handle *sh = (struct session_handle*) handle;
-    struct result_set *new_set;
     const char *db, *db_sep;
 
     if (rr->num_bases != 1)
@@ -375,7 +369,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
         return 0;
     }
 
-    new_set = get_set(sh, rr->setname);
+    struct result_set *new_set = get_set(sh, rr->setname);
     if (new_set)
     {
         if (!rr->replace_set)
@@ -404,8 +398,7 @@ int ztest_search(void *handle, bend_search_rr *rr)
         char **names;
         char **values;
         int no_parms = yaz_uri_to_array(db_sep+1, rr->stream, &names, &values);
-        int i;
-        for (i = 0; i < no_parms; i++)
+        for (int i = 0; i < no_parms; i++)
         {
             const char *name = names[i];
             const char *value = values[i];
@@ -759,8 +752,7 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
             }
             if (notToKeep)
             {
-                int i;
-                for (i = 0; i < notToKeep->num; i++)
+                for (int i = 0; i < notToKeep->num; i++)
                 {
                     Z_External *rec = notToKeep->elements[i]->record;
 
@@ -916,11 +908,9 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
     else if (!oid_oidcmp(oid, yaz_oid_recsyn_postscript))
     {
         char fname[20];
-        FILE *f;
-        long size;
 
         yaz_snprintf(fname, sizeof(fname), "part.%d.ps", r->number);
-        f = fopen(fname, "rb");
+        FILE *f = fopen(fname, "rb");
         if (!f)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
@@ -928,7 +918,7 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
             return 0;
         }
         fseek(f, 0L, SEEK_END);
-        size = ftell(f);
+        long size = ftell(f);
         if (size <= 0 || size >= 5000000)
         {
             r->errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
@@ -1031,7 +1021,6 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     }
     if (q->term)
     {
-        int len;
         if (q->term->term->which != Z_Term_general)
         {
             q->errcode = YAZ_BIB1_TERM_TYPE_UNSUPP;
@@ -1042,7 +1031,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
             q->errcode = YAZ_BIB1_ONLY_ZERO_STEP_SIZE_SUPPORTED_FOR_SCAN;
             return 0;
         }
-        len = q->term->term->u.general->len;
+        int len = q->term->term->u.general->len;
         if (len >= (int ) sizeof(term))
             len = sizeof(term)-1;
         memcpy(term, q->term->term->u.general->buf, len);
@@ -1075,9 +1064,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
             }
             for (; q->num_entries < q->term_position; q->num_entries++)
             {
-                int po;
-
-                po = pos - q->term_position + q->num_entries+1; /* find pos */
+                /* find pos */
+                int po = pos - q->term_position + q->num_entries+1;
                 if (po < 0)
                     po += 200;
 

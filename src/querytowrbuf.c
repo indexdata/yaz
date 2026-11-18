@@ -114,8 +114,7 @@ static const char *complex_op_name(const Z_Operator *op)
 
 static void yaz_attributes_to_wrbuf(WRBUF w, const Z_AttributeList *al)
 {
-    int i;
-    for (i = 0; i < al->num_attributes; i++)
+    for (int i = 0; i < al->num_attributes; i++)
         yaz_attribute_element_to_wrbuf(w, al->attributes[i]);
 }
 
@@ -276,8 +275,7 @@ void wrbuf_diags(WRBUF b, int num_diagnostics, Z_DiagRec **diags)
 
 void yaz_facet_list_to_wrbuf(WRBUF w, const Z_FacetList *fl)
 {
-    int i;
-    for (i = 0; i < fl->num; i++)
+    for (int i = 0; i < fl->num; i++)
     {
         Z_FacetField *ff = fl->elements[i];
 

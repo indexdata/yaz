@@ -261,12 +261,10 @@ Z_External *yaz_set_response_charneg(ODR o, const char *charset,
 /* Get negotiation from OtherInformation. Client&Server side */
 Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
 {
-    int i;
-
     if (!p)
         return 0;
 
-    for (i = 0; i < p->num_elements; i++)
+    for (int i = 0; i < p->num_elements; i++)
     {
         Z_External *pext;
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
@@ -285,12 +283,10 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
 /* Delete negotiation from OtherInformation. Client&Server side */
 int yaz_del_charneg_record(Z_OtherInformation **p)
 {
-    int i;
-
     if (!*p)
         return 0;
 
-    for (i = 0; i < (*p)->num_elements; i++)
+    for (int i = 0; i < (*p)->num_elements; i++)
     {
         Z_External *pext;
         if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&

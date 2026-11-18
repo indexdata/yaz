@@ -20,11 +20,10 @@ const char *yaz_xml_get_prop(const xmlNode *n, const char *fmt, ...)
 {
     int no = 0;
     va_list ap;
-    const char *cp;
     struct _xmlAttr *attr;
 
     va_start(ap, fmt);
-    for (cp = fmt; *cp; cp++)
+    for (const char *cp = fmt; *cp; cp++)
         if (*cp == '%')
             no++;
     if (no > 0)
@@ -43,7 +42,6 @@ const char *yaz_xml_get_prop(const xmlNode *n, const char *fmt, ...)
             for (i = 0; *cp1; i++)
             {
                 const char *cp2 = cp1;
-                size_t l;
                 while (*cp2 != '\0' && *cp2 != '%')
                     cp2++;
                 if (*cp2 != '\0')
@@ -51,7 +49,7 @@ const char *yaz_xml_get_prop(const xmlNode *n, const char *fmt, ...)
                     cp1 = cp2;
                     break;
                 }
-                l = cp2 - cp1;
+                size_t l = cp2 - cp1;
                 if (l > 0 && strlen((const char *) attr->name) == l &&
                     !memcmp((const char *) attr->name, cp1, l))
                     break;

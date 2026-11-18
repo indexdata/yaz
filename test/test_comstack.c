@@ -402,28 +402,25 @@ static void tst_http_response(void)
 /** \brief COMSTACK synopsis from manual, doc/comstack.xml */
 static int comstack_example(const char *server_address_str)
 {
-    COMSTACK stack;
     char *buf = 0;
     int size = 0, length_incoming;
-    void *server_address_ip;
-    int status;
 
     char *protocol_package = "GET / HTTP/1.0\r\n\r\n";
     int protocol_package_length = (int) strlen(protocol_package);
 
-    stack = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
+    COMSTACK stack = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
     if (!stack) {
         perror("cs_create");  /* use perror() here since we have no stack yet */
         return -1;
     }
 
-    server_address_ip = cs_straddr(stack, server_address_str);
+    void *server_address_ip = cs_straddr(stack, server_address_str);
     if (!server_address_ip) {
         fprintf(stderr, "cs_straddr: address could not be resolved\n");
         return -1;
     }
 
-    status = cs_connect(stack, server_address_ip);
+    int status = cs_connect(stack, server_address_ip);
     if (status) {
         fprintf(stderr, "cs_connect: %s\n", cs_strerror(stack));
         return -1;
@@ -657,7 +654,6 @@ static void tst_head_only_transport(CS_TYPE type)
     static const char response[] =
         "HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\ndata";
     int fd[2], r, saved_errno;
-    COMSTACK cs;
     char *buf = 0;
     int bufsize = 0;
 
@@ -671,7 +667,7 @@ static void tst_head_only_transport(CS_TYPE type)
     YAZ_CHECK_EQ(r, 0);
     if (r != 0)
         return;
-    cs = cs_createbysocket(fd[0], type, CS_FLAGS_BLOCKING, PROTO_HTTP);
+    COMSTACK cs = cs_createbysocket(fd[0], type, CS_FLAGS_BLOCKING, PROTO_HTTP);
     YAZ_CHECK(cs);
     if (!cs)
     {
@@ -744,15 +740,14 @@ static void tst_ssl_cafile(void)
 
 static void tst_invalid_connect_targets(void)
 {
-    int c;
-    for (c = 1; c <= 127; c++)
+    for (int c = 1; c <= 127; c++)
     {
         char host[] = "target.example:80 X/path";
-        COMSTACK cs;
         if (c > 32 && c != 127)
             continue;
         host[17] = c;
-        cs = yaz_tcpip_create3(-1, CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
+        COMSTACK cs =
+            yaz_tcpip_create3(-1, CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
         YAZ_CHECK(cs == 0);
         if (cs)
             cs_close(cs);

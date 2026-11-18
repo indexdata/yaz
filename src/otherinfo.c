@@ -78,11 +78,10 @@ Z_OtherInformationUnit *yaz_oi_update(
     const Odr_oid *oid, int categoryValue, int delete_flag)
 {
     int i;
-    Z_OtherInformation *otherInformation;
 
     if (!otherInformationP)
         return 0;
-    otherInformation = *otherInformationP;
+    Z_OtherInformation *otherInformation = *otherInformationP;
     if (!otherInformation)
     {
         if (!odr)

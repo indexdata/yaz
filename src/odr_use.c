@@ -14,7 +14,6 @@
 
 int odr_external(ODR o, Odr_external **p, int opt, const char *name)
 {
-    Odr_external *pp;
     static Odr_arm arm[] =
     {
         {ODR_EXPLICIT, ODR_CONTEXT, 0, ODR_EXTERNAL_single,
@@ -29,7 +28,7 @@ int odr_external(ODR o, Odr_external **p, int opt, const char *name)
     odr_implicit_settag(o, ODR_UNIVERSAL, ODR_EXTERNAL);
     if (!odr_sequence_begin(o, p, sizeof(Odr_external), name))
         return odr_missing(o, opt, name);
-    pp = *p;
+    Odr_external *pp = *p;
     return
         odr_oid(o, &pp->direct_reference, 1, "direct") &&
         odr_integer(o, &pp->indirect_reference, 1, "indirect") &&

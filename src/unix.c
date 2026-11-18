@@ -183,14 +183,12 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
 
 static int unix_strtoaddr_ex(const char *str, struct sockaddr_un *add)
 {
-    char *cp;
-
     unix_init();
     yaz_log(log_level, "unix_strtoaddr_ex %s", str ? str : "NULL");
     add->sun_family = AF_UNIX;
     strncpy(add->sun_path, str, sizeof(add->sun_path)-1);
     add->sun_path[sizeof(add->sun_path)-1] = 0;
-    cp = strchr (add->sun_path, ':');
+    char *cp = strchr (add->sun_path, ':');
     if (cp)
         *cp = '\0';
     return 1;
@@ -342,7 +340,6 @@ static int unix_connect(COMSTACK h, void *address)
 {
     struct sockaddr_un *add = (struct sockaddr_un *)address;
     int r;
-    int i;
 
     yaz_log(log_level, "unix_connect h=%p", h);
     h->io_pending = 0;
@@ -351,7 +348,7 @@ static int unix_connect(COMSTACK h, void *address)
         cs_set_error(h, CSOUTSTATE);
         return -1;
     }
-    for (i = 0; i<3; i++)
+    for (int i = 0; i<3; i++)
     {
         r = connect(h->iofile, (struct sockaddr *) add, (YAZ_SOCKLEN_T) SUN_LEN(add));
         if (r < 0 && yaz_errno() == EAGAIN)
@@ -787,11 +784,9 @@ static const char *unix_addrstr(COMSTACK h)
 
 static int unix_set_blocking(COMSTACK p, int flags)
 {
-    unsigned long flag;
-
     if (p->flags == flags)
         return 1;
-    flag = fcntl(p->iofile, F_GETFL, 0);
+    unsigned long flag = fcntl(p->iofile, F_GETFL, 0);
     if (flags & CS_FLAGS_BLOCKING)
         flag = flag & ~O_NONBLOCK;
     else

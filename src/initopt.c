@@ -90,8 +90,7 @@ void yaz_init_opt_decode(Z_Options *opt, void (*pr)(const char *name,
                                                     void *clientData),
                          void *clientData)
 {
-    int i;
-    for (i = 0; opt_array[i].name; i++)
+    for (int i = 0; opt_array[i].name; i++)
         if (ODR_MASK_GET(opt, opt_array[i].opt))
             (*pr)(opt_array[i].name, clientData);
 }

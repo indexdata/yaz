@@ -71,10 +71,9 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
     int ae_num = 0;
     Z_AttributeElement *ae[20];
     int ret = 0; /* 0=OK, != 0 FAIL */
-    int t;
     WRBUF w = wrbuf_alloc();
 
-    t = yaz_tok_move(tp);
+    int t = yaz_tok_move(tp);
 
     while (t == YAZ_TOK_STRING && ae_num < 20)
     {
@@ -207,10 +206,9 @@ static int cql_transform_parse_tok_line(cql_transform_t ct,
 int cql_transform_define_pattern(cql_transform_t ct, const char *pattern,
                                  const char *value)
 {
-    int r;
     yaz_tok_parse_t tp = yaz_tok_parse_buf(ct->tok_cfg, value);
     yaz_tok_cfg_single_tokens(ct->tok_cfg, "=");
-    r = cql_transform_parse_tok_line(ct, pattern, tp);
+    int r = cql_transform_parse_tok_line(ct, pattern, tp);
     yaz_tok_parse_destroy(tp);
     return r;
 }
@@ -260,10 +258,9 @@ int cql_transform_define_FILE(cql_transform_t ct, FILE *f)
 
 void cql_transform_close(cql_transform_t ct)
 {
-    struct cql_prop_entry *pe;
     if (!ct)
         return;
-    pe = ct->entry;
+    struct cql_prop_entry *pe = ct->entry;
     while (pe)
     {
         struct cql_prop_entry *pe_next = pe->next;
@@ -291,11 +288,10 @@ cql_transform_t cql_transform_open_fname(const char *fname)
 
 int cql_transform_define_fname(cql_transform_t ct, const char *fname)
 {
-    int ret;
     FILE *f = fopen(fname, "r");
     if (!f)
         return -2;
-    ret = cql_transform_define_FILE(ct, f);
+    int ret = cql_transform_define_FILE(ct, f);
     fclose(f);
     return ret;
 }
@@ -320,7 +316,6 @@ static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
     ODR odr_b = odr_createmem(ODR_ENCODE);
     int len_a, len_b;
     char *buf_a, *buf_b;
-    int ret;
 
     z_AttributeElement(odr_a, &a, 0, 0);
     z_AttributeElement(odr_b, &b, 0, 0);
@@ -328,7 +323,7 @@ static int compare_attr(Z_AttributeElement *a, Z_AttributeElement *b)
     buf_a = odr_getbuf(odr_a, &len_a, 0);
     buf_b = odr_getbuf(odr_b, &len_b, 0);
 
-    ret = yaz_memcmp(buf_a, buf_b, len_a, len_b);
+    int ret = yaz_memcmp(buf_a, buf_b, len_a, len_b);
 
     odr_destroy(odr_a);
     odr_destroy(odr_b);
@@ -339,9 +334,8 @@ const char *cql_lookup_reverse(cql_transform_t ct,
                                const char *category,
                                Z_AttributeList *attributes)
 {
-    struct cql_prop_entry *e;
     size_t clen = strlen(category);
-    for (e = ct->entry; e; e = e->next)
+    for (struct cql_prop_entry *e = ct->entry; e; e = e->next)
     {
         if (!strncmp(e->pattern, category, clen))
         {
@@ -381,7 +375,6 @@ static const char *cql_lookup_property(cql_transform_t ct,
                                        const char *pat3)
 {
     char pattern[120];
-    struct cql_prop_entry *e;
 
     if (pat1 && pat2 && pat3)
         yaz_snprintf(pattern, sizeof pattern, "%s.%s.%s", pat1, pat2, pat3);
@@ -394,7 +387,7 @@ static const char *cql_lookup_property(cql_transform_t ct,
     else
         return 0;
 
-    for (e = ct->entry; e; e = e->next)
+    for (struct cql_prop_entry *e = ct->entry; e; e = e->next)
     {
         if (!cql_strcmp(e->pattern, pattern))
             return e->value;
@@ -414,9 +407,7 @@ int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
 
     if (uri)
     {
-        struct cql_prop_entry *e;
-
-        for (e = ct->entry; e; e = e->next)
+        for (struct cql_prop_entry *e = ct->entry; e; e = e->next)
             if (!memcmp(e->pattern, "set.", 4) && e->value &&
                 !strcmp(e->value, uri))
             {
@@ -452,7 +443,6 @@ int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
         const char *cp0 = res, *cp1;
         while ((cp1 = strchr(cp0, '=')))
         {
-            int i;
             while (*cp1 && *cp1 != ' ')
                 cp1++;
             if (cp1 - cp0 >= (ptrdiff_t) sizeof(buf))
@@ -461,7 +451,7 @@ int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
             buf[cp1-cp0] = 0;
             (*pr)("@attr ", client_data);
 
-            for (i = 0; buf[i]; i++)
+            for (int i = 0; buf[i]; i++)
             {
                 if (buf[i] == '*')
                     (*pr)(eval, client_data);
@@ -589,8 +579,8 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
 
 /* ### checks for CQL relation-name rather than Type-1 attribute */
 static int has_modifier(struct cql_node *cn, const char *name) {
-    struct cql_node *mod;
-    for (mod = cn->u.st.modifiers; mod != 0; mod = mod->u.st.modifiers) {
+    for (struct cql_node *mod = cn->u.st.modifiers;
+         mod != 0; mod = mod->u.st.modifiers) {
         if (!mod->u.st.term && !strcmp(mod->u.st.index, name))
             return 1;
     }
@@ -809,15 +799,14 @@ static int emit_terms(cql_transform_t ct, struct cql_node *cn,
                       const char *op)
 {
     struct cql_node *ne = cn->u.st.extra_terms;
-    int r;
     if (ne)
     {
         (*pr)("@", client_data);
         (*pr)(op, client_data);
         (*pr)(" ", client_data);
     }
-    r = emit_term(ct, cn, addinfo, cn->u.st.term, strlen(cn->u.st.term),
-                  pr, client_data);
+    int r = emit_term(ct, cn, addinfo, cn->u.st.term, strlen(cn->u.st.term), pr,
+                      client_data);
     for (; !r && ne; ne = ne->u.st.extra_terms)
     {
         if (ne->u.st.extra_terms)
@@ -991,18 +980,16 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
                     void (*pr)(const char *buf, void *client_data),
                     void *client_data)
 {
-    struct cql_prop_entry *e;
     NMEM nmem = nmem_create();
-    int r;
 
-    for (e = ct->entry; e ; e = e->next)
+    for (struct cql_prop_entry *e = ct->entry; e ; e = e->next)
     {
         if (!cql_strncmp(e->pattern, "set.", 4))
             cql_apply_prefix(nmem, cn, e->pattern+4, e->value);
         else if (!cql_strcmp(e->pattern, "set"))
             cql_apply_prefix(nmem, cn, 0, e->value);
     }
-    r  = emit_node(ct, cn, addinfo, pr, client_data);
+    int r  = emit_node(ct, cn, addinfo, pr, client_data);
     nmem_destroy(nmem);
     return r;
 }
@@ -1027,12 +1014,11 @@ int cql_transform_buf(cql_transform_t ct, struct cql_node *cn,
                       char *out, int max)
 {
     struct cql_buf_write_info info;
-    int r;
 
     info.off = 0;
     info.max = max;
     info.buf = out;
-    r = cql_transform(ct, cn, cql_buf_write_handler, &info);
+    int r = cql_transform(ct, cn, cql_buf_write_handler, &info);
     if (info.off < 0) {
         /* Attempt to write past end of buffer.  For some reason, this
            SRW diagnostic is deprecated, but it's so perfect for our

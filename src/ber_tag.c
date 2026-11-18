@@ -147,9 +147,7 @@ int ber_enctag(ODR o, int zclass, int tag, int constructed)
         while (tag);
         while (n--)
         {
-            unsigned char oo;
-
-            oo = octs[n] | ((n > 0) << 7);
+            unsigned char oo = octs[n] | ((n > 0) << 7);
             if (odr_putc(o, oo) < 0)
                 return -1;
         }

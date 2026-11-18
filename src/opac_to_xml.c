@@ -23,14 +23,13 @@ static void opac_element_str(WRBUF wrbuf, yaz_iconv_t cd1, yaz_iconv_t cd2,
 {
     if (data)
     {
-        size_t pos;
         while (--l >= 0)
             wrbuf_puts(wrbuf, " ");
         wrbuf_puts(wrbuf, "<");
         wrbuf_puts(wrbuf, elem);
         wrbuf_puts(wrbuf, ">");
 
-        pos = wrbuf->pos; /* save position */
+        size_t pos = wrbuf->pos; /* save position */
         if (wrbuf_iconv_write2(wrbuf, cd1, data, strlen(data), wrbuf_xmlputs_n)
             && cd2)
         {
@@ -62,7 +61,6 @@ static void opac_element_bool(WRBUF wrbuf, int l, const char *elem, int *data)
 void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
                             yaz_iconv_t cd2)
 {
-    int i;
     yaz_iconv_t cd1 = yaz_marc_get_iconv(mt);
 
     wrbuf_puts(wrbuf, "<opacRecord>\n");
@@ -78,7 +76,7 @@ void yaz_opac_decode_wrbuf2(yaz_marc_t mt, Z_OPACRecord *r, WRBUF wrbuf,
     }
     wrbuf_puts(wrbuf, "<holdings>\n");
 
-    for (i = 0; i < r->num_holdingsData; i++)
+    for (int i = 0; i < r->num_holdingsData; i++)
     {
         Z_HoldingsRecord *h = r->holdingsData[i];
         wrbuf_puts(wrbuf, " <holding>\n");

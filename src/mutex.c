@@ -84,7 +84,6 @@ void yaz_mutex_enter(YAZ_MUTEX p)
             if (r)
             {
 #if HAVE_SYS_TIME_H
-                long long d;
                 struct timeval tv1, tv2;
                 gettimeofday(&tv1, 0);
 #endif
@@ -94,7 +93,8 @@ void yaz_mutex_enter(YAZ_MUTEX p)
 #if HAVE_SYS_TIME_H
                 r = pthread_mutex_lock(&p->handle);
                 gettimeofday(&tv2, 0);
-                d = 1000000LL * ((long long) tv2.tv_sec - tv1.tv_sec) +
+                long long d =
+                    1000000LL * ((long long) tv2.tv_sec - tv1.tv_sec) +
                     tv2.tv_usec - tv1.tv_usec;
                 yaz_log(p->log_level, "yaz_mutex_enter: %p tid=%p name=%s "
                         "lock delay %lld",

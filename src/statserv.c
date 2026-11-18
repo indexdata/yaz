@@ -210,7 +210,6 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
     unsigned char *cp;
     xmlNodePtr p;
     int len = 1;  /* start with 1, because of trailing 0 */
-    unsigned char *str;
     int first = 1; /* whitespace lead flag .. */
     /* determine length */
     for (p = ptr; p; p = p->next)
@@ -219,7 +218,7 @@ static char *nmem_dup_xml_content(NMEM n, xmlNodePtr ptr)
             len += xmlStrlen(p->content);
     }
     /* now allocate for the string */
-    str = (unsigned char *) nmem_malloc(n, len);
+    unsigned char *str = (unsigned char *) nmem_malloc(n, len);
     *str = '\0'; /* so we can use strcat */
     for (p = ptr; p; p = p->next)
     {
@@ -326,8 +325,7 @@ int control_association(association *assoc, const char *host, int force_open)
                 listen_match = 1;
             else
             {
-                int i;
-                for (i = 0; gfs->listen_ref[i] != -1; i++)
+                for (int i = 0; gfs->listen_ref[i] != -1; i++)
                     if (gfs->listen_ref[i] == assoc->client_chan->chan_id)
                         listen_match = 1;
             }
@@ -400,10 +398,9 @@ static void xml_config_read(const char *base_path)
         return;
     for (ptr = ptr->children; ptr; ptr = ptr->next)
     {
-        struct _xmlAttr *attr;
         if (ptr->type != XML_ELEMENT_NODE)
             continue;
-        attr = ptr->properties;
+        struct _xmlAttr *attr = ptr->properties;
         if (!strcmp((const char *) ptr->name, "listen"))
         {
             /*
@@ -426,10 +423,8 @@ static void xml_config_read(const char *base_path)
         else if (!strcmp((const char *) ptr->name, "server"))
         {
             xmlNodePtr ptr_server = ptr;
-            xmlNodePtr ptr;
             const char *listenref = 0;
             const char *id = 0;
-            struct gfs_server *gfs;
 
             for ( ; attr; attr = attr->next)
                 if (!xmlStrcmp(attr->name, BAD_CAST "listenref")
@@ -442,7 +437,7 @@ static void xml_config_read(const char *base_path)
                 else
                     yaz_log(YLOG_WARN, "Unknown attribute '%s' for server",
                             attr->name);
-            gfs = *gfsp = gfs_server_new(id);
+            struct gfs_server *gfs = *gfsp = gfs_server_new(id);
             gfs->server_node_ptr = ptr_server;
             if (listenref)
             {
@@ -453,10 +448,9 @@ static void xml_config_read(const char *base_path)
                                                      sizeof(int) * (num + 1));
                 for (i = 0; i < num; i++)
                 {
-                    int id_no;
                     struct gfs_listen *gl = gfs_listen_list;
                     gfs->listen_ref[i] = 0;
-                    for (id_no = 1; gl; gl = gl->next, id_no++)
+                    for (int id_no = 1; gl; gl = gl->next, id_no++)
                         if (gl->id && !strcmp(gl->id, refs[i]))
                         {
                             gfs->listen_ref[i] = id_no;
@@ -468,7 +462,7 @@ static void xml_config_read(const char *base_path)
                 }
                 gfs->listen_ref[i] = -1;
             }
-            for (ptr = ptr_server->children; ptr; ptr = ptr->next)
+            for (xmlNodePtr ptr = ptr_server->children; ptr; ptr = ptr->next)
             {
                 if (ptr->type != XML_ELEMENT_NODE)
                     continue;
@@ -577,7 +571,6 @@ static void xml_config_read(const char *base_path)
 
 static int xml_config_open(void)
 {
-    const char *last_p;
     const char *fname = control_block.xml_config;
     if (!getcwd(gfs_root_dir, FILENAME_MAX))
     {
@@ -616,7 +609,7 @@ static int xml_config_open(void)
             }
         }
     }
-    last_p = strrchr(fname,
+    const char *last_p = strrchr(fname,
 #ifdef WIN32
                      '\\'
 #else
@@ -659,10 +652,9 @@ static void xml_config_close(void)
 static int xml_config_add_listeners(void)
 {
     struct gfs_listen *gfs = gfs_listen_list;
-    int id_no;
     int ret = 0;
 
-    for (id_no = 1; gfs; gfs = gfs->next, id_no++)
+    for (int id_no = 1; gfs; gfs = gfs->next, id_no++)
     {
         if (!ret && gfs->address)
             ret = add_listener(gfs->address, id_no);
@@ -984,10 +976,8 @@ void statserv_remove(IOCHAN pIOChannel)
 
 static void statserv_closedown(void)
 {
-    IOCHAN p;
-
     xml_config_bend_stop();
-    for (p = pListener; p; p = p->next)
+    for (IOCHAN p = pListener; p; p = p->next)
     {
         iochan_destroy(p);
     }
@@ -1033,7 +1023,6 @@ static void listener(IOCHAN h, int event)
 
     if (event == EVENT_INPUT)
     {
-        COMSTACK new_line;
         if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
                                    control_block.daemon_name)) < 0)
         {
@@ -1046,7 +1035,7 @@ static void listener(IOCHAN h, int event)
             yaz_log(YLOG_WARN, "cs_listen incomplete");
             return;
         }
-        new_line = cs_accept(line);
+        COMSTACK new_line = cs_accept(line);
         if (!new_line)
         {
             log_comstack_error(YLOG_FATAL, line, "Accept failed");
@@ -1081,7 +1070,6 @@ static void listener(IOCHAN h, int event)
             else if (res == 0) /* child */
             {
                 char nbuf[100];
-                IOCHAN pp;
 
                 xfree(child);
                 while (children)
@@ -1091,7 +1079,7 @@ static void listener(IOCHAN h, int event)
                     xfree(child);
                 }
                 active_children = 0;
-                for (pp = pListener; pp; pp = iochan_getnext(pp))
+                for (IOCHAN pp = pListener; pp; pp = iochan_getnext(pp))
                 {
                     COMSTACK l = (COMSTACK)iochan_getdata(pp);
                     cs_close(l);
@@ -1141,7 +1129,6 @@ static void listener(IOCHAN h, int event)
 
 static void *new_session(void *vp)
 {
-    const char *a;
     association *newas;
     IOCHAN new_chan;
     COMSTACK new_line = (COMSTACK) vp;
@@ -1180,9 +1167,9 @@ static void *new_session(void *vp)
     iochan_setdata(new_chan, newas);
     iochan_settimeout(new_chan, 60);
 #if 1
-    a = cs_addrstr(new_line);
+    const char *a = cs_addrstr(new_line);
 #else
-    a = 0;
+    const char *a = 0;
 #endif
     yaz_log_xml_errors(0, YLOG_WARN);
     yaz_log(log_session, "Session - OK %d %s PID=%ld",
@@ -1249,7 +1236,6 @@ static void inetd_connection(int what)
  */
 static int add_listener(char *where, int listen_id)
 {
-    COMSTACK l;
     void *ap;
     IOCHAN lst = NULL;
     const char *mode;
@@ -1264,7 +1250,7 @@ static int add_listener(char *where, int listen_id)
     yaz_log(log_server, "Adding %s listener on %s id=%d PID=%ld", mode, where,
             listen_id, (long) getpid());
 
-    l = cs_create_host(where, CS_FLAGS_NUMERICHOST, &ap);
+    COMSTACK l = cs_create_host(where, CS_FLAGS_NUMERICHOST, &ap);
     if (!l)
     {
         yaz_log(YLOG_FATAL, "Failed to listen on %s", where);
@@ -1385,8 +1371,6 @@ static void show_version(void)
 
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
-    char sep;
-    int ret;
 #ifdef WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
@@ -1395,9 +1379,9 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 
 
 #ifdef WIN32
-    sep = '\\';
+    char sep = '\\';
 #else
-    sep = '/';
+    char sep = '/';
 #endif
     if ((me = strrchr(argv[0], sep)))
         me++; /* get the basename */
@@ -1442,11 +1426,11 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 #ifndef WIN32
     signal(SIGTERM, normal_stop_handler);
 #endif
-    ret = yaz_daemon(programname,
-                     (control_block.background ? YAZ_DAEMON_FORK : 0),
-                     daemon_handler, &pListener,
-                     *control_block.pid_fname ? control_block.pid_fname : 0,
-                     *control_block.setuid ? control_block.setuid : 0);
+    int ret = yaz_daemon(programname,
+                         (control_block.background ? YAZ_DAEMON_FORK : 0),
+                         daemon_handler, &pListener,
+                         *control_block.pid_fname ? control_block.pid_fname : 0,
+                         *control_block.setuid ? control_block.setuid : 0);
 #ifndef WIN32
     if (sig_received)
         yaz_log(YLOG_LOG, "Received SIGTERM PID=%ld", (long) getpid());
@@ -1463,11 +1447,10 @@ static void option_copy(char *dst, const char *src)
 static int positive_int_option(const char *arg, int *value)
 {
     char *end;
-    long n;
     if (!arg)
         return 0;
     errno = 0;
-    n = strtol(arg, &end, 10);
+    long n = strtol(arg, &end, 10);
     if (errno || !*arg || *end || n <= 0 || n > INT_MAX)
         return 0;
     *value = (int) n;
@@ -1477,12 +1460,10 @@ static int positive_int_option(const char *arg, int *value)
 static int handle_idle_timeout_option(const char *arg)
 {
     char *end = 0;
-    long timeout;
-    int factor;
 
     errno = 0;
-    timeout = arg ? strtol(arg, &end, 10) : 0;
-    factor = end && !strcmp(end, "s") ? 1 : 60;
+    long timeout = arg ? strtol(arg, &end, 10) : 0;
+    int factor = end && !strcmp(end, "s") ? 1 : 60;
     if (errno || !end || end == arg || (*end && strcmp(end, "s"))
         || timeout <= 0 || timeout > INT_MAX / factor)
     {
@@ -1661,7 +1642,6 @@ int statserv_main(int argc, char **argv,
                   bend_initresult *(*bend_init)(bend_initrequest *r),
                   void (*bend_close)(void *handle))
 {
-    int ret;
     struct statserv_options_block *cb = &control_block;
 
     /* control block does not have service_name member on Unix */
@@ -1676,7 +1656,7 @@ int statserv_main(int argc, char **argv,
     cb->bend_init = bend_init;
     cb->bend_close = bend_close;
 
-    ret = yaz_sc_program(s, argc, argv, statserv_sc_main, statserv_sc_stop);
+    int ret = yaz_sc_program(s, argc, argv, statserv_sc_main, statserv_sc_stop);
     yaz_sc_destroy(&s);
     return ret;
 }

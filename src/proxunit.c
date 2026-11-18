@@ -39,8 +39,7 @@ const char *z_ProxUnit_to_str(int u)
 
 int z_str_to_ProxUnit(const char *str)
 {
-    int i;
-    for (i = 1; i <= Z_ProxUnit_byte; i++)
+    for (int i = 1; i <= Z_ProxUnit_byte; i++)
         if (!strcmp(units[i], str))
             return i;
     return 0;
