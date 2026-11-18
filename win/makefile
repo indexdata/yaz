@@ -238,7 +238,6 @@ libxml2:
 !if $(HAVE_LIBXSLT)
 LIBXSLT_LIB="$(LIBXSLT_DIR)\lib\libxslt.lib"
 LIBXSLT_DEF= \
-	/D HAVE_XSLTSAVERESULTTOSTRING=1 \
 	/D YAZ_HAVE_XSLT=1 \
 	/I"$(LIBXSLT_DIR)\include"
 libxslt: $(BINDIR)\libxslt.dll

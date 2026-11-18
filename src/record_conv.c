@@ -281,11 +281,7 @@ static int convert_xslt(void *vinfo, WRBUF record, WRBUF wr_error)
             xmlChar *out_buf = 0;
             int out_len;
 
-#if HAVE_XSLTSAVERESULTTOSTRING
             xsltSaveResultToString(&out_buf, &out_len, res, xsp);
-#else
-            xmlDocDumpFormatMemory (res, &out_buf, &out_len, 1);
-#endif
             if (!out_buf)
             {
                 wrbuf_printf(wr_error,
