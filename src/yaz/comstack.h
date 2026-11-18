@@ -484,6 +484,17 @@ YAZ_EXPORT int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
     server certificate filename yaz.pem.
  */
 YAZ_EXPORT int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
+/** \brief Sets the PEM CA bundle used to verify the server
+    \param cs TLS endpoint, before connecting
+    \param fname filename, or NULL/empty to restore system trust
+    \returns 1 on success, 0 for a non-TLS endpoint or an existing TLS session
+
+    Copies the filename. A nonempty filename enables certificate and hostname
+    verification and replaces system trust. Loading is deferred until connect;
+    an unreadable, invalid, or empty bundle makes the connection fail.
+    Clearing the filename does not disable verification.
+ */
+YAZ_EXPORT int cs_set_ssl_cafile(COMSTACK cs, const char *fname);
 /** \brief Gets a human-readable description of the first peer X.509 certificate
     \param cs endpoint with an established TLS session
     \param buf required output pointer to allocated, NUL-terminated text

@@ -1909,7 +1909,17 @@
        <entry>cert_fname</entry>
        <entry>
         Specifies a PEM file containing the client certificate and private key.
-  +     Alternatively, specify certificate-file,key-file when they are separate.
+        Alternatively, specify certificate-file,key-file when they are separate.
+       </entry>
+       <entry>none</entry></row>
+      <row>
+       <entry>cafile</entry>
+       <entry>
+        Specifies a PEM CA bundle for server verification. A nonempty filename
+        enables certificate and hostname verification and replaces system trust.
+        Unreadable, invalid, or empty bundles cause TLS connections to fail.
+        An unset or empty option selects system trust when verification is enabled.
+        See <xref linkend="comstack.ssl.configuration"/> for examples.
        </entry>
        <entry>none</entry></row>
       <row>
@@ -1917,6 +1927,8 @@
        <entry>
         If value is <literal>1</literal> or <literal>T</literal>, SSL certificate
         server verification (system trust and server hostname) is enabled.
+        A nonempty <literal>cafile</literal> enables verification even when
+        <literal>check_cert</literal> is false.
        </entry>
        <entry>false</entry></row>
      </tbody>
@@ -10270,12 +10282,27 @@ void odr_choice_bias(ODR o, int what);
     <synopsis>
      int cs_set_ssl_certificate_file(COMSTACK cs, const char *fname);
     </synopsis>
-    Sets SSL certificate for comstack as a PEM file. This function
-    returns 1 for success; 0 for failure.
+    Sets the endpoint certificate and private key as a PEM file, or as
+    <literal>certificate-file,key-file</literal> for separate files.
+    This configures the server identity when listening, or the client identity
+    when connecting; it does not configure trusted server certificates.
+    This function returns 1 for success; 0 for failure.
    </para>
    <para>
     <synopsis>
-     int cs_get_ssl_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
+     int cs_set_ssl_cafile(COMSTACK cs, const char *fname);
+    </synopsis>
+    Selects a PEM CA bundle and enables certificate and hostname verification
+    for client TLS connections. Call before connecting. The filename is copied;
+    the file is loaded during connect. The bundle replaces system trust.
+    An unreadable, invalid, or empty bundle fails the connection with
+    <literal>CSERRORSSL</literal>. A NULL or empty filename restores system
+    trust without disabling verification. Returns 1 on success, or 0 for a
+    non-TLS endpoint or an existing TLS session.
+   </para>
+   <para>
+    <synopsis>
+     int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len);
     </synopsis>
     This function returns the peer certificate. If successful,
     <literal>*buf</literal> and <literal>*len</literal> holds
@@ -10283,6 +10310,92 @@ void odr_choice_bias(ODR o, int what);
     with <literal>xfree</literal>. This function returns 1 for success;
     0 for failure.
    </para>
+   <sect2 id="comstack.ssl.configuration">
+    <title>Configuring and testing TLS trust</title>
+    <para>
+     Certificate verification is currently opt-in. Use
+     <option>--check-cert</option> with <command>yaz-client</command> or
+     <command>yaz-url</command> to verify against system trust, or
+     <option>--cacert file</option> to enable verification against a private PEM
+     CA bundle. The explicit bundle replaces system trust. For ZOOM, set
+     <literal>cafile</literal>; for the URL API, call
+     <function>yaz_url_set_cafile</function>. These settings allow applications
+     to configure verified connections before a future default change.
+    </para>
+    <para>
+     Obtain CA certificates through a trusted channel. Include only public
+     certificates in the client bundle, never a CA or server private key.
+     The server certificate must name the host used to connect in its Subject
+     Alternative Name (SAN); trusting a CA does not disable hostname checking.
+     For several trusted CAs, concatenate their PEM certificates into one bundle.
+    </para>
+    <para>
+     The following OpenSSL commands create a private test CA and a server
+     certificate for <literal>localhost</literal>. Run them in a new directory.
+     The unencrypted private keys are intended for this local test; restrict
+     their permissions and keep the CA key off production servers.
+    </para>
+    <screen><![CDATA[
+umask 077
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
+  -keyout ca.key -out ca.pem -subj "/CN=YAZ test CA" \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign"
+openssl req -new -newkey rsa:2048 -nodes \
+  -keyout server.key -out server.csr -subj "/CN=localhost"
+cat > server.ext <<'EOF'
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+subjectAltName=DNS:localhost
+EOF
+openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key \
+  -CAcreateserial -out server.pem -days 365 -sha256 -extfile server.ext
+openssl verify -CAfile ca.pem -purpose sslserver \
+  -verify_hostname localhost server.pem
+]]></screen>
+    <para>
+     Start a local HTTPS test endpoint in one terminal, and fetch it in another:
+    </para>
+    <screen><![CDATA[
+openssl s_server -accept 8443 -cert server.pem -key server.key -www
+]]></screen>
+    <screen><![CDATA[
+yaz-url --cacert ca.pem https://localhost:8443/
+]]></screen>
+    <para>
+     For Z39.50 over TLS, start <command>yaz-ztest</command> with the same
+     certificate and key, then connect with <command>yaz-client</command>:
+    </para>
+    <screen><![CDATA[
+yaz-ztest -C server.pem,server.key ssl:@:9999
+]]></screen>
+    <screen><![CDATA[
+yaz-client --cacert ca.pem ssl:localhost:9999
+]]></screen>
+    <para>
+     To inspect and verify a running TLS endpoint independently, use
+     <command>openssl s_client</command>. The same command works for a
+     Z39.50 TLS endpoint by changing the port. Connecting as
+     <literal>127.0.0.1</literal> with YAZ should fail hostname verification
+     with this certificate, because its SAN contains only
+     <literal>localhost</literal>.
+    </para>
+    <screen><![CDATA[
+openssl s_client -connect localhost:8443 -servername localhost \
+  -CAfile ca.pem -verify_hostname localhost -verify_return_error
+openssl x509 -in server.pem -noout -subject -issuer -dates \
+  -ext subjectAltName
+]]></screen>
+    <para>
+     A deliberately trusted self-signed certificate can also be supplied in
+     the CA bundle; the hostname must still match. For deployments with
+     multiple servers, a private CA permits server certificates to be renewed
+     without replacing the trusted CA bundle on every client.
+     See the <ulink url="https://docs.openssl.org/3.0/man1/openssl-req/">OpenSSL
+     command documentation</ulink> for further certificate options.
+    </para>
+   </sect2>
   </sect1>
   <sect1 id="comstack.diagnostics">
    <title>Diagnostics</title>

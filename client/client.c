@@ -106,6 +106,7 @@ static COMSTACK conn = 0;               /* our z-association */
 static Z_IdAuthentication *auth = 0;    /* our current auth definition */
 static NMEM nmem_auth = NULL;
 static int check_cert = 0;
+static const char *cafile = 0;
 
 char *databaseNames[128];
 int num_databaseNames = 0;
@@ -749,6 +750,8 @@ static int session_connect_base(const char *arg, const char **basep)
     }
     if (cert_fname)
         cs_set_ssl_certificate_file(conn, cert_fname);
+    if (cafile)
+        cs_set_ssl_cafile(conn, cafile);
 
 #if YAZ_HAVE_XML2
 #else
@@ -2786,6 +2789,8 @@ static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
         void *add;
         int cs_flags = CS_FLAGS_BLOCKING | (check_cert ? CS_FLAGS_CHECK_CERT : 0);
         COMSTACK conn = cs_create_host(uri, cs_flags, &add);
+        if (conn && cafile)
+            cs_set_ssl_cafile(conn, cafile);
         if (!conn)
             fprintf(stderr, "Can not create connection for URL:%s\n", uri);
         else if (cs_connect(conn, add) < 0)
@@ -5555,7 +5560,7 @@ int main(int argc, char **argv)
 
     nmem_auth = nmem_create();
 
-    while ((ret = options("k:c:C:e{check-cert}q:a:b:m:v:p:u:t:Vxd:f:",
+    while ((ret = options("A{cacert}:k:c:C:e{check-cert}q:a:b:m:v:p:u:t:Vxd:f:",
                           argv, argc, &arg)) != -2)
     {
         switch (ret)
@@ -5573,6 +5578,14 @@ int main(int argc, char **argv)
                         prog);
                 exit(1);
             }
+            break;
+        case 'A':
+            if (!*arg)
+            {
+                fprintf(stderr, "--cacert requires a nonempty filename\n");
+                exit(1);
+            }
+            cafile = arg;
             break;
         case 'a':
             if (!strcmp(arg, "-"))
@@ -5641,6 +5654,7 @@ int main(int argc, char **argv)
             break;
         default:
             fprintf(stderr, "Usage: %s"
+                    " [-A|--cacert cafile]"
                     " [-a apdulog]"
                     " [-b berdump]"
                     " [-c cclfile]"

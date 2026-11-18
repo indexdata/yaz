@@ -1113,10 +1113,13 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
     if (c->cs)
     {
         const char *cert_fname = ZOOM_options_get(c->options, "cert_fname");
+        const char *cafile = ZOOM_options_get(c->options, "cafile");
         int ret;
 
         if (cert_fname)
             cs_set_ssl_certificate_file(c->cs, cert_fname);
+        if (cafile && *cafile)
+            cs_set_ssl_cafile(c->cs, cafile);
 
         ret = cs_connect(c->cs, add);
         if (ret == 0)

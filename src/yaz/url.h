@@ -114,8 +114,21 @@ YAZ_EXPORT const char *yaz_url_get_error(yaz_url_t p);
 /** \brief sets whether to check SSL certificates
     \param p handle
     \param check_cert 1 to check certificates, 0 to ignore
+
+    A configured nonempty CA filename always enables verification.
 */
 YAZ_EXPORT void yaz_url_set_check_cert(yaz_url_t p, int check_cert);
+
+/** \brief sets the PEM CA bundle used to verify HTTPS servers
+    \param p handle
+    \param fname filename, or NULL/empty to restore system trust
+
+    Copies the filename. A nonempty filename enables certificate and hostname
+    verification, even if check_cert is subsequently set to 0, and replaces
+    system trust. Invalid or empty bundles make HTTPS connections fail.
+    Clearing the filename does not disable verification.
+*/
+YAZ_EXPORT void yaz_url_set_cafile(yaz_url_t p, const char *fname);
 
 /** \brief sets file with client-side certificate
     \param p handle
