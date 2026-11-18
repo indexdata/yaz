@@ -718,6 +718,30 @@ static void tst_cs_set_head_only(void)
 #endif
 }
 
+static void tst_ssl_cafile(void)
+{
+    COMSTACK cs = cs_create(tcpip_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
+    YAZ_CHECK(cs);
+    YAZ_CHECK_EQ(cs_set_ssl_cafile(cs, "ca.pem"), 0);
+    cs_close(cs);
+    YAZ_CHECK_EQ(cs_set_ssl_cafile(0, "ca.pem"), 0);
+#if HAVE_GNUTLS_H
+    cs = cs_create(ssl_type, CS_FLAGS_BLOCKING, PROTO_HTTP);
+    YAZ_CHECK(cs);
+    if (cs)
+    {
+        YAZ_CHECK(!(cs->flags & CS_FLAGS_CHECK_CERT));
+        YAZ_CHECK(cs_set_ssl_cafile(cs, "ca.pem"));
+        YAZ_CHECK(cs->flags & CS_FLAGS_CHECK_CERT);
+        YAZ_CHECK(cs_set_ssl_cafile(cs, "other.pem"));
+        YAZ_CHECK(cs_set_ssl_cafile(cs, ""));
+        YAZ_CHECK(cs->flags & CS_FLAGS_CHECK_CERT);
+        YAZ_CHECK(cs_set_ssl_cafile(cs, 0));
+        cs_close(cs);
+    }
+#endif
+}
+
 static void tst_invalid_connect_targets(void)
 {
     int c;
@@ -754,6 +778,7 @@ int main (int argc, char **argv)
 #if HAVE_GNUTLS_H
     tst_cs_get_error_ssl();
 #endif
+    tst_ssl_cafile();
     tst_invalid_connect_targets();
     tst_cs_set_head_only();
 #ifndef WIN32

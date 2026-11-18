@@ -29,6 +29,7 @@
  <refsynopsisdiv>
   <cmdsynopsis>
    <command>yaz-url</command>
+   <arg choice="opt">-A | --cacert <replaceable>filename</replaceable></arg>
    <arg choice="opt">-C <replaceable>certfname</replaceable></arg>
    <arg choice="opt">-e | --check-cert</arg>
    <arg choice="opt">-H <replaceable>name:value</replaceable></arg>
@@ -59,6 +60,19 @@
 
  <refsect1><title>OPTIONS</title>
   <variablelist>
+   <varlistentry>
+    <term>-A <replaceable>filename</replaceable> | --cacert <replaceable>filename</replaceable></term>
+    <listitem><para>
+      Uses the PEM CA bundle in the specified file to verify the server
+      certificate and hostname. This enables verification without requiring
+      <option>--check-cert</option>. The bundle replaces system trust for TLS
+      connections; an unreadable, invalid, or empty bundle causes the connection
+      to fail. The file contains trusted certificates, not private keys.
+      Without this option, <option>--check-cert</option> uses system trust;
+      verification remains disabled by default when neither option is given.
+     </para></listitem>
+   </varlistentry>
+
    <varlistentry>
     <term>-C <replaceable>certfname</replaceable></term>
     <listitem><para>

@@ -18,6 +18,7 @@
 static void usage(void)
 {
     printf("yaz-url [options] url ..\n");
+    printf(" -A, --cacert file   Verify server using this PEM CA bundle\n");
     printf(" -C certfile         Client-side certificate\n");
     printf(" -e, --check-cert    Enables SSL certificate checking\n");
     printf(" -H name:value       Sets HTTP header (repeat if necessary)\n");
@@ -78,12 +79,20 @@ int main(int argc, char **argv)
     const char *outfname = 0;
 
     yaz_enable_panic_backtrace(*argv);
-    while ((ret = options("C:e{check-cert}h{help}H:m:O:p:R{max-redirs}:u:vx:",
+    while ((ret = options("A{cacert}:C:e{check-cert}h{help}H:m:O:p:R{max-redirs}:u:vx:",
                           argv, argc, &arg))
            != YAZ_OPTIONS_EOF)
     {
         switch (ret)
         {
+        case 'A':
+            if (!*arg)
+            {
+                fprintf(stderr, "--cacert requires a nonempty filename\n");
+                exit(1);
+            }
+            yaz_url_set_cafile(p, arg);
+            break;
         case 'C':
             yaz_url_set_cert_fname(p, arg);
             break;

@@ -141,6 +141,7 @@ typedef struct tcpip_state
     int yaz_pem_default;
     char cert_fname[256];
     char key_fname[256];
+    char *cafile;
     int use_bye;
 #endif
     char *connect_host;
@@ -198,6 +199,7 @@ static struct tcpip_state *tcpip_state_create(void)
 #endif
 
 #if HAVE_GNUTLS_H
+    sp->cafile = 0;
     sp->cred_ptr = 0;
     sp->session = 0;
     sp->cert_fname[0] = '\0';
@@ -220,6 +222,7 @@ static void tcpip_state_destroy(tcpip_state *sp)
     if (sp->session)
         gnutls_deinit(sp->session);
     tcpip_release_cred(&sp->cred_ptr);
+    xfree(sp->cafile);
 #endif
     if (sp->ai)
         freeaddrinfo(sp->ai);
@@ -922,11 +925,21 @@ int tcpip_rcvconnect(COMSTACK h)
         sp->cred_ptr = tcpip_create_cred();
         if (h->flags & CS_FLAGS_CHECK_CERT)
         {
-            r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
-            if (r < 0)
+            if (sp->cafile)
+                r = gnutls_certificate_set_x509_trust_file(sp->cred_ptr->xcred,
+                                                         sp->cafile,
+                                                         GNUTLS_X509_FMT_PEM);
+            else
+                r = gnutls_certificate_set_x509_system_trust(sp->cred_ptr->xcred);
+            if (r < 0 || (sp->cafile && r == 0))
             {
-                yaz_log(log_level, "gnutls_certificate_set_x509_system_trust r=%d msg=%s", r, gnutls_strerror(r));
-                cs_set_error(h, CSERRORSSL, gnutls_strerror(r));
+                char details[1024];
+                yaz_snprintf(details, sizeof(details),
+                             "TLS trust loading failed (%s): %s",
+                             sp->cafile ? sp->cafile : "system trust",
+                             r < 0 ? gnutls_strerror(r) : "no CA certificates found");
+                yaz_log(log_level, "%s", details);
+                cs_set_error(h, CSERRORSSL, details);
                 tcpip_release_cred(&sp->cred_ptr);
                 return -1;
             }
@@ -1726,6 +1739,25 @@ int cs_set_ssl_ctx(COMSTACK cs, void *ctx)
     if (cs && cs->type == ssl_type)
     {
         /* doesn't do anything for GNUTLS */
+        return 1;
+    }
+#endif
+    return 0;
+}
+
+int cs_set_ssl_cafile(COMSTACK cs, const char *fname)
+{
+#if HAVE_GNUTLS_H
+    if (cs && cs->type == ssl_type)
+    {
+        tcpip_state *sp = (tcpip_state *) cs->cprivate;
+        if (sp->session)
+            return 0;
+        char *copy = fname && *fname ? xstrdup(fname) : 0;
+        xfree(sp->cafile);
+        sp->cafile = copy;
+        if (copy)
+            cs->flags |= CS_FLAGS_CHECK_CERT;
         return 1;
     }
 #endif

@@ -1,3 +1,10 @@
+CA bundle configuration: yaz-client and yaz-url accept -A/--cacert file;
+ZOOM accepts option cafile. New APIs yaz_url_set_cafile and cs_set_ssl_cafile.
+A nonempty filename enables server certificate and hostname verification using
+only the specified PEM bundle, replacing system trust. Invalid, unreadable, or
+empty bundles fail the TLS connection. Verification defaults remain unchanged.
+The COMSTACK chapter includes OpenSSL commands for configuring private trust.
+
 --- 5.38.1 2026/10/16
 
 Windows build: use vcpkg for libraries such as libxml2, libxslt, icu.
