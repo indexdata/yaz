@@ -156,7 +156,7 @@ int odr_seek(ODR o, int whence, int offset)
 
 Odr_int odr_strtol(const char *nptr, char **endptr, int base)
 {
-#if WIN32
+#if _WIN32
     return _strtoui64(nptr, endptr, base);
 #else
     return strtoll(nptr, endptr, base);

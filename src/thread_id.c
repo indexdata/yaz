@@ -15,7 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -32,7 +32,7 @@
 
 void yaz_thread_id_cstr(char *buf, size_t buf_max)
 {
-#ifdef WIN32
+#ifdef _WIN32
     *buf = '\0';
 #elif YAZ_POSIX_THREADS
     pthread_t t = pthread_self();

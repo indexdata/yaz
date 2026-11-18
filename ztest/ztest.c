@@ -24,7 +24,7 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -227,7 +227,7 @@ static int parse_delay(struct delay *delayp, const char *value)
 
 static void ztest_sleep(double d)
 {
-#ifdef WIN32
+#ifdef _WIN32
     Sleep( (DWORD) (d * 1000));
 #else
     struct timeval tv;

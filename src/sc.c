@@ -10,7 +10,7 @@
 #include <config.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <tchar.h>
 #include <direct.h>
@@ -34,7 +34,7 @@ struct sc_s {
     void (*sc_stop)(yaz_sc_t s);
     int argc;
     char **argv;
-#ifdef WIN32
+#ifdef _WIN32
     SERVICE_STATUS_HANDLE   gSvcStatusHandle;
     SERVICE_STATUS          gSvcStatus;
 #endif
@@ -53,13 +53,13 @@ yaz_sc_t yaz_sc_create(const char *service_name, const char *display_name)
     s->run_flag = 0;
     s->sc_main = 0;
     s->sc_stop = 0;
-#ifdef WIN32
+#ifdef _WIN32
     s->gSvcStatusHandle = 0;
 #endif
     return s;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 static void parse_args(yaz_sc_t s, int *argc_p, char ***argv_p)
 {
     int skip_opt = 0;
@@ -225,7 +225,7 @@ static void WINAPI sc_service_main(DWORD argc, char **argv)
 
 void yaz_sc_running(yaz_sc_t s)
 {
-#ifdef WIN32
+#ifdef _WIN32
     sc_ReportSvcStatus(s, SERVICE_RUNNING, NO_ERROR, 0);
 #endif
 }
@@ -237,7 +237,7 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
 {
     s->sc_main = sc_main;
     s->sc_stop = sc_stop;
-#ifdef WIN32
+#ifdef _WIN32
     parse_args(s, &argc, &argv);
 
     if (s->install_flag || s->remove_flag)
@@ -363,7 +363,7 @@ int yaz_sc_program(yaz_sc_t s, int argc, char **argv,
         }
         return 0;
     }
-#endif /* WIN32 */
+#endif /* _WIN32 */
     /* run the program standalone (with no service) */
     return s->sc_main(s, argc, argv);
 }

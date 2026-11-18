@@ -24,7 +24,7 @@
 #include <yaz/log.h>
 #include <yaz/mutex.h>
 #include <yaz/gettimeofday.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <sys/timeb.h>
 #endif
@@ -45,7 +45,7 @@ void yaz_mutex_create(YAZ_MUTEX *p)
     if (!*p)
     {
         *p = (YAZ_MUTEX) malloc(sizeof(**p));
-#ifdef WIN32
+#ifdef _WIN32
         InitializeCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
         pthread_mutex_init(&(*p)->handle, 0);
@@ -73,7 +73,7 @@ void yaz_mutex_enter(YAZ_MUTEX p)
 {
     if (p)
     {
-#ifdef WIN32
+#ifdef _WIN32
         EnterCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
         int r = 1; /* signal : not locked (yet) */
@@ -124,7 +124,7 @@ void yaz_mutex_leave(YAZ_MUTEX p)
 {
     if (p)
     {
-#ifdef WIN32
+#ifdef _WIN32
         LeaveCriticalSection(&p->handle);
 #elif YAZ_POSIX_THREADS
         pthread_mutex_unlock(&p->handle);
@@ -142,7 +142,7 @@ void yaz_mutex_destroy(YAZ_MUTEX *p)
 {
     if (*p)
     {
-#ifdef WIN32
+#ifdef _WIN32
         DeleteCriticalSection(&(*p)->handle);
 #elif YAZ_POSIX_THREADS
         pthread_mutex_destroy(&(*p)->handle);

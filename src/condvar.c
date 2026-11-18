@@ -22,7 +22,7 @@
 #include <yaz/log.h>
 #include <yaz/mutex.h>
 #include <yaz/gettimeofday.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <sys/timeb.h>
 #endif
@@ -39,7 +39,7 @@
 #include "mutex-p.h"
 
 struct yaz_cond {
-#ifdef WIN32
+#ifdef _WIN32
     CONDITION_VARIABLE cond;
 #elif YAZ_POSIX_THREADS
     pthread_cond_t cond;
@@ -48,7 +48,7 @@ struct yaz_cond {
 
 void yaz_cond_create(YAZ_COND *p)
 {
-#ifdef WIN32
+#ifdef _WIN32
     *p = (YAZ_COND) malloc(sizeof(**p));
     InitializeConditionVariable(&(*p)->cond);
 #elif YAZ_POSIX_THREADS
@@ -63,7 +63,7 @@ void yaz_cond_destroy(YAZ_COND *p)
 {
     if (*p)
     {
-#ifdef WIN32
+#ifdef _WIN32
 #elif YAZ_POSIX_THREADS
         pthread_cond_destroy(&(*p)->cond);
 #endif
@@ -74,7 +74,7 @@ void yaz_cond_destroy(YAZ_COND *p)
 
 int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime)
 {
-#ifdef WIN32
+#ifdef _WIN32
     BOOL v;
     if (abstime)
     {
@@ -107,7 +107,7 @@ int yaz_cond_wait(YAZ_COND p, YAZ_MUTEX m, const struct timeval *abstime)
 
 int yaz_cond_signal(YAZ_COND p)
 {
-#ifdef WIN32
+#ifdef _WIN32
     WakeConditionVariable(&p->cond);
     return 0;
 #elif YAZ_POSIX_THREADS
@@ -119,7 +119,7 @@ int yaz_cond_signal(YAZ_COND p)
 
 int yaz_cond_broadcast(YAZ_COND p)
 {
-#ifdef WIN32
+#ifdef _WIN32
     WakeAllConditionVariable(&p->cond);
     return 0;
 #elif YAZ_POSIX_THREADS

@@ -24,7 +24,7 @@
 #if YAZ_POSIX_THREADS
 #include <pthread.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <process.h>
 #endif
@@ -33,7 +33,7 @@ struct yaz_thread {
 #if YAZ_POSIX_THREADS
     pthread_t id;
 #else
-#ifdef WIN32
+#ifdef _WIN32
     HANDLE handle;
     void *(*routine)(void *p);
 #endif
@@ -41,7 +41,7 @@ struct yaz_thread {
 #endif
 };
 
-#ifdef WIN32
+#if defined(_WIN32) && !YAZ_POSIX_THREADS
 unsigned int __stdcall win32_routine(void *p)
 {
     yaz_thread_t t = (yaz_thread_t) p;
@@ -63,7 +63,7 @@ yaz_thread_t yaz_thread_create(void *(*start_routine)(void *p), void *arg)
         t = 0;
     }
 #else
-#ifdef WIN32
+#ifdef _WIN32
     /* we create a wrapper on windows and pass yaz_thread struct to that */
     unsigned threadID;
     uintptr_t ex_ret;
@@ -90,7 +90,7 @@ void yaz_thread_join(yaz_thread_t *tp, void **value_ptr)
 #ifdef YAZ_POSIX_THREADS
         pthread_join((*tp)->id, value_ptr);
 #else
-#ifdef WIN32
+#ifdef _WIN32
         WaitForSingleObject((*tp)->handle, INFINITE);
         CloseHandle((*tp)->handle);
 #endif
@@ -109,7 +109,7 @@ void yaz_thread_detach(yaz_thread_t *tp)
 #ifdef YAZ_POSIX_THREADS
         pthread_detach((*tp)->id);
 #else
-#ifdef WIN32
+#ifdef _WIN32
         CloseHandle((*tp)->handle);
 #endif
 #endif

@@ -25,7 +25,7 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -41,7 +41,7 @@ void yaz_set_errno(int v)
 
 void yaz_strerror(char *buf, size_t bufsz)
 {
-#ifdef WIN32
+#ifdef _WIN32
     DWORD err;
 #else
     int error = errno;
@@ -50,7 +50,7 @@ void yaz_strerror(char *buf, size_t bufsz)
     if (!bufsz)
         return;
     *buf = '\0';
-#ifdef WIN32
+#ifdef _WIN32
     err = GetLastError();
     if (err)
     {

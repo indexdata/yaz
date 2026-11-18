@@ -27,7 +27,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #define YAZ_INVALID_SOCKET INVALID_SOCKET
 #else
@@ -75,7 +75,7 @@ struct yaz_spipe {
 
 static void yaz_spipe_close(int *fd)
 {
-#ifdef WIN32
+#ifdef _WIN32
     if (*fd != YAZ_INVALID_SOCKET)
         closesocket(*fd);
 #else
@@ -87,7 +87,7 @@ static void yaz_spipe_close(int *fd)
 
 static int nonblock(int s)
 {
-#ifdef WIN32
+#ifdef _WIN32
     unsigned long tru = 1;
     if (ioctlsocket(s, FIONBIO, &tru))
         return -1;
@@ -102,7 +102,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
 {
     yaz_spipe_t p = xmalloc(sizeof(*p));
 
-#ifdef WIN32
+#ifdef _WIN32
     {
         WSADATA wsaData;
         WORD wVersionRequested = MAKEWORD(2, 0);
@@ -135,7 +135,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
             yaz_spipe_destroy(p);
             return 0;
         }
-#ifndef WIN32
+#ifndef _WIN32
         {
             unsigned long one = 1;
             if (setsockopt(p->m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)
@@ -194,7 +194,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
         if (connect(p->m_fd[1], addr, sizeof(*addr)))
         {
             if (
-#ifdef WIN32
+#ifdef _WIN32
                 WSAGetLastError() != WSAEWOULDBLOCK
 #else
                 errno != EINPROGRESS
@@ -232,7 +232,7 @@ yaz_spipe_t yaz_spipe_create(int port_to_use, WRBUF *err_msg)
     }
     else
     {
-#ifdef WIN32
+#ifdef _WIN32
         yaz_spipe_destroy(p);
         return 0;
 #else
@@ -257,7 +257,7 @@ void yaz_spipe_destroy(yaz_spipe_t p)
     yaz_spipe_close(&p->m_fd[1]);
     yaz_spipe_close(&p->m_socket);
     xfree(p);
-#ifdef WIN32
+#ifdef _WIN32
     WSACleanup();
 #endif
 }

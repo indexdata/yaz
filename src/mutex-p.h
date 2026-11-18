@@ -31,7 +31,7 @@
  */
 
 struct yaz_mutex {
-#ifdef WIN32
+#ifdef _WIN32
     CRITICAL_SECTION handle;
 #elif YAZ_POSIX_THREADS
     pthread_mutex_t handle;

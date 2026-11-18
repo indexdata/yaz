@@ -33,7 +33,7 @@
 #ifndef UNIX_H
 #define UNIX_H
 
-#ifndef WIN32
+#ifndef _WIN32
 
 #include <yaz/comstack.h>
 

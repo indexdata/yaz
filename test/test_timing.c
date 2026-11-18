@@ -12,7 +12,7 @@
 #include <yaz/timing.h>
 #include <yaz/test.h>
 #include <yaz/log.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -27,7 +27,7 @@ static void tst(void)
     if (!t)
         return;
 
-#ifdef WIN32
+#ifdef _WIN32
     Sleep(10);
 #endif
     for (i = 0; i<5000000; i++)

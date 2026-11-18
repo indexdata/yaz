@@ -27,7 +27,7 @@
 #include <yaz/log.h>
 #include <yaz/xml_include.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #define S_ISREG(x) (x & _S_IFREG)
 #endif
 

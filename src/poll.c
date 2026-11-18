@@ -30,7 +30,7 @@
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #if FD_SETSIZE < 512
 #define FD_SETSIZE 512
 #endif

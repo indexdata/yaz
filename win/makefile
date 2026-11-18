@@ -265,7 +265,6 @@ COMMON_C_OPTIONS=          \
   /D "_CRT_SECURE_NO_DEPRECATE" \
   /D "_CRT_NONSTDC_NO_DEPRECATE" \
   /D "_WINDOWS"            \
-  /D "WIN32"               \
   /FR"$(OBJDIR)\\"         \
   /Fo"$(OBJDIR)\\"         \
   /Fd"$(OBJDIR)\\"

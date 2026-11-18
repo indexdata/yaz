@@ -14,7 +14,7 @@
 
 #include <yaz/yconfig.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <sys/stat.h>
 #endif
@@ -189,7 +189,7 @@ static void rotate_log(const char *cur_fname)
 {
     int i;
 
-#ifdef WIN32
+#ifdef _WIN32
     /* windows can't rename a file if it is open */
     yaz_log_close();
 #endif
@@ -214,7 +214,7 @@ static void rotate_log(const char *cur_fname)
                          "%s", cur_fname);
         yaz_snprintf(fname_str[1], sizeof(fname_str[1]),
                      "%s.%d", cur_fname, i);
-#ifdef WIN32
+#ifdef _WIN32
         MoveFileEx(fname_str[0], fname_str[1], MOVEFILE_REPLACE_EXISTING);
 #else
         rename(fname_str[0], fname_str[1]);
@@ -347,7 +347,7 @@ static void yaz_log_open_check(struct tm *tm, int force, const char *filemode)
     if (force && *cur_filename)
     {
         FILE *new_file;
-#ifdef WIN32
+#ifdef _WIN32
         yaz_log_close();
 #endif
         if (!strncmp(cur_filename, "fd=", 3))

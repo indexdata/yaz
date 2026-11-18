@@ -40,7 +40,7 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <sys/stat.h>
 #define S_ISREG(x) (x & _S_IFREG)

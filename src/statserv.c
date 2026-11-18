@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <process.h>
 #include <winsock.h>
 #include <direct.h>
@@ -78,7 +78,7 @@ static NMEM gfs_nmem = 0;
 
 static char *me = "statserver"; /* log prefix */
 static char *programname="statserver"; /* full program name */
-#ifdef WIN32
+#ifdef _WIN32
 DWORD current_control_tls;
 static int init_control_tls = 0;
 #elif YAZ_POSIX_THREADS
@@ -114,12 +114,12 @@ statserv_options_block control_block = {
     0,                          /* handle (for service, etc) */
     0,                          /* bend_init handle */
     0,                          /* bend_close handle */
-#ifdef WIN32
+#ifdef _WIN32
     "Z39.50 Server",            /* NT Service Name */
     "Server",                   /* NT application Name */
     "",                         /* NT Service Dependencies */
     "Z39.50 Server",            /* NT Service Display Name */
-#endif /* WIN32 */
+#endif /* _WIN32 */
     "",                         /* PID fname */
     0,                          /* background daemon */
     "",                         /* SSL certificate filename */
@@ -577,7 +577,7 @@ static int xml_config_open(void)
         yaz_log(YLOG_WARN|YLOG_ERRNO, "getcwd failed");
         gfs_root_dir[0] = '\0';
     }
-#ifdef WIN32
+#ifdef _WIN32
     init_control_tls = 1;
     current_control_tls = TlsAlloc();
 #elif YAZ_POSIX_THREADS
@@ -610,7 +610,7 @@ static int xml_config_open(void)
         }
     }
     const char *last_p = strrchr(fname,
-#ifdef WIN32
+#ifdef _WIN32
                      '\\'
 #else
                      '/'
@@ -640,7 +640,7 @@ static void xml_config_close(void)
 #endif
     gfs_server_list = 0;
     nmem_destroy(gfs_nmem);
-#ifdef WIN32
+#ifdef _WIN32
     if (init_control_tls)
         TlsFree(current_control_tls);
 #elif YAZ_POSIX_THREADS
@@ -719,7 +719,7 @@ static void remove_listeners(void);
  * doing all of the listening and accepting in the parent - it's
  * safer that way.
  */
-#ifdef WIN32
+#ifdef _WIN32
 
 typedef struct _ThreadList ThreadList;
 
@@ -965,7 +965,7 @@ static void listener(IOCHAN h, int event)
     }
 }
 
-#else /* ! WIN32 */
+#else /* ! _WIN32 */
 
 /* To save having an #ifdef in event_loop we need to
    define this empty function
@@ -1292,7 +1292,7 @@ static void remove_listeners(void)
         iochan_destroy(l);
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 /* UNIX only (for windows we don't need to catch the signals) */
 static void catchchld(int num)
 {
@@ -1303,7 +1303,7 @@ static void catchchld(int num)
 
 statserv_options_block *statserv_getcontrol(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
     if (init_control_tls)
         return (statserv_options_block *) TlsGetValue(current_control_tls);
     else
@@ -1328,7 +1328,7 @@ void statserv_setcontrol(statserv_options_block *block)
         if (chdir(gfs_root_dir))
             yaz_log(YLOG_WARN|YLOG_ERRNO, "chdir %s", gfs_root_dir);
     }
-#ifdef WIN32
+#ifdef _WIN32
     if (init_control_tls)
         TlsSetValue(current_control_tls, block);
 #elif YAZ_POSIX_THREADS
@@ -1345,7 +1345,7 @@ static void statserv_reset(void)
 
 static int sig_received = 0;
 
-#ifndef WIN32
+#ifndef _WIN32
 static void normal_stop_handler(int num)
 {
     sig_received = num;
@@ -1371,14 +1371,14 @@ static void show_version(void)
 
 static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 {
-#ifdef WIN32
+#ifdef _WIN32
     /* We need to initialize the thread list */
     ThreadList_Initialize();
 /* WIN32 */
 #endif
 
 
-#ifdef WIN32
+#ifdef _WIN32
     char sep = '\\';
 #else
     char sep = '/';
@@ -1399,7 +1399,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
 
     if (control_block.inetd)
     {
-#ifdef WIN32
+#ifdef _WIN32
         ; /* no inetd on Windows */
 #else
         inetd_connection(control_block.default_proto);
@@ -1413,7 +1413,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
         if (!pListener)
             add_listener("tcp:@:9999", 0);
 
-#ifndef WIN32
+#ifndef _WIN32
         if (control_block.dynamic)
             signal(SIGCHLD, catchchld);
 #endif
@@ -1423,7 +1423,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
     if (s)
         yaz_sc_running(s);
 
-#ifndef WIN32
+#ifndef _WIN32
     signal(SIGTERM, normal_stop_handler);
 #endif
     int ret = yaz_daemon(programname,
@@ -1431,7 +1431,7 @@ static int statserv_sc_main(yaz_sc_t s, int argc, char **argv)
                          daemon_handler, &pListener,
                          *control_block.pid_fname ? control_block.pid_fname : 0,
                          *control_block.setuid ? control_block.setuid : 0);
-#ifndef WIN32
+#ifndef _WIN32
     if (sig_received)
         yaz_log(YLOG_LOG, "Received SIGTERM PID=%ld", (long) getpid());
 #endif
@@ -1646,7 +1646,7 @@ int statserv_main(int argc, char **argv,
 
     /* control block does not have service_name member on Unix */
     yaz_sc_t s = yaz_sc_create(
-#ifdef WIN32
+#ifdef _WIN32
         cb->service_name, cb->service_display_name
 #else
         0, 0

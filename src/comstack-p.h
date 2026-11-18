@@ -42,7 +42,7 @@ YAZ_BEGIN_CDECL
 
 const char *yaz_tcpip_get_error_details(COMSTACK cs);
 int yaz_tcpip_set_head_only(COMSTACK cs, int head_only);
-#ifndef WIN32
+#ifndef _WIN32
 int yaz_unix_set_head_only(COMSTACK cs, int head_only);
 #endif
 

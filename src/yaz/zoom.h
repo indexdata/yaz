@@ -36,7 +36,7 @@
 #define ZOOM_BEGIN_CDECL YAZ_BEGIN_CDECL
 #define ZOOM_END_CDECL YAZ_END_CDECL
 
-#ifdef WIN32
+#ifdef _WIN32
 #  define ZOOM_API(x) __declspec(dllexport) x __stdcall
 #else
 #  define ZOOM_API(x) x

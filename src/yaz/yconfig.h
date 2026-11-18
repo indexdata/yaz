@@ -34,7 +34,7 @@
 #define YCONFIG_H
 
 #ifndef YAZ_EXPORT
-# ifdef WIN32
+# ifdef _WIN32
 #  define YAZ_EXPORT __declspec(dllexport)
 #  define YAZ_IMPORT __declspec(dllimport)
 # else
@@ -43,7 +43,7 @@
 # endif
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 # ifndef O_BINARY
 #  define O_BINARY 0
 # endif
