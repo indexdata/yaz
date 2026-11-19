@@ -18,6 +18,7 @@
 #include <yaz/test.h>
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
+#include <yaz/xmalloc.h>
 
 #if YAZ_HAVE_ICU
 #include "icu_I18N.h"
@@ -184,13 +185,13 @@ static int test_icu_sortmap(const char *locale, size_t src_list_len,
 
     int i;
 
-    struct icu_termmap *list[src_list_len];
-
     UCollator *coll = ucol_open(locale, &status);
     icu_check_status(status);
 
     if (U_FAILURE(status))
         return 0;
+
+    struct icu_termmap **list = xmalloc(src_list_len * sizeof(*list));
 
     /* assigning display terms and sort keys using buf 8 and buf16 */
     for (i = 0; i < src_list_len; i++)
@@ -243,6 +244,7 @@ static int test_icu_sortmap(const char *locale, size_t src_list_len,
 
     for (i = 0; i < src_list_len; i++)
         free(list[i]);
+    xfree(list);
 
     ucol_close(coll);
 

@@ -1297,6 +1297,19 @@
       nmake
      </screen>
     </para>
+    <para>
+     To build and run the C test suite, type the following from the
+     <filename>win</filename> directory with the same makefile settings:
+     <screen>
+      nmake check
+     </screen>
+     NMAKE's predefined <literal>CPP</literal> macro selects
+     <command>cl</command>, so there is no need to specify
+     <literal>CPP=cl</literal> in a Visual Studio Native Tools Command
+     Prompt. Each test is reported separately; a failure causes the
+     command to return a nonzero exit status. Test output and diagnostic
+     logs are written in the <filename>test</filename> directory.
+    </para>
     <note>
      <para>
       If the <filename>nmake</filename> command is not found on your system

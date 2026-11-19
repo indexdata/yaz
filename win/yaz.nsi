@@ -152,6 +152,8 @@ Section "YAZ Source" YAZ_Source
 	File /r ..\test\marc-files
 	SetOutPath $INSTDIR\win
 	File makefile
+	File tests.mak
+	File run-tests.tcl
 	File *.nsi
 	File *.rc
 	SetOutPath $INSTDIR\m4
