@@ -46,7 +46,7 @@ dist-hook:
 
 # Rule for generating codecs for our small ASN.1 spec
 test_odrcodec.c test_odrcodec.h: tstodr.asn $(YAZCOMP)
-	cd $(srcdir); $(YAZCOMP) tstodr.asn
+	cd $(srcdir); $(TCLSH) $(YAZCOMP) tstodr.asn
 
 LDADD = ../src/libyaz.la
 test_icu_LDADD = ../src/libyaz_icu.la ../src/libyaz.la $(ICU_LIBS)
