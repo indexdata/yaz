@@ -1,4 +1,4 @@
-# Compile the Windows libraries, tools and test programs with MSVC x64.
+# Build and test the Windows libraries and tools with MSVC x64.
 name: Build YAZ on Windows
 
 on:
@@ -75,7 +75,7 @@ jobs:
           & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install --triplet x64-windows libxml2 libxslt libiconv icu libstemmer
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Build with NMAKE
+      - name: Build and test with NMAKE
         working-directory: win
         run: |
           $prefix = Join-Path $env:VCPKG_INSTALLATION_ROOT 'installed\x64-windows'
@@ -86,5 +86,9 @@ jobs:
           $icuVersion = $Matches[1]
           & nmake /nologo /f makefile BARCH=x64 DEBUG=0 CPP=cl "TCL=$env:YAZ_TCL" `
             "ICONV_DIR=$prefix" "LIBXML2_DIR=$prefix" "LIBXSLT_DIR=$prefix" `
-            "ICU_BASE=$prefix" "ICU_VER=$icuVersion" "LIBSTEMMER_DIR=$prefix" all
+            "ICU_BASE=$prefix" "ICU_VER=$icuVersion" "LIBSTEMMER_DIR=$prefix" check |
+            Tee-Object -FilePath nmake-check.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Select-String -Path nmake-check.log -Pattern '^Tests: [1-9][0-9]*, passed: [0-9]+, skipped: [0-9]+, failed: 0$' -Quiet)) {
+            throw 'NMAKE completed without a successful test-suite summary'
+          }

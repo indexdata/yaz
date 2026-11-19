@@ -14,23 +14,29 @@
 static void tst_tpath(void)
 {
     char fullpath[FILENAME_MAX];
+    const char *filename = "test_tpath.tmp";
+    FILE *f = fopen(filename, "w");
+    YAZ_CHECK(f != 0);
+    if (!f)
+        return;
+    fclose(f);
 
     YAZ_CHECK(!yaz_filepath_resolve("etc", 0, 0, fullpath));
     YAZ_CHECK(!yaz_filepath_resolve("etc", "", 0, fullpath)); /* bug #606 */
     YAZ_CHECK(!yaz_filepath_resolve("etc", ".", 0, fullpath));
     YAZ_CHECK(!yaz_filepath_resolve("does_not_exist", "", 0, fullpath));
     YAZ_CHECK(!yaz_filepath_resolve("does_not_exist", ".", 0, fullpath));
-    YAZ_CHECK(yaz_filepath_resolve("test_tpath", 0, 0, fullpath));
+    YAZ_CHECK(yaz_filepath_resolve(filename, 0, 0, fullpath));
 
-    YAZ_CHECK(yaz_filepath_resolve("test_tpath", "", 0, fullpath));
-    YAZ_CHECK(yaz_filepath_resolve("test_tpath", ".", 0, fullpath));
+    YAZ_CHECK(yaz_filepath_resolve(filename, "", 0, fullpath));
+    YAZ_CHECK(yaz_filepath_resolve(filename, ".", 0, fullpath));
 
-    YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "unknown_dir", 0, fullpath));
-    YAZ_CHECK(yaz_filepath_resolve("test_tpath", "unknown_dir:.", 0, fullpath));
-    YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "unknown_dir:", 0, fullpath));
-    YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "unknown_dir:c:", 0, fullpath));
-    YAZ_CHECK(!yaz_filepath_resolve("test_tpath", "unknown_dir:c:\\other", 0, fullpath));
-
+    YAZ_CHECK(!yaz_filepath_resolve(filename, "unknown_dir", 0, fullpath));
+    YAZ_CHECK(yaz_filepath_resolve(filename, "unknown_dir:.", 0, fullpath));
+    YAZ_CHECK(!yaz_filepath_resolve(filename, "unknown_dir:", 0, fullpath));
+    YAZ_CHECK(!yaz_filepath_resolve(filename, "unknown_dir:c:", 0, fullpath));
+    YAZ_CHECK(!yaz_filepath_resolve(filename, "unknown_dir:c:\\other", 0, fullpath));
+    YAZ_CHECK_EQ(remove(filename), 0);
 }
 
 int main(int argc, char **argv)

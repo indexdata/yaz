@@ -37,6 +37,18 @@ what's listed in `Build-Depends`. For RPM based systems, read
     $ make
     $ make check
 
+On Windows, use an MSVC command prompt and the settings in `win/makefile`:
+
+    > cd win
+    > nmake all
+    > nmake check
+
+The `check` target builds and runs the C tests listed in
+`test/Makefile.am`, including their generated helpers and test variants.
+It runs every test, prints a pass/fail summary, and fails if any test fails.
+Test output and diagnostic logs are written in `test/`. Shell and Python
+integration tests are not included in this target.
+
 ## Help
 
 To get more information or assistance, send mail to info@indexdata.com

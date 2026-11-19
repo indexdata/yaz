@@ -11,9 +11,7 @@
 #include <yaz/poll.h>
 #include "../src/eventl.h"
 
-/* eventl.c is compiled into this test with its clock and poll calls renamed.
-   This avoids relying on shared-library symbol interposition on macOS.
-   The simulated clock and socket make the tests deterministic without sleep. */
+/* The simulated clock and socket make the tests deterministic without sleep. */
 static time_t clock_now;
 static int ready;
 static int scenario;
@@ -21,6 +19,15 @@ static int inputs;
 static int outputs;
 static int timeouts;
 static int first_wait;
+static int removals;
+
+/* Simulated channels are not registered with the server's thread list.
+   In particular, its Windows critical section is not initialized here. */
+static void test_eventl_remove(IOCHAN chan)
+{
+    YAZ_CHECK(chan->destroyed);
+    removals++;
+}
 
 time_t test_eventl_time(time_t *result)
 {
@@ -39,6 +46,15 @@ int test_eventl_poll(struct yaz_poll_fd *fds, int num_fds, int sec, int nsec)
         fds[i].output_mask = ready ? fds[i].input_mask : yaz_poll_none;
     return ready ? num_fds : 0;
 }
+
+/* Rename calls after loading the system headers: on Windows, renaming time
+   in <time.h> would declare the mock as an imported CRT function. Embed the
+   event loop so the test also works without library symbol interposition. */
+#undef HAVE_CONFIG_H
+#define time test_eventl_time
+#define yaz_poll test_eventl_poll
+#define statserv_remove test_eventl_remove
+#include "../src/eventl.c"
 
 static void callback(IOCHAN chan, int event)
 {
@@ -65,7 +81,7 @@ static void run(int which, time_t deadline, int idle, int activity,
     scenario = which;
     ready = activity;
     clock_now = 100;
-    inputs = outputs = timeouts = 0;
+    inputs = outputs = timeouts = removals = 0;
     first_wait = -1;
     IOCHAN chan = iochan_create(-1, callback, EVENT_INPUT | EVENT_OUTPUT, 0);
     iochan_settimeout(chan, idle);
@@ -76,6 +92,7 @@ static void run(int which, time_t deadline, int idle, int activity,
     YAZ_CHECK_EQ(inputs, expected_inputs);
     YAZ_CHECK_EQ(outputs, expected_inputs);
     YAZ_CHECK_EQ(timeouts, 1);
+    YAZ_CHECK_EQ(removals, 1);
     YAZ_CHECK_EQ(first_wait, expected_wait);
 }
 

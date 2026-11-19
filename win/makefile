@@ -156,10 +156,6 @@ YAZ_ICONV=$(BINDIR)\yaz-iconv.exe
 YAZ_RECORD_CONV=$(BINDIR)\yaz-record-conv.exe
 YAZ_JSON_PARSE=$(BINDIR)\yaz-json-parse.exe
 
-TSTLOG=$(BINDIR)\test_log.exe
-TST_TIMING=$(BINDIR)\test_timing.exe
-TEST_MUTEX=$(BINDIR)\test_mutex.exe
-
 # shortcut names defined here
 dll: dirs generate $(YAZ_DLL) $(YAZ_COND_DLL)
 client: dirs generate $(CLIENT)
@@ -172,7 +168,6 @@ zoomsh: $(ZOOMSH) $(ZOOMTST1) $(ZOOMTST2) $(ZOOMTST3) \
 yaz_url: $(YAZ_URL)
 
 utilprog: $(CQL2PQF) $(CQL2XCQL) $(YAZ_MARCDUMP) $(YAZ_ICONV) $(YAZ_RECORD_CONV) $(YAZ_JSON_PARSE)
-testprog: $(TSTLOG) $(TST_TIMING) $(TEST_MUTEX)
 
 htmlhelp: $(DOCDIR)\htmlhelp.chm
 
@@ -253,8 +248,8 @@ libxslt:
 
 
 ### C and CPP compiler  (the same thing)
-# Note: $(CPP) has already been defined in the environment
-# (if you set things up right!)
+# NMAKE predefines CPP=cl. Use a Visual Studio Native Tools Command Prompt
+# so the compiler, headers and libraries are available.
 
 COMMON_C_OPTIONS=          \
   /nologo /W3 /EHsc /FD /c   \
@@ -390,15 +385,6 @@ YAZ_RECORD_CONV_OBJS = \
    $(OBJDIR)\yaz-record-conv.obj
 YAZ_JSON_PARSE_OBJS = \
    $(OBJDIR)\json-parse.obj
-
-TSTLOG_OBJS = \
-   $(OBJDIR)\test_log.obj
-
-TST_TIMING_OBJS = \
-   $(OBJDIR)\test_timing.obj
-
-TEST_MUTEX_OBJS = \
-   $(OBJDIR)\test_mutex.obj
 
 MISC_OBJS= \
    $(OBJDIR)\diag_map.obj \
@@ -776,7 +762,7 @@ generate: \
 	$(CPP) $(COPT) $<
 
 {$(TESTDIR)}.c{$(OBJDIR)}.obj:
-	$(CPP) $(COPT) $<
+	$(CPP) $(TEST_COPT) $<
 
 # ASN-generated files
 
@@ -987,15 +973,6 @@ $(YAZ_RECORD_CONV) : "$(BINDIR)" $(YAZ_RECORD_CONV_OBJS) $(YAZ_DLL)
 $(YAZ_JSON_PARSE) : "$(BINDIR)" $(YAZ_JSON_PARSE_OBJS) $(YAZ_DLL)
 	$(LINK_PROGRAM) $(YAZ_JSON_PARSE_OBJS) /out:$@
 
-$(TSTLOG) : "$(BINDIR)" $(TSTLOG_OBJS) $(YAZ_DLL)
-	$(LINK_PROGRAM) $(TSTLOG_OBJS) /out:$@
-
-$(TST_TIMING) : "$(BINDIR)" $(TST_TIMING_OBJS) $(YAZ_DLL)
-	$(LINK_PROGRAM) $(TST_TIMING_OBJS) /out:$@
-
-$(TEST_MUTEX) : "$(BINDIR)" $(TEST_MUTEX_OBJS) $(YAZ_COND_DLL)
-	$(LINK_PROGRAM) $(YAZ_COND_IMPLIB) $(TEST_MUTEX_OBJS) /out:$@
-
 # Other rules
 
 $(DOCDIR)\htmlhelp.chm: $(DOCDIR)\htmlhelp.hhp
@@ -1010,6 +987,7 @@ clean:
 	-del $(TMPDIR)\*.
 	-del $(LIBDIR)\*.LIB
 	-del $(OBJDIR)\*.OBJ
+	-del $(OBJDIR)\yaz_test.lib
 
 realclean: clean
 	-del $(SRCDIR)\marc8.c
@@ -1047,4 +1025,6 @@ $(ILL_OBJS): $(ILL_CORE_FILES) $(ITEM_REQ_FILES)
 # makes sure we generate before compiling anything, as the
 # new proto.h refers to the generated files, and is included
 # in various places
+
+!include tests.mak
 

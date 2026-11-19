@@ -138,6 +138,11 @@ static void tst_configure(void)
                                   "Element <xslt>: attribute 'stylesheet' "
                                   "expected", 0));
 #endif
+#if YAZ_HAVE_XSLT
+    const char *xslt_error = 0;
+#else
+    const char *xslt_error = "Element <backend>: unsupported element <xslt>";
+#endif
     YAZ_CHECK(conv_configure_test("<backend syntax='usmarc' name='F'>"
                                   "<marc"
                                   " inputcharset=\"utf-8\""
@@ -147,12 +152,7 @@ static void tst_configure(void)
                                   "/>"
                                   "<xslt stylesheet=\"test_record_conv.xsl\"/>"
                                   "</backend>",
-#if YAZ_HAVE_XSLT
-                                  0
-#else
-                                  "Element <backend>: unsupported element <xslt>"
-#endif
-                                  , 0));
+                                  xslt_error, 0));
 }
 
 static int conv_convert_test(yaz_record_conv_t p,
