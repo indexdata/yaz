@@ -57,7 +57,7 @@ static void usage(const char *prog)
             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
             "[-p] [-v] [-V] [-O offset] [-L limit] file...\n",
             prog);
-    fprintf(stderr, "Output formats: line, marc, marcxml, marcxchange, "
+    fprintf(stderr, "Input/output formats: line, marc, marcxml, marcxchange, "
             "turbomarc, json, jsonlines\n");
 }
 
@@ -154,6 +154,103 @@ static long marcdump_read_json(yaz_marc_t mt, const char *fname)
     wrbuf_destroy(w);
     fclose(inf);
     return 1L;
+}
+
+/* Limit the input line, not the whole stream. Keep large records off the stack. */
+#define JSONLINES_MAX_RECORD (1024 * 1024)
+
+static long marcdump_read_jsonlines(yaz_marc_t mt, const char *fname,
+                                   long offset, long limit)
+{
+    long no = 0, selected = 0;
+    WRBUF input = wrbuf_alloc();
+    WRBUF output = wrbuf_alloc();
+    FILE *inf = fopen(fname, "rb");
+    if (!inf)
+    {
+        fprintf(stderr, "%s: cannot open %s:%s\n",
+                prog, fname, strerror(errno));
+        exit(1);
+    }
+    while (selected < limit)
+    {
+        int c, too_long = 0;
+        wrbuf_rewind(input);
+        while ((c = getc(inf)) != EOF && c != '\n')
+        {
+            if (wrbuf_len(input) < JSONLINES_MAX_RECORD)
+                wrbuf_putc(input, c);
+            else
+                too_long = 1; /* Discard through the end of this line. */
+        }
+        if (ferror(inf))
+        {
+            fprintf(stderr, "%s:%ld: read error: %s\n",
+                    fname, no + 1, strerror(errno));
+            no_errors++;
+            break;
+        }
+        if (c == EOF && wrbuf_len(input) == 0)
+            break;
+        no++;
+        if (no > offset)
+            selected++;
+        if (too_long)
+        {
+            fprintf(stderr, "%s:%ld: JSON Lines record exceeds %d bytes\n",
+                    fname, no, JSONLINES_MAX_RECORD);
+            no_errors++;
+            continue;
+        }
+        if (memchr(wrbuf_buf(input), '\0', wrbuf_len(input)))
+        {
+            fprintf(stderr, "%s:%ld: JSON parse error: NUL byte\n", fname, no);
+            no_errors++;
+            continue;
+        }
+        const char *errmsg = 0;
+        size_t errpos = 0;
+        struct json_node *n = json_parse2(wrbuf_cstr(input), &errmsg, &errpos);
+        if (!n)
+        {
+            fprintf(stderr, "%s:%ld: JSON parse error: %s . pos=%zu\n",
+                    fname, no, errmsg, errpos);
+            no_errors++;
+            continue;
+        }
+        yaz_marc_reset(mt);
+        int r = yaz_marc_read_json_node(mt, n);
+        if (r)
+        {
+            fprintf(stderr, "%s:%ld: JSON MARC parsing failed ret=%d\n",
+                    fname, no, r);
+            no_errors++;
+        }
+        else if (no > offset)
+        {
+            wrbuf_rewind(output);
+            r = yaz_marc_write_mode(mt, output);
+            if (r)
+            {
+                fprintf(stderr, "%s:%ld: MARC write failed ret=%d\n",
+                        fname, no, r);
+                no_errors++;
+            }
+            else if (fwrite(wrbuf_buf(output), 1, wrbuf_len(output), stdout)
+                     != wrbuf_len(output))
+            {
+                fprintf(stderr, "%s:%ld: write to stdout failed\n", fname, no);
+                no_errors++;
+                json_remove_node(n);
+                break;
+            }
+        }
+        json_remove_node(n);
+    }
+    fclose(inf);
+    wrbuf_destroy(input);
+    wrbuf_destroy(output);
+    return no;
 }
 
 #if YAZ_HAVE_XML2
@@ -445,6 +542,10 @@ static long dump(const char *fname, const char *from, const char *to,
     {
         total = marcdump_read_json(mt, fname);
     }
+    else if (input_format == YAZ_MARC_JSONLINES)
+    {
+        total = marcdump_read_jsonlines(mt, fname, offset, limit);
+    }
     else if (input_format == YAZ_MARC_ISO2709)
     {
         total = marcdump_read_iso2709(mt, from, to, print_offset, verbose, cfile,
@@ -454,6 +555,11 @@ static long dump(const char *fname, const char *from, const char *to,
         WRBUF wrbuf = wrbuf_alloc();
         yaz_marc_write_trailer(mt, wrbuf);
         fputs(wrbuf_cstr(wrbuf), stdout);
+        if (fflush(stdout) == EOF || ferror(stdout))
+        {
+            fprintf(stderr, "%s: write to stdout failed\n", fname);
+            no_errors++;
+        }
         wrbuf_destroy(wrbuf);
     }
     if (cd)
@@ -500,7 +606,7 @@ int main (int argc, char **argv)
         {
         case 'i':
             input_format = yaz_marc_decode_formatstr(arg);
-            if (input_format == -1 || input_format == YAZ_MARC_JSONLINES)
+            if (input_format == -1)
             {
                 fprintf(stderr, "%s: bad input format: %s\n", prog, arg);
                 exit(1);

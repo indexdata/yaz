@@ -94,7 +94,8 @@
       <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC),
       <literal>turbomarc</literal> (Turbo MARC),
-      or <literal>json</literal> (MARC-in-JSON).
+      <literal>json</literal> (MARC-in-JSON),
+      or <literal>jsonlines</literal> (one MARC-in-JSON record per line).
      </para></listitem>
    </varlistentry>
 
@@ -294,8 +295,22 @@
    <screen>yaz-marcdump -f MARC-8 -t UTF-8 -o jsonlines records.marc &gt; records.jsonl</screen>
    JSON Lines uses UTF-8; supply <literal>-f</literal> and
    <literal>-t UTF-8</literal> when conversion is required.
-   JSON Lines input is not yet supported; <literal>-i json</literal>
-   continues to expect one record object per file.
+  </para>
+  <para>
+   With <literal>-i jsonlines</literal>, input is read one record line at
+   a time. Both LF and CRLF line endings are accepted, and the final
+   record may omit its newline. Each line must contain one MARC-in-JSON
+   object; blank lines are errors. Input lines are limited to 1 MiB
+   (1,048,576 bytes, excluding the LF delimiter). Oversized or malformed
+   lines are reported with the filename and line number and skipped;
+   subsequent lines are still processed and the command exits with a
+   nonzero status. The <literal>-O</literal> and <literal>-L</literal>
+   options select a range of input record lines. For example:
+   <screen>yaz-marcdump -i jsonlines -o marcxml records.jsonl &gt; records.xml</screen>
+   The input buffer and parsed record are reused or released between
+   lines, so memory does not grow with the total number of records.
+   The <literal>-i json</literal> format continues to expect one record
+   object per file.
   </para>
  </refsect1>
 

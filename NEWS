@@ -1,3 +1,6 @@
+yaz-marcdump: add -i jsonlines for streaming MARC-in-JSON input, with a
+1 MiB limit per record line and line-numbered error reporting.
+
 yaz-marcdump: add -o jsonlines for one compact MARC-in-JSON record per line.
 Add YAZ_MARC_JSONLINES and yaz_marc_write_jsonlines for library output.
 
