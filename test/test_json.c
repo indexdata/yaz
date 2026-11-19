@@ -434,10 +434,71 @@ static void tst_marc_empty_containers(void)
     check_marc_json("[]", "[]");
 }
 
+static void check_marc_jsonlines(const char *fields)
+{
+    WRBUF input = wrbuf_alloc();
+    WRBUF pretty = wrbuf_alloc();
+    WRBUF expected = wrbuf_alloc();
+    WRBUF result = wrbuf_alloc();
+    yaz_marc_t mt = yaz_marc_create();
+
+    wrbuf_printf(input, "{\"leader\":\"00000nam a22000000a 4500\","
+                 "\"fields\":%s}", fields);
+    struct json_node *n = json_parse(wrbuf_cstr(input), 0);
+    YAZ_CHECK(n != 0);
+    if (n)
+    {
+        YAZ_CHECK_EQ(yaz_marc_read_json_node(mt, n), 0);
+        json_remove_node(n);
+        YAZ_CHECK_EQ(yaz_marc_write_json(mt, pretty), 0);
+        n = json_parse(wrbuf_cstr(pretty), 0);
+        YAZ_CHECK(n != 0);
+        if (n)
+        {
+            json_write_wrbuf(n, expected);
+            wrbuf_putc(expected, '\n');
+            json_remove_node(n);
+        }
+
+        YAZ_CHECK_EQ(yaz_marc_write_jsonlines(mt, result), 0);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(result), wrbuf_cstr(expected)));
+        YAZ_CHECK(strchr(wrbuf_cstr(result), '\n') ==
+                  wrbuf_cstr(result) + wrbuf_len(result) - 1);
+        YAZ_CHECK(strchr(wrbuf_cstr(result), '\r') == 0);
+
+        /* Mode dispatch appends a second record, without collection framing. */
+        yaz_marc_enable_collection(mt);
+        yaz_marc_xml(mt, YAZ_MARC_JSONLINES);
+        YAZ_CHECK_EQ(yaz_marc_write_mode(mt, result), 0);
+        YAZ_CHECK_EQ(yaz_marc_write_trailer(mt, result), 0);
+        YAZ_CHECK_EQ(wrbuf_len(result), 2 * wrbuf_len(expected));
+        YAZ_CHECK(!strcmp(wrbuf_cstr(result) + wrbuf_len(expected),
+                          wrbuf_cstr(expected)));
+    }
+    yaz_marc_destroy(mt);
+    wrbuf_destroy(input);
+    wrbuf_destroy(pretty);
+    wrbuf_destroy(expected);
+    wrbuf_destroy(result);
+}
+
+static void tst_marc_jsonlines(void)
+{
+    YAZ_CHECK_EQ(yaz_marc_decode_formatstr("jsonlines"), YAZ_MARC_JSONLINES);
+    check_marc_jsonlines("[]");
+    check_marc_jsonlines("[{\"001\":\"  id \\n\\r\\t\\\"\\\\  \"},"
+                         "{\"245\":{\"ind1\":\" \",\"ind2\":\"0\","
+                         "\"subfields\":[{\"a\":\"  caf\\u00e9  \"},"
+                         "{\"a\":\"line\\nbreak\"}]}},"
+                         "{\"245\":{\"ind1\":\"1\",\"ind2\":\" \","
+                         "\"subfields\":[]}}]");
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst_marc_empty_containers();
+    tst_marc_jsonlines();
     tst1();
     tst2();
     tst3();

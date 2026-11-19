@@ -79,6 +79,8 @@ YAZ_EXPORT void yaz_marc_xml(yaz_marc_t mt, int xmlmode);
 #define YAZ_MARC_TURBOMARC 7
 /** \brief Output format: JSON */
 #define YAZ_MARC_JSON      8
+/** \brief Output format: one compact JSON record per line */
+#define YAZ_MARC_JSONLINES 9
 
 /** \brief set iconv handle for character set conversion */
 YAZ_EXPORT void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
@@ -255,6 +257,15 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
 */
 YAZ_EXPORT
 int yaz_marc_write_json(yaz_marc_t mt, WRBUF w);
+
+/** \brief writes one compact MARC-in-JSON record followed by a newline
+    \param mt handle
+    \param w WRBUF for output
+    \retval 0 Creation successful
+    \retval -1 ERROR
+*/
+YAZ_EXPORT
+int yaz_marc_write_jsonlines(yaz_marc_t mt, WRBUF w);
 
 /** \brief sets leader spec (for modifying bytes in 24 byte leader)
     \param mt handle

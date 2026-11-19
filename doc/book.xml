@@ -7573,6 +7573,7 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
     #define YAZ_MARC_CHECK     6
     #define YAZ_MARC_TURBOMARC 7
     #define YAZ_MARC_JSON      8
+    #define YAZ_MARC_JSONLINES 9
 
     /* supply iconv handle for character set conversion .. */
     void yaz_marc_iconv(yaz_marc_t mt, yaz_iconv_t cd);
@@ -7665,6 +7666,15 @@ int cql_transform_rpn2cql_wrbuf(cql_transform_t ct,
       <listitem>
        <para>
         <ulink url="&url.marc_in_json;">MARC-in-JSON</ulink> format.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>YAZ_MARC_JSONLINES</term>
+      <listitem>
+       <para>
+        One compact MARC-in-JSON record per line, terminated by a newline.
+        The record structure is the same as for <literal>YAZ_MARC_JSON</literal>.
        </para>
       </listitem>
      </varlistentry>

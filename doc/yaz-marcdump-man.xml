@@ -106,7 +106,8 @@
       <literal>marcxchange</literal> (ISO25577),
       <literal>line</literal> (line mode MARC),
       <literal>turbomarc</literal> (Turbo MARC),
-      or <literal>json</literal> (MARC-in-JSON).
+      <literal>json</literal> (MARC-in-JSON),
+      or <literal>jsonlines</literal> (one compact MARC-in-JSON record per line).
      </para></listitem>
    </varlistentry>
 
@@ -281,6 +282,20 @@
    it writes successive record objects without an enclosing array.
    Use <literal>-f</literal> and <literal>-t UTF-8</literal> to convert
    records from another character encoding for JSON output.
+  </para>
+  <para>
+   With <literal>-o jsonlines</literal>, each record is written as one
+   compact JSON object followed by a newline, following the
+   <ulink url="https://jsonlines.org/">JSON Lines</ulink> format.
+   The record structure is the same as for <literal>-o json</literal>;
+   whitespace within strings is preserved and embedded newlines are escaped.
+   Multiple records and input files produce successive lines without an
+   enclosing array. Empty input produces no output. For example:
+   <screen>yaz-marcdump -f MARC-8 -t UTF-8 -o jsonlines records.marc &gt; records.jsonl</screen>
+   JSON Lines uses UTF-8; supply <literal>-f</literal> and
+   <literal>-t UTF-8</literal> when conversion is required.
+   JSON Lines input is not yet supported; <literal>-i json</literal>
+   continues to expect one record object per file.
   </para>
  </refsect1>
 
