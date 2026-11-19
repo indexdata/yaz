@@ -57,6 +57,8 @@ static void usage(const char *prog)
             "[-l pos=value] [-c cfile] [-s prefix] [-C size] [-n] "
             "[-p] [-v] [-V] [-O offset] [-L limit] file...\n",
             prog);
+    fprintf(stderr, "Output formats: line, marc, marcxml, marcxchange, "
+            "turbomarc, json, jsonlines\n");
 }
 
 static void show_version(void)
@@ -498,7 +500,7 @@ int main (int argc, char **argv)
         {
         case 'i':
             input_format = yaz_marc_decode_formatstr(arg);
-            if (input_format == -1)
+            if (input_format == -1 || input_format == YAZ_MARC_JSONLINES)
             {
                 fprintf(stderr, "%s: bad input format: %s\n", prog, arg);
                 exit(1);

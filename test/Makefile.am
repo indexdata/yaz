@@ -15,7 +15,7 @@ check_PROGRAMS = test_client_record test_ccl test_comstack test_cql2ccl \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
  test_gfs_vhosts test_marc_read_iso2709 test_marc_read_sax test_sru_update test_zoom_send
 
-check_SCRIPTS = test_marc.sh test_marccol.sh test_cql2xcql.sh \
+check_SCRIPTS = test_marc.sh test_marccol.sh test_jsonlines.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
