@@ -13,7 +13,7 @@
                  "YAZ_HAVE_ICU=1"
             ],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c89",
+            "cStandard": "c99",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
