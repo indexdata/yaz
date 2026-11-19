@@ -1,4 +1,4 @@
-# Build full-featured shared libraries with GCC and create a distribution archive.
+# Build full-featured shared libraries with GCC and test the archive with Clang C23.
 name: Build complete YAZ
 
 on:
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build-complete:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
         with:
@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            autoconf automake libtool gcc make bison \
+            autoconf automake libtool gcc clang make bison \
             tclsh xsltproc docbook docbook-xml docbook-xsl \
             pkg-config libxslt1-dev libgnutls28-dev \
             libreadline-dev libwrap0-dev libicu-dev libstemmer-dev \
@@ -37,7 +37,7 @@ jobs:
       - name: Run buildconf
         run: ./buildconf.sh
 
-      - name: Configure shared libraries
+      - name: Configure shared libraries with GCC
         env:
           CC: gcc
           CFLAGS: -g -O2 -Wall
@@ -46,19 +46,44 @@ jobs:
           --enable-tcpd --with-xslt --with-gnutls --with-icu
           --with-memcached --with-redis
 
-      - name: Build and test
+      - name: Build and test with GCC
         run: make -j4 check
 
       - name: Build distribution archive
         run: make -j4 dist
 
+      - name: Unpack distribution archive for Clang
+        if: github.event_name != 'push'
+        run: |
+          . ./IDMETA
+          mkdir build-clang
+          tar -xzf "yaz-$VERSION.tar.gz" -C build-clang --strip-components=1
+
+      - name: Configure static libraries with Clang C23
+        if: github.event_name != 'push'
+        working-directory: build-clang
+        env:
+          CC: clang
+          CFLAGS: -g -O2 -Wall -std=c23
+        run: >
+          ./configure --disable-shared --enable-static
+          --enable-tcpd --with-xslt --with-gnutls --with-icu
+          --with-memcached --with-redis
+
+      - name: Build and test with Clang C23
+        if: github.event_name != 'push'
+        working-directory: build-clang
+        run: make -j4 check
+
       - name: Show build and test failures
         if: failure()
         run: |
-          for log in config.log test/test-suite.log client/test-suite.log ztest/test-suite.log; do
-            if test -f "$log"; then
-              echo "::group::$log"
-              cat "$log"
-              echo "::endgroup::"
-            fi
+          for build in . build-clang; do
+            for log in config.log test/test-suite.log client/test-suite.log ztest/test-suite.log; do
+              if test -f "$build/$log"; then
+                echo "::group::$build/$log"
+                cat "$build/$log"
+                echo "::endgroup::"
+              fi
+            done
           done
