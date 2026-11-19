@@ -400,7 +400,7 @@
     <ulink url="&url.debian;">Debian GNU/Linux</ulink>,
     <ulink url="&url.centos;">CentOS</ulink>,
     <ulink url="&url.ubuntu;">Ubuntu Linux</ulink>,
-    <ulink url="&url.freebsd;">FreeBSD (i386)</ulink>,
+    <ulink url="&url.freebsd;">FreeBSD (amd64)</ulink>,
     <ulink url="&url.macosx;">MAC OSX</ulink>,
     Windows 11.
    </para>

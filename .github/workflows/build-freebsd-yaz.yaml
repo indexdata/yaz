@@ -1,0 +1,81 @@
+# Build and test a distribution archive with GCC on FreeBSD.
+name: Build YAZ on FreeBSD
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-freebsd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Build distribution archive and test on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: '14'
+          usesh: true
+          prepare: |
+            set -eu
+            pkg install -y autoconf automake libtool gcc gmake bison git \
+              tcl86 pkgconf libxml2 libxslt gnutls readline icu \
+              snowballstemmer docbook-xml docbook-xsl
+          run: |
+            set -eu
+            show_failures()
+            {
+              result=$?
+              if test "$result" -ne 0; then
+                for log in config.log test/test-suite.log client/test-suite.log ztest/test-suite.log; do
+                  if test -f "$log"; then
+                    echo "::group::$log"
+                    cat "$log"
+                    echo "::endgroup::"
+                  fi
+                done
+              fi
+              exit "$result"
+            }
+            trap show_failures EXIT
+
+            export CC=gcc
+            export CFLAGS='-g -O2 -Wall'
+            export CPPFLAGS='-I/usr/local/include'
+            export LDFLAGS='-L/usr/local/lib'
+            export TCLSH=tclsh8.6
+            export XML_CATALOG_FILES=/usr/local/share/xml/catalog.ports
+
+            freebsd-version
+            "$CC" --version
+            ./buildconf.sh
+            ./configure --enable-shared --disable-static \
+              --with-xslt --with-gnutls --with-icu --with-stemmer=/usr/local \
+              --disable-tcpd --without-memcached --without-redis \
+              --with-docbook-dtd=/usr/local/share/xml/docbook/4.5 \
+              --with-docbook-xsl=/usr/local/share/xsl/docbook
+            gmake -j3 dist
+
+            . ./IDMETA
+            mkdir dist-test
+            tar -xzf "yaz-$VERSION.tar.gz" -C dist-test
+            cd "dist-test/yaz-$VERSION"
+            ./configure --enable-shared --disable-static \
+              --with-xslt --with-gnutls --with-icu --with-stemmer=/usr/local \
+              --disable-tcpd --without-memcached --without-redis \
+              --with-docbook-dtd=/usr/local/share/xml/docbook/4.5 \
+              --with-docbook-xsl=/usr/local/share/xsl/docbook
+            gmake -j3 check
