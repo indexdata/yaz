@@ -1,4 +1,4 @@
-# Build and test a distribution archive with GCC on FreeBSD.
+# Build and test a distribution archive with Clang on FreeBSD.
 name: Build YAZ on FreeBSD
 
 on:
@@ -31,7 +31,7 @@ jobs:
           usesh: true
           prepare: |
             set -eu
-            pkg install -y autoconf automake libtool gcc gmake bison git \
+            pkg install -y autoconf automake libtool gmake bison git \
               tcl86 pkgconf libxml2 libxslt gnutls readline icu \
               snowballstemmer docbook-xml docbook-xsl
           run: |
@@ -52,7 +52,7 @@ jobs:
             }
             trap show_failures EXIT
 
-            export CC=gcc
+            export CC=clang
             export CFLAGS='-g -O2 -Wall'
             export CPPFLAGS='-I/usr/local/include'
             export LDFLAGS='-L/usr/local/lib'
