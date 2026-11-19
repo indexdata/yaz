@@ -8,9 +8,8 @@ AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.9 subdir-objects])
 dnl
-dnl initgroups is a system extension, not a POSIX interface.
+dnl Enable system interfaces, including initgroups.
 AC_USE_SYSTEM_EXTENSIONS
-AC_DEFINE([_POSIX_C_SOURCE],[200809L],[Enable POSIX])
 AC_SUBST([READLINE_LIBS])
 AC_SUBST([YAZ_CONF_CFLAGS])
 AC_SUBST([PKGCONFIG_XML])
@@ -224,6 +223,10 @@ iconv_t t = iconv_open("", "");
 	])
 fi
 dnl ------ various functions
+AS_IF([test "$ac_cv_header_execinfo_h" = "yes"], [
+    AC_SEARCH_LIBS([backtrace], [execinfo])
+    AC_CHECK_FUNCS([backtrace backtrace_symbols_fd])
+])
 AC_CHECK_FUNCS([initgroups setgid setuid getaddrinfo vsnprintf gettimeofday poll localtime_r nanosleep fopen64 open_memstream malloc_info])
 AC_FUNC_STRERROR_R
 if test "$ac_cv_func_getaddrinfo" = "no"; then
