@@ -45,7 +45,7 @@
 #define BACKTRACE_SZ 100
 
 static char static_progname[256];
-#if HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H && HAVE_BACKTRACE && HAVE_BACKTRACE_SYMBOLS_FD
 static int yaz_panic_fd = -1;
 
 static void iwrite(int fd, const char *buf, size_t len)
@@ -214,7 +214,7 @@ void yaz_enable_panic_backtrace(const char *progname)
 {
     strncpy(static_progname, progname, sizeof(static_progname) - 1);
     static_progname[sizeof(static_progname) - 1] = '\0';
-#if HAVE_EXECINFO_H
+#if HAVE_EXECINFO_H && HAVE_BACKTRACE && HAVE_BACKTRACE_SYMBOLS_FD
     signal(SIGABRT, yaz_panic_sig_handler);
     signal(SIGSEGV, yaz_panic_sig_handler);
     signal(SIGFPE, yaz_panic_sig_handler);

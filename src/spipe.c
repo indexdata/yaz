@@ -35,17 +35,11 @@
 #include <fcntl.h>
 #endif
 
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
-#if HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if HAVE_NETINET_TCP_H
-#include <netinet/tcp.h>
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
