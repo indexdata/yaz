@@ -95,7 +95,7 @@ Section "YAZ Runtime" YAZ_Runtime
 	ExecWait '"$INSTDIR\bin\yaz-ztest.exe" -remove'
 Noservice:
 	File ..\bin\*.dll
-	File ..\bin\*.exe
+	File /x test_*.exe ..\bin\*.exe
 	SetOutPath $SMPROGRAMS\YAZ
  	CreateShortCut "$SMPROGRAMS\YAZ\YAZ Client.lnk" \
                  "$INSTDIR\bin\yaz-client.exe"
