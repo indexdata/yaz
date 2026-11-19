@@ -64,7 +64,10 @@ static void tst_cond(void)
 
         abstime.tv_sec += 1; /* wait 1 second */
 
+        /* Condition waits require the calling thread to hold the mutex. */
+        yaz_mutex_enter(p);
         r = yaz_cond_wait(c, p, &abstime);
+        yaz_mutex_leave(p);
         YAZ_CHECK(r != 0);
 
     }
