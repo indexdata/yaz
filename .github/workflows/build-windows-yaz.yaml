@@ -16,8 +16,19 @@ concurrency:
 
 jobs:
   build-windows:
-    runs-on: windows-2022
+    name: Build and test YAZ (VS ${{ matrix.vs }}, x64)
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - vs: '2022'
+            vs-major: '17'
+            os: windows-2022
+          - vs: '2026'
+            vs-major: '18'
+            os: windows-2025-vs2026
     defaults:
       run:
         shell: pwsh
@@ -51,6 +62,18 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+          # Discover the latest installation: vsversion caps minor versions at 9.
+
+      - name: Verify MSVC version
+        env:
+          EXPECTED_VS_MAJOR: ${{ matrix.vs-major }}
+        run: |
+          if (!$env:VisualStudioVersion -or
+              ($env:VisualStudioVersion.Split('.')[0] -ne $env:EXPECTED_VS_MAJOR)) {
+            throw "Expected Visual Studio $env:EXPECTED_VS_MAJOR.x, found '$env:VisualStudioVersion'"
+          }
+          Write-Output "Visual Studio $env:VisualStudioVersion"
+          Write-Output "Compiler: $((Get-Command cl.exe).Source)"
 
       - name: Configure dependency cache
         id: vcpkg
@@ -66,9 +89,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/vcpkg-cache
-          key: windows-2022-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-${{ hashFiles('.github/workflows/build-windows-yaz.yaml') }}
+          key: ${{ matrix.os }}-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-${{ hashFiles('.github/workflows/build-windows-yaz.yaml') }}
           restore-keys: |
-            windows-2022-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-
+            ${{ matrix.os }}-x64-vcpkg-${{ steps.vcpkg.outputs.revision }}-
 
       - name: Install libraries
         run: |

@@ -1087,7 +1087,7 @@
      &yaz; is shipped with "makefiles" for the NMAKE tool that comes
      with <ulink url="&url.vstudio;">
      Microsoft Visual Studio</ulink>. It has been tested with
-     Microsoft Visual Studio 2019 and 2022.
+     Microsoft Visual Studio 2019, 2022, and 2026.
     </para>
     <para>
      Install the external libraries with vcpkg as described in
