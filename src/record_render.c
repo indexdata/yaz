@@ -501,7 +501,9 @@ const char *yaz_record_render(Z_NamePlusRecord *npr, const char *schema,
     nmem_destroy(nmem);
     if (len)
     {
-        if (len0 == (size_t) (-1))
+        if (!ret)
+            *len = 0;
+        else if (len0 == (size_t) (-1))
             *len = -1;
         else if (len0 < INT_MAX)
             *len = (int) len0;
