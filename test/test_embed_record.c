@@ -118,7 +118,7 @@ static int test_render(const char *type_spec, int is_marc, const char *input,
         }
     }
     else if (!actual_output && !expected_output)
-        res = 1;
+        res = actual_len == 0;
     else if (!actual_output && expected_output)
     {
         yaz_log(YLOG_LOG, "Got null result, but expected");
@@ -140,6 +140,7 @@ int main(int argc, char **argv)
     YAZ_CHECK_LOG();
     test1();
     test2();
+    YAZ_CHECK(test_render("unknownType", 0, "<my/>", 0));
 #if YAZ_HAVE_XML2
     YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
 
