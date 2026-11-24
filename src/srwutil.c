@@ -741,6 +741,8 @@ Z_SRW_record *yaz_srw_get_record(ODR o)
 static Z_SRW_PDU *yaz_srw_get_core_ver(ODR o, const char *version)
 {
     Z_SRW_PDU *p = (Z_SRW_PDU *) odr_malloc(o, sizeof(*p));
+    p->which = 0;
+    p->u.request = 0;
     p->srw_version = odr_strdup(o, version);
     p->username = 0;
     p->password = 0;
