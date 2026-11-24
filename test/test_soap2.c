@@ -104,6 +104,59 @@ static void tst_soap_namespaces(void)
     wrbuf_destroy(xml);
 }
 
+static void tst_scan_response_terms(void)
+{
+    /* only term elements count; other nodes must not advance the index */
+    const char *xml = "<scanResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\">\n"
+        "<version>1.1</version>\n"
+        "<terms>\n"
+        " <!-- first -->\n"
+        " <term><value>a</value><numberOfRecords>1</numberOfRecords></term>\n"
+        " <other/>\n"
+        " <term><value>b</value><displayTerm>B</displayTerm></term>\n"
+        " <term><value>c</value></term>\n"
+        "</terms>\n"
+        "</scanResponse>";
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler handlers[] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    char *buf = (char *) xml;
+    int len = strlen(xml);
+
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), 0);
+    YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+    if (soap && soap->which == Z_SOAP_generic)
+    {
+        Z_SRW_PDU *sr = (Z_SRW_PDU *) soap->u.generic->p;
+
+        YAZ_CHECK(sr && sr->which == Z_SRW_scan_response);
+        if (sr && sr->which == Z_SRW_scan_response)
+        {
+            Z_SRW_scanResponse *res = sr->u.scan_response;
+
+            YAZ_CHECK_EQ(res->num_terms, 3);
+            if (res->num_terms == 3)
+            {
+                Z_SRW_scanTerm *t = res->terms;
+
+                YAZ_CHECK(t[0].value && !strcmp(t[0].value, "a"));
+                YAZ_CHECK(t[0].numberOfRecords &&
+                          *t[0].numberOfRecords == 1);
+                YAZ_CHECK(t[0].displayTerm == 0);
+                YAZ_CHECK(t[1].value && !strcmp(t[1].value, "b"));
+                YAZ_CHECK(t[1].numberOfRecords == 0);
+                YAZ_CHECK(t[1].displayTerm && !strcmp(t[1].displayTerm, "B"));
+                YAZ_CHECK(t[2].value && !strcmp(t[2].value, "c"));
+                YAZ_CHECK(t[2].whereInList == 0);
+            }
+        }
+    }
+    odr_destroy(o);
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -249,6 +302,7 @@ int main(int argc, char **argv)
     LIBXML_TEST_VERSION;
     tst_srw();
     tst_soap_namespaces();
+    tst_scan_response_terms();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
