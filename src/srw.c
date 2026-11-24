@@ -1254,14 +1254,9 @@ int yaz_ucp_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                                         client_data, ns_ucp_str, 0);
             }
         }
-        else if (!xmlStrcmp(method->name, BAD_CAST "explainUpdateRequest"))
-        {
-        }
-        else if (!xmlStrcmp(method->name, BAD_CAST "explainUpdateResponse"))
-        {
-        }
         else
         {
+            /* includes explainUpdateRequest/Response: no PDU type for them */
             *p = 0;
             return -1;
         }

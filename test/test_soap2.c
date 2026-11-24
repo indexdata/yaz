@@ -157,6 +157,52 @@ static void tst_scan_response_terms(void)
     odr_destroy(o);
 }
 
+static void tst_ucp_methods(void)
+{
+    const struct {
+        const char *method;
+        int which;
+    } cases[] = {
+        { "updateRequest", Z_SRW_update_request },
+        { "updateResponse", Z_SRW_update_response },
+        /* no PDU type for these: must be rejected */
+        { "explainUpdateRequest", 0 },
+        { "explainUpdateResponse", 0 }
+    };
+    size_t i;
+    WRBUF xml = wrbuf_alloc();
+    for (i = 0; i < sizeof(cases) / sizeof(*cases); i++)
+    {
+        ODR o = odr_createmem(ODR_DECODE);
+        Z_SOAP *soap = 0;
+        Z_SRW_PDU *sr = 0;
+        char *charset = 0;
+        Z_HTTP_Request *request = z_get_HTTP_Request(o)->u.HTTP_Request;
+
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<u:%s xmlns:u=\"" YAZ_XMLNS_UPDATE_v0_9 "\"/>",
+                     cases[i].method);
+        request->method = "POST";
+        request->content_buf = (char *) wrbuf_cstr(xml);
+        request->content_len = wrbuf_len(xml);
+        z_HTTP_header_add(o, &request->headers, "Content-Type", "text/xml");
+        YAZ_CHECK_EQ(yaz_srw_decode(request, &sr, &soap, o, &charset),
+                     cases[i].which ? 0 : 1);
+        YAZ_CHECK(soap && soap->which ==
+                  (cases[i].which ? Z_SOAP_generic : Z_SOAP_error));
+        if (cases[i].which)
+        {
+            YAZ_CHECK(sr && sr->which == cases[i].which);
+        }
+        else
+        {
+            YAZ_CHECK(sr == 0);
+        }
+        odr_destroy(o);
+    }
+    wrbuf_destroy(xml);
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -303,6 +349,7 @@ int main(int argc, char **argv)
     tst_srw();
     tst_soap_namespaces();
     tst_scan_response_terms();
+    tst_ucp_methods();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
