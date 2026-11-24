@@ -517,11 +517,14 @@ static int yaz_srw_terms(ODR o, xmlNodePtr pptr, Z_SRW_scanTerm **terms,
         if (!*num)
             return 1;
         *terms = (Z_SRW_scanTerm *) odr_malloc(o, *num * sizeof(**terms));
-        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next, i++)
+        for (i = 0, ptr = pptr->children; ptr; ptr = ptr->next)
         {
             if (ptr->type == XML_ELEMENT_NODE &&
                 !xmlStrcmp(ptr->name, BAD_CAST "term"))
+            {
                 yaz_srw_term(o, ptr, (*terms)+i, client_data, ns);
+                i++;
+            }
         }
     }
     else if (o->direction == ODR_ENCODE)
