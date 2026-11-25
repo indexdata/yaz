@@ -282,6 +282,150 @@ static void tst_srw(void)
     odr_destroy(o);
     YAZ_CHECK(ret == 0);  /* codec failed ? */
 }
+
+/* decodes a response that declares a namespace with a name of uri_len
+   bytes, with data in recordData (which 0), extraRecordData (1) or
+   extraResponseData (2). Returns the data as decoded, or null if the
+   response was not accepted */
+static const char *srw_data_ns(ODR o, int uri_len, int which,
+                               const char *data)
+{
+    Z_SOAP_Handler h[2] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    WRBUF w = wrbuf_alloc();
+    char *buf;
+    int len, i;
+    const char *res = 0;
+
+    wrbuf_puts(w, "<s:Envelope xmlns:s=\""
+               "http://schemas.xmlsoap.org/soap/envelope/\"><s:Body>"
+               "<searchRetrieveResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\""
+               " xmlns:a=\"");
+    for (i = 0; i < uri_len; i++)
+        wrbuf_putc(w, 'u');
+    wrbuf_puts(w, "\"><version>1.1</version>"
+               "<numberOfRecords>1</numberOfRecords><records><record>"
+               "<recordData>");
+    wrbuf_puts(w, which == 0 ? data : "x");
+    wrbuf_puts(w, "</recordData>");
+    if (which == 1)
+    {
+        wrbuf_puts(w, "<extraRecordData>");
+        wrbuf_puts(w, data);
+        wrbuf_puts(w, "</extraRecordData>");
+    }
+    wrbuf_puts(w, "</record></records>");
+    if (which == 2)
+    {
+        wrbuf_puts(w, "<extraResponseData>");
+        wrbuf_puts(w, data);
+        wrbuf_puts(w, "</extraResponseData>");
+    }
+    wrbuf_puts(w, "</searchRetrieveResponse></s:Body></s:Envelope>");
+    buf = (char *) wrbuf_buf(w);
+    len = wrbuf_len(w);
+    if (z_soap_codec(o, &soap, &buf, &len, h) == 0)
+    {
+        YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+        if (soap && soap->which == Z_SOAP_generic)
+        {
+            Z_SRW_PDU *sr = (Z_SRW_PDU *) soap->u.generic->p;
+            YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_response &&
+                      sr->u.response->num_records == 1);
+            if (sr && sr->which == Z_SRW_searchRetrieve_response &&
+                sr->u.response->num_records == 1)
+            {
+                Z_SRW_searchRetrieveResponse *r = sr->u.response;
+                if (which == 0)
+                {
+                    res = r->records[0].recordData_buf;
+                    len = r->records[0].recordData_len;
+                }
+                else if (which == 1 && r->extra_records[0])
+                {
+                    res = r->extra_records[0]->extraRecordData_buf;
+                    len = r->extra_records[0]->extraRecordData_len;
+                }
+                else if (which == 2)
+                {
+                    res = sr->extraResponseData_buf;
+                    len = sr->extraResponseData_len;
+                }
+                YAZ_CHECK(res && len == (int) strlen(res));
+            }
+        }
+    }
+    else
+    {
+        YAZ_CHECK(soap && soap->which == Z_SOAP_error &&
+                  !strcmp(soap->u.soap_error->fault_string,
+                          "SOAP Handler returned error"));
+    }
+    wrbuf_destroy(w);
+    return res;
+}
+
+/* a record gets a declaration of each namespace that it inherits. Every
+   record, and every element at the top of it, gets a copy: they are limited
+   to 256 bytes and 8 times the size of the record as it is in the message */
+static void tst_srw_record_ns(void)
+{
+    ODR o = odr_createmem(ODR_DECODE);
+    WRBUF w = wrbuf_alloc();
+    const char *res;
+    int i;
+
+    res = srw_data_ns(o, 5, 0, "<a:r/>");
+    YAZ_CHECK(res && !strcmp(res, "<a:r xmlns:a=\"uuuuu\"/>"));
+
+    res = srw_data_ns(o, 5, 0, "<a:r/><a:r/>");
+    YAZ_CHECK(res && !strcmp(res, "<yaz_record><a:r xmlns:a=\"uuuuu\"/>"
+                             "<a:r xmlns:a=\"uuuuu\"/></yaz_record>"));
+
+    /* 6 bytes get 11 + 293 = 256 + 8 * 6 more */
+    res = srw_data_ns(o, 293, 0, "<a:r/>");
+    YAZ_CHECK(res && strlen(res) == 6 + 11 + 293);
+    YAZ_CHECK(srw_data_ns(o, 294, 0, "<a:r/>") == 0);
+    YAZ_CHECK(srw_data_ns(o, 1000, 0, "<r xmlns=\"urn:r\"><r a:b=\"\"/></r>")
+              == 0);
+
+    /* a long name is fine for a record that is not small .. */
+    res = srw_data_ns(o, 1000, 0, "<a:r>012345678901234567890123456789012345"
+                      "6789012345678901234567890123456789012345678901234567"
+                      "89</a:r>");
+    YAZ_CHECK(res && strlen(res) == 101 + 11 + 1000);
+
+    /* .. or that does not use the namespace */
+    res = srw_data_ns(o, 1000, 0, "<r xmlns=\"urn:r\"/>");
+    YAZ_CHECK(res && !strcmp(res, "<r xmlns=\"urn:r\"/>"));
+
+    /* many elements at the top of a record */
+    for (i = 0; i < 200; i++)
+        wrbuf_puts(w, "<a:title>The title</a:title>");
+    res = srw_data_ns(o, 60, 0, wrbuf_cstr(w));
+    YAZ_CHECK(res && strlen(res) == 200 * (28 + 11 + 60) + 25);
+
+    wrbuf_rewind(w);
+    for (i = 0; i < 200; i++)
+        wrbuf_puts(w, "<a:r/>");
+    YAZ_CHECK(srw_data_ns(o, 30, 0, wrbuf_cstr(w)) != 0);
+    YAZ_CHECK(srw_data_ns(o, 60, 0, wrbuf_cstr(w)) == 0);
+
+    /* the same for extraRecordData and extraResponseData */
+    for (i = 1; i <= 2; i++)
+    {
+        res = srw_data_ns(o, 5, i, "<a:r/><a:r/>");
+        YAZ_CHECK(res && !strcmp(res, "<a:r xmlns:a=\"uuuuu\"/>"
+                                 "<a:r xmlns:a=\"uuuuu\"/>"));
+        YAZ_CHECK(srw_data_ns(o, 1000, i, "<a:r/><a:r/>") == 0);
+    }
+
+    wrbuf_destroy(w);
+    odr_destroy(o);
+}
 #endif
 
 static void tst_array_to_uri(void)
@@ -397,6 +541,7 @@ int main(int argc, char **argv)
     tst_scan_response_terms();
     tst_ucp_methods();
     tst_srw_facet_analysis();
+    tst_srw_record_ns();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;

@@ -55,6 +55,17 @@ int yaz_match_xsd_string_n_nmem(xmlNodePtr ptr, const char *elem, NMEM nmem,
                                 char **val, int *len);
 int yaz_match_xsd_element(xmlNodePtr ptr, const char *elem);
 
+/** \brief appends element as XML that declares the namespaces it inherits
+    \param buf buffer that holds elements appended by this function only
+    \param ptr element
+    \param own size of the elements in buf without inherited declarations;
+    to be 0 before the first element
+    \retval 0 OK
+    \retval -1 failure, such as declarations out of proportion to elements
+*/
+int yaz_xml_dump_element(xmlBufferPtr buf, xmlNodePtr ptr, size_t *own);
+
+/** \brief returns 0 if ptr is not elem, 1 if content is in val, -1 on error */
 int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
                          char **val, int *len, int fixup_root);
 

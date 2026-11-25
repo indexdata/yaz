@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <yaz/srw.h>
 #include <yaz/log.h>
+#include <yaz/wrbuf.h>
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #endif
@@ -557,6 +558,38 @@ void tst_decoding(void)
         YAZ_CHECK(response->diagnostics == 0);
         YAZ_CHECK(response->nextRecordPosition != 0);
         YAZ_CHECK(response->facetList != 0);
+    }
+    odr_reset(odr);
+
+    /* a doc gets a declaration of the namespace that it inherits .. */
+    YAZ_CHECK(check_response(
+                  odr,
+                  "<response xmlns:a=\"urn:a\">"
+                  "<result numFound=\"2\" start=\"0\"><a:doc/><a:doc/>"
+                  "</result></response>", &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(response->num_records, 2);
+        if (response->num_records == 2)
+        {
+            YAZ_CHECK(!strcmp(response->records[1].recordData_buf,
+                              "<a:doc xmlns:a=\"urn:a\"/>"));
+        }
+    }
+    odr_reset(odr);
+
+    /* .. unless that is out of proportion: every doc gets a copy */
+    {
+        WRBUF w = wrbuf_alloc();
+        int i;
+
+        wrbuf_puts(w, "<response xmlns:a=\"");
+        for (i = 0; i < 1000; i++)
+            wrbuf_putc(w, 'u');
+        wrbuf_puts(w, "\"><result numFound=\"2\" start=\"0\"><a:doc/>"
+                   "<a:doc/></result></response>");
+        YAZ_CHECK(!check_response(odr, wrbuf_cstr(w), &response));
+        wrbuf_destroy(w);
     }
     odr_reset(odr);
 
