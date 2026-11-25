@@ -3226,8 +3226,12 @@ static void process_Z3950_close(Z_Close *req)
             "peer abort",
             "unspecified"
         };
+    const char *reason = "unknown";
 
-    printf("Reason: %s, message: %s\n", reasons[*req->closeReason],
+    if (*req->closeReason >= Z_Close_finished &&
+        *req->closeReason <= Z_Close_unspecified)
+        reason = reasons[*req->closeReason];
+    printf("Reason: %s, message: %s\n", reason,
            req->diagnosticInformation ? req->diagnosticInformation : "NULL");
     if (sent_close)
         close_session();
