@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <string.h>
 #include <yaz/oid_util.h>
+#include <yaz/proto.h>
 #include "test_odrcodec.h"
 
 #include <yaz/test.h>
@@ -454,6 +455,21 @@ static void tst_odr_write2(void)
     odr_destroy(encode);
 }
 
+static void tst_external_no_encoding(void)
+{
+    /* EXTERNAL with direct-reference SUTRS (a known type) and no encoding */
+    char buf[] = { 0x28, 0x09, 0x06, 0x07,
+                   0x2a, (char) 0x86, 0x48, (char) 0xce, 0x13, 0x05, 0x65 };
+    ODR decode = odr_createmem(ODR_DECODE);
+    Z_External *ext = 0;
+
+    odr_setbuf(decode, buf, sizeof(buf), 0);
+    /* present, but incomplete: must fail even if optional */
+    YAZ_CHECK(!z_External(decode, &ext, 1, 0));
+    YAZ_CHECK_EQ(odr_geterror(decode), OREQUIRED);
+    odr_destroy(decode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -461,6 +477,7 @@ int main(int argc, char **argv)
     tst_ber_length();
     tst_odr_write2();
     tst_odr_create_Odr_oct2();
+    tst_external_no_encoding();
     YAZ_CHECK_TERM;
 }
 
