@@ -208,8 +208,10 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
         int zclass, tag, cons;
         /* OID is present and we know it */
 
+        /* The EXTERNAL itself is present, so its encoding is required
+           regardless of opt */
         if (!odr_peektag(o, &zclass, &tag, &cons))
-            return opt && odr_ok(o);
+            return odr_missing(o, 0, name);
 #if PRT_EXT_DEBUG
         yaz_log(YLOG_LOG, "odr_peektag OK tag=%d cons=%d zclass=%d what=%d",
                 tag, cons, zclass, type->what);
