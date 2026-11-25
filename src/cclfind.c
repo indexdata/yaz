@@ -98,8 +98,7 @@ static char *copy_token_name(struct ccl_token *tp)
  */
 struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
 {
-    struct ccl_rpn_node *p;
-    p = (struct ccl_rpn_node *)xmalloc(sizeof(*p));
+    struct ccl_rpn_node *p = (struct ccl_rpn_node *)xmalloc(sizeof(*p));
     ccl_assert(p);
     p->kind = kind;
 
@@ -111,6 +110,7 @@ struct ccl_rpn_node *ccl_rpn_node_create(enum ccl_rpn_kind kind)
         p->u.t.qual = 0;
         break;
     default:
+        p->u.p[0] = p->u.p[1] = p->u.p[2] = 0;
         break;
     }
     return p;
@@ -244,6 +244,9 @@ void ccl_add_attr_numeric(struct ccl_rpn_node *p, const char *set,
 void ccl_set_attr_numeric(struct ccl_rpn_node *p, const char *set,
                           int type, int value)
 {
+    /* only terms have attributes; p may be any node from search_terms */
+    if (p->kind != CCL_RPN_TERM)
+        return;
     for (struct ccl_rpn_attr *n = p->u.t.attr_list; n; n = n->next)
         if (n->type == type)
         {

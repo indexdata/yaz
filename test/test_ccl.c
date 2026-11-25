@@ -566,6 +566,40 @@ void tst3(void)
     ccl_qual_rm(&b);
 }
 
+/* r=o / r=r qualifier with operand that is not a single term */
+static void tst_relation_operand(void)
+{
+    CCL_bibset b = ccl_qual_mk();
+
+    YAZ_CHECK(b);
+    if (!b)
+        return;
+
+    ccl_qual_fitem(b, "u=30 r=r", "date");
+    ccl_qual_fitem(b, "u=30 u=31 r=o", "dates");
+
+    YAZ_CHECK(tst_ccl_query(b, "date=a", "@attr 2=3 @attr 1=30 a "));
+    YAZ_CHECK(tst_ccl_query(b, "date=a%b",
+                            "@prox 0 1 0 2 k 2 "
+                            "@attr 1=30 a @attr 1=30 b "));
+    YAZ_CHECK(tst_ccl_query(b, "date=(a) b",
+                            "@prox 0 2 0 1 k 2 "
+                            "@attr 1=30 a @attr 1=30 b "));
+    YAZ_CHECK(tst_ccl_query(b, "date=(a) b )", 0));
+    YAZ_CHECK(tst_ccl_query(b, "date=(a or b)",
+                            "@or @attr 1=30 a @attr 1=30 b "));
+    YAZ_CHECK(tst_ccl_query(b, "date>(set=1)", "@set 1 "));
+    YAZ_CHECK(tst_ccl_query(b, "set=1 and date>(set=1)",
+                            "@and @set 1 @set 1 "));
+    YAZ_CHECK(tst_ccl_query(b, "date=(date=1-2)",
+                            "@and "
+                            "@attr 2=4 @attr 1=30 @attr 1=30 1 "
+                            "@attr 2=2 @attr 1=30 @attr 1=30 2 "));
+    YAZ_CHECK(tst_ccl_query(b, "dates=1980",
+                            "@or @attr 1=30 1980 @attr 1=31 1980 "));
+    ccl_qual_rm(&b);
+}
+
 void tst_addinfo(void)
 {
     const char *addinfo;
@@ -746,6 +780,7 @@ int main(int argc, char **argv)
     tst1(3);
     tst2();
     tst3();
+    tst_relation_operand();
     tst_addinfo();
     YAZ_CHECK_TERM;
 }
