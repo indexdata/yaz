@@ -38,6 +38,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_rpn2cql.exe \
     $(BINDIR)\test_rpn2solr.exe \
     $(BINDIR)\test_retrieval.exe \
+    $(BINDIR)\test_search_present.exe \
     $(BINDIR)\test_scan_limits.exe \
     $(BINDIR)\test_shared_ptr.exe \
     $(BINDIR)\test_soap1.exe \
