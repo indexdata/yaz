@@ -422,6 +422,21 @@ static void tst_marc8_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "p", UTF8_RING_ABOVE)); /* note: missing p */
     yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
 
+    /* 8 combining characters are held back until the base character */
+    YAZ_CHECK(tst_convert(cd, "\xe1\xe1\xe1\xe1\xe1\xe1\xe1" ESC "(B" "\xe1"
+                          "A",
+                          "A" "\xcc\x80\xcc\x80\xcc\x80\xcc\x80"
+                          "\xcc\x80\xcc\x80\xcc\x80\xcc\x80"));
+    /* more than 8: each of them is still read only once */
+    YAZ_CHECK(tst_convert(cd, "\xe1\xe1\xe1\xe1\xe1\xe1\xe1\xe1"
+                          ESC "(B" "\xea" "A",
+                          UTF8_RING_ABOVE
+                          "\xcc\x80\xcc\x80\xcc\x80\xcc\x80"
+                          "\xcc\x80\xcc\x80\xcc\x80\xcc\x80" "A"));
+    YAZ_CHECK(tst_convert_x(cd, "\xe1\xe1\xe1\xe1\xe1\xe1\xe1\xe1", "",
+                            YAZ_ICONV_EINVAL));
+    yaz_iconv(cd, 0, 0, 0, 0);
+
     /* bug #2115 */
     YAZ_CHECK(tst_convert(cd, ESC "(N" ESC ")Qp" ESC "(B", "\xd0\x9f"));
 

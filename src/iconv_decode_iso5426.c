@@ -87,7 +87,7 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
     }
 
     data->comb_offset = 0;
-    for (data->comb_size = 0; data->comb_size < 8; data->comb_size++)
+    for (data->comb_size = 0; ; data->comb_size++)
     {
         int comb = 0;
 
@@ -101,6 +101,8 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         x = yaz_read_iso5426_comb(cd, data, inp, inbytesleft, no_read, &comb);
         if (!comb || !x)
             break;
+        if (data->comb_size == 8)
+            break; /* table full: return x as is, it must not be replayed */
         data->comb_x[data->comb_size] = x;
         data->comb_no_read[data->comb_size] = *no_read;
         inp += *no_read;
