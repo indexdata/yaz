@@ -327,7 +327,7 @@ static int yaz_sru_proxy_decode_facets(ODR o, xmlNodePtr root,
             int num_facets = 0;
             for (node = ptr->children; node; node= node->next)
             {
-                if (node->type == XML_ELEMENT_NODE)
+                if (yaz_match_xsd_element(node, "facet"))
                     num_facets++;
             }
             Z_FacetList *facet_list = facet_list_create(o, num_facets);
