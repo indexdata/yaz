@@ -884,7 +884,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
     /* have a CQL query and  CQL to PQF transform .. */
     CQL_parser cp = cql_parser_create();
     int srw_errcode = 0;
-    const char *add = 0;
+    WRBUF addinfo = wrbuf_alloc();
     WRBUF rpn_buf = wrbuf_alloc();
 
     *sortkeys_p = 0;
@@ -898,9 +898,11 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
         struct cql_node *cn = cql_parser_result(cp);
 
         /* Syntax OK */
-        r = cql_transform(ct, cn, wrbuf_vp_puts, rpn_buf);
+        /* ct is shared between sessions (threads), so use the re-entrant
+           transform which does not store the error in ct */
+        r = cql_transform_r(ct, cn, addinfo, wrbuf_vp_puts, rpn_buf);
         if (r)
-            srw_errcode = cql_transform_error(ct, &add);
+            srw_errcode = r;
         else
         {
             char out[100];
@@ -942,6 +944,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
         yaz_pqf_destroy(pp);
     }
     cql_parser_destroy(cp);
+    wrbuf_destroy(addinfo);
     wrbuf_destroy(rpn_buf);
     return srw_errcode;
 }
