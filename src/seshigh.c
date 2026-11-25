@@ -1116,7 +1116,10 @@ static void srw_bend_search(association *assoc,
 
             yaz_log_zquery_level(log_requestdetail,rr.query);
 
-            (assoc->init->bend_search)(assoc->backend, &rr);
+            if (assoc->init->bend_search)
+                (assoc->init->bend_search)(assoc->backend, &rr);
+            else
+                rr.errcode = YAZ_BIB1_UNSUPP_SEARCH;
             if (rr.errcode)
             {
                 if (rr.errcode == YAZ_BIB1_DATABASE_UNAVAILABLE)
@@ -2791,6 +2794,15 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     *num = 0;
     *next = 0;
 
+    if (toget > 0 && !a->init->bend_fetch)
+    {
+        yaz_log(YLOG_WARN, "Fetch not supported");
+        *pres = Z_PresentStatus_failure;
+        if (errcode)
+            *errcode = YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS;
+        return diagrec(a, YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS, 0);
+    }
+
     yaz_log(log_requestdetail, "Request to pack " ODR_INT_PRINTF "+%d %s", start, toget, setname);
     yaz_log(log_requestdetail, "pms=%d, mrs=%d", a->preferredMessageSize,
         a->maximumRecordSize);
@@ -2959,6 +2971,10 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
     bsrr->partial_resultset = 0;
     bsrr->extra_args = 0;
     bsrr->extra_response_data = 0;
+    bsrr->hits = 0;
+    bsrr->errcode = 0;
+    bsrr->errstring = NULL;
+    bsrr->search_info = NULL;
 
     yaz_log(log_requestdetail, "ResultSet '%s'", req->resultSetName);
     if (req->databaseNames)
@@ -2980,10 +2996,6 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
         nmem_transfer(odr_getmem(bsrr->stream), reqb->request_mem);
         bsrr->decode = assoc->decode;
         bsrr->print = assoc->print;
-        bsrr->hits = 0;
-        bsrr->errcode = 0;
-        bsrr->errstring = NULL;
-        bsrr->search_info = NULL;
         bsrr->search_input = req->additionalSearchInfo;
         if (!bsrr->search_input)
             bsrr->search_input = req->otherInfo;
@@ -3031,8 +3043,8 @@ static Z_APDU *process_searchRequest(association *assoc, request *reqb)
     }
     else
     {
-        /* FIXME - make a diagnostic for it */
         yaz_log(YLOG_WARN,"Search not supported ?!?!");
+        bsrr->errcode = YAZ_BIB1_UNSUPP_SEARCH;
     }
     return response_searchRequest(assoc, reqb, bsrr);
 }

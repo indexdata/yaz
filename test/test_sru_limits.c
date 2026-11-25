@@ -13,6 +13,7 @@
 #include <yaz/srw.h>
 #include <yaz/diagsrw.h>
 #include <yaz/diagbib1.h>
+#include <yaz/pquery.h>
 #include <yaz/xmalloc.h>
 #include "../src/session.h"
 
@@ -80,6 +81,12 @@ static bend_initresult *init(bend_initrequest *rr)
     return &result;
 }
 
+static bend_initresult *init_no_handlers(bend_initrequest *rr)
+{
+    static bend_initresult result;
+    return &result;
+}
+
 static void close_backend(void *handle)
 {
     YAZ_CHECK(handle == &backend_handle);
@@ -103,6 +110,17 @@ static int get(COMSTACK cs, char **buf, int *size)
 {
     *buf = xstrdup((const char *) cs->user);
     *size = (int) strlen(*buf);
+    return *size;
+}
+
+/* Binary-safe variant for BER-encoded Z39.50 PDUs. */
+static int get_single_pdu(COMSTACK cs, char **buf, int *size)
+{
+    WRBUF pdu = (WRBUF) cs->user;
+    xfree(*buf);
+    *size = (int) wrbuf_len(pdu);
+    *buf = (char *) xmalloc(*size);
+    memcpy(*buf, wrbuf_buf(pdu), *size);
     return *size;
 }
 
@@ -497,6 +515,109 @@ static void check(int mode, const char *maximum, const char *start,
     wrbuf_destroy(args);
     odr_destroy(enc);
 }
+
+static Z_APDU *send_apdu(association *assoc, ODR enc, ODR dec, Z_APDU *apdu)
+{
+    WRBUF pdu = (WRBUF) assoc->client_link->user;
+    request *response;
+    Z_GDU *gdu = 0;
+    char *buf;
+    int len;
+
+    YAZ_CHECK(z_APDU(enc, &apdu, 0, 0));
+    buf = odr_getbuf(enc, &len, 0);
+    wrbuf_rewind(pdu);
+    wrbuf_write(pdu, buf, len);
+    odr_reset(enc);
+    assoc->cs_get_mask = EVENT_INPUT;
+    ir_session(assoc->client_chan, EVENT_INPUT);
+    response = request_deq(&assoc->outgoing);
+    YAZ_CHECK(response != 0);
+    if (response)
+    {
+        odr_setbuf(dec, response->response, response->len_response, 0);
+        YAZ_CHECK(z_GDU(dec, &gdu, 0, 0));
+        request_release(response);
+    }
+    return gdu && gdu->which == Z_GDU_Z3950 ? gdu->u.z3950 : 0;
+}
+
+static void check_diagnostic(Z_Records *records, int condition)
+{
+    YAZ_CHECK(records && records->which == Z_Records_NSD);
+    if (records && records->which == Z_Records_NSD)
+    {
+        Z_DefaultDiagFormat *diag = records->u.nonSurrogateDiagnostic;
+        YAZ_CHECK_EQ(*diag->condition, condition);
+        YAZ_CHECK(diag->u.v2Addinfo && !*diag->u.v2Addinfo);
+    }
+}
+
+/* A backend that installs no handlers gets diagnostics. The frontend must
+   neither call a missing handler nor reply from an unset search result. */
+static void check_no_handlers(void)
+{
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    ODR enc = odr_createmem(ODR_ENCODE);
+    ODR dec = odr_createmem(ODR_DECODE);
+    WRBUF pdu = wrbuf_alloc();
+    char *database = "Default";
+    association *assoc;
+    Z_APDU *apdu, *res;
+
+    statserv_getcontrol()->bend_init = init_no_handlers;
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_Z3950;
+    cs.f_get = get_single_pdu;
+    cs.f_more = more;
+    cs.f_addrstr = addrstr;
+    cs.user = pdu;
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+
+    res = send_apdu(assoc, enc, dec, zget_APDU(enc, Z_APDU_initRequest));
+    YAZ_CHECK(res && res->which == Z_APDU_initResponse);
+    if (res && res->which == Z_APDU_initResponse)
+        YAZ_CHECK(*res->u.initResponse->result);
+
+    apdu = zget_APDU(enc, Z_APDU_searchRequest);
+    apdu->u.searchRequest->num_databaseNames = 1;
+    apdu->u.searchRequest->databaseNames = &database;
+    apdu->u.searchRequest->query = (Z_Query *)
+        odr_malloc(enc, sizeof(*apdu->u.searchRequest->query));
+    apdu->u.searchRequest->query->which = Z_Query_type_1;
+    apdu->u.searchRequest->query->u.type_1 = p_query_rpn(enc, "test");
+    res = send_apdu(assoc, enc, dec, apdu);
+    YAZ_CHECK(res && res->which == Z_APDU_searchResponse);
+    if (res && res->which == Z_APDU_searchResponse)
+    {
+        Z_SearchResponse *sr = res->u.searchResponse;
+        YAZ_CHECK_EQ(*sr->resultCount, 0);
+        YAZ_CHECK(!*sr->searchStatus);
+        YAZ_CHECK(!sr->additionalSearchInfo);
+        check_diagnostic(sr->records, YAZ_BIB1_UNSUPP_SEARCH);
+    }
+
+    res = send_apdu(assoc, enc, dec, zget_APDU(enc, Z_APDU_presentRequest));
+    YAZ_CHECK(res && res->which == Z_APDU_presentResponse);
+    if (res && res->which == Z_APDU_presentResponse)
+    {
+        Z_PresentResponse *pr = res->u.presentResponse;
+        YAZ_CHECK_EQ(*pr->numberOfRecordsReturned, 0);
+        YAZ_CHECK_EQ(*pr->presentStatus, Z_PresentStatus_failure);
+        check_diagnostic(pr->records,
+                         YAZ_BIB1_SYSTEM_ERROR_IN_PRESENTING_RECORDS);
+    }
+    destroy_association(assoc);
+    xfree(chan);
+    wrbuf_destroy(pdu);
+    odr_destroy(dec);
+    odr_destroy(enc);
+
+    check(0, "0", "1", 0, 0, YAZ_SRW_QUERY_FEATURE_UNSUPP);
+    statserv_getcontrol()->bend_init = init;
+}
 #endif
 
 int main(int argc, char **argv)
@@ -520,6 +641,7 @@ int main(int argc, char **argv)
             check_unknown_host("1.0", "Keep-Alive", 1, mode);
             check_unknown_host("1.0", 0, 1, mode);
         }
+        check_no_handlers();
         /* Untrusted SRU PQF must return a diagnostic without backend work. */
         check(3, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
         check(4, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
