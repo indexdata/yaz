@@ -43,6 +43,7 @@ request *request_deq(request_q *q)
     q->head = q->head->next;
     if (!q->head)
         q->tail = 0;
+    r->next = 0; /* r may be released or moved to another queue */
     q->num--;
     return r;
 }

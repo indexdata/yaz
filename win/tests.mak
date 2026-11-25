@@ -19,6 +19,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_file_glob.exe \
     $(BINDIR)\test_iconv.exe \
     $(BINDIR)\test_icu.exe \
+    $(BINDIR)\test_gfs_requests.exe \
     $(BINDIR)\test_json.exe \
     $(BINDIR)\test_libstemmer.exe \
     $(BINDIR)\test_log.exe \

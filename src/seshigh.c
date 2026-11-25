@@ -473,8 +473,9 @@ void ir_session(IOCHAN h, int event)
     {
         if (!ir_read(h, event))
             return;
-        req = request_head(&assoc->incoming);
-        if (req->state == REQUEST_IDLE)
+        /* keep going past requests that get no response */
+        while ((req = request_head(&assoc->incoming))
+               && req->state == REQUEST_IDLE)
         {
             request_deq(&assoc->incoming);
             process_gdu_request(assoc, req);

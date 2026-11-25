@@ -58,3 +58,4 @@ test_zoom_send
 test_sru_update
 test_gfs_vhosts
 test_client_record
+test_gfs_requests
