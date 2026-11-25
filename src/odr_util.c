@@ -32,7 +32,8 @@ int odp_more_chunks(ODR o, const char *base, int len)
         return 0;
     if (len < 0) /* indefinite length */
     {
-        if (*o->op->bp == 0 && *(o->op->bp + 1) == 0)
+        /* no end-of-contents in the buffer: decoding next chunk will fail */
+        if (odr_max(o) >= 2 && *o->op->bp == 0 && *(o->op->bp + 1) == 0)
         {
             o->op->bp += 2;
             return 0;

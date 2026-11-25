@@ -135,6 +135,8 @@ int odr_constructed_more(ODR o)
         return 0;
     if (o->op->stack_top->len >= 0)
         return o->op->bp - o->op->stack_top->base < o->op->stack_top->len;
+    else if (odr_max(o) < 2) /* no room for end-of-contents or an element */
+        return 0;
     else
         return (!(*o->op->bp == 0 && *(o->op->bp + 1) == 0));
 }
@@ -156,7 +158,8 @@ int odr_constructed_end(ODR o)
     case ODR_DECODE:
         if (o->op->stack_top->len < 0)
         {
-            if (*o->op->bp++ == 0 && *(o->op->bp++) == 0)
+            if (odr_max(o) >= 2 &&
+                *o->op->bp++ == 0 && *(o->op->bp++) == 0)
             {
                 ODR_STACK_POP(o);
                 return 1;
