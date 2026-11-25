@@ -20,6 +20,8 @@
 static Odr_int hits;
 static int expected_number;
 static int fetched;
+static int fetch_limit;
+static const char *fetch_record = "<record/>";
 static int searched;
 static int presented;
 static int explained;
@@ -54,7 +56,7 @@ static int fetch(void *handle, bend_fetch_rr *rr)
 {
     fetched++;
     YAZ_CHECK(rr->number >= 1 && rr->number <= hits);
-    rr->record = "<record/>";
+    rr->record = (char *) fetch_record;
     rr->len = (int) strlen(rr->record);
     return 0;
 }
@@ -453,7 +455,14 @@ static void check(int mode, const char *maximum, const char *start,
     {
         YAZ_CHECK_EQ(searched, mode == 5 ? 1 : 0);
     }
-    YAZ_CHECK_EQ(fetched, count);
+    if (fetch_limit)
+    {
+        YAZ_CHECK(fetched > 0 && fetched <= fetch_limit);
+    }
+    else
+    {
+        YAZ_CHECK_EQ(fetched, count);
+    }
     YAZ_CHECK_EQ(presented, count ? 1 : 0);
     request *response = request_head(&assoc->outgoing);
     YAZ_CHECK(response != 0);
@@ -467,7 +476,21 @@ static void check(int mode, const char *maximum, const char *start,
                     mode, maximum, start, text);
         YAZ_CHECK(strstr(text, diagnostic ? marker : "numberOfRecords>") != 0);
         if (!diagnostic)
+        {
+            int records = 0;
+            const char *cp = text;
             YAZ_CHECK(strstr(text, "info:srw/diagnostic/") == 0);
+            /* Every fetched record is in the response. */
+            for (; (cp = strstr(cp, "</zs:recordData>")) != 0; cp++)
+                records++;
+            YAZ_CHECK_EQ(records, fetched);
+            if (fetch_limit)
+            {
+                sprintf(marker, "nextRecordPosition>" ODR_INT_PRINTF "</",
+                        odr_atoi(start) + fetched);
+                YAZ_CHECK(strstr(text, marker) != 0);
+            }
+        }
     }
     destroy_association(assoc);
     xfree(chan);
@@ -519,6 +542,37 @@ int main(int argc, char **argv)
             check(mode, above_int_max, "1", 10, mode == 2 ? 10 : 0,
                   mode == 2 ? 0 : 6);
             check(mode, "-1", "1", 10, 0, 6);
+            /* The lists of records grow while records are fetched. */
+            check(mode, "1000", "1", 1000, 1000, 0);
+            /* A client that asks for all records of a large result set
+               gets the records that fit in a message. Each record takes
+               at least one byte of it. */
+            {
+                statserv_options_block *cb = statserv_getcontrol();
+                int maxrecordsize = cb->maxrecordsize;
+                cb->maxrecordsize = fetch_limit = 8192;
+                check(mode, "100000", "1", 100000, 100000, 0);
+                cb->maxrecordsize = maxrecordsize;
+                fetch_limit = 0;
+            }
+            /* Record bytes in backend-owned memory must count towards the
+               message limit, even though odr_total() does not include them. */
+            {
+                char record[4096];
+                statserv_options_block *cb = statserv_getcontrol();
+                int maxrecordsize = cb->maxrecordsize;
+                memset(record, 'x', sizeof(record));
+                memcpy(record, "<record>", 8);
+                memcpy(record + sizeof(record) - 10, "</record>", 10);
+                fetch_record = record;
+                cb->maxrecordsize = 2 * (sizeof(record) - 1);
+                fetch_limit = 2;
+                check(mode, "1000", "1", 1000, 1000, 0);
+                YAZ_CHECK_EQ(fetched, 2);
+                fetch_record = "<record/>";
+                cb->maxrecordsize = maxrecordsize;
+                fetch_limit = 0;
+            }
             check(mode, "1", "0", 10, 0, mode == 2 ? 61 : 6);
             /* On 32-bit targets these products can fit in size_t but exceed
                the allocator's quarter-size limit. Reject before present. */

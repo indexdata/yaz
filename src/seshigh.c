@@ -148,6 +148,17 @@ static int validate_len(size_t len, int *dst)
     return 1;
 }
 
+/* Lists of records grow with the records that are fetched. The number of
+   records that a client asks for must not be used as an allocation size. */
+static void *grow_record_list(ODR o, void *list, size_t entry_size,
+                              int num, int new_max)
+{
+    void *new_list = odr_malloc(o, new_max * entry_size);
+
+    memcpy(new_list, list, num * entry_size);
+    return new_list;
+}
+
 /*
  * Create and initialize a new association-handle.
  *  channel  : iochannel for the current line.
@@ -1221,6 +1232,8 @@ static void srw_bend_search(association *assoc,
                     if (ok)
                     {
                         int j = 0;
+                        int max_records = number < 100 ? number : 100;
+                        Odr_int data_length = 0;
                         int packing = Z_SRW_recordPacking_string;
                         if (srw_req->recordPacking)
                         {
@@ -1230,22 +1243,39 @@ static void srw_bend_search(association *assoc,
                                 packing = Z_SRW_recordPacking_string;
                         }
                         srw_res->records = (Z_SRW_record *)
-                            odr_malloc(assoc->encode,
-                                       number * sizeof(*srw_res->records));
+                            odr_malloc(assoc->encode, max_records *
+                                       sizeof(*srw_res->records));
 
                         srw_res->extra_records = (Z_SRW_extra_record **)
-                            odr_malloc(assoc->encode,
-                                       number*sizeof(*srw_res->extra_records));
-
+                            odr_malloc(assoc->encode, max_records *
+                                       sizeof(*srw_res->extra_records));
                         for (i = 0; i<number; i++)
                         {
                             int last_in_set = 0;
                             const char *addinfo = 0;
+                            Odr_int before, this_length;
 
+                            if (j == max_records)
+                            {
+                                max_records = max_records > number / 2 ?
+                                    number : max_records * 2;
+                                srw_res->records = (Z_SRW_record *)
+                                    grow_record_list(
+                                        assoc->encode, srw_res->records,
+                                        sizeof(*srw_res->records),
+                                        j, max_records);
+                                srw_res->extra_records =
+                                    (Z_SRW_extra_record **)
+                                    grow_record_list(
+                                        assoc->encode, srw_res->extra_records,
+                                        sizeof(*srw_res->extra_records),
+                                        j, max_records);
+                            }
                             srw_res->records[j].recordPacking = packing;
                             srw_res->records[j].recordData_buf = 0;
                             srw_res->extra_records[j] = 0;
                             yaz_log(YLOG_DEBUG, "srw_bend_fetch %d", i+start);
+                            before = odr_total(assoc->encode);
                             int errcode = srw_bend_fetch(
                                 assoc, i + start, srw_req, srw_res->records + j,
                                 &addinfo, &last_in_set);
@@ -1259,10 +1289,29 @@ static void srw_bend_search(association *assoc,
 
                                 break;
                             }
+                            this_length = odr_total(assoc->encode) - before;
+                            if (srw_res->records[j].recordData_buf &&
+                                srw_res->records[j].recordData_len > this_length)
+                                this_length = srw_res->records[j].recordData_len;
+                            data_length += this_length;
                             if (srw_res->records[j].recordData_buf)
                                 j++;
                             if (last_in_set)
                                 break;
+                            /* Count record data even when the backend keeps
+                               it outside the encode stream. The client can
+                               continue with nextRecordPosition. */
+                            if (assoc->preferredMessageSize > 0 &&
+                                data_length >= assoc->preferredMessageSize)
+                            {
+                                if (i + 1 < number)
+                                    srw_res->nextRecordPosition = odr_intdup(
+                                        assoc->encode, (Odr_int) i + start + 1);
+                                yaz_log(log_requestdetail,
+                                        "  Message is full after %d records",
+                                        j);
+                                break;
+                            }
                         }
                         srw_res->num_records = j;
                         if (!j)
@@ -2720,6 +2769,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
 {
     Odr_int dumped_records = 0;
     int toget = odr_int_to_int(*num);
+    int max_records = toget < 100 ? toget : 100;
     Z_Records *records =
         (Z_Records *) odr_malloc(a->encode, sizeof(*records));
     Z_NamePlusRecordList *reclist =
@@ -2735,7 +2785,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         reclist->records = odr_nullval();
     else
         reclist->records = (Z_NamePlusRecord **)
-            odr_malloc(a->encode, sizeof(*reclist->records) * toget);
+            odr_malloc(a->encode, sizeof(*reclist->records) * max_records);
 
     *pres = Z_PresentStatus_success;
     *num = 0;
@@ -2750,12 +2800,24 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
         bend_fetch_rr freq;
         Z_NamePlusRecord *thisrec;
         Odr_int this_length = 0;
+        Odr_int total_length;
+
+        if (reclist->num_records == max_records)
+        {
+            /* The old list remains on the stream but is not record data. */
+            dumped_records += max_records * sizeof(*reclist->records);
+            max_records = max_records > toget / 2 ? toget : max_records * 2;
+            reclist->records = (Z_NamePlusRecord **)
+                grow_record_list(a->encode, reclist->records,
+                                 sizeof(*reclist->records),
+                                 reclist->num_records, max_records);
+        }
         /*
          * we get the number of bytes allocated on the stream before any
          * allocation done by the backend - this should give us a reasonable
          * idea of the total size of the data so far.
          */
-        Odr_int total_length = odr_total(a->encode) - dumped_records;
+        total_length = odr_total(a->encode) - dumped_records;
         freq.errcode = 0;
         freq.errstring = 0;
         freq.basename = 0;
