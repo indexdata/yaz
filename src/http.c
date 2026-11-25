@@ -90,6 +90,8 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         }
         if (!*content_len)
             *content_buf = 0;
+        else /* 0-terminate like odr_strdupn; chunk framing leaves room */
+            (*content_buf)[*content_len] = '\0';
     }
     else
     {
