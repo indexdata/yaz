@@ -418,9 +418,16 @@ static void tst_marc8_to_utf8(void)
     YAZ_CHECK(tst_convert(cd, "a" "\xea" "\x1e", "a" "\x1e" UTF8_RING_ABOVE));
     YAZ_CHECK(tst_convert(cd, "a" "\xea" "p", "ap" UTF8_RING_ABOVE));
 
+    /* incomplete. the combining char is not kept for the next buffer */
     YAZ_CHECK(tst_convert_x(cd, "a\xea", "a", YAZ_ICONV_EINVAL));
-    YAZ_CHECK(tst_convert(cd, "p", UTF8_RING_ABOVE)); /* note: missing p */
-    yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
+    YAZ_CHECK(tst_convert(cd, "p", "p"));
+    /* .. and neither is its length (7 here) */
+    YAZ_CHECK(tst_convert_x(cd, "a" ESC "(B" ESC "(B" "\xea", "a",
+                            YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "p", "p"));
+    /* incomplete, continued with the unconsumed input */
+    YAZ_CHECK(tst_convert_x(cd, "a\xea", "a", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "\xea" "p", "p" UTF8_RING_ABOVE));
 
     /* 8 combining characters are held back until the base character */
     YAZ_CHECK(tst_convert(cd, "\xe1\xe1\xe1\xe1\xe1\xe1\xe1" ESC "(B" "\xe1"
@@ -466,6 +473,26 @@ static void tst_marc8s_to_utf8(void)
     yaz_iconv_close(cd);
 }
 
+
+static void tst_iso5426_to_utf8(void)
+{
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "ISO5426");
+
+    YAZ_CHECK(cd);
+    if (!cd)
+        return;
+
+    YAZ_CHECK(tst_convert(cd, "\xca" "a", "a" UTF8_RING_ABOVE));
+
+    /* incomplete. the combining char is not kept for the next buffer */
+    YAZ_CHECK(tst_convert_x(cd, "a\xca", "a", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "p", "p"));
+    YAZ_CHECK(tst_convert_x(cd, "a" ESC "(B" ESC "(B" "\xca", "a",
+                            YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "p", "p"));
+
+    yaz_iconv_close(cd);
+}
 
 static void tst_marc8_to_latin1(void)
 {
@@ -787,6 +814,10 @@ static void tst_danmarc_to_utf8(void)
     YAZ_CHECK(tst_convert_x(cd, "p" "@0301", "p", YAZ_ICONV_EINVAL));
     yaz_iconv(cd, 0, 0, 0, 0);     /* incomplete. so we have to reset */
 
+    /** Incomplete is not kept for the next buffer */
+    YAZ_CHECK(tst_convert_x(cd, "p" "@0301", "p", YAZ_ICONV_EINVAL));
+    YAZ_CHECK(tst_convert(cd, "a", "a"));
+
     /** TILDE a */
     YAZ_CHECK(tst_convert(cd, "@0303" "a", "a" UTF8_TILDE));
 
@@ -893,6 +924,8 @@ int main (int argc, char **argv)
     tst_marc8s_to_utf8();
 
     tst_marc8_to_latin1();
+
+    tst_iso5426_to_utf8();
 
     tst_advance_to_utf8();
     tst_utf8_to_advance();
