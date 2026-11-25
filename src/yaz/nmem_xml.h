@@ -42,7 +42,9 @@ YAZ_BEGIN_CDECL
 /** \brief copies TEXT Libxml2 node data to NMEM */
 YAZ_EXPORT char *nmem_text_node_cdata(const xmlNode *ptr, NMEM nmem);
 
-/** \brief copies xmlBuffer data to NMEM */
+/** \brief copies xmlBuffer data to NMEM
+    \returns copy, or NULL if the buffer is too long for an int length
+*/
 YAZ_EXPORT char *nmem_from_xml_buffer(NMEM nmem, const xmlBufferPtr buf, int *len);
 
 #endif

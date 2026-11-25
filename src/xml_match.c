@@ -74,9 +74,74 @@ int yaz_match_xsd_string(xmlNodePtr ptr, const char *elem, ODR o, char **val)
     return yaz_match_xsd_string_n(ptr, elem, o, val, 0);
 }
 
+
+/* An element that is dumped on its own gets a declaration of each
+   namespace that it uses but that is declared further up (bug #740). The
+   message has such a declaration once, while every record, and every element
+   at the top of a record, gets a copy. Allow those copies
+   XML_NS_INHERIT_BASE bytes plus XML_NS_INHERIT_FACTOR times the size of the
+   elements themselves. Ordinary records need far less, and the result stays
+   in proportion to the message. */
+#define XML_NS_INHERIT_BASE 256
+#define XML_NS_INHERIT_FACTOR 8
+
+/* Unlike xmlNodeDump, this leaves buf valid if memory runs out */
+static int dump_node(xmlBufferPtr buf, xmlNodePtr ptr)
+{
+    xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, 0);
+
+    if (!out)
+        return -1;
+    xmlNodeDumpOutput(out, 0, ptr, 0, 0, 0);
+    return xmlOutputBufferClose(out) < 0 ? -1 : 0;
+}
+
+int yaz_xml_dump_element(xmlBufferPtr buf, xmlNodePtr ptr, size_t *own)
+{
+    /* copy node to get NS right (bug #740). */
+    xmlNode *tmp = xmlCopyNode(ptr, 1);
+    int start = xmlBufferLength(buf);
+    int total, len = -1;
+    size_t inherited;
+
+    if (tmp && dump_node(buf, tmp) == 0)
+    {
+        /* does the copy have more declarations than ptr? */
+        const xmlNs *ns, *ns_tmp = tmp->nsDef;
+
+        for (ns = ptr->nsDef; ns && ns_tmp; ns = ns->next)
+            ns_tmp = ns_tmp->next;
+        if (!ns_tmp)
+            len = xmlBufferLength(buf) - start;
+        else
+        {
+            /* get the size without them */
+            xmlBufferPtr org = xmlBufferCreate();
+
+            if (org && dump_node(org, ptr) == 0)
+                len = xmlBufferLength(org);
+            xmlBufferFree(org);
+        }
+    }
+    xmlFreeNode(tmp);
+
+    total = xmlBufferLength(buf);
+    if (len < 0 || total < 0) /* failed, or more than INT_MAX bytes */
+        return -1;
+    *own += len;
+    inherited = (size_t) total > *own ? (size_t) total - *own : 0;
+    /* inherited > BASE + FACTOR * own, in a form that does not overflow */
+    if (inherited > XML_NS_INHERIT_BASE &&
+        (inherited - XML_NS_INHERIT_BASE - 1) / XML_NS_INHERIT_FACTOR >= *own)
+        return -1;
+    return 0;
+}
+
+
 int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
                          char **val, int *len, int fixup_root)
 {
+    size_t own = 0;
     int no_root_nodes = 0;
 
     if (!yaz_match_xsd_element(ptr, elem))
@@ -93,12 +158,11 @@ int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
     {
         if (ptr->type == XML_ELEMENT_NODE)
         {
-            /* copy node to get NS right (bug #740). */
-            xmlNode *tmp = xmlCopyNode(ptr, 1);
-
-            xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
-
-            xmlFreeNode(tmp);
+            if (yaz_xml_dump_element(buf, ptr, &own))
+            {
+                xmlBufferFree(buf);
+                return -1;
+            }
             no_root_nodes++;
         }
     }
@@ -111,7 +175,7 @@ int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
     *val = nmem_from_xml_buffer(odr_getmem(o), buf, len);
     xmlBufferFree(buf);
 
-    return 1;
+    return *val ? 1 : -1;
 }
 
 int yaz_match_xsd_XML_n(xmlNodePtr ptr, const char *elem, ODR o,

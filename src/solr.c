@@ -53,9 +53,9 @@ static int match_xml_node_attribute(
     return 0;
 }
 
-static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
-                                        Odr_int start,
-                                        Z_SRW_searchRetrieveResponse *sr)
+static int yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
+                                       Odr_int start,
+                                       Z_SRW_searchRetrieveResponse *sr)
 {
     xmlNodePtr node;
     int offset = 0;
@@ -75,12 +75,14 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
         {
             Z_SRW_record *record = sr->records + i;
             xmlBufferPtr buf = xmlBufferCreate();
-            xmlNode *tmp = xmlCopyNode(node, 1);
+            size_t own = 0;
 
-            xmlNodeDump(buf, tmp->doc, tmp, 0, 0);
-
-            xmlFreeNode(tmp);
-
+            if (yaz_xml_dump_element(buf, node, &own))
+            {
+                xmlBufferFree(buf);
+                sr->num_records = 0;
+                return -1;
+            }
             record->recordSchema = 0;
             record->recordPacking = Z_SRW_recordPacking_XML;
             record->recordData_buf = nmem_from_xml_buffer(odr_getmem(o), buf, &record->recordData_len);
@@ -92,6 +94,7 @@ static void yaz_solr_decode_result_docs(ODR o, xmlNodePtr ptr,
             i++;
         }
     }
+    return 0;
 }
 
 static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
@@ -111,8 +114,12 @@ static int yaz_solr_decode_result(ODR o, xmlNodePtr ptr,
                 start = odr_atoi((const char *) attr->children->content);
             }
         }
-    if (sr->numberOfRecords && *sr->numberOfRecords > 0)
-        yaz_solr_decode_result_docs(o, ptr, start, sr);
+    if (sr->numberOfRecords && *sr->numberOfRecords > 0 &&
+        yaz_solr_decode_result_docs(o, ptr, start, sr))
+    {
+        sr->numberOfRecords = 0; /* as for a result without numFound */
+        return -1;
+    }
     if (sr->numberOfRecords)
         return 0;
     return -1;

@@ -35,6 +35,12 @@ char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
 char *nmem_from_xml_buffer(NMEM nmem, const xmlBufferPtr buf, int *ret_len)
 {
     int len = xmlBufferLength(buf);
+    if (len < 0) /* more than INT_MAX bytes */
+    {
+        if (ret_len)
+            *ret_len = 0;
+        return 0;
+    }
     if (ret_len)
         *ret_len = len;
     return nmem_strdupn(nmem, (const char *) xmlBufferContent(buf), len);
