@@ -42,6 +42,7 @@ struct Odr_ber_tag {
     int ltag;
     int br;
     int lcons;
+    const char *bp;       /* position in buffer where tag was decoded */
 };
 
 #define odr_max(o) ((o)->op->size - (int) ((o)->op->bp - (o)->op->buf))

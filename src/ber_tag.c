@@ -73,13 +73,16 @@ int ber_tag(ODR o, void *p, int zclass, int tag, int *constructed, int opt,
             }
             return 0;
         }
-        if (odr_ber_tag->lclass < 0)
+        /* the saved tag is only valid at the position it was decoded from */
+        if (odr_ber_tag->lclass < 0 || odr_ber_tag->bp != o->op->bp)
         {
+            odr_ber_tag->bp = o->op->bp;
             if ((odr_ber_tag->br =
                  ber_dectag(o->op->bp, &odr_ber_tag->lclass,
                             &odr_ber_tag->ltag, &odr_ber_tag->lcons,
                             odr_max(o))) <= 0)
             {
+                odr_ber_tag->lclass = -1;
                 odr_seterror(o, OPROTO, 26);
                 odr_setelement(o, name);
                 return 0;

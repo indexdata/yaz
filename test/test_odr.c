@@ -494,6 +494,45 @@ static void tst_indefinite_length(void)
     }
 }
 
+/* A tag that ber_tag looked at, but did not take, must not be matched
+   later at another position in the buffer (or in another buffer). */
+static void tst_ber_tag_position(void)
+{
+    /* SEQUENCE { a [1] INTEGER OPTIONAL, b ANY, c [2] INTEGER OPTIONAL } */
+    static char seq[] = "\x30\x06" "\x82\x01\x05" "\x02\x01\x07";
+    /* SearchRequest. additionalSearchInfo holds an OPAC record as
+       octet-aligned EXTERNAL, which ends at an unknown tag [201].
+       otherInfo [201] is absent. The zero bytes after the 71 byte PDU
+       would end the contents for a decoder that has moved beyond it */
+    static char pdu[80] =
+        "\xb6\x45\x8d\x01\x00\x8e\x01\x01\x8f\x01\x00\x90\x01\xff"
+        "\x91\x07" "default" "\xb2\x0a\x9f\x69\x07" "Default"
+        "\xb5\x05\xa2\x03\x04\x01x"
+        "\xbf\x81\x4b\x19\x30\x80\xa4\x80"
+        "\x06\x07\x2a\x86\x48\xce\x13\x05\x66"
+        "\x81\x08\x30\x80\xa1\x80\x9f\x80\x81\x49"
+        "\xff\xff";
+    ODR decode = odr_createmem(ODR_DECODE);
+    char *p = 0;
+    Odr_int *a = 0, *c = 0;
+    Odr_any *b = 0;
+    Z_APDU *apdu = 0;
+
+    odr_setbuf(decode, seq, sizeof(seq) - 1, 0);
+    YAZ_CHECK(odr_sequence_begin(decode, &p, 1, 0));
+    YAZ_CHECK(odr_implicit_tag(decode, odr_integer, &a, ODR_CONTEXT, 1, 1, 0));
+    YAZ_CHECK(!a);
+    YAZ_CHECK(odr_any(decode, &b, 0, 0));
+    YAZ_CHECK(odr_implicit_tag(decode, odr_integer, &c, ODR_CONTEXT, 2, 1, 0));
+    YAZ_CHECK(!c);
+
+    odr_reset(decode);
+    odr_setbuf(decode, pdu, 71, 0);
+    YAZ_CHECK(!z_APDU(decode, &apdu, 0, 0));
+    odr_destroy(decode);
+}
+
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -503,6 +542,7 @@ int main(int argc, char **argv)
     tst_odr_write2();
     tst_odr_create_Odr_oct2();
     tst_external_no_encoding();
+    tst_ber_tag_position();
     YAZ_CHECK_TERM;
 }
 
