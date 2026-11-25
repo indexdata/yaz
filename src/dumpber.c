@@ -29,7 +29,7 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
 
     if (!len)
         return 0;
-    if (!buf[0] && !buf[1])
+    if (len >= 2 && !buf[0] && !buf[1])
         return 0;
     if ((res = ber_dectag(b, &zclass, &tag, &cons, len)) <= 0)
         return 0;

@@ -470,11 +470,36 @@ static void tst_external_no_encoding(void)
     odr_destroy(decode);
 }
 
+/* end-of-contents octets beyond the end of the buffer must not be used */
+static void tst_indefinite_length(void)
+{
+    /* SEQUENCE { OCTET STRING (constructed) }, both of indefinite length */
+    static char buf[] = { 0x30, (char) 0x80, 0x24, (char) 0x80, 0, 0, 0, 0 };
+    int len;
+
+    for (len = 2; len <= (int) sizeof(buf); len++)
+    {
+        ODR decode = odr_createmem(ODR_DECODE);
+        char *p = 0;
+        Odr_oct *oct = 0;
+        int ret;
+
+        odr_setbuf(decode, buf, len, 0);
+        ret = odr_constructed_begin(decode, &p, ODR_UNIVERSAL,
+                                    ODR_SEQUENCE, 0)
+            && odr_octetstring(decode, &oct, 0, 0)
+            && odr_constructed_end(decode);
+        YAZ_CHECK_EQ(ret, len == (int) sizeof(buf));
+        odr_destroy(decode);
+    }
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
     tst_ber_length();
+    tst_indefinite_length();
     tst_odr_write2();
     tst_odr_create_Odr_oct2();
     tst_external_no_encoding();
