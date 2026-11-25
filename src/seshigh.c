@@ -245,10 +245,13 @@ static void do_close_req(association *a, int reason, const char *message,
 {
     Z_APDU *apdu = zget_APDU(a->encode, Z_APDU_close);
     Z_Close *cls = apdu->u.close;
+    request *r;
 
     /* Purge request queue */
-    while (request_deq(&a->incoming));
-    while (request_deq(&a->outgoing));
+    while ((r = request_deq(&a->incoming)))
+        request_release(r);
+    while ((r = request_deq(&a->outgoing)))
+        request_release(r);
     if (a->version >= 3)
     {
         yaz_log(log_requestdetail, "Sending Close PDU, reason=%d, message=%s",
@@ -1388,8 +1391,9 @@ static void srw_bend_explain(association *assoc,
 {
     Z_SRW_explainRequest *srw_req = sr->u.explain_request;
     yaz_log(log_requestdetail, "Got SRW ExplainRequest");
-    srw_bend_init(assoc, headers,
-                  &srw_res->diagnostics, &srw_res->num_diagnostics, sr);
+    if (!srw_bend_init(assoc, headers,
+                       &srw_res->diagnostics, &srw_res->num_diagnostics, sr))
+        return;
     if (!assoc->init && srw_res->num_diagnostics == 0)
         *http_code = 404;
     if (assoc->init)
@@ -2202,6 +2206,14 @@ static void process_http_request(association *assoc, request *req)
 
 static void process_gdu_request(association *assoc, request *req)
 {
+    if (assoc->state == ASSOC_DEAD)
+    {
+        /* Association is closing (rejected init, Connection: close, ..).
+           Requests queued behind the one that ended it are not served */
+        yaz_log(log_requestdetail, "Association dead. Request ignored");
+        request_release(req);
+        return;
+    }
     if (req->gdu_request->which == Z_GDU_Z3950)
     {
         const char *msg = 0;
@@ -2291,6 +2303,7 @@ static int process_z_request(association *assoc, request *req, const char **msg)
         }
         break;
     case Z_APDU_triggerResourceControlRequest:
+        request_release(req);
         return 0;
     default:
         *msg = "Bad APDU received";

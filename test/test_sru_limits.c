@@ -22,6 +22,8 @@ static int expected_number;
 static int fetched;
 static int searched;
 static int presented;
+static int explained;
+static int reject_login;
 static int initialize_backend;
 static int backend_handle;
 static int backend_closes;
@@ -57,13 +59,22 @@ static int fetch(void *handle, bend_fetch_rr *rr)
     return 0;
 }
 
+static int explain(void *handle, bend_explain_rr *rr)
+{
+    explained++;
+    return 0;
+}
+
 static bend_initresult *init(bend_initrequest *rr)
 {
     static bend_initresult result;
     result.handle = initialize_backend ? &backend_handle : 0;
+    result.errcode = reject_login ?
+        YAZ_BIB1_INIT_AC_BAD_USERID_AND_OR_PASSWORD : 0;
     rr->bend_search = search;
     rr->bend_present = present;
     rr->bend_fetch = fetch;
+    rr->bend_explain = explain;
     return &result;
 }
 
@@ -215,6 +226,164 @@ static void check_unknown_host(const char *version, const char *connection,
     odr_destroy(dec);
 }
 
+/* Several PDUs that the frontend gets in one read, as sent by a
+   pipelining client. */
+struct pdus {
+    WRBUF pdu[3];
+    int num;
+    int pos;
+};
+
+static int get_pdu(COMSTACK cs, char **buf, int *size)
+{
+    struct pdus *p = (struct pdus *) cs->user;
+    WRBUF w = p->pdu[p->pos++];
+
+    xfree(*buf);
+    *size = (int) wrbuf_len(w);
+    *buf = (char *) xmalloc(*size + 1);
+    memcpy(*buf, wrbuf_cstr(w), *size + 1);
+    return *size;
+}
+
+static int more_pdu(COMSTACK cs)
+{
+    struct pdus *p = (struct pdus *) cs->user;
+    return p->pos < p->num;
+}
+
+static void add_http(struct pdus *p, const char *args)
+{
+    p->pdu[p->num] = wrbuf_alloc();
+    wrbuf_printf(p->pdu[p->num++], "GET /Default?version=1.2&operation=%s "
+                 "HTTP/1.1\r\nHost: localhost\r\n\r\n", args);
+}
+
+static void add_apdu(struct pdus *p, ODR enc, int which)
+{
+    Z_APDU *apdu = zget_APDU(enc, which);
+    char *buf;
+    int len;
+
+    YAZ_CHECK(z_APDU(enc, &apdu, 0, 0));
+    buf = odr_getbuf(enc, &len, 0);
+    p->pdu[p->num] = wrbuf_alloc();
+    wrbuf_write(p->pdu[p->num++], buf, len);
+    odr_reset(enc);
+}
+
+/* Requests that were read together with one that ends the association
+   (rejected login, Close) must not reach the backend. Each request must
+   be answered or released; none may be lost or released twice. */
+static void check_pipeline(int mode)
+{
+    struct comstack cs;
+    struct pdus input;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    ODR enc = odr_createmem(ODR_ENCODE);
+    ODR dec = odr_createmem(ODR_DECODE);
+    statserv_options_block *cb = statserv_getcontrol();
+    association *assoc;
+    request *response;
+    int i, released = 0;
+
+    hits = 1;
+    expected_number = 1;
+    fetched = presented = searched = explained = 0;
+    backend_closes = responses_sent = 0;
+    backend_control = cb;
+    cb->bend_close = close_backend;
+    initialize_backend = 1;
+    reject_login = mode < 3;
+    memset(&input, 0, sizeof(input));
+    switch (mode)
+    {
+    case 0: /* SRU: search behind a search with rejected login */
+        add_http(&input, "searchRetrieve&query=test&maximumRecords=1");
+        add_http(&input, "searchRetrieve&query=test&maximumRecords=1");
+        break;
+    case 1: /* SRU: explain with rejected login is not served either */
+        add_http(&input, "explain");
+        add_http(&input, "searchRetrieve&query=test&maximumRecords=1");
+        break;
+    case 2: /* Z39.50: present behind a rejected init */
+        add_apdu(&input, enc, Z_APDU_initRequest);
+        add_apdu(&input, enc, Z_APDU_presentRequest);
+        break;
+    case 3: /* Z39.50: close purges the request behind it */
+        add_apdu(&input, enc, Z_APDU_initRequest);
+        add_apdu(&input, enc, Z_APDU_close);
+        add_apdu(&input, enc, Z_APDU_presentRequest);
+        break;
+    default: /* Z39.50: request that gets no response */
+        add_apdu(&input, enc, Z_APDU_initRequest);
+        add_apdu(&input, enc, Z_APDU_triggerResourceControlRequest);
+    }
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = mode < 2 ? PROTO_HTTP : PROTO_Z3950;
+    cs.f_get = get_pdu;
+    cs.f_more = more_pdu;
+    cs.f_addrstr = addrstr;
+    cs.f_put = put;
+    cs.user = &input;
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+    assoc->cs_get_mask = EVENT_INPUT;
+    ir_session(chan, EVENT_INPUT);
+
+    YAZ_CHECK_EQ(input.pos, input.num);
+    YAZ_CHECK_EQ(searched + presented + fetched + explained, 0);
+    YAZ_CHECK_EQ(assoc->state, mode < 4 ? ASSOC_DEAD : ASSOC_UP);
+    YAZ_CHECK(!request_head(&assoc->incoming));
+    response = request_head(&assoc->outgoing);
+    YAZ_CHECK(response != 0);
+    if (response)
+    {
+        Z_GDU *gdu = 0;
+        odr_setbuf(dec, response->response, response->len_response, 0);
+        YAZ_CHECK(z_GDU(dec, &gdu, 0, 0));
+        if (gdu && gdu->which == Z_GDU_HTTP_Response)
+        {
+            Z_HTTP_Response *http = gdu->u.HTTP_Response;
+            char *text = odr_strdupn(dec, http->content_buf, http->content_len);
+            YAZ_CHECK(mode < 2);
+            YAZ_CHECK(strstr(text, "info:srw/diagnostic/1/3") != 0);
+        }
+        else if (gdu && gdu->which == Z_GDU_Z3950)
+        {
+            Z_APDU *apdu = gdu->u.z3950;
+            if (mode == 3)
+            {
+                YAZ_CHECK_EQ(apdu->which, Z_APDU_close);
+            }
+            else
+            {
+                YAZ_CHECK(mode == 2 || mode == 4);
+                YAZ_CHECK_EQ(apdu->which, Z_APDU_initResponse);
+                if (apdu->which == Z_APDU_initResponse)
+                    YAZ_CHECK_EQ(*apdu->u.initResponse->result, mode == 4);
+            }
+        }
+        else
+            YAZ_CHECK(0);
+    }
+    /* One response is sent and nothing else is queued behind it. */
+    ir_session(chan, EVENT_OUTPUT);
+    YAZ_CHECK_EQ(responses_sent, 1);
+    YAZ_CHECK(!request_head(&assoc->outgoing));
+    for (response = assoc->incoming.list; response; response = response->next)
+        released++;
+    YAZ_CHECK_EQ(released, input.num);
+    destroy_association(assoc);
+    YAZ_CHECK_EQ(backend_closes, 1);
+    initialize_backend = reject_login = 0;
+    xfree(chan);
+    for (i = 0; i < input.num; i++)
+        wrbuf_destroy(input.pdu[i]);
+    odr_destroy(dec);
+    odr_destroy(enc);
+}
+
 static void check(int mode, const char *maximum, const char *start,
                   Odr_int hit_count, int count, int diagnostic)
 {
@@ -317,6 +486,8 @@ int main(int argc, char **argv)
         char int_max[32], above_int_max[32];
         Odr_int large_hits = (Odr_int) INT_MAX + 10;
         statserv_getcontrol()->bend_init = init;
+        for (mode = 0; mode < 5; mode++)
+            check_pipeline(mode);
         for (mode = 0; mode < 3; mode++)
         {
             check_unknown_host("1.1", 0, 1, mode);
