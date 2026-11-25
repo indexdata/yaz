@@ -441,12 +441,13 @@ void yaz_marc_endline_str(yaz_marc_t mt, const char *s)
     mt->endline_str[sizeof(mt->endline_str)-1] = '\0';
 }
 
-/* try to guess how many bytes the identifier really is! */
-static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
+/* try to guess how many bytes the identifier really is!
+   Inspects at most len bytes of buf */
+static size_t cdata_one_character_n(yaz_marc_t mt, const char *buf, size_t len)
 {
     if (mt->iconv_cd)
     {
-        for (size_t i = 1; i<5; i++)
+        for (size_t i = 1; i <= len; i++)
         {
             char outbuf[12];
             size_t outbytesleft = sizeof(outbuf);
@@ -466,7 +467,7 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
     {
         int error = 0;
         size_t no_read = 0;
-        (void) yaz_read_UTF8_char((const unsigned char *) buf, 4,
+        (void) yaz_read_UTF8_char((const unsigned char *) buf, len,
                                   &no_read, &error);
         if (error == 0 && no_read > 0)
             return no_read;
@@ -474,9 +475,22 @@ static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
     return 1; /* we don't know */
 }
 
+/* as above, but for a NUL-terminated string: the result never exceeds
+   the length of the string, so buf + result is still within it */
+static size_t cdata_one_character(yaz_marc_t mt, const char *buf)
+{
+    size_t len = 0;
+
+    while (len < 4 && buf[len])
+        len++;
+    if (len == 0)
+        return 0;
+    return cdata_one_character_n(mt, buf, len);
+}
+
 size_t yaz_marc_sizeof_char(yaz_marc_t mt, const char *buf)
 {
-    return cdata_one_character(mt, buf);
+    return cdata_one_character_n(mt, buf, 4);
 }
 
 void yaz_marc_reset(yaz_marc_t mt)
@@ -528,7 +542,13 @@ static size_t get_subfield_len(yaz_marc_t mt, const char *data,
        the code is a single character .. However we've
        seen multibyte codes, so see how big it really is */
     if (identifier_length > 2)
-        return identifier_length - 1;
+    {
+        /* the leader decides, but a subfield may be shorter than that */
+        size_t len = strlen(data);
+        if (len > (size_t) identifier_length - 1)
+            len = identifier_length - 1;
+        return len;
+    }
     else
         return cdata_one_character(mt, data);
 }

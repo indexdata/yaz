@@ -10,6 +10,7 @@
 #include <string.h>
 #include <yaz/test.h>
 #include <yaz/marcdisp.h>
+#include <yaz/wrbuf.h>
 #include <yaz/xmalloc.h>
 
 static void put_number(char *p, int width, int value)
@@ -116,10 +117,67 @@ static void tst_bounds(void)
     yaz_marc_destroy(mt);
 }
 
+/* Writers must not go beyond the end of a subfield or the indicators. */
+static void tst_write_bounds(void)
+{
+    static const int modes[] = { YAZ_MARC_LINE, YAZ_MARC_MARCXML,
+        YAZ_MARC_TURBOMARC, YAZ_MARC_XCHANGE, YAZ_MARC_JSON };
+    yaz_marc_t mt = yaz_marc_create();
+    yaz_iconv_t cd = yaz_iconv_open("UTF-8", "MARC-8");
+    WRBUF wr = wrbuf_alloc();
+    const char *result;
+    size_t result_len;
+    char *buf;
+    int len;
+    size_t i;
+
+    YAZ_CHECK(cd != 0);
+    for (i = 0; i < sizeof(modes) / sizeof(*modes); i++)
+    {
+        yaz_marc_xml(mt, modes[i]);
+        /* Something for a short subfield to run into, if not stopped. */
+        buf = record("245", "  \037aXXXXXXXXXXXXXXXXXXXXXXX\036", 28, &len);
+        YAZ_CHECK_EQ(yaz_marc_decode_buf(mt, buf, len, &result, &result_len),
+                     len);
+        YAZ_CHECK(strstr(result, "XXXXXXXX") != 0);
+        xfree(buf);
+        /* Identifier length 9, but the subfield is one byte. */
+        buf = record("245", "  \037a\036", 5, &len);
+        buf[11] = '9';
+        YAZ_CHECK_EQ(yaz_marc_decode_buf(mt, buf, len, &result, &result_len),
+                     len);
+        YAZ_CHECK(strchr(result, 'X') == 0);
+        if (modes[i] == YAZ_MARC_LINE)
+            YAZ_CHECK(!strcmp(result, "00043nam a2900037   4500\n"
+                              "245    $a \n\n"));
+        xfree(buf);
+    }
+
+    /* Seven indicators, then two where the last one is an incomplete MARC-8
+       character. The conversion is set after reading, as record_conv does. */
+    buf = record("245", "XXXXXXX\037aY\036", 11, &len);
+    buf[10] = '7';
+    YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, buf, len), len);
+    xfree(buf);
+    buf = record("245", "1\342\036", 3, &len);
+    YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, buf, len), len);
+    yaz_marc_iconv(mt, cd);
+    YAZ_CHECK_EQ(yaz_marc_write_marcxml(mt, wr), 0);
+    YAZ_CHECK(strstr(wrbuf_cstr(wr), " ind2=") != 0);
+    YAZ_CHECK(strstr(wrbuf_cstr(wr), " ind3=") == 0);
+    xfree(buf);
+
+    yaz_marc_iconv(mt, 0);
+    yaz_iconv_close(cd);
+    wrbuf_destroy(wr);
+    yaz_marc_destroy(mt);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_bounds();
+    tst_write_bounds();
     YAZ_CHECK_TERM;
 }
