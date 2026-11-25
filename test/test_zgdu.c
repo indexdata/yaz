@@ -241,6 +241,38 @@ static void tst_http_response(void)
     odr_destroy(dec);
 }
 
+static void tst_http_chunked_content(void)
+{
+    /* request, chunked content */
+    const char *http_buf =
+        "POST / HTTP/1.1\r\n"
+        "Transfer-Encoding: chunked\r\n"
+        "\r\n"
+        "2\r\n12\r\n"
+        "0\r\n\r\n";
+
+    int r;
+    Z_GDU *zgdu;
+    ODR dec = odr_createmem(ODR_DECODE);
+    /* leave non-zero bytes behind for the decoder to allocate from */
+    memset(odr_malloc(dec, 2000), 'X', 2000);
+    odr_reset(dec);
+    odr_setbuf(dec, (char *) http_buf, (int) strlen(http_buf), 0);
+    r = z_GDU(dec, &zgdu, 0, 0);
+    YAZ_CHECK(r);
+    if (r)
+    {
+        YAZ_CHECK_EQ(zgdu->which, Z_GDU_HTTP_Request);
+        YAZ_CHECK_EQ(zgdu->u.HTTP_Request->content_len, 2);
+        YAZ_CHECK(zgdu->u.HTTP_Request->content_buf);
+        YAZ_CHECK_EQ(zgdu->u.HTTP_Request->content_buf[0], '1');
+        YAZ_CHECK_EQ(zgdu->u.HTTP_Request->content_buf[1], '2');
+        /* 0-terminated, as it is with Content-Length */
+        YAZ_CHECK_EQ(zgdu->u.HTTP_Request->content_buf[2], 0);
+    }
+    odr_destroy(dec);
+}
+
 static void tst_double_encoding(const char *buf_in, const char *buf_out, int request_type)
 {
     Z_GDU *zgdu;
@@ -621,6 +653,7 @@ int main (int argc, char **argv)
     tst_http_origin_length();
     tst_yaz_decode_http_response_first();
     tst_http_response();
+    tst_http_chunked_content();
     tst_double_encoding("POST / HTTP/1.1\r\n"
                         "Transfer-Encoding: chunked\r\n"
                         "\r\n"
