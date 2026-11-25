@@ -108,6 +108,12 @@ static unsigned long read_iso5426(yaz_iconv_t cd, yaz_iconv_decoder_t d,
         inp += *no_read;
         inbytesleft = inbytesleft - *no_read;
     }
+    if (*no_read == 0)
+    {
+        /* error with nothing consumed. Drop the combining characters read
+           ahead, so they and their lengths are not used for later input */
+        data->comb_size = 0;
+    }
     return x;
 }
 

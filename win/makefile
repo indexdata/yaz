@@ -841,7 +841,7 @@ $(SRCDIR)\marc8r.c: $(SRCDIR)\codetables.xml $(SRCDIR)\charconv.tcl
 
 $(SRCDIR)\iso5426.c: $(SRCDIR)\codetables-iso5426.xml $(SRCDIR)\charconv.tcl
 	@cd $(SRCDIR)
-	$(TCL) charconv.tcl -r -p iso5426 codetables-iso5426.xml -o iso5426.c
+	$(TCL) charconv.tcl -p iso5426 codetables-iso5426.xml -o iso5426.c
 
 $(SRCDIR)\oid_std.c: $(SRCDIR)\oid.csv
 	$(TCL) $(SRCDIR)/oidtoc.tcl $(SRCDIR)\oid.csv $(SRCDIR)\oid_std.c $(INCLDIR)\yaz\oid_std.h

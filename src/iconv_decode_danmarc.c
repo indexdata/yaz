@@ -183,6 +183,12 @@ static unsigned long read_danmarc_comb(yaz_iconv_t cd,
         inp += *no_read;
         inbytesleft -= *no_read;
     }
+    if (*no_read == 0)
+    {
+        /* error with nothing consumed. Drop the combining characters read
+           ahead, so they and their lengths are not used for later input */
+        data->sz = 0;
+    }
     return x;
 }
 
