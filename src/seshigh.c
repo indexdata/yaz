@@ -3697,9 +3697,13 @@ static void process_close(association *assoc, request *reqb)
         "peerAbort",
         "unspecified"
     };
+    const char *reason = "unknown";
 
+    if (*req->closeReason >= Z_Close_finished &&
+        *req->closeReason <= Z_Close_unspecified)
+        reason = reasons[*req->closeReason];
     yaz_log(log_requestdetail, "Got Close, reason %s, message %s",
-        reasons[*req->closeReason], req->diagnosticInformation ?
+        reason, req->diagnosticInformation ?
         req->diagnosticInformation : "NULL");
     if (assoc->version < 3) /* to make do_force respond with close */
         assoc->version = 3;
