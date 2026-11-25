@@ -3132,7 +3132,8 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                 if (bprr->errcode)
                 {
                     resp->records = diagrec(assoc, bprr->errcode, bprr->errstring);
-                    *resp->presentStatus = Z_PresentStatus_failure;
+                    *presst = Z_PresentStatus_failure;
+                    *toget = 0; /* no records returned */
                 }
             }
 
