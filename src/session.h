@@ -114,7 +114,7 @@ typedef struct association
     int encoded_len;              /* length of encoded data */
     char *input_buffer;           /* input buffer (allocated by comstack) */
     int input_buffer_len;         /* length (size) of buffer */
-    int input_apdu_len;           /* length of current incoming APDU */
+    int input_apdu_len;           /* length of PDU read, not decoded yet */
     oid_proto proto;              /* protocol (PROTO_Z3950/PROTO_SR) */
     void *backend;                /* backend handle */
     request_q incoming;           /* Q of incoming PDUs */
@@ -153,6 +153,7 @@ void request_release(request *r);
 int control_association(association *assoc, const char *host, int force);
 
 int ir_read(IOCHAN h, int event);
+int ir_is_alive(IOCHAN h);
 
 #endif
 /*
