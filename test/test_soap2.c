@@ -7,6 +7,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 #include <yaz/test.h>
 #include <yaz/srw.h>
 #include <yaz/soap.h>
@@ -426,6 +427,67 @@ static void tst_srw_record_ns(void)
     wrbuf_destroy(w);
     odr_destroy(o);
 }
+
+/* recordData_len must always match recordData_buf, also when an empty
+   recordData follows one with content. */
+static void check_srw_record_data(const char *record_data, const char *expect)
+{
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler h[2] = {
+        {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    Z_SOAP *soap = 0;
+    WRBUF xml = wrbuf_alloc();
+    char *buf;
+    int len;
+
+    wrbuf_printf(xml, "<s:Envelope xmlns:s=\""
+                 "http://schemas.xmlsoap.org/soap/envelope/\"><s:Body>"
+                 "<searchRetrieveResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\">"
+                 "<version>1.1</version><numberOfRecords>1</numberOfRecords>"
+                 "<records><record><recordSchema>dc</recordSchema>%s"
+                 "<recordPosition>1</recordPosition></record></records>"
+                 "</searchRetrieveResponse></s:Body></s:Envelope>",
+                 record_data);
+    buf = (char *) wrbuf_cstr(xml);
+    len = (int) wrbuf_len(xml);
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, h), 0);
+    YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+    if (soap && soap->which == Z_SOAP_generic)
+    {
+        Z_SRW_PDU *sr = (Z_SRW_PDU *) soap->u.generic->p;
+        YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_response);
+        if (sr && sr->which == Z_SRW_searchRetrieve_response)
+        {
+            Z_SRW_searchRetrieveResponse *res = sr->u.response;
+            YAZ_CHECK_EQ(res->num_records, 1);
+            if (res->num_records == 1)
+            {
+                Z_SRW_record *rec = res->records;
+                YAZ_CHECK(rec->recordData_buf != 0);
+                YAZ_CHECK_EQ(rec->recordData_len, (int) strlen(expect));
+                YAZ_CHECK(rec->recordData_buf &&
+                          rec->recordData_len == (int) strlen(expect) &&
+                          !memcmp(rec->recordData_buf, expect,
+                                  rec->recordData_len));
+            }
+        }
+    }
+    wrbuf_destroy(xml);
+    odr_destroy(o);
+}
+
+static void tst_srw_record_data(void)
+{
+    check_srw_record_data("<recordData>payload</recordData>", "payload");
+    check_srw_record_data("<recordData/>", "");
+    check_srw_record_data("<recordData></recordData>", "");
+    check_srw_record_data("<recordData>payload</recordData><recordData/>", "");
+    check_srw_record_data("<recordData><a/></recordData><recordData/>", "");
+    check_srw_record_data("<recordData/><recordData>payload</recordData>",
+                          "payload");
+}
 #endif
 
 static void tst_array_to_uri(void)
@@ -542,6 +604,7 @@ int main(int argc, char **argv)
     tst_ucp_methods();
     tst_srw_facet_analysis();
     tst_srw_record_ns();
+    tst_srw_record_data();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
