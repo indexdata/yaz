@@ -73,7 +73,7 @@ int iochan_is_alive(IOCHAN chan)
     int res = yaz_poll(&fds, 1, 0, 0);
     if (res == 0)
         return 1;
-    if (!ir_read(chan, EVENT_INPUT))
+    if (!ir_is_alive(chan))
         return 0;
     return 1;
 }
