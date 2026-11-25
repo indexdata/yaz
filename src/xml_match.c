@@ -55,6 +55,8 @@ int yaz_match_xsd_string_n_nmem(xmlNodePtr ptr, const char *elem, NMEM nmem,
     if (!ptr || ptr->type != XML_TEXT_NODE)
     {
         *val = "";
+        if (len)
+            *len = 0;
         return 1;
     }
     *val = nmem_strdup(nmem, (const char *) ptr->content);
