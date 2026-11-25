@@ -120,6 +120,8 @@ int yaz_record_conv_configure_t(yaz_record_conv_t p, const xmlNode *node,
     \retval -1 failure
 
     On failure, use yaz_record_conv_get_error to get error string.
+    The error string is kept in the handle: use yaz_record_conv_record_r
+    if the handle is shared between threads.
 */
 YAZ_EXPORT
 int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record_buf,
@@ -135,11 +137,46 @@ int yaz_record_conv_record(yaz_record_conv_t p, const char *input_record_buf,
     \retval -1 failure
 
     On failure, use yaz_record_conv_get_error to get error string.
+    The error string is kept in the handle: use yaz_record_conv_opac_record_r
+    if the handle is shared between threads.
 */
 YAZ_EXPORT
 int yaz_record_conv_opac_record(yaz_record_conv_t p,
                                 Z_OPACRecord *input_record,
                                 WRBUF output_record);
+
+/** performs record conversion on record buffer (re-entrant)
+    \param p record conversion handle
+    \param input_record_buf input record buffer
+    \param input_record_len length of input record buffer
+    \param output_record resulting record (WRBUF string)
+    \param wr_error error string is appended here on failure (WRBUF string)
+    \retval 0 success
+    \retval -1 failure
+
+    Like yaz_record_conv_record, but does not modify the handle: no error
+    string is set for yaz_record_conv_get_error.
+*/
+YAZ_EXPORT
+int yaz_record_conv_record_r(yaz_record_conv_t p, const char *input_record_buf,
+                             size_t input_record_len,
+                             WRBUF output_record, WRBUF wr_error);
+
+/** performs record conversion on OPAC record (re-entrant)
+    \param p record conversion handle
+    \param input_record Z39.50 OPAC record
+    \param output_record resulting record (WRBUF string)
+    \param wr_error error string is appended here on failure (WRBUF string)
+    \retval 0 success
+    \retval -1 failure
+
+    Like yaz_record_conv_opac_record, but does not modify the handle: no
+    error string is set for yaz_record_conv_get_error.
+*/
+YAZ_EXPORT
+int yaz_record_conv_opac_record_r(yaz_record_conv_t p,
+                                  Z_OPACRecord *input_record,
+                                  WRBUF output_record, WRBUF wr_error);
 
 /** returns error string (for last error)
     \param p record conversion handle

@@ -705,21 +705,23 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
     if (rc && rr->record && rr->errcode == 0)
     {   /* post conversion must take place .. */
         WRBUF output_record = wrbuf_alloc();
+        WRBUF wr_error = wrbuf_alloc(); /* rc is shared between sessions */
         int r = 1;
         const char *details = 0;
         if (rr->len > 0)
         {
-            r = yaz_record_conv_record(rc, rr->record, rr->len, output_record);
+            r = yaz_record_conv_record_r(rc, rr->record, rr->len,
+                                         output_record, wr_error);
             if (r)
-                details = yaz_record_conv_get_error(rc);
+                details = wrbuf_cstr(wr_error);
         }
         else if (rr->len == -1 && rr->output_format &&
                  !oid_oidcmp(rr->output_format, yaz_oid_recsyn_opac))
         {
-            r = yaz_record_conv_opac_record(
-                rc, (Z_OPACRecord *) rr->record, output_record);
+            r = yaz_record_conv_opac_record_r(
+                rc, (Z_OPACRecord *) rr->record, output_record, wr_error);
             if (r)
-                details = yaz_record_conv_get_error(rc);
+                details = wrbuf_cstr(wr_error);
         }
         if (r == 0 && match_syntax &&
             !oid_oidcmp(match_syntax, yaz_oid_recsyn_opac))
@@ -767,6 +769,7 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
                 rr->errstring = odr_strdup(rr->stream, details);
         }
         wrbuf_destroy(output_record);
+        wrbuf_destroy(wr_error);
     }
     if (match_syntax)
         rr->output_format = match_syntax;

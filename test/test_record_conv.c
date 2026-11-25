@@ -610,6 +610,71 @@ static void tst_convert4(void)
     nmem_destroy(nmem);
 }
 
+/* the re-entrant functions return the error in the WRBUF given and leave
+   the handle alone */
+static void tst_convert_r(void)
+{
+    yaz_record_conv_t p = 0;
+
+    YAZ_CHECK(conv_configure_test("<backend>"
+                                  "<marc"
+                                  " inputformat=\"xml\""
+                                  " outputformat=\"marcxchange\""
+                                  " outputcharset=\"utf-8\""
+                                  "/>"
+                                  "</backend>",
+                                  0, &p));
+    if (p)
+    {
+        const char *bad_rec = "<record><leader>";
+        WRBUF output_record = wrbuf_alloc();
+        WRBUF wr_error = wrbuf_alloc();
+        int ret = yaz_record_conv_record_r(p, bad_rec, strlen(bad_rec),
+                                           output_record, wr_error);
+        YAZ_CHECK(ret == -1);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(wr_error), "xmlParseMemory failed"));
+        YAZ_CHECK(!strcmp(yaz_record_conv_get_error(p), ""));
+
+        wrbuf_rewind(output_record);
+        ret = yaz_record_conv_record(p, bad_rec, strlen(bad_rec),
+                                     output_record);
+        YAZ_CHECK(ret == -1);
+        YAZ_CHECK(!strcmp(yaz_record_conv_get_error(p),
+                          "xmlParseMemory failed"));
+        wrbuf_destroy(wr_error);
+        wrbuf_destroy(output_record);
+        yaz_record_conv_destroy(p);
+    }
+
+    YAZ_CHECK(conv_configure_test("<backend><solrmarc/></backend>", 0, &p));
+    if (p)
+    {
+        Z_OPACRecord z_opac;
+        WRBUF output_record = wrbuf_alloc();
+        WRBUF wr_error = wrbuf_alloc();
+        int ret;
+
+        memset(&z_opac, 0, sizeof(z_opac));
+        ret = yaz_record_conv_opac_record_r(p, &z_opac, output_record,
+                                            wr_error);
+        YAZ_CHECK(ret == -1);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(wr_error),
+                          "Expecting MARC rule as first rule for OPAC"));
+        YAZ_CHECK(!strcmp(yaz_record_conv_get_error(p), ""));
+
+        /* error string is for last error only */
+        ret = yaz_record_conv_opac_record(p, &z_opac, output_record);
+        YAZ_CHECK(ret == -1);
+        ret = yaz_record_conv_opac_record(p, &z_opac, output_record);
+        YAZ_CHECK(ret == -1);
+        YAZ_CHECK(!strcmp(yaz_record_conv_get_error(p),
+                          "Expecting MARC rule as first rule for OPAC"));
+        wrbuf_destroy(wr_error);
+        wrbuf_destroy(output_record);
+        yaz_record_conv_destroy(p);
+    }
+}
+
 #endif
 
 int main(int argc, char **argv)
@@ -618,6 +683,7 @@ int main(int argc, char **argv)
     yaz_log_xml_errors(0, 0 /* disable log */);
 #if YAZ_HAVE_XML2
     tst_configure();
+    tst_convert_r();
 #endif
 #if YAZ_HAVE_XSLT
     tst_convert1();
