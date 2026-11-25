@@ -203,6 +203,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
         anew->print = 0;
     anew->input_buffer = 0;
     anew->input_buffer_len = 0;
+    anew->input_apdu_len = 0;
     anew->backend = 0;
     anew->state = ASSOC_NEW;
     request_initq(&anew->incoming);
@@ -295,7 +296,11 @@ int ir_read(IOCHAN h, int event)
 
         do
         {
-            int res = cs_get(conn, &assoc->input_buffer,
+            int res = assoc->input_apdu_len;
+
+            assoc->input_apdu_len = 0;
+            if (!res) /* no PDU left by ir_is_alive */
+                res = cs_get(conn, &assoc->input_buffer,
                              &assoc->input_buffer_len);
             if (res < 0 && (cs_errno(conn) == CSBUFSIZE ||
                              cs_errno(conn) == CSPROTERR))
@@ -364,6 +369,39 @@ int ir_read(IOCHAN h, int event)
         }
         while (cs_more(conn));
     }
+    return 1;
+}
+
+/*
+ * Checks if the client is still connected. This is called from the backend
+ * (bend_assoc_is_alive), that is while a request is being processed. Input
+ * is read but not decoded or answered, because that resets the ODR streams
+ * (decode, encode) which hold the request in progress. A complete PDU stays
+ * in the input buffer until ir_read is called from the event loop.
+ */
+int ir_is_alive(IOCHAN h)
+{
+    association *assoc = (association *)iochan_getdata(h);
+    COMSTACK conn = assoc->client_link;
+    int res;
+
+    if (assoc->input_apdu_len || (assoc->cs_put_mask & EVENT_INPUT)
+        || (assoc->cs_get_mask & EVENT_INPUT) == 0)
+        return 1;
+    res = cs_get(conn, &assoc->input_buffer, &assoc->input_buffer_len);
+    if (res <= 0)
+    {
+        assoc->state = ASSOC_DEAD;
+        if (res < 0)
+            yaz_log(log_session, "Connection error: %s",
+                    cs_errmsg(cs_errno(conn)));
+        else
+            yaz_log(log_session, "Connection closed by client");
+        return 0;
+    }
+    if (res > 1) /* complete PDU. Keep it for ir_read */
+        assoc->input_apdu_len = res;
+    iochan_setevent(h, EVENT_INPUT);
     return 1;
 }
 
