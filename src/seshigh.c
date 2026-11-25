@@ -969,6 +969,7 @@ static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
 
     bsrr->query->which = Z_Query_type_1;
     bsrr->query->u.type_1 = ccl_rpn_query(odr, node);
+    ccl_rpn_delete(node);
     return 0;
 }
 
