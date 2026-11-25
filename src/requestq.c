@@ -20,6 +20,7 @@
 
 void request_enq(request_q *q, request *r)
 {
+    r->next = 0;
     if (q->tail)
         q->tail->next = r;
     else
