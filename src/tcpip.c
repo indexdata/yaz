@@ -910,6 +910,15 @@ int tcpip_rcvconnect(COMSTACK h)
         char tmp[YAZ_TCPIP_HOST_PORT_BUFSIZE];
         int r;
 
+        if (sp->altlen)
+        {
+            /* Data read in the clear (following the proxy's CONNECT response)
+               must not be returned by tcpip_get as if the TLS peer sent it */
+            yaz_log(log_level, "tcpip_rcvconnect %d bytes before SSL handshake",
+                    sp->altlen);
+            cs_set_error(h, CSPROTERR, "unexpected data before TLS handshake");
+            return -1;
+        }
         sp->cred_ptr = tcpip_create_cred();
         if (h->flags & CS_FLAGS_CHECK_CERT)
         {

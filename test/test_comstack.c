@@ -647,6 +647,78 @@ static void tst_redirect_connect(void)
 #endif
 }
 
+static void check_connect_surplus(int use_ssl)
+{
+    static const char reply[] =
+        "HTTP/1.0 200 Connection established\r\n\r\n"
+        "HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\ndata";
+    const char *surplus = strstr(reply, "\r\n\r\n") + 4;
+    const char *host = "target.example:443";
+    COMSTACK cs;
+    char *buf = 0;
+    int bufsize = 0, fd[2], r, saved_errno;
+
+    r = socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+    {
+        fprintf(stderr, "Skipping CONNECT surplus: socketpair denied\n");
+        return;
+    }
+    YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+        return;
+#if HAVE_GNUTLS_H
+    if (use_ssl)
+        cs = yaz_ssl_create(fd[0], CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
+    else
+#endif
+        cs = yaz_tcpip_create3(fd[0], CS_FLAGS_BLOCKING, PROTO_HTTP, host, 0, 0);
+    YAZ_CHECK(cs);
+    if (!cs)
+    {
+        close(fd[0]);
+        close(fd[1]);
+        return;
+    }
+    /* The proxy sends more than its CONNECT reply. For a plain target that
+       is data from the tunnel. For a TLS target it is not protected by TLS
+       and must not be returned as if the TLS peer had sent it. */
+    YAZ_CHECK_EQ(write(fd[1], reply, sizeof(reply) - 1), sizeof(reply) - 1);
+    shutdown(fd[1], SHUT_WR);
+    cs->state = CS_ST_CONNECTING;
+    r = cs_rcvconnect(cs);
+    saved_errno = errno;
+    /* Some sandboxes permit socketpair but deny send. */
+    if (r == -1 && cs_errno(cs) == CSYSERR
+        && (saved_errno == EPERM || saved_errno == EACCES))
+        fprintf(stderr, "Skipping CONNECT surplus: send denied\n");
+    else if (use_ssl)
+    {
+        YAZ_CHECK_EQ(r, -1);
+        YAZ_CHECK_EQ(cs_errno(cs), CSPROTERR);
+    }
+    else
+    {
+        YAZ_CHECK_EQ(r, 0);
+        r = cs_get(cs, &buf, &bufsize);
+        YAZ_CHECK_EQ(r, strlen(surplus));
+        if (r == strlen(surplus))
+            YAZ_CHECK(!memcmp(buf, surplus, r));
+    }
+    cs_close(cs);
+    close(fd[1]);
+    xfree(buf);
+}
+
+static void tst_connect_surplus(void)
+{
+    check_connect_surplus(0);
+#if HAVE_GNUTLS_H
+    check_connect_surplus(1);
+#endif
+}
+
 static void tst_head_only_transport(CS_TYPE type)
 {
     static const char head[] =
@@ -778,6 +850,7 @@ int main (int argc, char **argv)
     tst_cs_set_head_only();
 #ifndef _WIN32
     tst_redirect_connect();
+    tst_connect_surplus();
 #endif
     YAZ_CHECK_TERM;
 }
