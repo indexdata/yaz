@@ -386,13 +386,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
         return 0;
     }
     if (!syntax_matches && syntax)
-    {
-        char buf[OID_STR_MAX];
-        wrbuf_printf(p->wr_error, "%s", oid_oid_to_dotstring(syntax, buf));
         return 2;
-    }
-    if (schema)
-        wrbuf_printf(p->wr_error, "%s", schema);
     if (!schema_matches)
         return 1;
     return 3;

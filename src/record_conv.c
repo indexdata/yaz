@@ -1203,19 +1203,18 @@ int yaz_record_conv_configure(yaz_record_conv_t p, const xmlNode *ptr)
     return yaz_record_conv_configure_t(p, ptr, 0);
 }
 
-static int yaz_record_conv_record_rule(yaz_record_conv_t p,
-                                       struct yaz_record_conv_rule *r,
+static int yaz_record_conv_record_rule(struct yaz_record_conv_rule *r,
                                        const char *input_record_buf,
                                        size_t input_record_len,
-                                       WRBUF output_record)
+                                       WRBUF output_record,
+                                       WRBUF wr_error)
 {
     int ret = 0;
     WRBUF record = output_record; /* pointer transfer */
-    wrbuf_rewind(p->wr_error);
 
     wrbuf_write(record, input_record_buf, input_record_len);
     for (; ret == 0 && r; r = r->next)
-        ret = r->type->convert(r->info, record, p->wr_error);
+        ret = r->type->convert(r->info, record, wr_error);
     return ret;
 }
 
@@ -1230,15 +1229,15 @@ const char *yaz_record_get_output_charset(yaz_record_conv_t p)
     return 0;
 }
 
-int yaz_record_conv_opac_record(yaz_record_conv_t p,
-                                Z_OPACRecord *input_record,
-                                WRBUF output_record)
+int yaz_record_conv_opac_record_r(yaz_record_conv_t p,
+                                  Z_OPACRecord *input_record,
+                                  WRBUF output_record, WRBUF wr_error)
 {
     int ret = 0;
     struct yaz_record_conv_rule *r = p->rules;
     if (!r || r->type->construct != construct_marc)
     {
-        wrbuf_puts(p->wr_error, "Expecting MARC rule as first rule for OPAC");
+        wrbuf_puts(wr_error, "Expecting MARC rule as first rule for OPAC");
         ret = -1; /* no marc rule so we can't do OPAC */
     }
     else
@@ -1253,7 +1252,6 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
             input_charset = "utf-8";
         yaz_iconv_t cd = yaz_iconv_open("utf-8", input_charset);
 
-        wrbuf_rewind(p->wr_error);
         yaz_marc_xml(mt, mi->output_format_mode);
 
         if (mi->leader_spec)
@@ -1264,10 +1262,9 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
         yaz_opac_decode_wrbuf(mt, input_record, res);
         if (ret != -1)
         {
-            ret = yaz_record_conv_record_rule(p,
-                                              r->next,
+            ret = yaz_record_conv_record_rule(r->next,
                                               wrbuf_buf(res), wrbuf_len(res),
-                                              output_record);
+                                              output_record, wr_error);
         }
         yaz_marc_destroy(mt);
         if (cd)
@@ -1277,14 +1274,34 @@ int yaz_record_conv_opac_record(yaz_record_conv_t p,
     return ret;
 }
 
+int yaz_record_conv_opac_record(yaz_record_conv_t p,
+                                Z_OPACRecord *input_record,
+                                WRBUF output_record)
+{
+    wrbuf_rewind(p->wr_error);
+    return yaz_record_conv_opac_record_r(p, input_record, output_record,
+                                         p->wr_error);
+}
+
+int yaz_record_conv_record_r(yaz_record_conv_t p,
+                             const char *input_record_buf,
+                             size_t input_record_len,
+                             WRBUF output_record, WRBUF wr_error)
+{
+    return yaz_record_conv_record_rule(p->rules,
+                                       input_record_buf,
+                                       input_record_len, output_record,
+                                       wr_error);
+}
+
 int yaz_record_conv_record(yaz_record_conv_t p,
                            const char *input_record_buf,
                            size_t input_record_len,
                            WRBUF output_record)
 {
-    return yaz_record_conv_record_rule(p, p->rules,
-                                       input_record_buf,
-                                       input_record_len, output_record);
+    wrbuf_rewind(p->wr_error);
+    return yaz_record_conv_record_r(p, input_record_buf, input_record_len,
+                                    output_record, p->wr_error);
 }
 
 const char *yaz_record_conv_get_error(yaz_record_conv_t p)
