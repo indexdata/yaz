@@ -28,6 +28,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+#endif
 #include <yaz/thread_create.h>
 #include <yaz/log.h>
 #include <yaz/wrbuf.h>
@@ -109,8 +112,12 @@ static void *tcpip_straddr(COMSTACK h, const char *str);
 #if HAVE_GNUTLS_H
 struct tcpip_cred_ptr {
     gnutls_certificate_credentials_t xcred;
-    int ref;
+    int ref; /* protected by tcpip_cred_mutex */
 };
+#if YAZ_POSIX_THREADS
+/* a listener and the sessions it accepted may run in different threads */
+static pthread_mutex_t tcpip_cred_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 static void tcpip_release_cred(struct tcpip_cred_ptr **ptr);
 
 #endif
@@ -378,13 +385,39 @@ static struct tcpip_cred_ptr *tcpip_create_cred(void)
     return cred_ptr;
 }
 
+static void tcpip_cred_lock(void)
+{
+#if YAZ_POSIX_THREADS
+    pthread_mutex_lock(&tcpip_cred_mutex);
+#endif
+}
+
+static void tcpip_cred_unlock(void)
+{
+#if YAZ_POSIX_THREADS
+    pthread_mutex_unlock(&tcpip_cred_mutex);
+#endif
+}
+
+static void tcpip_use_cred(struct tcpip_cred_ptr *ptr)
+{
+    tcpip_cred_lock();
+    (ptr->ref)++;
+    tcpip_cred_unlock();
+}
+
 static void tcpip_release_cred(struct tcpip_cred_ptr **ptr)
 {
     if (*ptr)
     {
-        assert((*ptr)->ref > 0);
+        int ref;
 
-        if (--((*ptr)->ref) == 0)
+        tcpip_cred_lock();
+        assert((*ptr)->ref > 0);
+        ref = --((*ptr)->ref);
+        tcpip_cred_unlock();
+
+        if (ref == 0)
         {
             yaz_log(log_level, "tcpip_release_cred: removed credentials h=%p",
                     (*ptr)->xcred);
@@ -1178,7 +1211,7 @@ COMSTACK tcpip_accept(COMSTACK h)
         state->cred_ptr = st->cred_ptr;
         if (st->cred_ptr)
         {
-            (state->cred_ptr->ref)++;
+            tcpip_use_cred(state->cred_ptr);
             gnutls_init(&state->session, GNUTLS_SERVER);
             if (!state->session)
             {
