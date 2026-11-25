@@ -203,6 +203,52 @@ static void tst_ucp_methods(void)
     wrbuf_destroy(xml);
 }
 
+static void tst_srw_facet_analysis(void)
+{
+    /* Only facet elements become entries in the decoded facet list. */
+    const char *xml = "<searchRetrieveResponse xmlns=\""
+        YAZ_XMLNS_SRU_v1_1 "\"><version>1.1</version>"
+        "<numberOfRecords>1</numberOfRecords>"
+        "<facet_analysis><facets><other/>"
+        "<facet code=\"author\">"
+        "<facetvalue est_representation=\"3\">Smith</facetvalue>"
+        "<other/></facet>"
+        "<other/></facets></facet_analysis>"
+        "</searchRetrieveResponse>";
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler handlers[] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    char *buf = (char *) xml;
+    int len = strlen(xml);
+    Z_SRW_PDU *sr = 0;
+
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), 0);
+    YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+    if (soap && soap->which == Z_SOAP_generic)
+        sr = (Z_SRW_PDU *) soap->u.generic->p;
+    YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_response);
+    if (sr && sr->which == Z_SRW_searchRetrieve_response)
+    {
+        Z_FacetList *fl = sr->u.response->facetList;
+
+        YAZ_CHECK(fl);
+        if (fl)
+        {
+            YAZ_CHECK_EQ(fl->num, 1);
+            if (fl->num == 1)
+            {
+                YAZ_CHECK(fl->elements[0]);
+                if (fl->elements[0])
+                    YAZ_CHECK_EQ(fl->elements[0]->num_terms, 1);
+            }
+        }
+    }
+    odr_destroy(o);
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -350,6 +396,7 @@ int main(int argc, char **argv)
     tst_soap_namespaces();
     tst_scan_response_terms();
     tst_ucp_methods();
+    tst_srw_facet_analysis();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
