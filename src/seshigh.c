@@ -2339,8 +2339,13 @@ static int process_gdu_response(association *assoc, request *req, Z_GDU *res)
     if (!z_GDU(assoc->encode, &res, 0, 0))
     {
         yaz_log(YLOG_WARN, "ODR error when encoding PDU: %s [element %s]",
-                odr_errmsg(odr_geterror(assoc->decode)),
-                odr_getelement(assoc->decode));
+                odr_errmsg(odr_geterror(assoc->encode)),
+                odr_getelement(assoc->encode));
+        /* req still owns the buffer, which may have been reallocated */
+        req->response = odr_getbuf(assoc->encode, &req->len_response,
+            &req->size_response);
+        odr_setbuf(assoc->encode, 0, 0, 0);
+        odr_reset(assoc->encode);
         return -1;
     }
     req->response = odr_getbuf(assoc->encode, &req->len_response,
