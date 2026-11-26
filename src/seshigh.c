@@ -175,6 +175,9 @@ association *create_association(IOCHAN channel, COMSTACK link,
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
         return 0;
     anew->init = 0;
+    /* control_association sets these only when a server is selected */
+    anew->preferredMessageSize = 0;
+    anew->maximumRecordSize = 0;
     anew->version = 0;
     anew->last_control = 0;
     anew->client_chan = channel;
