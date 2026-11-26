@@ -230,6 +230,46 @@ static void tst_overlap(void)
     yaz_marc_destroy(mt);
 }
 
+/* Comments quote record data and must not be able to end the XML comment. */
+static void tst_xml_comment(void)
+{
+    static const int formats[] = {
+        YAZ_MARC_MARCXML, YAZ_MARC_TURBOMARC, YAZ_MARC_XCHANGE
+    };
+    yaz_marc_t mt = yaz_marc_create();
+    WRBUF wr = wrbuf_alloc();
+    const char valid[] = "  \037aX\036";
+    char comment[] = "trailing-";
+    char *buf;
+    int len, i, libxml2;
+
+    buf = record("245", valid, sizeof(valid) - 1, &len);
+    memcpy(buf + 24, "--><x/><!---", 12); /* bad directory entry */
+#if YAZ_HAVE_XML2
+    for (libxml2 = 0; libxml2 < 2; libxml2++)
+#else
+    for (libxml2 = 0; libxml2 < 1; libxml2++)
+#endif
+    {
+        yaz_marc_write_using_libxml2(mt, libxml2);
+        for (i = 0; i < 3; i++)
+        {
+            yaz_marc_xml(mt, formats[i]);
+            YAZ_CHECK_EQ(yaz_marc_read_iso2709(mt, buf, len), len);
+            yaz_marc_add_comment(mt, comment);
+            wrbuf_rewind(wr);
+            YAZ_CHECK_EQ(yaz_marc_write_mode(mt, wr), 0);
+            YAZ_CHECK(strstr(wrbuf_cstr(wr), "(- -><x/><!- - -)"));
+            YAZ_CHECK(strstr(wrbuf_cstr(wr), "trailing- "));
+            YAZ_CHECK(!strstr(wrbuf_cstr(wr), "--><x/>"));
+            YAZ_CHECK(!strstr(wrbuf_cstr(wr), "--->"));
+        }
+    }
+    xfree(buf);
+    wrbuf_destroy(wr);
+    yaz_marc_destroy(mt);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -237,5 +277,6 @@ int main(int argc, char **argv)
     tst_bounds();
     tst_write_bounds();
     tst_overlap();
+    tst_xml_comment();
     YAZ_CHECK_TERM;
 }
