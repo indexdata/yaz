@@ -211,11 +211,24 @@ static const char *return_record_wrbuf(WRBUF wrbuf, size_t *len,
     }
     else if (r->which == Z_External_grs1)
     {
-        yaz_display_grs1(wrbuf, r->u.grs1, 0);
-        return return_string_record(wrbuf, len,
-                                    wrbuf_buf(wrbuf),
-                                    wrbuf_len(wrbuf),
-                                    charset);
+        /* return_string_record appends the converted text to wrbuf, so
+           the text to be converted must not live in wrbuf itself */
+        WRBUF grs1_wrbuf = wrbuf_alloc();
+        const char *ret_buf;
+
+        yaz_display_grs1(grs1_wrbuf, r->u.grs1, 0);
+        ret_buf = return_string_record(wrbuf, len,
+                                       wrbuf_buf(grs1_wrbuf),
+                                       wrbuf_len(grs1_wrbuf),
+                                       charset);
+        if (ret_buf == wrbuf_buf(grs1_wrbuf))
+        {
+            /* no conversion: result must outlive grs1_wrbuf */
+            wrbuf_write(wrbuf, wrbuf_buf(grs1_wrbuf), wrbuf_len(grs1_wrbuf));
+            ret_buf = wrbuf_cstr(wrbuf);
+        }
+        wrbuf_destroy(grs1_wrbuf);
+        return ret_buf;
     }
     return 0;
 }

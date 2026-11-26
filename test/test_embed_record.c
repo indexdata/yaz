@@ -18,6 +18,7 @@
 
 #include <yaz/base64.h>
 #include <yaz/marcdisp.h>
+#include <yaz/oid_db.h>
 #include <yaz/proto.h>
 #include <yaz/prt-ext.h>
 
@@ -151,14 +152,73 @@ static int test_render(const char *type_spec, int is_marc, const char *input,
     return res;
 }
 
+static int test_render_grs1(const char *type_spec, int data_len)
+{
+    ODR odr = odr_createmem(ODR_ENCODE);
+    const char *actual_output;
+    int actual_len;
+    int res = 0;
+    WRBUF wrbuf = wrbuf_alloc();
+    WRBUF expected = wrbuf_alloc();
+    Z_NamePlusRecord *npr = odr_malloc(odr, sizeof(*npr));
+    Z_GenericRecord *r = odr_malloc(odr, sizeof(*r));
+    Z_TaggedElement *t = odr_malloc(odr, sizeof(*t));
+    char *data = odr_malloc(odr, data_len + 1);
+
+    memset(data, 'A', data_len);
+    data[data_len] = '\0';
+
+    r->num_elements = 1;
+    r->elements = odr_malloc(odr, sizeof(*r->elements));
+    r->elements[0] = t;
+    t->tagType = odr_intdup(odr, 2);
+    t->tagValue = odr_malloc(odr, sizeof(*t->tagValue));
+    t->tagValue->which = Z_StringOrNumeric_numeric;
+    t->tagValue->u.numeric = odr_intdup(odr, 1);
+    t->tagOccurrence = 0;
+    t->content = odr_malloc(odr, sizeof(*t->content));
+    t->content->which = Z_ElementData_string;
+    t->content->u.string = data;
+    t->metaData = 0;
+    t->appliedVariant = 0;
+
+    npr->which = Z_NamePlusRecord_databaseRecord;
+    npr->u.databaseRecord = z_ext_record_oid(odr, yaz_oid_recsyn_grs_1,
+                                             (const char *) r, -1);
+
+    wrbuf_printf(expected, "(2,1) %s\n", data);
+
+    actual_output = yaz_record_render(npr, 0, wrbuf, type_spec, &actual_len);
+    if (actual_output && wrbuf_len(expected) == actual_len &&
+        !memcmp(wrbuf_buf(expected), actual_output, actual_len))
+        res = 1;
+    else if (!actual_output)
+        yaz_log(YLOG_LOG, "Got null result for GRS-1 %s", type_spec);
+    else
+        yaz_log(YLOG_LOG, "Got GRS-1 result of length %d, expected %d",
+                actual_len, (int) wrbuf_len(expected));
+    wrbuf_destroy(expected);
+    wrbuf_destroy(wrbuf);
+    odr_destroy(odr);
+    return res;
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     test1();
-    test_bad_base64();
     test2();
+    test_bad_base64();
     YAZ_CHECK(test_render("unknownType", 0, "<my/>", 0));
+
+    YAZ_CHECK(test_render_grs1("render", 10));
+    YAZ_CHECK(test_render_grs1("render", 2000));
+    YAZ_CHECK(test_render_grs1("render; charset=utf-8", 10));
+    /* rendered text is converted while the result WRBUF grows */
+    YAZ_CHECK(test_render_grs1("render; charset=utf-8", 2000));
+    YAZ_CHECK(test_render_grs1("xml; charset=iso-8859-1,utf-8", 2000));
+
 #if YAZ_HAVE_XML2
     YAZ_CHECK(test_render("xml", 0, "<my/>", "<my/>"));
 
@@ -312,7 +372,6 @@ int main(int argc, char **argv)
 "    <subfield code=\"a\">Cryptography.</subfield>\n"
 "  </datafield>\n"
 "</record></my>\n"));
-
 
 #endif
     YAZ_CHECK_TERM;
