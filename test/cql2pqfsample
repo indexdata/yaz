@@ -57,3 +57,4 @@ a prox/ordered b
 a prox/distance < 3 b
 a prox/distance<3/ordered b
 a prox/unit=paragraph b
+a prox/unit b
