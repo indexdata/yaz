@@ -758,6 +758,8 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
                 r = 1;
             }
             yaz_marc_destroy(mt);
+            if (cd)
+                yaz_iconv_close(cd);
         }
         else if (r == 0)
         {
