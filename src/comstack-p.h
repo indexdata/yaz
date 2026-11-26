@@ -46,16 +46,38 @@ int yaz_tcpip_set_head_only(COMSTACK cs, int head_only);
 int yaz_unix_set_head_only(COMSTACK cs, int head_only);
 #endif
 
+/* How far yaz_cs_complete got with a message that is being received. */
+struct yaz_cs_complete_state {
+    int off;   /* BER: end of the last complete element
+                  HTTP: start, within a chunked body, of the first
+                  incomplete chunk */
+    int level; /* BER: number of open indefinite-length elements */
+};
+
+/* Prepares st for a new message. */
+void yaz_cs_complete_reset(struct yaz_cs_complete_state *st);
+
+/*
+ * As cs_complete_auto, or cs_complete_auto_head if head_only is non-zero,
+ * but resumes where the previous call stopped rather than examine all of
+ * buf again.  buf must start with the bytes that were given in that call.
+ * Resets st when the result is non-zero.
+ */
+int yaz_cs_complete(const char *buf, int len, int head_only,
+                    struct yaz_cs_complete_state *st);
+
 /*
  * Parses an HTTP chunked body.
  *
  * Returns the number of bytes consumed, 0 if the body is incomplete, or -1
  * if it is malformed.  If content_buf is non-NULL, it must have room for len
  * bytes and the chunk payload is copied to it.  content_len, when non-NULL,
- * receives the payload length on success.
+ * receives the payload length on success.  resume, when non-NULL, holds the
+ * offset of the chunk to start with and receives the offset of the first
+ * chunk that is incomplete; it can not be combined with content_buf.
  */
 int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
-                          int *content_len);
+                          int *content_len, int *resume);
 
 /* Return the body offset, 0 for incomplete headers, or -1 for malformed
  * headers. content_len retains its caller-supplied default if absent. */

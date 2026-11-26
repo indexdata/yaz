@@ -830,7 +830,140 @@ static void tst_head_only_transport(CS_TYPE type)
     cs_close(cs);
     xfree(buf);
 }
+
+/* Receive a message one byte at a time: how far the completeness check
+   got must be kept between reads, and given up with the message. */
+static void tst_get_bytewise(CS_TYPE type, const char *msg, int len)
+{
+    int fd[2], r, i, saved_errno;
+    COMSTACK cs;
+    char *buf = 0, *tail;
+    int bufsize = 0;
+
+    r = socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+    {
+        fprintf(stderr, "Skipping bytewise framing: socketpair denied\n");
+        return;
+    }
+    YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+        return;
+    cs = cs_createbysocket(fd[0], type, 0, PROTO_Z3950);
+    YAZ_CHECK(cs);
+    if (!cs)
+    {
+        close(fd[0]);
+        close(fd[1]);
+        return;
+    }
+    YAZ_CHECK_EQ(cs_set_blocking(cs, 0), 1);
+    for (i = 0; i < len - 1; i++)
+    {
+        YAZ_CHECK_EQ(cs_complete_auto(msg, i + 1), 0);
+        YAZ_CHECK_EQ(write(fd[1], msg + i, 1), 1);
+        YAZ_CHECK_EQ(cs_get(cs, &buf, &bufsize), 1);
+        YAZ_CHECK_EQ(cs_more(cs), 0);
+    }
+    /* The last byte arrives with most of the same message once more. */
+    tail = (char *) xmalloc(len);
+    tail[0] = msg[len - 1];
+    memcpy(tail + 1, msg, len - 1);
+    YAZ_CHECK_EQ(write(fd[1], tail, len), len);
+    xfree(tail);
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, len);
+    if (r == len)
+        YAZ_CHECK(!memcmp(buf, msg, r));
+    YAZ_CHECK_EQ(cs_more(cs), 0);
+    YAZ_CHECK_EQ(cs_get(cs, &buf, &bufsize), 1);
+    YAZ_CHECK_EQ(write(fd[1], msg + len - 1, 1), 1);
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, len);
+    if (r == len)
+        YAZ_CHECK(!memcmp(buf, msg, r));
+    YAZ_CHECK_EQ(cs_more(cs), 0);
+    close(fd[1]);
+    cs_close(cs);
+    xfree(buf);
+}
+
+static void tst_get_bytewise_transport(CS_TYPE type)
+{
+    static const char ber[] =
+        "\x30\x80"                 /* SEQUENCE, indefinite length */
+        "\x04\x03" "abc"
+        "\x30\x80"                 /* another one inside it */
+        "\x04\x02\x00\x00"         /* content; not end-of-contents */
+        "\x30\x04\x30\x80\x00\x00" /* definite length; not looked into */
+        "\x00\x00"
+        "\x05\x00"
+        "\x00\x00";
+    static const char http[] =
+        "POST / HTTP/1.1\r\n"
+        "Transfer-Encoding: chunked\r\n"
+        "\r\n"
+        "3\r\nabc\r\n"
+        "a;ext=1\r\n0123456789\r\n"
+        "0\r\n"
+        "Trailer: x\r\n"
+        "\r\n";
+
+    tst_get_bytewise(type, ber, sizeof(ber) - 1);
+    tst_get_bytewise(type, http, sizeof(http) - 1);
+}
 #endif
+
+/* What can not be told complete from its first bytes is limited in size,
+   so that looking for its end takes a limited time. */
+static void tst_complete_limits(void)
+{
+    static const char head[] =
+        "POST / HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n";
+    static const char tag6[] = "\x3f\x81\x80\x80\x80\x01\x00";
+    static const char tag7[] = "\x3f\x81\x80\x80\x80\x80\x01\x00";
+    int off = sizeof(head) - 1;
+    char *buf = (char *) xmalloc(off + 8200);
+
+    memcpy(buf, head, off);
+    memset(buf + off, 'x', 8200);
+
+    /* chunk extension */
+    memcpy(buf + off, "1;", 2);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8191), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8192), -1);
+
+    /* chunk size */
+    memset(buf + off, '0', 8192);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8191), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8192), -1);
+    memset(buf + off, 'x', 8192);
+
+    /* blanks after the size also count towards the line limit */
+    memset(buf + off, ' ', 8200);
+    buf[off] = '1';
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8191), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8192), -1);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 8200), -1);
+
+    /* trailer fields */
+    memcpy(buf + off, "0\r\nX: ", 6);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 3 + 8192), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 3 + 8193), -1);
+    memcpy(buf + off + 3 + 8190, "\r\n", 2);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 3 + 8192), 0);
+    memcpy(buf + off + 3 + 8188, "\r\n\r\n", 4);
+    YAZ_CHECK_EQ(cs_complete_auto(buf, off + 3 + 8193), off + 3 + 8192);
+    xfree(buf);
+
+    /* BER tag */
+    YAZ_CHECK_EQ(cs_complete_auto(tag6, 5), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(tag6, 7), 7);
+    YAZ_CHECK_EQ(cs_complete_auto(tag7, 5), 0);
+    YAZ_CHECK_EQ(cs_complete_auto(tag7, 6), -1);
+    YAZ_CHECK_EQ(cs_complete_auto(tag7, 8), -1);
+}
 
 static void tst_cs_set_head_only(void)
 {
@@ -910,7 +1043,13 @@ int main (int argc, char **argv)
     tst_ssl_cafile();
     tst_invalid_connect_targets();
     tst_cs_set_head_only();
+    tst_complete_limits();
 #ifndef _WIN32
+    tst_get_bytewise_transport(tcpip_type);
+    tst_get_bytewise_transport(unix_type);
+#if HAVE_GNUTLS_H
+    tst_get_bytewise_transport(ssl_type);
+#endif
     tst_redirect_connect();
     tst_connect_surplus();
 #endif

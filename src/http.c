@@ -82,7 +82,7 @@ static int decode_headers_content(ODR o, int off, Z_HTTP_Header **headers,
         /* we know buffer will be smaller than o->size - i*/
         *content_buf = (char*) odr_malloc(o, size - i);
         int r =
-            yaz_http_parse_chunks(buf + i, size - i, *content_buf, content_len);
+            yaz_http_parse_chunks(buf + i, size - i, *content_buf, content_len, 0);
         if (r <= 0)
         {
             o->error = OHTTP;

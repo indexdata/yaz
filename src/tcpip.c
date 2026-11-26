@@ -130,7 +130,8 @@ typedef struct tcpip_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
-    int (*complete)(const char *buf, int len); /* length/complete. */
+    int head_only; /* HTTP message is complete without content */
+    struct yaz_cs_complete_state complete_state;
     char *bind_host;
     char *host_port;
     struct addrinfo *ai;
@@ -195,7 +196,8 @@ static struct tcpip_state *tcpip_state_create(void)
     sp->altbuf = 0;
     sp->altsize = sp->altlen = 0;
     sp->towrite = sp->written = -1;
-    sp->complete = cs_complete_auto;
+    sp->head_only = 0;
+    yaz_cs_complete_reset(&sp->complete_state);
     sp->bind_host = 0;
     sp->host_port = 0;
     sp->ai = 0;
@@ -723,7 +725,8 @@ int tcpip_more(COMSTACK h)
 {
     tcpip_state *sp = (tcpip_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) != 0;
+    return sp->altlen && yaz_cs_complete(sp->altbuf, sp->altlen, sp->head_only,
+                                         &sp->complete_state) != 0;
 }
 
 static int cont_connect(COMSTACK h)
@@ -892,7 +895,7 @@ int tcpip_rcvconnect(COMSTACK h)
         if (sp->connect_phase == 0)
         {
             size_t connect_request_len = wrbuf_len(sp->connect_request);
-            sp->complete = cs_complete_auto_head;
+            sp->head_only = 1;
             if (connect_request_len > INT_MAX)
             {
                 cs_set_error(h, CSBUFSIZE, 0);
@@ -927,7 +930,7 @@ int tcpip_rcvconnect(COMSTACK h)
                 cs_set_error(h, CSDENY, 0);
                 return -1;
             }
-            sp->complete = cs_complete_auto;
+            sp->head_only = 0;
             sp->connect_phase = 2;
         }
     }
@@ -1300,8 +1303,11 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
         sp->altbuf = tmpc;
         sp->altsize = tmpi;
     }
+    else /* nothing buffered: a new message starts here */
+        yaz_cs_complete_reset(&sp->complete_state);
     h->io_pending = 0;
-    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
+    while ((berlen = yaz_cs_complete(*buf, hasread, sp->head_only,
+                                     &sp->complete_state)) == 0)
     {
         if (!*bufsize)
         {
@@ -1416,7 +1422,18 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                 hasread, berlen);
-    /* move surplus buffer (or everything if we didn't get a BER rec.) */
+    if (!berlen)
+    {   /* incomplete: keep it all, by switching buffers, not by copying */
+        tmpc = *buf;
+        tmpi = *bufsize;
+        *buf = sp->altbuf;
+        *bufsize = sp->altsize;
+        sp->altbuf = tmpc;
+        sp->altsize = tmpi;
+        sp->altlen = hasread;
+        return 1;
+    }
+    /* move surplus buffer */
     if (hasread > berlen)
     {
         tomove = req = hasread - berlen;
@@ -1442,7 +1459,7 @@ int tcpip_get(COMSTACK h, char **buf, int *bufsize)
     }
     if (berlen < CS_TCPIP_BUFCHUNK - 1)
         *(*buf + berlen) = '\0';
-    return berlen ? berlen : 1;
+    return berlen;
 }
 
 
@@ -1867,13 +1884,12 @@ int cs_get_peer_certificate_x509(COMSTACK cs, char **buf, int *len)
 
 int yaz_tcpip_set_head_only(COMSTACK cs, int head_only)
 {
-    int (*completer)(const char *buf, int len) =
-        head_only ? cs_complete_auto_head : cs_complete_auto;
-
     if (cs->type == tcpip_type || cs->type == ssl_type)
     {
         tcpip_state *sp = (tcpip_state *)cs->cprivate;
-        sp->complete = completer;
+        sp->head_only = head_only;
+        /* what is buffered must be examined again from the start */
+        yaz_cs_complete_reset(&sp->complete_state);
         return 0;
     }
     cs->cerrno = CSOUTSTATE;

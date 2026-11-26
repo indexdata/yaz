@@ -304,25 +304,31 @@ static int http_token_char(char c)
 }
 
 int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
-                          int *content_len)
+                          int *content_len, int *resume)
 {
-    int i = 0;
+    int i = resume ? *resume : 0;
     int off = 0;
+    int incomplete = 0;
 
     /* inside chunked body .. */
     while (1)
     {
         int chunk_len = 0;
+        int line = i;
 
+        if (resume)
+            *resume = i;
         if (i >= len)
             return 0;
         /* read chunk length */
-        int ret = yaz_atoi(16, buf + i, len - i, &chunk_len);
+        int ret = yaz_atoi(16, buf + i, len - i < 8192 ? len - i : 8192,
+                           &chunk_len);
         if (ret <= 0)
             return -1;
         i += ret;
         /* only blanks, then chunk extension or line ending may follow size */
-        while (i < len && (buf[i] == ' ' || buf[i] == '\t'))
+        while (i < len && i - line < 8192
+               && (buf[i] == ' ' || buf[i] == '\t'))
             i++;
         if (i < len && buf[i] != ';' && buf[i] != '\n'
             && !(buf[i] == '\r' && (i == len - 1 || buf[i + 1] == '\n')))
@@ -330,6 +336,8 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
         /* skip chunk extension and consume the line ending */
         while (1)
         {
+            if (i - line >= 8192)
+                return -1;
             if (i >= len)
                 return 0;
             if (skip_crlf(buf, len, &i))
@@ -355,12 +363,17 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
         }
     }
     /* consider trailing headers .. */
+    if (len - i > 8192)
+    {   /* limited in size, as the headers are */
+        len = i + 8192;
+        incomplete = -1;
+    }
     while (1)
     {
         if (i >= len)
-            return 0;
+            return incomplete;
         if (buf[i] == '\r' && i == len - 1)
-            return 0;
+            return incomplete;
         if (skip_crlf(buf, len, &i))
         {
             if (content_len)
@@ -375,7 +388,7 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
             while (1)
             {
                 if (i >= len)
-                    return 0;
+                    return incomplete;
                 if (buf[i] == ':')
                 {
                     if (i == field_start)
@@ -393,7 +406,7 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
         while (1)
         {
             if (i >= len)
-                return 0;
+                return incomplete;
             if (skip_crlf(buf, len, &i))
                 break;
             i++;
@@ -465,7 +478,8 @@ int yaz_http_parse_headers(const char *buf, int len, int off,
     return 0;
 }
 
-static int cs_complete_http(const char *buf, int len, int head_only)
+static int cs_complete_http(const char *buf, int len, int head_only,
+                            struct yaz_cs_complete_state *st)
 {
     int i, content_len = 0, chunked = 0;
 
@@ -500,7 +514,7 @@ static int cs_complete_http(const char *buf, int len, int head_only)
         return i;
     if (chunked)
     {
-        int r = yaz_http_parse_chunks(buf + i, len - i, 0, 0);
+        int r = yaz_http_parse_chunks(buf + i, len - i, 0, 0, &st->off);
         return r > 0 ? i + r : r;
     }
     if (content_len == -1)
@@ -510,27 +524,96 @@ static int cs_complete_http(const char *buf, int len, int head_only)
     return len >= i + content_len ? i + content_len : 0;
 }
 
-static int cs_complete_auto_x(const char *buf, int len, int head_only)
+/* As completeBER_n, but not recursive, so that st is all there is to keep
+ * between calls. A tag is limited to the 6 bytes that an int may take; the
+ * end of a longer one would be searched for from its start in every call. */
+static int cs_complete_ber(const char *buf, int len,
+                           struct yaz_cs_complete_state *st)
 {
+    do
+    {
+        const char *b = buf + st->off;
+        int left = len - st->off;
+        int res, ll, zclass, tag, cons;
+
+        if (left < 2)
+            return 0;
+        if (b[0] == 0 && b[1] == 0)
+        {   /* end-of-contents */
+            if (st->level == 0)
+                return -1;
+            st->level--;
+            st->off += 2;
+            continue;
+        }
+        if (st->level > 1000)
+            return -1;
+        if ((res = ber_dectag(b, &zclass, &tag, &cons,
+                              left < 6 ? left : 6)) <= 0)
+            return left < 6 ? 0 : -1;
+        b += res;
+        left -= res;
+        res = ber_declen(b, &ll, left);
+        if (res == -2)
+            return -1;  /* error */
+        if (res == -1)
+            return 0;    /* incomplete length */
+        b += res;
+        left -= res;
+        if (ll >= 0)
+        {   /* definite length */
+            if (left < ll)
+                return 0;
+            st->off = (int) (ll + (b - buf));
+        }
+        else
+        {   /* indefinite length */
+            if (!cons)
+                return -1;   /* if primitive, it's an error */
+            st->off = (int) (b - buf);
+            st->level++;
+        }
+    }
+    while (st->level);
+    return st->off;
+}
+
+void yaz_cs_complete_reset(struct yaz_cs_complete_state *st)
+{
+    st->off = st->level = 0;
+}
+
+int yaz_cs_complete(const char *buf, int len, int head_only,
+                    struct yaz_cs_complete_state *st)
+{
+    int r;
+
     if (len > 5 && buf[0] >= 0x20 && buf[0] < 0x7f
                 && buf[1] >= 0x20 && buf[1] < 0x7f
                 && buf[2] >= 0x20 && buf[2] < 0x7f
                 && buf[3] >= 0x20 && buf[3] < 0x7f)
-    {
-        int r = cs_complete_http(buf, len, head_only);
-        return r;
-    }
-    return completeBER_n(buf, len, 0);
+        r = cs_complete_http(buf, len, head_only, st);
+    else
+        r = cs_complete_ber(buf, len, st);
+    if (r)
+        yaz_cs_complete_reset(st);
+    return r;
 }
 
 int cs_complete_auto(const char *buf, int len)
 {
-    return cs_complete_auto_x(buf, len, 0);
+    struct yaz_cs_complete_state st;
+
+    yaz_cs_complete_reset(&st);
+    return yaz_cs_complete(buf, len, 0, &st);
 }
 
 int cs_complete_auto_head(const char *buf, int len)
 {
-    return cs_complete_auto_x(buf, len, 1);
+    struct yaz_cs_complete_state st;
+
+    yaz_cs_complete_reset(&st);
+    return yaz_cs_complete(buf, len, 1, &st);
 }
 
 int cs_set_head_only(COMSTACK cs, int head_only)
