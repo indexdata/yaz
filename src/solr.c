@@ -40,6 +40,8 @@ static int match_xml_node_attribute(
     const char *node_name, const char *attribute_name, const char *value)
 {
     const char *attribute_value;
+    if (ptr->type != XML_ELEMENT_NODE)
+        return 0;
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
     if (attribute_name)
@@ -288,6 +290,8 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
             Odr_int count = 0;
             const char *val = get_facet_term_count(o, node, &count);
 
+            if (!val)
+                continue;
             term->numberOfRecords = odr_intdup(o, count);
 
             /* if val contains a ^ then it is probably term<^>display term so separate them.
@@ -308,6 +312,7 @@ static int yaz_solr_decode_scan_result(ODR o, xmlNodePtr ptr,
             i++;
         }
     }
+    scr->num_terms = i;
 
     if (scr->num_terms)
         return 0;

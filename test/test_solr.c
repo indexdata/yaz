@@ -159,6 +159,34 @@ static int check_response(ODR o, const char *content,
     return 1;
 }
 
+static int check_scan_response(ODR o, const char *content,
+                               Z_SRW_scanResponse **p)
+{
+    int r;
+    Z_GDU *gdu;
+    Z_SRW_PDU *sr_p;
+    char *http_response = odr_malloc(o, strlen(content) + 300);
+
+    yaz_snprintf(http_response, strlen(content) + 300,
+                 "HTTP/1.1 200 OK\r\n"
+                 "Content-Type: text/xml; charset=utf-8\r\n"
+                 "Content-Length: %d\r\n\r\n%s",
+                 (int) strlen(content), content);
+    odr_setbuf(o, http_response, (int) strlen(http_response), 0);
+
+    *p = 0;
+    r = z_GDU(o, &gdu, 0, 0);
+    if (!r || gdu->which != Z_GDU_HTTP_Response)
+        return 0;
+    r = yaz_solr_decode_response(o, gdu->u.HTTP_Response, &sr_p);
+    if (r)
+        return 0;
+    if (sr_p->which != Z_SRW_scan_response)
+        return 0;
+    *p = sr_p->u.scan_response;
+    return 1;
+}
+
 static int check_srw_response(ODR o, const char *content,
                               Z_SRW_searchRetrieveResponse **p)
 {
@@ -216,6 +244,7 @@ void tst_decoding(void)
 #if YAZ_HAVE_XML2
     ODR odr = odr_createmem(ODR_DECODE);
     Z_SRW_searchRetrieveResponse *response;
+    Z_SRW_scanResponse *scan_response;
 
     YAZ_CHECK(check_response(
                   odr,
@@ -507,6 +536,136 @@ void tst_decoding(void)
             YAZ_CHECK(facetField->num_terms == 0);
         }
     }
+    odr_reset(odr);
+
+    /* CDATA sections (no node name) where elements are expected */
+    YAZ_CHECK(check_response(
+                  odr,
+                  "<response>"
+                  "<result name=\"response\" numFound=\"1\" start=\"0\"/>"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"facet_counts\">"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"facet_fields\">"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"date\">"
+                  "<![CDATA[x]]>"
+                  "<int name=\"2011\">7</int>"
+                  "</lst>"
+                  "</lst>"
+                  "</lst>"
+                  "</response>", &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(*response->numberOfRecords, 1);
+        YAZ_CHECK(response->facetList);
+        if (response->facetList)
+        {
+            YAZ_CHECK_EQ(response->facetList->num, 1);
+            if (response->facetList->num == 1)
+            {
+                Z_FacetField *facetField = response->facetList->elements[0];
+                YAZ_CHECK_EQ(facetField->num_terms, 1);
+                if (facetField->num_terms == 1)
+                    YAZ_CHECK_EQ(*facetField->terms[0]->count, 7);
+            }
+        }
+    }
+    odr_reset(odr);
+
+    YAZ_CHECK(check_response(
+                  odr,
+                  "<response>"
+                  "<result name=\"response\" numFound=\"0\" start=\"0\"/>"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"spellcheck\">"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"suggestions\">"
+                  "<![CDATA[x]]>"
+                  "<lst name=\"author\">"
+                  "<![CDATA[x]]>"
+                  "<arr name=\"suggestion\">"
+                  "<![CDATA[x]]>"
+                  "<lst>"
+                  "<![CDATA[x]]>"
+                  "<str name=\"word\">w1</str>"
+                  "</lst>"
+                  "</arr>"
+                  "</lst>"
+                  "</lst>"
+                  "</lst>"
+                  "</response>", &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(*response->numberOfRecords, 0);
+        YAZ_CHECK(response->suggestions &&
+                  strcmp(response->suggestions,
+                         "<misspelled term=\"author\">\n"
+                         "<suggestion>w1</suggestion>\n"
+                         "</misspelled>\n") == 0);
+    }
+    odr_reset(odr);
+
+    /* scan terms */
+    YAZ_CHECK(check_scan_response(
+                  odr,
+                  "<response>"
+                  "<lst name=\"terms\">"
+                  "<lst name=\"title\">"
+                  "<int name=\"water\">5</int>"
+                  "<int name=\"wave^Wave\">3</int>"
+                  "</lst>"
+                  "</lst>"
+                  "</response>", &scan_response));
+    if (scan_response)
+    {
+        YAZ_CHECK_EQ(scan_response->num_terms, 2);
+        if (scan_response->num_terms == 2)
+        {
+            Z_SRW_scanTerm *terms = scan_response->terms;
+            YAZ_CHECK(strcmp(terms[0].value, "water") == 0);
+            YAZ_CHECK_EQ(*terms[0].numberOfRecords, 5);
+            YAZ_CHECK(terms[0].displayTerm == 0);
+            YAZ_CHECK(strcmp(terms[1].value, "wave") == 0);
+            YAZ_CHECK_EQ(*terms[1].numberOfRecords, 3);
+            YAZ_CHECK(terms[1].displayTerm &&
+                      strcmp(terms[1].displayTerm, "Wave") == 0);
+        }
+    }
+    odr_reset(odr);
+
+    /* scan terms without a name are skipped */
+    YAZ_CHECK(check_scan_response(
+                  odr,
+                  "<response>"
+                  "<lst name=\"terms\">"
+                  "<lst name=\"title\">"
+                  "<int>5</int>"
+                  "<int name=\"water\">4</int>"
+                  "<int>3</int>"
+                  "</lst>"
+                  "</lst>"
+                  "</response>", &scan_response));
+    if (scan_response)
+    {
+        YAZ_CHECK_EQ(scan_response->num_terms, 1);
+        if (scan_response->num_terms == 1)
+        {
+            YAZ_CHECK(strcmp(scan_response->terms[0].value, "water") == 0);
+            YAZ_CHECK_EQ(*scan_response->terms[0].numberOfRecords, 4);
+        }
+    }
+    odr_reset(odr);
+
+    YAZ_CHECK(!check_scan_response(
+                  odr,
+                  "<response>"
+                  "<lst name=\"terms\">"
+                  "<lst name=\"title\">"
+                  "<int>5</int>"
+                  "</lst>"
+                  "</lst>"
+                  "</response>", &scan_response));
     odr_reset(odr);
 
     YAZ_CHECK(check_srw_response(
