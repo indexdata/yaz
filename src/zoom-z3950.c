@@ -553,6 +553,7 @@ static zoom_ret send_APDU(ZOOM_connection c, Z_APDU *a)
     if (encode_APDU(c, a, c->odr_out))
         return zoom_complete;
     yaz_log(c->log_details, "%p send APDU type=%d", c, a->which);
+    c->request_sent = a->which;
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
@@ -1668,13 +1669,40 @@ static zoom_ret send_Z3950_sort_present(ZOOM_connection c)
     return r;
 }
 
+/* A search task sends Search, Sort and Present requests, so the type of
+   the task does not tell which response is due. Check that the response
+   answers the request that was sent: any other response makes no
+   progress and the same request would be sent again. */
+static int response_fits_request(Z_APDU *apdu, int request_sent)
+{
+    switch (apdu->which)
+    {
+    case Z_APDU_searchResponse:
+        return request_sent == Z_APDU_searchRequest;
+    case Z_APDU_presentResponse:
+        return request_sent == Z_APDU_presentRequest;
+    case Z_APDU_sortResponse:
+        return request_sent == Z_APDU_sortRequest;
+    }
+    return 1;
+}
+
 void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
 {
     Z_InitResponse *initrs;
+    int request_sent = c->request_sent;
 
+    c->request_sent = 0;
     ZOOM_connection_set_mask(c, 0);
     yaz_log(c->log_details, "%p handle_Z3950_apdu apdu->which=%d",
             c, apdu->which);
+    if (!response_fits_request(apdu, request_sent))
+    {
+        yaz_log(c->log_api, "%p Received unexpected PDU", c);
+        ZOOM_set_error(c, ZOOM_ERROR_DECODE, 0);
+        ZOOM_connection_close(c);
+        return;
+    }
     switch (apdu->which)
     {
     case Z_APDU_initResponse:
