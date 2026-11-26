@@ -397,7 +397,9 @@ void yaz_get_response_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
     if (p->which != Z_CharSetandLanguageNegotiation_response)
         return;
     Z_TargetResponse *res = p->u.response;
-    if (charset && res->which == Z_TargetResponse_private &&
+    /* selectedCharSets is optional: which means nothing when u is NULL */
+    if (charset && res->u.zprivate &&
+        res->which == Z_TargetResponse_private &&
         res->u.zprivate->which == Z_PrivateCharacterSet_externallySpecified)
     {
         Z_External *pext = res->u.zprivate->u.externallySpecified;
@@ -411,7 +413,8 @@ void yaz_get_response_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
             (*charset)[pext->u.octet_aligned->len] = 0;
         }
     }
-    if (charset && res->which == Z_TargetResponse_iso10646)
+    if (charset && res->u.iso10646 &&
+        res->which == Z_TargetResponse_iso10646)
         *charset = set_form(res->u.iso10646->encodingLevel);
     if (lang && res->selectedLanguage)
         *lang = nmem_strdup(mem, res->selectedLanguage);
