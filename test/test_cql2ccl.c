@@ -189,11 +189,46 @@ static void tst(void)
 
 }
 
+/* relation modifiers count once for each term that they apply to */
+static int tst_modifiers(CQL_parser cp, int modifiers, int terms)
+{
+    WRBUF w = wrbuf_alloc();
+    int i, r;
+
+    wrbuf_puts(w, "dc.title =");
+    for (i = 0; i < modifiers; i++)
+        wrbuf_puts(w, "/m");
+    wrbuf_puts(w, " (a");
+    for (i = 1; i < terms; i++)
+        wrbuf_puts(w, " or a");
+    wrbuf_puts(w, ")");
+    r = cql_parser_string(cp, wrbuf_cstr(w));
+    wrbuf_destroy(w);
+    return r;
+}
+
+static void tst_limits(void)
+{
+    CQL_parser cp = cql_parser_create();
+
+    YAZ_CHECK(tst_modifiers(cp, 64, CQL_MAX_MODIFIERS / 64 + 1) != 0);
+    YAZ_CHECK(tst_modifiers(cp, CQL_MAX_MODIFIERS + 1, 1) != 0);
+    /* the count starts over for each query */
+    YAZ_CHECK(tst_modifiers(cp, 64, CQL_MAX_MODIFIERS / 64) == 0);
+    cql_parser_destroy(cp);
+
+    /* terms without modifiers are not limited */
+    cp = cql_parser_create();
+    YAZ_CHECK(tst_modifiers(cp, 0, 2 * CQL_MAX_MODIFIERS) == 0);
+    cql_parser_destroy(cp);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst();
+    tst_limits();
     YAZ_CHECK_TERM;
 }
 /*
