@@ -862,6 +862,33 @@ static void tst_stop_words(void)
     ccl_qual_rm(&bibset);
 }
 
+static void tst_field_or(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+    CCL_parser parser;
+    struct ccl_rpn_node *rpn;
+    int pos = -1;
+
+    ccl_qual_fitem(bibset, "or", "@field");
+    ccl_qual_fitem(bibset, "u=4 s=pw", "ti");
+    ccl_qual_fitem(bibset, "u=1003 s=pw", "au");
+
+    YAZ_CHECK(tst_ccl_query(bibset, "ti,au=x",
+                            "@or @attr 4=2 @attr 1=4 x "
+                            "@attr 4=2 @attr 1=1003 x "));
+    YAZ_CHECK(tst_ccl_query(bibset, "nofield,ti=x", 0));
+
+    /* unknown field after known ones: nodes for ti and au must be freed */
+    parser = ccl_parser_create(bibset);
+    rpn = ccl_parser_find_str(parser, "ti,au,nofield=x");
+    YAZ_CHECK(!rpn);
+    YAZ_CHECK_EQ(ccl_parser_get_error(parser, &pos), CCL_ERR_UNKNOWN_QUAL);
+    YAZ_CHECK_EQ(pos, 6);
+    ccl_rpn_delete(rpn);
+    ccl_parser_destroy(parser);
+    ccl_qual_rm(&bibset);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -877,6 +904,7 @@ int main(int argc, char **argv)
     tst_relation_operand();
     tst_addinfo();
     tst_stop_words();
+    tst_field_or();
     YAZ_CHECK_TERM;
 }
 /*

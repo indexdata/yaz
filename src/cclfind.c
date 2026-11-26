@@ -1081,6 +1081,7 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             {
                 cclp->look_token = lookahead;
                 cclp->error_code = CCL_ERR_UNKNOWN_QUAL;
+                ccl_rpn_delete(node);
                 xfree(ap);
                 return NULL;
             }
