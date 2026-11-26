@@ -63,18 +63,16 @@ static int qual_val_type(ccl_qualifier_t *qa, int type, int value,
 }
 
 /**
- * strxcat: concatenate strings.
- * n:      Null-terminated Destination string
+ * term_cat: append to term being built.
+ * end:    Pointer to end (null terminator) of term; updated.
  * src:    Source string to be appended (not null-terminated)
  * len:    Length of source string.
  */
-static void strxcat(char *n, const char *src, size_t len)
+static void term_cat(char **end, const char *src, size_t len)
 {
-    while (*n)
-        n++;
-    while (len-- > 0)
-        *n++ = *src++;
-    *n = '\0';
+    memcpy(*end, src, len);
+    *end += len;
+    **end = '\0';
 }
 
 /**
@@ -327,7 +325,7 @@ static int has_ccl_masking(const char *src_str,
 }
 
 static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
-                       char *dst_term, int regex_trunc, int z3958_trunc,
+                       char **dst_term, int regex_trunc, int z3958_trunc,
                        const char **truncation_aliases,
                        const char **mask_aliases,
                        int is_first, int is_last,
@@ -341,10 +339,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         if (j > 0 && src_str[j-1] == '\\')
         {
             if (regex_trunc && strchr(REGEX_CHARS "\\", src_str[j]))
-                strcat(dst_term, "\\");
+                term_cat(dst_term, "\\", 1);
             else if (z3958_trunc && strchr(CCL_CHARS "\\", src_str[j]))
-                strcat(dst_term, "\\");
-            strxcat(dst_term, src_str + j, 1);
+                term_cat(dst_term, "\\", 1);
+            term_cat(dst_term, src_str + j, 1);
         }
         else if (src_str[j] == '"')
             quote_mode = !quote_mode;
@@ -355,9 +353,9 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         {
             j += (op_size - 1);  /* j++ in for loop */
             if (regex_trunc)
-                strcat(dst_term, ".*");
+                term_cat(dst_term, ".*", 2);
             else if (z3958_trunc)
-                strcat(dst_term, "?");
+                term_cat(dst_term, "?", 1);
             else if (is_first && j == 0)
                 *left_trunc = 1;
             else if (is_last && j == src_len - 1)
@@ -373,9 +371,9 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         {
             j += (op_size - 1);  /* j++ in for loop */
             if (regex_trunc)
-                strcat(dst_term, ".");
+                term_cat(dst_term, ".", 1);
             else if (z3958_trunc)
-                strcat(dst_term, "#");
+                term_cat(dst_term, "#", 1);
             else
             {
                 cclp->error_code = CCL_ERR_TRUNC_NOT_SINGLE;
@@ -385,10 +383,10 @@ static int append_term(CCL_parser cclp, const char *src_str, size_t src_len,
         else if (src_str[j] != '\\')
         {
             if (regex_trunc && strchr(REGEX_CHARS, src_str[j]))
-                strcat(dst_term, "\\");
+                term_cat(dst_term, "\\", 1);
             else if (z3958_trunc && strchr(CCL_CHARS, src_str[j]))
-                strcat(dst_term, "\\");
-            strxcat(dst_term, src_str + j, 1);
+                term_cat(dst_term, "\\", 1);
+            term_cat(dst_term, src_str + j, 1);
         }
     }
     return 0;
@@ -415,6 +413,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     const char *t_default[2];
     const char *m_default[2];
     size_t term_len = 0;
+    char *term_end;
 
     if (!ccl_parse_step(cclp))
         return 0;
@@ -524,6 +523,7 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     p->u.t.term = (char *)xmalloc(term_len * 2 + 2);
     ccl_assert(p->u.t.term);
     p->u.t.term[0] = '\0';
+    term_end = p->u.t.term;
 
     for (i = 0; i < no; i++)
     {
@@ -532,10 +532,10 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
 
         if (p->u.t.term[0] && lookahead->ws_prefix_len)
         {
-            strxcat(p->u.t.term, lookahead->ws_prefix_buf,
-                    lookahead->ws_prefix_len);
+            term_cat(&term_end, lookahead->ws_prefix_buf,
+                     lookahead->ws_prefix_len);
         }
-        if (append_term(cclp, src_str, src_len, p->u.t.term, regex_trunc,
+        if (append_term(cclp, src_str, src_len, &term_end, regex_trunc,
                         z3958_trunc, truncation_aliases, mask_aliases,
                         i == 0, i == no - 1,
                         &left_trunc, &right_trunc))
