@@ -380,6 +380,64 @@ static void tst_scan_request(void)
                        "@attr 1=4 water");
 }
 
+/* A record is returned with the namespaces that it uses from the envelope. */
+static void tst_record_namespaces(void)
+{
+    const char *xml =
+        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\""
+        " xmlns:a=\"urn:a\" xmlns:b=\"urn:b\" xmlns:c=\"urn:c\"><s:Body>"
+        "<searchRetrieveResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\">"
+        "<version>1.1</version><numberOfRecords>2</numberOfRecords><records>"
+        "<record><recordData>"
+        "<a:r xmlns:d=\"urn:d\" xml:lang=\"en\"><e b:x=\"1\" d:y=\"2\"/>"
+        "<a:e xmlns:a=\"urn:a2\" xml:id=\"i\"><a:f b:x=\"3\"/></a:e><a:f/></a:r>"
+        "</recordData></record>"
+        "<record><recordData>"
+        "<r xmlns=\"\"><e/></r><r xmlns=\"urn:r\"><e/></r><c:r><e/></c:r>"
+        "</recordData></record>"
+        "</records></searchRetrieveResponse></s:Body></s:Envelope>";
+    const char *expect[] = {
+        "<a:r xmlns:d=\"urn:d\" xmlns:a=\"urn:a\""
+        " xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\" xmlns:b=\"urn:b\" xml:lang=\"en\">"
+        "<e b:x=\"1\" d:y=\"2\"/>"
+        "<a:e xmlns:a=\"urn:a2\" xml:id=\"i\"><a:f b:x=\"3\"/></a:e><a:f/></a:r>",
+        "<yaz_record><r xmlns=\"\"><e/></r><r xmlns=\"urn:r\"><e/></r>"
+        "<c:r xmlns:c=\"urn:c\" xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\"><e/></c:r>"
+        "</yaz_record>"
+    };
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler handlers[] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    char *buf = (char *) xml;
+    int len = strlen(xml);
+
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), 0);
+    YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+    if (soap && soap->which == Z_SOAP_generic)
+    {
+        Z_SRW_PDU *sr = (Z_SRW_PDU *) soap->u.generic->p;
+        YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_response);
+        if (sr && sr->which == Z_SRW_searchRetrieve_response)
+        {
+            Z_SRW_searchRetrieveResponse *res = sr->u.response;
+            int i;
+            YAZ_CHECK_EQ(res->num_records, 2);
+            for (i = 0; i < res->num_records && i < 2; i++)
+            {
+                Z_SRW_record *rec = res->records + i;
+                YAZ_CHECK_EQ(rec->recordPacking, Z_SRW_recordPacking_XML);
+                YAZ_CHECK(rec->recordData_len == strlen(expect[i]) &&
+                          !memcmp(rec->recordData_buf, expect[i],
+                                  rec->recordData_len));
+            }
+        }
+    }
+    odr_destroy(o);
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -884,6 +942,7 @@ int main(int argc, char **argv)
     LIBXML_TEST_VERSION;
     tst_srw();
     tst_soap_namespaces();
+    tst_record_namespaces();
     tst_scan_response_terms();
     tst_ucp_methods();
     tst_srw_facet_analysis();

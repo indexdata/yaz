@@ -290,7 +290,8 @@ static int replace_node(NMEM nmem, xmlNode *ptr,
         xmlDoc *doc = yaz_xml_parse_memory(res, strlen(res));
         if (doc)
         {
-            xmlNode *nptr = xmlCopyNode(xmlDocGetRootElement(doc), 1);
+            xmlNode *nptr = xmlDocCopyNode(xmlDocGetRootElement(doc),
+                                           ptr->doc, 1);
             xmlReplaceNode(ptr, nptr);
             xmlFreeDoc(doc);
         }
