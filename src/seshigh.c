@@ -1584,10 +1584,24 @@ static void srw_bend_scan(association *assoc,
             bsrr->term = yaz_pqf_scan(pqf_parser, assoc->decode,
                                       &bsrr->attributeset,
                                       srw_req->scanClause);
-            yaz_pqf_destroy(pqf_parser);
             bsrr->scanClause = 0;
-            ((int (*)(void *, bend_scan_rr *))
-             (*assoc->init->bend_scan))(assoc->backend, bsrr);
+            if (!bsrr->term)
+            {
+                const char *pqf_msg;
+                size_t off;
+                int code = yaz_pqf_error(pqf_parser, &pqf_msg, &off);
+                yaz_log(log_requestdetail, "Parse error %d %s near offset %ld",
+                        code, pqf_msg, (long) off);
+                yaz_add_srw_diagnostic(assoc->encode, &srw_res->diagnostics,
+                                       &srw_res->num_diagnostics,
+                                       YAZ_SRW_QUERY_SYNTAX_ERROR, pqf_msg);
+            }
+            else
+            {
+                ((int (*)(void *, bend_scan_rr *))
+                 (*assoc->init->bend_scan))(assoc->backend, bsrr);
+            }
+            yaz_pqf_destroy(pqf_parser);
         }
         else if ((!srw_req->queryType || !strcmp(srw_req->queryType, "cql"))
                  && assoc->init->bend_scan && assoc->server

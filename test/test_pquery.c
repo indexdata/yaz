@@ -15,6 +15,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/querytowrbuf.h>
 #include <yaz/pquery.h>
+#include <yaz/oid_db.h>
 #include <yaz/test.h>
 
 int expect_pqf(const char *pqf, const char *expect_pqf, int expect_error)
@@ -187,12 +188,61 @@ static void tst_complexity(void)
     yaz_pqf_destroy(parser);
 }
 
+static void tst_scan(void)
+{
+    YAZ_PQF_Parser parser = yaz_pqf_create();
+    ODR odr = odr_createmem(ODR_ENCODE);
+    Odr_oid stale[] = { 1, 2, 3, -1 };
+    Odr_oid *set = stale;
+    Z_AttributesPlusTerm *apt;
+    const char *msg;
+    size_t offset;
+
+    apt = yaz_pqf_scan(parser, odr, &set, "@attr 1=4 a");
+    YAZ_CHECK(apt && apt->attributes && apt->term);
+    YAZ_CHECK(set && !oid_oidcmp(set, yaz_oid_attset_bib_1));
+
+    set = stale;
+    apt = yaz_pqf_scan(parser, odr, &set, "@attrset gils @attr 1=4 a");
+    YAZ_CHECK(apt && apt->attributes && apt->term);
+    YAZ_CHECK(set && !oid_oidcmp(set, yaz_oid_attset_gils));
+
+    /* An unknown attribute set fails the parse and must not leave the
+       caller's attribute set pointer as it was. */
+    set = stale;
+    YAZ_CHECK(!yaz_pqf_scan(parser, odr, &set, "@attrset nosuch"));
+    YAZ_CHECK_EQ(yaz_pqf_error(parser, &msg, &offset), YAZ_PQF_ERROR_ATTSET);
+    YAZ_CHECK(set == 0);
+
+    set = stale;
+    YAZ_CHECK(!yaz_pqf_scan(parser, odr, &set, "@attrset nosuch a"));
+    YAZ_CHECK_EQ(yaz_pqf_error(parser, &msg, &offset), YAZ_PQF_ERROR_ATTSET);
+    YAZ_CHECK(set == 0);
+
+    set = stale;
+    YAZ_CHECK(!yaz_pqf_scan_attribute_list(parser, odr, &set,
+                                           "@attrset nosuch"));
+    YAZ_CHECK_EQ(yaz_pqf_error(parser, &msg, &offset), YAZ_PQF_ERROR_ATTSET);
+    YAZ_CHECK(set == 0);
+
+    /* A bad attribute list is an error too, not a term without attributes. */
+    set = stale;
+    YAZ_CHECK(!yaz_pqf_scan(parser, odr, &set, "@attr p=q a"));
+    YAZ_CHECK_EQ(yaz_pqf_error(parser, &msg, &offset),
+                 YAZ_PQF_ERROR_BAD_INTEGER);
+    YAZ_CHECK(set != stale);
+
+    odr_destroy(odr);
+    yaz_pqf_destroy(parser);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
     tst_term_create();
     tst_complexity();
+    tst_scan();
     YAZ_CHECK_TERM;
 }
 

@@ -747,6 +747,7 @@ static Z_AttributeList *p_query_scan_attributes_mk(struct yaz_pqf_parser *li,
     int max_attr = 512;
     Odr_oid *top_set = 0;
 
+    *attributeSetP = 0;
     lex(li);
     if (li->query_look == 'r')
     {
@@ -803,6 +804,8 @@ static Z_AttributesPlusTerm *p_query_scan_mk(struct yaz_pqf_parser *li,
 {
     Z_AttributeList *attr_list = p_query_scan_attributes_mk(li, o, attributeSetP);
 
+    if (!attr_list)
+        return 0;
     if (!li->query_look)
     {
         li->error = YAZ_PQF_ERROR_MISSING;
