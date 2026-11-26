@@ -726,6 +726,33 @@ static void tst_complexity(void)
         wrbuf_puts(query, "a ");
     check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
     check_complexity(parser, "a ! (", CCL_ERR_TERM_EXPECTED);
+
+    /* Each term gets the attributes of all qualifiers in its list: one
+       count per qualifier and one per attribute, for every term. */
+    wrbuf_rewind(query);
+    for (i = 0; i < 16; i++)
+        wrbuf_puts(query, i ? ",ti" : "ti");
+    wrbuf_puts(query, "=a");
+    for (i = 1; i < CCL_MAX_APPLIED / 32; i++)
+        wrbuf_puts(query, "!a");
+    check_complexity(parser, wrbuf_cstr(query), 0); /* exactly 65536 */
+    wrbuf_puts(query, "!a");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
+    check_complexity(parser, "ti,ti=a", 0);
+
+    /* A nested list inherits, and so counts, the outer qualifiers too:
+       42 inherited, then 43 qualifiers and 43 attributes for the term. */
+    wrbuf_rewind(query);
+    for (i = 0; i < 42; i++)
+        wrbuf_puts(query, i ? ",ti" : "ti");
+    wrbuf_puts(query, "=(ti=a");
+    for (i = 1; i < CCL_MAX_APPLIED / 128; i++)
+        wrbuf_puts(query, " and ti=a");
+    wrbuf_puts(query, ")");
+    check_complexity(parser, wrbuf_cstr(query), 0); /* exactly 65536 */
+    wrbuf_cut_right(query, 1);
+    wrbuf_puts(query, " and ti=a)");
+    check_complexity(parser, wrbuf_cstr(query), CCL_ERR_COMPLEXITY);
     check_complexity(parser, "a", 0);
 
     ZOOM_query_destroy(zoom);

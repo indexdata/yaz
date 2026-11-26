@@ -99,6 +99,8 @@ YAZ_BEGIN_CDECL
 #define CCL_MAX_DEPTH 256
 /** Maximum expression, operand, term-expansion and split-list steps. */
 #define CCL_MAX_STEPS 4096
+/** Maximum qualifiers and attributes applied to the terms of a query. */
+#define CCL_MAX_APPLIED 65536
 
 /** \brief attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {
@@ -163,8 +165,10 @@ typedef struct ccl_parser *CCL_parser;
    CCL_ERR_COMPLEXITY: parsing is limited to CCL_MAX_DEPTH simultaneous
    expression/split-list calls and CCL_MAX_STEPS total parsing steps.
    Steps count expression and operand visits, term expansions, and
-   split-list branches. Limits reset for each query. Use the error/pos
-   outputs or ccl_parser_get_error to obtain the error and its position.
+   split-list branches. At most CCL_MAX_APPLIED qualifiers and attributes
+   are applied to terms in total. Limits reset for each query. Use the
+   error/pos outputs or ccl_parser_get_error to obtain the error and its
+   position.
 */
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
@@ -180,8 +184,10 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
    CCL_ERR_COMPLEXITY: parsing is limited to CCL_MAX_DEPTH simultaneous
    expression/split-list calls and CCL_MAX_STEPS total parsing steps.
    Steps count expression and operand visits, term expansions, and
-   split-list branches. Limits reset for each query. Use the error/pos
-   outputs or ccl_parser_get_error to obtain the error and its position.
+   split-list branches. At most CCL_MAX_APPLIED qualifiers and attributes
+   are applied to terms in total. Limits reset for each query. Use the
+   error/pos outputs or ccl_parser_get_error to obtain the error and its
+   position.
 */
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str);
