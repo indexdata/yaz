@@ -1332,13 +1332,15 @@ static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
         if (t)
         {
             *value_term = t->value;
-            *value_len = strlen(*value_term);
+            if (*value_term)
+                *value_len = strlen(*value_term);
 
             if (t->displayTerm)
                 *disp_term = t->displayTerm;
             else
                 *disp_term = t->value;
-            *disp_len = strlen(*disp_term);
+            if (*disp_term)
+                *disp_len = strlen(*disp_term);
             *occ = t->numberOfRecords ? *t->numberOfRecords : 0;
         }
     }
