@@ -339,6 +339,8 @@ YAZ_EXPORT const char *yaz_check_location(ODR odr, const char *uri,
     \returns resolved connection address, or NULL for an invalid target.
     Redirects cannot supply COMSTACK transport wrappers. Any CONNECT prefix
     comes exclusively from uri and is retained for absolute redirects too.
+    Nor can they supply a local source address: a location with a space
+    anywhere, including its fragment, is an invalid target.
     The result may borrow location or belong to odr; do not free it and
     keep both alive while using it. Success does not enforce same-origin
     policy: the caller must use same_origin to decide whether credentials
