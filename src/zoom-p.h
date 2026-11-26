@@ -101,6 +101,7 @@ struct ZOOM_connection_p {
     int async;
     int support_named_resultsets;
     int last_event;
+    int request_sent; /* Z_APDU_.. of request awaiting response; 0 if none */
 
     int maximum_record_size;
     int preferred_message_size;

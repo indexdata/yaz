@@ -300,6 +300,7 @@ ZOOM_API(ZOOM_connection)
     c->check_cert = 0;
     c->support_named_resultsets = 0;
     c->last_event = ZOOM_EVENT_NONE;
+    c->request_sent = 0;
 
     c->m_queue_front = 0;
     c->m_queue_back = 0;
@@ -2159,6 +2160,7 @@ ZOOM_API(void) ZOOM_connection_close(ZOOM_connection c)
     c->cs = 0;
     ZOOM_connection_set_mask(c, 0);
     c->state = STATE_IDLE;
+    c->request_sent = 0;
 }
 
 /*
