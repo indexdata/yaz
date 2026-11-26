@@ -1301,17 +1301,26 @@ static void ZOOM_scanset_term_x(ZOOM_scanset scan, size_t pos,
         {
             Z_TermInfo *t = res->entries->entries[pos]->u.termInfo;
 
-            *value_term = (const char *) t->term->u.general->buf;
-            *value_len = t->term->u.general->len;
+            /* Term is a CHOICE: only use the alternatives that hold text */
+            if (t->term->which == Z_Term_general)
+            {
+                *value_term = (const char *) t->term->u.general->buf;
+                *value_len = t->term->u.general->len;
+            }
+            else if (t->term->which == Z_Term_characterString)
+            {
+                *value_term = t->term->u.characterString;
+                *value_len = strlen(*value_term);
+            }
             if (t->displayTerm)
             {
                 *disp_term = t->displayTerm;
                 *disp_len = strlen(*disp_term);
             }
-            else if (t->term->which == Z_Term_general)
+            else
             {
-                *disp_term = (const char *) t->term->u.general->buf;
-                *disp_len = t->term->u.general->len;
+                *disp_term = *value_term;
+                *disp_len = *value_len;
             }
             *occ = t->globalOccurrences ? *t->globalOccurrences : 0;
         }

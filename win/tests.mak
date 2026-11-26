@@ -58,6 +58,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_marc_read_iso2709.exe \
     $(BINDIR)\test_marc_read_sax.exe \
     $(BINDIR)\test_sru_update.exe \
+    $(BINDIR)\test_zoom_scan.exe \
     $(BINDIR)\test_zoom_send.exe
 
 # Use the library objects in an archive so tests can exercise private APIs.
