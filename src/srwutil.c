@@ -128,7 +128,8 @@ static void yaz_srw_decodeauth(Z_SRW_PDU *sr, Z_HTTP_Request *hreq,
         size_t len = strlen(basic);
         if (!len || len > 256)
             return;
-        yaz_base64decode(basic, out);
+        if (yaz_base64decode(basic, out))
+            return;
         /* Format of out should be username:password at this point */
         strcpy(ubuf, out);
         if ((p = strchr(ubuf, ':')))

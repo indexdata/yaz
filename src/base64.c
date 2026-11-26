@@ -89,26 +89,29 @@ int yaz_base64decode(const char *in, char *out)
 
         i0 = next_char(&in, &len);
         if (i0 < 0)
-            return -1;
+            goto bad;
         i1 = next_char(&in, &len);
         if (i1 < 0)
-            return -1;
+            goto bad;
         *(out++) = i0 << 2 | i1 >> 4;
         i2 = next_char(&in, &len);
         if (i2 == -2)
             break;
         if (i2 == -1)
-            return -1;
+            goto bad;
         *(out++) = i1 << 4 | i2 >> 2;
         i3 = next_char(&in, &len);
         if (i3 == -2)
             break;
         if (i3 == -1)
-            return -1;
+            goto bad;
         *(out++) = i2 << 6 | i3;
     }
     *out = '\0';
     return 0;
+bad:
+    *out = '\0';
+    return -1;
 }
 
 /*
