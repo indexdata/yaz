@@ -305,6 +305,49 @@ static void tst_berint64(ODR encode, ODR decode)
     YAZ_CHECK_EQ(ret_val, val);
 }
 
+/* a decoder that fails without setting an ODR error */
+static int tst_choice_fail(ODR o, char **p, int opt, const char *name)
+{
+    return 0;
+}
+
+/* An arm whose tag is there is present: if it does not decode, that is an
+   error. Only a CHOICE with none of its tags is absent (0 and no error). */
+static void tst_choice(ODR decode)
+{
+    static Odr_arm arm[] = {
+        {ODR_EXPLICIT, ODR_CONTEXT, 1, 1, (Odr_fun) odr_integer, "first"},
+        {ODR_IMPLICIT, ODR_CONTEXT, 2, 2, (Odr_fun) odr_integer, "second"},
+        {ODR_IMPLICIT, ODR_CONTEXT, 3, 3, (Odr_fun) tst_choice_fail, "third"},
+        {-1, -1, -1, -1, (Odr_fun) 0, 0}
+    };
+    void *u;
+    int which;
+
+    odr_reset(decode);
+    odr_setbuf(decode, (char *) "\x82\x01\x05", 3, 0);
+    YAZ_CHECK(odr_choice(decode, arm, &u, &which, 0));
+    YAZ_CHECK_EQ(which, 2);
+
+    /* no arm has tag [4] */
+    odr_reset(decode);
+    odr_setbuf(decode, (char *) "\x84\x01\x05", 3, 0);
+    YAZ_CHECK(!odr_choice(decode, arm, &u, &which, 0));
+    YAZ_CHECK_EQ(odr_geterror(decode), ONONE);
+
+    /* [1] is EXPLICIT, but primitive here */
+    odr_reset(decode);
+    odr_setbuf(decode, (char *) "\x81\x01\x05", 3, 0);
+    YAZ_CHECK(!odr_choice(decode, arm, &u, &which, 0));
+    YAZ_CHECK_EQ(odr_geterror(decode), OPROTO);
+
+    /* [3] is there, but its decoder fails and sets no error */
+    odr_reset(decode);
+    odr_setbuf(decode, (char *) "\x83\x01\x05", 3, 0);
+    YAZ_CHECK(!odr_choice(decode, arm, &u, &which, 0));
+    YAZ_CHECK_EQ(odr_geterror(decode), OPROTO);
+}
+
 static void tst(void)
 {
     ODR odr_encode = odr_createmem(ODR_ENCODE);
@@ -319,6 +362,8 @@ static void tst(void)
 
     tst_berint32(odr_encode, odr_decode);
     tst_berint64(odr_encode, odr_decode);
+
+    tst_choice(odr_decode);
 
     odr_destroy(odr_encode);
     odr_destroy(odr_decode);
