@@ -323,7 +323,7 @@ static int yaz_solr_decode_error(ODR o, xmlNode *ptr,
                                  Z_SRW_searchRetrieveResponse *sr)
 {
     for (ptr = ptr->children; ptr; ptr = ptr->next)
-        if (ptr->type == XML_ELEMENT_NODE &&
+        if (ptr->type == XML_ELEMENT_NODE && sr->num_diagnostics < 10 &&
             match_xml_node_attribute(ptr, "str", "name", "msg"))
         {
             char *msg = nmem_text_node_cdata(ptr->children, odr_getmem(o));
