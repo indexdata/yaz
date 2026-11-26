@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <string.h>
 #include <yaz/oid_util.h>
+#include <yaz/charneg.h>
 #include <yaz/proto.h>
 #include "test_odrcodec.h"
 
@@ -578,6 +579,57 @@ static void tst_ber_tag_position(void)
 }
 
 
+static void tst_charneg_response(void)
+{
+    /* response [2]: selectedCharSets [1] holding a primitive private [3],
+       and selectedCharSets omitted */
+    static const char *bufs[] = { "\xa2\x03\xa1\x01\x83", "\xa2\x00" };
+    static const char *charsets[] = { "ISO-8859-1", "UTF-8" };
+    size_t i;
+
+    for (i = 0; i < sizeof(bufs) / sizeof(*bufs); i++)
+    {
+        ODR decode = odr_createmem(ODR_DECODE);
+        Z_CharSetandLanguageNegotiation *p = 0;
+
+        odr_setbuf(decode, (char *) bufs[i], (int) strlen(bufs[i]), 0);
+        if (z_CharSetandLanguageNegotiation(decode, &p, 0, 0))
+        {
+            char *charset = 0, *lang = 0;
+            int selected = -1;
+
+            YAZ_CHECK_EQ(p->which, Z_CharSetandLanguageNegotiation_response);
+            YAZ_CHECK(!p->u.response->u.zprivate);
+            yaz_get_response_charneg(odr_getmem(decode), p, &charset, &lang,
+                                     &selected);
+            YAZ_CHECK(!charset);
+            YAZ_CHECK(!lang);
+            YAZ_CHECK_EQ(selected, -1);
+        }
+        odr_destroy(decode);
+    }
+    for (i = 0; i < sizeof(charsets) / sizeof(*charsets); i++)
+    {
+        ODR encode = odr_createmem(ODR_ENCODE);
+        ODR decode = odr_createmem(ODR_DECODE);
+        Z_External *ext = yaz_set_response_charneg(encode, charsets[i], 0, 1);
+        Z_CharSetandLanguageNegotiation *p = 0;
+        char *buf, *charset = 0;
+        int len;
+
+        YAZ_CHECK(z_CharSetandLanguageNegotiation(encode, &ext->u.charNeg3,
+                                                  0, 0));
+        buf = odr_getbuf(encode, &len, 0);
+        odr_setbuf(decode, buf, len, 0);
+        YAZ_CHECK(z_CharSetandLanguageNegotiation(decode, &p, 0, 0));
+        if (p)
+            yaz_get_response_charneg(odr_getmem(decode), p, &charset, 0, 0);
+        YAZ_CHECK(charset && !strcmp(charset, charsets[i]));
+        odr_destroy(decode);
+        odr_destroy(encode);
+    }
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -588,6 +640,7 @@ int main(int argc, char **argv)
     tst_odr_create_Odr_oct2();
     tst_external_no_encoding();
     tst_ber_tag_position();
+    tst_charneg_response();
     YAZ_CHECK_TERM;
 }
 
