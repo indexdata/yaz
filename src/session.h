@@ -131,6 +131,7 @@ typedef struct association
     int cs_accept_mask;
 
     struct bend_initrequest *init;
+    char *srw_ident;              /* SRU: who init is for; NULL otherwise */
     statserv_options_block *last_control;
 
     struct gfs_server *server;

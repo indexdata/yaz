@@ -175,6 +175,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     if (!(anew = (association *)xmalloc(sizeof(*anew))))
         return 0;
     anew->init = 0;
+    anew->srw_ident = 0;
     /* control_association sets these only when a server is selected */
     anew->preferredMessageSize = 0;
     anew->maximumRecordSize = 0;
@@ -236,6 +237,7 @@ void destroy_association(association *h)
     request *req;
 
     xfree(h->init);
+    xfree(h->srw_ident);
     odr_destroy(h->decode);
     odr_destroy(h->encode);
     if (h->print)
@@ -552,6 +554,8 @@ static void assoc_init_reset(association *assoc, const char *peer_name1)
 {
     const char *peer_name2 = cs_addrstr(assoc->client_link);
 
+    xfree(assoc->srw_ident);
+    assoc->srw_ident = 0;
     xfree(assoc->init);
     assoc->init = (bend_initrequest *) xmalloc(sizeof(*assoc->init));
 
@@ -597,37 +601,66 @@ static void assoc_init_reset(association *assoc, const char *peer_name1)
     yaz_log(log_requestdetail, "peer %s", assoc->init->peer_name);
 }
 
+/* Release the backend session, so that the next request makes its own */
+static void srw_bend_close(association *assoc)
+{
+    statserv_options_block *cb = statserv_getcontrol();
+
+    if (assoc->backend)
+        (*cb->bend_close)(assoc->backend);
+    assoc->backend = 0;
+    xfree(assoc->init);
+    assoc->init = 0;
+}
+
 static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
                          Z_SRW_diagnostic **d, int *num, Z_SRW_PDU *sr)
 {
     statserv_options_block *cb = statserv_getcontrol();
+    const char *peer = z_HTTP_header_lookup(headers, "X-Forwarded-For");
+    Z_IdAuthentication *auth = 0;
+    const char *ident;
+
+    if (sr->username)
+    {
+        size_t len;
+
+        auth = (Z_IdAuthentication *) odr_malloc(assoc->decode, sizeof(*auth));
+        len = strlen(sr->username) + 1;
+        if (sr->password)
+            len += strlen(sr->password) + 2;
+        auth->which = Z_IdAuthentication_open;
+        auth->u.open = (char *) odr_malloc(assoc->decode, len);
+        strcpy(auth->u.open, sr->username);
+        if (sr->password && *sr->password)
+        {
+            strcat(auth->u.open, "/");
+            strcat(auth->u.open, sr->password);
+        }
+    }
+    /* HTTP requests on one connection are independent and may come from
+       different users (reverse proxy), but bend_init is only called for
+       the first of them. Keep what the backend was told about the client
+       then and make a new session when a request says otherwise. */
+    ident = nmem_printf(odr_getmem(assoc->decode), "%s\n%c%s",
+                        peer ? peer : "", auth ? '+' : '-',
+                        auth ? auth->u.open : "");
+    if (assoc->init && assoc->srw_ident && strcmp(assoc->srw_ident, ident))
+        srw_bend_close(assoc);
     if (!assoc->init)
     {
         const char *encoding = "UTF-8";
         bend_initresult *binitres;
 
         yaz_log(log_requestdetail, "srw_bend_init config=%s", cb->configname);
-        assoc_init_reset(assoc, z_HTTP_header_lookup(headers, "X-Forwarded-For"));
+        assoc_init_reset(assoc, peer);
+        assoc->srw_ident = xstrdup(ident);
 
-        if (sr->username)
+        if (auth)
         {
-            Z_IdAuthentication *auth = (Z_IdAuthentication *)
-                odr_malloc(assoc->decode, sizeof(*auth));
-
-            size_t len = strlen(sr->username) + 1;
-            if (sr->password)
-                len += strlen(sr->password) + 2;
             yaz_log(log_requestdetail, "username=%s password-len=%ld",
                     sr->username, (long)
                     (sr->password ? strlen(sr->password) : 0));
-            auth->which = Z_IdAuthentication_open;
-            auth->u.open = (char *) odr_malloc(assoc->decode, len);
-            strcpy(auth->u.open, sr->username);
-            if (sr->password && *sr->password)
-            {
-                strcat(auth->u.open, "/");
-                strcat(auth->u.open, sr->password);
-            }
             assoc->init->auth = auth;
         }
 
@@ -642,6 +675,7 @@ static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
             assoc->state = ASSOC_DEAD;
             yaz_add_srw_diagnostic(assoc->encode, d, num,
                             YAZ_SRW_AUTHENTICATION_ERROR, 0);
+            srw_bend_close(assoc);
             return 0;
         }
         assoc->backend = binitres->handle;
@@ -652,6 +686,8 @@ static int srw_bend_init(association *assoc, Z_HTTP_Header *headers,
             assoc->state = ASSOC_DEAD;
             yaz_add_srw_diagnostic(assoc->encode, d, num, srw_code,
                                    binitres->errstring);
+            /* a session that was refused must not serve requests */
+            srw_bend_close(assoc);
             return 0;
         }
         return 1;
@@ -2266,7 +2302,8 @@ static void process_http_request(association *assoc, request *req)
             keepalive = 1;
         hres->version = "1.1";
     }
-    if (!keepalive || !assoc->last_control || !assoc->last_control->keepalive)
+    if (!keepalive || assoc->state == ASSOC_DEAD
+        || !assoc->last_control || !assoc->last_control->keepalive)
     {
         z_HTTP_header_add(o, &hres->headers, "Connection", "close");
         assoc->state = ASSOC_DEAD;
