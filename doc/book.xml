@@ -6885,6 +6885,14 @@ int cql_transform_FILE(cql_transform_t ct,
       output stream. The latter writes the result to an already
       open <literal>FILE</literal>.
      </para>
+     <para>
+      The index and the relation modifiers of a search clause are part of
+      the PQF for each of its terms. Conversion is therefore limited to
+      4096 steps per query, where each term counts as one step plus one
+      for each relation modifier of its clause. This is the limit of PQF
+      parsing (<literal>YAZ_PQF_MAX_NODES</literal>). Queries exceeding it
+      are rejected with SRU error 10 (query syntax error).
+     </para>
     </sect3>
     <sect3 id="cql.to.rpn">
      <title>Specification of CQL to RPN mappings</title>
@@ -6918,6 +6926,8 @@ int cql_transform_FILE(cql_transform_t ct,
       Each occurrence of <literal>*</literal> is substituted with the
       CQL matching name (index, relation, qualifier etc).
       This facility can be used to copy a CQL name verbatim to the RPN result.
+      A name of more than 255 characters is not copied; it is treated
+      as unsupported.
      </para>
      <para>
       The following CQL patterns are recognized:

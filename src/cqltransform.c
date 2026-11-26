@@ -36,6 +36,11 @@
 #include <yaz/log.h>
 #include <yaz/proxunit.h>
 #include <yaz/snprintf.h>
+#include <yaz/pquery.h>
+
+/* Longest name of a query (index, ..) that is passed on where a property
+   has * in its value. It is written again for each term of a search clause. */
+#define CQL_MAX_PASS_LENGTH 255
 
 struct cql_prop_entry {
     char *pattern;
@@ -436,6 +441,8 @@ int cql_pr_attr_uri(cql_transform_t ct, WRBUF addinfo, const char *category,
         if (!res)
             res = cql_lookup_property(ct, category, prefix, "*");
     }
+    if (res && strchr(res, '*') && eval && strlen(eval) > CQL_MAX_PASS_LENGTH)
+        res = 0; /* too long to be passed on: not supported */
     if (res)
     {
         char buf[64];
@@ -588,11 +595,30 @@ static int has_modifier(struct cql_node *cn, const char *name) {
     return 0;
 }
 
+/* Counts the steps that a term of a search clause takes: one for the term
+   and one for each relation modifier, as these are gone through and written
+   for every term. The PQF must pass yaz_pqf_parse, which gives up after
+   YAZ_PQF_MAX_NODES steps. */
+static int emit_term_steps(struct cql_node *cn, WRBUF addinfo, int *steps)
+{
+    struct cql_node *mod = cn->u.st.modifiers;
+
+    for (++*steps; mod && *steps <= YAZ_PQF_MAX_NODES;
+         mod = mod->u.st.modifiers)
+        ++*steps;
+    if (*steps > YAZ_PQF_MAX_NODES)
+    {
+        wrbuf_puts(addinfo, "query complexity limit exceeded");
+        return YAZ_SRW_QUERY_SYNTAX_ERROR;
+    }
+    return 0;
+}
+
 static int emit_term(cql_transform_t ct,
                      struct cql_node *cn, WRBUF addinfo,
                      const char *term, size_t length,
                      void (*pr)(const char *buf, void *client_data),
-                     void *client_data)
+                     void *client_data, int *steps)
 {
     size_t i;
     int r;
@@ -600,6 +626,9 @@ static int emit_term(cql_transform_t ct,
     int z3958_mode = 0;
     int process_term = 1;
 
+    r = emit_term_steps(cn, addinfo, steps);
+    if (r)
+        return r;
 
     if (has_modifier(cn, "regexp"))
         process_term = 0;
@@ -796,7 +825,7 @@ static int emit_terms(cql_transform_t ct, struct cql_node *cn,
                       WRBUF addinfo,
                       void (*pr)(const char *buf, void *client_data),
                       void *client_data,
-                      const char *op)
+                      const char *op, int *steps)
 {
     struct cql_node *ne = cn->u.st.extra_terms;
     if (ne)
@@ -806,7 +835,7 @@ static int emit_terms(cql_transform_t ct, struct cql_node *cn,
         (*pr)(" ", client_data);
     }
     int r = emit_term(ct, cn, addinfo, cn->u.st.term, strlen(cn->u.st.term), pr,
-                      client_data);
+                      client_data, steps);
     for (; !r && ne; ne = ne->u.st.extra_terms)
     {
         if (ne->u.st.extra_terms)
@@ -816,7 +845,7 @@ static int emit_terms(cql_transform_t ct, struct cql_node *cn,
             (*pr)(" ", client_data);
         }
         r = emit_term(ct, cn, addinfo, ne->u.st.term, strlen(ne->u.st.term),
-                      pr, client_data);
+                      pr, client_data, steps);
     }
     return r;
 }
@@ -825,7 +854,7 @@ static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
                          WRBUF addinfo,
                          void (*pr)(const char *buf, void *client_data),
                          void *client_data,
-                         const char *op)
+                         const char *op, int *steps)
 {
     int r = 0;
     const char *cp0 = cn->u.st.term;
@@ -843,7 +872,7 @@ static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
             (*pr)(op, client_data);
             (*pr)(" ", client_data);
             r = emit_term(ct, cn, addinfo, last_term, last_length,
-                          pr, client_data);
+                          pr, client_data, steps);
         }
         last_term = cp0;
         if (cp1)
@@ -853,14 +882,15 @@ static int emit_wordlist(cql_transform_t ct, struct cql_node *cn,
         cp0 = cp1;
     }
     if (!r && last_term)
-        r = emit_term(ct, cn, addinfo, last_term, last_length, pr, client_data);
+        r = emit_term(ct, cn, addinfo, last_term, last_length,
+                      pr, client_data, steps);
     return r;
 }
 
 static int emit_node(cql_transform_t ct, struct cql_node *cn,
                      WRBUF addinfo,
                      void (*pr)(const char *buf, void *client_data),
-                     void *client_data)
+                     void *client_data, int *steps)
 {
     const char *ns;
     int r = 0;
@@ -915,11 +945,13 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
         if (r)
             return r;
         if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "all"))
-            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "and");
+            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "and", steps);
         else if (cn->u.st.relation && !cql_strcmp(cn->u.st.relation, "any"))
-            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "or");
+            r = emit_wordlist(ct, cn, addinfo, pr, client_data, "or", steps);
         else
-            r = emit_terms(ct, cn, addinfo, pr, client_data, "and");
+            r = emit_terms(ct, cn, addinfo, pr, client_data, "and", steps);
+        if (r)
+            return r;
 
         if (cn->u.st.modifiers)
         {
@@ -958,15 +990,17 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
             return YAZ_SRW_UNSUPP_BOOLEAN_MODIFIER;
         }
 
-        r = emit_node(ct, cn->u.boolean.left, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.boolean.left, addinfo, pr, client_data,
+                      steps);
         if (r)
             return r;
-        r = emit_node(ct, cn->u.boolean.right, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.boolean.right, addinfo, pr, client_data,
+                      steps);
         if (r)
             return r;
         break;
     case CQL_NODE_SORT:
-        r = emit_node(ct, cn->u.sort.search, addinfo, pr, client_data);
+        r = emit_node(ct, cn->u.sort.search, addinfo, pr, client_data, steps);
         break;
     default:
         fprintf(stderr, "Fatal: impossible CQL node-type %d\n", cn->which);
@@ -989,7 +1023,8 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
         else if (!cql_strcmp(e->pattern, "set"))
             cql_apply_prefix(nmem, cn, 0, e->value);
     }
-    int r  = emit_node(ct, cn, addinfo, pr, client_data);
+    int steps = 0;
+    int r  = emit_node(ct, cn, addinfo, pr, client_data, &steps);
     nmem_destroy(nmem);
     return r;
 }
