@@ -76,6 +76,8 @@ const char *yaz_element_attribute_value_get(xmlNodePtr ptr,
                                             const char *node_name,
                                             const char *attribute_name)
 {
+    if (ptr->type != XML_ELEMENT_NODE)
+        return 0;
     if (strcmp((const char*) ptr->name, node_name))
         return 0;
     for (struct _xmlAttr *attr = ptr->properties; attr; attr = attr->next)
