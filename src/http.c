@@ -849,6 +849,11 @@ const char *yaz_check_http_redirect(ODR odr, const char *uri,
     }
     if (!http_origin(base, &host, &host_len, &port, &secure))
         return 0;
+    /* cs_create_host2 takes whatever follows the first space, even in a
+       path or fragment, as the local address to bind to. A space is not
+       valid in a URI, so refuse it rather than let a redirect choose. */
+    if (strchr(location, ' '))
+        return 0;
     location = yaz_check_location(odr, base, location, host_change);
     if (!http_origin(location, &host, &host_len, &port, &secure))
         return 0;

@@ -530,7 +530,14 @@ static void tst_http_redirect(void)
         { "unix:/tmp/socket:https://target.example/next", 0, 1, 0 },
         { "tcp:target.example:443", 0, 1, 0 },
         { "ssl:target.example:443", 0, 1, 0 },
-        { "https://[::1]#ignored:8080", 0, 1, 0 }
+        { "https://[::1]#ignored:8080", 0, 1, 0 },
+        /* text after a space is a local source address for COMSTACK */
+        { "/next# 127.0.0.77", 0, 1, 0 },
+        { "/next 127.0.0.77", 0, 1, 0 },
+        { "/next?query 127.0.0.77", 0, 1, 0 },
+        { "https://target.example/next# 127.0.0.77", 0, 1, 0 },
+        { "https://target.example:443/ [::1]:0", 0, 1, 0 },
+        { "https://target.example/next#fragment ", 0, 1, 0 }
     };
     for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); i++)
         check_http_redirect("connect:proxy.example:8080,https://target.example:443/sru",
@@ -566,6 +573,9 @@ static void tst_http_redirect(void)
                          "/next", 0, 1, 0);
     check_http_redirect("https://target/sru",
                          "connect:evil:8080,https://target/next", 0, 1, 0);
+    check_http_redirect("http://target/sru", "/next# 127.0.0.77", 0, 1, 0);
+    check_http_redirect("http://target/sru",
+                         "http://target/next# 127.0.0.77", 0, 1, 0);
 }
 
 static void tst_http_origin_length(void)
