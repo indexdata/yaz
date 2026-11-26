@@ -85,7 +85,8 @@ typedef struct unix_state
 
     int written;  /* -1 if we aren't writing */
     int towrite;  /* to verify against user input */
-    int (*complete)(const char *buf, int len); /* length/complete. */
+    int head_only; /* HTTP message is complete without content */
+    struct yaz_cs_complete_state complete_state;
     struct sockaddr_un addr;  /* returned by cs_straddr */
     int uid;
     int gid;
@@ -173,7 +174,8 @@ COMSTACK unix_type(int s, int flags, int protocol, void *vp)
     state->altbuf = 0;
     state->altsize = state->altlen = 0;
     state->towrite = state->written = -1;
-    state->complete = cs_complete_auto;
+    state->head_only = 0;
+    yaz_cs_complete_reset(&state->complete_state);
 
     yaz_log(log_level, "Created UNIX comstack h=%p", p);
 
@@ -317,7 +319,9 @@ int yaz_unix_set_head_only(COMSTACK cs, int head_only)
     if (cs->type == unix_type)
     {
         unix_state *sp = (unix_state *)cs->cprivate;
-        sp->complete = head_only ? cs_complete_auto_head : cs_complete_auto;
+        sp->head_only = head_only;
+        /* what is buffered must be examined again from the start */
+        yaz_cs_complete_reset(&sp->complete_state);
         return 0;
     }
     cs->cerrno = CSOUTSTATE;
@@ -328,7 +332,8 @@ static int unix_more(COMSTACK h)
 {
     unix_state *sp = (unix_state *)h->cprivate;
 
-    return sp->altlen && (*sp->complete)(sp->altbuf, sp->altlen) != 0;
+    return sp->altlen && yaz_cs_complete(sp->altbuf, sp->altlen, sp->head_only,
+                                         &sp->complete_state) != 0;
 }
 
 /*
@@ -562,7 +567,8 @@ static COMSTACK unix_accept(COMSTACK h)
         state->altbuf = 0;
         state->altsize = state->altlen = 0;
         state->towrite = state->written = -1;
-        state->complete = st->complete;
+        state->head_only = st->head_only;
+        yaz_cs_complete_reset(&state->complete_state);
         memcpy(&state->addr, &st->addr, sizeof(state->addr));
         cnew->state = CS_ST_ACCEPT;
         cnew->event = CS_NONE;
@@ -612,8 +618,11 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
         sp->altbuf = tmpc;
         sp->altsize = tmpi;
     }
+    else /* nothing buffered: a new message starts here */
+        yaz_cs_complete_reset(&sp->complete_state);
     h->io_pending = 0;
-    while ((berlen = (*sp->complete)(*buf, hasread)) == 0)
+    while ((berlen = yaz_cs_complete(*buf, hasread, sp->head_only,
+                                     &sp->complete_state)) == 0)
     {
         if (!*bufsize)
         {
@@ -675,7 +684,18 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     }
     yaz_log(log_level, "  Out of read loop with hasread=%d, berlen=%d",
                   hasread, berlen);
-    /* move surplus buffer (or everything if we didn't get a BER rec.) */
+    if (!berlen)
+    {   /* incomplete: keep it all, by switching buffers, not by copying */
+        tmpc = *buf;
+        tmpi = *bufsize;
+        *buf = sp->altbuf;
+        *bufsize = sp->altsize;
+        sp->altbuf = tmpc;
+        sp->altsize = tmpi;
+        sp->altlen = hasread;
+        return 1;
+    }
+    /* move surplus buffer */
     if (hasread > berlen)
     {
         tomove = req = hasread - berlen;
@@ -695,7 +715,7 @@ static int unix_get(COMSTACK h, char **buf, int *bufsize)
     }
     if (berlen < CS_UNIX_BUFCHUNK - 1)
         *(*buf + berlen) = '\0';
-    return berlen ? berlen : 1;
+    return berlen;
 }
 
 

@@ -450,6 +450,8 @@ YAZ_EXPORT int cs_complete_auto_head(const char *buf, int len);
     Transfer-Encoding combined with Content-Length, and transfer codings
     other than a single chunked token. Field names must be HTTP tokens;
     folded fields and control characters other than value tabs are rejected.
+    A chunk-size line and the trailer fields are limited to 8192 bytes each.
+    BER rejects tags of more than 6 bytes.
  */
 YAZ_EXPORT int cs_complete_auto(const char *buf, int len);
 /** \brief Legacy OpenSSL session accessor
