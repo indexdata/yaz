@@ -83,6 +83,9 @@ struct ccl_rpn_node *ccl_remove_stop_r(ccl_stop_words_t csw,
     case CCL_RPN_PROX:
         left = ccl_remove_stop_r(csw, bibset, p->u.p[0]);
         right = ccl_remove_stop_r(csw, bibset, p->u.p[1]);
+        /* a child may have been deleted or replaced by its own child */
+        p->u.p[0] = left;
+        p->u.p[1] = right;
         if (!left || !right)
         {
             /* we must delete our binary node and return child (if any) */

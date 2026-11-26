@@ -768,6 +768,73 @@ static void tst_range_error_position(void)
     wrbuf_destroy(query);
 }
 
+static int tst_stop_words_query(CCL_bibset bibset, const char *query,
+                                const char *result)
+{
+    int ret = 0, error, pos;
+    struct ccl_rpn_node *rpn = ccl_find_str(bibset, query, &error, &pos);
+
+    if (rpn)
+    {
+        ccl_stop_words_t csw = ccl_stop_words_create();
+        WRBUF wrbuf = wrbuf_alloc();
+
+        ccl_stop_words_tree(csw, bibset, &rpn);
+        ccl_pquery(wrbuf, rpn);
+        if (!strcmp(wrbuf_cstr(wrbuf), result))
+            ret = 1;
+        else
+        {
+            yaz_log(YLOG_WARN, "%s: result does not match", query);
+            yaz_log(YLOG_WARN, " expected %s", result);
+            yaz_log(YLOG_WARN, " got      %s", wrbuf_cstr(wrbuf));
+        }
+        wrbuf_destroy(wrbuf);
+        ccl_stop_words_destroy(csw);
+        ccl_rpn_delete(rpn);
+    }
+    else
+        yaz_log(YLOG_WARN, "%s: parse failed", query);
+    return ret;
+}
+
+static void tst_stop_words(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+
+    YAZ_CHECK(bibset);
+    if (!bibset)
+        return;
+    ccl_qual_fitem(bibset, "s=al", "term");
+    ccl_qual_add_special(bibset, "stop.*", "the of a");
+
+    YAZ_CHECK(tst_stop_words_query(bibset, "cat", "cat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "the", ""));
+    YAZ_CHECK(tst_stop_words_query(bibset, "cat hat the", "@and cat hat "));
+    /* stop word removed below the top node */
+    YAZ_CHECK(tst_stop_words_query(bibset, "the cat hat", "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "cat the hat", "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "the and cat and hat",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "(the or cat) and hat",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "cat and (the or hat)",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "(the or of) and cat and hat",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "(cat and the) or (a and hat)",
+                                   "@or cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "(cat not the) and hat",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "(the % cat) and hat",
+                                   "@and cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "cat % (the or hat)",
+                                   "@prox 0 1 0 2 k 2 cat hat "));
+    YAZ_CHECK(tst_stop_words_query(bibset, "the of a the of a cat hat the",
+                                   "@and cat hat "));
+    ccl_qual_rm(&bibset);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -782,6 +849,7 @@ int main(int argc, char **argv)
     tst3();
     tst_relation_operand();
     tst_addinfo();
+    tst_stop_words();
     YAZ_CHECK_TERM;
 }
 /*
