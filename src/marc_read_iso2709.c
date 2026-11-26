@@ -32,6 +32,7 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
     int length_data_entry;
     int length_starting;
     int length_implementation;
+    int data_used = 0;
 
     yaz_marc_reset(mt);
 
@@ -232,6 +233,16 @@ int yaz_marc_read_iso2709(yaz_marc_t mt, const char *buf, int bsize)
         {
             yaz_marc_cprintf(mt, "No separator at end of field length=%d",
                              data_length);
+        }
+        /* Entries are only validated one by one, so they may share data.
+         * Fields that do not overlap cannot use more than the data area;
+         * this keeps the decoded record proportional to the input. */
+        data_used += i + 1 - (data_offset + base_address);
+        if (data_used > record_length - base_address)
+        {
+            yaz_marc_cprintf(mt, "Directory offset %d: Overlapping fields",
+                             entry_p0);
+            return -1;
         }
     }
     return record_length;
