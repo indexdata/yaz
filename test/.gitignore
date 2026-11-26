@@ -59,5 +59,6 @@ test_zoom_send
 test_search_present
 test_sru_update
 test_gfs_vhosts
+test_charneg
 test_client_record
 test_gfs_requests

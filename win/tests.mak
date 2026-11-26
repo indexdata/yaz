@@ -4,6 +4,7 @@
 # Keep this list in step with check_PROGRAMS in test/Makefile.am.
 # test_odrcodec.c is generated support for test_odr, not a test program.
 TEST_PROGRAMS = \
+    $(BINDIR)\test_charneg.exe \
     $(BINDIR)\test_client_record.exe \
     $(BINDIR)\test_ccl.exe \
     $(BINDIR)\test_comstack.exe \

@@ -1,7 +1,7 @@
 ## This file is part of the YAZ toolkit.
 ## Copyright (C) Index Data
 
-check_PROGRAMS = test_client_record test_ccl test_comstack test_cql2ccl \
+check_PROGRAMS = test_client_record test_ccl test_charneg test_comstack test_cql2ccl \
  test_daemon test_daemon_no_groups test_daemon_no_passwd \
  test_errno test_statserv_startup test_embed_record test_eventl test_filepath test_file_glob \
  test_iconv test_icu test_json \
@@ -67,6 +67,7 @@ test_wrbuf_SOURCES = test_wrbuf.c
 test_odr_SOURCES = test_odrcodec.c test_odrcodec.h test_odr.c
 test_odrstack_SOURCES = test_odrstack.c
 test_ccl_SOURCES = test_ccl.c
+test_charneg_SOURCES = test_charneg.c
 test_log_SOURCES = test_log.c
 test_mutex_SOURCES = test_mutex.c
 test_soap1_SOURCES = test_soap1.c

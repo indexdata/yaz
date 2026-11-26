@@ -316,7 +316,15 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
                               char ***charsets, int *num_charsets,
                               char ***langs, int *num_langs, int *selected)
 {
-    int i;
+    /* a peer may send either arm; only a proposal can be read as one */
+    if (p->which != Z_CharSetandLanguageNegotiation_proposal)
+    {
+        if (num_charsets)
+            *num_charsets = 0;
+        if (num_langs)
+            *num_langs = 0;
+        return;
+    }
     Z_OriginProposal *pro = p->u.proposal;
 
     if (num_charsets && charsets)
@@ -328,7 +336,7 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
             (*charsets) = (char **)
                 nmem_malloc(mem, pro->num_proposedCharSets * sizeof(char *));
 
-            for (i = 0; i < pro->num_proposedCharSets; i++)
+            for (int i = 0; i < pro->num_proposedCharSets; i++)
             {
                 (*charsets)[i] = 0;
 
@@ -370,7 +378,7 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
             (*langs) = (char **)
                 nmem_malloc(mem, pro->num_proposedlanguages * sizeof(char *));
 
-            for (i = 0; i < pro->num_proposedlanguages; i++)
+            for (int i = 0; i < pro->num_proposedlanguages; i++)
                 (*langs)[i] = nmem_strdup(mem, pro->proposedlanguages[i]);
         }
         else
@@ -385,8 +393,10 @@ void yaz_get_proposal_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
 void yaz_get_response_charneg(NMEM mem, Z_CharSetandLanguageNegotiation *p,
                               char **charset, char **lang, int *selected)
 {
+    /* a peer may send either arm; only a response can be read as one */
+    if (p->which != Z_CharSetandLanguageNegotiation_response)
+        return;
     Z_TargetResponse *res = p->u.response;
-
     if (charset && res->which == Z_TargetResponse_private &&
         res->u.zprivate->which == Z_PrivateCharacterSet_externallySpecified)
     {
