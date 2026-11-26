@@ -889,12 +889,53 @@ static void tst_field_or(void)
     ccl_qual_rm(&bibset);
 }
 
+static void tst_long_term(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+    WRBUF query = wrbuf_alloc();
+    WRBUF result = wrbuf_alloc();
+    const int len = 100000;
+    int i;
+
+    ccl_qual_fitem(bibset, "u=4", "ti");
+    ccl_qual_fitem(bibset, "t=x", "reg");
+
+    /* A term is built in time proportional to its length. */
+    wrbuf_puts(query, "ti=");
+    wrbuf_puts(result, "@attr 1=4 ");
+    for (i = 0; i < len; i++)
+    {
+        wrbuf_putc(query, 'x');
+        wrbuf_putc(result, 'x');
+    }
+    wrbuf_puts(result, " ");
+    YAZ_CHECK(tst_ccl_query(bibset, wrbuf_cstr(query), wrbuf_cstr(result)));
+
+    /* Phrase with each character taking two in the term. */
+    wrbuf_rewind(query);
+    wrbuf_rewind(result);
+    wrbuf_puts(query, "reg=a? ");
+    wrbuf_puts(result, "@attr 5=102 \"a.* ");
+    for (i = 0; i < len; i++)
+    {
+        wrbuf_putc(query, '.');
+        wrbuf_puts(result, "\\\\.");
+    }
+    wrbuf_puts(result, "\" ");
+    YAZ_CHECK(tst_ccl_query(bibset, wrbuf_cstr(query), wrbuf_cstr(result)));
+
+    ccl_qual_rm(&bibset);
+    wrbuf_destroy(query);
+    wrbuf_destroy(result);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_range_error_position();
     tst_complexity();
+    tst_long_term();
     tst1(0);
     tst1(1);
     tst1(2);
