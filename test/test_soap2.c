@@ -541,6 +541,70 @@ static void tst_sru_basic_auth(void)
     check_sru_basic_auth("Basic !!!!", 0, 0);
     check_sru_basic_auth("Basic dXNlcjpwYXN!", 0, 0);
 }
+
+static void tst_srw_explain_response(void)
+{
+    /* second response has no record: nothing of the first may show up */
+    const char *xml[] = {
+        "<explainResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\"><record>"
+        "<recordSchema>schema1</recordSchema>"
+        "<recordData><x/></recordData>"
+        "<recordIdentifier>id1</recordIdentifier>"
+        "</record></explainResponse>",
+        "<explainResponse xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\"/>"
+    };
+    Z_SOAP_Handler h[2] = {
+        {YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    ODR decode = odr_createmem(ODR_DECODE);
+    ODR encode = odr_createmem(ODR_ENCODE);
+    int i;
+
+    for (i = 0; i < 2; i++)
+    {
+        Z_SOAP *soap = 0;
+        char *buf = (char *) xml[i];
+        int len = strlen(xml[i]);
+        Z_SRW_explainResponse *res = 0;
+
+        YAZ_CHECK_EQ(z_soap_codec(decode, &soap, &buf, &len, h), 0);
+        YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+        if (soap && soap->which == Z_SOAP_generic)
+        {
+            Z_SRW_PDU *sr = (Z_SRW_PDU *) soap->u.generic->p;
+            YAZ_CHECK(sr && sr->which == Z_SRW_explain_response);
+            if (sr && sr->which == Z_SRW_explain_response)
+                res = sr->u.explain_response;
+        }
+        YAZ_CHECK(res);
+        if (res && i == 0)
+        {
+            YAZ_CHECK_EQ(res->record.recordPacking, Z_SRW_recordPacking_XML);
+            YAZ_CHECK(res->extra_record &&
+                      res->extra_record->recordIdentifier &&
+                      !strcmp(res->extra_record->recordIdentifier, "id1"));
+        }
+        else if (res)
+        {
+            YAZ_CHECK_EQ(res->record.recordPacking,
+                         Z_SRW_recordPacking_string);
+            YAZ_CHECK(res->extra_record == 0);
+            if (res->extra_record == 0)
+            {
+                char *out_buf = 0;
+                int out_len = 0;
+                YAZ_CHECK_EQ(z_soap_codec_enc(encode, &soap, &out_buf,
+                                              &out_len, h, 0), 0);
+                YAZ_CHECK(out_buf && out_len > 0);
+            }
+        }
+        odr_reset(decode);
+        odr_reset(encode);
+    }
+    odr_destroy(decode);
+    odr_destroy(encode);
+}
 #endif
 
 static void tst_array_to_uri(void)
@@ -690,6 +754,7 @@ int main(int argc, char **argv)
     tst_srw_record_data();
     tst_sru_basic_auth();
     tst_surrogate_diagnostics();
+    tst_srw_explain_response();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;

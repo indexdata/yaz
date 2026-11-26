@@ -50,6 +50,7 @@ static int yaz_srw_record(ODR o, xmlNodePtr pptr, Z_SRW_record *rec,
         rec->packing = 0;
 #endif
         rec->recordSchema = 0;
+        rec->recordPacking = Z_SRW_recordPacking_string;
         rec->recordData_buf = 0;
         rec->recordData_len = 0;
         rec->recordPosition = 0;
@@ -708,6 +709,7 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
             res->diagnostics = 0;
             res->num_diagnostics = 0;
             res->nextRecordPosition = 0;
+            res->extra_records = 0;
             res->facetList = 0;
             res->suggestions = 0;
 
@@ -802,7 +804,9 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 odr_malloc(o, sizeof(*res));
             res->diagnostics = 0;
             res->num_diagnostics = 0;
+            res->extra_record = 0;
             res->record.recordSchema = 0;
+            res->record.recordPacking = Z_SRW_recordPacking_string;
             res->record.recordData_buf = 0;
             res->record.recordData_len = 0;
             res->record.recordPosition = 0;
