@@ -374,6 +374,13 @@ void cql_transform_close(cql_transform_t ct);
     \retval != 0 error
 
     The result is written to a user-defined stream.
+
+    The index and the relation modifiers of a search clause are written
+    for each of its terms. To bound the size of the result, a name that is
+    copied to it by * in a pattern may be at most 255 characters (a longer
+    one is unsupported), and conversion fails with
+    YAZ_SRW_QUERY_SYNTAX_ERROR when the terms of the query, each counted
+    with its relation modifiers, exceed YAZ_PQF_MAX_NODES.
 */
 YAZ_EXPORT
 int cql_transform(cql_transform_t ct,
@@ -390,7 +397,8 @@ int cql_transform(cql_transform_t ct,
     \retval 0 success
     \retval != 0 error code
 
-    The result is written to a user-defined stream.
+    The result is written to a user-defined stream. The limits of
+    cql_transform apply.
 */
 YAZ_EXPORT
 int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
