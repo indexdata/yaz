@@ -670,6 +670,33 @@ static const char *datafield_name[2]    = { "datafield", "d"};
 static const char *indicator_name[2]    = { "ind", "i"};
 static const char *subfield_name[2]     = { "subfield", "s"};
 
+/** \brief writes comment text for the XML writers
+    \param wr WRBUF output
+    \param comment comment text
+
+    Comments may quote data from the record. "--" is not allowed in an
+    XML comment and a comment may not end with "-", so a blank is inserted
+    in those cases. Control characters not allowed in XML are omitted.
+*/
+static void marc_write_xml_comment(WRBUF wr, const char *comment)
+{
+    char last = '\0';
+    const char *cp;
+
+    for (cp = comment; *cp; cp++)
+    {
+        /* only TAB,CR,LF of ASCII CTRL are allowed in XML 1.0! */
+        if (*cp > 0 && *cp <= 31 && *cp != 9 && *cp != 10 && *cp != 13)
+            continue;
+        if (*cp == '-' && last == '-')
+            wrbuf_putc(wr, ' ');
+        wrbuf_putc(wr, *cp);
+        last = *cp;
+    }
+    if (last == '-')
+        wrbuf_putc(wr, ' ');
+}
+
 /** \brief common MARC XML/Xchange/turbomarc writer
     \param mt handle
     \param wr WRBUF output
@@ -813,7 +840,7 @@ static int yaz_marc_write_marcxml_wrbuf(yaz_marc_t mt, WRBUF wr,
             break;
         case YAZ_MARC_COMMENT:
             wrbuf_printf(wr, "<!-- ");
-            wrbuf_puts(wr, n->u.comment);
+            marc_write_xml_comment(wr, n->u.comment);
             wrbuf_printf(wr, " -->\n");
             break;
         case YAZ_MARC_LEADER:
@@ -1023,7 +1050,9 @@ static int yaz_marc_write_xml_turbo_xml(yaz_marc_t mt, xmlNode **root_ptr,
                                   BAD_CAST wrbuf_cstr(wr_cdata));
             break;
         case YAZ_MARC_COMMENT:
-            ptr = xmlNewComment(BAD_CAST n->u.comment);
+            wrbuf_rewind(wr_cdata);
+            marc_write_xml_comment(wr_cdata, n->u.comment);
+            ptr = xmlNewComment(BAD_CAST wrbuf_cstr(wr_cdata));
             xmlAddChild(record_ptr, ptr);
             break;
         case YAZ_MARC_LEADER:
@@ -1113,7 +1142,9 @@ int yaz_marc_write_xml(yaz_marc_t mt, xmlNode **root_ptr,
             xmlNewProp(ptr, BAD_CAST "tag", BAD_CAST n->u.controlfield.tag);
             break;
         case YAZ_MARC_COMMENT:
-            ptr = xmlNewComment(BAD_CAST n->u.comment);
+            wrbuf_rewind(wr_cdata);
+            marc_write_xml_comment(wr_cdata, n->u.comment);
+            ptr = xmlNewComment(BAD_CAST wrbuf_cstr(wr_cdata));
             xmlAddChild(record_ptr, ptr);
             break;
         case YAZ_MARC_LEADER:
