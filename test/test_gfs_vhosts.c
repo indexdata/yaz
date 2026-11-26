@@ -5,6 +5,7 @@
 /* Use the real server selection with an in-memory virtual-host configuration. */
 #include "../src/statserv.c"
 #include <yaz/test.h>
+#include <yaz/diagbib1.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -13,6 +14,9 @@
 static struct gfs_server servers[2];
 static int inits[2], searches[2], closes[2];
 static int use_handle;
+static int auth_inits, auth_searches, auth_closes;
+static const char *auth_user;
+static char connection[20];
 
 static int search_a(void *handle, bend_search_rr *rr)
 {
@@ -131,6 +135,37 @@ static bend_initresult *init_alive(bend_initrequest *rr)
     return &result;
 }
 
+/* The handle of a session is the name of the user that logged in. */
+static int search_auth(void *handle, bend_search_rr *rr)
+{
+    auth_user = (const char *) handle;
+    auth_searches++;
+    rr->hits = 0;
+    return 0;
+}
+
+static bend_initresult *init_auth(bend_initrequest *rr)
+{
+    static bend_initresult result;
+    const char *open = rr->auth && rr->auth->which == Z_IdAuthentication_open
+        ? rr->auth->u.open : "";
+    auth_inits++;
+    memset(&result, 0, sizeof(result));
+    rr->bend_search = search_auth;
+    if (!strcmp(open, "alice/wonderland"))
+        result.handle = "alice";
+    else if (!strcmp(open, "bob/builder"))
+        result.handle = "bob";
+    else
+        result.errcode = YAZ_BIB1_INIT_AC_BAD_USERID_AND_OR_PASSWORD;
+    return &result;
+}
+
+static void close_auth(void *handle)
+{
+    auth_closes++;
+}
+
 static int get(COMSTACK cs, char **buf, int *size)
 {
     xfree(*buf);
@@ -149,12 +184,14 @@ static const char *addrstr(COMSTACK cs)
     return "test";
 }
 
-static void send_search(association *assoc, const char *host, int status)
+static void send_search_args(association *assoc, const char *host,
+                             const char *args, const char *headers, int status)
 {
     WRBUF wire = wrbuf_alloc();
     ODR dec = odr_createmem(ODR_DECODE);
     wrbuf_printf(wire, "GET /db?version=1.2&operation=searchRetrieve&"
-                 "query=cql.allRecords%%3D1 HTTP/1.1\r\nHost: %s\r\n\r\n", host);
+                 "query=cql.allRecords%%3D1%s HTTP/1.1\r\nHost: %s\r\n%s\r\n",
+                 args, host, headers);
     assoc->client_link->user = (void *) wrbuf_cstr(wire);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(assoc->client_chan, EVENT_INPUT);
@@ -166,13 +203,25 @@ static void send_search(association *assoc, const char *host, int status)
         odr_setbuf(dec, response->response, response->len_response, 0);
         YAZ_CHECK(z_GDU(dec, &reply, 0, 0));
         YAZ_CHECK(reply && reply->which == Z_GDU_HTTP_Response);
+        *connection = '\0';
         if (reply && reply->which == Z_GDU_HTTP_Response)
+        {
+            const char *v = z_HTTP_header_lookup(
+                reply->u.HTTP_Response->headers, "Connection");
             YAZ_CHECK_EQ(reply->u.HTTP_Response->code, status);
+            if (v)
+                yaz_snprintf(connection, sizeof connection, "%s", v);
+        }
         request_release(response);
     }
     assoc->client_link->user = 0;
     odr_destroy(dec);
     wrbuf_destroy(wire);
+}
+
+static void send_search(association *assoc, const char *host, int status)
+{
+    send_search_args(assoc, host, "", "", status);
 }
 
 static void tst_switch(int nonnull)
@@ -314,6 +363,67 @@ static void tst_alive(void)
     control_block.xml_config[0] = 0;
     statserv_setcontrol(&control_block);
 }
+
+/* Requests of several users on one connection, as a reverse proxy that
+   keeps its server connection open sends them. */
+static void tst_auth(const char *intruder)
+{
+    const char *alice = "&x-username=alice&x-password=wonderland";
+    const char *bob = "&x-username=bob&x-password=builder";
+    const char *forwarded = "X-Forwarded-For: 192.0.2.1\r\n";
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    association *assoc;
+    statserv_options_block saved = control_block;
+
+    auth_inits = auth_searches = auth_closes = 0;
+    auth_user = 0;
+    control_block.bend_init = init_auth;
+    control_block.bend_close = close_auth;
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_HTTP;
+    cs.f_get = get;
+    cs.f_more = more;
+    cs.f_addrstr = addrstr;
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+
+    send_search_args(assoc, "a.example", alice, "", 200);
+    send_search_args(assoc, "a.example", alice, "", 200);
+    YAZ_CHECK_EQ(auth_inits, 1); /* reuse for the same user */
+    YAZ_CHECK_EQ(auth_searches, 2);
+    YAZ_CHECK(auth_user && !strcmp(auth_user, "alice"));
+    YAZ_CHECK(!strcmp(connection, "Keep-Alive"));
+
+    send_search_args(assoc, "a.example", bob, "", 200);
+    YAZ_CHECK_EQ(auth_inits, 2); /* another user gets a session of its own */
+    YAZ_CHECK_EQ(auth_closes, 1);
+    YAZ_CHECK_EQ(auth_searches, 3);
+    YAZ_CHECK(auth_user && !strcmp(auth_user, "bob"));
+
+    send_search_args(assoc, "a.example", bob, forwarded, 200);
+    YAZ_CHECK_EQ(auth_inits, 3); /* and so does another forwarded client */
+    YAZ_CHECK_EQ(auth_closes, 2);
+    send_search_args(assoc, "a.example", bob, forwarded, 200);
+    YAZ_CHECK_EQ(auth_inits, 3);
+    YAZ_CHECK_EQ(auth_searches, 5);
+
+    /* Bad or no credentials must not be served by the previous session. */
+    send_search_args(assoc, "a.example", intruder, forwarded, 200);
+    YAZ_CHECK_EQ(auth_inits, 4);
+    YAZ_CHECK_EQ(auth_closes, 3);
+    YAZ_CHECK_EQ(auth_searches, 5);
+    YAZ_CHECK(assoc->init == 0);
+    YAZ_CHECK(assoc->backend == 0);
+    YAZ_CHECK_EQ(assoc->state, ASSOC_DEAD);
+    YAZ_CHECK(!strcmp(connection, "close"));
+
+    destroy_association(assoc);
+    YAZ_CHECK_EQ(auth_closes, 3);
+    xfree(chan);
+    control_block = saved;
+    statserv_setcontrol(&control_block);
+}
 #endif
 
 int main(int argc, char **argv)
@@ -326,6 +436,8 @@ int main(int argc, char **argv)
     tst_switch(0);
     tst_switch(1);
     tst_alive();
+    tst_auth("");
+    tst_auth("&x-username=alice&x-password=wrong");
     xml_config_close();
 #endif
     YAZ_CHECK_TERM;

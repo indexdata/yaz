@@ -3834,7 +3834,12 @@ bend_initresult (*bend_init)(bend_initrequest *r);
     <para>
      This handler is also called when operating in SRU mode - when
      a connection has been made (even though SRU does not offer
-     this service).
+     this service). HTTP requests on a connection are independent of
+     each other, so the handler may be called several times for one SRU
+     connection: a request with other credentials, or with another
+     <literal>X-Forwarded-For</literal> address, than the request that
+     the session was made for ends that session
+     (<function>bend_close</function>) and starts a new one.
     </para>
     <para>
      Unlike previous versions of YAZ, the <function>bend_init</function> also
