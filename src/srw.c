@@ -301,6 +301,9 @@ static Z_FacetField *yaz_sru_proxy_decode_facet_field(ODR odr, xmlNodePtr ptr)
     xmlNodePtr node;
     /* USE attribute */
     const char* name = yaz_element_attribute_value_get(ptr, "facet", "code");
+
+    if (name == 0)
+        return 0;
     yaz_log(YLOG_DEBUG, "sru-proxy facet type: %s", name);
 
     Z_AttributeList *list = zget_AttributeList_use_string(odr, name);
@@ -343,12 +346,16 @@ static int yaz_sru_proxy_decode_facets(ODR o, xmlNodePtr root,
             {
                 if (yaz_match_xsd_element(node, "facet"))
                 {
-                    facet_list_field_set(
-                        o, facet_list,
-                        yaz_sru_proxy_decode_facet_field(o, node), num_facets);
-                    num_facets++;
+                    Z_FacetField *ff =
+                        yaz_sru_proxy_decode_facet_field(o, node);
+                    if (ff)
+                    {
+                        facet_list_field_set(o, facet_list, ff, num_facets);
+                        num_facets++;
+                    }
                 }
             }
+            facet_list->num = num_facets;
             *facetList = facet_list;
             break;
         }
