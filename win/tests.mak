@@ -33,6 +33,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_odrstack.exe \
     $(BINDIR)\test_oid.exe \
     $(BINDIR)\test_options.exe \
+    $(BINDIR)\test_otherinfo.exe \
     $(BINDIR)\test_pquery.exe \
     $(BINDIR)\test_query_charset.exe \
     $(BINDIR)\test_record_conv.exe \

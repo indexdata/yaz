@@ -102,6 +102,7 @@ Z_OtherInformationUnit *yaz_oi_update(
         else
         {
             if (otherInformation->list[i]->category &&
+                otherInformation->list[i]->category->categoryTypeId &&
                 categoryValue ==
                 *otherInformation->list[i]->category->categoryValue &&
                 !oid_oidcmp (oid, otherInformation->list[i]->category->
