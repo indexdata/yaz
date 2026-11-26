@@ -946,9 +946,11 @@ static void listener(IOCHAN h, int event)
         newHandle = (HANDLE) _beginthread(event_loop_thread, 0, new_chan);
         if (newHandle == (HANDLE) -1)
         {
-
-            yaz_log(YLOG_FATAL|YLOG_ERRNO, "Failed to create new thread.");
-            iochan_destroy(h);
+            /* drop this connection only; the listener must survive */
+            yaz_log(YLOG_WARN|YLOG_ERRNO, "Failed to create new thread.");
+            cs_close(new_line);
+            destroy_association(newas);
+            xfree(new_chan);
             return;
         }
         /* We successfully created the thread, so add it to the list */
@@ -1061,10 +1063,10 @@ static void listener(IOCHAN h, int event)
             child = xmalloc(sizeof(*child));
             if ((res = fork()) < 0)
             {
+                /* drop this connection only; the listener must survive */
+                yaz_log(YLOG_WARN|YLOG_ERRNO, "fork");
                 xfree(child);
                 cs_close(new_line);
-                yaz_log(YLOG_FATAL|YLOG_ERRNO, "fork");
-                iochan_destroy(h);
                 return;
             }
             else if (res == 0) /* child */
@@ -1106,7 +1108,14 @@ static void listener(IOCHAN h, int event)
         {
 #if YAZ_POSIX_THREADS
             pthread_t child_thread;
-            pthread_create(&child_thread, 0, new_session, new_line);
+            res = pthread_create(&child_thread, 0, new_session, new_line);
+            if (res)
+            {
+                errno = res;
+                yaz_log(YLOG_WARN|YLOG_ERRNO, "pthread_create");
+                cs_close(new_line);
+                return;
+            }
             pthread_detach(child_thread);
 #else
             new_session(new_line);
