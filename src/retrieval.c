@@ -300,6 +300,19 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                           const char **backend_schema,
                           Odr_oid **backend_syntax)
 {
+    return yaz_retrieval_request2(p, schema, syntax, match_schema,
+                                  match_syntax, rc, backend_schema,
+                                  backend_syntax, 0);
+}
+
+int yaz_retrieval_request2(yaz_retrieval_t p,
+                           const char *schema, const Odr_oid *syntax,
+                           const char **match_schema, Odr_oid **match_syntax,
+                           yaz_record_conv_t *rc,
+                           const char **backend_schema,
+                           Odr_oid **backend_syntax,
+                           NMEM nmem)
+{
     struct yaz_retrieval_elem *el = p->list;
     int syntax_matches = 0;
     int schema_matches = 0;
@@ -346,6 +359,7 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                 el_best = el;
         }
     }
+    wrbuf_destroy(w);
     if (el_best)
     {
         el = el_best;
@@ -361,14 +375,19 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                 if (*el->backend_name)
                 {
                     const char *cp;
-                    wrbuf_rewind(w);
-                    wrbuf_puts(w, el->backend_name);
+                    *backend_schema = el->backend_name;
                     if (el->split && *el->split && schema
                         && (cp = strchr(schema, *el->split)))
                     {
-                        wrbuf_puts(w, cp);
+                        size_t len = strlen(el->backend_name);
+                        size_t sz = len + strlen(cp) + 1;
+                        /* without NMEM the result can not be freed */
+                        char *buf = (char *)
+                            (nmem ? nmem_malloc(nmem, sz) : xmalloc(sz));
+                        memcpy(buf, el->backend_name, len);
+                        strcpy(buf + len, cp);
+                        *backend_schema = buf;
                     }
-                    *backend_schema = wrbuf_cstr(w);
                 }
             }
             else
