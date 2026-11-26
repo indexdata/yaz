@@ -980,19 +980,25 @@ static int cql2pqf_scan(ODR odr, const char *cql, cql_transform_t ct,
 static int ccl2pqf(ODR odr, const Odr_oct *ccl, CCL_bibset bibset,
                    bend_search_rr *bsrr)
 {
-    struct ccl_rpn_node *node;
-    int errcode, pos;
-
     char *ccl0 = odr_strdupn(odr, (char*) ccl->buf, ccl->len);
-    if ((node = ccl_find_str(bibset, ccl0, &errcode, &pos)) == 0)
+    int errcode, pos;
+    struct ccl_rpn_node *node = ccl_find_str(bibset, ccl0, &errcode, &pos);
+    if (node == 0)
     {
         bsrr->errstring = (char*) ccl_err_msg(errcode);
         return YAZ_SRW_QUERY_SYNTAX_ERROR;    /* Query syntax error */
     }
 
-    bsrr->query->which = Z_Query_type_1;
-    bsrr->query->u.type_1 = ccl_rpn_query(odr, node);
+    /* PQF parser may reject what CCL parser accepted (nesting, attributes) */
+    Z_RPNQuery *rpnquery = ccl_rpn_query(odr, node);
     ccl_rpn_delete(node);
+    if (!rpnquery)
+    {
+        bsrr->errstring = "CCL to RPN conversion failed";
+        return YAZ_SRW_QUERY_SYNTAX_ERROR;    /* Query syntax error */
+    }
+    bsrr->query->which = Z_Query_type_1;
+    bsrr->query->u.type_1 = rpnquery;
     return 0;
 }
 
