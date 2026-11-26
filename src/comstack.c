@@ -321,6 +321,12 @@ int yaz_http_parse_chunks(const char *buf, int len, char *content_buf,
         if (ret <= 0)
             return -1;
         i += ret;
+        /* only blanks, then chunk extension or line ending may follow size */
+        while (i < len && (buf[i] == ' ' || buf[i] == '\t'))
+            i++;
+        if (i < len && buf[i] != ';' && buf[i] != '\n'
+            && !(buf[i] == '\r' && (i == len - 1 || buf[i + 1] == '\n')))
+            return -1;
         /* skip chunk extension and consume the line ending */
         while (1)
         {

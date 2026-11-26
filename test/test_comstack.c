@@ -313,6 +313,68 @@ static void tst_http_request(void)
     }
 
     {
+        /* one header, one chunk with blanks after chunk size */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "GET / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "3 ; foo\r\n"
+            "123\r\n"
+            "0 \t\r\n\r\n"
+            "GET / HTTP/1.0\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 66), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 67), 67);
+    }
+
+    {
+        /* chunk size followed by something that is not an extension */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "POST / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "0x3\r\n"
+            "\r\n"
+            "123\r\n"
+            "0\r\n\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 48), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 49), -1);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, (int) strlen(http_buf)), -1);
+    }
+
+    {
+        /* chunk size followed by blank and more digits */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "POST / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "3 3\r\n"
+            "123\r\n"
+            "0\r\n\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 49), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 50), -1);
+    }
+
+    {
+        /* chunk size followed by bare CR */
+        const char *http_buf =
+            /*12345678901234567890123456789 */
+            "POST / HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "0\r3\r\n"
+            "\r\n";
+
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 49), 0);
+        YAZ_CHECK_EQ(cs_complete_auto(http_buf, 50), -1);
+    }
+
+    {
         /* a pipelined request is not a trailer field */
         const char *http_buf =
             "POST / HTTP/1.1\r\n"

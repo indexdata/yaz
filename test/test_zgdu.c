@@ -700,6 +700,14 @@ int main (int argc, char **argv)
     tst_invalid_encoding("POST / HTTP/1.1\r\n"
                          "Transfer-Encoding: chunked\r\n"
                          "\r\n"
+                         "0x3\r\n\r\nhej\r\n0\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
+                         "3 3\r\nhej\r\n0\r\n\r\n");
+    tst_invalid_encoding("POST / HTTP/1.1\r\n"
+                         "Transfer-Encoding: chunked\r\n"
+                         "\r\n"
                          "3\r\nhe");
     tst_invalid_encoding("POST / HTTP/1.1\r\n"
                          "Transfer-Encoding: chunked\r\n"
