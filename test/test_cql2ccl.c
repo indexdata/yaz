@@ -189,6 +189,21 @@ static void tst(void)
 
 }
 
+/* Keep large term counts below the boolean depth limit. */
+static void tst_balanced_terms(WRBUF w, int terms)
+{
+    if (terms == 1)
+        wrbuf_puts(w, "a");
+    else
+    {
+        wrbuf_puts(w, "(");
+        tst_balanced_terms(w, terms / 2);
+        wrbuf_puts(w, " or ");
+        tst_balanced_terms(w, terms - terms / 2);
+        wrbuf_puts(w, ")");
+    }
+}
+
 /* relation modifiers count once for each term that they apply to */
 static int tst_modifiers(CQL_parser cp, int modifiers, int terms)
 {
@@ -198,9 +213,8 @@ static int tst_modifiers(CQL_parser cp, int modifiers, int terms)
     wrbuf_puts(w, "dc.title =");
     for (i = 0; i < modifiers; i++)
         wrbuf_puts(w, "/m");
-    wrbuf_puts(w, " (a");
-    for (i = 1; i < terms; i++)
-        wrbuf_puts(w, " or a");
+    wrbuf_puts(w, " (");
+    tst_balanced_terms(w, terms);
     wrbuf_puts(w, ")");
     r = cql_parser_string(cp, wrbuf_cstr(w));
     wrbuf_destroy(w);
@@ -212,15 +226,57 @@ static void tst_limits(void)
     CQL_parser cp = cql_parser_create();
 
     YAZ_CHECK(tst_modifiers(cp, 64, CQL_MAX_MODIFIERS / 64 + 1) != 0);
-    YAZ_CHECK(tst_modifiers(cp, CQL_MAX_MODIFIERS + 1, 1) != 0);
+    YAZ_CHECK(tst_modifiers(cp, 1, CQL_MAX_MODIFIERS + 1) != 0);
     /* the count starts over for each query */
     YAZ_CHECK(tst_modifiers(cp, 64, CQL_MAX_MODIFIERS / 64) == 0);
     cql_parser_destroy(cp);
 
-    /* terms without modifiers are not limited */
+    /* terms without modifiers do not count towards the modifier budget */
     cp = cql_parser_create();
     YAZ_CHECK(tst_modifiers(cp, 0, 2 * CQL_MAX_MODIFIERS) == 0);
     cql_parser_destroy(cp);
+}
+
+/* parses head, num times repeat, tail, num times close */
+static int tst_parse(const char *head, const char *repeat, const char *tail,
+                     const char *close, int num)
+{
+    CQL_parser cp = cql_parser_create();
+    WRBUF w = wrbuf_alloc();
+    int i, r;
+
+    wrbuf_puts(w, head);
+    for (i = 0; i < num; i++)
+        wrbuf_puts(w, repeat);
+    wrbuf_puts(w, tail);
+    for (i = 0; i < num; i++)
+        wrbuf_puts(w, close);
+    r = cql_parser_string(cp, wrbuf_cstr(w));
+    wrbuf_destroy(w);
+    cql_parser_destroy(cp);
+    return r;
+}
+
+static void tst_depth(void)
+{
+    /* nested boolean operators */
+    YAZ_CHECK(tst_parse("a", " or a", "", "", CQL_MAX_DEPTH) == 0);
+    YAZ_CHECK(tst_parse("a", " or a", "", "", CQL_MAX_DEPTH + 1) != 0);
+    YAZ_CHECK(tst_parse("a", " or a", "", "", 100000) != 0);
+    YAZ_CHECK(tst_parse("", "a or (", "a", ")", CQL_MAX_DEPTH) == 0);
+    YAZ_CHECK(tst_parse("", "a or (", "a", ")", CQL_MAX_DEPTH + 1) != 0);
+    /* the deeper operand counts */
+    YAZ_CHECK(tst_parse("a", " or (a and a)", "", "", CQL_MAX_DEPTH - 1) == 0);
+    YAZ_CHECK(tst_parse("a", " or (a and a)", "", "", CQL_MAX_DEPTH) != 0);
+
+    /* modifiers for relation, boolean and sort key */
+    YAZ_CHECK(tst_parse("a =", "/x", " b", "", CQL_MAX_DEPTH) == 0);
+    YAZ_CHECK(tst_parse("a =", "/x", " b", "", CQL_MAX_DEPTH + 1) != 0);
+    YAZ_CHECK(tst_parse("a =", "/x", " b", "", 300000) != 0);
+    YAZ_CHECK(tst_parse("a and", "/x=1", " b", "", CQL_MAX_DEPTH) == 0);
+    YAZ_CHECK(tst_parse("a and", "/x=1", " b", "", CQL_MAX_DEPTH + 1) != 0);
+    YAZ_CHECK(tst_parse("a sortby t", "/x", "", "", CQL_MAX_DEPTH) == 0);
+    YAZ_CHECK(tst_parse("a sortby t", "/x", "", "", CQL_MAX_DEPTH + 1) != 0);
 }
 
 int main(int argc, char **argv)
@@ -229,6 +285,7 @@ int main(int argc, char **argv)
     YAZ_CHECK_LOG();
     tst();
     tst_limits();
+    tst_depth();
     YAZ_CHECK_TERM;
 }
 /*

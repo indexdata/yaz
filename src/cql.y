@@ -33,6 +33,8 @@
         struct cql_node *rel;
         /** Synthesized attribute: CQL node */
         struct cql_node *cql;
+        /** Synthesized attribute: nesting depth of CQL node */
+        int depth;
         /** string buffer with token */
         char *buf;
         /** length of token */
@@ -125,12 +127,14 @@ cqlQuery:
   } cqlQuery {
     $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
                               $6.cql, $2.buf, $4.buf);
+    $$.depth = $6.depth;
   }
 | '>' searchTerm {
       $$.rel = $0.rel;
   } cqlQuery {
     $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
                               $4.cql, 0, $2.buf);
+    $$.depth = $4.depth;
    }
 ;
 
@@ -143,6 +147,10 @@ scopedClause:
       struct cql_node *cn = cql_node_mk_boolean(((CQL_parser) parm)->nmem,
                                                 $2.buf);
 
+      /* the tree is walked recursively, so bound its depth */
+      $$.depth = 1 + ($1.depth > $5.depth ? $1.depth : $5.depth);
+      if ($$.depth > CQL_MAX_DEPTH)
+          YYABORT;
       cn->u.boolean.modifiers = $3.cql;
       cn->u.boolean.left = $1.cql;
       cn->u.boolean.right = $5.cql;
@@ -157,6 +165,7 @@ searchClause:
 
   } cqlQuery ')' {
       $$.cql = $3.cql;
+      $$.depth = $3.depth;
   }
 |
 searchTerm extraTerms {
@@ -166,6 +175,7 @@ searchTerm extraTerms {
       st->u.st.extra_terms = $2.cql;
       st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
+      $$.depth = 0;
   }
 |
   index relation modifiers {
@@ -173,6 +183,7 @@ searchTerm extraTerms {
       $$.rel->u.st.modifiers = $3.cql;
   } searchClause {
       $$.cql = $5.cql;
+      $$.depth = $5.depth;
       cql_node_destroy($4.rel);
   }
 ;
@@ -199,6 +210,10 @@ modifiers: modifiers '/' searchTerm
     struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
                                           $3.buf, 0, 0);
 
+    /* the modifier list is walked recursively, too */
+    $$.depth = $1.depth + 1;
+    if ($$.depth > CQL_MAX_DEPTH)
+        YYABORT;
     mod->u.st.modifiers = $1.cql;
     $$.cql = mod;
 }
@@ -208,12 +223,16 @@ modifiers '/' searchTerm relation_symbol searchTerm
     struct cql_node *mod = cql_node_mk_sc(((CQL_parser)parm)->nmem,
                                           $3.buf, $4.buf, $5.buf);
 
+    $$.depth = $1.depth + 1;
+    if ($$.depth > CQL_MAX_DEPTH)
+        YYABORT;
     mod->u.st.modifiers = $1.cql;
     $$.cql = mod;
 }
 |
 {
     $$.cql = 0;
+    $$.depth = 0;
 }
 ;
 
@@ -308,6 +327,7 @@ int yylex(YYSTYPE *lval, void *vp)
     int c;
     lval->cql = 0;
     lval->rel = 0;
+    lval->depth = 0;
     lval->len = 0;
     lval->size = 10;
     lval->buf = (char *) nmem_malloc(cp->nmem, lval->size);

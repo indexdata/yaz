@@ -6629,6 +6629,14 @@ void cql_parser_destroy(CQL_parser cp);
      is destroyed by <function>cql_parser_destroy</function>.
      </para>
      <para>
+      The parser permits at most 256 (<literal>CQL_MAX_DEPTH</literal>)
+      nested boolean operators; a chain such as
+      <literal>a or b or c</literal> nests one level per operator.
+      It also permits at most 256 modifiers for a relation, boolean
+      operator or sort key. A query exceeding either limit is rejected
+      as a syntax error.
+     </para>
+     <para>
       To parse a CQL query string, the following function
       is provided:
       <synopsis>
