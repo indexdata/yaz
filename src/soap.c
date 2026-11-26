@@ -20,6 +20,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <yaz/snprintf.h>
+#include "xml_util.h"
 
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
 static const char *soap_v1_2 = "http://www.w3.org/2001/06/soap-envelope";
@@ -42,7 +43,8 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         *pp = p = (Z_SOAP *) odr_malloc(o, sizeof(*p));
         p->ns = soap_v1_1;
 
-        xmlDocPtr doc = xmlParseMemory(*content_buf, *content_len);
+        /* SOAP 1.1, section 3: no document type declaration */
+        xmlDocPtr doc = yaz_xml_parse_memory_no_dtd(*content_buf, *content_len);
         if (!doc)
             return z_soap_error(o, p, "SOAP-ENV:Client",
                                 "Bad XML Document", 0);

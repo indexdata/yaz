@@ -16,6 +16,12 @@
 
 /* Returns NULL on parse failure or when len exceeds INT_MAX. */
 xmlDocPtr yaz_xml_parse_memory(const char *buf, size_t len);
+
+/* As yaz_xml_parse_memory, but also returns NULL for a document with a
+   document type declaration; none of it is parsed. For protocol messages
+   from a peer: a DTD has no place in them and its entities make the cost
+   of parsing out of proportion to the size of the message. */
+xmlDocPtr yaz_xml_parse_memory_no_dtd(const char *buf, size_t len);
 #endif
 
 #endif

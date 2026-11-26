@@ -101,6 +101,20 @@ static void tst_soap_namespaces(void)
         wrbuf_printf(xml, "<Envelope xmlns=\"%s\"><Header/>"
                      "<Body xmlns=\"\">%s</Body></Envelope>", ns[i], payload);
         check_soap_namespace(wrbuf_cstr(xml), "SOAP bad NS for Body element");
+        /* SOAP has no document type declaration: refused, not parsed */
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<!DOCTYPE Envelope>"
+                     "<Envelope xmlns=\"%s\"><Body>%s</Body></Envelope>",
+                     ns[i], payload);
+        check_soap_namespace(wrbuf_cstr(xml), "Bad XML Document");
+        wrbuf_rewind(xml);
+        wrbuf_printf(xml, "<!DOCTYPE Envelope [\n"
+                     "<!ENTITY %% a \"<?x y?>\">\n"
+                     "<!ENTITY %% b \"<?y?>\">\n"
+                     "%%a;%%b;%%a;%%b;\n]>"
+                     "<Envelope xmlns=\"%s\"><Body>%s</Body></Envelope>",
+                     ns[i], payload);
+        check_soap_namespace(wrbuf_cstr(xml), "Bad XML Document");
     }
     wrbuf_destroy(xml);
 }
@@ -632,6 +646,36 @@ static void tst_array_to_uri(void)
     odr_destroy(odr);
 }
 
+static void tst_surrogate_diagnostics(void)
+{
+    const char *diagnostic = "<diagnostic xmlns=\""
+        "http://www.loc.gov/zing/srw/diagnostic/\">"
+        "<uri>info:srw/diagnostic/1/1</uri></diagnostic>";
+    ODR o = odr_createmem(ODR_DECODE);
+    WRBUF xml = wrbuf_alloc();
+    Z_SRW_diagnostic *diag = 0;
+    int num = 0;
+
+    sru_decode_surrogate_diagnostics(diagnostic, strlen(diagnostic),
+                                     &diag, &num, o);
+    YAZ_CHECK_EQ(num, 1);
+    YAZ_CHECK(diag && diag->uri
+              && !strcmp(diag->uri, "info:srw/diagnostic/1/1"));
+
+    /* with a document type declaration: refused, not parsed */
+    diag = 0;
+    num = 0;
+    wrbuf_printf(xml, "<!DOCTYPE diagnostic [<!ENTITY %% a \"<?x y?>\">"
+                 "%%a;]>%s", diagnostic);
+    sru_decode_surrogate_diagnostics(wrbuf_buf(xml), wrbuf_len(xml),
+                                     &diag, &num, o);
+    YAZ_CHECK_EQ(num, 0);
+    YAZ_CHECK(diag == 0);
+
+    wrbuf_destroy(xml);
+    odr_destroy(o);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -645,6 +689,7 @@ int main(int argc, char **argv)
     tst_srw_record_ns();
     tst_srw_record_data();
     tst_sru_basic_auth();
+    tst_surrogate_diagnostics();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
