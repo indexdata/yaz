@@ -60,10 +60,18 @@ YAZ_EXPORT YAZ_PQF_Parser yaz_pqf_create(void);
 */
 YAZ_EXPORT Z_RPNQuery *yaz_pqf_parse(YAZ_PQF_Parser p, ODR o,
                                      const char *qbuf);
+/** Parse a PQF scan clause into an ODR-owned term with attributes, or
+    return NULL on failure. On return *attributeSetId is the attribute set
+    of the clause (Bib-1 unless given with \@attrset), or NULL if the
+    clause names an unknown attribute set.
+*/
 YAZ_EXPORT Z_AttributesPlusTerm *yaz_pqf_scan(YAZ_PQF_Parser p, ODR o,
                                               Odr_oid **attributeSetId,
                                               const char *qbuf);
 
+/** As yaz_pqf_scan, but parses only the leading \@attrset and \@attr
+    part of the clause and returns its attribute list.
+*/
 YAZ_EXPORT Z_AttributeList *yaz_pqf_scan_attribute_list(YAZ_PQF_Parser p, ODR o,
                                               Odr_oid **attributeSetId,
                                               const char *qbuf);

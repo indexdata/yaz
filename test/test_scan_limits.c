@@ -20,6 +20,7 @@
 #endif
 
 static int calls, requested, bad_result;
+static char *pqf_clause = "@attr 1=4 term";
 static char *input;
 static int input_len;
 
@@ -154,7 +155,7 @@ static void check(int mode, const char *maximum, int expected,
     else
     {
         Z_SRW_PDU *sr = yaz_srw_get_pdu(enc, Z_SRW_scan_request, "1.2");
-        sr->u.scan_request->scanClause = mode == 4 ? "@attr 1=4 term" : "term";
+        sr->u.scan_request->scanClause = mode == 4 ? pqf_clause : "term";
         if (mode == 4)
             sr->u.scan_request->queryType = "pqf";
         if (maximum)
@@ -256,6 +257,14 @@ int main(int argc, char **argv)
         for (bad = 1; bad <= 3; bad++)
             check(mode, "1", 1, 1, bad);
     }
+#if YAZ_HAVE_XML2
+    /* A PQF scan clause that does not parse must not reach the backend. */
+    pqf_clause = "@attrset nosuch";
+    check(4, "1", -1, 10, 0);
+    pqf_clause = "@attr p=q term";
+    check(4, "1", -1, 10, 0);
+    pqf_clause = "@attr 1=4 term";
+#endif
     YAZ_CHECK_EQ(statserv_getcontrol()->options_func(3, config), 0);
     YAZ_CHECK_EQ(statserv_max_scan_terms(), 2);
     for (mode = 0; mode < 5; mode++)
