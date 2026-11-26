@@ -823,6 +823,27 @@ static void tst_array_to_uri(void)
         YAZ_CHECK(!strcmp(query_string, "a=AA&bb=&x="));
     }
 
+    /* incomplete escapes are kept as is; heap copy so that a read
+       beyond the terminating NUL is seen by valgrind/ASan */
+    query_string = xstrdup("a=%&b=%4&c=%");
+    r = yaz_uri_to_array(query_string, odr, &names, &values);
+    YAZ_CHECK_EQ(r, 3);
+    if (r == 3)
+    {
+        YAZ_CHECK(names[0] && !strcmp(names[0], "a"));
+        YAZ_CHECK(values[0] && !strcmp(values[0], "%"));
+
+        YAZ_CHECK(names[1] && !strcmp(names[1], "b"));
+        YAZ_CHECK(values[1] && !strcmp(values[1], "%4"));
+
+        YAZ_CHECK(names[2] && !strcmp(names[2], "c"));
+        YAZ_CHECK(values[2] && !strcmp(values[2], "%"));
+
+        YAZ_CHECK(names[3] == 0);
+        YAZ_CHECK(values[3] == 0);
+    }
+    xfree(query_string);
+
     odr_destroy(odr);
 }
 

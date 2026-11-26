@@ -164,7 +164,7 @@ int yaz_uri_to_array(const char *path, ODR o, char ***name, char ***val)
             (*val)[no] = ret = (char *) odr_malloc(o, cp - path + 1);
             while (*path && *path != '&')
             {
-                size_t l = 3;
+                size_t l = cp - path; /* bytes left in value */
                 ret[i++] = decode_uri_char(path, &l);
                 path += l;
             }
