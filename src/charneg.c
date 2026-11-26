@@ -270,7 +270,8 @@ Z_CharSetandLanguageNegotiation *yaz_get_charneg_record(Z_OtherInformation *p)
         if ((p->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = p->list[i]->information.externallyDefinedInfo))
         {
-            if (!oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
+            if (pext->direct_reference
+                && !oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
                 return pext->u.charNeg3;
@@ -292,7 +293,8 @@ int yaz_del_charneg_record(Z_OtherInformation **p)
         if (((*p)->list[i]->which == Z_OtherInfo_externallyDefinedInfo) &&
             (pext = (*p)->list[i]->information.externallyDefinedInfo))
         {
-            if (!oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
+            if (pext->direct_reference
+                && !oid_oidcmp(pext->direct_reference, yaz_oid_negot_charset_3)
                 && pext->which == Z_External_charSetandLanguageNegotiation)
             {
                 if ((*p)->num_elements <= 1)

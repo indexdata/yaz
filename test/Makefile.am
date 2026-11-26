@@ -7,7 +7,7 @@ check_PROGRAMS = test_client_record test_ccl test_charneg test_comstack test_cql
  test_iconv test_icu test_json \
  test_libstemmer test_log test_log_thread \
  test_match_glob test_matchstr test_mutex \
- test_nmem test_odr test_odrstack test_oid test_options \
+ test_nmem test_odr test_odrstack test_oid test_options test_otherinfo \
  test_pquery test_query_charset \
  test_record_conv test_rpn2cql test_rpn2solr test_retrieval test_scan_limits \
  test_search_present \
@@ -138,3 +138,5 @@ test_gfs_requests_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_client_record_SOURCES = test_client_record.c ../client/admin.c \
  ../client/tabcomplete.c ../client/fhistory.c
 test_client_record_LDADD = ../src/libyaz.la $(READLINE_LIBS)
+
+test_otherinfo_SOURCES = test_otherinfo.c

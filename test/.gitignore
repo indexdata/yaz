@@ -62,3 +62,4 @@ test_gfs_vhosts
 test_charneg
 test_client_record
 test_gfs_requests
+test_otherinfo
