@@ -6629,6 +6629,12 @@ void cql_parser_destroy(CQL_parser cp);
      is destroyed by <function>cql_parser_destroy</function>.
      </para>
      <para>
+      The parser accepts at most 20 nested prefix assignments
+      (<literal>&gt;uri</literal> or <literal>&gt;name=uri</literal>),
+      that is, assignments in effect for the same search clause.
+      A query with more is rejected as a syntax error.
+     </para>
+     <para>
       The parser permits at most 256 (<literal>CQL_MAX_DEPTH</literal>)
       nested boolean operators; a chain such as
       <literal>a or b or c</literal> nests one level per operator.

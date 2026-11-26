@@ -54,7 +54,13 @@
         int strict;
         /** relation modifiers copied to search terms in this query */
         int modifiers;
+        /** number of prefix assignments in effect at current position */
+        int prefixes;
     };
+
+/** Max number of nested prefix assignments. Each one makes a pass
+    over the query it applies to (cql_apply_prefix). */
+#define CQL_MAX_PREFIXES 20
 
 #define YYSTYPE token
 
@@ -124,14 +130,20 @@ cqlQuery:
  |
   '>' searchTerm '=' searchTerm {
     $$.rel = $0.rel;
+    if (++((CQL_parser) parm)->prefixes > CQL_MAX_PREFIXES)
+        YYABORT;
   } cqlQuery {
+    ((CQL_parser) parm)->prefixes--;
     $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
                               $6.cql, $2.buf, $4.buf);
     $$.depth = $6.depth;
   }
 | '>' searchTerm {
       $$.rel = $0.rel;
+      if (++((CQL_parser) parm)->prefixes > CQL_MAX_PREFIXES)
+          YYABORT;
   } cqlQuery {
+    ((CQL_parser) parm)->prefixes--;
     $$.cql = cql_apply_prefix(((CQL_parser) parm)->nmem,
                               $4.cql, 0, $2.buf);
     $$.depth = $4.depth;
@@ -473,6 +485,7 @@ int cql_parser_stream(CQL_parser cp,
     cp->ungetbyte = ungetbyte;
     cp->client_data = client_data;
     cp->modifiers = 0;
+    cp->prefixes = 0;
     cql_node_destroy(cp->top);
     cql_parse(cp);
     if (cp->top)
@@ -493,6 +506,7 @@ CQL_parser cql_parser_create(void)
     cp->nmem = nmem_create();
     cp->strict = 0;
     cp->modifiers = 0;
+    cp->prefixes = 0;
     return cp;
 }
 

@@ -279,6 +279,41 @@ static void tst_depth(void)
     YAZ_CHECK(tst_parse("a sortby t", "/x", "", "", CQL_MAX_DEPTH + 1) != 0);
 }
 
+/* parse query with a number of nested prefix assignments */
+static int tst_prefixes(const char *prefix, int no, const char *query,
+                        const char *suffix)
+{
+    CQL_parser cp = cql_parser_create();
+    WRBUF w = wrbuf_alloc();
+    int i, r;
+
+    for (i = 0; i < no; i++)
+        wrbuf_puts(w, prefix);
+    wrbuf_puts(w, query);
+    for (i = 0; i < no; i++)
+        wrbuf_puts(w, suffix);
+    r = cql_parser_string(cp, wrbuf_cstr(w));
+    wrbuf_destroy(w);
+    cql_parser_destroy(cp);
+    return r;
+}
+
+static void tst_prefix_limit(void)
+{
+    /* at most 20 prefix assignments may be in effect for a clause */
+    YAZ_CHECK(tst_prefixes(">u ", 20, "a", "") == 0);
+    YAZ_CHECK(tst_prefixes(">u ", 21, "a", "") != 0);
+    YAZ_CHECK(tst_prefixes(">p=u ", 20, "p.a=b", "") == 0);
+    YAZ_CHECK(tst_prefixes(">p=u ", 21, "p.a=b", "") != 0);
+    YAZ_CHECK(tst_prefixes(">u (", 20, "a", ")") == 0);
+    YAZ_CHECK(tst_prefixes(">u (", 21, "a", ")") != 0);
+    YAZ_CHECK(tst_prefixes(">u ", 3000, "a or b", "") != 0);
+    /* assignments that are not nested are not limited */
+    YAZ_CHECK(tst_prefixes("(>u a) or ", 200, "a", "") == 0);
+    YAZ_CHECK(tst_prefixes(">u (>p=u a) or (", 19, "a", ")") == 0);
+    YAZ_CHECK(tst_prefixes(">u (>p=u a) or (", 20, "a", ")") != 0);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -286,6 +321,7 @@ int main(int argc, char **argv)
     tst();
     tst_limits();
     tst_depth();
+    tst_prefix_limit();
     YAZ_CHECK_TERM;
 }
 /*
