@@ -197,6 +197,25 @@ static int ccl_parse_apply(CCL_parser cclp)
     return 1;
 }
 
+/* Charge the query text from token "from" up to the current token, before
+   it is parsed again for a further qualifier. The parsing steps do not bound
+   this: a term is one step whatever its length, and nested qualifier aliases
+   double the number of times that the innermost term is copied. */
+static int ccl_parse_repeat(CCL_parser cclp, struct ccl_token *from)
+{
+    size_t len = 0;
+
+    for (; from && from != cclp->look_token; from = from->next)
+        len += from->ws_prefix_len + from->len + 1;
+    if (len > CCL_MAX_REPEAT - cclp->repeated)
+    {
+        cclp->error_code = CCL_ERR_COMPLEXITY;
+        return 0;
+    }
+    cclp->repeated += len;
+    return 1;
+}
+
 static int ccl_parse_enter(CCL_parser cclp)
 {
     if (cclp->depth >= CCL_MAX_DEPTH)
@@ -1065,6 +1084,12 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             while ((ap[0] = ccl_qual_search(cclp, lookahead->name,
                                             lookahead->len, seq)) != 0)
             {
+                if (node && !ccl_parse_repeat(cclp, la))
+                {
+                    ccl_rpn_delete(node);
+                    xfree(ap);
+                    return 0;
+                }
                 cclp->look_token = la;
 
                 struct ccl_rpn_node *node_sub = qualifier_relation(cclp, ap);
@@ -1129,6 +1154,12 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
             if (!found)
                 break;
 
+            if (node && !ccl_parse_repeat(cclp, la))
+            {
+                ccl_rpn_delete(node);
+                node = 0;
+                break;
+            }
             cclp->look_token = lookahead;
 
             struct ccl_rpn_node *node_sub = qualifier_relation(cclp, ap);
@@ -1263,6 +1294,11 @@ static struct ccl_rpn_node *search_elements(CCL_parser cclp,
             if (!qa[0])
                 break;
 
+            if (node && !ccl_parse_repeat(cclp, lookahead))
+            {
+                ccl_rpn_delete(node);
+                return 0;
+            }
             cclp->look_token = lookahead;
 
             struct ccl_rpn_node *node_sub = search_terms(cclp, qa);
@@ -1354,6 +1390,7 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
 {
     cclp->depth = 0;
     cclp->steps = 0;
+    cclp->repeated = 0;
     cclp->applied = 0;
     cclp->error_code = CCL_ERR_OK;
     cclp->look_token = list;

@@ -101,6 +101,8 @@ YAZ_BEGIN_CDECL
 #define CCL_MAX_STEPS 4096
 /** Maximum qualifiers and attributes applied to the terms of a query. */
 #define CCL_MAX_APPLIED 65536
+/** Maximum octets of query text parsed again for further qualifiers. */
+#define CCL_MAX_REPEAT 1048576
 
 /** \brief attribute node (type, value) pair as used in RPN */
 struct ccl_rpn_attr {
@@ -166,9 +168,11 @@ typedef struct ccl_parser *CCL_parser;
    expression/split-list calls and CCL_MAX_STEPS total parsing steps.
    Steps count expression and operand visits, term expansions, and
    split-list branches. At most CCL_MAX_APPLIED qualifiers and attributes
-   are applied to terms in total. Limits reset for each query. Use the
-   error/pos outputs or ccl_parser_get_error to obtain the error and its
-   position.
+   are applied to terms in total. Query text that is parsed once for each
+   of several qualifiers (qualifier alias, ORed qualifier list) is limited
+   to CCL_MAX_REPEAT octets beyond the first time. Limits reset for each
+   query. Use the error/pos outputs or ccl_parser_get_error to obtain the
+   error and its position.
 */
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
@@ -185,9 +189,11 @@ struct ccl_rpn_node *ccl_find_str(CCL_bibset bibset,
    expression/split-list calls and CCL_MAX_STEPS total parsing steps.
    Steps count expression and operand visits, term expansions, and
    split-list branches. At most CCL_MAX_APPLIED qualifiers and attributes
-   are applied to terms in total. Limits reset for each query. Use the
-   error/pos outputs or ccl_parser_get_error to obtain the error and its
-   position.
+   are applied to terms in total. Query text that is parsed once for each
+   of several qualifiers (qualifier alias, ORed qualifier list) is limited
+   to CCL_MAX_REPEAT octets beyond the first time. Limits reset for each
+   query. Use the error/pos outputs or ccl_parser_get_error to obtain the
+   error and its position.
 */
 YAZ_EXPORT
 struct ccl_rpn_node *ccl_parser_find_str(CCL_parser cclp, const char *str);
