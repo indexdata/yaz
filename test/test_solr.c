@@ -593,6 +593,17 @@ void tst_decoding(void)
     }
     odr_reset(odr);
 
+    /* a response with a document type declaration is refused */
+    YAZ_CHECK(check_response(
+                  odr, "<response><result numFound=\"1\" start=\"0\"/>"
+                  "</response>", &response));
+    odr_reset(odr);
+    YAZ_CHECK(!check_response(
+                  odr, "<!DOCTYPE response [<!ENTITY % a \"<?x y?>\">%a;]>"
+                  "<response><result numFound=\"1\" start=\"0\"/>"
+                  "</response>", &response));
+    odr_reset(odr);
+
     odr_destroy(odr);
 #endif
 }

@@ -409,7 +409,7 @@ int sru_decode_surrogate_diagnostics(const char *buf, size_t len,
                                      int *num, ODR odr)
 {
     int ret = 0;
-    xmlDocPtr doc = yaz_xml_parse_memory(buf, len);
+    xmlDocPtr doc = yaz_xml_parse_memory_no_dtd(buf, len);
     if (doc)
     {
         xmlNodePtr ptr = xmlDocGetRootElement(doc);
