@@ -1371,7 +1371,8 @@ static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
     NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan = c->tasks->u.scan.scan;
 
-    if (res->entries && res->entries->nonsurrogateDiagnostics)
+    if (res->entries && res->entries->nonsurrogateDiagnostics &&
+        res->entries->num_nonsurrogateDiagnostics > 0)
         response_diag(c, res->entries->nonsurrogateDiagnostics[0]);
     scan->scan_response = res;
     scan->srw_scan_response = 0;
