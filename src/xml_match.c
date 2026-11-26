@@ -98,47 +98,124 @@ static int dump_node(xmlBufferPtr buf, xmlNodePtr ptr)
     return xmlOutputBufferClose(out) < 0 ? -1 : 0;
 }
 
+/* Adds a declaration of ns to the list that ends at *last. Nothing is done
+   if ns is declared inside top or was added before: in both cases its
+   _private member, which libxml2 leaves to the application, is top. */
+static int inherit_ns(xmlNodePtr top, xmlNsPtr ns, xmlNsPtr **last)
+{
+    if (ns && ns->_private != top)
+    {
+        if (!xmlStrEqual(ns->prefix, BAD_CAST "xml")) /* needs none */
+        {
+            xmlNsPtr n = xmlNewNs(0, ns->href, ns->prefix);
+            if (!n)
+                return -1;
+            n->_private = ns; /* for the reset in yaz_xml_dump_element */
+            **last = n;
+            *last = &n->next;
+        }
+        ns->_private = top;
+    }
+    return 0;
+}
+
+/* Makes declarations for the namespaces that top and the elements and
+   attributes inside of it use, but that are declared further up: the ones
+   that xmlCopyNode adds to a copy of top, in the same order. This is one
+   pass over the tree, without searching. */
+static int inherit_ns_all(xmlNodePtr top, xmlNsPtr **last)
+{
+    xmlNodePtr ptr = top;
+
+    while (1)
+    {
+        if (ptr->type == XML_ELEMENT_NODE)
+        {
+            xmlNsPtr ns;
+            xmlAttrPtr attr;
+
+            for (ns = ptr->nsDef; ns; ns = ns->next)
+                ns->_private = top;
+            if (inherit_ns(top, ptr->ns, last))
+                return -1;
+            for (attr = ptr->properties; attr; attr = attr->next)
+                if (inherit_ns(top, attr->ns, last))
+                    return -1;
+            if (ptr->children)
+            {
+                ptr = ptr->children;
+                continue;
+            }
+        }
+        while (ptr != top && !ptr->next)
+            ptr = ptr->parent;
+        if (ptr == top)
+            break;
+        ptr = ptr->next;
+    }
+    return 0;
+}
+
+/* Appends element ptr to buf as XML that can be parsed on its own: with
+   the namespace declarations that it inherits (bug #740). The result is
+   that of dumping xmlCopyNode(ptr, 1), which was done here before. But the
+   copy searches the lists of declarations for every element and attribute,
+   and it adds a declaration for every attribute with prefix xml. For a
+   record from a peer that took time in proportion to the square of its
+   size. */
 int yaz_xml_dump_element(xmlBufferPtr buf, xmlNodePtr ptr, size_t *own)
 {
-    /* copy node to get NS right (bug #740). */
-    xmlNode *tmp = xmlCopyNode(ptr, 1);
+    xmlNsPtr inherited = 0, *last = &inherited, *end = &ptr->nsDef, ns;
+
     int start = xmlBufferLength(buf);
     int total, len = -1;
-    size_t inherited;
+    size_t inherited_size;
 
-    if (tmp && dump_node(buf, tmp) == 0)
+    if (inherit_ns_all(ptr, &last) == 0)
     {
-        /* does the copy have more declarations than ptr? */
-        const xmlNs *ns, *ns_tmp = tmp->nsDef;
+        const xmlChar *encoding = 0;
 
-        for (ns = ptr->nsDef; ns && ns_tmp; ns = ns->next)
-            ns_tmp = ns_tmp->next;
-        if (!ns_tmp)
-            len = xmlBufferLength(buf) - start;
-        else
+        /* Measure without inherited declarations for the expansion budget. */
+        if (inherited)
         {
-            /* get the size without them */
             xmlBufferPtr org = xmlBufferCreate();
-
             if (org && dump_node(org, ptr) == 0)
                 len = xmlBufferLength(org);
             xmlBufferFree(org);
         }
+        /* ptr has the declarations while it is dumped */
+        while (*end)
+            end = &(*end)->next;
+        *end = inherited;
+        if (ptr->doc)
+        {
+            /* as for a copy, which has no document: non-ASCII characters
+               in attribute values are dumped as character references */
+            encoding = ptr->doc->encoding;
+            ptr->doc->encoding = 0;
+        }
+        if (dump_node(buf, ptr) != 0)
+            len = -1;
+        else if (!inherited)
+            len = xmlBufferLength(buf) - start;
+        if (ptr->doc)
+            ptr->doc->encoding = encoding;
+        *end = 0;
     }
-    xmlFreeNode(tmp);
+    for (ns = inherited; ns; ns = ns->next)
+        ((xmlNsPtr) ns->_private)->_private = 0;
+    xmlFreeNsList(inherited);
 
     total = xmlBufferLength(buf);
-    if (len < 0 || total < 0) /* failed, or more than INT_MAX bytes */
+    if (len < 0 || total < 0)
         return -1;
     *own += len;
-    inherited = (size_t) total > *own ? (size_t) total - *own : 0;
-    /* inherited > BASE + FACTOR * own, in a form that does not overflow */
-    if (inherited > XML_NS_INHERIT_BASE &&
-        (inherited - XML_NS_INHERIT_BASE - 1) / XML_NS_INHERIT_FACTOR >= *own)
+    inherited_size = (size_t) total > *own ? (size_t) total - *own : 0;
+    if (inherited_size > XML_NS_INHERIT_BASE &&
+        (inherited_size - XML_NS_INHERIT_BASE - 1) / XML_NS_INHERIT_FACTOR >= *own)
         return -1;
     return 0;
 }
-
 
 int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
                          char **val, int *len, int fixup_root)
@@ -151,7 +228,7 @@ int yaz_match_xsd_XML_n2(xmlNodePtr ptr, const char *elem, ODR o,
 
     xmlBufferPtr buf = xmlBufferCreate();
 
-    /* Copy each element nodes at top.
+    /* Dump each element nodes at top.
        In most cases there is only one root node.. At least one server
        http://www.theeuropeanlibrary.org/sru/sru.pl
        has multiple root nodes in recordData.

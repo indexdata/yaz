@@ -28,7 +28,7 @@ void add_XML_n(xmlNodePtr ptr, const char *elem, char *val, int len,
         {
             xmlNodePtr c = xmlNewChild(ptr, ns_ptr, BAD_CAST elem, 0);
             xmlNodePtr t = xmlDocGetRootElement(doc);
-            xmlAddChild(c, xmlCopyNode(t,1));
+            xmlAddChild(c, xmlDocCopyNode(t, ptr->doc, 1));
             xmlFreeDoc(doc);
         }
     }
