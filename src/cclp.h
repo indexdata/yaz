@@ -72,6 +72,7 @@ struct ccl_parser {
     /** Per-query parsing limits. */
     unsigned depth;
     unsigned steps;
+    unsigned applied;
 
     /** current bibset */
     CCL_bibset bibset;

@@ -186,6 +186,19 @@ static int ccl_parse_step(CCL_parser cclp)
     return 1;
 }
 
+/* A term gets the attributes of every qualifier in effect, so that work is
+   terms times qualifiers: count each qualifier and attribute applied. */
+static int ccl_parse_apply(CCL_parser cclp)
+{
+    if (cclp->applied >= CCL_MAX_APPLIED)
+    {
+        cclp->error_code = CCL_ERR_COMPLEXITY;
+        return 0;
+    }
+    cclp->applied++;
+    return 1;
+}
+
 static int ccl_parse_enter(CCL_parser cclp)
 {
     if (cclp->depth >= CCL_MAX_DEPTH)
@@ -445,12 +458,22 @@ static struct ccl_rpn_node *ccl_term_one_use(CCL_parser cclp,
     /* go through all attributes and add them to the attribute list */
     for (i = 0; qa && qa[i]; i++)
     {
+        if (!ccl_parse_apply(cclp))
+        {
+            ccl_rpn_delete(p);
+            return NULL;
+        }
         for (struct ccl_rpn_attr *attr = ccl_qual_get_attr(qa[i]);
              attr; attr = attr->next)
             if (attr->type == 1 && attr_use && attr != attr_use)
                 continue;
             else
             {
+                if (!ccl_parse_apply(cclp))
+                {
+                    ccl_rpn_delete(p);
+                    return NULL;
+                }
                 switch (attr->kind)
                 {
                 case CCL_RPN_ATTR_STRING:
@@ -1014,7 +1037,12 @@ static struct ccl_rpn_node *qualifier_list(CCL_parser cclp,
         no++;
     if (qa)
         for (i=0; qa[i]; i++)
+        {
+            /* inherited qualifiers are copied for each nested list */
+            if (!ccl_parse_apply(cclp))
+                return NULL;
             no++;
+        }
     ap = (ccl_qualifier_t *)xmalloc((no ? (no+1) : 2) * sizeof(*ap));
     ccl_assert(ap);
 
@@ -1325,6 +1353,7 @@ struct ccl_rpn_node *ccl_parser_find_token(CCL_parser cclp,
 {
     cclp->depth = 0;
     cclp->steps = 0;
+    cclp->applied = 0;
     cclp->error_code = CCL_ERR_OK;
     cclp->look_token = list;
     struct ccl_rpn_node *p = find_spec(cclp, NULL);
