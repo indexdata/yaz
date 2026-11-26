@@ -56,11 +56,19 @@ CQL_parser cql_parser_create(void);
 YAZ_EXPORT
 void cql_parser_destroy(CQL_parser cp);
 
+/** \brief maximum number of relation modifiers on search terms in a query
+
+    A relation modifier counts once for each search term that it applies
+    to, e.g. 6 for title =/a/b (x or y or z). Parsing fails for a query
+    that exceeds the limit.
+ */
+#define CQL_MAX_MODIFIERS 1024
+
 /** \brief parses a CQL query (string)
     \param cp CQL parser
     \param str CQL string
     \retval 0 success
-    \retval !=0 failure
+    \retval !=0 failure (syntax error or CQL_MAX_MODIFIERS exceeded)
  */
 YAZ_EXPORT
 int cql_parser_string(CQL_parser cp, const char *str);

@@ -6640,6 +6640,14 @@ int cql_parser_string(CQL_parser cp, const char *str);
       otherwise -1 is returned to indicate a syntax error.
      </para>
      <para>
+      A query may hold at most 1024 relation modifiers
+      (<literal>CQL_MAX_MODIFIERS</literal>), where a modifier counts once
+      for each search term that it applies to. For example,
+      <literal>title =/a/b (x or y or z)</literal> counts as 6.
+      A query that exceeds the limit is rejected like a query with a
+      syntax error.
+     </para>
+     <para>
       <synopsis>
 int cql_parser_stream(CQL_parser cp,
                       int (*getbyte)(void *client_data),

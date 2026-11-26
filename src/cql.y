@@ -50,12 +50,15 @@
         struct cql_node *top;
         NMEM nmem;
         int strict;
+        /** relation modifiers copied to search terms in this query */
+        int modifiers;
     };
 
 #define YYSTYPE token
 
 int yylex(YYSTYPE *lval, void *vp);
 int yyerror(void *lval, char *msg);
+static struct cql_node *term_node(CQL_parser cp, struct cql_node *rel);
 
 %}
 
@@ -157,7 +160,9 @@ searchClause:
   }
 |
 searchTerm extraTerms {
-      struct cql_node *st = cql_node_dup(((CQL_parser) parm)->nmem, $0.rel);
+      struct cql_node *st = term_node((CQL_parser) parm, $0.rel);
+      if (!st)
+          YYABORT;
       st->u.st.extra_terms = $2.cql;
       st->u.st.term = nmem_strdup(((CQL_parser)parm)->nmem, $1.buf);
       $$.cql = st;
@@ -242,6 +247,34 @@ searchTerm:
 int yyerror(void *locp, char *s)
 {
     return 0;
+}
+
+/**
+ * term_node makes the node for a search term that is in the scope of
+ * relation rel. Each term gets its own modifier nodes, because
+ * cql_apply_prefix resolves them per term. The strings are not modified
+ * in place and are shared with rel rather than copied for every term.
+ * Returns 0 if the query exceeds CQL_MAX_MODIFIERS.
+ */
+static struct cql_node *term_node(CQL_parser cp, struct cql_node *rel)
+{
+    struct cql_node *st = cql_node_mk_sc(cp->nmem, 0, 0, 0);
+    struct cql_node **mp = &st->u.st.modifiers;
+    struct cql_node *mod;
+
+    st->u.st.index = rel->u.st.index;
+    st->u.st.relation = rel->u.st.relation;
+    for (mod = rel->u.st.modifiers; mod; mod = mod->u.st.modifiers)
+    {
+        if (cp->modifiers >= CQL_MAX_MODIFIERS)
+            return 0;
+        cp->modifiers++;
+        *mp = (struct cql_node *) nmem_malloc(cp->nmem, sizeof(**mp));
+        **mp = *mod;
+        mp = &(*mp)->u.st.modifiers;
+    }
+    *mp = 0;
+    return st;
 }
 
 /**
@@ -419,6 +452,7 @@ int cql_parser_stream(CQL_parser cp,
     cp->getbyte = getbyte;
     cp->ungetbyte = ungetbyte;
     cp->client_data = client_data;
+    cp->modifiers = 0;
     cql_node_destroy(cp->top);
     cql_parse(cp);
     if (cp->top)
@@ -438,6 +472,7 @@ CQL_parser cql_parser_create(void)
     cp->last_pos = 0;
     cp->nmem = nmem_create();
     cp->strict = 0;
+    cp->modifiers = 0;
     return cp;
 }
 
