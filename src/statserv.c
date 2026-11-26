@@ -1048,7 +1048,8 @@ static void listener(IOCHAN h, int event)
         if (control_block.one_shot)
             remove_listeners();
 
-        yaz_log(log_sessiondetail, "Connect from %s", cs_addrstr(new_line));
+        const char *a = cs_addrstr(new_line);
+        yaz_log(log_sessiondetail, "Connect from %s", a ? a : "[Unknown]");
 
         no_sessions++;
         if (control_block.dynamic)
