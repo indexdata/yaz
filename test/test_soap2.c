@@ -264,6 +264,69 @@ static void tst_srw_facet_analysis(void)
     odr_destroy(o);
 }
 
+static void tst_sru_proxy_facets(void)
+{
+    /* facets without a code and elements other than facet are skipped */
+    const char *xml = "<searchRetrieveResponse xmlns=\""
+        YAZ_XMLNS_SRU_v1_1 "\"><numberOfRecords>1</numberOfRecords>"
+        "<facet_analysis><facets>"
+        "<facet/>"
+        "<other code=\"subject\"/>"
+        "<facet code=\"author\">"
+        "<facetvalue est_representation=\"3\">Smith</facetvalue>"
+        "<facetvalue>Jones</facetvalue>"
+        "</facet>"
+        "<facet><facetvalue>x</facetvalue></facet>"
+        "</facets></facet_analysis></searchRetrieveResponse>";
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_SOAP_Handler handlers[] = {
+        { YAZ_XMLNS_SRU_v1_1, 0, (Z_SOAP_fun) yaz_srw_codec },
+        { 0, 0, 0 }
+    };
+    Z_SOAP *soap = 0;
+    char *buf = (char *) xml;
+    int len = strlen(xml);
+    Z_SRW_PDU *sr = 0;
+    Z_FacetList *fl = 0;
+
+    YAZ_CHECK_EQ(z_soap_codec(o, &soap, &buf, &len, handlers), 0);
+    YAZ_CHECK(soap && soap->which == Z_SOAP_generic);
+    if (soap && soap->which == Z_SOAP_generic)
+        sr = (Z_SRW_PDU *) soap->u.generic->p;
+    YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_response);
+    if (sr && sr->which == Z_SRW_searchRetrieve_response)
+        fl = sr->u.response->facetList;
+    YAZ_CHECK(fl != 0);
+    if (fl)
+    {
+        YAZ_CHECK_EQ(fl->num, 1);
+        if (fl->num == 1)
+        {
+            Z_FacetField *ff = fl->elements[0];
+            YAZ_CHECK(ff && ff->attributes &&
+                      ff->attributes->num_attributes == 1);
+            if (ff && ff->attributes && ff->attributes->num_attributes == 1)
+            {
+                Z_AttributeElement *ae = ff->attributes->attributes[0];
+                YAZ_CHECK(ae->which == Z_AttributeValue_complex &&
+                          !strcmp(ae->value.complex->list[0]->u.string,
+                                  "author"));
+            }
+            YAZ_CHECK(ff && ff->num_terms == 2);
+            if (ff && ff->num_terms == 2)
+            {
+                YAZ_CHECK(*ff->terms[0]->count == 3);
+                YAZ_CHECK(ff->terms[0]->term->which == Z_Term_general &&
+                          ff->terms[0]->term->u.general->len == 5 &&
+                          !memcmp(ff->terms[0]->term->u.general->buf,
+                                  "Smith", 5));
+                YAZ_CHECK(*ff->terms[1]->count == -1);
+            }
+        }
+    }
+    odr_destroy(o);
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -755,6 +818,7 @@ int main(int argc, char **argv)
     tst_sru_basic_auth();
     tst_surrogate_diagnostics();
     tst_srw_explain_response();
+    tst_sru_proxy_facets();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
