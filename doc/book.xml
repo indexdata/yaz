@@ -6029,7 +6029,10 @@ typedef struct {
      calls and 4096 total parsing steps. Steps include expression and
      operand visits, term expansions, and split-list branches. Each term
      gets the attributes of all qualifiers in effect for it; at most 65536
-     qualifiers and attributes are applied to terms in total. Excessive
+     qualifiers and attributes are applied to terms in total.
+     Query text that is parsed once for each of several qualifiers (a qualifier alias,
+     or a qualifier list with <literal>@field or</literal>) is limited to
+     1 MB beyond the first time. Excessive
      complexity returns <literal>CCL_ERR_COMPLEXITY</literal> and no parse
      tree. These limits apply to both CCL parsing APIs and
      <function>ZOOM_query_ccl2rpn</function>, and reset for each query.

@@ -761,6 +761,69 @@ static void tst_complexity(void)
     wrbuf_destroy(query);
 }
 
+/* query of about len octets: a term that is one parsing step, in levels */
+static void check_repeat(CCL_parser parser, WRBUF query, const char *prefix,
+                         int levels, size_t len, int error)
+{
+    int i;
+
+    wrbuf_rewind(query);
+    for (i = 0; i < levels; i++)
+        wrbuf_puts(query, prefix);
+    wrbuf_puts(query, "a");
+    while (wrbuf_len(query) < len)
+        wrbuf_puts(query, " ");
+    wrbuf_puts(query, "b");
+    for (i = 0; i < levels; i++)
+        wrbuf_puts(query, ")");
+    check_complexity(parser, wrbuf_cstr(query), error);
+    check_complexity(parser, "a", 0);
+}
+
+static void tst_repeat(void)
+{
+    CCL_bibset bibset = ccl_qual_mk();
+    CCL_parser parser;
+    WRBUF query = wrbuf_alloc();
+
+    ccl_qual_fitem(bibset, "u=4", "ti");
+    ccl_qual_fitem(bibset, "u=1003", "au");
+    ccl_qual_fitem(bibset, "ti au", "tiau");
+    parser = ccl_parser_create(bibset);
+
+    /* text parsed once: not limited */
+    check_repeat(parser, query, "ti=(", 1, 2 * CCL_MAX_REPEAT, 0);
+    check_repeat(parser, query, "ti=(", 9, 2 * CCL_MAX_REPEAT, 0);
+    /* qualifier alias: text is parsed again for the second qualifier */
+    check_repeat(parser, query, "tiau=(", 1, CCL_MAX_REPEAT / 2, 0);
+    check_repeat(parser, query, "tiau=(", 1, 2 * CCL_MAX_REPEAT,
+                 CCL_ERR_COMPLEXITY);
+    /* .. and nested aliases double that for each level */
+    check_repeat(parser, query, "tiau=(", 8, CCL_MAX_REPEAT / 512, 0);
+    check_repeat(parser, query, "tiau=(", 9, CCL_MAX_REPEAT / 128,
+                 CCL_ERR_COMPLEXITY);
+    ccl_parser_destroy(parser);
+
+    /* each qualifier of a list parses the text when fields are ORed */
+    ccl_qual_fitem(bibset, "or", "@field");
+    parser = ccl_parser_create(bibset);
+    check_repeat(parser, query, "ti,au=(", 1, CCL_MAX_REPEAT / 2, 0);
+    check_repeat(parser, query, "ti,au,ti,au=(", 1, CCL_MAX_REPEAT / 2,
+                 CCL_ERR_COMPLEXITY);
+    ccl_parser_destroy(parser);
+
+    /* .. and so does each qualifier of the default qualifier, term */
+    ccl_qual_fitem(bibset, "ti au", "term");
+    parser = ccl_parser_create(bibset);
+    check_repeat(parser, query, "(", 1, CCL_MAX_REPEAT / 2, 0);
+    check_repeat(parser, query, "(", 1, 2 * CCL_MAX_REPEAT,
+                 CCL_ERR_COMPLEXITY);
+    ccl_parser_destroy(parser);
+
+    ccl_qual_rm(&bibset);
+    wrbuf_destroy(query);
+}
+
 static void tst_range_error_position(void)
 {
     const char *ranges[] = { "abc-", "abc-def", "-abc", "abc -def" };
@@ -936,6 +999,7 @@ int main(int argc, char **argv)
     tst_range_error_position();
     tst_complexity();
     tst_long_term();
+    tst_repeat();
     tst1(0);
     tst1(1);
     tst1(2);
