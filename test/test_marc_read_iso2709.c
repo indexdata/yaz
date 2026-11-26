@@ -173,11 +173,69 @@ static void tst_write_bounds(void)
     yaz_marc_destroy(mt);
 }
 
+/* Two identical fields; each directory entry names the field it refers to. */
+static char *record_dir(const int *fields, int entries, int *len)
+{
+    const char body[] = "  \037aX\036";
+    int body_len = sizeof(body) - 1;
+    int base = 24 + 12 * entries + 1;
+    char *buf;
+    int i;
+    *len = base + 2 * body_len + 1;
+    buf = xmalloc(*len);
+    memcpy(buf, "00000nam a2200000   4500", 24);
+    put_number(buf, 5, *len);
+    put_number(buf + 12, 5, base);
+    for (i = 0; i < entries; i++)
+    {
+        char *p = buf + 24 + 12 * i;
+        memcpy(p, "245", 3);
+        put_number(p + 3, 4, body_len);
+        put_number(p + 7, 5, fields[i] * body_len);
+    }
+    buf[base - 1] = ISO2709_FS;
+    memcpy(buf + base, body, body_len);
+    memcpy(buf + base + body_len, body, body_len);
+    buf[*len - 1] = ISO2709_RS;
+    return buf;
+}
+
+static void tst_overlap(void)
+{
+    yaz_marc_t mt = yaz_marc_create();
+    int fields[100];
+    char *buf;
+    int len, i;
+    yaz_marc_xml(mt, YAZ_MARC_LINE);
+
+    fields[0] = 0;
+    fields[1] = 1;
+    buf = record_dir(fields, 2, &len);
+    check_record(mt, buf, len, 1);
+    xfree(buf);
+    fields[0] = 1;
+    fields[1] = 0;
+    buf = record_dir(fields, 2, &len);
+    check_record(mt, buf, len, 1); /* directory order differs from data */
+    xfree(buf);
+    fields[2] = 0;
+    buf = record_dir(fields, 3, &len);
+    check_record(mt, buf, len, 0); /* more field data than the record has */
+    xfree(buf);
+    for (i = 0; i < 100; i++)
+        fields[i] = 0;
+    buf = record_dir(fields, 100, &len);
+    check_record(mt, buf, len, 0);
+    xfree(buf);
+    yaz_marc_destroy(mt);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst_bounds();
     tst_write_bounds();
+    tst_overlap();
     YAZ_CHECK_TERM;
 }
