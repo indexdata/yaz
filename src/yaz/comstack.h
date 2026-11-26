@@ -262,7 +262,8 @@ struct comstack
 #define cs_getproto(handle) ((handle)->protocol)
 /** \brief Formats the peer address as text
     \param handle endpoint
-    \returns borrowed transport-owned string; do not free it
+    \returns borrowed transport-owned string, or NULL if the peer address is
+             unavailable (e.g. connection reset by peer); do not free it
 
     Subsequent calls may overwrite the result. Network transports may perform
     reverse DNS unless CS_FLAGS_NUMERICHOST is set.

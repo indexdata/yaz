@@ -554,6 +554,8 @@ static void assoc_init_reset(association *assoc, const char *peer_name1)
 {
     const char *peer_name2 = cs_addrstr(assoc->client_link);
 
+    if (!peer_name2) /* no peer address, e.g. connection already reset */
+        peer_name2 = "unknown";
     xfree(assoc->srw_ident);
     assoc->srw_ident = 0;
     xfree(assoc->init);

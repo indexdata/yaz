@@ -17,6 +17,7 @@ static int use_handle;
 static int auth_inits, auth_searches, auth_closes;
 static const char *auth_user;
 static char connection[20];
+static const char *peer_address;
 
 static int search_a(void *handle, bend_search_rr *rr)
 {
@@ -41,6 +42,8 @@ static bend_initresult *init(bend_initrequest *rr)
     static bend_initresult result;
     int n = statserv_getcontrol() == &servers[1].cb;
     inits[n]++;
+    YAZ_CHECK(rr->peer_name && !strcmp(rr->peer_name, peer_address ?
+                                       peer_address : "unknown"));
     memset(&result, 0, sizeof(result));
     result.handle = use_handle ? &servers[n] : 0;
     rr->bend_search = n ? search_b : search_a;
@@ -181,7 +184,7 @@ static int more(COMSTACK cs)
 
 static const char *addrstr(COMSTACK cs)
 {
-    return "test";
+    return peer_address;
 }
 
 static void send_search_args(association *assoc, const char *host,
@@ -233,6 +236,7 @@ static void tst_switch(int nonnull)
     memset(searches, 0, sizeof(searches));
     memset(closes, 0, sizeof(closes));
     use_handle = nonnull;
+    peer_address = "test";
     for (int i = 0; i < 2; i++)
     {
         servers[i].cb = control_block;
@@ -274,11 +278,18 @@ static void tst_switch(int nonnull)
     YAZ_CHECK_EQ(inits[0], 3);
     YAZ_CHECK_EQ(closes[0], 2 * nonnull);
 
+    /* cs_addrstr returns NULL once the peer has reset the connection. */
+    peer_address = 0;
+    YAZ_CHECK(control_association(assoc, "a.example", 1));
+    send_search(assoc, "a.example", 200);
+    YAZ_CHECK_EQ(inits[0], 4);
+    YAZ_CHECK_EQ(closes[0], 3 * nonnull);
+
     send_search(assoc, "unknown.example", 404);
     YAZ_CHECK(assoc->init == 0);
     YAZ_CHECK(assoc->backend == 0);
     YAZ_CHECK(assoc->last_control == 0);
-    YAZ_CHECK_EQ(closes[0], 3 * nonnull);
+    YAZ_CHECK_EQ(closes[0], 4 * nonnull);
     destroy_association(assoc);
     xfree(chan);
     gfs_server_list = 0;
