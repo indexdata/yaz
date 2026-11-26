@@ -1361,10 +1361,10 @@ static void handle_Z3950_sort_response(ZOOM_connection c, Z_SortResponse *res)
 
 static void handle_Z3950_scan_response(ZOOM_connection c, Z_ScanResponse *res)
 {
-    NMEM nmem = odr_extract_mem(c->odr_in);
-
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
         return;
+
+    NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     if (res->entries && res->entries->nonsurrogateDiagnostics)

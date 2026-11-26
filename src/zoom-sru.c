@@ -396,10 +396,10 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
 static zoom_ret handle_srw_scan_response(ZOOM_connection c,
                                          Z_SRW_scanResponse *res)
 {
-    NMEM nmem = odr_extract_mem(c->odr_in);
-
     if (!c->tasks || c->tasks->which != ZOOM_TASK_SCAN)
         return zoom_complete;
+
+    NMEM nmem = odr_extract_mem(c->odr_in);
     ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     if (res->num_diagnostics > 0)
