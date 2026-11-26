@@ -37,6 +37,7 @@
 #include <yaz/wrbuf.h>
 #include <yaz/yconfig.h>
 #include <yaz/oid_util.h>
+#include <yaz/nmem.h>
 #include <yaz/record_conv.h>
 
 YAZ_BEGIN_CDECL
@@ -118,6 +119,10 @@ int yaz_retrieval_configure_t(yaz_retrieval_t p, const xmlNode *node,
     \retval 1 schema does not match
     \retval 2 syntax does not match
     \retval 3 both match but not together
+
+    This function has no memory handle for backend_schema. If the matched
+    retrieval element uses split, the backend schema is allocated and
+    never freed. Use yaz_retrieval_request2 instead.
 */
 YAZ_EXPORT
 int yaz_retrieval_request(yaz_retrieval_t p,
@@ -125,7 +130,40 @@ int yaz_retrieval_request(yaz_retrieval_t p,
                           const char **match_schema, Odr_oid **match_syntax,
                           yaz_record_conv_t *rc,
                           const char **backend_schema,
-                          Odr_oid **backend_syntax);
+                          Odr_oid **backend_syntax)
+#ifdef __GNUC__
+    __attribute__ ((deprecated))
+#endif
+    ;
+                          ;
+
+/** performs retrieval request based on schema and format (NMEM)
+    \param p retrieval handle
+    \param schema record schema (SRU) / element set name (Z39.50)
+    \param syntax record syntax (format)
+    \param match_schema matched schema (if conversion was successful)
+    \param match_syntax matched syntax OID (if conversion was successful)
+    \param rc record conversion reference (if conversion was successful)
+    \param backend_schema backend schema (if conversion was successful)
+    \param backend_syntax backend syntax (if conversion was successful)
+    \param nmem memory for backend_schema
+    \retval 0 success, schema and syntax matches
+    \retval -1 failure, use yaz_retrieval_get_error() for reason
+    \retval 1 schema does not match
+    \retval 2 syntax does not match
+    \retval 3 both match but not together
+
+    Like yaz_retrieval_request, but backend_schema, if it has to be
+    allocated, is allocated on nmem.
+*/
+YAZ_EXPORT
+int yaz_retrieval_request2(yaz_retrieval_t p,
+                           const char *schema, const Odr_oid *syntax,
+                           const char **match_schema, Odr_oid **match_syntax,
+                           yaz_record_conv_t *rc,
+                           const char **backend_schema,
+                           Odr_oid **backend_syntax,
+                           NMEM nmem);
 
 /** returns error string (for last error)
     \param p record conversion handle

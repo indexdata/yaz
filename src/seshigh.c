@@ -671,10 +671,10 @@ static int retrieve_fetch(association *assoc, bend_fetch_rr *rr)
         const char *backend_schema = 0;
         Odr_oid *backend_syntax = 0;
 
-        int r = yaz_retrieval_request(assoc->server->retrieval, input_schema,
-                                      input_syntax_raw, &match_schema,
-                                      &match_syntax, &rc, &backend_schema,
-                                      &backend_syntax);
+        int r = yaz_retrieval_request2(assoc->server->retrieval, input_schema,
+                                       input_syntax_raw, &match_schema,
+                                       &match_syntax, &rc, &backend_schema,
+                                       &backend_syntax, odr_getmem(rr->stream));
         if (r == -1) /* error ? */
         {
             const char *details = yaz_retrieval_get_error(
