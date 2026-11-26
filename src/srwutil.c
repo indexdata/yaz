@@ -409,6 +409,7 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
         const char *facetStart = 0;
         const char *facetSort = 0;
         Z_SRW_extra_arg *extra_args = 0;
+        Z_SRW_extra_arg **extra_args_tail = &extra_args;
 #endif
         char **uri_name;
         char **uri_val;
@@ -488,7 +489,8 @@ int yaz_sru_decode(Z_HTTP_Request *hreq, Z_SRW_PDU **srw_pdu,
                     ; /* ignoring extraRequestData */
                 else if (n[0] == 'x' && n[1] == '-')
                 {
-                    append_extra_arg(decode, &extra_args, n, v);
+                    extra_args_tail = append_extra_arg(decode, extra_args_tail,
+                                                       n, v);
                 }
                 else
                 {
