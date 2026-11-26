@@ -763,6 +763,29 @@ void tst_decoding(void)
                   "</response>", &response));
     odr_reset(odr);
 
+    /* error: a diagnostic for each msg, but at most 10 */
+    YAZ_CHECK(check_response(
+                  odr,
+                  "<response><lst name=\"error\">"
+                  "<str name=\"msg\">m1</str><int name=\"code\">400</int>"
+                  "<str name=\"msg\">m2</str><str name=\"msg\"/>"
+                  "<str name=\"msg\"/><str name=\"msg\"/><str name=\"msg\"/>"
+                  "<str name=\"msg\"/><str name=\"msg\"/><str name=\"msg\"/>"
+                  "<str name=\"msg\"/><str name=\"msg\"/><str name=\"msg\"/>"
+                  "</lst></response>", &response));
+    if (response)
+    {
+        YAZ_CHECK_EQ(response->num_diagnostics, 10);
+        if (response->num_diagnostics == 10)
+        {
+            YAZ_CHECK(response->diagnostics[0].details &&
+                      !strcmp(response->diagnostics[0].details, "m1"));
+            YAZ_CHECK(response->diagnostics[1].details &&
+                      !strcmp(response->diagnostics[1].details, "m2"));
+        }
+    }
+    odr_reset(odr);
+
     odr_destroy(odr);
 #endif
 }
