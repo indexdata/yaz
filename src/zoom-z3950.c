@@ -1771,7 +1771,7 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
             if (p)
             {
                 char *charset = NULL, *lang = NULL;
-                int sel;
+                int sel = 0;
 
                 yaz_get_response_charneg(tmpmem, p, &charset, &lang, &sel);
                 yaz_log(c->log_details, "%p handle_Z3950_apdu target accepted: "

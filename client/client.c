@@ -485,7 +485,7 @@ static int process_Z3950_initResponse(Z_InitResponse *res)
         if (p)
         {
             char *charset=NULL, *lang=NULL;
-            int selected;
+            int selected = 0;
 
             yaz_get_response_charneg(session_mem, p, &charset, &lang,
                                      &selected);
