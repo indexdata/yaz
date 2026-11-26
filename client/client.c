@@ -1091,6 +1091,11 @@ static void display_record(Z_External *r)
     }
     else if (oid && !oid_oidcmp(oid, yaz_oid_recsyn_opac))
     {
+        if (r->which != Z_External_OPAC)
+        {
+            printf("Expecting single OPAC type for OPAC.\n");
+            return;
+        }
         if (r->u.opac->bibliographicRecord)
             display_record(r->u.opac->bibliographicRecord);
         for (int i = 0; i<r->u.opac->num_holdingsData; i++)
@@ -2070,7 +2075,8 @@ static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
             print_stringn((const char *) id->buf, id->len);
             printf("\n");
         }
-        if (ext->which == Z_External_update)
+        if (ext->which == Z_External_update &&
+            ext->u.update->which == Z_IUUpdate_taskPackage)
         {
             Z_IUUpdateTaskPackage *utp = ext->u.update->u.taskPackage;
             if (utp && utp->targetPart)
@@ -2094,7 +2100,8 @@ static void process_Z3950_ESResponse(Z_ExtendedServicesResponse *res)
                 }
             }
         }
-        if (ext->which == Z_External_itemOrder)
+        if (ext->which == Z_External_itemOrder &&
+            ext->u.itemOrder->which == Z_IOItemOrder_taskPackage)
         {
             Z_IOTaskPackage *otp = ext->u.itemOrder->u.taskPackage;
 

@@ -1058,13 +1058,17 @@ static int es_response_taskpackage(ZOOM_connection c,
         break;
     }
     /* NOTE: Only Update/Update0 implemented, no others. */
-    if (taskPackage->taskSpecificParameters->which == Z_External_update)
+    if (taskPackage->taskSpecificParameters->which == Z_External_update &&
+        taskPackage->taskSpecificParameters->u.update->which ==
+        Z_IUUpdate_taskPackage)
     {
         Z_IUUpdateTaskPackage *utp =
             taskPackage->taskSpecificParameters->u.update->u.taskPackage;
         es_response_taskpackage_update(c, utp);
     }
-    if (taskPackage->taskSpecificParameters->which == Z_External_update0)
+    if (taskPackage->taskSpecificParameters->which == Z_External_update0 &&
+        taskPackage->taskSpecificParameters->u.update0->which ==
+        Z_IU0Update_taskPackage)
     {
         Z_IU0UpdateTaskPackage *utp =
             taskPackage->taskSpecificParameters->u.update0->u.taskPackage;
