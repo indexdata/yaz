@@ -66,16 +66,26 @@ int odr_choice(ODR o, Odr_arm arm[], void *p, void *whichp,
             }
             if (tg == arm[i].tag && cl == arm[i].zclass)
             {
+                int r;
+
                 if (arm[i].tagmode == ODR_IMPLICIT)
                 {
                     odr_implicit_settag(o, cl, tg);
-                    return (*arm[i].fun)(o, (char **)p, 0, arm[i].name);
+                    r = (*arm[i].fun)(o, (char **)p, 0, arm[i].name);
                 }
-                /* explicit */
-                if (!odr_constructed_begin(o, p, cl, tg, 0))
-                    return 0;
-                return (*arm[i].fun)(o, (char **)p, 0, arm[i].name) &&
-                    odr_constructed_end(o);
+                else /* explicit */
+                    r = odr_constructed_begin(o, p, cl, tg, 0) &&
+                        (*arm[i].fun)(o, (char **)p, 0, arm[i].name) &&
+                        odr_constructed_end(o);
+                /* The tag matched, so this arm is present. Returning 0
+                   without an error means "CHOICE absent" to our callers,
+                   which would then accept a partially decoded arm. */
+                if (!r && o->direction == ODR_DECODE && !o->error)
+                {
+                    odr_seterror(o, OPROTO, 59);
+                    odr_setelement(o, arm[i].name);
+                }
+                return r;
             }
         }
         else  /* no tagging. Have to poll type */
