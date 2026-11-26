@@ -40,6 +40,14 @@ YAZ_BEGIN_CDECL
 /** \brief CQL parser handle (opaque pointer) */
 typedef struct cql_parser *CQL_parser;
 
+/** \brief maximum nesting of boolean operators in a CQL query
+
+    A chain such as "a or b or c" nests one level per operator. The
+    same limit applies to the number of modifiers of a relation, boolean
+    operator or sort key. Queries exceeding it fail to parse.
+ */
+#define CQL_MAX_DEPTH 256
+
 /** \brief creates a CQL parser.
     \returns CCL parser
 
