@@ -59,11 +59,61 @@ static void check_encoding_failure(int invalid_method)
     ZOOM_connection_destroy(c);
 }
 
+static int closes;
+
+static int get_http_response(COMSTACK cs, char **buf, int *size)
+{
+    const char response[] =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/xml\r\n"
+        "Content-Length: 144\r\n"
+        "\r\n"
+        "<searchRetrieveResponse xmlns=\"http://www.loc.gov/zing/srw/\">"
+        "<version>1.1</version><numberOfRecords>0</numberOfRecords>"
+        "</searchRetrieveResponse>";
+    int len = sizeof(response) - 1;
+
+    xfree(*buf);
+    *buf = (char *) xmalloc(len);
+    *size = len;
+    memcpy(*buf, response, len);
+    return len;
+}
+
+static void close_comstack(COMSTACK cs)
+{
+    closes++;
+}
+
+/* a Z39.50 target answers Init with an SRU response */
+static void check_http_response_on_z3950(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    struct comstack cs;
+
+    memset(&cs, 0, sizeof(cs));
+    cs.f_get = get_http_response;
+    cs.f_close = close_comstack;
+    cs.event = CS_DATA;
+    c->cs = &cs;
+    closes = 0;
+    ZOOM_connection_add_task(c, ZOOM_TASK_CONNECT);
+    ZOOM_connection_set_mask(c, ZOOM_SELECT_READ);
+    ZOOM_connection_fire_event_socket(c, ZOOM_SELECT_READ);
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, 0), ZOOM_ERROR_DECODE);
+    YAZ_CHECK(!c->reconnect_ok);
+    YAZ_CHECK(!c->cs);
+    YAZ_CHECK_EQ(closes, 1);
+    c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_connection_destroy(c);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     check_encoding_failure(0);
     check_encoding_failure(1);
+    check_http_response_on_z3950();
     YAZ_CHECK_TERM;
 }

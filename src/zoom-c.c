@@ -1732,14 +1732,17 @@ static int do_read(ZOOM_connection c)
                 z_GDU(c->odr_save, &gdu, 0, 0);
             if (gdu->which == Z_GDU_Z3950)
                 ZOOM_handle_Z3950_apdu(c, gdu->u.z3950);
-            else if (gdu->which == Z_GDU_HTTP_Response)
-            {
 #if YAZ_HAVE_XML2
+            else if (gdu->which == Z_GDU_HTTP_Response
+                     && c->proto == PROTO_HTTP)
                 handle_http(c, gdu->u.HTTP_Response);
-#else
-                ZOOM_set_error(c, ZOOM_ERROR_DECODE, 0);
-                ZOOM_connection_close(c);
 #endif
+            else
+            {
+                /* HTTP is only expected if we sent HTTP (SRU, Solr) */
+                ZOOM_set_error(c, ZOOM_ERROR_DECODE,
+                               "unexpected HTTP message");
+                ZOOM_connection_close(c);
             }
         }
     }
