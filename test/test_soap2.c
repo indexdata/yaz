@@ -488,6 +488,45 @@ static void tst_srw_record_data(void)
     check_srw_record_data("<recordData/><recordData>payload</recordData>",
                           "payload");
 }
+
+static void check_sru_basic_auth(const char *authorization,
+                                 const char *username, const char *password)
+{
+    ODR o = odr_createmem(ODR_DECODE);
+    Z_HTTP_Request *request = z_get_HTTP_Request(o)->u.HTTP_Request;
+    Z_SRW_PDU *sr = 0;
+    Z_SOAP *soap = 0;
+    char *charset = 0;
+    Z_SRW_diagnostic *diag = 0;
+    int num_diag = 0;
+
+    request->method = "GET";
+    request->path = "/Default?version=1.1&operation=searchRetrieve&query=a";
+    z_HTTP_header_add(o, &request->headers, "Authorization", authorization);
+    YAZ_CHECK_EQ(yaz_sru_decode(request, &sr, &soap, o, &charset,
+                                &diag, &num_diag), 0);
+    YAZ_CHECK(sr != 0);
+    if (sr)
+    {
+        YAZ_CHECK(username ?
+                  sr->username && !strcmp(sr->username, username) :
+                  sr->username == 0);
+        YAZ_CHECK(password ?
+                  sr->password && !strcmp(sr->password, password) :
+                  sr->password == 0);
+    }
+    odr_destroy(o);
+}
+
+static void tst_sru_basic_auth(void)
+{
+    check_sru_basic_auth("Basic dXNlcjpwYXNz", "user", "pass");
+    check_sru_basic_auth("Basic dXNlcg==", "user", 0);
+    /* not Base64: must be ignored rather than partially decoded */
+    check_sru_basic_auth("Basic dXNlcjpwYXNz!!!!", 0, 0);
+    check_sru_basic_auth("Basic !!!!", 0, 0);
+    check_sru_basic_auth("Basic dXNlcjpwYXN!", 0, 0);
+}
 #endif
 
 static void tst_array_to_uri(void)
@@ -605,6 +644,7 @@ int main(int argc, char **argv)
     tst_srw_facet_analysis();
     tst_srw_record_ns();
     tst_srw_record_data();
+    tst_sru_basic_auth();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;

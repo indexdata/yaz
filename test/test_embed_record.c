@@ -47,6 +47,23 @@ void test1(void)
     }
 }
 
+static void test_bad_base64(void)
+{
+    const char *bad[] = {"!UJD", "Q!JD", "QU!D", "QUJ!", "QUJDQUJD!!!!", 0};
+    const char *expect[] = {"", "", "A", "AB", "ABCABC", 0};
+    int i;
+    for (i = 0; bad[i]; i++)
+    {
+        char out[32];
+
+        /* out must be a string also when decoding fails */
+        memset(out, 'x', sizeof(out) - 1);
+        out[sizeof(out) - 1] = '\0';
+        YAZ_CHECK(yaz_base64decode(bad[i], out) == -1);
+        YAZ_CHECK(strcmp(out, expect[i]) == 0);
+    }
+}
+
 void test2(void)
 {
   char base_enc[] =
@@ -139,6 +156,7 @@ int main(int argc, char **argv)
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     test1();
+    test_bad_base64();
     test2();
     YAZ_CHECK(test_render("unknownType", 0, "<my/>", 0));
 #if YAZ_HAVE_XML2

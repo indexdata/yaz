@@ -57,6 +57,9 @@ void yaz_base64encode(const char *in, char *out);
     The out buffer should at least be of size:
 
     strlen(in)
+
+    The out buffer is null-terminated in all cases. On failure it holds
+    what was decoded before the invalid character.
 */
 YAZ_EXPORT
 int yaz_base64decode(const char *in, char *out);
