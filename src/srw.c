@@ -890,6 +890,8 @@ int yaz_srw_codec(ODR o, void * vptr, Z_SRW_PDU **handler_data,
                 else
                     yaz_match_xsd_string(ptr, "database", o, &req->database);
             }
+            if (!req->scanClause)
+                return -1;
         }
         else if (!xmlStrcmp(method->name, BAD_CAST "scanResponse"))
         {

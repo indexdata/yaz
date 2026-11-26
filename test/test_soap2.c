@@ -327,6 +327,59 @@ static void tst_sru_proxy_facets(void)
     odr_destroy(o);
 }
 
+/* scanClause is mandatory: query_type is 0 if decoding must fail. */
+static void check_scan_request(const char *clause, const char *query_type,
+                               const char *scan_clause)
+{
+    ODR o = odr_createmem(ODR_DECODE);
+    WRBUF xml = wrbuf_alloc();
+    Z_SOAP *soap = 0;
+    Z_SRW_PDU *sr = 0;
+    char *charset = 0;
+    Z_HTTP_Request *request = z_get_HTTP_Request(o)->u.HTTP_Request;
+
+    wrbuf_printf(xml, "<s:Envelope xmlns:s=\""
+                 "http://schemas.xmlsoap.org/soap/envelope/\"><s:Body>"
+                 "<scanRequest xmlns=\"" YAZ_XMLNS_SRU_v1_1 "\">"
+                 "<version>1.1</version>%s<maximumTerms>5</maximumTerms>"
+                 "</scanRequest></s:Body></s:Envelope>", clause);
+    request->method = "POST";
+    request->content_buf = (char *) wrbuf_cstr(xml);
+    request->content_len = (int) wrbuf_len(xml);
+    z_HTTP_header_add(o, &request->headers, "Content-Type", "text/xml");
+    YAZ_CHECK_EQ(yaz_srw_decode(request, &sr, &soap, o, &charset),
+                 query_type ? 0 : 1);
+    YAZ_CHECK(soap != 0);
+    if (!query_type)
+    {
+        YAZ_CHECK(sr == 0);
+        YAZ_CHECK(soap && soap->which == Z_SOAP_error);
+    }
+    else
+    {
+        YAZ_CHECK(sr && sr->which == Z_SRW_scan_request);
+        if (sr && sr->which == Z_SRW_scan_request)
+        {
+            Z_SRW_scanRequest *req = sr->u.scan_request;
+            YAZ_CHECK(req->queryType && !strcmp(req->queryType, query_type));
+            YAZ_CHECK(req->scanClause &&
+                      !strcmp(req->scanClause, scan_clause));
+        }
+    }
+    wrbuf_destroy(xml);
+    odr_destroy(o);
+}
+
+static void tst_scan_request(void)
+{
+    check_scan_request("", 0, 0);
+    check_scan_request("<stylesheet>a.xsl</stylesheet>", 0, 0);
+    check_scan_request("<scanClause/>", "cql", "");
+    check_scan_request("<scanClause>water</scanClause>", "cql", "water");
+    check_scan_request("<pScanClause>@attr 1=4 water</pScanClause>", "pqf",
+                       "@attr 1=4 water");
+}
+
 static void tst_srw(void)
 {
     const char *charset = 0;
@@ -819,6 +872,7 @@ int main(int argc, char **argv)
     tst_surrogate_diagnostics();
     tst_srw_explain_response();
     tst_sru_proxy_facets();
+    tst_scan_request();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;
