@@ -160,6 +160,8 @@ static void tst(void)
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance=3 dinosaurs", 0));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance>3 dinosaurs", 0));
     YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance>=3 dinosaurs", 0));
+    YAZ_CHECK(tst_query("dc.title=encyclopedia prox/unit dinosaurs", 0));
+    YAZ_CHECK(tst_query("dc.title=encyclopedia prox/distance dinosaurs", 0));
     YAZ_CHECK(tst_query_s("a sortby title", "\"a\"",
                           "title,,1,0,highValue"));
     YAZ_CHECK(tst_query_s("a sortby dc.title", "\"a\"",

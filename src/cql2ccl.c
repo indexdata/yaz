@@ -187,13 +187,15 @@ static int node_bool(struct cql_node *cn,
             {
                 if (!cql_strcmp(n->u.st.index, "unit"))
                 {
-                    if (!cql_strcmp(n->u.st.term, "word"))
+                    if (n->u.st.term && !cql_strcmp(n->u.st.term, "word"))
                         ;
                     else
                         return -1;
                 }
                 else if (!cql_strcmp(n->u.st.index, "distance"))
                 {
+                    if (!n->u.st.relation || !n->u.st.term)
+                        return -1;
                     if (!strcmp(n->u.st.relation, "<="))
                         distance = atoi(n->u.st.term);
                     else if (!strcmp(n->u.st.relation, "<"))

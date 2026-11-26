@@ -556,10 +556,10 @@ static int cql_pr_prox(cql_transform_t ct, struct cql_node *mods,
             ordered = 0;
         else if (!strcmp(name, "unit"))
         {
-            unit = z_str_to_ProxUnit(term);
+            unit = term ? z_str_to_ProxUnit(term) : 0;
             if (unit == 0)
             {
-                wrbuf_puts(addinfo, term);
+                wrbuf_puts(addinfo, term ? term : "unit");
                 return YAZ_SRW_UNSUPP_PROX_UNIT;
             }
         }
