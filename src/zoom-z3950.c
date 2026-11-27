@@ -1772,8 +1772,11 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
             Z_DefaultDiagFormat *df = yaz_decode_init_diag(0, initrs);
             if (df)
                 response_default_diag(c, df);
-            else
+            /* Init rejected is always an error, also when the diagnostic
+               is missing or has condition 0 */
+            if (!df || c->error == ZOOM_ERROR_NONE)
                 ZOOM_set_error(c, ZOOM_ERROR_INIT, 0); /* default error */
+            ZOOM_connection_remove_tasks(c);
         }
         else
         {
