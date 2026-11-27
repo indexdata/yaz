@@ -164,6 +164,21 @@ void tst_nmem_strsplit(void)
     YAZ_CHECK(num > 0 && !strcmp(array[0], "\\,a"));
     YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\,\\,c\\\\\\|d"));
 
+    /* escape char at end of string is literal; must not skip the NUL */
+    nmem_strsplit_escape(nmem, ",", "a\\\0,b", &array, &num, 0, '\\');
+    YAZ_CHECK(num == 1);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "a\\"));
+
+    nmem_strsplit_escape(nmem, ",", "a,b\\\0,c", &array, &num, 1, '\\');
+    YAZ_CHECK(num == 2);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\"));
+
+    nmem_strsplit_escape2(nmem, ",", "a,b\\\0,c", &array, &num, 0, '\\', 0);
+    YAZ_CHECK(num == 2);
+    YAZ_CHECK(num > 0 && !strcmp(array[0], "a"));
+    YAZ_CHECK(num > 1 && !strcmp(array[1], "b\\"));
+
     nmem_destroy(nmem);
 }
 

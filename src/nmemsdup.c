@@ -105,7 +105,7 @@ void nmem_strsplit_escape2(NMEM nmem, const char *delim, const char *dstr,
             const char *cp0 = cp;
             while (*cp && !strchr(delim, *cp))
             {
-                if (*cp == escape_char)
+                if (*cp == escape_char && cp[1])
                     cp++;
                 cp++;
             }
