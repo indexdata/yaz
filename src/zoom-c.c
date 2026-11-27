@@ -861,12 +861,18 @@ ZOOM_API(int)
 
     ZOOM_query newq = ZOOM_query_create();
     if (ZOOM_query_sortby(newq, sort_spec) < 0)
+    {
+        ZOOM_query_destroy(newq);
         return -1;
+    }
+    if (!c)
+    {
+        ZOOM_query_destroy(newq);
+        return 0;
+    }
 
     yaz_log(c->log_api, "%p ZOOM_resultset_sort r=%p sort_type=%s sort_spec=%s",
             r, r, sort_type, sort_spec);
-    if (!c)
-        return 0;
 
     if (c->host_port && c->proto == PROTO_HTTP)
     {
