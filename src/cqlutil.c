@@ -107,9 +107,9 @@ const char *cql_uri(void)
     return "info:srw/cql-context-set/1/cql-v1.2";
 }
 
-struct cql_node *cql_apply_prefix(NMEM nmem,
-                                  struct cql_node *n, const char *prefix,
-                                  const char *uri)
+/* uri is allocated in nmem and shared by all nodes that it resolves */
+static void apply_prefix_r(NMEM nmem, struct cql_node *n, const char *prefix,
+                           char *uri)
 {
     if (n->which == CQL_NODE_ST)
     {
@@ -121,12 +121,12 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
                 !cql_strncmp(n->u.st.index, prefix, strlen(prefix)))
             {
                 char *nval = nmem_strdup(nmem, cp+1);
-                n->u.st.index_uri = nmem_strdup(nmem, uri);
+                n->u.st.index_uri = uri;
                 n->u.st.index = nval;
             }
             else if (!prefix && !cp)
             {
-                n->u.st.index_uri = nmem_strdup(nmem, uri);
+                n->u.st.index_uri = uri;
             }
         }
         if (!n->u.st.relation_uri && n->u.st.relation)
@@ -137,7 +137,7 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
                 !cql_strncmp(n->u.st.relation, prefix, strlen(prefix)))
             {
                 char *nval = nmem_strdup(nmem, cp+1);
-                n->u.st.relation_uri = nmem_strdup(nmem, uri);
+                n->u.st.relation_uri = uri;
                 n->u.st.relation = nval;
             }
         }
@@ -152,7 +152,7 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
                     !cql_strncmp(mod->u.st.index, prefix, strlen(prefix)))
                 {
                     char *nval = nmem_strdup(nmem, cp+1);
-                    mod->u.st.index_uri = nmem_strdup(nmem, uri);
+                    mod->u.st.index_uri = uri;
                     mod->u.st.index = nval;
                 }
             }
@@ -160,13 +160,21 @@ struct cql_node *cql_apply_prefix(NMEM nmem,
     }
     else if (n->which == CQL_NODE_BOOL)
     {
-        cql_apply_prefix(nmem, n->u.boolean.left, prefix, uri);
-        cql_apply_prefix(nmem, n->u.boolean.right, prefix, uri);
+        apply_prefix_r(nmem, n->u.boolean.left, prefix, uri);
+        apply_prefix_r(nmem, n->u.boolean.right, prefix, uri);
     }
     else if (n->which == CQL_NODE_SORT)
     {
-        cql_apply_prefix(nmem, n->u.sort.search, prefix, uri);
+        apply_prefix_r(nmem, n->u.sort.search, prefix, uri);
     }
+}
+
+struct cql_node *cql_apply_prefix(NMEM nmem,
+                                  struct cql_node *n, const char *prefix,
+                                  const char *uri)
+{
+    /* one copy of the URI per call, not one per resolved node */
+    apply_prefix_r(nmem, n, prefix, nmem_strdup_null(nmem, uri));
     return n;
 }
 
