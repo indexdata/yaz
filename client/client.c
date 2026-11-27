@@ -456,9 +456,11 @@ static int process_Z3950_initResponse(Z_InitResponse *res)
                     if (!z_OCLC_UserInformation(decode, &oclc_ui, 0, 0))
                         printf("Bad OCLC UserInformation:\n");
                     else
+                    {
                         printf("OCLC UserInformation:\n");
-                    if (!z_OCLC_UserInformation(print, &oclc_ui, 0, 0))
-                        printf("Bad OCLC UserInformation spec\n");
+                        if (!z_OCLC_UserInformation(print, &oclc_ui, 0, 0))
+                            printf("Bad OCLC UserInformation spec\n");
+                    }
                     odr_destroy(decode);
                 }
                 else
@@ -4658,11 +4660,6 @@ static void wait_and_handle_response(int one_response_only)
                 fprintf(f, "Packet dump:\n---------\n");
                 odr_dumpBER(f, netbuffer, res);
                 fprintf(f, "---------\n");
-                if (apdu_file)
-                {
-                    z_GDU(print, &gdu, 0, 0);
-                    odr_reset(print);
-                }
                 if (conn && cs_more(conn))
                     continue;
                 break;

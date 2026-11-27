@@ -523,10 +523,11 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                                         "Couldn't decode ItemRequest %s near %ld",
                                         odr_errmsg(odr_geterror(rr->decode)),
                                         (long) odr_offset(rr->decode));
+                                item_req = 0;
                             }
                             else
                                 yaz_log(log_level, "Decode ItemRequest OK");
-                            if (rr->print)
+                            if (item_req && rr->print)
                             {
                                 ill_ItemRequest(rr->print, &item_req, 0,
                                                 "ItemRequest");
@@ -550,10 +551,11 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                                 odr_dumpBER(yaz_log_file(),
                                             (char *) r->u.single_ASN1_type->buf,
                                             r->u.single_ASN1_type->len);
+                                ill_apdu = 0;
                             }
                             else
                                 yaz_log(log_level, "Decode ILL APDU OK");
-                            if (rr->print)
+                            if (ill_apdu && rr->print)
                             {
                                 ill_APDU(rr->print, &ill_apdu, 0,
                                          "ILL APDU");
