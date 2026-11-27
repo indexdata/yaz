@@ -109,6 +109,12 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     sr = ZOOM_srw_get_pdu(c, Z_SRW_scan_request);
 
     Z_Query *z_query = ZOOM_query_get_Z_Query(scan->query);
+    if (!z_query)
+    {
+        odr_reset(c->odr_out);
+        ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+        return zoom_complete;
+    }
     /* SRU scan can only carry CQL and PQF */
     if (z_query->which == Z_Query_type_104)
     {
@@ -201,7 +207,12 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
 
     sr = ZOOM_srw_get_pdu(c, Z_SRW_searchRetrieve_request);
     Z_Query *z_query = ZOOM_query_get_Z_Query(resultset->query);
-
+    if (!z_query)
+    {
+        odr_reset(c->odr_out);
+        ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+        return zoom_complete;
+    }
     if (z_query->which == Z_Query_type_104
         && z_query->u.type_104->which == Z_External_CQL)
     {

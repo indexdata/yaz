@@ -817,7 +817,12 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
     ZOOM_scanset scan = c->tasks->u.scan.scan;
 
     Z_Query *z_query = ZOOM_query_get_Z_Query(scan->query);
-
+    if (!z_query)
+    {
+        odr_reset(c->odr_out);
+        ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+        return zoom_complete;
+    }
     /* Z39.50 scan can only carry RPN */
     if (z_query->which == Z_Query_type_1 ||
         z_query->which == Z_Query_type_101)
