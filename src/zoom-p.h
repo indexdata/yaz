@@ -143,7 +143,9 @@ struct ZOOM_resultset_p {
     int piggyback;
     char *setname;
     ODR odr;
-    ZOOM_record_cache record_hash[RECORD_HASH_SIZE];
+    ZOOM_record_cache *record_hash;
+    size_t record_hash_size; /* buckets; initially RECORD_HASH_SIZE */
+    size_t record_hash_count; /* records in all buckets */
     ZOOM_options options;
     ZOOM_connection connection;
     char **databaseNames;

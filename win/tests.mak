@@ -62,6 +62,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_present_limits.exe \
     $(BINDIR)\test_sru_update.exe \
     $(BINDIR)\test_zoom_facet.exe \
+    $(BINDIR)\test_zoom_record_cache.exe \
     $(BINDIR)\test_zoom_scan.exe \
     $(BINDIR)\test_zoom_send.exe
 
