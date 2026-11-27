@@ -21,6 +21,46 @@ void cql_fputs(const char *buf, void *client_data)
     fputs(buf, f);
 }
 
+/* copies a single search clause node, not the lists it is the head of */
+static struct cql_node *cql_node_dup_st(NMEM nmem, const struct cql_node *cp)
+{
+    struct cql_node *cn = cql_node_mk_sc(nmem, cp->u.st.index,
+                                         cp->u.st.relation,
+                                         cp->u.st.term);
+    cn->u.st.index_uri = nmem_strdup_null(nmem, cp->u.st.index_uri);
+    cn->u.st.relation_uri = nmem_strdup_null(nmem, cp->u.st.relation_uri);
+    return cn;
+}
+
+/* modifiers and extra terms are lists of any length: iterate, not recurse */
+static struct cql_node *cql_node_dup_modifiers(NMEM nmem,
+                                               const struct cql_node *cp)
+{
+    struct cql_node *res = 0;
+    struct cql_node **np = &res;
+
+    for (; cp; cp = cp->u.st.modifiers)
+    {
+        *np = cql_node_dup_st(nmem, cp);
+        np = &(*np)->u.st.modifiers;
+    }
+    return res;
+}
+
+static struct cql_node *cql_node_dup_extra_terms(NMEM nmem,
+                                                 const struct cql_node *cp)
+{
+    struct cql_node *res = 0;
+    struct cql_node **np = &res;
+
+    for (; cp; cp = cp->u.st.extra_terms)
+    {
+        *np = cql_node_dup_st(nmem, cp);
+        np = &(*np)->u.st.extra_terms;
+    }
+    return res;
+}
+
 struct cql_node *cql_node_dup(NMEM nmem, struct cql_node *cp)
 {
     struct cql_node *cn = 0;
@@ -30,22 +70,22 @@ struct cql_node *cql_node_dup(NMEM nmem, struct cql_node *cp)
     switch (cp->which)
     {
     case CQL_NODE_ST:
-        cn = cql_node_mk_sc(nmem, cp->u.st.index,
-                            cp->u.st.relation,
-                            cp->u.st.term);
-        cn->u.st.modifiers = cql_node_dup(nmem, cp->u.st.modifiers);
-        cn->u.st.index_uri = cp->u.st.index_uri ?
-            nmem_strdup(nmem, cp->u.st.index_uri) : 0;
-        cn->u.st.relation_uri = cp->u.st.relation_uri ?
-            nmem_strdup(nmem, cp->u.st.relation_uri) : 0;
+        cn = cql_node_dup_st(nmem, cp);
+        cn->u.st.modifiers = cql_node_dup_modifiers(nmem, cp->u.st.modifiers);
+        cn->u.st.extra_terms =
+            cql_node_dup_extra_terms(nmem, cp->u.st.extra_terms);
         break;
     case CQL_NODE_BOOL:
         cn = cql_node_mk_boolean(nmem, cp->u.boolean.value);
         cn->u.boolean.left = cql_node_dup(nmem, cp->u.boolean.left);
         cn->u.boolean.right = cql_node_dup(nmem, cp->u.boolean.right);
+        cn->u.boolean.modifiers =
+            cql_node_dup_modifiers(nmem, cp->u.boolean.modifiers);
         break;
     case CQL_NODE_SORT:
-        cn = cql_node_mk_sort(nmem, cp->u.sort.index, cp->u.sort.modifiers);
+        cn = cql_node_mk_sort(
+            nmem, cp->u.sort.index,
+            cql_node_dup_modifiers(nmem, cp->u.sort.modifiers));
         cn->u.sort.next = cql_node_dup(nmem, cp->u.sort.next);
         cn->u.sort.search = cql_node_dup(nmem, cp->u.sort.search);
     }

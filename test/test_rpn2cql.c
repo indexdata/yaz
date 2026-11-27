@@ -266,12 +266,59 @@ static void tst_cql2pqf_limits(void)
     cql_transform_close(ct);
 }
 
+/* CQL to PQF: cql_transform must leave the tree of the caller alone, so
+   that it can be converted again */
+static void tst3(void)
+{
+    cql_transform_t ct = cql_transform_create();
+    CQL_parser cp = cql_parser_create();
+    char pqf1[200], pqf2[200];
+    WRBUF before = wrbuf_alloc();
+    WRBUF after = wrbuf_alloc();
+
+    cql_transform_define_pattern(ct, "set.dc", "info:srw/dc");
+    cql_transform_define_pattern(ct, "index.dc.title", "1=4");
+    cql_transform_define_pattern(ct, "index.dc.creator", "1=1003");
+    cql_transform_define_pattern(ct, "relation.eq", "2=3");
+    cql_transform_define_pattern(ct, "structure.*", "4=1");
+    cql_transform_define_pattern(ct, "position.any", "3=3");
+
+    YAZ_CHECK_EQ(cql_parser_string(
+                     cp, "dc.title=a b prox/distance<3 dc.creator=c"), 0);
+    struct cql_node *cn = cql_parser_result(cp);
+    YAZ_CHECK(cn && cn->which == CQL_NODE_BOOL);
+    if (cn && cn->which == CQL_NODE_BOOL)
+    {
+        struct cql_node *left = cn->u.boolean.left;
+        cql_to_xml(cn, wrbuf_vp_puts, before);
+
+        YAZ_CHECK_EQ(cql_transform_buf(ct, cn, pqf1, sizeof(pqf1)), 0);
+        YAZ_CHECK(!strcmp(pqf1, "@prox 0 3 0 1 k 2 "
+                          "@attr 2=3 @attr 4=1 "
+                          "@and @attr 3=3 @attr 1=4 \"a\" "
+                          "@attr 3=3 @attr 1=4 \"b\" "
+                          "@attr 2=3 @attr 4=1 @attr 3=3 @attr 1=1003 \"c\" "));
+        YAZ_CHECK(left->u.st.index_uri == 0);
+        YAZ_CHECK(!strcmp(left->u.st.index, "dc.title"));
+
+        YAZ_CHECK_EQ(cql_transform_buf(ct, cn, pqf2, sizeof(pqf2)), 0);
+        YAZ_CHECK(!strcmp(pqf1, pqf2));
+        cql_to_xml(cn, wrbuf_vp_puts, after);
+        YAZ_CHECK(!strcmp(wrbuf_cstr(before), wrbuf_cstr(after)));
+    }
+    wrbuf_destroy(before);
+    wrbuf_destroy(after);
+    cql_parser_destroy(cp);
+    cql_transform_close(ct);
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     tst1();
     tst2();
+    tst3();
     tst_cql2pqf_limits();
     YAZ_CHECK_TERM;
 }
