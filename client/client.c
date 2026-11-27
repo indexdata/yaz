@@ -4218,7 +4218,11 @@ static int cmd_register_oid(const char* args)
         return 0;
     }
 
-    oid_dotstring_to_oid(oid_str, oid);
+    if (oid_dotstring_to_oid(oid_str, oid))
+    {
+        printf("Bad oid %s\n", oid_str);
+        return 0;
+    }
 
     if (yaz_oid_add(yaz_oid_std(), oidclass, oname_str, oid))
     {

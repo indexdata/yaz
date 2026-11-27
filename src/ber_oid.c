@@ -54,15 +54,15 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
                 }
                 id <<= 7;
                 id |= *o->op->bp & 0X7F;
+                if (id != (Odr_oid) id) /* arc does not fit in Odr_oid */
+                {
+                    odr_seterror(o, ODATA, 23);
+                    return 0;
+                }
                 len--;
             }
             while (*(o->op->bp++) & 0X80);
 
-            if (id < 0)
-            {
-                odr_seterror(o, ODATA, 23);
-                return 0;
-            }
             if (pos > 0)
                 p[pos++] = id;
             else
@@ -104,6 +104,11 @@ int ber_oidc(ODR o, Odr_oid *p, int max_oid_size)
                 id = p[0]*40 + p[1];
             else
                 id = p[pos];
+            if (id < 0)
+            {
+                odr_seterror(o, ODATA, 23);
+                return 0;
+            }
             do
             {
                 octs[n++] = id & 0X7F;

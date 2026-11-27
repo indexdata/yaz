@@ -630,6 +630,47 @@ static void tst_charneg_response(void)
     }
 }
 
+static void tst_oid_arc_range(void)
+{
+    ODR encode = odr_createmem(ODR_ENCODE);
+    ODR decode = odr_createmem(ODR_DECODE);
+    /* 1.2.840.32767 and 1.2.840.32768 */
+    char fits[] = { 6, 6, 0x2a, '\x86', 0x48, '\x81', '\xff', 0x7f };
+    char too_big[] = { 6, 6, 0x2a, '\x86', 0x48, '\x82', '\x80', 0 };
+    Odr_oid negative[] = { 1, 2, 840, -32768, -1 };
+    Odr_oid tmp[OID_SIZE];
+    Odr_oid *oid = 0;
+    int len;
+    char *buf;
+
+    odr_setbuf(decode, fits, sizeof(fits), 0);
+    YAZ_CHECK(odr_oid(decode, &oid, 0, 0));
+    YAZ_CHECK(oid && oid_oidlen(oid) == 4 && oid[3] == 32767);
+    YAZ_CHECK(odr_oid(encode, &oid, 0, 0));
+    buf = odr_getbuf(encode, &len, 0);
+    YAZ_CHECK_EQ(len, sizeof(fits));
+    YAZ_CHECK(memcmp(buf, fits, sizeof(fits)) == 0);
+
+    /* An arc that does not fit in Odr_oid must not be stored truncated. */
+    odr_reset(decode);
+    odr_setbuf(decode, too_big, sizeof(too_big), 0);
+    YAZ_CHECK(!odr_oid(decode, &oid, 0, 0));
+    YAZ_CHECK_EQ(odr_geterror(decode), ODATA);
+
+    odr_reset(encode);
+    oid = negative;
+    YAZ_CHECK(!odr_oid(encode, &oid, 0, 0));
+    YAZ_CHECK_EQ(odr_geterror(encode), ODATA);
+
+    YAZ_CHECK_EQ(oid_dotstring_to_oid("1.2.840.32767", tmp), 0);
+    YAZ_CHECK_EQ(tmp[3], 32767);
+    YAZ_CHECK_EQ(oid_dotstring_to_oid("1.2.840.32768", tmp), -1);
+    YAZ_CHECK_EQ(oid_dotstring_to_oid("1.2.840.4294967297", tmp), -1);
+
+    odr_destroy(encode);
+    odr_destroy(decode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -641,6 +682,7 @@ int main(int argc, char **argv)
     tst_external_no_encoding();
     tst_ber_tag_position();
     tst_charneg_response();
+    tst_oid_arc_range();
     YAZ_CHECK_TERM;
 }
 
