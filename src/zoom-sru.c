@@ -386,6 +386,17 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         nmem_transfer(odr_getmem(resultset->odr), nmem);
         nmem_destroy(nmem);
 
+        if (c->no_redirects)
+        {
+            /* response from a redirect target: the request for the remaining
+               records is for host_port and must not be sent on this
+               connection. handle_http reconnects and the search resumes.
+               No records means no progress, so stop rather than redirect
+               again (and again) */
+            if (i > 0 && *count > 0 && *start < resultset->size)
+                return zoom_pending;
+            return zoom_complete;
+        }
         return ZOOM_connection_srw_send_search(c);
     }
     return zoom_complete;

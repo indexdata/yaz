@@ -4553,6 +4553,7 @@ static void wait_and_handle_response(int one_response_only)
 {
     int reconnect_ok = 1;
     int no_redirects = 0;
+    int redirect_host = 0; /* connected to the host of a redirect target */
     int res;
     char *netbuffer= 0;
     int netbufferlen = 0;
@@ -4739,7 +4740,10 @@ static void wait_and_handle_response(int one_response_only)
                     break;
                 }
                 if (host_change)
+                {
                     session_connect_base(location, &base_tmp);
+                    redirect_host = 1;
+                }
                 no_redirects++;
                 if (conn)
                 {
@@ -4750,6 +4754,10 @@ static void wait_and_handle_response(int one_response_only)
             }
             else
                 http_response(gdu->u.HTTP_Response);
+            /* end of redirect. The next request is for cur_host, so do
+               not leave the connection to the redirect target */
+            if (redirect_host)
+                close_session();
         }
 #endif
         if (one_response_only)
