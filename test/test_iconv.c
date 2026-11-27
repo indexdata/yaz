@@ -830,6 +830,17 @@ static void tst_danmarc_to_utf8(void)
     /** Trema */
     YAZ_CHECK(tst_convert(cd, "@UFCe", "e\xCC\x88"));
 
+    /** Not hex digits, so not a sequence: @ is passed as is */
+    YAZ_CHECK(tst_convert(cd, "a@   \n", "a@   \n"));
+    YAZ_CHECK(tst_convert(cd, "a@12zzb", "a@12zzb"));
+    YAZ_CHECK(tst_convert(cd, "a@+0412", "a@+0412"));
+    YAZ_CHECK(tst_convert(cd, "@Uzze", "@Uzze"));
+    YAZ_CHECK(tst_convert(cd, "@U Ae", "@U Ae"));
+
+    /** Input is counted: digits beyond it must not be used */
+    YAZ_CHECK(tst_convert_l(cd, 6, "a@   \n4711", 6, "a@   \n"));
+    YAZ_CHECK(tst_convert_l(cd, 5, "@U  \nFC", 5, "@U  \n"));
+
     yaz_iconv_close(cd);
 }
 
