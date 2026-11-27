@@ -344,6 +344,16 @@ static void tst_convert1(void)
                                   "</backend>",
                                   0, &p));
     YAZ_CHECK(conv_convert_test(p, raw_rec, marcxml_rec));
+    YAZ_CHECK(conv_convert_test(p, "<raw>a<b/>c<b>x</b>d</raw>", "acd"));
+    yaz_record_conv_destroy(p);
+
+    /* each selected text node once; not with its following siblings */
+    YAZ_CHECK(conv_configure_test("<backend>"
+                                  "<select path=\"/raw/text()\"/>"
+                                  "</backend>",
+                                  0, &p));
+    YAZ_CHECK(conv_convert_test(p, raw_rec, marcxml_rec));
+    YAZ_CHECK(conv_convert_test(p, "<raw>a<b/>c<b>x</b>d</raw>", "acd"));
     yaz_record_conv_destroy(p);
 }
 
