@@ -2713,10 +2713,14 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
 
     yaz_log(log_requestdetail, "Negotiated to v%d: %s", assoc->version, options);
 
-    if (*req->maximumRecordSize < assoc->maximumRecordSize)
+    /* The client may lower the sizes of the server, but not turn them off.
+       pack_records takes a preferredMessageSize of 0 or less as no limit. */
+    if (*req->maximumRecordSize > 0 &&
+        *req->maximumRecordSize < assoc->maximumRecordSize)
         assoc->maximumRecordSize = odr_int_to_int(*req->maximumRecordSize);
 
-    if (*req->preferredMessageSize < assoc->preferredMessageSize)
+    if (*req->preferredMessageSize > 0 &&
+        *req->preferredMessageSize < assoc->preferredMessageSize)
         assoc->preferredMessageSize = odr_int_to_int(*req->preferredMessageSize);
 
     resp->preferredMessageSize =
@@ -2888,10 +2892,6 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
     for (int recno = odr_int_to_int(start);
          reclist->num_records < toget; recno++)
     {
-        bend_fetch_rr freq;
-        Z_NamePlusRecord *thisrec;
-        Odr_int this_length = 0;
-        Odr_int total_length;
 
         if (reclist->num_records == max_records)
         {
@@ -2908,7 +2908,21 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
          * allocation done by the backend - this should give us a reasonable
          * idea of the total size of the data so far.
          */
-        total_length = odr_total(a->encode) - dumped_records;
+        Odr_int total_length = odr_total(a->encode) - dumped_records;
+
+        /* Dropped records and surrogate diagnostics are not checked against
+           the negotiated sizes below, but they still take up memory. Stop
+           when that exceeds the limit of the server itself. */
+        if (reclist->num_records > 0 && a->last_control->maxrecordsize > 0 &&
+            odr_total(a->encode) > (size_t) a->last_control->maxrecordsize)
+        {
+            yaz_log(log_requestdetail, "  Stopped at server limit %d",
+                    a->last_control->maxrecordsize);
+            *pres = Z_PresentStatus_partial_2;
+            break;
+        }
+
+        bend_fetch_rr freq;
         freq.errcode = 0;
         freq.errstring = 0;
         freq.basename = 0;
@@ -2960,6 +2974,7 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             *next = 0;   /* signal end-of-set and stop */
             break;
         }
+        Odr_int this_length;
         if (freq.len >= 0)
             this_length = freq.len;
         else
@@ -3010,8 +3025,9 @@ static Z_Records *pack_records(association *a, char *setname, Odr_int start,
             }
         }
 
-        if (!(thisrec = (Z_NamePlusRecord *)
-              odr_malloc(a->encode, sizeof(*thisrec))))
+        Z_NamePlusRecord *thisrec = (Z_NamePlusRecord *)
+              odr_malloc(a->encode, sizeof(*thisrec));
+        if (thisrec == 0)
             return 0;
         thisrec->databaseName = odr_strdup_null(a->encode, freq.basename);
         thisrec->which = Z_NamePlusRecord_databaseRecord;

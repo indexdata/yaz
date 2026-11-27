@@ -63,3 +63,4 @@ test_charneg
 test_client_record
 test_gfs_requests
 test_otherinfo
+test_present_limits
