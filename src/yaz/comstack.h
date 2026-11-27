@@ -201,8 +201,10 @@ struct comstack
     \returns 0 when a connection is ready, -1 on error
 
     The callback receives cd, a binary peer address, its byte length, and its
-    address family. The check is supported by TCP/IP and TLS on non-Windows
-    systems; the UNIX transport ignores it.
+    address family: a struct sockaddr_in with AF_INET for an IPv4 peer (also
+    on a listener that accepts both IPv6 and IPv4), a struct sockaddr_in6
+    with AF_INET6 for an IPv6 peer. The check is supported by TCP/IP and TLS
+    on non-Windows systems; the UNIX transport ignores it.
  */
 #define cs_listen_check(handle, ap, al, cf, cd) ((*(handle)->f_listen)(handle, ap, al, cf, cd))
 /** \brief Creates an endpoint for a connection received by cs_listen

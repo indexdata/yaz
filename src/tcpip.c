@@ -1108,7 +1108,8 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
 #ifdef _WIN32
     /* we don't get peer address on Windows (via accept) */
 #else
-    struct sockaddr_in addr;
+    /* the listener may be IPv6 (and "@" accepts both IPv6 and IPv4) */
+    struct sockaddr_storage addr;
     YAZ_SOCKLEN_T len = sizeof(addr);
 #endif
 
@@ -1150,12 +1151,30 @@ int tcpip_listen(COMSTACK h, char *raddr, int *addrlen,
     if (addrlen)
         *addrlen = 0;
 #else
-    if (addrlen && (size_t) (*addrlen) >= sizeof(struct sockaddr_in))
-        memcpy(raddr, &addr, *addrlen = sizeof(struct sockaddr_in));
+    if (addr.ss_family == AF_INET6)
+    {
+        /* IPv4 client on a listener for both: present it as IPv4 */
+        const struct sockaddr_in6 *in6 = (const struct sockaddr_in6 *) &addr;
+
+        if (IN6_IS_ADDR_V4MAPPED(&in6->sin6_addr))
+        {
+            struct sockaddr_in in4;
+
+            memset(&in4, 0, sizeof(in4));
+            in4.sin_family = AF_INET;
+            in4.sin_port = in6->sin6_port;
+            memcpy(&in4.sin_addr, in6->sin6_addr.s6_addr + 12,
+                   sizeof(in4.sin_addr));
+            len = sizeof(in4);
+            memcpy(&addr, &in4, len);
+        }
+    }
+    if (addrlen && *addrlen >= (int) len)
+        memcpy(raddr, &addr, *addrlen = (int) len);
     else if (addrlen)
         *addrlen = 0;
     if (check_ip && (*check_ip)(cd, (const char *) &addr,
-        sizeof(addr), AF_INET))
+                                (int) len, addr.ss_family))
     {
         cs_set_error(h, CSDENY, 0);
 #ifdef _WIN32
