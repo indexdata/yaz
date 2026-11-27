@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
-#include <stdio.h>
+#include <yaz/atoi.h>
 #include <yaz/log.h>
 #include <yaz/xmalloc.h>
 #include "iconv-p.h"
@@ -62,7 +62,12 @@ static unsigned long read_useq(yaz_iconv_t cd,
         *no_read = 0;
         return 0;
     }
-    sscanf((const char *) inp+2, "%2lx", &x);
+    /* input is counted, not 0-terminated */
+    if (yaz_atoul(16, (const char *) inp+2, 2, &x) != 2)
+    {
+        *no_read = 1; /* not a sequence; pass @ as is */
+        return inp[0];
+    }
     *no_read = 4;
     for (int i = 0; u_seq[i]; i += 2)
         if (x == u_seq[i])
@@ -118,7 +123,12 @@ static unsigned long read_danmarc(yaz_iconv_t cd,
             *no_read = 0;
             return 0;
         }
-        sscanf((const char *) inp+1, "%4lx", &x);
+        /* input is counted, not 0-terminated */
+        if (yaz_atoul(16, (const char *) inp+1, 4, &x) != 4)
+        {
+            *no_read = 1; /* not a sequence; pass @ as is */
+            return inp[0];
+        }
         *no_read = 5;
     }
     return x;
