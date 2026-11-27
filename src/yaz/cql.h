@@ -208,7 +208,8 @@ struct cql_node *cql_node_mk_sc(NMEM nmem, const char *index,
 
 /** \brief applies a prefix+uri to "unresolved" index and relation URIs.
     "unresolved" URIs are those nodes where member index_uri / relation_uri
-    is NULL.
+    is NULL. The URI is copied to nmem once and that copy is shared by all
+    nodes that it resolves.
 */
 YAZ_EXPORT
 struct cql_node *cql_apply_prefix(NMEM nmem, struct cql_node *cn,
