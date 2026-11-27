@@ -19,6 +19,7 @@ static const char *expected_data;
 static int update(void *handle, bend_update_rr *rr)
 {
     updates++;
+    YAZ_CHECK(!rr->referenceId);
     YAZ_CHECK(!strcmp(rr->operation, "delete"));
     YAZ_CHECK(rr->record_id && !strcmp(rr->record_id, "record-1"));
     YAZ_CHECK(expected_schema ?

@@ -887,6 +887,7 @@ static int srw_bend_fetch(association *assoc, int pos,
     rr.len = 0;
     rr.record = 0;
     rr.last_in_set = 0;
+    rr.output_format = 0;
     rr.errcode = 0;
     rr.errstring = 0;
     rr.surrogate_flag = 0;
@@ -1253,6 +1254,7 @@ static void srw_bend_search(association *assoc,
                         bprr->setname = "default";
                         bprr->start = start;
                         bprr->number = number;
+                        bprr->format = 0;
                         if (srw_req->recordSchema)
                         {
                             bprr->comp = (Z_RecordComposition *) odr_malloc(assoc->decode,
@@ -1627,6 +1629,7 @@ static void srw_bend_scan(association *assoc,
         {
             YAZ_PQF_Parser pqf_parser = yaz_pqf_create();
 
+            bsrr->attributeset = 0;
             bsrr->term = yaz_pqf_scan(pqf_parser, assoc->decode,
                                       &bsrr->attributeset,
                                       srw_req->scanClause);
@@ -1791,6 +1794,7 @@ static void srw_bend_update(association *assoc,
         rr.print = assoc->print;
         rr.num_bases = 1;
         rr.basenames = &srw_req->database;
+        rr.referenceId = 0;
         rr.operation = srw_req->operation;
         rr.operation_status = "failed";
         rr.record_id = 0;

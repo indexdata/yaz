@@ -45,6 +45,8 @@ static int search(void *handle, bend_search_rr *rr)
 static int present(void *handle, bend_present_rr *rr)
 {
     presented++;
+    /* SRU has no record syntax; the frontend must not leave it unset. */
+    YAZ_CHECK(!rr->format);
     YAZ_CHECK_EQ(rr->number, expected_number);
     YAZ_CHECK(rr->number - 1 <= INT_MAX - rr->start);
     /* Stop a regression before it tries to allocate billions of records. */
