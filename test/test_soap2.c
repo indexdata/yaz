@@ -779,6 +779,55 @@ static void tst_srw_explain_response(void)
     odr_destroy(decode);
     odr_destroy(encode);
 }
+
+static void tst_stylesheet(void)
+{
+    /* value that attempts to end href and the processing instruction */
+    const char *stylesheet = "a.xsl?x=1&y=2\"?><!DOCTYPE x []><?x \"";
+    char *content_buf = 0;
+    int content_len = 0;
+    int ret;
+    ODR o = odr_createmem(ODR_ENCODE);
+    Z_SOAP_Handler h[2] = {
+        {"http://www.loc.gov/zing/srw/", 0, (Z_SOAP_fun) yaz_srw_codec},
+        {0, 0, 0}
+    };
+    Z_SRW_PDU *sr = yaz_srw_get(o, Z_SRW_searchRetrieve_response);
+    Z_SOAP *p = (Z_SOAP *) odr_malloc(o, sizeof(*p));
+
+    p->which = Z_SOAP_generic;
+    p->u.generic = (Z_SOAP_Generic *) odr_malloc(o, sizeof(*p->u.generic));
+    p->u.generic->no = 0;
+    p->u.generic->ns = 0;
+    p->u.generic->p = sr;
+    p->ns = "SRU";
+
+    ret = z_soap_codec_enc_xsl(o, &p, &content_buf, &content_len, h, 0,
+                               stylesheet);
+    YAZ_CHECK(ret == 0);
+    if (ret == 0)
+    {
+        xmlDocPtr doc = xmlParseMemory(content_buf, content_len);
+        YAZ_CHECK(doc);
+        if (doc)
+        {
+            xmlNodePtr ptr = doc->children;
+            YAZ_CHECK(xmlGetIntSubset(doc) == 0);
+            YAZ_CHECK(ptr && ptr->type == XML_PI_NODE);
+            if (ptr && ptr->type == XML_PI_NODE)
+            {
+                YAZ_CHECK(!strcmp((const char *) ptr->name, "xml-stylesheet"));
+                YAZ_CHECK(!strcmp((const char *) ptr->content,
+                                  "type=\"text/xsl\" href=\"a.xsl?x=1&amp;y=2"
+                                  "&quot;?&gt;&lt;!DOCTYPE x []&gt;&lt;?x "
+                                  "&quot;\""));
+                YAZ_CHECK(ptr->next == xmlDocGetRootElement(doc));
+            }
+            xmlFreeDoc(doc);
+        }
+    }
+    odr_destroy(o);
+}
 #endif
 
 static void tst_array_to_uri(void)
@@ -953,6 +1002,7 @@ int main(int argc, char **argv)
     tst_srw_explain_response();
     tst_sru_proxy_facets();
     tst_scan_request();
+    tst_stylesheet();
 #endif
     tst_array_to_uri();
     YAZ_CHECK_TERM;

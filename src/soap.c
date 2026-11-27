@@ -19,7 +19,7 @@
 #if YAZ_HAVE_XML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <yaz/snprintf.h>
+#include <yaz/wrbuf.h>
 #include "xml_util.h"
 
 static const char *soap_v1_1 = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -277,13 +277,18 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
         }
         if (stylesheet)
         {
-            char *content = (char *) odr_malloc(o, strlen(stylesheet) + 40);
+            WRBUF content = wrbuf_alloc();
             xmlNodePtr pi, ptr = xmlDocGetRootElement(doc);
 
-            yaz_snprintf(content, strlen(stylesheet) + 40,
-                "type=\"text/xsl\" href=\"%s\"", stylesheet);
-            pi = xmlNewPI(BAD_CAST "xml-stylesheet", BAD_CAST content);
+            /* libxml2 writes PI content as is. Escape the pseudo-attribute
+               value so that it can not end href or the PI itself */
+            wrbuf_puts(content, "type=\"text/xsl\" href=\"");
+            wrbuf_xmlputs(content, stylesheet);
+            wrbuf_puts(content, "\"");
+            pi = xmlNewPI(BAD_CAST "xml-stylesheet",
+                          BAD_CAST wrbuf_cstr(content));
             xmlAddPrevSibling(ptr, pi);
+            wrbuf_destroy(content);
         }
         if (1)
         {
