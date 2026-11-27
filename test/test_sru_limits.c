@@ -618,6 +618,40 @@ static void check_no_handlers(void)
     check(0, "0", "1", 0, 0, YAZ_SRW_QUERY_FEATURE_UNSUPP);
     statserv_getcontrol()->bend_init = init;
 }
+
+/* Untrusted facetLimit may hold any number of entries. Only the first 100
+   are decoded. */
+static void check_facet_limit(int no_fields, int expected)
+{
+    ODR odr = odr_createmem(ODR_DECODE);
+    WRBUF path = wrbuf_alloc();
+    Z_GDU *gdu = z_get_HTTP_Request_uri(odr, "http://localhost/Default", 0, 0);
+    Z_SRW_PDU *sr = 0;
+    Z_SOAP *soap_package = 0;
+    char *charset = 0;
+    Z_SRW_diagnostic *diag = 0;
+    int num_diag = 0;
+    int i;
+
+    wrbuf_puts(path, "/Default?version=2.0&operation=searchRetrieve&query=a"
+               "&facetLimit=");
+    for (i = 0; i < no_fields; i++)
+        wrbuf_printf(path, "%s1:f%d", i ? "," : "", i);
+    gdu->u.HTTP_Request->method = "GET";
+    gdu->u.HTTP_Request->path = odr_strdup(odr, wrbuf_cstr(path));
+    YAZ_CHECK_EQ(yaz_sru_decode(gdu->u.HTTP_Request, &sr, &soap_package, odr,
+                                &charset, &diag, &num_diag), 0);
+    YAZ_CHECK(sr && sr->which == Z_SRW_searchRetrieve_request);
+    if (sr && sr->which == Z_SRW_searchRetrieve_request)
+    {
+        Z_FacetList *fl = sr->u.request->facetList;
+        YAZ_CHECK(fl);
+        if (fl)
+            YAZ_CHECK_EQ(fl->num, expected);
+    }
+    wrbuf_destroy(path);
+    odr_destroy(odr);
+}
 #endif
 
 int main(int argc, char **argv)
@@ -642,6 +676,10 @@ int main(int argc, char **argv)
             check_unknown_host("1.0", 0, 1, mode);
         }
         check_no_handlers();
+        check_facet_limit(2, 2);
+        check_facet_limit(100, 100);
+        check_facet_limit(101, 100);
+        check_facet_limit(20000, 100);
         /* Untrusted SRU PQF must return a diagnostic without backend work. */
         check(3, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
         check(4, "0", "1", 0, 0, YAZ_SRW_QUERY_SYNTAX_ERROR);
