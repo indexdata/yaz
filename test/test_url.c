@@ -20,6 +20,7 @@
    fetch and redirect loop without sockets or library symbol interposition. */
 static int connections;
 static int connect_calls;
+static int get_calls;
 static int response_code;
 static const char *redirect_location;
 static const char *set_cookie;
@@ -44,10 +45,13 @@ static int put_stub(COMSTACK cs, char *buf, int size)
 
 static int get_stub(COMSTACK cs, char **buf, int *size)
 {
-    if (failure_mode == 4)
+    get_calls++;
+    if (failure_mode == 4 || (failure_mode == 5 && get_calls > 1))
         return 0;
     WRBUF response = wrbuf_alloc();
-    if (connections == 1 || (chain && connections == 2))
+    if (failure_mode == 5)
+        wrbuf_puts(response, "GET / HTTP/1.1\r\n");
+    else if (connections == 1 || (chain && connections == 2))
     {
         wrbuf_printf(response, "HTTP/1.1 %d Redirect\r\nLocation: %s\r\n",
                       response_code,
@@ -268,6 +272,23 @@ static void tst_credential_errors(void)
     wrbuf_destroy(warnings);
 }
 
+static void tst_decode_failure(void)
+{
+    /* A complete message that is not an HTTP response ends the fetch. */
+    yaz_url_t url = yaz_url_create();
+    connections = get_calls = 0;
+    failure_mode = 5;
+    YAZ_CHECK(!yaz_url_exec(url, "http://example.org/path", "GET", 0, 0, 0));
+    YAZ_CHECK_EQ(connections, 1);
+    YAZ_CHECK_EQ(get_calls, 1);
+    YAZ_CHECK(!strcmp(yaz_url_get_error(url),
+                      "HTTP decoding fail for URL http://example.org/path"));
+    xfree(requests[0]);
+    requests[0] = 0;
+    failure_mode = 0;
+    yaz_url_destroy(url);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -275,6 +296,7 @@ int main(int argc, char **argv)
     tst_credential_errors();
     YAZ_CHECK_LOG();
     tst_invalid_requests();
+    tst_decode_failure();
     for (response_code = 301; response_code <= 307; response_code++)
         if (response_code == 301 || response_code == 302 || response_code == 307)
             tst_redirects();
