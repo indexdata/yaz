@@ -697,11 +697,12 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
             yaz_iconv_t cd = yaz_iconv_open(cp, "UTF-8");
             if (cd)
             {
+                int r = -1;
                 search_req->query = yaz_copy_Z_Query(search_req->query,
                                                      c->odr_out);
-
-                int r = yaz_query_charset_convert_rpnquery_check(
-                    search_req->query->u.type_1, c->odr_out, cd);
+                if (search_req->query)
+                    r = yaz_query_charset_convert_rpnquery_check(
+                        search_req->query->u.type_1, c->odr_out, cd);
                 yaz_iconv_close(cd);
                 if (r)
                 {  /* query could not be char converted */
@@ -829,6 +830,13 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
             if (cd)
             {
                 rpn = yaz_copy_z_RPNQuery(rpn, c->odr_out);
+                if (!rpn)
+                {
+                    odr_reset(c->odr_out);
+                    yaz_iconv_close(cd);
+                    ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
+                    return zoom_complete;
+                }
 
                 yaz_query_charset_convert_rpnquery(
                     rpn, c->odr_out, cd);

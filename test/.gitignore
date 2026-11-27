@@ -55,6 +55,7 @@ test_errno
 test_statserv_startup
 test_daemon_no_passwd
 test_zoom_facet
+test_zoom_record
 test_zoom_record_cache
 test_zoom_scan
 test_zoom_send

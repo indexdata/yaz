@@ -26,8 +26,10 @@ Z_##x *yaz_clone_z_##x(Z_##x *q, NMEM nmem_out) \
         if (buf) \
         { \
             odr_setbuf(dec, buf, len, 0); \
-            z_##x(dec, &q1, 0, 0); \
-            nmem_transfer(nmem_out, dec->mem);  \
+            if (z_##x(dec, &q1, 0, 0)) \
+                nmem_transfer(nmem_out, dec->mem); \
+            else \
+                q1 = 0; /* do not return a partially decoded copy */ \
         } \
     } \
     odr_destroy(enc); \

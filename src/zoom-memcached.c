@@ -580,7 +580,8 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                 int v_len = reply2->len;
 
                 odr_setbuf(r->odr, v_buf, v_len, 0);
-                z_NamePlusRecord(r->odr, &npr, 0, 0);
+                if (!z_NamePlusRecord(r->odr, &npr, 0, 0))
+                    npr = 0; /* partially decoded; treat as cache miss */
                 if (npr)
                     yaz_log(YLOG_LOG, "returned redis copy");
                 freeReplyObject(reply2);
@@ -627,7 +628,8 @@ Z_NamePlusRecord *ZOOM_memcached_lookup(ZOOM_resultset r, int pos,
                 Z_NamePlusRecord *npr = 0;
 
                 odr_setbuf(r->odr, v_buf, v_len, 0);
-                z_NamePlusRecord(r->odr, &npr, 0, 0);
+                if (!z_NamePlusRecord(r->odr, &npr, 0, 0))
+                    npr = 0; /* partially decoded; treat as cache miss */
                 free(v_buf);
                 if (npr)
                     yaz_log(YLOG_LOG, "returned memcached copy");
