@@ -1542,7 +1542,18 @@ static zoom_ret send_HTTP_redirect(ZOOM_connection c, const char *uri)
     }
     xfree(c->location);
     c->location = 0;
-    return ZOOM_send_GDU(c, gdu);
+    zoom_ret ret = ZOOM_send_GDU(c, gdu);
+    if (ret == zoom_complete)
+    {
+        /* nothing was sent and error is set. The callers do not pass this
+           on to ZOOM_connection_exec_task, so end the redirect and the
+           task here rather than leave the new connection open without
+           a request */
+        c->no_redirects = 0;
+        ZOOM_connection_close(c);
+        ZOOM_connection_remove_task(c);
+    }
+    return ret;
 }
 
 

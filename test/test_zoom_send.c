@@ -160,6 +160,53 @@ static void check_sort_of_pending_search(void)
     ZOOM_connection_destroy(c);
 }
 
+static int closes;
+
+static int rcvconnect_ready(COMSTACK cs)
+{
+    return 0;
+}
+
+static void close_connection(COMSTACK cs)
+{
+    closes++;
+}
+
+/* The connection for a redirect is ready, but the request for the redirect
+   can not be encoded. That must end the task and close the connection,
+   rather than leave it waiting for I/O without a request. */
+static void check_redirect_encoding_failure(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    ZOOM_task task = ZOOM_connection_add_task(c, ZOOM_TASK_SEARCH);
+    struct comstack cs;
+
+    memset(&task->u, 0, sizeof(task->u));
+    task->running = 1;
+    memset(&cs, 0, sizeof(cs));
+    cs.event = CS_CONNECT;
+    cs.f_rcvconnect = rcvconnect_ready;
+    cs.f_put = put_request;
+    cs.f_close = close_connection;
+    c->cs = &cs;
+    c->proto = PROTO_HTTP;
+    c->cookies = yaz_cookies_create();
+    c->no_redirects = 1;
+    c->location = xstrdup("http://example.org/a\tb");
+    ZOOM_connection_set_mask(c, ZOOM_SELECT_WRITE|ZOOM_SELECT_EXCEPT);
+    writes = 0;
+    closes = 0;
+    ZOOM_connection_fire_event_socket(c, ZOOM_SELECT_WRITE);
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, 0), ZOOM_ERROR_ENCODE);
+    YAZ_CHECK_EQ(writes, 0);
+    YAZ_CHECK_EQ(closes, 1);
+    YAZ_CHECK(!c->cs);
+    YAZ_CHECK(ZOOM_connection_is_idle(c));
+    YAZ_CHECK_EQ(c->no_redirects, 0);
+    c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_connection_destroy(c);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -167,5 +214,7 @@ int main(int argc, char **argv)
     check_encoding_failure(0);
     check_encoding_failure(1);
     check_http_response_on_z3950();
+    check_sort_of_pending_search();
+    check_redirect_encoding_failure();
     YAZ_CHECK_TERM;
 }
