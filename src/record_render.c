@@ -250,12 +250,15 @@ static const char *get_record_format(WRBUF wrbuf, size_t *len,
             xmlChar *xml_mem;
             int xml_size;
             xmlDocDumpFormatMemory(doc, &xml_mem, &xml_size, 1);
-            wrbuf_rewind(wrbuf);
-            wrbuf_write(wrbuf, (const char *) xml_mem, xml_size);
+            if (xml_mem && xml_size >= 0)
+            {
+                wrbuf_rewind(wrbuf);
+                wrbuf_write(wrbuf, (const char *) xml_mem, xml_size);
+                res = wrbuf_cstr(wrbuf);
+                *len = wrbuf_len(wrbuf);
+            }
             xmlFree(xml_mem);
             xmlFreeDoc(doc);
-            res = wrbuf_cstr(wrbuf);
-            *len = wrbuf_len(wrbuf);
         }
     }
 #endif
