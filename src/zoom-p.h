@@ -66,7 +66,8 @@ typedef struct ZOOM_task_p *ZOOM_task;
 struct ZOOM_connection_p {
     enum oid_proto proto;
     COMSTACK cs;
-    char *host_port;
+    char *host_port; /* without the login for a CONNECT proxy */
+    char *connect_auth; /* user:password for CONNECT proxy of host_port */
     int error;
     char *addinfo;
     char *diagset;
