@@ -53,6 +53,7 @@ static int generate(ZOOM_query s)
         wrbuf_rewind(s->full_query);
         wrbuf_puts(s->full_query, s->query_string);
         odr_reset(s->odr_query);
+        s->z_query = 0; /* was allocated in odr_query; set again below */
 
         if (s->sort_spec && (s->sort_strategy == SORT_STRATEGY_SRU11 || s->sort_strategy == SORT_STRATEGY_SOLR))
         {
