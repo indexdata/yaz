@@ -15,7 +15,8 @@ check_PROGRAMS = test_client_record test_ccl test_charneg test_comstack test_cql
  test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
  test_gfs_requests test_gfs_vhosts test_marc_read_iso2709 test_marc_read_sax \
- test_present_limits test_sru_update test_zoom_facet test_zoom_scan test_zoom_send
+ test_present_limits test_sru_update test_zoom_facet test_zoom_record_cache \
+ test_zoom_scan test_zoom_send
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_jsonlines.sh test_cql2xcql.sh \
 	test_cql2pqf.sh test_icu.sh
@@ -122,6 +123,7 @@ test_daemon_no_passwd_SOURCES = test_daemon.c
 test_daemon_no_passwd_CPPFLAGS = $(AM_CPPFLAGS) -DTEST_DAEMON_NO_PASSWD
 
 test_zoom_facet_SOURCES = test_zoom_facet.c
+test_zoom_record_cache_SOURCES = test_zoom_record_cache.c
 test_zoom_send_SOURCES = test_zoom_send.c
 test_zoom_scan_SOURCES = test_zoom_scan.c
 

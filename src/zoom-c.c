@@ -726,8 +726,12 @@ ZOOM_resultset ZOOM_resultset_create(void)
     r->piggyback = 1;
     r->setname = 0;
     r->step = 0;
+    r->record_hash = (ZOOM_record_cache *)
+        odr_malloc(r->odr, RECORD_HASH_SIZE * sizeof(*r->record_hash));
     for (int i = 0; i<RECORD_HASH_SIZE; i++)
         r->record_hash[i] = 0;
+    r->record_hash_size = RECORD_HASH_SIZE;
+    r->record_hash_count = 0;
     r->r_sort_spec = 0;
     r->query = 0;
     r->connection = 0;

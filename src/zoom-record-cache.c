@@ -51,11 +51,38 @@ struct ZOOM_record_cache_p {
     ZOOM_record_cache next;
 };
 
-static size_t record_hash(Odr_int pos)
+static size_t record_hash(Odr_int pos, size_t size)
 {
     if (pos < 0)
         pos = 0;
-    return pos % RECORD_HASH_SIZE;
+    return pos % size;
+}
+
+/* doubles the number of buckets, so that chains stay short no matter
+   how many records a result set holds */
+static void record_hash_grow(ZOOM_resultset r)
+{
+    size_t i, size = r->record_hash_size * 2;
+    ZOOM_record_cache *hash = (ZOOM_record_cache *)
+        odr_malloc(r->odr, size * sizeof(*hash));
+
+    for (i = 0; i < size; i++)
+        hash[i] = 0;
+    for (i = 0; i < r->record_hash_size; i++)
+    {
+        ZOOM_record_cache rc = r->record_hash[i];
+        while (rc)
+        {
+            ZOOM_record_cache next = rc->next;
+            size_t h = record_hash(rc->pos, size);
+
+            rc->next = hash[h];
+            hash[h] = rc;
+            rc = next;
+        }
+    }
+    r->record_hash = hash;
+    r->record_hash_size = size;
 }
 
 static ZOOM_record record_cache_add(ZOOM_resultset r,
@@ -71,7 +98,8 @@ static ZOOM_record record_cache_add(ZOOM_resultset r,
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_RECV_RECORD);
     ZOOM_connection_put_event(r->connection, event);
 
-    for (rc = r->record_hash[record_hash(pos)]; rc; rc = rc->next)
+    for (rc = r->record_hash[record_hash(pos, r->record_hash_size)]; rc;
+         rc = rc->next)
     {
         if (pos == rc->pos
             && yaz_strcmp_null(schema, rc->schema) == 0
@@ -81,6 +109,9 @@ static ZOOM_record record_cache_add(ZOOM_resultset r,
     }
     if (!rc)
     {
+        if (r->record_hash_count >= r->record_hash_size)
+            record_hash_grow(r);
+        size_t h = record_hash(pos, r->record_hash_size);
         rc = (ZOOM_record_cache) odr_malloc(r->odr, sizeof(*rc));
         rc->rec.odr = 0;
 #if SHPTR
@@ -96,9 +127,9 @@ static ZOOM_record record_cache_add(ZOOM_resultset r,
         rc->schema = odr_strdup_null(r->odr, schema);
 
         rc->pos = pos;
-        rc->next = r->record_hash[record_hash(pos)];
-        r->record_hash[record_hash(pos)] = rc;
-
+        rc->next = r->record_hash[h];
+        r->record_hash[h] = rc;
+        r->record_hash_count++;
     }
 
     rc->rec.npr = npr;
@@ -141,8 +172,9 @@ ZOOM_record ZOOM_record_cache_lookup_i(ZOOM_resultset r, Odr_int pos,
 {
     if (pos > INT_MAX)
         return 0;
-    for (ZOOM_record_cache rc = r->record_hash[record_hash(pos)];
-         rc; rc = rc->next)
+    ZOOM_record_cache rc;
+    for (rc = r->record_hash[record_hash(pos, r->record_hash_size)]; rc;
+         rc = rc->next)
     {
         if (pos == rc->pos)
         {
@@ -229,7 +261,7 @@ static void ZOOM_record_release(ZOOM_record rec)
 ZOOM_API(void)
     ZOOM_resultset_cache_reset(ZOOM_resultset r)
 {
-    for (int i = 0; i<RECORD_HASH_SIZE; i++)
+    for (size_t i = 0; i<r->record_hash_size; i++)
     {
         for (ZOOM_record_cache rc = r->record_hash[i]; rc; rc = rc->next)
         {
@@ -237,6 +269,7 @@ ZOOM_API(void)
         }
         r->record_hash[i] = 0;
     }
+    r->record_hash_count = 0;
 }
 
 

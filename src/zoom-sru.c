@@ -340,9 +340,11 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
             Z_SRW_diagnostic *diag = 0;
             int num_diag;
 
-            /* only trust recordPosition if >= calculated position */
+            /* only trust recordPosition if >= calculated position and
+               within the range of records asked for */
             if (res->records[i].recordPosition &&
-                *res->records[i].recordPosition >= pos + 1)
+                *res->records[i].recordPosition >= pos + 1 &&
+                *res->records[i].recordPosition <= *start + *count)
                 pos = *res->records[i].recordPosition - 1;
 
             if (pos >= INT_MAX ||
