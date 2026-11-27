@@ -1573,6 +1573,10 @@ int tcpip_put(COMSTACK h, char *buf, int size)
             }
         }
         state->written += res;
+        /* connection is established and data has been sent on it. From
+           now on a failure must not make cont_connect try another address
+           as it would only get the remainder of what we are sending */
+        state->ai_connect = 0;
         yaz_log(log_level, "  Wrote %ld, written=%d, nbytes=%d",
                 (long) res, state->written, size);
     }
