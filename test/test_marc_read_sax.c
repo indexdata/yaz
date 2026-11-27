@@ -148,6 +148,46 @@ static void tst_leader_lengths(void)
                   "<datafield tag=\"245\" ind1=\"1\" ind2=\"2\">");
     wrbuf_destroy(xml);
 }
+
+static void tst_nested_controlfield(void)
+{
+    /* The tag of a controlfield is used for that element only. Enclosing
+     * controlfield elements must not add further copies of it. */
+    const char *xml = "<record><leader>00062cgm a2200037Ia 4500</leader>"
+        "<controlfield tag=\"001\"><controlfield><controlfield tag=\"003\">"
+        "x</controlfield></controlfield></controlfield>"
+        "<controlfield tag=\"005\">y</controlfield></record>";
+    const char *tag = "<controlfield tag=\"003\">";
+    const char *cp;
+    struct leader_test_data data;
+    yaz_marc_t mt = yaz_marc_create();
+    yaz_marc_sax_t sax;
+    xmlParserCtxtPtr parser;
+    data.records = 0;
+    data.output = wrbuf_alloc();
+    sax = yaz_marc_sax_new(mt, leader_handler, &data);
+    parser = xmlCreatePushParserCtxt(yaz_marc_sax_get_handler(sax), sax,
+                                     xml, (int) strlen(xml), 0);
+    YAZ_CHECK(parser != 0);
+    if (parser)
+    {
+        YAZ_CHECK_EQ(xmlParseChunk(parser, 0, 0, 1), 0);
+        xmlFreeParserCtxt(parser);
+    }
+    YAZ_CHECK_EQ(data.records, 1);
+    cp = strstr(wrbuf_cstr(data.output), tag);
+    YAZ_CHECK(cp != 0);
+    if (cp)
+    {
+        YAZ_CHECK(strncmp(cp + strlen(tag), "x</controlfield>", 16) == 0);
+        YAZ_CHECK(strstr(cp + 1, tag) == 0);
+    }
+    YAZ_CHECK(strstr(wrbuf_cstr(data.output),
+                     "<controlfield tag=\"005\">y</controlfield>") != 0);
+    yaz_marc_sax_destroy(sax);
+    yaz_marc_destroy(mt);
+    wrbuf_destroy(data.output);
+}
 #endif
 
 
@@ -157,6 +197,7 @@ int main(int argc, char **argv)
     tst1();
 #if YAZ_HAVE_XML2
     tst_leader_lengths();
+    tst_nested_controlfield();
 #endif
     YAZ_CHECK_TERM;
 }

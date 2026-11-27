@@ -149,6 +149,9 @@ static void yaz_end_element_ns(void *vp, const xmlChar *localname,
     {
         yaz_marc_add_controlfield(ctx->mt, wrbuf_cstr(ctx->tag),
                                   wrbuf_buf(ctx->cdata), wrbuf_len(ctx->cdata));
+        /* tag belongs to this element only; an enclosing controlfield
+           must not add it again */
+        wrbuf_rewind(ctx->tag);
     }
     else if (strcmp((const char *)localname, "subfield") == 0)
     {
