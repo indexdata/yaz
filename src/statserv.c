@@ -36,6 +36,12 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #if HAVE_PWD_H
 #include <pwd.h>
 #endif
@@ -1028,6 +1034,52 @@ void statserv_reap_children(void)
     errno = saved_errno;
 }
 
+/* check_ip may wait for a name server (TCP wrappers do a reverse lookup).
+   With a process or thread per session it is called from there, so that
+   only the client in question waits for it and not the listener */
+static int check_ip_in_session(void)
+{
+    return control_block.dynamic || control_block.threads;
+}
+
+/* returns 1 if check_ip refuses the peer of new_line, which is then closed */
+static int peer_denied(COMSTACK new_line)
+{
+    struct sockaddr_storage addr;
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *) &addr;
+    YAZ_SOCKLEN_T len = sizeof(addr);
+    const char *a;
+
+    if (!control_block.check_ip)
+        return 0;
+    if (getpeername(cs_fileno(new_line), (struct sockaddr *) &addr, &len) == 0)
+    {
+        if (addr.ss_family == AF_INET6 &&
+            IN6_IS_ADDR_V4MAPPED(&addr6->sin6_addr))
+        {   /* IPv4 peer of an IPv6 socket: present it as such */
+            struct sockaddr_in addr4;
+
+            memset(&addr4, 0, sizeof(addr4));
+            addr4.sin_family = AF_INET;
+            addr4.sin_port = addr6->sin6_port;
+            memcpy(&addr4.sin_addr, addr6->sin6_addr.s6_addr + 12,
+                   sizeof(addr4.sin_addr));
+            len = sizeof(addr4);
+            memcpy(&addr, &addr4, len);
+        }
+        if (addr.ss_family != AF_INET && addr.ss_family != AF_INET6)
+            return 0; /* local socket */
+        if (!(*control_block.check_ip)(control_block.daemon_name,
+                                       (const char *) &addr, len,
+                                       addr.ss_family))
+            return 0;
+    }
+    a = cs_addrstr(new_line);
+    yaz_log(YLOG_WARN, "Access denied for %s", a ? a : "[Unknown]");
+    cs_close(new_line);
+    return 1;
+}
+
 /* UNIX listener */
 static void listener(IOCHAN h, int event)
 {
@@ -1036,8 +1088,7 @@ static void listener(IOCHAN h, int event)
 
     if (event == EVENT_INPUT)
     {
-        if ((res = cs_listen_check(line, 0, 0, control_block.check_ip,
-                                   control_block.daemon_name)) < 0)
+        if ((res = cs_listen(line, 0, 0)) < 0)
         {
             log_comstack_error(YLOG_WARN|YLOG_ERRNO, line,
                                "cs_listen failed");
@@ -1055,6 +1106,8 @@ static void listener(IOCHAN h, int event)
             iochan_setflags(h, EVENT_INPUT | EVENT_EXCEPT); /* reset listener */
             return;
         }
+        if (!check_ip_in_session() && peer_denied(new_line))
+            return;
 
         if (control_block.one_shot)
             remove_listeners();
@@ -1159,6 +1212,8 @@ static void *new_session(void *vp)
         ((new_line->io_pending & CS_WANT_WRITE) ? EVENT_OUTPUT : 0) |
         ((new_line->io_pending & CS_WANT_READ) ? EVENT_INPUT : 0);
 
+    if (check_ip_in_session() && peer_denied(new_line))
+        return 0;
     if (mask)
     {
         cs_accept_mask = mask;  /* accept didn't complete */
