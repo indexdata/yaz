@@ -2248,7 +2248,8 @@
     <literal>SearchResult.</literal><replaceable>no</replaceable>
     where no presents the item number (0=first, 1=second).
     Read <literal>searchresult.size</literal> to determine the
-    number of items.
+    number of items. Only the first Search Info report of a search
+    response is used, and at most 1000 items of it are made available.
    </para>
    <table id="zoom.search.info.report.options"
     frame="top"><title>Search Info Report Options</title>

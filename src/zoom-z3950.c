@@ -1253,6 +1253,12 @@ static void handle_queryExpression(ZOOM_options opt, const char *name,
 }
 
 
+/* Max number of Search Info report entries that are made available as
+   result set options. Each entry is up to five options and options are
+   kept in a linear list, so without a limit a target could make setting
+   and getting them arbitrarily slow. */
+#define MAX_SEARCHRESULT_ENTRIES 1000
+
 void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                                Z_OtherInformation *o)
 {
@@ -1265,12 +1271,15 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
             if (ext->which == Z_External_searchResult1)
             {
                 Z_SearchInfoReport *sr = ext->u.searchResult1;
+                int num = sr->num;
 
-                if (sr->num)
+                if (num > MAX_SEARCHRESULT_ENTRIES)
+                    num = MAX_SEARCHRESULT_ENTRIES;
+                if (num)
                     ZOOM_options_set_int(
-                        resultset->options, "searchresult.size", sr->num);
+                        resultset->options, "searchresult.size", num);
 
-                for (int j = 0; j < sr->num; j++)
+                for (int j = 0; j < num; j++)
                 {
                     Z_SearchInfoReport_s *ent =
                         ext->u.searchResult1->elements[j];
@@ -1318,6 +1327,9 @@ void ZOOM_handle_search_result(ZOOM_connection c, ZOOM_resultset resultset,
                                                  *ent->subqueryCount);
                     }
                 }
+                /* one report only: a further one would use the same
+                   option names */
+                break;
             }
         }
     }
