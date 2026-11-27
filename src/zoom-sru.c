@@ -56,6 +56,7 @@ static zoom_ret send_srw(ZOOM_connection c, Z_SRW_PDU *sr)
     }
     if (ret)
     {
+        odr_reset(c->odr_out); /* nothing is sent */
         ZOOM_set_error(c, ZOOM_ERROR_ENCODE, 0);
         return zoom_complete;
     }
@@ -124,6 +125,7 @@ zoom_ret ZOOM_connection_srw_send_scan(ZOOM_connection c)
     }
     else
     {
+        odr_reset(c->odr_out); /* nothing is sent */
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
@@ -170,9 +172,6 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     ZOOM_options_set(resultset->options, "setname", resultset->setname);
     start = &c->tasks->u.search.start;
     count = &c->tasks->u.search.count;
-    if (resultset->req_facets)
-        facet_list = yaz_pqf_parse_facet_list(c->odr_out,
-                                              resultset->req_facets);
     schema = c->tasks->u.search.schema;
 
     if (resultset->live_set)
@@ -218,6 +217,7 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
     }
     else
     {
+        odr_reset(c->odr_out); /* nothing is sent */
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
@@ -233,6 +233,9 @@ zoom_ret ZOOM_connection_srw_send_search(ZOOM_connection c)
         c->odr_out, (resultset->step > 0 && resultset->step < *count) ?
         resultset->step : *count);
     sr->u.request->recordSchema = odr_strdup_null(c->odr_out, schema);
+    if (resultset->req_facets)
+        facet_list = yaz_pqf_parse_facet_list(c->odr_out,
+                                              resultset->req_facets);
     sr->u.request->facetList = facet_list;
 
     option_val = ZOOM_resultset_option_get(resultset, "recordPacking");
