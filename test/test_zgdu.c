@@ -146,6 +146,24 @@ static void tst_cookies(void)
     z_HTTP_header_add(odr, &res->headers, "Set-Cookie", "session=");
     yaz_cookies_response(cookies, res);
     YAZ_CHECK(!yaz_cookies_is_empty(cookies));
+    /* The jar holds at most 100 cookies. Existing ones are still updated. */
+    for (int i = 0; i < 200; i++)
+    {
+        char buf[20];
+        sprintf(buf, "n%d=v", i);
+        res->headers = 0;
+        z_HTTP_header_add(odr, &res->headers, "Set-Cookie", buf);
+        yaz_cookies_response(cookies, res);
+    }
+    res->headers = 0;
+    z_HTTP_header_add(odr, &res->headers, "Set-Cookie", "session=new");
+    yaz_cookies_response(cookies, res);
+    req = z_get_HTTP_Request_uri(odr, "https://example.org/", 0, 0)
+        ->u.HTTP_Request;
+    yaz_cookies_request(cookies, odr, req);
+    const char *cp = z_HTTP_header_lookup(req->headers, "Cookie");
+    YAZ_CHECK(cp && strstr(cp, "session=new") && strstr(cp, "n98=v")
+              && !strstr(cp, "n99=v"));
     yaz_cookies_destroy(cookies);
     odr_destroy(odr);
 }
