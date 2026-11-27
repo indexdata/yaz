@@ -684,6 +684,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
     search_req->query = ZOOM_query_get_Z_Query(r->query);
     if (!search_req->query)
     {
+        odr_reset(c->odr_out); /* nothing is sent */
         ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
         return zoom_complete;
     }
@@ -704,6 +705,7 @@ static zoom_ret Z3950_send_search(ZOOM_connection c)
                 yaz_iconv_close(cd);
                 if (r)
                 {  /* query could not be char converted */
+                    odr_reset(c->odr_out); /* nothing is sent */
                     ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
                     return zoom_complete;
                 }
@@ -806,7 +808,10 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
 
     yaz_log(c->log_details, "%p send_scan", c);
     if (!c->tasks)
+    {
+        odr_reset(c->odr_out); /* nothing is sent */
         return zoom_complete;
+    }
     assert (c->tasks->which == ZOOM_TASK_SCAN);
     ZOOM_scanset scan = c->tasks->u.scan.scan;
 
@@ -841,12 +846,14 @@ zoom_ret ZOOM_connection_Z3950_send_scan(ZOOM_connection c)
         }
         else
         {
+            odr_reset(c->odr_out); /* nothing is sent */
             ZOOM_set_error(c, ZOOM_ERROR_INVALID_QUERY, 0);
             return zoom_complete;
         }
     }
     else
     {
+        odr_reset(c->odr_out); /* nothing is sent */
         ZOOM_set_error(c, ZOOM_ERROR_UNSUPPORTED_QUERY, 0);
         return zoom_complete;
     }
