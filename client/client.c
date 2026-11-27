@@ -4612,6 +4612,8 @@ static void wait_and_handle_response(int one_response_only)
                     odr_reset(out);
                     continue;
                 }
+                close_session();
+                break;
             }
             else
             {
@@ -4651,6 +4653,8 @@ static void wait_and_handle_response(int one_response_only)
                     odr_reset(out);
                     continue;
                 }
+                close_session();
+                break;
             }
             else
             {
