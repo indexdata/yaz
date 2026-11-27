@@ -93,7 +93,7 @@ int ber_decinteger(const char *buf, Odr_int *val, int max)
 
     if ((res = ber_declen((const char *) b, &len, max)) < 0)
         return -1;
-    if (len < 0 || len > max - res) /* out of bounds or indefinite encoding */
+    if (len < 1 || len > max - res) /* empty, out of bounds or indefinite */
         return -1;
     if (len > (int) sizeof(uval))  /* let's be reasonable, here */
         return -1;

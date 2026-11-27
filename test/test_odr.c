@@ -350,6 +350,20 @@ static void tst_choice(ODR decode)
     YAZ_CHECK_EQ(odr_geterror(decode), OPROTO);
 }
 
+static void tst_berint_empty(ODR decode)
+{
+    /* length 0: no content octets. Second byte is not part of the buffer */
+    char buf[] = { 0, (char) 0xff };
+    Odr_int ret_val = 0;
+
+    odr_reset(decode);
+    odr_setbuf(decode, buf, 1, 0);
+    YAZ_CHECK_EQ(ber_integer(decode, &ret_val), 0);
+    YAZ_CHECK_EQ(odr_geterror(decode), OPROTO);
+    YAZ_CHECK_EQ(ret_val, 0);
+    odr_reset(decode);
+}
+
 static void tst(void)
 {
     ODR odr_encode = odr_createmem(ODR_ENCODE);
@@ -364,6 +378,7 @@ static void tst(void)
 
     tst_berint32(odr_encode, odr_decode);
     tst_berint64(odr_encode, odr_decode);
+    tst_berint_empty(odr_decode);
 
     tst_choice(odr_decode);
 
