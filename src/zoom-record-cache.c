@@ -233,10 +233,9 @@ ZOOM_API(ZOOM_record)
     odr_setbuf(nrec->odr, buf, size, 0);
     if (!z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0))
     {
-        /* a partially decoded record must not be returned */
-        odr_destroy(nrec->odr);
-        xfree(nrec);
         odr_destroy(odr_enc);
+        /* a partially decoded record must not be returned */
+        ZOOM_record_destroy(nrec);
         return 0;
     }
 
