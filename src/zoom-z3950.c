@@ -1148,11 +1148,15 @@ static ZOOM_facet_field get_zoom_facet_field(ODR odr, Z_FacetField *facet)
     struct yaz_facet_attr attr_values;
     ZOOM_facet_field facet_field = odr_malloc(odr, sizeof(*facet_field));
     yaz_facet_attr_init(&attr_values);
-    yaz_facet_attr_get_z_attributes(facet->attributes, &attr_values);
-    facet_field->facet_name = odr_strdup(odr, attr_values.useattr);
+    /* peer may omit attributes (SRU facet without index) or the use
+       attribute: the facet name is empty then */
+    if (facet->attributes)
+        yaz_facet_attr_get_z_attributes(facet->attributes, &attr_values);
+    facet_field->facet_name =
+        odr_strdup(odr, attr_values.useattr ? attr_values.useattr : "");
     facet_field->num_terms = facet->num_terms;
     yaz_log(YLOG_DEBUG, "ZOOM_facet_field %s %d terms %d",
-            attr_values.useattr, attr_values.limit, facet->num_terms);
+            facet_field->facet_name, attr_values.limit, facet->num_terms);
     facet_field->facet_terms =
         odr_malloc(odr, facet->num_terms * sizeof(*facet_field->facet_terms));
     for (int i = 0 ; i < facet->num_terms; i++)
