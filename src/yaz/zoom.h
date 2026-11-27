@@ -246,7 +246,7 @@ ZOOM_record_get(ZOOM_record rec, const char *type, int *len);
 ZOOM_API(void)
 ZOOM_record_destroy(ZOOM_record rec);
 
-/* return copy of record */
+/* return copy of record; NULL if record could not be copied */
 ZOOM_API(ZOOM_record)
 ZOOM_record_clone(ZOOM_record srec);
 

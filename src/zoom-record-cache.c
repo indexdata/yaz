@@ -214,15 +214,16 @@ ZOOM_record ZOOM_record_cache_lookup(ZOOM_resultset r, int pos,
 ZOOM_API(ZOOM_record)
     ZOOM_record_clone(ZOOM_record srec)
 {
-    int size;
-    ZOOM_record nrec;
-
     ODR odr_enc = odr_createmem(ODR_ENCODE);
     if (!z_NamePlusRecord(odr_enc, &srec->npr, 0, 0))
+    {
+        odr_destroy(odr_enc);
         return 0;
+    }
+    int size;
     char *buf = odr_getbuf(odr_enc, &size, 0);
 
-    nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
+    ZOOM_record nrec = (ZOOM_record) xmalloc(sizeof(*nrec));
     nrec->odr = odr_createmem(ODR_DECODE);
 #if SHPTR
     nrec->record_wrbuf = 0;
@@ -230,7 +231,14 @@ ZOOM_API(ZOOM_record)
     nrec->wrbuf = 0;
 #endif
     odr_setbuf(nrec->odr, buf, size, 0);
-    z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0);
+    if (!z_NamePlusRecord(nrec->odr, &nrec->npr, 0, 0))
+    {
+        /* a partially decoded record must not be returned */
+        odr_destroy(nrec->odr);
+        xfree(nrec);
+        odr_destroy(odr_enc);
+        return 0;
+    }
 
     nrec->schema = odr_strdup_null(nrec->odr, srec->schema);
     nrec->diag_uri = odr_strdup_null(nrec->odr, srec->diag_uri);

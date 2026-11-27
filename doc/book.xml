@@ -2450,6 +2450,7 @@
     <function>ZOOM_record_clone</function> should be used.
     It returns a record reference that should be destroyed
     by a call to <function>ZOOM_record_destroy</function>.
+    If the record could not be copied <literal>NULL</literal> is returned.
    </para>
    <para>
     A single record is returned by function
