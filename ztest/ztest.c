@@ -547,10 +547,14 @@ int ztest_esrequest(void *handle, bend_esrequest_rr *rr)
                                         "Couldn't decode ILL APDU %s near %ld",
                                         odr_errmsg(odr_geterror(rr->decode)),
                                         (long) odr_offset(rr->decode));
-                                yaz_log(log_level, "PDU dump:");
-                                odr_dumpBER(yaz_log_file(),
-                                            (char *) r->u.single_ASN1_type->buf,
-                                            r->u.single_ASN1_type->len);
+                                if (log_level)
+                                {
+                                    yaz_log(log_level, "PDU dump:");
+                                    odr_dumpBER(
+                                        yaz_log_file(),
+                                        (char *) r->u.single_ASN1_type->buf,
+                                        r->u.single_ASN1_type->len);
+                                }
                                 ill_apdu = 0;
                             }
                             else

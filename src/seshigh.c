@@ -363,8 +363,13 @@ int ir_read(IOCHAN h, int event)
                         (long) odr_offset(assoc->decode));
                 if (assoc->decode->error != OHTTP)
                 {
-                    yaz_log(YLOG_WARN, "PDU dump:");
-                    odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
+                    /* odr_dumpBER is not filtered by yaz_log and writes a
+                       line per BER element: requestdetail only */
+                    if (log_requestdetail)
+                    {
+                        yaz_log(log_requestdetail, "PDU dump:");
+                        odr_dumpBER(yaz_log_file(), assoc->input_buffer, res);
+                    }
                     request_release(req);
                     do_close(assoc, Z_Close_protocolError, "Malformed package");
                 }
