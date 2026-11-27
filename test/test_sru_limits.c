@@ -305,7 +305,7 @@ static void check_pipeline(int mode)
     statserv_options_block *cb = statserv_getcontrol();
     association *assoc;
     request *response;
-    int i, released = 0;
+    int i;
 
     hits = 1;
     expected_number = 1;
@@ -391,9 +391,12 @@ static void check_pipeline(int mode)
     ir_session(chan, EVENT_OUTPUT);
     YAZ_CHECK_EQ(responses_sent, 1);
     YAZ_CHECK(!request_head(&assoc->outgoing));
-    for (response = assoc->incoming.list; response; response = response->next)
-        released++;
-    YAZ_CHECK_EQ(released, input.num);
+    YAZ_CHECK_EQ(assoc->incoming.num, 0);
+    YAZ_CHECK_EQ(assoc->outgoing.num, 0);
+    /* Released requests are freed, except for one cached for reuse. The
+       freelist length therefore no longer counts all released requests. */
+    YAZ_CHECK(assoc->incoming.list != 0);
+    YAZ_CHECK(assoc->incoming.list && !assoc->incoming.list->next);
     destroy_association(assoc);
     YAZ_CHECK_EQ(backend_closes, 1);
     initialize_backend = reject_login = 0;

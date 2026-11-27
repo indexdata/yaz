@@ -127,12 +127,12 @@ static void tst_no_response(void)
     YAZ_CHECK_EQ(exchange(assoc, trigger_last, 2), 1);
     for (i = 0; i < 10; i++)
         YAZ_CHECK_EQ(exchange(assoc, trigger_only, 1), 0);
-    /* every request is back for reuse: three at most were in use at once */
-    YAZ_CHECK_EQ(idle_requests(assoc), 3);
+    /* Only one released request is cached; the others are freed. */
+    YAZ_CHECK_EQ(idle_requests(assoc), 1);
 
     /* Close is answered; the requests behind it are purged and released */
     YAZ_CHECK_EQ(exchange(assoc, close_first, 3), 1);
-    YAZ_CHECK_EQ(idle_requests(assoc), 3);
+    YAZ_CHECK_EQ(idle_requests(assoc), 1);
 
     destroy_association(assoc);
     xfree(chan);

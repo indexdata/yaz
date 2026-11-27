@@ -60,6 +60,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_marc_read_iso2709.exe \
     $(BINDIR)\test_marc_read_sax.exe \
     $(BINDIR)\test_present_limits.exe \
+    $(BINDIR)\test_requestq.exe \
     $(BINDIR)\test_sru_update.exe \
     $(BINDIR)\test_zoom_facet.exe \
     $(BINDIR)\test_zoom_record.exe \
