@@ -502,6 +502,9 @@ void yaz_log(int level, const char *fmt, ...)
         char buf[1024];
         /* 30 is enough for our 'rest of output' message */
         yaz_vsnprintf(buf, sizeof(buf)-30, fmt, ap);
+        /* ap is consumed; restart it for yaz_log_to_file below */
+        va_end(ap);
+        va_start(ap, fmt);
         if (strlen(buf) >= sizeof(buf)-31)
             strcat(buf, " [rest of output omitted]");
         if (start_hook_func)
