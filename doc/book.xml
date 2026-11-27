@@ -7201,7 +7201,10 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
       </synopsis>
       Function <function>cql_to_xml_buf</function> converts
       to XCQL and stores the result in a user-supplied buffer of a given
-      max size.
+      max size, including space for the NUL terminator. It returns the
+      output length excluding the terminator, or -1 if the result does
+      not fit. On overflow, the buffer holds an empty string if its
+      size is greater than zero.
      </para>
      <para>
       <function>cql_to_xml</function> writes the result in

@@ -271,6 +271,8 @@ int cql_to_xml_buf(struct cql_node *cn, char *out, int max)
     cql_to_xml(cn, cql_buf_write_handler, &info);
     if (info.off >= 0)
         info.buf[info.off] = '\0';
+    else if (max > 0)
+        *out = '\0'; /* no partial, unterminated result on overflow */
     return info.off;
 }
 

@@ -265,8 +265,9 @@ void cql_to_xml_stdio(struct cql_node *cn, FILE *f);
 /** \brief converts CQL tree to XCQL and writes result to buffer
     \param cn CQL node (tree)
     \param out buffer
-    \param max size of buffer (max chars to write)
-    \returns length of resulting buffer
+    \param max size of buffer, including space for the NUL terminator
+    \returns output length excluding the NUL terminator, or -1 if the
+    result does not fit. On overflow, out holds an empty string if max > 0.
  */
 YAZ_EXPORT
 int cql_to_xml_buf(struct cql_node *cn, char *out, int max);
@@ -519,7 +520,7 @@ int cql_sortby_to_sortkeys(struct cql_node *cn,
     \param out result buffer
     \param max size of buffer (allocated)
     \retval 0 OK
-    \retval -1 ERROR
+    \retval -1 ERROR (including sortkeys too large for buffer)
 */
 YAZ_EXPORT
 int cql_sortby_to_sortkeys_buf(struct cql_node *cn, char *out, int max);
