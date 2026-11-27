@@ -1056,6 +1056,8 @@ static int tcpip_bind(COMSTACK h, void *address, int mode)
         if (sp->yaz_pem_default)
             strcpy(sp->cert_fname, "yaz.pem");
 
+        /* may still hold credentials of a previous attempt (cont_connect) */
+        tcpip_release_cred(&sp->cred_ptr);
         sp->cred_ptr = tcpip_create_cred();
         int res = gnutls_certificate_set_x509_key_file(
             sp->cred_ptr->xcred, sp->cert_fname,
