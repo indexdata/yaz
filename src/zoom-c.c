@@ -943,6 +943,7 @@ ZOOM_API(size_t)
 
 int ZOOM_test_reconnect(ZOOM_connection c)
 {
+    /* without a task there is nothing to run again on a new connection */
     if (!c->reconnect_ok || !c->tasks)
         return 0;
     ZOOM_connection_close(c);
@@ -1101,6 +1102,8 @@ static zoom_ret do_connect_host(ZOOM_connection c,
 
 static zoom_ret do_connect(ZOOM_connection c)
 {
+    xfree(c->location);
+    c->location = 0;
     return do_connect_host(c, c->host_port);
 }
 
@@ -2137,7 +2140,7 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
             else
             {
                 /* no init request for SRW .. */
-                if (c->tasks->which == ZOOM_TASK_CONNECT)
+                if (!c->tasks || c->tasks->which == ZOOM_TASK_CONNECT)
                 {
                     ZOOM_connection_remove_task(c);
                     ZOOM_connection_set_mask(c, 0);
@@ -2273,6 +2276,9 @@ ZOOM_API(void) ZOOM_connection_close(ZOOM_connection c)
     if (c->cs)
         cs_close(c->cs);
     c->cs = 0;
+    /* a redirect that was not followed must not be sent on a later connect */
+    xfree(c->location);
+    c->location = 0;
     ZOOM_connection_set_mask(c, 0);
     c->state = STATE_IDLE;
     c->request_sent = 0;

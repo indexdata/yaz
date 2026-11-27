@@ -24,6 +24,7 @@
 #endif
 #include <yaz/test.h>
 #include <yaz/wrbuf.h>
+#include <yaz/xmalloc.h>
 #include <yaz/snprintf.h>
 #include <yaz/copy_types.h>
 #include <yaz/sortspec.h>
@@ -374,6 +375,58 @@ static void check_sru_continue(const char *records, zoom_ret expect_ret,
 }
 #endif
 
+static int rcvconnect_complete(COMSTACK cs)
+{
+    return 0;
+}
+
+static void check_abandoned_redirect_on_connect(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+
+    /* A CONNECT wrapper is not supported as the proxy option, so this
+       fails in cs_create_host2 without opening a socket or calling
+       ZOOM_connection_close. A stale redirect must still be discarded. */
+    ZOOM_connection_option_set(c, "proxy",
+                              "connect:127.0.0.1:1,tcp:127.0.0.1:1");
+    c->location = xstrdup("http://example.org/moved");
+    c->no_redirects = 1;
+    ZOOM_connection_connect(c, "http://127.0.0.1:1/db", 0);
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, 0), ZOOM_ERROR_CONNECT);
+    YAZ_CHECK(!c->cs);
+    YAZ_CHECK(ZOOM_connection_is_idle(c));
+    YAZ_CHECK(!c->location);
+    ZOOM_connection_destroy(c);
+}
+
+static void check_no_task(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    struct comstack cs;
+
+    /* A lost connection is only re-established for a queued task. */
+    c->reconnect_ok = 1;
+    YAZ_CHECK(ZOOM_connection_is_idle(c));
+    YAZ_CHECK_EQ(ZOOM_test_reconnect(c), 0);
+
+    /* An HTTP connect that completes with nothing queued leaves the
+       connection idle. */
+    memset(&cs, 0, sizeof(cs));
+    cs.event = CS_CONNECT;
+    cs.f_rcvconnect = rcvconnect_complete;
+    c->cs = &cs;
+    c->proto = PROTO_HTTP;
+    ZOOM_connection_set_mask(c, ZOOM_SELECT_WRITE);
+    ZOOM_connection_fire_event_socket(c, ZOOM_SELECT_WRITE);
+    YAZ_CHECK_EQ(ZOOM_connection_get_mask(c), 0);
+    c->cs = 0; /* the test owns this in-memory transport */
+
+    /* A redirect that was not followed does not survive a close. */
+    c->location = xstrdup("http://example.org/moved");
+    ZOOM_connection_close(c);
+    YAZ_CHECK(!c->location);
+    ZOOM_connection_destroy(c);
+}
 
 int main(int argc, char **argv)
 {
@@ -401,6 +454,8 @@ int main(int argc, char **argv)
     check_sru_continue("<records>" SRU_RECORD SRU_RECORD "</records>",
                        zoom_complete, 0, 1);
 #endif
+    check_no_task();
+    check_abandoned_redirect_on_connect();
 
 YAZ_CHECK_TERM;
 }
