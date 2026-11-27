@@ -2045,6 +2045,20 @@ static int check_path(const char *path)
     return 1;
 }
 
+/* check if path is docpath itself or below it (1); otherwise (0) */
+static int check_docpath(const char *path, const char *docpath)
+{
+    size_t len = strlen(docpath);
+
+    if (*path != '/' || strncmp(path + 1, docpath, len))
+        return 0;
+    if (len == 0 || docpath[len - 1] == '/')
+        return 1;
+    /* docpath "doc" is a prefix of /doc/a and /docs/a; only /doc/a is ours */
+    path += 1 + len;
+    return *path == '/' || *path == '?' || *path == '\0';
+}
+
 static char *read_file(const char *fname, ODR o, long *sz)
 {
     struct stat stat_buf;
@@ -2104,12 +2118,7 @@ static void process_http_request(association *assoc, request *req)
         r = 1;
     }
     if (r == 2 && assoc->server && assoc->server->docpath
-        && hreq->path[0] == '/'
-        &&
-        /* check if path is a proper prefix of documentroot */
-        strncmp(hreq->path+1, assoc->server->docpath,
-                strlen(assoc->server->docpath))
-        == 0)
+        && check_docpath(hreq->path, assoc->server->docpath))
     {
         if (!check_path(hreq->path))
         {

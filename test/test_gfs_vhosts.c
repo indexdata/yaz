@@ -187,14 +187,13 @@ static const char *addrstr(COMSTACK cs)
     return peer_address;
 }
 
-static void send_search_args(association *assoc, const char *host,
-                             const char *args, const char *headers, int status)
+static void send_get_headers(association *assoc, const char *path,
+                             const char *host, const char *headers, int status)
 {
     WRBUF wire = wrbuf_alloc();
     ODR dec = odr_createmem(ODR_DECODE);
-    wrbuf_printf(wire, "GET /db?version=1.2&operation=searchRetrieve&"
-                 "query=cql.allRecords%%3D1%s HTTP/1.1\r\nHost: %s\r\n%s\r\n",
-                 args, host, headers);
+    wrbuf_printf(wire, "GET %s HTTP/1.1\r\nHost: %s\r\n%s\r\n",
+                 path, host, headers);
     assoc->client_link->user = (void *) wrbuf_cstr(wire);
     assoc->cs_get_mask = EVENT_INPUT;
     ir_session(assoc->client_chan, EVENT_INPUT);
@@ -222,9 +221,27 @@ static void send_search_args(association *assoc, const char *host,
     wrbuf_destroy(wire);
 }
 
+static void send_search_args(association *assoc, const char *host,
+                             const char *args, const char *headers, int status)
+{
+    WRBUF path = wrbuf_alloc();
+    wrbuf_puts(path, "/db?version=1.2&operation=searchRetrieve&"
+               "query=cql.allRecords%3D1");
+    wrbuf_puts(path, args);
+    send_get_headers(assoc, wrbuf_cstr(path), host, headers, status);
+    wrbuf_destroy(path);
+}
+
+static void send_get(association *assoc, const char *path, const char *host,
+                     int status)
+{
+    send_get_headers(assoc, path, host, "", status);
+}
+
 static void send_search(association *assoc, const char *host, int status)
 {
-    send_search_args(assoc, host, "", "", status);
+    send_get(assoc, "/db?version=1.2&operation=searchRetrieve&"
+             "query=cql.allRecords%3D1", host, status);
 }
 
 static void tst_switch(int nonnull)
@@ -435,6 +452,50 @@ static void tst_auth(const char *intruder)
     control_block = saved;
     statserv_setcontrol(&control_block);
 }
+
+/* docpath names a file or directory; it is not a prefix of other names. */
+static void tst_docpath(void)
+{
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 0);
+    association *assoc;
+    memset(servers, 0, sizeof(servers));
+    memset(searches, 0, sizeof(searches));
+    use_handle = 0;
+    servers[0].cb = control_block;
+    servers[0].cb.bend_init = init;
+    servers[0].host = "a.example";
+    servers[0].docpath = "d";
+    gfs_server_list = servers;
+    strcpy(control_block.xml_config, "in-memory");
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_HTTP;
+    cs.f_get = get;
+    cs.f_more = more;
+    cs.f_addrstr = addrstr;
+    assoc = create_association(chan, &cs, 0);
+    iochan_setdata(chan, assoc);
+
+    /* No such files, but these are file requests: not found. */
+    send_get(assoc, "/d", "a.example", 404);
+    send_get(assoc, "/d/none.txt", "a.example", 404);
+    send_get(assoc, "/d?version=1.2&operation=searchRetrieve&"
+             "query=cql.allRecords%3D1", "a.example", 404);
+    YAZ_CHECK_EQ(searches[0], 0);
+    /* /db is not below d and goes to SRU. */
+    send_search(assoc, "a.example", 200);
+    YAZ_CHECK_EQ(searches[0], 1);
+
+    servers[0].docpath = "d/";
+    send_get(assoc, "/d/none.txt", "a.example", 404);
+    send_search(assoc, "a.example", 200);
+    YAZ_CHECK_EQ(searches[0], 2);
+    destroy_association(assoc);
+    xfree(chan);
+    gfs_server_list = 0;
+    control_block.xml_config[0] = 0;
+    statserv_setcontrol(&control_block);
+}
 #endif
 
 int main(int argc, char **argv)
@@ -449,6 +510,7 @@ int main(int argc, char **argv)
     tst_alive();
     tst_auth("");
     tst_auth("&x-username=alice&x-password=wrong");
+    tst_docpath();
     xml_config_close();
 #endif
     YAZ_CHECK_TERM;

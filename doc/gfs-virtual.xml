@@ -170,11 +170,15 @@
    <listitem>
     <para>
      Specifies a path for local file access using HTTP. All URLs with
-     a leading prefix (/ excluded) that matches the value of <literal>docpath</literal>
+     a path (leading / excluded) that is the value of <literal>docpath</literal>
+     or begins with <literal>docpath</literal> followed by /
      are used for file access. For example, if the server is to offer
      access in directory <literal>xsl</literal>, the docpath would be
      <literal>xsl</literal> and all URLs of the form
-     <literal>http://host/xsl</literal> will result in a local file access.
+     <literal>http://host/xsl/...</literal> will result in a local file
+     access. URLs for other names that merely begin with
+     <literal>xsl</literal>, such as <literal>http://host/xslt/...</literal>,
+     are not.
     </para>
    </listitem>
   </varlistentry>
