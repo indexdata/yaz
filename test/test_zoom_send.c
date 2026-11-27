@@ -23,6 +23,7 @@
 #include <unistd.h>
 #endif
 #include <yaz/test.h>
+#include <yaz/wrbuf.h>
 #include <yaz/snprintf.h>
 #include <yaz/copy_types.h>
 #include <yaz/sortspec.h>
@@ -317,6 +318,62 @@ static void check_connect_auth(void)
 }
 #endif
 
+#if YAZ_HAVE_XML2
+static int count_request(COMSTACK cs, char *buf, int len)
+{
+    writes++;
+    return 0;
+}
+
+/* SRU response with 2 hits for a search that asks for 2 records. The
+   remaining records must be requested only if the response had some. */
+static void check_sru_continue(const char *records, zoom_ret expect_ret,
+                               int expect_writes, int expect_record)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    struct comstack cs;
+    ZOOM_resultset r;
+    Z_HTTP_Response *hres;
+    WRBUF w = wrbuf_alloc();
+    zoom_ret cret = zoom_complete;
+    char *addinfo = 0;
+
+    memset(&cs, 0, sizeof(cs));
+    cs.f_put = count_request;
+    c->cs = &cs;
+    c->async = 1; /* just queue the search task */
+    c->sru_mode = zoom_sru_get;
+    c->host_port = xstrdup("http://example.org/db");
+    c->sru_version = xstrdup("1.2");
+    ZOOM_connection_option_set(c, "count", "2");
+    r = ZOOM_connection_search_pqf(c, "water");
+    YAZ_CHECK(r);
+
+    wrbuf_printf(w, "<searchRetrieveResponse "
+                 "xmlns=\"http://www.loc.gov/zing/srw/\">"
+                 "<version>1.1</version>"
+                 "<numberOfRecords>2</numberOfRecords>%s"
+                 "</searchRetrieveResponse>", records);
+    hres = z_get_HTTP_Response(c->odr_in, 200)->u.HTTP_Response;
+    z_HTTP_header_add(c->odr_in, &hres->headers, "Content-Type", "text/xml");
+    hres->content_buf = odr_strdup(c->odr_in, wrbuf_cstr(w));
+    hres->content_len = wrbuf_len(w);
+    wrbuf_destroy(w);
+
+    writes = 0;
+    YAZ_CHECK_EQ(ZOOM_handle_sru(c, hres, &cret, &addinfo), 0);
+    YAZ_CHECK_EQ(cret, expect_ret);
+    YAZ_CHECK_EQ(writes, expect_writes);
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, 0), 0);
+    YAZ_CHECK_EQ(ZOOM_resultset_size(r), 2);
+    YAZ_CHECK_EQ(ZOOM_resultset_record_immediate(r, 0) != 0, expect_record);
+
+    ZOOM_resultset_destroy(r);
+    c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_connection_destroy(c);
+}
+#endif
+
 
 int main(int argc, char **argv)
 {
@@ -330,5 +387,20 @@ int main(int argc, char **argv)
 #if HAVE_SYS_SOCKET_H
     check_connect_auth();
 #endif
-    YAZ_CHECK_TERM;
+#if YAZ_HAVE_XML2
+#define SRU_RECORD "<record><recordSchema>dc</recordSchema>" \
+        "<recordPacking>xml</recordPacking>" \
+        "<recordData><dc/></recordData></record>"
+    /* no records: must not send the same request again */
+    check_sru_continue("", zoom_complete, 0, 0);
+    check_sru_continue("<records/>", zoom_complete, 0, 0);
+    /* one of two records: ask for the other */
+    check_sru_continue("<records>" SRU_RECORD "</records>", zoom_pending,
+                       1, 1);
+    /* all records */
+    check_sru_continue("<records>" SRU_RECORD SRU_RECORD "</records>",
+                       zoom_complete, 0, 1);
+#endif
+
+YAZ_CHECK_TERM;
 }
