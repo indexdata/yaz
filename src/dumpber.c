@@ -27,6 +27,11 @@ static int do_dumpBER(FILE *f, const char *buf, int len, int level, int offset)
     else
         yaz_snprintf(level_str, sizeof level_str, "%*s", level * 2, "");
 
+    if (level > ODR_MAX_STACK)
+    {
+        fprintf(f, "%5d: %s : Too many nested levels\n", offset, level_str);
+        return 0;
+    }
     if (!len)
         return 0;
     if (len >= 2 && !buf[0] && !buf[1])

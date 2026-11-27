@@ -35,10 +35,21 @@ int ber_octetstring(ODR o, Odr_oct *p, int cons)
         o->op->bp += res;
         if (cons)       /* fetch component strings */
         {
+            /* a component may be constructed too: limit the nesting */
+            if (o->op->stack_depth >= ODR_MAX_STACK)
+            {
+                odr_seterror(o, OSTACK, 59);
+                return 0;
+            }
+            o->op->stack_depth++;
             base = o->op->bp;
             while (odp_more_chunks(o, base, len))
                 if (!odr_octetstring(o, &p, 0, 0))
+                {
+                    o->op->stack_depth--;
                     return 0;
+                }
+            o->op->stack_depth--;
             return 1;
         }
         /* primitive octetstring */

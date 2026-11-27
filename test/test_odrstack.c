@@ -7,6 +7,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 #include <yaz/pquery.h>
 #include <yaz/proto.h>
 #include <yaz/test.h>
@@ -57,11 +58,51 @@ void test2(void)
     odr_destroy(odr);
 }
 
+/** \brief decode a string of nested constructed segments in a SEQUENCE */
+static int decode_nested_string(int tag, int depth)
+{
+    ODR odr = odr_createmem(ODR_DECODE);
+    int len = 4 * depth + 4;
+    char *buf = (char *) odr_malloc(odr, len);
+    void *seq = 0;
+    Odr_oct *oct = 0;
+    Odr_bitmask *bits = 0;
+    int i;
+    int ret;
+
+    memset(buf, 0, len);                  /* end-of-contents for all */
+    buf[0] = 0x20 | ODR_SEQUENCE;
+    buf[1] = (char) 0x80;
+    for (i = 1; i <= depth; i++)
+    {
+        buf[2 * i] = 0x20 | tag;          /* constructed */
+        buf[2 * i + 1] = (char) 0x80;     /* indefinite length */
+    }
+    odr_setbuf(odr, buf, len, 0);
+    ret = odr_sequence_begin(odr, &seq, 0, 0) &&
+        (tag == ODR_OCTETSTRING ?
+         odr_octetstring(odr, &oct, 0, 0) :
+         odr_bitstring(odr, &bits, 0, 0)) &&
+        odr_sequence_end(odr);
+    odr_destroy(odr);
+    return ret;
+}
+
+/** \brief nested constructed strings must not exhaust the C stack */
+void test3(void)
+{
+    YAZ_CHECK(decode_nested_string(ODR_OCTETSTRING, 10));
+    YAZ_CHECK(decode_nested_string(ODR_BITSTRING, 10));
+    YAZ_CHECK(!decode_nested_string(ODR_OCTETSTRING, 100000));
+    YAZ_CHECK(!decode_nested_string(ODR_BITSTRING, 100000));
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     test1();
     test2();
+    test3();
     YAZ_CHECK_TERM;
 }
 /*
