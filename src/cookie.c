@@ -21,6 +21,10 @@ struct cookie {
     struct cookie *next;
 };
 
+/* Max number of cookies kept. A peer could otherwise grow the jar without
+   bound. Name and value are already limited by the HTTP header size */
+#define MAX_COOKIES 100
+
 struct yaz_cookies_s {
     struct cookie *list;
 };
@@ -73,11 +77,14 @@ void yaz_cookies_response(yaz_cookies_t yc, Z_HTTP_Response *res)
             if (!cp)
                 continue;
             size_t len = cp - h->value;
-            for (c = yc->list; c; c = c->next)
+            int no = 0;
+            for (c = yc->list; c; c = c->next, no++)
                 if (!strncmp(h->value, c->name, len) && c->name[len] == '\0')
                     break;
             if (!c)
             {
+                if (no >= MAX_COOKIES)
+                    continue; /* full: only update existing cookies */
                 c = xmalloc(sizeof(*c));
                 c->name = xstrndup(h->value, len);
                 c->value = 0;
