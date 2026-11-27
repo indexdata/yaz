@@ -412,6 +412,9 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
             }
             break;
         case ICU_chain_step_type_tokenize:
+            /* reset before attach: ICU leaves the break iterator on its
+               previous text if status is a failure (from display, say) */
+            iter->status = U_ZERO_ERROR;
             if (dst)
             {
                 struct icu_buf_utf16 *src = dst;
@@ -425,7 +428,6 @@ struct icu_buf_utf16 *icu_iter_invoke(yaz_icu_iter_t iter,
                 icu_buf_utf16_destroy(src);
             }
             dst = icu_buf_utf16_create(0);
-            iter->status = U_ZERO_ERROR;
             if (!icu_tokenizer_next_token(step->u.tokenizer, dst, &iter->status,
                                           &iter->org_start, &iter->org_len))
             {

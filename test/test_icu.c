@@ -894,6 +894,59 @@ static void check_icu_iter4(void)
     icu_chain_destroy(chain);
 }
 
+/* display fails on an unpaired surrogate; the tokenizer that follows must
+   still get the new string and not keep that of the previous icu_iter_first */
+static void check_icu_iter5(void)
+{
+    UErrorCode status = U_ZERO_ERROR;
+    struct icu_chain *chain = 0;
+    xmlNode *xml_node;
+    yaz_icu_iter_t iter;
+    WRBUF result;
+
+    const char *xml_str = "<icu locale=\"en\">"
+        "<transform rule=\"Hex-Any/Java\"/>"
+        "<display/>"
+        "<tokenize rule=\"w\"/>"
+        "</icu>";
+
+    xmlDoc *doc = yaz_xml_parse_memory(xml_str, strlen(xml_str));
+    YAZ_CHECK(doc);
+    if (!doc)
+        return;
+    xml_node = xmlDocGetRootElement(doc);
+    YAZ_CHECK(xml_node);
+    if (!xml_node)
+        return ;
+
+    chain = icu_chain_xml_config(xml_node, 1, &status);
+
+    xmlFreeDoc(doc);
+    YAZ_CHECK(chain);
+    if (!chain)
+        return;
+
+    iter = icu_iter_create(chain);
+    YAZ_CHECK(iter);
+    if (!iter)
+        return;
+    result = wrbuf_alloc();
+
+    icu_iter_first(iter, "first string");
+    while (icu_iter_next(iter))
+        wrbuf_printf(result, "[%s]", icu_iter_get_norm(iter));
+    YAZ_CHECK(!strcmp(wrbuf_cstr(result), "[first][ ][string]"));
+
+    wrbuf_rewind(result);
+    icu_iter_first(iter, "x\\uD800");
+    while (icu_iter_next(iter))
+        wrbuf_printf(result, "[%s]", icu_iter_get_norm(iter));
+    YAZ_CHECK(!strcmp(wrbuf_cstr(result), "[x][]"));
+
+    wrbuf_destroy(result);
+    icu_iter_destroy(iter);
+    icu_chain_destroy(chain);
+}
 
 static void check_norm(void)
 {
@@ -975,6 +1028,7 @@ int main(int argc, char **argv)
     check_icu_iter2();
     check_icu_iter3();
     check_icu_iter4();
+    check_icu_iter5();
 
     check_bug_1140();
     check_norm();

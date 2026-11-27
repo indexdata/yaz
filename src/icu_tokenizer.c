@@ -154,7 +154,12 @@ int icu_tokenizer_attach(struct icu_tokenizer *tokenizer,
                  tokenizer->buf16->utf16, tokenizer->buf16->utf16_len, status);
 
     if (U_FAILURE(*status))
+    {
+        /* bi still refers to the previous text (possibly freed by the
+           copy above), so leave nothing for icu_tokenizer_next_token */
+        icu_buf_utf16_clear(tokenizer->buf16);
         return 0;
+    }
 
     return 1;
 }
