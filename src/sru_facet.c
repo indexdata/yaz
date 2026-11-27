@@ -25,6 +25,11 @@
 #include <yaz/facet.h>
 #include <yaz/snprintf.h>
 
+/* Max number of facetLimit entries decoded from an SRU request; further
+   entries are ignored. Each entry is looked up in the list of those before
+   it, so without a limit the work is quadratic in the size of the request. */
+#define MAX_SRU_FACET_LIMITS 100
+
 static void insert_field(WRBUF w, const char *field, size_t length,
                          const char *attr)
 {
@@ -132,7 +137,9 @@ void yaz_sru_facet_request(ODR o, Z_FacetList **facetList, const char **limit,
             const char *cp = *limit;
             int nor = 0;
             int val = 0;
-            while (sscanf(cp, "%d%n", &val, &nor) >= 1 && nor > 0)
+            int no = 0;
+            while (no++ < MAX_SRU_FACET_LIMITS &&
+                   sscanf(cp, "%d%n", &val, &nor) >= 1 && nor > 0)
             {
                 cp += nor;
                 if (*cp == ':') /* field name follows */
