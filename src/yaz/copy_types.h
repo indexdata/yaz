@@ -75,6 +75,14 @@ YAZ_EXPORT
 int yaz_compare_z_OtherInformation(Z_OtherInformation *a,
                                    Z_OtherInformation *b);
 
+YAZ_EXPORT
+Z_SortKeySpecList *yaz_clone_z_SortKeySpecList(Z_SortKeySpecList *s,
+                                               NMEM out);
+
+YAZ_EXPORT
+int yaz_compare_z_SortKeySpecList(Z_SortKeySpecList *a,
+                                  Z_SortKeySpecList *b);
+
 YAZ_END_CDECL
 
 #endif

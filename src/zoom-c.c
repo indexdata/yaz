@@ -26,6 +26,7 @@
 #include <yaz/query-charset.h>
 #include <yaz/snprintf.h>
 #include <yaz/facet.h>
+#include <yaz/copy_types.h>
 
 #include <yaz/shptr.h>
 
@@ -744,8 +745,13 @@ ZOOM_API(ZOOM_resultset)
     ZOOM_resultset r = ZOOM_resultset_create();
     int start, count;
     const char *syntax, *elementSetName, *schema;
+    Z_SortKeySpecList *sort_spec = ZOOM_query_get_sortspec(q);
     yaz_log(c->log_api, "%p ZOOM_connection_search set %p query %p", c, r, q);
-    r->r_sort_spec = ZOOM_query_get_sortspec(q);
+    /* The sort request is sent when the search response arrives. Keep a
+       copy, as ZOOM_query_sortby may free the query's sort spec before that */
+    if (sort_spec)
+        r->r_sort_spec = yaz_clone_z_SortKeySpecList(sort_spec,
+                                                     odr_getmem(r->odr));
     r->query = q;
     ZOOM_query_addref(q);
 
