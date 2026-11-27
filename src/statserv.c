@@ -257,7 +257,9 @@ static struct gfs_server * gfs_server_new(const char *id)
     n->cql_transform = 0;
     n->ccl_transform = 0;
     n->server_node_ptr = 0;
-    n->directory = 0;
+    /* absolute, so that files can be located without the (process-wide)
+       working directory */
+    n->directory = gfs_root_dir[0] ? gfs_root_dir : 0;
     n->docpath = 0;
     n->stylesheet = 0;
     n->client_query_charset = 0;
@@ -515,8 +517,17 @@ static void xml_config_read(const char *base_path)
                 }
                 else if (!strcmp((const char *) ptr->name, "directory"))
                 {
-                    gfs->directory =
-                        nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    char *dir = nmem_dup_xml_content(gfs_nmem, ptr->children);
+                    if (gfs_root_dir[0] && !yaz_is_abspath(dir))
+                    {
+                        WRBUF w = wrbuf_alloc();
+                        wrbuf_puts(w, gfs_root_dir);
+                        wrbuf_putc(w, '/');
+                        wrbuf_puts(w, dir);
+                        dir = nmem_strdup(gfs_nmem, wrbuf_cstr(w));
+                        wrbuf_destroy(w);
+                    }
+                    gfs->directory = dir;
                 }
                 else if (!strcmp((const char *) ptr->name, "docpath"))
                 {

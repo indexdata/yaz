@@ -2115,7 +2115,19 @@ static void process_http_request(association *assoc, request *req)
         else
         {
             long content_size = 0;
-            char *content_buf = read_file(hreq->path+1, o, &content_size);
+            char *content_buf;
+            WRBUF fname = wrbuf_alloc();
+
+            /* The working directory is shared by all sessions in threaded
+               mode. Do not rely on it for locating the file. */
+            if (assoc->server->directory && !yaz_is_abspath(hreq->path+1))
+            {
+                wrbuf_puts(fname, assoc->server->directory);
+                wrbuf_putc(fname, '/');
+            }
+            wrbuf_puts(fname, hreq->path+1);
+            content_buf = read_file(wrbuf_cstr(fname), o, &content_size);
+            wrbuf_destroy(fname);
             if (!content_buf)
             {
                 p = z_get_HTTP_Response(o, 404);
