@@ -61,6 +61,7 @@ test_zoom_scan
 test_zoom_send
 test_search_present
 test_sru_update
+test_gfs_log
 test_gfs_vhosts
 test_charneg
 test_client_record

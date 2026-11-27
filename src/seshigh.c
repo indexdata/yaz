@@ -118,6 +118,24 @@ static void get_logbits(void)
     }
 }
 
+/** logs request entry as one line. Strings from the peer may hold control
+    characters; they are escaped, so that they do not start new log lines */
+static void log_request_line(WRBUF wr)
+{
+    const char *cp = wrbuf_cstr(wr);
+    WRBUF line = wrbuf_alloc();
+
+    for (; *cp; cp++)
+    {
+        if ((*cp > 0 && *cp < ' ') || *cp == 127)
+            wrbuf_printf(line, "\\x%02X", *cp & 0xff);
+        else
+            wrbuf_putc(line, *cp);
+    }
+    yaz_log(log_request, "%s", wrbuf_cstr(line));
+    wrbuf_destroy(line);
+}
+
 static void wr_diag(WRBUF w, int error, const char *addinfo)
 {
     wrbuf_printf(w, "ERROR %d+", error);
@@ -1440,8 +1458,9 @@ static void srw_bend_search(association *assoc,
                       srw_res->resultSetId : "-"),
                      (srw_req->startRecord ? *srw_req->startRecord : 1),
                      srw_res->num_records);
-        yaz_log(log_request, "%s %s: %s", wrbuf_cstr(wr), srw_req->queryType,
-                srw_req->query);
+        wrbuf_printf(wr, " %s: ", srw_req->queryType);
+        wrbuf_puts(wr, srw_req->query ? srw_req->query : "-");
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
 }
@@ -1769,7 +1788,7 @@ static void srw_bend_scan(association *assoc,
                       *srw_req->maximumTerms : 1));
         /* there is no step size in SRU/W ??? */
         wrbuf_printf(wr, "%s: %s ", srw_req->queryType, srw_req->scanClause);
-        yaz_log(log_request, "%s ", wrbuf_cstr(wr) );
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
 
@@ -2120,7 +2139,17 @@ static void process_http_request(association *assoc, request *req)
     int num_diagnostic = 0;
     const char *host = z_HTTP_header_lookup(hreq->headers, "Host");
 
-    yaz_log(log_request, "%s %s HTTP/%s", hreq->method, hreq->path, hreq->version);
+    if (log_request)
+    {
+        WRBUF wr = wrbuf_alloc();
+        wrbuf_puts(wr, hreq->method);
+        wrbuf_puts(wr, " ");
+        wrbuf_puts(wr, hreq->path);
+        wrbuf_puts(wr, " HTTP/");
+        wrbuf_puts(wr, hreq->version);
+        log_request_line(wr);
+        wrbuf_destroy(wr);
+    }
     if (!control_association(assoc, host, 0))
     {
         p = z_get_HTTP_Response(o, 404);
@@ -2789,20 +2818,27 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
             const char *open = req->idAuthentication->u.open;
             const char *slash = strchr(open, '/');
             size_t len;
+            WRBUF wr = wrbuf_alloc();
             if (slash)
                 len = slash - open;
             else
                 len = strlen(open);
             if (len > 100)
                 len = 100;
-            yaz_log(log_request, "Auth open %.*s", (int) len, open);
+            wrbuf_puts(wr, "Auth open ");
+            wrbuf_write(wr, open, len);
+            log_request_line(wr);
+            wrbuf_destroy(wr);
         }
         else if (req->idAuthentication->which == Z_IdAuthentication_idPass)
         {
             const char *user = req->idAuthentication->u.idPass->userId;
             const char *group = req->idAuthentication->u.idPass->groupId;
-            yaz_log(log_request, "Auth idPass %s %s",
-                    user ? user : "-", group ? group : "-");
+            WRBUF wr = wrbuf_alloc();
+            wrbuf_printf(wr, "Auth idPass %s %s",
+                         user ? user : "-", group ? group : "-");
+            log_request_line(wr);
+            wrbuf_destroy(wr);
         }
         else if (req->idAuthentication->which
                  == Z_IdAuthentication_anonymous)
@@ -2829,7 +2865,7 @@ static Z_APDU *process_initRequest(association *assoc, request *reqb)
                      (req->implementationVersion ?
                       req->implementationVersion : "-")
             );
-        yaz_log(log_request, "%s", wrbuf_cstr(wr));
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     return apdu;
@@ -3311,6 +3347,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
     {
         WRBUF wr = wrbuf_alloc();
 
+        wrbuf_printf(wr, "Search ");
         for (int i = 0 ; i < req->num_databaseNames; i++)
         {
             if (i)
@@ -3327,7 +3364,7 @@ static Z_APDU *response_searchRequest(association *assoc, request *reqb,
                      req->resultSetName, returnedrecs);
         yaz_query_to_wrbuf(wr, req->query);
 
-        yaz_log(log_request, "Search %s", wrbuf_cstr(wr));
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     return apdu;
@@ -3419,7 +3456,7 @@ static Z_APDU *process_presentRequest(association *assoc, request *reqb)
         wrbuf_printf(wr, " %s " ODR_INT_PRINTF "+" ODR_INT_PRINTF " ",
                 req->resultSetId, *req->resultSetStartPoint,
                 *req->numberOfRecordsRequested);
-        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     if (!resp->records)
@@ -3652,7 +3689,7 @@ static Z_APDU *process_scanRequest(association *assoc, request *reqb)
         wrbuf_printf(wr, " ");
         yaz_scan_to_wrbuf(wr, req->termListAndStartPoint,
                           bsrr->attributeset);
-        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     return apdu;
@@ -3728,7 +3765,7 @@ static Z_APDU *process_sortRequest(association *assoc, request *reqb)
         }
         wrbuf_printf(wr, ")->%s ",req->sortedResultSetName);
 
-        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     return apdu;
@@ -3811,7 +3848,7 @@ static Z_APDU *process_deleteRequest(association *assoc, request *reqb)
             wrbuf_printf(wr, "OK -");
         for (i = 0; i<req->num_resultSetList; i++)
             wrbuf_printf(wr, " %s ", req->resultSetList[i]);
-        yaz_log(log_request, "%s", wrbuf_cstr(wr) );
+        log_request_line(wr);
         wrbuf_destroy(wr);
     }
     return apdu;
@@ -3922,8 +3959,9 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
         if (log_request)
         {
             WRBUF wr = wrbuf_alloc();
+            wrbuf_printf(wr, "EsRequest ");
             wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
-            yaz_log(log_request, "EsRequest %s", wrbuf_cstr(wr) );
+            log_request_line(wr);
             wrbuf_destroy(wr);
         }
     }
@@ -3940,8 +3978,9 @@ static Z_APDU *process_ESRequest(association *assoc, request *reqb)
         if (log_request)
         {
             WRBUF wr = wrbuf_alloc();
+            wrbuf_printf(wr, "EsRequest ");
             wrbuf_diags(wr, resp->num_diagnostics, resp->diagnostics);
-            yaz_log(log_request, "EsRequest %s", wrbuf_cstr(wr) );
+            log_request_line(wr);
             wrbuf_destroy(wr);
         }
 
