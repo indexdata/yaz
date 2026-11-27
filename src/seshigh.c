@@ -2094,7 +2094,11 @@ static char *read_file(const char *fname, ODR o, long *sz)
         rewind(inf);
         buf = (char *) odr_malloc(o, *sz);
         if (fread(buf, 1, *sz, inf) != *sz)
+        {
+            /* file changed while reading; buf is only partly filled */
             yaz_log(YLOG_WARN|YLOG_ERRNO, "short read %s", fname);
+            buf = 0;
+        }
     }
     fclose(inf);
     return buf;

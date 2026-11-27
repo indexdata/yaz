@@ -231,6 +231,7 @@ int cmd_adm_import(const char *arg)
                     if (fread(oct->buf, 1, oct->len, inf) != (size_t) oct->len)
                     {
                         printf("Incomplete read of file %s\n", fname);
+                        oct->buf = 0;
                     }
                 }
                 if (fclose(inf))
