@@ -51,6 +51,11 @@
 #if HAVE_TCPD_H
 #include <syslog.h>
 #include <tcpd.h>
+#if YAZ_POSIX_THREADS
+#include <pthread.h>
+/* libwrap is not reentrant; DNS lookups must stay outside this lock. */
+static pthread_mutex_t tcpd_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 int allow_severity = LOG_INFO;  /* not YLOG !! */
 int deny_severity = LOG_WARNING;
@@ -61,32 +66,73 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 {
     const char *daemon_name = (const char *) cd;
 
-    if (type == AF_INET)
+    if ((type == AF_INET || type == AF_INET6) && daemon_name && *daemon_name)
     {
-        if (daemon_name && *daemon_name)
-        {
 #if HAVE_TCPD_H
-            struct request_info request_info;
-            struct sockaddr_in *addr_in = (struct sockaddr_in *) addr;
+        struct request_info request_info;
+        const struct sockaddr *sa = (const struct sockaddr *) addr;
+        char host_name[NI_MAXHOST], host_addr[NI_MAXHOST];
+        const char *name = STRING_UNKNOWN;
+        int allowed;
 
-            /* leave the name lookup to libwrap: it only uses a name that
-               resolves back to the address ("paranoid" otherwise) */
-            request_init(&request_info, RQ_DAEMON, daemon_name,
-                         RQ_CLIENT_SIN, addr_in, 0);
-            /* addr holds a sockaddr_in only */
-            if (len >= (int) sizeof(*addr_in)
-                && addr_in->sin_family == AF_INET)
-                sock_methods(&request_info);
-            if (!hosts_access(&request_info))
-            {
-                yaz_log(YLOG_DEBUG, "access denied from %s",
-                        eval_hostinfo(request_info.client));
-                return 1;
-            }
-            yaz_log(YLOG_DEBUG, "access granted from %s",
-                    eval_hostinfo(request_info.client));
-#endif
+        if (!addr || len < (int) (type == AF_INET ?
+                                 sizeof(struct sockaddr_in) :
+                                 sizeof(struct sockaddr_in6)) ||
+            sa->sa_family != type ||
+            getnameinfo(sa, len, host_addr, sizeof(host_addr), 0, 0,
+                        NI_NUMERICHOST))
+        {
+            yaz_log(YLOG_DEBUG, "access denied: bad address");
+            return 1;
         }
+
+        /* Run both DNS lookups in the session, outside the libwrap lock.
+           Never trust a PTR name unless it resolves back to this peer. */
+        if (!getnameinfo(sa, len, host_name, sizeof(host_name), 0, 0,
+                         NI_NAMEREQD))
+        {
+            struct addrinfo hints, *addresses = 0, *ai;
+            memset(&hints, 0, sizeof(hints));
+            hints.ai_family = type;
+            hints.ai_socktype = SOCK_STREAM;
+            name = STRING_PARANOID;
+            if (!getaddrinfo(host_name, 0, &hints, &addresses))
+            {
+                for (ai = addresses; ai; ai = ai->ai_next)
+                {
+                    if (ai->ai_family == AF_INET && type == AF_INET &&
+                        ai->ai_addrlen >= sizeof(struct sockaddr_in) &&
+                        !memcmp(&((const struct sockaddr_in *) sa)->sin_addr,
+                                &((struct sockaddr_in *) ai->ai_addr)->sin_addr,
+                                sizeof(struct in_addr)))
+                        name = host_name;
+                    else if (ai->ai_family == AF_INET6 && type == AF_INET6 &&
+                             ai->ai_addrlen >= sizeof(struct sockaddr_in6) &&
+                             !memcmp(&((const struct sockaddr_in6 *) sa)->sin6_addr,
+                                     &((struct sockaddr_in6 *) ai->ai_addr)->sin6_addr,
+                                     sizeof(struct in6_addr)))
+                        name = host_name;
+                }
+                freeaddrinfo(addresses);
+            }
+        }
+#if YAZ_POSIX_THREADS
+        pthread_mutex_lock(&tcpd_mutex);
+#endif
+        request_init(&request_info, RQ_DAEMON, daemon_name,
+                     RQ_CLIENT_ADDR, host_addr, RQ_CLIENT_NAME, name, 0);
+        if (type == AF_INET)
+            request_set(&request_info, RQ_CLIENT_SIN,
+                        (struct sockaddr_in *) addr, 0);
+        allowed = hosts_access(&request_info);
+#if YAZ_POSIX_THREADS
+        pthread_mutex_unlock(&tcpd_mutex);
+#endif
+        yaz_log(YLOG_DEBUG, "access %s from %s",
+                allowed ? "granted" : "denied",
+                name == host_name ? host_name : host_addr);
+        return allowed ? 0 : 1;
+#endif
     }
     return 0;
 }
