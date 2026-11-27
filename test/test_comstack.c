@@ -584,6 +584,59 @@ static void tst_cs_get_error_ssl(void)
 #endif
 
 #ifndef _WIN32
+static void tst_incomplete_transport(CS_TYPE type)
+{
+    static const char response[] =
+        "HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\ndata";
+    const int len = sizeof(response) - 1;
+    int fd[2], r, saved_errno;
+    COMSTACK cs;
+    char *buf = 0;
+    int bufsize = 0;
+
+    r = socketpair(AF_UNIX, SOCK_STREAM, 0, fd);
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+    {
+        fprintf(stderr, "Skipping incomplete message: socketpair denied\n");
+        return;
+    }
+    YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+        return;
+    cs = cs_createbysocket(fd[0], type, 0, PROTO_HTTP);
+    YAZ_CHECK(cs);
+    if (!cs)
+    {
+        close(fd[0]);
+        close(fd[1]);
+        return;
+    }
+
+    /* Non-blocking: an incomplete message is kept between calls. Its end
+       arrives together with a second message, which is kept as surplus. */
+    YAZ_CHECK(cs_set_blocking(cs, 0));
+    YAZ_CHECK_EQ(write(fd[1], response, len - 2), len - 2);
+    YAZ_CHECK_EQ(cs_get(cs, &buf, &bufsize), 1);
+    YAZ_CHECK(!cs_more(cs));
+    YAZ_CHECK_EQ(cs_get(cs, &buf, &bufsize), 1);
+    YAZ_CHECK_EQ(write(fd[1], response + len - 2, 2), 2);
+    YAZ_CHECK_EQ(write(fd[1], response, len), len);
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, len);
+    if (r == len)
+        YAZ_CHECK(!memcmp(buf, response, r));
+    YAZ_CHECK(cs_more(cs));
+    r = cs_get(cs, &buf, &bufsize);
+    YAZ_CHECK_EQ(r, len);
+    if (r == len)
+        YAZ_CHECK(!memcmp(buf, response, r));
+    YAZ_CHECK(!cs_more(cs));
+    close(fd[1]);
+    cs_close(cs);
+    xfree(buf);
+}
+
 static void check_redirect_connect(const char *base, const char *location,
                                    const char *expected)
 {
@@ -1032,7 +1085,7 @@ int main (int argc, char **argv)
     YAZ_CHECK_INIT(argc, argv);
     YAZ_CHECK_LOG();
     if (argc == 2)
-       comstack_example(argv[1]);
+        comstack_example(argv[1]);
     tst_http_request();
     tst_http_response();
     tst_cs_get_host_args();
@@ -1045,6 +1098,8 @@ int main (int argc, char **argv)
     tst_cs_set_head_only();
     tst_complete_limits();
 #ifndef _WIN32
+    tst_incomplete_transport(tcpip_type);
+    tst_incomplete_transport(unix_type);
     tst_get_bytewise_transport(tcpip_type);
     tst_get_bytewise_transport(unix_type);
 #if HAVE_GNUTLS_H
