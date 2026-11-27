@@ -199,7 +199,11 @@ int yaz_xml_dump_element(xmlBufferPtr buf, xmlNodePtr ptr, size_t *own)
         else if (!inherited)
             len = xmlBufferLength(buf) - start;
         if (ptr->doc)
-            ptr->doc->encoding = encoding;
+        {
+            /* libxml2 versions differ in the field's const qualification;
+               restore the original pointer without modifying its contents. */
+            ptr->doc->encoding = (xmlChar *) encoding;
+        }
         *end = 0;
     }
     for (ns = inherited; ns; ns = ns->next)
