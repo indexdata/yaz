@@ -1297,12 +1297,22 @@ static zoom_ret send_package(ZOOM_connection c)
     if (!c->tasks)
         return zoom_complete;
     assert (c->tasks->which == ZOOM_TASK_PACKAGE);
+    ZOOM_package p = c->tasks->u.package;
+
+    /* send from the buffer of the connection, like all other requests.
+       The package may be destroyed or sent again while a partial write
+       is pending, so its buffer must not be used for I/O */
+    if (!p->buf_out || odr_write(c->odr_out, p->buf_out, p->len_out) < 0)
+    {
+        ZOOM_set_error(c, ZOOM_ERROR_ENCODE, 0);
+        odr_reset(c->odr_out);
+        return zoom_complete;
+    }
+    c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
+    odr_reset(c->odr_out);
 
     ZOOM_Event event = ZOOM_Event_create(ZOOM_EVENT_SEND_APDU);
     ZOOM_connection_put_event(c, event);
-
-    c->buf_out = c->tasks->u.package->buf_out;
-    c->len_out = c->tasks->u.package->len_out;
 
     return ZOOM_send_buf(c);
 }
