@@ -39,7 +39,7 @@ static int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
             if (!strcmp((const char *) ptr->name, "subfield"))
             {
                 size_t ctrl_data_len = 0;
-                char *ctrl_data_buf = 0;
+                char *ctrl_data_buf = 0, *cp;
                 const xmlNode *p = 0, *ptr_code = 0;
                 for (struct _xmlAttr *attr = ptr->properties;
                      attr; attr = attr->next)
@@ -74,9 +74,13 @@ static int yaz_marc_read_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                         ctrl_data_len += strlen((const char *)p->content);
                 ctrl_data_buf = (char *) nmem_malloc(nmem, ctrl_data_len+1);
                 strcpy(ctrl_data_buf, (const char *)ptr_code->content);
+                cp = ctrl_data_buf + strlen(ctrl_data_buf);
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)
-                        strcat(ctrl_data_buf, (const char *)p->content);
+                    {
+                        strcpy(cp, (const char *)p->content);
+                        cp += strlen(cp);
+                    }
                 yaz_marc_add_subfield(mt, ctrl_data_buf, ctrl_data_len);
             }
             else
@@ -141,7 +145,7 @@ static int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                 NMEM nmem = yaz_marc_get_nmem(mt);
                 xmlNode *p;
                 size_t ctrl_data_len = 0;
-                char *ctrl_data_buf = 0;
+                char *ctrl_data_buf = 0, *cp;
                 const char *tag_value = element_attribute_value_extract(ptr, "code", nmem);
                 if (!tag_value)
                 {
@@ -159,9 +163,13 @@ static int yaz_marc_read_turbo_xml_subfields(yaz_marc_t mt, const xmlNode *ptr)
                 ctrl_data_buf = (char *) nmem_malloc(nmem, ctrl_data_len+1);
                 /* Build a string with "<Code><data>" */
                 strcpy(ctrl_data_buf, (const char *) tag_value);
+                cp = ctrl_data_buf + strlen(ctrl_data_buf);
                 for (p = ptr->children; p ; p = p->next)
                     if (p->type == XML_TEXT_NODE)
-                        strcat(ctrl_data_buf, (const char *)p->content);
+                    {
+                        strcpy(cp, (const char *)p->content);
+                        cp += strlen(cp);
+                    }
                 yaz_marc_add_subfield(mt, ctrl_data_buf, ctrl_data_len);
             }
             else
