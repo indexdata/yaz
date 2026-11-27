@@ -202,6 +202,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
     anew->client_chan = channel;
     channel->deadline = time(0) + statserv_request_timeout();
     anew->client_link = link;
+    cs_set_max_recv_bytes(link, statserv_max_recv_bytes(channel->chan_id));
     anew->cs_get_mask = 0;
     anew->cs_put_mask = 0;
     anew->cs_accept_mask = 0;

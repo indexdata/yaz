@@ -395,6 +395,36 @@ int control_association(association *assoc, const char *host, int force_open)
     return 1;
 }
 
+/* control_association selects the server, and with it the limit, from the
+   first message of a session. Until then, the limit is the largest one of
+   the servers that the listener can select. */
+int statserv_max_recv_bytes(int chan_id)
+{
+    int max_recv_bytes = 0;
+    if (control_block.xml_config[0])
+    {
+        struct gfs_server *gfs;
+        for (gfs = gfs_server_list; gfs; gfs = gfs->next)
+        {
+            int listen_match = 0;
+            if (!gfs->listen_ref)
+                listen_match = 1;
+            else
+            {
+                int i;
+                for (i = 0; gfs->listen_ref[i] != -1; i++)
+                    if (gfs->listen_ref[i] == chan_id)
+                        listen_match = 1;
+            }
+            if (listen_match && gfs->cb.maxrecordsize > max_recv_bytes)
+                max_recv_bytes = gfs->cb.maxrecordsize;
+        }
+    }
+    if (max_recv_bytes == 0)
+        max_recv_bytes = control_block.maxrecordsize;
+    return max_recv_bytes;
+}
+
 #if YAZ_HAVE_XML2
 static void xml_config_read(const char *base_path)
 {

@@ -85,6 +85,7 @@ void statserv_remove (IOCHAN pIOChannel);
 void statserv_reap_children(void);
 int statserv_request_timeout(void);
 int statserv_max_scan_terms(void);
+int statserv_max_recv_bytes(int chan_id);
 #endif
 /*
  * Local variables:

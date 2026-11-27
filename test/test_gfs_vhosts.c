@@ -496,6 +496,43 @@ static void tst_docpath(void)
     control_block.xml_config[0] = 0;
     statserv_setcontrol(&control_block);
 }
+
+/* The first message of a session is received before a server is selected. */
+static void tst_recv_limit(void)
+{
+    static int listen_b[] = {2, -1};
+    struct comstack cs;
+    IOCHAN chan = iochan_create(-1, ir_session, EVENT_INPUT, 2);
+    association *assoc;
+    int i;
+
+    memset(servers, 0, sizeof(servers));
+    memset(&cs, 0, sizeof(cs));
+    cs.protocol = PROTO_HTTP;
+    assoc = create_association(chan, &cs, 0);
+    YAZ_CHECK_EQ(cs.max_recv_bytes, control_block.maxrecordsize);
+    destroy_association(assoc);
+
+    for (i = 0; i < 2; i++)
+        servers[i].cb = control_block;
+    servers[0].cb.maxrecordsize = 1000;
+    servers[1].cb.maxrecordsize = 5000;
+    servers[1].listen_ref = listen_b;
+    servers[0].next = &servers[1];
+    gfs_server_list = servers;
+    strcpy(control_block.xml_config, "in-memory");
+    YAZ_CHECK_EQ(statserv_max_recv_bytes(1), 1000);
+    YAZ_CHECK_EQ(statserv_max_recv_bytes(2), 5000);
+    assoc = create_association(chan, &cs, 0);
+    YAZ_CHECK_EQ(cs.max_recv_bytes, 5000);
+    YAZ_CHECK(control_association(assoc, 0, 0));
+    YAZ_CHECK_EQ(cs.max_recv_bytes, 1000);
+    destroy_association(assoc);
+    xfree(chan);
+    gfs_server_list = 0;
+    control_block.xml_config[0] = 0;
+    statserv_setcontrol(&control_block);
+}
 #endif
 
 int main(int argc, char **argv)
@@ -511,6 +548,7 @@ int main(int argc, char **argv)
     tst_auth("");
     tst_auth("&x-username=alice&x-password=wrong");
     tst_docpath();
+    tst_recv_limit();
     xml_config_close();
 #endif
     YAZ_CHECK_TERM;
