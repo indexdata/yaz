@@ -937,7 +937,7 @@ ZOOM_API(size_t)
 
 int ZOOM_test_reconnect(ZOOM_connection c)
 {
-    if (!c->reconnect_ok)
+    if (!c->reconnect_ok || !c->tasks)
         return 0;
     ZOOM_connection_close(c);
     c->reconnect_ok = 0;
@@ -2130,10 +2130,11 @@ static void ZOOM_connection_do_io(ZOOM_connection c, int mask)
             }
             return;
         }
-        if (mask & ZOOM_SELECT_READ)
-            do_read(c);
-        if (c->cs && (mask & ZOOM_SELECT_WRITE))
+        /* a pending request is sent in full before any response is read */
+        if (c->mask & ZOOM_SELECT_WRITE)
             ZOOM_send_buf(c);
+        else if (mask & ZOOM_SELECT_READ)
+            do_read(c);
     }
 }
 
