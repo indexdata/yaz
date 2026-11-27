@@ -621,6 +621,9 @@ int yaz_encode_http_response(ODR o, Z_HTTP_Response *hr)
         odr_printf(o, "-- HTTP response:\n");
         dump_http_package(o, o->op->buf + top0, o->op->top - top0);
         odr_printf(o, "--\n");
+        /* the message was only encoded to be dumped; do not keep it */
+        odr_seek(o, ODR_S_SET, top0);
+        o->op->top = top0;
     }
     return 1;
 }
@@ -719,6 +722,9 @@ int yaz_encode_http_request(ODR o, Z_HTTP_Request *hr)
         odr_printf(o, "-- HTTP request:\n");
         dump_http_package(o, o->op->buf + top0, o->op->top - top0);
         odr_printf(o, "--\n");
+        /* the message was only encoded to be dumped; do not keep it */
+        odr_seek(o, ODR_S_SET, top0);
+        o->op->top = top0;
     }
     return 1;
 }

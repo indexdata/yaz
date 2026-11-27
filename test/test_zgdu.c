@@ -291,6 +291,45 @@ static void tst_http_chunked_content(void)
     odr_destroy(dec);
 }
 
+static void print_to_wrbuf(ODR o, void *handle, int type, const char *buf,
+                           int len)
+{
+    wrbuf_write((WRBUF) handle, buf, len);
+}
+
+static void tst_http_print(void)
+{
+    const char *http_buf =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Length: 2\r\n"
+        "\r\n"
+        "12";
+    Z_GDU *zgdu;
+    WRBUF w = wrbuf_alloc();
+    ODR dec = odr_createmem(ODR_DECODE);
+    ODR print = odr_createmem(ODR_PRINT);
+    int len = -1;
+
+    odr_set_stream(print, w, print_to_wrbuf, 0);
+    odr_setbuf(dec, (char *) http_buf, (int) strlen(http_buf), 0);
+    YAZ_CHECK(z_GDU(dec, &zgdu, 0, 0));
+    YAZ_CHECK(z_GDU(print, &zgdu, 0, 0));
+    YAZ_CHECK(strstr(wrbuf_cstr(w), http_buf));
+    /* the message is only printed; it must not stay in the ODR buffer */
+    odr_getbuf(print, &len, 0);
+    YAZ_CHECK_EQ(len, 0);
+
+    zgdu = z_get_HTTP_Request(dec);
+    YAZ_CHECK(z_GDU(print, &zgdu, 0, 0));
+    YAZ_CHECK(strstr(wrbuf_cstr(w), "-- HTTP request:\nPOST / HTTP/1.1\r\n"));
+    len = -1;
+    odr_getbuf(print, &len, 0);
+    YAZ_CHECK_EQ(len, 0);
+    odr_destroy(print);
+    odr_destroy(dec);
+    wrbuf_destroy(w);
+}
+
 static void tst_double_encoding(const char *buf_in, const char *buf_out, int request_type)
 {
     Z_GDU *zgdu;
@@ -750,6 +789,7 @@ int main (int argc, char **argv)
                          "\r\n"
                          "0\r\n"
                          ": value\r\n\r\n");
+    tst_http_print();
     YAZ_CHECK_TERM;
 }
 
