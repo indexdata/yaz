@@ -64,11 +64,11 @@ int deny_severity = LOG_WARNING;
 
 int check_ip_tcpd(void *cd, const char *addr, int len, int type)
 {
+#if HAVE_TCPD_H
     const char *daemon_name = (const char *) cd;
 
     if ((type == AF_INET || type == AF_INET6) && daemon_name && *daemon_name)
     {
-#if HAVE_TCPD_H
         struct request_info request_info;
         const struct sockaddr *sa = (const struct sockaddr *) addr;
         char host_name[NI_MAXHOST], host_addr[NI_MAXHOST];
@@ -132,8 +132,8 @@ int check_ip_tcpd(void *cd, const char *addr, int len, int type)
                 allowed ? "granted" : "denied",
                 name == host_name ? host_name : host_addr);
         return allowed ? 0 : 1;
-#endif
     }
+#endif
     return 0;
 }
 
