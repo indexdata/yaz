@@ -91,6 +91,9 @@ YAZ_EXPORT char *oid_oid_to_dotstring(const Odr_oid *oid, char *oidbuf);
     \param oid resulting OID buffer which should be at least of size OID_SIZE
     \retval 0 OK
     \retval -1 failure
+
+    Fails if the OID, including the terminating -1, does not fit in
+    OID_SIZE elements.
 */
 YAZ_EXPORT int oid_dotstring_to_oid(const char *name, Odr_oid *oid);
 
