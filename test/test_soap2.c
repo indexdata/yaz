@@ -468,8 +468,13 @@ static void tst_srw(void)
     p->ns = "http://schemas.xmlsoap.org/soap/envelope/";
 
     int ret = z_soap_codec_enc(o, &p, &content_buf, &content_len, h, charset);
-    odr_destroy(o);
     YAZ_CHECK(ret == 0);  /* codec failed ? */
+
+    /* libxml2 returns no buffer for an encoding that it does not know */
+    ret = z_soap_codec_enc(o, &p, &content_buf, &content_len, h,
+                           "x-no-such-charset");
+    YAZ_CHECK(ret == -1);
+    odr_destroy(o);
 }
 
 /* decodes a response that declares a namespace with a name of uri_len

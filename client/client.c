@@ -939,10 +939,13 @@ static void print_xml_record(const char *buf, int len)
             xmlChar *xml_mem;
             int xml_size;
             xmlDocDumpFormatMemory(doc, &xml_mem, &xml_size, 1);
-            fwrite(xml_mem, 1, xml_size, stdout);
+            if (xml_mem && xml_size >= 0)
+            {
+                fwrite(xml_mem, 1, xml_size, stdout);
+                has_printed = 1;
+            }
             xmlFree(xml_mem);
             xmlFreeDoc(doc);
-            has_printed = 1;
         }
     }
 #endif

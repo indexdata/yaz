@@ -298,6 +298,14 @@ int z_soap_codec_enc_xsl(ODR o, Z_SOAP **pp,
                 xmlDocDumpMemoryEnc(doc, &buf_out, &len_out, encoding);
             else
                 xmlDocDumpMemory(doc, &buf_out, &len_out);
+            /* no buffer: unknown encoding, or a document whose size
+               does not fit in an int (the length is negative then) */
+            if (!buf_out || len_out < 0)
+            {
+                xmlFree(buf_out);
+                xmlFreeDoc(doc);
+                return -1;
+            }
             *content_buf = (char *) odr_malloc(o, len_out);
             *content_len = len_out;
             memcpy(*content_buf, buf_out, len_out);

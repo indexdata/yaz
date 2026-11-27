@@ -880,7 +880,10 @@ static int yaz_marc_write_marcxml_ns(yaz_marc_t mt, WRBUF wr,
             xmlDocSetRootElement(doc, root_ptr);
             xmlDocDumpMemory(doc, &buf_out, &len_out);
 
-            wrbuf_write(wr, (const char *) buf_out, len_out);
+            if (!buf_out || len_out < 0)
+                ret = -1;
+            else
+                wrbuf_write(wr, (const char *) buf_out, len_out);
             wrbuf_puts(wr, "");
             xmlFree(buf_out);
             xmlFreeDoc(doc);

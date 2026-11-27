@@ -1482,13 +1482,11 @@ static char *srw_bend_explain_default(bend_explain_rr *rr)
             xmlDocSetRootElement(doc, ptr);
 
             xmlDocDumpMemory(doc, &buf_out, &len);
-            char *content = (char*) odr_malloc(rr->stream, 1+len);
-            memcpy(content, buf_out, len);
-            content[len] = '\0';
-
+            if (buf_out && len >= 0)
+                rr->explain_buf =
+                    odr_strdupn(rr->stream, (const char *) buf_out, len);
             xmlFree(buf_out);
             xmlFreeDoc(doc);
-            rr->explain_buf = content;
             return 0;
         }
     }
@@ -2289,13 +2287,20 @@ static void process_http_request(association *assoc, request *req)
             if (stylesheet && *stylesheet == '\0')
                 stylesheet = 0;
 
-            z_soap_codec_enc_xsl(assoc->encode, &soap_package,
-                                 &hres->content_buf, &hres->content_len,
-                                 soap_handlers, charset, stylesheet);
-            hres->code = http_code;
+            if (z_soap_codec_enc_xsl(assoc->encode, &soap_package,
+                                     &hres->content_buf, &hres->content_len,
+                                     soap_handlers, charset, stylesheet))
+            {
+                yaz_log(YLOG_WARN, "SRU response could not be encoded");
+                p = z_get_HTTP_Response(o, 500);
+            }
+            else
+            {
+                hres->code = http_code;
 
-            strcpy(ctype, "text/xml");
-            z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+                strcpy(ctype, "text/xml");
+                z_HTTP_header_add(o, &hres->headers, "Content-Type", ctype);
+            }
         }
         else
             p = z_get_HTTP_Response(o, http_code);
