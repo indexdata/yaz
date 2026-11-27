@@ -389,6 +389,11 @@ static zoom_ret handle_srw_response(ZOOM_connection c,
         nmem_transfer(odr_getmem(resultset->odr), nmem);
         nmem_destroy(nmem);
 
+        /* no records in response: start and count are unchanged, so
+           asking for the rest would send the very same request again */
+        if (res->num_records == 0)
+            return zoom_complete;
+
         if (c->no_redirects)
         {
             /* response from a redirect target: the request for the remaining
