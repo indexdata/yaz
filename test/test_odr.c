@@ -490,6 +490,98 @@ static void tst_odr_create_Odr_oct2(void)
     odr_destroy(o);
 }
 
+static int tst_decode_string(const char *ber, size_t len, const char *expect)
+{
+    ODR decode = odr_createmem(ODR_DECODE);
+    char *buf = (char *) malloc(len); /* exact size, no NUL */
+    size_t expect_len = expect ? strlen(expect) : 0;
+    Odr_oct *oct = 0;
+    char *str = 0;
+    int i, ok = 1;
+
+    memcpy(buf, ber, len);
+    for (i = 0; i < 3; i++)
+    {
+        int r;
+
+        odr_setbuf(decode, buf, (int) len, 0);
+        if (i == 0)
+        {
+            r = odr_octetstring(decode, &oct, 0, 0);
+            if (r && (!oct || !oct->buf || oct->len != (int) expect_len))
+                ok = 0;
+            else if (r)
+                str = oct->buf;
+        }
+        else if (i == 1)
+            r = odr_cstring(decode, &str, 0, 0);
+        else
+            r = odr_iconv_string(decode, &str, 0, 0);
+        if (expect)
+        {
+            if (!r || !str || memcmp(str, expect, expect_len + 1))
+                ok = 0;
+        }
+        else if (r || !odr_geterror(decode))
+            ok = 0;
+        odr_reset(decode);
+    }
+    odr_destroy(decode);
+    free(buf);
+    return ok;
+}
+
+#define TST_STRING(ber, expect) \
+    YAZ_CHECK(tst_decode_string(ber, sizeof(ber) - 1, expect))
+
+static void tst_constructed_string(void)
+{
+    char nested[4 * 3000]; /* more levels than the decoder accepts */
+    size_t i;
+
+    TST_STRING("\x04\x02" "AB", "AB");
+    TST_STRING("\x04\x00", "");
+    /* one segment, two segments, no segments */
+    TST_STRING("\x24\x04\x04\x02" "AB", "AB");
+    TST_STRING("\x24\x07\x04\x02" "AB" "\x04\x01" "C", "ABC");
+    TST_STRING("\x24\x00", "");
+    /* indefinite length */
+    TST_STRING("\x24\x80\x04\x02" "AB" "\x04\x01" "C" "\x00\x00", "ABC");
+    TST_STRING("\x24\x80\x00\x00", "");
+    /* segments that are constructed themselves */
+    TST_STRING("\x24\x0a\x04\x01" "A" "\x24\x80\x04\x01" "B" "\x00\x00",
+               "AB");
+    TST_STRING("\x24\x0b\x24\x06\x24\x04\x04\x02" "AB" "\x04\x01" "C",
+               "ABC");
+
+    /* segment that is not an OCTET STRING */
+    TST_STRING("\x24\x04\x0c\x02" "AB", 0);
+    TST_STRING("\x24\x04\x84\x02" "AB", 0);
+    /* segment beyond the end of the string or of the buffer */
+    TST_STRING("\x24\x03\x04\x02" "AB", 0);
+    TST_STRING("\x24\x04\x04\x03" "AB", 0);
+    TST_STRING("\x24\x05\x04\x02" "AB", 0);
+    TST_STRING("\x24\x06\x24\x02\x04\x02" "AB", 0);
+    TST_STRING("\x24\x03\x04", 0);
+    TST_STRING("\x24\x04\x04\x80" "AB", 0);
+    /* missing end of indefinite length content */
+    TST_STRING("\x24\x80", 0);
+    TST_STRING("\x24\x80\x04\x02" "AB", 0);
+    TST_STRING("\x24\x80\x04\x02" "AB" "\x00", 0);
+    TST_STRING("\x24\x80\x24\x80\x04\x02" "AB" "\x00\x00", 0);
+
+    /* nesting is limited */
+    memset(nested, 0, sizeof(nested));
+    for (i = 0; i < sizeof(nested) / 2; i += 2)
+    {
+        nested[i] = 0x24;
+        nested[i + 1] = (char) 0x80;
+    }
+    YAZ_CHECK(tst_decode_string(nested, sizeof(nested), 0));
+    memset(nested + 20, 0, sizeof(nested) - 20);
+    YAZ_CHECK(tst_decode_string(nested, 40, ""));
+}
+
 static void tst_odr_write2(void)
 {
     ODR encode = odr_createmem(ODR_ENCODE);
@@ -740,6 +832,7 @@ int main(int argc, char **argv)
     tst_charneg_response();
     tst_oid_arc_range();
     tst_odr_setprint_log();
+    tst_constructed_string();
     YAZ_CHECK_TERM;
 }
 
