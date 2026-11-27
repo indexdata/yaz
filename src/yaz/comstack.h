@@ -427,6 +427,7 @@ YAZ_EXPORT COMSTACK cs_create_host2(const char *vhost, int flags, void **vp,
     \param args required output pointer to borrowed arguments, or an empty string
 
     Returns the portion after the first path slash, skipping a :// separator.
+    A connect:proxy, wrapper is skipped first, as in cs_parse_host.
     For unix:path:args, returns args directly if that part contains no colon;
     otherwise extracts the target path. For example tcp:localhost:210/books
     yields books, and http://localhost/sru?version=1.2 yields sru?version=1.2.

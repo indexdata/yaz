@@ -213,8 +213,10 @@ YAZ_EXPORT Z_GDU *z_get_HTTP_Request(ODR o);
     \returns a Z_GDU containing the request.
 
     Uses z_get_HTTP_Request defaults. The Host value excludes any prefix
-    through :// and any following slash and path. This constructor does not
-    validate or percent-encode its inputs; encoding performs validation.
+    through :// and any following slash and path. It is the host that
+    cs_parse_host selects: a leading connect:[user:password@]proxy, wrapper
+    is skipped, and http: and https: need no slashes. This constructor does
+    not validate or percent-encode its inputs; encoding performs validation.
 */
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
                                                const char *host,
@@ -229,8 +231,11 @@ YAZ_EXPORT Z_GDU *z_get_HTTP_Request_host_path(ODR odr,
     Uses z_get_HTTP_Request defaults and adds Host. If args is NULL, uses
     the portion after the first slash following the URI authority, or an
     empty string if absent. The target is / followed by args, optionally
-    preceded by the URI prefix for proxy requests. This constructor does
-    not validate or percent-encode inputs; encoding performs validation.
+    preceded by the URI prefix for proxy requests. Host is the host that
+    cs_parse_host selects: http: and https: need no slashes, and a leading
+    connect:[user:password@]proxy, wrapper is for the transport only and
+    appears in neither Host nor the target. This constructor does not
+    validate or percent-encode inputs; encoding performs validation.
 */
 YAZ_EXPORT Z_GDU *z_get_HTTP_Request_uri(ODR odr, const char *uri,
                                          const char *args,

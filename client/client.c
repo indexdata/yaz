@@ -203,7 +203,6 @@ static void close_session(void);
 static void marc_file_write(const char *buf, size_t sz);
 
 static void wait_and_handle_response(int one_response_only);
-static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url);
 
 ODR getODROutputStream(void)
 {
@@ -1411,7 +1410,7 @@ static int send_SRW_redirect(const char *uri)
 {
     const char *username = 0;
     const char *password = 0;
-    Z_GDU *gdu = get_HTTP_Request_url(out, uri);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(out, uri, 0, 0);
 
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
     z_HTTP_header_add(out, &gdu->u.HTTP_Request->headers, "Accept",
@@ -2715,39 +2714,13 @@ static int cmd_init(const char *arg)
     return 2;
 }
 
-static Z_GDU *get_HTTP_Request_url(ODR odr, const char *url)
-{
-    Z_GDU *p = z_get_HTTP_Request(odr);
-    const char *host = url;
-    const char *cp0 = strstr(host, "://");
-    const char *cp1 = 0;
-    if (cp0)
-        cp0 = cp0+3;
-    else
-        cp0 = host;
-
-    cp1 = strchr(cp0, '/');
-    if (!cp1)
-        cp1 = cp0 + strlen(cp0);
-
-    if (cp0 && cp1)
-    {
-        char *h = (char*) odr_malloc(odr, cp1 - cp0 + 1);
-        memcpy (h, cp0, cp1 - cp0);
-        h[cp1-cp0] = '\0';
-        z_HTTP_header_add(odr, &p->u.HTTP_Request->headers, "Host", h);
-    }
-    p->u.HTTP_Request->path = odr_strdup(odr, *cp1 ? cp1 : "/");
-    return p;
-}
-
 static WRBUF get_url(const char *uri, WRBUF username, WRBUF password,
                      int *code, int show_headers)
 {
     WRBUF result = 0;
     ODR out = odr_createmem(ODR_ENCODE);
     ODR in = odr_createmem(ODR_DECODE);
-    Z_GDU *gdu = get_HTTP_Request_url(out, uri);
+    Z_GDU *gdu = z_get_HTTP_Request_uri(out, uri, 0, 0);
 
     gdu->u.HTTP_Request->method = odr_strdup(out, "GET");
     if (username && password)
