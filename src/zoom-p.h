@@ -116,6 +116,7 @@ struct ZOOM_connection_p {
     int no_redirects; /* 0 for no redirects. >0 for number of redirects */
     yaz_cookies_t cookies;
     char *location;
+    char *peer_url; /* URL of last connect. Cookies are from its origin */
 
     int log_details;
     int log_api;

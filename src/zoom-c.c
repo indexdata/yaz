@@ -311,6 +311,7 @@ ZOOM_API(ZOOM_connection)
     c->no_redirects = 0;
     c->cookies = 0;
     c->location = 0;
+    c->peer_url = 0;
     c->saveAPDU_wrbuf = 0;
 
     ZOOM_memcached_init(c);
@@ -676,6 +677,7 @@ ZOOM_API(void)
     xfree(c->password);
     xfree(c->sru_version);
     xfree(c->location);
+    xfree(c->peer_url);
     yaz_cookies_destroy(c->cookies);
     wrbuf_destroy(c->saveAPDU_wrbuf);
     xfree(c);
@@ -1102,17 +1104,45 @@ static zoom_ret do_connect(ZOOM_connection c)
     return do_connect_host(c, c->host_port);
 }
 
+/* skips the CONNECT wrapper (connect:proxy,) of a logical URL, if any */
+static const char *http_url_of(const char *logical_url)
+{
+    const char *comma;
+
+    if (!strncmp(logical_url, "connect:", 8)
+        && (comma = strchr(logical_url + 8, ',')))
+        return comma + 1;
+    return logical_url;
+}
+
+/* Records the URL that we connect to. Cookies are stored without origin,
+   so they are dropped unless the new URL has the origin of the previous
+   one: what one server set must not be sent to another. This includes
+   returning from a redirect target to the configured host. */
+static void set_peer_url(ZOOM_connection c, const char *logical_url)
+{
+    char *peer_url = xstrdup(logical_url);
+
+    if (!c->peer_url
+        || !yaz_http_same_origin(http_url_of(c->peer_url),
+                                 http_url_of(peer_url)))
+        yaz_cookies_reset(c->cookies);
+    xfree(c->peer_url);
+    c->peer_url = peer_url;
+}
+
 static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 {
-    void *add;
-    int flags = CS_FLAGS_DNS_NO_BLOCK;
-    WRBUF w_auth = 0;
+    set_peer_url(c, logical_url);
 
     if (c->cs)
         cs_close(c->cs);
 
+    int flags = CS_FLAGS_DNS_NO_BLOCK;
     if (c->check_cert)
         flags |= CS_FLAGS_CHECK_CERT;
+
+    WRBUF w_auth = 0;
     if (c->connect_auth && !strncmp(logical_url, "connect:", 8))
     {
         /* host_port, or a redirect of it: through the same CONNECT proxy */
@@ -1122,6 +1152,7 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
         wrbuf_puts(w_auth, "@");
         wrbuf_puts(w_auth, logical_url + 8);
     }
+    void *add;
     c->cs = cs_create_host2(w_auth ? wrbuf_cstr(w_auth) : logical_url,
                             flags, &add,
                             c->tproxy ? c->tproxy : c->proxy,
@@ -1678,7 +1709,9 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
 
             int host_change = 0;
             int same_origin = 0;
-            location = yaz_check_http_redirect(c->odr_in, c->host_port,
+            /* the response is from peer_url, which is not host_port if
+               we are already following a redirect */
+            location = yaz_check_http_redirect(c->odr_in, c->peer_url,
                                                location, &host_change,
                                                &same_origin);
             if (!location

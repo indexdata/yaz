@@ -157,6 +157,7 @@ static int scan_stepSize = 0;
 static char scan_position[64];
 static int scan_size = 20;
 static WRBUF cur_host = 0;
+static WRBUF peer_url = 0; /* URL of last connect, not cur_host if redirected */
 static Odr_int last_hit_count = 0;
 static int pretty_xml = 0;
 static Odr_int sru_maximumRecords = 0;
@@ -722,6 +723,11 @@ static int session_connect_base(const char *arg, const char **basep)
         nmem_destroy(session_mem);
         session_mem = NULL;
         session_initResponse = 0;
+    }
+    if (arg != wrbuf_cstr(peer_url))
+    {
+        wrbuf_rewind(peer_url);
+        wrbuf_puts(peer_url, arg);
     }
     cs_get_host_args(arg, basep);
 
@@ -3290,6 +3296,7 @@ static void exit_client(int code)
     file_history_destroy(&file_history);
     nmem_destroy(nmem_auth);
     wrbuf_destroy(cur_host);
+    wrbuf_destroy(peer_url);
     if (conn)
         cs_close(conn);
     exit(code);
@@ -4292,6 +4299,7 @@ static void add_to_readline_history(void *client_data, const char *line)
 static void initialize(const char *rc_file)
 {
     cur_host = wrbuf_alloc();
+    peer_url = wrbuf_alloc();
 
     if (!(out = odr_createmem(ODR_ENCODE)) ||
         !(in = odr_createmem(ODR_DECODE)) ||
@@ -4549,6 +4557,20 @@ static void http_response(Z_HTTP_Response *hres)
 
 #define max_HTTP_redirects 3
 
+/* Reconnects in order to resend the request in out. A redirect request,
+   with its cookies, is for the server that we were redirected to. */
+static void session_reconnect(int redirected)
+{
+    const char *basep;
+
+    cs_close(conn);
+    conn = 0;
+    if (redirected)
+        session_connect_base(wrbuf_cstr(peer_url), &basep);
+    else
+        session_connect();
+}
+
 static void wait_and_handle_response(int one_response_only)
 {
     int reconnect_ok = 1;
@@ -4572,9 +4594,7 @@ static void wait_and_handle_response(int one_response_only)
                 print_comstack_error("cs_get", conn);
             if (reconnect_ok && protocol == PROTO_HTTP)
             {
-                cs_close(conn);
-                conn = 0;
-                session_connect();
+                session_reconnect(no_redirects);
                 reconnect_ok = 0;
                 if (conn)
                 {
@@ -4613,9 +4633,7 @@ static void wait_and_handle_response(int one_response_only)
             if (reconnect_ok && protocol == PROTO_HTTP)
             {
                 fprintf(stderr, "Decoding error. Reconnecting\n");
-                cs_close(conn);
-                conn = 0;
-                session_connect();
+                session_reconnect(no_redirects);
                 reconnect_ok = 0;
                 if (conn)
                 {
@@ -4725,7 +4743,9 @@ static void wait_and_handle_response(int one_response_only)
                 const char *base_tmp;
                 int host_change = 0;
                 int same_origin = 0;
-                location = yaz_check_http_redirect(in, wrbuf_cstr(cur_host),
+                /* the response is from peer_url, which is not cur_host if
+                   we have been redirected */
+                location = yaz_check_http_redirect(in, wrbuf_cstr(peer_url),
                                                    location, &host_change,
                                                    &same_origin);
                 if (!location
