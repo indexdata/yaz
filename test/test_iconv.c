@@ -617,6 +617,19 @@ static void tst_utf8_to_marc8(const char *marc8_type)
                           "\x1B\x28\x42\x2C"
                   ));
 
+    /** CJK char pending, then A GRAVE (NFC) that must be retried because
+        only its first half fits in outbuf: ESC $1 must not be lost */
+    YAZ_CHECK(tst_convert(cd,
+                          "TTT" "\xE4\xB8\x80" "\xC3\x80", /* UTF-8 */
+                          "TTT" "\033$1" "\x21\x30\x21" "\033(B"
+                          "\xE1" "A"));
+
+    /** Same for the second half of a ligature */
+    YAZ_CHECK(tst_convert(cd,
+                          "TT" "\xE4\xB8\x80" "\xCD\xA1" "\xC3\x80", /* UTF-8 */
+                          "TT" "\xEB" "\033$1" "\x21\x30\x21" "\xEC" "\033(B"
+                          "\xE1" "A"));
+
     {
         char *inbuf0 = "\xe2\x81\xb0";
         char *inbuf = inbuf0;
