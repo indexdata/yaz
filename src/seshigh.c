@@ -948,11 +948,12 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
             srw_errcode = r;
         else
         {
-            char out[100];
-            int r = cql_sortby_to_sortkeys_buf(cn, out, sizeof(out)-1);
+            WRBUF sortkeys_buf = wrbuf_alloc();
+            int r = cql_sortby_to_sortkeys(cn, wrbuf_vp_puts, sortkeys_buf);
 
             if (r == 0)
             {
+                const char *out = wrbuf_cstr(sortkeys_buf);
                 if (*out)
                     yaz_log(log_requestdetail, "srw_sortKeys '%s'", out);
                 *sortkeys_p = odr_strdup(odr, out);
@@ -962,6 +963,7 @@ static int cql2pqf(ODR odr, const char *cql, cql_transform_t ct,
                 yaz_log(log_requestdetail, "failed to create srw_sortKeys");
                 srw_errcode = YAZ_SRW_UNSUPP_SORT_TYPE;
             }
+            wrbuf_destroy(sortkeys_buf);
         }
     }
     if (!r)

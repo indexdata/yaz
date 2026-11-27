@@ -127,6 +127,13 @@ int cql_sortby_to_sortkeys_buf(struct cql_node *cn, char *out, int max)
     int r = cql_sortby_to_sortkeys(cn, cql_buf_write_handler, &info);
     if (info.off >= 0)
         info.buf[info.off] = '\0';
+    else
+    {
+        /* buffer overflow: do not leave out unterminated */
+        if (max > 0)
+            *out = '\0';
+        return -1;
+    }
     return r;
 }
 

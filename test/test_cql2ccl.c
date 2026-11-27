@@ -346,6 +346,62 @@ static void tst_reuse(void)
     cql_parser_destroy(cp);
 }
 
+static int tst_sortkeys_buf(const char *cql, int max, int expected_r,
+                            const char *expected_keys)
+{
+    char out[40];
+    int r = -2;
+    CQL_parser cp = cql_parser_create();
+
+    memset(out, 'X', sizeof(out));
+    out[sizeof(out) - 1] = '\0';
+    if (cql_parser_string(cp, cql) == 0)
+        r = cql_sortby_to_sortkeys_buf(cql_parser_result(cp), out, max);
+    cql_parser_destroy(cp);
+    return r == expected_r && !strcmp(out, expected_keys);
+}
+
+static void tst_sortkeys(void)
+{
+    /* "title,,1,0,highValue" is 20 characters + terminator */
+    YAZ_CHECK(tst_sortkeys_buf("a", 21, 0, ""));
+    YAZ_CHECK(tst_sortkeys_buf("a sortby title", 21, 0,
+                               "title,,1,0,highValue"));
+    /* does not fit: error and no unterminated result */
+    YAZ_CHECK(tst_sortkeys_buf("a sortby title", 20, -1, ""));
+    YAZ_CHECK(tst_sortkeys_buf("a sortby title date", 30, -1, ""));
+}
+
+static void tst_xcql_buf(void)
+{
+    CQL_parser cp = cql_parser_create();
+    WRBUF expected = wrbuf_alloc();
+    char out[2048];
+
+    YAZ_CHECK(cql_parser_string(cp, "a or b") == 0);
+    struct cql_node *cn = cql_parser_result(cp);
+    cql_to_xml(cn, wrbuf_vp_puts, expected);
+    int len = (int) wrbuf_len(expected);
+    YAZ_CHECK(len > 0 && len < (int) sizeof(out));
+    if (len > 0 && len < (int) sizeof(out))
+    {
+        YAZ_CHECK_EQ(cql_to_xml_buf(cn, out, len + 1), len);
+        YAZ_CHECK(!strcmp(out, wrbuf_cstr(expected)));
+
+        /* Room for the content but not its terminator: clear partial output. */
+        memset(out, 'X', sizeof(out));
+        YAZ_CHECK_EQ(cql_to_xml_buf(cn, out, len), -1);
+        YAZ_CHECK_EQ(out[0], '\0');
+        YAZ_CHECK_EQ(out[len], 'X');
+
+        out[0] = 'X';
+        YAZ_CHECK_EQ(cql_to_xml_buf(cn, out, 0), -1);
+        YAZ_CHECK_EQ(out[0], 'X');
+    }
+    wrbuf_destroy(expected);
+    cql_parser_destroy(cp);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -355,6 +411,8 @@ int main(int argc, char **argv)
     tst_depth();
     tst_prefix_limit();
     tst_reuse();
+    tst_sortkeys();
+    tst_xcql_buf();
     YAZ_CHECK_TERM;
 }
 /*
