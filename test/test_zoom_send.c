@@ -7,6 +7,8 @@
 #endif
 #include <string.h>
 #include <yaz/test.h>
+#include <yaz/copy_types.h>
+#include <yaz/sortspec.h>
 #include "../src/zoom-p.h"
 
 static int writes;
@@ -105,6 +107,56 @@ static void check_http_response_on_z3950(void)
     YAZ_CHECK(!c->cs);
     YAZ_CHECK_EQ(closes, 1);
     c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_connection_destroy(c);
+}
+
+static int sort_requests;
+
+static int put_sort_request(COMSTACK cs, char *buf, int len)
+{
+    ODR odr = odr_createmem(ODR_DECODE);
+    Z_APDU *apdu = 0;
+
+    odr_setbuf(odr, buf, len, 0);
+    YAZ_CHECK(z_APDU(odr, &apdu, 0, 0));
+    YAZ_CHECK(apdu && apdu->which == Z_APDU_sortRequest);
+    if (apdu && apdu->which == Z_APDU_sortRequest)
+    {
+        YAZ_CHECK(yaz_compare_z_SortKeySpecList(
+                      apdu->u.sortRequest->sortSequence,
+                      yaz_sort_spec(odr, "1=4 ia")));
+        sort_requests++;
+    }
+    odr_destroy(odr);
+    return 0;
+}
+
+static void check_sort_of_pending_search(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    ZOOM_query q = ZOOM_query_create();
+    ZOOM_resultset r;
+    struct comstack cs;
+
+    memset(&cs, 0, sizeof(cs));
+    cs.f_put = put_sort_request;
+    c->async = 1;
+    ZOOM_connection_option_set(c, "setname", "1");
+    YAZ_CHECK_EQ(ZOOM_query_prefix(q, "computer"), 0);
+    YAZ_CHECK_EQ(ZOOM_query_sortby(q, "1=4 ia"), 0);
+    r = ZOOM_connection_search(c, q);
+
+    /* The search is pending. Reuse the query with another order. */
+    YAZ_CHECK_EQ(ZOOM_query_sortby(q, "1=1003 ia"), 0);
+
+    /* The sort request for the pending search must have its own order */
+    c->cs = &cs;
+    sort_requests = 0;
+    YAZ_CHECK_EQ(send_Z3950_sort(c, r), zoom_pending);
+    YAZ_CHECK_EQ(sort_requests, 1);
+    c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_resultset_destroy(r);
+    ZOOM_query_destroy(q);
     ZOOM_connection_destroy(c);
 }
 
