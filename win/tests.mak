@@ -59,6 +59,7 @@ TEST_PROGRAMS = \
     $(BINDIR)\test_gfs_vhosts.exe \
     $(BINDIR)\test_marc_read_iso2709.exe \
     $(BINDIR)\test_marc_read_sax.exe \
+    $(BINDIR)\test_present_limits.exe \
     $(BINDIR)\test_sru_update.exe \
     $(BINDIR)\test_zoom_scan.exe \
     $(BINDIR)\test_zoom_send.exe
