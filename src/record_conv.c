@@ -384,9 +384,12 @@ static int convert_select(void *vinfo, WRBUF record, WRBUF wr_error)
                     for (int i = 0; i < nodes->nodeNr; i++)
                     {
                         xmlNode *ptr = nodes->nodeTab[i];
-                        if (ptr->type == XML_ELEMENT_NODE)
+                        /* element: text of its children. Any other node
+                           is selected by itself, without its siblings */
+                        int is_element = ptr->type == XML_ELEMENT_NODE;
+                        if (is_element)
                             ptr = ptr->children;
-                        for (; ptr; ptr = ptr->next)
+                        for (; ptr; ptr = is_element ? ptr->next : 0)
                             if (ptr->type == XML_TEXT_NODE)
                                 wrbuf_puts(record, (const char *) ptr->content);
                     }
@@ -959,9 +962,12 @@ static void rdf_lookup_node(xmlNode *n, xmlXPathContextPtr xpathCtx,
             for (i = 0; !done && i < fldNodes->nodeNr; i++)
             {
                 xmlNode *f = fldNodes->nodeTab[i];
-                if (f->type == XML_ELEMENT_NODE)
+                /* element: text of its children. Any other node
+                   is selected by itself, without its siblings */
+                int is_element = f->type == XML_ELEMENT_NODE;
+                if (is_element)
                     f = f->children;
-                for (; f && !done; f = f->next)
+                for (; f && !done; f = is_element ? f->next : 0)
                     if (f->type == XML_TEXT_NODE)
                     {
                         yaz_timing_t tim = yaz_timing_create();
