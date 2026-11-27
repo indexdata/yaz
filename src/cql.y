@@ -480,13 +480,15 @@ int cql_parser_stream(CQL_parser cp,
                       void (*ungetbyte)(int b, void *client_data),
                       void *client_data)
 {
+    /* tree of previous query is in cp->nmem; drop it before the reset */
+    cql_node_destroy(cp->top);
+    cp->top = 0;
     nmem_reset(cp->nmem);
     cp->getbyte = getbyte;
     cp->ungetbyte = ungetbyte;
     cp->client_data = client_data;
     cp->modifiers = 0;
     cp->prefixes = 0;
-    cql_node_destroy(cp->top);
     cql_parse(cp);
     if (cp->top)
         return 0;
