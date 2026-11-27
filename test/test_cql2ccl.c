@@ -316,6 +316,36 @@ static void tst_prefix_limit(void)
     YAZ_CHECK(tst_prefixes(">u (>p=u a) or (", 20, "a", ")") != 0);
 }
 
+/* one parser handle used for several queries */
+static void tst_reuse(void)
+{
+    CQL_parser cp = cql_parser_create();
+    WRBUF w = wrbuf_alloc();
+
+    YAZ_CHECK(cql_parser_string(cp, "a and b") == 0);
+    YAZ_CHECK(cql_parser_result(cp) != 0);
+    YAZ_CHECK(cql_to_ccl(cql_parser_result(cp), wrbuf_vp_puts, w) == 0);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(w), "(\"a\") and (\"b\")"));
+
+    wrbuf_rewind(w);
+    YAZ_CHECK(cql_parser_string(cp, "c sortby title") == 0);
+    YAZ_CHECK(cql_parser_result(cp) != 0);
+    YAZ_CHECK(cql_to_ccl(cql_parser_result(cp), wrbuf_vp_puts, w) == 0);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(w), "\"c\""));
+
+    YAZ_CHECK(cql_parser_string(cp, "d and") != 0);
+    YAZ_CHECK(cql_parser_result(cp) == 0);
+
+    wrbuf_rewind(w);
+    YAZ_CHECK(cql_parser_string(cp, "e") == 0);
+    YAZ_CHECK(cql_parser_result(cp) != 0);
+    YAZ_CHECK(cql_to_ccl(cql_parser_result(cp), wrbuf_vp_puts, w) == 0);
+    YAZ_CHECK(!strcmp(wrbuf_cstr(w), "\"e\""));
+
+    wrbuf_destroy(w);
+    cql_parser_destroy(cp);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -324,6 +354,7 @@ int main(int argc, char **argv)
     tst_limits();
     tst_depth();
     tst_prefix_limit();
+    tst_reuse();
     YAZ_CHECK_TERM;
 }
 /*
