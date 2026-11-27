@@ -83,8 +83,9 @@ int oid_dotstring_to_oid(const char *name, Odr_oid *oid)
         name++;
         if (*name == '.')
         {
-            if (i < OID_SIZE-1)
-                oid[i++] = val;
+            if (i >= OID_SIZE-2) /* no room for last arc and terminator */
+                return -1;
+            oid[i++] = val;
             val = 0;
             name++;
         }

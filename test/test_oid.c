@@ -44,6 +44,21 @@ static void tst(void)
     oid = yaz_string_to_oid_odr(db, CLASS_ATTSET, "unknown", odr);
     YAZ_CHECK(oid == 0);
 
+    /* OID_SIZE-1 arcs plus terminator is what fits in OID_SIZE */
+    oid = odr_getoidbystr_nmem(
+        nmem, "1.2.3.4.5.6.7.8.9.10.11.12.13.14.15.16.17.18.19");
+    YAZ_CHECK(oid && oid_oidlen(oid) == OID_SIZE - 1);
+    YAZ_CHECK(oid && oid[OID_SIZE - 2] == 19);
+
+    oid = odr_getoidbystr_nmem(
+        nmem, "1.2.3.4.5.6.7.8.9.10.11.12.13.14.15.16.17.18.19.20");
+    YAZ_CHECK(oid == 0);
+
+    oid = yaz_string_to_oid_nmem(
+        db, CLASS_ATTSET,
+        "1.2.3.4.5.6.7.8.9.10.11.12.13.14.15.16.17.18.19.20.21.22", nmem);
+    YAZ_CHECK(oid == 0);
+
     const char *n = yaz_oid_to_string(db, yaz_oid_attset_bib_1, 0);
     YAZ_CHECK(n && !strcmp(n, "Bib-1"));
 
