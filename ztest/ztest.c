@@ -986,9 +986,9 @@ int ztest_fetch(void *handle, bend_fetch_rr *r)
  */
 int ztest_scan(void *handle, bend_scan_rr *q)
 {
-    static FILE *f = 0;
-    static struct scan_entry list[200];
-    static char entries[200][80];
+    FILE *f;
+    struct scan_entry *list;
+    char entries[200][80];
     int hits[200];
     char term[80], *p;
     int i, pos;
@@ -1009,13 +1009,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
 
     q->errcode = 0;
     q->errstring = 0;
-    q->entries = list;
     q->status = BEND_SCAN_SUCCESS;
-    if (!f && !(f = fopen("dummy-words", "r")))
-    {
-        perror("dummy-words");
-        exit(1);
-    }
     if (q->num_entries > 200)
     {
         q->errcode = YAZ_BIB1_RESOURCES_EXHAUSTED_NO_RESULTS_AVAILABLE;
@@ -1051,7 +1045,17 @@ int ztest_scan(void *handle, bend_scan_rr *q)
         if (yaz_islower(*p))
             *p = yaz_toupper(*p);
 
-    fseek(f, 0, SEEK_SET);
+    /* sessions may be threads: no state is shared between requests and
+       the result is allocated on the stream of this request */
+    if (!(f = fopen("dummy-words", "r")))
+    {
+        q->errcode = YAZ_BIB1_TEMPORARY_SYSTEM_ERROR;
+        q->errstring = "dummy-words";
+        return 0;
+    }
+    list = (struct scan_entry *) odr_malloc(q->stream, 200 * sizeof(*list));
+    memset(list, 0, 200 * sizeof(*list));
+    q->entries = list;
     q->num_entries = 0;
 
     for (i = 0, pos = 0; fscanf(f, " %79[^:]:%d", entries[pos], &hits[pos]) == 2;
@@ -1077,7 +1081,8 @@ int ztest_scan(void *handle, bend_scan_rr *q)
 
                 if (!strcmp(term, "SD") && q->num_entries == 2)
                 {
-                    list[q->num_entries].term = entries[pos];
+                    list[q->num_entries].term =
+                        odr_strdup(q->stream, entries[pos]);
                     list[q->num_entries].occurrences = -1;
                     list[q->num_entries].errcode =
                         YAZ_BIB1_SCAN_UNSUPP_VALUE_OF_POSITION_IN_RESPONSE;
@@ -1085,14 +1090,15 @@ int ztest_scan(void *handle, bend_scan_rr *q)
                 }
                 else
                 {
-                    list[q->num_entries].term = entries[po];
+                    list[q->num_entries].term =
+                        odr_strdup(q->stream, entries[po]);
                     list[q->num_entries].occurrences = hits[po];
                 }
             }
         }
         else if (q->num_entries)
         {
-            list[q->num_entries].term = entries[pos];
+            list[q->num_entries].term = odr_strdup(q->stream, entries[pos]);
             list[q->num_entries].occurrences = hits[pos];
             q->num_entries++;
         }
@@ -1102,6 +1108,7 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     echo_extra_args(q->stream, q->extra_args, &q->extra_response_data);
     if (feof(f))
         q->status = BEND_SCAN_PARTIAL;
+    fclose(f);
     return 0;
 }
 
