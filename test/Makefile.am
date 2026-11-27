@@ -15,7 +15,7 @@ check_PROGRAMS = test_client_record test_ccl test_charneg test_comstack test_cql
  test_timing test_tpath test_url test_wrbuf \
  test_xmalloc test_xml_include test_xmlquery test_zgdu \
  test_gfs_requests test_gfs_vhosts test_marc_read_iso2709 test_marc_read_sax \
- test_present_limits test_sru_update test_zoom_facet test_zoom_record \
+ test_present_limits test_requestq test_sru_update test_zoom_facet test_zoom_record \
  test_zoom_record_cache test_zoom_scan test_zoom_send
 
 check_SCRIPTS = test_marc.sh test_marccol.sh test_jsonlines.sh test_cql2xcql.sh \
@@ -103,6 +103,7 @@ test_eventl_SOURCES = test_eventl.c
 test_eventl_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_present_limits_SOURCES = test_present_limits.c
 test_present_limits_LDADD = ../src/libyaz_server.la ../src/libyaz.la
+test_requestq_SOURCES = test_requestq.c ../src/requestq.c
 test_sru_limits_SOURCES = test_sru_limits.c
 test_sru_limits_LDADD = ../src/libyaz_server.la ../src/libyaz.la
 test_scan_limits_SOURCES = test_scan_limits.c

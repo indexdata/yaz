@@ -95,7 +95,15 @@ void request_release(request *r)
     request_q *q = r->q;
     if (r->request_mem)
         nmem_destroy(r->request_mem);
-    r->next = q->list;
+    if (q->list)
+    {
+        /* Keep one structure and its encoding buffer for reuse, not one
+           for each request that the client had pending at the same time */
+        xfree(r->response);
+        xfree(r);
+        return;
+    }
+    r->next = 0;
     q->list = r;
 }
 
