@@ -1800,8 +1800,8 @@ void ZOOM_handle_Z3950_apdu(ZOOM_connection c, Z_APDU *apdu)
                 ZOOM_connection_option_set(
                     c,  "negotiation-charset-in-effect-for-records",
                     (sel != 0) ? "1" : "0");
-                nmem_destroy(tmpmem);
             }
+            nmem_destroy(tmpmem);
         }
         break;
     case Z_APDU_searchResponse:
