@@ -78,6 +78,8 @@ int oid_dotstring_to_oid(const char *name, Odr_oid *oid)
     while (yaz_isdigit (*name))
     {
         val = val*10 + (*name - '0');
+        if (val != (Odr_oid) val) /* arc does not fit in Odr_oid */
+            return -1;
         name++;
         if (*name == '.')
         {
