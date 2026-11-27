@@ -12,7 +12,13 @@
 #include <stdlib.h>
 
 #include <yaz/nmem.h>
+#include <yaz/nmem_xml.h>
 #include <yaz/test.h>
+
+#if YAZ_HAVE_XML2
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#endif
 
 void tst_nmem_malloc(void)
 {
@@ -178,6 +184,38 @@ void tst_nmem_printf(void)
     nmem_destroy(nmem);
 }
 
+void tst_nmem_text_node_cdata(void)
+{
+#if YAZ_HAVE_XML2
+    NMEM nmem = nmem_create();
+    const char *xml = "<a>AB<b/>CD<b>x</b><!-- y -->EF<b/></a>";
+    xmlDoc *doc = xmlParseMemory(xml, strlen(xml));
+
+    YAZ_CHECK(doc);
+    if (doc)
+    {
+        xmlNode *ptr = xmlDocGetRootElement(doc);
+        char *s;
+
+        /* text is split in three nodes; elements and comments are skipped */
+        s = nmem_text_node_cdata(ptr->children, nmem);
+        YAZ_CHECK(s && !strcmp(s, "ABCDEF"));
+
+        s = nmem_text_node_cdata(ptr->children->next, nmem);
+        YAZ_CHECK(s && !strcmp(s, "CDEF"));
+
+        s = nmem_text_node_cdata(ptr->last, nmem);
+        YAZ_CHECK(s && !strcmp(s, ""));
+
+        s = nmem_text_node_cdata(0, nmem);
+        YAZ_CHECK(s && !strcmp(s, ""));
+
+        xmlFreeDoc(doc);
+    }
+    nmem_destroy(nmem);
+#endif
+}
+
 int main (int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -185,6 +223,7 @@ int main (int argc, char **argv)
     tst_nmem_malloc();
     tst_nmem_strsplit();
     tst_nmem_printf();
+    tst_nmem_text_node_cdata();
     YAZ_CHECK_TERM;
 }
 /*

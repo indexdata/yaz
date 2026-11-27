@@ -18,17 +18,23 @@
 #if YAZ_HAVE_XML2
 char *nmem_text_node_cdata(const xmlNode *ptr_cdata, NMEM nmem)
 {
-    int len = 0;
+    size_t len = 0;
     const xmlNode *ptr;
 
     for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            len += xmlStrlen(ptr->content);
+        if (ptr->type == XML_TEXT_NODE && ptr->content)
+            len += strlen((const char *) ptr->content);
     char *cdata = (char *) nmem_malloc(nmem, len+1);
-    *cdata = '\0';
+    len = 0;
     for (ptr = ptr_cdata; ptr; ptr = ptr->next)
-        if (ptr->type == XML_TEXT_NODE)
-            strcat(cdata, (const char *) ptr->content);
+        if (ptr->type == XML_TEXT_NODE && ptr->content)
+        {
+            /* append at known end; strcat would rescan cdata every time */
+            size_t l = strlen((const char *) ptr->content);
+            memcpy(cdata + len, ptr->content, l);
+            len += l;
+        }
+    cdata[len] = '\0';
     return cdata;
 }
 
