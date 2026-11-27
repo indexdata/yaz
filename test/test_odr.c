@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <string.h>
 #include <yaz/oid_util.h>
+#include <yaz/log.h>
 #include <yaz/charneg.h>
 #include <yaz/proto.h>
 #include "test_odrcodec.h"
@@ -671,6 +672,46 @@ static void tst_oid_arc_range(void)
     odr_destroy(decode);
 }
 
+static int file_has(const char *fname, const char *str)
+{
+    char buf[1024];
+    size_t sz = 0;
+    FILE *f = fopen(fname, "r");
+
+    if (f)
+    {
+        sz = fread(buf, 1, sizeof(buf) - 1, f);
+        fclose(f);
+    }
+    buf[sz] = '\0';
+    return strstr(buf, str) ? 1 : 0;
+}
+
+static void tst_odr_setprint_log(void)
+{
+    const char *fname = "test_odr_print.log";
+    const char *fname0 = "test_odr_print.log.0";
+    ODR print = odr_createmem(ODR_PRINT);
+
+    remove(fname);
+    remove(fname0);
+    yaz_log_init_file(fname);
+    yaz_log_init_max_size(1);
+    odr_setprint_log(print);
+    odr_printf(print, "before rotate\n");
+    /* Log is beyond max size, so this rotates it and closes the old FILE. */
+    yaz_log(YLOG_LOG, "rotate");
+    odr_printf(print, "after rotate\n");
+    yaz_log_init_max_size(0);
+    yaz_log_init_file("");
+    odr_destroy(print);
+
+    YAZ_CHECK(file_has(fname0, "before rotate\n"));
+    YAZ_CHECK(file_has(fname, "after rotate\n"));
+    remove(fname);
+    remove(fname0);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -683,6 +724,7 @@ int main(int argc, char **argv)
     tst_ber_tag_position();
     tst_charneg_response();
     tst_oid_arc_range();
+    tst_odr_setprint_log();
     YAZ_CHECK_TERM;
 }
 

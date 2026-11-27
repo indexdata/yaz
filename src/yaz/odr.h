@@ -172,6 +172,14 @@ YAZ_EXPORT const char *odr_getelement(ODR o);
 YAZ_EXPORT void odr_perror(ODR o, const char *message);
 YAZ_EXPORT void odr_setprint(ODR o, FILE *file);
 YAZ_EXPORT void odr_setprint_noclose(ODR o, FILE *file);
+/** \brief makes a print ODR write to the YAZ log
+    \param o print ODR
+
+    The log file is looked up for each write, rather than once, because
+    the FILE returned by yaz_log_file is closed when the log is rotated or
+    reopened. The log file is not closed by odr_destroy.
+*/
+YAZ_EXPORT void odr_setprint_log(ODR o);
 YAZ_EXPORT ODR odr_createmem(int direction);
 YAZ_EXPORT void odr_reset(ODR o);
 YAZ_EXPORT void odr_destroy(ODR o);

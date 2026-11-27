@@ -168,6 +168,23 @@ void odr_setprint_noclose(ODR o, FILE *file)
     odr_set_stream(o, file, odr_FILE_write, 0);
 }
 
+static void odr_log_write(ODR o, void *handle, int type,
+                          const char *buf, int len)
+{
+    FILE *file;
+
+    yaz_log_lock();
+    file = yaz_log_file(); /* file changes when the log is rotated/reopened */
+    if (file)
+        odr_FILE_write(o, file, type, buf, len);
+    yaz_log_unlock();
+}
+
+void odr_setprint_log(ODR o)
+{
+    odr_set_stream(o, 0, odr_log_write, 0);
+}
+
 void odr_set_stream(ODR o, void *handle,
                     void (*stream_write)(ODR o,
                                          void *handle, int type,

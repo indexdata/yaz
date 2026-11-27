@@ -580,7 +580,7 @@ ZOOM_API(void)
     else if (ZOOM_options_get_bool(c->options, "apdulog", 0))
     {
         c->odr_print = odr_createmem(ODR_PRINT);
-        odr_setprint_noclose(c->odr_print, yaz_log_file());
+        odr_setprint_log(c->odr_print);
     }
 
     yaz_log(c->log_details, "%p ZOOM_connection_connect async=%d", c, c->async);

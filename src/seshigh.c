@@ -198,7 +198,7 @@ association *create_association(IOCHAN channel, COMSTACK link,
             return 0;
         if (*apdufile == '@')
         {
-            odr_setprint(anew->print, yaz_log_file());
+            odr_setprint_log(anew->print);
         }
         else if (*apdufile != '-')
         {
