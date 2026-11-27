@@ -1009,6 +1009,57 @@ static int emit_node(cql_transform_t ct, struct cql_node *cn,
     return r;
 }
 
+/* The caller keeps the source tree alive during transformation. Copy every
+   mutable node, but retain its strings: prefix resolution replaces pointers
+   and never writes into the strings. Avoid expanding shared strings once per
+   clause, as a full cql_node_dup would do. */
+static struct cql_node *copy_transform_list(NMEM nmem,
+                                          const struct cql_node *src,
+                                          int extra_terms)
+{
+    struct cql_node *head = 0;
+    struct cql_node **next = &head;
+
+    for (; src; src = extra_terms ? src->u.st.extra_terms : src->u.st.modifiers)
+    {
+        struct cql_node *node = nmem_malloc(nmem, sizeof(*node));
+        *node = *src;
+        node->u.st.modifiers = 0;
+        node->u.st.extra_terms = 0;
+        *next = node;
+        next = extra_terms ? &node->u.st.extra_terms : &node->u.st.modifiers;
+    }
+    return head;
+}
+
+static struct cql_node *copy_transform_tree(NMEM nmem,
+                                          const struct cql_node *src)
+{
+    if (!src)
+        return 0;
+    struct cql_node *node = nmem_malloc(nmem, sizeof(*node));
+    *node = *src;
+    switch (src->which)
+    {
+    case CQL_NODE_ST:
+        node->u.st.modifiers = copy_transform_list(nmem, src->u.st.modifiers, 0);
+        node->u.st.extra_terms = copy_transform_list(nmem, src->u.st.extra_terms, 1);
+        break;
+    case CQL_NODE_BOOL:
+        node->u.boolean.left = copy_transform_tree(nmem, src->u.boolean.left);
+        node->u.boolean.right = copy_transform_tree(nmem, src->u.boolean.right);
+        node->u.boolean.modifiers =
+            copy_transform_list(nmem, src->u.boolean.modifiers, 0);
+        break;
+    case CQL_NODE_SORT:
+        node->u.sort.search = copy_transform_tree(nmem, src->u.sort.search);
+        node->u.sort.next = copy_transform_tree(nmem, src->u.sort.next);
+        node->u.sort.modifiers = copy_transform_list(nmem, src->u.sort.modifiers, 0);
+        break;
+    }
+    return node;
+}
+
 int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
                     WRBUF addinfo,
                     void (*pr)(const char *buf, void *client_data),
@@ -1016,6 +1067,9 @@ int cql_transform_r(cql_transform_t ct, struct cql_node *cn,
 {
     NMEM nmem = nmem_create();
 
+    /* cql_apply_prefix stores strings allocated in nmem in the tree it is
+       given, and the tree of the caller outlives nmem: resolve in a copy */
+    cn = copy_transform_tree(nmem, cn);
     for (struct cql_prop_entry *e = ct->entry; e ; e = e->next)
     {
         if (!cql_strncmp(e->pattern, "set.", 4))
