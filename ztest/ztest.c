@@ -1059,7 +1059,11 @@ int ztest_scan(void *handle, bend_scan_rr *q)
     {
         if (!q->num_entries && strcmp(entries[pos], term) >= 0) /* s-point fnd */
         {
-            if ((q->term_position = term_position_req) > i + 1)
+            q->term_position = term_position_req;
+            /* list[] and entries[] hold no more than was requested (<= 200) */
+            if (q->term_position > num_entries_req)
+                q->term_position = num_entries_req;
+            if (q->term_position > i + 1)
             {
                 q->term_position = i + 1;
                 q->status = BEND_SCAN_PARTIAL;
