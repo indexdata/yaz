@@ -6,7 +6,24 @@
 #include <config.h>
 #endif
 #include <string.h>
+#include <errno.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <yaz/test.h>
+#include <yaz/snprintf.h>
 #include <yaz/copy_types.h>
 #include <yaz/sortspec.h>
 #include "../src/zoom-p.h"
@@ -207,6 +224,100 @@ static void check_redirect_encoding_failure(void)
     ZOOM_connection_destroy(c);
 }
 
+#if HAVE_SYS_SOCKET_H
+/* The login in connect:user:password@proxy,target is for the CONNECT proxy.
+   The proxy gets it. It is not part of the address that diagnostics and
+   option host show, also not when the peer makes the connection fail. */
+static void check_connect_auth(void)
+{
+    const char expected[] = "Proxy-Authorization: Basic YWxpY2U6c2VjcmV0\r\n";
+    ZOOM_options options = ZOOM_options_create();
+    ZOOM_connection c;
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    struct timeval tv;
+    char host[128], shown[128], request[512];
+    const char *addinfo = 0;
+    size_t len = 0;
+    int proxy, fd, i, r = -1, saved_errno;
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    proxy = socket(AF_INET, SOCK_STREAM, 0);
+    if (proxy != -1)
+    {
+        r = bind(proxy, (struct sockaddr *) &addr, sizeof(addr));
+        if (r == 0)
+            r = listen(proxy, 1);
+        if (r == 0)
+            r = getsockname(proxy, (struct sockaddr *) &addr, &addr_len);
+    }
+    saved_errno = errno;
+    if (r == -1 && (saved_errno == EPERM || saved_errno == EACCES))
+        fprintf(stderr, "Skipping CONNECT login: listener denied\n");
+    else
+        YAZ_CHECK_EQ(r, 0);
+    if (r != 0)
+    {
+        if (proxy != -1)
+            close(proxy);
+        ZOOM_options_destroy(options);
+        return;
+    }
+    yaz_snprintf(host, sizeof(host),
+                 "user=me,connect:alice:secret@127.0.0.1:%d,tcp:127.0.0.1:1/db",
+                 (int) ntohs(addr.sin_port));
+    yaz_snprintf(shown, sizeof(shown),
+                 "connect:127.0.0.1:%d,tcp:127.0.0.1:1/db",
+                 (int) ntohs(addr.sin_port));
+
+    ZOOM_options_set(options, "async", "1");
+    ZOOM_options_set(options, "timeout", "5");
+    c = ZOOM_connection_create(options);
+    ZOOM_connection_connect(c, host, 0);
+    YAZ_CHECK(c->host_port && !strcmp(c->host_port, shown));
+    addinfo = ZOOM_connection_option_get(c, "host");
+    YAZ_CHECK(addinfo && !strcmp(addinfo, shown));
+
+    /* until the CONNECT request is sent and the reply of the proxy awaited */
+    for (i = 0; i < 10 && ZOOM_event(1, &c); i++)
+        if (c->cs && c->mask && !(c->mask & ZOOM_SELECT_WRITE))
+            break;
+    YAZ_CHECK(c->cs && c->mask && !(c->mask & ZOOM_SELECT_WRITE));
+
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+    setsockopt(proxy, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof(tv));
+    fd = accept(proxy, 0, 0);
+    YAZ_CHECK(fd != -1);
+    if (fd != -1)
+    {
+        setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof(tv));
+        request[0] = '\0';
+        while (len < sizeof(request) - 1 && !strstr(request, "\r\n\r\n")
+               && (r = read(fd, request + len, sizeof(request) - 1 - len)) > 0)
+        {
+            len += r;
+            request[len] = '\0';
+        }
+        YAZ_CHECK(!strncmp(request, "CONNECT 127.0.0.1:1 ", 20));
+        YAZ_CHECK(strstr(request, expected));
+        close(fd); /* no reply: the connect fails */
+    }
+    for (i = 0; i < 10 && ZOOM_event(1, &c); i++)
+        ;
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, &addinfo), ZOOM_ERROR_CONNECT);
+    YAZ_CHECK(addinfo && !strcmp(addinfo, shown));
+    YAZ_CHECK(c->host_port && !strcmp(c->host_port, shown));
+
+    ZOOM_connection_destroy(c);
+    ZOOM_options_destroy(options);
+    close(proxy);
+}
+#endif
+
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -216,5 +327,8 @@ int main(int argc, char **argv)
     check_http_response_on_z3950();
     check_sort_of_pending_search();
     check_redirect_encoding_failure();
+#if HAVE_SYS_SOCKET_H
+    check_connect_auth();
+#endif
     YAZ_CHECK_TERM;
 }

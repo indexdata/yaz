@@ -273,6 +273,7 @@ ZOOM_API(ZOOM_connection)
     c->options = ZOOM_options_create_with_parent(options);
 
     c->host_port = 0;
+    c->connect_auth = 0;
     c->proxy = 0;
     c->tproxy = 0;
     c->proxy_mode = 0;
@@ -481,6 +482,28 @@ ZOOM_API(void)
             c->host_port = remainder;
         }
     }
+    if (host)
+    {
+        /*
+         * The login in connect:user:password@proxy,target is for the
+         * CONNECT proxy only. Like user and password above, it is not
+         * kept in host_port, which is also the address in diagnostics
+         * and the value of option host. do_connect_host puts it back for
+         * cs_create_host2, which takes it up to the first '@'.
+         */
+        xfree(c->connect_auth);
+        c->connect_auth = 0;
+        if (!strncmp(c->host_port, "connect:", 8))
+        {
+            char *auth = c->host_port + 8;
+            char *cp = auth + strcspn(auth, "@,");
+            if (*cp == '@')
+            {
+                c->connect_auth = xstrndup(auth, cp - auth);
+                memmove(auth, cp + 1, strlen(cp + 1) + 1);
+            }
+        }
+    }
 
     xfree(c->sru_version);
     val = ZOOM_options_get(c->options, "sru_version");
@@ -640,6 +663,7 @@ ZOOM_API(void)
     ZOOM_connection_remove_tasks(c);
     ZOOM_connection_remove_events(c);
     xfree(c->host_port);
+    xfree(c->connect_auth);
     xfree(c->proxy);
     xfree(c->tproxy);
     xfree(c->charset);
@@ -1078,15 +1102,27 @@ static zoom_ret do_connect_host(ZOOM_connection c, const char *logical_url)
 {
     void *add;
     int flags = CS_FLAGS_DNS_NO_BLOCK;
+    WRBUF w_auth = 0;
 
     if (c->cs)
         cs_close(c->cs);
 
     if (c->check_cert)
         flags |= CS_FLAGS_CHECK_CERT;
-    c->cs = cs_create_host2(logical_url, flags, &add,
+    if (c->connect_auth && !strncmp(logical_url, "connect:", 8))
+    {
+        /* host_port, or a redirect of it: through the same CONNECT proxy */
+        w_auth = wrbuf_alloc();
+        wrbuf_puts(w_auth, "connect:");
+        wrbuf_puts(w_auth, c->connect_auth);
+        wrbuf_puts(w_auth, "@");
+        wrbuf_puts(w_auth, logical_url + 8);
+    }
+    c->cs = cs_create_host2(w_auth ? wrbuf_cstr(w_auth) : logical_url,
+                            flags, &add,
                             c->tproxy ? c->tproxy : c->proxy,
                             &c->proxy_mode);
+    wrbuf_destroy(w_auth);
     if (!c->proxy)
         c->proxy_mode = 0;
 

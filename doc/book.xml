@@ -1729,6 +1729,8 @@
       <row><entry>
        host</entry><entry>Target host. This setting is "read-only".
        It's automatically set internally when connecting to a target.
+       Credentials given with the host, such as the login for a
+       CONNECT proxy, are not part of it.
       </entry><entry>none</entry></row>
       <row><entry>
        proxy</entry><entry>Proxy host. If set, the logical host
