@@ -428,6 +428,67 @@ static void check_no_task(void)
     ZOOM_connection_destroy(c);
 }
 
+#if YAZ_HAVE_XML2
+static int get_response(COMSTACK cs, char **buf, int *bufsize)
+{
+    const char response[] =
+        "HTTP/1.1 500 Internal Server Error\r\n"
+        "Content-Length: 4\r\n"
+        "\r\n"
+        "body";
+    int len = sizeof(response) - 1;
+    if (*bufsize < len)
+    {
+        *buf = (char *) xrealloc(*buf, len);
+        *bufsize = len;
+    }
+    memcpy(*buf, response, len);
+    return len;
+}
+
+static void close_transport(COMSTACK cs)
+{
+}
+
+/* Messages are only passed through the APDU log; none may stay in it. */
+static void check_apdu_log(void)
+{
+    ZOOM_connection c = ZOOM_connection_create(0);
+    struct comstack cs;
+    Z_GDU *gdu;
+    const char *apdu;
+    int len = -1;
+    memset(&cs, 0, sizeof(cs));
+    cs.f_put = put_request;
+    cs.f_get = get_response;
+    cs.f_close = close_transport;
+    cs.event = CS_DATA;
+    c->cs = &cs;
+    c->proto = PROTO_HTTP;
+    writes = 0;
+    ZOOM_connection_option_set(c, "saveAPDU", "1");
+    YAZ_CHECK(c->odr_save);
+
+    gdu = z_get_HTTP_Request_uri(c->odr_out, "http://example.org/valid", 0, 0);
+    YAZ_CHECK_EQ(ZOOM_send_GDU(c, gdu), zoom_pending);
+    YAZ_CHECK_EQ(writes, 1);
+    odr_getbuf(c->odr_save, &len, 0);
+    YAZ_CHECK_EQ(len, 0);
+
+    len = -1;
+    ZOOM_connection_fire_event_socket(c, ZOOM_SELECT_READ);
+    YAZ_CHECK_EQ(ZOOM_connection_error(c, 0, 0), 500);
+    odr_getbuf(c->odr_save, &len, 0);
+    YAZ_CHECK_EQ(len, 0);
+
+    apdu = ZOOM_connection_option_get(c, "APDU");
+    YAZ_CHECK(strstr(apdu, "-- HTTP request:\nPOST /valid HTTP/1.1\r\n"));
+    YAZ_CHECK(strstr(apdu, "-- HTTP response:\nHTTP/1.1 500 "));
+    c->cs = 0; /* the test owns this in-memory transport */
+    ZOOM_connection_destroy(c);
+}
+#endif
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
@@ -453,9 +514,9 @@ int main(int argc, char **argv)
     /* all records */
     check_sru_continue("<records>" SRU_RECORD SRU_RECORD "</records>",
                        zoom_complete, 0, 1);
+    check_apdu_log();
 #endif
     check_no_task();
     check_abandoned_redirect_on_connect();
-
-YAZ_CHECK_TERM;
+    YAZ_CHECK_TERM;
 }

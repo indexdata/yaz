@@ -1651,9 +1651,15 @@ zoom_ret ZOOM_send_GDU(ZOOM_connection c, Z_GDU *gdu)
         return zoom_complete;
     }
     if (c->odr_print)
+    {
         z_GDU(c->odr_print, &gdu, 0, 0);
+        odr_reset(c->odr_print);
+    }
     if (c->odr_save)
+    {
         z_GDU(c->odr_save, &gdu, 0, 0);
+        odr_reset(c->odr_save);
+    }
     c->buf_out = odr_getbuf(c->odr_out, &c->len_out, 0);
     odr_reset(c->odr_out);
 
@@ -1841,9 +1847,15 @@ static int do_read(ZOOM_connection c)
         else
         {
             if (c->odr_print)
+            {
                 z_GDU(c->odr_print, &gdu, 0, 0);
+                odr_reset(c->odr_print);
+            }
             if (c->odr_save)
+            {
                 z_GDU(c->odr_save, &gdu, 0, 0);
+                odr_reset(c->odr_save);
+            }
             if (gdu->which == Z_GDU_Z3950)
                 ZOOM_handle_Z3950_apdu(c, gdu->u.z3950);
 #if YAZ_HAVE_XML2
