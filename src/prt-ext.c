@@ -218,21 +218,32 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 #endif
         if (zclass == ODR_CONTEXT && tag == 1 && cons == 0)
         {
-            /* we have an OCTET STRING. decode BER contents from it */
+            /* Decode the OCTET STRING contents in place to avoid copying
+               the payload at every level of nested EXTERNAL records. */
             char *voidp = 0;
-            Odr_oct *oct;
-            if (!odr_implicit_tag(o, odr_octetstring, &oct,
-                                  ODR_CONTEXT, 1, 0, "octetaligned"))
+            int len;
+            if (ber_tag(o, &voidp, ODR_CONTEXT, 1, &cons, 0,
+                        "octetaligned") <= 0)
                 return 0;
+            int res = ber_declen(o->op->bp, &len, odr_max(o));
+            if (res < 0)
+            {
+                odr_seterror(o, OPROTO, 59);
+                return 0;
+            }
+            o->op->bp += res;
+            if (len < 0 || len > odr_max(o))
+            {
+                odr_seterror(o, OOTHER, 60);
+                return 0;
+            }
 
-            /* Save our decoding ODR members */
-            const char *o_bp = o->op->bp;
-            char *o_buf = o->op->buf;
+            /* Resume after the OCTET STRING when decoding is complete. */
+            const char *o_bp = o->op->bp + len;
             int o_size = o->op->size;
 
-            /* Set up the OCTET STRING buffer */
-            o->op->bp = o->op->buf = oct->buf;
-            o->op->size = oct->len;
+            /* Bound all reads by the end of the OCTET STRING. */
+            o->op->size = (int) (o->op->bp - o->op->buf) + len;
 
             /* and decode that */
             int r = (*type->fun)(o, &voidp, 0, 0);
@@ -241,7 +252,6 @@ int z_External(ODR o, Z_External **p, int opt, const char *name)
 
             /* Restore our decoding ODR member */
             o->op->bp = o_bp;
-            o->op->buf = o_buf;
             o->op->size = o_size;
 
             return r && odr_sequence_end(o);

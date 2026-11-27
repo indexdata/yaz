@@ -819,11 +819,117 @@ static void tst_odr_setprint_log(void)
     remove(fname0);
 }
 
+/* Prepend identifier and length octets to the contents between p and *end.
+   For indefinite length the end-of-contents octets are the zero bytes
+   at *end. */
+static char *ber_wrap(char *p, char **end, int id, int indefinite)
+{
+    if (indefinite)
+    {
+        *end += 2;
+        *--p = (char) 0x80;
+    }
+    else
+    {
+        int len = (int) (*end - p);
+
+        *--p = (char) (len & 0xff);
+        *--p = (char) (len >> 8);
+        *--p = (char) 0x82;
+    }
+    *--p = (char) id;
+    return p;
+}
+
+/* An octet-aligned EXTERNAL with a known OID is decoded in place: a record
+   nested in a record is not copied once for each level. */
+static void tst_external_nested_1(int indefinite)
+{
+    ODR decode = odr_createmem(ODR_DECODE);
+    Z_External *ext = 0;
+    static const char oid_opac[] = {
+        0x06, 0x07, 0x2a, (char) 0x86, 0x48, (char) 0xce, 0x13, 0x05, 0x66
+    };
+    static const char oid_unknown[] = { 0x06, 0x02, 0x2a, 0x03 };
+    static char buf[12000];
+    char *end = buf + sizeof(buf) - 100;
+    char *p = end;
+    const int levels = 10, payload = 10000;
+    int i;
+
+    memset(buf, 0, sizeof(buf));
+    /* innermost: unknown OID, octet-aligned [1] */
+    p -= payload;
+    memset(p, 'x', payload);
+    p = ber_wrap(p, &end, 0x81, 0);
+    p -= sizeof(oid_unknown);
+    memcpy(p, oid_unknown, sizeof(oid_unknown));
+    for (i = 0; i < levels; i++)
+    {
+        /* OPACRecord { bibliographicRecord [1] IMPLICIT EXTERNAL } */
+        p = ber_wrap(p, &end, 0xa1, indefinite);
+        p = ber_wrap(p, &end, 0x30, 0);
+        /* OPAC OID, octet-aligned [1] */
+        p = ber_wrap(p, &end, 0x81, 0);
+        p -= sizeof(oid_opac);
+        memcpy(p, oid_opac, sizeof(oid_opac));
+    }
+    p = ber_wrap(p, &end, 0x28, indefinite);
+
+    odr_setbuf(decode, p, (int) (end - p), 0);
+    if (!z_External(decode, &ext, 0, 0))
+        ext = 0;
+    for (i = 0; i < levels; i++)
+    {
+        YAZ_CHECK(ext && ext->which == Z_External_OPAC);
+        if (!ext || ext->which != Z_External_OPAC)
+            break;
+        ext = ext->u.opac->bibliographicRecord;
+    }
+    YAZ_CHECK_EQ(i, levels);
+    YAZ_CHECK(ext && ext->which == Z_External_octet);
+    if (ext && ext->which == Z_External_octet)
+        YAZ_CHECK_EQ(ext->u.octet_aligned->len, payload);
+    YAZ_CHECK(odr_total(decode) < 2 * (size_t) (end - p));
+    odr_destroy(decode);
+}
+
+static void tst_external_nested(void)
+{
+    ODR decode = odr_createmem(ODR_DECODE);
+    Z_External *ext = 0;
+
+    tst_external_nested_1(0);
+    tst_external_nested_1(1);
+
+    /* Contents may not extend beyond the OCTET STRING. */
+    odr_setbuf(decode, (char *)
+               "\x28\x0d\x06\x07\x2a\x86\x48\xce\x13\x05\x66\x81\x02"
+               "\x30\x02\xa1\x00", 17, 0);
+    YAZ_CHECK(!z_External(decode, &ext, 0, 0));
+    /* Nor may they take their end-of-contents from what follows it. */
+    odr_reset(decode);
+    odr_setbuf(decode, (char *)
+               "\x28\x80\x06\x07\x2a\x86\x48\xce\x13\x05\x66\x81\x02"
+               "\x30\x80\x00\x00", 17, 0);
+    YAZ_CHECK(!z_External(decode, &ext, 0, 0));
+    /* OCTET STRING may not extend beyond the buffer. */
+    odr_reset(decode);
+    odr_setbuf(decode, (char *)
+               "\x28\x80\x06\x07\x2a\x86\x48\xce\x13\x05\x66\x81\x05"
+               "\x30\x02\xa1\x00", 17, 0);
+    YAZ_CHECK(!z_External(decode, &ext, 0, 0));
+    YAZ_CHECK(odr_geterror(decode));
+    YAZ_CHECK(odr_offset(decode) <= 17);
+    odr_destroy(decode);
+}
+
 int main(int argc, char **argv)
 {
     YAZ_CHECK_INIT(argc, argv);
     tst();
     tst_ber_length();
+    tst_external_nested();
     tst_indefinite_length();
     tst_odr_write2();
     tst_odr_create_Odr_oct2();
