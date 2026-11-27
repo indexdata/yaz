@@ -1648,7 +1648,7 @@ static void handle_http(ZOOM_connection c, Z_HTTP_Response *hres)
         if (ret == 0)
         {
             if (c->no_redirects) /* end of redirect. change hosts again */
-                ZOOM_connection_close(c);
+                must_close = 1; /* and reconnect for what is still pending */
         }
         c->no_redirects = 0;
     }

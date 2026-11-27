@@ -32,10 +32,11 @@ def server():
             if cookie is not None:
                 self.send_header("Set-Cookie", cookie)
             self.send_header("Content-Type", "text/xml")
-            self.send_header("Content-Length", str(0 if location else len(RESPONSE)))
+            self.send_header("Content-Length",
+                             str(0 if location else len(self.server.response)))
             self.end_headers()
             if not location:
-                self.wfile.write(RESPONSE)
+                self.wfile.write(self.server.response)
 
         def log_message(self, *args):
             pass
@@ -44,6 +45,7 @@ def server():
     httpd.requests = []
     httpd.route = lambda path: (None, None)
     httpd.code = 302
+    httpd.response = RESPONSE
     httpd.url = "http://127.0.0.1:%d" % httpd.server_port
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -106,6 +108,40 @@ class RedirectCookies(unittest.TestCase):
                 self.assertEqual(target.requests, [], result.stdout)
             if mode not in ("same", "none"):
                 self.assertIn("Cross-origin authenticated redirect refused", result.stdout)
+
+    def test_requests_after_redirect(self):
+        # A redirect target of another origin gets the redirect URL only. What
+        # follows is for the configured host: the request for the records that
+        # the target did not return (ZOOM), and later searches (both).
+        for client in ("zoom", "client"):
+            with self.subTest(client=client):
+                self.check_after_redirect(client)
+
+    def check_after_redirect(self, client):
+        with server() as source, server() as target:
+            source.route = lambda path: (target.url + "/done", None)
+            target.response = RESPONSE.replace(b">0<", b">2<").replace(
+                b"</numberOfRecords>", b"</numberOfRecords><records><record>"
+                b"<recordData><title/></recordData></record></records>")
+            url = source.url + "/start"
+            if client == "zoom":
+                program = ROOT / "zoom/zoomsh"
+                commands = ("set sru get\nset count 2\nset extraArgs x-key=secret\n"
+                            "connect %s\nsearch water\nsearch fire\nquit\n" % url)
+            else:
+                program = ROOT / "client/yaz-client"
+                commands = "sru get\nopen %s\nfind water\nfind fire\nquit\n" % url
+            result = subprocess.run([str(program)], input=commands, text=True,
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    timeout=10)
+            self.assertEqual(result.returncode, 0, result.stdout)
+            # one request per record for ZOOM, one per search for yaz-client
+            expected = 4 if client == "zoom" else 2
+            self.assertEqual(len(source.requests), expected, result.stdout)
+            self.assertEqual(target.requests, [("/done", None)] * expected,
+                             result.stdout)
+            if client == "zoom":
+                self.assertEqual(result.stdout.count("<title"), 4, result.stdout)
 
 
 if __name__ == "__main__":
